@@ -15,7 +15,7 @@ export const RequirementTemplatesScreen = observer(function RequirementTemplate(
 
   return (
     <Container maxW="container.lg" p={8} as="main">
-      <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
+      <VStack alignItems={"flex-start"} gap={5} w={"full"} h={"full"}>
         <Flex justifyContent={"space-between"} w={"full"} alignItems={"flex-end"} gap={6}>
           <Box>
             <Heading as="h1" color={"text.primary"}>

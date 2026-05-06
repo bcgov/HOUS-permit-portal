@@ -145,49 +145,48 @@ const ProjectKanbanCard = observer(function ProjectKanbanCard({
       }
     >
       <Box
-        as={Link}
-        to={`projects/${project.id}/overview`}
         display="block"
         color="inherit"
         textDecoration="none"
         _hover={{ textDecoration: "none", color: "inherit" }}
         _visited={{ color: "inherit" }}
         _active={{ color: "inherit" }}
+        asChild
       >
-        <Box pr={12}>
-          <HStack spacing={2}>
-            {/* ### SUBMISSION INDEX STUB FEATURE */}
-            <Icon as={CalendarBlank} color="text.secondary" boxSize={4} display="none" />
-            <Text fontWeight={700} fontSize="md" noOfLines={1}>
-              {project.number}
+        <Link to={`projects/${project.id}/overview`}>
+          <Box pr={12}>
+            <HStack gap={2}>
+              {/* ### SUBMISSION INDEX STUB FEATURE */}
+              <Icon color="text.secondary" boxSize={4} display="none" asChild>
+                <CalendarBlank />
+              </Icon>
+              <Text fontWeight={700} fontSize="md" lineClamp={1}>
+                {project.number}
+              </Text>
+            </HStack>
+          </Box>
+          <Text fontSize="xs" lineClamp={1} mt={1.5}>
+            {project.shortAddress}
+          </Text>
+          {project.pid && (
+            <Text fontSize="xs" color="text.secondary">
+              PID {project.pid}
             </Text>
-          </HStack>
-        </Box>
-
-        <Text fontSize="xs" noOfLines={1} mt={1.5}>
-          {project.shortAddress}
-        </Text>
-        {project.pid && (
-          <Text fontSize="xs" color="text.secondary">
-            PID {project.pid}
-          </Text>
-        )}
-
-        <Text fontSize="xs" color="text.secondary" mt={1}>
-          {/* @ts-ignore */}
-          {t("submissionInbox.applicationsReceived", { received, total })}
-        </Text>
-
-        {project.daysInQueue != null && (
-          <Text fontSize="xs" color="text.secondary">
+          )}
+          <Text fontSize="xs" color="text.secondary" mt={1}>
             {/* @ts-ignore */}
-            {t("submissionInbox.daysInQueue", { count: project.daysInQueue })}
+            {t("submissionInbox.applicationsReceived", { received, total })}
           </Text>
-        )}
-
-        <Box mt={2.5}>
-          <ProjectInboxPermitApplicationsPopover project={project} />
-        </Box>
+          {project.daysInQueue != null && (
+            <Text fontSize="xs" color="text.secondary">
+              {/* @ts-ignore */}
+              {t("submissionInbox.daysInQueue", { count: project.daysInQueue })}
+            </Text>
+          )}
+          <Box mt={2.5}>
+            <ProjectInboxPermitApplicationsPopover project={project} />
+          </Box>
+        </Link>
       </Box>
     </KanbanCard>
   )

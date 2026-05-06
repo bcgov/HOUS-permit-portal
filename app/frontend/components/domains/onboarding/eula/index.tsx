@@ -37,7 +37,7 @@ export const EULAScreen = observer(function EULAScreen({ withClose }: { withClos
 
   return (
     <>
-      <VStack direction="column" spacing={8} py={20} w="full" h={`calc(100vh - ${navHeight}px)`}>
+      <VStack direction="column" gap={8} py={20} w="full" h={`calc(100vh - ${navHeight}px)`}>
         <Heading as="h1" m={0} flex={0} flexBasis="auto">
           {t("eula.title")}
         </Heading>
@@ -50,7 +50,7 @@ export const EULAScreen = observer(function EULAScreen({ withClose }: { withClos
               </Box>
               {!userStore.currentUser.eulaAccepted && (
                 <form onSubmit={handleSubmit(onSubmit)} style={{ flex: 0, flexBasis: "auto" }}>
-                  <Button variant="primary" type="submit" isLoading={isLoading} isDisabled={!isValid || isLoading}>
+                  <Button variant="primary" type="submit" loading={isLoading} disabled={!isValid || isLoading}>
                     {t("eula.accept")}
                   </Button>
                 </form>

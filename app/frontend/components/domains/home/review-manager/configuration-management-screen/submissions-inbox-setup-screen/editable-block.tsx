@@ -1,4 +1,4 @@
-import { Alert, Box, Button, FormControl, HStack, Input, VStack } from "@chakra-ui/react"
+import { Alert, Box, Button, Field, HStack, Input, VStack } from "@chakra-ui/react"
 import { Pencil, Plus, Warning } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
@@ -87,11 +87,11 @@ export const EditableBlock = observer(function SubmissionsInboxSetupEditableBloc
   ) : (
     <EditableBlockContainer>
       {heading && (
-        <FormControl flexBasis={"280px"} alignSelf="center">
+        <Field.Root flexBasis={"280px"} alignSelf="center">
           <EditableBlockHeading>{heading}</EditableBlockHeading>
-        </FormControl>
+        </Field.Root>
       )}
-      <VStack flex={1} spacing={5} alignSelf="center">
+      <VStack flex={1} gap={5} alignSelf="center">
         {fields.map((f, index) => {
           const trueIndex = getIndex(f)
           const contactId = getValues(`${fieldArrayName}.${trueIndex}.id`)
@@ -104,7 +104,7 @@ export const EditableBlock = observer(function SubmissionsInboxSetupEditableBloc
                   pos="relative"
                   label={t(`${i18nPrefix}.emailLabel`)}
                   fieldName={`${fieldArrayName}.${trueIndex}.email`}
-                  inputProps={{ isDisabled: !isEditing }}
+                  inputProps={{ disabled: !isEditing }}
                   required={isEditing}
                   validate={isEditing}
                   handleRemove={() => onRemove(trueIndex, contact)}
@@ -113,7 +113,7 @@ export const EditableBlock = observer(function SubmissionsInboxSetupEditableBloc
                   showIcon
                 />
                 {!isEditing && contact && !contact.confirmedAt && (
-                  <Alert
+                  <Alert.Root
                     status="warning"
                     rounded="lg"
                     borderWidth={1}
@@ -129,14 +129,15 @@ export const EditableBlock = observer(function SubmissionsInboxSetupEditableBloc
                   >
                     <Warning color="var(--chakra-colors-semantic-warning)" size={24} />
                     {t(`${i18nPrefix}.confirmationRequired`)}{" "}
-                  </Alert>
+                  </Alert.Root>
                 )}
               </HStack>
             </React.Fragment>
           )
         })}
         {isEditing && (
-          <Button alignSelf="start" size="sm" variant="link" leftIcon={<Plus />} onClick={onAdd}>
+          <Button alignSelf="start" size="sm" variant="plain" onClick={onAdd}>
+            <Plus />
             {t(`${i18nPrefix}.addEmail`)}
           </Button>
         )}
@@ -147,17 +148,18 @@ export const EditableBlock = observer(function SubmissionsInboxSetupEditableBloc
             <Button
               variant="primary"
               type="submit"
-              isLoading={isSubmitting && isEditing}
-              isDisabled={!isValid() || isSubmitting}
+              loading={isSubmitting && isEditing}
+              disabled={!isValid() || isSubmitting}
             >
               {t("ui.save")}
             </Button>
-            <Button variant="secondary" onClick={handleClickCancel} isDisabled={isSubmitting}>
+            <Button variant="secondary" onClick={handleClickCancel} disabled={isSubmitting}>
               {t("ui.cancel")}
             </Button>
           </HStack>
         ) : (
-          <Button variant="primary" leftIcon={<Pencil />} onClick={() => setIsEditing(true)}>
+          <Button variant="primary" onClick={() => setIsEditing(true)}>
+            <Pencil />
             {t("ui.edit")}
           </Button>
         )}

@@ -1,4 +1,5 @@
-import { Box, Flex, GridItem, HStack, Text, Tooltip } from "@chakra-ui/react"
+import { Tooltip } from "@/components/ui/tooltip"
+import { Box, Flex, GridItem, HStack, Text } from "@chakra-ui/react"
 import { Info } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -21,21 +22,23 @@ export const GridHeaders = observer(function GridHeaders() {
     <Box display={"contents"} role={"rowgroup"} position="fixed">
       <Box display={"contents"} role={"row"}>
         <GridItem
-          as={Flex}
           gridColumn={"span 6"}
           p={6}
           bg={"greys.grey10"}
           justifyContent={"space-between"}
           align="center"
+          asChild
         >
-          <Text role={"heading"}>{t("requirementsLibrary.index.tableHeading")}</Text>
-          <ModelSearchInput
-            inputGroupProps={{
-              position: "sticky",
-              right: 6,
-            }}
-            searchModel={searchModel as ISearch}
-          />
+          <Flex>
+            <Text role={"heading"}>{t("requirementsLibrary.index.tableHeading")}</Text>
+            <ModelSearchInput
+              inputGroupProps={{
+                position: "sticky",
+                right: 6,
+              }}
+              searchModel={searchModel as ISearch}
+            />
+          </Flex>
         </GridItem>
       </Box>
       <Box display={"contents"} role={"row"}>
@@ -43,33 +46,34 @@ export const GridHeaders = observer(function GridHeaders() {
           <GridHeader key={field} role={"columnheader"}>
             <Flex
               w={"full"}
-              as={"button"}
               justifyContent={"space-between"}
               cursor="pointer"
-              onClick={() => toggleSort(field)}
               borderRight={"1px solid"}
               borderColor={"border.light"}
               px={4}
+              asChild
             >
-              <Text>{getSortColumnHeader(field)}</Text>
-              {field === ERequirementLibrarySortFields.associations ? (
-                <HStack w={"fit-content"} spacing={3}>
+              <button onClick={() => toggleSort(field)}>
+                <Text>{getSortColumnHeader(field)}</Text>
+                {field === ERequirementLibrarySortFields.associations ? (
+                  <HStack w={"fit-content"} gap={3}>
+                    <SortIcon<ERequirementLibrarySortFields>
+                      field={field}
+                      currentSort={sort}
+                      aria-label={`Sort ${getSortColumnHeader(field)} Icon`}
+                    />
+                    <Tooltip content={t("requirementsLibrary.associationsInfo")}>
+                      <Info aria-label={"Info Icon"} />
+                    </Tooltip>
+                  </HStack>
+                ) : (
                   <SortIcon<ERequirementLibrarySortFields>
                     field={field}
                     currentSort={sort}
-                    aria-label={`Sort ${getSortColumnHeader(field)} Icon`}
+                    aria-label={`Sort ${getSortColumnHeader(field)}`}
                   />
-                  <Tooltip label={t("requirementsLibrary.associationsInfo")}>
-                    <Info aria-label={"Info Icon"} />
-                  </Tooltip>
-                </HStack>
-              ) : (
-                <SortIcon<ERequirementLibrarySortFields>
-                  field={field}
-                  currentSort={sort}
-                  aria-label={`Sort ${getSortColumnHeader(field)}`}
-                />
-              )}
+                )}
+              </button>
             </Flex>
           </GridHeader>
         ))}

@@ -8,9 +8,15 @@ interface IFormFooterProps<T = void> {
   handleSubmit?: (onValid: (data: T) => void | Promise<void>, onInvalid?: () => void) => (e?: any) => void
   onSubmit?: (data: T) => Promise<void> | void
   isLoading?: boolean
+  loading?: boolean
 }
 
-export const FormFooter = observer(function FormFooter<T>({ handleSubmit, onSubmit, isLoading }: IFormFooterProps<T>) {
+export const FormFooter = observer(function FormFooter<T>({
+  handleSubmit,
+  onSubmit,
+  isLoading,
+  loading,
+}: IFormFooterProps<T>) {
   const { t } = useTranslation()
   const { navigateToNext, hasNext } = useOverheatingCodeNavigation()
 
@@ -46,7 +52,7 @@ export const FormFooter = observer(function FormFooter<T>({ handleSubmit, onSubm
 
   return (
     <Flex gap={3} mt={8} justifyContent="flex-start">
-      <Button variant="primary" onClick={handleContinue} isDisabled={!hasNext} isLoading={isLoading}>
+      <Button variant="primary" onClick={handleContinue} disabled={!hasNext} loading={loading ?? isLoading}>
         {hasSaveLogic ? t("ui.saveAndcontinue", "Save and Continue") : t("ui.next", "Next")}
       </Button>
     </Flex>

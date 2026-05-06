@@ -1,4 +1,5 @@
-import { Badge, Box, Flex, Heading, Link, ListItem, Radio, Text, UnorderedList, VStack } from "@chakra-ui/react"
+import { Radio } from "@/components/ui/radio"
+import { Badge, Box, Flex, Heading, Link, List, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { Controller, useForm } from "react-hook-form"
@@ -52,12 +53,10 @@ export const ServicePartner = observer(function ServicePartner() {
           "To receive a compliance report, your drawings will be analyzed by a third-party service provider. Select the one that best fits your project needs. The Ministry of Housing and Municipal Affairs does not endorse one provider over another."
         )}
       </Text>
-
       <Heading as="h3" size="md" mb={4}>
         {t("preCheck.sections.servicePartner.availableProviders", "Available providers")}
       </Heading>
-
-      <VStack spacing={4} align="stretch" mb={8}>
+      <VStack gap={4} align="stretch" mb={8}>
         <Controller
           name="servicePartner"
           control={control}
@@ -82,7 +81,7 @@ export const ServicePartner = observer(function ServicePartner() {
                   <Heading as="h4" fontSize="lg">
                     {t("preCheck.sections.servicePartner.archistarTitle", "Archistar eCheck")}
                   </Heading>
-                  <Badge colorScheme="blue" fontSize="xs" textTransform="none" mb={2}>
+                  <Badge colorPalette="blue" fontSize="xs" textTransform="none" mb={2}>
                     {t("ui.beta", "Beta")}
                   </Badge>
                 </Flex>
@@ -92,37 +91,43 @@ export const ServicePartner = observer(function ServicePartner() {
                     "preCheck.sections.servicePartner.archistarDescription",
                     "Archistar is an Australian technology company that creates tools for property development, generative design, and automated compliance checking."
                   )}{" "}
-                  <Link href="https://archistar.ai" isExternal color="text.link" textDecoration="underline">
+                  <Link
+                    href="https://archistar.ai"
+                    color="text.link"
+                    textDecoration="underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     {t("preCheck.sections.servicePartner.visitWebsite", "Visit Archistar's website")}
                   </Link>
                 </Text>
 
-                <UnorderedList spacing={2} ml={4}>
-                  <ListItem>{t("preCheck.sections.servicePartner.freeToUse", "Free to use")}</ListItem>
-                  <ListItem>
+                <List.Root as="ul" gap={2} ml={4}>
+                  <List.Item>{t("preCheck.sections.servicePartner.freeToUse", "Free to use")}</List.Item>
+                  <List.Item>
                     {t("preCheck.sections.servicePartner.automatedReview", "Automated code analysis and human review")}
-                  </ListItem>
-                  <ListItem>
+                  </List.Item>
+                  <List.Item>
                     {t("preCheck.sections.servicePartner.resultsTime", "Results in 48 hours or less")}
-                  </ListItem>
-                  <ListItem>
+                  </List.Item>
+                  <List.Item>
                     {t("preCheck.sections.servicePartner.smallResidential", "For small residential buildings only")}
-                  </ListItem>
-                  <ListItem>
+                  </List.Item>
+                  <List.Item>
                     {t(
                       "preCheck.sections.servicePartner.preChecksFor",
                       "Pre-checks drawings for the following code requirements:"
                     )}
-                    <UnorderedList spacing={1} ml={4} mt={1}>
-                      <ListItem>{t("preCheck.sections.servicePartner.buildingHeight", "Building height")}</ListItem>
-                      <ListItem>
+                    <List.Root as="ul" gap={1} ml={4} mt={1}>
+                      <List.Item>{t("preCheck.sections.servicePartner.buildingHeight", "Building height")}</List.Item>
+                      <List.Item>
                         {t("preCheck.sections.servicePartner.footings", "House footings and foundation size")}
-                      </ListItem>
-                      <ListItem>{t("preCheck.sections.servicePartner.egress", "Shared egress facilities")}</ListItem>
-                      <ListItem>{t("preCheck.sections.servicePartner.stairs", "Stairs in dwelling units")}</ListItem>
-                    </UnorderedList>
-                  </ListItem>
-                </UnorderedList>
+                      </List.Item>
+                      <List.Item>{t("preCheck.sections.servicePartner.egress", "Shared egress facilities")}</List.Item>
+                      <List.Item>{t("preCheck.sections.servicePartner.stairs", "Stairs in dwelling units")}</List.Item>
+                    </List.Root>
+                  </List.Item>
+                </List.Root>
 
                 <Flex
                   align="center"
@@ -138,7 +143,7 @@ export const ServicePartner = observer(function ServicePartner() {
                   alignSelf="flex-end"
                 >
                   <Radio
-                    isChecked={selectedServicePartner === EPreCheckServicePartner.archistar}
+                    checked={selectedServicePartner === EPreCheckServicePartner.archistar}
                     value={EPreCheckServicePartner.archistar}
                     pointerEvents="none"
                   />
@@ -151,8 +156,7 @@ export const ServicePartner = observer(function ServicePartner() {
           )}
         />
       </VStack>
-
-      <FormFooter<IServicePartnerFormData> handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
+      <FormFooter<IServicePartnerFormData> handleSubmit={handleSubmit} onSubmit={onSubmit} loading={isSubmitting} />
     </Box>
   )
 })

@@ -212,12 +212,10 @@ export const ProjectMap = ({ coordinates, pid, parcelGeometry, onOpenFullscreen 
           <SharedSpinner my={0} />
         </Center>
       )}
-
       {/* Fullscreen button */}
       {onOpenFullscreen && isMapReady && (
         <IconButton
           aria-label={t("permitProject.map.openFullscreen")}
-          icon={<ArrowsOut size={18} />}
           size="sm"
           position="absolute"
           top={2}
@@ -228,9 +226,10 @@ export const ProjectMap = ({ coordinates, pid, parcelGeometry, onOpenFullscreen 
           borderRadius="md"
           _hover={{ bg: "gray.100" }}
           onClick={onOpenFullscreen}
-        />
+        >
+          <ArrowsOut size={18} />
+        </IconButton>
       )}
-
       <Box
         ref={mapDiv}
         h="100%"

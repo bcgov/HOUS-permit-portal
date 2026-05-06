@@ -1,4 +1,4 @@
-import { FormControl, FormLabel, Heading, Input, Text, VStack } from "@chakra-ui/react"
+import { Field, Heading, Input, Text, VStack } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -12,23 +12,22 @@ export const BaselineEnergyPerformance = observer(function BaselineEnergyPerform
   const occupancy: IBaselineOccupancy = checklist.baselineOccupancies[0]
 
   return (
-    <VStack flex={1} spacing={4} borderWidth={1} borderColor="border.light" rounded="md" p={4}>
+    <VStack flex={1} gap={4} borderWidth={1} borderColor="border.light" rounded="md" p={4}>
       <Heading variant="heading4">{t(`${i18nPrefix}.title`)}</Heading>
-      <FormControl w="auto" mx="auto">
-        <FormLabel mr={0} my={1} textAlign="center" fontWeight="normal">
+      <Field.Root w="auto" mx="auto">
+        <Field.Label mr={0} my={1} textAlign="center" fontWeight="normal">
           {t(`${i18nPrefix}.stepRequired`)}
-        </FormLabel>
+        </Field.Label>
         <Input
           maxW={"124px"}
           value={t(`stepCode.part3.performanceRequirements.${occupancy?.performanceRequirement}`)}
-          isDisabled
+          disabled
         />
-      </FormControl>
-
-      <FormControl w="100%">
-        <FormLabel mr={0} my={1} textAlign="center" fontWeight="normal">
+      </Field.Root>
+      <Field.Root w="100%">
+        <Field.Label mr={0} my={1} textAlign="center" fontWeight="normal">
           {t(`${i18nPrefix}.achieved`)}
-        </FormLabel>
+        </Field.Label>
         <Input
           value={
             stepAchieved
@@ -40,9 +39,9 @@ export const BaselineEnergyPerformance = observer(function BaselineEnergyPerform
             bg: !!stepAchieved ? "semantic.successLight" : "semantic.errorLight",
             borderColor: !!stepAchieved ? "semantic.success" : "semantic.error",
           }}
-          isDisabled
+          disabled
         />
-      </FormControl>
+      </Field.Root>
       <Text textAlign="center">{t(`${i18nPrefix}.result.${!!stepAchieved ? "success" : "failure"}`)}</Text>
     </VStack>
   )

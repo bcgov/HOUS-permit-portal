@@ -9,9 +9,8 @@ import {
   GridItem,
   Heading,
   Link,
-  ListItem,
+  List,
   Text,
-  UnorderedList,
   VStack,
 } from "@chakra-ui/react"
 
@@ -186,13 +185,13 @@ const JurisdictionScreenBody = observer(
               </Box>
               <Container maxW="container.lg" py={16} px={8}>
                 <Flex direction="column" gap={12}>
-                  <Accordion
+                  <Accordion.Root
                     display="flex"
                     flexDirection="column"
                     gap={4}
-                    allowMultiple
+                    multiple
                     key={canManageAbout ? "jurisdiction-about-accordion-manage" : "jurisdiction-about-accordion-public"}
-                    defaultIndex={canManageAbout ? [0, 1, 2, 3] : [0]}
+                    defaultValue={canManageAbout ? [0, 1, 2, 3] : [0]}
                   >
                     {showOverviewAccordion && (
                       <JurisdictionAboutAccordionItem
@@ -244,18 +243,19 @@ const JurisdictionScreenBody = observer(
                           {t("jurisdiction.edit.stepCode.aboutPageNotice")}
                         </Text>
                         <Link
-                          as={RouterLink}
-                          to={`/jurisdictions/${currentJurisdiction.slug}/step-code-requirements`}
                           color="text.link"
                           textDecoration="underline"
                           _hover={{ textDecoration: "none" }}
                           fontWeight="bold"
+                          asChild
                         >
-                          {t("jurisdiction.edit.stepCode.viewStepCodeRequirements")}{" "}
-                          <ArrowSquareOut style={{ display: "inline" }} />
+                          <RouterLink to={`/jurisdictions/${currentJurisdiction.slug}/step-code-requirements`}>
+                            {t("jurisdiction.edit.stepCode.viewStepCodeRequirements")}{" "}
+                            <ArrowSquareOut style={{ display: "inline" }} />
+                          </RouterLink>
                         </Link>
 
-                        <VStack align="start" spacing={4} mt={4}>
+                        <VStack align="start" gap={4} mt={4}>
                           <Heading as="h3" fontSize="lg">
                             {t(
                               "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.smallSimpleBuildings"
@@ -271,22 +271,22 @@ const JurisdictionScreenBody = observer(
                               "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.part9BuildingsAreGenerally"
                             )}
                           </Text>
-                          <UnorderedList pl={4}>
-                            <ListItem>
+                          <List.Root as="ul" pl={4}>
+                            <List.Item>
                               {t(
                                 "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.smallSimpleBuildingsCharacteristic1"
                               )}
-                            </ListItem>
-                            <ListItem>
+                            </List.Item>
+                            <List.Item>
                               {t(
                                 "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.smallSimpleBuildingsCharacteristic2"
                               )}
-                            </ListItem>
-                          </UnorderedList>
+                            </List.Item>
+                          </List.Root>
                           <StepCodeRequirementsTable currentJurisdiction={currentJurisdiction} />
                         </VStack>
 
-                        <VStack align="start" spacing={4} mt={6}>
+                        <VStack align="start" gap={4} mt={6}>
                           <Heading as="h3" fontSize="lg">
                             {t(
                               "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.largeComplexBuildings"
@@ -302,39 +302,40 @@ const JurisdictionScreenBody = observer(
                               "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.part3BuildingsAreGenerally"
                             )}
                           </Text>
-                          <UnorderedList pl={4}>
-                            <ListItem>
+                          <List.Root as="ul" pl={4}>
+                            <List.Item>
                               {t(
                                 "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.largeComplexBuildingsCharacteristic1"
                               )}
-                            </ListItem>
-                            <ListItem>
+                            </List.Item>
+                            <List.Item>
                               {t(
                                 "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.largeComplexBuildingsCharacteristic2"
                               )}
-                            </ListItem>
-                          </UnorderedList>
+                            </List.Item>
+                          </List.Root>
                           <Text fontSize="md">
                             {t(
                               "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.largeComplexBuildingsLinkPrefix"
                             )}{" "}
                             <Link
-                              as={RouterLink}
-                              to={`/jurisdictions/${currentJurisdiction.slug}/step-code-requirements`}
                               color="text.link"
                               textDecoration="underline"
                               _hover={{ textDecoration: "none" }}
+                              asChild
                             >
-                              {t(
-                                "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.checkStepCodesRequirementsInThisCommunity"
-                              )}
+                              <RouterLink to={`/jurisdictions/${currentJurisdiction.slug}/step-code-requirements`}>
+                                {t(
+                                  "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.checkStepCodesRequirementsInThisCommunity"
+                                )}
+                              </RouterLink>
                             </Link>
                             .
                           </Text>
                         </VStack>
                       </Flex>
                     </JurisdictionAboutAccordionItem>
-                  </Accordion>
+                  </Accordion.Root>
                   <JurisdictionResourcesGridSection
                     jurisdiction={currentJurisdiction}
                     configureResourcesPath={
@@ -385,12 +386,12 @@ const JurisdictionScreenBody = observer(
                             <Button
                               variant="primary"
                               size="xs"
-                              leftIcon={<Pencil size={12} />}
                               aria-label={isEditingContacts ? t("ui.done") : t("ui.edit")}
                               onClick={() => {
                                 setIsEditingContacts((current) => !current)
                               }}
                             >
+                              <Pencil size={12} />
                               {isEditingContacts ? t("ui.done") : t("ui.edit")}
                             </Button>
                           </Flex>
@@ -407,11 +408,11 @@ const JurisdictionScreenBody = observer(
                       mb={4}
                       variant="primary"
                       type="submit"
-                      isDisabled={isSubmitting}
-                      isLoading={isSubmitting}
+                      disabled={isSubmitting}
+                      loading={isSubmitting}
                       loadingText={t("ui.loading")}
-                      leftIcon={<FloppyDisk size={24} />}
                     >
+                      <FloppyDisk size={24} />
                       {t("ui.save")}
                     </Button>
                   </Center>
@@ -441,16 +442,11 @@ const JurisdictionScreenBody = observer(
                 <Text fontSize="md" mb={6}>
                   {t("jurisdiction.notUsingBPH.wantToUse.emailButtonDescription")}
                 </Text>
-                <Button
-                  as="a"
-                  href={mailtoHref}
-                  variant="primary"
-                  size="lg"
-                  rightIcon={<ArrowSquareOut />}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {t("jurisdiction.notUsingBPH.wantToUse.emailButtonText")}
+                <Button variant="primary" size="lg" asChild>
+                  <a href={mailtoHref} target="_blank" rel="noopener noreferrer">
+                    {t("jurisdiction.notUsingBPH.wantToUse.emailButtonText")}
+                    <ArrowSquareOut />
+                  </a>
                 </Button>
               </Box>
             </Box>
@@ -520,8 +516,8 @@ const JurisdictionTipTapFormController = observer(
     return (
       <Box
         p={1}
-        sx={{
-          ".tiptap-editor-readonly": {
+        css={{
+          "& .tiptap-editor-readonly": {
             padding: 0,
           },
         }}

@@ -1,4 +1,4 @@
-import { Flex, FormControl, GridItem, Heading, HStack, VStack } from "@chakra-ui/react"
+import { Field, Flex, GridItem, Heading, HStack, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React from "react"
@@ -33,19 +33,18 @@ export const ProjectsGrid = observer(() => {
   } = permitProjectStore
 
   return (
-    <VStack align="stretch" spacing={4} w="full">
+    <VStack align="stretch" gap={4} w="full">
       <Heading as="h2" size="lg">
         {t("permitProject.index.allProjects", "All projects")}
       </Heading>
-
       <Flex direction="column" gap={4} w="full">
-        <FormControl w="full">
+        <Field.Root w="full">
           <ModelSearchInput
             searchModel={permitProjectStore}
             inputProps={{ placeholder: t("ui.search"), width: "full" }}
             inputGroupProps={{ width: "full" }}
           />
-        </FormControl>
+        </Field.Root>
         <Flex justifyContent={"space-between"} w="full">
           <HStack>
             {/* currently we do not have the ability to archive projects */}
@@ -56,7 +55,6 @@ export const ProjectsGrid = observer(() => {
           </HStack>
         </Flex>
       </Flex>
-
       <SearchGrid templateColumns={PROJECTS_GRID_TEMPLATE_COLUMNS} gridRowClassName="project-grid-row">
         <GridHeaders columns={Object.values(EPermitProjectSortFields)} includeActionColumn />
 

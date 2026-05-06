@@ -1,4 +1,4 @@
-import { Box, Button, Flex, FormControl, FormLabel, HStack, Select, Tag, TagProps, Text } from "@chakra-ui/react"
+import { Box, Button, Field, Flex, HStack, NativeSelect, Tag, TagProps, Text } from "@chakra-ui/react"
 import { CheckCircle, WarningCircle, X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { ReactNode } from "react"
@@ -32,9 +32,9 @@ export const UserInput = observer(({ index, remove, adminOnly }: IUserInputProps
 
   return (
     <Flex bg="greys.grey03" p={4} borderRadius="md" flexWrap="wrap">
-      <HStack spacing={4} w="full">
-        <FormControl>
-          <FormLabel>{t("auth.role")}</FormLabel>
+      <HStack gap={4} w="full">
+        <Field.Root>
+          <Field.Label>{t("auth.role")}</Field.Label>
 
           <Controller
             name={`users.${index}.role`}
@@ -43,27 +43,32 @@ export const UserInput = observer(({ index, remove, adminOnly }: IUserInputProps
             render={({ field }) => {
               return (
                 <>
-                  <Select bg="greys.white" placeholder={t("ui.pleaseSelect")} {...field}>
-                    {adminOnly ? (
-                      <option value={EUserRoles.superAdmin}>{t(`user.roles.${EUserRoles.superAdmin}`)}</option>
-                    ) : (
-                      <>
-                        <option value={EUserRoles.reviewer}>{t(`user.roles.${EUserRoles.reviewer}`)}</option>
-                        <option value={EUserRoles.reviewManager}>{t(`user.roles.${EUserRoles.reviewManager}`)}</option>
-                        <option value={EUserRoles.regionalReviewManager}>
-                          {t(`user.roles.${EUserRoles.regionalReviewManager}`)}
-                        </option>
-                        <option value={EUserRoles.technicalSupport}>
-                          {t(`user.roles.${EUserRoles.technicalSupport}`)}
-                        </option>
-                      </>
-                    )}
-                  </Select>
+                  <NativeSelect.Root>
+                    <NativeSelect.Field bg="greys.white" placeholder={t("ui.pleaseSelect")} {...field}>
+                      {adminOnly ? (
+                        <option value={EUserRoles.superAdmin}>{t(`user.roles.${EUserRoles.superAdmin}`)}</option>
+                      ) : (
+                        <>
+                          <option value={EUserRoles.reviewer}>{t(`user.roles.${EUserRoles.reviewer}`)}</option>
+                          <option value={EUserRoles.reviewManager}>
+                            {t(`user.roles.${EUserRoles.reviewManager}`)}
+                          </option>
+                          <option value={EUserRoles.regionalReviewManager}>
+                            {t(`user.roles.${EUserRoles.regionalReviewManager}`)}
+                          </option>
+                          <option value={EUserRoles.technicalSupport}>
+                            {t(`user.roles.${EUserRoles.technicalSupport}`)}
+                          </option>
+                        </>
+                      )}
+                    </NativeSelect.Field>
+                    <NativeSelect.Indicator />
+                  </NativeSelect.Root>
                 </>
               )
             }}
           />
-        </FormControl>
+        </Field.Root>
         <EmailFormControl fieldName={`users.${index}.email`} validate required />
         <TextFormControl label={t("user.firstName")} fieldName={`users.${index}.firstName`} required />
         <TextFormControl label={t("user.lastName")} fieldName={`users.${index}.lastName`} required />
@@ -103,7 +108,8 @@ export const UserInput = observer(({ index, remove, adminOnly }: IUserInputProps
             </>
           )}
           {!invited && !taken && !reinvited && !failed && remove && !isSubmitting && (
-            <Button onClick={() => remove(index)} variant="tertiary" leftIcon={<X size={16} />}>
+            <Button onClick={() => remove(index)} variant="tertiary">
+              <X size={16} />
               {t("ui.remove")}
             </Button>
           )}
@@ -122,11 +128,11 @@ const IInviteResultTag = ({ bg, icon, text, ...rest }: IInviteResultTagProps) =>
   const color = (bg as string).replace(/Light/g, "")
 
   return (
-    <Tag
+    <Tag.Root
       border="1px solid"
       borderColor={color}
       mb={2}
-      noOfLines={1}
+      lineClamp={1}
       bg={bg}
       color={color}
       display="flex"
@@ -136,6 +142,6 @@ const IInviteResultTag = ({ bg, icon, text, ...rest }: IInviteResultTagProps) =>
     >
       {icon}
       <Text>{text}</Text>
-    </Tag>
+    </Tag.Root>
   )
 }

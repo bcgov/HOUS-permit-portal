@@ -1,17 +1,5 @@
-import {
-  Center,
-  Flex,
-  FormControl,
-  FormControlProps,
-  FormErrorMessage,
-  FormLabel,
-  Input,
-  InputGroup,
-  InputLeftElement,
-  Link,
-  Select,
-  Text,
-} from "@chakra-ui/react"
+import { InputGroup } from "@/components/ui/input-group"
+import { Center, Field, Flex, FormControlProps, Input, InputElement, Link, NativeSelect, Text } from "@chakra-ui/react"
 import { MapPin } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
@@ -113,7 +101,7 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
           <Flex gap={{ base: 6, xl: 6 }} direction="column">
             <Flex gap={2} alignItems="flex-end">
               <Flex direction="column" gap={4} w="full">
-                <FormControl isInvalid={editable && !!errors.fullAddress}>
+                <Field.Root invalid={editable && !!errors.fullAddress}>
                   {editable ? (
                     editingAddress || !currentStepCode.fullAddress ? (
                       <Controller
@@ -132,30 +120,30 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
                       />
                     ) : (
                       <Flex direction="column" gap={2}>
-                        <FormLabel>{t(`${i18nPrefix}.address`)}</FormLabel>
+                        <Field.Label>{t(`${i18nPrefix}.address`)}</Field.Label>
                         <Flex gap={2} alignItems="center">
                           <InputGroup>
-                            <InputLeftElement pointerEvents="none">
+                            <InputElement pointerEvents="none">
                               <MapPin />
-                            </InputLeftElement>
-                            <Input isDisabled value={currentStepCode.fullAddress || ""} />
+                            </InputElement>
+                            <Input disabled value={currentStepCode.fullAddress || ""} />
                           </InputGroup>
                         </Flex>
                       </Flex>
                     )
                   ) : (
                     <Flex direction="column" gap={2}>
-                      <FormLabel>{t(`${i18nPrefix}.address`)}</FormLabel>
+                      <Field.Label>{t(`${i18nPrefix}.address`)}</Field.Label>
                       <InputGroup>
-                        <InputLeftElement pointerEvents="none">
+                        <InputElement pointerEvents="none">
                           <MapPin />
-                        </InputLeftElement>
-                        <Input isDisabled value={currentStepCode.fullAddress || ""} />
+                        </InputElement>
+                        <Input disabled value={currentStepCode.fullAddress || ""} />
                       </InputGroup>
                     </Flex>
                   )}
-                  {editable && <FormErrorMessage>{errors.fullAddress?.message}</FormErrorMessage>}
-                </FormControl>
+                  {editable && <Field.ErrorText>{errors.fullAddress?.message}</Field.ErrorText>}
+                </Field.Root>
               </Flex>
             </Flex>
             {editable && (
@@ -164,13 +152,13 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
             )}
 
             {!editable && (
-              <FormControl flex={1}>
-                <FormLabel>{t(`${i18nPrefix}.jurisdiction`)}</FormLabel>
+              <Field.Root flex={1}>
+                <Field.Label>{t(`${i18nPrefix}.jurisdiction`)}</Field.Label>
                 <Input
-                  isDisabled
+                  disabled
                   value={currentStepCode.jurisdictionName || currentStepCode.jurisdiction?.qualifiedName || ""}
                 />
-              </FormControl>
+              </Field.Root>
             )}
           </Flex>
 
@@ -181,35 +169,38 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
               direction={{ base: "column", lg: "row" }}
             >
               {editable ? (
-                <FormControl>
-                  <FormLabel htmlFor="referenceNumber">{t(`${i18nPrefix}.identifier`)}</FormLabel>
+                <Field.Root>
+                  <Field.Label htmlFor="referenceNumber">{t(`${i18nPrefix}.identifier`)}</Field.Label>
                   <Input
                     id="referenceNumber"
                     {...register("referenceNumber")}
                     defaultValue={currentStepCode.referenceNumber || ""}
                   />
-                </FormControl>
+                </Field.Root>
               ) : (
                 <Field label={t(`${i18nPrefix}.identifier`)} value={currentStepCode.referenceNumber} />
               )}
               {editable ? (
-                <FormControl>
-                  <FormLabel htmlFor="phase">{t(`${i18nPrefix}.stage`)}</FormLabel>
-                  <Select
-                    id="phase"
-                    placeholder="Select stage"
-                    {...register("phase")}
-                    defaultValue={currentStepCode.phase || ""}
-                  >
-                    <option value="pre_construction">
-                      {t("stepCodeChecklist.edit.projectInfo.stages.pre_construction")}
-                    </option>
-                    <option value="mid_construction">
-                      {t("stepCodeChecklist.edit.projectInfo.stages.mid_construction")}
-                    </option>
-                    <option value="as_built">{t("stepCodeChecklist.edit.projectInfo.stages.as_built")}</option>
-                  </Select>
-                </FormControl>
+                <Field.Root>
+                  <Field.Label htmlFor="phase">{t(`${i18nPrefix}.stage`)}</Field.Label>
+                  <NativeSelect.Root>
+                    <NativeSelect.Field
+                      id="phase"
+                      placeholder="Select stage"
+                      {...register("phase")}
+                      defaultValue={currentStepCode.phase || ""}
+                    >
+                      <option value="pre_construction">
+                        {t("stepCodeChecklist.edit.projectInfo.stages.pre_construction")}
+                      </option>
+                      <option value="mid_construction">
+                        {t("stepCodeChecklist.edit.projectInfo.stages.mid_construction")}
+                      </option>
+                      <option value="as_built">{t("stepCodeChecklist.edit.projectInfo.stages.as_built")}</option>
+                    </NativeSelect.Field>
+                    <NativeSelect.Indicator />
+                  </NativeSelect.Root>
+                </Field.Root>
               ) : (
                 <Field label={t(`${i18nPrefix}.stage`)} value={currentStepCode.phase} />
               )}
@@ -243,7 +234,7 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
             <Text fontSize="md" fontWeight="bold">
               {t(`${i18nPrefix}.confirm`)}
             </Text>
-            <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
+            <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} loading={isSubmitting} />
           </Flex>
           {!editable && (
             <Text fontSize="md">
@@ -268,9 +259,9 @@ interface IFieldProps extends FormControlProps {
 
 const Field = function Field({ label, value, ...props }: IFieldProps) {
   return (
-    <FormControl {...props}>
-      <FormLabel>{label}</FormLabel>
-      <Input isDisabled value={value || ""} textOverflow="ellipsis" textAlign="left" />
-    </FormControl>
+    <Field.Root {...props}>
+      <Field.Label>{label}</Field.Label>
+      <Input disabled value={value || ""} textOverflow="ellipsis" textAlign="left" />
+    </Field.Root>
   )
 }

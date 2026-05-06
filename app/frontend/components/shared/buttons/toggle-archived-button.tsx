@@ -21,7 +21,8 @@ export const ToggleArchivedButton = observer(function ToggleArchivedButton<TSear
   }
 
   return (
-    <Button leftIcon={<Archive size={16} />} variant={"secondary"} onClick={handleClick} {...rest}>
+    <Button variant={"secondary"} onClick={handleClick} {...rest}>
+      <Archive size={16} />
       {showArchived ? t("ui.seeUnarchivedButton") : t("ui.seeArchivedButton")}
     </Button>
   )

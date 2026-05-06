@@ -88,7 +88,7 @@ export const CodeComplianceSetupScreen: React.FC = observer(function CodeComplia
         </Text>
         <Flex pb={4} justify="space-between" w="100%" borderBottom="1px solid" borderColor="border.light">
           <Text fontWeight="bold">{t(`${i18nPrefix}.toggleTitle`)}</Text>
-          <SwitchButton isChecked={codeComplianceEnabled} onChange={updateCodeComplianceEnabled} size={"lg"} />
+          <SwitchButton checked={codeComplianceEnabled} onChange={updateCodeComplianceEnabled} size={"lg"} />
         </Flex>
 
         {codeComplianceEnabled && (
@@ -107,7 +107,7 @@ export const CodeComplianceSetupScreen: React.FC = observer(function CodeComplia
               onChange={setEnrolledJurisdictions}
               onSave={handleSaveEnrollments}
               onToggleEnabledForAll={handleToggleEnabledForAll}
-              isLoading={isLoadingEnrollments}
+              loading={isLoadingEnrollments}
             />
           </Box>
         )}

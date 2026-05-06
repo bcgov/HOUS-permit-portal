@@ -12,13 +12,15 @@ export const ErrorScreen = ({ error, ...rest }: IErrorScreenProps) => {
   const { t } = useTranslation()
 
   return (
-    <Container as={Flex} direction="column" maxW="container.lg" flexGrow={1}>
-      <Center w="full" flex={1} color="greys.grey01">
-        <VStack>
-          <Warning size={100} />
-          {error?.message ? <Text>{error?.message}</Text> : <Text>{t("site.seeConsoleForDetails")}</Text>}
-        </VStack>
-      </Center>
+    <Container direction="column" maxW="container.lg" flexGrow={1} asChild>
+      <Flex>
+        <Center w="full" flex={1} color="greys.grey01">
+          <VStack>
+            <Warning size={100} />
+            {error?.message ? <Text>{error?.message}</Text> : <Text>{t("site.seeConsoleForDetails")}</Text>}
+          </VStack>
+        </Center>
+      </Flex>
     </Container>
   )
 }

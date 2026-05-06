@@ -1,4 +1,4 @@
-import { Box, Container, Heading, Link, ListItem, Text, UnorderedList, VStack } from "@chakra-ui/react"
+import { Box, Container, Heading, Link, List, Text, VStack } from "@chakra-ui/react"
 import i18next from "i18next"
 import React from "react"
 import { Trans, useTranslation } from "react-i18next"
@@ -15,7 +15,6 @@ export const ContactScreen = () => {
   return (
     <Container maxW="container.lg" pt="16" pb="36" px="8">
       <Heading as="h1">{t("site.contact")}</Heading>
-
       <Heading as="h2" variant="yellowline" mt="16">
         {t("site.contactInstructions_2")}
       </Heading>
@@ -27,11 +26,9 @@ export const ContactScreen = () => {
 					</Link>
 				*/}
       </Text>
-
       <Text mt={8} fontSize="lg">
         {t("site.contactUs.responseAim")}
       </Text>
-
       <Heading as="h2" variant="yellowline" mt="16">
         {t("site.contactUs.hours.title")}
       </Heading>
@@ -39,32 +36,30 @@ export const ContactScreen = () => {
       <Text fontStyle="italic" fontSize="lg">
         {t("site.contactUs.hours.note")}
       </Text>
-
       <Heading as="h2" variant="yellowline" mt="16">
         {t("site.contactUs.quickHelp.title")}
       </Heading>
-      <UnorderedList spacing={2} mt={4} fontSize="lg">
-        <ListItem>
+      <List.Root as="ul" gap={2} mt={4} fontSize="lg">
+        <List.Item>
           <Text fontSize="lg">
             <Trans i18nKey="site.contactUs.quickHelp.loginIssues" />
           </Text>
-        </ListItem>
-        <ListItem>
+        </List.Item>
+        <List.Item>
           <Text fontSize="lg">
             <Trans i18nKey="site.contactUs.quickHelp.uploadProblems" />
           </Text>
-        </ListItem>
-        <ListItem>
+        </List.Item>
+        <List.Item>
           <Text fontSize="lg">
             <Trans i18nKey="site.contactUs.quickHelp.applicationStatus" />
           </Text>
-        </ListItem>
-      </UnorderedList>
-
+        </List.Item>
+      </List.Root>
       <Heading as="h2" variant="yellowline" mt="16">
         {t("site.contactUs.routing.title")}
       </Heading>
-      <VStack align="start" spacing={6} mt={4} fontSize="lg">
+      <VStack align="start" gap={6} mt={4} fontSize="lg">
         <Box>
           <Heading as="h3" size="sm">
             {t("site.contactUs.routing.technical.title")}
@@ -73,7 +68,7 @@ export const ContactScreen = () => {
             {t("site.contactUs.routing.technical.description")}
           </Text>
           <Text>
-            <Link href={mailto} isExternal>
+            <Link href={mailto} target="_blank" rel="noopener noreferrer">
               {t("site.contactUs.routing.technical.email")}
             </Link>
           </Text>
@@ -88,7 +83,6 @@ export const ContactScreen = () => {
           <Text fontSize="lg">{t("site.contactUs.routing.permit.instruction")}</Text>
         </Box>
       </VStack>
-
       <Heading as="h2" variant="yellowline" mt="16">
         {t("site.contactUs.jurisdictionFinder.title")}
       </Heading>

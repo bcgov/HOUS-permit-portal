@@ -10,7 +10,7 @@ import { useLanguageChange } from "../i18n/use-language-change"
 import { setupReactotron } from "../setup/reactotron"
 import { Provider, setupRootStore } from "../setup/root"
 import { GlobalStyles } from "../styles"
-import { theme } from "../styles/theme"
+import { system } from "../styles/theme"
 
 import { useTranslation } from "react-i18next"
 import "../i18n/i18n"
@@ -24,7 +24,7 @@ const renderApp = (rootStore) => {
     const { t } = useTranslation()
 
     return (
-      <ChakraProvider theme={theme}>
+      <ChakraProvider value={system}>
         <Provider value={rootStore}>
           <Global styles={GlobalStyles} />
           <Helmet>

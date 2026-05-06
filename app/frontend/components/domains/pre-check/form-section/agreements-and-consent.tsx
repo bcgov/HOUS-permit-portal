@@ -57,29 +57,32 @@ export const AgreementsAndConsent = observer(function AgreementsAndConsent() {
       </Heading>
       <Text mb={6}>
         {t("preCheck.sections.agreementsAndConsent.description")}{" "}
-        <Link href="/profile/eula" isExternal>
+        <Link href="/profile/eula" target="_blank" rel="noopener noreferrer">
           {t("preCheck.sections.agreementsAndConsent.readEula")}
         </Link>
       </Text>
-
-      <VStack spacing={6} align="stretch">
-        <Stack spacing={4}>
+      <VStack gap={6} align="stretch">
+        <Stack gap={4}>
           <Controller
             name="eulaAccepted"
             control={control}
             rules={{ required: t("preCheck.sections.agreementsAndConsent.eulaRequired") }}
             render={({ field, fieldState }) => (
               <>
-                <Checkbox
-                  isChecked={field.value}
-                  onChange={(e) => field.onChange(e.target.checked)}
+                <Checkbox.Root
+                  onCheckedChange={(e) => field.onChange(e.target.checked)}
                   onBlur={field.onBlur}
                   name={field.name}
                   ref={field.ref}
-                  isDisabled={currentPreCheck?.eulaAccepted === true || currentPreCheck?.isSubmitted}
+                  disabled={currentPreCheck?.eulaAccepted === true || currentPreCheck?.isSubmitted}
+                  checked={field.value}
                 >
-                  {t("preCheck.sections.agreementsAndConsent.eulaCheckbox")}
-                </Checkbox>
+                  <Checkbox.HiddenInput />
+                  <Checkbox.Control>
+                    <Checkbox.Indicator />
+                  </Checkbox.Control>
+                  <Checkbox.Label>{t("preCheck.sections.agreementsAndConsent.eulaCheckbox")}</Checkbox.Label>
+                </Checkbox.Root>
                 {fieldState.error && (
                   <Text color="semantic.error" fontSize="sm" mt={1}>
                     {fieldState.error.message}
@@ -94,16 +97,20 @@ export const AgreementsAndConsent = observer(function AgreementsAndConsent() {
             rules={{ required: t("preCheck.sections.agreementsAndConsent.sendDrawingsRequired") }}
             render={({ field, fieldState }) => (
               <>
-                <Checkbox
-                  isChecked={field.value}
-                  onChange={(e) => field.onChange(e.target.checked)}
+                <Checkbox.Root
+                  onCheckedChange={(e) => field.onChange(e.target.checked)}
                   onBlur={field.onBlur}
                   name={field.name}
                   ref={field.ref}
-                  isDisabled={currentPreCheck?.consentToSendDrawings === true || currentPreCheck?.isSubmitted}
+                  disabled={currentPreCheck?.consentToSendDrawings === true || currentPreCheck?.isSubmitted}
+                  checked={field.value}
                 >
-                  {t("preCheck.sections.agreementsAndConsent.sendDrawingsCheckbox")}
-                </Checkbox>
+                  <Checkbox.HiddenInput />
+                  <Checkbox.Control>
+                    <Checkbox.Indicator />
+                  </Checkbox.Control>
+                  <Checkbox.Label>{t("preCheck.sections.agreementsAndConsent.sendDrawingsCheckbox")}</Checkbox.Label>
+                </Checkbox.Root>
                 {fieldState.error && (
                   <Text color="semantic.error" fontSize="sm" mt={1}>
                     {fieldState.error.message}
@@ -133,16 +140,22 @@ export const AgreementsAndConsent = observer(function AgreementsAndConsent() {
               jurisdictionName: currentPreCheck?.jurisdiction?.name || t("jurisdiction.yourJurisdiction"),
             })}
           </Text>
-          <Checkbox
+          <Checkbox.Root
             {...register("consentToShareWithJurisdiction")}
-            isChecked={formValues.consentToShareWithJurisdiction}
-            isDisabled={currentPreCheck?.isSubmitted}
+            disabled={currentPreCheck?.isSubmitted}
+            checked={formValues.consentToShareWithJurisdiction}
           >
-            {t("preCheck.sections.agreementsAndConsent.shareWithJurisdictionCheckbox", {
-              jurisdictionName: currentPreCheck?.jurisdiction?.name || t("jurisdiction.yourJurisdiction"),
-            })}{" "}
-            <strong>{t("ui.optional")}</strong>
-          </Checkbox>
+            <Checkbox.HiddenInput />
+            <Checkbox.Control>
+              <Checkbox.Indicator />
+            </Checkbox.Control>
+            <Checkbox.Label>
+              {t("preCheck.sections.agreementsAndConsent.shareWithJurisdictionCheckbox", {
+                jurisdictionName: currentPreCheck?.jurisdiction?.name || t("jurisdiction.yourJurisdiction"),
+              })}{" "}
+              <strong>{t("ui.optional")}</strong>
+            </Checkbox.Label>
+          </Checkbox.Root>
         </Box>
 
         <Box>
@@ -152,17 +165,22 @@ export const AgreementsAndConsent = observer(function AgreementsAndConsent() {
           <Text mb={4} fontSize="sm" color="text.secondary">
             {t("preCheck.sections.agreementsAndConsent.researchDescription")}
           </Text>
-          <Checkbox
+          <Checkbox.Root
             {...register("consentToResearchContact")}
-            isChecked={formValues.consentToResearchContact}
-            isDisabled={currentPreCheck?.isSubmitted}
+            disabled={currentPreCheck?.isSubmitted}
+            checked={formValues.consentToResearchContact}
           >
-            {t("preCheck.sections.agreementsAndConsent.researchCheckbox")} <strong>{t("ui.optional")}</strong>
-          </Checkbox>
+            <Checkbox.HiddenInput />
+            <Checkbox.Control>
+              <Checkbox.Indicator />
+            </Checkbox.Control>
+            <Checkbox.Label>
+              {t("preCheck.sections.agreementsAndConsent.researchCheckbox")} <strong>{t("ui.optional")}</strong>
+            </Checkbox.Label>
+          </Checkbox.Root>
         </Box>
       </VStack>
-
-      <FormFooter<IAgreementsFormData> handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
+      <FormFooter<IAgreementsFormData> handleSubmit={handleSubmit} onSubmit={onSubmit} loading={isSubmitting} />
     </Box>
   )
 })

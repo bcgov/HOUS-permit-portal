@@ -128,12 +128,11 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
         <Text fontSize="xs" fontWeight="bold" color="text.secondary" mb={4} px={4} textTransform="uppercase">
           {t("submissionInbox.workspace")}
         </Text>
-        <VStack align="stretch" spacing={1}>
+        <VStack align="stretch" gap={1}>
           <Button
             w="full"
             variant="ghost"
             justifyContent="flex-start"
-            leftIcon={<Tray />}
             bg="background.blueLight"
             fontWeight="bold"
             size="sm"
@@ -142,6 +141,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
             _hover={{ shadow: "sm", bg: "gray.50" }}
             _active={{ bg: "background.blueLight" }}
           >
+            <Tray />
             {t("submissionInbox.submissions")}
           </Button>
           {/* ### SUBMISSION INDEX STUB FEATURE */}
@@ -156,12 +156,11 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
           </Button> */}
         </VStack>
       </Box>
-
       {/* Main content */}
       <Flex direction="column" flex={1} minW={0} h="full" overflow="hidden">
         {/* Pinned header: title, search, filters, toggles */}
         <Box flexShrink={0} px={8} pt={8} pb={4}>
-          <VStack align="start" spacing={5} w="full">
+          <VStack align="start" gap={5} w="full">
             {submissionInboxConfigured && !currentJurisdiction.inboxEnabled && (
               <CalloutBanner type="error" title={t("permitApplication.submissionInbox.contactInviteWarning")} />
             )}
@@ -176,13 +175,12 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
                   body={t("submissionInbox.setupEmailNotificationsBody")}
                 />
                 {jurisdictionId && (
-                  <Link
-                    as={RouterLink}
-                    fontSize="sm"
-                    color="text.link"
-                    to={`/jurisdictions/${jurisdictionId}/configuration-management/feature-access/submissions-inbox-setup`}
-                  >
-                    {t("submissionInbox.setupEmailNotificationsLink")}
+                  <Link fontSize="sm" color="text.link" asChild>
+                    <RouterLink
+                      to={`/jurisdictions/${jurisdictionId}/configuration-management/feature-access/submissions-inbox-setup`}
+                    >
+                      {t("submissionInbox.setupEmailNotificationsLink")}
+                    </RouterLink>
                   </Link>
                 )}
               </>
@@ -190,7 +188,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
 
             {/* Search (full width) + toolbar row (toggles | filters | clear) + result count */}
             {submissionInboxConfigured && (
-              <VStack align="stretch" spacing={4} w="full">
+              <VStack align="stretch" gap={4} w="full">
                 <Flex
                   w="full"
                   align="center"
@@ -203,69 +201,80 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
                 >
                   <MagnifyingGlass size={18} weight="bold" color="var(--chakra-colors-gray-500)" aria-hidden />
                   <Box
-                    as="input"
                     flex={1}
                     minW={0}
                     py={2}
                     border="none"
                     outline="none"
                     fontSize="sm"
-                    placeholder={t("submissionInbox.searchPlaceholder")}
                     _placeholder={{ color: "text.secondary" }}
-                    value={activeSearchStore.query ?? ""}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      activeSearchStore.setQuery(e.target.value)
-                      activeSearchStore.search()
-                    }}
-                  />
+                    asChild
+                  >
+                    <input
+                      placeholder={t("submissionInbox.searchPlaceholder")}
+                      value={activeSearchStore.query ?? ""}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        activeSearchStore.setQuery(e.target.value)
+                        activeSearchStore.search()
+                      }}
+                    />
+                  </Box>
                 </Flex>
 
                 <Flex w="full" flexWrap="wrap" alignItems="center" gap={3}>
-                  <ButtonGroup isAttached variant="outline" size="sm">
+                  <ButtonGroup attached variant="outline" size="sm">
                     <Button
                       borderRightWidth={2}
                       onClick={() => setViewMode(EInboxViewMode.projects)}
                       fontWeight={viewMode === EInboxViewMode.projects ? "bold" : "normal"}
                       borderColor={viewMode === EInboxViewMode.projects ? "theme.blueActive" : "border.light"}
                       bg={viewMode === EInboxViewMode.projects ? "background.blueLight" : undefined}
-                      leftIcon={<RadioDot active={viewMode === EInboxViewMode.projects} />}
-                      rightIcon={<Icon as={Buildings} />}
                     >
+                      <RadioDot active={viewMode === EInboxViewMode.projects} />
                       {t("submissionInbox.projects")}
+                      <Icon asChild>
+                        <Buildings />
+                      </Icon>
                     </Button>
                     <Button
                       onClick={() => setViewMode(EInboxViewMode.applications)}
                       fontWeight={viewMode === EInboxViewMode.applications ? "bold" : "normal"}
                       borderColor={viewMode === EInboxViewMode.applications ? "theme.blueActive" : "border.light"}
                       bg={viewMode === EInboxViewMode.applications ? "background.blueLight" : undefined}
-                      leftIcon={<RadioDot active={viewMode === EInboxViewMode.applications} />}
-                      rightIcon={<Icon as={FileText} />}
                     >
+                      <RadioDot active={viewMode === EInboxViewMode.applications} />
                       {t("submissionInbox.applications")}
+                      <Icon asChild>
+                        <FileText />
+                      </Icon>
                     </Button>
                   </ButtonGroup>
 
-                  <ButtonGroup isAttached variant="outline" size="sm">
+                  <ButtonGroup attached variant="outline" size="sm">
                     <Button
                       borderRightWidth={2}
                       onClick={() => setDisplayMode(EInboxDisplayMode.list)}
                       fontWeight={displayMode === EInboxDisplayMode.list ? "bold" : "normal"}
                       borderColor={displayMode === EInboxDisplayMode.list ? "theme.blueActive" : "border.light"}
                       bg={displayMode === EInboxDisplayMode.list ? "background.blueLight" : undefined}
-                      leftIcon={<RadioDot active={displayMode === EInboxDisplayMode.list} />}
-                      rightIcon={<Icon as={ListDashes} />}
                     >
+                      <RadioDot active={displayMode === EInboxDisplayMode.list} />
                       {t("submissionInbox.list")}
+                      <Icon asChild>
+                        <ListDashes />
+                      </Icon>
                     </Button>
                     <Button
                       onClick={() => setDisplayMode(EInboxDisplayMode.columns)}
                       fontWeight={displayMode === EInboxDisplayMode.columns ? "bold" : "normal"}
                       borderColor={displayMode === EInboxDisplayMode.columns ? "theme.blueActive" : "border.light"}
                       bg={displayMode === EInboxDisplayMode.columns ? "background.blueLight" : undefined}
-                      leftIcon={<RadioDot active={displayMode === EInboxDisplayMode.columns} />}
-                      rightIcon={<Icon as={Columns} />}
                     >
+                      <RadioDot active={displayMode === EInboxDisplayMode.columns} />
                       {t("submissionInbox.columns")}
+                      <Icon asChild>
+                        <Columns />
+                      </Icon>
                     </Button>
                   </ButtonGroup>
 
@@ -327,7 +336,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
                   />
 
                   <Button
-                    variant="link"
+                    variant="plain"
                     size="sm"
                     flexShrink={0}
                     ml="auto"

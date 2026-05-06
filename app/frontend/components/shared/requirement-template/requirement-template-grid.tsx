@@ -35,7 +35,7 @@ export const RequirementTemplateGrid: React.FC<RequirementTemplateGridProps> = o
   useSearch(requirementTemplateStore)
 
   return (
-    <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
+    <VStack alignItems={"flex-start"} gap={5} w={"full"} h={"full"}>
       <SearchGrid templateColumns="1.5fr 1.5fr 2fr 1.5fr 1fr 1fr">
         <GridHeaders />
 
@@ -48,11 +48,11 @@ export const RequirementTemplateGrid: React.FC<RequirementTemplateGridProps> = o
             <Box key={rt.id} className={"requirements-template-grid-row"} role={"row"} display={"contents"}>
               <SearchGridItem fontWeight="bold">{rt.nickname}</SearchGridItem>
               <SearchGridItem>
-                <HStack as="ul" wrap="wrap" spacing={1} gap={1}>
+                <HStack as="ul" wrap="wrap" gap={1} gap={1}>
                   {(rt.tags ?? []).map((tag) => (
-                    <Tag key={tag} as="li" bg="greys.grey03" color="text.secondary" fontSize="xs">
+                    <Tag.Root key={tag} as="li" bg="greys.grey03" color="text.secondary" fontSize="xs">
                       {tag}
-                    </Tag>
+                    </Tag.Root>
                   ))}
                 </HStack>
               </SearchGridItem>
@@ -68,7 +68,6 @@ export const RequirementTemplateGrid: React.FC<RequirementTemplateGridProps> = o
           ))
         )}
       </SearchGrid>
-
       {/* Pagination Controls */}
       <Flex w={"full"} justifyContent={"space-between"}>
         <PerPageSelect
@@ -98,15 +97,17 @@ const GridHeaders = observer(function GridHeaders() {
     <Box display={"contents"} role={"rowgroup"}>
       <Box display={"contents"} role={"row"}>
         <GridItem
-          as={Flex}
           gridColumn={"1 / -1"}
           p={6}
           bg={"greys.grey10"}
           justifyContent={"space-between"}
           align="center"
+          asChild
         >
-          <Text role={"heading"}>{t("requirementTemplate.index.tableHeading")}</Text>
-          <ModelSearchInput searchModel={requirementTemplateStore} />
+          <Flex>
+            <Text role={"heading"}>{t("requirementTemplate.index.tableHeading")}</Text>
+            <ModelSearchInput searchModel={requirementTemplateStore} />
+          </Flex>
         </GridItem>
       </Box>
       <Box display={"contents"} role={"row"}>
@@ -114,16 +115,17 @@ const GridHeaders = observer(function GridHeaders() {
           <GridHeader key={field} role={"columnheader"}>
             <Flex
               w={"full"}
-              as={"button"}
               justifyContent={"space-between"}
               cursor="pointer"
-              onClick={() => toggleSort(field)}
               borderRight={"1px solid"}
               borderColor={"border.light"}
               px={4}
+              asChild
             >
-              <Text>{getSortColumnHeader(field)}</Text>
-              <SortIcon<ERequirementTemplateSortFields> field={field} currentSort={sort} />
+              <button onClick={() => toggleSort(field)}>
+                <Text>{getSortColumnHeader(field)}</Text>
+                <SortIcon<ERequirementTemplateSortFields> field={field} currentSort={sort} />
+              </button>
             </Flex>
           </GridHeader>
         ))}

@@ -1,16 +1,5 @@
-import {
-  Button,
-  Flex,
-  FormControl,
-  FormHelperText,
-  FormLabel,
-  Grid,
-  Input,
-  Radio,
-  RadioGroup,
-  Stack,
-  Text,
-} from "@chakra-ui/react"
+import { Radio, RadioGroup } from "@/components/ui/radio"
+import { Button, Field, Flex, Grid, Stack, Text } from "@chakra-ui/react"
 import { ErrorMessage } from "@hookform/error-message"
 import { Plus } from "@phosphor-icons/react"
 import { t } from "i18next"
@@ -95,59 +84,59 @@ export const ResidentialAdjustments = observer(function Part3StepCodeFormResiden
       </Flex>
       <FormProvider {...formMethods}>
         <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
-          <FormControl>
-            <FormLabel>{t(`${i18nPrefix}.hdd.label`)}</FormLabel>
-            <FormHelperText mb={1} mt={0}>
+          <Field.Root>
+            <Field.Label>{t(`${i18nPrefix}.hdd.label`)}</Field.Label>
+            <Field.HelperText mb={1} mt={0}>
               {t(`${i18nPrefix}.hdd.hint`)}
-            </FormHelperText>
-            <Input maxW={"200px"} value={checklist.heatingDegreeDays} isDisabled />
-          </FormControl>
-          <FormControl>
-            <FormLabel>{t(`${i18nPrefix}.pressurizedDoors.label`)}</FormLabel>
-            <FormHelperText mb={1} mt={0} color="semantic.error">
+            </Field.HelperText>
+            <Input maxW={"200px"} value={checklist.heatingDegreeDays} disabled />
+          </Field.Root>
+          <Field.Root>
+            <Field.Label>{t(`${i18nPrefix}.pressurizedDoors.label`)}</Field.Label>
+            <Field.HelperText mb={1} mt={0} color="semantic.error">
               <ErrorMessage errors={errors} name="pressurizedDoorsCount" />
-            </FormHelperText>
+            </Field.HelperText>
             <Input
               maxW={"200px"}
               type="number"
               step={1}
               {...register("pressurizedDoorsCount", { required: t(`${i18nPrefix}.pressurizedDoors.error`) })}
             />
-          </FormControl>
-          <FormControl>
-            <FormLabel pb={1}>{t(`${i18nPrefix}.airflow.label`)}</FormLabel>
-            <FormHelperText mb={1} mt={0} color="semantic.error">
+          </Field.Root>
+          <Field.Root>
+            <Field.Label pb={1}>{t(`${i18nPrefix}.airflow.label`)}</Field.Label>
+            <Field.HelperText mb={1} mt={0} color="semantic.error">
               <ErrorMessage errors={errors} name="pressurizedCorridorsArea" />
-            </FormHelperText>
+            </Field.HelperText>
             <Input
               maxW={"200px"}
               type="number"
               step={"any"}
               {...register("pressurizedCorridorsArea", { required: t(`${i18nPrefix}.airflow.error`) })}
             />
-          </FormControl>
-          <FormControl>
-            <FormLabel pb={1}>
+          </Field.Root>
+          <Field.Root>
+            <Field.Label pb={1}>
               <Trans i18nKey={`${i18nPrefix}.area.label`} components={{ sup: <sup /> }} />
-            </FormLabel>
-            <FormHelperText mb={1} mt={0}>
+            </Field.Label>
+            <Field.HelperText mb={1} mt={0}>
               {t(`${i18nPrefix}.area.hint`)}
-            </FormHelperText>
-            <FormHelperText mb={1} mt={0} color="semantic.error">
+            </Field.HelperText>
+            <Field.HelperText mb={1} mt={0} color="semantic.error">
               <ErrorMessage errors={errors} name="pressurizationAirflowPerDoor" />
-            </FormHelperText>
+            </Field.HelperText>
             <Input
               maxW={"200px"}
               type="number"
               step={"any"}
               {...register("pressurizationAirflowPerDoor", { required: t(`${i18nPrefix}.area.error`) })}
             />
-          </FormControl>
-          <FormControl>
-            <FormLabel pb={1}>{t(`${i18nPrefix}.muaFuel.label`)}</FormLabel>
-            <FormHelperText mb={1} mt={0} color="semantic.error">
+          </Field.Root>
+          <Field.Root>
+            <Field.Label pb={1}>{t(`${i18nPrefix}.muaFuel.label`)}</Field.Label>
+            <Field.HelperText mb={1} mt={0} color="semantic.error">
               {fields.length <= 1 && <ErrorMessage errors={errors} name="makeUpAirFuelsAttributes.root" />}
-            </FormHelperText>
+            </Field.HelperText>
             <Controller
               name="makeUpAirFuelsAttributes.0.fuelTypeId"
               control={control}
@@ -169,8 +158,8 @@ export const ResidentialAdjustments = observer(function Part3StepCodeFormResiden
                   setValue(value)
                 }
                 return (
-                  <RadioGroup defaultValue={defaultValue} value={value} onChange={handleChange}>
-                    <Stack spacing={1}>
+                  <RadioGroup.Root defaultValue={defaultValue} value={value} onValueChange={handleChange}>
+                    <Stack gap={1}>
                       {checklist.fuelTypes.map((ft) => (
                         <Radio key={ft.id} value={ft.id}>
                           {ft.key == EFuelType.other
@@ -178,17 +167,19 @@ export const ResidentialAdjustments = observer(function Part3StepCodeFormResiden
                             : t(`stepCode.part3.fuelTypes.fuelTypeKeys.${ft.key}`)}
                         </Radio>
                       ))}
-                      <Radio key="muaMixture" value="muaMixture">
-                        {t(`${i18nPrefix}.muaFuel.mixture.option`)}
-                      </Radio>
+                      <RadioGroup.Item key="muaMixture" value="muaMixture">
+                        <RadioGroup.ItemHiddenInput />
+                        <RadioGroup.ItemIndicator />
+                        <RadioGroup.ItemText>{t(`${i18nPrefix}.muaFuel.mixture.option`)}</RadioGroup.ItemText>
+                      </RadioGroup.Item>
                     </Stack>
-                  </RadioGroup>
+                  </RadioGroup.Root>
                 )
               }}
             />
-          </FormControl>
+          </Field.Root>
           {fields.length > 1 && (
-            <FormControl>
+            <Field.Root>
               <Grid
                 w="full"
                 templateColumns={`auto repeat(2, minmax(auto, 170px))`}
@@ -216,26 +207,26 @@ export const ResidentialAdjustments = observer(function Part3StepCodeFormResiden
                   )
                 })}
               </Grid>
-              <FormHelperText color="semantic.error">
+              <Field.HelperText color="semantic.error">
                 {R.all((f) => !!f.fuelTypeId && !!f.percentOfLoad, watchMuaFuels) && (
                   <ErrorMessage errors={errors} name={"makeUpAirFuelsAttributes.root"} />
                 )}
-              </FormHelperText>
+              </Field.HelperText>
               {fields.length < checklist.fuelTypes.length && (
                 <Button
-                  variant="link"
-                  leftIcon={<Plus />}
+                  variant="plain"
                   onClick={() =>
                     append({ id: undefined, _destroy: undefined, fuelTypeId: undefined, percentOfLoad: undefined })
                   }
                 >
+                  <Plus />
                   {t(`${i18nPrefix}.muaFuel.mixture.add`)}
                 </Button>
               )}
-            </FormControl>
+            </Field.Root>
           )}
           <SuiteSubMeteringFields />
-          <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
+          <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} loading={isSubmitting} />
         </Flex>
       </FormProvider>
     </>

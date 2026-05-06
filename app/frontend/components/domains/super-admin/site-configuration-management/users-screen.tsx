@@ -44,7 +44,7 @@ export const AdminUserIndexScreen = observer(() => {
 
   return (
     <Container maxW="container.lg" p={8} as={"main"}>
-      <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
+      <VStack alignItems={"flex-start"} gap={5} w={"full"} h={"full"}>
         <Flex justifyContent={"space-between"} w={"full"} alignItems={"flex-end"}>
           <Box>
             <Heading as="h1">{t(`${i18nPrefix}.title`)}</Heading>
@@ -66,7 +66,7 @@ export const AdminUserIndexScreen = observer(() => {
                 <Box key={u.id} className={"jurisdiction-user-index-grid-row"} role={"row"} display={"contents"}>
                   <SearchGridItem fontWeight={700}>{<RoleTag role={u.role} />}</SearchGridItem>
                   <SearchGridItem fontSize="sm">{u.email}</SearchGridItem>
-                  <SearchGridItem fontSize="sm" maxWidth="300px" sx={{ wordBreak: "break-word" }}>
+                  <SearchGridItem fontSize="sm" maxWidth="300px" css={{ wordBreak: "break-word" }}>
                     {u.name}
                   </SearchGridItem>
                   <SearchGridItem fontSize="sm">{format(u.createdAt, "yyyy-MM-dd")}</SearchGridItem>

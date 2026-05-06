@@ -1,4 +1,5 @@
-import { Box, BoxProps, Tooltip, TooltipProps } from "@chakra-ui/react"
+import { Tooltip } from "@/components/ui/tooltip"
+import { Box, BoxProps, TooltipProps } from "@chakra-ui/react"
 import React, { Children, ReactElement, cloneElement, forwardRef } from "react"
 
 interface ConditionalTooltipProps extends React.HTMLAttributes<HTMLElement> {
@@ -34,7 +35,7 @@ export const ConditionalTooltip = forwardRef<HTMLElement, ConditionalTooltipProp
   const { hasArrow = true, ...restTooltipProps } = tooltipProps ?? {}
 
   return (
-    <Tooltip label={message} hasArrow={hasArrow} {...restTooltipProps}>
+    <Tooltip content={message} showArrow={hasArrow}>
       <Box display="inline-block" {...wrapperProps}>
         {childWithProps}
       </Box>

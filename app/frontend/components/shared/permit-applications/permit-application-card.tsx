@@ -1,4 +1,4 @@
-import { Box, Flex, Image, Link, Show, Spacer, Text } from "@chakra-ui/react"
+import { Box, Flex, Image, Link, Spacer, Text } from "@chakra-ui/react"
 import { ArrowSquareOut, CaretRight, Info, Pencil, Users, Warning } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import React from "react"
@@ -60,7 +60,7 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
     >
       {permitApplication.sandbox && <SandboxHeader override sandbox={permitApplication.sandbox} />}
       <Flex flexDirection={{ base: "column", md: "row" }} gap={6} w="full">
-        <Show above="md">
+        <Box hideBelow="md">
           <Flex direction="column" flex={{ base: 0, md: 1 }} maxW={{ base: "100%", md: "20%" }}>
             <Box p={2}>
               <Image
@@ -76,8 +76,8 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
               </Text>
             </Box>
           </Flex>
-        </Show>
-        <Show below="md">
+        </Box>
+        <Box hideFrom="md">
           <Flex justify="space-between" alignItems="center">
             <Image
               src="/images/permit-thumbnail.png"
@@ -89,7 +89,7 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
             />
             <PermitApplicationStatusTag status={permitApplication.status} />
           </Flex>
-        </Show>
+        </Box>
         <Flex direction="column" gap={2} flex={{ base: 0, md: 5 }} maxW={{ base: "100%", md: "75%" }}>
           {showNewVersionWarning && (
             <Flex bg="semantic.warning" {...calloutBannerContainerProps}>
@@ -134,71 +134,71 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
           >
             {nickname}
           </RouterLinkButton>
-          <Show below="md">
+          <Box hideFrom="md">
             <Text>
               <Text as="span" fontWeight={700} mr="1">
                 {t("permitApplication.fields.number")}:
               </Text>
               {number}
             </Text>
-          </Show>
+          </Box>
           <YellowLineSmall />
           <Flex gap={4}>
             <Text>
               {t("permitApplication.startedOn")}{" "}
-              <Show below="md">
+              <Box hideFrom="md">
                 <br />
-              </Show>
+              </Box>
               {format(createdAt, "MMM d, yyyy")}
             </Text>
-            <Show above="md">
+            <Box hideBelow="md">
               <Text>{"  |  "}</Text>
-            </Show>
-            <Show below="md">
+            </Box>
+            <Box hideFrom="md">
               <Spacer />
-            </Show>
+            </Box>
             <Text>
               {t("permitApplication.lastUpdated")}
               <Text as="span">{":  "}</Text>
-              <Show below="md">
+              <Box hideFrom="md">
                 <br />
-              </Show>
+              </Box>
               {format(updatedAt, "MMM d, yyyy")}
             </Text>
             {viewedAt && (
               <>
-                <Show above="md">
+                <Box hideBelow="md">
                   <Text>{"  |  "}</Text>
-                </Show>
-                <Show below="md">
+                </Box>
+                <Box hideFrom="md">
                   <Spacer />
-                </Show>
+                </Box>
                 <Text>
                   {t("permitApplication.viewedOn")}
                   <Text as="span">{":  "}</Text>
-                  <Show below="md">
+                  <Box hideFrom="md">
                     <br />
-                  </Show>
+                  </Box>
                   {format(viewedAt, "MMM d, yyyy")}
                 </Text>
               </>
             )}
           </Flex>
           <Flex direction={{ base: "column", md: "row" }} gap={4}>
-            <Link href={t("permitApplication.seeBestPractices_link")} isExternal>
+            <Link href={t("permitApplication.seeBestPractices_link")} target="_blank" rel="noopener noreferrer">
               {t("permitApplication.seeBestPractices_CTA")}
               <ArrowSquareOut />
             </Link>
-            <Show above="md">
+            <Box hideBelow="md">
               <Text>{"  |  "}</Text>
-            </Show>
-            <Link href={t("permitApplication.searchKnowledge_link")} isExternal>
+            </Box>
+            <Link href={t("permitApplication.searchKnowledge_link")} target="_blank" rel="noopener noreferrer">
               {t("permitApplication.searchKnowledge_CTA")} <ArrowSquareOut />
             </Link>
           </Flex>
         </Flex>
         <Flex direction="column" align="flex-end" gap={4} flex={{ base: 0, md: 1 }} maxW={{ base: "100%", md: "25%" }}>
-          <Show above="md">
+          <Box hideBelow="md">
             <PermitApplicationStatusTag status={permitApplication.status} />
             <Box>
               <Text align="right" variant="tiny_uppercase">
@@ -206,7 +206,7 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
               </Text>
               <Text align="right">{number}</Text>
             </Box>
-          </Show>
+          </Box>
           <RouterLinkButton
             to={`/permit-applications/${id}/edit`}
             variant="primary"

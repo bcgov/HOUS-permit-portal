@@ -1,22 +1,16 @@
+import { InputGroup } from "@/components/ui/input-group"
 import {
   Button,
-  FormControl,
-  FormLabel,
+  Dialog,
+  Field,
   Grid,
   GridItem,
   HStack,
   IconButton,
   Input,
-  InputGroup,
-  InputLeftElement,
+  InputElement,
   Link,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
+  Portal,
 } from "@chakra-ui/react"
 import { Info, Key, Prohibit } from "@phosphor-icons/react"
 import { addYears } from "date-fns"
@@ -109,9 +103,9 @@ export const ExternalApiKeyModalSubRoute = observer(function ExternalApiKeyModal
     borderColor: "error",
   }
   const revokeButtonProps = {
-    variant: "primaryInverse",
+    variant: "primaryInverse" as const,
     leftIcon: <Prohibit />,
-    isDisabled: externalApiKey && externalApiKey.isRevoked,
+    disabled: externalApiKey && externalApiKey.isRevoked,
     ...sharedRevokeButtonProps,
     _hover: {
       ...sharedRevokeButtonProps,
@@ -126,155 +120,167 @@ export const ExternalApiKeyModalSubRoute = observer(function ExternalApiKeyModal
   }
 
   return (
-    <Modal isOpen onClose={onClose}>
-      <ModalOverlay />
-      <FormProvider {...formMethods}>
-        <ModalContent as={"form"} maxW={"container.md"} onSubmit={onSubmit}>
-          <ModalHeader>{t(`externalApiKey.modal.${externalApiKey ? "manageTitle" : "createTitle"}`)}</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <Grid templateColumns={"1fr 1fr"} gap={6}>
-              <GridItem>
-                <TextFormControl label={t("externalApiKey.fieldLabels.name")} fieldName={"name"} required />
-              </GridItem>
-              <GridItem colSpan={2}>
-                <FormLabel>{t("externalApiKey.fieldLabels.sandbox")}</FormLabel>
-                <Controller
-                  control={control}
-                  name={"sandboxId"}
-                  render={({ field: { onChange, value } }) => {
-                    return (
-                      <SandboxSelect
-                        onChange={onChange}
-                        value={value}
-                        options={currentJurisdiction.sandboxOptions}
-                        includeLive
-                        isDisabled={!!externalApiKey}
+    <Dialog.Root
+      open
+      onOpenChange={(e) => {
+        if (!e.open) {
+          onClose()
+        }
+      }}
+    >
+      <Portal>
+        <Dialog.Backdrop />
+        <FormProvider {...formMethods}>
+          <Dialog.Positioner>
+            <Dialog.Content maxW={"container.md"} asChild>
+              <form onSubmit={onSubmit}>
+                <Dialog.Header>
+                  {t(`externalApiKey.modal.${externalApiKey ? "manageTitle" : "createTitle"}`)}
+                </Dialog.Header>
+                <Dialog.CloseTrigger />
+                <Dialog.Body>
+                  <Grid templateColumns={"1fr 1fr"} gap={6}>
+                    <GridItem>
+                      <TextFormControl label={t("externalApiKey.fieldLabels.name")} fieldName={"name"} required />
+                    </GridItem>
+                    <GridItem colSpan={2}>
+                      <Field.Label>{t("externalApiKey.fieldLabels.sandbox")}</Field.Label>
+                      <Controller
+                        control={control}
+                        name={"sandboxId"}
+                        render={({ field: { onChange, value } }) => {
+                          return (
+                            <SandboxSelect
+                              onChange={onChange}
+                              value={value}
+                              options={currentJurisdiction.sandboxOptions}
+                              includeLive
+                              disabled={!!externalApiKey}
+                            />
+                          )
+                        }}
                       />
-                    )
-                  }}
-                />
-              </GridItem>
-              <GridItem>
-                <TextFormControl
-                  label={t("externalApiKey.fieldLabels.connectingApplication")}
-                  fieldName={"connectingApplication"}
-                  required
-                />
-              </GridItem>
+                    </GridItem>
+                    <GridItem>
+                      <TextFormControl
+                        label={t("externalApiKey.fieldLabels.connectingApplication")}
+                        fieldName={"connectingApplication"}
+                        required
+                      />
+                    </GridItem>
 
-              <GridItem>
-                <DatePickerFormControl
-                  label={t("externalApiKey.fieldLabels.expiredAt")}
-                  fieldName={"expiredAt"}
-                  required
-                />
-              </GridItem>
-              <GridItem>
-                <DatePickerFormControl
-                  label={t("externalApiKey.fieldLabels.revokedAt")}
-                  fieldName={"revokedAt"}
-                  inputProps={{ readOnly: true }}
-                  showOptional={false}
-                  isReadOnly
-                />
-              </GridItem>
+                    <GridItem>
+                      <DatePickerFormControl
+                        label={t("externalApiKey.fieldLabels.expiredAt")}
+                        fieldName={"expiredAt"}
+                        required
+                      />
+                    </GridItem>
+                    <GridItem>
+                      <DatePickerFormControl
+                        label={t("externalApiKey.fieldLabels.revokedAt")}
+                        fieldName={"revokedAt"}
+                        inputProps={{ readOnly: true }}
+                        showOptional={false}
+                        isReadOnly
+                      />
+                    </GridItem>
 
-              <GridItem colSpan={2}>
-                <UrlFormControl
-                  label={t("externalApiKey.fieldLabels.webhookUrl")}
-                  fieldName={"webhookUrl"}
-                  LabelInfo={() => (
-                    <IconButton
-                      as={Link}
-                      // TODO: Placeholder generic help link for now. Replace with actual link when available
-                      href={`https://www2.gov.bc.ca/gov/content?id=A5A88A4CE1D54D95AB23D57858EF11EE`}
-                      target={"_blank"}
-                      mb={1}
-                      minW={6}
-                      variant={"tertiary"}
-                      aria-label={"Webhook Url info link"}
-                      icon={<Info />}
+                    <GridItem colSpan={2}>
+                      <UrlFormControl
+                        label={t("externalApiKey.fieldLabels.webhookUrl")}
+                        fieldName={"webhookUrl"}
+                        LabelInfo={() => (
+                          <IconButton mb={1} minW={6} variant={"tertiary"} aria-label={"Webhook Url info link"} asChild>
+                            <Link
+                              // TODO: Placeholder generic help link for now. Replace with actual link when available
+                              href={`https://www2.gov.bc.ca/gov/content?id=A5A88A4CE1D54D95AB23D57858EF11EE`}
+                              target={"_blank"}
+                            >
+                              <Info />
+                            </Link>
+                          </IconButton>
+                        )}
+                        inputProps={{ placeholder: t("externalApiKey.fieldPlaceholders.webhookUrl") }}
+                        validate
+                      />
+                    </GridItem>
+                    <GridItem colSpan={2}>
+                      <TextFormControl
+                        label={t("externalApiKey.fieldLabels.notificationEmail")}
+                        fieldName={"notificationEmail"}
+                        inputProps={{
+                          type: "email",
+                        }}
+                        hint={t("externalApiKey.notificationEmailHint")}
+                      />
+                    </GridItem>
+                    <GridItem colSpan={2}>
+                      <Field.Root readOnly>
+                        <Field.Label>{t("externalApiKey.fieldLabels.token")}</Field.Label>
+                        <CopyableValue
+                          CustomDisplay={({ value }) => (
+                            <>
+                              <InputGroup>
+                                <InputElement>
+                                  <Key />
+                                </InputElement>
+                                <Input
+                                  overflow={"auto"}
+                                  type={showToken ? "text" : "password"}
+                                  bg={"greys.grey04"}
+                                  value={value}
+                                />
+                              </InputGroup>
+                              <Button
+                                px={4}
+                                size={"sm"}
+                                fontSize={"sm"}
+                                variant="plain"
+                                onClick={() => setShowToken((pastState) => !pastState)}
+                                disabled={!externalApiKey}
+                              >
+                                {showToken ? t("ui.hide") : t("ui.show")}
+                              </Button>
+                            </>
+                          )}
+                          value={token ?? ""}
+                          label={t("externalApiKey.fieldLabels.token")}
+                          iconButtonProps={{ isDisabled: !externalApiKey }}
+                        />
+                      </Field.Root>
+                    </GridItem>
+                  </Grid>
+                </Dialog.Body>
+                <Dialog.Footer justifyContent={externalApiKey ? "space-between" : undefined}>
+                  {externalApiKey && (
+                    <RemoveConfirmationModal
+                      title={t("externalApiKey.modal.removeConfirmationModal.title")}
+                      body={t("externalApiKey.modal.removeConfirmationModal.body")}
+                      triggerButtonProps={revokeButtonProps}
+                      triggerText={t("ui.revoke")}
+                      onRemove={onRevoke}
                     />
                   )}
-                  inputProps={{ placeholder: t("externalApiKey.fieldPlaceholders.webhookUrl") }}
-                  validate
-                />
-              </GridItem>
-              <GridItem colSpan={2}>
-                <TextFormControl
-                  label={t("externalApiKey.fieldLabels.notificationEmail")}
-                  fieldName={"notificationEmail"}
-                  inputProps={{
-                    type: "email",
-                  }}
-                  hint={t("externalApiKey.notificationEmailHint")}
-                />
-              </GridItem>
-              <GridItem colSpan={2}>
-                <FormControl isReadOnly>
-                  <FormLabel>{t("externalApiKey.fieldLabels.token")}</FormLabel>
-                  <CopyableValue
-                    CustomDisplay={({ value }) => (
-                      <>
-                        <InputGroup>
-                          <InputLeftElement>
-                            <Key />
-                          </InputLeftElement>
-                          <Input
-                            overflow={"auto"}
-                            type={showToken ? "text" : "password"}
-                            bg={"greys.grey04"}
-                            value={value}
-                          />
-                        </InputGroup>
-                        <Button
-                          px={4}
-                          size={"sm"}
-                          fontSize={"sm"}
-                          variant="link"
-                          onClick={() => setShowToken((pastState) => !pastState)}
-                          isDisabled={!externalApiKey}
-                        >
-                          {showToken ? t("ui.hide") : t("ui.show")}
-                        </Button>
-                      </>
-                    )}
-                    value={token ?? ""}
-                    label={t("externalApiKey.fieldLabels.token")}
-                    iconButtonProps={{ isDisabled: !externalApiKey }}
-                  />
-                </FormControl>
-              </GridItem>
-            </Grid>
-          </ModalBody>
-
-          <ModalFooter justifyContent={externalApiKey ? "space-between" : undefined}>
-            {externalApiKey && (
-              <RemoveConfirmationModal
-                title={t("externalApiKey.modal.removeConfirmationModal.title")}
-                body={t("externalApiKey.modal.removeConfirmationModal.body")}
-                triggerButtonProps={revokeButtonProps}
-                triggerText={t("ui.revoke")}
-                onRemove={onRevoke}
-              />
-            )}
-            <HStack>
-              <Button
-                variant={"primary"}
-                type={"submit"}
-                isDisabled={isSubmitting || !isValid}
-                isLoading={isSubmitting}
-              >
-                {externalApiKey ? t("ui.onlySave") : t("ui.create")}
-              </Button>
-              <Button variant={"secondary"} onClick={onClose} isDisabled={isSubmitting}>
-                {t("ui.cancel")}
-              </Button>
-            </HStack>
-          </ModalFooter>
-        </ModalContent>
-      </FormProvider>
-    </Modal>
+                  <HStack>
+                    <Button
+                      variant={"primary"}
+                      type={"submit"}
+                      disabled={isSubmitting || !isValid}
+                      loading={isSubmitting}
+                    >
+                      {externalApiKey ? t("ui.onlySave") : t("ui.create")}
+                    </Button>
+                    <Button variant={"secondary"} onClick={onClose} disabled={isSubmitting}>
+                      {t("ui.cancel")}
+                    </Button>
+                  </HStack>
+                </Dialog.Footer>
+              </form>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </FormProvider>
+      </Portal>
+    </Dialog.Root>
   )
 })

@@ -21,6 +21,7 @@ export type TAsyncSelectProps<
   | ({ isCreatable: true } & AsyncCreatableProps<TOption, TIsMulti, TGroup>)
 ) &
   RefAttributes<Select<TOption, TIsMulti, TGroup>> & {
+    disabled?: boolean
     stylesToMerge?: {
       [key in
         | "control"
@@ -39,7 +40,7 @@ export const AsyncSelect = observer(function <
   TIsMulti extends boolean = false,
   TGroup extends GroupBase<TOption> = undefined,
 >(props: TAsyncSelectProps<TOption, TIsMulti, TGroup>) {
-  const { onChange, value, styles, components, stylesToMerge, ...rest } = props
+  const { onChange, value, styles, components, stylesToMerge, disabled, isDisabled, ...rest } = props
 
   const getMergedStyles = (): StylesConfig<TOption, TIsMulti, TGroup> => {
     return {
@@ -113,6 +114,7 @@ export const AsyncSelect = observer(function <
       onChange={onChange}
       value={value}
       styles={getMergedStyles()}
+      isDisabled={disabled ?? isDisabled}
       {...rest}
     />
   )

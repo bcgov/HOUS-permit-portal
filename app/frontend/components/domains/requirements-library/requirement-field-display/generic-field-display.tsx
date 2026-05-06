@@ -1,4 +1,4 @@
-import { FormControl, FormControlProps, FormLabel, FormLabelProps } from "@chakra-ui/react"
+import { Field, FormControlProps, FormLabelProps } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -36,14 +36,14 @@ export const GenericFieldDisplay = observer(function GroupedFieldDisplay({
 }: IGroupedFieldProps) {
   const { t } = useTranslation()
   return (
-    <FormControl w={"100%"} isReadOnly {...containerProps}>
-      <FormLabel
+    <Field.Root w={"100%"} readOnly {...containerProps}>
+      <Field.Label
         pointerEvents="none"
         {...defaultLabelProps}
         {...(labelProps as FormLabelProps)}
         color={!label && showAddLabelIndicator ? "error" : undefined}
-        sx={{
-          ":after": {
+        css={{
+          "& :after": {
             content: `"${t("ui.optional")}"`,
             ml: 1.5,
             display: !required ? "inline" : "none",
@@ -54,8 +54,7 @@ export const GenericFieldDisplay = observer(function GroupedFieldDisplay({
           (showAddLabelIndicator
             ? `${t("requirementsLibrary.modals.addLabel")} *`
             : getRequirementTypeLabel(requirementType))}
-      </FormLabel>
-
+      </Field.Label>
       {!isTipTapEmpty(instructions) && (
         <EditorWithPreview
           label={t("requirementsLibrary.modals.addInstructionsLabel")}
@@ -73,6 +72,6 @@ export const GenericFieldDisplay = observer(function GroupedFieldDisplay({
           isReadOnly
         />
       )}
-    </FormControl>
+    </Field.Root>
   )
 })

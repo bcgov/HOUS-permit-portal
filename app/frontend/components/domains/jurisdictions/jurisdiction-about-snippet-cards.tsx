@@ -124,7 +124,7 @@ export const JurisdictionAboutSnippetCards = observer(({ control, canManage }: I
   }
 
   return (
-    <SimpleGrid columns={{ base: 1, md: Math.min(visibleFields.length, 3) }} spacing={6} w="full" alignItems="stretch">
+    <SimpleGrid columns={{ base: 1, md: Math.min(visibleFields.length, 3) }} gap={6} w="full" alignItems="stretch">
       {visibleFields.map((fieldName) => {
         if (fieldName === "officeAddress") {
           return <OfficeAddressSnippetCard key={fieldName} control={control} canManage={canManage} />
@@ -167,7 +167,6 @@ export const JurisdictionAboutSnippetCards = observer(({ control, canManage }: I
                         <Button
                           variant="primary"
                           size="xs"
-                          leftIcon={<Pencil size={12} />}
                           aria-label={isEditing ? t("ui.done") : t("ui.edit")}
                           onClick={async () => {
                             if (isEditing) {
@@ -178,6 +177,7 @@ export const JurisdictionAboutSnippetCards = observer(({ control, canManage }: I
                             }
                           }}
                         >
+                          <Pencil size={12} />
                           {isEditing ? t("ui.done") : t("ui.edit")}
                         </Button>
                       </Flex>

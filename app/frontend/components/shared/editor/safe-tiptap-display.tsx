@@ -68,32 +68,36 @@ export const SafeTipTapDisplay: React.FC<SafeTipTapDisplayProps> = ({
       overflowY="auto"
       overflowX="hidden"
       // Add default styling that matches Quill's output
-      sx={{
-        // Preserve default text formatting
-        "& p": {
+      css={{
+        "& & p": {
           marginBottom: "1em",
           "&:last-child": {
             marginBottom: 0,
           },
         },
-        "& strong": {
+
+        "& & strong": {
           fontWeight: "bold",
         },
-        "& em": {
+
+        "& & em": {
           fontStyle: "italic",
         },
-        "& u": {
+
+        "& & u": {
           textDecoration: "underline",
         },
-        "& s": {
+
+        "& & s": {
           textDecoration: "line-through",
         },
-        // List styling
-        "& ol, & ul": {
+
+        "& & ol, & ul": {
           paddingLeft: "1.5em",
           marginBottom: "1em",
         },
-        "& ol.paren-alpha": {
+
+        "& & ol.paren-alpha": {
           listStyle: "none",
           counterReset: "paren-alpha-counter",
           paddingLeft: "2.5em",
@@ -109,7 +113,8 @@ export const SafeTipTapDisplay: React.FC<SafeTipTapDisplayProps> = ({
             },
           },
         },
-        "& ol.paren-roman": {
+
+        "& & ol.paren-roman": {
           listStyle: "none",
           counterReset: "paren-roman-counter",
           paddingLeft: "2.5em",
@@ -125,19 +130,20 @@ export const SafeTipTapDisplay: React.FC<SafeTipTapDisplayProps> = ({
             },
           },
         },
-        "& li": {
+
+        "& & li": {
           marginBottom: "0.5em",
         },
-        // Link styling
-        "& a": {
+
+        "& & a": {
           color: "blue.600",
           textDecoration: "underline",
           "&:hover": {
             color: "blue.800",
           },
         },
-        // Blockquote styling
-        "& blockquote": {
+
+        "& & blockquote": {
           borderLeft: "4px solid",
           borderColor: "gray.300",
           paddingLeft: "1em",
@@ -145,15 +151,16 @@ export const SafeTipTapDisplay: React.FC<SafeTipTapDisplayProps> = ({
           fontStyle: "italic",
           color: "gray.700",
         },
-        // Code styling
-        "& code": {
+
+        "& & code": {
           backgroundColor: "gray.100",
           padding: "0.2em 0.4em",
           borderRadius: "3px",
           fontSize: "0.9em",
           fontFamily: "monospace",
         },
-        "& pre": {
+
+        "& & pre": {
           backgroundColor: "gray.100",
           padding: "1em",
           borderRadius: "4px",
@@ -163,6 +170,7 @@ export const SafeTipTapDisplay: React.FC<SafeTipTapDisplayProps> = ({
             padding: 0,
           },
         },
+
         // Override any box props styling
         ...boxProps.sx,
       }}
@@ -200,27 +208,33 @@ export const SafeTipTapDisplayInline: React.FC<SafeTipTapDisplayProps> = ({
       {...boxProps}
       data-testid={dataTestId || "safe-tiptap-display-inline"}
       dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
-      sx={{
+      css={{
         display: "inline",
         overflowY: "auto",
         overflowX: "hidden",
-        "& p": {
+
+        "& & p": {
           display: "inline",
           margin: 0,
         },
-        "& strong": {
+
+        "& & strong": {
           fontWeight: "bold",
         },
-        "& em": {
+
+        "& & em": {
           fontStyle: "italic",
         },
-        "& u": {
+
+        "& & u": {
           textDecoration: "underline",
         },
-        "& a": {
+
+        "& & a": {
           color: "blue.600",
           textDecoration: "underline",
         },
+
         ...boxProps.sx,
       }}
     />

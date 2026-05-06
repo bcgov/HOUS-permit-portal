@@ -10,8 +10,8 @@ export function RequirementTypeTag({
   type: ERequirementType
 } & Partial<TagProps>) {
   return (
-    <Tag bg={"greys.grey03"} color={"text.secondary"} fontWeight={700} fontSize={"xs"} {...tagProps}>
+    <Tag.Root bg={"greys.grey03"} color={"text.secondary"} fontWeight={700} fontSize={"xs"} {...tagProps}>
       {getRequirementTypeLabel(type)}
-    </Tag>
+    </Tag.Root>
   )
 }

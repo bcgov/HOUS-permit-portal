@@ -12,7 +12,7 @@ export function FloatingButtons({ isCollapsedAll, setIsCollapsedAll }: IProps) {
   const debouncedHandleClick = useCallback(debounce(onClickButton, 250), [onClickButton])
 
   return (
-    <Stack spacing={4} position={"fixed"} bottom={6} right={6} alignItems={"flex-end"}>
+    <Stack gap={4} position={"fixed"} bottom={6} right={6} alignItems={"flex-end"}>
       <Button variant="greyButton" minW="132px" onClick={debouncedHandleClick}>
         {isCollapsedAll ? t("ui.expandAll") : t("ui.collapseAll")}
       </Button>

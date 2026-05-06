@@ -216,7 +216,6 @@ export function JurisdictionContactInfoBanner({
           <Button
             variant="primary"
             size="xs"
-            leftIcon={<Pencil size={12} />}
             aria-label={isEditing ? t("ui.done") : t("ui.edit")}
             onClick={async () => {
               if (isEditing) {
@@ -227,11 +226,11 @@ export function JurisdictionContactInfoBanner({
               }
             }}
           >
+            <Pencil size={12} />
             {isEditing ? t("ui.done") : t("ui.edit")}
           </Button>
         </Flex>
       )}
-
       <Flex direction="column" gap={4} w="full" bgColor="greys.grey10" py={4} px={6}>
         <Heading as="h3" fontSize="md" fontWeight="bold" color="text.primary" w="full" mb={0}>
           {qualifiedName}
@@ -315,13 +314,14 @@ function DisplayValue({
     return (
       <Link
         href={mapsSearchUrl(trimmed)}
-        isExternal
         color="text.link"
         textDecoration="underline"
         fontSize="sm"
         whiteSpace="pre-wrap"
         wordBreak="break-word"
         _hover={{ textDecoration: "none" }}
+        target="_blank"
+        rel="noopener noreferrer"
       >
         {text}
       </Link>

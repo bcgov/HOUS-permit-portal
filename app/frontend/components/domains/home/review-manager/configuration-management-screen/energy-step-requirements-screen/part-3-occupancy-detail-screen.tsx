@@ -1,18 +1,15 @@
+import { InputGroup } from "@/components/ui/input-group"
 import {
   Box,
   Button,
   Container,
+  Field,
   Flex,
-  FormControl,
-  FormLabel,
   Heading,
   HStack,
   Input,
-  InputGroup,
-  InputRightElement,
+  InputElement,
   Popover,
-  PopoverContent,
-  PopoverTrigger,
   Portal,
   Text,
   VStack,
@@ -66,62 +63,84 @@ function formatZeroCarbonRange(t: TFunction, levels: number[]): string {
 interface IStepSelectProps {
   options: number[]
   value: number | undefined
-  onChange: (val: number) => void
+  onChange?: (val: number) => void
+  onValueChange?: (val: number) => void
   isDisabled?: boolean
   formatLabel: (val: number) => string
   placeholder?: string
 }
 
-function StepSelect({ options, value, onChange, isDisabled, formatLabel, placeholder }: IStepSelectProps) {
+function StepSelect({
+  options,
+  value,
+  onChange,
+  onValueChange,
+  isDisabled,
+  formatLabel,
+  placeholder,
+}: IStepSelectProps) {
   const { t } = useTranslation()
+  const handleChange = onValueChange ?? onChange ?? (() => undefined)
 
   return (
-    <Popover placement="bottom-end">
-      {({ onClose }) => (
-        <>
-          <PopoverTrigger>
-            <InputGroup pointerEvents={isDisabled ? "none" : "auto"}>
-              <Input
-                as={Flex}
-                bg="white"
-                cursor="pointer"
-                alignItems="center"
-                borderColor="gray.200"
-                borderWidth={1}
-                rounded="base"
-                shadow="base"
-                isDisabled={isDisabled}
-              >
-                {value !== undefined ? formatLabel(value) : (placeholder ?? t("ui.selectPlaceholder"))}
-              </Input>
-              <InputRightElement children={<CaretDown color="gray.300" />} />
-            </InputGroup>
-          </PopoverTrigger>
-          <Portal>
-            <PopoverContent>
-              <VStack align="start" spacing={0}>
-                {options.map((opt) => (
-                  <Flex
-                    key={opt}
-                    onClick={() => {
-                      onChange(opt)
-                      onClose()
-                    }}
-                    px={2}
-                    py={1.5}
-                    w="full"
+    <Popover.Root
+      positioning={{
+        placement: "bottom-end",
+      }}
+    >
+      <Popover.Context>
+        {({ setOpen: setOpen }) => {
+          const onClose = () => setOpen(false)
+
+          return (
+            <>
+              <Popover.Trigger asChild>
+                <InputGroup pointerEvents={isDisabled ? "none" : "auto"}>
+                  <Input
+                    bg="white"
                     cursor="pointer"
-                    _hover={{ bg: "hover.blue" }}
+                    alignItems="center"
+                    borderColor="gray.200"
+                    borderWidth={1}
+                    rounded="base"
+                    shadow="base"
+                    disabled={isDisabled}
+                    asChild
                   >
-                    {formatLabel(opt)}
-                  </Flex>
-                ))}
-              </VStack>
-            </PopoverContent>
-          </Portal>
-        </>
-      )}
-    </Popover>
+                    <Flex>{value !== undefined ? formatLabel(value) : (placeholder ?? t("ui.selectPlaceholder"))}</Flex>
+                  </Input>
+                  <InputElement placement="end" children={<CaretDown color="gray.300" />} />
+                </InputGroup>
+              </Popover.Trigger>
+              <Portal>
+                <Popover.Positioner>
+                  <Popover.Content>
+                    <VStack align="start" gap={0}>
+                      {options.map((opt) => (
+                        <Flex
+                          key={opt}
+                          onClick={() => {
+                            handleChange(opt)
+                            onClose()
+                          }}
+                          px={2}
+                          py={1.5}
+                          w="full"
+                          cursor="pointer"
+                          _hover={{ bg: "hover.blue" }}
+                        >
+                          {formatLabel(opt)}
+                        </Flex>
+                      ))}
+                    </VStack>
+                  </Popover.Content>
+                </Popover.Positioner>
+              </Portal>
+            </>
+          )
+        }}
+      </Popover.Context>
+    </Popover.Root>
   )
 }
 
@@ -148,7 +167,7 @@ function ProvinceBaseline({ occupancy }: { occupancy: IPart3Occupancy }) {
       </Heading>
       <Box borderWidth={1} borderColor="border.light" rounded="sm" p={6}>
         <Text mb={4}>{t(`${d}.provinceHasEstablished`)}</Text>
-        <VStack align="start" spacing={1} mb={4}>
+        <VStack align="start" gap={1} mb={4}>
           <BaselineRow
             label={t(`${d}.energyStepCodeLabel`)}
             value={formatStepLabel(t, occupancy.provincialBaseline.energyStep)}
@@ -305,7 +324,7 @@ function ConfigurableCompliancePathways({ occupancy, jurisdiction }: IConfigurab
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
-      <VStack spacing={6} align="start" w="full">
+      <VStack gap={6} align="start" w="full">
         <Box w="full">
           <Heading as="h3" fontSize="lg" mb={2}>
             {t(`${d}.localCompliancePathways`)}
@@ -314,15 +333,15 @@ function ConfigurableCompliancePathways({ occupancy, jurisdiction }: IConfigurab
             {t(`${d}.configurablePathwayDescription`)}
           </Text>
 
-          <VStack spacing={0} w="full" align="stretch">
+          <VStack gap={0} w="full" align="stretch">
             {fields.map((field, index) => (
               <React.Fragment key={field.id}>
                 {index > 0 && <OrDivider />}
                 <Box borderWidth={1} borderColor="border.light" rounded="sm" p={6}>
                   <Flex align="end" gap={6}>
                     <Box>
-                      <FormControl>
-                        <FormLabel fontSize="sm">{t(`${d}.energyStepCodeLevel`)}</FormLabel>
+                      <Field.Root>
+                        <Field.Label fontSize="sm">{t(`${d}.energyStepCodeLevel`)}</Field.Label>
                         <Controller
                           control={control}
                           name={`pathways.${index}.energyStep`}
@@ -331,16 +350,16 @@ function ConfigurableCompliancePathways({ occupancy, jurisdiction }: IConfigurab
                             <StepSelect
                               options={occupancy.allowedEnergySteps}
                               value={value}
-                              onChange={onChange}
+                              onValueChange={onChange}
                               formatLabel={(v) => String(v)}
                             />
                           )}
                         />
-                      </FormControl>
+                      </Field.Root>
                     </Box>
                     <Box>
-                      <FormControl>
-                        <FormLabel fontSize="sm">{t(`${d}.zeroCarbonStepCodeLevel`)}</FormLabel>
+                      <Field.Root>
+                        <Field.Label fontSize="sm">{t(`${d}.zeroCarbonStepCodeLevel`)}</Field.Label>
                         <Controller
                           control={control}
                           name={`pathways.${index}.zeroCarbonLevel`}
@@ -349,23 +368,23 @@ function ConfigurableCompliancePathways({ occupancy, jurisdiction }: IConfigurab
                             <StepSelect
                               options={occupancy.allowedZeroCarbonLevels}
                               value={value}
-                              onChange={onChange}
+                              onValueChange={onChange}
                               formatLabel={(v) => `EL-${v}`}
                             />
                           )}
                         />
-                      </FormControl>
+                      </Field.Root>
                     </Box>
                     <Box flex={1} />
                     <Button
-                      variant="link"
+                      variant="plain"
                       size="sm"
-                      leftIcon={<Trash />}
                       onClick={() => onRemove(index)}
                       color="text.secondary"
                       fontWeight="normal"
                       mb={1}
                     >
+                      <Trash />
                       {t(`${d}.remove`)}
                     </Button>
                   </Flex>
@@ -374,7 +393,8 @@ function ConfigurableCompliancePathways({ occupancy, jurisdiction }: IConfigurab
             ))}
           </VStack>
 
-          <Button variant="outline" size="sm" leftIcon={<Plus />} onClick={onAdd} mt={4}>
+          <Button variant="outline" size="sm" onClick={onAdd} mt={4}>
+            <Plus />
             {t(`${d}.addComplianceOption`)}
           </Button>
         </Box>
@@ -386,8 +406,8 @@ function ConfigurableCompliancePathways({ occupancy, jurisdiction }: IConfigurab
           <Button
             variant="primary"
             type="submit"
-            isLoading={formState.isSubmitting}
-            isDisabled={formState.isSubmitting || !formState.isValid}
+            loading={formState.isSubmitting}
+            disabled={formState.isSubmitting || !formState.isValid}
           >
             {t(`${d}.save`)}
           </Button>
@@ -456,8 +476,9 @@ export const Part3OccupancyDetailScreen = observer(function Part3OccupancyDetail
 
   return (
     <Container maxW="container.lg" py={8} px={{ base: 8, xl: 0 }} flexGrow={1}>
-      <VStack spacing={6} align="start" w="full">
-        <Button variant="link" onClick={() => navigate(-1)} leftIcon={<CaretLeft size={20} />} textDecoration="none">
+      <VStack gap={6} align="start" w="full">
+        <Button variant="plain" onClick={() => navigate(-1)} textDecoration="none">
+          <CaretLeft size={20} />
           {t("ui.back")}
         </Button>
 

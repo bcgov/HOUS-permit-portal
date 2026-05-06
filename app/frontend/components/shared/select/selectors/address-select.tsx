@@ -1,4 +1,5 @@
-import { FormControl, FormLabel, HStack, InputGroup, Text } from "@chakra-ui/react"
+import { InputGroup } from "@/components/ui/input-group"
+import { Field, HStack, Text } from "@chakra-ui/react"
 import { MapPin } from "@phosphor-icons/react"
 import debounce from "lodash/debounce"
 import { observer } from "mobx-react-lite"
@@ -64,8 +65,8 @@ export const AddressSelect = observer(function ({
     // Add other custom styles as needed
   }
   return (
-    <FormControl w="full" zIndex={2}>
-      <FormLabel>{t("landing.addressSelectLabel")}</FormLabel>
+    <Field.Root w="full" zIndex={2}>
+      <Field.Label>{t("landing.addressSelectLabel")}</Field.Label>
       <InputGroup w="full">
         <AsyncSelect<IOption, boolean>
           isClearable={true}
@@ -89,7 +90,7 @@ export const AddressSelect = observer(function ({
       <Text mt={2}>
         {t("landing.cantFind")} <RouterLink to="/jurisdictions">{t("landing.browseList")}</RouterLink>
       </Text>
-    </FormControl>
+    </Field.Root>
   )
 })
 

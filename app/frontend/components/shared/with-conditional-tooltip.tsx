@@ -1,4 +1,5 @@
-import { Box, Tooltip, TooltipProps } from "@chakra-ui/react"
+import { Tooltip } from "@/components/ui/tooltip"
+import { Box, TooltipProps } from "@chakra-ui/react"
 import { IconProps, Info } from "@phosphor-icons/react"
 import React from "react"
 
@@ -47,5 +48,5 @@ export function WithConditionalTooltip({
     </Box>
   )
 
-  return passesCondition ? <Tooltip {...tooltipProps}>{content}</Tooltip> : content
+  return passesCondition ? <Tooltip>{content}</Tooltip> : content
 }

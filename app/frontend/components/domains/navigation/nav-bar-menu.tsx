@@ -3,13 +3,10 @@ import {
   Button,
   Container,
   Drawer,
-  DrawerBody,
-  DrawerContent,
-  DrawerOverlay,
   Grid,
   Heading,
   IconButton,
-  Show,
+  Portal,
   Text,
   useDisclosure,
   VStack,
@@ -41,7 +38,7 @@ interface IStaticLinkItemProps extends LinkProps {
 
 const StaticLinkItem = ({ label, to, description, ...props }: IStaticLinkItemProps) => {
   return (
-    <VStack align="flex-start" spacing={1} w="full">
+    <VStack align="flex-start" gap={1} w="full">
       <RouterLink to={to} fontWeight="bold" {...props}>
         {label}
       </RouterLink>
@@ -57,7 +54,7 @@ interface IMenuSectionProps {
 
 const MenuSection = ({ title, children }: IMenuSectionProps) => {
   return (
-    <VStack align="flex-start" spacing={4} w="full">
+    <VStack align="flex-start" gap={4} w="full">
       <Heading as="h2" color="text.primary" mb={2}>
         {title}
       </Heading>
@@ -72,11 +69,11 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
   const { sessionStore, userStore, siteConfigurationStore } = useMst()
   const { currentUser } = userStore
   const { loggedIn } = sessionStore
-  const { isOpen, onOpen, onClose, onToggle } = useDisclosure()
+  const { open, onOpen, onClose, onToggle } = useDisclosure()
   const [menuOffset, setMenuOffset] = useState<string>("var(--app-navbar-height)")
 
   const handleToggle = () => {
-    if (!isOpen) {
+    if (!open) {
       const nav = document.getElementById("mainNav")
       if (nav) {
         setMenuOffset(`${nav.getBoundingClientRect().bottom}px`)
@@ -93,7 +90,7 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
   // Close menu when clicking outside (including the navbar above the drawer)
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (isOpen) {
+      if (open) {
         const target = event.target as HTMLElement
         const isButton = target.closest('[aria-label="menu dropdown button"]')
         const isDrawer = target.closest(".chakra-modal__content")
@@ -104,18 +101,18 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
       }
     }
 
-    if (isOpen) {
+    if (open) {
       document.addEventListener("mousedown", handleClickOutside)
     }
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside)
     }
-  }, [isOpen, onClose])
+  }, [open, onClose])
 
   // Column 1 - Project readiness tools
   const projectReadinessColumn = (
-    <VStack align="flex-start" spacing={4} w="full">
+    <VStack align="flex-start" gap={4} w="full">
       <MenuSection title={t("home.projectReadinessTools.title")}>
         <StaticLinkItem
           label={t("site.navMenu.projectReadiness.all.label")}
@@ -140,7 +137,7 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
 
   // Column 2 - About
   const aboutColumn = (
-    <VStack align="flex-start" spacing={4} w="full">
+    <VStack align="flex-start" gap={4} w="full">
       <MenuSection title={t("site.navMenu.sections.about")}>
         <StaticLinkItem label={t("site.navMenu.about.aboutHub.label")} to="/welcome" />
         <StaticLinkItem
@@ -192,7 +189,7 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
 
   return (
     <>
-      <Show below="md">
+      <Box hideFrom="md">
         <IconButton
           borderRadius="lg"
           border={currentUser?.isSubmitter || !loggedIn ? "solid black" : "solid white"}
@@ -200,12 +197,12 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
           p={3}
           variant={currentUser?.isSubmitter || !loggedIn ? "secondary" : "primary"}
           aria-label="menu dropdown button"
-          icon={<List size={16} weight="bold" />}
           onClick={handleToggle}
-        />
-      </Show>
-
-      <Show above="md">
+        >
+          <List size={16} weight="bold" />
+        </IconButton>
+      </Box>
+      <Box hideBelow="md">
         <Button
           borderRadius="lg"
           border={currentUser?.isSubmitter || !loggedIn ? "solid black" : "solid white"}
@@ -213,39 +210,51 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
           p={3}
           variant={currentUser?.isSubmitter || !loggedIn ? "secondary" : "primary"}
           aria-label="menu dropdown button"
-          leftIcon={isOpen ? <X size={16} weight="bold" /> : <List size={16} weight="bold" />}
           onClick={handleToggle}
         >
+          {open ? <X size={16} weight="bold" /> : <List size={16} weight="bold" />}
           {t("site.menu")}
         </Button>
-      </Show>
-
-      <Drawer isOpen={isOpen} placement="top" onClose={onClose} size="full">
-        <DrawerOverlay mt={menuOffset} zIndex={1400} />
-        <DrawerContent
-          mt={menuOffset}
-          maxH={`calc(100vh - ${menuOffset})`}
-          zIndex={1400}
-          display="flex"
-          flexDirection="column"
-          h="auto"
-        >
-          <DrawerBody flex="1" minH={0} overflow="auto">
-            <MenuCloseProvider value={onClose}>
-              <Container maxW="container.lg" px={8}>
-                <Grid templateColumns={{ base: "1fr", md: "3fr 3fr 2fr" }} gap={8} py={5}>
-                  <Box order={{ base: 2, md: 1 }}>{projectReadinessColumn}</Box>
-                  <Box order={{ base: 3, md: 2 }}>{aboutColumn}</Box>
-                  <Box order={{ base: 1, md: 3 }} flexDirection="column">
-                    {renderRightColumnContent()}
-                  </Box>
-                </Grid>
-                <VersionInfoMenuItem />
-              </Container>
-            </MenuCloseProvider>
-          </DrawerBody>
-        </DrawerContent>
-      </Drawer>
+      </Box>
+      <Drawer.Root
+        open={open}
+        placement="top"
+        size="full"
+        onOpenChange={(e) => {
+          if (!e.open) {
+            onClose()
+          }
+        }}
+      >
+        <Portal>
+          <Drawer.Backdrop mt={menuOffset} zIndex={1400} />
+          <Drawer.Positioner>
+            <Drawer.Content
+              mt={menuOffset}
+              maxH={`calc(100vh - ${menuOffset})`}
+              zIndex={1400}
+              display="flex"
+              flexDirection="column"
+              h="auto"
+            >
+              <Drawer.Body flex="1" minH={0} overflow="auto">
+                <MenuCloseProvider value={onClose}>
+                  <Container maxW="container.lg" px={8}>
+                    <Grid templateColumns={{ base: "1fr", md: "3fr 3fr 2fr" }} gap={8} py={5}>
+                      <Box order={{ base: 2, md: 1 }}>{projectReadinessColumn}</Box>
+                      <Box order={{ base: 3, md: 2 }}>{aboutColumn}</Box>
+                      <Box order={{ base: 1, md: 3 }} flexDirection="column">
+                        {renderRightColumnContent()}
+                      </Box>
+                    </Grid>
+                    <VersionInfoMenuItem />
+                  </Container>
+                </MenuCloseProvider>
+              </Drawer.Body>
+            </Drawer.Content>
+          </Drawer.Positioner>
+        </Portal>
+      </Drawer.Root>
     </>
   )
 })

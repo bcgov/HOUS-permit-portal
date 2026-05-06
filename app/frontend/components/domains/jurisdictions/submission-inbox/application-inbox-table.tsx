@@ -1,19 +1,5 @@
-import {
-  Box,
-  Circle,
-  Flex,
-  HStack,
-  Icon,
-  IconButton,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  Portal,
-  Text,
-  Tooltip,
-  VStack,
-} from "@chakra-ui/react"
+import { Tooltip } from "@/components/ui/tooltip"
+import { Box, Circle, Flex, HStack, Icon, IconButton, Menu, Portal, Text, VStack } from "@chakra-ui/react"
 import { Info, Swap } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -96,7 +82,7 @@ export const ApplicationInboxTable = observer(function ApplicationInboxTable({ s
           templateColumns="36px minmax(160px, 1.5fr) minmax(180px, 1.3fr) minmax(140px, 1fr) minmax(140px, 1fr) minmax(160px, 1.1fr) minmax(120px, auto) 72px"
           gridRowClassName="application-inbox-grid-row"
           overflow="visible"
-          sx={gridStickyHeaderSx}
+          css={gridStickyHeaderSx}
         >
           <Box display="contents" role="rowgroup">
             <Box display="contents" role="row">
@@ -193,25 +179,34 @@ const SortableHeader = ({
   <GridHeader role="columnheader">
     <Flex
       w="full"
-      as="button"
       justifyContent="space-between"
       cursor="pointer"
-      onClick={() => onToggleSort(field)}
       borderRight="1px solid"
       borderColor="border.light"
       px={3}
+      asChild
     >
-      <HStack spacing={1}>
-        <Text textAlign="left">{label}</Text>
-        {tooltip && (
-          <Tooltip label={tooltip} hasArrow placement="top">
-            <Flex align="center">
-              <Icon as={Info} boxSize={3.5} color="text.secondary" />
-            </Flex>
-          </Tooltip>
-        )}
-      </HStack>
-      <SortIcon<EPermitApplicationInboxSortFields> field={field} currentSort={sort} />
+      <button onClick={() => onToggleSort(field)}>
+        <HStack gap={1}>
+          <Text textAlign="left">{label}</Text>
+          {tooltip && (
+            <Tooltip
+              content={tooltip}
+              showArrow
+              positioning={{
+                placement: "top",
+              }}
+            >
+              <Flex align="center">
+                <Icon boxSize={3.5} color="text.secondary" asChild>
+                  <Info />
+                </Icon>
+              </Flex>
+            </Tooltip>
+          )}
+        </HStack>
+        <SortIcon<EPermitApplicationInboxSortFields> field={field} currentSort={sort} />
+      </button>
     </Flex>
   </GridHeader>
 )
@@ -235,21 +230,19 @@ const ApplicationInboxRow = observer(function ApplicationInboxRow({
       <SearchGridItem justifyContent="center" px={2}>
         <Circle size="8px" bg={!application.isViewed ? "theme.blueActive" : "transparent"} flexShrink={0} />
       </SearchGridItem>
-
       <SearchGridItem>
-        <VStack align="start" spacing={0}>
-          <Text fontWeight={700} fontSize="sm" noOfLines={1}>
+        <VStack align="start" gap={0}>
+          <Text fontWeight={700} fontSize="sm" lineClamp={1}>
             {application.templateNickname || "—"}
           </Text>
-          <Text fontSize="xs" color="text.secondary" noOfLines={1}>
+          <Text fontSize="xs" color="text.secondary" lineClamp={1}>
             {application.number}
           </Text>
         </VStack>
       </SearchGridItem>
-
       <SearchGridItem>
-        <VStack align="start" spacing={0}>
-          <Text fontSize="sm" noOfLines={1}>
+        <VStack align="start" gap={0}>
+          <Text fontSize="sm" lineClamp={1}>
             {application.shortAddress || application.fullAddress || "—"}
           </Text>
           {application.pid ? (
@@ -263,17 +256,15 @@ const ApplicationInboxRow = observer(function ApplicationInboxRow({
           )}
         </VStack>
       </SearchGridItem>
-
       <SearchGridItem>
         {application.projectId && application.projectNumber ? (
-          <Box
-            as={Link}
-            to={`projects/${application.projectId}/overview`}
-            color="text.link"
-            _hover={{ textDecoration: "underline" }}
-            onClick={(e: React.MouseEvent) => e.stopPropagation()}
-          >
-            {application.projectNumber}
+          <Box color="text.link" _hover={{ textDecoration: "underline" }} asChild>
+            <Link
+              to={`projects/${application.projectId}/overview`}
+              onClick={(e: React.MouseEvent) => e.stopPropagation()}
+            >
+              {application.projectNumber}
+            </Link>
           </Box>
         ) : (
           <Text fontSize="sm" color="text.secondary">
@@ -281,10 +272,9 @@ const ApplicationInboxRow = observer(function ApplicationInboxRow({
           </Text>
         )}
       </SearchGridItem>
-
       <SearchGridItem>
         {application.daysInQueue != null ? (
-          <VStack align="start" spacing={0}>
+          <VStack align="start" gap={0}>
             <Text fontSize="sm">{application.formattedDaysInQueue}</Text>
             <Text fontSize="xs" color="text.secondary">
               {t("submissionInbox.waitingSince")}
@@ -299,7 +289,6 @@ const ApplicationInboxRow = observer(function ApplicationInboxRow({
           </Text>
         )}
       </SearchGridItem>
-
       <SearchGridItem
         onClick={(e: React.MouseEvent) => {
           e.preventDefault()
@@ -308,11 +297,9 @@ const ApplicationInboxRow = observer(function ApplicationInboxRow({
       >
         <ApplicationReviewAssigneesCell application={application} />
       </SearchGridItem>
-
       <SearchGridItem>
         <PermitApplicationStatusTag status={application.status} size="sm" px={2} py={0.5} fontSize="xs" />
       </SearchGridItem>
-
       <SearchGridItem
         px={1}
         justifyContent="center"
@@ -321,7 +308,7 @@ const ApplicationInboxRow = observer(function ApplicationInboxRow({
           e.stopPropagation()
         }}
       >
-        <HStack spacing={0}>
+        <HStack gap={0}>
           <ApplicationActionsMenu application={application} />
           {application.isViewed && (
             <SubmissionInboxMarkUnreadIconButton onMarkUnread={() => application.markAsUnviewed()} />
@@ -345,49 +332,66 @@ const ApplicationActionsMenu = observer(function ApplicationActionsMenu({
   if (!hasTransitions && !showRevisionsRequestedLink) return null
 
   return (
-    <Menu>
-      <Tooltip label={t("submissionInbox.changeStatus")} hasArrow placement="top">
-        <MenuButton
-          as={IconButton}
-          aria-label={t("submissionInbox.changeStatus")}
-          icon={<Icon as={Swap} boxSize={4} />}
-          size="sm"
-          minW={7}
-          h={7}
-          variant="ghost"
-        />
+    <Menu.Root>
+      <Tooltip
+        content={t("submissionInbox.changeStatus")}
+        showArrow
+        positioning={{
+          placement: "top",
+        }}
+      >
+        <Menu.Trigger asChild>
+          <IconButton
+            aria-label={t("submissionInbox.changeStatus")}
+            icon={
+              <Icon boxSize={4} asChild>
+                <Swap />
+              </Icon>
+            }
+            size="sm"
+            minW={7}
+            h={7}
+            variant="ghost"
+          ></IconButton>
+        </Menu.Trigger>
       </Tooltip>
       <Portal>
-        <MenuList zIndex={10}>
-          {application.allowedManualTransitions.map((transition) => (
-            <MenuItem
-              key={transition}
-              fontSize="sm"
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                application.transitionStatus(transition)
-              }}
-            >
-              {/* @ts-ignore */}
-              {t(`submissionInbox.applicationStatuses.${transition}`)}
-            </MenuItem>
-          ))}
-          {showRevisionsRequestedLink && (
-            <MenuItem
-              fontSize="sm"
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                navigate(`/permit-applications/${application.id}`)
-              }}
-            >
-              {/* @ts-ignore */}
-              {t(`submissionInbox.applicationStatuses.${EPermitApplicationStatus.revisionsRequested}`)}
-            </MenuItem>
-          )}
-        </MenuList>
+        <Portal>
+          <Menu.Positioner>
+            <Menu.Content>
+              {application.allowedManualTransitions.map((transition) => (
+                <Menu.Item
+                  key={transition}
+                  fontSize="sm"
+                  onSelect={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    application.transitionStatus(transition)
+                  }}
+                  value="item-0"
+                >
+                  {/* @ts-ignore */}
+                  {t(`submissionInbox.applicationStatuses.${transition}`)}
+                </Menu.Item>
+              ))}
+              {showRevisionsRequestedLink && (
+                <Menu.Item
+                  fontSize="sm"
+                  onSelect={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    navigate(`/permit-applications/${application.id}`)
+                  }}
+                  value="item-1"
+                >
+                  {/* @ts-ignore */}
+                  {t(`submissionInbox.applicationStatuses.${EPermitApplicationStatus.revisionsRequested}`)}
+                </Menu.Item>
+              )}
+            </Menu.Content>
+          </Menu.Positioner>
+        </Portal>
       </Portal>
-    </Menu>
+    </Menu.Root>
   )
 })

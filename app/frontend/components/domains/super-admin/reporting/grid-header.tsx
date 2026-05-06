@@ -16,15 +16,17 @@ export const GridHeaders: React.FC<IGridHeadersProps> = observer(function GridHe
     <Box display={"contents"} role={"rowgroup"}>
       <Box display={"contents"} role={"row"}>
         <GridItem
-          as={Flex}
           gridColumn={`span 3`}
           p={6}
           bg={"greys.grey10"}
           justifyContent={"space-between"}
           align="center"
+          asChild
         >
-          <Text role={"heading"}>{t("reporting.tableHeading")}</Text>
-          {renderFilterInput()}
+          <Flex>
+            <Text role={"heading"}>{t("reporting.tableHeading")}</Text>
+            {renderFilterInput()}
+          </Flex>
         </GridItem>
       </Box>
       <Box display={"contents"} role={"row"}>
@@ -33,14 +35,16 @@ export const GridHeaders: React.FC<IGridHeadersProps> = observer(function GridHe
             <GridHeader key={field} role={"columnheader"}>
               <Flex
                 w={"full"}
-                as={"button"}
                 justifyContent={"space-between"}
                 borderRight={"1px solid"}
                 borderColor={"border.light"}
                 px={4}
+                asChild
               >
-                {/* @ts-ignore */}
-                <Text textAlign="left">{t(`reporting.columnHeaders.${field}`)}</Text>
+                <button>
+                  {/* @ts-ignore */}
+                  <Text textAlign="left">{t(`reporting.columnHeaders.${field}`)}</Text>
+                </button>
               </Flex>
             </GridHeader>
           )

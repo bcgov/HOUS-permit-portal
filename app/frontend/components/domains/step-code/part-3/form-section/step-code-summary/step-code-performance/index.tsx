@@ -1,4 +1,4 @@
-import { Flex, FormControl, FormLabel, HStack, Input } from "@chakra-ui/react"
+import { Field, Flex, HStack, Input } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -29,21 +29,19 @@ export const StepCodePerformance = observer(function StepCodePerformanceResults(
 
   return (
     <Flex direction="column" gap={4}>
-      <FormControl>
-        <FormLabel fontWeight="normal">{t(`${i18nPrefix}.compliancePath`)}</FormLabel>
+      <Field.Root>
+        <Field.Label fontWeight="normal">{t(`${i18nPrefix}.compliancePath`)}</Field.Label>
         <Input
-          isDisabled
+          disabled
           textAlign="left"
           value={t(`stepCode.part3.projectDetails.buildingCodeVersions.${checklist.buildingCodeVersion}`)}
         />
-      </FormControl>
-
-      <FormControl>
-        <FormLabel fontWeight="normal">{t(`${i18nPrefix}.stepCodeOccupancy.label`)}</FormLabel>
-        <Input isDisabled textAlign="left" value={occupancyName || t(`${i18nPrefix}.stepCodeOccupancy.mixedUse`)} />
-      </FormControl>
-
-      <HStack spacing={6} w="full" align="stretch">
+      </Field.Root>
+      <Field.Root>
+        <Field.Label fontWeight="normal">{t(`${i18nPrefix}.stepCodeOccupancy.label`)}</Field.Label>
+        <Input disabled textAlign="left" value={occupancyName || t(`${i18nPrefix}.stepCodeOccupancy.mixedUse`)} />
+      </Field.Root>
+      <HStack gap={6} w="full" align="stretch">
         {isBaseline ? (
           <>
             <BaselineEnergyPerformance />

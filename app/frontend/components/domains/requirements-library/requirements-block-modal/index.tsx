@@ -1,14 +1,4 @@
-import {
-  Button,
-  ButtonProps,
-  HStack,
-  ModalBody,
-  ModalCloseButton,
-  ModalHeader,
-  Tag,
-  Text,
-  useDisclosure,
-} from "@chakra-ui/react"
+import { Button, ButtonProps, Dialog, HStack, Tag, Text, useDisclosure } from "@chakra-ui/react"
 import { Archive } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
@@ -57,7 +47,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
   const { t } = useTranslation()
   const { fetchData } = searchModel
   const { createRequirementBlock } = requirementBlockStore
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { open, onOpen, onClose } = useDisclosure()
 
   const { autoComplianceModuleConfigurations, error } = useAutoComplianceModuleConfigurations()
 
@@ -185,7 +175,6 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
           {requirementBlock ? t("ui.edit") : t("requirementsLibrary.modals.create.triggerButton")}
         </Text>
       </Button>
-
       {/*this is so that the modal children unmount on close to reset their states*/}
       {isOpen && (
         <FormModal
@@ -196,9 +185,9 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
           confirmCloseBody={t("requirementsLibrary.modals.unsavedChanges.body")}
           confirmCloseButtonText={t("requirementsLibrary.modals.unsavedChanges.discard")}
         >
-          <ModalCloseButton fontSize={"11px"} />
+          <Dialog.CloseTrigger fontSize={"11px"} />
           {(requirementBlock as IRequirementBlock)?.isDiscarded && (
-            <Tag
+            <Tag.Root
               borderRadius="sm"
               border="1px solid"
               borderColor={"semantic.error"}
@@ -216,16 +205,16 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
                   {t("requirementsLibrary.modals.archived")}
                 </Text>
               </HStack>
-            </Tag>
+            </Tag.Root>
           )}
-          <ModalHeader display={"flex"} justifyContent={"space-between"} pt={4} px={"2.75rem"} pb={0}>
+          <Dialog.Header display={"flex"} justifyContent={"space-between"} pt={4} px={"2.75rem"} pb={0}>
             <Text as={"h2"} fontSize={"2xl"}>
               {t(`requirementsLibrary.modals.${requirementBlock ? "edit" : "create"}.title`)}
             </Text>
             <HStack>
               <Button
                 variant={"primary"}
-                isLoading={isSubmitting}
+                loading={isSubmitting}
                 onClick={(e) => {
                   e.stopPropagation()
                   handleSubmit(onSubmit)()
@@ -233,16 +222,16 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
               >
                 {t("ui.onlySave")}
               </Button>
-              <Button variant={"secondary"} onClick={onClose} isDisabled={isSubmitting}>
+              <Button variant={"secondary"} onClick={onClose} disabled={isSubmitting}>
                 {t("ui.cancel")}
               </Button>
             </HStack>
-          </ModalHeader>
-          <ModalBody px={"2.75rem"}>
+          </Dialog.Header>
+          <Dialog.Body px={"2.75rem"}>
             {showEditWarning && (
               <CalloutBanner type={"warning"} title={t("requirementsLibrary.modals.templateEditWarning")} />
             )}
-            <HStack spacing={9} w={"full"} h={"full"} alignItems={"flex-start"}>
+            <HStack gap={9} w={"full"} h={"full"} alignItems={"flex-start"}>
               <BlockSetup
                 requirementBlock={
                   (requirementBlock as IRequirementBlock)?.restore ? (requirementBlock as IRequirementBlock) : undefined
@@ -252,7 +241,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
 
               <FieldsSetup requirementBlock={requirementBlock} isEditable={isEditable} />
             </HStack>
-          </ModalBody>
+          </Dialog.Body>
         </FormModal>
       )}
     </>

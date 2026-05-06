@@ -39,7 +39,7 @@ export const ActivityTabPanelContent = observer(({ permitProject }: IProps) => {
   return (
     <Flex direction="column" flex={1} minH={0} bg="greys.white" p={10}>
       <Box as="section" mb={6} flexShrink={0}>
-        <HStack align="center" spacing={4}>
+        <HStack align="center" gap={4}>
           <TrendUp size={32} />
           <Heading as="h2" size="lg" mb={0}>
             {t("permitProject.activity.title")}
@@ -53,7 +53,7 @@ export const ActivityTabPanelContent = observer(({ permitProject }: IProps) => {
         <Flex justifyContent="space-between" align="flex-end" flexWrap="wrap" gap={4} flexShrink={0}>
           <HStack
             align="flex-end"
-            spacing={4}
+            gap={4}
             flex={1}
             justifyContent="space-between"
             borderBottom="1px solid"
@@ -62,23 +62,24 @@ export const ActivityTabPanelContent = observer(({ permitProject }: IProps) => {
           >
             <AuditDateRangeFilter searchModel={projectAuditStore} />
             <Flex
-              as="button"
               align="center"
               gap={2}
               cursor="pointer"
-              onClick={() => projectAuditStore.toggleSort(EProjectAuditSortFields.createdAt)}
               fontSize="sm"
               fontWeight="bold"
               color="text.secondary"
               h="40px"
               minW="40px"
               px={3}
+              asChild
             >
-              <Text>{t("permitProject.activity.columns.createdAt")}</Text>
-              <SortIcon<EProjectAuditSortFields>
-                field={EProjectAuditSortFields.createdAt}
-                currentSort={projectAuditStore.sort as ISort<EProjectAuditSortFields>}
-              />
+              <button onClick={() => projectAuditStore.toggleSort(EProjectAuditSortFields.createdAt)}>
+                <Text>{t("permitProject.activity.columns.createdAt")}</Text>
+                <SortIcon<EProjectAuditSortFields>
+                  field={EProjectAuditSortFields.createdAt}
+                  currentSort={projectAuditStore.sort as ISort<EProjectAuditSortFields>}
+                />
+              </button>
             </Flex>
           </HStack>
         </Flex>

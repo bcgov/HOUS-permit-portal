@@ -1,4 +1,4 @@
-import { StackDivider, VStack } from "@chakra-ui/react"
+import { Stack, VStack } from "@chakra-ui/react"
 import { t } from "i18next"
 import React from "react"
 import { IStepCodeZeroCarbonComplianceReport } from "../../../../../../../models/step-code-zero-carbon-compliance-report"
@@ -22,8 +22,9 @@ export const TotalGHG = function TotalGhg({ compliance }: IProps) {
           inputProps={{ isDisabled: true, textAlign: "center", value: compliance.totalGhgRequirement || "-" }}
           hint={t(`${i18nPrefix}.max`)}
           rightElement={
-            <VStack spacing={0} divider={<StackDivider color="border.base" />}>
+            <VStack gap={0}>
               <UnitsText>{t(`${i18nPrefix}.ghg.units.numerator`)}</UnitsText>
+              <Stack.Separator color="border.base" />
               <UnitsText>{t(`${i18nPrefix}.ghg.units.denominator`)}</UnitsText>
             </VStack>
           }
@@ -33,8 +34,9 @@ export const TotalGHG = function TotalGhg({ compliance }: IProps) {
         <TextFormControl
           inputProps={{ isDisabled: true, textAlign: "center", value: compliance.totalGhg || "-" }}
           rightElement={
-            <VStack spacing={0} divider={<StackDivider color="border.base" />}>
+            <VStack gap={0}>
               <UnitsText>{t(`${i18nPrefix}.ghg.units.numerator`)}</UnitsText>
+              <Stack.Separator color="border.base" />
               <UnitsText>{t(`${i18nPrefix}.ghg.units.denominator`)}</UnitsText>
             </VStack>
           }

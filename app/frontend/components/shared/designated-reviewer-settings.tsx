@@ -1,4 +1,4 @@
-import { Button, Container, Flex, Heading, ListItem, Text, UnorderedList, VStack } from "@chakra-ui/react"
+import { Button, Container, Flex, Heading, List, Text, VStack } from "@chakra-ui/react"
 import { CaretLeft } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -26,7 +26,8 @@ export const DesignatedReviewerSettings = observer(
     return (
       <Container maxW="container.lg" p={8} as={"main"}>
         <VStack alignItems={"flex-start"} w={"full"} h={"full"} gap={6}>
-          <Button variant="link" onClick={handleBack} leftIcon={<CaretLeft size={20} />} textDecoration="none">
+          <Button variant="plain" onClick={handleBack} textDecoration="none">
+            <CaretLeft size={20} />
             {t("ui.back")}
           </Button>
           <Heading as="h1" m={0} p={0}>
@@ -35,14 +36,14 @@ export const DesignatedReviewerSettings = observer(
           <Flex justify="space-between" w="100%">
             <VStack alignItems="flex-start">
               <Text>{t(`${i18nPrefix}.intro`)}</Text>
-              <UnorderedList pl={6} spacing={2}>
-                <ListItem>
+              <List.Root as="ul" pl={6} gap={2}>
+                <List.Item>
                   <Trans i18nKey={`${i18nPrefix}.item1`} />
-                </ListItem>
-                <ListItem>
+                </List.Item>
+                <List.Item>
                   <Trans i18nKey={`${i18nPrefix}.item2`} />
-                </ListItem>
-              </UnorderedList>
+                </List.Item>
+              </List.Root>
             </VStack>
           </Flex>
         </VStack>
@@ -52,7 +53,7 @@ export const DesignatedReviewerSettings = observer(
               {title}
             </Heading>
           </Flex>
-          <SwitchButton isChecked={isEnabled} onChange={(e) => onToggle(e.target.checked)} size={"lg"} />
+          <SwitchButton checked={isEnabled} onChange={(e) => onToggle(e.target.checked)} size={"lg"} />
         </Flex>
       </Container>
     )

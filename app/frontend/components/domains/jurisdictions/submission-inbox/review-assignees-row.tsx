@@ -1,4 +1,5 @@
-import { AvatarProps, HStack, IconButton, Spinner, Text, Tooltip } from "@chakra-ui/react"
+import { Tooltip } from "@/components/ui/tooltip"
+import { HStack, IconButton, Spinner, Text } from "@chakra-ui/react"
 import { UserPlus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -17,7 +18,7 @@ interface IReviewAssigneesRowProps {
    * affordance to assign).
    */
   emptyText?: string
-  avatarSize?: AvatarProps["size"]
+  avatarSize?: React.ComponentProps<typeof SharedAvatar>["size"]
   /**
    * Usually the assign-collaborator popover. Rendered immediately after the
    * avatars so the + icon trigger always sits to the right of any assigned
@@ -42,9 +43,16 @@ export const ReviewAssigneesRow = observer(function ReviewAssigneesRow({
   children,
 }: IReviewAssigneesRowProps) {
   return (
-    <HStack spacing={spacing}>
+    <HStack gap={spacing}>
       {primaryAssignee ? (
-        <Tooltip label={primaryAssignee.name} hasArrow placement="top" openDelay={200}>
+        <Tooltip
+          content={primaryAssignee.name}
+          showArrow
+          openDelay={200}
+          positioning={{
+            placement: "top",
+          }}
+        >
           <SharedAvatar
             key={primaryAssignee.id}
             size={avatarSize}
@@ -87,13 +95,14 @@ export const renderAssignPlusIconTrigger =
   ({ isLoading, onClick, isDisabled }: ITriggerRenderArgs) => (
     <IconButton
       aria-label={ariaLabel}
-      icon={isLoading ? <Spinner size="xs" /> : <UserPlus size={size === "sm" ? 16 : 14} />}
       size={size}
       minW={size === "sm" ? 7 : undefined}
       h={size === "sm" ? 7 : undefined}
       variant="ghost"
       borderRadius="full"
       onClick={onClick}
-      isDisabled={isDisabled}
-    />
+      disabled={isDisabled}
+    >
+      {isLoading ? <Spinner size="xs" /> : <UserPlus size={size === "sm" ? 16 : 14} />}
+    </IconButton>
   )

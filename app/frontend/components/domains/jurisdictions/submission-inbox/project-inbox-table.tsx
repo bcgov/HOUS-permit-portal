@@ -1,19 +1,5 @@
-import {
-  Box,
-  Circle,
-  Flex,
-  HStack,
-  Icon,
-  IconButton,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  Portal,
-  Text,
-  Tooltip,
-  VStack,
-} from "@chakra-ui/react"
+import { Tooltip } from "@/components/ui/tooltip"
+import { Box, Circle, Flex, HStack, Icon, IconButton, Menu, Portal, Text, VStack } from "@chakra-ui/react"
 import { Info, Swap } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -86,103 +72,97 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
     }
     return projects.map((project) => (
       <Box
-        key={project.id}
-        as={Link}
-        to={`projects/${project.id}/overview`}
         className="project-inbox-grid-row"
         role="row"
         display="contents"
         cursor="pointer"
         _hover={{ textDecoration: "none" }}
+        asChild
       >
-        <SearchGridItem>
-          <HStack spacing={3}>
-            <Circle size="8px" bg={!project.viewedAt ? "theme.blueActive" : "transparent"} flexShrink={0} />
+        <Link key={project.id} to={`projects/${project.id}/overview`}>
+          <SearchGridItem>
+            <HStack gap={3}>
+              <Circle size="8px" bg={!project.viewedAt ? "theme.blueActive" : "transparent"} flexShrink={0} />
 
-            <Text fontWeight={700} fontSize="sm">
-              {project.number}
-            </Text>
-          </HStack>
-        </SearchGridItem>
-
-        <SearchGridItem>
-          <VStack align="start" spacing={0}>
-            <Text fontSize="sm" noOfLines={1}>
-              {project.shortAddress || project.fullAddress || "—"}
-            </Text>
-            {project.pid ? (
-              <Text fontSize="xs" color="text.secondary">
-                PID {project.pid}
+              <Text fontWeight={700} fontSize="sm">
+                {project.number}
               </Text>
+            </HStack>
+          </SearchGridItem>
+          <SearchGridItem>
+            <VStack align="start" gap={0}>
+              <Text fontSize="sm" lineClamp={1}>
+                {project.shortAddress || project.fullAddress || "—"}
+              </Text>
+              {project.pid ? (
+                <Text fontSize="xs" color="text.secondary">
+                  PID {project.pid}
+                </Text>
+              ) : (
+                <Text fontSize="xs" color="text.secondary">
+                  —
+                </Text>
+              )}
+            </VStack>
+          </SearchGridItem>
+          <SearchGridItem>
+            <ProjectInboxPermitApplicationsPopover
+              project={project}
+              renderTrigger={
+                <Text fontSize="sm">
+                  {project.totalPermitsCount > 0
+                    ? `${project.inQueueCount} of ${project.totalPermitsCount} received`
+                    : "0 of 0 received"}
+                </Text>
+              }
+            />
+          </SearchGridItem>
+          <SearchGridItem>
+            {project.daysInQueue != null ? (
+              <VStack align="start" gap={0}>
+                <Text fontSize="sm" fontWeight={600}>
+                  {project.formattedDaysInQueue}
+                </Text>
+                <Text fontSize="xs" color="text.secondary">
+                  {t("submissionInbox.waitingSince")}
+                </Text>
+                <Text fontSize="xs" color="text.secondary">
+                  {project.formattedEnqueuedAt}
+                </Text>
+              </VStack>
             ) : (
-              <Text fontSize="xs" color="text.secondary">
+              <Text fontSize="sm" color="text.secondary">
                 —
               </Text>
             )}
-          </VStack>
-        </SearchGridItem>
-
-        <SearchGridItem>
-          <ProjectInboxPermitApplicationsPopover
-            project={project}
-            renderTrigger={
-              <Text fontSize="sm">
-                {project.totalPermitsCount > 0
-                  ? `${project.inQueueCount} of ${project.totalPermitsCount} received`
-                  : "0 of 0 received"}
-              </Text>
-            }
-          />
-        </SearchGridItem>
-
-        <SearchGridItem>
-          {project.daysInQueue != null ? (
-            <VStack align="start" spacing={0}>
-              <Text fontSize="sm" fontWeight={600}>
-                {project.formattedDaysInQueue}
-              </Text>
-              <Text fontSize="xs" color="text.secondary">
-                {t("submissionInbox.waitingSince")}
-              </Text>
-              <Text fontSize="xs" color="text.secondary">
-                {project.formattedEnqueuedAt}
-              </Text>
-            </VStack>
-          ) : (
-            <Text fontSize="sm" color="text.secondary">
-              —
-            </Text>
-          )}
-        </SearchGridItem>
-
-        <SearchGridItem
-          onClick={(e: React.MouseEvent) => {
-            e.preventDefault()
-            e.stopPropagation()
-          }}
-        >
-          <ProjectAssignedCell project={project} />
-        </SearchGridItem>
-
-        <SearchGridItem>
-          <ProjectStateTag state={project.state} fontSize="xs" />
-        </SearchGridItem>
-
-        <SearchGridItem
-          px={1}
-          justifyContent="center"
-          onClick={(e: React.MouseEvent) => {
-            e.preventDefault()
-            e.stopPropagation()
-          }}
-        >
-          <HStack spacing={0}>
-            <ProjectActionsMenu project={project} />
-            {!!project.viewedAt && (
-              <SubmissionInboxMarkUnreadIconButton onMarkUnread={() => project.markAsUnviewed()} />
-            )}
-          </HStack>
-        </SearchGridItem>
+          </SearchGridItem>
+          <SearchGridItem
+            onClick={(e: React.MouseEvent) => {
+              e.preventDefault()
+              e.stopPropagation()
+            }}
+          >
+            <ProjectAssignedCell project={project} />
+          </SearchGridItem>
+          <SearchGridItem>
+            <ProjectStateTag state={project.state} fontSize="xs" />
+          </SearchGridItem>
+          <SearchGridItem
+            px={1}
+            justifyContent="center"
+            onClick={(e: React.MouseEvent) => {
+              e.preventDefault()
+              e.stopPropagation()
+            }}
+          >
+            <HStack gap={0}>
+              <ProjectActionsMenu project={project} />
+              {!!project.viewedAt && (
+                <SubmissionInboxMarkUnreadIconButton onMarkUnread={() => project.markAsUnviewed()} />
+              )}
+            </HStack>
+          </SearchGridItem>
+        </Link>
       </Box>
     ))
   }
@@ -203,7 +183,7 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
           templateColumns="minmax(160px, 2fr) minmax(180px, 1.5fr) minmax(160px, 1fr) minmax(140px, 1fr) minmax(160px, 1fr) minmax(120px, 1fr) 72px"
           gridRowClassName="project-inbox-grid-row"
           overflow="visible"
-          sx={{
+          css={{
             ...gridStickyHeaderSx,
             ".project-inbox-grid-row:hover > div": {
               bg: "gray.50",
@@ -219,28 +199,37 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
                 <GridHeader key={field} role="columnheader">
                   <Flex
                     w="full"
-                    as="button"
                     justifyContent="space-between"
                     cursor="pointer"
-                    onClick={() => toggleSort(field)}
                     borderRight="1px solid"
                     borderColor="border.light"
                     px={3}
+                    asChild
                   >
-                    <HStack spacing={1}>
-                      <Text textAlign="left">{getSortColumnHeader(field)}</Text>
-                      {field === EPermitProjectInboxSortFields.daysInQueue && (
-                        <Tooltip label={t("submissionInbox.daysWithUsTooltip")} hasArrow placement="top">
-                          <Flex align="center">
-                            <Icon as={Info} boxSize={3.5} color="text.secondary" />
-                          </Flex>
-                        </Tooltip>
-                      )}
-                    </HStack>
-                    <SortIcon<EPermitProjectInboxSortFields>
-                      field={field}
-                      currentSort={sort as ISort<EPermitProjectInboxSortFields>}
-                    />
+                    <button onClick={() => toggleSort(field)}>
+                      <HStack gap={1}>
+                        <Text textAlign="left">{getSortColumnHeader(field)}</Text>
+                        {field === EPermitProjectInboxSortFields.daysInQueue && (
+                          <Tooltip
+                            content={t("submissionInbox.daysWithUsTooltip")}
+                            showArrow
+                            positioning={{
+                              placement: "top",
+                            }}
+                          >
+                            <Flex align="center">
+                              <Icon boxSize={3.5} color="text.secondary" asChild>
+                                <Info />
+                              </Icon>
+                            </Flex>
+                          </Tooltip>
+                        )}
+                      </HStack>
+                      <SortIcon<EPermitProjectInboxSortFields>
+                        field={field}
+                        currentSort={sort as ISort<EPermitProjectInboxSortFields>}
+                      />
+                    </button>
                   </Flex>
                 </GridHeader>
               ))}
@@ -309,36 +298,52 @@ const ProjectActionsMenu = observer(function ProjectActionsMenu({ project }: { p
   if (!hasTransitions) return null
 
   return (
-    <Menu>
-      <Tooltip label={t("submissionInbox.changeStatus")} hasArrow placement="top">
-        <MenuButton
-          as={IconButton}
-          aria-label={t("submissionInbox.changeStatus")}
-          icon={<Icon as={Swap} boxSize={4} />}
-          size="sm"
-          minW={7}
-          h={7}
-          variant="ghost"
-        />
+    <Menu.Root>
+      <Tooltip
+        content={t("submissionInbox.changeStatus")}
+        showArrow
+        positioning={{
+          placement: "top",
+        }}
+      >
+        <Menu.Trigger asChild>
+          <IconButton
+            aria-label={t("submissionInbox.changeStatus")}
+            icon={
+              <Icon boxSize={4} asChild>
+                <Swap />
+              </Icon>
+            }
+            size="sm"
+            minW={7}
+            h={7}
+            variant="ghost"
+          ></IconButton>
+        </Menu.Trigger>
       </Tooltip>
       <Portal>
-        <MenuList zIndex={10}>
-          {project.allowedManualTransitions.map((transition) => (
-            <MenuItem
-              key={transition}
-              fontSize="sm"
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                project.transitionState(transition)
-              }}
-            >
-              {/* @ts-ignore */}
-              {t(`submissionInbox.projectStates.${transition}`)}
-            </MenuItem>
-          ))}
-        </MenuList>
+        <Portal>
+          <Menu.Positioner>
+            <Menu.Content>
+              {project.allowedManualTransitions.map((transition) => (
+                <Menu.Item
+                  key={transition}
+                  fontSize="sm"
+                  onSelect={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    project.transitionState(transition)
+                  }}
+                  value="item-0"
+                >
+                  {/* @ts-ignore */}
+                  {t(`submissionInbox.projectStates.${transition}`)}
+                </Menu.Item>
+              ))}
+            </Menu.Content>
+          </Menu.Positioner>
+        </Portal>
       </Portal>
-    </Menu>
+    </Menu.Root>
   )
 })

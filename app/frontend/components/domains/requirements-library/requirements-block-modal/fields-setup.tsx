@@ -47,7 +47,7 @@ export const FieldsSetup = observer(function FieldsSetup({
 
   const [requirementIdsToEdit, setRequirementIdsToEdit] = useState<Record<string, boolean>>({})
 
-  const { isOpen: isInReorderMode, onToggle } = useDisclosure()
+  const { open: isInReorderMode, onToggle } = useDisclosure()
 
   const toggleRequirementToEdit = (requirementId: string) => {
     setRequirementIdsToEdit((pastState) => ({ ...pastState, [requirementId]: !pastState[requirementId] }))
@@ -137,7 +137,7 @@ export const FieldsSetup = observer(function FieldsSetup({
             {isInReorderMode ? (
               <ReorderList />
             ) : (
-              <VStack w={"full"} alignItems={"flex-start"} spacing={2} px={3}>
+              <VStack w={"full"} alignItems={"flex-start"} gap={2} px={3}>
                 {fields.map((field, index) => {
                   return (
                     <RequirementFieldRow
@@ -176,12 +176,12 @@ export const FieldsSetup = observer(function FieldsSetup({
           _hover={{ cursor: "not-allowed" }}
         >
           <Flex height="100%" justifyContent="center">
-            <Tag h="fit-content" mt={30} bg="semantic.infoLight" border="1px solid" borderColor="semantic.info">
-              <HStack spacing={2}>
+            <Tag.Root h="fit-content" mt={30} bg="semantic.infoLight" border="1px solid" borderColor="semantic.info">
+              <HStack gap={2}>
                 <Info />
                 <Text>{t("requirementsLibrary.modals.cantEditHere")}</Text>
               </HStack>
-            </Tag>
+            </Tag.Root>
           </Flex>
         </Box>
       )}

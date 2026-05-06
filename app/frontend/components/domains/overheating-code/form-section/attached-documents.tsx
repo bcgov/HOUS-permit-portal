@@ -1,15 +1,4 @@
-import {
-  Box,
-  Button,
-  CloseButton,
-  FormControl,
-  FormLabel,
-  Heading,
-  HStack,
-  Input,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { Box, Button, CloseButton, Field, Heading, HStack, Input, Text, VStack } from "@chakra-ui/react"
 import { Plus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -67,15 +56,14 @@ export const AttachedDocuments = observer(function AttachedDocuments() {
           "List documents that accompany this report, along with any relevant notes."
         )}
       </Text>
-
-      <VStack spacing={4} align="stretch">
+      <VStack gap={4} align="stretch">
         {fields.map((field, index) => (
-          <FormControl key={field.id}>
-            <FormLabel fontSize="sm" fontWeight="semibold">
+          <Field.Root key={field.id}>
+            <Field.Label fontSize="sm" fontWeight="semibold">
               {t("overheatingCode.sections.attachedDocuments.lineLabel", "Line {{number}}:", {
                 number: index + 1,
               })}
-            </FormLabel>
+            </Field.Label>
             <HStack>
               <Input
                 {...register(`documentNotes.${index}.value`)}
@@ -86,29 +74,19 @@ export const AttachedDocuments = observer(function AttachedDocuments() {
               />
               {fields.length > 1 && <CloseButton onClick={() => remove(index)} aria-label="Remove line" />}
             </HStack>
-          </FormControl>
+          </Field.Root>
         ))}
 
         {fields.length < MAX_LINES && (
           <Box>
-            <Button
-              variant="link"
-              colorScheme="blue"
-              size="sm"
-              leftIcon={<Plus />}
-              onClick={() => append({ value: "" })}
-            >
+            <Button variant="plain" colorPalette="blue" size="sm" onClick={() => append({ value: "" })}>
+              <Plus />
               {t("overheatingCode.sections.attachedDocuments.addLine", "Add Line")}
             </Button>
           </Box>
         )}
       </VStack>
-
-      <FormFooter<IAttachedDocumentsFormData>
-        handleSubmit={handleSubmit}
-        onSubmit={onSubmit}
-        isLoading={isSubmitting}
-      />
+      <FormFooter<IAttachedDocumentsFormData> handleSubmit={handleSubmit} onSubmit={onSubmit} loading={isSubmitting} />
     </Box>
   )
 })

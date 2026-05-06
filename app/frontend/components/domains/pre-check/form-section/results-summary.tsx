@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Heading, Icon, Link, List, ListItem, Text, UnorderedList } from "@chakra-ui/react"
+import { Box, Button, Flex, Heading, Icon, Link, List, Text } from "@chakra-ui/react"
 import { ArrowsClockwise, Download, Hourglass, Layout } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
@@ -53,7 +53,9 @@ export const ResultsSummary = observer(function ResultsSummary() {
         return (
           <Box bg="semantic.infoLight" p={8} borderRadius="lg" mb={6} color="theme.blueAlt">
             <Heading as="h2" size="lg" mb={4} display="flex" alignItems="center" gap={2}>
-              <Icon as={Hourglass} boxSize={6} />
+              <Icon boxSize={6} asChild>
+                <Hourglass />
+              </Icon>
               {t("preCheck.sections.resultsSummary.preparing", "We're preparing your results")}
             </Heading>
             <Text mb={6} color="theme.blueAlt">
@@ -62,36 +64,31 @@ export const ResultsSummary = observer(function ResultsSummary() {
                 "Most reports are ready within a few hours, but it can take up to 48 hours."
               )}
             </Text>
-
             <Heading as="h3" size="md" mb={4}>
               {t("preCheck.sections.resultsSummary.whatHappensNext", "What happens next")}
             </Heading>
-            <List spacing={2} pl={6} mb={6} styleType="decimal">
-              <ListItem>{t("preCheck.sections.resultsSummary.step1", "Your drawings are analyzed")}</ListItem>
-              <ListItem>
+            <List.Root gap={2} pl={6} mb={6} listStyleType="decimal">
+              <List.Item>{t("preCheck.sections.resultsSummary.step1", "Your drawings are analyzed")}</List.Item>
+              <List.Item>
                 {t("preCheck.sections.resultsSummary.step2", "A PDF report and interactive results are generated")}
-              </ListItem>
-              <ListItem>
+              </List.Item>
+              <List.Item>
                 {t(
                   "preCheck.sections.resultsSummary.step3",
                   "The downloadable report and a link to interactive results are available in your Pre-checks"
                 )}
-              </ListItem>
-            </List>
-
+              </List.Item>
+            </List.Root>
             <Text mb={4} fontSize="sm" color="theme.blueAlt">
               {t(
                 "preCheck.sections.resultsSummary.notification",
                 "You don't need to stay on this page. We'll notify you as soon as your results are ready. You'll find completed reports in the Pre-checks section."
               )}
             </Text>
-
-            <Button
-              variant="secondary"
-              leftIcon={<Icon as={ArrowsClockwise} />}
-              onClick={handleRefresh}
-              isLoading={isRefreshing}
-            >
+            <Button variant="secondary" onClick={handleRefresh} loading={isRefreshing}>
+              <Icon asChild>
+                <ArrowsClockwise />
+              </Icon>
               {t("preCheck.sections.resultsSummary.refreshStatus", "Refresh status")}
             </Button>
           </Box>
@@ -110,20 +107,20 @@ export const ResultsSummary = observer(function ResultsSummary() {
             <Heading as="h3" size="md" mb={4}>
               {t("preCheck.sections.resultsSummary.sections.whatYouCanDo.title", "What you can do now")}
             </Heading>
-            <UnorderedList spacing={2} pl={6} mb={6}>
-              <ListItem>
+            <List.Root as="ul" gap={2} pl={6} mb={6}>
+              <List.Item>
                 {t(
                   "preCheck.sections.resultsSummary.sections.whatYouCanDo.download",
                   "Download a PDF report listing all pre-check results, or explore them interactively in alongside your drawings."
                 )}
-              </ListItem>
-              <ListItem>
+              </List.Item>
+              <List.Item>
                 {t(
                   "preCheck.sections.resultsSummary.sections.whatYouCanDo.address",
                   "You can use these results to address any compliance issues and prepare your drawings for a permit application."
                 )}
-              </ListItem>
-              <ListItem>
+              </List.Item>
+              <List.Item>
                 {t(
                   "preCheck.sections.resultsSummary.sections.whatYouCanDo.beta",
                   "This service is in beta. If you experience issues or have questions about your results, contact us at"
@@ -134,9 +131,8 @@ export const ResultsSummary = observer(function ResultsSummary() {
                 >
                   digital.codes.permits@gov.bc.ca
                 </Link>
-              </ListItem>
-            </UnorderedList>
-
+              </List.Item>
+            </List.Root>
             <Heading as="h3" size="md" mb={4}>
               {t(
                 "preCheck.sections.resultsSummary.sections.reportPreparedBy.title",
@@ -146,52 +142,52 @@ export const ResultsSummary = observer(function ResultsSummary() {
                 }
               )}
             </Heading>
-            <UnorderedList spacing={2} pl={6} mb={6}>
-              <ListItem>
+            <List.Root as="ul" gap={2} pl={6} mb={6}>
+              <List.Item>
                 {t(
                   "preCheck.sections.resultsSummary.sections.reportPreparedBy.providedBy",
                   "This service is provided by {{serviceProvider}} to give you early guidance only.",
                   { serviceProvider: currentPreCheck?.providerName }
                 )}
-              </ListItem>
-              <ListItem>
+              </List.Item>
+              <List.Item>
                 {t(
                   "preCheck.sections.resultsSummary.sections.reportPreparedBy.ministryDisclaimer",
                   "The Ministry of Housing and Municipal Affairs (“we”) does not guarantee the accuracy or completeness of any information produced by this service."
                 )}
-              </ListItem>
-              <ListItem>
+              </List.Item>
+              <List.Item>
                 {t(
                   "preCheck.sections.resultsSummary.sections.reportPreparedBy.liability",
                   "We are not liable for any errors, omissions, or any actions you take in reliance upon this service."
                 )}
-              </ListItem>
-              <ListItem>
+              </List.Item>
+              <List.Item>
                 {t(
                   "preCheck.sections.resultsSummary.sections.reportPreparedBy.notShared",
                   "Results from this service are not shared with your local building officials and are not part of your official permit submission."
                 )}
-              </ListItem>
-              <ListItem>
+              </List.Item>
+              <List.Item>
                 {t(
                   "preCheck.sections.resultsSummary.sections.reportPreparedBy.noGuarantee",
                   "A passing result does not guarantee approval: a building official will still carry out a full review as part of the permit application process."
                 )}
-              </ListItem>
-              <ListItem>
+              </List.Item>
+              <List.Item>
                 {t(
                   "preCheck.sections.resultsSummary.sections.reportPreparedBy.jurisdiction",
                   "Only your local jurisdiction can approve or reject a permit application."
                 )}
-              </ListItem>
-            </UnorderedList>
+              </List.Item>
+            </List.Root>
             {!currentPreCheck?.expired && (
               <RouterLinkButton
                 leftIcon={<Layout />}
                 to={`/pre-checks/${currentPreCheck?.id}/viewer`}
                 variant="primary"
                 mb={4}
-                isDisabled={currentPreCheck?.expired}
+                disabled={currentPreCheck?.expired}
               >
                 {t("preCheck.sections.resultsSummary.exploreResults", "Explore interactive results")}
               </RouterLinkButton>
@@ -203,31 +199,20 @@ export const ResultsSummary = observer(function ResultsSummary() {
                 </Text>
 
                 {isFetchingPdfUrl ? (
-                  <Button
-                    size="sm"
-                    variant="link"
-                    leftIcon={<Icon as={Download} />}
-                    isLoading
-                    isDisabled={currentPreCheck?.expired}
-                  >
+                  <Button size="sm" variant="plain" loading disabled={currentPreCheck?.expired}>
+                    <Icon asChild>
+                      <Download />
+                    </Icon>
                     {t("preCheck.sections.resultsSummary.downloadReport", "Download your PDF report")}
                   </Button>
                 ) : pdfReportUrl ? (
-                  <Button
-                    as="a"
-                    mb={2}
-                    ml={2}
-                    href={pdfReportUrl}
-                    download
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    size="sm"
-                    variant="link"
-                    leftIcon={<Icon as={Download} />}
-                    isDisabled={currentPreCheck?.expired}
-                    disabled={currentPreCheck?.expired}
-                  >
-                    {t("preCheck.sections.resultsSummary.downloadReport", "Download your PDF report")}
+                  <Button mb={2} ml={2} size="sm" variant="plain" disabled={currentPreCheck?.expired} asChild>
+                    <a href={pdfReportUrl} download target="_blank" rel="noopener noreferrer">
+                      <Icon asChild>
+                        <Download />
+                      </Icon>
+                      {t("preCheck.sections.resultsSummary.downloadReport", "Download your PDF report")}
+                    </a>
                   </Button>
                 ) : (
                   <Text fontSize="sm" color="text.secondary">

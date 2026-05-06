@@ -96,7 +96,7 @@ export const EditorWithPreview = observer(function EditorWithPreview(props: TEdi
             </Button>
           )}
           {/* SafeTipTapDisplay also sanitizes internally, but sanitizing here adds defense-in-depth */}
-          <SafeTipTapDisplay htmlContent={sanitizedHtmlValue} fontSize="sm" sx={previewParagraphSx} />
+          <SafeTipTapDisplay htmlContent={sanitizedHtmlValue} fontSize="sm" css={previewParagraphSx} />
         </>
       )}
     </Box>

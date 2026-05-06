@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Heading, HeadingProps, HStack, Stack, Text } from "@chakra-ui/react"
+import { Box, Button, Heading, HeadingProps, HStack, Separator, Stack, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -57,8 +57,7 @@ export const SectionsSidebar = observer(function SectionsSidebar({
           </Button>
         )}
       </HStack>
-
-      <Stack w={"full"} h="calc( 100vh - 76px)" overflow={"auto"} spacing={4} pt={2} pb={80} alignItems={"flex-start"}>
+      <Stack w={"full"} h="calc( 100vh - 76px)" overflow={"auto"} gap={4} pt={2} pb={80} alignItems={"flex-start"}>
         {sections?.map((section, index) => {
           const isHighlightedSection = sectionIdToHighlight === section.id
           return (
@@ -80,7 +79,15 @@ export const SectionsSidebar = observer(function SectionsSidebar({
                   {section.name}
                 </Heading>
                 {section.templateSectionBlocks.length > 0 && (
-                  <Box as={"ol"} sx={{ listStyle: "none" }} w={"full"} p={0} m={0}>
+                  <Box
+                    as={"ol"}
+                    css={{
+                      listStyle: "none",
+                    }}
+                    w={"full"}
+                    p={0}
+                    m={0}
+                  >
                     {section.templateSectionBlocks.map((sectionBlock) => {
                       return (
                         <Text
@@ -100,7 +107,7 @@ export const SectionsSidebar = observer(function SectionsSidebar({
                   </Box>
                 )}
               </Box>
-              {index < sections.length - 1 && <Divider borderColor={"border.light"} m={0} />}
+              {index < sections.length - 1 && <Separator borderColor={"border.light"} m={0} />}
             </React.Fragment>
           )
         })}

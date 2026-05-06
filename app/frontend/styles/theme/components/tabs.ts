@@ -1,19 +1,24 @@
-export const Tabs = {
+import { defineSlotRecipe } from "@chakra-ui/react"
+
+export const Tabs = defineSlotRecipe({
+  slots: ["root", "list", "trigger", "content", "indicator"],
   variants: {
-    sidebar: {
-      tab: {
-        justifyContent: "flex-start",
-        _selected: {
-          fontWeight: "bold",
-          bg: "background.blueLight",
-          _hover: {
-            bg: "hover.blue",
+    variant: {
+      sidebar: {
+        trigger: {
+          justifyContent: "flex-start",
+          _selected: {
+            fontWeight: "bold",
+            bg: "background.blueLight",
+            _hover: {
+              bg: "hover.blue",
+            },
           },
-        },
-        _hover: {
-          bg: "greys.grey02",
+          _hover: {
+            bg: "greys.grey02",
+          },
         },
       },
     },
   },
-}
+})

@@ -21,8 +21,9 @@ export const SearchGrid = ({
       w="full"
       maxW={"full"}
       overflow={"auto"}
-      sx={{
+      css={{
         borderCollapse: "separate",
+
         ...(gridRowClassName
           ? {
               [`.${gridRowClassName}:not(:last-of-type) > div`]: {
@@ -31,10 +32,12 @@ export const SearchGrid = ({
               },
             }
           : {}),
-        "[role='row']:not(:last-child) > [role='cell']": {
+
+        "& [role='row']:not(:last-child) > [role='cell']": {
           borderBottom: "1px solid",
           borderColor: "border.light",
         },
+
         ...sx,
       }}
       borderRadius={"sm"}

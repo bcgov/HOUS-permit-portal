@@ -14,8 +14,10 @@ export const RouterLink = forwardRef<HTMLAnchorElement, IRouterLinkProps>(functi
   }
 
   return (
-    <Link as={ReactRouterLink} to={to} ref={ref} onClick={handleClick} {...rest}>
-      {children}
+    <Link {...rest} asChild>
+      <ReactRouterLink to={to} ref={ref} onClick={handleClick}>
+        {children}
+      </ReactRouterLink>
     </Link>
   )
 })

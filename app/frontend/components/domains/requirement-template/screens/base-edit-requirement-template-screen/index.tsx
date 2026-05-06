@@ -55,7 +55,7 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
   renderActions,
 }: IBaseEditRequirementTemplateScreenProps) {
   const navigate = useNavigate()
-  const { isOpen: isReorderMode, onClose: closeReorderMode, onOpen: openReorderMode } = useDisclosure()
+  const { open: isReorderMode, onClose: closeReorderMode, onOpen: openReorderMode } = useDisclosure()
   const { requirementTemplateStore, requirementBlockStore } = useMst()
   const { requirementTemplate, error } = useRequirementTemplate()
   const formMethods = useForm({ defaultValues: formFormDefaults(requirementTemplate) })
@@ -207,7 +207,9 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
           borderTop={"1px solid"}
           borderColor={"border.base"}
           position="relative"
-          sx={{ "&:after": { content: `""`, display: "block", clear: "both" } }}
+          css={{
+            "& &:after": { content: `""`, display: "block", clear: "both" },
+          }}
         >
           {isReorderMode ? (
             <SectionsDnd sections={watchedSectionsAttributes} onCancel={closeReorderMode} onDone={onDndComplete} />

@@ -58,7 +58,7 @@ export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermi
         return (
           <SectionBox key={templateVersion.id} w="full">
             <Flex w="full" as="section">
-              <Stack spacing={3} flex={1}>
+              <Stack gap={3} flex={1}>
                 <Text as="h3" color={"text.link"} fontWeight={700} fontSize="xl">
                   {templateVersion.denormalizedTemplateJson.nickname}
                 </Text>
@@ -96,14 +96,8 @@ export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermi
               {renderButton ? (
                 renderButton(templateVersion)
               ) : (
-                <Button
-                  to={`/digital-building-permits/${templateVersion.id}/edit`}
-                  as={RouterLink}
-                  variant={"primary"}
-                  ml={4}
-                  alignSelf={"center"}
-                >
-                  {t("ui.manage")}
+                <Button variant={"primary"} ml={4} alignSelf={"center"} asChild>
+                  <RouterLink to={`/digital-building-permits/${templateVersion.id}/edit`}>{t("ui.manage")}</RouterLink>
                 </Button>
               )}
             </Flex>

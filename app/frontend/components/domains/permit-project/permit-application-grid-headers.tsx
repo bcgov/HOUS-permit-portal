@@ -23,23 +23,17 @@ export const PermitApplicationGridHeaders = observer(
       <>
         {columns.map((column) => (
           <GridHeader key={column}>
-            <Flex
-              w={"full"}
-              as={"button"}
-              justifyContent={"space-between"}
-              cursor="pointer"
-              onClick={() => toggleSort(column)}
-              px={4}
-            >
-              <Text textAlign="left">{getProjectPermitApplicationSortColumnHeader(column)}</Text>
-              <SortIcon<EProjectPermitApplicationSortFields>
-                field={column}
-                currentSort={sort as ISort<EProjectPermitApplicationSortFields>}
-              />
+            <Flex w={"full"} justifyContent={"space-between"} cursor="pointer" px={4} asChild>
+              <button onClick={() => toggleSort(column)}>
+                <Text textAlign="left">{getProjectPermitApplicationSortColumnHeader(column)}</Text>
+                <SortIcon<EProjectPermitApplicationSortFields>
+                  field={column}
+                  currentSort={sort as ISort<EProjectPermitApplicationSortFields>}
+                />
+              </button>
             </Flex>
           </GridHeader>
         ))}
-
         {includeActionColumn && <GridHeader role={"columnheader"} />}
       </>
     )

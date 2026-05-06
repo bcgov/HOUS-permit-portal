@@ -1,17 +1,5 @@
-import {
-  Checkbox,
-  CheckboxGroup,
-  Flex,
-  FormControl,
-  FormHelperText,
-  FormLabel,
-  ListItem,
-  Radio,
-  RadioGroup,
-  SimpleGrid,
-  Stack,
-  UnorderedList,
-} from "@chakra-ui/react"
+import { RadioGroup } from "@/components/ui/radio"
+import { Checkbox, CheckboxGroup, Field, Flex, List, SimpleGrid, Stack } from "@chakra-ui/react"
 import { ErrorMessage } from "@hookform/error-message"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
@@ -97,29 +85,33 @@ export const BaselineOccupancies = observer(function Part3StepCodeFormBaselineOc
         <SectionHeading>{t(`${i18nPrefix}.heading`)}</SectionHeading>
         <Trans
           i18nKey={`${i18nPrefix}.instructions`}
-          components={{ ul: <UnorderedList ml={0} pl={6} />, li: <ListItem mb={0} />, strong: <strong /> }}
+          components={{ ul: <List.Root as="ul" ml={0} pl={6} />, li: <List.Item mb={0} />, strong: <strong /> }}
         />
       </Flex>
       <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
-        <FormControl>
-          <FormLabel>{t(`${i18nPrefix}.isRelevant`)}</FormLabel>
-          <RadioGroup onChange={setIsRelevant} value={isRelevant}>
-            <Stack spacing={5} direction="row">
-              <Radio variant="binary" value={"yes"}>
-                {t("ui.yes")}
-              </Radio>
-              <Radio variant="binary" value={"no"}>
-                {t("ui.no")}
-              </Radio>
+        <Field.Root>
+          <Field.Label>{t(`${i18nPrefix}.isRelevant`)}</Field.Label>
+          <RadioGroup.Root onValueChange={setIsRelevant} value={isRelevant}>
+            <Stack gap={5} direction="row">
+              <RadioGroup.Item variant="binary" value={"yes"}>
+                <RadioGroup.ItemHiddenInput />
+                <RadioGroup.ItemIndicator />
+                <RadioGroup.ItemText>{t("ui.yes")}</RadioGroup.ItemText>
+              </RadioGroup.Item>
+              <RadioGroup.Item variant="binary" value={"no"}>
+                <RadioGroup.ItemHiddenInput />
+                <RadioGroup.ItemIndicator />
+                <RadioGroup.ItemText>{t("ui.no")}</RadioGroup.ItemText>
+              </RadioGroup.Item>
             </Stack>
-          </RadioGroup>
-        </FormControl>
+          </RadioGroup.Root>
+        </Field.Root>
         {isRelevant == "yes" && (
-          <FormControl>
-            <FormLabel pb={1}>{t(`${i18nPrefix}.occupancies.label`)}</FormLabel>
-            <FormHelperText mb={1} mt={0} color="semantic.error">
+          <Field.Root>
+            <Field.Label pb={1}>{t(`${i18nPrefix}.occupancies.label`)}</Field.Label>
+            <Field.HelperText mb={1} mt={0} color="semantic.error">
               <ErrorMessage errors={errors} name="baselineOccupancies" />
-            </FormHelperText>
+            </Field.HelperText>
             <Controller
               name="baselineOccupancies"
               rules={{
@@ -132,21 +124,27 @@ export const BaselineOccupancies = observer(function Part3StepCodeFormBaselineOc
               }}
               control={control}
               render={({ field: { onChange, value } }) => (
-                <CheckboxGroup defaultValue={value} onChange={onChange}>
-                  <SimpleGrid columns={2} spacing={1}>
+                <CheckboxGroup defaultValue={value} onValueChange={onChange}>
+                  <SimpleGrid columns={2} gap={1}>
                     {Object.values(EBaselineOccupancyKey).map((key) => (
-                      <Checkbox key={key} value={key}>
-                        <Trans i18nKey={`${i18nPrefix}.occupancyKeys.${key}`} components={{ strong: <strong /> }} />
-                      </Checkbox>
+                      <Checkbox.Root key={key} value={key}>
+                        <Checkbox.HiddenInput />
+                        <Checkbox.Control>
+                          <Checkbox.Indicator />
+                        </Checkbox.Control>
+                        <Checkbox.Label>
+                          <Trans i18nKey={`${i18nPrefix}.occupancyKeys.${key}`} components={{ strong: <strong /> }} />
+                        </Checkbox.Label>
+                      </Checkbox.Root>
                     ))}
                   </SimpleGrid>
                 </CheckboxGroup>
               )}
             />
-          </FormControl>
+          </Field.Root>
         )}
         {(isRelevant == "yes" || isRelevant == "no") && (
-          <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
+          <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} loading={isSubmitting} />
         )}
       </Flex>
     </>

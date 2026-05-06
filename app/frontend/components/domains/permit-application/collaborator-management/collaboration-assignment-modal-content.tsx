@@ -1,4 +1,4 @@
-import { Button, Flex, HStack, IconButton, ModalBody, ModalHeader, Stack, Text, useDisclosure } from "@chakra-ui/react"
+import { Button, Dialog, Flex, HStack, IconButton, Stack, Text, useDisclosure } from "@chakra-ui/react"
 import { Plus, X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
@@ -89,43 +89,41 @@ export const CollaborationAssignmentModalContent = observer(function Collaborato
 
   return (
     <>
-      <ModalHeader as={Stack} p={4} flexShrink={0}>
-        <Flex justifyContent={"space-between"}>
-          <Text fontSize={"lg"} fontFamily={"heading"} fontWeight={"bold"}>
-            {t("permitCollaboration.popover.assignment.title")}
-          </Text>
-          <IconButton
-            size={"xs"}
-            onClick={onClose}
-            variant={"ghost"}
-            aria-label={"close assignment screen"}
-            icon={<X />}
-            color={"text.primary"}
-          />
-        </Flex>
-        {showSearch && (
-          <HStack justifyContent={"space-between"} spacing={4}>
-            <ModelSearchInput
-              searchModel={collaboratorStore as ISearch}
-              inputGroupProps={{ w: transitionToInvite ? "initial" : "100%" }}
-              inputProps={{ w: transitionToInvite ? "194px" : "100%", placeholder: "Find" }}
-            />
-            {transitionToInvite && (
-              <Button
-                variant={"secondary"}
-                leftIcon={<Plus />}
-                size={"sm"}
-                fontSize={"sm"}
-                onClick={transitionToInvite}
-              >
-                {t("permitCollaboration.popover.assignment.newContactButton")}
-              </Button>
-            )}
-          </HStack>
-        )}
-      </ModalHeader>
-      <ModalBody p={4} overflowY="auto" flex={1} minH={0}>
-        <Stack spacing={4}>
+      <Dialog.Header p={4} flexShrink={0} asChild>
+        <Stack>
+          <Flex justifyContent={"space-between"}>
+            <Text fontSize={"lg"} fontFamily={"heading"} fontWeight={"bold"}>
+              {t("permitCollaboration.popover.assignment.title")}
+            </Text>
+            <IconButton
+              size={"xs"}
+              onClick={onClose}
+              variant={"ghost"}
+              aria-label={"close assignment screen"}
+              color={"text.primary"}
+            >
+              <X />
+            </IconButton>
+          </Flex>
+          {showSearch && (
+            <HStack justifyContent={"space-between"} gap={4}>
+              <ModelSearchInput
+                searchModel={collaboratorStore as ISearch}
+                inputGroupProps={{ w: transitionToInvite ? "initial" : "100%" }}
+                inputProps={{ w: transitionToInvite ? "194px" : "100%", placeholder: "Find" }}
+              />
+              {transitionToInvite && (
+                <Button variant={"secondary"} size={"sm"} fontSize={"sm"} onClick={transitionToInvite}>
+                  <Plus />
+                  {t("permitCollaboration.popover.assignment.newContactButton")}
+                </Button>
+              )}
+            </HStack>
+          )}
+        </Stack>
+      </Dialog.Header>
+      <Dialog.Body p={4} overflowY="auto" flex={1} minH={0}>
+        <Stack gap={4}>
           <SelectedCollaboratorsSection
             collaborations={selectedCollaborations}
             title={selectedTitle ?? t("permitCollaboration.popover.assignment.currentCollaborators")}
@@ -158,14 +156,14 @@ export const CollaborationAssignmentModalContent = observer(function Collaborato
                       bg: "theme.blueLight",
                     }}
                   >
-                    <HStack spacing={2} minW={0}>
+                    <HStack gap={2} minW={0}>
                       <SharedAvatar size="xs" name={collaborator.user?.name} role={collaborator.user?.role} />
-                      <Stack spacing={0} minW={0}>
-                        <Text fontSize="sm" fontWeight={600} noOfLines={1}>
+                      <Stack gap={0} minW={0}>
+                        <Text fontSize="sm" fontWeight={600} lineClamp={1}>
                           {collaborator.user?.name}
                         </Text>
                         {collaborator.user?.email && (
-                          <Text fontSize="xs" color="text.secondary" noOfLines={1}>
+                          <Text fontSize="xs" color="text.secondary" lineClamp={1}>
                             {collaborator.user.email}
                           </Text>
                         )}
@@ -239,7 +237,7 @@ export const CollaborationAssignmentModalContent = observer(function Collaborato
             title={additionalCollaboratorsTitle ?? t("permitCollaboration.popover.assignment.additionalCollaborators")}
           />
         </Stack>
-      </ModalBody>
+      </Dialog.Body>
     </>
   )
 })
@@ -264,7 +262,7 @@ const SelectedCollaboratorsSection = observer(function SelectedCollaboratorsSect
   }
 
   return (
-    <Stack spacing={2}>
+    <Stack gap={2}>
       <Text fontSize="xs" fontWeight={700} color="text.secondary" textTransform="uppercase">
         {title}
       </Text>
@@ -274,26 +272,20 @@ const SelectedCollaboratorsSection = observer(function SelectedCollaboratorsSect
         </Text>
       ) : (
         collaborations.map((collaboration) => (
-          <Stack
-            key={collaboration.id ?? collaboration.collaborator.id}
-            spacing={2}
-            p={2}
-            bg="gray.50"
-            borderRadius="md"
-          >
-            <HStack spacing={3} justify="space-between">
-              <HStack spacing={2} minW={0}>
+          <Stack key={collaboration.id ?? collaboration.collaborator.id} gap={2} p={2} bg="gray.50" borderRadius="md">
+            <HStack gap={3} justify="space-between">
+              <HStack gap={2} minW={0}>
                 <SharedAvatar
                   size="xs"
                   name={collaboration.collaborator.user?.name}
                   role={collaboration.collaborator.user?.role}
                 />
-                <Stack spacing={0} minW={0}>
-                  <Text fontSize="sm" fontWeight={600} noOfLines={1}>
+                <Stack gap={0} minW={0}>
+                  <Text fontSize="sm" fontWeight={600} lineClamp={1}>
                     {collaboration.collaborator.user?.name}
                   </Text>
                   {collaboration.collaborator.user?.organization && (
-                    <Text fontSize="xs" color="text.secondary" noOfLines={1}>
+                    <Text fontSize="xs" color="text.secondary" lineClamp={1}>
                       {collaboration.collaborator.user.organization}
                     </Text>
                   )}
@@ -303,7 +295,7 @@ const SelectedCollaboratorsSection = observer(function SelectedCollaboratorsSect
                 <RequestLoadingButton
                   size="xs"
                   variant="ghost"
-                  colorScheme="red"
+                  colorPalette="red"
                   flexShrink={0}
                   onClick={() => onUnselect(collaboration)}
                 >
@@ -344,7 +336,7 @@ const AdditionalCollaboratorsSection = observer(function AdditionalCollaborators
 
   return (
     <>
-      <Stack spacing={2}>
+      <Stack gap={2}>
         <Text fontSize="xs" fontWeight={700} color="text.secondary" textTransform="uppercase">
           {title}
         </Text>
@@ -355,18 +347,18 @@ const AdditionalCollaboratorsSection = observer(function AdditionalCollaborators
             .filter(Boolean)
             .join(", ")
           return (
-            <HStack key={firstCollaboration.collaborator.id} spacing={2} p={2} bg="gray.50" borderRadius="md" minW={0}>
+            <HStack key={firstCollaboration.collaborator.id} gap={2} p={2} bg="gray.50" borderRadius="md" minW={0}>
               <SharedAvatar
                 size="xs"
                 name={firstCollaboration.collaborator.user?.name}
                 role={firstCollaboration.collaborator.user?.role}
               />
-              <Stack spacing={0} minW={0}>
-                <Text fontSize="sm" fontWeight={600} noOfLines={1}>
+              <Stack gap={0} minW={0}>
+                <Text fontSize="sm" fontWeight={600} lineClamp={1}>
                   {firstCollaboration.collaborator.user?.name}
                 </Text>
                 {blockNames && (
-                  <Text fontSize="xs" color="text.secondary" noOfLines={1}>
+                  <Text fontSize="xs" color="text.secondary" lineClamp={1}>
                     {blockNames}
                   </Text>
                 )}

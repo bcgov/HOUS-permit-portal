@@ -1,4 +1,4 @@
-import { Container, ContainerProps, Tab, TabList, Tabs } from "@chakra-ui/react"
+import { Container, ContainerProps, Tab, Tabs } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -54,8 +54,8 @@ export const PermitApplicationStatusTabs = observer(function ToggleArchivedButto
 
   return (
     <Container maxW="container.lg" py={3} {...rest}>
-      <Tabs index={selectedIndex} onChange={handleChange}>
-        <TabList>
+      <Tabs.Root value={selectedIndex} onValueChange={handleChange}>
+        <Tabs.List>
           {Object.values(EPermitApplicationStatusGroup).map((statusGroup) => {
             return (
               <Tab key={statusGroup} px={8}>
@@ -63,8 +63,8 @@ export const PermitApplicationStatusTabs = observer(function ToggleArchivedButto
               </Tab>
             )
           })}
-        </TabList>
-      </Tabs>
+        </Tabs.List>
+      </Tabs.Root>
     </Container>
   )
 })

@@ -58,14 +58,14 @@ export const ControlsHeader = observer(function ControlsHeader({
       justifyContent="space-between"
       boxShadow="elevations.elevation02"
     >
-      <HStack spacing={4}>
-        <Button variant={"secondary"} isDisabled={isSubmitting} leftIcon={<Plus />} onClick={onAddSection}>
+      <HStack gap={4}>
+        <Button variant={"secondary"} disabled={isSubmitting} onClick={onAddSection}>
+          <Plus />
           {t("requirementTemplate.edit.addSectionButton")}
         </Button>
         {renderOptionsMenu && renderOptionsMenu({ requirementTemplate })}
       </HStack>
-
-      <HStack spacing={4}>
+      <HStack gap={4}>
         <BrowserSearchPrompt color="text.primary" />
 
         {renderActions &&
@@ -80,11 +80,11 @@ export const ControlsHeader = observer(function ControlsHeader({
               isDisabled: isSubmitDisabled,
             },
           })}
-        <Button variant={"secondary"} isDisabled={isSubmitDisabled} isLoading={isSubmitting} onClick={onSaveDraft}>
+        <Button variant={"secondary"} disabled={isSubmitDisabled} loading={isSubmitting} onClick={onSaveDraft}>
           {t("requirementTemplate.edit.saveTemplate")}
         </Button>
 
-        <Button variant={"secondary"} isDisabled={isSubmitting} onClick={onClose}>
+        <Button variant={"secondary"} disabled={isSubmitting} onClick={onClose}>
           {t("requirementTemplate.edit.closeEditor")}
         </Button>
       </HStack>

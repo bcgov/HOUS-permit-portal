@@ -17,16 +17,11 @@ export const StepCodesGridHeaders = observer((props: GridItemProps) => {
     <>
       {Object.values(EStepCodeSortFields).map((field) => (
         <GridHeader key={field} role={"columnheader"}>
-          <Flex
-            w={"full"}
-            as={"button"}
-            justifyContent={"space-between"}
-            cursor="pointer"
-            onClick={() => toggleSort(field)}
-            px={4}
-          >
-            <Text textAlign="left">{getSortColumnHeader(field)}</Text>
-            <SortIcon field={field} currentSort={sort as any} />
+          <Flex w={"full"} justifyContent={"space-between"} cursor="pointer" px={4} asChild>
+            <button onClick={() => toggleSort(field)}>
+              <Text textAlign="left">{getSortColumnHeader(field)}</Text>
+              <SortIcon field={field} currentSort={sort as any} />
+            </button>
           </Flex>
         </GridHeader>
       ))}

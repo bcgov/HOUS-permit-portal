@@ -1,4 +1,4 @@
-import { Flex, FormLabel } from "@chakra-ui/react"
+import { Flex } from "@chakra-ui/react"
 import React, { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import Select from "react-select"
@@ -59,8 +59,7 @@ export const SortSelect: React.FC<ISearchSortProps> = ({ searchModel, i18nPrefix
 
   return (
     <Flex direction="column" minW={250}>
-      <FormLabel htmlFor={uniqueId}>{t("ui.sortBy")}</FormLabel>
-
+      <Field.Label htmlFor={uniqueId}>{t("ui.sortBy")}</Field.Label>
       <Select
         inputId={uniqueId}
         options={sortOptions}

@@ -1,16 +1,4 @@
-import {
-  Box,
-  Divider,
-  FormControl,
-  FormHelperText,
-  FormLabel,
-  HStack,
-  Heading,
-  Link,
-  Text,
-  VStack,
-  styled,
-} from "@chakra-ui/react"
+import { Box, Field, HStack, Heading, Link, Separator, Text, VStack, styled } from "@chakra-ui/react"
 import { ArrowSquareOut } from "@phosphor-icons/react"
 import { CalendarBlank } from "@phosphor-icons/react/dist/ssr"
 import { t } from "i18next"
@@ -48,25 +36,24 @@ export const ComplianceSummary = observer(function ComplianceSummary({
           value: t(`${i18nPrefix}.compliancePath.options.${checklist.compliancePath}`),
         }}
       />
-
       {checklist.complianceReports.length > 1 && (
         <VStack gap={4} borderWidth={1} p={4} rounded="sm" borderColor="border.light" align="start" w="full">
           <Heading as="h3" fontSize="lg" mb={0}>
             {t(`${i18nPrefix}.stepRequirement.heading`)}
           </Heading>
-          <FormControl w="auto">
-            <FormLabel>{t(`${i18nPrefix}.stepRequirement.label`)}</FormLabel>
+          <Field.Root w="auto">
+            <Field.Label>{t(`${i18nPrefix}.stepRequirement.label`)}</Field.Label>
             <StepRequirementRadioGroup checklist={checklist} />
-            <FormHelperText>
+            <Field.HelperText>
               <Trans
                 i18nKey={`${i18nPrefix}.stepRequirement.helpText`}
                 components={{
-                  1: <Link href={t("stepCode.helpLink")} isExternal></Link>,
+                  1: <Link href={t("stepCode.helpLink")} target="_blank" rel="noopener noreferrer"></Link>,
                   2: <ArrowSquareOut />,
                 }}
               />
-            </FormHelperText>
-          </FormControl>
+            </Field.HelperText>
+          </Field.Root>
           {R.isNil(report.energy.proposedStep) && (
             <StepNotMetWarning i18nKey="energyStepNotMet" scrollToSection={scrollToEnergyCompliance} fontSize="xs" />
           )}
@@ -79,11 +66,10 @@ export const ComplianceSummary = observer(function ComplianceSummary({
           )}
         </VStack>
       )}
-
       {/* Step Requirements */}
-      <HStack spacing={6} w="full" align="stretch">
+      <HStack gap={6} w="full" align="stretch">
         {/* Energy */}
-        <VStack flex={1} spacing={4} borderWidth={1} borderColor="border.light" rounded="sm" p={4}>
+        <VStack flex={1} gap={4} borderWidth={1} borderColor="border.light" rounded="sm" p={4}>
           <Heading as="h3" mb={0} fontSize="lg">
             {t(`${i18nPrefix}.energyStepCode.heading`)}
           </Heading>
@@ -118,7 +104,7 @@ export const ComplianceSummary = observer(function ComplianceSummary({
         </VStack>
 
         {/* Zero Carbon */}
-        <VStack flex={1} spacing={4} borderWidth={1} borderColor="border.light" rounded="sm" p={4}>
+        <VStack flex={1} gap={4} borderWidth={1} borderColor="border.light" rounded="sm" p={4}>
           <Heading as="h3" mb={0} fontSize="md">
             {t(`${i18nPrefix}.zeroCarbonStepCode.heading`)}
           </Heading>
@@ -146,9 +132,7 @@ export const ComplianceSummary = observer(function ComplianceSummary({
           </VStack>
         </VStack>
       </HStack>
-
-      <Divider />
-
+      <Separator />
       {/* Plan Info */}
       {(checklist.planAuthor || checklist.planVersion || checklist.planDate) && (
         <VStack align="start" w="full">

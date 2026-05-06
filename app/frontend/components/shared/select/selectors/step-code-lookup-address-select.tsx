@@ -1,4 +1,5 @@
-import { Alert, Button, FormControl, HStack, InputGroup, Text, useBreakpointValue } from "@chakra-ui/react"
+import { InputGroup } from "@/components/ui/input-group"
+import { Alert, Button, Field, HStack, Text, useBreakpointValue } from "@chakra-ui/react"
 import { MapPin, WarningCircle } from "@phosphor-icons/react"
 import debounce from "lodash/debounce"
 import { observer } from "mobx-react-lite"
@@ -90,7 +91,7 @@ export const StepCodeLookupAddressSelect = observer(function ({
     }),
   }
   return (
-    <FormControl w="full" zIndex={2}>
+    <Field.Root w="full" zIndex={2}>
       <InputGroup w="full">
         <AsyncSelect<IOption, false>
           isClearable={true}
@@ -130,7 +131,7 @@ export const StepCodeLookupAddressSelect = observer(function ({
         />
       </InputGroup>
       {showError && (
-        <Alert
+        <Alert.Root
           status="error"
           rounded="md"
           borderWidth={1}
@@ -142,9 +143,9 @@ export const StepCodeLookupAddressSelect = observer(function ({
         >
           <WarningCircle color="var(--chakra-colors-semantic-error)" />
           <Text ml="2"> {t("ui.noAddressFound")}</Text>
-        </Alert>
+        </Alert.Root>
       )}
-    </FormControl>
+    </Field.Root>
   )
 })
 

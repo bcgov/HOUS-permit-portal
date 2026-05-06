@@ -31,8 +31,9 @@ export const Part9StepCodeConfigScreen = observer(function Part9StepCodeConfigSc
 
   return (
     <Container maxW="container.lg" py={8} px={{ base: 8, xl: 0 }} flexGrow={1}>
-      <VStack spacing={6} align="start" w="full">
-        <Button variant="link" onClick={() => navigate(-1)} leftIcon={<CaretLeft size={20} />} textDecoration="none">
+      <VStack gap={6} align="start" w="full">
+        <Button variant="plain" onClick={() => navigate(-1)} textDecoration="none">
+          <CaretLeft size={20} />
           {t("ui.back")}
         </Button>
 
@@ -42,7 +43,7 @@ export const Part9StepCodeConfigScreen = observer(function Part9StepCodeConfigSc
 
         <Text fontWeight="bold">
           {t(`${i18nPrefix}.setMinimum`)} <br />{" "}
-          <Link href={t("stepCode.helpLink")} isExternal fontWeight="normal">
+          <Link href={t("stepCode.helpLink")} fontWeight="normal" target="_blank" rel="noopener noreferrer">
             {t("stepCode.helpLinkText")}
             <ArrowSquareOut />
           </Link>

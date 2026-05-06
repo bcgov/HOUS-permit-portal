@@ -1,4 +1,5 @@
-import { Avatar, Box, HStack, Stack, Tooltip } from "@chakra-ui/react"
+import { Tooltip } from "@/components/ui/tooltip"
+import { Avatar, Box, HStack, Stack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { createPortal } from "react-dom"
@@ -32,7 +33,7 @@ export const BlockCollaboratorAssignmentManagement = observer(function BlockColl
   return (
     <>
       {createPortal(
-        <HStack mr={6} spacing={6} onClick={(e) => e.stopPropagation()}>
+        <HStack mr={6} gap={6} onClick={(e) => e.stopPropagation()}>
           <StatusSelect
             permitApplication={permitApplication}
             collaborationType={collaborationType}
@@ -46,7 +47,6 @@ export const BlockCollaboratorAssignmentManagement = observer(function BlockColl
         </HStack>,
         attachmentNode
       )}
-
       {createPortal(
         <Stack
           as={"ul"}
@@ -55,14 +55,16 @@ export const BlockCollaboratorAssignmentManagement = observer(function BlockColl
           position={"absolute"}
           listStyleType={"none"}
           pl={0}
-          spacing={1}
+          gap={1}
           onClick={(e) => e.stopPropagation()}
           cursor={"auto"}
         >
           {existingAssignments.map((assignment) => (
             <Box as={"li"} key={assignment.id} pl={0}>
-              <Tooltip label={assignment.collaborator?.user?.name}>
-                <Avatar name={assignment.collaborator?.user?.name} size={"sm"} />
+              <Tooltip content={assignment.collaborator?.user?.name}>
+                <Avatar.Root size={"sm"}>
+                  <Avatar.Fallback name={assignment.collaborator?.user?.name} />
+                </Avatar.Root>
               </Tooltip>
             </Box>
           ))}

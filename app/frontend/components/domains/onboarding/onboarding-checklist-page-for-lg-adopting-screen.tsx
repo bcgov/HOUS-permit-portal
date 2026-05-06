@@ -1,4 +1,4 @@
-import { Container, Heading, ListItem, OrderedList, Text, UnorderedList } from "@chakra-ui/react"
+import { Container, Heading, List, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { Trans, useTranslation } from "react-i18next"
@@ -16,7 +16,6 @@ export const OnboardingChecklistPageForLgAdoptingScreen = observer(() => {
       <Text fontSize="md" color="gray.700" mb="8">
         {t(`${prefix}.subtitle`)}
       </Text>
-
       {/* About Building Permit Hub */}
       <Heading as="h2" size="lg" variant="yellowline" mb={4}>
         {t(`${prefix}.about.title`)}
@@ -24,27 +23,26 @@ export const OnboardingChecklistPageForLgAdoptingScreen = observer(() => {
       <Text fontSize="md" color="gray.700" mb="4">
         <Trans i18nKey={`${prefix}.about.description`} />
       </Text>
-      <UnorderedList mb={4} pl={6}>
-        <ListItem fontSize="md">{t(`${prefix}.about.audiences.localGovernments`)}</ListItem>
-        <ListItem fontSize="md">{t(`${prefix}.about.audiences.builders`)}</ListItem>
-        <ListItem fontSize="md">{t(`${prefix}.about.audiences.homeowners`)}</ListItem>
-        <ListItem fontSize="md">{t(`${prefix}.about.audiences.anyone`)}</ListItem>
-      </UnorderedList>
+      <List.Root as="ul" mb={4} pl={6}>
+        <List.Item fontSize="md">{t(`${prefix}.about.audiences.localGovernments`)}</List.Item>
+        <List.Item fontSize="md">{t(`${prefix}.about.audiences.builders`)}</List.Item>
+        <List.Item fontSize="md">{t(`${prefix}.about.audiences.homeowners`)}</List.Item>
+        <List.Item fontSize="md">{t(`${prefix}.about.audiences.anyone`)}</List.Item>
+      </List.Root>
       <Text fontSize="md" color="gray.700" mb="4">
         <Trans i18nKey={`${prefix}.about.freeAndVoluntary`} />
       </Text>
       <Text fontSize="md" color="gray.700" mb="4">
         {t(`${prefix}.about.workingTo`)}
       </Text>
-      <UnorderedList mb={4} pl={6}>
-        <ListItem fontSize="md">{t(`${prefix}.about.goals.speedUp`)}</ListItem>
-        <ListItem fontSize="md">{t(`${prefix}.about.goals.support`)}</ListItem>
-        <ListItem fontSize="md">{t(`${prefix}.about.goals.reduce`)}</ListItem>
-      </UnorderedList>
+      <List.Root as="ul" mb={4} pl={6}>
+        <List.Item fontSize="md">{t(`${prefix}.about.goals.speedUp`)}</List.Item>
+        <List.Item fontSize="md">{t(`${prefix}.about.goals.support`)}</List.Item>
+        <List.Item fontSize="md">{t(`${prefix}.about.goals.reduce`)}</List.Item>
+      </List.Root>
       <Text fontSize="md" color="gray.700" mb="10">
         <Trans i18nKey={`${prefix}.about.flexible`} />
       </Text>
-
       {/* Available features */}
       <Heading as="h2" size="lg" variant="yellowline" mb={4}>
         {t(`${prefix}.availableFeatures.title`)}
@@ -55,14 +53,13 @@ export const OnboardingChecklistPageForLgAdoptingScreen = observer(() => {
       <Text mb={2} fontSize="md">
         {t(`${prefix}.availableFeatures.features.title`)}
       </Text>
-      <UnorderedList mb={10} pl={6}>
-        <ListItem fontSize="md">{t(`${prefix}.availableFeatures.features.permitApplications`)}</ListItem>
-        <ListItem fontSize="md">{t(`${prefix}.availableFeatures.features.automatedStepCodes`)}</ListItem>
-        <ListItem fontSize="md">{t(`${prefix}.availableFeatures.features.collaborativeWorkflows`)}</ListItem>
-        <ListItem fontSize="md">{t(`${prefix}.availableFeatures.features.customizablePermits`)}</ListItem>
-        <ListItem fontSize="md">{t(`${prefix}.availableFeatures.features.resubmissionTools`)}</ListItem>
-      </UnorderedList>
-
+      <List.Root as="ul" mb={10} pl={6}>
+        <List.Item fontSize="md">{t(`${prefix}.availableFeatures.features.permitApplications`)}</List.Item>
+        <List.Item fontSize="md">{t(`${prefix}.availableFeatures.features.automatedStepCodes`)}</List.Item>
+        <List.Item fontSize="md">{t(`${prefix}.availableFeatures.features.collaborativeWorkflows`)}</List.Item>
+        <List.Item fontSize="md">{t(`${prefix}.availableFeatures.features.customizablePermits`)}</List.Item>
+        <List.Item fontSize="md">{t(`${prefix}.availableFeatures.features.resubmissionTools`)}</List.Item>
+      </List.Root>
       {/* Co-developed with BC communities */}
       <Heading as="h2" size="lg" variant="yellowline" mb={4}>
         {t(`${prefix}.coDeveloped.title`)}
@@ -73,12 +70,11 @@ export const OnboardingChecklistPageForLgAdoptingScreen = observer(() => {
       <Text mb={2} fontSize="md">
         {t(`${prefix}.coDeveloped.recentFeatures.title`)}
       </Text>
-      <UnorderedList mb={10} pl={6}>
-        <ListItem fontSize="md">{t(`${prefix}.coDeveloped.recentFeatures.multipleFiles`)}</ListItem>
-        <ListItem fontSize="md">{t(`${prefix}.coDeveloped.recentFeatures.maliciousFiles`)}</ListItem>
-        <ListItem fontSize="md">{t(`${prefix}.coDeveloped.recentFeatures.collaborationTools`)}</ListItem>
-      </UnorderedList>
-
+      <List.Root as="ul" mb={10} pl={6}>
+        <List.Item fontSize="md">{t(`${prefix}.coDeveloped.recentFeatures.multipleFiles`)}</List.Item>
+        <List.Item fontSize="md">{t(`${prefix}.coDeveloped.recentFeatures.maliciousFiles`)}</List.Item>
+        <List.Item fontSize="md">{t(`${prefix}.coDeveloped.recentFeatures.collaborationTools`)}</List.Item>
+      </List.Root>
       {/* New features in development */}
       <Heading as="h2" size="lg" variant="yellowline" mb={4}>
         {t(`${prefix}.newFeatures.title`)}
@@ -86,45 +82,44 @@ export const OnboardingChecklistPageForLgAdoptingScreen = observer(() => {
       <Text fontSize="md" color="gray.700" mb="4">
         {t(`${prefix}.newFeatures.description`)}
       </Text>
-      <UnorderedList mb={10} pl={0} listStyleType="none">
-        <ListItem mb={4}>
+      <List.Root as="ul" mb={10} pl={0} listStyleType="none">
+        <List.Item mb={4}>
           <Heading as="h3" fontWeight="bold" fontSize="md">
             {t(`${prefix}.newFeatures.features.permitProjectFolders.title`)}
           </Heading>
           <Text fontSize="md">{t(`${prefix}.newFeatures.features.permitProjectFolders.description`)}</Text>
-        </ListItem>
-        <ListItem mb={4}>
+        </List.Item>
+        <List.Item mb={4}>
           <Heading as="h3" fontWeight="bold" fontSize="md">
             {t(`${prefix}.newFeatures.features.preApplicationTools.title`)}
           </Heading>
           <Text fontSize="md">{t(`${prefix}.newFeatures.features.preApplicationTools.description`)}</Text>
-        </ListItem>
-        <ListItem mb={4}>
+        </List.Item>
+        <List.Item mb={4}>
           <Heading as="h3" fontWeight="bold" fontSize="md">
             {t(`${prefix}.newFeatures.features.uploadDocuments.title`)}
           </Heading>
           <Text fontSize="md">{t(`${prefix}.newFeatures.features.uploadDocuments.description`)}</Text>
-        </ListItem>
-        <ListItem mb={4}>
+        </List.Item>
+        <List.Item mb={4}>
           <Heading as="h3" fontWeight="bold" fontSize="md">
             {t(`${prefix}.newFeatures.features.standardHousing.title`)}
           </Heading>
           <Text fontSize="md">{t(`${prefix}.newFeatures.features.standardHousing.description`)}</Text>
-        </ListItem>
-        <ListItem mb={4}>
+        </List.Item>
+        <List.Item mb={4}>
           <Heading as="h3" fontWeight="bold" fontSize="md">
             {t(`${prefix}.newFeatures.features.crossJurisdiction.title`)}
           </Heading>
           <Text fontSize="md">{t(`${prefix}.newFeatures.features.crossJurisdiction.description`)}</Text>
-        </ListItem>
-        <ListItem>
+        </List.Item>
+        <List.Item>
           <Heading as="h3" fontWeight="bold" fontSize="md">
             {t(`${prefix}.newFeatures.features.realTimeStatus.title`)}
           </Heading>
           <Text fontSize="md">{t(`${prefix}.newFeatures.features.realTimeStatus.description`)}</Text>
-        </ListItem>
-      </UnorderedList>
-
+        </List.Item>
+      </List.Root>
       {/* Flexible use and adoption */}
       <Heading as="h2" size="lg" variant="yellowline" mb={4}>
         {t(`${prefix}.flexibleUse.title`)}
@@ -132,15 +127,14 @@ export const OnboardingChecklistPageForLgAdoptingScreen = observer(() => {
       <Text fontSize="md" color="gray.700" mb="2">
         {t(`${prefix}.flexibleUse.description`)}
       </Text>
-      <UnorderedList mb={4} pl={6}>
-        <ListItem fontSize="md">{t(`${prefix}.flexibleUse.examples.stepCode`)}</ListItem>
-        <ListItem fontSize="md">{t(`${prefix}.flexibleUse.examples.newFeatures`)}</ListItem>
-        <ListItem fontSize="md">{t(`${prefix}.flexibleUse.examples.preApplication`)}</ListItem>
-      </UnorderedList>
+      <List.Root as="ul" mb={4} pl={6}>
+        <List.Item fontSize="md">{t(`${prefix}.flexibleUse.examples.stepCode`)}</List.Item>
+        <List.Item fontSize="md">{t(`${prefix}.flexibleUse.examples.newFeatures`)}</List.Item>
+        <List.Item fontSize="md">{t(`${prefix}.flexibleUse.examples.preApplication`)}</List.Item>
+      </List.Root>
       <Text fontSize="md" color="gray.700" mb="10">
         <Trans i18nKey={`${prefix}.flexibleUse.note`} />
       </Text>
-
       {/* Integration with your existing systems */}
       <Heading as="h2" size="lg" variant="yellowline" mb={4}>
         {t(`${prefix}.integration.title`)}
@@ -151,18 +145,17 @@ export const OnboardingChecklistPageForLgAdoptingScreen = observer(() => {
       <Text mb={2} fontSize="md">
         {t(`${prefix}.integration.includes`)}
       </Text>
-      <UnorderedList mb={10} pl={6}>
-        <ListItem fontSize="md">{t(`${prefix}.integration.features.openApi`)}</ListItem>
-        <ListItem fontSize="md">{t(`${prefix}.integration.features.automaticTransfer`)}</ListItem>
-        <ListItem fontSize="md">{t(`${prefix}.integration.features.comingSoon`)}</ListItem>
-      </UnorderedList>
-
+      <List.Root as="ul" mb={10} pl={6}>
+        <List.Item fontSize="md">{t(`${prefix}.integration.features.openApi`)}</List.Item>
+        <List.Item fontSize="md">{t(`${prefix}.integration.features.automaticTransfer`)}</List.Item>
+        <List.Item fontSize="md">{t(`${prefix}.integration.features.comingSoon`)}</List.Item>
+      </List.Root>
       {/* How to join */}
       <Heading as="h2" size="lg" variant="yellowline" mb={4}>
         {t(`${prefix}.howToJoin.title`)}
       </Heading>
-      <OrderedList mb={10} pl={6} spacing={3}>
-        <ListItem>
+      <List.Root as="ol" mb={10} pl={6} gap={3}>
+        <List.Item>
           <Heading as="h3" fontWeight="bold" fontSize="md">
             {t(`${prefix}.howToJoin.step1.title`)}
           </Heading>
@@ -180,15 +173,14 @@ export const OnboardingChecklistPageForLgAdoptingScreen = observer(() => {
               }}
             />
           </Text>
-        </ListItem>
-        <ListItem>
+        </List.Item>
+        <List.Item>
           <Heading as="h3" fontWeight="bold" fontSize="md">
             {t(`${prefix}.howToJoin.step2.title`)}
           </Heading>
           <Text fontSize="md">{t(`${prefix}.howToJoin.step2.description`)}</Text>
-        </ListItem>
-      </OrderedList>
-
+        </List.Item>
+      </List.Root>
       {/* Learn more about Building Permit Hub */}
       <Heading as="h2" size="lg" variant="yellowline" mb={4}>
         {t(`${prefix}.learnMore.title`)}
@@ -196,12 +188,12 @@ export const OnboardingChecklistPageForLgAdoptingScreen = observer(() => {
       <Text fontSize="md" color="gray.700" mb="4">
         {t(`${prefix}.learnMore.description`)}
       </Text>
-      <UnorderedList mb={4} pl={6}>
-        <ListItem fontSize="md">{t(`${prefix}.learnMore.options.liveOnboarding`)}</ListItem>
-        <ListItem fontSize="md">{t(`${prefix}.learnMore.options.liveDemo`)}</ListItem>
-        <ListItem fontSize="md">{t(`${prefix}.learnMore.options.technicalQuestions`)}</ListItem>
-        <ListItem fontSize="md">{t(`${prefix}.learnMore.options.share`)}</ListItem>
-      </UnorderedList>
+      <List.Root as="ul" mb={4} pl={6}>
+        <List.Item fontSize="md">{t(`${prefix}.learnMore.options.liveOnboarding`)}</List.Item>
+        <List.Item fontSize="md">{t(`${prefix}.learnMore.options.liveDemo`)}</List.Item>
+        <List.Item fontSize="md">{t(`${prefix}.learnMore.options.technicalQuestions`)}</List.Item>
+        <List.Item fontSize="md">{t(`${prefix}.learnMore.options.share`)}</List.Item>
+      </List.Root>
       <Text fontSize="md" color="gray.700" mb="8">
         <Trans
           i18nKey={`${prefix}.learnMore.contact`}

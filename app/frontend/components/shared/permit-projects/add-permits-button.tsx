@@ -22,9 +22,13 @@ export const AddPermitsButton = observer(({ permitProject }: IProps) => {
   const button = (
     <RouterLinkButton
       variant="primary"
-      leftIcon={<Icon as={Plus} />}
+      leftIcon={
+        <Icon asChild>
+          <Plus />
+        </Icon>
+      }
       to={`/projects/${permitProject.id}/add-permits`}
-      isDisabled={isDisabled}
+      disabled={isDisabled}
       onClick={preventWhenDisabled}
     >
       {t("permitProject.addPermits.button")}

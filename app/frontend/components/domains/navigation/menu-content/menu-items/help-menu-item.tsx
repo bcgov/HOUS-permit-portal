@@ -11,8 +11,10 @@ export const HelpMenuItem = () => {
   return (
     <HelpDrawer
       renderTriggerButton={({ onClick }) => (
-        <Box as="button" onClick={onClick} w="full" borderRadius="md" _hover={{ bg: "hover.blue", cursor: "pointer" }}>
-          <MenuLinkItem icon={<Question size={20} />} label={t("ui.help")} />
+        <Box w="full" borderRadius="md" _hover={{ bg: "hover.blue", cursor: "pointer" }} asChild>
+          <button onClick={onClick}>
+            <MenuLinkItem icon={<Question size={20} />} label={t("ui.help")} />
+          </button>
         </Box>
       )}
     />

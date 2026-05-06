@@ -26,7 +26,7 @@ export function PidInfoEdit<TFieldValues>({
   requirementType,
 }: TPinInfoEditProps<TFieldValues>) {
   return (
-    <Stack spacing={4}>
+    <Stack gap={4}>
       <GenericMultiDisplay
         containerProps={{
           borderBottomRadius: "none",

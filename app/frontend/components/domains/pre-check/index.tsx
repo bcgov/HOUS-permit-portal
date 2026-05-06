@@ -1,4 +1,4 @@
-import { Center, Flex, FormLabel, Show } from "@chakra-ui/react"
+import { Box, Center, Flex } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { Suspense, useEffect } from "react"
 import { RemoveScroll } from "react-remove-scroll"
@@ -77,11 +77,11 @@ export const PreCheckForm = observer(function PreCheckForm() {
           }
         >
           <Flex flex={1} w="full" overflow="auto" position="relative">
-            <Show above="lg">
+            <Box hideBelow="lg">
               <Flex w={"sidebar.width"} boxShadow="md" borderRightWidth={1} borderColor="greys.grey02" overflow="auto">
                 <Sidebar />
               </Flex>
-            </Show>
+            </Box>
             <Flex
               direction="column"
               flex={1}
@@ -102,6 +102,3 @@ export const PreCheckForm = observer(function PreCheckForm() {
     </RemoveScroll>
   )
 })
-
-// base styles for pre-check form
-FormLabel.defaultProps = { fontWeight: "bold" }

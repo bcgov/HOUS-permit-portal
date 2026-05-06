@@ -1,4 +1,4 @@
-import { Avatar, Button, IconButton, Modal, ModalContent, ModalOverlay, useDisclosure } from "@chakra-ui/react"
+import { Avatar, Button, Dialog, IconButton, Portal, useDisclosure } from "@chakra-ui/react"
 import { Plus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
@@ -49,7 +49,7 @@ export const DesignatedCollaboratorAssignmentModal = observer(function Designate
   const existingCollaboratorIds = new Set<string>(
     existingDelegateeCollaboration ? [existingDelegateeCollaboration.collaborator?.id] : []
   )
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { open, onOpen, onClose } = useDisclosure()
   const createConfirmationModalDisclosureProps = useDisclosure()
   const [isBeforeOpenLoading, setIsBeforeOpenLoading] = useState(false)
   const [currentScreen, setCurrentScreen] = React.useState<TDesignatedSubmitterAssignmentModalScreen>(INITIAL_SCREEN)
@@ -71,14 +71,14 @@ export const DesignatedCollaboratorAssignmentModal = observer(function Designate
   }
 
   useEffect(() => {
-    if (isOpen) {
+    if (open) {
       changeScreen(INITIAL_SCREEN)
       setOpenAssignmentConfirmationModals(new Set())
     }
-  }, [isOpen])
+  }, [open])
 
   const onModalClose = () => {
-    if (openAssignmentConfirmationModals.size > 0 || createConfirmationModalDisclosureProps.isOpen) {
+    if (openAssignmentConfirmationModals.size > 0 || createConfirmationModalDisclosureProps.open) {
       return
     }
 
@@ -134,18 +134,15 @@ export const DesignatedCollaboratorAssignmentModal = observer(function Designate
 
   const renderDefaultTrigger = () =>
     avatarTrigger ? (
-      <IconButton
-        variant={"ghost"}
-        icon={
-          existingDelegateeCollaboration ? (
-            <Avatar name={existingDelegateeCollaboration?.collaborator?.user?.name} size={"sm"} />
-          ) : (
-            <Plus />
-          )
-        }
-        aria-label={"designated assignee selector"}
-        {...triggerButtonProps}
-      />
+      <IconButton variant={"ghost"} aria-label={"designated assignee selector"} {...triggerButtonProps}>
+        {existingDelegateeCollaboration ? (
+          <Avatar.Root size={"sm"}>
+            <Avatar.Fallback name={existingDelegateeCollaboration?.collaborator?.user?.name} />
+          </Avatar.Root>
+        ) : (
+          <Plus />
+        )}
+      </IconButton>
     ) : (
       <Button variant={"link"} textDecoration={"underline"} fontSize={"sm"} {...triggerButtonProps}>
         {existingDelegateeCollaboration
@@ -168,52 +165,73 @@ export const DesignatedCollaboratorAssignmentModal = observer(function Designate
             isDisabled: !canManage || isBeforeOpenLoading,
           })
         : renderDefaultTrigger()}
-      <Modal isOpen={isOpen} onClose={onModalClose} isCentered>
-        <ModalOverlay />
-        <ModalContent
-          w={{ base: "calc(100vw - 2rem)", md: "370px" }}
-          maxW="calc(100vw - 2rem)"
-          maxH="min(560px, calc(100vh - 2rem))"
-          overflow="hidden"
-          display="flex"
-          flexDirection="column"
-          ref={contentRef}
-        >
-          {canManage && currentScreen === EAssignmentModalScreen.collaborationAssignment && (
-            <CollaborationAssignmentModalContent
-              onSelect={async (collaboratorId) => {
-                const response = await permitApplication.assignCollaborator(collaboratorId, ECollaboratorType.delegatee)
-                response && onClose()
-              }}
-              onClose={onClose}
-              takenCollaboratorIds={existingCollaboratorIds}
-              getConfirmationModalDisclosureProps={createAssignmentConfirmationModalDisclosureProps}
-              transitionToInvite={
-                isSubmissionCollaboration ? () => changeScreen(EAssignmentModalScreen.collaboratorInvite) : undefined
-              }
-              selectedCollaborations={existingDelegateeCollaboration ? [existingDelegateeCollaboration] : []}
-              selectedTitle={selectedTitle}
-              selectedEmptyText={t("permitCollaboration.popover.assignment.noneAssigned")}
-              onUnselectSelected={async () => {
-                if (!existingDelegateeCollaboration) return
+      <Dialog.Root
+        open={open}
+        placement="center"
+        onOpenChange={(e) => {
+          if (!e.open) {
+            onModalClose()
+          }
+        }}
+      >
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content
+              w={{ base: "calc(100vw - 2rem)", md: "370px" }}
+              maxW="calc(100vw - 2rem)"
+              maxH="min(560px, calc(100vh - 2rem))"
+              overflow="hidden"
+              display="flex"
+              flexDirection="column"
+              ref={contentRef}
+            >
+              {canManage && currentScreen === EAssignmentModalScreen.collaborationAssignment && (
+                <CollaborationAssignmentModalContent
+                  onSelect={async (collaboratorId) => {
+                    const response = await permitApplication.assignCollaborator(
+                      collaboratorId,
+                      ECollaboratorType.delegatee
+                    )
+                    response && onClose()
+                  }}
+                  onClose={onClose}
+                  takenCollaboratorIds={existingCollaboratorIds}
+                  getConfirmationModalDisclosureProps={createAssignmentConfirmationModalDisclosureProps}
+                  transitionToInvite={
+                    isSubmissionCollaboration
+                      ? () => changeScreen(EAssignmentModalScreen.collaboratorInvite)
+                      : undefined
+                  }
+                  selectedCollaborations={existingDelegateeCollaboration ? [existingDelegateeCollaboration] : []}
+                  selectedTitle={selectedTitle}
+                  selectedEmptyText={t("permitCollaboration.popover.assignment.noneAssigned")}
+                  onUnselectSelected={async () => {
+                    if (!existingDelegateeCollaboration) return
 
-                const response = await permitApplication.unassignPermitCollaboration(existingDelegateeCollaboration.id)
-                response && onClose()
-              }}
-              additionalCollaborations={additionalCollaborations}
-              collaborationType={collaborationType}
-            />
-          )}
-          {canManage && currentScreen === EAssignmentModalScreen.collaboratorInvite && isSubmissionCollaboration && (
-            <CollaboratorInviteModalContent
-              onClose={() => changeScreen(INITIAL_SCREEN)}
-              onInviteSuccess={onClose}
-              onInvite={onInviteCollaborator}
-              confirmationModalDisclosureProps={createConfirmationModalDisclosureProps}
-            />
-          )}
-        </ModalContent>
-      </Modal>
+                    const response = await permitApplication.unassignPermitCollaboration(
+                      existingDelegateeCollaboration.id
+                    )
+                    response && onClose()
+                  }}
+                  additionalCollaborations={additionalCollaborations}
+                  collaborationType={collaborationType}
+                />
+              )}
+              {canManage &&
+                currentScreen === EAssignmentModalScreen.collaboratorInvite &&
+                isSubmissionCollaboration && (
+                  <CollaboratorInviteModalContent
+                    onClose={() => changeScreen(INITIAL_SCREEN)}
+                    onInviteSuccess={onClose}
+                    onInvite={onInviteCollaborator}
+                    confirmationModalDisclosureProps={createConfirmationModalDisclosureProps}
+                  />
+                )}
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
     </>
   )
 })

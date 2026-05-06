@@ -1,4 +1,5 @@
-import { Box, Flex, GridItem, Text, Tooltip } from "@chakra-ui/react"
+import { Tooltip } from "@/components/ui/tooltip"
+import { Box, Flex, GridItem, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -27,24 +28,26 @@ export const GridHeaders = observer(function GridHeaders() {
     <Box display={"contents"} role={"rowgroup"}>
       <Box display={"contents"} role={"row"}>
         <GridItem
-          as={Flex}
           gridColumn={"span 8"}
           p={6}
           bg={"greys.grey10"}
           justifyContent={"space-between"}
           align="center"
+          asChild
         >
-          <Text role={"heading"}>{t("externalApiKey.index.table.heading")}</Text>
-
-          {currentUser.isManager && currentUser.jurisdiction.externalApiState === EJurisdictionExternalApiState.gOff ? (
-            <Tooltip label={t("externalApiKey.index.disabledTooltipLabel")}>
-              <Box>
-                <ExternalApiEnabledSwitchWithConfirmation />
-              </Box>
-            </Tooltip>
-          ) : (
-            <ExternalApiEnabledSwitchWithConfirmation />
-          )}
+          <Flex>
+            <Text role={"heading"}>{t("externalApiKey.index.table.heading")}</Text>
+            {currentUser.isManager &&
+            currentUser.jurisdiction.externalApiState === EJurisdictionExternalApiState.gOff ? (
+              <Tooltip content={t("externalApiKey.index.disabledTooltipLabel")}>
+                <Box>
+                  <ExternalApiEnabledSwitchWithConfirmation />
+                </Box>
+              </Tooltip>
+            ) : (
+              <ExternalApiEnabledSwitchWithConfirmation />
+            )}
+          </Flex>
         </GridItem>
       </Box>
       <Box display={"contents"} role={"row"}>
@@ -87,7 +90,7 @@ const ExternalApiEnabledSwitchWithConfirmation = observer(() => {
       renderTriggerButton={({ onClick }) => (
         <ExternalApiEnabledSwitch
           externalApiEnabled={currentJurisdiction.externalApiEnabled}
-          isDisabled={isDisabled}
+          disabled={isDisabled}
           // @ts-ignore
           onChange={onClick}
         />
@@ -100,7 +103,7 @@ const ExternalApiEnabledSwitchWithConfirmation = observer(() => {
   ) : (
     <ExternalApiEnabledSwitch
       externalApiEnabled={currentJurisdiction.externalApiEnabled}
-      isDisabled={isDisabled}
+      disabled={isDisabled}
       onChange={currentJurisdiction.toggleExternalApiEnabled}
     />
   )
@@ -110,9 +113,11 @@ const ExternalApiEnabledSwitch = observer(
   ({
     externalApiEnabled,
     isDisabled = false,
+    disabled,
     onChange,
   }: {
     isDisabled?: boolean
+    disabled?: boolean
     externalApiEnabled: boolean
     onChange?: () => void
   }) => {
@@ -121,9 +126,9 @@ const ExternalApiEnabledSwitch = observer(
     return (
       <FormSwitch
         switchIdForAccessibility={"enableJurisdictionExternalApiKey"}
-        isChecked={externalApiEnabled}
+        checked={externalApiEnabled}
         onChange={onChange}
-        isDisabled={isDisabled}
+        disabled={disabled ?? isDisabled}
         checkedText={t("externalApiKey.index.enabled")}
         uncheckedText={t("externalApiKey.index.disabled")}
       />

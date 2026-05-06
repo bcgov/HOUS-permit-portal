@@ -1,14 +1,4 @@
-import {
-  Button,
-  Flex,
-  FormControl,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
-} from "@chakra-ui/react"
+import { Button, Dialog, Field, Flex, Portal } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
@@ -42,28 +32,41 @@ export const StepCodeSelectModal = observer(function StepCodeSelectModal({
   }, [isOpen, stepCodeType])
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="4xl" isCentered>
-      <ModalOverlay />
-      <ModalContent>
-        <ModalHeader>{t("stepCode.index.title")}</ModalHeader>
-        <ModalCloseButton />
-        <ModalBody>
-          <Flex direction="column" gap={4} w="full">
-            <FormControl w="full">
-              <ModelSearchInput
-                searchModel={stepCodeStore}
-                inputProps={{ placeholder: t("ui.search"), width: "full" }}
-                inputGroupProps={{ width: "full" }}
-              />
-            </FormControl>
-            <StepCodesSelectGrid onSelect={onSelect} />
+    <Dialog.Root
+      open={open}
+      size="xl"
+      placement="center"
+      onOpenChange={(e) => {
+        if (!e.open) {
+          onClose()
+        }
+      }}
+    >
+      <Portal>
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content>
+            <Dialog.Header>{t("stepCode.index.title")}</Dialog.Header>
+            <Dialog.CloseTrigger />
+            <Dialog.Body>
+              <Flex direction="column" gap={4} w="full">
+                <Field.Root w="full">
+                  <ModelSearchInput
+                    searchModel={stepCodeStore}
+                    inputProps={{ placeholder: t("ui.search"), width: "full" }}
+                    inputGroupProps={{ width: "full" }}
+                  />
+                </Field.Root>
+                <StepCodesSelectGrid onSelect={onSelect} />
 
-            <Flex justify="flex-end" gap={2} mt={4}>
-              <Button onClick={onClose}>{t("ui.close")}</Button>
-            </Flex>
-          </Flex>
-        </ModalBody>
-      </ModalContent>
-    </Modal>
+                <Flex justify="flex-end" gap={2} mt={4}>
+                  <Button onClick={onClose}>{t("ui.close")}</Button>
+                </Flex>
+              </Flex>
+            </Dialog.Body>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Portal>
+    </Dialog.Root>
   )
 })

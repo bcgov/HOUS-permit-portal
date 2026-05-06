@@ -22,15 +22,17 @@ export const GridHeaders = observer(function GridHeaders() {
     <Box display={"contents"} role={"rowgroup"}>
       <Box display={"contents"} role={"row"}>
         <GridItem
-          as={Flex}
           gridColumn={"span 8"}
           p={6}
           bg={"greys.grey10"}
           justifyContent={"space-between"}
           align="center"
+          asChild
         >
-          <Text role={"heading"}>{t("permitApplication.submissionInbox.tableHeading")}</Text>
-          <ModelSearchInput searchModel={permitApplicationStore} />
+          <Flex>
+            <Text role={"heading"}>{t("permitApplication.submissionInbox.tableHeading")}</Text>
+            <ModelSearchInput searchModel={permitApplicationStore} />
+          </Flex>
         </GridItem>
       </Box>
       <Box display={"contents"} role={"row"}>
@@ -43,19 +45,20 @@ export const GridHeaders = observer(function GridHeaders() {
               <GridHeader key={key} role={"columnheader"}>
                 <Flex
                   w={"full"}
-                  as={"button"}
                   justifyContent={"space-between"}
                   cursor="pointer"
-                  onClick={() => toggleSort(castField)}
                   borderRight={"1px solid"}
                   borderColor={"border.light"}
                   px={4}
+                  asChild
                 >
-                  <Text textAlign="left">{getSortColumnHeader(castField)}</Text>
-                  <SortIcon<EPermitApplicationSortFields>
-                    field={castField}
-                    currentSort={sort as ISort<EPermitApplicationSortFields>}
-                  />
+                  <button onClick={() => toggleSort(castField)}>
+                    <Text textAlign="left">{getSortColumnHeader(castField)}</Text>
+                    <SortIcon<EPermitApplicationSortFields>
+                      field={castField}
+                      currentSort={sort as ISort<EPermitApplicationSortFields>}
+                    />
+                  </button>
                 </Flex>
               </GridHeader>
             )

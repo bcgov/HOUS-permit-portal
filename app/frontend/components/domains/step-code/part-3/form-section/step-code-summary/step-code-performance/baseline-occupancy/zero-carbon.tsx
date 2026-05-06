@@ -1,4 +1,4 @@
-import { FormControl, FormLabel, Heading, Text, VStack } from "@chakra-ui/react"
+import { Field, Heading, Text, VStack } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -7,26 +7,24 @@ export const BaselineZeroCarbonPerformance = observer(function BaselineZeroCarbo
   const i18nPrefix = "stepCode.part3.stepCodeSummary.stepCode.zeroCarbon"
 
   return (
-    <VStack flex={1} spacing={4} borderWidth={1} borderColor="border.light" rounded="md" p={4}>
+    <VStack flex={1} gap={4} borderWidth={1} borderColor="border.light" rounded="md" p={4}>
       <Heading variant="heading4">{t(`${i18nPrefix}.title`)}</Heading>
-
-      <FormControl w="auto" mx="auto">
-        <FormLabel mr={0} my={1} textAlign="center" fontWeight="normal">
+      <Field.Root w="auto" mx="auto">
+        <Field.Label mr={0} my={1} textAlign="center" fontWeight="normal">
           {t(`${i18nPrefix}.levelRequired`)}
-        </FormLabel>
+        </Field.Label>
         <Text fontWeight="bold" fontSize="lg">
           {t(`${i18nPrefix}.notRequired`)}
         </Text>
-      </FormControl>
-
-      <FormControl w="auto" mx="auto">
-        <FormLabel mr={0} my={1} textAlign="center" fontWeight="normal">
+      </Field.Root>
+      <Field.Root w="auto" mx="auto">
+        <Field.Label mr={0} my={1} textAlign="center" fontWeight="normal">
           {t(`${i18nPrefix}.achieved`)}
-        </FormLabel>
+        </Field.Label>
         <Text fontWeight="bold" fontSize="lg">
           {t(`${i18nPrefix}.notRequired`)}
         </Text>
-      </FormControl>
+      </Field.Root>
     </VStack>
   )
 })

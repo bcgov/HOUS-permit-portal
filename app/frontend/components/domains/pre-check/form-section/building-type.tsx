@@ -21,11 +21,11 @@ export const BuildingType = observer(function BuildingType() {
           "Pre-checks are currently available for the following building type:"
         )}
       </Text>
-      <Tag size="lg" colorScheme="blue" mb={6}>
+      <Tag.Root size="lg" colorPalette="blue" mb={6}>
         {t("preCheck.sections.buildingType.part9SmallBuilding", "Part 9 - Small Building")}
-      </Tag>
+      </Tag.Root>
       <Flex gap={3} mt={8} justifyContent="flex-start">
-        <Button variant="primary" onClick={navigateToNext} isDisabled={!hasNext}>
+        <Button variant="primary" onClick={navigateToNext} disabled={!hasNext}>
           {t("ui.saveAndcontinue", "Save and Continue")}
         </Button>
       </Flex>

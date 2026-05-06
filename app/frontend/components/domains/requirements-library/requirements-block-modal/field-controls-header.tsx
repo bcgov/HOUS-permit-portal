@@ -41,7 +41,7 @@ export function FieldControlsHeader({
   const { t } = useTranslation()
 
   return (
-    <HStack pos={"absolute"} right={0} top={0} spacing={4}>
+    <HStack pos={"absolute"} right={0} top={0} gap={4}>
       {/*right now there is only two menu options,so if both are disabled we just hide the options menu*/}
       {isRequirementInEditMode &&
         !(disabledMenuOptions.includes("remove") && disabledMenuOptions.includes("conditional")) && (

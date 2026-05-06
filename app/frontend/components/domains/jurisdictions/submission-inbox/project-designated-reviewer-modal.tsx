@@ -1,4 +1,4 @@
-import { AvatarGroup, IconButton, Modal, ModalContent, ModalOverlay, useDisclosure } from "@chakra-ui/react"
+import { AvatarGroup, Dialog, IconButton, Portal, useDisclosure } from "@chakra-ui/react"
 import { UserPlus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
@@ -27,7 +27,7 @@ export const ProjectReviewCollaboratorsModal = observer(function ProjectReviewCo
 }: IProps) {
   const { userStore } = useMst()
   const { t } = useTranslation()
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { open, onOpen, onClose } = useDisclosure()
   const [isBeforeOpenLoading, setIsBeforeOpenLoading] = useState(false)
 
   const collaborations = project.permitProjectCollaborations
@@ -64,21 +64,20 @@ export const ProjectReviewCollaboratorsModal = observer(function ProjectReviewCo
   const renderDefaultTrigger = () => (
     <IconButton
       variant="ghost"
-      icon={
-        collaborations.length > 0 ? (
-          <AvatarGroup size="xs" max={3}>
-            {collaborations.map((c) => (
-              <SharedAvatar key={c.id} size="xs" name={c.collaborator.user?.name} role={c.collaborator.user?.role} />
-            ))}
-          </AvatarGroup>
-        ) : (
-          <UserPlus size={16} />
-        )
-      }
       aria-label={t("permitCollaboration.projectSidebar.projectReviewCollaborators")}
       onClick={triggerOnClick}
-      isDisabled={isBeforeOpenLoading}
-    />
+      disabled={isBeforeOpenLoading}
+    >
+      {collaborations.length > 0 ? (
+        <AvatarGroup size="xs">
+          {collaborations.map((c) => (
+            <SharedAvatar key={c.id} size="xs" name={c.collaborator.user?.name} role={c.collaborator.user?.role} />
+          ))}
+        </AvatarGroup>
+      ) : (
+        <UserPlus size={16} />
+      )}
+    </IconButton>
   )
 
   return (
@@ -91,27 +90,39 @@ export const ProjectReviewCollaboratorsModal = observer(function ProjectReviewCo
             isDisabled: isBeforeOpenLoading,
           })
         : renderDefaultTrigger()}
-      <Modal isOpen={isOpen} onClose={onClose} isCentered>
-        <ModalOverlay />
-        <ModalContent
-          w={{ base: "calc(100vw - 2rem)", md: "370px" }}
-          maxW="calc(100vw - 2rem)"
-          maxH="min(560px, calc(100vh - 2rem))"
-          overflow="hidden"
-          display="flex"
-          flexDirection="column"
-        >
-          <CollaborationAssignmentModalContent
-            onSelect={handleSelectCollaborator}
-            onClose={onClose}
-            takenCollaboratorIds={takenCollaboratorIds}
-            collaborationType={ECollaborationType.review}
-            selectedCollaborations={collaborations}
-            selectedTitle={t("permitCollaboration.projectSidebar.projectReviewCollaborators")}
-            onUnselectSelected={(collaboration) => handleUnassign(collaboration.collaborator.id)}
-          />
-        </ModalContent>
-      </Modal>
+      <Dialog.Root
+        open={open}
+        placement="center"
+        onOpenChange={(e) => {
+          if (!e.open) {
+            onClose()
+          }
+        }}
+      >
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content
+              w={{ base: "calc(100vw - 2rem)", md: "370px" }}
+              maxW="calc(100vw - 2rem)"
+              maxH="min(560px, calc(100vh - 2rem))"
+              overflow="hidden"
+              display="flex"
+              flexDirection="column"
+            >
+              <CollaborationAssignmentModalContent
+                onSelect={handleSelectCollaborator}
+                onClose={onClose}
+                takenCollaboratorIds={takenCollaboratorIds}
+                collaborationType={ECollaborationType.review}
+                selectedCollaborations={collaborations}
+                selectedTitle={t("permitCollaboration.projectSidebar.projectReviewCollaborators")}
+                onUnselectSelected={(collaboration) => handleUnassign(collaboration.collaborator.id)}
+              />
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
     </>
   )
 })

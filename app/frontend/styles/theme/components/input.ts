@@ -1,38 +1,34 @@
-import { inputAnatomy } from "@chakra-ui/anatomy"
-import { createMultiStyleConfigHelpers } from "@chakra-ui/react"
+import { defineSlotRecipe } from "@chakra-ui/react"
 
-const { definePartsStyle, defineMultiStyleConfig } = createMultiStyleConfigHelpers(inputAnatomy.keys)
-
-const baseStyle = definePartsStyle({
-  field: {
-    lineHeight: "27px",
-    borderRadius: "sm",
-    paddingInlineStart: 3,
-    paddingInlineEnd: 3,
-    _disabled: {
-      bg: "greys.grey04",
-      borderColor: "border.light",
-      color: "text.primary",
-      opacity: 1,
-      _hover: {
+export const Input = defineSlotRecipe({
+  slots: ["addon", "element", "field", "root"],
+  base: {
+    field: {
+      lineHeight: "27px",
+      borderRadius: "sm",
+      paddingInlineStart: 3,
+      paddingInlineEnd: 3,
+      _disabled: {
+        bg: "greys.grey04",
         borderColor: "border.light",
-        cursor: "auto",
+        color: "text.primary",
+        opacity: 1,
+        _hover: {
+          borderColor: "border.light",
+          cursor: "auto",
+        },
+      },
+      _placeholder: { color: "greys.grey01" },
+    },
+  },
+  variants: {
+    variant: {
+      outline: {
+        field: {
+          borderColor: "border.light",
+          _hover: { borderColor: "greys.grey01" },
+        },
       },
     },
-    _placeholder: { color: "greys.grey01" },
   },
 })
-
-const styles = {
-  baseStyle,
-  variants: {
-    outline: {
-      field: {
-        borderColor: "border.light",
-        _hover: { borderColor: "greys.grey01" },
-      },
-    },
-  },
-}
-
-export const Input = defineMultiStyleConfig(styles)

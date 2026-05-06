@@ -1,4 +1,4 @@
-import { Flex, FormControl, FormLabel, Input, Text } from "@chakra-ui/react"
+import { Field, Flex, Input, Text } from "@chakra-ui/react"
 import { SlidersHorizontal, Users } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
@@ -50,22 +50,17 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
             <Text mb={2} mr={2}>
               The
             </Text>
-            <FormControl>
-              <FormLabel>{t(`${i18nPrefix}.jurisdictionLocalityTypeLabel`)}</FormLabel>
-              <Input
-                bg="greys.white"
-                value={currentJurisdiction.localityType}
-                isDisabled
-                textTransform={"capitalize"}
-              />
-            </FormControl>
+            <Field.Root>
+              <Field.Label>{t(`${i18nPrefix}.jurisdictionLocalityTypeLabel`)}</Field.Label>
+              <Input bg="greys.white" value={currentJurisdiction.localityType} disabled textTransform={"capitalize"} />
+            </Field.Root>
             <Text mb={2} mx={2}>
               of
             </Text>
-            <FormControl>
-              <FormLabel>{t(`${i18nPrefix}.jurisdictionNameLabel`)}</FormLabel>
-              <Input bg="greys.white" value={currentJurisdiction.name} isDisabled />
-            </FormControl>
+            <Field.Root>
+              <Field.Label>{t(`${i18nPrefix}.jurisdictionNameLabel`)}</Field.Label>
+              <Input bg="greys.white" value={currentJurisdiction.name} disabled />
+            </Field.Root>
           </Flex>
         </SectionBox>
       </TechnicalSupportHomeSection>

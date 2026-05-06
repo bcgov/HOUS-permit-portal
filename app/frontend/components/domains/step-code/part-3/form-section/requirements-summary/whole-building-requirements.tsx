@@ -1,4 +1,4 @@
-import { FormControl, FormHelperText, FormLabel, Grid, Input, Text } from "@chakra-ui/react"
+import { Field, Grid, Input, Text } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -24,31 +24,31 @@ export const WholeBuildingRequirements = observer(function WholeBuildingRequirem
         <Text>{t(`${i18nPrefix}.wholeBuildingRequirements.title`)}</Text>
       </GridColumnHeader>
       <GridData>
-        <FormControl>
-          <FormLabel>{t("stepCode.part3.metrics.teui.label")}</FormLabel>
-          <FormHelperText>
+        <Field.Root>
+          <Field.Label>{t("stepCode.part3.metrics.teui.label")}</Field.Label>
+          <Field.HelperText>
             <Trans i18nKey={"stepCode.part3.metrics.teui.units"} components={{ sup: <sup /> }} />
-          </FormHelperText>
-          <Input isDisabled value={roundMetric(requirements.wholeBuilding.teui)} />
-        </FormControl>
+          </Field.HelperText>
+          <Input disabled value={roundMetric(requirements.wholeBuilding.teui)} />
+        </Field.Root>
       </GridData>
       <GridData>
-        <FormControl>
-          <FormLabel>{t("stepCode.part3.metrics.tedi.label")}</FormLabel>
-          <FormHelperText>
+        <Field.Root>
+          <Field.Label>{t("stepCode.part3.metrics.tedi.label")}</Field.Label>
+          <Field.HelperText>
             <Trans i18nKey={"stepCode.part3.metrics.tedi.units"} components={{ sup: <sup /> }} />
-          </FormHelperText>
-          <Input isDisabled value={roundMetric(requirements.wholeBuilding.tedi)} />
-        </FormControl>
+          </Field.HelperText>
+          <Input disabled value={roundMetric(requirements.wholeBuilding.tedi)} />
+        </Field.Root>
       </GridData>
       <GridData>
-        <FormControl>
-          <FormLabel>{t("stepCode.part3.metrics.ghgi.label")}</FormLabel>
-          <FormHelperText>
+        <Field.Root>
+          <Field.Label>{t("stepCode.part3.metrics.ghgi.label")}</Field.Label>
+          <Field.HelperText>
             <Trans i18nKey={"stepCode.part3.metrics.ghgi.units"} components={{ sup: <sup />, sub: <sub /> }} />
-          </FormHelperText>
-          <Input isDisabled value={roundMetric(requirements.wholeBuilding.ghgi)} />
-        </FormControl>
+          </Field.HelperText>
+          <Input disabled value={roundMetric(requirements.wholeBuilding.ghgi)} />
+        </Field.Root>
       </GridData>
       <GridData colSpan={3}>
         <Text>

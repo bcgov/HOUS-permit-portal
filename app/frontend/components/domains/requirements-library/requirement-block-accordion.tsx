@@ -1,18 +1,4 @@
-import {
-  Accordion,
-  AccordionButton,
-  AccordionIcon,
-  AccordionItem,
-  AccordionPanel,
-  AccordionProps,
-  Box,
-  Flex,
-  HStack,
-  IconButton,
-  Text,
-  useDisclosure,
-  VStack,
-} from "@chakra-ui/react"
+import { Accordion, Box, Flex, HStack, IconButton, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import { Trash } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
@@ -43,7 +29,7 @@ type TProps = {
   renderEdit?: () => JSX.Element
   requirementBlockCustomization?: IRequirementBlockCustomization
   hideElectiveField?: (requirementBlockId: string, requirement: IDenormalizedRequirement) => boolean
-} & Partial<AccordionProps> &
+} & Partial<React.ComponentProps<typeof Accordion.Root>> &
   (
     | { isEditable?: boolean; showEditWarning?: never }
     | { isEditable: boolean; showEditWarning?: boolean }
@@ -67,7 +53,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
   const { t } = useTranslation()
   const { userStore } = useMst()
   const { currentUser } = userStore
-  const { isOpen, onToggle, onClose, onOpen } = useDisclosure({ defaultIsOpen: true })
+  const { open, onToggle, onClose, onOpen } = useDisclosure({ defaultOpen: true })
 
   // Get resources based on resourceIds in customization
   const selectedResources = useMemo(() => {
@@ -98,7 +84,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
   }, [isCollapsedAll])
 
   return (
-    <Accordion
+    <Accordion.Root
       as={"section"}
       w={"full"}
       border={"1px solid"}
@@ -106,13 +92,13 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
       borderRadius={"lg"}
       bg="greys.grey04"
       _focus={{ bg: "semantic.warningLight", borderColor: "semantic.warning" }}
-      allowMultiple
-      index={isOpen ? 0 : null}
+      multiple
+      value={open ? ["requirement-block"] : []}
       {...accordionProps}
     >
-      <AccordionItem border="0">
+      <Accordion.Item border="0" value="requirement-block">
         <Box as={"h5"} w={"full"} m={0} borderTopRadius="radii.lg">
-          <AccordionButton
+          <Accordion.ItemTrigger
             as="div"
             minH="10"
             py={0}
@@ -122,11 +108,11 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
             justifyContent={"space-between"}
             onClick={onToggle}
           >
-            <HStack spacing={4}>
+            <HStack gap={4}>
               <Box fontWeight={700} fontSize={"base"}>
                 {requirementBlock.displayName}
               </Box>
-              {isOpen && onRemove && (
+              {open && onRemove && (
                 <ConfirmationModal
                   promptHeader={t("ui.removeRequirementBlock" as any)}
                   promptMessage={t("ui.removeRequirementBlockConfirm" as any)}
@@ -140,13 +126,12 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
                           e.stopPropagation()
                           onConfirmationModalOpen()
                         }}
-                        icon={
-                          <Flex align="center">
-                            <Trash size={16} />
-                            <Text ml={2}> {t("ui.remove" as any)}</Text>
-                          </Flex>
-                        }
-                      />
+                      >
+                        <Flex align="center">
+                          <Trash size={16} />
+                          <Text ml={2}> {t("ui.remove" as any)}</Text>
+                        </Flex>
+                      </IconButton>
                     )
                   }}
                   onConfirm={() => {
@@ -156,8 +141,8 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
               )}
             </HStack>
 
-            <HStack spacing={2}>
-              {isOpen && !renderEdit && (
+            <HStack gap={2}>
+              {open && !renderEdit && (
                 <RequirementsBlockModal
                   showEditWarning={showEditWarning}
                   isEditable={isEditable}
@@ -172,161 +157,163 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
                 />
               )}
               {renderEdit?.()}
-              <IconButton variant="unstyled" aria-label="Collapse or expand accordion">
-                <AccordionIcon color={"text.primary"} />
+              <IconButton variant="plain" aria-label="Collapse or expand accordion">
+                <Accordion.ItemIndicator color={"text.primary"} />
               </IconButton>
             </HStack>
-          </AccordionButton>
+          </Accordion.ItemTrigger>
         </Box>
-        <AccordionPanel
+        <Accordion.ItemContent
           pb={8}
           borderTop="1px solid"
           borderTopColor="border.light"
           bg="greys.white"
           borderBottomRadius="8px"
         >
-          {!isTipTapEmpty(requirementBlock.displayDescription) && (
-            <Box
-              sx={{
-                ".tiptap-editor-readonly": {
-                  p: 0,
-                },
-              }}
-              px={6}
-              mx="-4"
-              p={6}
-              className="requirement-block-description"
-              borderBottom="1px solid"
-              borderBottomColor="border.light"
-            >
-              {/* Use SafeTipTapDisplay for safe HTML rendering */}
-              <SafeTipTapDisplay htmlContent={requirementBlock.displayDescription} />
-            </Box>
-          )}
-          {!R.isEmpty(requirementBlock.requirementDocuments) && (
-            <Flex
-              direction={"column"}
-              gap={2}
-              mb={4}
-              px={6}
-              pb={6}
-              mx="-4"
-              borderBottom="1px solid"
-              borderBottomColor="border.light"
-            >
-              <Text fontWeight={700}>{t("requirementsLibrary.fields.requirementDocuments")}</Text>
-              {requirementBlock.requirementDocuments?.map((document) => (
-                <DownloadLinkButton
-                  key={document.id}
-                  document={document}
-                  modelType={EFileUploadAttachmentType.RequirementDocument}
-                />
-              ))}
-            </Flex>
-          )}
-          {!isTipTapEmpty(requirementBlockCustomization?.tip) && (
-            <Box px={2} my={4}>
-              <RichTextTip tip={requirementBlockCustomization.tip} />
-            </Box>
-          )}
-          {selectedResources.length > 0 && (
-            <Box px={2} my={4}>
-              <VStack align="start" spacing={4} w="full">
-                {(Object.entries(resourcesByCategory) as [string, IResource[]][]).map(([category, resources]) => (
-                  <Box key={category} w="full">
-                    <Text fontWeight={600} fontSize="xs" color="text.secondary" mb={2}>
-                      {t(`jurisdiction.resources.categories.${category as EResourceCategory}`)}{" "}
-                      {(t("home.configurationManagement.resources.title") as string).toLowerCase()}
-                    </Text>
-                    <VStack align="start" spacing={3} w="full">
-                      {resources.map((resource) => {
-                        return <ResourceItem key={resource.id} resource={resource} />
-                      })}
-                    </VStack>
-                  </Box>
+          <Accordion.ItemBody>
+            {!isTipTapEmpty(requirementBlock.displayDescription) && (
+              <Box
+                css={{
+                  "& .tiptap-editor-readonly": {
+                    p: 0,
+                  },
+                }}
+                px={6}
+                mx="-4"
+                p={6}
+                className="requirement-block-description"
+                borderBottom="1px solid"
+                borderBottomColor="border.light"
+              >
+                {/* Use SafeTipTapDisplay for safe HTML rendering */}
+                <SafeTipTapDisplay htmlContent={requirementBlock.displayDescription} />
+              </Box>
+            )}
+            {!R.isEmpty(requirementBlock.requirementDocuments) && (
+              <Flex
+                direction={"column"}
+                gap={2}
+                mb={4}
+                px={6}
+                pb={6}
+                mx="-4"
+                borderBottom="1px solid"
+                borderBottomColor="border.light"
+              >
+                <Text fontWeight={700}>{t("requirementsLibrary.fields.requirementDocuments")}</Text>
+                {requirementBlock.requirementDocuments?.map((document) => (
+                  <DownloadLinkButton
+                    key={document.id}
+                    document={document}
+                    modelType={EFileUploadAttachmentType.RequirementDocument}
+                  />
                 ))}
-              </VStack>
-            </Box>
-          )}
-          <VStack
-            w={"full"}
-            alignItems={"flex-start"}
-            spacing={2}
-            px={2}
-            mt={
-              isTipTapEmpty(requirementBlock.displayDescription) && isTipTapEmpty(requirementBlockCustomization?.tip)
-                ? 4
-                : 0
-            }
-          >
-            {requirementBlock.requirements
-              .filter((requirement) => {
-                if (!requirement.elective) {
-                  return true
-                }
-
-                if (!hideElectiveField) {
-                  return true
-                }
-
-                if (hideElectiveField) {
-                  return !hideElectiveField(requirementBlock.id, requirement)
-                }
-              })
-              .map((requirement: IDenormalizedRequirement, index) => {
-                const requirementType = requirement.inputType
-                const showConditionalTag = !!currentUser?.isReviewStaff && !!requirement?.inputOptions?.conditional
-                const showElectiveTag = !!requirement?.elective
-                return (
-                  <Box
-                    key={requirement.id}
-                    w={"full"}
-                    borderRadius={"sm"}
-                    pt={index === 0 ? 0 : 1}
-                    pb={5}
-                    pos={"relative"}
-                  >
-                    <Box
-                      w={"full"}
-                      position="relative"
-                      pr="var(--app-permit-fieldset-right-white-space)"
-                      sx={{
-                        "& input": {
-                          maxW: "var(--app-permit-input-field-short)",
-                        },
-                      }}
-                    >
-                      <RequirementFieldDisplay
-                        requirementType={requirementType}
-                        label={requirement.label}
-                        helperText={requirement?.hint}
-                        instructions={requirement?.instructions}
-                        inputOptions={requirement?.inputOptions}
-                        unit={
-                          requirementType === ERequirementType.number
-                            ? (requirement?.inputOptions?.numberUnit ?? null)
-                            : undefined
-                        }
-                        options={requirement?.inputOptions?.valueOptions?.map((option) => option.label)}
-                        selectProps={{
-                          maxW: "339px",
-                        }}
-                        showAddButton={!!requirement?.inputOptions?.canAddMultipleContacts}
-                        required={requirement.required}
-                      />
-                      {(showConditionalTag || showElectiveTag) && (
-                        <Flex position="absolute" right="0" top="0" gap={2}>
-                          {showConditionalTag && <ConditionalTag />}
-                          {showElectiveTag && <ElectiveTag />}
-                        </Flex>
-                      )}
+              </Flex>
+            )}
+            {!isTipTapEmpty(requirementBlockCustomization?.tip) && (
+              <Box px={2} my={4}>
+                <RichTextTip tip={requirementBlockCustomization.tip} />
+              </Box>
+            )}
+            {selectedResources.length > 0 && (
+              <Box px={2} my={4}>
+                <VStack align="start" gap={4} w="full">
+                  {(Object.entries(resourcesByCategory) as [string, IResource[]][]).map(([category, resources]) => (
+                    <Box key={category} w="full">
+                      <Text fontWeight={600} fontSize="xs" color="text.secondary" mb={2}>
+                        {t(`jurisdiction.resources.categories.${category as EResourceCategory}`)}{" "}
+                        {(t("home.configurationManagement.resources.title") as string).toLowerCase()}
+                      </Text>
+                      <VStack align="start" gap={3} w="full">
+                        {resources.map((resource) => {
+                          return <ResourceItem key={resource.id} resource={resource} />
+                        })}
+                      </VStack>
                     </Box>
-                  </Box>
-                )
-              })}
-          </VStack>
-        </AccordionPanel>
-      </AccordionItem>
-    </Accordion>
+                  ))}
+                </VStack>
+              </Box>
+            )}
+            <VStack
+              w={"full"}
+              alignItems={"flex-start"}
+              gap={2}
+              px={2}
+              mt={
+                isTipTapEmpty(requirementBlock.displayDescription) && isTipTapEmpty(requirementBlockCustomization?.tip)
+                  ? 4
+                  : 0
+              }
+            >
+              {requirementBlock.requirements
+                .filter((requirement) => {
+                  if (!requirement.elective) {
+                    return true
+                  }
+
+                  if (!hideElectiveField) {
+                    return true
+                  }
+
+                  if (hideElectiveField) {
+                    return !hideElectiveField(requirementBlock.id, requirement)
+                  }
+                })
+                .map((requirement: IDenormalizedRequirement, index) => {
+                  const requirementType = requirement.inputType
+                  const showConditionalTag = !!currentUser?.isReviewStaff && !!requirement?.inputOptions?.conditional
+                  const showElectiveTag = !!requirement?.elective
+                  return (
+                    <Box
+                      key={requirement.id}
+                      w={"full"}
+                      borderRadius={"sm"}
+                      pt={index === 0 ? 0 : 1}
+                      pb={5}
+                      pos={"relative"}
+                    >
+                      <Box
+                        w={"full"}
+                        position="relative"
+                        pr="var(--app-permit-fieldset-right-white-space)"
+                        css={{
+                          "& & input": {
+                            maxW: "var(--app-permit-input-field-short)",
+                          },
+                        }}
+                      >
+                        <RequirementFieldDisplay
+                          requirementType={requirementType}
+                          label={requirement.label}
+                          helperText={requirement?.hint}
+                          instructions={requirement?.instructions}
+                          inputOptions={requirement?.inputOptions}
+                          unit={
+                            requirementType === ERequirementType.number
+                              ? (requirement?.inputOptions?.numberUnit ?? null)
+                              : undefined
+                          }
+                          options={requirement?.inputOptions?.valueOptions?.map((option) => option.label)}
+                          selectProps={{
+                            maxW: "339px",
+                          }}
+                          showAddButton={!!requirement?.inputOptions?.canAddMultipleContacts}
+                          required={requirement.required}
+                        />
+                        {(showConditionalTag || showElectiveTag) && (
+                          <Flex position="absolute" right="0" top="0" gap={2}>
+                            {showConditionalTag && <ConditionalTag />}
+                            {showElectiveTag && <ElectiveTag />}
+                          </Flex>
+                        )}
+                      </Box>
+                    </Box>
+                  )
+                })}
+            </VStack>
+          </Accordion.ItemBody>
+        </Accordion.ItemContent>
+      </Accordion.Item>
+    </Accordion.Root>
   )
 })

@@ -1,13 +1,4 @@
-import {
-  Flex,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
-  useDisclosure,
-} from "@chakra-ui/react"
+import { Dialog, Flex, Portal, useDisclosure } from "@chakra-ui/react"
 import * as R from "ramda"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -163,19 +154,30 @@ export const ContactModal: React.FC<IContactModalProps> = ({
   }
 
   return (
-    <Modal onClose={onClose} isOpen={isOpen} size="2xl">
-      <ModalOverlay />
-
-      <ModalContent mt={48}>
-        <ModalHeader>
-          <ModalCloseButton fontSize="11px" />
-        </ModalHeader>
-        <ModalBody py={6}>
-          <Flex w="full" gap={2}>
-            <ContactSelect onChange={onChange} selectedOption={selectedOption} />
-          </Flex>
-        </ModalBody>
-      </ModalContent>
-    </Modal>
+    <Dialog.Root
+      open={open}
+      size="xl"
+      onOpenChange={(e) => {
+        if (!e.open) {
+          onClose()
+        }
+      }}
+    >
+      <Portal>
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content mt={48}>
+            <Dialog.Header>
+              <Dialog.CloseTrigger fontSize="11px" />
+            </Dialog.Header>
+            <Dialog.Body py={6}>
+              <Flex w="full" gap={2}>
+                <ContactSelect onChange={onChange} selectedOption={selectedOption} />
+              </Flex>
+            </Dialog.Body>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Portal>
+    </Dialog.Root>
   )
 }

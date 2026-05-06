@@ -1,4 +1,4 @@
-import { Button, HStack, Menu, MenuButton, MenuItem, MenuList, Portal, Text } from "@chakra-ui/react"
+import { Button, HStack, Menu, Portal, Text } from "@chakra-ui/react"
 import { CaretDown } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useMemo, useRef } from "react"
@@ -38,72 +38,68 @@ export const BlockStatusSelect = observer(function BlockStatusSelect({
   return (
     <HStack>
       <Text
-        as={"label"}
-        htmlFor={selectId}
         id={labelId}
         fontWeight={400}
         textTransform={"uppercase"}
         fontSize={"0.625rem"}
         color={"text.secondary"}
-        onClick={() => btnRef.current?.focus()}
+        asChild
       >
-        {t("permitCollaboration.status")}
+        <label htmlFor={selectId} onClick={() => btnRef.current?.focus()}>
+          {t("permitCollaboration.status")}
+        </label>
       </Text>
-      <Menu>
-        <MenuButton
-          id={selectId}
-          ref={btnRef}
-          aria-labelledby={labelId}
-          as={Button}
-          aria-haspopup={"listbox"}
-          fontSize={"sm"}
-          lineHeight="27px"
-          borderRadius="sm"
-          px={2}
-          py={0}
-          h={"fit-content"}
-          border={"1px solid"}
-          borderColor="border.base"
-          bg={statusColors[value]}
-          sx={{
-            "&:focus": { borderColor: "focus" },
-          }}
-          rightIcon={<CaretDown />}
-          onClick={(e) => e.stopPropagation()}
-          isDisabled={isTriggerDisabled}
-        >
-          {getLabel(value)}
-        </MenuButton>
-        <Portal>
-          <MenuList
-            aria-multiselectable={false}
-            aria-label={"Unit options"}
-            role={"listbox"}
-            minW={"100px"}
-            w={"100px"}
-            p={0}
+      <Menu.Root>
+        <Menu.Trigger asChild>
+          <Button
+            id={selectId}
+            ref={btnRef}
+            aria-labelledby={labelId}
+            aria-haspopup={"listbox"}
+            fontSize={"sm"}
+            lineHeight="27px"
+            borderRadius="sm"
+            px={2}
+            py={0}
+            h={"fit-content"}
             border={"1px solid"}
-            borderColor={"border.base"}
-            overflow={"hidden"}
+            borderColor="border.base"
+            bg={statusColors[value]}
+            css={{
+              "& &:focus": { borderColor: "focus" },
+            }}
+            onClick={(e) => e.stopPropagation()}
+            disabled={isTriggerDisabled}
           >
-            {statuses.map((status) => (
-              <MenuItem
-                key={status}
-                fontSize={"sm"}
-                role={"option"}
-                _focus={{ bg: "semantic.infoLight" }}
-                bg={statusColors[status]}
-                onClick={() => onChange(status)}
-                aria-selected={value === status}
-                p={2}
-                isDisabled={isSelectionDisabled}
-              >
-                {getLabel(status)}
-              </MenuItem>
-            ))}
-          </MenuList>
+            {getLabel(value)}
+            <CaretDown />
+          </Button>
+        </Menu.Trigger>
+        <Portal>
+          <Portal>
+            <Menu.Positioner>
+              <Menu.Content>
+                {statuses.map((status) => (
+                  <Menu.Item
+                    key={status}
+                    fontSize={"sm"}
+                    role={"option"}
+                    _focus={{ bg: "semantic.infoLight" }}
+                    bg={statusColors[status]}
+                    onSelect={() => onChange(status)}
+                    aria-selected={value === status}
+                    p={2}
+                    disabled={isSelectionDisabled}
+                    value="item-0"
+                  >
+                    {getLabel(status)}
+                  </Menu.Item>
+                ))}
+              </Menu.Content>
+            </Menu.Positioner>
+          </Portal>
         </Portal>
-      </Menu>
+      </Menu.Root>
     </HStack>
   )
 })

@@ -1,4 +1,5 @@
-import { Box, Icon, IconButton, Menu, MenuButton, MenuItem, MenuList, Portal, Text, Tooltip } from "@chakra-ui/react"
+import { Tooltip } from "@/components/ui/tooltip"
+import { Box, Icon, IconButton, Menu, Portal, Text } from "@chakra-ui/react"
 import { Swap } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useMemo } from "react"
@@ -165,60 +166,58 @@ const ApplicationKanbanCard = observer(function ApplicationKanbanCard({
         />
       )}
       <Box
-        as={Link}
-        to={`/permit-applications/${application.id}`}
         display="block"
         color="inherit"
         textDecoration="none"
         _hover={{ textDecoration: "none", color: "inherit" }}
         _visited={{ color: "inherit" }}
         _active={{ color: "inherit" }}
+        asChild
       >
-        <Box pr={8}>
-          <Text fontWeight={700} fontSize="md" noOfLines={2}>
-            {application.nickname}
+        <Link to={`/permit-applications/${application.id}`}>
+          <Box pr={8}>
+            <Text fontWeight={700} fontSize="md" lineClamp={2}>
+              {application.nickname}
+            </Text>
+            <Text fontSize="xs" color="text.secondary" lineClamp={1}>
+              {application.number}
+            </Text>
+          </Box>
+          <Text fontSize="xs" lineClamp={1} mt={1.5}>
+            {application.shortAddress}
           </Text>
-          <Text fontSize="xs" color="text.secondary" noOfLines={1}>
-            {application.number}
-          </Text>
-        </Box>
-
-        <Text fontSize="xs" noOfLines={1} mt={1.5}>
-          {application.shortAddress}
-        </Text>
-        {application.pid && (
-          <Text fontSize="xs" color="text.secondary">
-            PID {application.pid}
-          </Text>
-        )}
-
-        {application.projectId && application.projectNumber && (
-          <Text fontSize="xs" mt={1}>
-            {/* @ts-ignore */}
-            {t("submissionInbox.project")}{" "}
-            <Box
-              as="span"
-              color="text.link"
-              fontWeight={600}
-              cursor="pointer"
-              _hover={{ textDecoration: "underline" }}
-              onClick={(e: React.MouseEvent) => {
-                e.preventDefault()
-                e.stopPropagation()
-                navigate(`projects/${application.projectId}/overview`)
-              }}
-            >
-              {application.projectNumber}
-            </Box>
-          </Text>
-        )}
-
-        {application.daysInQueue != null && (
-          <Text fontSize="xs" color="text.secondary" mt={2.5}>
-            {/* @ts-ignore */}
-            {t("submissionInbox.daysInQueue", { count: application.daysInQueue })}
-          </Text>
-        )}
+          {application.pid && (
+            <Text fontSize="xs" color="text.secondary">
+              PID {application.pid}
+            </Text>
+          )}
+          {application.projectId && application.projectNumber && (
+            <Text fontSize="xs" mt={1}>
+              {/* @ts-ignore */}
+              {t("submissionInbox.project")}{" "}
+              <Box
+                as="span"
+                color="text.link"
+                fontWeight={600}
+                cursor="pointer"
+                _hover={{ textDecoration: "underline" }}
+                onClick={(e: React.MouseEvent) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  navigate(`projects/${application.projectId}/overview`)
+                }}
+              >
+                {application.projectNumber}
+              </Box>
+            </Text>
+          )}
+          {application.daysInQueue != null && (
+            <Text fontSize="xs" color="text.secondary" mt={2.5}>
+              {/* @ts-ignore */}
+              {t("submissionInbox.daysInQueue", { count: application.daysInQueue })}
+            </Text>
+          )}
+        </Link>
       </Box>
     </KanbanCard>
   )
@@ -233,49 +232,66 @@ const ChangeStatusMenu = observer(function ChangeStatusMenu({ application }: { a
   if (application.allowedManualTransitions.length === 0 && !showRevisionsRequestedLink) return null
 
   return (
-    <Menu>
-      <Tooltip label={t("submissionInbox.changeStatus")} hasArrow placement="top">
-        <MenuButton
-          as={IconButton}
-          aria-label={t("submissionInbox.changeStatus")}
-          icon={<Icon as={Swap} boxSize={4} />}
-          size="sm"
-          minW={7}
-          h={7}
-          variant="ghost"
-        />
+    <Menu.Root>
+      <Tooltip
+        content={t("submissionInbox.changeStatus")}
+        showArrow
+        positioning={{
+          placement: "top",
+        }}
+      >
+        <Menu.Trigger asChild>
+          <IconButton
+            aria-label={t("submissionInbox.changeStatus")}
+            icon={
+              <Icon boxSize={4} asChild>
+                <Swap />
+              </Icon>
+            }
+            size="sm"
+            minW={7}
+            h={7}
+            variant="ghost"
+          ></IconButton>
+        </Menu.Trigger>
       </Tooltip>
       <Portal>
-        <MenuList zIndex={10}>
-          {application.allowedManualTransitions.map((transition) => (
-            <MenuItem
-              key={transition}
-              fontSize="sm"
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                application.transitionStatus(transition)
-              }}
-            >
-              {/* @ts-ignore */}
-              {t(`submissionInbox.applicationStatuses.${transition}`)}
-            </MenuItem>
-          ))}
-          {showRevisionsRequestedLink && (
-            <MenuItem
-              fontSize="sm"
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                navigate(`/permit-applications/${application.id}`)
-              }}
-            >
-              {/* @ts-ignore */}
-              {t(`submissionInbox.applicationStatuses.${EPermitApplicationStatus.revisionsRequested}`)}
-            </MenuItem>
-          )}
-        </MenuList>
+        <Portal>
+          <Menu.Positioner>
+            <Menu.Content>
+              {application.allowedManualTransitions.map((transition) => (
+                <Menu.Item
+                  key={transition}
+                  fontSize="sm"
+                  onSelect={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    application.transitionStatus(transition)
+                  }}
+                  value="item-0"
+                >
+                  {/* @ts-ignore */}
+                  {t(`submissionInbox.applicationStatuses.${transition}`)}
+                </Menu.Item>
+              ))}
+              {showRevisionsRequestedLink && (
+                <Menu.Item
+                  fontSize="sm"
+                  onSelect={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    navigate(`/permit-applications/${application.id}`)
+                  }}
+                  value="item-1"
+                >
+                  {/* @ts-ignore */}
+                  {t(`submissionInbox.applicationStatuses.${EPermitApplicationStatus.revisionsRequested}`)}
+                </Menu.Item>
+              )}
+            </Menu.Content>
+          </Menu.Positioner>
+        </Portal>
       </Portal>
-    </Menu>
+    </Menu.Root>
   )
 })

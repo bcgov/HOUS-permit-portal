@@ -1,4 +1,5 @@
-import { Button, ButtonProps, Menu, MenuButton, MenuList, Radio, RadioGroup, VStack } from "@chakra-ui/react"
+import { RadioGroup } from "@/components/ui/radio"
+import { Button, ButtonProps, Portal, VStack } from "@chakra-ui/react"
 import { CaretDown } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -25,25 +26,33 @@ export const ActiveArchivedFilter = observer(function ActiveArchivedFilter<TSear
   }
 
   return (
-    <Menu>
-      <MenuButton
-        as={Button}
-        variant="outline"
-        borderColor="semantic.info"
-        bg="semantic.infoLight"
-        rightIcon={<CaretDown />}
-        {...rest}
-      >
-        {showArchived ? t("ui.archived", "Archived") : t("ui.active", "Active")}
-      </MenuButton>
-      <MenuList p={4} zIndex="dropdown">
-        <RadioGroup onChange={handleChange} value={String(showArchived)}>
-          <VStack align="start" spacing={4}>
-            <Radio value="false">{t("ui.active", "Active")}</Radio>
-            <Radio value="true">{t("ui.archived", "Archived")}</Radio>
-          </VStack>
-        </RadioGroup>
-      </MenuList>
-    </Menu>
+    <Menu.Root>
+      <Menu.Trigger asChild>
+        <Button variant="outline" borderColor="semantic.info" bg="semantic.infoLight" {...rest}>
+          {showArchived ? t("ui.archived", "Archived") : t("ui.active", "Active")}
+          <CaretDown />
+        </Button>
+      </Menu.Trigger>
+      <Portal>
+        <Menu.Positioner>
+          <Menu.Content>
+            <RadioGroup.Root onValueChange={handleChange} value={String(showArchived)}>
+              <VStack align="start" gap={4}>
+                <RadioGroup.Item value="false">
+                  <RadioGroup.ItemHiddenInput />
+                  <RadioGroup.ItemIndicator />
+                  <RadioGroup.ItemText>{t("ui.active", "Active")}</RadioGroup.ItemText>
+                </RadioGroup.Item>
+                <RadioGroup.Item value="true">
+                  <RadioGroup.ItemHiddenInput />
+                  <RadioGroup.ItemIndicator />
+                  <RadioGroup.ItemText>{t("ui.archived", "Archived")}</RadioGroup.ItemText>
+                </RadioGroup.Item>
+              </VStack>
+            </RadioGroup.Root>
+          </Menu.Content>
+        </Menu.Positioner>
+      </Portal>
+    </Menu.Root>
   )
 })

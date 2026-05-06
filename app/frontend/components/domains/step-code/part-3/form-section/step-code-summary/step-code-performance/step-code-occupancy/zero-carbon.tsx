@@ -1,4 +1,4 @@
-import { Flex, FormControl, FormLabel, Heading, Input, VStack } from "@chakra-ui/react"
+import { Field, Flex, Heading, Input, VStack } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -14,31 +14,30 @@ export const StepCodeZeroCarbonPerformance = observer(function StepCodeZeroCarbo
   const achievedRequired = stepAchieved >= occupancy.zeroCarbonStepRequired
 
   return (
-    <VStack flex={1} spacing={4} borderWidth={1} borderColor="border.light" rounded="md" p={4}>
+    <VStack flex={1} gap={4} borderWidth={1} borderColor="border.light" rounded="md" p={4}>
       <Heading variant="heading4">{t(`${i18nPrefix}.title`)}</Heading>
-      <FormControl w="auto" mx="auto">
-        <FormLabel mr={0} my={1} textAlign="center" fontWeight="normal">
+      <Field.Root w="auto" mx="auto">
+        <Field.Label mr={0} my={1} textAlign="center" fontWeight="normal">
           {t(`${i18nPrefix}.levelRequired`)}
-        </FormLabel>
+        </Field.Label>
         <Input
           maxW={"124px"}
           value={t(
             `stepCodeChecklist.edit.codeComplianceSummary.zeroCarbonStepCode.steps.${occupancy.zeroCarbonStepRequired}`
           )}
-          isDisabled
+          disabled
         />
-      </FormControl>
-
+      </Field.Root>
       <Flex maxW="240px" w="full">
         <ZeroCarbonSteps offset={1} requiredStep={occupancy.zeroCarbonStepRequired} achievedStep={stepAchieved} />
       </Flex>
-      <FormControl w="auto" mx="auto">
-        <FormLabel mr={0} my={1} textAlign="center" fontWeight="normal">
+      <Field.Root w="auto" mx="auto">
+        <Field.Label mr={0} my={1} textAlign="center" fontWeight="normal">
           {t(`${i18nPrefix}.achieved`)}
-        </FormLabel>
+        </Field.Label>
         <Input
           maxW={"124px"}
-          isDisabled
+          disabled
           _disabled={{
             fontWeight: "bold",
             bg: !!achievedRequired ? "semantic.successLight" : "semantic.errorLight",
@@ -46,7 +45,7 @@ export const StepCodeZeroCarbonPerformance = observer(function StepCodeZeroCarbo
           }}
           value={t(`stepCodeChecklist.edit.codeComplianceSummary.zeroCarbonStepCode.steps.${stepAchieved || 0}`)}
         />
-      </FormControl>
+      </Field.Root>
     </VStack>
   )
 })

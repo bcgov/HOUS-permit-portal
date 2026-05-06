@@ -1,16 +1,5 @@
-import {
-  Box,
-  Button,
-  Divider,
-  Flex,
-  Heading,
-  HStack,
-  Spacer,
-  Stack,
-  Text,
-  Tooltip,
-  useDisclosure,
-} from "@chakra-ui/react"
+import { Tooltip } from "@/components/ui/tooltip"
+import { Box, Button, Flex, Heading, HStack, Separator, Spacer, Stack, Text, useDisclosure } from "@chakra-ui/react"
 import { CaretDown, CaretRight, CaretUp, FloppyDiskBack, Info, NotePencil } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
@@ -81,14 +70,14 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
 
   const [completedBlocks, setCompletedBlocks] = useState({})
 
-  const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
+  const { open: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
 
   const [processEventOnLoad, setProcessEventOnLoad] = useState<CustomEvent | null>(null)
   const { requirementBlockAssignmentNodes, updateRequirementBlockAssignmentNode } = useCollaborationAssignmentNodes({
     formRef,
   })
   const {
-    isOpen: isSubmitBlockedModalOpen,
+    open: isSubmitBlockedModalOpen,
     onOpen: onSubmitBlockedModalOpen,
     onClose: onSubmitBlockedModalClose,
   } = useDisclosure()
@@ -295,13 +284,18 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
               <PermitApplicationStatusTag status={currentPermitApplication.status} />
               <Flex direction="column" w="full">
                 <form>
-                  <Tooltip label={t("permitApplication.edit.clickToWriteNickname")} placement="top-start">
+                  <Tooltip
+                    content={t("permitApplication.edit.clickToWriteNickname")}
+                    positioning={{
+                      placement: "top-start",
+                    }}
+                  >
                     <Box>
                       <EditableInputWithControls
                         w="full"
                         initialHint={t("permitApplication.edit.clickToWriteNickname")}
                         value={nicknameWatch || ""}
-                        isDisabled={!doesUserHaveSubmissionPermission || isSubmitted}
+                        disabled={!doesUserHaveSubmissionPermission || isSubmitted}
                         controlsProps={{
                           iconButtonProps: {
                             color: "greys.white",
@@ -338,7 +332,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                   </Tooltip>
                 </form>
 
-                <Text noOfLines={1}>{tagsOrNickname}</Text>
+                <Text lineClamp={1}>{tagsOrNickname}</Text>
                 <HStack>
                   <CopyableValue value={number} label={t("permitApplication.fields.number")} />
                   {currentPermitApplication.referenceNumber && (
@@ -354,7 +348,8 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
             {isSubmitted ? (
               <Stack direction={{ base: "column", lg: "row" }} align={{ base: "flex-end", lg: "center" }}>
                 <BrowserSearchPrompt />
-                <Button variant="ghost" leftIcon={<Info size={20} />} color="white" onClick={onContactsOpen}>
+                <Button variant="ghost" color="white" onClick={onContactsOpen}>
+                  <Info size={20} />
                   {t("permitApplication.show.contactsSummary")}
                 </Button>{" "}
                 <CollaboratorsSidebar
@@ -365,7 +360,10 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                   <SubmissionDownloadModal permitApplication={currentPermitApplication} />
                 )}
                 <Link to={parentProjectPath}>
-                  <Button rightIcon={<CaretRight />}>{t("ui.back")}</Button>
+                  <Button>
+                    {t("ui.back")}
+                    <CaretRight />
+                  </Button>
                 </Link>
               </Stack>
             ) : (
@@ -384,12 +382,11 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                 <Button
                   variant="primary"
                   onClick={handleClickFinishLater}
-                  isDisabled={currentPermitApplication.isViewingPastRequests}
+                  disabled={currentPermitApplication.isViewingPastRequests}
                 >
                   {t("permitApplication.edit.saveDraft")}
                 </Button>
                 <Button
-                  rightIcon={<CaretRight />}
                   onClick={
                     currentPermitApplication.canUserSubmit(currentUser)
                       ? handleScrollToBottom
@@ -397,11 +394,12 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                   }
                 >
                   {t("permitApplication.edit.submit")}
+                  <CaretRight />
                 </Button>
                 {!currentPermitApplication.canUserSubmit(currentUser) && isSubmitBlockedModalOpen && (
                   <PermitApplicationSubmitModal
                     permitApplication={currentPermitApplication}
-                    isOpen={isSubmitBlockedModalOpen}
+                    open={isSubmitBlockedModalOpen}
                     onClose={onSubmitBlockedModalClose}
                   />
                 )}
@@ -433,18 +431,23 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                   h={8}
                   p={1}
                   variant="secondary"
-                  rightIcon={hideRevisionList ? <CaretDown /> : <CaretUp />}
                   onClick={() => setHideRevisionList((cur) => !cur)}
                 >
                   {hideRevisionList ? t("permitApplication.show.showList") : t("permitApplication.show.hideList")}
+                  {hideRevisionList ? <CaretDown /> : <CaretUp />}
                 </Button>
-                <Divider orientation="vertical" height="24px" mx={4} borderColor="greys.grey01" />
+                <Separator orientation="vertical" height="24px" mx={4} borderColor="greys.grey01" />
               </Flex>
             </Flex>
           )}
         </Flex>
       )}
-      <Box id="sidebar-and-form-container" sx={{ "&:after": { content: `""`, display: "block", clear: "both" } }}>
+      <Box
+        id="sidebar-and-form-container"
+        css={{
+          "& &:after": { content: `""`, display: "block", clear: "both" },
+        }}
+      >
         {isRevisionsRequested && !hideRevisionList ? (
           <RevisionSideBar permitApplication={currentPermitApplication} forSubmitter />
         ) : (
@@ -472,7 +475,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
       </Box>
       {isContactsOpen && (
         <ContactSummaryModal
-          isOpen={isContactsOpen}
+          open={isContactsOpen}
           onOpen={onContactsOpen}
           onClose={onContactsClose}
           permitApplication={currentPermitApplication}
@@ -501,13 +504,8 @@ function SaveButton({ handleSave, isViewingPastRequests }) {
   }
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <Button
-        variant="primary"
-        leftIcon={<FloppyDiskBack />}
-        type="submit"
-        isLoading={isSubmitting}
-        isDisabled={isSubmitting || isViewingPastRequests}
-      >
+      <Button variant="primary" type="submit" loading={isSubmitting} disabled={isSubmitting || isViewingPastRequests}>
+        <FloppyDiskBack />
         {t("ui.onlySave")}
       </Button>
     </form>

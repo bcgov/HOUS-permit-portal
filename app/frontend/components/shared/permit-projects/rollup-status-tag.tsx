@@ -22,9 +22,11 @@ export const RollupStatusTag = ({ rollupStatus }: IProps) => {
   const IconComponent = rollupStatusToIconMap[rollupStatus]
 
   return (
-    <Tag bg="transparent" p={0}>
-      <Icon as={IconComponent} mr={2} />
+    <Tag.Root bg="transparent" p={0}>
+      <Icon mr={2} asChild>
+        <IconComponent />
+      </Icon>
       <Text>{t(`permitProject.rollupStatus.${rollupStatus}`)}</Text>
-    </Tag>
+    </Tag.Root>
   )
 }

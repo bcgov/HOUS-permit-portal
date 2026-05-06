@@ -1,4 +1,5 @@
-import { Box, Center, Flex, FormControl, FormLabel, Heading, HStack, InputGroup, Text, VStack } from "@chakra-ui/react"
+import { InputGroup } from "@/components/ui/input-group"
+import { Box, Center, Field, Flex, Heading, HStack, Text, VStack } from "@chakra-ui/react"
 import { CaretRight, CheckCircle, MapPin } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
@@ -65,8 +66,8 @@ export const JurisdictionSearch = observer(({}: IJurisdictionSearchProps) => {
               />
 
               {manualMode && (
-                <FormControl w="full" zIndex={1}>
-                  <FormLabel>{t("jurisdiction.index.title")}</FormLabel>
+                <Field.Root w="full" zIndex={1}>
+                  <Field.Label>{t("jurisdiction.index.title")}</Field.Label>
                   <InputGroup w="full">
                     <JurisdictionSelect
                       onChange={(value) => {
@@ -78,7 +79,7 @@ export const JurisdictionSearch = observer(({}: IJurisdictionSearchProps) => {
                       menuPortalTarget={document.body}
                     />
                   </InputGroup>
-                </FormControl>
+                </Field.Root>
               )}
             </Flex>
           </form>

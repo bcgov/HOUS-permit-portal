@@ -1,4 +1,4 @@
-import { StackDivider, Text, VStack } from "@chakra-ui/react"
+import { Stack, Text, VStack } from "@chakra-ui/react"
 import { Percent } from "@phosphor-icons/react"
 import { t } from "i18next"
 import React from "react"
@@ -25,8 +25,9 @@ export const MEUI = function MEUI({ compliance }: IProps) {
           inputProps={{ isDisabled: true, textAlign: "center", value: compliance.meuiRequirement || "-" }}
           hint={t(`${i18nPrefix}.max`)}
           rightElement={
-            <VStack spacing={0} divider={<StackDivider color="border.base" />}>
+            <VStack gap={0}>
               <UnitsText>{t(`${i18nPrefix}.meuiUnits.numerator`)}</UnitsText>
+              <Stack.Separator color="border.base" />
               <UnitsText>{t(`${i18nPrefix}.meuiUnits.denominator`)}</UnitsText>
             </VStack>
           }
@@ -36,8 +37,9 @@ export const MEUI = function MEUI({ compliance }: IProps) {
         <TextFormControl
           inputProps={{ isDisabled: true, textAlign: "center", value: compliance.meui || "-" }}
           rightElement={
-            <VStack spacing={0} divider={<StackDivider color="border.base" />}>
+            <VStack gap={0}>
               <UnitsText>{t(`${i18nPrefix}.meuiUnits.numerator`)}</UnitsText>
+              <Stack.Separator color="border.base" />
               <UnitsText>{t(`${i18nPrefix}.meuiUnits.denominator`)}</UnitsText>
             </VStack>
           }
@@ -46,7 +48,6 @@ export const MEUI = function MEUI({ compliance }: IProps) {
       <GridData rowSpan={2} alignItems="center" justifyContent="center">
         <RequirementsMetTag success={compliance.meuiPassed} />
       </GridData>
-
       <GridRowHeader>{t(`${i18nPrefix}.meuiImprovement`)}</GridRowHeader>
       <GridData>
         <TextFormControl

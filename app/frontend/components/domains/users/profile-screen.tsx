@@ -1,32 +1,22 @@
+import { InputGroup } from "@/components/ui/input-group"
+import { Switch } from "@/components/ui/switch"
 import {
   Accordion,
-  AccordionButton,
-  AccordionIcon,
-  AccordionItem,
-  AccordionPanel,
   Alert,
   Avatar,
   Button,
   Checkbox,
   Container,
-  Divider,
+  Field,
   Flex,
-  FormControl,
   Heading,
-  InputGroup,
-  InputRightElement,
+  InputElement,
   Link,
-  Select,
-  Switch,
+  NativeSelect,
+  Separator,
   Table,
   Tag,
-  TagLabel,
-  Tbody,
-  Td,
   Text,
-  Th,
-  Thead,
-  Tr,
 } from "@chakra-ui/react"
 import { Info, Warning } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
@@ -146,25 +136,29 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
             {!currentUser.isSubmitter && (
               <InputGroup>
                 <Flex direction="column" w="full">
-                  <Select
-                    disabled
-                    defaultValue={currentUser.role}
-                    w={{ base: "100%", md: "50%" }}
-                    textTransform="capitalize"
-                  >
-                    <option value={currentUser.role}>{t(`user.roles.${currentUser.role as EUserRoles}`)}</option>
-                  </Select>
+                  <NativeSelect.Root>
+                    <NativeSelect.Field
+                      disabled
+                      defaultValue={currentUser.role}
+                      w={{ base: "100%", md: "50%" }}
+                      textTransform="capitalize"
+                    >
+                      <option value={currentUser.role}>{t(`user.roles.${currentUser.role as EUserRoles}`)}</option>
+                    </NativeSelect.Field>
+                    <NativeSelect.Indicator />
+                  </NativeSelect.Root>
                 </Flex>
               </InputGroup>
             )}
 
             <Section>
-              <Avatar
+              <Avatar.Root
                 size="xl"
-                name={currentUser.name}
                 bg={currentUser.name ? "semantic.warningLight" : "greys.grey02"}
                 color="text.primary"
-              />
+              >
+                <Avatar.Fallback name={currentUser.name} />
+              </Avatar.Root>
               <Flex gap={{ base: 4, md: 6 }} direction={{ base: "column", md: "row" }}>
                 <TextFormControl label={t("user.firstName")} fieldName="firstName" required />
                 <TextFormControl label={t("user.lastName")} fieldName="lastName" required />
@@ -172,22 +166,26 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
               {currentUser.isSubmitter && (
                 <>
                   <TextFormControl label={t("auth.organizationLabel")} fieldName="organization" />
-                  <FormControl>
+                  <Field.Root>
                     <Controller
                       name="certified"
                       control={control}
                       render={({ field: { onChange, value } }) => {
                         return (
-                          <Checkbox isChecked={value} onChange={onChange}>
-                            {t("auth.certifiedProfessional")}
-                          </Checkbox>
+                          <Checkbox.Root onCheckedChange={onChange} checked={value}>
+                            <Checkbox.HiddenInput />
+                            <Checkbox.Control>
+                              <Checkbox.Indicator />
+                            </Checkbox.Control>
+                            <Checkbox.Label>{t("auth.certifiedProfessional")}</Checkbox.Label>
+                          </Checkbox.Root>
                         )
                       }}
                     />
-                  </FormControl>
+                  </Field.Root>
                 </>
               )}
-              <Divider my={1} />
+              <Separator my={1} />
               {currentUser.omniauthProvider !== "bcsc" && (
                 <TextFormControl
                   // @ts-ignore
@@ -198,7 +196,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
                 />
               )}
               {!currentUser.isSuperAdmin && (
-                <Alert
+                <Alert.Root
                   status={EFlashMessageStatus.info}
                   borderRadius="sm"
                   gap={1.5}
@@ -211,11 +209,11 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
                   <Info color="var(--chakra-colors-semantic-info)" />
                   <Text>
                     {t("user.changeBceid")}
-                    <Link href={import.meta.env.VITE_BCEID_URL} isExternal>
+                    <Link href={import.meta.env.VITE_BCEID_URL} target="_blank" rel="noopener noreferrer">
                       {t("user.changeBceidLinkText")}
                     </Link>
                   </Text>
-                </Alert>
+                </Alert.Root>
               )}
               {currentUser.isReviewStaff && (
                 <Flex gap={{ base: 4, md: 6 }} direction={{ base: "column", md: "row" }}>
@@ -244,7 +242,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
                         _disabled: { color: "text.primary", bg: "greys.grey04", borderColor: "border.light" },
                       }}
                       inputRightElement={
-                        <InputRightElement pointerEvents="none" width="auto" px={2}>
+                        <InputElement placement="end" pointerEvents="none" width="auto" px={2}>
                           <Flex
                             color="text.primary"
                             borderColor="semantic.warning"
@@ -257,7 +255,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
                           >
                             {t("ui.unverified")}
                           </Flex>
-                        </InputRightElement>
+                        </InputElement>
                       }
                     />
                   ) : (
@@ -272,23 +270,23 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
                         _disabled: { color: "text.primary", bg: "greys.grey04", borderColor: "border.light" },
                       }}
                       inputRightElement={
-                        <InputRightElement pointerEvents="none" width="auto" px={2}>
-                          <Tag
+                        <InputElement placement="end" pointerEvents="none" width="auto" px={2}>
+                          <Tag.Root
                             variant="outline"
                             color="text.primary"
                             borderColor="semantic.success"
                             bg="theme.green.100"
                             rounded="xs"
                           >
-                            <TagLabel>{t("ui.verified")}</TagLabel>
-                          </Tag>
-                        </InputRightElement>
+                            <Tag.Label>{t("ui.verified")}</Tag.Label>
+                          </Tag.Root>
+                        </InputElement>
                       }
                     />
                   )}
 
                   {confirmationRequired && (
-                    <Alert
+                    <Alert.Root
                       status={EFlashMessageStatus.warning}
                       borderRadius="sm"
                       gap={1.5}
@@ -304,25 +302,25 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
                           <Trans
                             i18nKey="user.confirmationRequiredWithEmail"
                             values={{ email: currentUser.email }}
-                            components={{ 1: <Button variant="link" onClick={handleResendConfirmationEmail} /> }}
+                            components={{ 1: <Button variant="plain" onClick={handleResendConfirmationEmail} /> }}
                           />
                         ) : (
                           <Trans
                             i18nKey="user.confirmationRequired"
-                            components={{ 1: <Button variant="link" onClick={handleResendConfirmationEmail} /> }}
+                            components={{ 1: <Button variant="plain" onClick={handleResendConfirmationEmail} /> }}
                           />
                         )}
                       </Text>
-                    </Alert>
+                    </Alert.Root>
                   )}
                   {isEditingEmail ? (
                     <>
-                      <Divider my={4} />
+                      <Separator my={4} />
                       <EmailFormControl showIcon label={t("user.newEmail")} fieldName="email" required />
                     </>
                   ) : (
                     <Button
-                      variant="link"
+                      variant="plain"
                       onClick={() => {
                         setIsEditingEmail(true)
                       }}
@@ -333,67 +331,73 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
                 </>
               )}
 
-              <Table variant="simple">
-                <Thead>
-                  <Tr>
-                    <Th>{t("user.notifications.event")}</Th>
-                    <Th>{t("user.notifications.enableNotification")}</Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
+              <Table.Root variant="simple">
+                <Table.Header>
+                  <Table.Row>
+                    <Table.ColumnHeader>{t("user.notifications.event")}</Table.ColumnHeader>
+                    <Table.ColumnHeader>{t("user.notifications.enableNotification")}</Table.ColumnHeader>
+                  </Table.Row>
+                </Table.Header>
+                <Table.Body>
                   {events.map((event, index) => (
                     <EventRow key={index} {...event} />
                   ))}
-                </Tbody>
-              </Table>
+                </Table.Body>
+              </Table.Root>
             </Section>
 
             {!currentUser.isSuperAdmin && <UserEulas />}
 
             <Section>
-              <Accordion allowToggle>
-                <AccordionItem border="none">
-                  <AccordionButton px={0}>
+              <Accordion.Root collapsible>
+                <Accordion.Item border="none" value="item-0">
+                  <Accordion.ItemTrigger px={0}>
                     <Heading as="h3" m={0}>
                       {t("user.closeAccountSectionTitle")}
                     </Heading>
-                    <AccordionIcon />
-                  </AccordionButton>
-                  <AccordionPanel px={0} pt={2}>
-                    <Flex direction="column" gap={4}>
-                      <Text>{t("user.closeAccountParagraph1" as any)}</Text>
-                      <Text>{t("user.closeAccountParagraph2" as any)}</Text>
-                      <Text>{t("user.closeAccountParagraph3" as any)}</Text>
-                      <Checkbox
-                        isChecked={closeAccountAcknowledged}
-                        onChange={(e) => setCloseAccountAcknowledged(e.target.checked)}
-                      >
-                        {t("user.closeAccountAcknowledge" as any)}
-                      </Checkbox>
+                    <Accordion.ItemIndicator />
+                  </Accordion.ItemTrigger>
+                  <Accordion.ItemContent px={0} pt={2}>
+                    <Accordion.ItemBody>
+                      <Flex direction="column" gap={4}>
+                        <Text>{t("user.closeAccountParagraph1" as any)}</Text>
+                        <Text>{t("user.closeAccountParagraph2" as any)}</Text>
+                        <Text>{t("user.closeAccountParagraph3" as any)}</Text>
+                        <Checkbox.Root
+                          onCheckedChange={(e) => setCloseAccountAcknowledged(e.target.checked)}
+                          checked={closeAccountAcknowledged}
+                        >
+                          <Checkbox.HiddenInput />
+                          <Checkbox.Control>
+                            <Checkbox.Indicator />
+                          </Checkbox.Control>
+                          <Checkbox.Label>{t("user.closeAccountAcknowledge" as any)}</Checkbox.Label>
+                        </Checkbox.Root>
 
-                      <Button
-                        colorScheme="red"
-                        variant="outline"
-                        alignSelf="flex-start"
-                        isLoading={isArchiving}
-                        loadingText={t("ui.loading")}
-                        isDisabled={!closeAccountAcknowledged || isSubmitting || isArchiving}
-                        onClick={handleArchiveMyAccount}
-                      >
-                        {t("user.archiveMyAccount" as any)}
-                      </Button>
-                    </Flex>
-                  </AccordionPanel>
-                </AccordionItem>
-              </Accordion>
+                        <Button
+                          colorPalette="red"
+                          variant="outline"
+                          alignSelf="flex-start"
+                          loading={isArchiving}
+                          loadingText={t("ui.loading")}
+                          disabled={!closeAccountAcknowledged || isSubmitting || isArchiving}
+                          onClick={handleArchiveMyAccount}
+                        >
+                          {t("user.archiveMyAccount" as any)}
+                        </Button>
+                      </Flex>
+                    </Accordion.ItemBody>
+                  </Accordion.ItemContent>
+                </Accordion.Item>
+              </Accordion.Root>
             </Section>
 
             <Flex as="section" gap={4} mt={4}>
-              <Button variant="primary" type="submit" isLoading={isSubmitting} loadingText={t("ui.loading")}>
+              <Button variant="primary" type="submit" loading={isSubmitting} loadingText={t("ui.loading")}>
                 {t("ui.save")}
               </Button>
               {!currentUser.isUnconfirmed && (
-                <Button variant="secondary" isDisabled={isSubmitting} onClick={() => navigate(-1)}>
+                <Button variant="secondary" disabled={isSubmitting} onClick={() => navigate(-1)}>
                   {t("ui.cancel")}
                 </Button>
               )}
@@ -426,22 +430,22 @@ const EventRow: React.FC<IEventRowProps> = ({ event, inAppControl, emailControl,
   const { t } = useTranslation()
 
   return (
-    <Tr>
-      <Td w="45%">{event}</Td>
-      <Td w="55%">
+    <Table.Row>
+      <Table.Cell w="45%">{event}</Table.Cell>
+      <Table.Cell w="55%">
         <Flex gap={6} alignItems="center">
           {inAppControl ? (
             <Controller
               name={inAppControl}
               control={control}
               render={({ field: { onChange, value } }) => (
-                <Switch isChecked={value} onChange={onChange}>
+                <Switch checked={value} onValueChange={onChange}>
                   {t("user.inApp")}
                 </Switch>
               )}
             />
           ) : (
-            <Switch isChecked={inAppChecked} disabled={true}>
+            <Switch checked={inAppChecked} disabled={true}>
               {t("user.inApp")}
             </Switch>
           )}
@@ -451,18 +455,18 @@ const EventRow: React.FC<IEventRowProps> = ({ event, inAppControl, emailControl,
               name={emailControl}
               control={control}
               render={({ field: { onChange, value } }) => (
-                <Switch isChecked={value} onChange={onChange}>
+                <Switch checked={value} onValueChange={onChange}>
                   {t("user.email")}
                 </Switch>
               )}
             />
           ) : (
-            <Switch isChecked={emailChecked} disabled={true}>
+            <Switch checked={emailChecked} disabled={true}>
               {t("user.email")}
             </Switch>
           )}
         </Flex>
-      </Td>
-    </Tr>
+      </Table.Cell>
+    </Table.Row>
   )
 }

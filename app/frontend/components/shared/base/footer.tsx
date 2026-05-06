@@ -1,4 +1,4 @@
-import { Box, Container, Divider, Flex, Heading, Image, Link, Text, VStack } from "@chakra-ui/react"
+import { Box, Container, Flex, Heading, Image, Link, Separator, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -129,7 +129,7 @@ export const Footer = observer(() => {
                     </Link>
                   </VStack>
                 </Flex>
-                <Divider borderColor="theme.blue" />
+                <Separator borderColor="theme.blue" />
                 <Text color="text.secondary" fontSize="sm">
                   &copy; {new Date().getFullYear()} {t("site.copyrightHolder")}
                 </Text>

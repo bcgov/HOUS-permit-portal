@@ -1,4 +1,5 @@
-import { Tooltip, TooltipProps } from "@chakra-ui/react"
+import { Tooltip } from "@/components/ui/tooltip"
+import { TooltipProps } from "@chakra-ui/react"
 import { Info } from "@phosphor-icons/react/dist/ssr"
 import React from "react"
 
@@ -8,7 +9,7 @@ interface InfoTooltipProps extends Omit<TooltipProps, "children"> {
 }
 export function InfoTooltip({ iconSize = 16, ...props }: InfoTooltipProps) {
   return (
-    <Tooltip {...props}>
+    <Tooltip>
       <Info aria-label={props.ariaLabel} size={iconSize} />
     </Tooltip>
   )

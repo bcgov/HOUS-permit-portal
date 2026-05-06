@@ -1,14 +1,6 @@
-import {
-  FormControl,
-  FormHelperText,
-  FormLabel,
-  Input,
-  InputGroup,
-  InputRightElement,
-  Radio,
-  RadioGroup,
-  Stack,
-} from "@chakra-ui/react"
+import { InputGroup } from "@/components/ui/input-group"
+import { Radio, RadioGroup } from "@/components/ui/radio"
+import { Field, Input, InputElement, Stack } from "@chakra-ui/react"
 import { ErrorMessage } from "@hookform/error-message"
 import { t } from "i18next"
 import React from "react"
@@ -25,46 +17,46 @@ export const SuiteSubMeteringFields = () => {
 
   return (
     <>
-      <FormControl>
-        <FormLabel pb={1}>{t(`${i18nPrefix}.isRelevant.label`)}</FormLabel>
-        <FormHelperText mb={1} mt={0} color="semantic.error">
+      <Field.Root>
+        <Field.Label pb={1}>{t(`${i18nPrefix}.isRelevant.label`)}</Field.Label>
+        <Field.HelperText mb={1} mt={0} color="semantic.error">
           <ErrorMessage errors={errors} name="isSuiteSubMetered" />
-        </FormHelperText>
+        </Field.HelperText>
         <Controller
           name="isSuiteSubMetered"
           control={control}
           rules={{ required: t(`${i18nPrefix}.isRelevant.error`) }}
           render={({ field: { value, onChange } }) => (
-            <RadioGroup value={value} onChange={onChange}>
-              <Stack spacing={1}>
+            <RadioGroup.Root value={value} onValueChange={onChange}>
+              <Stack gap={1}>
                 {Object.values(EIsSuiteSubMetered).map((v) => (
                   <Radio key={generateUUID()} value={v}>
                     {t(`${i18nPrefix}.isRelevant.options.${v}`)}
                   </Radio>
                 ))}
               </Stack>
-            </RadioGroup>
+            </RadioGroup.Root>
           )}
         />
-      </FormControl>
+      </Field.Root>
       {watchIsSuiteSubMetered == EIsSuiteSubMetered.no && (
-        <FormControl>
-          <FormLabel>{t(`${i18nPrefix}.heatingEnergy.label`)}</FormLabel>
-          <FormHelperText mb={1} mt={0}>
+        <Field.Root>
+          <Field.Label>{t(`${i18nPrefix}.heatingEnergy.label`)}</Field.Label>
+          <Field.HelperText mb={1} mt={0}>
             {t(`${i18nPrefix}.heatingEnergy.hint`)}
-          </FormHelperText>
-          <FormHelperText mb={1} mt={0} color="semantic.error">
+          </Field.HelperText>
+          <Field.HelperText mb={1} mt={0} color="semantic.error">
             <ErrorMessage errors={errors} name="suiteHeatingEnergy" />
-          </FormHelperText>
+          </Field.HelperText>
           <InputGroup maxW="200px">
             <Input
               type="number"
               step={"any"}
               {...register("suiteHeatingEnergy", { required: t(`${i18nPrefix}.heatingEnergy.error`) })}
             />
-            <InputRightElement>{t(`${i18nPrefix}.heatingEnergy.units`)}</InputRightElement>
+            <InputElement placement="end">{t(`${i18nPrefix}.heatingEnergy.units`)}</InputElement>
           </InputGroup>
-        </FormControl>
+        </Field.Root>
       )}
     </>
   )

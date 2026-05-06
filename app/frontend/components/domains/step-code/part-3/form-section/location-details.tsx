@@ -1,15 +1,5 @@
-import {
-  Flex,
-  FormControl,
-  FormErrorMessage,
-  FormHelperText,
-  FormLabel,
-  Input,
-  Radio,
-  RadioGroup,
-  Stack,
-  Text,
-} from "@chakra-ui/react"
+import { Radio, RadioGroup } from "@/components/ui/radio"
+import { Field, Flex, Input, Stack, Text } from "@chakra-ui/react"
 import { ErrorMessage } from "@hookform/error-message"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
@@ -59,14 +49,14 @@ export const LocationDetails = observer(function Part3StepCodeFormLocationDetail
         <Text fontSize="md">{t(`${i18nPrefix}.instructions`)}</Text>
       </Flex>
       <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
-        <FormControl>
-          <FormLabel>{t(`${i18nPrefix}.aboveGradeStories.label`)}</FormLabel>
-          <FormHelperText mb={1} mt={0}>
+        <Field.Root>
+          <Field.Label>{t(`${i18nPrefix}.aboveGradeStories.label`)}</Field.Label>
+          <Field.HelperText mb={1} mt={0}>
             {t(`${i18nPrefix}.aboveGradeStories.hint`)}
-          </FormHelperText>
-          <FormHelperText mb={1} mt={0} color="semantic.error">
+          </Field.HelperText>
+          <Field.HelperText mb={1} mt={0} color="semantic.error">
             <ErrorMessage errors={errors} name="buildingHeight" />
-          </FormHelperText>
+          </Field.HelperText>
           <Input
             maxW={"200px"}
             type="number"
@@ -74,45 +64,45 @@ export const LocationDetails = observer(function Part3StepCodeFormLocationDetail
             textAlign="left"
             {...register("buildingHeight", { required: t(`${i18nPrefix}.aboveGradeStories.error`) })}
           />
-        </FormControl>
-        <FormControl>
-          <FormLabel>{t(`${i18nPrefix}.hdd.label`)}</FormLabel>
-          <FormHelperText mb={1} mt={0}>
+        </Field.Root>
+        <Field.Root>
+          <Field.Label>{t(`${i18nPrefix}.hdd.label`)}</Field.Label>
+          <Field.HelperText mb={1} mt={0}>
             {t(`${i18nPrefix}.hdd.hint`)}
-          </FormHelperText>
-          <FormHelperText mb={1} mt={0} color="semantic.error">
+          </Field.HelperText>
+          <Field.HelperText mb={1} mt={0} color="semantic.error">
             <ErrorMessage errors={errors} name="heatingDegreeDays" />
-          </FormHelperText>
+          </Field.HelperText>
           <Input
             maxW={"200px"}
             type="number"
             textAlign="left"
             {...register("heatingDegreeDays", { required: t(`${i18nPrefix}.hdd.error`) })}
           />
-        </FormControl>
-        <FormControl>
-          <FormLabel pb={1}>{t(`${i18nPrefix}.climateZone.label`)}</FormLabel>
-          <FormErrorMessage mb={1} mt={0} color="semantic.error">
+        </Field.Root>
+        <Field.Root>
+          <Field.Label pb={1}>{t(`${i18nPrefix}.climateZone.label`)}</Field.Label>
+          <Field.ErrorText mb={1} mt={0} color="semantic.error">
             <ErrorMessage errors={errors} name="climateZone" />
-          </FormErrorMessage>
+          </Field.ErrorText>
           <Controller
             name="climateZone"
             control={control}
             rules={{ required: t(`${i18nPrefix}.climateZone.error`) }}
             render={({ field: { onChange, value } }) => (
-              <RadioGroup defaultValue={value} onChange={onChange}>
-                <Stack spacing={1}>
+              <RadioGroup.Root defaultValue={value} onValueChange={onChange}>
+                <Stack gap={1}>
                   {Object.values(EClimateZone).map((zone) => (
                     <Radio key={zone} value={zone}>
                       {t(`${i18nPrefix}.climateZones.${zone}`)}
                     </Radio>
                   ))}
                 </Stack>
-              </RadioGroup>
+              </RadioGroup.Root>
             )}
           />
-        </FormControl>
-        <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
+        </Field.Root>
+        <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} loading={isSubmitting} />
       </Flex>
     </>
   )

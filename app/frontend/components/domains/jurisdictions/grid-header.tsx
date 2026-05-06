@@ -23,15 +23,17 @@ export const GridHeaders = observer(function GridHeaders({ columns, span, includ
     <Box display={"contents"} role={"rowgroup"}>
       <Box display={"contents"} role={"row"}>
         <GridItem
-          as={Flex}
           gridColumn={`span ${span}`}
           p={6}
           bg={"greys.grey10"}
           justifyContent={"space-between"}
           align="center"
+          asChild
         >
-          <Text role={"heading"}>{t("jurisdiction.index.tableHeading")}</Text>
-          <ModelSearchInput searchModel={jurisdictionStore} />
+          <Flex>
+            <Text role={"heading"}>{t("jurisdiction.index.tableHeading")}</Text>
+            <ModelSearchInput searchModel={jurisdictionStore} />
+          </Flex>
         </GridItem>
       </Box>
       <Box display={"contents"} role={"row"}>
@@ -40,16 +42,20 @@ export const GridHeaders = observer(function GridHeaders({ columns, span, includ
             <GridHeader key={field} role={"columnheader"}>
               <Flex
                 w={"full"}
-                as={"button"}
                 justifyContent={"space-between"}
                 cursor="pointer"
-                onClick={() => toggleSort(field as any as EJurisdictionSortFields)}
                 borderRight={"1px solid"}
                 borderColor={"border.light"}
                 px={4}
+                asChild
               >
-                <Text textAlign="left">{getSortColumnHeader(field as any as EJurisdictionSortFields)}</Text>
-                <SortIcon<EJurisdictionSortFields> field={field as any as EJurisdictionSortFields} currentSort={sort} />
+                <button onClick={() => toggleSort(field as any as EJurisdictionSortFields)}>
+                  <Text textAlign="left">{getSortColumnHeader(field as any as EJurisdictionSortFields)}</Text>
+                  <SortIcon<EJurisdictionSortFields>
+                    field={field as any as EJurisdictionSortFields}
+                    currentSort={sort}
+                  />
+                </button>
               </Flex>
             </GridHeader>
           )

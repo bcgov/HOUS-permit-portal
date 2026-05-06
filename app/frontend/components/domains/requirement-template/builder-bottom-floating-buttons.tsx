@@ -15,7 +15,7 @@ export function BuilderBottomFloatingButtons({ isCollapsedAll, setIsCollapsedAll
 
   return (
     <HStack
-      spacing={4}
+      gap={4}
       justify="space-between"
       w="full"
       bg="greys.grey03"
@@ -30,7 +30,8 @@ export function BuilderBottomFloatingButtons({ isCollapsedAll, setIsCollapsedAll
     >
       {renderSaveButton && renderSaveButton()}
       <HStack ml="auto">
-        <Button variant="greyButton" minW="132px" leftIcon={<ArrowUp />} onClick={handleScrollToTop}>
+        <Button variant="greyButton" minW="132px" onClick={handleScrollToTop}>
+          <ArrowUp />
           {t("requirementTemplate.edit.goToTop")}
         </Button>
         <Button variant="greyButton" minW="132px" onClick={debouncedHandleClick}>

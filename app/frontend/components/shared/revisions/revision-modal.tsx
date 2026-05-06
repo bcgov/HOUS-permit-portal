@@ -1,19 +1,12 @@
 import {
   Button,
-  Divider,
+  Dialog,
+  Field,
   Flex,
-  FormControl,
-  FormHelperText,
-  FormLabel,
   Heading,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Select,
+  NativeSelect,
+  Portal,
+  Separator,
   Spacer,
   Textarea,
   useDisclosure,
@@ -123,94 +116,110 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
   const selectedLabel = revisionReasonOptions.find((opt) => opt.value === reasonCode)?.label
 
   return (
-    <Modal onClose={handleClose} isOpen={isOpen} size="2xl">
-      <ModalOverlay />
-
-      <ModalContent mt={48}>
-        <ModalHeader textAlign="center">
-          <ModalCloseButton fontSize="11px" />
-          <Heading as="h3" fontSize="xl">
-            {t("permitApplication.show.revision.revisionRequest")}
-          </Heading>
-        </ModalHeader>
-        <ModalBody>
-          <Flex direction="column" gap={4}>
-            <FormControl>
-              <FormLabel>{t("permitApplication.show.revision.reasonFor")}</FormLabel>
-              {isRevisionsRequested ? (
-                <Textarea disabled={true}>{selectedLabel}</Textarea>
-              ) : (
-                <Select
-                  placeholder={t("ui.pleaseSelect")}
-                  value={reasonCode}
-                  onChange={(e) => setReasonCode(e.target.value)}
-                  isDisabled={disableInput}
-                >
-                  {revisionReasonOptions.map((opt) => (
-                    <option value={opt.value} key={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </Select>
-              )}
-            </FormControl>
-            <FormControl>
-              <FormLabel>{t("permitApplication.show.revision.comment")}</FormLabel>
-              <Textarea
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                placeholder={t("permitApplication.show.revision.comment")}
-                maxLength={350}
-                isDisabled={disableInput}
-                sx={{
-                  _disabled: {
-                    color: "text.primary",
-                    cursor: "not-allowed",
-                  },
-                }}
-              />
-              {!disableInput && <FormHelperText>{t("permitApplication.show.revision.maxCharacters")}</FormHelperText>}
-            </FormControl>
-
-            <Divider />
-
-            <SingleRequirementForm requirementJson={requirementForm} submissionData={requirementSubmission} />
-          </Flex>
-          <ModalFooter>
-            <Flex width="full" justify="center" gap={4}>
-              {disableInput ? (
-                <>
-                  <Button variant="secondary" onClick={onClose}>
-                    {t("ui.ok")}
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button onClick={handleUpsert} variant="primary" isDisabled={!reasonCode || isRevisionsRequested}>
-                    {t("permitApplication.show.revision.useButton")}
-                  </Button>
-
-                  <Button variant="secondary" onClick={onClose}>
-                    {t("ui.cancel")}
-                  </Button>
-                  <Spacer />
-                  {revisionRequest && (
-                    <Button
-                      color="semantic.error"
-                      leftIcon={<Trash />}
-                      variant="link"
-                      onClick={handleDelete}
-                      isDisabled={isRevisionsRequested}
-                    >
-                      {t("ui.delete")}
-                    </Button>
+    <Dialog.Root
+      open={open}
+      size="xl"
+      onOpenChange={(e) => {
+        if (!e.open) {
+          handleClose()
+        }
+      }}
+    >
+      <Portal>
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content mt={48}>
+            <Dialog.Header textAlign="center">
+              <Dialog.CloseTrigger fontSize="11px" />
+              <Heading as="h3" fontSize="xl">
+                {t("permitApplication.show.revision.revisionRequest")}
+              </Heading>
+            </Dialog.Header>
+            <Dialog.Body>
+              <Flex direction="column" gap={4}>
+                <Field.Root>
+                  <Field.Label>{t("permitApplication.show.revision.reasonFor")}</Field.Label>
+                  {isRevisionsRequested ? (
+                    <Textarea disabled={true}>{selectedLabel}</Textarea>
+                  ) : (
+                    <NativeSelect.Root>
+                      <NativeSelect.Field
+                        placeholder={t("ui.pleaseSelect")}
+                        value={reasonCode}
+                        onValueChange={(e) => setReasonCode(e.target.value)}
+                        disabled={disableInput}
+                      >
+                        {revisionReasonOptions.map((opt) => (
+                          <option value={opt.value} key={opt.value}>
+                            {opt.label}
+                          </option>
+                        ))}
+                      </NativeSelect.Field>
+                      <NativeSelect.Indicator />
+                    </NativeSelect.Root>
                   )}
-                </>
-              )}
-            </Flex>
-          </ModalFooter>
-        </ModalBody>
-      </ModalContent>
-    </Modal>
+                </Field.Root>
+                <Field.Root>
+                  <Field.Label>{t("permitApplication.show.revision.comment")}</Field.Label>
+                  <Textarea
+                    value={comment}
+                    onValueChange={(e) => setComment(e.target.value)}
+                    placeholder={t("permitApplication.show.revision.comment")}
+                    maxLength={350}
+                    disabled={disableInput}
+                    css={{
+                      "& _disabled": {
+                        color: "text.primary",
+                        cursor: "not-allowed",
+                      },
+                    }}
+                  />
+                  {!disableInput && (
+                    <Field.HelperText>{t("permitApplication.show.revision.maxCharacters")}</Field.HelperText>
+                  )}
+                </Field.Root>
+
+                <Separator />
+
+                <SingleRequirementForm requirementJson={requirementForm} submissionData={requirementSubmission} />
+              </Flex>
+              <Dialog.Footer>
+                <Flex width="full" justify="center" gap={4}>
+                  {disableInput ? (
+                    <>
+                      <Button variant="secondary" onClick={onClose}>
+                        {t("ui.ok")}
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button onClick={handleUpsert} variant="primary" disabled={!reasonCode || isRevisionsRequested}>
+                        {t("permitApplication.show.revision.useButton")}
+                      </Button>
+
+                      <Button variant="secondary" onClick={onClose}>
+                        {t("ui.cancel")}
+                      </Button>
+                      <Spacer />
+                      {revisionRequest && (
+                        <Button
+                          color="semantic.error"
+                          variant="plain"
+                          onClick={handleDelete}
+                          disabled={isRevisionsRequested}
+                        >
+                          <Trash />
+                          {t("ui.delete")}
+                        </Button>
+                      )}
+                    </>
+                  )}
+                </Flex>
+              </Dialog.Footer>
+            </Dialog.Body>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Portal>
+    </Dialog.Root>
   )
 }

@@ -1,4 +1,4 @@
-import { Box, Button, Container, Flex, Heading, Tab, TabList, TabPanel, TabPanels, Tabs, Text } from "@chakra-ui/react"
+import { Box, Button, Container, Flex, Heading, Tab, TabPanel, TabPanels, Tabs, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
@@ -62,7 +62,7 @@ export const JurisdictionApiMappingsSetupIndexScreen = observer(function Jurisdi
           {t("apiMappingsSetup.title")}
         </Heading>
 
-        <Tabs isLazy index={selectedStatusTabIndex}>
+        <Tabs.Root lazyMount value={selectedStatusTabIndex}>
           <Flex alignItems={"center"}>
             <Box flex={1}>
               <Text color="text.secondary" my={6}>
@@ -73,13 +73,13 @@ export const JurisdictionApiMappingsSetupIndexScreen = observer(function Jurisdi
                 {t("digitalBuildingPermits.index.selectPermit")}
               </Text>
             </Box>
-            <TabList border={"none"} h={"fit-content"}>
+            <Tabs.List border={"none"} h={"fit-content"}>
               {templateStatuses.map((s) => (
                 <Tab key={s} onClick={() => navigateToStatusTab(s)}>
                   {t(`requirementTemplate.status.${s}`)}
                 </Tab>
               ))}
-            </TabList>
+            </Tabs.List>
           </Flex>
 
           <TabPanels>
@@ -88,14 +88,15 @@ export const JurisdictionApiMappingsSetupIndexScreen = observer(function Jurisdi
                 <DigitalBuildingPermitsList
                   renderButton={(templateVersion) => (
                     <Button
-                      as={RouterLink}
-                      to={`/api-settings/api-mappings/digital-building-permits/${templateVersion.id}/edit`}
-                      isDisabled={!currentUser?.jurisdiction?.externalApiEnabled}
+                      disabled={!currentUser?.jurisdiction?.externalApiEnabled}
                       variant={"primary"}
                       ml={4}
                       alignSelf={"center"}
+                      asChild
                     >
-                      {t("ui.manage")}
+                      <RouterLink to={`/api-settings/api-mappings/digital-building-permits/${templateVersion.id}/edit`}>
+                        {t("ui.manage")}
+                      </RouterLink>
                     </Button>
                   )}
                   status={s}
@@ -107,7 +108,7 @@ export const JurisdictionApiMappingsSetupIndexScreen = observer(function Jurisdi
               </TabPanel>
             ))}
           </TabPanels>
-        </Tabs>
+        </Tabs.Root>
       </Box>
     </Container>
   )

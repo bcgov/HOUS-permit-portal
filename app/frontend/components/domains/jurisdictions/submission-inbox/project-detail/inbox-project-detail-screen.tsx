@@ -1,4 +1,4 @@
-import { Container, Flex, Heading, IconButton, TabPanel, TabPanels, Tabs, Text } from "@chakra-ui/react"
+import { Container, Flex, Heading, IconButton, Tabs, Text } from "@chakra-ui/react"
 import { CaretLeft, ClipboardText, SquaresFour, TrendUp } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useTransition } from "react"
@@ -69,15 +69,12 @@ export const InboxProjectDetailScreen = observer(() => {
       <Flex flexShrink={0} justify="space-between" align="center" py={6} borderBottom="1px" borderColor="border.light">
         <Container maxW="container.lg">
           <Flex align="center" h={24}>
-            <IconButton
-              as={RouterLink}
-              to={`/jurisdictions/${jurisdictionId}/submission-inbox`}
-              aria-label={t("submissionInbox.projectDetail.backToInbox")}
-              icon={<CaretLeft size={24} />}
-              variant="ghost"
-              mr={2}
-            />
-            <Heading as="h1" fontWeight={700} fontSize="3xl" flex={1} noOfLines={1} mb={0}>
+            <IconButton aria-label={t("submissionInbox.projectDetail.backToInbox")} variant="ghost" mr={2} asChild>
+              <RouterLink to={`/jurisdictions/${jurisdictionId}/submission-inbox`}>
+                <CaretLeft size={24} />
+              </RouterLink>
+            </IconButton>
+            <Heading as="h1" fontWeight={700} fontSize="3xl" flex={1} lineClamp={1} mb={0}>
               {currentPermitProject.number}
             </Heading>
             {/* todo: inbox specific rollup status box? */}
@@ -85,30 +82,30 @@ export const InboxProjectDetailScreen = observer(() => {
           </Flex>
         </Container>
       </Flex>
-      <Tabs
+      <Tabs.Root
         w="full"
         flex={1}
         minH={0}
         minW={0}
-        index={getTabIndex()}
-        onChange={handleTabChange}
+        value={String(getTabIndex())}
+        onValueChange={({ value }) => handleTabChange(Number(value))}
         display="flex"
-        isLazy
+        lazyMount
         variant="sidebar"
       >
         <ProjectSidebarTabList p={0} tabsData={TABS_DATA} />
-        <TabPanels flex={1} minH={0} minW={0} overflow="hidden" display="flex" flexDirection="column">
-          <TabPanel flex={1} minH={0} minW={0} display="flex" flexDirection="column" overflow="hidden">
+        <Tabs.ContentGroup flex={1} minH={0} minW={0} overflow="hidden" display="flex" flexDirection="column">
+          <Tabs.Content value="0" flex={1} minH={0} minW={0} display="flex" flexDirection="column" overflow="hidden">
             {isPending ? <LoadingScreen /> : <InboxOverviewTab permitProject={currentPermitProject} />}
-          </TabPanel>
-          <TabPanel flex={1} minH={0} minW={0} display="flex" flexDirection="column" overflow="hidden">
+          </Tabs.Content>
+          <Tabs.Content value="1" flex={1} minH={0} minW={0} display="flex" flexDirection="column" overflow="hidden">
             {isPending ? <LoadingScreen /> : <InboxPermitsTab permitProject={currentPermitProject} />}
-          </TabPanel>
-          <TabPanel flex={1} minH={0} minW={0} display="flex" flexDirection="column" overflow="hidden">
+          </Tabs.Content>
+          <Tabs.Content value="2" flex={1} minH={0} minW={0} display="flex" flexDirection="column" overflow="hidden">
             {isPending ? <LoadingScreen /> : <ActivityTabPanelContent permitProject={currentPermitProject} />}
-          </TabPanel>
-        </TabPanels>
-      </Tabs>
+          </Tabs.Content>
+        </Tabs.ContentGroup>
+      </Tabs.Root>
     </Flex>
   )
 })

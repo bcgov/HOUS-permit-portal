@@ -1,15 +1,5 @@
-import {
-  Checkbox,
-  CheckboxGroup,
-  Flex,
-  FormControl,
-  FormHelperText,
-  FormLabel,
-  Radio,
-  RadioGroup,
-  Stack,
-  Text,
-} from "@chakra-ui/react"
+import { RadioGroup } from "@/components/ui/radio"
+import { Checkbox, CheckboxGroup, Field, Flex, Stack, Text } from "@chakra-ui/react"
 import { ErrorMessage } from "@hookform/error-message"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
@@ -98,45 +88,55 @@ export const FuelTypes = observer(function Part3StepCodeFormFuelTypes() {
         </Text>
       </Flex>
       <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
-        <FormControl>
-          <FormLabel>{t(`${i18nPrefix}.isRelevant`)}</FormLabel>
-          <RadioGroup onChange={setIsRelevant} value={isRelevant}>
-            <Stack spacing={5} direction="row">
-              <Radio variant="binary" value={"yes"}>
-                {t("ui.yes")}
-              </Radio>
-              <Radio variant="binary" value={"no"}>
-                {t("ui.no")}
-              </Radio>
+        <Field.Root>
+          <Field.Label>{t(`${i18nPrefix}.isRelevant`)}</Field.Label>
+          <RadioGroup.Root onValueChange={setIsRelevant} value={isRelevant}>
+            <Stack gap={5} direction="row">
+              <RadioGroup.Item variant="binary" value={"yes"}>
+                <RadioGroup.ItemHiddenInput />
+                <RadioGroup.ItemIndicator />
+                <RadioGroup.ItemText>{t("ui.yes")}</RadioGroup.ItemText>
+              </RadioGroup.Item>
+              <RadioGroup.Item variant="binary" value={"no"}>
+                <RadioGroup.ItemHiddenInput />
+                <RadioGroup.ItemIndicator />
+                <RadioGroup.ItemText>{t("ui.no")}</RadioGroup.ItemText>
+              </RadioGroup.Item>
             </Stack>
-          </RadioGroup>
-        </FormControl>
+          </RadioGroup.Root>
+        </Field.Root>
         {isRelevant == "yes" && (
-          <FormControl>
-            <FormLabel pb={1}>{t(`${i18nPrefix}.fuelTypes.label`)}</FormLabel>
-            <FormHelperText mb={1} mt={0} color="semantic.error">
+          <Field.Root>
+            <Field.Label pb={1}>{t(`${i18nPrefix}.fuelTypes.label`)}</Field.Label>
+            <Field.HelperText mb={1} mt={0} color="semantic.error">
               <ErrorMessage errors={errors} name="fuelTypes" />
-            </FormHelperText>
+            </Field.HelperText>
             <Controller
               name="fuelTypes"
               rules={{ required: t(`${i18nPrefix}.fuelTypes.error`) }}
               control={control}
               render={({ field: { onChange, value } }) => (
-                <CheckboxGroup defaultValue={value} onChange={onChange}>
+                <CheckboxGroup defaultValue={value} onValueChange={onChange}>
                   <Flex direction="column">
                     {Object.values(checklist?.uncommonFuelTypeKeys || []).map((key) => (
-                      <Checkbox key={key} value={key}>
-                        <Trans i18nKey={`${i18nPrefix}.fuelTypeKeys.${key}`} components={{ strong: <strong /> }} />
-                      </Checkbox>
+                      <Checkbox.Root key={key} value={key}>
+                        <Checkbox.HiddenInput />
+                        <Checkbox.Control>
+                          <Checkbox.Indicator />
+                        </Checkbox.Control>
+                        <Checkbox.Label>
+                          <Trans i18nKey={`${i18nPrefix}.fuelTypeKeys.${key}`} components={{ strong: <strong /> }} />
+                        </Checkbox.Label>
+                      </Checkbox.Root>
                     ))}
                   </Flex>
                 </CheckboxGroup>
               )}
             />
-          </FormControl>
+          </Field.Root>
         )}
         {(isRelevant == "yes" || isRelevant == "no") && (
-          <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
+          <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} loading={isSubmitting} />
         )}
       </Flex>
     </>

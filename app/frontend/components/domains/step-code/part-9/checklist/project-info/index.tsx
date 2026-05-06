@@ -1,4 +1,5 @@
-import { Flex, FormControl, FormLabel, InputGroup, Text } from "@chakra-ui/react"
+import { InputGroup } from "@/components/ui/input-group"
+import { Field, Flex, Text } from "@chakra-ui/react"
 import { MapPin } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
@@ -24,7 +25,6 @@ export const ProjectInfo = observer(function ProjectInfo({ checklist }: IProps) 
       </Text>
       <TextFormControl label={t(`${i18nPrefix}.permitNum`)} fieldName="referenceNumber" />
       <TextFormControl label={t(`${i18nPrefix}.builder`)} fieldName="builder" />
-
       <TextFormControl
         label={t(`${i18nPrefix}.address`)}
         inputProps={{ isDisabled: true, value: checklist.fullAddress || "" }}
@@ -35,10 +35,9 @@ export const ProjectInfo = observer(function ProjectInfo({ checklist }: IProps) 
         inputProps={{ isDisabled: true, value: checklist.jurisdictionName }}
       />
       <TextFormControl label={t(`${i18nPrefix}.pid`)} inputProps={{ isDisabled: true, value: checklist.pid || "" }} />
-
       <Flex gap={2} w="full">
-        <FormControl flex={1}>
-          <FormLabel>{t(`${i18nPrefix}.buildingType.label`)}</FormLabel>
+        <Field.Root flex={1}>
+          <Field.Label>{t(`${i18nPrefix}.buildingType.label`)}</Field.Label>
           <InputGroup>
             <Controller
               control={control}
@@ -46,7 +45,7 @@ export const ProjectInfo = observer(function ProjectInfo({ checklist }: IProps) 
               render={({ field: { onChange, value } }) => <BuildingTypeSelect onChange={onChange} value={value} />}
             />
           </InputGroup>
-        </FormControl>
+        </Field.Root>
 
         <TextFormControl
           flex={1}

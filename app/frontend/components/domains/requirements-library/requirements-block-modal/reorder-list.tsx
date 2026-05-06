@@ -37,7 +37,7 @@ export function ReorderList() {
   )
 
   return (
-    <Stack spacing={2} px={3}>
+    <Stack gap={2} px={3}>
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -92,7 +92,9 @@ function Component({
       {...sortableProps?.listeners}
       {...sortableProps?.attributes}
     >
-      <IconButton aria-label={"drag-handle"} variant={"ghost"} icon={<ListIcon />} />
+      <IconButton aria-label={"drag-handle"} variant={"ghost"}>
+        <ListIcon />
+      </IconButton>
       <Text>{label}</Text>
     </HStack>
   )

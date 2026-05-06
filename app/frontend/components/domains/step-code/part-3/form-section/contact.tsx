@@ -57,10 +57,9 @@ export const Contact = observer(() => {
       <Text fontSize="md" mt={5}>
         {t(`${i18nPrefix}.disclaimer`)}
       </Text>
-
       <FormProvider {...formMethods}>
         <Box mt={9} maxW="26.875rem">
-          <Stack direction="column" spacing={7}>
+          <Stack direction="column" gap={7}>
             <TextFormControl fieldName="completedByName" label={t(`${i18nPrefix}.fields.completedByName`)} required />
             <TextFormControl fieldName="completedByTitle" label={t(`${i18nPrefix}.fields.completedByTitle`)} required />
             <TextFormControl
@@ -75,7 +74,7 @@ export const Contact = observer(() => {
               required
             />
           </Stack>
-          <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
+          <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} loading={isSubmitting} />
         </Box>
       </FormProvider>
     </Box>

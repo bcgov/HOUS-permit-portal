@@ -1,4 +1,4 @@
-import { Container, Flex, FormControl, FormLabel, Grid, GridItem, Heading, Input, Text, VStack } from "@chakra-ui/react"
+import { Container, Field, Flex, Grid, GridItem, Heading, Input, Text, VStack } from "@chakra-ui/react"
 import { FileText, Info, Key, Paperclip, SlidersHorizontal, Users } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
@@ -22,7 +22,7 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
     <Suspense fallback={<LoadingScreen />}>
       {currentJurisdiction && (
         <Container maxW="container.lg" py={8} px={{ base: 8, xl: 0 }} flexGrow={1}>
-          <VStack spacing={8} align="start">
+          <VStack gap={8} align="start">
             <Heading mb={0} fontSize="3xl">
               {t(`${i18nPrefix}.title`)}
             </Heading>
@@ -31,22 +31,22 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
                 <Text mb={2} mr={2}>
                   The
                 </Text>
-                <FormControl>
-                  <FormLabel>{t(`${i18nPrefix}.jurisdictionLocalityTypeLabel`)}</FormLabel>
+                <Field.Root>
+                  <Field.Label>{t(`${i18nPrefix}.jurisdictionLocalityTypeLabel`)}</Field.Label>
                   <Input
                     bg="greys.white"
                     value={currentJurisdiction.localityType}
-                    isDisabled
+                    disabled
                     textTransform={"capitalize"}
                   />
-                </FormControl>
+                </Field.Root>
                 <Text mb={2} mx={2}>
                   of
                 </Text>
-                <FormControl>
-                  <FormLabel>{t(`${i18nPrefix}.jurisdictionNameLabel`)}</FormLabel>
-                  <Input bg="greys.white" value={currentJurisdiction.name} isDisabled />
-                </FormControl>
+                <Field.Root>
+                  <Field.Label>{t(`${i18nPrefix}.jurisdictionNameLabel`)}</Field.Label>
+                  <Input bg="greys.white" value={currentJurisdiction.name} disabled />
+                </Field.Root>
                 {/* TODO: what to show here? */}
                 {/* <FormControl>
               <FormLabel>{t(`${i18nPrefix}.jurisdictionLocationLabel`)}</FormLabel>

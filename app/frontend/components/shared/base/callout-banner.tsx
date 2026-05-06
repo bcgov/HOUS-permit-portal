@@ -54,7 +54,7 @@ export function CalloutBanner({ type, title, body, ...rest }: IProps) {
   return (
     <HStack
       alignItems={"flex-start"}
-      spacing={2}
+      gap={2}
       w={"full"}
       my={8}
       p={4}
@@ -66,7 +66,7 @@ export function CalloutBanner({ type, title, body, ...rest }: IProps) {
     >
       {typeSpecificProps.icon}
       {title && body ? (
-        <Stack spacing={1}>
+        <Stack gap={1}>
           <Text fontSize={"md"} fontWeight={700}>
             {title}
           </Text>

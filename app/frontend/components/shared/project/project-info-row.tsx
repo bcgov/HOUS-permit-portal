@@ -27,7 +27,7 @@ export const ProjectInfoRow = ({
     w="full"
   >
     <Flex justify="space-between" align="center" w="full" mr={2}>
-      <VStack align="flex-start" spacing={0}>
+      <VStack align="flex-start" gap={0}>
         <Text>{label}</Text>
         {subLabel && (
           <Text fontSize="sm" color="text.secondary">

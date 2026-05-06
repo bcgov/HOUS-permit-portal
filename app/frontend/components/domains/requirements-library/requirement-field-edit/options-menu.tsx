@@ -1,15 +1,4 @@
-import {
-  Button,
-  ButtonProps,
-  HStack,
-  Menu,
-  MenuButton,
-  MenuDivider,
-  MenuItem,
-  MenuList,
-  Text,
-  useDisclosure,
-} from "@chakra-ui/react"
+import { Button, ButtonProps, HStack, Menu, Portal, Text, useDisclosure } from "@chakra-ui/react"
 import { CaretDown, Warning, X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
@@ -37,62 +26,77 @@ export const OptionsMenu = observer(function OptionsMenu({
   requirementType,
 }: IRequirementOptionsMenu) {
   const { t } = useTranslation()
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { open, onOpen, onClose } = useDisclosure()
 
   useEffect(() => {
-    emitOpenState?.(isOpen)
-  }, [isOpen])
+    emitOpenState?.(open)
+  }, [open])
 
   return (
-    <Menu isOpen={isOpen} onClose={onClose} onOpen={onOpen} placement={"bottom-end"}>
-      <MenuButton
-        as={Button}
-        _expanded={{
-          "div > span": {
-            textDecoration: "none",
-          },
-        }}
-        sx={{
-          "div > span": {
-            textDecoration: "underline",
-          },
-        }}
-        rightIcon={<CaretDown />}
-        {...menuButtonProps}
-      >
-        {t("requirementsLibrary.modals.optionsMenu.triggerButton")}
-      </MenuButton>
-      <MenuList w={"220px"}>
-        {requirementType === ERequirementType.number ||
-        requirementType === ERequirementType.date ||
-        requirementType === ERequirementType.multiOptionSelect ||
-        requirementType === ERequirementType.file ? (
-          <DataValidationSetupModal index={index} requirementType={requirementType} />
-        ) : (
-          <MenuItem color={"text.primary"} isDisabled>
-            <HStack spacing={2} fontSize={"sm"}>
-              <Warning />
-              <Text as={"span"}>{t("requirementsLibrary.modals.optionsMenu.dataValidation")}</Text>
-            </HStack>
-          </MenuItem>
-        )}
-
-        <ConditionalSetupModal
-          index={index}
-          triggerButtonProps={{
-            isDisabled: disabledOptions.includes("conditional"),
+    <Menu.Root
+      open={open}
+      onClose={onClose}
+      onOpen={onOpen}
+      positioning={{
+        placement: "bottom-end",
+      }}
+    >
+      <Menu.Trigger asChild>
+        <Button
+          _expanded={{
+            "div > span": {
+              textDecoration: "none",
+            },
           }}
-        />
-        <ComputedComplianceSetupModal requirementIndex={index} />
-
-        <MenuDivider />
-        <MenuItem color={"semantic.error"} onClick={onRemove} isDisabled={disabledOptions.includes("remove")}>
-          <HStack spacing={2} fontSize={"sm"}>
-            <X />
-            <Text as={"span"}>{t("requirementsLibrary.modals.optionsMenu.remove")}</Text>
-          </HStack>
-        </MenuItem>
-      </MenuList>
-    </Menu>
+          css={{
+            "& div > span": {
+              textDecoration: "underline",
+            },
+          }}
+          {...menuButtonProps}
+        >
+          {t("requirementsLibrary.modals.optionsMenu.triggerButton")}
+          <CaretDown />
+        </Button>
+      </Menu.Trigger>
+      <Portal>
+        <Menu.Positioner>
+          <Menu.Content>
+            {requirementType === ERequirementType.number ||
+            requirementType === ERequirementType.date ||
+            requirementType === ERequirementType.multiOptionSelect ||
+            requirementType === ERequirementType.file ? (
+              <DataValidationSetupModal index={index} requirementType={requirementType} />
+            ) : (
+              <Menu.Item color={"text.primary"} disabled value="item-0">
+                <HStack gap={2} fontSize={"sm"}>
+                  <Warning />
+                  <Text as={"span"}>{t("requirementsLibrary.modals.optionsMenu.dataValidation")}</Text>
+                </HStack>
+              </Menu.Item>
+            )}
+            <ConditionalSetupModal
+              index={index}
+              triggerButtonProps={{
+                isDisabled: disabledOptions.includes("conditional"),
+              }}
+            />
+            <ComputedComplianceSetupModal requirementIndex={index} />
+            <Menu.Separator />
+            <Menu.Item
+              color={"semantic.error"}
+              onSelect={onRemove}
+              disabled={disabledOptions.includes("remove")}
+              value="item-1"
+            >
+              <HStack gap={2} fontSize={"sm"}>
+                <X />
+                <Text as={"span"}>{t("requirementsLibrary.modals.optionsMenu.remove")}</Text>
+              </HStack>
+            </Menu.Item>
+          </Menu.Content>
+        </Menu.Positioner>
+      </Portal>
+    </Menu.Root>
   )
 })

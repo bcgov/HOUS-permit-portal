@@ -1,14 +1,5 @@
-import {
-  Flex,
-  FormControl,
-  FormHelperText,
-  FormLabel,
-  Grid,
-  Input,
-  InputGroup,
-  InputRightElement,
-  Text,
-} from "@chakra-ui/react"
+import { InputGroup } from "@/components/ui/input-group"
+import { Field, Flex, Grid, Input, InputElement, Text } from "@chakra-ui/react"
 import { ErrorMessage } from "@hookform/error-message"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
@@ -96,14 +87,14 @@ export const BaselinePerformance = observer(function Part3StepCodeFormBaselinePe
       </Flex>
       <FormProvider {...formMethods}>
         <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
-          <FormControl>
-            <FormLabel>{t(`${i18nPrefix}.refAnnualThermalEnergyDemand.label`)}</FormLabel>
-            <FormHelperText mb={1} mt={0}>
+          <Field.Root>
+            <Field.Label>{t(`${i18nPrefix}.refAnnualThermalEnergyDemand.label`)}</Field.Label>
+            <Field.HelperText mb={1} mt={0}>
               {t(`${i18nPrefix}.refAnnualThermalEnergyDemand.hint`)}
-            </FormHelperText>
-            <FormHelperText mb={1} mt={0} color="semantic.error">
+            </Field.HelperText>
+            <Field.HelperText mb={1} mt={0} color="semantic.error">
               <ErrorMessage errors={errors} name="refAnnualThermalEnergyDemand" />
-            </FormHelperText>
+            </Field.HelperText>
             <InputGroup maxW={"200px"}>
               <Input
                 type="number"
@@ -112,11 +103,11 @@ export const BaselinePerformance = observer(function Part3StepCodeFormBaselinePe
                   required: t(`${i18nPrefix}.refAnnualThermalEnergyDemand.error`),
                 })}
               />
-              <InputRightElement>{t(`${i18nPrefix}.refAnnualThermalEnergyDemand.units`)}</InputRightElement>
+              <InputElement placement="end">{t(`${i18nPrefix}.refAnnualThermalEnergyDemand.units`)}</InputElement>
             </InputGroup>
-          </FormControl>
+          </Field.Root>
 
-          <FormLabel>{t(`${i18nPrefix}.refEnergyOutputs.label`)}</FormLabel>
+          <Field.Label>{t(`${i18nPrefix}.refEnergyOutputs.label`)}</Field.Label>
 
           <Grid
             w="full"
@@ -154,7 +145,7 @@ export const BaselinePerformance = observer(function Part3StepCodeFormBaselinePe
               </Text>
             </GridData>
             <GridData borderX={0} borderTopWidth={1}>
-              <Input isDisabled textAlign="center" value={totalAnnualEnergy} />
+              <Input disabled textAlign="center" value={totalAnnualEnergy} />
             </GridData>
             <GridData borderX={0} borderTopWidth={1} justifyContent="center" px={0}>
               <Text fontSize="sm" fontWeight="bold">
@@ -162,11 +153,11 @@ export const BaselinePerformance = observer(function Part3StepCodeFormBaselinePe
               </Text>
             </GridData>
             <GridData borderX={0} borderTopWidth={1}>
-              <Input value={totalEmissions} isReadOnly isDisabled textAlign="center" />
+              <Input value={totalEmissions} readOnly disabled textAlign="center" />
             </GridData>
           </Grid>
 
-          <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
+          <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} loading={isSubmitting} />
         </Flex>
       </FormProvider>
     </>
@@ -187,7 +178,7 @@ const ReferenceEnergyOutputRow = ({ field, idx }) => {
   return (
     <>
       <GridData px={3} justifyContent={"center"}>
-        <Input isDisabled value={t(`stepCode.part3.fuelTypes.fuelTypeKeys.${fuelType.key}`)} />
+        <Input disabled value={t(`stepCode.part3.fuelTypes.fuelTypeKeys.${fuelType.key}`)} />
       </GridData>
       <GridData>
         <Input
@@ -198,10 +189,10 @@ const ReferenceEnergyOutputRow = ({ field, idx }) => {
         />
       </GridData>
       <GridData>
-        <Input value={fuelType.emissionsFactor} isReadOnly isDisabled textAlign="center" />
+        <Input value={fuelType.emissionsFactor} readOnly disabled textAlign="center" />
       </GridData>
       <GridData borderRightWidth={1}>
-        <Input value={emissions} isReadOnly isDisabled textAlign="center" />
+        <Input value={emissions} readOnly disabled textAlign="center" />
       </GridData>
     </>
   )

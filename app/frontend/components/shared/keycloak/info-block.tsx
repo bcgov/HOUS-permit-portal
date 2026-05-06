@@ -1,4 +1,4 @@
-import { Button, Flex, Heading, Link, ListItem, Text, UnorderedList } from "@chakra-ui/react"
+import { Button, Flex, Heading, Link, List, Text } from "@chakra-ui/react"
 import { ArrowSquareOut, CaretRight } from "@phosphor-icons/react"
 import React from "react"
 
@@ -9,19 +9,25 @@ export function KeycloakInfoBlock({ title, description, bulletPoints, ctaText, c
         {title}
       </Heading>
       <Text fontSize="sm">{description}</Text>
-      <UnorderedList fontSize="sm" pl={2}>
+      <List.Root as="ul" fontSize="sm" pl={2}>
         {bulletPoints.map((p) => (
-          <ListItem key={p}>{p}</ListItem>
+          <List.Item key={p}>{p}</List.Item>
         ))}
-      </UnorderedList>
+      </List.Root>
       {infoLink && (
         /* TODO: link to CMS Page */
-        <Button variant="link" as={Link} href="" rightIcon={<CaretRight />}>
-          {infoLink}
+        <Button variant="plain" asChild>
+          <Link href="">
+            {infoLink}
+            <CaretRight />
+          </Link>
         </Button>
       )}
-      <Button as={Link} href={ctaLink} isExternal variant="secondary" rightIcon={<ArrowSquareOut />} mt={2}>
-        {ctaText}
+      <Button isExternal variant="secondary" mt={2} asChild>
+        <Link href={ctaLink}>
+          {ctaText}
+          <ArrowSquareOut />
+        </Link>
       </Button>
     </Flex>
   )

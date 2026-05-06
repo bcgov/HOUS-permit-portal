@@ -1,4 +1,4 @@
-import { Box, Container, Divider, Flex, Heading, HStack, Text, VStack } from "@chakra-ui/react"
+import { Box, Container, Flex, Heading, HStack, Separator, Text, VStack } from "@chakra-ui/react"
 import { CaretLeft } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -26,7 +26,7 @@ export const AdminSubmissionInboxScreen = observer(() => {
 
   return (
     <Container maxW="container.lg" p={8} as={"main"}>
-      <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
+      <VStack alignItems={"flex-start"} gap={5} w={"full"} h={"full"}>
         <Flex justifyContent={"space-between"} w={"full"} alignItems={"flex-end"}>
           <Box>
             <RouterLinkButton
@@ -50,17 +50,17 @@ export const AdminSubmissionInboxScreen = observer(() => {
         <VStack justifyContent={"space-between"} w={"full"} alignItems={"flex-end"}>
           <Flex direction="row" justify="space-between" w="100%">
             <Text style={{ fontWeight: "bold" }}>{t(`${i18nPrefix}.submissionInbox`)}</Text>
-            <HStack spacing={5} align="center">
-              <HStack spacing={6}>
+            <HStack gap={5} align="center">
+              <HStack gap={6}>
                 <SwitchButton
-                  isChecked={siteConfigurationStore.inboxEnabled || false}
+                  checked={siteConfigurationStore.inboxEnabled || false}
                   onChange={(e) => updateInboxEnabled(e.target.checked)}
                   size={"lg"}
                 />
               </HStack>
             </HStack>
           </Flex>
-          <Divider />
+          <Separator />
         </VStack>
       </Flex>
     </Container>

@@ -1,27 +1,16 @@
 import {
   Accordion,
-  AccordionButton,
-  AccordionIcon,
-  AccordionItem,
-  AccordionPanel,
   Avatar,
   Box,
   Button,
   ButtonProps,
   Drawer,
-  DrawerBody,
-  DrawerCloseButton,
-  DrawerContent,
-  DrawerHeader,
-  DrawerOverlay,
   Flex,
   HStack,
   IconButton,
   Link,
   Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
+  Portal,
   Stack,
   StackProps,
   Text,
@@ -51,7 +40,8 @@ interface IProps {
 interface IDrawerProps {
   permitApplication: IPermitApplication
   collaborationType: ECollaborationType
-  isOpen: boolean
+  isOpen?: boolean
+  open?: boolean
   onClose: () => void
 }
 
@@ -59,6 +49,7 @@ export const CollaboratorsSidebarDrawer = observer(function CollaboratorsSidebar
   permitApplication,
   collaborationType,
   isOpen,
+  open,
   onClose,
 }: IDrawerProps) {
   const { t } = useTranslation()
@@ -66,52 +57,67 @@ export const CollaboratorsSidebarDrawer = observer(function CollaboratorsSidebar
   const currentUser = userStore.currentUser
   const canManage = permitApplication.canUserManageCollaborators(currentUser, collaborationType)
 
-  return (
-    <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
-      <DrawerOverlay />
-      <DrawerContent maxW={"430px"} pt={"var(--app-navbar-height)"}>
-        <DrawerCloseButton />
-        <DrawerHeader gap={2} alignItems={"center"} display={"flex"} mt={7} px={8} pb={0}>
-          <Users size={23} />
-          <Text as="h2" fontWeight={700} fontSize={"2xl"}>
-            {t("permitCollaboration.sidebar.title")}
-          </Text>
-        </DrawerHeader>
+  const drawerOpen = open ?? isOpen ?? false
 
-        <DrawerBody as={Stack} spacing={8}>
-          <Text color={"text.secondary"} mt={6}>
-            {t(`permitCollaboration.sidebar.description.${collaborationType}`)}
-          </Text>
-          <Stack borderLeft={"4px solid"} borderColor={"theme.blueAlt"} px={6} py={3} bg={"theme.blueLight"}>
-            <Text fontSize={"lg"} fontWeight={700} color={"theme.blueAlt"}>
-              {t("permitCollaboration.sidebar.howItWorksTitle")}
-            </Text>
-            {/*TODO update copy*/}
-            <Text fontSize={"sm"}>
-              {
-                <Trans
-                  i18nKey={`permitCollaboration.sidebar.howItWorksDescription.${collaborationType}`}
-                  t={t}
-                  components={{
-                    1: <br />,
-                  }}
+  return (
+    <Drawer.Root
+      open={drawerOpen}
+      placement="end"
+      onOpenChange={(e) => {
+        if (!e.open) {
+          onClose()
+        }
+      }}
+    >
+      <Portal>
+        <Drawer.Backdrop />
+        <Drawer.Positioner>
+          <Drawer.Content maxW={"430px"} pt={"var(--app-navbar-height)"}>
+            <Drawer.CloseTrigger />
+            <Drawer.Header gap={2} alignItems={"center"} display={"flex"} mt={7} px={8} pb={0}>
+              <Users size={23} />
+              <Text as="h2" fontWeight={700} fontSize={"2xl"}>
+                {t("permitCollaboration.sidebar.title")}
+              </Text>
+            </Drawer.Header>
+            <Drawer.Body gap={8} asChild>
+              <Stack>
+                <Text color={"text.secondary"} mt={6}>
+                  {t(`permitCollaboration.sidebar.description.${collaborationType}`)}
+                </Text>
+                <Stack borderLeft={"4px solid"} borderColor={"theme.blueAlt"} px={6} py={3} bg={"theme.blueLight"}>
+                  <Text fontSize={"lg"} fontWeight={700} color={"theme.blueAlt"}>
+                    {t("permitCollaboration.sidebar.howItWorksTitle")}
+                  </Text>
+                  {/*TODO update copy*/}
+                  <Text fontSize={"sm"}>
+                    {
+                      <Trans
+                        i18nKey={`permitCollaboration.sidebar.howItWorksDescription.${collaborationType}`}
+                        t={t}
+                        components={{
+                          1: <br />,
+                        }}
+                      />
+                    }
+                  </Text>
+                </Stack>
+                <DesignatedCollaborators
+                  permitApplication={permitApplication}
+                  collaborationType={collaborationType}
+                  canManage={canManage}
                 />
-              }
-            </Text>
-          </Stack>
-          <DesignatedCollaborators
-            permitApplication={permitApplication}
-            collaborationType={collaborationType}
-            canManage={canManage}
-          />
-          <Assignees
-            permitApplication={permitApplication}
-            collaborationType={collaborationType}
-            canManage={canManage}
-          />
-        </DrawerBody>
-      </DrawerContent>
-    </Drawer>
+                <Assignees
+                  permitApplication={permitApplication}
+                  collaborationType={collaborationType}
+                  canManage={canManage}
+                />
+              </Stack>
+            </Drawer.Body>
+          </Drawer.Content>
+        </Drawer.Positioner>
+      </Portal>
+    </Drawer.Root>
   )
 })
 
@@ -121,11 +127,12 @@ export const CollaboratorsSidebar = observer(function CollaboratorsSidebar({
   triggerButtonProps,
 }: IProps) {
   const { t } = useTranslation()
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { open, onOpen, onClose } = useDisclosure()
 
   return (
     <>
-      <Button leftIcon={<Users />} variant={"primary"} onClick={onOpen} {...triggerButtonProps}>
+      <Button variant={"primary"} onClick={onOpen} {...triggerButtonProps}>
+        <Users />
         {t("permitCollaboration.sidebar.triggerButton", {
           count: permitApplication.getCollaborationUniqueUserCount(collaborationType),
         })}
@@ -133,7 +140,7 @@ export const CollaboratorsSidebar = observer(function CollaboratorsSidebar({
       <CollaboratorsSidebarDrawer
         permitApplication={permitApplication}
         collaborationType={collaborationType}
-        isOpen={isOpen}
+        open={open}
         onClose={onClose}
       />
     </>
@@ -157,7 +164,7 @@ const DesignatedCollaborators = observer(function DesignatedCollaborators({
     return <></>
   }
   return (
-    <Stack spacing={2}>
+    <Stack gap={2}>
       <Text as={"h3"} fontSize={"md"} fontWeight={700}>
         {t(`permitCollaboration.sidebar.designated${isSubmissionCollaboration ? "Submitters" : "Reviewers"}`)}
       </Text>
@@ -205,7 +212,7 @@ const Assignees = observer(function Assignees({
   const sidebarAssigneeList = permitApplication.getSidebarAssigneesList(collaborationType)
 
   return (
-    <Stack spacing={2}>
+    <Stack gap={2}>
       <Text as={"h3"} fontSize={"md"} fontWeight={700}>
         {t("permitCollaboration.sidebar.assignees")}
       </Text>
@@ -254,11 +261,11 @@ const AssigneeAccordion = observer(function AssigneeAccordion({
   })
 
   return (
-    <Accordion allowToggle>
-      <AccordionItem border={"1px solid"} borderColor={"border.light"} borderRadius={"sm"}>
+    <Accordion.Root collapsible>
+      <Accordion.Item border={"1px solid"} borderColor={"border.light"} borderRadius={"sm"} value="item-0">
         {permitCollaborations?.[0] && (
           <Box as={"h4"} mb={0}>
-            <AccordionButton
+            <Accordion.ItemTrigger
               p={0}
               border={"none"}
               _expanded={{
@@ -270,10 +277,10 @@ const AssigneeAccordion = observer(function AssigneeAccordion({
             >
               <CollaborationCard
                 border={"none"}
-                rightElement={<AccordionIcon />}
+                rightElement={<Accordion.ItemIndicator />}
                 moreDetailsElement={
                   notificationEmail ? (
-                    <HStack spacing={4} className={"collaboratorCardEmailContainer"} display={"none"}>
+                    <HStack gap={4} className={"collaboratorCardEmailContainer"} display={"none"}>
                       <Text fontSize={"sm"} fontWeight={700}>
                         {t("permitCollaboration.sidebar.assigneeEmail")}
                       </Text>
@@ -303,88 +310,108 @@ const AssigneeAccordion = observer(function AssigneeAccordion({
                 }
                 permitCollaboration={permitCollaborations?.[0]}
               />
-            </AccordionButton>
+            </Accordion.ItemTrigger>
           </Box>
         )}
-        <AccordionPanel border={"none"} bg={"greys.grey04"} pb={2}>
-          <Box w={"full"} bg={"white"} p={2} border={"1px solid red"} borderColor={"border.light"} borderRadius={"sm"}>
-            <Text as={"h5"} fontSize={"sm"} fontWeight={700} textTransform={"uppercase"} color={"text.secondary"}>
-              {t("permitCollaboration.sidebar.assignedTo")}
-            </Text>
-            <Box as={"ul"} listStyleType={"none"} p={0} mt={3}>
-              {filteredPermitCollaborations.map((permitCollaboration) => {
-                const requirementBlockNode =
-                  formioRequirementBlockAccordionNodes[permitCollaboration.assignedRequirementBlockId]
-                const onNavigate = () => {
-                  requirementBlockNode?.scrollIntoView({ behavior: "smooth", block: "center" })
-                }
-                return (
-                  <HStack as={"li"} key={permitCollaboration.id} justifyContent={"space-between"}>
-                    <Button
-                      variant={"link"}
-                      onClick={onNavigate}
-                      size={"sm"}
-                      fontSize={"sm"}
-                      maxW={"full"}
-                      isDisabled={!requirementBlockNode}
-                    >
-                      <Text overflow={"hidden"} textOverflow={"ellipsis"} whiteSpace={"nowrap"} maxW={"full"}>
-                        {permitCollaboration.assignedRequirementBlockName}
-                      </Text>
-                    </Button>
-                    {canManage && (
-                      <Menu closeOnSelect={false}>
-                        <MenuButton
-                          as={IconButton}
-                          icon={<DotsThree size={14} />}
-                          color={"text.primary"}
-                          size={"xs"}
-                          aria-label={"unassign requirement block menu"}
-                          variant={"ghost"}
-                        />
-                        <MenuList minW={"84px"} py={0} borderRadius={"sm"}>
-                          <MenuItem
-                            as={RequestLoadingButton}
-                            fontSize={"sm"}
-                            border={"1px solid"}
-                            borderColor={"borders.medium"}
-                            borderRadius={"sm !important"}
-                            onClick={() => permitApplication.unassignPermitCollaboration(permitCollaboration.id)}
-                          >
-                            {t("permitCollaboration.popover.collaborations.unassignButton")}
-                          </MenuItem>
-                        </MenuList>
-                      </Menu>
-                    )}
-                  </HStack>
-                )
-              })}
+        <Accordion.ItemContent border={"none"} bg={"greys.grey04"} pb={2}>
+          <Accordion.ItemBody>
+            <Box
+              w={"full"}
+              bg={"white"}
+              p={2}
+              border={"1px solid red"}
+              borderColor={"border.light"}
+              borderRadius={"sm"}
+            >
+              <Text as={"h5"} fontSize={"sm"} fontWeight={700} textTransform={"uppercase"} color={"text.secondary"}>
+                {t("permitCollaboration.sidebar.assignedTo")}
+              </Text>
+              <Box as={"ul"} listStyleType={"none"} p={0} mt={3}>
+                {filteredPermitCollaborations.map((permitCollaboration) => {
+                  const requirementBlockNode =
+                    formioRequirementBlockAccordionNodes[permitCollaboration.assignedRequirementBlockId]
+                  const onNavigate = () => {
+                    requirementBlockNode?.scrollIntoView({ behavior: "smooth", block: "center" })
+                  }
+                  return (
+                    <HStack as={"li"} key={permitCollaboration.id} justifyContent={"space-between"}>
+                      <Button
+                        variant={"link"}
+                        onClick={onNavigate}
+                        size={"sm"}
+                        fontSize={"sm"}
+                        maxW={"full"}
+                        disabled={!requirementBlockNode}
+                      >
+                        <Text overflow={"hidden"} textOverflow={"ellipsis"} whiteSpace={"nowrap"} maxW={"full"}>
+                          {permitCollaboration.assignedRequirementBlockName}
+                        </Text>
+                      </Button>
+                      {canManage && (
+                        <Menu.Root closeOnSelect={false}>
+                          <Menu.Trigger asChild>
+                            <IconButton
+                              icon={<DotsThree size={14} />}
+                              color={"text.primary"}
+                              size={"xs"}
+                              aria-label={"unassign requirement block menu"}
+                              variant={"ghost"}
+                            ></IconButton>
+                          </Menu.Trigger>
+                          <Portal>
+                            <Menu.Positioner>
+                              <Menu.Content>
+                                <Menu.Item
+                                  fontSize={"sm"}
+                                  border={"1px solid"}
+                                  borderColor={"borders.medium"}
+                                  borderRadius={"sm !important"}
+                                  value="item-0"
+                                  asChild
+                                >
+                                  <RequestLoadingButton
+                                    onSelect={() =>
+                                      permitApplication.unassignPermitCollaboration(permitCollaboration.id)
+                                    }
+                                  >
+                                    {t("permitCollaboration.popover.collaborations.unassignButton")}
+                                  </RequestLoadingButton>
+                                </Menu.Item>
+                              </Menu.Content>
+                            </Menu.Positioner>
+                          </Portal>
+                        </Menu.Root>
+                      )}
+                    </HStack>
+                  )
+                })}
+              </Box>
             </Box>
-          </Box>
-          <RemoveConfirmationModal
-            onRemove={() =>
-              permitApplication.removeCollaboratorCollaborations(
-                collaborator.id,
-                ECollaboratorType.assignee,
-                collaborationType
-              )
-            }
-            triggerButtonProps={{
-              mt: 2,
-              display: canManage ? "block" : "none",
-            }}
-            title={t("permitCollaboration.sidebar.removeCollaboratorModal.title")}
-            body={t("permitCollaboration.sidebar.removeCollaboratorModal.body")}
-            triggerText={t("permitCollaboration.sidebar.removeCollaboratorModal.triggerButton")}
-            renderConfirmationButton={({ onClick }) => (
-              <RequestLoadingButton onClick={onClick as () => Promise<any>} variant={"primary"}>
-                {t("ui.remove")}
-              </RequestLoadingButton>
-            )}
-          />
-        </AccordionPanel>
-      </AccordionItem>
-    </Accordion>
+            <RemoveConfirmationModal
+              onRemove={() =>
+                permitApplication.removeCollaboratorCollaborations(
+                  collaborator.id,
+                  ECollaboratorType.assignee,
+                  collaborationType
+                )
+              }
+              triggerButtonProps={{
+                mt: 2,
+                display: canManage ? "block" : "none",
+              }}
+              title={t("permitCollaboration.sidebar.removeCollaboratorModal.title")}
+              body={t("permitCollaboration.sidebar.removeCollaboratorModal.body")}
+              triggerText={t("permitCollaboration.sidebar.removeCollaboratorModal.triggerButton")}
+              renderConfirmationButton={({ onClick }) => (
+                <RequestLoadingButton onClick={onClick as () => Promise<any>} variant={"primary"}>
+                  {t("ui.remove")}
+                </RequestLoadingButton>
+              )}
+            />
+          </Accordion.ItemBody>
+        </Accordion.ItemContent>
+      </Accordion.Item>
+    </Accordion.Root>
   )
 })
 
@@ -416,10 +443,12 @@ const CollaborationCard = observer(function CollaborationCard({
       justifyContent={"space-between"}
       {...containerProps}
     >
-      <HStack spacing={4} w={"full"}>
-        <Avatar name={name} size={"xs"} maxW={"24px"} />
+      <HStack gap={4} w={"full"}>
+        <Avatar.Root size={"xs"} maxW={"24px"}>
+          <Avatar.Fallback name={name} />
+        </Avatar.Root>
         {permitCollaboration ? (
-          <Stack spacing={1} alignItems={"flex-start"}>
+          <Stack gap={1} alignItems={"flex-start"}>
             <Text fontWeight={700}>{name}</Text>
             <Text fontSize={"sm"}>{organization}</Text>
             {onReinvite && <Reinvite permitCollaboration={permitCollaboration} onReinvite={onReinvite} />}

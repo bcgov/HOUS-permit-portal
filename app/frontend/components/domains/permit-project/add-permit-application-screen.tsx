@@ -1,17 +1,5 @@
-import {
-  Box,
-  Button,
-  Checkbox,
-  Container,
-  Flex,
-  Heading,
-  Input,
-  InputGroup,
-  InputLeftElement,
-  ListItem,
-  Text,
-  UnorderedList,
-} from "@chakra-ui/react"
+import { InputGroup } from "@/components/ui/input-group"
+import { Box, Button, Checkbox, Container, Flex, Heading, Input, InputElement, List, Text } from "@chakra-ui/react"
 import { CaretLeft, MagnifyingGlass } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useMemo, useState } from "react"
@@ -97,9 +85,7 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
         </RouterLinkButton>
         <Heading>{t("permitProject.addPermits.title")}</Heading>
       </Flex>
-
       {/* Before you begin */}
-
       <Flex as="section" direction="column" gap={4} mb={8}>
         <Box w={{ base: "full", md: "50%" }}>
           <Heading as="h2" variant="yellowline">
@@ -108,12 +94,12 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
 
           <Text>{t("permitProject.addPermits.beforeYouBegin.intro")}</Text>
 
-          <UnorderedList ml="0" spacing={2}>
-            <ListItem>{t("permitProject.addPermits.beforeYouBegin.bcBuildingCode")}</ListItem>
-            <ListItem>{t("permitProject.addPermits.beforeYouBegin.localZoningBylaws")}</ListItem>
-            <ListItem>{t("permitProject.addPermits.beforeYouBegin.ocp")}</ListItem>
-            <ListItem>{t("permitProject.addPermits.beforeYouBegin.dpaRules")}</ListItem>
-          </UnorderedList>
+          <List.Root as="ul" ml="0" gap={2}>
+            <List.Item>{t("permitProject.addPermits.beforeYouBegin.bcBuildingCode")}</List.Item>
+            <List.Item>{t("permitProject.addPermits.beforeYouBegin.localZoningBylaws")}</List.Item>
+            <List.Item>{t("permitProject.addPermits.beforeYouBegin.ocp")}</List.Item>
+            <List.Item>{t("permitProject.addPermits.beforeYouBegin.dpaRules")}</List.Item>
+          </List.Root>
 
           <Text>
             {t("permitProject.addPermits.beforeYouBegin.moreInfo")}{" "}
@@ -168,15 +154,15 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
 
           {/* Search bar */}
           <InputGroup mb={6} maxW="full">
-            <InputLeftElement pointerEvents="none">
+            <InputElement pointerEvents="none">
               <MagnifyingGlass />
-            </InputLeftElement>
+            </InputElement>
             <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t("ui.search")} bg="white" />
           </InputGroup>
 
           {/* Action controls above the template list */}
           <Flex w="full" gap={4} mb={4}>
-            <Button variant="secondary" onClick={clearSelection} isDisabled={selectedTemplateVersionIds.length === 0}>
+            <Button variant="secondary" onClick={clearSelection} disabled={selectedTemplateVersionIds.length === 0}>
               {t("ui.clearSelection")}
             </Button>
             <AddPermitsFAB
@@ -227,7 +213,16 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
                         borderRadius="md"
                         alignSelf="flex-end"
                       >
-                        <Checkbox isChecked={checked} onChange={() => toggleSelection(tv.id)} pointerEvents="none" />
+                        <Checkbox.Root
+                          onCheckedChange={() => toggleSelection(tv.id)}
+                          pointerEvents="none"
+                          checked={checked}
+                        >
+                          <Checkbox.HiddenInput />
+                          <Checkbox.Control>
+                            <Checkbox.Indicator />
+                          </Checkbox.Control>
+                        </Checkbox.Root>
                         <Text fontWeight="medium">{t("permitProject.addPermits.addToProject")}</Text>
                       </Flex>
                     </Flex>
@@ -239,7 +234,7 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
 
           {/* Action controls below the template list */}
           <Flex w="full" gap={4} mt={2}>
-            <Button variant="secondary" onClick={clearSelection} isDisabled={selectedTemplateVersionIds.length === 0}>
+            <Button variant="secondary" onClick={clearSelection} disabled={selectedTemplateVersionIds.length === 0}>
               {t("ui.clearSelection")}
             </Button>
             <AddPermitsFAB
@@ -266,7 +261,7 @@ const AddPermitsFAB = ({ label, count, disabled, onClick }: IAddPermitsFABProps)
   return (
     <Button
       onClick={onClick}
-      isDisabled={disabled}
+      disabled={disabled}
       bg="theme.blue"
       color="white"
       _hover={{ bg: "theme.blueAlt" }}

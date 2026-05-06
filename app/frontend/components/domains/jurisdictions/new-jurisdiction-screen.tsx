@@ -54,7 +54,7 @@ export const NewJurisdictionScreen = observer(() => {
     <Container maxW="container.lg" p={8} as="main">
       <FormProvider {...formMethods}>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
+          <VStack alignItems={"flex-start"} gap={5} w={"full"} h={"full"}>
             <Heading as="h1" alignSelf="center">
               {t("jurisdiction.new.title")}
             </Heading>
@@ -90,13 +90,13 @@ export const NewJurisdictionScreen = observer(() => {
                   <Button
                     variant="primary"
                     type="submit"
-                    isDisabled={!isValid || isSubmitting}
-                    isLoading={isSubmitting}
+                    disabled={!isValid || isSubmitting}
+                    loading={isSubmitting}
                     loadingText={t("ui.loading")}
                   >
                     {t("jurisdiction.new.createButton")}
                   </Button>
-                  <Button variant="secondary" isDisabled={isSubmitting} onClick={() => navigate(-1)}>
+                  <Button variant="secondary" disabled={isSubmitting} onClick={() => navigate(-1)}>
                     {t("ui.cancel")}
                   </Button>
                 </Flex>

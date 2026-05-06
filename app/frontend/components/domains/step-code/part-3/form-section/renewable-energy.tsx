@@ -1,15 +1,6 @@
-import {
-  Flex,
-  FormControl,
-  FormHelperText,
-  FormLabel,
-  Input,
-  InputGroup,
-  InputRightElement,
-  Radio,
-  RadioGroup,
-  Stack,
-} from "@chakra-ui/react"
+import { InputGroup } from "@/components/ui/input-group"
+import { RadioGroup } from "@/components/ui/radio"
+import { Field, Flex, Input, InputElement, Stack } from "@chakra-ui/react"
 import { ErrorMessage } from "@hookform/error-message"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
@@ -89,57 +80,61 @@ export const RenewableEnergy = observer(function Part3StepCodeFormRenewableEnerg
         <SectionHeading>{t(`${i18nPrefix}.heading`)}</SectionHeading>
       </Flex>
       <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
-        <FormControl>
-          <FormLabel>{t(`${i18nPrefix}.isRelevant`)}</FormLabel>
-          <RadioGroup onChange={setIsRelevant} value={isRelevant}>
-            <Stack spacing={5} direction="row">
-              <Radio variant="binary" value={"yes"}>
-                {t("ui.yes")}
-              </Radio>
-              <Radio variant="binary" value={"no"}>
-                {t("ui.no")}
-              </Radio>
+        <Field.Root>
+          <Field.Label>{t(`${i18nPrefix}.isRelevant`)}</Field.Label>
+          <RadioGroup.Root onValueChange={setIsRelevant} value={isRelevant}>
+            <Stack gap={5} direction="row">
+              <RadioGroup.Item variant="binary" value={"yes"}>
+                <RadioGroup.ItemHiddenInput />
+                <RadioGroup.ItemIndicator />
+                <RadioGroup.ItemText>{t("ui.yes")}</RadioGroup.ItemText>
+              </RadioGroup.Item>
+              <RadioGroup.Item variant="binary" value={"no"}>
+                <RadioGroup.ItemHiddenInput />
+                <RadioGroup.ItemIndicator />
+                <RadioGroup.ItemText>{t("ui.no")}</RadioGroup.ItemText>
+              </RadioGroup.Item>
             </Stack>
-          </RadioGroup>
-        </FormControl>
+          </RadioGroup.Root>
+        </Field.Root>
         {isRelevant == "yes" ? (
           <>
-            <FormControl>
-              <FormLabel>{t(`${i18nPrefix}.generatedElectricity.label`)}</FormLabel>
-              <FormHelperText mb={1} mt={0} color="semantic.error">
+            <Field.Root>
+              <Field.Label>{t(`${i18nPrefix}.generatedElectricity.label`)}</Field.Label>
+              <Field.HelperText mb={1} mt={0} color="semantic.error">
                 <ErrorMessage errors={errors} name="generatedElectricity" />
-              </FormHelperText>
+              </Field.HelperText>
               <InputGroup maxW={"200px"}>
                 <Input
                   type="number"
                   step="any"
                   {...register("generatedElectricity", { required: t(`${i18nPrefix}.generatedElectricity.error`) })}
                 />
-                <InputRightElement>{t(`${i18nPrefix}.generatedElectricity.units`)}</InputRightElement>
+                <InputElement placement="end">{t(`${i18nPrefix}.generatedElectricity.units`)}</InputElement>
               </InputGroup>
-            </FormControl>
-            <FormControl>
-              <FormLabel>{t(`${i18nPrefix}.percentOfUse.label`)}</FormLabel>
-              <FormHelperText mb={1} mt={0}>
+            </Field.Root>
+            <Field.Root>
+              <Field.Label>{t(`${i18nPrefix}.percentOfUse.label`)}</Field.Label>
+              <Field.HelperText mb={1} mt={0}>
                 {t(`${i18nPrefix}.percentOfUse.hint`)}
-              </FormHelperText>
+              </Field.HelperText>
               <InputGroup maxW={"200px"}>
-                <Input value={percentOfUse || "-"} isDisabled />
-                <InputRightElement>{t(`${i18nPrefix}.percentOfUse.units`)}</InputRightElement>
+                <Input value={percentOfUse || "-"} disabled />
+                <InputElement placement="end">{t(`${i18nPrefix}.percentOfUse.units`)}</InputElement>
               </InputGroup>
-            </FormControl>
-            <FormControl>
-              <FormLabel>
+            </Field.Root>
+            <Field.Root>
+              <Field.Label>
                 <Trans i18nKey={`${i18nPrefix}.adjustedEF.label`} components={{ sub: <sub /> }} />
-              </FormLabel>
-              <FormHelperText mb={1} mt={0}>
+              </Field.Label>
+              <Field.HelperText mb={1} mt={0}>
                 {t(`${i18nPrefix}.adjustedEF.hint`)}
-              </FormHelperText>
-              <Input maxW={"200px"} value={adjustedElectricityEF || "-"} isDisabled />
-            </FormControl>
+              </Field.HelperText>
+              <Input maxW={"200px"} value={adjustedElectricityEF || "-"} disabled />
+            </Field.Root>
           </>
         ) : null}
-        {!!isRelevant && <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />}
+        {!!isRelevant && <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} loading={isSubmitting} />}
       </Flex>
     </>
   )

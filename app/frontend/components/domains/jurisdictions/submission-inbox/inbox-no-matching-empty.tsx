@@ -26,8 +26,8 @@ export const InboxNoMatchingEmpty = observer(function InboxNoMatchingEmpty({ vie
           {isProjects
             ? t("submissionInbox.noMatchingProjectsDescription")
             : t("submissionInbox.noMatchingApplicationsDescription")}{" "}
-          <Link as="button" onClick={onClearFilters} textDecoration="underline">
-            {t("submissionInbox.clearAllFilters")}
+          <Link textDecoration="underline" asChild>
+            <button onClick={onClearFilters}>{t("submissionInbox.clearAllFilters")}</button>
           </Link>
         </Text>
       }

@@ -73,8 +73,8 @@ export function GenericMultiDisplay<TFieldValues>({
           {fieldItems.map(({ type, key, label, required, containerProps }) => (
             <Box
               key={key}
-              sx={{
-                ".chakra-form-control": {
+              css={{
+                "& .chakra-form-control": {
                   display: "flex",
                   flexDir: "column",
                   justifyContent: "space-between",
@@ -88,14 +88,12 @@ export function GenericMultiDisplay<TFieldValues>({
           ))}
         </Box>
       </Box>
-
       {showAddButton && (
         <Button
           variant={"secondary"}
-          leftIcon={<Plus />}
           size={"sm"}
           my={6}
-          isDisabled
+          disabled
           // As it is a display component it should have the styles of
           // a normal button but should be disabled to screen readers and not clickable
           _disabled={{
@@ -106,6 +104,7 @@ export function GenericMultiDisplay<TFieldValues>({
             cursor: "not-allowed",
           }}
         >
+          <Plus />
           {label ? `${t("requirementsLibrary.addAnother")} ${label}` : t("requirementsLibrary.addAnother")}
         </Button>
       )}

@@ -15,7 +15,7 @@ export const ActivityListItem = observer(({ projectAudit }: IActivityListItemPro
 
   return (
     <Flex align="center" justify="space-between" py={3} px={4} gap={4} minH={20}>
-      <HStack align="center" spacing={1} flex={1} minW={0}>
+      <HStack align="center" gap={1} flex={1} minW={0}>
         <Text>{description}</Text>
         {permitName && (
           <RouterLink to={permitApplicationId ? `/permit-applications/${permitApplicationId}/edit` : undefined}>
@@ -23,7 +23,7 @@ export const ActivityListItem = observer(({ projectAudit }: IActivityListItemPro
           </RouterLink>
         )}
       </HStack>
-      <Text variant="secondary">{format(createdAt, datefnsTableDateTimeFormat)}</Text>
+      <Text color="text.secondary">{format(createdAt, datefnsTableDateTimeFormat)}</Text>
     </Flex>
   )
 })

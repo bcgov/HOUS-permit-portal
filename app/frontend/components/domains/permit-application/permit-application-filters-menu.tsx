@@ -1,4 +1,4 @@
-import { Button, Checkbox, Divider, Flex, Menu, MenuButton, MenuList } from "@chakra-ui/react"
+import { Button, Checkbox, Flex, Menu, Portal, Separator } from "@chakra-ui/react"
 import { CaretDown, Funnel } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
@@ -19,35 +19,38 @@ export const PermitApplicationFiltersMenu = observer(() => {
 
   return (
     <Flex direction="column" position="relative" zIndex={1}>
-      <Menu isOpen={isOpen} onOpen={() => setIsOpen(true)} onClose={() => setIsOpen(false)}>
-        <MenuButton as={Button} variant="outline" size="md" leftIcon={<Funnel />} rightIcon={<CaretDown />}>
-          {t("ui.filter")}
-        </MenuButton>
-        <MenuList
-          bg="greys.white"
-          border="1px solid"
-          borderColor="border.light"
-          borderRadius="sm"
-          boxShadow="md"
-          p={4}
-          zIndex={1}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <Flex direction="column">
-            <Checkbox
-              isChecked={!!hasCollaboratorFilter}
-              onChange={(e) => handleCheckboxChange(!!e.target.checked)}
-              mb={2}
-            >
-              {t(`permitApplication.filterMenu.collaborating`)}
-            </Checkbox>
-          </Flex>
-          <Divider borderColor="greys.grey03" my={4} />
-          <Button size="sm" variant="tertiary" onClick={() => resetFilters()}>
-            {t("ui.reset")}
+      <Menu.Root open={open} onOpen={() => setIsOpen(true)} onClose={() => setIsOpen(false)}>
+        <Menu.Trigger asChild>
+          <Button variant="outline" size="md">
+            <Funnel />
+            {t("ui.filter")}
+            <CaretDown />
           </Button>
-        </MenuList>
-      </Menu>
+        </Menu.Trigger>
+        <Portal>
+          <Menu.Positioner>
+            <Menu.Content>
+              <Flex direction="column">
+                <Checkbox.Root
+                  onCheckedChange={(e) => handleCheckboxChange(!!e.target.checked)}
+                  mb={2}
+                  checked={!!hasCollaboratorFilter}
+                >
+                  <Checkbox.HiddenInput />
+                  <Checkbox.Control>
+                    <Checkbox.Indicator />
+                  </Checkbox.Control>
+                  <Checkbox.Label>{t(`permitApplication.filterMenu.collaborating`)}</Checkbox.Label>
+                </Checkbox.Root>
+              </Flex>
+              <Separator borderColor="greys.grey03" my={4} />
+              <Button size="sm" variant="tertiary" onClick={() => resetFilters()}>
+                {t("ui.reset")}
+              </Button>
+            </Menu.Content>
+          </Menu.Positioner>
+        </Portal>
+      </Menu.Root>
     </Flex>
   )
 })

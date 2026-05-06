@@ -1,4 +1,4 @@
-import { Box, Divider, Flex, FormControl, FormLabel, Heading, Input, SimpleGrid, Text } from "@chakra-ui/react"
+import { Box, Field, Flex, Heading, Input, Separator, SimpleGrid, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo } from "react"
 import { useForm } from "react-hook-form"
@@ -83,35 +83,33 @@ export const CalculationsPerformedBy = observer(function CalculationsPerformedBy
       <Text mb={6} color="text.secondary">
         {t("overheatingCode.sections.calculationsPerformedBy.description")}
       </Text>
-
       {/* Contact Information */}
       <Heading as="h3" size="md" mb={4}>
         {t("overheatingCode.sections.calculationsPerformedBy.contactInfoHeading")}
       </Heading>
-
-      <SimpleGrid columns={{ base: 1, md: 2 }} spacing={5} mb={6}>
-        <FormControl isRequired isInvalid={!!errors.performerName}>
-          <FormLabel>{t("overheatingCode.sections.calculationsPerformedBy.fields.name")}</FormLabel>
+      <SimpleGrid columns={{ base: 1, md: 2 }} gap={5} mb={6}>
+        <Field.Root required invalid={!!errors.performerName}>
+          <Field.Label>{t("overheatingCode.sections.calculationsPerformedBy.fields.name")}</Field.Label>
           <Input {...register("performerName", { required: true })} />
-        </FormControl>
+        </Field.Root>
 
-        <FormControl>
-          <FormLabel>{t("overheatingCode.sections.calculationsPerformedBy.fields.company")}</FormLabel>
+        <Field.Root>
+          <Field.Label>{t("overheatingCode.sections.calculationsPerformedBy.fields.company")}</Field.Label>
           <Input {...register("performerCompany")} />
-        </FormControl>
+        </Field.Root>
 
-        <FormControl>
-          <FormLabel>{t("overheatingCode.sections.calculationsPerformedBy.fields.address")}</FormLabel>
+        <Field.Root>
+          <Field.Label>{t("overheatingCode.sections.calculationsPerformedBy.fields.address")}</Field.Label>
           <Input {...register("performerAddress")} />
-        </FormControl>
+        </Field.Root>
 
-        <FormControl>
-          <FormLabel>{t("overheatingCode.sections.calculationsPerformedBy.fields.cityProvince")}</FormLabel>
+        <Field.Root>
+          <Field.Label>{t("overheatingCode.sections.calculationsPerformedBy.fields.cityProvince")}</Field.Label>
           <Input {...register("performerCityProvince")} placeholder="e.g. Vancouver, BC" />
-        </FormControl>
+        </Field.Root>
 
-        <FormControl>
-          <FormLabel>{t("overheatingCode.sections.calculationsPerformedBy.fields.postalCode")}</FormLabel>
+        <Field.Root>
+          <Field.Label>{t("overheatingCode.sections.calculationsPerformedBy.fields.postalCode")}</Field.Label>
           <Input
             {...register("performerPostalCode", {
               pattern: {
@@ -126,20 +124,20 @@ export const CalculationsPerformedBy = observer(function CalculationsPerformedBy
               {errors.performerPostalCode.message}
             </Text>
           )}
-        </FormControl>
+        </Field.Root>
 
-        <FormControl>
-          <FormLabel>{t("overheatingCode.sections.calculationsPerformedBy.fields.phone")}</FormLabel>
+        <Field.Root>
+          <Field.Label>{t("overheatingCode.sections.calculationsPerformedBy.fields.phone")}</Field.Label>
           <Input {...register("performerPhone")} type="tel" placeholder="e.g. (604) 555-0123" />
-        </FormControl>
+        </Field.Root>
 
-        <FormControl>
-          <FormLabel>{t("overheatingCode.sections.calculationsPerformedBy.fields.fax")}</FormLabel>
+        <Field.Root>
+          <Field.Label>{t("overheatingCode.sections.calculationsPerformedBy.fields.fax")}</Field.Label>
           <Input {...register("performerFax")} type="tel" />
-        </FormControl>
+        </Field.Root>
 
-        <FormControl isRequired isInvalid={!!errors.performerEmail}>
-          <FormLabel>{t("overheatingCode.sections.calculationsPerformedBy.fields.email")}</FormLabel>
+        <Field.Root required invalid={!!errors.performerEmail}>
+          <Field.Label>{t("overheatingCode.sections.calculationsPerformedBy.fields.email")}</Field.Label>
           <Input
             {...register("performerEmail", {
               required: true,
@@ -155,11 +153,9 @@ export const CalculationsPerformedBy = observer(function CalculationsPerformedBy
               {errors.performerEmail.message}
             </Text>
           )}
-        </FormControl>
+        </Field.Root>
       </SimpleGrid>
-
-      <Divider my={6} />
-
+      <Separator my={6} />
       {/* Attestation */}
       <Heading as="h3" size="md" mb={2}>
         {t("overheatingCode.sections.calculationsPerformedBy.attestationHeading")}
@@ -169,37 +165,35 @@ export const CalculationsPerformedBy = observer(function CalculationsPerformedBy
           {t("overheatingCode.sections.calculationsPerformedBy.attestationText")}
         </Text>
       </Box>
-
       <Flex gap={5} mb={6} direction={{ base: "column", md: "row" }}>
         <Box flex={1} borderWidth="1px" borderColor="border.light" borderRadius="md" p={4}>
-          <FormControl isRequired isInvalid={!!errors.accreditationRef1} mb={4}>
-            <FormLabel>{t("overheatingCode.sections.calculationsPerformedBy.fields.accreditationRef1")}</FormLabel>
+          <Field.Root required invalid={!!errors.accreditationRef1} mb={4}>
+            <Field.Label>{t("overheatingCode.sections.calculationsPerformedBy.fields.accreditationRef1")}</Field.Label>
             <Input {...register("accreditationRef1", { required: true })} />
-          </FormControl>
+          </Field.Root>
 
-          <FormControl isRequired>
-            <FormLabel>{t("overheatingCode.sections.calculationsPerformedBy.fields.issuedFor")}</FormLabel>
+          <Field.Root required>
+            <Field.Label>{t("overheatingCode.sections.calculationsPerformedBy.fields.issuedFor")}</Field.Label>
             <Input {...register("issuedFor1", { required: true })} type="date" />
-          </FormControl>
+          </Field.Root>
         </Box>
 
         <Box flex={1} borderWidth="1px" borderColor="border.light" borderRadius="md" p={4}>
-          <FormControl mb={4}>
-            <FormLabel>{t("overheatingCode.sections.calculationsPerformedBy.fields.accreditationRef2")}</FormLabel>
+          <Field.Root mb={4}>
+            <Field.Label>{t("overheatingCode.sections.calculationsPerformedBy.fields.accreditationRef2")}</Field.Label>
             <Input {...register("accreditationRef2")} />
-          </FormControl>
+          </Field.Root>
 
-          <FormControl>
-            <FormLabel>{t("overheatingCode.sections.calculationsPerformedBy.fields.issuedFor")}</FormLabel>
+          <Field.Root>
+            <Field.Label>{t("overheatingCode.sections.calculationsPerformedBy.fields.issuedFor")}</Field.Label>
             <Input {...register("issuedFor2")} type="date" />
-          </FormControl>
+          </Field.Root>
         </Box>
       </Flex>
-
       <FormFooter<ICalculationsPerformedByFormData>
         handleSubmit={handleSubmit}
         onSubmit={onSubmit}
-        isLoading={isSubmitting}
+        loading={isSubmitting}
       />
     </Box>
   )

@@ -50,7 +50,7 @@ export const RequirementTemplateForm = observer(({ onSuccess }: IRequirementTemp
   return (
     <FormProvider {...formMethods}>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <VStack alignItems={"flex-start"} spacing={5} gap={8} w={"full"} h={"full"}>
+        <VStack alignItems={"flex-start"} gap={5} gap={8} w={"full"} h={"full"}>
           <Text>{t("requirementTemplate.new.typePrompt")}</Text>
 
           <Flex direction="column" as="section" w="full">
@@ -91,13 +91,13 @@ export const RequirementTemplateForm = observer(({ onSuccess }: IRequirementTemp
             <Button
               variant="primary"
               type="submit"
-              isDisabled={!formState.isValid || isSubmitting}
-              isLoading={isSubmitting}
+              disabled={!formState.isValid || isSubmitting}
+              loading={isSubmitting}
               loadingText={t("ui.loading")}
             >
               {t("requirementTemplate.new.createButton")}
             </Button>
-            <Button variant="secondary" isDisabled={isSubmitting} onClick={() => navigate(-1)}>
+            <Button variant="secondary" disabled={isSubmitting} onClick={() => navigate(-1)}>
               {t("ui.cancel")}
             </Button>
           </Flex>

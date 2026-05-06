@@ -1,4 +1,4 @@
-import { HStack, Select, Text } from "@chakra-ui/react"
+import { HStack, NativeSelect, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -14,16 +14,19 @@ export const PerPageSelect = observer(({ handleCountPerPageChange, countPerPage,
 
   return (
     <HStack gap={4}>
-      <Select
-        aria-label={"Number of requirement Blocks per page"}
-        w={20}
-        onChange={(e) => handleCountPerPageChange(Number(e.target.value))}
-        value={countPerPage}
-      >
-        <option value="10">10</option>
-        <option value="25">25</option>
-        <option value="50">50</option>
-      </Select>
+      <NativeSelect.Root>
+        <NativeSelect.Field
+          aria-label={"Number of requirement Blocks per page"}
+          w={20}
+          onValueChange={(e) => handleCountPerPageChange(Number(e.target.value))}
+          value={countPerPage}
+        >
+          <option value="10">10</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+        </NativeSelect.Field>
+        <NativeSelect.Indicator />
+      </NativeSelect.Root>
       <Text>
         {totalCount} {t("ui.totalItems")}
       </Text>

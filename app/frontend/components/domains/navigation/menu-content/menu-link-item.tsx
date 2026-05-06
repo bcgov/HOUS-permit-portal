@@ -51,13 +51,13 @@ export const MenuLinkItem = ({ icon, label, to, onClick, description, badge }: I
       <Box mt={0.5} color="text.primary">
         {icon}
       </Box>
-      <VStack align="flex-start" spacing={0} flex={1}>
+      <VStack align="flex-start" gap={0} flex={1}>
         <Flex align="center" gap={2}>
           <Text fontWeight="medium" color="text.primary">
             {label}
           </Text>
           {!!badge && badge > 0 && (
-            <Badge colorScheme="green" borderRadius="full" px={2}>
+            <Badge colorPalette="green" borderRadius="full" px={2}>
               {badge} {t("ui.new")}
             </Badge>
           )}

@@ -29,13 +29,14 @@ const projectStateBorderColorMap: Record<string, string> = {
 
 interface IProjectStateTagProps extends TagProps {
   state: string
+  [key: string]: unknown
 }
 
 export const ProjectStateTag = React.forwardRef<HTMLSpanElement, IProjectStateTagProps>(({ state, ...rest }, ref) => {
   const { t } = useTranslation()
 
   return (
-    <Tag
+    <Tag.Root
       ref={ref}
       p={1}
       bg={projectStateBgMap[state] || "greys.grey04"}
@@ -50,6 +51,6 @@ export const ProjectStateTag = React.forwardRef<HTMLSpanElement, IProjectStateTa
     >
       {/* @ts-ignore */}
       {t(`submissionInbox.projectStates.${state}`)}
-    </Tag>
+    </Tag.Root>
   )
 })

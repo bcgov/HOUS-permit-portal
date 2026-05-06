@@ -1,16 +1,5 @@
-import {
-  Avatar,
-  Button,
-  Icon,
-  IconButton,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  Text,
-  Tooltip,
-  VStack,
-} from "@chakra-ui/react"
+import { Tooltip } from "@/components/ui/tooltip"
+import { Avatar, Button, Icon, IconButton, Menu, Portal, Text, VStack } from "@chakra-ui/react"
 import { Archive, ClockClockwise, DotsThreeVertical } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
@@ -50,11 +39,13 @@ export const PermitApplicationGridRow = observer(
 
     return (
       <Tooltip
-        isDisabled={!isDisabledRow}
-        label={t("sandbox.disabledRow", "Disabled due to sandbox mismatch")}
-        hasArrow
-        placement="top"
+        disabled={!isDisabledRow}
+        content={t("sandbox.disabledRow", "Disabled due to sandbox mismatch")}
+        showArrow
         openDelay={200}
+        positioning={{
+          placement: "top",
+        }}
       >
         <SearchGridRow
           aria-disabled={isDisabledRow}
@@ -79,8 +70,8 @@ export const PermitApplicationGridRow = observer(
         >
           {!usingCurrentTemplateVersion && <OutdatedFormWarning colSpan={6} mx={4} mt={2} />}
           <SearchGridItem>
-            <VStack align="start" spacing={0}>
-              <Text variant="secondary">{permitApplication.templateNickname}</Text>
+            <VStack align="start" gap={0}>
+              <Text color="text.secondary">{permitApplication.templateNickname}</Text>
             </VStack>
           </SearchGridItem>
           <SearchGridItem
@@ -94,7 +85,9 @@ export const PermitApplicationGridRow = observer(
             {fromInbox ? (
               <ApplicationReviewAssigneesCell application={permitApplication} />
             ) : (
-              <Avatar name={designatedSubmitter?.collaborator?.user?.name} size="sm" />
+              <Avatar.Root size="sm">
+                <Avatar.Fallback name={designatedSubmitter?.collaborator?.user?.name} />
+              </Avatar.Root>
             )}
           </SearchGridItem>
           <SearchGridItem>{permitApplication.number}</SearchGridItem>
@@ -103,84 +96,96 @@ export const PermitApplicationGridRow = observer(
             <PermitApplicationStatusTag status={permitApplication.status} />
           </SearchGridItem>
           <SearchGridItem justifyContent="flex-end">
-            <Menu>
-              <MenuButton
-                as={IconButton}
-                icon={<Icon as={DotsThreeVertical} />}
-                variant="ghost"
-                isDisabled={isDisabledRow}
-                onClick={(e) => e.stopPropagation()}
-                aria-label={t("ui.options")}
-              />
-              <MenuList>
-                <MenuItem
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    if (isDisabledRow) return
-                    navigate(permitApplicationPath)
-                  }}
-                >
-                  {t("ui.view")}
-                </MenuItem>
-                {!permitApplication.isDiscarded && permitApplication.isDraft && isSubmitter && (
-                  <ConfirmationModal
-                    title={t("ui.confirmArchive")}
-                    body={t("ui.archiveRetentionNotice" as any)}
-                    onConfirm={async (closeModal) => {
-                      if (await permitApplication.archive()) {
-                        await searchModel?.search()
-                      }
-                      closeModal()
-                    }}
-                    renderTriggerButton={({ onClick }) => (
-                      <MenuItem
-                        icon={<Archive size={16} />}
-                        color="semantic.error"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          onClick(e)
+            <Menu.Root>
+              <Menu.Trigger asChild>
+                <IconButton
+                  icon={
+                    <Icon asChild>
+                      <DotsThreeVertical />
+                    </Icon>
+                  }
+                  variant="ghost"
+                  disabled={isDisabledRow}
+                  onClick={(e) => e.stopPropagation()}
+                  aria-label={t("ui.options")}
+                ></IconButton>
+              </Menu.Trigger>
+              <Portal>
+                <Menu.Positioner>
+                  <Menu.Content>
+                    <Menu.Item
+                      onSelect={(e) => {
+                        e.stopPropagation()
+                        if (isDisabledRow) return
+                        navigate(permitApplicationPath)
+                      }}
+                      value="item-0"
+                    >
+                      {t("ui.view")}
+                    </Menu.Item>
+                    {!permitApplication.isDiscarded && permitApplication.isDraft && isSubmitter && (
+                      <ConfirmationModal
+                        title={t("ui.confirmArchive")}
+                        body={t("ui.archiveRetentionNotice" as any)}
+                        onConfirm={async (closeModal) => {
+                          if (await permitApplication.archive()) {
+                            await searchModel?.search()
+                          }
+                          closeModal()
                         }}
-                      >
-                        {t("ui.archive")}
-                      </MenuItem>
+                        renderTriggerButton={({ onClick }) => (
+                          <Menu.Item
+                            icon={<Archive size={16} />}
+                            color="semantic.error"
+                            onSelect={(e) => {
+                              e.stopPropagation()
+                              onClick(e)
+                            }}
+                            value="item-1"
+                          >
+                            {t("ui.archive")}
+                          </Menu.Item>
+                        )}
+                        renderConfirmationButton={(props) => (
+                          <Button {...props} colorPalette="red">
+                            {t("ui.archive")}
+                          </Button>
+                        )}
+                      />
                     )}
-                    renderConfirmationButton={(props) => (
-                      <Button {...props} colorScheme="red">
-                        {t("ui.archive")}
-                      </Button>
-                    )}
-                  />
-                )}
-                {permitApplication.isDiscarded && isSubmitter && (
-                  <ConfirmationModal
-                    title={t("ui.confirmRestore")}
-                    onConfirm={async (closeModal) => {
-                      if (await permitApplication.restore()) {
-                        await searchModel?.search()
-                      }
-                      closeModal()
-                    }}
-                    renderTriggerButton={({ onClick }) => (
-                      <MenuItem
-                        icon={<ClockClockwise size={16} />}
-                        color="semantic.success"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          onClick(e)
+                    {permitApplication.isDiscarded && isSubmitter && (
+                      <ConfirmationModal
+                        title={t("ui.confirmRestore")}
+                        onConfirm={async (closeModal) => {
+                          if (await permitApplication.restore()) {
+                            await searchModel?.search()
+                          }
+                          closeModal()
                         }}
-                      >
-                        {t("ui.restore")}
-                      </MenuItem>
+                        renderTriggerButton={({ onClick }) => (
+                          <Menu.Item
+                            icon={<ClockClockwise size={16} />}
+                            color="semantic.success"
+                            onSelect={(e) => {
+                              e.stopPropagation()
+                              onClick(e)
+                            }}
+                            value="item-2"
+                          >
+                            {t("ui.restore")}
+                          </Menu.Item>
+                        )}
+                        renderConfirmationButton={(props) => (
+                          <Button {...props} colorPalette="green">
+                            {t("ui.restore")}
+                          </Button>
+                        )}
+                      />
                     )}
-                    renderConfirmationButton={(props) => (
-                      <Button {...props} colorScheme="green">
-                        {t("ui.restore")}
-                      </Button>
-                    )}
-                  />
-                )}
-              </MenuList>
-            </Menu>
+                  </Menu.Content>
+                </Menu.Positioner>
+              </Portal>
+            </Menu.Root>
           </SearchGridItem>
         </SearchGridRow>
       </Tooltip>

@@ -6,18 +6,10 @@ import {
   Heading,
   IconButton,
   IconButtonProps,
-  ListItem,
+  List,
   Popover,
-  PopoverArrow,
-  PopoverBody,
-  PopoverCloseButton,
-  PopoverContent,
-  PopoverFooter,
-  PopoverHeader,
-  PopoverTrigger,
   Portal,
   Text,
-  UnorderedList,
 } from "@chakra-ui/react"
 import { Bell, BellRinging, CaretDown, CaretRight } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
@@ -53,9 +45,9 @@ export const NotificationsPopover: React.FC<INotificationsPopoverProps> = observ
 
   // Default renderer: list of navigation links
   const renderLinks = (n) => (
-    <UnorderedList pl={0} mb={0}>
+    <List.Root as="ul" pl={0} mb={0}>
       {generateSpecificLinkData(n)?.map((link) => (
-        <ListItem whiteSpace={"normal"} key={link.href}>
+        <List.Item whiteSpace={"normal"} key={link.href}>
           <RouterLinkButton
             variant="link"
             rightIcon={<CaretRight />}
@@ -67,9 +59,9 @@ export const NotificationsPopover: React.FC<INotificationsPopoverProps> = observ
           >
             {link.text}
           </RouterLinkButton>
-        </ListItem>
+        </List.Item>
       ))}
-    </UnorderedList>
+    </List.Root>
   )
 
   // Map of actionType -> renderer
@@ -94,16 +86,21 @@ export const NotificationsPopover: React.FC<INotificationsPopoverProps> = observ
   }
 
   return (
-    <Popover isOpen={isOpen} onOpen={handleOpen} onClose={handleClose}>
-      <PopoverTrigger>
+    <Popover.Root
+      open={open}
+      onOpenChange={(e) => {
+        if (e.open) {
+          handleOpen()
+        } else {
+          handleClose()
+        }
+      }}
+    >
+      <Popover.Trigger asChild>
         <Box position="relative">
-          <IconButton
-            variant="ghost"
-            icon={anyUnread ? <BellRinging size={24} /> : <Bell size={24} />}
-            aria-label="open notifications"
-            zIndex={1}
-            {...rest}
-          />
+          <IconButton variant="ghost" aria-label="open notifications" zIndex={1} {...rest}>
+            {anyUnread ? <BellRinging size={24} /> : <Bell size={24} />}
+          </IconButton>
           {anyUnread && (
             <Badge
               position="absolute"
@@ -118,47 +115,46 @@ export const NotificationsPopover: React.FC<INotificationsPopoverProps> = observ
             />
           )}
         </Box>
-      </PopoverTrigger>
+      </Popover.Trigger>
       <Portal>
-        <PopoverContent color="black" w={500}>
-          <PopoverArrow />
-          <PopoverCloseButton mt={1} />
-          <PopoverHeader>
-            <Flex gap={4}>
-              <Heading as="h3" fontSize="lg" mb={0}>
-                {t("notification.title")}
-              </Heading>
-              {numberJustRead > 0 && (
-                <Badge fontWeight="normal" textTransform="lowercase">
-                  {t("notification.nUnread", { n: 3 })}
-                </Badge>
-              )}
-            </Flex>
-          </PopoverHeader>
-          <PopoverBody p={4} maxH="50vh" overflow="auto">
-            <Flex direction="column" gap={4}>
-              {R.isEmpty(notificationsToShow) ? (
-                <Text color="greys.grey01">{t("notification.noUnread")}</Text>
-              ) : (
-                notificationsToShow?.map((n) => (
-                  <CustomMessageBox status={getSemanticKey(n)} description={n.actionText} key={n.id}>
-                    {(notificationRenderers[n.actionType] || renderLinks)(n)}
-                  </CustomMessageBox>
-                ))
-              )}
-            </Flex>
-          </PopoverBody>
-          <PopoverFooter border={0} padding={2}>
-            <Button
-              variant="ghost"
-              leftIcon={<CaretDown />}
-              onClick={showRead ? fetchNotifications : () => setShowRead(true)}
-            >
-              {t("ui.seeMore")}
-            </Button>
-          </PopoverFooter>
-        </PopoverContent>
+        <Popover.Positioner>
+          <Popover.Content color="black" w={500}>
+            <Popover.Arrow />
+            <Popover.CloseTrigger mt={1} />
+            <Popover.Title>
+              <Flex gap={4}>
+                <Heading as="h3" fontSize="lg" mb={0}>
+                  {t("notification.title")}
+                </Heading>
+                {numberJustRead > 0 && (
+                  <Badge fontWeight="normal" textTransform="lowercase">
+                    {t("notification.nUnread", { n: 3 })}
+                  </Badge>
+                )}
+              </Flex>
+            </Popover.Title>
+            <Popover.Body p={4} maxH="50vh" overflow="auto">
+              <Flex direction="column" gap={4}>
+                {R.isEmpty(notificationsToShow) ? (
+                  <Text color="greys.grey01">{t("notification.noUnread")}</Text>
+                ) : (
+                  notificationsToShow?.map((n) => (
+                    <CustomMessageBox status={getSemanticKey(n)} description={n.actionText} key={n.id}>
+                      {(notificationRenderers[n.actionType] || renderLinks)(n)}
+                    </CustomMessageBox>
+                  ))
+                )}
+              </Flex>
+            </Popover.Body>
+            <Popover.Footer border={0} padding={2}>
+              <Button variant="ghost" onClick={showRead ? fetchNotifications : () => setShowRead(true)}>
+                <CaretDown />
+                {t("ui.seeMore")}
+              </Button>
+            </Popover.Footer>
+          </Popover.Content>
+        </Popover.Positioner>
       </Portal>
-    </Popover>
+    </Popover.Root>
   )
 })

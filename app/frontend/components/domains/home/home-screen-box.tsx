@@ -1,4 +1,4 @@
-import { BoxProps, Flex, Heading, LinkBox, LinkOverlay, Text } from "@chakra-ui/react"
+import { BoxProps, Flex, Heading, LinkBox, Text } from "@chakra-ui/react"
 import { CaretRight } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { ReactNode } from "react"
@@ -48,7 +48,6 @@ export const HomeScreenBox = observer(
         {...rest}
       >
         {isMarked && <SandboxHeader />}
-
         <Flex direction={{ base: "column", md: "row" }} gap={8} align="center">
           <Flex direction="column" gap={3} flex={1}>
             <Flex align="center" color="text.link">
@@ -66,8 +65,7 @@ export const HomeScreenBox = observer(
               {t("sandbox.disabledFor")}
             </Text>
           ) : (
-            <LinkOverlay
-              as={RouterLinkButton}
+            <RouterLinkButton
               to={href}
               variant="link"
               rightIcon={<CaretRight size={16} />}
@@ -75,7 +73,7 @@ export const HomeScreenBox = observer(
               fontSize="lg"
             >
               {linkText || t("ui.manage")}
-            </LinkOverlay>
+            </RouterLinkButton>
           )}
         </Flex>
       </LinkBox>

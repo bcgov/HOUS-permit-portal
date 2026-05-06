@@ -116,7 +116,7 @@ export const ProjectAddress = observer(function ProjectAddress() {
           )}
         </Text>
 
-        <VStack spacing={4} align="stretch">
+        <VStack gap={4} align="stretch">
           <SitesSelect
             onChange={(option) => !currentPreCheck?.isSubmitted && setValue("site", option)}
             selectedOption={selectedSite}
@@ -127,7 +127,7 @@ export const ProjectAddress = observer(function ProjectAddress() {
             showManualModeToggle={true}
             showJurisdiction={true}
             initialJurisdiction={currentPreCheck?.jurisdiction || null}
-            isDisabled={currentPreCheck?.isSubmitted}
+            disabled={currentPreCheck?.isSubmitted}
           />
 
           {/* Show form validation errors */}
@@ -154,8 +154,8 @@ export const ProjectAddress = observer(function ProjectAddress() {
         <FormFooter<IProjectAddressFormData>
           handleSubmit={handleSubmit}
           onSubmit={onSubmit}
-          isLoading={isSubmitting}
-          isDisabled={!getIsJurisdictionEnrolled()}
+          loading={isSubmitting}
+          disabled={!getIsJurisdictionEnrolled()}
           disabledMessage={!getIsJurisdictionEnrolled() ? t("ui.selectParticipatingJurisdiction") : undefined}
         />
       </Box>

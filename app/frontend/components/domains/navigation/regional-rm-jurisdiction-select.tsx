@@ -1,14 +1,4 @@
-import {
-  Box,
-  Button,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-  Portal,
-  Text,
-  VStack,
-  useDisclosure,
-} from "@chakra-ui/react"
+import { Box, Button, Popover, Portal, Text, VStack, useDisclosure } from "@chakra-ui/react"
 import { CaretDown, MagnifyingGlass } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -24,82 +14,96 @@ export const RegionalRMJurisdictionSelect = observer(function RegionalRMJurisdic
   const { userStore, uiStore, sandboxStore } = useMst()
   const { currentUser } = userStore
   const { isSandboxActive } = sandboxStore
-  const { onOpen, onClose, isOpen } = useDisclosure()
+  const { onOpen, onClose, open } = useDisclosure()
   const { t } = useTranslation()
 
   return (
-    <Popover isOpen={isOpen} onOpen={onOpen} onClose={onClose} placement="bottom-end">
-      <PopoverTrigger>
+    <Popover.Root
+      open={open}
+      onOpenChange={(e) => {
+        if (e.open) {
+          onOpen()
+        } else {
+          onClose()
+        }
+      }}
+      positioning={{
+        placement: "bottom-end",
+      }}
+    >
+      <Popover.Trigger asChild>
         <ConditionalTooltip
           showTooltip={isSandboxActive}
           message={t("sandbox.disableJurisdictionSwitchTooltip")}
           tooltipProps={{ placement: "bottom-end", openDelay: 200 }}
         >
           <Button
-            rightIcon={<CaretDown />}
             variant="outline"
             fontWeight="bold"
             size="xs"
-            bg={isOpen ? "semantic.warning" : "semantic.warningLight"}
+            bg={open ? "semantic.warning" : "semantic.warningLight"}
             borderColor="semantic.warning"
             _hover={{ bg: "semantic.warning" }}
-            isDisabled={isSandboxActive}
+            disabled={isSandboxActive}
           >
             {currentUser.jurisdiction.qualifiedName}
+            <CaretDown />
           </Button>
         </ConditionalTooltip>
-      </PopoverTrigger>
+      </Popover.Trigger>
       <Portal>
-        <PopoverContent shadow="none">
-          <JurisdictionSelect
-            onChange={(val) => {
-              uiStore.setCurrentlySelectedJurisdictionId(val.id)
-              onClose()
-            }}
-            selectedOption={{
-              label: currentUser.jurisdiction.qualifiedName,
-              value: currentUser.jurisdiction,
-            }}
-            stylesToMerge={{
-              control: {
-                borderBottomLeftRadius: 0,
-                borderBottomRightRadius: 0,
-                borderBottomWidth: 0,
-                borderColor: "var(--chakra-colors-border-base)",
-                boxShadow: "none",
-                //@ts-ignore
-                "&:hover": {
-                  border: "1px solid var(--chakra-colors-border-base)",
+        <Popover.Positioner>
+          <Popover.Content shadow="none">
+            <JurisdictionSelect
+              onChange={(val) => {
+                uiStore.setCurrentlySelectedJurisdictionId(val.id)
+                onClose()
+              }}
+              selectedOption={{
+                label: currentUser.jurisdiction.qualifiedName,
+                value: currentUser.jurisdiction,
+              }}
+              stylesToMerge={{
+                control: {
+                  borderBottomLeftRadius: 0,
+                  borderBottomRightRadius: 0,
+                  borderBottomWidth: 0,
+                  borderColor: "var(--chakra-colors-border-base)",
+                  boxShadow: "none",
+                  //@ts-ignore
+                  "&:hover": {
+                    border: "1px solid var(--chakra-colors-border-base)",
+                  },
+                  gap: "var(--chakra-space-1)",
                 },
-                gap: "var(--chakra-space-1)",
-              },
-              input: { margin: 0 },
-              menu: {
-                margin: 0,
-                borderTopLeftRadius: 0,
-                borderTopRightRadius: 0,
-                boxShadow: "none",
-                borderWidth: 1,
-                borderTopWidth: 0,
-                borderColor: "var(--chakra-colors-border-base)",
-              },
-              valueContainer: {
-                paddingInlineStart: 0,
-                paddingInlineEnd: 0,
-                padding: 0,
-              },
-            }}
-            components={{ Control: Control as any }}
-            filters={{ userId: currentUser.id }}
-            isClearable={false}
-            placeholder={null}
-            controlShouldRenderValue={false}
-            closeMenuOnSelect={false}
-            menuIsOpen={true}
-          />
-        </PopoverContent>
+                input: { margin: 0 },
+                menu: {
+                  margin: 0,
+                  borderTopLeftRadius: 0,
+                  borderTopRightRadius: 0,
+                  boxShadow: "none",
+                  borderWidth: 1,
+                  borderTopWidth: 0,
+                  borderColor: "var(--chakra-colors-border-base)",
+                },
+                valueContainer: {
+                  paddingInlineStart: 0,
+                  paddingInlineEnd: 0,
+                  padding: 0,
+                },
+              }}
+              components={{ Control: Control as any }}
+              filters={{ userId: currentUser.id }}
+              isClearable={false}
+              placeholder={null}
+              controlShouldRenderValue={false}
+              closeMenuOnSelect={false}
+              menuIsOpen={true}
+            />
+          </Popover.Content>
+        </Popover.Positioner>
       </Portal>
-    </Popover>
+    </Popover.Root>
   )
 })
 

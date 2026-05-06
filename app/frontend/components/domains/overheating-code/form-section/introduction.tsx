@@ -1,4 +1,4 @@
-import { Box, FormControl, FormErrorMessage, FormLabel, Heading, Input, Text, VStack } from "@chakra-ui/react"
+import { Box, Field, Heading, Input, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useForm } from "react-hook-form"
@@ -52,7 +52,6 @@ export const Introduction = observer(function Introduction() {
         description={t("overheatingCode.sections.introduction.formVersion", "B.C. SZCG Form Set Ver 1.0")}
         mb={6}
       />
-
       <Heading as="h2" size="lg" mb={2}>
         {t("overheatingCode.sections.introduction.title", "Overheating Code Check")}
       </Heading>
@@ -62,12 +61,11 @@ export const Introduction = observer(function Introduction() {
           "Provide basic project identification details to get started with your overheating code compliance check."
         )}
       </Text>
-
-      <VStack spacing={6} align="stretch">
-        <FormControl isInvalid={!!errors.issuedTo}>
-          <FormLabel>
+      <VStack gap={6} align="stretch">
+        <Field.Root invalid={!!errors.issuedTo}>
+          <Field.Label>
             {t("overheatingCode.sections.introduction.issuedToLabel", "These documents issued for the use of")}
-          </FormLabel>
+          </Field.Label>
           <Input
             {...register("issuedTo", {
               required: t(
@@ -80,11 +78,11 @@ export const Introduction = observer(function Introduction() {
               "e.g. Jane Smith, ABC Construction Ltd."
             )}
           />
-          <FormErrorMessage>{errors.issuedTo?.message}</FormErrorMessage>
-        </FormControl>
+          <Field.ErrorText>{errors.issuedTo?.message}</Field.ErrorText>
+        </Field.Root>
 
-        <FormControl isInvalid={!!errors.projectNumber}>
-          <FormLabel>{t("overheatingCode.sections.introduction.projectNumberLabel", "Project #")}</FormLabel>
+        <Field.Root invalid={!!errors.projectNumber}>
+          <Field.Label>{t("overheatingCode.sections.introduction.projectNumberLabel", "Project #")}</Field.Label>
           <Input
             {...register("projectNumber", {
               required: t(
@@ -94,11 +92,10 @@ export const Introduction = observer(function Introduction() {
             })}
             placeholder={t("overheatingCode.sections.introduction.projectNumberPlaceholder", "e.g. 2026-001")}
           />
-          <FormErrorMessage>{errors.projectNumber?.message}</FormErrorMessage>
-        </FormControl>
+          <Field.ErrorText>{errors.projectNumber?.message}</Field.ErrorText>
+        </Field.Root>
       </VStack>
-
-      <FormFooter<IIntroductionFormData> handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
+      <FormFooter<IIntroductionFormData> handleSubmit={handleSubmit} onSubmit={onSubmit} loading={isSubmitting} />
     </Box>
   )
 })

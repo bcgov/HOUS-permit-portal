@@ -17,7 +17,7 @@ export const SectionsDisplay = observer(function SectionsDisplay(props: IProps) 
   const { sections } = props
 
   return (
-    <Stack w={"full"} alignItems={"flex-start"} spacing={16}>
+    <Stack w={"full"} alignItems={"flex-start"} gap={16}>
       {sections.map((section) => (
         <SectionDisplay key={section.id} section={section} {...props} />
       ))}
@@ -57,7 +57,7 @@ const SectionDisplay = observer(
         id={formScrollToId?.(section.id)}
         data-section-id={section.id}
       >
-        <Stack w="full" spacing="6" mt="8" mb="20" mx="auto" px="8" maxWidth="container.lg">
+        <Stack w="full" gap="6" mt="8" mb="20" mx="auto" px="8" maxWidth="container.lg">
           <Heading as="h3" variant="yellowline" fontSize="2xl">
             {sectionName}
           </Heading>

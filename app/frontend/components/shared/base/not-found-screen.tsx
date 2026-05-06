@@ -15,7 +15,9 @@ export const NotFoundScreen = observer(({ ...rest }: INotFoundScreenProps) => {
   return (
     <Container maxW="container.lg">
       <VStack gap="16" my="20" mb="40">
-        <Icon as={ListMagnifyingGlass} boxSize="14" color="theme.yellow" />
+        <Icon boxSize="14" color="theme.yellow" asChild>
+          <ListMagnifyingGlass />
+        </Icon>
         <Box>
           <Heading as="h1">{t("site.pageNotFound")}</Heading>
           <Text>{t("site.pageNotFoundInstructions")}</Text>

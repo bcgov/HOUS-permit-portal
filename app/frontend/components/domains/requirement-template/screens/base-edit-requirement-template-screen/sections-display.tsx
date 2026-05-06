@@ -32,7 +32,7 @@ export const SectionsDisplay = observer(function SectionsDisplay(props: IProps) 
       id="sections-display-form-blocks"
       w={"full"}
       alignItems={"flex-start"}
-      spacing={16}
+      gap={16}
       mt="8"
       mb="20"
       mx="auto"
@@ -114,7 +114,7 @@ const SectionDisplay = observer(
             fontWeight={700}
             fontSize={"2xl"}
             className={"edit-template-yellowBarHeader"}
-            sx={{
+            css={{
               "&::before": {
                 borderTop: isInEditMode ? "none" : undefined,
               },
@@ -140,13 +140,13 @@ const SectionDisplay = observer(
 
           {watchedSectionBlocks.length === 0 ? (
             <Button
-              leftIcon={<X />}
               variant={"ghost"}
               color={"error"}
               visibility={"hidden"}
               onClick={() => removeSection(sectionIndex)}
               marginTop={isInEditMode ? 3 : 9}
             >
+              <X />
               {t("ui.remove")}
             </Button>
           ) : (

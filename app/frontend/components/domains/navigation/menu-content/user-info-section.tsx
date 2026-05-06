@@ -9,7 +9,9 @@ export const UserInfoSection = observer(() => {
 
   return (
     <Flex align="center" gap={3} w="full" pb={4} borderBottom="1px solid" borderColor="border.light">
-      <Avatar name={currentUser?.name} size="md" bg="semantic.warningLight" color="text.primary" />
+      <Avatar.Root size="md" bg="semantic.warningLight" color="text.primary">
+        <Avatar.Fallback name={currentUser?.name} />
+      </Avatar.Root>
       <Text fontWeight="bold" fontSize="lg" color="text.primary">
         {currentUser?.name}
       </Text>

@@ -1,4 +1,5 @@
-import { Flex, FormControl, FormHelperText, FormLabel, Input, Radio, RadioGroup, Stack } from "@chakra-ui/react"
+import { RadioGroup } from "@/components/ui/radio"
+import { Field, Flex, Input, Stack } from "@chakra-ui/react"
 import { ErrorMessage } from "@hookform/error-message"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
@@ -76,42 +77,46 @@ export const DistrictEnergy = observer(function Part3StepCodeFormDistrictEnergy(
         <SectionHeading>{t(`${i18nPrefix}.heading`)}</SectionHeading>
       </Flex>
       <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
-        <FormControl>
-          <FormLabel>{t(`${i18nPrefix}.isRelevant`)}</FormLabel>
-          <RadioGroup onChange={setIsRelevant} value={isRelevant}>
-            <Stack spacing={5} direction="row">
-              <Radio variant="binary" value={"yes"}>
-                {t("ui.yes")}
-              </Radio>
-              <Radio variant="binary" value={"no"}>
-                {t("ui.no")}
-              </Radio>
+        <Field.Root>
+          <Field.Label>{t(`${i18nPrefix}.isRelevant`)}</Field.Label>
+          <RadioGroup.Root onValueChange={setIsRelevant} value={isRelevant}>
+            <Stack gap={5} direction="row">
+              <RadioGroup.Item variant="binary" value={"yes"}>
+                <RadioGroup.ItemHiddenInput />
+                <RadioGroup.ItemIndicator />
+                <RadioGroup.ItemText>{t("ui.yes")}</RadioGroup.ItemText>
+              </RadioGroup.Item>
+              <RadioGroup.Item variant="binary" value={"no"}>
+                <RadioGroup.ItemHiddenInput />
+                <RadioGroup.ItemIndicator />
+                <RadioGroup.ItemText>{t("ui.no")}</RadioGroup.ItemText>
+              </RadioGroup.Item>
             </Stack>
-          </RadioGroup>
-        </FormControl>
+          </RadioGroup.Root>
+        </Field.Root>
         {isRelevant == "yes" && (
           <>
             <Input type="hidden" {...register("fuelTypesAttributes.0.key")} />
-            <FormControl>
-              <FormLabel>{t(`${i18nPrefix}.description.label`)}</FormLabel>
-              <FormHelperText mb={1} mt={0} color="semantic.error">
+            <Field.Root>
+              <Field.Label>{t(`${i18nPrefix}.description.label`)}</Field.Label>
+              <Field.HelperText mb={1} mt={0} color="semantic.error">
                 <ErrorMessage errors={errors} name="fuelTypesAttributes.0.description" />
-              </FormHelperText>
+              </Field.HelperText>
               <Input
                 maxW={"224px"}
                 {...register("fuelTypesAttributes.0.description", { required: t(`${i18nPrefix}.description.error`) })}
               />
-            </FormControl>
-            <FormControl>
-              <FormLabel>
+            </Field.Root>
+            <Field.Root>
+              <Field.Label>
                 <Trans i18nKey={`${i18nPrefix}.emissionsFactor.label`} components={{ sub: <sub /> }} />
-              </FormLabel>
-              <FormHelperText mb={1} mt={0}>
+              </Field.Label>
+              <Field.HelperText mb={1} mt={0}>
                 {t(`${i18nPrefix}.emissionsFactor.hint`)}
-              </FormHelperText>
-              <FormHelperText mb={1} mt={0} color="semantic.error">
+              </Field.HelperText>
+              <Field.HelperText mb={1} mt={0} color="semantic.error">
                 <ErrorMessage errors={errors} name="fuelTypesAttributes.0.emissionsFactor" />
-              </FormHelperText>
+              </Field.HelperText>
               <Input
                 maxW={"224px"}
                 type="number"
@@ -120,25 +125,25 @@ export const DistrictEnergy = observer(function Part3StepCodeFormDistrictEnergy(
                   required: t(`${i18nPrefix}.emissionsFactor.error`),
                 })}
               />
-            </FormControl>
-            <FormControl>
-              <FormLabel>{t(`${i18nPrefix}.source.label`)}</FormLabel>
-              <FormHelperText mb={1} mt={0}>
+            </Field.Root>
+            <Field.Root>
+              <Field.Label>{t(`${i18nPrefix}.source.label`)}</Field.Label>
+              <Field.HelperText mb={1} mt={0}>
                 {t(`${i18nPrefix}.source.hint`)}
-              </FormHelperText>
-              <FormHelperText mb={1} mt={0} color="semantic.error">
+              </Field.HelperText>
+              <Field.HelperText mb={1} mt={0} color="semantic.error">
                 <ErrorMessage errors={errors} name="fuelTypesAttributes.0.source" />
-              </FormHelperText>
+              </Field.HelperText>
               <Input
                 maxW={"224px"}
                 {...register("fuelTypesAttributes.0.source", {
                   required: t(`${i18nPrefix}.source.error`),
                 })}
               />
-            </FormControl>
+            </Field.Root>
           </>
         )}
-        {!!isRelevant && <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />}
+        {!!isRelevant && <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} loading={isSubmitting} />}
       </Flex>
     </>
   )

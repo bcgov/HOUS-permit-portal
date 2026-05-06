@@ -1,20 +1,4 @@
-import {
-  Accordion,
-  AccordionButton,
-  AccordionIcon,
-  AccordionItem,
-  AccordionPanel,
-  Box,
-  Button,
-  Divider,
-  Flex,
-  Grid,
-  GridItem,
-  Heading,
-  Link,
-  Show,
-  Text,
-} from "@chakra-ui/react"
+import { Accordion, Box, Button, Flex, Grid, GridItem, Heading, Link, Separator, Text } from "@chakra-ui/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { BceidLoginForm, BcscLoginForm, IdirLoginForm } from "../../shared/auth/login-forms"
@@ -56,14 +40,14 @@ export const LoginScreen = ({ isAdmin }: ILoginScreenProps) => {
             </>
           ) : (
             <>
-              <Show above="md">
+              <Box hideBelow="md">
                 <Grid templateColumns={"1fr auto 1fr"} gap={6} width="100%" alignItems="start">
                   <GridItem>
                     <Heading as="h2">{t("auth.publicLogin")}</Heading>
                   </GridItem>
 
                   <GridItem rowSpan={3} h="full">
-                    <Divider orientation="vertical" height="100%" borderColor="border.light" mx={12} />
+                    <Separator orientation="vertical" height="100%" borderColor="border.light" mx={12} />
                   </GridItem>
 
                   <GridItem>
@@ -89,8 +73,8 @@ export const LoginScreen = ({ isAdmin }: ILoginScreenProps) => {
                     <BceidLoginForm />
                   </GridItem>
                 </Grid>
-              </Show>
-              <Show below="md">
+              </Box>
+              <Box hideFrom="md">
                 <Grid
                   templateColumns={"1fr"} // Single column on small screens, three columns on md and up
                   gap={6}
@@ -124,53 +108,59 @@ export const LoginScreen = ({ isAdmin }: ILoginScreenProps) => {
                     <BceidLoginForm />
                   </GridItem>
                 </Grid>
-              </Show>
+              </Box>
             </>
           )}
           {!isAdmin && (
             <Flex direction="column">
               <Heading>{t("auth.firstTime")}</Heading>
               <Text>{t("auth.chooseSituation")}</Text>
-              <Accordion mt={8} allowToggle allowMultiple>
-                <AccordionItem>
-                  <AccordionButton display="flex" justifyContent="space-between">
+              <Accordion.Root mt={8} collapsible multiple>
+                <Accordion.Item value="item-0">
+                  <Accordion.ItemTrigger display="flex" justifyContent="space-between">
                     <Box as="span" py={2} textAlign="left">
                       <Heading as="h3">{t("auth.submitterAccordion")}</Heading>
                     </Box>
-                    <AccordionIcon />
-                  </AccordionButton>
-                  <AccordionPanel pb={4}>
-                    <SubmitterBasicBCeIDInfo />
-                    <BCSCInfo />
-                  </AccordionPanel>
-                </AccordionItem>
+                    <Accordion.ItemIndicator />
+                  </Accordion.ItemTrigger>
+                  <Accordion.ItemContent pb={4}>
+                    <Accordion.ItemBody>
+                      <SubmitterBasicBCeIDInfo />
+                      <BCSCInfo />
+                    </Accordion.ItemBody>
+                  </Accordion.ItemContent>
+                </Accordion.Item>
 
-                <AccordionItem>
-                  <AccordionButton display="flex" justifyContent="space-between">
+                <Accordion.Item value="item-1">
+                  <Accordion.ItemTrigger display="flex" justifyContent="space-between">
                     <Box as="span" py={2} textAlign="left">
                       <Heading as="h3">{t("auth.entityAccordion")}</Heading>
                     </Box>
-                    <AccordionIcon />
-                  </AccordionButton>
-                  <AccordionPanel pb={4}>
-                    <EntityBasicBCeIDInfo />
-                    <EntityBusinessBCeIDInfo />
-                  </AccordionPanel>
-                </AccordionItem>
+                    <Accordion.ItemIndicator />
+                  </Accordion.ItemTrigger>
+                  <Accordion.ItemContent pb={4}>
+                    <Accordion.ItemBody>
+                      <EntityBasicBCeIDInfo />
+                      <EntityBusinessBCeIDInfo />
+                    </Accordion.ItemBody>
+                  </Accordion.ItemContent>
+                </Accordion.Item>
 
-                <AccordionItem>
-                  <AccordionButton display="flex" justifyContent="space-between">
+                <Accordion.Item value="item-2">
+                  <Accordion.ItemTrigger display="flex" justifyContent="space-between">
                     <Box as="span" py={2} textAlign="left">
                       <Heading as="h3">{t("auth.lgAccordion")}</Heading>
                     </Box>
-                    <AccordionIcon />
-                  </AccordionButton>
-                  <AccordionPanel pb={4}>
-                    <LgBusinessBCeIDInfo />
-                    <LgBasicBCeIDInfo />
-                  </AccordionPanel>
-                </AccordionItem>
-              </Accordion>
+                    <Accordion.ItemIndicator />
+                  </Accordion.ItemTrigger>
+                  <Accordion.ItemContent pb={4}>
+                    <Accordion.ItemBody>
+                      <LgBusinessBCeIDInfo />
+                      <LgBasicBCeIDInfo />
+                    </Accordion.ItemBody>
+                  </Accordion.ItemContent>
+                </Accordion.Item>
+              </Accordion.Root>
             </Flex>
           )}
         </Flex>
@@ -183,18 +173,18 @@ export const LoginScreen = ({ isAdmin }: ILoginScreenProps) => {
                 {t("auth.loginHelp")}{" "}
               </Text>
               <Text as="span">{t("auth.goToPartners")} </Text>
-              <Link href={import.meta.env.VITE_BCEID_PARTNER_URL} isExternal>
+              <Link href={import.meta.env.VITE_BCEID_PARTNER_URL} target="_blank" rel="noopener noreferrer">
                 {t("auth.bceid")}
               </Link>{" "}
               {t("ui.or")}{" "}
-              <Link href={import.meta.env.VITE_BCSC_REGISTRATION_URL} isExternal>
+              <Link href={import.meta.env.VITE_BCSC_REGISTRATION_URL} target="_blank" rel="noopener noreferrer">
                 {t("auth.bcsc")}
               </Link>
             </Text>
 
             <HelpDrawer
               renderTriggerButton={({ onClick }) => (
-                <Button variant="link" onClick={onClick}>
+                <Button variant="plain" onClick={onClick}>
                   {t("ui.help")}
                 </Button>
               )}

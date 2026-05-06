@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, ModalBody, ModalHeader, SimpleGrid, useDisclosure } from "@chakra-ui/react"
+import { Box, Button, Dialog, IconButton, SimpleGrid, useDisclosure } from "@chakra-ui/react"
 import { X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -49,7 +49,7 @@ export const CollaboratorInviteModalContent = observer(function CollaboratorCrea
 
   return (
     <>
-      <ModalHeader
+      <Dialog.Header
         fontSize={"lg"}
         fontFamily={"heading"}
         fontWeight={"bold"}
@@ -64,13 +64,14 @@ export const CollaboratorInviteModalContent = observer(function CollaboratorCrea
           onClick={onClose}
           variant={"ghost"}
           aria-label={"close assignment screen"}
-          icon={<X />}
           color={"text.primary"}
-        />
-      </ModalHeader>
-      <ModalBody px={5} py={4}>
+        >
+          <X />
+        </IconButton>
+      </Dialog.Header>
+      <Dialog.Body px={5} py={4}>
         <FormProvider {...formMethods}>
-          <SimpleGrid columns={2} spacing={4}>
+          <SimpleGrid columns={2} gap={4}>
             <TextFormControl label={t("contact.fields.firstName")} fieldName={`firstName`} required />
             <TextFormControl label={t("contact.fields.lastName")} fieldName={`lastName`} required />
             <Box gridColumn={"span 2"}>
@@ -96,8 +97,8 @@ export const CollaboratorInviteModalContent = observer(function CollaboratorCrea
                     fontWeight={"semibold"}
                     fontSize={"sm"}
                     onClick={onClick as (e: React.MouseEvent) => Promise<any>}
-                    isDisabled={!isValid}
-                    isLoading={isSubmitting}
+                    disabled={!isValid}
+                    loading={isSubmitting}
                     {...rest}
                   >
                     {t("permitCollaboration.popover.collaboratorInvite.inviteButton")}
@@ -118,7 +119,7 @@ export const CollaboratorInviteModalContent = observer(function CollaboratorCrea
             </Box>
           </SimpleGrid>
         </FormProvider>
-      </ModalBody>
+      </Dialog.Body>
     </>
   )
 })

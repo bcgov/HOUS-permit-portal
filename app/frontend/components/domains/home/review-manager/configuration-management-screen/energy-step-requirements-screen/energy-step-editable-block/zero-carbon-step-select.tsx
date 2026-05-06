@@ -1,14 +1,5 @@
-import {
-  Flex,
-  Input,
-  InputGroup,
-  InputRightElement,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-  Portal,
-  VStack,
-} from "@chakra-ui/react"
+import { InputGroup } from "@/components/ui/input-group"
+import { Flex, Input, InputElement, Popover, Portal, VStack } from "@chakra-ui/react"
 import { CaretDown } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
@@ -22,6 +13,7 @@ interface IProps {
   onChange: (event: any) => void
   value: EZeroCarbonStep
   isDisabled?: boolean
+  disabled?: boolean
   allowNull?: boolean
   portal?: boolean
 }
@@ -30,6 +22,7 @@ export const ZeroCarbonStepSelect = observer(function ZeroCarbonStepSelect({
   onChange,
   value,
   isDisabled,
+  disabled,
   allowNull,
   portal,
 }: IProps) {
@@ -40,57 +33,71 @@ export const ZeroCarbonStepSelect = observer(function ZeroCarbonStepSelect({
   const options = getZeroCarbonStepOptions(allowNull)
 
   return (
-    <Popover placement="bottom-end">
-      {({ onClose }) => (
-        <>
-          <PopoverTrigger>
-            <InputGroup pointerEvents={isDisabled ? "none" : "auto"}>
-              <Input
-                as={Flex}
-                bg="white"
-                cursor="pointer"
-                alignItems="center"
-                borderColor="gray.200"
-                borderWidth={1}
-                rounded="base"
-                shadow="base"
-                isDisabled={isDisabled}
-              >
-                {value === undefined || value === null
-                  ? t(`ui.selectPlaceholder`)
-                  : t(`${i18nPrefix}.stepRequired.zeroCarbon.options.${value}`)}
-              </Input>
-              <InputRightElement children={<CaretDown color="gray.300" />} />
-            </InputGroup>
-          </PopoverTrigger>
-          <ConditionalWrapper condition={portal} wrapper={(children) => <Portal>{children}</Portal>}>
-            <PopoverContent>
-              <VStack align="start" spacing={0}>
-                {options.map((value, i) => (
-                  <Flex
-                    key={value}
-                    onClick={() => {
-                      onChange(value)
-                      onClose()
-                    }}
-                    px={2}
-                    py={1.5}
-                    w="full"
-                    borderTopWidth={value ? undefined : 1}
-                    borderColor="border.light"
+    <Popover.Root
+      positioning={{
+        placement: "bottom-end",
+      }}
+    >
+      <Popover.Context>
+        {({ setOpen: setOpen }) => {
+          const onClose = () => setOpen(false)
+
+          return (
+            <>
+              <Popover.Trigger asChild>
+                <InputGroup pointerEvents={(disabled ?? isDisabled) ? "none" : "auto"}>
+                  <Input
+                    bg="white"
                     cursor="pointer"
-                    _hover={{ bg: "hover.blue" }}
+                    alignItems="center"
+                    borderColor="gray.200"
+                    borderWidth={1}
+                    rounded="base"
+                    shadow="base"
+                    disabled={disabled ?? isDisabled}
+                    asChild
                   >
-                    {value
-                      ? t(`${i18nPrefix}.stepRequired.zeroCarbon.options.${value}`)
-                      : t(`${i18nPrefix}.notRequired`)}
-                  </Flex>
-                ))}
-              </VStack>
-            </PopoverContent>
-          </ConditionalWrapper>
-        </>
-      )}
-    </Popover>
+                    <Flex>
+                      {value === undefined || value === null
+                        ? t(`ui.selectPlaceholder`)
+                        : t(`${i18nPrefix}.stepRequired.zeroCarbon.options.${value}`)}
+                    </Flex>
+                  </Input>
+                  <InputElement placement="end" children={<CaretDown color="gray.300" />} />
+                </InputGroup>
+              </Popover.Trigger>
+              <ConditionalWrapper condition={portal} wrapper={(children) => <Portal>{children}</Portal>}>
+                <Popover.Positioner>
+                  <Popover.Content>
+                    <VStack align="start" gap={0}>
+                      {options.map((value, i) => (
+                        <Flex
+                          key={value}
+                          onClick={() => {
+                            onChange(value)
+                            onClose()
+                          }}
+                          px={2}
+                          py={1.5}
+                          w="full"
+                          borderTopWidth={value ? undefined : 1}
+                          borderColor="border.light"
+                          cursor="pointer"
+                          _hover={{ bg: "hover.blue" }}
+                        >
+                          {value
+                            ? t(`${i18nPrefix}.stepRequired.zeroCarbon.options.${value}`)
+                            : t(`${i18nPrefix}.notRequired`)}
+                        </Flex>
+                      ))}
+                    </VStack>
+                  </Popover.Content>
+                </Popover.Positioner>
+              </ConditionalWrapper>
+            </>
+          )
+        }}
+      </Popover.Context>
+    </Popover.Root>
   )
 })

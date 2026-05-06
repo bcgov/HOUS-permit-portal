@@ -1,11 +1,21 @@
-import { Badge, Tooltip } from "@chakra-ui/react"
+import { Tooltip } from "@/components/ui/tooltip"
+import { Badge } from "@chakra-ui/react"
 import React from "react"
 
 export function ClauseBadge({ clause, tooltip }: { clause: string; tooltip: string }) {
   return (
-    <Tooltip label={tooltip} fontSize="xs" placement="top" hasArrow maxW="400px" whiteSpace="normal">
+    <Tooltip
+      content={tooltip}
+      fontSize="xs"
+      showArrow
+      maxW="400px"
+      whiteSpace="normal"
+      positioning={{
+        placement: "top",
+      }}
+    >
       <Badge
-        colorScheme="blue"
+        colorPalette="blue"
         variant="subtle"
         fontSize="2xs"
         fontWeight="semibold"

@@ -1,4 +1,4 @@
-import { Button, IconButton, Menu, MenuButton, MenuItem, MenuList, Text } from "@chakra-ui/react"
+import { Button, IconButton, Menu, Portal, Text } from "@chakra-ui/react"
 import { Archive, ArrowSquareOut, ClockClockwise, DotsThreeVertical, ShareNetwork } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
@@ -55,104 +55,112 @@ export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode })
       <SearchGridItem>{fullAddress}</SearchGridItem>
       <SearchGridItem>{updatedAt ? format(updatedAt, datefnsTableDateTimeFormat) : ""}</SearchGridItem>
       <SearchGridItem justifyContent="flex-end" px={2} onClick={(e) => e.stopPropagation()}>
-        <Menu>
-          <MenuButton
-            as={IconButton}
-            aria-label={t("ui.options")}
-            icon={<DotsThreeVertical size={20} />}
-            variant="ghost"
-          />
-          <MenuList>
-            {isDiscarded ? (
-              <ConfirmationModal
-                title={t("ui.confirmRestore")}
-                onConfirm={(closeModal) => {
-                  handleRestore()
-                  closeModal()
-                }}
-                renderTriggerButton={({ onClick }) => (
-                  <MenuItem
-                    icon={<ClockClockwise size={16} />}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onClick(e)
+        <Menu.Root>
+          <Menu.Trigger asChild>
+            <IconButton
+              aria-label={t("ui.options")}
+              icon={<DotsThreeVertical size={20} />}
+              variant="ghost"
+            ></IconButton>
+          </Menu.Trigger>
+          <Portal>
+            <Menu.Positioner>
+              <Menu.Content>
+                {isDiscarded ? (
+                  <ConfirmationModal
+                    title={t("ui.confirmRestore")}
+                    onConfirm={(closeModal) => {
+                      handleRestore()
+                      closeModal()
                     }}
-                    color="semantic.success"
-                  >
-                    {t("ui.restore")}
-                  </MenuItem>
-                )}
-                renderConfirmationButton={(props) => (
-                  <Button {...props} colorScheme="green">
-                    {t("ui.restore")}
-                  </Button>
-                )}
-              />
-            ) : (
-              <>
-                {(stepCode as any)?.reportDocuments?.length > 0 ? (
-                  <FileDownloadButton
-                    as={MenuItem}
-                    modelType={EFileUploadAttachmentType.ReportDocument}
-                    document={(stepCode as any).reportDocuments[stepCode.reportDocuments.length - 1]}
-                    variant="ghost"
-                    size="sm"
-                    simpleLabel
-                    w="full"
-                    display="flex"
-                    justifyContent="flex-start"
-                    textAlign="left"
+                    renderTriggerButton={({ onClick }) => (
+                      <Menu.Item
+                        icon={<ClockClockwise size={16} />}
+                        onSelect={(e) => {
+                          e.stopPropagation()
+                          onClick(e)
+                        }}
+                        color="semantic.success"
+                        value="item-0"
+                      >
+                        {t("ui.restore")}
+                      </Menu.Item>
+                    )}
+                    renderConfirmationButton={(props) => (
+                      <Button {...props} colorPalette="green">
+                        {t("ui.restore")}
+                      </Button>
+                    )}
                   />
                 ) : (
-                  <MenuItem _hover={{ cursor: "not-allowed" }}>
-                    <Text>{t("stepCode.index.noReportAvailable")}</Text>
-                  </MenuItem>
-                )}
+                  <>
+                    {(stepCode as any)?.reportDocuments?.length > 0 ? (
+                      <FileDownloadButton
+                        as={Menu.Item}
+                        modelType={EFileUploadAttachmentType.ReportDocument}
+                        document={(stepCode as any).reportDocuments[stepCode.reportDocuments.length - 1]}
+                        variant="ghost"
+                        size="sm"
+                        simpleLabel
+                        w="full"
+                        display="flex"
+                        justifyContent="flex-start"
+                        textAlign="left"
+                      />
+                    ) : (
+                      <Menu.Item _hover={{ cursor: "not-allowed" }} value="item-1">
+                        <Text>{t("stepCode.index.noReportAvailable")}</Text>
+                      </Menu.Item>
+                    )}
 
-                {(stepCode as any)?.reportDocuments?.length > 0 && (stepCode as any)?.jurisdiction && (
-                  <MenuItem icon={<ShareNetwork size={16} />} onClick={handleShareReport} isDisabled={isSharing}>
-                    {isSharing ? t("stepCode.shareReport.sharing") : t("stepCode.shareReport.action")}
-                  </MenuItem>
-                )}
+                    {(stepCode as any)?.reportDocuments?.length > 0 && (stepCode as any)?.jurisdiction && (
+                      <Menu.Item
+                        icon={<ShareNetwork size={16} />}
+                        onSelect={handleShareReport}
+                        disabled={isSharing}
+                        value="item-2"
+                      >
+                        {isSharing ? t("stepCode.shareReport.sharing") : t("stepCode.shareReport.action")}
+                      </Menu.Item>
+                    )}
 
-                <MenuItem
-                  as={ReactRouterLink}
-                  to={targetPath || "#"}
-                  isDisabled={!targetPath}
-                  icon={<ArrowSquareOut size={16} />}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {t("ui.open")}
-                </MenuItem>
+                    <Menu.Item disabled={!targetPath} icon={<ArrowSquareOut size={16} />} value="item-3" asChild>
+                      <ReactRouterLink to={targetPath || "#"} onSelect={(e) => e.stopPropagation()}>
+                        {t("ui.open")}
+                      </ReactRouterLink>
+                    </Menu.Item>
 
-                <ConfirmationModal
-                  title={t("ui.confirmArchive")}
-                  onConfirm={(closeModal) => {
-                    handleArchive()
-                    closeModal()
-                  }}
-                  renderTriggerButton={({ onClick }) => (
-                    <MenuItem
-                      icon={<Archive size={16} />}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        onClick(e)
+                    <ConfirmationModal
+                      title={t("ui.confirmArchive")}
+                      onConfirm={(closeModal) => {
+                        handleArchive()
+                        closeModal()
                       }}
-                      color="semantic.error"
-                    >
-                      {t("ui.archive")}
-                    </MenuItem>
-                  )}
-                  renderConfirmationButton={(props) => (
-                    <Button {...props} colorScheme="red">
-                      {t("ui.archive")}
-                    </Button>
-                  )}
-                />
-              </>
-            )}
-          </MenuList>
-        </Menu>
+                      renderTriggerButton={({ onClick }) => (
+                        <Menu.Item
+                          icon={<Archive size={16} />}
+                          onSelect={(e) => {
+                            e.stopPropagation()
+                            onClick(e)
+                          }}
+                          color="semantic.error"
+                          value="item-4"
+                        >
+                          {t("ui.archive")}
+                        </Menu.Item>
+                      )}
+                      renderConfirmationButton={(props) => (
+                        <Button {...props} colorPalette="red">
+                          {t("ui.archive")}
+                        </Button>
+                      )}
+                    />
+                  </>
+                )}
+              </Menu.Content>
+            </Menu.Positioner>
+          </Portal>
+        </Menu.Root>
       </SearchGridItem>
     </SearchGridRow>
   )

@@ -1,4 +1,5 @@
-import { Heading, Radio, RadioGroup, Stack, StackProps, Text } from "@chakra-ui/react"
+import { Radio, RadioGroup } from "@/components/ui/radio"
+import { Heading, Stack, StackProps, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import { path } from "ramda"
 import React, { useEffect, useMemo } from "react"
@@ -196,9 +197,8 @@ export const HVAC = observer(() => {
         {t(`${i18nPrefix}.heading`)}
       </Heading>
       <Text fontSize="md">{t(`${i18nPrefix}.description`)}</Text>
-
       <FormProvider {...formMethods}>
-        <Stack spacing={7} mt={3}>
+        <Stack gap={7} mt={3}>
           {optionSections.map((section) => (
             <OptionsSection
               key={section.optionFieldName}
@@ -207,7 +207,7 @@ export const HVAC = observer(() => {
               otherDescriptionFieldName={section.otherDescriptionFieldName as TDescriptionFieldName}
             />
           ))}
-          <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
+          <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} loading={isSubmitting} />
         </Stack>
       </FormProvider>
     </Stack>
@@ -281,7 +281,7 @@ export const OptionsSection = observer(
     const optionErrorMessage = path([optionFieldName, "message"], errors)
 
     return (
-      <Stack spacing={3.25} {...props}>
+      <Stack gap={3.25} {...props}>
         <Heading as="h3" fontSize="md" display="flex" alignItems="center">
           {t(`${i18nPrefix}.${optionFieldName as TOptionFieldName}.heading`)}
           {optionErrorMessage && (
@@ -290,14 +290,15 @@ export const OptionsSection = observer(
             </Text>
           )}
         </Heading>
-        <RadioGroup
+        <RadioGroup.Root
           display="grid"
           gridTemplateColumns={["1fr", null, "repeat(2, minmax(200px, max-content))"]}
           rowGap={2}
           columnGap={10}
-          gridAutoRows="minmax(35px, auto)" // Ensure minimum height for grid cells, this so that when the description field is shown, there is no layout shift
+          // Ensure minimum height for grid cells, this so that when the description field is shown, there is no layout shift
+          gridAutoRows="minmax(35px, auto)"
           value={optionValue}
-          onChange={handleOptionChange}
+          onValueChange={handleOptionChange}
         >
           {options.map((option) => {
             const showDescriptionField = otherSelected && option === "other"
@@ -325,7 +326,7 @@ export const OptionsSection = observer(
               </Container>
             )
           })}
-        </RadioGroup>
+        </RadioGroup.Root>
       </Stack>
     )
   }

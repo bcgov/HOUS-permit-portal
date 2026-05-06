@@ -32,7 +32,7 @@ export const LimitedJurisdictionIndexScreen = observer(function JurisdictionInde
 
   return (
     <Container maxW="container.lg" p={8} as={"main"} flexGrow={1}>
-      <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
+      <VStack alignItems={"flex-start"} gap={5} w={"full"} h={"full"}>
         <Flex justifyContent={"space-between"} w={"full"} alignItems={"flex-end"}>
           <Box>
             <Heading as="h1">{t("jurisdiction.index.title")}</Heading>

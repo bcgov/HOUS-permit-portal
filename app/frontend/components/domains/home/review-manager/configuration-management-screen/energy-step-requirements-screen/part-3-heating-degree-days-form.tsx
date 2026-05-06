@@ -58,7 +58,7 @@ export const Part3HeatingDegreeDaysForm = observer(function Part3HeatingDegreeDa
             <NumberFormControl
               label={t("home.configurationManagement.stepCodeRequirements.heatingDegreeDays.label")}
               fieldName="heatingDegreeDays"
-              inputProps={{ step: 1, isDisabled: !isEditing }}
+              inputProps={{ step: 1, disabled: !isEditing }}
               showOptional={false}
             />
           </Flex>
@@ -68,17 +68,18 @@ export const Part3HeatingDegreeDaysForm = observer(function Part3HeatingDegreeDa
                 variant="primary"
                 w="full"
                 type="submit"
-                isLoading={isSubmitting}
-                isDisabled={isSubmitting || !isValid}
+                loading={isSubmitting}
+                disabled={isSubmitting || !isValid}
               >
                 {t("ui.onlySave")}
               </Button>
-              <Button variant="secondary" w="full" onClick={handleClickCancel} isDisabled={isSubmitting}>
+              <Button variant="secondary" w="full" onClick={handleClickCancel} disabled={isSubmitting}>
                 {t("ui.cancel")}
               </Button>
             </VStack>
           ) : (
-            <Button alignSelf="start" variant="primary" leftIcon={<Pencil />} onClick={() => setIsEditing(true)}>
+            <Button alignSelf="start" variant="primary" onClick={() => setIsEditing(true)}>
+              <Pencil />
               {t("ui.edit")}
             </Button>
           )}

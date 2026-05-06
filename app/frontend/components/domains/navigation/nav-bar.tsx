@@ -1,4 +1,4 @@
-import { Box, Container, Flex, HStack, Heading, Image, Link, Show, Spacer, Text, VStack } from "@chakra-ui/react"
+import { Box, Container, Flex, HStack, Heading, Image, Link, Spacer, Text, VStack } from "@chakra-ui/react"
 import { Buildings, Tray, Warning } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
@@ -213,7 +213,7 @@ const NavBarContent = observer(function NavBarContent() {
             <RouterLink to="/">
               <Box w={120} mr={2}>
                 <Image
-                  fit="contain"
+                  objectFit="contain"
                   htmlHeight="64px"
                   htmlWidth="166px"
                   alt={t("site.linkHome")}
@@ -221,7 +221,7 @@ const NavBarContent = observer(function NavBarContent() {
                 />
               </Box>
             </RouterLink>
-            <Show above="lg">
+            <Box hideBelow="lg">
               <Flex direction="column" w="full">
                 <HStack>
                   <Text fontSize="2xl" fontWeight="normal" mb="0" whiteSpace="nowrap">
@@ -234,7 +234,7 @@ const NavBarContent = observer(function NavBarContent() {
                 </HStack>
               </Flex>
               <Spacer />
-            </Show>
+            </Box>
             <HStack gap={3} w="full" justify="flex-end">
               {(currentUser?.isReviewStaff || currentUser?.isTechnicalSupport) &&
                 !currentUser.isRegionalReviewManager && (
@@ -260,11 +260,11 @@ const NavBarContent = observer(function NavBarContent() {
                 </Text>
               )}
               {(!loggedIn || currentUser?.isSubmitter) && (
-                <Show above="md">
+                <Box hideBelow="md">
                   <RouterLinkButton variant="tertiary" to="/jurisdictions">
                     {t("home.jurisdictionsTitle")}
                   </RouterLinkButton>
-                </Show>
+                </Box>
               )}
               {loggedIn && (
                 <NotificationsPopover
@@ -280,21 +280,21 @@ const NavBarContent = observer(function NavBarContent() {
                   color="greys.white"
                 >
                   <Tray size={24} />
-                  <Show above="xl">
+                  <Box hideBelow="xl">
                     <Box as="span" ml={2}>
                       {t("home.submissionsInboxTitle")}
                     </Box>
-                  </Show>
+                  </Box>
                 </RouterLinkButton>
               )}
               {currentUser?.isSubmitter && !currentUser.isUnconfirmed && (
                 <RouterLinkButton px={2} to={`/projects`} variant="ghost">
                   <Buildings size={24} />
-                  <Show above="xl">
+                  <Box hideBelow="xl">
                     <Box as="span" ml={2}>
                       {t("site.myProjects")}
                     </Box>
-                  </Show>
+                  </Box>
                 </RouterLinkButton>
               )}
               <NavBarMenu />

@@ -1,19 +1,5 @@
-import {
-  Badge,
-  Button,
-  Checkbox,
-  Divider,
-  HStack,
-  Popover,
-  PopoverBody,
-  PopoverContent,
-  PopoverTrigger,
-  Radio,
-  RadioGroup,
-  Text,
-  useDisclosure,
-  VStack,
-} from "@chakra-ui/react"
+import { Radio, RadioGroup } from "@/components/ui/radio"
+import { Badge, Button, Checkbox, HStack, Popover, Separator, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import { CaretDown } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
@@ -64,7 +50,7 @@ export const InboxFilter = observer(function InboxFilter({
   isDisabled,
 }: IInboxFilterProps) {
   const { t } = useTranslation()
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { open, onOpen, onClose } = useDisclosure()
   const [options, setOptions] = useState<IOption[]>(staticOptions || [])
   const [localValue, setLocalValue] = useState<string | string[]>(value)
 
@@ -122,25 +108,31 @@ export const InboxFilter = observer(function InboxFilter({
   }
 
   return (
-    <Popover
-      isOpen={!isDisabled && isOpen}
-      onOpen={isDisabled ? undefined : onOpen}
-      onClose={onClose}
-      placement="bottom-start"
-      closeOnBlur
+    <Popover.Root
+      open={!isDisabled && isOpen}
+      closeOnInteractOutside
+      onOpenChange={(e) => {
+        if (e.open) {
+          ;(isDisabled ? undefined : onOpen)()
+        } else {
+          onClose()
+        }
+      }}
+      positioning={{
+        placement: "bottom-start",
+      }}
     >
-      <PopoverTrigger>
+      <Popover.Trigger asChild>
         <Button
           variant="secondary"
-          rightIcon={<CaretDown />}
           bg={hasSelection ? "background.blueLight" : undefined}
           borderColor={hasSelection ? "theme.blueActive" : undefined}
           size="sm"
           fontWeight="normal"
-          isDisabled={isDisabled}
+          disabled={isDisabled}
           opacity={isDisabled ? 0.5 : 1}
         >
-          <HStack spacing={2}>
+          <HStack gap={2}>
             <Text>{title}</Text>
             {showSelectionParens && (
               <Text as="span" fontSize="sm">
@@ -149,64 +141,76 @@ export const InboxFilter = observer(function InboxFilter({
             )}
             {showResultsBadge && <UnreadBadge count={badgeCount} />}
           </HStack>
+          <CaretDown />
         </Button>
-      </PopoverTrigger>
-      <PopoverContent w="auto" minW="200px" p={4} zIndex="dropdown">
-        <PopoverBody p={0}>
-          <VStack align="start" spacing={3}>
-            {isMulti ? (
-              <>
-                <Checkbox
-                  isChecked={Array.isArray(localValue) && localValue.length === options.length && options.length > 0}
-                  isIndeterminate={
-                    Array.isArray(localValue) && localValue.length > 0 && localValue.length < options.length
-                  }
-                  onChange={handleSelectAll}
-                >
-                  {t("ui.selectAll")}
-                </Checkbox>
-                {options.map((option) => (
-                  <Checkbox
-                    key={option.value}
-                    isChecked={Array.isArray(localValue) && localValue.includes(option.value)}
-                    onChange={() => handleCheckboxToggle(option.value)}
+      </Popover.Trigger>
+      <Popover.Positioner>
+        <Popover.Content w="auto" minW="200px" p={4} zIndex="dropdown">
+          <Popover.Body p={0}>
+            <VStack align="start" gap={3}>
+              {isMulti ? (
+                <>
+                  <Checkbox.Root
+                    onCheckedChange={handleSelectAll}
+                    checked={
+                      Array.isArray(localValue) && localValue.length > 0 && localValue.length < options.length
+                        ? "indeterminate"
+                        : Array.isArray(localValue) && localValue.length === options.length && options.length > 0
+                    }
                   >
-                    {option.label}
-                  </Checkbox>
-                ))}
-                <Divider />
-                <HStack w="full" justifyContent="space-between">
-                  <Button variant="link" size="sm" onClick={handleClear}>
-                    {t("ui.clear")}
-                  </Button>
-                  <Button variant="primary" size="sm" onClick={handleApply}>
+                    <Checkbox.HiddenInput />
+                    <Checkbox.Control>
+                      <Checkbox.Indicator />
+                    </Checkbox.Control>
+                    <Checkbox.Label>{t("ui.selectAll")}</Checkbox.Label>
+                  </Checkbox.Root>
+                  {options.map((option) => (
+                    <Checkbox.Root
+                      key={option.value}
+                      onCheckedChange={() => handleCheckboxToggle(option.value)}
+                      checked={Array.isArray(localValue) && localValue.includes(option.value)}
+                    >
+                      <Checkbox.HiddenInput />
+                      <Checkbox.Control>
+                        <Checkbox.Indicator />
+                      </Checkbox.Control>
+                      <Checkbox.Label>{option.label}</Checkbox.Label>
+                    </Checkbox.Root>
+                  ))}
+                  <Separator />
+                  <HStack w="full" justifyContent="space-between">
+                    <Button variant="plain" size="sm" onClick={handleClear}>
+                      {t("ui.clear")}
+                    </Button>
+                    <Button variant="primary" size="sm" onClick={handleApply}>
+                      {t("ui.apply")}
+                    </Button>
+                  </HStack>
+                </>
+              ) : (
+                <>
+                  <RadioGroup.Root
+                    value={typeof localValue === "string" ? localValue : ""}
+                    onValueChange={(val) => setLocalValue(val)}
+                  >
+                    <VStack align="start" gap={3}>
+                      {options.map((option) => (
+                        <Radio key={option.value} value={option.value}>
+                          {option.label}
+                        </Radio>
+                      ))}
+                    </VStack>
+                  </RadioGroup.Root>
+                  <Separator />
+                  <Button variant="primary" size="sm" w="full" onClick={handleApply}>
                     {t("ui.apply")}
                   </Button>
-                </HStack>
-              </>
-            ) : (
-              <>
-                <RadioGroup
-                  value={typeof localValue === "string" ? localValue : ""}
-                  onChange={(val) => setLocalValue(val)}
-                >
-                  <VStack align="start" spacing={3}>
-                    {options.map((option) => (
-                      <Radio key={option.value} value={option.value}>
-                        {option.label}
-                      </Radio>
-                    ))}
-                  </VStack>
-                </RadioGroup>
-                <Divider />
-                <Button variant="primary" size="sm" w="full" onClick={handleApply}>
-                  {t("ui.apply")}
-                </Button>
-              </>
-            )}
-          </VStack>
-        </PopoverBody>
-      </PopoverContent>
-    </Popover>
+                </>
+              )}
+            </VStack>
+          </Popover.Body>
+        </Popover.Content>
+      </Popover.Positioner>
+    </Popover.Root>
   )
 })

@@ -24,12 +24,12 @@ export const RequirementDocumentDownloadButton: React.FC<RequirementDocumentDown
   return (
     <Button
       size="sm"
-      variant="link"
-      leftIcon={<Download size={16} />}
+      variant="plain"
       onClick={handleDownload}
       textDecoration={document._destroy ? "line-through" : "none"}
       {...buttonProps}
     >
+      <Download size={16} />
       {document.file?.metadata?.filename}
     </Button>
   )

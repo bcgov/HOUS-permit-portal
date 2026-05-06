@@ -12,12 +12,14 @@ interface ISectionLinkProps {
   navLink: INavLink
   isComplete?: boolean
   isDisabled?: boolean
+  disabled?: boolean
 }
 
 export const SectionLink = observer(function SectionLink({
   navLink,
   isComplete,
   isDisabled,
+  disabled,
   ...rest
 }: ISectionLinkProps) {
   const { section } = useParams()
@@ -34,7 +36,8 @@ export const SectionLink = observer(function SectionLink({
       }
     : {}
 
-  const disabledProps = isDisabled
+  const linkDisabled = disabled ?? isDisabled
+  const disabledProps = linkDisabled
     ? {
         opacity: 0.5,
         cursor: "not-allowed",
@@ -67,7 +70,7 @@ export const SectionLink = observer(function SectionLink({
     </Flex>
   )
 
-  if (isDisabled) {
+  if (linkDisabled) {
     return content
   }
 

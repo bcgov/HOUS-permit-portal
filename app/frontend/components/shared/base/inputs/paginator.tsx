@@ -49,16 +49,15 @@ export const Paginator = observer(({ handlePageChange, totalPages, ...pagination
           border={0}
           size="sm"
           mx={1}
-          icon={
-            <Box color="theme.blue">
-              <CaretLeft size={16} />
-            </Box>
-          }
           onClick={() => handlePageChange(pageToTransitionTo)}
           aria-label={"previous page"}
           _after={{ display: "none !important" }}
-          isDisabled={pageToTransitionTo === 0}
-        ></IconButton>
+          disabled={pageToTransitionTo === 0}
+        >
+          <Box color="theme.blue">
+            <CaretLeft size={16} />
+          </Box>
+        </IconButton>
       )
     }
     if (type === "next") {
@@ -68,18 +67,17 @@ export const Paginator = observer(({ handlePageChange, totalPages, ...pagination
           border={0}
           size="sm"
           mx={1}
-          icon={
-            <Box color="theme.blue">
-              <CaretRight size={16} />
-            </Box>
-          }
           onClick={() => handlePageChange(pageToTransitionTo)}
           aria-label={"next page"}
           _after={{ display: "none !important" }}
-          isDisabled={
+          disabled={
             totalPages === 0 || (totalPages === pageToTransitionTo && pageToTransitionTo === paginationProps.current)
           }
-        ></IconButton>
+        >
+          <Box color="theme.blue">
+            <CaretRight size={16} />
+          </Box>
+        </IconButton>
       )
     }
     return element

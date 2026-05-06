@@ -21,16 +21,11 @@ export const GridHeaders = observer(function GridHeaders({ columns, includeActio
       {columns.map((field) => {
         return (
           <GridHeader key={field} role={"columnheader"}>
-            <Flex
-              w={"full"}
-              as={"button"}
-              justifyContent={"space-between"}
-              cursor="pointer"
-              onClick={() => toggleSort(field as EPermitProjectSortFields)}
-              px={4}
-            >
-              <Text textAlign="left">{getSortColumnHeader(field as EPermitProjectSortFields)}</Text>
-              <SortIcon<EPermitProjectSortFields> field={field as EPermitProjectSortFields} currentSort={sort} />
+            <Flex w={"full"} justifyContent={"space-between"} cursor="pointer" px={4} asChild>
+              <button onClick={() => toggleSort(field as EPermitProjectSortFields)}>
+                <Text textAlign="left">{getSortColumnHeader(field as EPermitProjectSortFields)}</Text>
+                <SortIcon<EPermitProjectSortFields> field={field as EPermitProjectSortFields} currentSort={sort} />
+              </button>
             </Flex>
           </GridHeader>
         )

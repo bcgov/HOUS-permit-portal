@@ -1,25 +1,19 @@
+import { Radio, RadioGroup } from "@/components/ui/radio"
 import {
   Box,
   Button,
   ButtonGroup,
   ButtonProps,
   Checkbox,
+  Dialog,
+  Field,
   Flex,
-  FormLabel,
   Grid,
   GridItem,
   HStack,
   Input,
-  MenuItem,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Radio,
-  RadioGroup,
+  Menu,
+  Portal,
   Stack,
   Text,
   useDisclosure,
@@ -156,7 +150,7 @@ const FileTypeSelector = ({ value, onChange }: IFileTypeSelectorProps) => {
 
   return (
     <Box>
-      <Stack spacing={4}>
+      <Stack gap={4}>
         {FILE_GROUPS.map((group) => (
           <Box key={group.label}>
             <Text fontWeight="bold" fontSize="xs" mb={2} color="text.secondary">
@@ -168,9 +162,16 @@ const FileTypeSelector = ({ value, onChange }: IFileTypeSelectorProps) => {
                 const isChecked = typesInGroup.every((t) => currentTypes.includes(t))
                 return (
                   <GridItem key={opt.value}>
-                    <Checkbox isChecked={isChecked} onChange={(e) => handleCheckboxChange(opt.value, e.target.checked)}>
-                      {opt.label}
-                    </Checkbox>
+                    <Checkbox.Root
+                      onCheckedChange={(e) => handleCheckboxChange(opt.value, e.target.checked)}
+                      checked={isChecked}
+                    >
+                      <Checkbox.HiddenInput />
+                      <Checkbox.Control>
+                        <Checkbox.Indicator />
+                      </Checkbox.Control>
+                      <Checkbox.Label>{opt.label}</Checkbox.Label>
+                    </Checkbox.Root>
                   </GridItem>
                 )
               })}
@@ -182,26 +183,30 @@ const FileTypeSelector = ({ value, onChange }: IFileTypeSelectorProps) => {
             {t("ui.other")}
           </Text>
           <HStack>
-            <Checkbox
-              isChecked={isOtherChecked}
-              onChange={(e) => {
+            <Checkbox.Root
+              onCheckedChange={(e) => {
                 setIsOtherChecked(e.target.checked)
                 if (!e.target.checked) {
                   const currentStandardTypes = currentTypes.filter((t) => standardTypesFlat.includes(t))
                   onChange(currentStandardTypes.join(","))
                 }
               }}
+              checked={isOtherChecked}
             >
-              {t("ui.other")}:
-            </Checkbox>
+              <Checkbox.HiddenInput />
+              <Checkbox.Control>
+                <Checkbox.Indicator />
+              </Checkbox.Control>
+              <Checkbox.Label>{t("ui.other")}:</Checkbox.Label>
+            </Checkbox.Root>
             <Input
               size="sm"
               value={inputValue}
-              onChange={handleOtherChange}
+              onValueChange={handleOtherChange}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
               bg="white"
-              isDisabled={!isOtherChecked}
+              disabled={!isOtherChecked}
             />
           </HStack>
         </Box>
@@ -302,13 +307,13 @@ const ValidationValueInput = ({ requirementType, value, onChange }: IValidationV
     case ERequirementType.number:
     case ERequirementType.multiOptionSelect:
     default:
-      return <Input onChange={onChange} value={value} type="number" width="150px" bg="white" />
+      return <Input onValueChange={onChange} value={value} type="number" width="150px" bg="white" />
   }
 }
 
 export const DataValidationSetupModal = observer(
   ({ triggerButtonProps, renderTriggerButton, index, requirementType }: IProps) => {
-    const { isOpen, onOpen, onClose } = useDisclosure()
+    const { open, onOpen, onClose } = useDisclosure()
     const { t } = useTranslation()
 
     const { control, setValue, getValues } = useFormContext<IRequirementBlockForm>()
@@ -317,7 +322,7 @@ export const DataValidationSetupModal = observer(
     const { defaultOperation, operations, valueLabel, errorMessagePlaceholder } = validationConfig as IValidationConfig
 
     useEffect(() => {
-      if (isOpen) {
+      if (open) {
         const operationPath = `requirementsAttributes.${index}.inputOptions.dataValidation.operation` as any
         const currentOperation = getValues(operationPath)
 
@@ -329,7 +334,7 @@ export const DataValidationSetupModal = observer(
           })
         }
       }
-    }, [isOpen, defaultOperation, index, setValue, getValues])
+    }, [open, defaultOperation, index, setValue, getValues])
 
     const onReset = () => {
       setValue(`requirementsAttributes.${index}.inputOptions.dataValidation`, undefined, {
@@ -344,121 +349,131 @@ export const DataValidationSetupModal = observer(
         {renderTriggerButton ? (
           renderTriggerButton({ onClick: onOpen })
         ) : (
-          <MenuItem color={"text.primary"} onClick={onOpen} {...triggerButtonProps}>
-            <HStack spacing={2} fontSize={"sm"}>
+          <Menu.Item value="data-validation" color={"text.primary"} onClick={onOpen} {...triggerButtonProps}>
+            <HStack gap={2} fontSize={"sm"}>
               <Warning />
               <Text as={"span"}>{t("requirementsLibrary.modals.optionsMenu.dataValidation")}</Text>
             </HStack>
-          </MenuItem>
+          </Menu.Item>
         )}
-        <Modal isOpen={isOpen} onClose={onClose}>
-          <ModalOverlay />
-          <ModalContent maxW={"600px"} fontSize={"sm"} color={"text.secondary"}>
-            <ModalCloseButton />
-            <ModalHeader
-              display={"flex"}
-              justifyContent={"center"}
-              alignItems={"center"}
-              bg={"greys.grey03"}
-              borderTopRadius={"md"}
-              maxHeight={12}
-              fontSize="md"
-            >
-              <Warning style={{ marginRight: "var(--chakra-space-2)" }} />
-              {t("requirementsLibrary.modals.optionsMenu.dataValidation")}
-            </ModalHeader>
-            <ModalBody
-              py={4}
-              sx={{
-                pre: {
-                  bg: "greys.grey03",
-                  px: 4,
-                  py: 3,
-                  borderRadius: "sm",
-                  color: "text.primary",
-                },
-              }}
-            >
-              <Flex direction="column" gap={4}>
-                <Flex direction="column" gap={4}>
-                  {operations && (
-                    <>
-                      <Text fontWeight="bold">
-                        {t("requirementsLibrary.modals.dataValidationSetup.valueMustBe", "Value must be:")}
-                      </Text>
+        <Dialog.Root
+          open={open}
+          onOpenChange={(e) => {
+            if (!e.open) {
+              onClose()
+            }
+          }}
+        >
+          <Portal>
+            <Dialog.Backdrop />
+            <Dialog.Positioner>
+              <Dialog.Content maxW={"600px"} fontSize={"sm"} color={"text.secondary"}>
+                <Dialog.CloseTrigger />
+                <Dialog.Header
+                  display={"flex"}
+                  justifyContent={"center"}
+                  alignItems={"center"}
+                  bg={"greys.grey03"}
+                  borderTopRadius={"md"}
+                  maxHeight={12}
+                  fontSize="md"
+                >
+                  <Warning style={{ marginRight: "var(--chakra-space-2)" }} />
+                  {t("requirementsLibrary.modals.optionsMenu.dataValidation")}
+                </Dialog.Header>
+                <Dialog.Body
+                  py={4}
+                  css={{
+                    "& pre": {
+                      bg: "greys.grey03",
+                      px: 4,
+                      py: 3,
+                      borderRadius: "sm",
+                      color: "text.primary",
+                    },
+                  }}
+                >
+                  <Flex direction="column" gap={4}>
+                    <Flex direction="column" gap={4}>
+                      {operations && (
+                        <>
+                          <Text fontWeight="bold">
+                            {t("requirementsLibrary.modals.dataValidationSetup.valueMustBe", "Value must be:")}
+                          </Text>
 
-                      <Controller
-                        name={`requirementsAttributes.${index}.inputOptions.dataValidation.operation`}
-                        control={control}
-                        defaultValue={defaultOperation as EDataValidationOperation}
-                        render={({ field: { onChange, value } }) => (
-                          <RadioGroup onChange={onChange} value={value || defaultOperation}>
-                            <Stack direction="column">
-                              {operations.map((op) => (
-                                <Radio key={op.value} value={op.value}>
-                                  {op.label}
-                                </Radio>
-                              ))}
-                            </Stack>
-                          </RadioGroup>
-                        )}
-                      />
-                    </>
-                  )}
-                  {!operations && (
-                    <Controller
-                      name={`requirementsAttributes.${index}.inputOptions.dataValidation.operation`}
-                      control={control}
-                      defaultValue={defaultOperation as EDataValidationOperation}
-                      render={() => <></>}
-                    />
-                  )}
-
-                  <Box>
-                    <FormLabel fontSize="sm" mb={1} fontWeight={operations ? "normal" : "bold"}>
-                      {valueLabel}
-                    </FormLabel>
-                    <Controller
-                      name={`requirementsAttributes.${index}.inputOptions.dataValidation.value`}
-                      control={control}
-                      render={({ field: { onChange, value } }) => (
-                        <ValidationValueInput requirementType={requirementType} onChange={onChange} value={value} />
+                          <Controller
+                            name={`requirementsAttributes.${index}.inputOptions.dataValidation.operation`}
+                            control={control}
+                            defaultValue={defaultOperation as EDataValidationOperation}
+                            render={({ field: { onChange, value } }) => (
+                              <RadioGroup.Root onValueChange={onChange} value={value || defaultOperation}>
+                                <Stack direction="column">
+                                  {operations.map((op) => (
+                                    <Radio key={op.value} value={op.value}>
+                                      {op.label}
+                                    </Radio>
+                                  ))}
+                                </Stack>
+                              </RadioGroup.Root>
+                            )}
+                          />
+                        </>
                       )}
-                    />
-                  </Box>
-
-                  <Box>
-                    <FormLabel fontSize="sm" mb={1}>
-                      {t(
-                        "requirementsLibrary.modals.dataValidationSetup.customErrorMessage",
-                        "Custom error message (Optional)"
+                      {!operations && (
+                        <Controller
+                          name={`requirementsAttributes.${index}.inputOptions.dataValidation.operation`}
+                          control={control}
+                          defaultValue={defaultOperation as EDataValidationOperation}
+                          render={() => <></>}
+                        />
                       )}
-                    </FormLabel>
-                    <Controller
-                      name={`requirementsAttributes.${index}.inputOptions.dataValidation.errorMessage`}
-                      control={control}
-                      render={({ field }) => <Input {...field} placeholder={errorMessagePlaceholder} bg="white" />}
-                    />
-                  </Box>
-                </Flex>
-              </Flex>
-            </ModalBody>
 
-            <ModalFooter justifyContent={"flex-start"}>
-              <ButtonGroup>
-                <Button variant={"primary"} onClick={onClose}>
-                  {t("ui.save")}
-                </Button>
-                <Button variant={"secondary"} onClick={onClose}>
-                  {t("ui.cancel")}
-                </Button>
-                <Button variant={"ghost"} onClick={onReset} ml="auto">
-                  {t("ui.reset")}
-                </Button>
-              </ButtonGroup>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
+                      <Box>
+                        <Field.Label fontSize="sm" mb={1} fontWeight={operations ? "normal" : "bold"}>
+                          {valueLabel}
+                        </Field.Label>
+                        <Controller
+                          name={`requirementsAttributes.${index}.inputOptions.dataValidation.value`}
+                          control={control}
+                          render={({ field: { onChange, value } }) => (
+                            <ValidationValueInput requirementType={requirementType} onChange={onChange} value={value} />
+                          )}
+                        />
+                      </Box>
+
+                      <Box>
+                        <Field.Label fontSize="sm" mb={1}>
+                          {t(
+                            "requirementsLibrary.modals.dataValidationSetup.customErrorMessage",
+                            "Custom error message (Optional)"
+                          )}
+                        </Field.Label>
+                        <Controller
+                          name={`requirementsAttributes.${index}.inputOptions.dataValidation.errorMessage`}
+                          control={control}
+                          render={({ field }) => <Input {...field} placeholder={errorMessagePlaceholder} bg="white" />}
+                        />
+                      </Box>
+                    </Flex>
+                  </Flex>
+                </Dialog.Body>
+                <Dialog.Footer justifyContent={"flex-start"}>
+                  <ButtonGroup>
+                    <Button variant={"primary"} onClick={onClose}>
+                      {t("ui.save")}
+                    </Button>
+                    <Button variant={"secondary"} onClick={onClose}>
+                      {t("ui.cancel")}
+                    </Button>
+                    <Button variant={"ghost"} onClick={onReset} ml="auto">
+                      {t("ui.reset")}
+                    </Button>
+                  </ButtonGroup>
+                </Dialog.Footer>
+              </Dialog.Content>
+            </Dialog.Positioner>
+          </Portal>
+        </Dialog.Root>
       </>
     )
   }

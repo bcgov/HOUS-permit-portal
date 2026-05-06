@@ -2,15 +2,10 @@ import {
   Button,
   ButtonGroup,
   ButtonProps,
+  Dialog,
   HStack,
-  MenuItem,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
+  Menu,
+  Portal,
   Stack,
   Text,
   useDisclosure,
@@ -57,7 +52,7 @@ export const ComputedComplianceSetupModal = observer(function ComputedCompliance
   renderTriggerButton,
   requirementIndex,
 }: IProps) {
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { open, onOpen, onClose } = useDisclosure()
   const { t } = useTranslation()
   const { requirementBlockStore } = useMst()
   const requirementBlockFormMethods = useFormContext<IRequirementBlockForm>()
@@ -103,10 +98,10 @@ export const ComputedComplianceSetupModal = observer(function ComputedCompliance
   const effectiveModuleConfig = selectedModuleConfig ?? (selectedModuleRawConfig as TAutoComplianceModuleConfiguration)
 
   useEffect(() => {
-    if (isOpen) {
+    if (open) {
       reset(formFormDefaults(watchedComputedCompliance))
     }
-  }, [watchedComputedCompliance, isOpen, autoComplianceModuleConfigurations, watchedRequirementValueOptions])
+  }, [watchedComputedCompliance, open, autoComplianceModuleConfigurations, watchedRequirementValueOptions])
 
   const { field: moduleField } = useController({
     name: "module",
@@ -222,7 +217,7 @@ export const ComputedComplianceSetupModal = observer(function ComputedCompliance
 
   // prunes the optionsMap if the value options changed
   useEffect(() => {
-    if (isOpen && watchedOptionsMap && autoComplianceModuleConfigurations) {
+    if (open && watchedOptionsMap && autoComplianceModuleConfigurations) {
       const prunedOptionsMap = getPrunedOptionsMapBasedOnValueOptions(
         watchedOptionsMap,
         watchedRequirementValueOptions,
@@ -231,7 +226,7 @@ export const ComputedComplianceSetupModal = observer(function ComputedCompliance
 
       optionsMapField.onChange(prunedOptionsMap)
     }
-  }, [isOpen, watchedRequirementValueOptions, autoComplianceModuleConfigurations])
+  }, [open, watchedRequirementValueOptions, autoComplianceModuleConfigurations])
 
   return (
     <>
@@ -241,63 +236,80 @@ export const ComputedComplianceSetupModal = observer(function ComputedCompliance
           isDisabled: isSetupDisabled,
         })
       ) : (
-        <MenuItem color={"text.primary"} onClick={onOpen} isDisabled={isSetupDisabled} {...triggerButtonProps}>
-          <HStack spacing={2} fontSize={"sm"}>
+        <Menu.Item
+          value="computed-compliance"
+          color={"text.primary"}
+          onClick={onOpen}
+          disabled={isSetupDisabled}
+          {...triggerButtonProps}
+        >
+          <HStack gap={2} fontSize={"sm"}>
             <LightningA weight={"fill"} />
             <Text as={"span"}>{t("requirementsLibrary.modals.optionsMenu.automatedCompliance")}</Text>
           </HStack>
-        </MenuItem>
+        </Menu.Item>
       )}
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent maxW={"lg"} fontSize={"sm"} color={"text.secondary"}>
-          <ModalCloseButton />
-          <ModalHeader
-            display={"flex"}
-            justifyContent={"center"}
-            alignItems={"center"}
-            bg={"greys.grey03"}
-            borderTopRadius={"md"}
-            maxHeight={12}
-            fontSize="md"
-          >
-            <LightningA weight={"fill"} style={{ marginRight: "var(--chakra-space-2)" }} />
-            {t("requirementsLibrary.modals.optionsMenu.automatedCompliance")}
-          </ModalHeader>
-          <ModalBody py={4}>
-            <Stack direction="column" spacing={6}>
-              <ModuleSelect options={moduleSelectOptions} value={selectedModuleOption} onChange={onModuleChange} />
+      <Dialog.Root
+        open={open}
+        onOpenChange={(e) => {
+          if (!e.open) {
+            onClose()
+          }
+        }}
+      >
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content maxW={"lg"} fontSize={"sm"} color={"text.secondary"}>
+              <Dialog.CloseTrigger />
+              <Dialog.Header
+                display={"flex"}
+                justifyContent={"center"}
+                alignItems={"center"}
+                bg={"greys.grey03"}
+                borderTopRadius={"md"}
+                maxHeight={12}
+                fontSize="md"
+              >
+                <LightningA weight={"fill"} style={{ marginRight: "var(--chakra-space-2)" }} />
+                {t("requirementsLibrary.modals.optionsMenu.automatedCompliance")}
+              </Dialog.Header>
+              <Dialog.Body py={4}>
+                <Stack direction="column" gap={6}>
+                  <ModuleSelect options={moduleSelectOptions} value={selectedModuleOption} onChange={onModuleChange} />
 
-              {valueExtractionFieldOptions && (
-                <ValueExtractionFieldSelect
-                  options={valueExtractionFieldOptions}
-                  value={selectedValueExtractionFieldOption}
-                  onChange={onValueExtractionFieldChange}
-                />
-              )}
-              {mappableExternalOptions && (
-                <OptionsMapGrid
-                  mappableExternalOptions={mappableExternalOptions}
-                  setOptionMapValue={setOptionMapValue}
-                  availableRequirementOptions={availableRequirementOptions}
-                  optionValueToRequirementOption={optionValueToRequirementOption}
-                  currentOptionsMap={watchedOptionsMap}
-                />
-              )}
-            </Stack>
-          </ModalBody>
-          <ModalFooter justifyContent={"flex-start"}>
-            <ButtonGroup>
-              <Button variant={"secondary"} onClick={onReset}>
-                {t("ui.reset")}
-              </Button>
-              <Button variant={"primary"} onClick={handleSubmit(onDone)} isDisabled={!isValid}>
-                {t("ui.done")}
-              </Button>
-            </ButtonGroup>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+                  {valueExtractionFieldOptions && (
+                    <ValueExtractionFieldSelect
+                      options={valueExtractionFieldOptions}
+                      value={selectedValueExtractionFieldOption}
+                      onChange={onValueExtractionFieldChange}
+                    />
+                  )}
+                  {mappableExternalOptions && (
+                    <OptionsMapGrid
+                      mappableExternalOptions={mappableExternalOptions}
+                      setOptionMapValue={setOptionMapValue}
+                      availableRequirementOptions={availableRequirementOptions}
+                      optionValueToRequirementOption={optionValueToRequirementOption}
+                      currentOptionsMap={watchedOptionsMap}
+                    />
+                  )}
+                </Stack>
+              </Dialog.Body>
+              <Dialog.Footer justifyContent={"flex-start"}>
+                <ButtonGroup>
+                  <Button variant={"secondary"} onClick={onReset}>
+                    {t("ui.reset")}
+                  </Button>
+                  <Button variant={"primary"} onClick={handleSubmit(onDone)} disabled={!isValid}>
+                    {t("ui.done")}
+                  </Button>
+                </ButtonGroup>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
     </>
   )
 

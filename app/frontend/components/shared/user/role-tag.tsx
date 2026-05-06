@@ -30,7 +30,7 @@ export const RoleTag = ({ role }: IRoleTagProps) => {
   const borderColor = roleBorderColors[role]
   const { t } = useTranslation()
   return (
-    <Tag
+    <Tag.Root
       p={1}
       borderRadius="sm"
       border="1px solid"
@@ -40,6 +40,6 @@ export const RoleTag = ({ role }: IRoleTagProps) => {
       textAlign="center"
     >
       {t(`user.roles.${role}`)}
-    </Tag>
+    </Tag.Root>
   )
 }

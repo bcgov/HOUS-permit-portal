@@ -1,24 +1,16 @@
+import { Radio, RadioGroup } from "@/components/ui/radio"
 import {
   Box,
   Button,
   Container,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
+  Field,
   Heading,
   HStack,
   IconButton,
   Input,
-  Radio,
-  RadioGroup,
   Stack,
   Table,
-  Tbody,
-  Td,
   Text,
-  Th,
-  Thead,
-  Tr,
   VStack,
 } from "@chakra-ui/react"
 import { CaretLeft, Pencil, Plus, Trash } from "@phosphor-icons/react"
@@ -90,29 +82,28 @@ function AddClimateZoneForm({ onAdd, onCancel, existingZones }: IAddClimateZoneF
 
   return (
     <Box w="full">
-      <FormControl isInvalid={!!addForm.formState.errors.climateZone} mb={4}>
-        <FormLabel fontWeight="bold">{t(`${czPrefix}.bcClimateZone`)}</FormLabel>
+      <Field.Root invalid={!!addForm.formState.errors.climateZone} mb={4}>
+        <Field.Label fontWeight="bold">{t(`${czPrefix}.bcClimateZone`)}</Field.Label>
         <Controller
           control={addForm.control}
           name="climateZone"
           rules={{ required: t(`${czPrefix}.validation.zoneRequired`) }}
           render={({ field: { onChange, value } }) => (
-            <RadioGroup value={value} onChange={onChange}>
-              <Stack spacing={2}>
+            <RadioGroup.Root value={value} onValueChange={onChange}>
+              <Stack gap={2}>
                 {availableZones.map((zone) => (
                   <Radio key={zone} value={zone}>
                     {t(`${czPrefix}.zoneShortLabels.${zone}`)}
                   </Radio>
                 ))}
               </Stack>
-            </RadioGroup>
+            </RadioGroup.Root>
           )}
         />
-        <FormErrorMessage>{addForm.formState.errors.climateZone?.message}</FormErrorMessage>
-      </FormControl>
-
-      <FormControl isInvalid={!!addForm.formState.errors.heatingDegreeDays} mb={4} maxW="250px">
-        <FormLabel fontWeight="bold">{t(`${czPrefix}.heatingDegreeDaysLabel`)}</FormLabel>
+        <Field.ErrorText>{addForm.formState.errors.climateZone?.message}</Field.ErrorText>
+      </Field.Root>
+      <Field.Root invalid={!!addForm.formState.errors.heatingDegreeDays} mb={4} maxW="250px">
+        <Field.Label fontWeight="bold">{t(`${czPrefix}.heatingDegreeDaysLabel`)}</Field.Label>
         <Input
           type="number"
           {...addForm.register("heatingDegreeDays", {
@@ -125,14 +116,13 @@ function AddClimateZoneForm({ onAdd, onCancel, existingZones }: IAddClimateZoneF
             },
           })}
         />
-        <FormErrorMessage>{addForm.formState.errors.heatingDegreeDays?.message}</FormErrorMessage>
-      </FormControl>
-
-      <HStack spacing={3}>
+        <Field.ErrorText>{addForm.formState.errors.heatingDegreeDays?.message}</Field.ErrorText>
+      </Field.Root>
+      <HStack gap={3}>
         <Button variant="outline" onClick={onCancel}>
           {t(`${czPrefix}.cancel`)}
         </Button>
-        <Button variant="primary" onClick={handleAddSubmit} isDisabled={!addForm.formState.isValid}>
+        <Button variant="primary" onClick={handleAddSubmit} disabled={!addForm.formState.isValid}>
           {t(`${czPrefix}.save`)}
         </Button>
       </HStack>
@@ -224,9 +214,10 @@ function ClimateZonesForm({ jurisdiction }: IClimateZonesFormProps) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
-      <VStack spacing={6} align="start" w="full">
+      <VStack gap={6} align="start" w="full">
         {!isAdding && !allZonesAdded && (
-          <Button variant="outline" size="sm" leftIcon={<Plus />} onClick={() => setIsAdding(true)}>
+          <Button variant="outline" size="sm" onClick={() => setIsAdding(true)}>
+            <Plus />
             {t(`${czPrefix}.addClimateZone`)}
           </Button>
         )}
@@ -237,27 +228,27 @@ function ClimateZonesForm({ jurisdiction }: IClimateZonesFormProps) {
 
         {fields.length > 0 ? (
           <Box w="full" borderWidth={1} borderColor="border.light" rounded="sm" overflow="hidden">
-            <Table variant="simple" size="md">
-              <Thead>
-                <Tr bg="greys.grey03">
-                  <Th>{t(`${czPrefix}.tableClimateZone`)}</Th>
-                  <Th>{t(`${czPrefix}.tableHdd`)}</Th>
-                  <Th />
-                </Tr>
-              </Thead>
-              <Tbody>
+            <Table.Root variant="line" size="md">
+              <Table.Header>
+                <Table.Row bg="greys.grey03">
+                  <Table.ColumnHeader>{t(`${czPrefix}.tableClimateZone`)}</Table.ColumnHeader>
+                  <Table.ColumnHeader>{t(`${czPrefix}.tableHdd`)}</Table.ColumnHeader>
+                  <Table.ColumnHeader />
+                </Table.Row>
+              </Table.Header>
+              <Table.Body>
                 {fields.map((field, index) => {
                   const isEditing = editingIndex === index
                   const fieldError = formState.errors.zones?.[index]?.heatingDegreeDays
 
                   return (
-                    <Tr key={field.id}>
+                    <Table.Row key={field.id}>
                       {/* @ts-ignore - dynamic climate zone key */}
-                      <Td>{t(`${czPrefix}.zoneLabels.${field.climateZone}`)}</Td>
-                      <Td>
+                      <Table.Cell>{t(`${czPrefix}.zoneLabels.${field.climateZone}`)}</Table.Cell>
+                      <Table.Cell>
                         {isEditing ? (
-                          <HStack spacing={2}>
-                            <FormControl isInvalid={!!fieldError} maxW="150px">
+                          <HStack gap={2}>
+                            <Field.Root invalid={!!fieldError} maxW="150px">
                               <Controller
                                 control={control}
                                 name={`zones.${index}.heatingDegreeDays`}
@@ -283,32 +274,34 @@ function ClimateZonesForm({ jurisdiction }: IClimateZonesFormProps) {
                                   />
                                 )}
                               />
-                              {fieldError && <FormErrorMessage fontSize="xs">{fieldError.message}</FormErrorMessage>}
-                            </FormControl>
+                              {fieldError && <Field.ErrorText fontSize="xs">{fieldError.message}</Field.ErrorText>}
+                            </Field.Root>
                             <IconButton
                               aria-label="done editing"
-                              icon={<Pencil size={16} />}
                               variant="ghost"
                               size="xs"
                               onClick={() => setEditingIndex(null)}
-                            />
+                            >
+                              <Pencil size={16} />
+                            </IconButton>
                           </HStack>
                         ) : (
-                          <HStack spacing={2}>
+                          <HStack gap={2}>
                             <Text color={field.heatingDegreeDays ? "text.primary" : "text.secondary"}>
                               {field.heatingDegreeDays ?? t(`${czPrefix}.notConfigured`)}
                             </Text>
                             <IconButton
                               aria-label="edit HDD"
-                              icon={<Pencil size={16} />}
                               variant="ghost"
                               size="xs"
                               onClick={() => setEditingIndex(index)}
-                            />
+                            >
+                              <Pencil size={16} />
+                            </IconButton>
                           </HStack>
                         )}
-                      </Td>
-                      <Td>
+                      </Table.Cell>
+                      <Table.Cell>
                         <ConfirmationModal
                           onConfirm={() => onRemove(index)}
                           promptHeader={t(`${czPrefix}.removeConfirmationModal.title`)}
@@ -316,38 +309,38 @@ function ClimateZonesForm({ jurisdiction }: IClimateZonesFormProps) {
                           confirmText={t(`${czPrefix}.remove`)}
                           renderTrigger={(onOpen) => (
                             <Button
-                              variant="link"
+                              variant="plain"
                               size="sm"
-                              leftIcon={<Trash size={14} />}
                               color="text.secondary"
                               fontWeight="normal"
                               onClick={onOpen}
                             >
+                              <Trash size={14} />
                               {t(`${czPrefix}.remove`)}
                             </Button>
                           )}
                         />
-                      </Td>
-                    </Tr>
+                      </Table.Cell>
+                    </Table.Row>
                   )
                 })}
-              </Tbody>
-            </Table>
+              </Table.Body>
+            </Table.Root>
           </Box>
         ) : (
           !isAdding && <EmptyState />
         )}
 
         {isDirty && (
-          <HStack spacing={3}>
+          <HStack gap={3}>
             <Button variant="outline" onClick={handleCancel}>
               {t(`${czPrefix}.cancel`)}
             </Button>
             <Button
               variant="primary"
               type="submit"
-              isLoading={formState.isSubmitting}
-              isDisabled={formState.isSubmitting || !formState.isValid}
+              loading={formState.isSubmitting}
+              disabled={formState.isSubmitting || !formState.isValid}
             >
               {t(`${czPrefix}.save`)}
             </Button>
@@ -368,8 +361,9 @@ export const ClimateZonesScreen = observer(function ClimateZonesScreen() {
 
   return (
     <Container maxW="container.lg" py={8} px={{ base: 8, xl: 0 }} flexGrow={1}>
-      <VStack spacing={6} align="start" w="full">
-        <Button variant="link" onClick={() => navigate(-1)} leftIcon={<CaretLeft size={20} />} textDecoration="none">
+      <VStack gap={6} align="start" w="full">
+        <Button variant="plain" onClick={() => navigate(-1)} textDecoration="none">
+          <CaretLeft size={20} />
           {t("ui.back")}
         </Button>
 

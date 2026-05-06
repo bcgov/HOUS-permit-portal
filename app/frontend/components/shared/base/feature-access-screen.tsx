@@ -1,4 +1,4 @@
-import { Box, Container, Divider, Grid, GridItem, Heading, Text } from "@chakra-ui/react"
+import { Box, Container, Grid, GridItem, Heading, Separator, Text } from "@chakra-ui/react"
 import { ArrowRight } from "@phosphor-icons/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -91,7 +91,7 @@ const FeatureRow = ({
         </RouterLinkButton>
       </GridItem>
       <GridItem colSpan={2}>
-        <Divider />
+        <Separator />
       </GridItem>
     </>
   )

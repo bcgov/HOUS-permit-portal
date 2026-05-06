@@ -50,7 +50,7 @@ export function EditableGroup<TFieldValues>({
   const isEditLimited = isEnergyStepCodeDependency || isArchitecturalDependency
 
   return (
-    <Stack spacing={4} {...containerProps}>
+    <Stack gap={4} {...containerProps}>
       <EditableInstructionsText {...editableInstructionsTextProps} />
       <EditableLabel {...editableLabelProps} />
       {editableInput}
@@ -62,10 +62,10 @@ export function EditableGroup<TFieldValues>({
         </Stack>
       )}
       {isMultipleFilesCheckboxProps && (
-        <IsMultipleFilesCheckbox isDisabled={isEditLimited} mt={2} {...isMultipleFilesCheckboxProps} />
+        <IsMultipleFilesCheckbox disabled={isEditLimited} mt={2} {...isMultipleFilesCheckboxProps} />
       )}
-      <IsOptionalCheckbox isDisabled={isEditLimited} mt={2} {...isOptionalCheckboxProps} />
-      <IsElectiveCheckbox isDisabled={isEditLimited} mt={2} {...isElectiveCheckboxProps} />
+      <IsOptionalCheckbox disabled={isEditLimited} mt={2} {...isOptionalCheckboxProps} />
+      <IsElectiveCheckbox disabled={isEditLimited} mt={2} {...isElectiveCheckboxProps} />
     </Stack>
   )
 }

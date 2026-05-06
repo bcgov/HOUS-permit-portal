@@ -1,4 +1,4 @@
-import { Flex, FormControl, GridItem, Heading, StackProps, VStack } from "@chakra-ui/react"
+import { Field, Flex, GridItem, Heading, StackProps, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React from "react"
@@ -30,20 +30,19 @@ export const PreChecksGrid = observer(({ ...restProps }: StackProps) => {
   } = preCheckStore
 
   return (
-    <VStack align="stretch" spacing={4} w="full" {...restProps}>
+    <VStack align="stretch" gap={4} w="full" {...restProps}>
       <Flex direction="column" gap={4} w="full">
         <Heading as="h3" size="lg" mb={4}>
           {t("preCheck.index.resultTitle", "Pre-checks")}
         </Heading>
-        <FormControl w="full">
+        <Field.Root w="full">
           <ModelSearchInput
             searchModel={preCheckStore}
             inputProps={{ placeholder: t("ui.search"), width: "full" }}
             inputGroupProps={{ width: "full" }}
           />
-        </FormControl>
+        </Field.Root>
       </Flex>
-
       <SearchGrid templateColumns={PRE_CHECKS_GRID_TEMPLATE_COLUMNS} gridRowClassName="pre-check-grid-row">
         <PreCheckGridHeaders columns={Object.values(EPreCheckSortFields)} includeActionColumn />
 

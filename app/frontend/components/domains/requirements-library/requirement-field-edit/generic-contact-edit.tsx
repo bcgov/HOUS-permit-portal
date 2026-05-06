@@ -26,7 +26,7 @@ export function GenericContactEdit<TFieldValues>({
   } = useController(controlProps)
 
   return (
-    <Stack spacing={4}>
+    <Stack gap={4}>
       <GenericContactDisplay
         containerProps={{
           borderBottomRadius: "none",

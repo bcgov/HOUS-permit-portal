@@ -13,8 +13,12 @@ export function IsElectiveCheckbox<TFieldValues extends FieldValues>({
   } = useController(controlProps)
   const { t } = useTranslation()
   return (
-    <Checkbox {...checkboxProps} isChecked={value} {...restField}>
-      {t("requirementsLibrary.modals.isAnElectiveField")}
-    </Checkbox>
+    <Checkbox.Root {...checkboxProps} {...restField} checked={value}>
+      <Checkbox.HiddenInput />
+      <Checkbox.Control>
+        <Checkbox.Indicator />
+      </Checkbox.Control>
+      <Checkbox.Label>{t("requirementsLibrary.modals.isAnElectiveField")}</Checkbox.Label>
+    </Checkbox.Root>
   )
 }

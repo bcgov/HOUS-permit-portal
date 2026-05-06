@@ -126,7 +126,7 @@ export const ModelledOutputs = observer(function Part3StepCodeFormModelledOutput
             <ModelledEnergyOutputsGrid mt={6} />
             <AnnualEnergyWholeBuildingGrid />
             <StepCodeBuildingPortionsGrid />
-            <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={formState.isSubmitting} />
+            <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} loading={formState.isSubmitting} />
           </Stack>
         ) : (
           <SharedSpinner mt={16} />

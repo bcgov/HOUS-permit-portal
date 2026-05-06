@@ -1,4 +1,4 @@
-import { Box, Flex, Image, Link, Show, Spacer, Text } from "@chakra-ui/react"
+import { Box, Flex, Image, Link, Spacer, Text } from "@chakra-ui/react"
 import { ArrowSquareOut, CaretRight, Info, Pencil, Warning } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
@@ -70,7 +70,7 @@ export const PermitProjectCard = observer(({ permitProject }: IPermitProjectCard
       {/* Placeholder for SandboxHeader if projects can be sandboxed */}
       {/* {permitProject.sandbox && <SandboxHeader override sandbox={permitProject.sandbox} />} */}
       <Flex flexDirection={{ base: "column", md: "row" }} gap={6} w="full">
-        <Show above="md">
+        <Box hideBelow="md">
           <Flex direction="column" flex={{ base: 0, md: 1 }} maxW={{ base: "100%", md: "20%" }}>
             <Box p={2}>
               <Image
@@ -86,8 +86,8 @@ export const PermitProjectCard = observer(({ permitProject }: IPermitProjectCard
               </Text>
             </Box>
           </Flex>
-        </Show>
-        <Show below="md">
+        </Box>
+        <Box hideFrom="md">
           <Flex justify="space-between" alignItems="center">
             <Image
               src="/images/logo.png"
@@ -99,7 +99,7 @@ export const PermitProjectCard = observer(({ permitProject }: IPermitProjectCard
             />
             {status && <PermitApplicationStatusTag status={status} />}
           </Flex>
-        </Show>
+        </Box>
         <Flex direction="column" gap={2} flex={{ base: 0, md: 5 }} maxW={{ base: "100%", md: "75%" }}>
           {showNewVersionWarning && (
             <Flex bg="semantic.warning" {...calloutBannerContainerProps}>
@@ -151,57 +151,57 @@ export const PermitProjectCard = observer(({ permitProject }: IPermitProjectCard
             {createdAt && (
               <Text>
                 {t("permitApplication.startedOn")}{" "}
-                <Show below="md">
+                <Box hideFrom="md">
                   <br />
-                </Show>
+                </Box>
                 {format(new Date(createdAt), "MMM d, yyyy")}
               </Text>
             )}
-            <Show above="md">{createdAt && updatedAt && <Text>{"  |  "}</Text>}</Show>
-            <Show below="md">{createdAt && updatedAt && <Spacer />}</Show>
+            <Box hideBelow="md">{createdAt && updatedAt && <Text>{"  |  "}</Text>}</Box>
+            <Box hideFrom="md">{createdAt && updatedAt && <Spacer />}</Box>
             {updatedAt && (
               <Text>
                 {t("permitApplication.lastUpdated")}
                 <Text as="span">{":  "}</Text>
-                <Show below="md">
+                <Box hideFrom="md">
                   <br />
-                </Show>
+                </Box>
                 {format(new Date(updatedAt), "MMM d, yyyy")}
               </Text>
             )}
             {viewedAt && (
               <>
-                <Show above="md">
+                <Box hideBelow="md">
                   <Text>{"  |  "}</Text>
-                </Show>
-                <Show below="md">
+                </Box>
+                <Box hideFrom="md">
                   <Spacer />
-                </Show>
+                </Box>
                 <Text>
                   {t("permitApplication.viewedOn")}
                   <Text as="span">{":  "}</Text>
-                  <Show below="md">
+                  <Box hideFrom="md">
                     <br />
-                  </Show>
+                  </Box>
                   {format(new Date(viewedAt), "MMM d, yyyy")}
                 </Text>
               </>
             )}
           </Flex>
           <Flex direction={{ base: "column", md: "row" }} gap={4}>
-            <Link href={t("permitApplication.seeBestPractices_link")} isExternal>
+            <Link href={t("permitApplication.seeBestPractices_link")} target="_blank" rel="noopener noreferrer">
               {t("permitApplication.seeBestPractices_CTA")} <ArrowSquareOut />
             </Link>
-            <Show above="md">
+            <Box hideBelow="md">
               <Text>{"  |  "}</Text>
-            </Show>
-            <Link href={t("permitApplication.searchKnowledge_link")} isExternal>
+            </Box>
+            <Link href={t("permitApplication.searchKnowledge_link")} target="_blank" rel="noopener noreferrer">
               {t("permitApplication.searchKnowledge_CTA")} <ArrowSquareOut />
             </Link>
           </Flex>
         </Flex>
         <Flex direction="column" align="flex-end" gap={4} flex={{ base: 0, md: 1 }} maxW={{ base: "100%", md: "25%" }}>
-          <Show above="md">{status && <PermitApplicationStatusTag status={status} />}</Show>
+          <Box hideBelow="md">{status && <PermitApplicationStatusTag status={status} />}</Box>
           <RouterLinkButton
             to={`/projects/${permitProject.id}`} // Link to project detail/edit page
             variant="primary"

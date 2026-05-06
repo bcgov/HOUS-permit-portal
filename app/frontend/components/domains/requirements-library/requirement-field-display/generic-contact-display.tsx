@@ -1,4 +1,5 @@
-import { Box, BoxProps, Button, FormControl, FormLabel, Heading, HeadingProps, Switch } from "@chakra-ui/react"
+import { Switch } from "@/components/ui/switch"
+import { Box, BoxProps, Button, Field, Heading, HeadingProps } from "@chakra-ui/react"
 import { Plus } from "@phosphor-icons/react"
 import React from "react"
 import { FieldValues } from "react-hook-form"
@@ -62,8 +63,8 @@ export function GenericContactDisplay<TFieldValues>({
           {contactFieldItems.map(({ type, containerProps }) => (
             <Box
               key={type}
-              sx={{
-                ".chakra-form-control": {
+              css={{
+                "& .chakra-form-control": {
                   display: "flex",
                   flexDir: "column",
                   justifyContent: "space-between",
@@ -77,9 +78,8 @@ export function GenericContactDisplay<TFieldValues>({
           ))}
         </Box>
       </Box>
-
       {addMultipleContactProps?.shouldRender && (
-        <FormControl
+        <Field.Root
           bg={"greys.grey04"}
           border={"1px solid"}
           borderColor={"border.light"}
@@ -93,28 +93,26 @@ export function GenericContactDisplay<TFieldValues>({
           justifyContent={"space-between"}
           {...addMultipleContactProps?.formControlProps}
         >
-          <FormLabel htmlFor="can-add-label" mb="0">
+          <Field.Label htmlFor="can-add-label" mb="0">
             {t("requirementsLibrary.modals.canAddMultipleContacts")}
-          </FormLabel>
+          </Field.Label>
           <Switch
             id="can-add-label"
-            sx={{
-              ".chakra-switch__track[aria-checked=true], .chakra-switch__track[data-checked]": {
+            css={{
+              "& .chakra-switch__track[aria-checked=true], .chakra-switch__track[data-checked]": {
                 "--switch-bg": "var(--chakra-colors-success)",
               },
             }}
             {...addMultipleContactProps?.switchProps}
           />
-        </FormControl>
+        </Field.Root>
       )}
-
       {showAddButton && (
         <Button
           variant={"secondary"}
-          leftIcon={<Plus />}
           size={"sm"}
           my={6}
-          isDisabled
+          disabled
           // As it is a display component it should have the styles of
           // a normal button but should be disabled to screen readers and not clickable
           _disabled={{
@@ -125,6 +123,7 @@ export function GenericContactDisplay<TFieldValues>({
             cursor: "not-allowed",
           }}
         >
+          <Plus />
           {t("requirementsLibrary.addAnotherPerson")}
         </Button>
       )}

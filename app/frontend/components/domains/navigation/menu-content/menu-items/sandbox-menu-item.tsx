@@ -1,4 +1,5 @@
-import { Flex, Switch, Text, useDisclosure } from "@chakra-ui/react"
+import { Switch } from "@/components/ui/switch"
+import { Flex, Text, useDisclosure } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useState } from "react"
@@ -15,7 +16,7 @@ export const SandboxMenuItem = observer(() => {
   const { sandboxOptions } = currentUser.jurisdiction
   const { setCurrentSandboxId, clearSandboxId, isSandboxActive } = sandboxStore
 
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { open, onOpen, onClose } = useDisclosure()
 
   // Find published sandbox and default to it
   const publishedSandbox = currentUser.jurisdiction?.sandboxes.find(
@@ -46,8 +47,6 @@ export const SandboxMenuItem = observer(() => {
   return (
     <>
       <Flex
-        as="button"
-        onClick={handleToggle}
         align="center"
         justify="flex-start"
         gap={3}
@@ -55,15 +54,17 @@ export const SandboxMenuItem = observer(() => {
         borderRadius="md"
         _hover={{ bg: "hover.blue", cursor: "pointer" }}
         w="full"
+        asChild
       >
-        <Text fontWeight="medium" color="text.primary">
-          {t("sandbox.switch.label")}
-        </Text>
-        <Switch isChecked={isSandboxActive} pointerEvents="none" />
+        <button onClick={handleToggle}>
+          <Text fontWeight="medium" color="text.primary">
+            {t("sandbox.switch.label")}
+          </Text>
+          <Switch checked={isSandboxActive} pointerEvents="none" />
+        </button>
       </Flex>
-
       <SandboxSwitchModal
-        isOpen={isOpen}
+        open={open}
         onClose={onClose}
         isSandboxActive={isSandboxActive}
         sandboxOptions={sandboxOptions}

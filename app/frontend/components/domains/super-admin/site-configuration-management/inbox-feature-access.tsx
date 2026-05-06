@@ -47,7 +47,7 @@ export const InboxFeatureAccessScreen = observer(() => {
         </Text>
         <Flex pb={4} justify="space-between" w="100%" borderBottom="1px solid" borderColor="border.light">
           <Text fontWeight="bold">{t(`${i18nPrefix}.submissionInbox`)}</Text>
-          <SwitchButton isChecked={inboxEnabled} onChange={updateInboxEnabled} size={"lg"} />
+          <SwitchButton checked={inboxEnabled} onChange={updateInboxEnabled} size={"lg"} />
         </Flex>
       </VStack>
     </Container>

@@ -1,4 +1,4 @@
-import { Box, Container, Heading, ListItem, Text, UnorderedList } from "@chakra-ui/react"
+import { Box, Container, Heading, List, Text } from "@chakra-ui/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../../setup/root"
@@ -14,10 +14,10 @@ export const CheckStepCodeRequirementsScreen = () => {
       <Box>
         <Heading as="h1">{t("projectReadinessTools.checkStepCodeRequirementsScreen.pageHeading")}</Heading>
         <Text mt={8}>{t("projectReadinessTools.checkStepCodeRequirementsScreen.toolIntro")}</Text>
-        <UnorderedList mt={4} spacing={2}>
-          <ListItem>{t("projectReadinessTools.checkStepCodeRequirementsScreen.toolPoint1")}</ListItem>
-          <ListItem>{t("projectReadinessTools.checkStepCodeRequirementsScreen.toolPoint2")}</ListItem>
-        </UnorderedList>
+        <List.Root as="ul" mt={4} gap={2}>
+          <List.Item>{t("projectReadinessTools.checkStepCodeRequirementsScreen.toolPoint1")}</List.Item>
+          <List.Item>{t("projectReadinessTools.checkStepCodeRequirementsScreen.toolPoint2")}</List.Item>
+        </List.Root>
         <RouterLinkButton
           size="lg"
           variant="primary"
@@ -32,10 +32,10 @@ export const CheckStepCodeRequirementsScreen = () => {
           {t("projectReadinessTools.checkStepCodeRequirementsScreen.whoTitle")}
         </Heading>
         <Text mt={4}>{t("projectReadinessTools.checkStepCodeRequirementsScreen.whoDescription")}</Text>
-        <UnorderedList mt={4} spacing={2}>
-          <ListItem>{t("projectReadinessTools.checkStepCodeRequirementsScreen.whoPoint1")}</ListItem>
-          <ListItem>{t("projectReadinessTools.checkStepCodeRequirementsScreen.whoPoint2")}</ListItem>
-        </UnorderedList>
+        <List.Root as="ul" mt={4} gap={2}>
+          <List.Item>{t("projectReadinessTools.checkStepCodeRequirementsScreen.whoPoint1")}</List.Item>
+          <List.Item>{t("projectReadinessTools.checkStepCodeRequirementsScreen.whoPoint2")}</List.Item>
+        </List.Root>
 
         <Heading as="h2" size="lg" mt={8}>
           {t("projectReadinessTools.checkStepCodeRequirementsScreen.whenTitle")}
@@ -50,10 +50,10 @@ export const CheckStepCodeRequirementsScreen = () => {
         <Heading as="h3" size="md" mt={8}>
           {t("projectReadinessTools.checkStepCodeRequirementsScreen.whatsIncludedTitle")}
         </Heading>
-        <UnorderedList mt={4} spacing={2}>
-          <ListItem>{t("projectReadinessTools.checkStepCodeRequirementsScreen.whatsIncludedPoint1")}</ListItem>
-          <ListItem>{t("projectReadinessTools.checkStepCodeRequirementsScreen.whatsIncludedPoint2")}</ListItem>
-        </UnorderedList>
+        <List.Root as="ul" mt={4} gap={2}>
+          <List.Item>{t("projectReadinessTools.checkStepCodeRequirementsScreen.whatsIncludedPoint1")}</List.Item>
+          <List.Item>{t("projectReadinessTools.checkStepCodeRequirementsScreen.whatsIncludedPoint2")}</List.Item>
+        </List.Root>
         {/* <RouterLink to="#" color="text.link">
           {t("projectReadinessTools.checkStepCodeRequirementsScreen.downloadSampleLink")}
         </RouterLink> */}

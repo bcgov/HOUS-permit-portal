@@ -1,16 +1,12 @@
+import { InputGroup } from "@/components/ui/input-group"
 import {
-  FormControl,
+  Field,
   FormControlProps,
-  FormErrorMessage,
-  FormHelperText,
-  FormLabel,
   HStack,
   Input,
-  InputGroup,
-  InputLeftElement,
+  InputElement,
   InputProps,
-  InputRightElement,
-  Select,
+  NativeSelect,
   SelectProps,
   Text,
   Textarea,
@@ -37,6 +33,11 @@ interface IInputFormControlProps<TInputProps = Partial<InputProps>> extends Form
   inputProps?: TInputProps
   LabelInfo?: () => JSX.Element
   showOptional?: boolean
+  isReadOnly?: boolean
+  readOnly?: boolean
+  css?: Record<string, unknown>
+  flex?: unknown
+  maxW?: unknown
 }
 
 interface ISelectFormControlProps extends IInputFormControlProps<Partial<SelectProps>> {
@@ -159,10 +160,10 @@ export const DatePickerFormControl = ({
 
   const id = `${fieldName}-form-control-label`
   return (
-    <FormControl isInvalid={!!errorMessage} {...rest}>
+    <Field.Root invalid={!!errorMessage} {...rest}>
       {label && (
         <HStack gap={0}>
-          <FormLabel id={id}>{label} </FormLabel>
+          <Field.Label id={id}>{label} </Field.Label>
           {!required && showOptional && (
             <Text ml={-2} mb={2}>
               {t("ui.optional")}
@@ -170,7 +171,6 @@ export const DatePickerFormControl = ({
           )}
         </HStack>
       )}
-
       <InputGroup w="full" display="flex" flexDirection="column" zIndex={1}>
         <DatePicker
           selected={value}
@@ -186,12 +186,16 @@ export const DatePickerFormControl = ({
           ariaLabelledBy={id}
           {...inputProps}
         />
-        {errorMessage && <FormErrorMessage>{errorMessage as any}</FormErrorMessage>}
-        {hint && <FormHelperText color="border.base">{hint}</FormHelperText>}
-        {leftElement && <InputLeftElement pointerEvents="none">{leftElement}</InputLeftElement>}
-        {rightElement && <InputRightElement pointerEvents="none">{rightElement}</InputRightElement>}
+        {errorMessage && <Field.ErrorText>{errorMessage as any}</Field.ErrorText>}
+        {hint && <Field.HelperText color="border.base">{hint}</Field.HelperText>}
+        {leftElement && <InputElement pointerEvents="none">{leftElement}</InputElement>}
+        {rightElement && (
+          <InputElement placement="end" pointerEvents="none">
+            {rightElement}
+          </InputElement>
+        )}
       </InputGroup>
-    </FormControl>
+    </Field.Root>
   )
 }
 export const TextAreaFormControl = (props: IInputFormControlProps) => {
@@ -248,17 +252,17 @@ export const InputFormControl = ({
     }
   }
   return (
-    <FormControl isInvalid={!!errorMessage} {...rest}>
+    <Field.Root invalid={!!errorMessage} {...rest}>
       {label && (
         <HStack gap={0}>
-          <FormLabel>
+          <Field.Label>
             {label}
             {required && (
               <Text as="span" color="semantic.error" ml={1}>
                 *
               </Text>
             )}
-          </FormLabel>
+          </Field.Label>
           {!required && showOptional && (
             <Text ml={-2} mb={2}>
               {t("ui.optional")}
@@ -267,19 +271,22 @@ export const InputFormControl = ({
           {LabelInfo && <LabelInfo />}
         </HStack>
       )}
-
       <InputGroup w="full" display="flex" flexDirection="column">
         <Input bg="greys.white" {...registerProps} {...inputProps} onChange={chainedOnChange} onBlur={chainedOnBlur} />
-        {errorMessage && <FormErrorMessage>{errorMessage}</FormErrorMessage>}
+        {errorMessage && <Field.ErrorText>{errorMessage}</Field.ErrorText>}
         {hint && (
-          <FormHelperText mt={1} color="border.base">
+          <Field.HelperText mt={1} color="border.base">
             {hint}
-          </FormHelperText>
+          </Field.HelperText>
         )}
-        {leftElement && <InputLeftElement pointerEvents="none">{leftElement}</InputLeftElement>}
-        {rightElement && <InputRightElement pointerEvents="none">{rightElement}</InputRightElement>}
+        {leftElement && <InputElement pointerEvents="none">{leftElement}</InputElement>}
+        {rightElement && (
+          <InputElement placement="end" pointerEvents="none">
+            {rightElement}
+          </InputElement>
+        )}
       </InputGroup>
-    </FormControl>
+    </Field.Root>
   )
 }
 
@@ -304,17 +311,17 @@ export const SelectFormControl = ({
     : {}
 
   return (
-    <FormControl isInvalid={!!errorMessage} {...rest}>
+    <Field.Root invalid={!!errorMessage} {...rest}>
       {label && (
         <HStack gap={0}>
-          <FormLabel>
+          <Field.Label>
             {label}
             {required && (
               <Text as="span" color="semantic.error" ml={1}>
                 *
               </Text>
             )}
-          </FormLabel>
+          </Field.Label>
           {!required && showOptional && (
             <Text ml={-2} mb={2}>
               {t("ui.optional")}
@@ -322,28 +329,31 @@ export const SelectFormControl = ({
           )}
         </HStack>
       )}
-      <Select bg="greys.white" {...registerProps} {...inputProps}>
-        {options?.map((option) => (
-          <option key={option.value.toString()} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-        {optionGroups?.map((group) => (
-          <optgroup key={group.label} label={group.label}>
-            {group.options.map((option) => (
-              <option key={option.value.toString()} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </optgroup>
-        ))}
-      </Select>
-      {errorMessage && <FormErrorMessage>{errorMessage as any}</FormErrorMessage>}
+      <NativeSelect.Root>
+        <NativeSelect.Field bg="greys.white" {...registerProps} {...inputProps}>
+          {options?.map((option) => (
+            <option key={option.value.toString()} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+          {optionGroups?.map((group) => (
+            <optgroup key={group.label} label={group.label}>
+              {group.options.map((option) => (
+                <option key={option.value.toString()} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </optgroup>
+          ))}
+        </NativeSelect.Field>
+        <NativeSelect.Indicator />
+      </NativeSelect.Root>
+      {errorMessage && <Field.ErrorText>{errorMessage as any}</Field.ErrorText>}
       {hint && (
-        <FormHelperText mt={1} color="border.base">
+        <Field.HelperText mt={1} color="border.base">
           {hint}
-        </FormHelperText>
+        </Field.HelperText>
       )}
-    </FormControl>
+    </Field.Root>
   )
 }

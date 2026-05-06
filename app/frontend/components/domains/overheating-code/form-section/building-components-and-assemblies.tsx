@@ -2,12 +2,11 @@ import {
   Box,
   Button,
   CloseButton,
-  Divider,
-  FormControl,
-  FormLabel,
+  Field,
   Heading,
   HStack,
   Input,
+  Separator,
   SimpleGrid,
   Text,
   VStack,
@@ -75,8 +74,7 @@ export const BuildingComponentsAndAssemblies = observer(function BuildingCompone
           "Describe the building components and assemblies for the cooling zone, including those facing outside and those facing adjacent unconditioned spaces."
         )}
       </Text>
-
-      <VStack spacing={8} align="stretch">
+      <VStack gap={8} align="stretch">
         <Box>
           <Heading as="h3" size="md" mb={1}>
             {t("overheatingCode.sections.buildingComponents.facingOutsideHeading", "Facing Outside")}
@@ -92,15 +90,15 @@ export const BuildingComponentsAndAssemblies = observer(function BuildingCompone
             )}
           </Text>
 
-          <VStack spacing={4} align="stretch">
-            <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
+          <VStack gap={4} align="stretch">
+            <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
               {outsideFields.fields.map((field, index) => (
-                <FormControl key={field.id}>
-                  <FormLabel fontSize="sm" fontWeight="semibold">
+                <Field.Root key={field.id}>
+                  <Field.Label fontSize="sm" fontWeight="semibold">
                     {t("overheatingCode.sections.buildingComponents.itemLabel", "Item {{label}}", {
                       label: ITEM_LABELS[index] || index + 1,
                     })}
-                  </FormLabel>
+                  </Field.Label>
                   <HStack>
                     <Input
                       {...register(`componentsFacingOutside.${index}.value`)}
@@ -113,19 +111,19 @@ export const BuildingComponentsAndAssemblies = observer(function BuildingCompone
                       <CloseButton onClick={() => outsideFields.remove(index)} aria-label="Remove item" />
                     )}
                   </HStack>
-                </FormControl>
+                </Field.Root>
               ))}
             </SimpleGrid>
 
             {outsideFields.fields.length < MAX_ITEMS && (
               <Box>
                 <Button
-                  variant="link"
-                  colorScheme="blue"
+                  variant="plain"
+                  colorPalette="blue"
                   size="sm"
-                  leftIcon={<Plus />}
                   onClick={() => outsideFields.append({ value: "" })}
                 >
+                  <Plus />
                   {t("overheatingCode.sections.buildingComponents.addItem", "Add Item")}
                 </Button>
               </Box>
@@ -133,7 +131,7 @@ export const BuildingComponentsAndAssemblies = observer(function BuildingCompone
           </VStack>
         </Box>
 
-        <Divider />
+        <Separator />
 
         <Box>
           <Heading as="h3" size="md" mb={1}>
@@ -150,15 +148,15 @@ export const BuildingComponentsAndAssemblies = observer(function BuildingCompone
             )}
           </Text>
 
-          <VStack spacing={4} align="stretch">
-            <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
+          <VStack gap={4} align="stretch">
+            <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
               {adjacentFields.fields.map((field, index) => (
-                <FormControl key={field.id}>
-                  <FormLabel fontSize="sm" fontWeight="semibold">
+                <Field.Root key={field.id}>
+                  <Field.Label fontSize="sm" fontWeight="semibold">
                     {t("overheatingCode.sections.buildingComponents.itemLabel", "Item {{label}}", {
                       label: ITEM_LABELS[index] || index + 1,
                     })}
-                  </FormLabel>
+                  </Field.Label>
                   <HStack>
                     <Input
                       {...register(`componentsFacingAdjacent.${index}.value`)}
@@ -171,19 +169,19 @@ export const BuildingComponentsAndAssemblies = observer(function BuildingCompone
                       <CloseButton onClick={() => adjacentFields.remove(index)} aria-label="Remove item" />
                     )}
                   </HStack>
-                </FormControl>
+                </Field.Root>
               ))}
             </SimpleGrid>
 
             {adjacentFields.fields.length < MAX_ITEMS && (
               <Box>
                 <Button
-                  variant="link"
-                  colorScheme="blue"
+                  variant="plain"
+                  colorPalette="blue"
                   size="sm"
-                  leftIcon={<Plus />}
                   onClick={() => adjacentFields.append({ value: "" })}
                 >
+                  <Plus />
                   {t("overheatingCode.sections.buildingComponents.addItem", "Add Item")}
                 </Button>
               </Box>
@@ -191,12 +189,7 @@ export const BuildingComponentsAndAssemblies = observer(function BuildingCompone
           </VStack>
         </Box>
       </VStack>
-
-      <FormFooter<IBuildingComponentsFormData>
-        handleSubmit={handleSubmit}
-        onSubmit={onSubmit}
-        isLoading={isSubmitting}
-      />
+      <FormFooter<IBuildingComponentsFormData> handleSubmit={handleSubmit} onSubmit={onSubmit} loading={isSubmitting} />
     </Box>
   )
 })

@@ -1,20 +1,14 @@
+import { InputGroup } from "@/components/ui/input-group"
+import { Radio, RadioGroup } from "@/components/ui/radio"
 import {
+  Field,
   Flex,
-  FormControl,
-  FormHelperText,
-  FormLabel,
   Grid,
   HStack,
   IconButton,
   Input,
-  InputGroup,
-  InputRightElement,
+  InputElement,
   Popover,
-  PopoverBody,
-  PopoverContent,
-  PopoverTrigger,
-  Radio,
-  RadioGroup,
   SimpleGrid,
   Stack,
   Text,
@@ -129,55 +123,55 @@ export const PerformanceCharacteristics = observer(function Part3StepCodeFormPer
       </Flex>
       <FormProvider {...formMethods}>
         <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
-          <FormControl>
-            <FormLabel pb={1}>{t(`${i18nPrefix}.software.label`)}</FormLabel>
-            <FormHelperText mb={1} mt={0} color="semantic.error">
+          <Field.Root>
+            <Field.Label pb={1}>{t(`${i18nPrefix}.software.label`)}</Field.Label>
+            <Field.HelperText mb={1} mt={0} color="semantic.error">
               <ErrorMessage errors={errors} name="software" />
-            </FormHelperText>
+            </Field.HelperText>
             <Controller
               name="software"
               control={control}
               rules={{ required: t(`${i18nPrefix}.software.error`) }}
               render={({ field: { value, onChange } }) => (
-                <RadioGroup value={value} onChange={onChange}>
-                  <SimpleGrid columns={2} spacing={4}>
+                <RadioGroup.Root value={value} onValueChange={onChange}>
+                  <SimpleGrid columns={2} gap={4}>
                     {Object.values(EPart3StepCodeSoftware).map((s) => (
                       <Radio key={generateUUID()} value={s}>
                         {t(`${i18nPrefix}.software.options.${s}`)}
                       </Radio>
                     ))}
                   </SimpleGrid>
-                </RadioGroup>
+                </RadioGroup.Root>
               )}
             />
-          </FormControl>
+          </Field.Root>
           {watchSoftware == EPart3StepCodeSoftware.other && (
-            <FormControl>
-              <FormLabel>{t(`${i18nPrefix}.softwareName.label`)}</FormLabel>
-              <FormHelperText mb={1} mt={0} color="semantic.error">
+            <Field.Root>
+              <Field.Label>{t(`${i18nPrefix}.softwareName.label`)}</Field.Label>
+              <Field.HelperText mb={1} mt={0} color="semantic.error">
                 <ErrorMessage errors={errors} name="softwareName" />
-              </FormHelperText>
+              </Field.HelperText>
               <Input
                 maxW={"430px"}
                 {...register("softwareName", { required: t(`${i18nPrefix}.softwareName.error`) })}
               />
-            </FormControl>
+            </Field.Root>
           )}
-          <FormControl>
-            <FormLabel>{t(`${i18nPrefix}.weatherFile.label`)}</FormLabel>
-            <FormHelperText mb={1} mt={0} color="semantic.error">
+          <Field.Root>
+            <Field.Label>{t(`${i18nPrefix}.weatherFile.label`)}</Field.Label>
+            <Field.HelperText mb={1} mt={0} color="semantic.error">
               <ErrorMessage errors={errors} name="simulationWeatherFile" />
-            </FormHelperText>
+            </Field.HelperText>
             <Input
               maxW={"430px"}
               {...register("simulationWeatherFile", { required: t(`${i18nPrefix}.weatherFile.error`) })}
             />
-          </FormControl>
-          <FormControl>
-            <FormLabel pb={1}>{t(`${i18nPrefix}.ventilation.label`)}</FormLabel>
-            <FormHelperText mb={1} mt={0} color="semantic.error">
+          </Field.Root>
+          <Field.Root>
+            <Field.Label pb={1}>{t(`${i18nPrefix}.ventilation.label`)}</Field.Label>
+            <Field.HelperText mb={1} mt={0} color="semantic.error">
               <ErrorMessage errors={errors} name="isDemandControlVentilationUsed" />
-            </FormHelperText>
+            </Field.HelperText>
             <Controller
               name="isDemandControlVentilationUsed"
               control={control}
@@ -185,22 +179,26 @@ export const PerformanceCharacteristics = observer(function Part3StepCodeFormPer
                 validate: (value) => value === true || value === false || t(`${i18nPrefix}.ventilation.error`),
               }}
               render={({ field: { value, onChange } }) => (
-                <RadioGroup
-                  onChange={(val) => onChange(val === "yes")}
+                <RadioGroup.Root
+                  onValueChange={(val) => onChange(val === "yes")}
                   value={value === true ? "yes" : value === false ? "no" : undefined}
                 >
-                  <Stack spacing={5} direction="row">
-                    <Radio variant="binary" value={"yes"}>
-                      {t("ui.yes")}
-                    </Radio>
-                    <Radio variant="binary" value={"no"}>
-                      {t("ui.no")}
-                    </Radio>
+                  <Stack gap={5} direction="row">
+                    <RadioGroup.Item variant="binary" value={"yes"}>
+                      <RadioGroup.ItemHiddenInput />
+                      <RadioGroup.ItemIndicator />
+                      <RadioGroup.ItemText>{t("ui.yes")}</RadioGroup.ItemText>
+                    </RadioGroup.Item>
+                    <RadioGroup.Item variant="binary" value={"no"}>
+                      <RadioGroup.ItemHiddenInput />
+                      <RadioGroup.ItemIndicator />
+                      <RadioGroup.ItemText>{t("ui.no")}</RadioGroup.ItemText>
+                    </RadioGroup.Item>
                   </Stack>
-                </RadioGroup>
+                </RadioGroup.Root>
               )}
             />
-          </FormControl>
+          </Field.Root>
 
           <Grid
             w="full"
@@ -226,31 +224,39 @@ export const PerformanceCharacteristics = observer(function Part3StepCodeFormPer
                 <Text>
                   <Trans i18nKey={`${i18nPrefix}.aboveGroundWallArea.label`} components={{ sup: <sup /> }} />
                 </Text>
-                <Popover placement="top-start">
-                  <PopoverTrigger>
-                    <IconButton aria-label="above ground wall area hint" icon={<Info />} variant="ghost" />
-                  </PopoverTrigger>
-                  <PopoverContent>
-                    <PopoverBody fontWeight="normal">
-                      <Trans i18nKey={`${i18nPrefix}.aboveGroundWallArea.hint`} />
-                    </PopoverBody>
-                  </PopoverContent>
-                </Popover>
+                <Popover.Root
+                  positioning={{
+                    placement: "top-start",
+                  }}
+                >
+                  <Popover.Trigger asChild>
+                    <IconButton aria-label="above ground wall area hint" variant="ghost">
+                      <Info />
+                    </IconButton>
+                  </Popover.Trigger>
+                  <Popover.Positioner>
+                    <Popover.Content>
+                      <Popover.Body fontWeight="normal">
+                        <Trans i18nKey={`${i18nPrefix}.aboveGroundWallArea.hint`} />
+                      </Popover.Body>
+                    </Popover.Content>
+                  </Popover.Positioner>
+                </Popover.Root>
               </HStack>
             </RowHeader>
             <GridData>
-              <FormControl>
+              <Field.Root>
                 <Input
                   textAlign="center"
                   {...register("aboveGroundWallArea", { required: t(`${i18nPrefix}.aboveGroundWallArea.error`) })}
                 />
-                <FormHelperText mb={1} mt={0} color="semantic.error">
+                <Field.HelperText mb={1} mt={0} color="semantic.error">
                   <ErrorMessage errors={errors} name="aboveGroundWallArea" />
-                </FormHelperText>
-              </FormControl>
+                </Field.HelperText>
+              </Field.Root>
             </GridData>
             <GridData>
-              <Input value="-" isDisabled textAlign="center" />
+              <Input value="-" disabled textAlign="center" />
             </GridData>
 
             {/* Vertical facade to floor area ratio */}
@@ -260,12 +266,12 @@ export const PerformanceCharacteristics = observer(function Part3StepCodeFormPer
               </HStack>
             </RowHeader>
             <GridData>
-              <FormControl>
-                <Input value={verticalFacadeFloorRatio || "-"} isDisabled textAlign="center" />
-              </FormControl>
+              <Field.Root>
+                <Input value={verticalFacadeFloorRatio || "-"} disabled textAlign="center" />
+              </Field.Root>
             </GridData>
             <GridData>
-              <Input value="-" isDisabled textAlign="center" />
+              <Input value="-" disabled textAlign="center" />
             </GridData>
 
             {/* window-to-wall area ratio */}
@@ -275,46 +281,54 @@ export const PerformanceCharacteristics = observer(function Part3StepCodeFormPer
               </HStack>
             </RowHeader>
             <GridData>
-              <FormControl>
+              <Field.Root>
                 <InputGroup>
                   <Input
                     textAlign="center"
                     {...register("windowToWallAreaRatio", { required: t(`${i18nPrefix}.wwr.error`) })}
                   />
-                  <InputRightElement>{t(`${i18nPrefix}.wwr.units`)}</InputRightElement>
+                  <InputElement placement="end">{t(`${i18nPrefix}.wwr.units`)}</InputElement>
                 </InputGroup>
-                <FormHelperText mb={1} mt={0} color="semantic.error">
+                <Field.HelperText mb={1} mt={0} color="semantic.error">
                   <ErrorMessage errors={errors} name="windowToWallAreaRatio" />
-                </FormHelperText>
-              </FormControl>
+                </Field.HelperText>
+              </Field.Root>
             </GridData>
             <GridData>
-              <Input value="-" isDisabled textAlign="center" />
+              <Input value="-" disabled textAlign="center" />
             </GridData>
 
             {/* window-to-floor area ratio */}
             <RowHeader borderRightWidth={1}>
               <HStack>
                 <Text>{t(`${i18nPrefix}.wfr.label`)}</Text>
-                <Popover placement="top-start">
-                  <PopoverTrigger>
-                    <IconButton aria-label={t(`${i18nPrefix}.wfr.hint`)} icon={<Info />} variant="ghost" />
-                  </PopoverTrigger>
-                  <PopoverContent>
-                    <PopoverBody fontWeight="normal">
-                      <Trans i18nKey={`${i18nPrefix}.wfr.hint`} />
-                    </PopoverBody>
-                  </PopoverContent>
-                </Popover>
+                <Popover.Root
+                  positioning={{
+                    placement: "top-start",
+                  }}
+                >
+                  <Popover.Trigger asChild>
+                    <IconButton aria-label={t(`${i18nPrefix}.wfr.hint`)} variant="ghost">
+                      <Info />
+                    </IconButton>
+                  </Popover.Trigger>
+                  <Popover.Positioner>
+                    <Popover.Content>
+                      <Popover.Body fontWeight="normal">
+                        <Trans i18nKey={`${i18nPrefix}.wfr.hint`} />
+                      </Popover.Body>
+                    </Popover.Content>
+                  </Popover.Positioner>
+                </Popover.Root>
               </HStack>
             </RowHeader>
             <GridData>
-              <FormControl>
-                <Input value={windowFloorRatio?.toFixed(3) || "-"} isDisabled textAlign="center" />
-              </FormControl>
+              <Field.Root>
+                <Input value={windowFloorRatio?.toFixed(3) || "-"} disabled textAlign="center" />
+              </Field.Root>
             </GridData>
             <GridData>
-              <Input value="-" isDisabled textAlign="center" />
+              <Input value="-" disabled textAlign="center" />
             </GridData>
 
             {/* airtightness */}
@@ -323,31 +337,39 @@ export const PerformanceCharacteristics = observer(function Part3StepCodeFormPer
                 <Text>
                   <Trans i18nKey={`${i18nPrefix}.airtightness.label`} components={{ sup: <sup /> }} />
                 </Text>
-                <Popover placement="top-start">
-                  <PopoverTrigger>
-                    <IconButton aria-label={t(`${i18nPrefix}.airtightness.hint`)} icon={<Info />} variant="ghost" />
-                  </PopoverTrigger>
-                  <PopoverContent>
-                    <PopoverBody fontWeight="normal">
-                      <Trans i18nKey={`${i18nPrefix}.airtightness.hint`} />
-                    </PopoverBody>
-                  </PopoverContent>
-                </Popover>
+                <Popover.Root
+                  positioning={{
+                    placement: "top-start",
+                  }}
+                >
+                  <Popover.Trigger asChild>
+                    <IconButton aria-label={t(`${i18nPrefix}.airtightness.hint`)} variant="ghost">
+                      <Info />
+                    </IconButton>
+                  </Popover.Trigger>
+                  <Popover.Positioner>
+                    <Popover.Content>
+                      <Popover.Body fontWeight="normal">
+                        <Trans i18nKey={`${i18nPrefix}.airtightness.hint`} />
+                      </Popover.Body>
+                    </Popover.Content>
+                  </Popover.Positioner>
+                </Popover.Root>
               </HStack>
             </RowHeader>
             <GridData>
-              <FormControl>
+              <Field.Root>
                 <Input
                   textAlign="center"
                   {...register("designAirtightness", { required: t(`${i18nPrefix}.airtightness.error`) })}
                 />
-                <FormHelperText mb={1} mt={0} color="semantic.error">
+                <Field.HelperText mb={1} mt={0} color="semantic.error">
                   <ErrorMessage errors={errors} name="designAirtightness" />
-                </FormHelperText>
-              </FormControl>
+                </Field.HelperText>
+              </Field.Root>
             </GridData>
             <GridData>
-              <Input value="-" isDisabled textAlign="center" />
+              <Input value="-" disabled textAlign="center" />
             </GridData>
 
             {/* infiltration rate */}
@@ -356,31 +378,39 @@ export const PerformanceCharacteristics = observer(function Part3StepCodeFormPer
                 <Text>
                   <Trans i18nKey={`${i18nPrefix}.infiltrationRate.label`} components={{ sup: <sup /> }} />
                 </Text>
-                <Popover placement="top-start">
-                  <PopoverTrigger>
-                    <IconButton aria-label={t(`${i18nPrefix}.infiltrationRate.hint`)} icon={<Info />} variant="ghost" />
-                  </PopoverTrigger>
-                  <PopoverContent>
-                    <PopoverBody fontWeight="normal">
-                      <Trans i18nKey={`${i18nPrefix}.infiltrationRate.hint`} />
-                    </PopoverBody>
-                  </PopoverContent>
-                </Popover>
+                <Popover.Root
+                  positioning={{
+                    placement: "top-start",
+                  }}
+                >
+                  <Popover.Trigger asChild>
+                    <IconButton aria-label={t(`${i18nPrefix}.infiltrationRate.hint`)} variant="ghost">
+                      <Info />
+                    </IconButton>
+                  </Popover.Trigger>
+                  <Popover.Positioner>
+                    <Popover.Content>
+                      <Popover.Body fontWeight="normal">
+                        <Trans i18nKey={`${i18nPrefix}.infiltrationRate.hint`} />
+                      </Popover.Body>
+                    </Popover.Content>
+                  </Popover.Positioner>
+                </Popover.Root>
               </HStack>
             </RowHeader>
             <GridData>
-              <FormControl>
+              <Field.Root>
                 <Input
                   textAlign="center"
                   {...register("modelledInfiltrationRate", { required: t(`${i18nPrefix}.infiltrationRate.error`) })}
                 />
-                <FormHelperText mb={1} mt={0} color="semantic.error">
+                <Field.HelperText mb={1} mt={0} color="semantic.error">
                   <ErrorMessage errors={errors} name="modelledInfiltrationRate" />
-                </FormHelperText>
-              </FormControl>
+                </Field.HelperText>
+              </Field.Root>
             </GridData>
             <GridData>
-              <Input value="-" isDisabled textAlign="center" />
+              <Input value="-" disabled textAlign="center" />
             </GridData>
 
             {/* wall clear field R-value */}
@@ -389,37 +419,45 @@ export const PerformanceCharacteristics = observer(function Part3StepCodeFormPer
                 <Text>
                   <Trans i18nKey={`${i18nPrefix}.wallClearField.label`} components={{ sup: <sup /> }} />
                 </Text>
-                <Popover placement="top-start">
-                  <PopoverTrigger>
-                    <IconButton aria-label={t(`${i18nPrefix}.wallClearField.hint`)} icon={<Info />} variant="ghost" />
-                  </PopoverTrigger>
-                  <PopoverContent>
-                    <PopoverBody fontWeight="normal">
-                      <Trans i18nKey={`${i18nPrefix}.wallClearField.hint`} />
-                    </PopoverBody>
-                  </PopoverContent>
-                </Popover>
+                <Popover.Root
+                  positioning={{
+                    placement: "top-start",
+                  }}
+                >
+                  <Popover.Trigger asChild>
+                    <IconButton aria-label={t(`${i18nPrefix}.wallClearField.hint`)} variant="ghost">
+                      <Info />
+                    </IconButton>
+                  </Popover.Trigger>
+                  <Popover.Positioner>
+                    <Popover.Content>
+                      <Popover.Body fontWeight="normal">
+                        <Trans i18nKey={`${i18nPrefix}.wallClearField.hint`} />
+                      </Popover.Body>
+                    </Popover.Content>
+                  </Popover.Positioner>
+                </Popover.Root>
               </HStack>
             </RowHeader>
             <GridData>
-              <FormControl>
+              <Field.Root>
                 <Input
                   textAlign="center"
                   {...register("averageWallClearFieldRValue", { required: t(`${i18nPrefix}.wallClearField.error`) })}
                 />
-                <FormHelperText mb={1} mt={0} color="semantic.error">
+                <Field.HelperText mb={1} mt={0} color="semantic.error">
                   <ErrorMessage errors={errors} name="averageWallClearFieldRValue" />
-                </FormHelperText>
-              </FormControl>
+                </Field.HelperText>
+              </Field.Root>
             </GridData>
             <GridData>
               <InputGroup>
-                <Input value={wallClearFieldConversion || "-"} isDisabled pr={"88px"} textAlign="center" />
-                <InputRightElement w="auto" px={1}>
+                <Input value={wallClearFieldConversion || "-"} disabled pr={"88px"} textAlign="center" />
+                <InputElement placement="end" w="auto" px={1}>
                   <Text>
                     <Trans i18nKey={`${i18nPrefix}.wallClearField.conversionUnits`} components={{ sup: <sup /> }} />
                   </Text>
-                </InputRightElement>
+                </InputElement>
               </InputGroup>
             </GridData>
 
@@ -429,37 +467,41 @@ export const PerformanceCharacteristics = observer(function Part3StepCodeFormPer
                 <Text>
                   <Trans i18nKey={`${i18nPrefix}.wallEffectiveField.label`} components={{ sup: <sup /> }} />
                 </Text>
-                <Popover placement="top-start">
-                  <PopoverTrigger>
-                    <IconButton
-                      aria-label={t(`${i18nPrefix}.wallEffectiveField.hint`)}
-                      icon={<Info />}
-                      variant="ghost"
-                    />
-                  </PopoverTrigger>
-                  <PopoverContent>
-                    <PopoverBody fontWeight="normal">
-                      <Trans i18nKey={`${i18nPrefix}.wallEffectiveField.hint`} />
-                    </PopoverBody>
-                  </PopoverContent>
-                </Popover>
+                <Popover.Root
+                  positioning={{
+                    placement: "top-start",
+                  }}
+                >
+                  <Popover.Trigger asChild>
+                    <IconButton aria-label={t(`${i18nPrefix}.wallEffectiveField.hint`)} variant="ghost">
+                      <Info />
+                    </IconButton>
+                  </Popover.Trigger>
+                  <Popover.Positioner>
+                    <Popover.Content>
+                      <Popover.Body fontWeight="normal">
+                        <Trans i18nKey={`${i18nPrefix}.wallEffectiveField.hint`} />
+                      </Popover.Body>
+                    </Popover.Content>
+                  </Popover.Positioner>
+                </Popover.Root>
               </HStack>
             </RowHeader>
             <GridData>
-              <FormControl>
+              <Field.Root>
                 <Input
                   textAlign="center"
                   {...register("averageWallEffectiveRValue", {
                     required: t(`${i18nPrefix}.wallEffectiveField.error`),
                   })}
                 />
-                <FormHelperText mb={1} mt={0} color="semantic.error">
+                <Field.HelperText mb={1} mt={0} color="semantic.error">
                   <ErrorMessage errors={errors} name="averageWallEffectiveRValue" />
-                </FormHelperText>
-              </FormControl>
+                </Field.HelperText>
+              </Field.Root>
             </GridData>
             <GridData>
-              <Input value="-" isDisabled textAlign="center" />
+              <Input value="-" disabled textAlign="center" />
             </GridData>
 
             {/* roof clear field R-value */}
@@ -468,37 +510,45 @@ export const PerformanceCharacteristics = observer(function Part3StepCodeFormPer
                 <Text>
                   <Trans i18nKey={`${i18nPrefix}.roofClearField.label`} components={{ sup: <sup /> }} />
                 </Text>
-                <Popover placement="top-start">
-                  <PopoverTrigger>
-                    <IconButton aria-label={t(`${i18nPrefix}.roofClearField.hint`)} icon={<Info />} variant="ghost" />
-                  </PopoverTrigger>
-                  <PopoverContent>
-                    <PopoverBody fontWeight="normal">
-                      <Trans i18nKey={`${i18nPrefix}.roofClearField.hint`} />
-                    </PopoverBody>
-                  </PopoverContent>
-                </Popover>
+                <Popover.Root
+                  positioning={{
+                    placement: "top-start",
+                  }}
+                >
+                  <Popover.Trigger asChild>
+                    <IconButton aria-label={t(`${i18nPrefix}.roofClearField.hint`)} variant="ghost">
+                      <Info />
+                    </IconButton>
+                  </Popover.Trigger>
+                  <Popover.Positioner>
+                    <Popover.Content>
+                      <Popover.Body fontWeight="normal">
+                        <Trans i18nKey={`${i18nPrefix}.roofClearField.hint`} />
+                      </Popover.Body>
+                    </Popover.Content>
+                  </Popover.Positioner>
+                </Popover.Root>
               </HStack>
             </RowHeader>
             <GridData>
-              <FormControl>
+              <Field.Root>
                 <Input
                   textAlign="center"
                   {...register("averageRoofClearFieldRValue", { required: t(`${i18nPrefix}.roofClearField.error`) })}
                 />
-                <FormHelperText mb={1} mt={0} color="semantic.error">
+                <Field.HelperText mb={1} mt={0} color="semantic.error">
                   <ErrorMessage errors={errors} name="averageRoofClearFieldRValue" />
-                </FormHelperText>
-              </FormControl>
+                </Field.HelperText>
+              </Field.Root>
             </GridData>
             <GridData>
               <InputGroup>
-                <Input value={roofClearFieldConversion || "-"} isDisabled pr={"88px"} textAlign="center" />
-                <InputRightElement w="auto" px={1}>
+                <Input value={roofClearFieldConversion || "-"} disabled pr={"88px"} textAlign="center" />
+                <InputElement placement="end" w="auto" px={1}>
                   <Text>
                     <Trans i18nKey={`${i18nPrefix}.roofClearField.conversionUnits`} components={{ sup: <sup /> }} />
                   </Text>
-                </InputRightElement>
+                </InputElement>
               </InputGroup>
             </GridData>
 
@@ -508,37 +558,41 @@ export const PerformanceCharacteristics = observer(function Part3StepCodeFormPer
                 <Text>
                   <Trans i18nKey={`${i18nPrefix}.roofEffectiveField.label`} components={{ sup: <sup /> }} />
                 </Text>
-                <Popover placement="top-start">
-                  <PopoverTrigger>
-                    <IconButton
-                      aria-label={t(`${i18nPrefix}.roofEffectiveField.hint`)}
-                      icon={<Info />}
-                      variant="ghost"
-                    />
-                  </PopoverTrigger>
-                  <PopoverContent>
-                    <PopoverBody fontWeight="normal">
-                      <Trans i18nKey={`${i18nPrefix}.roofEffectiveField.hint`} />
-                    </PopoverBody>
-                  </PopoverContent>
-                </Popover>
+                <Popover.Root
+                  positioning={{
+                    placement: "top-start",
+                  }}
+                >
+                  <Popover.Trigger asChild>
+                    <IconButton aria-label={t(`${i18nPrefix}.roofEffectiveField.hint`)} variant="ghost">
+                      <Info />
+                    </IconButton>
+                  </Popover.Trigger>
+                  <Popover.Positioner>
+                    <Popover.Content>
+                      <Popover.Body fontWeight="normal">
+                        <Trans i18nKey={`${i18nPrefix}.roofEffectiveField.hint`} />
+                      </Popover.Body>
+                    </Popover.Content>
+                  </Popover.Positioner>
+                </Popover.Root>
               </HStack>
             </RowHeader>
             <GridData>
-              <FormControl>
+              <Field.Root>
                 <Input
                   textAlign="center"
                   {...register("averageRoofEffectiveRValue", {
                     required: t(`${i18nPrefix}.roofEffectiveField.error`),
                   })}
                 />
-                <FormHelperText mb={1} mt={0} color="semantic.error">
+                <Field.HelperText mb={1} mt={0} color="semantic.error">
                   <ErrorMessage errors={errors} name="averageRoofEffectiveRValue" />
-                </FormHelperText>
-              </FormControl>
+                </Field.HelperText>
+              </Field.Root>
             </GridData>
             <GridData>
-              <Input value="-" isDisabled textAlign="center" />
+              <Input value="-" disabled textAlign="center" />
             </GridData>
 
             {/* window effective U-value */}
@@ -547,39 +601,47 @@ export const PerformanceCharacteristics = observer(function Part3StepCodeFormPer
                 <Text>
                   <Trans i18nKey={`${i18nPrefix}.windowEffective.label`} components={{ sup: <sup /> }} />
                 </Text>
-                <Popover placement="top-start">
-                  <PopoverTrigger>
-                    <IconButton aria-label={t(`${i18nPrefix}.windowEffective.hint`)} icon={<Info />} variant="ghost" />
-                  </PopoverTrigger>
-                  <PopoverContent>
-                    <PopoverBody fontWeight="normal">
-                      <Trans i18nKey={`${i18nPrefix}.windowEffective.hint`} />
-                    </PopoverBody>
-                  </PopoverContent>
-                </Popover>
+                <Popover.Root
+                  positioning={{
+                    placement: "top-start",
+                  }}
+                >
+                  <Popover.Trigger asChild>
+                    <IconButton aria-label={t(`${i18nPrefix}.windowEffective.hint`)} variant="ghost">
+                      <Info />
+                    </IconButton>
+                  </Popover.Trigger>
+                  <Popover.Positioner>
+                    <Popover.Content>
+                      <Popover.Body fontWeight="normal">
+                        <Trans i18nKey={`${i18nPrefix}.windowEffective.hint`} />
+                      </Popover.Body>
+                    </Popover.Content>
+                  </Popover.Positioner>
+                </Popover.Root>
               </HStack>
             </RowHeader>
             <GridData>
-              <FormControl>
+              <Field.Root>
                 <Input
                   textAlign="center"
                   {...register("averageWindowEffectiveUValue", {
                     required: t(`${i18nPrefix}.windowEffective.error`),
                   })}
                 />
-                <FormHelperText mb={1} mt={0} color="semantic.error">
+                <Field.HelperText mb={1} mt={0} color="semantic.error">
                   <ErrorMessage errors={errors} name="averageWindowEffectiveUValue" />
-                </FormHelperText>
-              </FormControl>
+                </Field.HelperText>
+              </Field.Root>
             </GridData>
             <GridData>
               <InputGroup>
-                <Input value={windowEffectiveConversion || "-"} isDisabled pr={"88px"} textAlign="center" />
-                <InputRightElement w="auto" px={1}>
+                <Input value={windowEffectiveConversion || "-"} disabled pr={"88px"} textAlign="center" />
+                <InputElement placement="end" w="auto" px={1}>
                   <Text>
                     <Trans i18nKey={`${i18nPrefix}.windowEffective.conversionUnits`} components={{ sup: <sup /> }} />
                   </Text>
-                </InputRightElement>
+                </InputElement>
               </InputGroup>
             </GridData>
 
@@ -589,33 +651,41 @@ export const PerformanceCharacteristics = observer(function Part3StepCodeFormPer
                 <Text>
                   <Trans i18nKey={`${i18nPrefix}.windowSolar.label`} components={{ sup: <sup /> }} />
                 </Text>
-                <Popover placement="top-start">
-                  <PopoverTrigger>
-                    <IconButton aria-label={t(`${i18nPrefix}.windowSolar.hint`)} icon={<Info />} variant="ghost" />
-                  </PopoverTrigger>
-                  <PopoverContent>
-                    <PopoverBody fontWeight="normal">
-                      <Trans i18nKey={`${i18nPrefix}.windowSolar.hint`} />
-                    </PopoverBody>
-                  </PopoverContent>
-                </Popover>
+                <Popover.Root
+                  positioning={{
+                    placement: "top-start",
+                  }}
+                >
+                  <Popover.Trigger asChild>
+                    <IconButton aria-label={t(`${i18nPrefix}.windowSolar.hint`)} variant="ghost">
+                      <Info />
+                    </IconButton>
+                  </Popover.Trigger>
+                  <Popover.Positioner>
+                    <Popover.Content>
+                      <Popover.Body fontWeight="normal">
+                        <Trans i18nKey={`${i18nPrefix}.windowSolar.hint`} />
+                      </Popover.Body>
+                    </Popover.Content>
+                  </Popover.Positioner>
+                </Popover.Root>
               </HStack>
             </RowHeader>
             <GridData>
-              <FormControl>
+              <Field.Root>
                 <Input
                   textAlign="center"
                   {...register("averageWindowSolarHeatGainCoefficient", {
                     required: t(`${i18nPrefix}.windowSolar.error`),
                   })}
                 />
-                <FormHelperText mb={1} mt={0} color="semantic.error">
+                <Field.HelperText mb={1} mt={0} color="semantic.error">
                   <ErrorMessage errors={errors} name="averageWindowSolarHeatGainCoefficient" />
-                </FormHelperText>
-              </FormControl>
+                </Field.HelperText>
+              </Field.Root>
             </GridData>
             <GridData>
-              <Input value="-" isDisabled textAlign="center" />
+              <Input value="-" disabled textAlign="center" />
             </GridData>
 
             {/* occupant density */}
@@ -624,33 +694,41 @@ export const PerformanceCharacteristics = observer(function Part3StepCodeFormPer
                 <Text>
                   <Trans i18nKey={`${i18nPrefix}.occupantDensity.label`} components={{ sup: <sup /> }} />
                 </Text>
-                <Popover placement="top-start">
-                  <PopoverTrigger>
-                    <IconButton aria-label={t(`${i18nPrefix}.occupantDensity.hint`)} icon={<Info />} variant="ghost" />
-                  </PopoverTrigger>
-                  <PopoverContent>
-                    <PopoverBody fontWeight="normal">
-                      <Trans i18nKey={`${i18nPrefix}.occupantDensity.hint`} />
-                    </PopoverBody>
-                  </PopoverContent>
-                </Popover>
+                <Popover.Root
+                  positioning={{
+                    placement: "top-start",
+                  }}
+                >
+                  <Popover.Trigger asChild>
+                    <IconButton aria-label={t(`${i18nPrefix}.occupantDensity.hint`)} variant="ghost">
+                      <Info />
+                    </IconButton>
+                  </Popover.Trigger>
+                  <Popover.Positioner>
+                    <Popover.Content>
+                      <Popover.Body fontWeight="normal">
+                        <Trans i18nKey={`${i18nPrefix}.occupantDensity.hint`} />
+                      </Popover.Body>
+                    </Popover.Content>
+                  </Popover.Positioner>
+                </Popover.Root>
               </HStack>
             </RowHeader>
             <GridData>
-              <FormControl>
+              <Field.Root>
                 <Input
                   textAlign="center"
                   {...register("averageOccupantDensity", {
                     required: t(`${i18nPrefix}.occupantDensity.error`),
                   })}
                 />
-                <FormHelperText mb={1} mt={0} color="semantic.error">
+                <Field.HelperText mb={1} mt={0} color="semantic.error">
                   <ErrorMessage errors={errors} name="averageOccupantDensity" />
-                </FormHelperText>
-              </FormControl>
+                </Field.HelperText>
+              </Field.Root>
             </GridData>
             <GridData>
-              <Input value="-" isDisabled textAlign="center" />
+              <Input value="-" disabled textAlign="center" />
             </GridData>
 
             {/* lighting density */}
@@ -659,33 +737,41 @@ export const PerformanceCharacteristics = observer(function Part3StepCodeFormPer
                 <Text>
                   <Trans i18nKey={`${i18nPrefix}.lightingDensity.label`} components={{ sup: <sup /> }} />
                 </Text>
-                <Popover placement="top-start">
-                  <PopoverTrigger>
-                    <IconButton aria-label={t(`${i18nPrefix}.lightingDensity.hint`)} icon={<Info />} variant="ghost" />
-                  </PopoverTrigger>
-                  <PopoverContent>
-                    <PopoverBody fontWeight="normal">
-                      <Trans i18nKey={`${i18nPrefix}.lightingDensity.hint`} />
-                    </PopoverBody>
-                  </PopoverContent>
-                </Popover>
+                <Popover.Root
+                  positioning={{
+                    placement: "top-start",
+                  }}
+                >
+                  <Popover.Trigger asChild>
+                    <IconButton aria-label={t(`${i18nPrefix}.lightingDensity.hint`)} variant="ghost">
+                      <Info />
+                    </IconButton>
+                  </Popover.Trigger>
+                  <Popover.Positioner>
+                    <Popover.Content>
+                      <Popover.Body fontWeight="normal">
+                        <Trans i18nKey={`${i18nPrefix}.lightingDensity.hint`} />
+                      </Popover.Body>
+                    </Popover.Content>
+                  </Popover.Positioner>
+                </Popover.Root>
               </HStack>
             </RowHeader>
             <GridData>
-              <FormControl>
+              <Field.Root>
                 <Input
                   textAlign="center"
                   {...register("averageLightingPowerDensity", {
                     required: t(`${i18nPrefix}.lightingDensity.error`),
                   })}
                 />
-                <FormHelperText mb={1} mt={0} color="semantic.error">
+                <Field.HelperText mb={1} mt={0} color="semantic.error">
                   <ErrorMessage errors={errors} name="averageLightingPowerDensity" />
-                </FormHelperText>
-              </FormControl>
+                </Field.HelperText>
+              </Field.Root>
             </GridData>
             <GridData>
-              <Input value="-" isDisabled textAlign="center" />
+              <Input value="-" disabled textAlign="center" />
             </GridData>
 
             {/* ventilation rate */}
@@ -694,33 +780,41 @@ export const PerformanceCharacteristics = observer(function Part3StepCodeFormPer
                 <Text>
                   <Trans i18nKey={`${i18nPrefix}.ventilationRate.label`} components={{ sup: <sup /> }} />
                 </Text>
-                <Popover placement="top-start">
-                  <PopoverTrigger>
-                    <IconButton aria-label={t(`${i18nPrefix}.ventilationRate.hint`)} icon={<Info />} variant="ghost" />
-                  </PopoverTrigger>
-                  <PopoverContent>
-                    <PopoverBody fontWeight="normal">
-                      <Trans i18nKey={`${i18nPrefix}.ventilationRate.hint`} />
-                    </PopoverBody>
-                  </PopoverContent>
-                </Popover>
+                <Popover.Root
+                  positioning={{
+                    placement: "top-start",
+                  }}
+                >
+                  <Popover.Trigger asChild>
+                    <IconButton aria-label={t(`${i18nPrefix}.ventilationRate.hint`)} variant="ghost">
+                      <Info />
+                    </IconButton>
+                  </Popover.Trigger>
+                  <Popover.Positioner>
+                    <Popover.Content>
+                      <Popover.Body fontWeight="normal">
+                        <Trans i18nKey={`${i18nPrefix}.ventilationRate.hint`} />
+                      </Popover.Body>
+                    </Popover.Content>
+                  </Popover.Positioner>
+                </Popover.Root>
               </HStack>
             </RowHeader>
             <GridData>
-              <FormControl>
+              <Field.Root>
                 <Input
                   textAlign="center"
                   {...register("averageVentilationRate", {
                     required: t(`${i18nPrefix}.ventilationRate.error`),
                   })}
                 />
-                <FormHelperText mb={1} mt={0} color="semantic.error">
+                <Field.HelperText mb={1} mt={0} color="semantic.error">
                   <ErrorMessage errors={errors} name="averageVentilationRate" />
-                </FormHelperText>
-              </FormControl>
+                </Field.HelperText>
+              </Field.Root>
             </GridData>
             <GridData>
-              <Input value="-" isDisabled textAlign="center" />
+              <Input value="-" disabled textAlign="center" />
             </GridData>
 
             {/* DHW low-flow savings */}
@@ -729,20 +823,28 @@ export const PerformanceCharacteristics = observer(function Part3StepCodeFormPer
                 <Text>
                   <Trans i18nKey={`${i18nPrefix}.dhwSavings.label`} components={{ sup: <sup /> }} />
                 </Text>
-                <Popover placement="top-start">
-                  <PopoverTrigger>
-                    <IconButton aria-label={t(`${i18nPrefix}.dhwSavings.hint`)} icon={<Info />} variant="ghost" />
-                  </PopoverTrigger>
-                  <PopoverContent>
-                    <PopoverBody fontWeight="normal">
-                      <Trans i18nKey={`${i18nPrefix}.dhwSavings.hint`} />
-                    </PopoverBody>
-                  </PopoverContent>
-                </Popover>
+                <Popover.Root
+                  positioning={{
+                    placement: "top-start",
+                  }}
+                >
+                  <Popover.Trigger asChild>
+                    <IconButton aria-label={t(`${i18nPrefix}.dhwSavings.hint`)} variant="ghost">
+                      <Info />
+                    </IconButton>
+                  </Popover.Trigger>
+                  <Popover.Positioner>
+                    <Popover.Content>
+                      <Popover.Body fontWeight="normal">
+                        <Trans i18nKey={`${i18nPrefix}.dhwSavings.hint`} />
+                      </Popover.Body>
+                    </Popover.Content>
+                  </Popover.Positioner>
+                </Popover.Root>
               </HStack>
             </RowHeader>
             <GridData>
-              <FormControl>
+              <Field.Root>
                 <InputGroup>
                   <Input
                     textAlign="center"
@@ -750,16 +852,16 @@ export const PerformanceCharacteristics = observer(function Part3StepCodeFormPer
                       required: t(`${i18nPrefix}.dhwSavings.error`),
                     })}
                   />
-                  <InputRightElement>{t(`${i18nPrefix}.dhwSavings.units`)}</InputRightElement>
+                  <InputElement placement="end">{t(`${i18nPrefix}.dhwSavings.units`)}</InputElement>
                 </InputGroup>
 
-                <FormHelperText mb={1} mt={0} color="semantic.error">
+                <Field.HelperText mb={1} mt={0} color="semantic.error">
                   <ErrorMessage errors={errors} name="dhwLowFlowSavings" />
-                </FormHelperText>
-              </FormControl>
+                </Field.HelperText>
+              </Field.Root>
             </GridData>
             <GridData>
-              <Input value="-" isDisabled textAlign="center" />
+              <Input value="-" disabled textAlign="center" />
             </GridData>
 
             {/* HRV/ERV sensible efficiency */}
@@ -768,36 +870,44 @@ export const PerformanceCharacteristics = observer(function Part3StepCodeFormPer
                 <Text>
                   <Trans i18nKey={`${i18nPrefix}.hrvErvEfficiency.label`} components={{ sup: <sup /> }} />
                 </Text>
-                <Popover placement="top-start">
-                  <PopoverTrigger>
-                    <IconButton aria-label={t(`${i18nPrefix}.hrvErvEfficiency.hint`)} icon={<Info />} variant="ghost" />
-                  </PopoverTrigger>
-                  <PopoverContent>
-                    <PopoverBody fontWeight="normal">
-                      <Trans i18nKey={`${i18nPrefix}.hrvErvEfficiency.hint`} />
-                    </PopoverBody>
-                  </PopoverContent>
-                </Popover>
+                <Popover.Root
+                  positioning={{
+                    placement: "top-start",
+                  }}
+                >
+                  <Popover.Trigger asChild>
+                    <IconButton aria-label={t(`${i18nPrefix}.hrvErvEfficiency.hint`)} variant="ghost">
+                      <Info />
+                    </IconButton>
+                  </Popover.Trigger>
+                  <Popover.Positioner>
+                    <Popover.Content>
+                      <Popover.Body fontWeight="normal">
+                        <Trans i18nKey={`${i18nPrefix}.hrvErvEfficiency.hint`} />
+                      </Popover.Body>
+                    </Popover.Content>
+                  </Popover.Positioner>
+                </Popover.Root>
               </HStack>
             </RowHeader>
             <GridData>
-              <FormControl>
+              <Field.Root>
                 <Input
                   textAlign="center"
                   {...register("sensibleRecoveryEfficiency", {
                     required: t(`${i18nPrefix}.hrvErvEfficiency.error`),
                   })}
                 />
-                <FormHelperText mb={1} mt={0} color="semantic.error">
+                <Field.HelperText mb={1} mt={0} color="semantic.error">
                   <ErrorMessage errors={errors} name="sensibleRecoveryEfficiency" />
-                </FormHelperText>
-              </FormControl>
+                </Field.HelperText>
+              </Field.Root>
             </GridData>
             <GridData>
-              <Input value="-" isDisabled textAlign="center" />
+              <Input value="-" disabled textAlign="center" />
             </GridData>
           </Grid>
-          <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
+          <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} loading={isSubmitting} />
         </Flex>
       </FormProvider>
     </>

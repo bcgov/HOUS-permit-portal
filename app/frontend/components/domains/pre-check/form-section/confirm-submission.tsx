@@ -53,9 +53,7 @@ export const ConfirmSubmission = observer(function ConfirmSubmission() {
       <Heading as="h2" size="lg" mb={6}>
         {t("preCheck.sections.confirmSubmission.title", "Review and submit")}
       </Heading>
-
       <PreCheckReviewDetails preCheck={currentPreCheck} />
-
       <Flex gap={3} mt={8}>
         {!currentPreCheck?.isSubmitted ? (
           <>
@@ -69,8 +67,8 @@ export const ConfirmSubmission = observer(function ConfirmSubmission() {
               renderTriggerButton={(props) => (
                 <Button
                   variant="primary"
-                  isLoading={isSubmitting}
-                  isDisabled={!currentPreCheck?.isReadyForSubmission || !codeComplianceEnabled}
+                  loading={isSubmitting}
+                  disabled={!currentPreCheck?.isReadyForSubmission || !codeComplianceEnabled}
                   {...props}
                 >
                   {t("preCheck.sections.confirmSubmission.submit", "Submit")}

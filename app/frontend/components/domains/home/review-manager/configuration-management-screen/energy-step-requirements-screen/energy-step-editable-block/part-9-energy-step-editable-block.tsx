@@ -1,4 +1,4 @@
-import { Box, Button, Flex, FormControl, FormLabel, IconButton, Input, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Field, Flex, IconButton, Input, Text, VStack } from "@chakra-ui/react"
 import { Pencil, Plus, X } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
@@ -138,21 +138,19 @@ export const Part9EnergyStepEditableBlock = observer(function Part9EnergyStepEdi
             <Flex gap={14} flex={1}>
               <Input type="hidden" {...register(`${fieldArrayName}.${defaultIndex}.id`)} />
               <Input type="hidden" {...register(`${fieldArrayName}.${defaultIndex}.default`)} />
-              <FormControl>
-                <FormLabel noOfLines={1}>{t(`${i18nPrefix}.stepRequired.energy.title`)}</FormLabel>
+              <Field.Root>
+                <Field.Label lineClamp={1}>{t(`${i18nPrefix}.stepRequired.energy.title`)}</Field.Label>
                 <Controller
                   control={control}
                   rules={{ required: !isCustomizing }}
                   name={`${fieldArrayName}.${defaultIndex}.energyStepRequired`}
                   render={({ field: { onChange, value } }) => {
-                    return (
-                      <EnergyStepSelect onChange={onChange} value={value} isDisabled={!isEditing || isCustomizing} />
-                    )
+                    return <EnergyStepSelect onChange={onChange} value={value} disabled={!isEditing || isCustomizing} />
                   }}
                 />
-              </FormControl>
-              <FormControl>
-                <FormLabel noOfLines={1}>{t(`${i18nPrefix}.stepRequired.zeroCarbon.title`)}</FormLabel>
+              </Field.Root>
+              <Field.Root>
+                <Field.Label lineClamp={1}>{t(`${i18nPrefix}.stepRequired.zeroCarbon.title`)}</Field.Label>
                 <Controller
                   control={control}
                   rules={{ required: !isCustomizing }}
@@ -162,13 +160,13 @@ export const Part9EnergyStepEditableBlock = observer(function Part9EnergyStepEdi
                       <ZeroCarbonStepSelect
                         onChange={onChange}
                         value={value}
-                        isDisabled={!isEditing || isCustomizing}
+                        disabled={!isEditing || isCustomizing}
                         portal
                       />
                     )
                   }}
                 />
-              </FormControl>
+              </Field.Root>
             </Flex>
             {isCustomizing && (
               <CustomMessageBox
@@ -200,24 +198,24 @@ export const Part9EnergyStepEditableBlock = observer(function Part9EnergyStepEdi
                     <Input type="hidden" name={`${fieldArrayName}.${trueIndex}.id`} value={f?.id || ""} />
                     <Flex gap={4}>
                       <Flex gap={4} flex={1}>
-                        <FormControl flex={1}>
-                          <FormLabel noOfLines={1}>{t(`${i18nPrefix}.stepRequired.energy.title`)}</FormLabel>
+                        <Field.Root flex={1}>
+                          <Field.Label lineClamp={1}>{t(`${i18nPrefix}.stepRequired.energy.title`)}</Field.Label>
                           <Controller
                             control={control}
                             rules={{ validate: (value) => value !== undefined }}
                             name={`${fieldArrayName}.${trueIndex}.energyStepRequired`}
                             render={({ field: { onChange, value } }) => {
                               return (
-                                <EnergyStepSelect onChange={onChange} value={value} isDisabled={!isEditing} allowNull />
+                                <EnergyStepSelect onChange={onChange} value={value} disabled={!isEditing} allowNull />
                               )
                             }}
                           />
-                        </FormControl>
+                        </Field.Root>
                         <Text color="text.secondary" fontStyle="italic" alignSelf="flex-end" mb={2}>
                           {t("ui.and")}
                         </Text>
-                        <FormControl flex={1}>
-                          <FormLabel noOfLines={1}>{t(`${i18nPrefix}.stepRequired.zeroCarbon.title`)}</FormLabel>
+                        <Field.Root flex={1}>
+                          <Field.Label lineClamp={1}>{t(`${i18nPrefix}.stepRequired.zeroCarbon.title`)}</Field.Label>
                           <Controller
                             control={control}
                             rules={{ validate: (value) => value !== undefined }}
@@ -227,23 +225,24 @@ export const Part9EnergyStepEditableBlock = observer(function Part9EnergyStepEdi
                                 <ZeroCarbonStepSelect
                                   onChange={onChange}
                                   value={value}
-                                  isDisabled={!isEditing}
+                                  disabled={!isEditing}
                                   allowNull
                                   portal
                                 />
                               )
                             }}
                           />
-                        </FormControl>
+                        </Field.Root>
                       </Flex>
                       {isEditing && customFields.length > 1 ? (
                         <IconButton
                           alignSelf="flex-end"
                           variant="ghost"
-                          icon={<X />}
                           onClick={() => onRemove(trueIndex, f)}
                           aria-label={"remove customization"}
-                        />
+                        >
+                          <X />
+                        </IconButton>
                       ) : (
                         <Box w={10} />
                       )}
@@ -256,17 +255,13 @@ export const Part9EnergyStepEditableBlock = observer(function Part9EnergyStepEdi
               })}
               {isEditing && (
                 <Flex w="full" justify="space-between">
-                  <Button size="sm" variant="primary" leftIcon={<Plus />} onClick={onAdd}>
+                  <Button size="sm" variant="primary" onClick={onAdd}>
+                    <Plus />
                     {t(`${i18nPrefix}.addStep`)}
                   </Button>
 
-                  <Button
-                    size="sm"
-                    variant="link"
-                    color="semantic.error"
-                    leftIcon={<X />}
-                    onClick={handleClickDeleteCustomization}
-                  >
+                  <Button size="sm" variant="plain" color="semantic.error" onClick={handleClickDeleteCustomization}>
+                    <X />
                     {t(`${i18nPrefix}.deleteCustomization`)}
                   </Button>
                 </Flex>
@@ -282,21 +277,16 @@ export const Part9EnergyStepEditableBlock = observer(function Part9EnergyStepEdi
         </Flex>
         {isEditing ? (
           <VStack alignSelf="start">
-            <Button
-              variant="primary"
-              w="full"
-              type="submit"
-              isLoading={isSubmitting}
-              isDisabled={isSubmitting || !isValid}
-            >
+            <Button variant="primary" w="full" type="submit" loading={isSubmitting} disabled={isSubmitting || !isValid}>
               {t("ui.onlySave")}
             </Button>
-            <Button variant="secondary" w="full" onClick={handleClickCancel} isDisabled={isSubmitting}>
+            <Button variant="secondary" w="full" onClick={handleClickCancel} disabled={isSubmitting}>
               {t("ui.cancel")}
             </Button>
           </VStack>
         ) : (
-          <Button alignSelf="start" variant="primary" leftIcon={<Pencil />} onClick={() => setIsEditing(true)}>
+          <Button alignSelf="start" variant="primary" onClick={() => setIsEditing(true)}>
+            <Pencil />
             {t("ui.edit")}
           </Button>
         )}

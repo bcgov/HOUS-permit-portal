@@ -1,4 +1,4 @@
-import { Button, ButtonProps, MenuItem } from "@chakra-ui/react"
+import { Button, ButtonProps } from "@chakra-ui/react"
 import React, { ReactElement, ReactNode } from "react"
 import { IRouterLinkProps, RouterLink } from "../navigation/router-link"
 

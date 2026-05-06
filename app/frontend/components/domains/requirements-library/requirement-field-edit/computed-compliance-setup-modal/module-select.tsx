@@ -1,4 +1,4 @@
-import { Box, FormControl, FormLabel } from "@chakra-ui/react"
+import { Box, Field } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -17,10 +17,10 @@ const MODULE_SELECT_ID = "compliance-module-select-id"
 export const ModuleSelect = observer(function ModuleSelect({ value, onChange, options }: IProps) {
   const { t } = useTranslation()
   return (
-    <FormControl>
-      <FormLabel id={MODULE_SELECT_LABEL_ID} htmlFor={MODULE_SELECT_ID} fontWeight="bold" size="lg">
+    <Field.Root>
+      <Field.Label id={MODULE_SELECT_LABEL_ID} htmlFor={MODULE_SELECT_ID} fontWeight="bold" size="lg">
         {t("requirementsLibrary.modals.computedComplianceSetup.module")}
-      </FormLabel>
+      </Field.Label>
       <Box px={4}>
         <Select
           isClearable
@@ -31,6 +31,6 @@ export const ModuleSelect = observer(function ModuleSelect({ value, onChange, op
           onChange={onChange}
         />
       </Box>
-    </FormControl>
+    </Field.Root>
   )
 })

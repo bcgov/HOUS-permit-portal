@@ -3,18 +3,11 @@ import {
   Button,
   ButtonGroup,
   Drawer,
-  DrawerBody,
-  DrawerCloseButton,
-  DrawerContent,
-  DrawerHeader,
-  DrawerOverlay,
   Flex,
   FlexProps,
   HStack,
   Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
+  Portal,
   Stack,
   Text,
   useDisclosure,
@@ -38,18 +31,20 @@ import { SharePreviewAccordion } from "./share-preview-popover"
 interface IProps {
   requirementTemplate: IRequirementTemplate
   isOpen?: boolean
+  open?: boolean
   onClose?: () => void
 }
 
 export const TemplateVersionsSidebar = observer(function TemplateVersionsSidebar({
   requirementTemplate,
   isOpen: externalIsOpen,
+  open: externalOpen,
   onClose: externalOnClose,
 }: IProps) {
-  const { isOpen: internalIsOpen, onOpen: internalOnOpen, onClose: internalOnClose } = useDisclosure()
+  const { open: internalIsOpen, onOpen: internalOnOpen, onClose: internalOnClose } = useDisclosure()
   const btnRef = React.useRef()
 
-  const isOpen = externalIsOpen ?? internalIsOpen
+  const isOpen = externalOpen ?? externalIsOpen ?? internalIsOpen
   const onClose = externalOnClose || internalOnClose
   const onOpen = internalOnOpen
 
@@ -60,93 +55,117 @@ export const TemplateVersionsSidebar = observer(function TemplateVersionsSidebar
           {t("requirementTemplate.versionSidebar.triggerButton")}
         </Button>
       )}
-      <Drawer isOpen={isOpen} placement="right" onClose={onClose} finalFocusRef={btnRef}>
-        <DrawerOverlay />
-        <DrawerContent maxW="644px" pt="var(--app-navbar-height)">
-          <DrawerCloseButton />
-          <DrawerHeader mt={4} px={8} borderBottom="1px solid" borderColor={"border.light"}>
-            <Text as="h2" fontWeight={700} fontSize={"2xl"}>
-              {t("requirementTemplate.versionSidebar.title")}
-            </Text>
-            <Text
-              fontSize={"md"}
-              fontWeight={700}
-              mt={2}
-            >{`${t("requirementTemplate.versionSidebar.subtitlePrefix")} ${requirementTemplate.displayLabel}`}</Text>
-          </DrawerHeader>
-
-          <DrawerBody py={10} px={8}>
-            <Stack spacing={10}>
-              <Box w="full">
-                <VersionsList
-                  type={ETemplateVersionStatus.published}
-                  templateVersions={
-                    requirementTemplate.publishedTemplateVersion ? [requirementTemplate.publishedTemplateVersion] : []
-                  }
-                />
-              </Box>
-              {!requirementTemplate.isDiscarded && (
-                <Box>
-                  <Text as="h3" fontSize={"xl"} fontWeight={700} mb={2}>
-                    {t("requirementTemplate.versionSidebar.listTitles.templateBuilder")}
-                  </Text>
-
-                  <VersionCard
-                    viewRoute={`/requirement-templates/${requirementTemplate.id}/edit`}
-                    status={"builder"}
-                    updatedAt={requirementTemplate.updatedAt}
-                  />
-                </Box>
-              )}
-              {requirementTemplate.draftTemplateVersion && (
-                <Box>
-                  <Text as="h3" fontSize={"xl"} fontWeight={700} mb={2}>
-                    {t("requirementTemplate.versionSidebar.listTitles.draft")}
-                  </Text>
-
-                  <Box border="1px solid" borderColor="border.light" borderRadius="sm" overflow="hidden">
-                    <VersionCard
-                      viewRoute={`/template-versions/${requirementTemplate.draftTemplateVersion.id}`}
-                      status={ETemplateVersionStatus.draft}
-                      updatedAt={requirementTemplate.draftTemplateVersion.updatedAt}
-                      borderRadius="none"
-                      border="none"
+      <Drawer.Root
+        open={isOpen}
+        placement="end"
+        finalFocusEl={() => btnRef.current}
+        onOpenChange={(e) => {
+          if (!e.open) {
+            onClose()
+          }
+        }}
+      >
+        <Portal>
+          <Drawer.Backdrop />
+          <Drawer.Positioner>
+            <Drawer.Content maxW="644px" pt="var(--app-navbar-height)">
+              <Drawer.CloseTrigger />
+              <Drawer.Header mt={4} px={8} borderBottom="1px solid" borderColor={"border.light"}>
+                <Text as="h2" fontWeight={700} fontSize={"2xl"}>
+                  {t("requirementTemplate.versionSidebar.title")}
+                </Text>
+                <Text
+                  fontSize={"md"}
+                  fontWeight={700}
+                  mt={2}
+                >{`${t("requirementTemplate.versionSidebar.subtitlePrefix")} ${requirementTemplate.displayLabel}`}</Text>
+              </Drawer.Header>
+              <Drawer.Body py={10} px={8}>
+                <Stack gap={10}>
+                  <Box w="full">
+                    <VersionsList
+                      type={ETemplateVersionStatus.published}
+                      templateVersions={
+                        requirementTemplate.publishedTemplateVersion
+                          ? [requirementTemplate.publishedTemplateVersion]
+                          : []
+                      }
                     />
-                    <SharePreviewAccordion draftTemplateVersion={requirementTemplate.draftTemplateVersion} />
                   </Box>
-                </Box>
-              )}
+                  {!requirementTemplate.isDiscarded && (
+                    <Box>
+                      <Text as="h3" fontSize={"xl"} fontWeight={700} mb={2}>
+                        {t("requirementTemplate.versionSidebar.listTitles.templateBuilder")}
+                      </Text>
 
-              <VersionsList
-                type={ETemplateVersionStatus.scheduled}
-                templateVersions={requirementTemplate.scheduledTemplateVersions}
-                onUnschedule={requirementTemplate.unscheduleTemplateVersion}
-              />
+                      <VersionCard
+                        viewRoute={`/requirement-templates/${requirementTemplate.id}/edit`}
+                        status={"builder"}
+                        updatedAt={requirementTemplate.updatedAt}
+                      />
+                    </Box>
+                  )}
+                  {requirementTemplate.draftTemplateVersion && (
+                    <Box>
+                      <Text as="h3" fontSize={"xl"} fontWeight={700} mb={2}>
+                        {t("requirementTemplate.versionSidebar.listTitles.draft")}
+                      </Text>
 
-              <VersionsList
-                type={ETemplateVersionStatus.deprecated}
-                templateVersions={requirementTemplate.lastThreeDeprecatedTemplateVersions}
-              />
-              {requirementTemplate.publishedTemplateVersion && (
-                <Menu>
-                  <MenuButton as={Button} aria-label="Options" variant="secondary" rightIcon={<Export />} px={2}>
-                    {t("ui.export")}
-                  </MenuButton>
+                      <Box border="1px solid" borderColor="border.light" borderRadius="sm" overflow="hidden">
+                        <VersionCard
+                          viewRoute={`/template-versions/${requirementTemplate.draftTemplateVersion.id}`}
+                          status={ETemplateVersionStatus.draft}
+                          updatedAt={requirementTemplate.draftTemplateVersion.updatedAt}
+                          borderRadius="none"
+                          border="none"
+                        />
+                        <SharePreviewAccordion draftTemplateVersion={requirementTemplate.draftTemplateVersion} />
+                      </Box>
+                    </Box>
+                  )}
 
-                  <MenuList>
-                    <MenuItem onClick={requirementTemplate.publishedTemplateVersion.downloadRequirementSummary}>
-                      <HStack spacing={2} fontSize={"sm"}>
-                        <FileCsv size={24} />
-                        <Text as={"span"}>{t("requirementTemplate.export.downloadSummaryCsv")}</Text>
-                      </HStack>
-                    </MenuItem>
-                  </MenuList>
-                </Menu>
-              )}
-            </Stack>
-          </DrawerBody>
-        </DrawerContent>
-      </Drawer>
+                  <VersionsList
+                    type={ETemplateVersionStatus.scheduled}
+                    templateVersions={requirementTemplate.scheduledTemplateVersions}
+                    onUnschedule={requirementTemplate.unscheduleTemplateVersion}
+                  />
+
+                  <VersionsList
+                    type={ETemplateVersionStatus.deprecated}
+                    templateVersions={requirementTemplate.lastThreeDeprecatedTemplateVersions}
+                  />
+                  {requirementTemplate.publishedTemplateVersion && (
+                    <Menu.Root>
+                      <Menu.Trigger asChild>
+                        <Button aria-label="Options" variant="secondary" px={2}>
+                          {t("ui.export")}
+                          <Export />
+                        </Button>
+                      </Menu.Trigger>
+
+                      <Portal>
+                        <Menu.Positioner>
+                          <Menu.Content>
+                            <Menu.Item
+                              onSelect={requirementTemplate.publishedTemplateVersion.downloadRequirementSummary}
+                              value="item-0"
+                            >
+                              <HStack gap={2} fontSize={"sm"}>
+                                <FileCsv size={24} />
+                                <Text as={"span"}>{t("requirementTemplate.export.downloadSummaryCsv")}</Text>
+                              </HStack>
+                            </Menu.Item>
+                          </Menu.Content>
+                        </Menu.Positioner>
+                      </Portal>
+                    </Menu.Root>
+                  )}
+                </Stack>
+              </Drawer.Body>
+            </Drawer.Content>
+          </Drawer.Positioner>
+        </Portal>
+      </Drawer.Root>
     </>
   )
 })
@@ -215,27 +234,30 @@ const VersionCard = observer(function VersionCard({
   const renderTemplateButton = () => {
     if (status === ETemplateVersionStatus.published || status === ETemplateVersionStatus.deprecated) {
       return (
-        <Button as={RouterLink} to={viewRoute} variant={"primary"} size="sm">
-          {t("requirementTemplate.versionSidebar.viewTemplateButton")}
+        <Button variant={"primary"} size="sm" asChild>
+          <RouterLink to={viewRoute}>{t("requirementTemplate.versionSidebar.viewTemplateButton")}</RouterLink>
         </Button>
       )
     } else if (status === "builder") {
       return (
-        <Button as={RouterLink} to={viewRoute} variant={"primary"} size="sm" leftIcon={<Pencil />}>
-          {t("translation:requirementTemplate.versionSidebar.openBuilderButton")}
+        <Button variant={"primary"} size="sm" asChild>
+          <RouterLink to={viewRoute}>
+            <Pencil />
+            {t("translation:requirementTemplate.versionSidebar.openBuilderButton")}
+          </RouterLink>
         </Button>
       )
     } else if (status === ETemplateVersionStatus.draft) {
       return (
-        <Button as={RouterLink} to={viewRoute} variant={"primary"} size="sm">
-          {t("requirementTemplate.versionSidebar.viewDraftButton")}
+        <Button variant={"primary"} size="sm" asChild>
+          <RouterLink to={viewRoute}>{t("requirementTemplate.versionSidebar.viewDraftButton")}</RouterLink>
         </Button>
       )
     } else {
       return (
-        <ButtonGroup spacing={4}>
-          <Button as={RouterLink} to={viewRoute} variant={"primary"} size="sm">
-            {t("ui.preview")}
+        <ButtonGroup gap={4}>
+          <Button variant={"primary"} size="sm" asChild>
+            <RouterLink to={viewRoute}>{t("ui.preview")}</RouterLink>
           </Button>
           <RemoveConfirmationModal
             title={t("requirementTemplate.versionSidebar.unscheduleWarning.title")}
@@ -264,7 +286,7 @@ const VersionCard = observer(function VersionCard({
       justifyContent={"space-between"}
       {...containerProps}
     >
-      <HStack spacing={16}>
+      <HStack gap={16}>
         <TemplateStatusTag
           status={status}
           scheduledFor={status === ETemplateVersionStatus.scheduled && versionDate ? versionDate : undefined}

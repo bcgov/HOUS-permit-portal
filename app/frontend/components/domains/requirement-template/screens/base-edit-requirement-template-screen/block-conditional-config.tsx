@@ -1,4 +1,4 @@
-import { Box, Button, Collapse, Flex, FormLabel, HStack, IconButton, Text, useDisclosure } from "@chakra-ui/react"
+import { Box, Button, Collapsible, Field, Flex, HStack, IconButton, Text, useDisclosure } from "@chakra-ui/react"
 import { SlidersHorizontal, Trash } from "@phosphor-icons/react"
 import { format, parse } from "date-fns"
 import { observer } from "mobx-react-lite"
@@ -77,7 +77,7 @@ export const BlockConditionalConfig = observer(function BlockConditionalConfig({
   const { t } = useTranslation()
   const { requirementBlockStore } = useMst()
   const { watch, setValue } = useFormContext<IRequirementTemplateForm>()
-  const { isOpen, onToggle, onOpen } = useDisclosure()
+  const { open, onToggle, onOpen } = useDisclosure()
 
   const basePath =
     `requirementTemplateSectionsAttributes.${sectionIndex}.templateSectionBlocksAttributes.${blockIndex}` as const
@@ -240,7 +240,7 @@ export const BlockConditionalConfig = observer(function BlockConditionalConfig({
     conditional?.operator &&
     (isValueless || conditional?.eq)
 
-  if (hasConditional && !isOpen) {
+  if (hasConditional && !open) {
     const blockName = selectedBlock?.displayName || selectedBlock?.name || ""
     const fieldLabel = selectedRequirement?.label || conditional.whenRequirementCode
     const effect = conditional.show
@@ -254,7 +254,7 @@ export const BlockConditionalConfig = observer(function BlockConditionalConfig({
         px={4}
         py={2}
         borderRadius="md"
-        spacing={3}
+        gap={3}
         cursor="pointer"
         onClick={onOpen}
         role="button"
@@ -272,7 +272,6 @@ export const BlockConditionalConfig = observer(function BlockConditionalConfig({
         </Text>
         <IconButton
           aria-label={t("requirementTemplate.edit.blockConditional.removeConditional")}
-          icon={<Trash size={14} />}
           size="xs"
           variant="ghost"
           color="error"
@@ -280,152 +279,151 @@ export const BlockConditionalConfig = observer(function BlockConditionalConfig({
             e.stopPropagation()
             handleRemove()
           }}
-        />
+        >
+          <Trash size={14} />
+        </IconButton>
       </HStack>
     )
   }
 
   return (
     <Box>
-      {!isOpen && !hasConditional && (
-        <Button
-          variant="link"
-          size="xs"
-          leftIcon={<SlidersHorizontal size={12} />}
-          color="text.link"
-          onClick={onToggle}
-        >
+      {!open && !hasConditional && (
+        <Button variant="plain" size="xs" color="text.link" onClick={onToggle}>
+          <SlidersHorizontal size={12} />
           {t("requirementTemplate.edit.blockConditional.addConditional")}
         </Button>
       )}
-      <Collapse in={isOpen} animateOpacity>
-        <Box border="1px solid" borderColor="border.light" borderRadius="md" p={4} mt={1} bg="greys.grey03">
-          <Flex direction="column" gap={3}>
-            <Flex direction="column" gap={1}>
-              <FormLabel fontSize="xs" fontWeight="bold" mb={0}>
-                {t("requirementTemplate.edit.blockConditional.whenBlock")}
-              </FormLabel>
-              <Select
-                options={blockOptions}
-                value={blockOptions.find((o) => o.value === conditional?.whenBlockId) || null}
-                onChange={handleBlockChange}
-                placeholder={t("requirementTemplate.edit.blockConditional.selectBlock")}
-                menuPortalTarget={document.body}
-                styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
-              />
-            </Flex>
-
-            {conditional?.whenBlockId && (
+      <Collapsible.Root open={open}>
+        <Collapsible.Content>
+          <Box border="1px solid" borderColor="border.light" borderRadius="md" p={4} mt={1} bg="greys.grey03">
+            <Flex direction="column" gap={3}>
               <Flex direction="column" gap={1}>
-                <FormLabel fontSize="xs" fontWeight="bold" mb={0}>
-                  {t("requirementTemplate.edit.blockConditional.whenField")}
-                </FormLabel>
+                <Field.Label fontSize="xs" fontWeight="bold" mb={0}>
+                  {t("requirementTemplate.edit.blockConditional.whenBlock")}
+                </Field.Label>
                 <Select
-                  options={fieldOptions}
-                  value={fieldOptions.find((o) => o.value === conditional?.whenRequirementCode) || null}
-                  onChange={handleFieldChange}
-                  placeholder={t("requirementTemplate.edit.blockConditional.selectField")}
+                  options={blockOptions}
+                  value={blockOptions.find((o) => o.value === conditional?.whenBlockId) || null}
+                  onChange={handleBlockChange}
+                  placeholder={t("requirementTemplate.edit.blockConditional.selectBlock")}
                   menuPortalTarget={document.body}
                   styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
                 />
               </Flex>
-            )}
 
-            {conditional?.whenRequirementCode && (
-              <Flex direction="column" gap={1}>
-                <FormLabel fontSize="xs" fontWeight="bold" mb={0}>
-                  {t("requirementTemplate.edit.blockConditional.operator")}
-                </FormLabel>
-                <Select
-                  options={operatorOptions}
-                  value={operatorOptions.find((o) => o.value === currentOperator) || operatorOptions[0]}
-                  onChange={handleOperatorChange}
-                  placeholder={t("requirementTemplate.edit.blockConditional.selectOperator")}
-                  menuPortalTarget={document.body}
-                  styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
-                />
-              </Flex>
-            )}
-
-            {conditional?.whenRequirementCode && !isValueless && (
-              <Flex direction="column" gap={1}>
-                <FormLabel fontSize="xs" fontWeight="bold" mb={0}>
-                  {t("requirementTemplate.edit.blockConditional.value")}
-                </FormLabel>
-                {isOptionType ? (
+              {conditional?.whenBlockId && (
+                <Flex direction="column" gap={1}>
+                  <Field.Label fontSize="xs" fontWeight="bold" mb={0}>
+                    {t("requirementTemplate.edit.blockConditional.whenField")}
+                  </Field.Label>
                   <Select
-                    options={valueOptions}
-                    value={valueOptions.find((o) => o.value === conditional?.eq) || null}
-                    onChange={(opt) => handleValueChange(opt?.value || "")}
-                    placeholder={t("requirementTemplate.edit.blockConditional.selectValue")}
+                    options={fieldOptions}
+                    value={fieldOptions.find((o) => o.value === conditional?.whenRequirementCode) || null}
+                    onChange={handleFieldChange}
+                    placeholder={t("requirementTemplate.edit.blockConditional.selectField")}
                     menuPortalTarget={document.body}
                     styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
                   />
-                ) : selectedRequirement?.inputType === ERequirementType.date ? (
-                  <DatePicker
-                    selected={conditional?.eq ? parse(conditional.eq, datefnsAppDateFormat, new Date()) : null}
-                    onChange={(date: Date) => handleValueChange(date ? format(date, datefnsAppDateFormat) : "")}
-                    containerProps={{
-                      w: "full",
-                      sx: {
-                        ".react-datepicker-wrapper": { w: "full" },
-                        ".react-datepicker__input-container": { w: "full" },
-                      },
-                    }}
-                  />
-                ) : (
-                  <input
-                    type={selectedRequirement?.inputType === ERequirementType.number ? "number" : "text"}
-                    value={conditional?.eq || ""}
-                    onChange={(e) => handleValueChange(e.target.value)}
-                    style={{
-                      padding: "6px 10px",
-                      borderRadius: "4px",
-                      border: "1px solid #ccc",
-                      fontSize: "14px",
-                      width: "100%",
-                    }}
-                  />
-                )}
-              </Flex>
-            )}
-
-            {conditional?.whenRequirementCode && (
-              <Flex direction="column" gap={1}>
-                <FormLabel fontSize="xs" fontWeight="bold" mb={0}>
-                  {t("requirementTemplate.edit.blockConditional.then")}
-                </FormLabel>
-                <Select
-                  options={effectOptions}
-                  value={effectOptions.find((o) => o.value === currentEffect) || effectOptions[0]}
-                  onChange={handleEffectChange}
-                  menuPortalTarget={document.body}
-                  styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
-                />
-              </Flex>
-            )}
-
-            <HStack justifyContent="flex-end" pt={1}>
-              <Button
-                size="xs"
-                variant="ghost"
-                color="error"
-                onClick={() => {
-                  handleRemove()
-                  onToggle()
-                }}
-              >
-                {hasConditional ? t("requirementTemplate.edit.blockConditional.removeConditional") : t("ui.cancel")}
-              </Button>
-              {hasConditional && (
-                <Button size="xs" variant="primary" onClick={onToggle}>
-                  {t("ui.done")}
-                </Button>
+                </Flex>
               )}
-            </HStack>
-          </Flex>
-        </Box>
-      </Collapse>
+
+              {conditional?.whenRequirementCode && (
+                <Flex direction="column" gap={1}>
+                  <Field.Label fontSize="xs" fontWeight="bold" mb={0}>
+                    {t("requirementTemplate.edit.blockConditional.operator")}
+                  </Field.Label>
+                  <Select
+                    options={operatorOptions}
+                    value={operatorOptions.find((o) => o.value === currentOperator) || operatorOptions[0]}
+                    onChange={handleOperatorChange}
+                    placeholder={t("requirementTemplate.edit.blockConditional.selectOperator")}
+                    menuPortalTarget={document.body}
+                    styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+                  />
+                </Flex>
+              )}
+
+              {conditional?.whenRequirementCode && !isValueless && (
+                <Flex direction="column" gap={1}>
+                  <Field.Label fontSize="xs" fontWeight="bold" mb={0}>
+                    {t("requirementTemplate.edit.blockConditional.value")}
+                  </Field.Label>
+                  {isOptionType ? (
+                    <Select
+                      options={valueOptions}
+                      value={valueOptions.find((o) => o.value === conditional?.eq) || null}
+                      onChange={(opt) => handleValueChange(opt?.value || "")}
+                      placeholder={t("requirementTemplate.edit.blockConditional.selectValue")}
+                      menuPortalTarget={document.body}
+                      styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+                    />
+                  ) : selectedRequirement?.inputType === ERequirementType.date ? (
+                    <DatePicker
+                      selected={conditional?.eq ? parse(conditional.eq, datefnsAppDateFormat, new Date()) : null}
+                      onChange={(date: Date) => handleValueChange(date ? format(date, datefnsAppDateFormat) : "")}
+                      containerProps={{
+                        w: "full",
+                        sx: {
+                          ".react-datepicker-wrapper": { w: "full" },
+                          ".react-datepicker__input-container": { w: "full" },
+                        },
+                      }}
+                    />
+                  ) : (
+                    <input
+                      type={selectedRequirement?.inputType === ERequirementType.number ? "number" : "text"}
+                      value={conditional?.eq || ""}
+                      onChange={(e) => handleValueChange(e.target.value)}
+                      style={{
+                        padding: "6px 10px",
+                        borderRadius: "4px",
+                        border: "1px solid #ccc",
+                        fontSize: "14px",
+                        width: "100%",
+                      }}
+                    />
+                  )}
+                </Flex>
+              )}
+
+              {conditional?.whenRequirementCode && (
+                <Flex direction="column" gap={1}>
+                  <Field.Label fontSize="xs" fontWeight="bold" mb={0}>
+                    {t("requirementTemplate.edit.blockConditional.then")}
+                  </Field.Label>
+                  <Select
+                    options={effectOptions}
+                    value={effectOptions.find((o) => o.value === currentEffect) || effectOptions[0]}
+                    onChange={handleEffectChange}
+                    menuPortalTarget={document.body}
+                    styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+                  />
+                </Flex>
+              )}
+
+              <HStack justifyContent="flex-end" pt={1}>
+                <Button
+                  size="xs"
+                  variant="ghost"
+                  color="error"
+                  onClick={() => {
+                    handleRemove()
+                    onToggle()
+                  }}
+                >
+                  {hasConditional ? t("requirementTemplate.edit.blockConditional.removeConditional") : t("ui.cancel")}
+                </Button>
+                {hasConditional && (
+                  <Button size="xs" variant="primary" onClick={onToggle}>
+                    {t("ui.done")}
+                  </Button>
+                )}
+              </HStack>
+            </Flex>
+          </Box>
+        </Collapsible.Content>
+      </Collapsible.Root>
     </Box>
   )
 })

@@ -1,4 +1,5 @@
-import { Flex, FlexProps, Radio, RadioGroup, Stack, Text } from "@chakra-ui/react"
+import { Radio, RadioGroup } from "@/components/ui/radio"
+import { Flex, Stack, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { Controller, useFormContext } from "react-hook-form"
@@ -45,8 +46,8 @@ export const AsyncRadioGroup = observer(
             rules={{ required: true }}
             render={({ field: { onChange, value } }) => {
               return (
-                <RadioGroup
-                  onChange={onChange}
+                <RadioGroup.Root
+                  onValueChange={onChange}
                   value={value}
                   bg="greys.grey03"
                   flex={1}
@@ -65,7 +66,7 @@ export const AsyncRadioGroup = observer(
                       )
                     })}
                   </Stack>
-                </RadioGroup>
+                </RadioGroup.Root>
               )
             }}
           />

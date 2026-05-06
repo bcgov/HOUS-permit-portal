@@ -1,4 +1,4 @@
-import { Flex, TabPanel, TabPanels, Tabs } from "@chakra-ui/react"
+import { Flex, Tabs } from "@chakra-ui/react"
 import { Buildings, ClipboardText, ListMagnifyingGlass, Thermometer } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useTransition } from "react"
@@ -64,24 +64,32 @@ export const ProjectDashboardScreen = observer(({}: IProjectDashboardScreenProps
 
   return (
     <Flex as="main" direction="row" w="full" flexGrow={1}>
-      <Tabs
+      <Tabs.Root
         w="full"
         flexGrow={1}
-        index={getTabIndex()}
-        onChange={handleTabChange}
+        value={String(getTabIndex())}
+        onValueChange={({ value }) => handleTabChange(Number(value))}
         display="flex"
-        isLazy
+        lazyMount
         variant="sidebar"
       >
         <ProjectSidebarTabList p={0} tabsData={TABS_DATA} />
-        <TabPanels>
-          <TabPanel p={0}>{isPending ? <LoadingScreen /> : <ProjectTabPanelContent />}</TabPanel>
-          <TabPanel p={0}>{isPending ? <LoadingScreen /> : <StepCodeTabPanelContent />}</TabPanel>
-          <TabPanel p={0}>{isPending ? <LoadingScreen /> : <PreCheckTabPanelContent />}</TabPanel>
-          <TabPanel p={0}>{isPending ? <LoadingScreen /> : <OverheatingCodeTabPanelContent />}</TabPanel>
-          {/* <TabPanel p={0}>{isPending ? <LoadingScreen /> : <ComingSoonPlaceholder />}</TabPanel> */}
-        </TabPanels>
-      </Tabs>
+        <Tabs.ContentGroup>
+          <Tabs.Content value="0" p={0}>
+            {isPending ? <LoadingScreen /> : <ProjectTabPanelContent />}
+          </Tabs.Content>
+          <Tabs.Content value="1" p={0}>
+            {isPending ? <LoadingScreen /> : <StepCodeTabPanelContent />}
+          </Tabs.Content>
+          <Tabs.Content value="2" p={0}>
+            {isPending ? <LoadingScreen /> : <PreCheckTabPanelContent />}
+          </Tabs.Content>
+          <Tabs.Content value="3" p={0}>
+            {isPending ? <LoadingScreen /> : <OverheatingCodeTabPanelContent />}
+          </Tabs.Content>
+          {/* <Tabs.Content value="4" p={0}>{isPending ? <LoadingScreen /> : <ComingSoonPlaceholder />}</Tabs.Content> */}
+        </Tabs.ContentGroup>
+      </Tabs.Root>
     </Flex>
   )
 })

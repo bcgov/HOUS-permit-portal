@@ -1,18 +1,4 @@
-import {
-  Accordion,
-  AccordionButton,
-  AccordionIcon,
-  AccordionItem,
-  AccordionPanel,
-  Box,
-  Center,
-  Flex,
-  Grid,
-  GridItem,
-  Heading,
-  Tag,
-  Text,
-} from "@chakra-ui/react"
+import { Accordion, Box, Center, Flex, Grid, GridItem, Heading, Tag, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -73,56 +59,62 @@ const OccupancyAccordionItem = observer(
     const pathways = getDisplayPathways(occupancy, jurisdiction)
 
     return (
-      <AccordionItem borderWidth={1} borderColor="border.light" rounded="sm" minW="30%">
-        <AccordionButton bg="greys.grey03" fontWeight="bold">
+      <Accordion.Item borderWidth={1} borderColor="border.light" rounded="sm" minW="30%" value="item-0">
+        <Accordion.ItemTrigger bg="greys.grey03" fontWeight="bold">
           <Box flex="1" textAlign="left">
             {occupancy.name}
           </Box>
-          <AccordionIcon />
-        </AccordionButton>
-        <AccordionPanel pb={4}>
-          <Grid templateColumns="2fr 1fr 2fr" gap={4} w="full" color="text.secondary">
-            <GridItem textAlign="center" textTransform="uppercase" fontSize="xs">
-              {t("jurisdiction.edit.stepCode.energyStepRequired")}
-            </GridItem>
-            <GridItem textAlign="center" />
-            <GridItem textAlign="center" textTransform="uppercase" fontSize="xs">
-              {t("jurisdiction.edit.stepCode.zeroCarbonStepRequired")}
-            </GridItem>
-            {pathways.map((pw, i) => (
-              <React.Fragment key={i}>
-                <GridItem as={Center}>
-                  <Tag bg="semantic.successLight" color="inherit" rounded="xs" fontWeight="bold">
-                    {pw.energyStep}
-                  </Tag>
-                </GridItem>
-                <GridItem as={Center} fontStyle="italic" fontWeight="bold" fontSize="sm" px={4} mx="auto">
-                  {t("ui.and")}
-                </GridItem>
-                <GridItem as={Center}>
-                  <Tag bg="semantic.successLight" color="inherit" rounded="xs" fontWeight="bold">
-                    {pw.zeroCarbonLevel}
-                  </Tag>
-                </GridItem>
-                {i !== pathways.length - 1 && (
-                  <GridItem
-                    colSpan={3}
-                    textTransform="uppercase"
-                    bg="theme.blueLight"
-                    fontStyle="italic"
-                    color="text.link"
-                    fontSize="sm"
-                    px={2}
-                    py={1}
-                  >
-                    {t("ui.or")}
+          <Accordion.ItemIndicator />
+        </Accordion.ItemTrigger>
+        <Accordion.ItemContent pb={4}>
+          <Accordion.ItemBody>
+            <Grid templateColumns="2fr 1fr 2fr" gap={4} w="full" color="text.secondary">
+              <GridItem textAlign="center" textTransform="uppercase" fontSize="xs">
+                {t("jurisdiction.edit.stepCode.energyStepRequired")}
+              </GridItem>
+              <GridItem textAlign="center" />
+              <GridItem textAlign="center" textTransform="uppercase" fontSize="xs">
+                {t("jurisdiction.edit.stepCode.zeroCarbonStepRequired")}
+              </GridItem>
+              {pathways.map((pw, i) => (
+                <React.Fragment key={i}>
+                  <GridItem asChild>
+                    <Center>
+                      <Tag.Root bg="semantic.successLight" color="inherit" rounded="xs" fontWeight="bold">
+                        {pw.energyStep}
+                      </Tag.Root>
+                    </Center>
                   </GridItem>
-                )}
-              </React.Fragment>
-            ))}
-          </Grid>
-        </AccordionPanel>
-      </AccordionItem>
+                  <GridItem fontStyle="italic" fontWeight="bold" fontSize="sm" px={4} mx="auto" asChild>
+                    <Center>{t("ui.and")}</Center>
+                  </GridItem>
+                  <GridItem asChild>
+                    <Center>
+                      <Tag.Root bg="semantic.successLight" color="inherit" rounded="xs" fontWeight="bold">
+                        {pw.zeroCarbonLevel}
+                      </Tag.Root>
+                    </Center>
+                  </GridItem>
+                  {i !== pathways.length - 1 && (
+                    <GridItem
+                      colSpan={3}
+                      textTransform="uppercase"
+                      bg="theme.blueLight"
+                      fontStyle="italic"
+                      color="text.link"
+                      fontSize="sm"
+                      px={2}
+                      py={1}
+                    >
+                      {t("ui.or")}
+                    </GridItem>
+                  )}
+                </React.Fragment>
+              ))}
+            </Grid>
+          </Accordion.ItemBody>
+        </Accordion.ItemContent>
+      </Accordion.Item>
     )
   }
 )
@@ -149,11 +141,11 @@ const OccupancyGroupSection = observer(
             {group.classificationDescription}
           </Text>
         )}
-        <Accordion allowToggle>
+        <Accordion.Root collapsible>
           {group.occupancies.map((occ) => (
             <OccupancyAccordionItem key={occ.key} occupancy={occ} jurisdiction={jurisdiction} />
           ))}
-        </Accordion>
+        </Accordion.Root>
       </Flex>
     )
   }

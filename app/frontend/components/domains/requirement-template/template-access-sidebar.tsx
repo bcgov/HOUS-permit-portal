@@ -1,17 +1,4 @@
-import {
-  Box,
-  Divider,
-  Drawer,
-  DrawerBody,
-  DrawerCloseButton,
-  DrawerContent,
-  DrawerHeader,
-  DrawerOverlay,
-  Flex,
-  Heading,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { Box, Drawer, Flex, Heading, Portal, Separator, Text, VStack } from "@chakra-ui/react"
 import { Buildings, Globe } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -22,13 +9,15 @@ import { JurisdictionAccessSelect } from "../../shared/jurisdiction/jurisdiction
 
 interface TemplateAccessSidebarProps {
   requirementTemplate: IRequirementTemplate
-  isOpen: boolean
+  isOpen?: boolean
+  open?: boolean
   onClose: () => void
 }
 
 export const TemplateAccessSidebar = observer(function TemplateAccessSidebar({
   requirementTemplate,
   isOpen,
+  open,
   onClose,
 }: TemplateAccessSidebarProps) {
   const { t } = useTranslation()
@@ -86,70 +75,39 @@ export const TemplateAccessSidebar = observer(function TemplateAccessSidebar({
   const availabilityStatus = getAvailabilityStatus()
 
   return (
-    <Drawer isOpen={isOpen} placement="right" onClose={onClose} size="md">
-      <DrawerOverlay />
-      <DrawerContent pt="var(--app-navbar-height)">
-        <DrawerCloseButton />
-        <DrawerHeader borderBottomWidth="1px">
-          <VStack align="start" spacing={1}>
-            <Heading as="h2" size="md">
-              {t("requirementTemplate.access.title", "Manage access")}
-            </Heading>
-            <Text fontSize="sm" color="text.secondary" fontWeight="normal">
-              {t("requirementTemplate.access.subtitle", "Control which jurisdictions can use this permit template:")}
-              <br />
-              {requirementTemplate.displayLabel}
-            </Text>
-          </VStack>
-        </DrawerHeader>
-
-        <DrawerBody py={6}>
-          <VStack spacing={6} align="stretch">
-            {/* Availability Section */}
-            <Box>
-              <Heading as="h3" size="sm" mb={4} color="text.secondary" textTransform="uppercase" letterSpacing="wide">
-                {t("requirementTemplate.access.availability", "Availability")}
-              </Heading>
-
-              {/* Status Banner - always blue/info */}
-              <Box
-                p={4}
-                mb={4}
-                bg="semantic.infoLight"
-                borderRadius="md"
-                borderLeft="4px solid"
-                borderLeftColor="semantic.info"
-              >
-                <Flex align="center" gap={2} mb={1}>
-                  <Globe size={16} weight={requirementTemplate.availableGlobally ? "fill" : "regular"} />
-                  <Text fontWeight="semibold">{availabilityStatus.title}</Text>
-                </Flex>
-                <Text fontSize="sm" color="text.secondary">
-                  {availabilityStatus.description}
+    <Drawer.Root
+      open={open ?? isOpen ?? false}
+      placement="end"
+      size="md"
+      onOpenChange={(e) => {
+        if (!e.open) {
+          onClose()
+        }
+      }}
+    >
+      <Portal>
+        <Drawer.Backdrop />
+        <Drawer.Positioner>
+          <Drawer.Content pt="var(--app-navbar-height)">
+            <Drawer.CloseTrigger />
+            <Drawer.Header borderBottomWidth="1px">
+              <VStack align="start" gap={1}>
+                <Heading as="h2" size="md">
+                  {t("requirementTemplate.access.title", "Manage access")}
+                </Heading>
+                <Text fontSize="sm" color="text.secondary" fontWeight="normal">
+                  {t(
+                    "requirementTemplate.access.subtitle",
+                    "Control which jurisdictions can use this permit template:"
+                  )}
+                  <br />
+                  {requirementTemplate.displayLabel}
                 </Text>
-              </Box>
-
-              <JurisdictionAccessSelect
-                title={t("requirementTemplate.access.jurisdictionAccess", "Jurisdiction access")}
-                description={t(
-                  "requirementTemplate.access.description",
-                  "Control which jurisdictions can use this template."
-                )}
-                value={currentOptions}
-                enabledForAll={requirementTemplate.availableGlobally ?? false}
-                onChange={handleChange}
-                onSave={handleSave}
-                onToggleEnabledForAll={handleToggleAvailableGlobally}
-                enableForAllLabel={t("requirementTemplate.access.enableForAll", "Available to all jurisdictions")}
-                defaultOpen
-                mb={0}
-              />
-            </Box>
-
-            {/* Jurisdiction Overrides Section - only show if there are disabled jurisdictions */}
-            {disabledJurisdictions.length > 0 && (
-              <>
-                <Divider />
+              </VStack>
+            </Drawer.Header>
+            <Drawer.Body py={6}>
+              <VStack gap={6} align="stretch">
+                {/* Availability Section */}
                 <Box>
                   <Heading
                     as="h3"
@@ -159,58 +117,121 @@ export const TemplateAccessSidebar = observer(function TemplateAccessSidebar({
                     textTransform="uppercase"
                     letterSpacing="wide"
                   >
-                    {t("requirementTemplate.access.jurisdictionOverrides", "Jurisdiction overrides")}
+                    {t("requirementTemplate.access.availability", "Availability")}
                   </Heading>
 
-                  <Box>
-                    <Text fontWeight="semibold" fontSize="sm" mb={2}>
-                      {t("requirementTemplate.access.disabledBy", "Permit disabled by:")}
+                  {/* Status Banner - always blue/info */}
+                  <Box
+                    p={4}
+                    mb={4}
+                    bg="semantic.infoLight"
+                    borderRadius="md"
+                    borderLeft="4px solid"
+                    borderLeftColor="semantic.info"
+                  >
+                    <Flex align="center" gap={2} mb={1}>
+                      <Globe size={16} weight={requirementTemplate.availableGlobally ? "fill" : "regular"} />
+                      <Text fontWeight="semibold">{availabilityStatus.title}</Text>
+                    </Flex>
+                    <Text fontSize="sm" color="text.secondary">
+                      {availabilityStatus.description}
                     </Text>
-                    <VStack align="start" spacing={1}>
-                      {disabledJurisdictions.map((jurisdiction) => (
-                        <Text key={jurisdiction.id} fontSize="sm" color="text.secondary">
-                          {jurisdiction.qualifiedName}
-                        </Text>
-                      ))}
-                    </VStack>
                   </Box>
+
+                  <JurisdictionAccessSelect
+                    title={t("requirementTemplate.access.jurisdictionAccess", "Jurisdiction access")}
+                    description={t(
+                      "requirementTemplate.access.description",
+                      "Control which jurisdictions can use this template."
+                    )}
+                    value={currentOptions}
+                    enabledForAll={requirementTemplate.availableGlobally ?? false}
+                    onChange={handleChange}
+                    onSave={handleSave}
+                    onToggleEnabledForAll={handleToggleAvailableGlobally}
+                    enableForAllLabel={t("requirementTemplate.access.enableForAll", "Available to all jurisdictions")}
+                    defaultOpen
+                    mb={0}
+                  />
                 </Box>
-              </>
-            )}
 
-            <Divider />
+                {/* Jurisdiction Overrides Section - only show if there are disabled jurisdictions */}
+                {disabledJurisdictions.length > 0 && (
+                  <>
+                    <Separator />
+                    <Box>
+                      <Heading
+                        as="h3"
+                        size="sm"
+                        mb={4}
+                        color="text.secondary"
+                        textTransform="uppercase"
+                        letterSpacing="wide"
+                      >
+                        {t("requirementTemplate.access.jurisdictionOverrides", "Jurisdiction overrides")}
+                      </Heading>
 
-            {/* Usage Statistics Section */}
-            <Box>
-              <Heading as="h3" size="sm" mb={4} color="text.secondary" textTransform="uppercase" letterSpacing="wide">
-                {t("requirementTemplate.access.usageStats", "Usage statistics")}
-              </Heading>
+                      <Box>
+                        <Text fontWeight="semibold" fontSize="sm" mb={2}>
+                          {t("requirementTemplate.access.disabledBy", "Permit disabled by:")}
+                        </Text>
+                        <VStack align="start" gap={1}>
+                          {disabledJurisdictions.map((jurisdiction) => (
+                            <Text key={jurisdiction.id} fontSize="sm" color="text.secondary">
+                              {jurisdiction.qualifiedName}
+                            </Text>
+                          ))}
+                        </VStack>
+                      </Box>
+                    </Box>
+                  </>
+                )}
 
-              <Flex align="center" gap={4} p={4} bg="greys.grey03" borderRadius="md">
-                <Flex
-                  align="center"
-                  justify="center"
-                  w={10}
-                  h={10}
-                  borderRadius="full"
-                  bg="theme.blueLight"
-                  color="theme.blue"
-                >
-                  <Buildings size={20} weight="fill" />
-                </Flex>
+                <Separator />
+
+                {/* Usage Statistics Section */}
                 <Box>
-                  <Text fontSize="2xl" fontWeight="bold" lineHeight="1">
-                    {usedByCount}
-                  </Text>
-                  <Text fontSize="sm" color="text.secondary">
-                    {t("requirementTemplate.access.jurisdictionsUsingTemplate", "jurisdictions using this template")}
-                  </Text>
+                  <Heading
+                    as="h3"
+                    size="sm"
+                    mb={4}
+                    color="text.secondary"
+                    textTransform="uppercase"
+                    letterSpacing="wide"
+                  >
+                    {t("requirementTemplate.access.usageStats", "Usage statistics")}
+                  </Heading>
+
+                  <Flex align="center" gap={4} p={4} bg="greys.grey03" borderRadius="md">
+                    <Flex
+                      align="center"
+                      justify="center"
+                      w={10}
+                      h={10}
+                      borderRadius="full"
+                      bg="theme.blueLight"
+                      color="theme.blue"
+                    >
+                      <Buildings size={20} weight="fill" />
+                    </Flex>
+                    <Box>
+                      <Text fontSize="2xl" fontWeight="bold" lineHeight="1">
+                        {usedByCount}
+                      </Text>
+                      <Text fontSize="sm" color="text.secondary">
+                        {t(
+                          "requirementTemplate.access.jurisdictionsUsingTemplate",
+                          "jurisdictions using this template"
+                        )}
+                      </Text>
+                    </Box>
+                  </Flex>
                 </Box>
-              </Flex>
-            </Box>
-          </VStack>
-        </DrawerBody>
-      </DrawerContent>
-    </Drawer>
+              </VStack>
+            </Drawer.Body>
+          </Drawer.Content>
+        </Drawer.Positioner>
+      </Portal>
+    </Drawer.Root>
   )
 })

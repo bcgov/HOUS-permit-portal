@@ -1,15 +1,4 @@
-import {
-  Box,
-  Button,
-  Divider,
-  Flex,
-  Heading,
-  IconButton,
-  ListItem,
-  OrderedList,
-  Text,
-  useDisclosure,
-} from "@chakra-ui/react"
+import { Box, Button, Flex, Heading, IconButton, List, Separator, Text, useDisclosure } from "@chakra-ui/react"
 import { CaretDown, CaretUp, Warning } from "@phosphor-icons/react"
 import * as R from "ramda"
 import React from "react"
@@ -35,7 +24,7 @@ export const CompareRequirementsBox = ({
 }: ICompareRequirementsBoxDataProps) => {
   const { t } = useTranslation()
 
-  const { isOpen, onToggle } = useDisclosure({ defaultIsOpen: true })
+  const { open, onToggle } = useDisclosure({ defaultOpen: true })
   return (
     <Flex
       direction="column"
@@ -69,13 +58,9 @@ export const CompareRequirementsBox = ({
                 {t("requirementTemplate.edit.diffBox.title")}
               </Heading>
             )}
-            <IconButton
-              onClick={onToggle}
-              icon={isOpen ? <CaretUp /> : <CaretDown />}
-              variant={"secondary"}
-              size={"sm"}
-              aria-label={"Open errors"}
-            ></IconButton>
+            <IconButton onClick={onToggle} variant={"secondary"} size={"sm"} aria-label={"Open errors"}>
+              {open ? <CaretUp /> : <CaretDown />}
+            </IconButton>
           </Flex>
           {isUpdatable ? (
             <Button
@@ -94,13 +79,7 @@ export const CompareRequirementsBox = ({
           )}
         </Flex>
       </Box>
-      <Box
-        p={4}
-        display={isOpen ? "block" : "none"}
-        borderTop="1px solid"
-        borderColor="semantic.warning"
-        overflow="auto"
-      >
+      <Box p={4} display={open ? "block" : "none"} borderTop="1px solid" borderColor="semantic.warning" overflow="auto">
         <Text fontSize="sm" mt="2">
           {t("requirementTemplate.edit.diffBox.instructions")}
         </Text>
@@ -109,7 +88,7 @@ export const CompareRequirementsBox = ({
           {(showingCompareAfter || !isUpdatable) && (
             <>
               <Heading as="h3">{t("requirementTemplate.edit.diffBox.added")}</Heading>
-              <Divider borderColor="black" my={0} />
+              <Separator borderColor="black" my={0} />
               <CompareRequirementsList data={data.added} />
             </>
           )}
@@ -117,7 +96,7 @@ export const CompareRequirementsBox = ({
           {
             <>
               <Heading as="h3">{t("requirementTemplate.edit.diffBox.changed")}</Heading>
-              <Divider borderColor="black" my={0} />
+              <Separator borderColor="black" my={0} />
               <CompareRequirementsList data={data.changed} />
             </>
           }
@@ -125,7 +104,7 @@ export const CompareRequirementsBox = ({
           {!showingCompareAfter && (
             <>
               <Heading as="h3">{t("requirementTemplate.edit.diffBox.removed")}</Heading>
-              <Divider borderColor="black" my={0} />
+              <Separator borderColor="black" my={0} />
               <CompareRequirementsList data={data.removed} />
             </>
           )}
@@ -163,24 +142,25 @@ const CompareRequirementsList: React.FC<ICompareRequirementsListProps> = ({ data
           <Heading as="h4" fontSize="lg" mt={1}>
             {sectionLabel}
           </Heading>
-          <OrderedList
+          <List.Root
+            as="ol"
             mt="2"
             ml="0"
             fontSize="sm"
-            sx={{
-              "li a": {
+            css={{
+              "& li a": {
                 color: "text.primary",
               },
             }}
           >
             {partitionedData[sectionLabel].map((item, idx) => (
-              <ListItem key={idx}>
+              <List.Item key={idx}>
                 <ScrollLink key={item.id} to={item.class || item.id}>
                   {item.label}
                 </ScrollLink>
-              </ListItem>
+              </List.Item>
             ))}
-          </OrderedList>
+          </List.Root>
         </Box>
       ))}
     </>

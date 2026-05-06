@@ -97,12 +97,8 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
                 {fields.map((field, index) => (
                   <UserInput key={field.id} index={index} remove={remove} />
                 ))}
-                <Button
-                  type="button"
-                  variant="tertiary"
-                  onClick={() => append(defaultUserValues)}
-                  leftIcon={<Plus size={16} />}
-                >
+                <Button type="button" variant="tertiary" onClick={() => append(defaultUserValues)}>
+                  <Plus size={16} />
                   {t("user.addUser")}
                 </Button>
               </Flex>
@@ -117,14 +113,14 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
                 <Button
                   variant="primary"
                   type="submit"
-                  isLoading={isSubmitting}
-                  isDisabled={!isValid || isSubmitting}
+                  loading={isSubmitting}
+                  disabled={!isValid || isSubmitting}
                   loadingText={t("ui.loading")}
-                  rightIcon={<PaperPlaneTilt size={16} />}
                 >
                   {t("user.sendInvites")}
+                  <PaperPlaneTilt size={16} />
                 </Button>
-                <Button variant="secondary" isDisabled={isSubmitting} onClick={() => navigate(-1)}>
+                <Button variant="secondary" disabled={isSubmitting} onClick={() => navigate(-1)}>
                   {t("ui.cancel")}
                 </Button>
               </Flex>

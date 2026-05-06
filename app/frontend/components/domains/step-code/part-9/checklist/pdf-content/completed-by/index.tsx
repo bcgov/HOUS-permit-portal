@@ -71,7 +71,7 @@ export const CompletedBy = function StepCodeChecklistPDFCompletedBy({ checklist 
       </VStack>
 
       <HStack>
-        <CheckBox isChecked={checklist.codeco} />
+        <CheckBox checked={checklist.codeco} />
         <Text style={{ fontSize: 12 }}>{t(`${i18nPrefix}.codeco`)}</Text>
       </HStack>
 

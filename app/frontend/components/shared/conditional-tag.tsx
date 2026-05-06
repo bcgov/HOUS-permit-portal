@@ -6,7 +6,7 @@ export const ConditionalTag: React.FC = () => {
   const { t } = useTranslation()
 
   return (
-    <Tag
+    <Tag.Root
       bg={"semantic.infoLight"}
       border="1px solid"
       borderColor={"semantic.info"}
@@ -15,6 +15,6 @@ export const ConditionalTag: React.FC = () => {
       fontSize={"xs"}
     >
       {t("requirementsLibrary.conditional")}
-    </Tag>
+    </Tag.Root>
   )
 }

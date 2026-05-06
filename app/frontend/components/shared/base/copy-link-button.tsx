@@ -30,25 +30,20 @@ export const CopyLinkButton = ({ value, label, iconOnly, "aria-label": ariaLabel
     return (
       <IconButton
         aria-label={ariaLabel || t("ui.copyValue")}
-        icon={<Copy color="var(--chakra-colors-text-link)" />}
         onClick={handleClickCopy}
         variant="ghost"
         size="sm"
         {...(rest as IconButtonProps)}
-      />
+      >
+        <Copy color="var(--chakra-colors-text-link)" />
+      </IconButton>
     )
   }
 
   return (
-    <Button
-      aria-label={ariaLabel || "copy link"}
-      rightIcon={<Copy color="var(--chakra-colors-text-link)" />}
-      onClick={handleClickCopy}
-      variant="secondary"
-      size="sm"
-      {...rest}
-    >
+    <Button aria-label={ariaLabel || "copy link"} onClick={handleClickCopy} variant="secondary" size="sm" {...rest}>
       {label || t("ui.copy")}
+      <Copy color="var(--chakra-colors-text-link)" />
     </Button>
   )
 }

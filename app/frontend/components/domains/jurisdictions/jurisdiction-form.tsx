@@ -1,15 +1,7 @@
-import {
-  Box,
-  Button,
-  Flex,
-  FormControl,
-  FormLabel,
-  IconButton,
-  InputGroup,
-  Switch,
-  Text,
-  Tooltip,
-} from "@chakra-ui/react"
+import { InputGroup } from "@/components/ui/input-group"
+import { Switch } from "@/components/ui/switch"
+import { Tooltip } from "@/components/ui/tooltip"
+import { Box, Button, Field, Flex, IconButton, Text } from "@chakra-ui/react"
 import { Info } from "@phosphor-icons/react"
 import React from "react"
 import { Controller, useFormContext } from "react-hook-form"
@@ -77,26 +69,24 @@ export const JurisdictionFormSection: React.FC<TJurisdictionFormProps> = ({
           <TextFormControl label={t("jurisdiction.new.nameLabel")} fieldName={"name"} required />
         </Box>
       </Flex>
-
-      <FormControl display="flex" alignItems="center">
-        <FormLabel htmlFor="use-custom" mb="0">
+      <Field.Root display="flex" alignItems="center">
+        <Field.Label htmlFor="use-custom" mb="0">
           {t("jurisdiction.new.useCustom")}
-        </FormLabel>
-        <Switch id="use-custom" isChecked={useCustom} onChange={onToggleCustom} />
-      </FormControl>
-
+        </Field.Label>
+        <Switch id="use-custom" checked={useCustom} onValueChange={onToggleCustom} />
+      </Field.Root>
       <Flex gap={8}>
         <Box w="full">
           <Controller
             name="regionalDistrict"
             control={control}
             render={({ field: { onChange, value } }) => (
-              <FormControl w="full" zIndex={1}>
-                <FormLabel>{`${t("jurisdiction.fields.regionalDistrictName")} ${t("ui.optional")}`}</FormLabel>
+              <Field.Root w="full" zIndex={1}>
+                <Field.Label>{`${t("jurisdiction.fields.regionalDistrictName")} ${t("ui.optional")}`}</Field.Label>
                 <InputGroup w="full">
                   <JurisdictionSelect
                     onChange={onChange}
-                    isDisabled={localityTypeWatch == regionalDistrictLocalityType}
+                    disabled={localityTypeWatch == regionalDistrictLocalityType}
                     filters={{ type: EJurisdictionTypes.regionalDistrict }}
                     selectedOption={{
                       label: value?.reverseQualifiedName,
@@ -105,27 +95,27 @@ export const JurisdictionFormSection: React.FC<TJurisdictionFormProps> = ({
                     menuPortalTarget={document.body}
                   />
                 </InputGroup>
-              </FormControl>
+              </Field.Root>
             )}
           />
         </Box>
       </Flex>
-
       <Flex gap={8}>
         <Box w="full">
-          <FormControl>
-            <FormLabel display="flex" alignItems="center" gap={2}>
+          <Field.Root>
+            <Field.Label display="flex" alignItems="center" gap={2}>
               {t("jurisdiction.determineWithSite")}
-              <Tooltip label={t("jurisdiction.ltsaMatcherExplanation")} hasArrow>
+              <Tooltip content={t("jurisdiction.ltsaMatcherExplanation")} showArrow>
                 <IconButton
                   aria-label={t("jurisdiction.ltsaMatcherExplanation")}
-                  icon={<Info size={16} />}
                   size="xs"
                   variant="ghost"
                   type="button"
-                />
+                >
+                  <Info size={16} />
+                </IconButton>
               </Tooltip>
-            </FormLabel>
+            </Field.Label>
             <Controller
               name="site"
               control={control}
@@ -142,29 +132,29 @@ export const JurisdictionFormSection: React.FC<TJurisdictionFormProps> = ({
                 />
               )}
             />
-          </FormControl>
+          </Field.Root>
         </Box>
       </Flex>
-
       <Flex gap={4} align="flex-end">
         <Box flex="1">
           <TextFormControl
             label={t("jurisdiction.fields.ltsaMatcher")}
             fieldName={"ltsaMatcher"}
             inputProps={{
-              isDisabled: true,
+              disabled: true,
             }}
             LabelInfo={() => (
-              <Tooltip label={t("jurisdiction.ltsaMatcherHelp")} hasArrow>
+              <Tooltip content={t("jurisdiction.ltsaMatcherHelp")} showArrow>
                 <IconButton
                   mb={2}
                   ml={2}
                   aria-label={t("jurisdiction.ltsaMatcherHelp")}
-                  icon={<Info size={16} />}
                   size="xs"
                   variant="ghost"
                   type="button"
-                />
+                >
+                  <Info size={16} />
+                </IconButton>
               </Tooltip>
             )}
           />

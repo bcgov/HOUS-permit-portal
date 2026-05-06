@@ -1,18 +1,4 @@
-import {
-  Alert,
-  AlertIcon,
-  Box,
-  Button,
-  Container,
-  HStack,
-  Heading,
-  List,
-  ListIcon,
-  ListItem,
-  Text,
-  UnorderedList,
-  VStack,
-} from "@chakra-ui/react"
+import { Alert, Box, Button, Container, HStack, Heading, List, Text, VStack } from "@chakra-ui/react"
 import { CheckCircle, XCircle } from "@phosphor-icons/react"
 import { UppyFile } from "@uppy/core"
 import "@uppy/core/dist/style.min.css"
@@ -117,7 +103,7 @@ export const CheckDigitalSealsScreen = observer(() => {
 
   return (
     <Container maxW="container.lg" py="16" px="8">
-      <HStack mb="4" spacing={2} alignItems="center">
+      <HStack mb="4" gap={2} alignItems="center">
         <Heading as="h1" mb="0">
           {t("projectReadinessTools.digitalSealValidator.title") as string}
         </Heading>
@@ -125,35 +111,32 @@ export const CheckDigitalSealsScreen = observer(() => {
       <Text fontSize="lg" color="text.primary" mb="6">
         {t("projectReadinessTools.digitalSealValidator.description") as string}
       </Text>
-      <UnorderedList fontSize="lg" spacing={2} mb="8" pl="4">
-        <ListItem>{t("projectReadinessTools.digitalSealValidator.listItem1") as string}</ListItem>
-        <ListItem>{t("projectReadinessTools.digitalSealValidator.listItem2") as string}</ListItem>
-      </UnorderedList>
-
+      <List.Root as="ul" fontSize="lg" gap={2} mb="8" pl="4">
+        <List.Item>{t("projectReadinessTools.digitalSealValidator.listItem1") as string}</List.Item>
+        <List.Item>{t("projectReadinessTools.digitalSealValidator.listItem2") as string}</List.Item>
+      </List.Root>
       <Heading as="h2" size="md" mb="4">
         {t("projectReadinessTools.digitalSealValidator.howItWorks.title") as string}
       </Heading>
       <Text fontSize="lg" color="text.primary" mb="6">
         {t("projectReadinessTools.digitalSealValidator.howItWorks.description") as string}
       </Text>
-      <UnorderedList spacing={2} mb="4" pl="4" fontSize="lg">
-        <ListItem>{t("projectReadinessTools.digitalSealValidator.howItWorks.listItem1") as string}</ListItem>
-        <ListItem>{t("projectReadinessTools.digitalSealValidator.howItWorks.listItem2") as string}</ListItem>
-      </UnorderedList>
+      <List.Root as="ul" gap={2} mb="4" pl="4" fontSize="lg">
+        <List.Item>{t("projectReadinessTools.digitalSealValidator.howItWorks.listItem1") as string}</List.Item>
+        <List.Item>{t("projectReadinessTools.digitalSealValidator.howItWorks.listItem2") as string}</List.Item>
+      </List.Root>
       <Text fontSize="lg" color="text.primary" mb="6">
         {t("projectReadinessTools.digitalSealValidator.howItWorks.listItem3") as string}
       </Text>
-
       <Heading as="h2" size="md" mb="4">
         {t("projectReadinessTools.digitalSealValidator.fileRequirementsTitle") as string}
       </Heading>
-      <UnorderedList spacing={2} mb="8" pl="4" fontSize="lg">
-        <ListItem>{t("projectReadinessTools.digitalSealValidator.requirement1") as string}</ListItem>
-        <ListItem>{t("projectReadinessTools.digitalSealValidator.requirement2") as string}</ListItem>
-        <ListItem>{t("projectReadinessTools.digitalSealValidator.requirement3") as string}</ListItem>
-      </UnorderedList>
-
-      <VStack spacing={6} align="stretch" maxW="full">
+      <List.Root as="ul" gap={2} mb="8" pl="4" fontSize="lg">
+        <List.Item>{t("projectReadinessTools.digitalSealValidator.requirement1") as string}</List.Item>
+        <List.Item>{t("projectReadinessTools.digitalSealValidator.requirement2") as string}</List.Item>
+        <List.Item>{t("projectReadinessTools.digitalSealValidator.requirement3") as string}</List.Item>
+      </List.Root>
+      <VStack gap={6} align="stretch" maxW="full">
         {result && (
           <Box bg="blue.50" borderLeft="8px solid" borderColor="blue.500" p={4} borderRadius="sm">
             {result.length === 0 ? (
@@ -170,7 +153,7 @@ export const CheckDigitalSealsScreen = observer(() => {
                   {t("projectReadinessTools.digitalSealValidator.digitalSignaturesDetected") as string}
                 </Heading>
                 <Box mb={4}>
-                  <HStack spacing={2} align="center">
+                  <HStack gap={2} align="center">
                     <Text>
                       {t("projectReadinessTools.digitalSealValidator.fileLabel") as string} {file?.name}
                     </Text>
@@ -190,7 +173,7 @@ export const CheckDigitalSealsScreen = observer(() => {
                       : ""}
                   </Text>
                 </Box>
-                <List fontSize="lg" spacing={4} pl={0}>
+                <List.Root fontSize="lg" gap={4} pl={0}>
                   {result
                     .filter(
                       (sig: any, index: number, self: any[]) =>
@@ -218,10 +201,10 @@ export const CheckDigitalSealsScreen = observer(() => {
                       const isValid = sig.result === "SUCCESS"
 
                       return (
-                        <ListItem key={rawSignerName || index}>
-                          <VStack align="start" spacing={1}>
-                            <HStack spacing={2}>
-                              <ListIcon
+                        <List.Item key={rawSignerName || index}>
+                          <VStack align="start" gap={1}>
+                            <HStack gap={2}>
+                              <List.Indicator
                                 as={isValid ? CheckCircle : XCircle}
                                 color={isValid ? "blue.500" : "red.500"}
                                 m={0}
@@ -237,22 +220,22 @@ export const CheckDigitalSealsScreen = observer(() => {
                               </Text>
                             )}
                           </VStack>
-                        </ListItem>
+                        </List.Item>
                       )
                     })}
-                </List>
+                </List.Root>
               </Box>
             )}
           </Box>
         )}
 
         {error && (
-          <Alert status="error" borderRadius="md">
-            <AlertIcon />
-            <HStack spacing={2} align="start" flexWrap="wrap">
+          <Alert.Root status="error" borderRadius="md">
+            <Alert.Indicator />
+            <HStack gap={2} align="start" flexWrap="wrap">
               <Text>{error}</Text>
               <Button
-                variant="link"
+                variant="plain"
                 onClick={resetValidator}
                 color="text.link"
                 textDecoration="underline"
@@ -262,13 +245,13 @@ export const CheckDigitalSealsScreen = observer(() => {
                 {t("projectReadinessTools.digitalSealValidator.uploadAnotherFile") as string}
               </Button>
             </HStack>
-          </Alert>
+          </Alert.Root>
         )}
 
         {result && !error && (
           <Box display="flex" justifyContent="flex-start" width="100%">
             <Button
-              variant="link"
+              variant="plain"
               mt={4}
               fontSize="lg"
               onClick={resetValidator}
@@ -290,19 +273,21 @@ export const CheckDigitalSealsScreen = observer(() => {
         <Box
           position="relative"
           mb={6}
-          sx={{
-            ".uppy-Dashboard": {
+          css={{
+            "& .uppy-Dashboard": {
               border: "2px dashed var(--chakra-colors-border-light)",
               borderRadius: "var(--chakra-radii-lg)",
               borderColor: "var(--chakra-colors-theme-blue)",
               width: "100%",
               height: "100%",
             },
-            ".uppy-Container": {
+
+            "& .uppy-Container": {
               display: result || error ? "none" : "",
               height: "100%",
             },
-            ".uppy-Dashboard-inner": {
+
+            "& .uppy-Dashboard-inner": {
               border: "none",
               borderRadius: "var(--chakra-radii-lg)",
               backgroundColor: "var(--chakra-colors-theme-blueLight)",
@@ -310,34 +295,44 @@ export const CheckDigitalSealsScreen = observer(() => {
               height: "100%",
               display: result || error ? "none" : "",
             },
-            ".uppy-Dashboard-innerWrap": {
+
+            "& .uppy-Dashboard-innerWrap": {
               display: result || error ? "none" : "",
             },
-            ".uppy-Dashboard-dropFilesHereHint": {
+
+            "& .uppy-Dashboard-dropFilesHereHint": {
               display: "none",
             },
-            ".uppy-DashboardContent-title": {
+
+            "& .uppy-DashboardContent-title": {
               display: "none",
             },
-            ".uppy-DashboardContent-back": {
+
+            "& .uppy-DashboardContent-back": {
               display: "none",
             },
-            ".uppy-DashboardContent-bar": {
+
+            "& .uppy-DashboardContent-bar": {
               display: "none",
             },
-            ".uppy-StatusBar-actionBtn--done": {
+
+            "& .uppy-StatusBar-actionBtn--done": {
               display: "none",
             },
-            ".uppy-Informer": {
+
+            "& .uppy-Informer": {
               display: "none",
             },
-            ".uppy-StatusBar-statusPrimary": {
+
+            "& .uppy-StatusBar-statusPrimary": {
               display: "none",
             },
-            ".uppy-StatusBar-statusSecondary": {
+
+            "& .uppy-StatusBar-statusSecondary": {
               display: "none",
             },
-            ".uppy-StatusBar-actionBtn--retry": {
+
+            "& .uppy-StatusBar-actionBtn--retry": {
               display: "none",
             },
           }}

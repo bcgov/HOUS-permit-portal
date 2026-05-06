@@ -1,4 +1,5 @@
-import { Badge, Box, Button, Flex, HStack, Text, Tooltip } from "@chakra-ui/react"
+import { Tooltip } from "@/components/ui/tooltip"
+import { Badge, Box, Button, Flex, HStack, Text } from "@chakra-ui/react"
 import { closestCenter, DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core"
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
@@ -204,7 +205,13 @@ function KanbanBoardInner<T extends IKanbanItem>({
                       transition={{ duration: 0.15 }}
                       style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}
                     >
-                      <Tooltip label={column.label} hasArrow placement="top">
+                      <Tooltip
+                        content={column.label}
+                        showArrow
+                        positioning={{
+                          placement: "top",
+                        }}
+                      >
                         <Flex
                           direction="column"
                           align="center"
@@ -220,7 +227,6 @@ function KanbanBoardInner<T extends IKanbanItem>({
                           <Flex minH="24px" align="center" justify="center" flexShrink={0}>
                             <Button
                               aria-label="Show column"
-                              leftIcon={<CaretRight size={12} />}
                               variant="ghost"
                               size="xs"
                               minW="48px"
@@ -230,9 +236,10 @@ function KanbanBoardInner<T extends IKanbanItem>({
                               fontSize="xs"
                               fontWeight="normal"
                               color="text.secondary"
-                              iconSpacing={0.25}
+                              gap={0.25}
                               onClick={() => onToggleColumn(column.key)}
                             >
+                              <CaretRight size={12} />
                               {t("submissionInbox.showColumn")}
                             </Button>
                           </Flex>
@@ -244,7 +251,9 @@ function KanbanBoardInner<T extends IKanbanItem>({
                               color="text.secondary"
                               textAlign="center"
                               whiteSpace="nowrap"
-                              sx={{ writingMode: "vertical-rl" }}
+                              css={{
+                                writingMode: "vertical-rl",
+                              }}
                             >
                               {column.label}
                             </Text>
@@ -288,7 +297,7 @@ function KanbanBoardInner<T extends IKanbanItem>({
                           <Text fontSize="md" fontWeight="bold" textTransform="capitalize" color="text.secondary">
                             {column.label}
                           </Text>
-                          <HStack spacing={1}>
+                          <HStack gap={1}>
                             <UnreadBadge count={unreadCount} />
                             <Badge
                               borderRadius="full"
@@ -303,7 +312,6 @@ function KanbanBoardInner<T extends IKanbanItem>({
                             </Badge>
                             <Button
                               aria-label="Collapse column"
-                              leftIcon={<CaretLeft size={12} />}
                               variant="ghost"
                               size="xs"
                               h={6}
@@ -311,9 +319,10 @@ function KanbanBoardInner<T extends IKanbanItem>({
                               fontSize="xs"
                               fontWeight="normal"
                               color="text.secondary"
-                              iconSpacing={0.5}
+                              gap={0.5}
                               onClick={() => onToggleColumn(column.key)}
                             >
+                              <CaretLeft size={12} />
                               {t("submissionInbox.hideColumn")}
                             </Button>
                           </HStack>
@@ -327,7 +336,7 @@ function KanbanBoardInner<T extends IKanbanItem>({
                         overflowX="hidden"
                         gap={3}
                         p={3}
-                        sx={{
+                        css={{
                           touchAction: "pan-y",
                         }}
                         onScroll={(e) => {
@@ -355,7 +364,7 @@ function KanbanBoardInner<T extends IKanbanItem>({
                           )}
                         </SortableContext>
                         {hasMore && onShowMore && (
-                          <Button variant="link" size="sm" flexShrink={0} onClick={() => onShowMore(column.key)}>
+                          <Button variant="plain" size="sm" flexShrink={0} onClick={() => onShowMore(column.key)}>
                             {/* @ts-ignore */}
                             {t("submissionInbox.showMoreInColumn", { count: totalCount - displayedCount })}
                           </Button>

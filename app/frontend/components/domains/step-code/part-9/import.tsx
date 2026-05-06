@@ -1,4 +1,4 @@
-import { Button, Flex, FormControl, FormLabel, HStack, Heading, IconButton, VStack } from "@chakra-ui/react"
+import { Button, Field, Flex, HStack, Heading, IconButton, VStack } from "@chakra-ui/react"
 import { Plus, X } from "@phosphor-icons/react"
 import { t } from "i18next"
 import React, { useState } from "react"
@@ -131,15 +131,15 @@ export const H2KImport = function StepCodeH2kImport() {
               rules={{ required: true }}
               render={({ field: { onChange, value } }) => {
                 return (
-                  <FormControl>
-                    <FormLabel>{t("stepCode.import.compliancePath.label")}</FormLabel>
+                  <Field.Root>
+                    <Field.Label>{t("stepCode.import.compliancePath.label")}</Field.Label>
                     <CompliancePathSelect onChange={onChange} value={value} />
-                  </FormControl>
+                  </Field.Root>
                 )
               }}
             />
             {fields.map((field, index) => (
-              <VStack key={`step-code-data-entry-${index}`} w="full" spacing={4}>
+              <VStack key={`step-code-data-entry-${index}`} w="full" gap={4}>
                 <HStack w="full" align="start">
                   <FileFormControl
                     inputProps={{ borderWidth: 0, p: 0 }}
@@ -156,8 +156,9 @@ export const H2KImport = function StepCodeH2kImport() {
                       onClick={() => handleRemoveData(index)}
                       variant="ghost"
                       aria-label={`remove-step-code-data-${index}`}
-                      icon={<X />}
-                    />
+                    >
+                      <X />
+                    </IconButton>
                   )}
                 </HStack>
 
@@ -189,7 +190,8 @@ export const H2KImport = function StepCodeH2kImport() {
               </VStack>
             ))}
 
-            <Button onClick={handleAddData} leftIcon={<Plus />} w="full">
+            <Button onClick={handleAddData} w="full">
+              <Plus />
               {t("stepCode.import.addData")}
             </Button>
 
@@ -197,10 +199,10 @@ export const H2KImport = function StepCodeH2kImport() {
               variant="primary"
               w="full"
               type="submit"
-              isDisabled={
+              disabled={
                 !isValid || isSubmitting || !areAllUploaded || !(currentPermitApplication || watchJurisdictionId)
               }
-              isLoading={isSubmitting}
+              loading={isSubmitting}
             >
               {t("stepCode.import.create")}
             </Button>

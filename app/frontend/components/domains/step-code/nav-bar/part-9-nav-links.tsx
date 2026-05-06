@@ -39,7 +39,6 @@ export const Part9NavLinks = observer(function Part9StepCodeNavLinks() {
       {/* <Button variant="tertiary" rightIcon={<ArrowSquareOut />}>
         {t("stepCode.checklistGuide")}
       </Button> */}
-
       {checklist ? (
         <>
           <RestartConfirmationModal />
@@ -49,8 +48,8 @@ export const Part9NavLinks = observer(function Part9StepCodeNavLinks() {
           <Button
             variant="primary"
             onClick={onComplete}
-            isLoading={isSubmitting}
-            isDisabled={isSubmitting || !isValid}
+            loading={isSubmitting}
+            disabled={isSubmitting || !isValid}
             type="submit"
           >
             {checklist.isComplete ? t("ui.save") : t("stepCode.markAsComplete")}

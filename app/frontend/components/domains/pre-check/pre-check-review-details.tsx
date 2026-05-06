@@ -19,7 +19,7 @@ export const PreCheckReviewDetails = observer(function PreCheckReviewDetails({
   const uploadedFilesCount = designDocuments.filter((doc) => !doc._destroy).length
 
   return (
-    <VStack spacing={6} align="stretch" mb={8}>
+    <VStack gap={6} align="stretch" mb={8}>
       {/* Address */}
       <Box>
         <Heading as="h3" size="sm" mb={2} fontWeight="bold">
@@ -27,7 +27,6 @@ export const PreCheckReviewDetails = observer(function PreCheckReviewDetails({
         </Heading>
         {preCheck?.fullAddress ? <Text>{preCheck.fullAddress}</Text> : <Text color="text.secondary">—</Text>}
       </Box>
-
       {/* Jurisdiction */}
       <Box>
         <Heading as="h3" size="sm" mb={2} fontWeight="bold">
@@ -39,7 +38,6 @@ export const PreCheckReviewDetails = observer(function PreCheckReviewDetails({
           <Text color="text.secondary">—</Text>
         )}
       </Box>
-
       {/* Uploaded Files */}
       <Box>
         <Heading as="h3" size="sm" mb={2} fontWeight="bold">
@@ -48,7 +46,7 @@ export const PreCheckReviewDetails = observer(function PreCheckReviewDetails({
           })}
         </Heading>
         {designDocuments.length > 0 ? (
-          <VStack align="stretch" spacing={1}>
+          <VStack align="stretch" gap={1}>
             {designDocuments
               .filter((doc) => !doc._destroy)
               .map((doc) => (

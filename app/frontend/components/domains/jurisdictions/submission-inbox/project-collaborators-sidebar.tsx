@@ -1,17 +1,4 @@
-import {
-  Button,
-  Link as ChakraLink,
-  Drawer,
-  DrawerBody,
-  DrawerCloseButton,
-  DrawerContent,
-  DrawerHeader,
-  DrawerOverlay,
-  HStack,
-  Select,
-  Stack,
-  Text,
-} from "@chakra-ui/react"
+import { Button, Link as ChakraLink, Drawer, HStack, NativeSelect, Portal, Stack, Text } from "@chakra-ui/react"
 import { ArrowSquareOut, Users } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
@@ -53,95 +40,115 @@ export const ProjectCollaboratorsSidebar = observer(function ProjectCollaborator
     siteConfigurationStore.allowDesignatedReviewer && project.jurisdiction?.allowDesignatedReviewer
 
   return (
-    <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
-      <DrawerOverlay />
-      <DrawerContent maxW="430px" pt="var(--app-navbar-height)">
-        <DrawerCloseButton />
-        <DrawerHeader gap={2} alignItems="center" display="flex" mt={7} px={8} pb={0}>
-          <Users size={23} />
-          <Text as="h2" fontWeight={700} fontSize="2xl">
-            {/* @ts-ignore */}
-            {t("permitCollaboration.projectSidebar.title")}
-          </Text>
-        </DrawerHeader>
-
-        <DrawerBody as={Stack} spacing={8}>
-          {designatedReviewerEnabled && <ProjectReviewCollaboratorsSection project={project} />}
-
-          <Stack spacing={4}>
-            <Text as="h3" fontSize="md" fontWeight={700}>
-              {/* @ts-ignore */}
-              {t("permitCollaboration.projectSidebar.permitApplications")}
-            </Text>
-
-            {submittedApps.length === 0 ? (
-              <Text fontSize="sm" color="text.secondary">
+    <Drawer.Root
+      open={open}
+      placement="end"
+      onOpenChange={(e) => {
+        if (!e.open) {
+          onClose()
+        }
+      }}
+    >
+      <Portal>
+        <Drawer.Backdrop />
+        <Drawer.Positioner>
+          <Drawer.Content maxW="430px" pt="var(--app-navbar-height)">
+            <Drawer.CloseTrigger />
+            <Drawer.Header gap={2} alignItems="center" display="flex" mt={7} px={8} pb={0}>
+              <Users size={23} />
+              <Text as="h2" fontWeight={700} fontSize="2xl">
                 {/* @ts-ignore */}
-                {t("permitCollaboration.projectSidebar.noSubmittedApplications")}
+                {t("permitCollaboration.projectSidebar.title")}
               </Text>
-            ) : (
-              <>
-                <Select size="sm" value={selectedPaId ?? ""} onChange={(e) => setSelectedPaId(e.target.value || null)}>
-                  {submittedApps.map((pa) => (
-                    <option key={pa.id} value={pa.id}>
-                      {pa.nickname || pa.number}
-                    </option>
-                  ))}
-                </Select>
+            </Drawer.Header>
+            <Drawer.Body gap={8} asChild>
+              <Stack>
+                {designatedReviewerEnabled && <ProjectReviewCollaboratorsSection project={project} />}
+                <Stack gap={4}>
+                  <Text as="h3" fontSize="md" fontWeight={700}>
+                    {/* @ts-ignore */}
+                    {t("permitCollaboration.projectSidebar.permitApplications")}
+                  </Text>
 
-                {selectedPa && (
-                  <Stack spacing={3} p={4} bg="gray.50" borderRadius="md">
-                    {designatedReviewerEnabled && (
-                      <HStack spacing={3}>
-                        <Text fontSize="sm" fontWeight={600} flexShrink={0}>
-                          {/* @ts-ignore */}
-                          {t("permitCollaboration.projectSidebar.designatedReviewer")}:
-                        </Text>
-                        {selectedPa.designatedReviewer?.collaborator?.user ? (
-                          <HStack spacing={2}>
-                            <SharedAvatar
-                              size="xs"
-                              name={selectedPa.designatedReviewer.collaborator.user.name}
-                              role={selectedPa.designatedReviewer.collaborator.user.role}
-                              fontSize="2xs"
-                            />
-                            <Text fontSize="sm">{selectedPa.designatedReviewer.collaborator.user.name}</Text>
-                          </HStack>
-                        ) : (
-                          <Text fontSize="sm" color="text.secondary">
-                            {/* @ts-ignore */}
-                            {t("permitCollaboration.projectSidebar.noneAssigned")}
-                          </Text>
-                        )}
-                      </HStack>
-                    )}
-
+                  {submittedApps.length === 0 ? (
                     <Text fontSize="sm" color="text.secondary">
                       {/* @ts-ignore */}
-                      {t("permitCollaboration.projectSidebar.goToApplication")}
+                      {t("permitCollaboration.projectSidebar.noSubmittedApplications")}
                     </Text>
+                  ) : (
+                    <>
+                      <NativeSelect.Root>
+                        <NativeSelect.Field
+                          size="sm"
+                          value={selectedPaId ?? ""}
+                          onValueChange={(e) => setSelectedPaId(e.target.value || null)}
+                        >
+                          {submittedApps.map((pa) => (
+                            <option key={pa.id} value={pa.id}>
+                              {pa.nickname || pa.number}
+                            </option>
+                          ))}
+                        </NativeSelect.Field>
+                        <NativeSelect.Indicator />
+                      </NativeSelect.Root>
 
-                    <ChakraLink
-                      as={Link}
-                      to={`/permit-applications/${selectedPa.id}`}
-                      color="text.link"
-                      fontSize="sm"
-                      fontWeight={600}
-                      display="inline-flex"
-                      alignItems="center"
-                      gap={1}
-                    >
-                      {selectedPa.nickname || selectedPa.number}
-                      <ArrowSquareOut size={14} />
-                    </ChakraLink>
-                  </Stack>
-                )}
-              </>
-            )}
-          </Stack>
-        </DrawerBody>
-      </DrawerContent>
-    </Drawer>
+                      {selectedPa && (
+                        <Stack gap={3} p={4} bg="gray.50" borderRadius="md">
+                          {designatedReviewerEnabled && (
+                            <HStack gap={3}>
+                              <Text fontSize="sm" fontWeight={600} flexShrink={0}>
+                                {/* @ts-ignore */}
+                                {t("permitCollaboration.projectSidebar.designatedReviewer")}:
+                              </Text>
+                              {selectedPa.designatedReviewer?.collaborator?.user ? (
+                                <HStack gap={2}>
+                                  <SharedAvatar
+                                    size="xs"
+                                    name={selectedPa.designatedReviewer.collaborator.user.name}
+                                    role={selectedPa.designatedReviewer.collaborator.user.role}
+                                    fontSize="2xs"
+                                  />
+                                  <Text fontSize="sm">{selectedPa.designatedReviewer.collaborator.user.name}</Text>
+                                </HStack>
+                              ) : (
+                                <Text fontSize="sm" color="text.secondary">
+                                  {/* @ts-ignore */}
+                                  {t("permitCollaboration.projectSidebar.noneAssigned")}
+                                </Text>
+                              )}
+                            </HStack>
+                          )}
+
+                          <Text fontSize="sm" color="text.secondary">
+                            {/* @ts-ignore */}
+                            {t("permitCollaboration.projectSidebar.goToApplication")}
+                          </Text>
+
+                          <ChakraLink
+                            color="text.link"
+                            fontSize="sm"
+                            fontWeight={600}
+                            display="inline-flex"
+                            alignItems="center"
+                            gap={1}
+                            asChild
+                          >
+                            <Link to={`/permit-applications/${selectedPa.id}`}>
+                              {selectedPa.nickname || selectedPa.number}
+                              <ArrowSquareOut size={14} />
+                            </Link>
+                          </ChakraLink>
+                        </Stack>
+                      )}
+                    </>
+                  )}
+                </Stack>
+              </Stack>
+            </Drawer.Body>
+          </Drawer.Content>
+        </Drawer.Positioner>
+      </Portal>
+    </Drawer.Root>
   )
 })
 
@@ -177,19 +184,18 @@ const ProjectReviewCollaboratorsSection = observer(function ProjectReviewCollabo
   }
 
   return (
-    <Stack spacing={4} mt={6}>
+    <Stack gap={4} mt={6}>
       <Text as="h3" fontSize="md" fontWeight={700}>
         {/* @ts-ignore */}
         {t("permitCollaboration.projectSidebar.projectReviewCollaborators")}
       </Text>
-
-      <Stack spacing={2}>
+      <Stack gap={2}>
         {collaborations.length > 0 ? (
           collaborations.map((c) => (
-            <HStack key={c.id} spacing={3} p={3} bg="gray.50" borderRadius="md" justify="space-between">
-              <HStack spacing={3}>
+            <HStack key={c.id} gap={3} p={3} bg="gray.50" borderRadius="md" justify="space-between">
+              <HStack gap={3}>
                 <SharedAvatar size="sm" name={c.collaborator.user?.name} role={c.collaborator.user?.role} />
-                <Stack spacing={0}>
+                <Stack gap={0}>
                   <Text fontSize="sm" fontWeight={600}>
                     {c.collaborator.user?.name}
                   </Text>
@@ -200,7 +206,7 @@ const ProjectReviewCollaboratorsSection = observer(function ProjectReviewCollabo
                   )}
                 </Stack>
               </HStack>
-              <Button size="xs" variant="ghost" colorScheme="red" onClick={() => handleUnassign(c.collaborator.id)}>
+              <Button size="xs" variant="ghost" colorPalette="red" onClick={() => handleUnassign(c.collaborator.id)}>
                 {/* @ts-ignore */}
                 {t("permitCollaboration.projectSidebar.unassignCollaborator")}
               </Button>
@@ -214,11 +220,11 @@ const ProjectReviewCollaboratorsSection = observer(function ProjectReviewCollabo
         )}
 
         {availableCollaborators.length > 0 && (
-          <Stack spacing={1} maxH="200px" overflowY="auto">
+          <Stack gap={1} maxH="200px" overflowY="auto">
             {availableCollaborators.map((collaborator) => (
               <HStack
                 key={collaborator.id}
-                spacing={3}
+                gap={3}
                 p={2}
                 borderRadius="md"
                 cursor="pointer"
@@ -226,7 +232,7 @@ const ProjectReviewCollaboratorsSection = observer(function ProjectReviewCollabo
                 onClick={() => handleAssign(collaborator.id)}
               >
                 <SharedAvatar size="xs" name={collaborator.user?.name} role={collaborator.user?.role} />
-                <Stack spacing={0}>
+                <Stack gap={0}>
                   <Text fontSize="sm">{collaborator.user?.name}</Text>
                   <Text fontSize="xs" color="text.secondary">
                     {collaborator.user?.email}

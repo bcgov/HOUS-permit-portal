@@ -1,4 +1,4 @@
-import { Tag, TagLabel, Text, VStack } from "@chakra-ui/react"
+import { Tag, Text, VStack } from "@chakra-ui/react"
 import { format } from "date-fns"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -34,7 +34,7 @@ const PreviewStatusTag: React.FC<PreviewStatusTagProps> = ({ templateVersionPrev
   const formattedDate = format(dateToDisplay, "MMM dd")
 
   return (
-    <Tag
+    <Tag.Root
       size="md"
       borderRadius="0"
       variant="solid"
@@ -45,13 +45,13 @@ const PreviewStatusTag: React.FC<PreviewStatusTagProps> = ({ templateVersionPrev
       textTransform="uppercase"
     >
       <VStack gap={1}>
-        <TagLabel fontWeight="bold">{status}</TagLabel>
+        <Tag.Label fontWeight="bold">{status}</Tag.Label>
         <Text fontSize="xs">
           {status === EPreviewStatus.access && `${t("ui.until")} `}
           {formattedDate}
         </Text>
       </VStack>
-    </Tag>
+    </Tag.Root>
   )
 }
 

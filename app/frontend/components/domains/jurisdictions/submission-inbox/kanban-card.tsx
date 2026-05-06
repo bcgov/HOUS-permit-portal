@@ -1,16 +1,5 @@
-import {
-  Box,
-  Circle,
-  HStack,
-  IconButton,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  Portal,
-  Spinner,
-  Tooltip,
-} from "@chakra-ui/react"
+import { Tooltip } from "@/components/ui/tooltip"
+import { Box, Circle, HStack, IconButton, Menu, Portal, Spinner } from "@chakra-ui/react"
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { ArrowsDownUp, DotsSixVertical, UserPlus } from "@phosphor-icons/react"
@@ -88,12 +77,17 @@ export const KanbanCard = observer(function KanbanCard({
       _active={{ bg: "background.blueLight" }}
       position="relative"
     >
-      <HStack position="absolute" top={2} right={2} spacing={1} align="center" zIndex={1}>
+      <HStack position="absolute" top={2} right={2} gap={1} align="center" zIndex={1}>
         {isUnread && <Circle size="10px" bg="theme.blueActive" flexShrink={0} />}
-        <Tooltip label={t("submissionInbox.dragToReorder")} hasArrow placement="top">
+        <Tooltip
+          content={t("submissionInbox.dragToReorder")}
+          showArrow
+          positioning={{
+            placement: "top",
+          }}
+        >
           <IconButton
             aria-label={t("submissionInbox.reorder")}
-            icon={<DotsSixVertical size={16} weight="bold" />}
             size="xs"
             minW={5}
             h={5}
@@ -103,66 +97,85 @@ export const KanbanCard = observer(function KanbanCard({
             cursor="grab"
             {...attributes}
             {...listeners}
-          />
+          >
+            <DotsSixVertical size={16} weight="bold" />
+          </IconButton>
         </Tooltip>
       </HStack>
-
       {children}
-
-      <HStack spacing={0} mt={1} justifyContent="space-between">
-        <HStack spacing={1}>
+      <HStack gap={0} mt={1} justifyContent="space-between">
+        <HStack gap={1}>
           {avatars}
           {onAssigneeClick && (
-            <Tooltip label={t("permitCollaboration.sidebar.title")} hasArrow placement="top">
+            <Tooltip
+              content={t("permitCollaboration.sidebar.title")}
+              showArrow
+              positioning={{
+                placement: "top",
+              }}
+            >
               <IconButton
                 aria-label={t("permitCollaboration.sidebar.title")}
-                icon={isAssigneeLoading ? <Spinner size="xs" /> : <UserPlus size={16} />}
                 size="sm"
                 minW={7}
                 h={7}
                 variant="ghost"
                 onClick={onAssigneeClick}
-                isDisabled={isAssigneeLoading}
-              />
+                disabled={isAssigneeLoading}
+              >
+                {isAssigneeLoading ? <Spinner size="xs" /> : <UserPlus size={16} />}
+              </IconButton>
             </Tooltip>
           )}
         </HStack>
-        <HStack spacing={0}>
+        <HStack gap={0}>
           {showReorderMenu && (
-            <Menu>
-              <Tooltip label={t("submissionInbox.reorder")} hasArrow placement="top">
-                <MenuButton
-                  as={IconButton}
-                  aria-label={t("submissionInbox.reorder")}
-                  icon={<ArrowsDownUp size={16} />}
-                  size="sm"
-                  minW={7}
-                  h={7}
-                  variant="ghost"
-                  onClick={(e: React.MouseEvent) => {
-                    e.stopPropagation()
-                  }}
-                />
+            <Menu.Root>
+              <Tooltip
+                content={t("submissionInbox.reorder")}
+                showArrow
+                positioning={{
+                  placement: "top",
+                }}
+              >
+                <Menu.Trigger asChild>
+                  <IconButton
+                    aria-label={t("submissionInbox.reorder")}
+                    icon={<ArrowsDownUp size={16} />}
+                    size="sm"
+                    minW={7}
+                    h={7}
+                    variant="ghost"
+                    onClick={(e: React.MouseEvent) => {
+                      e.stopPropagation()
+                    }}
+                  ></IconButton>
+                </Menu.Trigger>
               </Tooltip>
               <Portal>
-                <MenuList zIndex={10}>
-                  {REORDER_MENU_ITEMS.map(({ direction, labelKey, needsUp }) => (
-                    <MenuItem
-                      key={direction}
-                      fontSize="sm"
-                      isDisabled={needsUp ? !canMoveUp : !canMoveDown}
-                      onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        onMove?.(direction)
-                      }}
-                    >
-                      {t(labelKey)}
-                    </MenuItem>
-                  ))}
-                </MenuList>
+                <Portal>
+                  <Menu.Positioner>
+                    <Menu.Content>
+                      {REORDER_MENU_ITEMS.map(({ direction, labelKey, needsUp }) => (
+                        <Menu.Item
+                          key={direction}
+                          fontSize="sm"
+                          disabled={needsUp ? !canMoveUp : !canMoveDown}
+                          onSelect={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            onMove?.(direction)
+                          }}
+                          value="item-0"
+                        >
+                          {t(labelKey)}
+                        </Menu.Item>
+                      ))}
+                    </Menu.Content>
+                  </Menu.Positioner>
+                </Portal>
               </Portal>
-            </Menu>
+            </Menu.Root>
           )}
           {statusMenu}
           {onMarkUnread && <SubmissionInboxMarkUnreadIconButton onMarkUnread={onMarkUnread} />}

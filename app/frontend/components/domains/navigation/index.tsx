@@ -63,32 +63,32 @@ const EnergyStepRequirementsScreen = lazy(() =>
   }))
 )
 const Part9StepCodeConfigScreen = lazy(() =>
-  import(
-    "../home/review-manager/configuration-management-screen/energy-step-requirements-screen/part-9-step-code-config-screen"
-  ).then((module) => ({
-    default: module.Part9StepCodeConfigScreen,
-  }))
+  import("../home/review-manager/configuration-management-screen/energy-step-requirements-screen/part-9-step-code-config-screen").then(
+    (module) => ({
+      default: module.Part9StepCodeConfigScreen,
+    })
+  )
 )
 const ClimateZonesScreen = lazy(() =>
-  import(
-    "../home/review-manager/configuration-management-screen/energy-step-requirements-screen/climate-zones-screen"
-  ).then((module) => ({
-    default: module.ClimateZonesScreen,
-  }))
+  import("../home/review-manager/configuration-management-screen/energy-step-requirements-screen/climate-zones-screen").then(
+    (module) => ({
+      default: module.ClimateZonesScreen,
+    })
+  )
 )
 const Part3OccupancyOverviewScreen = lazy(() =>
-  import(
-    "../home/review-manager/configuration-management-screen/energy-step-requirements-screen/part-3-occupancy-overview-screen"
-  ).then((module) => ({
-    default: module.Part3OccupancyOverviewScreen,
-  }))
+  import("../home/review-manager/configuration-management-screen/energy-step-requirements-screen/part-3-occupancy-overview-screen").then(
+    (module) => ({
+      default: module.Part3OccupancyOverviewScreen,
+    })
+  )
 )
 const Part3OccupancyDetailScreen = lazy(() =>
-  import(
-    "../home/review-manager/configuration-management-screen/energy-step-requirements-screen/part-3-occupancy-detail-screen"
-  ).then((module) => ({
-    default: module.Part3OccupancyDetailScreen,
-  }))
+  import("../home/review-manager/configuration-management-screen/energy-step-requirements-screen/part-3-occupancy-detail-screen").then(
+    (module) => ({
+      default: module.Part3OccupancyDetailScreen,
+    })
+  )
 )
 const ReviewManagerFeatureAccessScreen = lazy(() =>
   import("../home/review-manager/configuration-management-screen/feature-access-screen").then((module) => ({
@@ -106,11 +106,11 @@ const ResourcesScreenLazy = lazy(() =>
   }))
 )
 const ReviewStaffMyJurisdictionAboutPageScreen = lazy(() =>
-  import(
-    "../home/review-manager/configuration-management-screen/feature-access-screen/my-jurisdiction-about-page"
-  ).then((module) => ({
-    default: module.myJurisdictionAboutPageScreen,
-  }))
+  import("../home/review-manager/configuration-management-screen/feature-access-screen/my-jurisdiction-about-page").then(
+    (module) => ({
+      default: module.myJurisdictionAboutPageScreen,
+    })
+  )
 )
 
 const DesignatedReviewerScreen = lazy(() =>

@@ -1,4 +1,4 @@
-import { Container, Divider, Flex, Heading, Icon, Image, Tag, Text, VStack } from "@chakra-ui/react"
+import { Container, Flex, Heading, Icon, Image, Separator, Tag, Text, VStack } from "@chakra-ui/react"
 import { CheckCircle } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -22,14 +22,16 @@ export const SuccessfulSubmissionScreen = observer(() => {
   return (
     <Container maxW="container.lg">
       <Flex direction="column" align="center" my={24} gap={8}>
-        <Icon as={CheckCircle} boxSize="14" color="semantic.success" />
+        <Icon boxSize="14" color="semantic.success" asChild>
+          <CheckCircle />
+        </Icon>
 
         <VStack>
           <Heading as="h1">{t("permitApplication.new.submitted")}</Heading>
           <Text>{t("permitApplication.new.emailed", { jurisdictionName: qualifiedName })}</Text>
-          <Tag mt="4" color="semantic.info" border="1px solid" borderColor="semantic.info" p={2}>
+          <Tag.Root mt="4" color="semantic.info" border="1px solid" borderColor="semantic.info" p={2}>
             {t("permitApplication.new.yourReference", { number })}
-          </Tag>
+          </Tag.Root>
         </VStack>
         <Flex direction="column" bg="greys.grey04" w="full" p={8} gap={8} borderRadius="md" position="relative">
           {currentPermitApplication.sandbox && (
@@ -45,7 +47,7 @@ export const SuccessfulSubmissionScreen = observer(() => {
             bg="semantic.infoLight"
             objectFit="cover"
           />
-          <Divider borderColor="greys.grey02" />
+          <Separator borderColor="greys.grey02" />
           <Flex direction="column" gap={4}>
             <Text>
               <Text as="span" fontWeight="700">

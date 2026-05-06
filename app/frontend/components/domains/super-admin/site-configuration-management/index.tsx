@@ -10,7 +10,7 @@ export const SiteConfigurationManagementScreen = observer(function SiteConfigura
 
   return (
     <Container maxW="container.lg" py={8} px={{ base: 8, xl: 0 }} flexGrow={1}>
-      <VStack spacing={8} align="start">
+      <VStack gap={8} align="start">
         <Heading mb={0} fontSize="3xl">
           {t(`${i18nPrefix}.title`)}
         </Heading>

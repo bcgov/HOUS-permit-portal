@@ -5,8 +5,7 @@ import ReactMarkdown from "react-markdown"
 import { EFlashMessageStatus } from "../../../types/enums"
 
 interface ICustomMessageBoxProps
-  extends Omit<FlexProps, "id" | "title">,
-    Omit<ToastProps, "position" | "title" | "id" | "status"> {
+  extends Omit<FlexProps, "id" | "title">, Omit<ToastProps, "position" | "title" | "id" | "status"> {
   title?: React.ReactNode // Allow title to be any ReactNode
   description?: string | React.ReactNode // Allow description to be any ReactNode
   children?: React.ReactNode

@@ -1,17 +1,4 @@
-import {
-  Box,
-  BoxProps,
-  Button,
-  Container,
-  Flex,
-  Heading,
-  Image,
-  Link,
-  ListItem,
-  Text,
-  UnorderedList,
-  VStack,
-} from "@chakra-ui/react"
+import { Box, BoxProps, Button, Container, Flex, Heading, Image, Link, List, Text, VStack } from "@chakra-ui/react"
 import { CaretRight, CheckCircle, ClipboardText, FileArrowUp, Info } from "@phosphor-icons/react"
 import i18next from "i18next"
 import { observer } from "mobx-react-lite"
@@ -62,7 +49,7 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
       </HeroBanner>
       <Box bg="greys.grey03">
         <Flex as="section" direction="column" gap={20}>
-          <VStack spacing={4} py={4} px={8} align="start" w="full" maxW="container.lg" mx="auto">
+          <VStack gap={4} py={4} px={8} align="start" w="full" maxW="container.lg" mx="auto">
             <Heading as="h1" variant="yellowline">
               {t("home.projectReadinessTools.stepCodeLookupTool.title")}
             </Heading>
@@ -70,7 +57,6 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
           </VStack>
         </Flex>
       </Box>
-
       <Container maxW="container.lg" py={16} px={8}>
         <Flex as="section" direction="column" gap={20}>
           <Flex gap={6} direction={{ base: "column", md: "row" }}>
@@ -95,29 +81,24 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
               {t("landing.toolsSectionTitle")}
             </Heading>
             <Text fontSize="lg">{t("landing.toolsSectionDesc1")}</Text>
-            <Button
-              as={RouterLink}
-              to="/project-readiness-tools"
-              variant="primary"
-              size="lg"
-              alignSelf="flex-start"
-              rightIcon={<CaretRight size={20} />}
-              mt={2}
-            >
-              {t("landing.goToTools")}
+            <Button variant="primary" size="lg" alignSelf="flex-start" mt={2} asChild>
+              <RouterLink to="/project-readiness-tools">
+                {t("landing.goToTools")}
+                <CaretRight size={20} />
+              </RouterLink>
             </Button>
           </Flex>
           <Flex gap={10} alignItems="flex-start" direction={{ base: "column", md: "row" }}>
-            <VStack as="section" align="flex-start" spacing={4}>
+            <VStack as="section" align="flex-start" gap={4}>
               <Heading as="h2" variant="yellowline">
                 {t("landing.whoForTitle")}
               </Heading>
-              <UnorderedList spacing={1} pl={4}>
+              <List.Root as="ul" gap={1} pl={4}>
                 {whoFor.map((str) => (
-                  <ListItem key={str}>{str}</ListItem>
+                  <List.Item key={str}>{str}</List.Item>
                 ))}
-              </UnorderedList>
-              <Button variant="link" onClick={scrollToJurisdictionSearch}>
+              </List.Root>
+              <Button variant="plain" onClick={scrollToJurisdictionSearch}>
                 {t("landing.iNeed")}
               </Button>
             </VStack>
@@ -197,13 +178,11 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
             </Heading>
             <Text mb={4}>{t("landing.helpShapeBody")}</Text>
             <Flex justifyContent="space-between" alignItems="center">
-              <Button
-                as={RouterLink}
-                to="/standardization-preview"
-                rightIcon={<CaretRight size={20} />}
-                variant="primary"
-              >
-                {t("landing.reviewMaterials")}
+              <Button variant="primary" asChild>
+                <RouterLink to="/standardization-preview">
+                  {t("landing.reviewMaterials")}
+                  <CaretRight size={20} />
+                </RouterLink>
               </Button>
             </Flex>
           </Box>
@@ -215,7 +194,7 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
             {t("landing.createdQ")}
           </Heading>
           <Text>{t("landing.createdA")}</Text>
-          <Link href={mailto} isExternal mt="4">
+          <Link href={mailto} mt="4" target="_blank" rel="noopener noreferrer">
             {t("landing.tellUsYourExperience")}
           </Link>
         </Container>

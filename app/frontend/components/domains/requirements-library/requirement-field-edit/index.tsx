@@ -1,3 +1,4 @@
+import { InputGroup } from "@/components/ui/input-group"
 import {
   Box,
   BoxProps,
@@ -7,8 +8,7 @@ import {
   HStack,
   IconButton,
   Input,
-  InputGroup,
-  InputLeftElement,
+  InputElement,
   Stack,
   Textarea,
 } from "@chakra-ui/react"
@@ -48,7 +48,7 @@ export type TRequirementEditProps<TFieldValues extends FieldValues> = TEditableG
 
 const requirementsComponentMap = {
   [ERequirementType.text]: function <TFieldValues>(props: TRequirementEditProps<TFieldValues>) {
-    return <EditableGroup editableInput={<Input bg={"white"} isReadOnly />} {...props} />
+    return <EditableGroup editableInput={<Input bg={"white"} readOnly />} {...props} />
   },
 
   [ERequirementType.phone]: function <TFieldValues>(props: TRequirementEditProps<TFieldValues>) {
@@ -56,10 +56,10 @@ const requirementsComponentMap = {
       <EditableGroup
         editableInput={
           <InputGroup>
-            <InputLeftElement pointerEvents="none">
+            <InputElement pointerEvents="none">
               <Phone />
-            </InputLeftElement>
-            <Input bg={"white"} isReadOnly />
+            </InputElement>
+            <Input bg={"white"} readOnly />
           </InputGroup>
         }
         {...props}
@@ -72,10 +72,10 @@ const requirementsComponentMap = {
       <EditableGroup
         editableInput={
           <InputGroup>
-            <InputLeftElement pointerEvents="none">
+            <InputElement pointerEvents="none">
               <Envelope />
-            </InputLeftElement>
-            <Input bg={"white"} isReadOnly />
+            </InputElement>
+            <Input bg={"white"} readOnly />
           </InputGroup>
         }
         {...props}
@@ -88,10 +88,10 @@ const requirementsComponentMap = {
       <EditableGroup
         editableInput={
           <InputGroup>
-            <InputLeftElement>
+            <InputElement>
               <MapPin />
-            </InputLeftElement>
-            <Input bg={"white"} isReadOnly />
+            </InputElement>
+            <Input bg={"white"} readOnly />
           </InputGroup>
         }
         {...props}
@@ -104,10 +104,10 @@ const requirementsComponentMap = {
       <EditableGroup
         editableInput={
           <InputGroup>
-            <InputLeftElement>
+            <InputElement>
               <MapPin />
-            </InputLeftElement>
-            <Input bg={"white"} isReadOnly />
+            </InputElement>
+            <Input bg={"white"} readOnly />
           </InputGroup>
         }
         {...props}
@@ -120,10 +120,10 @@ const requirementsComponentMap = {
       <EditableGroup
         editableInput={
           <InputGroup w={"166px"}>
-            <InputLeftElement>
+            <InputElement>
               <CalendarBlank />
-            </InputLeftElement>
-            <Input bg={"white"} isReadOnly />
+            </InputElement>
+            <Input bg={"white"} readOnly />
           </InputGroup>
         }
         {...props}
@@ -146,7 +146,7 @@ const requirementsComponentMap = {
       <EditableGroup
         editableInput={
           <HStack>
-            <Input bg={"white"} isReadOnly w={"130px"} />
+            <Input bg={"white"} readOnly w={"130px"} />
             <Controller<TFieldValues>
               {...unitSelectControlProps}
               render={({ field: { onChange, value } }) => (
@@ -163,7 +163,7 @@ const requirementsComponentMap = {
   [ERequirementType.textArea]: function <TFieldValues>(props: TRequirementEditProps<TFieldValues>) {
     return (
       <EditableGroup
-        editableInput={<Textarea bg={"white"} _hover={{ borderColor: "border.base" }} isReadOnly />}
+        editableInput={<Textarea bg={"white"} _hover={{ borderColor: "border.base" }} readOnly />}
         {...props}
       />
     )
@@ -205,17 +205,18 @@ const requirementsComponentMap = {
                   bg={"white"}
                   size={"sm"}
                   value={getOptionValue(idx)?.label}
-                  onChange={(e) => onOptionValueChange(idx, e.target.value)}
+                  onValueChange={(e) => onOptionValueChange(idx, e.target.value)}
                   w={"150px"}
-                  isDisabled={isLockedOptions}
+                  disabled={isLockedOptions}
                 />
                 <IconButton
                   aria-label={"remove option"}
-                  variant={"unstyled"}
-                  icon={<X />}
+                  variant={"plain"}
                   onClick={() => remove(idx)}
-                  isDisabled={isLockedOptions}
-                />
+                  disabled={isLockedOptions}
+                >
+                  <X />
+                </IconButton>
               </HStack>
             ))}
 
@@ -224,7 +225,7 @@ const requirementsComponentMap = {
               variant={"link"}
               textDecoration={"underline"}
               onClick={() => append({ value: "", label: "" })}
-              isDisabled={isLockedOptions}
+              disabled={isLockedOptions}
             >
               {t("requirementsLibrary.modals.addOptionButton")}
             </Button>
@@ -241,7 +242,7 @@ const requirementsComponentMap = {
   }: TRequirementEditProps<TFieldValues>) {
     return (
       <EditableGroup
-        sx={{
+        css={{
           "& > div:nth-of-type(2)": {
             alignItems: "center",
             "&:before": {
@@ -297,15 +298,12 @@ const requirementsComponentMap = {
                   bg={"white"}
                   size={"sm"}
                   value={getOptionValue(idx)?.label}
-                  onChange={(e) => onOptionValueChange(idx, e.target.value)}
+                  onValueChange={(e) => onOptionValueChange(idx, e.target.value)}
                   w={"150px"}
                 />
-                <IconButton
-                  aria-label={"remove option"}
-                  variant={"unstyled"}
-                  icon={<X />}
-                  onClick={() => remove(idx)}
-                />
+                <IconButton aria-label={"remove option"} variant={"plain"} onClick={() => remove(idx)}>
+                  <X />
+                </IconButton>
               </HStack>
             ))}
 
@@ -347,17 +345,18 @@ const requirementsComponentMap = {
                   bg={"white"}
                   size={"sm"}
                   value={getOptionValue(idx)?.label}
-                  onChange={(e) => onOptionValueChange(idx, e.target.value)}
+                  onValueChange={(e) => onOptionValueChange(idx, e.target.value)}
                   w={"150px"}
-                  isDisabled={isEnergyStepCodeDependency}
+                  disabled={isEnergyStepCodeDependency}
                 />
                 <IconButton
                   aria-label={"remove option"}
-                  variant={"unstyled"}
-                  icon={<X />}
+                  variant={"plain"}
                   onClick={() => remove(idx)}
-                  isDisabled={isEnergyStepCodeDependency}
-                />
+                  disabled={isEnergyStepCodeDependency}
+                >
+                  <X />
+                </IconButton>
               </HStack>
             ))}
 
@@ -366,7 +365,7 @@ const requirementsComponentMap = {
               textDecoration={"underline"}
               //  @ts-ignore
               onClick={() => append({ value: "", label: "" })}
-              isDisabled={isEnergyStepCodeDependency}
+              disabled={isEnergyStepCodeDependency}
             >
               {t("requirementsLibrary.modals.addOptionButton")}
             </Button>
@@ -568,7 +567,7 @@ const requirementsComponentMap = {
     return (
       <EditableGroup
         editableInput={
-          <Stack spacing={3}>
+          <Stack gap={3}>
             <MultiplySumGridPreview
               headers={{
                 firstColumn: first.field.value as any,
@@ -583,7 +582,7 @@ const requirementsComponentMap = {
                 ab: { value: ab.field.value as any, onChange: ab.field.onChange },
               }}
             />
-            <Stack spacing={2}>
+            <Stack gap={2}>
               <Grid templateColumns="2fr 2fr 1fr 1fr" gap={2}>
                 {fields.map((row, idx) => (
                   <React.Fragment key={row.id}>
@@ -596,7 +595,7 @@ const requirementsComponentMap = {
                             placeholder={`${t("requirementsLibrary.multiplySumGrid.itemPlaceholder")}`}
                             bg="white"
                             value={`${field.value ?? ""}`}
-                            onChange={field.onChange}
+                            onValueChange={field.onChange}
                             w="100%"
                           />
                         )}
@@ -612,14 +611,16 @@ const requirementsComponentMap = {
                             type="number"
                             bg="white"
                             value={`${field.value ?? ""}`}
-                            onChange={(e) => field.onChange(e.target.value === "" ? "" : Number(e.target.value))}
+                            onValueChange={(e) => field.onChange(e.target.value === "" ? "" : Number(e.target.value))}
                             w="100%"
                           />
                         )}
                       />
                     </GridItem>
                     <GridItem display="flex" alignItems="right" justifyContent="flex-start">
-                      <IconButton aria-label="Remove" icon={<X />} variant="ghost" onClick={() => remove(idx)} />
+                      <IconButton aria-label="Remove" variant="ghost" onClick={() => remove(idx)}>
+                        <X />
+                      </IconButton>
                     </GridItem>
                     <GridItem />
                   </React.Fragment>

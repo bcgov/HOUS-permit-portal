@@ -56,12 +56,13 @@ export const ResourceItem = ({ resource }: IResourceItemProps) => {
       ) : resource.resourceType === EResourceType.link && resource.linkUrl ? (
         <Link
           href={resource.linkUrl}
-          isExternal
           color="semantic.info"
           fontSize="md"
           display="inline-flex"
           alignItems="center"
           gap={1}
+          target="_blank"
+          rel="noopener noreferrer"
         >
           <ArrowSquareOut size={16} />
           {resource.title}

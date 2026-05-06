@@ -45,13 +45,14 @@ export const CopyableValue = ({
       )}
       <IconButton
         aria-label={"copy value"}
-        icon={<Copy />}
         onClick={handleClickCopy}
         variant="ghost"
         color="theme.yellow"
         size="sm"
         {...iconButtonProps}
-      />
+      >
+        <Copy />
+      </IconButton>
     </HStack>
   )
 }

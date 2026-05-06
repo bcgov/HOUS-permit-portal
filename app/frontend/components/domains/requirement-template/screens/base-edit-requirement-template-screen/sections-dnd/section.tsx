@@ -16,7 +16,9 @@ export const Section = forwardRef<HTMLDivElement, ISectionProps>(function Sectio
   return (
     <Box ref={ref} {...containerProps} bg={"white"}>
       <HStack>
-        <IconButton variant={"ghost"} aria-label={"section drag handle"} icon={<ListIcon />} {...dragHandleProps} />
+        <IconButton variant={"ghost"} aria-label={"section drag handle"} {...dragHandleProps}>
+          <ListIcon />
+        </IconButton>
         <Text>{sectionName}</Text>
       </HStack>
       {children}

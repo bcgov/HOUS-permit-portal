@@ -51,7 +51,7 @@ export const EnergyPerformanceCompliance = function StepCodeChecklistPDFEnergyPe
         <Field value={t(`${i18nPrefix}.epcTestingTargetType.options.${checklist.epcCalculationTestingTargetType}`)} />
       </HStack>
       <HStack style={{ width: "100%", gap: 3.5 }}>
-        <CheckBox isChecked={checklist.epcCalculationCompliance} />
+        <CheckBox checked={checklist.epcCalculationCompliance} />
         <Text style={{ fontSize: 10.5, color: theme.colors.text.primary }}>{t(`${i18nPrefix}.compliance`)}</Text>
       </HStack>
     </Panel>

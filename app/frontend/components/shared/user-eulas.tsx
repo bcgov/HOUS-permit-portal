@@ -1,21 +1,12 @@
 import {
   Accordion,
-  AccordionButton,
-  AccordionIcon,
-  AccordionItem,
-  AccordionPanel,
   Box,
   Button,
   Center,
+  Dialog,
   HStack,
   Heading,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
+  Portal,
   Stack,
   Tag,
   Text,
@@ -72,9 +63,8 @@ export const UserEulas = observer(function UserEulas() {
         })}
       </Text>
     ) : (
-      <Tag
-        as={HStack}
-        spacing={1.5}
+      <Tag.Root
+        gap={1.5}
         w={"fit-content"}
         px={2}
         py={1.5}
@@ -82,10 +72,13 @@ export const UserEulas = observer(function UserEulas() {
         border={"1px solid"}
         borderColor={"semantic.error"}
         bg={"semantic.errorLight"}
+        asChild
       >
-        <WarningCircle color={colors.semantic.error} />
-        <Text as={"span"}>{t("userEulas.actionRequired")}</Text>
-      </Tag>
+        <HStack>
+          <WarningCircle color={colors.semantic.error} />
+          <Text as={"span"}>{t("userEulas.actionRequired")}</Text>
+        </HStack>
+      </Tag.Root>
     )
   }, [isLoading, error, licenseAgreements, currentEula])
 
@@ -130,7 +123,7 @@ export const PastEulasModal = observer(function PastEulasModal({
   pastLicenseAgreements: ILicenseAgreement[]
 }) {
   const { t } = useTranslation()
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { open, onOpen, onClose } = useDisclosure()
 
   return (
     <>
@@ -141,49 +134,64 @@ export const PastEulasModal = observer(function PastEulasModal({
         </Button>
         )
       </Box>
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent maxW={"800px"}>
-          <ModalHeader fontSize={"2xl"}>{t("userEulas.pastAgreementsModal.title")}</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <Accordion as={Stack} spacing={4} allowToggle allowMultiple>
-              {pastLicenseAgreements.map((la) => (
-                <AccordionItem
-                  border={"1px solid"}
-                  borderColor={"border.light"}
-                  borderRadius={"sm"}
-                  bg={"greys.grey04"}
-                  key={la.id}
-                >
-                  <Box as={"h2"}>
-                    <AccordionButton fontWeight={"700"}>
-                      <Box as="span" flex="1" textAlign="left">
-                        {t("userEulas.pastAgreementsModal.acceptedOn", {
-                          timestamp: format(la.acceptedAt, "MMM dd, yyy hh:mm"),
-                        })}
-                      </Box>
-                      <AccordionIcon />
-                    </AccordionButton>
-                  </Box>
-                  <AccordionPanel bg={"white"} borderBottomRadius={"sm"}>
-                    <Box maxW="4xl" overflow="hidden">
-                      {/* Use SafeTipTapDisplay for safe HTML rendering */}
-                      <SafeTipTapDisplay htmlContent={la.agreement?.content} />
-                    </Box>
-                  </AccordionPanel>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </ModalBody>
-
-          <ModalFooter justifyContent={"flex-start"} mt={4}>
-            <Button variant={"primary"} onClick={onClose}>
-              {t("ui.close")}
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <Dialog.Root
+        open={open}
+        onOpenChange={(e) => {
+          if (!e.open) {
+            onClose()
+          }
+        }}
+      >
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content maxW={"800px"}>
+              <Dialog.Header fontSize={"2xl"}>{t("userEulas.pastAgreementsModal.title")}</Dialog.Header>
+              <Dialog.CloseTrigger />
+              <Dialog.Body>
+                <Accordion.Root gap={4} collapsible multiple asChild>
+                  <Stack>
+                    {pastLicenseAgreements.map((la) => (
+                      <Accordion.Item
+                        border={"1px solid"}
+                        borderColor={"border.light"}
+                        borderRadius={"sm"}
+                        bg={"greys.grey04"}
+                        key={la.id}
+                        value="item-0"
+                      >
+                        <Box as={"h2"}>
+                          <Accordion.ItemTrigger fontWeight={"700"}>
+                            <Box as="span" flex="1" textAlign="left">
+                              {t("userEulas.pastAgreementsModal.acceptedOn", {
+                                timestamp: format(la.acceptedAt, "MMM dd, yyy hh:mm"),
+                              })}
+                            </Box>
+                            <Accordion.ItemIndicator />
+                          </Accordion.ItemTrigger>
+                        </Box>
+                        <Accordion.ItemContent bg={"white"} borderBottomRadius={"sm"}>
+                          <Accordion.ItemBody>
+                            <Box maxW="4xl" overflow="hidden">
+                              {/* Use SafeTipTapDisplay for safe HTML rendering */}
+                              <SafeTipTapDisplay htmlContent={la.agreement?.content} />
+                            </Box>
+                          </Accordion.ItemBody>
+                        </Accordion.ItemContent>
+                      </Accordion.Item>
+                    ))}
+                  </Stack>
+                </Accordion.Root>
+              </Dialog.Body>
+              <Dialog.Footer justifyContent={"flex-start"} mt={4}>
+                <Button variant={"primary"} onClick={onClose}>
+                  {t("ui.close")}
+                </Button>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
     </>
   )
 })

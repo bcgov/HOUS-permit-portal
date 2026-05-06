@@ -1,4 +1,4 @@
-import { Box, Container, Flex, IconButton, TabPanel, TabPanels, Tabs, Text } from "@chakra-ui/react"
+import { Box, Container, Flex, IconButton, Tabs, Text } from "@chakra-ui/react"
 import { CaretLeft, ClipboardText, Folder, SquaresFour, TrendUp } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useTransition } from "react"
@@ -80,14 +80,11 @@ export const PermitProjectScreen = observer(() => {
       <Flex justify="space-between" align="center" py={6} borderBottom="1px" borderColor="border.light">
         <Container maxW="container.lg">
           <Flex align="center" h={24}>
-            <IconButton
-              as={RouterLink}
-              to="/projects"
-              aria-label={t("permitProject.details.backToProjects")}
-              icon={<CaretLeft size={24} />}
-              variant="ghost"
-              mr={2}
-            />
+            <IconButton aria-label={t("permitProject.details.backToProjects")} variant="ghost" mr={2} asChild>
+              <RouterLink to="/projects">
+                <CaretLeft size={24} />
+              </RouterLink>
+            </IconButton>
             <EditableInputWithControls
               w="full"
               initialHint={t("permitProject.details.editPermitProjectTitleHint")}
@@ -116,31 +113,31 @@ export const PermitProjectScreen = observer(() => {
           </Flex>
         </Container>
       </Flex>
-      <Tabs
+      <Tabs.Root
         w="full"
         flexGrow={1}
-        index={getTabIndex()}
-        onChange={handleTabChange}
+        value={String(getTabIndex())}
+        onValueChange={({ value }) => handleTabChange(Number(value))}
         display="flex"
-        isLazy
+        lazyMount
         variant="sidebar"
       >
         <ProjectSidebarTabList p={0} tabsData={TABS_DATA} />
-        <TabPanels>
-          <TabPanel>
+        <Tabs.ContentGroup>
+          <Tabs.Content value="0">
             {isPending ? <LoadingScreen /> : <OverviewTabPanelContent permitProject={currentPermitProject} />}
-          </TabPanel>
-          <TabPanel>
+          </Tabs.Content>
+          <Tabs.Content value="1">
             {isPending ? <LoadingScreen /> : <ActivityTabPanelContent permitProject={currentPermitProject} />}
-          </TabPanel>
-          <TabPanel>
+          </Tabs.Content>
+          <Tabs.Content value="2">
             {isPending ? <LoadingScreen /> : <PermitsTabPanelContent permitProject={currentPermitProject} />}
-          </TabPanel>
-          <TabPanel>
+          </Tabs.Content>
+          <Tabs.Content value="3">
             {isPending ? <LoadingScreen /> : <LocalResourcesTabPanelContent permitProject={currentPermitProject} />}
-          </TabPanel>
-        </TabPanels>
-      </Tabs>
+          </Tabs.Content>
+        </Tabs.ContentGroup>
+      </Tabs.Root>
     </Box>
   )
 })

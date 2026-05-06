@@ -1,4 +1,5 @@
-import { FormControl, FormHelperText, IconButton, Input, InputGroup, InputRightElement } from "@chakra-ui/react"
+import { InputGroup } from "@/components/ui/input-group"
+import { Field, IconButton, Input, InputElement } from "@chakra-ui/react"
 import { ErrorMessage } from "@hookform/error-message"
 import { X } from "@phosphor-icons/react"
 import { t } from "i18next"
@@ -48,7 +49,7 @@ export const MUAFuelRow = observer(function MUAFuelRow({ field, idx, remove }: I
   return (
     <>
       <GridData px={3}>
-        <FormControl>
+        <Field.Root>
           <Controller
             control={control}
             rules={{
@@ -73,29 +74,29 @@ export const MUAFuelRow = observer(function MUAFuelRow({ field, idx, remove }: I
               />
             )}
           />
-          <FormHelperText color="semantic.error">
+          <Field.HelperText color="semantic.error">
             <ErrorMessage errors={errors} name={`makeUpAirFuelsAttributes.${idx}.fuelTypeId`} />
-          </FormHelperText>
-        </FormControl>
+          </Field.HelperText>
+        </Field.Root>
       </GridData>
       <GridData>
-        <FormControl>
-          <Input value={emissionsFactor || ""} isDisabled />
-        </FormControl>
+        <Field.Root>
+          <Input value={emissionsFactor || ""} disabled />
+        </Field.Root>
       </GridData>
       <GridData>
-        <FormControl pos="relative">
+        <Field.Root pos="relative">
           <InputGroup>
             <Input
               {...register(`makeUpAirFuelsAttributes.${idx}.percentOfLoad`, {
                 required: t(`${i18nPrefix}.muaFuel.mixture.percentOfLoad.error`),
               })}
             />
-            <InputRightElement>{t(`${i18nPrefix}.muaFuel.mixture.percentOfLoad.units`)}</InputRightElement>
+            <InputElement placement="end">{t(`${i18nPrefix}.muaFuel.mixture.percentOfLoad.units`)}</InputElement>
           </InputGroup>
-          <FormHelperText color="semantic.error">
+          <Field.HelperText color="semantic.error">
             <ErrorMessage errors={errors} name={`makeUpAirFuelsAttributes.${idx}.percentOfLoad`} />
-          </FormHelperText>
+          </Field.HelperText>
           {idx > 1 && (
             <IconButton
               aria-label={t("ui.remove")}
@@ -105,11 +106,12 @@ export const MUAFuelRow = observer(function MUAFuelRow({ field, idx, remove }: I
               bottom={0}
               margin="auto"
               variant="link"
-              icon={<X />}
               onClick={handleRemove}
-            />
+            >
+              <X />
+            </IconButton>
           )}
-        </FormControl>
+        </Field.Root>
       </GridData>
     </>
   )

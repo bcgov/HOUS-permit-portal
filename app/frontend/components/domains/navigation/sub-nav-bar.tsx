@@ -1,4 +1,4 @@
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, Container, Flex, FlexProps, Text } from "@chakra-ui/react"
+import { Breadcrumb, Container, ContainerProps, Flex, FlexProps, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -14,7 +14,7 @@ const BREADCRUMB_LINK_MAX_W = "min(520px, 48vw)"
 const BREADCRUMB_CURRENT_MAX_W = "300px"
 
 interface ISubNavBar extends FlexProps {
-  breadCrumbContainerProps?: FlexProps
+  breadCrumbContainerProps?: ContainerProps
   staticBreadCrumbs?: TBreadcrumbSegment[]
 }
 
@@ -91,48 +91,51 @@ interface ISiteBreadcrumbProps {
 const SiteBreadcrumbs = observer(function SiteBreadcrumb({ breadcrumbs }: ISiteBreadcrumbProps) {
   const { t } = useTranslation()
   return (
-    <Breadcrumb spacing={2} separator="/">
-      <BreadcrumbItem minW={0}>
-        <BreadcrumbLink
-          as={RouterLinkButton}
-          to="/"
-          textTransform="capitalize"
-          variant="link"
-          justifyContent="flex-start"
-          textAlign="left"
-        >
-          {t("site.home")}
-        </BreadcrumbLink>
-      </BreadcrumbItem>
-
-      {breadcrumbs.map((breadcrumb, index) => {
-        const finalSegment = index == breadcrumbs.length - 1
-        return (
-          <BreadcrumbItem key={index} maxW={"600px"} minW={0} flexShrink={1} overflow="hidden">
-            {finalSegment ? (
-              <Text fontWeight="bold" isTruncated w="100%">
-                {breadcrumb.title}
-              </Text>
-            ) : (
-              <BreadcrumbLink
-                as={RouterLinkButton}
-                to={breadcrumb.href}
-                variant="link"
-                justifyContent="flex-start"
-                textAlign="left"
-                minW={0}
-                maxW="100%"
-                w="100%"
-                overflow="hidden"
-              >
-                <Text as="span" display="block" w="100%" isTruncated>
+    <Breadcrumb.Root>
+      <Breadcrumb.List gap={2}>
+        {breadcrumbs.map((breadcrumb, index) => {
+          const finalSegment = index == breadcrumbs.length - 1
+          return (
+            <Breadcrumb.Item key={index} maxW={"600px"} minW={0} flexShrink={1} overflow="hidden">
+              {finalSegment ? (
+                <Text fontWeight="bold" isTruncated w="100%">
                   {breadcrumb.title}
                 </Text>
-              </BreadcrumbLink>
-            )}
-          </BreadcrumbItem>
-        )
-      })}
-    </Breadcrumb>
+              ) : (
+                <Breadcrumb.Link asChild>
+                  <RouterLinkButton
+                    to={breadcrumb.href}
+                    variant="link"
+                    justifyContent="flex-start"
+                    textAlign="left"
+                    minW={0}
+                    maxW="100%"
+                    w="100%"
+                    overflow="hidden"
+                  >
+                    <Text as="span" display="block" w="100%" isTruncated>
+                      {breadcrumb.title}
+                    </Text>
+                  </RouterLinkButton>
+                </Breadcrumb.Link>
+              )}
+            </Breadcrumb.Item>
+          )
+        })}
+        <Breadcrumb.Item minW={0}>
+          <Breadcrumb.Link asChild>
+            <RouterLinkButton
+              to="/"
+              textTransform="capitalize"
+              variant="link"
+              justifyContent="flex-start"
+              textAlign="left"
+            >
+              {t("site.home")}
+            </RouterLinkButton>
+          </Breadcrumb.Link>
+        </Breadcrumb.Item>
+      </Breadcrumb.List>
+    </Breadcrumb.Root>
   )
 })

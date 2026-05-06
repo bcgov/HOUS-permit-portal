@@ -106,11 +106,11 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
   return (
     <Container my={10} maxW="780px" px={0}>
       <VStack gap={8} align="stretch">
-        <HStack spacing={5}>
+        <HStack gap={5}>
           <Heading fontSize="2xl" mb={0} color="text.primary">
             {t(`${i18nPrefix}.heading`)}
           </Heading>
-          <Tag
+          <Tag.Root
             p={1}
             bg={checklist.isComplete ? "theme.blue" : "greys.grey03"}
             color={checklist.isComplete ? "greys.white" : "text.primary"}
@@ -121,16 +121,16 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
             minW="fit-content"
           >
             {checklist.status}
-          </Tag>
+          </Tag.Root>
         </HStack>
-        <VStack spacing={2}>
+        <VStack gap={2}>
           {R.isNil(checklist.selectedReport.energy.proposedStep) && (
             <StepNotMetWarning i18nKey="energyStepNotMet" scrollToSection={scrollToEnergyCompliance} />
           )}
           {R.isNil(checklist.selectedReport.zeroCarbon.proposedStep) && (
             <StepNotMetWarning i18nKey="zeroCarbonStepNotMet" scrollToSection={scrollToZeroCarbonCompliance} />
           )}
-          <Alert
+          <Alert.Root
             status={EFlashMessageStatus.info}
             rounded="lg"
             borderWidth={1}
@@ -141,16 +141,19 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
           >
             <LightningA color="var(--chakra-colors-semantic-info)" />
             {t(`${i18nPrefix}.notice`)}
-          </Alert>
+          </Alert.Root>
         </VStack>
         <FormProvider {...formMethods}>
           <form onSubmit={handleSubmit(onSubmit)} name="stepCodeChecklistForm">
-            <Accordion
-              allowMultiple
-              defaultIndex={[0, 1, 2, 3, 4]}
-              index={index}
-              onChange={(expandedIndex) =>
-                setIndex(Array.isArray(expandedIndex) ? (expandedIndex as number[]) : [expandedIndex as number])
+            <Accordion.Root
+              multiple
+              defaultValue={["0", "1", "2", "3", "4"]}
+              value={index}
+              onValueChange={({ value: value }) =>
+                ((expandedIndex) =>
+                  setIndex(Array.isArray(expandedIndex) ? (expandedIndex as number[]) : [expandedIndex as number]))(
+                  value
+                )
               }
             >
               <ProjectInfo checklist={checklist} />
@@ -167,7 +170,7 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
                 ref={zeroCarbonComplianceRef}
                 compliance={checklist.selectedReport.zeroCarbon}
               />
-            </Accordion>
+            </Accordion.Root>
           </form>
         </FormProvider>
         {checklist.isComplete && !isSubmitting && currentStepCode?.latestReportDocument && (

@@ -1,4 +1,4 @@
-import { Box, Button, Container, HStack, Heading, Menu, MenuButton, MenuItem, MenuList, Text } from "@chakra-ui/react"
+import { Box, Button, Container, HStack, Heading, Menu, Portal, Text } from "@chakra-ui/react"
 import { BracketsCurly, Export, FileCsv } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -28,25 +28,38 @@ export const ExportTemplatesScreen = observer(function ExportTemplatesScreen() {
 
         <DigitalBuildingPermitsList
           renderButton={(templateVersion) => (
-            <Menu>
-              <MenuButton as={Button} aria-label="Options" variant="secondary" rightIcon={<Export />} px={2}>
-                {t("ui.export")}
-              </MenuButton>
-              <MenuList>
-                <MenuItem onClick={() => templateVersion.downloadExport(currentJurisdiction.id, EExportFormat.csv)}>
-                  <HStack spacing={2} fontSize={"sm"}>
-                    <FileCsv size={24} />
-                    <Text as={"span"}>{t("requirementTemplate.export.downloadCustomizationCsv")}</Text>
-                  </HStack>
-                </MenuItem>
-                <MenuItem onClick={() => templateVersion.downloadExport(currentJurisdiction.id, EExportFormat.json)}>
-                  <HStack spacing={2} fontSize={"sm"}>
-                    <BracketsCurly size={24} />
-                    <Text as={"span"}>{t("requirementTemplate.export.downloadCustomizationJson")}</Text>
-                  </HStack>
-                </MenuItem>
-              </MenuList>
-            </Menu>
+            <Menu.Root>
+              <Menu.Trigger asChild>
+                <Button aria-label="Options" variant="secondary" px={2}>
+                  {t("ui.export")}
+                  <Export />
+                </Button>
+              </Menu.Trigger>
+              <Portal>
+                <Menu.Positioner>
+                  <Menu.Content>
+                    <Menu.Item
+                      onSelect={() => templateVersion.downloadExport(currentJurisdiction.id, EExportFormat.csv)}
+                      value="item-0"
+                    >
+                      <HStack gap={2} fontSize={"sm"}>
+                        <FileCsv size={24} />
+                        <Text as={"span"}>{t("requirementTemplate.export.downloadCustomizationCsv")}</Text>
+                      </HStack>
+                    </Menu.Item>
+                    <Menu.Item
+                      onSelect={() => templateVersion.downloadExport(currentJurisdiction.id, EExportFormat.json)}
+                      value="item-1"
+                    >
+                      <HStack gap={2} fontSize={"sm"}>
+                        <BracketsCurly size={24} />
+                        <Text as={"span"}>{t("requirementTemplate.export.downloadCustomizationJson")}</Text>
+                      </HStack>
+                    </Menu.Item>
+                  </Menu.Content>
+                </Menu.Positioner>
+              </Portal>
+            </Menu.Root>
           )}
         />
       </Box>

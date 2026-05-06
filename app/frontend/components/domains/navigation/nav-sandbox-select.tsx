@@ -1,4 +1,4 @@
-import { FormControl, FormLabel } from "@chakra-ui/react"
+import { Field } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -12,16 +12,16 @@ export const NavSandboxSelect = observer(function NavSandboxSelect() {
   const { t } = useTranslation()
 
   return (
-    <FormControl display="flex" alignItems="center">
-      <FormLabel htmlFor="sandbox-select" mb="0" color="white">
+    <Field.Root display="flex" alignItems="center">
+      <Field.Label htmlFor="sandbox-select" mb="0" color="white">
         {t("sandbox.formLabel")}
-      </FormLabel>
+      </Field.Label>
       <SandboxSelect
         onChange={setCurrentSandboxId}
         value={currentSandboxId}
         options={currentUser.jurisdiction.sandboxOptions}
         children={""}
       />
-    </FormControl>
+    </Field.Root>
   )
 })

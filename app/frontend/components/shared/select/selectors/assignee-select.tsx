@@ -1,17 +1,5 @@
-import {
-  Avatar,
-  Box,
-  Button,
-  HStack,
-  Popover,
-  PopoverArrow,
-  PopoverBody,
-  PopoverContent,
-  PopoverTrigger,
-  Portal,
-  Text,
-  Tooltip,
-} from "@chakra-ui/react"
+import { Tooltip } from "@/components/ui/tooltip"
+import { Avatar, Box, Button, HStack, Popover, Portal, Text } from "@chakra-ui/react"
 import { CaretDown, MagnifyingGlass } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
@@ -53,122 +41,131 @@ export const AssigneeSelect = observer(
     if (!options) return <SharedSpinner />
 
     return (
-      <Popover
-        initialFocusRef={selectRef}
-        isOpen={props.isDisabled === true ? false : undefined}
-        placement="bottom-end"
-        isLazy
+      <Popover.Root
+        initialFocusEl={() => selectRef.current}
+        open={props.isDisabled === true ? false : undefined}
+        lazyMount
+        positioning={{
+          placement: "bottom-end",
+        }}
       >
-        {({ isOpen, onClose }) => (
-          <>
-            <ConditionalWrapper
-              condition={!R.isNil(props.tooltip)}
-              wrapper={(children) => (
-                <Tooltip label={props.tooltip}>
-                  {/* <Box> wrapper is required so tooltip and popover don't share the same trigger DOM element */}
-                  {/* see: https://github.com/chakra-ui/chakra-ui/issues/2843 */}
-                  <Box>{children}</Box>
-                </Tooltip>
-              )}
-            >
-              <PopoverTrigger>
-                <Button
-                  rightIcon={<CaretDown size="12px" color={selectedOption?.value ? "greys.grey03" : "text.link"} />}
-                  variant="select"
-                  minW="120px"
+        <Popover.Context>
+          {({ open: isOpen, setOpen: setOpen }) => {
+            const onClose = () => setOpen(false)
+
+            return (
+              <>
+                <ConditionalWrapper
+                  condition={!R.isNil(props.tooltip)}
+                  wrapper={(children) => (
+                    <Tooltip content={props.tooltip}>
+                      {/* <Box> wrapper is required so tooltip and popover don't share the same trigger DOM element */}
+                      {/* see: https://github.com/chakra-ui/chakra-ui/issues/2843 */}
+                      <Box>{children}</Box>
+                    </Tooltip>
+                  )}
                 >
-                  <UserCard
-                    user={selectedUser}
-                    compact={compact}
-                    placeholder={
-                      placeholder || (
-                        <Text color="utility.link" fontSize="xs" lineHeight={6}>
-                          {t("ui.unassigned")}
-                        </Text>
-                      )
-                    }
-                    avatarProps={avatarProps}
-                  />
-                </Button>
-              </PopoverTrigger>
-            </ConditionalWrapper>
-            <Portal>
-              <PopoverContent width="3xs">
-                <PopoverArrow />
-                <PopoverBody p={0}>
-                  <Select
-                    ref={selectRef}
-                    controlShouldRenderValue={false}
-                    isClearable={false}
-                    hideSelectedOptions={false}
-                    menuIsOpen
-                    value={selectedOption}
-                    onChange={(val) => {
-                      onClose()
-                      handleChange(val)
-                    }}
-                    options={options}
-                    isOptionDisabled={(option) => option.value === selectedOption?.value}
-                    placeholder={t("user.assignTo")}
-                    //@ts-ignore
-                    dropdownTargetProps={{
-                      rightIcon: <CaretDown />,
-                      variant: "link",
-                      color: "text.link",
-                      label: props.label || t("ui.unassigned"),
-                      ...dropdownTargetProps,
-                    }}
-                    components={{
-                      Control,
-                      MultiValue,
-                      DropdownIndicator: null,
-                      IndicatorSeparator: null,
-                      Option: Option,
-                      ...components,
-                    }}
-                    styles={{
-                      control: (css, state) => ({
-                        ...css,
-                        paddingLeft: 8,
-                        paddingRight: 8,
-                        border: 0,
-                        borderBottomRightRadius: 0,
-                        borderBottomLeftRadius: 0,
-                        boxShadow: "var(--chakra-shadows-md)",
-                      }),
-                      menu: (css, state) => ({
-                        boxShadow: "inset 0 1px 0 rgba(0, 0, 0, 0.1)",
-                      }),
-                      option: (css, state) => ({
-                        ...css,
-                        backgroundColor:
+                  <Popover.Trigger asChild>
+                    <Button variant="select" minW="120px">
+                      <UserCard
+                        user={selectedUser}
+                        compact={compact}
+                        placeholder={
+                          placeholder || (
+                            <Text color="utility.link" fontSize="xs" lineHeight={6}>
+                              {t("ui.unassigned")}
+                            </Text>
+                          )
+                        }
+                        avatarProps={avatarProps}
+                      />
+                      <CaretDown size="12px" color={selectedOption?.value ? "greys.grey03" : "text.link"} />
+                    </Button>
+                  </Popover.Trigger>
+                </ConditionalWrapper>
+                <Portal>
+                  <Popover.Positioner>
+                    <Popover.Content width="3xs">
+                      <Popover.Arrow />
+                      <Popover.Body p={0}>
+                        <Select
+                          ref={selectRef}
+                          controlShouldRenderValue={false}
+                          isClearable={false}
+                          hideSelectedOptions={false}
+                          menuIsOpen
+                          value={selectedOption}
+                          onChange={(val) => {
+                            onClose()
+                            handleChange(val)
+                          }}
+                          options={options}
+                          isOptionDisabled={(option) => option.value === selectedOption?.value}
+                          placeholder={t("user.assignTo")}
                           //@ts-ignore
-                          state.isSelected && state.value ? "var(--chakra-colors-background-yellow)" : "transparent",
-                        color: "var(--chakra-colors-gray-400)",
-                        cursor: state.isSelected ? "auto" : "pointer",
-                        //@ts-ignore
-                        borderTopWidth: state.value ? 0 : 1,
-                        "&:hover": {
-                          backgroundColor: "var(--chakra-colors-gray-100)",
-                        },
-                      }),
-                      valueContainer: (css, state) => ({
-                        ...css,
-                        padding: "0px 8px",
-                      }),
-                      input: (css, state) => ({
-                        ...css,
-                        fontSize: "var(--chakra-fontSizes-sm)",
-                      }),
-                    }}
-                    {...rest}
-                  />
-                </PopoverBody>
-              </PopoverContent>
-            </Portal>
-          </>
-        )}
-      </Popover>
+                          dropdownTargetProps={{
+                            rightIcon: <CaretDown />,
+                            variant: "link",
+                            color: "text.link",
+                            label: props.label || t("ui.unassigned"),
+                            ...dropdownTargetProps,
+                          }}
+                          components={{
+                            Control,
+                            MultiValue,
+                            DropdownIndicator: null,
+                            IndicatorSeparator: null,
+                            Option: Option,
+                            ...components,
+                          }}
+                          styles={{
+                            control: (css, state) => ({
+                              ...css,
+                              paddingLeft: 8,
+                              paddingRight: 8,
+                              border: 0,
+                              borderBottomRightRadius: 0,
+                              borderBottomLeftRadius: 0,
+                              boxShadow: "var(--chakra-shadows-md)",
+                            }),
+                            menu: (css, state) => ({
+                              boxShadow: "inset 0 1px 0 rgba(0, 0, 0, 0.1)",
+                            }),
+                            option: (css, state) => ({
+                              ...css,
+                              backgroundColor:
+                                //@ts-ignore
+                                state.isSelected && state.value
+                                  ? "var(--chakra-colors-background-yellow)"
+                                  : "transparent",
+                              color: "var(--chakra-colors-gray-400)",
+                              cursor: state.isSelected ? "auto" : "pointer",
+                              //@ts-ignore
+                              borderTopWidth: state.value ? 0 : 1,
+                              "&:hover": {
+                                backgroundColor: "var(--chakra-colors-gray-100)",
+                              },
+                            }),
+                            valueContainer: (css, state) => ({
+                              ...css,
+                              padding: "0px 8px",
+                            }),
+                            input: (css, state) => ({
+                              ...css,
+                              fontSize: "var(--chakra-fontSizes-sm)",
+                            }),
+                          }}
+                          {...rest}
+                        />
+                      </Popover.Body>
+                    </Popover.Content>
+                  </Popover.Positioner>
+                </Portal>
+              </>
+            )
+          }}
+        </Popover.Context>
+      </Popover.Root>
     )
   },
   { forwardRef: true }
@@ -182,7 +179,10 @@ const Option = (props) => {
     <components.Option {...props}>
       {user ? (
         <HStack>
-          <Avatar src={user.avatarImage?.url} name={user.name} size="xs" />
+          <Avatar.Root size="xs">
+            <Avatar.Fallback name={user.name} />
+            <Avatar.Image src={user.avatarImage?.url} />
+          </Avatar.Root>
           <Text fontSize="xs" color="black" fontWeight="bold">
             {user.name}
           </Text>

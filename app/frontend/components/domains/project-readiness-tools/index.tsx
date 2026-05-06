@@ -1,4 +1,4 @@
-import { Box, Container, Divider, Flex, Heading, Text, VStack } from "@chakra-ui/react"
+import { Box, Container, Flex, Heading, Text, VStack } from "@chakra-ui/react"
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -69,13 +69,12 @@ export const ProjectReadinessToolsIndexScreen = () => {
       <Text pt="4" fontSize="lg" color="text.primary">
         {t("projectReadinessTools.pageDescription")}
       </Text>
-
       {projectReadinessPageItems.map((section, sectionIndex) => (
         <Box key={sectionIndex} mt="16">
           <Heading as="h2" size="lg" mb="8">
             {section.sectionTitle}
           </Heading>
-          <VStack divider={<Divider borderColor="border.light" />} spacing={0} align="stretch">
+          <VStack gap={0} align="stretch">
             {section.items.map((item, itemIndex) => (
               <Box key={itemIndex} py="6" borderColor="border.light" mb={2}>
                 <Flex justify="space-between" align="center" w="full">

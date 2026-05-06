@@ -1,4 +1,4 @@
-import { Box, Container, Divider, Flex, FormControl, Heading, Link, Text, VStack } from "@chakra-ui/react"
+import { Box, Container, Field, Flex, Heading, Link, Separator, Text, VStack } from "@chakra-ui/react"
 import { CaretRight } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -21,7 +21,7 @@ export const StepCodeTabPanelContent = observer(() => {
   return (
     <Flex direction="column" flex={1} bg="greys.white" pb={24} overflowY="auto" h={"full"}>
       <Container maxW="container.xl" py={8} h={"full"}>
-        <VStack spacing={3} align="stretch">
+        <VStack gap={3} align="stretch">
           <Flex justify="space-between" align="center">
             <Heading>{t("stepCode.index.title")}</Heading>
           </Flex>
@@ -43,32 +43,29 @@ export const StepCodeTabPanelContent = observer(() => {
               >
                 {t("stepCode.createButton")}
               </RouterLinkButton>
-              <Divider borderColor="greys.grey03" my={4} />
+              <Separator borderColor="greys.grey03" my={4} />
               <Heading as="h3" mt={2} mb={1}>
                 {t("stepCode.index.lookupTitle")}
               </Heading>
               <Text mt={1}>
                 {t("stepCode.index.lookupDescriptionPrefix")}{" "}
-                <Link
-                  as={RouterLink}
-                  to="/project-readiness-tools/look-up-step-codes-requirements-for-your-project"
-                  color="text.link"
-                  textDecoration="underline"
-                >
-                  {t("stepCode.index.lookupDescriptionLinkLabel")}
+                <Link color="text.link" textDecoration="underline" asChild>
+                  <RouterLink to="/project-readiness-tools/look-up-step-codes-requirements-for-your-project">
+                    {t("stepCode.index.lookupDescriptionLinkLabel")}
+                  </RouterLink>
                 </Link>
                 .
               </Text>
             </Box>
           </Box>
           <Flex direction="column" gap={4} w="full">
-            <FormControl w="full">
+            <Field.Root w="full">
               <ModelSearchInput
                 searchModel={stepCodeStore}
                 inputProps={{ placeholder: t("ui.search"), width: "full" }}
                 inputGroupProps={{ width: "full" }}
               />
-            </FormControl>
+            </Field.Root>
             <StepCodeTypeFilter searchModel={stepCodeStore} />
           </Flex>
 

@@ -74,7 +74,6 @@ export const StepCodeBuildingPortionsGrid = observer(function StepCodeBuildingPo
       borderColor="borders.light"
     >
       <GridColumnHeader colSpan={2}>{t(`${i18nPrefix}.tableHeader`)}</GridColumnHeader>
-
       {/* Annual thermal energy demand row   */}
       <GridRowHeader>
         <HStack>
@@ -89,10 +88,10 @@ export const StepCodeBuildingPortionsGrid = observer(function StepCodeBuildingPo
         </HStack>
       </GridRowHeader>
       <GridData borderRightWidth={1}>
-        <Stack direction="column" spacing={1} align="center">
+        <Stack direction="column" gap={1} align="center">
           <Input
             value={formattedStepCodeAnnualThermalEnergyDemand}
-            onChange={handleChangeStepCodeAnnualThermalEnergyDemand}
+            onValueChange={handleChangeStepCodeAnnualThermalEnergyDemand}
             {...editableInputProps}
           />
           {errorMessage && (
@@ -102,11 +101,10 @@ export const StepCodeBuildingPortionsGrid = observer(function StepCodeBuildingPo
           )}
         </Stack>
       </GridData>
-
       {/* kWh/m2 */}
       <GridRowHeader>{t(`${i18nPrefix}.kwhM2`)}</GridRowHeader>
       <GridData borderRightWidth={1}>
-        <Input value={formattedStepCodeAnnualThermalEnergyDemandPerSquareMeter} isReadOnly {...disabledInputProps} />
+        <Input value={formattedStepCodeAnnualThermalEnergyDemandPerSquareMeter} readOnly {...disabledInputProps} />
       </GridData>
     </Grid>
   )

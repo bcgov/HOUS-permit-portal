@@ -1,4 +1,4 @@
-import { Box, Button, Heading, Icon, List, ListIcon, ListItem, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Heading, Icon, List, Text, VStack } from "@chakra-ui/react"
 import { CheckCircle, DownloadSimple, WarningCircle } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
@@ -51,8 +51,7 @@ export const Summary = observer(function Summary() {
       <Text mb={6} color="text.secondary">
         {t("overheatingCode.sections.summary.description")}
       </Text>
-
-      <VStack align="stretch" spacing={6}>
+      <VStack align="stretch" gap={6}>
         {/* Section completion checklist */}
         <Box bg="gray.50" borderRadius="md" p={5}>
           <Heading as="h3" size="sm" mb={3}>
@@ -61,19 +60,19 @@ export const Summary = observer(function Summary() {
               total: sections.length,
             })}
           </Heading>
-          <List spacing={2}>
+          <List.Root gap={2}>
             {sections.map((section) => (
-              <ListItem key={section.labelKey} display="flex" alignItems="center">
-                <ListIcon
+              <List.Item key={section.labelKey} display="flex" alignItems="center">
+                <List.Indicator
                   as={section.complete ? CheckCircle : WarningCircle}
                   color={section.complete ? "green.500" : "yellow.600"}
                   weight="regular"
                   boxSize={5}
                 />
                 <Text fontSize="sm">{t(`overheatingCode.sidebar.${section.labelKey}` as const as any)}</Text>
-              </ListItem>
+              </List.Item>
             ))}
-          </List>
+          </List.Root>
         </Box>
 
         {!allComplete && (
@@ -88,11 +87,11 @@ export const Summary = observer(function Summary() {
           <Button
             size="lg"
             variant="primary"
-            leftIcon={<Icon as={DownloadSimple} weight="bold" />}
             onClick={handleDownloadPdf}
-            isLoading={isDownloading}
+            loading={isDownloading}
             loadingText={t("overheatingCode.sections.summary.generating" as const as any)}
           >
+            <Icon as={DownloadSimple} weight="bold" />
             {t("overheatingCode.sections.summary.downloadReport" as const as any)}
           </Button>
           <Text fontSize="xs" color="text.secondary" mt={2}>

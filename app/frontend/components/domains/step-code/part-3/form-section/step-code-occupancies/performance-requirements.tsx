@@ -1,15 +1,5 @@
-import {
-  Flex,
-  FormControl,
-  FormHelperText,
-  FormLabel,
-  Grid,
-  Input,
-  Radio,
-  RadioGroup,
-  Stack,
-  Text,
-} from "@chakra-ui/react"
+import { RadioGroup } from "@/components/ui/radio"
+import { Field, Flex, Grid, Stack, Text } from "@chakra-ui/react"
 import { ErrorMessage } from "@hookform/error-message"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
@@ -128,7 +118,7 @@ export const StepCodeOccupanciesPerformanceRequirements = observer(
                 }}
               />
             </Text>
-            <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
+            <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} loading={isSubmitting} />
           </Flex>
         </FormProvider>
       </>
@@ -148,35 +138,39 @@ const OccupancyEnergyStep = observer(function OccupancyEnergyStep({ field, idx }
 
   return (
     <>
-      <FormControl>
-        <FormLabel>
+      <Field.Root>
+        <Field.Label>
           {t(`${i18nPrefix}.stepCodeRequirement.isCustom.label`, { occupancyName: t(`${oci18nPrefix}.${field.key}`) })}
-        </FormLabel>
-        <FormHelperText mb={1} mt={0}>
+        </Field.Label>
+        <Field.HelperText mb={1} mt={0}>
           {t(`${i18nPrefix}.stepCodeRequirement.isCustom.hint`)}
-        </FormHelperText>
-        <RadioGroup onChange={setIsRelevant} value={isRelevant}>
-          <Stack spacing={5} direction="row">
-            <Radio variant="binary" value={"yes"}>
-              {t("ui.yes")}
-            </Radio>
-            <Radio variant="binary" value={"no"}>
-              {t("ui.no")}
-            </Radio>
+        </Field.HelperText>
+        <RadioGroup.Root onValueChange={setIsRelevant} value={isRelevant}>
+          <Stack gap={5} direction="row">
+            <RadioGroup.Item variant="binary" value={"yes"}>
+              <RadioGroup.ItemHiddenInput />
+              <RadioGroup.ItemIndicator />
+              <RadioGroup.ItemText>{t("ui.yes")}</RadioGroup.ItemText>
+            </RadioGroup.Item>
+            <RadioGroup.Item variant="binary" value={"no"}>
+              <RadioGroup.ItemHiddenInput />
+              <RadioGroup.ItemIndicator />
+              <RadioGroup.ItemText>{t("ui.no")}</RadioGroup.ItemText>
+            </RadioGroup.Item>
           </Stack>
-        </RadioGroup>
-      </FormControl>
+        </RadioGroup.Root>
+      </Field.Root>
       {isRelevant == "yes" && (
         <>
-          <FormControl maxW="200px">
-            <FormLabel>
+          <Field.Root maxW="200px">
+            <Field.Label>
               {t(`${i18nPrefix}.stepCodeRequirement.energyStepRequired.label`, {
                 occupancyName: t(`${oci18nPrefix}.${field.key}`),
               })}
-            </FormLabel>
-            <FormHelperText mb={1} mt={0} color="semantic.error">
+            </Field.Label>
+            <Field.HelperText mb={1} mt={0} color="semantic.error">
               <ErrorMessage errors={errors} name={`stepCodeOccupanciesAttributes.${idx}.energyStepRequired`} />
-            </FormHelperText>
+            </Field.HelperText>
             <Controller
               control={control}
               rules={{ required: t(`${i18nPrefix}.stepCodeRequirement.energyStepRequired.error`) }}
@@ -185,19 +179,19 @@ const OccupancyEnergyStep = observer(function OccupancyEnergyStep({ field, idx }
                 return <EnergyStepSelect onChange={onChange} value={value} />
               }}
             />
-          </FormControl>
-          <FormControl>
-            <FormLabel>
+          </Field.Root>
+          <Field.Root>
+            <Field.Label>
               {t(`${i18nPrefix}.stepCodeRequirement.source.label`, {
                 occupancyName: t(`${oci18nPrefix}.${field.key}`),
               })}
-            </FormLabel>
-            <FormHelperText mb={1} mt={0}>
+            </Field.Label>
+            <Field.HelperText mb={1} mt={0}>
               {t(`${i18nPrefix}.stepCodeRequirement.source.hint`)}
-            </FormHelperText>
-            <FormHelperText mb={1} mt={0} color="semantic.error">
+            </Field.HelperText>
+            <Field.HelperText mb={1} mt={0} color="semantic.error">
               <ErrorMessage errors={errors} name={`stepCodeOccupanciesAttributes.${idx}.requirementSource`} />
-            </FormHelperText>
+            </Field.HelperText>
             <Input
               textAlign="left"
               maxW={"430px"}
@@ -205,7 +199,7 @@ const OccupancyEnergyStep = observer(function OccupancyEnergyStep({ field, idx }
                 required: t(`${i18nPrefix}.stepCodeRequirement.source.error`),
               })}
             />
-          </FormControl>
+          </Field.Root>
         </>
       )}
     </>
@@ -219,10 +213,10 @@ const OccupancyRow = observer(function OccupancyRow({ field, idx }: IOccupancyPr
   return (
     <>
       <GridData px={3}>
-        <Input isDisabled value={t(`stepCode.part3.stepCodeOccupancyKeys.${field.key}`)} />
+        <Input disabled value={t(`stepCode.part3.stepCodeOccupancyKeys.${field.key}`)} />
       </GridData>
       <GridData>
-        <FormControl>
+        <Field.Root>
           <Input
             type="number"
             step="any"
@@ -233,13 +227,13 @@ const OccupancyRow = observer(function OccupancyRow({ field, idx }: IOccupancyPr
               }),
             })}
           />
-          <FormHelperText color="semantic.error">
+          <Field.HelperText color="semantic.error">
             <ErrorMessage errors={errors} name={`stepCodeOccupanciesAttributes.${idx}.modelledFloorArea`} />
-          </FormHelperText>
-        </FormControl>
+          </Field.HelperText>
+        </Field.Root>
       </GridData>
       <GridData>
-        <FormControl>
+        <Field.Root>
           <Controller
             control={control}
             rules={{
@@ -255,10 +249,10 @@ const OccupancyRow = observer(function OccupancyRow({ field, idx }: IOccupancyPr
               return <ZeroCarbonStepSelect onChange={onChange} value={value} allowNull />
             }}
           />
-          <FormHelperText color="semantic.error">
+          <Field.HelperText color="semantic.error">
             <ErrorMessage errors={errors} name={`stepCodeOccupanciesAttributes.${idx}.zeroCarbonStepRequired`} />
-          </FormHelperText>
-        </FormControl>
+          </Field.HelperText>
+        </Field.Root>
       </GridData>
     </>
   )

@@ -1,4 +1,4 @@
-import { Tag, TagLabel, TagLeftIcon } from "@chakra-ui/react"
+import { Tag } from "@chakra-ui/react"
 import { Warning } from "@phosphor-icons/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -7,7 +7,7 @@ export const FileRemovedTag: React.FC = () => {
   const { t } = useTranslation()
 
   return (
-    <Tag
+    <Tag.Root
       size="sm"
       variant="solid"
       color="text.secondary"
@@ -15,10 +15,12 @@ export const FileRemovedTag: React.FC = () => {
       borderRadius="sm"
       px={2}
     >
-      <TagLeftIcon boxSize="12px" as={Warning} />
-      <TagLabel fontWeight="bold" fontSize="xs">
+      <Tag.StartElement boxSize="12px" asChild>
+        <Warning />
+      </Tag.StartElement>
+      <Tag.Label fontWeight="bold" fontSize="xs">
         {t("ui.fileRemoved")}
-      </TagLabel>
-    </Tag>
+      </Tag.Label>
+    </Tag.Root>
   )
 }

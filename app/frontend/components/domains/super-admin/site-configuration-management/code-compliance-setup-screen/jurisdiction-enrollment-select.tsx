@@ -34,7 +34,7 @@ export const JurisdictionEnrollmentSelect = observer(function JurisdictionEnroll
       onChange={onChange}
       onSave={onSave}
       onToggleEnabledForAll={onToggleEnabledForAll}
-      isLoading={isLoading}
+      loading={isLoading}
     />
   )
 })

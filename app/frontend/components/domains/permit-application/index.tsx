@@ -1,4 +1,4 @@
-import { Button, Container, Flex, FormControl, FormLabel, Heading } from "@chakra-ui/react"
+import { Button, Container, Field, Flex, Heading } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React from "react"
@@ -76,15 +76,15 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
             </Heading>
             <Flex align="flex-end" gap={4} direction={{ base: "column", md: "row" }}>
               {hasResetableFilters && (
-                <Button variant="link" mb={2} onClick={permitApplicationStore.resetFilters}>
+                <Button variant="plain" mb={2} onClick={permitApplicationStore.resetFilters}>
                   {t("ui.resetFilters")}
                 </Button>
               )}
               <PermitApplicationFiltersMenu />
-              <FormControl w="fit-content">
-                <FormLabel>{t("ui.search")}</FormLabel>
+              <Field.Root w="fit-content">
+                <Field.Label>{t("ui.search")}</Field.Label>
                 <ModelSearchInput searchModel={permitApplicationStore} />
-              </FormControl>
+              </Field.Root>
               <SortSelect
                 searchModel={permitApplicationStore}
                 i18nPrefix="permitApplication"

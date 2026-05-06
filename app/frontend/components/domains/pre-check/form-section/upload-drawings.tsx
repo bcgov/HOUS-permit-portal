@@ -1,19 +1,4 @@
-import {
-  Box,
-  Heading,
-  Icon,
-  IconButton,
-  ListItem,
-  Table,
-  TableContainer,
-  Tbody,
-  Td,
-  Text,
-  Th,
-  Thead,
-  Tr,
-  UnorderedList,
-} from "@chakra-ui/react"
+import { Box, Heading, Icon, IconButton, List, Table, Text } from "@chakra-ui/react"
 import { Trash } from "@phosphor-icons/react"
 import { UppyFile } from "@uppy/core"
 import "@uppy/core/dist/style.min.css"
@@ -130,52 +115,53 @@ export const UploadDrawings = observer(function UploadDrawings() {
           "Upload a single PDF that includes the drawings you would normally submit with a building permit application."
         )}
       </Text>
-
       <Heading as="h3" size="md" mb={4}>
         {t("preCheck.sections.uploadDrawings.fileRequirementsTitle", "File requirements")}
       </Heading>
-      <UnorderedList pl={6} mb={6}>
-        <ListItem>{t("preCheck.sections.uploadDrawings.requirement1", "PDF format only")}</ListItem>
-        <ListItem>{t("preCheck.sections.uploadDrawings.requirement2", "One file, not multiple PDFs")}</ListItem>
-        <ListItem>
+      <List.Root as="ul" pl={6} mb={6}>
+        <List.Item>{t("preCheck.sections.uploadDrawings.requirement1", "PDF format only")}</List.Item>
+        <List.Item>{t("preCheck.sections.uploadDrawings.requirement2", "One file, not multiple PDFs")}</List.Item>
+        <List.Item>
           {t(
             "preCheck.sections.uploadDrawings.requirement3",
             "Architectural drawings must be legible and properly scaled"
           )}
-        </ListItem>
-        <ListItem>{t("preCheck.sections.uploadDrawings.requirement4", "Maximum file size: 200 MB")}</ListItem>
-      </UnorderedList>
-
+        </List.Item>
+        <List.Item>{t("preCheck.sections.uploadDrawings.requirement4", "Maximum file size: 200 MB")}</List.Item>
+      </List.Root>
       {designDocumentsAttributes && designDocumentsAttributes.length > 0 && (
-        <TableContainer mb={6}>
-          <Table variant="simple" size="sm">
-            <Thead bg="gray.50">
-              <Tr>
-                <Th width="40px" fontWeight="bold"></Th>
-                <Th fontWeight="bold" textTransform="capitalize">
+        <Table.ScrollArea mb={6}>
+          <Table.Root variant="line" size="sm">
+            <Table.Header bg="gray.50">
+              <Table.Row>
+                <Table.ColumnHeader width="40px" fontWeight="bold"></Table.ColumnHeader>
+                <Table.ColumnHeader fontWeight="bold" textTransform="capitalize">
                   {t("preCheck.sections.uploadDrawings.fileName", "File Name")}
-                </Th>
-                <Th isNumeric fontWeight="bold" textTransform="capitalize">
+                </Table.ColumnHeader>
+                <Table.ColumnHeader fontWeight="bold" textTransform="capitalize" textAlign="end">
                   {t("preCheck.sections.uploadDrawings.size", "Size")}
-                </Th>
-              </Tr>
-            </Thead>
-            <Tbody>
+                </Table.ColumnHeader>
+              </Table.Row>
+            </Table.Header>
+            <Table.Body>
               {designDocumentsAttributes.map((doc) => (
-                <Tr key={doc.id || doc.file?.id}>
-                  <Td>
+                <Table.Row key={doc.id || doc.file?.id}>
+                  <Table.Cell>
                     {!currentPreCheck?.isSubmitted && !doc._destroy && (
                       <IconButton
                         aria-label={t("ui.remove")}
                         color="semantic.error"
-                        icon={<Icon as={Trash} />}
                         variant="ghost"
                         size="xs"
                         onClick={() => handleRemoveFile(doc.id || doc.file?.id)}
-                      />
+                      >
+                        <Icon asChild>
+                          <Trash />
+                        </Icon>
+                      </IconButton>
                     )}
-                  </Td>
-                  <Td>
+                  </Table.Cell>
+                  <Table.Cell>
                     {doc.id ? (
                       <FileDownloadButton document={doc} modelType={EFileUploadAttachmentType.DesignDocument} />
                     ) : (
@@ -187,23 +173,21 @@ export const UploadDrawings = observer(function UploadDrawings() {
                         {doc.file?.metadata?.filename}
                       </Text>
                     )}
-                  </Td>
-                  <Td isNumeric>
+                  </Table.Cell>
+                  <Table.Cell textAlign="end">
                     <Text color="gray.600">{formatFileSize(doc.file?.metadata?.size)}</Text>
-                  </Td>
-                </Tr>
+                  </Table.Cell>
+                </Table.Row>
               ))}
-            </Tbody>
-          </Table>
-        </TableContainer>
+            </Table.Body>
+          </Table.Root>
+        </Table.ScrollArea>
       )}
-
       {!currentPreCheck?.isSubmitted && !currentPreCheck?.isUploadDrawingsComplete && (
         <Box position="relative" mb={6}>
           <Dashboard uppy={uppy} width="100%" height={276} proudlyDisplayPoweredByUppy={false} />
         </Box>
       )}
-
       <Box mb={6}>
         <Heading as="h3" size="md" mb={3}>
           {t("preCheck.sections.uploadDrawings.protectionTitle", "How {{provider}} protects and stores your drawings", {
@@ -220,8 +204,7 @@ export const UploadDrawings = observer(function UploadDrawings() {
           )}
         </Text>
       </Box>
-
-      <FormFooter<IUploadDrawingsFormData> handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
+      <FormFooter<IUploadDrawingsFormData> handleSubmit={handleSubmit} onSubmit={onSubmit} loading={isSubmitting} />
     </Box>
   )
 })

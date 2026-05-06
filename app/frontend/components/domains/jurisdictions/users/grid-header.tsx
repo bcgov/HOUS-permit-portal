@@ -21,15 +21,17 @@ export const GridHeaders = observer(function GridHeaders() {
     <Box display={"contents"} role={"rowgroup"}>
       <Box display={"contents"} role={"row"}>
         <GridItem
-          as={Flex}
           gridColumn={"span 6"}
           p={6}
           bg={"greys.grey10"}
           justifyContent={"space-between"}
           align="center"
+          asChild
         >
-          <Text role={"heading"}>{t("user.index.tableHeading")}</Text>
-          <ModelSearchInput searchModel={userStore} />
+          <Flex>
+            <Text role={"heading"}>{t("user.index.tableHeading")}</Text>
+            <ModelSearchInput searchModel={userStore} />
+          </Flex>
         </GridItem>
       </Box>
       <Box display={"contents"} role={"row"}>
@@ -37,16 +39,17 @@ export const GridHeaders = observer(function GridHeaders() {
           <GridHeader key={field} role={"columnheader"}>
             <Flex
               w={"full"}
-              as={"button"}
               justifyContent={"space-between"}
               cursor="pointer"
-              onClick={() => toggleSort(field)}
               borderRight={"1px solid"}
               borderColor={"border.light"}
               px={4}
+              asChild
             >
-              <Text textAlign="left">{getSortColumnHeader(field)}</Text>
-              <SortIcon<EUserSortFields> field={field} currentSort={sort} />
+              <button onClick={() => toggleSort(field)}>
+                <Text textAlign="left">{getSortColumnHeader(field)}</Text>
+                <SortIcon<EUserSortFields> field={field} currentSort={sort} />
+              </button>
             </Flex>
           </GridHeader>
         ))}

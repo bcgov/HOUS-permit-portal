@@ -9,8 +9,8 @@ interface IYesNoTagProps {
 export const YesNoTag = ({ boolean }: IYesNoTagProps) => {
   const { t } = useTranslation()
   return (
-    <Tag p={1} px={2} backgroundColor={boolean ? "semantic.successLight" : "greys.grey03"}>
+    <Tag.Root p={1} px={2} backgroundColor={boolean ? "semantic.successLight" : "greys.grey03"}>
       {t(boolean ? "ui.yes" : "ui.no")}
-    </Tag>
+    </Tag.Root>
   )
 }

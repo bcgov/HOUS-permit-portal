@@ -1,4 +1,4 @@
-import { Box, Button, Container, HStack, Heading, Menu, MenuButton, MenuItem, MenuList, Text } from "@chakra-ui/react"
+import { Box, Button, Container, HStack, Heading, Menu, Portal, Text } from "@chakra-ui/react"
 import { Export, FileCsv } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -20,19 +20,26 @@ export const ExportTemplateSummaryScreen = observer(function ExportTemplateSumma
 
         <DigitalBuildingPermitsList
           renderButton={(templateVersion) => (
-            <Menu>
-              <MenuButton as={Button} aria-label="Options" variant="secondary" rightIcon={<Export />} px={2}>
-                {t("ui.export")}
-              </MenuButton>
-              <MenuList>
-                <MenuItem onClick={() => templateVersion.downloadRequirementSummary()}>
-                  <HStack spacing={2} fontSize={"sm"}>
-                    <FileCsv size={24} />
-                    <Text as={"span"}>{t("requirementTemplate.export.downloadSummaryCsv")}</Text>
-                  </HStack>
-                </MenuItem>
-              </MenuList>
-            </Menu>
+            <Menu.Root>
+              <Menu.Trigger asChild>
+                <Button aria-label="Options" variant="secondary" px={2}>
+                  {t("ui.export")}
+                  <Export />
+                </Button>
+              </Menu.Trigger>
+              <Portal>
+                <Menu.Positioner>
+                  <Menu.Content>
+                    <Menu.Item onSelect={() => templateVersion.downloadRequirementSummary()} value="item-0">
+                      <HStack gap={2} fontSize={"sm"}>
+                        <FileCsv size={24} />
+                        <Text as={"span"}>{t("requirementTemplate.export.downloadSummaryCsv")}</Text>
+                      </HStack>
+                    </Menu.Item>
+                  </Menu.Content>
+                </Menu.Positioner>
+              </Portal>
+            </Menu.Root>
           )}
         />
       </Box>

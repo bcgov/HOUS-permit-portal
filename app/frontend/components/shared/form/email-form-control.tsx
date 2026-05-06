@@ -1,14 +1,12 @@
+import { InputGroup } from "@/components/ui/input-group"
 import {
+  Field,
   Flex,
-  FormControl,
   FormControlProps,
-  FormErrorMessage,
-  FormLabel,
   HStack,
   IconButton,
   Input,
-  InputGroup,
-  InputLeftElement,
+  InputElement,
   InputProps,
   Text,
 } from "@chakra-ui/react"
@@ -20,6 +18,7 @@ import { EMAIL_REGEX } from "../../../constants"
 import { fieldArrayCompatibleErrorMessage } from "./form-helpers"
 
 interface IEmailFormControlProps extends FormControlProps {
+  pos?: string
   validate?: boolean
   label?: string
   required?: boolean
@@ -52,18 +51,18 @@ export const EmailFormControl = ({
   const errorMessage = fieldName && fieldArrayCompatibleErrorMessage(fieldName, formState?.errors)
 
   return (
-    <FormControl isInvalid={errorMessage && !inputProps?.isDisabled} {...rest}>
+    <Field.Root invalid={errorMessage && !(inputProps?.disabled ?? inputProps?.isDisabled)} {...rest}>
       <HStack gap={0}>
         {!hideLabel && (
           <>
-            <FormLabel>
+            <Field.Label>
               {label || t("auth.emailLabel")}
               {required && (
                 <Text as="span" color="semantic.error" ml={1}>
                   *
                 </Text>
               )}
-            </FormLabel>
+            </Field.Label>
             {!required && showOptional && (
               <Text ml={-2} mb={1}>
                 {t("ui.optional")}
@@ -75,13 +74,13 @@ export const EmailFormControl = ({
       <Flex>
         <InputGroup pos="relative">
           {showIcon && (
-            <InputLeftElement pointerEvents="none">
+            <InputElement pointerEvents="none">
               <Envelope
                 color={
                   inputProps?.isDisabled ? "var(--chakra-colors-greys-grey01)" : "var(--chakra-colors-text-primary)"
                 }
               />
-            </InputLeftElement>
+            </InputElement>
           )}
           <Input
             {...(fieldName &&
@@ -108,11 +107,12 @@ export const EmailFormControl = ({
             alignSelf="center"
             bg="transparent"
             aria-label="Remove"
-            icon={<X size={"10px"} color="text.primary" />}
-          />
+          >
+            <X size={"10px"} color="text.primary" />
+          </IconButton>
         )}
       </Flex>
-      {errorMessage && !inputProps?.isDisabled && <FormErrorMessage>{String(errorMessage)}</FormErrorMessage>}
-    </FormControl>
+      {errorMessage && !inputProps?.isDisabled && <Field.ErrorText>{String(errorMessage)}</Field.ErrorText>}
+    </Field.Root>
   )
 }

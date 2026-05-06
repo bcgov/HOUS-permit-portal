@@ -1,4 +1,4 @@
-import { Avatar, AvatarProps } from "@chakra-ui/react"
+import { Avatar } from "@chakra-ui/react"
 import React from "react"
 import { EUserRoles } from "../../../types/enums"
 
@@ -21,7 +21,7 @@ export function getRoleAvatarColors(role?: string | null): { bg: string; color: 
   }
 }
 
-interface ISharedAvatarProps extends Omit<AvatarProps, "bg" | "color"> {
+interface ISharedAvatarProps extends Omit<React.ComponentProps<typeof Avatar.Root>, "bg" | "color"> {
   role?: string | null
 }
 
@@ -30,5 +30,9 @@ export const SharedAvatar = React.forwardRef<HTMLSpanElement, ISharedAvatarProps
   ref
 ) {
   const colors = getRoleAvatarColors(role)
-  return <Avatar ref={ref} bg={colors.bg} color={colors.color} {...rest} />
+  return (
+    <Avatar.Root ref={ref} bg={colors.bg} color={colors.color} {...rest}>
+      <Avatar.Fallback />
+    </Avatar.Root>
+  )
 })

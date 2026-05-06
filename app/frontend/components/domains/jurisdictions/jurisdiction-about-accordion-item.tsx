@@ -1,4 +1,4 @@
-import { AccordionButton, AccordionIcon, AccordionItem, AccordionPanel, Heading } from "@chakra-ui/react"
+import { Accordion, Heading } from "@chakra-ui/react"
 import React from "react"
 
 export type TJurisdictionAboutAccordionItemProps = {
@@ -17,15 +17,16 @@ export function JurisdictionAboutAccordionItem({
   children,
 }: TJurisdictionAboutAccordionItemProps) {
   return (
-    <AccordionItem
+    <Accordion.Item
       display="flex"
       flexDirection="column"
       border="none"
       borderTop={showTopSeparator ? "1px solid" : "none"}
       borderColor={showTopSeparator ? "theme.yellow" : undefined}
       gap={4}
+      value="item-0"
     >
-      <AccordionButton
+      <Accordion.ItemTrigger
         display="flex"
         justifyContent="space-between"
         alignItems={useYellowlineHeading ? "flex-start" : "center"}
@@ -46,11 +47,11 @@ export function JurisdictionAboutAccordionItem({
         >
           {title}
         </Heading>
-        <AccordionIcon alignSelf="center" fontSize="2xl" fontWeight="light" />
-      </AccordionButton>
-      <AccordionPanel px={{ base: 4, md: 0 }} py="0">
-        {children}
-      </AccordionPanel>
-    </AccordionItem>
+        <Accordion.ItemIndicator alignSelf="center" fontSize="2xl" fontWeight="light" />
+      </Accordion.ItemTrigger>
+      <Accordion.ItemContent px={{ base: 4, md: 0 }} py="0">
+        <Accordion.ItemBody>{children}</Accordion.ItemBody>
+      </Accordion.ItemContent>
+    </Accordion.Item>
   )
 }

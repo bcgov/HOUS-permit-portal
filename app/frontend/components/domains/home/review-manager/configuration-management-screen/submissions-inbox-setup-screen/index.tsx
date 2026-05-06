@@ -27,7 +27,8 @@ export const SubmissionsInboxSetupScreen: React.FC = observer(function Submissio
   return (
     <Container maxW="container.lg" p={8} as={"main"}>
       <VStack alignItems={"flex-start"} w={"full"} h={"full"} gap={6}>
-        <Button variant="link" onClick={() => navigate(-1)} leftIcon={<CaretLeft size={20} />} textDecoration="none">
+        <Button variant="plain" onClick={() => navigate(-1)} textDecoration="none">
+          <CaretLeft size={20} />
           {t("ui.back")}
         </Button>
         <Flex align="center" w="100%" direction="column" alignItems="flex-start">
@@ -40,7 +41,7 @@ export const SubmissionsInboxSetupScreen: React.FC = observer(function Submissio
         </Flex>
       </VStack>
       {/* Content from original SubmissionsInboxSetupScreen's VStack */}
-      <VStack spacing={8} align="start" w="full" mt={8}>
+      <VStack gap={8} align="start" w="full" mt={8}>
         <Suspense fallback={<LoadingScreen />}>
           {currentJurisdiction && <Form jurisdiction={currentJurisdiction} />}
         </Suspense>
@@ -54,7 +55,7 @@ export const SubmissionsInboxSetupScreen: React.FC = observer(function Submissio
           {t(`${i18nPrefix}.switchButtonInstructions`)}
         </Text>
         <SwitchButton
-          isChecked={currentJurisdiction?.inboxEnabled ?? false}
+          checked={currentJurisdiction?.inboxEnabled ?? false}
           onChange={(e) => handleToggle(e.target.checked)}
           size={"lg"}
         />

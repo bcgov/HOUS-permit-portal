@@ -1,4 +1,4 @@
-import { Button, Container, Divider, Flex, GridItem, Heading, Text, VStack } from "@chakra-ui/react"
+import { Button, Container, Flex, GridItem, Heading, Separator, Text, VStack } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { Suspense, useEffect, useState } from "react"
@@ -67,7 +67,7 @@ const Content = observer(function Content({ invitedUser }: Readonly<IProps>) {
               <Trans i18nKey="user.invitedBy" values={{ email: invitedByEmail }} />
             </Text>
 
-            <VStack spacing={4} w="full" p={4} bg="theme.blueLight" rounded="sm" textAlign="center">
+            <VStack gap={4} w="full" p={4} bg="theme.blueLight" rounded="sm" textAlign="center">
               <Heading as="h2" m={0}>
                 {defaultedJurisdiction.qualifiedName}
               </Heading>
@@ -87,7 +87,7 @@ const Content = observer(function Content({ invitedUser }: Readonly<IProps>) {
           <Trans i18nKey="user.invitationIntent" values={{ email }} />
         </Text>
 
-        <Divider my={4} />
+        <Separator my={4} />
 
         {loggedIn ? (
           <AcceptInviteForm />
@@ -111,13 +111,13 @@ const Content = observer(function Content({ invitedUser }: Readonly<IProps>) {
 
         {!isSuperAdmin && (
           <>
-            <Divider my={4} />
+            <Separator my={4} />
             <LgBusinessBCeIDInfo />
             <LgBasicBCeIDInfo />
 
             <HelpDrawer
               renderTriggerButton={({ onClick }) => (
-                <Button variant="link" onClick={onClick}>
+                <Button variant="plain" onClick={onClick}>
                   {t("ui.help")}
                 </Button>
               )}
@@ -164,7 +164,7 @@ const AcceptInviteForm = observer(function AcceptInviteForm() {
   }
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <Button variant="primary" w="full" type="submit" isDisabled={isSubmitting}>
+      <Button variant="primary" w="full" type="submit" disabled={isSubmitting}>
         {t("user.acceptInvitation")}
       </Button>
     </form>

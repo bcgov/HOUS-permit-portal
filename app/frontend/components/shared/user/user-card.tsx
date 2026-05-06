@@ -14,7 +14,14 @@ export const UserCard = ({ user, compact = false, placeholder, avatarProps = {} 
 
   return (
     <HStack>
-      {user ? <Avatar src={null} name={name} size="sm" fontFamily="body" {...avatarProps} /> : placeholder}
+      {user ? (
+        <Avatar.Root size="sm" fontFamily="body" {...avatarProps}>
+          <Avatar.Fallback name={name} />
+          <Avatar.Image src={null} />
+        </Avatar.Root>
+      ) : (
+        placeholder
+      )}
       {!compact && (
         <Text fontSize="sm" color={"black"} fontStyle={"normal"} textTransform="none" letterSpacing="normal">
           {name}

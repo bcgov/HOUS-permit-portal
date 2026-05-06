@@ -1,4 +1,4 @@
-import { Flex, FormControl, FormHelperText, Heading, Input, Text } from "@chakra-ui/react"
+import { Field, Flex, Heading, Input, Text } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -71,7 +71,7 @@ export const StepCodeSummary = observer(function StepCodeSummary() {
           <MixedUsePerformance />
         </Flex>
       )}
-      <FormControl>
+      <Field.Root>
         <Flex gap={4} align="center">
           {isSubmitting && <SharedSpinner m={0} />}
           {!isSubmitting && currentStepCode?.latestReportDocument && (
@@ -83,8 +83,8 @@ export const StepCodeSummary = observer(function StepCodeSummary() {
             />
           )}
         </Flex>
-      </FormControl>
-      <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
+      </Field.Root>
+      <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} loading={isSubmitting} />
     </Flex>
   )
 })

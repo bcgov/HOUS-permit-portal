@@ -1,14 +1,4 @@
-import {
-  Accordion,
-  AccordionButton,
-  AccordionIcon,
-  AccordionItem,
-  AccordionPanel,
-  Box,
-  Flex,
-  Heading,
-  Text,
-} from "@chakra-ui/react"
+import { Accordion, Box, Flex, Heading, Text } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
@@ -66,22 +56,24 @@ export const BaselineDetails = observer(function Part3StepCodeFormBaselineDetail
       </Flex>
       <FormProvider {...formMethods}>
         <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
-          <Accordion defaultIndex={[...Array(checklist.baselineOccupancies.length).keys()]} allowMultiple>
+          <Accordion.Root defaultValue={[...Array(checklist.baselineOccupancies.length).keys()]} multiple>
             {checklist.baselineOccupancies.map((oc, idx) => (
-              <AccordionItem border="none" key={oc.id}>
-                <AccordionButton bg="greys.grey04" rounded="lg">
+              <Accordion.Item border="none" key={oc.id} value="item-0">
+                <Accordion.ItemTrigger bg="greys.grey04" rounded="lg">
                   <Box as="span" flex="1" textAlign="left">
                     {t(`stepCode.part3.baselineOccupancyKeys.${oc.key}`)}
                   </Box>
-                  <AccordionIcon />
-                </AccordionButton>
-                <AccordionPanel pb={4}>
-                  <OccupancyPanel occupancy={oc} idx={idx} />
-                </AccordionPanel>
-              </AccordionItem>
+                  <Accordion.ItemIndicator />
+                </Accordion.ItemTrigger>
+                <Accordion.ItemContent pb={4}>
+                  <Accordion.ItemBody>
+                    <OccupancyPanel occupancy={oc} idx={idx} />
+                  </Accordion.ItemBody>
+                </Accordion.ItemContent>
+              </Accordion.Item>
             ))}
-          </Accordion>
-          <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
+          </Accordion.Root>
+          <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} loading={isSubmitting} />
         </Flex>
       </FormProvider>
     </>

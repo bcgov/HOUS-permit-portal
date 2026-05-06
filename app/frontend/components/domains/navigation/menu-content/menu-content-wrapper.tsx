@@ -7,7 +7,7 @@ interface IMenuContentWrapperProps {
 
 export const MenuContentWrapper: React.FC<IMenuContentWrapperProps> = ({ children }) => {
   return (
-    <VStack align="flex-start" spacing={4} w="full">
+    <VStack align="flex-start" gap={4} w="full">
       {children}
     </VStack>
   )

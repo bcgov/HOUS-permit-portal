@@ -1,4 +1,5 @@
-import { Button, IconButton, Menu, MenuButton, MenuItem, MenuList, Portal, Tooltip } from "@chakra-ui/react"
+import { Tooltip } from "@/components/ui/tooltip"
+import { Button, IconButton, Menu, Portal } from "@chakra-ui/react"
 import { Swap } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -26,42 +27,56 @@ export const ChangeProjectStateMenu = observer(function ChangeProjectStateMenu({
   if (project.allowedManualTransitions.length === 0) return null
 
   return (
-    <Menu>
+    <Menu.Root>
       {compact ? (
-        <Tooltip label={t("submissionInbox.changeStatus")} hasArrow placement="top">
-          <MenuButton
-            as={IconButton}
-            aria-label={t("submissionInbox.changeStatus")}
-            icon={<Swap size={16} />}
-            size="sm"
-            minW={7}
-            h={7}
-            variant="ghost"
-          />
+        <Tooltip
+          content={t("submissionInbox.changeStatus")}
+          showArrow
+          positioning={{
+            placement: "top",
+          }}
+        >
+          <Menu.Trigger asChild>
+            <IconButton
+              aria-label={t("submissionInbox.changeStatus")}
+              icon={<Swap size={16} />}
+              size="sm"
+              minW={7}
+              h={7}
+              variant="ghost"
+            ></IconButton>
+          </Menu.Trigger>
         </Tooltip>
       ) : (
-        <MenuButton as={Button} variant="link" fontWeight="normal" color="text.link" textDecoration="underline">
-          {triggerLabel ?? t("submissionInbox.changeState")}
-        </MenuButton>
+        <Menu.Trigger asChild>
+          <Button variant="link" fontWeight="normal" color="text.link" textDecoration="underline">
+            {triggerLabel ?? t("submissionInbox.changeState")}
+          </Button>
+        </Menu.Trigger>
       )}
       <Portal>
-        <MenuList zIndex={10}>
-          {project.allowedManualTransitions.map((transition) => (
-            <MenuItem
-              key={transition}
-              fontSize="sm"
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                project.transitionState(transition)
-              }}
-            >
-              {/* @ts-ignore */}
-              {t(`submissionInbox.projectStates.${transition}`)}
-            </MenuItem>
-          ))}
-        </MenuList>
+        <Portal>
+          <Menu.Positioner>
+            <Menu.Content>
+              {project.allowedManualTransitions.map((transition) => (
+                <Menu.Item
+                  key={transition}
+                  fontSize="sm"
+                  onSelect={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    project.transitionState(transition)
+                  }}
+                  value="item-0"
+                >
+                  {/* @ts-ignore */}
+                  {t(`submissionInbox.projectStates.${transition}`)}
+                </Menu.Item>
+              ))}
+            </Menu.Content>
+          </Menu.Positioner>
+        </Portal>
       </Portal>
-    </Menu>
+    </Menu.Root>
   )
 })

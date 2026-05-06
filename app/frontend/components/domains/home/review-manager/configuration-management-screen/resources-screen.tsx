@@ -1,20 +1,13 @@
+import { RadioGroup } from "@/components/ui/radio"
 import {
   Box,
   Button,
   Container,
+  Dialog,
+  Field,
   Flex,
-  FormControl,
-  FormLabel,
   Heading,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Radio,
-  RadioGroup,
+  Portal,
   Stack,
   Tag,
   Text,
@@ -80,7 +73,7 @@ export const ResourcesScreen = observer(function ResourcesScreen() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { currentJurisdiction, error } = useJurisdiction()
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { open, onOpen, onClose } = useDisclosure()
   const [editingResource, setEditingResource] = useState<IResource | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const modalContainerRef = useRef<HTMLDivElement>(null)
@@ -240,22 +233,24 @@ export const ResourcesScreen = observer(function ResourcesScreen() {
     <Flex as="main" direction="column" w="full" bg="greys.white" pb="24">
       <BlueTitleBar title={currentJurisdiction.qualifiedName} />
       <Container maxW="container.lg" py={{ base: 6, md: 16 }} px={8}>
-        <VStack spacing={4} align="start" w="full">
-          <Button variant="link" onClick={() => navigate(-1)} leftIcon={<CaretLeft size={20} />} textDecoration="none">
+        <VStack gap={4} align="start" w="full">
+          <Button variant="plain" onClick={() => navigate(-1)} textDecoration="none">
+            <CaretLeft size={20} />
             {t("ui.back")}
           </Button>
           <Flex justify="space-between" w="full">
             <Text as="h1" fontSize="3xl" fontWeight="bold" mb={0}>
               {t("home.configurationManagement.resources.title")}
             </Text>
-            <Button variant="primary" leftIcon={<Plus size={20} />} onClick={() => handleOpenModal()}>
+            <Button variant="primary" onClick={() => handleOpenModal()}>
+              <Plus size={20} />
               {t("home.configurationManagement.resources.addResource")}
             </Button>
           </Flex>
           <Text color="text.secondary" fontSize="lg" mt={2}>
             {t("home.configurationManagement.resources.description")}
           </Text>
-          <VStack spacing={6} align="stretch" w="full">
+          <VStack gap={6} align="stretch" w="full">
             {Object.values(EResourceCategory).map((category) => {
               const categoryResources = getResourcesByCategory(category)
               if (categoryResources.length === 0) return null
@@ -265,7 +260,7 @@ export const ResourcesScreen = observer(function ResourcesScreen() {
                   <Heading as="h3" fontSize="lg" fontWeight={700} mb={3}>
                     {t(`jurisdiction.resources.categories.${category as EResourceCategory}`)}
                   </Heading>
-                  <VStack spacing={4} w="full" alignItems="stretch">
+                  <VStack gap={4} w="full" alignItems="stretch">
                     {categoryResources.map((resource) => (
                       <ResourceInputCard
                         key={resource.id}
@@ -281,87 +276,112 @@ export const ResourcesScreen = observer(function ResourcesScreen() {
           </VStack>
         </VStack>
       </Container>
+      <Dialog.Root
+        open={open}
+        size="xl"
+        onOpenChange={(e) => {
+          if (!e.open) {
+            handleCloseModal()
+          }
+        }}
+      >
+        <Portal>
+          <Dialog.Backdrop />
+          <FormProvider {...modalFormMethods}>
+            <Dialog.Positioner>
+              <Dialog.Content asChild>
+                <form onSubmit={modalHandleSubmit(onModalSubmit)}>
+                  <Dialog.Header>
+                    <Dialog.CloseTrigger />
+                    {editingResource
+                      ? t("home.configurationManagement.resources.editResource")
+                      : t("home.configurationManagement.resources.addResource")}
+                  </Dialog.Header>
+                  <Dialog.Body>
+                    <VStack gap={4} align="stretch">
+                      <SelectFormControl
+                        label={t("home.configurationManagement.resources.category")}
+                        fieldName="category"
+                        required
+                        options={Object.values(EResourceCategory).map((cat) => ({
+                          label: t(`jurisdiction.resources.categories.${cat}`),
+                          value: cat,
+                        }))}
+                      />
 
-      <Modal onClose={handleCloseModal} isOpen={isOpen} size="2xl">
-        <ModalOverlay />
-        <FormProvider {...modalFormMethods}>
-          <ModalContent as="form" onSubmit={modalHandleSubmit(onModalSubmit)}>
-            <ModalHeader>
-              <ModalCloseButton />
-              {editingResource
-                ? t("home.configurationManagement.resources.editResource")
-                : t("home.configurationManagement.resources.addResource")}
-            </ModalHeader>
-            <ModalBody>
-              <VStack spacing={4} align="stretch">
-                <SelectFormControl
-                  label={t("home.configurationManagement.resources.category")}
-                  fieldName="category"
-                  required
-                  options={Object.values(EResourceCategory).map((cat) => ({
-                    label: t(`jurisdiction.resources.categories.${cat}`),
-                    value: cat,
-                  }))}
-                />
+                      <TextFormControl
+                        label={t("home.configurationManagement.resources.titleLabel")}
+                        fieldName="title"
+                        required
+                      />
 
-                <TextFormControl
-                  label={t("home.configurationManagement.resources.titleLabel")}
-                  fieldName="title"
-                  required
-                />
+                      <TextAreaFormControl
+                        label={t("home.configurationManagement.resources.descriptionLabel")}
+                        fieldName="description"
+                      />
 
-                <TextAreaFormControl
-                  label={t("home.configurationManagement.resources.descriptionLabel")}
-                  fieldName="description"
-                />
+                      <Field.Root>
+                        <Field.Label>{t("home.configurationManagement.resources.resourceType")}</Field.Label>
+                        <RadioGroup.Root
+                          value={resourceType}
+                          onValueChange={(value) => {
+                            modalSetValue("resourceType", value)
+                            if (value === EResourceType.file) {
+                              modalSetValue("linkUrl", "")
+                            } else {
+                              modalSetValue("resourceDocumentAttributes", undefined)
+                            }
+                          }}
+                        >
+                          <Stack direction="row" gap={4}>
+                            <RadioGroup.Item value={EResourceType.file}>
+                              <RadioGroup.ItemHiddenInput />
+                              <RadioGroup.ItemIndicator />
+                              <RadioGroup.ItemText>
+                                {t("home.configurationManagement.resources.types.file")}
+                              </RadioGroup.ItemText>
+                            </RadioGroup.Item>
+                            <RadioGroup.Item value={EResourceType.link}>
+                              <RadioGroup.ItemHiddenInput />
+                              <RadioGroup.ItemIndicator />
+                              <RadioGroup.ItemText>
+                                {t("home.configurationManagement.resources.types.link")}
+                              </RadioGroup.ItemText>
+                            </RadioGroup.Item>
+                          </Stack>
+                        </RadioGroup.Root>
+                      </Field.Root>
 
-                <FormControl>
-                  <FormLabel>{t("home.configurationManagement.resources.resourceType")}</FormLabel>
-                  <RadioGroup
-                    value={resourceType}
-                    onChange={(value) => {
-                      modalSetValue("resourceType", value)
-                      if (value === EResourceType.file) {
-                        modalSetValue("linkUrl", "")
-                      } else {
-                        modalSetValue("resourceDocumentAttributes", undefined)
-                      }
-                    }}
-                  >
-                    <Stack direction="row" spacing={4}>
-                      <Radio value={EResourceType.file}>{t("home.configurationManagement.resources.types.file")}</Radio>
-                      <Radio value={EResourceType.link}>{t("home.configurationManagement.resources.types.link")}</Radio>
-                    </Stack>
-                  </RadioGroup>
-                </FormControl>
-
-                {resourceType === EResourceType.file ? (
-                  <Box ref={modalContainerRef}>
-                    <FormLabel>{t("home.configurationManagement.resources.file")}</FormLabel>
-                    <Box position="relative" mt={2}>
-                      <Dashboard uppy={modalUppy} height={300} width="100%" proudlyDisplayPoweredByUppy={false} />
-                    </Box>
-                  </Box>
-                ) : (
-                  <UrlFormControl
-                    label={t("home.configurationManagement.resources.linkUrl")}
-                    fieldName="linkUrl"
-                    required
-                  />
-                )}
-              </VStack>
-            </ModalBody>
-            <ModalFooter>
-              <Button variant="ghost" mr={3} onClick={handleCloseModal} isDisabled={isSubmitting}>
-                {t("ui.cancel")}
-              </Button>
-              <Button type="submit" variant="primary" isLoading={isSubmitting}>
-                {t("ui.save")}
-              </Button>
-            </ModalFooter>
-          </ModalContent>
-        </FormProvider>
-      </Modal>
+                      {resourceType === EResourceType.file ? (
+                        <Box ref={modalContainerRef}>
+                          <Field.Label>{t("home.configurationManagement.resources.file")}</Field.Label>
+                          <Box position="relative" mt={2}>
+                            <Dashboard uppy={modalUppy} height={300} width="100%" proudlyDisplayPoweredByUppy={false} />
+                          </Box>
+                        </Box>
+                      ) : (
+                        <UrlFormControl
+                          label={t("home.configurationManagement.resources.linkUrl")}
+                          fieldName="linkUrl"
+                          required
+                        />
+                      )}
+                    </VStack>
+                  </Dialog.Body>
+                  <Dialog.Footer>
+                    <Button variant="ghost" mr={3} onClick={handleCloseModal} disabled={isSubmitting}>
+                      {t("ui.cancel")}
+                    </Button>
+                    <Button type="submit" variant="primary" loading={isSubmitting}>
+                      {t("ui.save")}
+                    </Button>
+                  </Dialog.Footer>
+                </form>
+              </Dialog.Content>
+            </Dialog.Positioner>
+          </FormProvider>
+        </Portal>
+      </Dialog.Root>
     </Flex>
   )
 })
@@ -391,7 +411,7 @@ const ResourceInputCard: React.FC<IResourceInputCardProps> = ({ resource, onEdit
     <Box p={4} bg={"greys.grey04"} borderRadius="lg" position="relative">
       <Flex gap={4} justify="space-between" alignItems="flex-start">
         {/* Content */}
-        <VStack align="start" spacing={2} flex={1}>
+        <VStack align="start" gap={2} flex={1}>
           <Text fontWeight="bold" fontSize="md">
             {resource.title}
           </Text>
@@ -400,18 +420,18 @@ const ResourceInputCard: React.FC<IResourceInputCardProps> = ({ resource, onEdit
             {isInfected ? (
               <FileRemovedTag />
             ) : (
-              <Tag backgroundColor="semantic.infoLight" size="sm" fontWeight="medium" color="text.secondary">
+              <Tag.Root backgroundColor="semantic.infoLight" size="sm" fontWeight="medium" color="text.secondary">
                 <Flex align="center" gap={1}>
                   {fileTypeInfo.icon}
                   <Text as="span">{fileTypeInfo.label}</Text>
                 </Flex>
-              </Tag>
+              </Tag.Root>
             )}
 
             {resource.resourceType === EResourceType.file &&
               resource.resourceDocument?.file?.metadata?.filename &&
               (isInfected ? (
-                <Text fontSize="sm" color="text.primary" noOfLines={1}>
+                <Text fontSize="sm" color="text.primary" lineClamp={1}>
                   {resource.resourceDocument.file.metadata.filename}
                 </Text>
               ) : (
@@ -421,7 +441,7 @@ const ResourceInputCard: React.FC<IResourceInputCardProps> = ({ resource, onEdit
                 />
               ))}
             {resource.resourceType === EResourceType.link && resource.linkUrl && (
-              <Text fontSize="sm" color="text.primary" noOfLines={1}>
+              <Text fontSize="sm" color="text.primary" lineClamp={1}>
                 {resource.linkUrl}
               </Text>
             )}
@@ -446,12 +466,14 @@ const ResourceInputCard: React.FC<IResourceInputCardProps> = ({ resource, onEdit
         {/* Actions */}
         <Flex direction="column" align="flex-end" gap={2} flexShrink={0}>
           {isInfected ? (
-            <Button variant="ghost" onClick={() => onDelete(resource)} leftIcon={<X />} size="sm">
+            <Button variant="ghost" onClick={() => onDelete(resource)} size="sm">
+              <X />
               {t("ui.dismiss")}
             </Button>
           ) : (
             <>
-              <Button variant="secondary" onClick={() => onEdit(resource)} leftIcon={<Pencil />}>
+              <Button variant="secondary" onClick={() => onEdit(resource)}>
+                <Pencil />
                 {t("ui.edit")}
               </Button>
               <ConfirmationModal
@@ -462,7 +484,8 @@ const ResourceInputCard: React.FC<IResourceInputCardProps> = ({ resource, onEdit
                   closeModal()
                 }}
                 renderTriggerButton={(props) => (
-                  <Button {...props} variant="tertiary" px={0} leftIcon={<Trash />}>
+                  <Button {...props} variant="tertiary" px={0}>
+                    <Trash />
                     {t("ui.delete")}
                   </Button>
                 )}

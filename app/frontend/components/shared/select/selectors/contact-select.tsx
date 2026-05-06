@@ -106,11 +106,12 @@ export const ContactSelect = observer(({ onChange, selectedOption, stylesToMerge
         isCreatable={false}
         {...rest}
       />
-      <Button onClick={handleCreate} leftIcon={<Plus />} variant="primary" w="28%" px={2}>
+      <Button onClick={handleCreate} variant="primary" w="28%" px={2}>
+        <Plus />
         {t("contact.create")}
       </Button>
       <CreateEditContactModal
-        isOpen={isOpen}
+        open={open}
         onClose={() => {
           setEditingContact(null)
           onClose()
@@ -150,10 +151,10 @@ const Option = ({ onClickEdit, ...props }: IOptionComponentProps) => {
               e.stopPropagation()
               onClickEdit(value)
             }}
-            leftIcon={<Pencil />}
-            variant="link"
+            variant="plain"
             px={2}
           >
+            <Pencil />
             {t("ui.edit")}
           </Button>
         </Flex>

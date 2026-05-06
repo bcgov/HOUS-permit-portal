@@ -1,4 +1,4 @@
-import { Divider, Heading, HStack, Link, Text, VStack } from "@chakra-ui/react"
+import { Heading, HStack, Link, Separator, Text, VStack } from "@chakra-ui/react"
 import { Files, Info, Steps } from "@phosphor-icons/react"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -23,7 +23,7 @@ export const StepCodeLookupTool = ({ showJurisdictionOnPage = false }: IStepCode
   }
 
   return (
-    <VStack spacing={4} align="start" w="full" maxW="container.lg" mx="auto">
+    <VStack gap={4} align="start" w="full" maxW="container.lg" mx="auto">
       <Text color="text.secondary" fontSize="lg">
         {t("home.projectReadinessTools.stepCodeLookupTool.description")}
       </Text>
@@ -32,22 +32,22 @@ export const StepCodeLookupTool = ({ showJurisdictionOnPage = false }: IStepCode
         setShowError={setShowError}
         showError={showError}
       />
-
       <Text fontSize="lg" mb={10}>
         {t("home.projectReadinessTools.stepCodeLookupTool.cantFindAddress")}{" "}
-        <Link as={RouterLink} to="/jurisdictions" color="text.link" textDecoration="underline">
-          {t("home.projectReadinessTools.stepCodeLookupTool.browseJurisdictions")}
+        <Link color="text.link" textDecoration="underline" asChild>
+          <RouterLink to="/jurisdictions">
+            {t("home.projectReadinessTools.stepCodeLookupTool.browseJurisdictions")}
+          </RouterLink>
         </Link>
       </Text>
-
       {showJurisdictionOnPage && jurisdiction && !showError && (
-        <VStack w="full" bg="white" p={6} borderRadius="md" align="start" spacing={4}>
+        <VStack w="full" bg="white" p={6} borderRadius="md" align="start" gap={4}>
           <Heading as="h2" size="lg">
             {jurisdiction.name}
           </Heading>
           {jurisdiction.showAboutPage ? (
             <RouterLink to={`/jurisdictions/${jurisdiction.slug}`}>
-              <HStack spacing={4}>
+              <HStack gap={4}>
                 <Info size={24} color="var(--chakra-colors-semantic-info)" />
                 <Text as="span" textDecoration="underline" fontSize="lg">
                   {t("home.projectReadinessTools.stepCodeLookupTool.checkWhatIsNeededToApplyForPermitsInThisCommunity")}
@@ -56,8 +56,8 @@ export const StepCodeLookupTool = ({ showJurisdictionOnPage = false }: IStepCode
             </RouterLink>
           ) : (
             <>
-              <Divider />
-              <HStack spacing={4}>
+              <Separator />
+              <HStack gap={4}>
                 <Info size={24} color="var(--chakra-colors-semantic-info)" />
                 <Text as="span" fontSize="lg" ml={2}>
                   {t("home.projectReadinessTools.stepCodeLookupTool.permitInformationForThisCommunityIsntAvailable")}
@@ -67,9 +67,9 @@ export const StepCodeLookupTool = ({ showJurisdictionOnPage = false }: IStepCode
           )}
           {jurisdiction.inboxEnabled ? (
             <>
-              <Divider />
+              <Separator />
               <RouterLink to={`/projects/new`}>
-                <HStack spacing={4}>
+                <HStack gap={4}>
                   <Files size={24} color="var(--chakra-colors-semantic-files)" />
                   <Text as="span" textDecoration="underline" fontSize="lg">
                     {t("home.projectReadinessTools.stepCodeLookupTool.projectsNew")}
@@ -79,8 +79,8 @@ export const StepCodeLookupTool = ({ showJurisdictionOnPage = false }: IStepCode
             </>
           ) : (
             <>
-              <Divider />
-              <HStack spacing={4}>
+              <Separator />
+              <HStack gap={4}>
                 <Files size={24} color="var(--chakra-colors-semantic-info)" />
                 <Text as="span" fontSize="lg" ml={2}>
                   {t("home.projectReadinessTools.stepCodeLookupTool.notAcceptingPermitApplications")}
@@ -88,11 +88,11 @@ export const StepCodeLookupTool = ({ showJurisdictionOnPage = false }: IStepCode
               </HStack>
             </>
           )}
-          <Divider />
+          <Separator />
           <RouterLink
             to={`/jurisdictions/${jurisdiction.slug}/step-code-requirements?address=${encodeURIComponent(searchedAddress)}`}
           >
-            <HStack spacing={4}>
+            <HStack gap={4}>
               <Steps size={24} color="var(--chakra-colors-semantic-info)" />
               <Text as="span" textDecoration="underline" fontSize="lg">
                 {t(

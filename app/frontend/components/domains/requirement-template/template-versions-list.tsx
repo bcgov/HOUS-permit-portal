@@ -65,12 +65,11 @@ export const TemplateVersionsList = observer(function TemplateVersionsList({
           {t("digitalBuildingPermits.index.emptyPermitsText")}
         </Text>
       )}
-
       {templateVersions.map((tv) => (
         <SectionBox key={tv.id} w="full" pt={isSandboxActive ? 12 : 6}>
           {isSandboxActive && <SandboxHeader sandbox={tv.sandbox} />}
           <Flex w="full" as="section">
-            <Stack spacing={3} flex={1}>
+            <Stack gap={3} flex={1}>
               <Text as="h4" color={"text.link"} fontWeight={700} fontSize="xl">
                 {tv.denormalizedTemplateJson?.nickname}
               </Text>
@@ -105,14 +104,8 @@ export const TemplateVersionsList = observer(function TemplateVersionsList({
             {renderButton ? (
               renderButton(tv)
             ) : (
-              <Button
-                to={`/digital-building-permits/${tv.id}/edit`}
-                as={RouterLink}
-                variant={"primary"}
-                ml={4}
-                alignSelf={"center"}
-              >
-                {t("ui.manage")}
+              <Button variant={"primary"} ml={4} alignSelf={"center"} asChild>
+                <RouterLink to={`/digital-building-permits/${tv.id}/edit`}>{t("ui.manage")}</RouterLink>
               </Button>
             )}
           </Flex>

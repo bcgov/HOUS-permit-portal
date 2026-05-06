@@ -16,15 +16,19 @@ export function IsOptionalCheckbox<TFieldValues extends FieldValues>({
     //   This is checked inverse of the boolean value. This is because the db field is for "required", instead of
     //   optional, and by default it should be required
 
-    <Checkbox
+    <Checkbox.Root
       {...checkboxProps}
-      isChecked={value === undefined ? value : !value}
-      onChange={(e) => {
+      onCheckedChange={(e) => {
         onChange(!e.target.checked)
       }}
       {...restField}
+      checked={value === undefined ? value : !value}
     >
-      {t("requirementsLibrary.modals.optionalForSubmitters")}
-    </Checkbox>
+      <Checkbox.HiddenInput />
+      <Checkbox.Control>
+        <Checkbox.Indicator />
+      </Checkbox.Control>
+      <Checkbox.Label>{t("requirementsLibrary.modals.optionalForSubmitters")}</Checkbox.Label>
+    </Checkbox.Root>
   )
 }

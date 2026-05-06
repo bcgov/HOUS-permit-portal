@@ -1,13 +1,12 @@
+import { InputGroup } from "@/components/ui/input-group"
 import {
   Button,
   Checkbox,
-  Divider,
   Input,
-  InputGroup,
-  InputLeftElement,
+  InputElement,
   Menu,
-  MenuButton,
-  MenuList,
+  Portal,
+  Separator,
   Text,
   useCheckboxGroup,
   VStack,
@@ -45,57 +44,70 @@ export const CheckboxFilter = observer(function CheckboxFilter({ value, onChange
   })
 
   return (
-    <Menu
-      isOpen={isMenuOpen}
+    <Menu.Root
+      open={isMenuOpen}
       onOpen={() => setIsMenuOpen(true)}
       onClose={() => setIsMenuOpen(false)}
       closeOnSelect={false}
     >
-      <MenuButton
-        as={Button}
-        variant="outline"
-        rightIcon={<CaretDown />}
-        bg={hasSelection ? "background.blueLight" : undefined}
-        _expanded={{ bg: "background.blueLight" }}
-      >
-        {title}
-      </MenuButton>
-      <MenuList p={4} zIndex="dropdown">
-        <VStack align="start" spacing={4}>
-          <InputGroup>
-            <InputLeftElement pointerEvents="none">
-              <MagnifyingGlass />
-            </InputLeftElement>
-            <Input placeholder={t("ui.search")} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-          </InputGroup>
-          <Divider />
-          {filteredOptions.length === 0 ? (
-            <Text color="greys.grey01" fontSize="sm" px={2} w="full" textAlign="center">
-              {t("ui.noOptionsFound")}
-            </Text>
-          ) : (
-            filteredOptions.map((option) => {
-              const checkboxProps = getCheckboxProps({ value: option.value })
-              return (
-                <Checkbox key={option.value} {...checkboxProps}>
-                  {option.label}
-                </Checkbox>
-              )
-            })
-          )}
-          <Divider />
-          <Button
-            onClick={onReset}
-            variant="primary"
-            size="sm"
-            alignSelf="center"
-            w="full"
-            isDisabled={!value || value.length === 0}
-          >
-            {t("ui.reset")}
-          </Button>
-        </VStack>
-      </MenuList>
-    </Menu>
+      <Menu.Trigger asChild>
+        <Button
+          variant="outline"
+          bg={hasSelection ? "background.blueLight" : undefined}
+          _expanded={{ bg: "background.blueLight" }}
+        >
+          {title}
+          <CaretDown />
+        </Button>
+      </Menu.Trigger>
+      <Portal>
+        <Menu.Positioner>
+          <Menu.Content>
+            <VStack align="start" gap={4}>
+              <InputGroup>
+                <InputElement pointerEvents="none">
+                  <MagnifyingGlass />
+                </InputElement>
+                <Input
+                  placeholder={t("ui.search")}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </InputGroup>
+              <Separator />
+              {filteredOptions.length === 0 ? (
+                <Text color="greys.grey01" fontSize="sm" px={2} w="full" textAlign="center">
+                  {t("ui.noOptionsFound")}
+                </Text>
+              ) : (
+                filteredOptions.map((option) => {
+                  const checkboxProps = getCheckboxProps({ value: option.value })
+                  return (
+                    <Checkbox.Root key={option.value} {...checkboxProps}>
+                      <Checkbox.HiddenInput />
+                      <Checkbox.Control>
+                        <Checkbox.Indicator />
+                      </Checkbox.Control>
+                      <Checkbox.Label>{option.label}</Checkbox.Label>
+                    </Checkbox.Root>
+                  )
+                })
+              )}
+              <Separator />
+              <Button
+                onClick={onReset}
+                variant="primary"
+                size="sm"
+                alignSelf="center"
+                w="full"
+                disabled={!value || value.length === 0}
+              >
+                {t("ui.reset")}
+              </Button>
+            </VStack>
+          </Menu.Content>
+        </Menu.Positioner>
+      </Portal>
+    </Menu.Root>
   )
 })

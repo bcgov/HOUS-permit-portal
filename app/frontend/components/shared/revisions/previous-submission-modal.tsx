@@ -1,16 +1,4 @@
-import {
-  Button,
-  Flex,
-  Heading,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  useDisclosure,
-} from "@chakra-ui/react"
+import { Button, Dialog, Flex, Heading, Portal, useDisclosure } from "@chakra-ui/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { ISingleRequirementFormJson } from "../../../types/types"
@@ -31,27 +19,38 @@ export const PreviousSubmissionModal: React.FC<IPreviousSubmissionModalProps> = 
   const { t } = useTranslation()
 
   return (
-    <Modal onClose={onClose} isOpen={isOpen} size="2xl">
-      <ModalOverlay />
-
-      <ModalContent mt={48}>
-        <ModalHeader textAlign="center">
-          <ModalCloseButton fontSize="11px" />
-          <Heading as="h3" fontSize="xl">
-            {t("permitApplication.show.revision.originallySubmitted")}
-          </Heading>
-        </ModalHeader>
-        <ModalBody>
-          <SingleRequirementForm requirementJson={requirementJson} submissionData={submissionData} />
-          <ModalFooter>
-            <Flex width="full" justify="center">
-              <Button variant="secondary" onClick={onClose}>
-                {t("ui.ok")}
-              </Button>
-            </Flex>
-          </ModalFooter>
-        </ModalBody>
-      </ModalContent>
-    </Modal>
+    <Dialog.Root
+      open={open}
+      size="xl"
+      onOpenChange={(e) => {
+        if (!e.open) {
+          onClose()
+        }
+      }}
+    >
+      <Portal>
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content mt={48}>
+            <Dialog.Header textAlign="center">
+              <Dialog.CloseTrigger fontSize="11px" />
+              <Heading as="h3" fontSize="xl">
+                {t("permitApplication.show.revision.originallySubmitted")}
+              </Heading>
+            </Dialog.Header>
+            <Dialog.Body>
+              <SingleRequirementForm requirementJson={requirementJson} submissionData={submissionData} />
+              <Dialog.Footer>
+                <Flex width="full" justify="center">
+                  <Button variant="secondary" onClick={onClose}>
+                    {t("ui.ok")}
+                  </Button>
+                </Flex>
+              </Dialog.Footer>
+            </Dialog.Body>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Portal>
+    </Dialog.Root>
   )
 }

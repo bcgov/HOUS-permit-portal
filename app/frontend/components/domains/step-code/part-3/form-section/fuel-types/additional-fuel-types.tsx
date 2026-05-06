@@ -1,16 +1,5 @@
-import {
-  Flex,
-  FormControl,
-  FormHelperText,
-  FormLabel,
-  Heading,
-  Input,
-  Link,
-  Radio,
-  RadioGroup,
-  Stack,
-  Text,
-} from "@chakra-ui/react"
+import { RadioGroup } from "@/components/ui/radio"
+import { Field, Flex, Heading, Input, Link, Stack, Text } from "@chakra-ui/react"
 import { ErrorMessage } from "@hookform/error-message"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
@@ -83,7 +72,8 @@ export const AdditionalFuelTypes = observer(function Part3StepCodeFormAdditional
                 download: (
                   <Link
                     href="https://publications.gc.ca/collections/collection_2022/eccc/En81-4-2020-2-eng.pdf"
-                    isExternal
+                    target="_blank"
+                    rel="noopener noreferrer"
                   />
                 ),
               }}
@@ -97,7 +87,7 @@ export const AdditionalFuelTypes = observer(function Part3StepCodeFormAdditional
             <OtherFuelTypeFields field={field} idx={idx} onAdd={onAdd} />
           ))}
 
-          <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
+          <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} loading={isSubmitting} />
         </Flex>
       </FormProvider>
     </>
@@ -121,14 +111,14 @@ const OtherFuelTypeFields = ({ field, onAdd, idx }) => {
 
   return (
     <>
-      <FormControl>
-        <FormLabel>{t(`${i18nPrefix}.description.label`)}</FormLabel>
-        <FormHelperText mb={1} mt={0}>
+      <Field.Root>
+        <Field.Label>{t(`${i18nPrefix}.description.label`)}</Field.Label>
+        <Field.HelperText mb={1} mt={0}>
           {t(`${i18nPrefix}.description.hint`)}
-        </FormHelperText>
-        <FormHelperText mb={1} mt={0} color="semantic.error">
+        </Field.HelperText>
+        <Field.HelperText mb={1} mt={0} color="semantic.error">
           <ErrorMessage errors={errors} name={`fuelTypesAttributes.${idx}.description`} />
-        </FormHelperText>
+        </Field.HelperText>
         <Input
           key={field.id}
           maxW={"430px"}
@@ -136,17 +126,17 @@ const OtherFuelTypeFields = ({ field, onAdd, idx }) => {
             required: t(`${i18nPrefix}.description.error`),
           })}
         />
-      </FormControl>
-      <FormControl>
-        <FormLabel>
+      </Field.Root>
+      <Field.Root>
+        <Field.Label>
           <Trans i18nKey={`${i18nPrefix}.emissionsFactor.label`} components={{ sub: <sub /> }} />
-        </FormLabel>
-        <FormHelperText mb={1} mt={0}>
+        </Field.Label>
+        <Field.HelperText mb={1} mt={0}>
           {t(`${i18nPrefix}.emissionsFactor.hint`)}
-        </FormHelperText>
-        <FormHelperText mb={1} mt={0} color="semantic.error">
+        </Field.HelperText>
+        <Field.HelperText mb={1} mt={0} color="semantic.error">
           <ErrorMessage errors={errors} name={`fuelTypesAttributes.${idx}.emissionsFactor`} />
-        </FormHelperText>
+        </Field.HelperText>
         <Input
           key={field.id}
           maxW={"200px"}
@@ -156,15 +146,15 @@ const OtherFuelTypeFields = ({ field, onAdd, idx }) => {
             required: t(`${i18nPrefix}.emissionsFactor.error`),
           })}
         />
-      </FormControl>
-      <FormControl>
-        <FormLabel>{t(`${i18nPrefix}.source.label`)}</FormLabel>
-        <FormHelperText mb={1} mt={0}>
+      </Field.Root>
+      <Field.Root>
+        <Field.Label>{t(`${i18nPrefix}.source.label`)}</Field.Label>
+        <Field.HelperText mb={1} mt={0}>
           {t(`${i18nPrefix}.source.hint`)}
-        </FormHelperText>
-        <FormHelperText mb={1} mt={0} color="semantic.error">
+        </Field.HelperText>
+        <Field.HelperText mb={1} mt={0} color="semantic.error">
           <ErrorMessage errors={errors} name={`fuelTypesAttributes.${idx}.source`} />
-        </FormHelperText>
+        </Field.HelperText>
         <Input
           key={field.id}
           maxW={"430px"}
@@ -172,20 +162,24 @@ const OtherFuelTypeFields = ({ field, onAdd, idx }) => {
             required: t(`${i18nPrefix}.source.error`),
           })}
         />
-      </FormControl>
-      <FormControl>
-        <FormLabel>{t(`${i18nPrefix}.addMore.label`)}</FormLabel>
-        <RadioGroup onChange={handleChangeAddMore} value={addMore}>
-          <Stack spacing={5} direction="row">
-            <Radio variant="binary" value={"yes"}>
-              {t("ui.yes")}
-            </Radio>
-            <Radio variant="binary" value={"no"}>
-              {t("ui.no")}
-            </Radio>
+      </Field.Root>
+      <Field.Root>
+        <Field.Label>{t(`${i18nPrefix}.addMore.label`)}</Field.Label>
+        <RadioGroup.Root onValueChange={handleChangeAddMore} value={addMore}>
+          <Stack gap={5} direction="row">
+            <RadioGroup.Item variant="binary" value={"yes"}>
+              <RadioGroup.ItemHiddenInput />
+              <RadioGroup.ItemIndicator />
+              <RadioGroup.ItemText>{t("ui.yes")}</RadioGroup.ItemText>
+            </RadioGroup.Item>
+            <RadioGroup.Item variant="binary" value={"no"}>
+              <RadioGroup.ItemHiddenInput />
+              <RadioGroup.ItemIndicator />
+              <RadioGroup.ItemText>{t("ui.no")}</RadioGroup.ItemText>
+            </RadioGroup.Item>
           </Stack>
-        </RadioGroup>
-      </FormControl>
+        </RadioGroup.Root>
+      </Field.Root>
     </>
   )
 }

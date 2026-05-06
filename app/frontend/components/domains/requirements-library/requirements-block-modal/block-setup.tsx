@@ -2,10 +2,8 @@ import {
   Box,
   Button,
   Center,
+  Field,
   Flex,
-  FormControl,
-  FormHelperText,
-  FormLabel,
   Icon,
   IconButton,
   Input,
@@ -99,30 +97,34 @@ export const BlockSetup = observer(function BlockSetup({
           {t("requirementsLibrary.modals.blockSetupTitle")}
         </Text>
       </Box>
-      <VStack spacing={4} w={"full"} alignItems={"flex-start"} px={6} pb={6} pt={3}>
+      <VStack gap={4} w={"full"} alignItems={"flex-start"} px={6} pb={6} pt={3}>
         <Text color={"text.secondary"} fontSize={"sm"} fontWeight={700}>
           {t("requirementsLibrary.modals.internalUse")}
         </Text>
-        <FormControl mt={1}>
-          <FormLabel>{t("requirementsLibrary.fields.name")}</FormLabel>
+        <Field.Root mt={1}>
+          <Field.Label>{t("requirementsLibrary.fields.name")}</Field.Label>
           <Input bg={"white"} {...register("name", { required: true })} />
-        </FormControl>
-        <FormControl>
-          <FormLabel>{`${t("requirementsLibrary.fields.description")} ${t("ui.optional")}`}</FormLabel>
+        </Field.Root>
+        <Field.Root>
+          <Field.Label>{`${t("requirementsLibrary.fields.description")} ${t("ui.optional")}`}</Field.Label>
           <Textarea
             bg={"white"}
             _hover={{ borderColor: "border.base" }}
             {...register("description", { maxLength: 250 })}
           />
-          <FormHelperText {...helperTextStyles}>
+          <Field.HelperText {...helperTextStyles}>
             {t("requirementsLibrary.fieldDescriptions.description")} <br />
             {t("requirementsLibrary.descriptionMaxLength")}
-          </FormHelperText>
-        </FormControl>
-        <FormControl>
-          <FormLabel sx={{ ":after": { content: `"${t("ui.optional")}"`, ml: 1.5 } }}>
+          </Field.HelperText>
+        </Field.Root>
+        <Field.Root>
+          <Field.Label
+            css={{
+              "& :after": { content: `"${t("ui.optional")}"`, ml: 1.5 },
+            }}
+          >
             {t("requirementsLibrary.fields.associations")}
-          </FormLabel>
+          </Field.Label>
           <Controller
             name="associationList"
             control={control}
@@ -143,38 +145,43 @@ export const BlockSetup = observer(function BlockSetup({
             }}
           />
 
-          <FormHelperText {...helperTextStyles}>
+          <Field.HelperText {...helperTextStyles}>
             {t("requirementsLibrary.fieldDescriptions.associations")}
-          </FormHelperText>
-        </FormControl>
-        <FormControl isReadOnly={true}>
-          <FormLabel>{t("requirementsLibrary.fields.requirementSku")}</FormLabel>
-          <Input bg={"white"} value={watch("sku")} isDisabled={true} />
-        </FormControl>
-        <FormControl>
-          <FormLabel>{t("requirementsLibrary.fields.requirementDocuments")}</FormLabel>
+          </Field.HelperText>
+        </Field.Root>
+        <Field.Root readOnly={true}>
+          <Field.Label>{t("requirementsLibrary.fields.requirementSku")}</Field.Label>
+          <Input bg={"white"} value={watch("sku")} disabled={true} />
+        </Field.Root>
+        <Field.Root>
+          <Field.Label>{t("requirementsLibrary.fields.requirementDocuments")}</Field.Label>
           {requirementDocumentsAttributes?.map((doc) => (
             <Flex key={doc.id || doc.file?.id} justifyContent="space-between" alignItems="center" gap={2} mb={1}>
               <Text textDecoration={doc._destroy ? "line-through" : "none"}>{doc.file?.metadata?.filename}</Text>
               {doc._destroy ? (
                 <Button
-                  variant="link"
+                  variant="plain"
                   size="sm"
                   color="semantic.info"
-                  leftIcon={<Icon as={ArrowCounterClockwise} />}
                   onClick={() => handleUndoRemove(doc.id || doc.file?.id)}
                 >
+                  <Icon asChild>
+                    <ArrowCounterClockwise />
+                  </Icon>
                   {t("ui.undo")}
                 </Button>
               ) : (
                 <IconButton
                   aria-label={t("ui.remove")}
                   color="semantic.error"
-                  icon={<Icon as={Trash} />}
                   variant="tertiary"
                   size="sm"
                   onClick={() => handleRemoveFile(doc.id || doc.file?.id)}
-                />
+                >
+                  <Icon asChild>
+                    <Trash />
+                  </Icon>
+                </IconButton>
               )}
             </Flex>
           ))}
@@ -186,7 +193,7 @@ export const BlockSetup = observer(function BlockSetup({
               </Center>
             )}
           </Box>
-        </FormControl>
+        </Field.Root>
         {withOptionsMenu && requirementBlock && <BlockSetupOptionsMenu requirementBlock={requirementBlock} />}
       </VStack>
     </Box>

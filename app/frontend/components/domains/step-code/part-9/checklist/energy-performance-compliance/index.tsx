@@ -1,4 +1,4 @@
-import { Checkbox, Divider, FormControl, FormLabel, HStack, Text } from "@chakra-ui/react"
+import { Checkbox, Field, HStack, Separator, Text } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
@@ -51,7 +51,7 @@ export const EnergyPerformanceCompliance = observer(function EnergyPerformanceCo
           hint={t(`${i18nPrefix}.energyUnit`)}
         />
       </HStack>
-      <Divider />
+      <Separator />
       <Text fontWeight="bold" fontSize="md">
         {t(`${i18nPrefix}.referenceHouseRatedEnergyTarget`)}
       </Text>
@@ -81,15 +81,15 @@ export const EnergyPerformanceCompliance = observer(function EnergyPerformanceCo
           hint={t(`${i18nPrefix}.energyUnit`)}
         />
       </HStack>
-      <Divider />
-      <FormControl>
-        <FormLabel>{t(`${i18nPrefix}.calculationAirtightness`)}</FormLabel>
+      <Separator />
+      <Field.Root>
+        <Field.Label>{t(`${i18nPrefix}.calculationAirtightness`)}</Field.Label>
         <Controller
           control={control}
           name="epcCalculationAirtightness"
           render={({ field: { onChange, value, ref } }) => <AirtightnessSelect onChange={onChange} value={value} />}
         />
-      </FormControl>
+      </Field.Root>
       <HStack align="end">
         <TextFormControl
           label={t(`${i18nPrefix}.calculationTestingTarget`)}
@@ -105,9 +105,13 @@ export const EnergyPerformanceCompliance = observer(function EnergyPerformanceCo
         name="epcCalculationCompliance"
         control={control}
         render={({ field: { onChange, value } }) => (
-          <Checkbox isChecked={!!value} onChange={onChange}>
-            {t(`${i18nPrefix}.compliance`)}
-          </Checkbox>
+          <Checkbox.Root onCheckedChange={onChange} checked={!!value}>
+            <Checkbox.HiddenInput />
+            <Checkbox.Control>
+              <Checkbox.Indicator />
+            </Checkbox.Control>
+            <Checkbox.Label>{t(`${i18nPrefix}.compliance`)}</Checkbox.Label>
+          </Checkbox.Root>
         )}
       />
     </ChecklistSection>

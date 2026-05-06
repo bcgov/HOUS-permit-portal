@@ -1,21 +1,4 @@
-import {
-  Box,
-  Button,
-  Center,
-  Flex,
-  Hide,
-  ListItem,
-  OrderedList,
-  Portal,
-  Spacer,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Tabs,
-  Text,
-  useDisclosure,
-} from "@chakra-ui/react"
+import { Box, Button, Center, Flex, List, Portal, Spacer, Tabs, Text, useDisclosure } from "@chakra-ui/react"
 import { CaretRight, ChatDots, PaperPlaneTilt } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { MutableRefObject, useEffect, useMemo, useState } from "react"
@@ -128,9 +111,9 @@ export const RevisionSideBar = observer(
       }
     }, [isMounted])
 
-    const { isOpen, onOpen, onClose } = useDisclosure()
+    const { open, onOpen, onClose } = useDisclosure()
     const {
-      isOpen: isDesignatedReviewerModalOpen,
+      open: isDesignatedReviewerModalOpen,
       onOpen: onDesignatedReviewerModalOpen,
       onClose: onDesignatedReviewerModalClose,
     } = useDisclosure()
@@ -175,8 +158,9 @@ export const RevisionSideBar = observer(
     const renderButtons = () => {
       if (forSubmitter) {
         return (
-          <Button rightIcon={<CaretRight />} onClick={handleScrollToBottom} variant="primary">
+          <Button onClick={handleScrollToBottom} variant="primary">
             {t("permitApplication.edit.submit")}
+            <CaretRight />
           </Button>
         )
       }
@@ -199,11 +183,11 @@ export const RevisionSideBar = observer(
                 <Button
                   variant="primary"
                   border={0}
-                  rightIcon={<PaperPlaneTilt />}
                   onClick={handleClick}
-                  isDisabled={permitApplication.isRevisionsRequested || fields?.length == 0}
+                  disabled={permitApplication.isRevisionsRequested || fields?.length == 0}
                 >
                   {t("permitApplication.show.revision.send")}
+                  <PaperPlaneTilt />
                 </Button>
               )
             }}
@@ -237,9 +221,8 @@ export const RevisionSideBar = observer(
 
     return (
       <>
-        <Hide below="md">
+        <Box hideBelow="md">
           <Flex
-            as={Tabs}
             direction="column"
             boxShadow="md"
             borderRight="1px solid"
@@ -252,83 +235,83 @@ export const RevisionSideBar = observer(
             float="left"
             id="permit-revision-sidebar"
             bg="theme.yellowLight"
-            index={tabIndex}
-            // @ts-ignore
-            onChange={(index: number) => handleSetTabIndex(index)}
           >
-            <TabList borderBottom="1px solid" borderColor="border.dark" mt={4}>
-              <Tab ml={4} _selected={selectedTabStyles}>
-                {t("permitApplication.show.revision.newRevision")}
-              </Tab>
-              <Tab ml={4} _selected={selectedTabStyles}>
-                {t("permitApplication.show.revision.pastRequests")}
-              </Tab>
-            </TabList>
-            <TabPanels as={Flex} direction="column" flex={1} overflowY="auto">
-              <TabPanel flex={1}>
-                <Box flex={1}>
-                  <Center p={4} textAlign="center" borderBottom="1px solid" borderColor="border.light">
-                    <Text fontStyle="italic">
-                      {forSubmitter
-                        ? t("permitApplication.show.locateRevisions")
-                        : t("permitApplication.show.clickQuestion")}
+            <Tabs.Root value={String(tabIndex)} onValueChange={({ value }) => handleSetTabIndex(Number(value))}>
+              <Tabs.List borderBottom="1px solid" borderColor="border.dark" mt={4}>
+                <Tabs.Trigger value="0" ml={4} _selected={selectedTabStyles}>
+                  {t("permitApplication.show.revision.newRevision")}
+                </Tabs.Trigger>
+                <Tabs.Trigger value="1" ml={4} _selected={selectedTabStyles}>
+                  {t("permitApplication.show.revision.pastRequests")}
+                </Tabs.Trigger>
+              </Tabs.List>
+              <Tabs.ContentGroup direction="column" flex={1} overflowY="auto" asChild>
+                <Flex>
+                  <Tabs.Content value="0" flex={1}>
+                    <Box flex={1}>
+                      <Center p={4} textAlign="center" borderBottom="1px solid" borderColor="border.light">
+                        <Text fontStyle="italic">
+                          {forSubmitter
+                            ? t("permitApplication.show.locateRevisions")
+                            : t("permitApplication.show.clickQuestion")}
+                        </Text>
+                      </Center>
+                      <List.Root as="ol" pb={50} mt={4} ml={0}>
+                        {fields
+                          .filter((field) => !field._destroy)
+                          .map((field) => {
+                            return <RevisionRequestListItem revisionRequest={field} key={field.id} />
+                          })}
+                      </List.Root>
+                    </Box>
+                  </Tabs.Content>
+                  <Tabs.Content value="1">
+                    <SubmissionVersionSelect
+                      options={permitApplication.pastSubmissionVersionOptions}
+                      onChange={handleSelectPastVersionChange}
+                      value={selectedSubmissionVersion}
+                    />
+                    <List.Root as="ol" mt={4} ml={0}>
+                      {sortedPastRevisionRequests.map((rr) => (
+                        <RevisionRequestListItem revisionRequest={rr} key={rr.id} />
+                      ))}
+                    </List.Root>
+                  </Tabs.Content>
+                </Flex>
+              </Tabs.ContentGroup>
+              {inNewRequest && (
+                <Flex
+                  direction="column"
+                  border="1px solid"
+                  borderColor="border.light"
+                  p={8}
+                  width={"sidebar.width"}
+                  gap={4}
+                  justify="center"
+                  position="sticky"
+                  bottom={0}
+                  left={0}
+                  maxH={145}
+                  bg="theme.yellowLight"
+                  flex={1}
+                >
+                  <Box>
+                    <Text as="span" fontWeight="bold">
+                      {fields.length}
+                    </Text>{" "}
+                    <Text as="span" color="text.secondary">
+                      {t("ui.selected")}
                     </Text>
-                  </Center>
-                  <OrderedList pb={50} mt={4} ml={0}>
-                    {fields
-                      .filter((field) => !field._destroy)
-                      .map((field) => {
-                        return <RevisionRequestListItem revisionRequest={field} key={field.id} />
-                      })}
-                  </OrderedList>
-                </Box>
-              </TabPanel>
-              <TabPanel>
-                <SubmissionVersionSelect
-                  options={permitApplication.pastSubmissionVersionOptions}
-                  onChange={handleSelectPastVersionChange}
-                  value={selectedSubmissionVersion}
-                />
-                <OrderedList mt={4} ml={0}>
-                  {sortedPastRevisionRequests.map((rr) => (
-                    <RevisionRequestListItem revisionRequest={rr} key={rr.id} />
-                  ))}
-                </OrderedList>
-              </TabPanel>
-            </TabPanels>
-            {inNewRequest && (
-              <Flex
-                direction="column"
-                border="1px solid"
-                borderColor="border.light"
-                p={8}
-                width={"sidebar.width"}
-                gap={4}
-                justify="center"
-                position="sticky"
-                bottom={0}
-                left={0}
-                maxH={145}
-                bg="theme.yellowLight"
-                flex={1}
-              >
-                <Box>
-                  <Text as="span" fontWeight="bold">
-                    {fields.length}
-                  </Text>{" "}
-                  <Text as="span" color="text.secondary">
-                    {t("ui.selected")}
-                  </Text>
-                </Box>
-                {renderButtons()}
-              </Flex>
-            )}
+                  </Box>
+                  {renderButtons()}
+                </Flex>
+              )}
+            </Tabs.Root>
           </Flex>
-        </Hide>
-
-        {isOpen && (
+        </Box>
+        {open && (
           <RevisionModal
-            isOpen={isOpen}
+            open={open}
             onOpen={onOpen}
             onClose={onClose}
             requirementJson={requirementForRevision}
@@ -342,7 +325,7 @@ export const RevisionSideBar = observer(
           />
         )}
         <DesignatedReviewerModal
-          isOpen={isDesignatedReviewerModalOpen}
+          open={isDesignatedReviewerModalOpen}
           onClose={onDesignatedReviewerModalClose}
           designatedReviewer={permitApplication.designatedReviewer}
         />
@@ -382,7 +365,7 @@ const RevisionRequestListItem = ({ revisionRequest }: IRevisionRequestListItemPr
   }
 
   return (
-    <ListItem mb={4} w="full">
+    <List.Item mb={4} w="full">
       {requirementKey ? (
         <ScrollLink to={`formio-component-${requirementKey}`}>{requirementJson?.label}</ScrollLink>
       ) : (
@@ -395,9 +378,9 @@ const RevisionRequestListItem = ({ revisionRequest }: IRevisionRequestListItemPr
         <Box width={6} height={6}>
           <ChatDots size={24} />
         </Box>
-        <Text noOfLines={1}>{comment}</Text>
+        <Text lineClamp={1}>{comment}</Text>
         <Spacer />
-        <Button variant="link" onClick={clickHandleView} isDisabled={!requirementKey}>
+        <Button variant="plain" onClick={clickHandleView} disabled={!requirementKey}>
           {t("ui.view")}
         </Button>
       </Flex>
@@ -406,6 +389,6 @@ const RevisionRequestListItem = ({ revisionRequest }: IRevisionRequestListItemPr
           {t("ui.modifiedBy")}: {user.firstName} {user.lastName}
         </Text>
       )}
-    </ListItem>
+    </List.Item>
   )
 }

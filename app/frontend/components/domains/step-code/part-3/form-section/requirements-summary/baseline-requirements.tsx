@@ -1,4 +1,4 @@
-import { FormControl, FormHelperText, FormLabel, Grid, Input, Text } from "@chakra-ui/react"
+import { Field, Grid, Input, Text } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -23,40 +23,40 @@ export const BaselineRequirements = observer(function BaselineRequirementsSummar
         <Text>{t(`${i18nPrefix}.baselineRequirements.title`)}</Text>
       </GridColumnHeader>
       <GridData>
-        <FormControl>
-          <FormLabel>{t("stepCode.part3.metrics.teui.label")}</FormLabel>
-          <FormHelperText>
+        <Field.Root>
+          <Field.Label>{t("stepCode.part3.metrics.teui.label")}</Field.Label>
+          <Field.HelperText>
             <Trans i18nKey={"stepCode.part3.metrics.teui.units"} components={{ sup: <sup /> }} />
-          </FormHelperText>
+          </Field.HelperText>
           <Input
-            isDisabled
+            disabled
             value={roundMetric(checklist.complianceReport.performance.requirements.baselinePortions.teui)}
           />
-        </FormControl>
+        </Field.Root>
       </GridData>
       <GridData>
-        <FormControl>
-          <FormLabel>{t("stepCode.part3.metrics.tedi.label")}</FormLabel>
-          <FormHelperText>
+        <Field.Root>
+          <Field.Label>{t("stepCode.part3.metrics.tedi.label")}</Field.Label>
+          <Field.HelperText>
             <Trans i18nKey={"stepCode.part3.metrics.tedi.units"} components={{ sup: <sup /> }} />
-          </FormHelperText>
+          </Field.HelperText>
           <Input
-            isDisabled
+            disabled
             value={roundMetric(checklist.complianceReport.performance.requirements.baselinePortions.tedi)}
           />
-        </FormControl>
+        </Field.Root>
       </GridData>
       <GridData>
-        <FormControl>
-          <FormLabel>{t("stepCode.part3.metrics.ghgi.label")}</FormLabel>
-          <FormHelperText>
+        <Field.Root>
+          <Field.Label>{t("stepCode.part3.metrics.ghgi.label")}</Field.Label>
+          <Field.HelperText>
             <Trans i18nKey={"stepCode.part3.metrics.ghgi.units"} components={{ sup: <sup />, sub: <sub /> }} />
-          </FormHelperText>
+          </Field.HelperText>
           <Input
-            isDisabled
+            disabled
             value={roundMetric(checklist.complianceReport.performance.requirements.baselinePortions.ghgi)}
           />
-        </FormControl>
+        </Field.Root>
       </GridData>
       <GridData colSpan={3}>
         <Text>

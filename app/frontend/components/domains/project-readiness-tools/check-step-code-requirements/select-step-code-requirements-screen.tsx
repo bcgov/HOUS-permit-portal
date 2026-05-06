@@ -1,16 +1,5 @@
-import {
-  Box,
-  Button,
-  Container,
-  Heading,
-  List,
-  ListItem,
-  Radio,
-  RadioGroup,
-  Stack,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { RadioGroup } from "@/components/ui/radio"
+import { Box, Button, Container, Heading, List, Stack, Text, VStack } from "@chakra-ui/react"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
@@ -49,61 +38,69 @@ export const SelectStepCodeRequirementsScreen = () => {
 
   return (
     <Container maxW="container.lg" py={16}>
-      <VStack align="start" spacing={8}>
+      <VStack align="start" gap={8}>
         <BackButton />
-        <VStack align="start" spacing={4} w="100%">
+        <VStack align="start" gap={4} w="100%">
           <Heading as="h1" size="lg">
             {t("projectReadinessTools.startCheckStepCodeRequirementsScreen.title")}
           </Heading>
           <Text>{t("projectReadinessTools.startCheckStepCodeRequirementsScreen.description")}</Text>
           <Box pl={4}>
-            <List spacing={3}>
-              <ListItem>
+            <List.Root gap={3}>
+              <List.Item>
                 <Text>
                   <strong>
                     {t("projectReadinessTools.startCheckStepCodeRequirementsScreen.part3Buildings.title")}
                   </strong>
                   : {t("projectReadinessTools.startCheckStepCodeRequirementsScreen.part3Buildings.description")}
                 </Text>
-              </ListItem>
-              <ListItem>
+              </List.Item>
+              <List.Item>
                 <Text>
                   <strong>
                     {t("projectReadinessTools.startCheckStepCodeRequirementsScreen.part9Buildings.title")}
                   </strong>
                   : {t("projectReadinessTools.startCheckStepCodeRequirementsScreen.part9Buildings.description")}
                 </Text>
-              </ListItem>
-              <ListItem>
+              </List.Item>
+              <List.Item>
                 <Text>
                   <strong>
                     {t("projectReadinessTools.startCheckStepCodeRequirementsScreen.otherBuildingTypes.title")}
                   </strong>
                   : {t("projectReadinessTools.startCheckStepCodeRequirementsScreen.otherBuildingTypes.description")}
                 </Text>
-              </ListItem>
-            </List>
+              </List.Item>
+            </List.Root>
           </Box>
           <Text pt={4}>{t("projectReadinessTools.startCheckStepCodeRequirementsScreen.question")}</Text>
-          <RadioGroup
-            onChange={(nextValue) => setStepCodeTypeValue(nextValue as EStepCodeType)}
+          <RadioGroup.Root
+            onValueChange={(nextValue) => setStepCodeTypeValue(nextValue as EStepCodeType)}
             value={stepCodeTypeValue}
           >
             <Stack direction="column">
-              <Radio value={EStepCodeType.part3StepCode}>
-                {t("projectReadinessTools.startCheckStepCodeRequirementsScreen.part3")}
-              </Radio>
-              <Radio value={EStepCodeType.part9StepCode}>
-                {t("projectReadinessTools.startCheckStepCodeRequirementsScreen.part9")}
-              </Radio>
+              <RadioGroup.Item value={EStepCodeType.part3StepCode}>
+                <RadioGroup.ItemHiddenInput />
+                <RadioGroup.ItemIndicator />
+                <RadioGroup.ItemText>
+                  {t("projectReadinessTools.startCheckStepCodeRequirementsScreen.part3")}
+                </RadioGroup.ItemText>
+              </RadioGroup.Item>
+              <RadioGroup.Item value={EStepCodeType.part9StepCode}>
+                <RadioGroup.ItemHiddenInput />
+                <RadioGroup.ItemIndicator />
+                <RadioGroup.ItemText>
+                  {t("projectReadinessTools.startCheckStepCodeRequirementsScreen.part9")}
+                </RadioGroup.ItemText>
+              </RadioGroup.Item>
             </Stack>
-          </RadioGroup>
+          </RadioGroup.Root>
           <Box pt={4}>
             <Button
               onClick={handleNextClick}
               variant="primary"
-              isDisabled={!stepCodeTypeValue || isCreating}
-              isLoading={isCreating}
+              disabled={!stepCodeTypeValue || isCreating}
+              loading={isCreating}
             >
               {t("projectReadinessTools.startCheckStepCodeRequirementsScreen.next")}
             </Button>

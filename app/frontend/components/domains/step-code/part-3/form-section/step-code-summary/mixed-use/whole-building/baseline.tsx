@@ -1,4 +1,4 @@
-import { FormControl, FormHelperText, FormLabel, Grid, GridItem, Input } from "@chakra-ui/react"
+import { Field, Grid, GridItem, Input } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -19,32 +19,31 @@ export const BaselineWholeBuildingSummary = observer(function BaselineWholeBuild
     <Grid templateColumns="300px 1fr" borderRightWidth={1} borderBottomWidth={1} borderColor="borders.light">
       <GridItem />
       <GridData>
-        <FormControl>
-          <FormLabel m={0}>{t("stepCode.part3.metrics.totalEnergy.label")}</FormLabel>
-          <FormHelperText mt={0}>
+        <Field.Root>
+          <Field.Label m={0}>{t("stepCode.part3.metrics.totalEnergy.label")}</Field.Label>
+          <Field.HelperText mt={0}>
             <Trans i18nKey={"stepCode.part3.metrics.totalEnergy.units"} components={{ sup: <sup />, sub: <sub /> }} />
-          </FormHelperText>
-        </FormControl>
+          </Field.HelperText>
+        </Field.Root>
       </GridData>
-
       <GridData>
-        <FormLabel>{t(`${i18nPrefix}.requirements`)}</FormLabel>
+        <Field.Label>{t(`${i18nPrefix}.requirements`)}</Field.Label>
       </GridData>
       <GridData justifyContent="center">
-        <Input isDisabled value={roundMetric(requirement)} />
+        <Input disabled value={roundMetric(requirement)} />
       </GridData>
       <GridData>
-        <FormLabel>{t(`${i18nPrefix}.performance`)}</FormLabel>
+        <Field.Label>{t(`${i18nPrefix}.performance`)}</Field.Label>
       </GridData>
       <GridData justifyContent="center">
-        <Input isDisabled value={roundMetric(performance)} />
+        <Input disabled value={roundMetric(performance)} />
       </GridData>
       <GridData>
-        <FormLabel>{t(`${i18nPrefix}.compliance`)}</FormLabel>
+        <Field.Label>{t(`${i18nPrefix}.compliance`)}</Field.Label>
       </GridData>
       <GridData justifyContent="center">
         <Input
-          isDisabled
+          disabled
           _disabled={{
             bg: isCompliant ? "semantic.successLight" : "semantic.errorLight",
             borderColor: isCompliant ? "semantic.success" : "semantic.error",

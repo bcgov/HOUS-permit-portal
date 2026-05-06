@@ -23,7 +23,8 @@ export const myJurisdictionAboutPageScreen = observer(() => {
   return (
     <Container maxW="container.lg" p={8} as={"main"}>
       <VStack alignItems={"flex-start"} w={"full"} h={"full"} gap={6}>
-        <Button variant="link" onClick={() => navigate(-1)} leftIcon={<CaretLeft size={20} />} textDecoration="none">
+        <Button variant="plain" onClick={() => navigate(-1)} textDecoration="none">
+          <CaretLeft size={20} />
           {t("ui.back")}
         </Button>
         <Flex align="center" w="100%" direction="column" alignItems="flex-start">
@@ -47,7 +48,7 @@ export const myJurisdictionAboutPageScreen = observer(() => {
             {t(`${i18nPrefix}.editJurisdictionAboutPage`)}
           </Heading>
         </Flex>
-        <SwitchButton isChecked={isEnabled} onChange={(e) => handleToggle(e.target.checked)} size={"lg"} />
+        <SwitchButton checked={isEnabled} onChange={(e) => handleToggle(e.target.checked)} size={"lg"} />
       </Flex>
     </Container>
   )

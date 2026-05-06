@@ -24,16 +24,11 @@ export const PreCheckGridHeaders = observer(function PreCheckGridHeaders({
       {columns.map((field) => {
         return (
           <GridHeader key={field} role={"columnheader"}>
-            <Flex
-              w={"full"}
-              as={"button"}
-              justifyContent={"space-between"}
-              cursor="pointer"
-              onClick={() => toggleSort(field as EPreCheckSortFields)}
-              px={4}
-            >
-              <Text textAlign="left">{getSortColumnHeader(field as EPreCheckSortFields)}</Text>
-              <SortIcon<EPreCheckSortFields> field={field as EPreCheckSortFields} currentSort={sort} />
+            <Flex w={"full"} justifyContent={"space-between"} cursor="pointer" px={4} asChild>
+              <button onClick={() => toggleSort(field as EPreCheckSortFields)}>
+                <Text textAlign="left">{getSortColumnHeader(field as EPreCheckSortFields)}</Text>
+                <SortIcon<EPreCheckSortFields> field={field as EPreCheckSortFields} currentSort={sort} />
+              </button>
             </Flex>
           </GridHeader>
         )

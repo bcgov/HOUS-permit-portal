@@ -1,4 +1,4 @@
-import { Box, Button, Container, Flex, Heading, Input, Menu, MenuButton, MenuList, VStack } from "@chakra-ui/react"
+import { Box, Button, Container, Flex, Heading, Input, Menu, Portal, VStack } from "@chakra-ui/react"
 import { FileCsv } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
@@ -91,7 +91,7 @@ export const ReportingScreen = observer(() => {
 
   return (
     <Container maxW="container.lg" p={8} as={"main"}>
-      <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
+      <VStack alignItems={"flex-start"} gap={5} w={"full"} h={"full"}>
         <Flex justifyContent={"space-between"} w={"full"} alignItems={"flex-end"}>
           <Box>
             <Heading as="h1">{t("reporting.title")}</Heading>
@@ -106,7 +106,7 @@ export const ReportingScreen = observer(() => {
                   maxW="50%"
                   bg="white"
                   value={filter}
-                  onChange={(e) => setFilter(e.target.value)}
+                  onValueChange={(e) => setFilter(e.target.value)}
                   placeholder={t("reporting.filterPlaceholder")}
                 />
               )
@@ -120,24 +120,34 @@ export const ReportingScreen = observer(() => {
                 <SearchGridItem>{reportType.description}</SearchGridItem>
                 <SearchGridItem>
                   {
-                    <Menu>
-                      <MenuButton as={Button} aria-label="manage" variant="link">
-                        {t("ui.manage")}
-                      </MenuButton>
-                      <MenuList>
-                        {reportType.dropdown.map((item, index) =>
-                          item.href ? (
-                            <ManageMenuItem key={index} icon={<FileCsv size={24} />} to={item.href}>
-                              {item.text}
-                            </ManageMenuItem>
-                          ) : (
-                            <ManageMenuItemButton key={index} leftIcon={<FileCsv size={24} />} onClick={item.onClick}>
-                              {item.text}
-                            </ManageMenuItemButton>
-                          )
-                        )}
-                      </MenuList>
-                    </Menu>
+                    <Menu.Root>
+                      <Menu.Trigger asChild>
+                        <Button aria-label="manage" variant="link">
+                          {t("ui.manage")}
+                        </Button>
+                      </Menu.Trigger>
+                      <Portal>
+                        <Menu.Positioner>
+                          <Menu.Content>
+                            {reportType.dropdown.map((item, index) =>
+                              item.href ? (
+                                <ManageMenuItem key={index} icon={<FileCsv size={24} />} to={item.href}>
+                                  {item.text}
+                                </ManageMenuItem>
+                              ) : (
+                                <ManageMenuItemButton
+                                  key={index}
+                                  leftIcon={<FileCsv size={24} />}
+                                  onClick={item.onClick}
+                                >
+                                  {item.text}
+                                </ManageMenuItemButton>
+                              )
+                            )}
+                          </Menu.Content>
+                        </Menu.Positioner>
+                      </Portal>
+                    </Menu.Root>
                   }
                 </SearchGridItem>
               </Box>

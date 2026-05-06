@@ -26,17 +26,17 @@ const ResourceGridItem = ({ resource }: { resource: IResource }) => {
           simpleLabel
           color="text.link"
           leftIcon={undefined}
-          noOfLines={1}
+          lineClamp={1}
         >
           {resource.title}
         </FileDownloadButton>
       ) : resource.resourceType === EResourceType.link && resource.linkUrl ? (
-        <Link href={resource.linkUrl} isExternal noOfLines={1}>
+        <Link href={resource.linkUrl} lineClamp={1} target="_blank" rel="noopener noreferrer">
           {resource.title}
         </Link>
       ) : null}
       {showDescription && (
-        <Text color="text.secondary" fontSize="md" mt={1} noOfLines={1}>
+        <Text color="text.secondary" fontSize="md" mt={1} lineClamp={1}>
           {resource.description}
         </Text>
       )}
@@ -70,16 +70,11 @@ export const JurisdictionResourcesGridSection = ({
       >
         {configureResourcesPath && (
           <Flex justify="flex-end">
-            <Button
-              as={RouterLink}
-              to={configureResourcesPath}
-              target="_blank"
-              rel="noopener noreferrer"
-              rightIcon={<ArrowSquareOut size={14} />}
-              size="xs"
-              variant="primary"
-            >
-              {t("ui.edit")}
+            <Button size="xs" variant="primary" asChild>
+              <RouterLink to={configureResourcesPath} target="_blank" rel="noopener noreferrer">
+                {t("ui.edit")}
+                <ArrowSquareOut size={14} />
+              </RouterLink>
             </Button>
           </Flex>
         )}
@@ -92,7 +87,7 @@ export const JurisdictionResourcesGridSection = ({
           />
         ) : (
           <Box bg="theme.gold" borderRadius="md" p={4}>
-            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
+            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap={4}>
               {jurisdiction.resources.map((resource) => (
                 <ResourceGridItem key={resource.id} resource={resource} />
               ))}

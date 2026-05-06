@@ -1,16 +1,11 @@
 import {
   Button,
+  Dialog,
   Flex,
   HStack,
   Heading,
   Link,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
+  Portal,
   Stack,
   Text,
   VStack,
@@ -43,15 +38,15 @@ export const SubmissionDownloadModal = observer(
     const applicationJsonUrl = `/api/permit_applications/${permitApplication.id}/download_application_json`
     const applicationJsonName = `permit-application-${permitApplication.id}.json`
 
-    const { isOpen, onOpen, onClose } = useDisclosure()
+    const { open, onOpen, onClose } = useDisclosure()
 
     useEffect(() => {
-      if (!isOpen) return
+      if (!open) return
 
       if (!permitApplication?.isFullyLoaded) {
         permitApplicationStore.fetchPermitApplication(permitApplication?.id, review)
       }
-    }, [permitApplication?.isFullyLoaded, isOpen])
+    }, [permitApplication?.isFullyLoaded, open])
 
     useEffect(() => {
       const fetch = async () => await checklist.load()
@@ -75,98 +70,118 @@ export const SubmissionDownloadModal = observer(
         {renderTrigger ? (
           renderTrigger(onOpen)
         ) : (
-          <Button variant="primary" onClick={onOpen} leftIcon={<Download />}>
+          <Button variant="primary" onClick={onOpen}>
+            <Download />
             {t("permitApplication.show.downloadApplication")}
           </Button>
         )}
-
-        <Modal onClose={onClose} isOpen={isOpen} size="lg" scrollBehavior="inside">
-          <ModalOverlay />
-          <ModalContent maxW={"container.lg"}>
-            {!permitApplication?.isFullyLoaded ? (
-              <SharedSpinner />
-            ) : (
-              <>
-                <ModalHeader>
-                  <VStack w="full" align="start">
-                    <Heading as="h1" fontSize="2xl" textTransform={"capitalize"}>
-                      {t("permitApplication.show.downloadHeading")}
-                      <br />
-                      <Text as="span" fontSize="lg" color="text.secondary">
-                        {permitApplication.number}
-                      </Text>
-                    </Heading>
-                    <Text fontSize="md" fontWeight="normal">
-                      {t("permitApplication.show.downloadPrompt")}
-                    </Text>
-                    {/* TODO: Fix and re-enable permit application CSV download */}
-                    {/* <Button
-                      size="sm"
-                      variant="outline"
-                      leftIcon={<FileArrowDown />}
-                      onClick={() => exportPermitApplicationCsv(permitApplication)}
-                    >
-                      {t("permitApplication.show.downloadAsCsv")}
-                    </Button> */}
-                  </VStack>
-                  <ModalCloseButton fontSize="11px" />
-                </ModalHeader>
-                <ModalBody>
-                  <Flex direction="column" gap={3} borderRadius="lg" borderWidth={1} borderColor="border.light" p={4}>
-                    <VStack align="flex-start" w="full" spacing={3}>
-                      {permitApplication.missingPdfs.map((pdfKey) => (
-                        <MissingPdf key={pdfKey} pdfKey={pdfKey} />
-                      ))}
-                      {allSubmissionVersionCompletedSupportingDocuments.map((doc) => (
-                        <FileDownloadLink
-                          key={doc.fileUrl}
-                          url={doc.fileUrl}
-                          name={doc.fileName}
-                          size={doc.fileSize}
-                          createdAt={doc.createdAt}
-                        />
-                      ))}
-                    </VStack>
-                  </Flex>
-                </ModalBody>
-                <ModalFooter>
-                  <Flex gap={2} w="full" wrap="wrap">
-                    <Button
-                      variant="primary"
-                      as={Link}
-                      flex={1}
-                      href={zipfileUrl}
-                      download={zipfileName}
-                      textDecoration="none"
-                      leftIcon={<FileZip />}
-                      isDisabled={!zipfileUrl}
-                      _hover={{ textDecoration: "none" }}
-                    >
-                      {t("permitApplication.show.downloadZip")}
-                    </Button>
-                    {review && (
-                      <Button
-                        variant="secondary"
-                        as={Link}
-                        flex={1}
-                        href={applicationJsonUrl}
-                        download={applicationJsonName}
-                        textDecoration="none"
-                        leftIcon={<FileArrowDown />}
-                        _hover={{ textDecoration: "none" }}
+        <Dialog.Root
+          open={open}
+          size="lg"
+          scrollBehavior="inside"
+          onOpenChange={(e) => {
+            if (!e.open) {
+              onClose()
+            }
+          }}
+        >
+          <Portal>
+            <Dialog.Backdrop />
+            <Dialog.Positioner>
+              <Dialog.Content maxW={"container.lg"}>
+                {!permitApplication?.isFullyLoaded ? (
+                  <SharedSpinner />
+                ) : (
+                  <>
+                    <Dialog.Header>
+                      <VStack w="full" align="start">
+                        <Heading as="h1" fontSize="2xl" textTransform={"capitalize"}>
+                          {t("permitApplication.show.downloadHeading")}
+                          <br />
+                          <Text as="span" fontSize="lg" color="text.secondary">
+                            {permitApplication.number}
+                          </Text>
+                        </Heading>
+                        <Text fontSize="md" fontWeight="normal">
+                          {t("permitApplication.show.downloadPrompt")}
+                        </Text>
+                        {/* TODO: Fix and re-enable permit application CSV download */}
+                        {/* <Button
+                          size="sm"
+                          variant="outline"
+                          leftIcon={<FileArrowDown />}
+                          onClick={() => exportPermitApplicationCsv(permitApplication)}
+                        >
+                          {t("permitApplication.show.downloadAsCsv")}
+                        </Button> */}
+                      </VStack>
+                      <Dialog.CloseTrigger fontSize="11px" />
+                    </Dialog.Header>
+                    <Dialog.Body>
+                      <Flex
+                        direction="column"
+                        gap={3}
+                        borderRadius="lg"
+                        borderWidth={1}
+                        borderColor="border.light"
+                        p={4}
                       >
-                        {t("permitApplication.show.downloadJson")}
-                      </Button>
-                    )}
-                    <Button variant="secondary" onClick={onClose}>
-                      {t("ui.neverMind")}
-                    </Button>
-                  </Flex>
-                </ModalFooter>
-              </>
-            )}
-          </ModalContent>
-        </Modal>
+                        <VStack align="flex-start" w="full" gap={3}>
+                          {permitApplication.missingPdfs.map((pdfKey) => (
+                            <MissingPdf key={pdfKey} pdfKey={pdfKey} />
+                          ))}
+                          {allSubmissionVersionCompletedSupportingDocuments.map((doc) => (
+                            <FileDownloadLink
+                              key={doc.fileUrl}
+                              url={doc.fileUrl}
+                              name={doc.fileName}
+                              size={doc.fileSize}
+                              createdAt={doc.createdAt}
+                            />
+                          ))}
+                        </VStack>
+                      </Flex>
+                    </Dialog.Body>
+                    <Dialog.Footer>
+                      <Flex gap={2} w="full" wrap="wrap">
+                        <Button
+                          variant="primary"
+                          flex={1}
+                          textDecoration="none"
+                          disabled={!zipfileUrl}
+                          _hover={{ textDecoration: "none" }}
+                          asChild
+                        >
+                          <Link href={zipfileUrl} download={zipfileName}>
+                            <FileZip />
+                            {t("permitApplication.show.downloadZip")}
+                          </Link>
+                        </Button>
+                        {review && (
+                          <Button
+                            variant="secondary"
+                            flex={1}
+                            textDecoration="none"
+                            _hover={{ textDecoration: "none" }}
+                            asChild
+                          >
+                            <Link href={applicationJsonUrl} download={applicationJsonName}>
+                              <FileArrowDown />
+                              {t("permitApplication.show.downloadJson")}
+                            </Link>
+                          </Button>
+                        )}
+                        <Button variant="secondary" onClick={onClose}>
+                          {t("ui.neverMind")}
+                        </Button>
+                      </Flex>
+                    </Dialog.Footer>
+                  </>
+                )}
+              </Dialog.Content>
+            </Dialog.Positioner>
+          </Portal>
+        </Dialog.Root>
       </>
     )
   }
@@ -175,22 +190,17 @@ export const SubmissionDownloadModal = observer(
 const FileDownloadLink = function ApplicationFileDownloadLink({ url, name, size, createdAt }) {
   return (
     <HStack w="full" align="center">
-      <Stack flex={1} spacing={2}>
-        <Button
-          as={Link}
-          href={url}
-          download={name}
-          variant="link"
-          leftIcon={<FileArrowDown size={16} />}
-          whiteSpace="normal"
-        >
-          {name}
+      <Stack flex={1} gap={2}>
+        <Button variant="plain" whiteSpace="normal" asChild>
+          <Link href={url} download={name}>
+            <FileArrowDown size={16} />
+            {name}
+          </Link>
         </Button>
         <Text color="greys.grey01" fontSize="xs" ml={8}>
           {formatBytes(size)}
         </Text>
       </Stack>
-
       <Text color="greys.grey01" textAlign="right" fontSize="xs">
         {format(createdAt, datefnsAppDateFormat)}
       </Text>
@@ -212,13 +222,12 @@ function MissingPdf({ pdfKey }: { pdfKey: "permit_application_pdf" }) {
   }
   return (
     <Flex w="full" align="center" justify="space-between" pl={1}>
-      <HStack spacing={3}>
+      <HStack gap={3}>
         <FileArrowDown size={16} />
         <Text as={"span"} color={"semantic.error"}>
           {t("permitApplication.show.fetchingMissingPdf", { missingPdf: getMissingPdfLabel() || pdfKey })}
         </Text>
       </HStack>
-
       <LoadingIcon icon={<Gear />} />
     </Flex>
   )

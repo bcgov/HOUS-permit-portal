@@ -1,16 +1,4 @@
-import {
-  Button,
-  Flex,
-  Grid,
-  Heading,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
-  useDisclosure,
-} from "@chakra-ui/react"
+import { Button, Dialog, Flex, Grid, Heading, Portal, useDisclosure } from "@chakra-ui/react"
 import { Trash } from "@phosphor-icons/react"
 import React, { useEffect } from "react"
 import { FormProvider, useForm } from "react-hook-form"
@@ -125,86 +113,92 @@ export const CreateEditContactModal = ({
   }
 
   return (
-    <Modal onClose={onClose} isOpen={isOpen} size="2xl">
-      <ModalOverlay />
-      <ModalContent>
-        <ModalHeader>
-          <Heading as="h1" textTransform={"capitalize"}>
-            {contact ? t("contact.edit") : t("contact.create")}
-          </Heading>
-          <ModalCloseButton fontSize="11px" />
-        </ModalHeader>
-        <ModalBody py={6}>
-          <FormProvider {...formMethods}>
-            <Flex direction="column" gap={2} border="1px solid" borderColor="border.light" p={4}>
-              <SelectFormControl
-                label={t("contact.fields.contactType")}
-                fieldName="contactType"
-                optionGroups={contactTypeOptionGroups}
-                required
-              />
-              <Flex direction={{ base: "column", md: "row" }} gap={2}>
-                <TextFormControl label={t("contact.fields.firstName")} fieldName="firstName" required />
-                <TextFormControl label={t("contact.fields.lastName")} fieldName="lastName" required />
-              </Flex>
-              <Flex direction={{ base: "column", md: "row" }} gap={2}>
-                <EmailFormControl validate fieldName="email" required />
-                <PhoneFormControl label={t("contact.fields.phone")} fieldName="phone" required />
-              </Flex>
-              <TextFormControl label={t("contact.fields.extension")} fieldName="extension" />
-              <PhoneFormControl label={t("contact.fields.cell")} fieldName="cell" />
-              <TextFormControl label={t("contact.fields.title")} fieldName="title" required />
-              <TextFormControl label={t("contact.fields.address")} fieldName="address" />
-              <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
-                <TextFormControl label={t("contact.fields.organization")} fieldName="organization" />
-                <TextFormControl label={t("contact.fields.department")} fieldName="department" />
-              </Grid>
-              <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
-                <TextFormControl label={t("contact.fields.businessName")} fieldName="businessName" />
-                <TextFormControl label={t("contact.fields.businessLicense")} fieldName="businessLicense" />
-              </Grid>
-              <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
-                <TextFormControl
-                  label={t("contact.fields.professionalAssociation")}
-                  fieldName="professionalAssociation"
-                />
-                <TextFormControl label={t("contact.fields.professionalNumber")} fieldName="professionalNumber" />
-              </Grid>
-              <Flex w="full" justify="space-between">
-                <Button
-                  variant="primary"
-                  onClick={handleSubmit(onSubmit)}
-                  isDisabled={!isValid || isSubmitting}
-                  isLoading={isSubmitting}
-                  loadingText={t("ui.loading")}
-                >
-                  {contact ? t("contact.updateButton") : t("contact.createButton")}
-                </Button>
+    <Dialog.Root
+      open={open}
+      size="xl"
+      onOpenChange={(e) => {
+        if (!e.open) {
+          onClose()
+        }
+      }}
+    >
+      <Portal>
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content>
+            <Dialog.Header>
+              <Heading as="h1" textTransform={"capitalize"}>
+                {contact ? t("contact.edit") : t("contact.create")}
+              </Heading>
+              <Dialog.CloseTrigger fontSize="11px" />
+            </Dialog.Header>
+            <Dialog.Body py={6}>
+              <FormProvider {...formMethods}>
+                <Flex direction="column" gap={2} border="1px solid" borderColor="border.light" p={4}>
+                  <SelectFormControl
+                    label={t("contact.fields.contactType")}
+                    fieldName="contactType"
+                    optionGroups={contactTypeOptionGroups}
+                    required
+                  />
+                  <Flex direction={{ base: "column", md: "row" }} gap={2}>
+                    <TextFormControl label={t("contact.fields.firstName")} fieldName="firstName" required />
+                    <TextFormControl label={t("contact.fields.lastName")} fieldName="lastName" required />
+                  </Flex>
+                  <Flex direction={{ base: "column", md: "row" }} gap={2}>
+                    <EmailFormControl validate fieldName="email" required />
+                    <PhoneFormControl label={t("contact.fields.phone")} fieldName="phone" required />
+                  </Flex>
+                  <TextFormControl label={t("contact.fields.extension")} fieldName="extension" />
+                  <PhoneFormControl label={t("contact.fields.cell")} fieldName="cell" />
+                  <TextFormControl label={t("contact.fields.title")} fieldName="title" required />
+                  <TextFormControl label={t("contact.fields.address")} fieldName="address" />
+                  <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
+                    <TextFormControl label={t("contact.fields.organization")} fieldName="organization" />
+                    <TextFormControl label={t("contact.fields.department")} fieldName="department" />
+                  </Grid>
+                  <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
+                    <TextFormControl label={t("contact.fields.businessName")} fieldName="businessName" />
+                    <TextFormControl label={t("contact.fields.businessLicense")} fieldName="businessLicense" />
+                  </Grid>
+                  <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
+                    <TextFormControl
+                      label={t("contact.fields.professionalAssociation")}
+                      fieldName="professionalAssociation"
+                    />
+                    <TextFormControl label={t("contact.fields.professionalNumber")} fieldName="professionalNumber" />
+                  </Grid>
+                  <Flex w="full" justify="space-between">
+                    <Button
+                      variant="primary"
+                      onClick={handleSubmit(onSubmit)}
+                      disabled={!isValid || isSubmitting}
+                      loading={isSubmitting}
+                      loadingText={t("ui.loading")}
+                    >
+                      {contact ? t("contact.updateButton") : t("contact.createButton")}
+                    </Button>
 
-                <RemoveConfirmationModal
-                  title={t("contact.confirmDeleteTitle")}
-                  body={t("contact.confirmDeleteBody")}
-                  renderTriggerButton={(props) => {
-                    return (
-                      <Button
-                        color="semantic.error"
-                        onClick={(e) => {}}
-                        leftIcon={<Trash />}
-                        variant="link"
-                        px={2}
-                        {...props}
-                      >
-                        {t("ui.delete")}
-                      </Button>
-                    )
-                  }}
-                  onRemove={handleDelete}
-                />
-              </Flex>
-            </Flex>
-          </FormProvider>
-        </ModalBody>
-      </ModalContent>
-    </Modal>
+                    <RemoveConfirmationModal
+                      title={t("contact.confirmDeleteTitle")}
+                      body={t("contact.confirmDeleteBody")}
+                      renderTriggerButton={(props) => {
+                        return (
+                          <Button color="semantic.error" onClick={(e) => {}} variant="plain" px={2} {...props}>
+                            <Trash />
+                            {t("ui.delete")}
+                          </Button>
+                        )
+                      }}
+                      onRemove={handleDelete}
+                    />
+                  </Flex>
+                </Flex>
+              </FormProvider>
+            </Dialog.Body>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Portal>
+    </Dialog.Root>
   )
 }

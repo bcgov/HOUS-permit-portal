@@ -8,7 +8,7 @@ export interface IMenuSectionProps {
 
 export const MenuSection = ({ title, children }: IMenuSectionProps) => {
   return (
-    <VStack align="flex-start" spacing={0} w="full">
+    <VStack align="flex-start" gap={0} w="full">
       {title && (
         <Heading as="h2" size="lg" color="text.primary" mb={2}>
           {title}

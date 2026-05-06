@@ -46,7 +46,7 @@ export const Part9StepCodeForm = observer(function Part9StepCodeForm() {
                   <SharedSpinner />
                 </Center>
               ) : (
-                <VStack spacing={8} align="start" w="full" pb={20}>
+                <VStack gap={8} align="start" w="full" pb={20}>
                   <Title />
                   <Info />
                   {permitApplicationId && <DrawingsWarning />}

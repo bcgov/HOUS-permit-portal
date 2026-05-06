@@ -1,4 +1,4 @@
-import { Box, Button, Collapse, Flex, FormControl, FormLabel, Heading, Select, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Collapsible, Field, Flex, Heading, NativeSelect, Text, VStack } from "@chakra-ui/react"
 import { Wrench } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo, useState } from "react"
@@ -28,9 +28,9 @@ export const QaToolsPopout = observer(() => {
   const isProjectsPath = location.pathname === "/projects"
   const isEligible = Boolean(
     import.meta.env.VITE_QA_MODE === "true" &&
-      sessionStore.loggedIn &&
-      currentUser &&
-      (currentUser.isSubmitter || currentUser.isReviewStaff)
+    sessionStore.loggedIn &&
+    currentUser &&
+    (currentUser.isSubmitter || currentUser.isReviewStaff)
   )
   const hasActions = isProjectsPath || !!permitApplicationId
   const currentActionRequiresSandbox = Boolean(
@@ -93,81 +93,88 @@ export const QaToolsPopout = observer(() => {
         <Button
           borderLeftRadius={0}
           boxShadow="lg"
-          leftIcon={<Wrench />}
           minH={24}
           onClick={() => setIsOpen((current) => !current)}
           size="sm"
-          sx={{ writingMode: "vertical-rl" }}
+          css={{
+            writingMode: "vertical-rl",
+          }}
           transform="translateX(0)"
           variant="primary"
         >
+          <Wrench />
           {t("qaTools.trigger")}
         </Button>
-        <Collapse in={isOpen} animateOpacity>
-          <Box
-            bg="white"
-            border="1px solid"
-            borderColor="border.light"
-            borderRight="0"
-            boxShadow="lg"
-            mr={0}
-            p={4}
-            w="xs"
-          >
-            <VStack align="stretch" spacing={4}>
-              <Box>
-                <Heading as="h2" size="sm">
-                  {t("qaTools.title")}
-                </Heading>
-                <Text fontSize="sm">{t("qaTools.description")}</Text>
-              </Box>
+        <Collapsible.Root open={open}>
+          <Collapsible.Content>
+            <Box
+              bg="white"
+              border="1px solid"
+              borderColor="border.light"
+              borderRight="0"
+              boxShadow="lg"
+              mr={0}
+              p={4}
+              w="xs"
+            >
+              <VStack align="stretch" gap={4}>
+                <Box>
+                  <Heading as="h2" size="sm">
+                    {t("qaTools.title")}
+                  </Heading>
+                  <Text fontSize="sm">{t("qaTools.description")}</Text>
+                </Box>
 
-              {currentActionRequiresSandbox && (
-                <Text color="semantic.error" fontSize="sm">
-                  {t("qaTools.sandboxRequired")}
-                </Text>
-              )}
+                {currentActionRequiresSandbox && (
+                  <Text color="semantic.error" fontSize="sm">
+                    {t("qaTools.sandboxRequired")}
+                  </Text>
+                )}
 
-              {isProjectsPath && (
-                <VStack align="stretch" spacing={3}>
-                  <FormControl>
-                    <FormLabel>{t("qaTools.jurisdiction")}</FormLabel>
-                    <Select
-                      isDisabled={isLoadingJurisdictions || isCreatingProject}
-                      onChange={(event) => setSelectedJurisdictionId(event.target.value)}
-                      value={selectedJurisdictionId}
+                {isProjectsPath && (
+                  <VStack align="stretch" gap={3}>
+                    <Field.Root>
+                      <Field.Label>{t("qaTools.jurisdiction")}</Field.Label>
+                      <NativeSelect.Root>
+                        <NativeSelect.Field
+                          disabled={isLoadingJurisdictions || isCreatingProject}
+                          onValueChange={(event) => setSelectedJurisdictionId(event.target.value)}
+                          value={selectedJurisdictionId}
+                        >
+                          {jurisdictionOptions.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </NativeSelect.Field>
+                        <NativeSelect.Indicator />
+                      </NativeSelect.Root>
+                    </Field.Root>
+                    <Button
+                      disabled={!selectedJurisdictionId || currentActionRequiresSandbox}
+                      loading={isCreatingProject || isLoadingJurisdictions}
+                      onClick={createFullPermitProject}
+                      variant="primary"
                     >
-                      {jurisdictionOptions.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </Select>
-                  </FormControl>
+                      {t("qaTools.createProject")}
+                    </Button>
+                  </VStack>
+                )}
+
+                {permitApplicationId && (
                   <Button
-                    isDisabled={!selectedJurisdictionId || currentActionRequiresSandbox}
-                    isLoading={isCreatingProject || isLoadingJurisdictions}
-                    onClick={createFullPermitProject}
+                    disabled={currentActionRequiresSandbox}
+                    loading={isAutofilling}
+                    onClick={autofillPermitApplication}
                     variant="primary"
                   >
-                    {t("qaTools.createProject")}
+                    {t("qaTools.autofillApplication")}
                   </Button>
-                </VStack>
-              )}
-
-              {permitApplicationId && (
-                <Button
-                  isDisabled={currentActionRequiresSandbox}
-                  isLoading={isAutofilling}
-                  onClick={autofillPermitApplication}
-                  variant="primary"
-                >
-                  {t("qaTools.autofillApplication")}
-                </Button>
-              )}
-            </VStack>
-          </Box>
-        </Collapse>
+                )}
+              </VStack>
+            </Box>
+          </Collapsible.Content>
+        </Collapsible.Root>
       </Flex>
     </Box>
   )

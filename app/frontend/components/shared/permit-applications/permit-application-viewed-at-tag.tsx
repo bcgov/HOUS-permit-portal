@@ -16,7 +16,7 @@ export const PermitApplicationViewedAtTag = ({ permitApplication, ...rest }: IPe
     [EPermitApplicationStatus.resubmitted]: t("permitApplication.newlyRevised"),
   }
   return (
-    <Tag
+    <Tag.Root
       p={1}
       bg={permitApplication.isViewed ? undefined : "theme.yellow"}
       color={"text.primary"}
@@ -29,6 +29,6 @@ export const PermitApplicationViewedAtTag = ({ permitApplication, ...rest }: IPe
       {...rest}
     >
       {permitApplication.isViewed ? t("permitApplication.viewed") : statusMap[permitApplication.status]}
-    </Tag>
+    </Tag.Root>
   )
 }

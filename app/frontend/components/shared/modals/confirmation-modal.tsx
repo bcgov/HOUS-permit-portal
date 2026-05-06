@@ -1,15 +1,4 @@
-import {
-  Button,
-  Flex,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  useDisclosure,
-} from "@chakra-ui/react"
+import { Button, Dialog, Flex, Portal, useDisclosure } from "@chakra-ui/react"
 import React, { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -28,7 +17,7 @@ export const ConfirmationModal = ({
   confirmText,
   renderTrigger,
 }: IConfirmationModalProps) => {
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { open, onOpen, onClose } = useDisclosure()
   const { t } = useTranslation()
 
   const handleConfirm = () => {
@@ -43,24 +32,36 @@ export const ConfirmationModal = ({
   return (
     <>
       {renderTrigger ? renderTrigger(onOpen) : <Button onClick={onOpen}>{t("ui.confirm")}</Button>}
-      <Modal isOpen={isOpen} onClose={onClose} size="lg">
-        <ModalOverlay />
-        <ModalContent p={4}>
-          <ModalHeader>{promptHeader ?? t("ui.defaultConfirmation")}</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>{promptMessage ?? t("ui.confirm")}</ModalBody>
-          <ModalFooter>
-            <Flex justify="flex-start" w="full" gap={4}>
-              <Button variant="primary" onClick={handleConfirm}>
-                {confirmText ?? t("ui.confirm")}
-              </Button>
-              <Button variant="secondary" onClick={handleCancel}>
-                {t("ui.neverMind")}
-              </Button>
-            </Flex>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <Dialog.Root
+        open={open}
+        size="lg"
+        onOpenChange={(e) => {
+          if (!e.open) {
+            onClose()
+          }
+        }}
+      >
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content p={4}>
+              <Dialog.Header>{promptHeader ?? t("ui.defaultConfirmation")}</Dialog.Header>
+              <Dialog.CloseTrigger />
+              <Dialog.Body>{promptMessage ?? t("ui.confirm")}</Dialog.Body>
+              <Dialog.Footer>
+                <Flex justify="flex-start" w="full" gap={4}>
+                  <Button variant="primary" onClick={handleConfirm}>
+                    {confirmText ?? t("ui.confirm")}
+                  </Button>
+                  <Button variant="secondary" onClick={handleCancel}>
+                    {t("ui.neverMind")}
+                  </Button>
+                </Flex>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
     </>
   )
 }

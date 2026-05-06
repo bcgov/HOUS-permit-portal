@@ -3,17 +3,12 @@ import {
   Button,
   ButtonGroup,
   ButtonProps,
+  Dialog,
+  Field,
   Flex,
-  FormLabel,
   HStack,
-  MenuItem,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
+  Menu,
+  Portal,
   Text,
   useDisclosure,
 } from "@chakra-ui/react"
@@ -74,7 +69,7 @@ function getOperatorsForInputType(inputType: string | undefined): EConditionalOp
 }
 
 export const ConditionalSetupModal = observer(({ triggerButtonProps, renderTriggerButton, index }: IProps) => {
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { open, onOpen, onClose } = useDisclosure()
   const { t } = useTranslation()
 
   const formMethods = useFormContext<IRequirementBlockForm>()
@@ -206,149 +201,159 @@ export const ConditionalSetupModal = observer(({ triggerButtonProps, renderTrigg
       {renderTriggerButton ? (
         renderTriggerButton({ onClick: onOpen })
       ) : (
-        <MenuItem color={"text.primary"} onClick={onOpen} {...triggerButtonProps}>
-          <HStack spacing={2} fontSize={"sm"}>
+        <Menu.Item value="conditional-setup" color={"text.primary"} onClick={onOpen} {...triggerButtonProps}>
+          <HStack gap={2} fontSize={"sm"}>
             <SlidersHorizontal />
             <Text as={"span"}>{t("requirementsLibrary.modals.optionsMenu.conditionalLogic")}</Text>
           </HStack>
-        </MenuItem>
+        </Menu.Item>
       )}
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent maxW={"600px"} fontSize={"sm"} color={"text.secondary"}>
-          <ModalCloseButton />
-          <ModalHeader
-            display={"flex"}
-            justifyContent={"center"}
-            alignItems={"center"}
-            bg={"greys.grey03"}
-            borderTopRadius={"md"}
-            maxHeight={12}
-            fontSize="md"
-          >
-            <SlidersHorizontal style={{ marginRight: "var(--chakra-space-2)" }} />
-            {t("requirementsLibrary.modals.optionsMenu.conditionalLogic")}
-          </ModalHeader>
-          <ModalBody
-            py={4}
-            sx={{
-              pre: {
-                bg: "greys.grey03",
-                px: 4,
-                py: 3,
-                borderRadius: "sm",
-                color: "text.primary",
-              },
-            }}
-          >
-            <Flex direction="column" gap={4}>
-              <Flex direction="column">
-                <FormLabel fontWeight="bold" size="lg">
-                  {t("requirementsLibrary.modals.conditionalSetup.when")}
-                </FormLabel>
-                <Box px={4}>
-                  <Controller
-                    name={`requirementsAttributes.${index}.inputOptions.conditional.when`}
-                    control={control}
-                    render={({ field: { onChange, value } }) => (
-                      <RequirementSelect
-                        onChange={(opt) => handleWhenChange(opt, onChange)}
-                        options={requirementOptions}
-                        selectedOption={value && requirementOptions?.find((option) => option.value === value)}
-                      />
-                    )}
-                  />
-                </Box>
-              </Flex>
-
-              {watchedWhen && (
-                <Flex direction="column">
-                  <FormLabel fontWeight="bold" size="lg">
-                    {t("requirementsLibrary.modals.conditionalSetup.operator")}
-                  </FormLabel>
-                  <Box px={4}>
-                    <Controller
-                      name={`requirementsAttributes.${index}.inputOptions.conditional.operator`}
-                      control={control}
-                      render={({ field: { onChange, value } }) => (
-                        <Select
-                          options={operatorSelectOptions}
-                          value={operatorSelectOptions.find((o) => o.value === value) || operatorSelectOptions[0]}
-                          onChange={(opt) => {
-                            const newOp = opt?.value
-                            if (VALUELESS_OPERATORS.includes(newOp as EConditionalOperator)) {
-                              setValue(`requirementsAttributes.${index}.inputOptions.conditional.operand`, null)
-                            }
-                            onChange(newOp)
-                          }}
-                        />
-                      )}
-                    />
-                  </Box>
-                </Flex>
-              )}
-
-              {watchedWhen && !isValueless && (
-                <Flex direction="column">
-                  <FormLabel fontWeight="bold" size="lg">
-                    {t("requirementsLibrary.modals.conditionalSetup.satisfies")}
-                  </FormLabel>
-                  <Flex px={4} gap={4} align="center">
-                    {getOperandSelectFormControl(
-                      `requirementsAttributes.${index}.inputOptions.conditional.operand` as keyof IRequirementBlockForm
-                    )}
-                  </Flex>
-                </Flex>
-              )}
-
-              {watchedWhen && (
-                <Flex direction="column" bg="theme.blueLight" p={4}>
-                  <FormLabel fontWeight="bold" size="lg">
-                    {t("requirementsLibrary.modals.conditionalSetup.then")}
-                  </FormLabel>
-                  <Text fontSize="sm" pb={4} color="text.secondary">
-                    "{watchedLabel}"
-                  </Text>
-                  <Box px={4}>
-                    <Controller
-                      name={`requirementsAttributes.${index}.inputOptions.conditional.then`}
-                      control={control}
-                      render={({ field: { onChange, value } }) => (
-                        <EffectSelect
-                          onChange={(opt) => onChange(opt.value)}
-                          options={effectOptions}
-                          selectedOption={effectOptions?.find((option) => option.value === value)}
-                        />
-                      )}
-                    />
-                  </Box>
-                </Flex>
-              )}
-              <Box overflow="auto">
-                <Button variant="link" onClick={toggleShowAdvanced}>
-                  {showAdvanced ? t("ui.hideAdvanced") : t("ui.showAdvanced")}
-                </Button>
-                {showAdvanced && <pre>{JSON.stringify(watchedRequirements, null, 2)}</pre>}
-              </Box>
-            </Flex>
-          </ModalBody>
-
-          <ModalFooter justifyContent={"flex-start"}>
-            <ButtonGroup>
-              <Button variant={"secondary"} onClick={onReset}>
-                {t("ui.reset")}
-              </Button>
-              <Button
-                variant={"primary"}
-                onClick={onClose}
-                isDisabled={!allFieldsProvided || !isSupportedInputType(inputType)}
+      <Dialog.Root
+        open={open}
+        onOpenChange={(e) => {
+          if (!e.open) {
+            onClose()
+          }
+        }}
+      >
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content maxW={"600px"} fontSize={"sm"} color={"text.secondary"}>
+              <Dialog.CloseTrigger />
+              <Dialog.Header
+                display={"flex"}
+                justifyContent={"center"}
+                alignItems={"center"}
+                bg={"greys.grey03"}
+                borderTopRadius={"md"}
+                maxHeight={12}
+                fontSize="md"
               >
-                {t("ui.done")}
-              </Button>
-            </ButtonGroup>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+                <SlidersHorizontal style={{ marginRight: "var(--chakra-space-2)" }} />
+                {t("requirementsLibrary.modals.optionsMenu.conditionalLogic")}
+              </Dialog.Header>
+              <Dialog.Body
+                py={4}
+                css={{
+                  "& pre": {
+                    bg: "greys.grey03",
+                    px: 4,
+                    py: 3,
+                    borderRadius: "sm",
+                    color: "text.primary",
+                  },
+                }}
+              >
+                <Flex direction="column" gap={4}>
+                  <Flex direction="column">
+                    <Field.Label fontWeight="bold" size="lg">
+                      {t("requirementsLibrary.modals.conditionalSetup.when")}
+                    </Field.Label>
+                    <Box px={4}>
+                      <Controller
+                        name={`requirementsAttributes.${index}.inputOptions.conditional.when`}
+                        control={control}
+                        render={({ field: { onChange, value } }) => (
+                          <RequirementSelect
+                            onChange={(opt) => handleWhenChange(opt, onChange)}
+                            options={requirementOptions}
+                            selectedOption={value && requirementOptions?.find((option) => option.value === value)}
+                          />
+                        )}
+                      />
+                    </Box>
+                  </Flex>
+
+                  {watchedWhen && (
+                    <Flex direction="column">
+                      <Field.Label fontWeight="bold" size="lg">
+                        {t("requirementsLibrary.modals.conditionalSetup.operator")}
+                      </Field.Label>
+                      <Box px={4}>
+                        <Controller
+                          name={`requirementsAttributes.${index}.inputOptions.conditional.operator`}
+                          control={control}
+                          render={({ field: { onChange, value } }) => (
+                            <Select
+                              options={operatorSelectOptions}
+                              value={operatorSelectOptions.find((o) => o.value === value) || operatorSelectOptions[0]}
+                              onChange={(opt) => {
+                                const newOp = opt?.value
+                                if (VALUELESS_OPERATORS.includes(newOp as EConditionalOperator)) {
+                                  setValue(`requirementsAttributes.${index}.inputOptions.conditional.operand`, null)
+                                }
+                                onChange(newOp)
+                              }}
+                            />
+                          )}
+                        />
+                      </Box>
+                    </Flex>
+                  )}
+
+                  {watchedWhen && !isValueless && (
+                    <Flex direction="column">
+                      <Field.Label fontWeight="bold" size="lg">
+                        {t("requirementsLibrary.modals.conditionalSetup.satisfies")}
+                      </Field.Label>
+                      <Flex px={4} gap={4} align="center">
+                        {getOperandSelectFormControl(
+                          `requirementsAttributes.${index}.inputOptions.conditional.operand` as keyof IRequirementBlockForm
+                        )}
+                      </Flex>
+                    </Flex>
+                  )}
+
+                  {watchedWhen && (
+                    <Flex direction="column" bg="theme.blueLight" p={4}>
+                      <Field.Label fontWeight="bold" size="lg">
+                        {t("requirementsLibrary.modals.conditionalSetup.then")}
+                      </Field.Label>
+                      <Text fontSize="sm" pb={4} color="text.secondary">
+                        "{watchedLabel}"
+                      </Text>
+                      <Box px={4}>
+                        <Controller
+                          name={`requirementsAttributes.${index}.inputOptions.conditional.then`}
+                          control={control}
+                          render={({ field: { onChange, value } }) => (
+                            <EffectSelect
+                              onChange={(opt) => onChange(opt.value)}
+                              options={effectOptions}
+                              selectedOption={effectOptions?.find((option) => option.value === value)}
+                            />
+                          )}
+                        />
+                      </Box>
+                    </Flex>
+                  )}
+                  <Box overflow="auto">
+                    <Button variant="plain" onClick={toggleShowAdvanced}>
+                      {showAdvanced ? t("ui.hideAdvanced") : t("ui.showAdvanced")}
+                    </Button>
+                    {showAdvanced && <pre>{JSON.stringify(watchedRequirements, null, 2)}</pre>}
+                  </Box>
+                </Flex>
+              </Dialog.Body>
+              <Dialog.Footer justifyContent={"flex-start"}>
+                <ButtonGroup>
+                  <Button variant={"secondary"} onClick={onReset}>
+                    {t("ui.reset")}
+                  </Button>
+                  <Button
+                    variant={"primary"}
+                    onClick={onClose}
+                    disabled={!allFieldsProvided || !isSupportedInputType(inputType)}
+                  >
+                    {t("ui.done")}
+                  </Button>
+                </ButtonGroup>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
     </>
   )
 })

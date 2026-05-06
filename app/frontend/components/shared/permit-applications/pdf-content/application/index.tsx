@@ -353,7 +353,7 @@ const ChecklistField = function ApplicationPDFPanelChecklistField({ options, lab
       </Text>
       <View style={{ gap: 8 }}>
         {normalizedOptions.map((option) => {
-          return <Checkbox key={option.value} isChecked={options?.[option.value]} label={option.label} />
+          return <Checkbox key={option.value} checked={options?.[option.value]} label={option.label} />
         })}
       </View>
     </View>
@@ -363,7 +363,7 @@ const ChecklistField = function ApplicationPDFPanelChecklistField({ options, lab
 const CheckboxField = function ApplicationPDFPanelCheckboxField({ value, label }) {
   return (
     <View style={{ gap: 4, paddingTop: 4 }} wrap={false}>
-      <Checkbox isChecked={value} label={label} />
+      <Checkbox checked={value} label={label} />
     </View>
   )
 }

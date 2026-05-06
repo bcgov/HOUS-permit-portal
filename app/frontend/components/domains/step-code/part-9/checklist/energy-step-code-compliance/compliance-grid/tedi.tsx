@@ -1,4 +1,4 @@
-import { StackDivider, VStack } from "@chakra-ui/react"
+import { Stack, VStack } from "@chakra-ui/react"
 import { Percent } from "@phosphor-icons/react"
 import { t } from "i18next"
 import React from "react"
@@ -23,8 +23,9 @@ export const TEDI = function TEDI({ compliance }: IProps) {
           inputProps={{ isDisabled: true, textAlign: "center", value: compliance.tediRequirement || "-" }}
           hint={t(`${i18nPrefix}.max`)}
           rightElement={
-            <VStack spacing={0} divider={<StackDivider color="border.base" />}>
+            <VStack gap={0}>
               <UnitsText>{t(`${i18nPrefix}.tediUnits.numerator`)}</UnitsText>
+              <Stack.Separator color="border.base" />
               <UnitsText>{t(`${i18nPrefix}.tediUnits.denominator`)}</UnitsText>
             </VStack>
           }
@@ -34,8 +35,9 @@ export const TEDI = function TEDI({ compliance }: IProps) {
         <TextFormControl
           inputProps={{ isDisabled: true, textAlign: "center", value: compliance.tedi || "-" }}
           rightElement={
-            <VStack spacing={0} divider={<StackDivider color="border.base" />}>
+            <VStack gap={0}>
               <UnitsText>{t(`${i18nPrefix}.tediUnits.numerator`)}</UnitsText>
+              <Stack.Separator color="border.base" />
               <UnitsText>{t(`${i18nPrefix}.tediUnits.denominator`)}</UnitsText>
             </VStack>
           }

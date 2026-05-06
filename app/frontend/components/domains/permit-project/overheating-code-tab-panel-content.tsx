@@ -1,17 +1,4 @@
-import {
-  Button,
-  Container,
-  Flex,
-  Heading,
-  Icon,
-  IconButton,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { Button, Container, Flex, Heading, Icon, IconButton, Menu, Portal, Text, VStack } from "@chakra-ui/react"
 import { Archive, ClockClockwise, DotsThreeVertical, Plus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -52,7 +39,7 @@ export const OverheatingCodeTabPanelContent = observer(() => {
   return (
     <Flex direction="column" flex={1} bg="greys.white" pb={24} overflowY="auto" h={"full"}>
       <Container maxW="container.xl" py={8} h={"full"}>
-        <VStack spacing={3} align="stretch">
+        <VStack gap={3} align="stretch">
           <Flex justify="space-between" align="center">
             <Heading as="h1">{t("overheatingCode.index.title", "Overheating Code Checks")}</Heading>
             <RouterLinkButton to="/overheating-codes/new" variant="primary" leftIcon={<Plus />}>
@@ -80,74 +67,87 @@ export const OverheatingCodeTabPanelContent = observer(() => {
                   <SearchGridItem>{oc.buildingModel || "—"}</SearchGridItem>
                   <SearchGridItem>{oc.fullAddress || "—"}</SearchGridItem>
                   <SearchGridItem justifyContent="flex-end">
-                    <Menu>
-                      <MenuButton
-                        as={IconButton}
-                        icon={<Icon as={DotsThreeVertical} />}
-                        variant="ghost"
-                        onClick={(e) => e.stopPropagation()}
-                        aria-label={t("ui.options")}
-                      />
-                      <MenuList>
-                        <MenuItem onClick={() => navigate(`/overheating-codes/${oc.id}/edit`)}>{t("ui.view")}</MenuItem>
-                        {!oc.isDiscarded && (
-                          <ConfirmationModal
-                            title={t("ui.confirmArchive")}
-                            onConfirm={async (closeModal) => {
-                              if (await oc.archive()) {
-                                await overheatingCodeStore.search()
-                              }
-                              closeModal()
-                            }}
-                            renderTriggerButton={({ onClick }) => (
-                              <MenuItem
-                                icon={<Archive size={16} />}
-                                color="semantic.error"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  onClick(e)
+                    <Menu.Root>
+                      <Menu.Trigger asChild>
+                        <IconButton
+                          icon={
+                            <Icon asChild>
+                              <DotsThreeVertical />
+                            </Icon>
+                          }
+                          variant="ghost"
+                          onClick={(e) => e.stopPropagation()}
+                          aria-label={t("ui.options")}
+                        ></IconButton>
+                      </Menu.Trigger>
+                      <Portal>
+                        <Menu.Positioner>
+                          <Menu.Content>
+                            <Menu.Item onSelect={() => navigate(`/overheating-codes/${oc.id}/edit`)} value="item-0">
+                              {t("ui.view")}
+                            </Menu.Item>
+                            {!oc.isDiscarded && (
+                              <ConfirmationModal
+                                title={t("ui.confirmArchive")}
+                                onConfirm={async (closeModal) => {
+                                  if (await oc.archive()) {
+                                    await overheatingCodeStore.search()
+                                  }
+                                  closeModal()
                                 }}
-                              >
-                                {t("ui.archive")}
-                              </MenuItem>
+                                renderTriggerButton={({ onClick }) => (
+                                  <Menu.Item
+                                    icon={<Archive size={16} />}
+                                    color="semantic.error"
+                                    onSelect={(e) => {
+                                      e.stopPropagation()
+                                      onClick(e)
+                                    }}
+                                    value="item-1"
+                                  >
+                                    {t("ui.archive")}
+                                  </Menu.Item>
+                                )}
+                                renderConfirmationButton={(props) => (
+                                  <Button {...props} colorPalette="red">
+                                    {t("ui.archive")}
+                                  </Button>
+                                )}
+                              />
                             )}
-                            renderConfirmationButton={(props) => (
-                              <Button {...props} colorScheme="red">
-                                {t("ui.archive")}
-                              </Button>
-                            )}
-                          />
-                        )}
-                        {oc.isDiscarded && (
-                          <ConfirmationModal
-                            title={t("ui.confirmRestore")}
-                            onConfirm={async (closeModal) => {
-                              if (await oc.restore()) {
-                                await overheatingCodeStore.search()
-                              }
-                              closeModal()
-                            }}
-                            renderTriggerButton={({ onClick }) => (
-                              <MenuItem
-                                icon={<ClockClockwise size={16} />}
-                                color="semantic.success"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  onClick(e)
+                            {oc.isDiscarded && (
+                              <ConfirmationModal
+                                title={t("ui.confirmRestore")}
+                                onConfirm={async (closeModal) => {
+                                  if (await oc.restore()) {
+                                    await overheatingCodeStore.search()
+                                  }
+                                  closeModal()
                                 }}
-                              >
-                                {t("ui.restore")}
-                              </MenuItem>
+                                renderTriggerButton={({ onClick }) => (
+                                  <Menu.Item
+                                    icon={<ClockClockwise size={16} />}
+                                    color="semantic.success"
+                                    onSelect={(e) => {
+                                      e.stopPropagation()
+                                      onClick(e)
+                                    }}
+                                    value="item-2"
+                                  >
+                                    {t("ui.restore")}
+                                  </Menu.Item>
+                                )}
+                                renderConfirmationButton={(props) => (
+                                  <Button {...props} colorPalette="green">
+                                    {t("ui.restore")}
+                                  </Button>
+                                )}
+                              />
                             )}
-                            renderConfirmationButton={(props) => (
-                              <Button {...props} colorScheme="green">
-                                {t("ui.restore")}
-                              </Button>
-                            )}
-                          />
-                        )}
-                      </MenuList>
-                    </Menu>
+                          </Menu.Content>
+                        </Menu.Positioner>
+                      </Portal>
+                    </Menu.Root>
                   </SearchGridItem>
                 </SearchGridRow>
               ))

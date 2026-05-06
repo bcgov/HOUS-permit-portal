@@ -1,25 +1,16 @@
 import {
   Accordion,
-  AccordionButton,
-  AccordionIcon,
-  AccordionItem,
-  AccordionPanel,
   Box,
   Button,
   ButtonGroup,
   ButtonProps,
   Checkbox,
   Drawer,
-  DrawerBody,
-  DrawerCloseButton,
-  DrawerContent,
-  DrawerHeader,
-  DrawerOverlay,
+  Field,
   Flex,
-  FormControl,
-  FormLabel,
   Input,
-  Select,
+  NativeSelect,
+  Portal,
   Spacer,
   Stack,
   Tag,
@@ -85,7 +76,7 @@ export const JurisdictionRequirementBlockEditSidebar = observer(function Jurisdi
   onSave,
   onResetDefault,
 }: IProps) {
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { open, onOpen, onClose } = useDisclosure()
   const btnRef = React.useRef()
   const { t } = useTranslation()
   const electiveFields = requirementBlock?.requirements?.filter((req) => req.elective) ?? []
@@ -100,10 +91,10 @@ export const JurisdictionRequirementBlockEditSidebar = observer(function Jurisdi
   const watchedEnabledElectiveFieldReasons = watch("enabledElectiveFieldReasons") ?? {}
 
   useEffect(() => {
-    if (isOpen) {
+    if (open) {
       reset(formFormDefaults(electiveFields, requirementBlockCustomization))
     }
-  }, [requirementBlockCustomization, isOpen])
+  }, [requirementBlockCustomization, open])
 
   const handleCancel = () => {
     reset(formFormDefaults(electiveFields, requirementBlockCustomization))
@@ -136,48 +127,60 @@ export const JurisdictionRequirementBlockEditSidebar = observer(function Jurisdi
       >
         {t("ui.edit")}
       </Button>
-      <Drawer isOpen={isOpen} placement="right" onClose={handleCancel} finalFocusRef={btnRef}>
-        <DrawerOverlay />
-        <DrawerContent maxW="430px" pt={"var(--app-navbar-height)"}>
-          <DrawerCloseButton />
-          <DrawerHeader mt={4} px={8} pb={0} borderColor={"border.light"}>
-            <Text as="h2" fontWeight={700} fontSize={"2xl"}>
-              {requirementBlock.displayName}
-            </Text>
-          </DrawerHeader>
-
-          <DrawerBody px={8} py={0}>
-            <FormProvider {...formMethods}>
-              {showManageFieldsView ? (
-                <ManageElectiveFieldsView
-                  existingEnabledElectiveFieldIds={watchedEnabledElectiveFieldIds}
-                  existingOptionalElectiveFieldIds={watchedOptionalElectiveFieldIds}
-                  electiveFields={electiveFields}
-                  onCancel={() => setShowManageFieldsView(false)}
-                  onAddFields={(fieldIds, optionalFieldIds, fieldReasons) => {
-                    setValue("enabledElectiveFieldIds", fieldIds)
-                    setValue("optionalElectiveFieldIds", optionalFieldIds)
-                    setValue("enabledElectiveFieldReasons", fieldReasons)
-                    setShowManageFieldsView(false)
-                  }}
-                  existingEnabledElectiveFieldReasons={watchedEnabledElectiveFieldReasons}
-                />
-              ) : (
-                <MainView
-                  electiveFields={electiveFields}
-                  onDone={onSubmit}
-                  onCancel={handleCancel}
-                  onManageElectiveFields={() => setShowManageFieldsView(true)}
-                  onResetDefault={() => {
-                    const defaultCustomization = onResetDefault(requirementBlock.id)
-                    defaultCustomization && reset(formFormDefaults(electiveFields, defaultCustomization))
-                  }}
-                />
-              )}
-            </FormProvider>
-          </DrawerBody>
-        </DrawerContent>
-      </Drawer>
+      <Drawer.Root
+        open={open}
+        placement="end"
+        finalFocusEl={() => btnRef.current}
+        onOpenChange={(e) => {
+          if (!e.open) {
+            handleCancel()
+          }
+        }}
+      >
+        <Portal>
+          <Drawer.Backdrop />
+          <Drawer.Positioner>
+            <Drawer.Content maxW="430px" pt={"var(--app-navbar-height)"}>
+              <Drawer.CloseTrigger />
+              <Drawer.Header mt={4} px={8} pb={0} borderColor={"border.light"}>
+                <Text as="h2" fontWeight={700} fontSize={"2xl"}>
+                  {requirementBlock.displayName}
+                </Text>
+              </Drawer.Header>
+              <Drawer.Body px={8} py={0}>
+                <FormProvider {...formMethods}>
+                  {showManageFieldsView ? (
+                    <ManageElectiveFieldsView
+                      existingEnabledElectiveFieldIds={watchedEnabledElectiveFieldIds}
+                      existingOptionalElectiveFieldIds={watchedOptionalElectiveFieldIds}
+                      electiveFields={electiveFields}
+                      onCancel={() => setShowManageFieldsView(false)}
+                      onAddFields={(fieldIds, optionalFieldIds, fieldReasons) => {
+                        setValue("enabledElectiveFieldIds", fieldIds)
+                        setValue("optionalElectiveFieldIds", optionalFieldIds)
+                        setValue("enabledElectiveFieldReasons", fieldReasons)
+                        setShowManageFieldsView(false)
+                      }}
+                      existingEnabledElectiveFieldReasons={watchedEnabledElectiveFieldReasons}
+                    />
+                  ) : (
+                    <MainView
+                      electiveFields={electiveFields}
+                      onDone={onSubmit}
+                      onCancel={handleCancel}
+                      onManageElectiveFields={() => setShowManageFieldsView(true)}
+                      onResetDefault={() => {
+                        const defaultCustomization = onResetDefault(requirementBlock.id)
+                        defaultCustomization && reset(formFormDefaults(electiveFields, defaultCustomization))
+                      }}
+                    />
+                  )}
+                </FormProvider>
+              </Drawer.Body>
+            </Drawer.Content>
+          </Drawer.Positioner>
+        </Portal>
+      </Drawer.Root>
     </>
   )
 })
@@ -233,7 +236,7 @@ const MainView = ({
   }
 
   return (
-    <Stack as={"section"} w={"full"} spacing={6} h="full">
+    <Stack as={"section"} w={"full"} gap={6} h="full">
       <Text color={"text.secondary"} fontSize={"sm"}>
         {t("digitalBuildingPermits.edit.requirementBlockSidebar.description")}
       </Text>
@@ -241,7 +244,6 @@ const MainView = ({
         <Text mb={1}>{t("digitalBuildingPermits.edit.requirementBlockSidebar.tipLabel")}</Text>
         <Editor htmlValue={tipValue} onChange={onTipChange} />
       </Box>
-
       {electiveFields.length > 0 && (
         <Box w={"full"}>
           {watchedEnabledElectiveFieldIds.length === 0 ? (
@@ -255,47 +257,49 @@ const MainView = ({
               />
             </>
           ) : (
-            <Accordion allowMultiple w={"full"}>
-              <AccordionItem border="none">
-                <AccordionButton px={0}>
+            <Accordion.Root multiple w={"full"}>
+              <Accordion.Item border="none" value="item-0">
+                <Accordion.ItemTrigger px={0}>
                   <Box as="span" flex="1" textAlign="left" fontWeight="bold" fontSize="md">
                     {t("digitalBuildingPermits.edit.requirementBlockSidebar.electiveFormFields")}
                   </Box>
-                  <AccordionIcon />
-                </AccordionButton>
-                <AccordionPanel pb={4} px={0}>
-                  <Stack w={"full"} spacing={2}>
-                    {watchedEnabledElectiveFieldIds.map((requirementFieldId) => {
-                      const requirementField = electiveFields.find((req) => req.id === requirementFieldId)
-                      const reasonLabel =
-                        getEnabledElectiveReasonOptions().find(
-                          (o) => o.value === watchedEnabledElectiveFieldReasons[requirementFieldId]
-                        )?.label || ""
-                      const isOptional = watchedOptionalElectiveFieldIds.includes(requirementFieldId)
+                  <Accordion.ItemIndicator />
+                </Accordion.ItemTrigger>
+                <Accordion.ItemContent pb={4} px={0}>
+                  <Accordion.ItemBody>
+                    <Stack w={"full"} gap={2}>
+                      {watchedEnabledElectiveFieldIds.map((requirementFieldId) => {
+                        const requirementField = electiveFields.find((req) => req.id === requirementFieldId)
+                        const reasonLabel =
+                          getEnabledElectiveReasonOptions().find(
+                            (o) => o.value === watchedEnabledElectiveFieldReasons[requirementFieldId]
+                          )?.label || ""
+                        const isOptional = watchedOptionalElectiveFieldIds.includes(requirementFieldId)
 
-                      return (
-                        <Box key={requirementField.id} borderRadius={"md"} bg={"theme.blueLight"} px={4} py={3}>
-                          <Flex align="center" justify="space-between" mb={1}>
-                            <Text fontWeight="bold" fontSize="sm">
-                              {requirementField.label}
+                        return (
+                          <Box key={requirementField.id} borderRadius={"md"} bg={"theme.blueLight"} px={4} py={3}>
+                            <Flex align="center" justify="space-between" mb={1}>
+                              <Text fontWeight="bold" fontSize="sm">
+                                {requirementField.label}
+                              </Text>
+                              <Tag.Root size="sm" variant="solid" colorPalette={isOptional ? "gray" : "blue"}>
+                                {isOptional ? t("ui.optional") : t("ui.required")}
+                              </Tag.Root>
+                            </Flex>
+                            <Text fontSize="sm" fontWeight="bold" mt={1}>
+                              {t("digitalBuildingPermits.edit.requirementBlockSidebar.reason")} {reasonLabel}
                             </Text>
-                            <Tag size="sm" variant="solid" colorScheme={isOptional ? "gray" : "blue"}>
-                              {isOptional ? t("ui.optional") : t("ui.required")}
-                            </Tag>
-                          </Flex>
-                          <Text fontSize="sm" fontWeight="bold" mt={1}>
-                            {t("digitalBuildingPermits.edit.requirementBlockSidebar.reason")} {reasonLabel}
-                          </Text>
-                          {requirementField.hint && (
-                            <SafeTipTapDisplay htmlContent={requirementField.hint} fontSize="sm" mt={1} />
-                          )}
-                        </Box>
-                      )
-                    })}
-                  </Stack>
-                </AccordionPanel>
-              </AccordionItem>
-            </Accordion>
+                            {requirementField.hint && (
+                              <SafeTipTapDisplay htmlContent={requirementField.hint} fontSize="sm" mt={1} />
+                            )}
+                          </Box>
+                        )
+                      })}
+                    </Stack>
+                  </Accordion.ItemBody>
+                </Accordion.ItemContent>
+              </Accordion.Item>
+            </Accordion.Root>
           )}
 
           {electiveFields?.length > 0 && (
@@ -305,7 +309,6 @@ const MainView = ({
           )}
         </Box>
       )}
-
       <Box w="full">
         {!hasResources ? (
           <>
@@ -329,77 +332,84 @@ const MainView = ({
             />
           </>
         ) : (
-          <Accordion allowMultiple w="full">
-            <AccordionItem border="none">
-              <AccordionButton px={0}>
+          <Accordion.Root multiple w="full">
+            <Accordion.Item border="none" value="item-1">
+              <Accordion.ItemTrigger px={0}>
                 <Box as="span" flex="1" textAlign="left" fontWeight="bold" fontSize="md">
                   {t("digitalBuildingPermits.edit.requirementBlockSidebar.resourcesLabel")}
                 </Box>
-                <AccordionIcon />
-              </AccordionButton>
-              <AccordionPanel pb={4} px={0}>
-                <VStack align="stretch" spacing={4}>
-                  <RouterLinkButton
-                    to={`/jurisdictions/${currentJurisdiction.slug}/configuration-management/resources`}
-                    variant="link"
-                  >
-                    {t("digitalBuildingPermits.edit.requirementBlockSidebar.manageResourcesLink")}
-                  </RouterLinkButton>
-                  {(Object.entries(resourcesByCategory) as [string, IResource[]][]).map(([category, resources]) => (
-                    <Box key={category}>
-                      <Text fontSize="sm" fontWeight={600} mb={2}>
-                        {t(`jurisdiction.resources.categories.${category}` as any)}
-                      </Text>
-                      <VStack align="stretch" spacing={2}>
-                        {resources.map((resource) => {
-                          const isInfected =
-                            resource.resourceType === EResourceType.file &&
-                            resource.resourceDocument?.scanStatus === EFileScanStatus.infected
+                <Accordion.ItemIndicator />
+              </Accordion.ItemTrigger>
+              <Accordion.ItemContent pb={4} px={0}>
+                <Accordion.ItemBody>
+                  <VStack align="stretch" gap={4}>
+                    <RouterLinkButton
+                      to={`/jurisdictions/${currentJurisdiction.slug}/configuration-management/resources`}
+                      variant="link"
+                    >
+                      {t("digitalBuildingPermits.edit.requirementBlockSidebar.manageResourcesLink")}
+                    </RouterLinkButton>
+                    {(Object.entries(resourcesByCategory) as [string, IResource[]][]).map(([category, resources]) => (
+                      <Box key={category}>
+                        <Text fontSize="sm" fontWeight={600} mb={2}>
+                          {t(`jurisdiction.resources.categories.${category}` as any)}
+                        </Text>
+                        <VStack align="stretch" gap={2}>
+                          {resources.map((resource) => {
+                            const isInfected =
+                              resource.resourceType === EResourceType.file &&
+                              resource.resourceDocument?.scanStatus === EFileScanStatus.infected
 
-                          const fileTypeInfo =
-                            resource.resourceType === "link"
-                              ? { icon: <Link />, label: "LINK" }
-                              : getFileTypeInfo(resource.resourceDocument?.file?.metadata?.mimeType)
+                            const fileTypeInfo =
+                              resource.resourceType === "link"
+                                ? { icon: <Link />, label: "LINK" }
+                                : getFileTypeInfo(resource.resourceDocument?.file?.metadata?.mimeType)
 
-                          return (
-                            <Checkbox
-                              key={resource.id}
-                              isChecked={watchedResourceIds.includes(resource.id)}
-                              onChange={(e) => handleResourceToggle(resource.id, e.target.checked)}
-                              isDisabled={isInfected}
-                            >
-                              <Flex align="center" gap={2}>
-                                {isInfected ? (
-                                  <FileRemovedTag />
-                                ) : (
-                                  <Tag
-                                    backgroundColor="semantic.infoLight"
-                                    size="sm"
-                                    fontWeight="medium"
-                                    color="text.secondary"
-                                  >
-                                    <Flex align="center" gap={1}>
-                                      {fileTypeInfo.icon}
-                                      <Text as="span">{fileTypeInfo.label}</Text>
-                                    </Flex>
-                                  </Tag>
-                                )}
+                            return (
+                              <Checkbox.Root
+                                key={resource.id}
+                                onCheckedChange={(e) => handleResourceToggle(resource.id, e.target.checked)}
+                                disabled={isInfected}
+                                checked={watchedResourceIds.includes(resource.id)}
+                              >
+                                <Checkbox.HiddenInput />
+                                <Checkbox.Control>
+                                  <Checkbox.Indicator />
+                                </Checkbox.Control>
+                                <Checkbox.Label>
+                                  <Flex align="center" gap={2}>
+                                    {isInfected ? (
+                                      <FileRemovedTag />
+                                    ) : (
+                                      <Tag.Root
+                                        backgroundColor="semantic.infoLight"
+                                        size="sm"
+                                        fontWeight="medium"
+                                        color="text.secondary"
+                                      >
+                                        <Flex align="center" gap={1}>
+                                          {fileTypeInfo.icon}
+                                          <Text as="span">{fileTypeInfo.label}</Text>
+                                        </Flex>
+                                      </Tag.Root>
+                                    )}
 
-                                <Text fontSize="sm">{resource.title}</Text>
-                              </Flex>
-                            </Checkbox>
-                          )
-                        })}
-                      </VStack>
-                    </Box>
-                  ))}
-                </VStack>
-              </AccordionPanel>
-            </AccordionItem>
-          </Accordion>
+                                    <Text fontSize="sm">{resource.title}</Text>
+                                  </Flex>
+                                </Checkbox.Label>
+                              </Checkbox.Root>
+                            )
+                          })}
+                        </VStack>
+                      </Box>
+                    ))}
+                  </VStack>
+                </Accordion.ItemBody>
+              </Accordion.ItemContent>
+            </Accordion.Item>
+          </Accordion.Root>
         )}
       </Box>
-
       <ButtonGroup size={"md"}>
         <Button
           variant={"primary"}
@@ -415,7 +425,6 @@ const MainView = ({
           {t("ui.cancel")}
         </Button>
       </ButtonGroup>
-
       <Button variant={"link"} textDecoration={"underline"} onClick={onResetDefault}>
         {t("digitalBuildingPermits.edit.requirementBlockSidebar.resetToDefaults")}
       </Button>
@@ -520,7 +529,7 @@ const ManageElectiveFieldsView = ({
     <>
       <Stack
         direction={"row"}
-        spacing={4}
+        gap={4}
         align="center"
         w="full"
         py={4}
@@ -533,40 +542,43 @@ const ManageElectiveFieldsView = ({
         borderColor="border.light"
       >
         {/* Filter Text Box */}
-        <FormControl w="full">
-          <FormLabel>{t("digitalBuildingPermits.edit.requirementBlockSidebar.filterLabel")}</FormLabel>
+        <Field.Root w="full">
+          <Field.Label>{t("digitalBuildingPermits.edit.requirementBlockSidebar.filterLabel")}</Field.Label>
           <Input
             placeholder={t("digitalBuildingPermits.edit.requirementBlockSidebar.filterPlaceholder")}
             value={filterText}
-            onChange={(e) => setFilterText(e.target.value)}
+            onValueChange={(e) => setFilterText(e.target.value)}
           />
-        </FormControl>
+        </Field.Root>
 
         {/* Sort Dropdown */}
-        <FormControl w="full">
-          <FormLabel>{t("digitalBuildingPermits.edit.requirementBlockSidebar.sortLabel")}</FormLabel>
-          <Select value={sortOption} onChange={(e) => setSortOption(e.target.value)}>
-            <option value="labelAsc">
-              {t("digitalBuildingPermits.edit.requirementBlockSidebar.sortOptions.labelAsc")}
-            </option>
-            <option value="labelDesc">
-              {t("digitalBuildingPermits.edit.requirementBlockSidebar.sortOptions.labelDesc")}
-            </option>
-            <option value="reasonAsc">
-              {t("digitalBuildingPermits.edit.requirementBlockSidebar.sortOptions.reasonAsc")}
-            </option>
-            <option value="reasonDesc">
-              {t("digitalBuildingPermits.edit.requirementBlockSidebar.sortOptions.reasonDesc")}
-            </option>
-          </Select>
-        </FormControl>
+        <Field.Root w="full">
+          <Field.Label>{t("digitalBuildingPermits.edit.requirementBlockSidebar.sortLabel")}</Field.Label>
+          <NativeSelect.Root>
+            <NativeSelect.Field value={sortOption} onValueChange={(e) => setSortOption(e.target.value)}>
+              <option value="labelAsc">
+                {t("digitalBuildingPermits.edit.requirementBlockSidebar.sortOptions.labelAsc")}
+              </option>
+              <option value="labelDesc">
+                {t("digitalBuildingPermits.edit.requirementBlockSidebar.sortOptions.labelDesc")}
+              </option>
+              <option value="reasonAsc">
+                {t("digitalBuildingPermits.edit.requirementBlockSidebar.sortOptions.reasonAsc")}
+              </option>
+              <option value="reasonDesc">
+                {t("digitalBuildingPermits.edit.requirementBlockSidebar.sortOptions.reasonDesc")}
+              </option>
+            </NativeSelect.Field>
+            <NativeSelect.Indicator />
+          </NativeSelect.Root>
+        </Field.Root>
       </Stack>
-      <Stack as={"section"} w={"full"} spacing={6} mt={7} h="full">
+      <Stack as={"section"} w={"full"} gap={6} mt={7} h="full">
         <Text color={"text.secondary"} fontWeight={700}>
           {t("digitalBuildingPermits.edit.requirementBlockSidebar.selectFieldsTitle")}
         </Text>
 
-        <Stack w={"full"} spacing={4}>
+        <Stack w={"full"} gap={4}>
           {filteredAndSortedFields.map((requirementField) => {
             const enabled = enabledFieldIds.includes(requirementField.id)
             const isRequired = !optionalFieldIds.includes(requirementField.id)
@@ -584,47 +596,61 @@ const ManageElectiveFieldsView = ({
                   gap={2}
                 >
                   <Flex align="start" gap={2}>
-                    <Checkbox
+                    <Checkbox.Root
                       borderColor={"border.input"}
-                      isChecked={enabled}
-                      onChange={(e) => onFieldEnableChange(requirementField.id, e.target.checked)}
-                    />
+                      onCheckedChange={(e) => onFieldEnableChange(requirementField.id, e.target.checked)}
+                      checked={enabled}
+                    >
+                      <Checkbox.HiddenInput />
+                      <Checkbox.Control>
+                        <Checkbox.Indicator />
+                      </Checkbox.Control>
+                    </Checkbox.Root>
                     <Box>
                       <Text fontWeight={700}>{requirementField.label}</Text>
                       {enabled && (
                         <>
-                          <FormControl maxW={"200px"} isRequired={enabled} mt={2}>
-                            <FormLabel>{t("digitalBuildingPermits.edit.requirementBlockSidebar.reason")}</FormLabel>
-                            <Select
-                              bg="greys.white"
-                              value={enabledFieldReasons[requirementField.id] || ""}
-                              placeholder={t(
-                                "digitalBuildingPermits.edit.requirementBlockSidebar.reasonLabels.placeholder"
-                              )}
-                              onChange={(e) =>
-                                onReasonChange(requirementField.id, e.target.value as EEnabledElectiveFieldReason)
-                              }
-                            >
-                              {getEnabledElectiveReasonOptions().map((option) => (
-                                <option key={option.value} value={option.value}>
-                                  {option.label}
-                                </option>
-                              ))}
-                            </Select>
-                          </FormControl>
-                          <Checkbox
+                          <Field.Root maxW={"200px"} required={enabled} mt={2}>
+                            <Field.Label>{t("digitalBuildingPermits.edit.requirementBlockSidebar.reason")}</Field.Label>
+                            <NativeSelect.Root>
+                              <NativeSelect.Field
+                                bg="greys.white"
+                                value={enabledFieldReasons[requirementField.id] || ""}
+                                placeholder={t(
+                                  "digitalBuildingPermits.edit.requirementBlockSidebar.reasonLabels.placeholder"
+                                )}
+                                onValueChange={(e) =>
+                                  onReasonChange(requirementField.id, e.target.value as EEnabledElectiveFieldReason)
+                                }
+                              >
+                                {getEnabledElectiveReasonOptions().map((option) => (
+                                  <option key={option.value} value={option.value}>
+                                    {option.label}
+                                  </option>
+                                ))}
+                              </NativeSelect.Field>
+                              <NativeSelect.Indicator />
+                            </NativeSelect.Root>
+                          </Field.Root>
+                          <Checkbox.Root
                             mt={2}
-                            isChecked={isRequired}
-                            onChange={(e) =>
+                            onCheckedChange={(e) =>
                               e.target.checked
                                 ? markAsRequired(requirementField.id)
                                 : markAsOptional(requirementField.id)
                             }
+                            checked={isRequired}
                           >
-                            <Text fontSize="sm">
-                              {t("digitalBuildingPermits.edit.requirementBlockSidebar.requiredForSubmitter")}
-                            </Text>
-                          </Checkbox>
+                            <Checkbox.HiddenInput />
+                            <Checkbox.Control>
+                              <Checkbox.Indicator />
+                            </Checkbox.Control>
+                            <Checkbox.Label>
+                              <Text fontSize="sm">
+                                {t("digitalBuildingPermits.edit.requirementBlockSidebar.requiredForSubmitter")}
+                              </Text>
+                            </Checkbox.Label>
+                          </Checkbox.Root>
                         </>
                       )}
                     </Box>
@@ -651,7 +677,7 @@ const ManageElectiveFieldsView = ({
             onClick={() =>
               onAddFields([...new Set(enabledFieldIds)], [...new Set(optionalFieldIds)], enabledFieldReasons)
             }
-            isDisabled={!isAddValid}
+            disabled={!isAddValid}
           >
             {t("digitalBuildingPermits.edit.requirementBlockSidebar.addSelectedButton")}
           </Button>

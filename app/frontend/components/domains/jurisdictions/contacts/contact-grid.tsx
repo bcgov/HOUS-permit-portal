@@ -62,7 +62,7 @@ export const ContactGrid = observer(({ isEditing }: IContactGridProps) => {
   }
 
   return (
-    <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing={4} w="full">
+    <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} gap={4} w="full">
       {fields.map((contact, index) =>
         isEditing ? (
           <ContactFields key={contact.id} index={index} remove={remove} />
@@ -78,10 +78,11 @@ export const ContactGrid = observer(({ isEditing }: IContactGridProps) => {
             w="full"
             variant="secondary"
             borderColor="border.light"
-            icon={<Plus size={40} />}
             aria-label={"add jurisdiction"}
             onClick={handleClickAdd}
-          />
+          >
+            <Plus size={40} />
+          </IconButton>
         </Can>
       )}
     </SimpleGrid>
@@ -109,7 +110,9 @@ const ContactFields = ({ index, remove }: IContactFieldsProps) => {
   return (
     <Flex direction="column" gap={2} border="1px solid" borderColor="border.light" p={4} bgColor="greys.grey10">
       <Flex justify="flex-end">
-        <IconButton variant="tertiary" icon={<X />} aria-label={"remove contact"} onClick={() => remove(index)} />
+        <IconButton variant="tertiary" aria-label={"remove contact"} onClick={() => remove(index)}>
+          <X />
+        </IconButton>
       </Flex>
       <TextFormControl
         label={t("contact.fields.firstName")}

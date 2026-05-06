@@ -1,4 +1,4 @@
-import { FormControl, FormLabel, HStack } from "@chakra-ui/react"
+import { Field, HStack } from "@chakra-ui/react"
 import { format, parse } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
@@ -47,9 +47,9 @@ export const AuditDateRangeFilter = observer(function AuditDateRangeFilter({ sea
   }
 
   return (
-    <HStack spacing={4}>
-      <FormControl>
-        <FormLabel htmlFor="audit-date-from">{t("permitProject.activity.fromFilter")}</FormLabel>
+    <HStack gap={4}>
+      <Field.Root>
+        <Field.Label htmlFor="audit-date-from">{t("permitProject.activity.fromFilter")}</Field.Label>
         <DatePicker
           id="audit-date-from"
           selected={fromDate}
@@ -59,9 +59,9 @@ export const AuditDateRangeFilter = observer(function AuditDateRangeFilter({ sea
           endDate={toDate}
           isClearable
         />
-      </FormControl>
-      <FormControl>
-        <FormLabel htmlFor="audit-date-to">{t("permitProject.activity.toFilter")}</FormLabel>
+      </Field.Root>
+      <Field.Root>
+        <Field.Label htmlFor="audit-date-to">{t("permitProject.activity.toFilter")}</Field.Label>
         <DatePicker
           id="audit-date-to"
           selected={toDate}
@@ -72,7 +72,7 @@ export const AuditDateRangeFilter = observer(function AuditDateRangeFilter({ sea
           minDate={fromDate ?? undefined}
           isClearable
         />
-      </FormControl>
+      </Field.Root>
     </HStack>
   )
 })

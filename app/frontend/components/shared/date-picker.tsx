@@ -49,22 +49,22 @@ const CustomInput = forwardRef<
       borderColor="border.input"
       bg={"white"}
       _hover={{ borderColor: "border.input" }}
-      sx={{
-        "&:focus": { borderColor: "focus" },
+      css={{
+        "& &:focus": { borderColor: "focus" },
       }}
-      leftIcon={<CalendarBlank color={"var(--chakra-colors-text-secondary)"} size={20} />}
-      rightIcon={<CaretDown color={"var(--chakra-colors-text-secondary)"} size={20} />}
       color={value ? "text.primary" : "greys.grey01"}
       aria-label={"Select date"}
       role={"date-picker"}
       onClick={onClick}
       ref={ref}
-      isDisabled={readOnly}
+      disabled={readOnly}
       {...rest}
     >
+      <CalendarBlank color={"var(--chakra-colors-text-secondary)"} size={20} />
       <Text as={"span"} textAlign={"start"} flex={1}>
         {value || (!readOnly && t("ui.select"))}
       </Text>
+      <CaretDown color={"var(--chakra-colors-text-secondary)"} size={20} />
     </Button>
   )
 })
@@ -75,7 +75,7 @@ export function DatePicker({ containerProps, ...datePickerProps }: IDatePickerPr
     <Box
       w={"200px"}
       {...containerProps}
-      sx={
+      css={
         R.mergeDeepRight(
           {
             ".react-datepicker__input-container": {

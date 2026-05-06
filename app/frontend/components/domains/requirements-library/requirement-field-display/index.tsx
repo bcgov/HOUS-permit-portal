@@ -1,3 +1,6 @@
+import { InputGroup } from "@/components/ui/input-group"
+import { Radio, RadioGroup } from "@/components/ui/radio"
+import { SwitchProps } from "@/components/ui/switch"
 import {
   BoxProps,
   Checkbox,
@@ -6,15 +9,10 @@ import {
   FormLabelProps,
   HeadingProps,
   Input,
-  InputGroup,
-  InputLeftElement,
-  InputRightElement,
-  Radio,
-  RadioGroup,
-  Select,
+  InputElement,
+  NativeSelect,
   SelectProps,
   Stack,
-  SwitchProps,
   Textarea,
 } from "@chakra-ui/react"
 import { CalendarBlank, Envelope, FileCloud, LightningA, MapPin, Phone } from "@phosphor-icons/react"
@@ -61,9 +59,9 @@ const requirementsComponentMap = {
       <GenericFieldDisplay
         inputDisplay={
           <InputGroup>
-            <InputLeftElement pointerEvents="none">
+            <InputElement pointerEvents="none">
               <Phone />
-            </InputLeftElement>
+            </InputElement>
             <Input bg={"white"} />
           </InputGroup>
         }
@@ -77,9 +75,9 @@ const requirementsComponentMap = {
       <GenericFieldDisplay
         inputDisplay={
           <InputGroup>
-            <InputLeftElement pointerEvents="none">
+            <InputElement pointerEvents="none">
               <Envelope />
-            </InputLeftElement>
+            </InputElement>
             <Input bg={"white"} />
           </InputGroup>
         }
@@ -93,9 +91,9 @@ const requirementsComponentMap = {
       <GenericFieldDisplay
         inputDisplay={
           <InputGroup>
-            <InputLeftElement>
+            <InputElement>
               <MapPin />
-            </InputLeftElement>
+            </InputElement>
             <Input bg={"white"} />
           </InputGroup>
         }
@@ -109,9 +107,9 @@ const requirementsComponentMap = {
       <GenericFieldDisplay
         inputDisplay={
           <InputGroup>
-            <InputLeftElement>
+            <InputElement>
               <MapPin />
-            </InputLeftElement>
+            </InputElement>
             <Input bg={"white"} />
           </InputGroup>
         }
@@ -125,9 +123,9 @@ const requirementsComponentMap = {
       <GenericFieldDisplay
         inputDisplay={
           <InputGroup>
-            <InputLeftElement>
+            <InputElement>
               <CalendarBlank />
-            </InputLeftElement>
+            </InputElement>
             <Input bg={"white"} />
           </InputGroup>
         }
@@ -141,7 +139,9 @@ const requirementsComponentMap = {
       <GenericFieldDisplay
         inputDisplay={
           <InputGroup>
-            <InputRightElement mr={2}>{unit === undefined ? "unit" : unit}</InputRightElement>
+            <InputElement placement="end" mr={2}>
+              {unit === undefined ? "unit" : unit}
+            </InputElement>
             <Input bg={"white"} />
           </InputGroup>
         }
@@ -163,7 +163,7 @@ const requirementsComponentMap = {
     return (
       <GenericFieldDisplay
         inputDisplay={
-          <RadioGroup defaultValue="1">
+          <RadioGroup.Root defaultValue="1">
             <Stack>
               {options.map((option, index) => (
                 <Radio key={index} value={option}>
@@ -171,7 +171,7 @@ const requirementsComponentMap = {
                 </Radio>
               ))}
             </Stack>
-          </RadioGroup>
+          </RadioGroup.Root>
         }
         {...genericDisplayProps}
       />
@@ -197,9 +197,21 @@ const requirementsComponentMap = {
         inputDisplay={
           // this is a hack needed to leverage form control, but still make the checkbox accessible
           <CheckboxGroup>
-            <Checkbox sx={{ "span:last-child": { display: "none" } }} mr={2} order={1} alignItems="flex-start" pt="1.5">
-              Yes
-            </Checkbox>
+            <Checkbox.Root
+              css={{
+                "& span:last-child": { display: "none" },
+              }}
+              mr={2}
+              order={1}
+              alignItems="flex-start"
+              pt="1.5"
+            >
+              <Checkbox.HiddenInput />
+              <Checkbox.Control>
+                <Checkbox.Indicator />
+              </Checkbox.Control>
+              <Checkbox.Label>Yes</Checkbox.Label>
+            </Checkbox.Root>
           </CheckboxGroup>
         }
         editorContainerProps={{ order: 3, gridColumn: "span 2" }}
@@ -218,16 +230,20 @@ const requirementsComponentMap = {
           <CheckboxGroup>
             <Stack>
               {options.map((option, index) => (
-                <Checkbox
+                <Checkbox.Root
                   key={index}
                   value={option}
                   alignItems="flex-start"
-                  sx={{
-                    "& .chakra-checkbox__control": { marginTop: "1" },
+                  css={{
+                    "& & .chakra-checkbox__control": { marginTop: "1" },
                   }}
                 >
-                  {option}
-                </Checkbox>
+                  <Checkbox.HiddenInput />
+                  <Checkbox.Control>
+                    <Checkbox.Indicator />
+                  </Checkbox.Control>
+                  <Checkbox.Label>{option}</Checkbox.Label>
+                </Checkbox.Root>
               ))}
             </Stack>
           </CheckboxGroup>
@@ -245,13 +261,16 @@ const requirementsComponentMap = {
     return (
       <GenericFieldDisplay
         inputDisplay={
-          <Select placeholder={"Select"} color={"greys.grey01"} value={""} isReadOnly {...selectProps}>
-            {options.map((option, index) => (
-              <option key={index} value={option} style={{ width: "100%" }}>
-                {option}
-              </option>
-            ))}
-          </Select>
+          <NativeSelect.Root>
+            <NativeSelect.Field placeholder={"Select"} color={"greys.grey01"} value={""} readOnly {...selectProps}>
+              {options.map((option, index) => (
+                <option key={index} value={option} style={{ width: "100%" }}>
+                  {option}
+                </option>
+              ))}
+            </NativeSelect.Field>
+            <NativeSelect.Indicator />
+          </NativeSelect.Root>
         }
         {...genericDisplayProps}
       />
@@ -412,9 +431,9 @@ export function hasRequirementFieldDisplayComponent(requirementType: ERequiremen
 function DummyFileInput() {
   return (
     <InputGroup border={"1px solid var(--chakra-colors-border-light)"} borderRadius={"var(--input-border-radius)"}>
-      <InputLeftElement pointerEvents="none">
+      <InputElement pointerEvents="none">
         <FileCloud />
-      </InputLeftElement>
+      </InputElement>
       <Input bg={"white"} type={"file"} visibility={"hidden"} />
     </InputGroup>
   )
@@ -423,9 +442,9 @@ function DummyFileInput() {
 function DummyStepCodeInput() {
   return (
     <InputGroup border={"1px solid var(--chakra-colors-border-light)"} borderRadius={"var(--input-border-radius)"}>
-      <InputLeftElement pointerEvents="none">
+      <InputElement pointerEvents="none">
         <LightningA />
-      </InputLeftElement>
+      </InputElement>
       <Input bg={"white"} type={"file"} visibility={"hidden"} />
     </InputGroup>
   )

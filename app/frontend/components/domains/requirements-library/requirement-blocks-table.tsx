@@ -1,15 +1,4 @@
-import {
-  Box,
-  ButtonProps,
-  Flex,
-  HStack,
-  ListItem,
-  StackProps,
-  Tag,
-  Text,
-  UnorderedList,
-  VStack,
-} from "@chakra-ui/react"
+import { Box, ButtonProps, Flex, HStack, List, StackProps, Tag, Text, VStack } from "@chakra-ui/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
@@ -63,7 +52,7 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
   useSearch(searchModel as ISearch, [showArchived])
 
   return (
-    <VStack as={"article"} spacing={5} {...containerProps}>
+    <VStack as={"article"} gap={5} {...containerProps}>
       <SearchGrid gridRowClassName={ROW_CLASS_NAME} templateColumns="repeat(6, 1fr)" pos={"relative"}>
         <GridHeaders />
 
@@ -77,40 +66,46 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
               <Box key={requirementBlock.id} className={ROW_CLASS_NAME} role={"row"} display={"contents"}>
                 <SearchGridItem minW="250px" maxW="280px">
                   <Flex direction="column" overflow="hidden">
-                    <Text as={"span"} fontWeight={700} noOfLines={2} title={requirementBlock.name}>
+                    <Text as={"span"} fontWeight={700} lineClamp={2} title={requirementBlock.name}>
                       {requirementBlock.name}
                     </Text>
-                    <Text as={"span"} noOfLines={2} title={requirementBlock.description || undefined}>
+                    <Text as={"span"} lineClamp={2} title={requirementBlock.description || undefined}>
                       {requirementBlock.description}
                     </Text>
                   </Flex>
                 </SearchGridItem>
                 <SearchGridItem maxW="150px" minW="120px">
-                  <HStack as={"ul"} wrap={"wrap"} spacing={1}>
+                  <HStack as={"ul"} wrap={"wrap"} gap={1}>
                     {requirementBlock.associations.map((association) => (
-                      <Tag key={association} as={"li"} bg={"greys.grey03"} color={"text.secondary"} fontSize={"xs"}>
+                      <Tag.Root
+                        key={association}
+                        as={"li"}
+                        bg={"greys.grey03"}
+                        color={"text.secondary"}
+                        fontSize={"xs"}
+                      >
                         {association}
-                      </Tag>
+                      </Tag.Root>
                     ))}
                   </HStack>
                 </SearchGridItem>
                 <SearchGridItem pr={0} minW="180px" maxW="220px">
-                  <UnorderedList ml={0} pl={0} w={"full"}>
+                  <List.Root as="ul" ml={0} pl={0} w={"full"}>
                     {requirementBlock.requirements.map((requirement) => {
                       return (
-                        <ListItem
+                        <List.Item
                           key={requirement.id}
                           color={"text.secondary"}
                           fontSize={"xs"}
                           mb="1"
-                          noOfLines={1}
+                          lineClamp={1}
                           title={requirement.label}
                         >
                           {requirement.label}
-                        </ListItem>
+                        </List.Item>
                       )
                     })}
-                  </UnorderedList>
+                  </List.Root>
                 </SearchGridItem>
                 <SearchGridItem maxW="120px" minW="100px" fontSize={"sm"}>
                   {format(requirementBlock.updatedAt, datefnsTableDateFormat)}

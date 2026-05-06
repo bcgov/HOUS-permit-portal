@@ -21,7 +21,7 @@ export const InboxDocumentsTab = observer(({ permitProject }: IProps) => {
   return (
     <Flex direction="column" flex={1} bg="greys.white" p={10}>
       <Box as="section">
-        <HStack align="center" spacing={4} mb={6}>
+        <HStack align="center" gap={4} mb={6}>
           <Folder size={32} />
           <Heading as="h2" size="lg" mb={0}>
             {t("submissionInbox.projectDetail.documents")}

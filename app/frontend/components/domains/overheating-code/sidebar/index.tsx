@@ -1,4 +1,4 @@
-import { Box, Divider, Heading, VStack } from "@chakra-ui/react"
+import { Box, Heading, Separator, VStack } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -34,9 +34,9 @@ export const Sidebar = observer(function OverheatingCodeSidebar() {
             const isComplete =
               currentOverheatingCode && completionKey ? !!(currentOverheatingCode as any)[completionKey] : false
 
-            return <SectionLink key={navLink.key} navLink={navLink} isComplete={isComplete} isDisabled={false} />
+            return <SectionLink key={navLink.key} navLink={navLink} isComplete={isComplete} disabled={false} />
           })}
-          <Divider />
+          <Separator />
         </React.Fragment>
       ))}
       <Box py={2} w="full" />

@@ -82,7 +82,7 @@ export const JurisdictionEditorWithPreview = observer(function JurisdictionEdito
       {editableEmptyFallback}
     </Box>
   ) : (
-    <SafeTipTapDisplay htmlContent={sanitizedHtmlValue} sx={jurisdictionTipTapBodyTypography} />
+    <SafeTipTapDisplay htmlContent={sanitizedHtmlValue} css={jurisdictionTipTapBodyTypography} />
   )
 
   const borderedEditor = (
@@ -94,7 +94,7 @@ export const JurisdictionEditorWithPreview = observer(function JurisdictionEdito
       borderColor="border.light"
       borderRadius="md"
       overflow="hidden"
-      sx={borderedEditorSx}
+      css={borderedEditorSx}
     >
       <Editor key="edit" htmlValue={sanitizedHtmlValue} onChange={onChange} />
     </Box>
@@ -104,19 +104,20 @@ export const JurisdictionEditorWithPreview = observer(function JurisdictionEdito
     <Button
       variant="primary"
       size="xs"
-      leftIcon={<Pencil size={12} />}
       onClick={(e) => {
         e.stopPropagation()
         setIsEditMode(true)
       }}
       flexShrink={0}
     >
+      <Pencil size={12} />
       {editLabel}
     </Button>
   )
 
   const doneButton = (
-    <Button variant="primary" size="xs" leftIcon={<Pencil size={12} />} onClick={handleClickDone} flexShrink={0}>
+    <Button variant="primary" size="xs" onClick={handleClickDone} flexShrink={0}>
+      <Pencil size={12} />
       {doneLabel}
     </Button>
   )

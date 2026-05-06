@@ -1,4 +1,4 @@
-import { Center, Flex, FormLabel, Hide, Show } from "@chakra-ui/react"
+import { Center, Flex } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { Suspense, useEffect } from "react"
 import { useNavigate, useParams } from "react-router-dom"
@@ -72,11 +72,11 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
       >
         {currentStepCode && (
           <Flex flex={1} w="full" overflow="hidden" position="relative">
-            <Show above="lg">
+            <Box hideBelow="lg">
               <Flex w={"sidebar.width"} boxShadow="md" borderRightWidth={1} borderColor="greys.grey02" overflow="auto">
                 <Sidebar />
               </Flex>
-            </Show>
+            </Box>
             <Flex
               direction="column"
               flex={1}
@@ -88,9 +88,9 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
               pb={10}
               id="stepCodeScroll"
             >
-              <Hide above="lg">
+              <Box hideFrom="lg">
                 <SideBarDrawer triggerProps={{ ml: 6, size: "md" }} />
-              </Hide>
+              </Box>
 
               <FloatingHelpDrawer />
               <Flex direction="column" flex={1} maxW="780px" px={6} py={3}>

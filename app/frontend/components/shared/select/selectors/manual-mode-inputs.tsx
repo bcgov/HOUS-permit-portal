@@ -1,4 +1,5 @@
-import { Flex, FormControl, FormLabel, InputGroup } from "@chakra-ui/react"
+import { InputGroup } from "@/components/ui/input-group"
+import { Field, Flex } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { Controller, useFormContext } from "react-hook-form"
@@ -24,8 +25,8 @@ export const ManualModeInputs = observer(({ disabled }: IManualModeInputsProps) 
           control={control}
           render={({ field: { onChange, value } }) => {
             return (
-              <FormControl w="full" zIndex={1}>
-                <FormLabel>{t("permitProject.new.jurisdictionTitle")}</FormLabel>
+              <Field.Root w="full" zIndex={1}>
+                <Field.Label>{t("permitProject.new.jurisdictionTitle")}</Field.Label>
                 <InputGroup w="full">
                   <JurisdictionSelect
                     onChange={(selectValue) => {
@@ -35,10 +36,10 @@ export const ManualModeInputs = observer(({ disabled }: IManualModeInputsProps) 
                     onFetch={() => setValue("jurisdictionId", null)}
                     selectedOption={value ? { label: getJurisdictionById(value)?.reverseQualifiedName, value } : null}
                     menuPortalTarget={document.body}
-                    isDisabled={disabled}
+                    disabled={disabled}
                   />
                 </InputGroup>
-              </FormControl>
+              </Field.Root>
             )
           }}
         />

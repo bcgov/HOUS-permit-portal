@@ -20,5 +20,5 @@ export const RequestLoadingButton = forwardRef<HTMLButtonElement, IProps>(functi
     }
   }
 
-  return <Button {...rest} ref={ref} onClick={onClickHandler} isLoading={isLoading} />
+  return <Button {...rest} ref={ref} onClick={onClickHandler} loading={isLoading} />
 })

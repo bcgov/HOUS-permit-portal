@@ -2,15 +2,10 @@ import {
   Button,
   ButtonGroup,
   ButtonProps,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
+  Dialog,
   ModalContentProps,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
   ModalProps,
+  Portal,
   useDisclosure,
 } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
@@ -50,7 +45,7 @@ export const ConfirmationModal = observer(function ConfirmationModal({
     disclosureProps.onOpen()
   }
 
-  const isOpen = modalControlProps?.isOpen ?? disclosureProps.isOpen
+  const isOpen = modalControlProps?.isOpen ?? disclosureProps.open
   const onOpen = modalControlProps?.onOpen ?? disclosureOpen
   const onClose = modalControlProps?.onClose ?? disclosureProps.onClose
 
@@ -67,38 +62,49 @@ export const ConfirmationModal = observer(function ConfirmationModal({
           {triggerText ?? (t as any)("ui.confirm")}
         </Button>
       )}
-      <Modal isOpen={isOpen} onClose={onClose} {...modalProps}>
-        <ModalOverlay />
-        <ModalContent {...modalContentProps}>
-          {title && (
-            <ModalHeader fontSize={"2xl"} mt={2}>
-              {title}
-            </ModalHeader>
-          )}
-          <ModalCloseButton />
-          {body && <ModalBody>{body}</ModalBody>}
-
-          <ModalFooter justifyContent={"flex-start"}>
-            <ButtonGroup spacing={4}>
-              {renderConfirmationButton ? (
-                renderConfirmationButton({ onClick: () => onConfirm(onClose), isDisabled: isConfirmDisabled })
-              ) : (
-                <Button
-                  variant={"primary"}
-                  onClick={() => onConfirm(onClose)}
-                  {...confirmButtonProps}
-                  isDisabled={isConfirmDisabled}
-                >
-                  {triggerText ?? (t as any)("ui.confirm")}
-                </Button>
+      <Dialog.Root
+        open={open}
+        {...modalProps}
+        onOpenChange={(e) => {
+          if (!e.open) {
+            onClose()
+          }
+        }}
+      >
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content {...modalContentProps}>
+              {title && (
+                <Dialog.Header fontSize={"2xl"} mt={2}>
+                  {title}
+                </Dialog.Header>
               )}
-              <Button variant={"secondary"} onClick={onClose}>
-                {(t as any)("ui.neverMind")}
-              </Button>
-            </ButtonGroup>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+              <Dialog.CloseTrigger />
+              {body && <Dialog.Body>{body}</Dialog.Body>}
+              <Dialog.Footer justifyContent={"flex-start"}>
+                <ButtonGroup gap={4}>
+                  {renderConfirmationButton ? (
+                    renderConfirmationButton({ onClick: () => onConfirm(onClose), isDisabled: isConfirmDisabled })
+                  ) : (
+                    <Button
+                      variant={"primary"}
+                      onClick={() => onConfirm(onClose)}
+                      {...confirmButtonProps}
+                      disabled={isConfirmDisabled}
+                    >
+                      {triggerText ?? (t as any)("ui.confirm")}
+                    </Button>
+                  )}
+                  <Button variant={"secondary"} onClick={onClose}>
+                    {(t as any)("ui.neverMind")}
+                  </Button>
+                </ButtonGroup>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
     </>
   )
 })

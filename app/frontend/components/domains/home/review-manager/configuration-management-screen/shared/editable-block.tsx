@@ -1,6 +1,6 @@
-import { Flex, Text, styled } from "@chakra-ui/react"
+import { Flex, Text, chakra } from "@chakra-ui/react"
 
-export const EditableBlockContainer = styled(Flex)
+export const EditableBlockContainer = chakra(Flex)
 EditableBlockContainer.defaultProps = {
   bg: "greys.grey03",
   alignItems: "center",
@@ -12,7 +12,7 @@ EditableBlockContainer.defaultProps = {
   minH: "136px",
 }
 
-export const EditableBlockHeading = styled(Text)
+export const EditableBlockHeading = chakra(Text)
 EditableBlockHeading.defaultProps = {
   fontSize: "lg",
   color: "text.primary",

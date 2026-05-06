@@ -1,4 +1,4 @@
-import { Box, Divider, VStack } from "@chakra-ui/react"
+import { Box, Separator, VStack } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -53,9 +53,9 @@ export const Sidebar = observer(function PreCheckSidebar() {
               isDisabled = true
             }
 
-            return <SectionLink key={navLink.key} navLink={navLink} isComplete={isComplete} isDisabled={isDisabled} />
+            return <SectionLink key={navLink.key} navLink={navLink} isComplete={isComplete} disabled={isDisabled} />
           })}
-          <Divider />
+          <Separator />
         </React.Fragment>
       ))}
       {/* add some padding below the final element */}

@@ -1,17 +1,5 @@
-import {
-  Box,
-  Checkbox,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
-  Heading,
-  Input,
-  InputGroup,
-  InputRightAddon,
-  SimpleGrid,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { InputGroup } from "@/components/ui/input-group"
+import { Box, Checkbox, Field, Heading, Input, InputAddon, SimpleGrid, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo } from "react"
 import { Controller, useForm } from "react-hook-form"
@@ -135,32 +123,31 @@ export const DesignConditions = observer(function DesignConditions() {
           "Design temperatures, ventilation, and zone parameters for the cooling assessment."
         )}
       </Text>
-
-      <VStack spacing={8} align="stretch">
+      <VStack gap={8} align="stretch">
         <Box>
           <Heading as="h3" size="md" mb={4}>
             {t("overheatingCode.sections.designConditions.temperaturesHeading", "Temperatures")}
           </Heading>
-          <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
-            <FormControl isInvalid={!!errors.designOutdoorTemp}>
-              <FormLabel>
+          <SimpleGrid columns={{ base: 1, md: 3 }} gap={6}>
+            <Field.Root invalid={!!errors.designOutdoorTemp}>
+              <Field.Label>
                 {t("overheatingCode.sections.designConditions.outdoorTempLabel", "Outdoor Temp")}
                 <ClauseBadge
                   clause="§ 2.1.2"
                   tooltip="2.1.2 Outdoor Design Temperature: (1) Except as permitted by 2.1.2.(2) the Outdoor Design temperature (Toc) shall be the outside summer design temperatures determined from Appendix C of the BCBC and shall be those listed for the July 2.5% dry bulb values. (2) The Outdoor Design temperature (Toc) may be set at a higher temperature than the temperature determined according to 2.1.2.(1) by the Authority Having Jurisdiction."
                 />
-              </FormLabel>
+              </Field.Label>
               <InputGroup>
                 <Input
                   type="number"
                   step="any"
                   {...register("designOutdoorTemp", { validate: validateTemp })}
                   placeholder="e.g. 31"
-                  isReadOnly={hasJurisdictionTemp}
+                  readOnly={hasJurisdictionTemp}
                   bg={hasJurisdictionTemp ? "greys.grey03" : undefined}
                   fontWeight={hasJurisdictionTemp ? "semibold" : undefined}
                 />
-                <InputRightAddon>{tempUnit}</InputRightAddon>
+                <InputAddon>{tempUnit}</InputAddon>
               </InputGroup>
               <Text fontSize="xs" color="text.secondary" mt={1}>
                 {hasJurisdictionTemp
@@ -173,20 +160,20 @@ export const DesignConditions = observer(function DesignConditions() {
                       "From BCBC Appendix C — July 2.5% dry bulb"
                     )}
               </Text>
-              <FormErrorMessage>{errors.designOutdoorTemp?.message}</FormErrorMessage>
-            </FormControl>
+              <Field.ErrorText>{errors.designOutdoorTemp?.message}</Field.ErrorText>
+            </Field.Root>
 
-            <FormControl>
-              <FormLabel>
+            <Field.Root>
+              <Field.Label>
                 {t("overheatingCode.sections.designConditions.indoorTempLabel", "Indoor Temp")}
                 <ClauseBadge
                   clause="§ 2.1.1"
                   tooltip="2.1.1 The Design temperature of the Cooling Zone shall be 24ºC."
                 />
-              </FormLabel>
+              </Field.Label>
               <InputGroup>
-                <Input type="number" value={FIXED_INDOOR_TEMP} isReadOnly bg="greys.grey03" fontWeight="semibold" />
-                <InputRightAddon>{tempUnit}</InputRightAddon>
+                <Input type="number" value={FIXED_INDOOR_TEMP} readOnly bg="greys.grey03" fontWeight="semibold" />
+                <InputAddon>{tempUnit}</InputAddon>
               </InputGroup>
               <Text fontSize="xs" color="text.secondary" mt={1}>
                 {t(
@@ -194,25 +181,25 @@ export const DesignConditions = observer(function DesignConditions() {
                   "Fixed at 24°C per BC-SZCG clause 2.1.1"
                 )}
               </Text>
-            </FormControl>
+            </Field.Root>
 
-            <FormControl isInvalid={!!errors.designAdjacentTemp}>
-              <FormLabel>
+            <Field.Root invalid={!!errors.designAdjacentTemp}>
+              <Field.Label>
                 {t("overheatingCode.sections.designConditions.adjacentTempLabel", "Adjacent Temp")}
                 <ClauseBadge
                   clause="§ 2.1.3"
                   tooltip="2.1.3 The Design Temperature of Adjacent Unconditioned spaces (Tca) shall be the same as the outdoor design temperature determined according to clause 2.1.2."
                 />
-              </FormLabel>
+              </Field.Label>
               <InputGroup>
                 <Input
                   type="number"
                   step="any"
                   {...register("designAdjacentTemp", { validate: validateTemp })}
                   bg="greys.grey03"
-                  isReadOnly
+                  readOnly
                 />
-                <InputRightAddon>{tempUnit}</InputRightAddon>
+                <InputAddon>{tempUnit}</InputAddon>
               </InputGroup>
               <Text fontSize="xs" color="text.secondary" mt={1}>
                 {t(
@@ -220,8 +207,8 @@ export const DesignConditions = observer(function DesignConditions() {
                   "Auto-filled from outdoor temp per clause 2.1.3"
                 )}
               </Text>
-              <FormErrorMessage>{errors.designAdjacentTemp?.message}</FormErrorMessage>
-            </FormControl>
+              <Field.ErrorText>{errors.designAdjacentTemp?.message}</Field.ErrorText>
+            </Field.Root>
           </SimpleGrid>
         </Box>
 
@@ -229,15 +216,15 @@ export const DesignConditions = observer(function DesignConditions() {
           <Heading as="h3" size="md" mb={4}>
             {t("overheatingCode.sections.designConditions.zoneAndVentilationHeading", "Zone & Ventilation")}
           </Heading>
-          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
-            <FormControl isInvalid={!!errors.coolingZoneArea}>
-              <FormLabel>
+          <SimpleGrid columns={{ base: 1, md: 2 }} gap={6}>
+            <Field.Root invalid={!!errors.coolingZoneArea}>
+              <Field.Label>
                 {t("overheatingCode.sections.designConditions.coolingZoneAreaLabel", "Cooling Zone Area")}
                 <ClauseBadge
                   clause="§ 2.2.4"
                   tooltip="2.2.4 The cooling zone should have the following attributes: (2) have a minimum area of at least 48 ft² (4.5 m²) for each occupant based on the design number of occupants calculated according to sentence 2.3.1."
                 />
-              </FormLabel>
+              </Field.Label>
               <InputGroup>
                 <Input
                   type="number"
@@ -262,7 +249,7 @@ export const DesignConditions = observer(function DesignConditions() {
                   })}
                   placeholder="e.g. 850"
                 />
-                <InputRightAddon>{areaUnit}</InputRightAddon>
+                <InputAddon>{areaUnit}</InputAddon>
               </InputGroup>
               <Text fontSize="xs" color="text.secondary" mt={1}>
                 {t(
@@ -270,24 +257,24 @@ export const DesignConditions = observer(function DesignConditions() {
                   "Min. 48 ft² per occupant (bedrooms + 1)"
                 )}
               </Text>
-              <FormErrorMessage>{errors.coolingZoneArea?.message}</FormErrorMessage>
-            </FormControl>
+              <Field.ErrorText>{errors.coolingZoneArea?.message}</Field.ErrorText>
+            </Field.Root>
 
-            <FormControl>
-              <FormLabel>
+            <Field.Root>
+              <Field.Label>
                 {t("overheatingCode.sections.designConditions.weatherLocationLabel", "Weather Location")}
                 <ClauseBadge
                   clause="§ 2.1.2(1)"
                   tooltip="2.1.2(1) The Outdoor Design temperature (Toc) shall be the outside summer design temperatures determined from Appendix C of the BCBC and shall be those listed for the July 2.5% dry bulb values."
                 />
-              </FormLabel>
+              </Field.Label>
               <Input
                 {...register("weatherLocation")}
                 placeholder={t(
                   "overheatingCode.sections.designConditions.weatherLocationPlaceholder",
                   "e.g. Kaslo, BC"
                 )}
-                isReadOnly={hasJurisdictionWeather}
+                readOnly={hasJurisdictionWeather}
                 bg={hasJurisdictionWeather ? "greys.grey03" : undefined}
                 fontWeight={hasJurisdictionWeather ? "semibold" : undefined}
               />
@@ -299,16 +286,16 @@ export const DesignConditions = observer(function DesignConditions() {
                   )}
                 </Text>
               )}
-            </FormControl>
+            </Field.Root>
 
-            <FormControl isInvalid={!!errors.ventilationRate}>
-              <FormLabel>
+            <Field.Root invalid={!!errors.ventilationRate}>
+              <Field.Label>
                 {t("overheatingCode.sections.designConditions.ventilationRateLabel", "Ventilation Rate")}
                 <ClauseBadge
                   clause="§ 2.3.2"
                   tooltip="2.3.2 Ventilation Air flow rate: (1) In a home without a central air handling system, the ventilation airflow rate for the purposes of calculating heat gain shall be assumed to be 3.5 L/s (7.5 cfm) per person based on the occupancy determined according to sentence 2.3.1. (2) In a home with a central air handling system the ventilation airflow rate shall be the greater of 3.5 L/s per person or the estimated air flow to or from the cooling zone."
                 />
-              </FormLabel>
+              </Field.Label>
               <InputGroup>
                 <Input
                   type="number"
@@ -327,7 +314,7 @@ export const DesignConditions = observer(function DesignConditions() {
                   })}
                   placeholder="e.g. 17.5"
                 />
-                <InputRightAddon>{ventilationUnit}</InputRightAddon>
+                <InputAddon>{ventilationUnit}</InputAddon>
               </InputGroup>
               <Text fontSize="xs" color="text.secondary" mt={1}>
                 {t(
@@ -335,8 +322,8 @@ export const DesignConditions = observer(function DesignConditions() {
                   "3.5 L/s per person (occupants = bedrooms + 1)"
                 )}
               </Text>
-              <FormErrorMessage>{errors.ventilationRate?.message}</FormErrorMessage>
-            </FormControl>
+              <Field.ErrorText>{errors.ventilationRate?.message}</Field.ErrorText>
+            </Field.Root>
           </SimpleGrid>
         </Box>
 
@@ -344,24 +331,28 @@ export const DesignConditions = observer(function DesignConditions() {
           <Heading as="h3" size="md" mb={4}>
             {t("overheatingCode.sections.designConditions.hrvErvHeading", "Heat/Energy Recovery")}
           </Heading>
-          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6} alignItems="start">
-            <FormControl>
-              <FormLabel>{t("overheatingCode.sections.designConditions.hrvErvLabel", "HRV/ERV?")}</FormLabel>
+          <SimpleGrid columns={{ base: 1, md: 2 }} gap={6} alignItems="start">
+            <Field.Root>
+              <Field.Label>{t("overheatingCode.sections.designConditions.hrvErvLabel", "HRV/ERV?")}</Field.Label>
               <Controller
                 name="hrvErv"
                 control={control}
                 render={({ field: { value, onChange, ...rest } }) => (
-                  <Checkbox
-                    isChecked={value}
-                    onChange={(e) => onChange(e.target.checked)}
+                  <Checkbox.Root
+                    onCheckedChange={(e) => onChange(e.target.checked)}
                     {...rest}
                     size="lg"
                     h="40px"
                     display="flex"
                     alignItems="center"
+                    checked={value}
                   >
-                    {t("ui.yes", "Yes")}
-                  </Checkbox>
+                    <Checkbox.HiddenInput />
+                    <Checkbox.Control>
+                      <Checkbox.Indicator />
+                    </Checkbox.Control>
+                    <Checkbox.Label>{t("ui.yes", "Yes")}</Checkbox.Label>
+                  </Checkbox.Root>
                 )}
               />
               <Text fontSize="xs" color="text.secondary" mt={1}>
@@ -370,16 +361,16 @@ export const DesignConditions = observer(function DesignConditions() {
                   "Is a Heat Recovery Ventilator or Energy Recovery Ventilator used?"
                 )}
               </Text>
-            </FormControl>
+            </Field.Root>
 
-            <FormControl isInvalid={!!errors.atrePercentage} isDisabled={!hrvErvValue}>
-              <FormLabel>
+            <Field.Root invalid={!!errors.atrePercentage} disabled={!hrvErvValue}>
+              <Field.Label>
                 {t("overheatingCode.sections.designConditions.atreLabel", "ATRE %")}
                 <ClauseBadge
                   clause="§ 2.5.9"
                   tooltip="2.5.9 Sensible Heat Gain due to Ventilation: HGsvcz = VCcz × CZODTDc × 1.2 × (1 − ATRE). Where ATRE = adjusted total recovery efficiency of the HRV/ERV, expressed as a fraction, or zero if there is no ATRE reported or if there is no heat recovery."
                 />
-              </FormLabel>
+              </Field.Label>
               <InputGroup maxW="200px">
                 <Input
                   type="number"
@@ -387,7 +378,7 @@ export const DesignConditions = observer(function DesignConditions() {
                   {...register("atrePercentage", { validate: validatePercentage })}
                   placeholder="e.g. 23"
                 />
-                <InputRightAddon>%</InputRightAddon>
+                <InputAddon>%</InputAddon>
               </InputGroup>
               <Text fontSize="xs" color="text.secondary" mt={1}>
                 {t(
@@ -395,13 +386,12 @@ export const DesignConditions = observer(function DesignConditions() {
                   "Adjusted Total Recovery Efficiency — zero if no HRV/ERV"
                 )}
               </Text>
-              <FormErrorMessage>{errors.atrePercentage?.message}</FormErrorMessage>
-            </FormControl>
+              <Field.ErrorText>{errors.atrePercentage?.message}</Field.ErrorText>
+            </Field.Root>
           </SimpleGrid>
         </Box>
       </VStack>
-
-      <FormFooter<IDesignConditionsFormData> handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
+      <FormFooter<IDesignConditionsFormData> handleSubmit={handleSubmit} onSubmit={onSubmit} loading={isSubmitting} />
     </Box>
   )
 })

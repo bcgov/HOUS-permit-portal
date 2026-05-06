@@ -1,4 +1,4 @@
-import { Flex, FormLabel, Grid, Input } from "@chakra-ui/react"
+import { Flex, Grid, Input } from "@chakra-ui/react"
 import { t } from "i18next"
 import React from "react"
 import { usePart3StepCode } from "../../../../../../../hooks/resources/use-part-3-step-code"
@@ -11,8 +11,7 @@ export const StepCodeOccupanciesPerformance = function MixedUseStepCodeOccupanci
 
   return (
     <Flex direction="column" gap={2}>
-      <FormLabel>{t(`${i18nPrefix}.title`)}</FormLabel>
-
+      <Field.Label>{t(`${i18nPrefix}.title`)}</Field.Label>
       <Grid
         templateColumns="300px repeat(2, 1fr)"
         borderRightWidth={1}
@@ -20,29 +19,29 @@ export const StepCodeOccupanciesPerformance = function MixedUseStepCodeOccupanci
         borderColor="borders.light"
       >
         <GridData>
-          <FormLabel>{t(`${i18nPrefix}.occupancy`)}</FormLabel>
+          <Field.Label>{t(`${i18nPrefix}.occupancy`)}</Field.Label>
         </GridData>
         <GridData>
-          <FormLabel>{t(`${i18nPrefix}.energy`)}</FormLabel>
+          <Field.Label>{t(`${i18nPrefix}.energy`)}</Field.Label>
         </GridData>
         <GridData>
-          <FormLabel>{t(`${i18nPrefix}.ghgi`)}</FormLabel>
+          <Field.Label>{t(`${i18nPrefix}.ghgi`)}</Field.Label>
         </GridData>
 
         {checklist.stepCodeOccupancies.map((oc) => (
           <React.Fragment key={oc.id}>
             <GridData justifyContent="center">
-              <Input isDisabled value={t(`stepCode.part3.stepCodeOccupancyKeys.${oc.key}`)} />
+              <Input disabled value={t(`stepCode.part3.stepCodeOccupancyKeys.${oc.key}`)} />
             </GridData>
             <GridData justifyContent="center">
               <Input
-                isDisabled
+                disabled
                 value={t(`stepCodeChecklist.edit.codeComplianceSummary.energyStepCode.steps.${oc.energyStepRequired}`)}
               />
             </GridData>
             <GridData justifyContent="center">
               <Input
-                isDisabled
+                disabled
                 value={t(
                   `stepCodeChecklist.edit.codeComplianceSummary.zeroCarbonStepCode.steps.${oc.zeroCarbonStepRequired}`
                 )}
@@ -53,13 +52,13 @@ export const StepCodeOccupanciesPerformance = function MixedUseStepCodeOccupanci
         {checklist.baselineOccupancies.map((oc) => (
           <React.Fragment key={oc.id}>
             <GridData justifyContent="center">
-              <Input isDisabled value={t(`stepCode.part3.baselineOccupancyKeys.${oc.key}`)} />
+              <Input disabled value={t(`stepCode.part3.baselineOccupancyKeys.${oc.key}`)} />
             </GridData>
             <GridData justifyContent="center">
-              <Input isDisabled value={t(`stepCode.part3.performanceRequirements.${oc.performanceRequirement}`)} />
+              <Input disabled value={t(`stepCode.part3.performanceRequirements.${oc.performanceRequirement}`)} />
             </GridData>
             <GridData justifyContent="center">
-              <Input isDisabled value={"-"} />
+              <Input disabled value={"-"} />
             </GridData>
           </React.Fragment>
         ))}

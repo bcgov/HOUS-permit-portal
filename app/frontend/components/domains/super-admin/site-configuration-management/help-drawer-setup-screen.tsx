@@ -1,4 +1,5 @@
-import { Box, Button, Container, Flex, FormControl, FormLabel, HStack, Heading, Switch, Text } from "@chakra-ui/react"
+import { Switch } from "@/components/ui/switch"
+import { Box, Button, Container, Field, Flex, HStack, Heading, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useEffect } from "react"
@@ -49,7 +50,7 @@ export const HelpDrawerSetupScreen = observer(function HelpDrawerSetupScreen() {
         <FormProvider {...formMethods}>
           <Flex mt={8} gap={16}>
             <Box minW="fit-content">
-              <Heading as="h3" noOfLines={1}>
+              <Heading as="h3" lineClamp={1}>
                 {t("siteConfiguration.helpDrawerSetup.settings")}
               </Heading>
             </Box>
@@ -64,7 +65,7 @@ export const HelpDrawerSetupScreen = observer(function HelpDrawerSetupScreen() {
                       <Box borderRadius="md" border="1px solid" borderColor="border.light" key={key}>
                         <Flex p={4} direction="column" gap={6}>
                           <Flex gap={4}>
-                            <FormControl display="flex" flexDirection="column" flex={1}>
+                            <Field.Root display="flex" flexDirection="column" flex={1}>
                               <Text fontWeight="bold">
                                 {t(`siteConfiguration.helpDrawerSetup.${key as keyof IHelpLinkItems}.label`)}
                               </Text>
@@ -75,16 +76,16 @@ export const HelpDrawerSetupScreen = observer(function HelpDrawerSetupScreen() {
                                   render={({ field: { onChange, value } }) => (
                                     <Switch
                                       id="show-switch"
-                                      isChecked={!!value}
-                                      onChange={(e) => onChange(e.target.checked)}
+                                      checked={!!value}
+                                      onValueChange={(e) => onChange(e.target.checked)}
                                     />
                                   )}
                                 />
-                                <FormLabel htmlFor="show-switch" mb="0">
+                                <Field.Label htmlFor="show-switch" mb="0">
                                   {t("siteConfiguration.helpDrawerSetup.fields.show")}
-                                </FormLabel>
+                                </Field.Label>
                               </HStack>
-                            </FormControl>
+                            </Field.Root>
                             <TextFormControl
                               flex={2}
                               label={t("siteConfiguration.helpDrawerSetup.fields.href")}
@@ -135,10 +136,10 @@ export const HelpDrawerSetupScreen = observer(function HelpDrawerSetupScreen() {
         justify="center"
         gap={4}
       >
-        <Button variant="primary" type="submit" isLoading={isSubmitting} isDisabled={isSubmitting}>
+        <Button variant="primary" type="submit" loading={isSubmitting} disabled={isSubmitting}>
           {t("ui.save")}
         </Button>
-        <Button variant="secondary" onClick={() => navigate(-1)} isDisabled={isSubmitting}>
+        <Button variant="secondary" onClick={() => navigate(-1)} disabled={isSubmitting}>
           {t("ui.cancel")}
         </Button>
       </Flex>

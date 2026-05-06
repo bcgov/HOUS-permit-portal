@@ -1,4 +1,4 @@
-import { Button, Checkbox, FormControl, FormLabel, HStack, Text, VStack, useDisclosure } from "@chakra-ui/react"
+import { Button, Checkbox, Field, HStack, Text, VStack, useDisclosure } from "@chakra-ui/react"
 import { AddressBook, Envelope, MapPin } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
@@ -18,7 +18,7 @@ interface IProps {
 
 export const CompletedBy = observer(function CompletedBy({ checklist }: IProps) {
   const { control, setValue } = useFormContext()
-  const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
+  const { open: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
 
   const onContactChange = (option: IOption<IContact>) => {
     const contact = option.value
@@ -36,7 +36,8 @@ export const CompletedBy = observer(function CompletedBy({ checklist }: IProps) 
         <Text fontSize="md">{t(`${i18nPrefix}.description`)}</Text>
         <VStack borderWidth={1} p={4} rounded="sm" borderColor="border.light" align="start" w="full">
           <Text fontWeight="bold">{t(`${i18nPrefix}.energyAdvisor`)}</Text>
-          <Button variant="primary" leftIcon={<AddressBook size={20} />} onClick={onContactsOpen}>
+          <Button variant="primary" onClick={onContactsOpen}>
+            <AddressBook size={20} />
             {t("ui.autofill")}
           </Button>
           <HStack w="full">
@@ -58,8 +59,8 @@ export const CompletedBy = observer(function CompletedBy({ checklist }: IProps) 
           </HStack>
         </VStack>
 
-        <FormControl>
-          <FormLabel>{t(`${i18nPrefix}.date`)}</FormLabel>
+        <Field.Root>
+          <Field.Label>{t(`${i18nPrefix}.date`)}</Field.Label>
           <Controller
             control={control}
             name="completedAt"
@@ -67,28 +68,31 @@ export const CompletedBy = observer(function CompletedBy({ checklist }: IProps) 
               return <DatePicker selected={value} onChange={onChange} />
             }}
           />
-        </FormControl>
+        </Field.Root>
 
-        <FormControl>
+        <Field.Root>
           <Controller
             control={control}
             name="codeco"
             render={({ field: { onChange, value } }) => {
               return (
-                <Checkbox isChecked={value} onChange={onChange}>
-                  {t(`${i18nPrefix}.codeco`)}
-                </Checkbox>
+                <Checkbox.Root onCheckedChange={onChange} checked={value}>
+                  <Checkbox.HiddenInput />
+                  <Checkbox.Control>
+                    <Checkbox.Indicator />
+                  </Checkbox.Control>
+                  <Checkbox.Label>{t(`${i18nPrefix}.codeco`)}</Checkbox.Label>
+                </Checkbox.Root>
               )
             }}
           />
-        </FormControl>
+        </Field.Root>
 
         <TextFormControl label={t(`${i18nPrefix}.pFile`)} inputProps={{ isDisabled: true, value: checklist.pFileNo }} />
       </ChecklistSection>
-
       {isContactsOpen && (
         <ContactModal
-          isOpen={isContactsOpen}
+          open={isContactsOpen}
           onOpen={onContactsOpen}
           onClose={onContactsClose}
           onContactChange={onContactChange}

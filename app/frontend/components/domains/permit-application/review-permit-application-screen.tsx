@@ -1,14 +1,12 @@
 import {
   Box,
   Button,
-  Divider,
   Flex,
   HStack,
   Heading,
   Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
+  Portal,
+  Separator,
   Spacer,
   Stack,
   Text,
@@ -63,7 +61,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
 
   const [completedBlocks, setCompletedBlocks] = useState({})
 
-  const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
+  const { open: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
 
   const [hideRevisionList, setHideRevisionList] = useState(false)
   const [isRetriggeringWebhook, setIsRetriggeringWebhook] = useState(false)
@@ -162,14 +160,19 @@ export const ReviewPermitApplicationScreen = observer(() => {
               <Heading fontSize="xl" as="h3">
                 {currentPermitApplication.nickname}
               </Heading>
-              <Text noOfLines={1}>{tagsOrNickname}</Text>
+              <Text lineClamp={1}>{tagsOrNickname}</Text>
               <HStack>
                 <CopyableValue
                   textTransform={"uppercase"}
                   value={number}
                   label={t("permitApplication.fields.number")}
                 />
-                <HStack mt={2} sx={{ svg: { fill: "theme.yellow" } }}>
+                <HStack
+                  mt={2}
+                  css={{
+                    "& svg": { fill: "theme.yellow" },
+                  }}
+                >
                   <Text textTransform={"uppercase"} whiteSpace="nowrap" flexShrink={0}>
                     {" "}
                     {t("permitApplication.referenceNumber")}:
@@ -203,32 +206,42 @@ export const ReviewPermitApplicationScreen = observer(() => {
           <Flex direction="column" align="flex-end" justify="space-between">
             <Stack direction={{ base: "column", lg: "row" }} align={{ base: "flex-end", lg: "center" }}>
               <BrowserSearchPrompt />
-              <Button variant="ghost" leftIcon={<Info size={20} />} color="white" onClick={onContactsOpen}>
+              <Button variant="ghost" color="white" onClick={onContactsOpen}>
+                <Info size={20} />
                 {t("permitApplication.show.contactsSummary")}
               </Button>
               <SubmissionDownloadModal permitApplication={currentPermitApplication} review />
-              <Button rightIcon={<CaretRight />} onClick={() => navigate(-1)}>
+              <Button onClick={() => navigate(-1)}>
                 {t("ui.back")}
+                <CaretRight />
               </Button>
             </Stack>
             {currentPermitApplication.isSubmitted && currentPermitApplication.jurisdiction.externalApiEnabled && (
-              <Menu>
-                <MenuButton as={Button} variant="tertiaryInverse" rightIcon={<CaretDown />}>
-                  {t("ui.options")}
-                </MenuButton>
-                <MenuList>
-                  <MenuItem
-                    icon={<ArrowsClockwise size={16} />}
-                    onClick={handleRetriggerWebhook}
-                    isDisabled={isRetriggeringWebhook}
-                    color="text.primary"
-                  >
-                    {isRetriggeringWebhook
-                      ? t("permitApplication.show.retriggeringWebhook")
-                      : t("permitApplication.show.retriggerWebhook")}
-                  </MenuItem>
-                </MenuList>
-              </Menu>
+              <Menu.Root>
+                <Menu.Trigger asChild>
+                  <Button variant="tertiaryInverse">
+                    {t("ui.options")}
+                    <CaretDown />
+                  </Button>
+                </Menu.Trigger>
+                <Portal>
+                  <Menu.Positioner>
+                    <Menu.Content>
+                      <Menu.Item
+                        icon={<ArrowsClockwise size={16} />}
+                        onSelect={handleRetriggerWebhook}
+                        disabled={isRetriggeringWebhook}
+                        color="text.primary"
+                        value="item-0"
+                      >
+                        {isRetriggeringWebhook
+                          ? t("permitApplication.show.retriggeringWebhook")
+                          : t("permitApplication.show.retriggerWebhook")}
+                      </Menu.Item>
+                    </Menu.Content>
+                  </Menu.Positioner>
+                </Portal>
+              </Menu.Root>
             )}
           </Flex>
         </Flex>
@@ -251,23 +264,22 @@ export const ReviewPermitApplicationScreen = observer(() => {
                 {t("permitApplication.show.requestingRevisions")}
               </Heading>
               <Spacer />
-              <Button
-                fontSize="sm"
-                h={8}
-                p={1}
-                variant="secondary"
-                rightIcon={hideRevisionList ? <CaretDown /> : <CaretUp />}
-                onClick={() => setHideRevisionList((cur) => !cur)}
-              >
+              <Button fontSize="sm" h={8} p={1} variant="secondary" onClick={() => setHideRevisionList((cur) => !cur)}>
                 {hideRevisionList ? t("permitApplication.show.showList") : t("permitApplication.show.hideList")}
+                {hideRevisionList ? <CaretDown /> : <CaretUp />}
               </Button>
-              <Divider orientation="vertical" height="24px" mx={4} borderColor="greys.grey01" />
+              <Separator orientation="vertical" height="24px" mx={4} borderColor="greys.grey01" />
             </Flex>
             <Flex align="center" gap={2} flex={1} justify="flex-end" ref={sendRevisionContainerRef}></Flex>
           </Flex>
         )}
       </Flex>
-      <Box id="sidebar-and-form-container" sx={{ "&:after": { content: `""`, display: "block", clear: "both" } }}>
+      <Box
+        id="sidebar-and-form-container"
+        css={{
+          "& &:after": { content: `""`, display: "block", clear: "both" },
+        }}
+      >
         {!isReadOnly && revisionMode && !hideRevisionList ? (
           <RevisionSideBar
             permitApplication={currentPermitApplication}
@@ -298,15 +310,15 @@ export const ReviewPermitApplicationScreen = observer(() => {
 
                 if (isReadOnly) {
                   return (
-                    <HStack spacing={6}>
+                    <HStack gap={6}>
                       {canStartReview && (
                         <Button
                           variant="callout"
-                          leftIcon={<Swap />}
                           onClick={handleStartReview}
-                          isLoading={isStartingReview}
+                          loading={isStartingReview}
                           loadingText={t("permitApplication.show.startingReview")}
                         >
+                          <Swap />
                           {t("permitApplication.show.readyForReview")}
                         </Button>
                       )}
@@ -316,9 +328,10 @@ export const ReviewPermitApplicationScreen = observer(() => {
                 }
 
                 return (
-                  <HStack spacing={6}>
+                  <HStack gap={6}>
                     {!revisionMode && (
-                      <Button variant="callout" leftIcon={<NotePencil />} onClick={() => setRevisionMode(true)}>
+                      <Button variant="callout" onClick={() => setRevisionMode(true)}>
+                        <NotePencil />
                         {currentPermitApplication.isRevisionsRequested
                           ? t("permitApplication.show.viewRevisionRequests")
                           : t("permitApplication.show.requestRevisions")}{" "}
@@ -337,7 +350,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
       </Box>
       {isContactsOpen && (
         <ContactSummaryModal
-          isOpen={isContactsOpen}
+          open={isContactsOpen}
           onOpen={onContactsOpen}
           onClose={onContactsClose}
           permitApplication={currentPermitApplication}

@@ -61,12 +61,13 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
 
   return (
     <Container maxW="container.lg" p={8} as={"main"} h={"full"} w={"full"} {...containerProps}>
-      <Button variant="link" onClick={handleBack} leftIcon={<CaretLeft size={20} />} textDecoration="none">
+      <Button variant="plain" onClick={handleBack} textDecoration="none">
+        <CaretLeft size={20} />
         {t("ui.back")}
       </Button>
       {/*This outlet will render the create/edit modal*/}
       <Outlet />
-      <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
+      <VStack alignItems={"flex-start"} gap={5} w={"full"} h={"full"}>
         <Flex justifyContent={"space-between"} w={"full"} alignItems={"flex-end"}>
           <Box>
             <Heading as="h1">{currentJurisdiction?.qualifiedName}</Heading>
@@ -77,7 +78,7 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
                 alignSelf={"flex-end"}
                 variant={"secondary"}
                 to={"/api-settings/api-mappings"}
-                isDisabled={!externalApiEnabled}
+                disabled={!externalApiEnabled}
                 onClick={disableLinkClick}
               >
                 {t("apiMappingsSetup.title")}
@@ -87,7 +88,7 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
               alignSelf={"flex-end"}
               variant={"primary"}
               to={"create"}
-              isDisabled={!externalApiEnabled}
+              disabled={!externalApiEnabled}
               onClick={disableLinkClick}
               replace
             >
@@ -101,7 +102,7 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
             title={
               <>
                 {t("externalApiKey.index.disabledWarningTitle")}{" "}
-                <Link href={"mailto:" + t("site.contactEmail")} isExternal>
+                <Link href={"mailto:" + t("site.contactEmail")} target="_blank" rel="noopener noreferrer">
                   {t("site.contactEmail")}
                 </Link>
               </>
@@ -142,7 +143,7 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
                     <RouterLinkButton
                       variant={"link"}
                       to={`${externalApiKey.id}/manage`}
-                      isDisabled={!externalApiEnabled}
+                      disabled={!externalApiEnabled}
                       onClick={disableLinkClick}
                     >
                       {t("ui.manage")}

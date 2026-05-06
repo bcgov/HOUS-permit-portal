@@ -1,17 +1,4 @@
-import {
-  Accordion,
-  AccordionButton,
-  AccordionIcon,
-  AccordionItem,
-  AccordionPanel,
-  Box,
-  Button,
-  ButtonGroup,
-  IconButton,
-  Stack,
-  Text,
-  UseAccordionProps,
-} from "@chakra-ui/react"
+import { Accordion, Box, Button, ButtonGroup, IconButton, Stack, Text } from "@chakra-ui/react"
 import { X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import pluck from "ramda/src/pluck"
@@ -50,35 +37,34 @@ export const GridAccordion = observer(function GridAccordion({
   onSaveLocalMapping,
 }: IProps) {
   const { t } = useTranslation()
-  const [expandedIndex, setExpandedIndex] = useState(0)
+  const [accordionValue, setAccordionValue] = useState<string[]>(["requirements"])
   const requirementBlockJson = templateVersion.getRequirementBlockJsonById(requirementBlockMapping.id)
-  const isExpanded = expandedIndex === 0
+  const isExpanded = accordionValue.includes("requirements")
 
   useEffect(() => {
-    setExpandedIndex(requirementBlockMapping?.integrationMapping?.isAllAccordionCollapsed ? -1 : 0)
+    setAccordionValue(requirementBlockMapping?.integrationMapping?.isAllAccordionCollapsed ? [] : ["requirements"])
   }, [requirementBlockMapping?.integrationMapping?.isAllAccordionCollapsed])
   return (
     <Box display={"contents"}>
-      <Accordion
-        sx={{
-          "& .chakra-collapse": {
+      <Accordion.Root
+        css={{
+          "& [data-scope='accordion'][data-part='item-content']": {
             display: `${isExpanded ? "contents" : "none"} !important`, // this is needed for the data grid layout to work
           },
         }}
         display={"contents"}
-        index={expandedIndex}
-        defaultIndex={0}
-        onChange={setExpandedIndex as UseAccordionProps["onChange"]}
-        allowToggle
+        value={accordionValue}
+        onValueChange={({ value }) => setAccordionValue(value)}
+        collapsible
       >
-        <AccordionItem display={"contents"}>
+        <Accordion.Item display={"contents"} value="requirements">
           <Text
             as={"h3"}
             style={{
               gridColumn: "1/-1",
             }}
           >
-            <AccordionButton
+            <Accordion.ItemTrigger
               _expanded={{
                 bg: "greys.grey04",
               }}
@@ -93,70 +79,72 @@ export const GridAccordion = observer(function GridAccordion({
                   components={{ 1: <Text as={"span"} fontWeight={700} fontSize={"sm"} /> }}
                 />
               </Box>
-              <AccordionIcon />
-            </AccordionButton>
+              <Accordion.ItemIndicator />
+            </Accordion.ItemTrigger>
           </Text>
-          <AccordionPanel pb={4} bg={"red"} sx={{ display: "contents" }}>
-            {(requirementBlockMapping.getTableRequirementsJson(requirementBlockJson.requirements) ?? []).map(
-              (requirementJson) => {
-                const localMappingSearchMatchIndicies = requirementJson?.matches?.find(
-                  (match) => match.key === "local_system_mapping"
-                )?.indices
-                const requirementCodeSearchMatchIndicies = requirementJson?.matches?.find(
-                  (match) => match.key === "requirementCode"
-                )?.indices
+          <Accordion.ItemContent pb={4} bg={"red"} css={{ display: "contents" }}>
+            <Accordion.ItemBody>
+              {(requirementBlockMapping.getTableRequirementsJson(requirementBlockJson.requirements) ?? []).map(
+                (requirementJson) => {
+                  const localMappingSearchMatchIndicies = requirementJson?.matches?.find(
+                    (match) => match.key === "local_system_mapping"
+                  )?.indices
+                  const requirementCodeSearchMatchIndicies = requirementJson?.matches?.find(
+                    (match) => match.key === "requirementCode"
+                  )?.indices
 
-                return (
-                  <Box key={requirementJson.id} role={"row"} display={"contents"}>
-                    <SearchGridItem fontWeight={700} {...searchGridItemProps}>
-                      <EditableLocalSystemMapping
-                        requirementMapping={requirementBlockMapping.requirements.get(requirementJson.requirementCode)}
-                        onSave={async (localSystemMapping) =>
-                          onSaveLocalMapping({
-                            [requirementBlockJson.sku]: { [requirementJson.requirementCode]: localSystemMapping },
-                          })
-                        }
-                        searchMatchIndices={localMappingSearchMatchIndicies}
-                      />
-                    </SearchGridItem>
-                    <SearchGridItem fontWeight={700} {...searchGridItemProps}>
-                      <Text maxW={"full"}>
-                        <HighlightedText
-                          text={requirementJson?.requirementCode ?? ""}
-                          indices={requirementCodeSearchMatchIndicies ?? []}
+                  return (
+                    <Box key={requirementJson.id} role={"row"} display={"contents"}>
+                      <SearchGridItem fontWeight={700} {...searchGridItemProps}>
+                        <EditableLocalSystemMapping
+                          requirementMapping={requirementBlockMapping.requirements.get(requirementJson.requirementCode)}
+                          onSave={async (localSystemMapping) =>
+                            onSaveLocalMapping({
+                              [requirementBlockJson.sku]: { [requirementJson.requirementCode]: localSystemMapping },
+                            })
+                          }
+                          searchMatchIndices={localMappingSearchMatchIndicies}
                         />
-                      </Text>
-                    </SearchGridItem>
-                    <SearchGridItem {...searchGridItemProps} justifyContent={"flex-start"} alignItems={"flex-start"}>
-                      <Stack color={"text.secondary"}>
-                        <RequirementFieldDisplay
-                          requirementType={requirementJson.inputType}
-                          label={requirementJson.label}
-                          helperText={requirementJson.hint}
-                          inputOptions={requirementJson?.inputOptions}
-                          unit={requirementJson?.inputOptions?.numberUnit}
-                          options={pluck("label", requirementJson.inputOptions?.valueOptions ?? [])}
-                          selectProps={{
-                            maxW: "339px",
-                          }}
-                          addMultipleContactProps={{
-                            shouldRender: true,
-                            formControlProps: { isDisabled: true },
-                            switchProps: {
-                              isChecked: requirementJson?.inputOptions?.canAddMultipleContacts,
-                            },
-                          }}
-                          required={requirementJson?.required}
-                        />
-                      </Stack>
-                    </SearchGridItem>
-                  </Box>
-                )
-              }
-            )}
-          </AccordionPanel>
-        </AccordionItem>
-      </Accordion>
+                      </SearchGridItem>
+                      <SearchGridItem fontWeight={700} {...searchGridItemProps}>
+                        <Text maxW={"full"}>
+                          <HighlightedText
+                            text={requirementJson?.requirementCode ?? ""}
+                            indices={requirementCodeSearchMatchIndicies ?? []}
+                          />
+                        </Text>
+                      </SearchGridItem>
+                      <SearchGridItem {...searchGridItemProps} justifyContent={"flex-start"} alignItems={"flex-start"}>
+                        <Stack color={"text.secondary"}>
+                          <RequirementFieldDisplay
+                            requirementType={requirementJson.inputType}
+                            label={requirementJson.label}
+                            helperText={requirementJson.hint}
+                            inputOptions={requirementJson?.inputOptions}
+                            unit={requirementJson?.inputOptions?.numberUnit}
+                            options={pluck("label", requirementJson.inputOptions?.valueOptions ?? [])}
+                            selectProps={{
+                              maxW: "339px",
+                            }}
+                            addMultipleContactProps={{
+                              shouldRender: true,
+                              formControlProps: { isDisabled: true },
+                              switchProps: {
+                                isChecked: requirementJson?.inputOptions?.canAddMultipleContacts,
+                              },
+                            }}
+                            required={requirementJson?.required}
+                          />
+                        </Stack>
+                      </SearchGridItem>
+                    </Box>
+                  )
+                }
+              )}
+            </Accordion.ItemBody>
+          </Accordion.ItemContent>
+        </Accordion.Item>
+      </Accordion.Root>
     </Box>
   )
 })
@@ -205,8 +193,8 @@ const EditableLocalSystemMapping = observer(function EditableLocalSystemMapping(
     <EditableInputWithControls
       controlsProps={{
         CustomEditModeControls: ({ getSubmitButtonProps, getCancelButtonProps }) => (
-          <ButtonGroup justifyContent="center" size="sm" spacing={2} ml={4} isDisabled={isSubmitting}>
-            <Button {...getSubmitButtonProps()} variant={"primary"} isLoading={isSubmitting}>
+          <ButtonGroup justifyContent="center" size="sm" spacing={2} ml={4} disabled={isSubmitting}>
+            <Button {...getSubmitButtonProps()} variant={"primary"} loading={isSubmitting}>
               {t("ui.onlySave")}
             </Button>
             <IconButton variant={"ghost"} icon={<X />} aria-label={t("ui.cancel")} {...getCancelButtonProps()} />
@@ -221,7 +209,7 @@ const EditableLocalSystemMapping = observer(function EditableLocalSystemMapping(
       onCancel={() => resetToModelValue()}
       onSubmit={(_) => onSubmit()}
       submitOnBlur={false}
-      isDisabled={isSubmitting}
+      disabled={isSubmitting}
       editablePreviewProps={{
         renderCustomPreview: ({ isEditing, onClick, initialHint }) => (
           <Text display={isEditing ? "none" : "initial"} onClick={onClick} flex={1} maxW={"full"}>

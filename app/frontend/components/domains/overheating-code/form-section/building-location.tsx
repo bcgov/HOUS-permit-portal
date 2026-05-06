@@ -1,14 +1,4 @@
-import {
-  Box,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
-  Heading,
-  Input,
-  SimpleGrid,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { Box, Field, Heading, Input, SimpleGrid, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { FormProvider, useForm } from "react-hook-form"
@@ -85,7 +75,7 @@ export const BuildingLocation = observer(function BuildingLocation() {
           )}
         </Text>
 
-        <VStack spacing={6} align="stretch">
+        <VStack gap={6} align="stretch">
           <SitesSelect
             onChange={(option) => setValue("site", option)}
             selectedOption={selectedSite}
@@ -98,33 +88,33 @@ export const BuildingLocation = observer(function BuildingLocation() {
             initialJurisdiction={currentOverheatingCode?.jurisdiction || null}
           />
 
-          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
-            <FormControl>
-              <FormLabel>{t("overheatingCode.sections.buildingLocation.modelLabel", "Model")}</FormLabel>
+          <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
+            <Field.Root>
+              <Field.Label>{t("overheatingCode.sections.buildingLocation.modelLabel", "Model")}</Field.Label>
               <Input
                 {...register("buildingModel")}
                 placeholder={t("overheatingCode.sections.buildingLocation.modelPlaceholder", "e.g. Model A")}
               />
-            </FormControl>
+            </Field.Root>
 
-            <FormControl>
-              <FormLabel>{t("overheatingCode.sections.buildingLocation.siteLabel", "Site")}</FormLabel>
+            <Field.Root>
+              <Field.Label>{t("overheatingCode.sections.buildingLocation.siteLabel", "Site")}</Field.Label>
               <Input
                 {...register("siteName")}
                 placeholder={t("overheatingCode.sections.buildingLocation.sitePlaceholder", "e.g. Site 1")}
               />
-            </FormControl>
+            </Field.Root>
 
-            <FormControl>
-              <FormLabel>{t("overheatingCode.sections.buildingLocation.lotLabel", "Lot")}</FormLabel>
+            <Field.Root>
+              <Field.Label>{t("overheatingCode.sections.buildingLocation.lotLabel", "Lot")}</Field.Label>
               <Input
                 {...register("lot")}
                 placeholder={t("overheatingCode.sections.buildingLocation.lotPlaceholder", "e.g. Lot 12")}
               />
-            </FormControl>
+            </Field.Root>
 
-            <FormControl isInvalid={!!errors.postalCode}>
-              <FormLabel>{t("overheatingCode.sections.buildingLocation.postalCodeLabel", "Postal Code")}</FormLabel>
+            <Field.Root invalid={!!errors.postalCode}>
+              <Field.Label>{t("overheatingCode.sections.buildingLocation.postalCodeLabel", "Postal Code")}</Field.Label>
               <Input
                 {...register("postalCode", {
                   validate: (value) => {
@@ -140,16 +130,12 @@ export const BuildingLocation = observer(function BuildingLocation() {
                 })}
                 placeholder={t("overheatingCode.sections.buildingLocation.postalCodePlaceholder", "e.g. V7L 1C3")}
               />
-              <FormErrorMessage>{errors.postalCode?.message}</FormErrorMessage>
-            </FormControl>
+              <Field.ErrorText>{errors.postalCode?.message}</Field.ErrorText>
+            </Field.Root>
           </SimpleGrid>
         </VStack>
 
-        <FormFooter<IBuildingLocationFormData>
-          handleSubmit={handleSubmit}
-          onSubmit={onSubmit}
-          isLoading={isSubmitting}
-        />
+        <FormFooter<IBuildingLocationFormData> handleSubmit={handleSubmit} onSubmit={onSubmit} loading={isSubmitting} />
       </Box>
     </FormProvider>
   )

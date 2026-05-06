@@ -71,6 +71,7 @@ export const applicationStatusBorderColorMap: Record<string, string> = {
 
 interface IPermitApplicationStatusTagProps extends TagProps {
   status: string
+  [key: string]: unknown
 }
 
 export const PermitApplicationStatusTag = React.forwardRef<HTMLSpanElement, IPermitApplicationStatusTagProps>(
@@ -78,7 +79,7 @@ export const PermitApplicationStatusTag = React.forwardRef<HTMLSpanElement, IPer
     const { t } = useTranslation()
 
     return (
-      <Tag
+      <Tag.Root
         ref={ref}
         p={1}
         bg={applicationStatusBgMap[status] || "greys.grey04"}
@@ -93,7 +94,7 @@ export const PermitApplicationStatusTag = React.forwardRef<HTMLSpanElement, IPer
       >
         {/* @ts-ignore */}
         {t(`permitApplication.status.${status}`)}
-      </Tag>
+      </Tag.Root>
     )
   }
 )

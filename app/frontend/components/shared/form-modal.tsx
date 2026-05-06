@@ -1,4 +1,4 @@
-import { Modal, ModalContent, ModalOverlay, ModalProps, useDisclosure } from "@chakra-ui/react"
+import { Dialog, ModalProps, Portal, useDisclosure } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { FieldValues, FormProvider, UseFormReturn } from "react-hook-form"
@@ -33,7 +33,7 @@ export const FormModal = observer(function FormModal<T extends FieldValues>({
   } = formProps
 
   const {
-    isOpen: isConfirmationModalOpen,
+    open: isConfirmationModalOpen,
     onOpen: onConfirmationModalOpen,
     onClose: onConfirmationModalClose,
   } = useDisclosure()
@@ -63,22 +63,32 @@ export const FormModal = observer(function FormModal<T extends FieldValues>({
 
   return (
     <>
-      <Modal onClose={handleClose} isOpen={isOpen} {...modalProps}>
-        <ModalOverlay />
-        <FormProvider {...formProps}>
-          <ModalContent
-            as={"form"}
-            onClick={(e) => e.stopPropagation()}
-            // Default styles that can be overridden by modalProps or children
-            w={"min(1170px, 95%)"}
-            maxW={"full"}
-            {...(modalProps?.size ? {} : { w: "min(1170px, 95%)", maxW: "full" })}
-          >
-            {children}
-          </ModalContent>
-        </FormProvider>
-      </Modal>
-
+      <Dialog.Root
+        open={open}
+        {...modalProps}
+        onOpenChange={(e) => {
+          if (!e.open) {
+            handleClose()
+          }
+        }}
+      >
+        <Portal>
+          <Dialog.Backdrop />
+          <FormProvider {...formProps}>
+            <Dialog.Positioner>
+              <Dialog.Content
+                // Default styles that can be overridden by modalProps or children
+                w={"min(1170px, 95%)"}
+                maxW={"full"}
+                {...(modalProps?.size ? {} : { w: "min(1170px, 95%)", maxW: "full" })}
+                asChild
+              >
+                <form onClick={(e) => e.stopPropagation()}>{children}</form>
+              </Dialog.Content>
+            </Dialog.Positioner>
+          </FormProvider>
+        </Portal>
+      </Dialog.Root>
       <ConfirmationModal
         modalControlProps={{
           isOpen: isConfirmationModalOpen,

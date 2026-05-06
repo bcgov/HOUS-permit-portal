@@ -47,7 +47,7 @@ export const TemplateStatusTag = ({ status, scheduledFor, subText }: ITemplateSt
   const { t } = useTranslation()
   return (
     <Flex direction="column">
-      <Tag
+      <Tag.Root
         p={1}
         pr={2}
         borderRadius="sm"
@@ -60,7 +60,7 @@ export const TemplateStatusTag = ({ status, scheduledFor, subText }: ITemplateSt
           {statusIcons[status]}
           <Text>{t(`requirementTemplate.status.${status}`)}</Text>
         </HStack>
-      </Tag>
+      </Tag.Root>
       {scheduledFor && (
         <Text fontSize="sm" fontWeight="bold">
           {format(utcToZonedTime(scheduledFor, vancouverTimeZone), "yyyy-MM-dd")}

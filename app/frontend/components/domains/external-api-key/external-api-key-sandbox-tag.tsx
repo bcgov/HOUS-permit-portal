@@ -12,7 +12,7 @@ interface IExternalApiKeySandboxTagProps {
 export const ExternalApiKeySandboxTag = ({ statusScope }: IExternalApiKeySandboxTagProps) => {
   const { t } = useTranslation()
   return (
-    <Tag
+    <Tag.Root
       p={1}
       pr={2}
       borderRadius="sm"
@@ -33,6 +33,6 @@ export const ExternalApiKeySandboxTag = ({ statusScope }: IExternalApiKeySandbox
         {statusScope}
         <Text>{t(`sandbox.scopeLabels.${statusScope}`)}</Text>
       </HStack>
-    </Tag>
+    </Tag.Root>
   )
 }

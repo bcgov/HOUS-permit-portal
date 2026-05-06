@@ -1,4 +1,5 @@
-import { Input, InputGroup, InputGroupProps, InputLeftElement, InputProps } from "@chakra-ui/react"
+import { InputGroup } from "@/components/ui/input-group"
+import { Input, InputElement, InputProps } from "@chakra-ui/react"
 import { MagnifyingGlass } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -30,9 +31,9 @@ export const SearchInput = observer(function SearchInput<TSearchModel extends IS
         borderColor="border.input"
         {...inputProps}
       />
-      <InputLeftElement color={"greys.grey01"}>
+      <InputElement color={"greys.grey01"}>
         <MagnifyingGlass size={16} />
-      </InputLeftElement>
+      </InputElement>
     </InputGroup>
   )
 })

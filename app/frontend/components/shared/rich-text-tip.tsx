@@ -22,8 +22,8 @@ export function RichTextTip({ tip, helpLink, headerProps, ...containerProps }: I
         borderLeft={"4px solid"}
         borderColor={"theme.blueAlt"}
         bg={"theme.blueLight"}
-        sx={{
-          ".tiptap-editor-readonly": {
+        css={{
+          "& .tiptap-editor-readonly": {
             p: 0,
           },
         }}

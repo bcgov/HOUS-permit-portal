@@ -13,8 +13,8 @@ export const ElectiveTag: React.FC<ElectiveTagProps> = ({ hasElective, ...rest }
   const hasElectiveText = t("requirementsLibrary.hasElective")
 
   return (
-    <Tag bg={"theme.yellowLight"} color={"text.secondary"} fontWeight={700} fontSize={"xs"} {...rest}>
+    <Tag.Root bg={"theme.yellowLight"} color={"text.secondary"} fontWeight={700} fontSize={"xs"} {...rest}>
       {hasElective ? hasElectiveText : isElectiveText}
-    </Tag>
+    </Tag.Root>
   )
 }

@@ -17,7 +17,9 @@ export const RequirementBlock = observer<IRequirementBlockProps, HTMLDivElement>
     return (
       <Box ref={ref} {...containerProps} bg={"white"}>
         <HStack>
-          <IconButton variant={"ghost"} aria-label={"section drag handle"} icon={<ListIcon />} {...dragHandleProps} />
+          <IconButton variant={"ghost"} aria-label={"section drag handle"} {...dragHandleProps}>
+            <ListIcon />
+          </IconButton>
           <Text>{requirementBlock?.displayName}</Text>
         </HStack>
       </Box>

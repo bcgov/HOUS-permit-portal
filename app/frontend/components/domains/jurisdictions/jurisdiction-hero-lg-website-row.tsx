@@ -11,7 +11,6 @@ function HeroLgBackToWebsiteLink({ href, jurisdictionName }: { href: string; jur
   return (
     <Link
       href={href}
-      isExternal
       display="flex"
       alignItems="center"
       gap={2}
@@ -22,6 +21,8 @@ function HeroLgBackToWebsiteLink({ href, jurisdictionName }: { href: string; jur
       lineHeight="shorter"
       textDecoration="none"
       _hover={{ color: "greys.white", textDecoration: "underline" }}
+      target="_blank"
+      rel="noopener noreferrer"
     >
       <Box as="span" display="inline-flex" flexShrink={0} lineHeight={1} aria-hidden>
         <CaretLeft size={14} weight="bold" color="currentColor" />
@@ -70,7 +71,7 @@ export function JurisdictionHeroLgWebsiteRow({
           {isEditingWebsite ? (
             <UrlFormControl
               fieldName="websiteUrl"
-              sx={{
+              css={{
                 position: "relative",
                 "& .chakra-form__error-message, & [role='alert']": {
                   position: "absolute",
@@ -105,7 +106,6 @@ export function JurisdictionHeroLgWebsiteRow({
           flexShrink={0}
           variant="primary"
           size="xs"
-          leftIcon={<Pencil size={12} />}
           aria-label={isEditingWebsite ? t("ui.done") : t("ui.edit")}
           onClick={async () => {
             if (isEditingWebsite) {
@@ -116,6 +116,7 @@ export function JurisdictionHeroLgWebsiteRow({
             }
           }}
         >
+          <Pencil size={12} />
           {isEditingWebsite ? t("ui.done") : t("ui.edit")}
         </Button>
       </Flex>

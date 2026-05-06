@@ -1,4 +1,4 @@
-import { Box, Container, Heading, Link, ListItem, Text, UnorderedList, VStack } from "@chakra-ui/react"
+import { Box, Container, Heading, Link, List, Text, VStack } from "@chakra-ui/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
 
@@ -10,8 +10,7 @@ export const PrivacyPolicyScreen = () => {
       <Heading as="h1" mb={8}>
         {t("site.privacyPolicy")}
       </Heading>
-
-      <VStack align="flex-start" spacing={2} mb={8}>
+      <VStack align="flex-start" gap={2} mb={8}>
         <Text fontSize="lg">
           <strong>{t("site.privacyPolicyEffectiveDate")}</strong>
         </Text>
@@ -22,8 +21,7 @@ export const PrivacyPolicyScreen = () => {
           <strong>{t("site.privacyPolicyAppliesTo")}</strong>
         </Text>
       </VStack>
-
-      <VStack align="flex-start" spacing={4}>
+      <VStack align="flex-start" gap={4}>
         <Box>
           <Heading as="h2" size="lg" mb={4} mt={8}>
             {t("site.privacyPolicyOverview")}
@@ -41,12 +39,12 @@ export const PrivacyPolicyScreen = () => {
           <Text mb={4} fontSize="lg">
             {t("site.privacyPolicyWhatInformationWeCollectDescription1")}
           </Text>
-          <UnorderedList spacing={2} pl={6}>
-            <ListItem fontSize="lg">{t("site.privacyPolicyWhatInformationWeCollectItem1")}</ListItem>
-            <ListItem fontSize="lg">{t("site.privacyPolicyWhatInformationWeCollectItem2")}</ListItem>
-            <ListItem fontSize="lg">{t("site.privacyPolicyWhatInformationWeCollectItem3")}</ListItem>
-            <ListItem fontSize="lg">{t("site.privacyPolicyWhatInformationWeCollectItem4")}</ListItem>
-          </UnorderedList>
+          <List.Root as="ul" gap={2} pl={6}>
+            <List.Item fontSize="lg">{t("site.privacyPolicyWhatInformationWeCollectItem1")}</List.Item>
+            <List.Item fontSize="lg">{t("site.privacyPolicyWhatInformationWeCollectItem2")}</List.Item>
+            <List.Item fontSize="lg">{t("site.privacyPolicyWhatInformationWeCollectItem3")}</List.Item>
+            <List.Item fontSize="lg">{t("site.privacyPolicyWhatInformationWeCollectItem4")}</List.Item>
+          </List.Root>
           <Text mt={4} fontSize="lg">
             {t("site.privacyPolicyWhatInformationWeCollectDescription2")}
           </Text>
@@ -59,14 +57,14 @@ export const PrivacyPolicyScreen = () => {
           <Text mb={4} fontSize="lg">
             {t("site.privacyPolicyHowWeUseYourInformationDescription")}
           </Text>
-          <UnorderedList spacing={2} pl={6}>
-            <ListItem fontSize="lg">{t("site.privacyPolicyHowWeUseYourInformationItem1")}</ListItem>
-            <ListItem fontSize="lg">{t("site.privacyPolicyHowWeUseYourInformationItem2")}</ListItem>
-            <ListItem fontSize="lg">{t("site.privacyPolicyHowWeUseYourInformationItem3")}</ListItem>
-            <ListItem fontSize="lg">{t("site.privacyPolicyHowWeUseYourInformationItem4")}</ListItem>
-            <ListItem fontSize="lg">{t("site.privacyPolicyHowWeUseYourInformationItem5")}</ListItem>
-            <ListItem fontSize="lg">{t("site.privacyPolicyHowWeUseYourInformationItem6")}</ListItem>
-          </UnorderedList>
+          <List.Root as="ul" gap={2} pl={6}>
+            <List.Item fontSize="lg">{t("site.privacyPolicyHowWeUseYourInformationItem1")}</List.Item>
+            <List.Item fontSize="lg">{t("site.privacyPolicyHowWeUseYourInformationItem2")}</List.Item>
+            <List.Item fontSize="lg">{t("site.privacyPolicyHowWeUseYourInformationItem3")}</List.Item>
+            <List.Item fontSize="lg">{t("site.privacyPolicyHowWeUseYourInformationItem4")}</List.Item>
+            <List.Item fontSize="lg">{t("site.privacyPolicyHowWeUseYourInformationItem5")}</List.Item>
+            <List.Item fontSize="lg">{t("site.privacyPolicyHowWeUseYourInformationItem6")}</List.Item>
+          </List.Root>
           <Text mt={4} fontSize="lg">
             {t("site.privacyPolicyHowWeUseYourInformationDescription2")}
           </Text>
@@ -79,12 +77,12 @@ export const PrivacyPolicyScreen = () => {
           <Text mb={4} fontSize="lg">
             {t("site.privacyPolicyWhoCanAccessYourInformationDescription")}
           </Text>
-          <UnorderedList spacing={2} pl={6}>
-            <ListItem fontSize="lg">{t("site.privacyPolicyWhoCanAccessYourInformationItem1")}</ListItem>
-            <ListItem fontSize="lg">{t("site.privacyPolicyWhoCanAccessYourInformationItem2")}</ListItem>
-            <ListItem fontSize="lg">{t("site.privacyPolicyWhoCanAccessYourInformationItem3")}</ListItem>
-            <ListItem fontSize="lg">{t("site.privacyPolicyWhoCanAccessYourInformationItem4")}</ListItem>
-          </UnorderedList>
+          <List.Root as="ul" gap={2} pl={6}>
+            <List.Item fontSize="lg">{t("site.privacyPolicyWhoCanAccessYourInformationItem1")}</List.Item>
+            <List.Item fontSize="lg">{t("site.privacyPolicyWhoCanAccessYourInformationItem2")}</List.Item>
+            <List.Item fontSize="lg">{t("site.privacyPolicyWhoCanAccessYourInformationItem3")}</List.Item>
+            <List.Item fontSize="lg">{t("site.privacyPolicyWhoCanAccessYourInformationItem4")}</List.Item>
+          </List.Root>
           <Text mt={4} fontSize="lg">
             {t("site.privacyPolicyWhoCanAccessYourInformationDescription2")}
           </Text>
@@ -97,13 +95,13 @@ export const PrivacyPolicyScreen = () => {
           <Text mb={4} fontSize="lg">
             {t("site.privacyPolicyHowWeProtectYourInformationDescription")}
           </Text>
-          <UnorderedList spacing={2} pl={6}>
-            <ListItem fontSize="lg">{t("site.privacyPolicyHowWeProtectYourInformationItem1")}</ListItem>
-            <ListItem fontSize="lg">{t("site.privacyPolicyHowWeProtectYourInformationItem2")}</ListItem>
-            <ListItem fontSize="lg">{t("site.privacyPolicyHowWeProtectYourInformationItem3")}</ListItem>
-            <ListItem fontSize="lg">{t("site.privacyPolicyHowWeProtectYourInformationItem4")}</ListItem>
-            <ListItem fontSize="lg">{t("site.privacyPolicyHowWeProtectYourInformationItem5")}</ListItem>
-          </UnorderedList>
+          <List.Root as="ul" gap={2} pl={6}>
+            <List.Item fontSize="lg">{t("site.privacyPolicyHowWeProtectYourInformationItem1")}</List.Item>
+            <List.Item fontSize="lg">{t("site.privacyPolicyHowWeProtectYourInformationItem2")}</List.Item>
+            <List.Item fontSize="lg">{t("site.privacyPolicyHowWeProtectYourInformationItem3")}</List.Item>
+            <List.Item fontSize="lg">{t("site.privacyPolicyHowWeProtectYourInformationItem4")}</List.Item>
+            <List.Item fontSize="lg">{t("site.privacyPolicyHowWeProtectYourInformationItem5")}</List.Item>
+          </List.Root>
         </Box>
 
         <Box>

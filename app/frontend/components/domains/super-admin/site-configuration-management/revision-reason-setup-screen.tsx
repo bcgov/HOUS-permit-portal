@@ -67,7 +67,7 @@ export const RevisionReasonSetupScreen = observer(function RevisionReasonSetupSc
         <FormProvider {...formMethods}>
           <Flex mt={8} gap={16}>
             <Box minW="fit-content">
-              <Heading as="h3" noOfLines={1}>
+              <Heading as="h3" lineClamp={1}>
                 {t("siteConfiguration.revisionReasonsAttributesSetup.options")}
               </Heading>
             </Box>
@@ -87,7 +87,7 @@ export const RevisionReasonSetupScreen = observer(function RevisionReasonSetupSc
                             label={t("siteConfiguration.revisionReasonsAttributesSetup.fields.reasonCode")}
                             fieldName={`revisionReasonsAttributes.${index}.reasonCode`}
                             required
-                            isDisabled={field._discard}
+                            disabled={field._discard}
                           />
                         </Flex>
                         <Flex gap={4}>
@@ -101,7 +101,7 @@ export const RevisionReasonSetupScreen = observer(function RevisionReasonSetupSc
                               height: "40px",
                             }}
                             required
-                            isDisabled={field._discard}
+                            disabled={field._discard}
                           />
                         </Flex>
                         {!field._discard ? (
@@ -135,10 +135,10 @@ export const RevisionReasonSetupScreen = observer(function RevisionReasonSetupSc
         justify="center"
         gap={4}
       >
-        <Button variant="primary" type="submit" isLoading={isSubmitting} isDisabled={isSubmitting}>
+        <Button variant="primary" type="submit" loading={isSubmitting} disabled={isSubmitting}>
           {t("ui.save")}
         </Button>
-        <Button variant="secondary" onClick={() => navigate(-1)} isDisabled={isSubmitting}>
+        <Button variant="secondary" onClick={() => navigate(-1)} disabled={isSubmitting}>
           {t("ui.cancel")}
         </Button>
       </Flex>

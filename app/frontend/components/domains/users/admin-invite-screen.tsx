@@ -83,12 +83,8 @@ export const AdminInviteScreen = observer(({}: IAdminInviteScreenProps) => {
                 {fields.map((field, index) => (
                   <UserInput key={field.id} index={index} remove={remove} adminOnly />
                 ))}
-                <Button
-                  type="button"
-                  variant="tertiary"
-                  onClick={() => append(defaultUserValues)}
-                  leftIcon={<Plus size={16} />}
-                >
+                <Button type="button" variant="tertiary" onClick={() => append(defaultUserValues)}>
+                  <Plus size={16} />
                   {t("user.addUser")}
                 </Button>
               </Flex>
@@ -103,16 +99,16 @@ export const AdminInviteScreen = observer(({}: IAdminInviteScreenProps) => {
                 <Button
                   variant="primary"
                   type="submit"
-                  isLoading={isSubmitting}
-                  isDisabled={!isValid || isSubmitting}
+                  loading={isSubmitting}
+                  disabled={!isValid || isSubmitting}
                   loadingText={t("ui.loading")}
-                  rightIcon={<PaperPlaneTilt size={16} />}
                 >
                   {t("user.sendInvites")}
+                  <PaperPlaneTilt size={16} />
                 </Button>
                 <Button
                   variant="secondary"
-                  isDisabled={isSubmitting}
+                  disabled={isSubmitting}
                   onClick={() => navigate("/configuration-management/users")}
                 >
                   {t("ui.cancel")}

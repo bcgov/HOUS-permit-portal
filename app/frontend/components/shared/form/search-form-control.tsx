@@ -1,4 +1,5 @@
-import { FormControl, FormControlProps, FormErrorMessage, Input, InputGroup, InputLeftElement } from "@chakra-ui/react"
+import { InputGroup } from "@/components/ui/input-group"
+import { Field, FormControlProps, Input, InputElement } from "@chakra-ui/react"
 import { MagnifyingGlass } from "@phosphor-icons/react"
 import React from "react"
 import { useFormContext } from "react-hook-form"
@@ -13,11 +14,11 @@ export const SearchFormControl = ({ label, fieldName, ...rest }: ISearchFormCont
   const { t } = useTranslation()
 
   return (
-    <FormControl isInvalid={!!formState?.errors[fieldName]} flex={1} {...rest}>
+    <Field.Root invalid={!!formState?.errors[fieldName]} flex={1} {...rest}>
       <InputGroup>
-        <InputLeftElement pointerEvents="none" color="greys.grey02">
+        <InputElement pointerEvents="none" color="greys.grey02">
           <MagnifyingGlass size={16} />
-        </InputLeftElement>
+        </InputElement>
         <Input
           {...register(fieldName)}
           title={t("ui.search")}
@@ -26,9 +27,9 @@ export const SearchFormControl = ({ label, fieldName, ...rest }: ISearchFormCont
           type={"text"}
         />
         {formState?.errors[fieldName] && (
-          <FormErrorMessage>{formState?.errors[fieldName].message as string}</FormErrorMessage>
+          <Field.ErrorText>{formState?.errors[fieldName].message as string}</Field.ErrorText>
         )}
       </InputGroup>
-    </FormControl>
+    </Field.Root>
   )
 }

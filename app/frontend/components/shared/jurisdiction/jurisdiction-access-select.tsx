@@ -1,15 +1,4 @@
-import {
-  Accordion,
-  AccordionButton,
-  AccordionIcon,
-  AccordionItem,
-  AccordionPanel,
-  AccordionProps,
-  Box,
-  Flex,
-  Heading,
-  Text,
-} from "@chakra-ui/react"
+import { Accordion, AccordionProps, Box, Flex, Heading, Text } from "@chakra-ui/react"
 import debounce from "lodash/debounce"
 import { observer } from "mobx-react-lite"
 import React, { useCallback, useState } from "react"
@@ -19,8 +8,10 @@ import { useMst } from "../../../setup/root"
 import { IOption } from "../../../types/types"
 import { SwitchButton } from "../buttons/switch-button"
 
-interface JurisdictionAccessSelectProps
-  extends Omit<AccordionProps, "defaultIndex" | "allowToggle" | "children" | "onChange"> {
+interface JurisdictionAccessSelectProps extends Omit<
+  AccordionProps,
+  "defaultIndex" | "allowToggle" | "children" | "onChange"
+> {
   title: string
   description?: string
   value: IOption[]
@@ -89,9 +80,9 @@ export const JurisdictionAccessSelect = observer(function JurisdictionAccessSele
   }
 
   return (
-    <Accordion allowToggle defaultIndex={defaultOpen ? [0] : []} mb={24} {...accordionProps}>
-      <AccordionItem border="1px solid" borderColor="border.light" borderRadius="md">
-        <AccordionButton _hover={{ bg: "greys.grey03" }} px={4} py={4}>
+    <Accordion.Root collapsible defaultValue={defaultOpen ? [0] : []} mb={24} {...accordionProps}>
+      <Accordion.Item border="1px solid" borderColor="border.light" borderRadius="md" value="item-0">
+        <Accordion.ItemTrigger _hover={{ bg: "greys.grey03" }} px={4} py={4}>
           <Box flex="1" textAlign="left">
             <Heading as="h3" fontSize="lg" mb={1}>
               {title}
@@ -105,69 +96,69 @@ export const JurisdictionAccessSelect = observer(function JurisdictionAccessSele
                     }))}
             </Text>
           </Box>
-          <AccordionIcon />
-        </AccordionButton>
+          <Accordion.ItemIndicator />
+        </Accordion.ItemTrigger>
 
-        <AccordionPanel pb={4} pt={4} borderTop="1px solid" borderColor="border.light">
-          <Flex
-            justify="space-between"
-            align="center"
-            mb={4}
-            pb={4}
-            borderBottom="1px solid"
-            borderColor="border.light"
-          >
-            <Text fontWeight="bold">
-              {enableForAllLabel || t("siteConfiguration.globalFeatureAccess.codeComplianceSetup.enableForAll")}
-            </Text>
-            <SwitchButton
-              isChecked={enabledForAll}
-              onChange={handleToggleAll}
-              size="lg"
-              isDisabled={isLoading || isSaving}
-            />
-          </Flex>
-
-          {!enabledForAll && (
-            <Box>
-              <Text mb={2} fontWeight="medium">
-                {t("siteConfiguration.globalFeatureAccess.codeComplianceSetup.enrolledJurisdictions")}
+        <Accordion.ItemContent pb={4} pt={4} borderTop="1px solid" borderColor="border.light">
+          <Accordion.ItemBody>
+            <Flex
+              justify="space-between"
+              align="center"
+              mb={4}
+              pb={4}
+              borderBottom="1px solid"
+              borderColor="border.light"
+            >
+              <Text fontWeight="bold">
+                {enableForAllLabel || t("siteConfiguration.globalFeatureAccess.codeComplianceSetup.enableForAll")}
               </Text>
-              <AsyncSelect
-                isMulti
-                cacheOptions
-                defaultOptions
-                value={value}
-                loadOptions={debouncedLoadOptions}
-                isClearable={false}
-                onChange={handleJurisdictionsChange}
-                placeholder={
-                  searchPlaceholder ||
-                  t("siteConfiguration.globalFeatureAccess.codeComplianceSetup.searchJurisdictions")
-                }
-                isLoading={isSaving || isLoading}
-                isDisabled={isSaving || isLoading}
-                menuPortalTarget={document.body}
-                styles={{
-                  menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-                }}
+              <SwitchButton
+                checked={enabledForAll}
+                onChange={handleToggleAll}
+                size="lg"
+                disabled={isLoading || isSaving}
               />
-            </Box>
-          )}
-
-          {enabledForAll && (
-            <Box p={4} bg="semantic.infoLight" borderRadius="md">
-              <Text>
-                {enableForAllDescription ||
-                  t(
-                    "jurisdiction.allJurisdictionsEnabledDescription",
-                    "All jurisdictions are currently enabled. Turn off the switch above to select specific jurisdictions."
-                  )}
-              </Text>
-            </Box>
-          )}
-        </AccordionPanel>
-      </AccordionItem>
-    </Accordion>
+            </Flex>
+            {!enabledForAll && (
+              <Box>
+                <Text mb={2} fontWeight="medium">
+                  {t("siteConfiguration.globalFeatureAccess.codeComplianceSetup.enrolledJurisdictions")}
+                </Text>
+                <AsyncSelect
+                  isMulti
+                  cacheOptions
+                  defaultOptions
+                  value={value}
+                  loadOptions={debouncedLoadOptions}
+                  isClearable={false}
+                  onChange={handleJurisdictionsChange}
+                  placeholder={
+                    searchPlaceholder ||
+                    t("siteConfiguration.globalFeatureAccess.codeComplianceSetup.searchJurisdictions")
+                  }
+                  loading={isSaving || isLoading}
+                  disabled={isSaving || isLoading}
+                  menuPortalTarget={document.body}
+                  styles={{
+                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                  }}
+                />
+              </Box>
+            )}
+            {enabledForAll && (
+              <Box p={4} bg="semantic.infoLight" borderRadius="md">
+                <Text>
+                  {enableForAllDescription ||
+                    t(
+                      "jurisdiction.allJurisdictionsEnabledDescription",
+                      "All jurisdictions are currently enabled. Turn off the switch above to select specific jurisdictions."
+                    )}
+                </Text>
+              </Box>
+            )}
+          </Accordion.ItemBody>
+        </Accordion.ItemContent>
+      </Accordion.Item>
+    </Accordion.Root>
   )
 })

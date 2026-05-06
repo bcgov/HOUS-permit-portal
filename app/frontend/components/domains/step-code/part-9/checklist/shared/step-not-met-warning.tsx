@@ -11,7 +11,7 @@ interface IProps extends AlertProps {
 
 export function StepNotMetWarning({ i18nKey, scrollToSection, ...rest }: IProps) {
   return (
-    <Alert
+    <Alert.Root
       status={EFlashMessageStatus.error}
       rounded="lg"
       borderWidth={1}
@@ -26,10 +26,10 @@ export function StepNotMetWarning({ i18nKey, scrollToSection, ...rest }: IProps)
         <Trans
           i18nKey={`stepCodeChecklist.edit.${i18nKey}`}
           components={{
-            1: <Button variant="link" onClick={scrollToSection} />,
+            1: <Button variant="plain" onClick={scrollToSection} />,
           }}
         />
       </Box>
-    </Alert>
+    </Alert.Root>
   )
 }

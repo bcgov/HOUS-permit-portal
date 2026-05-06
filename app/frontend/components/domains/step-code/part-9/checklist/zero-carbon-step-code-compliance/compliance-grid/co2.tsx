@@ -1,4 +1,4 @@
-import { StackDivider, VStack } from "@chakra-ui/react"
+import { Stack, VStack } from "@chakra-ui/react"
 import { t } from "i18next"
 import React from "react"
 import { IStepCodeZeroCarbonComplianceReport } from "../../../../../../../models/step-code-zero-carbon-compliance-report"
@@ -18,15 +18,15 @@ export const CO2 = function CO2({ compliance }: IProps) {
   return (
     <>
       <GridColumnHeader colSpan={4}>{t(`${i18nPrefix}.co2.title`)}</GridColumnHeader>
-
       <GridRowHeader>{t(`${i18nPrefix}.co2.perFloorArea.label`)}</GridRowHeader>
       <GridData>
         <TextFormControl
           inputProps={{ isDisabled: true, textAlign: "center", value: compliance.co2Requirement || "-" }}
           hint={t(`${i18nPrefix}.max`)}
           rightElement={
-            <VStack spacing={0} divider={<StackDivider color="border.base" />}>
+            <VStack gap={0}>
               <UnitsText>{t(`${i18nPrefix}.co2.perFloorArea.units.numerator`)}</UnitsText>
+              <Stack.Separator color="border.base" />
               <UnitsText>{t(`${i18nPrefix}.co2.perFloorArea.units.denominator`)}</UnitsText>
             </VStack>
           }
@@ -36,8 +36,9 @@ export const CO2 = function CO2({ compliance }: IProps) {
         <TextFormControl
           inputProps={{ isDisabled: true, textAlign: "center", value: compliance.co2 || "-" }}
           rightElement={
-            <VStack spacing={0} divider={<StackDivider color="border.base" />}>
+            <VStack gap={0}>
               <UnitsText>{t(`${i18nPrefix}.co2.perFloorArea.units.numerator`)}</UnitsText>
+              <Stack.Separator color="border.base" />
               <UnitsText>{t(`${i18nPrefix}.co2.perFloorArea.units.denominator`)}</UnitsText>
             </VStack>
           }
@@ -46,7 +47,6 @@ export const CO2 = function CO2({ compliance }: IProps) {
       <GridData rowSpan={2} alignItems="center" justifyContent="center">
         <RequirementsMetTag success={compliance.co2Passed} />
       </GridData>
-
       <GridRowHeader>{t(`${i18nPrefix}.co2.max.label`)}</GridRowHeader>
       <GridData>
         <TextFormControl

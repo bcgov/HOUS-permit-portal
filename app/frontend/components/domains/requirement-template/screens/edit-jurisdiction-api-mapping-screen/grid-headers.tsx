@@ -54,28 +54,22 @@ export const GridHeaders = observer(function GridHeaders({
   return (
     <Box display={"contents"} role={"rowgroup"} w={"full"}>
       <Box display={"contents"} role={"row"}>
-        <GridItem
-          as={Flex}
-          gridColumn={"1/-1"}
-          p={6}
-          bg={"greys.grey10"}
-          justifyContent={"space-between"}
-          align="center"
-        >
-          <HStack>
-            <Text role={"heading"} fontSize={"sm"} as={"h2"}>
-              {t("apiMappingsSetup.edit.table.title")}
-            </Text>
-            <FormSwitch
-              switchIdForAccessibility={"integrationMappingShowOnlyUnmappedSwitch"}
-              isChecked={integrationMapping?.showOnlyUnmapped}
-              onChange={(e) => integrationMapping?.setShowOnlyUnmapped(!!e.target.checked)}
-              checkedText={t("apiMappingsSetup.edit.table.filter.showAll")}
-              uncheckedText={t("apiMappingsSetup.edit.table.filter.showOnlyUnmapped")}
-            />
-          </HStack>
-
-          <SearchInput query={searchQuery} onQueryChange={onQueryChange} />
+        <GridItem gridColumn={"1/-1"} p={6} bg={"greys.grey10"} justifyContent={"space-between"} align="center" asChild>
+          <Flex>
+            <HStack>
+              <Text role={"heading"} fontSize={"sm"} as={"h2"}>
+                {t("apiMappingsSetup.edit.table.title")}
+              </Text>
+              <FormSwitch
+                switchIdForAccessibility={"integrationMappingShowOnlyUnmappedSwitch"}
+                checked={integrationMapping?.showOnlyUnmapped}
+                onChange={(e) => integrationMapping?.setShowOnlyUnmapped(!!e.target.checked)}
+                checkedText={t("apiMappingsSetup.edit.table.filter.showAll")}
+                uncheckedText={t("apiMappingsSetup.edit.table.filter.showOnlyUnmapped")}
+              />
+            </HStack>
+            <SearchInput query={searchQuery} onQueryChange={onQueryChange} />
+          </Flex>
         </GridItem>
       </Box>
       <Box display={"contents"} role={"row"} w={"full"}>

@@ -122,7 +122,6 @@ export const ModelledEnergyOutputsGrid = observer(({ ...rest }: IProps) => {
       <GridColumnHeader textAlign="left" borderRightWidth={1}>
         {t(`${i18nPrefix}.column.emissions`)}
       </GridColumnHeader>
-
       {/* Data Rows */}
       {fields.map((field, index) => (
         <ModelledEnergyOutputRow
@@ -134,14 +133,13 @@ export const ModelledEnergyOutputsGrid = observer(({ ...rest }: IProps) => {
           removeRow={remove}
         />
       ))}
-
       {/* Add Row Button */}
       <GridData colSpan={5} borderRightWidth={1} pb={9}>
-        <Button leftIcon={<Plus />} variant="link" size="sm" fontSize={"sm"} onClick={handleAddUseType}>
+        <Button variant="plain" size="sm" fontSize={"sm"} onClick={handleAddUseType}>
+          <Plus />
           {t(`${i18nPrefix}.addUseType`)}
         </Button>
       </GridData>
-
       {/* Total by fuel type rows */}
       {Object.values(fuelTypeIdsToFuelType).map((fuelType) => {
         const fuelTypeLabel = t(`${i18nPrefix}.fuelTypes.${fuelType.key as EFuelType}`)
@@ -178,7 +176,6 @@ export const ModelledEnergyOutputsGrid = observer(({ ...rest }: IProps) => {
           </React.Fragment>
         )
       })}
-
       {/* Totals Row */}
       <GridRowHeader colSpan={1} fontWeight="bold" fontSize="sm">
         <HStack>
@@ -327,14 +324,15 @@ const ModelledEnergyOutputRow = ({
         <Flex>
           <IconButton
             mr={1}
-            icon={<X />}
             variant="link"
             size="sm"
             color="semantic.error"
             aria-label={t("ui.remove")}
             visibility={fuelTypeId || annualEnergy > 0 || isUseTypeOther ? "visible" : "hidden"}
             onClick={handleRemoveUseType}
-          />
+          >
+            <X />
+          </IconButton>
           <HStack>
             {isUseTypeOther ? (
               <TextFormControl flex={1} fieldName={`modelledEnergyOutputsAttributes.${index}.name`} required />
@@ -355,10 +353,10 @@ const ModelledEnergyOutputRow = ({
         </Flex>
       </GridData>
       <GridData {...sharedGridDataProps}>
-        <Input value={formattedAnnualEnergy} onChange={handleChangeAnnualEnergy} min={0} {...sharedInputProps} />
+        <Input value={formattedAnnualEnergy} onValueChange={handleChangeAnnualEnergy} min={0} {...sharedInputProps} />
       </GridData>
       <GridData {...sharedGridDataProps}>
-        <Stack spacing={0.5} flexDirection={"column"}>
+        <Stack gap={0.5} flexDirection={"column"}>
           <FuelTypeSelect
             options={checklist.fuelTypeSelectOptions}
             onChange={onChangeFuelTypeId}

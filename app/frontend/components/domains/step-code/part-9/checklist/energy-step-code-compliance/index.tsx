@@ -33,8 +33,7 @@ export const EnergyStepCodeCompliance = observer(
             />
           </VStack>
         </HStack>
-
-        <VStack spacing={6} align="start">
+        <VStack gap={6} align="start">
           <EnergyComplianceGrid compliance={compliance} />
           <OtherData compliance={compliance} />
         </VStack>

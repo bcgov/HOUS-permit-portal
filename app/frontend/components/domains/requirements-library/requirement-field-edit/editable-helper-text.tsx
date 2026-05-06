@@ -21,8 +21,9 @@ export function EditableHelperText<TFieldValues extends FieldValues>({
       htmlValue={value}
       onChange={onChange}
       renderInitialTrigger={(buttonProps) => (
-        <Button variant={"link"} rightIcon={<Pencil size={14} />} fontSize={"md"} {...buttonProps}>
+        <Button variant={"link"} fontSize={"md"} {...buttonProps}>
           {t("requirementsLibrary.modals.addHelpText")}
+          <Pencil size={14} />
         </Button>
       )}
       editText={t("requirementsLibrary.modals.editHelpTextLabel")}

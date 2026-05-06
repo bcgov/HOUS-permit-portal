@@ -17,6 +17,7 @@ type TJurisdictionSelectProps = {
   selectedOption: IOption<IJurisdiction>
   title?: string
   filters?: IJurisdictionFilters
+  disabled?: boolean
 } & Partial<TAsyncSelectProps>
 
 export const JurisdictionSelect = observer(function ({

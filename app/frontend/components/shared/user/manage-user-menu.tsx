@@ -1,4 +1,4 @@
-import { Button, Menu, MenuButton, MenuList } from "@chakra-ui/react"
+import { Button, Menu, Portal } from "@chakra-ui/react"
 import { Archive, ArrowsLeftRight, ClockClockwise, PaperPlaneTilt } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
@@ -42,69 +42,73 @@ export const ManageUserMenu = observer(function ManageUserMenu<TSearchModel exte
 
   return (
     <Can action="jurisdiction:manage" data={{ jurisdiction: currentJurisdiction }}>
-      <Menu>
-        <MenuButton as={Button} variant="link">
-          {t("ui.manage")}
-        </MenuButton>
-        <MenuList>
-          {user.role != EUserRoles.superAdmin && (
-            <Can action="user:updateRole">
-              <ManageMenuItemButton
-                color={isCurrentUser ? "greys.grey01" : "text.primary"}
-                leftIcon={<ArrowsLeftRight />}
-                onClick={handleChangeRole}
-                isDisabled={isCurrentUser}
-              >
-                {t("user.changeRole")}
-              </ManageMenuItemButton>
-            </Can>
-          )}
-          {(user.isUnconfirmed || user.isDiscarded) && <ReinviteUserForm user={user} />}
-          {user.isDiscarded ? (
-            <ConfirmationModal
-              title={t("ui.confirmRestore")}
-              onConfirm={(closeModal) => {
-                handleRestore()
-                closeModal()
-              }}
-              renderTriggerButton={(props) => (
-                <ManageMenuItemButton color="semantic.success" leftIcon={<ClockClockwise size={16} />} {...props}>
-                  {t("ui.restore")}
-                </ManageMenuItemButton>
+      <Menu.Root>
+        <Menu.Trigger asChild>
+          <Button variant="link">{t("ui.manage")}</Button>
+        </Menu.Trigger>
+        <Portal>
+          <Menu.Positioner>
+            <Menu.Content>
+              {user.role != EUserRoles.superAdmin && (
+                <Can action="user:updateRole">
+                  <ManageMenuItemButton
+                    color={isCurrentUser ? "greys.grey01" : "text.primary"}
+                    leftIcon={<ArrowsLeftRight />}
+                    onClick={handleChangeRole}
+                    disabled={isCurrentUser}
+                  >
+                    {t("user.changeRole")}
+                  </ManageMenuItemButton>
+                </Can>
               )}
-              renderConfirmationButton={(props) => (
-                <Button {...props} colorScheme="green">
-                  {t("ui.restore")}
-                </Button>
+              {(user.isUnconfirmed || user.isDiscarded) && <ReinviteUserForm user={user} />}
+              {user.isDiscarded ? (
+                <ConfirmationModal
+                  title={t("ui.confirmRestore")}
+                  onConfirm={(closeModal) => {
+                    handleRestore()
+                    closeModal()
+                  }}
+                  renderTriggerButton={(props) => (
+                    <ManageMenuItemButton color="semantic.success" leftIcon={<ClockClockwise size={16} />} {...props}>
+                      {t("ui.restore")}
+                    </ManageMenuItemButton>
+                  )}
+                  renderConfirmationButton={(props) => (
+                    <Button {...props} colorPalette="green">
+                      {t("ui.restore")}
+                    </Button>
+                  )}
+                />
+              ) : (
+                <ConfirmationModal
+                  title={t("ui.confirmArchive")}
+                  body={t("ui.archiveRetentionNotice" as any)}
+                  onConfirm={(closeModal) => {
+                    handleRemove()
+                    closeModal()
+                  }}
+                  renderTriggerButton={(props) => (
+                    <ManageMenuItemButton
+                      color={isCurrentUser ? "greys.grey01" : "semantic.error"}
+                      leftIcon={<Archive size={16} />}
+                      disabled={isCurrentUser}
+                      {...props}
+                    >
+                      {t("ui.archive")}
+                    </ManageMenuItemButton>
+                  )}
+                  renderConfirmationButton={(props) => (
+                    <Button {...props} colorPalette="red">
+                      {t("ui.archive")}
+                    </Button>
+                  )}
+                />
               )}
-            />
-          ) : (
-            <ConfirmationModal
-              title={t("ui.confirmArchive")}
-              body={t("ui.archiveRetentionNotice" as any)}
-              onConfirm={(closeModal) => {
-                handleRemove()
-                closeModal()
-              }}
-              renderTriggerButton={(props) => (
-                <ManageMenuItemButton
-                  color={isCurrentUser ? "greys.grey01" : "semantic.error"}
-                  leftIcon={<Archive size={16} />}
-                  isDisabled={isCurrentUser}
-                  {...props}
-                >
-                  {t("ui.archive")}
-                </ManageMenuItemButton>
-              )}
-              renderConfirmationButton={(props) => (
-                <Button {...props} colorScheme="red">
-                  {t("ui.archive")}
-                </Button>
-              )}
-            />
-          )}
-        </MenuList>
-      </Menu>
+            </Menu.Content>
+          </Menu.Positioner>
+        </Portal>
+      </Menu.Root>
     </Can>
   )
 })
@@ -124,8 +128,8 @@ const ReinviteUserForm = function ReinviteUserForm({ user }: IFormProps) {
         color="text.primary"
         type="submit"
         leftIcon={<PaperPlaneTilt size={16} />}
-        isLoading={isSubmitting}
-        isDisabled={isSubmitting}
+        loading={isSubmitting}
+        disabled={isSubmitting}
       >
         {t("user.reinvite")}
       </ManageMenuItemButton>

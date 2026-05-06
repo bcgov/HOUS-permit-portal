@@ -1,4 +1,5 @@
-import { Button, Input as ChakraInput, Flex, FormControl, FormLabel, HStack, InputGroup, Text } from "@chakra-ui/react"
+import { InputGroup } from "@/components/ui/input-group"
+import { Button, Input as ChakraInput, Field, Flex, HStack, Text } from "@chakra-ui/react"
 import { MapPin } from "@phosphor-icons/react"
 import debounce from "lodash/debounce"
 import { observer } from "mobx-react-lite"
@@ -28,6 +29,7 @@ export type TSitesSelectProps = {
   showJurisdiction?: boolean
   initialJurisdiction?: IJurisdiction | null
   isDisabled?: boolean
+  disabled?: boolean
 } & Partial<TAsyncSelectProps>
 
 // Please be advised that this is expected to be used within a form context!
@@ -47,6 +49,7 @@ export const SitesSelect = observer(function ({
   showJurisdiction = true,
   initialJurisdiction = null,
   isDisabled = false,
+  disabled,
   ...rest
 }: TSitesSelectProps) {
   const { t } = useTranslation()
@@ -64,6 +67,7 @@ export const SitesSelect = observer(function ({
   const pidSelectRef = useRef(null)
 
   const { setValue, control, watch } = useFormContext()
+  const selectDisabled = disabled ?? isDisabled
 
   const pidWatch = watch(pidName)
   const siteWatch = watch(siteName)
@@ -159,8 +163,8 @@ export const SitesSelect = observer(function ({
     <Flex direction="column" gap={4} w="full">
       {/* Address and PID - Always visible */}
       <Flex direction={{ base: "column", md: "row" }} bg="greys.grey03" px={6} py={2} gap={4} w="full">
-        <FormControl>
-          <FormLabel>{t("permitApplication.addressLabel")}</FormLabel>
+        <Field.Root>
+          <Field.Label>{t("permitApplication.addressLabel")}</Field.Label>
           <InputGroup>
             <AsyncSelect<IOption, boolean>
               isClearable={true}
@@ -169,7 +173,7 @@ export const SitesSelect = observer(function ({
               value={selectedOption}
               menuPosition="fixed"
               menuShouldScrollIntoView={false}
-              isDisabled={isDisabled}
+              disabled={selectDisabled}
               components={{
                 Control,
                 Option,
@@ -205,10 +209,10 @@ export const SitesSelect = observer(function ({
               {...rest}
             />
           </InputGroup>
-        </FormControl>
+        </Field.Root>
 
-        <FormControl>
-          <FormLabel>{t("permitApplication.pidLabel")}</FormLabel>
+        <Field.Root>
+          <Field.Label>{t("permitApplication.pidLabel")}</Field.Label>
           <InputGroup>
             <Flex w="full" direction="column">
               <Controller
@@ -252,29 +256,27 @@ export const SitesSelect = observer(function ({
                       }}
                       isClearable
                       isSearchable
-                      isDisabled={isDisabled}
+                      disabled={selectDisabled}
                     />
                   )
                 }}
               />
             </Flex>
           </InputGroup>
-        </FormControl>
+        </Field.Root>
       </Flex>
-
       {/* Auto-matched Jurisdiction Display - Only in automatic mode */}
       {!manualMode && showJurisdiction && (
         <Flex bg="greys.grey03" px={6} py={2} gap={2} w="full" direction="column">
-          <FormLabel mb={0}>{t("permitProject.new.jurisdictionTitle")}</FormLabel>
-          <ChakraInput isDisabled value={jurisdiction?.qualifiedName || ""} />
+          <Field.Label mb={0}>{t("permitProject.new.jurisdictionTitle")}</Field.Label>
+          <ChakraInput disabled value={jurisdiction?.qualifiedName || ""} />
         </Flex>
       )}
-
       {/* Manual Jurisdiction Selector - Only in manual mode */}
       {manualMode && showJurisdiction && (
         <Flex bg="greys.grey03" px={6} py={2} gap={4} w="full" direction="column">
-          <FormControl w="full" zIndex={1}>
-            <FormLabel>{t("permitProject.new.jurisdictionTitle")}</FormLabel>
+          <Field.Root w="full" zIndex={1}>
+            <Field.Label>{t("permitProject.new.jurisdictionTitle")}</Field.Label>
             <InputGroup w="full">
               <Controller
                 name={jurisdictionIdFieldName}
@@ -289,19 +291,18 @@ export const SitesSelect = observer(function ({
                       onFetch={() => setValue(jurisdictionIdFieldName, null)}
                       selectedOption={value ? { label: getJurisdictionById(value)?.reverseQualifiedName, value } : null}
                       menuPortalTarget={document.body}
-                      isDisabled={isDisabled}
+                      disabled={selectDisabled}
                     />
                   )
                 }}
               />
             </InputGroup>
-          </FormControl>
+          </Field.Root>
         </Flex>
       )}
-
       {/* Manual Mode Toggle */}
       {showManualModeToggle && showJurisdiction && (
-        <Button isDisabled={isDisabled} variant="link" size="sm" onClick={() => setManualMode((prev) => !prev)}>
+        <Button disabled={selectDisabled} variant="plain" size="sm" onClick={() => setManualMode((prev) => !prev)}>
           {manualMode ? t("ui.switchToAutomaticMode") : t("ui.switchToManualMode")}
         </Button>
       )}

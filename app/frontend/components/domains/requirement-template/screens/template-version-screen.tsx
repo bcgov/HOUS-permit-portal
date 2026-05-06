@@ -1,4 +1,5 @@
-import { Box, Button, Flex, FormControl, FormLabel, HStack, Switch } from "@chakra-ui/react"
+import { Switch } from "@/components/ui/switch"
+import { Box, Button, Field, Flex, HStack } from "@chakra-ui/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo, useState } from "react"
@@ -156,19 +157,19 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
             justifyContent={"flex-end"}
             boxShadow={"elevations.elevation02"}
           >
-            <HStack spacing={3}>
+            <HStack gap={3}>
               {templateVersion.isDraft && isSuperAdmin && (
-                <FormControl display="flex" alignItems="center" width="auto" mr={2}>
-                  <FormLabel htmlFor="publicly-previewable-toggle" mb="0" mr={2} fontSize="sm">
+                <Field.Root display="flex" alignItems="center" width="auto" mr={2}>
+                  <Field.Label htmlFor="publicly-previewable-toggle" mb="0" mr={2} fontSize="sm">
                     {t("requirementTemplate.publiclyPreviewable.toggleLabel")}
-                  </FormLabel>
+                  </Field.Label>
                   <Switch
                     id="publicly-previewable-toggle"
-                    isChecked={templateVersion.publiclyPreviewable}
-                    isDisabled={isTogglingPubliclyPreviewable}
-                    onChange={handleTogglePubliclyPreviewable}
+                    checked={templateVersion.publiclyPreviewable}
+                    disabled={isTogglingPubliclyPreviewable}
+                    onValueChange={handleTogglePubliclyPreviewable}
                   />
-                </FormControl>
+                </Field.Root>
               )}
               {templateVersion.isDraft && (
                 <SharePreviewPopover draftTemplateVersion={templateVersion} variant="primary" />

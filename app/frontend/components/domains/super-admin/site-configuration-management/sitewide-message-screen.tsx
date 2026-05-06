@@ -1,16 +1,5 @@
-import {
-  Box,
-  Button,
-  Container,
-  Divider,
-  Flex,
-  FormControl,
-  FormLabel,
-  HStack,
-  Heading,
-  Switch,
-  VStack,
-} from "@chakra-ui/react"
+import { Switch } from "@/components/ui/switch"
+import { Box, Button, Container, Field, Flex, HStack, Heading, Separator, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
@@ -57,11 +46,11 @@ export const SitewideMessageScreen = observer(function SitewideMessageScreen() {
         <form onSubmit={handleSubmit(onSubmit)}>
           <Flex mt={8} gap={16}>
             <Box minW="fit-content">
-              <Heading as="h3" noOfLines={1}>
+              <Heading as="h3" lineClamp={1}>
                 {t("siteConfiguration.sitewideMessage.settings")}
               </Heading>
             </Box>
-            <VStack spacing={8} align="start" w="full">
+            <VStack gap={8} align="start" w="full">
               <SectionBox>
                 <Flex justify="space-between" w="full" gap={16}>
                   <Flex direction="column">
@@ -72,28 +61,28 @@ export const SitewideMessageScreen = observer(function SitewideMessageScreen() {
                       showOptional={false}
                     />
                   </Flex>
-                  <FormControl display="flex" alignItems="center" w="fit-content" gap={2}>
+                  <Field.Root display="flex" alignItems="center" w="fit-content" gap={2}>
                     <Controller
                       name="displaySitewideMessage"
                       control={control}
                       render={({ field }) => (
-                        <Switch id="displaySitewideMessage" isChecked={field.value} onChange={field.onChange} />
+                        <Switch id="displaySitewideMessage" checked={field.value} onValueChange={field.onChange} />
                       )}
                     />
-                    <FormLabel htmlFor="displaySitewideMessage">
+                    <Field.Label htmlFor="displaySitewideMessage">
                       {t("siteConfiguration.sitewideMessage.enable")}
-                    </FormLabel>
-                  </FormControl>
+                    </Field.Label>
+                  </Field.Root>
                 </Flex>
               </SectionBox>
             </VStack>
           </Flex>
-          <Divider my={16} />
+          <Separator my={16} />
           <HStack alignSelf="end">
-            <Button variant="primary" type="submit" isLoading={isSubmitting} isDisabled={isSubmitting}>
+            <Button variant="primary" type="submit" loading={isSubmitting} disabled={isSubmitting}>
               {t("ui.save")}
             </Button>
-            <Button variant="secondary" onClick={() => navigate(-1)} isDisabled={isSubmitting}>
+            <Button variant="secondary" onClick={() => navigate(-1)} disabled={isSubmitting}>
               {t("ui.cancel")}
             </Button>
           </HStack>

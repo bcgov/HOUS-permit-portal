@@ -1,4 +1,4 @@
-import { Flex, FormLabel } from "@chakra-ui/react"
+import { Flex } from "@chakra-ui/react"
 import { t } from "i18next"
 import * as R from "ramda"
 import React from "react"
@@ -13,7 +13,7 @@ export const WholeBuildingPerformance = function MixedUseWholeBuildingPerformanc
 
   return (
     <Flex direction="column" gap={2}>
-      <FormLabel>{t(`${i18nPrefix}.title`)}</FormLabel>
+      <Field.Label>{t(`${i18nPrefix}.title`)}</Field.Label>
       {isBaseline ? <BaselineWholeBuildingSummary /> : <StepCodeWholeBuildingSummary />}
     </Flex>
   )

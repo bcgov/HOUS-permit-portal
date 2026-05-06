@@ -43,13 +43,13 @@ export const StartPage = observer(function Part3StepCodeFormStartPage() {
           <Trans
             i18nKey={`${i18nPrefix}.info.help`}
             components={{
-              1: <Link href={t(`${i18nPrefix}.info.link`)} isExternal></Link>,
+              1: <Link href={t(`${i18nPrefix}.info.link`)} target="_blank" rel="noopener noreferrer"></Link>,
               2: <ArrowSquareOut />,
             }}
           />
         </Box>
       </Flex>
-      <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
+      <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} loading={isSubmitting} />
     </Flex>
   )
 })

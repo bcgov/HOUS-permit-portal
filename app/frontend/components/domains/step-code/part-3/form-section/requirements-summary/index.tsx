@@ -1,4 +1,4 @@
-import { Flex, FormControl, FormHelperText, FormLabel, Heading, Input, Text } from "@chakra-ui/react"
+import { Field, Flex, Heading, Input, Text } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -38,7 +38,6 @@ export const RequirementsSummary = observer(function RequirementsSummary() {
   return (
     <Flex direction="column" gap={6}>
       <SectionHeading>{t(`${i18nPrefix}.heading`)}</SectionHeading>
-
       <Flex direction="column" gap={6} pb={4}>
         {!checklist.canShowResults ? (
           <Flex direction="column" gap={4} p={4} bg="theme.blueLight" color="theme.blueAlt" rounded="lg" w="full">
@@ -59,17 +58,17 @@ export const RequirementsSummary = observer(function RequirementsSummary() {
           </Flex>
         ) : (
           <>
-            <FormControl>
-              <FormLabel>{t(`${i18nPrefix}.buildingType.label`)}</FormLabel>
-              <FormHelperText mb={1} mt={0}>
+            <Field.Root>
+              <Field.Label>{t(`${i18nPrefix}.buildingType.label`)}</Field.Label>
+              <Field.HelperText mb={1} mt={0}>
                 {t(`${i18nPrefix}.buildingType.hint`)}
-              </FormHelperText>
+              </Field.HelperText>
               <Input
-                isDisabled
+                disabled
                 textAlign="left"
                 value={t(`${i18nPrefix}.buildingType.options.${checklist.buildingType}`)}
               />
-            </FormControl>
+            </Field.Root>
 
             {checklist.buildingType == EPart3BuildingType.baseline && (
               <>
@@ -91,11 +90,11 @@ export const RequirementsSummary = observer(function RequirementsSummary() {
               </>
             )}
 
-            <FormControl>
-              <FormLabel>{t(`${i18nPrefix}.confirm.label`)}</FormLabel>
-              <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
-              <FormHelperText mt={6}>{t(`${i18nPrefix}.help`)}</FormHelperText>
-            </FormControl>
+            <Field.Root>
+              <Field.Label>{t(`${i18nPrefix}.confirm.label`)}</Field.Label>
+              <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} loading={isSubmitting} />
+              <Field.HelperText mt={6}>{t(`${i18nPrefix}.help`)}</Field.HelperText>
+            </Field.Root>
           </>
         )}
       </Flex>

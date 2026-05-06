@@ -1,7 +1,6 @@
 import { Box, Button, Center, Flex, Link, Text, useDisclosure } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 
-import { ArrowSquareOut } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import * as R from "ramda"
 import React, { useEffect, useMemo, useRef, useState } from "react"
@@ -74,7 +73,7 @@ export const RequirementForm = observer(
     const isMounted = useMountStatus()
     const { t } = useTranslation()
     const navigate = useNavigate()
-    const { isOpen, onOpen, onClose } = useDisclosure()
+    const { open, onOpen, onClose } = useDisclosure()
     const boxRef = useRef<HTMLDivElement>(null)
 
     const [wrapperClickCount, setWrapperClickCount] = useState(0)
@@ -115,9 +114,9 @@ export const RequirementForm = observer(
       setUnsavedSubmissionData(data)
     }
 
-    const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
+    const { open: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
     const {
-      isOpen: isPreviousSubmissionOpen,
+      open: isPreviousSubmissionOpen,
       onOpen: onPreviousSubmissionOpen,
       onClose: onPreviousSubmissionClose,
     } = useDisclosure()
@@ -416,8 +415,8 @@ export const RequirementForm = observer(
           gap={8}
           ref={boxRef}
           id="requirement-form-wrapper"
-          sx={{
-            "[id^='error-list-'].alert.alert-danger > p::before": {
+          css={{
+            "& [id^='error-list-'].alert.alert-danger > p::before": {
               content: `"${t("requirementTemplate.edit.errorsBox.title", { count: errorBoxData.length })}"`,
             },
           }}
@@ -500,21 +499,23 @@ export const RequirementForm = observer(
                   components={{
                     1: (
                       <Button
-                        sx={{
-                          span: {
+                        css={{
+                          "& span": {
                             ml: 0,
                           },
                         }}
-                        as={Link}
-                        rightIcon={<ArrowSquareOut />}
-                        href={
-                          "https://www2.gov.bc.ca/gov/content/governments/local-governments/planning-land-use/land-use-regulation/zoning-bylaws"
-                        }
                         variant={"link"}
-                        target="_blank"
                         color={"text.primary !important"}
-                        rel="noopener noreferrer"
-                      />
+                        asChild
+                      >
+                        <Link
+                          href={
+                            "https://www2.gov.bc.ca/gov/content/governments/local-governments/planning-land-use/land-use-regulation/zoning-bylaws"
+                          }
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        />
+                      </Button>
                     ),
                   }}
                 />
@@ -525,7 +526,7 @@ export const RequirementForm = observer(
           <Box bg="greys.grey03" p={3} borderRadius="sm">
             <Text fontStyle="italic">
               {t("site.foippaWarning")}
-              <Link href={"mailto:" + t("site.contactEmail")} isExternal>
+              <Link href={"mailto:" + t("site.contactEmail")} target="_blank" rel="noopener noreferrer">
                 {t("site.contactEmail")}
               </Link>
             </Text>
@@ -543,7 +544,6 @@ export const RequirementForm = observer(
             onInitialized={onInitialized}
           />
         </Flex>
-
         <BuilderBottomFloatingButtons
           isCollapsedAll={isCollapsedAll}
           setIsCollapsedAll={setIsCollapsedAll}
@@ -552,14 +552,14 @@ export const RequirementForm = observer(
         {isOpen && (
           <PermitApplicationSubmitModal
             permitApplication={permitApplication}
-            isOpen={isOpen}
+            open={open}
             onClose={onClose}
             onSubmit={onModalSubmit}
           />
         )}
         {isContactsOpen && (
           <ContactModal
-            isOpen={isContactsOpen}
+            open={isContactsOpen}
             onOpen={onContactsOpen}
             onClose={onContactsClose}
             autofillContactKey={autofillContactKey}
@@ -568,17 +568,15 @@ export const RequirementForm = observer(
             setSubmissionState={handleSetUnsavedSubmissionData}
           />
         )}
-
         <StepCodeSelectModal
-          isOpen={isStepCodeSelectOpen}
+          open={isStepCodeSelectOpen}
           onClose={() => setIsStepCodeSelectOpen(false)}
           stepCodeType={stepCodeSelectType}
           onSelect={handleSelectExistingStepCode}
         />
-
         {isPreviousSubmissionOpen && (
           <PreviousSubmissionModal
-            isOpen={isPreviousSubmissionOpen}
+            open={isPreviousSubmissionOpen}
             onOpen={onPreviousSubmissionOpen}
             onClose={onPreviousSubmissionClose}
             requirementJson={singleRequirementFormJson(

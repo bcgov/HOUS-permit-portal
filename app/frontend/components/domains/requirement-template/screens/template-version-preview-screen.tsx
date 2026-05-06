@@ -46,7 +46,7 @@ export const TemplateVersionPreviewScreen = observer(() => {
 
             <Flex direction="column" w="full">
               <Heading fontSize="xl">{templateVersion.nickname ?? templateVersion.label}</Heading>
-              <Text noOfLines={1}>{templateVersion.label}</Text>
+              <Text lineClamp={1}>{templateVersion.label}</Text>
             </Flex>
           </HStack>
           <HStack flexDir={{ base: "column", md: "row" }} gap={4}>
@@ -55,7 +55,12 @@ export const TemplateVersionPreviewScreen = observer(() => {
         </Flex>
         <FloatingHelpDrawer top={permitHeaderHeight + 20} position="absolute" />
       </Flex>
-      <Box id="sidebar-and-form-container" sx={{ "&:after": { content: `""`, display: "block", clear: "both" } }}>
+      <Box
+        id="sidebar-and-form-container"
+        css={{
+          "& &:after": { content: `""`, display: "block", clear: "both" },
+        }}
+      >
         <ChecklistSideBar permitApplication={ephemeralPermitApplication} completedBlocks={completedBlocks} />
 
         <Flex flex={1} direction="column" pt={8} position={"relative"} id="permitApplicationFieldsContainer">

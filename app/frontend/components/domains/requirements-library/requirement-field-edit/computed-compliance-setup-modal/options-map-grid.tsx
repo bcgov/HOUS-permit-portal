@@ -43,7 +43,7 @@ export const OptionsMapGrid = observer(function OptionsMapGrid({
           mt={2}
           gridRowClassName={"compliance-mapper-grid-row"}
           templateColumns={"1fr 55px 1fr"}
-          sx={{
+          css={{
             "[role='columnheader'], [role='cell']": {
               justifyContent: "center",
               display: "flex",

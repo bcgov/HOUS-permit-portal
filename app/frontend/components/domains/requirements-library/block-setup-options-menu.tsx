@@ -1,4 +1,4 @@
-import { Button, Divider, Menu, MenuButton, MenuList } from "@chakra-ui/react"
+import { Button, Menu, Portal, Separator } from "@chakra-ui/react"
 import { Archive, CaretDown, ClockClockwise, Copy } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
@@ -37,69 +37,73 @@ export const BlockSetupOptionsMenu = observer(function BlockSetupOptionsMenu({
   }
 
   return (
-    <Menu>
+    <Menu.Root>
       {isLoading ? (
         <SharedSpinner />
       ) : (
-        <MenuButton
-          as={Button}
-          variant="link"
-          color={"text.primary"}
-          textDecoration={"none"}
-          _hover={{
-            textDecoration: "underline",
-          }}
-          rightIcon={<CaretDown />}
-          h={6}
-        >
-          {t("requirementsLibrary.modals.edit.options")}
-        </MenuButton>
+        <Menu.Trigger asChild>
+          <Button
+            variant="link"
+            color={"text.primary"}
+            textDecoration={"none"}
+            _hover={{
+              textDecoration: "underline",
+            }}
+            h={6}
+          >
+            {t("requirementsLibrary.modals.edit.options")}
+            <CaretDown />
+          </Button>
+        </Menu.Trigger>
       )}
-
-      <MenuList>
-        <ManageMenuItemButton onClick={handleCopy} leftIcon={<Copy size={16} />}>
-          {t("requirementsLibrary.modals.edit.copy")}
-        </ManageMenuItemButton>
-        <Divider color="border.light" />
-        {requirementBlock.isDiscarded ? (
-          <ConfirmationModal
-            title={t("ui.confirmRestore")}
-            onConfirm={(closeModal) => {
-              handleRestore()
-              closeModal()
-            }}
-            renderTriggerButton={(props) => (
-              <ManageMenuItemButton color="semantic.success" leftIcon={<ClockClockwise size={16} />} {...props}>
-                {t("ui.restore")}
-              </ManageMenuItemButton>
+      <Portal>
+        <Menu.Positioner>
+          <Menu.Content>
+            <ManageMenuItemButton onClick={handleCopy} leftIcon={<Copy size={16} />}>
+              {t("requirementsLibrary.modals.edit.copy")}
+            </ManageMenuItemButton>
+            <Separator color="border.light" />
+            {requirementBlock.isDiscarded ? (
+              <ConfirmationModal
+                title={t("ui.confirmRestore")}
+                onConfirm={(closeModal) => {
+                  handleRestore()
+                  closeModal()
+                }}
+                renderTriggerButton={(props) => (
+                  <ManageMenuItemButton color="semantic.success" leftIcon={<ClockClockwise size={16} />} {...props}>
+                    {t("ui.restore")}
+                  </ManageMenuItemButton>
+                )}
+                renderConfirmationButton={(props) => (
+                  <Button {...props} colorPalette="green">
+                    {t("ui.restore")}
+                  </Button>
+                )}
+              />
+            ) : (
+              <ConfirmationModal
+                title={t("requirementsLibrary.modals.edit.removeConfirmationModal.title")}
+                body={t("requirementsLibrary.modals.edit.removeConfirmationModal.body")}
+                onConfirm={(closeModal) => {
+                  handleRemove()
+                  closeModal()
+                }}
+                renderTriggerButton={(props) => (
+                  <ManageMenuItemButton color="semantic.error" leftIcon={<Archive size={16} />} {...props}>
+                    {t("ui.archive")}
+                  </ManageMenuItemButton>
+                )}
+                renderConfirmationButton={(props) => (
+                  <Button {...props} colorPalette="red">
+                    {t("ui.archive")}
+                  </Button>
+                )}
+              />
             )}
-            renderConfirmationButton={(props) => (
-              <Button {...props} colorScheme="green">
-                {t("ui.restore")}
-              </Button>
-            )}
-          />
-        ) : (
-          <ConfirmationModal
-            title={t("requirementsLibrary.modals.edit.removeConfirmationModal.title")}
-            body={t("requirementsLibrary.modals.edit.removeConfirmationModal.body")}
-            onConfirm={(closeModal) => {
-              handleRemove()
-              closeModal()
-            }}
-            renderTriggerButton={(props) => (
-              <ManageMenuItemButton color="semantic.error" leftIcon={<Archive size={16} />} {...props}>
-                {t("ui.archive")}
-              </ManageMenuItemButton>
-            )}
-            renderConfirmationButton={(props) => (
-              <Button {...props} colorScheme="red">
-                {t("ui.archive")}
-              </Button>
-            )}
-          />
-        )}
-      </MenuList>
-    </Menu>
+          </Menu.Content>
+        </Menu.Positioner>
+      </Portal>
+    </Menu.Root>
   )
 })

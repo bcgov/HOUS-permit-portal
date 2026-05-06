@@ -1,4 +1,4 @@
-import { Box, Container, Heading, Link, List, ListItem, Text, UnorderedList } from "@chakra-ui/react"
+import { Box, Container, Heading, Link, List, Text } from "@chakra-ui/react"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
@@ -29,26 +29,26 @@ export const PreCheckInfoScreen = () => {
   const renderCommunitiesList = () => {
     if (siteConfigurationStore.anyProviderEnabledForAllJurisdictions) {
       return (
-        <UnorderedList spacing={2} pl={6}>
-          <ListItem color="theme.blueAlt">{t("preCheck.infoPage.allJurisdictions", "All jurisdictions")}</ListItem>
-        </UnorderedList>
+        <List.Root as="ul" gap={2} pl={6}>
+          <List.Item color="theme.blueAlt">{t("preCheck.infoPage.allJurisdictions", "All jurisdictions")}</List.Item>
+        </List.Root>
       )
     }
 
     if (enrolledJurisdictions.length === 0) {
       return (
-        <UnorderedList spacing={2} pl={6}>
-          <ListItem>{t("preCheck.infoPage.noJurisdictions", "No jurisdictions enrolled")}</ListItem>
-        </UnorderedList>
+        <List.Root as="ul" gap={2} pl={6}>
+          <List.Item>{t("preCheck.infoPage.noJurisdictions", "No jurisdictions enrolled")}</List.Item>
+        </List.Root>
       )
     }
 
     return (
-      <UnorderedList spacing={2} pl={6}>
+      <List.Root as="ul" gap={2} pl={6}>
         {enrolledJurisdictions.map((jurisdiction, index) => (
-          <ListItem key={index}>{jurisdiction}</ListItem>
+          <List.Item key={index}>{jurisdiction}</List.Item>
         ))}
-      </UnorderedList>
+      </List.Root>
     )
   }
 
@@ -63,7 +63,6 @@ export const PreCheckInfoScreen = () => {
           "You can use this service to pre-check your drawings for compliance with select areas of the BC Building Code before you submit a permit application. During beta, the service is available only in participating communities. You may also be invited to share feedback about your experience."
         )}
       </Text>
-
       <Box bg="background.blueLight" p={6} borderRadius="lg" mt={8} color="theme.blueAlt">
         <Heading as="h2" size="md" mb={4} color="theme.blueAlt">
           {t("preCheck.infoPage.whereYouCanUse", "Where you can use this service")}
@@ -85,14 +84,14 @@ export const PreCheckInfoScreen = () => {
             "This service is only for small residential projects Part 9 of the BC Building Code, including:"
           )}
         </Text>
-        <UnorderedList spacing={2} pl={6}>
-          <ListItem>{t("preCheck.infoPage.projectType1", "single detached houses")}</ListItem>
-          <ListItem>{t("preCheck.infoPage.projectType2", "townhouses")}</ListItem>
-          <ListItem>{t("preCheck.infoPage.projectType3", "duplexes, triplexes, or fourplexes")}</ListItem>
-          <ListItem>
+        <List.Root as="ul" gap={2} pl={6}>
+          <List.Item>{t("preCheck.infoPage.projectType1", "single detached houses")}</List.Item>
+          <List.Item>{t("preCheck.infoPage.projectType2", "townhouses")}</List.Item>
+          <List.Item>{t("preCheck.infoPage.projectType3", "duplexes, triplexes, or fourplexes")}</List.Item>
+          <List.Item>
             {t("preCheck.infoPage.projectType4", "laneway houses, carriage houses, or garden suites")}
-          </ListItem>
-        </UnorderedList>
+          </List.Item>
+        </List.Root>
         <Text>
           {t(
             "preCheck.infoPage.conclusion",
@@ -108,17 +107,17 @@ export const PreCheckInfoScreen = () => {
         <Heading as="h2" size="lg" mt={12} mb={6}>
           {t("preCheck.infoPage.howItWorks", "How it works")}
         </Heading>
-        <List spacing={3} pl={6} styleType="decimal" mb={8}>
-          <ListItem>{t("preCheck.infoPage.step1", "Upload your drawings")}</ListItem>
-          <ListItem>
+        <List.Root gap={3} pl={6} listStyleType="decimal" mb={8}>
+          <List.Item>{t("preCheck.infoPage.step1", "Upload your drawings")}</List.Item>
+          <List.Item>
             {t(
               "preCheck.infoPage.step2",
               "Receive a detailed report showing where your drawings do or don't follow the BC Building Code"
             )}
-          </ListItem>
-          <ListItem>{t("preCheck.infoPage.step3", "Update your drawings to fix issues")}</ListItem>
-          <ListItem>{t("preCheck.infoPage.step4", "Apply for your permit(s) with your updated drawings")}</ListItem>
-        </List>
+          </List.Item>
+          <List.Item>{t("preCheck.infoPage.step3", "Update your drawings to fix issues")}</List.Item>
+          <List.Item>{t("preCheck.infoPage.step4", "Apply for your permit(s) with your updated drawings")}</List.Item>
+        </List.Root>
 
         <Heading as="h2" size="lg" mb={6}>
           {t("preCheck.infoPage.aboutResults", "About your results and permit approval")}
@@ -129,47 +128,47 @@ export const PreCheckInfoScreen = () => {
             "This service gives you information only. Results depend on the accuracy of the drawings you upload."
           )}
         </Text>
-        <UnorderedList spacing={3} pl={6} mb={8}>
-          <ListItem>
+        <List.Root as="ul" gap={3} pl={6} mb={8}>
+          <List.Item>
             {t(
               "preCheck.infoPage.disclaimer1",
               "Results are for your reference only; results will not be included as part of a permit application for your project"
             )}
-          </ListItem>
-          <ListItem>
+          </List.Item>
+          <List.Item>
             {t("preCheck.infoPage.disclaimer2", "Results do not replace a plan check by a building official")}
-          </ListItem>
-          <ListItem>
+          </List.Item>
+          <List.Item>
             {t(
               "preCheck.infoPage.disclaimer3",
               "A passing result does not mean your drawings are approved or that a permit will be issued"
             )}
-          </ListItem>
-          <ListItem>
+          </List.Item>
+          <List.Item>
             {t(
               "preCheck.infoPage.disclaimer4",
               "Permits are approved or rejected by the authority having jurisdiction for your project"
             )}
-          </ListItem>
-          <ListItem>
+          </List.Item>
+          <List.Item>
             {t("preCheck.infoPage.disclaimer5", "While this service is in beta, you may encounter occasional issues")}
-          </ListItem>
-        </UnorderedList>
+          </List.Item>
+        </List.Root>
 
         <Heading as="h2" size="lg" mb={6}>
           {t("preCheck.infoPage.betaBenefits", "Benefits of taking part in this service during beta")}
         </Heading>
         <Text mb={4}>{t("preCheck.infoPage.betaBenefitsIntro", "By using this service during beta, you may:")}</Text>
-        <UnorderedList spacing={3} pl={6} mb={8}>
-          <ListItem>
+        <List.Root as="ul" gap={3} pl={6} mb={8}>
+          <List.Item>
             {t("preCheck.infoPage.benefit1", "Pre-check your drawings for common compliance issues before you apply")}
-          </ListItem>
-          <ListItem>{t("preCheck.infoPage.benefit2", "Get feedback within two days or less")}</ListItem>
-          <ListItem>{t("preCheck.infoPage.benefit3", "Spot issues early, before they cause delays")}</ListItem>
-          <ListItem>
+          </List.Item>
+          <List.Item>{t("preCheck.infoPage.benefit2", "Get feedback within two days or less")}</List.Item>
+          <List.Item>{t("preCheck.infoPage.benefit3", "Spot issues early, before they cause delays")}</List.Item>
+          <List.Item>
             {t("preCheck.infoPage.benefit4", "Better understand building code requirements for your project")}
-          </ListItem>
-        </UnorderedList>
+          </List.Item>
+        </List.Root>
 
         <Heading as="h2" size="lg" mb={6}>
           {t(

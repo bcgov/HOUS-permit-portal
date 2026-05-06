@@ -1,4 +1,4 @@
-import { Button, Container, Heading, HStack, Link, ListItem, Text, UnorderedList, VStack } from "@chakra-ui/react"
+import { Button, Container, Heading, HStack, Link, List, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -30,7 +30,7 @@ export const JurisdictionStepCodeRequirementsScreen = observer(() => {
   }
 
   const ActionButtons = () => (
-    <HStack spacing={4}>
+    <HStack gap={4}>
       <Button variant="outline" onClick={handleCheckAnotherAddress}>
         {t(`${i18nPrefix}.checkAnotherAddress`)}
       </Button>
@@ -42,48 +42,41 @@ export const JurisdictionStepCodeRequirementsScreen = observer(() => {
       <Heading as="h1" mb={4}>
         {t(`${i18nPrefix}.stepCodeRequirementsFor`)} {currentJurisdiction.qualifiedName}
       </Heading>
-
       <Text fontSize="md" color="text.primary" mb={2}>
         {t(`${i18nPrefix}.stepCodeRequirementsDescription`)}
       </Text>
-
       <Text fontSize="md" color="text.primary" mb={6}>
         {t(`${i18nPrefix}.stepCodeRequirementsNotice`)}
       </Text>
-
       <ActionButtons />
-
       {/* Part 9: Small, simple buildings */}
-      <VStack align="start" spacing={4} mt={10}>
+      <VStack align="start" gap={4} mt={10}>
         <Heading as="h2" fontSize="2xl">
           {t(`${i18nPrefix}.smallSimpleBuildings`)}
         </Heading>
         <Text fontSize="md">{t(`${i18nPrefix}.smallSimpleBuildingsDescription`)}</Text>
         <Text fontSize="md">{t(`${i18nPrefix}.part9BuildingsAreGenerally`)}</Text>
-        <UnorderedList pl={4}>
-          <ListItem>{t(`${i18nPrefix}.smallSimpleBuildingsCharacteristic1`)}</ListItem>
-          <ListItem>{t(`${i18nPrefix}.smallSimpleBuildingsCharacteristic2`)}</ListItem>
-        </UnorderedList>
+        <List.Root as="ul" pl={4}>
+          <List.Item>{t(`${i18nPrefix}.smallSimpleBuildingsCharacteristic1`)}</List.Item>
+          <List.Item>{t(`${i18nPrefix}.smallSimpleBuildingsCharacteristic2`)}</List.Item>
+        </List.Root>
         <StepCodeRequirementsTable currentJurisdiction={currentJurisdiction} />
       </VStack>
-
       {/* Part 3: Large, complex buildings */}
-      <VStack align="start" spacing={4} mt={10}>
+      <VStack align="start" gap={4} mt={10}>
         <Heading as="h2" fontSize="2xl">
           {t(`${i18nPrefix}.largeComplexBuildings`)}
         </Heading>
         <Text fontSize="md">{t(`${i18nPrefix}.largeComplexBuildingsDescription`)}</Text>
         <Text fontSize="md">{t(`${i18nPrefix}.part3BuildingsAreGenerally`)}</Text>
-        <UnorderedList pl={4}>
-          <ListItem>{t(`${i18nPrefix}.largeComplexBuildingsCharacteristic1`)}</ListItem>
-          <ListItem>{t(`${i18nPrefix}.largeComplexBuildingsCharacteristic2`)}</ListItem>
-        </UnorderedList>
+        <List.Root as="ul" pl={4}>
+          <List.Item>{t(`${i18nPrefix}.largeComplexBuildingsCharacteristic1`)}</List.Item>
+          <List.Item>{t(`${i18nPrefix}.largeComplexBuildingsCharacteristic2`)}</List.Item>
+        </List.Root>
         <Part3StepCodeRequirements currentJurisdiction={currentJurisdiction} />
       </VStack>
-
       <ActionButtons />
-
-      <VStack align="start" spacing={4} mt={12}>
+      <VStack align="start" gap={4} mt={12}>
         <Heading as="h2" fontSize="2xl">
           {t(`${i18nPrefix}.generateStepCodesReport`)}
         </Heading>
@@ -94,7 +87,8 @@ export const JurisdictionStepCodeRequirementsScreen = observer(() => {
             color="text.link"
             textDecoration="underline"
             _hover={{ textDecoration: "none" }}
-            isExternal
+            target="_blank"
+            rel="noopener noreferrer"
           >
             {t(`${i18nPrefix}.checkIfYourProjectMeetsBCsStepCodesRequirements`)}
           </Link>

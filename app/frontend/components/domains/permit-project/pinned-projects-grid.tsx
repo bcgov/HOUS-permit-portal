@@ -17,7 +17,7 @@ export const PinnedProjectsGrid = observer(() => {
   const { isFetchingPinnedProjects, pinnedPermitProjects } = permitProjectStore
 
   return (
-    <VStack align="stretch" spacing={4}>
+    <VStack align="stretch" gap={4}>
       <Heading as="h2" size="lg">
         {t("permitProject.index.pinnedPermitProjects", "Pinned projects")}
       </Heading>

@@ -1,4 +1,5 @@
-import { Box, Radio, RadioGroup, RadioGroupProps, Stack, Text } from "@chakra-ui/react"
+import { Radio, RadioGroup } from "@/components/ui/radio"
+import { Stack, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -20,11 +21,11 @@ export const SandboxSelect = observer(function SandboxSelect({
 }: ISandboxSelectProps) {
   const { t } = useTranslation()
   return (
-    <RadioGroup
+    <RadioGroup.Root
       id="sandbox-select"
       aria-label="Select a sandbox"
       w="full"
-      onChange={onChange}
+      onValueChange={onChange}
       value={value || ""}
       {...rest}
     >
@@ -73,6 +74,6 @@ export const SandboxSelect = observer(function SandboxSelect({
           </Radio>
         ))}
       </Stack>
-    </RadioGroup>
+    </RadioGroup.Root>
   )
 })

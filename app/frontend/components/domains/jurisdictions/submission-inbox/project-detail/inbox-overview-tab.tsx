@@ -1,4 +1,4 @@
-import { Box, Divider, Flex, Grid, Heading, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
+import { Box, Flex, Grid, Heading, HStack, Separator, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import { CaretRight, Info, SquaresFour, Steps } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -33,12 +33,12 @@ export const InboxOverviewTab = observer(({ permitProject }: IProps) => {
   } = permitProject
   const { t } = useTranslation()
   const { permitProjectStore } = useMst()
-  const { isOpen: isMapFullscreen, onOpen: onOpenMapFullscreen, onClose: onCloseMapFullscreen } = useDisclosure()
+  const { open: isMapFullscreen, onOpen: onOpenMapFullscreen, onClose: onCloseMapFullscreen } = useDisclosure()
 
   return (
     <Flex direction="column" flex={1} minH={0} minW={0} overflowY="auto" bg="greys.white" p={10}>
       <Box as="section" mb={10}>
-        <HStack align="center" spacing={4} mb={6}>
+        <HStack align="center" gap={4} mb={6}>
           <SquaresFour size={32} />
           <Heading as="h2" size="lg" mb={0}>
             {t("permitProject.overview.title")}
@@ -53,7 +53,7 @@ export const InboxOverviewTab = observer(({ permitProject }: IProps) => {
             <ProjectInfoRow
               label={t("permitProject.overview.projectState")}
               value={
-                <HStack spacing={3}>
+                <HStack gap={3}>
                   <ProjectStateTag state={state} />
                   <ChangeProjectStateMenu project={permitProject} />
                 </HStack>
@@ -83,7 +83,7 @@ export const InboxOverviewTab = observer(({ permitProject }: IProps) => {
               isCopyable={!!firstApplicationReceivedAt}
             />
 
-            <VStack align="flex-start" spacing={4} mt={8}>
+            <VStack align="flex-start" gap={4} mt={8}>
               <RouterLinkButton variant="link" to={`/jurisdictions/${jurisdiction?.id}`} leftIcon={<Info size={24} />}>
                 {t("permitProject.overview.checkPermitNeeds")}
               </RouterLinkButton>
@@ -108,9 +108,7 @@ export const InboxOverviewTab = observer(({ permitProject }: IProps) => {
           </Box>
         </Grid>
       </Box>
-
-      <Divider borderColor="border.light" />
-
+      <Separator borderColor="border.light" />
       <Box as="section" mt={10}>
         <Flex justify="space-between" align="center" mb={6}>
           <Heading as="h3" size="md" mb={0}>
@@ -152,9 +150,8 @@ export const InboxOverviewTab = observer(({ permitProject }: IProps) => {
           </>
         )}
       </Box>
-
       <FullscreenMapModal
-        isOpen={isMapFullscreen}
+        open={isMapFullscreen}
         onClose={onCloseMapFullscreen}
         coordinates={permitProject.mapPosition}
         pid={pid}

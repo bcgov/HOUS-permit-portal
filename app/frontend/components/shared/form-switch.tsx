@@ -1,11 +1,14 @@
-import { FormControl, FormControlProps, FormLabel, Switch } from "@chakra-ui/react"
+import { Switch } from "@/components/ui/switch"
+import { Field, FormControlProps } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { ChangeEventHandler } from "react"
 import { useTranslation } from "react-i18next"
 
 interface IProps extends Partial<FormControlProps> {
   isDisabled?: boolean
-  isChecked: boolean
+  disabled?: boolean
+  isChecked?: boolean
+  checked?: boolean
   onChange?: ChangeEventHandler<HTMLInputElement>
   switchIdForAccessibility: string
   checkedText: string
@@ -16,6 +19,8 @@ export const FormSwitch = observer(
   ({
     isChecked,
     isDisabled = false,
+    disabled,
+    checked,
     onChange,
     switchIdForAccessibility,
     checkedText,
@@ -23,15 +28,17 @@ export const FormSwitch = observer(
     ...rest
   }: IProps) => {
     const { t } = useTranslation()
+    const switchDisabled = disabled ?? isDisabled
+    const switchChecked = checked ?? isChecked ?? false
 
     return (
-      <FormControl display="flex" alignItems="center" w="fit-content" gap={2} isDisabled={isDisabled} {...rest}>
+      <Field.Root display="flex" alignItems="center" w="fit-content" gap={2} disabled={switchDisabled} {...rest}>
         {/*  @ts-ignore*/}
-        <Switch id={switchIdForAccessibility} isChecked={isChecked} onChange={onChange} />
-        <FormLabel htmlFor={switchIdForAccessibility} _hover={{ cursor: isDisabled ? "not-allowed" : undefined }}>
-          {isChecked ? checkedText : uncheckedText}
-        </FormLabel>
-      </FormControl>
+        <Switch id={switchIdForAccessibility} checked={switchChecked} onValueChange={onChange} />
+        <Field.Label htmlFor={switchIdForAccessibility} _hover={{ cursor: switchDisabled ? "not-allowed" : undefined }}>
+          {switchChecked ? checkedText : uncheckedText}
+        </Field.Label>
+      </Field.Root>
     )
   }
 )

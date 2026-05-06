@@ -1,4 +1,5 @@
-import { Flex, FormControl, FormHelperText, FormLabel, Input, Radio, RadioGroup, Stack } from "@chakra-ui/react"
+import { RadioGroup } from "@/components/ui/radio"
+import { Field, Flex, Input, Stack } from "@chakra-ui/react"
 import { ErrorMessage } from "@hookform/error-message"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
@@ -67,39 +68,43 @@ export const OverheatingRequirements = observer(function Part3StepCodeFormOverhe
         <SectionHeading>{t(`${i18nPrefix}.heading`)}</SectionHeading>
       </Flex>
       <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
-        <FormControl>
-          <FormLabel>{t(`${i18nPrefix}.isRelevant`)}</FormLabel>
-          <RadioGroup onChange={setIsRelevant} value={isRelevant}>
-            <Stack spacing={5} direction="row">
-              <Radio variant="binary" value={"yes"}>
-                {t("ui.yes")}
-              </Radio>
-              <Radio variant="binary" value={"no"}>
-                {t("ui.no")}
-              </Radio>
+        <Field.Root>
+          <Field.Label>{t(`${i18nPrefix}.isRelevant`)}</Field.Label>
+          <RadioGroup.Root onValueChange={setIsRelevant} value={isRelevant}>
+            <Stack gap={5} direction="row">
+              <RadioGroup.Item variant="binary" value={"yes"}>
+                <RadioGroup.ItemHiddenInput />
+                <RadioGroup.ItemIndicator />
+                <RadioGroup.ItemText>{t("ui.yes")}</RadioGroup.ItemText>
+              </RadioGroup.Item>
+              <RadioGroup.Item variant="binary" value={"no"}>
+                <RadioGroup.ItemHiddenInput />
+                <RadioGroup.ItemIndicator />
+                <RadioGroup.ItemText>{t("ui.no")}</RadioGroup.ItemText>
+              </RadioGroup.Item>
             </Stack>
-          </RadioGroup>
-        </FormControl>
+          </RadioGroup.Root>
+        </Field.Root>
         {isRelevant == "yes" ? (
           <>
-            <FormControl>
-              <FormLabel>{t(`${i18nPrefix}.limit.label`)}</FormLabel>
-              <FormHelperText mb={1} mt={0}>
+            <Field.Root>
+              <Field.Label>{t(`${i18nPrefix}.limit.label`)}</Field.Label>
+              <Field.HelperText mb={1} mt={0}>
                 {t(`${i18nPrefix}.limit.hint`)}
-              </FormHelperText>
-              <Input maxW="200px" value={checklist.overheatingHoursLimit} isDisabled />
-            </FormControl>
-            <FormControl>
-              <FormLabel>{t(`${i18nPrefix}.worstCase.label`)}</FormLabel>
-              <FormHelperText mb={1} mt={0} color="semantic.error">
+              </Field.HelperText>
+              <Input maxW="200px" value={checklist.overheatingHoursLimit} disabled />
+            </Field.Root>
+            <Field.Root>
+              <Field.Label>{t(`${i18nPrefix}.worstCase.label`)}</Field.Label>
+              <Field.HelperText mb={1} mt={0} color="semantic.error">
                 <ErrorMessage errors={errors} name="overheatingHours" />
-              </FormHelperText>
+              </Field.HelperText>
               <Input
                 maxW={"200px"}
                 type="number"
                 {...register("overheatingHours", { required: t(`${i18nPrefix}.worstCase.error`) })}
               />
-            </FormControl>
+            </Field.Root>
             {watchOverheatingHours > checklist.overheatingHoursLimit ? (
               <CustomMessageBox title={t(`${i18nPrefix}.compliance.fail`)} status={EFlashMessageStatus.error} />
             ) : watchOverheatingHours ? (
@@ -107,7 +112,7 @@ export const OverheatingRequirements = observer(function Part3StepCodeFormOverhe
             ) : null}
           </>
         ) : null}
-        {!!isRelevant && <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />}
+        {!!isRelevant && <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} loading={isSubmitting} />}
       </Flex>
     </>
   )

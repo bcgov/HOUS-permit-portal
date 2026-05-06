@@ -1,15 +1,6 @@
-import {
-  Flex,
-  FormControl,
-  FormHelperText,
-  FormLabel,
-  Input,
-  InputGroup,
-  InputRightElement,
-  Radio,
-  RadioGroup,
-  Stack,
-} from "@chakra-ui/react"
+import { InputGroup } from "@/components/ui/input-group"
+import { Radio, RadioGroup } from "@/components/ui/radio"
+import { Field, Flex, Input, InputElement, Stack } from "@chakra-ui/react"
 import { ErrorMessage } from "@hookform/error-message"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
@@ -45,13 +36,13 @@ export const OccupancyPanel = observer(function Part3StepCodeFormBaselineDetails
 
   return (
     <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
-      <FormControl>
-        <FormLabel>
+      <Field.Root>
+        <Field.Label>
           {t(`${i18nPrefix}.modelledFloorArea.label`, { occupancyName: t(`${oci18nPrefix}.${occupancy.key}`) })}
-        </FormLabel>
-        <FormHelperText mb={1} mt={0} color="semantic.error">
+        </Field.Label>
+        <Field.HelperText mb={1} mt={0} color="semantic.error">
           <ErrorMessage errors={errors} name={`baselineOccupanciesAttributes.${idx}.modelledFloorArea`} />
-        </FormHelperText>
+        </Field.HelperText>
         <InputGroup maxW={"200px"}>
           <Input
             type="number"
@@ -61,24 +52,23 @@ export const OccupancyPanel = observer(function Part3StepCodeFormBaselineDetails
               }),
             })}
           />
-          <InputRightElement pointerEvents="none">
+          <InputElement placement="end" pointerEvents="none">
             <Trans
               i18nKey={`${i18nPrefix}.modelledFloorArea.units`}
               components={{
                 sup: <sup />,
               }}
             />
-          </InputRightElement>
+          </InputElement>
         </InputGroup>
-      </FormControl>
-
-      <FormControl>
-        <FormLabel pb={1}>
+      </Field.Root>
+      <Field.Root>
+        <Field.Label pb={1}>
           {t(`${i18nPrefix}.performanceRequirement.label`, { occupancyName: t(`${oci18nPrefix}.${occupancy.key}`) })}
-        </FormLabel>
-        <FormHelperText mb={1} mt={0} color="semantic.error">
+        </Field.Label>
+        <Field.HelperText mb={1} mt={0} color="semantic.error">
           <ErrorMessage errors={errors} name={`baselineOccupanciesAttributes.${idx}.performanceRequirement`} />
-        </FormHelperText>
+        </Field.HelperText>
         <Controller
           name={`baselineOccupanciesAttributes.${idx}.performanceRequirement`}
           control={control}
@@ -88,44 +78,46 @@ export const OccupancyPanel = observer(function Part3StepCodeFormBaselineDetails
             }),
           }}
           render={({ field: { onChange, value } }) => (
-            <RadioGroup defaultValue={value} onChange={onChange}>
-              <Stack spacing={1}>
+            <RadioGroup.Root defaultValue={value} onValueChange={onChange}>
+              <Stack gap={1}>
                 {Object.values(EBaselinePerformanceRequirement).map((requirement) => (
                   <Radio key={requirement} value={requirement}>
                     {t(`stepCode.part3.performanceRequirements.${requirement}`)}
                   </Radio>
                 ))}
               </Stack>
-            </RadioGroup>
+            </RadioGroup.Root>
           )}
         />
-      </FormControl>
-
-      <FormControl>
-        <FormLabel>
+      </Field.Root>
+      <Field.Root>
+        <Field.Label>
           {t(`${i18nPrefix}.isCustomRequirement`, { occupancyName: t(`${oci18nPrefix}.${occupancy.key}`) })}
-        </FormLabel>
-        <RadioGroup onChange={setIsCustomRequirement} value={isCustomRequirement}>
-          <Stack spacing={5} direction="row">
-            <Radio variant="binary" value={"yes"}>
-              {t("ui.yes")}
-            </Radio>
-            <Radio variant="binary" value={"no"} defaultChecked>
-              {t("ui.no")}
-            </Radio>
+        </Field.Label>
+        <RadioGroup.Root onValueChange={setIsCustomRequirement} value={isCustomRequirement}>
+          <Stack gap={5} direction="row">
+            <RadioGroup.Item variant="binary" value={"yes"}>
+              <RadioGroup.ItemHiddenInput />
+              <RadioGroup.ItemIndicator />
+              <RadioGroup.ItemText>{t("ui.yes")}</RadioGroup.ItemText>
+            </RadioGroup.Item>
+            <RadioGroup.Item variant="binary" value={"no"}>
+              <RadioGroup.ItemHiddenInput />
+              <RadioGroup.ItemIndicator />
+              <RadioGroup.ItemText>{t("ui.no")}</RadioGroup.ItemText>
+            </RadioGroup.Item>
           </Stack>
-        </RadioGroup>
-      </FormControl>
-
+        </RadioGroup.Root>
+      </Field.Root>
       {isCustomRequirement == "yes" && (
-        <FormControl>
-          <FormLabel>{t(`${i18nPrefix}.requirementSource.label`)}</FormLabel>
-          <FormHelperText mb={1} mt={0} maxW={"430px"}>
+        <Field.Root>
+          <Field.Label>{t(`${i18nPrefix}.requirementSource.label`)}</Field.Label>
+          <Field.HelperText mb={1} mt={0} maxW={"430px"}>
             {t(`${i18nPrefix}.requirementSource.hint`)}
-          </FormHelperText>
-          <FormHelperText mb={1} mt={0} color="semantic.error">
+          </Field.HelperText>
+          <Field.HelperText mb={1} mt={0} color="semantic.error">
             <ErrorMessage errors={errors} name={`baselineOccupanciesAttributes.${idx}.requirementSource`} />
-          </FormHelperText>
+          </Field.HelperText>
           <Input
             {...register(`baselineOccupanciesAttributes.${idx}.requirementSource`, {
               required: t(`${i18nPrefix}.requirementSource.error`, {
@@ -133,7 +125,7 @@ export const OccupancyPanel = observer(function Part3StepCodeFormBaselineDetails
               }),
             })}
           />
-        </FormControl>
+        </Field.Root>
       )}
     </Flex>
   )

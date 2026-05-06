@@ -122,10 +122,10 @@ export const AnnualEnergyWholeBuildingGrid = observer(function AnnualEnergyWhole
         </HStack>
       </GridRowHeader>
       <GridData>
-        <Stack direction="column" spacing={1} align="center">
+        <Stack direction="column" gap={1} align="center">
           <Input
             value={formattedTotalAnnualThermalEnergyDemand}
-            onChange={handleChangeTotalAnnualThermalEnergyDemand}
+            onValueChange={handleChangeTotalAnnualThermalEnergyDemand}
             {...editableInputProps}
           />
           {thermalErrorMessage && (
@@ -136,7 +136,7 @@ export const AnnualEnergyWholeBuildingGrid = observer(function AnnualEnergyWhole
         </Stack>
       </GridData>
       <GridData borderRightWidth={1}>
-        <Input value={formattedThermalEnergyDemandPerSquareMeter} isReadOnly {...disabledInputProps} />
+        <Input value={formattedThermalEnergyDemandPerSquareMeter} readOnly {...disabledInputProps} />
       </GridData>
       {/* Cooling energy demand row */}
       <GridRowHeader>
@@ -154,10 +154,10 @@ export const AnnualEnergyWholeBuildingGrid = observer(function AnnualEnergyWhole
         </HStack>
       </GridRowHeader>
       <GridData>
-        <Stack direction="column" spacing={1} align="center">
+        <Stack direction="column" gap={1} align="center">
           <Input
             value={formattedTotalAnnualCoolingEnergyDemand}
-            onChange={handleChangeTotalAnnualCoolingEnergyDemand}
+            onValueChange={handleChangeTotalAnnualCoolingEnergyDemand}
             {...editableInputProps}
           />
           {coolingErrorMessage && (
@@ -168,7 +168,7 @@ export const AnnualEnergyWholeBuildingGrid = observer(function AnnualEnergyWhole
         </Stack>
       </GridData>
       <GridData borderRightWidth={1}>
-        <Input value={formattedCoolingEnergyDemandPerSquareMeter} isReadOnly {...disabledInputProps} />
+        <Input value={formattedCoolingEnergyDemandPerSquareMeter} readOnly {...disabledInputProps} />
       </GridData>
     </Grid>
   )

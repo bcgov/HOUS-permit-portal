@@ -22,7 +22,9 @@ export const PreCheckBackLink = observer(function PreCheckBackLink() {
       _hover={{ textDecoration: "underline" }}
       cursor="pointer"
     >
-      <Icon as={CaretLeft} boxSize={4} />
+      <Icon boxSize={4} asChild>
+        <CaretLeft />
+      </Icon>
       {t("ui.back", "Back")}
     </Link>
   )

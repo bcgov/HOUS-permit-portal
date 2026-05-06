@@ -1,4 +1,4 @@
-import { Box, FormControl, FormLabel } from "@chakra-ui/react"
+import { Box, Field } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -21,15 +21,15 @@ export const ValueExtractionFieldSelect = observer(function ValueExtractionField
 }: IProps) {
   const { t } = useTranslation()
   return (
-    <FormControl>
-      <FormLabel
+    <Field.Root>
+      <Field.Label
         id={VALUE_EXTRACTION_FIELD_SELECT_LABEL_ID}
         htmlFor={VALUE_EXTRACTION_FIELD_SELECT_ID}
         fontWeight="bold"
         size="lg"
       >
         {t("requirementsLibrary.modals.computedComplianceSetup.valueExtractionField")}
-      </FormLabel>
+      </Field.Label>
       <Box px={4}>
         <Select
           inputId={VALUE_EXTRACTION_FIELD_SELECT_ID}
@@ -39,6 +39,6 @@ export const ValueExtractionFieldSelect = observer(function ValueExtractionField
           onChange={onChange}
         />
       </Box>
-    </FormControl>
+    </Field.Root>
   )
 })

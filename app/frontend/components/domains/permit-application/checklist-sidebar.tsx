@@ -1,4 +1,4 @@
-import { Box, Divider, Flex, Heading, Hide, Tab, TabIndicator, TabList, Tabs, Text } from "@chakra-ui/react"
+import { Box, Flex, Heading, Separator, Tabs, Text } from "@chakra-ui/react"
 import { CheckCircle, CircleDashed } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -27,7 +27,7 @@ export const ChecklistSideBar = observer(({ permitApplication, completedBlocks }
   }
 
   return (
-    <Hide below="md">
+    <Box hideBelow="md">
       <Flex
         direction="column"
         boxShadow="md"
@@ -42,8 +42,8 @@ export const ChecklistSideBar = observer(({ permitApplication, completedBlocks }
         id="permit-checklist-sidebar"
       >
         <Box overflowY="auto">
-          <Tabs orientation="vertical" index={selectedTabIndex} w="full">
-            <TabList w="full" border={0} py="4" pb={navHeight}>
+          <Tabs.Root orientation="vertical" value={String(selectedTabIndex)} w="full">
+            <Tabs.List w="full" border={0} py="4" pb={navHeight}>
               {formJson.components.map((section) => {
                 return (
                   <Box key={section.key}>
@@ -61,8 +61,9 @@ export const ChecklistSideBar = observer(({ permitApplication, completedBlocks }
                           ? stepCode?.isComplete
                           : completedBlocks[block.key] || false
                       return (
-                        <Tab
+                        <Tabs.Trigger
                           key={block.key}
+                          value={String(indexOfBlockId(block.id))}
                           pl={6}
                           gap={2}
                           w="full"
@@ -81,19 +82,19 @@ export const ChecklistSideBar = observer(({ permitApplication, completedBlocks }
                             </Box>
                             <Text>{block.title}</Text>
                           </Flex>
-                        </Tab>
+                        </Tabs.Trigger>
                       )
                     })}
-                    <Divider color="greys.grey01" />
+                    <Separator color="greys.grey01" />
                   </Box>
                 )
               })}
-            </TabList>
+            </Tabs.List>
 
-            <TabIndicator bg="theme.blue" border="2px solid" />
-          </Tabs>
+            <Tabs.Indicator bg="theme.blue" border="2px solid" />
+          </Tabs.Root>
         </Box>
       </Flex>
-    </Hide>
+    </Box>
   )
 })

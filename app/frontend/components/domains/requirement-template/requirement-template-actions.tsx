@@ -1,4 +1,4 @@
-import { Button, Menu, MenuButton, MenuItem, MenuList, useDisclosure } from "@chakra-ui/react"
+import { Button, Menu, Portal, useDisclosure } from "@chakra-ui/react"
 import { ClockCounterClockwise, Globe } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -15,32 +15,36 @@ export const RequirementTemplateActions = observer(function RequirementTemplateA
   requirementTemplate,
 }: RequirementTemplateActionsProps) {
   const { t } = useTranslation()
-  const { isOpen: isVersionsOpen, onOpen: onVersionsOpen, onClose: onVersionsClose } = useDisclosure()
-  const { isOpen: isAccessOpen, onOpen: onAccessOpen, onClose: onAccessClose } = useDisclosure()
+  const { open: isVersionsOpen, onOpen: onVersionsOpen, onClose: onVersionsClose } = useDisclosure()
+  const { open: isAccessOpen, onOpen: onAccessOpen, onClose: onAccessClose } = useDisclosure()
 
   return (
     <>
-      <Menu>
-        <MenuButton as={Button} aria-label="more options" variant="link">
-          {t("ui.moreOptions")}
-        </MenuButton>
-        <MenuList>
-          <MenuItem icon={<ClockCounterClockwise size={20} />} onClick={onVersionsOpen}>
-            {t("requirementTemplate.versions", "Versions")}
-          </MenuItem>
-          <MenuItem icon={<Globe size={20} />} onClick={onAccessOpen}>
-            {t("requirementTemplate.access.title", "Access")}
-          </MenuItem>
-        </MenuList>
-      </Menu>
-
+      <Menu.Root>
+        <Menu.Trigger asChild>
+          <Button aria-label="more options" variant="link">
+            {t("ui.moreOptions")}
+          </Button>
+        </Menu.Trigger>
+        <Portal>
+          <Menu.Positioner>
+            <Menu.Content>
+              <Menu.Item icon={<ClockCounterClockwise size={20} />} onSelect={onVersionsOpen} value="item-0">
+                {t("requirementTemplate.versions", "Versions")}
+              </Menu.Item>
+              <Menu.Item icon={<Globe size={20} />} onSelect={onAccessOpen} value="item-1">
+                {t("requirementTemplate.access.title", "Access")}
+              </Menu.Item>
+            </Menu.Content>
+          </Menu.Positioner>
+        </Portal>
+      </Menu.Root>
       <TemplateVersionsSidebar
         requirementTemplate={requirementTemplate}
-        isOpen={isVersionsOpen}
+        open={isVersionsOpen}
         onClose={onVersionsClose}
       />
-
-      <TemplateAccessSidebar requirementTemplate={requirementTemplate} isOpen={isAccessOpen} onClose={onAccessClose} />
+      <TemplateAccessSidebar requirementTemplate={requirementTemplate} open={isAccessOpen} onClose={onAccessClose} />
     </>
   )
 })

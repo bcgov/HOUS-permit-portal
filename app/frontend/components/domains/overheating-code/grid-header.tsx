@@ -17,15 +17,17 @@ export const OverheatingCodeGridHeaders = observer(function OverheatingCodeGridH
     <Box display={"contents"} role={"rowgroup"}>
       <Box display={"contents"} role={"row"}>
         <GridItem
-          as={Flex}
           gridColumn={"span 5"}
           p={6}
           bg={"greys.grey10"}
           justifyContent={"space-between"}
           align="center"
+          asChild
         >
-          <Text role={"heading"}>{t("overheatingCode.index.title", "Overheating Code Checks")}</Text>
-          <ModelSearchInput searchModel={overheatingCodeStore} />
+          <Flex>
+            <Text role={"heading"}>{t("overheatingCode.index.title", "Overheating Code Checks")}</Text>
+            <ModelSearchInput searchModel={overheatingCodeStore} />
+          </Flex>
         </GridItem>
       </Box>
       <Box display={"contents"} role={"row"}>
@@ -33,16 +35,17 @@ export const OverheatingCodeGridHeaders = observer(function OverheatingCodeGridH
           <GridHeader key={field} role={"columnheader"}>
             <Flex
               w={"full"}
-              as={"button"}
               justifyContent={"space-between"}
               cursor="pointer"
-              onClick={() => toggleSort(field)}
               borderRight={"1px solid"}
               borderColor={"border.light"}
               px={4}
+              asChild
             >
-              <Text textAlign="left">{getSortColumnHeader(field)}</Text>
-              <SortIcon<EOverheatingCodeSortFields> field={field} currentSort={sort} />
+              <button onClick={() => toggleSort(field)}>
+                <Text textAlign="left">{getSortColumnHeader(field)}</Text>
+                <SortIcon<EOverheatingCodeSortFields> field={field} currentSort={sort} />
+              </button>
             </Flex>
           </GridHeader>
         ))}

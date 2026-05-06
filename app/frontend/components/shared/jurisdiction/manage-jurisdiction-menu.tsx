@@ -1,4 +1,4 @@
-import { Button, Menu, MenuButton, MenuList } from "@chakra-ui/react"
+import { Button, Menu, Portal } from "@chakra-ui/react"
 import { Export, FileText, Info, Key, Pencil, Users } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -20,34 +20,40 @@ export const ManageJurisdictionMenu = observer(function ManageJurisdictionMenu<T
   const { t } = useTranslation()
   return (
     <Can action="jurisdiction:manage" data={{ jurisdiction }}>
-      <Menu>
-        <MenuButton as={Button} aria-label="manage" variant="link">
-          {t("ui.manage")}
-        </MenuButton>
-        <MenuList boxShadow="elevations.elevation04">
-          <ManageMenuItem icon={<Info size={16} />} to={`${jurisdiction.slug}`}>
-            {t("jurisdiction.index.about")}
-          </ManageMenuItem>
-          <ManageMenuItem icon={<Pencil size={16} />} to={`${jurisdiction.slug}/update`}>
-            {t("jurisdiction.index.rename")}
-          </ManageMenuItem>
-          <ManageMenuItem icon={<Users size={16} />} to={`${jurisdiction.slug}/users`}>
-            {t("jurisdiction.index.users")}
-          </ManageMenuItem>
-          <ManageMenuItem
-            icon={<FileText size={16} />}
-            to={`${jurisdiction.slug}/configuration-management/energy-step`}
-          >
-            {t("jurisdiction.index.energyStepRequirements")}
-          </ManageMenuItem>
-          <ManageMenuItem icon={<Key size={16} />} to={`${jurisdiction.slug}/api-settings`}>
-            {t("jurisdiction.index.externalApiKeys")}
-          </ManageMenuItem>
-          <ManageMenuItem icon={<Export size={16} />} to={`${jurisdiction.slug}/export-templates`}>
-            {t("jurisdiction.index.exportTemplates")}
-          </ManageMenuItem>
-        </MenuList>
-      </Menu>
+      <Menu.Root>
+        <Menu.Trigger asChild>
+          <Button aria-label="manage" variant="link">
+            {t("ui.manage")}
+          </Button>
+        </Menu.Trigger>
+        <Portal>
+          <Menu.Positioner>
+            <Menu.Content>
+              <ManageMenuItem icon={<Info size={16} />} to={`${jurisdiction.slug}`}>
+                {t("jurisdiction.index.about")}
+              </ManageMenuItem>
+              <ManageMenuItem icon={<Pencil size={16} />} to={`${jurisdiction.slug}/update`}>
+                {t("jurisdiction.index.rename")}
+              </ManageMenuItem>
+              <ManageMenuItem icon={<Users size={16} />} to={`${jurisdiction.slug}/users`}>
+                {t("jurisdiction.index.users")}
+              </ManageMenuItem>
+              <ManageMenuItem
+                icon={<FileText size={16} />}
+                to={`${jurisdiction.slug}/configuration-management/energy-step`}
+              >
+                {t("jurisdiction.index.energyStepRequirements")}
+              </ManageMenuItem>
+              <ManageMenuItem icon={<Key size={16} />} to={`${jurisdiction.slug}/api-settings`}>
+                {t("jurisdiction.index.externalApiKeys")}
+              </ManageMenuItem>
+              <ManageMenuItem icon={<Export size={16} />} to={`${jurisdiction.slug}/export-templates`}>
+                {t("jurisdiction.index.exportTemplates")}
+              </ManageMenuItem>
+            </Menu.Content>
+          </Menu.Positioner>
+        </Portal>
+      </Menu.Root>
     </Can>
   )
 })

@@ -1,4 +1,4 @@
-import { FormControl, FormHelperText, FormLabel, Grid, GridItem, Input } from "@chakra-ui/react"
+import { Field, Grid, GridItem, Input } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -19,78 +19,74 @@ export const StepCodeWholeBuildingSummary = observer(function StepCodeWholeBuild
   return (
     <Grid templateColumns="160px repeat(3, 1fr)" borderRightWidth={1} borderBottomWidth={1} borderColor="borders.light">
       <GridItem />
-
       <GridData>
-        <FormControl>
-          <FormLabel m={0}>{t("stepCode.part3.metrics.teui.label")}</FormLabel>
-          <FormHelperText mt={0}>
+        <Field.Root>
+          <Field.Label m={0}>{t("stepCode.part3.metrics.teui.label")}</Field.Label>
+          <Field.HelperText mt={0}>
             <Trans i18nKey={"stepCode.part3.metrics.teui.units"} components={{ sup: <sup />, sub: <sub /> }} />
-          </FormHelperText>
-        </FormControl>
+          </Field.HelperText>
+        </Field.Root>
       </GridData>
       <GridData>
-        <FormControl>
-          <FormLabel m={0}>{t("stepCode.part3.metrics.tedi.label")}</FormLabel>
-          <FormHelperText mt={0}>
+        <Field.Root>
+          <Field.Label m={0}>{t("stepCode.part3.metrics.tedi.label")}</Field.Label>
+          <Field.HelperText mt={0}>
             <Trans i18nKey={"stepCode.part3.metrics.tedi.units"} components={{ sup: <sup />, sub: <sub /> }} />
-          </FormHelperText>
-        </FormControl>
+          </Field.HelperText>
+        </Field.Root>
       </GridData>
       <GridData>
-        <FormControl>
-          <FormLabel m={0}>{t("stepCode.part3.metrics.ghgi.label")}</FormLabel>
-          <FormHelperText mt={0}>
+        <Field.Root>
+          <Field.Label m={0}>{t("stepCode.part3.metrics.ghgi.label")}</Field.Label>
+          <Field.HelperText mt={0}>
             <Trans i18nKey={"stepCode.part3.metrics.ghgi.units"} components={{ sup: <sup />, sub: <sub /> }} />
-          </FormHelperText>
-        </FormControl>
+          </Field.HelperText>
+        </Field.Root>
       </GridData>
-
       <GridData>
-        <FormLabel>{t(`${i18nPrefix}.requirements`)}</FormLabel>
+        <Field.Label>{t(`${i18nPrefix}.requirements`)}</Field.Label>
       </GridData>
       <GridData justifyContent="center">
-        <Input isDisabled value={roundMetric(requirements.wholeBuilding.teui)} />
+        <Input disabled value={roundMetric(requirements.wholeBuilding.teui)} />
       </GridData>
       <GridData justifyContent="center">
-        <Input isDisabled value={roundMetric(requirements.wholeBuilding.tedi)} />
+        <Input disabled value={roundMetric(requirements.wholeBuilding.tedi)} />
       </GridData>
       <GridData justifyContent="center">
-        <Input isDisabled value={roundMetric(requirements.wholeBuilding.ghgi)} />
+        <Input disabled value={roundMetric(requirements.wholeBuilding.ghgi)} />
       </GridData>
-
       <GridData>
-        <FormLabel>{t(`${i18nPrefix}.performance`)}</FormLabel>
+        <Field.Label>{t(`${i18nPrefix}.performance`)}</Field.Label>
       </GridData>
       <GridData justifyContent="center">
-        <Input isDisabled value={roundMetric(adjustedResults.teui)} />
+        <Input disabled value={roundMetric(adjustedResults.teui)} />
       </GridData>
       <GridData justifyContent="center">
-        <Input isDisabled value={roundMetric(adjustedResults.tedi?.wholeBuilding)} />
+        <Input disabled value={roundMetric(adjustedResults.tedi?.wholeBuilding)} />
       </GridData>
       <GridData justifyContent="center">
-        <Input isDisabled value={roundMetric(adjustedResults.ghgi)} />
+        <Input disabled value={roundMetric(adjustedResults.ghgi)} />
       </GridData>
-
       <GridData>
-        <FormLabel>{t(`${i18nPrefix}.compliance`)}</FormLabel>
+        <Field.Label>{t(`${i18nPrefix}.compliance`)}</Field.Label>
       </GridData>
       <GridData justifyContent="center">
         <Input
-          isDisabled
+          disabled
           _disabled={{ bg: teuiComplies ? "semantic.successLight" : "semantic.errorLight" }}
           value={teuiComplies ? t("ui.yes") : t("ui.no")}
         />
       </GridData>
       <GridData justifyContent="center">
         <Input
-          isDisabled
+          disabled
           _disabled={{ bg: tediComplies ? "semantic.successLight" : "semantic.errorLight" }}
           value={tediComplies ? t("ui.yes") : t("ui.no")}
         />
       </GridData>
       <GridData justifyContent="center">
         <Input
-          isDisabled
+          disabled
           _disabled={{
             bg: ghgiComplies
               ? "semantic.successLight"

@@ -1,14 +1,4 @@
-import {
-  Box,
-  HStack,
-  Popover,
-  PopoverBody,
-  PopoverContent,
-  PopoverTrigger,
-  Portal,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { Box, HoverCard, HStack, Portal, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -50,37 +40,31 @@ export const ProjectInboxPermitApplicationsPopover = observer(function ProjectIn
   }
 
   const popoverBody = (
-    <PopoverBody p={3}>
+    <Box p={3}>
       <Text fontSize="2xs" fontWeight="bold" textTransform="uppercase" color="text.secondary" mb={2}>
         {t("submissionInbox.permitApplicationStatuses")}
       </Text>
-      <VStack align="stretch" spacing={1}>
+      <VStack align="stretch" gap={1}>
         {sortedStatuses.map((entry, idx) => {
           const linkDisabled = DRAFT_LINK_DISABLED_STATUSES.has(entry.status)
           const label = entry.nickname || "—"
           return (
-            <HStack key={idx} spacing={2} justify="space-between">
+            <HStack key={idx} gap={2} justify="space-between">
               {linkDisabled ? (
                 <Text
                   fontSize="xs"
                   color="text.secondary"
-                  noOfLines={1}
+                  lineClamp={1}
                   cursor="default"
                   onClick={(e: React.MouseEvent) => e.stopPropagation()}
                 >
                   {label}
                 </Text>
               ) : (
-                <Text
-                  as={Link}
-                  to={`/permit-applications/${entry.id}`}
-                  fontSize="xs"
-                  color="text.link"
-                  noOfLines={1}
-                  _hover={{ textDecoration: "underline" }}
-                  onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                >
-                  {label}
+                <Text fontSize="xs" color="text.link" lineClamp={1} _hover={{ textDecoration: "underline" }} asChild>
+                  <Link to={`/permit-applications/${entry.id}`} onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+                    {label}
+                  </Link>
                 </Text>
               )}
               <PermitApplicationStatusTag
@@ -95,22 +79,29 @@ export const ProjectInboxPermitApplicationsPopover = observer(function ProjectIn
           )
         })}
       </VStack>
-    </PopoverBody>
+    </Box>
   )
 
   return (
-    <Popover trigger="hover" placement="right-end" isLazy flip={false}>
-      <PopoverTrigger>
+    <HoverCard.Root
+      lazyMount
+      positioning={{
+        placement: "right-end",
+        flip: false,
+      }}
+    >
+      <HoverCard.Trigger asChild>
         <Box as="span" display="inline-block" maxW="100%">
           {trigger}
         </Box>
-      </PopoverTrigger>
-
+      </HoverCard.Trigger>
       <Portal>
-        <PopoverContent w="auto" minW="220px" maxW="320px" onClick={(e) => e.preventDefault()}>
-          {popoverBody}
-        </PopoverContent>
+        <HoverCard.Positioner>
+          <HoverCard.Content w="auto" minW="220px" maxW="320px" onClick={(e) => e.preventDefault()}>
+            {popoverBody}
+          </HoverCard.Content>
+        </HoverCard.Positioner>
       </Portal>
-    </Popover>
+    </HoverCard.Root>
   )
 })

@@ -180,7 +180,9 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
         borderTop={"1px solid"}
         borderColor={"border.base"}
         id="sidebar-and-form-container"
-        sx={{ "&:after": { content: `""`, display: "block", clear: "both" } }}
+        css={{
+          "& &:after": { content: `""`, display: "block", clear: "both" },
+        }}
       >
         <SectionsSidebar
           sections={templateSections}
@@ -213,9 +215,17 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
                 name="disabled"
                 control={control}
                 render={({ field: { value, onChange } }) => (
-                  <Checkbox isChecked={!value} onChange={(e) => onChange(!e.target.checked)} fontWeight="medium">
-                    {t("requirementTemplate.edit.availableToApplicants")}
-                  </Checkbox>
+                  <Checkbox.Root
+                    onCheckedChange={(e) => onChange(!e.target.checked)}
+                    fontWeight="medium"
+                    checked={!value}
+                  >
+                    <Checkbox.HiddenInput />
+                    <Checkbox.Control>
+                      <Checkbox.Indicator />
+                    </Checkbox.Control>
+                    <Checkbox.Label>{t("requirementTemplate.edit.availableToApplicants")}</Checkbox.Label>
+                  </Checkbox.Root>
                 )}
               />
             )}
@@ -236,12 +246,12 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
                   renderTrigger={(onOpen) => (
                     <Button
                       variant={"primary"}
-                      rightIcon={<ArrowUp />}
                       onClick={onOpen}
-                      isDisabled={isSubmitting || !isValid}
-                      isLoading={isSubmitting}
+                      disabled={isSubmitting || !isValid}
+                      loading={isSubmitting}
                     >
                       {t("requirementTemplate.edit.promoteElectives")}
+                      <ArrowUp />
                     </Button>
                   )}
                   onConfirm={onPromote}
@@ -253,18 +263,18 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
                 renderTrigger={(onOpen) => (
                   <Button
                     variant={"primary"}
-                    rightIcon={<CaretRight />}
                     onClick={onOpen}
-                    isDisabled={isSubmitting || !isValid}
-                    isLoading={isSubmitting}
+                    disabled={isSubmitting || !isValid}
+                    loading={isSubmitting}
                   >
                     {t("ui.save")}
+                    <CaretRight />
                   </Button>
                 )}
                 onConfirm={onSubmit}
               />
 
-              <Button variant={"secondary"} onClick={onClose} isDisabled={isSubmitting}>
+              <Button variant={"secondary"} onClick={onClose} disabled={isSubmitting}>
                 {t("ui.close")}
               </Button>
             </ButtonGroup>

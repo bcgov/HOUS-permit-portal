@@ -61,30 +61,30 @@ function OccupancyRow({ occupancy, configuredPathways }: IOccupancyRowProps) {
           <Text fontWeight="bold">{occupancy.name}</Text>
         </Box>
         <Box w="30%">
-          <VStack align="start" spacing={1}>
+          <VStack align="start" gap={1}>
             {occupancy.isConfigurable && hasConfiguredPathways ? (
               configuredPathways.map((pw) => (
-                <Tag key={pw.id} size="sm" bg="greys.grey03" color="text.secondary" rounded="sm">
+                <Tag.Root key={pw.id} size="sm" bg="greys.grey03" color="text.secondary" rounded="sm">
                   {formatPathwayTag(t, pw.energyStepRequired, pw.zeroCarbonStepRequired)}
-                </Tag>
+                </Tag.Root>
               ))
             ) : (
-              <Tag size="sm" bg="greys.grey03" color="text.secondary" rounded="sm">
+              <Tag.Root size="sm" bg="greys.grey03" color="text.secondary" rounded="sm">
                 {baselineTag}
-              </Tag>
+              </Tag.Root>
             )}
           </VStack>
         </Box>
         <Box flex={1}>
           {occupancy.isConfigurable ? (
-            <Tag
+            <Tag.Root
               size="sm"
               rounded="sm"
               bg={hasConfiguredPathways ? "semantic.successLight" : "greys.grey03"}
               color={hasConfiguredPathways ? "semantic.success" : "text.secondary"}
             >
               {t(`${p}.pathwaysConfigured`, { count: pathwayCount })}
-            </Tag>
+            </Tag.Root>
           ) : (
             <Text fontSize="sm" color="text.secondary">
               {t(`${p}.alternativePathwaysNotApplicable`)}
@@ -159,8 +159,9 @@ export const Part3OccupancyOverviewScreen = observer(function Part3OccupancyOver
 
   return (
     <Container maxW="container.lg" py={8} px={{ base: 8, xl: 0 }} flexGrow={1}>
-      <VStack spacing={4} align="start" w="full">
-        <Button variant="link" onClick={() => navigate(-1)} leftIcon={<CaretLeft size={20} />} textDecoration="none">
+      <VStack gap={4} align="start" w="full">
+        <Button variant="plain" onClick={() => navigate(-1)} textDecoration="none">
+          <CaretLeft size={20} />
           {t("ui.back")}
         </Button>
 

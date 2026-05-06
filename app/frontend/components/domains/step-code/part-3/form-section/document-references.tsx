@@ -1,19 +1,5 @@
-import {
-  Accordion,
-  AccordionButton,
-  AccordionIcon,
-  AccordionItem,
-  AccordionItemProps,
-  AccordionPanel,
-  Box,
-  Flex,
-  FormControl,
-  FormLabel,
-  Heading,
-  Radio,
-  RadioGroup,
-  Stack,
-} from "@chakra-ui/react"
+import { RadioGroup } from "@/components/ui/radio"
+import { Accordion, AccordionItemProps, Box, Field, Flex, Heading, Stack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { forwardRef, useCallback, useEffect, useMemo, useState } from "react"
 import { FormProvider, useFieldArray, useForm } from "react-hook-form"
@@ -161,23 +147,21 @@ export const DocumentReferences = observer(function DocumentaReferences() {
       <Heading as="h2" fontSize="2xl" variant="yellowline">
         {t(`${i18nPrefix}.heading`)}
       </Heading>
-
       <FormProvider {...formMethods}>
         <Box>
-          <Accordion
-            index={openAccordionIndexes}
-            onChange={(expandedIndex) =>
-              setOpenAccordionIndexes(Array.isArray(expandedIndex) ? expandedIndex : [expandedIndex])
-            }
-            as={Stack}
-            spacing={2}
-            allowMultiple
-          >
-            {defaultDocumentReferencesAttributes.map((field, index) => (
-              <DocumentReferenceAccordionItem key={field.id} documentType={field.documentType} index={index} />
-            ))}
-          </Accordion>
-          <Stack spacing={"1.844rem"} mt={"1.844rem"}>
+          <Accordion.Root value={openAccordionIndexes} gap={2} multiple asChild>
+            <Stack
+              onValueChange={({ value: value }) =>
+                ((expandedIndex) =>
+                  setOpenAccordionIndexes(Array.isArray(expandedIndex) ? expandedIndex : [expandedIndex]))(value)
+              }
+            >
+              {defaultDocumentReferencesAttributes.map((field, index) => (
+                <DocumentReferenceAccordionItem key={field.id} documentType={field.documentType} index={index} />
+              ))}
+            </Stack>
+          </Accordion.Root>
+          <Stack gap={"1.844rem"} mt={"1.844rem"}>
             {otherDocumentReferencesAttributes.map((field, index) => (
               <OtherDocumentReferenceFormFields
                 key={field.id}
@@ -190,7 +174,7 @@ export const DocumentReferences = observer(function DocumentaReferences() {
           <Part3FormFooter
             handleSubmit={formMethods.handleSubmit}
             onSubmit={onSubmit}
-            isLoading={formMethods.formState.isSubmitting}
+            loading={formMethods.formState.isSubmitting}
           />
         </Box>
       </FormProvider>
@@ -217,45 +201,48 @@ export const DocumentReferenceAccordionItem = observer(
     const datePickerPortalId = `datePickerPortal-${documentType}`
 
     return (
-      <AccordionItem border="none" ref={ref} {...props}>
+      <Accordion.Item border="none" ref={ref} {...props} value="item-0">
         <h3>
-          <AccordionButton background={"greys.grey04"} borderTopRadius={"lg"} px={6}>
+          <Accordion.ItemTrigger background={"greys.grey04"} borderTopRadius={"lg"} px={6}>
             <Box as="span" flex="1" textAlign="left" fontWeight={"bold"}>
               {t(`${i18nPrefix}.documentTypes.${documentType}`)}
             </Box>
-            <AccordionIcon />
-          </AccordionButton>
+            <Accordion.ItemIndicator />
+          </Accordion.ItemTrigger>
         </h3>
-        <AccordionPanel as={Stack} spacing={8} px={6} pt={4} pb={"1.8rem"}>
-          <TextFormControl
-            maxW={largeInputWidth}
-            fieldName={`defaultDocumentReferencesAttributes.${index}.documentName`}
-            label={t(`${i18nPrefix}.documentFields.documentName`)}
-            required
-          />
-
-          {/* The date picker portal is needed to ensure the date picker is not cut off by the accordion */}
-          <Box id={datePickerPortalId}>
-            <DatePickerFormControl
-              fieldName={`defaultDocumentReferencesAttributes.${index}.dateIssued`}
-              label={t(`${i18nPrefix}.documentFields.dateIssued`)}
-              showOptional={false}
-              inputProps={{
-                portalId: datePickerPortalId,
-                isClearable: true,
-              }}
-              maxW={smallInputWidth}
-              required
-            />
-          </Box>
-          <TextFormControl
-            maxW={largeInputWidth}
-            fieldName={`defaultDocumentReferencesAttributes.${index}.preparedBy`}
-            label={t(`${i18nPrefix}.documentFields.preparedBy`)}
-            required
-          />
-        </AccordionPanel>
-      </AccordionItem>
+        <Accordion.ItemContent gap={8} px={6} pt={4} pb={"1.8rem"} asChild>
+          <Stack>
+            <Accordion.ItemBody>
+              <TextFormControl
+                maxW={largeInputWidth}
+                fieldName={`defaultDocumentReferencesAttributes.${index}.documentName`}
+                label={t(`${i18nPrefix}.documentFields.documentName`)}
+                required
+              />
+              {/* The date picker portal is needed to ensure the date picker is not cut off by the accordion */}
+              <Box id={datePickerPortalId}>
+                <DatePickerFormControl
+                  fieldName={`defaultDocumentReferencesAttributes.${index}.dateIssued`}
+                  label={t(`${i18nPrefix}.documentFields.dateIssued`)}
+                  showOptional={false}
+                  inputProps={{
+                    portalId: datePickerPortalId,
+                    isClearable: true,
+                  }}
+                  maxW={smallInputWidth}
+                  required
+                />
+              </Box>
+              <TextFormControl
+                maxW={largeInputWidth}
+                fieldName={`defaultDocumentReferencesAttributes.${index}.preparedBy`}
+                label={t(`${i18nPrefix}.documentFields.preparedBy`)}
+                required
+              />
+            </Accordion.ItemBody>
+          </Stack>
+        </Accordion.ItemContent>
+      </Accordion.Item>
     )
   })
 )
@@ -351,16 +338,27 @@ export function AdditionalDocumentsQuestion({ value = "no", onChange }: IAdditio
   const { t } = useTranslation()
 
   return (
-    <FormControl>
-      <FormLabel>{t(`${i18nPrefix}.otherDocumentQuestion`)}</FormLabel>
-      <RadioGroup value={value} onChange={onChange} display="flex" flexDirection="row" gap={"1rem !important"} mt={3}>
+    <Field.Root>
+      <Field.Label>{t(`${i18nPrefix}.otherDocumentQuestion`)}</Field.Label>
+      <RadioGroup.Root
+        value={value}
+        onValueChange={onChange}
+        display="flex"
+        flexDirection="row"
+        gap={"1rem !important"}
+        mt={3}
+      >
         <Flex
           justifyContent="center"
           alignItems="center"
           {...sharedRadioContainerProps}
           bg={getRadioBackgroundColor(value, "yes")}
         >
-          <Radio value="yes">{t(`${i18nPrefix}.otherDocumentAnswers.yes`)}</Radio>
+          <RadioGroup.Item value="yes">
+            <RadioGroup.ItemHiddenInput />
+            <RadioGroup.ItemIndicator />
+            <RadioGroup.ItemText>{t(`${i18nPrefix}.otherDocumentAnswers.yes`)}</RadioGroup.ItemText>
+          </RadioGroup.Item>
         </Flex>
         <Flex
           justifyContent="center"
@@ -368,9 +366,13 @@ export function AdditionalDocumentsQuestion({ value = "no", onChange }: IAdditio
           {...sharedRadioContainerProps}
           bg={getRadioBackgroundColor(value, "no")}
         >
-          <Radio value="no">{t(`${i18nPrefix}.otherDocumentAnswers.no`)}</Radio>
+          <RadioGroup.Item value="no">
+            <RadioGroup.ItemHiddenInput />
+            <RadioGroup.ItemIndicator />
+            <RadioGroup.ItemText>{t(`${i18nPrefix}.otherDocumentAnswers.no`)}</RadioGroup.ItemText>
+          </RadioGroup.Item>
         </Flex>
-      </RadioGroup>
-    </FormControl>
+      </RadioGroup.Root>
+    </Field.Root>
   )
 }

@@ -1,4 +1,5 @@
-import { Box, FormControl, FormLabel, InputGroup, useBreakpointValue, VStack } from "@chakra-ui/react"
+import { InputGroup } from "@/components/ui/input-group"
+import { Box, Field, useBreakpointValue, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
@@ -78,7 +79,7 @@ const StepCodeAddressSearch = observer(
 
     return (
       <FormProvider {...methods}>
-        <VStack w="full" spacing={0}>
+        <VStack w="full" gap={0}>
           <Controller
             key={searchKey}
             name="address"
@@ -103,8 +104,8 @@ const StepCodeAddressSearch = observer(
           />
           <Box aria-live="polite" w={"full"}>
             {showError && (
-              <FormControl w="full" zIndex={1} mt={4}>
-                <FormLabel fontWeight="bold">{t("ui.cityOrJurisdiction")}</FormLabel>
+              <Field.Root w="full" zIndex={1} mt={4}>
+                <Field.Label fontWeight="bold">{t("ui.cityOrJurisdiction")}</Field.Label>
                 <InputGroup w={isMobile ? "100%" : "57%"}>
                   <JurisdictionSelect
                     onChange={(value) => {
@@ -118,7 +119,7 @@ const StepCodeAddressSearch = observer(
                     menuPortalTarget={document.body}
                   />
                 </InputGroup>
-              </FormControl>
+              </Field.Root>
             )}
           </Box>
         </VStack>

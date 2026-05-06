@@ -1,4 +1,4 @@
-import { Box, Flex, Image, Link, Show, Spacer, Text } from "@chakra-ui/react"
+import { Box, Flex, Image, Link, Spacer, Text } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -28,17 +28,23 @@ export const StepCodeNavBar = observer(function StepCodeNavBar({ title, NavLinks
     >
       <Link href="/">
         <Box w={120} mr={2}>
-          <Image fit="contain" htmlHeight="64px" htmlWidth="166px" alt={t("site.linkHome")} src="/images/logo.svg" />
+          <Image
+            objectFit="contain"
+            htmlHeight="64px"
+            htmlWidth="166px"
+            alt={t("site.linkHome")}
+            src="/images/logo.svg"
+          />
         </Box>
       </Link>
-      <Show above="xl">
+      <Box hideBelow="xl">
         <Text fontSize="md" color="text.primary" fontWeight="bold">
           {title}
         </Text>
         <Text fontSize="sm" textTransform="uppercase" color="theme.yellow" fontWeight="bold" mb={2} ml={1}>
           {t("site.beta")}
         </Text>
-      </Show>
+      </Box>
       <Spacer />
       {NavLinks || null}
     </Flex>

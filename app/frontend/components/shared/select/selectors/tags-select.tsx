@@ -61,23 +61,24 @@ export const TagsSelect = observer(
 const Option = (props: OptionProps<IOption>) => {
   return (
     <components.Option {...props}>
-      <Tag bg={"greys.grey03"} color={"text.secondary"} fontSize={"xs"}>
+      <Tag.Root bg={"greys.grey03"} color={"text.secondary"} fontSize={"xs"}>
         <TagIcon size={"12px"} style={{ marginRight: "0.5rem" }} />
         {props.label}
-      </Tag>
+      </Tag.Root>
     </components.Option>
   )
 }
 
 const MultiValue = (props: MultiValueProps<IOption>) => {
   return (
-    <Tag
+    <Tag.Root
       bg={"greys.grey03"}
       color={"text.secondary"}
       fontSize={"xs"}
-      sx={{
+      css={{
         "--association-remove-icon-visibility": "hidden",
-        _hover: {
+
+        "& _hover": {
           "--association-remove-icon-visibility": "visible",
         },
       }}
@@ -90,11 +91,14 @@ const MultiValue = (props: MultiValueProps<IOption>) => {
         size={"xxs"}
         bg={"greys.grey03"}
         aria-label={"remove association"}
-        icon={<XIcon size={14} />}
-        sx={{ visibility: "var(--association-remove-icon-visibility)" }}
+        css={{
+          visibility: "var(--association-remove-icon-visibility)",
+        }}
         {...props?.removeProps}
-      />
-    </Tag>
+      >
+        <XIcon size={14} />
+      </IconButton>
+    </Tag.Root>
   )
 }
 

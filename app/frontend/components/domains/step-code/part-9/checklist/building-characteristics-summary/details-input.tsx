@@ -15,7 +15,8 @@ export const DetailsInput = ({ fieldName, isRemovable, isLast, onAdd, onRemove }
         </Box>
       )}
       {isLast && (
-        <Button size="sm" variant="link" leftIcon={<Plus />} onClick={onAdd}>
+        <Button size="sm" variant="plain" onClick={onAdd}>
+          <Plus />
           {t(`${i18nPrefix}.addLine`)}
         </Button>
       )}

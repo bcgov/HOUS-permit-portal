@@ -1,16 +1,4 @@
-import {
-  Box,
-  Container,
-  Grid,
-  Heading,
-  Link,
-  LinkBox,
-  LinkOverlay,
-  ListItem,
-  Text,
-  UnorderedList,
-  VStack,
-} from "@chakra-ui/react"
+import { Box, Container, Grid, Heading, Link, LinkBox, LinkOverlay, List, Text, VStack } from "@chakra-ui/react"
 import { CaretRight } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
@@ -52,7 +40,7 @@ export const StandardizationPreviewScreen = observer(function StandardizationPre
             transition="all 0.2s"
             cursor="pointer"
           >
-            <VStack align="start" spacing={4} h="full" justify="space-between">
+            <VStack align="start" gap={4} h="full" justify="space-between">
               <Box>
                 <Heading as="h4" size="sm" mb={3}>
                   {template.nickname}
@@ -62,8 +50,6 @@ export const StandardizationPreviewScreen = observer(function StandardizationPre
                 </Text>
               </Box>
               <LinkOverlay
-                as={RouterLink}
-                to={`/template-versions/${template.id}`}
                 color="text.link"
                 fontWeight="bold"
                 display="flex"
@@ -73,8 +59,11 @@ export const StandardizationPreviewScreen = observer(function StandardizationPre
                 alignSelf="flex-end"
                 width="full"
                 justifyContent="flex-end"
+                asChild
               >
-                {t("standardizationPreview.previewDraftForm")} <CaretRight />
+                <RouterLink to={`/template-versions/${template.id}`}>
+                  {t("standardizationPreview.previewDraftForm")} <CaretRight />
+                </RouterLink>
               </LinkOverlay>
             </VStack>
           </LinkBox>
@@ -86,9 +75,9 @@ export const StandardizationPreviewScreen = observer(function StandardizationPre
   return (
     <Box bg="greys.white" minH="calc(100vh - 200px)">
       <Container maxW="container.lg" py={16} px={8}>
-        <VStack spacing={16} align="start" w="full">
-          <VStack spacing={6} align="start" w="full">
-            <VStack spacing={2} align="start" w="full">
+        <VStack gap={16} align="start" w="full">
+          <VStack gap={6} align="start" w="full">
+            <VStack gap={2} align="start" w="full">
               <Heading as="h1" size="xl">
                 {t("standardizationPreview.title")}
               </Heading>
@@ -97,7 +86,7 @@ export const StandardizationPreviewScreen = observer(function StandardizationPre
               </Text>
             </VStack>
 
-            <VStack spacing={4} align="start" w="full">
+            <VStack gap={4} align="start" w="full">
               <Heading as="h2" variant="yellowline">
                 {t("standardizationPreview.about.title")}
               </Heading>
@@ -105,13 +94,13 @@ export const StandardizationPreviewScreen = observer(function StandardizationPre
               <Text>{t("standardizationPreview.about.description2")}</Text>
             </VStack>
 
-            <VStack spacing={4} align="start" w="full">
+            <VStack gap={4} align="start" w="full">
               <Heading as="h2" variant="yellowline">
                 {t("standardizationPreview.resources.title")}
               </Heading>
               <Text>{t("standardizationPreview.resources.description")}</Text>
 
-              <VStack spacing={4} align="start" pl={0} mt={2}>
+              <VStack gap={4} align="start" pl={0} mt={2}>
                 <Box>
                   <Text as="span" fontWeight="bold" display="block">
                     {t("standardizationPreview.resources.forms.title")}
@@ -139,49 +128,49 @@ export const StandardizationPreviewScreen = observer(function StandardizationPre
               </VStack>
             </VStack>
 
-            <VStack spacing={4} align="start" w="full">
+            <VStack gap={4} align="start" w="full">
               <Heading as="h2" variant="yellowline">
                 {t("standardizationPreview.voluntaryUse.title")}
               </Heading>
               <Text>{t("standardizationPreview.voluntaryUse.description1")}</Text>
             </VStack>
 
-            <VStack spacing={4} align="start" w="full">
+            <VStack gap={4} align="start" w="full">
               <Heading as="h2" variant="yellowline">
                 {t("standardizationPreview.benefits.title")}
               </Heading>
               <Text>{t("standardizationPreview.benefits.description")}</Text>
 
-              <VStack spacing={4} align="start" w="full" mt={2}>
+              <VStack gap={4} align="start" w="full" mt={2}>
                 <Box>
                   <Heading as="h3" size="md" mb={2}>
                     {t("standardizationPreview.benefits.applicants.title")}
                   </Heading>
-                  <UnorderedList spacing={1} pl={4}>
+                  <List.Root as="ul" gap={1} pl={4}>
                     {(t("standardizationPreview.benefits.applicants.list", { returnObjects: true }) as string[]).map(
                       (item, index) => (
-                        <ListItem key={item}>{item}</ListItem>
+                        <List.Item key={item}>{item}</List.Item>
                       )
                     )}
-                  </UnorderedList>
+                  </List.Root>
                 </Box>
 
                 <Box>
                   <Heading as="h3" size="md" mb={2}>
                     {t("standardizationPreview.benefits.localGovernments.title")}
                   </Heading>
-                  <UnorderedList spacing={1} pl={4}>
+                  <List.Root as="ul" gap={1} pl={4}>
                     {(
                       t("standardizationPreview.benefits.localGovernments.list", { returnObjects: true }) as string[]
                     ).map((item, index) => (
-                      <ListItem key={item}>{item}</ListItem>
+                      <List.Item key={item}>{item}</List.Item>
                     ))}
-                  </UnorderedList>
+                  </List.Root>
                 </Box>
               </VStack>
             </VStack>
 
-            <VStack spacing={4} align="start" w="full">
+            <VStack gap={4} align="start" w="full">
               <Heading as="h2" variant="yellowline">
                 {t("standardizationPreview.feedback.title")}
               </Heading>
@@ -190,8 +179,9 @@ export const StandardizationPreviewScreen = observer(function StandardizationPre
                 {t("standardizationPreview.feedback.email")}
                 <Link
                   href={`mailto:${t("standardizationPreview.feedback.emailAddress")}`}
-                  isExternal
                   textDecoration="underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
                   {t("standardizationPreview.feedback.emailAddress")}
                 </Link>
@@ -205,8 +195,9 @@ export const StandardizationPreviewScreen = observer(function StandardizationPre
                   {t("standardizationPreview.feedback.demo.description")}{" "}
                   <Link
                     href="https://e1.envoke.com/ext/pages/6e7bc0aa50913a261f468c45f52734e9"
-                    isExternal
                     textDecoration="underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
                     {t("standardizationPreview.feedback.demo.link")}
                   </Link>
@@ -214,7 +205,7 @@ export const StandardizationPreviewScreen = observer(function StandardizationPre
               </Box>
             </VStack>
 
-            <VStack spacing={4} align="start" w="full">
+            <VStack gap={4} align="start" w="full">
               <Heading as="h2" variant="yellowline">
                 {t("standardizationPreview.explore.title")}
               </Heading>
@@ -229,9 +220,9 @@ export const StandardizationPreviewScreen = observer(function StandardizationPre
             </VStack>
           </VStack>
 
-          <VStack spacing={8} align="start" w="full">
+          <VStack gap={8} align="start" w="full">
             {availableForAdoption.length > 0 && (
-              <VStack spacing={4} align="start" w="full">
+              <VStack gap={4} align="start" w="full">
                 <Heading as="h2" variant="yellowline">
                   {t("standardizationPreview.availableForAdoption.title")}
                 </Heading>
@@ -240,7 +231,7 @@ export const StandardizationPreviewScreen = observer(function StandardizationPre
             )}
 
             {underDevelopment.length > 0 && (
-              <VStack spacing={4} align="start" w="full">
+              <VStack gap={4} align="start" w="full">
                 <Heading as="h2" variant="yellowline">
                   {t("standardizationPreview.underDevelopment.title")}
                 </Heading>

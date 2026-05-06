@@ -1,15 +1,4 @@
-import {
-  Button,
-  ButtonGroup,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  useDisclosure,
-} from "@chakra-ui/react"
+import { Button, ButtonGroup, Dialog, Portal, useDisclosure } from "@chakra-ui/react"
 import { ArrowCounterClockwise } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
@@ -18,7 +7,7 @@ import { useNavigate } from "react-router-dom"
 import { useMst } from "../../../../setup/root"
 
 export const RestartConfirmationModal = observer(function RestartStepCodeConfirmationModal() {
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { open, onOpen, onClose } = useDisclosure()
   const { stepCodeStore } = useMst()
   const navigate = useNavigate()
 
@@ -36,31 +25,42 @@ export const RestartConfirmationModal = observer(function RestartStepCodeConfirm
 
   return (
     <>
-      <Button variant="tertiary" rightIcon={<ArrowCounterClockwise />} onClick={onOpen}>
+      <Button variant="tertiary" onClick={onOpen}>
         {t("stepCode.restart.trigger")}
+        <ArrowCounterClockwise />
       </Button>
-
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader fontSize={"2xl"} mt={2}>
-            {t("stepCode.restart.confirm.title")}
-          </ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>{t("stepCode.restart.confirm.body")}</ModalBody>
-
-          <ModalFooter justifyContent={"flex-start"}>
-            <ButtonGroup spacing={4}>
-              <Button variant={"primary"} onClick={handleDeleteStepCode} leftIcon={<ArrowCounterClockwise />}>
-                {t("stepCode.restart.trigger")}
-              </Button>
-              <Button variant={"secondary"} onClick={onClose}>
-                {t("ui.neverMind")}
-              </Button>
-            </ButtonGroup>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <Dialog.Root
+        open={open}
+        onOpenChange={(e) => {
+          if (!e.open) {
+            onClose()
+          }
+        }}
+      >
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              <Dialog.Header fontSize={"2xl"} mt={2}>
+                {t("stepCode.restart.confirm.title")}
+              </Dialog.Header>
+              <Dialog.CloseTrigger />
+              <Dialog.Body>{t("stepCode.restart.confirm.body")}</Dialog.Body>
+              <Dialog.Footer justifyContent={"flex-start"}>
+                <ButtonGroup gap={4}>
+                  <Button variant={"primary"} onClick={handleDeleteStepCode}>
+                    <ArrowCounterClockwise />
+                    {t("stepCode.restart.trigger")}
+                  </Button>
+                  <Button variant={"secondary"} onClick={onClose}>
+                    {t("ui.neverMind")}
+                  </Button>
+                </ButtonGroup>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
     </>
   )
 })

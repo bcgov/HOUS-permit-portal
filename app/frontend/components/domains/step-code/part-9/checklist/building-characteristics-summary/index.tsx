@@ -14,7 +14,7 @@ interface IProps {
 export const BuildingCharacteristicsSummary = function BuildingCharacteristicsSummary({ checklist }: IProps) {
   return (
     <ChecklistSection heading={t(`${i18nPrefix}.heading`)}>
-      <VStack spacing={6}>
+      <VStack gap={6}>
         <StaticCharacteristicsGrid />
         <DynamicCharacteristicsGrid checklist={checklist} />
       </VStack>

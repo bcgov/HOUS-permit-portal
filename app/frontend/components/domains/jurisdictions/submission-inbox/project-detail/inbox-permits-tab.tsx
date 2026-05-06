@@ -44,14 +44,14 @@ export const InboxPermitsTab = observer(function InboxPermitsTab({ permitProject
   return (
     <Flex direction="column" flex={1} minH={0} minW={0} bg="greys.white" p={4} overflow="hidden">
       <Box as="section" mb={6} flexShrink={0}>
-        <HStack align="center" spacing={4} mb={4}>
+        <HStack align="center" gap={4} mb={4}>
           <ClipboardText size={32} />
           <Heading as="h2" size="lg" mb={0}>
             {t("submissionInbox.projectDetail.permits")}
           </Heading>
         </HStack>
 
-        <VStack align="stretch" spacing={4}>
+        <VStack align="stretch" gap={4}>
           <Flex
             w="full"
             align="center"
@@ -64,25 +64,28 @@ export const InboxPermitsTab = observer(function InboxPermitsTab({ permitProject
           >
             <MagnifyingGlass size={18} weight="bold" color="var(--chakra-colors-gray-500)" aria-hidden />
             <Box
-              as="input"
               flex={1}
               minW={0}
               py={2}
               border="none"
               outline="none"
               fontSize="sm"
-              placeholder={t("submissionInbox.searchPlaceholder")}
               _placeholder={{ color: "text.secondary" }}
-              value={permitProject.query ?? ""}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                permitProject.setQuery(e.target.value)
-                permitProject.search()
-              }}
-            />
+              asChild
+            >
+              <input
+                placeholder={t("submissionInbox.searchPlaceholder")}
+                value={permitProject.query ?? ""}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  permitProject.setQuery(e.target.value)
+                  permitProject.search()
+                }}
+              />
+            </Box>
           </Flex>
 
           <Flex w="full" flexWrap="wrap" alignItems="center" columnGap={3} rowGap={3}>
-            <ButtonGroup isAttached variant="outline" size="sm" flexShrink={0}>
+            <ButtonGroup attached variant="outline" size="sm" flexShrink={0}>
               <Button
                 borderRightWidth={2}
                 onClick={() => {
@@ -92,10 +95,12 @@ export const InboxPermitsTab = observer(function InboxPermitsTab({ permitProject
                 fontWeight={permitProject.displayMode === EInboxDisplayMode.list ? "bold" : "normal"}
                 borderColor={permitProject.displayMode === EInboxDisplayMode.list ? "theme.blueActive" : "border.light"}
                 bg={permitProject.displayMode === EInboxDisplayMode.list ? "background.blueLight" : undefined}
-                leftIcon={<RadioDot active={permitProject.displayMode === EInboxDisplayMode.list} />}
-                rightIcon={<Icon as={ListDashes} />}
               >
+                <RadioDot active={permitProject.displayMode === EInboxDisplayMode.list} />
                 {t("submissionInbox.list")}
+                <Icon asChild>
+                  <ListDashes />
+                </Icon>
               </Button>
               <Button
                 onClick={() => {
@@ -108,10 +113,10 @@ export const InboxPermitsTab = observer(function InboxPermitsTab({ permitProject
                   permitProject.displayMode === EInboxDisplayMode.columns ? "theme.blueActive" : "border.light"
                 }
                 bg={permitProject.displayMode === EInboxDisplayMode.columns ? "background.blueLight" : undefined}
-                leftIcon={<RadioDot active={permitProject.displayMode === EInboxDisplayMode.columns} />}
-                rightIcon={<Columns />}
               >
+                <RadioDot active={permitProject.displayMode === EInboxDisplayMode.columns} />
                 {t("submissionInbox.columns")}
+                <Columns />
               </Button>
             </ButtonGroup>
 
@@ -164,7 +169,7 @@ export const InboxPermitsTab = observer(function InboxPermitsTab({ permitProject
             </Flex>
 
             <Button
-              variant="link"
+              variant="plain"
               size="sm"
               flexShrink={0}
               ml={{ base: 0, lg: "auto" }}
@@ -189,7 +194,6 @@ export const InboxPermitsTab = observer(function InboxPermitsTab({ permitProject
             )}
         </VStack>
       </Box>
-
       {permitProject.displayMode === EInboxDisplayMode.list ? (
         <Flex flex={1} minH={0} minW={0} direction="column" overflow="hidden">
           <ApplicationInboxTable searchStore={permitProject} applications={applications} />

@@ -49,13 +49,13 @@ export const BuilderHeader = observer(function BuilderHeader({
           {t("requirementTemplate.edit.title")}
         </Text>
       </HStack>
-      <VStack spacing={2} w={"full"} alignItems={"flex-start"} py={5}>
+      <VStack gap={2} w={"full"} alignItems={"flex-start"} py={5}>
         {renderHeading ? renderHeading() : <Heading as="h1">{requirementTemplate.nickname}</Heading>}
         <HStack>
           <Text fontWeight={700}>{t("requirementTemplate.fields.description")}:</Text>
           {renderDescription ? renderDescription() : <Text as="span">{requirementTemplate.description}</Text>}
         </HStack>
-        <HStack alignItems={"center"} spacing={2}>
+        <HStack alignItems={"center"} gap={2}>
           <TemplateStatusTag
             status={status}
             scheduledFor={status === ETemplateVersionStatus.scheduled && versionDate ? versionDate : undefined}

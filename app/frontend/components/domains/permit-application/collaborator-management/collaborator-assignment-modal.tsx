@@ -1,4 +1,4 @@
-import { Button, Modal, ModalContent, ModalOverlay, Text, useDisclosure } from "@chakra-ui/react"
+import { Button, Dialog, Portal, Text, useDisclosure } from "@chakra-ui/react"
 import { Users } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
@@ -33,7 +33,7 @@ export const CollaboratorAssignmentModal = observer(function AssignmentModal({
     requirementBlockId
   )
   const existingCollaboratorIds = new Set<string>(existingAssignments.map((a) => a.collaborator.id))
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { open, onOpen, onClose } = useDisclosure()
   const createConfirmationModalDisclosureProps = useDisclosure()
   const [currentScreen, setCurrentScreen] = React.useState<EAssignmentModalScreen>(INITIAL_SCREEN)
   const [openAssignmentConfirmationModals, setOpenAssignmentConfirmationModals] = React.useState<Set<string>>(new Set())
@@ -55,18 +55,18 @@ export const CollaboratorAssignmentModal = observer(function AssignmentModal({
   }
 
   useEffect(() => {
-    if (isOpen) {
+    if (open) {
       changeScreen(INITIAL_SCREEN)
       setOpenAssignmentConfirmationModals(new Set())
     }
-  }, [isOpen])
+  }, [open])
 
   useEffect(() => {
     contentRef?.current?.focus()
   }, [currentScreen])
 
   const onModalClose = () => {
-    if (openAssignmentConfirmationModals.size > 0 || createConfirmationModalDisclosureProps.isOpen) {
+    if (openAssignmentConfirmationModals.size > 0 || createConfirmationModalDisclosureProps.open) {
       return
     }
 
@@ -106,81 +106,93 @@ export const CollaboratorAssignmentModal = observer(function AssignmentModal({
         onKeyDown={(e) => {
           e.stopPropagation()
         }}
-        leftIcon={<Users />}
         variant={"link"}
       >
+        <Users />
         <Text as={"span"} textDecoration={"underline"}>
           {t("permitCollaboration.popover.triggerButton", { count: existingAssignments.length })}
         </Text>
       </Button>
-      <Modal isOpen={isOpen} onClose={onModalClose} isCentered>
-        <ModalOverlay />
-        <ModalContent
-          w={{ base: "calc(100vw - 2rem)", md: "370px" }}
-          maxW="calc(100vw - 2rem)"
-          maxH="min(560px, calc(100vh - 2rem))"
-          overflow="hidden"
-          display="flex"
-          flexDirection="column"
-          ref={contentRef}
-        >
-          {currentScreen === EAssignmentModalScreen.collaborationAssignment && (
-            <CollaborationAssignmentModalContent
-              onSelect={async (collaboratorId) => {
-                const response = await permitApplication.assignCollaborator(
-                  collaboratorId,
-                  ECollaboratorType.assignee,
-                  requirementBlockId
-                )
-                response && onClose()
-              }}
-              onClose={onClose}
-              takenCollaboratorIds={existingCollaboratorIds}
-              getConfirmationModalDisclosureProps={createAssignmentConfirmationModalDisclosureProps}
-              transitionToInvite={
-                canManage && collaborationType === ECollaborationType.submission
-                  ? () => changeScreen(EAssignmentModalScreen.collaboratorInvite)
-                  : undefined
-              }
-              selectedCollaborations={existingAssignments}
-              selectedTitle={t("permitCollaboration.popover.collaborations.title")}
-              selectedEmptyText={t("permitCollaboration.popover.assignment.noneAssigned")}
-              onUnselectSelected={
-                canManage
-                  ? async (permitCollaboration) => {
-                      if (!permitCollaboration.id) return
+      <Dialog.Root
+        open={open}
+        placement="center"
+        onOpenChange={(e) => {
+          if (!e.open) {
+            onModalClose()
+          }
+        }}
+      >
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content
+              w={{ base: "calc(100vw - 2rem)", md: "370px" }}
+              maxW="calc(100vw - 2rem)"
+              maxH="min(560px, calc(100vh - 2rem))"
+              overflow="hidden"
+              display="flex"
+              flexDirection="column"
+              ref={contentRef}
+            >
+              {currentScreen === EAssignmentModalScreen.collaborationAssignment && (
+                <CollaborationAssignmentModalContent
+                  onSelect={async (collaboratorId) => {
+                    const response = await permitApplication.assignCollaborator(
+                      collaboratorId,
+                      ECollaboratorType.assignee,
+                      requirementBlockId
+                    )
+                    response && onClose()
+                  }}
+                  onClose={onClose}
+                  takenCollaboratorIds={existingCollaboratorIds}
+                  getConfirmationModalDisclosureProps={createAssignmentConfirmationModalDisclosureProps}
+                  transitionToInvite={
+                    canManage && collaborationType === ECollaborationType.submission
+                      ? () => changeScreen(EAssignmentModalScreen.collaboratorInvite)
+                      : undefined
+                  }
+                  selectedCollaborations={existingAssignments}
+                  selectedTitle={t("permitCollaboration.popover.collaborations.title")}
+                  selectedEmptyText={t("permitCollaboration.popover.assignment.noneAssigned")}
+                  onUnselectSelected={
+                    canManage
+                      ? async (permitCollaboration) => {
+                          if (!permitCollaboration.id) return
 
-                      try {
-                        const response = await permitApplication.unassignPermitCollaboration(permitCollaboration.id)
-                        response && onClose()
-                      } finally {
-                        contentRef.current?.focus()
-                      }
-                    }
-                  : undefined
-              }
-              renderSelectedFooter={(permitCollaboration) => (
-                <Reinvite
-                  permitCollaboration={permitCollaboration as IPermitCollaboration}
-                  onReinvite={permitApplication.reinvitePermitCollaboration}
+                          try {
+                            const response = await permitApplication.unassignPermitCollaboration(permitCollaboration.id)
+                            response && onClose()
+                          } finally {
+                            contentRef.current?.focus()
+                          }
+                        }
+                      : undefined
+                  }
+                  renderSelectedFooter={(permitCollaboration) => (
+                    <Reinvite
+                      permitCollaboration={permitCollaboration as IPermitCollaboration}
+                      onReinvite={permitApplication.reinvitePermitCollaboration}
+                    />
+                  )}
+                  showSearch={canManage}
+                  collaborationType={collaborationType}
                 />
               )}
-              showSearch={canManage}
-              collaborationType={collaborationType}
-            />
-          )}
-          {canManage &&
-            currentScreen === EAssignmentModalScreen.collaboratorInvite &&
-            collaborationType === ECollaborationType.submission && (
-              <CollaboratorInviteModalContent
-                onInviteSuccess={() => changeScreen(EAssignmentModalScreen.collaborationAssignment)}
-                onClose={() => changeScreen(EAssignmentModalScreen.collaborationAssignment)}
-                onInvite={onInviteCollaborator}
-                confirmationModalDisclosureProps={createConfirmationModalDisclosureProps}
-              />
-            )}
-        </ModalContent>
-      </Modal>
+              {canManage &&
+                currentScreen === EAssignmentModalScreen.collaboratorInvite &&
+                collaborationType === ECollaborationType.submission && (
+                  <CollaboratorInviteModalContent
+                    onInviteSuccess={() => changeScreen(EAssignmentModalScreen.collaborationAssignment)}
+                    onClose={() => changeScreen(EAssignmentModalScreen.collaborationAssignment)}
+                    onInvite={onInviteCollaborator}
+                    confirmationModalDisclosureProps={createConfirmationModalDisclosureProps}
+                  />
+                )}
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
     </>
   )
 })

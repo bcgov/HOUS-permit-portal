@@ -1,4 +1,5 @@
-import { FormControl, FormHelperText, FormLabel, Grid, Input, Text, Tooltip } from "@chakra-ui/react"
+import { Tooltip } from "@/components/ui/tooltip"
+import { Field, Grid, Input, Text } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -24,54 +25,51 @@ export const StepCodeRequirements = observer(function StepCodeRequirementsSummar
       <GridColumnHeader colSpan={4}>
         <Text>{t(`${i18nPrefix}.stepCodeRequirements.title`)}</Text>
       </GridColumnHeader>
-
       <GridData>
-        <FormLabel m={0}>{t(`${i18nPrefix}.stepCodeRequirements.occupancy`)}</FormLabel>
+        <Field.Label m={0}>{t(`${i18nPrefix}.stepCodeRequirements.occupancy`)}</Field.Label>
       </GridData>
       <GridData>
-        <FormLabel m={0}>{t("stepCode.part3.metrics.teui.label")}</FormLabel>
+        <Field.Label m={0}>{t("stepCode.part3.metrics.teui.label")}</Field.Label>
       </GridData>
       <GridData>
-        <FormLabel m={0}>{t("stepCode.part3.metrics.tedi.label")}</FormLabel>
+        <Field.Label m={0}>{t("stepCode.part3.metrics.tedi.label")}</Field.Label>
       </GridData>
       <GridData>
-        <FormLabel m={0}>{t("stepCode.part3.metrics.ghgi.label")}</FormLabel>
+        <Field.Label m={0}>{t("stepCode.part3.metrics.ghgi.label")}</Field.Label>
       </GridData>
-
       {checklist.complianceReport.performance.requirements.stepCodePortions.occupanciesRequirements.map((ocReq) => (
         <>
           <GridData justifyContent="flex-end" borderTop="none">
-            <Tooltip label={t(`stepCode.part3.stepCodeOccupancyKeys.${ocReq.occupancy}`)}>
-              <Input isDisabled value={t(`stepCode.part3.stepCodeOccupancyKeys.${ocReq.occupancy}`)} />
+            <Tooltip content={t(`stepCode.part3.stepCodeOccupancyKeys.${ocReq.occupancy}`)}>
+              <Input disabled value={t(`stepCode.part3.stepCodeOccupancyKeys.${ocReq.occupancy}`)} />
             </Tooltip>
           </GridData>
           <GridData borderTop="none">
-            <FormControl>
-              <FormHelperText mt={0}>
+            <Field.Root>
+              <Field.HelperText mt={0}>
                 <Trans i18nKey={"stepCode.part3.metrics.teui.units"} components={{ sup: <sup /> }} />
-              </FormHelperText>
-              <Input isDisabled value={roundMetric(ocReq.teui)} />
-            </FormControl>
+              </Field.HelperText>
+              <Input disabled value={roundMetric(ocReq.teui)} />
+            </Field.Root>
           </GridData>
           <GridData borderTop="none">
-            <FormControl>
-              <FormHelperText mt={0}>
+            <Field.Root>
+              <Field.HelperText mt={0}>
                 <Trans i18nKey={"stepCode.part3.metrics.tedi.units"} components={{ sup: <sup /> }} />
-              </FormHelperText>
-              <Input isDisabled value={roundMetric(ocReq.tedi)} />
-            </FormControl>
+              </Field.HelperText>
+              <Input disabled value={roundMetric(ocReq.tedi)} />
+            </Field.Root>
           </GridData>
           <GridData borderTop="none">
-            <FormControl>
-              <FormHelperText mt={0}>
+            <Field.Root>
+              <Field.HelperText mt={0}>
                 <Trans i18nKey={"stepCode.part3.metrics.ghgi.units"} components={{ sup: <sup />, sub: <sub /> }} />
-              </FormHelperText>
-              <Input isDisabled value={roundMetric(ocReq.ghgi)} />
-            </FormControl>
+              </Field.HelperText>
+              <Input disabled value={roundMetric(ocReq.ghgi)} />
+            </Field.Root>
           </GridData>
         </>
       ))}
-
       <GridData colSpan={4}>
         <Text>
           <Trans

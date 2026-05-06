@@ -1,16 +1,5 @@
-import {
-  Box,
-  Button,
-  ButtonGroup,
-  Flex,
-  Grid,
-  Heading,
-  HStack,
-  Text,
-  Tooltip,
-  useDisclosure,
-  VStack,
-} from "@chakra-ui/react"
+import { Tooltip } from "@/components/ui/tooltip"
+import { Box, Button, ButtonGroup, Flex, Grid, Heading, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import { CaretRight, Info, Pencil, SquaresFour, Steps } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
@@ -51,7 +40,7 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
   const { permitProjectStore } = useMst()
   const [isEditing, setIsEditing] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { isOpen: isMapFullscreen, onOpen: onOpenMapFullscreen, onClose: onCloseMapFullscreen } = useDisclosure()
+  const { open: isMapFullscreen, onOpen: onOpenMapFullscreen, onClose: onCloseMapFullscreen } = useDisclosure()
 
   const formMethods = useForm<IProjectInfoForm>({
     defaultValues: {
@@ -113,7 +102,7 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
   return (
     <Flex direction="column" flex={1} bg="greys.white" p={10}>
       <Box as="section" mb={10}>
-        <HStack align="center" spacing={4} mb={6}>
+        <HStack align="center" gap={4} mb={6}>
           <SquaresFour size={32} />
           <Heading as="h2" size="lg" mb={0}>
             {t("permitProject.overview.title")}
@@ -126,7 +115,8 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
                 {t("permitProject.overview.projectInformation")}
               </Heading>
               {!isEditing && (
-                <Button variant="link" leftIcon={<Pencil size={16} />} onClick={handleEditClick} color="text.link">
+                <Button variant="plain" onClick={handleEditClick} color="text.link">
+                  <Pencil size={16} />
                   {t("permitProject.overview.editProjectInfo")}
                 </Button>
               )}
@@ -135,7 +125,7 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
             {isEditing ? (
               <FormProvider {...formMethods}>
                 <form onSubmit={handleSubmit(onSubmit)}>
-                  <VStack spacing={4} align="stretch">
+                  <VStack gap={4} align="stretch">
                     {fullAddress && (
                       <Text fontSize="sm" color="text.secondary">
                         {t("permitProject.overview.currentAddress", { address: fullAddress })}
@@ -153,10 +143,10 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
                     />
 
                     <ButtonGroup spacing={3} mt={4}>
-                      <Button type="submit" variant="primary" isLoading={isSubmitting}>
+                      <Button type="submit" variant="primary" loading={isSubmitting}>
                         {t("permitProject.overview.saveProjectInfo")}
                       </Button>
-                      <Button variant="secondary" onClick={handleCancelClick} isDisabled={isSubmitting}>
+                      <Button variant="secondary" onClick={handleCancelClick} disabled={isSubmitting}>
                         {t("permitProject.overview.cancelEditProjectInfo")}
                       </Button>
                     </ButtonGroup>
@@ -187,7 +177,7 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
             )}
 
             {!isEditing && (
-              <VStack align="flex-start" spacing={4} mt={8}>
+              <VStack align="flex-start" gap={4} mt={8}>
                 <RouterLinkButton
                   variant="link"
                   to={`/jurisdictions/${jurisdiction?.id}`}
@@ -206,7 +196,7 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
             )}
           </Box>
           <Box>
-            <Tooltip label={t("permitProject.overview.mapVisualReferenceDisclaimer")} hasArrow>
+            <Tooltip content={t("permitProject.overview.mapVisualReferenceDisclaimer")} showArrow>
               <Box height={{ base: "200px", lg: "250px" }} borderRadius="md" overflow="hidden">
                 <ProjectMap
                   coordinates={permitProject.mapPosition}
@@ -219,7 +209,6 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
           </Box>
         </Grid>
       </Box>
-
       <Box as="section">
         <Flex justify="space-between" align="center" mb={6}>
           <Heading as="h3" size="md">
@@ -264,9 +253,8 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
           </>
         )}
       </Box>
-
       <FullscreenMapModal
-        isOpen={isMapFullscreen}
+        open={isMapFullscreen}
         onClose={onCloseMapFullscreen}
         coordinates={permitProject.mapPosition}
         pid={pid}

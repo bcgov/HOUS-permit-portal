@@ -46,7 +46,7 @@ export const Header = observer(function Header({ templateVersion }: IProps) {
         h={"fit-content"}
         w={"fit-content"}
       />
-      <VStack spacing={2} w={"full"} alignItems={"flex-start"} py={5}>
+      <VStack gap={2} w={"full"} alignItems={"flex-start"} py={5}>
         <Heading as="h1" mb={0}>
           <Trans
             i18nKey={"apiMappingsSetup.edit.heading"}
@@ -60,8 +60,8 @@ export const Header = observer(function Header({ templateVersion }: IProps) {
           />
         </Heading>
         <TemplateStatusTag status={templateVersion.status} />
-        <HStack spacing={6} fontSize={"sm"}>
-          <HStack alignItems={"flex-start"} spacing={2}>
+        <HStack gap={6} fontSize={"sm"}>
+          <HStack alignItems={"flex-start"} gap={2}>
             <Text>{t("apiMappingsSetup.edit.permitTemplate")}:</Text>
             <VersionTag versionDate={templateVersion.versionDate} py={0} />
           </HStack>

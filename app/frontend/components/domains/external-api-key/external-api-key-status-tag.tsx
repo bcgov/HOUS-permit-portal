@@ -28,7 +28,7 @@ export const ExternalApiKeyStatusTag = ({ status }: IExternalApiKeyStatusTagProp
   const borderColor = statusBorderColors[status]
   const { t } = useTranslation()
   return (
-    <Tag
+    <Tag.Root
       p={1}
       pr={2}
       borderRadius="sm"
@@ -41,6 +41,6 @@ export const ExternalApiKeyStatusTag = ({ status }: IExternalApiKeyStatusTagProp
         {statusIcons[status]}
         <Text>{t(`externalApiKey.status.${status}`)}</Text>
       </HStack>
-    </Tag>
+    </Tag.Root>
   )
 }

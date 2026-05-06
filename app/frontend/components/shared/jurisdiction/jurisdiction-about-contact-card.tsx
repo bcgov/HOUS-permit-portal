@@ -29,7 +29,13 @@ export const JurisdictionAboutContactCard = ({ contact, ...rest }: IJurisdiction
               {t("contact.fields.telephone")}
             </Text>
             {contact.phone ? (
-              <Link href={`tel:${contact.phone}`} color="text.link" textDecoration="underline" isExternal>
+              <Link
+                href={`tel:${contact.phone}`}
+                color="text.link"
+                textDecoration="underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 {contact.phone}
               </Link>
             ) : null}
@@ -44,7 +50,13 @@ export const JurisdictionAboutContactCard = ({ contact, ...rest }: IJurisdiction
               {t("contact.fields.email")}
             </Text>
             {contact.email ? (
-              <Link href={`mailto:${contact.email}`} color="text.link" textDecoration="underline" isExternal>
+              <Link
+                href={`mailto:${contact.email}`}
+                color="text.link"
+                textDecoration="underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 {contact.email}
               </Link>
             ) : null}

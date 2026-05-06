@@ -24,7 +24,7 @@ export const Airtightness = function Airtightness({ compliance }: IProps) {
           inputProps={{ isDisabled: true, textAlign: "center", value: compliance.achRequirement || "-" }}
           hint={t(`${i18nPrefix}.max`)}
           rightElement={
-            <VStack spacing={0}>
+            <VStack gap={0}>
               <UnitsText>{t(`${i18nPrefix}.achUnits.numerator`)}</UnitsText>
               <UnitsText>{t(`${i18nPrefix}.achUnits.denominator`)}</UnitsText>
             </VStack>
@@ -35,7 +35,7 @@ export const Airtightness = function Airtightness({ compliance }: IProps) {
         <TextFormControl
           inputProps={{ isDisabled: true, textAlign: "center", value: compliance.ach || "-" }}
           rightElement={
-            <VStack spacing={0}>
+            <VStack gap={0}>
               <UnitsText>{t(`${i18nPrefix}.achUnits.numerator`)}</UnitsText>
               <UnitsText>{t(`${i18nPrefix}.achUnits.denominator`)}</UnitsText>
             </VStack>
@@ -45,14 +45,13 @@ export const Airtightness = function Airtightness({ compliance }: IProps) {
       <GridData rowSpan={3} alignItems="center" justifyContent="center">
         <RequirementsMetTag success={compliance.airtightnessPassed} />
       </GridData>
-
       <GridRowHeader>{t(`${i18nPrefix}.nla`)}</GridRowHeader>
       <GridData>
         <TextFormControl
           inputProps={{ isDisabled: true, textAlign: "center", value: compliance.nlaRequirement || "-" }}
           hint={t(`${i18nPrefix}.max`)}
           rightElement={
-            <VStack spacing={0}>
+            <VStack gap={0}>
               <UnitsText>{t(`${i18nPrefix}.nlaUnits.numerator`)}</UnitsText>
               <UnitsText>{t(`${i18nPrefix}.nlaUnits.denominator`)}</UnitsText>
             </VStack>
@@ -63,14 +62,13 @@ export const Airtightness = function Airtightness({ compliance }: IProps) {
         <TextFormControl
           inputProps={{ isDisabled: true, textAlign: "center", value: compliance.nla || "-" }}
           rightElement={
-            <VStack spacing={0}>
+            <VStack gap={0}>
               <UnitsText>{t(`${i18nPrefix}.nlaUnits.numerator`)}</UnitsText>
               <UnitsText>{t(`${i18nPrefix}.nlaUnits.denominator`)}</UnitsText>
             </VStack>
           }
         />
       </GridData>
-
       <GridRowHeader>{t(`${i18nPrefix}.nlr`)}</GridRowHeader>
       <GridData>
         <TextFormControl
