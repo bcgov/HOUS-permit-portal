@@ -15,6 +15,10 @@ class ReleaseNotePolicy < ApplicationPolicy
     true
   end
 
+  def show?
+    true
+  end
+
   class Scope < Scope
     def resolve
       return scope.all if user.super_admin?
