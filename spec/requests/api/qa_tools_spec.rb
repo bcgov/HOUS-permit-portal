@@ -76,14 +76,6 @@ RSpec.describe "Api::QaTools", type: :request do
   end
 
   before do
-    requirement_template.permit_type.update!(enabled: true)
-    requirement_template.activity.update!(enabled: true)
-
-    create(
-      :permit_type_submission_contact,
-      jurisdiction: jurisdiction,
-      permit_type: requirement_template.permit_type
-    )
     allow(TemplateVersion).to receive(:cached_published_ids).and_return(
       [template_version.id]
     )
@@ -184,8 +176,6 @@ RSpec.describe "Api::QaTools", type: :request do
         :permit_application,
         submitter: submitter,
         jurisdiction: jurisdiction,
-        permit_type: requirement_template.permit_type,
-        activity: requirement_template.activity,
         template_version: template_version
       )
     end

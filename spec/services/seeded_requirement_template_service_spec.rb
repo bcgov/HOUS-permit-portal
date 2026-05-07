@@ -28,10 +28,8 @@ RSpec.describe SeededRequirementTemplateService, type: :service do
     it "keeps Part 9 and Part 3 step code requirements separated" do
       described_class.seed!
 
-      part_9_input_types =
-        requirement_input_types("Sandbox - Large Part 9 Template")
-      part_3_input_types =
-        requirement_input_types("Sandbox - Large Part 3 Template")
+      part_9_input_types = requirement_input_types("Large Part 9 Template")
+      part_3_input_types = requirement_input_types("Large Part 3 Template")
 
       expect(part_9_input_types).to include("energy_step_code")
       expect(part_9_input_types).not_to include("energy_step_code_part_3")
@@ -42,10 +40,7 @@ RSpec.describe SeededRequirementTemplateService, type: :service do
     it "includes requirement-level and block-level conditionals in snapshots" do
       described_class.seed!
 
-      template =
-        RequirementTemplate.find_by!(
-          nickname: "Sandbox - Large Part 9 Template"
-        )
+      template = RequirementTemplate.find_by!(nickname: "Large Part 9 Template")
       version = template.published_template_version
 
       requirements = version.form_json_requirements

@@ -19,7 +19,7 @@ RSpec.describe TemplateVersionPreview::ManagementService,
   end
 
   describe "#invite_previewers!" do
-    subject { service.invite_previewers!(emails) }
+    subject(:result) { service.invite_previewers!(emails) }
 
     let(:emails) { [] }
 
@@ -29,18 +29,17 @@ RSpec.describe TemplateVersionPreview::ManagementService,
       let(:emails) { %w[user1@example.com user2@example.com] }
 
       it "creates template version previews for existing users" do
-        expect { subject }.to change(TemplateVersionPreview, :count).by(2)
+        expect { result }.to change(TemplateVersionPreview, :count).by(2)
 
-        expect(subject[:previews].map(&:previewer_id)).to contain_exactly(
+        expect(result[:previews].map(&:previewer_id)).to contain_exactly(
           user1.id,
           user2.id
         )
-        expect(subject[:failed_emails]).to be_empty
+        expect(result[:failed_emails]).to be_empty
       end
 
       it "sends notification emails to confirmed and active users" do
-        subject
-        previews = subject[:previews]
+        previews = result[:previews]
 
         expect(PermitHubMailer).to have_received(
           :notify_template_version_preview
@@ -57,7 +56,7 @@ RSpec.describe TemplateVersionPreview::ManagementService,
       let(:emails) { ["new_user@example.com"] }
 
       it "creates new users and template version previews" do
-        expect { subject }.to change(User, :count).by(1).and change(
+        expect { result }.to change(User, :count).by(1).and change(
                 TemplateVersionPreview,
                 :count
               ).by(1)
@@ -68,13 +67,12 @@ RSpec.describe TemplateVersionPreview::ManagementService,
         expect(new_user.last_name).to eq("User")
         expect(new_user.role).to eq("submitter")
 
-        expect(subject[:previews].first.previewer).to eq(new_user)
-        expect(subject[:failed_emails]).to be_empty
+        expect(result[:previews].first.previewer).to eq(new_user)
+        expect(result[:failed_emails]).to be_empty
       end
 
       it "sends notification emails to newly created users" do
-        subject
-        preview = subject[:previews].first
+        preview = result[:previews].first
         expect(PermitHubMailer).to have_received(
           :notify_new_or_unconfirmed_template_version_preview
         ).with(template_version_preview: preview, user: preview.previewer).once
@@ -85,12 +83,13 @@ RSpec.describe TemplateVersionPreview::ManagementService,
       let(:emails) { %w[invalid_email another_invalid] }
 
       it "does not create template version previews and returns failed emails" do
-        expect { subject }.not_to change(TemplateVersionPreview, :count)
-        expect { subject }.not_to change(User, :count)
+        expect { result }.to change(TemplateVersionPreview, :count).by(
+          0
+        ).and change(User, :count).by(0)
 
-        expect(subject[:previews]).to be_empty
+        expect(result[:previews]).to be_empty
 
-        expect(subject[:failed_emails]).to match(
+        expect(result[:failed_emails]).to match(
           [
             { email: "invalid_email", error: "Invalid email format" },
             { email: "another_invalid", error: "Invalid email format" }
@@ -99,7 +98,7 @@ RSpec.describe TemplateVersionPreview::ManagementService,
       end
 
       it "does not send any emails" do
-        subject
+        result
         expect(PermitHubMailer).not_to have_received(
           :notify_new_or_unconfirmed_template_version_preview
         )
@@ -114,17 +113,18 @@ RSpec.describe TemplateVersionPreview::ManagementService,
       let(:emails) { %w[user@example.com invalid_email] }
 
       it "creates template version previews for valid emails and reports failures" do
-        expect { subject }.to change(TemplateVersionPreview, :count).by(1)
-        expect { subject }.not_to change(User, :count)
+        expect { result }.to change(TemplateVersionPreview, :count).by(
+          1
+        ).and change(User, :count).by(0)
 
-        expect(subject[:previews].first.previewer).to eq(user)
-        expect(subject[:failed_emails]).to match(
+        expect(result[:previews].first.previewer).to eq(user)
+        expect(result[:failed_emails]).to match(
           [{ email: "invalid_email", error: "Invalid email format" }]
         )
       end
 
       it "sends notification emails only for valid previews" do
-        subject
+        result
         expect(PermitHubMailer).to have_received(
           :notify_template_version_preview
         ).once
@@ -140,14 +140,14 @@ RSpec.describe TemplateVersionPreview::ManagementService,
 
       it "does not create a duplicate preview and returns the existing one twice" do
         # First invite creates the preview; second iteration should find the existing one.
-        expect { subject }.to change(TemplateVersionPreview, :count).by(1)
+        expect { result }.to change(TemplateVersionPreview, :count).by(1)
 
-        expect(subject[:failed_emails]).to be_empty
-        expect(subject[:previews].map(&:id).uniq.length).to eq(1)
+        expect(result[:failed_emails]).to be_empty
+        expect(result[:previews].map(&:id).uniq.length).to eq(1)
       end
 
       it "re-sends the notification email on every invite" do
-        subject
+        result
 
         expect(PermitHubMailer).to have_received(
           :notify_template_version_preview
@@ -168,11 +168,13 @@ RSpec.describe TemplateVersionPreview::ManagementService,
       end
 
       it "reports the user creation failure" do
-        expect { subject }.not_to change(User, :count)
-        expect { subject }.not_to change(TemplateVersionPreview, :count)
+        expect { result }.to change(User, :count).by(0).and change(
+                TemplateVersionPreview,
+                :count
+              ).by(0)
 
-        expect(subject[:previews]).to be_empty
-        expect(subject[:failed_emails]).to match(
+        expect(result[:previews]).to be_empty
+        expect(result[:failed_emails]).to match(
           [
             {
               email: "fail_user@example.com",
@@ -193,7 +195,7 @@ RSpec.describe TemplateVersionPreview::ManagementService,
       let(:emails) { %w[unconfirmed@example.com discarded@example.com] }
 
       it "sends notify_new_or_unconfirmed_template_version_preview emails" do
-        subject
+        result
 
         previews =
           TemplateVersionPreview.where(
@@ -215,7 +217,7 @@ RSpec.describe TemplateVersionPreview::ManagementService,
       let(:emails) { ["confirmed@example.com"] }
 
       it "sends notify_template_version_preview email" do
-        subject
+        result
 
         preview = TemplateVersionPreview.last
         expect(PermitHubMailer).to have_received(
