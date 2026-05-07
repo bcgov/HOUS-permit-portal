@@ -1,4 +1,6 @@
 class Api::ReleaseNotesController < Api::ApplicationController
+  include Api::Concerns::Search::ReleaseNotes
+
   before_action :set_release_note, only: %i[update publish]
 
   def create
@@ -67,6 +69,21 @@ class Api::ReleaseNotesController < Api::ApplicationController
                      }
                    }
     end
+  end
+
+  def index
+    authorize :release_note, :index?
+    perform_release_note_search
+    view = current_user.super_admin? ? :base : :extended
+    render_success @release_notes,
+                   nil,
+                   {
+                     meta: page_meta(@release_notes),
+                     blueprint: ReleaseNoteBlueprint,
+                     blueprint_opts: {
+                       view: view
+                     }
+                   }
   end
 
   private
