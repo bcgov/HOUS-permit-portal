@@ -1,6 +1,7 @@
 require "rails_helper"
 
-A_CLIENT_ERROR = "a client error"
+AN_INVALID_PAYLOAD_RESPONSE = "an invalid payload response"
+A_NOT_FOUND_RESPONSE = "a not found response"
 
 RSpec.describe "ReleaseNotes", type: :request do
   include Devise::Test::IntegrationHelpers
@@ -23,11 +24,16 @@ RSpec.describe "ReleaseNotes", type: :request do
     @release_note = create(:release_note)
   end
 
-  shared_examples "a client error" do |request|
+  shared_examples AN_INVALID_PAYLOAD_RESPONSE do |request|
     it "returns an error if the user is not authorized" do
       sign_in submitter
       instance_exec(
-        { id: create(:release_note).id, params: { release_note: params } },
+        {
+          id: create(:release_note, status: :published).id,
+          params: {
+            release_note: params
+          }
+        },
         &request
       )
 
@@ -50,6 +56,15 @@ RSpec.describe "ReleaseNotes", type: :request do
     end
   end
 
+  shared_examples A_NOT_FOUND_RESPONSE do |request|
+    it "returns an error if the release note is not found" do
+      sign_in super_admin
+      instance_exec({ id: 0, params: { release_note: params } }, &request)
+      expect(response).to have_http_status(:not_found)
+      expect(error_message).to match(/not.*found/i)
+    end
+  end
+
   describe "#create" do
     it "creates a release note" do
       sign_in super_admin
@@ -68,13 +83,18 @@ RSpec.describe "ReleaseNotes", type: :request do
       )
     end
 
-    it_behaves_like A_CLIENT_ERROR,
+    it_behaves_like AN_INVALID_PAYLOAD_RESPONSE,
                     ->(payload) do
                       post release_notes_path, params: payload[:params]
                     end
   end
 
   describe "#update" do
+    update_with_payload =
+      lambda do |payload|
+        patch release_note_path(payload[:id]), params: payload[:params]
+      end
+
     it "updates a release note" do
       setup
       patch release_note_path(@release_note.id),
@@ -88,14 +108,16 @@ RSpec.describe "ReleaseNotes", type: :request do
       expect(subject).to include("version" => params[:version])
     end
 
-    it_behaves_like A_CLIENT_ERROR,
-                    ->(payload) do
-                      patch release_note_path(payload[:id]),
-                            params: payload[:params]
-                    end
+    it_behaves_like AN_INVALID_PAYLOAD_RESPONSE, update_with_payload
+    it_behaves_like A_NOT_FOUND_RESPONSE, update_with_payload
   end
 
   describe "#publish" do
+    publish_with_payload =
+      lambda do |payload|
+        patch publish_release_note_path(payload[:id]), params: payload[:params]
+      end
+
     it "publishes a release note" do
       setup
       patch publish_release_note_path(@release_note.id)
@@ -104,11 +126,8 @@ RSpec.describe "ReleaseNotes", type: :request do
       expect(subject).to include("status" => "published")
     end
 
-    it_behaves_like A_CLIENT_ERROR,
-                    ->(payload) do
-                      patch publish_release_note_path(payload[:id]),
-                            params: payload[:params]
-                    end
+    it_behaves_like AN_INVALID_PAYLOAD_RESPONSE, publish_with_payload
+    it_behaves_like A_NOT_FOUND_RESPONSE, publish_with_payload
   end
 
   describe "#index" do
@@ -183,5 +202,25 @@ RSpec.describe "ReleaseNotes", type: :request do
       it_sorts_by "updated_at", "asc", :earliest_release_note
       it_sorts_by "updated_at", "desc", :latest_release_note
     end
+  end
+
+  describe "#show" do
+    it "returns a release note" do
+      setup
+      get release_note_path(@release_note.id)
+
+      expect(response).to have_http_status(:success)
+      expect(subject).to include("version" => @release_note.version)
+    end
+
+    it "returns an error if a non-admin tries to access a draft release note" do
+      sign_in submitter
+      get release_note_path(create(:release_note).id)
+
+      expect(response).to have_http_status(:not_found)
+    end
+
+    it_behaves_like A_NOT_FOUND_RESPONSE,
+                    ->(payload) { get release_note_path(payload[:id]) }
   end
 end
