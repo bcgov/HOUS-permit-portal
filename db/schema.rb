@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_04_27_222000) do
+ActiveRecord::Schema[7.2].define(version: 2026_05_07_162600) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -98,9 +98,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_27_222000) do
     t.uuid "contactable_id"
     t.string "contact_type"
     t.index ["contactable_type", "contactable_id"], name: "index_contacts_on_contactable"
-  end
-
-  create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
   end
 
   create_table "design_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -291,6 +288,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_27_222000) do
     t.jsonb "boundary_points", default: []
     t.string "weather_location"
     t.decimal "design_summer_temp", precision: 5, scale: 1
+    t.boolean "hide_from_search", default: false, null: false
     t.text "processing_time_html"
     t.text "key_stages_html"
     t.text "timeline_and_deliverables_html"
@@ -595,6 +593,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_27_222000) do
     t.datetime "discarded_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "state", default: 0, null: false
     t.string "number"
     t.decimal "latitude", precision: 10, scale: 6
     t.decimal "longitude", precision: 10, scale: 6
@@ -603,8 +602,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_27_222000) do
     t.string "last_name_snapshot"
     t.datetime "orphaned_at"
     t.jsonb "parcel_geometry"
-    t.integer "status", default: 0, null: false
-    t.integer "state", default: 0, null: false
     t.datetime "viewed_at"
     t.integer "inbox_sort_order"
     t.datetime "enqueued_at"
