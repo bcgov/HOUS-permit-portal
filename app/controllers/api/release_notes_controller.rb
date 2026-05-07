@@ -1,7 +1,7 @@
 class Api::ReleaseNotesController < Api::ApplicationController
   include Api::Concerns::Search::ReleaseNotes
 
-  before_action :set_release_note, only: %i[update publish]
+  before_action :set_release_note, only: %i[update publish show]
 
   def create
     @release_note = ReleaseNote.new(release_note_params)
@@ -86,10 +86,26 @@ class Api::ReleaseNotesController < Api::ApplicationController
                    }
   end
 
+  def show
+    authorize @release_note
+    render_success @release_note,
+                   nil,
+                   {
+                     blueprint: ReleaseNoteBlueprint,
+                     blueprint_opts: {
+                       view: :extended
+                     }
+                   }
+  end
+
   private
 
   def set_release_note
-    @release_note = ReleaseNote.find(params[:id])
+    begin
+      @release_note = policy_scope(ReleaseNote).find(params[:id])
+    rescue ActiveRecord::RecordNotFound => e
+      render_error "misc.not_found_error", { status: 404 }, e
+    end
   end
 
   def release_note_params
