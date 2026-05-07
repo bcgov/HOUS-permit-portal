@@ -4,8 +4,9 @@ import React from "react"
 import { useTranslation } from "react-i18next"
 import { Link as RouterLink } from "react-router-dom"
 import { IJurisdiction } from "../../../models/jurisdiction"
-import { EFileUploadAttachmentType, EResourceType } from "../../../types/enums"
+import { EFileUploadAttachmentType, EFlashMessageStatus, EResourceType } from "../../../types/enums"
 import { IResource } from "../../../types/types"
+import { CustomMessageBox } from "../base/custom-message-box"
 import { FileDownloadButton } from "../base/file-download-button"
 
 interface IJurisdictionResourcesGridSectionProps {
@@ -82,19 +83,22 @@ export const JurisdictionResourcesGridSection = ({
             </Button>
           </Flex>
         )}
-        <Box bg="theme.gold" borderRadius="md" p={4}>
-          {!hasResources ? (
-            <Text color="text.secondary" fontSize="sm">
-              {t("jurisdiction.resources.emptyForStaff")}
-            </Text>
-          ) : (
+        {!hasResources ? (
+          <CustomMessageBox
+            status={EFlashMessageStatus.info}
+            description={t("jurisdiction.resources.emptyForStaff")}
+            px={6}
+            py={4}
+          />
+        ) : (
+          <Box bg="theme.gold" borderRadius="md" p={4}>
             <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
               {jurisdiction.resources.map((resource) => (
                 <ResourceGridItem key={resource.id} resource={resource} />
               ))}
             </SimpleGrid>
-          )}
-        </Box>
+          </Box>
+        )}
       </Box>
     </Flex>
   )

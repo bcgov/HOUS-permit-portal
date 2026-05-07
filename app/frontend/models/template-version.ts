@@ -18,7 +18,7 @@ export const TemplateVersionModel = types
     deprecationReason: types.maybeNull(types.enumeration(Object.values(EDeprecationReason))),
     versionDate: types.Date,
     label: types.string,
-    firstNations: types.boolean,
+    tags: types.optional(types.array(types.string), []),
     updatedAt: types.Date,
     denormalizedTemplateJson: types.maybeNull(types.frozen<IDenormalizedTemplate>()),
     requirementBlocksJson: types.maybeNull(types.frozen<Record<string, IDenormalizedRequirementBlock>>()),
@@ -27,9 +27,25 @@ export const TemplateVersionModel = types
     latestVersionId: types.maybeNull(types.string),
     formJson: types.maybeNull(types.frozen<IFormJson>()),
     isFullyLoaded: types.optional(types.boolean, false),
-    public: types.boolean,
-    earlyAccess: types.boolean,
     requirementTemplateId: types.string,
+    // Draft workflow fields
+    changeNotes: types.maybeNull(types.string),
+    changeSignificance: types.maybeNull(types.string),
+    notificationScope: types.maybeNull(types.string),
+    publiclyPreviewable: types.optional(types.boolean, false),
+    hasUnresolvedFeedbacks: types.optional(types.boolean, false),
+    feedbacksCount: types.optional(types.number, 0),
+    // Preview IDs (populated on extended view for drafts).
+    // Stored as string IDs instead of safeReferences to avoid circular dependency:
+    // TemplateVersion -> TemplateVersionPreview -> User -> Jurisdiction -> PermitApplication -> TemplateVersion
+    templateVersionPreviewIds: types.optional(types.array(types.string), []),
+    // Fields populated only by the :standardization_preview blueprint view
+    // (delegated from the owning RequirementTemplate). Left undefined for
+    // every other view. Nullable because the owning RequirementTemplate
+    // may have null description/category.
+    nickname: types.maybeNull(types.string),
+    description: types.maybeNull(types.string),
+    isAvailableForAdoption: types.maybeNull(types.boolean),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -46,8 +62,13 @@ export const TemplateVersionModel = types
       return self.status === ETemplateVersionStatus.deprecated
     },
 
-    get nonFirstNationLabel() {
-      return self.label.replace(/\s\(First Nations\)/g, "")
+    get isDraft() {
+      return self.status === ETemplateVersionStatus.draft
+    },
+
+    get templateVersionPreviews() {
+      const previewStore = self.rootStore.templateVersionPreviewStore
+      return self.templateVersionPreviewIds.map((id) => previewStore.getPreviewById(id)).filter(Boolean)
     },
 
     getJurisdictionTemplateVersionCustomization(jurisdictionId: string) {
@@ -254,6 +275,38 @@ export const TemplateVersionModel = types
       }
 
       return response.ok
+    }),
+    shareDraft: flow(function* () {
+      if (!self.isDraft) {
+        return false
+      }
+      const response = yield* toGenerator(self.environment.api.shareDraft(self.id))
+      if (response.ok) {
+        // Merge updated template version data (extended view with previews)
+        const tvData = response.data.data
+        tvData.isFullyLoaded = true
+        self.rootStore.templateVersionStore.mergeUpdate(tvData, "templateVersionMap")
+      }
+      return response.ok
+    }),
+    inviteDraftPreviewersByEmail: flow(function* (emails: string[]) {
+      if (!self.isDraft) {
+        return null
+      }
+      const response = yield* toGenerator(self.environment.api.inviteDraftPreviewers(self.id, emails))
+      if (response.ok) {
+        // The response.data.data is the full template version (extended view) with templateVersionPreviews embedded.
+        // Merge the template version (including its previews) back through the store.
+        const responseData = response.data as any
+        const tvData = responseData.data
+        tvData.isFullyLoaded = true
+        self.rootStore.templateVersionStore.mergeUpdate(tvData, "templateVersionMap")
+
+        // Return failed emails from meta
+        const meta = responseData.meta
+        return { failedEmails: meta?.failedEmails ?? [] }
+      }
+      return null
     }),
   }))
   .actions((self) => ({

@@ -140,7 +140,6 @@ class Api::PreChecksController < Api::ApplicationController
       :pid,
       :permit_application_id,
       :jurisdiction_id,
-      :permit_type_id,
       :service_partner,
       :eula_accepted,
       :consent_to_send_drawings,

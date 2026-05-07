@@ -1,11 +1,13 @@
-import { Box, Flex, IconButton, SimpleGrid, Text } from "@chakra-ui/react"
+import { Flex, IconButton, SimpleGrid } from "@chakra-ui/react"
 import { Plus, X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useFieldArray, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../../setup/root"
+import { EFlashMessageStatus } from "../../../../types/enums"
 import { IContact } from "../../../../types/types"
+import { CustomMessageBox } from "../../../shared/base/custom-message-box"
 import { EmailFormControl } from "../../../shared/form/email-form-control"
 import { TextFormControl } from "../../../shared/form/input-form-control"
 import { JurisdictionAboutContactCard } from "../../../shared/jurisdiction/jurisdiction-about-contact-card"
@@ -50,11 +52,12 @@ export const ContactGrid = observer(({ isEditing }: IContactGridProps) => {
 
   if (!isEditing && hasNoContacts) {
     return (
-      <Box as="section" borderRadius="md" bg="greys.grey10" px={6} py={4}>
-        <Text color="text.secondary" fontSize="sm" w="full">
-          {t("jurisdiction.edit.contactsEmptyState")}
-        </Text>
-      </Box>
+      <CustomMessageBox
+        status={EFlashMessageStatus.info}
+        description={t("jurisdiction.edit.contactsEmptyState")}
+        px={6}
+        py={4}
+      />
     )
   }
 

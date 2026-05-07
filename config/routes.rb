@@ -47,9 +47,9 @@ Rails.application.routes.draw do
       get "/logout" => "sessions#destroy"
     end
 
-    get "/permit_type_submission_contacts/confirm",
-        to: "permit_type_submission_contacts#confirm",
-        as: :permit_type_submission_contact_confirmation
+    get "/submission_contacts/confirm",
+        to: "submission_contacts#confirm",
+        as: :submission_contact_confirmation
 
     resources :requirement_blocks, only: %i[create show update destroy] do
       post "restore", on: :member, to: "requirement_blocks#restore"
@@ -78,20 +78,46 @@ Rails.application.routes.draw do
       post "force_publish_now",
            to: "requirement_templates#force_publish_now",
            on: :member
-      post "invite_previewers",
-           to: "requirement_templates#invite_previewers",
-           on: :member
       patch "restore", on: :member
       post "template_versions/:id/unschedule",
            on: :collection,
            to: "requirement_templates#unschedule_template_version"
       post "copy", on: :collection
+
+      # Draft workflow endpoints
+      member do
+        post "create_draft", to: "requirement_templates#create_draft"
+        delete "discard_draft", to: "requirement_templates#discard_draft"
+        post "promote_draft", to: "requirement_templates#promote_draft"
+      end
       post "jurisdiction_availabilities",
            on: :member,
            to: "requirement_templates#update_jurisdiction_availabilities"
     end
 
-    resources :early_access_previews do
+    # Draft version-specific endpoints (feedback, previews, block editing)
+    resources :template_versions, only: [] do
+      member do
+        patch "update_draft_block", to: "template_versions#update_draft_block"
+        post "refresh_draft", to: "template_versions#refresh_draft"
+        post "invite_draft_previewers",
+             to: "template_versions#invite_draft_previewers"
+        post "share_draft", to: "template_versions#share_draft"
+        patch "toggle_publicly_previewable",
+              to: "template_versions#toggle_publicly_previewable"
+      end
+
+      resources :template_version_feedbacks,
+                only: %i[index create],
+                path: "feedbacks" do
+        member do
+          post "resolve"
+          post "unresolve"
+        end
+      end
+    end
+
+    resources :template_version_previews, only: [] do
       member do
         post :revoke_access
         post :unrevoke_access
@@ -100,6 +126,9 @@ Rails.application.routes.draw do
     end
 
     resources :template_versions, only: %i[index show] do
+      get "publicly_previewable",
+          to: "template_versions#publicly_previewable",
+          on: :collection
       get "compare_requirements",
           to: "template_versions#compare_requirements",
           on: :member
@@ -153,9 +182,7 @@ Rails.application.routes.draw do
       get "contact_options", on: :collection
     end
 
-    resources :permit_classifications, only: %i[index create update destroy] do
-      post "permit_classification_options", on: :collection
-    end
+    resources :submission_contacts, only: %i[index create update destroy]
 
     resources :geocoder, only: %i[] do
       get "site_options", on: :collection
@@ -239,6 +266,14 @@ Rails.application.routes.draw do
         delete :unassign_project_review_collaborator
       end
       collection { patch :reorder }
+    end
+
+    resources :qa_tools, only: [] do
+      collection do
+        post "permit_projects/full", to: "qa_tools#create_full_permit_project"
+        post "permit_applications/:id/autofill",
+             to: "qa_tools#autofill_permit_application"
+      end
     end
 
     resources :permit_collaborations, only: %i[destroy] do

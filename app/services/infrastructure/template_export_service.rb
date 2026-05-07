@@ -5,10 +5,6 @@ module Infrastructure
     MANIFEST_FILENAME = "manifest.json"
 
     MODELS_TO_EXPORT = [
-      {
-        model: PermitClassification,
-        filename: "permit_classifications.ndjson"
-      },
       { model: RequirementTemplate, filename: "requirement_templates.ndjson" },
       {
         model: RequirementTemplateSection,

@@ -233,21 +233,11 @@ RSpec.describe "Api::PermitProjects", type: :request, search: true do
   end
 
   describe "POST /api/permit_projects/:id/permit_applications/search" do
-    let(:permit_type) { create(:permit_type) }
-    let(:activity) { create(:activity) }
-
     it "returns permit applications for a project" do
-      create(
-        :permit_type_submission_contact,
-        jurisdiction: permit_project.jurisdiction,
-        permit_type: permit_type
-      )
       create(
         :permit_application,
         permit_project: permit_project,
-        submitter: owner,
-        permit_type: permit_type,
-        activity: activity
+        submitter: owner
       )
       PermitApplication.reindex
 
@@ -276,18 +266,14 @@ RSpec.describe "Api::PermitProjects", type: :request, search: true do
         status: "published"
       )
     end
-    let(:permit_type) { requirement_template.permit_type }
-    let(:activity) { requirement_template.activity }
 
     it "bulk creates permit applications for a project" do
       post "/api/permit_projects/#{permit_project.id}/permit_applications",
            params: {
              permit_applications: [
                {
-                 activity_id: activity.id,
-                 permit_type_id: permit_type.id,
-                 jurisdiction_id: permit_project.jurisdiction_id,
-                 first_nations: false
+                 template_version_id: template_version.id,
+                 jurisdiction_id: permit_project.jurisdiction_id
                }
              ]
            },
@@ -300,16 +286,23 @@ RSpec.describe "Api::PermitProjects", type: :request, search: true do
     end
 
     it "returns errors when any payload is invalid" do
-      allow_any_instance_of(PermitApplication).to receive(
-        :assign_default_nickname
+      errors_double =
+        instance_double(
+          ActiveModel::Errors,
+          full_messages: ["Something went wrong"]
+        )
+      allow_any_instance_of(PermitApplication).to receive(:save).and_return(
+        false
+      )
+      allow_any_instance_of(PermitApplication).to receive(:errors).and_return(
+        errors_double
       )
 
       post "/api/permit_projects/#{permit_project.id}/permit_applications",
            params: {
              permit_applications: [
                {
-                 activity_id: activity.id,
-                 permit_type_id: permit_type.id,
+                 template_version_id: template_version.id,
                  jurisdiction_id: permit_project.jurisdiction_id
                }
              ]

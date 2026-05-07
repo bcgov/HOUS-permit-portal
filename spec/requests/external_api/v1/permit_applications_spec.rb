@@ -46,10 +46,10 @@ RSpec.describe "external_api/v1/permit_applications",
                 schema: {
                   type: :object,
                   description:
-                    "Filters permit applications by status, submitted date, resubmitted_date and permit classifications",
+                    "Filters permit applications by status, submitted date, resubmitted_date and template tags",
                   properties: {
-                    permit_classifications: {
-                      description: "Filters by permit classifications",
+                    template_tags: {
+                      description: "Filters by template tags",
                       type: :string
                     },
                     status: {

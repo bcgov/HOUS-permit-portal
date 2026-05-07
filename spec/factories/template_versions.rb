@@ -7,7 +7,7 @@ FactoryBot.define do
     version_date { "2024-02-15" }
     status { 1 }
     requirement_template do
-      LiveRequirementTemplate.first || association(:live_requirement_template)
+      RequirementTemplate.first || association(:requirement_template)
     end
   end
 end

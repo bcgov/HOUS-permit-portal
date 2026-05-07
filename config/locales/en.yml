@@ -42,17 +42,15 @@ en:
         cell: "Mobile no."
         phone: "Phone no."
       requirement_template:
-        first_nations: "First Nations"
+        tags: "Tags"
         available_in_all: "All"
       sandbox:
         scope_names:
           published: 'Training mode: "Published"'
           scheduled: 'Training mode: "Upcoming"'
-        available_in_all: "All"
     errors:
       models:
-        early_access_preview:
-          already_invited: "User already invited to preview"
+        template_version_preview:
           invalid_email: "Invalid email format"
         jurisdiction:
           no_sandboxes: "Jurisdiction must have at least one sandbox."
@@ -79,8 +77,6 @@ en:
               inbox_not_enabled: "inbox for this permit application is not enabled"
               no_jurisdiction: "must be present if not associated with a project."
             pid_or_pin: "must have a PID or PIN."
-            template_version:
-              must_be_live: "must be for a live requirement template"
         permit_project:
           attributes:
             owner:
@@ -95,19 +91,10 @@ en:
           step_code_package_required: '"Energy step code" is required to have the Design package energy step code file'
           duplicate_energy_step_code: 'Multiple "Energy step code" requirements found. Please ensure there is only one "Energy step code" requirement in the template'
           duplicate_step_code_package: 'Multiple "Design package energy step code files" found. Please ensure there is only one "Design package energy step code file" when there is an "Energy step code" requirement'
-          nonunique_classification: "There can only be one requirement template per permit type, activity, and First Nations combination"
+          nonunique_nickname: "There can only be one live requirement template with this nickname"
           taken: "must be unique"
-          attributes:
-            public:
-              true_on_early_access_only: "can only be true for early access"
-              standardization_published_requires_public: "cannot be set to false because a site configuration is set to use this template on the standardization preview page."
-            template_versions:
-              published_required_for_early_access: "requires one or less published template version on early access"
         requirement_block:
           attributes:
-            visibility:
-              associated_requirement_templates_must_be_early_access: "can not be set to 'preview' if the block is present in any live drafts"
-              associated_requirement_templates_must_be_live: "can not be set to 'exclude preview' if the block is present in any early-access previews"
             requirements:
               incorrect_energy_step_code_dependencies: "missing or duplicate energy step code dependencies"
               duplicate_architectural_drawing_file: "must have only one design package file for energy step code per requirement block"
@@ -175,13 +162,15 @@ en:
       notify_application_revisions_requested: "Revisions requested on application %{permit_application_number}"
       remind_reviewer: "Your report on outstanding permit applications"
       remind_resource_update: "Reminder: Review your jurisdiction resources"
-      permit_type_submission_contact_confirm: "Confirm submission inbox email"
+      submission_contact_confirm: "Confirm submission inbox email"
       new_jurisdiction_membership: "New jurisdiction membership"
       notify_permit_collaboration: "Welcome you have been invited to Collaborate in the Building Permit Hub"
       notify_project_review_collaboration: "You have been assigned as a review collaborator on a project"
       notify_new_or_unconfirmed_permit_collaboration: "You’re Invited to Collaborate on a Building Permit Application"
       notify_new_or_unconfirmed_preview: "You’re Invited to Preview a Building Permit Template"
       notify_preview: "You're Invited to Preview a Building Permit Template"
+      notify_new_or_unconfirmed_template_version_preview: "You’re Invited to Preview a Building Permit Template"
+      notify_template_version_preview: "You're Invited to Preview a Building Permit Template"
       notify_batched_integration_mapping: "New API mappings"
       notify_pre_check_submitted: "Your pre-check has been submitted"
       notify_pre_check_completed: "Your pre-check has been completed"
@@ -251,22 +240,6 @@ en:
       jurisdiction_ltsa_error:
         title: Error
         message: Jurisdiction could not be determined. Please check back later.
-    permit_classification:
-      options_error:
-        title: Error
-        message: Error encountered fetching permit classification options
-      create_error:
-        title: Error
-        message: "%{error_message}"
-      update_error:
-        title: Error
-        message: "There was an error updating the permit classification"
-      destroy_error:
-        title: Error
-        message: "There was an error deleting the permit classification"
-      in_use_error:
-        title: Error
-        message: "This permit classification is in use and cannot be deleted"
     overheating_code:
       create_success:
         title: ""
@@ -474,31 +447,6 @@ en:
       revoke_success:
         title: Success
         message: "External api key revoked successfully!"
-    early_access_preview:
-      revoke_success:
-        title: ""
-        message: "Preview revoked successfully!"
-      revoke_error:
-        title: "Error"
-        message: "%{error_message}"
-      unrevoke_success:
-        title: ""
-        message: "Preview unrevoked successfully!"
-      unrevoke_error:
-        title: "Error"
-        message: "%{error_message}"
-      already_revoked:
-        title: "Error"
-        message: "Preview already revoked"
-      not_revoked:
-        title: "Error"
-        message: "Preview not revoked"
-      extend_success:
-        title: ""
-        message: "Preview extended successfully!"
-      extend_error:
-        title: "Error"
-        message: "%{error_message}"
     requirement_template:
       create_success:
         title: ""
@@ -512,12 +460,6 @@ en:
       force_publish_now_success:
         title: ""
         message: "Permit has been published."
-      invite_previewers_success:
-        title: ""
-        message: "Successfully invited previewers"
-      invite_previewers_error:
-        title: Error
-        message: "Previewers could not be invited"
       create_error:
         title: Error
         message: "%{error_message}"
@@ -547,7 +489,28 @@ en:
         message: "Template unscheduled successfully"
       force_publish_now_error:
         title: Error force publishing template
-        message: "There was an error publishing the template"
+        message: "%{error_message}"
+      create_draft_success:
+        title: ""
+        message: "Draft version created successfully"
+      create_draft_error:
+        title: Error
+        message: "%{error_message}"
+      discard_draft_success:
+        title: ""
+        message: "Draft version discarded"
+      discard_draft_error:
+        title: Error
+        message: "%{error_message}"
+      promote_draft_success:
+        title: ""
+        message: "Draft promoted to scheduled version"
+      promote_draft_error:
+        title: Error
+        message: "%{error_message}"
+      no_draft_error:
+        title: Error
+        message: "No draft version exists for this template"
       delete_error:
         title: Error
         message: "%{error_message}"
@@ -710,6 +673,22 @@ en:
       feature_not_enabled:
         title: Error
         message: "Designated reviewer is not enabled for this project"
+    qa_tools:
+      full_permit_project_success:
+        title: ""
+        message: "QA project created successfully"
+      full_permit_project_error:
+        title: Error
+        message: "%{error_message}"
+      autofill_permit_application_success:
+        title: ""
+        message: "Permit application autofilled successfully"
+      autofill_permit_application_error:
+        title: Error
+        message: "%{error_message}"
+      autofill_permit_application_not_draft:
+        title: Error
+        message: "Only draft permit applications can be autofilled"
     permit_collaboration:
       destroy_success:
         title: ""
@@ -864,6 +843,81 @@ en:
         message: "Jurisdiction Template Customization copied!"
       no_copy_target_error:
         title: Error
+        message: "Could not find a template version to copy from"
+    template_version:
+      update_draft_block_success:
+        title: ""
+        message: "Draft block updated"
+      update_draft_block_error:
+        title: Error
+        message: "%{error_message}"
+      refresh_draft_success:
+        title: ""
+        message: "Draft refreshed from current template"
+      refresh_draft_error:
+        title: Error
+        message: "%{error_message}"
+      share_draft_success:
+        title: ""
+        message: "Draft shared with %{count} previewer(s)"
+      no_previewers_error:
+        title: Error
+        message: "No previewers are invited to this draft yet. Invite previewers first."
+      not_draft_error:
+        title: Error
+        message: "This version is not a draft"
+      invite_previewers_success:
+        title: ""
+        message: "Previewers invited to draft"
+      invite_previewers_error:
+        title: Error
+        message: "Could not invite previewers"
+      toggle_publicly_previewable_success:
+        title: ""
+        message: "Public preview visibility updated"
+      toggle_publicly_previewable_error:
+        title: Error
+        message: "%{error_message}"
+    template_version_preview:
+      revoke_success:
+        title: ""
+        message: "Preview revoked successfully!"
+      revoke_error:
+        title: "Error"
+        message: "%{error_message}"
+      unrevoke_success:
+        title: ""
+        message: "Preview unrevoked successfully!"
+      unrevoke_error:
+        title: "Error"
+        message: "%{error_message}"
+      already_revoked:
+        title: "Error"
+        message: "Preview already revoked"
+      not_revoked:
+        title: "Error"
+        message: "Preview not revoked"
+      extend_success:
+        title: ""
+        message: "Preview extended successfully!"
+      extend_error:
+        title: "Error"
+        message: "%{error_message}"
+    template_version_feedback:
+      create_success:
+        title: ""
+        message: "Feedback submitted"
+      create_error:
+        title: Error
+        message: "%{error_message}"
+      resolve_success:
+        title: ""
+        message: "Feedback resolved"
+      unresolve_success:
+        title: ""
+        message: "Feedback unresolved"
+      no_copy_target_error:
+        title: Error
         message: "Could not copy from non-first nations template version - please ensure a non-first nations template version exists"
     integration_mapping:
       update_success:
@@ -909,12 +963,7 @@ en:
         assign_collaborator_error: "Failed to assign collaborator: %{error_message}"
         create_user_error: "Failed to invite user to collaborate: %{error_message}"
         submission_collaborator_must_be_submitter: "Ineligible user for submission collaboration"
-    preview:
-      preview_management:
-        create_user_error: "Failed to invite user to preview: %{error_message}"
-        assign_previewer_error: "Failed to assign previewer: %{error_message}"
     template_versioning_service:
-      early_access_version_error: "Cannot create early access version for a non-early access requirement template"
       invalid_schedule_date: "Version date must be in the future and after latest scheduled version date"
       force_publish_disabled: "Force publish is not enabled"
       publish_before_schedule_date: "Version cannot be published before it's scheduled date"
@@ -1036,4 +1085,4 @@ en:
     template_version_csv_headers: "Requirement Block,Requirement block tip,Question,Requirement code,Input type,Optional,Is elective,Elective enabled,Elective reason"
     requirement_summary_csv_headers: "Field Name,Is Elective,Used By (Number of Jurisdictions),Reason: Bylaw Count, Reason: Zoning count,Reason: Policy Count"
     step_code_summary_csv_headers: "Jurisdiction,Permit type,Enabled/disabled,Energy step code level,Zero carbon level"
-    application_metrics_csv_headers: "Jurisdiction,Permit type,Work type,First Nations,In draft,In inbox,Average days before first submit,Average days before latest submit"
+    application_metrics_csv_headers: "Jurisdiction,Template,Tags,In draft,In inbox,Average days before first submit,Average days before latest submit"

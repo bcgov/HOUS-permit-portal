@@ -433,7 +433,7 @@ RSpec.describe NotificationService do
       assignee =
         instance_double("User", id: "u_assignee", preference: assignee_pref)
 
-      contact = instance_double("PermitTypeSubmissionContact")
+      contact = instance_double("SubmissionContact")
 
       permit_application =
         instance_double(
@@ -446,7 +446,7 @@ RSpec.describe NotificationService do
           revisions_request_event_notification_data: {
             msg: "rev"
           },
-          confirmed_permit_type_submission_contacts: [contact]
+          confirmed_submission_contacts: [contact]
         )
 
       allow(permit_application).to receive(

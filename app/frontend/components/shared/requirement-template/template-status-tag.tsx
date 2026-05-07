@@ -1,5 +1,5 @@
 import { Flex, HStack, Tag, Text } from "@chakra-ui/react"
-import { CheckSquareOffset, Clock, Pencil, TrashSimple } from "@phosphor-icons/react"
+import { CheckSquareOffset, Clock, Pencil, TrashSimple, Wrench } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { utcToZonedTime } from "date-fns-tz"
 import React, { ReactNode } from "react"
@@ -7,31 +7,38 @@ import { useTranslation } from "react-i18next"
 import { vancouverTimeZone } from "../../../constants"
 import { ETemplateVersionStatus } from "../../../types/enums"
 
+// "builder" is a UI-only status representing the template builder editing state
+// It is not a real TemplateVersion status, just a display variant
+export type TTemplateStatusTagStatus = ETemplateVersionStatus | "builder"
+
 interface ITemplateStatusTagProps {
-  status: ETemplateVersionStatus
+  status: TTemplateStatusTagStatus
   scheduledFor?: Date
   subText?: string
 }
 
-const statusColors: { [key in ETemplateVersionStatus]: string } = {
+const statusColors: Record<TTemplateStatusTagStatus, string> = {
   [ETemplateVersionStatus.published]: "semantic.infoLight",
   [ETemplateVersionStatus.scheduled]: "semantic.successLight",
   [ETemplateVersionStatus.draft]: "semantic.warningLight",
   [ETemplateVersionStatus.deprecated]: "semantic.errorLight",
+  builder: "semantic.warningLight",
 }
 
-const statusBorderColors: { [key in ETemplateVersionStatus]: string } = {
+const statusBorderColors: Record<TTemplateStatusTagStatus, string> = {
   [ETemplateVersionStatus.published]: "semantic.info",
   [ETemplateVersionStatus.scheduled]: "semantic.success",
   [ETemplateVersionStatus.draft]: "semantic.warning",
   [ETemplateVersionStatus.deprecated]: "semantic.error",
+  builder: "semantic.warning",
 }
 
-const statusIcons: { [key in ETemplateVersionStatus]: ReactNode } = {
+const statusIcons: Record<TTemplateStatusTagStatus, ReactNode> = {
   [ETemplateVersionStatus.published]: <CheckSquareOffset />,
   [ETemplateVersionStatus.scheduled]: <Clock />,
   [ETemplateVersionStatus.draft]: <Pencil />,
   [ETemplateVersionStatus.deprecated]: <TrashSimple />,
+  builder: <Wrench />,
 }
 
 export const TemplateStatusTag = ({ status, scheduledFor, subText }: ITemplateStatusTagProps) => {

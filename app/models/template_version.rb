@@ -3,25 +3,34 @@ class TemplateVersion < ApplicationRecord
   belongs_to :requirement_template
   belongs_to :deprecated_by, class_name: "User", optional: true
 
+  # Draft workflow associations
+  belongs_to :assignee, class_name: "User", optional: true
+  belongs_to :site_configuration, optional: true
+
   has_many :jurisdiction_template_version_customizations, dependent: :destroy
   has_many :permit_applications, dependent: :nullify
   has_many :submitters, through: :permit_applications
   has_many :integration_mappings, dependent: :destroy
+  has_many :template_version_feedbacks, dependent: :destroy
+  has_many :template_version_previews, dependent: :destroy
 
-  delegate :permit_type, to: :requirement_template
-  delegate :activity, to: :requirement_template
-  delegate :label, to: :requirement_template
   delegate :published_template_version, to: :requirement_template
-  delegate :first_nations, to: :requirement_template
-  delegate :early_access?, to: :requirement_template
-  delegate :live?, to: :requirement_template
-  delegate :public?, to: :requirement_template
+  delegate :tag_list, to: :requirement_template
 
-  enum :status, { scheduled: 0, published: 1, deprecated: 2 }, default: 0
+  enum :status,
+       { scheduled: 0, published: 1, deprecated: 2, draft: 3 },
+       default: 0
   enum :deprecation_reason, { new_publish: 0, unscheduled: 1 }, prefix: true
+  enum :change_significance, { major: 0, minor: 1, patch: 2 }, prefix: true
+  enum :notification_scope,
+       { all_jurisdictions: 0, specific_jurisdictions: 1, silent: 2 },
+       prefix: true
 
   validates :deprecation_reason, presence: true, if: :deprecated?
   validates :deprecated_by, presence: true, if: :deprecation_reason_unscheduled?
+
+  # Only one draft version per requirement template at a time
+  validate :only_one_draft_per_template, if: :draft?
 
   before_validation :set_default_deprecation_reason
 
@@ -45,13 +54,10 @@ class TemplateVersion < ApplicationRecord
           end
         end
 
-  # Published versions on kept LiveRequirementTemplate records (excludes early-access copies, etc.).
-  # Matches PermitApplication validation: template_version must be "live".
-  scope :published_for_live_requirement_templates,
+  # Published versions whose owning RequirementTemplate has not been discarded.
+  scope :published_on_kept_templates,
         -> do
-          published.joins(:requirement_template).merge(
-            LiveRequirementTemplate.kept
-          )
+          published.joins(:requirement_template).merge(RequirementTemplate.kept)
         end
 
   def self.cached_published_ids
@@ -67,12 +73,29 @@ class TemplateVersion < ApplicationRecord
     jurisdiction_template_version_customizations
   end
 
+  def feedbacks
+    template_version_feedbacks
+  end
+
+  def previews
+    template_version_previews
+  end
+
+  def unresolved_feedbacks
+    template_version_feedbacks.unresolved
+  end
+
+  def has_unresolved_feedbacks?
+    unresolved_feedbacks.exists?
+  end
+
   def version_date_in_province_time
     version_date.in_time_zone("Pacific Time (US & Canada)").to_time
   end
 
   def label
-    "#{requirement_template.label} (#{version_date.to_s})"
+    prefix = draft? ? "[Draft] " : ""
+    "#{prefix}#{requirement_template.nickname} (#{version_date})"
   end
 
   def lookup_props
@@ -193,5 +216,16 @@ class TemplateVersion < ApplicationRecord
 
   def clear_published_ids_cache
     Rails.cache.delete("published_template_version_ids")
+  end
+
+  def only_one_draft_per_template
+    existing_draft =
+      TemplateVersion
+        .where(requirement_template_id: requirement_template_id, status: :draft)
+        .where.not(id: id)
+
+    if existing_draft.exists?
+      errors.add(:status, "only one draft version is allowed per template")
+    end
   end
 end

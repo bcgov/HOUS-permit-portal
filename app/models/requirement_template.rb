@@ -1,18 +1,15 @@
 class RequirementTemplate < ApplicationRecord
   SEARCH_INCLUDES = %i[
     published_template_version
-    permit_type
+    draft_template_version
     last_three_deprecated_template_versions
-    activity
     scheduled_template_versions
   ]
 
-  searchkick searchable: %i[description current_version permit_type activity],
-             word_start: %i[description current_version permit_type activity],
+  searchkick searchable: %i[description current_version nickname tags],
+             word_start: %i[description current_version nickname tags],
              text_middle: %i[current_version description]
 
-  belongs_to :activity, optional: false
-  belongs_to :permit_type, optional: false
   belongs_to :copied_from, class_name: "RequirementTemplate", optional: true
 
   has_many :requirement_template_sections,
@@ -48,7 +45,6 @@ class RequirementTemplate < ApplicationRecord
              foreign_key: "copied_from_id",
              optional: true
 
-  # Self-referential association for sections copied from this section
   has_many :copied_sections,
            class_name: "RequirementTemplate",
            foreign_key: "copied_from_id",
@@ -58,7 +54,10 @@ class RequirementTemplate < ApplicationRecord
           -> { where(status: "published") },
           class_name: "TemplateVersion"
 
-  # Scope to get RequirementTemplates with a published template version
+  has_one :draft_template_version,
+          -> { where(status: "draft") },
+          class_name: "TemplateVersion"
+
   scope :for_sandbox,
         ->(sandbox) do
           joins(:template_versions).where(
@@ -72,43 +71,30 @@ class RequirementTemplate < ApplicationRecord
 
   include Discard::Model
 
+  acts_as_taggable_on :tags
+
   accepts_nested_attributes_for :requirement_template_sections,
                                 allow_destroy: true
 
-  # This is a workaround needed to validate step code related errors
   attr_accessor :requirement_template_sections_attributes_copy
 
   validate :validate_uniqueness_of_blocks
   validate :validate_step_code_related_dependencies
   validate :validate_block_level_conditionals
-  validate :public_only_for_early_access_preview
+  validate :validate_nickname_uniqueness
+
+  scope :with_published_version, -> { joins(:published_template_version) }
 
   before_validation :set_default_nickname
 
   def set_default_nickname
     return if nickname.present?
 
-    self.nickname ||= label
+    self.nickname = tag_list.join(" | ").presence || "New template"
   end
 
   def assignee
     nil
-  end
-
-  def early_access?
-    type == "EarlyAccessRequirementTemplate"
-  end
-
-  def live?
-    type == "LiveRequirementTemplate"
-  end
-
-  def visibility
-    if early_access?
-      "early_access"
-    elsif live?
-      "live"
-    end
   end
 
   def sections
@@ -116,7 +102,6 @@ class RequirementTemplate < ApplicationRecord
   end
 
   def customizations
-    # Convenience method to prevent carpal tunnel syndrome
     jurisdiction_template_version_customizations
   end
 
@@ -180,12 +165,6 @@ class RequirementTemplate < ApplicationRecord
             jurisdiction_requirement_templates.pluck(:jurisdiction_id)
       )
     end
-  end
-
-  def label
-    return "New template" if permit_type.nil? || activity.nil?
-
-    "#{permit_type.name} | #{activity.name}#{first_nations ? " (" + I18n.t("activerecord.attributes.requirement_template.first_nations") + ")" : ""}"
   end
 
   def key
@@ -279,32 +258,14 @@ class RequirementTemplate < ApplicationRecord
     )
   end
 
-  def self.published_requirement_template_version(
-    activity,
-    permit_type,
-    first_nations
-  )
-    find_by(
-      activity: activity,
-      permit_type: permit_type,
-      first_nations: first_nations
-    )&.published_template_version
-  rescue NoMethodError => e
-    rails.logger.error e.message
-  end
-
   def search_data
     {
       nickname: nickname,
       description: description,
-      first_nations: first_nations,
+      tags: tag_list.join(", "),
       current_version: published_template_version&.version_date,
-      permit_type: permit_type.name,
-      activity: activity.name,
       discarded: discarded_at.present?,
       assignee: assignee&.name,
-      visibility: visibility,
-      public: public?,
       created_at: created_at,
       used_by: published_customizations_count,
       available_in:
@@ -332,32 +293,7 @@ class RequirementTemplate < ApplicationRecord
     map
   end
 
-  def public_only_for_early_access_preview
-    if public && !early_access?
-      errors.add(
-        :public,
-        I18n.t(
-          "activerecord.errors.models.requirement_template.attributes.public.true_on_early_access_only"
-        )
-      )
-    end
-  end
-
-  def validate_uniqueness_of_blocks
-    # Track duplicates across all sections within the same template
-    duplicates =
-      requirement_blocks
-        .unscope(:order)
-        .group(:id)
-        .having("COUNT(*) > 1")
-        .pluck(:name)
-  end
-
   def requirement_block_ids_from_nested_attributes_copy
-    # have to manually loop instead of using association because
-    # when using deeply nested attributes to save, the queries go against the database
-    # which will have stale data e.g. records trying to delete currently
-
     if requirement_template_sections_attributes_copy.blank? ||
          !requirement_template_sections_attributes_copy.is_a?(Array)
       return []
@@ -591,6 +527,17 @@ class RequirementTemplate < ApplicationRecord
 
   def refresh_search_index
     RequirementTemplate.search_index.refresh
+  end
+
+  def validate_nickname_uniqueness
+    return if nickname.blank?
+
+    if RequirementTemplate
+         .where.not(id: id)
+         .where(discarded_at: nil)
+         .exists?(nickname: nickname)
+      errors.add(:nickname, :taken)
+    end
   end
 
   def log_creation_in_specs

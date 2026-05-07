@@ -6,7 +6,6 @@ import {
   ENumberUnit,
   ERequirementType,
   ETagType,
-  EVisibility,
 } from "./enums"
 import {
   IHelpLinkItems,
@@ -65,9 +64,7 @@ export interface IRequirementAttributes {
 
 export interface IRequirementBlockParams {
   name: string
-  firstNations: boolean
   displayName: string
-  visibility: EVisibility
   displayDescription: string
   description?: string
   associationList?: string[]
@@ -122,16 +119,9 @@ export interface IRevisionReasonsAttributes {
 export interface IRequirementTemplateUpdateParams {
   description?: string | null
   nickname?: string | null
-  public?: boolean | null
   assigneeId?: string | null
-  permitTypeId?: string | null
-  activityId?: string | null
   requirementTemplateSectionsAttributes?: IRequirementTemplateSectionAttributes[]
   availableGlobally?: boolean | null
-}
-
-export interface IInvitePreviewersParams {
-  emails: string[]
 }
 
 export interface ISiteConfigurationUpdateParams {
@@ -143,7 +133,6 @@ export interface ISiteConfigurationUpdateParams {
   sitewideMessage?: string | null
   helpLinkItems?: IHelpLinkItems
   revisionReasonsMap?: { [key: string]: IRevisionReason }
-  standardizationPageEarlyAccessRequirementTemplateIds?: string[] | null
   revisionReasonsAttributes?: IRevisionReasonsAttributes[]
 }
 
