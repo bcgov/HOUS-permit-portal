@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_04_27_222000) do
+ActiveRecord::Schema[7.2].define(version: 2026_05_07_162600) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -98,9 +98,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_27_222000) do
     t.uuid "contactable_id"
     t.string "contact_type"
     t.index ["contactable_type", "contactable_id"], name: "index_contacts_on_contactable"
-  end
-
-  create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
   end
 
   create_table "design_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -290,6 +287,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_27_222000) do
     t.jsonb "boundary_points", default: []
     t.string "weather_location"
     t.decimal "design_summer_temp", precision: 5, scale: 1
+    t.boolean "hide_from_search", default: false, null: false
     t.index ["ltsa_matcher"], name: "index_jurisdictions_on_ltsa_matcher"
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"], name: "index_jurisdictions_on_regional_district_id"

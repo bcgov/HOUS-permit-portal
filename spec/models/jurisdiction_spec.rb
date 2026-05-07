@@ -117,6 +117,14 @@ RSpec.describe Jurisdiction, type: :model do
     end
   end
 
+  describe "#should_index?" do
+    it "excludes hidden jurisdictions from the Searchkick index" do
+      jurisdiction = build(:sub_district, hide_from_search: true)
+
+      expect(jurisdiction.should_index?).to be(false)
+    end
+  end
+
   describe "callbacks" do
     let(:super_admin) { create(:user, :super_admin) }
     let(:manager) { create(:user, :review_manager) }
