@@ -49,4 +49,13 @@ RSpec.describe ReleaseNote, type: :model do
       expect(build(:release_note, content: nil)).not_to be_valid
     end
   end
+
+  describe "scopes" do
+    it "returns published release notes" do
+      published_release_note = create(:release_note, status: :published)
+      draft_release_note = create(:release_note, status: :draft)
+      expect(ReleaseNote.published).to include(published_release_note)
+      expect(ReleaseNote.published).not_to include(draft_release_note)
+    end
+  end
 end
