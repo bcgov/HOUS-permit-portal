@@ -15,4 +15,6 @@ class ReleaseNote < ApplicationRecord
             }
 
   validates :release_date, :content, :release_notes_url, presence: true
+
+  scope :published, -> { where(status: :published) }
 end
