@@ -27,7 +27,9 @@ class Api::HelpVideosController < Api::ApplicationController
   end
 
   def create
-    video = HelpVideo.new(help_video_params)
+    attributes, publish = help_video_attributes_and_publish_state
+    video = HelpVideo.new(attributes)
+    apply_publish_state(video, publish)
     authorize video
 
     if video.save
@@ -39,8 +41,11 @@ class Api::HelpVideosController < Api::ApplicationController
 
   def update
     authorize @help_video
+    attributes, publish = help_video_attributes_and_publish_state
+    @help_video.assign_attributes(attributes)
+    apply_publish_state(@help_video, publish)
 
-    if @help_video.update(help_video_params)
+    if @help_video.save
       render_success(@help_video, "help_video.update_success")
     else
       render_validation_error(@help_video)
@@ -93,11 +98,27 @@ class Api::HelpVideosController < Api::ApplicationController
       :help_video_section_id,
       :title,
       :description,
-      :sort_order,
+      :publish,
       video_document_attributes: document_attributes,
       caption_document_attributes: document_attributes,
       transcript_document_attributes: document_attributes
     )
+  end
+
+  def help_video_attributes_and_publish_state
+    attributes = help_video_params.to_h
+    publish = attributes.delete("publish")
+
+    [
+      attributes,
+      publish.nil? ? nil : ActiveModel::Type::Boolean.new.cast(publish)
+    ]
+  end
+
+  def apply_publish_state(video, publish)
+    return if publish.nil?
+
+    video.published_at = publish ? (video.published_at || Time.current) : nil
   end
 
   def document_attributes

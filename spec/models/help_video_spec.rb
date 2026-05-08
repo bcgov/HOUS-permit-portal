@@ -52,4 +52,15 @@ RSpec.describe HelpVideo, type: :model do
       )
     end
   end
+
+  describe "list ordering" do
+    it "adds new videos to the bottom of their section list" do
+      section = create(:help_video_section)
+      create(:help_video, help_video_section: section, sort_order: 0)
+
+      video = create(:help_video, help_video_section: section)
+
+      expect(video.sort_order).to eq(1)
+    end
+  end
 end

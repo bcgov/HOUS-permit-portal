@@ -48,16 +48,6 @@ export const SiteConfigurationManagementScreen = observer(function SiteConfigura
           </GridItem>
           <GridItem>
             <HomeScreenBox
-              title={t(`${i18nPrefix}.helpVideos.title`)}
-              description={t(`${i18nPrefix}.helpVideos.description`)}
-              linkText={t("ui.edit")}
-              icon={<VideoCamera size="24px" color="var(--chakra-colors-text-link)" />}
-              href="help-videos"
-              h="full"
-            />
-          </GridItem>
-          <GridItem>
-            <HomeScreenBox
               title={t(`${i18nPrefix}.revisionReasonsAttributesSetup.title`)}
               description={t(`${i18nPrefix}.revisionReasonsAttributesSetup.description`)}
               linkText={t("ui.edit")}
@@ -93,6 +83,16 @@ export const SiteConfigurationManagementScreen = observer(function SiteConfigura
               linkText={t("ui.edit")}
               icon={<SlidersHorizontal size="24px" color="var(--chakra-colors-text-link)" />}
               href="global-feature-access"
+              h="full"
+            />
+          </GridItem>
+          <GridItem>
+            <HomeScreenBox
+              title={t(`${i18nPrefix}.helpVideos.title`)}
+              description={t(`${i18nPrefix}.helpVideos.description`)}
+              linkText={t("ui.edit")}
+              icon={<VideoCamera size="24px" color="var(--chakra-colors-text-link)" />}
+              href="help-videos"
               h="full"
             />
           </GridItem>

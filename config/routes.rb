@@ -299,7 +299,11 @@ Rails.application.routes.draw do
            to: "report_documents#share_with_jurisdiction"
     end
 
-    resources :help_video_sections, only: %i[index show create update destroy]
+    resources :help_video_sections,
+              only: %i[index show create update destroy] do
+      post "reorder", on: :collection
+      post "reorder_videos", on: :member
+    end
     resources :help_videos, only: %i[index show create update destroy] do
       post "publish", on: :member
       post "unpublish", on: :member
