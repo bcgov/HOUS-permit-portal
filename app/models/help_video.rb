@@ -22,10 +22,11 @@ class HelpVideo < ApplicationRecord
   accepts_nested_attributes_for :caption_document, allow_destroy: true
   accepts_nested_attributes_for :transcript_document, allow_destroy: true
 
+  acts_as_list scope: :help_video_section, column: :sort_order, top_of_list: 0
+
   validates :help_video_section, presence: true
   validates :title, presence: true
   validates :sort_order, numericality: { only_integer: true }
-  validates :sort_order, uniqueness: { scope: :help_video_section_id }
   validate :required_documents_exist_when_published
 
   scope :published, -> { where.not(published_at: nil) }

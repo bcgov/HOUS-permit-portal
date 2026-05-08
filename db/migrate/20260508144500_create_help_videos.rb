@@ -8,7 +8,7 @@ class CreateHelpVideos < ActiveRecord::Migration[7.2]
       t.timestamps
     end
 
-    add_index :help_video_sections, :sort_order, unique: true
+    add_index :help_video_sections, :sort_order
 
     create_table :help_videos, id: :uuid do |t|
       t.references :help_video_section,
@@ -25,7 +25,6 @@ class CreateHelpVideos < ActiveRecord::Migration[7.2]
 
     add_index :help_videos,
               %i[help_video_section_id sort_order],
-              unique: true,
               name: "index_help_videos_on_section_and_sort_order"
     add_index :help_videos, :published_at
 

@@ -3,7 +3,6 @@ FactoryBot.define do
     association :help_video_section
     sequence(:title) { |n| "Help video #{n}" }
     description { "A short help video." }
-    sequence(:sort_order)
     published_at { nil }
 
     trait :with_required_documents do

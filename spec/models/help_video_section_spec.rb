@@ -18,4 +18,14 @@ RSpec.describe HelpVideoSection, type: :model do
       expect(described_class.ordered).to eq([earlier, later])
     end
   end
+
+  describe "list ordering" do
+    it "adds new sections to the bottom of the list" do
+      create(:help_video_section, sort_order: 0)
+
+      section = create(:help_video_section)
+
+      expect(section.sort_order).to eq(1)
+    end
+  end
 end

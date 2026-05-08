@@ -800,6 +800,12 @@ en:
       destroy_success:
         title: ""
         message: "Video section deleted successfully."
+      reorder_success:
+        title: ""
+        message: "Video sections reordered successfully."
+      reorder_videos_success:
+        title: ""
+        message: "Videos reordered successfully."
     help_video:
       create_success:
         title: ""

@@ -6,6 +6,8 @@ export const HelpVideoSectionModel = types.model("HelpVideoSectionModel", {
   title: types.string,
   description: types.maybeNull(types.string),
   sortOrder: types.number,
+  createdAt: types.optional(types.maybeNull(types.Date), null),
+  updatedAt: types.optional(types.maybeNull(types.Date), null),
   helpVideos: types.optional(types.array(types.safeReference(HelpVideoModel)), []),
 })
 
