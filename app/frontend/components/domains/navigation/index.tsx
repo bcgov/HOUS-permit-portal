@@ -46,6 +46,14 @@ const LoginScreen = lazy(() =>
 
 const HomeScreen = lazy(() => import("../home").then((module) => ({ default: module.HomeScreen })))
 
+const HelpVideosIndexScreen = lazy(() =>
+  import("../help-videos").then((module) => ({ default: module.HelpVideosIndexScreen }))
+)
+
+const HelpVideoScreen = lazy(() =>
+  import("../help-videos/help-video-screen").then((module) => ({ default: module.HelpVideoScreen }))
+)
+
 const StandardizationPreviewScreen = lazy(() =>
   import("../landing/standardization-preview-screen").then((module) => ({
     default: module.StandardizationPreviewScreen,
@@ -103,6 +111,11 @@ const SubmissionsInboxSetupScreenLazy = lazy(() =>
 const ResourcesScreenLazy = lazy(() =>
   import("../home/review-manager/configuration-management-screen/resources-screen").then((module) => ({
     default: module.ResourcesScreen,
+  }))
+)
+const HelpVideosManagementScreen = lazy(() =>
+  import("../super-admin/help-videos-management-screen").then((module) => ({
+    default: module.HelpVideosManagementScreen,
   }))
 )
 const ReviewStaffMyJurisdictionAboutPageScreen = lazy(() =>
@@ -485,6 +498,7 @@ const AppRoutes = observer(() => {
       <Route path="/configuration-management" element={<SiteConfigurationManagementScreen />} />
       <Route path="/configuration-management/sitewide-message" element={<SitewideMessageScreen />} />
       <Route path="/configuration-management/help-drawer-setup" element={<HelpDrawerSetupScreen />} />
+      <Route path="/configuration-management/help-videos" element={<HelpVideosManagementScreen />} />
       <Route path="/configuration-management/revision-reason-setup" element={<RevisionReasonSetupScreen />} />
       {/* DEPRECATED: /configuration-management/standardization-setup route removed.
           Super admins toggle publicly_previewable directly on TemplateVersionScreen. */}
@@ -814,6 +828,8 @@ const AppRoutes = observer(() => {
         {/* Public Routes */}
         <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
         <Route path="/contact" element={<ContactScreen />} />
+        <Route path="/videos" element={<HelpVideosIndexScreen />} />
+        <Route path="/videos/:videoId" element={<HelpVideoScreen />} />
         <Route path="/standardization-preview" element={<StandardizationPreviewScreen />} />
         <Route path="/template-versions/:templateVersionId/preview" element={<TemplateVersionPreviewScreen />} />
         <Route path="/project-readiness-tools" element={<ProjectReadinessToolsIndexScreen />} />

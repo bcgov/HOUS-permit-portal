@@ -3847,6 +3847,24 @@ Thank you,
           auditLogTitle: "Audit log",
           stepCodes: "Step Codes",
         },
+        helpVideos: {
+          fetchError: "There was an error loading this video.",
+          index: {
+            title: "Videos",
+            description: "Watch help videos about using Building Permit Hub.",
+          },
+          show: {
+            backToVideos: "Back to videos",
+            downloadTranscript: "Download transcript",
+            englishCaptions: "English captions",
+            errorTitle: "Video unavailable",
+          },
+          management: {
+            title: "Video management",
+            description:
+              "Manage public help video sections, videos, MP4 files, WebVTT captions, and transcripts. Full management controls will be added here.",
+          },
+        },
         projectReadinessTools: {
           title: "Project readiness tools",
           pageHeading: "Prepare and check your project documents",
@@ -4582,6 +4600,10 @@ Thank you,
               label: "User and role guide",
             },
           },
+          helpVideos: {
+            title: "Videos",
+            description: "Manage public help videos, captions, transcripts, and video sections",
+          },
         },
 
         reporting: {
@@ -4735,6 +4757,10 @@ Thank you,
                 label: "For local governments",
                 description: "Information for local governments interested in joining Building Permit Hub",
               },
+              videos: {
+                label: "Videos",
+                description: "Watch help videos about using Building Permit Hub",
+              },
               standardPermitApplicationMaterials: {
                 label: "Standard permit application materials",
                 description: "Review and provide feedback on permit application materials under development",
@@ -4752,6 +4778,7 @@ Thank you,
           home: "Home",
           welcome: "Welcome",
           contact: "Contact us",
+          videos: "Videos",
           contactEmail: "digital.codes.permits@gov.bc.ca",
           contactInstructions_1: "If you have any questions or need assistance, see the contact options below:",
           contactInstructions_2: "Have a question about your digital permit application?",
@@ -5012,6 +5039,8 @@ Thank you,
             resources: "Resources",
             preChecks: "Pre-checks",
             preview: "Preview",
+            videos: "Videos",
+            helpVideos: "Help videos",
           },
         },
         automatedCompliance: {

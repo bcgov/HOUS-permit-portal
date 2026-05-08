@@ -3,6 +3,8 @@ import { IRevisionRequestForm } from "../../components/domains/permit-applicatio
 import { IJurisdictionTemplateVersionCustomizationForm } from "../../components/domains/requirement-template/screens/jurisdiction-edit-digital-permit-screen"
 import { TContactFormData } from "../../components/shared/contact/create-edit-contact-modal"
 import { IExternalApiKey } from "../../models/external-api-key"
+import { IHelpVideo } from "../../models/help-video"
+import { IHelpVideoSection } from "../../models/help-video-section"
 import { IIntegrationMapping } from "../../models/integration-mapping"
 import { IJurisdiction } from "../../models/jurisdiction"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
@@ -147,6 +149,14 @@ export class Api {
 
   async fetchJurisdiction(id) {
     return this.client.get<ApiResponse<IJurisdiction>>(`/jurisdictions/${id}`)
+  }
+
+  async fetchHelpVideoSections() {
+    return this.client.get<ApiResponse<IHelpVideoSection[]>>(`/help_video_sections`)
+  }
+
+  async fetchHelpVideo(id: string) {
+    return this.client.get<ApiResponse<IHelpVideo>>(`/help_videos/${id}`)
   }
 
   async fetchPermitApplication(id: string, review?: boolean) {
@@ -771,31 +781,6 @@ export class Api {
 
   async fetchPubliclyPreviewableTemplateVersions() {
     return this.client.get<ApiResponse<ITemplateVersion[]>>(`/template_versions/publicly_previewable`)
-  }
-
-  // ── Draft feedback API methods ──────────────────────────────────────
-
-  async fetchDraftFeedbacks(templateVersionId: string) {
-    return this.client.get<ApiResponse<ITemplateVersionFeedback[]>>(`/template_versions/${templateVersionId}/feedbacks`)
-  }
-
-  async createDraftFeedback(templateVersionId: string, params: { body: string; sentiment?: string }) {
-    return this.client.post<ApiResponse<ITemplateVersionFeedback>>(
-      `/template_versions/${templateVersionId}/feedbacks`,
-      params
-    )
-  }
-
-  async resolveDraftFeedback(templateVersionId: string, feedbackId: string) {
-    return this.client.post<ApiResponse<ITemplateVersionFeedback>>(
-      `/template_versions/${templateVersionId}/feedbacks/${feedbackId}/resolve`
-    )
-  }
-
-  async unresolveDraftFeedback(templateVersionId: string, feedbackId: string) {
-    return this.client.post<ApiResponse<ITemplateVersionFeedback>>(
-      `/template_versions/${templateVersionId}/feedbacks/${feedbackId}/unresolve`
-    )
   }
 
   async fetchPart9StepCodes() {
