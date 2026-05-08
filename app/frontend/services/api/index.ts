@@ -16,6 +16,7 @@ import { IPermitCollaboration } from "../../models/permit-collaboration"
 import { IPermitProject } from "../../models/permit-project"
 import { IPreCheck } from "../../models/pre-check"
 import { IProjectAudit } from "../../models/project-audit"
+import { IReleaseNote } from "../../models/release-note-model"
 import { IRequirementTemplate } from "../../models/requirement-template"
 import { ITemplateVersion } from "../../models/template-version"
 import { ITemplateVersionPreview } from "../../models/template-version-preview"
@@ -53,6 +54,7 @@ import {
   EPermitProjectSortFields,
   EPreCheckSortFields,
   EProjectAuditSortFields,
+  EReleaseNoteSortFields,
   ERequirementLibrarySortFields,
   ERequirementTemplateSortFields,
   EStepCodeSortFields,
@@ -1081,5 +1083,9 @@ export class Api {
     return this.client.post<ApiResponse<{ message: string }>>(
       `/report_documents/${reportDocumentId}/share_with_jurisdiction`
     )
+  }
+
+  async fetchReleaseNotes(params?: TSearchParams<EReleaseNoteSortFields>) {
+    return this.client.post<ApiResponse<IReleaseNote[]>>(`/release_notes/search`, params)
   }
 }
