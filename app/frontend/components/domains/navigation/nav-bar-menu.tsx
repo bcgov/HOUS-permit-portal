@@ -154,6 +154,11 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
           description={t("site.navMenu.about.forLocalGovernments.description")}
         />
         <StaticLinkItem
+          label={t("site.navMenu.about.videos.label")}
+          to="/videos"
+          description={t("site.navMenu.about.videos.description")}
+        />
+        <StaticLinkItem
           label={t("site.navMenu.about.standardPermitApplicationMaterials.label")}
           to="/standardization-preview"
           description={t("site.navMenu.about.standardPermitApplicationMaterials.description")}

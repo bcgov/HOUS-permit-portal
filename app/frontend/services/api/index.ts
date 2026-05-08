@@ -4,6 +4,8 @@ import { IJurisdictionTemplateVersionCustomizationForm } from "../../components/
 import { TContactFormData } from "../../components/shared/contact/create-edit-contact-modal"
 import { IEarlyAccessPreview } from "../../models/early-access-preview"
 import { IExternalApiKey } from "../../models/external-api-key"
+import { IHelpVideo } from "../../models/help-video"
+import { IHelpVideoSection } from "../../models/help-video-section"
 import { IIntegrationMapping } from "../../models/integration-mapping"
 import { IJurisdiction } from "../../models/jurisdiction"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
@@ -151,6 +153,14 @@ export class Api {
 
   async fetchJurisdiction(id) {
     return this.client.get<ApiResponse<IJurisdiction>>(`/jurisdictions/${id}`)
+  }
+
+  async fetchHelpVideoSections() {
+    return this.client.get<ApiResponse<IHelpVideoSection[]>>(`/help_video_sections`)
+  }
+
+  async fetchHelpVideo(id: string) {
+    return this.client.get<ApiResponse<IHelpVideo>>(`/help_videos/${id}`)
   }
 
   async fetchPermitApplication(id: string, review?: boolean) {
