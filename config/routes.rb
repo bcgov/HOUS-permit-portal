@@ -384,6 +384,7 @@ Rails.application.routes.draw do
 
     resources :release_notes, only: %i[index show create update] do
       patch "publish", on: :member, to: "release_notes#publish"
+      post "search", on: :collection, to: "release_notes#index"
     end
   end
 
