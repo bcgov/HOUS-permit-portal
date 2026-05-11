@@ -200,7 +200,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_08_144500) do
   create_table "help_videos", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "help_video_section_id", null: false
     t.string "title", null: false
-    t.text "description"
+    t.string "slug"
+    t.text "description_html"
     t.integer "sort_order", default: 0, null: false
     t.datetime "published_at"
     t.datetime "created_at", null: false
@@ -208,6 +209,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_08_144500) do
     t.index ["help_video_section_id", "sort_order"], name: "index_help_videos_on_section_and_sort_order"
     t.index ["help_video_section_id"], name: "index_help_videos_on_help_video_section_id"
     t.index ["published_at"], name: "index_help_videos_on_published_at"
+    t.index ["slug"], name: "index_help_videos_on_slug", unique: true
   end
 
   create_table "integration_mapping_notifications", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

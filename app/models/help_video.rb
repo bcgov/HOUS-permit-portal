@@ -1,4 +1,10 @@
 class HelpVideo < ApplicationRecord
+  extend FriendlyId
+  friendly_id :title, use: :slugged
+  include HtmlSanitizeAttributes
+
+  sanitizable :description_html
+
   belongs_to :help_video_section
 
   has_many :documents,
@@ -44,6 +50,19 @@ class HelpVideo < ApplicationRecord
     update!(published_at: nil)
   end
 
+  def publish=(value)
+    return if value.nil?
+
+    self.published_at =
+      (
+        if ActiveModel::Type::Boolean.new.cast(value)
+          (published_at || Time.current)
+        else
+          nil
+        end
+      )
+  end
+
   private
 
   def required_documents_exist_when_published
@@ -60,6 +79,6 @@ class HelpVideo < ApplicationRecord
 
   def publishable_document?(document)
     document.present? && !document.marked_for_destruction? &&
-      document.file_available? && document.clean?
+      document.file_available?
   end
 end

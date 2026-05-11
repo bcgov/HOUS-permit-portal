@@ -16,7 +16,8 @@ class CreateHelpVideos < ActiveRecord::Migration[7.2]
                    foreign_key: true,
                    type: :uuid
       t.string :title, null: false
-      t.text :description
+      t.string :slug
+      t.text :description_html
       t.integer :sort_order, null: false, default: 0
       t.datetime :published_at
 
@@ -27,6 +28,7 @@ class CreateHelpVideos < ActiveRecord::Migration[7.2]
               %i[help_video_section_id sort_order],
               name: "index_help_videos_on_section_and_sort_order"
     add_index :help_videos, :published_at
+    add_index :help_videos, :slug, unique: true
 
     create_table :help_video_documents, id: :uuid do |t|
       t.string :type, null: false

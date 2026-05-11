@@ -59,6 +59,7 @@ export const Editor = observer(
     autoFocus = false,
     shouldContainRichTextToolbarItem = () => true,
   }: IEditorProps) => {
+    const isSyncingExternalContentRef = React.useRef(false)
     const debouncedHandleChange = useMemo(
       () =>
         debounce((html: string) => {
@@ -85,6 +86,8 @@ export const Editor = observer(
       content: htmlValue,
       editable: !readonly,
       onUpdate: ({ editor }) => {
+        if (isSyncingExternalContentRef.current) return
+
         const html = editor.getHTML()
         debouncedHandleChange(html)
       },
@@ -98,9 +101,19 @@ export const Editor = observer(
     // Update content when htmlValue prop changes externally
     useEffect(() => {
       if (editor && htmlValue !== editor.getHTML()) {
-        editor.commands.setContent(htmlValue)
+        debouncedHandleChange.cancel()
+        isSyncingExternalContentRef.current = true
+        try {
+          editor.commands.setContent(htmlValue, { emitUpdate: false })
+        } finally {
+          isSyncingExternalContentRef.current = false
+        }
       }
-    }, [htmlValue, editor])
+    }, [debouncedHandleChange, htmlValue, editor])
+
+    useEffect(() => {
+      return () => debouncedHandleChange.cancel()
+    }, [debouncedHandleChange])
 
     // Handle autoFocus
     useEffect(() => {

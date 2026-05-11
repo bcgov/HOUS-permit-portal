@@ -3856,10 +3856,12 @@ Thank you,
             onThisPage: "On this page",
           },
           show: {
-            backToVideos: "Back to videos",
+            about: "About this video",
             downloadTranscript: "Download transcript",
             englishCaptions: "English captions",
             errorTitle: "Video unavailable",
+            relatedResources: "Related resources",
+            transcript: "Transcript",
           },
           management: {
             title: "Building Permit Hub videos",

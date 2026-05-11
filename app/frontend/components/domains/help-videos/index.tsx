@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next"
 import { Link as RouterLink } from "react-router-dom"
 import { useMst } from "../../../setup/root"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
+import { SafeTipTapDisplay } from "../../shared/editor/safe-tiptap-display"
 
 export const HelpVideosIndexScreen = observer(function HelpVideosIndexScreen() {
   const { helpVideoStore } = useMst()
@@ -25,9 +26,7 @@ export const HelpVideosIndexScreen = observer(function HelpVideosIndexScreen() {
           <Heading as="h1" fontSize="3xl" mb={5}>
             {translate("helpVideos.index.title")}
           </Heading>
-          <Text maxW="640px" lineHeight="1.7">
-            {translate("helpVideos.index.description")}
-          </Text>
+          <Text maxW="640px">{translate("helpVideos.index.description")}</Text>
         </Box>
 
         {isLoadingHelpVideoSections ? (
@@ -72,11 +71,11 @@ export const HelpVideosIndexScreen = observer(function HelpVideosIndexScreen() {
                       _hover={{ borderColor: "text.link" }}
                     >
                       <Heading as="h3" fontSize="md" mb={5}>
-                        <LinkOverlay as={RouterLink} to={`/videos/${video.id}`} color="text.link">
+                        <LinkOverlay as={RouterLink} to={`/videos/${video.slug ?? video.id}`} color="text.link">
                           {video.title}
                         </LinkOverlay>
                       </Heading>
-                      {video.description && <Text lineHeight="1.7">{video.description}</Text>}
+                      {video.descriptionHtml && <SafeTipTapDisplay htmlContent={video.descriptionHtml} />}
                     </LinkBox>
                   ))}
                 </SimpleGrid>

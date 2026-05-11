@@ -61,8 +61,11 @@ class Api::HelpVideoSectionsController < Api::ApplicationController
   def destroy
     authorize @help_video_section
 
-    @help_video_section.destroy!
-    render_success(nil, "help_video_section.destroy_success")
+    if @help_video_section.destroy
+      render_success(nil, "help_video_section.destroy_success")
+    else
+      render_validation_error(@help_video_section)
+    end
   end
 
   def reorder

@@ -34,12 +34,12 @@ import {
   useSortable,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable"
-import { List as ListIcon, Plus } from "@phosphor-icons/react"
+import { CaretLeft, List as ListIcon, Plus } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { CSSProperties, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useNavigate } from "react-router-dom"
+import { Link as RouterLink, useNavigate } from "react-router-dom"
 import { datefnsTableDateFormat } from "../../../constants"
 import { IHelpVideo } from "../../../models/help-video"
 import { IHelpVideoSection } from "../../../models/help-video-section"
@@ -145,14 +145,26 @@ export const HelpVideosManagementScreen = observer(function HelpVideosManagement
     const newIndex = sectionIds.indexOf(String(over.id))
     if (oldIndex === -1 || newIndex === -1) return
 
-    await reorderHelpVideoSections(arrayMove(sectionIds, oldIndex, newIndex))
+    const orderedIds = arrayMove(sectionIds, oldIndex, newIndex)
+    const scrollYBeforeReorder = window.scrollY
+    await reorderHelpVideoSections(orderedIds)
+
+    if (window.scrollY !== scrollYBeforeReorder) {
+      window.scrollTo({ top: scrollYBeforeReorder })
+    }
   }
 
   return (
     <Container maxW="container.lg" py={8} as="main">
       <VStack align="stretch" spacing={6}>
-        <Button variant="link" alignSelf="flex-start" onClick={() => navigate(-1)}>
-          {translate("ui.back")}
+        <Button
+          onClick={() => navigate(-1)}
+          variant="link"
+          alignSelf="flex-start"
+          leftIcon={<CaretLeft size={20} />}
+          textDecoration="none"
+        >
+          {t("ui.back")}
         </Button>
         <Box>
           <Heading as="h1" fontSize="3xl">
@@ -204,13 +216,8 @@ export const HelpVideosManagementScreen = observer(function HelpVideosManagement
                 <Tbody>
                   {helpVideos.map((video) => (
                     <Tr key={video.id}>
-                      <Td maxW="320px">
-                        <Text fontWeight="bold">{video.title}</Text>
-                        {video.description && (
-                          <Text color="text.secondary" fontSize="sm">
-                            {video.description}
-                          </Text>
-                        )}
+                      <Td maxW="320px" fontWeight="bold">
+                        <RouterLink to={`/videos/${video.slug ?? video.id}`}>{video.title}</RouterLink>
                       </Td>
                       <Td>{getSectionTitle(video.helpVideoSectionId)}</Td>
                       <Td>
@@ -375,7 +382,7 @@ const formatDate = (date?: Date | null) => {
 const videoPayload = (formData: IHelpVideoFormData) => {
   const payload: Record<string, any> = {
     title: formData.title,
-    description: formData.description,
+    descriptionHtml: formData.descriptionHtml,
     helpVideoSectionId: formData.helpVideoSectionId,
     publish: formData.isPublished,
   }

@@ -2,7 +2,7 @@ FactoryBot.define do
   factory :help_video do
     association :help_video_section
     sequence(:title) { |n| "Help video #{n}" }
-    description { "A short help video." }
+    description_html { "<p>A short help video.</p>" }
     published_at { nil }
 
     trait :with_required_documents do
