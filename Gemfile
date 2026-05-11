@@ -31,7 +31,7 @@ gem "tzinfo-data", platforms: %i[windows jruby]
 gem "bootsnap", require: false
 
 # Authentication
-gem "devise", "5.0.3"
+gem "devise", "5.0.4"
 gem "devise_invitable", "~> 2.0.9"
 gem "devise-jwt", "0.13.0"
 # devise-jwt-cookie functionality is vendored in lib/devise/jwt/cookie/ (see that directory for details)
