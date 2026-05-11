@@ -112,7 +112,7 @@ export enum ERequirementTemplateSortFields {
 
 export enum EReleaseNoteSortFields {
   releaseDate = "release_date",
-  lastEdited = "last_edited",
+  lastEdited = "updated_at",
   status = "status",
 }
 
