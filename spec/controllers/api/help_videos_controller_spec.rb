@@ -25,6 +25,23 @@ RSpec.describe Api::HelpVideosController, type: :controller do
       expect(json_response.dig("data", "id")).to eq(video.id)
     end
 
+    it "returns a published video by slug" do
+      video =
+        create(
+          :help_video,
+          :published,
+          title: "Submitting a Permit Application"
+        )
+
+      get :show, params: { id: video.slug }, format: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("data", "id")).to eq(video.id)
+      expect(json_response.dig("data", "slug")).to eq(
+        "submitting-a-permit-application"
+      )
+    end
+
     it "does not return an unpublished video to public users" do
       video = create(:help_video)
 
@@ -35,6 +52,7 @@ RSpec.describe Api::HelpVideosController, type: :controller do
 
     it "returns inline signed playback URLs" do
       video = create(:help_video, :published)
+      create(:help_video_transcript_document, help_video: video)
       allow_any_instance_of(HelpVideoVideoDocument).to receive(:file_url).with(
         disposition: "inline",
         response_content_type: "video/mp4"
@@ -45,6 +63,11 @@ RSpec.describe Api::HelpVideosController, type: :controller do
         disposition: "inline",
         response_content_type: "text/vtt"
       ).and_return("https://example.com/captions.vtt")
+      allow_any_instance_of(HelpVideoTranscriptDocument).to receive(
+        :file_url
+      ).with(disposition: "attachment").and_return(
+        "https://example.com/transcript.pdf"
+      )
 
       get :show, params: { id: video.id }, format: :json
 
@@ -53,6 +76,9 @@ RSpec.describe Api::HelpVideosController, type: :controller do
       )
       expect(json_response.dig("data", "caption_url")).to eq(
         "https://example.com/captions.vtt"
+      )
+      expect(json_response.dig("data", "transcript_url")).to eq(
+        "https://example.com/transcript.pdf"
       )
     end
   end

@@ -107,4 +107,19 @@ RSpec.describe Api::HelpVideoSectionsController, type: :controller do
       expect(second.reload.sort_order).to eq(0)
     end
   end
+
+  describe "DELETE #destroy" do
+    it "moves videos to the default section" do
+      sign_in create(:user, :super_admin)
+      section = create(:help_video_section)
+      video = create(:help_video, help_video_section: section)
+
+      delete :destroy, params: { id: section.id }, format: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(video.reload.help_video_section).to eq(
+        HelpVideoSection.default_section
+      )
+    end
+  end
 end

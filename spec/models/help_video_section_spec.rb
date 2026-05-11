@@ -2,7 +2,7 @@ require "rails_helper"
 
 RSpec.describe HelpVideoSection, type: :model do
   describe "associations" do
-    it { should have_many(:help_videos).dependent(:destroy) }
+    it { should have_many(:help_videos) }
   end
 
   describe "validations" do
@@ -26,6 +26,37 @@ RSpec.describe HelpVideoSection, type: :model do
       section = create(:help_video_section)
 
       expect(section.sort_order).to eq(1)
+    end
+  end
+
+  describe ".default_section" do
+    it "finds or creates the default section" do
+      section = described_class.default_section
+
+      expect(section.title).to eq("Uncategorized")
+      expect(section).to be_persisted
+    end
+  end
+
+  describe "destroying a section" do
+    it "moves videos to the default section" do
+      section = create(:help_video_section)
+      video = create(:help_video, help_video_section: section)
+
+      section.destroy!
+
+      expect(video.reload.help_video_section).to eq(
+        described_class.default_section
+      )
+    end
+
+    it "does not allow deleting the default section" do
+      section = described_class.default_section
+      create(:help_video, help_video_section: section)
+
+      expect { section.destroy! }.to raise_error(
+        ActiveRecord::RecordNotDestroyed
+      )
     end
   end
 end

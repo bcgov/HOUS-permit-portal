@@ -41,6 +41,7 @@ import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { IHelpVideo } from "../../../models/help-video"
 import { IHelpVideoSection } from "../../../models/help-video-section"
+import { SafeTipTapDisplay } from "../../shared/editor/safe-tiptap-display"
 import { SortableItem } from "../../shared/sortable-item"
 
 interface IHelpVideoSectionModalProps {
@@ -211,10 +212,8 @@ function SectionVideoRow({
         />
         <Box>
           <Text fontWeight="bold">{video.title}</Text>
-          {video.description && (
-            <Text color="text.secondary" fontSize="sm">
-              {video.description}
-            </Text>
+          {video.descriptionHtml && (
+            <SafeTipTapDisplay htmlContent={video.descriptionHtml} color="text.secondary" fontSize="sm" />
           )}
         </Box>
       </HStack>

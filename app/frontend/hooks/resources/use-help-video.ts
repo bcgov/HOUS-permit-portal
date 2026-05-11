@@ -27,7 +27,7 @@ export const useHelpVideo = () => {
     })()
   }, [videoId])
 
-  const matchedVideo = currentHelpVideo?.id === videoId ? currentHelpVideo : null
+  const matchedVideo = currentHelpVideo?.id === videoId || currentHelpVideo?.slug === videoId ? currentHelpVideo : null
 
   return { currentHelpVideo: matchedVideo, error }
 }

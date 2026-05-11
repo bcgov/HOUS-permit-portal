@@ -27,9 +27,7 @@ class Api::HelpVideosController < Api::ApplicationController
   end
 
   def create
-    attributes, publish = help_video_attributes_and_publish_state
-    video = HelpVideo.new(attributes)
-    apply_publish_state(video, publish)
+    video = HelpVideo.new(help_video_params)
     authorize video
 
     if video.save
@@ -41,9 +39,7 @@ class Api::HelpVideosController < Api::ApplicationController
 
   def update
     authorize @help_video
-    attributes, publish = help_video_attributes_and_publish_state
-    @help_video.assign_attributes(attributes)
-    apply_publish_state(@help_video, publish)
+    @help_video.assign_attributes(help_video_params)
 
     if @help_video.save
       render_success(@help_video, "help_video.update_success")
@@ -83,12 +79,15 @@ class Api::HelpVideosController < Api::ApplicationController
 
   def set_help_video
     @help_video =
-      HelpVideo.includes(
-        :help_video_section,
-        :video_document,
-        :caption_document,
-        :transcript_document
-      ).find(params[:id])
+      HelpVideo
+        .includes(
+          :help_video_section,
+          :video_document,
+          :caption_document,
+          :transcript_document
+        )
+        .friendly
+        .find(params[:id])
   rescue ActiveRecord::RecordNotFound => e
     render_error "misc.not_found_error", { status: :not_found }, e
   end
@@ -97,28 +96,12 @@ class Api::HelpVideosController < Api::ApplicationController
     params.require(:help_video).permit(
       :help_video_section_id,
       :title,
-      :description,
+      :description_html,
       :publish,
       video_document_attributes: document_attributes,
       caption_document_attributes: document_attributes,
       transcript_document_attributes: document_attributes
     )
-  end
-
-  def help_video_attributes_and_publish_state
-    attributes = help_video_params.to_h
-    publish = attributes.delete("publish")
-
-    [
-      attributes,
-      publish.nil? ? nil : ActiveModel::Type::Boolean.new.cast(publish)
-    ]
-  end
-
-  def apply_publish_state(video, publish)
-    return if publish.nil?
-
-    video.published_at = publish ? (video.published_at || Time.current) : nil
   end
 
   def document_attributes

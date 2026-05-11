@@ -2,7 +2,8 @@ class HelpVideoBlueprint < Blueprinter::Base
   identifier :id
 
   fields :title,
-         :description,
+         :slug,
+         :description_html,
          :sort_order,
          :published_at,
          :created_at,
@@ -26,7 +27,7 @@ class HelpVideoBlueprint < Blueprinter::Base
     end
 
     field :transcript_url do |video, _options|
-      video.transcript_document&.file_url
+      video.transcript_document&.file_url(disposition: "attachment")
     end
 
     association :video_document, blueprint: HelpVideoDocumentBlueprint

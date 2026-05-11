@@ -53,7 +53,7 @@ const DynamicBreadcrumb = observer(({ path }: IDynamicBreadcrumbProps) => {
 
   const [breadcrumbs, setBreadcrumbs] = useState<TBreadcrumbSegment[]>([])
 
-  const FRIENDLY_SLUG_RESOURCES = ["jurisdictions"]
+  const FRIENDLY_SLUG_RESOURCES = ["jurisdictions", "videos"]
 
   useEffect(() => {
     // Get the current path and split into segments
@@ -65,9 +65,10 @@ const DynamicBreadcrumb = observer(({ path }: IDynamicBreadcrumbProps) => {
       const previousSegment = pathSegments[index - 1]
       const resourceNeeded = isUUID(segment) || FRIENDLY_SLUG_RESOURCES.includes(previousSegment)
 
-      const currentResourceMap = {
+      const currentResourceMap: Record<string, string | undefined> = {
         jurisdictions: rootStore.jurisdictionStore.currentJurisdiction?.name,
         "permit-applications": rootStore.permitApplicationStore.currentPermitApplication?.number,
+        videos: rootStore.helpVideoStore.currentHelpVideo?.title,
       }
 
       const title = resourceNeeded
@@ -79,7 +80,12 @@ const DynamicBreadcrumb = observer(({ path }: IDynamicBreadcrumbProps) => {
     })
 
     setBreadcrumbs(breadcrumbSegments)
-  }, [path, rootStore.jurisdictionStore.currentJurisdiction])
+  }, [
+    path,
+    rootStore.helpVideoStore.currentHelpVideo?.title,
+    rootStore.jurisdictionStore.currentJurisdiction,
+    rootStore.permitApplicationStore.currentPermitApplication?.number,
+  ])
 
   return <SiteBreadcrumbs breadcrumbs={breadcrumbs} />
 })

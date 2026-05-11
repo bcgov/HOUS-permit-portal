@@ -14,7 +14,6 @@ import {
   ModalOverlay,
   Select,
   Text,
-  Textarea,
   VStack,
 } from "@chakra-ui/react"
 import { UppyFile } from "@uppy/core"
@@ -27,6 +26,9 @@ import { useTranslation } from "react-i18next"
 import useUppyS3 from "../../../hooks/use-uppy-s3"
 import { IHelpVideo } from "../../../models/help-video"
 import { IHelpVideoSection } from "../../../models/help-video-section"
+import { Editor } from "../../shared/editor/editor"
+
+const DEFAULT_DESCRIPTION_HTML = "<p>Add a description</p><h3><b>Topics covered</b></h3><ul><li>...</li></ul>"
 
 type TDocumentFieldName = "videoDocumentAttributes" | "captionDocumentAttributes" | "transcriptDocumentAttributes"
 
@@ -45,7 +47,7 @@ export interface IHelpVideoDocumentFormData {
 
 export interface IHelpVideoFormData {
   title: string
-  description?: string
+  descriptionHtml?: string
   helpVideoSectionId: string
   isPublished: boolean
   videoDocumentAttributes?: IHelpVideoDocumentFormData
@@ -74,7 +76,7 @@ export const HelpVideoModal = ({ isOpen, onClose, video, sections, onSubmit }: I
   } = useForm<IHelpVideoFormData>({
     defaultValues: {
       title: "",
-      description: "",
+      descriptionHtml: DEFAULT_DESCRIPTION_HTML,
       helpVideoSectionId: "",
       isPublished: false,
     },
@@ -120,6 +122,8 @@ export const HelpVideoModal = ({ isOpen, onClose, video, sections, onSubmit }: I
   useEffect(() => {
     if (!isOpen) return
 
+    const nextDescriptionHtml = video?.descriptionHtml ?? DEFAULT_DESCRIPTION_HTML
+
     resetUppy(videoUppy)
     resetUppy(captionUppy)
     resetUppy(transcriptUppy)
@@ -131,7 +135,7 @@ export const HelpVideoModal = ({ isOpen, onClose, video, sections, onSubmit }: I
 
     reset({
       title: video?.title ?? "",
-      description: video?.description ?? "",
+      descriptionHtml: nextDescriptionHtml,
       helpVideoSectionId: video?.helpVideoSectionId ?? sections[0]?.id ?? "",
       isPublished: Boolean(video?.publishedAt),
     })
@@ -143,6 +147,7 @@ export const HelpVideoModal = ({ isOpen, onClose, video, sections, onSubmit }: I
   })
 
   const selectedSectionId = watch("helpVideoSectionId")
+  const descriptionHtml = watch("descriptionHtml")
   const hasSections = sections.length > 0
 
   return (
@@ -163,7 +168,10 @@ export const HelpVideoModal = ({ isOpen, onClose, video, sections, onSubmit }: I
             </FormControl>
             <FormControl>
               <FormLabel>{translate("helpVideos.management.fields.description")}</FormLabel>
-              <Textarea {...register("description")} />
+              <Editor
+                htmlValue={descriptionHtml}
+                onChange={(value) => setValue("descriptionHtml", value, { shouldDirty: true })}
+              />
             </FormControl>
             <FormControl isRequired>
               <FormLabel>{translate("helpVideos.management.fields.section")}</FormLabel>

@@ -98,7 +98,8 @@ RSpec.describe PromoteJob, type: :job do
     stub_const("SomeAttacher", attacher_class)
 
     record = instance_double("Upload", id: "r1", update_column: true)
-    allow(record).to receive(:respond_to?).and_return(false)
+    allow(record).to receive(:respond_to?).with(:data_key).and_return(false)
+    allow(record).to receive(:respond_to?).with(:scan_status=).and_return(true)
     record_class = class_double("Upload", find: record)
     stub_const("Upload", record_class)
 
@@ -116,6 +117,7 @@ RSpec.describe PromoteJob, type: :job do
     described_class.perform_one
 
     expect(attacher).to have_received(:atomic_promote)
+    expect(record).to have_received(:update_column).with(:scan_status, :clean)
   end
 
   it "skips scanning for system-generated documents by data_key" do
