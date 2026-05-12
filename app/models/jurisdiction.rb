@@ -239,6 +239,10 @@ class Jurisdiction < ApplicationRecord
     }
   end
 
+  def should_index?
+    !hide_from_search?
+  end
+
   def self.custom_titleize_locality_type(locality_type)
     locality_type
       .split

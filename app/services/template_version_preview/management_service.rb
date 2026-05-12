@@ -68,6 +68,12 @@ class TemplateVersionPreview::ManagementService
       template_version
         .template_version_previews
         .find_or_create_by!(previewer: previewer) do |p|
+          # TODO: Remove after early-access preview cleanup runs in all envs.
+          # db/schema.rb still has this legacy NOT NULL column until final cleanup.
+          if p.has_attribute?(:early_access_requirement_template_id)
+            p.early_access_requirement_template_id =
+              template_version.requirement_template_id
+          end
           p.expires_at = expires_at
         end
 
