@@ -91,7 +91,7 @@ RSpec.describe PromoteJob, type: :job do
     expect(record).to have_received(:update_columns).with(file_data: nil)
   end
 
-  it "skips scanning when NotEnabledError is raised and still promotes" do
+  it "skips scanning when NotEnabledError is raised, still promotes, and does not mark clean" do
     attacher =
       instance_double("Attacher", atomic_promote: true, file: double("File"))
     attacher_class = class_double("SomeAttacher", retrieve: attacher)
@@ -117,7 +117,7 @@ RSpec.describe PromoteJob, type: :job do
     described_class.perform_one
 
     expect(attacher).to have_received(:atomic_promote)
-    expect(record).to have_received(:update_column).with(:scan_status, :clean)
+    expect(record).not_to have_received(:update_column)
   end
 
   it "skips scanning for system-generated documents by data_key" do
