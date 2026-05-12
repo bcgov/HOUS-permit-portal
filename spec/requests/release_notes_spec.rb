@@ -108,16 +108,19 @@ RSpec.describe "ReleaseNotes", type: :request do
       expect(subject).to include("version" => params[:version])
     end
 
-    it "sets the status to draft" do
+    it "does not allow a published release note to be saved as a draft" do
       setup
       @release_note.update!(status: :published)
       patch release_note_path(@release_note.id),
             params: {
               release_note: {
-                version: params[:version]
+                release_date: params[:release_date]
               }
             }
-      expect(subject).to include("status" => "draft")
+
+      expect(response).to have_http_status(:bad_request)
+      expect(error_message).to match(/no.*draft/i)
+      expect(@release_note.reload).to be_published
     end
 
     it_behaves_like AN_INVALID_PAYLOAD_RESPONSE, update_with_payload
