@@ -186,10 +186,10 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
     }
   }
 
-  const isAlreadyPublished =
-    !isCreate &&
-    releaseNoteId &&
-    releaseNoteStore.releaseNoteMap.get(releaseNoteId)?.status === EReleaseNoteStatus.published
+  const currentReleaseNote = !isCreate && releaseNoteId ? releaseNoteStore.releaseNoteMap.get(releaseNoteId) : undefined
+  const isAlreadyPublished = currentReleaseNote?.status === EReleaseNoteStatus.published
+
+  const isSaveDraftDisabled = submittingIntent === "publish" || isAlreadyPublished
 
   const publishFlow = async (data: TReleaseNoteFormData) => {
     if (isCreate) {
@@ -222,6 +222,9 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
       return
     }
     const intent = intentValue
+    if (intent === "saveDraft" && isAlreadyPublished) {
+      return
+    }
 
     setSubmittingIntent(intent)
     try {
@@ -269,7 +272,7 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
               label={t("releaseNote.form.version")}
               fieldName="version"
               required
-              inputProps={{ w: "252px", maxW: "252px" }}
+              inputProps={{ w: "252px", maxW: "252px", isDisabled: isAlreadyPublished }}
               validate={{
                 semver: (v: string) =>
                   !v || releaseNoteSemverRegex.test(v) || t("releaseNote.form.versionInvalidSemver"),
@@ -338,7 +341,7 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
                 variant="secondary"
                 size="sm"
                 isLoading={submittingIntent === "saveDraft"}
-                isDisabled={submittingIntent === "publish"}
+                isDisabled={isSaveDraftDisabled}
               >
                 {t("releaseNote.form.saveDraft")}
               </Button>
