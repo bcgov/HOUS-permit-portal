@@ -1,5 +1,5 @@
 import { Container, Grid, GridItem, Heading, VStack } from "@chakra-ui/react"
-import { FlagBanner, NotePencil, Question, SlidersHorizontal, Users } from "@phosphor-icons/react"
+import { File, FlagBanner, NotePencil, Question, SlidersHorizontal, Users } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -66,6 +66,16 @@ export const SiteConfigurationManagementScreen = observer(function SiteConfigura
               linkText={t("ui.edit")}
               icon={<SlidersHorizontal size="24px" color="var(--chakra-colors-text-link)" />}
               href="global-feature-access"
+              h="full"
+            />
+          </GridItem>
+          <GridItem>
+            <HomeScreenBox
+              title={t(`${i18nPrefix}.releaseNotes.title`)}
+              description={t(`${i18nPrefix}.releaseNotes.description`)}
+              linkText={t("ui.edit")}
+              icon={<File size="24px" color="var(--chakra-colors-text-link)" />}
+              href="/release-notes"
               h="full"
             />
           </GridItem>

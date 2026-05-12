@@ -15,4 +15,15 @@ class ReleaseNote < ApplicationRecord
             }
 
   validates :release_date, :content, :release_notes_url, presence: true
+  validate :version_unchanged_once_published
+
+  scope :published, -> { where(status: :published) }
+
+  private
+
+  def version_unchanged_once_published
+    return unless persisted? && status_was == "published" && version_changed?
+
+    errors.add(:version, "cannot be changed once a release note is published")
+  end
 end

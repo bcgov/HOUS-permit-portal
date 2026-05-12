@@ -110,6 +110,17 @@ export enum ERequirementTemplateSortFields {
   availableIn = "available_in",
 }
 
+export enum EReleaseNoteSortFields {
+  releaseDate = "release_date",
+  lastEdited = "updated_at",
+  status = "status",
+}
+
+export enum EReleaseNoteStatus {
+  draft = "draft",
+  published = "published",
+}
+
 export enum EPreCheckSortFields {
   fullAddress = "full_address",
   title = "title",

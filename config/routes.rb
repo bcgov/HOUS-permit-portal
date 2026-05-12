@@ -383,7 +383,8 @@ Rails.application.routes.draw do
     resources :digital_seal_validator, only: [:create]
 
     resources :release_notes, only: %i[index show create update] do
-      patch "publish", on: :member
+      patch "publish", on: :member, to: "release_notes#publish"
+      post "search", on: :collection, to: "release_notes#index"
     end
   end
 
