@@ -21,7 +21,6 @@ export const ReleaseNoteStoreModel = types
   .extend(withMerge())
   .views(() => ({
     getSortColumnHeader(field: EReleaseNoteSortFields) {
-      // @ts-expect-error - projectAudit translation keys may not be in i18n types yet
       return t(`releaseNote.columns.${field}`)
     },
   }))
