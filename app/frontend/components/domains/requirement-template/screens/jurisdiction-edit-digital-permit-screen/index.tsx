@@ -1,16 +1,5 @@
-import {
-  Box,
-  Button,
-  ButtonGroup,
-  Checkbox,
-  Flex,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  Spacer,
-} from "@chakra-ui/react"
-import { ArrowUp, CaretDown, CaretRight } from "@phosphor-icons/react"
+import { Box, Button, ButtonGroup, Checkbox, Flex, Spacer } from "@chakra-ui/react"
+import { ArrowUp, CaretRight } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
@@ -81,13 +70,6 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
     customErrorMessage: t("errors.fetchBuildingPermit"),
   })
   const denormalizedTemplate = templateVersion?.denormalizedTemplateJson
-  const handleCopyTips = () => {
-    templateVersion?.copyJurisdictionTemplateVersionTips(currentUser.jurisdiction.id)
-  }
-
-  const handleCopyElectives = () => {
-    templateVersion?.copyJurisdictionTemplateVersionElectives(currentUser.jurisdiction.id)
-  }
 
   const {
     rootContainerRef: rightContainerRef,
@@ -237,30 +219,7 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
                 )}
               />
             )}
-
-            {templateVersion.firstNations ? (
-              <Menu>
-                <MenuButton as={Button} rightIcon={<CaretDown />} variant="ghost">
-                  {t("requirementTemplate.edit.options.button")}
-                </MenuButton>
-                <MenuList>
-                  <>
-                    <MenuItem onClick={handleCopyTips}>
-                      {t("requirementTemplate.edit.options.copyTips", {
-                        templateLabel: templateVersion.nonFirstNationLabel,
-                      })}
-                    </MenuItem>
-                    <MenuItem onClick={handleCopyElectives}>
-                      {t("requirementTemplate.edit.options.copyElectives", {
-                        templateLabel: templateVersion.nonFirstNationLabel,
-                      })}
-                    </MenuItem>
-                  </>
-                </MenuList>
-              </Menu>
-            ) : (
-              <Spacer />
-            )}
+            <Spacer />
             <ButtonGroup>
               <BrowserSearchPrompt color="text.primary" />
               {currentSandbox && templateVersion.isPublished && (

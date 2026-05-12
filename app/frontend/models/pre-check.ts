@@ -3,7 +3,6 @@ import { withEnvironment } from "../lib/with-environment"
 import { EPreCheckAssessmentResult, EPreCheckServicePartner, EPreCheckStatus } from "../types/enums"
 import { IDesignDocument } from "../types/types"
 import { JurisdictionModel } from "./jurisdiction"
-import { PermitTypeModel } from "./permit-classification"
 
 export const PreCheckModel = types
   .model("PreCheck", {
@@ -15,7 +14,6 @@ export const PreCheckModel = types
     pid: types.maybeNull(types.string),
     permitApplicationId: types.maybeNull(types.string),
     jurisdiction: types.maybeNull(types.reference(types.late(() => JurisdictionModel))),
-    permitType: types.maybeNull(types.reference(types.late(() => PermitTypeModel))),
     servicePartner: types.enumeration(Object.values(EPreCheckServicePartner)),
     eulaAccepted: types.optional(types.boolean, false),
     consentToSendDrawings: types.optional(types.boolean, false),
@@ -58,7 +56,7 @@ export const PreCheckModel = types
       return self.eulaAccepted && self.consentToSendDrawings
     },
     get isBuildingTypeComplete() {
-      return !!self.permitType
+      return true
     },
     get isUploadDrawingsComplete() {
       return self.designDocuments.length > 0

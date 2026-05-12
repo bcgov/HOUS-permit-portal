@@ -38,8 +38,7 @@ class ExternalApi::ApplicationController < ActionController::API
   def external_api_key_not_authorized(exception)
     render_error(
       "misc.external_api_key_unauthorized_error",
-      { message_opts: { error_message: exception.message }, status: 403 },
-      exception
+      { status: 403, log_args: { errors: exception.message } }
     ) and return
   end
 

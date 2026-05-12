@@ -1,4 +1,4 @@
-import { Container, HStack, Heading, Text, VStack } from "@chakra-ui/react"
+import { Container, Heading, HStack, Text, VStack } from "@chakra-ui/react"
 import { CaretRight } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -6,15 +6,18 @@ import { useTranslation } from "react-i18next"
 import { ETemplateVersionStatus } from "../../../../../types/enums"
 import { IDenormalizedTemplate } from "../../../../../types/types"
 import { RouterLinkButton } from "../../../../shared/navigation/router-link-button"
-import { TemplateStatusTag } from "../../../../shared/requirement-template/template-status-tag"
+import {
+  TemplateStatusTag,
+  TTemplateStatusTagStatus,
+} from "../../../../shared/requirement-template/template-status-tag"
 import { VersionTag } from "../../../../shared/version-tag"
 import { SubNavBar } from "../../../navigation/sub-nav-bar"
 
 interface IProps {
-  requirementTemplate: Pick<IDenormalizedTemplate, "id" | "description" | "activity" | "permitType" | "label">
+  requirementTemplate: Pick<IDenormalizedTemplate, "id" | "description" | "tags" | "nickname">
   renderDescription?: () => JSX.Element
   renderHeading?: () => JSX.Element
-  status?: ETemplateVersionStatus
+  status?: TTemplateStatusTagStatus
   versionDate?: Date
   breadCrumbs?: { href: string; title: string }[]
   latestVersionId?: string
@@ -47,7 +50,7 @@ export const BuilderHeader = observer(function BuilderHeader({
         </Text>
       </HStack>
       <VStack spacing={2} w={"full"} alignItems={"flex-start"} py={5}>
-        {renderHeading ? renderHeading() : <Heading as="h1">{requirementTemplate.label}</Heading>}
+        {renderHeading ? renderHeading() : <Heading as="h1">{requirementTemplate.nickname}</Heading>}
         <HStack>
           <Text fontWeight={700}>{t("requirementTemplate.fields.description")}:</Text>
           {renderDescription ? renderDescription() : <Text as="span">{requirementTemplate.description}</Text>}

@@ -247,6 +247,14 @@ class Api::JurisdictionsController < Api::ApplicationController
       :show_about_page,
       :allow_designated_reviewer,
       :contact_summary_html,
+      :processing_time_html,
+      :key_stages_html,
+      :timeline_and_deliverables_html,
+      :office_hours,
+      :office_address,
+      :office_telephone,
+      :office_email,
+      :website_url,
       :map_zoom,
       :inbox_enabled,
       :ltsa_matcher,
@@ -263,15 +271,9 @@ class Api::JurisdictionsController < Api::ApplicationController
         cell
         email
       ],
-      permit_type_submission_contacts_attributes: %i[
+      submission_contacts_attributes: %i[id email title default _destroy],
+      jurisdiction_step_requirements_attributes: %i[
         id
-        email
-        permit_type_id
-        _destroy
-      ],
-      permit_type_required_steps_attributes: %i[
-        id
-        permit_type_id
         default
         energy_step_required
         zero_carbon_step_required

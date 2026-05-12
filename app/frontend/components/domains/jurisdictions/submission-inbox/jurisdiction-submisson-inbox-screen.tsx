@@ -477,6 +477,7 @@ const InboxContent = observer(function InboxContent({
           projects={permitProjectSearch.tablePermitProjects}
           stateCounts={permitProjectSearch.stateCounts}
           columnTotals={permitProjectSearch.columnTotals}
+          unreadCounts={permitProjectSearch.unreadColumnCounts}
           collapsedColumns={[...submissionInboxStore.collapsedColumns]}
           onToggleColumn={(state) => submissionInboxStore.toggleColumnCollapsed(state)}
           onShowMore={onShowMore}
@@ -489,6 +490,7 @@ const InboxContent = observer(function InboxContent({
         applications={permitApplicationSearch.tablePermitApplications}
         stateCounts={permitApplicationSearch.stateCounts}
         columnTotals={permitApplicationSearch.columnTotals}
+        unreadCounts={permitApplicationSearch.unreadColumnCounts}
         collapsedColumns={[...submissionInboxStore.collapsedColumns]}
         onToggleColumn={(state) => submissionInboxStore.toggleColumnCollapsed(state)}
         onShowMore={onShowMore}

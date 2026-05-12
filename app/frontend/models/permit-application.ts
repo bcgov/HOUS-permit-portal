@@ -23,7 +23,6 @@ import {
   ITemplateCustomization,
   ITemplateVersionDiff,
 } from "../types/types"
-import { injectOptionalElectivesButtons } from "../utils/early-access-view-optional-electives"
 import {
   combineChangeMarkers,
   combineCustomizations,
@@ -40,7 +39,6 @@ import { convertResourceArrayToRecord } from "../utils/utility-functions"
 import { ICollaborator } from "./collaborator"
 import { JurisdictionModel } from "./jurisdiction"
 import { IPermitBlockStatus, PermitBlockStatusModel } from "./permit-block-status"
-import { IActivity, IPermitType } from "./permit-classification"
 import { IPermitCollaboration, PermitCollaborationModel } from "./permit-collaboration"
 import { IRequirement } from "./requirement"
 import { SandboxModel } from "./sandbox"
@@ -56,8 +54,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       fullAddress: types.maybeNull(types.string), // for now some seeds will not have this
       pin: types.maybeNull(types.string), // for now some seeds will not have this
       pid: types.maybeNull(types.string), // for now some seeds will not have this
-      permitType: types.frozen<IPermitType>(),
-      activity: types.frozen<IActivity>(),
+      tags: types.optional(types.array(types.string), []),
       status: types.enumeration(Object.values(EPermitApplicationStatus)),
       submitter: types.maybeNull(types.maybe(types.reference(types.late(() => UserModel)))),
       jurisdiction: types.maybeNull(types.maybe(types.reference(types.late(() => JurisdictionModel)))),
@@ -235,8 +232,8 @@ export const PermitApplicationModel = types.snapshotProcessor(
       get jurisdictionName() {
         return self.jurisdiction.name
       },
-      get permitTypeAndActivity() {
-        return `${self.activity.name} - ${self.permitType.name}`.trim()
+      get tagsOrNickname() {
+        return self.tags?.length ? self.tags.join(" | ") : (self.templateNickname ?? "N/A")
       },
       get flattenedBlocks() {
         return self.formJson.components
@@ -287,13 +284,6 @@ export const PermitApplicationModel = types.snapshotProcessor(
           self.revisionMode || self.isRevisionsRequested
             ? combineRevisionButtons(changedMarkedFormJson, self.isSubmitted, revisionRequestsToUse)
             : changedMarkedFormJson // Use changedMarkedFormJson if not in revision mode
-
-        if (self.templateVersion?.earlyAccess) {
-          return injectOptionalElectivesButtons(
-            revisionModeFormJson,
-            t("earlyAccessRequirementTemplate.viewOptionalElectives")
-          )
-        }
 
         return revisionModeFormJson
       },
@@ -349,8 +339,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
         return self.permitCollaborationMap.get(collaborationId)
       },
       shouldShowApplicationDiff(isEditing: boolean) {
-        if (self.templateVersion.earlyAccess) return false
-
+        if (self.status === EPermitApplicationStatus.ephemeral) return false
         return isEditing && (!self.usingCurrentTemplateVersion || self.showingCompareAfter)
       },
       get contacts() {
@@ -834,8 +823,8 @@ export const PermitApplicationModel = types.snapshotProcessor(
         if (response.ok) {
           const { data: stepCode } = response.data
           self.rootStore.stepCodeStore.mergeUpdate(stepCode, "stepCodesMap")
-          // Refresh current permit application from server so associations are consistent
-          yield self.rootStore.permitApplicationStore.fetchPermitApplication(self.id)
+          self.stepCode = cast(stepCode.id)
+          self.rootStore.stepCodeStore.setCurrentStepCode(stepCode.id)
         }
         return response.ok
       }),
@@ -859,18 +848,36 @@ export const PermitApplicationModel = types.snapshotProcessor(
         return response.ok
       }),
       markAsViewed: flow(function* () {
+        const wasUnread = !self.isViewed
+        const status = self.status
         const response = yield self.environment.api.viewPermitApplication(self.id)
         if (response.ok) {
           const { data: permitApplication } = response.data
           self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
+          if (wasUnread) {
+            self.rootStore.submissionInboxStore?.permitApplicationSearch?.adjustUnreadCountForColumn(status, -1)
+            const currentProject = self.rootStore.permitProjectStore.currentPermitProject
+            if (currentProject?.id === self.projectId) {
+              currentProject.adjustUnreadCountForColumn(status, -1)
+            }
+          }
         }
         return response.ok
       }),
       markAsUnviewed: flow(function* () {
+        const wasViewed = !!self.isViewed
+        const status = self.status
         const response = yield self.environment.api.unviewPermitApplication(self.id)
         if (response.ok) {
           const { data: permitApplication } = response.data
           self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
+          if (wasViewed) {
+            self.rootStore.submissionInboxStore?.permitApplicationSearch?.adjustUnreadCountForColumn(status, 1)
+            const currentProject = self.rootStore.permitProjectStore.currentPermitProject
+            if (currentProject?.id === self.projectId) {
+              currentProject.adjustUnreadCountForColumn(status, 1)
+            }
+          }
         }
         return response.ok
       }),
@@ -937,16 +944,23 @@ export const PermitApplicationModel = types.snapshotProcessor(
 
       transitionStatus: flow(function* (targetStatus: string) {
         const oldStatus = self.status
+        const isUnread = !self.isViewed
         const response = yield self.environment.api.transitionPermitApplicationStatus(self.id, targetStatus)
         if (response.ok) {
           const responseData = response.data.data
+          const newStatus = responseData.status
           self.status = responseData.status
           self.allowedManualTransitions.replace(responseData.allowedManualTransitions || [])
           self.inboxSortOrder = responseData.inboxSortOrder ?? null
           self.rootStore.submissionInboxStore?.permitApplicationSearch?.adjustCountsForTransition(
             oldStatus,
-            targetStatus
+            newStatus,
+            isUnread
           )
+          const currentProject = self.rootStore.permitProjectStore.currentPermitProject
+          if (isUnread && currentProject?.id === self.projectId) {
+            currentProject.moveUnreadCountBetweenColumns(oldStatus, newStatus)
+          }
         }
         return response
       }),

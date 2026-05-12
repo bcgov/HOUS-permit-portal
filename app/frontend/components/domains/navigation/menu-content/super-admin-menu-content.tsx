@@ -3,7 +3,6 @@ import React from "react"
 import { useTranslation } from "react-i18next"
 import { LogoutButton } from "./logout-button"
 import { MenuContentWrapper } from "./menu-content-wrapper"
-import { EarlyAccessMenuItem } from "./menu-items/early-access-menu-item"
 import { GiveFeedbackMenuItem } from "./menu-items/give-feedback-menu-item"
 import { HelpMenuItem } from "./menu-items/help-menu-item"
 import { HomeMenuItem } from "./menu-items/home-menu-item"
@@ -41,7 +40,6 @@ export const SuperAdminMenuContent = observer(() => {
       <MenuSection title={t("site.navMenu.sections.permits")}>
         <PermitTemplateCatalogueMenuItem />
         <RequirementsLibraryMenuItem />
-        <EarlyAccessMenuItem />
         <ReportingMenuItem />
       </MenuSection>
 

@@ -78,7 +78,7 @@ export const InboxProjectDetailScreen = observer(() => {
               mr={2}
             />
             <Heading as="h1" fontWeight={700} fontSize="3xl" flex={1} noOfLines={1} mb={0}>
-              {currentPermitProject.title}
+              {currentPermitProject.number}
             </Heading>
             {/* todo: inbox specific rollup status box? */}
             {/* <RollupStatusBox project={currentPermitProject} w="240px" /> */}
@@ -105,7 +105,7 @@ export const InboxProjectDetailScreen = observer(() => {
             {isPending ? <LoadingScreen /> : <InboxPermitsTab permitProject={currentPermitProject} />}
           </TabPanel>
           <TabPanel flex={1} minH={0} minW={0} display="flex" flexDirection="column" overflow="hidden">
-            {isPending ? <LoadingScreen /> : <ActivityTabPanelContent permitProject={currentPermitProject} />}
+            {isPending ? <LoadingScreen /> : <ActivityTabPanelContent permitProject={currentPermitProject} fromInbox />}
           </TabPanel>
         </TabPanels>
       </Tabs>

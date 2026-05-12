@@ -28,7 +28,8 @@ module Constants
         DOMAIN = :jurisdiction
         TYPES = {
           unviewed_submissions_count_updated:
-            :unviewed_submissions_count_updated
+            :unviewed_submissions_count_updated,
+          unviewed_projects_count_updated: :unviewed_projects_count_updated
         }.freeze
       end
     end

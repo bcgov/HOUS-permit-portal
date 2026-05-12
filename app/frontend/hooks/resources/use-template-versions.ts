@@ -5,42 +5,28 @@ import { useMst } from "../../setup/root"
 import { ETemplateVersionStatus } from "../../types/enums"
 
 export const useTemplateVersions = ({
-  activityId,
-  permitTypeId,
   customErrorMessage,
   status,
-  earlyAccess = false,
-  isPublic = false,
+  isPubliclyPreviewable = false,
 }: {
-  activityId?: string
-  permitTypeId?: string
   customErrorMessage?: string
   status?: ETemplateVersionStatus
-  earlyAccess?: boolean
-  isPublic?: boolean
+  isPubliclyPreviewable?: boolean
 }) => {
   const [error, setError] = useState<Error | undefined>(undefined)
   const { templateVersionStore, sandboxStore } = useMst()
   const { currentSandbox } = sandboxStore
-  const { getTemplateVersionsByActivityId, getTemplateVersionsByStatus, fetchTemplateVersions, isLoading } =
-    templateVersionStore
+  const { getTemplateVersionsByStatus, fetchTemplateVersions, isLoading } = templateVersionStore
   status ??= currentSandbox?.templateVersionStatusScope || ETemplateVersionStatus.published
 
-  let templateVersions = getTemplateVersionsByStatus(status, earlyAccess, isPublic) as ITemplateVersion[]
-  if (activityId) {
-    templateVersions = getTemplateVersionsByActivityId(activityId, status, earlyAccess, isPublic) as ITemplateVersion[]
-  } else if (permitTypeId) {
-    templateVersions = (templateVersions as ITemplateVersion[]).filter(
-      (tv) => tv.denormalizedTemplateJson?.permitType?.id === permitTypeId
-    )
-  }
+  const templateVersions = getTemplateVersionsByStatus(status, isPubliclyPreviewable) as ITemplateVersion[]
   const { t } = useTranslation()
 
   useEffect(() => {
     ;(async () => {
       const errorMessage = customErrorMessage ?? t("errors.fetchTemplateVersions")
       try {
-        const isSuccess = await fetchTemplateVersions(activityId, status, earlyAccess, isPublic, permitTypeId)
+        const isSuccess = await fetchTemplateVersions(status, isPubliclyPreviewable)
 
         if (isSuccess) {
           setError(null)
@@ -51,7 +37,7 @@ export const useTemplateVersions = ({
         setError(e instanceof Error ? e : new Error(errorMessage))
       }
     })()
-  }, [activityId, permitTypeId, currentSandbox?.id])
+  }, [currentSandbox?.id])
 
   return { templateVersions, error, isLoading }
 }

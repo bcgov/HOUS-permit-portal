@@ -3,7 +3,6 @@ import React from "react"
 import { useController, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { IRequirementTemplate } from "../../../../../models/requirement-template"
-import { ERequirementTemplateType, ETemplateVersionStatus } from "../../../../../types/enums"
 import { EditableInputWithControls } from "../../../../shared/editable-input-with-controls"
 import { BuilderHeader } from "./builder-header"
 import { IRequirementTemplateForm } from "./index"
@@ -23,38 +22,22 @@ export const EditableBuilderHeader = observer(function EditableBuilderHeader({ r
     field: { value: nickname, onChange: onNicknameChange },
   } = useController({ control, name: "nickname" })
 
-  const breadCrumbs = {
-    [ERequirementTemplateType.EarlyAccessRequirementTemplate]: [
-      {
-        href: "/early-access",
-        title: t("site.breadcrumb.earlyAccess"),
-      },
-      {
-        href: "/early-access/requirement-templates",
-        title: t("site.breadcrumb.requirementTemplates"),
-      },
-      {
-        href: `/requirement-templates/${requirementTemplate.id}/edit`,
-        title: t("site.breadcrumb.editTemplate"),
-      },
-    ],
-    [ERequirementTemplateType.LiveRequirementTemplate]: [
-      {
-        href: "/requirement-templates",
-        title: t("site.breadcrumb.requirementTemplates"),
-      },
-      {
-        href: `/requirement-templates/${requirementTemplate.id}/edit`,
-        title: t("site.breadcrumb.editTemplate"),
-      },
-    ],
-  }
+  const breadCrumbs = [
+    {
+      href: "/requirement-templates",
+      title: t("site.breadcrumb.requirementTemplates"),
+    },
+    {
+      href: `/requirement-templates/${requirementTemplate.id}/edit`,
+      title: t("site.breadcrumb.editTemplate"),
+    },
+  ]
 
   return (
     <BuilderHeader
-      breadCrumbs={breadCrumbs[requirementTemplate.type]}
+      breadCrumbs={breadCrumbs}
       requirementTemplate={requirementTemplate}
-      status={ETemplateVersionStatus.draft}
+      status={"builder"}
       renderHeading={() => (
         <EditableInputWithControls
           w="full"

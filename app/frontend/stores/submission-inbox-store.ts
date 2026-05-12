@@ -35,6 +35,7 @@ export const PermitProjectInboxStoreModel = types
       tablePermitProjects: types.array(types.reference(PermitProjectModel)),
       stateCounts: types.optional(types.frozen<Record<string, number>>(), {}),
       columnTotals: types.optional(types.frozen<Record<string, number>>(), {}),
+      unreadColumnCounts: types.optional(types.frozen<Record<string, number>>(), {}),
       /** Jurisdiction-wide count of unread projects (ignores current filters/query). */
       unreadCount: types.optional(types.number, 0),
       requirementTemplateIdFilter: types.optional(types.array(types.string), []),
@@ -71,8 +72,17 @@ export const PermitProjectInboxStoreModel = types
     setColumnTotals(counts: Record<string, number>) {
       self.columnTotals = decamelizeHashKeys(counts)
     },
+    setUnreadColumnCounts(counts: Record<string, number>) {
+      self.unreadColumnCounts = decamelizeHashKeys(counts)
+    },
     setUnreadCount(count: number) {
       self.unreadCount = count ?? 0
+    },
+    adjustUnreadCountForColumn(columnKey: string, delta: number) {
+      const counts = { ...self.unreadColumnCounts }
+      counts[columnKey] = Math.max(0, (counts[columnKey] ?? 0) + delta)
+      self.unreadColumnCounts = counts
+      self.unreadCount = Math.max(0, self.unreadCount + delta)
     },
     setRequirementTemplateIdFilter(value: string[]) {
       self.requirementTemplateIdFilter = cast(value)
@@ -98,7 +108,7 @@ export const PermitProjectInboxStoreModel = types
     setAssignedFilter(value: string[]) {
       self.assignedFilter = cast(value)
     },
-    adjustCountsForTransition(oldState: string, newState: string) {
+    adjustCountsForTransition(oldState: string, newState: string, isUnread = false) {
       const sc = { ...self.stateCounts }
       if (sc[oldState] != null) sc[oldState] = Math.max(0, sc[oldState] - 1)
       sc[newState] = (sc[newState] ?? 0) + 1
@@ -108,6 +118,13 @@ export const PermitProjectInboxStoreModel = types
       if (ct[oldState] != null) ct[oldState] = Math.max(0, ct[oldState] - 1)
       ct[newState] = (ct[newState] ?? 0) + 1
       self.columnTotals = ct
+
+      if (isUnread) {
+        const uc = { ...self.unreadColumnCounts }
+        if (uc[oldState] != null) uc[oldState] = Math.max(0, uc[oldState] - 1)
+        uc[newState] = (uc[newState] ?? 0) + 1
+        self.unreadColumnCounts = uc
+      }
     },
   }))
   .actions((self) => ({
@@ -159,6 +176,9 @@ export const PermitProjectInboxStoreModel = types
         }
         if (response.data.meta?.unreadCount != null) {
           self.setUnreadCount(response.data.meta.unreadCount)
+        }
+        if (response.data.meta?.unreadStateCounts) {
+          self.setUnreadColumnCounts(response.data.meta.unreadStateCounts)
         }
       }
       return response.ok
@@ -220,7 +240,7 @@ export const PermitApplicationInboxStoreModel = types
     setTablePermitApplications(permitApplications) {
       self.tablePermitApplications = cast(permitApplications.map((pa) => pa.id))
     },
-    adjustCountsForTransition(oldStatus: string, newStatus: string) {
+    adjustCountsForTransition(oldStatus: string, newStatus: string, isUnread = false) {
       const sc = { ...self.stateCounts }
       if (sc[oldStatus] != null) sc[oldStatus] = Math.max(0, sc[oldStatus] - 1)
       sc[newStatus] = (sc[newStatus] ?? 0) + 1
@@ -230,6 +250,13 @@ export const PermitApplicationInboxStoreModel = types
       if (ct[oldStatus] != null) ct[oldStatus] = Math.max(0, ct[oldStatus] - 1)
       ct[newStatus] = (ct[newStatus] ?? 0) + 1
       self.columnTotals = ct
+
+      if (isUnread) {
+        const uc = { ...self.unreadColumnCounts }
+        if (uc[oldStatus] != null) uc[oldStatus] = Math.max(0, uc[oldStatus] - 1)
+        uc[newStatus] = (uc[newStatus] ?? 0) + 1
+        self.unreadColumnCounts = uc
+      }
     },
   }))
   .actions((self) => ({
@@ -274,6 +301,9 @@ export const PermitApplicationInboxStoreModel = types
         }
         if (response.data.meta?.unreadCount != null) {
           self.setUnreadCount(response.data.meta.unreadCount)
+        }
+        if (response.data.meta?.unreadStatusCounts) {
+          self.setUnreadColumnCounts(response.data.meta.unreadStatusCounts)
         }
       }
       return response.ok

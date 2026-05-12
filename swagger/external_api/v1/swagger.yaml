@@ -2,7 +2,7 @@
 openapi: 3.1.0
 info:
   title: Integration API V1
-  version: v1
+  version: v1.1
   description: "### API documentation overview\nThis document provides detailed information
     about the APIs available for external integrators to query and retrieve submitted
     and resubmitted permit applications.\nIt also includes specifications on webhook
@@ -87,7 +87,6 @@ x-example-permit-application-all-types: &example_permit_application_all_types
     type: PermitType
   permit_version:
     id: "00000000-0000-4000-8000-000000000005"
-    early_access: false
     first_nations: false
     public: false
     requirement_template_id: "00000000-0000-4000-8000-000000000006"
@@ -817,9 +816,6 @@ components:
           - published
           - deprecated
           description: The status of the version.
-        early_access:
-          type: boolean
-          description: Whether this template version is early access.
         first_nations:
           type: boolean
           description: Whether this template version is for First Nations.

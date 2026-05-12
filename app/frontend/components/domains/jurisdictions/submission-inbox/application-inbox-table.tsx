@@ -1,5 +1,4 @@
 import {
-  Avatar,
   Box,
   Circle,
   Flex,
@@ -11,26 +10,19 @@ import {
   MenuItem,
   MenuList,
   Portal,
-  Spinner,
   Text,
   Tooltip,
   VStack,
 } from "@chakra-ui/react"
-import { Info, Swap, UserPlus } from "@phosphor-icons/react"
+import { Info, Swap } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useMemo } from "react"
+import React from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useNavigate } from "react-router-dom"
 import { IPermitApplication } from "../../../../models/permit-application"
 import { IPermitProject } from "../../../../models/permit-project"
-import { useMst } from "../../../../setup/root"
 import { IPermitApplicationInboxStore } from "../../../../stores/submission-inbox-store"
-import {
-  ECollaborationType,
-  EInboxViewMode,
-  EPermitApplicationInboxSortFields,
-  EPermitApplicationStatus,
-} from "../../../../types/enums"
+import { EInboxViewMode, EPermitApplicationInboxSortFields, EPermitApplicationStatus } from "../../../../types/enums"
 import { ISort } from "../../../../types/types"
 import { Paginator } from "../../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../../shared/base/inputs/per-page-select"
@@ -41,8 +33,7 @@ import { SearchGridItem } from "../../../shared/grid/search-grid-item"
 import { SearchGridRow } from "../../../shared/grid/search-grid-row"
 import { PermitApplicationStatusTag } from "../../../shared/permit-applications/permit-application-status-tag"
 import { SortIcon } from "../../../shared/sort-icon"
-import { SharedAvatar } from "../../../shared/user/shared-avatar"
-import { DesignatedCollaboratorAssignmentPopover } from "../../permit-application/collaborator-management/designated-collaborator-assignment-popover"
+import { ApplicationReviewAssigneesCell } from "./application-review-assignees-cell"
 import { InboxNoMatchingEmpty } from "./inbox-no-matching-empty"
 import { SubmissionInboxMarkUnreadIconButton } from "./submission-inbox-mark-unread-icon-button"
 
@@ -50,8 +41,6 @@ interface IProps {
   searchStore: IPermitApplicationInboxStore | IPermitProject
   applications: IPermitApplication[]
 }
-
-const MAX_VISIBLE_BLOCK_LEVEL_REVIEW_ASSIGNEE_AVATARS = 3
 
 export const ApplicationInboxTable = observer(function ApplicationInboxTable({ searchStore, applications }: IProps) {
   const { t } = useTranslation()
@@ -104,7 +93,7 @@ export const ApplicationInboxTable = observer(function ApplicationInboxTable({ s
     <Flex direction="column" flex={1} minH={0} minW={0} w="full" align="stretch">
       <Box flex={1} minH={0} overflow="auto">
         <SearchGrid
-          templateColumns="36px minmax(0, 1.5fr) minmax(0, 1.3fr) minmax(0, 1fr) minmax(140px, 1fr) minmax(160px, 1.1fr) auto 72px"
+          templateColumns="36px minmax(160px, 1.5fr) minmax(180px, 1.3fr) minmax(140px, 1fr) minmax(140px, 1fr) minmax(160px, 1.1fr) minmax(120px, auto) 72px"
           gridRowClassName="application-inbox-grid-row"
           overflow="visible"
           sx={gridStickyHeaderSx}
@@ -210,7 +199,7 @@ const SortableHeader = ({
       onClick={() => onToggleSort(field)}
       borderRight="1px solid"
       borderColor="border.light"
-      px={4}
+      px={3}
     >
       <HStack spacing={1}>
         <Text textAlign="left">{label}</Text>
@@ -250,7 +239,7 @@ const ApplicationInboxRow = observer(function ApplicationInboxRow({
       <SearchGridItem>
         <VStack align="start" spacing={0}>
           <Text fontWeight={700} fontSize="sm" noOfLines={1}>
-            {application.nickname || application.permitType?.name || application.permitTypeAndActivity || "—"}
+            {application.templateNickname || "—"}
           </Text>
           <Text fontSize="xs" color="text.secondary" noOfLines={1}>
             {application.number}
@@ -317,7 +306,7 @@ const ApplicationInboxRow = observer(function ApplicationInboxRow({
           e.stopPropagation()
         }}
       >
-        <ApplicationBlockLevelAndDesignatedAssigneesCell application={application} />
+        <ApplicationReviewAssigneesCell application={application} />
       </SearchGridItem>
 
       <SearchGridItem>
@@ -342,97 +331,6 @@ const ApplicationInboxRow = observer(function ApplicationInboxRow({
     </SearchGridRow>
   )
 })
-
-const ApplicationBlockLevelAndDesignatedAssigneesCell = observer(
-  function ApplicationBlockLevelAndDesignatedAssigneesCell({ application }: { application: IPermitApplication }) {
-    const { t } = useTranslation()
-    const { permitApplicationStore } = useMst()
-
-    const blockLevelReviewAssigneeUsers = useMemo(() => {
-      const designatedReviewerUserId = application.designatedReviewer?.collaborator?.user?.id
-      const seenUserIds = new Set<string>(designatedReviewerUserId ? [designatedReviewerUserId] : [])
-      const users: { id: string; name: string; role: string }[] = []
-
-      application.getCollaborationAssignees(ECollaborationType.review).forEach((collaboration) => {
-        const user = collaboration.collaborator?.user
-        if (user && !seenUserIds.has(user.id)) {
-          seenUserIds.add(user.id)
-          users.push({ id: user.id, name: user.name, role: user.role })
-        }
-      })
-
-      return users
-    }, [application])
-
-    const visibleBlockLevelReviewAssignees = blockLevelReviewAssigneeUsers.slice(
-      0,
-      MAX_VISIBLE_BLOCK_LEVEL_REVIEW_ASSIGNEE_AVATARS
-    )
-    const blockLevelReviewAssigneesOverflowCount =
-      blockLevelReviewAssigneeUsers.length - MAX_VISIBLE_BLOCK_LEVEL_REVIEW_ASSIGNEE_AVATARS
-    const hasDesignatedReviewer = !!application.designatedReviewer
-    const hasDesignatedReviewerOrBlockLevelReviewers = hasDesignatedReviewer || blockLevelReviewAssigneeUsers.length > 0
-
-    return (
-      <HStack spacing={1}>
-        {hasDesignatedReviewerOrBlockLevelReviewers ? (
-          <>
-            {visibleBlockLevelReviewAssignees.map((user) => (
-              <SharedAvatar key={user.id} size="xs" name={user.name} role={user.role} fontSize="2xs" />
-            ))}
-            {blockLevelReviewAssigneesOverflowCount > 0 && (
-              <Avatar
-                size="xs"
-                name={`+${blockLevelReviewAssigneesOverflowCount}`}
-                getInitials={(name) => name}
-                bg="gray.200"
-                color="text.primary"
-                fontSize="2xs"
-              />
-            )}
-          </>
-        ) : (
-          <Text fontSize="sm" color="text.secondary">
-            {t("ui.unassigned")}
-          </Text>
-        )}
-        <DesignatedCollaboratorAssignmentPopover
-          permitApplication={application}
-          collaborationType={ECollaborationType.review}
-          onBeforeOpen={async () => {
-            await permitApplicationStore.fetchPermitApplication(application.id, true)
-          }}
-          renderTrigger={({ isLoading, existingDelegateeCollaboration, onClick, isDisabled }) => (
-            <IconButton
-              aria-label={t("permitCollaboration.sidebar.title")}
-              icon={
-                isLoading ? (
-                  <Spinner size="xs" />
-                ) : existingDelegateeCollaboration ? (
-                  <SharedAvatar
-                    size="xs"
-                    name={existingDelegateeCollaboration.collaborator?.user?.name}
-                    role={existingDelegateeCollaboration.collaborator?.user?.role}
-                    fontSize="2xs"
-                    border="2px solid"
-                    borderColor="theme.blueActive"
-                  />
-                ) : (
-                  <UserPlus size={14} />
-                )
-              }
-              size="xs"
-              variant="ghost"
-              borderRadius="full"
-              onClick={onClick}
-              isDisabled={isDisabled}
-            />
-          )}
-        />
-      </HStack>
-    )
-  }
-)
 
 const ApplicationActionsMenu = observer(function ApplicationActionsMenu({
   application,

@@ -5,7 +5,23 @@ class TemplateVersionPolicy < ApplicationPolicy
   end
 
   def show?
+    # Anonymous visitors (and any signed-in user) can view a draft template
+    # version that has been explicitly marked as publicly previewable. This
+    # powers the public /standardization-preview landing flow.
+    return true if record&.draft? && record&.publicly_previewable?
+
+    return false if user.nil?
+
     if sandbox.nil? || sandbox.published?
+      # Non-public drafts are gated. Only super admins are exempt; everyone
+      # else (including review managers) must hold an active (kept,
+      # non-expired) TemplateVersionPreview invite for this record.
+      if record&.draft?
+        return true if user.super_admin?
+
+        return active_previewer?
+      end
+
       !record.scheduled? || user.super_admin?
     elsif sandbox.scheduled?
       record.scheduled?
@@ -49,21 +65,54 @@ class TemplateVersionPolicy < ApplicationPolicy
     show?
   end
 
+  # Draft workflow mutations (share, invite previewers, refresh, update block)
+  # should only be available to super admins and only on draft versions.
+  def update?
+    user&.super_admin? && record&.draft?
+  end
+
+  def active_previewer?
+    return false if user.nil? || record.nil?
+
+    record
+      .template_version_previews
+      .kept
+      .where(previewer_id: user.id)
+      .where("expires_at > ?", Time.current)
+      .exists?
+  end
+
   class Scope < Scope
     def resolve
       template_versions =
         scope
-          .joins(requirement_template: :activity)
+          .joins(:requirement_template)
           .where(requirement_templates: { discarded_at: nil })
           .where.not(status: "deprecated")
-      if sandbox.present?
-        template_versions.for_sandbox(sandbox)
-      elsif user.super_admin? || user.review_manager? ||
-            user.regional_review_manager?
-        template_versions
-      else
-        template_versions.where(status: "published")
-      end
+
+      return template_versions.for_sandbox(sandbox) if sandbox.present?
+      return template_versions if user.super_admin?
+
+      # Non-super-admins (including review managers) can only see drafts
+      # they hold an active (kept, non-expired) TemplateVersionPreview
+      # invite for.
+      visible_draft_ids =
+        TemplateVersionPreview
+          .kept
+          .where(previewer_id: user.id)
+          .where("expires_at > ?", Time.current)
+          .select(:template_version_id)
+
+      visible_non_draft_statuses =
+        if user.review_manager? || user.regional_review_manager?
+          %w[scheduled published]
+        else
+          %w[published]
+        end
+
+      template_versions.where(status: visible_non_draft_statuses).or(
+        template_versions.where(status: "draft", id: visible_draft_ids)
+      )
     end
   end
 end

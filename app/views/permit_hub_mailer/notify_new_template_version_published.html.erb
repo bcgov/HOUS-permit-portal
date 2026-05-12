@@ -50,9 +50,6 @@
                   <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px; text-align: left;">Template</dt>
                   <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 1px solid #d9d9d9;"><%= @template_version.label %></dd>
 
-                  <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px; text-align: left;">Permit type</dt>
-                  <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 1px solid #d9d9d9;"><%= @template_version.permit_type&.name %></dd>
-
                   <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px; text-align: left;"><%= is_scheduled ? "Scheduled date" : "Version" %></dt>
                   <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 0;"><%= @template_version.version_date&.strftime("%B %d, %Y") %></dd>
 
@@ -132,7 +129,7 @@
                 <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top; padding: 16px;" valign="top">
                   <h2 style="color: #92400e; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 0; margin-bottom: 12px; text-align: left; font-size: 18px;">Action Required: Set Up Submission Inbox</h2>
                   <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 16px; color: #78350f;">
-                    Your jurisdiction does not have a submission inbox contact configured for the "<strong><%= @template_version.permit_type&.name %></strong>" permit type. To receive application submissions for this permit type, please set up a submission inbox contact.
+                    Your jurisdiction does not have a submission inbox contact configured. To receive application submissions, please set up a submission inbox contact.
                   </p>
                   <a href="<%= @inbox_setup_url %>" style="display: inline-block; background-color: #1a5a96; color: #ffffff; font-family: 'Open Sans', sans-serif; font-size: 14px; font-weight: 600; text-decoration: none; padding: 10px 20px; border-radius: 4px;">Set Up Submission Inbox</a>
                 </td>

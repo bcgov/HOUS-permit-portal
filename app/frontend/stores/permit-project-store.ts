@@ -52,14 +52,14 @@ export const PermitProjectStoreModel = types
       }
 
       // Handle permit applications (inbox reviewer payloads use permitApplications for full visible list)
-      if (permitProject.permitApplications && Array.isArray(permitProject.permitApplications)) {
+      if (permitProject.permitApplications) {
         permitProject.permitApplications.forEach((app) => {
           if (typeof app === "object") {
             self.rootStore.permitApplicationStore.mergeUpdate(app, "permitApplicationMap")
           }
         })
       }
-      if (permitProject.recentPermitApplications && Array.isArray(permitProject.recentPermitApplications)) {
+      if (permitProject.recentPermitApplications) {
         permitProject.recentPermitApplications.forEach((app) => {
           if (typeof app === "object") {
             self.rootStore.permitApplicationStore.mergeUpdate(app, "permitApplicationMap")
@@ -73,8 +73,8 @@ export const PermitProjectStoreModel = types
 
       if (permitProject.permitProjectCollaborations) {
         permitProject.permitProjectCollaborations.forEach((collab: any) => {
-          if (collab?.collaborator?.user && typeof collab.collaborator.user === "object") {
-            self.rootStore.userStore.mergeUpdate(collab.collaborator.user, "usersMap")
+          if (collab?.collaborator) {
+            self.rootStore.collaboratorStore.mergeUpdate(collab.collaborator, "collaboratorMap")
           }
         })
       }
@@ -83,13 +83,23 @@ export const PermitProjectStoreModel = types
         owner: permitProject.owner?.id || null,
       }
 
+      if ("reviewDelegatee" in permitProject) {
+        const rd = permitProject.reviewDelegatee
+        if (rd) {
+          self.rootStore.collaboratorStore.mergeUpdate(rd, "collaboratorMap")
+          overrides.reviewDelegatee = rd.id
+        } else {
+          overrides.reviewDelegatee = null
+        }
+      }
+
       // Inbox extended: permit_applications -> inboxTablePermitApplications (not tablePermitApplications)
-      if (permitProject.permitApplications && Array.isArray(permitProject.permitApplications)) {
+      if (permitProject.permitApplications) {
         overrides.inboxTablePermitApplications =
           permitProject.permitApplications.map((app) => (typeof app === "object" ? app.id : app)) || []
       }
 
-      if (permitProject.recentPermitApplications && Array.isArray(permitProject.recentPermitApplications)) {
+      if (permitProject.recentPermitApplications) {
         overrides.recentPermitApplications =
           permitProject.recentPermitApplications.map((app) => (typeof app === "object" ? app.id : app)) || []
       }
