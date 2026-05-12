@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next"
 import { Link as RouterLink } from "react-router-dom"
 import { useMst } from "../../../setup/root"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
-import { SafeTipTapDisplay } from "../../shared/editor/safe-tiptap-display"
 
 export const HelpVideosIndexScreen = observer(function HelpVideosIndexScreen() {
   const { helpVideoStore } = useMst()
@@ -75,7 +74,11 @@ export const HelpVideosIndexScreen = observer(function HelpVideosIndexScreen() {
                           {video.title}
                         </LinkOverlay>
                       </Heading>
-                      {video.descriptionHtml && <SafeTipTapDisplay htmlContent={video.descriptionHtml} />}
+                      {video.description && (
+                        <Text fontSize="sm" color="text.secondary" lineHeight="short">
+                          {video.description}
+                        </Text>
+                      )}
                     </LinkBox>
                   ))}
                 </SimpleGrid>

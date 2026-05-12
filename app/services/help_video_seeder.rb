@@ -105,7 +105,9 @@ class HelpVideoSeeder
     video = HelpVideo.find_or_initialize_by(title: video_attributes[:title])
     video.assign_attributes(
       help_video_section: section,
-      description_html: description_html_for(video_attributes)
+      description:
+        video_attributes[:description].to_s.truncate(256, omission: ""),
+      about_html: about_html_for
     )
     video.save!
     video.insert_at(video_index)
@@ -137,9 +139,9 @@ class HelpVideoSeeder
     )
   end
 
-  def description_html_for(video_attributes)
+  def about_html_for
     <<~HTML.squish
-      <p>#{video_attributes[:description]}</p>
+      <p>Add about text</p>
       <h3><b>Topics covered</b></h3>
       <ul><li>Add topics covered in this video.</li></ul>
     HTML

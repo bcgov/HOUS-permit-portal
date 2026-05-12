@@ -3,7 +3,7 @@ class HelpVideo < ApplicationRecord
   friendly_id :title, use: :slugged
   include HtmlSanitizeAttributes
 
-  sanitizable :description_html
+  sanitizable :about_html
 
   belongs_to :help_video_section
 
@@ -33,6 +33,7 @@ class HelpVideo < ApplicationRecord
   validates :help_video_section, presence: true
   validates :title, presence: true
   validates :sort_order, numericality: { only_integer: true }
+  validates :description, length: { maximum: 256 }, allow_blank: true
   validate :required_documents_exist_when_published
 
   scope :published, -> { where.not(published_at: nil) }
@@ -63,7 +64,37 @@ class HelpVideo < ApplicationRecord
       )
   end
 
+  def previous_help_video_for(user)
+    adjacent_help_videos_for(user).first
+  end
+
+  def next_help_video_for(user)
+    adjacent_help_videos_for(user).last
+  end
+
+  def adjacent_help_videos_for(user)
+    siblings = nav_siblings_for(user).to_a
+    idx = siblings.index { |v| v.id == id }
+    return nil, nil if idx.nil?
+
+    prev = idx.positive? ? siblings[idx - 1] : nil
+    nxt = siblings[idx + 1]
+    [prev, nxt]
+  end
+
   private
+
+  # Neighbors follow the published-only order for everyone viewing a *published* video, so
+  # prev/next never point at drafts. Super admins viewing a draft use the full section order
+  # so the current video appears in the sibling list.
+  def nav_siblings_for(user)
+    scope = help_video_section.help_videos.merge(HelpVideo.ordered)
+    if user&.super_admin? && !published?
+      scope
+    else
+      scope.published
+    end
+  end
 
   def required_documents_exist_when_published
     return unless published?
@@ -74,6 +105,10 @@ class HelpVideo < ApplicationRecord
 
     unless publishable_document?(caption_document)
       errors.add(:base, "Caption file must exist before publishing")
+    end
+
+    unless publishable_document?(transcript_document)
+      errors.add(:base, "Transcript file must exist before publishing")
     end
   end
 

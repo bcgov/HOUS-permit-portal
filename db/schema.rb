@@ -279,7 +279,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_27_222000) do
     t.uuid "help_video_section_id", null: false
     t.string "title", null: false
     t.string "slug"
-    t.text "description_html"
+    t.string "description", limit: 256
+    t.text "about_html"
     t.integer "sort_order", default: 0, null: false
     t.datetime "published_at"
     t.datetime "created_at", null: false

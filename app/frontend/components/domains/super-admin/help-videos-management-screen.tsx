@@ -362,7 +362,7 @@ function SectionRow({
         <ConfirmationModal
           title={translate("helpVideos.management.sections.deleteTitle")}
           body={translate("helpVideos.management.sections.deleteBody")}
-          triggerText={translate("ui.remove")}
+          triggerText={translate("ui.delete")}
           triggerButtonProps={{ color: "semantic.error", size: "sm" }}
           confirmButtonProps={{ variant: "primary" }}
           onConfirm={async (closeModal) => {
@@ -382,7 +382,8 @@ const formatDate = (date?: Date | null) => {
 const videoPayload = (formData: IHelpVideoFormData) => {
   const payload: Record<string, any> = {
     title: formData.title,
-    descriptionHtml: formData.descriptionHtml,
+    description: formData.description ?? "",
+    aboutHtml: formData.aboutHtml,
     helpVideoSectionId: formData.helpVideoSectionId,
     publish: formData.isPublished,
   }

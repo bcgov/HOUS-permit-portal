@@ -3862,7 +3862,7 @@ Thank you,
         helpVideos: {
           fetchError: "There was an error loading this video.",
           index: {
-            title: "Building Permit Hub videos",
+            title: "Videos",
             description:
               "Watch step-by-step video guides to help you complete common tasks in Building Permit Hub. These guides show you how to submit applications, respond to feedback, and work with your local jurisdiction.",
             onThisPage: "On this page",
@@ -3874,9 +3874,13 @@ Thank you,
             errorTitle: "Video unavailable",
             relatedResources: "Related resources",
             transcript: "Transcript",
+            previousVideo: "Previous video",
+            nextVideo: "Next video",
+            previousVideoAria: "Previous video in this section: {{title}}",
+            nextVideoAria: "Next video in this section: {{title}}",
           },
           management: {
-            title: "Building Permit Hub videos",
+            title: "Videos",
             description: "Manage public help videos, captions, transcripts, and video sections.",
             table: {
               title: "Title",
@@ -3888,6 +3892,9 @@ Thank you,
             fields: {
               title: "Title",
               description: "Description",
+              shortDescription: "Short description",
+              shortDescriptionHelp: "Shown on the public videos page. Maximum 256 characters.",
+              about: "About this video",
               section: "Section",
               published: "Published",
               videoFile: "Video file",
@@ -4848,7 +4855,7 @@ Thank you,
                 description: "Information for local governments interested in joining Building Permit Hub",
               },
               videos: {
-                label: "Building Permit Hub videos",
+                label: "Videos",
                 description: "Videos to help you use Building Permit Hub",
               },
               standardPermitApplicationMaterials: {

@@ -22,7 +22,14 @@ class Api::HelpVideosController < Api::ApplicationController
     render_success(
       @help_video,
       nil,
-      { blueprint: HelpVideoBlueprint, blueprint_opts: { view: :detail } }
+      {
+        blueprint: HelpVideoBlueprint,
+        blueprint_opts: {
+          view: :detail,
+          current_user: current_user,
+          include_navigation_neighbors: true
+        }
+      }
     )
   end
 
@@ -96,7 +103,8 @@ class Api::HelpVideosController < Api::ApplicationController
     params.require(:help_video).permit(
       :help_video_section_id,
       :title,
-      :description_html,
+      :description,
+      :about_html,
       :publish,
       video_document_attributes: document_attributes,
       caption_document_attributes: document_attributes,
