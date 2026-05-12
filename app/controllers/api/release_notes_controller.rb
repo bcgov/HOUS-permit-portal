@@ -41,7 +41,7 @@ class Api::ReleaseNotesController < Api::ApplicationController
       )
     end
 
-    if @release_note.update(release_note_params.merge(status: :draft))
+    if @release_note.update(release_note_params)
       render_success @release_note,
                      "release_note.update_success",
                      {
