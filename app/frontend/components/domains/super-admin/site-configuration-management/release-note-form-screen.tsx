@@ -17,7 +17,7 @@ import { FormProvider, useController, useForm, useFormContext } from "react-hook
 import { useTranslation } from "react-i18next"
 import { matchPath, useLocation, useNavigate, useParams } from "react-router-dom"
 import { useMst } from "../../../../setup/root"
-import { EFlashMessageStatus } from "../../../../types/enums"
+import { EReleaseNoteStatus } from "../../../../types/enums"
 import { TReleaseNoteFormData } from "../../../../types/types"
 import { isTipTapEmpty } from "../../../../utils/utility-functions"
 import { SharedSpinner } from "../../../shared/base/shared-spinner"
@@ -108,13 +108,14 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
   const navigate = useNavigate()
   const location = useLocation()
   const { releaseNoteId } = useParams<{ releaseNoteId: string }>()
-  const { releaseNoteStore, uiStore } = useMst()
-  const { fetchReleaseNote, createReleaseNote, updateReleaseNote } = releaseNoteStore
+  const { releaseNoteStore } = useMst()
+  const { fetchReleaseNote, createReleaseNote, updateReleaseNote, publishReleaseNote } = releaseNoteStore
 
   const isCreate = Boolean(matchPath({ path: "/release-notes/new", end: true }, location.pathname))
 
   const [loadError, setLoadError] = React.useState(false)
   const [isLoading, setIsLoading] = React.useState(!isCreate)
+  const [submittingIntent, setSubmittingIntent] = React.useState<"saveDraft" | "publish" | null>(null)
   const [showIssuesSection, setShowIssuesSection] = React.useState(false)
 
   const formMethods = useForm<TReleaseNoteFormData>({
@@ -129,8 +130,7 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
     },
   })
 
-  const { handleSubmit, reset, formState, setValue } = formMethods
-  const { isSubmitting } = formState
+  const { handleSubmit, reset, setValue } = formMethods
 
   useEffect(() => {
     if (isCreate) {
@@ -171,20 +171,62 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
     }
   }, [fetchReleaseNote, isCreate, releaseNoteId, reset])
 
-  const onSubmit = handleSubmit(async (data) => {
+  const saveDraft = async (data: TReleaseNoteFormData) => {
     const result = isCreate ? await createReleaseNote(data) : await updateReleaseNote(releaseNoteId as string, data)
 
     if (result.ok) {
-      uiStore.flashMessage.show(
-        EFlashMessageStatus.success,
-        null,
-        isCreate ? t("releaseNote.form.createSuccess") : t("releaseNote.form.updateSuccess"),
-        3000
-      )
       navigate("/release-notes")
     } else {
-      const message = result.error ?? t("ui.error")
-      uiStore.flashMessage.show(EFlashMessageStatus.error, null, String(message), 5000)
+      console.error("Failed to save release note:", result.error)
+    }
+  }
+
+  const isAlreadyPublished =
+    !isCreate &&
+    releaseNoteId &&
+    releaseNoteStore.releaseNoteMap.get(releaseNoteId)?.status === EReleaseNoteStatus.published
+
+  const publishFlow = async (data: TReleaseNoteFormData) => {
+    if (isCreate) {
+      const createResult = await createReleaseNote(data)
+      if (!createResult.ok) {
+        console.error("Failed to create release note:", createResult.error)
+        return
+      }
+      const publishResult = await publishReleaseNote(createResult.data.id, data)
+      if (!publishResult.ok) {
+        console.error("Failed to publish release note after create:", publishResult.error)
+        navigate(`/release-notes/${createResult.data.id}/edit`, { replace: true })
+        return
+      }
+    } else {
+      const publishResult = await publishReleaseNote(releaseNoteId as string, data)
+      if (!publishResult.ok) {
+        console.error("Failed to publish release note:", publishResult.error)
+        return
+      }
+    }
+
+    navigate("/release-notes")
+  }
+
+  const onFormSubmit = handleSubmit(async (data: TReleaseNoteFormData, event?: React.BaseSyntheticEvent) => {
+    const submitter = (event?.nativeEvent as SubmitEvent)?.submitter as HTMLButtonElement | null
+    const intentValue = submitter?.name === "intent" ? submitter.value : undefined
+    if (intentValue !== "saveDraft" && intentValue !== "publish") {
+      return
+    }
+    const intent = intentValue
+
+    setSubmittingIntent(intent)
+    try {
+      if (intent === "saveDraft") {
+        await saveDraft(data)
+      } else {
+        await publishFlow(data)
+      }
+    } finally {
+      setSubmittingIntent(null)
     }
   })
 
@@ -216,7 +258,7 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
       </Heading>
 
       <FormProvider {...formMethods}>
-        <Box as="form" onSubmit={onSubmit} maxW="720px">
+        <Box as="form" maxW="720px" onSubmit={onFormSubmit}>
           <VStack align="stretch" spacing={8}>
             <TextFormControl
               label={t("releaseNote.form.version")}
@@ -272,11 +314,35 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
               borderTopColor="border.light"
               py={4}
             >
-              <RouterLinkButton to="/release-notes" variant="secondary" size="sm" isDisabled={isSubmitting}>
+              <RouterLinkButton
+                to="/release-notes"
+                variant="secondary"
+                size="sm"
+                isDisabled={submittingIntent !== null}
+              >
                 {t("releaseNote.form.cancel")}
               </RouterLinkButton>
-              <Button type="submit" variant="secondary" size="sm" isLoading={isSubmitting}>
+              <Button
+                type="submit"
+                name="intent"
+                value="saveDraft"
+                variant="secondary"
+                size="sm"
+                isLoading={submittingIntent === "saveDraft"}
+                isDisabled={submittingIntent === "publish"}
+              >
                 {t("releaseNote.form.saveDraft")}
+              </Button>
+              <Button
+                type="submit"
+                name="intent"
+                value="publish"
+                variant="primary"
+                size="sm"
+                isLoading={submittingIntent === "publish"}
+                isDisabled={submittingIntent === "saveDraft" || isAlreadyPublished}
+              >
+                {t("releaseNote.form.publish")}
               </Button>
             </Flex>
           </VStack>
