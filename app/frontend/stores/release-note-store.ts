@@ -83,6 +83,16 @@ export const ReleaseNoteStoreModel = types
       console.error("Failed to update release note:", response.problem, response.data)
       return { ok: false as const, error: response.data?.errors || response.problem }
     }),
+
+    publishReleaseNote: flow(function* (id: string, data: TReleaseNoteFormData) {
+      const response = yield self.environment.api.publishReleaseNote(id, data)
+      if (response.ok && response.data?.data) {
+        self.mergeUpdate(response.data.data, "releaseNoteMap")
+        return { ok: true as const, data: response.data.data }
+      }
+      console.error("Failed to publish release note:", response.problem, response.data)
+      return { ok: false as const, error: response.data?.errors || response.problem }
+    }),
   }))
 
 export interface IReleaseNoteStore extends Instance<typeof ReleaseNoteStoreModel> {}
