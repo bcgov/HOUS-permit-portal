@@ -1101,4 +1101,8 @@ export class Api {
   async updateReleaseNote(id: string, releaseNote: TReleaseNoteFormData) {
     return this.client.patch<ApiResponse<IReleaseNote>>(`/release_notes/${id}`, { releaseNote })
   }
+
+  async publishReleaseNote(id: string, releaseNote: TReleaseNoteFormData) {
+    return this.client.patch<ApiResponse<IReleaseNote>>(`/release_notes/${id}/publish`, { releaseNote })
+  }
 }
