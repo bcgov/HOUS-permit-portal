@@ -76,6 +76,7 @@ import {
   TAutoComplianceModuleConfigurations,
   TCreatePermitApplicationFormData,
   TCreateRequirementTemplateFormData,
+  TReleaseNoteFormData,
   TSearchParams,
 } from "../../types/types"
 import { camelizeResponse, decamelizeRequest } from "../../utils"
@@ -1087,5 +1088,17 @@ export class Api {
 
   async fetchReleaseNotes(params?: TSearchParams<EReleaseNoteSortFields>) {
     return this.client.post<ApiResponse<IReleaseNote[]>>(`/release_notes/search`, params)
+  }
+
+  async fetchReleaseNote(id: string) {
+    return this.client.get<ApiResponse<IReleaseNote>>(`/release_notes/${id}`)
+  }
+
+  async createReleaseNote(releaseNote: TReleaseNoteFormData) {
+    return this.client.post<ApiResponse<IReleaseNote>>("/release_notes", { releaseNote })
+  }
+
+  async updateReleaseNote(id: string, releaseNote: TReleaseNoteFormData) {
+    return this.client.patch<ApiResponse<IReleaseNote>>(`/release_notes/${id}`, { releaseNote })
   }
 }
