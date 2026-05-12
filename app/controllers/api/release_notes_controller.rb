@@ -29,6 +29,18 @@ class Api::ReleaseNotesController < Api::ApplicationController
 
   def update
     authorize @release_note
+    if @release_note.published?
+      return(
+        render_error "release_note.update_error",
+                     {
+                       message_opts: {
+                         error_message:
+                           "Published release notes cannot be saved as drafts"
+                       }
+                     }
+      )
+    end
+
     if @release_note.update(release_note_params.merge(status: :draft))
       render_success @release_note,
                      "release_note.update_success",
