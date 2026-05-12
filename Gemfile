@@ -61,7 +61,7 @@ gem "faraday", "~> 2.14.1"
 gem "factory_bot", "~> 6.4"
 # The timcop gem mocks Time, it is only used in specs and for seeding a published template version to get around time based validations
 gem "timecop", "~> 0.9.8"
-gem "sidekiq-cron", "~> 1.12"
+gem "sidekiq-cron", "~> 2.4"
 gem "sidekiq-unique-jobs", "~> 8.0"
 gem "rubyzip", "~> 2.3.2"
 gem "anycable-rails", "~> 1.6.0"
