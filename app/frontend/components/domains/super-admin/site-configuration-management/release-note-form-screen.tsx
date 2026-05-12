@@ -25,6 +25,11 @@ import { Editor } from "../../../shared/editor/editor"
 import { DatePickerFormControl, TextFormControl, UrlFormControl } from "../../../shared/form/input-form-control"
 import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
 
+// Mirrors `ReleaseNote::SEMVER_REGEX` in app/models/release_note.rb
+// https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
+const releaseNoteSemverRegex =
+  /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
+
 const releaseNoteEditorChrome = {
   ".tiptap-wrapper": {
     bg: "white",
@@ -258,13 +263,17 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
       </Heading>
 
       <FormProvider {...formMethods}>
-        <Box as="form" maxW="720px" onSubmit={onFormSubmit}>
+        <Box as="form" onSubmit={onFormSubmit}>
           <VStack align="stretch" spacing={8}>
             <TextFormControl
               label={t("releaseNote.form.version")}
               fieldName="version"
               required
               inputProps={{ w: "252px", maxW: "252px" }}
+              validate={{
+                semver: (v: string) =>
+                  !v || releaseNoteSemverRegex.test(v) || t("releaseNote.form.versionInvalidSemver"),
+              }}
             />
             <DatePickerFormControl
               label={t("releaseNote.form.releaseDate")}
