@@ -32,7 +32,6 @@ type ReleaseNoteGridHeaderColumn =
       id: string
       i18nKey: string
       showDivider: boolean
-      textPl?: number
     }
   | {
       type: "sortable"
@@ -45,7 +44,6 @@ const RELEASE_NOTE_GRID_HEADER_COLUMNS = [
     id: "version",
     i18nKey: "releaseNote.columns.version",
     showDivider: true,
-    textPl: 1,
   },
   { type: "sortable" as const, field: EReleaseNoteSortFields.releaseDate },
   { type: "sortable" as const, field: EReleaseNoteSortFields.status },
@@ -73,7 +71,7 @@ export const ReleaseNotesGridHeaders = observer(function ReleaseNotesGridHeaders
             <GridHeader key={key} {...releaseNoteColumnHeaderGridProps}>
               {col.type === "text" ? (
                 <GridItem {...(col.showDivider ? headerCellDividerProps : { px: 4, w: "full" })}>
-                  <Text {...(col.textPl != null ? { pl: col.textPl } : undefined)}>{t(col.i18nKey)}</Text>
+                  <Text>{t(col.i18nKey)}</Text>
                 </GridItem>
               ) : (
                 <GridItem {...headerCellDividerProps}>
