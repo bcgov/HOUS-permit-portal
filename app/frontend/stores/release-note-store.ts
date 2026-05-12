@@ -6,7 +6,7 @@ import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IReleaseNote, ReleaseNoteModel } from "../models/release-note-model"
 import { EReleaseNoteSortFields } from "../types/enums"
-import { TSearchParams } from "../types/types"
+import { TReleaseNoteFormData, TSearchParams } from "../types/types"
 
 export const ReleaseNoteStoreModel = types
   .compose(
@@ -52,6 +52,36 @@ export const ReleaseNoteStoreModel = types
         console.error("Failed to search release notes:", response)
       }
       return response.ok
+    }),
+
+    fetchReleaseNote: flow(function* (id: string) {
+      const response = yield self.environment.api.fetchReleaseNote(id)
+      if (response.ok && response.data?.data) {
+        self.mergeUpdate(response.data.data, "releaseNoteMap")
+        return response.data.data
+      }
+      console.error("Failed to fetch release note:", response.problem, response.data)
+      return null
+    }),
+
+    createReleaseNote: flow(function* (data: TReleaseNoteFormData) {
+      const response = yield self.environment.api.createReleaseNote(data)
+      if (response.ok && response.data?.data) {
+        self.mergeUpdate(response.data.data, "releaseNoteMap")
+        return { ok: true as const, data: response.data.data }
+      }
+      console.error("Failed to create release note:", response.problem, response.data)
+      return { ok: false as const, error: response.data?.errors || response.problem }
+    }),
+
+    updateReleaseNote: flow(function* (id: string, data: TReleaseNoteFormData) {
+      const response = yield self.environment.api.updateReleaseNote(id, data)
+      if (response.ok && response.data?.data) {
+        self.mergeUpdate(response.data.data, "releaseNoteMap")
+        return { ok: true as const, data: response.data.data }
+      }
+      console.error("Failed to update release note:", response.problem, response.data)
+      return { ok: false as const, error: response.data?.errors || response.problem }
     }),
   }))
 
