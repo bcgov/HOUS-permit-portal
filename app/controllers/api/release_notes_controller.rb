@@ -29,7 +29,7 @@ class Api::ReleaseNotesController < Api::ApplicationController
 
   def update
     authorize @release_note
-    if @release_note.update(release_note_params)
+    if @release_note.update(release_note_params.merge(status: :draft))
       render_success @release_note,
                      "release_note.update_success",
                      {
