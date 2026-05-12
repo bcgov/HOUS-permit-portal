@@ -354,6 +354,12 @@ const ReleaseNotesScreen = lazy(() =>
   }))
 )
 
+const ReleaseNoteFormScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/release-note-form-screen").then((module) => ({
+    default: module.ReleaseNoteFormScreen,
+  }))
+)
+
 const AdminSubmissionInboxScreen = lazy(() =>
   import("../super-admin/site-configuration-management/submission-inbox").then((module) => ({
     default: module.AdminSubmissionInboxScreen,
@@ -496,6 +502,8 @@ const AppRoutes = observer(() => {
           Super admins toggle publicly_previewable directly on TemplateVersionScreen. */}
       <Route path="/configuration-management/users" element={<AdminUserIndexScreen />} />
       <Route path="/configuration-management/global-feature-access" element={<AdminGlobalFeatureAccessScreen />} />
+      <Route path="/release-notes/new" element={<ReleaseNoteFormScreen />} />
+      <Route path="/release-notes/:releaseNoteId/edit" element={<ReleaseNoteFormScreen />} />
       <Route path="/release-notes" element={<ReleaseNotesScreen />} />
       <Route
         path="/configuration-management/global-feature-access/submission-inbox"
