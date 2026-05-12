@@ -3,9 +3,7 @@ module Api::Concerns::Search::ReleaseNotes
 
   SORTABLE_COLUMNS = {
     "release_date" => :release_date,
-    "version" => :version,
     "updated_at" => :updated_at,
-    "created_at" => :created_at,
     "status" => :status
   }.freeze
 
