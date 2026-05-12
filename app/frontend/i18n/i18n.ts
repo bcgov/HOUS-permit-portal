@@ -189,9 +189,9 @@ const options = {
           reviewMaterials: "Review materials",
           underDevelopmentTitle: "Share your feedback on permit applications under development",
           underDevelopmentBody:
-            "We’re co-developing standard permit classifications with local governments and First Nations across BC. These drafts are available for review and discussion as we continue this work together.",
+            "We’re co-developing standard permit classifications with local governments and First Nations across BC. These early access versions are available for review and discussion as we continue this work together.",
           listedDrafts:
-            " The listed drafts are open for review. These permit applications are drafts; do not use for permit intake.",
+            " The listed early access versions are open for review. These permit applications are early access versions; do not use for permit intake.",
           shareFeedbackBody:
             "We’re looking for your input. <1>Email us your feedback at:</1> <2>digital.codes.permits@gov.bc.ca</2>",
           ssmuHousingTitle: "Small-scale / multi-unit housing permits",
@@ -209,7 +209,7 @@ const options = {
             description1:
               "Building Permit Hub is working with BC communities to bring more clarity and consistency to building permit application materials.",
             description2:
-              "We are developing shared forms and guidance that communities can choose to adopt. Feedback from local governments and First Nations helps shape these materials so they meet local needs. Published and draft versions are available for review.",
+              "We are developing shared forms and guidance that communities can choose to adopt. Feedback from local governments and First Nations helps shape these materials so they meet local needs. Published and early access versions are available for review.",
           },
           resources: {
             title: "Creating shared, common permitting resources",
@@ -277,7 +277,7 @@ const options = {
           explore: {
             title: "Explore standard permit application forms",
             description:
-              "You are invited to review and provide feedback on the draft forms, requirements, and guidance for the permit types currently available in Building Permit Hub.",
+              "You are invited to review and provide feedback on the early access forms, requirements, and guidance for the permit types currently available in Building Permit Hub.",
             smallScale: {
               title: "Small-scale projects only",
               description:
@@ -1818,7 +1818,7 @@ Thank you,
             published: 'Training mode: "Published"',
             scheduled: 'Training mode: "Upcoming"',
             deprecated: "Deprecated",
-            draft: "Draft",
+            draft: "Early access",
           },
           scopeDescriptions: {
             published: "Copies of live permit templates available only in Training Mode for testing",
@@ -1903,7 +1903,7 @@ Thank you,
               copy: "Copy this block",
               removeConfirmationModal: {
                 title: "Confirm you want to archive this requirement block.",
-                body: "Archiving this requirement blocks will remove it from all draft templates. This action cannot be undone.",
+                body: "Archiving this requirement blocks will remove it from all early access templates. This action cannot be undone.",
               },
             },
             clickToWriteDisplayName: "Click to write display name",
@@ -1985,9 +1985,9 @@ Thank you,
             },
             addOptionButton: "Add another option",
             templateEditWarning:
-              "Any changes made here will be reflected in all unsaved preview drafts that use this requirement block.",
+              "Any changes made here will be reflected in all unsaved early access previews that use this requirement block.",
             previewEditWarning:
-              "Any changes made here will be reflected in all in-progress template drafts that use this requirement block.",
+              "Any changes made here will be reflected in all in-progress early access versions that use this requirement block.",
             templates: "templates",
             previews: "previews",
             stepCodeDependencies: {
@@ -4183,13 +4183,13 @@ Thank you,
           department: "Department",
         },
         templateVersionPreview: {
-          earlyAccessTitle: "Early Access – Submissions Not Yet Enabled",
+          earlyAccessTitle: "Early access – submissions not yet enabled",
           earlyAccessDescription:
             "This permit is available for early access to help your team get familiar with the application process. You can view and edit your application, but submission is currently disabled. Submissions will be enabled once this permit type is officially launched in your jurisdiction.",
           schedulePublish: {
-            scheduleModalTitle: "Publish draft?",
+            scheduleModalTitle: "Publish early access version?",
             scheduleModalBody:
-              "Publishing this draft will replace the currently-published version. Local jurisdictions and submitters will be able to see and use this new version of the form. <br><br><1>Notifications will only be sent out to those jurisdictions you have set available, which is currently: {{count}}</1>",
+              "Publishing this early access version will replace the currently-published version. Local jurisdictions and submitters will be able to see and use this new version of the form. <br><br><1>Notifications will only be sent out to those jurisdictions you have set available, which is currently: {{count}}</1>",
             scheduleModalHelperText: "Schedule to <1>publish</1> (at midnight 00:01 PST)",
             scheduleModalCancelMessage: "Changes were not scheduled.",
             forcePublishNow: "Force publish now",
@@ -4215,13 +4215,13 @@ Thank you,
             confirmation: {
               revokeTitle: "Are you sure you want to revoke access for {{ name }}?",
               revokeBody:
-                "Revoking access will immediately prevent this user from accessing the draft preview content. This may be undone.",
+                "Revoking access will immediately prevent this user from accessing the early access version preview content. This may be undone.",
               extendTitle: "Extend Access Duration for {{ name }}",
               extendBody:
-                "Extending access will give the user 60 additional days to interact with the draft preview content. Do you want to proceed?",
+                "Extending access will give the user 60 additional days to interact with the early access version preview content. Do you want to proceed?",
               unrevokeTitle: "Restore Access for {{ name }}",
               unrevokeBody:
-                "Restoring access will allow the user to access the draft preview content again. Are you sure you want to proceed?",
+                "Restoring access will allow the user to access the early access version preview content again. Are you sure you want to proceed?",
             },
           },
         },
@@ -4325,6 +4325,11 @@ Thank you,
               "Once you publish, local jurisdictions and submitters will be able to see and use this new version of the form. <br><br><1>Notifications will only be sent out to those jurisdictions you have set available, which is currently: {{count}}</1>",
             scheduleModalHelperText: "Schedule to <1>publish</1> (at midnight 00:01 PST)",
             scheduleModalCancelMessage: "Changes were not scheduled.",
+            createVersion: "Create version",
+            createEarlyAccessVersion: "Create early access version",
+            earlyAccessModalTitle: "Create early access version?",
+            earlyAccessModalBody:
+              "This will save your current template changes and create an early access version that can be shared for preview before it is scheduled or published.",
             forcePublishNow: "Force publish!",
             pleaseReview: "Please review the following:",
             errorsBox: {
@@ -4353,7 +4358,7 @@ Thank you,
           status: {
             published: "Published",
             scheduled: "Upcoming",
-            draft: "Draft",
+            draft: "Early access",
             deprecated: "Deprecated",
             builder: "Editing",
           },
@@ -4379,14 +4384,20 @@ Thank you,
             title: "Template versions",
             subtitlePrefix: "For:",
             viewTemplateButton: "View template",
-            viewDraftButton: "View draft",
-            shareDraftButton: "Share draft",
+            viewDraftButton: "View early access version",
+            shareDraftButton: "Share early access version",
             openBuilderButton: "Open builder",
             unscheduleButton: "Unschedule",
+            builderTitle: "Template builder",
+            flowTitle: "Version flow",
+            flowDescription: "Versions can move from the builder into early access or scheduled release.",
+            noEarlyAccessVersion: "No early access version",
+            noScheduledVersion: "No scheduled version",
+            noPublishedVersion: "No published version",
             listTitles: {
               published: "Published",
-              templateBuilder: "Template Builder",
-              draft: "Drafts",
+              templateBuilder: "Template builder",
+              draft: "Early access versions",
               scheduled: "Scheduled",
               deprecated: "Deprecated (last 3)",
             },

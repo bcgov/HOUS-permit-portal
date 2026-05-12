@@ -379,7 +379,7 @@ RSpec.describe TemplateVersioningService, type: :service, search: true do
           )
         }.to raise_error(
           TemplateVersionDraftError,
-          /Can only promote a draft version/
+          /Can only promote an early access version/
         )
       end
     end

@@ -225,7 +225,10 @@ class TemplateVersion < ApplicationRecord
         .where.not(id: id)
 
     if existing_draft.exists?
-      errors.add(:status, "only one draft version is allowed per template")
+      errors.add(
+        :status,
+        "only one early access version is allowed per template"
+      )
     end
   end
 end

@@ -137,7 +137,7 @@ class TemplateVersioningService
   def self.create_draft!(requirement_template, assignee: nil)
     if requirement_template.draft_template_version.present?
       raise TemplateVersionDraftError,
-            "A draft version already exists for this template. Discard or promote it first."
+            "An early access version already exists for this template. Discard or promote it first."
     end
 
     template_version =
@@ -169,13 +169,13 @@ class TemplateVersioningService
   def self.update_draft_block!(draft_version, block_id, block_data)
     unless draft_version.draft?
       raise TemplateVersionDraftError,
-            "Can only update blocks on a draft version"
+            "Can only update blocks on an early access version"
     end
 
     blocks_json = draft_version.requirement_blocks_json.deep_dup
     unless blocks_json.key?(block_id)
       raise TemplateVersionDraftError,
-            "Block #{block_id} not found in this draft version"
+            "Block #{block_id} not found in this early access version"
     end
 
     blocks_json[block_id] = blocks_json[block_id].merge(block_data)
@@ -192,7 +192,8 @@ class TemplateVersioningService
   # keep any draft-specific block edits.
   def self.refresh_draft_snapshot!(draft_version)
     unless draft_version.draft?
-      raise TemplateVersionDraftError, "Can only refresh a draft version"
+      raise TemplateVersionDraftError,
+            "Can only refresh an early access version"
     end
 
     requirement_template = draft_version.requirement_template
@@ -234,7 +235,8 @@ class TemplateVersioningService
     current_user: nil
   )
     unless draft_version.draft?
-      raise TemplateVersionDraftError, "Can only promote a draft version"
+      raise TemplateVersionDraftError,
+            "Can only promote an early access version"
     end
 
     requirement_template = draft_version.requirement_template
@@ -363,7 +365,8 @@ class TemplateVersioningService
   # Discards a draft version (sets to deprecated).
   def self.discard_draft!(draft_version)
     unless draft_version.draft?
-      raise TemplateVersionDraftError, "Can only discard a draft version"
+      raise TemplateVersionDraftError,
+            "Can only discard an early access version"
     end
 
     draft_version.update!(
