@@ -24,6 +24,13 @@ RSpec.describe ReleaseNote, type: :model do
       create(:release_note, version: "1.0.0")
       expect(build(:release_note, version: "1.0.0")).not_to be_valid
     end
+
+    it "cannot be changed once the release note is published" do
+      release_note = create(:release_note, status: :published, version: "1.0.0")
+      release_note.version = "1.0.1"
+      expect(release_note).not_to be_valid
+      expect(release_note.errors[:version]).to be_present
+    end
   end
 
   describe "#release_notes_url" do
