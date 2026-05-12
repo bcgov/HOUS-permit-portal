@@ -17,7 +17,8 @@ class CreateHelpVideos < ActiveRecord::Migration[7.2]
                    type: :uuid
       t.string :title, null: false
       t.string :slug
-      t.text :description_html
+      t.string :description, limit: 256
+      t.text :about_html
       t.integer :sort_order, null: false, default: 0
       t.datetime :published_at
 

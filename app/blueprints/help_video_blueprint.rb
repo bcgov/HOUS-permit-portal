@@ -3,13 +3,44 @@ class HelpVideoBlueprint < Blueprinter::Base
 
   fields :title,
          :slug,
-         :description_html,
+         :description,
+         :about_html,
          :sort_order,
          :published_at,
          :created_at,
          :updated_at
 
   field :help_video_section_id
+
+  field :previous_help_video do |video, options|
+    if options[:include_navigation_neighbors]
+      pair =
+        (
+          options[:help_video_adjacent_pair] ||= video.adjacent_help_videos_for(
+            options[:current_user]
+          )
+        )
+      HelpVideoBlueprint.neighbor_preview(pair.first)
+    end
+  end
+
+  field :next_help_video do |video, options|
+    if options[:include_navigation_neighbors]
+      pair =
+        (
+          options[:help_video_adjacent_pair] ||= video.adjacent_help_videos_for(
+            options[:current_user]
+          )
+        )
+      HelpVideoBlueprint.neighbor_preview(pair.last)
+    end
+  end
+
+  def self.neighbor_preview(video)
+    return nil if video.blank?
+
+    { id: video.id, title: video.title, slug: video.slug }
+  end
 
   view :detail do
     field :video_url do |video, _options|

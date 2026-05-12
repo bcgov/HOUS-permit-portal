@@ -50,9 +50,48 @@ RSpec.describe Api::HelpVideosController, type: :controller do
       expect(response).to have_http_status(:forbidden)
     end
 
+    it "includes previous and next published videos in the same section" do
+      section = create(:help_video_section)
+      first_v =
+        create(
+          :help_video,
+          :published,
+          help_video_section: section,
+          sort_order: 0
+        )
+      middle =
+        create(
+          :help_video,
+          :published,
+          help_video_section: section,
+          sort_order: 1
+        )
+      last_v =
+        create(
+          :help_video,
+          :published,
+          help_video_section: section,
+          sort_order: 2
+        )
+
+      get :show, params: { id: middle.id }, format: :json
+
+      expect(json_response.dig("data", "previous_help_video", "id")).to eq(
+        first_v.id
+      )
+      expect(json_response.dig("data", "next_help_video", "id")).to eq(
+        last_v.id
+      )
+      expect(json_response.dig("data", "previous_help_video", "title")).to eq(
+        first_v.title
+      )
+      expect(json_response.dig("data", "next_help_video", "slug")).to eq(
+        last_v.slug
+      )
+    end
+
     it "returns inline signed playback URLs" do
       video = create(:help_video, :published)
-      create(:help_video_transcript_document, help_video: video)
       allow_any_instance_of(HelpVideoVideoDocument).to receive(:file_url).with(
         disposition: "inline",
         response_content_type: "video/mp4"
@@ -100,6 +139,17 @@ RSpec.describe Api::HelpVideosController, type: :controller do
     it "does not publish a video without captions" do
       video = create(:help_video)
       create(:help_video_video_document, help_video: video)
+
+      post :publish, params: { id: video.id }, format: :json
+
+      expect(response).to have_http_status(:bad_request)
+      expect(video.reload).not_to be_published
+    end
+
+    it "does not publish a video without a transcript" do
+      video = create(:help_video)
+      create(:help_video_video_document, help_video: video)
+      create(:help_video_caption_document, help_video: video)
 
       post :publish, params: { id: video.id }, format: :json
 
