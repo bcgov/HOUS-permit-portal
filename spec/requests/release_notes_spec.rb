@@ -141,6 +141,17 @@ RSpec.describe "ReleaseNotes", type: :request do
       expect(subject).to include("status" => "published")
     end
 
+    it "triggers a publish notification" do
+      setup
+      expect(NotificationService).to receive(
+        :publish_release_note_publish_event
+      ).with(an_instance_of(ReleaseNote))
+
+      patch publish_release_note_path(@release_note.id)
+
+      expect(response).to have_http_status(:success)
+    end
+
     it_behaves_like AN_INVALID_PAYLOAD_RESPONSE, publish_with_payload
     it_behaves_like A_NOT_FOUND_RESPONSE, publish_with_payload
   end
