@@ -1096,6 +1096,8 @@ en:
       status_ready_no_user: 'Requirement “%{requirement_block_name}” status set to "ready" for permit application %{number}'
     resource:
       reminder: "Reminder: Review your jurisdiction resources"
+    release_note:
+      publish_notification: "Version %{version} is now available. See what's new."
     integration_mapping:
       published_template_missing_requirements_mapping: "Missing API mapping: A new version of “%{template_label}” has been published on %{version_date}"
       scheduled_template_missing_requirements_mapping: "Missing API Mapping: A new version of “%{template_label}” has been scheduled for %{version_date}, 01:00hrs PST."
