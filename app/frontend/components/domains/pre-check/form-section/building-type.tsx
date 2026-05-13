@@ -22,7 +22,7 @@ export const BuildingType = observer(function BuildingType() {
         )}
       </Text>
       <Tag size="lg" colorScheme="blue" mb={6}>
-        {t("preCheck.sections.buildingType.part9SmallBuilding", "Part 9 - Small Building")}
+        {t("preCheck.sections.buildingType.part9SmallBuilding", "BC Building Code Part 9 Small Buildings")}
       </Tag>
       <Flex gap={3} mt={8} justifyContent="flex-start">
         <Button variant="primary" onClick={navigateToNext} isDisabled={!hasNext}>

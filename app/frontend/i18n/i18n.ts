@@ -623,6 +623,7 @@ const options = {
               title: "Building Type",
               description:
                 "Choose the building type that best describes your project. Only small-scale/multi-unit housing is supported at this time.",
+              part9SmallBuilding: "BC Building Code Part 9 Small Buildings",
             },
             uploadDrawings: {
               title: "Upload drawings",
