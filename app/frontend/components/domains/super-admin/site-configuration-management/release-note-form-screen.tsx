@@ -114,7 +114,14 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
   const location = useLocation()
   const { releaseNoteId } = useParams<{ releaseNoteId: string }>()
   const { releaseNoteStore } = useMst()
-  const { fetchReleaseNote, createReleaseNote, updateReleaseNote, publishReleaseNote } = releaseNoteStore
+  const {
+    fetchReleaseNote,
+    createReleaseNote,
+    updateReleaseNote,
+    publishReleaseNote,
+    resetCurrentReleaseNote,
+    setCurrentReleaseNote,
+  } = releaseNoteStore
 
   const isCreate = Boolean(matchPath({ path: "/release-notes/new", end: true }, location.pathname))
 
@@ -141,6 +148,7 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
     if (isCreate) {
       setShowIssuesSection(false)
       setIsLoading(false)
+      resetCurrentReleaseNote()
       return
     }
 
@@ -148,13 +156,20 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
     if (!id) {
       setLoadError(true)
       setIsLoading(false)
+      resetCurrentReleaseNote()
       return
     }
 
+    if (releaseNoteStore.releaseNoteMap.has(id)) {
+      setCurrentReleaseNote(id)
+    } else {
+      setCurrentReleaseNote(null)
+    }
     let cancelled = false
     fetchReleaseNote(id).then((note) => {
       if (cancelled) return
       if (note) {
+        setCurrentReleaseNote(id)
         const issuesHtml = note.issues ?? ""
         reset({
           version: note.version,
@@ -166,6 +181,7 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
         setShowIssuesSection(!isTipTapEmpty(issuesHtml))
         setLoadError(false)
       } else {
+        resetCurrentReleaseNote()
         setLoadError(true)
       }
       setIsLoading(false)
@@ -173,8 +189,9 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
 
     return () => {
       cancelled = true
+      resetCurrentReleaseNote()
     }
-  }, [fetchReleaseNote, isCreate, releaseNoteId, reset])
+  }, [fetchReleaseNote, isCreate, releaseNoteId, reset, resetCurrentReleaseNote, setCurrentReleaseNote])
 
   const saveDraft = async (data: TReleaseNoteFormData) => {
     const result = isCreate ? await createReleaseNote(data) : await updateReleaseNote(releaseNoteId as string, data)
