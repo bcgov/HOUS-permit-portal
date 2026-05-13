@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_05_07_162600) do
+ActiveRecord::Schema[7.2].define(version: 2026_05_12_163028) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -680,6 +680,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_07_162600) do
     t.boolean "enable_email_unmapped_api_notification", default: true
     t.boolean "enable_in_app_resource_reminder_notification", default: true
     t.boolean "enable_email_resource_reminder_notification", default: true
+    t.boolean "enable_in_app_release_note_publish_notification", default: true
     t.index ["user_id"], name: "index_preferences_on_user_id"
   end
 
