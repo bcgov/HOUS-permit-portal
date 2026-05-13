@@ -651,4 +651,47 @@ RSpec.describe NotificationService do
       )
     end
   end
+
+  describe ".publish_customization_update_event" do
+    it "notifies only submitters with drafts in the customizing jurisdiction" do
+      allow(NotificationPushJob).to receive(:perform_async)
+
+      requirement_template = create(:requirement_template)
+      template_version =
+        create(:template_version, requirement_template: requirement_template)
+
+      jurisdiction_customized = create(:sub_district)
+      jurisdiction_other = create(:sub_district)
+
+      customization =
+        create(
+          :jurisdiction_template_version_customization,
+          jurisdiction: jurisdiction_customized,
+          template_version: template_version
+        )
+
+      matching_submitter = create(:user, :submitter)
+      other_submitter = create(:user, :submitter)
+
+      create(
+        :permit_application,
+        submitter: matching_submitter,
+        template_version: template_version,
+        jurisdiction: jurisdiction_customized
+      )
+
+      create(
+        :permit_application,
+        submitter: other_submitter,
+        template_version: template_version,
+        jurisdiction: jurisdiction_other
+      )
+
+      described_class.publish_customization_update_event(customization)
+
+      expect(NotificationPushJob).to have_received(:perform_async) do |payload|
+        expect(payload.keys).to contain_exactly(matching_submitter.id)
+      end
+    end
+  end
 end
