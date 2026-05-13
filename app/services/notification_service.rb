@@ -630,6 +630,32 @@ class NotificationService
     end
   end
 
+  def self.publish_release_note_publish_event(release_note)
+    return unless release_note&.published?
+
+    recipient_ids =
+      User
+        .kept
+        .joins(:preference)
+        .where(
+          preferences: {
+            enable_in_app_release_note_publish_notification: true
+          }
+        )
+        .pluck(:id)
+
+    return if recipient_ids.blank?
+
+    notification_data = release_note.publish_event_notification_data
+
+    notification_user_hash =
+      recipient_ids.each_with_object({}) do |user_id, hash|
+        hash[user_id] = notification_data
+      end
+
+    NotificationPushJob.perform_async(notification_user_hash)
+  end
+
   def self.publish_resource_reminder_event(jurisdiction, resource_ids)
     all_managers = jurisdiction.managers
 
