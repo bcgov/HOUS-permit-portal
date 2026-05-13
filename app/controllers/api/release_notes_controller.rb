@@ -64,6 +64,7 @@ class Api::ReleaseNotesController < Api::ApplicationController
   def publish
     authorize @release_note
     if @release_note.update(release_note_params.merge(status: :published))
+      NotificationService.publish_release_note_publish_event(@release_note)
       render_success @release_note,
                      "release_note.publish_success",
                      {
