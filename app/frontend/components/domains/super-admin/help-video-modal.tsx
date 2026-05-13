@@ -179,6 +179,7 @@ export const HelpVideoModal = ({ isOpen, onClose, video, sections, onSubmit }: I
             <FormControl>
               <FormLabel>{translate("helpVideos.management.fields.about")}</FormLabel>
               <Editor htmlValue={aboutHtml} onChange={(value) => setValue("aboutHtml", value, { shouldDirty: true })} />
+              <FormHelperText>{translate("helpVideos.management.fields.aboutHelp")}</FormHelperText>
             </FormControl>
             <FormControl isRequired>
               <FormLabel>{translate("helpVideos.management.fields.section")}</FormLabel>
@@ -194,7 +195,10 @@ export const HelpVideoModal = ({ isOpen, onClose, video, sections, onSubmit }: I
                 ))}
               </Select>
             </FormControl>
-            <Checkbox {...register("isPublished")}>{translate("helpVideos.management.fields.published")}</Checkbox>
+            <FormControl>
+              <Checkbox {...register("isPublished")}>{translate("helpVideos.management.fields.published")}</Checkbox>
+              <FormHelperText>{translate("helpVideos.management.fields.publishedHelp")}</FormHelperText>
+            </FormControl>
 
             <UploadField
               label={translate("helpVideos.management.fields.videoFile")}
