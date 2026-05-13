@@ -65,4 +65,22 @@ RSpec.describe ReleaseNote, type: :model do
       expect(ReleaseNote.published).not_to include(draft_release_note)
     end
   end
+
+  describe "#publish_event_notification_data" do
+    it "returns notification payload referencing the release note" do
+      release_note = create(:release_note, status: :published)
+
+      data = release_note.publish_event_notification_data
+
+      expect(data).to include(
+        "action_type" =>
+          Constants::NotificationActionTypes::RELEASE_NOTE_PUBLISH
+      )
+      expect(data["action_text"]).to include(release_note.version)
+      expect(data["object_data"]).to include(
+        "release_note_id" => release_note.id,
+        "version" => release_note.version
+      )
+    end
+  end
 end
