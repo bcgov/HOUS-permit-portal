@@ -420,16 +420,26 @@ RSpec.describe NotificationService do
       discarded = create(:user, :submitter)
       discarded.discard
 
-      release_note = create(:release_note, status: :published)
-      payload = release_note.publish_event_notification_data
+      release_note = create(:release_note, status: :published, version: "9.9.9")
 
       allow(NotificationPushJob).to receive(:perform_async)
 
       described_class.publish_release_note_publish_event(release_note)
 
+      expected_payload =
+        include(
+          "action_type" =>
+            Constants::NotificationActionTypes::RELEASE_NOTE_PUBLISH,
+          "action_text" => include("9.9.9"),
+          "object_data" =>
+            include("release_note_id" => release_note.id, "version" => "9.9.9")
+        )
+
       expect(NotificationPushJob).to have_received(:perform_async) do |hash|
         expect(hash.keys).to match_array([opted_in_a.id, opted_in_b.id])
-        expect(hash.values).to all(eq(payload))
+        expect(hash.values).to all(match(expected_payload))
+        # All recipients should receive the exact same payload object.
+        expect(hash.values.uniq.size).to eq(1)
       end
     end
 
