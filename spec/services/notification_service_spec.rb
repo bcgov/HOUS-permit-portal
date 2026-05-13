@@ -400,6 +400,53 @@ RSpec.describe NotificationService do
     end
   end
 
+  describe ".publish_release_note_publish_event" do
+    it "no-ops when the release note is not published" do
+      release_note = instance_double("ReleaseNote", published?: false)
+      allow(NotificationPushJob).to receive(:perform_async)
+
+      described_class.publish_release_note_publish_event(release_note)
+
+      expect(NotificationPushJob).not_to have_received(:perform_async)
+    end
+
+    it "pushes notifications to every kept user with the preference enabled" do
+      opted_in_a = create(:user, :submitter)
+      opted_in_b = create(:user, :review_manager)
+      opted_out = create(:user, :submitter)
+      opted_out.preference.update!(
+        enable_in_app_release_note_publish_notification: false
+      )
+      discarded = create(:user, :submitter)
+      discarded.discard
+
+      release_note = create(:release_note, status: :published)
+      payload = release_note.publish_event_notification_data
+
+      allow(NotificationPushJob).to receive(:perform_async)
+
+      described_class.publish_release_note_publish_event(release_note)
+
+      expect(NotificationPushJob).to have_received(:perform_async) do |hash|
+        expect(hash.keys).to match_array([opted_in_a.id, opted_in_b.id])
+        expect(hash.values).to all(eq(payload))
+      end
+    end
+
+    it "does not enqueue a job when no users opted in" do
+      user = create(:user, :submitter)
+      user.preference.update!(
+        enable_in_app_release_note_publish_notification: false
+      )
+      release_note = create(:release_note, status: :published)
+      allow(NotificationPushJob).to receive(:perform_async)
+
+      described_class.publish_release_note_publish_event(release_note)
+
+      expect(NotificationPushJob).not_to have_received(:perform_async)
+    end
+  end
+
   describe ".publish_application_submission_event / .publish_application_revisions_request_event" do
     it "creates correct in-app and email notifications for submitters and collaborators" do
       submitter_pref =
