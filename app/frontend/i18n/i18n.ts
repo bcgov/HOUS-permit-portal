@@ -97,13 +97,13 @@ const options = {
         qaTools: {
           trigger: "QA",
           title: "QA tools",
-          description: "Sandbox helpers for quickly setting up test data.",
+          description:
+            "Shown when QA mode is enabled in this environment. Shortcuts to seed a full permit project or autofill an application for testing.",
           jurisdiction: "Jurisdiction",
           createProject: "Create project with all permits",
           createProjectSuccess: "QA project created",
           autofillApplication: "Autofill application",
           autofillSuccess: "Permit application autofilled",
-          sandboxRequired: "Select a sandbox to use this QA action.",
         },
         landing: {
           title: "Building Permit Hub",
