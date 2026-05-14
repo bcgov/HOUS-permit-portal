@@ -423,6 +423,11 @@ if Rails.env.development?
   )
 end
 
+puts "Seeding help videos..."
+
+help_video_section_count = HelpVideoSeeder.call
+puts "  ✓ Seeded #{help_video_section_count} help video sections"
+
 puts "Seeding Permit Projects from Permit Applications..."
 PermitProjectSeederService.call
 
