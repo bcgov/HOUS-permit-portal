@@ -185,6 +185,11 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
                   hideManageAccessButton
                 />
               )}
+              {isSuperAdmin && requirementTemplateId && (
+                <RouterLinkButton to={`/requirement-templates/${requirementTemplateId}/edit`} variant="secondary">
+                  {t("templateVersionPreview.goToBuilder")}
+                </RouterLinkButton>
+              )}
               <RouterLinkButton to={`/template-versions/${templateVersion.id}/preview`} variant="secondary">
                 {t("ui.view")}
               </RouterLinkButton>
