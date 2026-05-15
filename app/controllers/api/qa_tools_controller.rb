@@ -74,7 +74,9 @@ class Api::QaToolsController < Api::ApplicationController
   private
 
   def require_qa_mode!
-    return if ENV["VITE_QA_MODE"] == "true"
+    if ENV["VITE_QA_MODE"] == "true" && SiteConfiguration.qa_tools_enabled?
+      return
+    end
 
     head :not_found
   end

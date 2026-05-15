@@ -129,6 +129,7 @@ export interface ISiteConfigurationUpdateParams {
   inboxEnabled?: boolean | null
   allowDesignatedReviewer?: boolean | null
   codeComplianceEnabled?: boolean | null
+  qaToolsEnabled?: boolean | null
   archistarEnabledForAllJurisdictions?: boolean | null
   sitewideMessage?: string | null
   helpLinkItems?: IHelpLinkItems

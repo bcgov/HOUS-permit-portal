@@ -366,6 +366,12 @@ const CodeComplianceSetupScreen = lazy(() =>
   }))
 )
 
+const QaToolsFeatureAccessScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/qa-tools-feature-access").then((module) => ({
+    default: module.QaToolsFeatureAccessScreen,
+  }))
+)
+
 const ReportingScreen = lazy(() =>
   import("../super-admin/reporting/reporting-screen").then((module) => ({ default: module.ReportingScreen }))
 )
@@ -473,6 +479,7 @@ const AppRoutes = observer(() => {
   const eulaAccepted = currentUser ? currentUser.eulaAccepted : false
   const isSuperAdmin = currentUser ? currentUser.isSuperAdmin : false
   const isUnconfirmed = currentUser ? currentUser.isUnconfirmed : false
+  const qaModeEnabled = import.meta.env.VITE_QA_MODE === "true"
 
   const superAdminOnlyRoutes = (
     <>
@@ -502,6 +509,12 @@ const AppRoutes = observer(() => {
         path="/configuration-management/global-feature-access/code-compliance"
         element={<CodeComplianceSetupScreen />}
       />
+      {qaModeEnabled && (
+        <Route
+          path="/configuration-management/global-feature-access/qa-tools"
+          element={<QaToolsFeatureAccessScreen />}
+        />
+      )}
       <Route path="/configuration-management/users/invite" element={<AdminInviteScreen />} />
       <Route path="/reporting" element={<ReportingScreen />} />
       <Route path="/reporting/export-template-summary" element={<ExportTemplateSummaryScreen />} />

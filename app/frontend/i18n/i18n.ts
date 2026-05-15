@@ -4539,6 +4539,9 @@ Thank you,
               jurisdictionsCount_other: "{{count}} jurisdictions enabled",
               searchJurisdictions: "Search and select jurisdictions...",
             },
+            qaTools: "QA tools",
+            qaToolsDescription:
+              "Enable QA tools for users who can access test helpers. This setting only applies when QA mode is enabled for the environment.",
           },
           sitewideMessage: {
             title: "Site-wide message",

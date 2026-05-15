@@ -16,6 +16,16 @@ RSpec.describe SiteConfiguration, type: :model do
     end
   end
 
+  describe ".qa_tools_enabled?" do
+    before { SiteConfiguration.delete_all }
+
+    it "returns the global QA tools flag" do
+      described_class.create!(qa_tools_enabled: true)
+
+      expect(described_class.qa_tools_enabled?).to eq(true)
+    end
+  end
+
   describe "singleton enforcement" do
     it "prevents creating a second record" do
       SiteConfiguration.create!

@@ -93,6 +93,7 @@ class Api::SiteConfigurationController < Api::ApplicationController
       :inbox_enabled,
       :allow_designated_reviewer,
       :code_compliance_enabled,
+      :qa_tools_enabled,
       :archistar_enabled_for_all_jurisdictions,
       help_link_items: [
         get_started_link_item: %i[href title description show],

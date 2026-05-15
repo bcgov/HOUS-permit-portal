@@ -13,7 +13,7 @@ export const QaToolsPopout = observer(() => {
   const location = useLocation()
   const navigate = useNavigate()
   const api = useServerAPI()
-  const { permitApplicationStore, sandboxStore, sessionStore, uiStore, userStore } = useMst()
+  const { permitApplicationStore, sandboxStore, sessionStore, siteConfigurationStore, uiStore, userStore } = useMst()
 
   const { currentUser } = userStore
   const [isOpen, setIsOpen] = useState(false)
@@ -28,6 +28,7 @@ export const QaToolsPopout = observer(() => {
   const isProjectsPath = location.pathname === "/projects"
   const isEligible = Boolean(
     import.meta.env.VITE_QA_MODE === "true" &&
+      siteConfigurationStore.qaToolsEnabled &&
       sessionStore.loggedIn &&
       currentUser &&
       (currentUser.isSubmitter || currentUser.isReviewStaff)
