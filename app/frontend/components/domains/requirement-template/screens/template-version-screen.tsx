@@ -181,6 +181,7 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
                   onScheduleConfirm={onScheduleConfirm}
                   onForcePublishNow={onForcePublishNow}
                   translationNamespace="templateVersionPreview.schedulePublish"
+                  triggerLabel={t("templateVersionPreview.schedulePublish.triggerButton")}
                   hideManageAccessButton
                 />
               )}

@@ -4187,12 +4187,13 @@ Thank you,
           earlyAccessDescription:
             "This permit is available for early access to help your team get familiar with the application process. You can view and edit your application, but submission is currently disabled. Submissions will be enabled once this permit type is officially launched in your jurisdiction.",
           schedulePublish: {
-            scheduleModalTitle: "Publish early access version?",
+            triggerButton: "Promote",
+            scheduleModalTitle: "Promote early access version?",
             scheduleModalBody:
-              "Publishing this early access version will replace the currently-published version. Local jurisdictions and submitters will be able to see and use this new version of the form. <br><br><1>Notifications will only be sent out to those jurisdictions you have set available, which is currently: {{count}}</1>",
-            scheduleModalHelperText: "Schedule to <1>publish</1> (at midnight 00:01 PST)",
-            scheduleModalCancelMessage: "Changes were not scheduled.",
-            forcePublishNow: "Force publish now",
+              "Promoting this early access version will create a scheduled or published version from the current early access snapshot. The early access version will remain available for preview. Once the promoted version is published, local jurisdictions and submitters will be able to see and use it. <br><br><1>Notifications will only be sent out to those jurisdictions you have set available, which is currently: {{count}}</1>",
+            scheduleModalHelperText: "Schedule to <1>promote</1> (at midnight 00:01 PST)",
+            scheduleModalCancelMessage: "Promotion was not scheduled.",
+            forcePublishNow: "Force promote now",
             conflictWarning:
               "Another version is already scheduled for <1>{{dates}}</1>. Confirming this date will auto-unschedule that version.",
             laterScheduledWarning:
@@ -4398,7 +4399,7 @@ Thank you,
               published: "Published",
               templateBuilder: "Template builder",
               draft: "Early access versions",
-              scheduled: "Scheduled",
+              scheduled: "Schedule publish",
               deprecated: "Deprecated (last 3)",
             },
             unscheduleWarning: {
