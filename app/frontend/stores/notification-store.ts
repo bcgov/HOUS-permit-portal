@@ -203,6 +203,18 @@ export const NotificationStoreModel = types
             href: `/jurisdictions/${jurisdictionId}/configuration-management/resources`,
           },
         ]
+      } else if (notification.actionType === ENotificationActionType.releaseNotePublish) {
+        const data = notification.objectData as { releaseNoteId?: string }
+        const releaseNoteId = data?.releaseNoteId
+        if (!releaseNoteId) {
+          return []
+        }
+        return [
+          {
+            text: t("ui.show"),
+            href: `/release-notes/${releaseNoteId}`,
+          },
+        ]
       }
     },
   }))

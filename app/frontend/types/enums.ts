@@ -455,6 +455,7 @@ export enum ENotificationActionType {
   resourceReminder = "resource_reminder",
   projectReviewCollaborationAssignment = "project_review_collaboration_assignment",
   projectReviewCollaborationUnassignment = "project_review_collaboration_unassignment",
+  releaseNotePublish = "release_note_publish",
 }
 
 export enum ECollaboratorableType {

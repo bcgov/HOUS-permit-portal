@@ -19,6 +19,22 @@ class ReleaseNote < ApplicationRecord
 
   scope :published, -> { where(status: :published) }
 
+  def publish_event_notification_data
+    {
+      "id" => SecureRandom.uuid,
+      "action_type" => Constants::NotificationActionTypes::RELEASE_NOTE_PUBLISH,
+      "action_text" =>
+        I18n.t(
+          "notification.release_note.publish_notification",
+          version: version
+        ),
+      "object_data" => {
+        "release_note_id" => id,
+        "version" => version
+      }
+    }
+  end
+
   private
 
   def version_unchanged_once_published

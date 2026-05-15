@@ -13,6 +13,7 @@ export const ReleaseNoteStoreModel = types
     types.model("ReleaseNoteStoreModel", {
       releaseNoteMap: types.map(ReleaseNoteModel),
       tableReleaseNotes: types.array(types.reference(ReleaseNoteModel)),
+      currentReleaseNote: types.maybeNull(types.reference(ReleaseNoteModel)),
     }),
     createSearchModel<EReleaseNoteSortFields>("searchReleaseNotes")
   )
@@ -27,6 +28,12 @@ export const ReleaseNoteStoreModel = types
   .actions((self) => ({
     setTableReleaseNotes(releaseNotes: IReleaseNote[]) {
       self.tableReleaseNotes = cast(releaseNotes.map((r) => r.id))
+    },
+    setCurrentReleaseNote(releaseNoteId) {
+      self.currentReleaseNote = releaseNoteId
+    },
+    resetCurrentReleaseNote() {
+      self.currentReleaseNote = null
     },
   }))
   .actions((self) => ({

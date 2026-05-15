@@ -3,7 +3,7 @@ import { Pencil } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { Link as ReactRouterLink } from "react-router-dom"
 import { useSearch } from "../../../../hooks/use-search"
@@ -53,9 +53,14 @@ export const ReleaseNotesScreen = observer(function ReleaseNotesScreen() {
     handlePageChange,
     isSearching,
     tableReleaseNotes,
+    resetCurrentReleaseNote,
   } = releaseNoteStore
 
   useSearch(releaseNoteStore, [])
+
+  useEffect(() => {
+    resetCurrentReleaseNote()
+  }, [resetCurrentReleaseNote])
 
   return (
     <Container maxW="container.lg" px={8} pt={6} pb={20} flexGrow={1}>
