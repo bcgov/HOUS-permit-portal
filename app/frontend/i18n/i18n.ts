@@ -97,13 +97,13 @@ const options = {
         qaTools: {
           trigger: "QA",
           title: "QA tools",
-          description: "Sandbox helpers for quickly setting up test data.",
+          description:
+            "Shown when QA mode is enabled in this build and a super admin has turned on QA tools for this environment. Shortcuts to seed a full permit project or lightly prepare an application draft for testing.",
           jurisdiction: "Jurisdiction",
           createProject: "Create project with all permits",
           createProjectSuccess: "QA project created",
           autofillApplication: "Autofill application",
-          autofillSuccess: "Permit application autofilled",
-          sandboxRequired: "Select a sandbox to use this QA action.",
+          autofillSuccess: "Permit application updated",
         },
         landing: {
           title: "Building Permit Hub",
@@ -4522,6 +4522,7 @@ Thank you,
                 "When <strong>on</strong>, jurisdictions can choose to limit who can request revisions from applicants",
             },
             codeCompliance: "Code compliance",
+            qaTools: "QA tools",
             codeComplianceSetup: {
               title: "Code compliance",
               description:
@@ -4538,6 +4539,12 @@ Thank you,
               jurisdictionsCount_one: "{{count}} jurisdiction enabled",
               jurisdictionsCount_other: "{{count}} jurisdictions enabled",
               searchJurisdictions: "Search and select jurisdictions...",
+            },
+            qaToolsSetup: {
+              title: "QA tools",
+              description:
+                "Allow QA shortcuts for environments built with QA mode: creating a permit project pre-filled with permit applications for each configured permit type, and a light autofill action on draft applications. Only turn this on in non-production environments where QA builds are deployed.",
+              toggleTitle: "QA tools",
             },
           },
           sitewideMessage: {
@@ -5013,6 +5020,9 @@ Thank you,
             resources: "Resources",
             preChecks: "Pre-checks",
             preview: "Preview",
+            videos: "Videos",
+            helpVideos: "Videos",
+            qaTools: "QA tools",
           },
         },
         automatedCompliance: {

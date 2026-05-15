@@ -18,6 +18,7 @@ class PermitApplication::FormJsonService
   private
 
   def remove_empty_blocks
+    return form_json unless form_json["components"].is_a?(Array)
     return form_json if empty_block_ids.empty?
 
     form_json["components"].each do |component|
@@ -30,6 +31,8 @@ class PermitApplication::FormJsonService
   end
 
   def remove_empty_sections
+    return form_json unless form_json["components"].is_a?(Array)
+
     form_json["components"].delete_if do |component|
       component["components"].blank? || component["components"].empty?
     end

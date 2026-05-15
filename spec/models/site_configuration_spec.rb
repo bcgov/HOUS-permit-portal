@@ -189,4 +189,11 @@ RSpec.describe SiteConfiguration, type: :model do
       ).to eq(true)
     end
   end
+
+  describe ".qa_tools_enabled?" do
+    it "returns the qa_tools_enabled flag on the singleton" do
+      SiteConfiguration.instance.update!(qa_tools_enabled: true)
+      expect(described_class.qa_tools_enabled?).to eq(true)
+    end
+  end
 end

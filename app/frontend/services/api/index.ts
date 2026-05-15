@@ -252,6 +252,16 @@ export class Api {
     return this.client.get<IOptionResponse>(`/permit_projects/jurisdiction_options`)
   }
 
+  async createQaFullPermitProject(params: { jurisdictionId: string; title?: string }) {
+    return this.client.post<ApiResponse<IPermitProject>>("/qa_tools/permit_projects/full", {
+      qaFullPermitProject: params,
+    })
+  }
+
+  async autofillQaPermitApplication(id: string) {
+    return this.client.post<ApiResponse<IPermitApplication>>(`/qa_tools/permit_applications/${id}/autofill`)
+  }
+
   async createPermitProject(projectData: {
     title: string
     fullAddress?: string

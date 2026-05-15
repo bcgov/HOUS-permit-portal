@@ -288,7 +288,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_07_162600) do
     t.jsonb "boundary_points", default: []
     t.string "weather_location"
     t.decimal "design_summer_temp", precision: 5, scale: 1
-    t.boolean "hide_from_search", default: false, null: false
     t.text "processing_time_html"
     t.text "key_stages_html"
     t.text "timeline_and_deliverables_html"
@@ -297,6 +296,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_07_162600) do
     t.string "office_telephone"
     t.string "office_email"
     t.string "website_url"
+    t.boolean "hide_from_search", default: false, null: false
     t.index ["ltsa_matcher"], name: "index_jurisdictions_on_ltsa_matcher"
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"], name: "index_jurisdictions_on_regional_district_id"

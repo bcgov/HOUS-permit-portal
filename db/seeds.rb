@@ -364,7 +364,8 @@ if Rails.env.development?
   site_config.update(
     inbox_enabled: true,
     code_compliance_enabled: true,
-    allow_designated_reviewer: true
+    allow_designated_reviewer: true,
+    qa_tools_enabled: true
   )
 end
 

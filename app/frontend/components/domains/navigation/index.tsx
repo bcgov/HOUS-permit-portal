@@ -366,6 +366,12 @@ const CodeComplianceSetupScreen = lazy(() =>
   }))
 )
 
+const QaToolsSetupScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/qa-tools-setup-screen").then((module) => ({
+    default: module.QaToolsSetupScreen,
+  }))
+)
+
 const ReportingScreen = lazy(() =>
   import("../super-admin/reporting/reporting-screen").then((module) => ({ default: module.ReportingScreen }))
 )
@@ -388,6 +394,8 @@ const RedirectScreen = lazy(() =>
 )
 
 const Footer = lazy(() => import("../../shared/base/footer").then((module) => ({ default: module.Footer })))
+
+const QaToolsPopout = lazy(() => import("./qa-tools-popout").then((module) => ({ default: module.QaToolsPopout })))
 
 export const Navigation = observer(() => {
   const { sessionStore, siteConfigurationStore, subscribeToUserChannel } = useMst()
@@ -423,6 +431,7 @@ export const Navigation = observer(() => {
         <Suspense fallback={<LoadingScreen />}>
           <AppRoutes />
 
+          <QaToolsPopout />
           <Footer />
         </Suspense>
       )}
@@ -502,6 +511,7 @@ const AppRoutes = observer(() => {
         path="/configuration-management/global-feature-access/code-compliance"
         element={<CodeComplianceSetupScreen />}
       />
+      <Route path="/configuration-management/global-feature-access/qa-tools" element={<QaToolsSetupScreen />} />
       <Route path="/configuration-management/users/invite" element={<AdminInviteScreen />} />
       <Route path="/reporting" element={<ReportingScreen />} />
       <Route path="/reporting/export-template-summary" element={<ExportTemplateSummaryScreen />} />
