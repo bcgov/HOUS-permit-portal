@@ -16,6 +16,7 @@ import { IPermitCollaboration } from "../../models/permit-collaboration"
 import { IPermitProject } from "../../models/permit-project"
 import { IPreCheck } from "../../models/pre-check"
 import { IProjectAudit } from "../../models/project-audit"
+import { IReleaseNote } from "../../models/release-note-model"
 import { IRequirementTemplate } from "../../models/requirement-template"
 import { ITemplateVersion } from "../../models/template-version"
 import { ITemplateVersionPreview } from "../../models/template-version-preview"
@@ -53,6 +54,7 @@ import {
   EPermitProjectSortFields,
   EPreCheckSortFields,
   EProjectAuditSortFields,
+  EReleaseNoteSortFields,
   ERequirementLibrarySortFields,
   ERequirementTemplateSortFields,
   EStepCodeSortFields,
@@ -74,6 +76,7 @@ import {
   TAutoComplianceModuleConfigurations,
   TCreatePermitApplicationFormData,
   TCreateRequirementTemplateFormData,
+  TReleaseNoteFormData,
   TSearchParams,
 } from "../../types/types"
 import { camelizeResponse, decamelizeRequest } from "../../utils"
@@ -1081,5 +1084,25 @@ export class Api {
     return this.client.post<ApiResponse<{ message: string }>>(
       `/report_documents/${reportDocumentId}/share_with_jurisdiction`
     )
+  }
+
+  async fetchReleaseNotes(params?: TSearchParams<EReleaseNoteSortFields>) {
+    return this.client.post<ApiResponse<IReleaseNote[]>>(`/release_notes/search`, params)
+  }
+
+  async fetchReleaseNote(id: string) {
+    return this.client.get<ApiResponse<IReleaseNote>>(`/release_notes/${id}`)
+  }
+
+  async createReleaseNote(releaseNote: TReleaseNoteFormData) {
+    return this.client.post<ApiResponse<IReleaseNote>>("/release_notes", { releaseNote })
+  }
+
+  async updateReleaseNote(id: string, releaseNote: TReleaseNoteFormData) {
+    return this.client.patch<ApiResponse<IReleaseNote>>(`/release_notes/${id}`, { releaseNote })
+  }
+
+  async publishReleaseNote(id: string, releaseNote: TReleaseNoteFormData) {
+    return this.client.patch<ApiResponse<IReleaseNote>>(`/release_notes/${id}/publish`, { releaseNote })
   }
 }

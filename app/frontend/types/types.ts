@@ -728,6 +728,14 @@ export type TCreatePermitApplicationFormData = {
   sandboxId?: string
 }
 
+export type TReleaseNoteFormData = {
+  version: string
+  releaseDate: Date | null
+  content: string
+  releaseNotesUrl: string
+  issues: string
+}
+
 export interface ICopyRequirementTemplateFormData extends Partial<TCreateRequirementTemplateFormData> {
   id?: string
 }
