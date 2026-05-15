@@ -25,6 +25,11 @@ export const AdminGlobalFeatureAccessScreen = observer(() => {
       enabled: siteConfigurationStore?.codeComplianceEnabled,
       route: "code-compliance",
     },
+    {
+      label: t(`${i18nPrefix}.qaTools`),
+      enabled: siteConfigurationStore?.qaToolsEnabled,
+      route: "qa-tools",
+    },
     // Add more features here as needed
   ]
 

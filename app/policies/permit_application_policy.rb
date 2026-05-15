@@ -103,6 +103,16 @@ class PermitApplicationPolicy < ApplicationPolicy
       ((user.review_staff?) && user.member_of?(record.jurisdiction_id))
   end
 
+  def qa_autofill?
+    return false unless record.draft?
+
+    return true if user.super_admin?
+    return true if record.submitter == user
+
+    user.review_staff? && user.member_of?(record.jurisdiction_id) &&
+      record.permit_project&.sandbox_id == sandbox&.id
+  end
+
   def finalize_revision_requests?
     return false unless user.review_staff? && record.submitted?
 

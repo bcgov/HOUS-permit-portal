@@ -702,6 +702,19 @@ en:
       re_invite_error:
         title: ""
         message: "%{error_message}"
+    qa_tools:
+      full_permit_project_success:
+        title: ""
+        message: "QA permit project created successfully"
+      full_permit_project_error:
+        title: Error
+        message: "%{error_message}"
+      autofill_permit_application_success:
+        title: ""
+        message: "Permit application updated for QA"
+      autofill_permit_application_error:
+        title: Error
+        message: "%{error_message}"
     site_configuration:
       enrollments_updated:
         title: ""

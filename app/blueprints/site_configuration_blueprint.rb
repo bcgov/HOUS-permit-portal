@@ -4,7 +4,8 @@ class SiteConfigurationBlueprint < Blueprinter::Base
          :inbox_enabled,
          :allow_designated_reviewer,
          :code_compliance_enabled,
-         :archistar_enabled_for_all_jurisdictions
+         :archistar_enabled_for_all_jurisdictions,
+         :qa_tools_enabled
 
   field :help_link_items do |site_configuration, _options|
     HelpLinkItemsBlueprint.render_as_hash(site_configuration.help_link_items)

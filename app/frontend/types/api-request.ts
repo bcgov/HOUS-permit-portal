@@ -130,6 +130,7 @@ export interface ISiteConfigurationUpdateParams {
   allowDesignatedReviewer?: boolean | null
   codeComplianceEnabled?: boolean | null
   archistarEnabledForAllJurisdictions?: boolean | null
+  qaToolsEnabled?: boolean | null
   sitewideMessage?: string | null
   helpLinkItems?: IHelpLinkItems
   revisionReasonsMap?: { [key: string]: IRevisionReason }
