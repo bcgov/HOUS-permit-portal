@@ -32,7 +32,7 @@ class TemplateVersionFeedback < ApplicationRecord
     unless template_version.draft?
       errors.add(
         :template_version,
-        "must be a draft version to receive feedback"
+        "must be an early access version to receive feedback"
       )
     end
   end

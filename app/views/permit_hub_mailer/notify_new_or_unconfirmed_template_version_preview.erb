@@ -11,7 +11,7 @@
           <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">Dear <%= @user.email %>
             ,</p>
           <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
-            You’ve been selected to preview a draft building permit template in the BC Building Permit Hub!
+            You’ve been selected to preview an early access building permit template in the BC Building Permit Hub!
             This exclusive opportunity allows you to review and provide feedback on proposed updates to permit application requirements.
           </p>
 
@@ -31,11 +31,11 @@
           <h2 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 24px; margin-bottom: 16px; text-align: left; font-size: 22px;">Action
             Required #2</h2>
           <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
-            Once your account is set up, you can view the draft preview using the link below.
+            Once your account is set up, you can view the early access preview using the link below.
             This link will guide you
             directly to the template where you can view proposed requirements.
           </p>
-          <a href="<%= @template_version_preview.frontend_url %>" target="_blank" rel="noopener">View Draft Preview</a>.
+          <a href="<%= @template_version_preview.frontend_url %>" target="_blank" rel="noopener">View early access preview</a>.
           <% if !@user.confirmed? %>
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; box-sizing: border-box; width: 100%; margin: 12px auto;" width="100%">
               <tbody>

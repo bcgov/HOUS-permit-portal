@@ -137,7 +137,7 @@ class TemplateVersioningService
   def self.create_draft!(requirement_template, assignee: nil)
     if requirement_template.draft_template_version.present?
       raise TemplateVersionDraftError,
-            "A draft version already exists for this template. Discard or promote it first."
+            "An early access version already exists for this template. Discard or promote it first."
     end
 
     template_version =
@@ -169,13 +169,13 @@ class TemplateVersioningService
   def self.update_draft_block!(draft_version, block_id, block_data)
     unless draft_version.draft?
       raise TemplateVersionDraftError,
-            "Can only update blocks on a draft version"
+            "Can only update blocks on an early access version"
     end
 
     blocks_json = draft_version.requirement_blocks_json.deep_dup
     unless blocks_json.key?(block_id)
       raise TemplateVersionDraftError,
-            "Block #{block_id} not found in this draft version"
+            "Block #{block_id} not found in this early access version"
     end
 
     blocks_json[block_id] = blocks_json[block_id].merge(block_data)
@@ -192,7 +192,8 @@ class TemplateVersioningService
   # keep any draft-specific block edits.
   def self.refresh_draft_snapshot!(draft_version)
     unless draft_version.draft?
-      raise TemplateVersionDraftError, "Can only refresh a draft version"
+      raise TemplateVersionDraftError,
+            "Can only refresh an early access version"
     end
 
     requirement_template = draft_version.requirement_template
@@ -217,14 +218,15 @@ class TemplateVersioningService
     draft_version
   end
 
-  # Promotes a draft to scheduled status with a future version_date. The draft's
-  # JSON snapshot becomes the scheduled version's snapshot. Any sibling scheduled
-  # versions whose version_date is on or before the incoming date are auto-
-  # unscheduled (deprecated with reason :unscheduled) so the newly-scheduled
-  # draft becomes the canonical next version. Pass skip_date_check: true (gated
-  # on ENABLE_TEMPLATE_FORCE_PUBLISH) to force-publish the draft inline with
-  # today's version_date; in that case publish_version! handles deprecation of
-  # existing published/scheduled versions via deprecate_versions_before_template.
+  # Promotes a copy of a draft to scheduled status with a future version_date.
+  # The original draft remains available for early access and public preview.
+  # Any sibling scheduled versions whose version_date is on or before the
+  # incoming date are auto-unscheduled (deprecated with reason :unscheduled) so
+  # the promoted copy becomes the canonical next version. Pass skip_date_check:
+  # true (gated on ENABLE_TEMPLATE_FORCE_PUBLISH) to publish the promoted copy
+  # inline with today's version_date; in that case publish_version! handles
+  # deprecation of existing published/scheduled versions via
+  # deprecate_versions_before_template.
   def self.promote_draft_to_scheduled!(
     draft_version,
     version_date,
@@ -234,7 +236,8 @@ class TemplateVersioningService
     current_user: nil
   )
     unless draft_version.draft?
-      raise TemplateVersionDraftError, "Can only promote a draft version"
+      raise TemplateVersionDraftError,
+            "Can only promote an early access version"
     end
 
     requirement_template = draft_version.requirement_template
@@ -268,33 +271,40 @@ class TemplateVersioningService
         )
       end
 
-      draft_version.assign_attributes(
-        status: "scheduled",
-        version_date: version_date,
-        version_diff: compute_version_diff(draft_version),
-        change_notes: change_notes,
-        change_significance: change_significance
-      )
+      promoted_version =
+        requirement_template.template_versions.build(
+          denormalized_template_json:
+            draft_version.denormalized_template_json.deep_dup,
+          form_json: draft_version.form_json.deep_dup,
+          requirement_blocks_json:
+            draft_version.requirement_blocks_json.deep_dup,
+          status: "scheduled",
+          version_date: version_date,
+          change_notes: change_notes,
+          change_significance: change_significance
+        )
 
-      unless draft_version.save
+      promoted_version.version_diff = compute_version_diff(promoted_version)
+
+      unless promoted_version.save
         raise TemplateVersionScheduleError.new(
-                draft_version.errors.full_messages.join(", ")
+                promoted_version.errors.full_messages.join(", ")
               )
       end
 
       if skip_date_check
-        publish_version!(draft_version, true)
+        publish_version!(promoted_version, true)
 
         WebsocketBroadcaster.push_update_to_relevant_users(
           User.super_admin.kept.all.pluck(:id),
           Constants::Websockets::Events::TemplateVersion::DOMAIN,
           Constants::Websockets::Events::TemplateVersion::TYPES[:update],
-          TemplateVersionBlueprint.render_as_hash(draft_version)
+          TemplateVersionBlueprint.render_as_hash(promoted_version)
         )
       end
-    end
 
-    draft_version
+      promoted_version
+    end
   end
 
   # Deprecates sibling scheduled TemplateVersions whose version_date is on or
@@ -363,7 +373,8 @@ class TemplateVersioningService
   # Discards a draft version (sets to deprecated).
   def self.discard_draft!(draft_version)
     unless draft_version.draft?
-      raise TemplateVersionDraftError, "Can only discard a draft version"
+      raise TemplateVersionDraftError,
+            "Can only discard an early access version"
     end
 
     draft_version.update!(

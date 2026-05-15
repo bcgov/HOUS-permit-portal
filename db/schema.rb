@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_05_07_162600) do
+ActiveRecord::Schema[7.2].define(version: 2026_05_15_165400) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -98,6 +98,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_07_162600) do
     t.uuid "contactable_id"
     t.string "contact_type"
     t.index ["contactable_type", "contactable_id"], name: "index_contacts_on_contactable"
+  end
+
+  create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
   end
 
   create_table "design_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -273,7 +276,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_07_162600) do
     t.text "checklist_html"
     t.text "look_out_html"
     t.text "contact_summary_html"
-    t.jsonb "map_position"
+    t.jsonb "map_position", default: [0.0, 0.0]
     t.string "prefix", null: false
     t.string "slug"
     t.integer "map_zoom"
@@ -288,7 +291,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_07_162600) do
     t.jsonb "boundary_points", default: []
     t.string "weather_location"
     t.decimal "design_summer_temp", precision: 5, scale: 1
-    t.boolean "hide_from_search", default: false, null: false
     t.text "processing_time_html"
     t.text "key_stages_html"
     t.text "timeline_and_deliverables_html"
@@ -297,6 +299,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_07_162600) do
     t.string "office_telephone"
     t.string "office_email"
     t.string "website_url"
+    t.boolean "hide_from_search", default: false, null: false
     t.index ["ltsa_matcher"], name: "index_jurisdictions_on_ltsa_matcher"
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"], name: "index_jurisdictions_on_regional_district_id"
@@ -749,14 +752,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_07_162600) do
     t.string "nickname"
     t.datetime "fetched_at"
     t.uuid "copied_from_id"
-    t.uuid "assignee_id"
-    t.boolean "public", default: false
-    t.uuid "site_configuration_id"
     t.boolean "available_globally"
-    t.index ["assignee_id"], name: "index_requirement_templates_on_assignee_id"
     t.index ["copied_from_id"], name: "index_requirement_templates_on_copied_from_id"
     t.index ["discarded_at"], name: "index_requirement_templates_on_discarded_at"
-    t.index ["site_configuration_id"], name: "index_requirement_templates_on_site_configuration_id"
   end
 
   create_table "requirements", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -852,6 +850,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_07_162600) do
     t.boolean "allow_designated_reviewer", default: false, null: false
     t.boolean "code_compliance_enabled", default: false, null: false
     t.boolean "archistar_enabled_for_all_jurisdictions", default: false, null: false
+    t.boolean "qa_tools_enabled", default: false, null: false
   end
 
   create_table "step_code_building_characteristics_summaries", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1048,14 +1047,12 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_07_162600) do
   end
 
   create_table "template_version_previews", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.uuid "early_access_requirement_template_id", null: false
     t.uuid "previewer_id", null: false
     t.datetime "expires_at", null: false
     t.datetime "discarded_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.uuid "template_version_id"
-    t.index ["early_access_requirement_template_id", "previewer_id"], name: "index_early_access_previews_on_template_id_and_previewer_id", unique: true
+    t.uuid "template_version_id", null: false
     t.index ["previewer_id"], name: "index_template_version_previews_on_previewer_id"
     t.index ["template_version_id", "previewer_id"], name: "index_tv_previews_on_tv_id_and_previewer_id", unique: true
     t.index ["template_version_id"], name: "index_template_version_previews_on_template_version_id"
@@ -1217,8 +1214,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_07_162600) do
   add_foreign_key "requirement_template_sections", "requirement_template_sections", column: "copied_from_id"
   add_foreign_key "requirement_template_sections", "requirement_templates"
   add_foreign_key "requirement_templates", "requirement_templates", column: "copied_from_id"
-  add_foreign_key "requirement_templates", "site_configurations"
-  add_foreign_key "requirement_templates", "users", column: "assignee_id"
   add_foreign_key "requirements", "requirement_blocks"
   add_foreign_key "resource_documents", "resources"
   add_foreign_key "resources", "jurisdictions"

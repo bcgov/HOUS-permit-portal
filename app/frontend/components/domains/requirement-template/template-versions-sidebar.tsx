@@ -1,7 +1,6 @@
 import {
   Box,
   Button,
-  ButtonGroup,
   Drawer,
   DrawerBody,
   DrawerCloseButton,
@@ -39,12 +38,15 @@ interface IProps {
   requirementTemplate: IRequirementTemplate
   isOpen?: boolean
   onClose?: () => void
+  /** Hide "Open builder" in the drawer when the user is already on the template builder. */
+  isInBuilder?: boolean
 }
 
 export const TemplateVersionsSidebar = observer(function TemplateVersionsSidebar({
   requirementTemplate,
   isOpen: externalIsOpen,
   onClose: externalOnClose,
+  isInBuilder = false,
 }: IProps) {
   const { isOpen: internalIsOpen, onOpen: internalOnOpen, onClose: internalOnClose } = useDisclosure()
   const btnRef = React.useRef()
@@ -77,51 +79,15 @@ export const TemplateVersionsSidebar = observer(function TemplateVersionsSidebar
 
           <DrawerBody py={10} px={8}>
             <Stack spacing={10}>
-              <Box w="full">
-                <VersionsList
-                  type={ETemplateVersionStatus.published}
-                  templateVersions={
-                    requirementTemplate.publishedTemplateVersion ? [requirementTemplate.publishedTemplateVersion] : []
-                  }
-                />
-              </Box>
               {!requirementTemplate.isDiscarded && (
-                <Box>
-                  <Text as="h3" fontSize={"xl"} fontWeight={700} mb={2}>
-                    {t("requirementTemplate.versionSidebar.listTitles.templateBuilder")}
-                  </Text>
-
-                  <VersionCard
-                    viewRoute={`/requirement-templates/${requirementTemplate.id}/edit`}
-                    status={"builder"}
-                    updatedAt={requirementTemplate.updatedAt}
-                  />
-                </Box>
-              )}
-              {requirementTemplate.draftTemplateVersion && (
-                <Box>
-                  <Text as="h3" fontSize={"xl"} fontWeight={700} mb={2}>
-                    {t("requirementTemplate.versionSidebar.listTitles.draft")}
-                  </Text>
-
-                  <Box border="1px solid" borderColor="border.light" borderRadius="sm" overflow="hidden">
-                    <VersionCard
-                      viewRoute={`/template-versions/${requirementTemplate.draftTemplateVersion.id}`}
-                      status={ETemplateVersionStatus.draft}
-                      updatedAt={requirementTemplate.draftTemplateVersion.updatedAt}
-                      borderRadius="none"
-                      border="none"
-                    />
-                    <SharePreviewAccordion draftTemplateVersion={requirementTemplate.draftTemplateVersion} />
-                  </Box>
-                </Box>
+                <BuilderPanel
+                  viewRoute={`/requirement-templates/${requirementTemplate.id}/edit`}
+                  updatedAt={requirementTemplate.updatedAt}
+                  hideOpenBuilderButton={isInBuilder}
+                />
               )}
 
-              <VersionsList
-                type={ETemplateVersionStatus.scheduled}
-                templateVersions={requirementTemplate.scheduledTemplateVersions}
-                onUnschedule={requirementTemplate.unscheduleTemplateVersion}
-              />
+              <VersionFlow requirementTemplate={requirementTemplate} />
 
               <VersionsList
                 type={ETemplateVersionStatus.deprecated}
@@ -151,6 +117,177 @@ export const TemplateVersionsSidebar = observer(function TemplateVersionsSidebar
   )
 })
 
+const BuilderPanel = ({
+  viewRoute,
+  updatedAt,
+  hideOpenBuilderButton = false,
+}: {
+  viewRoute: string
+  updatedAt: Date
+  hideOpenBuilderButton?: boolean
+}) => {
+  const { t } = useTranslation()
+
+  return (
+    <Box>
+      <Text as="h3" fontSize={"xl"} fontWeight={700} mb={2}>
+        {t("requirementTemplate.versionSidebar.listTitles.templateBuilder")}
+      </Text>
+      <Flex
+        p={4}
+        border={"1px solid"}
+        borderColor={"border.light"}
+        borderRadius={"sm"}
+        bg={"greys.grey04"}
+        w="full"
+        justifyContent={hideOpenBuilderButton ? "flex-start" : "space-between"}
+        alignItems={"center"}
+        gap={4}
+      >
+        <HStack spacing={4}>
+          <Flex
+            border={"1px solid"}
+            borderColor={"border.base"}
+            borderRadius={"sm"}
+            bg={"greys.white"}
+            p={2}
+            color={"text.primary"}
+          >
+            <Pencil />
+          </Flex>
+          <Box>
+            <Text fontWeight={700}>{t("requirementTemplate.versionSidebar.builderTitle")}</Text>
+            <Text color={"text.secondary"} fontSize={"sm"}>
+              {t("requirementTemplate.versionSidebar.lastUpdated")} {format(updatedAt, "MMM dd, yyyy")}
+            </Text>
+          </Box>
+        </HStack>
+        {!hideOpenBuilderButton && (
+          <Button as={RouterLink} to={viewRoute} variant={"primary"} size="sm" leftIcon={<Pencil />}>
+            {t("translation:requirementTemplate.versionSidebar.openBuilderButton")}
+          </Button>
+        )}
+      </Flex>
+    </Box>
+  )
+}
+
+const VersionFlow = observer(function VersionFlow({
+  requirementTemplate,
+}: {
+  requirementTemplate: IRequirementTemplate
+}) {
+  const { t } = useTranslation()
+  const publishedTemplateVersions = requirementTemplate.publishedTemplateVersion
+    ? [requirementTemplate.publishedTemplateVersion]
+    : []
+
+  return (
+    <Box>
+      <Text as="h3" fontSize={"xl"} fontWeight={700} mb={2}>
+        {t("requirementTemplate.versionSidebar.flowTitle")}
+      </Text>
+      <Text color={"text.secondary"} fontSize={"sm"} mb={4}>
+        {t("requirementTemplate.versionSidebar.flowDescription")}
+      </Text>
+
+      <Stack spacing={0}>
+        <VersionFlowStep
+          label={t("requirementTemplate.versionSidebar.listTitles.draft")}
+          emptyLabel={t("requirementTemplate.versionSidebar.noEarlyAccessVersion")}
+          hasContent={!!requirementTemplate.draftTemplateVersion}
+        >
+          {requirementTemplate.draftTemplateVersion && (
+            <Box border="1px solid" borderColor="border.light" borderRadius="sm" overflow="hidden">
+              <VersionCard
+                viewRoute={`/template-versions/${requirementTemplate.draftTemplateVersion.id}`}
+                status={ETemplateVersionStatus.draft}
+                updatedAt={requirementTemplate.draftTemplateVersion.updatedAt}
+                borderRadius="none"
+                border="none"
+              />
+              <SharePreviewAccordion draftTemplateVersion={requirementTemplate.draftTemplateVersion} />
+            </Box>
+          )}
+        </VersionFlowStep>
+
+        <VersionFlowStep
+          label={t("requirementTemplate.versionSidebar.listTitles.scheduled")}
+          emptyLabel={t("requirementTemplate.versionSidebar.noScheduledVersion")}
+          hasContent={requirementTemplate.scheduledTemplateVersions.length > 0}
+        >
+          {requirementTemplate.scheduledTemplateVersions.map((templateVersion, index) => (
+            <VersionCard
+              key={templateVersion.id}
+              viewRoute={`/template-versions/${templateVersion.id}`}
+              status={ETemplateVersionStatus.scheduled}
+              versionDate={templateVersion.versionDate}
+              borderTop={index !== 0 ? "none" : undefined}
+              borderTopRadius={index === 0 ? "sm" : undefined}
+              borderBottomRadius={index === requirementTemplate.scheduledTemplateVersions.length - 1 ? "sm" : undefined}
+              borderRadius={"none"}
+              onUnschedule={() => requirementTemplate.unscheduleTemplateVersion(templateVersion.id)}
+            />
+          ))}
+        </VersionFlowStep>
+
+        <VersionFlowStep
+          label={t("requirementTemplate.versionSidebar.listTitles.published")}
+          emptyLabel={t("requirementTemplate.versionSidebar.noPublishedVersion")}
+          hasContent={publishedTemplateVersions.length > 0}
+          isLast
+        >
+          {publishedTemplateVersions.map((templateVersion) => (
+            <VersionCard
+              key={templateVersion.id}
+              viewRoute={`/template-versions/${templateVersion.id}`}
+              status={ETemplateVersionStatus.published}
+              versionDate={templateVersion.versionDate}
+            />
+          ))}
+        </VersionFlowStep>
+      </Stack>
+    </Box>
+  )
+})
+
+const VersionFlowStep = ({
+  label,
+  emptyLabel,
+  hasContent,
+  isLast,
+  children,
+}: {
+  label: string
+  emptyLabel: string
+  hasContent: boolean
+  isLast?: boolean
+  children?: React.ReactNode
+}) => {
+  return (
+    <Flex align="stretch">
+      <Flex direction="column" align="center" mr={4} pt={2}>
+        <Box w={3} h={3} borderRadius="full" bg="theme.blue" />
+        {!isLast && <Box flex={1} borderLeft="1px solid" borderColor="border.base" my={2} />}
+      </Flex>
+      <Box flex={1} pb={isLast ? 0 : 5}>
+        <Text fontWeight={700} mb={2}>
+          {label}
+        </Text>
+        {hasContent ? (
+          children
+        ) : (
+          <Flex p={4} border={"1px dashed"} borderColor={"border.base"} borderRadius={"sm"} bg={"greys.grey04"}>
+            <Text color={"text.secondary"} fontSize={"sm"}>
+              {emptyLabel}
+            </Text>
+          </Flex>
+        )}
+      </Box>
+    </Flex>
+  )
+}
+
 const VersionsList = observer(function VersionsList({
   type,
   templateVersions,
@@ -178,7 +315,7 @@ const VersionsList = observer(function VersionsList({
           borderTopRadius={index === 0 ? "sm" : undefined}
           borderBottomRadius={index === templateVersions.length - 1 ? "sm" : undefined}
           borderRadius={"none"}
-          onUnschedule={() => onUnschedule(templateVersion.id)}
+          onUnschedule={onUnschedule ? () => onUnschedule(templateVersion.id) : undefined}
           deprecationReasonLabel={templateVersion.deprecationReasonLabel}
         />
       ))}
@@ -194,7 +331,7 @@ type TVersionCardProps = Partial<FlexProps> & { viewRoute: string; onUnschedule?
         deprecationReasonLabel?: string
       }
     | {
-        status: "builder" | ETemplateVersionStatus.draft
+        status: ETemplateVersionStatus.draft
         versionDate?: never
         updatedAt: Date
         deprecationReasonLabel?: never
@@ -216,27 +353,18 @@ const VersionCard = observer(function VersionCard({
     if (status === ETemplateVersionStatus.published || status === ETemplateVersionStatus.deprecated) {
       return (
         <Button as={RouterLink} to={viewRoute} variant={"primary"} size="sm">
-          {t("requirementTemplate.versionSidebar.viewTemplateButton")}
-        </Button>
-      )
-    } else if (status === "builder") {
-      return (
-        <Button as={RouterLink} to={viewRoute} variant={"primary"} size="sm" leftIcon={<Pencil />}>
-          {t("translation:requirementTemplate.versionSidebar.openBuilderButton")}
+          {t("ui.view")}
         </Button>
       )
     } else if (status === ETemplateVersionStatus.draft) {
       return (
         <Button as={RouterLink} to={viewRoute} variant={"primary"} size="sm">
-          {t("requirementTemplate.versionSidebar.viewDraftButton")}
+          {t("ui.view")}
         </Button>
       )
     } else {
       return (
-        <ButtonGroup spacing={4}>
-          <Button as={RouterLink} to={viewRoute} variant={"primary"} size="sm">
-            {t("ui.preview")}
-          </Button>
+        <>
           <RemoveConfirmationModal
             title={t("requirementTemplate.versionSidebar.unscheduleWarning.title")}
             body={t("requirementTemplate.versionSidebar.unscheduleWarning.body")}
@@ -250,7 +378,10 @@ const VersionCard = observer(function VersionCard({
             onRemove={onUnschedule}
             triggerText={t("translation:requirementTemplate.versionSidebar.unscheduleButton")}
           />
-        </ButtonGroup>
+          <Button as={RouterLink} to={viewRoute} variant={"primary"} size="sm" ml="auto">
+            {t("ui.view")}
+          </Button>
+        </>
       )
     }
   }
@@ -262,6 +393,8 @@ const VersionCard = observer(function VersionCard({
       borderRadius={"sm"}
       w="full"
       justifyContent={"space-between"}
+      alignItems={"center"}
+      gap={4}
       {...containerProps}
     >
       <HStack spacing={16}>
@@ -270,7 +403,7 @@ const VersionCard = observer(function VersionCard({
           scheduledFor={status === ETemplateVersionStatus.scheduled && versionDate ? versionDate : undefined}
           subText={status === ETemplateVersionStatus.deprecated ? deprecationReasonLabel : undefined}
         />
-        {status === "builder" || status === ETemplateVersionStatus.draft ? (
+        {status === ETemplateVersionStatus.draft ? (
           <Text>
             {t("requirementTemplate.versionSidebar.lastUpdated")}
             <br />
