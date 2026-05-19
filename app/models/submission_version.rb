@@ -1,4 +1,8 @@
 class SubmissionVersion < ApplicationRecord
+  audited on: %i[update],
+          only: %i[viewed_at],
+          associated_with: :permit_application
+
   belongs_to :permit_application
   has_many :revision_requests, dependent: :destroy
   has_many :supporting_documents, dependent: :destroy
