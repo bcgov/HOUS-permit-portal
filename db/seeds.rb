@@ -135,7 +135,11 @@ Jurisdiction.all.each do |j|
       confirmed_at: Time.now,
       default: true
     )
-  j.update(inbox_enabled: true, show_about_page: true)
+  j.update(
+    inbox_enabled: true,
+    show_about_page: true,
+    project_meetings_enabled: true
+  )
 end
 if PermitApplication.first.blank?
   jurisdictions
@@ -365,6 +369,7 @@ if Rails.env.development?
     inbox_enabled: true,
     code_compliance_enabled: true,
     qa_tools_enabled: true,
+    project_meetings_enabled: true,
     allow_designated_reviewer: true
   )
 end

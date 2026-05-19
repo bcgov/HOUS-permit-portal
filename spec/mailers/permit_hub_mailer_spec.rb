@@ -286,6 +286,37 @@ RSpec.describe PermitHubMailer, type: :mailer do
     )
   end
 
+  it "sends project meeting submitted notification" do
+    jurisdiction =
+      instance_double(
+        "Jurisdiction",
+        disambiguated_name: "Capital Regional District"
+      )
+    permit_project =
+      instance_double(
+        "PermitProject",
+        id: "project-id",
+        number: "P-123",
+        full_address: "1208 North Rd, Gabriola Island, BC",
+        jurisdiction: jurisdiction
+      )
+    project_meeting =
+      instance_double(
+        "ProjectMeeting",
+        requested_by: confirmed_user,
+        contact_email: "jane@example.com",
+        contact_name: "Jane Smith",
+        permit_project: permit_project
+      )
+
+    mailer.notify_project_meeting_submitted(project_meeting)
+
+    expect(mailer).to have_received(:send_mail).with(
+      email: "jane@example.com",
+      template_key: "notify_project_meeting_submitted"
+    )
+  end
+
   it "sends template version published notification and sets inbox setup urls when contact missing" do
     template_version =
       instance_double(

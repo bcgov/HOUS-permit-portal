@@ -16,6 +16,7 @@ import { IPermitCollaboration } from "../../models/permit-collaboration"
 import { IPermitProject } from "../../models/permit-project"
 import { IPreCheck } from "../../models/pre-check"
 import { IProjectAudit } from "../../models/project-audit"
+import { IProjectMeeting } from "../../models/project-meeting"
 import { IRequirementTemplate } from "../../models/requirement-template"
 import { ITemplateVersion } from "../../models/template-version"
 import { ITemplateVersionPreview } from "../../models/template-version-preview"
@@ -285,6 +286,26 @@ export class Api {
 
   async updatePermitProject(id: string, params: IPermitProjectUpdateParams) {
     return this.client.patch<ApiResponse<IPermitProject>>(`/permit_projects/${id}`, { permitProject: params })
+  }
+
+  async createProjectMeeting(permitProjectId: string) {
+    return this.client.post<ApiResponse<IProjectMeeting>>(`/permit_projects/${permitProjectId}/meetings`)
+  }
+
+  async fetchProjectMeeting(permitProjectId: string, id: string) {
+    return this.client.get<ApiResponse<IProjectMeeting>>(`/permit_projects/${permitProjectId}/meetings/${id}`)
+  }
+
+  async updateProjectMeeting(permitProjectId: string, id: string, params: Record<string, any>) {
+    return this.client.patch<ApiResponse<IProjectMeeting>>(`/permit_projects/${permitProjectId}/meetings/${id}`, {
+      projectMeeting: params,
+    })
+  }
+
+  async submitProjectMeeting(permitProjectId: string, id: string, params: Record<string, any>) {
+    return this.client.post<ApiResponse<IProjectMeeting>>(`/permit_projects/${permitProjectId}/meetings/${id}/submit`, {
+      projectMeeting: params,
+    })
   }
 
   async pinPermitProject(id: string) {

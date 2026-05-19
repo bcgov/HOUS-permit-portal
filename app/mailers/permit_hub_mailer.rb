@@ -242,6 +242,22 @@ class PermitHubMailer < ApplicationMailer
     )
   end
 
+  def notify_project_meeting_submitted(project_meeting)
+    @project_meeting = project_meeting
+    @user = project_meeting.requested_by
+    @permit_project = project_meeting.permit_project
+    @jurisdiction = @permit_project.jurisdiction
+    @contact_first_name =
+      contact_first_name(project_meeting.contact_name, @user)
+    @project_overview_url =
+      FrontendUrlHelper.frontend_url("/projects/#{@permit_project.id}/overview")
+
+    send_user_mail(
+      email: project_meeting.contact_email,
+      template_key: "notify_project_meeting_submitted"
+    )
+  end
+
   def notify_new_template_version_published(
     template_version,
     user,
@@ -440,6 +456,11 @@ class PermitHubMailer < ApplicationMailer
 
   def login_identifier(user)
     user.omniauth_username.presence || user.email
+  end
+
+  def contact_first_name(contact_name, user)
+    contact_name.to_s.split.first.presence || user.first_name.presence ||
+      user.name
   end
 
   # Helper method to attach a file from a FileUploadAttachment subclass instance

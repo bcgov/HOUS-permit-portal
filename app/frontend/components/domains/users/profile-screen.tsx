@@ -56,8 +56,8 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
     currentUser.unconfirmedEmail || (currentUser.isUnconfirmed && currentUser.confirmationSentAt)
 
   const getDefaults = () => {
-    const { firstName, lastName, nickname, certified, organization, preference, department } = currentUser
-    return { firstName, lastName, certified, organization, preferenceAttributes: preference, department }
+    const { firstName, lastName, certified, organization, preference, department, phoneNumber } = currentUser
+    return { firstName, lastName, certified, organization, preferenceAttributes: preference, department, phoneNumber }
   }
   const formMethods = useForm({ mode: "onSubmit", defaultValues: getDefaults() })
   const { handleSubmit, formState, control, reset, setValue } = formMethods
@@ -169,6 +169,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
                 <TextFormControl label={t("user.firstName")} fieldName="firstName" required />
                 <TextFormControl label={t("user.lastName")} fieldName="lastName" required />
               </Flex>
+              <TextFormControl label={t("user.phoneNumber")} fieldName="phoneNumber" />
               {currentUser.isSubmitter && (
                 <>
                   <TextFormControl label={t("auth.organizationLabel")} fieldName="organization" />

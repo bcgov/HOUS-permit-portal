@@ -13,6 +13,7 @@ import { IPermitApplicationStore, PermitApplicationStoreModel } from "./permit-a
 import { IPermitProjectStore, PermitProjectStoreModel } from "./permit-project-store"
 import { IPreCheckStore, PreCheckStoreModel } from "./pre-check-store"
 import { IProjectAuditStore, ProjectAuditStoreModel } from "./project-audit-store"
+import { IProjectMeetingStore, ProjectMeetingStoreModel } from "./project-meeting-store"
 import { IRequirementBlockStoreModel, RequirementBlockStoreModel } from "./requirement-block-store"
 import { IRequirementTemplateStoreModel, RequirementTemplateStoreModel } from "./requirement-template-store"
 import { ISandboxStore, SandboxStoreModel } from "./sandbox-store"
@@ -35,6 +36,7 @@ export const RootStoreModel = types
     permitProjectStore: types.optional(PermitProjectStoreModel, {}),
     projectAuditStore: types.optional(ProjectAuditStoreModel, {}),
     preCheckStore: types.optional(PreCheckStoreModel, {}),
+    projectMeetingStore: types.optional(ProjectMeetingStoreModel, {}),
     overheatingCodeStore: types.optional(OverheatingCodeStoreModel, {}),
     jurisdictionStore: types.optional(JurisdictionStoreModel, {}),
     requirementBlockStore: types.optional(RequirementBlockStoreModel, {}),
@@ -118,6 +120,7 @@ export interface IRootStore extends IStateTreeNode {
   permitProjectStore: IPermitProjectStore
   projectAuditStore: IProjectAuditStore
   preCheckStore: IPreCheckStore
+  projectMeetingStore: IProjectMeetingStore
   overheatingCodeStore: IOverheatingCodeStore
   jurisdictionStore: IJurisdictionStore
   userStore: IUserStore

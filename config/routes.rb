@@ -243,6 +243,11 @@ Rails.application.routes.draw do
     end
 
     resources :permit_projects, only: %i[show index update create] do
+      resources :project_meetings,
+                path: "meetings",
+                only: %i[create show update] do
+        post :submit, on: :member
+      end
       get "pinned", on: :collection
       get "jurisdiction_options", on: :collection
       post "search", on: :collection, to: "permit_projects#index"

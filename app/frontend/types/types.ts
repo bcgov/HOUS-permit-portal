@@ -358,6 +358,10 @@ export interface IProjectDocument extends IBaseFileAttachment {
   permitProjectId: string // Foreign key to link to PermitProject
 }
 
+export interface IMeetingRequestDocument extends IBaseFileAttachment {
+  projectMeetingId?: string
+}
+
 export interface IRequirementBlockCustomization {
   tip?: string
   resourceIds?: string[]
@@ -678,6 +682,7 @@ export interface IMinimalFrozenUser {
   role: EUserRoles
   firstName: string
   lastName: string
+  phoneNumber?: string
   organization?: string
   certified: boolean
   discardedAt?: Date

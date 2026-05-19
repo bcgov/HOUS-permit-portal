@@ -17,9 +17,22 @@ export enum EFileUploadAttachmentType {
   RequirementDocument = "RequirementDocument",
   SupportingDocument = "SupportingDocument",
   ProjectDocument = "ProjectDocument",
+  MeetingRequestDocument = "MeetingRequestDocument",
   ReportDocument = "ReportDocument",
   ResourceDocument = "ResourceDocument",
   DesignDocument = "DesignDocument",
+}
+
+export enum EProjectMeetingStatus {
+  draft = "draft",
+  submitted = "submitted",
+}
+
+export enum EProjectMeetingRequesterRelationship {
+  ownerOrLandholder = "owner_or_landholder",
+  leaseholderOrTenant = "leaseholder_or_tenant",
+  ownersRepresentative = "owners_representative",
+  other = "other",
 }
 
 export enum EResourceCategory {

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_05_15_165400) do
+ActiveRecord::Schema[7.2].define(version: 2026_05_19_182523) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -300,6 +300,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_15_165400) do
     t.string "office_email"
     t.string "website_url"
     t.boolean "hide_from_search", default: false, null: false
+    t.boolean "project_meetings_enabled", default: false, null: false
     t.index ["ltsa_matcher"], name: "index_jurisdictions_on_ltsa_matcher"
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"], name: "index_jurisdictions_on_regional_district_id"
@@ -325,6 +326,16 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_15_165400) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["hdd", "conditioned_space_percent", "step", "conditioned_space_area"], name: "meui_composite_index", unique: true
+  end
+
+  create_table "meeting_request_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "project_meeting_id", null: false
+    t.text "file_data"
+    t.string "scan_status", default: "pending", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["project_meeting_id"], name: "index_meeting_request_documents_on_project_meeting_id"
+    t.index ["scan_status"], name: "index_meeting_request_documents_on_scan_status"
   end
 
   create_table "occupancy_classifications", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -696,6 +707,29 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_15_165400) do
     t.index ["scan_status"], name: "index_project_documents_on_scan_status"
   end
 
+  create_table "project_meetings", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "permit_project_id", null: false
+    t.uuid "requested_by_id", null: false
+    t.integer "status", default: 0, null: false
+    t.integer "requester_relationship"
+    t.string "contact_name"
+    t.string "contact_email"
+    t.string "contact_phone_number"
+    t.text "project_description"
+    t.text "meeting_notes"
+    t.boolean "request_property_information"
+    t.datetime "submitted_at"
+    t.datetime "confirmed_date"
+    t.string "meeting_url"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["permit_project_id"], name: "index_project_meetings_on_permit_project_id"
+    t.index ["requested_by_id"], name: "index_project_meetings_on_requested_by_id"
+    t.index ["requester_relationship"], name: "index_project_meetings_on_requester_relationship"
+    t.index ["status"], name: "index_project_meetings_on_status"
+    t.index ["submitted_at"], name: "index_project_meetings_on_submitted_at"
+  end
+
   create_table "report_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "step_code_id", null: false
     t.jsonb "file_data"
@@ -851,6 +885,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_15_165400) do
     t.boolean "code_compliance_enabled", default: false, null: false
     t.boolean "archistar_enabled_for_all_jurisdictions", default: false, null: false
     t.boolean "qa_tools_enabled", default: false, null: false
+    t.boolean "project_meetings_enabled", default: false, null: false
   end
 
   create_table "step_code_building_characteristics_summaries", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1149,6 +1184,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_15_165400) do
     t.string "omniauth_email"
     t.string "omniauth_username"
     t.string "department"
+    t.string "phone_number"
     t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
     t.index ["discarded_at"], name: "index_users_on_discarded_at"
     t.index ["email"], name: "index_users_on_email"
@@ -1184,6 +1220,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_15_165400) do
   add_foreign_key "jurisdiction_template_version_customizations", "template_versions"
   add_foreign_key "jurisdictions", "jurisdictions", column: "regional_district_id"
   add_foreign_key "make_up_air_fuels", "part_3_step_code_checklists", column: "checklist_id", on_delete: :cascade
+  add_foreign_key "meeting_request_documents", "project_meetings"
   add_foreign_key "occupancy_classifications", "part_3_step_code_checklists", column: "checklist_id", on_delete: :cascade
   add_foreign_key "overheating_codes", "jurisdictions"
   add_foreign_key "overheating_codes", "users", column: "creator_id"
@@ -1210,6 +1247,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_15_165400) do
   add_foreign_key "pre_checks", "users", column: "creator_id"
   add_foreign_key "preferences", "users"
   add_foreign_key "project_documents", "permit_projects"
+  add_foreign_key "project_meetings", "permit_projects"
+  add_foreign_key "project_meetings", "users", column: "requested_by_id"
   add_foreign_key "requirement_documents", "requirement_blocks"
   add_foreign_key "requirement_template_sections", "requirement_template_sections", column: "copied_from_id"
   add_foreign_key "requirement_template_sections", "requirement_templates"

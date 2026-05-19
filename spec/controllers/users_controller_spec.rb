@@ -17,7 +17,8 @@ RSpec.describe Api::UsersController, type: :controller do
         first_name: params[:first_name] || user.first_name,
         last_name: params[:last_name] || user.last_name,
         certified: params[:certified] || user.certified,
-        department: params[:department] || user.department
+        department: params[:department] || user.department,
+        phone_number: params[:phone_number] || user.phone_number
       }
     }
   end
@@ -92,6 +93,15 @@ RSpec.describe Api::UsersController, type: :controller do
               params:
                 profile_params(review_manager, { department: "Department1" })
         expect(json_response.dig("data", "department")).to eq "Department1"
+      end
+
+      it "phone number should be updated in DB and response" do
+        patch :profile,
+              params:
+                profile_params(review_manager, { phone_number: "2505551212" })
+
+        expect(review_manager.reload.phone_number).to eq "+12505551212"
+        expect(json_response.dig("data", "phone_number")).to eq "+12505551212"
       end
     end
   end

@@ -68,6 +68,10 @@ const DynamicBreadcrumb = observer(({ path }: IDynamicBreadcrumbProps) => {
       const currentResourceMap = {
         jurisdictions: rootStore.jurisdictionStore.currentJurisdiction?.name,
         "permit-applications": rootStore.permitApplicationStore.currentPermitApplication?.number,
+        projects:
+          rootStore.permitProjectStore.currentPermitProject?.shortAddress ||
+          rootStore.permitProjectStore.currentPermitProject?.number,
+        meetings: t("site.breadcrumb.requestProjectMeeting"),
       }
 
       const title = resourceNeeded
@@ -79,7 +83,12 @@ const DynamicBreadcrumb = observer(({ path }: IDynamicBreadcrumbProps) => {
     })
 
     setBreadcrumbs(breadcrumbSegments)
-  }, [path, rootStore.jurisdictionStore.currentJurisdiction])
+  }, [
+    path,
+    rootStore.jurisdictionStore.currentJurisdiction,
+    rootStore.permitProjectStore.currentPermitProject,
+    rootStore.permitApplicationStore.currentPermitApplication,
+  ])
 
   return <SiteBreadcrumbs breadcrumbs={breadcrumbs} />
 })

@@ -246,6 +246,7 @@ class Api::JurisdictionsController < Api::ApplicationController
       :look_out_html,
       :show_about_page,
       :allow_designated_reviewer,
+      :project_meetings_enabled,
       :contact_summary_html,
       :processing_time_html,
       :key_stages_html,

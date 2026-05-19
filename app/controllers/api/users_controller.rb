@@ -226,6 +226,7 @@ class Api::UsersController < Api::ApplicationController
       :nickname,
       :first_name,
       :last_name,
+      :phone_number,
       :organization,
       :certified,
       :department,
