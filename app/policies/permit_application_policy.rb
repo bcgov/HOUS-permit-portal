@@ -37,6 +37,7 @@ class PermitApplicationPolicy < ApplicationPolicy
 
   def qa_autofill?
     return false unless ENV["VITE_QA_MODE"] == "true"
+    return false unless SiteConfiguration.qa_tools_enabled?
 
     is_draft = record.draft?
     update_allowed = is_draft && update?
