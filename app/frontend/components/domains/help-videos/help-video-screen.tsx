@@ -57,18 +57,20 @@ export const HelpVideoScreen = observer(function HelpVideoScreen() {
           </Text>
         )}
         {currentHelpVideo.videoUrl && (
-          <video controls width="100%">
-            <source src={currentHelpVideo.videoUrl} type="video/mp4" />
-            {currentHelpVideo.captionUrl && (
-              <track
-                kind="captions"
-                src={currentHelpVideo.captionUrl}
-                srcLang="en"
-                label={t("helpVideos.show.englishCaptions")}
-                default
-              />
-            )}
-          </video>
+          <Box aspectRatio={16 / 9} w="100%" bg="black">
+            <Box as="video" controls width="100%" height="100%" display="block">
+              <source src={currentHelpVideo.videoUrl} type="video/mp4" />
+              {currentHelpVideo.captionUrl && (
+                <track
+                  kind="captions"
+                  src={currentHelpVideo.captionUrl}
+                  srcLang="en"
+                  label={t("helpVideos.show.englishCaptions")}
+                  default
+                />
+              )}
+            </Box>
+          </Box>
         )}
         {currentHelpVideo.aboutHtml && (
           <VStack align="stretch" spacing={4}>
