@@ -33,7 +33,6 @@ export const SectionsDisplay = observer(function SectionsDisplay(props: IProps) 
       w={"full"}
       alignItems={"flex-start"}
       spacing={16}
-      mt="8"
       mb="20"
       mx="auto"
       pl="8"

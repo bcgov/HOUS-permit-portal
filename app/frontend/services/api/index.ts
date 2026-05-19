@@ -79,6 +79,17 @@ import {
 import { camelizeResponse, decamelizeRequest } from "../../utils"
 import { getCsrfToken } from "../../utils/utility-functions"
 
+interface ITemplateVersionFeedback {
+  id: string
+  sentiment: string
+  body: string
+  resolved: boolean
+  createdAt: Date
+  updatedAt: Date
+  user?: IUser
+  resolvedBy?: IUser | null
+}
+
 export class Api {
   client: ApisauceInstance
 
@@ -546,8 +557,9 @@ export class Api {
   }
 
   async createRequirementTemplate(params: TCreateRequirementTemplateFormData) {
+    const requirementTemplateParams = { ...params, tagList: params.tags }
     return this.client.post<ApiResponse<IRequirementTemplate>>(`/requirement_templates`, {
-      requirementTemplate: params,
+      requirementTemplate: requirementTemplateParams,
     })
   }
 
@@ -565,8 +577,10 @@ export class Api {
   }
 
   async updateRequirementTemplate(templateId: string, params: IRequirementTemplateUpdateParams) {
+    const { tags, ...rest } = params
+    const requirementTemplateParams = tags ? { ...rest, tagList: tags } : rest
     return this.client.put<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${templateId}`, {
-      requirementTemplate: params,
+      requirementTemplate: requirementTemplateParams,
     })
   }
 
@@ -581,17 +595,25 @@ export class Api {
       versionDate: string
     }
   ) {
+    const { tags, ...rest } = requirementTemplate ?? {}
+    const requirementTemplateParams = requirementTemplate
+      ? tags
+        ? { ...rest, tagList: tags }
+        : rest
+      : requirementTemplate
     return this.client.post<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${templateId}/schedule`, {
-      requirementTemplate,
+      requirementTemplate: requirementTemplateParams,
       versionDate,
     })
   }
 
   async forcePublishRequirementTemplate(templateId: string, requirementTemplate: IRequirementTemplateUpdateParams) {
+    const { tags, ...rest } = requirementTemplate
+    const requirementTemplateParams = tags ? { ...rest, tagList: tags } : rest
     return this.client.post<ApiResponse<IRequirementTemplate>>(
       `/requirement_templates/${templateId}/force_publish_now`,
       {
-        requirementTemplate,
+        requirementTemplate: requirementTemplateParams,
       }
     )
   }

@@ -4,7 +4,7 @@ class TemplateVersionFeedbackService
   def self.create_feedback!(template_version, user:, body:, sentiment: :comment)
     unless template_version.draft?
       raise TemplateVersionDraftError,
-            "Feedback can only be added to draft versions"
+            "Feedback can only be added to early access versions"
     end
 
     feedback =

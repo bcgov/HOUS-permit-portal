@@ -34,9 +34,6 @@ export const QaToolsPopout = observer(() => {
       (currentUser.isSubmitter || currentUser.isReviewStaff)
   )
   const hasActions = isProjectsPath || !!permitApplicationId
-  const currentActionRequiresSandbox = Boolean(
-    currentUser?.isReviewStaff && !sandboxStore.currentSandboxId && hasActions
-  )
 
   useEffect(() => {
     if (!isEligible || !isProjectsPath || jurisdictionOptions.length > 0) return
@@ -123,12 +120,6 @@ export const QaToolsPopout = observer(() => {
                 <Text fontSize="sm">{t("qaTools.description")}</Text>
               </Box>
 
-              {currentActionRequiresSandbox && (
-                <Text color="semantic.error" fontSize="sm">
-                  {t("qaTools.sandboxRequired")}
-                </Text>
-              )}
-
               {isProjectsPath && (
                 <VStack align="stretch" spacing={3}>
                   <FormControl>
@@ -146,7 +137,7 @@ export const QaToolsPopout = observer(() => {
                     </Select>
                   </FormControl>
                   <Button
-                    isDisabled={!selectedJurisdictionId || currentActionRequiresSandbox}
+                    isDisabled={!selectedJurisdictionId}
                     isLoading={isCreatingProject || isLoadingJurisdictions}
                     onClick={createFullPermitProject}
                     variant="primary"
@@ -157,12 +148,7 @@ export const QaToolsPopout = observer(() => {
               )}
 
               {permitApplicationId && (
-                <Button
-                  isDisabled={currentActionRequiresSandbox}
-                  isLoading={isAutofilling}
-                  onClick={autofillPermitApplication}
-                  variant="primary"
-                >
+                <Button isLoading={isAutofilling} onClick={autofillPermitApplication} variant="primary">
                   {t("qaTools.autofillApplication")}
                 </Button>
               )}

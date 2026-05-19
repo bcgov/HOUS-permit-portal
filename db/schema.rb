@@ -276,7 +276,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_15_165400) do
     t.text "checklist_html"
     t.text "look_out_html"
     t.text "contact_summary_html"
-    t.jsonb "map_position"
+    t.jsonb "map_position", default: [0.0, 0.0]
     t.string "prefix", null: false
     t.string "slug"
     t.integer "map_zoom"

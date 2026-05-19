@@ -488,6 +488,7 @@ function formFormDefaults(requirementTemplate?: IRequirementTemplate): IRequirem
     return {
       description: "",
       nickname: "",
+      tags: [],
       requirementTemplateSectionsAttributes: [],
     }
   }
@@ -507,6 +508,7 @@ function formFormDefaults(requirementTemplate?: IRequirementTemplate): IRequirem
   return {
     description: requirementTemplate.description,
     nickname: requirementTemplate.nickname,
+    tags: [...(requirementTemplate.tags ?? [])],
     requirementTemplateSectionsAttributes,
   }
 }
