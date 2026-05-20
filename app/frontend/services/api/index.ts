@@ -4,6 +4,8 @@ import { IJurisdictionTemplateVersionCustomizationForm } from "../../components/
 import { TContactFormData } from "../../components/shared/contact/create-edit-contact-modal"
 import { IEarlyAccessPreview } from "../../models/early-access-preview"
 import { IExternalApiKey } from "../../models/external-api-key"
+import { IHelpVideo } from "../../models/help-video"
+import { IHelpVideoSection } from "../../models/help-video-section"
 import { IIntegrationMapping } from "../../models/integration-mapping"
 import { IJurisdiction } from "../../models/jurisdiction"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
@@ -151,6 +153,56 @@ export class Api {
 
   async fetchJurisdiction(id) {
     return this.client.get<ApiResponse<IJurisdiction>>(`/jurisdictions/${id}`)
+  }
+
+  async fetchHelpVideoSections() {
+    return this.client.get<ApiResponse<IHelpVideoSection[]>>(`/help_video_sections`)
+  }
+
+  async createHelpVideoSection(params) {
+    return this.client.post<ApiResponse<IHelpVideoSection>>(`/help_video_sections`, { helpVideoSection: params })
+  }
+
+  async updateHelpVideoSection(id: string, params) {
+    return this.client.patch<ApiResponse<IHelpVideoSection>>(`/help_video_sections/${id}`, { helpVideoSection: params })
+  }
+
+  async deleteHelpVideoSection(id: string) {
+    return this.client.delete<ApiResponse<null>>(`/help_video_sections/${id}`)
+  }
+
+  async reorderHelpVideoSections(orderedIds: string[]) {
+    return this.client.post<ApiResponse<IHelpVideoSection[]>>(`/help_video_sections/reorder`, { orderedIds })
+  }
+
+  async reorderHelpVideosInSection(sectionId: string, orderedIds: string[]) {
+    return this.client.post<ApiResponse<IHelpVideoSection>>(`/help_video_sections/${sectionId}/reorder_videos`, {
+      orderedIds,
+    })
+  }
+
+  async fetchHelpVideo(id: string) {
+    return this.client.get<ApiResponse<IHelpVideo>>(`/help_videos/${id}`)
+  }
+
+  async createHelpVideo(params) {
+    return this.client.post<ApiResponse<IHelpVideo>>(`/help_videos`, { helpVideo: params })
+  }
+
+  async updateHelpVideo(id: string, params) {
+    return this.client.patch<ApiResponse<IHelpVideo>>(`/help_videos/${id}`, { helpVideo: params })
+  }
+
+  async deleteHelpVideo(id: string) {
+    return this.client.delete<ApiResponse<null>>(`/help_videos/${id}`)
+  }
+
+  async publishHelpVideo(id: string) {
+    return this.client.post<ApiResponse<IHelpVideo>>(`/help_videos/${id}/publish`)
+  }
+
+  async unpublishHelpVideo(id: string) {
+    return this.client.post<ApiResponse<IHelpVideo>>(`/help_videos/${id}/unpublish`)
   }
 
   async fetchPermitApplication(id: string, review?: boolean) {
