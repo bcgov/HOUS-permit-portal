@@ -9,6 +9,18 @@ class SubmissionVersion < ApplicationRecord
 
   accepts_nested_attributes_for :revision_requests, allow_destroy: true
 
+  def mark_read!
+    return if viewed_at.present?
+
+    update!(viewed_at: Time.current)
+  end
+
+  def clear_read!
+    return if viewed_at.blank?
+
+    update!(viewed_at: nil)
+  end
+
   delegate :sandbox, to: :permit_application
 
   scope :sandboxed,
