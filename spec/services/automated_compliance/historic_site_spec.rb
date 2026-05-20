@@ -3,6 +3,14 @@ require "rails_helper"
 RSpec.describe AutomatedCompliance::HistoricSite,
                type: :service,
                search: true do
+  let(:vcr_options) { { match_requests_on: %i[method path query] } }
+
+  before do
+    allow_any_instance_of(Wrappers::LtsaParcelMapBc).to receive(
+      :get_coordinates_by_pid
+    ).and_return(nil)
+  end
+
   let!(:requirement_template) do
     create(:live_requirement_template_with_heritage)
   end
@@ -20,7 +28,10 @@ RSpec.describe AutomatedCompliance::HistoricSite,
     end
 
     it "respond to let them know that this is a historic site and they should check it carefully" do
-      VCR.use_cassette("automated_compliance/historic_site/matched_by_legal") do
+      VCR.use_cassette(
+        "automated_compliance/historic_site/matched_by_legal",
+        vcr_options
+      ) do
         AutomatedCompliance::HistoricSite.new.call(permit_application)
         expect(
           permit_application.compliance_data.dig(
@@ -45,7 +56,8 @@ RSpec.describe AutomatedCompliance::HistoricSite,
 
     it "respond to let them know that this is a historic site and they should check it carefully" do
       VCR.use_cassette(
-        "automated_compliance/historic_site/matched_by_geometry"
+        "automated_compliance/historic_site/matched_by_geometry",
+        vcr_options
       ) do
         AutomatedCompliance::HistoricSite.new.call(permit_application)
         expect(
@@ -70,7 +82,10 @@ RSpec.describe AutomatedCompliance::HistoricSite,
     end
 
     it "respond to let them know that this is a historic site and they should check it carefully" do
-      VCR.use_cassette("automated_compliance/historic_site/unmatched") do
+      VCR.use_cassette(
+        "automated_compliance/historic_site/unmatched",
+        vcr_options
+      ) do
         AutomatedCompliance::HistoricSite.new.call(permit_application)
         expect(
           permit_application.compliance_data.dig(
