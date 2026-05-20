@@ -34,6 +34,7 @@ export const JurisdictionModel = types
     showAboutPage: types.optional(types.boolean, false),
     allowDesignatedReviewer: types.optional(types.boolean, false),
     projectMeetingsEnabled: types.optional(types.boolean, false),
+    projectMeetingNotificationRecipientEmails: types.optional(types.array(types.string), []),
     reverseQualifiedName: types.maybeNull(types.string),
     regionalDistrictName: types.maybeNull(types.string),
     localityType: types.maybeNull(types.string),

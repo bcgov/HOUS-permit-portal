@@ -36,11 +36,56 @@ class ProjectMeeting < ApplicationRecord
   def submit_request!
     update!(status: :submitted, submitted_at: Time.current)
     permit_project.mark_as_unviewed
-    PermitHubMailer.notify_project_meeting_submitted(self).deliver_later
+    NotificationService.publish_project_meeting_submitted_event(self)
+    NotificationService.publish_project_meeting_request_received_event(self)
   end
 
   def feature_enabled?
     permit_project.project_meetings_enabled?
+  end
+
+  def authorization_required?
+    requester_relationship.present? &&
+      !requester_relationship_owner_or_landholder?
+  end
+
+  def active_meeting_request_documents
+    meeting_request_documents.reject(&:marked_for_destruction?)
+  end
+
+  def submitted_event_notification_data
+    {
+      "id" => SecureRandom.uuid,
+      "action_text" =>
+        I18n.t(
+          "notification.project_meeting.submitted",
+          project_number: permit_project.number
+        ),
+      "action_type" =>
+        Constants::NotificationActionTypes::PROJECT_MEETING_SUBMITTED,
+      "object_data" => {
+        "permit_project_id" => permit_project.id,
+        "project_meeting_id" => id
+      }
+    }
+  end
+
+  def request_received_event_notification_data
+    {
+      "id" => SecureRandom.uuid,
+      "action_text" =>
+        I18n.t(
+          "notification.project_meeting.request_received",
+          project_number: permit_project.number
+        ),
+      "action_type" =>
+        Constants::NotificationActionTypes::PROJECT_MEETING_REQUEST_RECEIVED,
+      "object_data" => {
+        "permit_project_id" => permit_project.id,
+        "project_meeting_id" => id,
+        "jurisdiction_slug" => permit_project.jurisdiction.slug
+      }
+    }
   end
 
   private
@@ -57,6 +102,11 @@ class ProjectMeeting < ApplicationRecord
 
     if request_property_information.nil?
       errors.add(:request_property_information, :blank)
+    end
+
+    if authorization_required? &&
+         active_meeting_request_documents.none?(&:document_type_authorization?)
+      errors.add(:meeting_request_documents, :authorization_required)
     end
   end
 

@@ -42,10 +42,16 @@ class Api::JurisdictionsController < Api::ApplicationController
 
   def update
     authorize @jurisdiction
-    if jurisdiction_params[:contacts_attributes]
+    permitted_params = jurisdiction_params
+
+    if project_meeting_settings_update?(permitted_params)
+      authorize @jurisdiction, :update_project_meetings_enabled?
+    end
+
+    if permitted_params[:contacts_attributes]
       # Get current contact ids from the params
       payload_record_ids =
-        jurisdiction_params[:contacts_attributes].map { |c| c[:id] }
+        permitted_params[:contacts_attributes].map { |c| c[:id] }
       # Mark contacts not included in the current payload for destruction
       @jurisdiction.contacts.each do |contact|
         unless payload_record_ids.include?(contact.id.to_s)
@@ -53,7 +59,7 @@ class Api::JurisdictionsController < Api::ApplicationController
         end
       end
     end
-    if @jurisdiction.update(jurisdiction_params)
+    if @jurisdiction.update(permitted_params)
       render_success @jurisdiction,
                      "jurisdiction.update_success",
                      {
@@ -261,6 +267,7 @@ class Api::JurisdictionsController < Api::ApplicationController
       :ltsa_matcher,
       :heating_degree_days,
       map_position: [],
+      project_meeting_notification_recipient_emails: [],
       users_attributes: %i[first_name last_name role email],
       contacts_attributes: %i[
         id
@@ -309,6 +316,11 @@ class Api::JurisdictionsController < Api::ApplicationController
         ]
       ]
     )
+  end
+
+  def project_meeting_settings_update?(permitted_params)
+    permitted_params.key?(:project_meetings_enabled) ||
+      permitted_params.key?(:project_meeting_notification_recipient_emails)
   end
 
   def update_external_api_enabled_params

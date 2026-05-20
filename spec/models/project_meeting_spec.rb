@@ -33,6 +33,45 @@ RSpec.describe ProjectMeeting, type: :model do
       expect(meeting.errors[:project_description]).to be_present
       expect(meeting.errors[:request_property_information]).to be_present
     end
+
+    %i[leaseholder_or_tenant owners_representative other].each do |relationship|
+      it "requires authorization documents when submitted by #{relationship}" do
+        meeting =
+          build(
+            :project_meeting,
+            :submitted,
+            requester_relationship: relationship
+          )
+
+        expect(meeting).not_to be_valid
+        expect(meeting.errors[:meeting_request_documents]).to be_present
+      end
+    end
+
+    it "allows non-owner requesters to submit with authorization documents" do
+      meeting =
+        build(
+          :project_meeting,
+          :submitted,
+          requester_relationship: :owners_representative
+        )
+      meeting.meeting_request_documents.build(
+        attributes_for(:meeting_request_document, :authorization)
+      )
+
+      expect(meeting).to be_valid
+    end
+
+    it "allows owners to submit without authorization documents" do
+      meeting =
+        build(
+          :project_meeting,
+          :submitted,
+          requester_relationship: :owner_or_landholder
+        )
+
+      expect(meeting).to be_valid
+    end
   end
 
   describe "#submit_request!" do
@@ -54,6 +93,18 @@ RSpec.describe ProjectMeeting, type: :model do
         PermitHubMailer,
         :notify_project_meeting_submitted
       ).with(meeting)
+    end
+
+    it "enqueues jurisdiction recipient notifications" do
+      meeting = create(:project_meeting)
+      meeting.permit_project.jurisdiction.update!(
+        project_meeting_notification_recipient_emails: ["meetings@example.com"]
+      )
+
+      expect { meeting.submit_request! }.to have_enqueued_mail(
+        PermitHubMailer,
+        :notify_project_meeting_submitted_to_jurisdiction
+      ).with(meeting, "meetings@example.com")
     end
   end
 end

@@ -1,16 +1,9 @@
-import { Alert, Box, Button, FormControl, HStack, Input, VStack } from "@chakra-ui/react"
-import { Pencil, Plus, Warning } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
-import * as R from "ramda"
-import React, { useEffect, useState } from "react"
-import { useFormContext } from "react-hook-form"
+import React from "react"
 import { useJurisdiction } from "../../../../../../hooks/resources/use-jurisdiction"
-import { ISubmissionContact } from "../../../../../../types/types"
-import { generateUUID } from "../../../../../../utils/utility-functions"
 import { ErrorScreen } from "../../../../../shared/base/error-screen"
-import { EmailFormControl } from "../../../../../shared/form/email-form-control"
-import { EditableBlockContainer, EditableBlockHeading } from "../shared/editable-block"
+import { EmailListEditableBlock } from "../../../../../shared/form/email-list-editable-block"
 import { i18nPrefix } from "./i18n-prefix"
 
 interface IProps {
@@ -34,134 +27,28 @@ export const EditableBlock = observer(function SubmissionsInboxSetupEditableBloc
   update,
   getIndex,
 }: IProps) {
-  const [isEditing, setIsEditing] = useState(null)
   const { currentJurisdiction, error } = useJurisdiction()
-
   const getSubmissionContact = currentJurisdiction?.getSubmissionContact
-
-  const { formState, trigger, getValues } = useFormContext()
-  const { errors, isSubmitting, isSubmitted } = formState
-
-  const isValid = () => {
-    return (
-      isEditing &&
-      R.all((f) => {
-        const index = getIndex(f)
-        const itemErrors = errors[fieldArrayName] && errors[fieldArrayName][index]?.email
-        return !itemErrors
-      }, fields)
-    )
-  }
-
-  const handleClickCancel = () => {
-    reset()
-    setIsEditing(false)
-  }
-
-  const onAdd = () => {
-    append({ id: null, email: null, title: null, default: false })
-  }
-
-  const onRemove = (index: number, contact?: ISubmissionContact) => {
-    if (contact) {
-      update(index, { _destroy: true, id: contact.id })
-    } else {
-      remove(index)
-    }
-  }
-
-  useEffect(() => {
-    isSubmitted && setIsEditing(false)
-  }, [isSubmitted])
-
-  useEffect(() => {
-    !!!isEditing && isSubmitted && reset()
-  }, [isEditing])
-
-  useEffect(() => {
-    isEditing && trigger()
-  }, [isEditing, fields.length])
 
   return error ? (
     <ErrorScreen error={error} />
   ) : (
-    <EditableBlockContainer>
-      {heading && (
-        <FormControl flexBasis={"280px"} alignSelf="center">
-          <EditableBlockHeading>{heading}</EditableBlockHeading>
-        </FormControl>
-      )}
-      <VStack flex={1} spacing={5} alignSelf="center">
-        {fields.map((f, index) => {
-          const trueIndex = getIndex(f)
-          const contactId = getValues(`${fieldArrayName}.${trueIndex}.id`)
-          const contact = contactId && getSubmissionContact && getSubmissionContact(contactId)
-          return (
-            <React.Fragment key={f.id || generateUUID()}>
-              <Input type="hidden" name={`${fieldArrayName}.${trueIndex}.id`} value={contactId || ""} />
-              <HStack flex={1} w="full">
-                <EmailFormControl
-                  pos="relative"
-                  label={t(`${i18nPrefix}.emailLabel`)}
-                  fieldName={`${fieldArrayName}.${trueIndex}.email`}
-                  inputProps={{ isDisabled: !isEditing }}
-                  required={isEditing}
-                  validate={isEditing}
-                  handleRemove={() => onRemove(trueIndex, contact)}
-                  isRemovable={isEditing}
-                  hideLabel={index !== 0}
-                  showIcon
-                />
-                {!isEditing && contact && !contact.confirmedAt && (
-                  <Alert
-                    status="warning"
-                    rounded="lg"
-                    borderWidth={1}
-                    borderColor="semantic.warning"
-                    bg="semantic.warningLight"
-                    gap={2}
-                    color="text.primary"
-                    fontSize="xs"
-                    alignSelf="end"
-                    py={1}
-                    px={2}
-                    mb={1.5}
-                  >
-                    <Warning color="var(--chakra-colors-semantic-warning)" size={24} />
-                    {t(`${i18nPrefix}.confirmationRequired`)}{" "}
-                  </Alert>
-                )}
-              </HStack>
-            </React.Fragment>
-          )
-        })}
-        {isEditing && (
-          <Button alignSelf="start" size="sm" variant="link" leftIcon={<Plus />} onClick={onAdd}>
-            {t(`${i18nPrefix}.addEmail`)}
-          </Button>
-        )}
-      </VStack>
-      <Box alignSelf="start">
-        {isEditing ? (
-          <HStack>
-            <Button
-              variant="primary"
-              type="submit"
-              isLoading={isSubmitting && isEditing}
-              isDisabled={!isValid() || isSubmitting}
-            >
-              {t("ui.save")}
-            </Button>
-            <Button variant="secondary" onClick={handleClickCancel} isDisabled={isSubmitting}>
-              {t("ui.cancel")}
-            </Button>
-          </HStack>
-        ) : (
-          <Button variant="primary" leftIcon={<Pencil />} onClick={() => setIsEditing(true)}>
-            {t("ui.edit")}
-          </Button>
-        )}
-      </Box>
-    </EditableBlockContainer>
+    <EmailListEditableBlock
+      heading={heading}
+      fields={fields}
+      fieldArrayName={fieldArrayName}
+      getIndex={getIndex}
+      append={append}
+      remove={remove}
+      update={update}
+      reset={reset}
+      emailLabel={t(`${i18nPrefix}.emailLabel`)}
+      addEmailLabel={t(`${i18nPrefix}.addEmail`)}
+      confirmationRequiredLabel={t(`${i18nPrefix}.confirmationRequired`)}
+      getItem={(id) => getSubmissionContact?.(id)}
+      buildNewItem={() => ({ id: null, email: null, title: null, default: false })}
+      buildDestroyedItem={(contact) => ({ _destroy: true, id: contact.id })}
+      showConfirmationWarning
+    />
   )
 })

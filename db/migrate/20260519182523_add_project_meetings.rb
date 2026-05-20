@@ -41,12 +41,14 @@ class AddProjectMeetings < ActiveRecord::Migration[7.2]
 
     create_table :meeting_request_documents, id: :uuid do |t|
       t.references :project_meeting, null: false, foreign_key: true, type: :uuid
+      t.integer :document_type, default: 0, null: false
       t.text :file_data
       t.string :scan_status, default: "pending", null: false
 
       t.timestamps
     end
 
+    add_index :meeting_request_documents, :document_type
     add_index :meeting_request_documents, :scan_status
   end
 end

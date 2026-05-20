@@ -694,4 +694,68 @@ RSpec.describe NotificationService do
       end
     end
   end
+
+  describe ".publish_project_meeting_submitted_event" do
+    it "respects submitter email and in-app preferences" do
+      meeting = create(:project_meeting)
+      meeting.requested_by.preference.update!(
+        enable_email_project_meeting_submitted_notification: false,
+        enable_in_app_project_meeting_submitted_notification: true
+      )
+      allow(NotificationPushJob).to receive(:perform_async)
+
+      expect {
+        described_class.publish_project_meeting_submitted_event(meeting)
+      }.not_to have_enqueued_mail(
+        PermitHubMailer,
+        :notify_project_meeting_submitted
+      )
+
+      expect(NotificationPushJob).to have_received(:perform_async) do |payload|
+        expect(payload.keys).to contain_exactly(meeting.requested_by.id)
+      end
+    end
+  end
+
+  describe ".publish_project_meeting_request_received_event" do
+    it "sends jurisdiction email recipients and respects manager in-app preferences" do
+      meeting = create(:project_meeting)
+      meeting.permit_project.jurisdiction.update!(
+        project_meeting_notification_recipient_emails: ["meetings@example.com"]
+      )
+      manager =
+        create(
+          :user,
+          :review_manager,
+          jurisdiction: meeting.permit_project.jurisdiction
+        )
+      manager.preference.update!(
+        enable_email_project_meeting_request_received_notification: false,
+        enable_in_app_project_meeting_request_received_notification: true
+      )
+      allow(NotificationPushJob).to receive(:perform_async)
+
+      expect {
+        described_class.publish_project_meeting_request_received_event(meeting)
+      }.to have_enqueued_mail(
+        PermitHubMailer,
+        :notify_project_meeting_submitted_to_jurisdiction
+      ).with(meeting, "meetings@example.com")
+
+      expect(NotificationPushJob).to have_received(:perform_async) do |payload|
+        expect(payload.keys).to contain_exactly(manager.id)
+      end
+    end
+
+    it "does not send jurisdiction email when no recipients are configured" do
+      meeting = create(:project_meeting)
+
+      expect {
+        described_class.publish_project_meeting_request_received_event(meeting)
+      }.not_to have_enqueued_mail(
+        PermitHubMailer,
+        :notify_project_meeting_submitted_to_jurisdiction
+      )
+    end
+  end
 end

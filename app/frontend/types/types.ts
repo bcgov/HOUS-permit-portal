@@ -21,6 +21,7 @@ import {
   EHotWaterPerformanceType,
   EJurisdictionSocketEventTypes,
   EJurisdictionTypes,
+  EMeetingRequestDocumentType,
   ENotificationActionType,
   ENumberUnit,
   EPermitApplicationSocketEventTypes,
@@ -360,6 +361,7 @@ export interface IProjectDocument extends IBaseFileAttachment {
 
 export interface IMeetingRequestDocument extends IBaseFileAttachment {
   projectMeetingId?: string
+  documentType?: EMeetingRequestDocumentType
 }
 
 export interface IRequirementBlockCustomization {
@@ -442,6 +444,13 @@ export interface INotification {
     | ITemplateVersionNotificationObjectData
     | IRequirementTemplateNotificationObjectData
     | IReportDocumentNotificationObjectData
+    | IProjectMeetingNotificationObjectData
+}
+
+export interface IProjectMeetingNotificationObjectData {
+  permitProjectId: string
+  projectMeetingId: string
+  jurisdictionSlug?: string
 }
 
 export interface ITemplateVersionUpdate {

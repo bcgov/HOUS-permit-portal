@@ -593,6 +593,12 @@ const AppRoutes = observer(() => {
         path="/jurisdictions/:jurisdictionId/configuration-management"
         element={<ConfigurationManagementScreen />}
       />
+      {projectMeetingsEnabled && (
+        <Route
+          path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/project-meetings"
+          element={<ProjectMeetingsJurisdictionFeatureAccessScreen />}
+        />
+      )}
       <Route path="/jurisdictions/:jurisdictionId/users" element={<JurisdictionUserIndexScreen />} />
       <Route path="/jurisdictions/:jurisdictionId/users/invite" element={<InviteScreen />} />
     </>
@@ -613,12 +619,6 @@ const AppRoutes = observer(() => {
         <Route
           path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/limit-who-can-request-revisions-from-submitters"
           element={<DesignatedReviewerScreen />}
-        />
-      )}
-      {projectMeetingsEnabled && (
-        <Route
-          path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/project-meetings"
-          element={<ProjectMeetingsJurisdictionFeatureAccessScreen />}
         />
       )}
       <Route
@@ -768,15 +768,17 @@ const AppRoutes = observer(() => {
             <Route path="/projects/new" element={<NewPermitProjectScreen />} />
             <Route path="/projects/:permitProjectId/*" element={<PermitProjectScreen />} />
             <Route path="/projects/:permitProjectId/add-permits" element={<AddPermitApplicationToProjectScreen />} />
-            <Route path="/projects/:permitProjectId/meetings/new" element={<ProjectMeetingNewScreen />} />
-            <Route
-              path="/projects/:permitProjectId/meetings/:projectMeetingId/edit/:section"
-              element={<ProjectMeetingScreen />}
-            />
-            <Route
-              path="/projects/:permitProjectId/meetings/:projectMeetingId/sent"
-              element={<ProjectMeetingSentScreen />}
-            />
+            <Route element={<ProtectedRoute isAllowed={projectMeetingsEnabled} redirectPath="/not-found" />}>
+              <Route path="/projects/:permitProjectId/meetings/new" element={<ProjectMeetingNewScreen />} />
+              <Route
+                path="/projects/:permitProjectId/meetings/:projectMeetingId/edit/:section"
+                element={<ProjectMeetingScreen />}
+              />
+              <Route
+                path="/projects/:permitProjectId/meetings/:projectMeetingId/sent"
+                element={<ProjectMeetingSentScreen />}
+              />
+            </Route>
             <Route path="/step-codes/*" element={<ProjectDashboardScreen />} />
             {/* Disabled: New Permit Application screen */}
             <Route path="/permit-applications/:permitApplicationId/edit" element={<EditPermitApplicationScreen />} />

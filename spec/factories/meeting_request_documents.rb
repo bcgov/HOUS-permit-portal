@@ -1,6 +1,7 @@
 FactoryBot.define do
   factory :meeting_request_document do
     association :project_meeting
+    document_type { :supporting }
     file_data do
       {
         "id" => SecureRandom.uuid,
@@ -13,5 +14,9 @@ FactoryBot.define do
       }
     end
     scan_status { "pending" }
+
+    trait :authorization do
+      document_type { :authorization }
+    end
   end
 end

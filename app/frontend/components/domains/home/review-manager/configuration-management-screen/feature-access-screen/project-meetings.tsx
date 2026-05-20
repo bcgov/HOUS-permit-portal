@@ -1,4 +1,4 @@
-import { Button, Container, Flex, Heading, Text, VStack } from "@chakra-ui/react"
+import { Button, Container, Flex, Heading, Link, Text, VStack } from "@chakra-ui/react"
 import { CaretLeft } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useJurisdiction } from "../../../../../../hooks/resources/use-jurisdiction"
 import { SwitchButton } from "../../../../../shared/buttons/switch-button"
+import { ProjectMeetingsNotificationRecipientsForm } from "./project-meetings-notification-recipients-form"
 
 export const ProjectMeetingsJurisdictionFeatureAccessScreen = observer(() => {
   const i18nPrefix = "home.configurationManagement.featureAccess"
@@ -39,9 +40,34 @@ export const ProjectMeetingsJurisdictionFeatureAccessScreen = observer(() => {
           <Heading as="h2" fontSize="2xl" fontWeight="bold" mb={4}>
             {t(`${i18nPrefix}.acceptProjectMeetings`)}
           </Heading>
+          <Text color="text.secondary" mb={2}>
+            {t(`${i18nPrefix}.projectMeetingsResourcesDescription`)}
+          </Text>
+          <Link
+            color="text.link"
+            onClick={() =>
+              currentJurisdiction &&
+              navigate(
+                `/jurisdictions/${currentJurisdiction.slug || currentJurisdiction.id}/configuration-management/resources`
+              )
+            }
+          >
+            {t(`${i18nPrefix}.projectMeetingsResourcesLink`)}
+          </Link>
         </Flex>
         <SwitchButton isChecked={isEnabled} onChange={(e) => handleToggle(e.target.checked)} size={"lg"} />
       </Flex>
+      {currentJurisdiction && (
+        <Flex mt={8} align="flex-start" w="100%" direction="column">
+          <Heading as="h2" fontSize="2xl" fontWeight="bold" mb={2}>
+            {t(`${i18nPrefix}.projectMeetingsNotificationRecipients`)}
+          </Heading>
+          <Text color="text.secondary" fontSize="lg" mb={4}>
+            {t(`${i18nPrefix}.projectMeetingsNotificationRecipientsDescription`)}
+          </Text>
+          <ProjectMeetingsNotificationRecipientsForm jurisdiction={currentJurisdiction} />
+        </Flex>
+      )}
     </Container>
   )
 })

@@ -146,6 +146,35 @@ RSpec.describe Jurisdiction, type: :model do
         expect(jurisdiction).to be_valid
       end
     end
+
+    describe "project meeting notification recipient emails" do
+      let(:jurisdiction) { create(:sub_district) }
+
+      it "normalizes blank and duplicate emails" do
+        jurisdiction.update!(
+          project_meeting_notification_recipient_emails: [
+            " meetings@example.com ",
+            "",
+            "meetings@example.com"
+          ]
+        )
+
+        expect(
+          jurisdiction.project_meeting_notification_recipient_emails
+        ).to eq(["meetings@example.com"])
+      end
+
+      it "rejects invalid emails" do
+        jurisdiction.project_meeting_notification_recipient_emails = [
+          "not-an-email"
+        ]
+
+        expect(jurisdiction).not_to be_valid
+        expect(
+          jurisdiction.errors[:project_meeting_notification_recipient_emails]
+        ).to be_present
+      end
+    end
   end
 
   describe "#should_index?" do

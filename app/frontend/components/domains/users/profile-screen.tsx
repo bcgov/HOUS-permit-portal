@@ -106,6 +106,11 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
       emailControl: "preferenceAttributes.enableEmailApplicationSubmissionNotification",
     },
     {
+      event: t("user.notifications.projectMeetingSubmitted"),
+      inAppControl: "preferenceAttributes.enableInAppProjectMeetingSubmittedNotification",
+      emailControl: "preferenceAttributes.enableEmailProjectMeetingSubmittedNotification",
+    },
+    {
       event: t("user.notifications.reviewStarted"),
       inAppControl: "preferenceAttributes.enableInAppApplicationViewNotification",
       emailControl: "preferenceAttributes.enableEmailApplicationViewNotification",
@@ -132,6 +137,11 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
       event: t("user.notifications.resourceReminder"),
       inAppControl: "preferenceAttributes.enableInAppResourceReminderNotification",
       emailControl: "preferenceAttributes.enableEmailResourceReminderNotification",
+    })
+    events.push({
+      event: t("user.notifications.projectMeetingRequestReceived"),
+      inAppControl: "preferenceAttributes.enableInAppProjectMeetingRequestReceivedNotification",
+      emailControl: "preferenceAttributes.enableEmailProjectMeetingRequestReceivedNotification",
     })
   }
 

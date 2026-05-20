@@ -49,6 +49,16 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
 
       expect(response).to have_http_status(:forbidden)
     end
+
+    it "blocks creation when the jurisdiction feature gate is off" do
+      jurisdiction.update!(project_meetings_enabled: false)
+
+      post "/api/permit_projects/#{permit_project.id}/meetings",
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:forbidden)
+    end
   end
 
   describe "GET /api/permit_projects/:permit_project_id/meetings/:id" do
@@ -74,6 +84,7 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
                 project_description: "Demolish and rebuild.",
                 meeting_request_documents_attributes: [
                   {
+                    document_type: "supporting",
                     file: {
                       id: SecureRandom.uuid,
                       storage: "cache",
@@ -97,12 +108,23 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
       expect(
         json_response.dig("data", "meeting_request_documents").length
       ).to eq(1)
+      expect(
+        json_response.dig(
+          "data",
+          "meeting_request_documents",
+          0,
+          "document_type"
+        )
+      ).to eq("supporting")
     end
   end
 
   describe "POST /api/permit_projects/:permit_project_id/meetings/:id/submit" do
     it "submits the completed meeting request" do
       meeting = create(:project_meeting, permit_project: permit_project)
+      jurisdiction.update!(
+        project_meeting_notification_recipient_emails: ["meetings@example.com"]
+      )
 
       expect {
         post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/submit",
@@ -111,7 +133,10 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
       }.to have_enqueued_mail(
         PermitHubMailer,
         :notify_project_meeting_submitted
-      )
+      ).and have_enqueued_mail(
+              PermitHubMailer,
+              :notify_project_meeting_submitted_to_jurisdiction
+            ).with(meeting, "meetings@example.com")
 
       expect(response).to have_http_status(:ok)
       expect(json_response.dig("data", "status")).to eq("submitted")
@@ -132,6 +157,42 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
            as: :json
 
       expect(response).to have_http_status(:unprocessable_entity)
+    end
+
+    it "requires authorization documents for non-owner requesters" do
+      meeting =
+        create(
+          :project_meeting,
+          permit_project: permit_project,
+          requester_relationship: :leaseholder_or_tenant
+        )
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/submit",
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+
+    it "submits non-owner requests with authorization documents" do
+      meeting =
+        create(
+          :project_meeting,
+          permit_project: permit_project,
+          requester_relationship: :owners_representative
+        )
+      create(
+        :meeting_request_document,
+        :authorization,
+        project_meeting: meeting
+      )
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/submit",
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("data", "status")).to eq("submitted")
     end
   end
 end

@@ -3,10 +3,26 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { Link as RouterLink, useParams } from "react-router-dom"
+import { usePermitProject } from "../../../hooks/resources/use-permit-project"
+import { useMst } from "../../../setup/root"
+import { ErrorScreen } from "../../shared/base/error-screen"
+import { LoadingScreen } from "../../shared/base/loading-screen"
 
 export const ProjectMeetingSentScreen = observer(() => {
   const { t } = useTranslation()
   const { permitProjectId } = useParams<{ permitProjectId: string }>()
+  const { currentPermitProject, error } = usePermitProject()
+  const { siteConfigurationStore } = useMst()
+
+  if (error) return <ErrorScreen />
+  if (!currentPermitProject || currentPermitProject.id !== permitProjectId) return <LoadingScreen />
+  if (
+    !currentPermitProject.isOwner ||
+    !siteConfigurationStore.projectMeetingsEnabled ||
+    !currentPermitProject.jurisdiction?.projectMeetingsEnabled
+  ) {
+    return <ErrorScreen error={new Error(t("projectMeeting.validation.featureUnavailable"))} />
+  }
 
   return (
     <Container maxW="container.lg" p={8} as="main">
