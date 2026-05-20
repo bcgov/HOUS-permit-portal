@@ -15,6 +15,8 @@ export const Footer = observer(() => {
     "/forgot-password",
     "/welcome",
     "/contact",
+    "/videos",
+    "/videos/:videoId",
     "/project-readiness-tools/*",
     "/jurisdictions/:slug/step-code-requirements",
     "/letter-of-assurance",
@@ -86,6 +88,9 @@ export const Footer = observer(() => {
                     </Link>
                     <RouterLink to="/contact" color="text.primary">
                       {t("site.contact")}
+                    </RouterLink>
+                    <RouterLink to="/videos" color="text.primary">
+                      {t("site.videos")}
                     </RouterLink>
                     <Link
                       href="https://www2.gov.bc.ca/gov/content?id=F2AE1595C6044E819A316925F0A74E09"

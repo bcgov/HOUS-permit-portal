@@ -811,6 +811,38 @@ en:
       update_error:
         title: Error
         message: "%{error_message}"
+    help_video_section:
+      create_success:
+        title: ""
+        message: "Video section created successfully."
+      update_success:
+        title: ""
+        message: "Video section updated successfully."
+      destroy_success:
+        title: ""
+        message: "Video section deleted successfully."
+      reorder_success:
+        title: ""
+        message: "Video sections reordered successfully."
+      reorder_videos_success:
+        title: ""
+        message: "Videos reordered successfully."
+    help_video:
+      create_success:
+        title: ""
+        message: "Video created successfully."
+      update_success:
+        title: ""
+        message: "Video updated successfully."
+      destroy_success:
+        title: ""
+        message: "Video deleted successfully."
+      publish_success:
+        title: ""
+        message: "Video published successfully."
+      unpublish_success:
+        title: ""
+        message: "Video unpublished successfully."
     misc:
       user_not_authorized_error:
         title: "Unauthorized"
@@ -824,6 +856,9 @@ en:
       not_found_error:
         title: "Error"
         message: 404 - The requested resource could not be found
+      validation_error:
+        title: "Error"
+        message: "%{error_message}"
     s3:
       multipart_init_failed:
         title: "File Upload Error"

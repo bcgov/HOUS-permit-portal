@@ -1,0 +1,2 @@
+class HelpVideoTranscriptDocumentPolicy < HelpVideoDocumentPolicy
+end
