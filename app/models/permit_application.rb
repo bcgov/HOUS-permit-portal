@@ -2,7 +2,7 @@ class PermitApplication < ApplicationRecord
   searchkick word_middle: %i[
                nickname
                full_address
-               permit_classifications
+               template_tags
                submitter
                status
                review_delegatee_name
@@ -23,24 +23,24 @@ class PermitApplication < ApplicationRecord
   has_parent :permit_project
 
   SEARCH_INCLUDES = [
-    :permit_type,
     :submission_versions,
     :step_code,
-    :activity,
     :submitter,
     { permit_collaborations: :collaborator }
   ]
 
   belongs_to :submitter, class_name: "User", optional: true
   public_recordable user_association: :submitter
-  belongs_to :permit_type
-  belongs_to :activity
   belongs_to :template_version
   belongs_to :permit_project, optional: true, touch: true
 
   has_one :requirement_template, through: :template_version
 
-  # The front end form update provides a json paylioad of items we want to force update on the front-end since form io maintains its own state and does not 'rerender' if we send the form data back
+  delegate :tag_list,
+           to: :requirement_template,
+           prefix: :template,
+           allow_nil: true
+
   attr_accessor :front_end_form_update
 
   has_many :submission_versions, dependent: :destroy
@@ -71,17 +71,12 @@ class PermitApplication < ApplicationRecord
           )
         end
 
-  # Custom validation
-
   validate :jurisdiction_or_permit_project_present
   validate :jurisdiction_has_matching_submission_contact
   validates :number, presence: true
   validates :reference_number, length: { maximum: 300 }, allow_nil: true
-  validate :template_version_of_live_template
   validate :submission_versions_match_status
 
-  delegate :code, :name, to: :permit_type, prefix: true
-  delegate :code, :name, to: :activity, prefix: true
   delegate :published_template_version, to: :template_version
 
   before_validation :assign_unique_number, on: :create
@@ -178,10 +173,6 @@ class PermitApplication < ApplicationRecord
       .distinct
   end
 
-  # Returns collaborations visible to the provided user.
-  # - If user is nil or the submitter, returns all collaborations.
-  # - If user is a collaborator, returns only their collaborations.
-  # Uses in-memory filtering when preloaded; falls back to a single SQL join otherwise.
   def permit_collaborations(user = nil)
     base = association(:permit_collaborations).reader
 
@@ -194,7 +185,6 @@ class PermitApplication < ApplicationRecord
     end
   end
 
-  # Helper method to get the latest SubmissionVersion
   def latest_submission_version
     submission_versions.order(created_at: :desc).first
   end
@@ -203,7 +193,6 @@ class PermitApplication < ApplicationRecord
     submission_versions.order(created_at: :desc).last
   end
 
-  # Method to get all revision requests from the latest SubmissionVersion
   def revision_requests
     latest_submission_version&.revision_requests || RevisionRequest.none
   end
@@ -219,7 +208,6 @@ class PermitApplication < ApplicationRecord
 
   def force_update_published_template_version
     return unless Rails.env.development?
-    # for development purposes only
 
     current_published_template_version.update(
       form_json:
@@ -248,7 +236,7 @@ class PermitApplication < ApplicationRecord
       number: number,
       nickname: nickname,
       full_address: full_address,
-      permit_classifications: formatted_permit_classifications,
+      template_tags: template_tag_list&.join(", "),
       submitter: "#{submitter.name} #{submitter.email}",
       submitted_at: submitted_at,
       resubmitted_at: resubmitted_at,
@@ -341,32 +329,12 @@ class PermitApplication < ApplicationRecord
     user_can_edit_block?(user_id: user_id, requirement_block_id: block_id)
   end
 
-  def formatted_permit_classifications
-    "#{activity.name} - #{permit_type.name}"
-  end
-
   def using_current_template_version
     TemplateVersion.cached_published_ids.include?(template_version_id)
   end
 
   def current_published_template_version
-    # this will eventually be different, if there is a new version it should notify the user
-    LiveRequirementTemplate.published_requirement_template_version(
-      activity,
-      permit_type,
-      first_nations
-    )
-  end
-
-  def latest_possibly_unpublished_template_version
-    LiveRequirementTemplate
-      .find_by(
-        activity: activity,
-        permit_type: permit_type,
-        first_nations: first_nations
-      )
-      &.template_versions
-      &.last
+    requirement_template&.published_template_version
   end
 
   def form_customizations
@@ -432,12 +400,7 @@ class PermitApplication < ApplicationRecord
   def set_template_version
     return unless template_version.blank?
 
-    self.template_version =
-      if sandbox.present? && sandbox.scheduled?
-        latest_possibly_unpublished_template_version
-      else
-        current_published_template_version
-      end
+    self.template_version = current_published_template_version
   end
 
   def populate_base_form_data
@@ -479,19 +442,21 @@ class PermitApplication < ApplicationRecord
     resubmitted_at&.strftime("%Y-%m-%d")
   end
 
-  def permit_type_and_activity
-    "#{activity.name} - #{permit_type.name}".strip
-  end
+  def confirmed_submission_contacts
+    customization =
+      jurisdiction&.jurisdiction_template_version_customizations&.find_by(
+        template_version: template_version,
+        sandbox_id: sandbox_id
+      )
 
-  def confirmed_permit_type_submission_contacts
-    jurisdiction
-      .permit_type_submission_contacts
-      .where(permit_type: permit_type)
-      .where.not(confirmed_at: nil)
+    if customization&.submission_contact&.confirmed?
+      [customization.submission_contact]
+    else
+      jurisdiction.submission_contacts.confirmed.default_contact
+    end
   end
 
   def send_submit_notifications
-    # All submission related emails and in-app notifications are handled by this method
     NotificationService.publish_application_submission_event(self)
   end
 
@@ -554,7 +519,6 @@ class PermitApplication < ApplicationRecord
   def resubmitted_at
     return nil if submission_versions.length <= 1
     return latest_submission_version.created_at
-    #
   end
 
   def submit_event_notification_data
@@ -620,7 +584,7 @@ class PermitApplication < ApplicationRecord
   end
 
   def step_code_requirements
-    jurisdiction&.permit_type_required_steps&.where(permit_type_id:)
+    jurisdiction&.jurisdiction_step_requirements
   end
 
   def energy_step_code_requirement_block_id
@@ -640,7 +604,9 @@ class PermitApplication < ApplicationRecord
   end
 
   def energy_step_code_required?
-    custom_requirements = step_code_requirements.customizations
+    custom_requirements = step_code_requirements&.customizations
+
+    return true if custom_requirements.blank?
 
     custom_requirements.empty? ||
       custom_requirements.any? do |r|
@@ -649,7 +615,6 @@ class PermitApplication < ApplicationRecord
   end
 
   def self.stats_by_template_jurisdiction_and_status
-    # Subquery to get the earliest submission_version.created_at per permit_application
     sv_min =
       SubmissionVersion.select(
         "permit_application_id, MIN(created_at) AS min_submission_created_at"
@@ -660,7 +625,6 @@ class PermitApplication < ApplicationRecord
         "permit_application_id, MAX(created_at) AS max_submission_created_at"
       ).group(:permit_application_id)
 
-    # Main aggregation query
     aggregates =
       PermitApplication
         .joins(template_version: :requirement_template)
@@ -705,20 +669,16 @@ class PermitApplication < ApplicationRecord
               ) AS average_time_spent_before_latest_submit"
         )
 
-    # Preload requirement templates with associated permit_type and activity
-    requirement_templates =
-      RequirementTemplate.includes(:permit_type, :activity).index_by(&:id)
+    requirement_templates = RequirementTemplate.all.index_by(&:id)
 
-    # Transform the aggregated data into the desired format
     aggregates.map do |aggregate|
       requirement_template =
         requirement_templates[aggregate.requirement_template_id]
       {
         jurisdiction_name:
           aggregate.jurisdiction_name || "Unknown Jurisdiction",
-        permit_type: requirement_template.permit_type.name,
-        activity: requirement_template.activity.name,
-        first_nations: requirement_template.first_nations,
+        template_nickname: requirement_template&.nickname,
+        tags: requirement_template&.tag_list || [],
         draft_applications: aggregate.draft_count.to_i,
         submitted_applications: aggregate.submitted_count.to_i,
         average_time_spent_before_first_submit:
@@ -741,7 +701,7 @@ class PermitApplication < ApplicationRecord
   end
 
   def search_document_id
-    self.id # Ensures Searchkick uses the PermitApplication's own ID
+    self.id
   end
 
   def short_address
@@ -777,9 +737,7 @@ class PermitApplication < ApplicationRecord
   end
 
   def assign_default_nickname
-    if nickname.blank? # Only attempt to default if nickname is not already provided
-      self.nickname = requirement_template.nickname
-    end
+    self.nickname = requirement_template.nickname if nickname.blank?
   end
 
   def assign_unique_number
@@ -797,27 +755,11 @@ class PermitApplication < ApplicationRecord
             .pluck(:number)
             .first
 
-        # Notice that the last number comes from the specific jurisdiction
-
         loop do
           if last_number
             number_parts = last_number.split("-")
-            new_integer = number_parts[1..-1].join.to_i + 1 # Increment the sequence
+            new_integer = number_parts[1..-1].join.to_i + 1
 
-            # the remainder of dividing any number by 1000 always gives the last 3 digits
-            # Removing the last 3 digits (integer division by 1000), then taking the remainder above gives the middle 3
-            # Removing the last 6 digits (division), then taking the remainder as above gives the first 3 digits
-
-            # irb(main):008> 123456789 / 1_000
-            # => 123456
-            # irb(main):010> 123456 % 1000
-            # => 456
-            # irb(main):009> 123456789 / 1_000_000
-            # => 123
-            # irb(main):013> 123 % 1000
-            # => 123
-
-            # %03d pads with 0s
             new_number =
               format(
                 "%s-%03d-%03d-%03d",
@@ -827,7 +769,6 @@ class PermitApplication < ApplicationRecord
                 new_integer % 1000
               )
           else
-            # Start with the initial number if there are no previous numbers
             new_number = format("%s-001-000-000", number_prefix)
           end
 
@@ -841,7 +782,6 @@ class PermitApplication < ApplicationRecord
         new_number
       end
 
-    # Assign the new number to the permit application
     self.number = new_number if self.number.blank?
     return new_number
   end
@@ -912,29 +852,13 @@ class PermitApplication < ApplicationRecord
     return if sandbox.present?
     return unless jurisdiction
 
-    matching_confirmed_contacts =
-      PermitTypeSubmissionContact
-        .where(jurisdiction: jurisdiction, permit_type: permit_type)
-        .where.not(confirmed_at: nil)
+    matching_confirmed_contacts = jurisdiction.submission_contacts.confirmed
 
     if matching_confirmed_contacts.empty?
       errors.add(
         :jurisdiction_id,
         I18n.t(
           "activerecord.errors.models.permit_application.attributes.jurisdiction.no_contact"
-        )
-      )
-    end
-  end
-
-  def template_version_of_live_template
-    return unless template_version.present?
-
-    unless template_version.live?
-      errors.add(
-        :template_version,
-        I18n.t(
-          "activerecord.errors.models.permit_application.attributes.template_version.must_be_live"
         )
       )
     end

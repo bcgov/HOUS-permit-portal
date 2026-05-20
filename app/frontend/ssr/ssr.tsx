@@ -5,12 +5,12 @@ import { Part3PDFContent } from "../components/domains/step-code/part-3/checklis
 import { Part9PDFContent } from "../components/domains/step-code/part-9/checklist/pdf-content"
 import { PDFContent as PermitApplicationPDFContent } from "../components/shared/permit-applications/pdf-content"
 import "../i18n/i18n"
-import { EPermitClassificationCode, EStepCodeType } from "../types/enums"
+import { EStepCodeType } from "../types/enums"
 import { combineCustomizations } from "../utils/formio-component-traversal"
 
 const ChecklistComponentMap = {
-  [EPermitClassificationCode.lowResidential]: Part9PDFContent,
-  [EPermitClassificationCode.mediumResidential]: Part3PDFContent,
+  [EStepCodeType.part9StepCode]: Part9PDFContent,
+  [EStepCodeType.part3StepCode]: Part3PDFContent,
 }
 
 const main = async () => {
@@ -60,20 +60,15 @@ const main = async () => {
     }
 
     if (stepCodeChecklistPDFPath) {
-      const permitTypeCode =
-        pdfData.permitApplication?.permitType?.code ||
-        pdfData?.meta?.permitTypeCode ||
-        (pdfData?.checklist?.stepCodeType === EStepCodeType.part9StepCode
-          ? EPermitClassificationCode.lowResidential
-          : EPermitClassificationCode.mediumResidential)
-      const ChecklistComponent = ChecklistComponentMap[permitTypeCode]
+      const stepCodeType = pdfData?.checklist?.stepCodeType ?? EStepCodeType.part9StepCode
+      const ChecklistComponent = ChecklistComponentMap[stepCodeType]
 
       if (!pdfData.checklist) {
         throw new Error("Checklist PDF generation failed: `checklist` data not provided in JSON input.")
       }
       if (!ChecklistComponent) {
         throw new Error(
-          `Checklist PDF generation failed: No checklist component found for permit type code '${permitTypeCode}'.`
+          `Checklist PDF generation failed: No checklist component found for step code type '${stepCodeType}'.`
         )
       }
 

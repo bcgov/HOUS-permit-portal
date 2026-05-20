@@ -98,7 +98,7 @@ export const TemplateAccessSidebar = observer(function TemplateAccessSidebar({
             <Text fontSize="sm" color="text.secondary" fontWeight="normal">
               {t("requirementTemplate.access.subtitle", "Control which jurisdictions can use this permit template:")}
               <br />
-              {requirementTemplate.permitType?.name} / {requirementTemplate.activity?.name}
+              {requirementTemplate.displayLabel}
             </Text>
           </VStack>
         </DrawerHeader>

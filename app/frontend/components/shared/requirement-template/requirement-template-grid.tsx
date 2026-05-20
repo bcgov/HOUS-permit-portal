@@ -1,4 +1,4 @@
-import { Box, Flex, GridItem, Text, VStack } from "@chakra-ui/react"
+import { Box, Flex, GridItem, HStack, Tag, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -14,7 +14,6 @@ import { SearchGrid } from "../grid/search-grid"
 import { SearchGridItem } from "../grid/search-grid-item"
 import { SortIcon } from "../sort-icon"
 import { VersionTag } from "../version-tag"
-import { YesNoTag } from "../yes-no-tag"
 
 interface RequirementTemplateGridProps {
   renderActions: (rt: any) => React.ReactNode // Replace 'any' with your actual type
@@ -37,30 +36,36 @@ export const RequirementTemplateGrid: React.FC<RequirementTemplateGridProps> = o
 
   return (
     <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
-      <SearchGrid templateColumns="1.5fr 1fr 0.8fr 2fr 1fr 1fr 1fr">
+      <SearchGrid templateColumns="1.5fr 1.5fr 2fr 1.5fr 1.5fr 1fr 1fr">
         <GridHeaders />
 
         {isSearching ? (
-          <Flex py={50} gridColumn={"span 6"} width="100%" justifyContent="center">
+          <Flex py={50} gridColumn={"1 / -1"} width="100%" justifyContent="center">
             <SharedSpinner />
           </Flex>
         ) : (
           tableRequirementTemplates.map((rt) => (
             <Box key={rt.id} className={"requirements-template-grid-row"} role={"row"} display={"contents"}>
-              <SearchGridItem fontWeight="bold">
-                <Text noOfLines={2} title={rt.permitType.name}>
-                  {rt.permitType.name}
-                </Text>
-              </SearchGridItem>
-              <SearchGridItem fontWeight="bold">{rt.activity.name}</SearchGridItem>
+              <SearchGridItem fontWeight="bold">{rt.nickname}</SearchGridItem>
               <SearchGridItem>
-                <YesNoTag boolean={rt.firstNations} />
+                <HStack as="ul" wrap="wrap" spacing={1} gap={1}>
+                  {(rt.tags ?? []).map((tag) => (
+                    <Tag key={tag} as="li" bg="greys.grey03" color="text.secondary" fontSize="xs">
+                      {tag}
+                    </Tag>
+                  ))}
+                </HStack>
               </SearchGridItem>
               <SearchGridItem>{rt.description}</SearchGridItem>
               <SearchGridItem>
                 {rt.publishedTemplateVersion?.versionDate ? (
                   <VersionTag versionDate={rt.publishedTemplateVersion.versionDate} />
                 ) : null}
+              </SearchGridItem>
+              <SearchGridItem>
+                {rt.draftTemplateVersion?.versionDate && (
+                  <VersionTag versionDate={rt.draftTemplateVersion.versionDate} />
+                )}
               </SearchGridItem>
               <SearchGridItem>{rt.availableIn}</SearchGridItem>
               <SearchGridItem>{renderActions(rt)}</SearchGridItem>
@@ -99,7 +104,7 @@ const GridHeaders = observer(function GridHeaders() {
       <Box display={"contents"} role={"row"}>
         <GridItem
           as={Flex}
-          gridColumn={"span 7"}
+          gridColumn={"1 / -1"}
           p={6}
           bg={"greys.grey10"}
           justifyContent={"space-between"}
@@ -111,21 +116,30 @@ const GridHeaders = observer(function GridHeaders() {
       </Box>
       <Box display={"contents"} role={"row"}>
         {Object.values(ERequirementTemplateSortFields).map((field) => (
-          <GridHeader key={field} role={"columnheader"}>
-            <Flex
-              w={"full"}
-              as={"button"}
-              justifyContent={"space-between"}
-              cursor="pointer"
-              onClick={() => toggleSort(field)}
-              borderRight={"1px solid"}
-              borderColor={"border.light"}
-              px={4}
-            >
-              <Text>{getSortColumnHeader(field)}</Text>
-              <SortIcon<ERequirementTemplateSortFields> field={field} currentSort={sort} />
-            </Flex>
-          </GridHeader>
+          <React.Fragment key={field}>
+            <GridHeader role={"columnheader"}>
+              <Flex
+                w={"full"}
+                as={"button"}
+                justifyContent={"space-between"}
+                cursor="pointer"
+                onClick={() => toggleSort(field)}
+                borderRight={"1px solid"}
+                borderColor={"border.light"}
+                px={4}
+              >
+                <Text>{getSortColumnHeader(field)}</Text>
+                <SortIcon<ERequirementTemplateSortFields> field={field} currentSort={sort} />
+              </Flex>
+            </GridHeader>
+            {field === ERequirementTemplateSortFields.currentVersion && (
+              <GridHeader role={"columnheader"}>
+                <Flex w={"full"} borderRight={"1px solid"} borderColor={"border.light"} px={4}>
+                  <Text>{t("requirementTemplate.status.draft")}</Text>
+                </Flex>
+              </GridHeader>
+            )}
+          </React.Fragment>
         ))}
         <GridHeader role={"columnheader"} />
       </Box>

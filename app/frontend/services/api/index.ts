@@ -2,7 +2,6 @@ import { ApiResponse, ApisauceInstance, create, Monitor } from "apisauce"
 import { IRevisionRequestForm } from "../../components/domains/permit-application/revision-sidebar"
 import { IJurisdictionTemplateVersionCustomizationForm } from "../../components/domains/requirement-template/screens/jurisdiction-edit-digital-permit-screen"
 import { TContactFormData } from "../../components/shared/contact/create-edit-contact-modal"
-import { IEarlyAccessPreview } from "../../models/early-access-preview"
 import { IExternalApiKey } from "../../models/external-api-key"
 import { IHelpVideo } from "../../models/help-video"
 import { IHelpVideoSection } from "../../models/help-video-section"
@@ -15,20 +14,19 @@ import { IPart3StepCodeChecklist } from "../../models/part-3-step-code-checklist
 import { IPart9StepCode } from "../../models/part-9-step-code"
 import { IPart9StepCodeChecklist } from "../../models/part-9-step-code-checklist"
 import { IPermitApplication } from "../../models/permit-application"
-import { IActivity, IPermitType } from "../../models/permit-classification"
 import { IPermitCollaboration } from "../../models/permit-collaboration"
 import { IPermitProject } from "../../models/permit-project"
 import { IPreCheck } from "../../models/pre-check"
 import { IProjectAudit } from "../../models/project-audit"
 import { IRequirementTemplate } from "../../models/requirement-template"
 import { ITemplateVersion } from "../../models/template-version"
+import { ITemplateVersionPreview } from "../../models/template-version-preview"
 import { IUser } from "../../models/user"
 import { ISiteConfigurationStore } from "../../stores/site-configuration-store"
 import { IStepCode } from "../../stores/step-code-store"
 import {
   IExternalApiKeyParams,
   IIntegrationMappingUpdateParams,
-  IInvitePreviewersParams,
   IPermitProjectUpdateParams,
   IRequirementBlockParams,
   IRequirementTemplateUpdateParams,
@@ -50,12 +48,10 @@ import {
 import {
   ECollaborationType,
   ECollaboratorType,
-  EEarlyAccessRequirementTemplateSortFields,
   EJurisdictionSortFields,
   EPermitApplicationInboxSortFields,
   EPermitApplicationSortFields,
   EPermitBlockStatus,
-  EPermitClassificationType,
   EPermitProjectSortFields,
   EPreCheckSortFields,
   EProjectAuditSortFields,
@@ -84,6 +80,17 @@ import {
 } from "../../types/types"
 import { camelizeResponse, decamelizeRequest } from "../../utils"
 import { getCsrfToken } from "../../utils/utility-functions"
+
+interface ITemplateVersionFeedback {
+  id: string
+  sentiment: string
+  body: string
+  resolved: boolean
+  createdAt: Date
+  updatedAt: Date
+  user?: IUser
+  resolvedBy?: IUser | null
+}
 
 export class Api {
   client: ApisauceInstance
@@ -231,64 +238,6 @@ export class Api {
     })
   }
 
-  async fetchPermitClassifications(onlyEnabled: boolean = true) {
-    return this.client.get<IOptionResponse<IContact>>(`/permit_classifications`, { onlyEnabled })
-  }
-
-  async createPermitClassification(permitClassification: {
-    name: string
-    code: string
-    description?: string
-    enabled?: boolean
-    type: EPermitClassificationType
-    category?: string | null
-  }) {
-    return this.client.post(`/permit_classifications`, { permitClassification })
-  }
-
-  async updatePermitClassification(
-    id: string,
-    permitClassification: Partial<{
-      name: string
-      code: string
-      description?: string
-      enabled?: boolean
-      type: EPermitClassificationType
-      category?: string | null
-    }>
-  ) {
-    return this.client.put(`/permit_classifications/${id}`, { permitClassification })
-  }
-
-  async destroyPermitClassification(id: string) {
-    return this.client.delete(`/permit_classifications/${id}`)
-  }
-
-  async fetchPermitClassificationOptions(
-    type,
-    published = false,
-    firstNations = false,
-    permitTypeId: string = null,
-    activityId: string = null,
-    pid: string = null,
-    jurisdictionId: string = null,
-    hideDisabled = false
-  ) {
-    return this.client.post<IOptionResponse<IPermitType | IActivity>>(
-      `/permit_classifications/permit_classification_options`,
-      {
-        type,
-        published,
-        firstNations,
-        permitTypeId,
-        activityId,
-        pid,
-        jurisdictionId,
-        hideDisabled,
-      }
-    )
-  }
-
   async createJurisdiction(params) {
     return this.client.post<ApiResponse<IJurisdiction>>("/jurisdictions", { jurisdiction: params })
   }
@@ -376,6 +325,16 @@ export class Api {
     return this.client.post<ApiResponse<IPermitProject>>("/permit_projects", { permitProject: projectData })
   }
 
+  async createQaFullPermitProject(params: { jurisdictionId: string; title?: string }) {
+    return this.client.post<ApiResponse<IPermitProject>>("/qa_tools/permit_projects/full", {
+      qaFullPermitProject: params,
+    })
+  }
+
+  async autofillQaPermitApplication(id: string) {
+    return this.client.post<ApiResponse<IPermitApplication>>(`/qa_tools/permit_applications/${id}/autofill`)
+  }
+
   async updatePermitProject(id: string, params: IPermitProjectUpdateParams) {
     return this.client.patch<ApiResponse<IPermitProject>>(`/permit_projects/${id}`, { permitProject: params })
   }
@@ -450,7 +409,7 @@ export class Api {
 
   async createProjectPermitApplications(
     permitProjectId: string,
-    params: Array<{ activityId: string; permitTypeId: string; firstNations: boolean }>
+    params: Array<{ templateVersionId: string; jurisdictionId?: string }>
   ) {
     return this.client.post<ApiResponse<IPermitApplication[]>>(
       `/permit_projects/${permitProjectId}/permit_applications`,
@@ -637,9 +596,7 @@ export class Api {
     return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/revision_requests/finalize`)
   }
 
-  async fetchRequirementTemplates(
-    params?: TSearchParams<ERequirementTemplateSortFields | EEarlyAccessRequirementTemplateSortFields>
-  ) {
+  async fetchRequirementTemplates(params?: TSearchParams<ERequirementTemplateSortFields>) {
     return this.client.post<IRequirementTemplateResponse>(`/requirement_templates/search`, params)
   }
 
@@ -652,8 +609,9 @@ export class Api {
   }
 
   async createRequirementTemplate(params: TCreateRequirementTemplateFormData) {
+    const requirementTemplateParams = { ...params, tagList: params.tags }
     return this.client.post<ApiResponse<IRequirementTemplate>>(`/requirement_templates`, {
-      requirementTemplate: params,
+      requirementTemplate: requirementTemplateParams,
     })
   }
 
@@ -671,28 +629,11 @@ export class Api {
   }
 
   async updateRequirementTemplate(templateId: string, params: IRequirementTemplateUpdateParams) {
+    const { tags, ...rest } = params
+    const requirementTemplateParams = tags ? { ...rest, tagList: tags } : rest
     return this.client.put<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${templateId}`, {
-      requirementTemplate: params,
+      requirementTemplate: requirementTemplateParams,
     })
-  }
-
-  async invitePreviewers(templateId: string, params: IInvitePreviewersParams) {
-    return this.client.post<ApiResponse<IRequirementTemplate>>(
-      `/requirement_templates/${templateId}/invite_previewers`,
-      params
-    )
-  }
-
-  async revokeEarlyAccess(previewId: string) {
-    return this.client.post<ApiResponse<IEarlyAccessPreview>>(`/early_access_previews/${previewId}/revoke_access`)
-  }
-
-  async unrevokeEarlyAccess(previewId: string) {
-    return this.client.post<ApiResponse<IEarlyAccessPreview>>(`/early_access_previews/${previewId}/unrevoke_access`)
-  }
-
-  async extendEarlyAccess(previewId: string) {
-    return this.client.post<ApiResponse<IEarlyAccessPreview>>(`/early_access_previews/${previewId}/extend_access`)
   }
 
   // we send the versionDate as string instead of date as we want to strip off timezone info
@@ -706,17 +647,25 @@ export class Api {
       versionDate: string
     }
   ) {
+    const { tags, ...rest } = requirementTemplate ?? {}
+    const requirementTemplateParams = requirementTemplate
+      ? tags
+        ? { ...rest, tagList: tags }
+        : rest
+      : requirementTemplate
     return this.client.post<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${templateId}/schedule`, {
-      requirementTemplate,
+      requirementTemplate: requirementTemplateParams,
       versionDate,
     })
   }
 
   async forcePublishRequirementTemplate(templateId: string, requirementTemplate: IRequirementTemplateUpdateParams) {
+    const { tags, ...rest } = requirementTemplate
+    const requirementTemplateParams = tags ? { ...rest, tagList: tags } : rest
     return this.client.post<ApiResponse<IRequirementTemplate>>(
       `/requirement_templates/${templateId}/force_publish_now`,
       {
-        requirementTemplate,
+        requirementTemplate: requirementTemplateParams,
       }
     )
   }
@@ -754,19 +703,10 @@ export class Api {
     return this.client.patch<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${id}/restore`)
   }
 
-  async fetchTemplateVersions(
-    activityId?: string,
-    status?: ETemplateVersionStatus,
-    earlyAccess?: boolean,
-    isPublic?: boolean,
-    permitTypeId?: string
-  ) {
+  async fetchTemplateVersions(status?: ETemplateVersionStatus, isPubliclyPreviewable?: boolean) {
     return this.client.get<ApiResponse<ITemplateVersion[]>>(`/template_versions`, {
-      activityId,
       status,
-      earlyAccess,
-      public: isPublic,
-      permitTypeId,
+      publiclyPreviewable: isPubliclyPreviewable,
     })
   }
 
@@ -821,6 +761,114 @@ export class Api {
   async unscheduleTemplateVersion(templateId: string) {
     return this.client.post<ApiResponse<ITemplateVersion>>(
       `requirement_templates/template_versions/${templateId}/unschedule`
+    )
+  }
+
+  // ── Draft workflow API methods ──────────────────────────────────────
+
+  async createDraft(templateId: string, params?: { assigneeId?: string }) {
+    return this.client.post<ApiResponse<IRequirementTemplate>>(
+      `/requirement_templates/${templateId}/create_draft`,
+      params
+    )
+  }
+
+  async discardDraft(templateId: string) {
+    return this.client.delete<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${templateId}/discard_draft`)
+  }
+
+  async promoteDraft(
+    templateId: string,
+    params: {
+      versionDate?: string
+      changeNotes?: string
+      changeSignificance?: string
+      notificationScope?: string
+      notifiedJurisdictionIds?: string[]
+      promoteBlockIds?: string[]
+      sendAdvanceNotice?: boolean
+      skipDateCheck?: boolean
+    }
+  ) {
+    return this.client.post<ApiResponse<IRequirementTemplate>>(
+      `/requirement_templates/${templateId}/promote_draft`,
+      params
+    )
+  }
+
+  async updateDraftBlock(templateVersionId: string, blockId: string, blockData: Record<string, unknown>) {
+    return this.client.patch<ApiResponse<ITemplateVersion>>(
+      `/template_versions/${templateVersionId}/update_draft_block`,
+      { blockId, blockData }
+    )
+  }
+
+  async refreshDraft(templateVersionId: string) {
+    return this.client.post<ApiResponse<ITemplateVersion>>(`/template_versions/${templateVersionId}/refresh_draft`)
+  }
+
+  async shareDraft(templateVersionId: string) {
+    return this.client.post<ApiResponse<ITemplateVersion>>(`/template_versions/${templateVersionId}/share_draft`)
+  }
+
+  async inviteDraftPreviewers(templateVersionId: string, emails: string[]) {
+    return this.client.post<ApiResponse<ITemplateVersion>>(
+      `/template_versions/${templateVersionId}/invite_draft_previewers`,
+      { emails }
+    )
+  }
+
+  async revokeTemplateVersionPreview(previewId: string) {
+    return this.client.post<ApiResponse<ITemplateVersionPreview>>(
+      `/template_version_previews/${previewId}/revoke_access`
+    )
+  }
+
+  async unrevokeTemplateVersionPreview(previewId: string) {
+    return this.client.post<ApiResponse<ITemplateVersionPreview>>(
+      `/template_version_previews/${previewId}/unrevoke_access`
+    )
+  }
+
+  async extendTemplateVersionPreview(previewId: string) {
+    return this.client.post<ApiResponse<ITemplateVersionPreview>>(
+      `/template_version_previews/${previewId}/extend_access`
+    )
+  }
+
+  async togglePubliclyPreviewable(templateVersionId: string, publiclyPreviewable: boolean) {
+    return this.client.patch<ApiResponse<ITemplateVersion>>(
+      `/template_versions/${templateVersionId}/toggle_publicly_previewable`,
+      { publiclyPreviewable }
+    )
+  }
+
+  async fetchPubliclyPreviewableTemplateVersions() {
+    return this.client.get<ApiResponse<ITemplateVersion[]>>(`/template_versions/publicly_previewable`)
+  }
+
+  // ── Draft feedback API methods ──────────────────────────────────────
+
+  async fetchDraftFeedbacks(templateVersionId: string) {
+    return this.client.get<ApiResponse<ITemplateVersionFeedback[]>>(`/template_versions/${templateVersionId}/feedbacks`)
+  }
+
+  async createDraftFeedback(templateVersionId: string, params: { body: string; sentiment?: string }) {
+    return this.client.post<ApiResponse<ITemplateVersionFeedback>>(
+      `/template_versions/${templateVersionId}/feedbacks`,
+      params
+    )
+  }
+
+  async resolveDraftFeedback(templateVersionId: string, feedbackId: string) {
+    return this.client.post<ApiResponse<ITemplateVersionFeedback>>(
+      `/template_versions/${templateVersionId}/feedbacks/${feedbackId}/resolve`
+    )
+  }
+
+  async unresolveDraftFeedback(templateVersionId: string, feedbackId: string) {
+    return this.client.post<ApiResponse<ITemplateVersionFeedback>>(
+      `/template_versions/${templateVersionId}/feedbacks/${feedbackId}/unresolve`
     )
   }
 

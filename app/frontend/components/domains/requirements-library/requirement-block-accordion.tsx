@@ -19,7 +19,7 @@ import * as R from "ramda"
 import React, { useEffect, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
-import { EFileUploadAttachmentType, ERequirementType, EResourceCategory, EVisibility } from "../../../types/enums"
+import { EFileUploadAttachmentType, ERequirementType, EResourceCategory } from "../../../types/enums"
 import {
   IDenormalizedRequirement,
   IDenormalizedRequirementBlock,
@@ -31,10 +31,8 @@ import { DownloadLinkButton, ResourceItem } from "../../shared/base/resource-ite
 import { ConditionalTag } from "../../shared/conditional-tag"
 import { SafeTipTapDisplay } from "../../shared/editor/safe-tiptap-display"
 import { ElectiveTag } from "../../shared/elective-tag"
-import { FirstNationsTag } from "../../shared/first-nations-tag"
 import { ConfirmationModal } from "../../shared/modals/confirmation-modal"
 import { RichTextTip } from "../../shared/rich-text-tip"
-import { VisibilityTag } from "../../shared/visibility-tag.tsx"
 import { RequirementFieldDisplay } from "./requirement-field-display"
 import { RequirementsBlockModal } from "./requirements-block-modal"
 
@@ -159,11 +157,8 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
             </HStack>
 
             <HStack spacing={2}>
-              <VisibilityTag visibility={requirementBlock.visibility} />
-              <Box mr={2}>{requirementBlock.firstNations && <FirstNationsTag />}</Box>
               {isOpen && !renderEdit && (
                 <RequirementsBlockModal
-                  forEarlyAccess={requirementBlock.visibility === EVisibility.earlyAccess}
                   showEditWarning={showEditWarning}
                   isEditable={isEditable}
                   requirementBlock={requirementBlock}

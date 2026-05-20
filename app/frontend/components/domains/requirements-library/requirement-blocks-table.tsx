@@ -27,24 +27,21 @@ import { SearchGridItem } from "../../shared/grid/search-grid-item"
 import { HasAutomatedComplianceTag } from "../../shared/has-automated-compliance-tag"
 import { HasConditionalTag } from "../../shared/has-conditional-tag"
 import { HasDataValidationTag } from "../../shared/has-data-validation-tag"
-import { YesNoTag } from "../../shared/yes-no-tag"
 import { GridHeaders } from "./grid-header"
 import { RequirementsBlockModal } from "./requirements-block-modal"
 
 interface IProps extends Partial<StackProps> {
   renderActionButton?: (props: ButtonProps & { requirementBlock: IRequirementBlock }) => JSX.Element
-  forEarlyAccess?: boolean
 }
 
 const ROW_CLASS_NAME = "requirements-library-grid-row"
 
 export const RequirementBlocksTable = observer(function RequirementBlocksTable({
   renderActionButton,
-  forEarlyAccess,
   ...containerProps
 }: IProps) {
-  const { requirementBlockStore, earlyAccessRequirementBlockStore } = useMst()
-  const searchModel = forEarlyAccess ? earlyAccessRequirementBlockStore : requirementBlockStore
+  const { requirementBlockStore } = useMst()
+  const searchModel = requirementBlockStore
   const {
     tableRequirementBlocks,
     currentPage,
@@ -63,12 +60,12 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
     }
   }, [])
 
-  useSearch(searchModel as ISearch, [showArchived, requirementBlockStore.isEditingEarlyAccess])
+  useSearch(searchModel as ISearch, [showArchived])
 
   return (
     <VStack as={"article"} spacing={5} {...containerProps}>
-      <SearchGrid gridRowClassName={ROW_CLASS_NAME} templateColumns="repeat(7, 1fr)" pos={"relative"}>
-        <GridHeaders forEarlyAccess={forEarlyAccess} />
+      <SearchGrid gridRowClassName={ROW_CLASS_NAME} templateColumns="repeat(6, 1fr)" pos={"relative"}>
+        <GridHeaders />
 
         {isSearching ? (
           <Flex py={50} gridColumn={"span 6"}>
@@ -87,9 +84,6 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
                       {requirementBlock.description}
                     </Text>
                   </Flex>
-                </SearchGridItem>
-                <SearchGridItem fontWeight={700} minW="50px" maxW="70px">
-                  <YesNoTag boolean={requirementBlock.firstNations} />
                 </SearchGridItem>
                 <SearchGridItem maxW="150px" minW="120px">
                   <HStack as={"ul"} wrap={"wrap"} spacing={1}>
@@ -133,11 +127,7 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
                   {renderActionButton ? (
                     renderActionButton({ requirementBlock })
                   ) : (
-                    <RequirementsBlockModal
-                      withOptionsMenu
-                      requirementBlock={requirementBlock}
-                      forEarlyAccess={requirementBlock.isEarlyAccess}
-                    />
+                    <RequirementsBlockModal withOptionsMenu requirementBlock={requirementBlock} />
                   )}
                 </SearchGridItem>
               </Box>

@@ -1,10 +1,11 @@
 import { observer } from "mobx-react-lite"
 import React from "react"
-import { useController, useFormContext } from "react-hook-form"
+import { Controller, useController, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { IRequirementTemplate } from "../../../../../models/requirement-template"
-import { ERequirementTemplateType, ETemplateVersionStatus } from "../../../../../types/enums"
+import { useMst } from "../../../../../setup/root"
 import { EditableInputWithControls } from "../../../../shared/editable-input-with-controls"
+import { TagsSelect } from "../../../../shared/select/selectors/tags-select"
 import { BuilderHeader } from "./builder-header"
 import { IRequirementTemplateForm } from "./index"
 
@@ -14,7 +15,10 @@ interface IProps {
 
 export const EditableBuilderHeader = observer(function EditableBuilderHeader({ requirementTemplate }: IProps) {
   const { t } = useTranslation()
-  const { control, register, watch, setValue } = useFormContext<IRequirementTemplateForm>()
+  const {
+    requirementTemplateStore: { searchTagOptions },
+  } = useMst()
+  const { control, register } = useFormContext<IRequirementTemplateForm>()
   const {
     field: { value: description, onChange: onDescriptionChange },
   } = useController({ control, name: "description" })
@@ -23,38 +27,21 @@ export const EditableBuilderHeader = observer(function EditableBuilderHeader({ r
     field: { value: nickname, onChange: onNicknameChange },
   } = useController({ control, name: "nickname" })
 
-  const breadCrumbs = {
-    [ERequirementTemplateType.EarlyAccessRequirementTemplate]: [
-      {
-        href: "/early-access",
-        title: t("site.breadcrumb.earlyAccess"),
-      },
-      {
-        href: "/early-access/requirement-templates",
-        title: t("site.breadcrumb.requirementTemplates"),
-      },
-      {
-        href: `/requirement-templates/${requirementTemplate.id}/edit`,
-        title: t("site.breadcrumb.editTemplate"),
-      },
-    ],
-    [ERequirementTemplateType.LiveRequirementTemplate]: [
-      {
-        href: "/requirement-templates",
-        title: t("site.breadcrumb.requirementTemplates"),
-      },
-      {
-        href: `/requirement-templates/${requirementTemplate.id}/edit`,
-        title: t("site.breadcrumb.editTemplate"),
-      },
-    ],
-  }
+  const breadCrumbs = [
+    {
+      href: "/requirement-templates",
+      title: t("site.breadcrumb.requirementTemplates"),
+    },
+    {
+      href: `/requirement-templates/${requirementTemplate.id}/edit`,
+      title: t("site.breadcrumb.editTemplate"),
+    },
+  ]
 
   return (
     <BuilderHeader
-      breadCrumbs={breadCrumbs[requirementTemplate.type]}
+      breadCrumbs={breadCrumbs}
       requirementTemplate={requirementTemplate}
-      status={ETemplateVersionStatus.draft}
       renderHeading={() => (
         <EditableInputWithControls
           w="full"
@@ -101,7 +88,27 @@ export const EditableBuilderHeader = observer(function EditableBuilderHeader({ r
           onCancel={onDescriptionChange}
         />
       )}
+      renderTags={() => (
+        <Controller
+          name="tags"
+          control={control}
+          render={({ field: { onChange, value } }) => (
+            <TagsSelect
+              onChange={(options) => onChange(options.map((o) => o.value))}
+              fetchOptions={(query) => searchTagOptions(query)}
+              placeholder={t("requirementTemplate.fields.tags")}
+              selectedOptions={(value ?? []).map((tag) => ({ value: tag, label: tag }))}
+              styles={{
+                container: (css) => ({ ...css, minWidth: "20rem" }),
+                menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+              }}
+              menuPortalTarget={document.body}
+            />
+          )}
+        />
+      )}
       forEdit
+      showBackButton
     />
   )
 })

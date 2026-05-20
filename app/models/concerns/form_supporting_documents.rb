@@ -51,6 +51,8 @@ module FormSupportingDocuments
       submission_data,
       []
     ) do |file_field_key, file_array|
+      next [] unless file_array.is_a?(Array)
+
       file_array.map { |fa| fa["model_id"] || fa["modelId"] }
     end
   end

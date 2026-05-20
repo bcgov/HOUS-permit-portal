@@ -24,6 +24,5 @@ class PreCheckBlueprint < Blueprinter::Base
 
   association :creator, blueprint: UserBlueprint
   association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
-  association :permit_type, blueprint: PermitClassificationBlueprint
   association :design_documents, blueprint: DesignDocumentBlueprint
 end
