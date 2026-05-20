@@ -104,6 +104,7 @@ class Api::ProjectMeetingsController < Api::ApplicationController
       meeting_request_documents_attributes: [
         :id,
         :project_meeting_id,
+        :document_type,
         :_destroy,
         file: [:id, :storage, metadata: %i[size filename mime_type]]
       ]

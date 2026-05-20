@@ -185,6 +185,52 @@ RSpec.describe JurisdictionPolicy, type: :policy do
     end
   end
 
+  permissions :update_project_meetings_enabled? do
+    let(:user) { create(:user) }
+
+    it "permits super_admin" do
+      expect(policy_class).to permit(
+        UserContext.new(create(:user, :super_admin), sandbox),
+        jurisdiction
+      )
+    end
+
+    it "permits manager members" do
+      manager = create(:user, :review_manager, jurisdiction:)
+      expect(policy_class).to permit(
+        UserContext.new(manager, sandbox),
+        jurisdiction
+      )
+    end
+
+    it "permits technical_support members" do
+      tech = create(:user, role: :technical_support)
+      create(:jurisdiction_membership, user: tech, jurisdiction: jurisdiction)
+      tech.reload
+
+      expect(policy_class).to permit(
+        UserContext.new(tech, sandbox),
+        jurisdiction
+      )
+    end
+
+    it "denies reviewer members" do
+      reviewer = create(:user, :reviewer, jurisdiction:)
+      expect(policy_class).not_to permit(
+        UserContext.new(reviewer, sandbox),
+        jurisdiction
+      )
+    end
+
+    it "denies non-members" do
+      manager = create(:user, :review_manager)
+      expect(policy_class).not_to permit(
+        UserContext.new(manager, sandbox),
+        jurisdiction
+      )
+    end
+  end
+
   describe "Scope" do
     it "returns all" do
       relation = double("Relation", all: :all)

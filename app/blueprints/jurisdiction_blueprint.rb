@@ -51,6 +51,11 @@ class JurisdictionBlueprint < Blueprinter::Base
     field :submission_inbox_set_up do |jurisdiction, _options|
       jurisdiction.submission_inbox_set_up?
     end
+    field :project_meeting_notification_recipient_emails,
+          if: ->(_field_name, jurisdiction, options) do
+            options[:current_user]&.super_admin? ||
+              options[:current_user]&.jurisdictions&.include?(jurisdiction)
+          end
     association :contacts, blueprint: ContactBlueprint
     association :submission_contacts,
                 blueprint: SubmissionContactBlueprint,

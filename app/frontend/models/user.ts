@@ -209,4 +209,9 @@ export interface IPreference {
 
   enableInAppResourceReminderNotification: boolean
   enableEmailResourceReminderNotification: boolean
+
+  enableInAppProjectMeetingSubmittedNotification: boolean
+  enableEmailProjectMeetingSubmittedNotification: boolean
+  enableInAppProjectMeetingRequestReceivedNotification: boolean
+  enableEmailProjectMeetingRequestReceivedNotification: boolean
 }

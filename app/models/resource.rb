@@ -6,7 +6,8 @@ class Resource < ApplicationRecord
          planning_zoning: "planning_zoning",
          bylaws_requirements: "bylaws_requirements",
          gis_mapping: "gis_mapping",
-         additional_resources: "additional_resources"
+         additional_resources: "additional_resources",
+         project_meeting_authorization: "project_meeting_authorization"
        }
 
   enum resource_type: { file: "file", link: "link" }
@@ -22,6 +23,18 @@ class Resource < ApplicationRecord
 
   scope :by_category, ->(category) { where(category: category) }
 
+  def self.resource_reminder_notification_data(jurisdiction_id, resource_ids)
+    {
+      "id" => SecureRandom.uuid,
+      "action_type" => Constants::NotificationActionTypes::RESOURCE_REMINDER,
+      "action_text" => I18n.t("notification.resource.reminder"),
+      "object_data" => {
+        "jurisdiction_id" => jurisdiction_id,
+        "resource_ids" => resource_ids
+      }
+    }
+  end
+
   private
 
   def resource_document_must_exist_for_file_type
@@ -36,17 +49,5 @@ class Resource < ApplicationRecord
     end
 
     errors.add(:base, "Resource document must exist for file type resources")
-  end
-
-  def self.resource_reminder_notification_data(jurisdiction_id, resource_ids)
-    {
-      "id" => SecureRandom.uuid,
-      "action_type" => Constants::NotificationActionTypes::RESOURCE_REMINDER,
-      "action_text" => I18n.t("notification.resource.reminder"),
-      "object_data" => {
-        "jurisdiction_id" => jurisdiction_id,
-        "resource_ids" => resource_ids
-      }
-    }
   end
 end

@@ -35,11 +35,17 @@ export enum EProjectMeetingRequesterRelationship {
   other = "other",
 }
 
+export enum EMeetingRequestDocumentType {
+  supporting = "supporting",
+  authorization = "authorization",
+}
+
 export enum EResourceCategory {
   planningZoning = "planning_zoning",
   bylawsRequirements = "bylaws_requirements",
   gisMapping = "gis_mapping",
   additionalResources = "additional_resources",
+  projectMeetingAuthorization = "project_meeting_authorization",
 }
 
 export enum EResourceType {
@@ -455,6 +461,8 @@ export enum ENotificationActionType {
   preCheckCompleted = "pre_check_completed",
   fileUploadFailed = "file_upload_failed",
   resourceReminder = "resource_reminder",
+  projectMeetingSubmitted = "project_meeting_submitted",
+  projectMeetingRequestReceived = "project_meeting_request_received",
   projectReviewCollaborationAssignment = "project_review_collaboration_assignment",
   projectReviewCollaborationUnassignment = "project_review_collaboration_unassignment",
 }

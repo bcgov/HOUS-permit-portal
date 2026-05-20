@@ -9,6 +9,15 @@ RSpec.describe MeetingRequestDocument, type: :model do
 
   describe "validations" do
     it { should validate_presence_of(:project_meeting) }
+    it { should validate_presence_of(:document_type) }
+  end
+
+  describe "document types" do
+    it "defaults to supporting documents" do
+      document = described_class.new
+
+      expect(document.document_type).to eq("supporting")
+    end
   end
 
   describe "#attached_to" do

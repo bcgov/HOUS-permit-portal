@@ -35,6 +35,11 @@ class JurisdictionPolicy < ApplicationPolicy
       )
   end
 
+  def update_project_meetings_enabled?
+    user.super_admin? ||
+      ((user.manager? || user.technical_support?) && user.member_of?(record.id))
+  end
+
   def search_users?
     update?
   end

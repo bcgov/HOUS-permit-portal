@@ -10,6 +10,7 @@ import {
   IPermitBlockStatusReadyNotificationObjectData,
   IPermitCollaborationNotificationObjectData,
   IPermitNotificationObjectData,
+  IProjectMeetingNotificationObjectData,
   ITemplateVersionNotificationObjectData,
   IUserPushPayload,
 } from "../types/types"
@@ -201,6 +202,26 @@ export const NotificationStoreModel = types
           {
             text: t("ui.show"),
             href: `/jurisdictions/${jurisdictionId}/configuration-management/resources`,
+          },
+        ]
+      } else if (notification.actionType === ENotificationActionType.projectMeetingSubmitted) {
+        const projectMeetingData = notification.objectData as IProjectMeetingNotificationObjectData
+        return [
+          {
+            text: t("ui.show"),
+            href: `/projects/${projectMeetingData.permitProjectId}/meetings/${projectMeetingData.projectMeetingId}/sent`,
+          },
+        ]
+      } else if (notification.actionType === ENotificationActionType.projectMeetingRequestReceived) {
+        const projectMeetingData = notification.objectData as IProjectMeetingNotificationObjectData
+        if (!projectMeetingData.jurisdictionSlug) {
+          return []
+        }
+
+        return [
+          {
+            text: t("ui.show"),
+            href: `/jurisdictions/${projectMeetingData.jurisdictionSlug}/submission-inbox/projects/${projectMeetingData.permitProjectId}/overview`,
           },
         ]
       }

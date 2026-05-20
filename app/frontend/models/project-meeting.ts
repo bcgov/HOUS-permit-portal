@@ -1,6 +1,10 @@
 import { Instance, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
-import { EProjectMeetingRequesterRelationship, EProjectMeetingStatus } from "../types/enums"
+import {
+  EMeetingRequestDocumentType,
+  EProjectMeetingRequesterRelationship,
+  EProjectMeetingStatus,
+} from "../types/enums"
 import { IMeetingRequestDocument } from "../types/types"
 
 export const ProjectMeetingModel = types
@@ -28,13 +32,27 @@ export const ProjectMeetingModel = types
     get isSubmitted() {
       return self.status === EProjectMeetingStatus.submitted
     },
+    get authorizationRequired() {
+      return (
+        !!self.requesterRelationship &&
+        self.requesterRelationship !== EProjectMeetingRequesterRelationship.ownerOrLandholder
+      )
+    },
     get isReadyForSubmission() {
+      const requiresAuthorization =
+        !!self.requesterRelationship &&
+        self.requesterRelationship !== EProjectMeetingRequesterRelationship.ownerOrLandholder
+      const hasAuthorizationDocument = self.meetingRequestDocuments.some(
+        (document) => document.documentType === EMeetingRequestDocumentType.authorization
+      )
+
       return (
         !!self.requesterRelationship &&
         !!self.contactName &&
         !!self.contactEmail &&
         !!self.projectDescription &&
-        self.requestPropertyInformation !== null
+        self.requestPropertyInformation !== null &&
+        (!requiresAuthorization || hasAuthorizationDocument)
       )
     },
   }))

@@ -258,6 +258,28 @@ class PermitHubMailer < ApplicationMailer
     )
   end
 
+  def notify_project_meeting_submitted_to_jurisdiction(
+    project_meeting,
+    recipient_email
+  )
+    @project_meeting = project_meeting
+    @permit_project = project_meeting.permit_project
+    @jurisdiction = @permit_project.jurisdiction
+    @requester = project_meeting.requested_by
+    @project_overview_url =
+      FrontendUrlHelper.frontend_url(
+        "/jurisdictions/#{@jurisdiction.id}/submission-inbox/projects/#{@permit_project.id}/overview"
+      )
+
+    send_mail(
+      email: recipient_email,
+      template_key: "notify_project_meeting_submitted_to_jurisdiction",
+      subject_i18n_params: {
+        project_number: @permit_project.number
+      }
+    )
+  end
+
   def notify_new_template_version_published(
     template_version,
     user,

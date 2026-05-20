@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_05_19_182523) do
+ActiveRecord::Schema[7.2].define(version: 2026_05_19_235200) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -301,6 +301,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_19_182523) do
     t.string "website_url"
     t.boolean "hide_from_search", default: false, null: false
     t.boolean "project_meetings_enabled", default: false, null: false
+    t.jsonb "project_meeting_notification_recipient_emails", default: [], null: false
     t.index ["ltsa_matcher"], name: "index_jurisdictions_on_ltsa_matcher"
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"], name: "index_jurisdictions_on_regional_district_id"
@@ -330,10 +331,12 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_19_182523) do
 
   create_table "meeting_request_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "project_meeting_id", null: false
+    t.integer "document_type", default: 0, null: false
     t.text "file_data"
     t.string "scan_status", default: "pending", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["document_type"], name: "index_meeting_request_documents_on_document_type"
     t.index ["project_meeting_id"], name: "index_meeting_request_documents_on_project_meeting_id"
     t.index ["scan_status"], name: "index_meeting_request_documents_on_scan_status"
   end
@@ -694,6 +697,10 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_19_182523) do
     t.boolean "enable_email_unmapped_api_notification", default: true
     t.boolean "enable_in_app_resource_reminder_notification", default: true
     t.boolean "enable_email_resource_reminder_notification", default: true
+    t.boolean "enable_in_app_project_meeting_submitted_notification", default: true
+    t.boolean "enable_email_project_meeting_submitted_notification", default: true
+    t.boolean "enable_in_app_project_meeting_request_received_notification", default: true
+    t.boolean "enable_email_project_meeting_request_received_notification", default: true
     t.index ["user_id"], name: "index_preferences_on_user_id"
   end
 

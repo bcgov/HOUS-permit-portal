@@ -1,28 +1,35 @@
 import * as R from "ramda"
 import { useLocation, useNavigate } from "react-router-dom"
+import { useMst } from "../../../setup/root"
+import { EProjectMeetingRequesterRelationship } from "../../../types/enums"
 import { projectMeetingNavSections } from "./nav-sections"
 
 export const useProjectMeetingNavigation = () => {
   const navigate = useNavigate()
   const { pathname } = useLocation()
+  const { projectMeetingStore } = useMst()
+  const currentProjectMeeting = projectMeetingStore.currentProjectMeeting
+  const requesterIsOwner =
+    currentProjectMeeting?.requesterRelationship === EProjectMeetingRequesterRelationship.ownerOrLandholder
+  const visibleSections = projectMeetingNavSections.filter((section) => !section.nonOwnerOnly || !requesterIsOwner)
 
   const getCurrentSectionKey = () => {
     const currentSection = pathname.split("/").pop()
-    return projectMeetingNavSections.find((link) => link.location === currentSection)?.key
+    return visibleSections.find((link) => link.location === currentSection)?.key
   }
 
   const getNextSection = () => {
     const currentKey = getCurrentSectionKey()
-    const currentIndex = projectMeetingNavSections.findIndex((link) => link.key === currentKey)
-    if (currentIndex === -1 || currentIndex === projectMeetingNavSections.length - 1) return null
-    return projectMeetingNavSections[currentIndex + 1]
+    const currentIndex = visibleSections.findIndex((link) => link.key === currentKey)
+    if (currentIndex === -1 || currentIndex === visibleSections.length - 1) return null
+    return visibleSections[currentIndex + 1]
   }
 
   const getPreviousSection = () => {
     const currentKey = getCurrentSectionKey()
-    const currentIndex = projectMeetingNavSections.findIndex((link) => link.key === currentKey)
+    const currentIndex = visibleSections.findIndex((link) => link.key === currentKey)
     if (currentIndex <= 0) return null
-    return projectMeetingNavSections[currentIndex - 1]
+    return visibleSections[currentIndex - 1]
   }
 
   const navigateToNext = () => {
@@ -42,7 +49,7 @@ export const useProjectMeetingNavigation = () => {
   }
 
   const navigateToSection = (sectionKey: string) => {
-    const section = projectMeetingNavSections.find((link) => link.key === sectionKey)
+    const section = visibleSections.find((link) => link.key === sectionKey)
     if (section) {
       const baseUrl = R.pipe(R.split("/"), R.dropLast(1), R.join("/"))(pathname)
       navigate(`${baseUrl}/${section.location}`)
