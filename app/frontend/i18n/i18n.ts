@@ -1542,6 +1542,9 @@ Thank you,
             nameHeading: "Name your project",
             nameDescription:
               "Give your project a name so it’s easy to find later. The name is private to you and anyone you invite to collaborate. For example: “My new house”, “1st Avenue laneway home”, or “Smith residence addition.”",
+            sandboxJurisdictionMismatchTitle: "This address is outside your jurisdiction",
+            sandboxJurisdictionMismatchDescription:
+              "While training mode is turned on, you can only create projects within your own jurisdiction.",
             nameLabel: "Project name",
             descriptionLabel: "Description",
             fullAddressHeading: "Enter your project location",
