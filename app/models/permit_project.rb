@@ -128,11 +128,15 @@ class PermitProject < ApplicationRecord
   end
 
   def update_viewed_at
-    update(viewed_at: Time.current)
+    return if viewed_at.present?
+
+    update!(viewed_at: Time.current)
   end
 
   def mark_as_unviewed
-    update(viewed_at: nil)
+    return if viewed_at.blank?
+
+    update!(viewed_at: nil)
   end
 
   def broadcast_jurisdiction_projects_count_update
