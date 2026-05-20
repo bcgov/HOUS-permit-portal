@@ -349,16 +349,18 @@ class PermitApplication < ApplicationRecord
   end
 
   def update_viewed_at
-    return unless latest_submission_version.present?
+    version = latest_submission_version
+    return unless version.present?
 
-    latest_submission_version.update(viewed_at: Time.current)
+    version.reload.mark_read!
     reindex
   end
 
   def mark_as_unviewed
-    return unless latest_submission_version.present?
+    version = latest_submission_version
+    return unless version.present?
 
-    latest_submission_version.update(viewed_at: nil)
+    version.reload.clear_read!
     reindex
   end
 
