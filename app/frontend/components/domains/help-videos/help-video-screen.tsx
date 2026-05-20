@@ -58,7 +58,7 @@ export const HelpVideoScreen = observer(function HelpVideoScreen() {
         )}
         {currentHelpVideo.videoUrl && (
           <Box aspectRatio={16 / 9} w="100%" bg="black">
-            <Box as="video" controls width="100%" height="100%" display="block">
+            <Box as="video" crossOrigin="anonymous" controls width="100%" height="100%" display="block">
               <source src={currentHelpVideo.videoUrl} type="video/mp4" />
               {currentHelpVideo.captionUrl && (
                 <track
