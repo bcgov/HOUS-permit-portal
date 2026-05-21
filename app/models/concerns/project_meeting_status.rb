@@ -27,6 +27,8 @@ module ProjectMeetingStatus
     validate :confirmed_date_present, if: :scheduled?
     validate :only_one_active_meeting_request, if: :active?
 
+    scope :active, -> { where(status: statuses.values_at(*active_statuses)) }
+
     def self.active_statuses
       ProjectMeetingStatus::ACTIVE_STATUSES
     end

@@ -96,6 +96,7 @@ class PermitProjectBlueprint < Blueprinter::Base
                 blueprint: ProjectDocumentBlueprint do |permit_project, options|
       permit_project.project_documents(options[:current_user])
     end
+    association :active_project_meeting, blueprint: ProjectMeetingBlueprint
     association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
   end
 

@@ -40,6 +40,7 @@ export const ProjectMeetingStoreModel = types
       const response = yield* toGenerator(self.environment.api.createProjectMeeting(permitProjectId))
       if (response.ok) {
         self.mergeUpdate(response.data.data, "projectMeetingsMap")
+        yield* toGenerator(self.rootStore.permitProjectStore.fetchPermitProject(permitProjectId))
         self.setCurrentProjectMeeting(response.data.data.id)
         return response.data.data as IProjectMeeting
       }
@@ -66,6 +67,7 @@ export const ProjectMeetingStoreModel = types
       const response = yield* toGenerator(self.environment.api.submitProjectMeeting(permitProjectId, id, params))
       if (response.ok) {
         self.mergeUpdate(response.data.data, "projectMeetingsMap")
+        yield* toGenerator(self.rootStore.permitProjectStore.fetchPermitProject(permitProjectId))
         return { ok: true, data: response.data.data as IProjectMeeting }
       }
       return { ok: false, error: response.data?.errors || response.problem }

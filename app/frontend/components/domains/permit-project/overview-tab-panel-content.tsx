@@ -11,7 +11,7 @@ import {
   useDisclosure,
   VStack,
 } from "@chakra-ui/react"
-import { CaretRight, Info, Pencil, SquaresFour, Steps } from "@phosphor-icons/react"
+import { CaretRight, Clock, Info, Pencil, SquaresFour, Steps } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { FormProvider, useForm } from "react-hook-form"
@@ -52,6 +52,9 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
   const [isEditing, setIsEditing] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { isOpen: isMapFullscreen, onOpen: onOpenMapFullscreen, onClose: onCloseMapFullscreen } = useDisclosure()
+  const hasActiveProjectMeeting = !!permitProject.activeProjectMeeting
+  const projectMeetingsEnabled =
+    siteConfigurationStore.projectMeetingsEnabled && permitProject.jurisdiction?.projectMeetingsEnabled
 
   const formMethods = useForm<IProjectInfoForm>({
     defaultValues: {
@@ -65,10 +68,7 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
 
   const { handleSubmit, watch, setValue, reset } = formMethods
   const siteWatch = watch("site")
-  const canRequestProjectMeeting =
-    permitProject.isOwner &&
-    siteConfigurationStore.projectMeetingsEnabled &&
-    permitProject.jurisdiction?.projectMeetingsEnabled
+  const canRequestProjectMeeting = permitProject.isOwner && projectMeetingsEnabled && !hasActiveProjectMeeting
 
   const handleEditClick = () => {
     // Reset form to current values when entering edit mode
@@ -206,6 +206,41 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
                 >
                   {t("permitProject.overview.lookupStepCode")}
                 </RouterLinkButton>
+                {permitProject.isOwner && projectMeetingsEnabled && (
+                  <RouterLinkButton
+                    variant="link"
+                    to={`/projects/${permitProject.id}/meetings/new`}
+                    leftIcon={<Info size={24} />}
+                    disabled={hasActiveProjectMeeting}
+                  >
+                    {t("permitProject.meetings.requestWithJurisdiction", {
+                      jurisdictionName: jurisdiction?.disambiguatedName,
+                    })}
+                  </RouterLinkButton>
+                )}
+                {hasActiveProjectMeeting && (
+                  <Box borderWidth={1} borderColor="border.light" borderRadius="md" p={4} w="full">
+                    <HStack align="flex-start" spacing={3}>
+                      <Clock size={16} />
+                      <Box>
+                        <Text fontWeight="bold">{t("permitProject.meetings.requestedTitle")}</Text>
+                        <Text fontSize="sm" color="text.secondary">
+                          {t("permitProject.meetings.requestedDescription")}{" "}
+                          <RouterLinkButton
+                            variant="link"
+                            size="sm"
+                            h="auto"
+                            minW={0}
+                            p={0}
+                            to={`/projects/${permitProject.id}/meetings`}
+                          >
+                            {t("permitProject.meetings.viewRequests")}
+                          </RouterLinkButton>
+                        </Text>
+                      </Box>
+                    </HStack>
+                  </Box>
+                )}
               </VStack>
             )}
           </Box>
@@ -230,8 +265,12 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
             {t("permitProject.overview.recentPermits")}
           </Heading>
           <HStack spacing={3}>
-            {canRequestProjectMeeting && (
-              <RouterLinkButton variant="secondary" to={`/projects/${permitProject.id}/meetings/new`}>
+            {permitProject.isOwner && projectMeetingsEnabled && (
+              <RouterLinkButton
+                variant="secondary"
+                to={`/projects/${permitProject.id}/meetings/new`}
+                disabled={!canRequestProjectMeeting}
+              >
                 {t("permitProject.meetings.requestButton")}
               </RouterLinkButton>
             )}

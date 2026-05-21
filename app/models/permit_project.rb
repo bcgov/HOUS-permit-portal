@@ -115,6 +115,10 @@ class PermitProject < ApplicationRecord
       permit_applications.kept.where(status: :approved).count
   end
 
+  def active_project_meeting
+    project_meetings.active.order(created_at: :desc).first
+  end
+
   def days_in_queue
     seconds = queue_time_seconds || 0
     seconds +=

@@ -1,5 +1,5 @@
 import { Box, Container, Flex, IconButton, TabPanel, TabPanels, Tabs, Text } from "@chakra-ui/react"
-import { CaretLeft, ClipboardText, Folder, SquaresFour, TrendUp } from "@phosphor-icons/react"
+import { CalendarBlank, CaretLeft, ClipboardText, Folder, SquaresFour, TrendUp } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useTransition } from "react"
 import { useForm } from "react-hook-form"
@@ -13,6 +13,7 @@ import { EditableInputWithControls } from "../../shared/editable-input-with-cont
 import { RollupStatusBox } from "../../shared/permit-projects/rollup-status-box"
 import { ActivityTabPanelContent } from "./activity-tab-panel-content"
 import { LocalResourcesTabPanelContent } from "./local-resources-tab-panel-content"
+import { MeetingsTabPanelContent } from "./meetings-tab-panel-content"
 import { OverviewTabPanelContent } from "./overview-tab-panel-content"
 import { PermitsTabPanelContent } from "./permits-tab-panel-content"
 import { ITabItem, ProjectSidebarTabList } from "./project-sidebar-tab-list"
@@ -28,7 +29,8 @@ export const PermitProjectScreen = observer(() => {
     { label: t("permitProject.details.overview"), icon: SquaresFour, to: "overview", tabIndex: 0 },
     { label: t("permitProject.details.activity"), icon: TrendUp, to: "activity", tabIndex: 1 },
     { label: t("permitProject.details.permits"), icon: ClipboardText, to: "permits", tabIndex: 2 },
-    { label: t("permitProject.details.localResources"), icon: Folder, to: "local-resources", tabIndex: 3 },
+    { label: t("permitProject.details.meetings"), icon: CalendarBlank, to: "meetings", tabIndex: 3 },
+    { label: t("permitProject.details.localResources"), icon: Folder, to: "local-resources", tabIndex: 4 },
   ]
 
   const getDefaultValues = () => {
@@ -136,6 +138,7 @@ export const PermitProjectScreen = observer(() => {
           <TabPanel>
             {isPending ? <LoadingScreen /> : <PermitsTabPanelContent permitProject={currentPermitProject} />}
           </TabPanel>
+          <TabPanel>{isPending ? <LoadingScreen /> : <MeetingsTabPanelContent />}</TabPanel>
           <TabPanel>
             {isPending ? <LoadingScreen /> : <LocalResourcesTabPanelContent permitProject={currentPermitProject} />}
           </TabPanel>
