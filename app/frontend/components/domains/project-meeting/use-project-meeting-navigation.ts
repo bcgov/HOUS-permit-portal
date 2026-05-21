@@ -9,23 +9,38 @@ export const useProjectMeetingNavigation = () => {
   const { pathname } = useLocation()
   const { projectMeetingStore } = useMst()
   const currentProjectMeeting = projectMeetingStore.currentProjectMeeting
-  const requesterIsOwner =
+
+  const getRequesterIsOwner = () =>
     currentProjectMeeting?.requesterRelationship === EProjectMeetingRequesterRelationship.ownerOrLandholder
-  const visibleSections = projectMeetingNavSections.filter((section) => !section.nonOwnerOnly || !requesterIsOwner)
+
+  const getVisibleSections = () =>
+    projectMeetingNavSections.filter((section) => !section.nonOwnerOnly || !getRequesterIsOwner())
+
+  const getCurrentSectionLocation = () => {
+    const currentSection = pathname.split("/").pop()
+    if (getRequesterIsOwner() && currentSection === "authorization-documents") {
+      return "contact-details"
+    }
+    return currentSection
+  }
 
   const getCurrentSectionKey = () => {
-    const currentSection = pathname.split("/").pop()
+    const visibleSections = getVisibleSections()
+    const currentSection = getCurrentSectionLocation()
     return visibleSections.find((link) => link.location === currentSection)?.key
   }
 
   const getNextSection = () => {
+    const visibleSections = getVisibleSections()
     const currentKey = getCurrentSectionKey()
     const currentIndex = visibleSections.findIndex((link) => link.key === currentKey)
-    if (currentIndex === -1 || currentIndex === visibleSections.length - 1) return null
-    return visibleSections[currentIndex + 1]
+    const next =
+      currentIndex === -1 || currentIndex === visibleSections.length - 1 ? null : visibleSections[currentIndex + 1]
+    return next
   }
 
   const getPreviousSection = () => {
+    const visibleSections = getVisibleSections()
     const currentKey = getCurrentSectionKey()
     const currentIndex = visibleSections.findIndex((link) => link.key === currentKey)
     if (currentIndex <= 0) return null
@@ -49,6 +64,7 @@ export const useProjectMeetingNavigation = () => {
   }
 
   const navigateToSection = (sectionKey: string) => {
+    const visibleSections = getVisibleSections()
     const section = visibleSections.find((link) => link.key === sectionKey)
     if (section) {
       const baseUrl = R.pipe(R.split("/"), R.dropLast(1), R.join("/"))(pathname)

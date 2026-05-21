@@ -3,7 +3,7 @@ import { CaretLeft } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { Link as RouterLink, useParams } from "react-router-dom"
+import { Navigate, Link as RouterLink, useParams } from "react-router-dom"
 import { usePermitProject } from "../../../../hooks/resources/use-permit-project"
 import { useProjectMeeting } from "../../../../hooks/resources/use-project-meeting"
 import { useMst } from "../../../../setup/root"
@@ -35,6 +35,15 @@ export const ProjectMeetingScreen = observer(() => {
     return <ErrorScreen error={new Error(t("projectMeeting.validation.featureUnavailable"))} />
   }
 
+  if (section === "authorization-documents" && !currentProjectMeeting.authorizationRequired) {
+    return (
+      <Navigate
+        to={`/projects/${currentPermitProject.id}/meetings/${currentProjectMeeting.id}/edit/contact-details`}
+        replace
+      />
+    )
+  }
+
   const renderSection = () => {
     switch (section) {
       case "project-information":
@@ -42,11 +51,7 @@ export const ProjectMeetingScreen = observer(() => {
       case "relationship":
         return <RelationshipSection meeting={currentProjectMeeting} />
       case "authorization-documents":
-        return currentProjectMeeting.authorizationRequired ? (
-          <AuthorizationDocumentsSection meeting={currentProjectMeeting} />
-        ) : (
-          <ContactDetailsSection meeting={currentProjectMeeting} />
-        )
+        return <AuthorizationDocumentsSection meeting={currentProjectMeeting} />
       case "contact-details":
         return <ContactDetailsSection meeting={currentProjectMeeting} />
       case "discussion":
