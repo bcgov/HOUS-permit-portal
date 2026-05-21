@@ -48,7 +48,7 @@ User.find_or_create_by(omniauth_username: "super_admin") do |user|
   user.omniauth_username = "super_admin"
 end
 
-User.find_or_create_by(omniauth_username: "review_manager") do |user|
+User.find_or_create_by(omniauth_username: "reviewman1") do |user|
   user.role = :review_manager
   user.first_name = "ReviewManager"
   user.last_name = "McUser"
@@ -56,9 +56,10 @@ User.find_or_create_by(omniauth_username: "review_manager") do |user|
   user.password = "P@ssword1"
   user.jurisdictions = [north_van]
   user.confirmed_at = Time.now
-  user.omniauth_uid = "85EEC5B6F05A4DB7BB5BB97FBC6985B1"
+  user.omniauth_uid = "4EC1D0E766CB4F39BA9657030D665C79"
   user.omniauth_provider = "bceidbasic"
   user.omniauth_email = "review_manager@example.com"
+  user.omniauth_username = "reviewman1"
 end
 
 User.find_or_create_by(omniauth_username: "regional_review_manager") do |user|
@@ -632,7 +633,7 @@ if north_van_projects.size >= 10
   reviewer_collab = north_van.collaborators.find_by(user: reviewer_user)
   rm_collab =
     north_van.collaborators.find_by(
-      user: User.find_by(omniauth_username: "review_manager")
+      user: User.find_by(omniauth_username: "reviewman1")
     )
 
   collab_projects =
