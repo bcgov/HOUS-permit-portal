@@ -7,6 +7,8 @@ class SubmissionContact < ApplicationRecord
   scope :confirmed, -> { where.not(confirmed_at: nil) }
   scope :default_contact, -> { where(default: true) }
 
+  after_commit :send_confirmation, on: :create, unless: :confirmed?
+
   def confirmed?
     confirmed_at.present?
   end
