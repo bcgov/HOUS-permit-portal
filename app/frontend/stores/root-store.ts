@@ -6,6 +6,7 @@ import { CollaboratorStoreModel, ICollaboratorStore } from "./collaborator-store
 import { ContactStoreModel, IContactStore } from "./contact-store"
 import { DigitalSealValidatorStoreModel, IDigitalSealValidatorStore } from "./digital-seal-validator-store"
 import { GeocoderStoreModel, IGeocoderStore } from "./geocoder-store"
+import { HelpVideoStoreModel, IHelpVideoStore } from "./help-video-store"
 import { IJurisdictionStore, JurisdictionStoreModel } from "./jurisdiction-store"
 import { INotificationStore, NotificationStoreModel } from "./notification-store"
 import { IOverheatingCodeStore, OverheatingCodeStoreModel } from "./overheating-code-store"
@@ -44,6 +45,7 @@ export const RootStoreModel = types
     collaboratorStore: types.optional(CollaboratorStoreModel, {}),
     templateVersionStore: types.optional(TemplateVersionStoreModel, {}),
     geocoderStore: types.optional(GeocoderStoreModel, {}),
+    helpVideoStore: types.optional(HelpVideoStoreModel, {}),
     stepCodeStore: types.optional(StepCodeStoreModel, {}),
     siteConfigurationStore: types.optional(SiteConfigurationStoreModel, {}),
     contactStore: types.optional(ContactStoreModel, {}),
@@ -127,6 +129,7 @@ export interface IRootStore extends IStateTreeNode {
   templateVersionPreviewStore: ITemplateVersionPreviewStoreModel
   templateVersionStore: ITemplateVersionStoreModel
   geocoderStore: IGeocoderStore
+  helpVideoStore: IHelpVideoStore
   stepCodeStore: IStepCodeStore
   siteConfigurationStore: ISiteConfigurationStore
   contactStore: IContactStore
