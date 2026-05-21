@@ -4743,7 +4743,7 @@ Thank you,
               "Enable project meeting requests site-wide. Jurisdictions still need to turn this on before submitters can request meetings.",
             qaTools: "QA tools",
             qaToolsDescription:
-              "Enable QA tools for users who can access test helpers. This setting only applies when QA mode is enabled for the environment.",
+              "Enable QA tools for logged-in users. This setting only applies when QA mode is enabled for the environment.",
           },
           sitewideMessage: {
             title: "Site-wide message",
@@ -5239,6 +5239,7 @@ Thank you,
             preview: "Preview",
             videos: "Videos",
             helpVideos: "Videos",
+            qaTools: "QA tools",
           },
         },
         automatedCompliance: {
