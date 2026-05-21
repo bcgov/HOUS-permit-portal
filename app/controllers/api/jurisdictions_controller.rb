@@ -44,10 +44,6 @@ class Api::JurisdictionsController < Api::ApplicationController
     authorize @jurisdiction
     permitted_params = jurisdiction_params
 
-    if project_meeting_settings_update?(permitted_params)
-      authorize @jurisdiction, :update_project_meetings_enabled?
-    end
-
     if permitted_params[:contacts_attributes]
       # Get current contact ids from the params
       payload_record_ids =
@@ -316,11 +312,6 @@ class Api::JurisdictionsController < Api::ApplicationController
         ]
       ]
     )
-  end
-
-  def project_meeting_settings_update?(permitted_params)
-    permitted_params.key?(:project_meetings_enabled) ||
-      permitted_params.key?(:project_meeting_notification_recipient_emails)
   end
 
   def update_external_api_enabled_params
