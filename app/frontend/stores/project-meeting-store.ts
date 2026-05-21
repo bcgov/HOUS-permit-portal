@@ -21,6 +21,9 @@ export const ProjectMeetingStoreModel = types
         ...projectMeeting,
         submittedAt: nullableDate(projectMeeting.submittedAt),
         confirmedDate: nullableDate(projectMeeting.confirmedDate),
+        scheduledAt: nullableDate(projectMeeting.scheduledAt),
+        completedAt: nullableDate(projectMeeting.completedAt),
+        closedAt: nullableDate(projectMeeting.closedAt),
         createdAt: nullableDate(projectMeeting.createdAt),
         updatedAt: nullableDate(projectMeeting.updatedAt),
       }
@@ -61,6 +64,21 @@ export const ProjectMeetingStoreModel = types
     }),
     submitProjectMeeting: flow(function* (permitProjectId: string, id: string, params: Record<string, any> = {}) {
       const response = yield* toGenerator(self.environment.api.submitProjectMeeting(permitProjectId, id, params))
+      if (response.ok) {
+        self.mergeUpdate(response.data.data, "projectMeetingsMap")
+        return { ok: true, data: response.data.data as IProjectMeeting }
+      }
+      return { ok: false, error: response.data?.errors || response.problem }
+    }),
+    transitionProjectMeetingStatus: flow(function* (
+      permitProjectId: string,
+      id: string,
+      targetStatus: string,
+      params: Record<string, any> = {}
+    ) {
+      const response = yield* toGenerator(
+        self.environment.api.transitionProjectMeetingStatus(permitProjectId, id, targetStatus, params)
+      )
       if (response.ok) {
         self.mergeUpdate(response.data.data, "projectMeetingsMap")
         return { ok: true, data: response.data.data as IProjectMeeting }

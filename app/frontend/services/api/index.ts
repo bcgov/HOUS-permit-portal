@@ -360,6 +360,21 @@ export class Api {
     })
   }
 
+  async transitionProjectMeetingStatus(
+    permitProjectId: string,
+    id: string,
+    targetStatus: string,
+    params: Record<string, any>
+  ) {
+    return this.client.post<ApiResponse<IProjectMeeting>>(
+      `/permit_projects/${permitProjectId}/meetings/${id}/transition_status`,
+      {
+        targetStatus,
+        projectMeeting: params,
+      }
+    )
+  }
+
   async pinPermitProject(id: string) {
     return this.client.post<ApiResponse<IPermitProject[]>>(`/permit_projects/${id}/pin`)
   }

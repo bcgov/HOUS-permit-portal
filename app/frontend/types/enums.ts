@@ -25,7 +25,10 @@ export enum EFileUploadAttachmentType {
 
 export enum EProjectMeetingStatus {
   draft = "draft",
-  submitted = "submitted",
+  open = "open",
+  scheduled = "scheduled",
+  completed = "completed",
+  closed = "closed",
 }
 
 export enum EProjectMeetingRequesterRelationship {

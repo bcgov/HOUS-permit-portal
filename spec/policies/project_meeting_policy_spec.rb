@@ -56,6 +56,27 @@ RSpec.describe ProjectMeetingPolicy, type: :policy do
     expect(policy(reviewer).update?).to be false
   end
 
+  it "allows jurisdiction review staff to manually transition open requests" do
+    open_meeting =
+      create(:project_meeting, :open, permit_project: permit_project)
+
+    expect(policy(reviewer, open_meeting).transition_status?).to be true
+  end
+
+  it "blocks owners from manually transitioning request status" do
+    open_meeting =
+      create(:project_meeting, :open, permit_project: permit_project)
+
+    expect(policy(owner, open_meeting).transition_status?).to be false
+  end
+
+  it "blocks manual transitions when no transition is available" do
+    closed_meeting =
+      create(:project_meeting, :closed, permit_project: permit_project)
+
+    expect(policy(reviewer, closed_meeting).transition_status?).to be false
+  end
+
   it "blocks creation when the global feature gate is off" do
     SiteConfiguration.instance.update!(project_meetings_enabled: false)
 

@@ -59,6 +59,16 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
 
       expect(response).to have_http_status(:forbidden)
     end
+
+    it "blocks creating a second active meeting request" do
+      create(:project_meeting, permit_project: permit_project)
+
+      post "/api/permit_projects/#{permit_project.id}/meetings",
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
   end
 
   describe "GET /api/permit_projects/:permit_project_id/meetings/:id" do
@@ -139,7 +149,7 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
             ).with(meeting, "meetings@example.com")
 
       expect(response).to have_http_status(:ok)
-      expect(json_response.dig("data", "status")).to eq("submitted")
+      expect(json_response.dig("data", "status")).to eq("open")
       expect(json_response.dig("data", "submitted_at")).to be_present
     end
 
@@ -192,7 +202,60 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
            as: :json
 
       expect(response).to have_http_status(:ok)
-      expect(json_response.dig("data", "status")).to eq("submitted")
+      expect(json_response.dig("data", "status")).to eq("open")
+    end
+  end
+
+  describe "POST /api/permit_projects/:permit_project_id/meetings/:id/transition_status" do
+    let(:reviewer) { create(:user, :reviewer, jurisdiction: jurisdiction) }
+
+    it "allows review staff to schedule an open meeting request" do
+      meeting = create(:project_meeting, :open, permit_project: permit_project)
+      confirmed_date = 1.week.from_now
+      sign_in reviewer
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/transition_status",
+           params: {
+             target_status: "scheduled",
+             project_meeting: {
+               confirmed_date: confirmed_date.iso8601,
+               meeting_url: "https://example.com/meeting"
+             }
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("data", "status")).to eq("scheduled")
+      expect(json_response.dig("data", "scheduled_at")).to be_present
+      expect(json_response.dig("data", "confirmed_date")).to be_present
+    end
+
+    it "returns validation errors when scheduling without a confirmed date" do
+      meeting = create(:project_meeting, :open, permit_project: permit_project)
+      sign_in reviewer
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/transition_status",
+           params: {
+             target_status: "scheduled"
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+
+    it "blocks project owners from manually transitioning status" do
+      meeting = create(:project_meeting, :open, permit_project: permit_project)
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/transition_status",
+           params: {
+             target_status: "closed"
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:forbidden)
     end
   end
 end

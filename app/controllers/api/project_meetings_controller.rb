@@ -1,6 +1,7 @@
 class Api::ProjectMeetingsController < Api::ApplicationController
   before_action :set_permit_project
-  before_action :set_project_meeting, only: %i[show update submit]
+  before_action :set_project_meeting,
+                only: %i[show update submit transition_status]
 
   def create
     @project_meeting =
@@ -65,6 +66,34 @@ class Api::ProjectMeetingsController < Api::ApplicationController
   rescue ActiveRecord::RecordInvalid
     render_error(
       "project_meeting.submit_error",
+      {
+        status: :unprocessable_entity,
+        log_args: {
+          errors: @project_meeting.errors.full_messages
+        }
+      }
+    )
+  end
+
+  def transition_status
+    authorize @project_meeting, :transition_status?
+
+    @project_meeting.assign_attributes(project_meeting_params)
+    target = params.require(:target_status)
+    event = ProjectMeetingStatus::STATUS_EVENT_MAP[target]
+
+    unless event &&
+             @project_meeting.allowed_manual_transitions.include?(target.to_sym)
+      return render_error("project_meeting.invalid_transition", { status: 422 })
+    end
+
+    @project_meeting.send(:"#{event}!")
+    render_success @project_meeting,
+                   "project_meeting.transition_success",
+                   { blueprint: ProjectMeetingBlueprint }
+  rescue AASM::InvalidTransition, ActiveRecord::RecordInvalid
+    render_error(
+      "project_meeting.invalid_transition",
       {
         status: :unprocessable_entity,
         log_args: {

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_05_19_235200) do
+ActiveRecord::Schema[7.2].define(version: 2026_05_19_182523) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -734,6 +734,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_19_235200) do
     t.boolean "enable_email_unmapped_api_notification", default: true
     t.boolean "enable_in_app_resource_reminder_notification", default: true
     t.boolean "enable_email_resource_reminder_notification", default: true
+    t.boolean "enable_in_app_project_meeting_request_received_notification", default: true
+    t.boolean "enable_email_project_meeting_request_received_notification", default: true
     t.boolean "enable_in_app_project_meeting_submitted_notification", default: true
     t.boolean "enable_email_project_meeting_submitted_notification", default: true
     t.index ["user_id"], name: "index_preferences_on_user_id"
@@ -762,12 +764,19 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_19_235200) do
     t.boolean "request_property_information"
     t.datetime "submitted_at"
     t.datetime "confirmed_date"
+    t.datetime "scheduled_at"
+    t.datetime "completed_at"
+    t.datetime "closed_at"
     t.string "meeting_url"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["closed_at"], name: "index_project_meetings_on_closed_at"
+    t.index ["completed_at"], name: "index_project_meetings_on_completed_at"
+    t.index ["permit_project_id"], name: "index_project_meetings_on_active_permit_project", unique: true, where: "(status = ANY (ARRAY[0, 1]))"
     t.index ["permit_project_id"], name: "index_project_meetings_on_permit_project_id"
     t.index ["requested_by_id"], name: "index_project_meetings_on_requested_by_id"
     t.index ["requester_relationship"], name: "index_project_meetings_on_requester_relationship"
+    t.index ["scheduled_at"], name: "index_project_meetings_on_scheduled_at"
     t.index ["status"], name: "index_project_meetings_on_status"
     t.index ["submitted_at"], name: "index_project_meetings_on_submitted_at"
   end

@@ -247,6 +247,7 @@ Rails.application.routes.draw do
                 path: "meetings",
                 only: %i[create show update] do
         post :submit, on: :member
+        post :transition_status, on: :member
       end
       get "pinned", on: :collection
       get "jurisdiction_options", on: :collection

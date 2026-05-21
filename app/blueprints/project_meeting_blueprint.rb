@@ -13,9 +13,14 @@ class ProjectMeetingBlueprint < Blueprinter::Base
          :request_property_information,
          :submitted_at,
          :confirmed_date,
+         :scheduled_at,
+         :completed_at,
+         :closed_at,
          :meeting_url,
          :created_at,
          :updated_at
+
+  field :allowed_manual_transitions, default: []
 
   association :meeting_request_documents,
               blueprint: MeetingRequestDocumentBlueprint

@@ -1,11 +1,11 @@
 class ProjectMeeting < ApplicationRecord
+  include ProjectMeetingStatus
+
   belongs_to :permit_project, inverse_of: :project_meetings
   belongs_to :requested_by, class_name: "User", inverse_of: :project_meetings
 
   has_many :meeting_request_documents, dependent: :destroy
   accepts_nested_attributes_for :meeting_request_documents, allow_destroy: true
-
-  enum :status, { draft: 0, submitted: 1 }
 
   enum :requester_relationship,
        {
@@ -32,13 +32,6 @@ class ProjectMeeting < ApplicationRecord
 
   before_validation :normalize_contact_phone_number
   after_commit :reindex_permit_project
-
-  def submit_request!
-    update!(status: :submitted, submitted_at: Time.current)
-    permit_project.mark_as_unviewed
-    NotificationService.publish_project_meeting_submitted_event(self)
-    NotificationService.publish_project_meeting_request_received_event(self)
-  end
 
   def feature_enabled?
     permit_project.project_meetings_enabled?

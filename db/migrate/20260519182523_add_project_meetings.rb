@@ -10,6 +10,19 @@ class AddProjectMeetings < ActiveRecord::Migration[7.2]
                :boolean,
                default: false,
                null: false
+    add_column :jurisdictions,
+               :project_meeting_notification_recipient_emails,
+               :jsonb,
+               default: [],
+               null: false
+    add_column :preferences,
+               :enable_in_app_project_meeting_submitted_notification,
+               :boolean,
+               default: true
+    add_column :preferences,
+               :enable_email_project_meeting_submitted_notification,
+               :boolean,
+               default: true
     add_column :users, :phone_number, :string
 
     create_table :project_meetings, id: :uuid do |t|
@@ -30,6 +43,9 @@ class AddProjectMeetings < ActiveRecord::Migration[7.2]
       t.boolean :request_property_information
       t.datetime :submitted_at
       t.datetime :confirmed_date
+      t.datetime :scheduled_at
+      t.datetime :completed_at
+      t.datetime :closed_at
       t.string :meeting_url
 
       t.timestamps
@@ -38,6 +54,14 @@ class AddProjectMeetings < ActiveRecord::Migration[7.2]
     add_index :project_meetings, :status
     add_index :project_meetings, :requester_relationship
     add_index :project_meetings, :submitted_at
+    add_index :project_meetings, :scheduled_at
+    add_index :project_meetings, :completed_at
+    add_index :project_meetings, :closed_at
+    add_index :project_meetings,
+              :permit_project_id,
+              unique: true,
+              where: "status IN (0, 1)",
+              name: "index_project_meetings_on_active_permit_project"
 
     create_table :meeting_request_documents, id: :uuid do |t|
       t.references :project_meeting, null: false, foreign_key: true, type: :uuid

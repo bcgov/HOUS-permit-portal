@@ -11,9 +11,30 @@ FactoryBot.define do
     meeting_notes { "Please review zoning constraints." }
     request_property_information { false }
 
-    trait :submitted do
-      status { :submitted }
+    trait :open do
+      status { :open }
       submitted_at { Time.current }
+    end
+
+    trait :scheduled do
+      status { :scheduled }
+      submitted_at { Time.current }
+      confirmed_date { 1.week.from_now }
+      scheduled_at { Time.current }
+    end
+
+    trait :completed do
+      status { :completed }
+      submitted_at { Time.current }
+      confirmed_date { 1.week.from_now }
+      scheduled_at { Time.current }
+      completed_at { Time.current }
+    end
+
+    trait :closed do
+      status { :closed }
+      submitted_at { Time.current }
+      closed_at { Time.current }
     end
   end
 end
