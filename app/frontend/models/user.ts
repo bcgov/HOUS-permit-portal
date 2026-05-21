@@ -212,6 +212,4 @@ export interface IPreference {
 
   enableInAppProjectMeetingSubmittedNotification: boolean
   enableEmailProjectMeetingSubmittedNotification: boolean
-  enableInAppProjectMeetingRequestReceivedNotification: boolean
-  enableEmailProjectMeetingRequestReceivedNotification: boolean
 }

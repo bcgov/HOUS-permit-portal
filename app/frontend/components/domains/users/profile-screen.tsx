@@ -138,11 +138,6 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
       inAppControl: "preferenceAttributes.enableInAppResourceReminderNotification",
       emailControl: "preferenceAttributes.enableEmailResourceReminderNotification",
     })
-    events.push({
-      event: t("user.notifications.projectMeetingRequestReceived"),
-      inAppControl: "preferenceAttributes.enableInAppProjectMeetingRequestReceivedNotification",
-      emailControl: "preferenceAttributes.enableEmailProjectMeetingRequestReceivedNotification",
-    })
   }
 
   return (

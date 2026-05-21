@@ -70,24 +70,6 @@ class ProjectMeeting < ApplicationRecord
     }
   end
 
-  def request_received_event_notification_data
-    {
-      "id" => SecureRandom.uuid,
-      "action_text" =>
-        I18n.t(
-          "notification.project_meeting.request_received",
-          project_number: permit_project.number
-        ),
-      "action_type" =>
-        Constants::NotificationActionTypes::PROJECT_MEETING_REQUEST_RECEIVED,
-      "object_data" => {
-        "permit_project_id" => permit_project.id,
-        "project_meeting_id" => id,
-        "jurisdiction_slug" => permit_project.jurisdiction.slug
-      }
-    }
-  end
-
   private
 
   def submitted_fields_present

@@ -212,18 +212,6 @@ export const NotificationStoreModel = types
             href: `/projects/${projectMeetingData.permitProjectId}/meetings/${projectMeetingData.projectMeetingId}/sent`,
           },
         ]
-      } else if (notification.actionType === ENotificationActionType.projectMeetingRequestReceived) {
-        const projectMeetingData = notification.objectData as IProjectMeetingNotificationObjectData
-        if (!projectMeetingData.jurisdictionSlug) {
-          return []
-        }
-
-        return [
-          {
-            text: t("ui.show"),
-            href: `/jurisdictions/${projectMeetingData.jurisdictionSlug}/submission-inbox/projects/${projectMeetingData.permitProjectId}/overview`,
-          },
-        ]
       }
     },
   }))

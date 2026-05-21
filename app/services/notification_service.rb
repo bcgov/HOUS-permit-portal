@@ -699,25 +699,6 @@ class NotificationService
         email
       ).deliver_later
     end
-
-    managers = jurisdiction.managers.uniq(&:id)
-
-    notification_user_hash = {}
-
-    managers.each do |manager|
-      preference = manager.preference
-      next if preference.blank?
-
-      if preference.enable_in_app_project_meeting_request_received_notification
-        notification_user_hash[
-          manager.id
-        ] = project_meeting.request_received_event_notification_data
-      end
-    end
-
-    unless notification_user_hash.empty?
-      NotificationPushJob.perform_async(notification_user_hash)
-    end
   end
 
   private_class_method :determine_file_owner

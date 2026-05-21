@@ -1104,7 +1104,6 @@ en:
       reminder: "Reminder: Review your jurisdiction resources"
     project_meeting:
       submitted: "Your project meeting request for project %{project_number} has been sent."
-      request_received: "New project meeting request received for project %{project_number}."
     integration_mapping:
       published_template_missing_requirements_mapping: "Missing API mapping: A new version of “%{template_label}” has been published on %{version_date}"
       scheduled_template_missing_requirements_mapping: "Missing API Mapping: A new version of “%{template_label}” has been scheduled for %{version_date}, 01:00hrs PST."

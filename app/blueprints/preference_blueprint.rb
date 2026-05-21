@@ -16,8 +16,6 @@ class PreferenceBlueprint < Blueprinter::Base
          :enable_email_resource_reminder_notification,
          :enable_in_app_project_meeting_submitted_notification,
          :enable_email_project_meeting_submitted_notification,
-         :enable_in_app_project_meeting_request_received_notification,
-         :enable_email_project_meeting_request_received_notification,
          :created_at,
          :updated_at
 end

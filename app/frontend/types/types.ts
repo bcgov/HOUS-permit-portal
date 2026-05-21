@@ -450,7 +450,6 @@ export interface INotification {
 export interface IProjectMeetingNotificationObjectData {
   permitProjectId: string
   projectMeetingId: string
-  jurisdictionSlug?: string
 }
 
 export interface ITemplateVersionUpdate {

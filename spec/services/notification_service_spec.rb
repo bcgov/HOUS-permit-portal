@@ -718,22 +718,11 @@ RSpec.describe NotificationService do
   end
 
   describe ".publish_project_meeting_request_received_event" do
-    it "sends jurisdiction email recipients and respects manager in-app preferences" do
+    it "sends only to jurisdiction project meeting notification recipient emails" do
       meeting = create(:project_meeting)
       meeting.permit_project.jurisdiction.update!(
         project_meeting_notification_recipient_emails: ["meetings@example.com"]
       )
-      manager =
-        create(
-          :user,
-          :review_manager,
-          jurisdiction: meeting.permit_project.jurisdiction
-        )
-      manager.preference.update!(
-        enable_email_project_meeting_request_received_notification: false,
-        enable_in_app_project_meeting_request_received_notification: true
-      )
-      allow(NotificationPushJob).to receive(:perform_async)
 
       expect {
         described_class.publish_project_meeting_request_received_event(meeting)
@@ -741,10 +730,6 @@ RSpec.describe NotificationService do
         PermitHubMailer,
         :notify_project_meeting_submitted_to_jurisdiction
       ).with(meeting, "meetings@example.com")
-
-      expect(NotificationPushJob).to have_received(:perform_async) do |payload|
-        expect(payload.keys).to contain_exactly(manager.id)
-      end
     end
 
     it "does not send jurisdiction email when no recipients are configured" do

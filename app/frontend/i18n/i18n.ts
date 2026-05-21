@@ -4264,7 +4264,6 @@ Thank you,
             unmappedApiNotification: "Unmapped API Notification",
             resourceReminder: "Resource reminder",
             projectMeetingSubmitted: "Project meeting request sent",
-            projectMeetingRequestReceived: "Project meeting request received",
           },
           emailConfirmed: {
             heading: "Email confirmed!",
