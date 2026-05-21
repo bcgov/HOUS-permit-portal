@@ -176,6 +176,43 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_19_235200) do
     t.index ["checklist_id"], name: "index_fuel_types_on_checklist_id"
   end
 
+  create_table "help_video_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "type", null: false
+    t.uuid "help_video_id", null: false
+    t.jsonb "file_data"
+    t.string "scan_status", default: "pending", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["help_video_id", "type"], name: "index_help_video_documents_on_video_and_type", unique: true
+    t.index ["help_video_id"], name: "index_help_video_documents_on_help_video_id"
+    t.index ["scan_status"], name: "index_help_video_documents_on_scan_status"
+  end
+
+  create_table "help_video_sections", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "title", null: false
+    t.text "description"
+    t.integer "sort_order", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["sort_order"], name: "index_help_video_sections_on_sort_order"
+  end
+
+  create_table "help_videos", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "help_video_section_id", null: false
+    t.string "title", null: false
+    t.string "slug"
+    t.string "description", limit: 256
+    t.text "about_html"
+    t.integer "sort_order", default: 0, null: false
+    t.datetime "published_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["help_video_section_id", "sort_order"], name: "index_help_videos_on_section_and_sort_order"
+    t.index ["help_video_section_id"], name: "index_help_videos_on_help_video_section_id"
+    t.index ["published_at"], name: "index_help_videos_on_published_at"
+    t.index ["slug"], name: "index_help_videos_on_slug", unique: true
+  end
+
   create_table "integration_mapping_notifications", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "notifiable_type", null: false
     t.uuid "notifiable_id", null: false
@@ -1209,6 +1246,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_19_235200) do
   add_foreign_key "external_api_keys", "jurisdictions"
   add_foreign_key "external_api_keys", "sandboxes"
   add_foreign_key "fuel_types", "part_3_step_code_checklists", column: "checklist_id", on_delete: :cascade
+  add_foreign_key "help_video_documents", "help_videos"
+  add_foreign_key "help_videos", "help_video_sections"
   add_foreign_key "integration_mapping_notifications", "template_versions"
   add_foreign_key "integration_mappings", "jurisdictions"
   add_foreign_key "integration_mappings", "template_versions"

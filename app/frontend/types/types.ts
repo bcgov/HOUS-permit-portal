@@ -103,6 +103,12 @@ export interface ISubmissionContact {
   confirmationSentAt?: string
 }
 
+export interface IHelpVideoNavigationNeighbor {
+  id: string
+  title: string
+  slug: string | null
+}
+
 export interface ISort<TField = string> {
   field: TField
   direction: ESortDirection
