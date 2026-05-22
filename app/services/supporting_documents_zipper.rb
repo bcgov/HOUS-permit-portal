@@ -95,7 +95,7 @@ class SupportingDocumentsZipper
       end
     end
     temp_file.close
-    temp_files << temp_file.path
+    temp_files << temp_file
     temp_file.path
   rescue => e
     Rails.logger.error(
@@ -107,7 +107,14 @@ class SupportingDocumentsZipper
   end
 
   def cleanup_temp_files
-    temp_files.each { |file| FileUtils.rm_f(file) }
+    temp_files.each do |file|
+      if file.is_a?(Tempfile)
+        file.close unless file.closed?
+        file.unlink
+      else
+        FileUtils.rm_f(file)
+      end
+    end
     FileUtils.rm_f(file_path)
   end
 end

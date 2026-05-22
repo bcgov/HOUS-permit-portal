@@ -76,6 +76,7 @@ RSpec.describe "Api::QaTools", type: :request do
   end
 
   before do
+    SiteConfiguration.instance.update!(qa_tools_enabled: true)
     allow(TemplateVersion).to receive(:cached_published_ids).and_return(
       [template_version.id]
     )
@@ -85,6 +86,24 @@ RSpec.describe "Api::QaTools", type: :request do
     it "returns not found when QA mode is disabled" do
       allow(ENV).to receive(:[]).and_call_original
       allow(ENV).to receive(:[]).with("VITE_QA_MODE").and_return(nil)
+      sign_in submitter
+
+      post "/api/qa_tools/permit_projects/full",
+           params: {
+             qa_full_permit_project: {
+               jurisdiction_id: jurisdiction.id
+             }
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:not_found)
+    end
+
+    it "returns not found when the global QA tools flag is disabled" do
+      allow(ENV).to receive(:[]).and_call_original
+      allow(ENV).to receive(:[]).with("VITE_QA_MODE").and_return("true")
+      SiteConfiguration.instance.update!(qa_tools_enabled: false)
       sign_in submitter
 
       post "/api/qa_tools/permit_projects/full",

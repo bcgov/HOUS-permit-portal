@@ -364,9 +364,15 @@ if Rails.env.development?
   site_config.update(
     inbox_enabled: true,
     code_compliance_enabled: true,
+    qa_tools_enabled: true,
     allow_designated_reviewer: true
   )
 end
+
+puts "Seeding help videos..."
+
+help_video_section_count = HelpVideoSeeder.call
+puts "  ✓ Seeded #{help_video_section_count} help video sections"
 
 puts "Seeding Permit Projects from Permit Applications..."
 PermitProjectSeederService.call

@@ -319,11 +319,13 @@ class NotificationService
 
   def self.publish_customization_update_event(customization)
     template_version = customization.template_version
+    jurisdiction_id = customization.jurisdiction_id
     relevant_submitter_ids =
       PermitApplication
         .kept
         .joins(:template_version)
         .joins(submitter: :preference)
+        .left_joins(:permit_project)
         .where(
           template_versions: {
             requirement_template_id: template_version.requirement_template_id
@@ -334,6 +336,12 @@ class NotificationService
               enable_in_app_customization_update_notification: true
             }
           }
+        )
+        .where(
+          Arel.sql(
+            "COALESCE(permit_projects.jurisdiction_id, permit_applications.jurisdiction_id) = ?"
+          ),
+          jurisdiction_id
         )
         .pluck(:submitter_id)
         .uniq

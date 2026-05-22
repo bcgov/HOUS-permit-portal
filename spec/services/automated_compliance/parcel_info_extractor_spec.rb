@@ -3,6 +3,14 @@ require "rails_helper"
 RSpec.describe AutomatedCompliance::ParcelInfoExtractor,
                type: :service,
                search: true do
+  let(:vcr_options) { { match_requests_on: %i[method path query] } }
+
+  before do
+    allow_any_instance_of(Wrappers::LtsaParcelMapBc).to receive(
+      :get_coordinates_by_pid
+    ).and_return(nil)
+  end
+
   let!(:requirement_template) do
     create(:live_requirement_template_with_compliance)
   end
@@ -26,7 +34,10 @@ RSpec.describe AutomatedCompliance::ParcelInfoExtractor,
           "unedited" => "previous_data"
         }
       )
-      VCR.use_cassette("automated_compliance/parcel_info_extractor/details") do
+      VCR.use_cassette(
+        "automated_compliance/parcel_info_extractor/details",
+        vcr_options
+      ) do
         AutomatedCompliance::ParcelInfoExtractor.new.call(permit_application)
         expect(
           permit_application.compliance_data.dig(
@@ -54,7 +65,10 @@ RSpec.describe AutomatedCompliance::ParcelInfoExtractor,
     end
 
     it "updates an empty submission data" do
-      VCR.use_cassette("automated_compliance/parcel_info_extractor/details") do
+      VCR.use_cassette(
+        "automated_compliance/parcel_info_extractor/details",
+        vcr_options
+      ) do
         AutomatedCompliance::ParcelInfoExtractor.new.call(permit_application)
         expect(
           permit_application.compliance_data.dig(
@@ -91,7 +105,8 @@ RSpec.describe AutomatedCompliance::ParcelInfoExtractor,
         }
       )
       VCR.use_cassette(
-        "automated_compliance/parcel_info_extractor/details_pin"
+        "automated_compliance/parcel_info_extractor/details_pin",
+        vcr_options
       ) do
         AutomatedCompliance::ParcelInfoExtractor.new.call(permit_application)
         expect(

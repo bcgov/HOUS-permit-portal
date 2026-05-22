@@ -36,7 +36,7 @@ export const RequirementTemplateGrid: React.FC<RequirementTemplateGridProps> = o
 
   return (
     <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
-      <SearchGrid templateColumns="1.5fr 1.5fr 2fr 1.5fr 1fr 1fr">
+      <SearchGrid templateColumns="1.5fr 1.5fr 2fr 1.5fr 1.5fr 1fr 1fr">
         <GridHeaders />
 
         {isSearching ? (
@@ -61,6 +61,11 @@ export const RequirementTemplateGrid: React.FC<RequirementTemplateGridProps> = o
                 {rt.publishedTemplateVersion?.versionDate ? (
                   <VersionTag versionDate={rt.publishedTemplateVersion.versionDate} />
                 ) : null}
+              </SearchGridItem>
+              <SearchGridItem>
+                {rt.draftTemplateVersion?.versionDate && (
+                  <VersionTag versionDate={rt.draftTemplateVersion.versionDate} />
+                )}
               </SearchGridItem>
               <SearchGridItem>{rt.availableIn}</SearchGridItem>
               <SearchGridItem>{renderActions(rt)}</SearchGridItem>
@@ -111,21 +116,30 @@ const GridHeaders = observer(function GridHeaders() {
       </Box>
       <Box display={"contents"} role={"row"}>
         {Object.values(ERequirementTemplateSortFields).map((field) => (
-          <GridHeader key={field} role={"columnheader"}>
-            <Flex
-              w={"full"}
-              as={"button"}
-              justifyContent={"space-between"}
-              cursor="pointer"
-              onClick={() => toggleSort(field)}
-              borderRight={"1px solid"}
-              borderColor={"border.light"}
-              px={4}
-            >
-              <Text>{getSortColumnHeader(field)}</Text>
-              <SortIcon<ERequirementTemplateSortFields> field={field} currentSort={sort} />
-            </Flex>
-          </GridHeader>
+          <React.Fragment key={field}>
+            <GridHeader role={"columnheader"}>
+              <Flex
+                w={"full"}
+                as={"button"}
+                justifyContent={"space-between"}
+                cursor="pointer"
+                onClick={() => toggleSort(field)}
+                borderRight={"1px solid"}
+                borderColor={"border.light"}
+                px={4}
+              >
+                <Text>{getSortColumnHeader(field)}</Text>
+                <SortIcon<ERequirementTemplateSortFields> field={field} currentSort={sort} />
+              </Flex>
+            </GridHeader>
+            {field === ERequirementTemplateSortFields.currentVersion && (
+              <GridHeader role={"columnheader"}>
+                <Flex w={"full"} borderRight={"1px solid"} borderColor={"border.light"} px={4}>
+                  <Text>{t("requirementTemplate.status.draft")}</Text>
+                </Flex>
+              </GridHeader>
+            )}
+          </React.Fragment>
         ))}
         <GridHeader role={"columnheader"} />
       </Box>

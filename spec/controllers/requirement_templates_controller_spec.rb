@@ -188,17 +188,28 @@ RSpec.describe Api::RequirementTemplatesController,
     context "as a super admin" do
       before { sign_in super_admin }
 
-      it "promotes the draft to scheduled for a future date" do
-        post :promote_draft,
-             params: {
-               id: requirement_template.id,
-               version_date: Date.tomorrow.to_s
-             }
+      it "creates a scheduled version from the draft for a future date" do
+        expect {
+          post :promote_draft,
+               params: {
+                 id: requirement_template.id,
+                 version_date: Date.tomorrow.to_s
+               }
+        }.to change { requirement_template.template_versions.count }.by(1)
 
         expect(response).to have_http_status(:success)
         draft_version.reload
-        expect(draft_version.status).to eq("scheduled")
-        expect(draft_version.version_date).to eq(Date.tomorrow)
+        promoted_version =
+          requirement_template
+            .template_versions
+            .where(status: :scheduled)
+            .where.not(id: draft_version.id)
+            .order(created_at: :desc)
+            .first
+
+        expect(draft_version.status).to eq("draft")
+        expect(promoted_version.id).not_to eq(draft_version.id)
+        expect(promoted_version.version_date).to eq(Date.tomorrow)
       end
 
       it "auto-unschedules sibling scheduled versions with earlier dates" do
@@ -265,17 +276,28 @@ RSpec.describe Api::RequirementTemplatesController,
             )
           end
 
-          it "publishes the draft inline with today's date" do
-            post :promote_draft,
-                 params: {
-                   id: requirement_template.id,
-                   skip_date_check: true
-                 }
+          it "publishes a copy inline with today's date and keeps the draft" do
+            expect {
+              post :promote_draft,
+                   params: {
+                     id: requirement_template.id,
+                     skip_date_check: true
+                   }
+            }.to change { requirement_template.template_versions.count }.by(1)
 
             expect(response).to have_http_status(:success)
             draft_version.reload
-            expect(draft_version.status).to eq("published")
-            expect(draft_version.version_date).to eq(Date.current)
+            promoted_version =
+              requirement_template
+                .template_versions
+                .where(status: :published)
+                .where.not(id: draft_version.id)
+                .order(created_at: :desc)
+                .first
+
+            expect(draft_version.status).to eq("draft")
+            expect(promoted_version.id).not_to eq(draft_version.id)
+            expect(promoted_version.version_date).to eq(Date.current)
           end
         end
       end
