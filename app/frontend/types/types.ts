@@ -742,6 +742,12 @@ export type TReleaseNoteFormData = {
   issues: string
 }
 
+export type TReleaseNoteViewerContext = {
+  releaseNoteId: string
+  year: number
+  page: number
+}
+
 export interface ICopyRequirementTemplateFormData extends Partial<TCreateRequirementTemplateFormData> {
   id?: string
 }
