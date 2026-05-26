@@ -5135,6 +5135,16 @@ Thank you,
         },
         releaseNote: {
           title: "Release notes",
+          viewing: {
+            title: "Release notes",
+            reportIssue: "Report an issue",
+            whatsNew: "What's new",
+            issues: "Issues",
+            githubLink: "Release notes on GitHub",
+            copyReleaseNoteLink: "Copy link to this release note",
+            openReleaseNotesUrl: "Open release notes link",
+            emptyState: "No release notes published for {{year}}.",
+          },
           createNew: "Create new release note",
           emptyState: "No release notes yet.",
           status: {
