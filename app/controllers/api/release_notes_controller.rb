@@ -1,7 +1,10 @@
 class Api::ReleaseNotesController < Api::ApplicationController
   include Api::Concerns::Search::ReleaseNotes
 
-  before_action :set_release_note, only: %i[update publish show]
+  skip_before_action :authenticate_user!, only: %i[index years viewer_context]
+  skip_before_action :require_confirmation, only: %i[index years viewer_context]
+
+  before_action :set_release_note, only: %i[update publish show viewer_context]
 
   def create
     @release_note = ReleaseNote.new(release_note_params)
@@ -84,10 +87,22 @@ class Api::ReleaseNotesController < Api::ApplicationController
     end
   end
 
+  def years
+    authorize :release_note, :index?
+    release_years =
+      policy_scope(ReleaseNote)
+        .order(release_date: :desc)
+        .pluck(:release_date)
+        .map(&:year)
+        .uniq
+
+    render json: { data: release_years, meta: default_meta(nil) }, status: :ok
+  end
+
   def index
     authorize :release_note, :index?
     perform_release_note_search
-    view = current_user.super_admin? ? :base : :extended
+    view = current_user&.super_admin? ? :base : :extended
     render_success @release_notes,
                    nil,
                    {
@@ -111,6 +126,18 @@ class Api::ReleaseNotesController < Api::ApplicationController
                    }
   end
 
+  def viewer_context
+    authorize @release_note, :viewer_context?
+    context =
+      ReleaseNoteViewerContext.call(
+        release_note: @release_note,
+        scope: policy_scope(ReleaseNote),
+        per_page: release_note_viewer_context_params[:per_page]
+      )
+
+    render json: { data: context, meta: default_meta(nil) }, status: :ok
+  end
+
   private
 
   def set_release_note
@@ -129,5 +156,9 @@ class Api::ReleaseNotesController < Api::ApplicationController
       :release_notes_url,
       :issues
     )
+  end
+
+  def release_note_viewer_context_params
+    params.permit(:per_page)
   end
 end
