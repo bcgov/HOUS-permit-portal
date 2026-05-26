@@ -16,12 +16,16 @@ class ReleaseNotePolicy < ApplicationPolicy
   end
 
   def show?
-    true
+    user&.super_admin?
+  end
+
+  def viewer_context?
+    record.published? || user&.super_admin?
   end
 
   class Scope < Scope
     def resolve
-      return scope.all if user.super_admin?
+      return scope.all if user&.super_admin?
 
       scope.published
     end
