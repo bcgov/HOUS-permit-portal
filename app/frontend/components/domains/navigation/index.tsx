@@ -361,7 +361,7 @@ const AdminGlobalFeatureAccessScreen = lazy(() =>
   }))
 )
 
-const ReleaseNotesScreen = lazy(() =>
+const ReleaseNotesManagementScreen = lazy(() =>
   import("../super-admin/site-configuration-management/release-notes-screen").then((module) => ({
     default: module.ReleaseNotesScreen,
   }))
@@ -370,6 +370,12 @@ const ReleaseNotesScreen = lazy(() =>
 const ReleaseNoteFormScreen = lazy(() =>
   import("../super-admin/site-configuration-management/release-note-form-screen").then((module) => ({
     default: module.ReleaseNoteFormScreen,
+  }))
+)
+
+const ReleaseNotesScreen = lazy(() =>
+  import("../release-notes/release-notes-screen").then((module) => ({
+    default: module.ReleaseNotesScreen,
   }))
 )
 
@@ -523,9 +529,9 @@ const AppRoutes = observer(() => {
           Super admins toggle publicly_previewable directly on TemplateVersionScreen. */}
       <Route path="/configuration-management/users" element={<AdminUserIndexScreen />} />
       <Route path="/configuration-management/global-feature-access" element={<AdminGlobalFeatureAccessScreen />} />
-      <Route path="/release-notes/new" element={<ReleaseNoteFormScreen />} />
-      <Route path="/release-notes/:releaseNoteId/edit" element={<ReleaseNoteFormScreen />} />
-      <Route path="/release-notes" element={<ReleaseNotesScreen />} />
+      <Route path="/configuration-management/release-notes" element={<ReleaseNotesManagementScreen />} />
+      <Route path="/configuration-management/release-notes/new" element={<ReleaseNoteFormScreen />} />
+      <Route path="/configuration-management/release-notes/:releaseNoteId/edit" element={<ReleaseNoteFormScreen />} />
       <Route
         path="/configuration-management/global-feature-access/submission-inbox"
         element={<AdminSubmissionInboxScreen />}
@@ -704,6 +710,12 @@ const AppRoutes = observer(() => {
   const isAllowedForReviewManagerOnly = loggedIn && !mustAcceptEula && (isReviewManager || isRegionalReviewManager)
   const isAllowedForTechnicalSupportOrManager =
     loggedIn && !mustAcceptEula && (isTechnicalSupport || isAllowedForReviewManagerOnly)
+  const releaseNotesRouteElement =
+    loggedIn && isSuperAdmin ? (
+      <RedirectScreen path="/configuration-management/release-notes" />
+    ) : (
+      <ReleaseNotesScreen />
+    )
 
   return (
     <>
@@ -856,6 +868,7 @@ const AppRoutes = observer(() => {
         {/* Public Routes */}
         <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
         <Route path="/contact" element={<ContactScreen />} />
+        <Route path="/release-notes" element={releaseNotesRouteElement} />
         <Route path="/videos" element={<HelpVideosIndexScreen />} />
         <Route path="/videos/:videoId" element={<HelpVideoScreen />} />
         <Route path="/standardization-preview" element={<StandardizationPreviewScreen />} />

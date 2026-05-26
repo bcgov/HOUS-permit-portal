@@ -81,7 +81,12 @@ export const ReleaseNotesScreen = observer(function ReleaseNotesScreen() {
               h="72px"
               align="center"
             >
-              <RouterLinkButton to="/release-notes/new" variant="primary" size="sm" fontSize="sm">
+              <RouterLinkButton
+                to="/configuration-management/release-notes/new"
+                variant="primary"
+                size="sm"
+                fontSize="sm"
+              >
                 {t("releaseNote.createNew")}
               </RouterLinkButton>
             </Flex>
@@ -113,7 +118,7 @@ export const ReleaseNotesScreen = observer(function ReleaseNotesScreen() {
                     <ReleaseNotesGridCell py={0} justifyContent="flex-end">
                       <Button
                         as={ReactRouterLink}
-                        to={`/release-notes/${note.id}/edit`}
+                        to={`/configuration-management/release-notes/${note.id}/edit`}
                         variant="secondary"
                         size="sm"
                         h="32px"
