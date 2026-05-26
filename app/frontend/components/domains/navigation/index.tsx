@@ -775,6 +775,10 @@ const AppRoutes = observer(() => {
           <Route path="/profile" element={<ProfileScreen />} />
         </Route>
 
+        <Route element={<ProtectedRoute isAllowed={loggedIn} />}>
+          <Route path="/project-readiness-tools/check-digital-seals" element={<CheckDigitalSealsScreen />} />
+        </Route>
+
         <Route element={<ProtectedRoute isAllowed={loggedIn && !currentUser?.isSuperAdmin && !isUnconfirmed} />}>
           <Route path="/profile/eula" element={<EULAScreen withClose />} />
         </Route>
@@ -845,7 +849,6 @@ const AppRoutes = observer(() => {
         <Route path="/videos/:videoId" element={<HelpVideoScreen />} />
         <Route path="/standardization-preview" element={<StandardizationPreviewScreen />} />
         <Route path="/template-versions/:templateVersionId/preview" element={<TemplateVersionPreviewScreen />} />
-        <Route path="/project-readiness-tools" element={<ProjectReadinessToolsIndexScreen />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyScreen />} />
         <Route
           path="/project-readiness-tools/create-your-letters-of-assurance"
