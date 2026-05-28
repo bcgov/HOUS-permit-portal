@@ -1,9 +1,20 @@
 class Api::SubmissionContactsController < Api::ApplicationController
+  skip_before_action :authenticate_user!, only: %i[confirm]
+  skip_before_action :require_confirmation, only: %i[confirm]
+  skip_after_action :verify_authorized, only: %i[confirm]
+
   before_action :set_submission_contact, only: %i[update destroy]
 
   def index
-    jurisdiction = Jurisdiction.find(params[:jurisdiction_id])
-    contacts = jurisdiction.submission_contacts
+    contacts =
+      if params[:jurisdiction_id].present?
+        policy_scope(SubmissionContact).where(
+          jurisdiction_id: params[:jurisdiction_id]
+        )
+      else
+        policy_scope(SubmissionContact)
+      end
+
     render_success contacts, nil, { blueprint: SubmissionContactBlueprint }
   end
 
@@ -17,10 +28,10 @@ class Api::SubmissionContactsController < Api::ApplicationController
   end
 
   def create
-    authorize :submission_contact, :create?
     jurisdiction =
       Jurisdiction.find(submission_contact_params[:jurisdiction_id])
     contact = jurisdiction.submission_contacts.new(submission_contact_params)
+    authorize contact, :create?
 
     if contact.save
       render_success contact, nil, { blueprint: SubmissionContactBlueprint }
@@ -72,6 +83,6 @@ class Api::SubmissionContactsController < Api::ApplicationController
   end
 
   def set_submission_contact
-    @submission_contact = SubmissionContact.find(params[:id])
+    @submission_contact = policy_scope(SubmissionContact).find(params[:id])
   end
 end
