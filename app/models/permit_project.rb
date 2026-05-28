@@ -200,8 +200,7 @@ class PermitProject < ApplicationRecord
         permit_applications.kept.where(status: :resubmitted).count,
       approved_count: permit_applications.kept.where(status: :approved).count,
       queue_time_seconds: queue_time_seconds,
-      queue_clock_started_at: queue_clock_started_at&.to_i,
-      has_submitted_project_meeting: project_meetings.submitted.exists?
+      queue_clock_started_at: queue_clock_started_at&.to_i
     }
   end
 

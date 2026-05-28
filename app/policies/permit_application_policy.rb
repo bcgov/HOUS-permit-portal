@@ -39,7 +39,7 @@ class PermitApplicationPolicy < ApplicationPolicy
     return false unless ENV["VITE_QA_MODE"] == "true"
     return false unless SiteConfiguration.qa_tools_enabled?
 
-    record.draft?
+    update?
   end
 
   def retrigger_submission_webhook?

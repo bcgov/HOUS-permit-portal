@@ -63,7 +63,7 @@ class Api::ProjectMeetingsController < Api::ApplicationController
     render_success @project_meeting,
                    "project_meeting.submit_success",
                    { blueprint: ProjectMeetingBlueprint }
-  rescue ActiveRecord::RecordInvalid
+  rescue AASM::InvalidTransition, ActiveRecord::RecordInvalid
     render_error(
       "project_meeting.submit_error",
       {

@@ -169,6 +169,7 @@ en:
       remind_reviewer: "Your report on outstanding permit applications"
       remind_resource_update: "Reminder: Review your jurisdiction resources"
       submission_contact_confirm: "Confirm submission inbox email"
+      project_meeting_contact_confirm: "Confirm project meeting notification email"
       new_jurisdiction_membership: "New jurisdiction membership"
       notify_permit_collaboration: "Welcome you have been invited to Collaborate in the Building Permit Hub"
       notify_project_review_collaboration: "You have been assigned as a review collaborator on a project"

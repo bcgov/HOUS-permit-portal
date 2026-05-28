@@ -228,10 +228,7 @@ RSpec.describe PermitHubMailer, type: :mailer do
         submitter: confirmed_user
       )
     contact =
-      instance_double(
-        "PermitTypeSubmissionContact",
-        email: "reviewer@example.com"
-      )
+      instance_double("SubmissionContact", email: "reviewer@example.com")
 
     mailer.notify_submitter_application_submitted(
       permit_application,
@@ -365,10 +362,9 @@ RSpec.describe PermitHubMailer, type: :mailer do
       )
     jurisdiction =
       instance_double("Jurisdiction", slug: "jur", external_api_enabled?: true)
-    confirmed_scope = double("ConfirmedScope", exists?: false)
-    contacts_scope = double("ContactsScope", confirmed: confirmed_scope)
-    allow(jurisdiction).to receive(:submission_contacts).and_return(
-      contacts_scope
+    confirmed_contacts = double("ConfirmedContacts", exists?: false)
+    allow(jurisdiction).to receive(:confirmed_submission_contacts).and_return(
+      confirmed_contacts
     )
 
     mailer.notify_new_template_version_published(
@@ -449,9 +445,37 @@ RSpec.describe PermitHubMailer, type: :mailer do
     )
   end
 
+  it "uses STI class specific subject for submission contact confirmations" do
+    submission_contact =
+      instance_double(
+        "ApplicationSubmissionContact",
+        email: "submission@example.com",
+        confirmation_subject_key: "submission_contact_confirm"
+      )
+    project_meeting_contact =
+      instance_double(
+        "MeetingSubmissionContact",
+        email: "meeting@example.com",
+        confirmation_subject_key: "project_meeting_contact_confirm"
+      )
+
+    mailer.submission_contact_confirm(submission_contact)
+    mailer.submission_contact_confirm(project_meeting_contact)
+
+    expect(mailer).to have_received(:send_mail).with(
+      email: "submission@example.com",
+      template_key: "submission_contact_confirm",
+      subject_key: "submission_contact_confirm"
+    )
+    expect(mailer).to have_received(:send_mail).with(
+      email: "meeting@example.com",
+      template_key: "submission_contact_confirm",
+      subject_key: "project_meeting_contact_confirm"
+    )
+  end
+
   it "reminds reviewer and resource update" do
-    contact =
-      instance_double("PermitTypeSubmissionContact", email: "r@example.com")
+    contact = instance_double("SubmissionContact", email: "r@example.com")
     mailer.remind_reviewer(contact, [instance_double("PermitApplication")])
 
     allow(Resource).to receive(:where).and_return([])

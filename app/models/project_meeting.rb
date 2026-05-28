@@ -28,7 +28,7 @@ class ProjectMeeting < ApplicationRecord
               with: URI::DEFAULT_PARSER.make_regexp(%w[http https])
             },
             allow_blank: true
-  validate :submitted_fields_present, if: :submitted?
+  validate :validate_submission_requirements, if: :submitted?
 
   before_validation :normalize_contact_phone_number
   after_commit :reindex_permit_project
@@ -65,7 +65,7 @@ class ProjectMeeting < ApplicationRecord
 
   private
 
-  def submitted_fields_present
+  def validate_submission_requirements
     %i[
       requester_relationship
       contact_name

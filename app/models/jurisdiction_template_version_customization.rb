@@ -17,7 +17,11 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
   belongs_to :submission_contact, optional: true
 
   def effective_submission_contact
-    submission_contact || jurisdiction.submission_contacts.default_contact.first
+    if submission_contact.is_a?(ApplicationSubmissionContact)
+      submission_contact
+    else
+      jurisdiction.submission_inbox_contacts.default_contact.first
+    end
   end
   belongs_to :template_version
 

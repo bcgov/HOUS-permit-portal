@@ -109,6 +109,14 @@ RSpec.describe ProjectMeeting, type: :model do
       expect(meeting.permit_project.reload.viewed_at).to be_nil
     end
 
+    it "does not submit without authorization documents for non-owner requesters" do
+      meeting =
+        create(:project_meeting, requester_relationship: :leaseholder_or_tenant)
+
+      expect { meeting.submit_request! }.to raise_error(AASM::InvalidTransition)
+      expect(meeting.reload).to be_draft
+    end
+
     it "enqueues a confirmation email" do
       meeting = create(:project_meeting)
 
@@ -120,8 +128,10 @@ RSpec.describe ProjectMeeting, type: :model do
 
     it "enqueues jurisdiction recipient notifications" do
       meeting = create(:project_meeting)
-      meeting.permit_project.jurisdiction.update!(
-        project_meeting_notification_recipient_emails: ["meetings@example.com"]
+      create(
+        :meeting_submission_contact,
+        jurisdiction: meeting.permit_project.jurisdiction,
+        email: "meetings@example.com"
       )
 
       expect { meeting.submit_request! }.to have_enqueued_mail(
@@ -139,6 +149,13 @@ RSpec.describe ProjectMeeting, type: :model do
 
       expect(meeting.reload).to be_scheduled
       expect(meeting.scheduled_at).to be_present
+    end
+
+    it "does not schedule without a confirmed date" do
+      meeting = create(:project_meeting, :open, confirmed_date: nil)
+
+      expect { meeting.schedule! }.to raise_error(AASM::InvalidTransition)
+      expect(meeting.reload).to be_open
     end
 
     it "completes a scheduled meeting request" do

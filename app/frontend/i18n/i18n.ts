@@ -3905,6 +3905,7 @@ Thank you,
                 "Specify email addresses that should receive new project meeting requests.",
               projectMeetingsEmailLabel: "Recipient email",
               projectMeetingsAddEmail: "Add another email",
+              projectMeetingsConfirmationRequired: "Action required: please click link in verification email",
               projectMeetingsResourcesDescription:
                 "Add authorization resources to explain what documents non-owner requesters should upload.",
               projectMeetingsResourcesLink: "Manage authorization resources",

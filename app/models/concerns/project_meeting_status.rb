@@ -41,11 +41,14 @@ module ProjectMeetingStatus
       state :closed
 
       event :submit_request, before: :stamp_submitted_at do
-        transitions from: :draft, to: :open, after: :handle_submission
+        transitions from: :draft,
+                    to: :open,
+                    guard: :can_submit_request?,
+                    after: :handle_submission
       end
 
       event :schedule, before: :stamp_scheduled_at do
-        transitions from: :open, to: :scheduled
+        transitions from: :open, to: :scheduled, guard: :can_schedule?
       end
 
       event :complete, before: :stamp_completed_at do
@@ -77,6 +80,15 @@ module ProjectMeetingStatus
 
     def stamp_submitted_at
       self.submitted_at ||= Time.current
+    end
+
+    def can_submit_request?
+      validate_submission_requirements
+      errors.empty?
+    end
+
+    def can_schedule?
+      confirmed_date.present?
     end
 
     def stamp_scheduled_at

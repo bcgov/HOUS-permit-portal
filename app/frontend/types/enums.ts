@@ -43,6 +43,11 @@ export enum EMeetingRequestDocumentType {
   authorization = "authorization",
 }
 
+export enum ESubmissionContactClass {
+  application = "ApplicationSubmissionContact",
+  meeting = "MeetingSubmissionContact",
+}
+
 export enum EResourceCategory {
   planningZoning = "planning_zoning",
   bylawsRequirements = "bylaws_requirements",

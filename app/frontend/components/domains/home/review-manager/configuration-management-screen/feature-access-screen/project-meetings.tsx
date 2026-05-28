@@ -1,23 +1,27 @@
 import { Button, Container, Flex, Heading, Link, Text, VStack } from "@chakra-ui/react"
 import { CaretLeft } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useState } from "react"
+import React, { Suspense } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useJurisdiction } from "../../../../../../hooks/resources/use-jurisdiction"
+import { ErrorScreen } from "../../../../../shared/base/error-screen"
+import { LoadingScreen } from "../../../../../shared/base/loading-screen"
 import { SwitchButton } from "../../../../../shared/buttons/switch-button"
 import { ProjectMeetingsNotificationRecipientsForm } from "./project-meetings-notification-recipients-form"
 
 export const ProjectMeetingsJurisdictionFeatureAccessScreen = observer(() => {
   const i18nPrefix = "home.configurationManagement.featureAccess"
-  const { currentJurisdiction } = useJurisdiction()
+  const { currentJurisdiction, error: jurisdictionError } = useJurisdiction()
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const [isEnabled, setIsEnabled] = useState(currentJurisdiction?.projectMeetingsEnabled ?? false)
 
   const handleToggle = (checked: boolean) => {
-    setIsEnabled(checked)
     currentJurisdiction?.update({ projectMeetingsEnabled: checked })
+  }
+
+  if (jurisdictionError) {
+    return <ErrorScreen />
   }
 
   return (
@@ -35,12 +39,25 @@ export const ProjectMeetingsJurisdictionFeatureAccessScreen = observer(() => {
           </Text>
         </Flex>
       </VStack>
-      <Flex mt={8} align="center" w="100%" direction="row" justify="space-between">
+      {currentJurisdiction && (
+        <Flex mt={8} align="flex-start" w="100%" direction="column">
+          <Heading as="h2" fontSize="2xl" fontWeight="bold" mb={2}>
+            {t(`${i18nPrefix}.projectMeetingsNotificationRecipients`)}
+          </Heading>
+          <Text color="text.secondary" fontSize="lg" mb={4}>
+            {t(`${i18nPrefix}.projectMeetingsNotificationRecipientsDescription`)}
+          </Text>
+          <Suspense fallback={<LoadingScreen />}>
+            <ProjectMeetingsNotificationRecipientsForm jurisdiction={currentJurisdiction} />
+          </Suspense>
+        </Flex>
+      )}
+      <Flex mt={8} align="center" w="100%" direction="column" alignItems="flex-start">
         <Flex direction="column" alignItems="flex-start">
-          <Heading as="h2" fontSize="2xl" fontWeight="bold" mb={4}>
+          <Heading as="h2" fontSize="2xl" fontWeight="bold" m={0} mb={2}>
             {t(`${i18nPrefix}.acceptProjectMeetings`)}
           </Heading>
-          <Text color="text.secondary" mb={2}>
+          <Text color="text.secondary" fontSize="lg" mb={2} mt={2}>
             {t(`${i18nPrefix}.projectMeetingsResourcesDescription`)}
           </Text>
           <Link
@@ -55,19 +72,12 @@ export const ProjectMeetingsJurisdictionFeatureAccessScreen = observer(() => {
             {t(`${i18nPrefix}.projectMeetingsResourcesLink`)}
           </Link>
         </Flex>
-        <SwitchButton isChecked={isEnabled} onChange={(e) => handleToggle(e.target.checked)} size={"lg"} />
+        <SwitchButton
+          isChecked={currentJurisdiction?.projectMeetingsEnabled ?? false}
+          onChange={(e) => handleToggle(e.target.checked)}
+          size={"lg"}
+        />
       </Flex>
-      {currentJurisdiction && (
-        <Flex mt={8} align="flex-start" w="100%" direction="column">
-          <Heading as="h2" fontSize="2xl" fontWeight="bold" mb={2}>
-            {t(`${i18nPrefix}.projectMeetingsNotificationRecipients`)}
-          </Heading>
-          <Text color="text.secondary" fontSize="lg" mb={4}>
-            {t(`${i18nPrefix}.projectMeetingsNotificationRecipientsDescription`)}
-          </Text>
-          <ProjectMeetingsNotificationRecipientsForm jurisdiction={currentJurisdiction} />
-        </Flex>
-      )}
     </Container>
   )
 })

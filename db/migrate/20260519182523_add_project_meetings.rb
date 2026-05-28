@@ -10,11 +10,6 @@ class AddProjectMeetings < ActiveRecord::Migration[7.2]
                :boolean,
                default: false,
                null: false
-    add_column :jurisdictions,
-               :project_meeting_notification_recipient_emails,
-               :jsonb,
-               default: [],
-               null: false
     add_column :preferences,
                :enable_in_app_project_meeting_submitted_notification,
                :boolean,

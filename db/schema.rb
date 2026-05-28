@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_05_19_182523) do
+ActiveRecord::Schema[7.2].define(version: 2026_05_28_162700) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -338,7 +338,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_19_182523) do
     t.string "website_url"
     t.boolean "hide_from_search", default: false, null: false
     t.boolean "project_meetings_enabled", default: false, null: false
-    t.jsonb "project_meeting_notification_recipient_emails", default: [], null: false
     t.index ["ltsa_matcher"], name: "index_jurisdictions_on_ltsa_matcher"
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"], name: "index_jurisdictions_on_regional_district_id"
@@ -1046,7 +1045,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_19_182523) do
     t.boolean "default", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["jurisdiction_id", "email"], name: "index_submission_contacts_on_jurisdiction_id_and_email", unique: true
+    t.string "type", default: "ApplicationSubmissionContact", null: false
+    t.index ["jurisdiction_id", "email", "type"], name: "idx_submission_contacts_on_jurisdiction_email_sti_type", unique: true
     t.index ["jurisdiction_id"], name: "index_submission_contacts_on_jurisdiction_id"
   end
 

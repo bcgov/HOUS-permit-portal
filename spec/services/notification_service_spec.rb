@@ -720,8 +720,10 @@ RSpec.describe NotificationService do
   describe ".publish_project_meeting_request_received_event" do
     it "sends only to jurisdiction project meeting notification recipient emails" do
       meeting = create(:project_meeting)
-      meeting.permit_project.jurisdiction.update!(
-        project_meeting_notification_recipient_emails: ["meetings@example.com"]
+      create(
+        :meeting_submission_contact,
+        jurisdiction: meeting.permit_project.jurisdiction,
+        email: "meetings@example.com"
       )
 
       expect {

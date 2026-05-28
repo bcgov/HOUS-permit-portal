@@ -67,7 +67,7 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
            headers: headers,
            as: :json
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
     end
   end
 
@@ -95,15 +95,7 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
                 meeting_request_documents_attributes: [
                   {
                     document_type: "supporting",
-                    file: {
-                      id: SecureRandom.uuid,
-                      storage: "cache",
-                      metadata: {
-                        size: 123,
-                        filename: "site-plan.pdf",
-                        mime_type: "application/pdf"
-                      }
-                    }
+                    file: TestData.cached_file_data
                   }
                 ]
               }
@@ -132,8 +124,10 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
   describe "POST /api/permit_projects/:permit_project_id/meetings/:id/submit" do
     it "submits the completed meeting request" do
       meeting = create(:project_meeting, permit_project: permit_project)
-      jurisdiction.update!(
-        project_meeting_notification_recipient_emails: ["meetings@example.com"]
+      create(
+        :meeting_submission_contact,
+        jurisdiction: jurisdiction,
+        email: "meetings@example.com"
       )
 
       expect {
@@ -166,7 +160,7 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
            headers: headers,
            as: :json
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
     end
 
     it "requires authorization documents for non-owner requesters" do
@@ -181,7 +175,7 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
            headers: headers,
            as: :json
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
     end
 
     it "submits non-owner requests with authorization documents" do
@@ -242,7 +236,7 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
            headers: headers,
            as: :json
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
     end
 
     it "blocks project owners from manually transitioning status" do
