@@ -133,6 +133,30 @@ export const RequirementBlockModel = types
       if (response.ok) applySnapshot(self, response.data.data)
       return response.ok
     }),
+    // ── Question-bank placement operations ──────────────────────────────────
+    linkRequirementToQuestionDefinition: flow(function* (
+      requirementId: string,
+      questionDefinitionId: string,
+      localOverrides?: Record<string, any>
+    ) {
+      const response = yield self.environment.api.linkRequirementToQuestionDefinition(
+        requirementId,
+        questionDefinitionId,
+        localOverrides
+      )
+      if (response.ok) applySnapshot(self, response.data.data)
+      return response.ok
+    }),
+    detachRequirementFromQuestionDefinition: flow(function* (requirementId: string) {
+      const response = yield self.environment.api.detachRequirementFromQuestionDefinition(requirementId)
+      if (response.ok) applySnapshot(self, response.data.data)
+      return response.ok
+    }),
+    forkRequirementQuestionDefinition: flow(function* (requirementId: string) {
+      const response = yield self.environment.api.forkRequirementQuestionDefinition(requirementId)
+      if (response.ok) applySnapshot(self, response.data.data)
+      return response.ok
+    }),
   }))
 
 export interface IRequirementBlock extends Instance<typeof RequirementBlockModel> {}

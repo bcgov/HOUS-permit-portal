@@ -2,6 +2,7 @@ import { ICollaborator } from "../models/collaborator"
 import { IJurisdiction } from "../models/jurisdiction"
 import { IPermitApplication } from "../models/permit-application"
 import { IPreCheck } from "../models/pre-check"
+import { IQuestionDefinition } from "../models/question-definition"
 import { IRequirementBlock } from "../models/requirement-block"
 import { IRequirementTemplate } from "../models/requirement-template"
 import { IUser } from "../models/user"
@@ -21,6 +22,10 @@ export interface IPageMeta {
 export interface IUserResponse extends IApiResponse<IUser, {}> {}
 
 export interface IRequirementBlockResponse extends IApiResponse<IRequirementBlock[], IPageMeta> {}
+
+export interface IQuestionDefinitionsResponse extends IApiResponse<IQuestionDefinition[], IPageMeta> {}
+
+export interface IQuestionDefinitionResponse extends IApiResponse<IQuestionDefinition, {}> {}
 
 export interface IRequirementTemplateResponse extends IApiResponse<IRequirementTemplate[], IPageMeta> {}
 

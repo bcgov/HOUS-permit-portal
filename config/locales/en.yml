@@ -422,6 +422,50 @@ en:
       restore_error:
         title: "Error"
         message: "There was an error restoring the requirement block"
+    question_definition:
+      create_success:
+        title: ""
+        message: "Question added to the bank!"
+      create_error:
+        title: Error
+        message: "%{error_message}"
+      update_success:
+        title: ""
+        message: "Shared question updated!"
+      update_error:
+        title: Error
+        message: "%{error_message}"
+      destroy_success:
+        title: ""
+        message: "The shared question was archived"
+      destroy_error:
+        title: Error
+        message: "%{error_message}"
+      restore_success:
+        title: ""
+        message: "The shared question was restored"
+      restore_error:
+        title: Error
+        message: "%{error_message}"
+    requirement:
+      link_success:
+        title: ""
+        message: "Linked to a shared question"
+      link_error:
+        title: Error
+        message: "%{error_message}"
+      detach_success:
+        title: ""
+        message: "Detached from the shared question"
+      detach_error:
+        title: Error
+        message: "%{error_message}"
+      fork_success:
+        title: ""
+        message: "Forked a new shared question"
+      fork_error:
+        title: Error
+        message: "%{error_message}"
     external_api_key:
       create_error:
         title: Create Error
@@ -1002,6 +1046,7 @@ en:
       invalid_schedule_date: "Version date must be in the future and after latest scheduled version date"
       force_publish_disabled: "Force publish is not enabled"
       publish_before_schedule_date: "Version cannot be published before it's scheduled date"
+      unapproved_question_definitions: "Cannot publish: one or more shared questions are not approved (blocks: %{blocks}). Approve the shared question definitions first."
       copy_customizations_error: "Old jurisdiction customizations could not be copied to new template version for jurisdiction_id:%{jurisdiction_id}"
       copy_customizations_log_error: "Error copying customizations to new template version: %{message}"
   formio:

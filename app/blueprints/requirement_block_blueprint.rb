@@ -19,4 +19,14 @@ class RequirementBlockBlueprint < Blueprinter::Base
 
   association :requirements, blueprint: RequirementBlueprint
   association :requirement_documents, blueprint: RequirementDocumentBlueprint
+
+  # Authoring surface (Requirements Library). Identical to the default view but
+  # renders requirements through their :authoring view so question-bank linkage
+  # metadata (is_shared, question_definition_id, local_overrides,
+  # shared_review_state) is included. The publish snapshot keeps using the
+  # default view, so TemplateVersion#requirement_blocks_json is unaffected.
+  view :authoring do
+    exclude :requirements
+    association :requirements, blueprint: RequirementBlueprint, view: :authoring
+  end
 end

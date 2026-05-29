@@ -55,6 +55,12 @@ class TemplateVersioningService
         status: "scheduled"
       )
 
+    # Surface the governance gate early (at schedule time) for better UX.
+    assert_publishable_question_definitions!(
+      template_version,
+      error_class: TemplateVersionScheduleError
+    )
+
     if !template_version.save
       raise TemplateVersionScheduleError.new(
               template_version.errors.full_messages.join(", ")
@@ -402,6 +408,10 @@ class TemplateVersioningService
             )
     end
 
+    # Governance gate: a placement linked to a non-approved QuestionDefinition
+    # cannot be published. No-op for unlinked placements (all NULL today).
+    assert_publishable_question_definitions!(template_version)
+
     ActiveRecord::Base.transaction do
       # Populate version_diff before publishing (replaces the old TODO)
       if template_version.version_diff.blank? ||
@@ -443,6 +453,10 @@ class TemplateVersioningService
         end
       end
     end
+    # The freshly published version now carries the latest shared-question
+    # content, so any question-bank drift for this template has shipped.
+    QuestionBankDriftService.clear_drift!(template_version.requirement_template)
+
     # Publish the notification after the transaction successfully completes,
     # respecting the notification_scope set on the template version.
     unless template_version.notification_scope_silent?
@@ -633,6 +647,54 @@ class TemplateVersioningService
       .where(status: TemplateVersion.statuses[:published])
       .order(version_date: :desc, created_at: :desc)
       .last
+  end
+
+  # Governance gate (Phase 5): a placement whose linked QuestionDefinition is
+  # not `approved` cannot be published/scheduled. Returns silently when nothing
+  # in the version is linked to a non-approved definition (the case for every
+  # existing template, since linkage defaults to NULL).
+  def self.assert_publishable_question_definitions!(
+    template_version,
+    error_class: TemplateVersionPublishError
+  )
+    offending = unapproved_linked_placements(template_version)
+    return if offending.empty?
+
+    block_names =
+      offending.filter_map { |req| req.requirement_block&.name }.uniq
+
+    raise error_class,
+          I18n.t(
+            "services.template_versioning_service.unapproved_question_definitions",
+            blocks: block_names.join(", ")
+          )
+  end
+
+  def self.unapproved_linked_placements(template_version)
+    ids = requirement_ids_from_snapshot(template_version)
+    return [] if ids.empty?
+
+    Requirement
+      .where(id: ids)
+      .where.not(question_definition_id: nil)
+      .joins(:question_definition)
+      .where.not(
+        question_definitions: {
+          review_state: QuestionDefinition.review_states[:approved]
+        }
+      )
+      .includes(:requirement_block)
+      .to_a
+  end
+
+  def self.requirement_ids_from_snapshot(template_version)
+    blocks = template_version.requirement_blocks_json || {}
+    blocks
+      .values
+      .flat_map do |block|
+        (block["requirements"] || []).map { |req| req["id"] }
+      end
+      .compact
   end
 
   private

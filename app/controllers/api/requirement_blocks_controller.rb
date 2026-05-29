@@ -13,7 +13,10 @@ class Api::RequirementBlocksController < Api::ApplicationController
                    nil,
                    {
                      meta: page_meta(@search),
-                     blueprint: RequirementBlockBlueprint
+                     blueprint: RequirementBlockBlueprint,
+                     blueprint_opts: {
+                       view: :authoring
+                     }
                    }
   end
 
@@ -22,7 +25,12 @@ class Api::RequirementBlocksController < Api::ApplicationController
 
     render_success @requirement_block,
                    nil,
-                   { blueprint: RequirementBlockBlueprint }
+                   {
+                     blueprint: RequirementBlockBlueprint,
+                     blueprint_opts: {
+                       view: :authoring
+                     }
+                   }
   end
 
   def create
@@ -33,7 +41,12 @@ class Api::RequirementBlocksController < Api::ApplicationController
       RequirementBlock.search_index.refresh
       render_success @requirement_block,
                      "requirement_block.create_success",
-                     { blueprint: RequirementBlockBlueprint }
+                     {
+                       blueprint: RequirementBlockBlueprint,
+                       blueprint_opts: {
+                         view: :authoring
+                       }
+                     }
     else
       render_error "requirement_block.create_error",
                    message_opts: {
@@ -48,7 +61,12 @@ class Api::RequirementBlocksController < Api::ApplicationController
     if @requirement_block.update(requirement_block_params)
       render_success @requirement_block,
                      nil,
-                     { blueprint: RequirementBlockBlueprint }
+                     {
+                       blueprint: RequirementBlockBlueprint,
+                       blueprint_opts: {
+                         view: :authoring
+                       }
+                     }
     else
       render_error "requirement_block.update_error",
                    message_opts: {

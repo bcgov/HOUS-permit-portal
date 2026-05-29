@@ -59,6 +59,30 @@ Rails.application.routes.draw do
           to: "requirement_blocks#auto_compliance_module_configurations"
     end
 
+    resources :question_definitions,
+              only: %i[index show create update destroy] do
+      post "restore", on: :member, to: "question_definitions#restore"
+      get "where_used", on: :member, to: "question_definitions#where_used"
+      post "search", on: :collection, to: "question_definitions#index"
+      get "dedup_candidates",
+          on: :collection,
+          to: "question_definitions#dedup_candidates"
+      post "apply_dedup",
+           on: :collection,
+           to: "question_definitions#apply_dedup"
+    end
+
+    resources :requirements, only: [] do
+      member do
+        post "link_question_definition",
+             to: "requirements#link_question_definition"
+        post "detach_question_definition",
+             to: "requirements#detach_question_definition"
+        post "fork_question_definition",
+             to: "requirements#fork_question_definition"
+      end
+    end
+
     resources :notifications, only: %i[index] do
       post "reset_last_read",
            on: :collection,

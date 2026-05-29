@@ -41,6 +41,8 @@ import {
   INotificationResponse,
   IOptionResponse,
   IPageMeta,
+  IQuestionDefinitionResponse,
+  IQuestionDefinitionsResponse,
   IRequirementBlockResponse,
   IRequirementTemplateResponse,
   IUsersResponse,
@@ -431,6 +433,51 @@ export class Api {
 
   async restoreRequirementBlock(id: string) {
     return this.client.post<IRequirementBlockResponse>(`/requirement_blocks/${id}/restore`)
+  }
+
+  // ── Question bank (QuestionDefinition) ────────────────────────────────────
+  async fetchQuestionDefinitions(params?: { query?: string; page?: number; perPage?: number; reviewState?: string }) {
+    return this.client.get<IQuestionDefinitionsResponse>("/question_definitions", params)
+  }
+
+  async fetchQuestionDefinition(id: string) {
+    return this.client.get<IQuestionDefinitionResponse>(`/question_definitions/${id}`)
+  }
+
+  async createQuestionDefinition(params: Record<string, any>) {
+    return this.client.post<IQuestionDefinitionResponse>(`/question_definitions`, { questionDefinition: params })
+  }
+
+  async updateQuestionDefinition(id: string, params: Record<string, any>) {
+    return this.client.put<IQuestionDefinitionResponse>(`/question_definitions/${id}`, { questionDefinition: params })
+  }
+
+  async archiveQuestionDefinition(id: string) {
+    return this.client.delete<IQuestionDefinitionResponse>(`/question_definitions/${id}`)
+  }
+
+  async restoreQuestionDefinition(id: string) {
+    return this.client.post<IQuestionDefinitionResponse>(`/question_definitions/${id}/restore`)
+  }
+
+  // ── Placement <-> definition operations ───────────────────────────────────
+  async linkRequirementToQuestionDefinition(
+    requirementId: string,
+    questionDefinitionId: string,
+    localOverrides?: Record<string, any>
+  ) {
+    return this.client.post<IRequirementBlockResponse>(`/requirements/${requirementId}/link_question_definition`, {
+      questionDefinitionId,
+      localOverrides,
+    })
+  }
+
+  async detachRequirementFromQuestionDefinition(requirementId: string) {
+    return this.client.post<IRequirementBlockResponse>(`/requirements/${requirementId}/detach_question_definition`)
+  }
+
+  async forkRequirementQuestionDefinition(requirementId: string) {
+    return this.client.post<IRequirementBlockResponse>(`/requirements/${requirementId}/fork_question_definition`)
   }
 
   async updateProfile(params) {

@@ -6,33 +6,46 @@ class Requirement < ApplicationRecord
 
   belongs_to :requirement_block, touch: true
 
+  # Canonical question definition (the "question bank"). NULL == a purely local
+  # placement that behaves exactly as it did before the bank existed.
+  belongs_to :question_definition, optional: true
+
   acts_as_list scope: :requirement_block, top_of_list: 0
 
-  enum :input_type,
-       {
-         text: 0,
-         number: 1,
-         checkbox: 2,
-         select: 3,
-         multi_option_select: 4,
-         date: 5,
-         textarea: 6,
-         file: 7,
-         phone: 10,
-         email: 11,
-         radio: 12,
-         address: 13,
-         bcaddress: 14,
-         signature: 15,
-         energy_step_code: 16, #NOTE: THIS IS ASSUMED TO BE PART_9
-         general_contact: 17,
-         professional_contact: 18,
-         pid_info: 19,
-         energy_step_code_part_3: 20,
-         multiply_sum_grid: 21,
-         architectural_drawing: 22
-       },
-       prefix: true
+  # Shared with QuestionDefinition so a placement and its canonical definition
+  # always speak the same input_type vocabulary.
+  INPUT_TYPES = {
+    text: 0,
+    number: 1,
+    checkbox: 2,
+    select: 3,
+    multi_option_select: 4,
+    date: 5,
+    textarea: 6,
+    file: 7,
+    phone: 10,
+    email: 11,
+    radio: 12,
+    address: 13,
+    bcaddress: 14,
+    signature: 15,
+    energy_step_code: 16, #NOTE: THIS IS ASSUMED TO BE PART_9
+    general_contact: 17,
+    professional_contact: 18,
+    pid_info: 19,
+    energy_step_code_part_3: 20,
+    multiply_sum_grid: 21,
+    architectural_drawing: 22
+  }.freeze
+
+  enum :input_type, INPUT_TYPES, prefix: true
+
+  # When linked to a QuestionDefinition, materialize the resolved (definition +
+  # local_overrides) values onto this placement's own columns before anything
+  # else runs. prepend: true guarantees this happens before set_requirement_code
+  # (which reads input_type) and the other before_validation hooks. When NOT
+  # linked this is a no-op, so unlinked placements behave exactly as before.
+  before_validation :apply_question_definition_resolution, prepend: true
 
   # This needs to run before validation because we have validations related to the requirement_code
   before_validation :set_requirement_code
@@ -80,6 +93,21 @@ class Requirement < ApplicationRecord
   NUMBER_UNITS = %w[no_unit mm cm m in ft mi sqm sqft cad]
   TYPES_WITH_VALUE_OPTIONS = %w[multi_option_select select radio]
   CONTACT_TYPES = %w[general_contact professional_contact]
+
+  # input_options keys that are intrinsically per-placement and are NEVER
+  # inherited from a shared QuestionDefinition. `conditional` references sibling
+  # requirement codes within this block; `customConditional`/`elective` show
+  # logic is likewise placement-local.
+  LOCAL_PLACEMENT_INPUT_OPTION_KEYS = %w[conditional customConditional].freeze
+
+  # local_overrides keys a placement may override on top of its definition.
+  OVERRIDABLE_FIELDS = %w[
+    label
+    hint
+    instructions
+    input_type
+    input_options
+  ].freeze
 
   ARCHITECTURAL_DRAWING_REQUIREMENT_CODE = "architectural_drawing_file".freeze
   ENERGY_STEP_CODE_SELECT_REQUIREMENT_CODE = "energy_step_code_method".freeze
@@ -224,6 +252,147 @@ class Requirement < ApplicationRecord
     form_json_service.to_form_json(requirement_block_key)
   end
 
+  # ── Question-bank resolution (definition + local_overrides) ───────────────
+  #
+  # A placement may link to a canonical QuestionDefinition. The resolved value
+  # for a shareable field is the definition's value, overlaid with any value the
+  # placement set in `local_overrides`. Placement-only data (position, required,
+  # elective, requirement_code, in-block conditionals) is never resolved away.
+  #
+  # NOTE: `apply_question_definition_resolution` materializes these resolved
+  # values onto the row before validation, so persisted records already carry
+  # resolved values. These readers stay correct either way and are the canonical
+  # source of truth for resolution (used by blueprints, previews, governance).
+
+  def linked_to_question_definition?
+    question_definition_id.present?
+  end
+
+  def resolved_label
+    return label unless linked_to_question_definition?
+    overrides = local_overrides_hash
+    overrides.key?("label") ? overrides["label"] : question_definition.label
+  end
+
+  def resolved_hint
+    return hint unless linked_to_question_definition?
+    overrides = local_overrides_hash
+    overrides.key?("hint") ? overrides["hint"] : question_definition.hint
+  end
+
+  def resolved_instructions
+    return instructions unless linked_to_question_definition?
+    overrides = local_overrides_hash
+    if overrides.key?("instructions")
+      overrides["instructions"]
+    else
+      question_definition.instructions
+    end
+  end
+
+  def resolved_input_type
+    return input_type unless linked_to_question_definition?
+    overrides = local_overrides_hash
+    overrides["input_type"].presence || question_definition.input_type
+  end
+
+  def resolved_input_options
+    return input_options unless linked_to_question_definition?
+
+    base = (question_definition.input_options || {}).deep_dup
+
+    # Carry forward placement-only keys (e.g. in-block conditionals) that live
+    # on this row and must not be inherited from the definition.
+    LOCAL_PLACEMENT_INPUT_OPTION_KEYS.each do |placement_key|
+      if input_options.is_a?(Hash) && input_options.key?(placement_key)
+        base[placement_key] = input_options[placement_key]
+      end
+    end
+
+    overridden_input_options = local_overrides_hash["input_options"]
+    if overridden_input_options.is_a?(Hash)
+      base = base.deep_merge(overridden_input_options)
+    end
+
+    base
+  end
+
+  def resolved_attributes
+    {
+      "label" => resolved_label,
+      "hint" => resolved_hint,
+      "instructions" => resolved_instructions,
+      "input_type" => resolved_input_type,
+      "input_options" => resolved_input_options
+    }
+  end
+
+  # Per-placement deltas vs the linked definition, used by the governance
+  # "where-used" view so review is "1 definition + N contexts".
+  def contextual_delta
+    return {} unless linked_to_question_definition?
+
+    {
+      requirement_code: requirement_code,
+      required: required,
+      elective: elective,
+      conditional: input_options["conditional"],
+      local_overrides: local_overrides_hash.presence,
+      requirement_block_id: requirement_block_id
+    }.compact
+  end
+
+  # ── Authoring operations (steward / super-admin) ──────────────────────────
+
+  # Point this placement at an existing canonical definition. Resolution is
+  # materialized on save. `overrides` lets the placement keep specific local
+  # values on top of the shared definition.
+  def link_to_question_definition!(definition, overrides = {})
+    self.question_definition = definition
+    self.local_overrides = overrides.presence || {}
+    save!
+    self
+  end
+
+  # Eject from the bank: the resolved values are already materialized onto this
+  # row, so we simply drop the link and any overrides and keep behaving locally.
+  def detach_from_question_definition!
+    self.question_definition = nil
+    self.local_overrides = {}
+    save!
+    self
+  end
+
+  # Create a brand-new definition from this placement's resolved values and
+  # repoint the placement at it. Works both to promote a local question into the
+  # bank (forked_from = nil) and to branch off an existing shared definition.
+  def fork_question_definition!(owner: nil, review_state: :draft)
+    resolved = resolved_attributes
+    definition_input_options =
+      (resolved["input_options"] || {}).except(
+        *LOCAL_PLACEMENT_INPUT_OPTION_KEYS
+      )
+
+    new_definition =
+      QuestionDefinition.create!(
+        label: resolved["label"],
+        hint: resolved["hint"],
+        instructions: resolved["instructions"],
+        input_type: resolved["input_type"],
+        input_options: definition_input_options,
+        requirement_code: requirement_code,
+        review_state: review_state,
+        owner: owner,
+        forked_from: question_definition
+      )
+
+    self.question_definition = new_definition
+    self.local_overrides = {}
+    save!
+
+    new_definition
+  end
+
   def computed_compliance?
     input_options["computed_compliance"].present?
   end
@@ -245,6 +414,25 @@ class Requirement < ApplicationRecord
   end
 
   private
+
+  def local_overrides_hash
+    local_overrides.is_a?(Hash) ? local_overrides : {}
+  end
+
+  # Materializes resolved (definition + local_overrides) values onto this row's
+  # own columns. No-op when not linked, so unlinked placements are byte-for-byte
+  # unchanged. Runs first (prepend: true) so downstream hooks/validations and
+  # the published snapshot all see resolved values.
+  def apply_question_definition_resolution
+    return unless linked_to_question_definition?
+    return if question_definition.blank?
+
+    self.label = resolved_label
+    self.hint = resolved_hint
+    self.instructions = resolved_instructions
+    self.input_type = resolved_input_type
+    self.input_options = resolved_input_options
+  end
 
   def merge_computed_compliance_default_settings
     configuration_service = AutomatedComplianceConfigurationService.new(self)

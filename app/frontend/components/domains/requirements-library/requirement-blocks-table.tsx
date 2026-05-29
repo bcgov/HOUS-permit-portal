@@ -27,6 +27,7 @@ import { SearchGridItem } from "../../shared/grid/search-grid-item"
 import { HasAutomatedComplianceTag } from "../../shared/has-automated-compliance-tag"
 import { HasConditionalTag } from "../../shared/has-conditional-tag"
 import { HasDataValidationTag } from "../../shared/has-data-validation-tag"
+import { SharedQuestionBadge } from "../../shared/shared-question-badge"
 import { GridHeaders } from "./grid-header"
 import { RequirementsBlockModal } from "./requirements-block-modal"
 
@@ -103,10 +104,20 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
                           color={"text.secondary"}
                           fontSize={"xs"}
                           mb="1"
-                          noOfLines={1}
                           title={requirement.label}
                         >
-                          {requirement.label}
+                          <HStack spacing={1} align="center">
+                            <Text as={"span"} noOfLines={1}>
+                              {requirement.label}
+                            </Text>
+                            {requirement.isShared && (
+                              <SharedQuestionBadge
+                                reviewState={requirement.sharedReviewState}
+                                size="sm"
+                                flexShrink={0}
+                              />
+                            )}
+                          </HStack>
                         </ListItem>
                       )
                     })}

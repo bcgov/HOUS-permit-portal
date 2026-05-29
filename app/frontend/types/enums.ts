@@ -6,6 +6,12 @@ export enum EFlashMessageStatus {
   special = "special",
 }
 
+export enum EQuestionReviewState {
+  draft = "draft",
+  approved = "approved",
+  deprecated = "deprecated",
+}
+
 export enum EPreviewStatus {
   invited = "invited",
   access = "access",

@@ -17,6 +17,12 @@ export const RequirementModel = types
     required: types.boolean,
     createdAt: types.Date,
     updatedAt: types.Date,
+    // Question-bank linkage. Only present on the authoring (:authoring) view, so
+    // these are optional to keep denormalized/published snapshots parsing.
+    questionDefinitionId: types.optional(types.maybeNull(types.string), null),
+    isShared: types.optional(types.boolean, false),
+    sharedReviewState: types.optional(types.maybeNull(types.string), null),
+    localOverrides: types.optional(types.frozen<Record<string, any>>(), {}),
   })
   .views((self) => ({
     get valueOptions(): IOption[] | undefined {

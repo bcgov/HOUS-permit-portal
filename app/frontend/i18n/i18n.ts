@@ -1867,6 +1867,18 @@ Thank you,
           hasAutomatedCompliance: "Has automated compliance",
           inputNotSupported: "Input type not yet supported",
           associationsInfo: "Sections, tags, etc...",
+          questionBank: {
+            shared: "Shared",
+            sharedTooltip: "This question is linked to a shared definition in the question bank.",
+            link: "Link to shared question",
+            detach: "Detach (keep local copy)",
+            fork: "Fork into a new shared question",
+            reviewState: {
+              draft: "Draft",
+              approved: "Approved",
+              deprecated: "Deprecated",
+            },
+          },
 
           index: {
             title: "Requirements library",
