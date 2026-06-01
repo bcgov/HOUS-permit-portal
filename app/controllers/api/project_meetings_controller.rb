@@ -1,7 +1,19 @@
 class Api::ProjectMeetingsController < Api::ApplicationController
+  include Api::Concerns::Search::ProjectMeetings
+
   before_action :set_permit_project
   before_action :set_project_meeting,
                 only: %i[show update submit transition_status]
+
+  def index
+    perform_project_meeting_search
+    render_success @project_meeting_search.results,
+                   nil,
+                   {
+                     meta: page_meta(@project_meeting_search),
+                     blueprint: ProjectMeetingBlueprint
+                   }
+  end
 
   def create
     @project_meeting =
@@ -32,7 +44,9 @@ class Api::ProjectMeetingsController < Api::ApplicationController
 
   def show
     authorize @project_meeting
-    render_success @project_meeting, nil, { blueprint: ProjectMeetingBlueprint }
+    render_success @project_meeting,
+                   nil,
+                   { blueprint: ProjectMeetingBlueprint, view: :extended }
   end
 
   def update

@@ -88,4 +88,32 @@ RSpec.describe ProjectMeetingPolicy, type: :policy do
 
     expect(policy(owner).create?).to be false
   end
+
+  describe "Scope" do
+    def resolved_scope_for(user)
+      described_class::Scope.new(
+        UserContext.new(user, sandbox),
+        ProjectMeeting.all
+      ).resolve
+    end
+
+    it "includes project meetings for the project owner" do
+      meeting
+      create(:project_meeting, permit_project: create(:permit_project))
+
+      expect(resolved_scope_for(owner)).to contain_exactly(meeting)
+    end
+
+    it "includes project meetings for jurisdiction review staff" do
+      meeting
+
+      expect(resolved_scope_for(reviewer)).to include(meeting)
+    end
+
+    it "excludes meetings for submitter collaborators" do
+      meeting
+
+      expect(resolved_scope_for(collaborator_user)).to be_empty
+    end
+  end
 end

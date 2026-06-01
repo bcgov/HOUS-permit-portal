@@ -1491,8 +1491,19 @@ Thank you,
             requestedDescription:
               "The jurisdiction has received your request and will contact you to schedule a meeting.",
             viewRequests: "View meeting requests",
+            viewRequest: "View meeting request",
             tabTitle: "Meetings",
             tabDescription: "Meeting requests for this project will appear here.",
+            requestCalloutTitle: "Request a meeting with your local authority to discuss your project",
+            requestCalloutDescription:
+              "Some permit types may require a project meeting before you can submit an application.",
+            empty: "There are no meeting requests for this project yet.",
+            columns: {
+              submitted_at: "Meeting time",
+              project_description: "Questions or additional details",
+              status: "Status",
+              notes: "Notes",
+            },
           },
           details: {
             overview: "Overview",
@@ -1580,6 +1591,43 @@ Thank you,
           sendRequestDescription:
             "By sending this request, you agree that your information may be shared with other government departments to confirm property details and your authority to act for the site.",
           acceptAndSend: "Accept and send",
+          detail: {
+            title: "Meeting request",
+            backToMeetings: "Back to meetings",
+            sentOn: "Sent {{date}}",
+            scheduledTitle: "Meeting details",
+            notScheduledTitle: "Meeting not scheduled yet",
+            notScheduledDescription:
+              "The building authority has received your request and will contact you directly to arrange a meeting time. Once the meeting is scheduled, the date, time, and meeting details will appear here.",
+            confirmedDate: "Confirmed date",
+            scheduledAt: "Scheduled time",
+            meetingUrl: "Meeting link",
+            projectNumber: "Project number",
+            requesterInformation: "Requester information",
+            relationshipToSite: "Relationship to site",
+            phoneNumber: "Phone number",
+            requestDetails: "Request details",
+            requesterNotesAndQuestions: "Requester notes and questions",
+            propertyInformationRequested: "Property information requested",
+            documents: "Documents",
+            documentsDescription:
+              "The requester uploaded these documents to provide additional context for their meeting request.",
+            noDocuments: "No documents uploaded",
+            notes: {
+              title: "Notes",
+              downloadAll: "Download all notes",
+              reviewerNotes: "Reviewer notes",
+              emptyDescription:
+                "The local building authority may add notes here about your project or meeting request.",
+            },
+          },
+          status: {
+            draft: "Draft",
+            open: "Open",
+            scheduled: "Scheduled",
+            completed: "Completed",
+            closed: "Closed",
+          },
           validation: {
             authorizationDocumentsRequired: "Upload at least one authorization document to continue.",
             contactEmailRequired: "Enter an email address.",

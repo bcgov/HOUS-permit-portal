@@ -1,5 +1,15 @@
 class ProjectMeeting < ApplicationRecord
+  searchkick word_middle: %i[
+               contact_name
+               contact_email
+               project_description
+               meeting_notes
+               status
+             ]
+
   include ProjectMeetingStatus
+
+  SEARCH_INCLUDES = [:meeting_request_documents].freeze
 
   belongs_to :permit_project, inverse_of: :project_meetings
   belongs_to :requested_by, class_name: "User", inverse_of: :project_meetings
@@ -60,6 +70,25 @@ class ProjectMeeting < ApplicationRecord
         "permit_project_id" => permit_project.id,
         "project_meeting_id" => id
       }
+    }
+  end
+
+  def search_data
+    {
+      permit_project_id: permit_project_id,
+      jurisdiction_id: permit_project&.jurisdiction_id,
+      sandbox_id: permit_project&.sandbox_id,
+      requested_by_id: requested_by_id,
+      status: status,
+      contact_name: contact_name,
+      contact_email: contact_email,
+      project_description: project_description,
+      meeting_notes: meeting_notes,
+      submitted_at: submitted_at,
+      confirmed_date: confirmed_date,
+      scheduled_at: scheduled_at,
+      created_at: created_at,
+      updated_at: updated_at
     }
   end
 

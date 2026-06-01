@@ -11,7 +11,7 @@ import {
   useDisclosure,
   VStack,
 } from "@chakra-ui/react"
-import { CaretRight, Clock, Info, Pencil, SquaresFour, Steps } from "@phosphor-icons/react"
+import { CaretRight, Info, Pencil, SquaresFour, Steps } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { FormProvider, useForm } from "react-hook-form"
@@ -30,6 +30,7 @@ import { FullscreenMapModal } from "../../shared/module-wrappers/fullscreen-map-
 import { ProjectMap } from "../../shared/module-wrappers/project-map"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { AddPermitsButton } from "../../shared/permit-projects/add-permits-button"
+import { ActiveProjectMeetingNotice } from "../../shared/project-meetings/active-project-meeting-notice"
 import ProjectInfoRow from "../../shared/project/project-info-row"
 import { SitesSelect } from "../../shared/select/selectors/sites-select"
 import { PermitApplicationGridHeaders } from "./permit-application-grid-headers"
@@ -218,29 +219,7 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
                     })}
                   </RouterLinkButton>
                 )}
-                {hasActiveProjectMeeting && (
-                  <Box borderWidth={1} borderColor="border.light" borderRadius="md" p={4} w="full">
-                    <HStack align="flex-start" spacing={3}>
-                      <Clock size={16} />
-                      <Box>
-                        <Text fontWeight="bold">{t("permitProject.meetings.requestedTitle")}</Text>
-                        <Text fontSize="sm" color="text.secondary">
-                          {t("permitProject.meetings.requestedDescription")}{" "}
-                          <RouterLinkButton
-                            variant="link"
-                            size="sm"
-                            h="auto"
-                            minW={0}
-                            p={0}
-                            to={`/projects/${permitProject.id}/meetings`}
-                          >
-                            {t("permitProject.meetings.viewRequests")}
-                          </RouterLinkButton>
-                        </Text>
-                      </Box>
-                    </HStack>
-                  </Box>
-                )}
+                {hasActiveProjectMeeting && <ActiveProjectMeetingNotice permitProject={permitProject} />}
               </VStack>
             )}
           </Box>

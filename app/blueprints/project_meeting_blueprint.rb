@@ -22,6 +22,10 @@ class ProjectMeetingBlueprint < Blueprinter::Base
 
   field :allowed_manual_transitions, default: []
 
-  association :meeting_request_documents,
-              blueprint: MeetingRequestDocumentBlueprint
+  view :extended do
+    include_view :default
+
+    association :meeting_request_documents,
+                blueprint: MeetingRequestDocumentBlueprint
+  end
 end

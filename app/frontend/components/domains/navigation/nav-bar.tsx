@@ -70,7 +70,7 @@ function isAdminPath(path: string): boolean {
 }
 
 function isProjectDetailPath(path: string): boolean {
-  const regex = /^\/projects\/[a-f\d-]+/
+  const regex = /^\/projects\/[a-f\d-]+(?:\/.*)?$/
   return regex.test(path)
 }
 
@@ -126,8 +126,6 @@ function isSubmissionInboxPath(path: string): boolean {
 }
 
 function shouldHideSubNavbarForPath(path: string): boolean {
-  if (isProjectMeetingPath(path)) return false
-
   const matchers: Array<(path: string) => boolean> = [
     (path) => path === "/",
     isTemplateEditPath,

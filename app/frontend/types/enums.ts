@@ -31,6 +31,12 @@ export enum EProjectMeetingStatus {
   closed = "closed",
 }
 
+export enum EProjectMeetingSortFields {
+  submittedAt = "submitted_at",
+  projectDescription = "project_description",
+  status = "status",
+}
+
 export enum EProjectMeetingRequesterRelationship {
   ownerOrLandholder = "owner_or_landholder",
   leaseholderOrTenant = "leaseholder_or_tenant",

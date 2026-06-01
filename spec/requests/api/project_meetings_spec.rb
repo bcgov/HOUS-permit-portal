@@ -74,12 +74,75 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
   describe "GET /api/permit_projects/:permit_project_id/meetings/:id" do
     it "returns a meeting request for the owner" do
       meeting = create(:project_meeting, permit_project: permit_project)
+      document = create(:meeting_request_document, project_meeting: meeting)
 
       get "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}",
           headers: headers
 
       expect(response).to have_http_status(:ok)
       expect(json_response.dig("data", "id")).to eq(meeting.id)
+      expect(
+        json_response.dig("data", "meeting_request_documents", 0, "id")
+      ).to eq(document.id)
+      expect(
+        json_response.dig("data", "meeting_request_documents", 0, "file", "id")
+      ).to eq(document.file_id)
+      expect(
+        json_response.dig(
+          "data",
+          "meeting_request_documents",
+          0,
+          "file",
+          "metadata",
+          "filename"
+        )
+      ).to eq(document.file_name)
+    end
+  end
+
+  describe "POST /api/permit_projects/:permit_project_id/meetings/search",
+           :search do
+    let!(:meeting) do
+      create(
+        :project_meeting,
+        :open,
+        permit_project: permit_project,
+        project_description: "Need zoning guidance."
+      )
+    end
+    let!(:other_meeting) { create(:project_meeting, :completed) }
+
+    before { ProjectMeeting.reindex }
+
+    it "returns scoped meeting requests for the project owner" do
+      post "/api/permit_projects/#{permit_project.id}/meetings/search",
+           params: {
+             query: "zoning",
+             page: 1,
+             per_page: 10
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response["data"].pluck("id")).to eq([meeting.id])
+      expect(json_response["data"].pluck("id")).not_to include(other_meeting.id)
+    end
+
+    it "does not return meetings to unrelated users" do
+      sign_in other_user
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/search",
+           params: {
+             query: "*",
+             page: 1,
+             per_page: 10
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response["data"]).to be_empty
     end
   end
 
