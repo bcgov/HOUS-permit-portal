@@ -16,13 +16,6 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
   belongs_to :jurisdiction
   belongs_to :submission_contact, optional: true
 
-  def effective_submission_contact
-    if submission_contact.is_a?(ApplicationSubmissionContact)
-      submission_contact
-    else
-      jurisdiction.submission_inbox_contacts.default_contact.first
-    end
-  end
   belongs_to :template_version
 
   before_save :sanitize_tip
