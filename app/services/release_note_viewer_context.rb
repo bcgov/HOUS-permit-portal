@@ -19,15 +19,16 @@ class ReleaseNoteViewerContext
     relation =
       @scope.where(release_date: start_date..end_date).order(
         release_date: :desc,
-        id: :desc
+        created_at: :desc
       )
 
     ahead_count =
       relation.where(
-        "release_date > ? OR (release_date = ? AND id > ?)",
+        # Use created_at to break ties when release_date (including time)is the same
+        "release_date > ? OR (release_date = ? AND created_at > ?)",
         @release_note.release_date,
         @release_note.release_date,
-        @release_note.id
+        @release_note.created_at
       ).count
 
     {

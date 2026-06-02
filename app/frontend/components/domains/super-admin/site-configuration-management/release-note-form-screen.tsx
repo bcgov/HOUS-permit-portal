@@ -311,6 +311,8 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
                     ".react-datepicker__input-container": { w: "252px" },
                   },
                 },
+                showTimeInput: true,
+                dateFormat: "yyyy/MM/dd h:mm aa",
               }}
             />
             <UrlFormControl label={t("releaseNote.form.releaseNotesUrl")} fieldName="releaseNotesUrl" required />
@@ -371,7 +373,7 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
                 variant="primary"
                 size="sm"
                 isLoading={submittingIntent === "publish"}
-                isDisabled={submittingIntent === "saveDraft" || isAlreadyPublished}
+                isDisabled={submittingIntent === "saveDraft"}
               >
                 {t("releaseNote.form.publish")}
               </Button>

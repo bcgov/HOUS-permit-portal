@@ -19,6 +19,19 @@ class ReleaseNote < ApplicationRecord
 
   scope :published, -> { where(status: :published) }
 
+  def search_data
+    {
+      id: id,
+      version: version,
+      content: content,
+      release_notes_url: release_notes_url,
+      release_date: release_date,
+      status: status,
+      created_at: created_at,
+      updated_at: updated_at
+    }
+  end
+
   def publish_event_notification_data
     {
       "id" => SecureRandom.uuid,

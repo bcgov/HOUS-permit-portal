@@ -152,42 +152,29 @@ RSpec.describe "ReleaseNotes", type: :request do
       expect(response).to have_http_status(:success)
     end
 
+    it "updates an already published release note without publishing again" do
+      setup
+      @release_note.update!(status: :published)
+      expect(NotificationService).not_to receive(
+        :publish_release_note_publish_event
+      )
+
+      patch publish_release_note_path(@release_note.id),
+            params: {
+              release_note: {
+                content: params[:content]
+              }
+            }
+
+      expect(response).to have_http_status(:success)
+      expect(subject).to include(
+        "status" => "published",
+        "content" => params[:content]
+      )
+    end
+
     it_behaves_like AN_INVALID_PAYLOAD_RESPONSE, publish_with_payload
     it_behaves_like A_NOT_FOUND_RESPONSE, publish_with_payload
-  end
-
-  describe "#years" do
-    let!(:note_2024) do
-      create(
-        :release_note,
-        status: :published,
-        release_date: Date.new(2024, 6, 1)
-      )
-    end
-    let!(:note_2025) do
-      create(
-        :release_note,
-        status: :published,
-        release_date: Date.new(2025, 3, 1)
-      )
-    end
-    let!(:draft_note_2026) do
-      create(:release_note, status: :draft, release_date: Date.new(2026, 1, 1))
-    end
-
-    it "returns distinct release years for published notes only" do
-      get years_release_notes_path
-
-      expect(response).to have_http_status(:success)
-      expect(json_response.fetch("data")).to eq([2025, 2024])
-    end
-
-    it "is available to unauthenticated users" do
-      get years_release_notes_path
-
-      expect(response).to have_http_status(:success)
-      expect(json_response.fetch("data")).to include(2024, 2025)
-    end
   end
 
   describe "#index" do
@@ -209,6 +196,8 @@ RSpec.describe "ReleaseNotes", type: :request do
         updated_at: 1.days.ago
       )
     end
+
+    before { ReleaseNote.reindex }
 
     it "returns all release notes for super admins" do
       sign_in super_admin
@@ -245,6 +234,23 @@ RSpec.describe "ReleaseNotes", type: :request do
 
       expect(response).to have_http_status(:success)
       expect(subject).to have_attributes(length: 1)
+    end
+
+    it "filters release notes by year" do
+      older_release_note =
+        create(
+          :release_note,
+          status: :published,
+          version: "0.9.0",
+          release_date: Date.new(2024, 12, 31)
+        )
+      ReleaseNote.reindex
+
+      sign_in super_admin
+      get release_notes_path, params: { year: 2024 }
+
+      expect(response).to have_http_status(:success)
+      expect(subject.pluck("id")).to contain_exactly(older_release_note.id)
     end
 
     describe "sorts", :aggregate_failures do

@@ -1,8 +1,8 @@
 class Api::ReleaseNotesController < Api::ApplicationController
   include Api::Concerns::Search::ReleaseNotes
 
-  skip_before_action :authenticate_user!, only: %i[index years viewer_context]
-  skip_before_action :require_confirmation, only: %i[index years viewer_context]
+  skip_before_action :authenticate_user!, only: %i[index viewer_context]
+  skip_before_action :require_confirmation, only: %i[index viewer_context]
 
   before_action :set_release_note, only: %i[update publish show viewer_context]
 
@@ -66,8 +66,12 @@ class Api::ReleaseNotesController < Api::ApplicationController
 
   def publish
     authorize @release_note
+    was_published = @release_note.published?
+
     if @release_note.update(release_note_params.merge(status: :published))
-      NotificationService.publish_release_note_publish_event(@release_note)
+      unless was_published
+        NotificationService.publish_release_note_publish_event(@release_note)
+      end
       render_success @release_note,
                      "release_note.publish_success",
                      {
@@ -87,26 +91,16 @@ class Api::ReleaseNotesController < Api::ApplicationController
     end
   end
 
-  def years
-    authorize :release_note, :index?
-    release_years =
-      policy_scope(ReleaseNote)
-        .order(release_date: :desc)
-        .pluck(:release_date)
-        .map(&:year)
-        .uniq
-
-    render json: { data: release_years, meta: default_meta(nil) }, status: :ok
-  end
-
   def index
     authorize :release_note, :index?
     perform_release_note_search
+    release_note_results = @release_note_search.results
+
     view = current_user&.super_admin? ? :base : :extended
-    render_success @release_notes,
+    render_success release_note_results,
                    nil,
                    {
-                     meta: page_meta(@release_notes),
+                     meta: page_meta(@release_note_search),
                      blueprint: ReleaseNoteBlueprint,
                      blueprint_opts: {
                        view: view

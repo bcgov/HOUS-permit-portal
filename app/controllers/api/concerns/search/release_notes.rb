@@ -8,10 +8,19 @@ module Api::Concerns::Search::ReleaseNotes
   }.freeze
 
   def perform_release_note_search
-    relation = policy_scope(ReleaseNote)
-    relation = apply_release_note_year_filter(relation)
-    relation = apply_release_note_order(relation)
-    @release_notes = relation.page(release_note_page).per(release_note_per_page)
+    where_clause = release_note_where_clause
+    order = release_note_order
+    release_note_policy_scope = policy_scope(ReleaseNote)
+
+    @release_note_search =
+      ReleaseNote.search(
+        "*",
+        where: where_clause,
+        order: order,
+        page: release_note_page,
+        per_page: release_note_per_page,
+        scope_results: ->(_relation) { release_note_policy_scope }
+      )
   end
 
   private
@@ -20,13 +29,17 @@ module Api::Concerns::Search::ReleaseNotes
     params.permit(:page, :per_page, :year, sort: %i[field direction])
   end
 
-  def apply_release_note_year_filter(relation)
+  def release_note_where_clause
+    filters = {}
+
+    filters[:status] = "published" unless current_user&.super_admin?
+
     year = release_note_search_params[:year].presence
-    return relation unless year
+    return filters unless year
 
     start_date = Date.new(year.to_i, 1, 1)
     end_date = Date.new(year.to_i, 12, 31)
-    relation.where(release_date: start_date..end_date)
+    filters.merge(release_date: start_date..end_date)
   end
 
   def release_note_page
@@ -38,14 +51,15 @@ module Api::Concerns::Search::ReleaseNotes
       Kaminari.config.default_per_page
   end
 
-  def apply_release_note_order(relation)
+  def release_note_order
     sort = release_note_search_params[:sort]
     field = SORTABLE_COLUMNS[sort&.dig(:field).to_s]
     direction = (sort&.dig(:direction).to_s.downcase == "asc" ? :asc : :desc)
+    # Use created_at to break ties when release_date (including time) is the same
     if field
-      relation.order(field => direction, :id => direction)
+      { field => direction, :created_at => direction }
     else
-      relation.order(release_date: :desc, id: :desc)
+      { release_date: :desc, created_at: :desc }
     end
   end
 end

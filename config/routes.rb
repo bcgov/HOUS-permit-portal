@@ -393,7 +393,6 @@ Rails.application.routes.draw do
     resources :digital_seal_validator, only: [:create]
 
     resources :release_notes, only: %i[index show create update] do
-      get "years", on: :collection, to: "release_notes#years"
       get "viewer_context", on: :member, to: "release_notes#viewer_context"
       patch "publish", on: :member, to: "release_notes#publish"
       post "search", on: :collection, to: "release_notes#index"
