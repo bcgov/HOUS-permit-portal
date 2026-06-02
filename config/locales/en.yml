@@ -806,6 +806,22 @@ en:
       reorder_videos_success:
         title: ""
         message: "Videos reordered successfully."
+    template_category:
+      create_success:
+        title: ""
+        message: "Template category created successfully."
+      update_success:
+        title: ""
+        message: "Template category updated successfully."
+      destroy_success:
+        title: ""
+        message: "Template category deleted successfully."
+      reorder_success:
+        title: ""
+        message: "Template categories reordered successfully."
+      reorder_templates_success:
+        title: ""
+        message: "Templates reordered successfully."
     help_video:
       create_success:
         title: ""

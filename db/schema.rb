@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_05_19_235200) do
+ActiveRecord::Schema[7.2].define(version: 2026_06_02_180000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -831,8 +831,12 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_19_235200) do
     t.datetime "fetched_at"
     t.uuid "copied_from_id"
     t.boolean "available_globally"
+    t.uuid "template_category_id"
+    t.integer "sort_order", default: 0, null: false
     t.index ["copied_from_id"], name: "index_requirement_templates_on_copied_from_id"
     t.index ["discarded_at"], name: "index_requirement_templates_on_discarded_at"
+    t.index ["template_category_id", "sort_order"], name: "index_requirement_templates_on_category_and_sort_order"
+    t.index ["template_category_id"], name: "index_requirement_templates_on_template_category_id"
   end
 
   create_table "requirements", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1099,6 +1103,15 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_19_235200) do
     t.index ["name"], name: "index_tags_on_name", unique: true
   end
 
+  create_table "template_categories", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "label", null: false
+    t.integer "sort_order", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index "lower((label)::text)", name: "index_template_categories_on_lower_label", unique: true
+    t.index ["sort_order"], name: "index_template_categories_on_sort_order"
+  end
+
   create_table "template_section_blocks", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "requirement_template_section_id", null: false
     t.uuid "requirement_block_id", null: false
@@ -1299,6 +1312,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_19_235200) do
   add_foreign_key "requirement_template_sections", "requirement_template_sections", column: "copied_from_id"
   add_foreign_key "requirement_template_sections", "requirement_templates"
   add_foreign_key "requirement_templates", "requirement_templates", column: "copied_from_id"
+  add_foreign_key "requirement_templates", "template_categories"
   add_foreign_key "requirements", "requirement_blocks"
   add_foreign_key "resource_documents", "resources"
   add_foreign_key "resources", "jurisdictions"

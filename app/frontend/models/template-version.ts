@@ -10,6 +10,12 @@ import { startBlobDownload } from "../utils/utility-functions"
 import { IIntegrationMapping, IntegrationMappingModel } from "./integration-mapping"
 import { JurisdictionTemplateVersionCustomizationModel } from "./jurisdiction-template-version-customization"
 
+interface ITemplateCategorySummary {
+  id: string
+  label: string
+  sortOrder: number
+}
+
 export const TemplateVersionModel = types
   .model("TemplateVersionModel")
   .props({
@@ -35,6 +41,9 @@ export const TemplateVersionModel = types
     publiclyPreviewable: types.optional(types.boolean, false),
     hasUnresolvedFeedbacks: types.optional(types.boolean, false),
     feedbacksCount: types.optional(types.number, 0),
+    templateCategoryId: types.maybeNull(types.string),
+    templateCategory: types.maybeNull(types.frozen<ITemplateCategorySummary>()),
+    templateSortOrder: types.optional(types.number, 0),
     // Preview IDs (populated on extended view for drafts).
     // Stored as string IDs instead of safeReferences to avoid circular dependency:
     // TemplateVersion -> TemplateVersionPreview -> User -> Jurisdiction -> PermitApplication -> TemplateVersion

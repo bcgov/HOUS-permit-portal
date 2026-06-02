@@ -343,6 +343,10 @@ Rails.application.routes.draw do
       post "publish", on: :member
       post "unpublish", on: :member
     end
+    resources :template_categories, only: %i[index create update destroy] do
+      post "reorder", on: :collection
+      post "reorder_templates", on: :member
+    end
 
     # Controller namespace is Api::Part9Building::*, but we expose path with underscore for continuity
     namespace :part9_building, path: "part_9_building" do

@@ -24,9 +24,18 @@ class Api::TemplateVersionsController < Api::ApplicationController
     status = template_version_params[:status] || "published"
     @template_versions =
       policy_scope(TemplateVersion)
-        .order(updated_at: :desc)
         .joins(:requirement_template)
+        .left_joins(requirement_template: :template_category)
+        .includes(requirement_template: :template_category)
         .where(status:)
+        .then do |scope|
+          if template_version_params.key?(:publicly_previewable)
+            scope.where(publicly_previewable: publicly_previewable_param)
+          else
+            scope
+          end
+        end
+        .order(template_category_order_sql)
 
     render_success @template_versions,
                    nil,
@@ -45,9 +54,10 @@ class Api::TemplateVersionsController < Api::ApplicationController
       TemplateVersion
         .where(publicly_previewable: true, status: :draft)
         .joins(:requirement_template)
-        .includes(:requirement_template)
+        .left_joins(requirement_template: :template_category)
+        .includes(requirement_template: :template_category)
         .where(requirement_templates: { discarded_at: nil })
-        .order(updated_at: :desc)
+        .order(template_category_order_sql)
 
     render_success @template_versions,
                    nil,
@@ -389,7 +399,21 @@ class Api::TemplateVersionsController < Api::ApplicationController
   private
 
   def template_version_params
-    params.permit(:status)
+    params.permit(:status, :publicly_previewable)
+  end
+
+  def publicly_previewable_param
+    ActiveModel::Type::Boolean.new.cast(
+      template_version_params[:publicly_previewable]
+    )
+  end
+
+  def template_category_order_sql
+    Arel.sql(
+      "template_categories.sort_order ASC NULLS LAST, " \
+        "requirement_templates.sort_order ASC, " \
+        "template_versions.updated_at DESC"
+    )
   end
 
   def template_version_sandbox_scope

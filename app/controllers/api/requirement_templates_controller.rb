@@ -461,6 +461,8 @@ class Api::RequirementTemplatesController < Api::ApplicationController
         :description,
         :nickname,
         :available_globally,
+        :template_category_id,
+        :sort_order,
         tag_list: [],
         requirement_template_sections_attributes: [
           :id,

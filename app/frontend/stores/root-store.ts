@@ -21,6 +21,7 @@ import { ISessionStore, SessionStoreModel } from "./session-store"
 import { ISiteConfigurationStore, SiteConfigurationStoreModel } from "./site-configuration-store"
 import { IStepCodeStore, StepCodeStoreModel } from "./step-code-store"
 import { ISubmissionInboxStore, SubmissionInboxStoreModel } from "./submission-inbox-store"
+import { ITemplateCategoryStoreModel, TemplateCategoryStoreModel } from "./template-category-store"
 import { ITemplateVersionPreviewStoreModel, TemplateVersionPreviewStoreModel } from "./template-version-preview-store"
 import { ITemplateVersionStoreModel, TemplateVersionStoreModel } from "./template-version-store"
 import { IUIStore, UIStoreModel } from "./ui-store"
@@ -43,6 +44,7 @@ export const RootStoreModel = types
     digitalSealValidatorStore: types.optional(DigitalSealValidatorStoreModel, {}),
     templateVersionPreviewStore: types.optional(TemplateVersionPreviewStoreModel, {}),
     collaboratorStore: types.optional(CollaboratorStoreModel, {}),
+    templateCategoryStore: types.optional(TemplateCategoryStoreModel, {}),
     templateVersionStore: types.optional(TemplateVersionStoreModel, {}),
     geocoderStore: types.optional(GeocoderStoreModel, {}),
     helpVideoStore: types.optional(HelpVideoStoreModel, {}),
@@ -135,6 +137,7 @@ export interface IRootStore extends IStateTreeNode {
   contactStore: IContactStore
   notificationStore: INotificationStore
   collaboratorStore: ICollaboratorStore
+  templateCategoryStore: ITemplateCategoryStoreModel
   sandboxStore: ISandboxStore
   submissionInboxStore: ISubmissionInboxStore
   subscribeToUserChannel: () => void

@@ -10,6 +10,12 @@ import { RequirementTemplateSectionModel } from "./requirement-template-section"
 import { TemplateVersionModel } from "./template-version"
 import { UserModel } from "./user"
 
+interface ITemplateCategorySummary {
+  id: string
+  label: string
+  sortOrder: number
+}
+
 function preProcessor(snapshot) {
   const processedSnapShot = {
     ...snapshot,
@@ -72,6 +78,9 @@ export const RequirementTemplateModel = types.snapshotProcessor(
       fetchedAt: types.maybeNull(types.Date),
       isFullyLoaded: types.optional(types.boolean, false),
       availableGlobally: types.maybeNull(types.boolean),
+      templateCategoryId: types.maybeNull(types.string),
+      templateCategory: types.maybeNull(types.frozen<ITemplateCategorySummary>()),
+      sortOrder: types.optional(types.number, 0),
       enabledJurisdictions: types.maybe(types.array(types.frozen<IJurisdictionStub>())),
       explicitlyDisabledJurisdictions: types.optional(types.array(types.frozen<IJurisdictionStub>()), []),
     })

@@ -489,6 +489,7 @@ function formFormDefaults(requirementTemplate?: IRequirementTemplate): IRequirem
       description: "",
       nickname: "",
       tags: [],
+      templateCategoryId: null,
       requirementTemplateSectionsAttributes: [],
     }
   }
@@ -509,6 +510,7 @@ function formFormDefaults(requirementTemplate?: IRequirementTemplate): IRequirem
     description: requirementTemplate.description,
     nickname: requirementTemplate.nickname,
     tags: [...(requirementTemplate.tags ?? [])],
+    templateCategoryId: requirementTemplate.templateCategoryId ?? null,
     requirementTemplateSectionsAttributes,
   }
 }
