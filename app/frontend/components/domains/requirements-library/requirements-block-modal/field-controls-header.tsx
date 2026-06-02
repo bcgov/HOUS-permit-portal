@@ -23,6 +23,11 @@ interface IProps {
   computedCompliance?: TComputedCompliance
   dataValidation?: IDataValidation
   index: number
+  onMakeReusable?: IRequirementOptionsMenu["onMakeReusable"]
+  onUpdateSharedQuestion?: IRequirementOptionsMenu["onUpdateSharedQuestion"]
+  onDetachSharedQuestion?: IRequirementOptionsMenu["onDetachSharedQuestion"]
+  isSharedQuestion?: boolean
+  canMakeReusable?: boolean
 }
 
 export function FieldControlsHeader({
@@ -37,6 +42,11 @@ export function FieldControlsHeader({
   onRemove,
   index,
   requirementCode,
+  onMakeReusable,
+  onUpdateSharedQuestion,
+  onDetachSharedQuestion,
+  isSharedQuestion,
+  canMakeReusable,
 }: IProps) {
   const { t } = useTranslation()
 
@@ -53,6 +63,11 @@ export function FieldControlsHeader({
             disabledOptions={disabledMenuOptions}
             index={index}
             requirementType={requirementType}
+            onMakeReusable={onMakeReusable}
+            onUpdateSharedQuestion={onUpdateSharedQuestion}
+            onDetachSharedQuestion={onDetachSharedQuestion}
+            isSharedQuestion={isSharedQuestion}
+            canMakeReusable={canMakeReusable}
           />
         )}
       <HStack className={"requirement-edit-controls-container"} p={2}>

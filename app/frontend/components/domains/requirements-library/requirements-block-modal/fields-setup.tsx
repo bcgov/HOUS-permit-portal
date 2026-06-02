@@ -13,6 +13,7 @@ import { CustomMessageBox } from "../../../shared/base/custom-message-box"
 import { EditableInputWithControls } from "../../../shared/editable-input-with-controls"
 import { EditorWithPreview } from "../../../shared/editor/custom-extensions/editor-with-preview"
 import { FieldsSetupDrawer } from "../fields-setup-drawer"
+import { RequirementQuestionsLibraryDrawer } from "../requirement-questions-library-drawer"
 import { IRequirementBlockForm } from "./index"
 import { ReorderList } from "./reorder-list"
 import { RequirementFieldRow } from "./requirement-field-row"
@@ -53,12 +54,13 @@ export const FieldsSetup = observer(function FieldsSetup({
     setRequirementIdsToEdit((pastState) => ({ ...pastState, [requirementId]: !pastState[requirementId] }))
   }
 
-  const { onUseRequirement, onRemoveRequirement, disabledRequirementTypeOptions } = useRequirementLogic({
-    append,
-    remove,
-    watchedRequirements: watchedRequirements as IRequirementAttributes[],
-    requirementBlock,
-  })
+  const { onUseRequirement, onUseSharedQuestion, onRemoveRequirement, disabledRequirementTypeOptions } =
+    useRequirementLogic({
+      append,
+      remove,
+      watchedRequirements: watchedRequirements as IRequirementAttributes[],
+      requirementBlock,
+    })
 
   const hasFields = fields.length > 0
 
@@ -128,10 +130,18 @@ export const FieldsSetup = observer(function FieldsSetup({
             {!hasFields && (
               <Flex w={"full"} justifyContent={"space-between"} px={6}>
                 <Text>{t("requirementsLibrary.modals.noFormFieldsAdded")}</Text>
-                <FieldsSetupDrawer
-                  disabledRequirementTypeOptions={disabledRequirementTypeOptions}
-                  onUse={onUseRequirement}
-                />
+                <HStack>
+                  <RequirementQuestionsLibraryDrawer
+                    onUse={(question, closeDrawer) => {
+                      onUseSharedQuestion(question)
+                      closeDrawer?.()
+                    }}
+                  />
+                  <FieldsSetupDrawer
+                    disabledRequirementTypeOptions={disabledRequirementTypeOptions}
+                    onUse={onUseRequirement}
+                  />
+                </HStack>
               </Flex>
             )}
             {isInReorderMode ? (
@@ -151,14 +161,18 @@ export const FieldsSetup = observer(function FieldsSetup({
                   )
                 })}
                 {hasFields && (
-                  <FieldsSetupDrawer
-                    disabledRequirementTypeOptions={disabledRequirementTypeOptions}
-                    onUse={onUseRequirement}
-                    defaultButtonProps={{
-                      alignSelf: "flex-end",
-                      mr: 3,
-                    }}
-                  />
+                  <HStack alignSelf="flex-end" mr={3}>
+                    <RequirementQuestionsLibraryDrawer
+                      onUse={(question, closeDrawer) => {
+                        onUseSharedQuestion(question)
+                        closeDrawer?.()
+                      }}
+                    />
+                    <FieldsSetupDrawer
+                      disabledRequirementTypeOptions={disabledRequirementTypeOptions}
+                      onUse={onUseRequirement}
+                    />
+                  </HStack>
                 )}
               </VStack>
             )}

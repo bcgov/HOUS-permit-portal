@@ -358,13 +358,22 @@ class TemplateVersioningService
         requirement = canonical_block.requirements.find_by(id: draft_req["id"])
         next if requirement.blank?
 
-        # Update mutable fields from the draft snapshot
+        # Update placement fields locally and definition fields through the
+        # linked question source so future snapshots see the shared wording.
         requirement.update(
+          required: draft_req["required"],
+          elective: draft_req["elective"]
+        )
+
+        next unless requirement.requirement_question.present?
+
+        requirement.requirement_question.update(
           label: draft_req["label"],
           input_type: draft_req["input_type"],
           hint: draft_req["hint"],
-          required: draft_req["required"],
-          elective: draft_req["elective"]
+          instructions: draft_req["instructions"],
+          input_options:
+            draft_req["input_options"] || requirement.effective_input_options
         )
       end
     end

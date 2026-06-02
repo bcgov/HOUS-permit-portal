@@ -18,6 +18,7 @@ import { IPermitCollaboration } from "../../models/permit-collaboration"
 import { IPermitProject } from "../../models/permit-project"
 import { IPreCheck } from "../../models/pre-check"
 import { IProjectAudit } from "../../models/project-audit"
+import { IRequirementQuestion } from "../../models/requirement-question"
 import { IRequirementTemplate } from "../../models/requirement-template"
 import { ITemplateVersion } from "../../models/template-version"
 import { ITemplateVersionPreview } from "../../models/template-version-preview"
@@ -29,6 +30,7 @@ import {
   IIntegrationMappingUpdateParams,
   IPermitProjectUpdateParams,
   IRequirementBlockParams,
+  IRequirementQuestionParams,
   IRequirementTemplateUpdateParams,
   ITagSearchParams,
 } from "../../types/api-request"
@@ -42,6 +44,7 @@ import {
   IOptionResponse,
   IPageMeta,
   IRequirementBlockResponse,
+  IRequirementQuestionResponse,
   IRequirementTemplateResponse,
   IUsersResponse,
 } from "../../types/api-responses"
@@ -254,6 +257,34 @@ export class Api {
 
   async fetchRequirementBlocks(params?: TSearchParams<ERequirementLibrarySortFields>) {
     return this.client.post<IRequirementBlockResponse>("/requirement_blocks/search", params)
+  }
+
+  async fetchRequirementQuestions(params?: TSearchParams<ERequirementLibrarySortFields>) {
+    return this.client.post<IRequirementQuestionResponse>("/requirement_questions/search", params)
+  }
+
+  async fetchRequirementQuestion(id: string) {
+    return this.client.get<ApiResponse<IRequirementQuestion>>(`/requirement_questions/${id}`)
+  }
+
+  async createRequirementQuestion(params: IRequirementQuestionParams) {
+    return this.client.post<ApiResponse<IRequirementQuestion>>("/requirement_questions", {
+      requirementQuestion: params,
+    })
+  }
+
+  async updateRequirementQuestion(id: string, params: Partial<IRequirementQuestionParams>) {
+    return this.client.patch<ApiResponse<IRequirementQuestion>>(`/requirement_questions/${id}`, {
+      requirementQuestion: params,
+    })
+  }
+
+  async archiveRequirementQuestion(id: string) {
+    return this.client.delete<ApiResponse<IRequirementQuestion>>(`/requirement_questions/${id}`)
+  }
+
+  async restoreRequirementQuestion(id: string) {
+    return this.client.post<ApiResponse<IRequirementQuestion>>(`/requirement_questions/${id}/restore`)
   }
 
   async fetchJurisdictionUsers(jurisdictionId, params?: TSearchParams<EUserSortFields>) {

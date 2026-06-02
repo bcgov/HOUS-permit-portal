@@ -5,6 +5,7 @@ import {
   getEnergyStepCodeRequirementRequiredSchema,
 } from "../../../../constants"
 import { IRequirementBlock } from "../../../../models/requirement-block"
+import { IRequirementQuestion } from "../../../../models/requirement-question"
 import { IRequirementAttributes } from "../../../../types/api-request"
 import {
   EEnergyStepCodeDependencyRequirementCode,
@@ -31,6 +32,26 @@ export const useRequirementLogic = ({
   requirementBlock,
 }: UseRequirementLogicProps) => {
   const { t } = useTranslation()
+  const onUseSharedQuestion = (question: IRequirementQuestion) => {
+    const requirementCodeAlreadyUsed = watchedRequirements?.some(
+      (requirement) => requirement.requirementCode === question.requirementCode
+    )
+
+    append({
+      id: `dummy-${uuidv4()}`,
+      requirementQuestionId: question.id,
+      requirementQuestion: question,
+      requirementCode: requirementCodeAlreadyUsed ? `dummy-${uuidv4()}` : question.requirementCode,
+      inputType: question.inputType,
+      label: question.label,
+      hint: question.hint ?? "",
+      instructions: question.instructions ?? "",
+      required: true,
+      elective: false,
+      inputOptions: question.inputOptions ?? {},
+    })
+  }
+
   const onUseRequirement = (requirementType: ERequirementType) => {
     // Architectural drawing is a single requirement with pre-configured defaults
     if (requirementType === ERequirementType.architecturalDrawing) {
@@ -192,6 +213,7 @@ export const useRequirementLogic = ({
 
   return {
     onUseRequirement,
+    onUseSharedQuestion,
     onRemoveRequirement,
     disabledRequirementTypeOptions,
   }

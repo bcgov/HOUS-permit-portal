@@ -1,8 +1,9 @@
-import { Box, Text } from "@chakra-ui/react"
+import { Box, Tag, Text } from "@chakra-ui/react"
 import { ErrorMessage } from "@hookform/error-message"
 import React from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { useMst } from "../../../../setup/root"
 import { IFormConditional, IRequirementAttributes } from "../../../../types/api-request"
 import { EEnergyStepCodeDependencyRequirementCode, ENumberUnit, ERequirementType } from "../../../../types/enums"
 import {
@@ -60,6 +61,7 @@ const getRequirementFieldState = (requirementCode: string | undefined, inputType
 
 export const RequirementFieldRow = ({ index, field, isEditing, toggleEdit, onRemove }: RequirementFieldRowProps) => {
   const { t } = useTranslation()
+  const { requirementQuestionStore } = useMst()
   const {
     setValue,
     control,
@@ -75,8 +77,49 @@ export const RequirementFieldRow = ({ index, field, isEditing, toggleEdit, onRem
   const watchedRequirementCode = watch(`requirementsAttributes.${index}.requirementCode`)
   const watchedComputedCompliance = watch(`requirementsAttributes.${index}.inputOptions.computedCompliance`)
   const watchedDataValidation = watch(`requirementsAttributes.${index}.inputOptions.dataValidation`)
+  const watchedRequirementQuestionId = watch(`requirementsAttributes.${index}.requirementQuestionId`)
+  const watchedRequirementQuestion = watch(`requirementsAttributes.${index}.requirementQuestion`)
+  const isSharedQuestion = !!watchedRequirementQuestion?.shared
+  const canMakeReusable = !!watchedRequirementQuestionId
 
   const { disabledMenuOptions, showEditControls } = getRequirementFieldState(watchedRequirementCode, requirementType)
+
+  const handleMakeReusable = async () => {
+    if (!watchedRequirementQuestionId) return
+
+    const isSuccess = await updateLinkedQuestion({ shared: true })
+
+    if (isSuccess) {
+      setValue(`requirementsAttributes.${index}.requirementQuestion.shared` as any, true)
+    }
+  }
+
+  const handleUpdateSharedQuestion = async () => {
+    await updateLinkedQuestion()
+  }
+
+  const updateLinkedQuestion = async (overrides = {}) => {
+    if (!watchedRequirementQuestionId) return false
+
+    const questionInputOptions = { ...(watch(`requirementsAttributes.${index}.inputOptions`) ?? {}) }
+    delete questionInputOptions.conditional
+
+    return await requirementQuestionStore.updateRequirementQuestion(watchedRequirementQuestionId, {
+      shared: true,
+      requirementCode: watchedRequirementCode,
+      label: watch(`requirementsAttributes.${index}.label`),
+      inputType: requirementType,
+      hint: watchedHint,
+      instructions: watch(`requirementsAttributes.${index}.instructions`),
+      inputOptions: questionInputOptions,
+      ...overrides,
+    })
+  }
+
+  const handleDetachSharedQuestion = () => {
+    setValue(`requirementsAttributes.${index}.requirementQuestionId` as any, null)
+    setValue(`requirementsAttributes.${index}.requirementQuestion` as any, null)
+  }
 
   return (
     <Box
@@ -106,6 +149,11 @@ export const RequirementFieldRow = ({ index, field, isEditing, toggleEdit, onRem
       pos={"relative"}
       bg={isEditing ? "greys.grey04" : "transparent"}
     >
+      {isSharedQuestion && (
+        <Tag size="sm" bg="semantic.infoLight" color="text.primary" mb={2}>
+          {t("requirementsLibrary.sharedQuestions.sharedQuestion")}
+        </Tag>
+      )}
       <ErrorMessage
         errors={errors}
         name={`requirementsAttributes.${index}.label`}
@@ -245,6 +293,11 @@ export const RequirementFieldRow = ({ index, field, isEditing, toggleEdit, onRem
         requirementType={requirementType}
         index={index}
         disabledMenuOptions={disabledMenuOptions}
+        isSharedQuestion={isSharedQuestion}
+        canMakeReusable={canMakeReusable}
+        onMakeReusable={handleMakeReusable}
+        onUpdateSharedQuestion={handleUpdateSharedQuestion}
+        onDetachSharedQuestion={handleDetachSharedQuestion}
       />
     </Box>
   )

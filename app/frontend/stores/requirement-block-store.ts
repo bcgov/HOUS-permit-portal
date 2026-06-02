@@ -184,7 +184,10 @@ export const RequirementBlockStoreModel = types
       const clonedParams: IRequirementBlockParams = {
         ...copyableRequirementsAttributes,
         requirementsAttributes: requirementBlock.requirements?.map((attr) => {
-          const { id, ...rest } = attr
+          const { id, requirementQuestion, requirementQuestionId, ...rest } = attr
+          if (requirementQuestion?.shared) {
+            return { ...rest, requirementQuestionId }
+          }
           return rest
         }),
         name: requirementBlock.name,

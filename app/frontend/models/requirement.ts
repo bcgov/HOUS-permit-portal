@@ -1,10 +1,13 @@
 import { Instance, types } from "mobx-state-tree"
 import { ENumberUnit, ERequirementType } from "../types/enums"
 import { IFormIORequirement, IOption, IRequirementOptions, TComputedCompliance, TConditional } from "../types/types"
+import { RequirementQuestionModel } from "./requirement-question"
 
 export const RequirementModel = types
   .model("RequirementModel", {
     id: types.identifier,
+    requirementQuestionId: types.maybeNull(types.string),
+    requirementQuestion: types.maybeNull(RequirementQuestionModel),
     label: types.string,
     requirementCode: types.string,
     hint: types.maybeNull(types.string),

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_05_19_235200) do
+ActiveRecord::Schema[7.2].define(version: 2026_06_02_030000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -338,7 +338,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_19_235200) do
     t.string "website_url"
     t.boolean "hide_from_search", default: false, null: false
     t.boolean "project_meetings_enabled", default: false, null: false
-    t.jsonb "project_meeting_notification_recipient_emails", default: [], null: false
     t.index ["ltsa_matcher"], name: "index_jurisdictions_on_ltsa_matcher"
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"], name: "index_jurisdictions_on_regional_district_id"
@@ -734,10 +733,10 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_19_235200) do
     t.boolean "enable_email_unmapped_api_notification", default: true
     t.boolean "enable_in_app_resource_reminder_notification", default: true
     t.boolean "enable_email_resource_reminder_notification", default: true
-    t.boolean "enable_in_app_project_meeting_submitted_notification", default: true
-    t.boolean "enable_email_project_meeting_submitted_notification", default: true
     t.boolean "enable_in_app_project_meeting_request_received_notification", default: true
     t.boolean "enable_email_project_meeting_request_received_notification", default: true
+    t.boolean "enable_in_app_project_meeting_submitted_notification", default: true
+    t.boolean "enable_email_project_meeting_submitted_notification", default: true
     t.index ["user_id"], name: "index_preferences_on_user_id"
   end
 
@@ -764,14 +763,41 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_19_235200) do
     t.boolean "request_property_information"
     t.datetime "submitted_at"
     t.datetime "confirmed_date"
+    t.datetime "scheduled_at"
+    t.datetime "completed_at"
+    t.datetime "closed_at"
     t.string "meeting_url"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["closed_at"], name: "index_project_meetings_on_closed_at"
+    t.index ["completed_at"], name: "index_project_meetings_on_completed_at"
+    t.index ["permit_project_id"], name: "index_project_meetings_on_active_permit_project", unique: true, where: "(status = ANY (ARRAY[0, 1]))"
     t.index ["permit_project_id"], name: "index_project_meetings_on_permit_project_id"
     t.index ["requested_by_id"], name: "index_project_meetings_on_requested_by_id"
     t.index ["requester_relationship"], name: "index_project_meetings_on_requester_relationship"
+    t.index ["scheduled_at"], name: "index_project_meetings_on_scheduled_at"
     t.index ["status"], name: "index_project_meetings_on_status"
     t.index ["submitted_at"], name: "index_project_meetings_on_submitted_at"
+  end
+
+  create_table "question_definitions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "label", null: false
+    t.string "hint"
+    t.text "instructions"
+    t.integer "input_type", null: false
+    t.jsonb "input_options", default: {}, null: false
+    t.string "requirement_code"
+    t.integer "review_state", default: 0, null: false
+    t.uuid "owner_id"
+    t.uuid "forked_from_id"
+    t.datetime "discarded_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["discarded_at"], name: "index_question_definitions_on_discarded_at"
+    t.index ["forked_from_id"], name: "index_question_definitions_on_forked_from_id"
+    t.index ["owner_id"], name: "index_question_definitions_on_owner_id"
+    t.index ["requirement_code"], name: "index_question_definitions_on_requirement_code"
+    t.index ["review_state"], name: "index_question_definitions_on_review_state"
   end
 
   create_table "report_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -811,6 +837,22 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_19_235200) do
     t.index ["scan_status"], name: "index_requirement_documents_on_scan_status"
   end
 
+  create_table "requirement_questions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "requirement_code", null: false
+    t.string "label"
+    t.integer "input_type", null: false
+    t.jsonb "input_options", default: {}, null: false
+    t.string "hint"
+    t.text "instructions"
+    t.boolean "shared", default: false, null: false
+    t.datetime "discarded_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["discarded_at"], name: "index_requirement_questions_on_discarded_at"
+    t.index ["requirement_code"], name: "index_requirement_questions_on_requirement_code"
+    t.index ["shared"], name: "index_requirement_questions_on_shared"
+  end
+
   create_table "requirement_template_sections", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name"
     t.uuid "requirement_template_id", null: false
@@ -831,6 +873,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_19_235200) do
     t.datetime "fetched_at"
     t.uuid "copied_from_id"
     t.boolean "available_globally"
+    t.datetime "question_bank_drift_pending_at"
     t.index ["copied_from_id"], name: "index_requirement_templates_on_copied_from_id"
     t.index ["discarded_at"], name: "index_requirement_templates_on_discarded_at"
   end
@@ -851,7 +894,12 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_19_235200) do
     t.integer "position"
     t.boolean "elective", default: false
     t.text "instructions"
+    t.uuid "question_definition_id"
+    t.jsonb "local_overrides", default: {}, null: false
+    t.uuid "requirement_question_id"
+    t.index ["question_definition_id"], name: "index_requirements_on_question_definition_id"
     t.index ["requirement_block_id"], name: "index_requirements_on_requirement_block_id"
+    t.index ["requirement_question_id"], name: "index_requirements_on_requirement_question_id"
   end
 
   create_table "resource_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1039,7 +1087,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_19_235200) do
     t.boolean "default", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["jurisdiction_id", "email"], name: "index_submission_contacts_on_jurisdiction_id_and_email", unique: true
+    t.string "type", default: "ApplicationSubmissionContact", null: false
+    t.index ["jurisdiction_id", "email", "type"], name: "idx_submission_contacts_on_jurisdiction_email_sti_type", unique: true
     t.index ["jurisdiction_id"], name: "index_submission_contacts_on_jurisdiction_id"
   end
 
@@ -1295,11 +1344,15 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_19_235200) do
   add_foreign_key "project_documents", "permit_projects"
   add_foreign_key "project_meetings", "permit_projects"
   add_foreign_key "project_meetings", "users", column: "requested_by_id"
+  add_foreign_key "question_definitions", "question_definitions", column: "forked_from_id", on_delete: :nullify
+  add_foreign_key "question_definitions", "users", column: "owner_id", on_delete: :nullify
   add_foreign_key "requirement_documents", "requirement_blocks"
   add_foreign_key "requirement_template_sections", "requirement_template_sections", column: "copied_from_id"
   add_foreign_key "requirement_template_sections", "requirement_templates"
   add_foreign_key "requirement_templates", "requirement_templates", column: "copied_from_id"
+  add_foreign_key "requirements", "question_definitions", on_delete: :nullify
   add_foreign_key "requirements", "requirement_blocks"
+  add_foreign_key "requirements", "requirement_questions"
   add_foreign_key "resource_documents", "resources"
   add_foreign_key "resources", "jurisdictions"
   add_foreign_key "revision_reasons", "site_configurations"

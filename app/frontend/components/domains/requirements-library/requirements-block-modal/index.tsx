@@ -98,14 +98,15 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
         // remove dummy id to prevent backend from trying to update a non-existent record
         ra.id = undefined
       }
-      if (!ra?.inputOptions) return ra
+      const requirementAttributes = R.omit(["requirementQuestion"], ra) as IRequirementAttributes
+      if (!requirementAttributes?.inputOptions) return requirementAttributes
 
-      const { conditional, ...restOfInputOptions } = ra?.inputOptions
+      const { conditional, ...restOfInputOptions } = requirementAttributes?.inputOptions
 
       const formConditional = conditional as IFormConditional
 
       const processedRequirementAttributes = {
-        ...ra,
+        ...requirementAttributes,
         inputOptions: {
           ...restOfInputOptions,
         } as any,

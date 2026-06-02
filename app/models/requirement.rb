@@ -5,6 +5,7 @@ class Requirement < ApplicationRecord
   scope :electives, -> { where(elective: true) }
 
   belongs_to :requirement_block, touch: true
+  belongs_to :requirement_question, optional: true, autosave: true
 
   acts_as_list scope: :requirement_block, top_of_list: 0
 
@@ -36,6 +37,8 @@ class Requirement < ApplicationRecord
 
   # This needs to run before validation because we have validations related to the requirement_code
   before_validation :set_requirement_code
+  before_validation :ensure_requirement_question
+  before_validation :sync_private_requirement_question_definition
   before_validation :merge_computed_compliance_default_settings
 
   before_validation :convert_value_options,
@@ -195,23 +198,52 @@ class Requirement < ApplicationRecord
     ARCHITECTURAL_DRAWING_DEPENDENCY_REQUIRED_SCHEMA.keys.map(&:to_s).freeze
 
   def value_options
-    return nil if input_options.blank? || input_options["value_options"].blank?
-
-    input_options["value_options"]
-  end
-
-  def number_unit
-    return nil if input_options.blank? || input_options["number_unit"].blank?
-
-    input_options["number_unit"]
-  end
-
-  def computed_compliance
-    if input_options.blank? || input_options["computed_compliance"].blank?
+    if effective_input_options.blank? ||
+         effective_input_options["value_options"].blank?
       return nil
     end
 
-    input_options["computed_compliance"]
+    effective_input_options["value_options"]
+  end
+
+  def number_unit
+    if effective_input_options.blank? ||
+         effective_input_options["number_unit"].blank?
+      return nil
+    end
+
+    effective_input_options["number_unit"]
+  end
+
+  def computed_compliance
+    if effective_input_options.blank? ||
+         effective_input_options["computed_compliance"].blank?
+      return nil
+    end
+
+    effective_input_options["computed_compliance"]
+  end
+
+  def effective_label
+    requirement_question&.label || read_attribute(:label)
+  end
+
+  def effective_hint
+    requirement_question&.hint || read_attribute(:hint)
+  end
+
+  def effective_instructions
+    requirement_question&.instructions || read_attribute(:instructions)
+  end
+
+  def effective_input_type
+    requirement_question&.input_type || input_type
+  end
+
+  def effective_input_options
+    question_options = requirement_question&.input_options || {}
+    placement_options = read_attribute(:input_options) || {}
+    question_options.deep_merge(placement_options)
   end
 
   def key(requirement_block_key)
@@ -225,15 +257,15 @@ class Requirement < ApplicationRecord
   end
 
   def computed_compliance?
-    input_options["computed_compliance"].present?
+    effective_input_options["computed_compliance"].present?
   end
 
   def has_conditional?
-    input_options["conditional"].present?
+    effective_input_options["conditional"].present?
   end
 
   def has_data_validation?
-    input_options["data_validation"].present?
+    effective_input_options["data_validation"].present?
   end
 
   def self.extract_requirement_id_from_submission_key(key)
@@ -249,6 +281,34 @@ class Requirement < ApplicationRecord
   def merge_computed_compliance_default_settings
     configuration_service = AutomatedComplianceConfigurationService.new(self)
     configuration_service.merge_default_settings!
+  end
+
+  def ensure_requirement_question
+    return if requirement_question.present?
+    return if label.blank? || input_type.blank?
+
+    self.requirement_question =
+      RequirementQuestion.new(requirement_question_definition_attributes)
+  end
+
+  def sync_private_requirement_question_definition
+    return unless requirement_question.present?
+    return if requirement_question.shared?
+
+    requirement_question.assign_attributes(
+      requirement_question_definition_attributes
+    )
+  end
+
+  def requirement_question_definition_attributes
+    {
+      requirement_code: requirement_code,
+      label: read_attribute(:label),
+      input_type: read_attribute(:input_type),
+      input_options: read_attribute(:input_options) || {},
+      hint: read_attribute(:hint),
+      instructions: read_attribute(:instructions)
+    }
   end
 
   def validate_architectural_drawing_file

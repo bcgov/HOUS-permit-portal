@@ -216,6 +216,7 @@ export interface ISubmissionData {
 
 export interface IDenormalizedRequirement {
   id: string
+  requirementQuestionId?: string
   label: string
   inputType: ERequirementType
   inputOptions: IRequirementOptions

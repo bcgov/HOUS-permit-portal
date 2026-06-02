@@ -42,6 +42,8 @@ export interface IDataValidation {
 
 export interface IRequirementAttributes {
   id?: string
+  requirementQuestionId?: string
+  requirementQuestion?: IRequirementQuestionParams
   label?: string
   inputType?: ERequirementType
   hint?: string
@@ -60,6 +62,17 @@ export interface IRequirementAttributes {
     dataValidation?: IDataValidation
   }
   position?: number
+}
+
+export interface IRequirementQuestionParams {
+  id?: string
+  requirementCode: string
+  label: string
+  inputType: ERequirementType
+  hint?: string
+  instructions?: string
+  shared?: boolean
+  inputOptions?: IRequirementAttributes["inputOptions"]
 }
 
 export interface IRequirementBlockParams {

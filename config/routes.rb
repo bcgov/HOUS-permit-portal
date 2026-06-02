@@ -59,6 +59,11 @@ Rails.application.routes.draw do
           to: "requirement_blocks#auto_compliance_module_configurations"
     end
 
+    resources :requirement_questions, only: %i[create show update destroy] do
+      post "restore", on: :member, to: "requirement_questions#restore"
+      post "search", on: :collection, to: "requirement_questions#index"
+    end
+
     resources :notifications, only: %i[index] do
       post "reset_last_read",
            on: :collection,

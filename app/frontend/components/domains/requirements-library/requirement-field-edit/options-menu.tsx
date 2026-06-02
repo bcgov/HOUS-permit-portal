@@ -10,7 +10,7 @@ import {
   Text,
   useDisclosure,
 } from "@chakra-ui/react"
-import { CaretDown, Warning, X } from "@phosphor-icons/react"
+import { CaretDown, LinkBreak, ShareNetwork, Warning, X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
@@ -26,6 +26,11 @@ export interface IRequirementOptionsMenu {
   index: number
   disabledOptions?: Array<"remove" | "conditional">
   requirementType?: ERequirementType
+  onMakeReusable?: () => void
+  onUpdateSharedQuestion?: () => void
+  onDetachSharedQuestion?: () => void
+  isSharedQuestion?: boolean
+  canMakeReusable?: boolean
 }
 
 export const OptionsMenu = observer(function OptionsMenu({
@@ -35,6 +40,11 @@ export const OptionsMenu = observer(function OptionsMenu({
   emitOpenState,
   index,
   requirementType,
+  onMakeReusable,
+  onUpdateSharedQuestion,
+  onDetachSharedQuestion,
+  isSharedQuestion,
+  canMakeReusable,
 }: IRequirementOptionsMenu) {
   const { t } = useTranslation()
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -84,6 +94,31 @@ export const OptionsMenu = observer(function OptionsMenu({
           }}
         />
         <ComputedComplianceSetupModal requirementIndex={index} />
+
+        <MenuDivider />
+        {isSharedQuestion ? (
+          <>
+            <MenuItem color={"text.primary"} onClick={onUpdateSharedQuestion}>
+              <HStack spacing={2} fontSize={"sm"}>
+                <ShareNetwork />
+                <Text as={"span"}>{t("requirementsLibrary.sharedQuestions.updateSharedQuestion")}</Text>
+              </HStack>
+            </MenuItem>
+            <MenuItem color={"text.primary"} onClick={onDetachSharedQuestion}>
+              <HStack spacing={2} fontSize={"sm"}>
+                <LinkBreak />
+                <Text as={"span"}>{t("requirementsLibrary.sharedQuestions.detach")}</Text>
+              </HStack>
+            </MenuItem>
+          </>
+        ) : (
+          <MenuItem color={"text.primary"} onClick={onMakeReusable} isDisabled={!canMakeReusable}>
+            <HStack spacing={2} fontSize={"sm"}>
+              <ShareNetwork />
+              <Text as={"span"}>{t("requirementsLibrary.sharedQuestions.makeReusable")}</Text>
+            </HStack>
+          </MenuItem>
+        )}
 
         <MenuDivider />
         <MenuItem color={"semantic.error"} onClick={onRemove} isDisabled={disabledOptions.includes("remove")}>

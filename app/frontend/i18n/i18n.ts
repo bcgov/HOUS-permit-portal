@@ -1879,6 +1879,17 @@ Thank you,
             useButton: "Use",
             dummyOption: "Option",
           },
+          sharedQuestions: {
+            actions: "Actions",
+            question: "Question",
+            sharedQuestion: "Shared question",
+            detach: "Detach and edit locally",
+            makeReusable: "Make reusable",
+            updateSharedQuestion: "Update shared question",
+            type: "Type",
+            usedBy: "Used by",
+            useSharedQuestion: "Use shared question",
+          },
           modals: {
             unsavedChanges: {
               title: "Unsaved changes",
