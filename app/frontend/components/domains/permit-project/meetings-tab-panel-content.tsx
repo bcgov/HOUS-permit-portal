@@ -116,7 +116,7 @@ const MeetingsListContent = observer(({ permitProject, projectMeetingsEnabled }:
         ) : (
           <>
             <SearchGrid
-              templateColumns="40px minmax(160px, 1fr) minmax(260px, 3fr) minmax(120px, 1fr) minmax(100px, 0.75fr)"
+              templateColumns="minmax(160px, 1fr) minmax(260px, 3fr) minmax(120px, 1fr) minmax(100px, 0.75fr)"
               mt={hasActiveProjectMeeting || canRequestProjectMeeting ? 8 : 0}
             >
               <ProjectMeetingGridHeaders />

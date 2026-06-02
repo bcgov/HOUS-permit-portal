@@ -2,20 +2,22 @@ import { Box, Button, Container, Heading, HStack, Link, Text, VStack } from "@ch
 import { Check, Download } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useParams } from "react-router-dom"
 import { datefnsTableDateTimeFormat } from "../../../constants"
 import { usePermitProject } from "../../../hooks/resources/use-permit-project"
 import { useProjectMeeting } from "../../../hooks/resources/use-project-meeting"
 import { IPermitProject } from "../../../models/permit-project"
-import { EFileUploadAttachmentType, EFlashMessageStatus } from "../../../types/enums"
+import { useMst } from "../../../setup/root"
+import { EFileUploadAttachmentType, EFlashMessageStatus, EProjectMeetingStatus } from "../../../types/enums"
 import { IMeetingRequestDocument } from "../../../types/types"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { FileDownloadButton } from "../../shared/base/file-download-button"
 import { InfoRow } from "../../shared/base/info-row"
 import { LoadingScreen } from "../../shared/base/loading-screen"
+import { ConfirmationModal } from "../../shared/confirmation-modal"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { ProjectMeetingStatusTag } from "../../shared/project-meetings/project-meeting-status-tag"
 
@@ -44,6 +46,8 @@ export const ProjectMeetingDetailContent = observer(({ permitProject }: ProjectM
   const { t } = useTranslation()
   const { permitProjectId } = useParams<{ permitProjectId: string }>()
   const { currentProjectMeeting, error, isLoading } = useProjectMeeting()
+  const { projectMeetingStore, uiStore } = useMst()
+  const [isCancelling, setIsCancelling] = useState(false)
 
   if (error) return <ErrorScreen error={error} />
   if (isLoading || !currentProjectMeeting || permitProject.id !== permitProjectId) return <LoadingScreen />
@@ -52,6 +56,21 @@ export const ProjectMeetingDetailContent = observer(({ permitProject }: ProjectM
   const hasScheduledDetails =
     !!currentProjectMeeting.scheduledAt || !!currentProjectMeeting.confirmedDate || !!currentProjectMeeting.meetingUrl
   const notProvided = t("ui.notProvided")
+  const canCancelMeeting =
+    permitProject.isOwner &&
+    [EProjectMeetingStatus.open, EProjectMeetingStatus.scheduled].includes(currentProjectMeeting.status)
+
+  const handleCancelMeeting = async (closeModal: () => void) => {
+    setIsCancelling(true)
+    const response = await projectMeetingStore.cancelProjectMeeting(permitProjectId, currentProjectMeeting.id)
+    setIsCancelling(false)
+
+    if (response.ok) {
+      closeModal()
+    } else {
+      uiStore.flashMessage.show(EFlashMessageStatus.error, null, t("projectMeeting.detail.cancelError"), 5000)
+    }
+  }
 
   return (
     <Box as="section">
@@ -75,6 +94,20 @@ export const ProjectMeetingDetailContent = observer(({ permitProject }: ProjectM
             <ProjectMeetingStatusTag status={currentProjectMeeting.status} />
           </HStack>
         </Box>
+        {canCancelMeeting && (
+          <ConfirmationModal
+            title={t("projectMeeting.detail.cancelConfirmationTitle")}
+            body={t("projectMeeting.detail.cancelConfirmationBody")}
+            triggerText={t("projectMeeting.detail.cancelMeeting")}
+            confirmText={t("projectMeeting.detail.confirmCancelMeeting")}
+            cancelText={t("projectMeeting.detail.keepMeetingRequestOpen")}
+            cancelFirst
+            triggerButtonProps={{ variant: "ghost", color: "text.secondary" }}
+            confirmButtonProps={{ isLoading: isCancelling, isDisabled: isCancelling }}
+            modalContentProps={{ maxW: "604px" }}
+            onConfirm={handleCancelMeeting}
+          />
+        )}
       </HStack>
 
       <Box maxW="3xl">

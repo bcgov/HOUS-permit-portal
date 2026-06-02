@@ -366,6 +366,10 @@ export class Api {
     })
   }
 
+  async cancelProjectMeeting(permitProjectId: string, id: string) {
+    return this.client.post<ApiResponse<IProjectMeeting>>(`/permit_projects/${permitProjectId}/meetings/${id}/cancel`)
+  }
+
   async transitionProjectMeetingStatus(
     permitProjectId: string,
     id: string,

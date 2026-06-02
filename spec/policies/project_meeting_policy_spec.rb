@@ -70,6 +70,34 @@ RSpec.describe ProjectMeetingPolicy, type: :policy do
     expect(policy(owner, open_meeting).transition_status?).to be false
   end
 
+  it "allows owners to cancel open and scheduled requests" do
+    open_meeting =
+      create(:project_meeting, :open, permit_project: permit_project)
+    scheduled_meeting =
+      create(
+        :project_meeting,
+        :scheduled,
+        permit_project: create(:permit_project, owner:, jurisdiction:)
+      )
+
+    expect(policy(owner, open_meeting).cancel?).to be true
+    expect(policy(owner, scheduled_meeting).cancel?).to be true
+  end
+
+  it "blocks owners from cancelling completed requests" do
+    completed_meeting =
+      create(:project_meeting, :completed, permit_project: permit_project)
+
+    expect(policy(owner, completed_meeting).cancel?).to be false
+  end
+
+  it "blocks review staff from cancelling as a submitter action" do
+    open_meeting =
+      create(:project_meeting, :open, permit_project: permit_project)
+
+    expect(policy(reviewer, open_meeting).cancel?).to be false
+  end
+
   it "blocks manual transitions when no transition is available" do
     closed_meeting =
       create(:project_meeting, :closed, permit_project: permit_project)

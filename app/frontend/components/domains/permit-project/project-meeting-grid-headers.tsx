@@ -21,7 +21,6 @@ export const ProjectMeetingGridHeaders = observer(() => {
 
   return (
     <>
-      <GridHeader />
       {sortableColumns.map((column) => (
         <GridHeader key={column}>
           <Flex

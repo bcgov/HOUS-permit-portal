@@ -40,6 +40,10 @@ class ProjectMeetingPolicy < ApplicationPolicy
     update?
   end
 
+  def cancel?
+    user_is_owner? && feature_enabled?
+  end
+
   def transition_status?
     user_is_review_staff_for_jurisdiction? && feature_enabled? &&
       record.allowed_manual_transitions.any?

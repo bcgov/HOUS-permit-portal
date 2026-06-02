@@ -7,7 +7,7 @@ module ProjectMeetingStatus
     draft: [],
     open: %i[scheduled closed],
     scheduled: %i[completed closed],
-    completed: %i[closed],
+    completed: %i[],
     closed: []
   }.freeze
 

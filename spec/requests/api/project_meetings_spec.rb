@@ -263,6 +263,43 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
     end
   end
 
+  describe "POST /api/permit_projects/:permit_project_id/meetings/:id/cancel" do
+    it "allows the project owner to cancel an open meeting request" do
+      meeting = create(:project_meeting, :open, permit_project: permit_project)
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/cancel",
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("data", "status")).to eq("closed")
+      expect(json_response.dig("data", "closed_at")).to be_present
+    end
+
+    it "blocks unrelated submitters" do
+      meeting = create(:project_meeting, :open, permit_project: permit_project)
+      sign_in other_user
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/cancel",
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it "blocks review staff from cancelling through the submitter action" do
+      reviewer = create(:user, :reviewer, jurisdiction: jurisdiction)
+      meeting = create(:project_meeting, :open, permit_project: permit_project)
+      sign_in reviewer
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/cancel",
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:forbidden)
+    end
+  end
+
   describe "POST /api/permit_projects/:permit_project_id/meetings/:id/transition_status" do
     let(:reviewer) { create(:user, :reviewer, jurisdiction: jurisdiction) }
 

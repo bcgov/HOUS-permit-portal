@@ -1594,6 +1594,13 @@ Thank you,
           detail: {
             title: "Meeting request",
             backToMeetings: "Back to meetings",
+            cancelMeeting: "Cancel meeting",
+            cancelConfirmationTitle: "Cancel this meeting request?",
+            cancelConfirmationBody:
+              "Cancelling will close this meeting request. The local building authority will not use this request to schedule a meeting about your project.",
+            confirmCancelMeeting: "Yes, cancel request",
+            keepMeetingRequestOpen: "No, keep request open",
+            cancelError: "We couldn't cancel your meeting request. Please try again.",
             sentOn: "Sent {{date}}",
             scheduledTitle: "Meeting details",
             notScheduledTitle: "Meeting not scheduled yet",

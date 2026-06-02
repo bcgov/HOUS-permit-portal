@@ -3,7 +3,7 @@ class Api::ProjectMeetingsController < Api::ApplicationController
 
   before_action :set_permit_project
   before_action :set_project_meeting,
-                only: %i[show update submit transition_status]
+                only: %i[show update submit cancel transition_status]
 
   def index
     perform_project_meeting_search
@@ -80,6 +80,29 @@ class Api::ProjectMeetingsController < Api::ApplicationController
   rescue AASM::InvalidTransition, ActiveRecord::RecordInvalid
     render_error(
       "project_meeting.submit_error",
+      {
+        status: :unprocessable_entity,
+        log_args: {
+          errors: @project_meeting.errors.full_messages
+        }
+      }
+    )
+  end
+
+  def cancel
+    authorize @project_meeting
+
+    unless @project_meeting.allowed_manual_transitions.include?(:closed)
+      return render_error("project_meeting.invalid_transition", { status: 422 })
+    end
+
+    @project_meeting.close!
+    render_success @project_meeting,
+                   "project_meeting.cancel_success",
+                   { blueprint: ProjectMeetingBlueprint }
+  rescue AASM::InvalidTransition, ActiveRecord::RecordInvalid
+    render_error(
+      "project_meeting.cancel_error",
       {
         status: :unprocessable_entity,
         log_args: {
