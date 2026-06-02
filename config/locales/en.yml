@@ -809,16 +809,16 @@ en:
     template_category:
       create_success:
         title: ""
-        message: "Template category created successfully."
+        message: "Permit category created successfully."
       update_success:
         title: ""
-        message: "Template category updated successfully."
+        message: "Permit category updated successfully."
       destroy_success:
         title: ""
-        message: "Template category deleted successfully."
+        message: "Permit category deleted successfully."
       reorder_success:
         title: ""
-        message: "Template categories reordered successfully."
+        message: "Permit categories reordered successfully."
       reorder_templates_success:
         title: ""
         message: "Templates reordered successfully."

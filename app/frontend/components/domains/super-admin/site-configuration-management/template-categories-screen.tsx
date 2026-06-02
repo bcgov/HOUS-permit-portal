@@ -210,7 +210,7 @@ export const TemplateCategoriesScreen = observer(function TemplateCategoriesScre
         <Flex justify="space-between" align="flex-start" gap={6}>
           <Box>
             <Heading as="h1" fontSize="3xl">
-              {translate("siteConfiguration.templateCategories.title", "Template categories")}
+              {translate("siteConfiguration.templateCategories.title", "Permit categories")}
             </Heading>
             <Text color="text.secondary" mt={3}>
               {translate(
