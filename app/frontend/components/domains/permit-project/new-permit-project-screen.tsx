@@ -6,7 +6,9 @@ import React, { useEffect } from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
+import { EFlashMessageStatus } from "../../../types/enums"
 import { IOption } from "../../../types/types"
+import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { BackButton } from "../../shared/buttons/back-button"
 import { TextFormControl } from "../../shared/form/input-form-control"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
@@ -33,14 +35,18 @@ export const NewPermitProjectScreen = observer(() => {
     },
   })
 
-  const { handleSubmit, formState, control, register, watch } = formMethods
-  const { isSubmitting, errors, isValid } = formState
+  const { handleSubmit, formState, control, watch } = formMethods
+  const { isSubmitting } = formState
   const navigate = useNavigate()
-  const { permitProjectStore, jurisdictionStore } = useMst()
+  const { permitProjectStore, jurisdictionStore, sandboxStore, userStore } = useMst()
+  const { isSandboxActive } = sandboxStore
 
   const jurisdictionId = watch("jurisdictionId")
   const selectedJurisdiction = jurisdictionId ? jurisdictionStore.getJurisdictionById(jurisdictionId) : null
   const sandboxOptions = selectedJurisdiction?.sandboxOptions ?? []
+  const currentUserJurisdictionId = userStore.currentUser?.jurisdiction?.id
+  const showOutsideTrainingJurisdictionError =
+    isSandboxActive && !!jurisdictionId && !!currentUserJurisdictionId && jurisdictionId !== currentUserJurisdictionId
 
   useEffect(() => {
     if (jurisdictionId) {
@@ -72,6 +78,14 @@ export const NewPermitProjectScreen = observer(() => {
       <FormProvider {...formMethods}>
         <Box as="form" onSubmit={handleSubmit(onSubmit)}>
           <VStack spacing={8} align="stretch">
+            {showOutsideTrainingJurisdictionError && (
+              <CustomMessageBox
+                status={EFlashMessageStatus.error}
+                title={t("permitProject.new.sandboxJurisdictionMismatchTitle")}
+                description={t("permitProject.new.sandboxJurisdictionMismatchDescription")}
+              />
+            )}
+
             <Flex direction="column" gap={2} w={{ base: "full", md: "50%" }}>
               <Heading as="h2" variant="yellowline">
                 {t("permitProject.new.nameHeading")}
@@ -134,7 +148,12 @@ export const NewPermitProjectScreen = observer(() => {
 
             <HStack>
               <BackButton>{t("ui.back")}</BackButton>
-              <Button variant="primary" isLoading={isSubmitting} type="submit">
+              <Button
+                variant="primary"
+                isLoading={isSubmitting}
+                type="submit"
+                isDisabled={showOutsideTrainingJurisdictionError}
+              >
                 {t("permitProject.new.createButton")}
               </Button>
             </HStack>
