@@ -214,6 +214,13 @@ en:
       unavailable:
         title: Account not found
         message: Administrator accounts are not available for self-registration. Please contact your administrator to gain access.
+    digital_seal_validator:
+      no_file_error:
+        title: Error
+        message: No file was provided
+      validation_error:
+        title: Error
+        message: Error encountered validating the digital seal
     geocoder:
       site_options_error:
         title: Error
