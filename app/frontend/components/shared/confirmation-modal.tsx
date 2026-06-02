@@ -21,9 +21,6 @@ export interface IConfirmationModalProps {
   triggerButtonProps?: Partial<ButtonProps>
   confirmButtonProps?: Partial<ButtonProps>
   triggerText?: string
-  confirmText?: string
-  cancelText?: string
-  cancelFirst?: boolean
   renderTriggerButton?: (props: ButtonProps) => JSX.Element
   renderConfirmationButton?: (props: ButtonProps) => JSX.Element
   title?: string
@@ -38,9 +35,6 @@ export const ConfirmationModal = observer(function ConfirmationModal({
   triggerButtonProps,
   renderTriggerButton,
   triggerText,
-  confirmText,
-  cancelText,
-  cancelFirst = false,
   title,
   body,
   onConfirm,
@@ -63,23 +57,6 @@ export const ConfirmationModal = observer(function ConfirmationModal({
   const { t } = useTranslation()
 
   const isConfirmDisabled = confirmButtonProps?.isDisabled ?? false
-  const confirmationButton = renderConfirmationButton ? (
-    renderConfirmationButton({ onClick: () => onConfirm(onClose), isDisabled: isConfirmDisabled })
-  ) : (
-    <Button
-      variant={"primary"}
-      onClick={() => onConfirm(onClose)}
-      {...confirmButtonProps}
-      isDisabled={isConfirmDisabled}
-    >
-      {confirmText ?? triggerText ?? (t as any)("ui.confirm")}
-    </Button>
-  )
-  const cancelButton = (
-    <Button variant={"secondary"} onClick={onClose}>
-      {cancelText ?? (t as any)("ui.neverMind")}
-    </Button>
-  )
 
   return (
     <>
@@ -103,17 +80,21 @@ export const ConfirmationModal = observer(function ConfirmationModal({
 
           <ModalFooter justifyContent={"flex-start"}>
             <ButtonGroup spacing={4}>
-              {cancelFirst ? (
-                <>
-                  {cancelButton}
-                  {confirmationButton}
-                </>
+              {renderConfirmationButton ? (
+                renderConfirmationButton({ onClick: () => onConfirm(onClose), isDisabled: isConfirmDisabled })
               ) : (
-                <>
-                  {confirmationButton}
-                  {cancelButton}
-                </>
+                <Button
+                  variant={"primary"}
+                  onClick={() => onConfirm(onClose)}
+                  {...confirmButtonProps}
+                  isDisabled={isConfirmDisabled}
+                >
+                  {triggerText ?? (t as any)("ui.confirm")}
+                </Button>
               )}
+              <Button variant={"secondary"} onClick={onClose}>
+                {(t as any)("ui.neverMind")}
+              </Button>
             </ButtonGroup>
           </ModalFooter>
         </ModalContent>

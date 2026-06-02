@@ -99,11 +99,12 @@ export const ProjectMeetingDetailContent = observer(({ permitProject }: ProjectM
             title={t("projectMeeting.detail.cancelConfirmationTitle")}
             body={t("projectMeeting.detail.cancelConfirmationBody")}
             triggerText={t("projectMeeting.detail.cancelMeeting")}
-            confirmText={t("projectMeeting.detail.confirmCancelMeeting")}
-            cancelText={t("projectMeeting.detail.keepMeetingRequestOpen")}
-            cancelFirst
             triggerButtonProps={{ variant: "ghost", color: "text.secondary" }}
-            confirmButtonProps={{ isLoading: isCancelling, isDisabled: isCancelling }}
+            renderConfirmationButton={(props) => (
+              <Button variant="primary" isLoading={isCancelling} {...props}>
+                {t("projectMeeting.detail.confirmCancelMeeting")}
+              </Button>
+            )}
             modalContentProps={{ maxW: "604px" }}
             onConfirm={handleCancelMeeting}
           />
