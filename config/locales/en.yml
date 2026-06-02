@@ -36,6 +36,38 @@ en:
       collaborator_change: "%{user} made a change to the collaborators"
       block_change: "%{user} made a change to %{block_name}"
       application_change: "%{user} made a change to the application"
+    actions:
+      changed_project_state: "%{user} changed project state from %{from} to %{to}"
+      changed_application_status: "%{user} changed status from %{from} to %{to}"
+      marked_project_read: "%{user} marked the project as read"
+      marked_project_unread: "%{user} marked the project as unread"
+      marked_application_read: "%{user} marked the application as read"
+      marked_application_unread: "%{user} marked the application as unread"
+      assigned_project_reviewer: "%{user} assigned %{reviewer} as project reviewer"
+      removed_project_reviewer: "%{user} removed %{reviewer} as project reviewer"
+      assigned_application_reviewer: "%{user} assigned %{reviewer} as reviewer"
+      removed_application_reviewer: "%{user} removed %{reviewer} as reviewer"
+    values:
+      unknown: "Unknown"
+      permit_project/state:
+        draft: "Draft"
+        queued: "Queued"
+        waiting: "Waiting"
+        in_progress: "In Progress"
+        ready: "Ready"
+        permit_issued: "Permit Issued"
+        active: "Active"
+        complete: "Complete"
+        closed: "Closed"
+      permit_application/status:
+        new_draft: "New draft"
+        newly_submitted: "Submitted"
+        in_review: "In review"
+        revisions_requested: "Revisions requested"
+        resubmitted: "Resubmitted"
+        approved: "Approved"
+        issued: "Issued"
+        withdrawn: "Withdrawn"
   activerecord:
     attributes:
       contact:

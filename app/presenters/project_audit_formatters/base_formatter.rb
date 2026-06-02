@@ -1,5 +1,7 @@
 module ProjectAuditFormatters
   class BaseFormatter
+    include ChangesHelper
+
     attr_reader :audit, :viewer
 
     def initialize(audit, viewer)

@@ -121,6 +121,35 @@ RSpec.describe ProjectAuditFormatters::PermitCollaborationFormatter do
         end
       end
 
+      context "review delegatee collaboration" do
+        let(:collab) do
+          instance_double(
+            PermitCollaboration,
+            blank?: false,
+            submission?: false,
+            delegatee?: true,
+            review?: true,
+            collaborator_name: "Dave",
+            assigned_requirement_block_name: "",
+            permit_application: permit_application,
+            permit_application_id: "pa-1",
+            assigned_requirement_block_id: nil
+          )
+        end
+        let(:audit) do
+          build_audit_double(
+            user: user,
+            auditable: collab,
+            auditable_type: "PermitCollaboration",
+            action: "create"
+          )
+        end
+
+        it "returns reviewer assignment message" do
+          expect(formatter.description).to eq("Alice assigned Dave as reviewer")
+        end
+      end
+
       context "review collaboration" do
         let(:collab) do
           instance_double(
@@ -248,6 +277,38 @@ RSpec.describe ProjectAuditFormatters::PermitCollaborationFormatter do
           expect(formatter.description).to eq(
             "Carol unassigned from Foundation"
           )
+        end
+      end
+
+      context "review delegatee discard" do
+        let(:collab) do
+          instance_double(
+            PermitCollaboration,
+            blank?: false,
+            submission?: false,
+            delegatee?: true,
+            review?: true,
+            collaborator_name: "Dave",
+            assigned_requirement_block_name: "",
+            permit_application: permit_application,
+            permit_application_id: "pa-1",
+            assigned_requirement_block_id: nil
+          )
+        end
+        let(:audit) do
+          build_audit_double(
+            user: user,
+            auditable: collab,
+            auditable_type: "PermitCollaboration",
+            action: "update",
+            audited_changes: {
+              "discarded_at" => [nil, "2026-01-01"]
+            }
+          )
+        end
+
+        it "returns reviewer removal message" do
+          expect(formatter.description).to eq("Alice removed Dave as reviewer")
         end
       end
 
