@@ -1,6 +1,4 @@
 class Jurisdiction < ApplicationRecord
-  audited on: %i[update], only: %i[project_meetings_enabled]
-
   extend FriendlyId
   friendly_id :qualified_name, use: :slugged
   include JurisdictionExternalApiState
