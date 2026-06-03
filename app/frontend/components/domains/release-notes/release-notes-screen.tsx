@@ -20,6 +20,7 @@ export const ReleaseNotesScreen = observer(function ReleaseNotesScreen() {
   const highlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const highlightedHashRef = useRef<string | null>(null)
   const [availableHeight, setAvailableHeight] = useState<number | null>(null)
+  const [initializedHash, setInitializedHash] = useState<string | null>(null)
   const [highlightedReleaseNoteId, setHighlightedReleaseNoteId] = useState<string | null>(null)
   const {
     viewingReleaseNotes,
@@ -40,8 +41,18 @@ export const ReleaseNotesScreen = observer(function ReleaseNotesScreen() {
   } = releaseNoteStore
 
   useEffect(() => {
-    initializeViewingPage(location.hash)
-  }, [initializeViewingPage])
+    let cancelled = false
+    const hash = location.hash
+    setInitializedHash(null)
+
+    Promise.resolve(initializeViewingPage(hash)).then(() => {
+      if (!cancelled) setInitializedHash(hash)
+    })
+
+    return () => {
+      cancelled = true
+    }
+  }, [initializeViewingPage, location.hash])
 
   useSearch(releaseNoteStore, [viewingYearInitialized ? selectedYear : null])
 
@@ -60,6 +71,14 @@ export const ReleaseNotesScreen = observer(function ReleaseNotesScreen() {
   }, [])
 
   useEffect(() => {
+    const releaseNoteId = parseReleaseNoteIdFromHash(location.hash)
+    const targetAnchorId = releaseNoteId ? getReleaseNoteAnchorId(releaseNoteId) : null
+    const targetElement = targetAnchorId ? document.getElementById(targetAnchorId) : null
+
+    if (location.hash && initializedHash !== location.hash) {
+      return
+    }
+
     if (!location.hash) {
       highlightedHashRef.current = null
       setHighlightedReleaseNoteId(null)
@@ -67,19 +86,16 @@ export const ReleaseNotesScreen = observer(function ReleaseNotesScreen() {
     }
 
     if (isSearching || highlightedHashRef.current === location.hash) {
-      setHighlightedReleaseNoteId(null)
       return
     }
 
-    const releaseNoteId = parseReleaseNoteIdFromHash(location.hash)
     if (!releaseNoteId) {
       setHighlightedReleaseNoteId(null)
       return
     }
 
-    const element = document.getElementById(getReleaseNoteAnchorId(releaseNoteId))
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" })
+    if (targetElement) {
+      targetElement.scrollIntoView({ behavior: "smooth", block: "start" })
       highlightedHashRef.current = location.hash
       setHighlightedReleaseNoteId(releaseNoteId)
 
@@ -98,7 +114,17 @@ export const ReleaseNotesScreen = observer(function ReleaseNotesScreen() {
         highlightTimeoutRef.current = null
       }
     }
-  }, [location.hash, isSearching, viewingReleaseNotes.length, getReleaseNoteAnchorId, parseReleaseNoteIdFromHash])
+  }, [
+    location.hash,
+    initializedHash,
+    isSearching,
+    viewingReleaseNotes.length,
+    selectedYear,
+    currentPage,
+    viewingYearInitialized,
+    getReleaseNoteAnchorId,
+    parseReleaseNoteIdFromHash,
+  ])
 
   const reportIssueMailto = `mailto:${t("site.contactEmail")}`
 

@@ -202,7 +202,13 @@ export const ReleaseNoteStoreModel = types
 
       const releaseNoteId = self.parseReleaseNoteIdFromHash(hash)
       if (releaseNoteId) {
-        yield self.ensureReleaseNoteVisibleInList(releaseNoteId)
+        const ensured = yield self.ensureReleaseNoteVisibleInList(releaseNoteId)
+        if (ensured) {
+          yield self.searchReleaseNotes({
+            page: self.currentPage,
+            countPerPage: self.countPerPage,
+          })
+        }
       }
 
       self.viewingYearInitialized = true
