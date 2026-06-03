@@ -19,6 +19,7 @@ import { IPermitProject } from "../../models/permit-project"
 import { IPreCheck } from "../../models/pre-check"
 import { IProjectAudit } from "../../models/project-audit"
 import { IRequirementTemplate } from "../../models/requirement-template"
+import { ITemplateCategory } from "../../models/template-category"
 import { ITemplateVersion } from "../../models/template-version"
 import { ITemplateVersionPreview } from "../../models/template-version-preview"
 import { IUser } from "../../models/user"
@@ -184,6 +185,36 @@ export class Api {
 
   async reorderHelpVideosInSection(sectionId: string, orderedIds: string[]) {
     return this.client.post<ApiResponse<IHelpVideoSection>>(`/help_video_sections/${sectionId}/reorder_videos`, {
+      orderedIds,
+    })
+  }
+
+  async fetchTemplateCategories() {
+    return this.client.get<ApiResponse<ITemplateCategory[]>>(`/template_categories`)
+  }
+
+  async createTemplateCategory(params: { label: string }) {
+    return this.client.post<ApiResponse<ITemplateCategory[]>>(`/template_categories`, {
+      templateCategory: params,
+    })
+  }
+
+  async updateTemplateCategory(id: string, params: { label: string }) {
+    return this.client.patch<ApiResponse<ITemplateCategory[]>>(`/template_categories/${id}`, {
+      templateCategory: params,
+    })
+  }
+
+  async deleteTemplateCategory(id: string) {
+    return this.client.delete<ApiResponse<ITemplateCategory[]>>(`/template_categories/${id}`)
+  }
+
+  async reorderTemplateCategories(orderedIds: string[]) {
+    return this.client.post<ApiResponse<ITemplateCategory[]>>(`/template_categories/reorder`, { orderedIds })
+  }
+
+  async reorderTemplatesInCategory(categoryId: string, orderedIds: string[]) {
+    return this.client.post<ApiResponse<ITemplateCategory[]>>(`/template_categories/${categoryId}/reorder_templates`, {
       orderedIds,
     })
   }

@@ -1,12 +1,13 @@
 import { Button, Center, Flex, HStack, Stack, Text } from "@chakra-ui/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { useTemplateVersions } from "../../../hooks/resources/use-template-versions"
 import { ITemplateVersion } from "../../../models/template-version"
 import { useMst } from "../../../setup/root"
 import { ETemplateVersionStatus } from "../../../types/enums"
+import { groupTemplateVersionsByCategory } from "../../../utils/template-version-grouping"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { RouterLink } from "../../shared/navigation/router-link"
@@ -48,6 +49,7 @@ export const TemplateVersionsList = observer(function TemplateVersionsList({
 
   const { showStatus = false, showVersionDate = true } = statusDisplayOptions || {}
   const showStatusTag = showStatus || can("requirementTemplate:manage")
+  const groupedTemplateVersions = useMemo(() => groupTemplateVersionsByCategory(templateVersions), [templateVersions])
 
   if (error) return <ErrorScreen error={error} />
   if (isLoading) {
@@ -66,57 +68,64 @@ export const TemplateVersionsList = observer(function TemplateVersionsList({
         </Text>
       )}
 
-      {templateVersions.map((tv) => (
-        <SectionBox key={tv.id} w="full" pt={isSandboxActive ? 12 : 6}>
-          {isSandboxActive && <SandboxHeader sandbox={tv.sandbox} />}
-          <Flex w="full" as="section">
-            <Stack spacing={3} flex={1}>
-              <Text as="h4" color={"text.link"} fontWeight={700} fontSize="xl">
-                {tv.denormalizedTemplateJson?.nickname}
-              </Text>
-              <Text fontSize={"sm"} color={"text.secondary"}>
-                {tv.denormalizedTemplateJson?.description}
-              </Text>
-              <Text fontSize={"sm"} color={"text.secondary"}>
-                <Text as="span" fontWeight={700}>
-                  {t("digitalBuildingPermits.index.lastUpdated")}:{" "}
-                </Text>
-                {format(tv.updatedAt, "MMM d, yyyy")}
-              </Text>
-              <HStack gap={4} align="center">
-                <VersionTag versionDate={tv.versionDate} w="fit-content" />
-                {(tv.denormalizedTemplateJson?.tags ?? []).length > 0 && (
-                  <Text fontSize="sm" color="text.secondary">
-                    {(tv.denormalizedTemplateJson?.tags ?? []).join(", ")}
+      {groupedTemplateVersions.map((group) => (
+        <Stack key={group.id} spacing={3} w="full">
+          <Text as="h3" color="text.secondary" fontWeight={700} fontSize="lg">
+            {group.label}
+          </Text>
+          {group.templateVersions.map((tv) => (
+            <SectionBox key={tv.id} w="full" pt={isSandboxActive ? 12 : 6}>
+              {isSandboxActive && <SandboxHeader />}
+              <Flex w="full" as="section">
+                <Stack spacing={3} flex={1}>
+                  <Text as="h4" color={"text.link"} fontWeight={700} fontSize="xl">
+                    {tv.denormalizedTemplateJson?.nickname}
                   </Text>
+                  <Text fontSize={"sm"} color={"text.secondary"}>
+                    {tv.denormalizedTemplateJson?.description}
+                  </Text>
+                  <Text fontSize={"sm"} color={"text.secondary"}>
+                    <Text as="span" fontWeight={700}>
+                      {t("digitalBuildingPermits.index.lastUpdated")}:{" "}
+                    </Text>
+                    {format(tv.updatedAt, "MMM d, yyyy")}
+                  </Text>
+                  <HStack gap={4} align="center">
+                    <VersionTag versionDate={tv.versionDate} w="fit-content" />
+                    {(tv.denormalizedTemplateJson?.tags ?? []).length > 0 && (
+                      <Text fontSize="sm" color="text.secondary">
+                        {(tv.denormalizedTemplateJson?.tags ?? []).join(", ")}
+                      </Text>
+                    )}
+                    {showStatusTag && (
+                      <TemplateStatusTag
+                        status={tv.status}
+                        scheduledFor={
+                          showVersionDate && tv.status === ETemplateVersionStatus.scheduled && tv.versionDate
+                            ? tv.versionDate
+                            : undefined
+                        }
+                      />
+                    )}
+                  </HStack>
+                </Stack>
+                {renderButton ? (
+                  renderButton(tv)
+                ) : (
+                  <Button
+                    to={`/digital-building-permits/${tv.id}/edit`}
+                    as={RouterLink}
+                    variant={"primary"}
+                    ml={4}
+                    alignSelf={"center"}
+                  >
+                    {t("ui.manage")}
+                  </Button>
                 )}
-                {showStatusTag && (
-                  <TemplateStatusTag
-                    status={tv.status}
-                    scheduledFor={
-                      showVersionDate && tv.status === ETemplateVersionStatus.scheduled && tv.versionDate
-                        ? tv.versionDate
-                        : undefined
-                    }
-                  />
-                )}
-              </HStack>
-            </Stack>
-            {renderButton ? (
-              renderButton(tv)
-            ) : (
-              <Button
-                to={`/digital-building-permits/${tv.id}/edit`}
-                as={RouterLink}
-                variant={"primary"}
-                ml={4}
-                alignSelf={"center"}
-              >
-                {t("ui.manage")}
-              </Button>
-            )}
-          </Flex>
-        </SectionBox>
+              </Flex>
+            </SectionBox>
+          ))}
+        </Stack>
       ))}
     </Stack>
   )

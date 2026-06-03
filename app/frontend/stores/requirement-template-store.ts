@@ -9,7 +9,7 @@ import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IRequirementTemplate, RequirementTemplateModel } from "../models/requirement-template"
 import { IRequirementTemplateUpdateParams } from "../types/api-request"
-import { ERequirementTemplateSortFields } from "../types/enums"
+import { ERequirementTemplateSortFields, ETagType } from "../types/enums"
 import { ICopyRequirementTemplateFormData, IOption, TCreateRequirementTemplateFormData } from "../types/types"
 import { toCamelCase } from "../utils/utility-functions"
 
@@ -188,7 +188,12 @@ export const RequirementTemplateStoreModel = types
       return response.ok
     }),
     searchTagOptions: flow(function* (query: string) {
-      const response = yield* toGenerator(self.environment.api.searchTags({ query }))
+      const response = yield* toGenerator(
+        self.environment.api.searchTags({
+          query,
+          taggableTypes: [ETagType.requirementTemplate],
+        })
+      )
       const tags = (response?.ok ? response.data : []) as string[]
       return (Array.isArray(tags) ? tags : []).map((tag) => ({ value: tag, label: tag }))
     }),

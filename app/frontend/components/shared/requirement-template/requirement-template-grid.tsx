@@ -20,6 +20,7 @@ interface RequirementTemplateGridProps {
 }
 
 export const RequirementTemplateGrid: React.FC<RequirementTemplateGridProps> = observer(({ renderActions }) => {
+  const { t } = useTranslation()
   const { requirementTemplateStore } = useMst()
   const {
     tableRequirementTemplates,
@@ -36,7 +37,7 @@ export const RequirementTemplateGrid: React.FC<RequirementTemplateGridProps> = o
 
   return (
     <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
-      <SearchGrid templateColumns="1.5fr 1.5fr 2fr 1.5fr 1.5fr 1fr 1fr">
+      <SearchGrid templateColumns="1.5fr 1fr 2.5fr 1.5fr 1.5fr 1fr 7.9rem">
         <GridHeaders />
 
         {isSearching ? (
@@ -48,6 +49,9 @@ export const RequirementTemplateGrid: React.FC<RequirementTemplateGridProps> = o
             <Box key={rt.id} className={"requirements-template-grid-row"} role={"row"} display={"contents"}>
               <SearchGridItem fontWeight="bold">{rt.nickname}</SearchGridItem>
               <SearchGridItem>
+                {rt.templateCategory?.label ?? t("siteConfiguration.templateCategories.uncategorized")}
+              </SearchGridItem>
+              <SearchGridItem>
                 <HStack as="ul" wrap="wrap" spacing={1} gap={1}>
                   {(rt.tags ?? []).map((tag) => (
                     <Tag key={tag} as="li" bg="greys.grey03" color="text.secondary" fontSize="xs">
@@ -56,7 +60,6 @@ export const RequirementTemplateGrid: React.FC<RequirementTemplateGridProps> = o
                   ))}
                 </HStack>
               </SearchGridItem>
-              <SearchGridItem>{rt.description}</SearchGridItem>
               <SearchGridItem>
                 {rt.publishedTemplateVersion?.versionDate ? (
                   <VersionTag versionDate={rt.publishedTemplateVersion.versionDate} />
@@ -68,7 +71,7 @@ export const RequirementTemplateGrid: React.FC<RequirementTemplateGridProps> = o
                 )}
               </SearchGridItem>
               <SearchGridItem>{rt.availableIn}</SearchGridItem>
-              <SearchGridItem>{renderActions(rt)}</SearchGridItem>
+              <SearchGridItem justifyContent="flex-end">{renderActions(rt)}</SearchGridItem>
             </Box>
           ))
         )}

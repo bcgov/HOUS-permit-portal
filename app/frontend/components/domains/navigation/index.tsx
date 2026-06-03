@@ -384,6 +384,11 @@ const QaToolsFeatureAccessScreen = lazy(() =>
     default: module.QaToolsFeatureAccessScreen,
   }))
 )
+const TemplateCategoriesScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/template-categories-screen").then((module) => ({
+    default: module.TemplateCategoriesScreen,
+  }))
+)
 
 const ReportingScreen = lazy(() =>
   import("../super-admin/reporting/reporting-screen").then((module) => ({ default: module.ReportingScreen }))
@@ -506,6 +511,7 @@ const AppRoutes = observer(() => {
       <Route path="/configuration-management/sitewide-message" element={<SitewideMessageScreen />} />
       <Route path="/configuration-management/help-drawer-setup" element={<HelpDrawerSetupScreen />} />
       <Route path="/configuration-management/help-videos" element={<HelpVideosManagementScreen />} />
+      <Route path="/configuration-management/template-categories" element={<TemplateCategoriesScreen />} />
       <Route path="/configuration-management/revision-reason-setup" element={<RevisionReasonSetupScreen />} />
       {/* DEPRECATED: /configuration-management/standardization-setup route removed.
           Super admins toggle publicly_previewable directly on TemplateVersionScreen. */}
