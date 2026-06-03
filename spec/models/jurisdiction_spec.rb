@@ -150,13 +150,22 @@ RSpec.describe Jurisdiction, type: :model do
     describe "project meeting notification recipient emails" do
       let(:jurisdiction) { create(:sub_district) }
 
-      it "normalizes blank and duplicate emails" do
-        jurisdiction.update!(
-          project_meeting_notification_recipient_emails: [
-            " meetings@example.com ",
-            "",
-            "meetings@example.com"
-          ]
+      it "returns confirmed project meeting contact emails" do
+        create(
+          :meeting_submission_contact,
+          jurisdiction: jurisdiction,
+          email: "meetings@example.com"
+        )
+        create(
+          :meeting_submission_contact,
+          jurisdiction: jurisdiction,
+          email: "unconfirmed@example.com",
+          confirmed_at: nil
+        )
+        create(
+          :submission_contact,
+          jurisdiction: jurisdiction,
+          email: "submission@example.com"
         )
 
         expect(
@@ -164,15 +173,11 @@ RSpec.describe Jurisdiction, type: :model do
         ).to eq(["meetings@example.com"])
       end
 
-      it "rejects invalid emails" do
-        jurisdiction.project_meeting_notification_recipient_emails = [
-          "not-an-email"
-        ]
+      it "exposes confirmed project meeting contacts" do
+        contact =
+          create(:meeting_submission_contact, jurisdiction: jurisdiction)
 
-        expect(jurisdiction).not_to be_valid
-        expect(
-          jurisdiction.errors[:project_meeting_notification_recipient_emails]
-        ).to be_present
+        expect(jurisdiction.confirmed_project_meeting_contacts).to eq([contact])
       end
     end
   end

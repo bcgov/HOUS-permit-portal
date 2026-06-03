@@ -25,7 +25,16 @@ export enum EFileUploadAttachmentType {
 
 export enum EProjectMeetingStatus {
   draft = "draft",
-  submitted = "submitted",
+  open = "open",
+  scheduled = "scheduled",
+  completed = "completed",
+  closed = "closed",
+}
+
+export enum EProjectMeetingSortFields {
+  submittedAt = "submitted_at",
+  projectDescription = "project_description",
+  status = "status",
 }
 
 export enum EProjectMeetingRequesterRelationship {
@@ -38,6 +47,11 @@ export enum EProjectMeetingRequesterRelationship {
 export enum EMeetingRequestDocumentType {
   supporting = "supporting",
   authorization = "authorization",
+}
+
+export enum ESubmissionContactClass {
+  application = "ApplicationSubmissionContact",
+  meeting = "MeetingSubmissionContact",
 }
 
 export enum EResourceCategory {

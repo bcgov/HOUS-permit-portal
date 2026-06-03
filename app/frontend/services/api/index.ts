@@ -42,6 +42,7 @@ import {
   INotificationResponse,
   IOptionResponse,
   IPageMeta,
+  IProjectMeetingResponse,
   IRequirementBlockResponse,
   IRequirementTemplateResponse,
   IUsersResponse,
@@ -56,6 +57,7 @@ import {
   EPermitProjectSortFields,
   EPreCheckSortFields,
   EProjectAuditSortFields,
+  EProjectMeetingSortFields,
   ERequirementLibrarySortFields,
   ERequirementTemplateSortFields,
   EStepCodeSortFields,
@@ -348,16 +350,39 @@ export class Api {
     return this.client.get<ApiResponse<IProjectMeeting>>(`/permit_projects/${permitProjectId}/meetings/${id}`)
   }
 
-  async updateProjectMeeting(permitProjectId: string, id: string, params: Record<string, any>) {
+  async fetchProjectMeetings(permitProjectId: string, params?: TSearchParams<EProjectMeetingSortFields>) {
+    return this.client.post<IProjectMeetingResponse>(`/permit_projects/${permitProjectId}/meetings/search`, params)
+  }
+
+  async updateProjectMeeting(permitProjectId: string, id: string, params: Record<string, unknown>) {
     return this.client.patch<ApiResponse<IProjectMeeting>>(`/permit_projects/${permitProjectId}/meetings/${id}`, {
       projectMeeting: params,
     })
   }
 
-  async submitProjectMeeting(permitProjectId: string, id: string, params: Record<string, any>) {
+  async submitProjectMeeting(permitProjectId: string, id: string, params: Record<string, unknown>) {
     return this.client.post<ApiResponse<IProjectMeeting>>(`/permit_projects/${permitProjectId}/meetings/${id}/submit`, {
       projectMeeting: params,
     })
+  }
+
+  async cancelProjectMeeting(permitProjectId: string, id: string) {
+    return this.client.post<ApiResponse<IProjectMeeting>>(`/permit_projects/${permitProjectId}/meetings/${id}/cancel`)
+  }
+
+  async transitionProjectMeetingStatus(
+    permitProjectId: string,
+    id: string,
+    targetStatus: string,
+    params: Record<string, unknown>
+  ) {
+    return this.client.post<ApiResponse<IProjectMeeting>>(
+      `/permit_projects/${permitProjectId}/meetings/${id}/transition_status`,
+      {
+        targetStatus,
+        projectMeeting: params,
+      }
+    )
   }
 
   async pinPermitProject(id: string) {

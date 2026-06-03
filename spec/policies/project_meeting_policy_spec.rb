@@ -56,6 +56,55 @@ RSpec.describe ProjectMeetingPolicy, type: :policy do
     expect(policy(reviewer).update?).to be false
   end
 
+  it "allows jurisdiction review staff to manually transition open requests" do
+    open_meeting =
+      create(:project_meeting, :open, permit_project: permit_project)
+
+    expect(policy(reviewer, open_meeting).transition_status?).to be true
+  end
+
+  it "blocks owners from manually transitioning request status" do
+    open_meeting =
+      create(:project_meeting, :open, permit_project: permit_project)
+
+    expect(policy(owner, open_meeting).transition_status?).to be false
+  end
+
+  it "allows owners to cancel open and scheduled requests" do
+    open_meeting =
+      create(:project_meeting, :open, permit_project: permit_project)
+    scheduled_meeting =
+      create(
+        :project_meeting,
+        :scheduled,
+        permit_project: create(:permit_project, owner:, jurisdiction:)
+      )
+
+    expect(policy(owner, open_meeting).cancel?).to be true
+    expect(policy(owner, scheduled_meeting).cancel?).to be true
+  end
+
+  it "blocks owners from cancelling completed requests" do
+    completed_meeting =
+      create(:project_meeting, :completed, permit_project: permit_project)
+
+    expect(policy(owner, completed_meeting).cancel?).to be false
+  end
+
+  it "blocks review staff from cancelling as a submitter action" do
+    open_meeting =
+      create(:project_meeting, :open, permit_project: permit_project)
+
+    expect(policy(reviewer, open_meeting).cancel?).to be false
+  end
+
+  it "blocks manual transitions when no transition is available" do
+    closed_meeting =
+      create(:project_meeting, :closed, permit_project: permit_project)
+
+    expect(policy(reviewer, closed_meeting).transition_status?).to be false
+  end
+
   it "blocks creation when the global feature gate is off" do
     SiteConfiguration.instance.update!(project_meetings_enabled: false)
 
@@ -66,5 +115,33 @@ RSpec.describe ProjectMeetingPolicy, type: :policy do
     jurisdiction.update!(project_meetings_enabled: false)
 
     expect(policy(owner).create?).to be false
+  end
+
+  describe "Scope" do
+    def resolved_scope_for(user)
+      described_class::Scope.new(
+        UserContext.new(user, sandbox),
+        ProjectMeeting.all
+      ).resolve
+    end
+
+    it "includes project meetings for the project owner" do
+      meeting
+      create(:project_meeting, permit_project: create(:permit_project))
+
+      expect(resolved_scope_for(owner)).to contain_exactly(meeting)
+    end
+
+    it "includes project meetings for jurisdiction review staff" do
+      meeting
+
+      expect(resolved_scope_for(reviewer)).to include(meeting)
+    end
+
+    it "excludes meetings for submitter collaborators" do
+      meeting
+
+      expect(resolved_scope_for(collaborator_user)).to be_empty
+    end
   end
 end

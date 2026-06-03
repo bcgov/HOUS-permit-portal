@@ -392,7 +392,8 @@ class PermitHubMailer < ApplicationMailer
     @submission_contact = submission_contact
     send_mail(
       email: submission_contact.email,
-      template_key: "submission_contact_confirm"
+      template_key: "submission_contact_confirm",
+      subject_key: submission_contact.confirmation_subject_key
     )
   end
 
@@ -444,7 +445,7 @@ class PermitHubMailer < ApplicationMailer
     @inbox_setup_url = nil
     return unless @jurisdiction.present?
 
-    return if @jurisdiction.submission_contacts.confirmed.exists?
+    return if @jurisdiction.confirmed_submission_contacts.exists?
 
     @submission_inbox_action_required = true
     @inbox_setup_url =

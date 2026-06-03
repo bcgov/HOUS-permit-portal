@@ -10,6 +10,7 @@ import { JurisdictionModel } from "./jurisdiction"
 import { IPermitApplication, PermitApplicationModel } from "./permit-application"
 import { PermitProjectCollaborationModel } from "./permit-project-collaboration"
 import { PermitProjectInboxApplicationSearchSlice } from "./permit-project-inbox-application-search"
+import { IProjectMeeting } from "./project-meeting"
 
 const PermitProjectCoreModel = types.model("PermitProjectCore", {
   id: types.identifier,
@@ -62,6 +63,7 @@ const PermitProjectCoreModel = types.model("PermitProjectCore", {
   recentAudits: types.optional(types.array(types.frozen<IProjectAuditSummary>()), []),
   reviewDelegatee: types.maybeNull(types.safeReference(CollaboratorModel)),
   permitProjectCollaborations: types.optional(types.array(PermitProjectCollaborationModel), []),
+  activeProjectMeeting: types.maybeNull(types.frozen<IProjectMeeting>()),
   displayMode: types.optional(types.enumeration(Object.values(EInboxDisplayMode)), EInboxDisplayMode.list),
 })
 

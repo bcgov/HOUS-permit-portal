@@ -263,7 +263,6 @@ class Api::JurisdictionsController < Api::ApplicationController
       :ltsa_matcher,
       :heating_degree_days,
       map_position: [],
-      project_meeting_notification_recipient_emails: [],
       users_attributes: %i[first_name last_name role email],
       contacts_attributes: %i[
         id
@@ -275,7 +274,7 @@ class Api::JurisdictionsController < Api::ApplicationController
         cell
         email
       ],
-      submission_contacts_attributes: %i[id email title default _destroy],
+      submission_contacts_attributes: %i[id email title default type _destroy],
       jurisdiction_step_requirements_attributes: %i[
         id
         default

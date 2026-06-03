@@ -37,6 +37,7 @@ import {
   EStepCodeCompliancePath,
   EStepCodeEPCTestingTargetType,
   EStepCodeOccupancyKey,
+  ESubmissionContactClass,
   ETemplateVersionStatus,
   EUserRoles,
   EWindowsGlazedDoorsPerformanceType,
@@ -101,6 +102,7 @@ export interface ISubmissionContact {
   confirmedAt: string
   default: boolean
   confirmationSentAt?: string
+  type: ESubmissionContactClass
 }
 
 export interface IHelpVideoNavigationNeighbor {

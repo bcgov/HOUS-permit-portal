@@ -30,6 +30,7 @@ import { FullscreenMapModal } from "../../shared/module-wrappers/fullscreen-map-
 import { ProjectMap } from "../../shared/module-wrappers/project-map"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { AddPermitsButton } from "../../shared/permit-projects/add-permits-button"
+import { ActiveProjectMeetingNotice } from "../../shared/project-meetings/active-project-meeting-notice"
 import ProjectInfoRow from "../../shared/project/project-info-row"
 import { SitesSelect } from "../../shared/select/selectors/sites-select"
 import { PermitApplicationGridHeaders } from "./permit-application-grid-headers"
@@ -52,6 +53,9 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
   const [isEditing, setIsEditing] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { isOpen: isMapFullscreen, onOpen: onOpenMapFullscreen, onClose: onCloseMapFullscreen } = useDisclosure()
+  const hasActiveProjectMeeting = !!permitProject.activeProjectMeeting
+  const projectMeetingsEnabled =
+    siteConfigurationStore.projectMeetingsEnabled && permitProject.jurisdiction?.projectMeetingsEnabled
 
   const formMethods = useForm<IProjectInfoForm>({
     defaultValues: {
@@ -65,10 +69,7 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
 
   const { handleSubmit, watch, setValue, reset } = formMethods
   const siteWatch = watch("site")
-  const canRequestProjectMeeting =
-    permitProject.isOwner &&
-    siteConfigurationStore.projectMeetingsEnabled &&
-    permitProject.jurisdiction?.projectMeetingsEnabled
+  const canRequestProjectMeeting = permitProject.isOwner && projectMeetingsEnabled && !hasActiveProjectMeeting
 
   const handleEditClick = () => {
     // Reset form to current values when entering edit mode
@@ -206,6 +207,19 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
                 >
                   {t("permitProject.overview.lookupStepCode")}
                 </RouterLinkButton>
+                {permitProject.isOwner && projectMeetingsEnabled && (
+                  <RouterLinkButton
+                    variant="link"
+                    to={`/projects/${permitProject.id}/meetings/new`}
+                    leftIcon={<Info size={24} />}
+                    disabled={hasActiveProjectMeeting}
+                  >
+                    {t("permitProject.meetings.requestWithJurisdiction", {
+                      jurisdictionName: jurisdiction?.disambiguatedName,
+                    })}
+                  </RouterLinkButton>
+                )}
+                {hasActiveProjectMeeting && <ActiveProjectMeetingNotice permitProject={permitProject} />}
               </VStack>
             )}
           </Box>
@@ -230,8 +244,12 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
             {t("permitProject.overview.recentPermits")}
           </Heading>
           <HStack spacing={3}>
-            {canRequestProjectMeeting && (
-              <RouterLinkButton variant="secondary" to={`/projects/${permitProject.id}/meetings/new`}>
+            {permitProject.isOwner && projectMeetingsEnabled && (
+              <RouterLinkButton
+                variant="secondary"
+                to={`/projects/${permitProject.id}/meetings/new`}
+                disabled={!canRequestProjectMeeting}
+              >
                 {t("permitProject.meetings.requestButton")}
               </RouterLinkButton>
             )}

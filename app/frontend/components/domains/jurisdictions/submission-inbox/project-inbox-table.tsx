@@ -1,6 +1,5 @@
 import {
   Box,
-  Circle,
   Flex,
   HStack,
   Icon,
@@ -27,6 +26,7 @@ import { ISort } from "../../../../types/types"
 import { Paginator } from "../../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../../shared/base/inputs/per-page-select"
 import { SharedSpinner } from "../../../shared/base/shared-spinner"
+import { UnreadIndicatorDot } from "../../../shared/base/unread-indicator-dot"
 import { GridHeader } from "../../../shared/grid/grid-header"
 import { SearchGrid } from "../../../shared/grid/search-grid"
 import { SearchGridItem } from "../../../shared/grid/search-grid-item"
@@ -97,7 +97,7 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
       >
         <SearchGridItem>
           <HStack spacing={3}>
-            <Circle size="8px" bg={!project.viewedAt ? "theme.blueActive" : "transparent"} flexShrink={0} />
+            <UnreadIndicatorDot isUnread={!project.viewedAt} />
 
             <Text fontWeight={700} fontSize="sm">
               {project.number}

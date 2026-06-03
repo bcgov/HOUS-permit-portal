@@ -1,11 +1,21 @@
 class ProjectMeeting < ApplicationRecord
+  searchkick word_middle: %i[
+               contact_name
+               contact_email
+               project_description
+               meeting_notes
+               status
+             ]
+
+  include ProjectMeetingStatus
+
+  SEARCH_INCLUDES = [:meeting_request_documents].freeze
+
   belongs_to :permit_project, inverse_of: :project_meetings
   belongs_to :requested_by, class_name: "User", inverse_of: :project_meetings
 
   has_many :meeting_request_documents, dependent: :destroy
   accepts_nested_attributes_for :meeting_request_documents, allow_destroy: true
-
-  enum :status, { draft: 0, submitted: 1 }
 
   enum :requester_relationship,
        {
@@ -28,17 +38,10 @@ class ProjectMeeting < ApplicationRecord
               with: URI::DEFAULT_PARSER.make_regexp(%w[http https])
             },
             allow_blank: true
-  validate :submitted_fields_present, if: :submitted?
+  validate :validate_submission_requirements, if: :submitted?
 
   before_validation :normalize_contact_phone_number
   after_commit :reindex_permit_project
-
-  def submit_request!
-    update!(status: :submitted, submitted_at: Time.current)
-    permit_project.mark_as_unviewed
-    NotificationService.publish_project_meeting_submitted_event(self)
-    NotificationService.publish_project_meeting_request_received_event(self)
-  end
 
   def feature_enabled?
     permit_project.project_meetings_enabled?
@@ -70,9 +73,28 @@ class ProjectMeeting < ApplicationRecord
     }
   end
 
+  def search_data
+    {
+      permit_project_id: permit_project_id,
+      jurisdiction_id: permit_project&.jurisdiction_id,
+      sandbox_id: permit_project&.sandbox_id,
+      requested_by_id: requested_by_id,
+      status: status,
+      contact_name: contact_name,
+      contact_email: contact_email,
+      project_description: project_description,
+      meeting_notes: meeting_notes,
+      submitted_at: submitted_at,
+      confirmed_date: confirmed_date,
+      scheduled_at: scheduled_at,
+      created_at: created_at,
+      updated_at: updated_at
+    }
+  end
+
   private
 
-  def submitted_fields_present
+  def validate_submission_requirements
     %i[
       requester_relationship
       contact_name

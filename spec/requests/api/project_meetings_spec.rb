@@ -59,17 +59,90 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
 
       expect(response).to have_http_status(:forbidden)
     end
+
+    it "blocks creating a second active meeting request" do
+      create(:project_meeting, permit_project: permit_project)
+
+      post "/api/permit_projects/#{permit_project.id}/meetings",
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:unprocessable_content)
+    end
   end
 
   describe "GET /api/permit_projects/:permit_project_id/meetings/:id" do
     it "returns a meeting request for the owner" do
       meeting = create(:project_meeting, permit_project: permit_project)
+      document = create(:meeting_request_document, project_meeting: meeting)
 
       get "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}",
           headers: headers
 
       expect(response).to have_http_status(:ok)
       expect(json_response.dig("data", "id")).to eq(meeting.id)
+      expect(
+        json_response.dig("data", "meeting_request_documents", 0, "id")
+      ).to eq(document.id)
+      expect(
+        json_response.dig("data", "meeting_request_documents", 0, "file", "id")
+      ).to eq(document.file_id)
+      expect(
+        json_response.dig(
+          "data",
+          "meeting_request_documents",
+          0,
+          "file",
+          "metadata",
+          "filename"
+        )
+      ).to eq(document.file_name)
+    end
+  end
+
+  describe "POST /api/permit_projects/:permit_project_id/meetings/search",
+           :search do
+    let!(:meeting) do
+      create(
+        :project_meeting,
+        :open,
+        permit_project: permit_project,
+        project_description: "Need zoning guidance."
+      )
+    end
+    let!(:other_meeting) { create(:project_meeting, :completed) }
+
+    before { ProjectMeeting.reindex }
+
+    it "returns scoped meeting requests for the project owner" do
+      post "/api/permit_projects/#{permit_project.id}/meetings/search",
+           params: {
+             query: "zoning",
+             page: 1,
+             per_page: 10
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response["data"].pluck("id")).to eq([meeting.id])
+      expect(json_response["data"].pluck("id")).not_to include(other_meeting.id)
+    end
+
+    it "does not return meetings to unrelated users" do
+      sign_in other_user
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/search",
+           params: {
+             query: "*",
+             page: 1,
+             per_page: 10
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response["data"]).to be_empty
     end
   end
 
@@ -85,15 +158,7 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
                 meeting_request_documents_attributes: [
                   {
                     document_type: "supporting",
-                    file: {
-                      id: SecureRandom.uuid,
-                      storage: "cache",
-                      metadata: {
-                        size: 123,
-                        filename: "site-plan.pdf",
-                        mime_type: "application/pdf"
-                      }
-                    }
+                    file: TestData.cached_file_data
                   }
                 ]
               }
@@ -122,8 +187,10 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
   describe "POST /api/permit_projects/:permit_project_id/meetings/:id/submit" do
     it "submits the completed meeting request" do
       meeting = create(:project_meeting, permit_project: permit_project)
-      jurisdiction.update!(
-        project_meeting_notification_recipient_emails: ["meetings@example.com"]
+      create(
+        :meeting_submission_contact,
+        jurisdiction: jurisdiction,
+        email: "meetings@example.com"
       )
 
       expect {
@@ -139,7 +206,7 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
             ).with(meeting, "meetings@example.com")
 
       expect(response).to have_http_status(:ok)
-      expect(json_response.dig("data", "status")).to eq("submitted")
+      expect(json_response.dig("data", "status")).to eq("open")
       expect(json_response.dig("data", "submitted_at")).to be_present
     end
 
@@ -156,7 +223,7 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
            headers: headers,
            as: :json
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
     end
 
     it "requires authorization documents for non-owner requesters" do
@@ -171,7 +238,7 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
            headers: headers,
            as: :json
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
     end
 
     it "submits non-owner requests with authorization documents" do
@@ -192,7 +259,97 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
            as: :json
 
       expect(response).to have_http_status(:ok)
-      expect(json_response.dig("data", "status")).to eq("submitted")
+      expect(json_response.dig("data", "status")).to eq("open")
+    end
+  end
+
+  describe "POST /api/permit_projects/:permit_project_id/meetings/:id/cancel" do
+    it "allows the project owner to cancel an open meeting request" do
+      meeting = create(:project_meeting, :open, permit_project: permit_project)
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/cancel",
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("data", "status")).to eq("closed")
+      expect(json_response.dig("data", "closed_at")).to be_present
+    end
+
+    it "blocks unrelated submitters" do
+      meeting = create(:project_meeting, :open, permit_project: permit_project)
+      sign_in other_user
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/cancel",
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it "blocks review staff from cancelling through the submitter action" do
+      reviewer = create(:user, :reviewer, jurisdiction: jurisdiction)
+      meeting = create(:project_meeting, :open, permit_project: permit_project)
+      sign_in reviewer
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/cancel",
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:forbidden)
+    end
+  end
+
+  describe "POST /api/permit_projects/:permit_project_id/meetings/:id/transition_status" do
+    let(:reviewer) { create(:user, :reviewer, jurisdiction: jurisdiction) }
+
+    it "allows review staff to schedule an open meeting request" do
+      meeting = create(:project_meeting, :open, permit_project: permit_project)
+      confirmed_date = 1.week.from_now
+      sign_in reviewer
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/transition_status",
+           params: {
+             target_status: "scheduled",
+             project_meeting: {
+               confirmed_date: confirmed_date.iso8601,
+               meeting_url: "https://example.com/meeting"
+             }
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("data", "status")).to eq("scheduled")
+      expect(json_response.dig("data", "scheduled_at")).to be_present
+      expect(json_response.dig("data", "confirmed_date")).to be_present
+    end
+
+    it "returns validation errors when scheduling without a confirmed date" do
+      meeting = create(:project_meeting, :open, permit_project: permit_project)
+      sign_in reviewer
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/transition_status",
+           params: {
+             target_status: "scheduled"
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:unprocessable_content)
+    end
+
+    it "blocks project owners from manually transitioning status" do
+      meeting = create(:project_meeting, :open, permit_project: permit_project)
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/transition_status",
+           params: {
+             target_status: "closed"
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:forbidden)
     end
   end
 end

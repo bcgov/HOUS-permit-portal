@@ -1,6 +1,19 @@
 class Api::ProjectMeetingsController < Api::ApplicationController
+  include Api::Concerns::Search::ProjectMeetings
+
   before_action :set_permit_project
-  before_action :set_project_meeting, only: %i[show update submit]
+  before_action :set_project_meeting,
+                only: %i[show update submit cancel transition_status]
+
+  def index
+    perform_project_meeting_search
+    render_success @project_meeting_search.results,
+                   nil,
+                   {
+                     meta: page_meta(@project_meeting_search),
+                     blueprint: ProjectMeetingBlueprint
+                   }
+  end
 
   def create
     @project_meeting =
@@ -31,7 +44,9 @@ class Api::ProjectMeetingsController < Api::ApplicationController
 
   def show
     authorize @project_meeting
-    render_success @project_meeting, nil, { blueprint: ProjectMeetingBlueprint }
+    render_success @project_meeting,
+                   nil,
+                   { blueprint: ProjectMeetingBlueprint, view: :extended }
   end
 
   def update
@@ -62,9 +77,60 @@ class Api::ProjectMeetingsController < Api::ApplicationController
     render_success @project_meeting,
                    "project_meeting.submit_success",
                    { blueprint: ProjectMeetingBlueprint }
-  rescue ActiveRecord::RecordInvalid
+  rescue AASM::InvalidTransition, ActiveRecord::RecordInvalid
     render_error(
       "project_meeting.submit_error",
+      {
+        status: :unprocessable_entity,
+        log_args: {
+          errors: @project_meeting.errors.full_messages
+        }
+      }
+    )
+  end
+
+  def cancel
+    authorize @project_meeting
+
+    unless @project_meeting.allowed_manual_transitions.include?(:closed)
+      return render_error("project_meeting.invalid_transition", { status: 422 })
+    end
+
+    @project_meeting.close!
+    render_success @project_meeting,
+                   "project_meeting.cancel_success",
+                   { blueprint: ProjectMeetingBlueprint }
+  rescue AASM::InvalidTransition, ActiveRecord::RecordInvalid
+    render_error(
+      "project_meeting.cancel_error",
+      {
+        status: :unprocessable_entity,
+        log_args: {
+          errors: @project_meeting.errors.full_messages
+        }
+      }
+    )
+  end
+
+  def transition_status
+    authorize @project_meeting, :transition_status?
+
+    @project_meeting.assign_attributes(project_meeting_params)
+    target = params.require(:target_status)
+    event = ProjectMeetingStatus::STATUS_EVENT_MAP[target]
+
+    unless event &&
+             @project_meeting.allowed_manual_transitions.include?(target.to_sym)
+      return render_error("project_meeting.invalid_transition", { status: 422 })
+    end
+
+    @project_meeting.send(:"#{event}!")
+    render_success @project_meeting,
+                   "project_meeting.transition_success",
+                   { blueprint: ProjectMeetingBlueprint }
+  rescue AASM::InvalidTransition, ActiveRecord::RecordInvalid
+    render_error(
+      "project_meeting.invalid_transition",
       {
         status: :unprocessable_entity,
         log_args: {

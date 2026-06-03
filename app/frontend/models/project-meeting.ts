@@ -22,15 +22,28 @@ export const ProjectMeetingModel = types
     requestPropertyInformation: types.maybeNull(types.boolean),
     submittedAt: types.maybeNull(types.Date),
     confirmedDate: types.maybeNull(types.Date),
+    scheduledAt: types.maybeNull(types.Date),
+    completedAt: types.maybeNull(types.Date),
+    closedAt: types.maybeNull(types.Date),
     meetingUrl: types.maybeNull(types.string),
     createdAt: types.maybeNull(types.Date),
     updatedAt: types.maybeNull(types.Date),
+    allowedManualTransitions: types.optional(types.array(types.enumeration(Object.values(EProjectMeetingStatus))), []),
     meetingRequestDocuments: types.optional(types.array(types.frozen<IMeetingRequestDocument>()), []),
   })
   .extend(withEnvironment())
   .views((self) => ({
     get isSubmitted() {
-      return self.status === EProjectMeetingStatus.submitted
+      return self.status !== EProjectMeetingStatus.draft
+    },
+    get isOpen() {
+      return self.status === EProjectMeetingStatus.open
+    },
+    get isActive() {
+      return self.status === EProjectMeetingStatus.draft || self.status === EProjectMeetingStatus.open
+    },
+    get isTerminal() {
+      return self.status === EProjectMeetingStatus.completed || self.status === EProjectMeetingStatus.closed
     },
     get authorizationRequired() {
       return (

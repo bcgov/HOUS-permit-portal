@@ -3,8 +3,6 @@ class Api::QaToolsController < Api::ApplicationController
   skip_after_action :verify_policy_scoped
 
   before_action :require_qa_mode!
-  before_action :require_sandbox_for_review_staff!,
-                only: %i[create_full_permit_project autofill_permit_application]
   before_action :set_permit_application, only: %i[autofill_permit_application]
 
   def create_full_permit_project
@@ -81,20 +79,8 @@ class Api::QaToolsController < Api::ApplicationController
     head :not_found
   end
 
-  def require_sandbox_for_review_staff!
-    return unless current_user.review_staff?
-    return if current_sandbox.present?
-
-    render_error "misc.user_not_authorized_error", { status: :forbidden }
-  end
-
   def set_permit_application
-    @permit_application =
-      if current_user.submitter? || current_user.super_admin?
-        PermitApplication.find(params[:id])
-      else
-        PermitApplication.for_sandbox(current_sandbox).find(params[:id])
-      end
+    @permit_application = PermitApplication.find(params[:id])
   end
 
   def qa_full_permit_project_params

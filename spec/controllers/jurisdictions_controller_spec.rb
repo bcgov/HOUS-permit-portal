@@ -257,7 +257,7 @@ RSpec.describe Api::JurisdictionsController, type: :controller do
       expect(response).to have_http_status(:ok)
     end
 
-    it "updates project meeting notification recipient emails" do
+    it "updates project meeting notification recipient contacts" do
       manager = create(:user, :review_manager, jurisdiction: jurisdiction)
       sign_in manager
 
@@ -265,22 +265,26 @@ RSpec.describe Api::JurisdictionsController, type: :controller do
             params: {
               id: jurisdiction.id,
               jurisdiction: {
-                project_meeting_notification_recipient_emails: [
-                  " meetings@example.com ",
-                  "meetings@example.com",
-                  "planner@example.com"
+                submission_contacts_attributes: [
+                  {
+                    email: "meetings@example.com",
+                    type: "MeetingSubmissionContact"
+                  }
                 ]
               }
             },
             format: :json
 
       expect(response).to have_http_status(:ok)
-      expect(
-        jurisdiction.reload.project_meeting_notification_recipient_emails
-      ).to eq(%w[meetings@example.com planner@example.com])
-      expect(
-        json_response["data"]["project_meeting_notification_recipient_emails"]
-      ).to eq(%w[meetings@example.com planner@example.com])
+      contact = jurisdiction.reload.project_meeting_contacts.first
+      expect(contact.email).to eq("meetings@example.com")
+      expect(contact).to be_a(MeetingSubmissionContact)
+      expect(json_response["data"]["submission_contacts"]).to include(
+        a_hash_including(
+          "email" => "meetings@example.com",
+          "type" => "MeetingSubmissionContact"
+        )
+      )
     end
 
     it "blocks reviewers" do
@@ -307,8 +311,11 @@ RSpec.describe Api::JurisdictionsController, type: :controller do
             params: {
               id: jurisdiction.id,
               jurisdiction: {
-                project_meeting_notification_recipient_emails: [
-                  "meetings@example.com"
+                submission_contacts_attributes: [
+                  {
+                    email: "meetings@example.com",
+                    type: "MeetingSubmissionContact"
+                  }
                 ]
               }
             },

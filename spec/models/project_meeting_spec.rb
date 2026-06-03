@@ -18,7 +18,7 @@ RSpec.describe ProjectMeeting, type: :model do
       meeting =
         build(
           :project_meeting,
-          :submitted,
+          :open,
           requester_relationship: nil,
           contact_name: nil,
           contact_email: nil,
@@ -37,11 +37,7 @@ RSpec.describe ProjectMeeting, type: :model do
     %i[leaseholder_or_tenant owners_representative other].each do |relationship|
       it "requires authorization documents when submitted by #{relationship}" do
         meeting =
-          build(
-            :project_meeting,
-            :submitted,
-            requester_relationship: relationship
-          )
+          build(:project_meeting, :open, requester_relationship: relationship)
 
         expect(meeting).not_to be_valid
         expect(meeting.errors[:meeting_request_documents]).to be_present
@@ -52,7 +48,7 @@ RSpec.describe ProjectMeeting, type: :model do
       meeting =
         build(
           :project_meeting,
-          :submitted,
+          :open,
           requester_relationship: :owners_representative
         )
       meeting.meeting_request_documents.build(
@@ -66,24 +62,59 @@ RSpec.describe ProjectMeeting, type: :model do
       meeting =
         build(
           :project_meeting,
-          :submitted,
+          :open,
           requester_relationship: :owner_or_landholder
         )
+
+      expect(meeting).to be_valid
+    end
+
+    it "requires a confirmed date when scheduled" do
+      meeting = build(:project_meeting, :scheduled, confirmed_date: nil)
+
+      expect(meeting).not_to be_valid
+      expect(meeting.errors[:confirmed_date]).to be_present
+    end
+
+    it "allows only one active meeting request per project" do
+      permit_project = create(:permit_project)
+      create(:project_meeting, permit_project: permit_project)
+
+      meeting = build(:project_meeting, permit_project: permit_project)
+
+      expect(meeting).not_to be_valid
+      expect(meeting.errors[:permit_project]).to be_present
+    end
+
+    it "allows a new active request after the prior request is scheduled" do
+      permit_project = create(:permit_project)
+      create(:project_meeting, :scheduled, permit_project: permit_project)
+
+      meeting = build(:project_meeting, permit_project: permit_project)
 
       expect(meeting).to be_valid
     end
   end
 
   describe "#submit_request!" do
-    it "marks the meeting as submitted and marks the project unviewed" do
+    it "opens the meeting request and marks the project unviewed" do
       meeting = create(:project_meeting)
       meeting.permit_project.update!(viewed_at: Time.current)
 
       meeting.submit_request!
 
-      expect(meeting.reload).to be_submitted
+      expect(meeting.reload).to be_open
+      expect(meeting).to be_submitted
       expect(meeting.submitted_at).to be_present
       expect(meeting.permit_project.reload.viewed_at).to be_nil
+    end
+
+    it "does not submit without authorization documents for non-owner requesters" do
+      meeting =
+        create(:project_meeting, requester_relationship: :leaseholder_or_tenant)
+
+      expect { meeting.submit_request! }.to raise_error(AASM::InvalidTransition)
+      expect(meeting.reload).to be_draft
     end
 
     it "enqueues a confirmation email" do
@@ -97,14 +128,58 @@ RSpec.describe ProjectMeeting, type: :model do
 
     it "enqueues jurisdiction recipient notifications" do
       meeting = create(:project_meeting)
-      meeting.permit_project.jurisdiction.update!(
-        project_meeting_notification_recipient_emails: ["meetings@example.com"]
+      create(
+        :meeting_submission_contact,
+        jurisdiction: meeting.permit_project.jurisdiction,
+        email: "meetings@example.com"
       )
 
       expect { meeting.submit_request! }.to have_enqueued_mail(
         PermitHubMailer,
         :notify_project_meeting_submitted_to_jurisdiction
       ).with(meeting, "meetings@example.com")
+    end
+  end
+
+  describe "status transitions" do
+    it "schedules an open meeting request" do
+      meeting = create(:project_meeting, :open, confirmed_date: 1.week.from_now)
+
+      meeting.schedule!
+
+      expect(meeting.reload).to be_scheduled
+      expect(meeting.scheduled_at).to be_present
+    end
+
+    it "does not schedule without a confirmed date" do
+      meeting = create(:project_meeting, :open, confirmed_date: nil)
+
+      expect { meeting.schedule! }.to raise_error(AASM::InvalidTransition)
+      expect(meeting.reload).to be_open
+    end
+
+    it "completes a scheduled meeting request" do
+      meeting = create(:project_meeting, :scheduled)
+
+      meeting.complete!
+
+      expect(meeting.reload).to be_completed
+      expect(meeting.completed_at).to be_present
+    end
+
+    it "closes an open meeting request" do
+      meeting = create(:project_meeting, :open)
+
+      meeting.close!
+
+      expect(meeting.reload).to be_closed
+      expect(meeting.closed_at).to be_present
+    end
+
+    it "blocks invalid transitions" do
+      meeting = create(:project_meeting, :open)
+
+      expect { meeting.complete! }.to raise_error(AASM::InvalidTransition)
     end
   end
 end

@@ -1,10 +1,4 @@
 class Jurisdiction < ApplicationRecord
-  audited on: %i[update],
-          only: %i[
-            project_meetings_enabled
-            project_meeting_notification_recipient_emails
-          ]
-
   extend FriendlyId
   friendly_id :qualified_name, use: :slugged
   include JurisdictionExternalApiState
@@ -74,6 +68,9 @@ class Jurisdiction < ApplicationRecord
            through: :jurisdiction_template_version_customizations
   has_many :requirement_templates, through: :template_versions
   has_many :submission_contacts, dependent: :destroy
+  has_many :application_submission_contacts,
+           class_name: "ApplicationSubmissionContact"
+  has_many :meeting_submission_contacts, class_name: "MeetingSubmissionContact"
   has_many :external_api_keys, dependent: :destroy
   has_many :integration_mappings
   has_many :jurisdiction_step_requirements, dependent: :destroy
@@ -90,9 +87,9 @@ class Jurisdiction < ApplicationRecord
   # Scopes
   scope :with_confirmed_submission_contacts,
         lambda {
-          joins(:submission_contacts)
-            .where.not(submission_contacts: { confirmed_at: nil })
-            .distinct
+          joins(:application_submission_contacts).merge(
+            ApplicationSubmissionContact.confirmed
+          ).distinct
         }
 
   validates :name, uniqueness: { scope: :locality_type, case_sensitive: false }
@@ -105,7 +102,6 @@ class Jurisdiction < ApplicationRecord
               with: URI::MailTo::EMAIL_REGEXP
             },
             allow_blank: true
-  validate :project_meeting_notification_recipient_emails_are_valid
   validates :office_telephone, phone: true, allow_blank: true
   validate :inbox_enabled_requires_inbox_setup
   validate :no_duplicate_part3_occupancy_pathways
@@ -119,7 +115,6 @@ class Jurisdiction < ApplicationRecord
   before_validation :normalize_locality_type
   before_validation :normalize_name
   before_validation :normalize_office_telephone
-  before_validation :normalize_project_meeting_notification_recipient_emails
   before_validation :set_type_based_on_locality
   before_validation :set_first_nation_flag, on: :create
 
@@ -164,7 +159,7 @@ class Jurisdiction < ApplicationRecord
   end
 
   def project_meeting_notification_recipient_emails
-    self[:project_meeting_notification_recipient_emails] || []
+    confirmed_project_meeting_contacts.pluck(:email).uniq
   end
 
   def manager_emails
@@ -340,15 +335,31 @@ class Jurisdiction < ApplicationRecord
   end
 
   def submission_inbox_set_up?
-    submission_contacts.confirmed.exists?
+    confirmed_submission_contacts.exists?
   end
 
   def confirmed_submission_emails
-    submission_contacts.confirmed.pluck(:email).uniq
+    confirmed_submission_contacts.pluck(:email).uniq
   end
 
   def has_confirmed_submission_contacts?
-    submission_contacts.confirmed.exists?
+    confirmed_submission_contacts.exists?
+  end
+
+  def submission_inbox_contacts
+    application_submission_contacts
+  end
+
+  def confirmed_submission_contacts
+    submission_inbox_contacts.confirmed
+  end
+
+  def project_meeting_contacts
+    meeting_submission_contacts
+  end
+
+  def confirmed_project_meeting_contacts
+    project_meeting_contacts.confirmed
   end
 
   def self.class_for_locality_type(locality_type)
@@ -468,21 +479,6 @@ class Jurisdiction < ApplicationRecord
 
     parsed = Phonelib.parse(office_telephone)
     self.office_telephone = parsed.e164 if parsed.valid?
-  end
-
-  def normalize_project_meeting_notification_recipient_emails
-    self.project_meeting_notification_recipient_emails =
-      Array(project_meeting_notification_recipient_emails)
-        .filter_map { |email| email.to_s.strip.presence }
-        .uniq
-  end
-
-  def project_meeting_notification_recipient_emails_are_valid
-    project_meeting_notification_recipient_emails.each do |email|
-      next if email.match?(URI::MailTo::EMAIL_REGEXP)
-
-      errors.add(:project_meeting_notification_recipient_emails, :invalid)
-    end
   end
 
   # Callback method to ensure a default sandbox is created

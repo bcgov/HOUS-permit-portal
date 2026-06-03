@@ -1,11 +1,16 @@
 class SubmissionContact < ApplicationRecord
   belongs_to :jurisdiction
 
-  validates :email, presence: true, uniqueness: { scope: :jurisdiction_id }
-  validate :only_one_default_per_jurisdiction
+  validates :email,
+            presence: true,
+            uniqueness: {
+              scope: %i[jurisdiction_id type]
+            }
 
   scope :confirmed, -> { where.not(confirmed_at: nil) }
   scope :default_contact, -> { where(default: true) }
+
+  after_commit :send_confirmation, on: :create, unless: :confirmed?
 
   def confirmed?
     confirmed_at.present?
@@ -22,21 +27,18 @@ class SubmissionContact < ApplicationRecord
     update!(confirmed_at: Time.current, confirmation_token: nil)
   end
 
-  private
+  def confirmation_subject_key
+    raise NotImplementedError,
+          "#{self.class} must implement #confirmation_subject_key"
+  end
 
-  def only_one_default_per_jurisdiction
-    return unless default?
+  def confirmation_heading
+    raise NotImplementedError,
+          "#{self.class} must implement #confirmation_heading"
+  end
 
-    existing_default =
-      SubmissionContact
-        .where(jurisdiction_id: jurisdiction_id, default: true)
-        .where.not(id: id)
-
-    if existing_default.exists?
-      errors.add(
-        :default,
-        "another default contact already exists for this jurisdiction"
-      )
-    end
+  def confirmation_configured_feature
+    raise NotImplementedError,
+          "#{self.class} must implement #confirmation_configured_feature"
   end
 end

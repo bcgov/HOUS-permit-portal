@@ -85,6 +85,8 @@ en:
               incorrect_jurisdiction: "must belong to the jurisdiction. Please apply to your own jurisdiction to use this sandbox."
         project_meeting:
           attributes:
+            permit_project:
+              active_project_meeting_exists: "can only have one active meeting request"
             meeting_request_documents:
               authorization_required: "must include authorization documents when the requester is not the owner"
         permit_project_collaboration:
@@ -167,6 +169,7 @@ en:
       remind_reviewer: "Your report on outstanding permit applications"
       remind_resource_update: "Reminder: Review your jurisdiction resources"
       submission_contact_confirm: "Confirm submission inbox email"
+      project_meeting_contact_confirm: "Confirm project meeting notification email"
       new_jurisdiction_membership: "New jurisdiction membership"
       notify_permit_collaboration: "Welcome you have been invited to Collaborate in the Building Permit Hub"
       notify_project_review_collaboration: "You have been assigned as a review collaborator on a project"
@@ -315,6 +318,18 @@ en:
       submit_error:
         title: Error
         message: "Project meeting request could not be sent"
+      cancel_success:
+        title: ""
+        message: "Project meeting request cancelled successfully!"
+      cancel_error:
+        title: Error
+        message: "Project meeting request could not be cancelled"
+      transition_success:
+        title: ""
+        message: "Project meeting request status updated successfully!"
+      invalid_transition:
+        title: Error
+        message: "Project meeting request status could not be updated"
     contact:
       options_error:
         title: Error

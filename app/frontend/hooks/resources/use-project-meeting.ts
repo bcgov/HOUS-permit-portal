@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react"
-import { useParams } from "react-router-dom"
+import { useMatch, useParams } from "react-router-dom"
 import { useMst } from "../../setup/root"
 import { isUUID } from "../../utils/utility-functions"
 
 export const useProjectMeeting = () => {
-  const { permitProjectId, projectMeetingId } = useParams<{
+  const { permitProjectId, projectMeetingId: projectMeetingIdParam } = useParams<{
     permitProjectId: string
     projectMeetingId: string
   }>()
+  const projectMeetingDetailMatch = useMatch("/projects/:permitProjectId/meetings/:projectMeetingId")
+  const projectMeetingId = projectMeetingIdParam || projectMeetingDetailMatch?.params.projectMeetingId
   const { projectMeetingStore } = useMst()
   const { currentProjectMeeting, fetchProjectMeeting } = projectMeetingStore
   const [isLoading, setIsLoading] = useState(true)
