@@ -124,6 +124,10 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
             href: "/template-versions",
             title: t("site.breadcrumb.templateVersions"),
           },
+          {
+            href: `/template-versions/${templateVersion.id}`,
+            title: t(`requirementTemplate.status.${templateVersion.status}`),
+          },
         ]}
         requirementTemplate={denormalizedTemplate}
         status={templateVersion.status}
