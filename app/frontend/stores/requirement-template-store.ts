@@ -53,8 +53,8 @@ export const RequirementTemplateStoreModel = types
         templateVersions.push(requirementTemplate.publishedTemplateVersion)
       }
 
-      if (requirementTemplate.draftTemplateVersion) {
-        templateVersions.push(requirementTemplate.draftTemplateVersion)
+      if (requirementTemplate.draftTemplateVersions?.length > 0) {
+        templateVersions.push(...requirementTemplate.draftTemplateVersions)
       }
 
       if (requirementTemplate.scheduledTemplateVersions?.length > 0) {
@@ -226,8 +226,8 @@ export const RequirementTemplateStoreModel = types
       return false
     }),
 
-    discardDraft: flow(function* (templateId: string) {
-      const response = yield* toGenerator(self.environment.api.discardDraft(templateId))
+    discardDraft: flow(function* (templateVersionId: string) {
+      const response = yield* toGenerator(self.environment.api.discardDraft(templateVersionId))
 
       if (response.ok) {
         const templateData = response.data.data
@@ -240,7 +240,7 @@ export const RequirementTemplateStoreModel = types
     }),
 
     promoteDraft: flow(function* (
-      templateId: string,
+      templateVersionId: string,
       params: {
         versionDate?: string
         changeNotes?: string
@@ -252,7 +252,7 @@ export const RequirementTemplateStoreModel = types
         skipDateCheck?: boolean
       }
     ) {
-      const response = yield* toGenerator(self.environment.api.promoteDraft(templateId, params))
+      const response = yield* toGenerator(self.environment.api.promoteDraft(templateVersionId, params))
 
       if (response.ok) {
         const templateData = response.data.data

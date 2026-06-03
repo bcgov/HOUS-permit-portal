@@ -153,10 +153,10 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
           await handleSubmit(async (templateFormData) => {
             const formattedSubmitData = formatSubmitData(templateFormData)
 
-            const updatedRequirementTemplate = await requirementTemplateStore.forcePublishRequirementTemplate(
+            const updatedRequirementTemplate = (await requirementTemplateStore.forcePublishRequirementTemplate(
               requirementTemplate.id,
               formattedSubmitData
-            )
+            )) as IRequirementTemplate | false
 
             if (updatedRequirementTemplate) {
               const publishedTemplateVersion = updatedRequirementTemplate.publishedTemplateVersion
@@ -179,10 +179,12 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
 
       if (!updatedTemplate) return
 
-      const templateWithDraft = await requirementTemplateStore.createDraft(requirementTemplate.id)
+      const templateWithDraft = (await requirementTemplateStore.createDraft(requirementTemplate.id)) as
+        | IRequirementTemplate
+        | false
       if (!templateWithDraft) return
 
-      const draftTemplateVersion = templateWithDraft.draftTemplateVersion
+      const draftTemplateVersion = templateWithDraft.draftTemplateVersions[0]
       draftTemplateVersion
         ? navigate(`/template-versions/${draftTemplateVersion.id}`)
         : navigate("/requirement-templates")

@@ -282,6 +282,18 @@ RSpec.describe TemplateVersioningService, type: :service, search: true do
     end
   end
 
+  describe "create_draft!" do
+    it "allows multiple draft versions for the same requirement template" do
+      expect {
+        2.times do
+          TemplateVersioningService.create_draft!(requirement_template)
+        end
+      }.to change {
+        requirement_template.template_versions.where(status: :draft).count
+      }.by(2)
+    end
+  end
+
   describe "promote_draft_to_scheduled!" do
     let(:super_admin) { create(:user, :super_admin) }
     let(:draft_version) do

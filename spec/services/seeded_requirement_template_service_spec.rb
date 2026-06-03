@@ -17,7 +17,7 @@ RSpec.describe SeededRequirementTemplateService, type: :service do
         template = RequirementTemplate.find_by!(nickname:)
 
         expect(template.published_template_version).to be_present
-        expect(template.draft_template_version).to be_present
+        expect(template.draft_template_versions).to be_present
         expect(template.scheduled_template_versions).to be_present
         expect(
           template.published_template_version.form_json.fetch("components")

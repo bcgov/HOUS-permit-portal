@@ -37,7 +37,7 @@ export const RequirementTemplateGrid: React.FC<RequirementTemplateGridProps> = o
 
   return (
     <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
-      <SearchGrid templateColumns="1.5fr 1fr 2.5fr 1.5fr 1.5fr 1fr 7.9rem">
+      <SearchGrid templateColumns="1.5fr 1fr 2.5fr 1.5fr 1fr 7.9rem">
         <GridHeaders />
 
         {isSearching ? (
@@ -64,11 +64,6 @@ export const RequirementTemplateGrid: React.FC<RequirementTemplateGridProps> = o
                 {rt.publishedTemplateVersion?.versionDate ? (
                   <VersionTag versionDate={rt.publishedTemplateVersion.versionDate} />
                 ) : null}
-              </SearchGridItem>
-              <SearchGridItem>
-                {rt.draftTemplateVersion?.versionDate && (
-                  <VersionTag versionDate={rt.draftTemplateVersion.versionDate} />
-                )}
               </SearchGridItem>
               <SearchGridItem>{rt.availableIn}</SearchGridItem>
               <SearchGridItem justifyContent="flex-end">{renderActions(rt)}</SearchGridItem>
@@ -135,13 +130,6 @@ const GridHeaders = observer(function GridHeaders() {
                 <SortIcon<ERequirementTemplateSortFields> field={field} currentSort={sort} />
               </Flex>
             </GridHeader>
-            {field === ERequirementTemplateSortFields.currentVersion && (
-              <GridHeader role={"columnheader"}>
-                <Flex w={"full"} borderRight={"1px solid"} borderColor={"border.light"} px={4}>
-                  <Text>{t("requirementTemplate.status.draft")}</Text>
-                </Flex>
-              </GridHeader>
-            )}
           </React.Fragment>
         ))}
         <GridHeader role={"columnheader"} />

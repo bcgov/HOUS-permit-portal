@@ -135,11 +135,6 @@ class TemplateVersioningService
   # Snapshots the current template state (sections, blocks, form JSON)
   # into the draft's JSON columns so edits are isolated from canonical records.
   def self.create_draft!(requirement_template, assignee: nil)
-    if requirement_template.draft_template_version.present?
-      raise TemplateVersionDraftError,
-            "An early access version already exists for this template. Discard or promote it first."
-    end
-
     template_version =
       requirement_template.template_versions.build(
         denormalized_template_json:
@@ -371,7 +366,7 @@ class TemplateVersioningService
   end
 
   # Discards a draft version (sets to deprecated).
-  def self.discard_draft!(draft_version)
+  def self.discard_draft!(draft_version, deprecated_by)
     unless draft_version.draft?
       raise TemplateVersionDraftError,
             "Can only discard an early access version"
@@ -379,7 +374,8 @@ class TemplateVersioningService
 
     draft_version.update!(
       status: "deprecated",
-      deprecation_reason: "unscheduled"
+      deprecation_reason: "unscheduled",
+      deprecated_by: deprecated_by
     )
 
     draft_version

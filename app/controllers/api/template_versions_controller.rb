@@ -269,6 +269,80 @@ class Api::TemplateVersionsController < Api::ApplicationController
 
   # ── Draft-specific actions ────────────────────────────────────────────
 
+  def discard_draft
+    authorize @template_version, :discard_draft?
+
+    begin
+      TemplateVersioningService.discard_draft!(@template_version, current_user)
+      render_requirement_template_success(
+        "requirement_template.discard_draft_success"
+      )
+    rescue TemplateVersionDraftError => e
+      render_error "requirement_template.discard_draft_error",
+                   message_opts: {
+                     error_message: e.message
+                   }
+    end
+  end
+
+  def promote_draft
+    skip_date_check =
+      ActiveModel::Type::Boolean.new.cast(
+        promote_draft_params[:skip_date_check]
+      )
+
+    if skip_date_check
+      authorize @template_version, :force_publish_draft?
+    else
+      authorize @template_version, :promote_draft?
+    end
+
+    begin
+      version_date =
+        (Date.parse(promote_draft_params[:version_date]) unless skip_date_check)
+
+      promoted =
+        TemplateVersioningService.promote_draft_to_scheduled!(
+          @template_version,
+          version_date,
+          change_notes: promote_draft_params[:change_notes],
+          change_significance: promote_draft_params[:change_significance],
+          skip_date_check: skip_date_check,
+          current_user: current_user
+        )
+
+      if promote_draft_params[:notification_scope].present?
+        promoted.update!(
+          notification_scope: promote_draft_params[:notification_scope],
+          notified_jurisdiction_ids:
+            promote_draft_params[:notified_jurisdiction_ids] || []
+        )
+      end
+
+      if promote_draft_params[:promote_block_ids].present?
+        TemplateVersioningService.promote_block_changes!(
+          promoted,
+          promote_draft_params[:promote_block_ids]
+        )
+      end
+
+      if !skip_date_check && promote_draft_params[:send_advance_notice]
+        NotificationService.publish_version_scheduled_event(promoted)
+      end
+
+      render_requirement_template_success(
+        "requirement_template.promote_draft_success"
+      )
+    rescue TemplateVersionDraftError,
+           TemplateVersionScheduleError,
+           TemplateVersionForcePublishNowError => e
+      render_error "requirement_template.promote_draft_error",
+                   message_opts: {
+                     error_message: e.message
+                   }
+    end
+  end
+
   def update_draft_block
     authorize @template_version, :update?
 
@@ -492,5 +566,32 @@ class Api::TemplateVersionsController < Api::ApplicationController
         params.permit(:publicly_previewable)[:publicly_previewable]
       end
     ActiveModel::Type::Boolean.new.cast(raw)
+  end
+
+  def promote_draft_params
+    params.permit(
+      :version_date,
+      :change_notes,
+      :change_significance,
+      :notification_scope,
+      :send_advance_notice,
+      :skip_date_check,
+      notified_jurisdiction_ids: [],
+      promote_block_ids: []
+    )
+  end
+
+  def render_requirement_template_success(message_key)
+    requirement_template = @template_version.requirement_template.reload
+
+    render_success requirement_template,
+                   message_key,
+                   {
+                     blueprint: RequirementTemplateBlueprint,
+                     blueprint_opts: {
+                       view: :extended,
+                       current_user: current_user
+                     }
+                   }
   end
 end
