@@ -693,5 +693,42 @@ RSpec.describe NotificationService do
         expect(payload.keys).to contain_exactly(matching_submitter.id)
       end
     end
+
+    it "throttles repeated notifications for the same jurisdiction and template version" do
+      allow(NotificationPushJob).to receive(:perform_async)
+      allow(Rails.cache).to receive(:write).and_return(true, false)
+
+      requirement_template = create(:requirement_template)
+      template_version =
+        create(:template_version, requirement_template: requirement_template)
+      jurisdiction = create(:sub_district)
+      customization =
+        create(
+          :jurisdiction_template_version_customization,
+          jurisdiction: jurisdiction,
+          template_version: template_version
+        )
+      submitter = create(:user, :submitter)
+
+      create(
+        :permit_application,
+        submitter: submitter,
+        template_version: template_version,
+        jurisdiction: jurisdiction
+      )
+
+      2.times do
+        described_class.publish_customization_update_event(customization)
+      end
+
+      expect(Rails.cache).to have_received(:write).with(
+        "customization_update_notification:" \
+          "#{jurisdiction.id}:#{template_version.id}",
+        true,
+        expires_in: 2.hours,
+        unless_exist: true
+      ).twice
+      expect(NotificationPushJob).to have_received(:perform_async).once
+    end
   end
 end

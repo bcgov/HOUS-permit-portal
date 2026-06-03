@@ -101,16 +101,6 @@ export const NewPermitProjectScreen = observer(() => {
               <Controller
                 name="site"
                 control={control}
-                rules={{
-                  validate: {
-                    hasJurisdiction: () => {
-                      const jurisdictionId = formMethods.getValues("jurisdictionId")
-                      return jurisdictionId
-                        ? true
-                        : (t("ui.isRequired", { field: t("permitProject.new.fullAddressHeading") }) as string)
-                    },
-                  },
-                }}
                 render={({ field: { onChange, value } }) => (
                   <SitesSelect
                     onChange={onChange}
@@ -118,6 +108,7 @@ export const NewPermitProjectScreen = observer(() => {
                     pidName="pid"
                     siteName="site"
                     jurisdictionIdFieldName="jurisdictionId"
+                    jurisdictionRequired
                   />
                 )}
               />
