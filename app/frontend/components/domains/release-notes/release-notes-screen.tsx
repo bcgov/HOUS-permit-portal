@@ -128,6 +128,19 @@ export const ReleaseNotesScreen = observer(function ReleaseNotesScreen() {
 
   const reportIssueMailto = `mailto:${t("site.contactEmail")}`
 
+  const releaseNotesContent =
+    viewingReleaseNotes.length === 0 ? (
+      <Text color="text.secondary" fontSize="lg">
+        {t("releaseNote.viewing.emptyState", { year: selectedYear })}
+      </Text>
+    ) : (
+      <VStack align="stretch" spacing="87px">
+        {viewingReleaseNotes.map((note) => (
+          <ReleaseNoteEntry key={note.id} releaseNote={note} isHighlighted={note.id === highlightedReleaseNoteId} />
+        ))}
+      </VStack>
+    )
+
   return (
     <Container
       ref={containerRef}
@@ -137,7 +150,7 @@ export const ReleaseNotesScreen = observer(function ReleaseNotesScreen() {
       as="main"
       display="flex"
       flexDirection="column"
-      h={availableHeight !== null ? `${availableHeight}px` : "auto"}
+      h={availableHeight === null ? "auto" : `${availableHeight}px`}
       overflow="hidden"
     >
       <VStack align="stretch" spacing={8} flex={1} minH={0} overflow="hidden">
@@ -155,23 +168,7 @@ export const ReleaseNotesScreen = observer(function ReleaseNotesScreen() {
 
           <Flex direction="column" flex={1} minW={0} minH={0} overflow="hidden">
             <Box flex={1} minH={0} overflowY="auto" pr={1}>
-              {isSearching ? (
-                <SharedSpinner />
-              ) : viewingReleaseNotes.length === 0 ? (
-                <Text color="text.secondary" fontSize="lg">
-                  {t("releaseNote.viewing.emptyState", { year: selectedYear })}
-                </Text>
-              ) : (
-                <VStack align="stretch" spacing="87px">
-                  {viewingReleaseNotes.map((note) => (
-                    <ReleaseNoteEntry
-                      key={note.id}
-                      releaseNote={note}
-                      isHighlighted={note.id === highlightedReleaseNoteId}
-                    />
-                  ))}
-                </VStack>
-              )}
+              {isSearching ? <SharedSpinner /> : releaseNotesContent}
             </Box>
 
             <Flex w="full" justify="space-between" align="center" flexWrap="wrap" gap={4} flexShrink={0} pt={4} pb={1}>

@@ -1,10 +1,10 @@
 import { Text } from "@chakra-ui/react"
 import React from "react"
 
-type ReleaseNoteVersionBadgeProps = {
+type ReleaseNoteVersionBadgeProps = Readonly<{
   version: string
   isHighlighted?: boolean
-}
+}>
 
 export function ReleaseNoteVersionBadge({ version, isHighlighted = false }: ReleaseNoteVersionBadgeProps) {
   return (

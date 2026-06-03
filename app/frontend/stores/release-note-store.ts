@@ -83,11 +83,11 @@ export const ReleaseNoteStoreModel = types
     },
   }))
   .actions((self) => ({
-    initializeViewingYear: flow(function* () {
+    initializeViewingYear() {
       const years = recentReleaseNoteYears()
       self.setAvailableYears(years)
       self.setSelectedYear(years[0])
-    }),
+    },
 
     searchReleaseNotes: flow(function* (opts?: {
       reset?: boolean
@@ -198,7 +198,7 @@ export const ReleaseNoteStoreModel = types
       self.syncWithUrl()
       self.setApplyYearFilterInSearch(true)
       self.setPublishedOnlyInSearch(true)
-      yield self.initializeViewingYear()
+      self.initializeViewingYear()
 
       const releaseNoteId = self.parseReleaseNoteIdFromHash(hash)
       if (releaseNoteId) {
