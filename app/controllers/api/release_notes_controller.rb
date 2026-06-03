@@ -13,12 +13,7 @@ class Api::ReleaseNotesController < Api::ApplicationController
     if @release_note.save
       render_success @release_note,
                      "release_note.create_success",
-                     {
-                       blueprint: ReleaseNoteBlueprint,
-                       blueprint_opts: {
-                         view: :extended
-                       }
-                     }
+                     { blueprint: ReleaseNoteBlueprint }
     else
       render_error "release_note.create_error",
                    {
@@ -47,12 +42,7 @@ class Api::ReleaseNotesController < Api::ApplicationController
     if @release_note.update(release_note_params)
       render_success @release_note,
                      "release_note.update_success",
-                     {
-                       blueprint: ReleaseNoteBlueprint,
-                       blueprint_opts: {
-                         view: :extended
-                       }
-                     }
+                     { blueprint: ReleaseNoteBlueprint }
     else
       render_error "release_note.update_error",
                    {
@@ -74,12 +64,7 @@ class Api::ReleaseNotesController < Api::ApplicationController
       end
       render_success @release_note,
                      "release_note.publish_success",
-                     {
-                       blueprint: ReleaseNoteBlueprint,
-                       blueprint_opts: {
-                         view: :extended
-                       }
-                     }
+                     { blueprint: ReleaseNoteBlueprint }
     else
       render_error "release_note.publish_error",
                    {
@@ -96,28 +81,17 @@ class Api::ReleaseNotesController < Api::ApplicationController
     perform_release_note_search
     release_note_results = @release_note_search.results
 
-    view = current_user&.super_admin? ? :base : :extended
     render_success release_note_results,
                    nil,
                    {
                      meta: page_meta(@release_note_search),
-                     blueprint: ReleaseNoteBlueprint,
-                     blueprint_opts: {
-                       view: view
-                     }
+                     blueprint: ReleaseNoteBlueprint
                    }
   end
 
   def show
     authorize @release_note
-    render_success @release_note,
-                   nil,
-                   {
-                     blueprint: ReleaseNoteBlueprint,
-                     blueprint_opts: {
-                       view: :extended
-                     }
-                   }
+    render_success @release_note, nil, { blueprint: ReleaseNoteBlueprint }
   end
 
   def viewer_context

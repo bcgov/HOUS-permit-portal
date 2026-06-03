@@ -132,6 +132,7 @@ export type TSearchParams<IModelSortFields, IModelFilterFields = {}> = {
   page?: number
   perPage?: number
   showArchived?: boolean
+  publishedOnly?: boolean
   filters?: IModelFilterFields
   mode?: "list" | "kanban"
   perColumn?: number

@@ -26,6 +26,7 @@ export const ReleaseNoteStoreModel = types
       selectedYear: types.optional(types.number, () => new Date().getFullYear()),
       viewingYearInitialized: types.optional(types.boolean, false),
       applyYearFilterInSearch: types.optional(types.boolean, false),
+      publishedOnlyInSearch: types.optional(types.boolean, false),
       availableYears: types.array(types.number),
     }),
     createSearchModel<EReleaseNoteSortFields>("searchReleaseNotes")
@@ -68,12 +69,16 @@ export const ReleaseNoteStoreModel = types
     setApplyYearFilterInSearch(apply: boolean) {
       self.applyYearFilterInSearch = apply
     },
+    setPublishedOnlyInSearch(apply: boolean) {
+      self.publishedOnlyInSearch = apply
+    },
     setAvailableYears(years: number[]) {
       self.availableYears = cast(years)
     },
     resetViewingState() {
       self.viewingYearInitialized = false
       self.applyYearFilterInSearch = false
+      self.publishedOnlyInSearch = false
       self.availableYears = cast([])
     },
   }))
@@ -103,6 +108,10 @@ export const ReleaseNoteStoreModel = types
 
       if (self.applyYearFilterInSearch && !opts?.skipYearFilter) {
         searchParams.year = self.selectedYear
+      }
+
+      if (self.publishedOnlyInSearch) {
+        searchParams.publishedOnly = true
       }
 
       const response = yield self.environment.api.fetchReleaseNotes(searchParams)
@@ -188,6 +197,7 @@ export const ReleaseNoteStoreModel = types
       self.resetViewingState()
       self.syncWithUrl()
       self.setApplyYearFilterInSearch(true)
+      self.setPublishedOnlyInSearch(true)
       yield self.initializeViewingYear()
 
       const releaseNoteId = self.parseReleaseNoteIdFromHash(hash)

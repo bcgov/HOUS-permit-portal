@@ -710,12 +710,6 @@ const AppRoutes = observer(() => {
   const isAllowedForReviewManagerOnly = loggedIn && !mustAcceptEula && (isReviewManager || isRegionalReviewManager)
   const isAllowedForTechnicalSupportOrManager =
     loggedIn && !mustAcceptEula && (isTechnicalSupport || isAllowedForReviewManagerOnly)
-  const releaseNotesRouteElement =
-    loggedIn && isSuperAdmin ? (
-      <RedirectScreen path="/configuration-management/release-notes" />
-    ) : (
-      <ReleaseNotesScreen />
-    )
 
   return (
     <>
@@ -868,7 +862,7 @@ const AppRoutes = observer(() => {
         {/* Public Routes */}
         <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
         <Route path="/contact" element={<ContactScreen />} />
-        <Route path="/release-notes" element={releaseNotesRouteElement} />
+        <Route path="/release-notes" element={<ReleaseNotesScreen />} />
         <Route path="/videos" element={<HelpVideosIndexScreen />} />
         <Route path="/videos/:videoId" element={<HelpVideoScreen />} />
         <Route path="/standardization-preview" element={<StandardizationPreviewScreen />} />

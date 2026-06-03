@@ -54,13 +54,17 @@ export const ReleaseNotesScreen = observer(function ReleaseNotesScreen() {
     isSearching,
     tableReleaseNotes,
     resetCurrentReleaseNote,
+    setApplyYearFilterInSearch,
+    setPublishedOnlyInSearch,
   } = releaseNoteStore
-
-  useSearch(releaseNoteStore, [])
 
   useEffect(() => {
     resetCurrentReleaseNote()
-  }, [resetCurrentReleaseNote])
+    setApplyYearFilterInSearch(false)
+    setPublishedOnlyInSearch(false)
+  }, [resetCurrentReleaseNote, setApplyYearFilterInSearch, setPublishedOnlyInSearch])
+
+  useSearch(releaseNoteStore, [])
 
   return (
     <Container maxW="container.lg" px={8} pt={6} pb={20} flexGrow={1}>

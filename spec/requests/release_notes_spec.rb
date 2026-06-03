@@ -211,6 +211,15 @@ RSpec.describe "ReleaseNotes", type: :request do
       end
     end
 
+    it "returns only published release notes when requested by super admins" do
+      sign_in super_admin
+      get release_notes_path, params: { published_only: true }
+
+      expect(response).to have_http_status(:success)
+      expect(subject).to have_attributes(length: 1)
+      expect(subject.first["id"]).to eq(earliest_release_note.id)
+    end
+
     it "returns published release notes for non-super admins" do
       sign_in submitter
       get release_notes_path

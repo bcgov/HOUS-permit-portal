@@ -26,13 +26,21 @@ module Api::Concerns::Search::ReleaseNotes
   private
 
   def release_note_search_params
-    params.permit(:page, :per_page, :year, sort: %i[field direction])
+    params.permit(
+      :page,
+      :per_page,
+      :year,
+      :published_only,
+      sort: %i[field direction]
+    )
   end
 
   def release_note_where_clause
     filters = {}
 
-    filters[:status] = "published" unless current_user&.super_admin?
+    if release_note_published_only? || !current_user&.super_admin?
+      filters[:status] = "published"
+    end
 
     year = release_note_search_params[:year].presence
     return filters unless year
@@ -61,5 +69,11 @@ module Api::Concerns::Search::ReleaseNotes
     else
       { release_date: :desc, created_at: :desc }
     end
+  end
+
+  def release_note_published_only?
+    ActiveModel::Type::Boolean.new.cast(
+      release_note_search_params[:published_only]
+    )
   end
 end
