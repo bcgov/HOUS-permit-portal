@@ -37,7 +37,7 @@ export const RequirementTemplateGrid: React.FC<RequirementTemplateGridProps> = o
 
   return (
     <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
-      <SearchGrid templateColumns="1.5fr 1fr 2.5fr 1.5fr 1.5fr 1fr 1fr">
+      <SearchGrid templateColumns="1.5fr 1fr 2.5fr 1.5fr 1.5fr 1fr 7.9rem">
         <GridHeaders />
 
         {isSearching ? (
@@ -71,7 +71,7 @@ export const RequirementTemplateGrid: React.FC<RequirementTemplateGridProps> = o
                 )}
               </SearchGridItem>
               <SearchGridItem>{rt.availableIn}</SearchGridItem>
-              <SearchGridItem>{renderActions(rt)}</SearchGridItem>
+              <SearchGridItem justifyContent="flex-end">{renderActions(rt)}</SearchGridItem>
             </Box>
           ))
         )}
