@@ -54,13 +54,51 @@ export const ReleaseNotesScreen = observer(function ReleaseNotesScreen() {
     isSearching,
     tableReleaseNotes,
     resetCurrentReleaseNote,
+    setApplyYearFilterInSearch,
+    setPublishedOnlyInSearch,
   } = releaseNoteStore
-
-  useSearch(releaseNoteStore, [])
 
   useEffect(() => {
     resetCurrentReleaseNote()
-  }, [resetCurrentReleaseNote])
+    setApplyYearFilterInSearch(false)
+    setPublishedOnlyInSearch(false)
+  }, [resetCurrentReleaseNote, setApplyYearFilterInSearch, setPublishedOnlyInSearch])
+
+  useSearch(releaseNoteStore, [])
+
+  const releaseNotesContent =
+    tableReleaseNotes.length === 0 ? (
+      <Flex py={16} gridColumn="1 / -1" justify="center">
+        <Text color="text.secondary">{t("releaseNote.emptyState")}</Text>
+      </Flex>
+    ) : (
+      tableReleaseNotes.map((note: IReleaseNote) => (
+        <Box key={note.id} display="contents" role="row">
+          <ReleaseNotesGridCell>{note.version}</ReleaseNotesGridCell>
+          <ReleaseNotesGridCell color="text.secondary">{format(note.releaseDate, "MMMM d, yyyy")}</ReleaseNotesGridCell>
+          <ReleaseNotesGridCell py={0}>
+            <ReleaseNoteStatusBadge status={note.status as EReleaseNoteStatus} />
+          </ReleaseNotesGridCell>
+          <ReleaseNotesGridCell color="text.secondary">
+            {format(note.updatedAt, "MMMM d, yyyy 'at' h:mm a")}
+          </ReleaseNotesGridCell>
+          <ReleaseNotesGridCell py={0} justifyContent="flex-end">
+            <Button
+              as={ReactRouterLink}
+              to={`/configuration-management/release-notes/${note.id}/edit`}
+              variant="secondary"
+              size="sm"
+              h="32px"
+              minW="32px"
+              px={3}
+              aria-label={t("ui.edit")}
+            >
+              <Pencil size={14} />
+            </Button>
+          </ReleaseNotesGridCell>
+        </Box>
+      ))
+    )
 
   return (
     <Container maxW="container.lg" px={8} pt={6} pb={20} flexGrow={1}>
@@ -81,7 +119,12 @@ export const ReleaseNotesScreen = observer(function ReleaseNotesScreen() {
               h="72px"
               align="center"
             >
-              <RouterLinkButton to="/release-notes/new" variant="primary" size="sm" fontSize="sm">
+              <RouterLinkButton
+                to="/configuration-management/release-notes/new"
+                variant="primary"
+                size="sm"
+                fontSize="sm"
+              >
                 {t("releaseNote.createNew")}
               </RouterLinkButton>
             </Flex>
@@ -93,39 +136,8 @@ export const ReleaseNotesScreen = observer(function ReleaseNotesScreen() {
                 <Flex py={16} gridColumn="1 / -1" justify="center">
                   <SharedSpinner />
                 </Flex>
-              ) : tableReleaseNotes.length === 0 ? (
-                <Flex py={16} gridColumn="1 / -1" justify="center">
-                  <Text color="text.secondary">{t("releaseNote.emptyState")}</Text>
-                </Flex>
               ) : (
-                tableReleaseNotes.map((note: IReleaseNote) => (
-                  <Box key={note.id} display="contents" role="row">
-                    <ReleaseNotesGridCell>{note.version}</ReleaseNotesGridCell>
-                    <ReleaseNotesGridCell color="text.secondary">
-                      {format(note.releaseDate, "MMMM d, yyyy")}
-                    </ReleaseNotesGridCell>
-                    <ReleaseNotesGridCell py={0}>
-                      <ReleaseNoteStatusBadge status={note.status as EReleaseNoteStatus} />
-                    </ReleaseNotesGridCell>
-                    <ReleaseNotesGridCell color="text.secondary">
-                      {format(note.updatedAt, "MMMM d, yyyy 'at' h:mm a")}
-                    </ReleaseNotesGridCell>
-                    <ReleaseNotesGridCell py={0} justifyContent="flex-end">
-                      <Button
-                        as={ReactRouterLink}
-                        to={`/release-notes/${note.id}/edit`}
-                        variant="secondary"
-                        size="sm"
-                        h="32px"
-                        minW="32px"
-                        px={3}
-                        aria-label={t("ui.edit")}
-                      >
-                        <Pencil size={14} />
-                      </Button>
-                    </ReleaseNotesGridCell>
-                  </Box>
-                ))
+                releaseNotesContent
               )}
             </SearchGrid>
           </Box>

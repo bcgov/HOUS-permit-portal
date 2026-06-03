@@ -132,6 +132,7 @@ export type TSearchParams<IModelSortFields, IModelFilterFields = {}> = {
   page?: number
   perPage?: number
   showArchived?: boolean
+  publishedOnly?: boolean
   filters?: IModelFilterFields
   mode?: "list" | "kanban"
   perColumn?: number
@@ -740,6 +741,12 @@ export type TReleaseNoteFormData = {
   content: string
   releaseNotesUrl: string
   issues: string
+}
+
+export type TReleaseNoteViewerContext = {
+  releaseNoteId: string
+  year: number
+  page: number
 }
 
 export interface ICopyRequirementTemplateFormData extends Partial<TCreateRequirementTemplateFormData> {

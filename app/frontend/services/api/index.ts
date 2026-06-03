@@ -79,6 +79,7 @@ import {
   TCreatePermitApplicationFormData,
   TCreateRequirementTemplateFormData,
   TReleaseNoteFormData,
+  TReleaseNoteViewerContext,
   TSearchParams,
 } from "../../types/types"
 import { camelizeResponse, decamelizeRequest } from "../../utils"
@@ -1166,6 +1167,10 @@ export class Api {
 
   async fetchReleaseNote(id: string) {
     return this.client.get<ApiResponse<IReleaseNote>>(`/release_notes/${id}`)
+  }
+
+  async fetchReleaseNoteViewerContext(id: string, params?: { perPage?: number }) {
+    return this.client.get<ApiResponse<TReleaseNoteViewerContext>>(`/release_notes/${id}/viewer_context`, params)
   }
 
   async createReleaseNote(releaseNote: TReleaseNoteFormData) {

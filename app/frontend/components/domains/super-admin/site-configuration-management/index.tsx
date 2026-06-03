@@ -85,7 +85,7 @@ export const SiteConfigurationManagementScreen = observer(function SiteConfigura
               description={t(`${i18nPrefix}.releaseNotes.description`)}
               linkText={t("ui.edit")}
               icon={<File size="24px" color="var(--chakra-colors-text-link)" />}
-              href="/release-notes"
+              href="/configuration-management/release-notes"
               h="full"
             />
           </GridItem>

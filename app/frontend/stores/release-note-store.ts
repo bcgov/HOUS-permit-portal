@@ -7,6 +7,15 @@ import { withRootStore } from "../lib/with-root-store"
 import { IReleaseNote, ReleaseNoteModel } from "../models/release-note-model"
 import { EReleaseNoteSortFields } from "../types/enums"
 import { TReleaseNoteFormData, TSearchParams } from "../types/types"
+import { urlForPath } from "../utils/utility-functions"
+
+const RELEASE_NOTE_ANCHOR_PREFIX = "release-note-"
+const RELEASE_NOTE_YEAR_COUNT = 10
+
+const recentReleaseNoteYears = () => {
+  const currentYear = new Date().getFullYear()
+  return Array.from({ length: RELEASE_NOTE_YEAR_COUNT }, (_, index) => currentYear - index)
+}
 
 export const ReleaseNoteStoreModel = types
   .compose(
@@ -14,15 +23,34 @@ export const ReleaseNoteStoreModel = types
       releaseNoteMap: types.map(ReleaseNoteModel),
       tableReleaseNotes: types.array(types.reference(ReleaseNoteModel)),
       currentReleaseNote: types.maybeNull(types.reference(ReleaseNoteModel)),
+      selectedYear: types.optional(types.number, () => new Date().getFullYear()),
+      viewingYearInitialized: types.optional(types.boolean, false),
+      applyYearFilterInSearch: types.optional(types.boolean, false),
+      publishedOnlyInSearch: types.optional(types.boolean, false),
+      availableYears: types.array(types.number),
     }),
     createSearchModel<EReleaseNoteSortFields>("searchReleaseNotes")
   )
   .extend(withEnvironment())
   .extend(withRootStore())
   .extend(withMerge())
-  .views(() => ({
+  .views((self) => ({
     getSortColumnHeader(field: EReleaseNoteSortFields) {
       return t(`releaseNote.columns.${field}`)
+    },
+    getReleaseNoteAnchorId(id: string) {
+      return `${RELEASE_NOTE_ANCHOR_PREFIX}${id}`
+    },
+    getReleaseNoteShareUrl(id: string) {
+      return urlForPath(`/release-notes#${RELEASE_NOTE_ANCHOR_PREFIX}${id}`)
+    },
+    parseReleaseNoteIdFromHash(hash: string) {
+      const anchorId = hash.replace("#", "")
+      if (!anchorId.startsWith(RELEASE_NOTE_ANCHOR_PREFIX)) return null
+      return anchorId.slice(RELEASE_NOTE_ANCHOR_PREFIX.length)
+    },
+    get viewingReleaseNotes(): IReleaseNote[] {
+      return self.tableReleaseNotes.filter((note): note is IReleaseNote => !!note)
     },
   }))
   .actions((self) => ({
@@ -35,18 +63,55 @@ export const ReleaseNoteStoreModel = types
     resetCurrentReleaseNote() {
       self.currentReleaseNote = null
     },
+    setSelectedYear(year: number) {
+      self.selectedYear = year
+    },
+    setApplyYearFilterInSearch(apply: boolean) {
+      self.applyYearFilterInSearch = apply
+    },
+    setPublishedOnlyInSearch(apply: boolean) {
+      self.publishedOnlyInSearch = apply
+    },
+    setAvailableYears(years: number[]) {
+      self.availableYears = cast(years)
+    },
+    resetViewingState() {
+      self.viewingYearInitialized = false
+      self.applyYearFilterInSearch = false
+      self.publishedOnlyInSearch = false
+      self.availableYears = cast([])
+    },
   }))
   .actions((self) => ({
-    searchReleaseNotes: flow(function* (opts?: { reset?: boolean; page?: number; countPerPage?: number }) {
+    initializeViewingYear() {
+      const years = recentReleaseNoteYears()
+      self.setAvailableYears(years)
+      self.setSelectedYear(years[0])
+    },
+
+    searchReleaseNotes: flow(function* (opts?: {
+      reset?: boolean
+      page?: number
+      countPerPage?: number
+      skipYearFilter?: boolean
+    }) {
       if (opts?.reset) {
         self.resetPages()
       }
 
-      const searchParams: TSearchParams<EReleaseNoteSortFields> = {
+      const searchParams: TSearchParams<EReleaseNoteSortFields> & { year?: number } = {
         query: self.query,
         sort: self.sort,
         page: opts?.page ?? self.currentPage,
         perPage: opts?.countPerPage ?? self.countPerPage,
+      }
+
+      if (self.applyYearFilterInSearch && !opts?.skipYearFilter) {
+        searchParams.year = self.selectedYear
+      }
+
+      if (self.publishedOnlyInSearch) {
+        searchParams.publishedOnly = true
       }
 
       const response = yield self.environment.api.fetchReleaseNotes(searchParams)
@@ -99,6 +164,54 @@ export const ReleaseNoteStoreModel = types
       }
       console.error("Failed to publish release note:", response.problem, response.data)
       return { ok: false as const, error: response.data?.errors || response.problem }
+    }),
+  }))
+  .actions((self) => ({
+    selectViewingYear: flow(function* (year: number) {
+      self.setSelectedYear(year)
+      yield self.searchReleaseNotes({ reset: true, page: 1 })
+    }),
+
+    ensureReleaseNoteVisibleInList: flow(function* (releaseNoteId: string) {
+      const contextResponse = yield self.environment.api.fetchReleaseNoteViewerContext(releaseNoteId, {
+        perPage: self.countPerPage,
+      })
+
+      if (!contextResponse.ok || !contextResponse.data?.data) {
+        return false
+      }
+
+      const { year, page } = contextResponse.data.data
+
+      if (year !== self.selectedYear) {
+        self.setSelectedYear(year)
+      }
+
+      self.setCurrentPage(page)
+
+      return true
+    }),
+  }))
+  .actions((self) => ({
+    initializeViewingPage: flow(function* (hash = "") {
+      self.resetViewingState()
+      self.syncWithUrl()
+      self.setApplyYearFilterInSearch(true)
+      self.setPublishedOnlyInSearch(true)
+      self.initializeViewingYear()
+
+      const releaseNoteId = self.parseReleaseNoteIdFromHash(hash)
+      if (releaseNoteId) {
+        const ensured = yield self.ensureReleaseNoteVisibleInList(releaseNoteId)
+        if (ensured) {
+          yield self.searchReleaseNotes({
+            page: self.currentPage,
+            countPerPage: self.countPerPage,
+          })
+        }
+      }
+
+      self.viewingYearInitialized = true
     }),
   }))
 

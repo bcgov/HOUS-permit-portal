@@ -6,6 +6,8 @@ class ReleaseNote < ApplicationRecord
     /\A(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?\z/
   enum :status, { draft: 0, published: 1 }, default: :draft
 
+  searchkick
+
   url_validatable :release_notes_url
   validates :version,
             presence: true,
@@ -18,6 +20,19 @@ class ReleaseNote < ApplicationRecord
   validate :version_unchanged_once_published
 
   scope :published, -> { where(status: :published) }
+
+  def search_data
+    {
+      id: id,
+      version: version,
+      content: content,
+      release_notes_url: release_notes_url,
+      release_date: release_date,
+      status: status,
+      created_at: created_at,
+      updated_at: updated_at
+    }
+  end
 
   def publish_event_notification_data
     {

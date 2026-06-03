@@ -212,7 +212,7 @@ export const NotificationStoreModel = types
         return [
           {
             text: t("ui.show"),
-            href: `/release-notes/${releaseNoteId}`,
+            href: `/release-notes#release-note-${releaseNoteId}`,
           },
         ]
       }

@@ -152,6 +152,27 @@ RSpec.describe "ReleaseNotes", type: :request do
       expect(response).to have_http_status(:success)
     end
 
+    it "updates an already published release note without publishing again" do
+      setup
+      @release_note.update!(status: :published)
+      expect(NotificationService).not_to receive(
+        :publish_release_note_publish_event
+      )
+
+      patch publish_release_note_path(@release_note.id),
+            params: {
+              release_note: {
+                content: params[:content]
+              }
+            }
+
+      expect(response).to have_http_status(:success)
+      expect(subject).to include(
+        "status" => "published",
+        "content" => params[:content]
+      )
+    end
+
     it_behaves_like AN_INVALID_PAYLOAD_RESPONSE, publish_with_payload
     it_behaves_like A_NOT_FOUND_RESPONSE, publish_with_payload
   end
@@ -176,6 +197,8 @@ RSpec.describe "ReleaseNotes", type: :request do
       )
     end
 
+    before { ReleaseNote.reindex }
+
     it "returns all release notes for super admins" do
       sign_in super_admin
       get release_notes_path
@@ -188,6 +211,15 @@ RSpec.describe "ReleaseNotes", type: :request do
       end
     end
 
+    it "returns only published release notes when requested by super admins" do
+      sign_in super_admin
+      get release_notes_path, params: { published_only: true }
+
+      expect(response).to have_http_status(:success)
+      expect(subject).to have_attributes(length: 1)
+      expect(subject.first["id"]).to eq(earliest_release_note.id)
+    end
+
     it "returns published release notes for non-super admins" do
       sign_in submitter
       get release_notes_path
@@ -197,12 +229,37 @@ RSpec.describe "ReleaseNotes", type: :request do
       expect(subject).to all(include("issues", "content"))
     end
 
+    it "returns published release notes for unauthenticated users" do
+      get release_notes_path
+
+      expect(response).to have_http_status(:success)
+      expect(subject).to have_attributes(length: 1)
+      expect(subject.first["id"]).to eq(earliest_release_note.id)
+    end
+
     it "paginates the response" do
       sign_in super_admin
       get release_notes_path, params: { page: 2, per_page: 1 }
 
       expect(response).to have_http_status(:success)
       expect(subject).to have_attributes(length: 1)
+    end
+
+    it "filters release notes by year" do
+      older_release_note =
+        create(
+          :release_note,
+          status: :published,
+          version: "0.9.0",
+          release_date: Date.new(2024, 12, 31)
+        )
+      ReleaseNote.reindex
+
+      sign_in super_admin
+      get release_notes_path, params: { year: 2024 }
+
+      expect(response).to have_http_status(:success)
+      expect(subject.pluck("id")).to contain_exactly(older_release_note.id)
     end
 
     describe "sorts", :aggregate_failures do
@@ -239,14 +296,97 @@ RSpec.describe "ReleaseNotes", type: :request do
       expect(subject).to include("version" => @release_note.version)
     end
 
-    it "returns an error if a non-admin tries to access a draft release note" do
+    it "returns an error if a non-admin tries to access a release note" do
       sign_in submitter
-      get release_note_path(create(:release_note).id)
+      get release_note_path(create(:release_note, status: :published).id)
+
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it "requires authentication" do
+      published = create(:release_note, status: :published)
+      get release_note_path(published.id)
+
+      expect(response).to have_http_status(:unauthorized)
+    end
+
+    it_behaves_like A_NOT_FOUND_RESPONSE,
+                    ->(payload) { get release_note_path(payload[:id]) }
+  end
+
+  describe "#viewer_context" do
+    let!(:newest_in_2025) do
+      create(
+        :release_note,
+        status: :published,
+        release_date: Date.new(2025, 6, 1)
+      )
+    end
+    let!(:middle_in_2025) do
+      create(
+        :release_note,
+        status: :published,
+        release_date: Date.new(2025, 5, 1)
+      )
+    end
+    let!(:oldest_in_2025) do
+      create(
+        :release_note,
+        status: :published,
+        release_date: Date.new(2025, 4, 1)
+      )
+    end
+    let!(:published_2024) do
+      create(
+        :release_note,
+        status: :published,
+        release_date: Date.new(2024, 12, 1)
+      )
+    end
+    let!(:draft_in_2025) do
+      create(:release_note, status: :draft, release_date: Date.new(2025, 3, 1))
+    end
+
+    it "returns year and page for a published note" do
+      get viewer_context_release_note_path(oldest_in_2025.id),
+          params: {
+            per_page: 2
+          }
+
+      expect(response).to have_http_status(:success)
+      expect(json_response.fetch("data")).to include(
+        "release_note_id" => oldest_in_2025.id,
+        "year" => 2025,
+        "page" => 2
+      )
+    end
+
+    it "returns page 1 for the newest note in a year" do
+      get viewer_context_release_note_path(newest_in_2025.id)
+
+      expect(json_response.fetch("data")).to include("page" => 1)
+    end
+
+    it "is available to unauthenticated users for published notes" do
+      get viewer_context_release_note_path(middle_in_2025.id)
+
+      expect(response).to have_http_status(:success)
+      expect(json_response.fetch("data")).to include(
+        "release_note_id" => middle_in_2025.id,
+        "year" => 2025,
+        "page" => 1
+      )
+    end
+
+    it "returns not found for draft notes when unauthenticated" do
+      get viewer_context_release_note_path(draft_in_2025.id)
 
       expect(response).to have_http_status(:not_found)
     end
 
     it_behaves_like A_NOT_FOUND_RESPONSE,
-                    ->(payload) { get release_note_path(payload[:id]) }
+                    ->(payload) do
+                      get viewer_context_release_note_path(payload[:id])
+                    end
   end
 end

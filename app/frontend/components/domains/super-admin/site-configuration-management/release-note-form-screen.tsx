@@ -123,7 +123,9 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
     setCurrentReleaseNote,
   } = releaseNoteStore
 
-  const isCreate = Boolean(matchPath({ path: "/release-notes/new", end: true }, location.pathname))
+  const isCreate = Boolean(
+    matchPath({ path: "/configuration-management/release-notes/new", end: true }, location.pathname)
+  )
 
   const [loadError, setLoadError] = React.useState(false)
   const [isLoading, setIsLoading] = React.useState(!isCreate)
@@ -197,7 +199,7 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
     const result = isCreate ? await createReleaseNote(data) : await updateReleaseNote(releaseNoteId as string, data)
 
     if (result.ok) {
-      navigate("/release-notes")
+      navigate("/configuration-management/release-notes")
     } else {
       console.error("Failed to save release note:", result.error)
     }
@@ -218,7 +220,7 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
       const publishResult = await publishReleaseNote(createResult.data.id, data)
       if (!publishResult.ok) {
         console.error("Failed to publish release note after create:", publishResult.error)
-        navigate(`/release-notes/${createResult.data.id}/edit`, { replace: true })
+        navigate(`/configuration-management/release-notes/${createResult.data.id}/edit`, { replace: true })
         return
       }
     } else {
@@ -229,7 +231,7 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
       }
     }
 
-    navigate("/release-notes")
+    navigate("/configuration-management/release-notes")
   }
 
   const onFormSubmit = handleSubmit(async (data: TReleaseNoteFormData, event?: React.BaseSyntheticEvent) => {
@@ -269,7 +271,7 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
         <Heading size="md" mb={4}>
           {t("site.breadcrumb.notFound")}
         </Heading>
-        <RouterLinkButton to="/release-notes" variant="secondary">
+        <RouterLinkButton to="/configuration-management/release-notes" variant="secondary">
           {t("releaseNote.form.cancel")}
         </RouterLinkButton>
       </Container>
@@ -309,6 +311,8 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
                     ".react-datepicker__input-container": { w: "252px" },
                   },
                 },
+                showTimeInput: true,
+                dateFormat: "yyyy/MM/dd h:mm aa",
               }}
             />
             <UrlFormControl label={t("releaseNote.form.releaseNotesUrl")} fieldName="releaseNotesUrl" required />
@@ -344,7 +348,7 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
               py={4}
             >
               <RouterLinkButton
-                to="/release-notes"
+                to="/configuration-management/release-notes"
                 variant="secondary"
                 size="sm"
                 isDisabled={submittingIntent !== null}
@@ -369,7 +373,7 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
                 variant="primary"
                 size="sm"
                 isLoading={submittingIntent === "publish"}
-                isDisabled={submittingIntent === "saveDraft" || isAlreadyPublished}
+                isDisabled={submittingIntent === "saveDraft"}
               >
                 {t("releaseNote.form.publish")}
               </Button>
