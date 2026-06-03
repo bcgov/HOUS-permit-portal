@@ -310,19 +310,10 @@ class PermitProject < ApplicationRecord
       &.collaborator
   end
 
-  def designated_reviewer_enabled?
-    SiteConfiguration.allow_designated_reviewer? &&
-      jurisdiction&.allow_designated_reviewer
-  end
-
   # Atomically assigns the project's single review collaborator, replacing any
   # existing assignment. Re-picking the current collaborator is a no-op (no
   # notification churn). Locks existing kept rows to serialize concurrent calls.
   def assign_project_review_collaborator!(collaborator_id)
-    unless designated_reviewer_enabled?
-      raise "Designated reviewer feature is not enabled"
-    end
-
     transaction do
       existing = permit_project_collaborations.kept.lock.first
 
