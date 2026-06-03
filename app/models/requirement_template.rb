@@ -1,7 +1,7 @@
 class RequirementTemplate < ApplicationRecord
   SEARCH_INCLUDES = %i[
     published_template_version
-    draft_template_version
+    draft_template_versions
     last_three_deprecated_template_versions
     scheduled_template_versions
     template_category
@@ -56,9 +56,13 @@ class RequirementTemplate < ApplicationRecord
           -> { where(status: "published") },
           class_name: "TemplateVersion"
 
-  has_one :draft_template_version,
-          -> { where(status: "draft") },
-          class_name: "TemplateVersion"
+  has_many :draft_template_versions,
+           -> do
+             where(template_versions: { status: "draft" }).order(
+               updated_at: :desc
+             )
+           end,
+           class_name: "TemplateVersion"
 
   scope :for_sandbox,
         ->(sandbox) do

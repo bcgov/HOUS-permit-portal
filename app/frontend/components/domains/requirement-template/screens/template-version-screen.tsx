@@ -68,8 +68,8 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
   const showSchedulePublishControls = isDraft && isSuperAdmin && !!requirementTemplate?.isFullyLoaded
 
   const onScheduleConfirm = async (scheduleDate: Date) => {
-    if (!requirementTemplate) return
-    const updated = await requirementTemplateStore.promoteDraft(requirementTemplate.id, {
+    if (!templateVersion) return
+    const updated = await requirementTemplateStore.promoteDraft(templateVersion.id, {
       versionDate: format(scheduleDate, datefnsAppDateFormat),
     })
     if (updated) {
@@ -83,8 +83,8 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
   const onForcePublishNow =
     import.meta.env.VITE_ENABLE_TEMPLATE_FORCE_PUBLISH === "true"
       ? async () => {
-          if (!requirementTemplate) return
-          const updated = await requirementTemplateStore.promoteDraft(requirementTemplate.id, {
+          if (!templateVersion) return
+          const updated = await requirementTemplateStore.promoteDraft(templateVersion.id, {
             skipDateCheck: true,
           })
           if (updated) {

@@ -58,13 +58,17 @@ export const TemplateVersionsSidebar = observer(function TemplateVersionsSidebar
   const onClose = externalOnClose || internalOnClose
   const onOpen = internalOnOpen
 
-  React.useEffect(() => {
-    if (!isOpen) return
-    const draftId = requirementTemplate.draftTemplateVersion?.id
-    if (!draftId) return
+  const draftTemplateVersionIds = requirementTemplate.draftTemplateVersions
+    .map((templateVersion) => templateVersion.id)
+    .join(",")
 
-    templateVersionStore.fetchTemplateVersion(draftId).catch(() => {})
-  }, [isOpen, requirementTemplate.draftTemplateVersion?.id, templateVersionStore])
+  React.useEffect(() => {
+    if (!isOpen || !draftTemplateVersionIds) return
+
+    requirementTemplate.draftTemplateVersions.forEach((templateVersion) => {
+      templateVersionStore.fetchTemplateVersion(templateVersion.id).catch(() => {})
+    })
+  }, [draftTemplateVersionIds, isOpen, requirementTemplate.draftTemplateVersions, templateVersionStore])
 
   return (
     <>
@@ -201,6 +205,7 @@ const VersionFlow = observer(function VersionFlow({
   const publishedTemplateVersions = requirementTemplate.publishedTemplateVersion
     ? [requirementTemplate.publishedTemplateVersion]
     : []
+  const draftTemplateVersions = requirementTemplate.draftTemplateVersions
 
   return (
     <Box>
@@ -215,20 +220,29 @@ const VersionFlow = observer(function VersionFlow({
         <VersionFlowStep
           label={t("requirementTemplate.versionSidebar.listTitles.draft")}
           emptyLabel={t("requirementTemplate.versionSidebar.noEarlyAccessVersion")}
-          hasContent={!!requirementTemplate.draftTemplateVersion}
+          hasContent={draftTemplateVersions.length > 0}
         >
-          {requirementTemplate.draftTemplateVersion && (
-            <Box border="1px solid" borderColor="border.light" borderRadius="sm" overflow="hidden">
+          {draftTemplateVersions.map((templateVersion, index) => (
+            <Box
+              key={templateVersion.id}
+              border="1px solid"
+              borderColor="border.light"
+              borderTop={index !== 0 ? "none" : undefined}
+              borderTopRadius={index === 0 ? "sm" : undefined}
+              borderBottomRadius={index === draftTemplateVersions.length - 1 ? "sm" : undefined}
+              borderRadius="none"
+              overflow="hidden"
+            >
               <VersionCard
-                viewRoute={`/template-versions/${requirementTemplate.draftTemplateVersion.id}`}
+                viewRoute={`/template-versions/${templateVersion.id}`}
                 status={ETemplateVersionStatus.draft}
-                updatedAt={requirementTemplate.draftTemplateVersion.updatedAt}
+                updatedAt={templateVersion.updatedAt}
                 borderRadius="none"
                 border="none"
               />
-              <SharePreviewAccordion draftTemplateVersion={requirementTemplate.draftTemplateVersion} />
+              <SharePreviewAccordion draftTemplateVersion={templateVersion} />
             </Box>
-          )}
+          ))}
         </VersionFlowStep>
 
         <VersionFlowStep

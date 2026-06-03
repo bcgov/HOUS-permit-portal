@@ -48,7 +48,7 @@ class RequirementTemplateBlueprint < Blueprinter::Base
                 options[:current_user]&.super_admin?
               end
 
-  association :draft_template_version,
+  association :draft_template_versions,
               blueprint: TemplateVersionBlueprint,
               if: ->(_field_name, _rt, options) do
                 options[:current_user]&.super_admin?
@@ -71,7 +71,7 @@ class RequirementTemplateBlueprint < Blueprinter::Base
       defaulted_template_version(rt, options)
     end
 
-    association :draft_template_version,
+    association :draft_template_versions,
                 blueprint: TemplateVersionBlueprint,
                 view: :extended,
                 if: ->(_field_name, _rt, options) do

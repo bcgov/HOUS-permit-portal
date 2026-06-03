@@ -804,12 +804,14 @@ export class Api {
     )
   }
 
-  async discardDraft(templateId: string) {
-    return this.client.delete<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${templateId}/discard_draft`)
+  async discardDraft(templateVersionId: string) {
+    return this.client.delete<ApiResponse<IRequirementTemplate>>(
+      `/template_versions/${templateVersionId}/discard_draft`
+    )
   }
 
   async promoteDraft(
-    templateId: string,
+    templateVersionId: string,
     params: {
       versionDate?: string
       changeNotes?: string
@@ -822,7 +824,7 @@ export class Api {
     }
   ) {
     return this.client.post<ApiResponse<IRequirementTemplate>>(
-      `/requirement_templates/${templateId}/promote_draft`,
+      `/template_versions/${templateVersionId}/promote_draft`,
       params
     )
   }
