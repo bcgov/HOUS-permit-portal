@@ -378,6 +378,7 @@ const options = {
           onlySave: "Save",
           done: "Done",
           view: "View",
+          previewForm: "Preview form",
           totalItems: "Total items",
           doLater: "Do this later",
           add: "Add",

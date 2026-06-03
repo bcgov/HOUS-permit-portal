@@ -191,7 +191,7 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
                 </RouterLinkButton>
               )}
               <RouterLinkButton to={`/template-versions/${templateVersion.id}/preview`} variant="secondary">
-                {t("ui.view")}
+                {t("ui.previewForm")}
               </RouterLinkButton>
               <Button variant={"secondary"} onClick={onClose}>
                 {t("ui.close")}

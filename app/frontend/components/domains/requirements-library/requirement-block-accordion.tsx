@@ -157,7 +157,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
             </HStack>
 
             <HStack spacing={2}>
-              {isOpen && !renderEdit && (
+              {isOpen && isEditable && !renderEdit && (
                 <RequirementsBlockModal
                   showEditWarning={showEditWarning}
                   isEditable={isEditable}
