@@ -80,20 +80,20 @@ export const BuilderHeader = observer(function BuilderHeader({
         </HStack>
         {(renderTags || renderCategory) && (
           <HStack alignItems={"flex-start"} spacing={6} flexWrap="wrap">
-            {renderTags && (
-              <HStack alignItems={"flex-start"}>
-                <Text fontWeight={700} pt={2}>
-                  {t("requirementTemplate.fields.tags")}:
-                </Text>
-                {renderTags()}
-              </HStack>
-            )}
             {renderCategory && (
               <HStack alignItems={"flex-start"}>
                 <Text fontWeight={700} pt={2}>
                   {t("requirementTemplate.fields.templateCategory")}:
                 </Text>
                 {renderCategory()}
+              </HStack>
+            )}
+            {renderTags && (
+              <HStack alignItems={"flex-start"}>
+                <Text fontWeight={700} pt={2}>
+                  {t("requirementTemplate.fields.tags")}:
+                </Text>
+                {renderTags()}
               </HStack>
             )}
           </HStack>

@@ -27,7 +27,6 @@ import {
   KeyboardSensor,
   PointerSensor,
   closestCenter,
-  useDroppable,
   useSensor,
   useSensors,
 } from "@dnd-kit/core"
@@ -50,8 +49,7 @@ import { ITemplateCategory } from "../../../../models/template-category"
 import { useMst } from "../../../../setup/root"
 import { SharedSpinner } from "../../../shared/base/shared-spinner"
 import { ConfirmationModal } from "../../../shared/confirmation-modal"
-
-const UNCATEGORIZED_ID = "uncategorized"
+import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
 
 export const TemplateCategoriesScreen = observer(function TemplateCategoriesScreen() {
   const { t } = useTranslation()
@@ -72,34 +70,41 @@ export const TemplateCategoriesScreen = observer(function TemplateCategoriesScre
   const modal = useDisclosure()
   const [editingCategory, setEditingCategory] = useState<ITemplateCategory | null>(null)
   const [label, setLabel] = useState("")
-  const [activeTemplateId, setActiveTemplateId] = useState<string | null>(null)
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null)
+  const [orderedCategoryIds, setOrderedCategoryIds] = useState<string[]>([])
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   )
+  const storeCategoryIdKey = templateCategories.map((category) => category.id).join("|")
 
   useEffect(() => {
     fetchTemplateCategories()
   }, [])
 
-  const categoryIds = useMemo(() => templateCategories.map((category) => category.id), [templateCategories])
-  const activeTemplate = useMemo(() => {
-    if (!activeTemplateId) return null
+  useEffect(() => {
+    setOrderedCategoryIds(storeCategoryIdKey ? storeCategoryIdKey.split("|") : [])
+  }, [storeCategoryIdKey])
 
-    return (
-      uncategorizedRequirementTemplates.find((template) => template.id === activeTemplateId) ??
-      templateCategories
-        .flatMap((category) => category.requirementTemplates)
-        .find((template) => template.id === activeTemplateId) ??
-      null
-    )
-  }, [activeTemplateId, templateCategories, uncategorizedRequirementTemplates])
+  const categoryById = useMemo(
+    () => new Map(templateCategories.map((category) => [category.id, category])),
+    [templateCategories]
+  )
+  const orderedCategories = useMemo(() => {
+    const categories = orderedCategoryIds.flatMap((id) => {
+      const category = categoryById.get(id)
+      return category ? [category] : []
+    })
+    const orderedIds = new Set(categories.map((category) => category.id))
+
+    return [...categories, ...templateCategories.filter((category) => !orderedIds.has(category.id))]
+  }, [categoryById, orderedCategoryIds, templateCategories])
+  const categoryIds = useMemo(() => orderedCategories.map((category) => category.id), [orderedCategories])
   const activeCategory = useMemo(() => {
     if (!activeCategoryId) return null
 
-    return templateCategories.find((category) => category.id === activeCategoryId) ?? null
-  }, [activeCategoryId, templateCategories])
+    return categoryById.get(activeCategoryId) ?? null
+  }, [activeCategoryId, categoryById])
 
   const openCreateModal = () => {
     setEditingCategory(null)
@@ -124,75 +129,28 @@ export const TemplateCategoriesScreen = observer(function TemplateCategoriesScre
     if (ok) modal.onClose()
   }
 
-  const findCategoryIdForTemplate = (templateId: string): string | null | undefined => {
-    if (uncategorizedRequirementTemplates.some((template) => template.id === templateId)) return null
-
-    return templateCategories.find((category) =>
-      category.requirementTemplates.some((template) => template.id === templateId)
-    )?.id
-  }
-
-  const templateIdsForCategory = (categoryId: string | null): string[] => {
-    if (categoryId === null) return uncategorizedRequirementTemplates.map((template) => template.id)
-
-    return (
-      templateCategories.find((category) => category.id === categoryId)?.requirementTemplates.map((t) => t.id) ?? []
-    )
-  }
-
-  const handleDragEnd = async (event: DragEndEvent) => {
+  const handleCategoryDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event
-    setActiveTemplateId(null)
     setActiveCategoryId(null)
     if (!over || active.id === over.id) return
 
-    const activeType = active.data.current?.type
-    const overType = over.data.current?.type
+    const oldIndex = categoryIds.indexOf(String(active.id))
+    const overCategoryId = over.data.current?.categoryId
+    if (!overCategoryId) return
 
-    if (activeType === "category" && overType === "category") {
-      const oldIndex = categoryIds.indexOf(String(active.id))
-      const overCategoryId = over.data.current?.categoryId
-      if (!overCategoryId) return
+    const newIndex = categoryIds.indexOf(overCategoryId)
+    if (oldIndex === -1 || newIndex === -1) return
 
-      const newIndex = categoryIds.indexOf(overCategoryId)
-      if (oldIndex === -1 || newIndex === -1) return
+    const nextCategoryIds = arrayMove(categoryIds, oldIndex, newIndex)
+    setOrderedCategoryIds(nextCategoryIds)
 
-      await reorderTemplateCategories(arrayMove(categoryIds, oldIndex, newIndex))
-      return
-    }
-
-    if (activeType !== "template") return
-
-    const activeTemplateId = String(active.id)
-    const sourceCategoryId = findCategoryIdForTemplate(activeTemplateId)
-    const targetCategoryId =
-      overType === "category"
-        ? (over.data.current?.categoryId as string | null)
-        : findCategoryIdForTemplate(String(over.id))
-
-    if (sourceCategoryId === undefined || targetCategoryId === undefined) return
-
-    const sourceTemplateIds = templateIdsForCategory(sourceCategoryId).filter((id) => id !== activeTemplateId)
-    const targetTemplateIds = templateIdsForCategory(targetCategoryId).filter((id) => id !== activeTemplateId)
-
-    const overIndex = overType === "template" ? targetTemplateIds.indexOf(String(over.id)) : targetTemplateIds.length
-    const insertIndex = overIndex === -1 ? targetTemplateIds.length : overIndex
-    const nextTargetIds = [...targetTemplateIds]
-    nextTargetIds.splice(insertIndex, 0, activeTemplateId)
-
-    if (sourceCategoryId === targetCategoryId) {
-      await reorderTemplatesInCategory(targetCategoryId, nextTargetIds)
-    } else {
-      await reorderTemplatesInCategory(sourceCategoryId, sourceTemplateIds)
-      await reorderTemplatesInCategory(targetCategoryId, nextTargetIds)
-    }
+    const ok = await reorderTemplateCategories(nextCategoryIds)
+    if (!ok) setOrderedCategoryIds(categoryIds)
   }
 
-  const handleDragStart = (event: DragStartEvent) => {
+  const handleCategoryDragStart = (event: DragStartEvent) => {
     const { active } = event
-    const activeType = active.data.current?.type
-    setActiveTemplateId(activeType === "template" ? String(active.id) : null)
-    setActiveCategoryId(activeType === "category" ? String(active.id) : null)
+    setActiveCategoryId(String(active.id))
   }
 
   return (
@@ -231,38 +189,34 @@ export const TemplateCategoriesScreen = observer(function TemplateCategoriesScre
             sensors={sensors}
             collisionDetection={closestCenter}
             modifiers={[restrictToVerticalAxis]}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
+            onDragStart={handleCategoryDragStart}
+            onDragEnd={handleCategoryDragEnd}
           >
             <SortableContext items={categoryIds} strategy={verticalListSortingStrategy}>
               <VStack align="stretch" spacing={4}>
-                {templateCategories.map((category) => (
+                {orderedCategories.map((category) => (
                   <TemplateCategorySection
                     key={category.id}
                     category={category}
                     isDragging={activeCategoryId === category.id}
                     onEdit={() => openEditModal(category)}
                     onDelete={() => deleteTemplateCategory(category.id)}
+                    onReorderTemplates={(orderedIds) => reorderTemplatesInCategory(category.id, orderedIds)}
                   />
                 ))}
               </VStack>
             </SortableContext>
-
-            <TemplateBucket
-              id={UNCATEGORIZED_ID}
-              categoryId={null}
-              title={translate("siteConfiguration.templateCategories.uncategorized", "Uncategorized")}
-              templates={uncategorizedRequirementTemplates as IRequirementTemplate[]}
-              mt={4}
-            />
-            <DragOverlay>
-              {activeCategory ? (
-                <CategoryOverlayContent category={activeCategory} />
-              ) : (
-                activeTemplate && <TemplateRowContent template={activeTemplate as IRequirementTemplate} isOverlay />
-              )}
-            </DragOverlay>
+            <DragOverlay>{activeCategory && <CategoryOverlayContent category={activeCategory} />}</DragOverlay>
           </DndContext>
+        )}
+
+        {!isLoading && (
+          <TemplateBucket
+            title={translate("siteConfiguration.templateCategories.uncategorized", "Uncategorized")}
+            templates={uncategorizedRequirementTemplates as IRequirementTemplate[]}
+            mt={4}
+            onReorderTemplates={(orderedIds) => reorderTemplatesInCategory(null, orderedIds)}
+          />
         )}
       </VStack>
 
@@ -297,6 +251,7 @@ interface ITemplateCategorySectionProps {
   isDragging: boolean
   onEdit: () => void
   onDelete: () => Promise<boolean>
+  onReorderTemplates: (orderedIds: string[]) => Promise<boolean>
 }
 
 const TemplateCategorySection = observer(function TemplateCategorySection({
@@ -304,6 +259,7 @@ const TemplateCategorySection = observer(function TemplateCategorySection({
   isDragging,
   onEdit,
   onDelete,
+  onReorderTemplates,
 }: ITemplateCategorySectionProps) {
   const { t } = useTranslation()
   const translate = t as any
@@ -319,10 +275,9 @@ const TemplateCategorySection = observer(function TemplateCategorySection({
   return (
     <Box ref={sortableProps.setNodeRef} style={style} opacity={isDragging ? 0.35 : 1}>
       <TemplateBucket
-        id={category.id}
-        categoryId={category.id}
         title={category.label}
         templates={category.requirementTemplates}
+        onReorderTemplates={onReorderTemplates}
         headerRight={
           <HStack spacing={3}>
             <Button variant="link" size="sm" onClick={onEdit}>
@@ -394,33 +349,66 @@ function CategoryOverlayContent({ category }: { category: ITemplateCategory }) {
 }
 
 interface ITemplateBucketProps {
-  id: string
-  categoryId: string | null
   title: string
   templates: IRequirementTemplate[]
+  onReorderTemplates: (orderedIds: string[]) => Promise<boolean>
   headerRight?: React.ReactNode
   mt?: number
 }
 
-function TemplateBucket({ id, categoryId, title, templates, headerRight, mt }: ITemplateBucketProps) {
+function TemplateBucket({ title, templates, onReorderTemplates, headerRight, mt }: ITemplateBucketProps) {
   const { t } = useTranslation()
   const translate = t as any
-  const droppableProps = useDroppable({
-    id: `${id}-bucket`,
-    data: { type: "category", categoryId },
-  })
-  const templateIds = templates.map((template) => template.id)
+  const [activeTemplateId, setActiveTemplateId] = useState<string | null>(null)
+  const [orderedTemplateIds, setOrderedTemplateIds] = useState<string[]>([])
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  )
+  const storeTemplateIdKey = templates.map((template) => template.id).join("|")
+  useEffect(() => {
+    setOrderedTemplateIds(storeTemplateIdKey ? storeTemplateIdKey.split("|") : [])
+  }, [storeTemplateIdKey])
+
+  const templateById = useMemo(() => new Map(templates.map((template) => [template.id, template])), [templates])
+  const orderedTemplates = useMemo(() => {
+    const sortedTemplates = orderedTemplateIds.flatMap((id) => {
+      const template = templateById.get(id)
+      return template ? [template] : []
+    })
+    const orderedIds = new Set(sortedTemplates.map((template) => template.id))
+
+    return [...sortedTemplates, ...templates.filter((template) => !orderedIds.has(template.id))]
+  }, [orderedTemplateIds, templateById, templates])
+  const templateIds = orderedTemplates.map((template) => template.id)
+  const activeTemplate = useMemo(
+    () => (activeTemplateId ? (templateById.get(activeTemplateId) ?? null) : null),
+    [activeTemplateId, templateById]
+  )
+
+  const handleTemplateDragStart = (event: DragStartEvent) => {
+    setActiveTemplateId(String(event.active.id))
+  }
+
+  const handleTemplateDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event
+    setActiveTemplateId(null)
+    if (!over || active.id === over.id) return
+
+    const oldIndex = templateIds.indexOf(String(active.id))
+    const newIndex = templateIds.indexOf(String(over.id))
+    if (oldIndex === -1 || newIndex === -1) return
+
+    const nextTemplateIds = arrayMove(templateIds, oldIndex, newIndex)
+    setOrderedTemplateIds(nextTemplateIds)
+
+    const ok = await onReorderTemplates(nextTemplateIds)
+    if (!ok) setOrderedTemplateIds(templateIds)
+  }
 
   return (
     <Box border="1px solid" borderColor="border.light" borderRadius="md" bg="white" mt={mt}>
-      <Flex
-        ref={droppableProps.setNodeRef}
-        p={4}
-        borderBottom="1px solid"
-        borderColor="border.light"
-        justify="space-between"
-        align="center"
-      >
+      <Flex p={4} borderBottom="1px solid" borderColor="border.light" justify="space-between" align="center">
         <HStack spacing={3}>
           <Heading as="h2" size="md" mb={0}>
             {title}
@@ -435,29 +423,38 @@ function TemplateBucket({ id, categoryId, title, templates, headerRight, mt }: I
         {headerRight}
       </Flex>
 
-      <SortableContext items={templateIds} strategy={verticalListSortingStrategy}>
-        <VStack align="stretch" spacing={0}>
-          {templates.length === 0 ? (
-            <Text color="text.secondary" fontSize="sm" fontStyle="italic" p={4}>
-              {translate("siteConfiguration.templateCategories.empty", "No templates in this category.")}
-            </Text>
-          ) : (
-            templates.map((template) => (
-              <SortableTemplateRow key={template.id} template={template} categoryId={categoryId} />
-            ))
-          )}
-        </VStack>
-      </SortableContext>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        modifiers={[restrictToVerticalAxis]}
+        onDragStart={handleTemplateDragStart}
+        onDragEnd={handleTemplateDragEnd}
+      >
+        <SortableContext items={templateIds} strategy={verticalListSortingStrategy}>
+          <VStack align="stretch" spacing={0}>
+            {templates.length === 0 ? (
+              <Text color="text.secondary" fontSize="sm" fontStyle="italic" p={4}>
+                {translate("siteConfiguration.templateCategories.empty", "No templates in this category.")}
+              </Text>
+            ) : (
+              orderedTemplates.map((template) => <SortableTemplateRow key={template.id} template={template} />)
+            )}
+          </VStack>
+        </SortableContext>
+        <DragOverlay>
+          {activeTemplate && <TemplateRowContent template={activeTemplate as IRequirementTemplate} isOverlay />}
+        </DragOverlay>
+      </DndContext>
     </Box>
   )
 }
 
-function SortableTemplateRow({ template, categoryId }: { template: IRequirementTemplate; categoryId: string | null }) {
+function SortableTemplateRow({ template }: { template: IRequirementTemplate }) {
   const { t } = useTranslation()
   const translate = t as any
   const sortableProps = useSortable({
     id: template.id,
-    data: { type: "template", categoryId },
+    data: { type: "template" },
   })
   const style: CSSProperties = {
     transform: CSS.Transform.toString(sortableProps.transform),
@@ -477,14 +474,19 @@ function SortableTemplateRow({ template, categoryId }: { template: IRequirementT
       bg="white"
     >
       <TemplateRowContent template={template} />
-      <IconButton
-        aria-label={translate("siteConfiguration.templateCategories.dragTemplate", "Drag template")}
-        variant="ghost"
-        size="sm"
-        icon={<ListIcon />}
-        {...sortableProps.listeners}
-        {...sortableProps.attributes}
-      />
+      <HStack spacing={3}>
+        <RouterLinkButton to={`/requirement-templates/${template.id}/edit`} size="sm" variant="link">
+          {translate("siteConfiguration.templateCategories.openBuilder", "Open builder")}
+        </RouterLinkButton>
+        <IconButton
+          aria-label={translate("siteConfiguration.templateCategories.dragTemplate", "Drag template")}
+          variant="ghost"
+          size="sm"
+          icon={<ListIcon />}
+          {...sortableProps.listeners}
+          {...sortableProps.attributes}
+        />
+      </HStack>
     </Flex>
   )
 }

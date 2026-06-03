@@ -66,29 +66,6 @@ export const RequirementTemplateForm = observer(({ onSuccess }: IRequirementTemp
 
           <Flex direction="column" as="section" w="full">
             <Text fontWeight={700} mb={2}>
-              {t("requirementTemplate.fields.tags")}
-            </Text>
-            <Controller
-              name="tags"
-              control={control}
-              render={({ field: { onChange, value } }) => (
-                <TagsSelect
-                  onChange={(options) => onChange(options.map((o) => o.value))}
-                  fetchOptions={fetchTagOptions}
-                  placeholder={t("requirementTemplate.fields.tags")}
-                  selectedOptions={(value ?? []).map((tag) => ({ value: tag, label: tag }))}
-                  styles={{
-                    container: (css) => ({ ...css, width: "100%" }),
-                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-                  }}
-                  menuPortalTarget={document.body}
-                />
-              )}
-            />
-          </Flex>
-
-          <Flex direction="column" as="section" w="full">
-            <Text fontWeight={700} mb={2}>
               {t("requirementTemplate.fields.templateCategory")}
             </Text>
             <Controller
@@ -106,6 +83,29 @@ export const RequirementTemplateForm = observer(({ onSuccess }: IRequirementTemp
                     container: (css) => ({ ...css, width: "100%" }),
                     menuPortal: (base) => ({ ...base, zIndex: 9999 }),
                   }}
+                />
+              )}
+            />
+          </Flex>
+
+          <Flex direction="column" as="section" w="full">
+            <Text fontWeight={700} mb={2}>
+              {t("requirementTemplate.fields.tags")}
+            </Text>
+            <Controller
+              name="tags"
+              control={control}
+              render={({ field: { onChange, value } }) => (
+                <TagsSelect
+                  onChange={(options) => onChange(options.map((o) => o.value))}
+                  fetchOptions={fetchTagOptions}
+                  placeholder={t("requirementTemplate.fields.tags")}
+                  selectedOptions={(value ?? []).map((tag) => ({ value: tag, label: tag }))}
+                  styles={{
+                    container: (css) => ({ ...css, width: "100%" }),
+                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                  }}
+                  menuPortalTarget={document.body}
                 />
               )}
             />
