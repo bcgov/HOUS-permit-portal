@@ -134,6 +134,14 @@ const DesignatedReviewerScreen = lazy(() =>
   )
 )
 
+const ProjectMeetingsJurisdictionFeatureAccessScreen = lazy(() =>
+  import("../home/review-manager/configuration-management-screen/feature-access-screen/project-meetings").then(
+    (module) => ({
+      default: module.ProjectMeetingsJurisdictionFeatureAccessScreen,
+    })
+  )
+)
+
 const JurisdictionIndexScreen = lazy(() =>
   import("../jurisdictions/index").then((module) => ({ default: module.JurisdictionIndexScreen }))
 )
@@ -385,6 +393,12 @@ const QaToolsFeatureAccessScreen = lazy(() =>
   }))
 )
 
+const ProjectMeetingsFeatureAccessScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/project-meetings-feature-access").then((module) => ({
+    default: module.ProjectMeetingsFeatureAccessScreen,
+  }))
+)
+
 const ReportingScreen = lazy(() =>
   import("../super-admin/reporting/reporting-screen").then((module) => ({ default: module.ReportingScreen }))
 )
@@ -401,6 +415,21 @@ const AcceptInvitationScreen = lazy(() =>
 const InviteScreen = lazy(() => import("../users/invite-screen").then((module) => ({ default: module.InviteScreen })))
 const ProfileScreen = lazy(() =>
   import("../users/profile-screen").then((module) => ({ default: module.ProfileScreen }))
+)
+const ProjectMeetingNewScreen = lazy(() =>
+  import("../project-meeting/project-meeting-new-screen").then((module) => ({
+    default: module.ProjectMeetingNewScreen,
+  }))
+)
+const ProjectMeetingScreen = lazy(() =>
+  import("../project-meeting/project-meeting-screen").then((module) => ({
+    default: module.ProjectMeetingScreen,
+  }))
+)
+const ProjectMeetingSentScreen = lazy(() =>
+  import("../project-meeting/project-meeting-sent-screen").then((module) => ({
+    default: module.ProjectMeetingSentScreen,
+  }))
 )
 const RedirectScreen = lazy(() =>
   import("../../shared/base/redirect-screen").then((module) => ({ default: module.RedirectScreen }))
@@ -460,7 +489,7 @@ const AppRoutes = observer(() => {
 
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const { allowDesignatedReviewer } = siteConfigurationStore
+  const { allowDesignatedReviewer, projectMeetingsEnabled } = siteConfigurationStore
   if (currentUser === undefined) {
     console.log("AppRoutes: currentUser is undefined, rendering LoadingScreen.")
     return <LoadingScreen />
@@ -523,6 +552,10 @@ const AppRoutes = observer(() => {
         path="/configuration-management/global-feature-access/code-compliance"
         element={<CodeComplianceSetupScreen />}
       />
+      <Route
+        path="/configuration-management/global-feature-access/project-meetings"
+        element={<ProjectMeetingsFeatureAccessScreen />}
+      />
       {qaModeEnabled && (
         <Route
           path="/configuration-management/global-feature-access/qa-tools"
@@ -574,6 +607,12 @@ const AppRoutes = observer(() => {
         path="/jurisdictions/:jurisdictionId/configuration-management"
         element={<ConfigurationManagementScreen />}
       />
+      {projectMeetingsEnabled && (
+        <Route
+          path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/project-meetings"
+          element={<ProjectMeetingsJurisdictionFeatureAccessScreen />}
+        />
+      )}
       <Route path="/jurisdictions/:jurisdictionId/users" element={<JurisdictionUserIndexScreen />} />
       <Route path="/jurisdictions/:jurisdictionId/users/invite" element={<InviteScreen />} />
     </>
@@ -743,6 +782,17 @@ const AppRoutes = observer(() => {
             <Route path="/projects/new" element={<NewPermitProjectScreen />} />
             <Route path="/projects/:permitProjectId/*" element={<PermitProjectScreen />} />
             <Route path="/projects/:permitProjectId/add-permits" element={<AddPermitApplicationToProjectScreen />} />
+            <Route element={<ProtectedRoute isAllowed={projectMeetingsEnabled} redirectPath="/not-found" />}>
+              <Route path="/projects/:permitProjectId/meetings/new" element={<ProjectMeetingNewScreen />} />
+              <Route
+                path="/projects/:permitProjectId/meetings/:projectMeetingId/edit/:section"
+                element={<ProjectMeetingScreen />}
+              />
+              <Route
+                path="/projects/:permitProjectId/meetings/:projectMeetingId/sent"
+                element={<ProjectMeetingSentScreen />}
+              />
+            </Route>
             <Route path="/step-codes/*" element={<ProjectDashboardScreen />} />
             {/* Disabled: New Permit Application screen */}
             <Route path="/permit-applications/:permitApplicationId/edit" element={<EditPermitApplicationScreen />} />

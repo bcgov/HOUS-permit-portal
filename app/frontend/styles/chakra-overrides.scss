@@ -168,7 +168,7 @@
     width: 28px;
     height: 28px;
     padding: 4px;
-    
+
     &:hover {
       background-color: #edf2f7;
     }
@@ -237,12 +237,12 @@
     margin: 0.5em 0;
   }
 
-.tiptap-editor,
-.tiptap-editor-readonly {
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  word-break: break-word;
-}
+  .tiptap-editor,
+  .tiptap-editor-readonly {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
 
   li {
     margin: 0.25em 0;
@@ -358,10 +358,88 @@
   background-color: var(--chakra-colors-theme-blueLight);
 }
 
+.uppy-Dashboard-browse {
+  color: $bcgov-link !important;
+  background: transparent;
+
+  &:hover,
+  &:focus,
+  &:focus-visible {
+    color: $bcgov-link !important;
+    background: transparent;
+  }
+}
+
 .uppy-Dashboard-dropFilesHereHint,
 .uppy-DashboardContent-title,
 .uppy-DashboardContent-back,
 .uppy-DashboardContent-bar,
 .uppy-StatusBar-actionBtn--done {
   display: none !important;
+}
+
+// File thumbnail sizing — balanced to fill the dashboard box without clipping file info
+.uppy-Dashboard {
+  .uppy-Dashboard-Item-preview {
+    width: 44px;
+    height: 44px;
+  }
+
+  .uppy-Dashboard-Item-previewIconWrap {
+    height: 100%;
+    max-height: 100%;
+  }
+
+  .uppy-Dashboard-Item-previewIcon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .uppy-Dashboard-Item-fileInfoAndButtons {
+    padding-top: 6px;
+  }
+
+  .uppy-Dashboard-Item-name {
+    margin-bottom: 3px;
+  }
+
+  .uppy-StatusBar:not([aria-hidden="true"]) {
+    height: 40px;
+  }
+}
+
+.uppy-Dashboard .uppy-size--md {
+  .uppy-Dashboard-Item {
+    height: 185px;
+  }
+
+  .uppy-Dashboard-Item-preview {
+    width: 100%;
+    height: 125px;
+  }
+
+  .uppy-Dashboard-Item-previewIcon {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+.uppy-Dashboard .uppy-size--lg {
+  .uppy-Dashboard-Item {
+    height: 175px;
+  }
+
+  .uppy-Dashboard-Item-preview {
+    height: 115px;
+  }
+}
+
+.uppy-Dashboard .uppy-size--xl {
+  .uppy-Dashboard-Item {
+    height: 185px;
+  }
+
+  .uppy-Dashboard-Item-preview {
+    height: 125px;
+  }
 }

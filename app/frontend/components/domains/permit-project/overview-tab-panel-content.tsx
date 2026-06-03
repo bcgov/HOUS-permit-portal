@@ -48,7 +48,7 @@ interface IProjectInfoForm {
 export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
   const { fullAddress, pid, jurisdiction, number } = permitProject
   const { t } = useTranslation()
-  const { permitProjectStore } = useMst()
+  const { permitProjectStore, siteConfigurationStore } = useMst()
   const [isEditing, setIsEditing] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { isOpen: isMapFullscreen, onOpen: onOpenMapFullscreen, onClose: onCloseMapFullscreen } = useDisclosure()
@@ -65,6 +65,10 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
 
   const { handleSubmit, watch, setValue, reset } = formMethods
   const siteWatch = watch("site")
+  const canRequestProjectMeeting =
+    permitProject.isOwner &&
+    siteConfigurationStore.projectMeetingsEnabled &&
+    permitProject.jurisdiction?.projectMeetingsEnabled
 
   const handleEditClick = () => {
     // Reset form to current values when entering edit mode
@@ -225,7 +229,14 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
           <Heading as="h3" size="md">
             {t("permitProject.overview.recentPermits")}
           </Heading>
-          <AddPermitsButton permitProject={permitProject} />
+          <HStack spacing={3}>
+            {canRequestProjectMeeting && (
+              <RouterLinkButton variant="secondary" to={`/projects/${permitProject.id}/meetings/new`}>
+                {t("permitProject.meetings.requestButton")}
+              </RouterLinkButton>
+            )}
+            <AddPermitsButton permitProject={permitProject} />
+          </HStack>
         </Flex>
         {permitProject.rollupStatus === EPermitProjectRollupStatus.empty ? (
           <CustomMessageBox status={EFlashMessageStatus.info} description={t("permitProject.index.empty")} mt={2} />

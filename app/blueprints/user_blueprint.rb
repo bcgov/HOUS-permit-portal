@@ -6,6 +6,7 @@ class UserBlueprint < Blueprinter::Base
            :role,
            :first_name,
            :last_name,
+           :phone_number,
            :organization,
            :certified,
            :confirmed_at,

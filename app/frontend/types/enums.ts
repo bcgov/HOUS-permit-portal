@@ -17,9 +17,27 @@ export enum EFileUploadAttachmentType {
   RequirementDocument = "RequirementDocument",
   SupportingDocument = "SupportingDocument",
   ProjectDocument = "ProjectDocument",
+  MeetingRequestDocument = "MeetingRequestDocument",
   ReportDocument = "ReportDocument",
   ResourceDocument = "ResourceDocument",
   DesignDocument = "DesignDocument",
+}
+
+export enum EProjectMeetingStatus {
+  draft = "draft",
+  submitted = "submitted",
+}
+
+export enum EProjectMeetingRequesterRelationship {
+  ownerOrLandholder = "owner_or_landholder",
+  leaseholderOrTenant = "leaseholder_or_tenant",
+  ownersRepresentative = "owners_representative",
+  other = "other",
+}
+
+export enum EMeetingRequestDocumentType {
+  supporting = "supporting",
+  authorization = "authorization",
 }
 
 export enum EResourceCategory {
@@ -27,6 +45,7 @@ export enum EResourceCategory {
   bylawsRequirements = "bylaws_requirements",
   gisMapping = "gis_mapping",
   additionalResources = "additional_resources",
+  projectMeetingAuthorization = "project_meeting_authorization",
 }
 
 export enum EResourceType {
@@ -442,6 +461,7 @@ export enum ENotificationActionType {
   preCheckCompleted = "pre_check_completed",
   fileUploadFailed = "file_upload_failed",
   resourceReminder = "resource_reminder",
+  projectMeetingSubmitted = "project_meeting_submitted",
   projectReviewCollaborationAssignment = "project_review_collaboration_assignment",
   projectReviewCollaborationUnassignment = "project_review_collaboration_unassignment",
 }

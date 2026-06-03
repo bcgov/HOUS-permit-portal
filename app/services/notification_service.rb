@@ -670,6 +670,37 @@ class NotificationService
     end
   end
 
+  def self.publish_project_meeting_submitted_event(project_meeting)
+    user = project_meeting.requested_by
+    preference = user&.preference
+    return if user.blank? || preference.blank?
+
+    if preference.enable_email_project_meeting_submitted_notification
+      PermitHubMailer.notify_project_meeting_submitted(
+        project_meeting
+      ).deliver_later
+    end
+
+    unless preference.enable_in_app_project_meeting_submitted_notification
+      return
+    end
+
+    NotificationPushJob.perform_async(
+      user.id => project_meeting.submitted_event_notification_data
+    )
+  end
+
+  def self.publish_project_meeting_request_received_event(project_meeting)
+    jurisdiction = project_meeting.permit_project.jurisdiction
+
+    jurisdiction.project_meeting_notification_recipient_emails.each do |email|
+      PermitHubMailer.notify_project_meeting_submitted_to_jurisdiction(
+        project_meeting,
+        email
+      ).deliver_later
+    end
+  end
+
   private_class_method :determine_file_owner
   private_class_method :send_external_api_key_notifications
   private_class_method :available_jurisdiction_ids_for

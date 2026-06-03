@@ -29,6 +29,7 @@ class JurisdictionBlueprint < Blueprinter::Base
            :inbox_enabled,
            :show_about_page,
            :allow_designated_reviewer,
+           :project_meetings_enabled,
            :map_zoom,
            :regional_district_name,
            :created_at,
@@ -50,6 +51,10 @@ class JurisdictionBlueprint < Blueprinter::Base
     field :submission_inbox_set_up do |jurisdiction, _options|
       jurisdiction.submission_inbox_set_up?
     end
+    field :project_meeting_notification_recipient_emails,
+          if: ->(_field_name, jurisdiction, options) do
+            options[:current_user]&.jurisdictions&.include?(jurisdiction)
+          end
     association :contacts, blueprint: ContactBlueprint
     association :submission_contacts,
                 blueprint: SubmissionContactBlueprint,

@@ -736,8 +736,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_19_235200) do
     t.boolean "enable_email_resource_reminder_notification", default: true
     t.boolean "enable_in_app_project_meeting_submitted_notification", default: true
     t.boolean "enable_email_project_meeting_submitted_notification", default: true
-    t.boolean "enable_in_app_project_meeting_request_received_notification", default: true
-    t.boolean "enable_email_project_meeting_request_received_notification", default: true
     t.index ["user_id"], name: "index_preferences_on_user_id"
   end
 

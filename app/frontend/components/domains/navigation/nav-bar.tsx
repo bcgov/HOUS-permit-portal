@@ -79,6 +79,11 @@ function isProjectPath(path: string): boolean {
   return regex.test(path)
 }
 
+function isProjectMeetingPath(path: string): boolean {
+  const regex = /^\/projects\/[a-f\d-]+\/meetings/
+  return regex.test(path)
+}
+
 function isProjectStepCodePath(path: string): boolean {
   const regex = /^\/step-codes/
   return regex.test(path)
@@ -121,6 +126,8 @@ function isSubmissionInboxPath(path: string): boolean {
 }
 
 function shouldHideSubNavbarForPath(path: string): boolean {
+  if (isProjectMeetingPath(path)) return false
+
   const matchers: Array<(path: string) => boolean> = [
     (path) => path === "/",
     isTemplateEditPath,

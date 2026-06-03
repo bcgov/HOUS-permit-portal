@@ -42,10 +42,12 @@ class Api::JurisdictionsController < Api::ApplicationController
 
   def update
     authorize @jurisdiction
-    if jurisdiction_params[:contacts_attributes]
+    permitted_params = jurisdiction_params
+
+    if permitted_params[:contacts_attributes]
       # Get current contact ids from the params
       payload_record_ids =
-        jurisdiction_params[:contacts_attributes].map { |c| c[:id] }
+        permitted_params[:contacts_attributes].map { |c| c[:id] }
       # Mark contacts not included in the current payload for destruction
       @jurisdiction.contacts.each do |contact|
         unless payload_record_ids.include?(contact.id.to_s)
@@ -53,7 +55,7 @@ class Api::JurisdictionsController < Api::ApplicationController
         end
       end
     end
-    if @jurisdiction.update(jurisdiction_params)
+    if @jurisdiction.update(permitted_params)
       render_success @jurisdiction,
                      "jurisdiction.update_success",
                      {
@@ -246,6 +248,7 @@ class Api::JurisdictionsController < Api::ApplicationController
       :look_out_html,
       :show_about_page,
       :allow_designated_reviewer,
+      :project_meetings_enabled,
       :contact_summary_html,
       :processing_time_html,
       :key_stages_html,
@@ -260,6 +263,7 @@ class Api::JurisdictionsController < Api::ApplicationController
       :ltsa_matcher,
       :heating_degree_days,
       map_position: [],
+      project_meeting_notification_recipient_emails: [],
       users_attributes: %i[first_name last_name role email],
       contacts_attributes: %i[
         id

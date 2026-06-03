@@ -21,18 +21,11 @@ class JurisdictionPolicy < ApplicationPolicy
 
   def update?
     user.super_admin? ||
-      (
-        (user.review_staff? || user.technical_support?) &&
-          user.member_of?(record.id)
-      )
+      ((user.manager? || user.technical_support?) && user.member_of?(record.id))
   end
 
   def update_external_api_enabled?
-    user.super_admin? ||
-      (
-        (user.manager? || user.technical_support?) &&
-          user.member_of?(record.id) && !record.g_off?
-      )
+    update? && (user.super_admin? || !record.g_off?)
   end
 
   def search_users?
@@ -40,17 +33,12 @@ class JurisdictionPolicy < ApplicationPolicy
   end
 
   def search_permit_applications?
-    # note that this applies to the jurisdiction, not the permit applications
-    update?
+    user.review_staff? && user.member_of?(record.id)
   end
 
   def search_permit_projects?
     # note that this applies to the jurisdiction, not the permit projects
-    update?
-  end
-
-  def sandboxes?
-    update?
+    search_permit_applications?
   end
 
   class Scope < Scope

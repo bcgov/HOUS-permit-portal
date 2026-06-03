@@ -83,6 +83,10 @@ en:
               review_staff_requires_sandbox: "review staff cannot own permit projects outside of a sandbox"
             sandbox:
               incorrect_jurisdiction: "must belong to the jurisdiction. Please apply to your own jurisdiction to use this sandbox."
+        project_meeting:
+          attributes:
+            meeting_request_documents:
+              authorization_required: "must include authorization documents when the requester is not the owner"
         permit_project_collaboration:
           attributes:
             permit_project:
@@ -174,6 +178,8 @@ en:
       notify_batched_integration_mapping: "New API mappings"
       notify_pre_check_submitted: "Your pre-check has been submitted"
       notify_pre_check_completed: "Your pre-check has been completed"
+      notify_project_meeting_submitted: "Your project meeting request has been sent"
+      notify_project_meeting_submitted_to_jurisdiction: "New project meeting request: %{project_number}"
       notify_new_template_version_published: "New version published for %{template_label}"
       notify_template_version_no_action: "Permit template updated - no action required: %{template_label}"
       notify_template_version_action_required: "ACTION REQUIRED: Permit template updated - API mapping review required: %{template_label}"
@@ -290,6 +296,25 @@ en:
       pdf_report_unavailable:
         title: Error
         message: "PDF report unavailable"
+    project_meeting:
+      create_success:
+        title: ""
+        message: "Project meeting request created successfully!"
+      create_error:
+        title: Error
+        message: "Project meeting request could not be created"
+      update_success:
+        title: ""
+        message: "Project meeting request updated successfully!"
+      update_error:
+        title: Error
+        message: "Project meeting request could not be updated"
+      submit_success:
+        title: ""
+        message: "Project meeting request sent successfully!"
+      submit_error:
+        title: Error
+        message: "Project meeting request could not be sent"
     contact:
       options_error:
         title: Error
@@ -1112,6 +1137,8 @@ en:
       status_ready_no_user: 'Requirement “%{requirement_block_name}” status set to "ready" for permit application %{number}'
     resource:
       reminder: "Reminder: Review your jurisdiction resources"
+    project_meeting:
+      submitted: "Your project meeting request for project %{project_number} has been sent."
     integration_mapping:
       published_template_missing_requirements_mapping: "Missing API mapping: A new version of “%{template_label}” has been published on %{version_date}"
       scheduled_template_missing_requirements_mapping: "Missing API Mapping: A new version of “%{template_label}” has been scheduled for %{version_date}, 01:00hrs PST."

@@ -21,6 +21,7 @@ import {
   EHotWaterPerformanceType,
   EJurisdictionSocketEventTypes,
   EJurisdictionTypes,
+  EMeetingRequestDocumentType,
   ENotificationActionType,
   ENumberUnit,
   EPermitApplicationSocketEventTypes,
@@ -364,6 +365,11 @@ export interface IProjectDocument extends IBaseFileAttachment {
   permitProjectId: string // Foreign key to link to PermitProject
 }
 
+export interface IMeetingRequestDocument extends IBaseFileAttachment {
+  projectMeetingId?: string
+  documentType?: EMeetingRequestDocumentType
+}
+
 export interface IRequirementBlockCustomization {
   tip?: string
   resourceIds?: string[]
@@ -444,6 +450,12 @@ export interface INotification {
     | ITemplateVersionNotificationObjectData
     | IRequirementTemplateNotificationObjectData
     | IReportDocumentNotificationObjectData
+    | IProjectMeetingNotificationObjectData
+}
+
+export interface IProjectMeetingNotificationObjectData {
+  permitProjectId: string
+  projectMeetingId: string
 }
 
 export interface ITemplateVersionUpdate {
@@ -684,6 +696,7 @@ export interface IMinimalFrozenUser {
   role: EUserRoles
   firstName: string
   lastName: string
+  phoneNumber?: string
   organization?: string
   certified: boolean
   discardedAt?: Date

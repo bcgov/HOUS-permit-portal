@@ -211,4 +211,110 @@ RSpec.describe Api::JurisdictionsController, type: :controller do
       expect(json_response["data"]).not_to be_empty
     end
   end
+
+  describe "PATCH #update project meetings flag" do
+    it "allows jurisdiction managers and records an audit" do
+      manager = create(:user, :review_manager, jurisdiction: jurisdiction)
+      sign_in manager
+
+      patch :update,
+            params: {
+              id: jurisdiction.id,
+              jurisdiction: {
+                project_meetings_enabled: true
+              }
+            },
+            format: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(jurisdiction.reload.project_meetings_enabled).to eq(true)
+      audit =
+        ApplicationAudit.where(
+          auditable_type: "Jurisdiction",
+          auditable_id: jurisdiction.id,
+          action: "update"
+        ).last
+      expect(audit.audited_changes["project_meetings_enabled"]).to eq(
+        [false, true]
+      )
+      expect(audit.user).to eq(manager)
+    end
+
+    it "allows technical support members" do
+      tech = create(:user, role: :technical_support)
+      create(:jurisdiction_membership, user: tech, jurisdiction: jurisdiction)
+      sign_in tech
+
+      patch :update,
+            params: {
+              id: jurisdiction.id,
+              jurisdiction: {
+                project_meetings_enabled: true
+              }
+            },
+            format: :json
+
+      expect(response).to have_http_status(:ok)
+    end
+
+    it "updates project meeting notification recipient emails" do
+      manager = create(:user, :review_manager, jurisdiction: jurisdiction)
+      sign_in manager
+
+      patch :update,
+            params: {
+              id: jurisdiction.id,
+              jurisdiction: {
+                project_meeting_notification_recipient_emails: [
+                  " meetings@example.com ",
+                  "meetings@example.com",
+                  "planner@example.com"
+                ]
+              }
+            },
+            format: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(
+        jurisdiction.reload.project_meeting_notification_recipient_emails
+      ).to eq(%w[meetings@example.com planner@example.com])
+      expect(
+        json_response["data"]["project_meeting_notification_recipient_emails"]
+      ).to eq(%w[meetings@example.com planner@example.com])
+    end
+
+    it "blocks reviewers" do
+      reviewer = create(:user, :reviewer, jurisdiction: jurisdiction)
+      sign_in reviewer
+
+      patch :update,
+            params: {
+              id: jurisdiction.id,
+              jurisdiction: {
+                project_meetings_enabled: true
+              }
+            },
+            format: :json
+
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it "blocks reviewers from updating project meeting notification recipients" do
+      reviewer = create(:user, :reviewer, jurisdiction: jurisdiction)
+      sign_in reviewer
+
+      patch :update,
+            params: {
+              id: jurisdiction.id,
+              jurisdiction: {
+                project_meeting_notification_recipient_emails: [
+                  "meetings@example.com"
+                ]
+              }
+            },
+            format: :json
+
+      expect(response).to have_http_status(:forbidden)
+    end
+  end
 end
