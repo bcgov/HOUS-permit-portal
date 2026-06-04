@@ -855,6 +855,7 @@ const AppRoutes = observer(() => {
         <Route path="/videos/:videoId" element={<HelpVideoScreen />} />
         <Route path="/standardization-preview" element={<StandardizationPreviewScreen />} />
         <Route path="/template-versions/:templateVersionId/preview" element={<TemplateVersionPreviewScreen />} />
+        <Route path="/project-readiness-tools" element={<ProjectReadinessToolsIndexScreen />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyScreen />} />
         <Route
           path="/project-readiness-tools/create-your-letters-of-assurance"
@@ -868,7 +869,6 @@ const AppRoutes = observer(() => {
           path="/project-readiness-tools/look-up-step-codes-requirements-for-your-project"
           element={<LookUpStepCodesRequirementsForYourProjectScreen />}
         />
-        <Route path="/project-readiness-tools/check-digital-seals" element={<CheckDigitalSealsScreen />} />
         <Route path="/project-readiness-tools/pre-check" element={<PreCheckInfoScreen />} />
         <Route
           path="/onboarding-checklist-page-for-lg-adopting"
