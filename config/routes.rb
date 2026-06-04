@@ -169,6 +169,9 @@ Rails.application.routes.draw do
       post "permit_projects/search",
            on: :member,
            to: "jurisdictions#search_permit_projects"
+      post "project_meetings/search",
+           on: :member,
+           to: "jurisdictions#search_project_meetings"
       patch "update_external_api_enabled",
             on: :member,
             to: "jurisdictions#update_external_api_enabled"
@@ -248,6 +251,8 @@ Rails.application.routes.draw do
         post :submit, on: :member
         post :cancel, on: :member
         post :transition_status, on: :member
+        post :mark_as_viewed, on: :member
+        post :mark_as_unviewed, on: :member
       end
       get "pinned", on: :collection
       get "jurisdiction_options", on: :collection

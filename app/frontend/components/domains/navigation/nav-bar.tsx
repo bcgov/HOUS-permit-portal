@@ -125,6 +125,11 @@ function isSubmissionInboxPath(path: string): boolean {
   return regex.test(path)
 }
 
+function isMeetingPath(path: string): boolean {
+  const regex = /^\/jurisdictions\/[a-z\d-]+\/meetings/
+  return regex.test(path)
+}
+
 function shouldHideSubNavbarForPath(path: string): boolean {
   const matchers: Array<(path: string) => boolean> = [
     (path) => path === "/",
@@ -146,6 +151,7 @@ function shouldHideSubNavbarForPath(path: string): boolean {
     isOverheatingCodePath,
     isWelcomePath,
     isSubmissionInboxPath,
+    isMeetingPath,
   ]
 
   return matchers.some((matcher) => matcher(path))

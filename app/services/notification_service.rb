@@ -705,7 +705,7 @@ class NotificationService
   end
 
   def self.publish_project_meeting_request_received_event(project_meeting)
-    jurisdiction = project_meeting.permit_project.jurisdiction
+    jurisdiction = project_meeting.jurisdiction
 
     jurisdiction.confirmed_project_meeting_contacts.each do |contact|
       PermitHubMailer.notify_project_meeting_submitted_to_jurisdiction(

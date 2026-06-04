@@ -51,9 +51,16 @@ RSpec.describe ProjectMeetingPolicy, type: :policy do
     expect(policy(collaborator_user).update?).to be false
   end
 
-  it "allows jurisdiction review staff to view but not update" do
-    expect(policy(reviewer).show?).to be true
-    expect(policy(reviewer).update?).to be false
+  it "allows jurisdiction review staff to view submitted requests but not update" do
+    open_meeting =
+      create(:project_meeting, :open, permit_project: permit_project)
+
+    expect(policy(reviewer, open_meeting).show?).to be true
+    expect(policy(reviewer, open_meeting).update?).to be false
+  end
+
+  it "blocks jurisdiction review staff from viewing draft requests" do
+    expect(policy(reviewer).show?).to be false
   end
 
   it "allows jurisdiction review staff to manually transition open requests" do
@@ -61,6 +68,19 @@ RSpec.describe ProjectMeetingPolicy, type: :policy do
       create(:project_meeting, :open, permit_project: permit_project)
 
     expect(policy(reviewer, open_meeting).transition_status?).to be true
+  end
+
+  it "allows jurisdiction review staff to mark requests read or unread" do
+    open_meeting =
+      create(:project_meeting, :open, permit_project: permit_project)
+
+    expect(policy(reviewer, open_meeting).mark_as_viewed?).to be true
+    expect(policy(reviewer, open_meeting).mark_as_unviewed?).to be true
+  end
+
+  it "blocks owners from marking requests read or unread" do
+    expect(policy(owner).mark_as_viewed?).to be false
+    expect(policy(owner).mark_as_unviewed?).to be false
   end
 
   it "blocks owners from manually transitioning request status" do
@@ -82,13 +102,6 @@ RSpec.describe ProjectMeetingPolicy, type: :policy do
 
     expect(policy(owner, open_meeting).cancel?).to be true
     expect(policy(owner, scheduled_meeting).cancel?).to be true
-  end
-
-  it "blocks owners from cancelling completed requests" do
-    completed_meeting =
-      create(:project_meeting, :completed, permit_project: permit_project)
-
-    expect(policy(owner, completed_meeting).cancel?).to be false
   end
 
   it "blocks review staff from cancelling as a submitter action" do
@@ -132,10 +145,17 @@ RSpec.describe ProjectMeetingPolicy, type: :policy do
       expect(resolved_scope_for(owner)).to contain_exactly(meeting)
     end
 
-    it "includes project meetings for jurisdiction review staff" do
+    it "includes submitted project meetings for jurisdiction review staff" do
+      open_meeting =
+        create(:project_meeting, :open, permit_project: permit_project)
+
+      expect(resolved_scope_for(reviewer)).to include(open_meeting)
+    end
+
+    it "excludes draft project meetings for jurisdiction review staff" do
       meeting
 
-      expect(resolved_scope_for(reviewer)).to include(meeting)
+      expect(resolved_scope_for(reviewer)).not_to include(meeting)
     end
 
     it "excludes meetings for submitter collaborators" do

@@ -14,10 +14,12 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { Info, Swap } from "@phosphor-icons/react"
+import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
+import { datefnsTableDateFormat } from "../../../../constants"
 import { IPermitProject } from "../../../../models/permit-project"
 import { useMst } from "../../../../setup/root"
 import { IPermitProjectInboxStore } from "../../../../stores/submission-inbox-store"
@@ -42,6 +44,8 @@ interface IProps {
   searchStore: IPermitProjectInboxStore
   projects: IPermitProject[]
 }
+
+const formatTableDate = (date?: Date | null) => (date ? format(date, datefnsTableDateFormat) : "—")
 
 const SORT_FIELDS = [
   EPermitProjectInboxSortFields.projectNumber,
@@ -145,7 +149,7 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
                 {t("submissionInbox.waitingSince")}
               </Text>
               <Text fontSize="xs" color="text.secondary">
-                {project.formattedEnqueuedAt}
+                {formatTableDate(project.enqueuedAt)}
               </Text>
             </VStack>
           ) : (

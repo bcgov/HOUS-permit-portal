@@ -252,19 +252,21 @@ RSpec.describe JurisdictionPolicy, type: :policy do
     end
   end
 
-  permissions :sandboxes? do
+  permissions :search_project_meetings? do
     let(:user) { create(:user) }
 
-    it "matches update? permissions" do
-      reviewer = create(:user, :review_manager, jurisdiction:)
+    it "matches search_permit_applications? permissions" do
+      reviewer = create(:user, :reviewer, jurisdiction:)
       expect(policy_class).to permit(
         UserContext.new(reviewer, sandbox),
         jurisdiction
       )
 
-      stranger = create(:user)
+      tech = create(:user, role: :technical_support)
+      create(:jurisdiction_membership, user: tech, jurisdiction: jurisdiction)
+      tech.reload
       expect(policy_class).not_to permit(
-        UserContext.new(stranger, sandbox),
+        UserContext.new(tech, sandbox),
         jurisdiction
       )
     end

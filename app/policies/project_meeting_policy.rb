@@ -7,13 +7,18 @@ class ProjectMeetingPolicy < ApplicationPolicy
       values = { uid: user.id }
 
       if user.review_staff?
-        review_clauses = ["permit_projects.jurisdiction_id IN (:jur_ids)"]
+        # NOTE: This will have to be updated if review staff can ever create meeting requests
+        review_clauses = [
+          "permit_projects.jurisdiction_id IN (:jur_ids)",
+          "project_meetings.status != :draft_status"
+        ]
         if sandbox.present?
           review_clauses << "permit_projects.sandbox_id = :sandbox_id"
         end
 
         clauses << review_clauses.join(" AND ")
         values[:jur_ids] = user.jurisdictions.pluck(:id)
+        values[:draft_status] = ProjectMeeting.statuses[:draft]
         values[:sandbox_id] = sandbox.id if sandbox.present?
       end
 
@@ -49,15 +54,23 @@ class ProjectMeetingPolicy < ApplicationPolicy
       record.allowed_manual_transitions.any?
   end
 
+  def mark_as_viewed?
+    user_is_review_staff_for_jurisdiction? && feature_enabled?
+  end
+
+  def mark_as_unviewed?
+    mark_as_viewed?
+  end
+
   private
 
   def user_is_owner?
-    user.present? && record.permit_project.owner_id == user.id
+    user.present? && record.owner&.id == user.id
   end
 
   def user_is_review_staff_for_jurisdiction?
-    user&.review_staff? &&
-      user.member_of?(record.permit_project.jurisdiction_id)
+    user&.review_staff? && user.member_of?(record.jurisdiction_id) &&
+      !record.draft?
   end
 
   def feature_enabled?

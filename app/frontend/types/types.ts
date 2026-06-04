@@ -27,6 +27,7 @@ import {
   EPermitApplicationSocketEventTypes,
   EPermitApplicationStatus,
   EPermitProjectRollupStatus,
+  EProjectMeetingStatus,
   ERequirementType,
   ESocketDomainTypes,
   ESocketEventTypes,
@@ -645,6 +646,11 @@ export interface IPermitApplicationInboxSearchFilters {
   meetingRequest?: string
   daysInQueue?: { operator: string; days: number }
   assigned?: string[]
+}
+
+export interface IProjectMeetingInboxSearchFilters {
+  status?: EProjectMeetingStatus[]
+  unread?: string
 }
 
 export interface IProjectAuditSearchFilters {

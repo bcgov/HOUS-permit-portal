@@ -3,6 +3,7 @@ import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
+import { datefnsTableDateFormat } from "../../../../constants"
 import { useSearch } from "../../../../hooks/use-search"
 import { IUser } from "../../../../models/user"
 import { useMst } from "../../../../setup/root"
@@ -69,9 +70,9 @@ export const AdminUserIndexScreen = observer(() => {
                   <SearchGridItem fontSize="sm" maxWidth="300px" sx={{ wordBreak: "break-word" }}>
                     {u.name}
                   </SearchGridItem>
-                  <SearchGridItem fontSize="sm">{format(u.createdAt, "yyyy-MM-dd")}</SearchGridItem>
+                  <SearchGridItem fontSize="sm">{format(u.createdAt, datefnsTableDateFormat)}</SearchGridItem>
                   <SearchGridItem fontSize="sm">
-                    {u.lastSignInAt ? format(u.lastSignInAt, "yyyy-MM-dd") : t("ui.never")}
+                    {u.lastSignInAt ? format(u.lastSignInAt, datefnsTableDateFormat) : t("ui.never")}
                   </SearchGridItem>
                   <SearchGridItem>
                     <Flex justify="space-between" w="full">

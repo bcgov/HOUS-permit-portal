@@ -33,6 +33,10 @@ export enum EProjectMeetingStatus {
 
 export enum EProjectMeetingSortFields {
   submittedAt = "submitted_at",
+  projectNumber = "project_number",
+  projectAddress = "project_address",
+  contactName = "contact_name",
+  confirmedDate = "confirmed_date",
   projectDescription = "project_description",
   status = "status",
 }

@@ -2,6 +2,9 @@ class ProjectMeeting < ApplicationRecord
   searchkick word_middle: %i[
                contact_name
                contact_email
+               project_number
+               project_address
+               project_pid
                project_description
                meeting_notes
                status
@@ -9,10 +12,13 @@ class ProjectMeeting < ApplicationRecord
 
   include ProjectMeetingStatus
 
-  SEARCH_INCLUDES = [:meeting_request_documents].freeze
+  SEARCH_INCLUDES = %i[permit_project meeting_request_documents].freeze
 
   belongs_to :permit_project, inverse_of: :project_meetings
   belongs_to :requested_by, class_name: "User", inverse_of: :project_meetings
+
+  include ProjectItem
+  has_parent :permit_project
 
   has_many :meeting_request_documents, dependent: :destroy
   accepts_nested_attributes_for :meeting_request_documents, allow_destroy: true
@@ -41,10 +47,9 @@ class ProjectMeeting < ApplicationRecord
   validate :validate_submission_requirements, if: :submitted?
 
   before_validation :normalize_contact_phone_number
-  after_commit :reindex_permit_project
 
   def feature_enabled?
-    permit_project.project_meetings_enabled?
+    parent&.project_meetings_enabled?
   end
 
   def authorization_required?
@@ -56,13 +61,25 @@ class ProjectMeeting < ApplicationRecord
     meeting_request_documents.reject(&:marked_for_destruction?)
   end
 
+  def update_viewed_at
+    return if viewed_at.present?
+
+    update!(viewed_at: Time.current)
+  end
+
+  def mark_as_unviewed
+    return if viewed_at.blank?
+
+    update!(viewed_at: nil)
+  end
+
   def submitted_event_notification_data
     {
       "id" => SecureRandom.uuid,
       "action_text" =>
         I18n.t(
           "notification.project_meeting.submitted",
-          project_number: permit_project.number
+          project_number: permit_project&.number
         ),
       "action_type" =>
         Constants::NotificationActionTypes::PROJECT_MEETING_SUBMITTED,
@@ -76,19 +93,24 @@ class ProjectMeeting < ApplicationRecord
   def search_data
     {
       permit_project_id: permit_project_id,
-      jurisdiction_id: permit_project&.jurisdiction_id,
-      sandbox_id: permit_project&.sandbox_id,
+      jurisdiction_id: jurisdiction_id,
+      sandbox_id: sandbox_id,
       requested_by_id: requested_by_id,
       status: status,
       contact_name: contact_name,
       contact_email: contact_email,
       project_description: project_description,
       meeting_notes: meeting_notes,
+      viewed_at: viewed_at,
+      project_number: permit_project&.number,
+      project_address: full_address,
+      project_pid: pid,
       submitted_at: submitted_at,
       confirmed_date: confirmed_date,
       scheduled_at: scheduled_at,
       created_at: created_at,
-      updated_at: updated_at
+      updated_at: updated_at,
+      discarded: parent&.discarded_at.present?
     }
   end
 
@@ -119,9 +141,5 @@ class ProjectMeeting < ApplicationRecord
 
     parsed = Phonelib.parse(contact_phone_number)
     self.contact_phone_number = parsed.e164 if parsed.valid?
-  end
-
-  def reindex_permit_project
-    permit_project&.reindex
   end
 end

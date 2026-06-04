@@ -39,6 +39,7 @@ import {
   IApiResponse,
   ICollaboratorSearchResponse,
   IJurisdictionPermitApplicationResponse,
+  IJurisdictionProjectMeetingResponse,
   IJurisdictionResponse,
   INotificationResponse,
   IOptionResponse,
@@ -76,6 +77,7 @@ import {
   IPermitApplicationSearchFilters,
   IPermitProjectSearchFilters,
   IProjectAuditSearchFilters,
+  IProjectMeetingInboxSearchFilters,
   ITemplateVersionDiff,
   TAutoComplianceModuleConfigurations,
   TCreatePermitApplicationFormData,
@@ -385,6 +387,16 @@ export class Api {
     return this.client.post<IProjectMeetingResponse>(`/permit_projects/${permitProjectId}/meetings/search`, params)
   }
 
+  async fetchJurisdictionProjectMeetings(
+    jurisdictionId: string,
+    params?: TSearchParams<EProjectMeetingSortFields, IProjectMeetingInboxSearchFilters>
+  ) {
+    return this.client.post<IJurisdictionProjectMeetingResponse>(
+      `/jurisdictions/${jurisdictionId}/project_meetings/search`,
+      params
+    )
+  }
+
   async updateProjectMeeting(permitProjectId: string, id: string, params: Record<string, unknown>) {
     return this.client.patch<ApiResponse<IProjectMeeting>>(`/permit_projects/${permitProjectId}/meetings/${id}`, {
       projectMeeting: params,
@@ -399,6 +411,18 @@ export class Api {
 
   async cancelProjectMeeting(permitProjectId: string, id: string) {
     return this.client.post<ApiResponse<IProjectMeeting>>(`/permit_projects/${permitProjectId}/meetings/${id}/cancel`)
+  }
+
+  async viewProjectMeeting(permitProjectId: string, id: string) {
+    return this.client.post<ApiResponse<IProjectMeeting>>(
+      `/permit_projects/${permitProjectId}/meetings/${id}/mark_as_viewed`
+    )
+  }
+
+  async unviewProjectMeeting(permitProjectId: string, id: string) {
+    return this.client.post<ApiResponse<IProjectMeeting>>(
+      `/permit_projects/${permitProjectId}/meetings/${id}/mark_as_unviewed`
+    )
   }
 
   async transitionProjectMeetingStatus(

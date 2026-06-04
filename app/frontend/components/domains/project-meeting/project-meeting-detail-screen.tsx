@@ -1,8 +1,8 @@
 import { Box, Button, Container, Heading, HStack, Link, Text, VStack } from "@chakra-ui/react"
-import { Check, Download } from "@phosphor-icons/react"
+import { CaretLeft, Check, Download } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useParams } from "react-router-dom"
 import { datefnsTableDateTimeFormat } from "../../../constants"
@@ -46,8 +46,15 @@ export const ProjectMeetingDetailContent = observer(({ permitProject }: ProjectM
   const { t } = useTranslation()
   const { permitProjectId } = useParams<{ permitProjectId: string }>()
   const { currentProjectMeeting, error, isLoading } = useProjectMeeting()
-  const { projectMeetingStore, uiStore } = useMst()
+  const { projectMeetingStore, uiStore, userStore } = useMst()
+  const { currentUser } = userStore
   const [isCancelling, setIsCancelling] = useState(false)
+
+  useEffect(() => {
+    if (currentUser?.isReviewStaff && currentProjectMeeting && !currentProjectMeeting.viewedAt) {
+      currentProjectMeeting.markAsViewed()
+    }
+  }, [currentUser?.isReviewStaff, currentProjectMeeting?.id, currentProjectMeeting?.viewedAt])
 
   if (error) return <ErrorScreen error={error} />
   if (isLoading || !currentProjectMeeting || permitProject.id !== permitProjectId) return <LoadingScreen />
@@ -74,7 +81,13 @@ export const ProjectMeetingDetailContent = observer(({ permitProject }: ProjectM
 
   return (
     <Box as="section">
-      <RouterLinkButton to={`/projects/${permitProjectId}/meetings`} variant="link" mb={6} px={0}>
+      <RouterLinkButton
+        to={`/projects/${permitProjectId}/meetings`}
+        leftIcon={<CaretLeft size={20} />}
+        variant="link"
+        mb={6}
+        px={0}
+      >
         {t("projectMeeting.detail.backToMeetings")}
       </RouterLinkButton>
 

@@ -22,8 +22,17 @@ RSpec.describe MeetingRequestDocumentPolicy, type: :policy do
     expect(policy(owner).download?).to be true
   end
 
-  it "permits download for jurisdiction review staff" do
-    expect(policy(reviewer).download?).to be true
+  it "permits download for jurisdiction review staff on submitted meetings" do
+    submitted_meeting =
+      create(:project_meeting, :open, permit_project: permit_project)
+    submitted_document =
+      create(:meeting_request_document, project_meeting: submitted_meeting)
+
+    expect(policy(reviewer, submitted_document).download?).to be true
+  end
+
+  it "blocks download for jurisdiction review staff on draft meetings" do
+    expect(policy(reviewer).download?).to be false
   end
 
   it "blocks download for other users" do

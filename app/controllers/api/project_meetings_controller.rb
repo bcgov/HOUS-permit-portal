@@ -3,7 +3,15 @@ class Api::ProjectMeetingsController < Api::ApplicationController
 
   before_action :set_permit_project
   before_action :set_project_meeting,
-                only: %i[show update submit cancel transition_status]
+                only: %i[
+                  show
+                  update
+                  submit
+                  cancel
+                  transition_status
+                  mark_as_viewed
+                  mark_as_unviewed
+                ]
 
   def index
     perform_project_meeting_search
@@ -46,7 +54,12 @@ class Api::ProjectMeetingsController < Api::ApplicationController
     authorize @project_meeting
     render_success @project_meeting,
                    nil,
-                   { blueprint: ProjectMeetingBlueprint, view: :extended }
+                   {
+                     blueprint: ProjectMeetingBlueprint,
+                     blueprint_opts: {
+                       view: :extended
+                     }
+                   }
   end
 
   def update
@@ -55,7 +68,12 @@ class Api::ProjectMeetingsController < Api::ApplicationController
     if @project_meeting.update(project_meeting_params)
       render_success @project_meeting,
                      "project_meeting.update_success",
-                     { blueprint: ProjectMeetingBlueprint }
+                     {
+                       blueprint: ProjectMeetingBlueprint,
+                       blueprint_opts: {
+                         view: :extended
+                       }
+                     }
     else
       render_error(
         "project_meeting.update_error",
@@ -140,6 +158,18 @@ class Api::ProjectMeetingsController < Api::ApplicationController
     )
   end
 
+  def mark_as_viewed
+    authorize @project_meeting
+    @project_meeting.update_viewed_at
+    render_success @project_meeting, nil, { blueprint: ProjectMeetingBlueprint }
+  end
+
+  def mark_as_unviewed
+    authorize @project_meeting
+    @project_meeting.mark_as_unviewed
+    render_success @project_meeting, nil, { blueprint: ProjectMeetingBlueprint }
+  end
+
   private
 
   def set_permit_project
@@ -149,7 +179,11 @@ class Api::ProjectMeetingsController < Api::ApplicationController
   end
 
   def set_project_meeting
-    @project_meeting = @permit_project.project_meetings.find(params[:id])
+    @project_meeting =
+      @permit_project
+        .project_meetings
+        .includes(:meeting_request_documents)
+        .find(params[:id])
   end
 
   def project_meeting_params

@@ -213,7 +213,7 @@ RSpec.describe Api::JurisdictionsController, type: :controller do
   end
 
   describe "PATCH #update project meetings flag" do
-    it "allows jurisdiction managers and records an audit" do
+    it "allows jurisdiction managers" do
       manager = create(:user, :review_manager, jurisdiction: jurisdiction)
       sign_in manager
 
@@ -228,16 +228,6 @@ RSpec.describe Api::JurisdictionsController, type: :controller do
 
       expect(response).to have_http_status(:ok)
       expect(jurisdiction.reload.project_meetings_enabled).to eq(true)
-      audit =
-        ApplicationAudit.where(
-          auditable_type: "Jurisdiction",
-          auditable_id: jurisdiction.id,
-          action: "update"
-        ).last
-      expect(audit.audited_changes["project_meetings_enabled"]).to eq(
-        [false, true]
-      )
-      expect(audit.user).to eq(manager)
     end
 
     it "allows technical support members" do

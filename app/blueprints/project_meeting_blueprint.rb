@@ -17,10 +17,23 @@ class ProjectMeetingBlueprint < Blueprinter::Base
          :completed_at,
          :closed_at,
          :meeting_url,
+         :viewed_at,
          :created_at,
          :updated_at
 
   field :allowed_manual_transitions, default: []
+
+  field :project_number do |project_meeting, _options|
+    project_meeting.permit_project&.number
+  end
+
+  field :project_address do |project_meeting, _options|
+    project_meeting.full_address
+  end
+
+  field :project_pid do |project_meeting, _options|
+    project_meeting.pid
+  end
 
   view :extended do
     include_view :default
