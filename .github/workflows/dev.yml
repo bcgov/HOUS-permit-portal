@@ -41,6 +41,7 @@ jobs:
             VITE_BCSC_REGISTRATION_URL=${{ vars.VITE_BCSC_REGISTRATION_URL }}
             VITE_BCEID_URL=${{ vars.VITE_BCEID_URL }}
             VITE_BCEID_PARTNER_URL=${{ vars.VITE_BCEID_PARTNER_URL }}
+            VITE_MATOMO_URL=${{ vars.VITE_MATOMO_URL }}
             VITE_RELEASE_VERSION=dev-${{ github.event.inputs.branch }}-${{ github.sha }}
             VITE_SITEMINDER_LOGOUT_URL=${{ vars.VITE_SITEMINDER_LOGOUT_URL }}
             VITE_KEYCLOAK_LOGOUT_URL=${{ vars.VITE_KEYCLOAK_LOGOUT_URL }}
