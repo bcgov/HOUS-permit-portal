@@ -1,6 +1,6 @@
 import { Button, Flex, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { useEffect } from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
@@ -9,6 +9,7 @@ import { useMst } from "../../../setup/root"
 import { TCreateRequirementTemplateFormData } from "../../../types/types"
 import { TextFormControl } from "../form/input-form-control"
 import { TagsSelect } from "../select/selectors/tags-select"
+import { TemplateCategorySelect } from "../select/selectors/template-category-select"
 
 interface IRequirementTemplateFormProps {
   onSuccess: (createdRequirementTemplate: IRequirementTemplate) => void
@@ -18,6 +19,7 @@ export const RequirementTemplateForm = observer(({ onSuccess }: IRequirementTemp
   const { t } = useTranslation()
   const {
     requirementTemplateStore: { createRequirementTemplate, searchTagOptions },
+    templateCategoryStore: { fetchTemplateCategories, isLoading: isLoadingTemplateCategories, templateCategories },
   } = useMst()
 
   const formMethods = useForm<TCreateRequirementTemplateFormData>({
@@ -26,6 +28,7 @@ export const RequirementTemplateForm = observer(({ onSuccess }: IRequirementTemp
       nickname: "",
       description: "",
       tags: [],
+      templateCategoryId: null,
     },
   })
 
@@ -33,6 +36,10 @@ export const RequirementTemplateForm = observer(({ onSuccess }: IRequirementTemp
   const { handleSubmit, formState, control } = formMethods
 
   const { isSubmitting } = formState
+
+  useEffect(() => {
+    fetchTemplateCategories()
+  }, [fetchTemplateCategories])
 
   const fetchTagOptions = async (query: string) => {
     const options = await searchTagOptions(query)
@@ -55,6 +62,30 @@ export const RequirementTemplateForm = observer(({ onSuccess }: IRequirementTemp
 
           <Flex direction="column" as="section" w="full">
             <TextFormControl label={t("requirementTemplate.fields.nickname")} fieldName={"nickname"} required />
+          </Flex>
+
+          <Flex direction="column" as="section" w="full">
+            <Text fontWeight={700} mb={2}>
+              {t("requirementTemplate.fields.templateCategory")}
+            </Text>
+            <Controller
+              name="templateCategoryId"
+              control={control}
+              render={({ field: { onChange, value } }) => (
+                <TemplateCategorySelect
+                  onChange={onChange}
+                  templateCategories={templateCategories}
+                  selectedCategoryId={value ?? null}
+                  placeholder={t("siteConfiguration.templateCategories.uncategorized")}
+                  isLoading={isLoadingTemplateCategories}
+                  menuPortalTarget={document.body}
+                  styles={{
+                    container: (css) => ({ ...css, width: "100%" }),
+                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                  }}
+                />
+              )}
+            />
           </Flex>
 
           <Flex direction="column" as="section" w="full">

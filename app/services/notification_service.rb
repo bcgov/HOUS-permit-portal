@@ -318,6 +318,20 @@ class NotificationService
   end
 
   def self.publish_customization_update_event(customization)
+    throttle_key =
+      "customization_update_notification:" \
+        "#{customization.jurisdiction_id}:#{customization.template_version_id}"
+
+    throttle_acquired =
+      Rails.cache.write(
+        throttle_key,
+        true,
+        expires_in: 2.hours,
+        unless_exist: true
+      )
+
+    return unless throttle_acquired
+
     template_version = customization.template_version
     jurisdiction_id = customization.jurisdiction_id
     relevant_submitter_ids =

@@ -9,8 +9,6 @@ class Api::RequirementTemplatesController < Api::ApplicationController
                   schedule
                   force_publish_now
                   create_draft
-                  discard_draft
-                  promote_draft
                   update_jurisdiction_availabilities
                 ]
   before_action :set_template_version, only: %i[unschedule_template_version]
@@ -298,110 +296,6 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     end
   end
 
-  def discard_draft
-    authorize @requirement_template
-
-    draft_version = @requirement_template.draft_template_version
-    if draft_version.blank?
-      render_error "requirement_template.no_draft_error" and return
-    end
-
-    begin
-      TemplateVersioningService.discard_draft!(draft_version)
-      @requirement_template.reload
-
-      render_success @requirement_template,
-                     "requirement_template.discard_draft_success",
-                     {
-                       blueprint: RequirementTemplateBlueprint,
-                       blueprint_opts: {
-                         view: :extended,
-                         current_user: current_user
-                       }
-                     }
-    rescue TemplateVersionDraftError => e
-      render_error "requirement_template.discard_draft_error",
-                   message_opts: {
-                     error_message: e.message
-                   }
-    end
-  end
-
-  def promote_draft
-    skip_date_check =
-      ActiveModel::Type::Boolean.new.cast(
-        promote_draft_params[:skip_date_check]
-      )
-
-    if skip_date_check
-      authorize @requirement_template, :force_publish_draft?
-    else
-      authorize @requirement_template, :promote_draft?
-    end
-
-    draft_version = @requirement_template.draft_template_version
-    if draft_version.blank?
-      render_error "requirement_template.no_draft_error" and return
-    end
-
-    begin
-      version_date =
-        (Date.parse(promote_draft_params[:version_date]) unless skip_date_check)
-
-      promoted =
-        TemplateVersioningService.promote_draft_to_scheduled!(
-          draft_version,
-          version_date,
-          change_notes: promote_draft_params[:change_notes],
-          change_significance: promote_draft_params[:change_significance],
-          skip_date_check: skip_date_check,
-          current_user: current_user
-        )
-
-      # Set notification preferences on the version
-      if promote_draft_params[:notification_scope].present?
-        promoted.update!(
-          notification_scope: promote_draft_params[:notification_scope],
-          notified_jurisdiction_ids:
-            promote_draft_params[:notified_jurisdiction_ids] || []
-        )
-      end
-
-      # Optionally promote block changes back to canonical records
-      if promote_draft_params[:promote_block_ids].present?
-        TemplateVersioningService.promote_block_changes!(
-          promoted,
-          promote_draft_params[:promote_block_ids]
-        )
-      end
-
-      # Optionally send advance notice to jurisdictions. Skipped for inline
-      # force-publish since the version is already published at that point.
-      if !skip_date_check && promote_draft_params[:send_advance_notice]
-        NotificationService.publish_version_scheduled_event(promoted)
-      end
-
-      @requirement_template.reload
-
-      render_success @requirement_template,
-                     "requirement_template.promote_draft_success",
-                     {
-                       blueprint: RequirementTemplateBlueprint,
-                       blueprint_opts: {
-                         view: :extended,
-                         current_user: current_user
-                       }
-                     }
-    rescue TemplateVersionDraftError,
-           TemplateVersionScheduleError,
-           TemplateVersionForcePublishNowError => e
-      render_error "requirement_template.promote_draft_error",
-                   message_opts: {
-                     error_message: e.message
-                   }
-    end
-  end
-
   def update_jurisdiction_availabilities
     authorize @requirement_template
 
@@ -442,6 +336,7 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     @requirement_template =
       RequirementTemplate.includes(
         :published_template_version,
+        :draft_template_versions,
         :last_three_deprecated_template_versions,
         :scheduled_template_versions,
         requirement_template_sections: [
@@ -461,6 +356,8 @@ class Api::RequirementTemplatesController < Api::ApplicationController
         :description,
         :nickname,
         :available_globally,
+        :template_category_id,
+        :sort_order,
         tag_list: [],
         requirement_template_sections_attributes: [
           :id,
@@ -525,18 +422,5 @@ class Api::RequirementTemplatesController < Api::ApplicationController
 
   def draft_params
     params.permit(:assignee_id)
-  end
-
-  def promote_draft_params
-    params.permit(
-      :version_date,
-      :change_notes,
-      :change_significance,
-      :notification_scope,
-      :send_advance_notice,
-      :skip_date_check,
-      notified_jurisdiction_ids: [],
-      promote_block_ids: []
-    )
   end
 end

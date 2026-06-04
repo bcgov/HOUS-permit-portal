@@ -137,8 +137,8 @@ export enum EUserSortFields {
 
 export enum ERequirementTemplateSortFields {
   nickname = "nickname",
+  templateCategoryLabel = "template_category_label",
   tags = "tags",
-  description = "description",
   currentVersion = "current_version",
   availableIn = "available_in",
 }
@@ -202,6 +202,7 @@ export enum ESortDirection {
 }
 
 export enum ETagType {
+  requirementTemplate = "RequirementTemplate",
   requirementBlock = "RequirementBlock",
 }
 

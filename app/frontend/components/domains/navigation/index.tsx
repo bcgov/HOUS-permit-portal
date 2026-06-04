@@ -392,6 +392,11 @@ const QaToolsFeatureAccessScreen = lazy(() =>
     default: module.QaToolsFeatureAccessScreen,
   }))
 )
+const TemplateCategoriesScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/template-categories-screen").then((module) => ({
+    default: module.TemplateCategoriesScreen,
+  }))
+)
 
 const ProjectMeetingsFeatureAccessScreen = lazy(() =>
   import("../super-admin/site-configuration-management/project-meetings-feature-access").then((module) => ({
@@ -535,6 +540,7 @@ const AppRoutes = observer(() => {
       <Route path="/configuration-management/sitewide-message" element={<SitewideMessageScreen />} />
       <Route path="/configuration-management/help-drawer-setup" element={<HelpDrawerSetupScreen />} />
       <Route path="/configuration-management/help-videos" element={<HelpVideosManagementScreen />} />
+      <Route path="/configuration-management/template-categories" element={<TemplateCategoriesScreen />} />
       <Route path="/configuration-management/revision-reason-setup" element={<RevisionReasonSetupScreen />} />
       {/* DEPRECATED: /configuration-management/standardization-setup route removed.
           Super admins toggle publicly_previewable directly on TemplateVersionScreen. */}
@@ -825,6 +831,10 @@ const AppRoutes = observer(() => {
           <Route path="/profile" element={<ProfileScreen />} />
         </Route>
 
+        <Route element={<ProtectedRoute isAllowed={loggedIn} />}>
+          <Route path="/project-readiness-tools/check-digital-seals" element={<CheckDigitalSealsScreen />} />
+        </Route>
+
         <Route element={<ProtectedRoute isAllowed={loggedIn && !currentUser?.isSuperAdmin && !isUnconfirmed} />}>
           <Route path="/profile/eula" element={<EULAScreen withClose />} />
         </Route>
@@ -895,7 +905,6 @@ const AppRoutes = observer(() => {
         <Route path="/videos/:videoId" element={<HelpVideoScreen />} />
         <Route path="/standardization-preview" element={<StandardizationPreviewScreen />} />
         <Route path="/template-versions/:templateVersionId/preview" element={<TemplateVersionPreviewScreen />} />
-        <Route path="/project-readiness-tools" element={<ProjectReadinessToolsIndexScreen />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyScreen />} />
         <Route
           path="/project-readiness-tools/create-your-letters-of-assurance"

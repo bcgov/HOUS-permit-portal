@@ -120,6 +120,7 @@ export interface IRequirementTemplateUpdateParams {
   description?: string | null
   nickname?: string | null
   tags?: string[]
+  templateCategoryId?: string | null
   assigneeId?: string | null
   requirementTemplateSectionsAttributes?: IRequirementTemplateSectionAttributes[]
   availableGlobally?: boolean | null

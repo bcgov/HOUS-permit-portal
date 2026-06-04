@@ -19,6 +19,7 @@ interface IProps {
   renderDescription?: () => JSX.Element
   renderHeading?: () => JSX.Element
   renderTags?: () => JSX.Element
+  renderCategory?: () => JSX.Element
   status?: TTemplateStatusTagStatus
   versionDate?: Date
   breadCrumbs?: { href: string; title: string }[]
@@ -34,6 +35,7 @@ export const BuilderHeader = observer(function BuilderHeader({
   renderDescription,
   renderHeading,
   renderTags,
+  renderCategory,
   breadCrumbs = [],
   latestVersionId,
   forEdit = false,
@@ -76,12 +78,24 @@ export const BuilderHeader = observer(function BuilderHeader({
           <Text fontWeight={700}>{t("requirementTemplate.fields.description")}:</Text>
           {renderDescription ? renderDescription() : <Text as="span">{requirementTemplate.description}</Text>}
         </HStack>
-        {renderTags && (
-          <HStack alignItems={"flex-start"}>
-            <Text fontWeight={700} pt={2}>
-              {t("requirementTemplate.fields.tags")}:
-            </Text>
-            {renderTags()}
+        {(renderTags || renderCategory) && (
+          <HStack alignItems={"flex-start"} spacing={6} flexWrap="wrap">
+            {renderCategory && (
+              <HStack alignItems={"flex-start"}>
+                <Text fontWeight={700} pt={2}>
+                  {t("requirementTemplate.fields.templateCategory")}:
+                </Text>
+                {renderCategory()}
+              </HStack>
+            )}
+            {renderTags && (
+              <HStack alignItems={"flex-start"}>
+                <Text fontWeight={700} pt={2}>
+                  {t("requirementTemplate.fields.tags")}:
+                </Text>
+                {renderTags()}
+              </HStack>
+            )}
           </HStack>
         )}
         {status && (
