@@ -379,8 +379,8 @@ export class Api {
     return this.client.post<ApiResponse<IProjectMeeting>>(`/permit_projects/${permitProjectId}/meetings`)
   }
 
-  async fetchProjectMeeting(permitProjectId: string, id: string) {
-    return this.client.get<ApiResponse<IProjectMeeting>>(`/permit_projects/${permitProjectId}/meetings/${id}`)
+  async fetchProjectMeeting(id: string) {
+    return this.client.get<ApiResponse<IProjectMeeting>>(`/project_meetings/${id}`)
   }
 
   async fetchProjectMeetings(permitProjectId: string, params?: TSearchParams<EProjectMeetingSortFields>) {

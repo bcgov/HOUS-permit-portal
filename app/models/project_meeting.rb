@@ -32,6 +32,10 @@ class ProjectMeeting < ApplicationRecord
        },
        prefix: true
 
+  enum :contact_method,
+       { phone: 0, in_person: 1, videoconference: 2 },
+       prefix: true
+
   validates :permit_project, :requested_by, :status, presence: true
   validates :contact_email,
             format: {
@@ -102,6 +106,7 @@ class ProjectMeeting < ApplicationRecord
       project_description: project_description,
       meeting_notes: meeting_notes,
       viewed_at: viewed_at,
+      contact_method: contact_method,
       project_number: permit_project&.number,
       project_address: full_address,
       project_pid: pid,

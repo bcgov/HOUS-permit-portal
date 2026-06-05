@@ -2,6 +2,7 @@ import { Box, Button, Flex, Heading, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
+import { useMatch, useParams } from "react-router-dom"
 import { useSearch } from "../../../../hooks/use-search"
 import { IJurisdiction } from "../../../../models/jurisdiction"
 import { useMst } from "../../../../setup/root"
@@ -9,6 +10,7 @@ import { EProjectMeetingStatus } from "../../../../types/enums"
 import { CalloutBanner } from "../../../shared/base/callout-banner"
 import { ProjectMeetingStatusFilter, UnreadFilter } from "./filters"
 import { ProjectMeetingInboxTable } from "./project-meeting-inbox-table"
+import { ReviewerMeetingDetailContent } from "./reviewer-meeting-detail-content"
 import { SearchInput } from "./submissions-tab-panel-content"
 
 interface IProps {
@@ -17,6 +19,8 @@ interface IProps {
 
 export const MeetingsTabPanelContent = observer(function MeetingsTabPanelContent({ currentJurisdiction }: IProps) {
   const { t } = useTranslation()
+  const { jurisdictionId } = useParams()
+  const reviewerMeetingDetailMatch = useMatch("/jurisdictions/:jurisdictionId/meetings/:meetingId")
   const { projectMeetingInboxStore, sandboxStore, siteConfigurationStore } = useMst()
   const { currentSandboxId } = sandboxStore
   const projectMeetingsEnabled = Boolean(
@@ -26,8 +30,20 @@ export const MeetingsTabPanelContent = observer(function MeetingsTabPanelContent
 
   useSearch(
     projectMeetingInboxStore,
-    projectMeetingsEnabled ? [currentJurisdiction.id, JSON.stringify(currentSandboxId), "meetings"] : [null]
+    projectMeetingsEnabled && !reviewerMeetingDetailMatch
+      ? [currentJurisdiction.id, JSON.stringify(currentSandboxId), "meetings"]
+      : [null]
   )
+
+  if (reviewerMeetingDetailMatch?.params.meetingId && jurisdictionId) {
+    return (
+      <Flex direction="column" flex={1} minW={0} h="full" overflow="auto" bg="greys.white" p={10}>
+        <Box w="full" maxW="container.lg">
+          <ReviewerMeetingDetailContent jurisdictionId={jurisdictionId} />
+        </Box>
+      </Flex>
+    )
+  }
 
   return (
     <Flex direction="column" flex={1} minW={0} h="full" overflow="hidden">

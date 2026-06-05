@@ -24,7 +24,7 @@ module ProjectMeetingStatus
          { draft: 0, open: 1, scheduled: 2, completed: 3, closed: 4 },
          default: 0
 
-    validate :confirmed_date_present, if: :scheduled?
+    validate :validate_schedule_requirements, if: :scheduled?
     validate :only_one_active_meeting_request, if: :active?
 
     scope :active, -> { where(status: statuses.values_at(*active_statuses)) }
@@ -88,7 +88,8 @@ module ProjectMeetingStatus
     end
 
     def can_schedule?
-      confirmed_date.present?
+      validate_schedule_requirements
+      errors.empty?
     end
 
     def stamp_scheduled_at
@@ -109,8 +110,13 @@ module ProjectMeetingStatus
       NotificationService.publish_project_meeting_request_received_event(self)
     end
 
-    def confirmed_date_present
+    def validate_schedule_requirements
       errors.add(:confirmed_date, :blank) if confirmed_date.blank?
+      errors.add(:contact_method, :blank) if contact_method.blank?
+
+      if contact_method_videoconference? && meeting_url.blank?
+        errors.add(:meeting_url, :blank)
+      end
     end
 
     def only_one_active_meeting_request

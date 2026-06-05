@@ -5,7 +5,7 @@ import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IProjectMeeting, ProjectMeetingModel } from "../models/project-meeting"
-import { EProjectMeetingSortFields } from "../types/enums"
+import { EProjectMeetingSortFields, EProjectMeetingStatus } from "../types/enums"
 import { TSearchParams } from "../types/types"
 import { convertToDate } from "../utils/utility-functions"
 
@@ -100,8 +100,8 @@ export const ProjectMeetingStoreModel = types
       }
       return null
     }),
-    fetchProjectMeeting: flow(function* (permitProjectId: string, id: string) {
-      const response = yield* toGenerator(self.environment.api.fetchProjectMeeting(permitProjectId, id))
+    fetchProjectMeeting: flow(function* (id: string) {
+      const response = yield* toGenerator(self.environment.api.fetchProjectMeeting(id))
       if (response.ok) {
         self.mergeUpdate(response.data.data, "projectMeetingsMap")
         self.setCurrentProjectMeeting(response.data.data.id)
@@ -149,6 +149,13 @@ export const ProjectMeetingStoreModel = types
         return { ok: true, data: response.data.data as IProjectMeeting }
       }
       return { ok: false, error: responseError(response.data, response.problem) }
+    }),
+  }))
+  .actions((self) => ({
+    scheduleProjectMeeting: flow(function* (permitProjectId: string, id: string, params: Record<string, unknown>) {
+      return yield* toGenerator(
+        self.transitionProjectMeetingStatus(permitProjectId, id, EProjectMeetingStatus.scheduled, params)
+      )
     }),
   }))
 

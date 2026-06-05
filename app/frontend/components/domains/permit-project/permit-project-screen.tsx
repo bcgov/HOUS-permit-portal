@@ -138,7 +138,7 @@ export const PermitProjectScreen = observer(() => {
           <TabPanel>
             {isPending ? <LoadingScreen /> : <PermitsTabPanelContent permitProject={currentPermitProject} />}
           </TabPanel>
-          <TabPanel>
+          <TabPanel p={0}>
             {isPending ? <LoadingScreen /> : <MeetingsTabPanelContent permitProject={currentPermitProject} />}
           </TabPanel>
           <TabPanel>

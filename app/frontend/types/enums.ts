@@ -31,6 +31,12 @@ export enum EProjectMeetingStatus {
   closed = "closed",
 }
 
+export enum EProjectMeetingContactMethod {
+  phone = "phone",
+  inPerson = "in_person",
+  videoconference = "videoconference",
+}
+
 export enum EProjectMeetingSortFields {
   submittedAt = "submitted_at",
   projectNumber = "project_number",

@@ -169,11 +169,6 @@ const ReviewerWorkspaceScreen = lazy(() =>
     default: module.ReviewerWorkspaceScreen,
   }))
 )
-const ReviewerMeetingDetailScreen = lazy(() =>
-  import("../jurisdictions/submission-inbox/reviewer-meeting-detail-screen").then((module) => ({
-    default: module.ReviewerMeetingDetailScreen,
-  }))
-)
 const InboxProjectDetailScreen = lazy(() =>
   import("../jurisdictions/submission-inbox/project-detail/inbox-project-detail-screen").then((module) => ({
     default: module.InboxProjectDetailScreen,
@@ -636,7 +631,7 @@ const AppRoutes = observer(() => {
         element={<InboxProjectDetailScreen />}
       />
       <Route path="/jurisdictions/:jurisdictionId/submission-inbox" element={<ReviewerWorkspaceScreen />} />
-      <Route path="/jurisdictions/:jurisdictionId/meetings/:meetingId" element={<ReviewerMeetingDetailScreen />} />
+      <Route path="/jurisdictions/:jurisdictionId/meetings/:meetingId" element={<ReviewerWorkspaceScreen />} />
       <Route path="/jurisdictions/:jurisdictionId/meetings" element={<ReviewerWorkspaceScreen />} />
       <Route
         path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/my-jurisdiction-about-page"

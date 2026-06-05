@@ -76,6 +76,26 @@ RSpec.describe ProjectMeeting, type: :model do
       expect(meeting.errors[:confirmed_date]).to be_present
     end
 
+    it "requires a contact method when scheduled" do
+      meeting = build(:project_meeting, :scheduled, contact_method: nil)
+
+      expect(meeting).not_to be_valid
+      expect(meeting.errors[:contact_method]).to be_present
+    end
+
+    it "requires a meeting link for videoconference meetings" do
+      meeting =
+        build(
+          :project_meeting,
+          :scheduled,
+          contact_method: :videoconference,
+          meeting_url: nil
+        )
+
+      expect(meeting).not_to be_valid
+      expect(meeting.errors[:meeting_url]).to be_present
+    end
+
     it "allows only one active meeting request per project" do
       permit_project = create(:permit_project)
       create(:project_meeting, permit_project: permit_project)
@@ -143,7 +163,13 @@ RSpec.describe ProjectMeeting, type: :model do
 
   describe "status transitions" do
     it "schedules an open meeting request" do
-      meeting = create(:project_meeting, :open, confirmed_date: 1.week.from_now)
+      meeting =
+        create(
+          :project_meeting,
+          :open,
+          contact_method: :phone,
+          confirmed_date: 1.week.from_now
+        )
 
       meeting.schedule!
 
@@ -152,7 +178,13 @@ RSpec.describe ProjectMeeting, type: :model do
     end
 
     it "does not schedule without a confirmed date" do
-      meeting = create(:project_meeting, :open, confirmed_date: nil)
+      meeting =
+        create(
+          :project_meeting,
+          :open,
+          contact_method: :phone,
+          confirmed_date: nil
+        )
 
       expect { meeting.schedule! }.to raise_error(AASM::InvalidTransition)
       expect(meeting.reload).to be_open

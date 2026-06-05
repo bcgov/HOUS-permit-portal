@@ -90,6 +90,19 @@ RSpec.describe ProjectMeetingPolicy, type: :policy do
     expect(policy(owner, open_meeting).transition_status?).to be false
   end
 
+  it "blocks review staff from manually transitioning requests outside their jurisdiction" do
+    other_reviewer =
+      create(
+        :user,
+        :reviewer,
+        jurisdiction: create(:sub_district, project_meetings_enabled: true)
+      )
+    open_meeting =
+      create(:project_meeting, :open, permit_project: permit_project)
+
+    expect(policy(other_reviewer, open_meeting).transition_status?).to be false
+  end
+
   it "allows owners to cancel open and scheduled requests" do
     open_meeting =
       create(:project_meeting, :open, permit_project: permit_project)

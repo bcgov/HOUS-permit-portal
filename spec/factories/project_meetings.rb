@@ -19,6 +19,7 @@ FactoryBot.define do
     trait :scheduled do
       status { :scheduled }
       submitted_at { Time.current }
+      contact_method { :phone }
       confirmed_date { 1.week.from_now }
       scheduled_at { Time.current }
     end
@@ -26,6 +27,7 @@ FactoryBot.define do
     trait :completed do
       status { :completed }
       submitted_at { Time.current }
+      contact_method { :phone }
       confirmed_date { 1.week.from_now }
       scheduled_at { Time.current }
       completed_at { Time.current }

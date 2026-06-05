@@ -1,7 +1,7 @@
 class Api::ProjectMeetingsController < Api::ApplicationController
   include Api::Concerns::Search::ProjectMeetings
 
-  before_action :set_permit_project
+  before_action :set_permit_project, except: %i[show]
   before_action :set_project_meeting,
                 only: %i[
                   show
@@ -179,11 +179,19 @@ class Api::ProjectMeetingsController < Api::ApplicationController
   end
 
   def set_project_meeting
-    @project_meeting =
-      @permit_project
-        .project_meetings
-        .includes(:meeting_request_documents)
-        .find(params[:id])
+    if @permit_project.present?
+      @project_meeting =
+        @permit_project
+          .project_meetings
+          .includes(:meeting_request_documents)
+          .find(params[:id])
+    else
+      @project_meeting =
+        policy_scope(ProjectMeeting).includes(
+          :permit_project,
+          :meeting_request_documents
+        ).find(params[:id])
+    end
   end
 
   def project_meeting_params
@@ -199,6 +207,7 @@ class Api::ProjectMeetingsController < Api::ApplicationController
       :project_description,
       :meeting_notes,
       :request_property_information,
+      :contact_method,
       :confirmed_date,
       :meeting_url,
       meeting_request_documents_attributes: [

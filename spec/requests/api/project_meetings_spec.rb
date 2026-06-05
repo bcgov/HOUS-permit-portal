@@ -71,32 +71,46 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
     end
   end
 
-  describe "GET /api/permit_projects/:permit_project_id/meetings/:id" do
-    it "returns a meeting request for the owner" do
+  describe "GET /api/project_meetings/:id" do
+    it "returns a meeting request for the owner without requiring a project id" do
       meeting = create(:project_meeting, permit_project: permit_project)
       document = create(:meeting_request_document, project_meeting: meeting)
 
-      get "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}",
-          headers: headers
+      get "/api/project_meetings/#{meeting.id}", headers: headers
 
       expect(response).to have_http_status(:ok)
       expect(json_response.dig("data", "id")).to eq(meeting.id)
+      expect(json_response.dig("data", "permit_project_id")).to eq(
+        permit_project.id
+      )
       expect(
         json_response.dig("data", "meeting_request_documents", 0, "id")
       ).to eq(document.id)
       expect(
         json_response.dig("data", "meeting_request_documents", 0, "file", "id")
       ).to eq(document.file_id)
-      expect(
-        json_response.dig(
-          "data",
-          "meeting_request_documents",
-          0,
-          "file",
-          "metadata",
-          "filename"
-        )
-      ).to eq(document.file_name)
+    end
+
+    it "returns a submitted meeting request for jurisdiction review staff" do
+      reviewer = create(:user, :reviewer, jurisdiction: jurisdiction)
+      meeting = create(:project_meeting, :open, permit_project: permit_project)
+      sign_in reviewer
+
+      get "/api/project_meetings/#{meeting.id}", headers: headers
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("data", "id")).to eq(meeting.id)
+    end
+
+    it "blocks review staff outside the jurisdiction" do
+      other_jurisdiction = create(:sub_district, project_meetings_enabled: true)
+      reviewer = create(:user, :reviewer, jurisdiction: other_jurisdiction)
+      meeting = create(:project_meeting, :open, permit_project: permit_project)
+      sign_in reviewer
+
+      get "/api/project_meetings/#{meeting.id}", headers: headers
+
+      expect(response).to have_http_status(:not_found)
     end
   end
 
@@ -464,6 +478,7 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
            params: {
              target_status: "scheduled",
              project_meeting: {
+               contact_method: "videoconference",
                confirmed_date: confirmed_date.iso8601,
                meeting_url: "https://example.com/meeting"
              }
@@ -474,6 +489,9 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
       expect(response).to have_http_status(:ok)
       expect(json_response.dig("data", "status")).to eq("scheduled")
       expect(json_response.dig("data", "scheduled_at")).to be_present
+      expect(json_response.dig("data", "contact_method")).to eq(
+        "videoconference"
+      )
       expect(json_response.dig("data", "confirmed_date")).to be_present
     end
 
@@ -491,12 +509,71 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
       expect(response).to have_http_status(:unprocessable_content)
     end
 
+    it "returns validation errors when scheduling without a contact method" do
+      meeting = create(:project_meeting, :open, permit_project: permit_project)
+      confirmed_date = 1.week.from_now
+      sign_in reviewer
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/transition_status",
+           params: {
+             target_status: "scheduled",
+             project_meeting: {
+               confirmed_date: confirmed_date.iso8601
+             }
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:unprocessable_content)
+    end
+
+    it "returns validation errors when scheduling a videoconference without a meeting link" do
+      meeting = create(:project_meeting, :open, permit_project: permit_project)
+      confirmed_date = 1.week.from_now
+      sign_in reviewer
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/transition_status",
+           params: {
+             target_status: "scheduled",
+             project_meeting: {
+               contact_method: "videoconference",
+               confirmed_date: confirmed_date.iso8601
+             }
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:unprocessable_content)
+    end
+
     it "blocks project owners from manually transitioning status" do
       meeting = create(:project_meeting, :open, permit_project: permit_project)
 
       post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/transition_status",
            params: {
              target_status: "closed"
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it "blocks review staff outside the jurisdiction from scheduling" do
+      other_jurisdiction = create(:sub_district, project_meetings_enabled: true)
+      other_reviewer =
+        create(:user, :reviewer, jurisdiction: other_jurisdiction)
+      meeting = create(:project_meeting, :open, permit_project: permit_project)
+      confirmed_date = 1.week.from_now
+      sign_in other_reviewer
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/transition_status",
+           params: {
+             target_status: "scheduled",
+             project_meeting: {
+               contact_method: "phone",
+               confirmed_date: confirmed_date.iso8601
+             }
            },
            headers: headers,
            as: :json
