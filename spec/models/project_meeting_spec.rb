@@ -177,6 +177,41 @@ RSpec.describe ProjectMeeting, type: :model do
       expect(meeting.scheduled_at).to be_present
     end
 
+    it "enqueues a scheduled meeting email for the requester" do
+      meeting =
+        create(
+          :project_meeting,
+          :open,
+          contact_method: :phone,
+          confirmed_date: 1.week.from_now
+        )
+
+      expect { meeting.schedule! }.to have_enqueued_mail(
+        PermitHubMailer,
+        :notify_project_meeting_scheduled
+      ).with(meeting)
+    end
+
+    it "enqueues scheduled meeting emails for jurisdiction contacts" do
+      meeting =
+        create(
+          :project_meeting,
+          :open,
+          contact_method: :phone,
+          confirmed_date: 1.week.from_now
+        )
+      create(
+        :meeting_submission_contact,
+        jurisdiction: meeting.permit_project.jurisdiction,
+        email: "meetings@example.com"
+      )
+
+      expect { meeting.schedule! }.to have_enqueued_mail(
+        PermitHubMailer,
+        :notify_project_meeting_scheduled_to_jurisdiction
+      ).with(meeting, "meetings@example.com")
+    end
+
     it "does not schedule without a confirmed date" do
       meeting =
         create(

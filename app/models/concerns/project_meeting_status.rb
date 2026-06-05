@@ -48,7 +48,10 @@ module ProjectMeetingStatus
       end
 
       event :schedule, before: :stamp_scheduled_at do
-        transitions from: :open, to: :scheduled, guard: :can_schedule?
+        transitions from: :open,
+                    to: :scheduled,
+                    guard: :can_schedule?,
+                    after: :handle_scheduled
       end
 
       event :complete, before: :stamp_completed_at do
@@ -108,6 +111,10 @@ module ProjectMeetingStatus
       permit_project&.mark_as_unviewed
       NotificationService.publish_project_meeting_submitted_event(self)
       NotificationService.publish_project_meeting_request_received_event(self)
+    end
+
+    def handle_scheduled
+      NotificationService.publish_project_meeting_scheduled_event(self)
     end
 
     def validate_schedule_requirements

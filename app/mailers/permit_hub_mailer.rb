@@ -280,6 +280,32 @@ class PermitHubMailer < ApplicationMailer
     )
   end
 
+  def notify_project_meeting_scheduled(project_meeting)
+    set_project_meeting_scheduled_variables(project_meeting)
+    @contact_first_name =
+      contact_first_name(project_meeting.contact_name, @user)
+
+    send_user_mail(
+      email: project_meeting.contact_email,
+      template_key: "notify_project_meeting_scheduled"
+    )
+  end
+
+  def notify_project_meeting_scheduled_to_jurisdiction(
+    project_meeting,
+    recipient_email
+  )
+    set_project_meeting_scheduled_variables(project_meeting)
+
+    send_mail(
+      email: recipient_email,
+      template_key: "notify_project_meeting_scheduled_to_jurisdiction",
+      subject_i18n_params: {
+        project_number: @permit_project.number
+      }
+    )
+  end
+
   def notify_new_template_version_published(
     template_version,
     user,
@@ -484,6 +510,39 @@ class PermitHubMailer < ApplicationMailer
   def contact_first_name(contact_name, user)
     contact_name.to_s.split.first.presence || user.first_name.presence ||
       user.name
+  end
+
+  def set_project_meeting_scheduled_variables(project_meeting)
+    @project_meeting = project_meeting
+    @user = project_meeting.requested_by
+    @permit_project = project_meeting.permit_project
+    @jurisdiction = @permit_project.jurisdiction
+    @meeting_datetime =
+      project_meeting.confirmed_date&.in_time_zone&.strftime(
+        "%b %-d, %Y at %-l:%M %P PT"
+      )
+    @contact_method = project_meeting_contact_method_label(project_meeting)
+    @project_meeting_url =
+      FrontendUrlHelper.frontend_url(
+        "/projects/#{@permit_project.id}/meetings/#{project_meeting.id}"
+      )
+    @reviewer_project_meeting_url =
+      FrontendUrlHelper.frontend_url(
+        "/jurisdictions/#{@jurisdiction.slug}/meetings/#{project_meeting.id}"
+      )
+  end
+
+  def project_meeting_contact_method_label(project_meeting)
+    case project_meeting.contact_method
+    when "phone"
+      "Phone"
+    when "in_person"
+      "In-person meeting"
+    when "videoconference"
+      "Videoconference"
+    else
+      project_meeting.contact_method.to_s.humanize
+    end
   end
 
   # Helper method to attach a file from a FileUploadAttachment subclass instance

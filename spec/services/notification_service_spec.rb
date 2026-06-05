@@ -782,4 +782,45 @@ RSpec.describe NotificationService do
       )
     end
   end
+
+  describe ".publish_project_meeting_scheduled_event" do
+    it "sends the scheduled meeting email to the requester" do
+      meeting =
+        create(
+          :project_meeting,
+          :scheduled,
+          contact_method: :phone,
+          meeting_url: nil
+        )
+
+      expect {
+        described_class.publish_project_meeting_scheduled_event(meeting)
+      }.to have_enqueued_mail(
+        PermitHubMailer,
+        :notify_project_meeting_scheduled
+      ).with(meeting)
+    end
+
+    it "sends scheduled meeting emails to jurisdiction project meeting contacts" do
+      meeting =
+        create(
+          :project_meeting,
+          :scheduled,
+          contact_method: :phone,
+          meeting_url: nil
+        )
+      create(
+        :meeting_submission_contact,
+        jurisdiction: meeting.permit_project.jurisdiction,
+        email: "meetings@example.com"
+      )
+
+      expect {
+        described_class.publish_project_meeting_scheduled_event(meeting)
+      }.to have_enqueued_mail(
+        PermitHubMailer,
+        :notify_project_meeting_scheduled_to_jurisdiction
+      ).with(meeting, "meetings@example.com")
+    end
+  end
 end

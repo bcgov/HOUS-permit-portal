@@ -215,6 +215,8 @@ en:
       notify_pre_check_completed: "Your pre-check has been completed"
       notify_project_meeting_submitted: "Your project meeting request has been sent"
       notify_project_meeting_submitted_to_jurisdiction: "New project meeting request: %{project_number}"
+      notify_project_meeting_scheduled: "Your project meeting has been scheduled"
+      notify_project_meeting_scheduled_to_jurisdiction: "Project meeting scheduled: %{project_number}"
       notify_new_template_version_published: "New version published for %{template_label}"
       notify_template_version_no_action: "Permit template updated - no action required: %{template_label}"
       notify_template_version_action_required: "ACTION REQUIRED: Permit template updated - API mapping review required: %{template_label}"

@@ -715,6 +715,22 @@ class NotificationService
     end
   end
 
+  def self.publish_project_meeting_scheduled_event(project_meeting)
+    PermitHubMailer.notify_project_meeting_scheduled(
+      project_meeting
+    ).deliver_later
+
+    project_meeting
+      .jurisdiction
+      .confirmed_project_meeting_contacts
+      .each do |contact|
+      PermitHubMailer.notify_project_meeting_scheduled_to_jurisdiction(
+        project_meeting,
+        contact.email
+      ).deliver_later
+    end
+  end
+
   private_class_method :determine_file_owner
   private_class_method :send_external_api_key_notifications
   private_class_method :available_jurisdiction_ids_for
