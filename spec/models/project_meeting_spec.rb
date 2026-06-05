@@ -159,6 +159,40 @@ RSpec.describe ProjectMeeting, type: :model do
         :notify_project_meeting_submitted_to_jurisdiction
       ).with(meeting, "meetings@example.com")
     end
+
+    it "enqueues property information notifications when enabled and requested" do
+      meeting = create(:project_meeting, request_property_information: true)
+      meeting.permit_project.jurisdiction.update!(
+        property_information_requests_enabled: true
+      )
+      create(
+        :property_information_submission_contact,
+        jurisdiction: meeting.permit_project.jurisdiction,
+        email: "property-info@example.com"
+      )
+
+      expect { meeting.submit_request! }.to have_enqueued_mail(
+        PermitHubMailer,
+        :notify_property_information_requested
+      ).with(meeting, "property-info@example.com")
+    end
+
+    it "does not enqueue property information notifications when not requested" do
+      meeting = create(:project_meeting, request_property_information: false)
+      meeting.permit_project.jurisdiction.update!(
+        property_information_requests_enabled: true
+      )
+      create(
+        :property_information_submission_contact,
+        jurisdiction: meeting.permit_project.jurisdiction,
+        email: "property-info@example.com"
+      )
+
+      expect { meeting.submit_request! }.not_to have_enqueued_mail(
+        PermitHubMailer,
+        :notify_property_information_requested
+      )
+    end
   end
 
   describe "status transitions" do

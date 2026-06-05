@@ -14,5 +14,10 @@ FactoryBot.define do
     factory :meeting_submission_contact, class: "MeetingSubmissionContact" do
       default { false }
     end
+
+    factory :property_information_submission_contact,
+            class: "PropertyInformationSubmissionContact" do
+      default { false }
+    end
   end
 end

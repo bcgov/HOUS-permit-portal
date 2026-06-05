@@ -62,6 +62,7 @@ export enum EMeetingRequestDocumentType {
 export enum ESubmissionContactClass {
   application = "ApplicationSubmissionContact",
   meeting = "MeetingSubmissionContact",
+  propertyInformation = "PropertyInformationSubmissionContact",
 }
 
 export enum EResourceCategory {

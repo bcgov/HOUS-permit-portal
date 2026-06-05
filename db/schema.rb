@@ -338,6 +338,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_04_191200) do
     t.string "website_url"
     t.boolean "hide_from_search", default: false, null: false
     t.boolean "project_meetings_enabled", default: false, null: false
+    t.boolean "property_information_requests_enabled", default: false, null: false
     t.index ["ltsa_matcher"], name: "index_jurisdictions_on_ltsa_matcher"
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"], name: "index_jurisdictions_on_regional_district_id"

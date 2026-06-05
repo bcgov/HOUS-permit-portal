@@ -180,6 +180,45 @@ RSpec.describe Jurisdiction, type: :model do
         expect(jurisdiction.confirmed_project_meeting_contacts).to eq([contact])
       end
     end
+
+    describe "property information notification recipient emails" do
+      let(:jurisdiction) { create(:sub_district) }
+
+      it "returns confirmed property information contact emails" do
+        create(
+          :property_information_submission_contact,
+          jurisdiction: jurisdiction,
+          email: "property-info@example.com"
+        )
+        create(
+          :property_information_submission_contact,
+          jurisdiction: jurisdiction,
+          email: "unconfirmed@example.com",
+          confirmed_at: nil
+        )
+        create(
+          :meeting_submission_contact,
+          jurisdiction: jurisdiction,
+          email: "meetings@example.com"
+        )
+
+        expect(
+          jurisdiction.property_information_notification_recipient_emails
+        ).to eq(["property-info@example.com"])
+      end
+
+      it "exposes confirmed property information contacts" do
+        contact =
+          create(
+            :property_information_submission_contact,
+            jurisdiction: jurisdiction
+          )
+
+        expect(jurisdiction.confirmed_property_information_contacts).to eq(
+          [contact]
+        )
+      end
+    end
   end
 
   describe "#should_index?" do

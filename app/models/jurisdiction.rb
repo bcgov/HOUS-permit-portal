@@ -72,6 +72,8 @@ class Jurisdiction < ApplicationRecord
   has_many :application_submission_contacts,
            class_name: "ApplicationSubmissionContact"
   has_many :meeting_submission_contacts, class_name: "MeetingSubmissionContact"
+  has_many :property_information_submission_contacts,
+           class_name: "PropertyInformationSubmissionContact"
   has_many :external_api_keys, dependent: :destroy
   has_many :integration_mappings
   has_many :jurisdiction_step_requirements, dependent: :destroy
@@ -161,6 +163,10 @@ class Jurisdiction < ApplicationRecord
 
   def project_meeting_notification_recipient_emails
     confirmed_project_meeting_contacts.pluck(:email).uniq
+  end
+
+  def property_information_notification_recipient_emails
+    confirmed_property_information_contacts.pluck(:email).uniq
   end
 
   def manager_emails
@@ -372,6 +378,14 @@ class Jurisdiction < ApplicationRecord
 
   def confirmed_project_meeting_contacts
     project_meeting_contacts.confirmed
+  end
+
+  def property_information_contacts
+    property_information_submission_contacts
+  end
+
+  def confirmed_property_information_contacts
+    property_information_contacts.confirmed
   end
 
   def self.class_for_locality_type(locality_type)

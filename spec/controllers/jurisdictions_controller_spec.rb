@@ -230,6 +230,28 @@ RSpec.describe Api::JurisdictionsController, type: :controller do
       expect(jurisdiction.reload.project_meetings_enabled).to eq(true)
     end
 
+    it "updates property information request access" do
+      manager = create(:user, :review_manager, jurisdiction: jurisdiction)
+      sign_in manager
+
+      patch :update,
+            params: {
+              id: jurisdiction.id,
+              jurisdiction: {
+                property_information_requests_enabled: true
+              }
+            },
+            format: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(jurisdiction.reload.property_information_requests_enabled).to eq(
+        true
+      )
+      expect(
+        json_response["data"]["property_information_requests_enabled"]
+      ).to eq(true)
+    end
+
     it "allows technical support members" do
       tech = create(:user, role: :technical_support)
       create(:jurisdiction_membership, user: tech, jurisdiction: jurisdiction)
@@ -273,6 +295,36 @@ RSpec.describe Api::JurisdictionsController, type: :controller do
         a_hash_including(
           "email" => "meetings@example.com",
           "type" => "MeetingSubmissionContact"
+        )
+      )
+    end
+
+    it "updates property information request notification recipient contacts" do
+      manager = create(:user, :review_manager, jurisdiction: jurisdiction)
+      sign_in manager
+
+      patch :update,
+            params: {
+              id: jurisdiction.id,
+              jurisdiction: {
+                submission_contacts_attributes: [
+                  {
+                    email: "property-info@example.com",
+                    type: "PropertyInformationSubmissionContact"
+                  }
+                ]
+              }
+            },
+            format: :json
+
+      expect(response).to have_http_status(:ok)
+      contact = jurisdiction.reload.property_information_contacts.first
+      expect(contact.email).to eq("property-info@example.com")
+      expect(contact).to be_a(PropertyInformationSubmissionContact)
+      expect(json_response["data"]["submission_contacts"]).to include(
+        a_hash_including(
+          "email" => "property-info@example.com",
+          "type" => "PropertyInformationSubmissionContact"
         )
       )
     end

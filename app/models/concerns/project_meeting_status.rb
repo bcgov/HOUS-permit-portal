@@ -111,6 +111,9 @@ module ProjectMeetingStatus
       permit_project&.mark_as_unviewed
       NotificationService.publish_project_meeting_submitted_event(self)
       NotificationService.publish_project_meeting_request_received_event(self)
+      NotificationService.publish_property_information_request_received_event(
+        self
+      )
     end
 
     def handle_scheduled

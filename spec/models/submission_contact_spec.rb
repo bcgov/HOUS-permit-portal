@@ -13,7 +13,7 @@ RSpec.describe SubmissionContact, type: :model do
 
       contact =
         build(
-          :meeting_submission_contact,
+          :property_information_submission_contact,
           jurisdiction: jurisdiction,
           email: "contact@example.com"
         )
@@ -64,6 +64,15 @@ RSpec.describe SubmissionContact, type: :model do
         )
 
       expect(contact).not_to be_valid
+    end
+
+    it "uses a distinct property information contact class" do
+      contact = build(:property_information_submission_contact)
+
+      expect(contact).to be_a(PropertyInformationSubmissionContact)
+      expect(contact.confirmation_subject_key).to eq(
+        "property_information_contact_confirm"
+      )
     end
   end
 

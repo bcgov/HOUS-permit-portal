@@ -2,7 +2,7 @@ import { Alert, Box, Button, FormControl, HStack, Input, VStack } from "@chakra-
 import { Pencil, Plus, Warning } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
-import React, { useEffect, useState } from "react"
+import React, { ReactNode, useEffect, useState } from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { generateUUID } from "../../../utils/utility-functions"
@@ -22,7 +22,7 @@ interface IEmailListItem {
 }
 
 interface IEmailListEditableBlockProps {
-  heading?: string | null
+  heading?: ReactNode
   fields: Record<"id", string | null>[]
   fieldArrayName: string
   append: any
@@ -105,7 +105,7 @@ export const EmailListEditableBlock = observer(function EmailListEditableBlock({
     <EditableBlockContainer>
       {heading && (
         <FormControl flexBasis={"280px"} alignSelf="center">
-          <EditableBlockHeading>{heading}</EditableBlockHeading>
+          {typeof heading === "string" ? <EditableBlockHeading>{heading}</EditableBlockHeading> : heading}
         </FormControl>
       )}
       <VStack flex={1} spacing={5} alignSelf="center">

@@ -1,6 +1,6 @@
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
-import React, { useEffect } from "react"
+import React, { ReactNode, useEffect } from "react"
 import { FormProvider, useFieldArray, useForm } from "react-hook-form"
 import { IJurisdiction } from "../../../../../../models/jurisdiction"
 import { ESubmissionContactClass } from "../../../../../../types/enums"
@@ -12,6 +12,7 @@ interface ISubmissionContactFormProps {
   emailLabel: string
   addEmailLabel: string
   confirmationRequiredLabel: string
+  heading?: ReactNode
 }
 
 interface ISubmissionContactField {
@@ -33,6 +34,7 @@ export const SubmissionContactForm = observer(function SubmissionContactForm({
   emailLabel,
   addEmailLabel,
   confirmationRequiredLabel,
+  heading,
 }: ISubmissionContactFormProps) {
   const contacts = jurisdiction.submissionContacts.filter((contact) => contact.type === contactClass)
 
@@ -82,6 +84,7 @@ export const SubmissionContactForm = observer(function SubmissionContactForm({
     <FormProvider {...formMethods}>
       <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
         <EmailListEditableBlock
+          heading={heading}
           fields={fields}
           fieldArrayName={fieldArrayName}
           getIndex={getIndex}

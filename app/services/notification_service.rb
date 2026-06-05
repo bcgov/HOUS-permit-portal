@@ -715,6 +715,20 @@ class NotificationService
     end
   end
 
+  def self.publish_property_information_request_received_event(project_meeting)
+    return unless project_meeting.request_property_information?
+
+    jurisdiction = project_meeting.jurisdiction
+    return unless jurisdiction&.property_information_requests_enabled?
+
+    jurisdiction.confirmed_property_information_contacts.each do |contact|
+      PermitHubMailer.notify_property_information_requested(
+        project_meeting,
+        contact.email
+      ).deliver_later
+    end
+  end
+
   def self.publish_project_meeting_scheduled_event(project_meeting)
     PermitHubMailer.notify_project_meeting_scheduled(
       project_meeting

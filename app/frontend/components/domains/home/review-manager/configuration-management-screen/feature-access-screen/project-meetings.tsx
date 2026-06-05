@@ -1,14 +1,14 @@
 import { Button, Container, Flex, Heading, Link, Text, VStack } from "@chakra-ui/react"
 import { CaretLeft } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { Suspense } from "react"
+import React from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useJurisdiction } from "../../../../../../hooks/resources/use-jurisdiction"
+import { ESubmissionContactClass } from "../../../../../../types/enums"
 import { ErrorScreen } from "../../../../../shared/base/error-screen"
-import { LoadingScreen } from "../../../../../shared/base/loading-screen"
 import { SwitchButton } from "../../../../../shared/buttons/switch-button"
-import { ProjectMeetingsNotificationRecipientsForm } from "./project-meetings-notification-recipients-form"
+import { SubmissionContactForm } from "../shared/submission-contact-form"
 
 export const ProjectMeetingsJurisdictionFeatureAccessScreen = observer(() => {
   const i18nPrefix = "home.configurationManagement.featureAccess"
@@ -16,9 +16,27 @@ export const ProjectMeetingsJurisdictionFeatureAccessScreen = observer(() => {
   const navigate = useNavigate()
   const { t } = useTranslation()
 
-  const handleToggle = (checked: boolean) => {
-    currentJurisdiction?.update({ projectMeetingsEnabled: checked })
+  const projectMeetingsEnabled = currentJurisdiction?.projectMeetingsEnabled ?? false
+  const propertyInformationRequestsEnabled = currentJurisdiction?.propertyInformationRequestsEnabled ?? false
+
+  const handleProjectMeetingsToggle = () => {
+    currentJurisdiction?.update({ projectMeetingsEnabled: !projectMeetingsEnabled })
   }
+
+  const handlePropertyInformationToggle = (checked: boolean) => {
+    currentJurisdiction?.update({ propertyInformationRequestsEnabled: checked })
+  }
+
+  const recipientHeading = (label: string) => (
+    <VStack align="flex-start" spacing={3}>
+      <Text fontSize="md" fontWeight="normal">
+        {t(`${i18nPrefix}.sendRequestsFor`)}
+      </Text>
+      <Text fontSize="lg" fontWeight="bold">
+        {label}
+      </Text>
+    </VStack>
+  )
 
   if (jurisdictionError) {
     return <ErrorScreen />
@@ -40,44 +58,77 @@ export const ProjectMeetingsJurisdictionFeatureAccessScreen = observer(() => {
         </Flex>
       </VStack>
       {currentJurisdiction && (
-        <Flex mt={8} align="flex-start" w="100%" direction="column">
-          <Heading as="h2" fontSize="2xl" fontWeight="bold" mb={2}>
-            {t(`${i18nPrefix}.projectMeetingsNotificationRecipients`)}
-          </Heading>
-          <Text color="text.secondary" fontSize="lg" mb={4}>
-            {t(`${i18nPrefix}.projectMeetingsNotificationRecipientsDescription`)}
-          </Text>
-          <Suspense fallback={<LoadingScreen />}>
-            <ProjectMeetingsNotificationRecipientsForm jurisdiction={currentJurisdiction} />
-          </Suspense>
+        <Flex mt={8} align="flex-start" w="100%" direction="column" gap={8}>
+          <Flex align="flex-start" w="100%" direction="column">
+            <Flex
+              align="center"
+              justify="space-between"
+              w="100%"
+              borderBottomWidth={1}
+              borderColor="border.light"
+              pb={2}
+            >
+              <Heading as="h2" fontSize="lg" fontWeight="bold" m={0}>
+                {t(`${i18nPrefix}.acceptProjectMeetings`)}
+              </Heading>
+              <Button variant={projectMeetingsEnabled ? "secondary" : "primary"} onClick={handleProjectMeetingsToggle}>
+                {t(`${i18nPrefix}.${projectMeetingsEnabled ? "turnOffProjectMeetings" : "turnOnProjectMeetings"}`)}
+              </Button>
+            </Flex>
+            <Link
+              color="text.link"
+              mt={4}
+              onClick={() =>
+                navigate(
+                  `/jurisdictions/${currentJurisdiction.slug || currentJurisdiction.id}/configuration-management/resources`
+                )
+              }
+            >
+              {t(`${i18nPrefix}.projectMeetingsResourcesLink`)}
+            </Link>
+          </Flex>
+
+          {projectMeetingsEnabled && (
+            <>
+              <SubmissionContactForm
+                jurisdiction={currentJurisdiction}
+                heading={recipientHeading(t(`${i18nPrefix}.projectMeetings`))}
+                contactClass={ESubmissionContactClass.meeting}
+                emailLabel={t(`${i18nPrefix}.projectMeetingsEmailLabel`)}
+                addEmailLabel={t(`${i18nPrefix}.projectMeetingsAddEmail`)}
+                confirmationRequiredLabel={t(`${i18nPrefix}.projectMeetingsConfirmationRequired`)}
+              />
+
+              <Flex align="center" w="100%" justify="space-between" gap={6}>
+                <Flex align="flex-start" direction="column">
+                  <Heading as="h2" fontSize="lg" fontWeight="bold" m={0} mb={2}>
+                    {t(`${i18nPrefix}.propertyInformationRequests`)}
+                  </Heading>
+                  <Text color="text.secondary" fontSize="md">
+                    {t(`${i18nPrefix}.propertyInformationRequestsDescription`)}
+                  </Text>
+                </Flex>
+                <SwitchButton
+                  isChecked={propertyInformationRequestsEnabled}
+                  onChange={(e) => handlePropertyInformationToggle(e.target.checked)}
+                  size={"lg"}
+                />
+              </Flex>
+
+              {propertyInformationRequestsEnabled && (
+                <SubmissionContactForm
+                  jurisdiction={currentJurisdiction}
+                  heading={recipientHeading(t(`${i18nPrefix}.propertyInformation`))}
+                  contactClass={ESubmissionContactClass.propertyInformation}
+                  emailLabel={t(`${i18nPrefix}.propertyInformationEmailLabel`)}
+                  addEmailLabel={t(`${i18nPrefix}.propertyInformationAddEmail`)}
+                  confirmationRequiredLabel={t(`${i18nPrefix}.propertyInformationConfirmationRequired`)}
+                />
+              )}
+            </>
+          )}
         </Flex>
       )}
-      <Flex mt={8} align="center" w="100%" direction="column" alignItems="flex-start">
-        <Flex direction="column" alignItems="flex-start">
-          <Heading as="h2" fontSize="2xl" fontWeight="bold" m={0} mb={2}>
-            {t(`${i18nPrefix}.acceptProjectMeetings`)}
-          </Heading>
-          <Text color="text.secondary" fontSize="lg" mb={2} mt={2}>
-            {t(`${i18nPrefix}.projectMeetingsResourcesDescription`)}
-          </Text>
-          <Link
-            color="text.link"
-            onClick={() =>
-              currentJurisdiction &&
-              navigate(
-                `/jurisdictions/${currentJurisdiction.slug || currentJurisdiction.id}/configuration-management/resources`
-              )
-            }
-          >
-            {t(`${i18nPrefix}.projectMeetingsResourcesLink`)}
-          </Link>
-        </Flex>
-        <SwitchButton
-          isChecked={currentJurisdiction?.projectMeetingsEnabled ?? false}
-          onChange={(e) => handleToggle(e.target.checked)}
-          size={"lg"}
-        />
-      </Flex>
     </Container>
   )
 })
