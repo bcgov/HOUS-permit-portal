@@ -29,9 +29,6 @@ class TemplateVersion < ApplicationRecord
   validates :deprecation_reason, presence: true, if: :deprecated?
   validates :deprecated_by, presence: true, if: :deprecation_reason_unscheduled?
 
-  # Only one draft version per requirement template at a time
-  validate :only_one_draft_per_template, if: :draft?
-
   before_validation :set_default_deprecation_reason
 
   after_save :reindex_models_if_published, if: :saved_change_to_status?
@@ -216,19 +213,5 @@ class TemplateVersion < ApplicationRecord
 
   def clear_published_ids_cache
     Rails.cache.delete("published_template_version_ids")
-  end
-
-  def only_one_draft_per_template
-    existing_draft =
-      TemplateVersion
-        .where(requirement_template_id: requirement_template_id, status: :draft)
-        .where.not(id: id)
-
-    if existing_draft.exists?
-      errors.add(
-        :status,
-        "only one early access version is allowed per template"
-      )
-    end
   end
 end

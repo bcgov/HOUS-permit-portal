@@ -1,11 +1,12 @@
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { useEffect } from "react"
 import { Controller, useController, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { IRequirementTemplate } from "../../../../../models/requirement-template"
 import { useMst } from "../../../../../setup/root"
 import { EditableInputWithControls } from "../../../../shared/editable-input-with-controls"
 import { TagsSelect } from "../../../../shared/select/selectors/tags-select"
+import { TemplateCategorySelect } from "../../../../shared/select/selectors/template-category-select"
 import { BuilderHeader } from "./builder-header"
 import { IRequirementTemplateForm } from "./index"
 
@@ -17,6 +18,7 @@ export const EditableBuilderHeader = observer(function EditableBuilderHeader({ r
   const { t } = useTranslation()
   const {
     requirementTemplateStore: { searchTagOptions },
+    templateCategoryStore: { fetchTemplateCategories, isLoading: isLoadingTemplateCategories, templateCategories },
   } = useMst()
   const { control, register } = useFormContext<IRequirementTemplateForm>()
   const {
@@ -26,6 +28,10 @@ export const EditableBuilderHeader = observer(function EditableBuilderHeader({ r
   const {
     field: { value: nickname, onChange: onNicknameChange },
   } = useController({ control, name: "nickname" })
+
+  useEffect(() => {
+    fetchTemplateCategories()
+  }, [fetchTemplateCategories])
 
   const breadCrumbs = [
     {
@@ -103,6 +109,26 @@ export const EditableBuilderHeader = observer(function EditableBuilderHeader({ r
                 menuPortal: (base) => ({ ...base, zIndex: 9999 }),
               }}
               menuPortalTarget={document.body}
+            />
+          )}
+        />
+      )}
+      renderCategory={() => (
+        <Controller
+          name="templateCategoryId"
+          control={control}
+          render={({ field: { onChange, value } }) => (
+            <TemplateCategorySelect
+              onChange={onChange}
+              templateCategories={templateCategories}
+              selectedCategoryId={value ?? null}
+              placeholder={t("siteConfiguration.templateCategories.uncategorized")}
+              isLoading={isLoadingTemplateCategories}
+              menuPortalTarget={document.body}
+              styles={{
+                container: (css) => ({ ...css, minWidth: "14rem" }),
+                menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+              }}
             />
           )}
         />

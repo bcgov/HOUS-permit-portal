@@ -1,9 +1,10 @@
 class RequirementTemplate < ApplicationRecord
   SEARCH_INCLUDES = %i[
     published_template_version
-    draft_template_version
+    draft_template_versions
     last_three_deprecated_template_versions
     scheduled_template_versions
+    template_category
   ]
 
   searchkick searchable: %i[description current_version nickname tags],
@@ -11,6 +12,7 @@ class RequirementTemplate < ApplicationRecord
              text_middle: %i[current_version description]
 
   belongs_to :copied_from, class_name: "RequirementTemplate", optional: true
+  belongs_to :template_category, optional: true
 
   has_many :requirement_template_sections,
            -> { order(position: :asc) },
@@ -54,9 +56,13 @@ class RequirementTemplate < ApplicationRecord
           -> { where(status: "published") },
           class_name: "TemplateVersion"
 
-  has_one :draft_template_version,
-          -> { where(status: "draft") },
-          class_name: "TemplateVersion"
+  has_many :draft_template_versions,
+           -> do
+             where(template_versions: { status: "draft" }).order(
+               updated_at: :desc
+             )
+           end,
+           class_name: "TemplateVersion"
 
   scope :for_sandbox,
         ->(sandbox) do
@@ -72,6 +78,7 @@ class RequirementTemplate < ApplicationRecord
   include Discard::Model
 
   acts_as_taggable_on :tags
+  acts_as_list scope: :template_category, column: :sort_order, top_of_list: 0
 
   accepts_nested_attributes_for :requirement_template_sections,
                                 allow_destroy: true
@@ -84,6 +91,16 @@ class RequirementTemplate < ApplicationRecord
   validate :validate_nickname_uniqueness
 
   scope :with_published_version, -> { joins(:published_template_version) }
+  scope :ordered_by_template_category,
+        -> do
+          left_joins(:template_category).order(
+            Arel.sql(
+              "template_categories.sort_order ASC NULLS LAST, " \
+                "requirement_templates.sort_order ASC, " \
+                "requirement_templates.created_at ASC"
+            )
+          )
+        end
 
   before_validation :set_default_nickname
 
@@ -275,7 +292,11 @@ class RequirementTemplate < ApplicationRecord
           else
             jurisdiction_requirement_templates.count
           end
-        )
+        ),
+      template_category_id: template_category_id,
+      template_category_label: template_category&.label,
+      template_category_sort_order: template_category&.sort_order,
+      sort_order: sort_order
     }
   end
 

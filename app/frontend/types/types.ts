@@ -256,6 +256,13 @@ export interface IDenormalizedTemplate {
   nickname: string
   description?: string
   tags: string[]
+  templateCategoryId?: string | null
+  templateCategory?: {
+    id: string
+    label: string
+    sortOrder: number
+  } | null
+  sortOrder?: number
   requirementTemplateSections: IDenormalizedRequirementTemplateSection[]
 }
 
@@ -722,6 +729,7 @@ export interface IJurisdictionClimateZone {
 export type TCreateRequirementTemplateFormData = {
   description: string
   tags?: string[]
+  templateCategoryId?: string | null
   type: string
   nickname?: string
 }

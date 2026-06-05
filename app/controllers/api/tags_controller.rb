@@ -1,5 +1,8 @@
 class Api::TagsController < Api::ApplicationController
   def index
+    escaped_query =
+      ActiveRecord::Base.sanitize_sql_like(tag_params[:query].to_s)
+
     render json:
              policy_scope(
                ActsAsTaggableOn::Tag,
@@ -9,7 +12,7 @@ class Api::TagsController < Api::ApplicationController
                  "taggings.taggable_type IN (:taggable_types) AND tags.name ILIKE :query",
                  {
                    taggable_types: tag_params[:taggable_types],
-                   query: "#{tag_params[:query]}%"
+                   query: "%#{escaped_query}%"
                  }
                )
                .uniq

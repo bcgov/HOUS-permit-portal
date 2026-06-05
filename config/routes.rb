@@ -85,11 +85,7 @@ Rails.application.routes.draw do
       post "copy", on: :collection
 
       # Draft workflow endpoints
-      member do
-        post "create_draft", to: "requirement_templates#create_draft"
-        delete "discard_draft", to: "requirement_templates#discard_draft"
-        post "promote_draft", to: "requirement_templates#promote_draft"
-      end
+      member { post "create_draft", to: "requirement_templates#create_draft" }
       post "jurisdiction_availabilities",
            on: :member,
            to: "requirement_templates#update_jurisdiction_availabilities"
@@ -100,6 +96,8 @@ Rails.application.routes.draw do
       member do
         patch "update_draft_block", to: "template_versions#update_draft_block"
         post "refresh_draft", to: "template_versions#refresh_draft"
+        delete "discard_draft", to: "template_versions#discard_draft"
+        post "promote_draft", to: "template_versions#promote_draft"
         post "invite_draft_previewers",
              to: "template_versions#invite_draft_previewers"
         post "share_draft", to: "template_versions#share_draft"
@@ -342,6 +340,10 @@ Rails.application.routes.draw do
     resources :help_videos, only: %i[index show create update destroy] do
       post "publish", on: :member
       post "unpublish", on: :member
+    end
+    resources :template_categories, only: %i[index create update destroy] do
+      post "reorder", on: :collection
+      post "reorder_templates", on: :member
     end
 
     # Controller namespace is Api::Part9Building::*, but we expose path with underscore for continuity

@@ -46,6 +46,7 @@ jobs:
             VITE_BCSC_REGISTRATION_URL=${{ vars.VITE_BCSC_REGISTRATION_URL }}
             VITE_BCEID_URL=${{ vars.VITE_BCEID_URL }}
             VITE_BCEID_PARTNER_URL=${{ vars.VITE_BCEID_PARTNER_URL }}
+            VITE_MATOMO_URL=${{ vars.VITE_MATOMO_URL }}
           registry_url: ${{ secrets.REGISTRY_URL }}
           builder_username: ${{ secrets.BUILDER_USERNAME }}
           builder_token: ${{ secrets.BUILDER_TOKEN }}

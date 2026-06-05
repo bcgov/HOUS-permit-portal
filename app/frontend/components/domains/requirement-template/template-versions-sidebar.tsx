@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Collapse,
   Drawer,
   DrawerBody,
   DrawerCloseButton,
@@ -18,7 +19,7 @@ import {
   Text,
   useDisclosure,
 } from "@chakra-ui/react"
-import { Export, FileCsv } from "@phosphor-icons/react"
+import { CaretDown, CaretUp, Export, FileCsv } from "@phosphor-icons/react"
 import { Pencil } from "@phosphor-icons/react/dist/ssr"
 import { format } from "date-fns"
 import { t } from "i18next"
@@ -27,6 +28,7 @@ import React from "react"
 import { useTranslation } from "react-i18next"
 import { IRequirementTemplate } from "../../../models/requirement-template"
 import { ITemplateVersion } from "../../../models/template-version"
+import { useMst } from "../../../setup/root"
 import { ETemplateVersionStatus } from "../../../types/enums"
 import { RemoveConfirmationModal } from "../../shared/modals/remove-confirmation-modal"
 import { RouterLink } from "../../shared/navigation/router-link"
@@ -48,12 +50,25 @@ export const TemplateVersionsSidebar = observer(function TemplateVersionsSidebar
   onClose: externalOnClose,
   isInBuilder = false,
 }: IProps) {
+  const { templateVersionStore } = useMst()
   const { isOpen: internalIsOpen, onOpen: internalOnOpen, onClose: internalOnClose } = useDisclosure()
   const btnRef = React.useRef()
 
   const isOpen = externalIsOpen ?? internalIsOpen
   const onClose = externalOnClose || internalOnClose
   const onOpen = internalOnOpen
+
+  const draftTemplateVersionIds = requirementTemplate.draftTemplateVersions
+    .map((templateVersion) => templateVersion.id)
+    .join(",")
+
+  React.useEffect(() => {
+    if (!isOpen || !draftTemplateVersionIds) return
+
+    requirementTemplate.draftTemplateVersions.forEach((templateVersion) => {
+      templateVersionStore.fetchTemplateVersion(templateVersion.id).catch(() => {})
+    })
+  }, [draftTemplateVersionIds, isOpen, requirementTemplate.draftTemplateVersions, templateVersionStore])
 
   return (
     <>
@@ -92,22 +107,31 @@ export const TemplateVersionsSidebar = observer(function TemplateVersionsSidebar
               <VersionsList
                 type={ETemplateVersionStatus.deprecated}
                 templateVersions={requirementTemplate.lastThreeDeprecatedTemplateVersions}
+                collapsible
               />
               {requirementTemplate.publishedTemplateVersion && (
-                <Menu>
-                  <MenuButton as={Button} aria-label="Options" variant="secondary" rightIcon={<Export />} px={2}>
-                    {t("ui.export")}
-                  </MenuButton>
+                <Box>
+                  <Text as="h3" fontSize={"xl"} fontWeight={700} mb={2}>
+                    {t("requirementTemplate.versionSidebar.downloadsTitle")}
+                  </Text>
+                  <Text color={"text.secondary"} fontSize={"sm"} mb={4}>
+                    {t("requirementTemplate.versionSidebar.downloadsDescription")}
+                  </Text>
+                  <Menu>
+                    <MenuButton as={Button} aria-label="Options" variant="secondary" rightIcon={<Export />} px={2}>
+                      {t("ui.export")}
+                    </MenuButton>
 
-                  <MenuList>
-                    <MenuItem onClick={requirementTemplate.publishedTemplateVersion.downloadRequirementSummary}>
-                      <HStack spacing={2} fontSize={"sm"}>
-                        <FileCsv size={24} />
-                        <Text as={"span"}>{t("requirementTemplate.export.downloadSummaryCsv")}</Text>
-                      </HStack>
-                    </MenuItem>
-                  </MenuList>
-                </Menu>
+                    <MenuList>
+                      <MenuItem onClick={requirementTemplate.publishedTemplateVersion.downloadRequirementSummary}>
+                        <HStack spacing={2} fontSize={"sm"}>
+                          <FileCsv size={24} />
+                          <Text as={"span"}>{t("requirementTemplate.export.downloadSummaryCsv")}</Text>
+                        </HStack>
+                      </MenuItem>
+                    </MenuList>
+                  </Menu>
+                </Box>
               )}
             </Stack>
           </DrawerBody>
@@ -181,6 +205,7 @@ const VersionFlow = observer(function VersionFlow({
   const publishedTemplateVersions = requirementTemplate.publishedTemplateVersion
     ? [requirementTemplate.publishedTemplateVersion]
     : []
+  const draftTemplateVersions = requirementTemplate.draftTemplateVersions
 
   return (
     <Box>
@@ -195,20 +220,29 @@ const VersionFlow = observer(function VersionFlow({
         <VersionFlowStep
           label={t("requirementTemplate.versionSidebar.listTitles.draft")}
           emptyLabel={t("requirementTemplate.versionSidebar.noEarlyAccessVersion")}
-          hasContent={!!requirementTemplate.draftTemplateVersion}
+          hasContent={draftTemplateVersions.length > 0}
         >
-          {requirementTemplate.draftTemplateVersion && (
-            <Box border="1px solid" borderColor="border.light" borderRadius="sm" overflow="hidden">
+          {draftTemplateVersions.map((templateVersion, index) => (
+            <Box
+              key={templateVersion.id}
+              border="1px solid"
+              borderColor="border.light"
+              borderTop={index !== 0 ? "none" : undefined}
+              borderTopRadius={index === 0 ? "sm" : undefined}
+              borderBottomRadius={index === draftTemplateVersions.length - 1 ? "sm" : undefined}
+              borderRadius="none"
+              overflow="hidden"
+            >
               <VersionCard
-                viewRoute={`/template-versions/${requirementTemplate.draftTemplateVersion.id}`}
+                viewRoute={`/template-versions/${templateVersion.id}`}
                 status={ETemplateVersionStatus.draft}
-                updatedAt={requirementTemplate.draftTemplateVersion.updatedAt}
+                updatedAt={templateVersion.updatedAt}
                 borderRadius="none"
                 border="none"
               />
-              <SharePreviewAccordion draftTemplateVersion={requirementTemplate.draftTemplateVersion} />
+              <SharePreviewAccordion draftTemplateVersion={templateVersion} />
             </Box>
-          )}
+          ))}
         </VersionFlowStep>
 
         <VersionFlowStep
@@ -292,20 +326,27 @@ const VersionsList = observer(function VersionsList({
   type,
   templateVersions,
   onUnschedule,
+  collapsible = false,
 }: {
   type: Exclude<ETemplateVersionStatus, ETemplateVersionStatus.draft>
   templateVersions: ITemplateVersion[]
   onUnschedule?: (templateVersionId: string) => Promise<boolean>
+  collapsible?: boolean
 }) {
   const { t } = useTranslation()
+  const { isOpen, onToggle } = useDisclosure()
 
-  return (
-    <Box>
-      <Text as="h3" fontSize={"xl"} fontWeight={700} mb={2}>
-        {t(`requirementTemplate.versionSidebar.listTitles.${type}`)}
-      </Text>
+  const emptyLabelByType: Record<typeof type, string> = {
+    [ETemplateVersionStatus.scheduled]: t("requirementTemplate.versionSidebar.noScheduledVersion"),
+    [ETemplateVersionStatus.published]: t("requirementTemplate.versionSidebar.noPublishedVersion"),
+    [ETemplateVersionStatus.deprecated]: t("requirementTemplate.versionSidebar.noDeprecatedVersion"),
+  }
 
-      {templateVersions.map((templateVersion, index) => (
+  const title = t(`requirementTemplate.versionSidebar.listTitles.${type}`)
+
+  const content =
+    templateVersions.length > 0 ? (
+      templateVersions.map((templateVersion, index) => (
         <VersionCard
           key={templateVersion.id}
           viewRoute={`/template-versions/${templateVersion.id}`}
@@ -318,7 +359,46 @@ const VersionsList = observer(function VersionsList({
           onUnschedule={onUnschedule ? () => onUnschedule(templateVersion.id) : undefined}
           deprecationReasonLabel={templateVersion.deprecationReasonLabel}
         />
-      ))}
+      ))
+    ) : (
+      <Flex p={4} border={"1px dashed"} borderColor={"border.base"} borderRadius={"sm"} bg={"greys.grey04"}>
+        <Text color={"text.secondary"} fontSize={"sm"}>
+          {emptyLabelByType[type]}
+        </Text>
+      </Flex>
+    )
+
+  if (!collapsible) {
+    return (
+      <Box>
+        <Text as="h3" fontSize={"xl"} fontWeight={700} mb={2}>
+          {title}
+        </Text>
+        {content}
+      </Box>
+    )
+  }
+
+  return (
+    <Box>
+      <Flex
+        as="button"
+        type="button"
+        onClick={onToggle}
+        w="full"
+        align="center"
+        justify="space-between"
+        cursor="pointer"
+        aria-expanded={isOpen}
+      >
+        <Text as="h3" fontSize={"xl"} fontWeight={700}>
+          {title}
+        </Text>
+        {isOpen ? <CaretUp size={20} /> : <CaretDown size={20} />}
+      </Flex>
+      <Collapse in={isOpen} animateOpacity>
+        <Box pt={2}>{content}</Box>
+      </Collapse>
     </Box>
   )
 })

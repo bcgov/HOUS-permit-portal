@@ -402,6 +402,11 @@ const QaToolsFeatureAccessScreen = lazy(() =>
     default: module.QaToolsFeatureAccessScreen,
   }))
 )
+const TemplateCategoriesScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/template-categories-screen").then((module) => ({
+    default: module.TemplateCategoriesScreen,
+  }))
+)
 
 const ReportingScreen = lazy(() =>
   import("../super-admin/reporting/reporting-screen").then((module) => ({ default: module.ReportingScreen }))
@@ -524,6 +529,7 @@ const AppRoutes = observer(() => {
       <Route path="/configuration-management/sitewide-message" element={<SitewideMessageScreen />} />
       <Route path="/configuration-management/help-drawer-setup" element={<HelpDrawerSetupScreen />} />
       <Route path="/configuration-management/help-videos" element={<HelpVideosManagementScreen />} />
+      <Route path="/configuration-management/template-categories" element={<TemplateCategoriesScreen />} />
       <Route path="/configuration-management/revision-reason-setup" element={<RevisionReasonSetupScreen />} />
       {/* DEPRECATED: /configuration-management/standardization-setup route removed.
           Super admins toggle publicly_previewable directly on TemplateVersionScreen. */}
@@ -796,6 +802,10 @@ const AppRoutes = observer(() => {
           <Route path="/profile" element={<ProfileScreen />} />
         </Route>
 
+        <Route element={<ProtectedRoute isAllowed={loggedIn} />}>
+          <Route path="/project-readiness-tools/check-digital-seals" element={<CheckDigitalSealsScreen />} />
+        </Route>
+
         <Route element={<ProtectedRoute isAllowed={loggedIn && !currentUser?.isSuperAdmin && !isUnconfirmed} />}>
           <Route path="/profile/eula" element={<EULAScreen withClose />} />
         </Route>
@@ -881,7 +891,6 @@ const AppRoutes = observer(() => {
           path="/project-readiness-tools/look-up-step-codes-requirements-for-your-project"
           element={<LookUpStepCodesRequirementsForYourProjectScreen />}
         />
-        <Route path="/project-readiness-tools/check-digital-seals" element={<CheckDigitalSealsScreen />} />
         <Route path="/project-readiness-tools/pre-check" element={<PreCheckInfoScreen />} />
         <Route
           path="/onboarding-checklist-page-for-lg-adopting"

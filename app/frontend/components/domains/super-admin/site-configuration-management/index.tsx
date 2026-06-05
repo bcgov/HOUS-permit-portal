@@ -1,5 +1,14 @@
 import { Container, Grid, GridItem, Heading, VStack } from "@chakra-ui/react"
-import { File, FlagBanner, NotePencil, Question, SlidersHorizontal, Users, VideoCamera } from "@phosphor-icons/react"
+import {
+  File,
+  FileText,
+  FlagBanner,
+  NotePencil,
+  Question,
+  SlidersHorizontal,
+  Users,
+  VideoCamera,
+} from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -76,6 +85,16 @@ export const SiteConfigurationManagementScreen = observer(function SiteConfigura
               linkText={t("ui.edit")}
               icon={<VideoCamera size="24px" color="var(--chakra-colors-text-link)" />}
               href="help-videos"
+              h="full"
+            />
+          </GridItem>
+          <GridItem>
+            <HomeScreenBox
+              title={t(`${i18nPrefix}.templateCategories.title`)}
+              description={t(`${i18nPrefix}.templateCategories.description`)}
+              linkText={t("ui.edit")}
+              icon={<FileText size="24px" color="var(--chakra-colors-text-link)" />}
+              href="template-categories"
               h="full"
             />
           </GridItem>

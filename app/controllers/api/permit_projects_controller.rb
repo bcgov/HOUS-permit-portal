@@ -124,10 +124,6 @@ class Api::PermitProjectsController < Api::ApplicationController
   def assign_project_review_collaborator
     authorize @permit_project
 
-    unless @permit_project.designated_reviewer_enabled?
-      return render_error("permit_project.feature_not_enabled", { status: 422 })
-    end
-
     collaborator_id = params.require(:collaborator_id)
     @permit_project.assign_project_review_collaborator!(collaborator_id)
     render_success @permit_project.reload,

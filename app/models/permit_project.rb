@@ -1,7 +1,7 @@
 class PermitProject < ApplicationRecord
   # searchkick must be declared before Discard::Model to ensure auto-callbacks register correctly
   searchkick word_middle: %i[title full_address pid pin number owner_name]
-  audited on: %i[create update], only: %i[title full_address]
+  audited on: %i[create update], only: %i[title full_address state viewed_at]
   has_associated_audits
 
   include Discard::Model
@@ -128,11 +128,15 @@ class PermitProject < ApplicationRecord
   end
 
   def update_viewed_at
-    update(viewed_at: Time.current)
+    return if viewed_at.present?
+
+    update!(viewed_at: Time.current)
   end
 
   def mark_as_unviewed
-    update(viewed_at: nil)
+    return if viewed_at.blank?
+
+    update!(viewed_at: nil)
   end
 
   def broadcast_jurisdiction_projects_count_update
@@ -306,19 +310,10 @@ class PermitProject < ApplicationRecord
       &.collaborator
   end
 
-  def designated_reviewer_enabled?
-    SiteConfiguration.allow_designated_reviewer? &&
-      jurisdiction&.allow_designated_reviewer
-  end
-
   # Atomically assigns the project's single review collaborator, replacing any
   # existing assignment. Re-picking the current collaborator is a no-op (no
   # notification churn). Locks existing kept rows to serialize concurrent calls.
   def assign_project_review_collaborator!(collaborator_id)
-    unless designated_reviewer_enabled?
-      raise "Designated reviewer feature is not enabled"
-    end
-
     transaction do
       existing = permit_project_collaborations.kept.lock.first
 

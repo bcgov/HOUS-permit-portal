@@ -20,6 +20,7 @@ import { IPreCheck } from "../../models/pre-check"
 import { IProjectAudit } from "../../models/project-audit"
 import { IReleaseNote } from "../../models/release-note-model"
 import { IRequirementTemplate } from "../../models/requirement-template"
+import { ITemplateCategory } from "../../models/template-category"
 import { ITemplateVersion } from "../../models/template-version"
 import { ITemplateVersionPreview } from "../../models/template-version-preview"
 import { IUser } from "../../models/user"
@@ -188,6 +189,36 @@ export class Api {
 
   async reorderHelpVideosInSection(sectionId: string, orderedIds: string[]) {
     return this.client.post<ApiResponse<IHelpVideoSection>>(`/help_video_sections/${sectionId}/reorder_videos`, {
+      orderedIds,
+    })
+  }
+
+  async fetchTemplateCategories() {
+    return this.client.get<ApiResponse<ITemplateCategory[]>>(`/template_categories`)
+  }
+
+  async createTemplateCategory(params: { label: string }) {
+    return this.client.post<ApiResponse<ITemplateCategory[]>>(`/template_categories`, {
+      templateCategory: params,
+    })
+  }
+
+  async updateTemplateCategory(id: string, params: { label: string }) {
+    return this.client.patch<ApiResponse<ITemplateCategory[]>>(`/template_categories/${id}`, {
+      templateCategory: params,
+    })
+  }
+
+  async deleteTemplateCategory(id: string) {
+    return this.client.delete<ApiResponse<ITemplateCategory[]>>(`/template_categories/${id}`)
+  }
+
+  async reorderTemplateCategories(orderedIds: string[]) {
+    return this.client.post<ApiResponse<ITemplateCategory[]>>(`/template_categories/reorder`, { orderedIds })
+  }
+
+  async reorderTemplatesInCategory(categoryId: string, orderedIds: string[]) {
+    return this.client.post<ApiResponse<ITemplateCategory[]>>(`/template_categories/${categoryId}/reorder_templates`, {
       orderedIds,
     })
   }
@@ -777,12 +808,14 @@ export class Api {
     )
   }
 
-  async discardDraft(templateId: string) {
-    return this.client.delete<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${templateId}/discard_draft`)
+  async discardDraft(templateVersionId: string) {
+    return this.client.delete<ApiResponse<IRequirementTemplate>>(
+      `/template_versions/${templateVersionId}/discard_draft`
+    )
   }
 
   async promoteDraft(
-    templateId: string,
+    templateVersionId: string,
     params: {
       versionDate?: string
       changeNotes?: string
@@ -795,7 +828,7 @@ export class Api {
     }
   ) {
     return this.client.post<ApiResponse<IRequirementTemplate>>(
-      `/requirement_templates/${templateId}/promote_draft`,
+      `/template_versions/${templateVersionId}/promote_draft`,
       params
     )
   }

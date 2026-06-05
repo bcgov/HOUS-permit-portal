@@ -68,7 +68,9 @@ const EditRequirementTemplateActions = observer(function EditRequirementTemplate
           {onCreateDraft && (
             <CreateEarlyAccessVersionModal
               onCreateEarlyAccessVersion={onCreateDraft}
-              renderTrigger={(onOpen) => <MenuItem onClick={onOpen}>{t("requirementTemplate.status.draft")}</MenuItem>}
+              renderTrigger={(onOpen) => (
+                <MenuItem onClick={onOpen}>{t("requirementTemplate.edit.earlyAccess")}</MenuItem>
+              )}
             />
           )}
           <PublishScheduleModal

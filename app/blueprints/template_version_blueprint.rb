@@ -29,6 +29,18 @@ class TemplateVersionBlueprint < Blueprinter::Base
     end
   end
 
+  field :template_category_id do |template_version|
+    template_version.requirement_template&.template_category_id
+  end
+
+  field :template_sort_order do |template_version|
+    template_version.requirement_template&.sort_order
+  end
+
+  association :template_category, blueprint: TemplateCategoryBlueprint do |tv|
+    tv.requirement_template&.template_category
+  end
+
   view :extended do
     fields :denormalized_template_json, :form_json, :requirement_blocks_json
 

@@ -50,6 +50,12 @@ module ProjectAuditFormatters
         else
           "#{collaborator_name} assigned to #{block_name}"
         end
+      elsif collab.review? && collab.delegatee?
+        I18n.t(
+          "project_audit.actions.assigned_application_reviewer",
+          user: user_display,
+          reviewer: collaborator_name
+        )
       elsif collab.review?
         "#{collaborator_name} assigned to application"
       else
@@ -65,6 +71,12 @@ module ProjectAuditFormatters
           else
             "#{collaborator_name} unassigned from #{block_name}"
           end
+        elsif collab.review? && collab.delegatee?
+          I18n.t(
+            "project_audit.actions.removed_application_reviewer",
+            user: user_display,
+            reviewer: collaborator_name
+          )
         elsif collab.review?
           "#{collaborator_name} unassigned from application"
         else
