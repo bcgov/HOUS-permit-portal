@@ -88,17 +88,17 @@ export const ProjectMeetingsJurisdictionFeatureAccessScreen = observer(() => {
             </Link>
           </Flex>
 
+          <SubmissionContactForm
+            jurisdiction={currentJurisdiction}
+            heading={recipientHeading(t(`${i18nPrefix}.projectMeetings`))}
+            contactClass={ESubmissionContactClass.meeting}
+            emailLabel={t(`${i18nPrefix}.projectMeetingsEmailLabel`)}
+            addEmailLabel={t(`${i18nPrefix}.projectMeetingsAddEmail`)}
+            confirmationRequiredLabel={t(`${i18nPrefix}.projectMeetingsConfirmationRequired`)}
+          />
+
           {projectMeetingsEnabled && (
             <>
-              <SubmissionContactForm
-                jurisdiction={currentJurisdiction}
-                heading={recipientHeading(t(`${i18nPrefix}.projectMeetings`))}
-                contactClass={ESubmissionContactClass.meeting}
-                emailLabel={t(`${i18nPrefix}.projectMeetingsEmailLabel`)}
-                addEmailLabel={t(`${i18nPrefix}.projectMeetingsAddEmail`)}
-                confirmationRequiredLabel={t(`${i18nPrefix}.projectMeetingsConfirmationRequired`)}
-              />
-
               <Flex align="center" w="100%" justify="space-between" gap={6}>
                 <Flex align="flex-start" direction="column">
                   <Heading as="h2" fontSize="lg" fontWeight="bold" m={0} mb={2}>
@@ -115,16 +115,14 @@ export const ProjectMeetingsJurisdictionFeatureAccessScreen = observer(() => {
                 />
               </Flex>
 
-              {propertyInformationRequestsEnabled && (
-                <SubmissionContactForm
-                  jurisdiction={currentJurisdiction}
-                  heading={recipientHeading(t(`${i18nPrefix}.propertyInformation`))}
-                  contactClass={ESubmissionContactClass.propertyInformation}
-                  emailLabel={t(`${i18nPrefix}.propertyInformationEmailLabel`)}
-                  addEmailLabel={t(`${i18nPrefix}.propertyInformationAddEmail`)}
-                  confirmationRequiredLabel={t(`${i18nPrefix}.propertyInformationConfirmationRequired`)}
-                />
-              )}
+              <SubmissionContactForm
+                jurisdiction={currentJurisdiction}
+                heading={recipientHeading(t(`${i18nPrefix}.propertyInformation`))}
+                contactClass={ESubmissionContactClass.propertyInformation}
+                emailLabel={t(`${i18nPrefix}.propertyInformationEmailLabel`)}
+                addEmailLabel={t(`${i18nPrefix}.propertyInformationAddEmail`)}
+                confirmationRequiredLabel={t(`${i18nPrefix}.propertyInformationConfirmationRequired`)}
+              />
             </>
           )}
         </Flex>

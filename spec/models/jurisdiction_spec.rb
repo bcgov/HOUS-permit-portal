@@ -220,15 +220,62 @@ RSpec.describe Jurisdiction, type: :model do
       end
     end
 
+    describe "feature setup requirements" do
+      let(:jurisdiction) { create(:sub_district) }
+
+      it "requires a confirmed project meeting contact before enabling project meetings" do
+        jurisdiction.project_meetings_enabled = true
+
+        expect(jurisdiction).not_to be_valid
+        expect(jurisdiction.errors[:project_meetings_enabled]).to include(
+          I18n.t(
+            "activerecord.errors.models.jurisdiction.enabled_project_meetings_requires_setup"
+          )
+        )
+      end
+
+      it "allows project meetings to be enabled with a confirmed project meeting contact" do
+        create(:meeting_submission_contact, jurisdiction: jurisdiction)
+
+        jurisdiction.project_meetings_enabled = true
+
+        expect(jurisdiction).to be_valid
+      end
+
+      it "requires a confirmed property information contact before enabling property information requests" do
+        jurisdiction.property_information_requests_enabled = true
+
+        expect(jurisdiction).not_to be_valid
+        expect(
+          jurisdiction.errors[:property_information_requests_enabled]
+        ).to include(
+          I18n.t(
+            "activerecord.errors.models.jurisdiction.enabled_property_information_requests_requires_setup"
+          )
+        )
+      end
+
+      it "allows property information requests to be enabled with a confirmed property information contact" do
+        create(
+          :property_information_submission_contact,
+          jurisdiction: jurisdiction
+        )
+
+        jurisdiction.property_information_requests_enabled = true
+
+        expect(jurisdiction).to be_valid
+      end
+    end
+
     describe "submission contact deletion" do
       let(:jurisdiction) { create(:sub_district) }
 
       it "prevents deleting the last confirmed contact through nested attributes when its feature is enabled" do
-        jurisdiction.update!(project_meetings_enabled: true)
         contact =
           create(:meeting_submission_contact, jurisdiction: jurisdiction)
+        jurisdiction.update!(project_meetings_enabled: true)
 
-        expect(
+        expect {
           jurisdiction.update(
             submission_contacts_attributes: [
               {
@@ -238,7 +285,7 @@ RSpec.describe Jurisdiction, type: :model do
               }
             ]
           )
-        ).to be(false)
+        }.to raise_error(ActiveRecord::RecordNotDestroyed)
 
         expect(MeetingSubmissionContact.exists?(contact.id)).to be(true)
       end

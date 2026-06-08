@@ -162,13 +162,13 @@ RSpec.describe ProjectMeeting, type: :model do
 
     it "enqueues property information notifications when enabled and requested" do
       meeting = create(:project_meeting, request_property_information: true)
-      meeting.permit_project.jurisdiction.update!(
-        property_information_requests_enabled: true
-      )
       create(
         :property_information_submission_contact,
         jurisdiction: meeting.permit_project.jurisdiction,
         email: "property-info@example.com"
+      )
+      meeting.permit_project.jurisdiction.update!(
+        property_information_requests_enabled: true
       )
 
       expect { meeting.submit_request! }.to have_enqueued_mail(
@@ -179,13 +179,13 @@ RSpec.describe ProjectMeeting, type: :model do
 
     it "does not enqueue property information notifications when not requested" do
       meeting = create(:project_meeting, request_property_information: false)
-      meeting.permit_project.jurisdiction.update!(
-        property_information_requests_enabled: true
-      )
       create(
         :property_information_submission_contact,
         jurisdiction: meeting.permit_project.jurisdiction,
         email: "property-info@example.com"
+      )
+      meeting.permit_project.jurisdiction.update!(
+        property_information_requests_enabled: true
       )
 
       expect { meeting.submit_request! }.not_to have_enqueued_mail(
