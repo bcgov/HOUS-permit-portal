@@ -4,14 +4,13 @@ import { observer } from "mobx-react-lite"
 import { ArrowSquareOut } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import * as R from "ramda"
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import React, { useEffect, useMemo, useRef, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
 import { EFileUploadAttachmentType, EFlashMessageStatus, EStepCodeType } from "../../../types/enums"
-import { IErrorsBoxData, IOptionalElectiveFieldInfo } from "../../../types/types"
-import { getOptionalElectivesByPanelId } from "../../../utils/early-access-view-optional-electives"
+import { IErrorsBoxData } from "../../../types/types"
 import { getCompletedBlocksFromForm, getRequirementByKey } from "../../../utils/formio-component-traversal"
 import { singleRequirementFormJson, singleRequirementSubmissionData } from "../../../utils/formio-helpers"
 import { downloadFileFromStorage } from "../../../utils/utility-functions"
@@ -23,7 +22,6 @@ import { SharedSpinner } from "../base/shared-spinner"
 import { Form, defaultOptions } from "../chefs"
 import { ContactModal } from "../contact/contact-modal"
 import { PreviousSubmissionModal } from "../revisions/previous-submission-modal"
-import { OptionalElectivesModal } from "./optional-electives-modal"
 import { PermitApplicationSubmitModal } from "./permit-application-submit-modal"
 import { StepCodeSelectModal } from "./step-code-select-modal"
 
@@ -38,7 +36,6 @@ interface IRequirementFormProps {
   readOnly?: boolean
   renderTopButtons?: () => React.ReactNode
   updateCollaborationAssignmentNodes?: () => void
-  isEarlyAccess?: boolean
 }
 
 export const RequirementForm = observer(
@@ -52,7 +49,6 @@ export const RequirementForm = observer(
     isEditing = false,
     readOnly: readOnlyProp = false,
     updateCollaborationAssignmentNodes,
-    isEarlyAccess = false,
   }: IRequirementFormProps) => {
     const {
       jurisdiction,
@@ -90,18 +86,6 @@ export const RequirementForm = observer(
     const [previousSubmissionKey, setPreviousSubmissionKey] = useState(null)
     const [firstComponentKey, setFirstComponentKey] = useState(null)
     const [isCollapsedAll, setIsCollapsedAllState] = useState(false)
-
-    // Early-access only: "View optional electives" modal state
-    const {
-      isOpen: isOptionalElectivesOpen,
-      onOpen: onOptionalElectivesOpen,
-      onClose: onOptionalElectivesClose,
-    } = useDisclosure()
-    const [optionalElectivesModalData, setOptionalElectivesModalData] = useState<{
-      blockTitle?: string
-      labels: string[]
-      electives: IOptionalElectiveFieldInfo[]
-    } | null>(null)
 
     const currentSubmissionData = useMemo(() => {
       return R.clone(submissionData)
@@ -214,20 +198,12 @@ export const RequirementForm = observer(
 
     const handleOpenStepCodePart3 = async (_event) => {
       await triggerSave?.()
-      if (isEarlyAccess) {
-        alert(t("site.earlyAccessStepCodePreviewNotAvailable"))
-      } else {
-        navigate("part-3-step-code")
-      }
+      navigate("part-3-step-code")
     }
 
     const handleOpenStepCodePart9 = async (_event) => {
       await triggerSave?.()
-      if (isEarlyAccess) {
-        alert(t("site.earlyAccessStepCodePreviewNotAvailable"))
-      } else {
-        navigate("part-9-step-code")
-      }
+      navigate("part-9-step-code")
     }
 
     const handleOpenContactAutofill = async (event) => {
@@ -278,28 +254,7 @@ export const RequirementForm = observer(
       })
     }
 
-    const optionalElectivesByPanelId = useMemo(() => {
-      if (!isEarlyAccess)
-        return new Map<string, { blockTitle?: string; labels: string[]; electives: IOptionalElectiveFieldInfo[] }>()
-      return getOptionalElectivesByPanelId(formattedFormJson)
-    }, [formattedFormJson, isEarlyAccess])
-
-    const handleOpenOptionalElectives = useCallback(
-      (event) => {
-        const panelId = event?.detail?.panelId as string | undefined
-        if (!panelId) return
-
-        const data = optionalElectivesByPanelId.get(panelId) || { labels: [], electives: [] }
-        setOptionalElectivesModalData(data)
-        onOptionalElectivesOpen()
-      },
-      [onOptionalElectivesOpen, optionalElectivesByPanelId]
-    )
-
     useEffect(() => {
-      // Wrapper to handle event listener type compatibility and deps
-      const handleOpenOptionalElectivesWrapper = (e: any) => handleOpenOptionalElectives(e)
-
       document.addEventListener("openStepCode", handleOpenStepCodePart9)
       document.addEventListener("openStepCodePart3", handleOpenStepCodePart3)
       document.addEventListener("openAutofillContact", handleOpenContactAutofill)
@@ -308,10 +263,6 @@ export const RequirementForm = observer(
       document.addEventListener("downloadRequirementDocument", handleDownloadRequirementDocument)
       document.addEventListener("openResourceLink", handleOpenResourceLink)
       document.addEventListener("downloadResourceDocument", handleDownloadResourceDocument)
-
-      if (isEarlyAccess) {
-        document.addEventListener("openOptionalElectives", handleOpenOptionalElectivesWrapper)
-      }
 
       return () => {
         document.removeEventListener("openStepCode", handleOpenStepCodePart9)
@@ -322,12 +273,8 @@ export const RequirementForm = observer(
         document.removeEventListener("downloadRequirementDocument", handleDownloadRequirementDocument)
         document.removeEventListener("openResourceLink", handleOpenResourceLink)
         document.removeEventListener("downloadResourceDocument", handleDownloadResourceDocument)
-
-        if (isEarlyAccess) {
-          document.removeEventListener("openOptionalElectives", handleOpenOptionalElectivesWrapper)
-        }
       }
-    }, [isEarlyAccess, handleOpenOptionalElectives])
+    }, [])
 
     const setIsCollapsedAll = (isCollapsedAll: boolean) => {
       if (isCollapsedAll) {
@@ -459,7 +406,7 @@ export const RequirementForm = observer(
           direction="column"
           as={"section"}
           flex={1}
-          className={`form-wrapper ${floatErrorBox ? "float-on" : "float-off"} ${isEarlyAccess ? "early-access-requirement-form" : ""}`}
+          className={`form-wrapper ${floatErrorBox ? "float-on" : "float-off"}`}
           mb="40vh"
           mx="auto"
           pl={{ base: "10" }}
@@ -511,7 +458,14 @@ export const RequirementForm = observer(
               status={EFlashMessageStatus.warning}
             />
           )}
-          {!inboxEnabled && !sandbox && !isEarlyAccess && (
+          {permitApplication?.isEphemeral && (
+            <CustomMessageBox
+              title={t("templateVersionPreview.earlyAccessTitle")}
+              description={t("templateVersionPreview.earlyAccessDescription")}
+              status={EFlashMessageStatus.warning}
+            />
+          )}
+          {!inboxEnabled && !sandbox && (
             <CustomMessageBox
               title={t("permitApplication.show.inboxDisabledTitle")}
               description={t("permitApplication.show.inboxDisabled")}
@@ -523,36 +477,6 @@ export const RequirementForm = observer(
               title={t("permitApplication.show.templateDisabledByJurisdictionTitle")}
               description={t("permitApplication.show.templateDisabledByJurisdiction")}
               status={EFlashMessageStatus.error}
-            />
-          )}
-          {!inboxEnabled && !sandbox && isEarlyAccess && (
-            <CustomMessageBox
-              title={t("permitApplication.show.inboxDisabledTitleEarlyAccess")}
-              description={
-                <Trans
-                  t={t}
-                  i18nKey={"permitApplication.show.inboxDisabledEarlyAccessInstructions"}
-                  components={{
-                    1: (
-                      <Button
-                        sx={{
-                          span: {
-                            ml: 0,
-                          },
-                        }}
-                        as={Link}
-                        rightIcon={<ArrowSquareOut />}
-                        href={"/projects/"}
-                        variant={"link"}
-                        target="_blank"
-                        color={"text.primary !important"}
-                        rel="noopener noreferrer"
-                      />
-                    ),
-                  }}
-                />
-              }
-              status={EFlashMessageStatus.warning}
             />
           )}
           {permitApplication?.isSubmitted || readOnlyProp ? (
@@ -619,12 +543,6 @@ export const RequirementForm = observer(
             onInitialized={onInitialized}
           />
         </Flex>
-
-        <OptionalElectivesModal
-          isOpen={isOptionalElectivesOpen}
-          onClose={onOptionalElectivesClose}
-          data={optionalElectivesModalData}
-        />
 
         <BuilderBottomFloatingButtons
           isCollapsedAll={isCollapsedAll}

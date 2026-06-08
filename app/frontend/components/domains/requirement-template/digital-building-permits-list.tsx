@@ -1,14 +1,14 @@
 import { Button, Center, Flex, HStack, Stack, Text } from "@chakra-ui/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { useTemplateVersions } from "../../../hooks/resources/use-template-versions"
 import { ITemplateVersion } from "../../../models/template-version"
 import { ETemplateVersionStatus } from "../../../types/enums"
+import { groupTemplateVersionsByCategory } from "../../../utils/template-version-grouping"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
-import { FirstNationsTag } from "../../shared/first-nations-tag"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { TemplateStatusTag } from "../../shared/requirement-template/template-status-tag"
 import { can } from "../../shared/user/can"
@@ -16,11 +16,9 @@ import { VersionTag } from "../../shared/version-tag"
 import { SectionBox } from "../home/section-box"
 
 interface IProps {
-  activityId?: string
   renderButton?: (templateVersion: ITemplateVersion) => React.ReactNode
   status?: ETemplateVersionStatus
-  earlyAccess?: boolean
-  isPublic?: boolean
+  isPubliclyPreviewable?: boolean
   statusDisplayOptions?: {
     showStatus?: boolean
     showVersionDate?: boolean
@@ -28,23 +26,20 @@ interface IProps {
 }
 
 export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermitsList({
-  activityId,
   renderButton,
   status,
   statusDisplayOptions,
-  earlyAccess,
-  isPublic,
+  isPubliclyPreviewable,
 }: IProps) {
   const { t } = useTranslation()
   const { error, templateVersions, isLoading } = useTemplateVersions({
-    activityId,
     customErrorMessage: t("errors.fetchBuildingPermits"),
     status,
-    earlyAccess,
-    isPublic,
+    isPubliclyPreviewable,
   })
   const { showStatus = false, showVersionDate = true } = statusDisplayOptions || {}
   const showStatusTag = showStatus || can("requirementTemplate:manage")
+  const groupedTemplateVersions = useMemo(() => groupTemplateVersionsByCategory(templateVersions), [templateVersions])
 
   if (error) return <ErrorScreen error={error} />
   if (isLoading)
@@ -61,58 +56,69 @@ export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermi
           {t("digitalBuildingPermits.index.emptyPermitsText")}
         </Text>
       )}
-      {templateVersions.map((templateVersion) => {
-        return (
-          <SectionBox key={templateVersion.id} w="full">
-            <Flex w="full" as="section">
-              <Stack spacing={3} flex={1}>
-                <Text as="h3" color={"text.link"} fontWeight={700} fontSize="xl">
-                  {templateVersion.denormalizedTemplateJson.label}
-                </Text>
-                <Text fontSize={"sm"} color={"text.secondary"}>
-                  {templateVersion.denormalizedTemplateJson?.description}
-                </Text>
-                <Text fontSize={"sm"} color={"text.secondary"}>
-                  <Text as="span" fontWeight={700}>
-                    {t("digitalBuildingPermits.index.lastUpdated")}:{" "}
-                  </Text>
-                  {format(templateVersion.updatedAt, "MMM d, yyyy")}
-                </Text>
-                <HStack gap={4} align="center">
-                  <VersionTag versionDate={templateVersion.versionDate} w="fit-content" />
-                  {templateVersion.denormalizedTemplateJson.firstNations && <FirstNationsTag />}
-                  {showStatusTag && (
-                    <TemplateStatusTag
-                      status={templateVersion.status}
-                      scheduledFor={
-                        showVersionDate &&
-                        templateVersion.status === ETemplateVersionStatus.scheduled &&
-                        templateVersion.versionDate
-                          ? templateVersion.versionDate
-                          : undefined
-                      }
-                    />
-                  )}
-                </HStack>
-              </Stack>
+      {groupedTemplateVersions.map((group) => (
+        <Stack key={group.id} spacing={3} w="full">
+          <Text as="h2" color="text.secondary" fontWeight={700} fontSize="lg">
+            {group.label}
+          </Text>
+          {group.templateVersions.map((templateVersion) => {
+            return (
+              <SectionBox key={templateVersion.id} w="full">
+                <Flex w="full" as="section">
+                  <Stack spacing={3} flex={1}>
+                    <Text as="h3" color={"text.link"} fontWeight={700} fontSize="xl">
+                      {templateVersion.denormalizedTemplateJson.nickname}
+                    </Text>
+                    <Text fontSize={"sm"} color={"text.secondary"}>
+                      {templateVersion.denormalizedTemplateJson?.description}
+                    </Text>
+                    <Text fontSize={"sm"} color={"text.secondary"}>
+                      <Text as="span" fontWeight={700}>
+                        {t("digitalBuildingPermits.index.lastUpdated")}:{" "}
+                      </Text>
+                      {format(templateVersion.updatedAt, "MMM d, yyyy")}
+                    </Text>
+                    <HStack gap={4} align="center">
+                      <VersionTag versionDate={templateVersion.versionDate} w="fit-content" />
+                      {(templateVersion.denormalizedTemplateJson?.tags ?? []).length > 0 && (
+                        <Text fontSize="sm" color="text.secondary">
+                          {(templateVersion.denormalizedTemplateJson?.tags ?? []).join(", ")}
+                        </Text>
+                      )}
+                      {showStatusTag && (
+                        <TemplateStatusTag
+                          status={templateVersion.status}
+                          scheduledFor={
+                            showVersionDate &&
+                            templateVersion.status === ETemplateVersionStatus.scheduled &&
+                            templateVersion.versionDate
+                              ? templateVersion.versionDate
+                              : undefined
+                          }
+                        />
+                      )}
+                    </HStack>
+                  </Stack>
 
-              {renderButton ? (
-                renderButton(templateVersion)
-              ) : (
-                <Button
-                  to={`/digital-building-permits/${templateVersion.id}/edit`}
-                  as={RouterLink}
-                  variant={"primary"}
-                  ml={4}
-                  alignSelf={"center"}
-                >
-                  {t("ui.manage")}
-                </Button>
-              )}
-            </Flex>
-          </SectionBox>
-        )
-      })}
+                  {renderButton ? (
+                    renderButton(templateVersion)
+                  ) : (
+                    <Button
+                      to={`/digital-building-permits/${templateVersion.id}/edit`}
+                      as={RouterLink}
+                      variant={"primary"}
+                      ml={4}
+                      alignSelf={"center"}
+                    >
+                      {t("ui.manage")}
+                    </Button>
+                  )}
+                </Flex>
+              </SectionBox>
+            )
+          })}
+        </Stack>
+      ))}
     </Stack>
   )
 })

@@ -5,13 +5,11 @@ RSpec.describe Api::Part9Building::ChecklistsController, type: :controller do
 
   let(:submitter) { create(:user, :submitter) }
   let(:jurisdiction) { create(:sub_district) }
-  let(:permit_type) { create(:permit_type) }
   let(:permit_application) do
     create(
       :permit_application,
       submitter: submitter,
       jurisdiction: jurisdiction,
-      permit_type: permit_type,
       with_fake_plan_document: true
     )
   end
@@ -24,10 +22,8 @@ RSpec.describe Api::Part9Building::ChecklistsController, type: :controller do
   end
   let(:checklist) { step_code.pre_construction_checklist }
   let(:step_requirement) do
-    PermitTypeRequiredStep.create!(
+    JurisdictionStepRequirement.create!(
       jurisdiction: jurisdiction,
-      permit_type: permit_type,
-      default: true,
       energy_step_required: 3,
       zero_carbon_step_required: 2
     )
@@ -48,11 +44,7 @@ RSpec.describe Api::Part9Building::ChecklistsController, type: :controller do
   end
 
   before do
-    create(
-      :permit_type_submission_contact,
-      jurisdiction: jurisdiction,
-      permit_type: permit_type
-    )
+    create(:submission_contact, jurisdiction: jurisdiction)
     allow(StepCode.search_index).to receive(:refresh)
     sign_in submitter
     request.headers["ACCEPT"] = "application/json"

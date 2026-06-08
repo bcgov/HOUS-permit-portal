@@ -6,7 +6,7 @@ const BlockConditionalModel = types.model("BlockConditionalModel", {
   whenBlockId: types.string,
   whenRequirementCode: types.string,
   operator: types.optional(types.string, EConditionalOperator.isEqual),
-  eq: types.optional(types.string, ""),
+  eq: types.optional(types.union(types.string, types.boolean), ""),
   show: types.maybe(types.boolean),
   hide: types.maybe(types.boolean),
 })

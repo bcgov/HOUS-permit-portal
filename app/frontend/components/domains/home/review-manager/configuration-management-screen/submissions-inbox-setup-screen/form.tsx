@@ -1,10 +1,9 @@
-import { VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useEffect } from "react"
 import { FormProvider, useFieldArray, useForm } from "react-hook-form"
+import { useTranslation } from "react-i18next"
 import { IJurisdiction } from "../../../../../../models/jurisdiction"
-import { useMst } from "../../../../../../setup/root"
 import { EditableBlock } from "./editable-block"
 
 interface IFormProps {
@@ -12,36 +11,33 @@ interface IFormProps {
 }
 
 interface IFormValues {
-  permitTypeSubmissionContactsAttributes: Array<{
-    permitTypeId: string
-    email: string | null
+  submissionContactsAttributes: Array<{
     id: string | null
+    email: string | null
+    title?: string | null
+    default?: boolean
   }>
   inboxEnabled: boolean
 }
 
 export const Form = observer(function SubmissionInboxSetupForm({ jurisdiction }: IFormProps) {
-  const {
-    permitClassificationStore: { permitTypes },
-  } = useMst()
-  const { permitTypeSubmissionContacts: submissionContacts, inboxEnabled } = jurisdiction
+  const { t } = useTranslation()
+  const { submissionContacts, inboxEnabled } = jurisdiction
 
-  const getDefaultValues = () => ({
-    permitTypeSubmissionContactsAttributes: [...submissionContacts, ...defaults()],
-    inboxEnabled: inboxEnabled, // Default value for the toggle
+  const getDefaultValues = (): IFormValues => ({
+    submissionContactsAttributes:
+      submissionContacts.length > 0
+        ? submissionContacts.map((c) => ({
+            id: c.id,
+            email: c.email,
+            title: c.title ?? null,
+            default: c.default ?? false,
+          }))
+        : [{ id: null, email: null, title: null, default: false }],
+    inboxEnabled,
   })
 
-  const defaults = () => {
-    return permitTypes.reduce((result, permitType) => {
-      const permitTypeContacts = submissionContacts.filter((c) => c.permitTypeId == permitType.id)
-      if (R.isEmpty(permitTypeContacts)) {
-        result.push({ permitTypeId: permitType.id, email: null, id: null })
-      }
-      return result
-    }, [])
-  }
-
-  const fieldArrayName = "permitTypeSubmissionContactsAttributes"
+  const fieldArrayName = "submissionContactsAttributes"
   const formMethods = useForm<IFormValues>({
     mode: "onChange",
     defaultValues: getDefaultValues(),
@@ -65,9 +61,20 @@ export const Form = observer(function SubmissionInboxSetupForm({ jurisdiction }:
   }
 
   useEffect(() => {
-    jurisdiction &&
-      setValue("permitTypeSubmissionContactsAttributes", [...jurisdiction.permitTypeSubmissionContacts, ...defaults()])
-    setValue("inboxEnabled", inboxEnabled) // Update inboxEnabled value
+    if (jurisdiction) {
+      setValue(
+        "submissionContactsAttributes",
+        submissionContacts.length > 0
+          ? submissionContacts.map((c) => ({
+              id: c.id,
+              email: c.email,
+              title: c.title ?? null,
+              default: c.default ?? false,
+            }))
+          : [{ id: null, email: null, title: null, default: false }]
+      )
+      setValue("inboxEnabled", inboxEnabled)
+    }
   }, [jurisdiction?.id])
 
   useEffect(() => {
@@ -78,26 +85,15 @@ export const Form = observer(function SubmissionInboxSetupForm({ jurisdiction }:
   return (
     <FormProvider {...formMethods}>
       <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
-        <VStack spacing={5}>
-          {/* Editable Blocks */}
-          {permitTypes.map((permitType) => {
-            const permitTypeFields = R.filter((f) => f.permitTypeId == permitType.id, fields)
-            return (
-              <EditableBlock
-                key={permitType.id}
-                heading={permitType.name}
-                permitTypeId={permitType.id}
-                fields={permitTypeFields}
-                fieldArrayName={fieldArrayName}
-                getIndex={getIndex}
-                append={append}
-                remove={remove}
-                update={update}
-                reset={handleReset}
-              />
-            )
-          })}
-        </VStack>
+        <EditableBlock
+          fields={fields}
+          fieldArrayName={fieldArrayName}
+          getIndex={getIndex}
+          append={append}
+          remove={remove}
+          update={update}
+          reset={handleReset}
+        />
       </form>
     </FormProvider>
   )

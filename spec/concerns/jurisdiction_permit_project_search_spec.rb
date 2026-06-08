@@ -15,25 +15,8 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitProjects,
   let!(:reviewer) { create(:user, :reviewer, jurisdiction: jurisdiction) }
   let!(:submitter) { create(:user, :submitter) }
 
-  let(:permit_type_a) { create(:permit_type) }
-  let(:permit_type_b) { create(:permit_type) }
-  let(:activity) { create(:activity) }
-
-  let!(:template_a) do
-    create(
-      :live_requirement_template,
-      permit_type: permit_type_a,
-      activity: activity
-    )
-  end
-
-  let!(:template_b) do
-    create(
-      :live_requirement_template,
-      permit_type: permit_type_b,
-      activity: activity
-    )
-  end
+  let!(:template_a) { create(:live_requirement_template) }
+  let!(:template_b) { create(:live_requirement_template) }
 
   let!(:template_version_a) do
     create(
@@ -104,20 +87,8 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitProjects,
     )
   end
 
-  let!(:contact_a) do
-    create(
-      :permit_type_submission_contact,
-      jurisdiction: jurisdiction,
-      permit_type: permit_type_a
-    )
-  end
-
-  let!(:contact_b) do
-    create(
-      :permit_type_submission_contact,
-      jurisdiction: jurisdiction,
-      permit_type: permit_type_b
-    )
+  let!(:submission_contact) do
+    create(:submission_contact, jurisdiction: jurisdiction)
   end
 
   let!(:app_a) do
@@ -126,9 +97,7 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitProjects,
       :newly_submitted,
       submitter: submitter,
       permit_project: project_a,
-      template_version: template_version_a,
-      permit_type: permit_type_a,
-      activity: activity
+      template_version: template_version_a
     )
   end
 
@@ -138,9 +107,7 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitProjects,
       :newly_submitted,
       submitter: submitter,
       permit_project: project_b,
-      template_version: template_version_b,
-      permit_type: permit_type_b,
-      activity: activity
+      template_version: template_version_b
     )
   end
 
@@ -150,9 +117,7 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitProjects,
       :newly_submitted,
       submitter: submitter,
       permit_project: project_c,
-      template_version: template_version_a,
-      permit_type: permit_type_a,
-      activity: activity
+      template_version: template_version_a
     )
   end
 

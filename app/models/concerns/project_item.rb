@@ -3,10 +3,6 @@ module ProjectItem
 
   class_methods do
     def has_parent(parent_association)
-      # Define an instance method rather than using alias_attribute since
-      # alias_attribute only supports real DB attributes (not associations).
-      # Using define_method also avoids ordering issues with when the
-      # association is declared on the including class.
       define_method(:parent) do
         reflection = self.class.reflect_on_association(parent_association)
         foreign_key = reflection&.foreign_key || "#{parent_association}_id"
@@ -29,25 +25,21 @@ module ProjectItem
       raise TypeError, "ProjectItem can only be included in ActiveRecord models"
     end
 
-    belongs_to :jurisdiction, optional: true # Added for direct association
-    belongs_to :permit_type, optional: true # Added for direct association
+    belongs_to :jurisdiction, optional: true
     has_one :owner, through: :permit_project
 
     after_commit :reindex_permit_project
 
-    # Delegations to PermitProject for core project details
-    delegate :permit_date, to: :permit_project, allow_nil: true # allow_nil should be false if permit_project is truly non-optional and always present
+    delegate :permit_date, to: :permit_project, allow_nil: true
     delegate :title, to: :permit_project, prefix: true, allow_nil: true
 
     delegate :qualified_name,
              :heating_degree_days,
              :name,
              to: :jurisdiction,
-             prefix: :jurisdiction, # Results in jurisdiction_name, jurisdiction_qualified_name, etc.
+             prefix: :jurisdiction,
              allow_nil: true
 
-    # Custom getters that prioritize permit_project but fall back to self
-    # Canonical title getter; prefers parent when present
     def title
       parent&.title || self[:title]
     end
@@ -68,20 +60,10 @@ module ProjectItem
       parent&.reference_number || self[:reference_number]
     end
 
-    def permit_type
-      parent&.permit_type || super
-    end
-
-    def permit_type_id
-      parent&.permit_type_id || super
-    end
-
     def phase
       parent&.phase || self[:phase]
     end
 
-    # Custom method for jurisdiction to ensure it safely accesses through permit_project
-    # or falls back to its own direct association.
     def jurisdiction
       parent&.jurisdiction || super
     end
@@ -100,7 +82,6 @@ module ProjectItem
       parent&.sandbox_id
     end
 
-    # Prefer parent permit_date when present, otherwise use standalone value
     def permit_date
       parent&.permit_date || self[:permit_date]
     end

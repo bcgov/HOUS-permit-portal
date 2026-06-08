@@ -24,7 +24,6 @@ import {
   EEnergyStepCodeDependencyRequirementCode,
   EEnergyStepCodePart3DependencyRequirementCode,
   ERequirementType,
-  EVisibility,
 } from "../../../../types/enums"
 import { IDenormalizedRequirementBlock, TAutoComplianceModuleConfigurations } from "../../../../types/types"
 import { AUTO_COMPLIANCE_OPTIONS_MAP_KEY_PREFIX } from "../../../../utils"
@@ -44,7 +43,6 @@ interface IRequirementsBlockProps {
   triggerButtonProps?: Partial<ButtonProps>
   withOptionsMenu?: boolean
   isEditable?: boolean
-  forEarlyAccess?: boolean
 }
 
 export const RequirementsBlockModal = observer(function RequirementsBlockModal({
@@ -53,13 +51,12 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
   triggerButtonProps,
   withOptionsMenu,
   isEditable,
-  forEarlyAccess,
 }: IRequirementsBlockProps) {
-  const { requirementBlockStore, earlyAccessRequirementBlockStore } = useMst()
-  const searchModel = forEarlyAccess ? earlyAccessRequirementBlockStore : requirementBlockStore
+  const { requirementBlockStore } = useMst()
+  const searchModel = requirementBlockStore
   const { t } = useTranslation()
   const { fetchData } = searchModel
-  const { createRequirementBlock, isEditingEarlyAccess } = requirementBlockStore
+  const { createRequirementBlock } = requirementBlockStore
   const { isOpen, onOpen, onClose } = useDisclosure()
 
   const { autoComplianceModuleConfigurations, error } = useAutoComplianceModuleConfigurations()
@@ -68,10 +65,8 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
     return requirementBlock
       ? {
           name: requirementBlock.name,
-          firstNations: requirementBlock.firstNations,
           description: requirementBlock.description,
           displayName: requirementBlock.displayName,
-          visibility: requirementBlock.visibility || EVisibility.any,
           displayDescription: requirementBlock.displayDescription,
           sku: (requirementBlock as IRequirementBlock).sku,
           associationList: (requirementBlock as IRequirementBlock).associations,
@@ -79,7 +74,6 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
           requirementDocumentsAttributes: (requirementBlock as IRequirementBlock).requirementDocuments,
         }
       : {
-          visibility: forEarlyAccess ? EVisibility.earlyAccess : EVisibility.any,
           associationList: [],
           requirementsAttributes: [],
           requirementDocumentsAttributes: [],
@@ -246,18 +240,10 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
           </ModalHeader>
           <ModalBody px={"2.75rem"}>
             {showEditWarning && (
-              <CalloutBanner
-                type={"warning"}
-                title={
-                  isEditingEarlyAccess
-                    ? t("requirementsLibrary.modals.previewEditWarning")
-                    : t("requirementsLibrary.modals.templateEditWarning")
-                }
-              />
+              <CalloutBanner type={"warning"} title={t("requirementsLibrary.modals.templateEditWarning")} />
             )}
             <HStack spacing={9} w={"full"} h={"full"} alignItems={"flex-start"}>
               <BlockSetup
-                forEarlyAccess={forEarlyAccess}
                 requirementBlock={
                   (requirementBlock as IRequirementBlock)?.restore ? (requirementBlock as IRequirementBlock) : undefined
                 }

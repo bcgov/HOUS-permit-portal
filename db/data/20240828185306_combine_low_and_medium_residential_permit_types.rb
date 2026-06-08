@@ -2,6 +2,11 @@
 
 class CombineLowAndMediumResidentialPermitTypes < ActiveRecord::Migration[7.1]
   def up
+    unless defined?(PermitClassificationSeeder)
+      say "PermitClassificationSeeder removed; skipping"
+      return
+    end
+
     PermitClassificationSeeder.seed
   end
 

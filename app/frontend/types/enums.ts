@@ -13,16 +13,6 @@ export enum EPreviewStatus {
   revoked = "revoked",
 }
 
-export enum EPermitClassificationType {
-  PermitType = "PermitType",
-  Activity = "Activity",
-}
-
-export enum ERequirementTemplateType {
-  EarlyAccessRequirementTemplate = "EarlyAccessRequirementTemplate",
-  LiveRequirementTemplate = "LiveRequirementTemplate",
-}
-
 export enum EFileUploadAttachmentType {
   RequirementDocument = "RequirementDocument",
   SupportingDocument = "SupportingDocument",
@@ -84,7 +74,6 @@ export enum EUserRoles {
 
 export enum ERequirementLibrarySortFields {
   name = "name",
-  firstNations = "first_nations",
   associations = "associations",
   requirementLabels = "requirement_labels",
   updatedAt = "updated_at",
@@ -114,10 +103,9 @@ export enum EUserSortFields {
 }
 
 export enum ERequirementTemplateSortFields {
-  permitType = "permit_type",
-  activity = "activity",
-  firstNations = "first_nations",
-  description = "description",
+  nickname = "nickname",
+  templateCategoryLabel = "template_category_label",
+  tags = "tags",
   currentVersion = "current_version",
   availableIn = "available_in",
 }
@@ -127,16 +115,6 @@ export enum EPreCheckSortFields {
   title = "title",
   updatedAt = "updated_at",
   status = "status",
-}
-
-export enum EEarlyAccessRequirementTemplateSortFields {
-  nickname = "nickname",
-  permitType = "permit_type",
-  activity = "activity",
-  firstNations = "first_nations",
-  sharedWith = "shared_with",
-  updatedAt = "updated_at",
-  assignee = "assignee",
 }
 
 export enum EContactSortFields {
@@ -149,7 +127,7 @@ export enum EContactSortFields {
 
 export enum EPermitApplicationSortFields {
   number = "number",
-  permitClassification = "permit_classification",
+  tags = "tags",
   submitter = "submitter",
   submittedAt = "submitted_at",
   viewedAt = "viewed_at",
@@ -166,7 +144,7 @@ export enum EProjectPermitApplicationSortFields {
 
 export enum EPermitApplicationSubmitterSortFields {
   number = "number",
-  permitClassification = "permit_classification",
+  tags = "tags",
   submitter = "submitter",
   submittedAt = "submitted_at",
   viewedAt = "viewed_at",
@@ -179,7 +157,7 @@ export enum EPermitApplicationReviewerSortFields {
   status = "status",
   number = "number",
   referenceNumber = "reference_number",
-  permitClassification = "permit_classification",
+  tags = "tags",
   submitter = "submitter",
   viewedAt = "viewed_at",
   submittedAt = "submitted_at",
@@ -191,6 +169,7 @@ export enum ESortDirection {
 }
 
 export enum ETagType {
+  requirementTemplate = "RequirementTemplate",
   requirementBlock = "RequirementBlock",
 }
 
@@ -483,12 +462,6 @@ export enum ECollaboratorType {
   assignee = "assignee",
 }
 
-export enum EVisibility {
-  live = "live",
-  earlyAccess = "early_access",
-  any = "any",
-}
-
 export enum EJurisdictionExternalApiState {
   jOn = "j_on",
   jOff = "j_off",
@@ -749,36 +722,6 @@ export enum EStepCodeSortFields {
   fullAddress = "full_address",
   updatedAt = "updated_at",
 }
-
-export enum EClassificationCategory {
-  buildingsAndStructures = "buildings_and_structures",
-  trades = "trades",
-  sitePreparation = "site_preparation",
-}
-
-// Centralized constants for permit classification codes (string-backed)
-export const EPermitClassificationCode = {
-  lowResidential: "low_residential",
-  mediumResidential: "medium_residential",
-  highResidential: "high_residential",
-  newConstruction: "new_construction",
-  additionAlterationRenovation: "addition_alteration_renovation",
-  siteAlteration: "site_alteration",
-  demolition: "demolition",
-  manufacturedHome: "manufactured_home",
-  mechanical: "mechanical",
-  plumbing: "plumbing",
-  electrical: "electrical",
-  gas: "gas",
-  solidFuelBurningAppliance: "solid_fuel_burning_appliance",
-  fireAlarm: "fire_alarm",
-  fireSuppression: "fire_suppression",
-  treeCuttingAndTreeRemoval: "tree_cutting_and_tree_removal",
-  retainingWall: "retaining_wall",
-  relocation: "relocation",
-} as const
-
-export type EPermitClassificationCode = (typeof EPermitClassificationCode)[keyof typeof EPermitClassificationCode]
 
 export enum EPreCheckServicePartner {
   archistar = "archistar",

@@ -40,7 +40,7 @@ module ExternalApi::Concerns::Search::PermitApplications
       :page,
       :per_page,
       constraints: [
-        :permit_classifications,
+        :template_tags,
         :status,
         submitted_at: %i[gt lt gte lte],
         resubmitted_at: %i[gt lt gte lte]

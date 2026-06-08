@@ -1,57 +1,53 @@
-import { Button, Checkbox, Flex, Link, Text, VStack } from "@chakra-ui/react"
+import { Button, Flex, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
-import React, { useState } from "react"
-import { Controller, FormProvider, useForm, useWatch } from "react-hook-form"
-import { Trans, useTranslation } from "react-i18next"
+import React, { useEffect } from "react"
+import { Controller, FormProvider, useForm } from "react-hook-form"
+import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { IRequirementTemplate } from "../../../models/requirement-template"
 import { useMst } from "../../../setup/root"
-import { ERequirementTemplateType } from "../../../types/enums"
 import { TCreateRequirementTemplateFormData } from "../../../types/types"
-import { AsyncRadioGroup } from "../base/inputs/async-radio-group"
 import { TextFormControl } from "../form/input-form-control"
+import { TagsSelect } from "../select/selectors/tags-select"
+import { TemplateCategorySelect } from "../select/selectors/template-category-select"
 
 interface IRequirementTemplateFormProps {
-  type: ERequirementTemplateType
   onSuccess: (createdRequirementTemplate: IRequirementTemplate) => void
 }
 
-export const RequirementTemplateForm = observer(({ type, onSuccess }: IRequirementTemplateFormProps) => {
+export const RequirementTemplateForm = observer(({ onSuccess }: IRequirementTemplateFormProps) => {
   const { t } = useTranslation()
   const {
-    requirementTemplateStore: { createRequirementTemplate, copyRequirementTemplate },
-    permitClassificationStore: { fetchPermitTypeOptions, fetchActivityOptions },
+    requirementTemplateStore: { createRequirementTemplate, searchTagOptions },
+    templateCategoryStore: { fetchTemplateCategories, isLoading: isLoadingTemplateCategories, templateCategories },
   } = useMst()
-
-  const [copyExisting, setCopyExisting] = useState(false)
 
   const formMethods = useForm<TCreateRequirementTemplateFormData>({
     mode: "onChange",
     defaultValues: {
+      nickname: "",
       description: "",
-      firstNations: false,
-      permitTypeId: null,
-      activityId: null,
+      tags: [],
+      templateCategoryId: null,
     },
   })
 
   const navigate = useNavigate()
   const { handleSubmit, formState, control } = formMethods
 
-  const firstNationsChecked = useWatch({
-    control,
-    name: "firstNations",
-    defaultValue: false,
-  })
-
   const { isSubmitting } = formState
 
-  const onSubmit = async (formData) => {
-    formData.type = type
+  useEffect(() => {
+    fetchTemplateCategories()
+  }, [fetchTemplateCategories])
 
-    const createdRequirementTemplate = copyExisting
-      ? await copyRequirementTemplate(formData)
-      : await createRequirementTemplate(formData)
+  const fetchTagOptions = async (query: string) => {
+    const options = await searchTagOptions(query)
+    return options ?? []
+  }
+
+  const onSubmit = async (formData) => {
+    const createdRequirementTemplate = await createRequirementTemplate(formData)
 
     if (createdRequirementTemplate) {
       onSuccess(createdRequirementTemplate)
@@ -64,45 +60,56 @@ export const RequirementTemplateForm = observer(({ type, onSuccess }: IRequireme
         <VStack alignItems={"flex-start"} spacing={5} gap={8} w={"full"} h={"full"}>
           <Text>{t("requirementTemplate.new.typePrompt")}</Text>
 
-          <Flex gap={8} w="full" as="section">
-            <AsyncRadioGroup
-              valueField="id"
-              label={t("requirementTemplate.fields.permitType")}
-              fetchOptions={fetchPermitTypeOptions}
-              fieldName={"permitTypeId"}
-            />
-            <AsyncRadioGroup
-              valueField="id"
-              label={t("requirementTemplate.fields.activity")}
-              fetchOptions={fetchActivityOptions}
-              fieldName={"activityId"}
-            />
+          <Flex direction="column" as="section" w="full">
+            <TextFormControl label={t("requirementTemplate.fields.nickname")} fieldName={"nickname"} required />
           </Flex>
-          <Controller
-            name="firstNations"
-            control={control}
-            defaultValue={false}
-            render={({ field: { onChange, value } }) => (
-              <Checkbox isChecked={value} onChange={onChange}>
-                <Trans
-                  i18nKey={"requirementTemplate.new.firstNationsLand"}
-                  components={{
-                    1: (
-                      <Link
-                        isExternal
-                        href="https://services.aadnc-aandc.gc.ca/ILRS_Public/Home/Home.aspx?ReturnUrl=%2filrs_public%2f"
-                      ></Link>
-                    ),
+
+          <Flex direction="column" as="section" w="full">
+            <Text fontWeight={700} mb={2}>
+              {t("requirementTemplate.fields.templateCategory")}
+            </Text>
+            <Controller
+              name="templateCategoryId"
+              control={control}
+              render={({ field: { onChange, value } }) => (
+                <TemplateCategorySelect
+                  onChange={onChange}
+                  templateCategories={templateCategories}
+                  selectedCategoryId={value ?? null}
+                  placeholder={t("siteConfiguration.templateCategories.uncategorized")}
+                  isLoading={isLoadingTemplateCategories}
+                  menuPortalTarget={document.body}
+                  styles={{
+                    container: (css) => ({ ...css, width: "100%" }),
+                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
                   }}
                 />
-              </Checkbox>
-            )}
-          />
-          {firstNationsChecked && (
-            <Checkbox isChecked={copyExisting} onChange={(e) => setCopyExisting(e.target.checked)}>
-              {t("requirementTemplate.new.copyExistingByClassifications")}
-            </Checkbox>
-          )}
+              )}
+            />
+          </Flex>
+
+          <Flex direction="column" as="section" w="full">
+            <Text fontWeight={700} mb={2}>
+              {t("requirementTemplate.fields.tags")}
+            </Text>
+            <Controller
+              name="tags"
+              control={control}
+              render={({ field: { onChange, value } }) => (
+                <TagsSelect
+                  onChange={(options) => onChange(options.map((o) => o.value))}
+                  fetchOptions={fetchTagOptions}
+                  placeholder={t("requirementTemplate.fields.tags")}
+                  selectedOptions={(value ?? []).map((tag) => ({ value: tag, label: tag }))}
+                  styles={{
+                    container: (css) => ({ ...css, width: "100%" }),
+                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                  }}
+                  menuPortalTarget={document.body}
+                />
+              )}
+            />
+          </Flex>
 
           <Flex direction="column" as="section" w="full">
             <TextFormControl label={t("requirementTemplate.fields.description")} fieldName={"description"} required />

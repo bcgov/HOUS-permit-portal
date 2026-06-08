@@ -287,22 +287,18 @@ RSpec.describe PermitHubMailer, type: :mailer do
   end
 
   it "sends template version published notification and sets inbox setup urls when contact missing" do
-    permit_type = instance_double("PermitType", id: "pt-1")
     template_version =
       instance_double(
         "TemplateVersion",
         label: "Label",
-        version_date: Date.new(2026, 1, 1),
-        permit_type: permit_type
+        version_date: Date.new(2026, 1, 1)
       )
     jurisdiction =
       instance_double("Jurisdiction", slug: "jur", external_api_enabled?: true)
-    relation = double("Relation")
-    allow(relation).to receive(:where).and_return(relation)
-    allow(relation).to receive(:not).and_return(relation)
-    allow(relation).to receive(:exists?).and_return(false)
-    allow(jurisdiction).to receive(:permit_type_submission_contacts).and_return(
-      relation
+    confirmed_scope = double("ConfirmedScope", exists?: false)
+    contacts_scope = double("ContactsScope", confirmed: confirmed_scope)
+    allow(jurisdiction).to receive(:submission_contacts).and_return(
+      contacts_scope
     )
 
     mailer.notify_new_template_version_published(

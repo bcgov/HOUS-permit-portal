@@ -28,7 +28,16 @@ module ValidateUrlAttributes
     end
 
     def url_validatable_attributes
-      @url_validatable_attributes || []
+      # Class instance variables are not inherited; STI subclasses must reuse
+      # the list from the base model that called `url_validatable`.
+      attrs = @url_validatable_attributes
+      return attrs if attrs.present?
+
+      if superclass.respond_to?(:url_validatable_attributes)
+        superclass.url_validatable_attributes
+      else
+        []
+      end
     end
   end
 end

@@ -6,7 +6,6 @@ import {
   ENumberUnit,
   ERequirementType,
   ETagType,
-  EVisibility,
 } from "./enums"
 import {
   IHelpLinkItems,
@@ -65,9 +64,7 @@ export interface IRequirementAttributes {
 
 export interface IRequirementBlockParams {
   name: string
-  firstNations: boolean
   displayName: string
-  visibility: EVisibility
   displayDescription: string
   description?: string
   associationList?: string[]
@@ -85,7 +82,7 @@ export interface IBlockConditional {
   whenBlockId: string
   whenRequirementCode: string
   operator: string
-  eq: string
+  eq: string | boolean
   show?: boolean
   hide?: boolean
 }
@@ -122,16 +119,11 @@ export interface IRevisionReasonsAttributes {
 export interface IRequirementTemplateUpdateParams {
   description?: string | null
   nickname?: string | null
-  public?: boolean | null
+  tags?: string[]
+  templateCategoryId?: string | null
   assigneeId?: string | null
-  permitTypeId?: string | null
-  activityId?: string | null
   requirementTemplateSectionsAttributes?: IRequirementTemplateSectionAttributes[]
   availableGlobally?: boolean | null
-}
-
-export interface IInvitePreviewersParams {
-  emails: string[]
 }
 
 export interface ISiteConfigurationUpdateParams {
@@ -139,11 +131,11 @@ export interface ISiteConfigurationUpdateParams {
   inboxEnabled?: boolean | null
   allowDesignatedReviewer?: boolean | null
   codeComplianceEnabled?: boolean | null
+  qaToolsEnabled?: boolean | null
   archistarEnabledForAllJurisdictions?: boolean | null
   sitewideMessage?: string | null
   helpLinkItems?: IHelpLinkItems
   revisionReasonsMap?: { [key: string]: IRevisionReason }
-  standardizationPageEarlyAccessRequirementTemplateIds?: string[] | null
   revisionReasonsAttributes?: IRevisionReasonsAttributes[]
 }
 

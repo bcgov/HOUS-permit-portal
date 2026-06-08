@@ -5,7 +5,6 @@ import React, { Suspense } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useJurisdiction } from "../../../../../../hooks/resources/use-jurisdiction"
-import { usePermitClassificationsLoad } from "../../../../../../hooks/resources/use-permit-classifications-load"
 import { ErrorScreen } from "../../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../../shared/base/loading-screen"
 import { SwitchButton } from "../../../../../shared/buttons/switch-button"
@@ -16,8 +15,6 @@ export const SubmissionsInboxSetupScreen: React.FC = observer(function Submissio
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { currentJurisdiction, error: jurisdictionError } = useJurisdiction() // from both, aliased error
-
-  const { isLoaded: permitClassificationsLoaded } = usePermitClassificationsLoad(true) // load only enabled by default
 
   const handleToggle = (checked) => {
     currentJurisdiction?.update({ inboxEnabled: checked })
@@ -45,7 +42,7 @@ export const SubmissionsInboxSetupScreen: React.FC = observer(function Submissio
       {/* Content from original SubmissionsInboxSetupScreen's VStack */}
       <VStack spacing={8} align="start" w="full" mt={8}>
         <Suspense fallback={<LoadingScreen />}>
-          {permitClassificationsLoaded && currentJurisdiction && <Form jurisdiction={currentJurisdiction} />}
+          {currentJurisdiction && <Form jurisdiction={currentJurisdiction} />}
         </Suspense>
       </VStack>
       {/* Content from InboxFeatureAccessScreen for the toggle */}

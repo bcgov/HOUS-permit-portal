@@ -7,8 +7,7 @@ module Api::Concerns::Search::RequirementTemplates
         query,
         order: order,
         where: {
-          discarded: discarded,
-          visibility: visibility
+          discarded: discarded
         },
         match: :word_start,
         page: search_params[:page],
@@ -20,33 +19,20 @@ module Api::Concerns::Search::RequirementTemplates
               nil
             end
           ),
-        includes: model_klass::SEARCH_INCLUDES
+        includes: RequirementTemplate::SEARCH_INCLUDES
       )
   end
 
   private
 
-  def model_klass
-    if search_params[:visibility] == "early_access"
-      EarlyAccessRequirementTemplate
-    else
-      LiveRequirementTemplate
-    end
-  end
-
   def search_params
     params.permit(
       :query,
       :show_archived,
-      :visibility,
       :page,
       :per_page,
       sort: %i[field direction]
     )
-  end
-
-  def visibility
-    search_params[:visibility]&.split(",") || "live"
   end
 
   def query

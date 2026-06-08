@@ -9,24 +9,16 @@ RSpec.describe RemindReviewerJob, type: :job do
     expect(opts["lock"] || opts[:lock]).to be_nil
   end
 
-  it "emails submission contacts for unviewed applications matching permit type" do
-    apps_relation = double("AppsRelation")
-    allow(apps_relation).to receive(:any?).and_return(true)
-
-    apps_for_type = double("AppsForType", any?: true)
-    allow(apps_relation).to receive(:where).with(
-      permit_type: "building"
-    ).and_return(apps_for_type)
-
-    contact =
-      instance_double("PermitTypeSubmissionContact", permit_type: "building")
-    contacts_relation = [contact]
+  it "emails each confirmed submission contact for the jurisdiction's unviewed applications" do
+    apps_relation = double("AppsRelation", any?: true)
+    contact = instance_double("SubmissionContact")
+    contacts_scope = double("ContactsScope", confirmed: [contact])
 
     jurisdiction =
       instance_double(
         "Jurisdiction",
         unviewed_permit_applications: apps_relation,
-        permit_type_submission_contacts: contacts_relation
+        submission_contacts: contacts_scope
       )
 
     allow(Jurisdiction).to receive(:all).and_return([jurisdiction])
@@ -39,7 +31,7 @@ RSpec.describe RemindReviewerJob, type: :job do
 
     expect(PermitHubMailer).to have_received(:remind_reviewer).with(
       contact,
-      apps_for_type
+      apps_relation
     )
   end
 
@@ -49,7 +41,7 @@ RSpec.describe RemindReviewerJob, type: :job do
       instance_double(
         "Jurisdiction",
         unviewed_permit_applications: apps_relation,
-        permit_type_submission_contacts: []
+        submission_contacts: double("ContactsScope", confirmed: [])
       )
     allow(Jurisdiction).to receive(:all).and_return([jurisdiction])
     allow(PermitHubMailer).to receive(:remind_reviewer)

@@ -11,6 +11,7 @@ import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EULAScreen } from "../onboarding/eula"
 import { NavBar } from "./nav-bar"
 import { ProtectedRoute } from "./protected-route"
+import { QaToolsPopout } from "./qa-tools-popout"
 
 const ExternalApiKeysIndexScreen = lazy(() =>
   import("../external-api-key").then((module) => ({ default: module.ExternalApiKeysIndexScreen }))
@@ -292,6 +293,11 @@ const TemplateVersionScreen = lazy(() =>
     default: module.TemplateVersionScreen,
   }))
 )
+const TemplateVersionPreviewScreen = lazy(() =>
+  import("../requirement-template/screens/template-version-preview-screen").then((module) => ({
+    default: module.TemplateVersionPreviewScreen,
+  }))
+)
 
 const ExportTemplatesScreen = lazy(() =>
   import("../jurisdictions/exports/export-templates-screen").then((module) => ({
@@ -326,11 +332,6 @@ const SiteConfigurationManagementScreen = lazy(() =>
     default: module.SiteConfigurationManagementScreen,
   }))
 )
-const PermitClassificationsScreen = lazy(() =>
-  import("../super-admin/site-configuration-management/permit-classifications-screen").then((module) => ({
-    default: module.PermitClassificationsScreen,
-  }))
-)
 const SitewideMessageScreen = lazy(() =>
   import("../super-admin/site-configuration-management/sitewide-message-screen").then((module) => ({
     default: module.SitewideMessageScreen,
@@ -345,12 +346,6 @@ const HelpDrawerSetupScreen = lazy(() =>
 const RevisionReasonSetupScreen = lazy(() =>
   import("../super-admin/site-configuration-management/revision-reason-setup-screen").then((module) => ({
     default: module.RevisionReasonSetupScreen,
-  }))
-)
-
-const StandardizationSetupScreen = lazy(() =>
-  import("../super-admin/site-configuration-management/standardization-setup-screen").then((module) => ({
-    default: module.StandardizationSetupScreen,
   }))
 )
 
@@ -384,6 +379,17 @@ const CodeComplianceSetupScreen = lazy(() =>
   }))
 )
 
+const QaToolsFeatureAccessScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/qa-tools-feature-access").then((module) => ({
+    default: module.QaToolsFeatureAccessScreen,
+  }))
+)
+const TemplateCategoriesScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/template-categories-screen").then((module) => ({
+    default: module.TemplateCategoriesScreen,
+  }))
+)
+
 const ReportingScreen = lazy(() =>
   import("../super-admin/reporting/reporting-screen").then((module) => ({ default: module.ReportingScreen }))
 )
@@ -391,48 +397,6 @@ const ReportingScreen = lazy(() =>
 const ExportTemplateSummaryScreen = lazy(() =>
   import("../super-admin/reporting/export-template-summary-screen").then((module) => ({
     default: module.ExportTemplateSummaryScreen,
-  }))
-)
-
-const EarlyAccessScreen = lazy(() =>
-  import("../super-admin/early-access/early-access-screen").then((module) => ({
-    default: module.EarlyAccessScreen,
-  }))
-)
-
-const EarlyAccessRequirementTemplatesIndexScreen = lazy(() =>
-  import("../super-admin/early-access/requirement-templates").then((module) => ({
-    default: module.EarlyAccessRequirementTemplatesIndexScreen,
-  }))
-)
-
-const EarlyAccessRequirementTemplateScreen = lazy(() =>
-  import("../super-admin/early-access/requirement-templates/early-access-requirement-template-screen").then(
-    (module) => ({
-      default: module.EarlyAccessRequirementTemplateScreen,
-    })
-  )
-)
-
-const NewEarlyAccessRequirementTemplateScreen = lazy(() =>
-  import("../super-admin/early-access/requirement-templates/new-early-access-requirement-template-screen").then(
-    (module) => ({
-      default: module.NewEarlyAccessRequirementTemplateScreen,
-    })
-  )
-)
-
-const EditEarlyAccessRequirementTemplateScreen = lazy(() =>
-  import("../super-admin/early-access/requirement-templates/edit-early-access-requirement-template-screen").then(
-    (module) => ({
-      default: module.EditEarlyAccessRequirementTemplateScreen,
-    })
-  )
-)
-
-const EarlyAccessRequirementsLibraryScreen = lazy(() =>
-  import("../super-admin/early-access/requirements-library").then((module) => ({
-    default: module.EarlyAccessRequirementsLibraryScreen,
   }))
 )
 
@@ -475,6 +439,7 @@ export const Navigation = observer(() => {
         </Center>
       )}
       <NavBar />
+      <QaToolsPopout />
 
       {isValidating ? (
         <LoadingScreen message={t("site.validating")} />
@@ -532,29 +497,24 @@ const AppRoutes = observer(() => {
   const eulaAccepted = currentUser ? currentUser.eulaAccepted : false
   const isSuperAdmin = currentUser ? currentUser.isSuperAdmin : false
   const isUnconfirmed = currentUser ? currentUser.isUnconfirmed : false
+  const qaModeEnabled = import.meta.env.VITE_QA_MODE === "true"
 
   const superAdminOnlyRoutes = (
     <>
       <Route path="/jurisdictions/new" element={<NewJurisdictionScreen />} />
       <Route path="/requirements-library" element={<RequirementsLibraryScreen />} />
-      <Route path="/early-access/requirements-library" element={<EarlyAccessRequirementsLibraryScreen />} />
       <Route path="/requirement-templates" element={<RequirementTemplatesScreen />} />
-      <Route path="/early-access/requirement-templates" element={<EarlyAccessRequirementTemplatesIndexScreen />} />
-      <Route path="/early-access/requirement-templates/new" element={<NewEarlyAccessRequirementTemplateScreen />} />
-      <Route
-        path="/early-access/requirement-templates/:requirementTemplateId/edit"
-        element={<EditEarlyAccessRequirementTemplateScreen />}
-      />
       <Route path="/requirement-templates/new" element={<NewRequirementTemplateScreen />} />
       <Route path="/requirement-templates/:requirementTemplateId/edit" element={<EditRequirementTemplateScreen />} />
       <Route path="/template-versions/:templateVersionId" element={<TemplateVersionScreen />} />
       <Route path="/configuration-management" element={<SiteConfigurationManagementScreen />} />
-      <Route path="/configuration-management/permit-classifications" element={<PermitClassificationsScreen />} />
       <Route path="/configuration-management/sitewide-message" element={<SitewideMessageScreen />} />
       <Route path="/configuration-management/help-drawer-setup" element={<HelpDrawerSetupScreen />} />
       <Route path="/configuration-management/help-videos" element={<HelpVideosManagementScreen />} />
+      <Route path="/configuration-management/template-categories" element={<TemplateCategoriesScreen />} />
       <Route path="/configuration-management/revision-reason-setup" element={<RevisionReasonSetupScreen />} />
-      <Route path="/configuration-management/standardization-setup" element={<StandardizationSetupScreen />} />
+      {/* DEPRECATED: /configuration-management/standardization-setup route removed.
+          Super admins toggle publicly_previewable directly on TemplateVersionScreen. */}
       <Route path="/configuration-management/users" element={<AdminUserIndexScreen />} />
       <Route path="/configuration-management/global-feature-access" element={<AdminGlobalFeatureAccessScreen />} />
       <Route
@@ -569,10 +529,15 @@ const AppRoutes = observer(() => {
         path="/configuration-management/global-feature-access/code-compliance"
         element={<CodeComplianceSetupScreen />}
       />
+      {qaModeEnabled && (
+        <Route
+          path="/configuration-management/global-feature-access/qa-tools"
+          element={<QaToolsFeatureAccessScreen />}
+        />
+      )}
       <Route path="/configuration-management/users/invite" element={<AdminInviteScreen />} />
       <Route path="/reporting" element={<ReportingScreen />} />
       <Route path="/reporting/export-template-summary" element={<ExportTemplateSummaryScreen />} />
-      <Route path="/early-access" element={<EarlyAccessScreen />} />
     </>
   )
 
@@ -816,6 +781,10 @@ const AppRoutes = observer(() => {
           <Route path="/profile" element={<ProfileScreen />} />
         </Route>
 
+        <Route element={<ProtectedRoute isAllowed={loggedIn} />}>
+          <Route path="/project-readiness-tools/check-digital-seals" element={<CheckDigitalSealsScreen />} />
+        </Route>
+
         <Route element={<ProtectedRoute isAllowed={loggedIn && !currentUser?.isSuperAdmin && !isUnconfirmed} />}>
           <Route path="/profile/eula" element={<EULAScreen withClose />} />
         </Route>
@@ -885,6 +854,7 @@ const AppRoutes = observer(() => {
         <Route path="/videos" element={<HelpVideosIndexScreen />} />
         <Route path="/videos/:videoId" element={<HelpVideoScreen />} />
         <Route path="/standardization-preview" element={<StandardizationPreviewScreen />} />
+        <Route path="/template-versions/:templateVersionId/preview" element={<TemplateVersionPreviewScreen />} />
         <Route path="/project-readiness-tools" element={<ProjectReadinessToolsIndexScreen />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyScreen />} />
         <Route
@@ -899,7 +869,6 @@ const AppRoutes = observer(() => {
           path="/project-readiness-tools/look-up-step-codes-requirements-for-your-project"
           element={<LookUpStepCodesRequirementsForYourProjectScreen />}
         />
-        <Route path="/project-readiness-tools/check-digital-seals" element={<CheckDigitalSealsScreen />} />
         <Route path="/project-readiness-tools/pre-check" element={<PreCheckInfoScreen />} />
         <Route
           path="/onboarding-checklist-page-for-lg-adopting"
@@ -907,10 +876,6 @@ const AppRoutes = observer(() => {
         />
         <Route path="/confirmed" element={<EmailConfirmedScreen />} />
         <Route path="/welcome" element={<LandingScreen />} />
-        <Route
-          path="/early-access/requirement-templates/:requirementTemplateId"
-          element={<EarlyAccessRequirementTemplateScreen />}
-        />
         <Route
           path="/jurisdictions"
           element={

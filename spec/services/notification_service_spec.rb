@@ -433,7 +433,7 @@ RSpec.describe NotificationService do
       assignee =
         instance_double("User", id: "u_assignee", preference: assignee_pref)
 
-      contact = instance_double("PermitTypeSubmissionContact")
+      contact = instance_double("SubmissionContact")
 
       permit_application =
         instance_double(
@@ -446,7 +446,7 @@ RSpec.describe NotificationService do
           revisions_request_event_notification_data: {
             msg: "rev"
           },
-          confirmed_permit_type_submission_contacts: [contact]
+          confirmed_submission_contacts: [contact]
         )
 
       allow(permit_application).to receive(
@@ -649,6 +649,86 @@ RSpec.describe NotificationService do
       expect(NotificationPushJob).to have_received(:perform_async).with(
         { "u1" => { b: 2 } }
       )
+    end
+  end
+
+  describe ".publish_customization_update_event" do
+    it "notifies only submitters with drafts in the customizing jurisdiction" do
+      allow(NotificationPushJob).to receive(:perform_async)
+
+      requirement_template = create(:requirement_template)
+      template_version =
+        create(:template_version, requirement_template: requirement_template)
+
+      jurisdiction_customized = create(:sub_district)
+      jurisdiction_other = create(:sub_district)
+
+      customization =
+        create(
+          :jurisdiction_template_version_customization,
+          jurisdiction: jurisdiction_customized,
+          template_version: template_version
+        )
+
+      matching_submitter = create(:user, :submitter)
+      other_submitter = create(:user, :submitter)
+
+      create(
+        :permit_application,
+        submitter: matching_submitter,
+        template_version: template_version,
+        jurisdiction: jurisdiction_customized
+      )
+
+      create(
+        :permit_application,
+        submitter: other_submitter,
+        template_version: template_version,
+        jurisdiction: jurisdiction_other
+      )
+
+      described_class.publish_customization_update_event(customization)
+
+      expect(NotificationPushJob).to have_received(:perform_async) do |payload|
+        expect(payload.keys).to contain_exactly(matching_submitter.id)
+      end
+    end
+
+    it "throttles repeated notifications for the same jurisdiction and template version" do
+      allow(NotificationPushJob).to receive(:perform_async)
+      allow(Rails.cache).to receive(:write).and_return(true, false)
+
+      requirement_template = create(:requirement_template)
+      template_version =
+        create(:template_version, requirement_template: requirement_template)
+      jurisdiction = create(:sub_district)
+      customization =
+        create(
+          :jurisdiction_template_version_customization,
+          jurisdiction: jurisdiction,
+          template_version: template_version
+        )
+      submitter = create(:user, :submitter)
+
+      create(
+        :permit_application,
+        submitter: submitter,
+        template_version: template_version,
+        jurisdiction: jurisdiction
+      )
+
+      2.times do
+        described_class.publish_customization_update_event(customization)
+      end
+
+      expect(Rails.cache).to have_received(:write).with(
+        "customization_update_notification:" \
+          "#{jurisdiction.id}:#{template_version.id}",
+        true,
+        expires_in: 2.hours,
+        unless_exist: true
+      ).twice
+      expect(NotificationPushJob).to have_received(:perform_async).once
     end
   end
 end
