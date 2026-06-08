@@ -10,10 +10,14 @@ export const useProjectMeeting = () => {
   }>()
   const projectMeetingDetailMatch = useMatch("/projects/:permitProjectId/meetings/:projectMeetingId")
   const reviewerMeetingDetailMatch = useMatch("/jurisdictions/:jurisdictionId/meetings/:meetingId")
+  const reviewerProjectMeetingDetailMatch = useMatch(
+    "/jurisdictions/:jurisdictionId/submission-inbox/projects/:permitProjectId/meetings/:meetingId"
+  )
   const projectMeetingId =
     projectMeetingIdParam ||
     projectMeetingDetailMatch?.params.projectMeetingId ||
-    reviewerMeetingDetailMatch?.params.meetingId
+    reviewerMeetingDetailMatch?.params.meetingId ||
+    reviewerProjectMeetingDetailMatch?.params.meetingId
   const { projectMeetingStore } = useMst()
   const { currentProjectMeeting, fetchProjectMeeting } = projectMeetingStore
   const [isLoading, setIsLoading] = useState(true)

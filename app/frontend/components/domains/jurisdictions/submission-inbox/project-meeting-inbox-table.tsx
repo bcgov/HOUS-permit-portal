@@ -6,8 +6,8 @@ import React from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useParams } from "react-router-dom"
 import { datefnsTableDateFormat, datefnsTableDateTimeFormat } from "../../../../constants"
+import { ISearch } from "../../../../lib/create-search-model"
 import { IProjectMeeting } from "../../../../models/project-meeting"
-import { IProjectMeetingInboxStore } from "../../../../stores/project-meeting-inbox-store"
 import { EFlashMessageStatus, EProjectMeetingSortFields } from "../../../../types/enums"
 import { ISort } from "../../../../types/types"
 import { CustomMessageBox } from "../../../shared/base/custom-message-box"
@@ -22,8 +22,11 @@ import { ProjectMeetingStatusTag } from "../../../shared/project-meetings/projec
 import { SortIcon } from "../../../shared/sort-icon"
 
 interface IProps {
-  searchStore: IProjectMeetingInboxStore
+  searchStore: ISearch
   projectMeetings: IProjectMeeting[]
+  getSortColumnHeader?: (field: EProjectMeetingSortFields) => string
+  getRowPath?: (projectMeeting: IProjectMeeting) => string
+  noResultsDescription?: React.ReactNode
 }
 
 const SORT_FIELDS = [
@@ -38,12 +41,14 @@ const SORT_FIELDS = [
 export const ProjectMeetingInboxTable = observer(function ProjectMeetingInboxTable({
   searchStore,
   projectMeetings,
+  getSortColumnHeader,
+  getRowPath,
+  noResultsDescription,
 }: IProps) {
   const { t } = useTranslation()
   const {
     toggleSort,
     sort,
-    getSortColumnHeader,
     currentPage,
     totalPages,
     totalCount,
@@ -54,6 +59,12 @@ export const ProjectMeetingInboxTable = observer(function ProjectMeetingInboxTab
   } = searchStore
 
   const listShowsNoResults = !isSearching && totalCount !== null && totalCount === 0
+  const { resetFilters } = searchStore as ISearch & { resetFilters?: () => void }
+  const storeGetSortColumnHeader = (
+    searchStore as { getSortColumnHeader?: (field: EProjectMeetingSortFields) => string }
+  ).getSortColumnHeader
+  const sortColumnHeader = (field: EProjectMeetingSortFields) =>
+    getSortColumnHeader?.(field) ?? storeGetSortColumnHeader?.(field) ?? field
 
   const renderListBody = () => {
     if (isSearching) {
@@ -72,12 +83,16 @@ export const ProjectMeetingInboxTable = observer(function ProjectMeetingInboxTab
             status={EFlashMessageStatus.info}
             title={t("submissionInbox.noMatchingMeetingsTitle")}
             description={
-              <Text>
-                {t("submissionInbox.noMatchingMeetingsDescription")}{" "}
-                <ChakraLink as="button" onClick={() => searchStore.resetFilters()} textDecoration="underline">
-                  {t("submissionInbox.clearAllFilters")}
-                </ChakraLink>
-              </Text>
+              resetFilters ? (
+                <Text>
+                  {t("submissionInbox.noMatchingMeetingsDescription")}{" "}
+                  <ChakraLink as="button" onClick={() => resetFilters()} textDecoration="underline">
+                    {t("submissionInbox.clearAllFilters")}
+                  </ChakraLink>
+                </Text>
+              ) : (
+                (noResultsDescription ?? t("submissionInbox.noMatchingMeetingsDescription"))
+              )
             }
           />
         </Flex>
@@ -85,7 +100,7 @@ export const ProjectMeetingInboxTable = observer(function ProjectMeetingInboxTab
     }
 
     return projectMeetings.map((projectMeeting) => (
-      <ProjectMeetingInboxRow key={projectMeeting.id} projectMeeting={projectMeeting} />
+      <ProjectMeetingInboxRow key={projectMeeting.id} projectMeeting={projectMeeting} getRowPath={getRowPath} />
     ))
   }
 
@@ -122,7 +137,7 @@ export const ProjectMeetingInboxTable = observer(function ProjectMeetingInboxTab
                 <SortableHeader
                   key={field}
                   field={field}
-                  label={getSortColumnHeader(field)}
+                  label={sortColumnHeader(field)}
                   sort={sort as ISort<EProjectMeetingSortFields>}
                   onToggleSort={toggleSort}
                 />
@@ -199,15 +214,18 @@ const formatDateTime = (date?: Date | null) => (date ? format(date, datefnsTable
 
 const ProjectMeetingInboxRow = observer(function ProjectMeetingInboxRow({
   projectMeeting,
+  getRowPath,
 }: {
   projectMeeting: IProjectMeeting
+  getRowPath?: (projectMeeting: IProjectMeeting) => string
 }) {
   const { jurisdictionId } = useParams()
+  const rowPath = getRowPath?.(projectMeeting) ?? `/jurisdictions/${jurisdictionId}/meetings/${projectMeeting.id}`
 
   return (
     <Box
       as={Link}
-      to={`/jurisdictions/${jurisdictionId}/meetings/${projectMeeting.id}`}
+      to={rowPath}
       className="project-meeting-inbox-grid-row"
       role="row"
       display="contents"
