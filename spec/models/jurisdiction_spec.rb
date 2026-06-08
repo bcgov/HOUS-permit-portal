@@ -219,6 +219,30 @@ RSpec.describe Jurisdiction, type: :model do
         )
       end
     end
+
+    describe "submission contact deletion" do
+      let(:jurisdiction) { create(:sub_district) }
+
+      it "prevents deleting the last confirmed contact through nested attributes when its feature is enabled" do
+        jurisdiction.update!(project_meetings_enabled: true)
+        contact =
+          create(:meeting_submission_contact, jurisdiction: jurisdiction)
+
+        expect(
+          jurisdiction.update(
+            submission_contacts_attributes: [
+              {
+                id: contact.id,
+                type: "MeetingSubmissionContact",
+                _destroy: true
+              }
+            ]
+          )
+        ).to be(false)
+
+        expect(MeetingSubmissionContact.exists?(contact.id)).to be(true)
+      end
+    end
   end
 
   describe "#should_index?" do

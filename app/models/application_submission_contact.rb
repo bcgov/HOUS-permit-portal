@@ -13,6 +13,10 @@ class ApplicationSubmissionContact < SubmissionContact
     "your Building Permit Hub Submission inbox"
   end
 
+  def feature_enabled_attribute
+    :inbox_enabled?
+  end
+
   private
 
   def only_one_default_per_jurisdiction
