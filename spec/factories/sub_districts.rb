@@ -1,5 +1,5 @@
 FactoryBot.define do
-  factory :sub_district do
+  factory :sub_district, aliases: [:jurisdiction] do
     sequence(:name) { |n| "#{Faker::Address.city} #{n}" }
     type { "SubDistrict" }
     locality_type { "city" }
