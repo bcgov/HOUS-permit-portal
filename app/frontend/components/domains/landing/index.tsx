@@ -294,7 +294,7 @@ const AvailableJurisdictionsMessageBox: React.FC = observer(() => {
             ))}
             <br />
             {totalPages > 1 ? (
-              <RouterLink color="black" to="/jurisdictions" as="span" fontWeight="bold">
+              <RouterLink color="black" to="/jurisdictions" fontWeight="bold">
                 {t("landing.andMore")}
               </RouterLink>
             ) : (
