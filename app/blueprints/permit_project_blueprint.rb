@@ -61,6 +61,16 @@ class PermitProjectBlueprint < Blueprinter::Base
   view :jurisdiction_review_inbox do
     include_view :base
 
+    field :has_active_project_meeting do |permit_project, options|
+      options[:active_project_meeting_ids_by_project_id]&.key?(
+        permit_project.id
+      ) || false
+    end
+
+    field :active_project_meeting_id do |permit_project, options|
+      options[:active_project_meeting_ids_by_project_id]&.[](permit_project.id)
+    end
+
     association :review_delegatee,
                 blueprint: CollaboratorBlueprint,
                 if: ->(_field_name, permit_project, options) do

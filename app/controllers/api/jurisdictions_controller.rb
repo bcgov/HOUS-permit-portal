@@ -211,7 +211,9 @@ class Api::JurisdictionsController < Api::ApplicationController
                        view: :jurisdiction_review_inbox,
                        current_user: current_user,
                        pinned_project_ids:
-                         current_user.pinned_permit_project_ids
+                         current_user.pinned_permit_project_ids,
+                       active_project_meeting_ids_by_project_id:
+                         @active_project_meeting_ids_by_project_id
                      },
                      meta: @jurisdiction_permit_project_meta
                    }

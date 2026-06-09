@@ -17,6 +17,7 @@ import { ArrowsDownUp, DotsSixVertical, UserPlus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
+import { ActiveProjectMeetingIndicator } from "../../../shared/project-meetings/active-project-meeting-indicator"
 import { EReorderDirection } from "./kanban-board"
 import { SubmissionInboxMarkUnreadIconButton } from "./submission-inbox-mark-unread-icon-button"
 
@@ -30,6 +31,7 @@ const REORDER_MENU_ITEMS = [
 interface IProps {
   id: string
   isUnread?: boolean
+  activeProjectMeetingPath?: string
   onMarkUnread?: () => void
   statusMenu?: ReactNode
   avatars?: ReactNode
@@ -44,6 +46,7 @@ interface IProps {
 export const KanbanCard = observer(function KanbanCard({
   id,
   isUnread,
+  activeProjectMeetingPath,
   onMarkUnread,
   statusMenu,
   avatars,
@@ -90,6 +93,7 @@ export const KanbanCard = observer(function KanbanCard({
     >
       <HStack position="absolute" top={2} right={2} spacing={1} align="center" zIndex={1}>
         {isUnread && <Circle size="10px" bg="theme.blueActive" flexShrink={0} />}
+        {activeProjectMeetingPath && <ActiveProjectMeetingIndicator to={activeProjectMeetingPath} />}
         <Tooltip label={t("submissionInbox.dragToReorder")} hasArrow placement="top">
           <IconButton
             aria-label={t("submissionInbox.reorder")}

@@ -78,7 +78,7 @@ export const ReviewerMeetingDetailContent = observer(({ jurisdictionId }: Review
   return (
     <Box as="section">
       <Button leftIcon={<CaretLeft size={20} />} variant="link" mb={6} px={0} onClick={() => navigate(-1)}>
-        {t("projectMeeting.detail.reviewer.backToMeetings")}
+        {t("ui.back")}
       </Button>
 
       <HStack justify="space-between" align="flex-start" mb={8}>
