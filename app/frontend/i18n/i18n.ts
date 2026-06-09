@@ -1542,7 +1542,7 @@ Thank you,
             createButton: "Create project",
             nameHeading: "Name your project",
             nameDescription:
-              "Give your project a name so it’s easy to find later. The name is private to you and anyone you invite to collaborate. For example: “My new house”, “1st Avenue laneway home”, or “Smith residence addition.”",
+              "Give your project a name so you can find it later. Do not include confidential or sensitive information. Examples: “My new house”, “1st Avenue Laneway Home”, or “800 Elm Multiplex”",
             sandboxJurisdictionMismatchTitle: "This address is outside your jurisdiction",
             sandboxJurisdictionMismatchDescription:
               "While training mode is turned on, you can only create projects within your own jurisdiction.",
