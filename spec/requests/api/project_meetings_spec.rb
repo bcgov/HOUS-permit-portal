@@ -60,14 +60,15 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
       expect(response).to have_http_status(:forbidden)
     end
 
-    it "blocks creating a second active meeting request" do
-      create(:project_meeting, permit_project: permit_project)
+    it "allows creating a draft meeting request when an active request exists" do
+      create(:project_meeting, :open, permit_project: permit_project)
 
       post "/api/permit_projects/#{permit_project.id}/meetings",
            headers: headers,
            as: :json
 
-      expect(response).to have_http_status(:unprocessable_content)
+      expect(response).to have_http_status(:created)
+      expect(json_response.dig("data", "status")).to eq("draft")
     end
   end
 
@@ -119,12 +120,20 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
     let!(:meeting) do
       create(
         :project_meeting,
-        :open,
+        :scheduled,
         permit_project: permit_project,
         project_description: "Need zoning guidance."
       )
     end
     let!(:other_meeting) { create(:project_meeting, :completed) }
+    let!(:draft_meeting) do
+      create(
+        :project_meeting,
+        permit_project: permit_project,
+        project_description: "Draft meeting request.",
+        meeting_notes: "Initial draft notes."
+      )
+    end
 
     before { ProjectMeeting.reindex }
 
@@ -145,6 +154,45 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
 
     it "does not return meetings to unrelated users" do
       sign_in other_user
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/search",
+           params: {
+             query: "*",
+             page: 1,
+             per_page: 10
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response["data"]).to be_empty
+    end
+
+    it "returns project-scoped submitted meeting requests for jurisdiction review staff" do
+      reviewer = create(:user, :reviewer, jurisdiction: jurisdiction)
+      sign_in reviewer
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/search",
+           params: {
+             query: "*",
+             page: 1,
+             per_page: 10
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response["data"].pluck("id")).to eq([meeting.id])
+      expect(json_response["data"].pluck("id")).not_to include(
+        draft_meeting.id,
+        other_meeting.id
+      )
+    end
+
+    it "does not return project meetings to review staff outside the jurisdiction" do
+      other_jurisdiction = create(:sub_district, project_meetings_enabled: true)
+      reviewer = create(:user, :reviewer, jurisdiction: other_jurisdiction)
+      sign_in reviewer
 
       post "/api/permit_projects/#{permit_project.id}/meetings/search",
            params: {
@@ -393,6 +441,18 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
            as: :json
 
       expect(response).to have_http_status(:unprocessable_content)
+    end
+
+    it "blocks submitting when another active meeting request exists" do
+      create(:project_meeting, :open, permit_project: permit_project)
+      meeting = create(:project_meeting, permit_project: permit_project)
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/submit",
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(meeting.reload).to be_draft
     end
 
     it "submits non-owner requests with authorization documents" do

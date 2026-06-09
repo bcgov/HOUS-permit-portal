@@ -64,7 +64,7 @@ export const PermitProjectScreen = observer(() => {
 
   const handleTabChange = (index: number) => {
     startTransition(() => {
-      navigate(TABS_DATA[index].to, { replace: true })
+      navigate(TABS_DATA[index].to)
     })
   }
 

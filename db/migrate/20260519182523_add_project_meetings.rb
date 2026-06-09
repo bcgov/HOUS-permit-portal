@@ -60,7 +60,7 @@ class AddProjectMeetings < ActiveRecord::Migration[7.2]
     add_index :project_meetings,
               :permit_project_id,
               unique: true,
-              where: "status IN (0, 1)",
+              where: "status IN (1, 2)",
               name: "index_project_meetings_on_active_permit_project"
 
     create_table :meeting_request_documents, id: :uuid do |t|

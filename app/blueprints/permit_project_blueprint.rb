@@ -56,6 +56,16 @@ class PermitProjectBlueprint < Blueprinter::Base
     field :has_outdated_draft_applications do |permit_project, options|
       options[:project_ids_with_outdated_drafts]&.include?(permit_project.id)
     end
+
+    field :has_active_project_meeting do |permit_project, options|
+      options[:active_project_meeting_ids_by_project_id]&.key?(
+        permit_project.id
+      ) || false
+    end
+
+    field :active_project_meeting_id do |permit_project, options|
+      options[:active_project_meeting_ids_by_project_id]&.[](permit_project.id)
+    end
   end
 
   view :jurisdiction_review_inbox do

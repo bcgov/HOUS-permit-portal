@@ -1,7 +1,7 @@
 module ProjectMeetingStatus
   extend ActiveSupport::Concern
 
-  ACTIVE_STATUSES = %w[draft open].freeze
+  ACTIVE_STATUSES = %w[open scheduled].freeze
 
   MANUAL_TRANSITIONS = {
     draft: [],
@@ -87,6 +87,7 @@ module ProjectMeetingStatus
 
     def can_submit_request?
       validate_submission_requirements
+      only_one_active_meeting_request
       errors.empty?
     end
 

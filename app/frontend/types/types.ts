@@ -626,6 +626,7 @@ export interface IPermitProjectSearchFilters {
   query?: string
   showArchived?: boolean
   rollupStatus?: EPermitProjectRollupStatus[]
+  activeMeeting?: string
   requirementTemplateIds?: string[]
   jurisdictionId?: string[]
 }

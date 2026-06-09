@@ -22,6 +22,7 @@ import { UnreadBadge } from "../base/unread-badge"
 
 interface IInboxFilterProps {
   title: string
+  leftIcon?: React.ReactNode
   /** Unread (or similar) result count — only rendered when `showResultsBadge` is true. */
   badgeCount?: number
   /** When true, `badgeCount` is shown as the blue results pill (unread filter only). */
@@ -38,6 +39,7 @@ interface IInboxFilterProps {
 
 export const InboxFilter = observer(function InboxFilter({
   title,
+  leftIcon,
   badgeCount,
   showResultsBadge,
   isMulti,
@@ -127,6 +129,7 @@ export const InboxFilter = observer(function InboxFilter({
           opacity={isDisabled ? 0.5 : 1}
         >
           <HStack spacing={2}>
+            {leftIcon}
             <Text>{title}</Text>
             {showSelectionParens && (
               <Text as="span" fontSize="sm">

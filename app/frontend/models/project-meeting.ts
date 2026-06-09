@@ -48,7 +48,7 @@ export const ProjectMeetingModel = types
       return self.status === EProjectMeetingStatus.open
     },
     get isActive() {
-      return self.status === EProjectMeetingStatus.draft || self.status === EProjectMeetingStatus.open
+      return self.status === EProjectMeetingStatus.open || self.status === EProjectMeetingStatus.scheduled
     },
     get isTerminal() {
       return self.status === EProjectMeetingStatus.completed || self.status === EProjectMeetingStatus.closed

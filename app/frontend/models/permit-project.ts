@@ -50,6 +50,8 @@ const PermitProjectCoreModel = types.model("PermitProjectCore", {
   flagList: types.optional(types.array(types.string), []),
   allowedManualTransitions: types.optional(types.array(types.string), []),
   hasOutdatedDraftApplications: types.maybeNull(types.boolean),
+  hasActiveProjectMeeting: types.optional(types.boolean, false),
+  activeProjectMeetingId: types.maybeNull(types.string),
   isFullyLoaded: types.optional(types.boolean, false),
   ownerName: types.maybeNull(types.string),
   ownerId: types.maybeNull(types.string),
@@ -239,7 +241,9 @@ export const PermitProjectModel = types
     }),
   }))
   .actions((self) => ({
-    bulkCreatePermitApplications: flow(function* (params: Array<Record<string, unknown>>) {
+    bulkCreatePermitApplications: flow(function* (
+      params: Array<{ templateVersionId: string; jurisdictionId?: string }>
+    ) {
       const response = yield* toGenerator(self.environment.api.createProjectPermitApplications(self.id, params))
       if (response.ok) {
         // Merge created applications into store

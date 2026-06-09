@@ -775,7 +775,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_04_191200) do
     t.index ["closed_at"], name: "index_project_meetings_on_closed_at"
     t.index ["completed_at"], name: "index_project_meetings_on_completed_at"
     t.index ["contact_method"], name: "index_project_meetings_on_contact_method"
-    t.index ["permit_project_id"], name: "index_project_meetings_on_active_permit_project", unique: true, where: "(status = ANY (ARRAY[0, 1]))"
+    t.index ["permit_project_id"], name: "index_project_meetings_on_active_permit_project", unique: true, where: "(status = ANY (ARRAY[1, 2]))"
     t.index ["permit_project_id"], name: "index_project_meetings_on_permit_project_id"
     t.index ["requested_by_id"], name: "index_project_meetings_on_requested_by_id"
     t.index ["requester_relationship"], name: "index_project_meetings_on_requester_relationship"

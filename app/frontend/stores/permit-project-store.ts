@@ -7,7 +7,7 @@ import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IPermitProject, PermitProjectModel } from "../models/permit-project"
 import { IPermitProjectUpdateParams, IProjectDocumentAttribute } from "../types/api-request" // Import new types
-import { EPermitProjectRollupStatus, EPermitProjectSortFields } from "../types/enums" // Import from enums
+import { EPermitProjectRollupStatus, EPermitProjectSortFields, ERadioFilterValue } from "../types/enums" // Import from enums
 import { IPermitProjectSearchFilters, IProjectDocument, TSearchParams } from "../types/types" // Import IPermitProjectSearchFilters and IProjectDocument from types
 import { setQueryParam } from "../utils/utility-functions"
 
@@ -19,6 +19,10 @@ export const PermitProjectStoreModel = types
       tablePermitProjects: types.array(types.reference(PermitProjectModel)), // For table views
       currentPermitProject: types.maybeNull(types.reference(PermitProjectModel)),
       rollupStatusFilter: types.maybeNull(types.array(types.enumeration(Object.values(EPermitProjectRollupStatus)))),
+      activeMeetingFilter: types.optional(
+        types.enumeration(Object.values(ERadioFilterValue)),
+        ERadioFilterValue.include
+      ),
       isFetchingPinnedProjects: types.optional(types.boolean, false),
       jurisdictionFilter: types.optional(types.array(types.string), []),
       requirementTemplateIdFilter: types.optional(types.array(types.string), []),
@@ -156,6 +160,7 @@ export const PermitProjectStoreModel = types
           showArchived: self.showArchived,
           query: self.query,
           rollupStatus: self.rollupStatusFilter,
+          activeMeeting: self.activeMeetingFilter !== ERadioFilterValue.include ? self.activeMeetingFilter : undefined,
           jurisdictionId: self.jurisdictionFilter,
           requirementTemplateIds,
         },
@@ -239,9 +244,11 @@ export const PermitProjectStoreModel = types
       const requirementTemplateFilter = queryParams.get("requirementTemplateFilter")
       const rollupStatusStr = queryParams.get("rollupStatus")
       const rollupStatus = rollupStatusStr ? (rollupStatusStr.split(",") as EPermitProjectRollupStatus[]) : null
+      const activeMeeting = queryParams.get("activeMeeting") as ERadioFilterValue
       const jurisdictionFilter = queryParams.get("jurisdictionFilter")?.split(",")
       const requirementTemplateIdFilter = queryParams.get("requirementTemplateId")?.split(",")
       self.rollupStatusFilter = rollupStatus ? cast(rollupStatus) : null
+      if (activeMeeting) self.activeMeetingFilter = activeMeeting
 
       if (jurisdictionFilter) {
         self.setJurisdictionFilter(jurisdictionFilter)
@@ -281,6 +288,10 @@ export const PermitProjectStoreModel = types
       const paramValue = value.length > 0 ? value.join(",") : null
       setQueryParam("rollupStatus", paramValue)
     },
+    setActiveMeetingFilter(value: ERadioFilterValue) {
+      self.activeMeetingFilter = value
+      setQueryParam("activeMeeting", value === ERadioFilterValue.include ? "" : value)
+    },
     updatePermitProject: flow(function* (id: string, params: IPermitProjectUpdateParams) {
       const response = yield self.environment.api.updatePermitProject(id, params)
       if (response.ok && response.data) {
@@ -293,6 +304,20 @@ export const PermitProjectStoreModel = types
       setQueryParam("requirementTemplateId", requirementTemplateIds)
       // @ts-ignore
       self.requirementTemplateIdFilter = requirementTemplateIds
+    },
+  }))
+  .actions((self) => ({
+    resetFilters() {
+      self.setQuery("")
+      self.requirementTemplateIdFilter = cast([])
+      setQueryParam("requirementTemplateId", [])
+      self.rollupStatusFilter = null
+      setQueryParam("rollupStatus", "")
+      self.jurisdictionFilter = cast([])
+      setQueryParam("jurisdictionFilter", [])
+      self.activeMeetingFilter = ERadioFilterValue.include
+      setQueryParam("activeMeeting", "")
+      self.search({ reset: true })
     },
   }))
 

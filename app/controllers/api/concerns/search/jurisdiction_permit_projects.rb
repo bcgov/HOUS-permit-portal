@@ -67,6 +67,9 @@ module Api::Concerns::Search::JurisdictionPermitProjects
 
     unread_state_counts = jurisdiction_unread_state_counts
     @jurisdiction_permit_projects = loaded.sort_by { |p| ids.index(p.id) }
+    compute_active_project_meeting_ids_by_project_id(
+      @jurisdiction_permit_projects
+    )
     @jurisdiction_permit_project_meta = {
       total_pages: @jurisdiction_permit_project_search.total_pages,
       current_page: @jurisdiction_permit_project_search.current_page,
@@ -133,6 +136,9 @@ module Api::Concerns::Search::JurisdictionPermitProjects
 
     unread_state_counts = jurisdiction_unread_state_counts
     @jurisdiction_permit_projects = loaded.sort_by { |p| all_ids.index(p.id) }
+    compute_active_project_meeting_ids_by_project_id(
+      @jurisdiction_permit_projects
+    )
     @jurisdiction_permit_project_meta = {
       total_pages: 1,
       current_page: 1,
@@ -151,6 +157,19 @@ module Api::Concerns::Search::JurisdictionPermitProjects
       "return total"
 
   private
+
+  def compute_active_project_meeting_ids_by_project_id(projects)
+    project_ids = projects.map(&:id)
+    @active_project_meeting_ids_by_project_id = {}
+    return if project_ids.empty?
+
+    @active_project_meeting_ids_by_project_id =
+      ProjectMeeting
+        .where(permit_project_id: project_ids)
+        .active
+        .pluck(:permit_project_id, :id)
+        .to_h
+  end
 
   # Unread (viewed_at nil) projects by state across the whole jurisdiction,
   # ignoring current filters/query so badges reflect the full jurisdiction-wide
@@ -329,7 +348,12 @@ module Api::Concerns::Search::JurisdictionPermitProjects
 
     search_filters.delete(:days_in_queue)
 
-    # ### SUBMISSION INDEX STUB FEATURE - meeting_request
+    meeting_request = search_filters.delete(:meeting_request)
+    if meeting_request == "only_show"
+      and_conditions << { has_active_project_meeting: true }
+    elsif meeting_request == "hide"
+      and_conditions << { has_active_project_meeting: false }
+    end
 
     assigned = search_filters.delete(:assigned)
     if assigned.present?

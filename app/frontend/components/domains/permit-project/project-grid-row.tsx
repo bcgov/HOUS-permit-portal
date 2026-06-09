@@ -12,6 +12,7 @@ import { SearchGridItem } from "../../shared/grid/search-grid-item"
 import { SearchGridRow } from "../../shared/grid/search-grid-row"
 import { OutdatedFormWarning } from "../../shared/outdated-form-warning"
 import { RollupStatusBox } from "../../shared/permit-projects/rollup-status-box"
+import { ActiveProjectMeetingIndicator } from "../../shared/project-meetings/active-project-meeting-indicator"
 
 interface IProjectGridRowProps {
   project: IPermitProject
@@ -24,7 +25,12 @@ export const ProjectGridRow = observer(({ project }: IProjectGridRowProps) => {
 
   return (
     <SearchGridRow onClick={() => navigate(`/projects/${project.id}`)}>
-      {project.hasOutdatedDraftApplications && <OutdatedFormWarning colSpan={7} mx={4} mt={2} />}
+      {project.hasOutdatedDraftApplications && <OutdatedFormWarning colSpan={8} mx={4} mt={2} />}
+      <SearchGridItem justifyContent="center" px={2}>
+        {project.hasActiveProjectMeeting && project.activeProjectMeetingId && (
+          <ActiveProjectMeetingIndicator to={`/projects/${project.id}/meetings/${project.activeProjectMeetingId}`} />
+        )}
+      </SearchGridItem>
       <SearchGridItem>{project.title}</SearchGridItem>
       <SearchGridItem>
         <Flex direction="column">

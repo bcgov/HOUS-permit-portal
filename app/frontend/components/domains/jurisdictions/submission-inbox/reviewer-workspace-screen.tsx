@@ -73,9 +73,7 @@ export const ReviewerWorkspaceScreen = observer(function ReviewerWorkspaceScreen
 
   const handleTabChange = (index: number) => {
     startTransition(() => {
-      navigate(`/jurisdictions/${jurisdictionId}/${tabsData[index].to}`, {
-        replace: true,
-      })
+      navigate(`/jurisdictions/${jurisdictionId}/${tabsData[index].to}`)
     })
   }
 
