@@ -14,10 +14,12 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { Info, Swap } from "@phosphor-icons/react"
+import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useNavigate } from "react-router-dom"
+import { datefnsTableDateFormat } from "../../../../constants"
 import { IPermitApplication } from "../../../../models/permit-application"
 import { IPermitProject } from "../../../../models/permit-project"
 import { IPermitApplicationInboxStore } from "../../../../stores/submission-inbox-store"
@@ -41,6 +43,8 @@ interface IProps {
   searchStore: IPermitApplicationInboxStore | IPermitProject
   applications: IPermitApplication[]
 }
+
+const formatTableDate = (date?: Date | null) => (date ? format(date, datefnsTableDateFormat) : "—")
 
 export const ApplicationInboxTable = observer(function ApplicationInboxTable({ searchStore, applications }: IProps) {
   const { t } = useTranslation()
@@ -290,7 +294,7 @@ const ApplicationInboxRow = observer(function ApplicationInboxRow({
               {t("submissionInbox.waitingSince")}
             </Text>
             <Text fontSize="xs" color="text.secondary">
-              {application.formattedSubmittedAt}
+              {formatTableDate(application.submittedAt)}
             </Text>
           </VStack>
         ) : (

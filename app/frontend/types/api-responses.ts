@@ -33,6 +33,14 @@ export interface IJurisdictionPermitApplicationResponse extends IApiResponse<IPe
 
 export interface IProjectMeetingResponse extends IApiResponse<IProjectMeeting[], IPageMeta> {}
 
+export interface IJurisdictionProjectMeetingMeta extends IPageMeta {
+  statusCounts?: Record<string, number>
+  unreadCount?: number
+}
+
+export interface IJurisdictionProjectMeetingResponse
+  extends IApiResponse<IProjectMeeting[], IJurisdictionProjectMeetingMeta> {}
+
 export interface ICollaboratorSearchResponse extends IApiResponse<ICollaborator[], IPageMeta> {}
 
 export interface IAcceptInvitationResponse extends IApiResponse<{}, { redirectUrl: string }> {}

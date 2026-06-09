@@ -104,7 +104,7 @@ module ProjectMeetingStatus
     end
 
     def handle_submission
-      permit_project.mark_as_unviewed
+      permit_project&.mark_as_unviewed
       NotificationService.publish_project_meeting_submitted_event(self)
       NotificationService.publish_project_meeting_request_received_event(self)
     end

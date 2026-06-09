@@ -655,10 +655,97 @@ if north_van_projects.size >= 10
   end
 
   puts "  ✓ Assigned review collaborators to #{collab_projects.size} projects"
+
+  puts "Seeding project meeting requests..."
+  submitter = User.find_by(omniauth_username: "submitter")
+  meeting_seed_projects =
+    if submitter
+      north_van_projects
+        .select { |project| project.owner_id == submitter.id }
+        .reject { |project| project.title == inbox_test_project_title }
+        .first(18)
+    else
+      []
+    end
+
+  meeting_statuses = %i[open scheduled completed closed].freeze
+  seeded_meeting_count = 0
+
+  meeting_seed_projects.each_with_index do |project, idx|
+    next if project.project_meetings.exists?
+
+    status = meeting_statuses[idx % meeting_statuses.size]
+    submitted_at = (idx + 2).days.ago
+    requested_by = submitter
+    confirmed_date =
+      case status
+      when :scheduled
+        (idx + 1).days.from_now.change(hour: 10 + (idx % 5), min: 0)
+      when :completed
+        (idx + 1).days.ago.change(hour: 10 + (idx % 5), min: 0)
+      else
+        nil
+      end
+
+    meeting =
+      project.project_meetings.build(
+        requested_by: requested_by,
+        status: status,
+        requester_relationship: :owner_or_landholder,
+        contact_name: requested_by.name,
+        contact_email: requested_by.email,
+        contact_phone_number:
+          requested_by.phone_number.presence || "250555#{format("%04d", idx)}",
+        project_description:
+          [
+            "Discuss zoning constraints before submitting revised drawings.",
+            "Review proposed coach house siting and access requirements.",
+            "Confirm documentation needed for the next permit submission.",
+            "Walk through servicing questions for the proposed renovation."
+          ][
+            idx % 4
+          ],
+        meeting_notes:
+          [
+            "Applicant asked for clarification on setbacks.",
+            "Bring latest site plan and project context.",
+            "Review staff should confirm next steps after the meeting.",
+            "Potential follow-up with engineering may be required."
+          ][
+            idx % 4
+          ],
+        request_property_information: idx.even?,
+        submitted_at: submitted_at,
+        viewed_at: idx % 3 == 0 ? submitted_at + 2.hours : nil,
+        confirmed_date: confirmed_date,
+        scheduled_at:
+          status.in?(%i[scheduled completed]) ? submitted_at + 1.day : nil,
+        completed_at: status == :completed ? submitted_at + 3.days : nil,
+        closed_at: status == :closed ? submitted_at + 2.days : nil,
+        meeting_url:
+          (
+            if status.in?(%i[scheduled completed])
+              "https://meet.example.com/project-meeting-#{idx + 1}"
+            else
+              nil
+            end
+          )
+      )
+
+    meeting.save!
+    seeded_meeting_count += 1
+  rescue => e
+    Rails.logger.warn(
+      "Seed: failed to create project meeting for project #{project.id}: #{e.message}"
+    )
+  end
+
+  puts "  ✓ Seeded #{seeded_meeting_count} project meeting requests for submitter (#{submitter&.omniauth_username || "n/a"})"
 end
 
 PermitApplication.reindex
 PermitProject.reindex
+ProjectMeeting.reindex
 
 puts "Running pending data migrations..."
 DataMigrate::DatabaseTasks.migrate

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_06_02_180000) do
+ActiveRecord::Schema[7.2].define(version: 2026_06_04_191200) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -769,6 +769,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_02_180000) do
     t.string "meeting_url"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "viewed_at"
     t.index ["closed_at"], name: "index_project_meetings_on_closed_at"
     t.index ["completed_at"], name: "index_project_meetings_on_completed_at"
     t.index ["permit_project_id"], name: "index_project_meetings_on_active_permit_project", unique: true, where: "(status = ANY (ARRAY[0, 1]))"
@@ -778,6 +779,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_02_180000) do
     t.index ["scheduled_at"], name: "index_project_meetings_on_scheduled_at"
     t.index ["status"], name: "index_project_meetings_on_status"
     t.index ["submitted_at"], name: "index_project_meetings_on_submitted_at"
+    t.index ["viewed_at"], name: "index_project_meetings_on_viewed_at"
   end
 
   create_table "report_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

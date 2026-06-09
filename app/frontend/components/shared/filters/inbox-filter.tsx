@@ -1,5 +1,4 @@
 import {
-  Badge,
   Button,
   Checkbox,
   Divider,
@@ -19,6 +18,7 @@ import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { IOption } from "../../../types/types"
+import { UnreadBadge } from "../base/unread-badge"
 
 interface IInboxFilterProps {
   title: string
@@ -34,20 +34,6 @@ interface IInboxFilterProps {
   onApply: () => void
   onClear?: () => void
   isDisabled?: boolean
-}
-
-interface IUnreadBadgeProps {
-  count?: number
-}
-
-export function UnreadBadge({ count }: IUnreadBadgeProps) {
-  if (count == null || count <= 0) return null
-
-  return (
-    <Badge bg="theme.blueActive" color="white" borderRadius="full" px={2} fontSize="xs" minW="20px" textAlign="center">
-      {count}
-    </Badge>
-  )
 }
 
 export const InboxFilter = observer(function InboxFilter({

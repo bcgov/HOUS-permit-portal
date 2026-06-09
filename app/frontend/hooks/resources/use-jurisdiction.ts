@@ -19,6 +19,8 @@ export const useJurisdiction = () => {
   const { t } = useTranslation()
 
   const jursidictionRoutes = [
+    "/jurisdictions/:jurisdictionId/meetings/:meetingId",
+    "/jurisdictions/:jurisdictionId/meetings",
     "/jurisdictions/:jurisdictionId/submission-inbox",
     "/jurisdictions/:jurisdictionId/configuration-management",
     "/jurisdictions/:jurisdictionId/configuration-management/feature-access/submissions-inbox-setup",

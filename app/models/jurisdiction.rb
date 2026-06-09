@@ -55,6 +55,7 @@ class Jurisdiction < ApplicationRecord
   has_one :preference
   has_many :permit_projects
   has_many :permit_applications, through: :permit_projects
+  has_many :project_meetings, through: :permit_projects
   has_many :contacts, as: :contactable, dependent: :destroy
   has_many :jurisdiction_memberships, dependent: :destroy
   has_many :users, through: :jurisdiction_memberships
@@ -326,6 +327,17 @@ class Jurisdiction < ApplicationRecord
       .kept
       .for_sandbox(sandbox)
       .where.not(state: PermitProject.states[:draft])
+      .where(viewed_at: nil)
+      .count
+  end
+
+  # Mirrors the jurisdiction project meeting search unread count:
+  # submitted meeting requests only (status != draft), scoped to the current
+  # jurisdiction and sandbox, with meeting-level viewed_at still unset.
+  def unviewed_project_meetings_count(sandbox: nil)
+    project_meetings
+      .where(permit_projects: { discarded_at: nil, sandbox_id: sandbox&.id })
+      .where.not(status: ProjectMeeting.statuses[:draft])
       .where(viewed_at: nil)
       .count
   end

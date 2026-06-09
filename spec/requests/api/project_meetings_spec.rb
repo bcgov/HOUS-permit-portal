@@ -146,6 +146,146 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
     end
   end
 
+  describe "POST /api/jurisdictions/:id/project_meetings/search", :search do
+    let(:reviewer) { create(:user, :reviewer, jurisdiction: jurisdiction) }
+    let(:other_jurisdiction) do
+      create(:sub_district, project_meetings_enabled: true)
+    end
+    let(:matching_project) do
+      create(
+        :permit_project,
+        jurisdiction: jurisdiction,
+        number: "CS-0000-0024",
+        full_address: "1208 North Rd",
+        pid: "012-333-029"
+      )
+    end
+    let!(:meeting) do
+      create(
+        :project_meeting,
+        :open,
+        permit_project: matching_project,
+        contact_name: "Michael Chan",
+        project_description: "Tree removal and new coach house."
+      )
+    end
+    let!(:viewed_meeting) do
+      create(
+        :project_meeting,
+        :scheduled,
+        :viewed,
+        permit_project:
+          create(
+            :permit_project,
+            jurisdiction: jurisdiction,
+            number: "CS-0000-0053"
+          )
+      )
+    end
+    let!(:draft_meeting) do
+      create(
+        :project_meeting,
+        permit_project:
+          create(
+            :permit_project,
+            jurisdiction: jurisdiction,
+            number: "CS-0000-DRAFT"
+          )
+      )
+    end
+    let!(:other_jurisdiction_meeting) do
+      create(
+        :project_meeting,
+        :open,
+        permit_project:
+          create(:permit_project, jurisdiction: other_jurisdiction)
+      )
+    end
+
+    before do
+      sign_in reviewer
+      ProjectMeeting.reindex
+    end
+
+    it "returns jurisdiction-scoped submitted meeting requests with metadata" do
+      post "/api/jurisdictions/#{jurisdiction.id}/project_meetings/search",
+           params: {
+             query: "*",
+             page: 1,
+             per_page: 10
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response["data"].pluck("id")).to contain_exactly(
+        meeting.id,
+        viewed_meeting.id
+      )
+      expect(json_response["data"].pluck("id")).not_to include(
+        draft_meeting.id,
+        other_jurisdiction_meeting.id
+      )
+      expect(json_response.dig("meta", "unread_count")).to eq(1)
+      expect(json_response.dig("meta", "status_counts")).to include(
+        "open" => 1,
+        "scheduled" => 1
+      )
+    end
+
+    it "searches by project metadata and requester" do
+      post "/api/jurisdictions/#{jurisdiction.id}/project_meetings/search",
+           params: {
+             query: "Michael",
+             page: 1,
+             per_page: 10
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response["data"].pluck("id")).to eq([meeting.id])
+      expect(json_response.dig("data", 0, "project_number")).to eq(
+        "CS-0000-0024"
+      )
+      expect(json_response.dig("data", 0, "project_address")).to eq(
+        "1208 North Rd"
+      )
+      expect(json_response.dig("data", 0, "project_pid")).to eq("012333029")
+    end
+
+    it "filters unread requests without counting drafts" do
+      post "/api/jurisdictions/#{jurisdiction.id}/project_meetings/search",
+           params: {
+             query: "*",
+             page: 1,
+             per_page: 10,
+             filters: {
+               unread: "only_show"
+             }
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response["data"].pluck("id")).to eq([meeting.id])
+      expect(json_response.dig("meta", "unread_count")).to eq(1)
+    end
+
+    it "blocks users outside the jurisdiction" do
+      sign_in create(:user, :reviewer)
+
+      post "/api/jurisdictions/#{jurisdiction.id}/project_meetings/search",
+           params: {
+             query: "*"
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:forbidden)
+    end
+  end
+
   describe "PATCH /api/permit_projects/:permit_project_id/meetings/:id" do
     it "updates meeting request step data and documents" do
       meeting = create(:project_meeting, permit_project: permit_project)
@@ -298,6 +438,18 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
 
       expect(response).to have_http_status(:forbidden)
     end
+
+    it "returns unprocessable when the meeting cannot be closed" do
+      meeting =
+        create(:project_meeting, :completed, permit_project: permit_project)
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/cancel",
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(meeting.reload).to be_completed
+    end
   end
 
   describe "POST /api/permit_projects/:permit_project_id/meetings/:id/transition_status" do
@@ -350,6 +502,52 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
            as: :json
 
       expect(response).to have_http_status(:forbidden)
+    end
+  end
+
+  describe "POST /api/permit_projects/:permit_project_id/meetings/:id/mark_as_viewed" do
+    let(:reviewer) { create(:user, :reviewer, jurisdiction: jurisdiction) }
+    let(:meeting) do
+      create(:project_meeting, :open, permit_project: permit_project)
+    end
+
+    it "marks a meeting request as viewed for review staff" do
+      sign_in reviewer
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/mark_as_viewed",
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(meeting.reload.viewed_at).to be_present
+      expect(json_response.dig("data", "viewed_at")).to be_present
+    end
+
+    it "blocks project owners" do
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/mark_as_viewed",
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:forbidden)
+    end
+  end
+
+  describe "POST /api/permit_projects/:permit_project_id/meetings/:id/mark_as_unviewed" do
+    let(:reviewer) { create(:user, :reviewer, jurisdiction: jurisdiction) }
+    let(:meeting) do
+      create(:project_meeting, :open, :viewed, permit_project: permit_project)
+    end
+
+    it "marks a meeting request as unviewed for review staff" do
+      sign_in reviewer
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/mark_as_unviewed",
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(meeting.reload.viewed_at).to be_nil
+      expect(json_response.dig("data", "viewed_at")).to be_nil
     end
   end
 end

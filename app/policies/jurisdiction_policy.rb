@@ -41,6 +41,10 @@ class JurisdictionPolicy < ApplicationPolicy
     search_permit_applications?
   end
 
+  def search_project_meetings?
+    search_permit_applications?
+  end
+
   class Scope < Scope
     def resolve
       scope.all

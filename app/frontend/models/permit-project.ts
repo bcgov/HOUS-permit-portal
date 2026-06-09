@@ -1,6 +1,7 @@
 import { format } from "date-fns"
 import { t } from "i18next"
 import { flow, Instance, toGenerator, types } from "mobx-state-tree"
+import { datefnsTableDateFormat } from "../constants"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { EInboxDisplayMode, EPermitProjectRollupStatus, EProjectState } from "../types/enums"
@@ -98,13 +99,9 @@ export const PermitProjectModel = types
       if (self.daysInQueue == null) return "—"
       return t("submissionInbox.daysInQueue", { count: self.daysInQueue })
     },
-    get formattedEnqueuedAt(): string {
-      if (!self.enqueuedAt) return "—"
-      return new Intl.DateTimeFormat("en-CA").format(self.enqueuedAt)
-    },
     get formattedFirstApplicationReceivedAt(): string {
       if (!self.firstApplicationReceivedAt) return t("permitProject.overview.notAvailable")
-      return format(self.firstApplicationReceivedAt, "MMM d, yyyy")
+      return format(self.firstApplicationReceivedAt, datefnsTableDateFormat)
     },
     get rollupStatusDescription() {
       const total = self.totalPermitsCount

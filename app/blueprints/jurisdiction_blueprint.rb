@@ -97,5 +97,11 @@ class JurisdictionBlueprint < Blueprinter::Base
     field :unviewed_projects_count do |jurisdiction, options|
       jurisdiction.unviewed_projects_count(sandbox: options[:current_sandbox])
     end
+
+    field :unviewed_project_meetings_count do |jurisdiction, options|
+      jurisdiction.unviewed_project_meetings_count(
+        sandbox: options[:current_sandbox]
+      )
+    end
   end
 end

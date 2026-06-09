@@ -113,10 +113,6 @@ export const PermitApplicationModel = types.snapshotProcessor(
         if (self.daysInQueue == null) return "—"
         return t("submissionInbox.daysInQueue", { count: self.daysInQueue })
       },
-      get formattedSubmittedAt(): string {
-        if (!self.submittedAt) return "—"
-        return new Intl.DateTimeFormat("en-CA").format(self.submittedAt)
-      },
       get isPart3() {
         // TODO
         return false

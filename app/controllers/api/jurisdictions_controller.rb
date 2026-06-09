@@ -3,6 +3,7 @@ class Api::JurisdictionsController < Api::ApplicationController
   include Api::Concerns::Search::JurisdictionUsers
   include Api::Concerns::Search::JurisdictionPermitApplications
   include Api::Concerns::Search::JurisdictionPermitProjects
+  include Api::Concerns::Search::JurisdictionProjectMeetings
 
   before_action :set_jurisdiction,
                 only: %i[
@@ -11,6 +12,7 @@ class Api::JurisdictionsController < Api::ApplicationController
                   search_users
                   search_permit_applications
                   search_permit_projects
+                  search_project_meetings
                   update_external_api_enabled
                 ]
   skip_after_action :verify_policy_scoped,
@@ -19,6 +21,7 @@ class Api::JurisdictionsController < Api::ApplicationController
                       search_users
                       search_permit_applications
                       search_permit_projects
+                      search_project_meetings
                     ]
   skip_before_action :authenticate_user!,
                      only: %i[show index jurisdiction_options]
@@ -211,6 +214,18 @@ class Api::JurisdictionsController < Api::ApplicationController
                          current_user.pinned_permit_project_ids
                      },
                      meta: @jurisdiction_permit_project_meta
+                   }
+  end
+
+  # POST /api/jurisdictions/:id/project_meetings/search
+  def search_project_meetings
+    authorize @jurisdiction
+    perform_jurisdiction_project_meeting_search
+    render_success @jurisdiction_project_meetings,
+                   nil,
+                   {
+                     blueprint: ProjectMeetingBlueprint,
+                     meta: @jurisdiction_project_meeting_meta
                    }
   end
 

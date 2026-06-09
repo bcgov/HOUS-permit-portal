@@ -4,6 +4,7 @@ import {
   EPermitApplicationInboxSortFields,
   EPermitApplicationStatus,
   EPermitProjectInboxSortFields,
+  EProjectMeetingSortFields,
   EProjectState,
 } from "../types/enums"
 
@@ -1237,7 +1238,9 @@ Thank you,
           submissions: "Submissions",
           meetings: "Meetings",
           searchPlaceholder: "Search by project number, address, PID, or submitter",
+          meetingSearchPlaceholder: "Search by project number, address, PID, or requester",
           clearAllFilters: "Clear all filters",
+          meetingsUnavailableTitle: "Meetings are not enabled for this jurisdiction.",
           setupEmailNotificationsTitle: "Set up email notifications to receive submissions",
           setupEmailNotificationsBody:
             "This area will show submissions once an email address is set up to receive notifications. Until then, submissions cannot be delivered to this workspace.",
@@ -1248,6 +1251,9 @@ Thank you,
           noMatchingApplicationsTitle: "No matching applications",
           noMatchingApplicationsDescription:
             "No applications match your current filter settings or search criteria. Check spelling or adjust filters.",
+          noMatchingMeetingsTitle: "No matching meetings",
+          noMatchingMeetingsDescription:
+            "No meeting requests match your current filter settings or search criteria. Check spelling or adjust filters.",
           project: "Project",
           projects: "Projects",
           applications: "Applications",
@@ -1340,6 +1346,15 @@ Thank you,
             [EPermitApplicationInboxSortFields.projectNumber]: "Project number",
             [EPermitApplicationInboxSortFields.daysInQueue]: "Days with us",
             [EPermitApplicationInboxSortFields.assigned]: "Assigned",
+          },
+          meetingColumns: {
+            [EProjectMeetingSortFields.projectNumber]: "Project number",
+            [EProjectMeetingSortFields.projectAddress]: "Address",
+            [EProjectMeetingSortFields.contactName]: "Requester",
+            [EProjectMeetingSortFields.submittedAt]: "Date received",
+            [EProjectMeetingSortFields.confirmedDate]: "Meeting time",
+            [EProjectMeetingSortFields.status]: "Status",
+            notes: "Notes",
           },
           applicationStatuses: {
             [EPermitApplicationStatus.newlySubmitted]: "Submitted",

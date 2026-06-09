@@ -36,5 +36,9 @@ FactoryBot.define do
       submitted_at { Time.current }
       closed_at { Time.current }
     end
+
+    trait :viewed do
+      viewed_at { Time.current }
+    end
   end
 end
