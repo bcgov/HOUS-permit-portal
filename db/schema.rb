@@ -734,6 +734,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_02_180000) do
     t.boolean "enable_email_unmapped_api_notification", default: true
     t.boolean "enable_in_app_resource_reminder_notification", default: true
     t.boolean "enable_email_resource_reminder_notification", default: true
+    t.boolean "enable_in_app_release_note_publish_notification", default: true
     t.boolean "enable_in_app_project_meeting_submitted_notification", default: true
     t.boolean "enable_email_project_meeting_submitted_notification", default: true
     t.boolean "enable_in_app_project_meeting_request_received_notification", default: true
@@ -749,6 +750,20 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_02_180000) do
     t.string "scan_status", default: "pending", null: false
     t.index ["permit_project_id"], name: "index_project_documents_on_permit_project_id"
     t.index ["scan_status"], name: "index_project_documents_on_scan_status"
+  end
+
+  create_table "release_notes", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "version"
+    t.datetime "release_date"
+    t.text "content"
+    t.string "release_notes_url"
+    t.text "issues"
+    t.integer "status", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["release_date"], name: "index_release_notes_on_release_date"
+    t.index ["status"], name: "index_release_notes_on_status"
+    t.index ["updated_at"], name: "index_release_notes_on_updated_at"
   end
 
   create_table "project_meetings", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

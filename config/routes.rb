@@ -393,6 +393,12 @@ Rails.application.routes.draw do
     end
 
     resources :digital_seal_validator, only: [:create]
+
+    resources :release_notes, only: %i[index show create update] do
+      get "viewer_context", on: :member, to: "release_notes#viewer_context"
+      patch "publish", on: :member, to: "release_notes#publish"
+      post "search", on: :collection, to: "release_notes#index"
+    end
   end
 
   scope module: :external_api, path: :external_api do

@@ -361,6 +361,24 @@ const AdminGlobalFeatureAccessScreen = lazy(() =>
   }))
 )
 
+const ReleaseNotesManagementScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/release-notes-screen").then((module) => ({
+    default: module.ReleaseNotesScreen,
+  }))
+)
+
+const ReleaseNoteFormScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/release-note-form-screen").then((module) => ({
+    default: module.ReleaseNoteFormScreen,
+  }))
+)
+
+const ReleaseNotesScreen = lazy(() =>
+  import("../release-notes/release-notes-screen").then((module) => ({
+    default: module.ReleaseNotesScreen,
+  }))
+)
+
 const AdminSubmissionInboxScreen = lazy(() =>
   import("../super-admin/site-configuration-management/submission-inbox").then((module) => ({
     default: module.AdminSubmissionInboxScreen,
@@ -517,6 +535,9 @@ const AppRoutes = observer(() => {
           Super admins toggle publicly_previewable directly on TemplateVersionScreen. */}
       <Route path="/configuration-management/users" element={<AdminUserIndexScreen />} />
       <Route path="/configuration-management/global-feature-access" element={<AdminGlobalFeatureAccessScreen />} />
+      <Route path="/configuration-management/release-notes" element={<ReleaseNotesManagementScreen />} />
+      <Route path="/configuration-management/release-notes/new" element={<ReleaseNoteFormScreen />} />
+      <Route path="/configuration-management/release-notes/:releaseNoteId/edit" element={<ReleaseNoteFormScreen />} />
       <Route
         path="/configuration-management/global-feature-access/submission-inbox"
         element={<AdminSubmissionInboxScreen />}
@@ -851,6 +872,7 @@ const AppRoutes = observer(() => {
         {/* Public Routes */}
         <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
         <Route path="/contact" element={<ContactScreen />} />
+        <Route path="/release-notes" element={<ReleaseNotesScreen />} />
         <Route path="/videos" element={<HelpVideosIndexScreen />} />
         <Route path="/videos/:videoId" element={<HelpVideoScreen />} />
         <Route path="/standardization-preview" element={<StandardizationPreviewScreen />} />
