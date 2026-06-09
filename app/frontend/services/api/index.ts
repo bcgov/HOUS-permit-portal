@@ -8,6 +8,7 @@ import { IHelpVideoSection } from "../../models/help-video-section"
 import { IIntegrationMapping } from "../../models/integration-mapping"
 import { IJurisdiction } from "../../models/jurisdiction"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
+import { INote } from "../../models/note"
 import { IOverheatingCode } from "../../models/overheating-code"
 import { IPart3StepCode } from "../../models/part-3-step-code"
 import { IPart3StepCodeChecklist } from "../../models/part-3-step-code-checklist"
@@ -41,6 +42,7 @@ import {
   IJurisdictionPermitApplicationResponse,
   IJurisdictionProjectMeetingResponse,
   IJurisdictionResponse,
+  INoteResponse,
   INotificationResponse,
   IOptionResponse,
   IPageMeta,
@@ -381,6 +383,26 @@ export class Api {
 
   async fetchProjectMeeting(id: string) {
     return this.client.get<ApiResponse<IProjectMeeting>>(`/project_meetings/${id}`)
+  }
+
+  async fetchProjectMeetingNotes(projectMeetingId: string) {
+    return this.client.get<INoteResponse>(`/project_meetings/${projectMeetingId}/notes`)
+  }
+
+  async createProjectMeetingNote(projectMeetingId: string, body: string) {
+    return this.client.post<ApiResponse<INote>>(`/project_meetings/${projectMeetingId}/notes`, { note: { body } })
+  }
+
+  async downloadProjectMeetingNotesCsv(projectMeetingId: string) {
+    return this.client.get<BlobPart>(`/project_meetings/${projectMeetingId}/notes/download_csv`)
+  }
+
+  async fetchPermitProjectNotes(permitProjectId: string) {
+    return this.client.get<INoteResponse>(`/permit_projects/${permitProjectId}/notes`)
+  }
+
+  async downloadPermitProjectNotesCsv(permitProjectId: string) {
+    return this.client.get<BlobPart>(`/permit_projects/${permitProjectId}/notes/download_csv`)
   }
 
   async fetchProjectMeetings(permitProjectId: string, params?: TSearchParams<EProjectMeetingSortFields>) {

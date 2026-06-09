@@ -1,5 +1,6 @@
 import { ICollaborator } from "../models/collaborator"
 import { IJurisdiction } from "../models/jurisdiction"
+import { INote } from "../models/note"
 import { IPermitApplication } from "../models/permit-application"
 import { IPreCheck } from "../models/pre-check"
 import { IProjectMeeting } from "../models/project-meeting"
@@ -32,6 +33,8 @@ export interface IUsersResponse extends IApiResponse<IUser[], IPageMeta> {}
 export interface IJurisdictionPermitApplicationResponse extends IApiResponse<IPermitApplication[], IPageMeta> {}
 
 export interface IProjectMeetingResponse extends IApiResponse<IProjectMeeting[], IPageMeta> {}
+
+export interface INoteResponse extends IApiResponse<INote[], IPageMeta> {}
 
 export interface IJurisdictionProjectMeetingMeta extends IPageMeta {
   statusCounts?: Record<string, number>

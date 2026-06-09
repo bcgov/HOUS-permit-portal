@@ -286,8 +286,8 @@ const ProjectMeetingInboxRow = observer(function ProjectMeetingInboxRow({
 
       <SearchGridItem>
         <HStack spacing={1} color="text.secondary">
-          {/* MEETING NOTES TODO */}
           <ChatText size={14} />
+          <Text fontSize="sm">{projectMeeting.notesCount}</Text>
         </HStack>
       </SearchGridItem>
     </Box>

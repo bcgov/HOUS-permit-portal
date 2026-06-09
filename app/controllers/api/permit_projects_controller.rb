@@ -16,6 +16,8 @@ class Api::PermitProjectsController < Api::ApplicationController
                   transition_state
                   assign_project_review_collaborator
                   unassign_project_review_collaborator
+                  notes
+                  download_notes_csv
                 ]
   before_action :set_pinned_projects, only: %i[pinned]
 
@@ -368,6 +370,24 @@ class Api::PermitProjectsController < Api::ApplicationController
     render_success options, nil, { blueprint: OptionBlueprint }
   end
 
+  def notes
+    authorize @permit_project, :show?
+    notes = project_notes_scope.order(created_at: :desc)
+
+    render_success notes, nil, { blueprint: NoteBlueprint }
+  end
+
+  def download_notes_csv
+    authorize @permit_project
+
+    send_data NotesExportService.new(
+                project_notes_scope.order(created_at: :asc)
+              ).to_csv,
+              filename: "project-notes-#{@permit_project.id}.csv",
+              type: "text/csv",
+              disposition: "attachment"
+  end
+
   private
 
   def set_pinned_projects
@@ -425,6 +445,16 @@ class Api::PermitProjectsController < Api::ApplicationController
     @permit_project = scope.find(params[:id])
     compute_project_ids_with_outdated_drafts([@permit_project])
     compute_active_project_meeting_ids_by_project_id([@permit_project])
+  end
+
+  def project_notes_scope
+    project_meetings =
+      ProjectMeeting.where(permit_project_id: @permit_project.id).select(:id)
+
+    policy_scope(Note).where(
+      noteable_type: ProjectMeeting.name,
+      noteable_id: project_meetings
+    ).includes(:user, noteable: :permit_project)
   end
 
   def permit_applications_params

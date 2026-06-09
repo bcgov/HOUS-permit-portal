@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_06_04_191200) do
+ActiveRecord::Schema[7.2].define(version: 2026_06_09_214500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -376,6 +376,18 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_04_191200) do
     t.index ["document_type"], name: "index_meeting_request_documents_on_document_type"
     t.index ["project_meeting_id"], name: "index_meeting_request_documents_on_project_meeting_id"
     t.index ["scan_status"], name: "index_meeting_request_documents_on_scan_status"
+  end
+
+  create_table "notes", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "user_id", null: false
+    t.string "noteable_type", null: false
+    t.uuid "noteable_id", null: false
+    t.text "body", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["noteable_type", "noteable_id", "created_at"], name: "index_notes_on_noteable_type_and_noteable_id_and_created_at"
+    t.index ["noteable_type", "noteable_id"], name: "index_notes_on_noteable"
+    t.index ["user_id"], name: "index_notes_on_user_id"
   end
 
   create_table "occupancy_classifications", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -772,6 +784,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_04_191200) do
     t.datetime "updated_at", null: false
     t.datetime "viewed_at"
     t.integer "contact_method"
+    t.integer "notes_count", default: 0, null: false
     t.index ["closed_at"], name: "index_project_meetings_on_closed_at"
     t.index ["completed_at"], name: "index_project_meetings_on_completed_at"
     t.index ["contact_method"], name: "index_project_meetings_on_contact_method"
@@ -1292,6 +1305,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_04_191200) do
   add_foreign_key "jurisdictions", "jurisdictions", column: "regional_district_id"
   add_foreign_key "make_up_air_fuels", "part_3_step_code_checklists", column: "checklist_id", on_delete: :cascade
   add_foreign_key "meeting_request_documents", "project_meetings"
+  add_foreign_key "notes", "users"
   add_foreign_key "occupancy_classifications", "part_3_step_code_checklists", column: "checklist_id", on_delete: :cascade
   add_foreign_key "overheating_codes", "jurisdictions"
   add_foreign_key "overheating_codes", "users", column: "creator_id"

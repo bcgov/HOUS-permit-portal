@@ -21,6 +21,7 @@ class ProjectMeeting < ApplicationRecord
   has_parent :permit_project
 
   has_many :meeting_request_documents, dependent: :destroy
+  has_many :notes, as: :noteable, dependent: :destroy
   accepts_nested_attributes_for :meeting_request_documents, allow_destroy: true
 
   enum :requester_relationship,
@@ -113,6 +114,7 @@ class ProjectMeeting < ApplicationRecord
       submitted_at: submitted_at,
       confirmed_date: confirmed_date,
       scheduled_at: scheduled_at,
+      notes_count: notes_count,
       created_at: created_at,
       updated_at: updated_at,
       discarded: parent&.discarded_at.present?

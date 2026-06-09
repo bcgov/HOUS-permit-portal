@@ -30,6 +30,7 @@ export const ProjectMeetingModel = types
     closedAt: types.maybeNull(types.Date),
     meetingUrl: types.maybeNull(types.string),
     viewedAt: types.maybeNull(types.Date),
+    notesCount: types.optional(types.number, 0),
     projectNumber: types.maybeNull(types.string),
     projectAddress: types.maybeNull(types.string),
     projectPid: types.maybeNull(types.string),
@@ -78,6 +79,9 @@ export const ProjectMeetingModel = types
     },
   }))
   .actions((self) => ({
+    setNotesCount(count: number) {
+      self.notesCount = count
+    },
     markAsViewed: flow(function* () {
       const wasUnread = !self.viewedAt
       const response = yield* toGenerator(self.environment.api.viewProjectMeeting(self.permitProjectId, self.id))

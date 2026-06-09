@@ -126,7 +126,11 @@ export const SubmitterProjectMeetingDetailContent = observer(
           <RequesterInformationSection projectMeeting={currentProjectMeeting} />
           <RequestDetailsSection projectMeeting={currentProjectMeeting} />
           <DocumentsSection documents={documents} />
-          <MeetingNotesSection status={currentProjectMeeting.status} />
+          <MeetingNotesSection
+            status={currentProjectMeeting.status}
+            notes={projectMeetingStore.currentProjectMeetingNotes}
+            onDownloadNotes={() => projectMeetingStore.downloadProjectMeetingNotesCsv(currentProjectMeeting.id)}
+          />
         </Box>
       </Box>
     )

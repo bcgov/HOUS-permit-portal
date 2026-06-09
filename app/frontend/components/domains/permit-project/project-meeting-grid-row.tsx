@@ -1,4 +1,5 @@
-import { Text } from "@chakra-ui/react"
+import { HStack, Text } from "@chakra-ui/react"
+import { ChatText } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -32,9 +33,10 @@ export const ProjectMeetingGridRow = observer(({ permitProjectId, projectMeeting
         <ProjectMeetingStatusTag status={projectMeeting.status} />
       </SearchGridItem>
       <SearchGridItem>
-        {/* MEETING NOTES TODO */}
-        {/* Populate the notes column once its source and meaning are finalized. It should show the count of the total number of notes */}
-        {null}
+        <HStack spacing={1} color="text.secondary">
+          <ChatText size={14} />
+          <Text>{projectMeeting.notesCount}</Text>
+        </HStack>
       </SearchGridItem>
     </SearchGridRow>
   )

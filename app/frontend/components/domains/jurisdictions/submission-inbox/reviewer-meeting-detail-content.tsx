@@ -57,7 +57,9 @@ export const ReviewerMeetingDetailContent = observer(({ jurisdictionId }: Review
   const canCancelMeeting = currentProjectMeeting.allowedManualTransitions.includes(EProjectMeetingStatus.closed)
   const showReOpenRequest = currentProjectMeeting.status === EProjectMeetingStatus.closed
   const projectLink = `/jurisdictions/${jurisdictionId}/submission-inbox/projects/${currentProjectMeeting.permitProjectId}/overview`
-  const internalNotesLink = projectLink
+  const internalNotesLink = `/jurisdictions/${jurisdictionId}/submission-inbox/projects/${currentProjectMeeting.permitProjectId}/notes`
+  const canAddNote = currentUser?.isReviewStaff && currentProjectMeeting.isActive
+  const notes = projectMeetingStore.currentProjectMeetingNotes
 
   const handleCancelMeeting = async (closeModal: () => void) => {
     setIsCancelling(true)
@@ -73,6 +75,11 @@ export const ReviewerMeetingDetailContent = observer(({ jurisdictionId }: Review
     } else {
       uiStore.flashMessage.show(EFlashMessageStatus.error, null, t("projectMeeting.detail.reviewer.cancelError"), 5000)
     }
+  }
+
+  const handleAddNote = async (body: string) => {
+    const response = await projectMeetingStore.createProjectMeetingNote(currentProjectMeeting.id, body)
+    return response.ok
   }
 
   return (
@@ -135,8 +142,12 @@ export const ReviewerMeetingDetailContent = observer(({ jurisdictionId }: Review
         <DocumentsSection documents={documents} />
         <MeetingNotesSection
           status={currentProjectMeeting.status}
+          notes={notes}
           showVisibilityBanner
           internalNotesLink={internalNotesLink}
+          canAddNote={canAddNote}
+          onAddNote={handleAddNote}
+          onDownloadNotes={() => projectMeetingStore.downloadProjectMeetingNotesCsv(currentProjectMeeting.id)}
         />
       </Box>
     </Box>

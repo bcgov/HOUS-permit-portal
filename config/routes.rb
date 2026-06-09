@@ -194,7 +194,13 @@ Rails.application.routes.draw do
       get "form_bc_addresses", on: :collection
     end
 
-    resources :project_meetings, only: %i[show]
+    resources :project_meetings, only: %i[show] do
+      resources :notes,
+                only: %i[index create],
+                controller: "project_meeting_notes" do
+        get :download_csv, on: :collection
+      end
+    end
 
     resources :permit_applications, only: %i[create update show destroy] do
       collection { patch :reorder }
@@ -266,6 +272,8 @@ Rails.application.routes.draw do
       get "permits", on: :member, to: "permit_projects#show"
       get "overview", on: :member, to: "permit_projects#show"
       member do
+        get :notes
+        get "notes/download_csv", to: "permit_projects#download_notes_csv"
         post :pin
         delete :unpin
         get :submission_collaborator_options

@@ -377,6 +377,13 @@ en:
       invalid_transition:
         title: Error
         message: "Project meeting request status could not be updated"
+    note:
+      create_success:
+        title: ""
+        message: "Note added successfully!"
+      create_error:
+        title: Error
+        message: "Note could not be added"
     contact:
       options_error:
         title: Error
