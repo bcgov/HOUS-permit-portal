@@ -119,6 +119,10 @@ class PermitProject < ApplicationRecord
     project_meetings.active.order(created_at: :desc).first
   end
 
+  def has_active_project_meeting
+    project_meetings.active.exists?
+  end
+
   def days_in_queue
     seconds = queue_time_seconds || 0
     seconds +=
@@ -186,6 +190,7 @@ class PermitProject < ApplicationRecord
       inbox_rollup_status: inbox_rollup_status,
       viewed_at: viewed_at,
       enqueued_at: enqueued_at,
+      has_active_project_meeting: has_active_project_meeting,
       forcasted_completion_date: forcasted_completion_date,
       requirement_template_ids:
         permit_applications

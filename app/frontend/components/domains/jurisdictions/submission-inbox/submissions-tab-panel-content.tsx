@@ -17,6 +17,7 @@ import { ApplicationKanbanBoard } from "./application-kanban-board"
 import {
   AssignedFilter,
   DaysInQueueFilter,
+  MeetingRequestsFilter,
   ProjectStateFilter,
   RequirementTemplateInboxFilter,
   StatusFilter,
@@ -213,6 +214,14 @@ export const SubmissionsTabPanelContent = observer(function SubmissionsTabPanelC
                   onApply={() => activeSearchStore.search()}
                   badgeCount={jurisdictionUnreadCount}
                 />
+                {viewMode === EInboxViewMode.projects && (
+                  <MeetingRequestsFilter
+                    value={permitProjectSearch.meetingRequestFilter}
+                    onChange={(val) => permitProjectSearch.setMeetingRequestFilter(val)}
+                    onApply={() => permitProjectSearch.search()}
+                    onClear={() => permitProjectSearch.search()}
+                  />
+                )}
                 <RequirementTemplateInboxFilter
                   value={[...activeSearchStore.requirementTemplateIdFilter]}
                   onChange={(val) => activeSearchStore.setRequirementTemplateIdFilter(val)}

@@ -321,6 +321,83 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitProjects,
       end
     end
 
+    context "with meeting_request filter" do
+      before do
+        create(:project_meeting, :open, permit_project: project_a)
+        create(:project_meeting, :scheduled, permit_project: project_b)
+        create(:project_meeting, :completed, permit_project: project_c)
+        PermitProject.reindex
+      end
+
+      context "only_show active meetings" do
+        let(:search_params) do
+          {
+            query: "",
+            page: 1,
+            per_page: 50,
+            filters: {
+              meeting_request: "only_show"
+            }
+          }
+        end
+
+        it "returns only projects with active meetings" do
+          perform_search
+          ids = search_result_ids
+
+          expect(ids).to include(project_a.id, project_b.id)
+          expect(ids).not_to include(project_c.id)
+        end
+      end
+
+      context "hide active meetings" do
+        let(:search_params) do
+          {
+            query: "",
+            page: 1,
+            per_page: 50,
+            filters: {
+              meeting_request: "hide"
+            }
+          }
+        end
+
+        it "returns only projects without active meetings" do
+          perform_search
+          ids = search_result_ids
+
+          expect(ids).to include(project_c.id)
+          expect(ids).not_to include(project_a.id, project_b.id)
+        end
+      end
+
+      context "in kanban mode" do
+        let(:search_params) do
+          {
+            query: "",
+            mode: "kanban",
+            per_column: 10,
+            filters: {
+              meeting_request: "only_show"
+            }
+          }
+        end
+
+        it "applies the active meeting filter to column totals" do
+          perform_search
+          meta =
+            controller.instance_variable_get(:@jurisdiction_permit_project_meta)
+
+          expect(search_result_ids).to contain_exactly(
+            project_a.id,
+            project_b.id
+          )
+          expect(meta[:column_totals]["queued"]).to eq(1)
+          expect(meta[:column_totals]["in_progress"]).to eq(1)
+        end
+      end
+    end
+
     context "with days_in_queue filter" do
       context "gte operator" do
         let(:search_params) do

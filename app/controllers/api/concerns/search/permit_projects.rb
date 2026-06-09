@@ -52,6 +52,7 @@ module Api::Concerns::Search::PermitProjects
       :per_page,
       filters: [
         :show_archived,
+        :active_meeting,
         { jurisdiction_id: [] },
         { rollup_status: [] },
         { requirement_template_ids: [] }
@@ -86,6 +87,13 @@ module Api::Concerns::Search::PermitProjects
     requirement_template_ids = search_filters.delete(:requirement_template_ids)
     if requirement_template_ids.present?
       search_filters[:requirement_template_ids] = requirement_template_ids
+    end
+
+    active_meeting = search_filters.delete(:active_meeting)
+    if active_meeting == "only_show"
+      search_filters[:has_active_project_meeting] = true
+    elsif active_meeting == "hide"
+      search_filters[:has_active_project_meeting] = false
     end
 
     jurisdiction_ids = search_filters.delete(:jurisdiction_id)

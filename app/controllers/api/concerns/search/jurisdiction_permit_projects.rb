@@ -348,7 +348,12 @@ module Api::Concerns::Search::JurisdictionPermitProjects
 
     search_filters.delete(:days_in_queue)
 
-    # ### SUBMISSION INDEX STUB FEATURE - meeting_request
+    meeting_request = search_filters.delete(:meeting_request)
+    if meeting_request == "only_show"
+      and_conditions << { has_active_project_meeting: true }
+    elsif meeting_request == "hide"
+      and_conditions << { has_active_project_meeting: false }
+    end
 
     assigned = search_filters.delete(:assigned)
     if assigned.present?
