@@ -60,14 +60,15 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
       expect(response).to have_http_status(:forbidden)
     end
 
-    it "blocks creating a second active meeting request" do
-      create(:project_meeting, permit_project: permit_project)
+    it "allows creating a draft meeting request when an active request exists" do
+      create(:project_meeting, :open, permit_project: permit_project)
 
       post "/api/permit_projects/#{permit_project.id}/meetings",
            headers: headers,
            as: :json
 
-      expect(response).to have_http_status(:unprocessable_content)
+      expect(response).to have_http_status(:created)
+      expect(json_response.dig("data", "status")).to eq("draft")
     end
   end
 
@@ -440,6 +441,18 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
            as: :json
 
       expect(response).to have_http_status(:unprocessable_content)
+    end
+
+    it "blocks submitting when another active meeting request exists" do
+      create(:project_meeting, :open, permit_project: permit_project)
+      meeting = create(:project_meeting, permit_project: permit_project)
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/submit",
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(meeting.reload).to be_draft
     end
 
     it "submits non-owner requests with authorization documents" do

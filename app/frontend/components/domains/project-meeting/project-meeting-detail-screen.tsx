@@ -4,7 +4,7 @@ import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useParams } from "react-router-dom"
+import { Navigate, useParams } from "react-router-dom"
 import { datefnsTableDateTimeFormat } from "../../../constants"
 import { usePermitProject } from "../../../hooks/resources/use-permit-project"
 import { useProjectMeeting } from "../../../hooks/resources/use-project-meeting"
@@ -16,8 +16,7 @@ import { LoadingScreen } from "../../shared/base/loading-screen"
 import { ConfirmationModal } from "../../shared/confirmation-modal"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { ProjectMeetingStatusTag } from "../../shared/project-meetings/project-meeting-status-tag"
-import { NotScheduledBanner } from "./detail/banners/not-scheduled-banner"
-import { RequesterScheduledMeetingBanner } from "./detail/banners/requester-scheduled-meeting-banner"
+import { ProjectMeetingStatusBanner } from "./detail/banners/project-meeting-status-banner"
 import { DocumentsSection } from "./detail/sections/documents-section"
 import { MeetingNotesSection } from "./detail/sections/meeting-notes-section"
 import { ProjectInformationSection } from "./detail/sections/project-information-section"
@@ -41,10 +40,16 @@ export const SubmitterProjectMeetingDetailContent = observer(
     if (error) return <ErrorScreen error={error} />
     if (isLoading || !currentProjectMeeting) return <LoadingScreen />
     if (permitProject.id !== permitProjectId) return <LoadingScreen />
+    if (currentProjectMeeting.status === EProjectMeetingStatus.draft && !permitProject.activeProjectMeeting) {
+      return (
+        <Navigate
+          to={`/projects/${permitProjectId}/meetings/${currentProjectMeeting.id}/edit/project-information`}
+          replace
+        />
+      )
+    }
 
     const documents = currentProjectMeeting.meetingRequestDocuments.filter((document) => !document._destroy)
-    const hasScheduledDetails =
-      !!currentProjectMeeting.scheduledAt || !!currentProjectMeeting.confirmedDate || !!currentProjectMeeting.meetingUrl
     const canCancelMeeting =
       permitProject.isOwner &&
       [EProjectMeetingStatus.open, EProjectMeetingStatus.scheduled].includes(currentProjectMeeting.status)
@@ -61,14 +66,6 @@ export const SubmitterProjectMeetingDetailContent = observer(
       } else {
         uiStore.flashMessage.show(EFlashMessageStatus.error, null, t("projectMeeting.detail.cancelError"), 5000)
       }
-    }
-
-    const renderStatusBanner = () => {
-      if (hasScheduledDetails) {
-        return <RequesterScheduledMeetingBanner projectMeeting={currentProjectMeeting} />
-      }
-
-      return <NotScheduledBanner />
     }
 
     return (
@@ -119,7 +116,11 @@ export const SubmitterProjectMeetingDetailContent = observer(
         </HStack>
 
         <Box maxW="3xl">
-          {renderStatusBanner()}
+          <ProjectMeetingStatusBanner
+            activeProjectMeeting={permitProject.activeProjectMeeting}
+            permitProjectId={permitProject.id}
+            projectMeeting={currentProjectMeeting}
+          />
 
           <ProjectInformationSection permitProject={permitProject} />
           <RequesterInformationSection projectMeeting={currentProjectMeeting} />

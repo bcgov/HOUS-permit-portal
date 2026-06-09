@@ -1621,10 +1621,31 @@ Thank you,
             keepMeetingRequestOpen: "No, keep request open",
             cancelError: "We couldn't cancel your meeting request. Please try again.",
             sentOn: "Sent {{date}}",
-            scheduledTitle: "Meeting details",
-            notScheduledTitle: "Meeting not scheduled yet",
-            notScheduledDescription:
-              "The building authority has received your request and will contact you directly to arrange a meeting time. Once the meeting is scheduled, the date, time, and meeting details will appear here.",
+            statusBanner: {
+              draft: {
+                title: "Meeting request not sent yet",
+                description: "Finish the request steps and send your meeting request when you are ready.",
+                activeDescription:
+                  "This draft cannot be sent because another meeting request is already active for this project.",
+                viewActiveRequest: "View the active meeting request",
+              },
+              open: {
+                title: "Meeting not scheduled yet",
+                description:
+                  "The building authority has received your request and will contact you directly to arrange a meeting time. Once the meeting is scheduled, the date, time, and meeting details will appear here.",
+              },
+              scheduled: {
+                title: "Meeting details",
+              },
+              completed: {
+                title: "Meeting completed",
+                description: "This meeting request has been marked as completed.",
+              },
+              closed: {
+                title: "Meeting request closed",
+                description: "This meeting request has been closed and is no longer active.",
+              },
+            },
             confirmedDate: "Confirmed date",
             scheduledAt: "Scheduled time",
             meetingUrl: "Meeting link",

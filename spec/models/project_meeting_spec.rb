@@ -96,21 +96,31 @@ RSpec.describe ProjectMeeting, type: :model do
       expect(meeting.errors[:meeting_url]).to be_present
     end
 
-    it "allows only one active meeting request per project" do
+    it "does not treat draft meeting requests as active" do
       permit_project = create(:permit_project)
       create(:project_meeting, permit_project: permit_project)
 
-      meeting = build(:project_meeting, permit_project: permit_project)
+      meeting = build(:project_meeting, :open, permit_project: permit_project)
+
+      expect(meeting).to be_valid
+    end
+
+    it "allows only one active meeting request per project" do
+      permit_project = create(:permit_project)
+      create(:project_meeting, :open, permit_project: permit_project)
+
+      meeting =
+        build(:project_meeting, :scheduled, permit_project: permit_project)
 
       expect(meeting).not_to be_valid
       expect(meeting.errors[:permit_project]).to be_present
     end
 
-    it "allows a new active request after the prior request is scheduled" do
+    it "allows a new active request after the prior request is completed" do
       permit_project = create(:permit_project)
-      create(:project_meeting, :scheduled, permit_project: permit_project)
+      create(:project_meeting, :completed, permit_project: permit_project)
 
-      meeting = build(:project_meeting, permit_project: permit_project)
+      meeting = build(:project_meeting, :open, permit_project: permit_project)
 
       expect(meeting).to be_valid
     end
