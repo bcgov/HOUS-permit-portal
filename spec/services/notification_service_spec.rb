@@ -787,12 +787,12 @@ RSpec.describe NotificationService do
     it "sends only to confirmed property information recipient emails when enabled and requested" do
       meeting = create(:project_meeting, request_property_information: true)
       jurisdiction = meeting.permit_project.jurisdiction
-      jurisdiction.update!(property_information_requests_enabled: true)
       create(
         :property_information_submission_contact,
         jurisdiction: jurisdiction,
         email: "property-info@example.com"
       )
+      jurisdiction.update!(property_information_requests_enabled: true)
 
       expect {
         described_class.publish_property_information_request_received_event(
@@ -825,12 +825,12 @@ RSpec.describe NotificationService do
     it "does not send when the submitter did not request property information" do
       meeting = create(:project_meeting, request_property_information: false)
       jurisdiction = meeting.permit_project.jurisdiction
-      jurisdiction.update!(property_information_requests_enabled: true)
       create(
         :property_information_submission_contact,
         jurisdiction: jurisdiction,
         email: "property-info@example.com"
       )
+      jurisdiction.update!(property_information_requests_enabled: true)
 
       expect {
         described_class.publish_property_information_request_received_event(
@@ -844,8 +844,9 @@ RSpec.describe NotificationService do
 
     it "does not send when no recipients are configured" do
       meeting = create(:project_meeting, request_property_information: true)
-      meeting.permit_project.jurisdiction.update!(
-        property_information_requests_enabled: true
+      meeting.permit_project.jurisdiction.update_column(
+        :property_information_requests_enabled,
+        true
       )
 
       expect {

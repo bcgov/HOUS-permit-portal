@@ -10,4 +10,8 @@ class PropertyInformationSubmissionContact < SubmissionContact
   def confirmation_configured_feature
     "property information request notifications"
   end
+
+  def feature_enabled_attribute
+    :property_information_requests_enabled?
+  end
 end

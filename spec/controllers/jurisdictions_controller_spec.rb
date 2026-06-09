@@ -215,6 +215,7 @@ RSpec.describe Api::JurisdictionsController, type: :controller do
   describe "PATCH #update project meetings flag" do
     it "allows jurisdiction managers" do
       manager = create(:user, :review_manager, jurisdiction: jurisdiction)
+      create(:meeting_submission_contact, jurisdiction: jurisdiction)
       sign_in manager
 
       patch :update,
@@ -232,6 +233,10 @@ RSpec.describe Api::JurisdictionsController, type: :controller do
 
     it "updates property information request access" do
       manager = create(:user, :review_manager, jurisdiction: jurisdiction)
+      create(
+        :property_information_submission_contact,
+        jurisdiction: jurisdiction
+      )
       sign_in manager
 
       patch :update,
@@ -255,6 +260,7 @@ RSpec.describe Api::JurisdictionsController, type: :controller do
     it "allows technical support members" do
       tech = create(:user, role: :technical_support)
       create(:jurisdiction_membership, user: tech, jurisdiction: jurisdiction)
+      create(:meeting_submission_contact, jurisdiction: jurisdiction)
       sign_in tech
 
       patch :update,

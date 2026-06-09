@@ -107,6 +107,8 @@ class Jurisdiction < ApplicationRecord
             allow_blank: true
   validates :office_telephone, phone: true, allow_blank: true
   validate :inbox_enabled_requires_inbox_setup
+  validate :project_meetings_enabled_requires_setup
+  validate :property_information_requests_enabled_requires_setup
   validate :no_duplicate_part3_occupancy_pathways
 
   # Validation to ensure at least one sandbox exists
@@ -536,6 +538,34 @@ class Jurisdiction < ApplicationRecord
         )
       )
     end
+  end
+
+  def project_meetings_enabled_requires_setup
+    return if new_record?
+    return unless project_meetings_enabled
+    return unless will_save_change_to_project_meetings_enabled?
+    return if confirmed_project_meeting_contacts.exists?
+
+    errors.add(
+      :project_meetings_enabled,
+      I18n.t(
+        "activerecord.errors.models.jurisdiction.enabled_project_meetings_requires_setup"
+      )
+    )
+  end
+
+  def property_information_requests_enabled_requires_setup
+    return if new_record?
+    return unless property_information_requests_enabled
+    return unless will_save_change_to_property_information_requests_enabled?
+    return if confirmed_property_information_contacts.exists?
+
+    errors.add(
+      :property_information_requests_enabled,
+      I18n.t(
+        "activerecord.errors.models.jurisdiction.enabled_property_information_requests_requires_setup"
+      )
+    )
   end
 
   def no_duplicate_part3_occupancy_pathways

@@ -58,22 +58,34 @@ class Api::JurisdictionsController < Api::ApplicationController
         end
       end
     end
-    if @jurisdiction.update(permitted_params)
-      render_success @jurisdiction,
-                     "jurisdiction.update_success",
-                     {
-                       blueprint: JurisdictionBlueprint,
-                       blueprint_opts: {
-                         view: :base,
-                         current_user: current_user
+    begin
+      if @jurisdiction.update(permitted_params)
+        render_success @jurisdiction,
+                       "jurisdiction.update_success",
+                       {
+                         blueprint: JurisdictionBlueprint,
+                         blueprint_opts: {
+                           view: :base,
+                           current_user: current_user
+                         }
                        }
+      else
+        render_error "jurisdiction.update_error",
+                     message_opts: {
+                       error_message:
+                         @jurisdiction.errors.full_messages.join(", ")
                      }
-    else
-      render_error "jurisdiction.update_error",
-                   message_opts: {
-                     error_message:
-                       @jurisdiction.errors.full_messages.join(", ")
-                   }
+      end
+    rescue ActiveRecord::RecordNotDestroyed => e
+      record = e.respond_to?(:record) ? e.record : nil
+      error_message =
+        record&.errors&.full_messages&.to_sentence.presence || e.message
+
+      render_error(
+        "jurisdiction.update_error",
+        { message_opts: { error_message: error_message } },
+        e
+      )
     end
   end
 

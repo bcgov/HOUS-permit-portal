@@ -10,4 +10,8 @@ class MeetingSubmissionContact < SubmissionContact
   def confirmation_configured_feature
     "project meeting notifications"
   end
+
+  def feature_enabled_attribute
+    :project_meetings_enabled?
+  end
 end

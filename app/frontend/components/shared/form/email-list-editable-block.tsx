@@ -1,4 +1,4 @@
-import { Alert, Box, Button, FormControl, HStack, Input, VStack } from "@chakra-ui/react"
+import { Alert, Badge, Box, Button, FormControl, HStack, Input, VStack } from "@chakra-ui/react"
 import { Pencil, Plus, Warning } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
@@ -83,10 +83,17 @@ export const EmailListEditableBlock = observer(function EmailListEditableBlock({
 
   const onRemove = (index: number, item?: IEmailListItem) => {
     if (item && update && buildDestroyedItem) {
-      update(index, buildDestroyedItem(item))
+      const destroyedItem = buildDestroyedItem(item)
+      update(index, destroyedItem)
     } else {
       remove(index)
     }
+  }
+
+  const onRestore = (index: number, item?: IEmailListItem) => {
+    if (!item || !update) return
+
+    update(index, item)
   }
 
   useEffect(() => {
@@ -112,23 +119,46 @@ export const EmailListEditableBlock = observer(function EmailListEditableBlock({
         {fields.map((f, index) => {
           const trueIndex = getIndex(f)
           const itemId = getValues(`${fieldArrayName}.${trueIndex}.id`)
+          const isMarkedForDestruction = Boolean(getValues(`${fieldArrayName}.${trueIndex}._destroy`))
           const item = itemId && getItem ? getItem(itemId) : undefined
           return (
             <React.Fragment key={f.id || generateUUID()}>
               <Input type="hidden" name={`${fieldArrayName}.${trueIndex}.id`} value={itemId || ""} />
-              <HStack flex={1} w="full">
+              <HStack
+                flex={1}
+                w="full"
+                opacity={isMarkedForDestruction ? 0.65 : 1}
+                bg={isMarkedForDestruction ? "semantic.errorLight" : undefined}
+                borderColor={isMarkedForDestruction ? "semantic.error" : undefined}
+                borderWidth={isMarkedForDestruction ? 1 : 0}
+                borderRadius="md"
+                p={isMarkedForDestruction ? 2 : 0}
+              >
                 <EmailFormControl
                   pos="relative"
                   label={emailLabel}
                   fieldName={`${fieldArrayName}.${trueIndex}.email`}
-                  inputProps={{ isDisabled: !isEditing }}
+                  inputProps={{
+                    isDisabled: !isEditing || isMarkedForDestruction,
+                    textDecoration: isMarkedForDestruction ? "line-through" : undefined,
+                  }}
                   required={isEditing}
-                  validate={isEditing}
+                  validate={isEditing && !isMarkedForDestruction}
                   handleRemove={() => onRemove(trueIndex, item)}
-                  isRemovable={isEditing}
+                  isRemovable={isEditing && !isMarkedForDestruction}
                   hideLabel={index !== 0}
                   showIcon
                 />
+                {isEditing && isMarkedForDestruction && (
+                  <HStack alignSelf="end" mb={1.5} spacing={2}>
+                    <Badge colorScheme="red" variant="subtle">
+                      {t("ui.markedForRemoval")}
+                    </Badge>
+                    <Button size="xs" variant="secondary" onClick={() => onRestore(trueIndex, item)}>
+                      {t("ui.undo")}
+                    </Button>
+                  </HStack>
+                )}
                 {!isEditing && showConfirmationWarning && item && !item.confirmedAt && confirmationRequiredLabel && (
                   <Alert
                     status="warning"
