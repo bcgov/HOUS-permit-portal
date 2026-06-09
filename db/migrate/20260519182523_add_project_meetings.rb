@@ -10,6 +10,11 @@ class AddProjectMeetings < ActiveRecord::Migration[7.2]
                :boolean,
                default: false,
                null: false
+    add_column :jurisdictions,
+               :property_information_requests_enabled,
+               :boolean,
+               default: false,
+               null: false
     add_column :preferences,
                :enable_in_app_project_meeting_submitted_notification,
                :boolean,

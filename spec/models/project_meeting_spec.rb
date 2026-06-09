@@ -76,6 +76,26 @@ RSpec.describe ProjectMeeting, type: :model do
       expect(meeting.errors[:confirmed_date]).to be_present
     end
 
+    it "requires a contact method when scheduled" do
+      meeting = build(:project_meeting, :scheduled, contact_method: nil)
+
+      expect(meeting).not_to be_valid
+      expect(meeting.errors[:contact_method]).to be_present
+    end
+
+    it "requires a meeting link for videoconference meetings" do
+      meeting =
+        build(
+          :project_meeting,
+          :scheduled,
+          contact_method: :videoconference,
+          meeting_url: nil
+        )
+
+      expect(meeting).not_to be_valid
+      expect(meeting.errors[:meeting_url]).to be_present
+    end
+
     it "allows only one active meeting request per project" do
       permit_project = create(:permit_project)
       create(:project_meeting, permit_project: permit_project)
@@ -139,11 +159,51 @@ RSpec.describe ProjectMeeting, type: :model do
         :notify_project_meeting_submitted_to_jurisdiction
       ).with(meeting, "meetings@example.com")
     end
+
+    it "enqueues property information notifications when enabled and requested" do
+      meeting = create(:project_meeting, request_property_information: true)
+      meeting.permit_project.jurisdiction.update!(
+        property_information_requests_enabled: true
+      )
+      create(
+        :property_information_submission_contact,
+        jurisdiction: meeting.permit_project.jurisdiction,
+        email: "property-info@example.com"
+      )
+
+      expect { meeting.submit_request! }.to have_enqueued_mail(
+        PermitHubMailer,
+        :notify_property_information_requested
+      ).with(meeting, "property-info@example.com")
+    end
+
+    it "does not enqueue property information notifications when not requested" do
+      meeting = create(:project_meeting, request_property_information: false)
+      meeting.permit_project.jurisdiction.update!(
+        property_information_requests_enabled: true
+      )
+      create(
+        :property_information_submission_contact,
+        jurisdiction: meeting.permit_project.jurisdiction,
+        email: "property-info@example.com"
+      )
+
+      expect { meeting.submit_request! }.not_to have_enqueued_mail(
+        PermitHubMailer,
+        :notify_property_information_requested
+      )
+    end
   end
 
   describe "status transitions" do
     it "schedules an open meeting request" do
-      meeting = create(:project_meeting, :open, confirmed_date: 1.week.from_now)
+      meeting =
+        create(
+          :project_meeting,
+          :open,
+          contact_method: :phone,
+          confirmed_date: 1.week.from_now
+        )
 
       meeting.schedule!
 
@@ -151,8 +211,49 @@ RSpec.describe ProjectMeeting, type: :model do
       expect(meeting.scheduled_at).to be_present
     end
 
+    it "enqueues a scheduled meeting email for the requester" do
+      meeting =
+        create(
+          :project_meeting,
+          :open,
+          contact_method: :phone,
+          confirmed_date: 1.week.from_now
+        )
+
+      expect { meeting.schedule! }.to have_enqueued_mail(
+        PermitHubMailer,
+        :notify_project_meeting_scheduled
+      ).with(meeting)
+    end
+
+    it "enqueues scheduled meeting emails for jurisdiction contacts" do
+      meeting =
+        create(
+          :project_meeting,
+          :open,
+          contact_method: :phone,
+          confirmed_date: 1.week.from_now
+        )
+      create(
+        :meeting_submission_contact,
+        jurisdiction: meeting.permit_project.jurisdiction,
+        email: "meetings@example.com"
+      )
+
+      expect { meeting.schedule! }.to have_enqueued_mail(
+        PermitHubMailer,
+        :notify_project_meeting_scheduled_to_jurisdiction
+      ).with(meeting, "meetings@example.com")
+    end
+
     it "does not schedule without a confirmed date" do
-      meeting = create(:project_meeting, :open, confirmed_date: nil)
+      meeting =
+        create(
+          :project_meeting,
+          :open,
+          contact_method: :phone,
+          confirmed_date: nil
+        )
 
       expect { meeting.schedule! }.to raise_error(AASM::InvalidTransition)
       expect(meeting.reload).to be_open

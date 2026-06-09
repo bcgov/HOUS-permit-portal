@@ -3,6 +3,7 @@ import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import {
   EMeetingRequestDocumentType,
+  EProjectMeetingContactMethod,
   EProjectMeetingRequesterRelationship,
   EProjectMeetingStatus,
 } from "../types/enums"
@@ -21,6 +22,7 @@ export const ProjectMeetingModel = types
     projectDescription: types.maybeNull(types.string),
     meetingNotes: types.maybeNull(types.string),
     requestPropertyInformation: types.maybeNull(types.boolean),
+    contactMethod: types.maybeNull(types.enumeration(Object.values(EProjectMeetingContactMethod))),
     submittedAt: types.maybeNull(types.Date),
     confirmedDate: types.maybeNull(types.Date),
     scheduledAt: types.maybeNull(types.Date),

@@ -11,6 +11,7 @@ class ProjectMeetingBlueprint < Blueprinter::Base
          :project_description,
          :meeting_notes,
          :request_property_information,
+         :contact_method,
          :submitted_at,
          :confirmed_date,
          :scheduled_at,

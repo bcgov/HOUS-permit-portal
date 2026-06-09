@@ -30,6 +30,7 @@ class ProjectMeetingPolicy < ApplicationPolicy
   end
 
   def show?
+    # TODO: confirm if collaborators can see all meeting details including documents
     user_is_owner? || user_is_review_staff_for_jurisdiction?
   end
 

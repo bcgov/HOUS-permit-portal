@@ -782,4 +782,121 @@ RSpec.describe NotificationService do
       )
     end
   end
+
+  describe ".publish_property_information_request_received_event" do
+    it "sends only to confirmed property information recipient emails when enabled and requested" do
+      meeting = create(:project_meeting, request_property_information: true)
+      jurisdiction = meeting.permit_project.jurisdiction
+      jurisdiction.update!(property_information_requests_enabled: true)
+      create(
+        :property_information_submission_contact,
+        jurisdiction: jurisdiction,
+        email: "property-info@example.com"
+      )
+
+      expect {
+        described_class.publish_property_information_request_received_event(
+          meeting
+        )
+      }.to have_enqueued_mail(
+        PermitHubMailer,
+        :notify_property_information_requested
+      ).with(meeting, "property-info@example.com")
+    end
+
+    it "does not send when property information requests are disabled" do
+      meeting = create(:project_meeting, request_property_information: true)
+      create(
+        :property_information_submission_contact,
+        jurisdiction: meeting.permit_project.jurisdiction,
+        email: "property-info@example.com"
+      )
+
+      expect {
+        described_class.publish_property_information_request_received_event(
+          meeting
+        )
+      }.not_to have_enqueued_mail(
+        PermitHubMailer,
+        :notify_property_information_requested
+      )
+    end
+
+    it "does not send when the submitter did not request property information" do
+      meeting = create(:project_meeting, request_property_information: false)
+      jurisdiction = meeting.permit_project.jurisdiction
+      jurisdiction.update!(property_information_requests_enabled: true)
+      create(
+        :property_information_submission_contact,
+        jurisdiction: jurisdiction,
+        email: "property-info@example.com"
+      )
+
+      expect {
+        described_class.publish_property_information_request_received_event(
+          meeting
+        )
+      }.not_to have_enqueued_mail(
+        PermitHubMailer,
+        :notify_property_information_requested
+      )
+    end
+
+    it "does not send when no recipients are configured" do
+      meeting = create(:project_meeting, request_property_information: true)
+      meeting.permit_project.jurisdiction.update!(
+        property_information_requests_enabled: true
+      )
+
+      expect {
+        described_class.publish_property_information_request_received_event(
+          meeting
+        )
+      }.not_to have_enqueued_mail(
+        PermitHubMailer,
+        :notify_property_information_requested
+      )
+    end
+  end
+
+  describe ".publish_project_meeting_scheduled_event" do
+    it "sends the scheduled meeting email to the requester" do
+      meeting =
+        create(
+          :project_meeting,
+          :scheduled,
+          contact_method: :phone,
+          meeting_url: nil
+        )
+
+      expect {
+        described_class.publish_project_meeting_scheduled_event(meeting)
+      }.to have_enqueued_mail(
+        PermitHubMailer,
+        :notify_project_meeting_scheduled
+      ).with(meeting)
+    end
+
+    it "sends scheduled meeting emails to jurisdiction project meeting contacts" do
+      meeting =
+        create(
+          :project_meeting,
+          :scheduled,
+          contact_method: :phone,
+          meeting_url: nil
+        )
+      create(
+        :meeting_submission_contact,
+        jurisdiction: meeting.permit_project.jurisdiction,
+        email: "meetings@example.com"
+      )
+
+      expect {
+        described_class.publish_project_meeting_scheduled_event(meeting)
+      }.to have_enqueued_mail(
+        PermitHubMailer,
+        :notify_project_meeting_scheduled_to_jurisdiction
+      ).with(meeting, "meetings@example.com")
+    end
+  end
 end

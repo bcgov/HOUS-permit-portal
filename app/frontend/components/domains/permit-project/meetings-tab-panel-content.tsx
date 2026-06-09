@@ -15,7 +15,7 @@ import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { ActiveProjectMeetingNotice } from "../../shared/project-meetings/active-project-meeting-notice"
-import { ProjectMeetingDetailContent } from "../project-meeting/project-meeting-detail-screen"
+import { SubmitterProjectMeetingDetailContent } from "../project-meeting/project-meeting-detail-screen"
 import { ProjectMeetingGridHeaders } from "./project-meeting-grid-headers"
 import { ProjectMeetingGridRow } from "./project-meeting-grid-row"
 
@@ -23,26 +23,32 @@ interface IProps {
   permitProject: IPermitProject
 }
 
-export const MeetingsTabPanelContent = observer(({ permitProject }: IProps) => {
+const ProjectMeetingFeatureUnavailable = () => {
   const { t } = useTranslation()
-  const { siteConfigurationStore } = useMst()
-  const projectMeetingDetailMatch = useMatch("/projects/:permitProjectId/meetings/:projectMeetingId")
-  const projectMeetingsEnabled = Boolean(
-    siteConfigurationStore.projectMeetingsEnabled && permitProject.jurisdiction?.projectMeetingsEnabled
+
+  return (
+    <Flex direction="column" flex={1} bg="greys.white" p={10}>
+      <ErrorScreen error={new Error(t("projectMeeting.validation.featureUnavailable"))} />
+    </Flex>
   )
+}
+
+const useProjectMeetingsEnabled = (permitProject: IPermitProject) => {
+  const { siteConfigurationStore } = useMst()
+
+  return Boolean(siteConfigurationStore.projectMeetingsEnabled && permitProject.jurisdiction?.projectMeetingsEnabled)
+}
+
+export const MeetingsTabPanelContent = observer(({ permitProject }: IProps) => {
+  const projectMeetingDetailMatch = useMatch("/projects/:permitProjectId/meetings/:projectMeetingId")
+  const projectMeetingsEnabled = useProjectMeetingsEnabled(permitProject)
 
   if (projectMeetingDetailMatch?.params.projectMeetingId) {
-    if (!projectMeetingsEnabled) {
-      return (
-        <Flex direction="column" flex={1} bg="greys.white" p={10}>
-          <ErrorScreen error={new Error(t("projectMeeting.validation.featureUnavailable"))} />
-        </Flex>
-      )
-    }
+    if (!projectMeetingsEnabled) return <ProjectMeetingFeatureUnavailable />
 
     return (
       <Flex direction="column" flex={1} bg="greys.white" p={10}>
-        <ProjectMeetingDetailContent permitProject={permitProject} />
+        <SubmitterProjectMeetingDetailContent permitProject={permitProject} />
       </Flex>
     )
   }

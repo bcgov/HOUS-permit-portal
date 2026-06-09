@@ -237,7 +237,7 @@ RSpec.describe "Api::QaTools", type: :request do
       ).to eq("SupportingDocument")
     end
 
-    it "autofills a draft permit application for any authenticated user" do
+    it "requires update permission to autofill a draft permit application" do
       allow(ENV).to receive(:[]).and_call_original
       allow(ENV).to receive(:[]).with("VITE_QA_MODE").and_return("true")
       sign_in create(:user, :super_admin)
@@ -246,7 +246,7 @@ RSpec.describe "Api::QaTools", type: :request do
            headers: headers,
            as: :json
 
-      expect(response).to have_http_status(:ok)
+      expect(response).to have_http_status(:forbidden)
     end
   end
 end

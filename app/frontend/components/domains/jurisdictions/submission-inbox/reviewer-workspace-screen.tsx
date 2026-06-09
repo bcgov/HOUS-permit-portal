@@ -58,11 +58,15 @@ export const ReviewerWorkspaceScreen = observer(function ReviewerWorkspaceScreen
 
   if (error) return <ErrorScreen error={error} />
   if (!currentJurisdiction || !jurisdictionId) return <LoadingScreen />
-  if (projectMeetingsFlagLoaded && !projectMeetingsEnabled && location.pathname.endsWith("/meetings")) {
+  if (projectMeetingsFlagLoaded && !projectMeetingsEnabled && location.pathname.includes("/meetings")) {
     return <Navigate to={`/jurisdictions/${jurisdictionId}/submission-inbox${location.search}`} replace />
   }
 
   const getTabIndex = () => {
+    if (location.pathname.includes(`/jurisdictions/${jurisdictionId}/meetings`)) {
+      return tabsData.find((tab) => tab.to === "meetings")?.tabIndex ?? 0
+    }
+
     const tabIndex = tabsData.find((tab) => location.pathname.endsWith(`/${tab.to}`))?.tabIndex
     return tabIndex ?? 0
   }

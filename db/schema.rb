@@ -338,6 +338,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_04_191200) do
     t.string "website_url"
     t.boolean "hide_from_search", default: false, null: false
     t.boolean "project_meetings_enabled", default: false, null: false
+    t.boolean "property_information_requests_enabled", default: false, null: false
     t.index ["ltsa_matcher"], name: "index_jurisdictions_on_ltsa_matcher"
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"], name: "index_jurisdictions_on_regional_district_id"
@@ -770,8 +771,10 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_04_191200) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.datetime "viewed_at"
+    t.integer "contact_method"
     t.index ["closed_at"], name: "index_project_meetings_on_closed_at"
     t.index ["completed_at"], name: "index_project_meetings_on_completed_at"
+    t.index ["contact_method"], name: "index_project_meetings_on_contact_method"
     t.index ["permit_project_id"], name: "index_project_meetings_on_active_permit_project", unique: true, where: "(status = ANY (ARRAY[0, 1]))"
     t.index ["permit_project_id"], name: "index_project_meetings_on_permit_project_id"
     t.index ["requested_by_id"], name: "index_project_meetings_on_requested_by_id"
