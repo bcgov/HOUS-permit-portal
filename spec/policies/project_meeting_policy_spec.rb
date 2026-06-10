@@ -93,7 +93,7 @@ RSpec.describe ProjectMeetingPolicy, type: :policy do
     expect(policy(reviewer, open_meeting).mark_as_unviewed?).to be true
   end
 
-  it "allows jurisdiction review staff to create notes on open, scheduled, and completed requests" do
+  it "allows jurisdiction review staff to create notes on open, scheduled, completed, and closed requests" do
     open_meeting =
       create(:project_meeting, :open, permit_project: permit_project)
     scheduled_meeting =
@@ -108,17 +108,13 @@ RSpec.describe ProjectMeetingPolicy, type: :policy do
         :completed,
         permit_project: create(:permit_project, owner:, jurisdiction:)
       )
+    closed_meeting =
+      create(:project_meeting, :closed, permit_project: permit_project)
 
     expect(policy(reviewer, open_meeting).create_note?).to be true
     expect(policy(reviewer, scheduled_meeting).create_note?).to be true
     expect(policy(reviewer, completed_meeting).create_note?).to be true
-  end
-
-  it "blocks note creation on inactive requests" do
-    closed_meeting =
-      create(:project_meeting, :closed, permit_project: permit_project)
-
-    expect(policy(reviewer, closed_meeting).create_note?).to be false
+    expect(policy(reviewer, closed_meeting).create_note?).to be true
   end
 
   it "allows owners and jurisdiction review staff to download meeting notes" do

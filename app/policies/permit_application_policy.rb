@@ -7,8 +7,9 @@ class PermitApplicationPolicy < ApplicationPolicy
       return false unless user.member_of?(record.jurisdiction.id)
       return false unless record.sandbox == sandbox
 
-      !record.new_draft? ||
-        record.permit_project&.project_meetings&.active&.exists?
+      return true unless record.new_draft?
+
+      record.permit_project&.project_meetings&.active&.exists? == true
     end
   end
 

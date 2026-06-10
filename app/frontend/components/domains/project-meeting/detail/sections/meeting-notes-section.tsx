@@ -10,14 +10,12 @@ import { isTipTapEmpty } from "../../../../../utils/utility-functions"
 import { Editor } from "../../../../shared/editor/editor"
 import { SafeTipTapDisplay } from "../../../../shared/editor/safe-tiptap-display"
 import { MeetingNotesVisibilityBanner } from "../banners/meeting-notes-visibility-banner"
-import { ReviewerClosedNotesBanner } from "../banners/reviewer-closed-notes-banner"
 import { DetailSection } from "../detail-section"
 
 interface MeetingNotesSectionProps {
   status: EProjectMeetingStatus
   notes?: INote[]
   showVisibilityBanner?: boolean
-  internalNotesLink?: string | null
   canAddNote?: boolean
   isAddingNote?: boolean
   onAddNote?: (body: string) => Promise<boolean>
@@ -28,7 +26,6 @@ export const MeetingNotesSection = ({
   status,
   notes = [],
   showVisibilityBanner = false,
-  internalNotesLink,
   canAddNote = false,
   isAddingNote = false,
   onAddNote,
@@ -36,7 +33,6 @@ export const MeetingNotesSection = ({
 }: MeetingNotesSectionProps) => {
   const { t } = useTranslation()
   const [body, setBody] = useState("")
-  const showClosedBanner = showVisibilityBanner && status === EProjectMeetingStatus.closed
   const addNoteDisabled = isAddingNote || isTipTapEmpty(body)
 
   const handleAddNote = async () => {
@@ -49,7 +45,6 @@ export const MeetingNotesSection = ({
   return (
     <DetailSection title={t("projectMeeting.detail.notes.title")}>
       {showVisibilityBanner && <MeetingNotesVisibilityBanner />}
-      {showClosedBanner && <ReviewerClosedNotesBanner internalNotesLink={internalNotesLink} />}
 
       {canAddNote && (
         <Box mb={4}>

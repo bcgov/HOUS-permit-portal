@@ -1727,9 +1727,6 @@ Thank you,
               completeError: "We couldn't mark this meeting request as completed. Please try again.",
               notesVisibilityTitle: "Meeting notes are visible to the meeting requester and project collaborators.",
               notesVisibilityDescription: "They can read notes but cannot reply to them.",
-              closedNotesTitle: "This meeting is marked as closed",
-              closedNotesDescription:
-                "You can no longer add notes to this meeting request. Add <internalNotesLink>internal notes</internalNotesLink> to the project instead, or follow up with the primary project contact by their preferred method of communication.",
             },
           },
           status: {

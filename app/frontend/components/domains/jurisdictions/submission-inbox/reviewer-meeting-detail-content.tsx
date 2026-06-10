@@ -73,12 +73,14 @@ export const ReviewerMeetingDetailContent = observer(
       currentProjectMeeting.allowedManualTransitions.includes(EProjectMeetingStatus.completed)
     const canCancelMeeting = currentProjectMeeting.allowedManualTransitions.includes(EProjectMeetingStatus.closed)
     const projectLink = `/jurisdictions/${jurisdictionId}/submission-inbox/projects/${currentProjectMeeting.permitProjectId}/overview`
-    const internalNotesLink = `/jurisdictions/${jurisdictionId}/submission-inbox/projects/${currentProjectMeeting.permitProjectId}/notes`
     const canAddNote =
       currentUser?.isReviewStaff &&
-      [EProjectMeetingStatus.open, EProjectMeetingStatus.scheduled, EProjectMeetingStatus.completed].includes(
-        currentProjectMeeting.status
-      )
+      [
+        EProjectMeetingStatus.open,
+        EProjectMeetingStatus.scheduled,
+        EProjectMeetingStatus.completed,
+        EProjectMeetingStatus.closed,
+      ].includes(currentProjectMeeting.status)
     const notes = projectMeetingStore.currentProjectMeetingNotes
 
     const handleCancelMeeting = async (closeModal: () => void) => {
@@ -187,7 +189,6 @@ export const ReviewerMeetingDetailContent = observer(
             status={currentProjectMeeting.status}
             notes={notes}
             showVisibilityBanner
-            internalNotesLink={internalNotesLink}
             canAddNote={canAddNote}
             onAddNote={handleAddNote}
             onDownloadNotes={() =>

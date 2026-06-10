@@ -64,7 +64,7 @@ RSpec.describe NotePolicy, type: :policy do
     end
 
     context "with an active sandbox" do
-      let(:sandbox) { create(:sandbox, jurisdiction: jurisdiction) }
+      let(:sandbox) { jurisdiction.sandboxes.published.first }
 
       it "only includes notes from that sandbox for jurisdiction review staff" do
         sandbox_project =

@@ -105,21 +105,28 @@ RSpec.describe "Api::Notes", type: :request do
       expect(response).to have_http_status(:forbidden)
     end
 
-    it "blocks notes on closed meetings" do
+    it "allows jurisdiction review staff to create notes for closed meetings" do
       closed_meeting =
         create(:project_meeting, :closed, permit_project: permit_project)
       sign_in reviewer
 
-      post "/api/project_meetings/#{closed_meeting.id}/notes",
-           params: {
-             note: {
-               body: "<p>Too late.</p>"
-             }
-           },
-           headers: headers,
-           as: :json
+      expect do
+        post "/api/project_meetings/#{closed_meeting.id}/notes",
+             params: {
+               note: {
+                 body: "<p>Post-close follow-up.</p>"
+               }
+             },
+             headers: headers,
+             as: :json
+      end.to change(Note, :count).by(1).and change {
+              closed_meeting.reload.notes_count
+            }.from(0).to(1)
 
-      expect(response).to have_http_status(:forbidden)
+      expect(response).to have_http_status(:created)
+      expect(json_response.dig("data", "body")).to eq(
+        "<p>Post-close follow-up.</p>"
+      )
     end
   end
 
