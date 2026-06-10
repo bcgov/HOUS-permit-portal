@@ -555,6 +555,71 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
       expect(json_response.dig("data", "confirmed_date")).to be_present
     end
 
+    it "allows review staff to mark a scheduled meeting request completed" do
+      meeting =
+        create(:project_meeting, :scheduled, permit_project: permit_project)
+      sign_in reviewer
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/transition_status",
+           params: {
+             target_status: "completed"
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("data", "status")).to eq("completed")
+      expect(json_response.dig("data", "completed_at")).to be_present
+      expect(meeting.reload).to be_completed
+    end
+
+    it "does not allow an open meeting request to be marked completed" do
+      meeting = create(:project_meeting, :open, permit_project: permit_project)
+      sign_in reviewer
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/transition_status",
+           params: {
+             target_status: "completed"
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(meeting.reload).to be_open
+    end
+
+    it "does not allow a completed meeting request to be re-opened" do
+      meeting =
+        create(:project_meeting, :completed, permit_project: permit_project)
+      sign_in reviewer
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/transition_status",
+           params: {
+             target_status: "open"
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(meeting.reload).to be_completed
+    end
+
+    it "does not allow a closed meeting request to be re-opened" do
+      meeting =
+        create(:project_meeting, :closed, permit_project: permit_project)
+      sign_in reviewer
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/transition_status",
+           params: {
+             target_status: "open"
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(meeting.reload).to be_closed
+    end
+
     it "returns validation errors when scheduling without a confirmed date" do
       meeting = create(:project_meeting, :open, permit_project: permit_project)
       sign_in reviewer

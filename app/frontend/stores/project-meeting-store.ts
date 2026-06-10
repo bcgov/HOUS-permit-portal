@@ -5,6 +5,7 @@ import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { INote, NoteModel } from "../models/note"
+import { IPermitProject } from "../models/permit-project"
 import { IProjectMeeting, ProjectMeetingModel } from "../models/project-meeting"
 import { EProjectMeetingSortFields, EProjectMeetingStatus } from "../types/enums"
 import { TSearchParams } from "../types/types"
@@ -161,17 +162,17 @@ export const ProjectMeetingStoreModel = types
       }
       return { ok: false, error: responseError(response.data, response.problem) }
     }),
-    downloadProjectMeetingNotesCsv: flow(function* (projectMeetingId: string) {
+    downloadProjectMeetingNotesCsv: flow(function* (projectMeetingId: string, project: IPermitProject) {
       const response = yield* toGenerator(self.environment.api.downloadProjectMeetingNotesCsv(projectMeetingId))
       if (response.ok) {
-        startBlobDownload(response.data, "text/csv", `project-meeting-notes-${projectMeetingId}.csv`)
+        startBlobDownload(response.data, "text/csv", `project-meeting-notes-${project.number}.csv`)
       }
       return response.ok
     }),
-    downloadPermitProjectNotesCsv: flow(function* (permitProjectId: string) {
-      const response = yield* toGenerator(self.environment.api.downloadPermitProjectNotesCsv(permitProjectId))
+    downloadPermitProjectNotesCsv: flow(function* (project: IPermitProject) {
+      const response = yield* toGenerator(self.environment.api.downloadPermitProjectNotesCsv(project.id))
       if (response.ok) {
-        startBlobDownload(response.data, "text/csv", `project-notes-${permitProjectId}.csv`)
+        startBlobDownload(response.data, "text/csv", `project-notes-${project.number}.csv`)
       }
       return response.ok
     }),

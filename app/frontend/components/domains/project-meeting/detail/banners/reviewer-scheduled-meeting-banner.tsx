@@ -57,7 +57,7 @@ export const ReviewerScheduledMeetingBanner = ({ projectMeeting }: ReviewerSched
           </HStack>
         )}
 
-        {/* TODO - Change meeting details — wire up when reviewer scheduling edit flow is implemented */}
+        {/* MEETINGS TODO - Change meeting details — wire up when reviewer scheduling edit flow is implemented */}
         <Button variant="secondary" size="sm" isDisabled alignSelf="flex-start">
           {t("projectMeeting.detail.reviewer.changeMeetingDetails")}
         </Button>

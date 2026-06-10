@@ -1,20 +1,18 @@
-import { Box, Button, Heading, HStack, Text } from "@chakra-ui/react"
+import { Box, Button, Flex, Heading, HStack, Text } from "@chakra-ui/react"
 import { ChatText, Download } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
-import { useParams } from "react-router-dom"
-import { IPermitProject } from "../../../../../models/permit-project"
-import { useMst } from "../../../../../setup/root"
-import { ProjectMeetingNotesList } from "../../../../shared/project-meetings/project-meeting-notes-list"
+import { IPermitProject } from "../../../models/permit-project"
+import { useMst } from "../../../setup/root"
+import { ProjectMeetingNotesList } from "../../shared/project-meetings/project-meeting-notes-list"
 
 interface IProps {
   permitProject: IPermitProject
 }
 
-export const InboxNotesTab = observer(({ permitProject }: IProps) => {
+export const ProjectNotesTabPanelContent = observer(({ permitProject }: IProps) => {
   const { t } = useTranslation()
-  const { jurisdictionId } = useParams<{ jurisdictionId: string }>()
   const { projectMeetingStore } = useMst()
   const notes = projectMeetingStore.currentPermitProjectNotes
 
@@ -23,20 +21,20 @@ export const InboxNotesTab = observer(({ permitProject }: IProps) => {
   }, [permitProject.id, projectMeetingStore])
 
   return (
-    <FlexColumn>
+    <Flex direction="column" flex={1} bg="greys.white" p={10}>
       <Box as="section">
         <HStack align="center" spacing={4} mb={6}>
           <ChatText size={32} />
           <Heading as="h2" size="lg" mb={0}>
-            {t("submissionInbox.projectDetail.notes")}
+            {t("permitProject.details.notes")}
           </Heading>
         </HStack>
 
         <Box bg="background.blueLight" borderRadius="lg" p={8} mb={6}>
           <Heading as="h3" size="md" mb={4}>
-            {t("submissionInbox.projectDetail.notesInfoTitle")}
+            {t("permitProject.notes.infoTitle")}
           </Heading>
-          <Text mb={5}>{t("submissionInbox.projectDetail.notesInfoDescription")}</Text>
+          <Text mb={5}>{t("permitProject.notes.infoDescription")}</Text>
           <Button
             variant="secondary"
             leftIcon={<Download size={16} />}
@@ -52,18 +50,10 @@ export const InboxNotesTab = observer(({ permitProject }: IProps) => {
 
         <ProjectMeetingNotesList
           notes={notes}
-          emptyDescription={t("submissionInbox.projectDetail.notesEmptyDescription")}
-          getMeetingPath={(note) =>
-            `/jurisdictions/${jurisdictionId}/submission-inbox/projects/${permitProject.id}/meetings/${note.projectMeetingId}`
-          }
+          emptyDescription={t("permitProject.notes.emptyDescription")}
+          getMeetingPath={(note) => `/projects/${permitProject.id}/meetings/${note.projectMeetingId}`}
         />
       </Box>
-    </FlexColumn>
+    </Flex>
   )
 })
-
-const FlexColumn = ({ children }: { children: React.ReactNode }) => (
-  <Box flex={1} minH={0} minW={0} overflowY="auto" bg="greys.white" p={10}>
-    {children}
-  </Box>
-)

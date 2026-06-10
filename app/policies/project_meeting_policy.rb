@@ -64,7 +64,7 @@ class ProjectMeetingPolicy < ApplicationPolicy
   end
 
   def create_note?
-    user_is_review_staff_for_jurisdiction? && record.active? && feature_enabled?
+    user_is_review_staff_for_jurisdiction? && feature_enabled?
   end
 
   def download_notes_csv?

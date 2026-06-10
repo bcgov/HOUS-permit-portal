@@ -66,6 +66,30 @@ RSpec.describe "Api::Notes", type: :request do
       )
     end
 
+    it "allows jurisdiction review staff to create notes for completed meetings" do
+      completed_meeting =
+        create(:project_meeting, :completed, permit_project: permit_project)
+      sign_in reviewer
+
+      expect do
+        post "/api/project_meetings/#{completed_meeting.id}/notes",
+             params: {
+               note: {
+                 body: "<p>Post-meeting follow-up.</p>"
+               }
+             },
+             headers: headers,
+             as: :json
+      end.to change(Note, :count).by(1).and change {
+              completed_meeting.reload.notes_count
+            }.from(0).to(1)
+
+      expect(response).to have_http_status(:created)
+      expect(json_response.dig("data", "body")).to eq(
+        "<p>Post-meeting follow-up.</p>"
+      )
+    end
+
     it "blocks project owners from creating reviewer notes" do
       sign_in owner
 
@@ -111,6 +135,17 @@ RSpec.describe "Api::Notes", type: :request do
       expect(response.media_type).to eq("text/csv")
       expect(response.body).to include("CSV body")
       expect(response.body).not_to include("<p>")
+      expect(CSV.parse(response.body).first).to eq(
+        [
+          "Author",
+          "Created at",
+          "Related item type",
+          "Related item id",
+          "Project number",
+          "Body"
+        ]
+      )
+      expect(CSV.parse(response.body).last.length).to eq(6)
     end
   end
 
@@ -119,6 +154,18 @@ RSpec.describe "Api::Notes", type: :request do
       project_note = create(:note, noteable: meeting, user: reviewer)
       create(:note)
       sign_in reviewer
+
+      get "/api/permit_projects/#{permit_project.id}/notes", headers: headers
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.fetch("data").map { |note| note.fetch("id") }).to eq(
+        [project_note.id]
+      )
+    end
+
+    it "returns project meeting notes for the project owner" do
+      project_note = create(:note, noteable: meeting, user: reviewer)
+      sign_in owner
 
       get "/api/permit_projects/#{permit_project.id}/notes", headers: headers
 

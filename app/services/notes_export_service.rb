@@ -26,7 +26,6 @@ class NotesExportService
   def row_for(note)
     [
       note.user&.name,
-      note.user&.email,
       note.created_at&.iso8601,
       related_item_type(note),
       note.noteable_id,

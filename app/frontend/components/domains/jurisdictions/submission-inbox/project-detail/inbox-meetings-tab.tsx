@@ -29,7 +29,7 @@ export const InboxMeetingsTab = observer(({ permitProject }: IProps) => {
     return (
       <Flex direction="column" flex={1} minW={0} h="full" overflow="auto" bg="greys.white" p={10}>
         <Box w="full" maxW="container.lg">
-          <ReviewerMeetingDetailContent jurisdictionId={jurisdictionId} />
+          <ReviewerMeetingDetailContent jurisdictionId={jurisdictionId} permitProject={permitProject} />
         </Box>
       </Flex>
     )

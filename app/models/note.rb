@@ -1,4 +1,8 @@
 class Note < ApplicationRecord
+  include HtmlSanitizeAttributes
+
+  sanitizable :body
+
   NOTEABLE_TYPES = %w[ProjectMeeting].freeze
 
   belongs_to :user

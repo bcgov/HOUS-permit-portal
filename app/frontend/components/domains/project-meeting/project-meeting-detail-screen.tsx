@@ -129,7 +129,9 @@ export const SubmitterProjectMeetingDetailContent = observer(
           <MeetingNotesSection
             status={currentProjectMeeting.status}
             notes={projectMeetingStore.currentProjectMeetingNotes}
-            onDownloadNotes={() => projectMeetingStore.downloadProjectMeetingNotesCsv(currentProjectMeeting.id)}
+            onDownloadNotes={() =>
+              projectMeetingStore.downloadProjectMeetingNotesCsv(currentProjectMeeting.id, permitProject)
+            }
           />
         </Box>
       </Box>
