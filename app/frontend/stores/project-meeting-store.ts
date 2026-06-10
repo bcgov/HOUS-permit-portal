@@ -202,6 +202,14 @@ export const ProjectMeetingStoreModel = types
       }
       return { ok: false, error: responseError(response.data, response.problem) }
     }),
+    rescheduleProjectMeeting: flow(function* (permitProjectId: string, id: string, params: Record<string, unknown>) {
+      const response = yield* toGenerator(self.environment.api.rescheduleProjectMeeting(permitProjectId, id, params))
+      if (response.ok) {
+        self.mergeUpdate(response.data.data, "projectMeetingsMap")
+        return { ok: true, data: response.data.data as IProjectMeeting }
+      }
+      return { ok: false, error: responseError(response.data, response.problem) }
+    }),
     transitionProjectMeetingStatus: flow(function* (
       permitProjectId: string,
       id: string,

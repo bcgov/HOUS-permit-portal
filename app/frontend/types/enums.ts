@@ -488,6 +488,7 @@ export enum ENotificationActionType {
   fileUploadFailed = "file_upload_failed",
   resourceReminder = "resource_reminder",
   projectMeetingSubmitted = "project_meeting_submitted",
+  projectMeetingRescheduled = "project_meeting_rescheduled",
   projectReviewCollaborationAssignment = "project_review_collaboration_assignment",
   projectReviewCollaborationUnassignment = "project_review_collaboration_unassignment",
 }

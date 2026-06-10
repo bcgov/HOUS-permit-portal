@@ -435,6 +435,15 @@ export class Api {
     return this.client.post<ApiResponse<IProjectMeeting>>(`/permit_projects/${permitProjectId}/meetings/${id}/cancel`)
   }
 
+  async rescheduleProjectMeeting(permitProjectId: string, id: string, params: Record<string, unknown>) {
+    return this.client.post<ApiResponse<IProjectMeeting>>(
+      `/permit_projects/${permitProjectId}/meetings/${id}/reschedule`,
+      {
+        projectMeeting: params,
+      }
+    )
+  }
+
   async viewProjectMeeting(permitProjectId: string, id: string) {
     return this.client.post<ApiResponse<IProjectMeeting>>(
       `/permit_projects/${permitProjectId}/meetings/${id}/mark_as_viewed`

@@ -70,6 +70,21 @@ RSpec.describe ProjectMeetingPolicy, type: :policy do
     expect(policy(reviewer, open_meeting).transition_status?).to be true
   end
 
+  it "allows jurisdiction review staff to reschedule scheduled requests only" do
+    open_meeting =
+      create(:project_meeting, :open, permit_project: permit_project)
+    scheduled_meeting =
+      create(
+        :project_meeting,
+        :scheduled,
+        permit_project: create(:permit_project, owner:, jurisdiction:)
+      )
+
+    expect(policy(reviewer, scheduled_meeting).reschedule?).to be true
+    expect(policy(reviewer, open_meeting).reschedule?).to be false
+    expect(policy(owner, scheduled_meeting).reschedule?).to be false
+  end
+
   it "allows jurisdiction review staff to mark requests read or unread" do
     open_meeting =
       create(:project_meeting, :open, permit_project: permit_project)

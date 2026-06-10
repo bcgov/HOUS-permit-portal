@@ -1,4 +1,4 @@
-class Api::ProjectMeetingNotesController < Api::ApplicationController
+class Api::ProjectMeetings::NotesController < Api::ApplicationController
   before_action :set_project_meeting
 
   def index

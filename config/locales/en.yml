@@ -223,6 +223,8 @@ en:
       notify_property_information_requested: "New property information request: %{project_number}"
       notify_project_meeting_scheduled: "Your project meeting has been scheduled"
       notify_project_meeting_scheduled_to_jurisdiction: "Project meeting scheduled: %{project_number}"
+      notify_project_meeting_rescheduled: "Your project meeting has been rescheduled"
+      notify_project_meeting_rescheduled_to_jurisdiction: "Project meeting rescheduled: %{project_number}"
       notify_new_template_version_published: "New version published for %{template_label}"
       notify_template_version_no_action: "Permit template updated - no action required: %{template_label}"
       notify_template_version_action_required: "ACTION REQUIRED: Permit template updated - API mapping review required: %{template_label}"
@@ -371,6 +373,12 @@ en:
       cancel_error:
         title: Error
         message: "Project meeting request could not be cancelled"
+      reschedule_success:
+        title: ""
+        message: "Project meeting details updated successfully!"
+      reschedule_error:
+        title: Error
+        message: "Project meeting details could not be updated"
       transition_success:
         title: ""
         message: "Project meeting request status updated successfully!"
@@ -1224,6 +1232,7 @@ en:
       reminder: "Reminder: Review your jurisdiction resources"
     project_meeting:
       submitted: "Your project meeting request for project %{project_number} has been sent."
+      rescheduled: "Your project meeting for project %{project_number} has been rescheduled."
     integration_mapping:
       published_template_missing_requirements_mapping: "Missing API mapping: A new version of “%{template_label}” has been published on %{version_date}"
       scheduled_template_missing_requirements_mapping: "Missing API Mapping: A new version of “%{template_label}” has been scheduled for %{version_date}, 01:00hrs PST."

@@ -95,6 +95,23 @@ class ProjectMeeting < ApplicationRecord
     }
   end
 
+  def rescheduled_event_notification_data
+    {
+      "id" => SecureRandom.uuid,
+      "action_text" =>
+        I18n.t(
+          "notification.project_meeting.rescheduled",
+          project_number: permit_project&.number
+        ),
+      "action_type" =>
+        Constants::NotificationActionTypes::PROJECT_MEETING_RESCHEDULED,
+      "object_data" => {
+        "permit_project_id" => permit_project.id,
+        "project_meeting_id" => id
+      }
+    }
+  end
+
   def search_data
     {
       permit_project_id: permit_project_id,

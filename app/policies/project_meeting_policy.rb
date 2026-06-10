@@ -50,6 +50,11 @@ class ProjectMeetingPolicy < ApplicationPolicy
     user_is_owner? && feature_enabled?
   end
 
+  def reschedule?
+    user_is_review_staff_for_jurisdiction? && feature_enabled? &&
+      record.scheduled?
+  end
+
   def transition_status?
     user_is_review_staff_for_jurisdiction? && feature_enabled? &&
       record.allowed_manual_transitions.any?
