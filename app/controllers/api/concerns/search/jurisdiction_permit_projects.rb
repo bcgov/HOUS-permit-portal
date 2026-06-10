@@ -163,12 +163,14 @@ module Api::Concerns::Search::JurisdictionPermitProjects
     @active_project_meeting_ids_by_project_id = {}
     return if project_ids.empty?
 
+    relation =
+      policy_scope(ProjectMeeting).where(permit_project_id: project_ids).active
+
+    rows = relation.pluck(:permit_project_id, :id)
     @active_project_meeting_ids_by_project_id =
-      ProjectMeeting
-        .where(permit_project_id: project_ids)
-        .active
-        .pluck(:permit_project_id, :id)
-        .to_h
+      rows.each_with_object({}) do |(project_id, meeting_id), hash|
+        hash[project_id] ||= meeting_id
+      end
   end
 
   # Unread (viewed_at nil) projects by state across the whole jurisdiction,
