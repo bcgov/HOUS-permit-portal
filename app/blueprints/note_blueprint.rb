@@ -12,10 +12,6 @@ class NoteBlueprint < Blueprinter::Base
     note.user&.name
   end
 
-  field :project_meeting_id do |note, _options|
-    note.noteable_id if note.noteable_type == ProjectMeeting.name
-  end
-
   field :project_number do |note, _options|
     note.permit_project&.number
   end

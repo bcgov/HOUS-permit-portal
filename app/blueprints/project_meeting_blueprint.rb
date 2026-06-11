@@ -42,5 +42,6 @@ class ProjectMeetingBlueprint < Blueprinter::Base
 
     association :meeting_request_documents,
                 blueprint: MeetingRequestDocumentBlueprint
+    association :notes, blueprint: NoteBlueprint
   end
 end

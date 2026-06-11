@@ -28,12 +28,6 @@ interface ReviewerMeetingDetailContentProps {
   permitProject?: IPermitProject
 }
 
-const showScheduledBanner = (status: EProjectMeetingStatus, hasScheduledDetails: boolean) => {
-  if (status === EProjectMeetingStatus.closed) return false
-  if ([EProjectMeetingStatus.scheduled, EProjectMeetingStatus.completed].includes(status)) return true
-  return hasScheduledDetails
-}
-
 export const ReviewerMeetingDetailContent = observer(
   ({ jurisdictionId, permitProject }: ReviewerMeetingDetailContentProps) => {
     const { t } = useTranslation()
@@ -42,7 +36,7 @@ export const ReviewerMeetingDetailContent = observer(
     const { currentPermitProject, error: permitProjectError } = usePermitProject(
       permitProject?.id ?? currentProjectMeeting?.permitProjectId
     )
-    const { projectMeetingStore, uiStore, userStore } = useMst()
+    const { noteStore, projectMeetingStore, uiStore, userStore } = useMst()
     const { currentUser } = userStore
     const [isCancelling, setIsCancelling] = useState(false)
     const [isCompleting, setIsCompleting] = useState(false)
@@ -62,26 +56,8 @@ export const ReviewerMeetingDetailContent = observer(
       return <LoadingScreen />
     }
 
-    const documents = currentProjectMeeting.meetingRequestDocuments.filter((document) => !document._destroy)
-    const hasScheduledDetails =
-      !!currentProjectMeeting.scheduledAt || !!currentProjectMeeting.confirmedDate || !!currentProjectMeeting.meetingUrl
-    const canScheduleMeeting =
-      currentProjectMeeting.status === EProjectMeetingStatus.open &&
-      currentProjectMeeting.allowedManualTransitions.includes(EProjectMeetingStatus.scheduled)
-    const canCompleteMeeting =
-      currentProjectMeeting.status === EProjectMeetingStatus.scheduled &&
-      currentProjectMeeting.allowedManualTransitions.includes(EProjectMeetingStatus.completed)
-    const canCancelMeeting = currentProjectMeeting.allowedManualTransitions.includes(EProjectMeetingStatus.closed)
     const projectLink = `/jurisdictions/${jurisdictionId}/submission-inbox/projects/${currentProjectMeeting.permitProjectId}/overview`
-    const canAddNote =
-      currentUser?.isReviewStaff &&
-      [
-        EProjectMeetingStatus.open,
-        EProjectMeetingStatus.scheduled,
-        EProjectMeetingStatus.completed,
-        EProjectMeetingStatus.closed,
-      ].includes(currentProjectMeeting.status)
-    const notes = projectMeetingStore.currentProjectMeetingNotes
+    const canAddNote = currentUser?.isReviewStaff && currentProjectMeeting.canAddReviewerNote
 
     const handleCancelMeeting = async (closeModal: () => void) => {
       setIsCancelling(true)
@@ -105,7 +81,7 @@ export const ReviewerMeetingDetailContent = observer(
     }
 
     const handleAddNote = async (body: string) => {
-      const response = await projectMeetingStore.createProjectMeetingNote(currentProjectMeeting.id, body)
+      const response = await noteStore.createProjectMeetingNote(currentProjectMeeting.id, body)
       return response.ok
     }
 
@@ -151,12 +127,12 @@ export const ReviewerMeetingDetailContent = observer(
             </HStack>
           </Box>
           <HStack spacing={4}>
-            {canCompleteMeeting && (
+            {currentProjectMeeting.canComplete && (
               <Button variant="secondary" size="sm" onClick={handleCompleteMeeting} isLoading={isCompleting}>
                 {t("projectMeeting.detail.reviewer.markCompleted")}
               </Button>
             )}
-            {canCancelMeeting && (
+            {currentProjectMeeting.canCancel && (
               <ConfirmationModal
                 title={t("projectMeeting.detail.reviewer.cancelConfirmationTitle")}
                 body={t("projectMeeting.detail.reviewer.cancelConfirmationBody")}
@@ -175,25 +151,23 @@ export const ReviewerMeetingDetailContent = observer(
         </HStack>
 
         <Box maxW="3xl">
-          {canScheduleMeeting && <ScheduleMeetingBanner projectMeeting={currentProjectMeeting} />}
+          {currentProjectMeeting.canSchedule && <ScheduleMeetingBanner projectMeeting={currentProjectMeeting} />}
 
-          {showScheduledBanner(currentProjectMeeting.status, hasScheduledDetails) && (
+          {currentProjectMeeting.shouldShowScheduledBanner && (
             <ReviewerScheduledMeetingBanner projectMeeting={currentProjectMeeting} />
           )}
 
           <ProjectInformationSection projectMeeting={currentProjectMeeting} projectLink={projectLink} />
           <RequesterInformationSection projectMeeting={currentProjectMeeting} />
           <RequestDetailsSection projectMeeting={currentProjectMeeting} />
-          <DocumentsSection documents={documents} />
+          <DocumentsSection documents={currentProjectMeeting.activeMeetingRequestDocuments} />
           <MeetingNotesSection
             status={currentProjectMeeting.status}
-            notes={notes}
+            notes={currentProjectMeeting.notes}
             showVisibilityBanner
             canAddNote={canAddNote}
             onAddNote={handleAddNote}
-            onDownloadNotes={() =>
-              projectMeetingStore.downloadProjectMeetingNotesCsv(currentProjectMeeting.id, downloadPermitProject)
-            }
+            onDownloadNotes={() => currentProjectMeeting.downloadNotesCsv(downloadPermitProject.number)}
           />
         </Box>
       </Box>

@@ -71,6 +71,10 @@ export const PermitProjectStoreModel = types
         })
       }
 
+      if (permitProject.notes) {
+        self.rootStore.noteStore.mergeUpdateAll(permitProject.notes, "notesMap")
+      }
+
       if (permitProject.jurisdiction) {
         self.rootStore.jurisdictionStore.mergeUpdate(permitProject.jurisdiction, "jurisdictionMap")
       }
@@ -106,6 +110,10 @@ export const PermitProjectStoreModel = types
       if (permitProject.recentPermitApplications) {
         overrides.recentPermitApplications =
           permitProject.recentPermitApplications.map((app) => (typeof app === "object" ? app.id : app)) || []
+      }
+
+      if (permitProject.notes) {
+        overrides.notes = permitProject.notes.map((note) => (typeof note === "object" ? note.id : note)) || []
       }
 
       if ("jurisdiction" in permitProject && permitProject.jurisdiction) {

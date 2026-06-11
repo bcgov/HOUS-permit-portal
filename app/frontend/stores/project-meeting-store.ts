@@ -4,12 +4,10 @@ import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
-import { INote, NoteModel } from "../models/note"
-import { IPermitProject } from "../models/permit-project"
 import { IProjectMeeting, ProjectMeetingModel } from "../models/project-meeting"
 import { EProjectMeetingSortFields, EProjectMeetingStatus } from "../types/enums"
 import { TSearchParams } from "../types/types"
-import { convertToDate, startBlobDownload } from "../utils/utility-functions"
+import { convertToDate } from "../utils/utility-functions"
 
 const nullableDate = (value: unknown) => (value ? convertToDate(value) : null)
 
@@ -21,10 +19,7 @@ export const ProjectMeetingStoreModel = types
   .compose(
     types.model("ProjectMeetingStore", {
       projectMeetingsMap: types.map(ProjectMeetingModel),
-      notesMap: types.map(NoteModel),
       tableProjectMeetings: types.array(types.reference(ProjectMeetingModel)),
-      currentProjectMeetingNotes: types.optional(types.array(types.reference(NoteModel)), []),
-      currentPermitProjectNotes: types.optional(types.array(types.reference(NoteModel)), []),
       currentProjectMeeting: types.maybeNull(types.reference(ProjectMeetingModel)),
     }),
     createSearchModel<EProjectMeetingSortFields>("searchProjectMeetings")
@@ -48,16 +43,16 @@ export const ProjectMeetingStoreModel = types
   }))
   .actions((self) => ({
     __beforeMergeUpdate(projectMeeting: Record<string, unknown>) {
-      if ("noteableType" in projectMeeting) {
-        return {
-          ...projectMeeting,
-          createdAt: nullableDate(projectMeeting.createdAt),
-          updatedAt: nullableDate(projectMeeting.updatedAt),
-        }
+      const notes = Array.isArray(projectMeeting.notes) ? projectMeeting.notes : null
+      if (notes) {
+        self.rootStore.noteStore.mergeUpdateAll(notes, "notesMap")
       }
 
       return {
         ...projectMeeting,
+        ...(notes && {
+          notes: notes.map((note) => note.id),
+        }),
         submittedAt: nullableDate(projectMeeting.submittedAt),
         confirmedDate: nullableDate(projectMeeting.confirmedDate),
         scheduledAt: nullableDate(projectMeeting.scheduledAt),
@@ -76,12 +71,6 @@ export const ProjectMeetingStoreModel = types
     },
     setTableProjectMeetings(projectMeetings: IProjectMeeting[]) {
       self.tableProjectMeetings = cast(projectMeetings.map((projectMeeting) => projectMeeting.id))
-    },
-    setCurrentProjectMeetingNotes(notes: INote[]) {
-      self.currentProjectMeetingNotes = cast(notes.map((note) => note.id))
-    },
-    setCurrentPermitProjectNotes(notes: INote[]) {
-      self.currentPermitProjectNotes = cast(notes.map((note) => note.id))
     },
   }))
   .actions((self) => ({
@@ -127,54 +116,6 @@ export const ProjectMeetingStoreModel = types
         return response.data.data as IProjectMeeting
       }
       return null
-    }),
-    fetchProjectMeetingNotes: flow(function* (projectMeetingId: string) {
-      const response = yield* toGenerator(self.environment.api.fetchProjectMeetingNotes(projectMeetingId))
-      if (response.ok) {
-        self.mergeUpdateAll(response.data.data, "notesMap")
-        self.setCurrentProjectMeetingNotes(response.data.data)
-        return response.data.data as INote[]
-      }
-      return []
-    }),
-    fetchPermitProjectNotes: flow(function* (permitProjectId: string) {
-      const response = yield* toGenerator(self.environment.api.fetchPermitProjectNotes(permitProjectId))
-      if (response.ok) {
-        self.mergeUpdateAll(response.data.data, "notesMap")
-        self.setCurrentPermitProjectNotes(response.data.data)
-        return response.data.data as INote[]
-      }
-      return []
-    }),
-    createProjectMeetingNote: flow(function* (projectMeetingId: string, body: string) {
-      const response = yield* toGenerator(self.environment.api.createProjectMeetingNote(projectMeetingId, body))
-      if (response.ok) {
-        self.mergeUpdate(response.data.data, "notesMap")
-        self.currentProjectMeetingNotes = cast([
-          response.data.data.id,
-          ...self.currentProjectMeetingNotes.map((note) => note.id),
-        ])
-        const projectMeeting = self.projectMeetingsMap.get(projectMeetingId)
-        if (projectMeeting) {
-          projectMeeting.setNotesCount(projectMeeting.notesCount + 1)
-        }
-        return { ok: true, data: response.data.data as INote }
-      }
-      return { ok: false, error: responseError(response.data, response.problem) }
-    }),
-    downloadProjectMeetingNotesCsv: flow(function* (projectMeetingId: string, project: IPermitProject) {
-      const response = yield* toGenerator(self.environment.api.downloadProjectMeetingNotesCsv(projectMeetingId))
-      if (response.ok) {
-        startBlobDownload(response.data, "text/csv", `project-meeting-notes-${project.number}.csv`)
-      }
-      return response.ok
-    }),
-    downloadPermitProjectNotesCsv: flow(function* (project: IPermitProject) {
-      const response = yield* toGenerator(self.environment.api.downloadPermitProjectNotesCsv(project.id))
-      if (response.ok) {
-        startBlobDownload(response.data, "text/csv", `project-notes-${project.number}.csv`)
-      }
-      return response.ok
     }),
     updateProjectMeeting: flow(function* (permitProjectId: string, id: string, params: Record<string, unknown>) {
       const response = yield* toGenerator(self.environment.api.updateProjectMeeting(permitProjectId, id, params))

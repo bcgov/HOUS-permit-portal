@@ -35,6 +35,8 @@ export const InboxProjectDetailScreen = observer(() => {
         to: "permits",
         tabIndex: 1,
       },
+      // Currently, notes are specific to projject meetings and thus will only be shown if project meetings are enabled
+      // Change this when notes are made independent of project meetings
       ...(projectMeetingsEnabled
         ? [
             {

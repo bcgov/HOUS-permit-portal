@@ -108,6 +108,9 @@ class PermitProjectBlueprint < Blueprinter::Base
     end
     association :active_project_meeting, blueprint: ProjectMeetingBlueprint
     association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
+    association :notes, blueprint: NoteBlueprint do |permit_project, options|
+      PermitProjectBlueprint.notes_for(permit_project, options)
+    end
   end
 
   view :inbox_extended do
@@ -135,6 +138,9 @@ class PermitProjectBlueprint < Blueprinter::Base
       permit_project.association(:project_documents).reader
     end
     association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
+    association :notes, blueprint: NoteBlueprint do |permit_project, options|
+      PermitProjectBlueprint.notes_for(permit_project, options)
+    end
     association :recent_audits,
                 blueprint: ProjectAuditBlueprint,
                 view: :base do |permit_project, options|
@@ -146,5 +152,14 @@ class PermitProjectBlueprint < Blueprinter::Base
     return false unless current_user
 
     return true if permit_project.owner_id == current_user.id
+  end
+
+  def self.notes_for(permit_project, options)
+    scope = options[:notes_scope] || Note.all
+
+    scope
+      .where(permit_project: permit_project)
+      .preload(:user, :permit_project)
+      .order(created_at: :desc)
   end
 end

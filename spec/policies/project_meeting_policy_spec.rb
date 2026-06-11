@@ -117,12 +117,20 @@ RSpec.describe ProjectMeetingPolicy, type: :policy do
     expect(policy(reviewer, closed_meeting).create_note?).to be true
   end
 
-  it "allows owners and jurisdiction review staff to download meeting notes" do
+  it "allows owners and jurisdiction review staff to view and download meeting notes" do
     open_meeting =
       create(:project_meeting, :open, permit_project: permit_project)
 
+    expect(policy(owner, open_meeting).view_notes?).to be true
+    expect(policy(reviewer, open_meeting).view_notes?).to be true
     expect(policy(owner, open_meeting).download_notes_csv?).to be true
     expect(policy(reviewer, open_meeting).download_notes_csv?).to be true
+  end
+
+  it "allows jurisdiction review staff to view notes on draft meetings" do
+    draft_meeting = create(:project_meeting, permit_project: permit_project)
+
+    expect(policy(reviewer, draft_meeting).view_notes?).to be true
   end
 
   it "blocks owners from marking requests read or unread" do

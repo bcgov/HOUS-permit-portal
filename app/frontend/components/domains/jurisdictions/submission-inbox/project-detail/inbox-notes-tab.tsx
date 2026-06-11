@@ -1,11 +1,10 @@
 import { Box, Button, Heading, HStack, Text } from "@chakra-ui/react"
 import { ChatText, Download } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useEffect } from "react"
+import React from "react"
 import { useTranslation } from "react-i18next"
 import { useParams } from "react-router-dom"
 import { IPermitProject } from "../../../../../models/permit-project"
-import { useMst } from "../../../../../setup/root"
 import { ProjectMeetingNotesList } from "../../../../shared/project-meetings/project-meeting-notes-list"
 
 interface IProps {
@@ -15,12 +14,6 @@ interface IProps {
 export const InboxNotesTab = observer(({ permitProject }: IProps) => {
   const { t } = useTranslation()
   const { jurisdictionId } = useParams<{ jurisdictionId: string }>()
-  const { projectMeetingStore } = useMst()
-  const notes = projectMeetingStore.currentPermitProjectNotes
-
-  useEffect(() => {
-    projectMeetingStore.fetchPermitProjectNotes(permitProject.id)
-  }, [permitProject.id, projectMeetingStore])
 
   return (
     <FlexColumn>
@@ -40,7 +33,7 @@ export const InboxNotesTab = observer(({ permitProject }: IProps) => {
           <Button
             variant="secondary"
             leftIcon={<Download size={16} />}
-            onClick={() => projectMeetingStore.downloadPermitProjectNotesCsv(permitProject)}
+            onClick={() => permitProject.downloadNotesCsv()}
           >
             {t("projectMeeting.detail.notes.downloadAll")}
           </Button>
@@ -51,7 +44,7 @@ export const InboxNotesTab = observer(({ permitProject }: IProps) => {
         </Heading>
 
         <ProjectMeetingNotesList
-          notes={notes}
+          notes={permitProject.notes}
           emptyDescription={t("submissionInbox.projectDetail.notesEmptyDescription")}
           getMeetingPath={(note) =>
             `/jurisdictions/${jurisdictionId}/submission-inbox/projects/${permitProject.id}/meetings/${note.projectMeetingId}`

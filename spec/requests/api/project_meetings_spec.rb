@@ -76,6 +76,7 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
     it "returns a meeting request for the owner without requiring a project id" do
       meeting = create(:project_meeting, permit_project: permit_project)
       document = create(:meeting_request_document, project_meeting: meeting)
+      note = create(:note, noteable: meeting, user: owner)
 
       get "/api/project_meetings/#{meeting.id}", headers: headers
 
@@ -90,6 +91,10 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
       expect(
         json_response.dig("data", "meeting_request_documents", 0, "file", "id")
       ).to eq(document.file_id)
+      expect(json_response.dig("data", "notes", 0, "id")).to eq(note.id)
+      expect(json_response.dig("data", "notes", 0, "permit_project_id")).to eq(
+        permit_project.id
+      )
     end
 
     it "returns a submitted meeting request for jurisdiction review staff" do

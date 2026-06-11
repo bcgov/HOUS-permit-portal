@@ -18,12 +18,16 @@ import { Controller, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { IProjectMeeting } from "../../../../../models/project-meeting"
 import { useMst } from "../../../../../setup/root"
-import { EFlashMessageStatus, EProjectMeetingContactMethod } from "../../../../../types/enums"
+import {
+  EFlashMessageStatus,
+  EProjectMeetingContactMethod,
+  EProjectMeetingScheduleMode,
+} from "../../../../../types/enums"
 import { DatePicker } from "../../../../shared/date-picker"
 
 interface ScheduleMeetingBannerProps {
   projectMeeting: IProjectMeeting
-  mode?: "schedule" | "reschedule"
+  mode?: EProjectMeetingScheduleMode
   onCancel?: () => void
 }
 
@@ -58,7 +62,7 @@ const normalizeUrl = (url: string) => {
 }
 
 export const ScheduleMeetingBanner = observer(
-  ({ projectMeeting, mode = "schedule", onCancel }: ScheduleMeetingBannerProps) => {
+  ({ projectMeeting, mode = EProjectMeetingScheduleMode.schedule, onCancel }: ScheduleMeetingBannerProps) => {
     const { t } = useTranslation()
     const { projectMeetingStore, uiStore } = useMst()
     const initialValues: ScheduleMeetingFormValues = {
@@ -83,7 +87,7 @@ export const ScheduleMeetingBanner = observer(
 
     const handleClear = () => {
       reset(
-        mode === "reschedule"
+        mode === EProjectMeetingScheduleMode.reschedule
           ? initialValues
           : {
               contactMethod: "",
@@ -107,7 +111,7 @@ export const ScheduleMeetingBanner = observer(
         meetingUrl,
       }
       const response =
-        mode === "reschedule"
+        mode === EProjectMeetingScheduleMode.reschedule
           ? await projectMeetingStore.rescheduleProjectMeeting(
               projectMeeting.permitProjectId,
               projectMeeting.id,
@@ -120,7 +124,7 @@ export const ScheduleMeetingBanner = observer(
           EFlashMessageStatus.error,
           null,
           t(
-            mode === "reschedule"
+            mode === EProjectMeetingScheduleMode.reschedule
               ? "projectMeeting.detail.reviewer.rescheduleError"
               : "projectMeeting.detail.reviewer.scheduleError"
           ),
@@ -129,7 +133,7 @@ export const ScheduleMeetingBanner = observer(
         return
       }
 
-      if (mode === "reschedule") {
+      if (mode === EProjectMeetingScheduleMode.reschedule) {
         uiStore.flashMessage.show(
           EFlashMessageStatus.success,
           null,
@@ -147,14 +151,14 @@ export const ScheduleMeetingBanner = observer(
             <Box>
               <Text fontWeight="bold" fontSize="lg" mb={2}>
                 {t(
-                  mode === "reschedule"
+                  mode === EProjectMeetingScheduleMode.reschedule
                     ? "projectMeeting.detail.reviewer.rescheduleTitle"
                     : "projectMeeting.detail.reviewer.scheduleTitle"
                 )}
               </Text>
               <Text fontSize="lg">
                 {t(
-                  mode === "reschedule"
+                  mode === EProjectMeetingScheduleMode.reschedule
                     ? "projectMeeting.detail.reviewer.rescheduleDescription"
                     : "projectMeeting.detail.reviewer.scheduleDescription"
                 )}
@@ -236,7 +240,7 @@ export const ScheduleMeetingBanner = observer(
             <HStack spacing={3}>
               <Button type="button" variant="secondary" size="sm" onClick={handleClear}>
                 {t(
-                  mode === "reschedule"
+                  mode === EProjectMeetingScheduleMode.reschedule
                     ? "projectMeeting.detail.reviewer.resetMeetingDetailsForm"
                     : "projectMeeting.detail.reviewer.clearScheduleForm"
                 )}
@@ -248,7 +252,7 @@ export const ScheduleMeetingBanner = observer(
               )}
               <Button type="submit" variant="primary" size="sm" isLoading={isSubmitting}>
                 {t(
-                  mode === "reschedule"
+                  mode === EProjectMeetingScheduleMode.reschedule
                     ? "projectMeeting.detail.reviewer.sendUpdatedMeetingDetails"
                     : "projectMeeting.detail.reviewer.sendMeetingDetails"
                 )}

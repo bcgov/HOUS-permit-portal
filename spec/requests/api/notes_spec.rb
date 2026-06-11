@@ -27,9 +27,11 @@ RSpec.describe "Api::Notes", type: :request do
       expect(json_response.dig("data", 0, "id")).to eq(note.id)
       expect(json_response.dig("data", 0, "author_name")).to eq(reviewer.name)
       expect(json_response.dig("data", 0)).not_to have_key("author_email")
-      expect(json_response.dig("data", 0, "project_meeting_id")).to eq(
-        meeting.id
+      expect(json_response.dig("data", 0)).not_to have_key("project_meeting_id")
+      expect(json_response.dig("data", 0, "noteable_type")).to eq(
+        ProjectMeeting.name
       )
+      expect(json_response.dig("data", 0, "noteable_id")).to eq(meeting.id)
     end
 
     it "returns draft meeting notes for jurisdiction review staff" do

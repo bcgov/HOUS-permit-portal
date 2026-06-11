@@ -19,7 +19,7 @@ export const useProjectMeeting = () => {
     reviewerMeetingDetailMatch?.params.meetingId ||
     reviewerProjectMeetingDetailMatch?.params.meetingId
   const { projectMeetingStore } = useMst()
-  const { currentProjectMeeting, fetchProjectMeeting, fetchProjectMeetingNotes } = projectMeetingStore
+  const { currentProjectMeeting, fetchProjectMeeting } = projectMeetingStore
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<Error | undefined>(undefined)
 
@@ -32,15 +32,12 @@ export const useProjectMeeting = () => {
 
       setIsLoading(true)
       const meeting = await fetchProjectMeeting(projectMeetingId)
-      if (meeting) {
-        await fetchProjectMeetingNotes(projectMeetingId)
-      }
       setError(meeting ? undefined : new Error("Failed to fetch project meeting."))
       setIsLoading(false)
     }
 
     loadProjectMeeting()
-  }, [projectMeetingId, fetchProjectMeeting, fetchProjectMeetingNotes])
+  }, [projectMeetingId, fetchProjectMeeting])
 
   return { currentProjectMeeting, isLoading, error }
 }

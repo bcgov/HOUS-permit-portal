@@ -1,4 +1,4 @@
-import { Instance, flow, toGenerator, types } from "mobx-state-tree"
+import { Instance, cast, flow, toGenerator, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import {
@@ -8,6 +8,8 @@ import {
   EProjectMeetingStatus,
 } from "../types/enums"
 import { IMeetingRequestDocument } from "../types/types"
+import { startBlobDownload } from "../utils/utility-functions"
+import { INote, NoteModel } from "./note"
 
 export const ProjectMeetingModel = types
   .model("ProjectMeeting", {
@@ -31,6 +33,7 @@ export const ProjectMeetingModel = types
     meetingUrl: types.maybeNull(types.string),
     viewedAt: types.maybeNull(types.Date),
     notesCount: types.optional(types.number, 0),
+    notes: types.optional(types.array(types.reference(types.late(() => NoteModel))), []),
     projectNumber: types.maybeNull(types.string),
     projectAddress: types.maybeNull(types.string),
     projectPid: types.maybeNull(types.string),
@@ -53,6 +56,40 @@ export const ProjectMeetingModel = types
     },
     get isTerminal() {
       return self.status === EProjectMeetingStatus.completed || self.status === EProjectMeetingStatus.closed
+    },
+    get activeMeetingRequestDocuments() {
+      return self.meetingRequestDocuments.filter((document) => !document._destroy)
+    },
+    get hasScheduledDetails() {
+      return !!self.scheduledAt || !!self.confirmedDate || !!self.meetingUrl
+    },
+    get canSchedule() {
+      return (
+        self.status === EProjectMeetingStatus.open &&
+        self.allowedManualTransitions.includes(EProjectMeetingStatus.scheduled)
+      )
+    },
+    get canComplete() {
+      return (
+        self.status === EProjectMeetingStatus.scheduled &&
+        self.allowedManualTransitions.includes(EProjectMeetingStatus.completed)
+      )
+    },
+    get canCancel() {
+      return self.allowedManualTransitions.includes(EProjectMeetingStatus.closed)
+    },
+    get canAddReviewerNote() {
+      return [
+        EProjectMeetingStatus.open,
+        EProjectMeetingStatus.scheduled,
+        EProjectMeetingStatus.completed,
+        EProjectMeetingStatus.closed,
+      ].includes(self.status)
+    },
+    get shouldShowScheduledBanner() {
+      if (self.status === EProjectMeetingStatus.closed) return false
+      if ([EProjectMeetingStatus.scheduled, EProjectMeetingStatus.completed].includes(self.status)) return true
+      return !!self.scheduledAt || !!self.confirmedDate || !!self.meetingUrl
     },
     get authorizationRequired() {
       return (
@@ -82,6 +119,19 @@ export const ProjectMeetingModel = types
     setNotesCount(count: number) {
       self.notesCount = count
     },
+    setNotes(notes: INote[]) {
+      self.notes = cast(notes.map((note) => note.id))
+    },
+    prependNote(note: INote) {
+      self.notes = cast([note.id, ...self.notes.map((existingNote) => existingNote.id).filter((id) => id !== note.id)])
+    },
+    downloadNotesCsv: flow(function* (projectNumber: string | null) {
+      const response = yield* toGenerator(self.environment.api.downloadProjectMeetingNotesCsv(self.id))
+      if (response.ok) {
+        startBlobDownload(response.data, "text/csv", `project-meeting-notes-${projectNumber || self.id}.csv`)
+      }
+      return response.ok
+    }),
     markAsViewed: flow(function* () {
       const wasUnread = !self.viewedAt
       const response = yield* toGenerator(self.environment.api.viewProjectMeeting(self.permitProjectId, self.id))

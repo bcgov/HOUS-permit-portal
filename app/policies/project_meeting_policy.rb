@@ -72,8 +72,12 @@ class ProjectMeetingPolicy < ApplicationPolicy
     user_is_review_staff_for_jurisdiction? && feature_enabled?
   end
 
-  def download_notes_csv?
+  def view_notes?
     user_is_owner? || user_is_review_staff_for_jurisdiction_in_active_sandbox?
+  end
+
+  def download_notes_csv?
+    view_notes?
   end
 
   private

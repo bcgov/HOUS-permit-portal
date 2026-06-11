@@ -415,7 +415,8 @@ class Api::PermitProjectsController < Api::ApplicationController
       pinned_project_ids: current_user.pinned_permit_project_ids,
       project_ids_with_outdated_drafts: @project_ids_with_outdated_drafts,
       active_project_meeting_ids_by_project_id:
-        @active_project_meeting_ids_by_project_id
+        @active_project_meeting_ids_by_project_id,
+      notes_scope: policy_scope(Note)
     }
   end
 

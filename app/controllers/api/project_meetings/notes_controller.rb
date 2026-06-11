@@ -2,6 +2,8 @@ class Api::ProjectMeetings::NotesController < Api::ApplicationController
   before_action :set_project_meeting
 
   def index
+    authorize @project_meeting, :view_notes?
+
     notes =
       policy_scope(Note)
         .where(noteable: @project_meeting)
@@ -53,32 +55,8 @@ class Api::ProjectMeetings::NotesController < Api::ApplicationController
   private
 
   def set_project_meeting
-    clauses = ["permit_projects.owner_id = :uid"]
-    values = { uid: current_user.id }
-
-    if current_user.review_staff?
-      review_clauses = [
-        "permit_projects.jurisdiction_id IN (:jur_ids)",
-        (
-          if current_sandbox.present?
-            "permit_projects.sandbox_id = :sandbox_id"
-          else
-            "permit_projects.sandbox_id IS NULL"
-          end
-        )
-      ]
-      clauses << review_clauses.join(" AND ")
-      values[:jur_ids] = current_user.jurisdictions.pluck(:id)
-      values[:sandbox_id] = current_sandbox.id if current_sandbox.present?
-    end
-
-    scope =
-      ProjectMeeting
-        .includes(:permit_project)
-        .joins(:permit_project)
-        .where(clauses.map { |clause| "(#{clause})" }.join(" OR "), values)
-
-    @project_meeting = scope.find(params[:project_meeting_id])
+    @project_meeting =
+      ProjectMeeting.preload(:permit_project).find(params[:project_meeting_id])
   end
 
   def note_params

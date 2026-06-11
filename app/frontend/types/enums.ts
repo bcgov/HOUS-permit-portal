@@ -37,6 +37,11 @@ export enum EProjectMeetingContactMethod {
   videoconference = "videoconference",
 }
 
+export enum EProjectMeetingScheduleMode {
+  schedule = "schedule",
+  reschedule = "reschedule",
+}
+
 export enum EProjectMeetingSortFields {
   submittedAt = "submitted_at",
   projectNumber = "project_number",
@@ -57,6 +62,10 @@ export enum EProjectMeetingRequesterRelationship {
 export enum EMeetingRequestDocumentType {
   supporting = "supporting",
   authorization = "authorization",
+}
+
+export enum ENoteableType {
+  ProjectMeeting = "ProjectMeeting",
 }
 
 export enum ESubmissionContactClass {

@@ -2,7 +2,7 @@ import { Box, Button, HStack, Link, Text, VStack } from "@chakra-ui/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { IProjectMeeting } from "../../../../../models/project-meeting"
-import { EProjectMeetingStatus } from "../../../../../types/enums"
+import { EProjectMeetingScheduleMode, EProjectMeetingStatus } from "../../../../../types/enums"
 import { CopyLinkButton } from "../../../../shared/base/copy-link-button"
 import { FormattedDateTime } from "../formatted-date-time"
 import { ScheduleMeetingBanner } from "./schedule-meeting-banner"
@@ -17,7 +17,11 @@ export const ReviewerScheduledMeetingBanner = ({ projectMeeting }: ReviewerSched
 
   if (isEditing) {
     return (
-      <ScheduleMeetingBanner projectMeeting={projectMeeting} mode="reschedule" onCancel={() => setIsEditing(false)} />
+      <ScheduleMeetingBanner
+        projectMeeting={projectMeeting}
+        mode={EProjectMeetingScheduleMode.reschedule}
+        onCancel={() => setIsEditing(false)}
+      />
     )
   }
 
