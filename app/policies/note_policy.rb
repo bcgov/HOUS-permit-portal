@@ -24,13 +24,7 @@ class NotePolicy < ApplicationPolicy
       end
 
       scope
-        .for_project_meetings
-        .joins(
-          "INNER JOIN project_meetings ON project_meetings.id = notes.noteable_id"
-        )
-        .joins(
-          "INNER JOIN permit_projects ON permit_projects.id = project_meetings.permit_project_id"
-        )
+        .joins(:permit_project)
         .where(clauses.map { |clause| "(#{clause})" }.join(" OR "), values)
         .distinct
     end

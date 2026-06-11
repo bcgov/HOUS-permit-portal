@@ -5,7 +5,7 @@ class Api::ProjectMeetings::NotesController < Api::ApplicationController
     notes =
       policy_scope(Note)
         .where(noteable: @project_meeting)
-        .includes(:user, noteable: :permit_project)
+        .preload(:user, :permit_project)
         .order(created_at: :desc)
 
     render_success notes, nil, { blueprint: NoteBlueprint }
@@ -41,7 +41,7 @@ class Api::ProjectMeetings::NotesController < Api::ApplicationController
     notes =
       policy_scope(Note)
         .where(noteable: @project_meeting)
-        .includes(:user, noteable: :permit_project)
+        .preload(:user, :permit_project)
         .order(created_at: :asc)
 
     send_data NotesExportService.new(notes).to_csv,

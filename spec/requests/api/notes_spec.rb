@@ -26,6 +26,7 @@ RSpec.describe "Api::Notes", type: :request do
       expect(response).to have_http_status(:ok)
       expect(json_response.dig("data", 0, "id")).to eq(note.id)
       expect(json_response.dig("data", 0, "author_name")).to eq(reviewer.name)
+      expect(json_response.dig("data", 0)).not_to have_key("author_email")
       expect(json_response.dig("data", 0, "project_meeting_id")).to eq(
         meeting.id
       )
@@ -61,6 +62,7 @@ RSpec.describe "Api::Notes", type: :request do
             }.from(0).to(1)
 
       expect(response).to have_http_status(:created)
+      expect(Note.last.permit_project).to eq(permit_project)
       expect(json_response.dig("data", "body")).to eq(
         "<p>Called requester.</p>"
       )
@@ -180,6 +182,7 @@ RSpec.describe "Api::Notes", type: :request do
       expect(json_response.fetch("data").map { |note| note.fetch("id") }).to eq(
         [project_note.id]
       )
+      expect(json_response.dig("data", 0)).not_to have_key("author_email")
     end
 
     it "includes project meeting notes regardless of meeting status for review staff" do

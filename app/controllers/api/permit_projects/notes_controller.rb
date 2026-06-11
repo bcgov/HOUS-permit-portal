@@ -29,12 +29,9 @@ class Api::PermitProjects::NotesController < Api::ApplicationController
   end
 
   def notes_scope
-    project_meetings =
-      ProjectMeeting.where(permit_project_id: @permit_project.id).select(:id)
-
-    policy_scope(Note).where(
-      noteable_type: ProjectMeeting.name,
-      noteable_id: project_meetings
-    ).includes(:user, noteable: :permit_project)
+    policy_scope(Note).where(permit_project: @permit_project).preload(
+      :user,
+      :permit_project
+    )
   end
 end

@@ -41,9 +41,7 @@ class NotesExportService
   end
 
   def project_number(note)
-    return unless note.noteable.respond_to?(:permit_project)
-
-    note.noteable.permit_project&.number
+    note.permit_project&.number
   end
 
   def plain_body(note)

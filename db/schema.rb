@@ -380,6 +380,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_09_214500) do
 
   create_table "notes", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "user_id", null: false
+    t.uuid "permit_project_id", null: false
     t.string "noteable_type", null: false
     t.uuid "noteable_id", null: false
     t.text "body", null: false
@@ -387,6 +388,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_09_214500) do
     t.datetime "updated_at", null: false
     t.index ["noteable_type", "noteable_id", "created_at"], name: "index_notes_on_noteable_type_and_noteable_id_and_created_at"
     t.index ["noteable_type", "noteable_id"], name: "index_notes_on_noteable"
+    t.index ["permit_project_id", "created_at"], name: "index_notes_on_permit_project_id_and_created_at"
     t.index ["user_id"], name: "index_notes_on_user_id"
   end
 
@@ -1305,6 +1307,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_09_214500) do
   add_foreign_key "jurisdictions", "jurisdictions", column: "regional_district_id"
   add_foreign_key "make_up_air_fuels", "part_3_step_code_checklists", column: "checklist_id", on_delete: :cascade
   add_foreign_key "meeting_request_documents", "project_meetings"
+  add_foreign_key "notes", "permit_projects"
   add_foreign_key "notes", "users"
   add_foreign_key "occupancy_classifications", "part_3_step_code_checklists", column: "checklist_id", on_delete: :cascade
   add_foreign_key "overheating_codes", "jurisdictions"
