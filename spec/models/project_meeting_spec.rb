@@ -25,6 +25,9 @@ RSpec.describe ProjectMeeting, type: :model do
           project_description: nil,
           request_property_information: nil
         )
+      meeting.permit_project.jurisdiction.update!(
+        property_information_requests_enabled: true
+      )
 
       expect(meeting).not_to be_valid
       expect(meeting.errors[:requester_relationship]).to be_present
