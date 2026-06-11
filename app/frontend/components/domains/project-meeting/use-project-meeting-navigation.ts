@@ -7,19 +7,30 @@ import { projectMeetingNavSections } from "./nav-sections"
 export const useProjectMeetingNavigation = () => {
   const navigate = useNavigate()
   const { pathname } = useLocation()
-  const { projectMeetingStore } = useMst()
+  const { projectMeetingStore, permitProjectStore } = useMst()
   const currentProjectMeeting = projectMeetingStore.currentProjectMeeting
+  const currentPermitProject = permitProjectStore.currentPermitProject
 
   const getRequesterIsOwner = () =>
     currentProjectMeeting?.requesterRelationship === EProjectMeetingRequesterRelationship.ownerOrLandholder
 
+  const getPropertyInformationRequestsEnabled = () =>
+    currentPermitProject?.jurisdiction?.propertyInformationRequestsEnabled ?? false
+
   const getVisibleSections = () =>
-    projectMeetingNavSections.filter((section) => !section.nonOwnerOnly || !getRequesterIsOwner())
+    projectMeetingNavSections.filter((section) => {
+      if (section.nonOwnerOnly && getRequesterIsOwner()) return false
+      if (section.propertyInformationRequestsOnly && !getPropertyInformationRequestsEnabled()) return false
+      return true
+    })
 
   const getCurrentSectionLocation = () => {
     const currentSection = pathname.split("/").pop()
     if (getRequesterIsOwner() && currentSection === "authorization-documents") {
       return "contact-details"
+    }
+    if (!getPropertyInformationRequestsEnabled() && currentSection === "property-information") {
+      return "review"
     }
     return currentSection
   }

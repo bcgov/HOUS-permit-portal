@@ -104,13 +104,18 @@ export const ProjectMeetingModel = types
       const hasAuthorizationDocument = self.meetingRequestDocuments.some(
         (document) => document.documentType === EMeetingRequestDocumentType.authorization
       )
+      const propertyInformationRequestsEnabled =
+        self.rootStore.permitProjectStore.currentPermitProject?.jurisdiction?.propertyInformationRequestsEnabled ??
+        false
+      const propertyInformationSatisfied =
+        !propertyInformationRequestsEnabled || self.requestPropertyInformation !== null
 
       return (
         !!self.requesterRelationship &&
         !!self.contactName &&
         !!self.contactEmail &&
         !!self.projectDescription &&
-        self.requestPropertyInformation !== null &&
+        propertyInformationSatisfied &&
         (!requiresAuthorization || hasAuthorizationDocument)
       )
     },

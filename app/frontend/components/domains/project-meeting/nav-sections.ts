@@ -2,6 +2,7 @@ export interface IProjectMeetingNavSection {
   key: string
   location: string
   nonOwnerOnly?: boolean
+  propertyInformationRequestsOnly?: boolean
 }
 
 export const projectMeetingNavSections: IProjectMeetingNavSection[] = [
@@ -11,6 +12,6 @@ export const projectMeetingNavSections: IProjectMeetingNavSection[] = [
   { key: "contactDetails", location: "contact-details" },
   { key: "discussion", location: "discussion" },
   { key: "documents", location: "documents" },
-  { key: "propertyInformation", location: "property-information" },
+  { key: "propertyInformation", location: "property-information", propertyInformationRequestsOnly: true },
   { key: "review", location: "review" },
 ]

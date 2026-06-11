@@ -69,6 +69,17 @@ RSpec.describe ProjectMeeting, type: :model do
       expect(meeting).to be_valid
     end
 
+    it "does not require property information when jurisdiction has requests disabled" do
+      meeting =
+        build(:project_meeting, :open, request_property_information: nil)
+      meeting.permit_project.jurisdiction.update!(
+        property_information_requests_enabled: false
+      )
+
+      expect(meeting).to be_valid
+      expect(meeting.request_property_information).to eq(false)
+    end
+
     it "requires a confirmed date when scheduled" do
       meeting = build(:project_meeting, :scheduled, confirmed_date: nil)
 

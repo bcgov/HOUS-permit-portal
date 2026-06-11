@@ -52,6 +52,7 @@ class ProjectMeeting < ApplicationRecord
   validate :validate_submission_requirements, if: :submitted?
 
   before_validation :normalize_contact_phone_number
+  before_validation :default_request_property_information, if: :submitted?
 
   def feature_enabled?
     parent&.project_meetings_enabled?
@@ -150,7 +151,8 @@ class ProjectMeeting < ApplicationRecord
       errors.add(attribute, :blank) if public_send(attribute).blank?
     end
 
-    if request_property_information.nil?
+    if request_property_information.nil? &&
+         permit_project.jurisdiction.property_information_requests_enabled?
       errors.add(:request_property_information, :blank)
     end
 
@@ -158,6 +160,13 @@ class ProjectMeeting < ApplicationRecord
          active_meeting_request_documents.none?(&:document_type_authorization?)
       errors.add(:meeting_request_documents, :authorization_required)
     end
+  end
+
+  def default_request_property_information
+    return if permit_project.jurisdiction.property_information_requests_enabled?
+
+    self.request_property_information =
+      false if request_property_information.nil?
   end
 
   def normalize_contact_phone_number
