@@ -287,6 +287,20 @@ RSpec.describe "ReleaseNotes", type: :request do
     end
   end
 
+  describe "#index with no release notes" do
+    before do
+      ReleaseNote.delete_all
+      ReleaseNote.reindex
+    end
+
+    it "returns an empty response" do
+      get release_notes_path
+
+      expect(response).to have_http_status(:success)
+      expect(subject).to eq([])
+    end
+  end
+
   describe "#show" do
     it "returns a release note" do
       setup

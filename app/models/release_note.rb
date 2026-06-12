@@ -6,7 +6,7 @@ class ReleaseNote < ApplicationRecord
     /\A(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?\z/
   enum :status, { draft: 0, published: 1 }, default: :draft
 
-  searchkick
+  searchkick searchable: %i[release_date status created_at]
 
   url_validatable :release_notes_url
   validates :version,
