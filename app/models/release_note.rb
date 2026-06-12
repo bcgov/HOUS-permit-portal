@@ -21,6 +21,8 @@ class ReleaseNote < ApplicationRecord
 
   scope :published, -> { where(status: :published) }
 
+  after_commit :refresh_release_note_search_index, on: %i[create update]
+
   def search_data
     {
       id: id,
@@ -56,5 +58,9 @@ class ReleaseNote < ApplicationRecord
     return unless persisted? && status_was == "published" && version_changed?
 
     errors.add(:version, "cannot be changed once a release note is published")
+  end
+
+  def refresh_release_note_search_index
+    ReleaseNote.search_index.refresh
   end
 end
