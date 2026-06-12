@@ -220,7 +220,7 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
       const publishResult = await publishReleaseNote(createResult.data.id, data)
       if (!publishResult.ok) {
         console.error("Failed to publish release note after create:", publishResult.error)
-        navigate(`/configuration-management/release-notes/${createResult.data.id}/edit`, { replace: true })
+        navigate(`/configuration-management/release-notes/${createResult.data.id}`, { replace: true })
         return
       }
     } else {

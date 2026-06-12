@@ -85,7 +85,7 @@ export const ReleaseNotesScreen = observer(function ReleaseNotesScreen() {
           <ReleaseNotesGridCell py={0} justifyContent="flex-end">
             <Button
               as={ReactRouterLink}
-              to={`/configuration-management/release-notes/${note.id}/edit`}
+              to={`/configuration-management/release-notes/${note.id}`}
               variant="secondary"
               size="sm"
               h="32px"

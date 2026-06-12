@@ -537,7 +537,7 @@ const AppRoutes = observer(() => {
       <Route path="/configuration-management/global-feature-access" element={<AdminGlobalFeatureAccessScreen />} />
       <Route path="/configuration-management/release-notes" element={<ReleaseNotesManagementScreen />} />
       <Route path="/configuration-management/release-notes/new" element={<ReleaseNoteFormScreen />} />
-      <Route path="/configuration-management/release-notes/:releaseNoteId/edit" element={<ReleaseNoteFormScreen />} />
+      <Route path="/configuration-management/release-notes/:releaseNoteId" element={<ReleaseNoteFormScreen />} />
       <Route
         path="/configuration-management/global-feature-access/submission-inbox"
         element={<AdminSubmissionInboxScreen />}
