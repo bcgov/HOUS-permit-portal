@@ -56,9 +56,15 @@ export const TemplateVersionStoreModel = types
     },
   }))
   .actions((self) => ({
-    fetchTemplateVersions: flow(function* (status?: ETemplateVersionStatus, isPubliclyPreviewable?: boolean) {
+    fetchTemplateVersions: flow(function* (
+      status?: ETemplateVersionStatus,
+      isPubliclyPreviewable?: boolean,
+      jurisdictionId?: string
+    ) {
       self.isLoading = true
-      const response = yield* toGenerator(self.environment.api.fetchTemplateVersions(status, isPubliclyPreviewable))
+      const response = yield* toGenerator(
+        self.environment.api.fetchTemplateVersions(status, isPubliclyPreviewable, jurisdictionId)
+      )
 
       if (response.ok) {
         const templateVersions = response.data.data

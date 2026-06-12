@@ -407,6 +407,7 @@ const options = {
           publish: "Publish",
           neverMind: "Never mind",
           open: "Open",
+          settings: "Settings",
           download: "Download",
           expandAll: "Expand all",
           collapseAll: "Collapse all",
@@ -1609,6 +1610,36 @@ Thank you,
         projectMeeting: {
           backToProjectOverview: "Back to project overview",
           projectInformation: "Project information",
+          request: {
+            title: "Request a project meeting",
+            intro:
+              "You can request a meeting with your local building authority to discuss your project before you submit a permit application. Some permit types may require a project meeting before you can submit.",
+            visibility:
+              "After you request a meeting, your local building authority will be able to view your draft permit applications.",
+            chanceTo: "A project meeting is a chance to:",
+            discussProposal: "Discuss your project proposal",
+            askQuestions: "Ask questions about zoning and building code requirements",
+            learnRequirements: "Learn which permits and documents may be required",
+            meetOfficials: "Meet your local building officials",
+            checkProjectInformation: {
+              title: "Check your project information before continuing",
+              description: "Need to make a change?",
+              link: "Update your project details",
+            },
+            addPermitsSuccess: {
+              title: "{{count}} permit applications added to your project",
+              description:
+                "You can now request a project meeting with your local building authority, or continue without requesting one.",
+            },
+            requiredPermits: {
+              title: "Your project has permit applications that require a project meeting",
+              description:
+                "Your selected permit applications include one or more permits that require a project meeting with your local government. You can request a meeting now or continue without requesting one. If you have already completed a project meeting about these permit applications, continue without requesting another meeting.",
+            },
+            question: "Would you like to request a project meeting?",
+            yes: "Yes, request a project meeting",
+            no: "No, return to my project without requesting a meeting",
+          },
           contactName: "Name",
           contactEmail: "Email address",
           contactPhoneNumber: "Phone number (optional)",
@@ -1970,10 +2001,19 @@ Thank you,
             contactInstruction:
               "You can log into the Building Permit Hub at any time to view a history of the applications you have submitted. Please contact the {{ jurisdictionName }} for questions related to your application.",
             whatsNextTitle: "What's next?",
-            ready: "Ready to submit this application?",
+            ready: "Submit this application?",
             bySubmitting: "By submitting this application",
             confirmation:
-              "You confirm that the information you provided was completed to the best of your knowledge and ability",
+              "By submitting this application, you confirm that the information you provided was completed to the best of your knowledge and ability.",
+            submitApplication: "Submit application",
+            projectMeetingAdvisory: {
+              title: "This type of permit application may need a project meeting",
+              prefix: "If you haven't completed a project meeting,",
+              link: "request one before submitting",
+              activeBody: "If you haven't completed a project meeting, your application may take longer to process.",
+              activeLink: "view your active meeting request",
+              suffix: ". Your application may take longer to process if the meeting has not happened yet.",
+            },
             yourReference: "For reference, your BC Building Permit Hub Application # is {{ number }}",
             noContactsAvailableTitle: "No template has been scheduled for this permit type",
             noContactsAvailableDescription:
@@ -4842,6 +4882,8 @@ Thank you,
             selectPermit: "Select a digital permit:",
             manageButton: "Manage",
             lastUpdated: "Last updated",
+            availableToApplicants: "Available to applicants",
+            notAvailableToApplicants: "Not available to applicants",
             requestNewPromptWithLink:
               "Your administrator has made the above permit types available for digital submissions. If there is another type you want please <1>request a new permit type</1>.",
             emptyPermitsText:
@@ -4882,6 +4924,22 @@ Thank you,
                 zoning: "Zoning",
                 policy: "Policy",
               },
+            },
+          },
+          settings: {
+            description: "Configure settings for this permit application form.",
+            saveError: "We couldn't save your settings. Please try again.",
+            openForm: "Open permit application form",
+            availableToApplicants: {
+              title: "Available to applicants",
+              description: "Turning this off will hide this permit application from applicants",
+            },
+            requiresProjectMeeting: {
+              title: "Require project meeting at submission",
+              description:
+                "Turning this on will advise applicants to request a project meeting before submitting this permit application.",
+              disabledDescription:
+                "Project meetings must be enabled for this jurisdiction before this setting can be changed.",
             },
           },
         },
