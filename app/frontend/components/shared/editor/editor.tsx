@@ -112,7 +112,9 @@ export const Editor = observer(
     }, [debouncedHandleChange, htmlValue, editor])
 
     useEffect(() => {
-      return () => debouncedHandleChange.cancel()
+      return () => {
+        debouncedHandleChange.flush()
+      }
     }, [debouncedHandleChange])
 
     // Handle autoFocus
