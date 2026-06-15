@@ -9,6 +9,18 @@ class ProjectMeeting < ApplicationRecord
                meeting_notes
                status
              ]
+  audited on: %i[update],
+          only: %i[
+            status
+            submitted_at
+            confirmed_date
+            scheduled_at
+            completed_at
+            closed_at
+            contact_method
+            meeting_url
+          ],
+          associated_with: :permit_project
 
   include ProjectMeetingStatus
 

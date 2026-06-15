@@ -68,7 +68,8 @@ RSpec.describe ProjectAuditPresenter do
       "PermitBlockStatus" => ProjectAuditFormatters::PermitBlockStatusFormatter,
       "PermitProjectCollaboration" =>
         ProjectAuditFormatters::PermitProjectCollaborationFormatter,
-      "SubmissionVersion" => ProjectAuditFormatters::SubmissionVersionFormatter
+      "SubmissionVersion" => ProjectAuditFormatters::SubmissionVersionFormatter,
+      "ProjectMeeting" => ProjectAuditFormatters::ProjectMeetingFormatter
     }.each do |type, formatter_class|
       context "when auditable_type is #{type}" do
         let(:auditable_type) { type }
