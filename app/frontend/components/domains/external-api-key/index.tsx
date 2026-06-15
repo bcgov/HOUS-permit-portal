@@ -47,7 +47,7 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
 
   const configurationManagementPath = `/jurisdictions/${currentJurisdiction.slug}/configuration-management`
   const handleBack = () => {
-    // Check for a history entry; default is the initial location.
+    // Check for a history entry; default is the initial location
     if (location.key === "default") {
       navigate(configurationManagementPath)
     } else {
