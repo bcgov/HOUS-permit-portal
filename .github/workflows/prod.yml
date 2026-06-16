@@ -29,16 +29,8 @@ jobs:
             exit 1
           fi
 
-      - name: Install Git LFS
-        run: |
-          sudo apt-get update
-          sudo apt-get install git-lfs
-          git lfs install
-
       - name: Checkout Workflow Code
         uses: actions/checkout@v4
-        with:
-          lfs: true
 
       - name: Deploy to OpenShift
         uses: ./.github/actions/openshift-deploy
