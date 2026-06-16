@@ -4219,6 +4219,8 @@ Thank you,
           sendInvites: "Send invites",
           acceptInvitation: "Accept invitation",
           acceptInstructions: "Enter your login and other user info below to finalize your account creation.",
+          loggedInStaffInviteWarning:
+            "You are already signed in. Accepting this staff invitation will attach it to your currently signed-in account. If you need to use a different BCeID account, sign out first or open this invitation in a private/incognito window.",
           rolesAndPermissions: "User roles & permissions",
           inviteInstructions:
             "Enter the email addresses of whom you wish to invite below.  For details about permissions for each role, please see",
