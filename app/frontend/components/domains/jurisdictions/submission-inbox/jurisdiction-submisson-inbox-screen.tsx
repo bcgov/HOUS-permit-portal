@@ -210,7 +210,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
                     border="none"
                     outline="none"
                     fontSize="sm"
-                    placeholder={t("submissionInbox.searchPlaceholder")}
+                    placeholder={t("permitProject.searchPlaceholder")}
                     _placeholder={{ color: "text.secondary" }}
                     value={activeSearchStore.query ?? ""}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {

@@ -35,7 +35,7 @@ export const ProjectDashboardScreen = observer(({}: IProjectDashboardScreenProps
       badgeCount: preCheckStore.unviewedCount,
     },
     {
-      label: t("overheatingCode.index.title", "Overheating Codes"),
+      label: t("overheatingCode.index.title", "Overheating"),
       icon: Thermometer,
       to: "overheating-codes",
       tabIndex: 3,
