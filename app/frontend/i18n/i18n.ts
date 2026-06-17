@@ -3957,7 +3957,7 @@ Thank you,
             foundTitle: "Digital seal found",
             notFoundTitle: "Digital seal not found",
             noSignaturesFound:
-              "We could not find a digital seal (signature) from an AIBC or EGBC member. You can use this document to submit a permit application through Building Permit Hub. Documents without digital seals may be reviewed manually, which could take longer.",
+              "We could not find a digital seal from an AIBC or EGBC member on this document. You can still use this document in a permit application. The local building authority may need to review it manually, which could take longer than reviewing documents with valid digital seals.",
             systemFailureTitle: "We could not check the digital seal",
             systemFailureMessage:
               "Try uploading the document again. You can still submit permit applications with this document. If you keep seeing this message, contact the team at <1>{{email}}</1>",
