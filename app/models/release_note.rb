@@ -6,7 +6,7 @@ class ReleaseNote < ApplicationRecord
     /\A(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?\z/
   enum :status, { draft: 0, published: 1 }, default: :draft
 
-  searchkick
+  searchkick searchable: %i[release_date status created_at]
 
   url_validatable :release_notes_url
   validates :version,
@@ -20,6 +20,8 @@ class ReleaseNote < ApplicationRecord
   validate :version_unchanged_once_published
 
   scope :published, -> { where(status: :published) }
+
+  after_commit :refresh_release_note_search_index, on: %i[create update]
 
   def search_data
     {
@@ -56,5 +58,9 @@ class ReleaseNote < ApplicationRecord
     return unless persisted? && status_was == "published" && version_changed?
 
     errors.add(:version, "cannot be changed once a release note is published")
+  end
+
+  def refresh_release_note_search_index
+    ReleaseNote.search_index.refresh
   end
 end

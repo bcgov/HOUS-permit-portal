@@ -1,12 +1,6 @@
 module Api::Concerns::Search::ReleaseNotes
   extend ActiveSupport::Concern
 
-  SORTABLE_COLUMNS = {
-    "release_date" => :release_date,
-    "updated_at" => :updated_at,
-    "status" => :status
-  }.freeze
-
   def perform_release_note_search
     where_clause = release_note_where_clause
     order = release_note_order
@@ -45,8 +39,8 @@ module Api::Concerns::Search::ReleaseNotes
     year = release_note_search_params[:year].presence
     return filters unless year
 
-    start_date = Date.new(year.to_i, 1, 1)
-    end_date = Date.new(year.to_i, 12, 31)
+    start_date = Date.new(year.to_i, 1, 1).beginning_of_day
+    end_date = Date.new(year.to_i, 12, 31).end_of_day
     filters.merge(release_date: start_date..end_date)
   end
 
@@ -60,14 +54,28 @@ module Api::Concerns::Search::ReleaseNotes
   end
 
   def release_note_order
-    sort = release_note_search_params[:sort]
-    field = SORTABLE_COLUMNS[sort&.dig(:field).to_s]
-    direction = (sort&.dig(:direction).to_s.downcase == "asc" ? :asc : :desc)
-    # Use created_at to break ties when release_date (including time) is the same
-    if field
-      { field => direction, :created_at => direction }
+    if (sort = release_note_search_params[:sort])
+      {
+        sort[:field] => {
+          order: sort[:direction],
+          unmapped_type: "long"
+        },
+        :created_at => {
+          order: sort[:direction],
+          unmapped_type: "long"
+        }
+      }
     else
-      { release_date: :desc, created_at: :desc }
+      {
+        release_date: {
+          order: :desc,
+          unmapped_type: "long"
+        },
+        created_at: {
+          order: :desc,
+          unmapped_type: "long"
+        }
+      }
     end
   end
 
