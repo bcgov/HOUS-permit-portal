@@ -291,7 +291,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
                       position="relative"
                       pr="var(--app-permit-fieldset-right-white-space)"
                       sx={{
-                        "& input": {
+                        "& .chakra-input__group": {
                           maxW: "var(--app-permit-input-field-short)",
                         },
                       }}
