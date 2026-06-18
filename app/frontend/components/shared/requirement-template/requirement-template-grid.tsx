@@ -107,8 +107,11 @@ const GridHeaders = observer(function GridHeaders() {
           bg={"greys.grey10"}
           justifyContent={"space-between"}
           align="center"
+          gap={6}
         >
-          <Text role={"heading"}>{t("requirementTemplate.index.tableHeading")}</Text>
+          <Text role={"heading"} flexShrink={0}>
+            {t("requirementTemplate.index.tableHeading")}
+          </Text>
           <ModelSearchInput searchModel={requirementTemplateStore} />
         </GridItem>
       </Box>

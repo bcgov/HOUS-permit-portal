@@ -91,7 +91,7 @@ export const SiteConfigurationManagementScreen = observer(function SiteConfigura
           <GridItem>
             <HomeScreenBox
               title={t(`${i18nPrefix}.templateCategories.title`)}
-              description={t(`${i18nPrefix}.templateCategories.description`)}
+              description={t(`${i18nPrefix}.templateCategories.cardDescription`)}
               linkText={t("ui.edit")}
               icon={<FileText size="24px" color="var(--chakra-colors-text-link)" />}
               href="template-categories"
