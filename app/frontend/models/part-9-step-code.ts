@@ -36,6 +36,9 @@ export const Part9StepCodeModel = types.snapshotProcessor(
       get primaryChecklist() {
         return self.checklists[0]
       },
+      // HUB-5145: This returns the first checklist, not the checklist whose
+      // stage is pre_construction. Stage-aware Part 9 UX should select by
+      // checklist.stage and expose separate As-Built navigation/PDF targets.
       get preConstructionChecklist() {
         return self.checklists[0]
       },

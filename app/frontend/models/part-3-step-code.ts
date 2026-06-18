@@ -13,6 +13,9 @@ export const Part3StepCodeModel = types
     types.model({
       id: types.identifier,
       type: types.literal(EStepCodeType.part3StepCode),
+      // HUB-5145: Part 3 state assumes one checklist for the whole report. If
+      // As-Built must inherit from Pre-Construction, this model needs a staged
+      // collection or a linked source report instead of a single `checklist`.
       checklist: types.maybeNull(types.late(() => Part3StepCodeChecklistModel)),
       zeroCarbonSteps: types.array(types.enumeration(Object.values(EZeroCarbonStep))),
       energySteps: types.array(types.enumeration(Object.values(EEnergyStep))),

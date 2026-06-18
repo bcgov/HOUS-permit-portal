@@ -1,6 +1,9 @@
 class StepCode::Part3::ChecklistBlueprint < Blueprinter::Base
   identifier :id
 
+  # HUB-5145: Part 3 checklist serialization has no stage/report identity. The
+  # UI reads stage from StepCode.phase instead, so As-Built-specific checklist
+  # behavior cannot be represented here without a model/API change.
   fields :section_completion_status,
          :total_annual_thermal_energy_demand,
          :total_annual_cooling_energy_demand,

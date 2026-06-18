@@ -3,6 +3,10 @@ class Part9StepCode < StepCode
            class_name: "Part9StepCode::Checklist",
            foreign_key: :step_code_id,
            dependent: :destroy
+  # HUB-5145: The database supports staged Part 9 checklists, but the app treats
+  # pre-construction as the only actionable report. As-Built work must define how
+  # users create/select non-pre-construction checklists and which checklist drives
+  # status, PDF generation, imports, and permit submission.
   has_one :pre_construction_checklist,
           -> { where(stage: :pre_construction) },
           class_name: "Part9StepCode::Checklist",

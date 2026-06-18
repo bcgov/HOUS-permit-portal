@@ -21,6 +21,9 @@ class Api::Part9Building::StepCodesController < Api::ApplicationController
       Part9StepCode.transaction do
         @step_code =
           if step_code_params[:permit_application_id]
+            # HUB-5145: This mirrors Part 3's one StepCode per permit behavior
+            # even though Part 9 has checklist stages. Decide whether As-Built is
+            # a new checklist under this StepCode or a separate linked report.
             Part9StepCode
               .kept
               .where(

@@ -1,6 +1,9 @@
 class StepCode::Part9::ChecklistBlueprint < Blueprinter::Base
   identifier :id
 
+  # HUB-5145: Part 9 exposes checklist `stage` and `status`, but most consumers
+  # still select the first/pre-construction checklist. As-Built work should make
+  # this serialized stage drive routing, labels, status, and PDF selection.
   fields :stage, :status, :updated_at
 
   view :extended do

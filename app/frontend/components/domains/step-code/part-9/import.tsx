@@ -39,6 +39,9 @@ export const H2KImport = function StepCodeH2kImport() {
       fullAddress: null,
       pid: null,
       jurisdictionId: null,
+      // HUB-5145: The Part 9 creation UX is hard-wired to a pre-construction
+      // H2K import. As-Built needs its own stage-aware import/default flow, or a
+      // clear decision that Part 9 As-Built is not created from this screen.
       preConstructionChecklistAttributes: { compliancePath: null, dataEntriesAttributes: [dataEntryAttributes] },
     },
   })

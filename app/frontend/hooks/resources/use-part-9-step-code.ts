@@ -34,6 +34,9 @@ export const usePart9StepCode = () => {
     } else {
       const paStepCode = currentPermitApplication?.stepCode
       if (paStepCode && !paStepCode.isDiscarded) {
+        // HUB-5145: This permit route also selects one StepCode and lets the
+        // model pick its first checklist. Stage-aware Part 9 routes should carry
+        // a checklist id or stage so As-Built does not open Pre-Construction.
         setCurrentStepCode(paStepCode.id)
       }
       setIsLoading(false)

@@ -16,6 +16,9 @@ module StepCodeParamsConcern
       :reference_number,
       :title,
       :permit_date,
+      # HUB-5145: `phase` is currently the only persisted Part 3 "stage" value.
+      # If Product wants report records per stage, replace this loose string with
+      # a validated report-stage concept instead of layering more UI copy on it.
       :phase,
       :building_code_version,
       :jurisdiction_id,
@@ -24,6 +27,9 @@ module StepCodeParamsConcern
         { section_completion_status: section_completion_status_params }
       ],
       # Part 9 specific
+      # HUB-5145: Creation only accepts pre-construction nested attributes. A
+      # Part 9 As-Built path needs stage-aware nested params or a dedicated
+      # checklist creation endpoint instead of overloading this import contract.
       pre_construction_checklist_attributes: [
         :compliance_path,
         data_entries_attributes: [

@@ -30,6 +30,9 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
     if (!isStandaloneStepCode && !currentPermitApplication?.isFullyLoaded) return // wait for permit application to load
 
     if (!currentStepCode) {
+      // HUB-5145: Permit-linked Part 3 entry auto-creates/loads one report with
+      // no stage choice. As-Built from a project needs either a stage-aware
+      // create call here or a separate route that links to the Pre-Con report.
       createPart3StepCode({
         permitApplicationId, // nil when the step code is not attached to a permit application
         checklistAttributes: { sectionCompletionStatus: defaultSectionCompletionStatus },

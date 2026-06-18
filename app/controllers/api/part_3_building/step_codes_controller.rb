@@ -15,6 +15,9 @@ class Api::Part3Building::StepCodesController < Api::ApplicationController
       Part3StepCode.transaction do
         @step_code =
           if step_code_params[:permit_application_id]
+            # HUB-5145: This finds/creates by permit only, not by report stage.
+            # A permit-linked As-Built story will currently reuse the existing
+            # Part 3 report unless the data model allows staged sibling reports.
             Part3StepCode
               .kept
               .where(

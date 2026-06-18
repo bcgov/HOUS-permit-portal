@@ -38,6 +38,9 @@ export const Part3StepCodeChecklistModel = types
     id: types.identifier,
     isLoaded: types.maybeNull(types.boolean),
     sectionCompletionStatus: types.maybeNull(types.frozen<IPart3SectionCompletionStatus>()),
+    // HUB-5145: This appears to be stale permit-status terminology; the active
+    // Part 3 project stage is `StepCodeBaseFields.phase`. Do not build As-Built
+    // behavior on this field without first reconciling the data contract.
     projectStage: types.maybeNull(types.enumeration<EProjectStage[]>(Object.values(EProjectStage))),
     buildingCodeVersion: types.maybeNull(
       types.enumeration<EBuildingCodeVersion[]>(Object.values(EBuildingCodeVersion))

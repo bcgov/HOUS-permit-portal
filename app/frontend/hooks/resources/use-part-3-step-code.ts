@@ -33,6 +33,9 @@ export const usePart3StepCode = () => {
     } else {
       const paStepCode = currentPermitApplication?.stepCode
       if (paStepCode && !paStepCode.isDiscarded) {
+        // HUB-5145: Permit routes select the permit's single StepCode, not a
+        // stage-specific report. If Pre-Con and As-Built both exist, the route
+        // needs stage/report id context instead of using currentPermitApplication.
         setCurrentStepCode(paStepCode.id)
       }
       setIsLoading(false)

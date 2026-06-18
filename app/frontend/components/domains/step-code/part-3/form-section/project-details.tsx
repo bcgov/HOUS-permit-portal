@@ -100,6 +100,10 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
 
   const editable = R.isNil(permitApplicationId)
 
+  // HUB-5145: Standalone reports can edit `phase`, but permit-linked reports
+  // only display values inherited from the permit application. Confirm whether
+  // As-Built should override that inherited stage and keep Project Identifier
+  // (`referenceNumber`) separate from Project Stage (`phase`).
   return (
     <>
       <Flex direction="column" gap={2} pb={6}>

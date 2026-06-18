@@ -14,6 +14,9 @@ export const StepCodeBaseFields = types
     jurisdictionName: types.maybeNull(types.string),
     jurisdiction: types.maybeNull(types.reference(types.late(() => JurisdictionModel))),
     permitDate: types.maybeNull(types.Date),
+    // HUB-5145: This loose `phase` field is the shared frontend representation
+    // for Part 3 project stage, while Part 9 reads stage from its checklist.
+    // Normalize naming before adding cross-part As-Built UX or index filters.
     phase: types.maybeNull(types.string),
     permitProjectTitle: types.maybeNull(types.string),
     reportDocuments: types.maybeNull(types.array(types.frozen<IReportDocument>())),

@@ -83,6 +83,9 @@ class Api::Part9Building::ChecklistsController < Api::ApplicationController
 
   def step_code_checklist_params
     params.require(:step_code_checklist).permit(
+      # HUB-5145: `stage` is intentionally not part of normal edits today. If
+      # As-Built checklists are user-created, stage should be set at creation
+      # time and guarded from accidental edits afterward.
       :builder,
       :compliance_path,
       :completed_by,

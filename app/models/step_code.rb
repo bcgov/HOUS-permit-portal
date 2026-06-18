@@ -32,6 +32,10 @@ class StepCode < ApplicationRecord
   # Delegates for attributes from PermitApplication
   delegate :number, to: :permit_application, prefix: true, allow_nil: true
 
+  # HUB-5145: This parent record mixes report identity, permit/project metadata,
+  # and lifecycle state (`phase`). Part 3 uses this loose phase string, while Part
+  # 9 stores stage on checklists; normalize this before adding linked As-Built
+  # inheritance or separate Step Codes index rows.
   validates :permit_application_id,
             uniqueness: {
               conditions: -> { kept }
@@ -52,6 +56,9 @@ class StepCode < ApplicationRecord
     raise NotImplementedError, "Subclasses must implement the complete? method"
   end
 
+  # HUB-5145: PDF generation, submission exports, and UI completeness all depend
+  # on one primary checklist. Stage-aware reports need callers to ask for a
+  # specific report/checklist instead of implicitly using the pre-construction one.
   def primary_checklist
     raise NotImplementedError,
           "Subclasses must implement the primary_checklist method"
