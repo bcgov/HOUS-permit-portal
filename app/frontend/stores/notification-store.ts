@@ -219,6 +219,18 @@ export const NotificationStoreModel = types
                 : `/projects/${projectMeetingData.permitProjectId}/meetings/${projectMeetingData.projectMeetingId}`,
           },
         ]
+      } else if (notification.actionType === ENotificationActionType.releaseNotePublish) {
+        const data = notification.objectData as { releaseNoteId?: string }
+        const releaseNoteId = data?.releaseNoteId
+        if (!releaseNoteId) {
+          return []
+        }
+        return [
+          {
+            text: t("ui.show"),
+            href: `/release-notes#release-note-${releaseNoteId}`,
+          },
+        ]
       }
     },
   }))

@@ -248,6 +248,7 @@ class Api::UsersController < Api::ApplicationController
         enable_email_resource_reminder_notification
         enable_in_app_project_meeting_submitted_notification
         enable_email_project_meeting_submitted_notification
+        enable_in_app_release_note_publish_notification
       ]
     )
   end

@@ -163,6 +163,17 @@ export enum ERequirementTemplateSortFields {
   availableIn = "available_in",
 }
 
+export enum EReleaseNoteSortFields {
+  releaseDate = "release_date",
+  lastEdited = "updated_at",
+  status = "status",
+}
+
+export enum EReleaseNoteStatus {
+  draft = "draft",
+  published = "published",
+}
+
 export enum EPreCheckSortFields {
   fullAddress = "full_address",
   title = "title",
@@ -500,6 +511,7 @@ export enum ENotificationActionType {
   projectMeetingRescheduled = "project_meeting_rescheduled",
   projectReviewCollaborationAssignment = "project_review_collaboration_assignment",
   projectReviewCollaborationUnassignment = "project_review_collaboration_unassignment",
+  releaseNotePublish = "release_note_publish",
 }
 
 export enum ECollaboratorableType {

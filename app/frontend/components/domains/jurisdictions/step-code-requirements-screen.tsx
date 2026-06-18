@@ -29,8 +29,8 @@ export const JurisdictionStepCodeRequirementsScreen = observer(() => {
     return <LoadingScreen />
   }
 
-  const ActionButtons = () => (
-    <HStack spacing={4}>
+  const ActionButtons = (props: React.ComponentProps<typeof HStack>) => (
+    <HStack spacing={4} {...props}>
       <Button variant="outline" onClick={handleCheckAnotherAddress}>
         {t(`${i18nPrefix}.checkAnotherAddress`)}
       </Button>
@@ -81,7 +81,7 @@ export const JurisdictionStepCodeRequirementsScreen = observer(() => {
         <Part3StepCodeRequirements currentJurisdiction={currentJurisdiction} />
       </VStack>
 
-      <ActionButtons />
+      <ActionButtons pt={8} />
 
       <VStack align="start" spacing={4} mt={12}>
         <Heading as="h2" fontSize="2xl">

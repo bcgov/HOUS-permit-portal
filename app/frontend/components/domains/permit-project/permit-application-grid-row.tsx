@@ -83,14 +83,7 @@ export const PermitApplicationGridRow = observer(
               <Text variant="secondary">{permitApplication.templateNickname}</Text>
             </VStack>
           </SearchGridItem>
-          <SearchGridItem
-            onClick={(e: React.MouseEvent) => {
-              if (fromInbox) {
-                e.preventDefault()
-                e.stopPropagation()
-              }
-            }}
-          >
+          <SearchGridItem>
             {fromInbox ? (
               <ApplicationReviewAssigneesCell application={permitApplication} />
             ) : (
