@@ -2,13 +2,13 @@ module PermitProjectState
   extend ActiveSupport::Concern
 
   MANUAL_TRANSITIONS = {
-    draft: [],
-    queued: %i[waiting in_progress closed],
+    draft: %i[],
+    queued: %i[waiting in_progress ready permit_issued active closed],
     waiting: %i[queued in_progress ready permit_issued active closed],
-    in_progress: %i[queued waiting ready permit_issued active closed],
-    ready: %i[permit_issued waiting closed],
-    permit_issued: %i[active waiting closed ready],
-    active: %i[complete waiting closed queued],
+    in_progress: %i[queued waiting ready closed],
+    ready: %i[in_progress permit_issued waiting closed],
+    permit_issued: %i[in_progress active waiting closed ready],
+    active: %i[complete waiting closed queued in_progress],
     complete: %i[active queued],
     closed: %i[queued]
   }.freeze
