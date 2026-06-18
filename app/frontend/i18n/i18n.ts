@@ -4796,6 +4796,8 @@ Thank you,
             title: "Permit templates catalogue",
             description:
               "View all permit templates and manage which ones are available to jurisdictions and applicants. Only published templates are visible to jurisdictions and applicants.",
+            categoryDescription:
+              "Use <permitCategoriesLink>permit categories</permitCategoriesLink> to control how permit applications appear to the public, including which permit applications appear in each category and the order they appear in.",
             createButton: "Create new template",
           },
           new: {
@@ -5058,7 +5060,8 @@ Thank you,
           },
           templateCategories: {
             title: "Permit categories",
-            description: "Group and order permit templates across public template lists.",
+            cardDescription: "Choose which permit applications appear in each category and the order they appear in",
+            description: "Choose which permit applications appear in each category and the order they appear in.",
             add: "Add category",
             label: "Label",
             uncategorized: "Uncategorized",
