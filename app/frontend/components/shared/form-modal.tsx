@@ -9,7 +9,7 @@ interface IFormModalProps<T extends FieldValues> {
   isOpen: boolean
   onClose: () => void
   formProps: UseFormReturn<T>
-  children: React.ReactNode
+  children: React.ReactNode | ((props: { onClose: () => void }) => React.ReactNode)
   modalProps?: Omit<ModalProps, "isOpen" | "onClose" | "children">
   confirmCloseTitle?: string
   confirmCloseBody?: string
@@ -74,7 +74,7 @@ export const FormModal = observer(function FormModal<T extends FieldValues>({
             maxW={"full"}
             {...(modalProps?.size ? {} : { w: "min(1170px, 95%)", maxW: "full" })}
           >
-            {children}
+            {typeof children === "function" ? children({ onClose: handleClose }) : children}
           </ModalContent>
         </FormProvider>
       </Modal>
@@ -87,9 +87,7 @@ export const FormModal = observer(function FormModal<T extends FieldValues>({
         title={confirmCloseTitle || t("ui.confirmation.unsavedChangesTitle")}
         body={confirmCloseBody || t("ui.confirmation.unsavedChangesBody")}
         onConfirm={handleConfirmClose}
-        confirmButtonProps={{
-          children: confirmCloseButtonText || t("ui.confirmation.discardChanges"),
-        }}
+        triggerText={confirmCloseButtonText || t("ui.confirmation.discardChanges")}
       />
     </>
   )
