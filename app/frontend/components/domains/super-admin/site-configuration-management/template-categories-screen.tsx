@@ -173,7 +173,7 @@ export const TemplateCategoriesScreen = observer(function TemplateCategoriesScre
             <Text color="text.secondary" mt={3}>
               {translate(
                 "siteConfiguration.templateCategories.description",
-                "Group and order permit templates across public template lists."
+                "Choose which permit applications appear in each category and the order they appear in."
               )}
             </Text>
           </Box>
