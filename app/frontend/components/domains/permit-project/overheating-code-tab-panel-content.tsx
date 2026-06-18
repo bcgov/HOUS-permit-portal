@@ -2,6 +2,7 @@ import {
   Button,
   Container,
   Flex,
+  FormControl,
   Heading,
   Icon,
   IconButton,
@@ -22,6 +23,7 @@ import { IOverheatingCode } from "../../../models/overheating-code"
 import { useMst } from "../../../setup/root"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
+import { ModelSearchInput } from "../../shared/base/model-search-input"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { ToggleArchivedButton } from "../../shared/buttons/toggle-archived-button"
 import { ConfirmationModal } from "../../shared/confirmation-modal"
@@ -65,6 +67,15 @@ export const OverheatingCodeTabPanelContent = observer(() => {
               "Your overheating code check results are stored here. Use this service to verify compliance with overheating requirements before submitting a permit application."
             )}
           </Text>
+          <Flex direction="column" gap={4} w="full">
+            <FormControl w="full">
+              <ModelSearchInput
+                searchModel={overheatingCodeStore}
+                inputProps={{ placeholder: t("ui.search"), width: "full" }}
+                inputGroupProps={{ width: "full" }}
+              />
+            </FormControl>
+          </Flex>
 
           <SearchGrid templateColumns="1.5fr 1fr 1.5fr 2fr 0.5fr">
             <OverheatingCodeGridHeaders />

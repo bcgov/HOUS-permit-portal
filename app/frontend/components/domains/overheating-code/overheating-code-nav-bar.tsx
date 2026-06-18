@@ -30,7 +30,7 @@ export const OverheatingCodeNavBar = observer(function OverheatingCodeNavBar() {
       </FormLabel>
       <Spacer />
       <RouterLinkButton to="/overheating-codes" variant="link">
-        {t("overheatingCode.form.backToOverheatingCodes", "Go to overheating codes")}
+        {t("overheatingCode.form.backToOverheatingCodes", "Go to overheating")}
       </RouterLinkButton>
     </Flex>
   )
