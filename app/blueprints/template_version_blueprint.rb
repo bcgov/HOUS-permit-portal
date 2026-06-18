@@ -44,6 +44,20 @@ class TemplateVersionBlueprint < Blueprinter::Base
   view :extended do
     fields :denormalized_template_json, :form_json, :requirement_blocks_json
 
+    field :requires_project_meeting do |template_version, options|
+      template_version.requires_project_meeting_for_jurisdiction?(
+        options[:jurisdiction_id],
+        options[:sandbox]
+      )
+    end
+
+    field :disabled_by_jurisdiction do |template_version, options|
+      template_version.disabled_for_jurisdiction?(
+        options[:jurisdiction_id],
+        options[:sandbox]
+      )
+    end
+
     field :latest_version_id do |template_version|
       template_version.latest_version&.id
     end

@@ -279,6 +279,11 @@ const JurisdictionEditDigitalPermitScreen = lazy(() =>
     default: module.JurisdictionEditDigitalPermitScreen,
   }))
 )
+const JurisdictionDigitalPermitSettingsScreen = lazy(() =>
+  import("../requirement-template/screens/jurisdiction-digital-permit-settings-screen").then((module) => ({
+    default: module.JurisdictionDigitalPermitSettingsScreen,
+  }))
+)
 const JurisdictionApiMappingsSetupIndexScreen = lazy(() =>
   import("../requirement-template/screens/jurisdiction-api-mappings-setup-index-screen").then((module) => ({
     default: module.JurisdictionApiMappingsSetupIndexScreen,
@@ -421,9 +426,9 @@ const InviteScreen = lazy(() => import("../users/invite-screen").then((module) =
 const ProfileScreen = lazy(() =>
   import("../users/profile-screen").then((module) => ({ default: module.ProfileScreen }))
 )
-const ProjectMeetingNewScreen = lazy(() =>
-  import("../project-meeting/project-meeting-new-screen").then((module) => ({
-    default: module.ProjectMeetingNewScreen,
+const ProjectMeetingRequestScreen = lazy(() =>
+  import("../project-meeting/project-meeting-request-screen").then((module) => ({
+    default: module.ProjectMeetingRequestScreen,
   }))
 )
 const ProjectMeetingScreen = lazy(() =>
@@ -694,6 +699,10 @@ const AppRoutes = observer(() => {
         element={<JurisdictionEditDigitalPermitScreen />}
       />
       <Route
+        path="/digital-building-permits/:templateVersionId/settings"
+        element={<JurisdictionDigitalPermitSettingsScreen />}
+      />
+      <Route
         path="/jurisdictions/:jurisdictionId/configuration-management/feature-access"
         element={<ReviewManagerFeatureAccessScreen />}
       />
@@ -791,7 +800,7 @@ const AppRoutes = observer(() => {
             <Route path="/projects/:permitProjectId/*" element={<PermitProjectScreen />} />
             <Route path="/projects/:permitProjectId/add-permits" element={<AddPermitApplicationToProjectScreen />} />
             <Route element={<ProtectedRoute isAllowed={projectMeetingsEnabled} redirectPath="/not-found" />}>
-              <Route path="/projects/:permitProjectId/meetings/new" element={<ProjectMeetingNewScreen />} />
+              <Route path="/projects/:permitProjectId/meetings/new" element={<ProjectMeetingRequestScreen />} />
               <Route
                 path="/projects/:permitProjectId/meetings/:projectMeetingId/edit/:section"
                 element={<ProjectMeetingScreen />}

@@ -101,6 +101,18 @@ class PermitApplicationBlueprint < Blueprinter::Base
       pa.template_version_disabled_by_jurisdiction?
     end
 
+    field :requires_project_meeting do |pa, _options|
+      pa.requires_project_meeting?
+    end
+
+    field :has_active_project_meeting do |pa, _options|
+      pa.permit_project&.has_active_project_meeting || false
+    end
+
+    field :active_project_meeting_id do |pa, _options|
+      pa.permit_project&.active_project_meeting&.id
+    end
+
     association :supporting_documents,
                 blueprint: SupportingDocumentBlueprint do |pa, options|
       pa.supporting_documents_for_submitter_based_on_user_permissions(
