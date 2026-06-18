@@ -3,6 +3,8 @@
 require "rails_helper"
 
 RSpec.describe "Project activity auditing", type: :model do
+  include ActiveSupport::Testing::TimeHelpers
+
   let(:jurisdiction) { create(:sub_district) }
   let(:reviewer) { create(:user, :review_manager, jurisdiction: jurisdiction) }
   let(:owner) { create(:user, :submitter) }
@@ -36,6 +38,28 @@ RSpec.describe "Project activity auditing", type: :model do
       )
       .where("audited_changes ? 'viewed_at'")
       .order(:created_at)
+  end
+
+  def project_meeting_audits
+    project_audits.where(auditable_type: "ProjectMeeting").order(
+      :created_at,
+      :id
+    )
+  end
+
+  def stub_project_meeting_notifications
+    allow(NotificationService).to receive(
+      :publish_project_meeting_submitted_event
+    )
+    allow(NotificationService).to receive(
+      :publish_project_meeting_request_received_event
+    )
+    allow(NotificationService).to receive(
+      :publish_property_information_request_received_event
+    )
+    allow(NotificationService).to receive(
+      :publish_project_meeting_scheduled_event
+    )
   end
 
   it "records project state changes" do
@@ -122,6 +146,99 @@ RSpec.describe "Project activity auditing", type: :model do
     Audited.audit_class.as_user(reviewer) { project.update_viewed_at }
 
     expect(permit_project_viewed_at_update_audits.count).to eq(read_count)
+  end
+
+  context "with a project meeting" do
+    let!(:project_meeting) do
+      create(:project_meeting, permit_project: project, requested_by: owner)
+    end
+
+    before { stub_project_meeting_notifications }
+
+    it "records lifecycle and scheduling actions in order" do
+      start_time = Time.zone.local(2026, 1, 1, 9, 0, 0)
+
+      travel_to(start_time) do
+        Audited.audit_class.as_user(owner) { project_meeting.submit_request! }
+      end
+
+      project_meeting.reload
+      travel_to(start_time + 10.minutes) do
+        Audited
+          .audit_class
+          .as_user(reviewer) do
+            project_meeting.assign_attributes(
+              contact_method: :phone,
+              confirmed_date: 1.week.from_now
+            )
+            project_meeting.schedule!
+          end
+      end
+
+      project_meeting.reload
+      travel_to(start_time + 20.minutes) do
+        Audited
+          .audit_class
+          .as_user(reviewer) do
+            project_meeting.update!(confirmed_date: 2.weeks.from_now)
+          end
+      end
+
+      project_meeting.reload
+      travel_to(start_time + 30.minutes) do
+        Audited.audit_class.as_user(reviewer) { project_meeting.complete! }
+      end
+
+      audits = project_meeting_audits.to_a
+
+      expect(audits.map(&:associated_type)).to all(eq("PermitProject"))
+      expect(audits.map(&:associated_id)).to all(eq(project.id))
+      expect(audits.map(&:user)).to eq([owner, reviewer, reviewer, reviewer])
+      expect(audits.map(&:created_at)).to eq(
+        [
+          start_time,
+          start_time + 10.minutes,
+          start_time + 20.minutes,
+          start_time + 30.minutes
+        ]
+      )
+      expect(audits.map(&:audited_changes)).to match(
+        [
+          a_hash_including("status", "submitted_at"),
+          a_hash_including("status", "scheduled_at", "confirmed_date"),
+          a_hash_including("confirmed_date"),
+          a_hash_including("status", "completed_at")
+        ]
+      )
+    end
+
+    it "records cancelled meeting requests" do
+      Audited.audit_class.as_user(owner) { project_meeting.submit_request! }
+
+      project_meeting.reload
+      Audited.audit_class.as_user(owner) { project_meeting.close! }
+
+      close_audit =
+        project_meeting_audits.where("audited_changes ? 'closed_at'").last
+
+      expect(close_audit).to be_present
+      expect(close_audit.audited_changes["status"]).to eq(
+        [ProjectMeeting.statuses["open"], ProjectMeeting.statuses["closed"]]
+      )
+    end
+
+    it "does not record draft edits or read/unread changes" do
+      audit_count = project_meeting_audits.count
+
+      Audited
+        .audit_class
+        .as_user(owner) do
+          project_meeting.update!(meeting_notes: "Updated draft notes")
+          project_meeting.update_viewed_at
+        end
+
+      expect(project_meeting_audits.count).to eq(audit_count)
+    end
   end
 
   context "with a submitted permit application" do

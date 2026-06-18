@@ -3,6 +3,7 @@ import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useMemo } from "react"
 import { useTranslation } from "react-i18next"
+import { datefnsTableDateFormat } from "../../../constants"
 import { useTemplateVersions } from "../../../hooks/resources/use-template-versions"
 import { ITemplateVersion } from "../../../models/template-version"
 import { useMst } from "../../../setup/root"
@@ -88,7 +89,7 @@ export const TemplateVersionsList = observer(function TemplateVersionsList({
                     <Text as="span" fontWeight={700}>
                       {t("digitalBuildingPermits.index.lastUpdated")}:{" "}
                     </Text>
-                    {format(tv.updatedAt, "MMM d, yyyy")}
+                    {format(tv.updatedAt, datefnsTableDateFormat)}
                   </Text>
                   <HStack gap={4} align="center">
                     <VersionTag versionDate={tv.versionDate} w="fit-content" />

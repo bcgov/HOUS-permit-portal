@@ -1,6 +1,7 @@
 import { t } from "i18next"
 import { flow } from "mobx"
-import { Instance, toGenerator, types } from "mobx-state-tree"
+import { applySnapshot, getSnapshot, Instance, toGenerator, types } from "mobx-state-tree"
+import * as R from "ramda"
 import { IJurisdictionTemplateVersionCustomizationForm } from "../components/domains/requirement-template/screens/jurisdiction-edit-digital-permit-screen"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
@@ -39,6 +40,8 @@ export const TemplateVersionModel = types
     changeSignificance: types.maybeNull(types.string),
     notificationScope: types.maybeNull(types.string),
     publiclyPreviewable: types.optional(types.boolean, false),
+    requiresProjectMeeting: types.optional(types.boolean, false),
+    disabledByJurisdiction: types.optional(types.boolean, false),
     hasUnresolvedFeedbacks: types.optional(types.boolean, false),
     feedbacksCount: types.optional(types.number, 0),
     templateCategoryId: types.maybeNull(types.string),
@@ -100,11 +103,20 @@ export const TemplateVersionModel = types
     },
   }))
   .actions((self) => ({
+    __mergeUpdate(resourceData: Record<string, unknown>) {
+      applySnapshot(self, R.mergeDeepLeft(resourceData, getSnapshot(self)) as any)
+    },
     setJurisdictionTemplateVersionCustomization(
       jurisdictionId: string,
-      customization: IJurisdictionTemplateVersionCustomizationForm
+      customization:
+        | IJurisdictionTemplateVersionCustomizationForm
+        | Instance<typeof JurisdictionTemplateVersionCustomizationModel>
     ) {
-      self.templateVersionCustomizationsByJurisdiction.set(jurisdictionId, customization)
+      const customizationModel = JurisdictionTemplateVersionCustomizationModel.is(customization)
+        ? customization
+        : JurisdictionTemplateVersionCustomizationModel.create(customization)
+
+      self.templateVersionCustomizationsByJurisdiction.set(jurisdictionId, customizationModel)
     },
     setIntegrationMapping(jurisdictionId: string, integrationMapping: IIntegrationMapping) {
       self.integrationMappingByJurisdiction.set(jurisdictionId, integrationMapping)

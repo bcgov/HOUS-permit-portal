@@ -46,6 +46,52 @@ RSpec.describe "Api::PermitProjects", type: :request, search: true do
       expect(returned_ids).to include(permit_project.id)
       expect(returned_ids).not_to include(*other_projects.map(&:id))
     end
+
+    it "only shows projects with active meetings when active_meeting is only_show" do
+      inactive_project = create(:permit_project, owner: owner)
+      create(:project_meeting, :open, permit_project: permit_project)
+      create(:project_meeting, :completed, permit_project: inactive_project)
+      PermitProject.reindex
+
+      post "/api/permit_projects/search",
+           params: {
+             page: 1,
+             per_page: 50,
+             filters: {
+               active_meeting: "only_show"
+             }
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      returned_ids = json_response["data"].map { |proj| proj["id"] }
+      expect(returned_ids).to include(permit_project.id)
+      expect(returned_ids).not_to include(inactive_project.id)
+    end
+
+    it "hides projects with active meetings when active_meeting is hide" do
+      inactive_project = create(:permit_project, owner: owner)
+      create(:project_meeting, :scheduled, permit_project: permit_project)
+      create(:project_meeting, :closed, permit_project: inactive_project)
+      PermitProject.reindex
+
+      post "/api/permit_projects/search",
+           params: {
+             page: 1,
+             per_page: 50,
+             filters: {
+               active_meeting: "hide"
+             }
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      returned_ids = json_response["data"].map { |proj| proj["id"] }
+      expect(returned_ids).to include(inactive_project.id)
+      expect(returned_ids).not_to include(permit_project.id)
+    end
   end
 
   describe "POST /api/permit_projects" do
@@ -118,10 +164,14 @@ RSpec.describe "Api::PermitProjects", type: :request, search: true do
 
   describe "GET /api/permit_projects/:id" do
     it "returns the project for the owner" do
+      meeting = create(:project_meeting, :open, permit_project: permit_project)
+      note = create(:note, noteable: meeting, user: owner)
+
       get "/api/permit_projects/#{permit_project.id}", headers: headers
 
       expect(response).to have_http_status(:ok)
       expect(json_response.dig("data", "id")).to eq(permit_project.id)
+      expect(json_response.dig("data", "notes", 0, "id")).to eq(note.id)
     end
   end
 

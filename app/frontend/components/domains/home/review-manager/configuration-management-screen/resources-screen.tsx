@@ -24,7 +24,6 @@ import {
 import { CaretLeft, Link, Pencil, Plus, Trash, X } from "@phosphor-icons/react"
 import { UppyFile } from "@uppy/core"
 import "@uppy/core/dist/style.min.css"
-import "@uppy/dashboard/dist/style.css"
 import Dashboard from "@uppy/react/lib/Dashboard.js"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"

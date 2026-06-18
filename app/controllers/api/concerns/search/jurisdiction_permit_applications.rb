@@ -313,10 +313,8 @@ module Api::Concerns::Search::JurisdictionPermitApplications
 
     if status_filter
       and_conditions << { status: status_filter }
-    else
-      and_conditions << {
-        status: statuses.present? ? statuses : { not: "new_draft" }
-      }
+    elsif statuses.present?
+      and_conditions << { status: statuses }
     end
 
     unless current_user.super_admin?

@@ -9,7 +9,6 @@ RSpec.describe "Api::QaTools", type: :request do
   let(:review_manager) do
     create(:user, :review_manager, jurisdiction: jurisdiction)
   end
-  let(:sandbox) { jurisdiction.sandboxes.published.first }
   let(:requirement_template) do
     create(:live_full_requirement_template, available_globally: true)
   end
@@ -159,7 +158,7 @@ RSpec.describe "Api::QaTools", type: :request do
       )
     end
 
-    it "requires a sandbox for review staff on this action" do
+    it "creates a project for review staff without requiring a sandbox" do
       allow(ENV).to receive(:[]).and_call_original
       allow(ENV).to receive(:[]).with("VITE_QA_MODE").and_return("true")
       sign_in review_manager
@@ -173,19 +172,7 @@ RSpec.describe "Api::QaTools", type: :request do
            headers: headers,
            as: :json
 
-      expect(response).to have_http_status(:forbidden)
-
-      post "/api/qa_tools/permit_projects/full",
-           params: {
-             qa_full_permit_project: {
-               jurisdiction_id: jurisdiction.id
-             }
-           },
-           headers: headers.merge("X-Sandbox-ID" => sandbox.id),
-           as: :json
-
       expect(response).to have_http_status(:created)
-      expect(PermitProject.last.sandbox_id).to eq(sandbox.id)
     end
   end
 
@@ -248,6 +235,18 @@ RSpec.describe "Api::QaTools", type: :request do
           "model"
         )
       ).to eq("SupportingDocument")
+    end
+
+    it "requires update permission to autofill a draft permit application" do
+      allow(ENV).to receive(:[]).and_call_original
+      allow(ENV).to receive(:[]).with("VITE_QA_MODE").and_return("true")
+      sign_in create(:user, :super_admin)
+
+      post "/api/qa_tools/permit_applications/#{permit_application.id}/autofill",
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:forbidden)
     end
   end
 end

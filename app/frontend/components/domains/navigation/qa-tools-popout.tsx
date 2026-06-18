@@ -13,9 +13,8 @@ export const QaToolsPopout = observer(() => {
   const location = useLocation()
   const navigate = useNavigate()
   const api = useServerAPI()
-  const { permitApplicationStore, sandboxStore, sessionStore, siteConfigurationStore, uiStore, userStore } = useMst()
+  const { permitApplicationStore, sessionStore, siteConfigurationStore, uiStore } = useMst()
 
-  const { currentUser } = userStore
   const [isOpen, setIsOpen] = useState(false)
   const [jurisdictionOptions, setJurisdictionOptions] = useState<IOption[]>([])
   const [selectedJurisdictionId, setSelectedJurisdictionId] = useState("")
@@ -27,11 +26,7 @@ export const QaToolsPopout = observer(() => {
   const permitApplicationId = permitApplicationEditMatch?.params.permitApplicationId
   const isProjectsPath = location.pathname === "/projects"
   const isEligible = Boolean(
-    import.meta.env.VITE_QA_MODE === "true" &&
-      siteConfigurationStore.qaToolsEnabled &&
-      sessionStore.loggedIn &&
-      currentUser &&
-      (currentUser.isSubmitter || currentUser.isReviewStaff)
+    import.meta.env.VITE_QA_MODE === "true" && siteConfigurationStore.qaToolsEnabled && sessionStore.loggedIn
   )
   const hasActions = isProjectsPath || !!permitApplicationId
 

@@ -23,7 +23,7 @@ export const JurisdictionDigitalPermitScreen = observer(function JurisdictionDig
           {t("digitalBuildingPermits.index.selectPermit")}
         </Text>
 
-        <DigitalBuildingPermitsList />
+        <DigitalBuildingPermitsList jurisdictionId={currentUser.jurisdiction.id} />
         <Center>
           <Box bg="greys.grey03" p={4} w="75%" mt={24}>
             <Trans

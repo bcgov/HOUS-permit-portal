@@ -127,6 +127,21 @@ RSpec.describe "Api::PermitApplications", type: :request do
       expect(response).to have_http_status(:forbidden)
       expect(json_response.dig("meta", "message", "message")).to be_present
     end
+
+    it "returns active project meeting metadata for the submitter" do
+      active_meeting =
+        create(:project_meeting, :open, permit_project: permit_project)
+
+      get "/api/permit_applications/#{permit_application.id}", headers: headers
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("data", "has_active_project_meeting")).to be(
+        true
+      )
+      expect(json_response.dig("data", "active_project_meeting_id")).to eq(
+        active_meeting.id
+      )
+    end
   end
 
   describe "GET /api/permit_applications/:id/download_application_json" do
@@ -234,6 +249,33 @@ RSpec.describe "Api::PermitApplications", type: :request do
 
       expect(response).to have_http_status(:ok)
       expect(json_response).to include("data", "meta")
+    end
+
+    it "submits when the permit type advises a project meeting" do
+      create(
+        :jurisdiction_template_version_customization,
+        jurisdiction: jurisdiction,
+        template_version: template_version,
+        requires_project_meeting: true
+      )
+
+      post "/api/permit_applications/#{permit_application.id}/submit",
+           params: {
+             permit_application: {
+               submission_data: {
+                 data: {
+                   "section-completion-key" => {
+                     signed: true
+                   }
+                 }
+               }
+             }
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("data", "requires_project_meeting")).to be(true)
     end
   end
 

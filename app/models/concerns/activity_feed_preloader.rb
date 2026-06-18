@@ -7,6 +7,7 @@ module ActivityFeedPreloader
       preload_permit_block_statuses(audits)
       preload_permit_project_collaborations(audits)
       preload_submission_versions(audits)
+      preload_project_meetings(audits)
     end
 
     private
@@ -40,6 +41,22 @@ module ActivityFeedPreloader
         records: records,
         associations: {
           collaborator: :user,
+          permit_project: :jurisdiction
+        }
+      ).call
+    end
+
+    def preload_project_meetings(audits)
+      records =
+        audits
+          .select { |a| a.auditable_type == "ProjectMeeting" }
+          .map(&:auditable)
+          .compact
+      return if records.empty?
+
+      ActiveRecord::Associations::Preloader.new(
+        records: records,
+        associations: {
           permit_project: :jurisdiction
         }
       ).call

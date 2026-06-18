@@ -13,7 +13,7 @@ class Qa::FullPermitProjectService
         PermitProject.create!(
           title: @title,
           jurisdiction: @jurisdiction,
-          owner: @current_user,
+          owner: project_owner,
           sandbox: @current_sandbox
         )
 
@@ -33,6 +33,12 @@ class Qa::FullPermitProjectService
   end
 
   private
+
+  def project_owner
+    return nil if @current_user.jurisdiction_staff? && @current_sandbox.blank?
+
+    @current_user
+  end
 
   def available_template_versions
     status = @current_sandbox&.template_version_status_scope || :published

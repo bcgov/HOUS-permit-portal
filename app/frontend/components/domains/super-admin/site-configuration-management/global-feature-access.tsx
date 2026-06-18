@@ -26,6 +26,11 @@ export const AdminGlobalFeatureAccessScreen = observer(() => {
       enabled: siteConfigurationStore?.codeComplianceEnabled,
       route: "code-compliance",
     },
+    {
+      label: t(`${i18nPrefix}.projectMeetings`),
+      enabled: siteConfigurationStore?.projectMeetingsEnabled,
+      route: "project-meetings",
+    },
     ...(qaModeEnabled
       ? [
           {

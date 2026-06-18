@@ -409,6 +409,24 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitApplications,
         # to the project, not jurisdiction-wide.
         expect(meta[:unread_count]).to eq(submitted_permit_applications.size)
       end
+
+      context "when the scoped permit project has an active meeting" do
+        let(:target_project) { draft_permit_applications.first.permit_project }
+
+        before do
+          create(:project_meeting, :open, permit_project: target_project)
+        end
+
+        it "includes draft applications for that permit project" do
+          controller.perform_jurisdiction_permit_application_search
+          results =
+            controller.instance_variable_get(
+              :@jurisdiction_permit_application_search
+            ).results
+
+          expect(results).to match_array(draft_permit_applications)
+        end
+      end
     end
 
     context "unread_count in meta" do

@@ -25,6 +25,39 @@ RSpec.describe PermitApplication, type: :model do
     end
   end
 
+  describe "#requires_project_meeting?" do
+    let(:jurisdiction) { create(:sub_district) }
+    let(:template_version) { create(:template_version) }
+    let(:permit_application) do
+      create(
+        :permit_application,
+        jurisdiction: jurisdiction,
+        template_version: template_version
+      )
+    end
+
+    it "returns true when its jurisdiction customization requires a project meeting" do
+      create(
+        :jurisdiction_template_version_customization,
+        jurisdiction: jurisdiction,
+        template_version: template_version,
+        requires_project_meeting: true
+      )
+
+      expect(permit_application.requires_project_meeting?).to be(true)
+    end
+
+    it "returns false when the customization is for a different template" do
+      create(
+        :jurisdiction_template_version_customization,
+        jurisdiction: jurisdiction,
+        requires_project_meeting: true
+      )
+
+      expect(permit_application.requires_project_meeting?).to be(false)
+    end
+  end
+
   describe "Scopes" do
     # Create sandboxed and non-sandboxed permit applications
     let!(:jurisdiction) { create(:sub_district) }

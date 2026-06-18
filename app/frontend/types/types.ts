@@ -21,11 +21,13 @@ import {
   EHotWaterPerformanceType,
   EJurisdictionSocketEventTypes,
   EJurisdictionTypes,
+  EMeetingRequestDocumentType,
   ENotificationActionType,
   ENumberUnit,
   EPermitApplicationSocketEventTypes,
   EPermitApplicationStatus,
   EPermitProjectRollupStatus,
+  EProjectMeetingStatus,
   ERequirementType,
   ESocketDomainTypes,
   ESocketEventTypes,
@@ -36,6 +38,7 @@ import {
   EStepCodeCompliancePath,
   EStepCodeEPCTestingTargetType,
   EStepCodeOccupancyKey,
+  ESubmissionContactClass,
   ETemplateVersionStatus,
   EUserRoles,
   EWindowsGlazedDoorsPerformanceType,
@@ -100,6 +103,7 @@ export interface ISubmissionContact {
   confirmedAt: string
   default: boolean
   confirmationSentAt?: string
+  type: ESubmissionContactClass
 }
 
 export interface IHelpVideoNavigationNeighbor {
@@ -372,6 +376,11 @@ export interface IProjectDocument extends IBaseFileAttachment {
   permitProjectId: string // Foreign key to link to PermitProject
 }
 
+export interface IMeetingRequestDocument extends IBaseFileAttachment {
+  projectMeetingId?: string
+  documentType?: EMeetingRequestDocumentType
+}
+
 export interface IRequirementBlockCustomization {
   tip?: string
   resourceIds?: string[]
@@ -452,6 +461,12 @@ export interface INotification {
     | ITemplateVersionNotificationObjectData
     | IRequirementTemplateNotificationObjectData
     | IReportDocumentNotificationObjectData
+    | IProjectMeetingNotificationObjectData
+}
+
+export interface IProjectMeetingNotificationObjectData {
+  permitProjectId: string
+  projectMeetingId: string
 }
 
 export interface ITemplateVersionUpdate {
@@ -612,6 +627,7 @@ export interface IPermitProjectSearchFilters {
   query?: string
   showArchived?: boolean
   rollupStatus?: EPermitProjectRollupStatus[]
+  activeMeeting?: string
   requirementTemplateIds?: string[]
   jurisdictionId?: string[]
 }
@@ -632,6 +648,11 @@ export interface IPermitApplicationInboxSearchFilters {
   meetingRequest?: string
   daysInQueue?: { operator: string; days: number }
   assigned?: string[]
+}
+
+export interface IProjectMeetingInboxSearchFilters {
+  status?: EProjectMeetingStatus[]
+  unread?: string
 }
 
 export interface IProjectAuditSearchFilters {
@@ -692,6 +713,7 @@ export interface IMinimalFrozenUser {
   role: EUserRoles
   firstName: string
   lastName: string
+  phoneNumber?: string
   organization?: string
   certified: boolean
   discardedAt?: Date

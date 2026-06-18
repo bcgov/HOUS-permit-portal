@@ -29,7 +29,7 @@ function isTemplateEditPath(path: string): boolean {
 }
 
 function isDigitalPermitEditPath(path: string): boolean {
-  const regex = /^\/digital-building-permits\/([a-f\d-]+)\/edit$/
+  const regex = /^\/digital-building-permits\/([a-f\d-]+)\/(edit|settings)$/
 
   return regex.test(path)
 }
@@ -70,12 +70,17 @@ function isAdminPath(path: string): boolean {
 }
 
 function isProjectDetailPath(path: string): boolean {
-  const regex = /^\/projects\/[a-f\d-]+/
+  const regex = /^\/projects\/[a-f\d-]+(?:\/.*)?$/
   return regex.test(path)
 }
 
 function isProjectPath(path: string): boolean {
   const regex = /^\/projects/
+  return regex.test(path)
+}
+
+function isProjectMeetingPath(path: string): boolean {
+  const regex = /^\/projects\/[a-f\d-]+\/meetings/
   return regex.test(path)
 }
 
@@ -120,6 +125,11 @@ function isSubmissionInboxPath(path: string): boolean {
   return regex.test(path)
 }
 
+function isMeetingPath(path: string): boolean {
+  const regex = /^\/jurisdictions\/[a-z\d-]+\/meetings/
+  return regex.test(path)
+}
+
 function shouldHideSubNavbarForPath(path: string): boolean {
   const matchers: Array<(path: string) => boolean> = [
     (path) => path === "/",
@@ -141,6 +151,7 @@ function shouldHideSubNavbarForPath(path: string): boolean {
     isOverheatingCodePath,
     isWelcomePath,
     isSubmissionInboxPath,
+    isMeetingPath,
   ]
 
   return matchers.some((matcher) => matcher(path))

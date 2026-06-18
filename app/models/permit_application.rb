@@ -231,6 +231,16 @@ class PermitApplication < ApplicationRecord
     template_version.requirement_template.nickname
   end
 
+  def requires_project_meeting?
+    return false if jurisdiction.blank?
+
+    jurisdiction
+      .jurisdiction_template_version_customizations
+      .for_sandbox(sandbox)
+      .requiring_project_meeting
+      .exists?(template_version: template_version)
+  end
+
   def search_data
     {
       number: number,
@@ -451,10 +461,11 @@ class PermitApplication < ApplicationRecord
         sandbox_id: sandbox_id
       )
 
-    if customization&.submission_contact&.confirmed?
+    if customization&.submission_contact.is_a?(ApplicationSubmissionContact) &&
+         customization.submission_contact.confirmed?
       [customization.submission_contact]
     else
-      jurisdiction.submission_contacts.confirmed.default_contact
+      jurisdiction.confirmed_submission_contacts.default_contact
     end
   end
 
@@ -854,7 +865,7 @@ class PermitApplication < ApplicationRecord
     return if sandbox.present?
     return unless jurisdiction
 
-    matching_confirmed_contacts = jurisdiction.submission_contacts.confirmed
+    matching_confirmed_contacts = jurisdiction.confirmed_submission_contacts
 
     if matching_confirmed_contacts.empty?
       errors.add(

@@ -228,10 +228,7 @@ RSpec.describe PermitHubMailer, type: :mailer do
         submitter: confirmed_user
       )
     contact =
-      instance_double(
-        "PermitTypeSubmissionContact",
-        email: "reviewer@example.com"
-      )
+      instance_double("SubmissionContact", email: "reviewer@example.com")
 
     mailer.notify_submitter_application_submitted(
       permit_application,
@@ -286,6 +283,267 @@ RSpec.describe PermitHubMailer, type: :mailer do
     )
   end
 
+  it "sends project meeting submitted notification" do
+    jurisdiction =
+      instance_double(
+        "Jurisdiction",
+        disambiguated_name: "Capital Regional District"
+      )
+    permit_project =
+      instance_double(
+        "PermitProject",
+        id: "project-id",
+        number: "P-123",
+        full_address: "1208 North Rd, Gabriola Island, BC",
+        jurisdiction: jurisdiction
+      )
+    project_meeting =
+      instance_double(
+        "ProjectMeeting",
+        requested_by: confirmed_user,
+        contact_email: "jane@example.com",
+        contact_name: "Jane Smith",
+        permit_project: permit_project
+      )
+
+    mailer.notify_project_meeting_submitted(project_meeting)
+
+    expect(mailer).to have_received(:send_mail).with(
+      email: "jane@example.com",
+      template_key: "notify_project_meeting_submitted"
+    )
+  end
+
+  it "sends project meeting submitted jurisdiction notification" do
+    jurisdiction =
+      instance_double(
+        "Jurisdiction",
+        id: "jurisdiction-id",
+        disambiguated_name: "Capital Regional District"
+      )
+    permit_project =
+      instance_double(
+        "PermitProject",
+        id: "project-id",
+        number: "P-123",
+        full_address: "1208 North Rd, Gabriola Island, BC",
+        jurisdiction: jurisdiction
+      )
+    project_meeting =
+      instance_double(
+        "ProjectMeeting",
+        requested_by: confirmed_user,
+        contact_email: "jane@example.com",
+        contact_name: "Jane Smith",
+        requester_relationship: "owners_representative",
+        permit_project: permit_project
+      )
+
+    mailer.notify_project_meeting_submitted_to_jurisdiction(
+      project_meeting,
+      "meetings@example.com"
+    )
+
+    expect(mailer).to have_received(:send_mail).with(
+      email: "meetings@example.com",
+      template_key: "notify_project_meeting_submitted_to_jurisdiction",
+      subject_i18n_params: {
+        project_number: "P-123"
+      }
+    )
+  end
+
+  it "sends property information request notification" do
+    jurisdiction =
+      instance_double(
+        "Jurisdiction",
+        id: "jurisdiction-id",
+        disambiguated_name: "Capital Regional District"
+      )
+    permit_project =
+      instance_double(
+        "PermitProject",
+        id: "project-id",
+        number: "P-123",
+        full_address: "1208 North Rd, Gabriola Island, BC",
+        jurisdiction: jurisdiction
+      )
+    project_meeting =
+      instance_double(
+        "ProjectMeeting",
+        requested_by: confirmed_user,
+        contact_email: "jane@example.com",
+        contact_name: "Jane Smith",
+        requester_relationship: "owners_representative",
+        permit_project: permit_project
+      )
+
+    mailer.notify_property_information_requested(
+      project_meeting,
+      "property-info@example.com"
+    )
+
+    expect(mailer).to have_received(:send_mail).with(
+      email: "property-info@example.com",
+      template_key: "notify_property_information_requested",
+      subject_i18n_params: {
+        project_number: "P-123"
+      }
+    )
+  end
+
+  it "sends project meeting scheduled notification" do
+    jurisdiction =
+      instance_double(
+        "Jurisdiction",
+        slug: "capital-regional-district",
+        office_email: "planning@example.com",
+        office_telephone: "2505551212"
+      )
+    permit_project =
+      instance_double(
+        "PermitProject",
+        id: "project-id",
+        title: "Winnipeg St Landscaping Project",
+        number: "P-123",
+        jurisdiction: jurisdiction
+      )
+    project_meeting =
+      instance_double(
+        "ProjectMeeting",
+        id: "meeting-id",
+        requested_by: confirmed_user,
+        contact_email: "jane@example.com",
+        contact_name: "Jane Smith",
+        contact_method: "videoconference",
+        confirmed_date: Time.zone.parse("2026-01-20 09:30"),
+        meeting_url: "https://example.com/meeting",
+        permit_project: permit_project
+      )
+
+    mailer.notify_project_meeting_scheduled(project_meeting)
+
+    expect(mailer).to have_received(:send_mail).with(
+      email: "jane@example.com",
+      template_key: "notify_project_meeting_scheduled"
+    )
+  end
+
+  it "sends project meeting scheduled jurisdiction notification" do
+    jurisdiction =
+      instance_double("Jurisdiction", slug: "capital-regional-district")
+    permit_project =
+      instance_double(
+        "PermitProject",
+        id: "project-id",
+        number: "P-123",
+        full_address: "1127 Winnipeg St",
+        jurisdiction: jurisdiction
+      )
+    project_meeting =
+      instance_double(
+        "ProjectMeeting",
+        id: "meeting-id",
+        requested_by: confirmed_user,
+        contact_name: "Jane Smith",
+        contact_email: "jane@example.com",
+        contact_phone_number: nil,
+        contact_method: "phone",
+        confirmed_date: Time.zone.parse("2026-01-20 09:30"),
+        meeting_url: nil,
+        permit_project: permit_project
+      )
+
+    mailer.notify_project_meeting_scheduled_to_jurisdiction(
+      project_meeting,
+      "meetings@example.com"
+    )
+
+    expect(mailer).to have_received(:send_mail).with(
+      email: "meetings@example.com",
+      template_key: "notify_project_meeting_scheduled_to_jurisdiction",
+      subject_i18n_params: {
+        project_number: "P-123"
+      }
+    )
+  end
+
+  it "sends project meeting rescheduled submitter notification" do
+    jurisdiction =
+      instance_double(
+        "Jurisdiction",
+        slug: "capital-regional-district",
+        office_email: "planning@example.com",
+        office_telephone: "2505551212"
+      )
+    permit_project =
+      instance_double(
+        "PermitProject",
+        id: "project-id",
+        title: "Winnipeg St Landscaping Project",
+        number: "P-123",
+        jurisdiction: jurisdiction
+      )
+    project_meeting =
+      instance_double(
+        "ProjectMeeting",
+        id: "meeting-id",
+        requested_by: confirmed_user,
+        contact_email: "jane@example.com",
+        contact_name: "Jane Smith",
+        contact_method: "videoconference",
+        confirmed_date: Time.zone.parse("2026-01-20 09:30"),
+        meeting_url: "https://example.com/meeting",
+        permit_project: permit_project
+      )
+
+    mailer.notify_project_meeting_rescheduled(project_meeting)
+
+    expect(mailer).to have_received(:send_mail).with(
+      email: "jane@example.com",
+      template_key: "notify_project_meeting_rescheduled"
+    )
+  end
+
+  it "sends project meeting rescheduled jurisdiction notification" do
+    jurisdiction =
+      instance_double("Jurisdiction", slug: "capital-regional-district")
+    permit_project =
+      instance_double(
+        "PermitProject",
+        id: "project-id",
+        number: "P-123",
+        full_address: "1127 Winnipeg St",
+        jurisdiction: jurisdiction
+      )
+    project_meeting =
+      instance_double(
+        "ProjectMeeting",
+        id: "meeting-id",
+        requested_by: confirmed_user,
+        contact_name: "Jane Smith",
+        contact_email: "jane@example.com",
+        contact_phone_number: nil,
+        contact_method: "phone",
+        confirmed_date: Time.zone.parse("2026-01-20 09:30"),
+        meeting_url: nil,
+        permit_project: permit_project
+      )
+
+    mailer.notify_project_meeting_rescheduled_to_jurisdiction(
+      project_meeting,
+      "meetings@example.com"
+    )
+
+    expect(mailer).to have_received(:send_mail).with(
+      email: "meetings@example.com",
+      template_key: "notify_project_meeting_rescheduled_to_jurisdiction",
+      subject_i18n_params: {
+        project_number: "P-123"
+      }
+    )
+  end
+
   it "sends template version published notification and sets inbox setup urls when contact missing" do
     template_version =
       instance_double(
@@ -295,10 +553,9 @@ RSpec.describe PermitHubMailer, type: :mailer do
       )
     jurisdiction =
       instance_double("Jurisdiction", slug: "jur", external_api_enabled?: true)
-    confirmed_scope = double("ConfirmedScope", exists?: false)
-    contacts_scope = double("ContactsScope", confirmed: confirmed_scope)
-    allow(jurisdiction).to receive(:submission_contacts).and_return(
-      contacts_scope
+    confirmed_contacts = double("ConfirmedContacts", exists?: false)
+    allow(jurisdiction).to receive(:confirmed_submission_contacts).and_return(
+      confirmed_contacts
     )
 
     mailer.notify_new_template_version_published(
@@ -379,9 +636,49 @@ RSpec.describe PermitHubMailer, type: :mailer do
     )
   end
 
+  it "uses STI class specific subject for submission contact confirmations" do
+    submission_contact =
+      instance_double(
+        "ApplicationSubmissionContact",
+        email: "submission@example.com",
+        confirmation_subject_key: "submission_contact_confirm"
+      )
+    project_meeting_contact =
+      instance_double(
+        "MeetingSubmissionContact",
+        email: "meeting@example.com",
+        confirmation_subject_key: "project_meeting_contact_confirm"
+      )
+    property_information_contact =
+      instance_double(
+        "PropertyInformationSubmissionContact",
+        email: "property-info@example.com",
+        confirmation_subject_key: "property_information_contact_confirm"
+      )
+
+    mailer.submission_contact_confirm(submission_contact)
+    mailer.submission_contact_confirm(project_meeting_contact)
+    mailer.submission_contact_confirm(property_information_contact)
+
+    expect(mailer).to have_received(:send_mail).with(
+      email: "submission@example.com",
+      template_key: "submission_contact_confirm",
+      subject_key: "submission_contact_confirm"
+    )
+    expect(mailer).to have_received(:send_mail).with(
+      email: "meeting@example.com",
+      template_key: "submission_contact_confirm",
+      subject_key: "project_meeting_contact_confirm"
+    )
+    expect(mailer).to have_received(:send_mail).with(
+      email: "property-info@example.com",
+      template_key: "submission_contact_confirm",
+      subject_key: "property_information_contact_confirm"
+    )
+  end
+
   it "reminds reviewer and resource update" do
-    contact =
-      instance_double("PermitTypeSubmissionContact", email: "r@example.com")
+    contact = instance_double("SubmissionContact", email: "r@example.com")
     mailer.remind_reviewer(contact, [instance_double("PermitApplication")])
 
     allow(Resource).to receive(:where).and_return([])
