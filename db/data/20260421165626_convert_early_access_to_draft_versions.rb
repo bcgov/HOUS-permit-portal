@@ -2,10 +2,12 @@
 
 # Converts existing EarlyAccessRequirementTemplate records into draft TemplateVersions
 # on LiveRequirementTemplates, migrates previews, and normalizes requirement block
-# visibility. Run after db/migrate through 20260212000004 and before
-# CleanupEarlyAccessLegacyColumns (db/data/20260421165700_*).
+# visibility.
 #
-# After deployment: rails data:migrate (or rely on db/seeds.rb which invokes it).
+# In deploys where schema migrations run before data migrations, this work is handled
+# by db/migrate/20260226180000_remove_permit_classification_system.rb before the
+# legacy classification columns are dropped. This data migration remains as a
+# guarded fallback for environments that have not run that schema migration yet.
 
 class ConvertEarlyAccessToDraftVersions < ActiveRecord::Migration[7.2]
   def up
@@ -32,7 +34,12 @@ class ConvertEarlyAccessToDraftVersions < ActiveRecord::Migration[7.2]
         :template_version_previews,
         :early_access_requirement_template_id
       ) && column_exists?(:requirement_templates, :assignee_id) &&
-      column_exists?(:requirement_templates, :type)
+      column_exists?(:requirement_templates, :public) &&
+      column_exists?(:requirement_templates, :site_configuration_id) &&
+      column_exists?(:requirement_templates, :type) &&
+      column_exists?(:requirement_templates, :permit_type_id) &&
+      column_exists?(:requirement_templates, :activity_id) &&
+      column_exists?(:requirement_templates, :first_nations)
   end
 
   def migrate_ea_templates_to_drafts
