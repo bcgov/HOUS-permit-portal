@@ -37,6 +37,7 @@ export interface IEditRequirementActionsProps {
   minDate?: Date
   onScheduleConfirm?: (date: Date) => void
   onForcePublishNow?: () => void
+  onCreateDraft?: () => void
   triggerButtonProps?: Partial<ButtonProps>
   requirementTemplate?: IRequirementTemplate
   onSaveDraft?: () => void
@@ -152,10 +153,10 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
           await handleSubmit(async (templateFormData) => {
             const formattedSubmitData = formatSubmitData(templateFormData)
 
-            const updatedRequirementTemplate = await requirementTemplateStore.forcePublishRequirementTemplate(
+            const updatedRequirementTemplate = (await requirementTemplateStore.forcePublishRequirementTemplate(
               requirementTemplate.id,
               formattedSubmitData
-            )
+            )) as IRequirementTemplate | false
 
             if (updatedRequirementTemplate) {
               const publishedTemplateVersion = updatedRequirementTemplate.publishedTemplateVersion
@@ -167,6 +168,28 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
           })()
         }
       : undefined
+
+  const onCreateDraft = async () => {
+    await handleSubmit(async (templateFormData) => {
+      const formattedSubmitData = formatSubmitData(templateFormData)
+      const updatedTemplate = await requirementTemplateStore.updateRequirementTemplate(
+        requirementTemplate.id,
+        formattedSubmitData
+      )
+
+      if (!updatedTemplate) return
+
+      const templateWithDraft = (await requirementTemplateStore.createDraft(requirementTemplate.id)) as
+        | IRequirementTemplate
+        | false
+      if (!templateWithDraft) return
+
+      const draftTemplateVersion = templateWithDraft.draftTemplateVersions[0]
+      draftTemplateVersion
+        ? navigate(`/template-versions/${draftTemplateVersion.id}`)
+        : navigate("/requirement-templates")
+    })()
+  }
 
   const hasNoSections = watchedSectionsAttributes.length === 0
 
@@ -209,6 +232,7 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
               onSaveDraft={onSaveDraft}
               onScheduleDate={onSchedule}
               onForcePublishNow={onForcePublishNow}
+              onCreateDraft={onCreateDraft}
               onAddSection={onAddSection}
               requirementTemplate={requirementTemplate}
               hasStepCodeDependencyError={hasStepCodeDependencyError}
@@ -466,6 +490,8 @@ function formFormDefaults(requirementTemplate?: IRequirementTemplate): IRequirem
     return {
       description: "",
       nickname: "",
+      tags: [],
+      templateCategoryId: null,
       requirementTemplateSectionsAttributes: [],
     }
   }
@@ -485,9 +511,8 @@ function formFormDefaults(requirementTemplate?: IRequirementTemplate): IRequirem
   return {
     description: requirementTemplate.description,
     nickname: requirementTemplate.nickname,
-    public: requirementTemplate.public,
-    permitTypeId: requirementTemplate.permitType?.id,
-    activityId: requirementTemplate.activity?.id,
+    tags: [...(requirementTemplate.tags ?? [])],
+    templateCategoryId: requirementTemplate.templateCategoryId ?? null,
     requirementTemplateSectionsAttributes,
   }
 }

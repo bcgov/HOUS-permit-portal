@@ -42,7 +42,7 @@ export const ProjectsGrid = observer(() => {
         <FormControl w="full">
           <ModelSearchInput
             searchModel={permitProjectStore}
-            inputProps={{ placeholder: t("ui.search"), width: "full" }}
+            inputProps={{ placeholder: t("permitProject.searchPlaceholder"), width: "full" }}
             inputGroupProps={{ width: "full" }}
           />
         </FormControl>

@@ -4,6 +4,8 @@ class RepairBoundaryPoints < ActiveRecord::Migration[7.2]
   MAX_BOUNDARY_POINTS = 200
 
   def up
+    return if Rails.env.development?
+
     updated = 0
     skipped = 0
     errored = 0

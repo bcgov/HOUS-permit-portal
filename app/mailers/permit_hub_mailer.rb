@@ -95,11 +95,38 @@ class PermitHubMailer < ApplicationMailer
     )
   end
 
-  def notify_preview(early_access_preview:)
-    @early_access_preview = early_access_preview
-    @user = early_access_preview.previewer
+  def notify_template_version_preview(template_version_preview:)
+    @template_version_preview = template_version_preview
+    @user = template_version_preview.previewer
 
-    send_user_mail(email: @user.email, template_key: :notify_preview)
+    send_user_mail(
+      email: @user.email,
+      template_key: :notify_template_version_preview
+    )
+  end
+
+  def notify_new_or_unconfirmed_template_version_preview(
+    template_version_preview:,
+    user:
+  )
+    @template_version_preview = template_version_preview
+    @user = user
+
+    return unless @template_version_preview.template_version
+
+    if !@user.discarded? && @user.submitter?
+      @user.skip_confirmation_notification!
+      @user.skip_invitation = true
+      @user.invite!
+      @user.invitation_sent_at = Time.now
+
+      @user.save!
+    end
+
+    send_mail(
+      email: @user.email,
+      template_key: :notify_new_or_unconfirmed_template_version_preview
+    )
   end
 
   def notify_block_status_ready(permit_block_status:, user:, status_set_by: nil)
@@ -157,34 +184,13 @@ class PermitHubMailer < ApplicationMailer
     )
   end
 
-  def notify_new_or_unconfirmed_preview(early_access_preview:, user:)
-    @early_access_preview = early_access_preview
-    @user = user
-
-    return unless @early_access_preview.early_access_requirement_template
-
-    if !@user.discarded? && @user.submitter?
-      @user.skip_confirmation_notification!
-      @user.skip_invitation = true
-      @user.invite!
-      @user.invitation_sent_at = Time.now
-
-      @user.save!
-    end
-
-    send_mail(
-      email: @user.email,
-      template_key: :notify_new_or_unconfirmed_preview
-    )
-  end
-
   def notify_reviewer_application_received(
-    permit_type_submission_contact,
+    submission_contact,
     permit_application
   )
     @permit_application = permit_application
     send_mail(
-      email: permit_type_submission_contact.email,
+      email: submission_contact.email,
       template_key: "notify_reviewer_application_received",
       subject_i18n_params: {
         permit_application_number: permit_application.number
@@ -307,12 +313,9 @@ class PermitHubMailer < ApplicationMailer
     )
   end
 
-  def remind_reviewer(permit_type_submission_contact, permit_applications)
+  def remind_reviewer(submission_contact, permit_applications)
     @permit_applications = permit_applications
-    send_mail(
-      email: permit_type_submission_contact.email,
-      template_key: "remind_reviewer"
-    )
+    send_mail(email: submission_contact.email, template_key: "remind_reviewer")
   end
 
   def remind_resource_update(user, jurisdiction, resource_ids)
@@ -347,12 +350,11 @@ class PermitHubMailer < ApplicationMailer
     )
   end
 
-  #### PermitTypeSubmission Contact Mailer
-  def permit_type_submission_contact_confirm(permit_type_submission_contact)
-    @permit_type_submission_contact = permit_type_submission_contact
+  def submission_contact_confirm(submission_contact)
+    @submission_contact = submission_contact
     send_mail(
-      email: permit_type_submission_contact.email,
-      template_key: "permit_type_submission_contact_confirm"
+      email: submission_contact.email,
+      template_key: "submission_contact_confirm"
     )
   end
 
@@ -404,20 +406,13 @@ class PermitHubMailer < ApplicationMailer
     @inbox_setup_url = nil
     return unless @jurisdiction.present?
 
-    has_contact =
-      @jurisdiction
-        .permit_type_submission_contacts
-        .where(permit_type_id: @template_version.permit_type.id)
-        .where.not(confirmed_at: nil)
-        .exists?
+    return if @jurisdiction.submission_contacts.confirmed.exists?
 
-    unless has_contact
-      @submission_inbox_action_required = true
-      @inbox_setup_url =
-        FrontendUrlHelper.frontend_url(
-          "/jurisdictions/#{@jurisdiction.slug}/configuration-management/feature-access/submissions-inbox-setup"
-        )
-    end
+    @submission_inbox_action_required = true
+    @inbox_setup_url =
+      FrontendUrlHelper.frontend_url(
+        "/jurisdictions/#{@jurisdiction.slug}/configuration-management/feature-access/submissions-inbox-setup"
+      )
   end
 
   def template_version_subject_key(change_type)

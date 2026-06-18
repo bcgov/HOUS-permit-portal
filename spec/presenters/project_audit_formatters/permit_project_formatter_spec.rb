@@ -62,6 +62,69 @@ RSpec.describe ProjectAuditFormatters::PermitProjectFormatter do
         end
       end
 
+      context "with state change" do
+        let(:audit) do
+          build_audit_double(
+            user: user,
+            auditable: auditable,
+            auditable_type: "PermitProject",
+            action: "update",
+            audited_changes: {
+              "state" => [
+                PermitProject.states["queued"],
+                PermitProject.states["in_progress"]
+              ]
+            }
+          )
+        end
+
+        it "returns state change message with old and new labels" do
+          expect(formatter.description).to eq(
+            "Alice changed project state from Queued to In Progress"
+          )
+        end
+      end
+
+      context "when marked as read" do
+        let(:audit) do
+          build_audit_double(
+            user: user,
+            auditable: auditable,
+            auditable_type: "PermitProject",
+            action: "update",
+            audited_changes: {
+              "viewed_at" => [nil, Time.current]
+            }
+          )
+        end
+
+        it "returns marked as read message" do
+          expect(formatter.description).to eq(
+            "Alice marked the project as read"
+          )
+        end
+      end
+
+      context "when marked as unread" do
+        let(:audit) do
+          build_audit_double(
+            user: user,
+            auditable: auditable,
+            auditable_type: "PermitProject",
+            action: "update",
+            audited_changes: {
+              "viewed_at" => [Time.current, nil]
+            }
+          )
+        end
+
+        it "returns marked as unread message" do
+          expect(formatter.description).to eq(
+            "Alice marked the project as unread"
+          )
+        end
+      end
+
       context "with other changes" do
         let(:audit) do
           build_audit_double(

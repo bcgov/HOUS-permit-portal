@@ -2,15 +2,8 @@ class PermitProjectBlueprint < Blueprinter::Base
   identifier :id
 
   view :base do
-    field :title,
-          if: ->(_field_name, permit_project, options) do
-            PermitProjectBlueprint.show_private_title?(
-              permit_project,
-              options[:current_user]
-            )
-          end
-
     fields :full_address,
+           :title,
            :pid,
            :number,
            :jurisdiction_disambiguated_name,

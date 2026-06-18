@@ -23,7 +23,7 @@ export const StepCodeTabPanelContent = observer(() => {
       <Container maxW="container.xl" py={8} h={"full"}>
         <VStack spacing={3} align="stretch">
           <Flex justify="space-between" align="center">
-            <Heading>{t("stepCode.index.title")}</Heading>
+            <Heading as="h1">{t("stepCode.index.title")}</Heading>
           </Flex>
           <Box w="full" bg="theme.blueLight" p={6} borderRadius="md">
             <Box maxW="xl">

@@ -1,4 +1,5 @@
 import { Flex, Heading, VStack } from "@chakra-ui/react"
+import { PushPinSimple } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -27,8 +28,15 @@ export const PinnedProjectsGrid = observer(() => {
         </Flex>
       ) : pinnedPermitProjects.length === 0 ? (
         <CustomMessageBox
+          w="full"
           status={EFlashMessageStatus.info}
-          description={t("permitProject.index.noPinnedProjects", "You have no pinned projects")}
+          icon={<PushPinSimple size={20} weight="bold" aria-label={t("permitProject.pinProject", "Pin project")} />}
+          title={t("permitProject.index.noPinnedProjects", "You haven't pinned any projects yet")}
+          description={t(
+            "permitProject.index.noPinnedProjectsDescription",
+            "Pinning a project keeps it at the top of your list so it's easier to find. Open the more actions menu for a project and select Pin."
+          )}
+          headingProps={{ mb: 1 }}
         />
       ) : (
         <SearchGrid templateColumns={PROJECTS_GRID_TEMPLATE_COLUMNS} gridRowClassName="project-grid-row">

@@ -214,7 +214,7 @@ RSpec.describe SupportingDocumentsZipper do
 
       expect(path).to be_present
       expect(File.exist?(path)).to eq(true)
-      expect(zipper.temp_files).to include(path)
+      expect(zipper.temp_files.map(&:path)).to include(path)
     end
 
     it "returns nil and logs when download fails" do

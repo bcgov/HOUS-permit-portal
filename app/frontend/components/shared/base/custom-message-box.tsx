@@ -11,6 +11,7 @@ interface ICustomMessageBoxProps
   description?: string | React.ReactNode // Allow description to be any ReactNode
   children?: React.ReactNode
   headingProps?: Partial<HeadingProps>
+  icon?: React.ReactNode
   status: EFlashMessageStatus
 }
 
@@ -28,6 +29,7 @@ export const CustomMessageBox = ({
   status,
   children,
   headingProps,
+  icon,
   ...rest
 }: ICustomMessageBoxProps) => {
   // Filter out Toast-specific props that shouldn't be passed to DOM elements
@@ -45,8 +47,8 @@ export const CustomMessageBox = ({
       {...flexProps}
     >
       <Flex align="flex-start" gap={2} whiteSpace={"normal"}>
-        <Box color={`semantic.${status}`}>{iconMap[status]}</Box>
-        <Flex direction="column">
+        <Box color={`semantic.${status}`}>{icon ?? iconMap[status]}</Box>
+        <Flex direction="column" gap={2}>
           {title && (
             <Heading as="h3" fontSize="md" mb={2} lineHeight={5} {...headingProps}>
               {title}

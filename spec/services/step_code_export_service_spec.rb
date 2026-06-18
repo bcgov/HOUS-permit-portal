@@ -4,10 +4,7 @@ RSpec.describe StepCodeExportService do
   let(:service) { described_class.new }
 
   describe "#summary_csv" do
-    it "outputs rows for each jurisdiction/permit type/required step record" do
-      jurisdiction = instance_double("Jurisdiction", qualified_name: "City A")
-      permit_type = instance_double("PermitType", name: "Low Residential")
-
+    it "outputs rows for each jurisdiction step requirement record" do
       required_steps_enabled =
         instance_double(
           "JurisdictionTemplateStepCode",
@@ -20,14 +17,17 @@ RSpec.describe StepCodeExportService do
           energy_step_required: nil,
           zero_carbon_step_required: nil
         )
+      jurisdiction =
+        instance_double(
+          "Jurisdiction",
+          qualified_name: "City A",
+          jurisdiction_step_requirements: [
+            required_steps_enabled,
+            required_steps_disabled
+          ]
+        )
 
       allow(Jurisdiction).to receive(:all).and_return([jurisdiction])
-      allow(PermitType).to receive(:all).and_return([permit_type])
-      allow(jurisdiction).to receive(
-        :permit_type_required_steps_by_classification
-      ).with(permit_type).and_return(
-        [required_steps_enabled, required_steps_disabled]
-      )
 
       allow(I18n).to receive(:t).with(
         "export.step_code_summary_csv_headers"
@@ -40,8 +40,8 @@ RSpec.describe StepCodeExportService do
       expect(csv).to include(
         "Jurisdiction,Permit Type,Enabled,Energy Step,Zero Carbon Step"
       )
-      expect(csv).to include("City A,Low Residential,true,3,")
-      expect(csv).to include("City A,Low Residential,false,,")
+      expect(csv).to include("City A,,true,3,")
+      expect(csv).to include("City A,,false,,")
     end
   end
 

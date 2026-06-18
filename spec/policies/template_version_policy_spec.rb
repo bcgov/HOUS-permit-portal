@@ -6,6 +6,8 @@ RSpec.describe TemplateVersionPolicy, type: :policy do
     double(
       "TemplateVersion",
       scheduled?: false,
+      draft?: false,
+      publicly_previewable?: false,
       sandbox: :s1,
       jurisdiction_id: "j1"
     )
@@ -26,6 +28,8 @@ RSpec.describe TemplateVersionPolicy, type: :policy do
         double(
           "TemplateVersion",
           scheduled?: true,
+          draft?: false,
+          publicly_previewable?: false,
           sandbox: :s1,
           jurisdiction_id: "j1"
         )
@@ -52,6 +56,8 @@ RSpec.describe TemplateVersionPolicy, type: :policy do
         double(
           "TemplateVersion",
           scheduled?: true,
+          draft?: false,
+          publicly_previewable?: false,
           sandbox: scheduled_sandbox,
           jurisdiction_id: "j1"
         )
@@ -59,6 +65,8 @@ RSpec.describe TemplateVersionPolicy, type: :policy do
         double(
           "TemplateVersion",
           scheduled?: false,
+          draft?: false,
+          publicly_previewable?: false,
           sandbox: scheduled_sandbox,
           jurisdiction_id: "j1"
         )
@@ -105,6 +113,48 @@ RSpec.describe TemplateVersionPolicy, type: :policy do
     expect(policy(user, sandbox:).download_summary_csv?).to be false
   end
 
+  describe "draft mutation actions" do
+    let(:admin) { create(:user, :super_admin) }
+    let(:non_admin) { create(:user) }
+    let(:draft_record) do
+      double("TemplateVersion", draft?: true, publicly_previewable?: false)
+    end
+    let(:published_record) do
+      double("TemplateVersion", draft?: false, publicly_previewable?: false)
+    end
+
+    def draft_policy(user, record)
+      policy_for(described_class, user:, record:, sandbox: nil)
+    end
+
+    it "permits super admins to discard and promote draft versions" do
+      p = draft_policy(admin, draft_record)
+
+      expect(p.discard_draft?).to be true
+      expect(p.promote_draft?).to be true
+    end
+
+    it "denies draft actions for non-admin users and non-draft records" do
+      expect(draft_policy(non_admin, draft_record).promote_draft?).to be false
+      expect(draft_policy(admin, published_record).promote_draft?).to be false
+    end
+
+    it "permits force publishing draft versions only when enabled" do
+      allow(ENV).to receive(:[]).and_call_original
+      allow(ENV).to receive(:[]).with(
+        "ENABLE_TEMPLATE_FORCE_PUBLISH"
+      ).and_return("true")
+
+      expect(draft_policy(admin, draft_record).force_publish_draft?).to be true
+
+      allow(ENV).to receive(:[]).with(
+        "ENABLE_TEMPLATE_FORCE_PUBLISH"
+      ).and_return("false")
+
+      expect(draft_policy(admin, draft_record).force_publish_draft?).to be false
+    end
+  end
+
   it "permits customization update actions for review managers who are members" do
     sandbox = nil
     rm = create(:user, :review_manager)
@@ -128,11 +178,13 @@ RSpec.describe TemplateVersionPolicy, type: :policy do
       where1 = double("Where1Relation")
       where2 = double("Where2Relation")
       where_chain = instance_double("ActiveRecord::QueryMethods::WhereChain")
-      published_only = double("PublishedOnlyRelation")
+      published_rel = double("PublishedRelation")
+      draft_rel = double("DraftRelation")
+      union_rel = double("UnionRelation")
 
-      allow(scope).to receive(:joins).with(
-        requirement_template: :activity
-      ).and_return(joined)
+      allow(scope).to receive(:joins).with(:requirement_template).and_return(
+        joined
+      )
       allow(joined).to receive(:where).with(
         requirement_templates: {
           discarded_at: nil
@@ -142,16 +194,38 @@ RSpec.describe TemplateVersionPolicy, type: :policy do
       allow(where_chain).to receive(:not).with(status: "deprecated").and_return(
         where2
       )
-      allow(where2).to receive(:where).with(status: "published").and_return(
-        published_only
+
+      previews_relation = double("TemplateVersionPreviewRelation")
+      allow(TemplateVersionPreview).to receive(:kept).and_return(
+        previews_relation
       )
+      allow(previews_relation).to receive(:where).with(
+        previewer_id: user.id
+      ).and_return(previews_relation)
+      allow(previews_relation).to receive(:where).with(
+        "expires_at > ?",
+        anything
+      ).and_return(previews_relation)
+      visible_draft_ids = double("VisibleDraftIds")
+      allow(previews_relation).to receive(:select).with(
+        :template_version_id
+      ).and_return(visible_draft_ids)
+
+      allow(where2).to receive(:where).with(status: %w[published]).and_return(
+        published_rel
+      )
+      allow(where2).to receive(:where).with(
+        status: "draft",
+        id: visible_draft_ids
+      ).and_return(draft_rel)
+      allow(published_rel).to receive(:or).with(draft_rel).and_return(union_rel)
 
       resolved =
         described_class::Scope.new(
           UserContext.new(user, sandbox),
           scope
         ).resolve
-      expect(resolved).to eq(published_only)
+      expect(resolved).to eq(union_rel)
     end
 
     it "uses for_sandbox when sandbox is present" do
