@@ -70,12 +70,67 @@ RSpec.describe ProjectMeetingPolicy, type: :policy do
     expect(policy(reviewer, open_meeting).transition_status?).to be true
   end
 
+  it "allows jurisdiction review staff to reschedule scheduled requests only" do
+    open_meeting =
+      create(:project_meeting, :open, permit_project: permit_project)
+    scheduled_meeting =
+      create(
+        :project_meeting,
+        :scheduled,
+        permit_project: create(:permit_project, owner:, jurisdiction:)
+      )
+
+    expect(policy(reviewer, scheduled_meeting).reschedule?).to be true
+    expect(policy(reviewer, open_meeting).reschedule?).to be false
+    expect(policy(owner, scheduled_meeting).reschedule?).to be false
+  end
+
   it "allows jurisdiction review staff to mark requests read or unread" do
     open_meeting =
       create(:project_meeting, :open, permit_project: permit_project)
 
     expect(policy(reviewer, open_meeting).mark_as_viewed?).to be true
     expect(policy(reviewer, open_meeting).mark_as_unviewed?).to be true
+  end
+
+  it "allows jurisdiction review staff to create notes on open, scheduled, completed, and closed requests" do
+    open_meeting =
+      create(:project_meeting, :open, permit_project: permit_project)
+    scheduled_meeting =
+      create(
+        :project_meeting,
+        :scheduled,
+        permit_project: create(:permit_project, owner:, jurisdiction:)
+      )
+    completed_meeting =
+      create(
+        :project_meeting,
+        :completed,
+        permit_project: create(:permit_project, owner:, jurisdiction:)
+      )
+    closed_meeting =
+      create(:project_meeting, :closed, permit_project: permit_project)
+
+    expect(policy(reviewer, open_meeting).create_note?).to be true
+    expect(policy(reviewer, scheduled_meeting).create_note?).to be true
+    expect(policy(reviewer, completed_meeting).create_note?).to be true
+    expect(policy(reviewer, closed_meeting).create_note?).to be true
+  end
+
+  it "allows owners and jurisdiction review staff to view and download meeting notes" do
+    open_meeting =
+      create(:project_meeting, :open, permit_project: permit_project)
+
+    expect(policy(owner, open_meeting).view_notes?).to be true
+    expect(policy(reviewer, open_meeting).view_notes?).to be true
+    expect(policy(owner, open_meeting).download_notes_csv?).to be true
+    expect(policy(reviewer, open_meeting).download_notes_csv?).to be true
+  end
+
+  it "allows jurisdiction review staff to view notes on draft meetings" do
+    draft_meeting = create(:project_meeting, permit_project: permit_project)
+
+    expect(policy(reviewer, draft_meeting).view_notes?).to be true
   end
 
   it "blocks owners from marking requests read or unread" do

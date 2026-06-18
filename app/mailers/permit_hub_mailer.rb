@@ -325,6 +325,32 @@ class PermitHubMailer < ApplicationMailer
     )
   end
 
+  def notify_project_meeting_rescheduled(project_meeting)
+    set_project_meeting_scheduled_variables(project_meeting)
+    @contact_first_name =
+      contact_first_name(project_meeting.contact_name, @user)
+
+    send_user_mail(
+      email: project_meeting.contact_email,
+      template_key: "notify_project_meeting_rescheduled"
+    )
+  end
+
+  def notify_project_meeting_rescheduled_to_jurisdiction(
+    project_meeting,
+    recipient_email
+  )
+    set_project_meeting_scheduled_variables(project_meeting)
+
+    send_mail(
+      email: recipient_email,
+      template_key: "notify_project_meeting_rescheduled_to_jurisdiction",
+      subject_i18n_params: {
+        project_number: @permit_project.number
+      }
+    )
+  end
+
   def notify_new_template_version_published(
     template_version,
     user,

@@ -76,6 +76,7 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
     it "returns a meeting request for the owner without requiring a project id" do
       meeting = create(:project_meeting, permit_project: permit_project)
       document = create(:meeting_request_document, project_meeting: meeting)
+      note = create(:note, noteable: meeting, user: owner)
 
       get "/api/project_meetings/#{meeting.id}", headers: headers
 
@@ -90,6 +91,10 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
       expect(
         json_response.dig("data", "meeting_request_documents", 0, "file", "id")
       ).to eq(document.file_id)
+      expect(json_response.dig("data", "notes", 0, "id")).to eq(note.id)
+      expect(json_response.dig("data", "notes", 0, "permit_project_id")).to eq(
+        permit_project.id
+      )
     end
 
     it "returns a submitted meeting request for jurisdiction review staff" do
@@ -526,6 +531,94 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
     end
   end
 
+  describe "POST /api/permit_projects/:permit_project_id/meetings/:id/reschedule" do
+    let(:reviewer) { create(:user, :reviewer, jurisdiction: jurisdiction) }
+
+    it "allows review staff to update scheduled meeting details and sends notifications" do
+      meeting =
+        create(:project_meeting, :scheduled, permit_project: permit_project)
+      scheduled_at = meeting.scheduled_at
+      confirmed_date = 2.weeks.from_now
+      create(
+        :meeting_submission_contact,
+        jurisdiction: jurisdiction,
+        email: "meetings@example.com"
+      )
+      allow(NotificationPushJob).to receive(:perform_async)
+      sign_in reviewer
+
+      expect {
+        post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/reschedule",
+             params: {
+               project_meeting: {
+                 contact_method: "videoconference",
+                 confirmed_date: confirmed_date.iso8601,
+                 meeting_url: "https://example.com/updated-meeting"
+               }
+             },
+             headers: headers,
+             as: :json
+      }.to have_enqueued_mail(
+        PermitHubMailer,
+        :notify_project_meeting_rescheduled
+      ).with(meeting).and have_enqueued_mail(
+              PermitHubMailer,
+              :notify_project_meeting_rescheduled_to_jurisdiction
+            ).with(meeting, "meetings@example.com")
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("data", "status")).to eq("scheduled")
+      expect(json_response.dig("data", "contact_method")).to eq(
+        "videoconference"
+      )
+      expect(json_response.dig("data", "meeting_url")).to eq(
+        "https://example.com/updated-meeting"
+      )
+      expect(meeting.reload.scheduled_at.to_i).to eq(scheduled_at.to_i)
+      expect(NotificationPushJob).to have_received(:perform_async) do |payload|
+        expect(payload.keys).to contain_exactly(meeting.requested_by.id)
+      end
+    end
+
+    it "returns unprocessable when updated schedule details are invalid" do
+      meeting =
+        create(:project_meeting, :scheduled, permit_project: permit_project)
+      sign_in reviewer
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/reschedule",
+           params: {
+             project_meeting: {
+               contact_method: "videoconference",
+               confirmed_date: 2.weeks.from_now.iso8601,
+               meeting_url: ""
+             }
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(meeting.reload.contact_method).to eq("phone")
+    end
+
+    it "blocks project owners from rescheduling through the reviewer action" do
+      meeting =
+        create(:project_meeting, :scheduled, permit_project: permit_project)
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/reschedule",
+           params: {
+             project_meeting: {
+               contact_method: "phone",
+               confirmed_date: 2.weeks.from_now.iso8601,
+               meeting_url: nil
+             }
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:forbidden)
+    end
+  end
+
   describe "POST /api/permit_projects/:permit_project_id/meetings/:id/transition_status" do
     let(:reviewer) { create(:user, :reviewer, jurisdiction: jurisdiction) }
 
@@ -553,6 +646,71 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
         "videoconference"
       )
       expect(json_response.dig("data", "confirmed_date")).to be_present
+    end
+
+    it "allows review staff to mark a scheduled meeting request completed" do
+      meeting =
+        create(:project_meeting, :scheduled, permit_project: permit_project)
+      sign_in reviewer
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/transition_status",
+           params: {
+             target_status: "completed"
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("data", "status")).to eq("completed")
+      expect(json_response.dig("data", "completed_at")).to be_present
+      expect(meeting.reload).to be_completed
+    end
+
+    it "does not allow an open meeting request to be marked completed" do
+      meeting = create(:project_meeting, :open, permit_project: permit_project)
+      sign_in reviewer
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/transition_status",
+           params: {
+             target_status: "completed"
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(meeting.reload).to be_open
+    end
+
+    it "does not allow a completed meeting request to be re-opened" do
+      meeting =
+        create(:project_meeting, :completed, permit_project: permit_project)
+      sign_in reviewer
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/transition_status",
+           params: {
+             target_status: "open"
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(meeting.reload).to be_completed
+    end
+
+    it "does not allow a closed meeting request to be re-opened" do
+      meeting =
+        create(:project_meeting, :closed, permit_project: permit_project)
+      sign_in reviewer
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/transition_status",
+           params: {
+             target_status: "open"
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(meeting.reload).to be_closed
     end
 
     it "returns validation errors when scheduling without a confirmed date" do

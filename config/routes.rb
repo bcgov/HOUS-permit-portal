@@ -194,7 +194,13 @@ Rails.application.routes.draw do
       get "form_bc_addresses", on: :collection
     end
 
-    resources :project_meetings, only: %i[show]
+    resources :project_meetings, only: %i[show] do
+      resources :notes,
+                only: %i[index create],
+                controller: "project_meetings/notes" do
+        get :download_csv, on: :collection
+      end
+    end
 
     resources :permit_applications, only: %i[create update show destroy] do
       collection { patch :reorder }
@@ -246,10 +252,15 @@ Rails.application.routes.draw do
     end
 
     resources :permit_projects, only: %i[show index update create] do
+      resources :notes, only: %i[index], controller: "permit_projects/notes" do
+        get :download_csv, on: :collection
+      end
+
       resources :project_meetings, path: "meetings", only: %i[create update] do
         post "search", on: :collection, to: "project_meetings#index"
         post :submit, on: :member
         post :cancel, on: :member
+        post :reschedule, on: :member
         post :transition_status, on: :member
         post :mark_as_viewed, on: :member
         post :mark_as_unviewed, on: :member

@@ -231,6 +231,16 @@ class PermitApplication < ApplicationRecord
     template_version.requirement_template.nickname
   end
 
+  def requires_project_meeting?
+    return false if jurisdiction.blank?
+
+    jurisdiction
+      .jurisdiction_template_version_customizations
+      .for_sandbox(sandbox)
+      .requiring_project_meeting
+      .exists?(template_version: template_version)
+  end
+
   def search_data
     {
       number: number,

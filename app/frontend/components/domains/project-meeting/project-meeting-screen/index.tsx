@@ -44,6 +44,12 @@ export const ProjectMeetingScreen = observer(() => {
     )
   }
 
+  if (section === "property-information" && !currentPermitProject.jurisdiction?.propertyInformationRequestsEnabled) {
+    return (
+      <Navigate to={`/projects/${currentPermitProject.id}/meetings/${currentProjectMeeting.id}/edit/review`} replace />
+    )
+  }
+
   const renderSection = () => {
     switch (section) {
       case "project-information":

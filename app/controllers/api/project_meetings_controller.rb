@@ -8,6 +8,7 @@ class Api::ProjectMeetingsController < Api::ApplicationController
                   update
                   submit
                   cancel
+                  reschedule
                   transition_status
                   mark_as_viewed
                   mark_as_unviewed
@@ -130,6 +131,36 @@ class Api::ProjectMeetingsController < Api::ApplicationController
     )
   end
 
+  def reschedule
+    authorize @project_meeting
+    @project_meeting.assign_attributes(project_meeting_schedule_params)
+
+    if @project_meeting.save
+      NotificationService.publish_project_meeting_rescheduled_event(
+        @project_meeting
+      )
+      render_success @project_meeting,
+                     "project_meeting.reschedule_success",
+                     {
+                       blueprint: ProjectMeetingBlueprint,
+                       blueprint_opts: {
+                         view: :extended
+                       }
+                     }
+    else
+      render_error(
+        "project_meeting.reschedule_error",
+        {
+          status: :unprocessable_entity,
+          log_args: {
+            errors: @project_meeting.errors.full_messages,
+            params: project_meeting_schedule_params.to_h
+          }
+        }
+      )
+    end
+  end
+
   def transition_status
     authorize @project_meeting, :transition_status?
 
@@ -183,13 +214,14 @@ class Api::ProjectMeetingsController < Api::ApplicationController
       @project_meeting =
         @permit_project
           .project_meetings
-          .includes(:meeting_request_documents)
+          .includes(:meeting_request_documents, notes: %i[user permit_project])
           .find(params[:id])
     else
       @project_meeting =
         policy_scope(ProjectMeeting).includes(
           :permit_project,
-          :meeting_request_documents
+          :meeting_request_documents,
+          notes: %i[user permit_project]
         ).find(params[:id])
     end
   end
@@ -217,6 +249,18 @@ class Api::ProjectMeetingsController < Api::ApplicationController
         :_destroy,
         file: [:id, :storage, metadata: %i[size filename mime_type]]
       ]
+    )
+  end
+
+  def project_meeting_schedule_params
+    if params[:project_meeting].blank?
+      return ActionController::Parameters.new.permit
+    end
+
+    params.require(:project_meeting).permit(
+      :contact_method,
+      :confirmed_date,
+      :meeting_url
     )
   end
 end

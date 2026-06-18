@@ -18,11 +18,17 @@ import { Controller, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { IProjectMeeting } from "../../../../../models/project-meeting"
 import { useMst } from "../../../../../setup/root"
-import { EFlashMessageStatus, EProjectMeetingContactMethod } from "../../../../../types/enums"
+import {
+  EFlashMessageStatus,
+  EProjectMeetingContactMethod,
+  EProjectMeetingScheduleMode,
+} from "../../../../../types/enums"
 import { DatePicker } from "../../../../shared/date-picker"
 
 interface ScheduleMeetingBannerProps {
   projectMeeting: IProjectMeeting
+  mode?: EProjectMeetingScheduleMode
+  onCancel?: () => void
 }
 
 type ScheduleMeetingFormValues = {
@@ -55,157 +61,206 @@ const normalizeUrl = (url: string) => {
   return /^(https?):\/\//i.test(trimmedUrl) ? trimmedUrl : `https://${trimmedUrl}`
 }
 
-export const ScheduleMeetingBanner = observer(({ projectMeeting }: ScheduleMeetingBannerProps) => {
-  const { t } = useTranslation()
-  const { projectMeetingStore, uiStore } = useMst()
-  const {
-    control,
-    formState: { errors, isSubmitting },
-    handleSubmit,
-    register,
-    reset,
-    watch,
-  } = useForm<ScheduleMeetingFormValues>({
-    defaultValues: {
-      contactMethod: projectMeeting.contactMethod || "",
-      confirmedDate: projectMeeting.confirmedDate || null,
+export const ScheduleMeetingBanner = observer(
+  ({ projectMeeting, mode = EProjectMeetingScheduleMode.schedule, onCancel }: ScheduleMeetingBannerProps) => {
+    const { t } = useTranslation()
+    const { projectMeetingStore, uiStore } = useMst()
+    const initialValues: ScheduleMeetingFormValues = {
+      contactMethod: (projectMeeting.contactMethod || "") as EProjectMeetingContactMethod | "",
+      confirmedDate: projectMeeting.confirmedDate ? new Date(projectMeeting.confirmedDate) : null,
       confirmedTime: timeValueFromDate(projectMeeting.confirmedDate),
       meetingUrl: projectMeeting.meetingUrl || "",
-    },
-  })
-
-  const selectedContactMethod = watch("contactMethod")
-  const contactMethodOptions = Object.values(EProjectMeetingContactMethod)
-
-  const handleClear = () => {
-    reset({
-      contactMethod: "",
-      confirmedDate: null,
-      confirmedTime: "",
-      meetingUrl: "",
+    }
+    const {
+      control,
+      formState: { errors, isSubmitting },
+      handleSubmit,
+      register,
+      reset,
+      watch,
+    } = useForm<ScheduleMeetingFormValues>({
+      defaultValues: initialValues,
     })
-  }
 
-  const onSubmit = async (data: ScheduleMeetingFormValues) => {
-    const confirmedDate = combineDateAndTime(data.confirmedDate, data.confirmedTime)
-    if (!confirmedDate) return
+    const selectedContactMethod = watch("contactMethod")
+    const contactMethodOptions = Object.values(EProjectMeetingContactMethod)
 
-    const meetingUrl =
-      data.contactMethod === EProjectMeetingContactMethod.videoconference ? normalizeUrl(data.meetingUrl) : null
+    const handleClear = () => {
+      reset(
+        mode === EProjectMeetingScheduleMode.reschedule
+          ? initialValues
+          : {
+              contactMethod: "",
+              confirmedDate: null,
+              confirmedTime: "",
+              meetingUrl: "",
+            }
+      )
+    }
 
-    const response = await projectMeetingStore.scheduleProjectMeeting(
-      projectMeeting.permitProjectId,
-      projectMeeting.id,
-      {
+    const onSubmit = async (data: ScheduleMeetingFormValues) => {
+      const confirmedDate = combineDateAndTime(data.confirmedDate, data.confirmedTime)
+      if (!confirmedDate) return
+
+      const meetingUrl =
+        data.contactMethod === EProjectMeetingContactMethod.videoconference ? normalizeUrl(data.meetingUrl) : null
+
+      const params = {
         contactMethod: data.contactMethod,
         confirmedDate: confirmedDate.toISOString(),
         meetingUrl,
       }
-    )
+      const response =
+        mode === EProjectMeetingScheduleMode.reschedule
+          ? await projectMeetingStore.rescheduleProjectMeeting(
+              projectMeeting.permitProjectId,
+              projectMeeting.id,
+              params
+            )
+          : await projectMeetingStore.scheduleProjectMeeting(projectMeeting.permitProjectId, projectMeeting.id, params)
 
-    if (!response.ok) {
-      uiStore.flashMessage.show(
-        EFlashMessageStatus.error,
-        null,
-        t("projectMeeting.detail.reviewer.scheduleError"),
-        5000
-      )
+      if (!response.ok) {
+        uiStore.flashMessage.show(
+          EFlashMessageStatus.error,
+          null,
+          t(
+            mode === EProjectMeetingScheduleMode.reschedule
+              ? "projectMeeting.detail.reviewer.rescheduleError"
+              : "projectMeeting.detail.reviewer.scheduleError"
+          ),
+          5000
+        )
+        return
+      }
+
+      if (mode === EProjectMeetingScheduleMode.reschedule) {
+        uiStore.flashMessage.show(
+          EFlashMessageStatus.success,
+          null,
+          t("projectMeeting.detail.reviewer.rescheduleSuccess"),
+          5000
+        )
+        onCancel?.()
+      }
     }
-  }
 
-  return (
-    <Box bg="theme.blueLight" borderRadius="lg" p={5} mb={8} maxW="xl">
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <VStack align="stretch" spacing={4}>
-          <Box>
-            <Text fontWeight="bold" fontSize="lg" mb={2}>
-              {t("projectMeeting.detail.reviewer.scheduleTitle")}
-            </Text>
-            <Text fontSize="lg">{t("projectMeeting.detail.reviewer.scheduleDescription")}</Text>
-          </Box>
+    return (
+      <Box bg="theme.blueLight" borderRadius="lg" p={5} mb={8} maxW="xl">
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <VStack align="stretch" spacing={4}>
+            <Box>
+              <Text fontWeight="bold" fontSize="lg" mb={2}>
+                {t(
+                  mode === EProjectMeetingScheduleMode.reschedule
+                    ? "projectMeeting.detail.reviewer.rescheduleTitle"
+                    : "projectMeeting.detail.reviewer.scheduleTitle"
+                )}
+              </Text>
+              <Text fontSize="lg">
+                {t(
+                  mode === EProjectMeetingScheduleMode.reschedule
+                    ? "projectMeeting.detail.reviewer.rescheduleDescription"
+                    : "projectMeeting.detail.reviewer.scheduleDescription"
+                )}
+              </Text>
+            </Box>
 
-          <FormControl isRequired isInvalid={!!errors.contactMethod}>
-            <FormLabel>{t("projectMeeting.detail.reviewer.contactMethod")}</FormLabel>
-            <Controller
-              name="contactMethod"
-              control={control}
-              rules={{ required: t("projectMeeting.detail.reviewer.contactMethodRequired") }}
-              render={({ field }) => (
-                <RadioGroup value={field.value} onChange={field.onChange}>
-                  <Stack spacing={2}>
-                    {contactMethodOptions.map((contactMethod) => (
-                      <Radio key={contactMethod} value={contactMethod}>
-                        {t(`projectMeeting.contactMethods.${contactMethod}`)}
-                      </Radio>
-                    ))}
-                  </Stack>
-                </RadioGroup>
-              )}
-            />
-            <FormErrorMessage>{errors.contactMethod?.message as string}</FormErrorMessage>
-          </FormControl>
+            <FormControl isRequired isInvalid={!!errors.contactMethod}>
+              <FormLabel>{t("projectMeeting.detail.reviewer.contactMethod")}</FormLabel>
+              <Controller
+                name="contactMethod"
+                control={control}
+                rules={{ required: t("projectMeeting.detail.reviewer.contactMethodRequired") }}
+                render={({ field }) => (
+                  <RadioGroup value={field.value} onChange={field.onChange}>
+                    <Stack spacing={2}>
+                      {contactMethodOptions.map((contactMethod) => (
+                        <Radio key={contactMethod} value={contactMethod}>
+                          {t(`projectMeeting.contactMethods.${contactMethod}`)}
+                        </Radio>
+                      ))}
+                    </Stack>
+                  </RadioGroup>
+                )}
+              />
+              <FormErrorMessage>{errors.contactMethod?.message as string}</FormErrorMessage>
+            </FormControl>
 
-          {selectedContactMethod === EProjectMeetingContactMethod.videoconference && (
-            <FormControl isRequired isInvalid={!!errors.meetingUrl}>
-              <FormLabel>{t("projectMeeting.detail.reviewer.meetingLink")}</FormLabel>
+            {selectedContactMethod === EProjectMeetingContactMethod.videoconference && (
+              <FormControl isRequired isInvalid={!!errors.meetingUrl}>
+                <FormLabel>{t("projectMeeting.detail.reviewer.meetingLink")}</FormLabel>
+                <Input
+                  type="text"
+                  placeholder="https://"
+                  bg="white"
+                  {...register("meetingUrl", {
+                    required: t("projectMeeting.detail.reviewer.meetingLinkRequired"),
+                  })}
+                />
+                <FormErrorMessage>{errors.meetingUrl?.message as string}</FormErrorMessage>
+              </FormControl>
+            )}
+
+            <FormControl isRequired isInvalid={!!errors.confirmedDate}>
+              <FormLabel>{t("projectMeeting.detail.reviewer.meetingDate")}</FormLabel>
+              <Controller
+                name="confirmedDate"
+                control={control}
+                rules={{ required: t("projectMeeting.detail.reviewer.meetingDateRequired") }}
+                render={({ field }) => (
+                  <DatePicker
+                    selected={field.value}
+                    onChange={field.onChange}
+                    minDate={new Date()}
+                    containerProps={{
+                      w: "full",
+                      sx: {
+                        ".react-datepicker-wrapper": { w: "full" },
+                        ".react-datepicker__input-container": { w: "full" },
+                      },
+                    }}
+                  />
+                )}
+              />
+              <FormErrorMessage>{errors.confirmedDate?.message as string}</FormErrorMessage>
+            </FormControl>
+
+            <FormControl isRequired isInvalid={!!errors.confirmedTime}>
+              <FormLabel>{t("projectMeeting.detail.reviewer.meetingTime")}</FormLabel>
               <Input
-                type="text"
-                placeholder="https://"
+                type="time"
                 bg="white"
-                {...register("meetingUrl", {
-                  required: t("projectMeeting.detail.reviewer.meetingLinkRequired"),
+                {...register("confirmedTime", {
+                  required: t("projectMeeting.detail.reviewer.meetingTimeRequired"),
                 })}
               />
-              <FormErrorMessage>{errors.meetingUrl?.message as string}</FormErrorMessage>
+              <FormErrorMessage>{errors.confirmedTime?.message as string}</FormErrorMessage>
             </FormControl>
-          )}
 
-          <FormControl isRequired isInvalid={!!errors.confirmedDate}>
-            <FormLabel>{t("projectMeeting.detail.reviewer.meetingDate")}</FormLabel>
-            <Controller
-              name="confirmedDate"
-              control={control}
-              rules={{ required: t("projectMeeting.detail.reviewer.meetingDateRequired") }}
-              render={({ field }) => (
-                <DatePicker
-                  selected={field.value}
-                  onChange={field.onChange}
-                  minDate={new Date()}
-                  containerProps={{
-                    w: "full",
-                    sx: {
-                      ".react-datepicker-wrapper": { w: "full" },
-                      ".react-datepicker__input-container": { w: "full" },
-                    },
-                  }}
-                />
+            <HStack spacing={3}>
+              <Button type="button" variant="secondary" size="sm" onClick={handleClear}>
+                {t(
+                  mode === EProjectMeetingScheduleMode.reschedule
+                    ? "projectMeeting.detail.reviewer.resetMeetingDetailsForm"
+                    : "projectMeeting.detail.reviewer.clearScheduleForm"
+                )}
+              </Button>
+              {onCancel && (
+                <Button type="button" variant="secondary" size="sm" onClick={onCancel}>
+                  {t("projectMeeting.detail.reviewer.cancelEditMeetingDetails")}
+                </Button>
               )}
-            />
-            <FormErrorMessage>{errors.confirmedDate?.message as string}</FormErrorMessage>
-          </FormControl>
-
-          <FormControl isRequired isInvalid={!!errors.confirmedTime}>
-            <FormLabel>{t("projectMeeting.detail.reviewer.meetingTime")}</FormLabel>
-            <Input
-              type="time"
-              bg="white"
-              {...register("confirmedTime", {
-                required: t("projectMeeting.detail.reviewer.meetingTimeRequired"),
-              })}
-            />
-            <FormErrorMessage>{errors.confirmedTime?.message as string}</FormErrorMessage>
-          </FormControl>
-
-          <HStack spacing={3}>
-            <Button type="button" variant="secondary" size="sm" onClick={handleClear}>
-              {t("projectMeeting.detail.reviewer.clearScheduleForm")}
-            </Button>
-            <Button type="submit" variant="primary" size="sm" isLoading={isSubmitting}>
-              {t("projectMeeting.detail.reviewer.sendMeetingDetails")}
-            </Button>
-          </HStack>
-        </VStack>
-      </form>
-    </Box>
-  )
-})
+              <Button type="submit" variant="primary" size="sm" isLoading={isSubmitting}>
+                {t(
+                  mode === EProjectMeetingScheduleMode.reschedule
+                    ? "projectMeeting.detail.reviewer.sendUpdatedMeetingDetails"
+                    : "projectMeeting.detail.reviewer.sendMeetingDetails"
+                )}
+              </Button>
+            </HStack>
+          </VStack>
+        </form>
+      </Box>
+    )
+  }
+)

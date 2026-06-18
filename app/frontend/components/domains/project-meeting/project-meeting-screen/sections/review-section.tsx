@@ -39,6 +39,8 @@ export const ReviewSection = observer(({ meeting }: ReviewSectionProps) => {
   const isAuthorizationRequired =
     !!meeting.requesterRelationship &&
     meeting.requesterRelationship !== EProjectMeetingRequesterRelationship.ownerOrLandholder
+  const propertyInformationRequestsEnabled =
+    currentPermitProject?.jurisdiction?.propertyInformationRequestsEnabled ?? false
 
   const submit = async () => {
     const response = await projectMeetingStore.submitProjectMeeting(permitProjectId, meeting.id)
@@ -119,13 +121,15 @@ export const ReviewSection = observer(({ meeting }: ReviewSectionProps) => {
           value={meeting.contactPhoneNumber || t("ui.notProvided")}
         />
       </ReviewSummarySection>
-      <ReviewSummarySection
-        title={t("projectMeeting.sections.propertyInformation.title")}
-        sectionKey="propertyInformation"
-        onNavigateToSection={navigateToSection}
-      >
-        <Text>{meeting.requestPropertyInformation ? t("ui.yes") : t("ui.no")}</Text>
-      </ReviewSummarySection>
+      {propertyInformationRequestsEnabled && (
+        <ReviewSummarySection
+          title={t("projectMeeting.sections.propertyInformation.title")}
+          sectionKey="propertyInformation"
+          onNavigateToSection={navigateToSection}
+        >
+          <Text>{meeting.requestPropertyInformation ? t("ui.yes") : t("ui.no")}</Text>
+        </ReviewSummarySection>
+      )}
       <Box mb={8}>
         <Heading as="h2" size="lg" variant="yellowline" mb={4}>
           {t("projectMeeting.sendRequest")}

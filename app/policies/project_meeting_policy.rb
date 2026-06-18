@@ -50,6 +50,11 @@ class ProjectMeetingPolicy < ApplicationPolicy
     user_is_owner? && feature_enabled?
   end
 
+  def reschedule?
+    user_is_review_staff_for_jurisdiction? && feature_enabled? &&
+      record.scheduled?
+  end
+
   def transition_status?
     user_is_review_staff_for_jurisdiction? && feature_enabled? &&
       record.allowed_manual_transitions.any?
@@ -63,6 +68,18 @@ class ProjectMeetingPolicy < ApplicationPolicy
     mark_as_viewed?
   end
 
+  def create_note?
+    user_is_review_staff_for_jurisdiction? && feature_enabled?
+  end
+
+  def view_notes?
+    user_is_owner? || user_is_review_staff_for_jurisdiction_in_active_sandbox?
+  end
+
+  def download_notes_csv?
+    view_notes?
+  end
+
   private
 
   def user_is_owner?
@@ -70,8 +87,12 @@ class ProjectMeetingPolicy < ApplicationPolicy
   end
 
   def user_is_review_staff_for_jurisdiction?
+    user_is_review_staff_for_jurisdiction_in_active_sandbox? && !record.draft?
+  end
+
+  def user_is_review_staff_for_jurisdiction_in_active_sandbox?
     user&.review_staff? && user.member_of?(record.jurisdiction_id) &&
-      !record.draft?
+      record.sandbox_id == sandbox&.id
   end
 
   def feature_enabled?

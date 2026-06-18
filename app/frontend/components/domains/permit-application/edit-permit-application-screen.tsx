@@ -32,6 +32,7 @@ import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EditableInputWithControls } from "../../shared/editable-input-with-controls"
 import { FloatingHelpDrawer } from "../../shared/floating-help-drawer"
+import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { BrowserSearchPrompt } from "../../shared/permit-applications/browser-search-prompt"
 import { PermitApplicationStatusTag } from "../../shared/permit-applications/permit-application-status-tag"
 import { PermitApplicationSubmitModal } from "../../shared/permit-applications/permit-application-submit-modal"
@@ -364,6 +365,9 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                 {doesUserHaveSubmissionPermission && (
                   <SubmissionDownloadModal permitApplication={currentPermitApplication} />
                 )}
+                <RouterLinkButton to={parentProjectPath} variant="default" rightIcon={<CaretRight />}>
+                  {t("permitApplication.show.goToProject")}
+                </RouterLinkButton>
                 <Link to={parentProjectPath}>
                   <Button rightIcon={<CaretRight />}>{t("ui.back")}</Button>
                 </Link>

@@ -1,13 +1,15 @@
 import { format } from "date-fns"
 import { t } from "i18next"
-import { flow, Instance, toGenerator, types } from "mobx-state-tree"
+import { cast, flow, Instance, toGenerator, types } from "mobx-state-tree"
 import { datefnsTableDateFormat } from "../constants"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { EInboxDisplayMode, EPermitProjectRollupStatus, EProjectState } from "../types/enums"
 import { IParcelGeometry, IProjectAuditSummary, IProjectDocument } from "../types/types"
+import { startBlobDownload } from "../utils/utility-functions"
 import { CollaboratorModel } from "./collaborator"
 import { JurisdictionModel } from "./jurisdiction"
+import { INote, NoteModel } from "./note"
 import { IPermitApplication, PermitApplicationModel } from "./permit-application"
 import { PermitProjectCollaborationModel } from "./permit-project-collaboration"
 import { PermitProjectInboxApplicationSearchSlice } from "./permit-project-inbox-application-search"
@@ -30,6 +32,7 @@ const PermitProjectCoreModel = types.model("PermitProjectCore", {
   ),
   state: types.enumeration(Object.values(EProjectState)),
   tablePermitApplications: types.optional(types.array(types.reference(types.late(() => PermitApplicationModel))), []),
+  notes: types.optional(types.array(types.reference(types.late(() => NoteModel))), []),
   inboxTablePermitApplications: types.optional(
     types.array(types.reference(types.late(() => PermitApplicationModel))),
     []
@@ -158,6 +161,19 @@ export const PermitProjectModel = types
     setInboxDisplayMode(mode: EInboxDisplayMode) {
       self.displayMode = mode
     },
+    setNotes(notes: INote[]) {
+      self.notes = cast(notes.map((note) => note.id))
+    },
+    prependNote(note: INote) {
+      self.notes = cast([note.id, ...self.notes.map((existingNote) => existingNote.id).filter((id) => id !== note.id)])
+    },
+    downloadNotesCsv: flow(function* () {
+      const response = yield* toGenerator(self.environment.api.downloadPermitProjectNotesCsv(self.id))
+      if (response.ok) {
+        startBlobDownload(response.data, "text/csv", `project-notes-${self.number || self.id}.csv`)
+      }
+      return response.ok
+    }),
   }))
   .actions((self) => ({
     togglePin: flow(function* () {

@@ -204,12 +204,19 @@ export const NotificationStoreModel = types
             href: `/jurisdictions/${jurisdictionId}/configuration-management/resources`,
           },
         ]
-      } else if (notification.actionType === ENotificationActionType.projectMeetingSubmitted) {
+      } else if (
+        [ENotificationActionType.projectMeetingSubmitted, ENotificationActionType.projectMeetingRescheduled].includes(
+          notification.actionType
+        )
+      ) {
         const projectMeetingData = notification.objectData as IProjectMeetingNotificationObjectData
         return [
           {
             text: t("ui.show"),
-            href: `/projects/${projectMeetingData.permitProjectId}/meetings/${projectMeetingData.projectMeetingId}/sent`,
+            href:
+              notification.actionType === ENotificationActionType.projectMeetingSubmitted
+                ? `/projects/${projectMeetingData.permitProjectId}/meetings/${projectMeetingData.projectMeetingId}/sent`
+                : `/projects/${projectMeetingData.permitProjectId}/meetings/${projectMeetingData.projectMeetingId}`,
           },
         ]
       }

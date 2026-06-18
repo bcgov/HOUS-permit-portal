@@ -9,6 +9,18 @@ class ProjectMeeting < ApplicationRecord
                meeting_notes
                status
              ]
+  audited on: %i[update],
+          only: %i[
+            status
+            submitted_at
+            confirmed_date
+            scheduled_at
+            completed_at
+            closed_at
+            contact_method
+            meeting_url
+          ],
+          associated_with: :permit_project
 
   include ProjectMeetingStatus
 
@@ -21,6 +33,7 @@ class ProjectMeeting < ApplicationRecord
   has_parent :permit_project
 
   has_many :meeting_request_documents, dependent: :destroy
+  has_many :notes, as: :noteable, dependent: :destroy
   accepts_nested_attributes_for :meeting_request_documents, allow_destroy: true
 
   enum :requester_relationship,
@@ -51,6 +64,7 @@ class ProjectMeeting < ApplicationRecord
   validate :validate_submission_requirements, if: :submitted?
 
   before_validation :normalize_contact_phone_number
+  before_validation :default_request_property_information, if: :submitted?
 
   def feature_enabled?
     parent&.project_meetings_enabled?
@@ -94,6 +108,23 @@ class ProjectMeeting < ApplicationRecord
     }
   end
 
+  def rescheduled_event_notification_data
+    {
+      "id" => SecureRandom.uuid,
+      "action_text" =>
+        I18n.t(
+          "notification.project_meeting.rescheduled",
+          project_number: permit_project&.number
+        ),
+      "action_type" =>
+        Constants::NotificationActionTypes::PROJECT_MEETING_RESCHEDULED,
+      "object_data" => {
+        "permit_project_id" => permit_project.id,
+        "project_meeting_id" => id
+      }
+    }
+  end
+
   def search_data
     {
       permit_project_id: permit_project_id,
@@ -113,6 +144,7 @@ class ProjectMeeting < ApplicationRecord
       submitted_at: submitted_at,
       confirmed_date: confirmed_date,
       scheduled_at: scheduled_at,
+      notes_count: notes_count,
       created_at: created_at,
       updated_at: updated_at,
       discarded: parent&.discarded_at.present?
@@ -131,7 +163,8 @@ class ProjectMeeting < ApplicationRecord
       errors.add(attribute, :blank) if public_send(attribute).blank?
     end
 
-    if request_property_information.nil?
+    if request_property_information.nil? &&
+         permit_project.jurisdiction.property_information_requests_enabled?
       errors.add(:request_property_information, :blank)
     end
 
@@ -139,6 +172,13 @@ class ProjectMeeting < ApplicationRecord
          active_meeting_request_documents.none?(&:document_type_authorization?)
       errors.add(:meeting_request_documents, :authorization_required)
     end
+  end
+
+  def default_request_property_information
+    return if permit_project.jurisdiction.property_information_requests_enabled?
+
+    self.request_property_information =
+      false if request_property_information.nil?
   end
 
   def normalize_contact_phone_number

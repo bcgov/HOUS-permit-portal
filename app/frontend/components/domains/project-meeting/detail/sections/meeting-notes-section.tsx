@@ -1,45 +1,124 @@
-import { Box, Button, Text } from "@chakra-ui/react"
-import { Download } from "@phosphor-icons/react"
-import React from "react"
+import { Box, Button, HStack, Text, VStack } from "@chakra-ui/react"
+import { Clock, Download } from "@phosphor-icons/react"
+import { format } from "date-fns"
+import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
+import { datefnsTableDateTimeFormat } from "../../../../../constants"
+import { INote } from "../../../../../models/note"
 import { EProjectMeetingStatus } from "../../../../../types/enums"
+import { isTipTapEmpty } from "../../../../../utils/utility-functions"
+import { Editor } from "../../../../shared/editor/editor"
+import { SafeTipTapDisplay } from "../../../../shared/editor/safe-tiptap-display"
 import { MeetingNotesVisibilityBanner } from "../banners/meeting-notes-visibility-banner"
-import { ReviewerClosedNotesBanner } from "../banners/reviewer-closed-notes-banner"
 import { DetailSection } from "../detail-section"
 
 interface MeetingNotesSectionProps {
   status: EProjectMeetingStatus
+  notes?: INote[]
   showVisibilityBanner?: boolean
-  internalNotesLink?: string | null
+  canAddNote?: boolean
+  isAddingNote?: boolean
+  onAddNote?: (body: string) => Promise<boolean>
+  onDownloadNotes?: () => void
 }
 
 export const MeetingNotesSection = ({
   status,
+  notes = [],
   showVisibilityBanner = false,
-  internalNotesLink,
+  canAddNote = false,
+  isAddingNote = false,
+  onAddNote,
+  onDownloadNotes,
 }: MeetingNotesSectionProps) => {
   const { t } = useTranslation()
-  const showClosedBanner = showVisibilityBanner && status === EProjectMeetingStatus.closed
+  const [body, setBody] = useState("")
+  const addNoteDisabled = isAddingNote || isTipTapEmpty(body)
+
+  const handleAddNote = async () => {
+    if (!onAddNote || addNoteDisabled) return
+
+    const ok = await onAddNote(body)
+    if (ok) setBody("")
+  }
 
   return (
     <DetailSection title={t("projectMeeting.detail.notes.title")}>
       {showVisibilityBanner && <MeetingNotesVisibilityBanner />}
-      {showClosedBanner && <ReviewerClosedNotesBanner internalNotesLink={internalNotesLink} />}
 
-      {/* MEETING NOTES TODO */}
-      {/* Future work: reviewer-authored notes feed (Figma shows threaded cards by author + timestamp), */}
-      {/* "Download all notes" export, add-note composer for open/scheduled states, */}
-      {/* and backend storage/authorization distinct from requester `meetingNotes` field. */}
-      {/* Closed state: show Figma closed alert (implemented in banner) but no note list yet. */}
-      <Button variant="secondary" size="sm" leftIcon={<Download size={16} />} isDisabled mb={4}>
-        {t("projectMeeting.detail.notes.downloadAll")}
-      </Button>
-      <Box border="1px" borderColor="border.light" borderRadius="md" p={4}>
-        <Text fontWeight="bold" mb={1}>
-          {t("projectMeeting.detail.notes.reviewerNotes")}
-        </Text>
-        <Text color="text.secondary">{t("projectMeeting.detail.notes.emptyDescription")}</Text>
-      </Box>
+      {canAddNote && (
+        <Box mb={4}>
+          <Text fontWeight="bold" mb={2}>
+            {t("projectMeeting.detail.notes.addNote")}
+          </Text>
+          <Editor
+            htmlValue={body}
+            onChange={setBody}
+            placeholder={t("projectMeeting.detail.notes.addNotePlaceholder")}
+            shouldContainRichTextToolbarItem={(item) => item !== "image"}
+          />
+        </Box>
+      )}
+
+      <HStack spacing={3} mb={4}>
+        {canAddNote && (
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={handleAddNote}
+            isDisabled={addNoteDisabled}
+            isLoading={isAddingNote}
+          >
+            {t("projectMeeting.detail.notes.addNote")}
+          </Button>
+        )}
+        <Button variant="secondary" size="sm" leftIcon={<Download size={16} />} onClick={onDownloadNotes}>
+          {t("projectMeeting.detail.notes.downloadAll")}
+        </Button>
+      </HStack>
+
+      <Text fontWeight="bold" mb={3}>
+        {t("projectMeeting.detail.notes.reviewerNotes")}
+      </Text>
+      {notes.length === 0 ? (
+        <Box border="1px" borderColor="border.light" borderRadius="md" p={4}>
+          <HStack align="start" spacing={2}>
+            <Clock size={18} />
+            <Box>
+              <Text fontWeight="bold" mb={1}>
+                {t("projectMeeting.detail.notes.emptyTitle")}
+              </Text>
+              <Text fontSize="sm">{t("projectMeeting.detail.notes.emptyDescription")}</Text>
+            </Box>
+          </HStack>
+        </Box>
+      ) : (
+        <VStack align="stretch" spacing={4}>
+          {notes.map((note) => (
+            <NoteCard key={note.id} note={note} />
+          ))}
+        </VStack>
+      )}
     </DetailSection>
+  )
+}
+
+const NoteCard = ({ note }: { note: INote }) => {
+  const createdAt = note.createdAt ? format(note.createdAt, datefnsTableDateTimeFormat) : null
+
+  return (
+    <Box border="1px" borderColor="border.light" borderRadius="md" p={4}>
+      <VStack align="stretch" spacing={2}>
+        <HStack spacing={4} align="baseline">
+          <Text fontWeight="bold">{note.authorName}</Text>
+          {createdAt && (
+            <Text color="text.secondary" fontSize="sm">
+              {createdAt}
+            </Text>
+          )}
+        </HStack>
+        <SafeTipTapDisplay htmlContent={note.body} fontSize="md" />
+      </VStack>
+    </Box>
   )
 }

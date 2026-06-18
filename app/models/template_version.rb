@@ -95,6 +95,24 @@ class TemplateVersion < ApplicationRecord
     "#{prefix}#{requirement_template.nickname} (#{version_date})"
   end
 
+  def requires_project_meeting_for_jurisdiction?(jurisdiction_id, sandbox = nil)
+    return false if jurisdiction_id.blank?
+
+    jurisdiction_template_version_customizations
+      .for_sandbox(sandbox)
+      .requiring_project_meeting
+      .exists?(jurisdiction_id: jurisdiction_id)
+  end
+
+  def disabled_for_jurisdiction?(jurisdiction_id, sandbox = nil)
+    return false if jurisdiction_id.blank?
+
+    jurisdiction_template_version_customizations.for_sandbox(sandbox).exists?(
+      jurisdiction_id: jurisdiction_id,
+      disabled: true
+    )
+  end
+
   def lookup_props
     # form_json starts at root template
     flatten_requirements_from_form_hash(form_json)

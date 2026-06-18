@@ -2,8 +2,10 @@ import { Box, Button, HStack, Link, Text, VStack } from "@chakra-ui/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { IProjectMeeting } from "../../../../../models/project-meeting"
+import { EProjectMeetingScheduleMode, EProjectMeetingStatus } from "../../../../../types/enums"
 import { CopyLinkButton } from "../../../../shared/base/copy-link-button"
 import { FormattedDateTime } from "../formatted-date-time"
+import { ScheduleMeetingBanner } from "./schedule-meeting-banner"
 
 interface ReviewerScheduledMeetingBannerProps {
   projectMeeting: IProjectMeeting
@@ -11,6 +13,17 @@ interface ReviewerScheduledMeetingBannerProps {
 
 export const ReviewerScheduledMeetingBanner = ({ projectMeeting }: ReviewerScheduledMeetingBannerProps) => {
   const { t } = useTranslation()
+  const [isEditing, setIsEditing] = React.useState(false)
+
+  if (isEditing) {
+    return (
+      <ScheduleMeetingBanner
+        projectMeeting={projectMeeting}
+        mode={EProjectMeetingScheduleMode.reschedule}
+        onCancel={() => setIsEditing(false)}
+      />
+    )
+  }
 
   return (
     <Box bg="theme.blueLight" borderRadius="lg" p={5} mb={8} maxW="xl">
@@ -57,10 +70,11 @@ export const ReviewerScheduledMeetingBanner = ({ projectMeeting }: ReviewerSched
           </HStack>
         )}
 
-        {/* TODO - Change meeting details — wire up when reviewer scheduling edit flow is implemented */}
-        <Button variant="secondary" size="sm" isDisabled alignSelf="flex-start">
-          {t("projectMeeting.detail.reviewer.changeMeetingDetails")}
-        </Button>
+        {projectMeeting.status === EProjectMeetingStatus.scheduled && (
+          <Button variant="secondary" size="sm" alignSelf="flex-start" onClick={() => setIsEditing(true)}>
+            {t("projectMeeting.detail.reviewer.changeMeetingDetails")}
+          </Button>
+        )}
       </VStack>
     </Box>
   )

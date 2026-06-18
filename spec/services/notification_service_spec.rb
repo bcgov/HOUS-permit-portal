@@ -900,4 +900,53 @@ RSpec.describe NotificationService do
       ).with(meeting, "meetings@example.com")
     end
   end
+
+  describe ".publish_project_meeting_rescheduled_event" do
+    it "sends the rescheduled meeting email to the requester and an in-app notification" do
+      meeting =
+        create(
+          :project_meeting,
+          :scheduled,
+          contact_method: :phone,
+          meeting_url: nil
+        )
+      allow(NotificationPushJob).to receive(:perform_async)
+
+      expect {
+        described_class.publish_project_meeting_rescheduled_event(meeting)
+      }.to have_enqueued_mail(
+        PermitHubMailer,
+        :notify_project_meeting_rescheduled
+      ).with(meeting)
+
+      expect(NotificationPushJob).to have_received(:perform_async) do |payload|
+        expect(payload.keys).to contain_exactly(meeting.requested_by.id)
+        expect(payload[meeting.requested_by.id]["action_type"]).to eq(
+          Constants::NotificationActionTypes::PROJECT_MEETING_RESCHEDULED
+        )
+      end
+    end
+
+    it "sends rescheduled meeting emails to jurisdiction project meeting contacts" do
+      meeting =
+        create(
+          :project_meeting,
+          :scheduled,
+          contact_method: :phone,
+          meeting_url: nil
+        )
+      create(
+        :meeting_submission_contact,
+        jurisdiction: meeting.permit_project.jurisdiction,
+        email: "meetings@example.com"
+      )
+
+      expect {
+        described_class.publish_project_meeting_rescheduled_event(meeting)
+      }.to have_enqueued_mail(
+        PermitHubMailer,
+        :notify_project_meeting_rescheduled_to_jurisdiction
+      ).with(meeting, "meetings@example.com")
+    end
+  end
 end

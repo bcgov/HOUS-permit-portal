@@ -8,6 +8,7 @@ import { IHelpVideoSection } from "../../models/help-video-section"
 import { IIntegrationMapping } from "../../models/integration-mapping"
 import { IJurisdiction } from "../../models/jurisdiction"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
+import { INote } from "../../models/note"
 import { IOverheatingCode } from "../../models/overheating-code"
 import { IPart3StepCode } from "../../models/part-3-step-code"
 import { IPart3StepCodeChecklist } from "../../models/part-3-step-code-checklist"
@@ -41,6 +42,7 @@ import {
   IJurisdictionPermitApplicationResponse,
   IJurisdictionProjectMeetingResponse,
   IJurisdictionResponse,
+  INoteResponse,
   INotificationResponse,
   IOptionResponse,
   IPageMeta,
@@ -383,6 +385,26 @@ export class Api {
     return this.client.get<ApiResponse<IProjectMeeting>>(`/project_meetings/${id}`)
   }
 
+  async fetchProjectMeetingNotes(projectMeetingId: string) {
+    return this.client.get<INoteResponse>(`/project_meetings/${projectMeetingId}/notes`)
+  }
+
+  async createProjectMeetingNote(projectMeetingId: string, body: string) {
+    return this.client.post<ApiResponse<INote>>(`/project_meetings/${projectMeetingId}/notes`, { note: { body } })
+  }
+
+  async downloadProjectMeetingNotesCsv(projectMeetingId: string) {
+    return this.client.get<BlobPart>(`/project_meetings/${projectMeetingId}/notes/download_csv`)
+  }
+
+  async fetchPermitProjectNotes(permitProjectId: string) {
+    return this.client.get<INoteResponse>(`/permit_projects/${permitProjectId}/notes`)
+  }
+
+  async downloadPermitProjectNotesCsv(permitProjectId: string) {
+    return this.client.get<BlobPart>(`/permit_projects/${permitProjectId}/notes/download_csv`)
+  }
+
   async fetchProjectMeetings(permitProjectId: string, params?: TSearchParams<EProjectMeetingSortFields>) {
     return this.client.post<IProjectMeetingResponse>(`/permit_projects/${permitProjectId}/meetings/search`, params)
   }
@@ -411,6 +433,15 @@ export class Api {
 
   async cancelProjectMeeting(permitProjectId: string, id: string) {
     return this.client.post<ApiResponse<IProjectMeeting>>(`/permit_projects/${permitProjectId}/meetings/${id}/cancel`)
+  }
+
+  async rescheduleProjectMeeting(permitProjectId: string, id: string, params: Record<string, unknown>) {
+    return this.client.post<ApiResponse<IProjectMeeting>>(
+      `/permit_projects/${permitProjectId}/meetings/${id}/reschedule`,
+      {
+        projectMeeting: params,
+      }
+    )
   }
 
   async viewProjectMeeting(permitProjectId: string, id: string) {
@@ -804,10 +835,15 @@ export class Api {
     return this.client.patch<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${id}/restore`)
   }
 
-  async fetchTemplateVersions(status?: ETemplateVersionStatus, isPubliclyPreviewable?: boolean) {
+  async fetchTemplateVersions(
+    status?: ETemplateVersionStatus,
+    isPubliclyPreviewable?: boolean,
+    jurisdictionId?: string
+  ) {
     return this.client.get<ApiResponse<ITemplateVersion[]>>(`/template_versions`, {
       status,
       publiclyPreviewable: isPubliclyPreviewable,
+      jurisdictionId,
     })
   }
 

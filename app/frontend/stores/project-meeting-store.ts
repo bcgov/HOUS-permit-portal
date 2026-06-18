@@ -43,8 +43,16 @@ export const ProjectMeetingStoreModel = types
   }))
   .actions((self) => ({
     __beforeMergeUpdate(projectMeeting: Record<string, unknown>) {
+      const notes = Array.isArray(projectMeeting.notes) ? projectMeeting.notes : null
+      if (notes) {
+        self.rootStore.noteStore.mergeUpdateAll(notes, "notesMap")
+      }
+
       return {
         ...projectMeeting,
+        ...(notes && {
+          notes: notes.map((note) => note.id),
+        }),
         submittedAt: nullableDate(projectMeeting.submittedAt),
         confirmedDate: nullableDate(projectMeeting.confirmedDate),
         scheduledAt: nullableDate(projectMeeting.scheduledAt),
@@ -131,6 +139,14 @@ export const ProjectMeetingStoreModel = types
       if (response.ok) {
         self.mergeUpdate(response.data.data, "projectMeetingsMap")
         yield* toGenerator(self.rootStore.permitProjectStore.fetchPermitProject(permitProjectId))
+        return { ok: true, data: response.data.data as IProjectMeeting }
+      }
+      return { ok: false, error: responseError(response.data, response.problem) }
+    }),
+    rescheduleProjectMeeting: flow(function* (permitProjectId: string, id: string, params: Record<string, unknown>) {
+      const response = yield* toGenerator(self.environment.api.rescheduleProjectMeeting(permitProjectId, id, params))
+      if (response.ok) {
+        self.mergeUpdate(response.data.data, "projectMeetingsMap")
         return { ok: true, data: response.data.data as IProjectMeeting }
       }
       return { ok: false, error: responseError(response.data, response.problem) }

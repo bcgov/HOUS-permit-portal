@@ -1,5 +1,5 @@
 import { Container, Flex, Heading, IconButton, TabPanel, TabPanels, Tabs, Text } from "@chakra-ui/react"
-import { CalendarBlank, CaretLeft, ClipboardText, SquaresFour, TrendUp } from "@phosphor-icons/react"
+import { CalendarBlank, CaretLeft, ChatText, ClipboardText, SquaresFour, TrendUp } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo, useTransition } from "react"
 import { useTranslation } from "react-i18next"
@@ -11,6 +11,7 @@ import { LoadingScreen } from "../../../../shared/base/loading-screen"
 import { ActivityTabPanelContent } from "../../../permit-project/activity-tab-panel-content"
 import { ITabItem, ProjectSidebarTabList } from "../../../permit-project/project-sidebar-tab-list"
 import { InboxMeetingsTab } from "./inbox-meetings-tab"
+import { InboxNotesTab } from "./inbox-notes-tab"
 import { InboxOverviewTab } from "./inbox-overview-tab"
 import { InboxPermitsTab } from "./inbox-permits-tab"
 
@@ -34,11 +35,23 @@ export const InboxProjectDetailScreen = observer(() => {
         to: "permits",
         tabIndex: 1,
       },
+      // Currently, notes are specific to projject meetings and thus will only be shown if project meetings are enabled
+      // Change this when notes are made independent of project meetings
+      ...(projectMeetingsEnabled
+        ? [
+            {
+              label: t("submissionInbox.projectDetail.notes"),
+              icon: ChatText,
+              to: "notes",
+              tabIndex: 2,
+            },
+          ]
+        : []),
       {
         label: t("submissionInbox.projectDetail.activity"),
         icon: TrendUp,
         to: "activity",
-        tabIndex: 2,
+        tabIndex: projectMeetingsEnabled ? 3 : 2,
       },
       ...(projectMeetingsEnabled
         ? [
@@ -46,7 +59,7 @@ export const InboxProjectDetailScreen = observer(() => {
               label: t("submissionInbox.projectDetail.meetings"),
               icon: CalendarBlank,
               to: "meetings",
-              tabIndex: 3,
+              tabIndex: 4,
             },
           ]
         : []),
@@ -125,6 +138,11 @@ export const InboxProjectDetailScreen = observer(() => {
           <TabPanel flex={1} minH={0} minW={0} display="flex" flexDirection="column" overflow="hidden">
             {isPending ? <LoadingScreen /> : <InboxPermitsTab permitProject={currentPermitProject} />}
           </TabPanel>
+          {projectMeetingsEnabled && (
+            <TabPanel flex={1} minH={0} minW={0} display="flex" flexDirection="column" overflow="hidden">
+              {isPending ? <LoadingScreen /> : <InboxNotesTab permitProject={currentPermitProject} />}
+            </TabPanel>
+          )}
           <TabPanel flex={1} minH={0} minW={0} display="flex" flexDirection="column" overflow="hidden">
             {isPending ? <LoadingScreen /> : <ActivityTabPanelContent permitProject={currentPermitProject} fromInbox />}
           </TabPanel>

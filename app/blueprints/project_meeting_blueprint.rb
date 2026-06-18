@@ -19,6 +19,7 @@ class ProjectMeetingBlueprint < Blueprinter::Base
          :closed_at,
          :meeting_url,
          :viewed_at,
+         :notes_count,
          :created_at,
          :updated_at
 
@@ -41,5 +42,6 @@ class ProjectMeetingBlueprint < Blueprinter::Base
 
     association :meeting_request_documents,
                 blueprint: MeetingRequestDocumentBlueprint
+    association :notes, blueprint: NoteBlueprint
   end
 end

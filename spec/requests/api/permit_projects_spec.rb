@@ -164,10 +164,14 @@ RSpec.describe "Api::PermitProjects", type: :request, search: true do
 
   describe "GET /api/permit_projects/:id" do
     it "returns the project for the owner" do
+      meeting = create(:project_meeting, :open, permit_project: permit_project)
+      note = create(:note, noteable: meeting, user: owner)
+
       get "/api/permit_projects/#{permit_project.id}", headers: headers
 
       expect(response).to have_http_status(:ok)
       expect(json_response.dig("data", "id")).to eq(permit_project.id)
+      expect(json_response.dig("data", "notes", 0, "id")).to eq(note.id)
     end
   end
 

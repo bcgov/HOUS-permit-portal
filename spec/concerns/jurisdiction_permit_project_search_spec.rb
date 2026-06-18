@@ -124,7 +124,7 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitProjects,
   before do
     allow(controller).to receive(:current_user).and_return(cur_user)
     allow(controller).to receive(:authorize).and_return(true)
-    allow(controller).to receive(:policy_scope).and_return(PermitProject.all)
+    allow(controller).to receive(:policy_scope) { |model| model.all }
     allow(controller).to receive(
       :jurisdiction_permit_project_search_params
     ).and_return(search_params)
