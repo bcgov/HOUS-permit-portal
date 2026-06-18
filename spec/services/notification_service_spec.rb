@@ -709,6 +709,62 @@ RSpec.describe NotificationService do
     end
   end
 
+  describe ".publish_new_template_version_publish_event" do
+    it "emails managers but not submitters with outdated drafts" do
+      allow(NotificationPushJob).to receive(:perform_async)
+      mail = instance_double("MailerMessage", deliver_later: true)
+      allow(PermitHubMailer).to receive(
+        :notify_new_template_version_published
+      ).and_return(mail)
+
+      jurisdiction = create(:sub_district)
+      manager = create(:user, :review_manager, jurisdiction: jurisdiction)
+      submitter = create(:user, :submitter)
+      requirement_template = create(:requirement_template)
+      old_template_version =
+        create(
+          :template_version,
+          requirement_template: requirement_template,
+          status: :deprecated,
+          deprecation_reason: :new_publish,
+          version_date: Date.new(2026, 1, 1)
+        )
+      new_template_version =
+        create(
+          :template_version,
+          requirement_template: requirement_template,
+          status: :published,
+          version_date: Date.new(2026, 2, 1)
+        )
+
+      create(
+        :permit_application,
+        submitter: submitter,
+        template_version: old_template_version
+      )
+
+      described_class.publish_new_template_version_publish_event(
+        new_template_version
+      )
+
+      expect(NotificationPushJob).to have_received(:perform_async) do |payload|
+        expect(payload.keys).to contain_exactly(manager.id, submitter.id)
+      end
+      expect(PermitHubMailer).to have_received(
+        :notify_new_template_version_published
+      ).with(
+        new_template_version,
+        manager,
+        jurisdiction: jurisdiction,
+        change_type: :no_action,
+        diff_summary: anything
+      )
+      expect(PermitHubMailer).not_to have_received(
+        :notify_new_template_version_published
+      ).with(new_template_version, submitter, any_args)
+    end
+  end
+
   describe ".publish_customization_update_event" do
     it "notifies only submitters with drafts in the customizing jurisdiction" do
       allow(NotificationPushJob).to receive(:perform_async)
