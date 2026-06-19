@@ -112,8 +112,8 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
           </Heading>
           <Tag
             p={1}
-            bg={checklist.isComplete ? "theme.blue" : "greys.grey03"}
-            color={checklist.isComplete ? "greys.white" : "text.primary"}
+            bg={checklist.isMarkedComplete ? "theme.blue" : "greys.grey03"}
+            color={checklist.isMarkedComplete ? "greys.white" : "text.primary"}
             fontWeight="bold"
             border="1px solid"
             borderColor="border.base"
@@ -144,7 +144,7 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
           </Alert>
         </VStack>
         <FormProvider {...formMethods}>
-          <form onSubmit={handleSubmit(onSubmit)} name="stepCodeChecklistForm">
+          <form onSubmit={handleSubmit(onSubmit)}>
             <Accordion
               allowMultiple
               defaultIndex={[0, 1, 2, 3, 4]}
@@ -170,7 +170,7 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
             </Accordion>
           </form>
         </FormProvider>
-        {checklist.isComplete && !isSubmitting && currentStepCode?.latestReportDocument && (
+        {checklist.isMarkedComplete && !isSubmitting && currentStepCode?.latestReportDocument && (
           <FileDownloadButton
             variant="link"
             modelType={EFileUploadAttachmentType.ReportDocument}

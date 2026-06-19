@@ -34,9 +34,8 @@ class Api::Part9Building::StepCodesController < Api::ApplicationController
             Part9StepCode.create!(step_code_params_for_create)
           end
 
-        # H2K processing occurs in Part9StepCode.after_create callback
         render_success @step_code,
-                       "step_code.h2k_imported",
+                       "step_code.create_success",
                        { blueprint: Part9StepCodeBlueprint } and return
       end
     rescue ActiveRecord::RecordInvalid => e

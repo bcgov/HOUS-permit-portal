@@ -32,6 +32,7 @@ module StepCodeParamsConcern
       # checklist creation endpoint instead of overloading this import contract.
       pre_construction_checklist_attributes: [
         :compliance_path,
+        { section_completion_status: part_9_section_completion_status_params },
         data_entries_attributes: [
           :district_energy_ef,
           :district_energy_consumption,
@@ -74,6 +75,22 @@ module StepCodeParamsConcern
       contact: %i[complete relevant],
       requirements_summary: %i[complete relevant],
       step_code_summary: %i[complete relevant]
+    }
+  end
+
+  def part_9_section_completion_status_params
+    {
+      start: %i[complete relevant],
+      project_info: %i[complete relevant],
+      h2k_import: %i[complete relevant],
+      compliance_summary: %i[complete relevant],
+      completed_by: %i[complete relevant],
+      building_characteristics: %i[complete relevant],
+      energy_performance: %i[complete relevant],
+      energy_step_compliance: %i[complete relevant],
+      zero_carbon_compliance: %i[complete relevant],
+      review: %i[complete relevant],
+      report: %i[complete relevant]
     }
   end
 

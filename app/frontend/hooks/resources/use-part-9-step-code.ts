@@ -22,7 +22,7 @@ export const usePart9StepCode = () => {
         if (stepCode) {
           setCurrentStepCode(stepCode.id)
         }
-      } else {
+      } else if (stepCodeId) {
         // No valid stepCodeId and no permitApplicationId in route: reset current
         setCurrentStepCode(null)
       }
@@ -44,5 +44,7 @@ export const usePart9StepCode = () => {
   }, [permitApplicationId, stepCodeId, fetchPart9StepCode, getStepCode, setCurrentStepCode, currentPermitApplication])
 
   const currentStepCode = stepCodeStore.currentStepCode as IPart9StepCode
-  return { currentStepCode, isLoading }
+  const checklist = currentStepCode?.currentChecklist
+
+  return { currentStepCode, checklist, isLoading }
 }

@@ -19,6 +19,7 @@ export const Part9StepCodeModel = types.snapshotProcessor(
         zeroCarbonSteps: types.array(types.enumeration(Object.values(EZeroCarbonStep))),
         energySteps: types.array(types.enumeration(Object.values(EEnergyStep))),
         permitApplicationId: types.maybeNull(types.string),
+        isFullyLoaded: types.optional(types.boolean, false),
       })
     )
     .extend(withEnvironment())
@@ -48,7 +49,7 @@ export const Part9StepCodeModel = types.snapshotProcessor(
         return self.currentChecklist
       },
       get isComplete() {
-        return self.currentChecklist?.isComplete
+        return self.currentChecklist?.isAllComplete
       },
       get targetPath() {
         if (self.permitApplicationId) {

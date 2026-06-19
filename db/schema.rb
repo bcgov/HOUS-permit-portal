@@ -719,6 +719,54 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_23_120000) do
     t.integer "status", default: 0, null: false
     t.string "builder"
     t.uuid "step_requirement_id"
+    t.jsonb "section_completion_status",
+            default: {
+              "start" => {
+                "complete" => false,
+                "relevant" => true
+              },
+              "report" => {
+                "complete" => false,
+                "relevant" => true
+              },
+              "review" => {
+                "complete" => false,
+                "relevant" => true
+              },
+              "h2k_import" => {
+                "complete" => false,
+                "relevant" => true
+              },
+              "completed_by" => {
+                "complete" => false,
+                "relevant" => true
+              },
+              "project_info" => {
+                "complete" => false,
+                "relevant" => true
+              },
+              "compliance_summary" => {
+                "complete" => false,
+                "relevant" => true
+              },
+              "energy_performance" => {
+                "complete" => false,
+                "relevant" => true
+              },
+              "energy_step_compliance" => {
+                "complete" => false,
+                "relevant" => true
+              },
+              "zero_carbon_compliance" => {
+                "complete" => false,
+                "relevant" => true
+              },
+              "building_characteristics" => {
+                "complete" => false,
+                "relevant" => true
+              }
+            },
+            null: false
     t.index ["status"], name: "index_part_9_step_code_checklists_on_status"
     t.index ["step_code_id"],
             name: "index_part_9_step_code_checklists_on_step_code_id"
@@ -972,15 +1020,11 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_23_120000) do
     t.boolean "enable_email_unmapped_api_notification", default: true
     t.boolean "enable_in_app_resource_reminder_notification", default: true
     t.boolean "enable_email_resource_reminder_notification", default: true
-    t.boolean "enable_in_app_project_meeting_request_received_notification",
-              default: true
-    t.boolean "enable_email_project_meeting_request_received_notification",
-              default: true
+    t.boolean "enable_in_app_release_note_publish_notification", default: true
     t.boolean "enable_in_app_project_meeting_submitted_notification",
               default: true
     t.boolean "enable_email_project_meeting_submitted_notification",
               default: true
-    t.boolean "enable_in_app_release_note_publish_notification", default: true
     t.index ["user_id"], name: "index_preferences_on_user_id"
   end
 
@@ -1307,6 +1351,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_23_120000) do
               default: false,
               null: false
     t.boolean "qa_tools_enabled", default: false, null: false
+    t.boolean "project_meetings_enabled", default: false, null: false
   end
 
   create_table "step_code_building_characteristics_summaries",
@@ -1808,6 +1853,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_23_120000) do
   add_foreign_key "pre_checks", "users", column: "creator_id"
   add_foreign_key "preferences", "users"
   add_foreign_key "project_documents", "permit_projects"
+  add_foreign_key "project_meetings", "permit_projects"
+  add_foreign_key "project_meetings", "users", column: "requested_by_id"
   add_foreign_key "requirement_documents", "requirement_blocks"
   add_foreign_key "requirement_template_sections",
                   "requirement_template_sections",

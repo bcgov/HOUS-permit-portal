@@ -266,6 +266,7 @@ export const StepCodeStoreModel = types
     fetchPart9StepCode: flow(function* (id: string) {
       const response = yield self.environment.api.fetchPart9StepCode(id)
       if (response.ok) {
+        response.data.data.isFullyLoaded = true
         self.mergeUpdate(response.data.data, "stepCodesMap")
         return response.data.data
       } else {

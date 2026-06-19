@@ -36,6 +36,8 @@ class Part9StepCode < StepCode
   end
 
   def step_requirements
+    return JurisdictionStepRequirement.none if jurisdiction.blank?
+
     all = jurisdiction.jurisdiction_step_requirements
     all.customizations.any? ? all.customizations : all
   end
@@ -48,6 +50,10 @@ class Part9StepCode < StepCode
 
   def checklist_blueprint
     StepCode::Part9::ChecklistBlueprint
+  end
+
+  def process_current_h2k_files
+    process_h2k_files
   end
 
   private

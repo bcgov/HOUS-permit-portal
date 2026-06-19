@@ -1,4 +1,3 @@
-import { View } from "@react-pdf/renderer"
 import { t } from "i18next"
 import React from "react"
 import { IPart9StepCodeChecklist } from "../../../../../../../models/part-9-step-code-checklist"
@@ -19,13 +18,10 @@ export const ProjectInfo = function StepCodeChecklistPDFProjectInfo({ checklist 
       <Field label={t(`${i18nPrefix}.address`)} value={checklist.fullAddress} />
       <Field label={t(`${i18nPrefix}.jurisdiction`)} value={checklist.jurisdictionName} />
       <Field label={t(`${i18nPrefix}.pid`)} value={checklist.pid} />
-      <View style={{ display: "flex" }}>
-        <Field
-          label={t(`${i18nPrefix}.buildingType.label`)}
-          value={t(`${i18nPrefix}.buildingType.options.${checklist.buildingType}`)}
-        />
-        <Field label={t(`${i18nPrefix}.dwellingUnits`)} value={checklist.dwellingUnitsCount} />
-      </View>
+      <Field
+        label={t(`${i18nPrefix}.buildingType.label`)}
+        value={t(`${i18nPrefix}.buildingType.options.${checklist.buildingType}`)}
+      />
     </Panel>
   )
 }

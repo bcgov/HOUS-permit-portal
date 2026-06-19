@@ -48,7 +48,14 @@ class Api::Part9Building::ChecklistsController < Api::ApplicationController
       )
     end
 
+    data_entries_updated =
+      params.dig(:step_code_checklist, :data_entries_attributes).present?
+
     if @step_code_checklist.update(step_code_checklist_params)
+      if data_entries_updated
+        @step_code_checklist.step_code&.process_current_h2k_files
+      end
+
       # If the client requested report generation and this step code is standalone (no permit application),
       # enqueue the standalone report generation job.
       should_generate_report =
@@ -110,6 +117,20 @@ class Api::Part9Building::ChecklistsController < Api::ApplicationController
       :hvac_consumption,
       :status,
       :step_requirement_id,
+      { section_completion_status: part_9_section_completion_status_params },
+      data_entries_attributes: [
+        :id,
+        :_destroy,
+        :district_energy_ef,
+        :district_energy_consumption,
+        :other_ghg_ef,
+        :other_ghg_consumption,
+        h2k_file: [
+          :id,
+          :storage,
+          metadata: %i[filename size mime_type content_disposition]
+        ]
+      ],
       building_characteristics_summary_attributes: [
         roof_ceilings_lines: %i[details rsi],
         above_grade_walls_lines: %i[details rsi],
@@ -135,6 +156,22 @@ class Api::Part9Building::ChecklistsController < Api::ApplicationController
         fossil_fuels: %i[details presence]
       ]
     )
+  end
+
+  def part_9_section_completion_status_params
+    {
+      start: %i[complete relevant],
+      project_info: %i[complete relevant],
+      h2k_import: %i[complete relevant],
+      compliance_summary: %i[complete relevant],
+      completed_by: %i[complete relevant],
+      building_characteristics: %i[complete relevant],
+      energy_performance: %i[complete relevant],
+      energy_step_compliance: %i[complete relevant],
+      zero_carbon_compliance: %i[complete relevant],
+      review: %i[complete relevant],
+      report: %i[complete relevant]
+    }
   end
 
   def set_and_authorize_checklist

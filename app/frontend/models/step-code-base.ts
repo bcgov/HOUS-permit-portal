@@ -11,6 +11,7 @@ export const StepCodeBaseFields = types
     title: types.maybeNull(types.string),
     referenceNumber: types.maybeNull(types.string),
     fullAddress: types.maybeNull(types.string),
+    pid: types.maybeNull(types.string),
     jurisdictionName: types.maybeNull(types.string),
     jurisdiction: types.maybeNull(types.reference(types.late(() => JurisdictionModel))),
     permitDate: types.maybeNull(types.Date),
@@ -42,6 +43,7 @@ export const StepCodeBaseFields = types
     update: flow(function* (
       data: Partial<{
         fullAddress: string
+        pid: string
         referenceNumber: string
         title: string
         permitDate: string

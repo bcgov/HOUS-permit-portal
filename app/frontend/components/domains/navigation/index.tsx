@@ -838,7 +838,13 @@ const AppRoutes = observer(() => {
               path="/permit-applications/:permitApplicationId/edit/part-9-step-code"
               element={<Part9StepCodeForm />}
             />
+            <Route
+              path="/permit-applications/:permitApplicationId/edit/part-9-step-code/:section"
+              element={<Part9StepCodeForm />}
+            />
+            <Route path="/part-9-step-code/new/:section" element={<Part9StepCodeForm />} />
             <Route path="/part-9-step-code/:stepCodeId" element={<Part9StepCodeForm />} />
+            <Route path="/part-9-step-code/:stepCodeId/:section" element={<Part9StepCodeForm />} />
             <Route
               path="/permit-applications/:permitApplicationId/edit/part-3-step-code"
               element={<Part3StepCodeForm />}
@@ -983,7 +989,8 @@ const AppRoutes = observer(() => {
         <Route path="/part-3-step-code/:stepCodeId" element={<RedirectScreen path="start" />} />
         <Route path="/part-3-step-code/:stepCodeId/:section" element={<Part3StepCodeForm />} />
         <Route path="/part-3-step-code/:section" element={<Part3StepCodeForm />} />
-        <Route path="/part-9-step-code/new" element={<Part9StepCodeForm />} />
+        <Route path="/part-9-step-code/new" element={<RedirectScreen path="/part-9-step-code/new/start" />} />
+        <Route path="/part-9-step-code/:section" element={<Part9StepCodeForm />} />
         <Route path="*" element={<NotFoundScreen />} />
       </Routes>
     </>

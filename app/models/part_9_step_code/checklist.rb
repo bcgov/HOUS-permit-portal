@@ -3,6 +3,53 @@ class Part9StepCode::Checklist < ActiveRecord::Base
 
   include ChecklistReportDocumentConcern
 
+  DEFAULT_SECTION_COMPLETION_STATUS = {
+    start: {
+      complete: false,
+      relevant: true
+    },
+    project_info: {
+      complete: false,
+      relevant: true
+    },
+    h2k_import: {
+      complete: false,
+      relevant: true
+    },
+    compliance_summary: {
+      complete: false,
+      relevant: true
+    },
+    completed_by: {
+      complete: false,
+      relevant: true
+    },
+    building_characteristics: {
+      complete: false,
+      relevant: true
+    },
+    energy_performance: {
+      complete: false,
+      relevant: true
+    },
+    energy_step_compliance: {
+      complete: false,
+      relevant: true
+    },
+    zero_carbon_compliance: {
+      complete: false,
+      relevant: true
+    },
+    review: {
+      complete: false,
+      relevant: true
+    },
+    report: {
+      complete: false,
+      relevant: true
+    }
+  }.deep_stringify_keys.freeze
+
   delegate :permit_application_id, to: :step_code, allow_nil: true
 
   belongs_to :step_code,
@@ -18,15 +65,27 @@ class Part9StepCode::Checklist < ActiveRecord::Base
   has_many :data_entries,
            class_name: "Part9StepCode::DataEntry",
            dependent: :destroy
-  accepts_nested_attributes_for :data_entries
+  accepts_nested_attributes_for :data_entries, allow_destroy: true
   has_one :building_characteristics_summary,
           class_name: "Part9StepCode::BuildingCharacteristicsSummary",
           foreign_key: "checklist_id",
           dependent: :destroy
   accepts_nested_attributes_for :building_characteristics_summary
   after_create :create_building_characteristics_summary
+  before_validation :set_default_section_completion_status
 
-  validates :compliance_path, presence: true, on: :update
+  COMPLIANCE_PATH_REQUIRED_CHANGES = %w[
+    compliance_path
+    hvac_consumption
+    dwh_heating_consumption
+    ref_hvac_consumption
+    ref_dwh_heating_consumption
+    epc_calculation_airtightness
+    epc_calculation_testing_target_type
+    epc_calculation_compliance
+  ].freeze
+
+  validates :compliance_path, presence: true, if: :requires_compliance_path?
 
   delegate :plan_author, :plan_version, :plan_date, to: :step_code
 
@@ -94,6 +153,8 @@ class Part9StepCode::Checklist < ActiveRecord::Base
   end
 
   def compliance_reports
+    return [] if data_entries.none?
+
     StepCode::Compliance::GenerateReports
       .new(checklist: self, requirements: step_code.step_requirements)
       .call
@@ -108,5 +169,20 @@ class Part9StepCode::Checklist < ActiveRecord::Base
     return unless step_requirement.present?
 
     compliance_reports.find { |r| r[:requirement_id] == step_requirement_id }
+  end
+
+  private
+
+  def requires_compliance_path?
+    COMPLIANCE_PATH_REQUIRED_CHANGES.any? do |attribute|
+      will_save_change_to_attribute?(attribute)
+    end
+  end
+
+  def set_default_section_completion_status
+    self.section_completion_status =
+      DEFAULT_SECTION_COMPLETION_STATUS.deep_merge(
+        section_completion_status.presence || {}
+      )
   end
 end

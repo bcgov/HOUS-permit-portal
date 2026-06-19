@@ -42,6 +42,11 @@ export const ComplianceSummary = observer(function ComplianceSummary({
   return (
     <ChecklistSection heading={t(`${i18nPrefix}.heading`)}>
       <TextFormControl
+        label={t("stepCodeChecklist.edit.projectInfo.dwellingUnits")}
+        inputProps={{ isDisabled: true, value: checklist.dwellingUnitsCount ?? "-" }}
+      />
+
+      <TextFormControl
         label={t(`${i18nPrefix}.compliancePath.label`)}
         inputProps={{
           isDisabled: true,

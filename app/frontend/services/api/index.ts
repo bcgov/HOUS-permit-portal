@@ -1051,6 +1051,7 @@ export class Api {
     id: string,
     data: Partial<{
       fullAddress: string
+      pid: string
       referenceNumber: string
       title: string
       permitDate: string
@@ -1142,7 +1143,7 @@ export class Api {
   }
 
   async updatePart9Checklist(id: string, data: Partial<IPart9StepCodeChecklist>, options?: Record<string, any>) {
-    return this.client.patch<ApiResponse<IPart9StepCode>>(`/part_9_building/checklists/${id}`, {
+    return this.client.patch<ApiResponse<IPart9StepCodeChecklist>>(`/part_9_building/checklists/${id}`, {
       stepCodeChecklist: data,
       ...(options ?? {}),
     })

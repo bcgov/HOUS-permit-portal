@@ -138,6 +138,102 @@ RSpec.describe Api::Part9Building::ChecklistsController, type: :controller do
       expect(step_code.reload.complete?).to be(true)
     end
 
+    it "persists section completion status without compliance path" do
+      checklist.update!(compliance_path: nil, step_requirement: nil)
+
+      patch :update,
+            params: {
+              id: checklist.id,
+              step_code_checklist: {
+                section_completion_status: {
+                  start: {
+                    complete: true,
+                    relevant: true
+                  }
+                }
+              }
+            },
+            as: :json
+
+      expect(response).to have_http_status(:success)
+      expect(
+        checklist.reload.section_completion_status.dig("start", "complete")
+      ).to be(true)
+    end
+
+    it "persists section completion status" do
+      report = {
+        requirement_id: step_requirement.id,
+        energy: {
+        },
+        zero_carbon: {
+        }
+      }
+      stub_part9_compliance_reports(checklist: checklist, reports: [report])
+      allow(StepCode::Part9::ComplianceReportBlueprint).to receive(
+        :render_as_hash
+      ).and_return(report_payload)
+
+      patch :update,
+            params: {
+              id: checklist.id,
+              step_code_checklist: {
+                section_completion_status: {
+                  h2k_import: {
+                    complete: true,
+                    relevant: true
+                  }
+                }
+              }
+            },
+            as: :json
+
+      expect(response).to have_http_status(:success)
+      expect(
+        checklist.reload.section_completion_status.dig("h2k_import", "complete")
+      ).to be(true)
+      expect(
+        json_response.dig(
+          "data",
+          "section_completion_status",
+          "h2k_import",
+          "complete"
+        )
+      ).to be(true)
+    end
+
+    it "reprocesses H2K files when data entries are updated" do
+      report = {
+        requirement_id: step_requirement.id,
+        energy: {
+        },
+        zero_carbon: {
+        }
+      }
+      stub_part9_compliance_reports(checklist: checklist, reports: [report])
+      allow(StepCode::Part9::ComplianceReportBlueprint).to receive(
+        :render_as_hash
+      ).and_return(report_payload)
+      expect_any_instance_of(Part9StepCode).to receive(
+        :process_current_h2k_files
+      )
+
+      patch :update,
+            params: {
+              id: checklist.id,
+              step_code_checklist: {
+                compliance_path: "step_code_ers",
+                data_entries_attributes: [
+                  { district_energy_ef: 12.5, district_energy_consumption: 100 }
+                ]
+              }
+            },
+            as: :json
+
+      expect(response).to have_http_status(:success)
+      expect(checklist.reload.data_entries.count).to eq(1)
+    end
+
     it "returns error for invalid input" do
       patch :update,
             params: {

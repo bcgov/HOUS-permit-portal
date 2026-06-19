@@ -2,7 +2,6 @@ import { Button, HStack } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
-import { useForm } from "react-hook-form"
 import { useNavigate } from "react-router-dom"
 import { usePart9StepCode } from "../../../../hooks/resources/use-part-9-step-code"
 import { useMst } from "../../../../setup/root"
@@ -13,24 +12,10 @@ export const Part9NavLinks = observer(function Part9StepCodeNavLinks() {
   const checklist = currentStepCode?.currentChecklist
   const navigate = useNavigate()
   const { uiStore } = useMst()
-  const { formState } = useForm()
-  const { isValid, isSubmitting } = formState
-
-  const onComplete = async () => {
-    //@ts-ignore
-    document.stepCodeChecklistForm.dispatchEvent(
-      new CustomEvent("submit", { cancelable: true, bubbles: true, detail: { markComplete: true } })
-    )
-  }
 
   const handleBack = () => {
     uiStore.setScrollToSelector(".formio-component[class*='energy_step_code_method']")
     navigate(-1)
-  }
-
-  const handleSave = async () => {
-    //@ts-ignore
-    document.stepCodeChecklistForm.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }))
   }
 
   return (
@@ -43,17 +28,8 @@ export const Part9NavLinks = observer(function Part9StepCodeNavLinks() {
       {checklist ? (
         <>
           <RestartConfirmationModal />
-          <Button variant="secondary" onClick={handleSave}>
-            {t("stepCode.saveAndGoBack")}
-          </Button>
-          <Button
-            variant="primary"
-            onClick={onComplete}
-            isLoading={isSubmitting}
-            isDisabled={isSubmitting || !isValid}
-            type="submit"
-          >
-            {checklist.isComplete ? t("ui.save") : t("stepCode.markAsComplete")}
+          <Button variant="secondary" onClick={handleBack}>
+            {t("stepCode.back")}
           </Button>
         </>
       ) : (
