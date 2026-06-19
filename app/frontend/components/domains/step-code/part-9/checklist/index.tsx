@@ -22,7 +22,7 @@ import { ZeroCarbonStepCodeCompliance } from "./zero-carbon-step-code-compliance
 export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
   const { currentStepCode } = usePart9StepCode()
   const { permitApplicationId } = useParams()
-  const checklist = currentStepCode.preConstructionChecklist
+  const checklist = currentStepCode.currentChecklist
   const navigate = useNavigate()
   const [index, setIndex] = useState([0, 1, 2, 3, 4])
   const [scrollRef, setScrollRef] = useState<null | HTMLDivElement>()

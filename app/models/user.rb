@@ -121,7 +121,10 @@ class User < ApplicationRecord
 
   # Validations
   validates :role, presence: true
-  validates :phone_number, phone: true, allow_blank: true
+  validates :phone_number,
+            phone: true,
+            allow_blank: true,
+            if: :phone_number_attribute?
   validate :valid_role_change, if: :role_changed?, on: :update
   validate :jurisdiction_must_belong_to_correct_roles
   validate :confirmed_user_has_fields
@@ -134,7 +137,7 @@ class User < ApplicationRecord
   after_commit :reindex_jurisdiction_user_size,
                :reindex_jurisdiction_review_manager_email
   before_save :create_default_preference
-  before_validation :normalize_phone_number
+  before_validation :normalize_phone_number, if: :phone_number_attribute?
 
   # Stub this for now since we do not want to use IP Tracking at the moment - Jan 30, 2024
   attr_accessor :current_sign_in_ip, :last_sign_in_ip
@@ -349,6 +352,10 @@ class User < ApplicationRecord
 
     parsed = Phonelib.parse(phone_number)
     self.phone_number = parsed.e164 if parsed.valid?
+  end
+
+  def phone_number_attribute?
+    has_attribute?(:phone_number)
   end
 
   def confirmed_user_has_fields

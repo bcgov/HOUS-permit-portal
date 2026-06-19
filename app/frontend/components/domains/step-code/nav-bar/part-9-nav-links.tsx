@@ -10,7 +10,7 @@ import { RestartConfirmationModal } from "../part-9/restart-confirmation-modal"
 
 export const Part9NavLinks = observer(function Part9StepCodeNavLinks() {
   const { currentStepCode } = usePart9StepCode()
-  const checklist = currentStepCode?.preConstructionChecklist
+  const checklist = currentStepCode?.currentChecklist
   const navigate = useNavigate()
   const { uiStore } = useMst()
   const { formState } = useForm()

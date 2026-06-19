@@ -3,7 +3,7 @@ import { Instance, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
-import { EEnergyStep, EStepCodeType, EZeroCarbonStep } from "../types/enums"
+import { EEnergyStep, EStepCodeChecklistStage, EStepCodeType, EZeroCarbonStep } from "../types/enums"
 import { Part9StepCodeChecklistModel } from "./part-9-step-code-checklist"
 import { StepCodeBaseFields } from "./step-code-base"
 
@@ -33,22 +33,22 @@ export const Part9StepCodeModel = types.snapshotProcessor(
       },
     }))
     .views((self) => ({
-      get primaryChecklist() {
-        return self.checklists[0]
+      get currentChecklist() {
+        return self.checklists.find((checklist) => checklist.stage === EStepCodeChecklistStage.preConstruction)
       },
-      // HUB-5145: This returns the first checklist, not the checklist whose
-      // stage is pre_construction. Stage-aware Part 9 UX should select by
-      // checklist.stage and expose separate As-Built navigation/PDF targets.
+      get primaryChecklist() {
+        return self.currentChecklist
+      },
       get preConstructionChecklist() {
-        return self.checklists[0]
+        return self.currentChecklist
       },
     }))
     .views((self) => ({
       get checklistForPdf() {
-        return self.preConstructionChecklist
+        return self.currentChecklist
       },
       get isComplete() {
-        return self.preConstructionChecklist?.isComplete
+        return self.currentChecklist?.isComplete
       },
       get targetPath() {
         if (self.permitApplicationId) {

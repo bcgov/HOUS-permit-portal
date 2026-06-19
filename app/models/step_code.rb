@@ -56,12 +56,16 @@ class StepCode < ApplicationRecord
     raise NotImplementedError, "Subclasses must implement the complete? method"
   end
 
-  # HUB-5145: PDF generation, submission exports, and UI completeness all depend
-  # on one primary checklist. Stage-aware reports need callers to ask for a
-  # specific report/checklist instead of implicitly using the pre-construction one.
-  def primary_checklist
+  # HUB-5145: PDF generation, submission exports, and UI completeness currently
+  # depend on one app-selected checklist. Stage-aware reports need callers to ask
+  # for a specific report/checklist instead of implicitly using the current one.
+  def current_checklist
     raise NotImplementedError,
-          "Subclasses must implement the primary_checklist method"
+          "Subclasses must implement the current_checklist method"
+  end
+
+  def primary_checklist
+    current_checklist
   end
 
   def blueprint

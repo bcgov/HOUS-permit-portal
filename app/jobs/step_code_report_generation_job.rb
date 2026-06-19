@@ -39,10 +39,10 @@ class StepCodeReportGenerationJob
     # Build checklist JSON using the checklist blueprint in extended view if available
     checklist_json =
       begin
-        # HUB-5145: Report generation always renders the model's primary
+        # HUB-5145: Report generation always renders the model's current
         # checklist. Stage-specific PDFs need an explicit stage/checklist id in
         # the job args so As-Built does not silently render Pre-Construction.
-        checklist = step_code.primary_checklist
+        checklist = step_code.current_checklist
         if checklist.present?
           step_code.checklist_blueprint.render_as_hash(
             checklist,

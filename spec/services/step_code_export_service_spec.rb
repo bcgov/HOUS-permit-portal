@@ -158,7 +158,7 @@ RSpec.describe StepCodeExportService do
           reference_number: "APP-9",
           jurisdiction_name: "Jur 9",
           full_address: "9 St",
-          primary_checklist: checklist
+          current_checklist: checklist
         )
 
       relation = double("ARRelation")
@@ -208,7 +208,7 @@ RSpec.describe StepCodeExportService do
           reference_number: "APP-10",
           jurisdiction_name: "Jur 10",
           full_address: "10 St",
-          primary_checklist: checklist
+          current_checklist: checklist
         )
 
       relation = double("ARRelation")

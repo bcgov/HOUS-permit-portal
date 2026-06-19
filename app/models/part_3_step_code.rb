@@ -14,8 +14,12 @@ class Part3StepCode < StepCode
     checklist&.complete?
   end
 
-  def primary_checklist
+  def current_checklist
     checklist
+  end
+
+  def primary_checklist
+    current_checklist
   end
 
   def blueprint

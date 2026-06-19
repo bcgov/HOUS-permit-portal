@@ -170,7 +170,7 @@ class StepCodeExportService
         .includes(:permit_application, :checklists)
         .where(permit_applications: { status: %i[newly_submitted resubmitted] })
         .find_each do |step_code|
-          checklist = step_code.primary_checklist
+          checklist = step_code.current_checklist
           next unless checklist
 
           # Get compliance reports to extract energy and zero carbon steps

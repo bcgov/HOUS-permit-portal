@@ -14,7 +14,7 @@ RSpec.describe StepCodeReportGenerationJob, type: :job do
   end
 
   it "skips when checklist data is not present" do
-    step_code = instance_double("StepCode", id: "sc1", primary_checklist: nil)
+    step_code = instance_double("StepCode", id: "sc1", current_checklist: nil)
     allow(StepCode).to receive(:find_by).with(id: "sc1").and_return(step_code)
 
     described_class.new.perform("sc1")
@@ -39,7 +39,7 @@ RSpec.describe StepCodeReportGenerationJob, type: :job do
         permit_date: nil,
         pid: nil,
         pin: nil,
-        primary_checklist: checklist,
+        current_checklist: checklist,
         checklist_blueprint: checklist_blueprint,
         report_documents: report_documents_assoc,
         is_a?: true
@@ -94,7 +94,7 @@ RSpec.describe StepCodeReportGenerationJob, type: :job do
         permit_date: nil,
         pid: nil,
         pin: nil,
-        primary_checklist: checklist,
+        current_checklist: checklist,
         checklist_blueprint: checklist_blueprint,
         is_a?: false
       )

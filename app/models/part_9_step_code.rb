@@ -23,8 +23,12 @@ class Part9StepCode < StepCode
     pre_construction_checklist&.complete?
   end
 
-  def primary_checklist
+  def current_checklist
     pre_construction_checklist
+  end
+
+  def primary_checklist
+    current_checklist
   end
 
   def blueprint

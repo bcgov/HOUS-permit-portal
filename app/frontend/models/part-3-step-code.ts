@@ -26,14 +26,17 @@ export const Part3StepCodeModel = types
   .extend(withRootStore())
   .extend(withMerge())
   .views((self) => ({
-    get primaryChecklist() {
+    get currentChecklist() {
       return self.checklist
+    },
+    get primaryChecklist() {
+      return self.currentChecklist
     },
     get checklistForPdf() {
-      return self.checklist
+      return self.currentChecklist
     },
     get isComplete() {
-      return self.checklist?.isAllComplete
+      return self.currentChecklist?.isAllComplete
     },
     get targetPath() {
       if (self.permitApplicationId) {
