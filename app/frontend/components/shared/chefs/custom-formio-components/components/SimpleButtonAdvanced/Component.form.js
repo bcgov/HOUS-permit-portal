@@ -1,2 +1,3 @@
 import baseEditForm from "formiojs/components/button/Button.form"
-export default baseEditForm
+import { interopDefault } from "../../../../../../utils/interop-default"
+export default interopDefault(baseEditForm)

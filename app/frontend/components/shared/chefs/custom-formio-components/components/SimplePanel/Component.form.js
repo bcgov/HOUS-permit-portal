@@ -1,9 +1,10 @@
 import nestedComponentForm from "formiojs/components/_classes/nested/NestedComponent.form"
+import { interopDefault } from "../../../../../../utils/interop-default"
 import SimpleApi from "../Common/Simple.edit.api.js"
 import SimpleConditional from "../Common/Simple.edit.conditional.js"
 import EditDisplay from "./editForm/Component.edit.display.js"
 export default function (...extend) {
-  return nestedComponentForm(
+  return interopDefault(nestedComponentForm)(
     [
       EditDisplay,
       {

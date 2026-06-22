@@ -1,4 +1,7 @@
 import DOMPurify from "dompurify"
+import { interopDefault } from "./interop-default"
+
+const domPurify = interopDefault(DOMPurify)
 
 /**
  * Sanitizes HTML content from TipTap editor to prevent XSS attacks.
@@ -74,7 +77,7 @@ export function sanitizeTipTapHtml(htmlContent: string | null | undefined): stri
   }
 
   // Add hook for additional link validation
-  DOMPurify.addHook("afterSanitizeAttributes", (node) => {
+  domPurify.addHook("afterSanitizeAttributes", (node) => {
     // Ensure links open in new tab with secure attributes
     if (node.tagName === "A") {
       const href = node.getAttribute("href")
@@ -94,10 +97,10 @@ export function sanitizeTipTapHtml(htmlContent: string | null | undefined): stri
     }
   })
 
-  const sanitized = DOMPurify.sanitize(htmlContent, config)
+  const sanitized = domPurify.sanitize(htmlContent, config)
 
   // Remove the hook after use to avoid accumulation
-  DOMPurify.removeHook("afterSanitizeAttributes")
+  domPurify.removeHook("afterSanitizeAttributes")
 
   return sanitized
 }
@@ -124,7 +127,7 @@ export function isTipTapContentEmpty(htmlContent: string | null | undefined): bo
   // Safely extract text content using DOMPurify to handle incomplete tags
   // This prevents XSS by ensuring all HTML (including incomplete tags like <script) is removed
   // Use DOMPurify with no allowed tags to strip all HTML and get plain text
-  const textOnly = DOMPurify.sanitize(htmlContent, { ALLOWED_TAGS: [] })
+  const textOnly = domPurify.sanitize(htmlContent, { ALLOWED_TAGS: [] })
   const textContent = textOnly.trim()
   return textContent.length === 0
 }

@@ -1,4 +1,5 @@
 import baseEditForm from "formiojs/components/_classes/component/Component.form"
+import { interopDefault } from "../../../../../../utils/interop-default"
 import SimpleApi from "../Common/Simple.edit.api.js"
 import SimpleConditional from "../Common/Simple.edit.conditional.js"
 import SimpleValidation from "../Common/Simple.edit.validation.js"
@@ -6,7 +7,7 @@ import EditData from "./editForm/Component.edit.data.js"
 import EditDisplay from "./editForm/Component.edit.display.js"
 import EditFile from "./editForm/Component.edit.file.js"
 export default function (...extend) {
-  return baseEditForm(
+  return interopDefault(baseEditForm)(
     [
       {
         key: "display",

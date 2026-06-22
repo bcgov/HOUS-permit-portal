@@ -1,6 +1,8 @@
 import NumberEditValidation from "formiojs/components/number/editForm/Number.edit.validation"
+import { interopDefault } from "../../../../../../../utils/interop-default"
 import common from "../../Common/Advanced.edit.validation.js"
 import { reArrangeComponents } from "../../Common/function.js"
+
 const neededposition = [
   "validate.isUseForCopy",
   "validateOn",
@@ -13,5 +15,7 @@ const neededposition = [
   "custom-validation-js",
   "json-validation-json",
 ]
-const newPosition = reArrangeComponents(neededposition, [...NumberEditValidation, ...common])
+const numberEditValidationComponents = interopDefault(NumberEditValidation)
+
+const newPosition = reArrangeComponents(neededposition, [...numberEditValidationComponents, ...common])
 export default newPosition

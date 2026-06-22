@@ -1,7 +1,8 @@
 import baseEditForm from "formiojs/components/_classes/component/Component.form"
+import { interopDefault } from "../../../../../../utils/interop-default"
 import EditDisplay from "./editForm/Component.edit.display.js"
 export default function (...extend) {
-  return baseEditForm(
+  return interopDefault(baseEditForm)(
     [
       {
         key: "display",
