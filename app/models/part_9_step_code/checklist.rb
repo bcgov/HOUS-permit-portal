@@ -3,52 +3,32 @@ class Part9StepCode::Checklist < ActiveRecord::Base
 
   include ChecklistReportDocumentConcern
 
-  DEFAULT_SECTION_COMPLETION_STATUS = {
-    start: {
-      complete: false,
-      relevant: true
-    },
-    project_info: {
-      complete: false,
-      relevant: true
-    },
-    h2k_import: {
-      complete: false,
-      relevant: true
-    },
-    compliance_summary: {
-      complete: false,
-      relevant: true
-    },
-    completed_by: {
-      complete: false,
-      relevant: true
-    },
-    building_characteristics: {
-      complete: false,
-      relevant: true
-    },
-    energy_performance: {
-      complete: false,
-      relevant: true
-    },
-    energy_step_compliance: {
-      complete: false,
-      relevant: true
-    },
-    zero_carbon_compliance: {
-      complete: false,
-      relevant: true
-    },
-    review: {
-      complete: false,
-      relevant: true
-    },
-    report: {
-      complete: false,
-      relevant: true
-    }
-  }.deep_stringify_keys.freeze
+  SECTION_COMPLETION_STATUS_KEYS = %i[
+    start
+    project_info
+    h2k_import
+    compliance_summary
+    completed_by
+    building_characteristics
+    energy_performance
+    energy_step_compliance
+    zero_carbon_compliance
+    review
+    report
+  ].freeze
+
+  SECTION_COMPLETION_STATUS_PARAMS =
+    SECTION_COMPLETION_STATUS_KEYS.index_with { %i[complete relevant] }.freeze
+
+  DEFAULT_SECTION_COMPLETION_STATUS =
+    SECTION_COMPLETION_STATUS_KEYS
+      .index_with { { complete: false, relevant: true } }
+      .deep_stringify_keys
+      .freeze
+
+  def self.section_completion_status_params
+    SECTION_COMPLETION_STATUS_PARAMS
+  end
 
   delegate :permit_application_id, to: :step_code, allow_nil: true
 
@@ -86,6 +66,7 @@ class Part9StepCode::Checklist < ActiveRecord::Base
   ].freeze
 
   validates :compliance_path, presence: true, if: :requires_compliance_path?
+  validates :stage, uniqueness: { scope: :step_code_id }, if: :step_code_id?
 
   delegate :plan_author, :plan_version, :plan_date, to: :step_code
 
@@ -155,10 +136,12 @@ class Part9StepCode::Checklist < ActiveRecord::Base
   def compliance_reports
     return [] if data_entries.none?
 
-    StepCode::Compliance::GenerateReports
-      .new(checklist: self, requirements: step_code.step_requirements)
-      .call
-      .reports
+    reports =
+      StepCode::Compliance::GenerateReports
+        .new(checklist: self, requirements: step_code.step_requirements)
+        .call
+        .reports
+    reports
   end
 
   def passing_compliance_reports
@@ -168,7 +151,8 @@ class Part9StepCode::Checklist < ActiveRecord::Base
   def selected_report
     return unless step_requirement.present?
 
-    compliance_reports.find { |r| r[:requirement_id] == step_requirement_id }
+    reports = compliance_reports
+    reports.find { |r| r[:requirement_id] == step_requirement_id }
   end
 
   private

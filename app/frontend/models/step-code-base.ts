@@ -1,4 +1,5 @@
 import { flow, toGenerator, types } from "mobx-state-tree"
+import { EStepCodeChecklistStage } from "../types/enums"
 import { IReportDocument } from "../types/types"
 import { JurisdictionModel } from "./jurisdiction"
 
@@ -15,10 +16,13 @@ export const StepCodeBaseFields = types
     jurisdictionName: types.maybeNull(types.string),
     jurisdiction: types.maybeNull(types.reference(types.late(() => JurisdictionModel))),
     permitDate: types.maybeNull(types.Date),
-    // HUB-5145: This loose `phase` field is the shared frontend representation
-    // for Part 3 project stage, while Part 9 reads stage from its checklist.
-    // Normalize naming before adding cross-part As-Built UX or index filters.
+    // HUB-5145: `phase` is legacy stage-like metadata. Introduce currentStage
+    // on StepCode for selection; keep lifecycle identity on checklist.stage.
     phase: types.maybeNull(types.string),
+    currentStage: types.optional(
+      types.enumeration<EStepCodeChecklistStage[]>(Object.values(EStepCodeChecklistStage)),
+      EStepCodeChecklistStage.preConstruction
+    ),
     permitProjectTitle: types.maybeNull(types.string),
     reportDocuments: types.maybeNull(types.array(types.frozen<IReportDocument>())),
   })
@@ -48,6 +52,7 @@ export const StepCodeBaseFields = types
         title: string
         permitDate: string
         phase: string
+        currentStage: EStepCodeChecklistStage
         jurisdictionId: string
       }>
     ) {
@@ -59,6 +64,9 @@ export const StepCodeBaseFields = types
       }
       return response.ok
     }),
+    setCurrentStage(stage: EStepCodeChecklistStage) {
+      self.currentStage = stage
+    },
     shareReportWithJurisdiction: flow(function* () {
       const latestReport = self.latestReportDocument
       if (!latestReport) {

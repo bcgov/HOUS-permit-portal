@@ -108,7 +108,8 @@ RSpec.describe Api::Part3Building::ChecklistsController, type: :controller do
         expected_climate_zone
       )
       expect(StepCodeReportGenerationJob).to have_received(:perform_async).with(
-        step_code.id
+        step_code.id,
+        { "checklist_id" => checklist.id }
       )
       expect(checklist.reload.complete?).to be(true)
     end

@@ -3,10 +3,10 @@ class Part9StepCode < StepCode
            class_name: "Part9StepCode::Checklist",
            foreign_key: :step_code_id,
            dependent: :destroy
-  # HUB-5145: The database supports staged Part 9 checklists, but the app treats
-  # pre-construction as the only actionable report. As-Built work must define how
-  # users create/select non-pre-construction checklists and which checklist drives
-  # status, PDF generation, imports, and permit submission.
+  # HUB-5145: Part 9 already has staged checklist envelopes. Add
+  # StepCode.current_stage and make current_checklist select by that value. If
+  # stage payloads diverge beyond today's mixed fields, move them to
+  # stage-specific detail models instead of widening this table indefinitely.
   has_one :pre_construction_checklist,
           -> { where(stage: :pre_construction) },
           class_name: "Part9StepCode::Checklist",
@@ -20,15 +20,13 @@ class Part9StepCode < StepCode
   after_create :process_h2k_files
 
   def complete?
-    pre_construction_checklist&.complete?
+    current_checklist&.complete?
   end
 
-  def current_checklist
-    pre_construction_checklist
-  end
+  def checklist_for(stage: current_stage, id: nil)
+    return checklists.find_by(id: id) if id.present?
 
-  def primary_checklist
-    current_checklist
+    checklists.find_by(stage: stage)
   end
 
   def blueprint
@@ -52,8 +50,8 @@ class Part9StepCode < StepCode
     StepCode::Part9::ChecklistBlueprint
   end
 
-  def process_current_h2k_files
-    process_h2k_files
+  def process_current_h2k_files(checklist = current_checklist)
+    process_h2k_files(checklist)
   end
 
   private
@@ -85,11 +83,11 @@ class Part9StepCode < StepCode
     end
   end
 
-  def process_h2k_files
-    # Ensure pre_construction_checklist and its data_entries exist to avoid errors
-    return unless pre_construction_checklist&.data_entries
+  def process_h2k_files(checklist = pre_construction_checklist)
+    # Ensure the checklist and its data_entries exist to avoid errors
+    return unless checklist&.data_entries
 
-    pre_construction_checklist.data_entries.each do |data_entry|
+    checklist.data_entries.each do |data_entry|
       # Shrine attachment presence check
       if data_entry.h2k_file_attacher&.attached?
         begin

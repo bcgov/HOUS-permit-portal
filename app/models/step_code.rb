@@ -1,4 +1,6 @@
 class StepCode < ApplicationRecord
+  STAGES = %w[pre_construction mid_construction as_built].freeze
+
   # searchkick must be declared before Discard::Model to ensure auto-callbacks register correctly
   searchkick word_middle: %i[
                title
@@ -32,15 +34,15 @@ class StepCode < ApplicationRecord
   # Delegates for attributes from PermitApplication
   delegate :number, to: :permit_application, prefix: true, allow_nil: true
 
-  # HUB-5145: This parent record mixes report identity, permit/project metadata,
-  # and lifecycle state (`phase`). Part 3 uses this loose phase string, while Part
-  # 9 stores stage on checklists; normalize this before adding linked As-Built
-  # inheritance or separate Step Codes index rows.
+  # HUB-5145: This parent should be the report family plus shared permit/project
+  # metadata. Move lifecycle selection from legacy `phase` to a normalized
+  # current_stage while child checklists own their immutable `stage` identity.
   validates :permit_application_id,
             uniqueness: {
               conditions: -> { kept }
             },
             allow_nil: true
+  validates :current_stage, inclusion: { in: STAGES }
 
   delegate :submitter,
            :newly_submitted_at,
@@ -56,16 +58,17 @@ class StepCode < ApplicationRecord
     raise NotImplementedError, "Subclasses must implement the complete? method"
   end
 
-  # HUB-5145: PDF generation, submission exports, and UI completeness currently
-  # depend on one app-selected checklist. Stage-aware reports need callers to ask
-  # for a specific report/checklist instead of implicitly using the current one.
   def current_checklist
-    raise NotImplementedError,
-          "Subclasses must implement the current_checklist method"
+    checklist_for(stage: current_stage)
   end
 
   def primary_checklist
     current_checklist
+  end
+
+  def checklist_for(stage: current_stage, id: nil)
+    raise NotImplementedError,
+          "Subclasses must implement the checklist_for method"
   end
 
   def blueprint

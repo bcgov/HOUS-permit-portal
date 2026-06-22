@@ -375,6 +375,11 @@ Rails.application.routes.draw do
       resources :checklists, only: %i[show update]
       resources :step_codes, only: %i[index create show] do
         get :select_options, on: :collection
+        # HUB-5145: Reserved for the staged-checklist flow. The future UI should
+        # create Mid-Construction/As-Built envelopes under the existing StepCode
+        # report family, then select them via StepCode.current_stage or route
+        # stage/checklist context instead of creating another StepCode.
+        resources :checklists, only: %i[create], controller: "checklists"
       end
     end
 

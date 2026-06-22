@@ -673,6 +673,13 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_23_120000) do
     t.string "heating_system_plant_description"
     t.string "cooling_system_plant_description"
     t.integer "is_suite_sub_metered"
+    t.integer "stage", default: 0, null: false
+    t.integer "status", default: 0, null: false
+    t.index ["status"], name: "index_part_3_step_code_checklists_on_status"
+    t.index %w[step_code_id stage],
+            name: "idx_part_3_checklists_on_step_code_id_and_stage",
+            unique: true,
+            where: "(step_code_id IS NOT NULL)"
     t.index ["step_code_id"],
             name: "index_part_3_step_code_checklists_on_step_code_id"
   end
@@ -768,6 +775,10 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_23_120000) do
             },
             null: false
     t.index ["status"], name: "index_part_9_step_code_checklists_on_status"
+    t.index %w[step_code_id stage],
+            name: "idx_part_9_checklists_on_step_code_id_and_stage",
+            unique: true,
+            where: "(step_code_id IS NOT NULL)"
     t.index ["step_code_id"],
             name: "index_part_9_step_code_checklists_on_step_code_id"
     t.index ["step_requirement_id"],
@@ -1462,7 +1473,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_23_120000) do
     t.string "first_name_snapshot"
     t.string "last_name_snapshot"
     t.datetime "orphaned_at"
+    t.string "current_stage", default: "pre_construction", null: false
     t.index ["creator_id"], name: "index_step_codes_on_creator_id"
+    t.index ["current_stage"], name: "index_step_codes_on_current_stage"
     t.index ["discarded_at"], name: "index_step_codes_on_discarded_at"
     t.index ["jurisdiction_id"], name: "index_step_codes_on_jurisdiction_id"
     t.index ["permit_application_id"],

@@ -1056,6 +1056,7 @@ export class Api {
       title: string
       permitDate: string
       phase: string
+      currentStage: string
       buildingCodeVersion: string
       jurisdictionId: string
       permitApplicationId: string
@@ -1147,6 +1148,18 @@ export class Api {
       stepCodeChecklist: data,
       ...(options ?? {}),
     })
+  }
+
+  // HUB-5145: Reserved for future Mid-Construction/As-Built creation. This
+  // creates a staged checklist envelope under an existing StepCode report family;
+  // selection should then happen via currentStage or explicit route context.
+  async createPart9Checklist(stepCodeId: string, data: Partial<IPart9StepCodeChecklist>) {
+    return this.client.post<ApiResponse<IPart9StepCodeChecklist>>(
+      `/part_9_building/step_codes/${stepCodeId}/checklists`,
+      {
+        stepCodeChecklist: data,
+      }
+    )
   }
 
   // importing IPart3StepCodeChecklist causes circular dependency typescript error
@@ -1267,7 +1280,7 @@ export class Api {
   async createPart3StepCode(data: {
     permitApplicationId?: string
     permitProjectId?: string
-    checklistAttributes: { sectionCompletionStatus: Record<string, any> }
+    preConstructionChecklistAttributes: { sectionCompletionStatus: Record<string, any> }
   }) {
     if (data.permitApplicationId) {
       return this.client.post<ApiResponse<IStepCode>>(

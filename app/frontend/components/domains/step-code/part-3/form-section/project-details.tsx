@@ -100,10 +100,9 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
 
   const editable = R.isNil(permitApplicationId)
 
-  // HUB-5145: Standalone reports can edit `phase`, but permit-linked reports
-  // only display values inherited from the permit application. Confirm whether
-  // As-Built should override that inherited stage and keep Project Identifier
-  // (`referenceNumber`) separate from Project Stage (`phase`).
+  // HUB-5145: `phase` is legacy stage-like metadata. Move lifecycle selection
+  // to StepCode.currentStage, keep checklist.stage as report identity, and keep
+  // Project Identifier (`referenceNumber`) separate from stage selection.
   return (
     <>
       <Flex direction="column" gap={2} pb={6}>

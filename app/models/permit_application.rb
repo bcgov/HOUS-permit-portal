@@ -50,9 +50,9 @@ class PermitApplication < ApplicationRecord
   has_many :collaborators, through: :permit_collaborations
   has_many :permit_block_statuses, dependent: :destroy
 
-  # HUB-5145: One kept Step Code per permit blocks separate Pre-Construction
-  # and As-Built reports for the same permit. A full lifecycle model needs staged
-  # child reports or an explicit link from an As-Built report back to its source.
+  # HUB-5145: Keep one StepCode per permit as the report family. Pre-Construction
+  # and As-Built should become staged child checklists selected by the StepCode's
+  # current_stage rather than competing permit-level StepCode records.
   has_one :step_code, -> { kept }, dependent: :nullify
 
   scope :submitted, -> { joins(:submission_versions).distinct }

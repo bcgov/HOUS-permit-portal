@@ -1,5 +1,5 @@
 class Api::Part9Building::StepCodesController < Api::ApplicationController
-  include StepCodeParamsConcern
+  include Part9StepCodeParamsConcern
   before_action :set_step_code, only: [:show]
 
   def select_options
@@ -21,9 +21,9 @@ class Api::Part9Building::StepCodesController < Api::ApplicationController
       Part9StepCode.transaction do
         @step_code =
           if step_code_params[:permit_application_id]
-            # HUB-5145: This mirrors Part 3's one StepCode per permit behavior
-            # even though Part 9 has checklist stages. Decide whether As-Built is
-            # a new checklist under this StepCode or a separate linked report.
+            # HUB-5145: One StepCode should remain the permit's report family.
+            # Additional lifecycle reports should be staged checklists selected
+            # by StepCode.current_stage, not separate competing StepCode rows.
             Part9StepCode
               .kept
               .where(

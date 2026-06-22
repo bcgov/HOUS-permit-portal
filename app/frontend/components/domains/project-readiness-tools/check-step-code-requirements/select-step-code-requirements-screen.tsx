@@ -35,11 +35,11 @@ export const SelectStepCodeRequirementsScreen = () => {
     let result
 
     // HUB-5145: Building Categories currently chooses only Part 3 vs Part 9.
-    // If As-Built can start here, add an explicit stage/default decision and
-    // pass it through creation so Project Details, index labels, and PDFs agree.
+    // Keep new reports defaulted to pre-construction until StepCode.currentStage
+    // and staged checklist creation are exposed in this entry flow.
     if (stepCodeTypeValue === EStepCodeType.part3StepCode) {
       result = await createPart3StepCode({
-        checklistAttributes: { sectionCompletionStatus: defaultSectionCompletionStatus },
+        preConstructionChecklistAttributes: { sectionCompletionStatus: defaultSectionCompletionStatus },
       })
       if (result?.ok) {
         navigate(`/part-3-step-code/${result.data.id}/start`)

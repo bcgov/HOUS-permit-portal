@@ -17,7 +17,7 @@ namespace :db do
         puts "No StepCode found for PermitApplication #{permit_id}. Aborting."
         exit(1)
       end
-      checklist = step_code.checklist
+      checklist = step_code.current_checklist
       unless checklist
         puts "No Checklist found for StepCode #{step_code.id}. Aborting."
         exit(1)

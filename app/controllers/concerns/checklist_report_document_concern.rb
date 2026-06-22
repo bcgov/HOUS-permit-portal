@@ -7,9 +7,14 @@ module ChecklistReportDocumentConcern
   end
 
   def generate_report_document
-    StepCodeReportGenerationJob.perform_async(
-      respond_to?(:step_code) ? step_code.id : id
-    )
+    if respond_to?(:step_code)
+      StepCodeReportGenerationJob.perform_async(
+        step_code.id,
+        { "checklist_id" => id }
+      )
+    else
+      StepCodeReportGenerationJob.perform_async(id)
+    end
   end
 
   def should_generate_report_document?

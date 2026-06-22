@@ -12,6 +12,7 @@ class StepCodeBaseBlueprint < Blueprinter::Base
          :jurisdiction_name,
          :permit_date,
          :phase,
+         :current_stage,
          :permit_application_id
 
   association :creator, blueprint: UserBlueprint

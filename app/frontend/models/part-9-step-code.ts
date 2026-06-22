@@ -35,7 +35,8 @@ export const Part9StepCodeModel = types.snapshotProcessor(
     }))
     .views((self) => ({
       get currentChecklist() {
-        return self.checklists.find((checklist) => checklist.stage === EStepCodeChecklistStage.preConstruction)
+        const stage = self.currentStage || EStepCodeChecklistStage.preConstruction
+        return self.checklists.find((checklist) => checklist.stage === stage)
       },
       get primaryChecklist() {
         return self.currentChecklist
@@ -64,6 +65,13 @@ export const Part9StepCodeModel = types.snapshotProcessor(
         if (response.ok) {
           self.mergeUpdate(response.data.data, "checklistsMap")
           return true
+        }
+      }),
+      createChecklist: flow(function* (values: Record<string, any>) {
+        const response = yield self.environment.api.createPart9Checklist(self.id, values)
+        if (response.ok) {
+          self.mergeUpdate(response.data.data, "checklistsMap")
+          return response.data.data
         }
       }),
     })),

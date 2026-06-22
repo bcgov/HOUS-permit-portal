@@ -2,10 +2,11 @@ import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
 import { IPart3StepCode } from "../../models/part-3-step-code"
 import { useMst } from "../../setup/root"
+import { EStepCodeChecklistStage } from "../../types/enums"
 import { isUUID } from "../../utils/utility-functions"
 
 export const usePart3StepCode = () => {
-  const { permitApplicationId, stepCodeId } = useParams()
+  const { permitApplicationId, stepCodeId, stage } = useParams()
   const { stepCodeStore, permitApplicationStore } = useMst()
   const { currentPermitApplication } = permitApplicationStore
   const { fetchPart3StepCode, getStepCode, setCurrentStepCode } = stepCodeStore
@@ -33,9 +34,9 @@ export const usePart3StepCode = () => {
     } else {
       const paStepCode = currentPermitApplication?.stepCode
       if (paStepCode && !paStepCode.isDiscarded) {
-        // HUB-5145: Permit routes select the permit's single StepCode, not a
-        // stage-specific report. If Pre-Con and As-Built both exist, the route
-        // needs stage/report id context instead of using currentPermitApplication.
+        // HUB-5145: Permit routes select the StepCode report family. The model
+        // should resolve currentChecklist from StepCode.currentStage, or from an
+        // explicit route stage/checklist id when present.
         setCurrentStepCode(paStepCode.id)
       }
       setIsLoading(false)
@@ -43,7 +44,14 @@ export const usePart3StepCode = () => {
   }, [permitApplicationId, stepCodeId, fetchPart3StepCode, getStepCode, setCurrentStepCode, currentPermitApplication])
 
   const currentStepCode = stepCodeStore.currentStepCode as IPart3StepCode
-  const checklist = currentStepCode?.checklist
+
+  useEffect(() => {
+    if (currentStepCode && Object.values(EStepCodeChecklistStage).includes(stage as EStepCodeChecklistStage)) {
+      currentStepCode.setCurrentStage(stage as EStepCodeChecklistStage)
+    }
+  }, [currentStepCode, stage])
+
+  const checklist = currentStepCode?.currentChecklist
 
   return { currentStepCode, checklist, isLoading }
 }

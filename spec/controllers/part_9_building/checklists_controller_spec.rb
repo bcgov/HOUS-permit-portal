@@ -56,6 +56,7 @@ RSpec.describe Api::Part9Building::ChecklistsController, type: :controller do
 
   describe "GET #show" do
     it "returns the checklist with compliance report" do
+      Part9StepCode::DataEntry.create!(checklist: checklist)
       report = {
         requirement_id: step_requirement.id,
         energy: {
@@ -97,6 +98,29 @@ RSpec.describe Api::Part9Building::ChecklistsController, type: :controller do
     end
   end
 
+  describe "POST #create" do
+    it "creates a staged checklist under the step code" do
+      post :create,
+           params: {
+             step_code_id: step_code.id,
+             step_code_checklist: {
+               stage: "as_built",
+               section_completion_status: {
+                 start: {
+                   complete: false,
+                   relevant: true
+                 }
+               }
+             }
+           },
+           as: :json
+
+      expect(response).to have_http_status(:success)
+      expect(json_response.dig("data", "stage")).to eq("as_built")
+      expect(step_code.checklists.as_built).to exist
+    end
+  end
+
   describe "PATCH #update" do
     it "updates the checklist, building characteristics, and enqueues report generation" do
       allow(StepCodeReportGenerationJob).to receive(:perform_async)
@@ -133,13 +157,14 @@ RSpec.describe Api::Part9Building::ChecklistsController, type: :controller do
         json_response.dig("data", "building_characteristics_summary")
       ).to be_present
       expect(StepCodeReportGenerationJob).to have_received(:perform_async).with(
-        step_code.id
+        step_code.id,
+        { "checklist_id" => checklist.id }
       )
       expect(step_code.reload.complete?).to be(true)
     end
 
     it "persists section completion status without compliance path" do
-      checklist.update!(compliance_path: nil, step_requirement: nil)
+      checklist.update_columns(compliance_path: nil, step_requirement_id: nil)
 
       patch :update,
             params: {
@@ -216,7 +241,7 @@ RSpec.describe Api::Part9Building::ChecklistsController, type: :controller do
       ).and_return(report_payload)
       expect_any_instance_of(Part9StepCode).to receive(
         :process_current_h2k_files
-      )
+      ).with(checklist)
 
       patch :update,
             params: {

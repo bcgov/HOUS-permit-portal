@@ -30,12 +30,12 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
     if (!isStandaloneStepCode && !currentPermitApplication?.isFullyLoaded) return // wait for permit application to load
 
     if (!currentStepCode) {
-      // HUB-5145: Permit-linked Part 3 entry auto-creates/loads one report with
-      // no stage choice. As-Built from a project needs either a stage-aware
-      // create call here or a separate route that links to the Pre-Con report.
+      // HUB-5145: Permit-linked Part 3 entry auto-creates the StepCode report
+      // family and its pre-construction checklist. Later, expose staged
+      // checklist creation/selection through StepCode.currentStage.
       createPart3StepCode({
         permitApplicationId, // nil when the step code is not attached to a permit application
-        checklistAttributes: { sectionCompletionStatus: defaultSectionCompletionStatus },
+        preConstructionChecklistAttributes: { sectionCompletionStatus: defaultSectionCompletionStatus },
       })
     }
   }, [currentPermitApplication?.isFullyLoaded, currentStepCode])
@@ -45,8 +45,8 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
     if (!currentStepCode) return // wait for step code to load or be created
     if (section) return // only redirect if no section is specified in params
 
-    if (currentStepCode.checklist) {
-      const navLink = currentStepCode.checklist.currentNavLink
+    if (currentStepCode.currentChecklist) {
+      const navLink = currentStepCode.currentChecklist.currentNavLink
       navigate(navLink?.location || "start")
     } else {
       navigate("start")

@@ -223,7 +223,7 @@ export const StepCodeStoreModel = types
     }),
     createPart3StepCode: flow(function* (values: {
       permitApplicationId?: string
-      checklistAttributes: { sectionCompletionStatus: Record<string, any> }
+      preConstructionChecklistAttributes: { sectionCompletionStatus: Record<string, any> }
     }) {
       const response = yield self.environment.api.createPart3StepCode(values)
 

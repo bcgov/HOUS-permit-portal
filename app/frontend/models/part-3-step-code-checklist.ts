@@ -16,6 +16,8 @@ import {
   EPart3BuildingType,
   EPart3StepCodeSoftware,
   EProjectStage,
+  EStepCodeChecklistStage,
+  EStepCodeChecklistStatus,
   EStepCodeType,
 } from "../types/enums"
 import {
@@ -37,10 +39,18 @@ export const Part3StepCodeChecklistModel = types
   .model("Part3StepCodeChecklistModel", {
     id: types.identifier,
     isLoaded: types.maybeNull(types.boolean),
+    stage: types.optional(
+      types.enumeration<EStepCodeChecklistStage[]>(Object.values(EStepCodeChecklistStage)),
+      EStepCodeChecklistStage.preConstruction
+    ),
+    status: types.optional(
+      types.enumeration<EStepCodeChecklistStatus[]>(Object.values(EStepCodeChecklistStatus)),
+      EStepCodeChecklistStatus.draf
+    ),
     sectionCompletionStatus: types.maybeNull(types.frozen<IPart3SectionCompletionStatus>()),
-    // HUB-5145: This appears to be stale permit-status terminology; the active
-    // Part 3 project stage is `StepCodeBaseFields.phase`. Do not build As-Built
-    // behavior on this field without first reconciling the data contract.
+    // HUB-5145: This appears to be stale permit-status terminology. Part 3
+    // should gain checklist.stage and use StepCode.currentStage for selection
+    // instead of building lifecycle behavior on projectStage.
     projectStage: types.maybeNull(types.enumeration<EProjectStage[]>(Object.values(EProjectStage))),
     buildingCodeVersion: types.maybeNull(
       types.enumeration<EBuildingCodeVersion[]>(Object.values(EBuildingCodeVersion))

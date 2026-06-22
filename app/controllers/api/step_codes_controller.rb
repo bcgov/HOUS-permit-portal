@@ -60,9 +60,9 @@ class Api::StepCodesController < Api::ApplicationController
       StepCode.transaction do
         # If assigning to a permit application that already has a different step code,
         # detach the previous one so this update can succeed (overtake behavior).
-        # HUB-5145: This is correct for one report per permit, but dangerous for
-        # staged reports. Assigning an As-Built report should not detach the
-        # related Pre-Construction report if both must remain visible/linked.
+        # HUB-5145: Keep one StepCode per permit as the report family. Additional
+        # lifecycle reports should be child checklists selected by current_stage,
+        # so this overtake behavior should not be used for staged reports.
         if step_code_params[:permit_application_id].present?
           existing =
             StepCode

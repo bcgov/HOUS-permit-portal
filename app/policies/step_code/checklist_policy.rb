@@ -4,6 +4,11 @@ class StepCode::ChecklistPolicy < ApplicationPolicy
     step_code_policy.show?
   end
 
+  def create?
+    step_code_policy = StepCodePolicy.new(user_context, record.step_code)
+    step_code_policy.update?
+  end
+
   def update?
     step_code_policy = StepCodePolicy.new(user_context, record.step_code)
     step_code_policy.update?

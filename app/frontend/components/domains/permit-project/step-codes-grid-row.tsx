@@ -50,9 +50,9 @@ export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode })
 
   return (
     <SearchGridRow isClickable={isNavigable} onClick={() => isNavigable && navigate(targetPath)}>
-      {/* HUB-5145: The index shows only Part 3/Part 9 type, not report stage or
-      linked Pre-Con/As-Built relationship. Separate report records need visible
-      stage labels, stage-aware target paths, and report-document actions. */}
+      {/* HUB-5145: The index shows only Part 3/Part 9 type today. As staged
+      checklists become user-selectable, include the StepCode currentStage,
+      stage-aware target paths, and report-document actions. */}
       <SearchGridItem>{t(`stepCode.types.${type as EStepCodeType}`)}</SearchGridItem>
       <SearchGridItem>{permitProjectTitle}</SearchGridItem>
       <SearchGridItem>{fullAddress}</SearchGridItem>

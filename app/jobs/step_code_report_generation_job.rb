@@ -25,6 +25,7 @@ class StepCodeReportGenerationJob
   # - step_code_id: ID of the StepCode record
   # - options: hash with optional overrides like { "outputFilename" => "custom.pdf" }
   def perform(step_code_id, options = {})
+    options = (options || {}).with_indifferent_access
     step_code = StepCode.find_by(id: step_code_id)
     return if step_code.blank?
 
@@ -39,10 +40,14 @@ class StepCodeReportGenerationJob
     # Build checklist JSON using the checklist blueprint in extended view if available
     checklist_json =
       begin
-        # HUB-5145: Report generation always renders the model's current
-        # checklist. Stage-specific PDFs need an explicit stage/checklist id in
-        # the job args so As-Built does not silently render Pre-Construction.
-        checklist = step_code.current_checklist
+        checklist =
+          if options[:checklist_id].present?
+            step_code.checklist_for(id: options[:checklist_id])
+          elsif options[:stage].present?
+            step_code.checklist_for(stage: options[:stage])
+          else
+            step_code.current_checklist
+          end
         if checklist.present?
           step_code.checklist_blueprint.render_as_hash(
             checklist,
@@ -75,6 +80,7 @@ class StepCodeReportGenerationJob
             reference_number: step_code.reference_number,
             title: step_code.title,
             phase: step_code.phase,
+            current_stage: step_code.current_stage,
             permit_date: step_code.permit_date,
             pid: step_code.pid,
             pin: step_code.pin,
