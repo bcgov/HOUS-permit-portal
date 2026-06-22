@@ -642,6 +642,7 @@ const options = {
               protectionTitle: "How {{provider}} protects and stores your drawings",
               protectionDescription1:
                 "Our service partners use industry-standard security to protect your drawings. {{provider}} will keep your drawings for up to 150 days, then delete them. All drawings will be deleted on December 31, 2025, when the beta testing period ends.",
+              uploadRequired: "Please upload a file before continuing.",
             },
             confirmSubmission: {
               title: "Review and submit",
