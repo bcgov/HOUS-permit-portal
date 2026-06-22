@@ -1,8 +1,9 @@
 import baseEditForm from "formiojs/components/_classes/component/Component.form"
+import { interopDefault } from "../../../../../../utils/interop-default"
 import SimpleApi from "../Common/Simple.edit.api.js"
 import SimpleConditional from "../Common/Simple.edit.conditional.js"
 export default function (...extend) {
-  const editForm = baseEditForm(
+  const editForm = interopDefault(baseEditForm)(
     [
       {
         key: "display",

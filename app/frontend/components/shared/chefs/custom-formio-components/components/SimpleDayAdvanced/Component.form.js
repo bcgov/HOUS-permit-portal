@@ -1,7 +1,8 @@
 import baseEditForm from "formiojs/components/day/Day.form"
+import { interopDefault } from "../../../../../../utils/interop-default"
 import EditValidation from "./editForm/Component.edit.validation.js"
 export default function (...extend) {
-  return baseEditForm(
+  return interopDefault(baseEditForm)(
     [
       {
         key: "validation",

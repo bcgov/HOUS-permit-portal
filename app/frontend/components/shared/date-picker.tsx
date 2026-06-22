@@ -7,6 +7,7 @@ import ReactDatePicker, { ReactDatePickerProps } from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 import { useTranslation } from "react-i18next"
 import { datefnsAppDateFormat } from "../../constants"
+import { interopDefault } from "../../utils/interop-default"
 
 type IDatePickerPropsBase = {
   containerProps?: Partial<BoxProps>
@@ -71,6 +72,7 @@ const CustomInput = forwardRef<
 
 export function DatePicker({ containerProps, ...datePickerProps }: IDatePickerProps) {
   const sxStyles = containerProps?.sx || {}
+  const ReactDatePickerComponent = interopDefault(ReactDatePicker)
   return (
     <Box
       w={"200px"}
@@ -102,7 +104,7 @@ export function DatePicker({ containerProps, ...datePickerProps }: IDatePickerPr
         ) as SystemStyleObject
       }
     >
-      <ReactDatePicker
+      <ReactDatePickerComponent
         customInput={<CustomInput />}
         dateFormat={datefnsAppDateFormat}
         popperPlacement={"bottom-start"}

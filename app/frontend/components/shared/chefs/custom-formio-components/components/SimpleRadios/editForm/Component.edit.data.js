@@ -1,5 +1,8 @@
 import BuilderUtils from "formiojs/utils/builder"
 import get from "lodash/get"
+import { interopDefault } from "../../../../../../../utils/interop-default"
+
+const builderUtils = interopDefault(BuilderUtils)
 
 export default [
   {
@@ -55,7 +58,7 @@ export default [
         template: "{{ item.label }}",
         data: {
           custom(context) {
-            return BuilderUtils.getAvailableShortcuts(
+            return builderUtils.getAvailableShortcuts(
               get(context, "instance.options.editForm", {}),
               get(context, "instance.options.editComponent", {})
             )

@@ -1,6 +1,8 @@
 import validationComponents from "formiojs/components/select/editForm/Select.edit.validation"
+import { interopDefault } from "../../../../../../../utils/interop-default"
 import common from "../../Common/Advanced.edit.validation.js"
 import { reArrangeComponents } from "../../Common/function.js"
+
 const neededposition = [
   "validate.isUseForCopy",
   "validateOn",
@@ -32,5 +34,7 @@ const componentSpecific = {
     },
   },
 }
-const newPosition = reArrangeComponents(neededposition, [componentSpecific, ...validationComponents, ...common])
+const validationComponentItems = interopDefault(validationComponents)
+
+const newPosition = reArrangeComponents(neededposition, [componentSpecific, ...validationComponentItems, ...common])
 export default newPosition
