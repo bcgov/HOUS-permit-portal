@@ -4536,6 +4536,7 @@ Thank you,
             "Action required: please click the link in the verification email that was sent to you. You will continue to receive emails at <strong>{{email}}</strong> until your new email is confirmed. <br/><br/>(Didn't receive it? <1>Resend email</1>)",
           confirmationRequired:
             "Action required: please click the link in the verification email that was sent to you. <br/><br/>(Didn't receive it? <1>Resend email</1>)",
+          sendConfirmationEmail: "Send confirmation email",
           receiveNotifications: "Receive notifications",
           notificationsEmail: "Notification email address",
           firstName: "First name",
