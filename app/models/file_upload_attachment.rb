@@ -93,10 +93,7 @@ class FileUploadAttachment < ApplicationRecord
     disposition: "attachment",
     filename: download_filename
   )
-    ActionDispatch::Http::ContentDisposition.format(
-      disposition: disposition,
-      filename: filename.presence || "download"
-    )
+    ContentDisposition.public_send(disposition, filename.presence || "download")
   end
 
   prepend FilenamePreservingFileUrl
