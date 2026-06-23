@@ -57,7 +57,7 @@ gem "pundit", "~> 2.3.1"
 gem "phonelib", "~> 0.8.5"
 gem "roo", "~> 2.10"
 gem "discard", "~> 1.2"
-gem "faraday", "~> 2.14.2"
+gem "faraday", "~> 2.14.3"
 gem "factory_bot", "~> 6.4"
 # The timcop gem mocks Time, it is only used in specs and for seeding a published template version to get around time based validations
 gem "timecop", "~> 0.9.8"
