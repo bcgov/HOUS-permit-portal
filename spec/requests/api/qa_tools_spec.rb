@@ -249,4 +249,70 @@ RSpec.describe "Api::QaTools", type: :request do
       expect(response).to have_http_status(:forbidden)
     end
   end
+
+  describe "POST /api/qa_tools/part_3_step_codes/:id/autofill" do
+    let(:jurisdiction) do
+      create(:sub_district, heating_degree_days: 4180, inbox_enabled: false)
+    end
+    let(:permit_application) do
+      create(
+        :permit_application,
+        submitter: submitter,
+        jurisdiction: jurisdiction,
+        template_version: template_version
+      )
+    end
+    let(:step_code) do
+      create(
+        :part_3_step_code,
+        permit_application: permit_application,
+        creator: submitter
+      )
+    end
+
+    it "returns not found when QA mode is disabled" do
+      allow(ENV).to receive(:[]).and_call_original
+      allow(ENV).to receive(:[]).with("VITE_QA_MODE").and_return(nil)
+      sign_in submitter
+
+      post "/api/qa_tools/part_3_step_codes/#{step_code.id}/autofill",
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:not_found)
+    end
+
+    it "autofills a Part 3 step code checklist" do
+      allow(ENV).to receive(:[]).and_call_original
+      allow(ENV).to receive(:[]).with("VITE_QA_MODE").and_return("true")
+      sign_in submitter
+
+      post "/api/qa_tools/part_3_step_codes/#{step_code.id}/autofill",
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      checklist = step_code.reload.pre_construction_checklist
+      expect(checklist.step_code_occupancies.pluck(:key)).to eq(["residential"])
+      expect(checklist.baseline_occupancies.pluck(:key)).to eq(
+        ["low_hazard_industrial"]
+      )
+      expect(
+        checklist.section_completion_status.dig("step_code_summary", "complete")
+      ).to be(true)
+      expect(json_response.dig("data", "id")).to eq(step_code.id)
+    end
+
+    it "requires update permission to autofill a Part 3 step code" do
+      allow(ENV).to receive(:[]).and_call_original
+      allow(ENV).to receive(:[]).with("VITE_QA_MODE").and_return("true")
+      sign_in create(:user, :super_admin)
+
+      post "/api/qa_tools/part_3_step_codes/#{step_code.id}/autofill",
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:forbidden)
+    end
+  end
 end

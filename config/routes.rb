@@ -295,6 +295,8 @@ Rails.application.routes.draw do
         post "permit_projects/full", to: "qa_tools#create_full_permit_project"
         post "permit_applications/:id/autofill",
              to: "qa_tools#autofill_permit_application"
+        post "part_3_step_codes/:id/autofill",
+             to: "qa_tools#autofill_part_3_step_code"
       end
     end
 
