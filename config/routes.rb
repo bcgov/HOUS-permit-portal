@@ -297,6 +297,8 @@ Rails.application.routes.draw do
              to: "qa_tools#autofill_permit_application"
         post "part_3_step_codes/:id/autofill",
              to: "qa_tools#autofill_part_3_step_code"
+        post "part_9_step_codes/:id/autofill",
+             to: "qa_tools#autofill_part_9_step_code"
       end
     end
 

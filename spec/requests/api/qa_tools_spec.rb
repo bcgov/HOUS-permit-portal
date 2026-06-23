@@ -315,4 +315,80 @@ RSpec.describe "Api::QaTools", type: :request do
       expect(response).to have_http_status(:forbidden)
     end
   end
+
+  describe "POST /api/qa_tools/part_9_step_codes/:id/autofill" do
+    let(:jurisdiction) { create(:sub_district, inbox_enabled: false) }
+    let(:permit_application) do
+      create(
+        :permit_application,
+        submitter: submitter,
+        jurisdiction: jurisdiction,
+        template_version: template_version,
+        with_fake_plan_document: true
+      )
+    end
+    let(:step_code) do
+      create(
+        :part_9_step_code,
+        permit_application: permit_application,
+        creator: submitter
+      )
+    end
+    let!(:step_requirement) do
+      JurisdictionStepRequirement.create!(
+        jurisdiction: jurisdiction,
+        energy_step_required: 3,
+        zero_carbon_step_required: 2
+      )
+    end
+
+    before do
+      StepCode::Part9::MEUIReferencesSeeder.seed!
+      StepCode::Part9::TEDIReferencesSeeder.seed!
+    end
+
+    it "returns not found when QA mode is disabled" do
+      allow(ENV).to receive(:[]).and_call_original
+      allow(ENV).to receive(:[]).with("VITE_QA_MODE").and_return(nil)
+      sign_in submitter
+
+      post "/api/qa_tools/part_9_step_codes/#{step_code.id}/autofill",
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:not_found)
+    end
+
+    it "autofills a Part 9 step code checklist" do
+      allow(ENV).to receive(:[]).and_call_original
+      allow(ENV).to receive(:[]).with("VITE_QA_MODE").and_return("true")
+      sign_in submitter
+
+      post "/api/qa_tools/part_9_step_codes/#{step_code.id}/autofill",
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      checklist = step_code.reload.pre_construction_checklist
+      expect(checklist.data_entries.count).to eq(1)
+      expect(checklist.compliance_path).to eq("step_code_ers")
+      expect(checklist.step_requirement_id).to eq(step_requirement.id)
+      expect(
+        checklist.section_completion_status.dig("report", "complete")
+      ).to be(true)
+      expect(json_response.dig("data", "id")).to eq(step_code.id)
+    end
+
+    it "requires update permission to autofill a Part 9 step code" do
+      allow(ENV).to receive(:[]).and_call_original
+      allow(ENV).to receive(:[]).with("VITE_QA_MODE").and_return("true")
+      sign_in create(:user, :super_admin)
+
+      post "/api/qa_tools/part_9_step_codes/#{step_code.id}/autofill",
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:forbidden)
+    end
+  end
 end

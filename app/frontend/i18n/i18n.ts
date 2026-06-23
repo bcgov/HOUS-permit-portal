@@ -99,7 +99,7 @@ const options = {
           trigger: "QA",
           title: "QA tools",
           description:
-            "Shown when QA mode is enabled in this environment. Shortcuts to seed a full permit project, autofill an application, or autofill a Part 3 step code for testing.",
+            "Shown when QA mode is enabled in this environment. Shortcuts to seed a full permit project, autofill an application, or autofill Part 3 or Part 9 step codes for testing.",
           jurisdiction: "Jurisdiction",
           createProject: "Create project with all permits",
           createProjectSuccess: "QA project created",
@@ -107,6 +107,8 @@ const options = {
           autofillSuccess: "Permit application autofilled",
           autofillPart3StepCode: "Autofill Part 3 step code",
           autofillPart3Success: "Part 3 step code autofilled",
+          autofillPart9StepCode: "Autofill Part 9 step code",
+          autofillPart9Success: "Part 9 step code autofilled",
         },
         landing: {
           title: "Building Permit Hub",
