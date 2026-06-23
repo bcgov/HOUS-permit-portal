@@ -149,7 +149,7 @@ module FormSupportingDocuments
       public: false,
       expires_in: 3600,
       response_content_disposition:
-        "attachment; filename=\"#{zipfile.original_filename}\""
+        ContentDisposition.attachment(zipfile.original_filename)
     )
   end
 
