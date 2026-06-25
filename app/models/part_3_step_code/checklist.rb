@@ -157,8 +157,6 @@ class Part3StepCode::Checklist < ActiveRecord::Base
             },
             allow_blank: true
 
-  before_create :set_climate_info
-
   def compliance_metrics
     if occupancy_classifications.step_code_occupancy.any?
       %i[teui tedi ghgi]
@@ -181,17 +179,5 @@ class Part3StepCode::Checklist < ActiveRecord::Base
 
   def complete?
     section_completion_status.dig("step_code_summary", "complete")
-  end
-
-  private
-
-  def set_climate_info
-    return unless step_code&.jurisdiction
-
-    self.heating_degree_days ||= step_code.jurisdiction_heating_degree_days
-    self.climate_zone ||=
-      StepCode::Part3::V0::Requirements::References::ClimateZone.value(
-        step_code.jurisdiction_heating_degree_days
-      )
   end
 end
