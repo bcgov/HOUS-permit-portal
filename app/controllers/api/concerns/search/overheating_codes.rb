@@ -20,7 +20,10 @@ module Api::Concerns::Search::OverheatingCodes
       scope_results: ->(relation) { policy_scope(relation) }
     }
     @overheating_code_search =
-      OverheatingCode.search(overheating_code_query, **search_conditions)
+      ensure_searchkick_policy_scoped!(
+        OverheatingCode,
+        OverheatingCode.search(overheating_code_query, **search_conditions)
+      )
   end
 
   private
