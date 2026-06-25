@@ -2,25 +2,29 @@ module Api::Concerns::Search::RequirementBlocks
   extend ActiveSupport::Concern
 
   def perform_search
+    search_conditions = {
+      order: order,
+      match: :word_start,
+      where: {
+        discarded: discarded
+      },
+      page: search_params[:page],
+      per_page:
+        (
+          if search_params[:page]
+            (search_params[:per_page] || Kaminari.config.default_per_page)
+          else
+            nil
+          end
+        ),
+      includes: %i[taggings requirements],
+      scope_results: ->(relation) { policy_scope(relation) }
+    }
+
     @search =
-      RequirementBlock.search(
-        query,
-        order: order,
-        match: :word_start,
-        where: {
-          discarded: discarded
-        },
-        page: search_params[:page],
-        per_page:
-          (
-            if search_params[:page]
-              (search_params[:per_page] || Kaminari.config.default_per_page)
-            else
-              nil
-            end
-          ),
-        includes: %i[taggings requirements],
-        scope_results: ->(relation) { policy_scope(relation) }
+      ensure_searchkick_policy_scoped!(
+        RequirementBlock,
+        RequirementBlock.search(query, **search_conditions)
       )
   end
 

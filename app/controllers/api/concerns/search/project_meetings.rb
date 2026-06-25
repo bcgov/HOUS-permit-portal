@@ -30,7 +30,10 @@ module Api::Concerns::Search::ProjectMeetings
     }
 
     @project_meeting_search =
-      ProjectMeeting.search(project_meeting_query, **search_conditions)
+      ensure_searchkick_policy_scoped!(
+        ProjectMeeting,
+        ProjectMeeting.search(project_meeting_query, **search_conditions)
+      )
   end
 
   private
