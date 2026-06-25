@@ -2297,10 +2297,6 @@ Thank you,
               },
             },
             addOptionButton: "Add another option",
-            templateEditWarning:
-              "Any changes made here will be reflected in all unsaved early access previews that use this requirement block.",
-            previewEditWarning:
-              "Any changes made here will be reflected in all in-progress early access versions that use this requirement block.",
             templates: "templates",
             previews: "previews",
             stepCodeDependencies: {
@@ -4611,6 +4607,7 @@ Thank you,
           earlyAccessDescription:
             "This permit is available for early access to help your team get familiar with the application process. You can view and edit your application, but submission is currently disabled. Submissions will be enabled once this permit type is officially launched in your jurisdiction.",
           goToBuilder: "Go to builder",
+          openInBuilder: "Open in builder",
           schedulePublish: {
             triggerButton: "Promote",
             scheduleModalTitle: "Promote early access version?",
