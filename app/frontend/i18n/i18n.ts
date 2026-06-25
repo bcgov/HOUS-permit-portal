@@ -3752,6 +3752,23 @@ Thank you,
                 "This page shows the Energy Step Code and Zero Carbon Step Code requirements for buildings in this community. Requirements may vary based on building type, occupancies, permit-processing date, and local bylaws.",
               stepCodeRequirementsNotice:
                 "These requirements apply to new buildings only. For existing buildings or renovations, contact your local building officials.",
+              heatingDegreeDaysTitle: "Climate zones and heating degree days",
+              heatingDegreeDaysDescription:
+                "Use the Heating Degree Days (HDD) value for your project's climate zone when preparing Step Code reporting for a permit application in this community.",
+              climateZoneColumnHeader: "Climate zone",
+              heatingDegreeDaysColumnHeader: "Heating Degree Days (HDD)",
+              heatingDegreeDaysNotConfigured: "Not configured",
+              noClimateZonesTitle: "No climate zones configured",
+              noClimateZonesDescription:
+                "This community has not published climate zone HDD values yet. Contact the local jurisdiction before preparing Step Code reporting.",
+              climateZoneLabels: {
+                zone4: "Climate Zone 4",
+                zone5: "Climate Zone 5",
+                zone6: "Climate Zone 6",
+                zone7a: "Climate Zone 7A",
+                zone7b: "Climate Zone 7B",
+                zone8: "Climate Zone 8",
+              },
               smallSimpleBuildings: "Small, simple buildings",
               smallSimpleBuildingsDescription:
                 "Energy Step Code and Zero Carbon Step Code requirements for residential buildings included in Part 9 of the BC Building Code. These requirements are organized by building type.",
