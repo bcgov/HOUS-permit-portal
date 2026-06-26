@@ -25,6 +25,75 @@ RSpec.describe PermitApplication, type: :model do
     end
   end
 
+  describe "#scheduled_deletion_at" do
+    let(:discarded_at) { Time.zone.local(2026, 1, 15, 10, 30) }
+
+    it "is nil when the application is not archived" do
+      permit_application = build_stubbed(:permit_application)
+
+      expect(permit_application.scheduled_deletion_at).to be_nil
+    end
+
+    it "uses six months after archive for draft applications" do
+      permit_application =
+        build_stubbed(
+          :permit_application,
+          status: :new_draft,
+          discarded_at: discarded_at
+        )
+
+      expect(permit_application.scheduled_deletion_at).to eq(
+        discarded_at + 6.months
+      )
+    end
+
+    it "uses six months after archive for revisions-requested applications" do
+      permit_application =
+        build_stubbed(
+          :permit_application,
+          status: :revisions_requested,
+          discarded_at: discarded_at
+        )
+
+      expect(permit_application.scheduled_deletion_at).to eq(
+        discarded_at + 6.months
+      )
+    end
+
+    it "uses one year after archive for decided applications" do
+      permit_application =
+        build_stubbed(
+          :permit_application,
+          status: :approved,
+          discarded_at: discarded_at
+        )
+
+      expect(permit_application.scheduled_deletion_at).to eq(
+        discarded_at + 1.year
+      )
+    end
+  end
+
+  describe "blueprint" do
+    it "serializes the scheduled deletion date" do
+      permit_application =
+        build_stubbed(
+          :permit_application,
+          discarded_at: Time.zone.local(2026, 1, 15, 10, 30)
+        )
+
+      serialized =
+        PermitApplicationBlueprint.render_as_hash(
+          permit_application,
+          view: :base
+        ).with_indifferent_access
+
+      expect(serialized[:scheduled_deletion_at]).to eq(
+        permit_application.scheduled_deletion_at.to_i * 1000
+      )
+    end
+  end
+
   describe "#requires_project_meeting?" do
     let(:jurisdiction) { create(:sub_district) }
     let(:template_version) { create(:template_version) }

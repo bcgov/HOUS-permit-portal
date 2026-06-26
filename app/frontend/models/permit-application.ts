@@ -99,6 +99,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       projectId: types.maybeNull(types.string),
       projectNumber: types.maybeNull(types.string),
       discardedAt: types.maybeNull(types.Date),
+      scheduledDeletionAt: types.maybeNull(types.Date),
       inboxSortOrder: types.maybeNull(types.number),
       allowedManualTransitions: types.optional(types.array(types.string), []),
       daysInQueue: types.maybeNull(types.number),

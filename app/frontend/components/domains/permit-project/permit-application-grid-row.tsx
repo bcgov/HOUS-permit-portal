@@ -12,12 +12,12 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { Archive, ClockClockwise, DotsThreeVertical } from "@phosphor-icons/react"
-import { format } from "date-fns"
+import { addMonths, format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
-import { datefnsTableDateTimeFormat } from "../../../constants"
+import { datefnsTableDateFormat, datefnsTableDateTimeFormat } from "../../../constants"
 import { ISearch } from "../../../lib/create-search-model"
 import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
@@ -47,6 +47,10 @@ export const PermitApplicationGridRow = observer(
     const shouldMarkRow = currentSandbox?.id !== permitApplication.sandbox?.id
     const isSubmitter = currentUser?.id === permitApplication.submitter?.id
     const permitApplicationPath = fromInbox ? `/permit-applications/${id}` : `/permit-applications/${id}/edit`
+    const scheduledDeletionDate = permitApplication.scheduledDeletionAt
+      ? format(permitApplication.scheduledDeletionAt, datefnsTableDateFormat)
+      : null
+    const archiveConfirmationDeletionDate = format(addMonths(new Date(), 6), datefnsTableDateFormat)
 
     return (
       <Tooltip
@@ -93,7 +97,16 @@ export const PermitApplicationGridRow = observer(
           <SearchGridItem>{permitApplication.number}</SearchGridItem>
           <SearchGridItem>{format(updatedAt, datefnsTableDateTimeFormat)}</SearchGridItem>
           <SearchGridItem>
-            <PermitApplicationStatusTag status={permitApplication.status} />
+            <VStack align="start" spacing={1}>
+              <PermitApplicationStatusTag status={permitApplication.status} />
+              {permitApplication.isDiscarded && scheduledDeletionDate && (
+                <Text fontSize="sm">
+                  {t("permitApplication.scheduledDeletionNotice", {
+                    date: scheduledDeletionDate,
+                  })}
+                </Text>
+              )}
+            </VStack>
           </SearchGridItem>
           <SearchGridItem justifyContent="flex-end">
             <Menu>
@@ -118,7 +131,9 @@ export const PermitApplicationGridRow = observer(
                 {!permitApplication.isDiscarded && permitApplication.isDraft && isSubmitter && (
                   <ConfirmationModal
                     title={t("ui.confirmArchive")}
-                    body={t("ui.archiveRetentionNotice" as any)}
+                    body={t("permitApplication.archiveRetentionNoticeWithDate", {
+                      date: archiveConfirmationDeletionDate,
+                    })}
                     onConfirm={async (closeModal) => {
                       if (await permitApplication.archive()) {
                         await searchModel?.search()

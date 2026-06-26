@@ -1890,6 +1890,9 @@ Thank you,
               "<1>{{authorName}} has assigned you to this permit.</1> Collaborate on this permit application.",
             collaborationCalloutSubmitted: "<1>{{authorName}} assigned you to this permit.</1>",
           },
+          scheduledDeletionNotice: "Permanent deletion on {{date}}",
+          archiveRetentionNoticeWithDate:
+            "This archived record will be kept until {{date}}. After that date, it will be permanently deleted and cannot be recovered.",
           referenceNumber: "Reference #",
           pdf: {
             for: "Permit application for",

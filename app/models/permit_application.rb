@@ -29,6 +29,13 @@ class PermitApplication < ApplicationRecord
     { permit_collaborations: :collaborator }
   ]
 
+  # HUB-4385: These durations currently drive display-only scheduled_deletion_at metadata.
+  # No cleanup job deletes manually archived permit applications by discarded_at; OrphanCleanupJob
+  # only deletes orphaned public records by orphaned_at. If this date must be enforced, add a
+  # dedicated archived permit application cleanup job rather than reusing OrphanCleanupJob.
+  ARCHIVED_DRAFT_RETENTION_DURATION = 6.months
+  ARCHIVED_RECORD_RETENTION_DURATION = 1.year
+
   belongs_to :submitter, class_name: "User", optional: true
   public_recordable user_association: :submitter
   belongs_to :template_version
@@ -432,6 +439,18 @@ class PermitApplication < ApplicationRecord
     seconds +=
       (Time.current - queue_clock_started_at).to_i if queue_clock_started_at
     (seconds / 86400.0).floor
+  end
+
+  def scheduled_deletion_at
+    return unless discarded_at
+
+    discarded_at + archived_retention_duration
+  end
+
+  def archived_retention_duration
+    return ARCHIVED_DRAFT_RETENTION_DURATION if draft?
+
+    ARCHIVED_RECORD_RETENTION_DURATION
   end
 
   def days_ago_submitted

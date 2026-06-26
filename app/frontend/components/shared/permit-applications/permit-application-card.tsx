@@ -40,6 +40,9 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
   const showNewVersionWarning = !usingCurrentTemplateVersion && !permitApplication.isSubmitted
 
   const isSubmissionCollaboration = permitApplication.submitter?.id !== currentUser?.id
+  const scheduledDeletionDate = permitApplication.scheduledDeletionAt
+    ? format(permitApplication.scheduledDeletionAt, datefnsTableDateFormat)
+    : null
 
   const routingButtonText = (() => {
     if (permitApplication.isSubmitted) return t("ui.view")
@@ -120,6 +123,16 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
                     authorName: permitApplication.submitter?.name,
                   }}
                 />
+              </Text>
+            </Flex>
+          )}
+          {permitApplication.isDiscarded && scheduledDeletionDate && (
+            <Flex bg="semantic.warning" {...calloutBannerContainerProps}>
+              <Info size={14} />
+              <Text {...calloutBannerTextProps}>
+                {t("permitApplication.scheduledDeletionNotice", {
+                  date: scheduledDeletionDate,
+                })}
               </Text>
             </Flex>
           )}
