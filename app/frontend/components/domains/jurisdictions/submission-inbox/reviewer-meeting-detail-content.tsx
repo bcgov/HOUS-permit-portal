@@ -4,7 +4,6 @@ import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useNavigate } from "react-router-dom"
 import { datefnsTableDateTimeFormat } from "../../../../constants"
 import { usePermitProject } from "../../../../hooks/resources/use-permit-project"
 import { useProjectMeeting } from "../../../../hooks/resources/use-project-meeting"
@@ -14,6 +13,7 @@ import { EFlashMessageStatus, EProjectMeetingStatus } from "../../../../types/en
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
 import { ConfirmationModal } from "../../../shared/confirmation-modal"
+import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
 import { ProjectMeetingStatusTag } from "../../../shared/project-meetings/project-meeting-status-tag"
 import { ReviewerScheduledMeetingBanner } from "../../project-meeting/detail/banners/reviewer-scheduled-meeting-banner"
 import { ScheduleMeetingBanner } from "../../project-meeting/detail/banners/schedule-meeting-banner"
@@ -31,7 +31,6 @@ interface ReviewerMeetingDetailContentProps {
 export const ReviewerMeetingDetailContent = observer(
   ({ jurisdictionId, permitProject }: ReviewerMeetingDetailContentProps) => {
     const { t } = useTranslation()
-    const navigate = useNavigate()
     const { currentProjectMeeting, error: projectMeetingError, isLoading } = useProjectMeeting()
     const { currentPermitProject, error: permitProjectError } = usePermitProject(
       permitProject?.id ?? currentProjectMeeting?.permitProjectId
@@ -106,9 +105,15 @@ export const ReviewerMeetingDetailContent = observer(
 
     return (
       <Box as="section">
-        <Button leftIcon={<CaretLeft size={20} />} variant="link" mb={6} px={0} onClick={() => navigate(-1)}>
+        <RouterLinkButton
+          to={`/jurisdictions/${jurisdictionId}/meetings`}
+          leftIcon={<CaretLeft size={20} />}
+          variant="link"
+          mb={6}
+          px={0}
+        >
           {t("ui.back")}
-        </Button>
+        </RouterLinkButton>
 
         <HStack justify="space-between" align="flex-start" mb={8}>
           <Box>

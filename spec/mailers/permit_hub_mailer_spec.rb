@@ -418,11 +418,21 @@ RSpec.describe PermitHubMailer, type: :mailer do
         contact_method: "videoconference",
         confirmed_date: Time.zone.parse("2026-01-20 09:30"),
         meeting_url: "https://example.com/meeting",
-        permit_project: permit_project
+        permit_project: permit_project,
+        updated_at: Time.zone.parse("2026-01-20 08:00")
       )
+    attachments_hash = {}
+    allow(mailer).to receive(:attachments).and_return(attachments_hash)
 
     mailer.notify_project_meeting_scheduled(project_meeting)
 
+    expect(attachments_hash.keys.first).to end_with(".ics")
+    expect(attachments_hash.values.first[:mime_type]).to include(
+      "text/calendar"
+    )
+    expect(attachments_hash.values.first[:content]).to include(
+      "BEGIN:VCALENDAR"
+    )
     expect(mailer).to have_received(:send_mail).with(
       email: "jane@example.com",
       template_key: "notify_project_meeting_scheduled"
@@ -436,6 +446,7 @@ RSpec.describe PermitHubMailer, type: :mailer do
       instance_double(
         "PermitProject",
         id: "project-id",
+        title: nil,
         number: "P-123",
         full_address: "1127 Winnipeg St",
         jurisdiction: jurisdiction
@@ -451,7 +462,8 @@ RSpec.describe PermitHubMailer, type: :mailer do
         contact_method: "phone",
         confirmed_date: Time.zone.parse("2026-01-20 09:30"),
         meeting_url: nil,
-        permit_project: permit_project
+        permit_project: permit_project,
+        updated_at: Time.zone.parse("2026-01-20 08:00")
       )
 
     mailer.notify_project_meeting_scheduled_to_jurisdiction(
@@ -494,7 +506,8 @@ RSpec.describe PermitHubMailer, type: :mailer do
         contact_method: "videoconference",
         confirmed_date: Time.zone.parse("2026-01-20 09:30"),
         meeting_url: "https://example.com/meeting",
-        permit_project: permit_project
+        permit_project: permit_project,
+        updated_at: Time.zone.parse("2026-01-20 08:00")
       )
 
     mailer.notify_project_meeting_rescheduled(project_meeting)
@@ -512,6 +525,7 @@ RSpec.describe PermitHubMailer, type: :mailer do
       instance_double(
         "PermitProject",
         id: "project-id",
+        title: nil,
         number: "P-123",
         full_address: "1127 Winnipeg St",
         jurisdiction: jurisdiction
@@ -527,7 +541,8 @@ RSpec.describe PermitHubMailer, type: :mailer do
         contact_method: "phone",
         confirmed_date: Time.zone.parse("2026-01-20 09:30"),
         meeting_url: nil,
-        permit_project: permit_project
+        permit_project: permit_project,
+        updated_at: Time.zone.parse("2026-01-20 08:00")
       )
 
     mailer.notify_project_meeting_rescheduled_to_jurisdiction(
