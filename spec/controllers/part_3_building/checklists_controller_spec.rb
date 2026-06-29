@@ -4,7 +4,7 @@ RSpec.describe Api::Part3Building::ChecklistsController, type: :controller do
   render_views
 
   let(:submitter) { create(:user, :submitter) }
-  let(:jurisdiction) { create(:sub_district, heating_degree_days: 2910) }
+  let(:jurisdiction) { create(:sub_district) }
   let(:permit_application) do
     create(
       :permit_application,
