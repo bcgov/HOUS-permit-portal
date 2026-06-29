@@ -3752,10 +3752,10 @@ Thank you,
                 "This page shows the Energy Step Code and Zero Carbon Step Code requirements for buildings in this community. Requirements may vary based on building type, occupancies, permit-processing date, and local bylaws.",
               stepCodeRequirementsNotice:
                 "These requirements apply to new buildings only. For existing buildings or renovations, contact your local building officials.",
-              heatingDegreeDaysTitle: "Climate zones and heating degree days",
+              heatingDegreeDaysTitle: "Climate information for energy modelling",
               heatingDegreeDaysDescription:
-                "Use the Heating Degree Days (HDD) value for your project's climate zone when preparing Step Code reporting for a permit application in this community.",
-              climateZoneColumnHeader: "Climate zone",
+                "The local building authority has set the Heating Degree Days (HDD) to use for each climate zone in this community. Use the value for your project's climate zone when completing energy modelling or creating a Step Codes report.",
+              climateZoneColumnHeader: "Climate Zone",
               heatingDegreeDaysColumnHeader: "Heating Degree Days (HDD)",
               heatingDegreeDaysNotConfigured: "Not configured",
               noClimateZonesTitle: "No climate zones configured",

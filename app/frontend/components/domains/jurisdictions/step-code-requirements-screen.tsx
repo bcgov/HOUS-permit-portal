@@ -2,7 +2,6 @@ import {
   Box,
   Button,
   Container,
-  Flex,
   Heading,
   HStack,
   Link,
@@ -88,66 +87,6 @@ export const JurisdictionStepCodeRequirementsScreen = observer(() => {
         {t(`${i18nPrefix}.stepCodeRequirementsNotice`)}
       </Text>
 
-      <Flex
-        bg="theme.blueLight"
-        borderRadius="lg"
-        p={6}
-        mb={6}
-        direction={{ base: "column", md: "row" }}
-        gap={6}
-        justify="space-between"
-        align={{ base: "stretch", md: "center" }}
-      >
-        <Box maxW="2xl">
-          <Heading as="h2" fontSize="xl" mb={2}>
-            {t(`${i18nPrefix}.heatingDegreeDaysTitle`)}
-          </Heading>
-          <Text fontSize="md" color="text.primary">
-            {t(`${i18nPrefix}.heatingDegreeDaysDescription`)}
-          </Text>
-        </Box>
-        <Box
-          bg="greys.white"
-          borderWidth={1}
-          borderColor="border.light"
-          borderRadius="md"
-          minW={{ base: "full", md: "360px" }}
-          overflowX="auto"
-        >
-          {climateZones.length > 0 ? (
-            <Table size="sm" variant="simple">
-              <Thead bg="greys.grey03">
-                <Tr>
-                  <Th>{t(`${i18nPrefix}.climateZoneColumnHeader`)}</Th>
-                  <Th isNumeric>{t(`${i18nPrefix}.heatingDegreeDaysColumnHeader`)}</Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {climateZones.map((zone) => {
-                  const climateZoneLabelKey = climateZoneLabelKeys[zone.climateZone as EClimateZone]
-
-                  return (
-                    <Tr key={zone.id ?? zone.climateZone}>
-                      <Td fontWeight="bold">{climateZoneLabelKey ? t(climateZoneLabelKey) : zone.climateZone}</Td>
-                      <Td isNumeric color={zone.heatingDegreeDays ? "text.primary" : "text.secondary"}>
-                        {zone.heatingDegreeDays?.toLocaleString() ?? t(`${i18nPrefix}.heatingDegreeDaysNotConfigured`)}
-                      </Td>
-                    </Tr>
-                  )
-                })}
-              </Tbody>
-            </Table>
-          ) : (
-            <Box p={4}>
-              <Text fontWeight="bold" mb={1}>
-                {t(`${i18nPrefix}.noClimateZonesTitle`)}
-              </Text>
-              <Text color="text.secondary">{t(`${i18nPrefix}.noClimateZonesDescription`)}</Text>
-            </Box>
-          )}
-        </Box>
-      </Flex>
-
       <ActionButtons />
 
       {/* Part 9: Small, simple buildings */}
@@ -179,6 +118,76 @@ export const JurisdictionStepCodeRequirementsScreen = observer(() => {
       </VStack>
 
       <ActionButtons pt={8} />
+
+      <VStack align="start" spacing={5} mt={10}>
+        <Heading as="h2" fontSize="2xl">
+          {t(`${i18nPrefix}.heatingDegreeDaysTitle`)}
+        </Heading>
+        <Text fontSize="lg">{t(`${i18nPrefix}.heatingDegreeDaysDescription`)}</Text>
+        {climateZones.length > 0 ? (
+          <Box borderWidth={1} borderColor="border.light" borderRadius="sm" overflow="hidden" w="fit-content">
+            <Table variant="simple" size="md">
+              <Thead>
+                <Tr bg="greys.grey04">
+                  <Th
+                    borderBottomWidth={1}
+                    borderColor="border.light"
+                    fontWeight="bold"
+                    fontSize="sm"
+                    w="220px"
+                    h="46px"
+                    px={4}
+                  >
+                    {t(`${i18nPrefix}.climateZoneColumnHeader`)}
+                  </Th>
+                  <Th
+                    borderBottomWidth={1}
+                    borderColor="border.light"
+                    fontWeight="bold"
+                    fontSize="sm"
+                    w="220px"
+                    h="46px"
+                    px={4}
+                  >
+                    {t(`${i18nPrefix}.heatingDegreeDaysColumnHeader`)}
+                  </Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {climateZones.map((zone) => {
+                  const climateZoneLabelKey = climateZoneLabelKeys[zone.climateZone as EClimateZone]
+
+                  return (
+                    <Tr key={zone.id ?? zone.climateZone}>
+                      <Td borderTopWidth={1} borderColor="greys.grey02" fontSize="lg" w="220px" minH="68px" px={4}>
+                        {climateZoneLabelKey ? t(climateZoneLabelKey) : zone.climateZone}
+                      </Td>
+                      <Td
+                        borderTopWidth={1}
+                        borderColor="greys.grey02"
+                        fontSize="lg"
+                        w="220px"
+                        minH="68px"
+                        px={4}
+                        color={zone.heatingDegreeDays ? "text.primary" : "text.secondary"}
+                      >
+                        {zone.heatingDegreeDays?.toLocaleString() ?? t(`${i18nPrefix}.heatingDegreeDaysNotConfigured`)}
+                      </Td>
+                    </Tr>
+                  )
+                })}
+              </Tbody>
+            </Table>
+          </Box>
+        ) : (
+          <Box borderWidth={1} borderColor="border.light" borderRadius="sm" p={4}>
+            <Text fontWeight="bold" mb={1}>
+              {t(`${i18nPrefix}.noClimateZonesTitle`)}
+            </Text>
+            <Text color="text.secondary">{t(`${i18nPrefix}.noClimateZonesDescription`)}</Text>
+          </Box>
+        )}
+      </VStack>
 
       <VStack align="start" spacing={4} mt={12}>
         <Heading as="h2" fontSize="2xl">
