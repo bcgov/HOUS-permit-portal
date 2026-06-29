@@ -290,7 +290,8 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
             position="sticky"
             top="0"
             zIndex={12}
-            flexDirection={{ base: "column", md: "row" }}
+            gap={4}
+            flexDirection={{ base: "column", "2lg": "row" }}
           >
             <HStack gap={4} flex={1}>
               <PermitApplicationStatusTag status={currentPermitApplication.status} />
@@ -353,7 +354,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
             </HStack>
 
             {isSubmitted ? (
-              <Stack direction={{ base: "column", lg: "row" }} align={{ base: "flex-end", lg: "center" }}>
+              <Stack direction={{ base: "column", "2lg": "row" }} align={{ base: "flex-end", "2lg": "center" }}>
                 <BrowserSearchPrompt />
                 <Button variant="ghost" leftIcon={<Info size={20} />} color="white" onClick={onContactsOpen}>
                   {t("permitApplication.show.contactsSummary")}
@@ -376,7 +377,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
               <HStack
                 flexDir={{
                   base: "column",
-                  md: "row",
+                  "2lg": "row",
                 }}
                 gap={4}
               >

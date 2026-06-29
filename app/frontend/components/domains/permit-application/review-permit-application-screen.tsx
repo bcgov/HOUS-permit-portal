@@ -161,7 +161,16 @@ export const ReviewPermitApplicationScreen = observer(() => {
   return (
     <Box as="main" id="reviewing-permit-application">
       <Flex id="permitHeader" direction="column" position="sticky" top={0} zIndex={12} ref={permitHeaderRef}>
-        <Flex w="full" px={6} py={3} bg="theme.blue" justify="space-between" color="greys.white">
+        <Flex
+          w="full"
+          px={6}
+          py={3}
+          bg="theme.blue"
+          justify="space-between"
+          color="greys.white"
+          gap={4}
+          flexDirection={{ base: "column", "2lg": "row" }}
+        >
           <HStack gap={4} flex={1}>
             <PermitApplicationStatusTag status={currentPermitApplication.status} />
             <Flex direction="column" w="full">
@@ -206,8 +215,8 @@ export const ReviewPermitApplicationScreen = observer(() => {
               </HStack>
             </Flex>
           </HStack>
-          <Flex direction="column" align="flex-end" justify="space-between">
-            <Stack direction={{ base: "column", lg: "row" }} align={{ base: "flex-end", lg: "center" }}>
+          <Flex direction="column" align={{ base: "stretch", "2lg": "flex-end" }} justify="space-between">
+            <Stack direction={{ base: "column", "2lg": "row" }} align={{ base: "flex-end", "2lg": "center" }}>
               <BrowserSearchPrompt />
               <Button variant="ghost" leftIcon={<Info size={20} />} color="white" onClick={onContactsOpen}>
                 {t("permitApplication.show.contactsSummary")}

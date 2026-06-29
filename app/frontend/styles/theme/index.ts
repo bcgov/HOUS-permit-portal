@@ -11,6 +11,7 @@ import { Tabs } from "./components/tabs"
 import { Tag } from "./components/tag"
 import { Text } from "./components/text"
 import { radii } from "./foundations/border-radii"
+import { breakpoints } from "./foundations/breakpoints"
 import { colors } from "./foundations/colors"
 import { fontSizes } from "./foundations/font-sizes"
 import { fonts } from "./foundations/fonts"
@@ -88,6 +89,6 @@ const styles = {
   },
 }
 const components = { Button, FormLabel, Heading, Input, Link, Select, Text, Table, Radio, Tag, Tabs }
-const overrides = { styles, colors, fonts, fontSizes, sizes, radii, space, shadows, components }
+const overrides = { styles, colors, fonts, fontSizes, sizes, radii, space, shadows, components, breakpoints }
 
 export const theme = extendTheme(overrides)
