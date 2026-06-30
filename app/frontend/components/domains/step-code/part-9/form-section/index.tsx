@@ -1,20 +1,34 @@
-import { Accordion, Alert, Center, Heading, HStack, Tag, Text, VStack } from "@chakra-ui/react"
+import {
+  Accordion,
+  Alert,
+  Center,
+  FormControl,
+  FormLabel,
+  Heading,
+  HStack,
+  InputGroup,
+  Tag,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { LightningA } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { ReactNode, useEffect } from "react"
-import { FormProvider, useForm } from "react-hook-form"
+import { Controller, FormProvider, useForm } from "react-hook-form"
 import { Navigate, useLocation, useParams } from "react-router-dom"
 import { usePart9StepCode } from "../../../../../hooks/resources/use-part-9-step-code"
 import { EFileUploadAttachmentType, EFlashMessageStatus } from "../../../../../types/enums"
 import { TPart9NavLinkKey } from "../../../../../types/types"
 import { FileDownloadButton } from "../../../../shared/base/file-download-button"
 import { SharedSpinner } from "../../../../shared/base/shared-spinner"
+import { TextFormControl } from "../../../../shared/form/input-form-control"
 import { BuildingCharacteristicsSummary } from "../checklist/building-characteristics-summary"
 import { CompletedBy } from "../checklist/completed-by"
 import { ComplianceSummary } from "../checklist/compliance-summary"
 import { EnergyPerformanceCompliance } from "../checklist/energy-performance-compliance"
 import { EnergyStepCodeCompliance } from "../checklist/energy-step-code-compliance"
+import { BuildingTypeSelect } from "../checklist/project-info/building-type-select"
 import { StepNotMetWarning } from "../checklist/shared/step-not-met-warning"
 import { ZeroCarbonStepCodeCompliance } from "../checklist/zero-carbon-step-code-compliance"
 import { DrawingsWarning } from "../drawings-warning"
@@ -24,10 +38,16 @@ import { Title } from "../title"
 import { usePart9Navigation } from "../use-part-9-navigation"
 import { Part9FormFooter } from "./shared/form-footer"
 
+type TPart9Checklist = NonNullable<ReturnType<typeof usePart9StepCode>["checklist"]>
+
 interface IChecklistRouteSectionProps {
   sectionKey: TPart9NavLinkKey
   requiresReport?: boolean
-  children: (helpers: { checklist: NonNullable<ReturnType<typeof usePart9StepCode>["checklist"]> }) => ReactNode
+  children: (helpers: { checklist: TPart9Checklist }) => ReactNode
+}
+
+interface IComplianceSummarySectionProps {
+  checklist: TPart9Checklist
 }
 
 export const FormSection = observer(function Part9StepCodeFormSection() {
@@ -48,6 +68,8 @@ export const FormSection = observer(function Part9StepCodeFormSection() {
       return <StartSection />
     case "project-info":
       return <Navigate to={pathname.replace(/\/project-info$/, "/start")} replace />
+    case "building-info":
+      return <BuildingInfoSection />
     case "h2k-import":
       return <H2KImport />
     case "compliance-summary":
@@ -120,6 +142,69 @@ const StartSection = observer(function StartSection() {
   )
 })
 
+const BuildingInfoSection = observer(function BuildingInfoSection() {
+  const { checklist } = usePart9StepCode()
+  const formMethods = useForm({ mode: "onChange" })
+  const { control, handleSubmit, reset, formState } = formMethods
+
+  useEffect(() => {
+    if (!checklist) return
+    if (checklist.isLoaded) return
+    ;(async () => {
+      await checklist.load()
+    })()
+  }, [checklist?.id, checklist?.isLoaded])
+
+  useEffect(() => {
+    if (!checklist?.isLoaded) return
+    reset(checklist.defaultFormValues)
+  }, [checklist?.id, checklist?.isLoaded])
+
+  const onSubmit = async (values) => {
+    const result = await checklist.update({
+      builder: values.builder,
+      buildingType: values.buildingType,
+    })
+    if (!result) throw new Error("Save failed")
+
+    const sectionCompleted = await checklist.completeSection("buildingInfo")
+    if (!sectionCompleted) throw new Error("Save failed")
+  }
+
+  if (!checklist?.isLoaded) {
+    return (
+      <Center>
+        <SharedSpinner />
+      </Center>
+    )
+  }
+
+  return (
+    <FormProvider {...formMethods}>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <VStack align="start" spacing={6}>
+          <Heading as="h2" fontSize="2xl">
+            {t("stepCode.part9.buildingInfo.heading")}
+          </Heading>
+          <Text>{t("stepCode.part9.buildingInfo.instructions")}</Text>
+          <TextFormControl label={t("stepCodeChecklist.edit.projectInfo.builder")} fieldName="builder" />
+          <FormControl>
+            <FormLabel>{t("stepCodeChecklist.edit.projectInfo.buildingType.label")}</FormLabel>
+            <InputGroup>
+              <Controller
+                control={control}
+                name="buildingType"
+                render={({ field: { onChange, value } }) => <BuildingTypeSelect onChange={onChange} value={value} />}
+              />
+            </InputGroup>
+          </FormControl>
+          <Part9FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={formState.isSubmitting} />
+        </VStack>
+      </form>
+    </FormProvider>
+  )
+})
+
 const ChecklistRouteSection = observer(function ChecklistRouteSection({
   sectionKey,
   requiresReport,
@@ -177,7 +262,9 @@ const ChecklistRouteSection = observer(function ChecklistRouteSection({
   )
 })
 
-const ComplianceSummarySection = observer(function ComplianceSummarySection({ checklist }) {
+const ComplianceSummarySection = observer(function ComplianceSummarySection({
+  checklist,
+}: IComplianceSummarySectionProps) {
   const { navigateToSection } = usePart9Navigation()
 
   return (

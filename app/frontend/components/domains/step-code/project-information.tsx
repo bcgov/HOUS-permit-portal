@@ -11,6 +11,7 @@ import {
   InputLeftElement,
   Radio,
   Table,
+  Tag,
   Tbody,
   Td,
   Text,
@@ -23,14 +24,13 @@ import React, { useEffect, useMemo, useState } from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useNavigate, useParams } from "react-router-dom"
 import { IJurisdiction } from "../../../models/jurisdiction"
-import { EStepCodeBuildingType, EStepCodeChecklistStage, EStepCodeType } from "../../../types/enums"
+import { EStepCodeChecklistStage } from "../../../types/enums"
 import { IOption } from "../../../types/types"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
-import { DatePickerFormControl, TextFormControl } from "../../shared/form/input-form-control"
+import { DatePickerFormControl } from "../../shared/form/input-form-control"
 import { InfoTooltip } from "../../shared/info-tooltip"
 import { SitesSelect } from "../../shared/select/selectors/sites-select"
 import { SectionHeading } from "./part-3/form-section/shared/section-heading"
-import { BuildingTypeSelect } from "./part-9/checklist/project-info/building-type-select"
 
 type TStepCodeKind = "part3" | "part9"
 
@@ -39,8 +39,6 @@ interface IProjectInformationForm {
   referenceNumber?: string
   permitDate?: string
   pid?: string
-  builder?: string
-  buildingType?: EStepCodeBuildingType
   site?: IOption
   jurisdictionId?: string
 }
@@ -56,6 +54,8 @@ const stageOptions = [
   EStepCodeChecklistStage.midConstruction,
   EStepCodeChecklistStage.asBuilt,
 ]
+
+const stepCodesPath = "/step-codes?currentPage=1"
 
 export const ProjectInformation = observer(function StepCodeProjectInformation({
   currentStepCode,
@@ -75,7 +75,6 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
     () => currentStepCode?.checklists?.find((checklist) => checklist.stage === selectedStage),
     [currentStepCode?.checklists?.length, selectedStage]
   )
-  const isStageChecklistLoading = Boolean(stepCodeKind === "part9" && stageChecklist && !stageChecklist.isLoaded)
 
   const formMethods = useForm<IProjectInformationForm>({
     defaultValues: getDefaultValues(currentStepCode),
@@ -86,7 +85,6 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
     handleSubmit,
     register,
     reset,
-    setValue,
     formState: { errors },
   } = formMethods
 
@@ -99,32 +97,13 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
   useEffect(() => {
     if (!currentStepCode) return
 
-    reset(getDefaultValues(currentStepCode, stageChecklist))
+    reset(getDefaultValues(currentStepCode))
   }, [currentStepCode?.id, currentStepCode?.currentStage, reset])
-
-  useEffect(() => {
-    if (stepCodeKind !== "part9") return
-
-    setValue("builder", stageChecklist?.builder || "")
-    setValue("buildingType", stageChecklist?.buildingType ?? undefined)
-  }, [
-    stepCodeKind,
-    stageChecklist?.id,
-    stageChecklist?.isLoaded,
-    stageChecklist?.builder,
-    stageChecklist?.buildingType,
-    setValue,
-  ])
-
-  useEffect(() => {
-    if (stepCodeKind !== "part9") return
-    if (!stageChecklist || stageChecklist.isLoaded) return
-
-    stageChecklist.load()
-  }, [stageChecklist?.id, stageChecklist?.isLoaded, stepCodeKind])
 
   const stageLabel = (stage: EStepCodeChecklistStage) => t(`stepCodeChecklist.edit.projectInfo.stages.${stage}`)
   const showPermitDate = selectedStage !== EStepCodeChecklistStage.preConstruction
+  const isPermitDateEditable = isEditable
+  const permitDateInputProps = isPermitDateEditable ? undefined : { readOnly: true }
 
   const handleStageSelect = (stage: EStepCodeChecklistStage) => {
     setSelectedStage(stage)
@@ -146,7 +125,7 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
     return `/${partPath}/${currentStepCode.id}/stages/${stage}/${section}`
   }
 
-  const onSubmit = async (values: IProjectInformationForm) => {
+  const saveProjectInformation = async (values: IProjectInformationForm) => {
     if (!currentStepCode) return
 
     setSubmitError(null)
@@ -167,34 +146,40 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
       const stepCodeUpdated = await currentStepCode.update(updateValues)
       if (!stepCodeUpdated) throw new Error("Step Code update failed")
 
-      const part9ChecklistValues =
-        stepCodeKind === "part9"
-          ? {
-              builder: values.builder,
-              buildingType: values.buildingType,
-            }
-          : {}
-
       if (!checklist) {
         checklist = await currentStepCode.createChecklist({
           stage: selectedStage,
           sectionCompletionStatus: defaultSectionCompletionStatus,
-          ...part9ChecklistValues,
         })
-      } else if (stepCodeKind === "part9") {
-        const checklistUpdated = await checklist.update(part9ChecklistValues)
-        if (!checklistUpdated) throw new Error("Checklist update failed")
       }
       if (!checklist) throw new Error("Checklist create failed")
 
-      const nextSection = checklist.currentNavLink?.location || "start"
-      navigate(checklistPath(selectedStage, nextSection))
+      return checklist
     } catch {
       setSubmitError(t("stepCode.projectInformation.error"))
     } finally {
       setIsSubmitting(false)
     }
   }
+
+  const onSubmit = async (values: IProjectInformationForm) => {
+    const checklist = await saveProjectInformation(values)
+    if (!checklist) return
+
+    const nextSection = checklist.currentNavLink?.location || "start"
+    navigate(checklistPath(selectedStage, nextSection))
+  }
+
+  const handleSaveAndGoBack = handleSubmit(async (values) => {
+    const checklist = await saveProjectInformation(values)
+    if (!checklist) return
+
+    navigate(stepCodesPath)
+  })
+  const stepCodeKindLabel =
+    stepCodeKind === "part3"
+      ? t("stepCode.projectInformation.types.part3")
+      : t("stepCode.projectInformation.types.part9")
 
   if (!currentStepCode) {
     return (
@@ -209,7 +194,12 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
       <form onSubmit={handleSubmit(onSubmit)}>
         <Flex direction="column" gap={6} pb={4}>
           <Flex direction="column" gap={2}>
-            <SectionHeading>{t("stepCode.projectInformation.heading")}</SectionHeading>
+            <HStack align="flex-end" spacing={3}>
+              <SectionHeading>{t("stepCode.projectInformation.heading")}</SectionHeading>
+              <Tag bg="theme.blueLight" color="text.primary" fontWeight="bold" mb={2}>
+                {stepCodeKindLabel}
+              </Tag>
+            </HStack>
             <Text fontSize="md">{t("stepCode.projectInformation.instructions")}</Text>
           </Flex>
 
@@ -226,7 +216,7 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
                       <SitesSelect
                         onChange={(option: IOption) => {
                           onChange(option)
-                          setValue("fullAddress", option?.label || "", { shouldValidate: true })
+                          formMethods.setValue("fullAddress", option?.label || "", { shouldValidate: true })
                         }}
                         selectedOption={value}
                         pidName="pid"
@@ -286,30 +276,6 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
             />
           )}
 
-          {isStageChecklistLoading ? (
-            <Center p={4}>
-              <SharedSpinner />
-            </Center>
-          ) : (
-            stepCodeKind === "part9" && (
-              <Flex gap={{ base: 6, xl: 6 }} direction={{ base: "column", xl: "row" }}>
-                <TextFormControl label={t("stepCodeChecklist.edit.projectInfo.builder")} fieldName="builder" />
-                <FormControl>
-                  <FormLabel>{t("stepCodeChecklist.edit.projectInfo.buildingType.label")}</FormLabel>
-                  <InputGroup>
-                    <Controller
-                      control={control}
-                      name="buildingType"
-                      render={({ field: { onChange, value } }) => (
-                        <BuildingTypeSelect onChange={onChange} value={value} />
-                      )}
-                    />
-                  </InputGroup>
-                </FormControl>
-              </Flex>
-            )
-          )}
-
           {showPermitDate && (
             <DatePickerFormControl
               flex={1}
@@ -317,10 +283,8 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
               label={t("stepCode.projectInformation.date") as string}
               fieldName="permitDate"
               showOptional={false}
-              inputProps={
-                isEditable && currentStepCode.type === EStepCodeType.part3StepCode ? undefined : { readOnly: true }
-              }
-              isReadOnly={!(isEditable && currentStepCode.type === EStepCodeType.part3StepCode)}
+              inputProps={permitDateInputProps}
+              isReadOnly={!isPermitDateEditable}
               LabelInfo={() => (
                 <InfoTooltip {...fieldTooltipProps} label={t("stepCode.projectInformation.dateTooltip") as string} />
               )}
@@ -362,7 +326,7 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
                         <Button
                           type="submit"
                           variant="primary"
-                          isDisabled={!isSelected || isStageChecklistLoading}
+                          isDisabled={!isSelected}
                           isLoading={isSelected && isSubmitting}
                         >
                           {checklist
@@ -376,20 +340,32 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
               </Tbody>
             </Table>
           </FormControl>
+
+          {isEditable && (
+            <Flex justify="flex-start">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={handleSaveAndGoBack}
+                isDisabled={isSubmitting}
+                isLoading={isSubmitting}
+              >
+                {t("stepCode.saveAndGoBack")}
+              </Button>
+            </Flex>
+          )}
         </Flex>
       </form>
     </FormProvider>
   )
 })
 
-function getDefaultValues(currentStepCode, checklist = null): IProjectInformationForm {
+function getDefaultValues(currentStepCode): IProjectInformationForm {
   return {
     fullAddress: currentStepCode?.fullAddress || "",
     referenceNumber: currentStepCode?.referenceNumber || "",
     permitDate: currentStepCode?.permitDate || "",
     pid: currentStepCode?.pid || "",
-    builder: checklist?.builder || "",
-    buildingType: checklist?.buildingType ?? undefined,
     jurisdictionId: currentStepCode?.jurisdiction?.id || "",
     site: currentStepCode?.fullAddress
       ? {

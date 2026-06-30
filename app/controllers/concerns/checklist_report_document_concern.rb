@@ -18,7 +18,7 @@ module ChecklistReportDocumentConcern
   end
 
   def should_generate_report_document?
-    complete? && step_code.present? && !permit_application_id.present? &&
-      saved_changes?
+    complete? && (!respond_to?(:step_code) || step_code.present?) &&
+      !permit_application_id.present? && saved_changes?
   end
 end

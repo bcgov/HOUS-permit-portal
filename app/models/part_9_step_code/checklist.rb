@@ -7,6 +7,7 @@ class Part9StepCode::Checklist < ActiveRecord::Base
   SECTION_COMPLETION_STATUS_KEYS = %i[
     start
     project_info
+    building_info
     h2k_import
     compliance_summary
     completed_by

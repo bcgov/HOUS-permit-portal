@@ -13,6 +13,12 @@ export const navLinks: IPart9NavLink[] = [
     section: "overview",
   },
   {
+    key: "buildingInfo",
+    location: "building-info",
+    subLinks: [],
+    section: "overview",
+  },
+  {
     key: "h2kImport",
     location: "h2k-import",
     subLinks: [],
@@ -97,6 +103,7 @@ export const reportDependentSectionKeys: TPart9NavLinkKey[] = [
 export const defaultSectionCompletionStatus: IPart9SectionCompletionStatus = {
   start: { complete: false, relevant: true },
   projectInfo: { complete: false, relevant: false },
+  buildingInfo: { complete: false, relevant: true },
   h2kImport: { complete: false, relevant: true },
   complianceSummary: { complete: false, relevant: true },
   completedBy: { complete: false, relevant: true },
