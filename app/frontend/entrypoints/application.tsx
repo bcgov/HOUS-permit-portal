@@ -24,14 +24,6 @@ const renderApp = (rootStore) => {
     const { t } = useTranslation()
 
     React.useEffect(() => {
-      if (import.meta.env.VITE_QA_MODE === "true") {
-        console.log("VITE_QA_MODE is true")
-      } else {
-        console.log("VITE_QA_MODE is false")
-      }
-    }, [])
-
-    React.useEffect(() => {
       if (!import.meta.env.VITE_MATOMO_URL) {
         console.warn("VITE_MATOMO_URL is not set")
         return
