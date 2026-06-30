@@ -2,15 +2,13 @@ import { View } from "@react-pdf/renderer"
 import { t } from "i18next"
 import React from "react"
 import { IPart3StepCode } from "../../../../../../../models/part-3-step-code"
-import { IPart3StepCodeChecklist } from "../../../../../../../models/part-3-step-code-checklist"
 import { Field } from "../../../../part-9/checklist/pdf-content/shared/field"
 import { Panel } from "../../../../part-9/checklist/pdf-content/shared/panel"
 
 interface IProps {
   stepCode: Partial<IPart3StepCode>
-  checklist: IPart3StepCodeChecklist
 }
-export const ProjectInfo = function StepCodePart3ChecklistPDFProjectInfo({ checklist, stepCode }: IProps) {
+export const ProjectInfo = function StepCodePart3ChecklistPDFProjectInfo({ stepCode }: IProps) {
   type TPrefix = "stepCode.part3.projectDetails"
   const i18nPrefix: TPrefix = "stepCode.part3.projectDetails"
   return (
@@ -29,10 +27,6 @@ export const ProjectInfo = function StepCodePart3ChecklistPDFProjectInfo({ check
         />
         <Field label={t(`${i18nPrefix}.date`)} value={stepCode.permitDate || ""} style={{ flex: 1 }} />
       </View>
-      <Field
-        label={t(`${i18nPrefix}.version`)}
-        value={t(`${i18nPrefix}.buildingCodeVersions.${checklist.buildingCodeVersion}`)}
-      />
     </Panel>
   )
 }
