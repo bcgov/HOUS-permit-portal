@@ -29,7 +29,11 @@ module Api::Concerns::Search::StepCodes
       scope_results: ->(relation) { policy_scope(relation) }
     }
 
-    @step_code_search = StepCode.search(step_code_query, **search_conditions)
+    @step_code_search =
+      ensure_searchkick_policy_scoped!(
+        StepCode,
+        StepCode.search(step_code_query, **search_conditions)
+      )
   end
 
   private

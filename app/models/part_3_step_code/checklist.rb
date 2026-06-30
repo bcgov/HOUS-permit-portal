@@ -2,6 +2,7 @@ class Part3StepCode::Checklist < ActiveRecord::Base
   self.table_name = "part_3_step_code_checklists"
 
   include ChecklistReportDocumentConcern
+  include StepCodeChecklistStageCompletion
 
   SECTION_COMPLETION_STATUS_KEYS = %i[
     start

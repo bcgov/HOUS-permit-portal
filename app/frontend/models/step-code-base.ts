@@ -1,5 +1,5 @@
 import { flow, toGenerator, types } from "mobx-state-tree"
-import { EStepCodeChecklistStage } from "../types/enums"
+import { EStepCodeChecklistStage, EStepCodeStageStatus } from "../types/enums"
 import { IReportDocument } from "../types/types"
 import { JurisdictionModel } from "./jurisdiction"
 
@@ -26,7 +26,13 @@ export const StepCodeBaseFields = types
     permitProjectTitle: types.maybeNull(types.string),
     reportDocuments: types.maybeNull(types.array(types.frozen<IReportDocument>())),
     stageCompletions: types.optional(
-      types.array(types.frozen<{ stage: EStepCodeChecklistStage; complete: boolean }>()),
+      types.array(
+        types.frozen<{
+          stage: EStepCodeChecklistStage
+          status: EStepCodeStageStatus
+          stageCompletedAt: Date | null
+        }>()
+      ),
       []
     ),
   })

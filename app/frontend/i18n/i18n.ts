@@ -303,6 +303,7 @@ const options = {
             discardChanges: "Discard changes",
           },
           other: "Other",
+          legend: "Legend",
           confirmArchive: "Are you sure you want to archive this item?",
           confirmRestore: "Are you sure you want to restore this item?",
           updatedAt: "Updated at",
@@ -2480,8 +2481,15 @@ Thank you,
             fullAddress: "Address",
             updatedAt: "Last modified",
             stages: "Stages",
+            stagesPopoverHeading: "Step code stages",
+            stagesStatus: {
+              complete: "Completed",
+              completedOn: "Completed · {{date}}",
+              inProgress: "In progress",
+              notStarted: "Not started",
+            },
             stagesTooltipLegend:
-              "Icons are shown left to right in this order. A filled circle means the stage is complete; a dashed circle means it is not started or still in progress.",
+              "Icons are shown left to right in this order. A green check means complete, a half-filled circle means in progress, and a dashed circle means not started.",
           },
           part3: {
             title: "Energy and Zero Carbon Step Codes for Step 3 Buildings",
@@ -3375,7 +3383,7 @@ Thank you,
         },
         stepCodeChecklist: {
           pdf: {
-            for: "Step code pre-construction checklist for",
+            for: "Step code pre-construction checklist for {{address}}",
             forPart3: "Part 3 Step code checklist for",
           },
           edit: {

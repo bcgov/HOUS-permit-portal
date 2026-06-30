@@ -1,6 +1,7 @@
 require "rails_helper"
 
 RSpec.describe Part3StepCode::Checklist, type: :model do
+  include ActiveSupport::Testing::TimeHelpers
   describe "associations" do
     it do
       should belong_to(:step_code)
@@ -43,6 +44,51 @@ RSpec.describe Part3StepCode::Checklist, type: :model do
       checklist = build(:part_3_checklist)
 
       expect(checklist.complete?).to be(false)
+    end
+  end
+
+  describe "stage_completed_at" do
+    it "is set when the checklist becomes complete" do
+      checklist = create(:part_3_checklist)
+
+      travel_to Time.zone.parse("2026-06-12 10:00") do
+        checklist.update!(
+          section_completion_status: {
+            "step_code_summary" => {
+              "complete" => true,
+              "relevant" => true
+            }
+          }
+        )
+        expect(checklist.stage_completed_at).to eq(
+          Time.zone.parse("2026-06-12 10:00")
+        )
+      end
+    end
+
+    it "is cleared when the summary section is no longer complete" do
+      checklist =
+        create(
+          :part_3_checklist,
+          section_completion_status: {
+            "step_code_summary" => {
+              "complete" => true,
+              "relevant" => true
+            }
+          },
+          stage_completed_at: 1.day.ago
+        )
+
+      checklist.update!(
+        section_completion_status: {
+          "step_code_summary" => {
+            "complete" => false,
+            "relevant" => true
+          }
+        }
+      )
+
+      expect(checklist.stage_completed_at).to be_nil
     end
   end
 

@@ -27,6 +27,7 @@ class Part3StepCode < StepCode
     checklist.step_code = self
     checklist.stage = stage
     checklist.status = :draft
+    checklist.stage_completed_at = nil
     checklist.section_completion_status =
       attrs["section_completion_status"] || attrs[:section_completion_status] ||
         Part3StepCode::Checklist::DEFAULT_SECTION_COMPLETION_STATUS

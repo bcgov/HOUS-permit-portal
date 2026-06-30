@@ -71,6 +71,20 @@ class StepCode < ApplicationRecord
           "Subclasses must implement the checklist_for method"
   end
 
+  def stage_completions
+    checklists_by_stage = checklists.index_by(&:stage)
+
+    STAGES.map do |stage|
+      checklist = checklists_by_stage[stage]
+
+      {
+        stage: stage,
+        status: StepCodeChecklistStageCompletion.status_for(checklist),
+        stage_completed_at: checklist&.stage_completed_at
+      }
+    end
+  end
+
   def blueprint
     raise NotImplementedError, "Subclasses must implement the blueprint method"
   end

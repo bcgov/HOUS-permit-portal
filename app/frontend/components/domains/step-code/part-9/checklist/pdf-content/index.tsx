@@ -38,7 +38,7 @@ export const Part9PDFContent = function StepCodeChecklistPDFContent({
       <CoverPage
         permitApplication={permitApplication}
         stepCode={stepCodeForPdf}
-        subTitle={t("stepCodeChecklist.pdf.for")}
+        subTitle={t("stepCodeChecklist.pdf.for", { address: checklist.fullAddress })}
         assetDirectoryPath={assetDirectoryPath}
       />
       <Page size="LETTER" style={page}>

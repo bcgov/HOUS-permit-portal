@@ -40,8 +40,13 @@ export function Part3FormFooter<T>({ handleSubmit, onSubmit, isLoading }: IPart3
 
   return (
     <Flex gap={3} pt={8}>
-      <Button variant="secondary" onClick={handleSaveAndGoBack} isDisabled={isLoading}>
-        {t("stepCode.saveAndGoBack")}
+      <Button
+        variant={hasNext ? "secondary" : "primary"}
+        onClick={handleSaveAndGoBack}
+        isDisabled={isLoading}
+        isLoading={!hasNext ? isLoading : undefined}
+      >
+        {t(hasNext ? "stepCode.saveAndGoBack" : "stepCode.markAsComplete")}
       </Button>
       {hasNext && (
         <Button variant="primary" onClick={handleContinue} isDisabled={isLoading} isLoading={isLoading}>
