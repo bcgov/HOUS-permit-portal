@@ -389,7 +389,9 @@ Rails.application.routes.draw do
 
     # Controller namespace is Api::Part3Building::*, but we expose path with underscore for continuity
     namespace :part3_building, path: "part_3_building" do
-      resources :step_codes, only: %i[create show]
+      resources :step_codes, only: %i[create show] do
+        resources :checklists, only: %i[create], controller: "checklists"
+      end
       resources :checklists, only: %i[show update]
     end
 

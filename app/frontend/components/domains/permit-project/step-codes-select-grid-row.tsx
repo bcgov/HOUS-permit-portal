@@ -8,6 +8,7 @@ import { IStepCode } from "../../../stores/step-code-store"
 import { EStepCodeType } from "../../../types/enums"
 import { SearchGridItem } from "../../shared/grid/search-grid-item"
 import { SearchGridRow } from "../../shared/grid/search-grid-row"
+import { StepCodeStageIndicators } from "./step-code-stage-indicators"
 
 export const StepCodesSelectGridRow = observer(
   ({ stepCode, onSelect }: { stepCode: IStepCode; onSelect: (stepCodeId: string) => Promise<void> }) => {
@@ -20,6 +21,9 @@ export const StepCodesSelectGridRow = observer(
         <SearchGridItem>{permitProjectTitle}</SearchGridItem>
         <SearchGridItem>{fullAddress}</SearchGridItem>
         <SearchGridItem>{updatedAt ? format(updatedAt, datefnsTableDateTimeFormat) : ""}</SearchGridItem>
+        <SearchGridItem>
+          <StepCodeStageIndicators stageCompletions={stepCode.stageCompletions} />
+        </SearchGridItem>
         <SearchGridItem justifyContent="flex-end" px={2}>
           <Button size="md" variant="primary" onClick={() => onSelect(stepCode.id)}>
             {t("ui.select")}

@@ -1178,6 +1178,12 @@ export class Api {
     })
   }
 
+  async createPart3Checklist(stepCodeId: string, checklist) {
+    return this.client.post<ApiResponse<any>>(`/part_3_building/step_codes/${stepCodeId}/checklists`, {
+      checklist,
+    })
+  }
+
   async fetchSiteConfiguration() {
     return this.client.get<ApiResponse<ISiteConfigurationStore>>(`/site_configuration`, {})
   }

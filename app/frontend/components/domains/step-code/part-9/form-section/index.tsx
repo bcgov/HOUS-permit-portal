@@ -4,10 +4,10 @@ import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { ReactNode, useEffect } from "react"
 import { FormProvider, useForm } from "react-hook-form"
-import { useParams } from "react-router-dom"
+import { Navigate, useLocation, useParams } from "react-router-dom"
 import { usePart9StepCode } from "../../../../../hooks/resources/use-part-9-step-code"
 import { EFileUploadAttachmentType, EFlashMessageStatus } from "../../../../../types/enums"
-import { IOption, TPart9NavLinkKey } from "../../../../../types/types"
+import { TPart9NavLinkKey } from "../../../../../types/types"
 import { FileDownloadButton } from "../../../../shared/base/file-download-button"
 import { SharedSpinner } from "../../../../shared/base/shared-spinner"
 import { BuildingCharacteristicsSummary } from "../checklist/building-characteristics-summary"
@@ -15,7 +15,6 @@ import { CompletedBy } from "../checklist/completed-by"
 import { ComplianceSummary } from "../checklist/compliance-summary"
 import { EnergyPerformanceCompliance } from "../checklist/energy-performance-compliance"
 import { EnergyStepCodeCompliance } from "../checklist/energy-step-code-compliance"
-import { ProjectInfo } from "../checklist/project-info"
 import { StepNotMetWarning } from "../checklist/shared/step-not-met-warning"
 import { ZeroCarbonStepCodeCompliance } from "../checklist/zero-carbon-step-code-compliance"
 import { DrawingsWarning } from "../drawings-warning"
@@ -33,6 +32,7 @@ interface IChecklistRouteSectionProps {
 
 export const FormSection = observer(function Part9StepCodeFormSection() {
   const { section } = useParams()
+  const { pathname } = useLocation()
 
   useEffect(() => {
     const scroller = document.getElementById("stepCodeScroll")
@@ -47,7 +47,7 @@ export const FormSection = observer(function Part9StepCodeFormSection() {
     case "start":
       return <StartSection />
     case "project-info":
-      return <ProjectInfoSection />
+      return <Navigate to={pathname.replace(/\/project-info$/, "/start")} replace />
     case "h2k-import":
       return <H2KImport />
     case "compliance-summary":
@@ -115,99 +115,6 @@ const StartSection = observer(function StartSection() {
           {permitApplicationId && <DrawingsWarning />}
           <Part9FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={formState.isSubmitting} />
         </VStack>
-      </form>
-    </FormProvider>
-  )
-})
-
-const ProjectInfoSection = observer(function ProjectInfoSection() {
-  const { currentStepCode, checklist } = usePart9StepCode()
-  const { permitApplicationId } = useParams()
-  const formMethods = useForm({ mode: "onChange" })
-  const { handleSubmit, reset, formState } = formMethods
-  const isEditable = !permitApplicationId
-
-  useEffect(() => {
-    if (!checklist) return
-    if (checklist.isLoaded) return
-    ;(async () => {
-      await checklist.load()
-    })()
-  }, [checklist?.id, checklist?.isLoaded])
-
-  useEffect(() => {
-    if (!checklist?.isLoaded) return
-
-    const site: IOption | null = checklist.fullAddress
-      ? {
-          label: checklist.fullAddress,
-          value: null,
-        }
-      : null
-
-    reset({
-      ...checklist.defaultFormValues,
-      fullAddress: checklist.fullAddress || "",
-      pid: checklist.pid || "",
-      jurisdictionId: currentStepCode?.jurisdiction?.id || "",
-      site,
-    })
-  }, [checklist?.id, checklist?.isLoaded, currentStepCode?.jurisdiction?.id])
-
-  const onSubmit = async (values) => {
-    if (!checklist || !currentStepCode) throw new Error("Save failed")
-
-    const checklistValues = { ...values }
-    const { fullAddress, jurisdictionId, pid } = checklistValues
-    delete checklistValues.fullAddress
-    delete checklistValues.jurisdictionId
-    delete checklistValues.pid
-    delete checklistValues.site
-
-    if (isEditable) {
-      const stepCodeUpdated = await currentStepCode.update({
-        fullAddress,
-        jurisdictionId,
-        pid,
-        referenceNumber: values.referenceNumber,
-      })
-      if (!stepCodeUpdated) throw new Error("Save failed")
-    }
-
-    const result = await checklist.update({
-      ...checklistValues,
-      stepRequirementId: checklist.stepRequirementId,
-    })
-    if (!result) throw new Error("Save failed")
-
-    const sectionCompleted = await checklist.completeSection("projectInfo")
-    if (!sectionCompleted) throw new Error("Save failed")
-  }
-
-  if (!currentStepCode || !checklist?.isLoaded) {
-    return (
-      <Center>
-        <SharedSpinner />
-      </Center>
-    )
-  }
-
-  return (
-    <FormProvider {...formMethods}>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <Accordion allowMultiple defaultIndex={[0]}>
-          <ProjectInfo
-            checklist={checklist}
-            isEditable={isEditable}
-            initialJurisdiction={currentStepCode?.jurisdiction}
-          />
-        </Accordion>
-        <Part9FormFooter
-          handleSubmit={handleSubmit}
-          onSubmit={onSubmit}
-          isDisabled={(isEditable && !formState.isValid) || formState.isSubmitting}
-          isLoading={formState.isSubmitting}
-        />
       </form>
     </FormProvider>
   )

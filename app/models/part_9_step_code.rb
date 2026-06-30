@@ -29,6 +29,29 @@ class Part9StepCode < StepCode
     checklists.find_by(stage: stage)
   end
 
+  def find_or_create_checklist_for!(stage:, attributes: {})
+    stage = stage.to_s
+    existing = checklists.find_by(stage: stage)
+    return existing if existing.present?
+
+    source = nearest_previous_checklist(stage)
+    checklist = source.present? ? source.dup : checklists.build
+    attrs = attributes.to_h.except("stage", :stage)
+    checklist.assign_attributes(attrs)
+    checklist.step_code = self
+    checklist.stage = stage
+    checklist.status = :draft
+    checklist.section_completion_status =
+      attrs["section_completion_status"] || attrs[:section_completion_status] ||
+        Part9StepCode::Checklist::DEFAULT_SECTION_COMPLETION_STATUS
+
+    Part9StepCode.transaction do
+      checklist.save!
+      clone_checklist_children(source, checklist) if source.present?
+      checklist
+    end
+  end
+
   def blueprint
     Part9StepCodeBlueprint
   end
@@ -108,5 +131,53 @@ class Part9StepCode < StepCode
         end
       end
     end
+  end
+
+  def nearest_previous_checklist(stage)
+    stage_index = STAGES.index(stage.to_s)
+    return if stage_index.blank? || stage_index.zero?
+
+    STAGES
+      .first(stage_index)
+      .reverse_each do |previous_stage|
+        checklist = checklists.find_by(stage: previous_stage)
+        return checklist if checklist.present?
+      end
+
+    nil
+  end
+
+  def clone_checklist_children(source, target)
+    clone_data_entries(source, target)
+    clone_building_characteristics_summary(source, target)
+  end
+
+  def clone_data_entries(source, target)
+    source.data_entries.find_each do |data_entry|
+      target.data_entries.create!(
+        data_entry.attributes.except(
+          "id",
+          "checklist_id",
+          "created_at",
+          "updated_at"
+        )
+      )
+    end
+  end
+
+  def clone_building_characteristics_summary(source, target)
+    return if source.building_characteristics_summary.blank?
+
+    target_summary =
+      target.building_characteristics_summary ||
+        target.create_building_characteristics_summary
+    target_summary.update!(
+      source.building_characteristics_summary.attributes.except(
+        "id",
+        "checklist_id",
+        "created_at",
+        "updated_at"
+      )
+    )
   end
 end

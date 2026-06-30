@@ -12,25 +12,25 @@ class Api::Part9Building::ChecklistsController < Api::ApplicationController
   # explicit stage/checklist route.
   def create
     @step_code_checklist =
-      @step_code.checklists.build(staged_step_code_checklist_params)
+      @step_code.find_or_create_checklist_for!(
+        stage: staged_step_code_checklist_params[:stage],
+        attributes: staged_step_code_checklist_params
+      )
     authorize @step_code_checklist
 
-    if @step_code_checklist.save
-      render_success @step_code_checklist,
-                     nil,
-                     {
-                       blueprint: StepCode::Part9::ChecklistBlueprint,
-                       blueprint_opts: {
-                         view: :extended
-                       }
+    render_success @step_code_checklist,
+                   nil,
+                   {
+                     blueprint: StepCode::Part9::ChecklistBlueprint,
+                     blueprint_opts: {
+                       view: :extended
                      }
-    else
-      render_error "step_code_checklist.update_error",
-                   message_opts: {
-                     error_message:
-                       @step_code_checklist.errors.full_messages.join(", ")
                    }
-    end
+  rescue ActiveRecord::RecordInvalid => e
+    render_error "step_code_checklist.update_error",
+                 message_opts: {
+                   error_message: e.record.errors.full_messages.join(", ")
+                 }
   end
 
   def show

@@ -105,6 +105,24 @@ class StepCode < ApplicationRecord
     StepCode.search_index.refresh
   end
 
+  def self.preload_checklists(records)
+    part_3, part_9 =
+      Array(records).partition { |record| record.is_a?(Part3StepCode) }
+    if part_3.any?
+      ActiveRecord::Associations::Preloader.new(
+        records: part_3,
+        associations: :checklists
+      ).call
+    end
+    if part_9.any?
+      ActiveRecord::Associations::Preloader.new(
+        records: part_9,
+        associations: :checklists
+      ).call
+    end
+    records
+  end
+
   def generate_report_document
     StepCodeReportGenerationJob.perform_async(id)
   end

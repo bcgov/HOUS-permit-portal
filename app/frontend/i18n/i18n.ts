@@ -2455,6 +2455,23 @@ Thank you,
             error: "Failed to share report",
             errorDescription: "There was an error sharing the report. Please try again.",
           },
+          projectInformation: {
+            heading: "Step code information",
+            instructions: "Confirm the step code information and select the step code stage you want to work on.",
+            name: "Project name",
+            address: "Project address",
+            identifier: "Reference number",
+            identifierTooltip:
+              "The reference number assigned by the issuing jurisdiction for the associated building permit or application.",
+            jurisdiction: "Jurisdiction",
+            pid: "PID or legal description",
+            date: "Building permit date",
+            dateTooltip: "The date on which the building permit was issued by the issuing jurisdiction.",
+            stage: "Step code stage",
+            create: "Create checklist",
+            continue: "Continue checklist",
+            error: "There was a problem opening this checklist. Please try again.",
+          },
 
           noneFound: "No Step Codes found",
           columns: {
@@ -2462,6 +2479,9 @@ Thank you,
             type: "Type",
             fullAddress: "Address",
             updatedAt: "Last modified",
+            stages: "Stages",
+            stagesTooltipLegend:
+              "Icons are shown left to right in this order. A filled circle means the stage is complete; a dashed circle means it is not started or still in progress.",
           },
           part3: {
             title: "Energy and Zero Carbon Step Codes for Step 3 Buildings",

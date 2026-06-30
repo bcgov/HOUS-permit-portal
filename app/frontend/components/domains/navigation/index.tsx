@@ -994,7 +994,7 @@ const AppRoutes = observer(() => {
           element={loggedIn && isUnconfirmed ? <RedirectScreen path="/" /> : <JurisdictionScreen />}
         />
         <Route path="/part-3-step-code" element={<RedirectScreen path="start" />} />
-        <Route path="/part-3-step-code/:stepCodeId" element={<RedirectScreen path="start" />} />
+        <Route path="/part-3-step-code/:stepCodeId" element={<Part3StepCodeForm />} />
         <Route path="/part-3-step-code/:stepCodeId/stages/:stage/:section" element={<Part3StepCodeForm />} />
         <Route path="/part-3-step-code/:stepCodeId/:section" element={<Part3StepCodeForm />} />
         <Route path="/part-3-step-code/:section" element={<Part3StepCodeForm />} />

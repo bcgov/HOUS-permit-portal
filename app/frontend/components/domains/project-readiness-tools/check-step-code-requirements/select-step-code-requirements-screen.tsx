@@ -34,15 +34,12 @@ export const SelectStepCodeRequirementsScreen = () => {
     setIsCreating(true)
     let result
 
-    // HUB-5145: Building Categories currently chooses only Part 3 vs Part 9.
-    // Keep new reports defaulted to pre-construction until StepCode.currentStage
-    // and staged checklist creation are exposed in this entry flow.
     if (stepCodeTypeValue === EStepCodeType.part3StepCode) {
       result = await createPart3StepCode({
         preConstructionChecklistAttributes: { sectionCompletionStatus: defaultSectionCompletionStatus },
       })
       if (result?.ok) {
-        navigate(`/part-3-step-code/${result.data.id}/start`)
+        navigate(`/part-3-step-code/${result.data.id}`)
       } else {
         setIsCreating(false)
       }
@@ -51,7 +48,7 @@ export const SelectStepCodeRequirementsScreen = () => {
         preConstructionChecklistAttributes: { sectionCompletionStatus: defaultPart9SectionCompletionStatus },
       })
       if (result?.ok) {
-        navigate(`/part-9-step-code/${result.data.id}/start`)
+        navigate(`/part-9-step-code/${result.data.id}`)
       } else {
         setIsCreating(false)
       }

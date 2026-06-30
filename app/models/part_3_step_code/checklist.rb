@@ -30,6 +30,13 @@ class Part3StepCode::Checklist < ActiveRecord::Base
   SECTION_COMPLETION_STATUS_PARAMS =
     SECTION_COMPLETION_STATUS_KEYS.index_with { %i[complete relevant] }.freeze
 
+  DEFAULT_SECTION_COMPLETION_STATUS =
+    SECTION_COMPLETION_STATUS_KEYS
+      .index_with { { complete: false, relevant: true } }
+      .merge(project_details: { complete: false, relevant: false })
+      .deep_stringify_keys
+      .freeze
+
   def self.section_completion_status_params
     SECTION_COMPLETION_STATUS_PARAMS
   end
@@ -193,6 +200,7 @@ class Part3StepCode::Checklist < ActiveRecord::Base
             },
             allow_blank: true
 
+  before_validation :set_default_section_completion_status
   before_create :set_climate_info
 
   def compliance_metrics
@@ -228,6 +236,13 @@ class Part3StepCode::Checklist < ActiveRecord::Base
     self.climate_zone ||=
       StepCode::Part3::V0::Requirements::References::ClimateZone.value(
         step_code.jurisdiction_heating_degree_days
+      )
+  end
+
+  def set_default_section_completion_status
+    self.section_completion_status =
+      DEFAULT_SECTION_COMPLETION_STATUS.deep_merge(
+        section_completion_status.presence || {}
       )
   end
 end

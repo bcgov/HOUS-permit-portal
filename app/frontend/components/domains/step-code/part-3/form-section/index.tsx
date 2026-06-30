@@ -14,7 +14,6 @@ import { LocationDetails } from "./location-details"
 import { ModelledOutputs } from "./modelled-outputs"
 import { OverheatingRequirements } from "./overheating-requirements"
 import { PerformanceCharacteristics } from "./performance-characteristics"
-import { ProjectDetails } from "./project-details"
 import { RenewableEnergy } from "./renewable-energy"
 import { RequirementsSummary } from "./requirements-summary"
 import { ResidentialAdjustments } from "./residential-adjustments"
@@ -38,8 +37,6 @@ export const FormSection = observer(function Part3StepCodeFormSection() {
   switch (section) {
     case "start":
       return <StartPage />
-    case "project-details":
-      return <ProjectDetails />
     case "location-details":
       return <LocationDetails />
     case "district-energy":

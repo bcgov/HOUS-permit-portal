@@ -1,7 +1,8 @@
-import { Button, Flex } from "@chakra-ui/react"
+import { Button, Flex, Spacer } from "@chakra-ui/react"
 import { t } from "i18next"
 import React from "react"
 import { useNavigate } from "react-router-dom"
+import { RestartConfirmationModal } from "../../restart-confirmation-modal"
 import { usePart9Navigation } from "../../use-part-9-navigation"
 
 interface IPart9FormFooterProps<T> {
@@ -41,7 +42,7 @@ export function Part9FormFooter<T>({ handleSubmit, onSubmit, isLoading, isDisabl
   const handleSaveAndGoBack = () => submitAndNavigate(() => navigate(goBackPath))
 
   return (
-    <Flex gap={3} pt={8}>
+    <Flex gap={3} pt={8} w="full" align="center">
       <Button variant="secondary" onClick={handleSaveAndGoBack} isDisabled={isButtonDisabled}>
         {t("stepCode.saveAndGoBack")}
       </Button>
@@ -50,6 +51,8 @@ export function Part9FormFooter<T>({ handleSubmit, onSubmit, isLoading, isDisabl
           {t("stepCode.part9.cta")}
         </Button>
       )}
+      <Spacer />
+      <RestartConfirmationModal />
     </Flex>
   )
 }

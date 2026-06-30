@@ -32,11 +32,11 @@ export const StepCodesGrid = observer(() => {
       <SearchGrid templateColumns={STEP_CODES_GRID_TEMPLATE_COLUMNS} gridRowClassName="step-code-grid-row">
         <StepCodesGridHeaders />
         {isSearching ? (
-          <Flex gridColumn="span 3" justify="center" align="center" minH="200px">
+          <Flex gridColumn="span 6" justify="center" align="center" minH="200px">
             <SharedSpinner />
           </Flex>
         ) : R.isEmpty(tableStepCodes) ? (
-          <GridItem gridColumn="span 5">
+          <GridItem gridColumn="span 6">
             <CustomMessageBox m={4} status={EFlashMessageStatus.info} description={t("stepCode.noneFound")} />
           </GridItem>
         ) : (

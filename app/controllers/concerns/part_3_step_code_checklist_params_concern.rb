@@ -4,7 +4,15 @@ module Part3StepCodeChecklistParamsConcern
   private
 
   def checklist_params
-    params.require(:checklist).permit(
+    params.require(:checklist).permit(*part_3_checklist_update_params)
+  end
+
+  def staged_checklist_params
+    params.require(:checklist).permit(:stage, *part_3_checklist_update_params)
+  end
+
+  def part_3_checklist_update_params
+    [
       :building_height,
       :heating_degree_days,
       :climate_zone,
@@ -54,53 +62,68 @@ module Part3StepCodeChecklistParamsConcern
       :completed_by_email,
       :completed_by_organization_name,
       :building_code_version,
-      :phase,
-      section_completion_status:
-        Part3StepCode::Checklist.section_completion_status_params,
-      baseline_occupancies_attributes: %i[
-        _destroy
-        id
-        key
-        modelled_floor_area
-        performance_requirement
-        percent_better_requirement
-        requirement_source
-      ],
-      step_code_occupancies_attributes: %i[
-        _destroy
-        id
-        key
-        modelled_floor_area
-        energy_step_required
-        zero_carbon_step_required
-        requirement_source
-      ],
-      fuel_types_attributes: %i[_destroy id key description emissions_factor],
-      reference_energy_outputs_attributes: %i[id fuel_type_id annual_energy],
-      modelled_energy_outputs_attributes: %i[
-        _destroy
-        id
-        fuel_type_id
-        use_type
-        name
-        annual_energy
-      ],
-      make_up_air_fuels_attributes: %i[
-        _destroy
-        id
-        fuel_type_id
-        percent_of_load
-      ],
-      document_references_attributes: %i[
-        _destroy
-        id
-        document_type
-        document_type_description
-        issued_for
-        document_name
-        date_issued
-        prepared_by
-      ]
-    )
+      {
+        section_completion_status:
+          Part3StepCode::Checklist.section_completion_status_params
+      },
+      {
+        baseline_occupancies_attributes: %i[
+          _destroy
+          id
+          key
+          modelled_floor_area
+          performance_requirement
+          percent_better_requirement
+          requirement_source
+        ]
+      },
+      {
+        step_code_occupancies_attributes: %i[
+          _destroy
+          id
+          key
+          modelled_floor_area
+          energy_step_required
+          zero_carbon_step_required
+          requirement_source
+        ]
+      },
+      {
+        fuel_types_attributes: %i[_destroy id key description emissions_factor]
+      },
+      {
+        reference_energy_outputs_attributes: %i[id fuel_type_id annual_energy]
+      },
+      {
+        modelled_energy_outputs_attributes: %i[
+          _destroy
+          id
+          fuel_type_id
+          use_type
+          name
+          annual_energy
+        ]
+      },
+      {
+        make_up_air_fuels_attributes: %i[
+          _destroy
+          id
+          fuel_type_id
+          percent_of_load
+        ]
+      },
+      {
+        document_references_attributes: %i[
+          _destroy
+          id
+          document_type
+          document_type_description
+          issued_for
+          document_name
+          date_issued
+          prepared_by
+        ]
+      }
+    ]
   end
 end

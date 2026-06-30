@@ -2,7 +2,7 @@ import * as R from "ramda"
 import { useLocation, useNavigate, useParams } from "react-router-dom"
 import { usePart9StepCode } from "../../../../hooks/resources/use-part-9-step-code"
 import { IPart9NavLink } from "../../../../types/types"
-import { navLinks, reportDependentSectionKeys } from "./sidebar/nav-sections"
+import { navLinks } from "./sidebar/nav-sections"
 
 function flattenNavLinks(links: IPart9NavLink[]): IPart9NavLink[] {
   return links.flatMap((link) => [link, ...flattenNavLinks(link.subLinks)])
@@ -16,19 +16,15 @@ export const usePart9Navigation = () => {
   const { permitApplicationId } = useParams()
   const { checklist } = usePart9StepCode()
 
-  const isReportDependentSectionAvailable = (link: IPart9NavLink) =>
-    !reportDependentSectionKeys.includes(link.key) || Boolean(checklist?.selectedReport)
-
-  const getRelevantNavLinks = () =>
-    allNavLinks.filter((link) => checklist?.isRelevant(link.key) !== false && isReportDependentSectionAvailable(link))
+  const getNavigationNavLinks = () => allNavLinks.filter((link) => checklist?.isRelevant(link.key) !== false)
 
   const getCurrentSectionKey = () => {
     const currentSection = pathname.split("/").pop()
-    return getRelevantNavLinks().find((link) => link.location === currentSection)?.key
+    return allNavLinks.find((link) => link.location === currentSection)?.key
   }
 
   const getNextSection = () => {
-    const links = getRelevantNavLinks()
+    const links = getNavigationNavLinks()
     const currentKey = getCurrentSectionKey()
     const currentIndex = links.findIndex((link) => link.key === currentKey)
     if (currentIndex === -1 || currentIndex === links.length - 1) return null
@@ -36,7 +32,7 @@ export const usePart9Navigation = () => {
   }
 
   const getPreviousSection = () => {
-    const links = getRelevantNavLinks()
+    const links = getNavigationNavLinks()
     const currentKey = getCurrentSectionKey()
     const currentIndex = links.findIndex((link) => link.key === currentKey)
     if (currentIndex <= 0) return null
@@ -60,8 +56,8 @@ export const usePart9Navigation = () => {
   }
 
   const navigateToSection = (sectionKey: string) => {
-    const section = getRelevantNavLinks().find((link) => link.key === sectionKey)
-    if (section) {
+    const section = allNavLinks.find((link) => link.key === sectionKey)
+    if (section && checklist?.isRelevant(section.key) !== false) {
       navigate(`${getBaseUrl()}/${section.location}`)
     }
   }

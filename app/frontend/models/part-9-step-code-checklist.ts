@@ -34,14 +34,17 @@ type TPart9StepCodeDataEntry = {
 }
 
 function preProcessor(snapshot) {
+  const sectionCompletionStatus = R.mergeDeepRight(
+    defaultSectionCompletionStatus,
+    snapshot.sectionCompletionStatus || {}
+  ) as IPart9SectionCompletionStatus
+  sectionCompletionStatus.projectInfo = { complete: false, relevant: false }
+
   return {
     ...snapshot,
     dataEntries: snapshot.dataEntries || [],
     selectedReportRequirementId: snapshot.selectedReport?.requirementId,
-    sectionCompletionStatus: R.mergeDeepRight(
-      defaultSectionCompletionStatus,
-      snapshot.sectionCompletionStatus || {}
-    ) as IPart9SectionCompletionStatus,
+    sectionCompletionStatus,
   }
 }
 

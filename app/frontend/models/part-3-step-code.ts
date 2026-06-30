@@ -1,4 +1,5 @@
-import { Instance, types } from "mobx-state-tree"
+import { applySnapshot, flow, getSnapshot, Instance, types } from "mobx-state-tree"
+import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
@@ -53,7 +54,18 @@ export const Part3StepCodeModel = types.snapshotProcessor(
         return `/part-3-step-code/${self.id}`
       },
     }))
-    .actions((self) => ({})),
+    .actions((self) => ({
+      __mergeUpdate(resourceData: Record<string, unknown>) {
+        applySnapshot(self, R.mergeDeepLeft(resourceData, getSnapshot(self)) as any)
+      },
+      createChecklist: flow(function* (values: Record<string, any>) {
+        const response = yield self.environment.api.createPart3Checklist(self.id, values)
+        if (response.ok) {
+          self.mergeUpdate(response.data.data, "checklistsMap")
+          return response.data.data
+        }
+      }),
+    })),
   {
     preProcessor(snapshot: any) {
       const processed = { ...snapshot }

@@ -1,13 +1,14 @@
 import { Center, Flex, FormLabel, Hide, Show } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { Suspense, useEffect } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useParams } from "react-router-dom"
 import { usePart3StepCode } from "../../../../hooks/resources/use-part-3-step-code"
 import { usePermitApplication } from "../../../../hooks/resources/use-permit-application"
 import { useMst } from "../../../../setup/root"
 import { NotFoundScreen } from "../../../shared/base/not-found-screen"
 import { SharedSpinner } from "../../../shared/base/shared-spinner"
 import { FloatingHelpDrawer } from "../../../shared/floating-help-drawer"
+import { ProjectInformation } from "../project-information"
 import { FormSection } from "./form-section"
 import { Sidebar } from "./sidebar"
 import { defaultSectionCompletionStatus } from "./sidebar/nav-sections"
@@ -19,7 +20,6 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
     stepCodeStore: { createPart3StepCode },
   } = useMst()
   const { currentStepCode } = usePart3StepCode()
-  const navigate = useNavigate()
   const isStandaloneStepCode = !permitApplicationId
 
   const { currentPermitApplication } = usePermitApplication()
@@ -39,19 +39,6 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
       })
     }
   }, [currentPermitApplication?.isFullyLoaded, currentStepCode])
-
-  // handle redirect if no section is specified
-  useEffect(() => {
-    if (!currentStepCode) return // wait for step code to load or be created
-    if (section) return // only redirect if no section is specified in params
-
-    if (currentStepCode.currentChecklist) {
-      const navLink = currentStepCode.currentChecklist.currentNavLink
-      navigate(navLink?.location || "start")
-    } else {
-      navigate("start")
-    }
-  }, [currentStepCode])
 
   // ensure scroll resets on section change at the container level
   useEffect(() => {
@@ -73,7 +60,19 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
           </Center>
         }
       >
-        {currentStepCode && (
+        {currentStepCode && !section && (
+          <Flex flex={1} overflow="auto" id="stepCodeScroll" px={6} py={10}>
+            <Flex direction="column" flex={1} maxW="780px" mx="auto" w="full">
+              <FloatingHelpDrawer />
+              <ProjectInformation
+                currentStepCode={currentStepCode}
+                defaultSectionCompletionStatus={defaultSectionCompletionStatus}
+                stepCodeKind="part3"
+              />
+            </Flex>
+          </Flex>
+        )}
+        {currentStepCode && section && (
           <Flex flex={1} w="full" overflow="hidden" position="relative">
             <Show above="lg">
               <Flex w={"sidebar.width"} boxShadow="md" borderRightWidth={1} borderColor="greys.grey02" overflow="auto">

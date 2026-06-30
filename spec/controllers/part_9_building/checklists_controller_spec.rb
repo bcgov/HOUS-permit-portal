@@ -99,7 +99,9 @@ RSpec.describe Api::Part9Building::ChecklistsController, type: :controller do
   end
 
   describe "POST #create" do
-    it "creates a staged checklist under the step code" do
+    it "creates a staged checklist under the step code with cloned values" do
+      checklist.update!(builder: "Original builder")
+
       post :create,
            params: {
              step_code_id: step_code.id,
@@ -117,7 +119,26 @@ RSpec.describe Api::Part9Building::ChecklistsController, type: :controller do
 
       expect(response).to have_http_status(:success)
       expect(json_response.dig("data", "stage")).to eq("as_built")
+      expect(json_response.dig("data", "builder")).to eq("Original builder")
       expect(step_code.checklists.as_built).to exist
+    end
+
+    it "returns the existing checklist for an already-created stage" do
+      create(:part_9_checklist, step_code: step_code, stage: :as_built)
+
+      expect do
+        post :create,
+             params: {
+               step_code_id: step_code.id,
+               step_code_checklist: {
+                 stage: "as_built"
+               }
+             },
+             as: :json
+      end.not_to change { step_code.checklists.reload.count }
+
+      expect(response).to have_http_status(:success)
+      expect(json_response.dig("data", "stage")).to eq("as_built")
     end
   end
 
