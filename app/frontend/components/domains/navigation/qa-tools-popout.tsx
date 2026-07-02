@@ -9,6 +9,11 @@ import { useMst, useServerAPI } from "../../../setup/root"
 import { EFlashMessageStatus, EStepCodeType } from "../../../types/enums"
 import { IOption } from "../../../types/types"
 import { isUUID } from "../../../utils/utility-functions"
+import { navLinks as part3NavLinks } from "../step-code/part-3/sidebar/nav-sections"
+import { navLinks as part9NavLinks } from "../step-code/part-9/sidebar/nav-sections"
+
+const part3PenultimateSection = part3NavLinks.at(-2)?.location ?? "requirements-summary"
+const part9PenultimateSection = part9NavLinks.at(-2)?.location ?? "review"
 
 export const QaToolsPopout = observer(() => {
   const { t } = useTranslation()
@@ -145,8 +150,8 @@ export const QaToolsPopout = observer(() => {
       uiStore.flashMessage.show(EFlashMessageStatus.success, null, t("qaTools.autofillPart3Success"), 3000)
 
       const summaryPath = autofilledStepCode.permitApplicationId
-        ? `/permit-applications/${autofilledStepCode.permitApplicationId}/edit/part-3-step-code/step-code-summary`
-        : `/part-3-step-code/${autofilledStepCode.id}/step-code-summary`
+        ? `/permit-applications/${autofilledStepCode.permitApplicationId}/edit/part-3-step-code/${part3PenultimateSection}`
+        : `/part-3-step-code/${autofilledStepCode.id}/${part3PenultimateSection}`
       navigate(summaryPath)
     }
   }
@@ -171,8 +176,8 @@ export const QaToolsPopout = observer(() => {
       uiStore.flashMessage.show(EFlashMessageStatus.success, null, t("qaTools.autofillPart9Success"), 3000)
 
       const reportPath = autofilledStepCode.permitApplicationId
-        ? `/permit-applications/${autofilledStepCode.permitApplicationId}/edit/part-9-step-code/report`
-        : `/part-9-step-code/${autofilledStepCode.id}/report`
+        ? `/permit-applications/${autofilledStepCode.permitApplicationId}/edit/part-9-step-code/${part9PenultimateSection}`
+        : `/part-9-step-code/${autofilledStepCode.id}/${part9PenultimateSection}`
       navigate(reportPath)
     }
   }

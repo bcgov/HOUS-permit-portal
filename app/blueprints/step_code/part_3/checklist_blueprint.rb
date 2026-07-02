@@ -102,6 +102,10 @@ class StepCode::Part3::ChecklistBlueprint < Blueprinter::Base
     )
   end
 
+  field :step_code_type do |checklist, _options|
+    checklist.step_code.class.name
+  end
+
   field :overheating_hours_limit do |_checklist, _options|
     Constants::Part3StepCode::OVERHEATING_HOURS_LIMIT
   end

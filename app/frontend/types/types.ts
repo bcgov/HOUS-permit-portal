@@ -352,6 +352,7 @@ export interface IJurisdictionStub {
 
 export interface IReportDocument extends IBaseFileAttachment {
   stepCodeId: string
+  stale?: boolean
 }
 
 export interface IResourceDocument extends IBaseFileAttachment {

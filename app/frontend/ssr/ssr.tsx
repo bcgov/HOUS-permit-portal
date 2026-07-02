@@ -60,7 +60,7 @@ const main = async () => {
     }
 
     if (stepCodeChecklistPDFPath) {
-      const stepCodeType = pdfData?.checklist?.stepCodeType ?? EStepCodeType.part9StepCode
+      const stepCodeType = pdfData?.checklist?.stepCodeType ?? pdfData?.stepCode?.type ?? EStepCodeType.part9StepCode
       const ChecklistComponent = ChecklistComponentMap[stepCodeType]
 
       if (!pdfData.checklist) {

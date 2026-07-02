@@ -23,20 +23,11 @@ class Qa::Part9StepCodeAutofillService
   private
 
   def update_step_code!
-    attributes = Qa::Part9StepCodeAutofillData::STEP_CODE_ATTRIBUTES.dup
-    permit_application = @step_code.permit_application
-
-    if permit_application
-      attributes[:jurisdiction_id] ||= permit_application.jurisdiction_id
-      attributes[:permit_date] ||= permit_application.permit_date
-
-      permit_application.permit_project&.update!(
-        full_address: attributes[:full_address]
-      )
-    end
-
-    @step_code.assign_attributes(attributes)
-    @step_code.save!(validate: false)
+    Qa::StepCodeAutofillSupport.apply_step_code_project_attributes!(
+      @step_code,
+      Qa::Part9StepCodeAutofillData::STEP_CODE_ATTRIBUTES.dup,
+      validate: false
+    )
   end
 
   def ensure_checklist!
@@ -83,27 +74,7 @@ class Qa::Part9StepCodeAutofillService
   end
 
   def ensure_jurisdiction!
-    jurisdiction =
-      @step_code.jurisdiction || @step_code.permit_application&.jurisdiction
-
-    if jurisdiction.blank?
-      jurisdiction = SubDistrict.order(:created_at).first
-
-      if jurisdiction.present?
-        @step_code.update!(jurisdiction_id: jurisdiction.id)
-        @step_code.reload
-      end
-    end
-
-    if jurisdiction.blank?
-      @step_code.errors.add(
-        :jurisdiction,
-        "must be set before QA autofill can create step requirements"
-      )
-      raise ActiveRecord::RecordInvalid, @step_code
-    end
-
-    jurisdiction
+    Qa::StepCodeAutofillSupport.ensure_jurisdiction!(@step_code)
   end
 
   def update_checklist!(checklist)
