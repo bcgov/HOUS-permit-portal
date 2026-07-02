@@ -256,6 +256,9 @@ en:
       failure:
         title: Login failed
         message: Please try again or contact your adminstrator for support
+      service_unavailable:
+        title: Login service unavailable
+        message: The BCeID login service may be unavailable. Please contact BCeID 77000 Service Desk staff for support.
       bceid_failure_with_message:
         title: BCeID login failed
         message: "%{error_message}"
