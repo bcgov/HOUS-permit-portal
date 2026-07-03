@@ -1406,7 +1406,7 @@ Thank you,
             pinnedPermitProjects: "Pinned projects",
             noPinnedProjects: "You haven't pinned any projects yet",
             noPinnedProjectsDescription:
-              "Pinning a project keeps it at the top of your list so it's easier to find. Open the more actions menu for a project and select Pin.",
+              "Pinning a project keeps it at the top of your list so it's easier to find. Open the more actions menu for a project and select Pin project.",
             pinnedPermitProjectsTbd: "Pinned projects TBD",
             allProjects: "All projects",
             requirementTemplateFilter: "Permit",

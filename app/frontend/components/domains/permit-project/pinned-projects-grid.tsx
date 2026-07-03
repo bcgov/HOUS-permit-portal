@@ -34,7 +34,7 @@ export const PinnedProjectsGrid = observer(() => {
           title={t("permitProject.index.noPinnedProjects", "You haven't pinned any projects yet")}
           description={t(
             "permitProject.index.noPinnedProjectsDescription",
-            "Pinning a project keeps it at the top of your list so it's easier to find. Open the more actions menu for a project and select Pin."
+            "Pinning a project keeps it at the top of your list so it's easier to find. Open the more actions menu for a project and select Pin project."
           )}
           headingProps={{ mb: 1 }}
         />
