@@ -1,7 +1,7 @@
-import { Button, Flex } from "@chakra-ui/react"
+import { Button, Flex, Link } from "@chakra-ui/react"
 import { t } from "i18next"
 import React from "react"
-import { useNavigate } from "react-router-dom"
+import { Link as RouterLink, useNavigate } from "react-router-dom"
 import { usePart9Navigation } from "../../use-part-9-navigation"
 
 interface IPart9FormFooterProps<T> {
@@ -13,7 +13,7 @@ interface IPart9FormFooterProps<T> {
 
 export function Part9FormFooter<T>({ handleSubmit, onSubmit, isLoading, isDisabled }: IPart9FormFooterProps<T>) {
   const navigate = useNavigate()
-  const { navigateToNext, hasNext, goBackPath } = usePart9Navigation()
+  const { navigateToNext, navigateToPrevious, hasNext, hasPrevious, goBackPath, infoPagePath } = usePart9Navigation()
   const isButtonDisabled = isDisabled ?? isLoading
 
   const submitAndNavigate = async (navigateFn: () => void) => {
@@ -38,23 +38,33 @@ export function Part9FormFooter<T>({ handleSubmit, onSubmit, isLoading, isDisabl
   }
 
   const handleContinue = () => submitAndNavigate(navigateToNext)
-  const handleSaveAndGoBack = () => submitAndNavigate(() => navigate(goBackPath))
+  const handleSaveAndGoBack = () =>
+    submitAndNavigate(() => {
+      if (!hasNext) return navigate(goBackPath)
+      if (hasPrevious) return navigateToPrevious()
+      return navigate(infoPagePath)
+    })
 
   return (
     <Flex gap={3} pt={8} w="full" align="center">
-      <Button
-        variant={hasNext ? "secondary" : "primary"}
-        onClick={handleSaveAndGoBack}
-        isDisabled={isButtonDisabled}
-        isLoading={!hasNext ? isLoading : undefined}
-      >
-        {t(hasNext ? "stepCode.saveAndGoBack" : "stepCode.markAsComplete")}
-      </Button>
-      {hasNext && (
-        <Button variant="primary" onClick={handleContinue} isDisabled={isButtonDisabled} isLoading={isLoading}>
-          {t("stepCode.part9.cta")}
+      <Flex gap={3}>
+        <Button
+          variant={hasNext ? "secondary" : "primary"}
+          onClick={handleSaveAndGoBack}
+          isDisabled={isButtonDisabled}
+          isLoading={!hasNext ? isLoading : undefined}
+        >
+          {t(hasNext ? "stepCode.saveAndGoBack" : "stepCode.markAsComplete")}
         </Button>
-      )}
+        {hasNext && (
+          <Button variant="primary" onClick={handleContinue} isDisabled={isButtonDisabled} isLoading={isLoading}>
+            {t("stepCode.part9.cta")}
+          </Button>
+        )}
+      </Flex>
+      <Link as={RouterLink} to="/step-codes?currentPage=1" ml="auto">
+        {t("stepCode.part9.goToStepCodes")}
+      </Link>
     </Flex>
   )
 }

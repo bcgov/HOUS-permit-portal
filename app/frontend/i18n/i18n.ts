@@ -2474,7 +2474,9 @@ Thank you,
             dateTooltip: "The date on which the building permit was issued by the issuing jurisdiction.",
             stage: "Step code stage",
             create: "Create checklist",
+            start: "Start checklist",
             continue: "Continue checklist",
+            view: "View checklist",
             error: "There was a problem opening this checklist. Please try again.",
           },
 
@@ -3306,6 +3308,7 @@ Thank you,
             },
           },
           part9: {
+            goToStepCodes: "Go to Step Codes",
             cta: "Save and continue",
             sidebar: {
               responsiveButton: "Sections",

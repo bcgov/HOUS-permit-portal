@@ -57,6 +57,19 @@ const stageOptions = [
 
 const stepCodesPath = "/step-codes?currentPage=1"
 
+function checklistHasProgress(checklist: {
+  sectionCompletionStatus?: Record<string, { complete: boolean; relevant: boolean }>
+}) {
+  return Object.values(checklist.sectionCompletionStatus ?? {}).some((status) => status.relevant && status.complete)
+}
+
+function checklistButtonLabel(checklist: any) {
+  if (!checklist) return t("stepCode.projectInformation.create")
+  if (checklist.isAllComplete) return t("stepCode.projectInformation.view")
+  if (checklistHasProgress(checklist)) return t("stepCode.projectInformation.continue")
+  return t("stepCode.projectInformation.start")
+}
+
 export const ProjectInformation = observer(function StepCodeProjectInformation({
   currentStepCode,
   defaultSectionCompletionStatus,
@@ -329,9 +342,7 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
                           isDisabled={!isSelected}
                           isLoading={isSelected && isSubmitting}
                         >
-                          {checklist
-                            ? t("stepCode.projectInformation.continue")
-                            : t("stepCode.projectInformation.create")}
+                          {checklistButtonLabel(checklist)}
                         </Button>
                       </Td>
                     </Tr>
