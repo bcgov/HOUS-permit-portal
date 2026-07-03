@@ -60,7 +60,7 @@ export const PermitsTabPanelContent = observer(({ permitProject }: IProps) => {
               )}
             </Flex>
             <SearchGrid
-              templateColumns="2fr 1.5fr 1.5fr 1.5fr 1.5fr 0.5fr"
+              templateColumns="2.25fr 1.75fr 1fr 1.4fr 1.1fr 1fr 0.5fr"
               gridRowClassName="permit-application-grid-row"
             >
               <PermitApplicationGridHeaders
