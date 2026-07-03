@@ -42,6 +42,10 @@ interface IDocumentReferenceStepCodeForm {
 
 const largeInputWidth = "26.875rem"
 const smallInputWidth = "12.5rem"
+const defaultDocumentTypes = Object.values(EDocumentReferenceDocumentType).filter(
+  (documentType) => documentType !== EDocumentReferenceDocumentType.other
+) as TDefaultDocumentType[]
+const defaultAccordionIndexes = defaultDocumentTypes.map((_, index) => index)
 
 function initializeDocumentReferenceForm(
   documentReferencesAttributes: IDocumentReference[] | undefined
@@ -56,21 +60,19 @@ function initializeDocumentReferenceForm(
           : documentReference?.dateIssued,
     })) ?? []) as IDocumentReferenceStepCodeForm["otherDocumentReferencesAttributes"]
   const defaultDocumentReferencesAttributes: IDocumentReferenceStepCodeForm["defaultDocumentReferencesAttributes"] =
-    Object.values(EDocumentReferenceDocumentType)
-      .filter((documentType) => documentType !== EDocumentReferenceDocumentType.other)
-      .map((documentType) => {
-        const existingDocumentReference = documentReferencesAttributes?.find(
-          (documentReference) => documentReference.documentType === documentType
-        )
-        return {
-          ...(existingDocumentReference ?? {}),
-          documentType,
-          dateIssued:
-            typeof existingDocumentReference?.dateIssued === "number"
-              ? new Date(existingDocumentReference?.dateIssued)
-              : existingDocumentReference?.dateIssued,
-        }
-      })
+    defaultDocumentTypes.map((documentType) => {
+      const existingDocumentReference = documentReferencesAttributes?.find(
+        (documentReference) => documentReference.documentType === documentType
+      )
+      return {
+        ...(existingDocumentReference ?? {}),
+        documentType,
+        dateIssued:
+          typeof existingDocumentReference?.dateIssued === "number"
+            ? new Date(existingDocumentReference?.dateIssued)
+            : existingDocumentReference?.dateIssued,
+      }
+    })
 
   return {
     defaultDocumentReferencesAttributes,
@@ -81,7 +83,7 @@ function initializeDocumentReferenceForm(
 export const DocumentReferences = observer(function DocumentaReferences() {
   const { t } = useTranslation()
   const { checklist } = usePart3StepCode()
-  const [openAccordionIndexes, setOpenAccordionIndexes] = useState<number[]>([])
+  const [openAccordionIndexes, setOpenAccordionIndexes] = useState<number[]>(defaultAccordionIndexes)
   const formMethods = useForm<IDocumentReferenceStepCodeForm>({
     mode: "onSubmit",
     defaultValues: initializeDocumentReferenceForm(checklist?.documentReferences),
