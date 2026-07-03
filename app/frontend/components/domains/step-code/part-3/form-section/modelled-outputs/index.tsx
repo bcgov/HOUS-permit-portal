@@ -23,7 +23,7 @@ export interface IMpdelledEnergyOutputChecklistForm {
 }
 
 function initializeModelledEnergyOutputs(
-  existingEnergyOutputs: Omit<IEnergyOutput, "source">[]
+  existingEnergyOutputs: Omit<IEnergyOutput, "source">[] = []
 ): IMpdelledEnergyOutputChecklistForm["modelledEnergyOutputsAttributes"] {
   const otherEnergyOutputs: IMpdelledEnergyOutputChecklistForm["modelledEnergyOutputsAttributes"] =
     existingEnergyOutputs
@@ -49,18 +49,16 @@ function initializeModelledEnergyOutputs(
   return defaultEnergyOutputs.concat(otherEnergyOutputs)
 }
 
+function numberFromChecklistValue(value: string | number | null | undefined) {
+  return value === null || value === undefined || value === "" ? null : Number(value)
+}
+
 function createFormValues(checklist: IPart3StepCodeChecklist | undefined) {
   return {
     modelledEnergyOutputsAttributes: initializeModelledEnergyOutputs(checklist?.modelledEnergyOutputs),
-    totalAnnualThermalEnergyDemand: checklist?.totalAnnualThermalEnergyDemand
-      ? Number(checklist.totalAnnualThermalEnergyDemand)
-      : null,
-    totalAnnualCoolingEnergyDemand: checklist?.totalAnnualCoolingEnergyDemand
-      ? Number(checklist.totalAnnualCoolingEnergyDemand)
-      : null,
-    stepCodeAnnualThermalEnergyDemand: checklist?.stepCodeAnnualThermalEnergyDemand
-      ? Number(checklist.stepCodeAnnualThermalEnergyDemand)
-      : null,
+    totalAnnualThermalEnergyDemand: numberFromChecklistValue(checklist?.totalAnnualThermalEnergyDemand),
+    totalAnnualCoolingEnergyDemand: numberFromChecklistValue(checklist?.totalAnnualCoolingEnergyDemand),
+    stepCodeAnnualThermalEnergyDemand: numberFromChecklistValue(checklist?.stepCodeAnnualThermalEnergyDemand),
   }
 }
 
@@ -75,14 +73,13 @@ export const ModelledOutputs = observer(function Part3StepCodeFormModelledOutput
   const { reset, handleSubmit, formState } = formMethods
 
   useEffect(() => {
-    reset({
-      modelledEnergyOutputsAttributes: initializeModelledEnergyOutputs(checklist?.modelledEnergyOutputs || []),
-    })
+    reset(createFormValues(checklist))
   }, [
     checklist?.totalAnnualCoolingEnergyDemand,
     checklist?.stepCodeAnnualThermalEnergyDemand,
     checklist?.totalAnnualThermalEnergyDemand,
     checklist?.modelledEnergyOutputs,
+    reset,
   ])
 
   const onSubmit = async (data: IMpdelledEnergyOutputChecklistForm) => {
