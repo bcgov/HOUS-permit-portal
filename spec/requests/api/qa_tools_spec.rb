@@ -298,8 +298,14 @@ RSpec.describe "Api::QaTools", type: :request do
         ["low_hazard_industrial"]
       )
       expect(
-        checklist.section_completion_status.dig("step_code_summary", "complete")
+        checklist.section_completion_status.dig(
+          "requirements_summary",
+          "complete"
+        )
       ).to be(true)
+      expect(
+        checklist.section_completion_status.dig("step_code_summary", "complete")
+      ).to be(false)
       expect(json_response.dig("data", "id")).to eq(step_code.id)
     end
 
@@ -374,8 +380,11 @@ RSpec.describe "Api::QaTools", type: :request do
       expect(checklist.compliance_path).to eq("step_code_ers")
       expect(checklist.step_requirement_id).to eq(step_requirement.id)
       expect(
-        checklist.section_completion_status.dig("report", "complete")
+        checklist.section_completion_status.dig("review", "complete")
       ).to be(true)
+      expect(
+        checklist.section_completion_status.dig("report", "complete")
+      ).to be(false)
       expect(json_response.dig("data", "id")).to eq(step_code.id)
     end
 

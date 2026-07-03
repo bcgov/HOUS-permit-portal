@@ -24,7 +24,7 @@ import React, { useEffect, useMemo, useState } from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useNavigate, useParams } from "react-router-dom"
 import { IJurisdiction } from "../../../models/jurisdiction"
-import { EStepCodeChecklistStage } from "../../../types/enums"
+import { EStepCodeChecklistStage, EStepCodeChecklistStatus } from "../../../types/enums"
 import { IOption } from "../../../types/types"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { DatePickerFormControl } from "../../shared/form/input-form-control"
@@ -65,7 +65,9 @@ function checklistHasProgress(checklist: {
 
 function checklistButtonLabel(checklist: any) {
   if (!checklist) return t("stepCode.projectInformation.create")
-  if (checklist.isAllComplete) return t("stepCode.projectInformation.view")
+  if (checklist.isAllComplete || checklist.isMarkedComplete || checklist.status === EStepCodeChecklistStatus.complete) {
+    return t("stepCode.projectInformation.view")
+  }
   if (checklistHasProgress(checklist)) return t("stepCode.projectInformation.continue")
   return t("stepCode.projectInformation.start")
 }
@@ -289,21 +291,6 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
             />
           )}
 
-          {showPermitDate && (
-            <DatePickerFormControl
-              flex={1}
-              maxW={{ base: "none", xl: "430px" }}
-              label={t("stepCode.projectInformation.date") as string}
-              fieldName="permitDate"
-              showOptional={false}
-              inputProps={permitDateInputProps}
-              isReadOnly={!isPermitDateEditable}
-              LabelInfo={() => (
-                <InfoTooltip {...fieldTooltipProps} label={t("stepCode.projectInformation.dateTooltip") as string} />
-              )}
-            />
-          )}
-
           {submitError && (
             <Text color="semantic.error" fontSize="sm">
               {submitError}
@@ -351,6 +338,21 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
               </Tbody>
             </Table>
           </FormControl>
+
+          {showPermitDate && (
+            <DatePickerFormControl
+              flex={1}
+              maxW={{ base: "none", xl: "430px" }}
+              label={t("stepCode.projectInformation.date") as string}
+              fieldName="permitDate"
+              showOptional={false}
+              inputProps={permitDateInputProps}
+              isReadOnly={!isPermitDateEditable}
+              LabelInfo={() => (
+                <InfoTooltip {...fieldTooltipProps} label={t("stepCode.projectInformation.dateTooltip") as string} />
+              )}
+            />
+          )}
 
           {isEditable && (
             <Flex justify="flex-start">

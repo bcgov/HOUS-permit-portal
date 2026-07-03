@@ -25,21 +25,10 @@ class Qa::Part3StepCodeAutofillService
   private
 
   def update_step_code!
-    attributes = Qa::Part3StepCodeAutofillData::STEP_CODE_ATTRIBUTES.dup
-    permit_application = @step_code.permit_application
-
-    if permit_application
-      attributes[:jurisdiction_id] ||= permit_application.jurisdiction_id
-      attributes[:permit_date] ||= permit_application.permit_date
-
-      # ProjectItem delegates full_address through permit_application → permit_project.
-      permit_application.permit_project&.update!(
-        full_address: attributes[:full_address]
-      )
-    end
-
-    updated = @step_code.update(attributes)
-    raise ActiveRecord::RecordInvalid, @step_code unless updated
+    Qa::StepCodeAutofillSupport.apply_step_code_project_attributes!(
+      @step_code,
+      Qa::Part3StepCodeAutofillData::STEP_CODE_ATTRIBUTES.dup
+    )
   end
 
   def ensure_checklist!

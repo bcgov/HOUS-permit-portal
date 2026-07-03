@@ -13,6 +13,7 @@ import {
 } from "../types/enums"
 import { IPart9NavLink, IPart9SectionCompletionStatus, TPart9NavLinkKey } from "../types/types"
 import { renameKeys } from "../utils/utility-functions"
+import { markParentStepCodeReportsStale } from "./step-code-base"
 import { StepCodeBuildingCharacteristicsSummaryModel } from "./step-code-building-characteristic-summary"
 import { StepCodeComplianceReportModel } from "./step-code-compliance-report"
 
@@ -201,6 +202,7 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
         if (response.ok) {
           const snapshotData = { ...preProcessor(response.data.data), isLoaded: true }
           applySnapshot(self, snapshotData)
+          markParentStepCodeReportsStale(self)
           return true
         }
         return false
@@ -214,6 +216,7 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
         if (response.ok) {
           const snapshotData = { ...preProcessor(response.data.data), isLoaded: true }
           applySnapshot(self, snapshotData)
+          markParentStepCodeReportsStale(self)
           return true
         }
         return false
@@ -223,6 +226,7 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
         if (response.ok) {
           const snapshotData = { ...preProcessor(response.data.data), isLoaded: true }
           applySnapshot(self, snapshotData)
+          markParentStepCodeReportsStale(self)
           return true
         }
         return false

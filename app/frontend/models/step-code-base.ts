@@ -1,4 +1,4 @@
-import { flow, toGenerator, types } from "mobx-state-tree"
+import { flow, getParent, IStateTreeNode, toGenerator, types } from "mobx-state-tree"
 import { EStepCodeChecklistStage, EStepCodeStageStatus } from "../types/enums"
 import { IReportDocument } from "../types/types"
 import { JurisdictionModel } from "./jurisdiction"
@@ -39,8 +39,8 @@ export const StepCodeBaseFields = types
   .views((self) => ({
     get latestReportDocument(): IReportDocument | null {
       if (!self.reportDocuments || self.reportDocuments.length === 0) return null
-      // documents are not guaranteed to be sorted; sort by createdAt if present, fallback to last
-      const docs = [...self.reportDocuments]
+      const docs = self.reportDocuments.filter((doc) => !doc.stale)
+      if (docs.length === 0) return null
       docs.sort((a, b) => (new Date(a.createdAt as any).getTime() || 0) - (new Date(b.createdAt as any).getTime() || 0))
       return docs[docs.length - 1]
     },
@@ -116,4 +116,28 @@ export const StepCodeBaseFields = types
       }
       return response.ok
     }),
+    markReportDocumentsStale() {
+      if (!self.reportDocuments?.length) return
+      if (!self.reportDocuments.some((doc) => !doc.stale)) return
+      self.reportDocuments = self.reportDocuments.map((doc) => ({ ...doc, stale: true }))
+    },
   }))
+
+export function markParentStepCodeReportsStale(checklist: IStateTreeNode) {
+  try {
+    let node: { markReportDocumentsStale?: () => void } | undefined = getParent(checklist)
+    while (node) {
+      if (typeof node.markReportDocumentsStale === "function") {
+        node.markReportDocumentsStale()
+        return
+      }
+      try {
+        node = getParent(node)
+      } catch {
+        break
+      }
+    }
+  } catch {
+    // checklist may be detached outside a StepCode map
+  }
+}
