@@ -209,6 +209,24 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
             isCollapsedAll={isCollapsedAll}
             setSectionRef={setSectionRef}
             formScrollToId={formScrollToId}
+            renderEdit={
+              isSuperAdmin && requirementTemplateId
+                ? ({ denormalizedRequirementBlock }) => (
+                    <RouterLinkButton
+                      to={builderBlockPath(denormalizedRequirementBlock.id)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      variant="link"
+                      color="text.primary"
+                      textDecoration="none"
+                      _hover={{ textDecoration: "underline" }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {t("templateVersionPreview.openInBuilder")}
+                    </RouterLinkButton>
+                  )
+                : undefined
+            }
           />
         </Box>
       </Box>
@@ -226,6 +244,10 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
     if (element) {
       element.scrollIntoView({ behavior: "smooth", block: "start" })
     }
+  }
+
+  function builderBlockPath(requirementBlockId: string) {
+    return `/requirement-templates/${requirementTemplateId}/edit?openRequirementBlockId=${requirementBlockId}`
   }
 
   function setSectionRef(el: HTMLElement, id: string) {

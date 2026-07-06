@@ -301,6 +301,10 @@ class PermitHubMailer < ApplicationMailer
 
   def notify_project_meeting_scheduled(project_meeting)
     set_project_meeting_scheduled_variables(project_meeting)
+    attach_project_meeting_calendar(
+      project_meeting,
+      hub_meeting_url: @project_meeting_url
+    )
     @contact_first_name =
       contact_first_name(project_meeting.contact_name, @user)
 
@@ -315,6 +319,10 @@ class PermitHubMailer < ApplicationMailer
     recipient_email
   )
     set_project_meeting_scheduled_variables(project_meeting)
+    attach_project_meeting_calendar(
+      project_meeting,
+      hub_meeting_url: @reviewer_project_meeting_url
+    )
 
     send_mail(
       email: recipient_email,
@@ -327,6 +335,10 @@ class PermitHubMailer < ApplicationMailer
 
   def notify_project_meeting_rescheduled(project_meeting)
     set_project_meeting_scheduled_variables(project_meeting)
+    attach_project_meeting_calendar(
+      project_meeting,
+      hub_meeting_url: @project_meeting_url
+    )
     @contact_first_name =
       contact_first_name(project_meeting.contact_name, @user)
 
@@ -341,6 +353,10 @@ class PermitHubMailer < ApplicationMailer
     recipient_email
   )
     set_project_meeting_scheduled_variables(project_meeting)
+    attach_project_meeting_calendar(
+      project_meeting,
+      hub_meeting_url: @reviewer_project_meeting_url
+    )
 
     send_mail(
       email: recipient_email,
@@ -588,6 +604,20 @@ class PermitHubMailer < ApplicationMailer
     else
       project_meeting.contact_method.to_s.humanize
     end
+  end
+
+  def attach_project_meeting_calendar(project_meeting, hub_meeting_url:)
+    return if project_meeting.confirmed_date.blank?
+
+    generator =
+      ProjectMeetingIcsGenerator.new(
+        project_meeting,
+        hub_meeting_url: hub_meeting_url
+      )
+    attachments[generator.filename] = {
+      mime_type: "text/calendar; method=PUBLISH; charset=UTF-8",
+      content: generator.generate
+    }
   end
 
   # Helper method to attach a file from a FileUploadAttachment subclass instance

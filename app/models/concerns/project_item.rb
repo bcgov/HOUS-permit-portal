@@ -34,7 +34,6 @@ module ProjectItem
     delegate :title, to: :permit_project, prefix: true, allow_nil: true
 
     delegate :qualified_name,
-             :heating_degree_days,
              :name,
              to: :jurisdiction,
              prefix: :jurisdiction,

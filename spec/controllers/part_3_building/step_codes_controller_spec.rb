@@ -81,9 +81,7 @@ RSpec.describe Api::Part3Building::StepCodesController, type: :controller do
         expect(response).to have_http_status(:success)
       end
 
-      it "sets climate zone based on heating degree days" do
-        jurisdiction.update!(heating_degree_days: 2910)
-
+      it "does not populate climate info until location details are provided" do
         post :create,
              params: {
                step_code: {
@@ -98,14 +96,8 @@ RSpec.describe Api::Part3Building::StepCodesController, type: :controller do
 
         body = JSON.parse(response.body)
         checklist = body.dig("data", "checklist")
-        expected_climate_zone =
-          StepCode::Part3::V0::Requirements::References::ClimateZone.value(
-            jurisdiction.heating_degree_days
-          )
-        expect(checklist["heating_degree_days"]).to eq(
-          jurisdiction.heating_degree_days
-        )
-        expect(checklist["climate_zone"]).to eq(expected_climate_zone)
+        expect(checklist["heating_degree_days"]).to be_nil
+        expect(checklist["climate_zone"]).to be_nil
       end
 
       it "renders error when model raises validation error" do

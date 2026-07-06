@@ -2303,10 +2303,6 @@ Thank you,
               },
             },
             addOptionButton: "Add another option",
-            templateEditWarning:
-              "Any changes made here will be reflected in all unsaved early access previews that use this requirement block.",
-            previewEditWarning:
-              "Any changes made here will be reflected in all in-progress early access versions that use this requirement block.",
             templates: "templates",
             previews: "previews",
             stepCodeDependencies: {
@@ -3823,6 +3819,23 @@ Thank you,
                 "This page shows the Energy Step Code and Zero Carbon Step Code requirements for buildings in this community. Requirements may vary based on building type, occupancies, permit-processing date, and local bylaws.",
               stepCodeRequirementsNotice:
                 "These requirements apply to new buildings only. For existing buildings or renovations, contact your local building officials.",
+              heatingDegreeDaysTitle: "Climate information for energy modelling",
+              heatingDegreeDaysDescription:
+                "The local building authority has set the Heating Degree Days (HDD) to use for each climate zone in this community. Use the value for your project's climate zone when completing energy modelling or creating a Step Codes report.",
+              climateZoneColumnHeader: "Climate Zone",
+              heatingDegreeDaysColumnHeader: "Heating Degree Days (HDD)",
+              heatingDegreeDaysNotConfigured: "Not configured",
+              noClimateZonesTitle: "No climate zones configured",
+              noClimateZonesDescription:
+                "This community has not published climate zone HDD values yet. Contact the local jurisdiction before preparing Step Code reporting.",
+              climateZoneLabels: {
+                zone4: "Climate Zone 4",
+                zone5: "Climate Zone 5",
+                zone6: "Climate Zone 6",
+                zone7a: "Climate Zone 7A",
+                zone7b: "Climate Zone 7B",
+                zone8: "Climate Zone 8",
+              },
               smallSimpleBuildings: "Small, simple buildings",
               smallSimpleBuildingsDescription:
                 "Energy Step Code and Zero Carbon Step Code requirements for residential buildings included in Part 9 of the BC Building Code. These requirements are organized by building type.",
@@ -4113,11 +4126,6 @@ Thank you,
                 "Set the minimum acceptable levels of Energy Step Code and Zero Carbon Step Code for BCBC part 9 buildings below:",
               part9Tab: "Part 9",
               part3Tab: "Part 3",
-              part3SetMinimum:
-                "Set the heating degree days below 18°C for BCBC part 3 buildings. This value is used to determine climate zone requirements:",
-              heatingDegreeDays: {
-                label: "Heating degree days below 18°C",
-              },
               part9Building: "Part 9 Building",
               addStep: "Add another requirement combination",
               deleteCustomization: "Delete customization",
@@ -4682,6 +4690,7 @@ Thank you,
           earlyAccessDescription:
             "This permit is available for early access to help your team get familiar with the application process. You can view and edit your application, but submission is currently disabled. Submissions will be enabled once this permit type is officially launched in your jurisdiction.",
           goToBuilder: "Go to builder",
+          openInBuilder: "Open in builder",
           schedulePublish: {
             triggerButton: "Promote",
             scheduleModalTitle: "Promote early access version?",

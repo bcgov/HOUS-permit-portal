@@ -65,30 +65,6 @@ RSpec.describe StepCode, type: :model do
   end
 
   describe "climate zone mapping" do
-    it "maps HDD values to climate zones on checklist creation" do
-      jurisdiction = create(:sub_district, heating_degree_days: 4000)
-      step_code =
-        Part3StepCode.create!(
-          creator: create(:user),
-          jurisdiction: jurisdiction
-        )
-
-      allow_any_instance_of(Part3StepCode::Checklist).to receive(
-        :complete?
-      ).and_return(false)
-
-      checklist =
-        create(
-          :part_3_checklist,
-          step_code: step_code,
-          heating_degree_days: nil,
-          climate_zone: nil
-        )
-
-      expect(checklist.heating_degree_days).to eq(4000)
-      expect(checklist.climate_zone).to eq("zone_6")
-    end
-
     it "handles boundary HDD values" do
       expect(
         StepCode::Part3::V0::Requirements::References::ClimateZone.value(2999)
