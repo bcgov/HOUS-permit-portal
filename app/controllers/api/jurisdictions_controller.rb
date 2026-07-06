@@ -185,13 +185,15 @@ class Api::JurisdictionsController < Api::ApplicationController
         @user_search.results,
         "search_jurisdiction_users"
       )
+    preload_jurisdiction_memberships(authorized_results)
     render_success authorized_results,
                    nil,
                    {
                      meta: page_meta(@user_search),
                      blueprint: UserBlueprint,
                      blueprint_opts: {
-                       view: :base
+                       view: :jurisdiction_users,
+                       jurisdiction_id: @jurisdiction.id
                      }
                    }
   end
@@ -354,5 +356,12 @@ class Api::JurisdictionsController < Api::ApplicationController
         .find(params[:id])
   rescue ActiveRecord::RecordNotFound => e
     render_error("misc.not_found_error", { status: :not_found }, e)
+  end
+
+  def preload_jurisdiction_memberships(users)
+    ActiveRecord::Associations::Preloader.new(
+      records: users,
+      associations: :jurisdiction_memberships
+    ).call
   end
 end

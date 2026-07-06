@@ -59,6 +59,23 @@ RSpec.describe Api::JurisdictionsController, type: :controller do
         )
       end
     end
+
+    it "returns jurisdiction membership created_at for the current jurisdiction" do
+      user = review_managers.first
+      membership =
+        user.jurisdiction_memberships.find_by!(jurisdiction: jurisdiction)
+      user.update_column(:created_at, 2.years.ago)
+      membership.update_column(:created_at, 1.week.ago)
+      User.reindex
+
+      post :search_users, params: { id: jurisdiction.id, query: user.email }
+
+      user_json =
+        json_response["data"].find { |record| record["id"] == user.id }
+      expect(user_json["jurisdiction_membership_created_at"]).to eq(
+        membership.created_at.to_i * 1000
+      )
+    end
   end
 
   describe "logged in as super_admin" do

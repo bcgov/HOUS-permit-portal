@@ -75,7 +75,9 @@ export const JurisdictionUserIndexScreen = observer(function JurisdictionUserInd
                   <SearchGridItem fontSize="sm" maxWidth="300px" sx={{ wordBreak: "break-word" }}>
                     {u.name}
                   </SearchGridItem>
-                  <SearchGridItem fontSize="sm">{format(u.createdAt, datefnsTableDateFormat)}</SearchGridItem>
+                  <SearchGridItem fontSize="sm">
+                    {format(u.jurisdictionMembershipCreatedAt ?? u.createdAt, datefnsTableDateFormat)}
+                  </SearchGridItem>
                   <SearchGridItem fontSize="sm">
                     {u.lastSignInAt ? format(u.lastSignInAt, datefnsTableDateFormat) : t("ui.never")}
                   </SearchGridItem>
