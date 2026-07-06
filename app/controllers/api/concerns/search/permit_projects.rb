@@ -78,7 +78,8 @@ module Api::Concerns::Search::PermitProjects
 
   # Determines the where clause for Searchkick, mirroring PermitApplication logic
   def permit_project_where_clause
-    search_filters = (permit_project_search_params[:filters] || {}).deep_dup
+    search_filters =
+      permit_project_search_params[:filters].to_h.deep_symbolize_keys
     show_archived =
       ActiveModel::Type::Boolean.new.cast(
         search_filters.delete(:show_archived) || false

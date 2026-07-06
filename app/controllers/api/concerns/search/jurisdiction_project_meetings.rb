@@ -24,9 +24,12 @@ module Api::Concerns::Search::JurisdictionProjectMeetings
     }
 
     @jurisdiction_project_meeting_search =
-      ProjectMeeting.search(
-        jurisdiction_project_meeting_query,
-        **search_conditions
+      ensure_searchkick_policy_scoped!(
+        ProjectMeeting,
+        ProjectMeeting.search(
+          jurisdiction_project_meeting_query,
+          **search_conditions
+        )
       )
 
     @jurisdiction_project_meetings =

@@ -1,6 +1,6 @@
 class StepCodePolicy < ApplicationPolicy
   def index?
-    record.creator == user
+    user.present?
   end
 
   def download_step_code_summary_csv?
@@ -76,7 +76,22 @@ class StepCodePolicy < ApplicationPolicy
   class Scope < Scope
     # NOTE: Be explicit about which records you allow access to!
     def resolve
-      scope.where(creator: user)
+      return scope.none unless user
+
+      permitted_permit_applications =
+        PermitApplicationPolicy::Scope.new(
+          UserContext.new(user, sandbox),
+          PermitApplication.all
+        ).resolve
+
+      standalone_step_codes =
+        scope.where(permit_application_id: nil, creator: user)
+      attached_step_codes =
+        scope.where(
+          permit_application_id: permitted_permit_applications.select(:id)
+        )
+
+      standalone_step_codes.or(attached_step_codes)
     end
   end
 end

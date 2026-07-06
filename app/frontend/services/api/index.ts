@@ -377,6 +377,14 @@ export class Api {
     return this.client.post<ApiResponse<IPermitApplication>>(`/qa_tools/permit_applications/${id}/autofill`)
   }
 
+  async autofillQaPart3StepCode(id: string) {
+    return this.client.post<ApiResponse<IPart3StepCode>>(`/qa_tools/part_3_step_codes/${id}/autofill`)
+  }
+
+  async autofillQaPart9StepCode(id: string) {
+    return this.client.post<ApiResponse<IPart9StepCode>>(`/qa_tools/part_9_step_codes/${id}/autofill`)
+  }
+
   async updatePermitProject(id: string, params: IPermitProjectUpdateParams) {
     return this.client.patch<ApiResponse<IPermitProject>>(`/permit_projects/${id}`, { permitProject: params })
   }
@@ -1051,10 +1059,12 @@ export class Api {
     id: string,
     data: Partial<{
       fullAddress: string
+      pid: string
       referenceNumber: string
       title: string
       permitDate: string
       phase: string
+      currentStage: string
       buildingCodeVersion: string
       jurisdictionId: string
       permitApplicationId: string
@@ -1142,10 +1152,22 @@ export class Api {
   }
 
   async updatePart9Checklist(id: string, data: Partial<IPart9StepCodeChecklist>, options?: Record<string, any>) {
-    return this.client.patch<ApiResponse<IPart9StepCode>>(`/part_9_building/checklists/${id}`, {
+    return this.client.patch<ApiResponse<IPart9StepCodeChecklist>>(`/part_9_building/checklists/${id}`, {
       stepCodeChecklist: data,
       ...(options ?? {}),
     })
+  }
+
+  // HUB-5145: Reserved for future Mid-Construction/As-Built creation. This
+  // creates a staged checklist envelope under an existing StepCode report family;
+  // selection should then happen via currentStage or explicit route context.
+  async createPart9Checklist(stepCodeId: string, data: Partial<IPart9StepCodeChecklist>) {
+    return this.client.post<ApiResponse<IPart9StepCodeChecklist>>(
+      `/part_9_building/step_codes/${stepCodeId}/checklists`,
+      {
+        stepCodeChecklist: data,
+      }
+    )
   }
 
   // importing IPart3StepCodeChecklist causes circular dependency typescript error
@@ -1153,6 +1175,12 @@ export class Api {
     return this.client.patch<ApiResponse<any>>(`/part_3_building/checklists/${checklistId}`, {
       checklist,
       ...(options ?? {}),
+    })
+  }
+
+  async createPart3Checklist(stepCodeId: string, checklist) {
+    return this.client.post<ApiResponse<any>>(`/part_3_building/step_codes/${stepCodeId}/checklists`, {
+      checklist,
     })
   }
 
@@ -1266,7 +1294,7 @@ export class Api {
   async createPart3StepCode(data: {
     permitApplicationId?: string
     permitProjectId?: string
-    checklistAttributes: { sectionCompletionStatus: Record<string, any> }
+    preConstructionChecklistAttributes: { sectionCompletionStatus: Record<string, any> }
   }) {
     if (data.permitApplicationId) {
       return this.client.post<ApiResponse<IStepCode>>(

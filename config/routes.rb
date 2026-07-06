@@ -295,6 +295,10 @@ Rails.application.routes.draw do
         post "permit_projects/full", to: "qa_tools#create_full_permit_project"
         post "permit_applications/:id/autofill",
              to: "qa_tools#autofill_permit_application"
+        post "part_3_step_codes/:id/autofill",
+             to: "qa_tools#autofill_part_3_step_code"
+        post "part_9_step_codes/:id/autofill",
+             to: "qa_tools#autofill_part_9_step_code"
       end
     end
 
@@ -375,12 +379,19 @@ Rails.application.routes.draw do
       resources :checklists, only: %i[show update]
       resources :step_codes, only: %i[index create show] do
         get :select_options, on: :collection
+        # HUB-5145: Reserved for the staged-checklist flow. The future UI should
+        # create Mid-Construction/As-Built envelopes under the existing StepCode
+        # report family, then select them via StepCode.current_stage or route
+        # stage/checklist context instead of creating another StepCode.
+        resources :checklists, only: %i[create], controller: "checklists"
       end
     end
 
     # Controller namespace is Api::Part3Building::*, but we expose path with underscore for continuity
     namespace :part3_building, path: "part_3_building" do
-      resources :step_codes, only: %i[create show]
+      resources :step_codes, only: %i[create show] do
+        resources :checklists, only: %i[create], controller: "checklists"
+      end
       resources :checklists, only: %i[show update]
     end
 

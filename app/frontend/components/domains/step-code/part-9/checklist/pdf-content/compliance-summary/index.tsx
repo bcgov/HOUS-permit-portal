@@ -16,6 +16,7 @@ export const ComplianceSummary = function StepCodeChecklistPDFComplianceSummary(
   const report = checklist.selectedReport
   return (
     <Panel heading={t(`${i18nPrefix}.heading`)} break>
+      <Field label={t("stepCodeChecklist.edit.projectInfo.dwellingUnits")} value={checklist.dwellingUnitsCount} />
       <Field
         label={t(`${i18nPrefix}.compliancePath.label`)}
         value={t(`${i18nPrefix}.compliancePath.options.${checklist.compliancePath}`)}

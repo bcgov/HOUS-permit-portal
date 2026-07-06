@@ -235,7 +235,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
                 {t("user.receiveNotifications")}
               </Heading>
               {currentUser.isUnconfirmed && !currentUser.confirmationSentAt ? (
-                <EmailFormControl fieldName="email" label={t("user.notificationsEmail")} showIcon required />
+                <ConfirmationEmailField label={t("user.notificationsEmail")} isSubmitting={isSubmitting} />
               ) : (
                 <>
                   {currentUser.unconfirmedEmail ? (
@@ -324,7 +324,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
                   {isEditingEmail ? (
                     <>
                       <Divider my={4} />
-                      <EmailFormControl showIcon label={t("user.newEmail")} fieldName="email" required />
+                      <ConfirmationEmailField label={t("user.newEmail")} isSubmitting={isSubmitting} />
                     </>
                   ) : (
                     <Button
@@ -415,6 +415,24 @@ function Section({ children }) {
   return (
     <Flex as="section" direction="column" gap={4} w="full" p={6} borderWidth={1} borderColor="border.light">
       {children}
+    </Flex>
+  )
+}
+
+interface IConfirmationEmailFieldProps {
+  label: string
+  isSubmitting: boolean
+}
+
+const ConfirmationEmailField: React.FC<IConfirmationEmailFieldProps> = ({ label, isSubmitting }) => {
+  const { t } = useTranslation()
+
+  return (
+    <Flex direction="column" gap={4} align="flex-start">
+      <EmailFormControl fieldName="email" label={label} showIcon required />
+      <Button variant="secondary" type="submit" isLoading={isSubmitting} loadingText={t("ui.loading")}>
+        {t("user.sendConfirmationEmail")}
+      </Button>
     </Flex>
   )
 }

@@ -8,6 +8,7 @@ import { CoverPage } from "../../../../../shared/permit-applications/pdf-content
 import { Footer } from "../../../../../shared/permit-applications/pdf-content/shared/footer"
 import { page } from "../../../../../shared/permit-applications/pdf-content/shared/styles/page"
 import { BuildingCharacteristicsSummary } from "./building-characteristics-summary"
+import { BuildingInfo } from "./building-info"
 import { CompletedBy } from "./completed-by"
 import { ComplianceSummary } from "./compliance-summary"
 import { EnergyPerformanceCompliance } from "./energy-performance-compliance"
@@ -38,11 +39,12 @@ export const Part9PDFContent = function StepCodeChecklistPDFContent({
       <CoverPage
         permitApplication={permitApplication}
         stepCode={stepCodeForPdf}
-        subTitle={t("stepCodeChecklist.pdf.for")}
+        subTitle={t("stepCodeChecklist.pdf.for", { address: checklist.fullAddress })}
         assetDirectoryPath={assetDirectoryPath}
       />
       <Page size="LETTER" style={page}>
         <ProjectInfo checklist={checklist} />
+        <BuildingInfo checklist={checklist} />
         <ComplianceSummary checklist={checklist} />
         <CompletedBy checklist={checklist} />
         <BuildingCharacteristicsSummary checklist={checklist} />

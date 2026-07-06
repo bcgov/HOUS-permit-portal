@@ -31,7 +31,7 @@ RSpec.describe Api::Part3Building::StepCodesController, type: :controller do
              params: {
                step_code: {
                  permit_application_id: permit_application.id,
-                 checklist_attributes: {
+                 pre_construction_checklist_attributes: {
                    section_completion_status: {
                    }
                  }
@@ -49,7 +49,7 @@ RSpec.describe Api::Part3Building::StepCodesController, type: :controller do
                params: {
                  step_code: {
                    permit_application_id: permit_application.id,
-                   checklist_attributes: {
+                   pre_construction_checklist_attributes: {
                      section_completion_status: {
                      }
                    }
@@ -69,7 +69,7 @@ RSpec.describe Api::Part3Building::StepCodesController, type: :controller do
           post :create,
                params: {
                  step_code: {
-                   checklist_attributes: {
+                   pre_construction_checklist_attributes: {
                      section_completion_status: {
                      }
                    }
@@ -88,7 +88,7 @@ RSpec.describe Api::Part3Building::StepCodesController, type: :controller do
              params: {
                step_code: {
                  jurisdiction_id: jurisdiction.id,
-                 checklist_attributes: {
+                 pre_construction_checklist_attributes: {
                    section_completion_status: {
                    }
                  }
@@ -118,7 +118,7 @@ RSpec.describe Api::Part3Building::StepCodesController, type: :controller do
         post :create,
              params: {
                step_code: {
-                 checklist_attributes: {
+                 pre_construction_checklist_attributes: {
                    section_completion_status: {
                    }
                  }
@@ -163,6 +163,24 @@ RSpec.describe Api::Part3Building::StepCodesController, type: :controller do
       )
       expect(StepCode::Part3::V1::GenerateReport).to have_received(:new).with(
         checklist: step_code.checklist
+      )
+    end
+
+    it "serializes the checklist for the current stage" do
+      as_built_checklist =
+        create(:part_3_checklist, step_code: step_code, stage: :as_built)
+      step_code.update!(current_stage: "as_built")
+      stub_part3_compliance_report(
+        checklist: as_built_checklist,
+        report_hash: {
+        }
+      )
+
+      get :show, params: { id: step_code.id }
+
+      expect(response).to have_http_status(:success)
+      expect(json_response.dig("data", "checklist", "id")).to eq(
+        as_built_checklist.id
       )
     end
 
