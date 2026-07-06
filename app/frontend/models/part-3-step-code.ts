@@ -38,9 +38,6 @@ export const Part3StepCodeModel = types.snapshotProcessor(
         const stage = self.currentStage || EStepCodeChecklistStage.preConstruction
         return self.checklists.find((checklist) => checklist.stage === stage) || self.checklist
       },
-      get primaryChecklist() {
-        return self.currentChecklist
-      },
       get checklistForPdf() {
         return self.currentChecklist
       },

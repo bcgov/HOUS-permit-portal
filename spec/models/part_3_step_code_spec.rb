@@ -9,7 +9,6 @@ RSpec.describe Part3StepCode, type: :model do
       step_code.update!(current_stage: "as_built")
 
       expect(step_code.current_checklist).to eq(as_built_checklist)
-      expect(step_code.primary_checklist).to eq(step_code.current_checklist)
     end
   end
 

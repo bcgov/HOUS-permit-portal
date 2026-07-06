@@ -62,10 +62,6 @@ class StepCode < ApplicationRecord
     checklist_for(stage: current_stage)
   end
 
-  def primary_checklist
-    current_checklist
-  end
-
   def checklist_for(stage: current_stage, id: nil)
     raise NotImplementedError,
           "Subclasses must implement the checklist_for method"

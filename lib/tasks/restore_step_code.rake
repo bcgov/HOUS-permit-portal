@@ -91,7 +91,7 @@ namespace :db do
 
         if pa.step_code.present?
           # Explicitly destroy the checklist first to avoid foreign key violations
-          pa.step_code.primary_checklist&.destroy
+          pa.step_code.current_checklist&.destroy
           pa.step_code.destroy
         end
         puts "Destroyed existing StepCode and its checklist if present"

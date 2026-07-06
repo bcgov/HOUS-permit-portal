@@ -57,7 +57,6 @@ RSpec.describe StepCode, type: :model do
 
       expect { step_code.complete? }.to raise_error(NotImplementedError)
       expect { step_code.current_checklist }.to raise_error(NotImplementedError)
-      expect { step_code.primary_checklist }.to raise_error(NotImplementedError)
       expect { step_code.blueprint }.to raise_error(NotImplementedError)
       expect { step_code.checklist_blueprint }.to raise_error(
         NotImplementedError
