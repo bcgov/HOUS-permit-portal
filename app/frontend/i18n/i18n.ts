@@ -3339,6 +3339,7 @@ Thank you,
           helpLink: "https://www2.gov.bc.ca/gov/content?id=C4F8CA77AC5648CBB86948C1AEA58C8F",
           helpLinkText: "What does each step code level mean?",
           saveAndGoBack: "Save and go back",
+          goToPermitApplication: "Go to permit application",
           markAsComplete: "Mark as complete",
           markAsCompleteAndGenerateReport: "Mark as complete and generate report",
           reportGenerationHint:

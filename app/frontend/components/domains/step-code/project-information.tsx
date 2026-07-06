@@ -191,6 +191,13 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
 
     navigate(stepCodesPath)
   })
+
+  const handleSaveAndGoToPermitApplication = handleSubmit(async (values) => {
+    const checklist = await saveProjectInformation(values)
+    if (!checklist) return
+
+    navigate(`/permit-applications/${permitApplicationId}/edit`)
+  })
   const stepCodeKindLabel =
     stepCodeKind === "part3"
       ? t("stepCode.projectInformation.types.part3")
@@ -354,17 +361,29 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
             />
           )}
 
-          {isEditable && (
+          {(isEditable || permitApplicationId) && (
             <Flex justify="flex-start">
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={handleSaveAndGoBack}
-                isDisabled={isSubmitting}
-                isLoading={isSubmitting}
-              >
-                {t("stepCode.saveAndGoBack")}
-              </Button>
+              {isEditable ? (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={handleSaveAndGoBack}
+                  isDisabled={isSubmitting}
+                  isLoading={isSubmitting}
+                >
+                  {t("stepCode.saveAndGoBack")}
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  variant="link"
+                  onClick={handleSaveAndGoToPermitApplication}
+                  isDisabled={isSubmitting}
+                  isLoading={isSubmitting}
+                >
+                  {t("stepCode.goToPermitApplication")}
+                </Button>
+              )}
             </Flex>
           )}
         </Flex>

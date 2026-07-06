@@ -1,7 +1,7 @@
 import { Button, Flex, Link, Text } from "@chakra-ui/react"
 import { t } from "i18next"
 import React from "react"
-import { Link as RouterLink, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 
 export interface IStepCodeFormFooterProps<T> {
   handleSubmit: (onValid: (data: T) => void | Promise<void>, onInvalid?: () => void) => (e?: any) => void
@@ -18,6 +18,8 @@ export interface IStepCodeFormFooterProps<T> {
     hasPrevious: boolean
     goBackPath: string
     infoPagePath: string
+    isPermitLinked: boolean
+    exitLinkPath: string
   }
 }
 
@@ -32,7 +34,16 @@ export function StepCodeFormFooter<T>({
   navigation,
 }: IStepCodeFormFooterProps<T>) {
   const navigate = useNavigate()
-  const { navigateToNext, navigateToPrevious, hasNext, hasPrevious, goBackPath, infoPagePath } = navigation
+  const {
+    navigateToNext,
+    navigateToPrevious,
+    hasNext,
+    hasPrevious,
+    goBackPath,
+    infoPagePath,
+    isPermitLinked,
+    exitLinkPath,
+  } = navigation
   const isButtonDisabled = isDisabled ?? isLoading
   const isFinalStep = !hasNext
   const completeLabel =
@@ -66,6 +77,8 @@ export function StepCodeFormFooter<T>({
       if (hasPrevious) return navigateToPrevious()
       return navigate(infoPagePath)
     })
+  const handleExit = () => submitAndNavigate(() => navigate(exitLinkPath))
+  const exitLabel = isPermitLinked ? t("stepCode.goToPermitApplication") : t(goToStepCodesTranslationKey)
 
   return (
     <Flex direction="column" gap={3} pt={8} w="full">
@@ -83,8 +96,14 @@ export function StepCodeFormFooter<T>({
             {t(ctaTranslationKey)}
           </Button>
         )}
-        <Link as={RouterLink} to="/step-codes?currentPage=1" ml="auto">
-          {t(goToStepCodesTranslationKey)}
+        <Link
+          ml="auto"
+          onClick={handleExit}
+          cursor={isButtonDisabled ? "not-allowed" : "pointer"}
+          opacity={isButtonDisabled ? 0.5 : 1}
+          pointerEvents={isButtonDisabled ? "none" : "auto"}
+        >
+          {exitLabel}
         </Link>
       </Flex>
       {generatesReport && isFinalStep && (

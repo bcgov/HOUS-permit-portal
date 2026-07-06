@@ -65,7 +65,9 @@ export const usePart9Navigation = () => {
     }
   }
 
-  const goBackPath = permitApplicationId ? `/permit-applications/${permitApplicationId}/edit` : "/step-codes"
+  const isPermitLinked = !!permitApplicationId
+  const goBackPath = isPermitLinked ? `/permit-applications/${permitApplicationId}/edit` : "/step-codes"
+  const exitLinkPath = isPermitLinked ? goBackPath : "/step-codes?currentPage=1"
 
   return {
     navigateToNext,
@@ -78,5 +80,7 @@ export const usePart9Navigation = () => {
     hasPrevious: getPreviousSection() !== null,
     goBackPath,
     infoPagePath,
+    isPermitLinked,
+    exitLinkPath,
   }
 }
