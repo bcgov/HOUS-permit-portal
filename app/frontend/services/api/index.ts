@@ -381,6 +381,10 @@ export class Api {
     return this.client.post<ApiResponse<IPart3StepCode>>(`/qa_tools/part_3_step_codes/${id}/autofill`)
   }
 
+  async autofillQaPart9StepCode(id: string) {
+    return this.client.post<ApiResponse<IPart9StepCode>>(`/qa_tools/part_9_step_codes/${id}/autofill`)
+  }
+
   async updatePermitProject(id: string, params: IPermitProjectUpdateParams) {
     return this.client.patch<ApiResponse<IPermitProject>>(`/permit_projects/${id}`, { permitProject: params })
   }
@@ -1171,6 +1175,12 @@ export class Api {
     return this.client.patch<ApiResponse<any>>(`/part_3_building/checklists/${checklistId}`, {
       checklist,
       ...(options ?? {}),
+    })
+  }
+
+  async createPart3Checklist(stepCodeId: string, checklist) {
+    return this.client.post<ApiResponse<any>>(`/part_3_building/step_codes/${stepCodeId}/checklists`, {
+      checklist,
     })
   }
 

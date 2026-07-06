@@ -285,6 +285,12 @@ export enum EStepCodeChecklistStage {
   asBuilt = "as_built",
 }
 
+export enum EStepCodeStageStatus {
+  notStarted = "not_started",
+  inProgress = "in_progress",
+  complete = "complete",
+}
+
 export enum EStepCodeChecklistStatus {
   draf = "draft",
   complete = "complete",

@@ -102,10 +102,10 @@ RSpec.describe StepCodeExportService do
           reference_number: "APP-1",
           jurisdiction_name: "Jur A",
           full_address: "123 St",
-          checklist: checklist
+          current_checklist: checklist
         )
       step_code_without_checklist =
-        instance_double("Part3StepCode", checklist: nil)
+        instance_double("Part3StepCode", current_checklist: nil)
 
       relation = double("ARRelation")
       allow(Part3StepCode).to receive(:includes).and_return(relation)

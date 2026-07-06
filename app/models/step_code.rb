@@ -62,13 +62,23 @@ class StepCode < ApplicationRecord
     checklist_for(stage: current_stage)
   end
 
-  def primary_checklist
-    current_checklist
-  end
-
   def checklist_for(stage: current_stage, id: nil)
     raise NotImplementedError,
           "Subclasses must implement the checklist_for method"
+  end
+
+  def stage_completions
+    checklists_by_stage = checklists.index_by(&:stage)
+
+    STAGES.map do |stage|
+      checklist = checklists_by_stage[stage]
+
+      {
+        stage: stage,
+        status: StepCodeChecklistStageCompletion.status_for(checklist),
+        stage_completed_at: checklist&.stage_completed_at
+      }
+    end
   end
 
   def blueprint
@@ -103,6 +113,24 @@ class StepCode < ApplicationRecord
 
   def refresh_search_index
     StepCode.search_index.refresh
+  end
+
+  def self.preload_checklists(records)
+    part_3, part_9 =
+      Array(records).partition { |record| record.is_a?(Part3StepCode) }
+    if part_3.any?
+      ActiveRecord::Associations::Preloader.new(
+        records: part_3,
+        associations: :checklists
+      ).call
+    end
+    if part_9.any?
+      ActiveRecord::Associations::Preloader.new(
+        records: part_9,
+        associations: :checklists
+      ).call
+    end
+    records
   end
 
   def generate_report_document

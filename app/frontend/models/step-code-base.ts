@@ -1,5 +1,5 @@
 import { flow, toGenerator, types } from "mobx-state-tree"
-import { EStepCodeChecklistStage } from "../types/enums"
+import { EStepCodeChecklistStage, EStepCodeStageStatus } from "../types/enums"
 import { IReportDocument } from "../types/types"
 import { JurisdictionModel } from "./jurisdiction"
 
@@ -25,6 +25,16 @@ export const StepCodeBaseFields = types
     ),
     permitProjectTitle: types.maybeNull(types.string),
     reportDocuments: types.maybeNull(types.array(types.frozen<IReportDocument>())),
+    stageCompletions: types.optional(
+      types.array(
+        types.frozen<{
+          stage: EStepCodeChecklistStage
+          status: EStepCodeStageStatus
+          stageCompletedAt: Date | null
+        }>()
+      ),
+      []
+    ),
   })
   .views((self) => ({
     get latestReportDocument(): IReportDocument | null {
@@ -59,8 +69,15 @@ export const StepCodeBaseFields = types
       // @ts-ignore environment provided by composed models (Part3/Part9)
       const response = yield* toGenerator(self.environment.api.updateStepCode(self.id as any, data))
       if (response.ok) {
-        // @ts-ignore rootStore provided by withRootStore on composed models
-        self.rootStore.stepCodeStore.mergeUpdate(response.data.data, "stepCodesMap")
+        if (data.currentStage) self.currentStage = data.currentStage
+        try {
+          // @ts-ignore rootStore provided by withRootStore on composed models
+          self.rootStore.stepCodeStore.mergeUpdate(response.data.data, "stepCodesMap")
+        } catch (error) {
+          if (import.meta.env.DEV) {
+            console.error("Failed to merge updated Step Code:", error)
+          }
+        }
       }
       return response.ok
     }),

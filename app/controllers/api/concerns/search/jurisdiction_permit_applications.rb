@@ -35,9 +35,12 @@ module Api::Concerns::Search::JurisdictionPermitApplications
     search_conditions[:body_options] = body_opts if body_opts.present?
 
     @jurisdiction_permit_application_search =
-      PermitApplication.search(
-        jurisdiction_permit_application_query,
-        **search_conditions
+      ensure_searchkick_policy_scoped!(
+        PermitApplication,
+        PermitApplication.search(
+          jurisdiction_permit_application_query,
+          **search_conditions
+        )
       )
 
     unread_status_counts = jurisdiction_application_unread_status_counts

@@ -54,5 +54,11 @@ export const usePart9StepCode = () => {
 
   const checklist = currentStepCode?.currentChecklist
 
+  useEffect(() => {
+    if (!checklist || checklist.isLoaded) return
+
+    checklist.load()
+  }, [checklist?.id, checklist?.isLoaded])
+
   return { currentStepCode, checklist, isLoading }
 }

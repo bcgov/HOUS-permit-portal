@@ -41,9 +41,14 @@ export function Part9FormFooter<T>({ handleSubmit, onSubmit, isLoading, isDisabl
   const handleSaveAndGoBack = () => submitAndNavigate(() => navigate(goBackPath))
 
   return (
-    <Flex gap={3} pt={8}>
-      <Button variant="secondary" onClick={handleSaveAndGoBack} isDisabled={isButtonDisabled}>
-        {t("stepCode.saveAndGoBack")}
+    <Flex gap={3} pt={8} w="full" align="center">
+      <Button
+        variant={hasNext ? "secondary" : "primary"}
+        onClick={handleSaveAndGoBack}
+        isDisabled={isButtonDisabled}
+        isLoading={!hasNext ? isLoading : undefined}
+      >
+        {t(hasNext ? "stepCode.saveAndGoBack" : "stepCode.markAsComplete")}
       </Button>
       {hasNext && (
         <Button variant="primary" onClick={handleContinue} isDisabled={isButtonDisabled} isLoading={isLoading}>

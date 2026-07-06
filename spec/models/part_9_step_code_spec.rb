@@ -26,7 +26,49 @@ RSpec.describe Part9StepCode, type: :model do
       step_code.update!(current_stage: "mid_construction")
 
       expect(step_code.current_checklist).to eq(mid_construction_checklist)
-      expect(step_code.primary_checklist).to eq(step_code.current_checklist)
+    end
+  end
+
+  describe "#find_or_create_checklist_for!" do
+    it "clones values from the nearest previous stage" do
+      step_code = create(:part_9_step_code)
+      pre_construction = step_code.pre_construction_checklist
+      pre_construction.update!(
+        builder: "Original builder",
+        compliance_path: "step_code_ers"
+      )
+      Part9StepCode::DataEntry.create!(
+        checklist: pre_construction,
+        district_energy_ef: 1.23
+      )
+
+      as_built = step_code.find_or_create_checklist_for!(stage: "as_built")
+
+      expect(as_built.builder).to eq("Original builder")
+      expect(as_built.compliance_path).to eq("step_code_ers")
+      expect(as_built.section_completion_status.dig("start", "complete")).to be(
+        false
+      )
+      expect(as_built.data_entries.count).to eq(1)
+      expect(as_built.data_entries.first.district_energy_ef).to eq(
+        BigDecimal("1.23")
+      )
+    end
+
+    it "returns an existing checklist for the requested stage" do
+      step_code = create(:part_9_step_code)
+      existing =
+        create(
+          :part_9_checklist,
+          step_code: step_code,
+          stage: :mid_construction
+        )
+
+      result =
+        step_code.find_or_create_checklist_for!(stage: "mid_construction")
+
+      expect(result).to eq(existing)
+      expect(step_code.checklists.mid_construction.count).to eq(1)
     end
   end
 

@@ -797,6 +797,12 @@ en:
       autofill_part_3_step_code_error:
         title: Error
         message: "%{error_message}"
+      autofill_part_9_step_code_success:
+        title: ""
+        message: "Part 9 step code autofilled successfully"
+      autofill_part_9_step_code_error:
+        title: Error
+        message: "%{error_message}"
     permit_collaboration:
       destroy_success:
         title: ""

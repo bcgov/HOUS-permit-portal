@@ -1,7 +1,7 @@
 import { Center, Flex, FormLabel, Hide, Show, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { Suspense, useEffect, useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useParams } from "react-router-dom"
 import { usePart9StepCode } from "../../../../hooks/resources/use-part-9-step-code"
 import { usePermitApplication } from "../../../../hooks/resources/use-permit-application"
 import { useMst } from "../../../../setup/root"
@@ -10,6 +10,7 @@ import { CustomMessageBox } from "../../../shared/base/custom-message-box"
 import { NotFoundScreen } from "../../../shared/base/not-found-screen"
 import { SharedSpinner } from "../../../shared/base/shared-spinner"
 import { FloatingHelpDrawer } from "../../../shared/floating-help-drawer"
+import { ProjectInformation } from "../project-information"
 import { DrawingsWarning } from "./drawings-warning"
 import { FormSection } from "./form-section"
 import { Info } from "./info"
@@ -25,7 +26,6 @@ export const Part9StepCodeForm = observer(function Part9StepCodeForm() {
   const { currentStepCode } = usePart9StepCode()
   const { currentPermitApplication } = usePermitApplication()
   const { permitApplicationId, section, stepCodeId } = useParams()
-  const navigate = useNavigate()
   const isStandaloneStepCode = !permitApplicationId
   const [createError, setCreateError] = useState<string | null>(null)
 
@@ -48,14 +48,6 @@ export const Part9StepCodeForm = observer(function Part9StepCodeForm() {
       }
     })()
   }, [currentPermitApplication?.isFullyLoaded, currentStepCode])
-
-  useEffect(() => {
-    if (!currentStepCode) return
-    if (section) return
-
-    const navLink = currentStepCode.currentChecklist?.currentNavLink
-    navigate(navLink?.location || "start")
-  }, [currentStepCode])
 
   useEffect(() => {
     const scroller = document.getElementById("stepCodeScroll")
@@ -89,7 +81,18 @@ export const Part9StepCodeForm = observer(function Part9StepCodeForm() {
               />
             </VStack>
           </Center>
-        ) : isOptionsLoaded && currentStepCode ? (
+        ) : isOptionsLoaded && currentStepCode && !section ? (
+          <Flex flex={1} overflow="auto" id="stepCodeScroll" px={6} py={10}>
+            <Flex direction="column" flex={1} maxW="780px" mx="auto" w="full">
+              <FloatingHelpDrawer />
+              <ProjectInformation
+                currentStepCode={currentStepCode}
+                defaultSectionCompletionStatus={defaultSectionCompletionStatus}
+                stepCodeKind="part9"
+              />
+            </Flex>
+          </Flex>
+        ) : isOptionsLoaded && currentStepCode && section ? (
           <Flex flex={1} w="full" overflow="hidden" position="relative">
             <Show above="lg">
               <Flex w={"sidebar.width"} boxShadow="md" borderRightWidth={1} borderColor="greys.grey02" overflow="auto">

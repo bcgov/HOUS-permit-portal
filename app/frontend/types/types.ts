@@ -894,6 +894,7 @@ export type IPart9SectionCompletionStatusEntry = IPart3SectionCompletionStatusEn
 export interface IPart9SectionCompletionStatus {
   start: IPart9SectionCompletionStatusEntry
   projectInfo: IPart9SectionCompletionStatusEntry
+  buildingInfo: IPart9SectionCompletionStatusEntry
   h2kImport: IPart9SectionCompletionStatusEntry
   complianceSummary: IPart9SectionCompletionStatusEntry
   completedBy: IPart9SectionCompletionStatusEntry

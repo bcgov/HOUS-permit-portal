@@ -1,4 +1,4 @@
-import { FormControl, FormLabel, InputGroup, Text } from "@chakra-ui/react"
+import { FormControl, FormLabel, InputGroup } from "@chakra-ui/react"
 import { MapPin } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
@@ -28,9 +28,6 @@ export const ProjectInfo = observer(function ProjectInfo({
 
   return (
     <ChecklistSection heading={t(`${i18nPrefix}.heading`)}>
-      <Text fontSize="lg" fontWeight="bold">
-        {t(`${i18nPrefix}.stages.${checklist.stage}`)}
-      </Text>
       <TextFormControl label={t(`${i18nPrefix}.permitNum`)} fieldName="referenceNumber" />
       <TextFormControl label={t(`${i18nPrefix}.builder`)} fieldName="builder" />
 

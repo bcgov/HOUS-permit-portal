@@ -140,6 +140,7 @@ export const DatePickerFormControl = ({
   leftElement,
   rightElement,
   inputProps = {},
+  LabelInfo,
   showOptional = true,
   ...rest
 }: IInputFormControlProps<Partial<IDatePickerProps>>) => {
@@ -168,6 +169,7 @@ export const DatePickerFormControl = ({
               {t("ui.optional")}
             </Text>
           )}
+          {LabelInfo && <LabelInfo />}
         </HStack>
       )}
 

@@ -2,10 +2,12 @@ class Part9StepCode::Checklist < ActiveRecord::Base
   self.table_name = "part_9_step_code_checklists"
 
   include ChecklistReportDocumentConcern
+  include StepCodeChecklistStageCompletion
 
   SECTION_COMPLETION_STATUS_KEYS = %i[
     start
     project_info
+    building_info
     h2k_import
     compliance_summary
     completed_by
@@ -23,6 +25,7 @@ class Part9StepCode::Checklist < ActiveRecord::Base
   DEFAULT_SECTION_COMPLETION_STATUS =
     SECTION_COMPLETION_STATUS_KEYS
       .index_with { { complete: false, relevant: true } }
+      .merge(project_info: { complete: false, relevant: false })
       .deep_stringify_keys
       .freeze
 
@@ -36,6 +39,7 @@ class Part9StepCode::Checklist < ActiveRecord::Base
              optional: true,
              class_name: "Part9StepCode",
              foreign_key: :step_code_id,
+             inverse_of: :checklists,
              touch: true
 
   belongs_to :step_requirement,
@@ -153,6 +157,10 @@ class Part9StepCode::Checklist < ActiveRecord::Base
 
     reports = compliance_reports
     reports.find { |r| r[:requirement_id] == step_requirement_id }
+  end
+
+  def complete?
+    status == "complete"
   end
 
   private
