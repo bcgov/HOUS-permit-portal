@@ -71,6 +71,13 @@ module ProjectItem
       parent&.jurisdiction_id || super
     end
 
+    def jurisdiction_heating_degree_days
+      jurisdiction
+        &.jurisdiction_climate_zones
+        &.filter_map(&:heating_degree_days)
+        &.first
+    end
+
     # Sandbox lives on the parent project. Project items no longer carry
     # their own sandbox_id column; always defer to the parent.
     def sandbox
