@@ -775,6 +775,13 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_02_120000) do
             },
             null: false
     t.datetime "stage_completed_at"
+    t.index ["status"], name: "index_part_9_step_code_checklists_on_status"
+    t.index %w[step_code_id stage],
+            name: "idx_part_9_checklists_on_step_code_id_and_stage",
+            unique: true,
+            where: "(step_code_id IS NOT NULL)"
+    t.index ["step_code_id"],
+            name: "index_part_9_step_code_checklists_on_step_code_id"
     t.index ["step_requirement_id"],
             name: "index_part_9_step_code_checklists_on_step_requirement_id"
   end
