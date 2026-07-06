@@ -163,7 +163,14 @@ export const DatePickerFormControl = ({
     <FormControl isInvalid={!!errorMessage} {...rest}>
       {label && (
         <HStack gap={0}>
-          <FormLabel id={id}>{label} </FormLabel>
+          <FormLabel id={id}>
+            {label}
+            {required && (
+              <Text as="span" color="semantic.error" ml={1}>
+                *
+              </Text>
+            )}
+          </FormLabel>
           {!required && showOptional && (
             <Text ml={-2} mb={2}>
               {t("ui.optional")}

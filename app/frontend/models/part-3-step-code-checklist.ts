@@ -34,6 +34,7 @@ import {
   IStepCodeOccupancy,
   TPart3NavLinkKey,
 } from "../types/types"
+import { markParentStepCodeReportsStale } from "./step-code-base"
 
 export const Part3StepCodeChecklistModel = types
   .model("Part3StepCodeChecklistModel", {
@@ -239,6 +240,7 @@ export const Part3StepCodeChecklistModel = types
       )
       if (response.ok) {
         self.sectionCompletionStatus = updatedStatus
+        markParentStepCodeReportsStale(self)
         return true
       }
       return false
@@ -251,6 +253,7 @@ export const Part3StepCodeChecklistModel = types
       })
       if (response.ok) {
         self.sectionCompletionStatus = updatedStatus
+        markParentStepCodeReportsStale(self)
         return true
       }
     }),
@@ -258,6 +261,7 @@ export const Part3StepCodeChecklistModel = types
       const response = yield self.environment.api.updatePart3Checklist(self.id, values)
       if (response.ok) {
         applySnapshot(self, response.data.data)
+        markParentStepCodeReportsStale(self)
         return true
       }
     }),

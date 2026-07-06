@@ -130,5 +130,23 @@ RSpec.describe Part3StepCode::Checklist, type: :model do
 
       expect(report.reload.stale).to be(true)
     end
+
+    it "does not auto-enqueue report generation when a summary-complete checklist is updated" do
+      step_code = create(:part_3_step_code)
+      checklist = step_code.pre_construction_checklist
+      checklist.update!(
+        section_completion_status:
+          checklist.section_completion_status.merge(
+            "step_code_summary" => {
+              "complete" => true,
+              "relevant" => true
+            }
+          )
+      )
+
+      expect(StepCodeReportGenerationJob).not_to receive(:perform_async)
+
+      checklist.update!(completed_by_email: "energy@example.com")
+    end
   end
 end

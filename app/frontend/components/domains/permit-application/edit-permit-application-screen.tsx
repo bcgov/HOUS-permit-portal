@@ -271,6 +271,10 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const doesUserHaveSubmissionPermission =
     currentUser?.id === currentPermitApplication.submitter?.id ||
     currentUser?.id === currentPermitApplication?.designatedSubmitter?.collaborator?.user?.id
+  const canEditPermitApplication =
+    currentPermitApplication.isDraft &&
+    doesUserHaveSubmissionPermission &&
+    !currentPermitApplication.isViewingPastRequests
 
   const parentProjectPath = currentPermitApplication.projectId
     ? `/projects/${currentPermitApplication.projectId}/permits`
@@ -296,17 +300,21 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
               <PermitApplicationStatusTag status={currentPermitApplication.status} />
               <Flex direction="column" w="full">
                 <form>
-                  <Tooltip label={t("permitApplication.edit.clickToWriteNickname")} placement="top-start">
+                  <Tooltip
+                    label={t("permitApplication.edit.clickToWriteNickname")}
+                    placement="top-start"
+                    isDisabled={!canEditPermitApplication}
+                  >
                     <Box>
                       <EditableInputWithControls
                         w="full"
                         initialHint={t("permitApplication.edit.clickToWriteNickname")}
                         value={nicknameWatch || ""}
-                        isDisabled={!doesUserHaveSubmissionPermission || isSubmitted}
+                        isDisabled={!canEditPermitApplication}
                         controlsProps={{
                           iconButtonProps: {
                             color: "greys.white",
-                            display: !doesUserHaveSubmissionPermission || isSubmitted ? "none" : "block",
+                            display: canEditPermitApplication ? "block" : "none",
                           },
                         }}
                         editableInputProps={{

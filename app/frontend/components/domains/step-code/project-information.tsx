@@ -24,7 +24,7 @@ import React, { useEffect, useMemo, useState } from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useNavigate, useParams } from "react-router-dom"
 import { IJurisdiction } from "../../../models/jurisdiction"
-import { EStepCodeChecklistStage } from "../../../types/enums"
+import { EStepCodeChecklistStage, EStepCodeChecklistStatus } from "../../../types/enums"
 import { IOption } from "../../../types/types"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { DatePickerFormControl } from "../../shared/form/input-form-control"
@@ -56,6 +56,21 @@ const stageOptions = [
 ]
 
 const stepCodesPath = "/step-codes?currentPage=1"
+
+function checklistHasProgress(checklist: {
+  sectionCompletionStatus?: Record<string, { complete: boolean; relevant: boolean }>
+}) {
+  return Object.values(checklist.sectionCompletionStatus ?? {}).some((status) => status.relevant && status.complete)
+}
+
+function checklistButtonLabel(checklist: any) {
+  if (!checklist) return t("stepCode.projectInformation.create")
+  if (checklist.isAllComplete || checklist.isMarkedComplete || checklist.status === EStepCodeChecklistStatus.complete) {
+    return t("stepCode.projectInformation.view")
+  }
+  if (checklistHasProgress(checklist)) return t("stepCode.projectInformation.continue")
+  return t("stepCode.projectInformation.start")
+}
 
 export const ProjectInformation = observer(function StepCodeProjectInformation({
   currentStepCode,
@@ -314,9 +329,7 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
                           isDisabled={!isSelected}
                           isLoading={isSelected && isSubmitting}
                         >
-                          {checklist
-                            ? t("stepCode.projectInformation.continue")
-                            : t("stepCode.projectInformation.create")}
+                          {checklistButtonLabel(checklist)}
                         </Button>
                       </Td>
                     </Tr>

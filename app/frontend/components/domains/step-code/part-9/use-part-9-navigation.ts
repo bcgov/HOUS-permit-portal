@@ -13,8 +13,8 @@ const allNavLinks = flattenNavLinks(navLinks)
 export const usePart9Navigation = () => {
   const navigate = useNavigate()
   const { pathname } = useLocation()
-  const { permitApplicationId } = useParams()
-  const { checklist } = usePart9StepCode()
+  const { permitApplicationId, stepCodeId } = useParams()
+  const { checklist, currentStepCode } = usePart9StepCode()
 
   const getNavigationNavLinks = () => allNavLinks.filter((link) => checklist?.isRelevant(link.key) !== false)
 
@@ -40,6 +40,9 @@ export const usePart9Navigation = () => {
   }
 
   const getBaseUrl = () => R.pipe(R.split("/"), R.dropLast(1), R.join("/"))(pathname)
+  const infoPagePath = permitApplicationId
+    ? `/permit-applications/${permitApplicationId}/edit/part-9-step-code`
+    : `/part-9-step-code/${stepCodeId ?? currentStepCode?.id ?? ""}`
 
   const navigateToNext = () => {
     const nextSection = getNextSection()
@@ -74,5 +77,6 @@ export const usePart9Navigation = () => {
     hasNext: getNextSection() !== null,
     hasPrevious: getPreviousSection() !== null,
     goBackPath,
+    infoPagePath,
   }
 }

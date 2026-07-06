@@ -31,7 +31,10 @@ module ChecklistReportDocumentConcern
   end
 
   def should_generate_report_document?
-    complete? && (!respond_to?(:step_code) || step_code.present?) &&
-      !permit_application_id.present? && saved_changes?
+    # Child checklists enqueue report generation explicitly via
+    # report_generation_requested; avoid regenerating on every edit after summary completion.
+    return false if respond_to?(:step_code)
+
+    complete? && !permit_application_id.present? && saved_changes?
   end
 end

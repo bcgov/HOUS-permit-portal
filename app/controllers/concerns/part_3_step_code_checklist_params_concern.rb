@@ -20,6 +20,7 @@ module Part3StepCodeChecklistParamsConcern
       :generated_electricity,
       :overheating_hours,
       :total_annual_thermal_energy_demand,
+      :total_annual_cooling_energy_demand,
       :step_code_annual_thermal_energy_demand,
       :pressurized_doors_count,
       :pressurization_airflow_per_door,

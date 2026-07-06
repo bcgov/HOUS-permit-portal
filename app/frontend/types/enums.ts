@@ -199,6 +199,7 @@ export enum EPermitApplicationSortFields {
 }
 
 export enum EProjectPermitApplicationSortFields {
+  applicationNickname = "nickname",
   permit = "permit",
   assignedTo = "assigned_to",
   permitApplicationNumber = "permit_application_number",

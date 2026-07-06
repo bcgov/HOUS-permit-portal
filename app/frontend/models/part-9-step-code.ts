@@ -61,6 +61,7 @@ export const Part9StepCodeModel = types.snapshotProcessor(
         const response = yield self.environment.api.updatePart9Checklist(id, values, options)
         if (response.ok) {
           self.mergeUpdate(response.data.data, "checklistsMap")
+          self.markReportDocumentsStale()
           return true
         }
       }),

@@ -1,4 +1,4 @@
-import { flow, toGenerator, types } from "mobx-state-tree"
+import { flow, getParent, IStateTreeNode, toGenerator, types } from "mobx-state-tree"
 import { EStepCodeChecklistStage, EStepCodeStageStatus } from "../types/enums"
 import { IReportDocument } from "../types/types"
 import { JurisdictionModel } from "./jurisdiction"
@@ -116,4 +116,28 @@ export const StepCodeBaseFields = types
       }
       return response.ok
     }),
+    markReportDocumentsStale() {
+      if (!self.reportDocuments?.length) return
+      if (!self.reportDocuments.some((doc) => !doc.stale)) return
+      self.reportDocuments = self.reportDocuments.map((doc) => ({ ...doc, stale: true }))
+    },
   }))
+
+export function markParentStepCodeReportsStale(checklist: IStateTreeNode) {
+  try {
+    let node: { markReportDocumentsStale?: () => void } | undefined = getParent(checklist)
+    while (node) {
+      if (typeof node.markReportDocumentsStale === "function") {
+        node.markReportDocumentsStale()
+        return
+      }
+      try {
+        node = getParent(node)
+      } catch {
+        break
+      }
+    }
+  } catch {
+    // checklist may be detached outside a StepCode map
+  }
+}
