@@ -39,8 +39,8 @@ export const StepCodeBaseFields = types
   .views((self) => ({
     get latestReportDocument(): IReportDocument | null {
       if (!self.reportDocuments || self.reportDocuments.length === 0) return null
-      // documents are not guaranteed to be sorted; sort by createdAt if present, fallback to last
-      const docs = [...self.reportDocuments]
+      const docs = self.reportDocuments.filter((doc) => !doc.stale)
+      if (docs.length === 0) return null
       docs.sort((a, b) => (new Date(a.createdAt as any).getTime() || 0) - (new Date(b.createdAt as any).getTime() || 0))
       return docs[docs.length - 1]
     },

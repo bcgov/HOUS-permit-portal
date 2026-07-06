@@ -1,7 +1,6 @@
 import { t } from "i18next"
 import { flow } from "mobx"
-import { applySnapshot, getSnapshot, Instance, toGenerator, types } from "mobx-state-tree"
-import * as R from "ramda"
+import { Instance, toGenerator, types } from "mobx-state-tree"
 import { IJurisdictionTemplateVersionCustomizationForm } from "../components/domains/requirement-template/screens/jurisdiction-edit-digital-permit-screen"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
@@ -103,9 +102,6 @@ export const TemplateVersionModel = types
     },
   }))
   .actions((self) => ({
-    __mergeUpdate(resourceData: Record<string, unknown>) {
-      applySnapshot(self, R.mergeDeepLeft(resourceData, getSnapshot(self)) as any)
-    },
     setJurisdictionTemplateVersionCustomization(
       jurisdictionId: string,
       customization:

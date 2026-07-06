@@ -124,14 +124,15 @@ module Qa
       full_address: "123 QA Street, Victoria, BC",
       reference_number: "QA-REF-001",
       permit_date: "2026-01-01",
-      phase: "Pre-construction"
+      pid: "123456789"
     }.freeze
 
     SECTION_COMPLETION_STATUS =
       Part3StepCode::Checklist::SECTION_COMPLETION_STATUS_KEYS
         .index_with do |key|
           relevant = key != :additional_fuel_types
-          { "complete" => true, "relevant" => relevant }
+          complete = key != :step_code_summary
+          { "complete" => complete, "relevant" => relevant }
         end
         .freeze
 

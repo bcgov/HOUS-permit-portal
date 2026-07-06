@@ -76,6 +76,7 @@ class StepCodeReportGenerationJob
         camelize_response(
           {
             id: step_code.id,
+            type: step_code.class.name,
             full_address: step_code.full_address,
             reference_number: step_code.reference_number,
             title: step_code.title,

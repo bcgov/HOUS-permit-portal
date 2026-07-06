@@ -276,21 +276,6 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
             />
           )}
 
-          {showPermitDate && (
-            <DatePickerFormControl
-              flex={1}
-              maxW={{ base: "none", xl: "430px" }}
-              label={t("stepCode.projectInformation.date") as string}
-              fieldName="permitDate"
-              showOptional={false}
-              inputProps={permitDateInputProps}
-              isReadOnly={!isPermitDateEditable}
-              LabelInfo={() => (
-                <InfoTooltip {...fieldTooltipProps} label={t("stepCode.projectInformation.dateTooltip") as string} />
-              )}
-            />
-          )}
-
           {submitError && (
             <Text color="semantic.error" fontSize="sm">
               {submitError}
@@ -340,6 +325,21 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
               </Tbody>
             </Table>
           </FormControl>
+
+          {showPermitDate && (
+            <DatePickerFormControl
+              flex={1}
+              maxW={{ base: "none", xl: "430px" }}
+              label={t("stepCode.projectInformation.date") as string}
+              fieldName="permitDate"
+              showOptional={false}
+              inputProps={permitDateInputProps}
+              isReadOnly={!isPermitDateEditable}
+              LabelInfo={() => (
+                <InfoTooltip {...fieldTooltipProps} label={t("stepCode.projectInformation.dateTooltip") as string} />
+              )}
+            />
+          )}
 
           {isEditable && (
             <Flex justify="flex-start">

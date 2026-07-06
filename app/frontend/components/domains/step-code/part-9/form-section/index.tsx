@@ -389,7 +389,12 @@ const ReportSection = observer(function ReportSection() {
               simpleLabel
             />
           )}
-          <Part9FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={formState.isSubmitting} />
+          <Part9FormFooter
+            handleSubmit={handleSubmit}
+            onSubmit={onSubmit}
+            isLoading={formState.isSubmitting}
+            generatesReport
+          />
         </VStack>
       </form>
     </FormProvider>

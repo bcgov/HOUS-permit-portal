@@ -47,6 +47,7 @@ RSpec.describe StepCodeReportGenerationJob, type: :job do
         is_a?: true
       )
     allow(step_code).to receive(:respond_to?).and_return(false)
+    allow(step_code).to receive(:class).and_return(Part9StepCode)
     allow(step_code).to receive(:is_a?).with(Part9StepCode).and_return(true)
     allow(StepCode).to receive(:find_by).with(id: "sc1").and_return(step_code)
 
@@ -103,6 +104,7 @@ RSpec.describe StepCodeReportGenerationJob, type: :job do
         is_a?: false
       )
     allow(StepCode).to receive(:find_by).and_return(step_code)
+    allow(step_code).to receive(:class).and_return(Part3StepCode)
     allow_any_instance_of(described_class).to receive(:ensure_directory_exists)
     allow_any_instance_of(described_class).to receive(
       :write_json_to_tmp
@@ -147,6 +149,7 @@ RSpec.describe StepCodeReportGenerationJob, type: :job do
         is_a?: false
       )
     allow(step_code).to receive(:respond_to?).and_return(false)
+    allow(step_code).to receive(:class).and_return(Part3StepCode)
     allow(StepCode).to receive(:find_by).with(id: "sc1").and_return(step_code)
 
     exit_status = instance_double(Process::Status, success?: true, to_s: "0")

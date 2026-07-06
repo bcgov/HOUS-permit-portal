@@ -119,4 +119,16 @@ RSpec.describe Part3StepCode::Checklist, type: :model do
       end
     end
   end
+
+  describe "report staleness" do
+    it "marks existing report documents stale when the checklist is updated" do
+      step_code = create(:part_3_step_code)
+      checklist = step_code.pre_construction_checklist
+      report = create(:report_document, step_code: step_code, stale: false)
+
+      checklist.update!(completed_by_email: "energy@example.com")
+
+      expect(report.reload.stale).to be(true)
+    end
+  end
 end

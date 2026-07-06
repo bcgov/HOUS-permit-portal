@@ -22,7 +22,7 @@ export const ProjectInfo = function StepCodePart3ChecklistPDFProjectInfo({ stepC
         <Field label={t(`${i18nPrefix}.identifier`)} value={stepCode.referenceNumber} style={{ flex: 1 }} />
         <Field
           label={t(`${i18nPrefix}.stage`)}
-          value={stepCode.phase ? t(`${i18nPrefix}.stages.${stepCode.phase}`) : ""}
+          value={stepCode.currentStage ? t(`${i18nPrefix}.stages.${stepCode.currentStage}`) : ""}
           style={{ flex: 1 }}
         />
         <Field label={t(`${i18nPrefix}.date`)} value={stepCode.permitDate || ""} style={{ flex: 1 }} />
