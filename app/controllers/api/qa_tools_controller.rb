@@ -4,6 +4,8 @@ class Api::QaToolsController < Api::ApplicationController
 
   before_action :require_qa_mode!
   before_action :set_permit_application, only: %i[autofill_permit_application]
+  before_action :set_part_3_step_code, only: %i[autofill_part_3_step_code]
+  before_action :set_part_9_step_code, only: %i[autofill_part_9_step_code]
 
   def create_full_permit_project
     authorize PermitProject, :create?
@@ -29,6 +31,54 @@ class Api::QaToolsController < Api::ApplicationController
   rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotFound => e
     render_error(
       "qa_tools.full_permit_project_error",
+      {
+        status: :unprocessable_entity,
+        message_opts: {
+          error_message: e.message
+        }
+      },
+      e
+    )
+  end
+
+  def autofill_part_3_step_code
+    authorize @step_code, :qa_autofill?
+
+    Qa::Part3StepCodeAutofillService.new(
+      step_code: @step_code,
+      current_user: current_user
+    ).call
+
+    render_success @step_code,
+                   "qa_tools.autofill_part_3_step_code_success",
+                   { blueprint: Part3StepCodeBlueprint }
+  rescue ActiveRecord::RecordInvalid => e
+    render_error(
+      "qa_tools.autofill_part_3_step_code_error",
+      {
+        status: :unprocessable_entity,
+        message_opts: {
+          error_message: e.message
+        }
+      },
+      e
+    )
+  end
+
+  def autofill_part_9_step_code
+    authorize @step_code, :qa_autofill?
+
+    Qa::Part9StepCodeAutofillService.new(
+      step_code: @step_code,
+      current_user: current_user
+    ).call
+
+    render_success @step_code,
+                   "qa_tools.autofill_part_9_step_code_success",
+                   { blueprint: Part9StepCodeBlueprint }
+  rescue ActiveRecord::RecordInvalid => e
+    render_error(
+      "qa_tools.autofill_part_9_step_code_error",
       {
         status: :unprocessable_entity,
         message_opts: {
@@ -81,6 +131,14 @@ class Api::QaToolsController < Api::ApplicationController
 
   def set_permit_application
     @permit_application = PermitApplication.find(params[:id])
+  end
+
+  def set_part_3_step_code
+    @step_code = Part3StepCode.find(params[:id])
+  end
+
+  def set_part_9_step_code
+    @step_code = Part9StepCode.find(params[:id])
   end
 
   def qa_full_permit_project_params

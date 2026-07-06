@@ -5,9 +5,13 @@ class StepCode::Compliance::CheckRequirements::ZeroCarbon::Prescriptive < StepCo
 
   def prescriptive_heating
     @heating ||=
-      min(
-        "CASE WHEN GREATEST(heating_furnace, heating_boiler, heating_combo) > 1 THEN 'carbon' ELSE 'zero_carbon' END"
-      ).to_sym
+      begin
+        min_result =
+          min(
+            "CASE WHEN GREATEST(heating_furnace, heating_boiler, heating_combo) > 1 THEN 'carbon' ELSE 'zero_carbon' END"
+          )
+        min_result ? min_result.to_sym : nil
+      end
   end
 
   def prescriptive_heating_requirement
@@ -32,9 +36,13 @@ class StepCode::Compliance::CheckRequirements::ZeroCarbon::Prescriptive < StepCo
 
   def prescriptive_other
     @prescriptive_other ||=
-      min(
-        "CASE WHEN GREATEST(cooking, laundry) > 1 THEN 'carbon' ELSE 'zero_carbon' END"
-      ).to_sym
+      begin
+        min_result =
+          min(
+            "CASE WHEN GREATEST(cooking, laundry) > 1 THEN 'carbon' ELSE 'zero_carbon' END"
+          )
+        min_result ? min_result.to_sym : nil
+      end
   end
 
   def prescriptive_other_requirement
@@ -48,6 +56,8 @@ class StepCode::Compliance::CheckRequirements::ZeroCarbon::Prescriptive < StepCo
   private
 
   def heating_passed?
+    return false if prescriptive_heating.nil?
+
     !prescriptive_heating_requirement ||
       heating_rating >= heating_requirement_rating
   end
@@ -82,6 +92,8 @@ class StepCode::Compliance::CheckRequirements::ZeroCarbon::Prescriptive < StepCo
   end
 
   def other_passed?
+    return false if prescriptive_other.nil?
+
     !prescriptive_other_requirement || other_rating >= other_requirement_rating
   end
 

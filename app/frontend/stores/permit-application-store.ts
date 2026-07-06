@@ -68,6 +68,7 @@ export const PermitApplicationStoreModel = types
     getProjectPermitApplicationSortColumnHeader(field: EProjectPermitApplicationSortFields) {
       const map = {
         [EProjectPermitApplicationSortFields.permit]: t("permitProject.overview.permit"),
+        [EProjectPermitApplicationSortFields.applicationNickname]: t("permitProject.overview.applicationNickname"),
         [EProjectPermitApplicationSortFields.assignedTo]: t("permitProject.overview.assignedTo"),
         [EProjectPermitApplicationSortFields.permitApplicationNumber]: t(
           "permitProject.overview.permitApplicationNumber"

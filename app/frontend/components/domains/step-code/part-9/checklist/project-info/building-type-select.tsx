@@ -6,6 +6,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
+  Portal,
   StackDivider,
   VStack,
 } from "@chakra-ui/react"
@@ -48,26 +49,28 @@ export const BuildingTypeSelect = observer(function BuildingTypeSelect({ onChang
               <InputRightElement children={<CaretDown color="gray.300" />} />
             </InputGroup>
           </PopoverTrigger>
-          <PopoverContent minW={320}>
-            <VStack align="start" spacing={0} divider={<StackDivider borderColor="border.light" />}>
-              {selectOptions.buildingTypes.map((value) => (
-                <Flex
-                  key={value}
-                  onClick={() => {
-                    onChange(value)
-                    onClose()
-                  }}
-                  px={2}
-                  py={1.5}
-                  w="full"
-                  cursor="pointer"
-                  _hover={{ bg: "hover.blue" }}
-                >
-                  {t(`${i18nPrefix}.buildingType.options.${value}`)}
-                </Flex>
-              ))}
-            </VStack>
-          </PopoverContent>
+          <Portal>
+            <PopoverContent bg="white" minW={320} zIndex="popover">
+              <VStack align="start" spacing={0} divider={<StackDivider borderColor="border.light" />}>
+                {selectOptions.buildingTypes.map((value) => (
+                  <Flex
+                    key={value}
+                    onClick={() => {
+                      onChange(value)
+                      onClose()
+                    }}
+                    px={2}
+                    py={1.5}
+                    w="full"
+                    cursor="pointer"
+                    _hover={{ bg: "hover.blue" }}
+                  >
+                    {t(`${i18nPrefix}.buildingType.options.${value}`)}
+                  </Flex>
+                ))}
+              </VStack>
+            </PopoverContent>
+          </Portal>
         </>
       )}
     </Popover>

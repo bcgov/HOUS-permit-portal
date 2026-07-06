@@ -791,6 +791,18 @@ en:
       autofill_permit_application_not_draft:
         title: Error
         message: "Only draft permit applications can be autofilled"
+      autofill_part_3_step_code_success:
+        title: ""
+        message: "Part 3 step code autofilled successfully"
+      autofill_part_3_step_code_error:
+        title: Error
+        message: "%{error_message}"
+      autofill_part_9_step_code_success:
+        title: ""
+        message: "Part 9 step code autofilled successfully"
+      autofill_part_9_step_code_error:
+        title: Error
+        message: "%{error_message}"
     permit_collaboration:
       destroy_success:
         title: ""

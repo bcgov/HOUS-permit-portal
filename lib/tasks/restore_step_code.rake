@@ -17,7 +17,7 @@ namespace :db do
         puts "No StepCode found for PermitApplication #{permit_id}. Aborting."
         exit(1)
       end
-      checklist = step_code.checklist
+      checklist = step_code.current_checklist
       unless checklist
         puts "No Checklist found for StepCode #{step_code.id}. Aborting."
         exit(1)
@@ -91,7 +91,7 @@ namespace :db do
 
         if pa.step_code.present?
           # Explicitly destroy the checklist first to avoid foreign key violations
-          pa.step_code.primary_checklist&.destroy
+          pa.step_code.current_checklist&.destroy
           pa.step_code.destroy
         end
         puts "Destroyed existing StepCode and its checklist if present"

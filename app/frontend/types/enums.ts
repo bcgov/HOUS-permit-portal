@@ -199,6 +199,7 @@ export enum EPermitApplicationSortFields {
 }
 
 export enum EProjectPermitApplicationSortFields {
+  applicationNickname = "nickname",
   permit = "permit",
   assignedTo = "assigned_to",
   permitApplicationNumber = "permit_application_number",
@@ -283,6 +284,12 @@ export enum EStepCodeChecklistStage {
   preConstruction = "pre_construction",
   midConstruction = "mid_construction",
   asBuilt = "as_built",
+}
+
+export enum EStepCodeStageStatus {
+  notStarted = "not_started",
+  inProgress = "in_progress",
+  complete = "complete",
 }
 
 export enum EStepCodeChecklistStatus {

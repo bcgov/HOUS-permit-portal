@@ -9,7 +9,6 @@ import {
   InputGroup,
   InputLeftElement,
   Link,
-  Select,
   Text,
 } from "@chakra-ui/react"
 import { MapPin } from "@phosphor-icons/react"
@@ -32,7 +31,6 @@ interface IProjectDetailsForm {
   fullAddress?: string
   referenceNumber?: string
   permitDate?: string
-  phase?: string
   site?: IOption
   jurisdictionId?: string
 }
@@ -47,7 +45,6 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
       fullAddress: currentStepCode?.fullAddress || "",
       referenceNumber: currentStepCode?.referenceNumber || "",
       permitDate: currentStepCode?.permitDate || "",
-      phase: currentStepCode?.phase || "",
       jurisdictionId: currentStepCode?.jurisdiction?.id || "",
     }
   }
@@ -82,7 +79,6 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
         fullAddress: data.fullAddress,
         referenceNumber: data.referenceNumber,
         permitDate: data.permitDate,
-        phase: data.phase,
         jurisdictionId: data.jurisdictionId,
       })
     }
@@ -191,27 +187,6 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
                 </FormControl>
               ) : (
                 <Field label={t(`${i18nPrefix}.identifier`)} value={currentStepCode.referenceNumber} />
-              )}
-              {editable ? (
-                <FormControl>
-                  <FormLabel htmlFor="phase">{t(`${i18nPrefix}.stage`)}</FormLabel>
-                  <Select
-                    id="phase"
-                    placeholder="Select stage"
-                    {...register("phase")}
-                    defaultValue={currentStepCode.phase || ""}
-                  >
-                    <option value="pre_construction">
-                      {t("stepCodeChecklist.edit.projectInfo.stages.pre_construction")}
-                    </option>
-                    <option value="mid_construction">
-                      {t("stepCodeChecklist.edit.projectInfo.stages.mid_construction")}
-                    </option>
-                    <option value="as_built">{t("stepCodeChecklist.edit.projectInfo.stages.as_built")}</option>
-                  </Select>
-                </FormControl>
-              ) : (
-                <Field label={t(`${i18nPrefix}.stage`)} value={currentStepCode.phase} />
               )}
             </Flex>
             {editable ? (

@@ -84,7 +84,7 @@ export const StepCodeSummary = observer(function StepCodeSummary() {
           )}
         </Flex>
       </FormControl>
-      <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
+      <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} generatesReport />
     </Flex>
   )
 })

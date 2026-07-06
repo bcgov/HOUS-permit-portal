@@ -1,4 +1,6 @@
 class StepCode::Part3::V0::Requirements::References::ClimateZone
+  # HUB-5145: This is a legacy lookup that is used to map HDD values to climate zones.
+  # TODO: consider the Jurisdiciton's configured heating degree days
   LOOKUP = {
     "zone_4" => 2999,
     "zone_5" => 3999,

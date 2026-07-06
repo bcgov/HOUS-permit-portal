@@ -1,4 +1,6 @@
 class StepCode < ApplicationRecord
+  STAGES = %w[pre_construction mid_construction as_built].freeze
+
   # searchkick must be declared before Discard::Model to ensure auto-callbacks register correctly
   searchkick word_middle: %i[
                title
@@ -32,11 +34,15 @@ class StepCode < ApplicationRecord
   # Delegates for attributes from PermitApplication
   delegate :number, to: :permit_application, prefix: true, allow_nil: true
 
+  # HUB-5145: This parent should be the report family plus shared permit/project
+  # metadata. Move lifecycle selection from legacy `phase` to a normalized
+  # current_stage while child checklists own their immutable `stage` identity.
   validates :permit_application_id,
             uniqueness: {
               conditions: -> { kept }
             },
             allow_nil: true
+  validates :current_stage, inclusion: { in: STAGES }
 
   delegate :submitter,
            :newly_submitted_at,
@@ -52,9 +58,27 @@ class StepCode < ApplicationRecord
     raise NotImplementedError, "Subclasses must implement the complete? method"
   end
 
-  def primary_checklist
+  def current_checklist
+    checklist_for(stage: current_stage)
+  end
+
+  def checklist_for(stage: current_stage, id: nil)
     raise NotImplementedError,
-          "Subclasses must implement the primary_checklist method"
+          "Subclasses must implement the checklist_for method"
+  end
+
+  def stage_completions
+    checklists_by_stage = checklists.index_by(&:stage)
+
+    STAGES.map do |stage|
+      checklist = checklists_by_stage[stage]
+
+      {
+        stage: stage,
+        status: StepCodeChecklistStageCompletion.status_for(checklist),
+        stage_completed_at: checklist&.stage_completed_at
+      }
+    end
   end
 
   def blueprint
@@ -89,6 +113,24 @@ class StepCode < ApplicationRecord
 
   def refresh_search_index
     StepCode.search_index.refresh
+  end
+
+  def self.preload_checklists(records)
+    part_3, part_9 =
+      Array(records).partition { |record| record.is_a?(Part3StepCode) }
+    if part_3.any?
+      ActiveRecord::Associations::Preloader.new(
+        records: part_3,
+        associations: :checklists
+      ).call
+    end
+    if part_9.any?
+      ActiveRecord::Associations::Preloader.new(
+        records: part_9,
+        associations: :checklists
+      ).call
+    end
+    records
   end
 
   def generate_report_document
