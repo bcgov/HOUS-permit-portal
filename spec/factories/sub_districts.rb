@@ -10,7 +10,26 @@ FactoryBot.define do
     inbox_enabled { false }
     external_api_state { "g_off" }
 
-    after(:create) do |jurisdiction|
+    transient do
+      heating_degree_days { nil }
+      climate_zone { nil }
+    end
+
+    after(:create) do |jurisdiction, evaluator|
+      if evaluator.heating_degree_days.present?
+        climate_zone =
+          evaluator.climate_zone ||
+            StepCode::Part3::V0::Requirements::References::ClimateZone.value(
+              evaluator.heating_degree_days
+            )&.downcase || "zone_5"
+
+        create(
+          :jurisdiction_climate_zone,
+          jurisdiction: jurisdiction,
+          climate_zone: climate_zone,
+          heating_degree_days: evaluator.heating_degree_days
+        )
+      end
       create(
         :submission_contact,
         jurisdiction: jurisdiction,
