@@ -10,6 +10,7 @@ RSpec.describe Api::OverheatingCodesController,
   before do
     sign_in user
     request.headers["ACCEPT"] = "application/json"
+    SiteConfiguration.instance.update!(overheating_tool_enabled: true)
   end
 
   describe "POST #index" do
@@ -37,6 +38,14 @@ RSpec.describe Api::OverheatingCodesController,
 
       expect(response).to have_http_status(:success)
       expect(json_response["data"]).to be_empty
+    end
+
+    it "returns forbidden when the overheating tool is disabled" do
+      SiteConfiguration.instance.update!(overheating_tool_enabled: false)
+
+      post :index, params: {}, format: :json
+
+      expect(response).to have_http_status(:forbidden)
     end
   end
 
@@ -95,6 +104,16 @@ RSpec.describe Api::OverheatingCodesController,
            as: :json
 
       expect(json_response["data"]["creator"]["id"]).to eq(user.id)
+    end
+
+    it "returns forbidden when the overheating tool is disabled" do
+      SiteConfiguration.instance.update!(overheating_tool_enabled: false)
+
+      expect do
+        post :create, params: { overheating_code: {} }, as: :json
+      end.not_to change(OverheatingCode, :count)
+
+      expect(response).to have_http_status(:forbidden)
     end
   end
 

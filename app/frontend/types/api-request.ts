@@ -133,6 +133,7 @@ export interface ISiteConfigurationUpdateParams {
   codeComplianceEnabled?: boolean | null
   qaToolsEnabled?: boolean | null
   projectMeetingsEnabled?: boolean | null
+  overheatingToolEnabled?: boolean | null
   archistarEnabledForAllJurisdictions?: boolean | null
   sitewideMessage?: string | null
   helpLinkItems?: IHelpLinkItems

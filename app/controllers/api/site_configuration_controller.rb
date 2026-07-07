@@ -95,6 +95,7 @@ class Api::SiteConfigurationController < Api::ApplicationController
       :code_compliance_enabled,
       :qa_tools_enabled,
       :project_meetings_enabled,
+      :overheating_tool_enabled,
       :archistar_enabled_for_all_jurisdictions,
       help_link_items: [
         get_started_link_item: %i[href title description show],
