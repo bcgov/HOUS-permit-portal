@@ -1,7 +1,9 @@
 import {
   Accordion,
   Alert,
+  Button,
   Center,
+  Flex,
   FormControl,
   FormLabel,
   Heading,
@@ -14,7 +16,7 @@ import {
 import { LightningA } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
-import React, { ReactNode, useEffect } from "react"
+import React, { ReactNode, useEffect, useState } from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
 import { Navigate, useLocation, useParams } from "react-router-dom"
 import { usePart9StepCode } from "../../../../../hooks/resources/use-part-9-step-code"
@@ -337,8 +339,10 @@ const ReviewSection = observer(function ReviewSection() {
           <Heading as="h2" fontSize="2xl">
             {t("stepCode.part9.sidebar.review")}
           </Heading>
+          <Text>{t("stepCode.part9.review.description")}</Text>
+          <Text>{t("stepCode.part9.review.reportGenerationDescription")}</Text>
           <HStack spacing={5}>
-            <Text fontWeight="bold">{t("stepCodeChecklist.edit.heading")}</Text>
+            <Text fontWeight="bold">{t("stepCode.part9.review.statusLabel")}</Text>
             <Tag
               p={1}
               bg={checklist.isMarkedComplete ? "theme.blue" : "greys.grey03"}
@@ -352,8 +356,12 @@ const ReviewSection = observer(function ReviewSection() {
               {checklist.status}
             </Tag>
           </HStack>
-          <Text>{t("stepCode.subTitle")}</Text>
-          <Part9FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={formState.isSubmitting} />
+          <Part9FormFooter
+            handleSubmit={handleSubmit}
+            onSubmit={onSubmit}
+            isLoading={formState.isSubmitting}
+            generatesReport
+          />
         </VStack>
       </form>
     </FormProvider>
@@ -364,10 +372,21 @@ const ReportSection = observer(function ReportSection() {
   const { currentStepCode, checklist } = usePart9StepCode()
   const formMethods = useForm({ mode: "onChange" })
   const { handleSubmit, formState } = formMethods
+  const [isRegenerating, setIsRegenerating] = useState(false)
 
   const onSubmit = async () => {
     const updated = await checklist.completeSection("report")
     if (!updated) throw new Error("Save failed")
+  }
+
+  const handleRegenerateReport = async () => {
+    setIsRegenerating(true)
+    try {
+      const updated = await checklist.regenerateReport()
+      if (!updated) throw new Error("Regenerate report failed")
+    } finally {
+      setIsRegenerating(false)
+    }
   }
 
   if (!checklist) return <SharedSpinner />
@@ -380,21 +399,29 @@ const ReportSection = observer(function ReportSection() {
           <Heading as="h2" fontSize="2xl">
             {t("stepCode.part9.sidebar.report")}
           </Heading>
-          <Text>{t("stepCodeChecklist.pdf.for", { address: checklist.fullAddress })}</Text>
-          {currentStepCode?.latestReportDocument && (
-            <FileDownloadButton
-              variant="link"
-              modelType={EFileUploadAttachmentType.ReportDocument}
-              document={currentStepCode.latestReportDocument as any}
-              simpleLabel
-            />
-          )}
-          <Part9FormFooter
-            handleSubmit={handleSubmit}
-            onSubmit={onSubmit}
-            isLoading={formState.isSubmitting}
-            generatesReport
-          />
+          <Text>{t("stepCode.part9.report.description")}</Text>
+          <Text>
+            {currentStepCode?.latestReportDocument
+              ? t("stepCode.part9.report.ready", { address: checklist.fullAddress })
+              : t("stepCode.part9.report.pending")}
+          </Text>
+          <Flex gap={3} align="start">
+            {currentStepCode?.latestReportDocument ? (
+              <FileDownloadButton
+                variant="link"
+                modelType={EFileUploadAttachmentType.ReportDocument}
+                document={currentStepCode.latestReportDocument as any}
+                simpleLabel
+                mt={2}
+              />
+            ) : (
+              <SharedSpinner m={0} />
+            )}
+            <Button variant="secondary" onClick={handleRegenerateReport} isLoading={isRegenerating}>
+              {t("stepCode.regenerateReport")}
+            </Button>
+          </Flex>
+          <Part9FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={formState.isSubmitting} />
         </VStack>
       </form>
     </FormProvider>

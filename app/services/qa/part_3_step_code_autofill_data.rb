@@ -131,7 +131,7 @@ module Qa
       Part3StepCode::Checklist::SECTION_COMPLETION_STATUS_KEYS
         .index_with do |key|
           relevant = key != :additional_fuel_types
-          complete = key != :step_code_summary
+          complete = key != :report
           { "complete" => complete, "relevant" => relevant }
         end
         .freeze

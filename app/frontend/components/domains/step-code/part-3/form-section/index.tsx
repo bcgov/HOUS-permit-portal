@@ -15,6 +15,7 @@ import { ModelledOutputs } from "./modelled-outputs"
 import { OverheatingRequirements } from "./overheating-requirements"
 import { PerformanceCharacteristics } from "./performance-characteristics"
 import { RenewableEnergy } from "./renewable-energy"
+import { Report } from "./report"
 import { RequirementsSummary } from "./requirements-summary"
 import { ResidentialAdjustments } from "./residential-adjustments"
 import { StartPage } from "./start-page"
@@ -75,5 +76,7 @@ export const FormSection = observer(function Part3StepCodeFormSection() {
       return <Contact />
     case "step-code-summary":
       return <StepCodeSummary />
+    case "report":
+      return <Report />
   }
 })

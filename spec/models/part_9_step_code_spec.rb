@@ -72,6 +72,54 @@ RSpec.describe Part9StepCode, type: :model do
     end
   end
 
+  describe "#process_current_h2k_files" do
+    let(:step_code) { create(:part_9_step_code) }
+    let(:checklist) { step_code.pre_construction_checklist }
+    let(:fixture_path) { Rails.root.join("spec/support/Test Model side 1.h2k") }
+
+    before do
+      uploaded_file =
+        File.open(fixture_path) do |file|
+          H2kFileUploader.upload(file, :store, metadata: false)
+        end
+      uploaded_file.metadata.merge!(
+        "filename" => File.basename(fixture_path),
+        "size" => File.size(fixture_path),
+        "mime_type" => "application/octet-stream"
+      )
+      checklist.data_entries.create!(h2k_file_data: uploaded_file.data)
+    end
+
+    it "populates the building characteristics summary from uploaded H2K files" do
+      step_code.process_current_h2k_files(checklist)
+
+      summary = checklist.reload.building_characteristics_summary
+      expect(summary.roof_ceilings_lines.map(&:details)).to include(
+        "Ceiling - 1 - 2x10 @ 24 R28 spray foam"
+      )
+      expect(summary.above_grade_walls_lines.map(&:details)).to include(
+        "Main - 2x6 @ 24 R24 Siding"
+      )
+      expect(summary.hot_water_lines.first.details).to eq(
+        "Domestic hot water - Electricity - Conserver tank"
+      )
+      expect(summary.fossil_fuels.presence).to eq("yes")
+    end
+
+    it "does not duplicate generated rows or overwrite non-empty manual fields on re-import" do
+      step_code.process_current_h2k_files(checklist)
+      summary = checklist.reload.building_characteristics_summary
+      roof_count = summary.roof_ceilings_lines.count
+      summary.update!(airtightness: { details: "Manual air barrier" })
+
+      step_code.process_current_h2k_files(checklist)
+
+      summary.reload
+      expect(summary.roof_ceilings_lines.count).to eq(roof_count)
+      expect(summary.airtightness.details).to eq("Manual air barrier")
+    end
+  end
+
   context "permit_applications" do
     it "invalid on create if there is no supporting doc with compliance" do
       expect(step_code.valid?).to eq false

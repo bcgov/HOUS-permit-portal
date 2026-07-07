@@ -26,12 +26,12 @@ RSpec.describe Part3StepCode::Checklist, type: :model do
   end
 
   describe "#complete?" do
-    it "returns true when the summary section is complete" do
+    it "returns true when the report section is complete" do
       checklist =
         build(
           :part_3_checklist,
           section_completion_status: {
-            "step_code_summary" => {
+            "report" => {
               "complete" => true
             }
           }
@@ -40,7 +40,7 @@ RSpec.describe Part3StepCode::Checklist, type: :model do
       expect(checklist.complete?).to be(true)
     end
 
-    it "returns false when the summary section is incomplete" do
+    it "returns false when the report section is incomplete" do
       checklist = build(:part_3_checklist)
 
       expect(checklist.complete?).to be(false)
@@ -54,7 +54,7 @@ RSpec.describe Part3StepCode::Checklist, type: :model do
       travel_to Time.zone.parse("2026-06-12 10:00") do
         checklist.update!(
           section_completion_status: {
-            "step_code_summary" => {
+            "report" => {
               "complete" => true,
               "relevant" => true
             }
@@ -66,12 +66,12 @@ RSpec.describe Part3StepCode::Checklist, type: :model do
       end
     end
 
-    it "is cleared when the summary section is no longer complete" do
+    it "is cleared when the report section is no longer complete" do
       checklist =
         create(
           :part_3_checklist,
           section_completion_status: {
-            "step_code_summary" => {
+            "report" => {
               "complete" => true,
               "relevant" => true
             }
@@ -81,7 +81,7 @@ RSpec.describe Part3StepCode::Checklist, type: :model do
 
       checklist.update!(
         section_completion_status: {
-          "step_code_summary" => {
+          "report" => {
             "complete" => false,
             "relevant" => true
           }
@@ -131,13 +131,13 @@ RSpec.describe Part3StepCode::Checklist, type: :model do
       expect(report.reload.stale).to be(true)
     end
 
-    it "does not auto-enqueue report generation when a summary-complete checklist is updated" do
+    it "does not auto-enqueue report generation when a report-complete checklist is updated" do
       step_code = create(:part_3_step_code)
       checklist = step_code.pre_construction_checklist
       checklist.update!(
         section_completion_status:
           checklist.section_completion_status.merge(
-            "step_code_summary" => {
+            "report" => {
               "complete" => true,
               "relevant" => true
             }

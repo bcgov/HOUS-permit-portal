@@ -885,6 +885,7 @@ export interface IPart3SectionCompletionStatus {
   contact: IPart3SectionCompletionStatusEntry
   requirementsSummary: IPart3SectionCompletionStatusEntry
   stepCodeSummary: IPart3SectionCompletionStatusEntry
+  report: IPart3SectionCompletionStatusEntry
 }
 
 export type TPart3NavLinkKey = keyof IPart3SectionCompletionStatus

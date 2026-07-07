@@ -1,4 +1,4 @@
-import { Button, Flex, Link, Text } from "@chakra-ui/react"
+import { Button, Flex, Link } from "@chakra-ui/react"
 import { t } from "i18next"
 import React from "react"
 import { useNavigate } from "react-router-dom"
@@ -46,8 +46,9 @@ export function StepCodeFormFooter<T>({
   } = navigation
   const isButtonDisabled = isDisabled ?? isLoading
   const isFinalStep = !hasNext
-  const completeLabel =
-    generatesReport && isFinalStep ? "stepCode.markAsCompleteAndGenerateReport" : "stepCode.markAsComplete"
+  const completeLabel = generatesReport ? "stepCode.markAsCompleteAndGenerateReport" : "stepCode.markAsComplete"
+  const continueLabel = generatesReport ? completeLabel : ctaTranslationKey
+  const finalLabel = generatesReport ? completeLabel : "stepCode.complete"
 
   const submitAndNavigate = async (navigateFn: () => void) => {
     try {
@@ -89,11 +90,11 @@ export function StepCodeFormFooter<T>({
           isDisabled={isButtonDisabled}
           isLoading={isFinalStep ? isLoading : undefined}
         >
-          {t(hasNext ? "stepCode.saveAndGoBack" : completeLabel)}
+          {t(hasNext ? "stepCode.saveAndGoBack" : finalLabel)}
         </Button>
         {hasNext && (
           <Button variant="primary" onClick={handleContinue} isDisabled={isButtonDisabled} isLoading={isLoading}>
-            {t(ctaTranslationKey)}
+            {t(continueLabel)}
           </Button>
         )}
         <Link
@@ -106,11 +107,6 @@ export function StepCodeFormFooter<T>({
           {exitLabel}
         </Link>
       </Flex>
-      {generatesReport && isFinalStep && (
-        <Text fontSize="sm" color="text.secondary">
-          {t("stepCode.reportGenerationHint")}
-        </Text>
-      )}
     </Flex>
   )
 }
