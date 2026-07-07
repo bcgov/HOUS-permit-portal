@@ -56,7 +56,8 @@ module ExternalApi::Concerns::Search::PermitApplications
 
   def permit_application_order
     if (sort = permit_application_search_params[:sort])
-      { sort[:field] => { order: sort[:direction], unmapped_type: "long" } }
+      field = PermitApplication.search_sort_field(sort[:field])
+      { field => { order: sort[:direction], unmapped_type: "long" } }
     else
       { submitted_at: { order: :desc, unmapped_type: "long" } }
     end
