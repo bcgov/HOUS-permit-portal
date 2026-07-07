@@ -23,12 +23,7 @@ north_van =
   )
 north_van&.update(map_position: [49.319981, -123.072414], map_zoom: 13)
 
-north_van.update(
-  external_api_state: :j_on,
-  allow_designated_reviewer: true,
-  project_meetings_enabled: true,
-  property_information_requests_enabled: true
-)
+north_van.update(external_api_state: :j_on, allow_designated_reviewer: true)
 
 van = Jurisdiction.find_by(name: "Vancouver")
 
@@ -141,11 +136,7 @@ Jurisdiction.all.each do |j|
       confirmed_at: Time.now,
       default: true
     )
-  j.update(
-    inbox_enabled: true,
-    show_about_page: true,
-    project_meetings_enabled: true
-  )
+  j.update(inbox_enabled: true, show_about_page: true)
 end
 
 if north_van
@@ -160,6 +151,11 @@ if north_van
       email: "north-van-property-information@laterolabs.com"
     )
   property_information_contact.update!(confirmed_at: Time.now, default: false)
+
+  north_van.reload.update(
+    project_meetings_enabled: true,
+    property_information_requests_enabled: true
+  )
 end
 
 if PermitApplication.first.blank?
