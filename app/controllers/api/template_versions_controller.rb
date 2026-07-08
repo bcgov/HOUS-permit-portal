@@ -42,7 +42,16 @@ class Api::TemplateVersionsController < Api::ApplicationController
                    {
                      blueprint: TemplateVersionBlueprint,
                      blueprint_opts: {
-                       view: :extended
+                       # TODO: This endpoint may be too heavy as the catalog grows (>50 templates). Consider:
+                       # - A lighter :list blueprint view with denormalized_template_json + jurisdiction flags only
+                       #   (drop form_json / requirement_blocks_json from index responses).
+                       # - Batch-loading jurisdiction customizations for blueprint_opts[:jurisdiction_id] and
+                       #   sandbox to avoid N+1 EXISTS queries for requires_project_meeting / disabled_by_jurisdiction.
+                       # - Moving nickname/description/tags to base fields if denormalized_template_json is no longer needed.
+                       view: :extended,
+                       jurisdiction_id:
+                         template_version_params[:jurisdiction_id],
+                       sandbox: current_sandbox
                      }
                    }
   end
@@ -77,7 +86,10 @@ class Api::TemplateVersionsController < Api::ApplicationController
                    {
                      blueprint: TemplateVersionBlueprint,
                      blueprint_opts: {
-                       view: :extended
+                       view: :extended,
+                       jurisdiction_id:
+                         template_version_params[:jurisdiction_id],
+                       sandbox: current_sandbox
                      }
                    }
   end
@@ -473,7 +485,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
   private
 
   def template_version_params
-    params.permit(:status, :publicly_previewable)
+    params.permit(:status, :publicly_previewable, :jurisdiction_id)
   end
 
   def publicly_previewable_param
@@ -539,6 +551,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
   def jurisdiction_template_version_customization_params
     params.require(:jurisdiction_template_version_customization).permit(
       :disabled,
+      :requires_project_meeting,
       customizations: {
         requirement_block_changes: {
         }

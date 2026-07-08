@@ -1,4 +1,4 @@
-import { IStateTreeNode } from "mobx-state-tree"
+import { getSnapshot, isStateTreeNode, IStateTreeNode } from "mobx-state-tree"
 import * as R from "ramda"
 
 declare namespace MSTMixins.WithMerge {
@@ -29,7 +29,14 @@ export const withMerge =
           resourceDataToUpdate = self["__beforeMergeUpdate"](resourceData)
         }
 
-        const existingResource = self[collectionName].get(resourceData.id) || {}
+        const existingResource = self[collectionName].get(resourceData.id)
+        // MST map values are live observable nodes, not plain data. Merge against
+        // their snapshot so the result passed back to `put` is a valid MST snapshot.
+        const existingResourceSnapshot = existingResource
+          ? isStateTreeNode(existingResource)
+            ? getSnapshot(existingResource)
+            : existingResource
+          : {}
 
         /**
          * if the resource requires additional merge logic
@@ -37,10 +44,10 @@ export const withMerge =
          * it can define a __mergeUpdate action to correctly merge in the new data.
          * This prevents non-API (e.g. UI/UX) fields on the map model from being overridden
          */
-        if (existingResource["__mergeUpdate"]) {
+        if (existingResource?.["__mergeUpdate"]) {
           existingResource["__mergeUpdate"](resourceDataToUpdate)
         } else {
-          const newData = R.mergeDeepLeft(resourceDataToUpdate, existingResource)
+          const newData = R.mergeDeepLeft(resourceDataToUpdate, existingResourceSnapshot)
           self[collectionName].put(newData)
         }
       },

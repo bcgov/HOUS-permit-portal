@@ -3,9 +3,9 @@ class Api::QaToolsController < Api::ApplicationController
   skip_after_action :verify_policy_scoped
 
   before_action :require_qa_mode!
-  before_action :require_sandbox_for_review_staff!,
-                only: %i[create_full_permit_project autofill_permit_application]
   before_action :set_permit_application, only: %i[autofill_permit_application]
+  before_action :set_part_3_step_code, only: %i[autofill_part_3_step_code]
+  before_action :set_part_9_step_code, only: %i[autofill_part_9_step_code]
 
   def create_full_permit_project
     authorize PermitProject, :create?
@@ -31,6 +31,54 @@ class Api::QaToolsController < Api::ApplicationController
   rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotFound => e
     render_error(
       "qa_tools.full_permit_project_error",
+      {
+        status: :unprocessable_entity,
+        message_opts: {
+          error_message: e.message
+        }
+      },
+      e
+    )
+  end
+
+  def autofill_part_3_step_code
+    authorize @step_code, :qa_autofill?
+
+    Qa::Part3StepCodeAutofillService.new(
+      step_code: @step_code,
+      current_user: current_user
+    ).call
+
+    render_success @step_code,
+                   "qa_tools.autofill_part_3_step_code_success",
+                   { blueprint: Part3StepCodeBlueprint }
+  rescue ActiveRecord::RecordInvalid => e
+    render_error(
+      "qa_tools.autofill_part_3_step_code_error",
+      {
+        status: :unprocessable_entity,
+        message_opts: {
+          error_message: e.message
+        }
+      },
+      e
+    )
+  end
+
+  def autofill_part_9_step_code
+    authorize @step_code, :qa_autofill?
+
+    Qa::Part9StepCodeAutofillService.new(
+      step_code: @step_code,
+      current_user: current_user
+    ).call
+
+    render_success @step_code,
+                   "qa_tools.autofill_part_9_step_code_success",
+                   { blueprint: Part9StepCodeBlueprint }
+  rescue ActiveRecord::RecordInvalid => e
+    render_error(
+      "qa_tools.autofill_part_9_step_code_error",
       {
         status: :unprocessable_entity,
         message_opts: {
@@ -81,20 +129,16 @@ class Api::QaToolsController < Api::ApplicationController
     head :not_found
   end
 
-  def require_sandbox_for_review_staff!
-    return unless current_user.review_staff?
-    return if current_sandbox.present?
-
-    render_error "misc.user_not_authorized_error", { status: :forbidden }
+  def set_permit_application
+    @permit_application = PermitApplication.find(params[:id])
   end
 
-  def set_permit_application
-    @permit_application =
-      if current_user.submitter? || current_user.super_admin?
-        PermitApplication.find(params[:id])
-      else
-        PermitApplication.for_sandbox(current_sandbox).find(params[:id])
-      end
+  def set_part_3_step_code
+    @step_code = Part3StepCode.find(params[:id])
+  end
+
+  def set_part_9_step_code
+    @step_code = Part9StepCode.find(params[:id])
   end
 
   def qa_full_permit_project_params

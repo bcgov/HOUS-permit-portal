@@ -52,6 +52,7 @@ module Api::Concerns::Search::PermitProjects
       :per_page,
       filters: [
         :show_archived,
+        :active_meeting,
         { jurisdiction_id: [] },
         { rollup_status: [] },
         { requirement_template_ids: [] }
@@ -77,7 +78,8 @@ module Api::Concerns::Search::PermitProjects
 
   # Determines the where clause for Searchkick, mirroring PermitApplication logic
   def permit_project_where_clause
-    search_filters = (permit_project_search_params[:filters] || {}).deep_dup
+    search_filters =
+      permit_project_search_params[:filters].to_h.deep_symbolize_keys
     show_archived =
       ActiveModel::Type::Boolean.new.cast(
         search_filters.delete(:show_archived) || false
@@ -86,6 +88,13 @@ module Api::Concerns::Search::PermitProjects
     requirement_template_ids = search_filters.delete(:requirement_template_ids)
     if requirement_template_ids.present?
       search_filters[:requirement_template_ids] = requirement_template_ids
+    end
+
+    active_meeting = search_filters.delete(:active_meeting)
+    if active_meeting == "only_show"
+      search_filters[:has_active_project_meeting] = true
+    elsif active_meeting == "hide"
+      search_filters[:has_active_project_meeting] = false
     end
 
     jurisdiction_ids = search_filters.delete(:jurisdiction_id)

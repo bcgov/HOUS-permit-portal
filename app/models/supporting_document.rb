@@ -148,7 +148,10 @@ class SupportingDocument < FileUploadAttachment
 
     file.url(
       response_content_disposition:
-        ContentDisposition.public_send(disposition, standardized_filename),
+        file_content_disposition(
+          disposition: disposition,
+          filename: standardized_filename
+        ),
       **options
     )
   end

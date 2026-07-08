@@ -1,6 +1,4 @@
 class Api::PermitApplicationsController < Api::ApplicationController
-  include StepCodeParamsConcern
-
   before_action :set_permit_application,
                 only: %i[
                   show

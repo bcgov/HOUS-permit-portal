@@ -25,6 +25,21 @@ RSpec.describe AuditRoleFilter do
     ApplicationAudit.visible_to_role(base_scope, user)
   end
 
+  def stub_project_meeting_notifications
+    allow(NotificationService).to receive(
+      :publish_project_meeting_submitted_event
+    )
+    allow(NotificationService).to receive(
+      :publish_project_meeting_request_received_event
+    )
+    allow(NotificationService).to receive(
+      :publish_property_information_request_received_event
+    )
+    allow(NotificationService).to receive(
+      :publish_project_meeting_scheduled_event
+    )
+  end
+
   describe ".visible_to_role for submitters" do
     it "excludes project state and read/unread changes" do
       Audited.audit_class.as_user(reviewer) { project.begin_progress! }
@@ -127,6 +142,36 @@ RSpec.describe AuditRoleFilter do
       expect(read_audit).to be_present
       expect(visible_audits_for(owner)).not_to include(read_audit)
     end
+
+    it "includes project meeting activity" do
+      stub_project_meeting_notifications
+      meeting =
+        create(
+          :project_meeting,
+          :open,
+          permit_project: project,
+          requested_by: owner
+        )
+
+      Audited
+        .audit_class
+        .as_user(reviewer) do
+          meeting.assign_attributes(
+            contact_method: :phone,
+            confirmed_date: 1.week.from_now
+          )
+          meeting.schedule!
+        end
+
+      schedule_audit =
+        ApplicationAudit
+          .where(auditable_type: "ProjectMeeting", auditable_id: meeting.id)
+          .where("audited_changes ? 'status'")
+          .last
+
+      expect(schedule_audit).to be_present
+      expect(visible_audits_for(owner)).to include(schedule_audit)
+    end
   end
 
   describe "excluding_redundant_viewed_at_audits" do
@@ -186,6 +231,23 @@ RSpec.describe AuditRoleFilter do
           .last
 
       expect(visible_audits_for(reviewer)).to include(state_audit)
+    end
+
+    it "includes project meeting activity" do
+      stub_project_meeting_notifications
+      meeting =
+        create(:project_meeting, permit_project: project, requested_by: owner)
+
+      Audited.audit_class.as_user(owner) { meeting.submit_request! }
+
+      submit_audit =
+        ApplicationAudit
+          .where(auditable_type: "ProjectMeeting", auditable_id: meeting.id)
+          .where("audited_changes ? 'status'")
+          .last
+
+      expect(submit_audit).to be_present
+      expect(visible_audits_for(reviewer)).to include(submit_audit)
     end
   end
 end

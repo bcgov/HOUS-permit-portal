@@ -1,9 +1,8 @@
-import { Box, HStack, Icon, Text } from "@chakra-ui/react"
-import { CalendarBlank } from "@phosphor-icons/react"
+import { Box, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { Link } from "react-router-dom"
+import { Link, useParams } from "react-router-dom"
 import { IPermitProject } from "../../../../models/permit-project"
 import { useMst } from "../../../../setup/root"
 import { EProjectState } from "../../../../types/enums"
@@ -58,7 +57,9 @@ export const ProjectKanbanBoard = observer(function ProjectKanbanBoard({
     [t]
   )
 
-  const itemsKey = projects.map((p) => `${p.id}:${p.state}:${p.inboxSortOrder ?? ""}:${p.viewedAt ?? ""}`).join(",")
+  const itemsKey = projects
+    .map((p) => `${p.id}:${p.state}:${p.inboxSortOrder ?? ""}:${p.viewedAt ?? ""}:${p.activeProjectMeetingId ?? ""}`)
+    .join(",")
   const items = useMemo(
     () =>
       projects.map((p) => ({
@@ -112,11 +113,16 @@ const ProjectKanbanCard = observer(function ProjectKanbanCard({
   onMove?: (direction: EReorderDirection) => void
 }) {
   const { t } = useTranslation()
+  const { jurisdictionId } = useParams()
   const { permitProjectStore } = useMst()
 
   const received = project.inQueueCount
   const total = project.totalPermitsCount
   const isUnread = !project.viewedAt
+  const activeProjectMeetingPath =
+    jurisdictionId && project.activeProjectMeetingId
+      ? `/jurisdictions/${jurisdictionId}/meetings/${project.activeProjectMeetingId}`
+      : undefined
 
   const primaryAssignee = project.reviewDelegatee?.user ?? null
 
@@ -124,6 +130,7 @@ const ProjectKanbanCard = observer(function ProjectKanbanCard({
     <KanbanCard
       id={project.id}
       isUnread={isUnread}
+      activeProjectMeetingPath={project.hasActiveProjectMeeting ? activeProjectMeetingPath : undefined}
       onMarkUnread={isUnread ? undefined : () => project.markAsUnviewed()}
       statusMenu={<ChangeProjectStateMenu project={project} compact />}
       isFirst={isFirst}
@@ -155,13 +162,9 @@ const ProjectKanbanCard = observer(function ProjectKanbanCard({
         _active={{ color: "inherit" }}
       >
         <Box pr={12}>
-          <HStack spacing={2}>
-            {/* ### SUBMISSION INDEX STUB FEATURE */}
-            <Icon as={CalendarBlank} color="text.secondary" boxSize={4} display="none" />
-            <Text fontWeight={700} fontSize="md" noOfLines={1}>
-              {project.number}
-            </Text>
-          </HStack>
+          <Text fontWeight={700} fontSize="md" noOfLines={1}>
+            {project.number}
+          </Text>
         </Box>
 
         <Text fontSize="xs" noOfLines={1} mt={1.5}>

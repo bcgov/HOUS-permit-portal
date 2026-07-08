@@ -5,6 +5,7 @@ ExceptionNotification.configure do |config|
   # ActiveRecord::RecordNotFound, Mongoid::Errors::DocumentNotFound, AbstractController::ActionNotFound and ActionController::RoutingError are already added.
   # config.ignored_exceptions += %w{ActionView::TemplateError CustomError}
   config.ignored_exceptions += %w[
+    ActionController::ParameterMissing
     ActionDispatch::Http::MimeNegotiation::InvalidType
   ]
 

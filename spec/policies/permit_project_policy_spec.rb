@@ -29,6 +29,7 @@ RSpec.describe PermitProjectPolicy, type: :policy do
       expect(p.search_permit_applications?).to be true
       expect(p.create_permit_applications?).to be true
       expect(p.submission_collaborator_options?).to be true
+      expect(p.download_notes_csv?).to be true
     end
   end
 

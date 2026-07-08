@@ -8,6 +8,7 @@ import { IHelpVideoSection } from "../../models/help-video-section"
 import { IIntegrationMapping } from "../../models/integration-mapping"
 import { IJurisdiction } from "../../models/jurisdiction"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
+import { INote } from "../../models/note"
 import { IOverheatingCode } from "../../models/overheating-code"
 import { IPart3StepCode } from "../../models/part-3-step-code"
 import { IPart3StepCodeChecklist } from "../../models/part-3-step-code-checklist"
@@ -18,6 +19,7 @@ import { IPermitCollaboration } from "../../models/permit-collaboration"
 import { IPermitProject } from "../../models/permit-project"
 import { IPreCheck } from "../../models/pre-check"
 import { IProjectAudit } from "../../models/project-audit"
+import { IProjectMeeting } from "../../models/project-meeting"
 import { IReleaseNote } from "../../models/release-note-model"
 import { IRequirementTemplate } from "../../models/requirement-template"
 import { ITemplateCategory } from "../../models/template-category"
@@ -39,10 +41,13 @@ import {
   IApiResponse,
   ICollaboratorSearchResponse,
   IJurisdictionPermitApplicationResponse,
+  IJurisdictionProjectMeetingResponse,
   IJurisdictionResponse,
+  INoteResponse,
   INotificationResponse,
   IOptionResponse,
   IPageMeta,
+  IProjectMeetingResponse,
   IRequirementBlockResponse,
   IRequirementTemplateResponse,
   IUsersResponse,
@@ -57,6 +62,7 @@ import {
   EPermitProjectSortFields,
   EPreCheckSortFields,
   EProjectAuditSortFields,
+  EProjectMeetingSortFields,
   EReleaseNoteSortFields,
   ERequirementLibrarySortFields,
   ERequirementTemplateSortFields,
@@ -75,6 +81,7 @@ import {
   IPermitApplicationSearchFilters,
   IPermitProjectSearchFilters,
   IProjectAuditSearchFilters,
+  IProjectMeetingInboxSearchFilters,
   ITemplateVersionDiff,
   TAutoComplianceModuleConfigurations,
   TCreatePermitApplicationFormData,
@@ -370,8 +377,110 @@ export class Api {
     return this.client.post<ApiResponse<IPermitApplication>>(`/qa_tools/permit_applications/${id}/autofill`)
   }
 
+  async autofillQaPart3StepCode(id: string) {
+    return this.client.post<ApiResponse<IPart3StepCode>>(`/qa_tools/part_3_step_codes/${id}/autofill`)
+  }
+
+  async autofillQaPart9StepCode(id: string) {
+    return this.client.post<ApiResponse<IPart9StepCode>>(`/qa_tools/part_9_step_codes/${id}/autofill`)
+  }
+
   async updatePermitProject(id: string, params: IPermitProjectUpdateParams) {
     return this.client.patch<ApiResponse<IPermitProject>>(`/permit_projects/${id}`, { permitProject: params })
+  }
+
+  async createProjectMeeting(permitProjectId: string) {
+    return this.client.post<ApiResponse<IProjectMeeting>>(`/permit_projects/${permitProjectId}/meetings`)
+  }
+
+  async fetchProjectMeeting(id: string) {
+    return this.client.get<ApiResponse<IProjectMeeting>>(`/project_meetings/${id}`)
+  }
+
+  async fetchProjectMeetingNotes(projectMeetingId: string) {
+    return this.client.get<INoteResponse>(`/project_meetings/${projectMeetingId}/notes`)
+  }
+
+  async createProjectMeetingNote(projectMeetingId: string, body: string) {
+    return this.client.post<ApiResponse<INote>>(`/project_meetings/${projectMeetingId}/notes`, { note: { body } })
+  }
+
+  async downloadProjectMeetingNotesCsv(projectMeetingId: string) {
+    return this.client.get<BlobPart>(`/project_meetings/${projectMeetingId}/notes/download_csv`)
+  }
+
+  async fetchPermitProjectNotes(permitProjectId: string) {
+    return this.client.get<INoteResponse>(`/permit_projects/${permitProjectId}/notes`)
+  }
+
+  async downloadPermitProjectNotesCsv(permitProjectId: string) {
+    return this.client.get<BlobPart>(`/permit_projects/${permitProjectId}/notes/download_csv`)
+  }
+
+  async fetchProjectMeetings(permitProjectId: string, params?: TSearchParams<EProjectMeetingSortFields>) {
+    return this.client.post<IProjectMeetingResponse>(`/permit_projects/${permitProjectId}/meetings/search`, params)
+  }
+
+  async fetchJurisdictionProjectMeetings(
+    jurisdictionId: string,
+    params?: TSearchParams<EProjectMeetingSortFields, IProjectMeetingInboxSearchFilters>
+  ) {
+    return this.client.post<IJurisdictionProjectMeetingResponse>(
+      `/jurisdictions/${jurisdictionId}/project_meetings/search`,
+      params
+    )
+  }
+
+  async updateProjectMeeting(permitProjectId: string, id: string, params: Record<string, unknown>) {
+    return this.client.patch<ApiResponse<IProjectMeeting>>(`/permit_projects/${permitProjectId}/meetings/${id}`, {
+      projectMeeting: params,
+    })
+  }
+
+  async submitProjectMeeting(permitProjectId: string, id: string, params: Record<string, unknown>) {
+    return this.client.post<ApiResponse<IProjectMeeting>>(`/permit_projects/${permitProjectId}/meetings/${id}/submit`, {
+      projectMeeting: params,
+    })
+  }
+
+  async cancelProjectMeeting(permitProjectId: string, id: string) {
+    return this.client.post<ApiResponse<IProjectMeeting>>(`/permit_projects/${permitProjectId}/meetings/${id}/cancel`)
+  }
+
+  async rescheduleProjectMeeting(permitProjectId: string, id: string, params: Record<string, unknown>) {
+    return this.client.post<ApiResponse<IProjectMeeting>>(
+      `/permit_projects/${permitProjectId}/meetings/${id}/reschedule`,
+      {
+        projectMeeting: params,
+      }
+    )
+  }
+
+  async viewProjectMeeting(permitProjectId: string, id: string) {
+    return this.client.post<ApiResponse<IProjectMeeting>>(
+      `/permit_projects/${permitProjectId}/meetings/${id}/mark_as_viewed`
+    )
+  }
+
+  async unviewProjectMeeting(permitProjectId: string, id: string) {
+    return this.client.post<ApiResponse<IProjectMeeting>>(
+      `/permit_projects/${permitProjectId}/meetings/${id}/mark_as_unviewed`
+    )
+  }
+
+  async transitionProjectMeetingStatus(
+    permitProjectId: string,
+    id: string,
+    targetStatus: string,
+    params: Record<string, unknown>
+  ) {
+    return this.client.post<ApiResponse<IProjectMeeting>>(
+      `/permit_projects/${permitProjectId}/meetings/${id}/transition_status`,
+      {
+        targetStatus,
+        projectMeeting: params,
+      }
+    )
   }
 
   async pinPermitProject(id: string) {
@@ -738,10 +847,15 @@ export class Api {
     return this.client.patch<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${id}/restore`)
   }
 
-  async fetchTemplateVersions(status?: ETemplateVersionStatus, isPubliclyPreviewable?: boolean) {
+  async fetchTemplateVersions(
+    status?: ETemplateVersionStatus,
+    isPubliclyPreviewable?: boolean,
+    jurisdictionId?: string
+  ) {
     return this.client.get<ApiResponse<ITemplateVersion[]>>(`/template_versions`, {
       status,
       publiclyPreviewable: isPubliclyPreviewable,
+      jurisdictionId,
     })
   }
 
@@ -945,10 +1059,12 @@ export class Api {
     id: string,
     data: Partial<{
       fullAddress: string
+      pid: string
       referenceNumber: string
       title: string
       permitDate: string
       phase: string
+      currentStage: string
       buildingCodeVersion: string
       jurisdictionId: string
       permitApplicationId: string
@@ -1036,10 +1152,22 @@ export class Api {
   }
 
   async updatePart9Checklist(id: string, data: Partial<IPart9StepCodeChecklist>, options?: Record<string, any>) {
-    return this.client.patch<ApiResponse<IPart9StepCode>>(`/part_9_building/checklists/${id}`, {
+    return this.client.patch<ApiResponse<IPart9StepCodeChecklist>>(`/part_9_building/checklists/${id}`, {
       stepCodeChecklist: data,
       ...(options ?? {}),
     })
+  }
+
+  // HUB-5145: Reserved for future Mid-Construction/As-Built creation. This
+  // creates a staged checklist envelope under an existing StepCode report family;
+  // selection should then happen via currentStage or explicit route context.
+  async createPart9Checklist(stepCodeId: string, data: Partial<IPart9StepCodeChecklist>) {
+    return this.client.post<ApiResponse<IPart9StepCodeChecklist>>(
+      `/part_9_building/step_codes/${stepCodeId}/checklists`,
+      {
+        stepCodeChecklist: data,
+      }
+    )
   }
 
   // importing IPart3StepCodeChecklist causes circular dependency typescript error
@@ -1047,6 +1175,12 @@ export class Api {
     return this.client.patch<ApiResponse<any>>(`/part_3_building/checklists/${checklistId}`, {
       checklist,
       ...(options ?? {}),
+    })
+  }
+
+  async createPart3Checklist(stepCodeId: string, checklist) {
+    return this.client.post<ApiResponse<any>>(`/part_3_building/step_codes/${stepCodeId}/checklists`, {
+      checklist,
     })
   }
 
@@ -1160,7 +1294,7 @@ export class Api {
   async createPart3StepCode(data: {
     permitApplicationId?: string
     permitProjectId?: string
-    checklistAttributes: { sectionCompletionStatus: Record<string, any> }
+    preConstructionChecklistAttributes: { sectionCompletionStatus: Record<string, any> }
   }) {
     if (data.permitApplicationId) {
       return this.client.post<ApiResponse<IStepCode>>(

@@ -4,12 +4,13 @@ import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
-import { IPart3StepCode, IPart3StepCodeChecklist, Part3StepCodeModel } from "../models/part-3-step-code"
+import { IPart3StepCode, Part3StepCodeModel } from "../models/part-3-step-code"
+import { IPart3StepCodeChecklist } from "../models/part-3-step-code-checklist"
 import { IPart9StepCode, Part9StepCodeModel } from "../models/part-9-step-code"
 import { IPart9StepCodeChecklist } from "../models/part-9-step-code-checklist"
 import { EEnergyStep, EStepCodeSortFields, EStepCodeType, EZeroCarbonStep } from "../types/enums"
 import { IPart3ChecklistSelectOptions, IPart9ChecklistSelectOptions, TSearchParams } from "../types/types"
-import { setQueryParam, startBlobDownload } from "../utils/utility-functions"
+import { convertToDate, setQueryParam, startBlobDownload } from "../utils/utility-functions"
 
 export const StepCodeModel = types.union(
   {
@@ -99,6 +100,12 @@ export const StepCodeStoreModel = types
       let normalized = stepCode as any
 
       // Part 9 checklists are normalized by Part9StepCodeModel preProcessor
+      if (normalized.stageCompletions) {
+        normalized.stageCompletions = normalized.stageCompletions.map((stageCompletion) => ({
+          ...stageCompletion,
+          stageCompletedAt: stageCompletion.stageCompletedAt ? convertToDate(stageCompletion.stageCompletedAt) : null,
+        }))
+      }
 
       // Jurisdiction: merge object into store, replace with reference id (applies to all types)
       const jurisdiction = normalized.jurisdiction
@@ -223,7 +230,7 @@ export const StepCodeStoreModel = types
     }),
     createPart3StepCode: flow(function* (values: {
       permitApplicationId?: string
-      checklistAttributes: { sectionCompletionStatus: Record<string, any> }
+      preConstructionChecklistAttributes: { sectionCompletionStatus: Record<string, any> }
     }) {
       const response = yield self.environment.api.createPart3StepCode(values)
 
@@ -266,6 +273,7 @@ export const StepCodeStoreModel = types
     fetchPart9StepCode: flow(function* (id: string) {
       const response = yield self.environment.api.fetchPart9StepCode(id)
       if (response.ok) {
+        response.data.data.isFullyLoaded = true
         self.mergeUpdate(response.data.data, "stepCodesMap")
         return response.data.data
       } else {

@@ -5,6 +5,7 @@ class SiteConfigurationBlueprint < Blueprinter::Base
          :allow_designated_reviewer,
          :code_compliance_enabled,
          :qa_tools_enabled,
+         :project_meetings_enabled,
          :archistar_enabled_for_all_jurisdictions
 
   field :help_link_items do |site_configuration, _options|

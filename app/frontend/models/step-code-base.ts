@@ -1,4 +1,5 @@
-import { flow, toGenerator, types } from "mobx-state-tree"
+import { flow, getParent, IStateTreeNode, toGenerator, types } from "mobx-state-tree"
+import { EStepCodeChecklistStage, EStepCodeStageStatus } from "../types/enums"
 import { IReportDocument } from "../types/types"
 import { JurisdictionModel } from "./jurisdiction"
 
@@ -11,18 +12,35 @@ export const StepCodeBaseFields = types
     title: types.maybeNull(types.string),
     referenceNumber: types.maybeNull(types.string),
     fullAddress: types.maybeNull(types.string),
+    pid: types.maybeNull(types.string),
     jurisdictionName: types.maybeNull(types.string),
     jurisdiction: types.maybeNull(types.reference(types.late(() => JurisdictionModel))),
     permitDate: types.maybeNull(types.Date),
+    // HUB-5145: `phase` is legacy stage-like metadata. Introduce currentStage
+    // on StepCode for selection; keep lifecycle identity on checklist.stage.
     phase: types.maybeNull(types.string),
+    currentStage: types.optional(
+      types.enumeration<EStepCodeChecklistStage[]>(Object.values(EStepCodeChecklistStage)),
+      EStepCodeChecklistStage.preConstruction
+    ),
     permitProjectTitle: types.maybeNull(types.string),
     reportDocuments: types.maybeNull(types.array(types.frozen<IReportDocument>())),
+    stageCompletions: types.optional(
+      types.array(
+        types.frozen<{
+          stage: EStepCodeChecklistStage
+          status: EStepCodeStageStatus
+          stageCompletedAt: Date | null
+        }>()
+      ),
+      []
+    ),
   })
   .views((self) => ({
     get latestReportDocument(): IReportDocument | null {
       if (!self.reportDocuments || self.reportDocuments.length === 0) return null
-      // documents are not guaranteed to be sorted; sort by createdAt if present, fallback to last
-      const docs = [...self.reportDocuments]
+      const docs = self.reportDocuments.filter((doc) => !doc.stale)
+      if (docs.length === 0) return null
       docs.sort((a, b) => (new Date(a.createdAt as any).getTime() || 0) - (new Date(b.createdAt as any).getTime() || 0))
       return docs[docs.length - 1]
     },
@@ -39,21 +57,33 @@ export const StepCodeBaseFields = types
     update: flow(function* (
       data: Partial<{
         fullAddress: string
+        pid: string
         referenceNumber: string
         title: string
         permitDate: string
         phase: string
+        currentStage: EStepCodeChecklistStage
         jurisdictionId: string
       }>
     ) {
       // @ts-ignore environment provided by composed models (Part3/Part9)
       const response = yield* toGenerator(self.environment.api.updateStepCode(self.id as any, data))
       if (response.ok) {
-        // @ts-ignore rootStore provided by withRootStore on composed models
-        self.rootStore.stepCodeStore.mergeUpdate(response.data.data, "stepCodesMap")
+        if (data.currentStage) self.currentStage = data.currentStage
+        try {
+          // @ts-ignore rootStore provided by withRootStore on composed models
+          self.rootStore.stepCodeStore.mergeUpdate(response.data.data, "stepCodesMap")
+        } catch (error) {
+          if (import.meta.env.DEV) {
+            console.error("Failed to merge updated Step Code:", error)
+          }
+        }
       }
       return response.ok
     }),
+    setCurrentStage(stage: EStepCodeChecklistStage) {
+      self.currentStage = stage
+    },
     shareReportWithJurisdiction: flow(function* () {
       const latestReport = self.latestReportDocument
       if (!latestReport) {
@@ -86,4 +116,28 @@ export const StepCodeBaseFields = types
       }
       return response.ok
     }),
+    markReportDocumentsStale() {
+      if (!self.reportDocuments?.length) return
+      if (!self.reportDocuments.some((doc) => !doc.stale)) return
+      self.reportDocuments = self.reportDocuments.map((doc) => ({ ...doc, stale: true }))
+    },
   }))
+
+export function markParentStepCodeReportsStale(checklist: IStateTreeNode) {
+  try {
+    let node: { markReportDocumentsStale?: () => void } | undefined = getParent(checklist)
+    while (node) {
+      if (typeof node.markReportDocumentsStale === "function") {
+        node.markReportDocumentsStale()
+        return
+      }
+      try {
+        node = getParent(node)
+      } catch {
+        break
+      }
+    }
+  } catch {
+    // checklist may be detached outside a StepCode map
+  }
+}

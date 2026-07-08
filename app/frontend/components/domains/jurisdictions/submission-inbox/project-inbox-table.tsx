@@ -1,6 +1,5 @@
 import {
   Box,
-  Circle,
   Flex,
   HStack,
   Icon,
@@ -15,10 +14,12 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { Info, Swap } from "@phosphor-icons/react"
+import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { Link } from "react-router-dom"
+import { Link, useParams } from "react-router-dom"
+import { datefnsTableDateFormat } from "../../../../constants"
 import { IPermitProject } from "../../../../models/permit-project"
 import { useMst } from "../../../../setup/root"
 import { IPermitProjectInboxStore } from "../../../../stores/submission-inbox-store"
@@ -27,10 +28,12 @@ import { ISort } from "../../../../types/types"
 import { Paginator } from "../../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../../shared/base/inputs/per-page-select"
 import { SharedSpinner } from "../../../shared/base/shared-spinner"
+import { UnreadIndicatorDot } from "../../../shared/base/unread-indicator-dot"
 import { GridHeader } from "../../../shared/grid/grid-header"
 import { SearchGrid } from "../../../shared/grid/search-grid"
 import { SearchGridItem } from "../../../shared/grid/search-grid-item"
 import { ProjectStateTag } from "../../../shared/permit-projects/project-state-tag"
+import { ActiveProjectMeetingIndicator } from "../../../shared/project-meetings/active-project-meeting-indicator"
 import { SortIcon } from "../../../shared/sort-icon"
 import { InboxNoMatchingEmpty } from "./inbox-no-matching-empty"
 import { ProjectReviewCollaboratorsModal } from "./project-designated-reviewer-modal"
@@ -43,6 +46,8 @@ interface IProps {
   projects: IPermitProject[]
 }
 
+const formatTableDate = (date?: Date | null) => (date ? format(date, datefnsTableDateFormat) : "—")
+
 const SORT_FIELDS = [
   EPermitProjectInboxSortFields.projectNumber,
   EPermitProjectInboxSortFields.address,
@@ -54,6 +59,7 @@ const SORT_FIELDS = [
 
 export const ProjectInboxTable = observer(function ProjectInboxTable({ searchStore, projects }: IProps) {
   const { t } = useTranslation()
+  const { jurisdictionId } = useParams()
   const {
     toggleSort,
     sort,
@@ -97,7 +103,14 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
       >
         <SearchGridItem>
           <HStack spacing={3}>
-            <Circle size="8px" bg={!project.viewedAt ? "theme.blueActive" : "transparent"} flexShrink={0} />
+            <HStack spacing={1}>
+              <UnreadIndicatorDot isUnread={!project.viewedAt} />
+              {project.hasActiveProjectMeeting && jurisdictionId && project.activeProjectMeetingId && (
+                <ActiveProjectMeetingIndicator
+                  to={`/jurisdictions/${jurisdictionId}/meetings/${project.activeProjectMeetingId}`}
+                />
+              )}
+            </HStack>
 
             <Text fontWeight={700} fontSize="sm">
               {project.number}
@@ -145,7 +158,7 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
                 {t("submissionInbox.waitingSince")}
               </Text>
               <Text fontSize="xs" color="text.secondary">
-                {project.formattedEnqueuedAt}
+                {formatTableDate(project.enqueuedAt)}
               </Text>
             </VStack>
           ) : (

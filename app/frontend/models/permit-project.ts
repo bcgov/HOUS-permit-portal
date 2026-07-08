@@ -1,15 +1,19 @@
 import { format } from "date-fns"
 import { t } from "i18next"
-import { flow, Instance, toGenerator, types } from "mobx-state-tree"
+import { cast, flow, Instance, toGenerator, types } from "mobx-state-tree"
+import { datefnsTableDateFormat } from "../constants"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { EInboxDisplayMode, EPermitProjectRollupStatus, EProjectState } from "../types/enums"
 import { IParcelGeometry, IProjectAuditSummary, IProjectDocument } from "../types/types"
+import { startBlobDownload } from "../utils/utility-functions"
 import { CollaboratorModel } from "./collaborator"
 import { JurisdictionModel } from "./jurisdiction"
+import { INote, NoteModel } from "./note"
 import { IPermitApplication, PermitApplicationModel } from "./permit-application"
 import { PermitProjectCollaborationModel } from "./permit-project-collaboration"
 import { PermitProjectInboxApplicationSearchSlice } from "./permit-project-inbox-application-search"
+import { IProjectMeeting } from "./project-meeting"
 
 const PermitProjectCoreModel = types.model("PermitProjectCore", {
   id: types.identifier,
@@ -28,6 +32,7 @@ const PermitProjectCoreModel = types.model("PermitProjectCore", {
   ),
   state: types.enumeration(Object.values(EProjectState)),
   tablePermitApplications: types.optional(types.array(types.reference(types.late(() => PermitApplicationModel))), []),
+  notes: types.optional(types.array(types.reference(types.late(() => NoteModel))), []),
   inboxTablePermitApplications: types.optional(
     types.array(types.reference(types.late(() => PermitApplicationModel))),
     []
@@ -48,6 +53,8 @@ const PermitProjectCoreModel = types.model("PermitProjectCore", {
   flagList: types.optional(types.array(types.string), []),
   allowedManualTransitions: types.optional(types.array(types.string), []),
   hasOutdatedDraftApplications: types.maybeNull(types.boolean),
+  hasActiveProjectMeeting: types.optional(types.boolean, false),
+  activeProjectMeetingId: types.maybeNull(types.string),
   isFullyLoaded: types.optional(types.boolean, false),
   ownerName: types.maybeNull(types.string),
   ownerId: types.maybeNull(types.string),
@@ -62,6 +69,7 @@ const PermitProjectCoreModel = types.model("PermitProjectCore", {
   recentAudits: types.optional(types.array(types.frozen<IProjectAuditSummary>()), []),
   reviewDelegatee: types.maybeNull(types.safeReference(CollaboratorModel)),
   permitProjectCollaborations: types.optional(types.array(PermitProjectCollaborationModel), []),
+  activeProjectMeeting: types.maybeNull(types.frozen<IProjectMeeting>()),
   displayMode: types.optional(types.enumeration(Object.values(EInboxDisplayMode)), EInboxDisplayMode.list),
 })
 
@@ -96,13 +104,9 @@ export const PermitProjectModel = types
       if (self.daysInQueue == null) return "—"
       return t("submissionInbox.daysInQueue", { count: self.daysInQueue })
     },
-    get formattedEnqueuedAt(): string {
-      if (!self.enqueuedAt) return "—"
-      return new Intl.DateTimeFormat("en-CA").format(self.enqueuedAt)
-    },
     get formattedFirstApplicationReceivedAt(): string {
       if (!self.firstApplicationReceivedAt) return t("permitProject.overview.notAvailable")
-      return format(self.firstApplicationReceivedAt, "MMM d, yyyy")
+      return format(self.firstApplicationReceivedAt, datefnsTableDateFormat)
     },
     get rollupStatusDescription() {
       const total = self.totalPermitsCount
@@ -157,6 +161,19 @@ export const PermitProjectModel = types
     setInboxDisplayMode(mode: EInboxDisplayMode) {
       self.displayMode = mode
     },
+    setNotes(notes: INote[]) {
+      self.notes = cast(notes.map((note) => note.id))
+    },
+    prependNote(note: INote) {
+      self.notes = cast([note.id, ...self.notes.map((existingNote) => existingNote.id).filter((id) => id !== note.id)])
+    },
+    downloadNotesCsv: flow(function* () {
+      const response = yield* toGenerator(self.environment.api.downloadPermitProjectNotesCsv(self.id))
+      if (response.ok) {
+        startBlobDownload(response.data, "text/csv", `project-notes-${self.number || self.id}.csv`)
+      }
+      return response.ok
+    }),
   }))
   .actions((self) => ({
     togglePin: flow(function* () {
@@ -240,7 +257,9 @@ export const PermitProjectModel = types
     }),
   }))
   .actions((self) => ({
-    bulkCreatePermitApplications: flow(function* (params: Array<Record<string, unknown>>) {
+    bulkCreatePermitApplications: flow(function* (
+      params: Array<{ templateVersionId: string; jurisdictionId?: string }>
+    ) {
       const response = yield* toGenerator(self.environment.api.createProjectPermitApplications(self.id, params))
       if (response.ok) {
         // Merge created applications into store

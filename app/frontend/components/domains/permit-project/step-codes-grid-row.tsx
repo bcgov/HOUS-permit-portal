@@ -1,5 +1,12 @@
 import { Button, IconButton, Menu, MenuButton, MenuItem, MenuList, Text } from "@chakra-ui/react"
-import { Archive, ArrowSquareOut, ClockClockwise, DotsThreeVertical, ShareNetwork } from "@phosphor-icons/react"
+import {
+  Archive,
+  ArrowSquareOut,
+  ClockClockwise,
+  DotsThreeVertical,
+  Download,
+  ShareNetwork,
+} from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
@@ -8,11 +15,12 @@ import { Link as ReactRouterLink, useNavigate } from "react-router-dom"
 import { datefnsTableDateTimeFormat } from "../../../constants"
 import { useMst } from "../../../setup/root"
 import { IStepCode } from "../../../stores/step-code-store"
-import { EFileUploadAttachmentType, EStepCodeType } from "../../../types/enums"
-import { FileDownloadButton } from "../../shared/base/file-download-button"
+import { EFileUploadAttachmentType, EStepCodeChecklistStage, EStepCodeType } from "../../../types/enums"
+import { downloadFileFromStorage } from "../../../utils/utility-functions"
 import { ConfirmationModal } from "../../shared/confirmation-modal"
 import { SearchGridItem } from "../../shared/grid/search-grid-item"
 import { SearchGridRow } from "../../shared/grid/search-grid-row"
+import { StepCodeStageIndicators } from "./step-code-stage-indicators"
 
 export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode }) => {
   const navigate = useNavigate()
@@ -47,13 +55,32 @@ export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode })
   }
 
   const isNavigable = !isDiscarded && !!targetPath
+  const stage = stepCode.currentStage || EStepCodeChecklistStage.preConstruction
+  const stageLabel = t(`stepCodeChecklist.edit.projectInfo.stages.${stage}`)
+  const latestReportDocument = stepCode.latestReportDocument
+  const hasStaleReport = stepCode.reportDocuments?.some((doc) => doc.stale)
+
+  const handleDownloadReport = () => {
+    if (!latestReportDocument) return
+    downloadFileFromStorage({
+      model: EFileUploadAttachmentType.ReportDocument,
+      modelId: latestReportDocument.id,
+      filename: latestReportDocument.file?.metadata?.filename,
+    })
+  }
 
   return (
     <SearchGridRow isClickable={isNavigable} onClick={() => isNavigable && navigate(targetPath)}>
+      {/* HUB-5145: The index shows only Part 3/Part 9 type today. As staged
+      checklists become user-selectable, include the StepCode currentStage,
+      stage-aware target paths, and report-document actions. */}
       <SearchGridItem>{t(`stepCode.types.${type as EStepCodeType}`)}</SearchGridItem>
       <SearchGridItem>{permitProjectTitle}</SearchGridItem>
       <SearchGridItem>{fullAddress}</SearchGridItem>
       <SearchGridItem>{updatedAt ? format(updatedAt, datefnsTableDateTimeFormat) : ""}</SearchGridItem>
+      <SearchGridItem>
+        <StepCodeStageIndicators stageCompletions={stepCode.stageCompletions} />
+      </SearchGridItem>
       <SearchGridItem justifyContent="flex-end" px={2} onClick={(e) => e.stopPropagation()}>
         <Menu>
           <MenuButton
@@ -90,26 +117,21 @@ export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode })
               />
             ) : (
               <>
-                {(stepCode as any)?.reportDocuments?.length > 0 ? (
-                  <FileDownloadButton
-                    as={MenuItem}
-                    modelType={EFileUploadAttachmentType.ReportDocument}
-                    document={(stepCode as any).reportDocuments[stepCode.reportDocuments.length - 1]}
-                    variant="ghost"
-                    size="sm"
-                    simpleLabel
-                    w="full"
-                    display="flex"
-                    justifyContent="flex-start"
-                    textAlign="left"
-                  />
+                {latestReportDocument ? (
+                  <MenuItem icon={<Download size={16} />} onClick={handleDownloadReport}>
+                    {t("stepCode.index.downloadStageReport", { stage: stageLabel })}
+                  </MenuItem>
+                ) : hasStaleReport ? (
+                  <MenuItem _hover={{ cursor: "not-allowed" }}>
+                    <Text>{t("stepCode.index.reportOutOfDate")}</Text>
+                  </MenuItem>
                 ) : (
                   <MenuItem _hover={{ cursor: "not-allowed" }}>
                     <Text>{t("stepCode.index.noReportAvailable")}</Text>
                   </MenuItem>
                 )}
 
-                {(stepCode as any)?.reportDocuments?.length > 0 && (stepCode as any)?.jurisdiction && (
+                {latestReportDocument && (stepCode as any)?.jurisdiction && (
                   <MenuItem icon={<ShareNetwork size={16} />} onClick={handleShareReport} isDisabled={isSharing}>
                     {isSharing ? t("stepCode.shareReport.sharing") : t("stepCode.shareReport.action")}
                   </MenuItem>

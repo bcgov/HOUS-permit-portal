@@ -15,7 +15,6 @@ import {
 import { CheckCircle } from "@phosphor-icons/react"
 import type { UppyFile } from "@uppy/core"
 import "@uppy/core/dist/style.min.css"
-import "@uppy/dashboard/dist/style.css"
 import Dashboard from "@uppy/react/lib/Dashboard.js"
 import * as R from "ramda"
 import React, { useRef, useState } from "react"

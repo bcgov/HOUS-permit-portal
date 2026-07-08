@@ -133,7 +133,7 @@ function AddClimateZoneForm({ onAdd, onCancel, existingZones }: IAddClimateZoneF
           {t(`${czPrefix}.cancel`)}
         </Button>
         <Button variant="primary" onClick={handleAddSubmit} isDisabled={!addForm.formState.isValid}>
-          {t(`${czPrefix}.save`)}
+          {t("ui.done")}
         </Button>
       </HStack>
     </Box>
