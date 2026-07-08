@@ -8,14 +8,14 @@ export interface IRouterLinkButtonProps extends ButtonProps, Omit<ReactRouterLin
 }
 
 export const RouterLinkButton = forwardRef<HTMLAnchorElement, IRouterLinkButtonProps>(function RouterLinkButton(
-  { to, icon, children, disabled, onClick, ...rest },
+  { to, icon, children, disabled, onClick, variant = "primary", ...rest },
   ref
 ) {
   return (
     <Button
       as={ReactRouterLink}
       to={to}
-      variant="primary"
+      variant={variant}
       ref={ref}
       leftIcon={icon}
       isDisabled={disabled}

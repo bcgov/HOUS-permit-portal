@@ -22,15 +22,26 @@ import { CustomMessageBox } from "../../../../shared/base/custom-message-box"
 import { Part3FormFooter } from "./shared/form-footer"
 import { SectionHeading } from "./shared/section-heading"
 
+interface IRenewableEnergyForm {
+  generatedElectricity: string | null
+}
+
+type RelevanceSelection = "yes" | "no" | undefined
+
+function hasGeneratedElectricity(value: string | null | undefined) {
+  return value !== null && value !== undefined && value !== ""
+}
+
 export const RenewableEnergy = observer(function Part3StepCodeFormRenewableEnergy() {
   const i18nPrefix = "stepCode.part3.renewableEnergy"
   const { checklist } = usePart3StepCode()
+  const renewableEnergyComplete = checklist.isComplete("renewableEnergy")
 
-  const [isRelevant, setIsRelevant] = useState(
-    !!checklist.generatedElectricity ? "yes" : checklist.isComplete("renewableEnergy") && "no"
+  const [isRelevant, setIsRelevant] = useState<RelevanceSelection>(
+    hasGeneratedElectricity(checklist.generatedElectricity) ? "yes" : renewableEnergyComplete ? "no" : undefined
   )
 
-  const { handleSubmit, formState, resetField, reset, register, watch } = useForm({
+  const { handleSubmit, formState, resetField, reset, register, watch } = useForm<IRenewableEnergyForm>({
     mode: "onSubmit",
     defaultValues: {
       generatedElectricity: checklist.generatedElectricity,
@@ -39,13 +50,13 @@ export const RenewableEnergy = observer(function Part3StepCodeFormRenewableEnerg
   const watchGeneratedElectricity = watch("generatedElectricity")
   const { isSubmitting, isValid, isSubmitted, errors } = formState
 
-  const onSubmit = async (values) => {
+  const onSubmit = async (values: IRenewableEnergyForm) => {
     if (!checklist) return
     if (!isValid) return
 
     if (isRelevant == "no") {
       const updated =
-        !checklist.generatedElectricity ||
+        !hasGeneratedElectricity(checklist.generatedElectricity) ||
         (await checklist.update({
           generatedElectricity: null,
         }))
@@ -59,26 +70,47 @@ export const RenewableEnergy = observer(function Part3StepCodeFormRenewableEnerg
   }
 
   useEffect(() => {
+    reset({ generatedElectricity: checklist.generatedElectricity })
+    setIsRelevant(
+      hasGeneratedElectricity(checklist.generatedElectricity) ? "yes" : renewableEnergyComplete ? "no" : undefined
+    )
+  }, [checklist.generatedElectricity, renewableEnergyComplete, reset])
+
+  useEffect(() => {
     if (isSubmitted) {
       reset(undefined, { keepDirtyValues: true, keepErrors: true })
     }
-  }, [isValid])
+  }, [isSubmitted, isValid, reset])
 
   useEffect(() => {
     if (isRelevant == "no") {
       resetField("generatedElectricity")
     }
-  }, [isRelevant])
+  }, [isRelevant, resetField])
 
   const percentOfUse = useMemo(() => {
-    if (checklist.totalElectricityUse == 0) return null
-    return parseFloat(watchGeneratedElectricity) / checklist.totalElectricityUse
-  }, [watchGeneratedElectricity])
+    const generatedElectricity = Number(watchGeneratedElectricity)
+    if (!Number.isFinite(generatedElectricity) || checklist.totalElectricityUse == 0) return 0
+
+    return generatedElectricity / checklist.totalElectricityUse
+  }, [checklist.totalElectricityUse, watchGeneratedElectricity])
 
   const adjustedElectricityEF = useMemo(() => {
-    if (!percentOfUse) return null
-    return parseFloat(checklist.electricity.emissionsFactor) - 0.157 * percentOfUse
-  }, [watchGeneratedElectricity])
+    const electricityEmissionsFactor = Number(checklist.electricity?.emissionsFactor)
+    if (!Number.isFinite(electricityEmissionsFactor)) return null
+
+    return Math.max(electricityEmissionsFactor - 0.157 * percentOfUse, 0)
+  }, [checklist.electricity?.emissionsFactor, percentOfUse])
+
+  const formattedPercentOfUse = useMemo(() => {
+    return (percentOfUse * 100).toLocaleString("en-CA", { maximumFractionDigits: 0 })
+  }, [percentOfUse])
+
+  const formattedAdjustedElectricityEF = useMemo(() => {
+    if (adjustedElectricityEF === null) return "-"
+
+    return adjustedElectricityEF.toLocaleString("en-CA", { maximumFractionDigits: 3 })
+  }, [adjustedElectricityEF])
 
   return (
     <>
@@ -91,7 +123,7 @@ export const RenewableEnergy = observer(function Part3StepCodeFormRenewableEnerg
       <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
         <FormControl>
           <FormLabel>{t(`${i18nPrefix}.isRelevant`)}</FormLabel>
-          <RadioGroup onChange={setIsRelevant} value={isRelevant}>
+          <RadioGroup onChange={(value) => setIsRelevant(value as RelevanceSelection)} value={isRelevant}>
             <Stack spacing={5} direction="row">
               <Radio variant="binary" value={"yes"}>
                 {t("ui.yes")}
@@ -124,7 +156,7 @@ export const RenewableEnergy = observer(function Part3StepCodeFormRenewableEnerg
                 {t(`${i18nPrefix}.percentOfUse.hint`)}
               </FormHelperText>
               <InputGroup maxW={"200px"}>
-                <Input value={percentOfUse || "-"} isDisabled />
+                <Input value={formattedPercentOfUse} isDisabled />
                 <InputRightElement>{t(`${i18nPrefix}.percentOfUse.units`)}</InputRightElement>
               </InputGroup>
             </FormControl>
@@ -135,7 +167,7 @@ export const RenewableEnergy = observer(function Part3StepCodeFormRenewableEnerg
               <FormHelperText mb={1} mt={0}>
                 {t(`${i18nPrefix}.adjustedEF.hint`)}
               </FormHelperText>
-              <Input maxW={"200px"} value={adjustedElectricityEF || "-"} isDisabled />
+              <Input maxW={"200px"} value={formattedAdjustedElectricityEF} isDisabled />
             </FormControl>
           </>
         ) : null}

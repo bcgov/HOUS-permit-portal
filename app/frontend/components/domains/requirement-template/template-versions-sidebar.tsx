@@ -26,6 +26,7 @@ import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
+import { datefnsTableDateFormat } from "../../../constants"
 import { IRequirementTemplate } from "../../../models/requirement-template"
 import { ITemplateVersion } from "../../../models/template-version"
 import { useMst } from "../../../setup/root"
@@ -182,7 +183,7 @@ const BuilderPanel = ({
           <Box>
             <Text fontWeight={700}>{t("requirementTemplate.versionSidebar.builderTitle")}</Text>
             <Text color={"text.secondary"} fontSize={"sm"}>
-              {t("requirementTemplate.versionSidebar.lastUpdated")} {format(updatedAt, "MMM dd, yyyy")}
+              {t("requirementTemplate.versionSidebar.lastUpdated")} {format(updatedAt, datefnsTableDateFormat)}
             </Text>
           </Box>
         </HStack>
@@ -487,7 +488,7 @@ const VersionCard = observer(function VersionCard({
           <Text>
             {t("requirementTemplate.versionSidebar.lastUpdated")}
             <br />
-            {format(updatedAt, "MMM dd, yyyy")}
+            {format(updatedAt, datefnsTableDateFormat)}
           </Text>
         ) : (
           <VersionTag versionDate={versionDate} />

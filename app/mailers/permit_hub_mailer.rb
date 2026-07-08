@@ -242,6 +242,131 @@ class PermitHubMailer < ApplicationMailer
     )
   end
 
+  def notify_project_meeting_submitted(project_meeting)
+    @project_meeting = project_meeting
+    @user = project_meeting.requested_by
+    @permit_project = project_meeting.permit_project
+    @jurisdiction = @permit_project.jurisdiction
+    @contact_first_name =
+      contact_first_name(project_meeting.contact_name, @user)
+    @project_overview_url =
+      FrontendUrlHelper.frontend_url("/projects/#{@permit_project.id}/overview")
+
+    send_user_mail(
+      email: project_meeting.contact_email,
+      template_key: "notify_project_meeting_submitted"
+    )
+  end
+
+  def notify_project_meeting_submitted_to_jurisdiction(
+    project_meeting,
+    recipient_email
+  )
+    @project_meeting = project_meeting
+    @permit_project = project_meeting.permit_project
+    @jurisdiction = @permit_project.jurisdiction
+    @requester = project_meeting.requested_by
+    @project_overview_url =
+      FrontendUrlHelper.frontend_url(
+        "/jurisdictions/#{@jurisdiction.id}/submission-inbox/projects/#{@permit_project.id}/overview"
+      )
+
+    send_mail(
+      email: recipient_email,
+      template_key: "notify_project_meeting_submitted_to_jurisdiction",
+      subject_i18n_params: {
+        project_number: @permit_project.number
+      }
+    )
+  end
+
+  def notify_property_information_requested(project_meeting, recipient_email)
+    @project_meeting = project_meeting
+    @permit_project = project_meeting.permit_project
+    @jurisdiction = @permit_project.jurisdiction
+    @requester = project_meeting.requested_by
+    @project_overview_url =
+      FrontendUrlHelper.frontend_url(
+        "/jurisdictions/#{@jurisdiction.id}/submission-inbox/projects/#{@permit_project.id}/overview"
+      )
+
+    send_mail(
+      email: recipient_email,
+      template_key: "notify_property_information_requested",
+      subject_i18n_params: {
+        project_number: @permit_project.number
+      }
+    )
+  end
+
+  def notify_project_meeting_scheduled(project_meeting)
+    set_project_meeting_scheduled_variables(project_meeting)
+    attach_project_meeting_calendar(
+      project_meeting,
+      hub_meeting_url: @project_meeting_url
+    )
+    @contact_first_name =
+      contact_first_name(project_meeting.contact_name, @user)
+
+    send_user_mail(
+      email: project_meeting.contact_email,
+      template_key: "notify_project_meeting_scheduled"
+    )
+  end
+
+  def notify_project_meeting_scheduled_to_jurisdiction(
+    project_meeting,
+    recipient_email
+  )
+    set_project_meeting_scheduled_variables(project_meeting)
+    attach_project_meeting_calendar(
+      project_meeting,
+      hub_meeting_url: @reviewer_project_meeting_url
+    )
+
+    send_mail(
+      email: recipient_email,
+      template_key: "notify_project_meeting_scheduled_to_jurisdiction",
+      subject_i18n_params: {
+        project_number: @permit_project.number
+      }
+    )
+  end
+
+  def notify_project_meeting_rescheduled(project_meeting)
+    set_project_meeting_scheduled_variables(project_meeting)
+    attach_project_meeting_calendar(
+      project_meeting,
+      hub_meeting_url: @project_meeting_url
+    )
+    @contact_first_name =
+      contact_first_name(project_meeting.contact_name, @user)
+
+    send_user_mail(
+      email: project_meeting.contact_email,
+      template_key: "notify_project_meeting_rescheduled"
+    )
+  end
+
+  def notify_project_meeting_rescheduled_to_jurisdiction(
+    project_meeting,
+    recipient_email
+  )
+    set_project_meeting_scheduled_variables(project_meeting)
+    attach_project_meeting_calendar(
+      project_meeting,
+      hub_meeting_url: @reviewer_project_meeting_url
+    )
+
+    send_mail(
+      email: recipient_email,
+      template_key: "notify_project_meeting_rescheduled_to_jurisdiction",
+      subject_i18n_params: {
+        project_number: @permit_project.number
+      }
+    )
+  end
+
   def notify_new_template_version_published(
     template_version,
     user,
@@ -354,7 +479,8 @@ class PermitHubMailer < ApplicationMailer
     @submission_contact = submission_contact
     send_mail(
       email: submission_contact.email,
-      template_key: "submission_contact_confirm"
+      template_key: "submission_contact_confirm",
+      subject_key: submission_contact.confirmation_subject_key
     )
   end
 
@@ -406,7 +532,7 @@ class PermitHubMailer < ApplicationMailer
     @inbox_setup_url = nil
     return unless @jurisdiction.present?
 
-    return if @jurisdiction.submission_contacts.confirmed.exists?
+    return if @jurisdiction.confirmed_submission_contacts.exists?
 
     @submission_inbox_action_required = true
     @inbox_setup_url =
@@ -440,6 +566,58 @@ class PermitHubMailer < ApplicationMailer
 
   def login_identifier(user)
     user.omniauth_username.presence || user.email
+  end
+
+  def contact_first_name(contact_name, user)
+    contact_name.to_s.split.first.presence || user.first_name.presence ||
+      user.name
+  end
+
+  def set_project_meeting_scheduled_variables(project_meeting)
+    @project_meeting = project_meeting
+    @user = project_meeting.requested_by
+    @permit_project = project_meeting.permit_project
+    @jurisdiction = @permit_project.jurisdiction
+    @meeting_datetime =
+      project_meeting.confirmed_date&.in_time_zone&.strftime(
+        "%b %-d, %Y at %-l:%M %P PT"
+      )
+    @contact_method = project_meeting_contact_method_label(project_meeting)
+    @project_meeting_url =
+      FrontendUrlHelper.frontend_url(
+        "/projects/#{@permit_project.id}/meetings/#{project_meeting.id}"
+      )
+    @reviewer_project_meeting_url =
+      FrontendUrlHelper.frontend_url(
+        "/jurisdictions/#{@jurisdiction.slug}/meetings/#{project_meeting.id}"
+      )
+  end
+
+  def project_meeting_contact_method_label(project_meeting)
+    case project_meeting.contact_method
+    when "phone"
+      "Phone"
+    when "in_person"
+      "In-person meeting"
+    when "videoconference"
+      "Videoconference"
+    else
+      project_meeting.contact_method.to_s.humanize
+    end
+  end
+
+  def attach_project_meeting_calendar(project_meeting, hub_meeting_url:)
+    return if project_meeting.confirmed_date.blank?
+
+    generator =
+      ProjectMeetingIcsGenerator.new(
+        project_meeting,
+        hub_meeting_url: hub_meeting_url
+      )
+    attachments[generator.filename] = {
+      mime_type: "text/calendar; method=PUBLISH; charset=UTF-8",
+      content: generator.generate
+    }
   end
 
   # Helper method to attach a file from a FileUploadAttachment subclass instance

@@ -7,7 +7,7 @@ import { AnimatePresence, motion } from "framer-motion"
 import { observer } from "mobx-react-lite"
 import React, { ReactNode, useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { UnreadBadge } from "../../../shared/filters/inbox-filter"
+import { UnreadBadge } from "../../../shared/base/unread-badge"
 
 export interface IKanbanColumn {
   key: string

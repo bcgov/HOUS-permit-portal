@@ -6,7 +6,7 @@ class RemindReviewerJob
       unviewed_applications = jur.unviewed_permit_applications
 
       if unviewed_applications.any?
-        jur.submission_contacts.confirmed.each do |contact|
+        jur.confirmed_submission_contacts.each do |contact|
           PermitHubMailer.remind_reviewer(
             contact,
             unviewed_applications

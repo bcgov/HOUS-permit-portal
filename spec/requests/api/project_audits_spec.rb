@@ -9,11 +9,27 @@ RSpec.describe "Api::ProjectAudits (project activities)", type: :request do
   let(:owner) { create(:user, :submitter) }
   let(:other_user) { create(:user, :submitter) }
   let(:jurisdiction) { create(:sub_district) }
+  let(:reviewer) { create(:user, :review_manager, jurisdiction: jurisdiction) }
   let!(:permit_project) do
     create(:permit_project, owner: owner, jurisdiction: jurisdiction)
   end
 
   before { sign_in owner }
+
+  def stub_project_meeting_notifications
+    allow(NotificationService).to receive(
+      :publish_project_meeting_submitted_event
+    )
+    allow(NotificationService).to receive(
+      :publish_project_meeting_request_received_event
+    )
+    allow(NotificationService).to receive(
+      :publish_property_information_request_received_event
+    )
+    allow(NotificationService).to receive(
+      :publish_project_meeting_scheduled_event
+    )
+  end
 
   describe "POST /api/permit_projects/:id/activities" do
     it "returns success for project owner" do
@@ -217,6 +233,68 @@ RSpec.describe "Api::ProjectAudits (project activities)", type: :request do
         expect(response).to have_http_status(:ok)
         ids = json_response["data"].map { |row| row["id"] }
         expect(ids).to include(audit.id)
+      end
+    end
+
+    context "with project meeting activity" do
+      before { stub_project_meeting_notifications }
+
+      it "returns staff meeting activity to the project owner" do
+        meeting =
+          create(
+            :project_meeting,
+            :open,
+            permit_project: permit_project,
+            requested_by: owner
+          )
+
+        Audited
+          .audit_class
+          .as_user(reviewer) do
+            meeting.assign_attributes(
+              contact_method: :phone,
+              confirmed_date: 1.week.from_now
+            )
+            meeting.schedule!
+          end
+
+        post "/api/permit_projects/#{permit_project.id}/activities",
+             params: {
+             },
+             headers: headers,
+             as: :json
+
+        expect(response).to have_http_status(:ok)
+        descriptions = json_response["data"].map { |row| row["description"] }
+        expect(descriptions).to include(
+          "#{jurisdiction.qualified_name} scheduled the project meeting"
+        )
+        expect(descriptions).not_to include(
+          "#{reviewer.name} scheduled the project meeting"
+        )
+      end
+
+      it "returns submitter meeting activity to review staff" do
+        meeting =
+          create(
+            :project_meeting,
+            permit_project: permit_project,
+            requested_by: owner
+          )
+        Audited.audit_class.as_user(owner) { meeting.submit_request! }
+
+        sign_in reviewer
+        post "/api/permit_projects/#{permit_project.id}/activities",
+             params: {
+             },
+             headers: headers,
+             as: :json
+
+        expect(response).to have_http_status(:ok)
+        descriptions = json_response["data"].map { |row| row["description"] }
+        expect(descriptions).to include(
+          "#{owner.name} submitted a project meeting request"
+        )
       end
     end
 

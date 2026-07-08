@@ -3,6 +3,7 @@ import { ArrowSquareOut, CaretRight, Info, Pencil, Users, Warning } from "@phosp
 import { format } from "date-fns"
 import React from "react"
 import { Trans, useTranslation } from "react-i18next"
+import { datefnsTableDateFormat } from "../../../constants"
 import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
 import { YellowLineSmall } from "../../shared/base/decorative/yellow-line-small"
@@ -149,7 +150,7 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
               <Show below="md">
                 <br />
               </Show>
-              {format(createdAt, "MMM d, yyyy")}
+              {format(createdAt, datefnsTableDateFormat)}
             </Text>
             <Show above="md">
               <Text>{"  |  "}</Text>
@@ -163,7 +164,7 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
               <Show below="md">
                 <br />
               </Show>
-              {format(updatedAt, "MMM d, yyyy")}
+              {format(updatedAt, datefnsTableDateFormat)}
             </Text>
             {viewedAt && (
               <>
@@ -179,7 +180,7 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
                   <Show below="md">
                     <br />
                   </Show>
-                  {format(viewedAt, "MMM d, yyyy")}
+                  {format(viewedAt, datefnsTableDateFormat)}
                 </Text>
               </>
             )}

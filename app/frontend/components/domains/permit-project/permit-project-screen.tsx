@@ -1,7 +1,7 @@
 import { Box, Container, Flex, IconButton, TabPanel, TabPanels, Tabs, Text } from "@chakra-ui/react"
-import { CaretLeft, ClipboardText, Folder, SquaresFour, TrendUp } from "@phosphor-icons/react"
+import { CalendarBlank, CaretLeft, ChatText, ClipboardText, Folder, SquaresFour, TrendUp } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useEffect, useTransition } from "react"
+import React, { useEffect, useMemo, useTransition } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom"
@@ -13,23 +13,42 @@ import { EditableInputWithControls } from "../../shared/editable-input-with-cont
 import { RollupStatusBox } from "../../shared/permit-projects/rollup-status-box"
 import { ActivityTabPanelContent } from "./activity-tab-panel-content"
 import { LocalResourcesTabPanelContent } from "./local-resources-tab-panel-content"
+import { MeetingsTabPanelContent } from "./meetings-tab-panel-content"
 import { OverviewTabPanelContent } from "./overview-tab-panel-content"
 import { PermitsTabPanelContent } from "./permits-tab-panel-content"
+import { ProjectNotesTabPanelContent } from "./project-notes-tab-panel-content"
 import { ITabItem, ProjectSidebarTabList } from "./project-sidebar-tab-list"
 
 export const PermitProjectScreen = observer(() => {
   const { currentPermitProject, error } = usePermitProject()
-  const { permitProjectStore } = useMst()
+  const { permitProjectStore, siteConfigurationStore } = useMst()
   const location = useLocation()
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const projectMeetingsEnabled = Boolean(
+    siteConfigurationStore.projectMeetingsEnabled && currentPermitProject?.jurisdiction?.projectMeetingsEnabled
+  )
 
-  const TABS_DATA: ITabItem[] = [
-    { label: t("permitProject.details.overview"), icon: SquaresFour, to: "overview", tabIndex: 0 },
-    { label: t("permitProject.details.activity"), icon: TrendUp, to: "activity", tabIndex: 1 },
-    { label: t("permitProject.details.permits"), icon: ClipboardText, to: "permits", tabIndex: 2 },
-    { label: t("permitProject.details.localResources"), icon: Folder, to: "local-resources", tabIndex: 3 },
-  ]
+  const TABS_DATA: ITabItem[] = useMemo(
+    () => [
+      { label: t("permitProject.details.overview"), icon: SquaresFour, to: "overview", tabIndex: 0 },
+      { label: t("permitProject.details.activity"), icon: TrendUp, to: "activity", tabIndex: 1 },
+      { label: t("permitProject.details.permits"), icon: ClipboardText, to: "permits", tabIndex: 2 },
+      ...(projectMeetingsEnabled
+        ? [
+            { label: t("permitProject.details.meetings"), icon: CalendarBlank, to: "meetings", tabIndex: 3 },
+            { label: t("permitProject.details.notes"), icon: ChatText, to: "notes", tabIndex: 4 },
+          ]
+        : []),
+      {
+        label: t("permitProject.details.localResources"),
+        icon: Folder,
+        to: "local-resources",
+        tabIndex: projectMeetingsEnabled ? 5 : 3,
+      },
+    ],
+    [projectMeetingsEnabled, t]
+  )
 
   const getDefaultValues = () => {
     return {
@@ -44,10 +63,12 @@ export const PermitProjectScreen = observer(() => {
   const { updatePermitProject } = permitProjectStore
 
   useEffect(() => {
+    if (!currentPermitProject) return
+
     if (!TABS_DATA.some((tab) => location.pathname.includes(tab.to))) {
       navigate("overview", { replace: true })
     }
-  }, [location.pathname, navigate])
+  }, [TABS_DATA, currentPermitProject, location.pathname, navigate])
 
   useEffect(() => {
     reset(getDefaultValues())
@@ -62,7 +83,7 @@ export const PermitProjectScreen = observer(() => {
 
   const handleTabChange = (index: number) => {
     startTransition(() => {
-      navigate(TABS_DATA[index].to, { replace: true })
+      navigate(TABS_DATA[index].to)
     })
   }
 
@@ -136,6 +157,16 @@ export const PermitProjectScreen = observer(() => {
           <TabPanel>
             {isPending ? <LoadingScreen /> : <PermitsTabPanelContent permitProject={currentPermitProject} />}
           </TabPanel>
+          {projectMeetingsEnabled && (
+            <TabPanel p={0}>
+              {isPending ? <LoadingScreen /> : <MeetingsTabPanelContent permitProject={currentPermitProject} />}
+            </TabPanel>
+          )}
+          {projectMeetingsEnabled && (
+            <TabPanel p={0}>
+              {isPending ? <LoadingScreen /> : <ProjectNotesTabPanelContent permitProject={currentPermitProject} />}
+            </TabPanel>
+          )}
           <TabPanel>
             {isPending ? <LoadingScreen /> : <LocalResourcesTabPanelContent permitProject={currentPermitProject} />}
           </TabPanel>

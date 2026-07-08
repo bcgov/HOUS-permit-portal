@@ -17,9 +17,61 @@ export enum EFileUploadAttachmentType {
   RequirementDocument = "RequirementDocument",
   SupportingDocument = "SupportingDocument",
   ProjectDocument = "ProjectDocument",
+  MeetingRequestDocument = "MeetingRequestDocument",
   ReportDocument = "ReportDocument",
   ResourceDocument = "ResourceDocument",
   DesignDocument = "DesignDocument",
+}
+
+export enum EProjectMeetingStatus {
+  draft = "draft",
+  open = "open",
+  scheduled = "scheduled",
+  completed = "completed",
+  closed = "closed",
+}
+
+export enum EProjectMeetingContactMethod {
+  phone = "phone",
+  inPerson = "in_person",
+  videoconference = "videoconference",
+}
+
+export enum EProjectMeetingScheduleMode {
+  schedule = "schedule",
+  reschedule = "reschedule",
+}
+
+export enum EProjectMeetingSortFields {
+  submittedAt = "submitted_at",
+  projectNumber = "project_number",
+  projectAddress = "project_address",
+  contactName = "contact_name",
+  confirmedDate = "confirmed_date",
+  projectDescription = "project_description",
+  status = "status",
+}
+
+export enum EProjectMeetingRequesterRelationship {
+  ownerOrLandholder = "owner_or_landholder",
+  leaseholderOrTenant = "leaseholder_or_tenant",
+  ownersRepresentative = "owners_representative",
+  other = "other",
+}
+
+export enum EMeetingRequestDocumentType {
+  supporting = "supporting",
+  authorization = "authorization",
+}
+
+export enum ENoteableType {
+  ProjectMeeting = "ProjectMeeting",
+}
+
+export enum ESubmissionContactClass {
+  application = "ApplicationSubmissionContact",
+  meeting = "MeetingSubmissionContact",
+  propertyInformation = "PropertyInformationSubmissionContact",
 }
 
 export enum EResourceCategory {
@@ -27,6 +79,7 @@ export enum EResourceCategory {
   bylawsRequirements = "bylaws_requirements",
   gisMapping = "gis_mapping",
   additionalResources = "additional_resources",
+  projectMeetingAuthorization = "project_meeting_authorization",
 }
 
 export enum EResourceType {
@@ -146,6 +199,7 @@ export enum EPermitApplicationSortFields {
 }
 
 export enum EProjectPermitApplicationSortFields {
+  applicationNickname = "nickname",
   permit = "permit",
   assignedTo = "assigned_to",
   permitApplicationNumber = "permit_application_number",
@@ -230,6 +284,12 @@ export enum EStepCodeChecklistStage {
   preConstruction = "pre_construction",
   midConstruction = "mid_construction",
   asBuilt = "as_built",
+}
+
+export enum EStepCodeStageStatus {
+  notStarted = "not_started",
+  inProgress = "in_progress",
+  complete = "complete",
 }
 
 export enum EStepCodeChecklistStatus {
@@ -454,6 +514,8 @@ export enum ENotificationActionType {
   preCheckCompleted = "pre_check_completed",
   fileUploadFailed = "file_upload_failed",
   resourceReminder = "resource_reminder",
+  projectMeetingSubmitted = "project_meeting_submitted",
+  projectMeetingRescheduled = "project_meeting_rescheduled",
   projectReviewCollaborationAssignment = "project_review_collaboration_assignment",
   projectReviewCollaborationUnassignment = "project_review_collaboration_unassignment",
   releaseNotePublish = "release_note_publish",

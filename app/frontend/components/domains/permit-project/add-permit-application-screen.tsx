@@ -20,6 +20,7 @@ import { useNavigate } from "react-router-dom"
 import { usePermitProject } from "../../../hooks/resources/use-permit-project"
 import { useTemplateVersions } from "../../../hooks/resources/use-template-versions"
 import { ITemplateVersion } from "../../../models/template-version"
+import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus } from "../../../types/enums"
 import { groupTemplateVersionsByCategory } from "../../../utils/template-version-grouping"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
@@ -30,6 +31,7 @@ import ProjectInfoRow from "../../shared/project/project-info-row"
 export const AddPermitApplicationToProjectScreen = observer(() => {
   const { t } = useTranslation()
   const { currentPermitProject, error } = usePermitProject()
+  const { siteConfigurationStore } = useMst()
   const navigate = useNavigate()
   const {
     templateVersions,
@@ -37,6 +39,7 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
     isLoading,
   } = useTemplateVersions({
     customErrorMessage: t("errors.fetchBuildingPermits"),
+    jurisdictionId: currentPermitProject?.jurisdiction?.id,
   })
 
   const [selectedTemplateVersionIds, setSelectedTemplateVersionIds] = useState<string[]>([])
@@ -54,6 +57,17 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
     })
   }, [templateVersions, query])
   const groupedTemplates = useMemo(() => groupTemplateVersionsByCategory(filteredTemplates), [filteredTemplates])
+  const selectedTemplateVersions = useMemo(
+    () => templateVersions.filter((templateVersion) => selectedTemplateVersionIds.includes(templateVersion.id)),
+    [selectedTemplateVersionIds, templateVersions]
+  )
+  const selectedTemplatesRequireProjectMeeting = selectedTemplateVersions.some(
+    (templateVersion) => templateVersion.requiresProjectMeeting
+  )
+  const shouldOfferProjectMeetingAfterAdd =
+    selectedTemplatesRequireProjectMeeting &&
+    siteConfigurationStore.projectMeetingsEnabled &&
+    (currentPermitProject?.jurisdiction?.projectMeetingsEnabled ?? false)
 
   const toggleSelection = (templateVersionId: string) => {
     setSelectedTemplateVersionIds((prev) =>
@@ -73,7 +87,16 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
       const response = await (currentPermitProject as any).bulkCreatePermitApplications(params)
       if (response?.ok) {
         currentPermitProject.resetIsFullyLoaded()
-        navigate(`/projects/${currentPermitProject.id}`)
+        if (shouldOfferProjectMeetingAfterAdd) {
+          const params = new URLSearchParams({
+            source: "add-permits",
+            count: selectedTemplateVersionIds.length.toString(),
+            requiresMeeting: "true",
+          })
+          navigate(`/projects/${currentPermitProject.id}/meetings/new?${params.toString()}`)
+        } else {
+          navigate(`/projects/${currentPermitProject.id}`)
+        }
       }
     } finally {
       setIsSubmitting(false)

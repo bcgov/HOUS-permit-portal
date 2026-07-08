@@ -21,11 +21,13 @@ import {
   EHotWaterPerformanceType,
   EJurisdictionSocketEventTypes,
   EJurisdictionTypes,
+  EMeetingRequestDocumentType,
   ENotificationActionType,
   ENumberUnit,
   EPermitApplicationSocketEventTypes,
   EPermitApplicationStatus,
   EPermitProjectRollupStatus,
+  EProjectMeetingStatus,
   ERequirementType,
   ESocketDomainTypes,
   ESocketEventTypes,
@@ -36,6 +38,7 @@ import {
   EStepCodeCompliancePath,
   EStepCodeEPCTestingTargetType,
   EStepCodeOccupancyKey,
+  ESubmissionContactClass,
   ETemplateVersionStatus,
   EUserRoles,
   EWindowsGlazedDoorsPerformanceType,
@@ -100,6 +103,7 @@ export interface ISubmissionContact {
   confirmedAt: string
   default: boolean
   confirmationSentAt?: string
+  type: ESubmissionContactClass
 }
 
 export interface IHelpVideoNavigationNeighbor {
@@ -348,6 +352,7 @@ export interface IJurisdictionStub {
 
 export interface IReportDocument extends IBaseFileAttachment {
   stepCodeId: string
+  stale?: boolean
 }
 
 export interface IResourceDocument extends IBaseFileAttachment {
@@ -370,6 +375,11 @@ export interface IResource {
 
 export interface IProjectDocument extends IBaseFileAttachment {
   permitProjectId: string // Foreign key to link to PermitProject
+}
+
+export interface IMeetingRequestDocument extends IBaseFileAttachment {
+  projectMeetingId?: string
+  documentType?: EMeetingRequestDocumentType
 }
 
 export interface IRequirementBlockCustomization {
@@ -453,6 +463,12 @@ export interface INotification {
     | ITemplateVersionNotificationObjectData
     | IRequirementTemplateNotificationObjectData
     | IReportDocumentNotificationObjectData
+    | IProjectMeetingNotificationObjectData
+}
+
+export interface IProjectMeetingNotificationObjectData {
+  permitProjectId: string
+  projectMeetingId: string
 }
 
 export interface ITemplateVersionUpdate {
@@ -613,6 +629,7 @@ export interface IPermitProjectSearchFilters {
   query?: string
   showArchived?: boolean
   rollupStatus?: EPermitProjectRollupStatus[]
+  activeMeeting?: string
   requirementTemplateIds?: string[]
   jurisdictionId?: string[]
 }
@@ -633,6 +650,11 @@ export interface IPermitApplicationInboxSearchFilters {
   meetingRequest?: string
   daysInQueue?: { operator: string; days: number }
   assigned?: string[]
+}
+
+export interface IProjectMeetingInboxSearchFilters {
+  status?: EProjectMeetingStatus[]
+  unread?: string
 }
 
 export interface IProjectAuditSearchFilters {
@@ -693,6 +715,7 @@ export interface IMinimalFrozenUser {
   role: EUserRoles
   firstName: string
   lastName: string
+  phoneNumber?: string
   organization?: string
   certified: boolean
   discardedAt?: Date
@@ -824,6 +847,18 @@ export interface IPart3NavSection {
   navLinks: IPart3NavLink[]
 }
 
+export interface IPart9NavLink {
+  key: TPart9NavLinkKey
+  location: string
+  subLinks: IPart9NavLink[]
+  section?: TNavLinkSection
+}
+
+export interface IPart9NavSection {
+  key: TPart9NavSectionKey
+  navLinks: IPart9NavLink[]
+}
+
 export interface IPart3SectionCompletionStatusEntry {
   complete: boolean
   relevant: boolean
@@ -855,6 +890,26 @@ export interface IPart3SectionCompletionStatus {
 
 export type TPart3NavLinkKey = keyof IPart3SectionCompletionStatus
 export type TPart3NavSectionKey = "overview" | "compliance" | "results"
+
+export type IPart9SectionCompletionStatusEntry = IPart3SectionCompletionStatusEntry
+
+export interface IPart9SectionCompletionStatus {
+  start: IPart9SectionCompletionStatusEntry
+  projectInfo: IPart9SectionCompletionStatusEntry
+  buildingInfo: IPart9SectionCompletionStatusEntry
+  h2kImport: IPart9SectionCompletionStatusEntry
+  complianceSummary: IPart9SectionCompletionStatusEntry
+  completedBy: IPart9SectionCompletionStatusEntry
+  buildingCharacteristics: IPart9SectionCompletionStatusEntry
+  energyPerformance: IPart9SectionCompletionStatusEntry
+  energyStepCompliance: IPart9SectionCompletionStatusEntry
+  zeroCarbonCompliance: IPart9SectionCompletionStatusEntry
+  review: IPart9SectionCompletionStatusEntry
+  report: IPart9SectionCompletionStatusEntry
+}
+
+export type TPart9NavLinkKey = keyof IPart9SectionCompletionStatus
+export type TPart9NavSectionKey = "overview" | "compliance" | "results"
 
 // Define the base structure shared by both metric types
 interface IPart3ComplianceMetricsBase {

@@ -25,10 +25,15 @@ module Api::Concerns::Search::StepCodes
           permit_project
           report_documents
         ]
-      }
+      },
+      scope_results: ->(relation) { policy_scope(relation) }
     }
 
-    @step_code_search = StepCode.search(step_code_query, **search_conditions)
+    @step_code_search =
+      ensure_searchkick_policy_scoped!(
+        StepCode,
+        StepCode.search(step_code_query, **search_conditions)
+      )
   end
 
   private
@@ -65,12 +70,11 @@ module Api::Concerns::Search::StepCodes
         step_code_search_params[:show_archived] || false
       )
 
-    # Base visibility: only records created by current user
+    # Base visibility: this endpoint currently lists only records created by the user.
     base_conditions = [{ creator_id: current_user.id }]
 
     final_where = { _and: [{ _or: base_conditions }] }
 
-    # Add discarded filter
     final_where[:_and] << { discarded: show_archived }
 
     # OR within a filter (arrays), AND across different filters

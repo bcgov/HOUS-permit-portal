@@ -39,7 +39,7 @@ export const SubmissionDownloadModal = observer(
     const { t } = useTranslation()
     const { permitApplicationStore } = useMst()
     const { allSubmissionVersionCompletedSupportingDocuments, zipfileUrl, zipfileName, stepCode } = permitApplication
-    const checklist = stepCode?.primaryChecklist
+    const checklist = stepCode?.currentChecklist
     const applicationJsonUrl = `/api/permit_applications/${permitApplication.id}/download_application_json`
     const applicationJsonName = `permit-application-${permitApplication.id}.json`
 

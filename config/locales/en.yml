@@ -87,6 +87,10 @@ en:
         jurisdiction:
           no_sandboxes: "Jurisdiction must have at least one sandbox."
           enabled_inbox_requires_setup: "can only be toggled on once all emails are set up."
+          enabled_project_meetings_requires_setup: "can only be toggled on once at least one project meeting contact is confirmed."
+          enabled_property_information_requests_requires_setup: "can only be toggled on once at least one property information contact is confirmed."
+        submission_contact:
+          last_confirmed_contact: "cannot be deleted while %{feature} is enabled. Turn the setting off before deleting the last confirmed contact."
         part3_occupancy_required_step:
           duplicate_pathway: "A pathway with identical energy step and zero carbon step already exists for this occupancy."
         jurisdiction_template_version_customizations:
@@ -115,6 +119,12 @@ en:
               review_staff_requires_sandbox: "review staff cannot own permit projects outside of a sandbox"
             sandbox:
               incorrect_jurisdiction: "must belong to the jurisdiction. Please apply to your own jurisdiction to use this sandbox."
+        project_meeting:
+          attributes:
+            permit_project:
+              active_project_meeting_exists: "can only have one active meeting request"
+            meeting_request_documents:
+              authorization_required: "must include authorization documents when the requester is not the owner"
         permit_project_collaboration:
           attributes:
             permit_project:
@@ -195,6 +205,8 @@ en:
       remind_reviewer: "Your report on outstanding permit applications"
       remind_resource_update: "Reminder: Review your jurisdiction resources"
       submission_contact_confirm: "Confirm submission inbox email"
+      project_meeting_contact_confirm: "Confirm project meeting notification email"
+      property_information_contact_confirm: "Confirm property information request notification email"
       new_jurisdiction_membership: "New jurisdiction membership"
       notify_permit_collaboration: "Welcome you have been invited to Collaborate in the Building Permit Hub"
       notify_project_review_collaboration: "You have been assigned as a review collaborator on a project"
@@ -206,6 +218,13 @@ en:
       notify_batched_integration_mapping: "New API mappings"
       notify_pre_check_submitted: "Your pre-check has been submitted"
       notify_pre_check_completed: "Your pre-check has been completed"
+      notify_project_meeting_submitted: "Your project meeting request has been sent"
+      notify_project_meeting_submitted_to_jurisdiction: "New project meeting request: %{project_number}"
+      notify_property_information_requested: "New property information request: %{project_number}"
+      notify_project_meeting_scheduled: "Your project meeting has been scheduled"
+      notify_project_meeting_scheduled_to_jurisdiction: "Project meeting scheduled: %{project_number}"
+      notify_project_meeting_rescheduled: "Your project meeting has been rescheduled"
+      notify_project_meeting_rescheduled_to_jurisdiction: "Project meeting rescheduled: %{project_number}"
       notify_new_template_version_published: "New version published for %{template_label}"
       notify_template_version_no_action: "Permit template updated - no action required: %{template_label}"
       notify_template_version_action_required: "ACTION REQUIRED: Permit template updated - API mapping review required: %{template_label}"
@@ -329,6 +348,50 @@ en:
       pdf_report_unavailable:
         title: Error
         message: "PDF report unavailable"
+    project_meeting:
+      create_success:
+        title: ""
+        message: "Project meeting request created successfully!"
+      create_error:
+        title: Error
+        message: "Project meeting request could not be created"
+      update_success:
+        title: ""
+        message: "Project meeting request updated successfully!"
+      update_error:
+        title: Error
+        message: "Project meeting request could not be updated"
+      submit_success:
+        title: ""
+        message: "Project meeting request sent successfully!"
+      submit_error:
+        title: Error
+        message: "Project meeting request could not be sent"
+      cancel_success:
+        title: ""
+        message: "Project meeting request cancelled successfully!"
+      cancel_error:
+        title: Error
+        message: "Project meeting request could not be cancelled"
+      reschedule_success:
+        title: ""
+        message: "Project meeting details updated successfully!"
+      reschedule_error:
+        title: Error
+        message: "Project meeting details could not be updated"
+      transition_success:
+        title: ""
+        message: "Project meeting request status updated successfully!"
+      invalid_transition:
+        title: Error
+        message: "Project meeting request status could not be updated"
+    note:
+      create_success:
+        title: ""
+        message: "Note added successfully!"
+      create_error:
+        title: Error
+        message: "Note could not be added"
     contact:
       options_error:
         title: Error
@@ -728,6 +791,18 @@ en:
       autofill_permit_application_not_draft:
         title: Error
         message: "Only draft permit applications can be autofilled"
+      autofill_part_3_step_code_success:
+        title: ""
+        message: "Part 3 step code autofilled successfully"
+      autofill_part_3_step_code_error:
+        title: Error
+        message: "%{error_message}"
+      autofill_part_9_step_code_success:
+        title: ""
+        message: "Part 9 step code autofilled successfully"
+      autofill_part_9_step_code_error:
+        title: Error
+        message: "%{error_message}"
     permit_collaboration:
       destroy_success:
         title: ""
@@ -1186,6 +1261,9 @@ en:
       status_ready_no_user: 'Requirement “%{requirement_block_name}” status set to "ready" for permit application %{number}'
     resource:
       reminder: "Reminder: Review your jurisdiction resources"
+    project_meeting:
+      submitted: "Your project meeting request for project %{project_number} has been sent."
+      rescheduled: "Your project meeting for project %{project_number} has been rescheduled."
     release_note:
       publish_notification: "Version %{version} is now available. See what's new."
     integration_mapping:

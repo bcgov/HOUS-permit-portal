@@ -2,7 +2,7 @@
 
 class SeedJursidictionsHDD < ActiveRecord::Migration[7.1]
   def up
-    StepCode::Part3::V0::Seeders::JurisdictionHDD.seed!
+    # Legacy jurisdiction-level HDD values are no longer stored.
   end
 
   def down

@@ -16,7 +16,7 @@ RSpec.describe StepCodeReportSharingService do
   describe ".confirmed_contact_email_for_jurisdiction" do
     it "returns nil when no confirmed default contact exists" do
       jurisdiction = create(:sub_district)
-      jurisdiction.submission_contacts.destroy_all
+      jurisdiction.submission_contacts.delete_all
 
       expect(
         described_class.confirmed_contact_email_for_jurisdiction(
@@ -27,7 +27,7 @@ RSpec.describe StepCodeReportSharingService do
 
     it "returns confirmed email when a default contact exists" do
       jurisdiction = create(:sub_district)
-      jurisdiction.submission_contacts.destroy_all
+      jurisdiction.submission_contacts.delete_all
       contact =
         create(
           :submission_contact,
@@ -78,7 +78,7 @@ RSpec.describe StepCodeReportSharingService do
 
     it "enqueues an email and logs when successful" do
       jurisdiction = create(:sub_district)
-      jurisdiction.submission_contacts.destroy_all
+      jurisdiction.submission_contacts.delete_all
       allow(jurisdiction).to receive(:qualified_name).and_return("Jur Name")
       create(
         :submission_contact,
@@ -112,7 +112,7 @@ RSpec.describe StepCodeReportSharingService do
 
     it "captures errors when mailer raises" do
       jurisdiction = create(:sub_district)
-      jurisdiction.submission_contacts.destroy_all
+      jurisdiction.submission_contacts.delete_all
       create(
         :submission_contact,
         jurisdiction: jurisdiction,

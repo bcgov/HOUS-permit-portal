@@ -33,6 +33,13 @@ class Api::ApplicationController < ActionController::API
     results.select { |result| policy(result).send("#{policy_action}?".to_sym) }
   end
 
+  # Searchkick only invokes scope_results when ES returns >= 1 hit, so policy_scope
+  # inside that lambda is skipped on empty results and verify_policy_scoped fails.
+  def ensure_searchkick_policy_scoped!(model_class, search)
+    policy_scope(model_class) if search.hits.empty?
+    search
+  end
+
   def skip_pundit?
     devise_controller?
   end

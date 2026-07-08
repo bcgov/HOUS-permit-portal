@@ -7,12 +7,15 @@ import { ContactStoreModel, IContactStore } from "./contact-store"
 import { GeocoderStoreModel, IGeocoderStore } from "./geocoder-store"
 import { HelpVideoStoreModel, IHelpVideoStore } from "./help-video-store"
 import { IJurisdictionStore, JurisdictionStoreModel } from "./jurisdiction-store"
+import { INoteStore, NoteStoreModel } from "./note-store"
 import { INotificationStore, NotificationStoreModel } from "./notification-store"
 import { IOverheatingCodeStore, OverheatingCodeStoreModel } from "./overheating-code-store"
 import { IPermitApplicationStore, PermitApplicationStoreModel } from "./permit-application-store"
 import { IPermitProjectStore, PermitProjectStoreModel } from "./permit-project-store"
 import { IPreCheckStore, PreCheckStoreModel } from "./pre-check-store"
 import { IProjectAuditStore, ProjectAuditStoreModel } from "./project-audit-store"
+import { IProjectMeetingInboxStore, ProjectMeetingInboxStoreModel } from "./project-meeting-inbox-store"
+import { IProjectMeetingStore, ProjectMeetingStoreModel } from "./project-meeting-store"
 import { IReleaseNoteStore, ReleaseNoteStoreModel } from "./release-note-store"
 import { IRequirementBlockStoreModel, RequirementBlockStoreModel } from "./requirement-block-store"
 import { IRequirementTemplateStoreModel, RequirementTemplateStoreModel } from "./requirement-template-store"
@@ -35,8 +38,11 @@ export const RootStoreModel = types
     userStore: types.optional(UserStoreModel, {}),
     permitApplicationStore: types.optional(PermitApplicationStoreModel, {}),
     permitProjectStore: types.optional(PermitProjectStoreModel, {}),
+    noteStore: types.optional(NoteStoreModel, {}),
     projectAuditStore: types.optional(ProjectAuditStoreModel, {}),
     preCheckStore: types.optional(PreCheckStoreModel, {}),
+    projectMeetingStore: types.optional(ProjectMeetingStoreModel, {}),
+    projectMeetingInboxStore: types.optional(ProjectMeetingInboxStoreModel, {}),
     overheatingCodeStore: types.optional(OverheatingCodeStoreModel, {}),
     jurisdictionStore: types.optional(JurisdictionStoreModel, {}),
     requirementBlockStore: types.optional(RequirementBlockStoreModel, {}),
@@ -120,8 +126,11 @@ export interface IRootStore extends IStateTreeNode {
   sessionStore: ISessionStore
   permitApplicationStore: IPermitApplicationStore
   permitProjectStore: IPermitProjectStore
+  noteStore: INoteStore
   projectAuditStore: IProjectAuditStore
   preCheckStore: IPreCheckStore
+  projectMeetingStore: IProjectMeetingStore
+  projectMeetingInboxStore: IProjectMeetingInboxStore
   overheatingCodeStore: IOverheatingCodeStore
   jurisdictionStore: IJurisdictionStore
   userStore: IUserStore

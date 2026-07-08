@@ -34,7 +34,6 @@ module ProjectItem
     delegate :title, to: :permit_project, prefix: true, allow_nil: true
 
     delegate :qualified_name,
-             :heating_degree_days,
              :name,
              to: :jurisdiction,
              prefix: :jurisdiction,
@@ -70,6 +69,13 @@ module ProjectItem
 
     def jurisdiction_id
       parent&.jurisdiction_id || super
+    end
+
+    def jurisdiction_heating_degree_days
+      jurisdiction
+        &.jurisdiction_climate_zones
+        &.filter_map(&:heating_degree_days)
+        &.first
     end
 
     # Sandbox lives on the parent project. Project items no longer carry

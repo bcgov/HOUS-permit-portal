@@ -62,10 +62,10 @@ RSpec.describe JurisdictionPolicy, type: :policy do
       )
     end
 
-    it "permits review staff members of the jurisdiction" do
-      reviewer = create(:user, :review_manager, jurisdiction:)
+    it "permits manager members of the jurisdiction" do
+      manager = create(:user, :review_manager, jurisdiction:)
       expect(policy_class).to permit(
-        UserContext.new(reviewer, sandbox),
+        UserContext.new(manager, sandbox),
         jurisdiction
       )
     end
@@ -87,57 +87,11 @@ RSpec.describe JurisdictionPolicy, type: :policy do
         jurisdiction
       )
     end
-  end
 
-  permissions :search_users? do
-    let(:user) { create(:user) }
-
-    it "matches update? permissions" do
-      reviewer = create(:user, :review_manager, jurisdiction:)
-      expect(policy_class).to permit(
-        UserContext.new(reviewer, sandbox),
-        jurisdiction
-      )
-
-      stranger = create(:user, :review_manager)
+    it "denies reviewer members" do
+      reviewer = create(:user, :reviewer, jurisdiction:)
       expect(policy_class).not_to permit(
-        UserContext.new(stranger, sandbox),
-        jurisdiction
-      )
-    end
-  end
-
-  permissions :search_permit_applications? do
-    let(:user) { create(:user) }
-
-    it "matches update? permissions" do
-      reviewer = create(:user, :review_manager, jurisdiction:)
-      expect(policy_class).to permit(
         UserContext.new(reviewer, sandbox),
-        jurisdiction
-      )
-
-      stranger = create(:user)
-      expect(policy_class).not_to permit(
-        UserContext.new(stranger, sandbox),
-        jurisdiction
-      )
-    end
-  end
-
-  permissions :sandboxes? do
-    let(:user) { create(:user) }
-
-    it "matches update? permissions" do
-      reviewer = create(:user, :review_manager, jurisdiction:)
-      expect(policy_class).to permit(
-        UserContext.new(reviewer, sandbox),
-        jurisdiction
-      )
-
-      stranger = create(:user)
-      expect(policy_class).not_to permit(
-        UserContext.new(stranger, sandbox),
         jurisdiction
       )
     end
@@ -146,10 +100,30 @@ RSpec.describe JurisdictionPolicy, type: :policy do
   permissions :update_external_api_enabled? do
     let(:user) { create(:user) }
 
-    it "permits super_admin" do
+    it "permits super_admin when not g_off" do
       allow(jurisdiction).to receive(:g_off?).and_return(false)
       expect(policy_class).to permit(
         UserContext.new(create(:user, :super_admin), sandbox),
+        jurisdiction
+      )
+    end
+
+    it "permits super_admin when g_off" do
+      allow(jurisdiction).to receive(:g_off?).and_return(true)
+      expect(policy_class).to permit(
+        UserContext.new(create(:user, :super_admin), sandbox),
+        jurisdiction
+      )
+    end
+
+    it "denies technical_support when g_off" do
+      allow(jurisdiction).to receive(:g_off?).and_return(true)
+      tech = create(:user, role: :technical_support)
+      create(:jurisdiction_membership, user: tech, jurisdiction: jurisdiction)
+      tech.reload
+
+      expect(policy_class).not_to permit(
+        UserContext.new(tech, sandbox),
         jurisdiction
       )
     end
@@ -179,6 +153,119 @@ RSpec.describe JurisdictionPolicy, type: :policy do
       tech.reload
 
       expect(policy_class).to permit(
+        UserContext.new(tech, sandbox),
+        jurisdiction
+      )
+    end
+
+    it "denies reviewer members" do
+      allow(jurisdiction).to receive(:g_off?).and_return(false)
+      reviewer = create(:user, :reviewer, jurisdiction:)
+      expect(policy_class).not_to permit(
+        UserContext.new(reviewer, sandbox),
+        jurisdiction
+      )
+    end
+  end
+
+  permissions :search_users? do
+    let(:user) { create(:user) }
+
+    it "matches update? permissions" do
+      reviewer = create(:user, :review_manager, jurisdiction:)
+      expect(policy_class).to permit(
+        UserContext.new(reviewer, sandbox),
+        jurisdiction
+      )
+
+      stranger = create(:user, :review_manager)
+      expect(policy_class).not_to permit(
+        UserContext.new(stranger, sandbox),
+        jurisdiction
+      )
+    end
+  end
+
+  permissions :search_permit_applications? do
+    let(:user) { create(:user) }
+
+    it "permits jurisdiction review staff members" do
+      reviewer = create(:user, :reviewer, jurisdiction:)
+      expect(policy_class).to permit(
+        UserContext.new(reviewer, sandbox),
+        jurisdiction
+      )
+    end
+
+    it "permits manager members" do
+      manager = create(:user, :review_manager, jurisdiction:)
+      expect(policy_class).to permit(
+        UserContext.new(manager, sandbox),
+        jurisdiction
+      )
+    end
+
+    it "denies technical_support members" do
+      tech = create(:user, role: :technical_support)
+      create(:jurisdiction_membership, user: tech, jurisdiction: jurisdiction)
+      tech.reload
+
+      expect(policy_class).not_to permit(
+        UserContext.new(tech, sandbox),
+        jurisdiction
+      )
+    end
+
+    it "denies super_admin" do
+      expect(policy_class).not_to permit(
+        UserContext.new(create(:user, :super_admin), sandbox),
+        jurisdiction
+      )
+    end
+
+    it "denies non-members" do
+      reviewer = create(:user, :reviewer)
+      expect(policy_class).not_to permit(
+        UserContext.new(reviewer, sandbox),
+        jurisdiction
+      )
+    end
+  end
+
+  permissions :search_permit_projects? do
+    let(:user) { create(:user) }
+
+    it "matches search_permit_applications? permissions" do
+      reviewer = create(:user, :reviewer, jurisdiction:)
+      expect(policy_class).to permit(
+        UserContext.new(reviewer, sandbox),
+        jurisdiction
+      )
+
+      tech = create(:user, role: :technical_support)
+      create(:jurisdiction_membership, user: tech, jurisdiction: jurisdiction)
+      tech.reload
+      expect(policy_class).not_to permit(
+        UserContext.new(tech, sandbox),
+        jurisdiction
+      )
+    end
+  end
+
+  permissions :search_project_meetings? do
+    let(:user) { create(:user) }
+
+    it "matches search_permit_applications? permissions" do
+      reviewer = create(:user, :reviewer, jurisdiction:)
+      expect(policy_class).to permit(
+        UserContext.new(reviewer, sandbox),
+        jurisdiction
+      )
+
+      tech = create(:user, role: :technical_support)
+      create(:jurisdiction_membership, user: tech, jurisdiction: jurisdiction)
+      tech.reload
+      expect(policy_class).not_to permit(
         UserContext.new(tech, sandbox),
         jurisdiction
       )

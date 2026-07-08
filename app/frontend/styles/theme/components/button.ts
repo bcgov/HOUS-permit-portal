@@ -28,6 +28,18 @@ export const Button = {
     },
   },
   variants: {
+    default: {
+      bg: "gray.100",
+      color: "gray.800",
+      textDecor: "none",
+      _hover: {
+        bg: "gray.200",
+        textDecor: "none",
+        _disabled: { ...disabledStyles },
+      },
+      _active: { bg: "gray.300" },
+      _focus: { ...focusStyles },
+    },
     primary: {
       color: "greys.white",
       borderWidth: 1,

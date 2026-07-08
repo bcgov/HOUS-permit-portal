@@ -17,8 +17,11 @@ import {
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
+import { Link as RouterLink } from "react-router-dom"
 import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
+import { EFlashMessageStatus } from "../../../types/enums"
+import { CustomMessageBox } from "../base/custom-message-box"
 import SandboxHeader from "../sandbox/sandbox-header"
 
 interface IProps {
@@ -34,9 +37,19 @@ export const PermitApplicationSubmitModal = observer(function PermitApplicationS
   onSubmit,
   onClose,
 }: IProps) {
-  const { userStore } = useMst()
+  const { siteConfigurationStore, userStore } = useMst()
   const currentUser = userStore.currentUser
   const { t } = useTranslation()
+  const projectId = permitApplication.projectId
+  const activeProjectMeetingId = permitApplication.activeProjectMeetingId
+  const hasActiveProjectMeeting = !!activeProjectMeetingId
+  const projectMeetingsAvailable =
+    siteConfigurationStore.projectMeetingsEnabled && (permitApplication.jurisdiction?.projectMeetingsEnabled ?? false)
+  const shouldShowProjectMeetingAdvisory =
+    permitApplication.requiresProjectMeeting && projectMeetingsAvailable && !!projectId
+  const projectMeetingLink = hasActiveProjectMeeting
+    ? `/projects/${projectId}/meetings/${activeProjectMeetingId}`
+    : `/projects/${projectId}/meetings/new`
 
   return (
     <Modal onClose={onClose} isOpen={isOpen} size="2xl">
@@ -60,25 +73,52 @@ export const PermitApplicationSubmitModal = observer(function PermitApplicationS
           {permitApplication.canUserSubmit(currentUser) ? (
             <Flex direction="column" gap={8}>
               <Heading as="h3">{t("permitApplication.new.ready")}</Heading>
-              <Box
-                borderRadius="md"
-                border="1px solid"
-                borderColor="semantic.warning"
-                backgroundColor="semantic.warningLight"
-                px={6}
-                py={3}
-              >
-                <Heading as="h3" fontSize="lg">
-                  {t("permitApplication.new.bySubmitting")}
-                </Heading>
-                <Text>{t("permitApplication.new.confirmation")}</Text>
-              </Box>
+              <Text fontSize="lg">{t("permitApplication.new.confirmation")}</Text>
+              {shouldShowProjectMeetingAdvisory && (
+                <CustomMessageBox
+                  status={EFlashMessageStatus.info}
+                  title={t("permitApplication.new.projectMeetingAdvisory.title")}
+                >
+                  <Text fontSize="sm">
+                    {hasActiveProjectMeeting ? (
+                      <>
+                        {t("permitApplication.new.projectMeetingAdvisory.activeBody")}{" "}
+                        <Text
+                          as={RouterLink}
+                          to={projectMeetingLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          display="inline"
+                          textDecoration="underline"
+                        >
+                          {t("permitApplication.new.projectMeetingAdvisory.activeLink")}
+                        </Text>
+                      </>
+                    ) : (
+                      <>
+                        {t("permitApplication.new.projectMeetingAdvisory.prefix")}{" "}
+                        <Text
+                          as={RouterLink}
+                          to={projectMeetingLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          display="inline"
+                          textDecoration="underline"
+                        >
+                          {t("permitApplication.new.projectMeetingAdvisory.link")}
+                        </Text>
+                        {t("permitApplication.new.projectMeetingAdvisory.suffix")}
+                      </>
+                    )}
+                  </Text>
+                </CustomMessageBox>
+              )}
               <Flex justify="center" gap={6}>
                 <Button onClick={onSubmit} variant="primary">
-                  {t("ui.submit")}
+                  {t("permitApplication.new.submitApplication")}
                 </Button>
                 <Button onClick={onClose} variant="secondary">
-                  {t("ui.neverMind")}
+                  {t("ui.cancel")}
                 </Button>
               </Flex>
             </Flex>

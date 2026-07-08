@@ -17,7 +17,7 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
-import { datefnsTableDateTimeFormat } from "../../../constants"
+import { datefnsTableDateFormat } from "../../../constants"
 import { ISearch } from "../../../lib/create-search-model"
 import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
@@ -77,7 +77,8 @@ export const PermitApplicationGridRow = observer(
                 }
           }
         >
-          {!usingCurrentTemplateVersion && <OutdatedFormWarning colSpan={6} mx={4} mt={2} />}
+          {!usingCurrentTemplateVersion && <OutdatedFormWarning colSpan={7} mx={4} mt={2} />}
+          <SearchGridItem>{permitApplication.nickname || "—"}</SearchGridItem>
           <SearchGridItem>
             <VStack align="start" spacing={0}>
               <Text variant="secondary">{permitApplication.templateNickname}</Text>
@@ -91,7 +92,7 @@ export const PermitApplicationGridRow = observer(
             )}
           </SearchGridItem>
           <SearchGridItem>{permitApplication.number}</SearchGridItem>
-          <SearchGridItem>{format(updatedAt, datefnsTableDateTimeFormat)}</SearchGridItem>
+          <SearchGridItem>{format(updatedAt, datefnsTableDateFormat)}</SearchGridItem>
           <SearchGridItem>
             <PermitApplicationStatusTag status={permitApplication.status} />
           </SearchGridItem>

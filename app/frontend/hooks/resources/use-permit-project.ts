@@ -3,31 +3,31 @@ import { useParams } from "react-router-dom"
 import { useMst } from "../../setup/root"
 import { isUUID } from "../../utils/utility-functions"
 
-export const usePermitProject = () => {
-  const { permitProjectId } = useParams<{ permitProjectId: string }>()
+export const usePermitProject = (permitProjectIdOverride?: string) => {
+  const { permitProjectId: permitProjectIdParam } = useParams<{ permitProjectId: string }>()
   const { permitProjectStore, sandboxStore } = useMst()
   const { currentSandbox } = sandboxStore
 
   const { currentPermitProject, setCurrentPermitProject, fetchPermitProject } = permitProjectStore
+  const permitProjectId = permitProjectIdOverride ?? permitProjectIdParam
 
   const [error, setError] = useState<Error | undefined>(undefined)
 
   useEffect(() => {
     const loadPermitProject = async () => {
+      if (!isUUID(permitProjectId)) return
       if (currentPermitProject?.id === permitProjectId && currentPermitProject.isFullyLoaded) return
 
       try {
         if (currentPermitProject?.id !== permitProjectId) {
           setCurrentPermitProject(null)
         }
-        if (isUUID(permitProjectId)) {
-          const project = await fetchPermitProject(permitProjectId)
-          if (project) {
-            setCurrentPermitProject(project.id)
-            setError(null)
-          } else {
-            setError(new Error("Failed to fetch project details."))
-          }
+        const project = await fetchPermitProject(permitProjectId)
+        if (project) {
+          setCurrentPermitProject(project.id)
+          setError(null)
+        } else {
+          setError(new Error("Failed to fetch project details."))
         }
       } catch (e) {
         console.error("Failed to fetch permit project:", e)

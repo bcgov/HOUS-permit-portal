@@ -10,7 +10,7 @@ interface IGridHeadersProps {
   columns: string[]
   includeActionColumn?: boolean
 }
-export const PROJECTS_GRID_TEMPLATE_COLUMNS = "2fr 1.5fr 1.5fr 2fr 2fr 0.5fr"
+export const PROJECTS_GRID_TEMPLATE_COLUMNS = "36px 2fr 1.5fr 1.5fr 2fr 2fr 0.5fr"
 
 export const GridHeaders = observer(function GridHeaders({ columns, includeActionColumn }: IGridHeadersProps) {
   const { permitProjectStore } = useMst()
@@ -18,6 +18,7 @@ export const GridHeaders = observer(function GridHeaders({ columns, includeActio
 
   return (
     <Box display={"contents"} role={"row"}>
+      <GridHeader role={"columnheader"} />
       {columns.map((field) => {
         return (
           <GridHeader key={field} role={"columnheader"}>

@@ -5,6 +5,7 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
+import { datefnsTableDateFormat } from "../../../../constants"
 import { useJurisdiction } from "../../../../hooks/resources/use-jurisdiction"
 import { useSearch } from "../../../../hooks/use-search"
 import { IUser } from "../../../../models/user"
@@ -74,9 +75,9 @@ export const JurisdictionUserIndexScreen = observer(function JurisdictionUserInd
                   <SearchGridItem fontSize="sm" maxWidth="300px" sx={{ wordBreak: "break-word" }}>
                     {u.name}
                   </SearchGridItem>
-                  <SearchGridItem fontSize="sm">{format(u.createdAt, "yyyy-MM-dd")}</SearchGridItem>
+                  <SearchGridItem fontSize="sm">{format(u.createdAt, datefnsTableDateFormat)}</SearchGridItem>
                   <SearchGridItem fontSize="sm">
-                    {u.lastSignInAt ? format(u.lastSignInAt, "yyyy-MM-dd") : t("ui.never")}
+                    {u.lastSignInAt ? format(u.lastSignInAt, datefnsTableDateFormat) : t("ui.never")}
                   </SearchGridItem>
                   <SearchGridItem>
                     <Flex justify="space-between" w="full">

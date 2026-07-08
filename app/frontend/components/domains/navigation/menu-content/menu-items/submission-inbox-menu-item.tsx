@@ -11,17 +11,18 @@ export const SubmissionInboxMenuItem = observer(() => {
   const { userStore, submissionInboxStore } = useMst()
   const { currentUser } = userStore
   const { viewMode } = submissionInboxStore
+  const jurisdiction = currentUser?.jurisdiction
 
   const count =
     viewMode === EInboxViewMode.projects
-      ? currentUser?.jurisdiction?.unviewedProjectsCount || 0
-      : currentUser?.jurisdiction?.unviewedSubmissionsCount || 0
+      ? (jurisdiction?.unviewedProjectsCount ?? 0)
+      : (jurisdiction?.unviewedSubmissionsCount ?? 0)
 
   return (
     <MenuLinkItem
       icon={<Tray size={20} />}
       label={t("site.breadcrumb.submissionInbox")}
-      to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/submission-inbox`}
+      to={`/jurisdictions/${jurisdiction?.slug}/submission-inbox`}
       badge={count}
     />
   )
