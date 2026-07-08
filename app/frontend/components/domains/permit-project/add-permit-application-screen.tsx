@@ -14,7 +14,7 @@ import {
 } from "@chakra-ui/react"
 import { CaretLeft, MagnifyingGlass } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useMemo, useState } from "react"
+import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { usePermitProject } from "../../../hooks/resources/use-permit-project"
@@ -43,17 +43,8 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
   const [query, setQuery] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const filteredTemplates = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    if (!q) return templateVersions
-    return templateVersions.filter((tv) => {
-      const nickname = tv.denormalizedTemplateJson?.nickname?.toLowerCase() || ""
-      const desc = tv.denormalizedTemplateJson?.description?.toLowerCase() || ""
-      const tags = (tv.denormalizedTemplateJson?.tags || tv.tags || []).join(" ").toLowerCase()
-      return nickname.includes(q) || desc.includes(q) || tags.includes(q)
-    })
-  }, [templateVersions, query])
-  const groupedTemplates = useMemo(() => groupTemplateVersionsByCategory(filteredTemplates), [filteredTemplates])
+  const filteredTemplates = templateVersions.filter((tv) => tv.matchesSearchQuery(query))
+  const groupedTemplates = groupTemplateVersionsByCategory(filteredTemplates)
 
   const toggleSelection = (templateVersionId: string) => {
     setSelectedTemplateVersionIds((prev) =>
