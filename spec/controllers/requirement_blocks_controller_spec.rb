@@ -14,7 +14,6 @@ RSpec.describe Api::RequirementBlocksController,
   # Define attributes for creating/updating a requirement block
   let(:valid_attributes) do
     {
-      visibility: "any",
       association_list: ["tag1"],
       requirements_attributes: [
         {
@@ -35,13 +34,7 @@ RSpec.describe Api::RequirementBlocksController,
   end
 
   let(:invalid_attributes) do
-    {
-      name: "",
-      first_nations: false,
-      description: "Invalid requirement block with missing name",
-      visibility: "any"
-      # Missing other required fields if any
-    }
+    { name: "", description: "Invalid requirement block with missing name" }
   end
 
   before do

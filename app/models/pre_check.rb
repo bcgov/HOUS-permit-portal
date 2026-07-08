@@ -50,7 +50,6 @@ class PreCheck < ApplicationRecord
 
   validate :permit_application_belongs_to_creator,
            if: -> { permit_application_id.present? }
-  validate :agreements_accepted_before_permit_type
   validate :agreements_accepted_before_design_documents
   validate :agreements_cannot_be_unaccepted
   validate :cannot_change_after_submission
@@ -139,11 +138,7 @@ class PreCheck < ApplicationRecord
   end
 
   def comply_certificate_id
-    if permit_type&.code == "low_residential"
-      152
-    else
-      nil
-    end
+    152
   end
 
   def search_data
@@ -227,16 +222,6 @@ class PreCheck < ApplicationRecord
     errors.add(:permit_application, :invalid)
   end
 
-  def agreements_accepted_before_permit_type
-    return unless permit_type_id.present?
-    return if required_agreements_accepted?
-
-    errors.add(
-      :permit_type_id,
-      "cannot be set until EULA and consent to send drawings are accepted"
-    )
-  end
-
   def agreements_accepted_before_design_documents
     return unless design_documents.any?
     return if required_agreements_accepted?
@@ -264,7 +249,6 @@ class PreCheck < ApplicationRecord
     locked_fields = %w[
       full_address
       jurisdiction_id
-      permit_type_id
       service_partner
       eula_accepted
       consent_to_send_drawings
@@ -305,7 +289,6 @@ class PreCheck < ApplicationRecord
     missing_fields << "jurisdiction" unless jurisdiction_id.present?
     missing_fields << "EULA acceptance" unless eula_accepted
     missing_fields << "consent to send drawings" unless consent_to_send_drawings
-    missing_fields << "permit type" unless permit_type_id.present?
     missing_fields << "design documents" unless design_documents.any?
 
     if missing_fields.any?

@@ -1,7 +1,6 @@
 import { Theme } from "@chakra-ui/react"
 import { IPermitApplication } from "../models/permit-application"
 import { IPermitBlockStatus } from "../models/permit-block-status"
-import { IActivity, IPermitType } from "../models/permit-classification"
 import { IRequirement } from "../models/requirement"
 import {
   EAutoComplianceModule,
@@ -39,7 +38,6 @@ import {
   EStepCodeOccupancyKey,
   ETemplateVersionStatus,
   EUserRoles,
-  EVisibility,
   EWindowsGlazedDoorsPerformanceType,
   EZeroCarbonStep,
 } from "./enums"
@@ -77,11 +75,31 @@ export interface IContact {
   updatedAt?: number | string // has to allow string to stop errors with useFieldArray
 }
 
-export interface IPermitTypeSubmissionContact {
+export type TJurisdictionFieldValues = {
+  descriptionHtml: string
+  checklistHtml: string
+  lookOutHtml: string
+  contactSummaryHtml: string
+  contactsAttributes: IContact[]
+  mapPosition: TLatLngTuple
+  mapZoom: number
+  processingTimeHtml: string
+  keyStagesHtml: string
+  officeAddress: string
+  officeHours: string
+  officeTelephone: string
+  officeEmail: string
+  websiteUrl: string
+  timelineAndDeliverablesHtml: string
+}
+
+export interface ISubmissionContact {
   id: string
   email: string
-  permitTypeId: string
+  title?: string
   confirmedAt: string
+  default: boolean
+  confirmationSentAt?: string
 }
 
 export interface IHelpVideoNavigationNeighbor {
@@ -114,7 +132,7 @@ export type TSearchParams<IModelSortFields, IModelFilterFields = {}> = {
   page?: number
   perPage?: number
   showArchived?: boolean
-  visibility?: TVisibility
+  publishedOnly?: boolean
   filters?: IModelFilterFields
   mode?: "list" | "kanban"
   perColumn?: number
@@ -210,20 +228,12 @@ export interface IDenormalizedRequirement {
   requirementCode: string
 }
 
-export interface IOptionalElectiveFieldInfo {
-  label: string
-  tooltip?: string
-  description?: string
-}
-
 export interface IDenormalizedRequirementBlock {
   id: string
   name: string
-  firstNations: boolean
   sku: string
   formJson?: IFormIOBlock
   description?: string
-  visibility?: EVisibility
   displayName: string
   displayDescription?: string
   requirements: IDenormalizedRequirement[]
@@ -243,12 +253,16 @@ export interface IDenormalizedRequirementTemplateSection {
 
 export interface IDenormalizedTemplate {
   id: string
-  label: string
   nickname: string
   description?: string
-  permitType: IPermitType
-  activity: IActivity
-  firstNations: boolean
+  tags: string[]
+  templateCategoryId?: string | null
+  templateCategory?: {
+    id: string
+    label: string
+    sortOrder: number
+  } | null
+  sortOrder?: number
   requirementTemplateSections: IDenormalizedRequirementTemplateSection[]
 }
 
@@ -374,6 +388,7 @@ export interface IDownloadableFile {
   fileUrl: string
   fileName: string
   fileSize: number
+  createdAt: Date
 }
 
 export interface IEULA {
@@ -692,15 +707,11 @@ export interface ISubmissionVersion {
   createdAt: number
 }
 
-export interface IPermitTypeRequiredStep {
+export interface IJurisdictionStepRequirement {
   id?: string
   default: boolean
-  permitTypeId: string
-  permitTypeName?: string
-  workType?: string
   energyStepRequired: EEnergyStep
   zeroCarbonStepRequired: EZeroCarbonStep
-  activityName?: string
 }
 
 export interface IPart3OccupancyRequiredStep {
@@ -718,33 +729,38 @@ export interface IJurisdictionClimateZone {
 
 export type TCreateRequirementTemplateFormData = {
   description: string
-  firstNations?: boolean
-  permitTypeId: string
-  activityId: string
+  tags?: string[]
+  templateCategoryId?: string | null
   type: string
+  nickname?: string
 }
 
 export type TCreatePermitApplicationFormData = {
   pid?: string
   pin?: string
-  permitTypeId: string
-  activityId: string
+  templateVersionId: string
   jurisdictionId?: string
   site?: IOption
-  firstNations: boolean
   sandboxId?: string
+}
+
+export type TReleaseNoteFormData = {
+  version: string
+  releaseDate: Date | null
+  content: string
+  releaseNotesUrl: string
+  issues: string
+}
+
+export type TReleaseNoteViewerContext = {
+  releaseNoteId: string
+  year: number
+  page: number
 }
 
 export interface ICopyRequirementTemplateFormData extends Partial<TCreateRequirementTemplateFormData> {
   id?: string
 }
-
-type EVisibilityValues = EVisibility.live | EVisibility.earlyAccess | EVisibility.any
-
-export type TVisibility =
-  | EVisibilityValues
-  | `${EVisibilityValues},${EVisibilityValues}`
-  | `${EVisibilityValues},${EVisibilityValues},${EVisibilityValues}`
 
 export interface IBaselineOccupancy {
   id?: string

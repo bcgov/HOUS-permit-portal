@@ -108,11 +108,11 @@ RSpec.configure do |config|
     PermitApplication.reindex
     RequirementBlock.reindex
     RequirementTemplate.reindex
-    EarlyAccessRequirementTemplate.reindex
     User.reindex
     Contact.reindex
     PreCheck.reindex
     OverheatingCode.reindex
+    ReleaseNote.reindex
 
     # and disable callbacks
     Searchkick.disable_callbacks

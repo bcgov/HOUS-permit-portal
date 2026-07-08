@@ -1,9 +1,10 @@
 import baseEditForm from "formiojs/components/_classes/component/Component.form"
+import { interopDefault } from "../../../../../../utils/interop-default"
 import EditData from "./editForm/Orgbook.edit.data.js"
 import EditDisplay from "./editForm/Orgbook.edit.display.js"
 import EditValidation from "./editForm/Orgbook.edit.validation.js"
 export default function (...extend) {
-  return baseEditForm(
+  return interopDefault(baseEditForm)(
     [
       {
         key: "display",

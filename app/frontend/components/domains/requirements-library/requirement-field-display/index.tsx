@@ -141,8 +141,9 @@ const requirementsComponentMap = {
       <GenericFieldDisplay
         inputDisplay={
           <InputGroup>
-            <InputRightElement mr={2}>{unit === undefined ? "unit" : unit}</InputRightElement>
+            {unit === ENumberUnit.cad && <InputLeftElement>$</InputLeftElement>}
             <Input bg={"white"} />
+            {unit !== ENumberUnit.cad && <InputRightElement>{unit === undefined ? "unit" : unit}</InputRightElement>}
           </InputGroup>
         }
         {...genericieldDisplayProps}

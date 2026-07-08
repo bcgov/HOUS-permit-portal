@@ -2,7 +2,6 @@ FactoryBot.define do
   factory :pre_check do
     association :creator, factory: :user
     association :jurisdiction, factory: :sub_district
-    association :permit_type, factory: :permit_type
     permit_application { association :permit_application, submitter: creator }
     full_address { "123 Test St" }
     external_id { "EXT-#{SecureRandom.hex(4)}" }
@@ -24,7 +23,6 @@ FactoryBot.define do
       submitted_at { Time.current }
 
       after(:create) do |pre_check|
-        # Bypass validations to set status directly for test setup
         pre_check.update_column(:status, PreCheck.statuses[:processing])
       end
     end
@@ -35,7 +33,6 @@ FactoryBot.define do
       result_message { "All sections have passed." }
 
       after(:create) do |pre_check|
-        # Bypass validations to set status and assessment_result together
         pre_check.update_columns(
           status: PreCheck.statuses[:complete],
           assessment_result: PreCheck.assessment_results[:passed]

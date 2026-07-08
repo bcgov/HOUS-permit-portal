@@ -1,4 +1,4 @@
-import { Button, Container, Divider, Flex, GridItem, Heading, Text, VStack } from "@chakra-ui/react"
+import { Alert, AlertIcon, Button, Container, Divider, Flex, GridItem, Heading, Text, VStack } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { Suspense, useEffect, useState } from "react"
@@ -49,6 +49,8 @@ const Content = observer(function Content({ invitedUser }: Readonly<IProps>) {
 
   const { invitedByEmail, invitedToJurisdiction, isSuperAdmin, email, role, jurisdiction } = invitedUser
   const defaultedJurisdiction = invitedToJurisdiction ?? jurisdiction
+  const showLoggedInStaffInviteWarning = loggedIn && !isSuperAdmin && role !== EUserRoles.submitter
+
   return (
     <CenterContainer>
       <Flex
@@ -90,7 +92,15 @@ const Content = observer(function Content({ invitedUser }: Readonly<IProps>) {
         <Divider my={4} />
 
         {loggedIn ? (
-          <AcceptInviteForm />
+          <>
+            {showLoggedInStaffInviteWarning && (
+              <Alert status="warning" borderRadius="md" alignItems="flex-start">
+                <AlertIcon mt={1} />
+                <Text fontSize="sm">{t("user.loggedInStaffInviteWarning")}</Text>
+              </Alert>
+            )}
+            <AcceptInviteForm />
+          </>
         ) : (
           <>
             <Heading as="h3" textAlign="center">

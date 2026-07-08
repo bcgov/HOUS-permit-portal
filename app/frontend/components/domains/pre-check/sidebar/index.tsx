@@ -48,6 +48,11 @@ export const Sidebar = observer(function PreCheckSidebar() {
               isDisabled = true
             }
 
+            // Disable confirm submission until upload drawings are saved
+            if (navLink.key === "confirmSubmission" && !currentPreCheck?.isUploadDrawingsComplete) {
+              isDisabled = true
+            }
+
             // Disable results summary until pre-check is submitted
             if (navLink.key === "resultsSummary" && !isSubmitted) {
               isDisabled = true

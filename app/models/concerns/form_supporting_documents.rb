@@ -51,6 +51,8 @@ module FormSupportingDocuments
       submission_data,
       []
     ) do |file_field_key, file_array|
+      next [] unless file_array.is_a?(Array)
+
       file_array.map { |fa| fa["model_id"] || fa["modelId"] }
     end
   end
@@ -147,7 +149,7 @@ module FormSupportingDocuments
       public: false,
       expires_in: 3600,
       response_content_disposition:
-        "attachment; filename=\"#{zipfile.original_filename}\""
+        ContentDisposition.attachment(zipfile.original_filename)
     )
   end
 

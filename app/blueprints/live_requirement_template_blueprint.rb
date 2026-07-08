@@ -1,2 +1,0 @@
-class LiveRequirementTemplateBlueprint < RequirementTemplateBlueprint
-end

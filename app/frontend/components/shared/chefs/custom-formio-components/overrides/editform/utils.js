@@ -1,5 +1,8 @@
 import EditFormUtils from "formiojs/components/_classes/component/editForm/utils"
-const originalLogicVariablesTable = EditFormUtils.logicVariablesTable
+import { interopDefault } from "../../../../../../utils/interop-default"
+
+const editFormUtils = interopDefault(EditFormUtils)
+const originalLogicVariablesTable = editFormUtils.logicVariablesTable
 // decorate this function to include global updates to evalContext.
 function logicVariablesTable(additional = "") {
   // Avoid this showing up twice in the table (don't see a currently supported better way to override this atm)
@@ -12,4 +15,4 @@ function logicVariablesTable(additional = "") {
     "<tr><th>user</th><td>The currently logged in user</td></tr>"
   return originalLogicVariablesTable(additional + customEval)
 }
-EditFormUtils.logicVariablesTable = logicVariablesTable
+editFormUtils.logicVariablesTable = logicVariablesTable

@@ -1,6 +1,11 @@
 import ComponentEditValidation from "formiojs/components/_classes/component/editForm/Component.edit.validation"
 import TextFieldEditValidation from "formiojs/components/textfield/editForm/TextField.edit.validation"
+import { interopDefault } from "../../../../../../utils/interop-default"
 import UseForCopy from "./UseForCopy.js"
+
+const componentEditValidationComponents = interopDefault(ComponentEditValidation)
+const textFieldEditValidationComponents = interopDefault(TextFieldEditValidation)
+
 const kickbox = {
   type: "panel",
   label: "Kickbox",
@@ -17,7 +22,7 @@ const kickbox = {
     },
   ],
 }
-export default [kickbox, UseForCopy, ...ComponentEditValidation, ...TextFieldEditValidation]
+export default [kickbox, UseForCopy, ...componentEditValidationComponents, ...textFieldEditValidationComponents]
 // const neededposition = [
 //   'validate.isUseForCopy',
 //   'validateOn',

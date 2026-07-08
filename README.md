@@ -11,7 +11,7 @@ Ensure you have the following:
 - Ruby 3.2.2
 - Postgres 13+
 - Redis
-- Node 20.10+
+- Node 20.19+
 
 (Alternatively run this locally with `docker compose` see section further down)
 

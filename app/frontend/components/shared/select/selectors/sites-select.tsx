@@ -1,10 +1,20 @@
-import { Button, Input as ChakraInput, Flex, FormControl, FormLabel, HStack, InputGroup, Text } from "@chakra-ui/react"
+import {
+  Button,
+  Input as ChakraInput,
+  Flex,
+  FormControl,
+  FormErrorMessage,
+  FormLabel,
+  HStack,
+  InputGroup,
+  Text,
+} from "@chakra-ui/react"
 import { MapPin } from "@phosphor-icons/react"
 import debounce from "lodash/debounce"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useCallback, useEffect, useRef, useState } from "react"
-import { Controller, useFormContext } from "react-hook-form"
+import { Controller, useController, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { ControlProps, InputProps, OptionProps, components } from "react-select"
 import CreatableSelect from "react-select/creatable"
@@ -12,6 +22,7 @@ import { IJurisdiction } from "../../../../models/jurisdiction"
 import { useMst } from "../../../../setup/root"
 import { IOption } from "../../../../types/types"
 import { formatPidLabel, formatPidValue } from "../../../../utils/utility-functions"
+import { fieldArrayCompatibleErrorMessage } from "../../form/form-helpers"
 import { AsyncSelect, TAsyncSelectProps } from "../async-select"
 import { JurisdictionSelect } from "./jurisdiction-select"
 
@@ -28,6 +39,7 @@ export type TSitesSelectProps = {
   showJurisdiction?: boolean
   initialJurisdiction?: IJurisdiction | null
   isDisabled?: boolean
+  jurisdictionRequired?: boolean
 } & Partial<TAsyncSelectProps>
 
 // Please be advised that this is expected to be used within a form context!
@@ -47,6 +59,7 @@ export const SitesSelect = observer(function ({
   showJurisdiction = true,
   initialJurisdiction = null,
   isDisabled = false,
+  jurisdictionRequired = false,
   ...rest
 }: TSitesSelectProps) {
   const { t } = useTranslation()
@@ -63,7 +76,17 @@ export const SitesSelect = observer(function ({
   const { addJurisdiction, getJurisdictionById } = jurisdictionStore
   const pidSelectRef = useRef(null)
 
-  const { setValue, control, watch } = useFormContext()
+  const { setValue, control, watch, formState } = useFormContext()
+  const { field: jurisdictionField } = useController({
+    name: jurisdictionIdFieldName,
+    control,
+    rules: {
+      required: jurisdictionRequired && String(t("ui.isRequired", { field: t("permitProject.new.jurisdictionTitle") })),
+    },
+  })
+  const jurisdictionErrorMessage = fieldArrayCompatibleErrorMessage(jurisdictionIdFieldName, formState.errors) as
+    | string
+    | undefined
 
   const pidWatch = watch(pidName)
   const siteWatch = watch(siteName)
@@ -133,14 +156,14 @@ export const SitesSelect = observer(function ({
         if (!isActive) return
         if (matchedJurisdiction) {
           addJurisdiction(matchedJurisdiction)
-          setValue(jurisdictionIdFieldName, matchedJurisdiction.id)
+          setValue(jurisdictionIdFieldName, matchedJurisdiction.id, { shouldValidate: true })
           setJurisdiction(matchedJurisdiction)
         } else {
-          setValue(jurisdictionIdFieldName, null)
+          setValue(jurisdictionIdFieldName, null, { shouldValidate: true })
           setJurisdiction(null)
         }
       } catch (_e) {
-        setValue(jurisdictionIdFieldName, null)
+        setValue(jurisdictionIdFieldName, null, { shouldValidate: true })
         setJurisdiction(null)
         if (onLtsaMatcherFound) {
           onLtsaMatcherFound(null)
@@ -265,36 +288,39 @@ export const SitesSelect = observer(function ({
       {/* Auto-matched Jurisdiction Display - Only in automatic mode */}
       {!manualMode && showJurisdiction && (
         <Flex bg="greys.grey03" px={6} py={2} gap={2} w="full" direction="column">
-          <FormLabel mb={0}>{t("permitProject.new.jurisdictionTitle")}</FormLabel>
-          <ChakraInput isDisabled value={jurisdiction?.qualifiedName || ""} />
+          <FormControl isInvalid={!!jurisdictionErrorMessage}>
+            <FormLabel mb={0}>{t("permitProject.new.jurisdictionTitle")}</FormLabel>
+            <ChakraInput isDisabled value={jurisdiction?.qualifiedName || ""} />
+            {jurisdictionErrorMessage && <FormErrorMessage>{jurisdictionErrorMessage}</FormErrorMessage>}
+          </FormControl>
         </Flex>
       )}
 
       {/* Manual Jurisdiction Selector - Only in manual mode */}
       {manualMode && showJurisdiction && (
         <Flex bg="greys.grey03" px={6} py={2} gap={4} w="full" direction="column">
-          <FormControl w="full" zIndex={1}>
+          <FormControl w="full" zIndex={1} isInvalid={!!jurisdictionErrorMessage}>
             <FormLabel>{t("permitProject.new.jurisdictionTitle")}</FormLabel>
             <InputGroup w="full">
-              <Controller
-                name={jurisdictionIdFieldName}
-                control={control}
-                render={({ field: { onChange, value } }) => {
-                  return (
-                    <JurisdictionSelect
-                      onChange={(selectValue) => {
-                        if (selectValue) addJurisdiction(selectValue)
-                        onChange(selectValue?.id)
-                      }}
-                      onFetch={() => setValue(jurisdictionIdFieldName, null)}
-                      selectedOption={value ? { label: getJurisdictionById(value)?.reverseQualifiedName, value } : null}
-                      menuPortalTarget={document.body}
-                      isDisabled={isDisabled}
-                    />
-                  )
+              <JurisdictionSelect
+                onChange={(selectValue) => {
+                  if (selectValue) addJurisdiction(selectValue)
+                  jurisdictionField.onChange(selectValue?.id)
                 }}
+                onFetch={() => setValue(jurisdictionIdFieldName, null, { shouldValidate: true })}
+                selectedOption={
+                  jurisdictionField.value
+                    ? {
+                        label: getJurisdictionById(jurisdictionField.value)?.reverseQualifiedName,
+                        value: jurisdictionField.value,
+                      }
+                    : null
+                }
+                menuPortalTarget={document.body}
+                isDisabled={isDisabled}
               />
             </InputGroup>
+            {jurisdictionErrorMessage && <FormErrorMessage>{jurisdictionErrorMessage}</FormErrorMessage>}
           </FormControl>
         </Flex>
       )}

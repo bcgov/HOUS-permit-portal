@@ -13,38 +13,33 @@ RSpec.describe StepCodeReportSharingService do
     )
   end
 
-  def ensure_permit_type!(code_sym)
-    PermitType.find_by(code: code_sym.to_s) ||
-      create(:permit_type, code: code_sym)
-  end
-
   describe ".confirmed_contact_email_for_jurisdiction" do
-    it "returns nil when permit type not found" do
-      allow(PermitType).to receive(:find_by).and_return(nil)
+    it "returns nil when no confirmed default contact exists" do
+      jurisdiction = create(:sub_district)
+      jurisdiction.submission_contacts.destroy_all
+
       expect(
         described_class.confirmed_contact_email_for_jurisdiction(
-          "j-1",
-          "low_residential"
+          jurisdiction.id
         )
       ).to be_nil
     end
 
-    it "returns confirmed email when contact exists" do
+    it "returns confirmed email when a default contact exists" do
       jurisdiction = create(:sub_district)
-      jurisdiction.permit_type_submission_contacts.destroy_all
+      jurisdiction.submission_contacts.destroy_all
       contact =
         create(
-          :permit_type_submission_contact,
+          :submission_contact,
           jurisdiction: jurisdiction,
-          permit_type: ensure_permit_type!(:low_residential),
           email: "x@example.com",
+          default: true,
           confirmed_at: Time.current
         )
 
       expect(
         described_class.confirmed_contact_email_for_jurisdiction(
-          jurisdiction.id,
-          "low_residential"
+          jurisdiction.id
         )
       ).to eq(contact.email)
     end
@@ -67,14 +62,13 @@ RSpec.describe StepCodeReportSharingService do
 
     it "adds an error when no confirmed submission contact exists" do
       jurisdiction = create(:sub_district)
-      jurisdiction.permit_type_submission_contacts.delete_all
+      jurisdiction.submission_contacts.delete_all
       allow(Jurisdiction).to receive(:find_by).with(
         id: jurisdiction.id
       ).and_return(jurisdiction)
       allow(step_code).to receive(:class).and_return(
         double(name: "Part9StepCode")
       )
-      ensure_permit_type!(:low_residential)
 
       expect(service.send_to_jurisdiction(jurisdiction.id)).to eq(false)
       expect(service.errors.join).to match(
@@ -84,13 +78,13 @@ RSpec.describe StepCodeReportSharingService do
 
     it "enqueues an email and logs when successful" do
       jurisdiction = create(:sub_district)
+      jurisdiction.submission_contacts.destroy_all
       allow(jurisdiction).to receive(:qualified_name).and_return("Jur Name")
-      permit_type = ensure_permit_type!(:low_residential)
       create(
-        :permit_type_submission_contact,
+        :submission_contact,
         jurisdiction: jurisdiction,
-        permit_type: permit_type,
         email: "to@example.com",
+        default: true,
         confirmed_at: Time.current
       )
       mailer = instance_double("MailerMessage", deliver_later: true)
@@ -118,12 +112,12 @@ RSpec.describe StepCodeReportSharingService do
 
     it "captures errors when mailer raises" do
       jurisdiction = create(:sub_district)
-      permit_type = ensure_permit_type!(:low_residential)
+      jurisdiction.submission_contacts.destroy_all
       create(
-        :permit_type_submission_contact,
+        :submission_contact,
         jurisdiction: jurisdiction,
-        permit_type: permit_type,
         email: "to@example.com",
+        default: true,
         confirmed_at: Time.current
       )
 

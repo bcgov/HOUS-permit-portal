@@ -1,4 +1,4 @@
-import { Badge, Box, BoxProps, Flex, Icon, Tab, TabList, VStack } from "@chakra-ui/react"
+import { Badge, Box, BoxProps, Flex, Icon, Tab, TabList, Text, VStack } from "@chakra-ui/react"
 import React from "react"
 
 // THS COMPOENENT MUST BE USED INSIDE OF A TABS COMPONENT
@@ -37,11 +37,13 @@ export const ProjectSidebarTabList = ({ top = 0, tabsData, children, ...rest }: 
       {tabsData ? (
         <VStack align="stretch" spacing={1} w="full" pt={8}>
           {tabsData.map((tabData) => (
-            <Tab key={tabData.label}>
-              <Flex align="center" justify="flex-start" w="full" gap={3}>
-                <Flex align="center">
-                  <Icon as={tabData.icon} mr={2} />
-                  {tabData.label}
+            <Tab key={tabData.label} w="full">
+              <Flex align="center" justify="space-between" w="full" gap={3}>
+                <Flex align="center" minW={0} flex={1} gap={2}>
+                  <Icon as={tabData.icon} boxSize={5} flexShrink={0} />
+                  <Text as="span" fontSize="md" lineHeight={6} whiteSpace="nowrap">
+                    {tabData.label}
+                  </Text>
                 </Flex>
                 {!!tabData.badgeCount && tabData.badgeCount > 0 && (
                   <Badge
@@ -55,6 +57,7 @@ export const ProjectSidebarTabList = ({ top = 0, tabsData, children, ...rest }: 
                     justifyContent="center"
                     fontSize="xs"
                     fontWeight="bold"
+                    flexShrink={0}
                   >
                     {tabData.badgeCount}
                   </Badge>

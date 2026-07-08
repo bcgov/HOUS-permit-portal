@@ -76,8 +76,12 @@ export const CoverPage = function PermitApplicationPDFCoverPage({
                 value={`${permitApplication.submitter.firstName} ${permitApplication.submitter.lastName}`}
               />
               <Row
-                label={t("permitApplication.pdf.permitType")}
-                value={`${permitApplication.permitType.name} | ${permitApplication.activity.name}`}
+                label={t("permitApplication.pdf.tags")}
+                value={
+                  permitApplication.tags?.length
+                    ? permitApplication.tags.join(" | ")
+                    : (permitApplication.templateNickname ?? "")
+                }
                 isLast
               />
             </>

@@ -6,7 +6,7 @@ RSpec.describe PermitApplicationExportService do
       allow(I18n).to receive(:t).with(
         "export.application_metrics_csv_headers"
       ).and_return(
-        "jurisdiction,permit_type,activity,first_nations,draft,submitted,avg_first,avg_latest"
+        "jurisdiction,template,tags,draft,submitted,avg_first,avg_latest"
       )
       allow(PermitApplication).to receive(
         :stats_by_template_jurisdiction_and_status
@@ -14,9 +14,8 @@ RSpec.describe PermitApplicationExportService do
         [
           {
             jurisdiction_name: "J1",
-            permit_type: "PT",
-            activity: "A",
-            first_nations: false,
+            template_nickname: "My Template",
+            tags: %w[part9 residential],
             draft_applications: 2,
             submitted_applications: 1,
             average_time_spent_before_first_submit: 86400.0, # 1 day
@@ -27,8 +26,10 @@ RSpec.describe PermitApplicationExportService do
 
       csv = described_class.new.application_metrics_csv
 
-      expect(csv).to include("jurisdiction,permit_type,activity")
-      expect(csv).to include("J1,PT,A,false,2,1,1.0,2.0")
+      expect(csv).to include("jurisdiction,template,tags")
+      expect(csv).to include(
+        "J1,My Template,\"part9, residential\",2,1,1.0,2.0"
+      )
     end
   end
 end

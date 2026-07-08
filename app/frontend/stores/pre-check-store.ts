@@ -34,13 +34,8 @@ export const PreCheckStoreModel = types
       if (preCheck.jurisdiction) {
         self.rootStore.jurisdictionStore.mergeUpdate(preCheck.jurisdiction, "jurisdictionMap")
       }
-      // Normalize permit_type data into permitTypeStore
-      if (preCheck.permitType) {
-        self.rootStore.permitClassificationStore.mergeUpdate(preCheck.permitType, "permitTypeMap")
-      }
       return R.mergeRight(preCheck, {
         jurisdiction: preCheck.jurisdiction?.id,
-        permitType: preCheck.permitType?.id,
       })
     },
 

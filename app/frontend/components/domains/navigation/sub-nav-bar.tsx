@@ -69,6 +69,7 @@ const DynamicBreadcrumb = observer(({ path }: IDynamicBreadcrumbProps) => {
         jurisdictions: rootStore.jurisdictionStore.currentJurisdiction?.name,
         "permit-applications": rootStore.permitApplicationStore.currentPermitApplication?.number,
         videos: rootStore.helpVideoStore.currentHelpVideo?.title,
+        "release-notes": rootStore.releaseNoteStore.currentReleaseNote?.version,
       }
 
       const title = resourceNeeded
@@ -85,6 +86,7 @@ const DynamicBreadcrumb = observer(({ path }: IDynamicBreadcrumbProps) => {
     rootStore.helpVideoStore.currentHelpVideo?.title,
     rootStore.jurisdictionStore.currentJurisdiction,
     rootStore.permitApplicationStore.currentPermitApplication?.number,
+    rootStore.releaseNoteStore.currentReleaseNote,
   ])
 
   return <SiteBreadcrumbs breadcrumbs={breadcrumbs} />

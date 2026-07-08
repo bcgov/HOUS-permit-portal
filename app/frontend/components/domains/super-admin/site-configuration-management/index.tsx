@@ -1,5 +1,14 @@
 import { Container, Grid, GridItem, Heading, VStack } from "@chakra-ui/react"
-import { FlagBanner, House, NotePencil, Question, SlidersHorizontal, TreeStructure, Users, VideoCamera } from "@phosphor-icons/react"
+import {
+  File,
+  FileText,
+  FlagBanner,
+  NotePencil,
+  Question,
+  SlidersHorizontal,
+  Users,
+  VideoCamera,
+} from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -56,26 +65,9 @@ export const SiteConfigurationManagementScreen = observer(function SiteConfigura
               h="full"
             />
           </GridItem>
-          <GridItem>
-            <HomeScreenBox
-              title={t(`${i18nPrefix}.standardizationPageSetup.title`)}
-              description={t(`${i18nPrefix}.standardizationPageSetup.description`)}
-              linkText={t("ui.edit")}
-              icon={<House size="24px" color="var(--chakra-colors-text-link)" />}
-              href="standardization-setup"
-              h="full"
-            />
-          </GridItem>
-          <GridItem>
-            <HomeScreenBox
-              title={t(`${i18nPrefix}.permitClassifications.title`)}
-              description={t(`${i18nPrefix}.permitClassifications.description`)}
-              linkText={t("ui.edit")}
-              icon={<TreeStructure size="24px" color="var(--chakra-colors-text-link)" />}
-              href="permit-classifications"
-              h="full"
-            />
-          </GridItem>
+          {/* DEPRECATED: Standardization page setup tile removed.
+              Super admins now toggle publicly_previewable directly on
+              TemplateVersionScreen for individual drafts. */}
           <GridItem>
             <HomeScreenBox
               title={t(`${i18nPrefix}.globalFeatureAccess.title`)}
@@ -93,6 +85,26 @@ export const SiteConfigurationManagementScreen = observer(function SiteConfigura
               linkText={t("ui.edit")}
               icon={<VideoCamera size="24px" color="var(--chakra-colors-text-link)" />}
               href="help-videos"
+              h="full"
+            />
+          </GridItem>
+          <GridItem>
+            <HomeScreenBox
+              title={t(`${i18nPrefix}.templateCategories.title`)}
+              description={t(`${i18nPrefix}.templateCategories.cardDescription`)}
+              linkText={t("ui.edit")}
+              icon={<FileText size="24px" color="var(--chakra-colors-text-link)" />}
+              href="template-categories"
+              h="full"
+            />
+          </GridItem>
+          <GridItem>
+            <HomeScreenBox
+              title={t(`${i18nPrefix}.releaseNotes.title`)}
+              description={t(`${i18nPrefix}.releaseNotes.description`)}
+              linkText={t("ui.edit")}
+              icon={<File size="24px" color="var(--chakra-colors-text-link)" />}
+              href="/configuration-management/release-notes"
               h="full"
             />
           </GridItem>

@@ -71,7 +71,7 @@ export const InboxPermitsTab = observer(function InboxPermitsTab({ permitProject
               border="none"
               outline="none"
               fontSize="sm"
-              placeholder={t("submissionInbox.searchPlaceholder")}
+              placeholder={t("permitProject.searchPlaceholder")}
               _placeholder={{ color: "text.secondary" }}
               value={permitProject.query ?? ""}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {

@@ -32,7 +32,7 @@ export const StepCodeRequirementsTable: React.FC<IStepCodeRequirementsTableProps
         <AccordionItem borderWidth={1} borderColor="border.light" rounded="sm">
           <AccordionButton bg="greys.grey03" fontWeight="bold">
             <Box flex="1" textAlign="left">
-              {part9RequiredSteps[0].permitTypeName}
+              {t("jurisdiction.edit.stepCode.part9Requirements")}
             </Box>
             <AccordionIcon />
           </AccordionButton>

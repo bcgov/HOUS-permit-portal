@@ -41,38 +41,74 @@ module ProjectAuditFormatters
     private
 
     def format_status_change
-      new_status = Array(changes["status"]).last
-      format_status_change_for(new_status)
+      format_status_change_for(new_status_from_changes)
     end
 
     def format_status_change_from_inferred_status
       format_status_change_for(permit_application&.status)
     end
 
-    def format_status_change_for(status_value)
-      status_str = status_value.to_s
+    # Audited may store status as [old, new], a single value, or a scalar integer.
+    def new_status_from_changes
+      values = Array.wrap(changes["status"])
+      return values.last if values.size >= 2
 
-      case status_str
-      when PermitApplication.statuses["new_draft"].to_s
+      values.first
+    end
+
+    def format_status_change_for(status_value)
+      case status_enum_key(status_value)
+      when "new_draft"
         "#{user_display} created the application"
-      when PermitApplication.statuses["newly_submitted"].to_s
+      when "newly_submitted"
         "#{user_display} submitted the application"
-      when PermitApplication.statuses["in_review"].to_s
+      when "in_review"
         "#{user_display} marked the application as in review"
-      when PermitApplication.statuses["revisions_requested"].to_s
+      when "revisions_requested"
         "Revisions requested — sent to submitter"
-      when PermitApplication.statuses["resubmitted"].to_s
+      when "resubmitted"
         submitter_name = audit.auditable&.submitter&.name || user_display
         "#{submitter_name} resubmitted the application"
-      when PermitApplication.statuses["approved"].to_s
+      when "approved"
         "#{user_display} approved the application"
-      when PermitApplication.statuses["issued"].to_s
+      when "issued"
         "#{user_display} issued the permit"
-      when PermitApplication.statuses["withdrawn"].to_s
+      when "withdrawn"
         "#{user_display} withdrew the application"
       else
-        "#{user_display} changed the application status on the application"
+        format_unrecognized_status_change
       end
+    end
+
+    def status_enum_key(status_value)
+      return nil if status_value.nil?
+
+      if status_value.is_a?(Integer) || status_value.to_s.match?(/\A\d+\z/)
+        int_value =
+          status_value.is_a?(Integer) ? status_value : status_value.to_i
+        return PermitApplication.statuses.key(int_value)
+      end
+
+      key = status_value.to_s
+      return key if PermitApplication.statuses.key?(key)
+
+      nil
+    end
+
+    def format_unrecognized_status_change
+      values = Array.wrap(changes["status"])
+      if values.size >= 2
+        return(
+          format_enum_change(
+            "project_audit.actions.changed_application_status",
+            PermitApplication.statuses,
+            "permit_application/status",
+            "status"
+          )
+        )
+      end
+
+      "#{user_display} changed the application status on the application"
     end
   end
 end

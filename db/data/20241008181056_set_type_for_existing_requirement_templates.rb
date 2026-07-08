@@ -1,17 +1,12 @@
 # frozen_string_literal: true
 
 class SetTypeForExistingRequirementTemplates < ActiveRecord::Migration[7.1]
+  # No-op: the `type` column is removed in a later migration now that
+  # `LiveRequirementTemplate` has been collapsed into `RequirementTemplate`.
+  # Kept as an entry in the data_migrations log for historical completeness.
   def up
-    # Set type to 'RequirementTemplate' for all existing records
-    RequirementTemplate.where(type: nil).update_all(
-      type: "LiveRequirementTemplate"
-    )
   end
 
   def down
-    # Revert type back to nil or handle as needed
-    RequirementTemplate.where(type: "LiveRequirementTemplate").update_all(
-      type: nil
-    )
   end
 end

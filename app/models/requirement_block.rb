@@ -26,7 +26,6 @@ class RequirementBlock < ApplicationRecord
 
   enum :sign_off_role, { any: 0 }, prefix: true
   enum :reviewer_role, { any: 0 }, prefix: true
-  enum :visibility, { any: 0, early_access: 1, live: 2 }, default: 0
 
   validates :sku, uniqueness: true, presence: true
   validates :name, presence: true
@@ -34,28 +33,16 @@ class RequirementBlock < ApplicationRecord
   validate :validate_step_code_dependencies
   validate :validate_requirements_conditional
   validate :validate_requirements_data_validation
-  validate :early_access_on_appropriate_template
   validate :unique_name_among_non_discarded
 
   before_validation :set_sku, on: :create
   before_validation :ensure_unique_name, on: :create
 
-  after_commit :refresh_search_index,
-               if: -> do
-                 saved_change_to_discarded_at? || saved_change_to_visibility?
-               end
+  after_commit :refresh_search_index, if: :saved_change_to_discarded_at?
 
   acts_as_taggable_on :associations
 
   after_discard { template_section_blocks.destroy_all }
-
-  def allowed_in(requirement_template)
-    if requirement_template.early_access?
-      %i[any early_access].include?(visibility.to_sym)
-    else
-      %i[any live].include?(visibility.to_sym)
-    end
-  end
 
   def sections
     requirement_template_sections
@@ -65,12 +52,10 @@ class RequirementBlock < ApplicationRecord
     {
       updated_at: updated_at,
       name: name,
-      first_nations: first_nations,
       requirement_labels: requirements.pluck(:label),
       associations: association_list,
       configurations: configurations_search_list,
       discarded: discarded_at.present?,
-      visibility: visibility,
       created_at: created_at
     }
   end
@@ -207,36 +192,6 @@ class RequirementBlock < ApplicationRecord
   # Escape for single-quoted JS strings
   def escape_for_js(str)
     str.to_s.gsub(/['\\]/) { |match| "\\#{match}" }
-  end
-
-  def early_access_on_appropriate_template
-    # Determine the required visibility based on the current object's state
-    if early_access?
-      required_visibility = :early_access
-      error_key = "associated_requirement_templates_must_be_early_access"
-    elsif live?
-      required_visibility = :live
-      error_key = "associated_requirement_templates_must_be_live"
-    elsif any?
-      # If any, no validation is needed
-      return
-    end
-
-    # Fetch associated requirement templates through requirement_template_sections
-    associated_templates =
-      requirement_template_sections.map(&:requirement_template)
-
-    method_to_use = :"#{required_visibility}?"
-
-    # Check if all associated templates satisfy the required visibility
-    unless associated_templates.all?(&method_to_use)
-      errors.add(
-        :visibility,
-        I18n.t(
-          "activerecord.errors.models.requirement_block.attributes.visibility.#{error_key}"
-        )
-      )
-    end
   end
 
   def refresh_search_index
@@ -447,11 +402,7 @@ class RequirementBlock < ApplicationRecord
     new_name = base_name
 
     # Loop to find a unique name
-    while self
-            .class
-            .where(discarded_at: nil)
-            .where(first_nations: first_nations)
-            .exists?(name: new_name)
+    while self.class.where(discarded_at: nil).exists?(name: new_name)
       new_name = increment_last_word(new_name)
     end
 
@@ -477,12 +428,7 @@ class RequirementBlock < ApplicationRecord
 
   def unique_name_among_non_discarded
     return if name.blank?
-    if self
-         .class
-         .where.not(id: id)
-         .where(first_nations: first_nations)
-         .where(discarded_at: nil)
-         .exists?(name: name)
+    if self.class.where.not(id: id).where(discarded_at: nil).exists?(name: name)
       errors.add(:name, "has already been taken")
     end
   end
