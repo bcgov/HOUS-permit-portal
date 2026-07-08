@@ -18,10 +18,10 @@ export const useTemplateVersions = ({
   const [error, setError] = useState<Error | undefined>(undefined)
   const { templateVersionStore, sandboxStore } = useMst()
   const { currentSandbox } = sandboxStore
-  const { getTemplateVersionsByStatus, fetchTemplateVersions, isLoading } = templateVersionStore
+  const { templateVersionsList, fetchTemplateVersions, isLoading } = templateVersionStore
   status ??= currentSandbox?.templateVersionStatusScope || ETemplateVersionStatus.published
 
-  const templateVersions = getTemplateVersionsByStatus(status, isPubliclyPreviewable) as ITemplateVersion[]
+  const templateVersions = templateVersionsList.filter(Boolean) as ITemplateVersion[]
   const { t } = useTranslation()
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export const useTemplateVersions = ({
         setError(e instanceof Error ? e : new Error(errorMessage))
       }
     })()
-  }, [currentSandbox?.id, jurisdictionId])
+  }, [currentSandbox?.id, status, isPubliclyPreviewable, jurisdictionId])
 
   return { templateVersions, error, isLoading }
 }
