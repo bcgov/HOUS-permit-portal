@@ -250,6 +250,7 @@ class PermitApplication < ApplicationRecord
       nickname: nickname,
       full_address: full_address,
       template_tags: template_tag_list&.join(", "),
+      template_nickname: template_nickname,
       submitter: "#{submitter.name} #{submitter.email}",
       submitted_at: submitted_at,
       resubmitted_at: resubmitted_at,

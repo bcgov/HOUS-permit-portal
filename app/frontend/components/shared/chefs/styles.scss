@@ -1009,6 +1009,17 @@
       background: transparent;
     }
 
+    &:disabled,
+    &[disabled="disabled"] {
+      cursor: not-allowed;
+
+      &::before {
+        background: var(--chakra-colors-greys-grey03) !important;
+        color: var(--chakra-colors-greys-grey01);
+        text-decoration: none;
+      }
+    }
+
     &::before {
       background: var(--chakra-colors-theme-yellow) !important;
       color: var(--chakra-colors-text-primary);

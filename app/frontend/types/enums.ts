@@ -200,9 +200,9 @@ export enum EPermitApplicationSortFields {
 
 export enum EProjectPermitApplicationSortFields {
   applicationNickname = "nickname",
-  permit = "permit",
-  assignedTo = "assigned_to",
-  permitApplicationNumber = "permit_application_number",
+  permit = "template_nickname",
+  assignedTo = "review_delegatee_name",
+  permitApplicationNumber = "number",
   updatedAt = "updated_at",
   status = "status",
 }
@@ -767,7 +767,7 @@ export enum EPermitProjectInboxSortFields {
 
 export enum EPermitApplicationInboxSortFields {
   status = "status",
-  permitType = "requirement_template_name",
+  permitType = "template_nickname",
   address = "full_address",
   projectNumber = "project_number",
   daysInQueue = "days_in_queue",
