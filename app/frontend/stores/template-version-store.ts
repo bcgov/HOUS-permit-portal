@@ -11,6 +11,7 @@ export const TemplateVersionStoreModel = types
   .model("TemplateVersionStoreModel")
   .props({
     templateVersionMap: types.map(TemplateVersionModel),
+    templateVersionsList: types.array(types.reference(TemplateVersionModel)),
     publiclyPreviewableTemplateVersions: types.array(types.safeReference(TemplateVersionModel)),
     isLoading: types.optional(types.boolean, false),
   })
@@ -48,12 +49,6 @@ export const TemplateVersionStoreModel = types
     getTemplateVersionById(id: string) {
       return self.templateVersionMap.get(id)
     },
-    getTemplateVersionsByStatus(
-      status: ETemplateVersionStatus = ETemplateVersionStatus.published,
-      isPubliclyPreviewable: boolean = false
-    ) {
-      return self.templateVersions.filter((t) => t.status === status && t.publiclyPreviewable === isPubliclyPreviewable)
-    },
   }))
   .actions((self) => ({
     fetchTemplateVersions: flow(function* (
@@ -73,6 +68,7 @@ export const TemplateVersionStoreModel = types
           version.isFullyLoaded = true
         })
         self.mergeUpdateAll(templateVersions, "templateVersionMap")
+        self.templateVersionsList = cast(templateVersions.map((templateVersion) => templateVersion.id))
       }
       self.isLoading = false
       return response.ok

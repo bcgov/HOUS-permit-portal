@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_07_07_180516) do
+ActiveRecord::Schema[7.2].define(version: 2026_07_07_200600) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -982,6 +982,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_07_180516) do
     t.boolean "archistar_enabled_for_all_jurisdictions", default: false, null: false
     t.boolean "qa_tools_enabled", default: false, null: false
     t.boolean "project_meetings_enabled", default: false, null: false
+    t.boolean "overheating_tool_enabled", default: false, null: false
   end
 
   create_table "step_code_building_characteristics_summaries", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

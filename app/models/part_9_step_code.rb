@@ -1,4 +1,17 @@
 class Part9StepCode < StepCode
+  BUILDING_CHARACTERISTICS_LINE_KEYS = %i[
+    roof_ceilings_lines
+    above_grade_walls_lines
+    framings_lines
+    unheated_floors_lines
+    below_grade_walls_lines
+    slabs_lines
+    doors_lines
+    space_heating_cooling_lines
+    hot_water_lines
+    ventilation_lines
+  ].freeze
+
   has_many :checklists,
            class_name: "Part9StepCode::Checklist",
            foreign_key: :step_code_id,
@@ -111,6 +124,7 @@ class Part9StepCode < StepCode
     # Ensure the checklist and its data_entries exist to avoid errors
     return unless checklist&.data_entries
 
+    building_characteristics_attrs = []
     checklist.data_entries.each do |data_entry|
       # Shrine attachment presence check
       if data_entry.h2k_file_attacher&.attached?
@@ -118,10 +132,14 @@ class Part9StepCode < StepCode
           # Use Shrine's API to access the file contents
           xml_content = nil
           data_entry.h2k_file.open { |io| xml_content = io.read }
+          xml = Nokogiri.XML(xml_content)
           StepCode::Part9::DataEntryFromHot2000.new(
-            xml: Nokogiri.XML(xml_content),
+            xml: xml,
             data_entry: data_entry
           ).call
+          building_characteristics_attrs << StepCode::Part9::BuildingCharacteristicsHot2000Mapper.new(
+            xml: xml
+          ).mappings
         rescue => e
           # Log the error, but don't let it break the callback chain for other entries
           # or the entire transaction unless that's desired.
@@ -132,6 +150,140 @@ class Part9StepCode < StepCode
         end
       end
     end
+
+    apply_building_characteristics_attrs(
+      checklist,
+      building_characteristics_attrs
+    )
+  end
+
+  def apply_building_characteristics_attrs(checklist, attrs_collection)
+    generated_attrs =
+      attrs_collection
+        .compact
+        .reduce({}) do |merged_attrs, attrs|
+          merge_building_characteristics_attrs(merged_attrs, attrs)
+        end
+    return if generated_attrs.blank?
+
+    summary =
+      checklist.building_characteristics_summary ||
+        checklist.create_building_characteristics_summary
+    update_attrs =
+      merge_building_characteristics_summary_attrs(summary, generated_attrs)
+    summary.update!(update_attrs) if update_attrs.present?
+  end
+
+  def merge_building_characteristics_summary_attrs(summary, generated_attrs)
+    BUILDING_CHARACTERISTICS_LINE_KEYS
+      .each_with_object({}) do |key, attrs|
+        generated_lines = generated_attrs[key]
+        next if generated_lines.blank?
+
+        attrs[key] = merge_characteristic_lines(
+          summary.public_send(key),
+          generated_lines
+        )
+      end
+      .tap do |attrs|
+        attrs[:windows_glazed_doors] = merge_windows_glazed_doors(
+          summary.windows_glazed_doors,
+          generated_attrs[:windows_glazed_doors]
+        )
+        attrs[:airtightness] = merge_characteristic_hash(
+          summary.airtightness,
+          generated_attrs[:airtightness]
+        )
+        attrs[:fossil_fuels] = merge_characteristic_hash(
+          summary.fossil_fuels,
+          generated_attrs[:fossil_fuels]
+        )
+        attrs.compact!
+      end
+  end
+
+  def merge_building_characteristics_attrs(existing_attrs, new_attrs)
+    merged_attrs = existing_attrs.deep_dup
+    BUILDING_CHARACTERISTICS_LINE_KEYS.each do |key|
+      next if new_attrs[key].blank?
+
+      merged_attrs[key] = merge_characteristic_lines(
+        merged_attrs[key],
+        new_attrs[key]
+      )
+    end
+    merged_attrs[:windows_glazed_doors] = merge_windows_glazed_doors(
+      merged_attrs[:windows_glazed_doors],
+      new_attrs[:windows_glazed_doors]
+    )
+    merged_attrs[:airtightness] = new_attrs[:airtightness] ||
+      merged_attrs[:airtightness]
+    merged_attrs[:fossil_fuels] = new_attrs[:fossil_fuels] ||
+      merged_attrs[:fossil_fuels]
+    merged_attrs.compact
+  end
+
+  def merge_characteristic_lines(existing_lines, generated_lines)
+    existing =
+      characteristic_array(existing_lines).reject do |line|
+        blank_characteristic_line?(line)
+      end
+    generated =
+      characteristic_array(generated_lines).reject do |line|
+        blank_characteristic_line?(line)
+      end
+    return generated if existing.blank?
+
+    (existing + generated).uniq do |line|
+      line[:details].presence || line["details"].presence || line.to_s
+    end
+  end
+
+  def merge_windows_glazed_doors(existing, generated)
+    return if generated.blank?
+
+    existing_attrs = characteristic_hash(existing)
+    generated_attrs = characteristic_hash(generated)
+    lines =
+      merge_characteristic_lines(
+        existing_attrs[:lines] || existing_attrs["lines"],
+        generated_attrs[:lines] || generated_attrs["lines"]
+      )
+    return if lines.blank?
+
+    {
+      performance_type:
+        existing_attrs[:performance_type] ||
+          existing_attrs["performance_type"] ||
+          generated_attrs[:performance_type] ||
+          generated_attrs["performance_type"],
+      lines: lines
+    }.compact
+  end
+
+  def merge_characteristic_hash(existing, generated)
+    return if generated.blank?
+
+    existing_attrs = characteristic_hash(existing)
+    return generated if existing_attrs.blank?
+
+    existing_attrs
+  end
+
+  def characteristic_array(value)
+    Array(value).map { |item| characteristic_hash(item) }
+  end
+
+  def characteristic_hash(value)
+    attrs = value.respond_to?(:attributes) ? value.attributes : value
+    return {} unless attrs.respond_to?(:to_h)
+
+    attrs.to_h.symbolize_keys.compact_blank
+  end
+
+  def blank_characteristic_line?(line)
+    line.blank? ||
+      line.except(:performance_type, :variant).values.all?(&:blank?)
   end
 
   def nearest_previous_checklist(stage)

@@ -122,6 +122,12 @@ export const navLinks: IPart3NavLink[] = [
     subLinks: [],
     section: "results",
   },
+  {
+    key: "report",
+    location: "report",
+    subLinks: [],
+    section: "results",
+  },
 ]
 
 export const navSections: IPart3NavSection[] = [
@@ -161,4 +167,5 @@ export const defaultSectionCompletionStatus = {
   contact: { complete: false, relevant: true },
   requirementsSummary: { complete: false, relevant: true },
   stepCodeSummary: { complete: false, relevant: true },
+  report: { complete: false, relevant: true },
 }

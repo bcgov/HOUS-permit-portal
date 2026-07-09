@@ -100,6 +100,21 @@ export const TemplateVersionModel = types
     getRequirementBlockJsonById(id: string) {
       return self.requirementBlocksJson?.[id]
     },
+    matchesSearchQuery(query: string) {
+      const normalizedQuery = query.trim().toLowerCase()
+      if (!normalizedQuery) return true
+
+      const searchableText = [
+        self.denormalizedTemplateJson?.nickname,
+        self.denormalizedTemplateJson?.description,
+        ...(self.denormalizedTemplateJson?.tags ?? self.tags),
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
+
+      return searchableText.includes(normalizedQuery)
+    },
   }))
   .actions((self) => ({
     setJurisdictionTemplateVersionCustomization(

@@ -652,6 +652,7 @@ const options = {
               protectionTitle: "How {{provider}} protects and stores your drawings",
               protectionDescription1:
                 "Our service partners use industry-standard security to protect your drawings. {{provider}} will keep your drawings for up to 150 days, then delete them. All drawings will be deleted on December 31, 2025, when the beta testing period ends.",
+              uploadRequired: "Please upload a file before continuing.",
             },
             confirmSubmission: {
               title: "Review and submit",
@@ -751,6 +752,14 @@ const options = {
             title: "Overheating",
             intro:
               "Your overheating code check results are stored here. Use this service to verify compliance with overheating requirements before submitting a permit application.",
+          },
+          unavailable: {
+            title: "Overheating Code Check is temporarily unavailable",
+            description:
+              "This tool is currently unavailable while we update and validate it with our partner organizations.",
+            savedWork:
+              "If you started or saved an overheating code check before, your work is still saved and will be available when access is restored.",
+            returnToTools: "Return to Project Readiness Tools",
           },
           columns: {
             issued_to: "Issued To",
@@ -2445,7 +2454,7 @@ Thank you,
             lookupDescriptionPrefix: "To check which Step Codes apply before generating a report,",
             lookupDescriptionLinkLabel: "look up Step Codes requirements for your project's jurisdiction",
             noReportAvailable: "No report generated yet",
-            reportOutOfDate: "Report out of date — regenerate from the summary section",
+            reportOutOfDate: "Report out of date — regenerate from the report section",
             downloadStageReport: "Download {{stage}} report",
           },
           shareReport: {
@@ -2525,8 +2534,9 @@ Thank you,
               hvac: "HVAC",
               results: "Results",
               contact: "Contact information",
-              requirementsSummary: "Performance requriements summary",
+              requirementsSummary: "Performance requirements summary",
               stepCodeSummary: "Step code summary",
+              report: "Report",
             },
             startPage: {
               heading: "Energy and Zero Carbon Step Codes for Step 3 Buildings",
@@ -3159,6 +3169,7 @@ Thank you,
             },
             requirementsSummary: {
               heading: "Performance requirements summary",
+              description: "Review the calculated performance requirements before continuing to the Step Code summary.",
               missingInfo: {
                 title: "You haven't entered any relevant performance details",
                 message:
@@ -3202,7 +3213,11 @@ Thank you,
                     "These values are calculated from inputs in <baselinePerformanceLink>Baseline energy performance requirements</baselinePerformanceLink> and <stepCodePerformanceLink>Performance requirements for Step 2, 3, and 4 Buildings</stepCodePerformanceLink><br /><br /><strong>Note:</strong> GHGI is to be reported in all cases, but will only be taken into account for compliance if GHGI is a requirements of the local government.<br /><br /><strong>Note:</strong> If the building has GHGI target as indicated in <stepCodePerformanceLink>Performance requirements for Step 2, 3, and 4 Buildings</stepCodePerformanceLink>, the value is determined as the area weighted average between the baseline/reference building GHGI from <baselinePerformanceLink>Baseline energy performance requirements</baselinePerformanceLink> and GHGI from <stepCodePerformanceLink>Performance requirements for Step 2, 3, and 4 Buildings</stepCodePerformanceLink> (if applicable)",
                 },
               },
-              confirm: { label: "Does everything look correct?", cta: "Yes, view summary" },
+              confirm: {
+                label: "Does everything look correct?",
+                cta: "Yes, view summary",
+                hint: "Continue to review the Step Code summary before generating the final report.",
+              },
               help: "Incorrect or missing information? Go to the relevant section to make corrections.",
             },
             documentReferences: {
@@ -3240,6 +3255,8 @@ Thank you,
               },
             },
             stepCodeSummary: {
+              description:
+                "This section summarizes the Step Code results for the project. Mark the checklist as complete to generate the report in the background.",
               missingInfo: {
                 title: "You haven't entered any relevant performance details",
                 message:
@@ -3305,6 +3322,12 @@ Thank you,
               cta: "Save and exit",
               standaloneCta: "Generate report",
             },
+            report: {
+              heading: "Report",
+              description: "The generated Step Code report will appear here after report generation finishes.",
+              pending:
+                "The report is being generated in the background. When it is ready, the notification bell will include a download notification and this section will show the download link.",
+            },
           },
           part9: {
             goToStepCodes: "Go to Step Codes",
@@ -3331,6 +3354,19 @@ Thank you,
               heading: "Building information",
               instructions: "Confirm the builder and building type for this step code stage.",
             },
+            review: {
+              description:
+                "Review the checklist status and confirm that the information entered for this stage is complete.",
+              reportGenerationDescription:
+                "When you mark this checklist as complete, the Step Code report will be generated in the background.",
+              statusLabel: "Checklist status",
+            },
+            report: {
+              description: "The generated Step Code report will appear here after report generation finishes.",
+              pending:
+                "The report is being generated in the background. When it is ready, the notification bell will include a download notification and this section will show the download link.",
+              ready: "The Step Code report for {{address}} is ready to download.",
+            },
           },
           title: "Step code auto-compliance tool",
           subTitle:
@@ -3341,9 +3377,8 @@ Thank you,
           saveAndGoBack: "Save and go back",
           goToPermitApplication: "Go to permit application",
           markAsComplete: "Mark as complete",
-          markAsCompleteAndGenerateReport: "Mark as complete and generate report",
-          reportGenerationHint:
-            "Any changes made will require re-generating your report. Your report will be generated in the background. When it is ready, open the notifications bell in the top navigation to download it, or return to this page.",
+          markAsCompleteAndGenerateReport: "Generate report and continue",
+          regenerateReport: "Regenerate report",
           back: "Go back",
           complete: "Complete",
           restart: {
@@ -4165,6 +4200,9 @@ Thank you,
               submissionInbox: "Submissions",
               submissionInboxDescription:
                 "Enable review managers to accept and process permit applications. If you turn off this feature, submitters can't submit applications, and review managers won't receive new applications.",
+              overheatingTool: "Overheating tool",
+              overheatingToolDescription:
+                "Enable the Overheating Code Check tool for logged-in users. If turned off, users cannot access existing checks or start new ones.",
               toggleOn: "On",
               toggleOff: "Off",
               acceptPermitApplications: "Accept permit applications",
@@ -5085,6 +5123,9 @@ Thank you,
             projectMeetings: "Project meetings",
             projectMeetingsDescription:
               "Enable project meeting requests site-wide. Jurisdictions still need to turn this on before submitters can request meetings.",
+            overheatingTool: "Overheating tool",
+            overheatingToolDescription:
+              "Enable the Overheating Code Check tool for logged-in users. If turned off, users cannot access existing checks or start new ones.",
             qaTools: "QA tools",
             qaToolsDescription:
               "Enable QA tools for logged-in users. This setting only applies when QA mode is enabled for the environment.",
@@ -5606,6 +5647,7 @@ Thank you,
             videos: "Videos",
             helpVideos: "Videos",
             qaTools: "QA tools",
+            overheatingTool: "Overheating tool",
             templateCategories: "Permit categories",
           },
         },

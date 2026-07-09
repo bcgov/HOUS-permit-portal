@@ -1,7 +1,7 @@
 import { Button, Center, Flex, HStack, Stack, Text } from "@chakra-ui/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
-import React, { useMemo } from "react"
+import React from "react"
 import { useTranslation } from "react-i18next"
 import { datefnsTableDateFormat } from "../../../constants"
 import { useTemplateVersions } from "../../../hooks/resources/use-template-versions"
@@ -50,7 +50,7 @@ export const TemplateVersionsList = observer(function TemplateVersionsList({
 
   const { showStatus = false, showVersionDate = true } = statusDisplayOptions || {}
   const showStatusTag = showStatus || can("requirementTemplate:manage")
-  const groupedTemplateVersions = useMemo(() => groupTemplateVersionsByCategory(templateVersions), [templateVersions])
+  const groupedTemplateVersions = groupTemplateVersionsByCategory(templateVersions)
 
   if (error) return <ErrorScreen error={error} />
   if (isLoading) {

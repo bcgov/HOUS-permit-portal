@@ -18,6 +18,7 @@ export const SiteConfigurationStoreModel = types.snapshotProcessor(
       codeComplianceEnabled: types.maybeNull(types.boolean),
       qaToolsEnabled: types.maybeNull(types.boolean),
       projectMeetingsEnabled: types.maybeNull(types.boolean),
+      overheatingToolEnabled: types.maybeNull(types.boolean),
       archistarEnabledForAllJurisdictions: types.maybeNull(types.boolean),
       sitewideMessage: types.maybeNull(types.string),
       helpLinkItems: types.frozen<IHelpLinkItems>(),

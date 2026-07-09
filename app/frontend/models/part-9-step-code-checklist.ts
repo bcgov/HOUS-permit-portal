@@ -193,12 +193,28 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
         updatedStatus[key] = { complete: true, relevant: true }
 
         const values: Record<string, any> = { sectionCompletionStatus: updatedStatus }
-        const requestOptions = key === "report" ? { reportGenerationRequested: true } : undefined
-        if (key === "report") {
+        const requestOptions = key === "review" ? { reportGenerationRequested: true } : undefined
+        if (key === "review") {
           values.status = EStepCodeChecklistStatus.complete
         }
 
         const response = yield self.environment.api.updatePart9Checklist(self.id, values, requestOptions)
+        if (response.ok) {
+          const snapshotData = { ...preProcessor(response.data.data), isLoaded: true }
+          applySnapshot(self, snapshotData)
+          if (key !== "report") {
+            markParentStepCodeReportsStale(self)
+          }
+          return true
+        }
+        return false
+      }),
+      regenerateReport: flow(function* () {
+        const response = yield self.environment.api.updatePart9Checklist(
+          self.id,
+          { sectionCompletionStatus: self.sectionCompletionStatus },
+          { reportGenerationRequested: true }
+        )
         if (response.ok) {
           const snapshotData = { ...preProcessor(response.data.data), isLoaded: true }
           applySnapshot(self, snapshotData)

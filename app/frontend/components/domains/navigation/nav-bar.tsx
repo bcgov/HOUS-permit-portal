@@ -157,13 +157,14 @@ function shouldHideSubNavbarForPath(path: string): boolean {
 
 export const NavBar = observer(function NavBar() {
   const location = useLocation()
+  const { siteConfigurationStore } = useMst()
   const path = location.pathname
 
   if (isPreCheckPath(path)) {
     return <PreCheckNavBar />
   }
 
-  if (isOverheatingCodeSubPath(path)) {
+  if (siteConfigurationStore.overheatingToolEnabled && isOverheatingCodeSubPath(path)) {
     return <OverheatingCodeNavBar />
   }
 

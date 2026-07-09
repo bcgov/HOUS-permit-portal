@@ -317,7 +317,8 @@ export const PermitApplicationModel = types.snapshotProcessor(
           (R.isNil(self.diff) ? `${self.templateVersion.id}` : `${self.templateVersion.id}-diff`) +
           (self.revisionMode ? "-revision" : "") +
           (self.selectedSubmissionVersion ? `-past-submission-version-${self.selectedSubmissionVersion.id}` : "") +
-          (self.isViewingPastRequests ? "-past-requests" : "")
+          (self.isViewingPastRequests ? "-past-requests" : "") +
+          `-${self.status}`
         )
       },
       indexOfBlockId: (blockId: string) => {
@@ -888,11 +889,6 @@ export const PermitApplicationModel = types.snapshotProcessor(
       resetCompareAfter: () => {
         self.showingCompareAfter = false
       },
-
-      generateMissingPdfs: flow(function* () {
-        const response = yield self.environment.api.generatePermitApplicationMissingPdfs(self.id)
-        return response.ok
-      }),
     }))
     .actions((self) => ({
       handleSocketSupportingDocsUpdate: (data: IPermitApplicationSupportingDocumentsUpdate) => {

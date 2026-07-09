@@ -27,7 +27,7 @@ class Part9StepCode::DataEntry < ApplicationRecord
       public: false,
       expires_in: 3600,
       response_content_disposition:
-        "attachment; filename=\"#{h2k_file.original_filename}\""
+        ContentDisposition.attachment(h2k_file.original_filename)
     )
   end
 end

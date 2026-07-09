@@ -66,6 +66,7 @@ export const UploadDrawings = observer(function UploadDrawings() {
   })
 
   const designDocumentsAttributes = watch("designDocumentsAttributes")
+  const hasUploadedFile = designDocumentsAttributes.some((doc) => !doc._destroy)
 
   const handleUploadSuccess = (file: UppyFile<{}, {}>, response: any) => {
     const parts = response.uploadURL.split("/")
@@ -220,7 +221,17 @@ export const UploadDrawings = observer(function UploadDrawings() {
         </Text>
       </Box>
 
-      <FormFooter<IUploadDrawingsFormData> handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
+      <FormFooter<IUploadDrawingsFormData>
+        handleSubmit={handleSubmit}
+        onSubmit={onSubmit}
+        isLoading={isSubmitting}
+        isDisabled={!hasUploadedFile}
+        disabledMessage={
+          !hasUploadedFile
+            ? t("preCheck.sections.uploadDrawings.uploadRequired", "Please upload a file before continuing.")
+            : undefined
+        }
+      />
     </Box>
   )
 })

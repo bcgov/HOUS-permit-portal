@@ -46,17 +46,8 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
   const [query, setQuery] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const filteredTemplates = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    if (!q) return templateVersions
-    return templateVersions.filter((tv) => {
-      const nickname = tv.denormalizedTemplateJson?.nickname?.toLowerCase() || ""
-      const desc = tv.denormalizedTemplateJson?.description?.toLowerCase() || ""
-      const tags = (tv.denormalizedTemplateJson?.tags || tv.tags || []).join(" ").toLowerCase()
-      return nickname.includes(q) || desc.includes(q) || tags.includes(q)
-    })
-  }, [templateVersions, query])
-  const groupedTemplates = useMemo(() => groupTemplateVersionsByCategory(filteredTemplates), [filteredTemplates])
+  const filteredTemplates = templateVersions.filter((tv) => tv.matchesSearchQuery(query))
+  const groupedTemplates = groupTemplateVersionsByCategory(filteredTemplates)
   const selectedTemplateVersions = useMemo(
     () => templateVersions.filter((templateVersion) => selectedTemplateVersionIds.includes(templateVersion.id)),
     [selectedTemplateVersionIds, templateVersions]
