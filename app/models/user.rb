@@ -180,6 +180,10 @@ class User < ApplicationRecord
       last_name: last_name,
       email: email,
       jurisdiction_ids: jurisdictions.pluck(:id),
+      jurisdiction_membership_created_ats:
+        jurisdiction_memberships.each_with_object({}) do |membership, hash|
+          hash[membership.jurisdiction_id] = membership.created_at
+        end,
       discarded: discarded_at.present?,
       last_sign_in_at: last_sign_in_at
     }

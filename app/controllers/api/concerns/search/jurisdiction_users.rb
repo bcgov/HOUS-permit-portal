@@ -69,9 +69,26 @@ module Api::Concerns::Search::JurisdictionUsers
 
   def user_order
     if (sort = user_search_params[:sort])
-      { sort[:field] => { order: sort[:direction], unmapped_type: "long" } }
+      field =
+        (
+          if sort[:field] == "created_at"
+            jurisdiction_membership_created_at_sort_field
+          else
+            sort[:field]
+          end
+        )
+      { field => { order: sort[:direction], unmapped_type: "long" } }
     else
-      { created_at: { order: :desc, unmapped_type: "long" } }
+      {
+        jurisdiction_membership_created_at_sort_field => {
+          order: :desc,
+          unmapped_type: "long"
+        }
+      }
     end
+  end
+
+  def jurisdiction_membership_created_at_sort_field
+    "jurisdiction_membership_created_ats.#{@jurisdiction.id}"
   end
 end

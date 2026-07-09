@@ -52,6 +52,20 @@ class UserBlueprint < Blueprinter::Base
                 options: ->(_user, options) { options }
   end
 
+  view :jurisdiction_users do
+    include_view :base
+
+    field :jurisdiction_membership_created_at do |user, options|
+      jurisdiction_id = options[:jurisdiction_id]
+      next unless jurisdiction_id
+
+      user
+        .jurisdiction_memberships
+        .find { |membership| membership.jurisdiction_id == jurisdiction_id }
+        &.created_at
+    end
+  end
+
   view :invited_user do
     fields :email, :role
 
