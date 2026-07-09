@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_06_02_180000) do
+ActiveRecord::Schema[7.2].define(version: 2026_07_07_200600) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -98,9 +98,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_02_180000) do
     t.uuid "contactable_id"
     t.string "contact_type"
     t.index ["contactable_type", "contactable_id"], name: "index_contacts_on_contactable"
-  end
-
-  create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
   end
 
   create_table "design_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -907,6 +904,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_02_180000) do
     t.boolean "code_compliance_enabled", default: false, null: false
     t.boolean "archistar_enabled_for_all_jurisdictions", default: false, null: false
     t.boolean "qa_tools_enabled", default: false, null: false
+    t.boolean "overheating_tool_enabled", default: false, null: false
   end
 
   create_table "step_code_building_characteristics_summaries", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

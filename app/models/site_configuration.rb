@@ -40,6 +40,10 @@ class SiteConfiguration < ApplicationRecord
     instance.qa_tools_enabled
   end
 
+  def self.overheating_tool_enabled?
+    instance.overheating_tool_enabled
+  end
+
   def self.archistar_enabled_for_jurisdiction?(jurisdiction)
     return false unless instance.code_compliance_enabled # Global switch
     return true if instance.archistar_enabled_for_all_jurisdictions # Override

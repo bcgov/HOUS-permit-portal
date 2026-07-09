@@ -6,6 +6,8 @@ class AddCustomizationsCountToTemplateVersions < ActiveRecord::Migration[7.2]
                default: 0,
                null: false
 
+    return unless column_exists?(:template_versions, :change_significance)
+
     # Reset column information so ActiveRecord knows about the new column
     TemplateVersion.reset_column_information
 

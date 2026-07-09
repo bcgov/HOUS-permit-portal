@@ -132,6 +132,7 @@ export interface ISiteConfigurationUpdateParams {
   allowDesignatedReviewer?: boolean | null
   codeComplianceEnabled?: boolean | null
   qaToolsEnabled?: boolean | null
+  overheatingToolEnabled?: boolean | null
   archistarEnabledForAllJurisdictions?: boolean | null
   sitewideMessage?: string | null
   helpLinkItems?: IHelpLinkItems

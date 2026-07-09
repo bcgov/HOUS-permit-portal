@@ -26,6 +26,11 @@ export const AdminGlobalFeatureAccessScreen = observer(() => {
       enabled: siteConfigurationStore?.codeComplianceEnabled,
       route: "code-compliance",
     },
+    {
+      label: t(`${i18nPrefix}.overheatingTool`),
+      enabled: siteConfigurationStore?.overheatingToolEnabled,
+      route: "overheating-tool",
+    },
     ...(qaModeEnabled
       ? [
           {

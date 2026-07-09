@@ -6,6 +6,7 @@ class Api::OverheatingCodesController < Api::ApplicationController
   skip_after_action :verify_policy_scoped, only: %i[index]
 
   def index
+    authorize OverheatingCode
     perform_overheating_code_search
     render_success @overheating_code_search.results,
                    nil,
