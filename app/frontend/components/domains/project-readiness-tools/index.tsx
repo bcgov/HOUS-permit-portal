@@ -9,6 +9,7 @@ export const ProjectReadinessToolsIndexScreen = () => {
   const { t } = useTranslation()
   const { siteConfigurationStore } = useMst()
   const codeComplianceEnabled = siteConfigurationStore.codeComplianceEnabled
+  const overheatingToolEnabled = siteConfigurationStore.overheatingToolEnabled
 
   const projectReadinessPageItems = [
     {
@@ -53,11 +54,15 @@ export const ProjectReadinessToolsIndexScreen = () => {
           description: t("projectReadinessTools.createLoaDescription"),
           href: "/project-readiness-tools/create-your-letters-of-assurance",
         },
-        {
-          linkText: t("projectReadinessTools.overheatingCodesLink"),
-          description: t("projectReadinessTools.overheatingCodesDescription"),
-          href: "/overheating-codes",
-        },
+        ...(overheatingToolEnabled
+          ? [
+              {
+                linkText: t("projectReadinessTools.overheatingCodesLink"),
+                description: t("projectReadinessTools.overheatingCodesDescription"),
+                href: "/overheating-codes",
+              },
+            ]
+          : []),
       ],
     },
   ]
