@@ -10,6 +10,7 @@ import {
   EPermitBlockStatus,
   ERequirementChangeAction,
   ERequirementType,
+  EStepCodeChecklistStage,
 } from "../types/enums"
 import {
   ICompareRequirementsBoxData,
@@ -72,6 +73,9 @@ export const PermitApplicationModel = types.snapshotProcessor(
       createdAt: types.Date,
       updatedAt: types.Date,
       stepCode: types.maybeNull(types.reference(types.late(() => StepCodeModel))),
+      stepCodeStage: types.maybeNull(
+        types.enumeration<EStepCodeChecklistStage[]>(Object.values(EStepCodeChecklistStage))
+      ),
       supportingDocuments: types.maybeNull(types.frozen<IDownloadableFile[]>()),
       allSubmissionVersionCompletedSupportingDocuments: types.maybeNull(types.frozen<IDownloadableFile[]>()),
       zipfileSize: types.maybeNull(types.number),
@@ -115,6 +119,23 @@ export const PermitApplicationModel = types.snapshotProcessor(
       get formattedDaysInQueue(): string {
         if (self.daysInQueue == null) return "—"
         return t("submissionInbox.daysInQueue", { count: self.daysInQueue })
+      },
+      get stepCodeChecklist() {
+        const stepCode = self.stepCode as
+          | { checklists?: Array<{ stage?: string; isAllComplete?: boolean; isMarkedComplete?: boolean }> }
+          | null
+          | undefined
+        if (!stepCode) return null
+        const stage = self.stepCodeStage || EStepCodeChecklistStage.preConstruction
+        return stepCode.checklists?.find((checklist) => checklist.stage === stage) ?? null
+      },
+      get isStepCodeComplete() {
+        const checklist = this.stepCodeChecklist as {
+          isAllComplete?: boolean
+          isMarkedComplete?: boolean
+        } | null
+        if (!checklist) return false
+        return !!(checklist.isAllComplete || checklist.isMarkedComplete)
       },
       get isPart3() {
         // TODO
@@ -825,6 +846,9 @@ export const PermitApplicationModel = types.snapshotProcessor(
           self.rootStore.stepCodeStore.mergeUpdate(stepCode, "stepCodesMap")
           self.stepCode = cast(stepCode.id)
           self.rootStore.stepCodeStore.setCurrentStepCode(stepCode.id)
+          if (!self.stepCodeStage && stepCode.currentStage) {
+            self.stepCodeStage = stepCode.currentStage
+          }
         }
         return response.ok
       }),

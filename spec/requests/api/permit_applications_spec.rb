@@ -200,6 +200,21 @@ RSpec.describe "Api::PermitApplications", type: :request do
       expect(json_response.dig("data", "nickname")).to eq("Updated Draft")
     end
 
+    it "updates step_code_stage" do
+      patch "/api/permit_applications/#{permit_application.id}",
+            params: {
+              permit_application: {
+                step_code_stage: "as_built"
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("data", "step_code_stage")).to eq("as_built")
+      expect(permit_application.reload.step_code_stage).to eq("as_built")
+    end
+
     it "does not allow submitter_id updates" do
       patch "/api/permit_applications/#{permit_application.id}",
             params: {

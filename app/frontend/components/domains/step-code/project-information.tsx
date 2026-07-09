@@ -24,6 +24,7 @@ import React, { useEffect, useMemo, useState } from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useNavigate, useParams } from "react-router-dom"
 import { IJurisdiction } from "../../../models/jurisdiction"
+import { useMst } from "../../../setup/root"
 import { EStepCodeChecklistStage, EStepCodeChecklistStatus } from "../../../types/enums"
 import { IOption } from "../../../types/types"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
@@ -79,9 +80,11 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
 }: IProjectInformationProps) {
   const { permitApplicationId } = useParams()
   const navigate = useNavigate()
-  const [selectedStage, setSelectedStage] = useState<EStepCodeChecklistStage>(
-    currentStepCode?.currentStage || EStepCodeChecklistStage.preConstruction
-  )
+  const { permitApplicationStore } = useMst()
+  const permitApplication = permitApplicationId ? permitApplicationStore.currentPermitApplication : null
+  const pinnedStage =
+    permitApplication?.stepCodeStage || currentStepCode?.currentStage || EStepCodeChecklistStage.preConstruction
+  const [selectedStage, setSelectedStage] = useState<EStepCodeChecklistStage>(pinnedStage)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const isEditable = !permitApplicationId
@@ -106,8 +109,10 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
   useEffect(() => {
     if (!currentStepCode) return
 
-    setSelectedStage(currentStepCode.currentStage || EStepCodeChecklistStage.preConstruction)
-  }, [currentStepCode?.id, currentStepCode?.currentStage])
+    setSelectedStage(
+      permitApplication?.stepCodeStage || currentStepCode.currentStage || EStepCodeChecklistStage.preConstruction
+    )
+  }, [currentStepCode?.id, currentStepCode?.currentStage, permitApplication?.stepCodeStage])
 
   useEffect(() => {
     if (!currentStepCode) return
@@ -147,8 +152,15 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
     setIsSubmitting(true)
     try {
       let checklist = stageChecklist
-      const updateValues: Record<string, any> = { currentStage: selectedStage }
-      if (isEditable) {
+
+      if (permitApplicationId && permitApplication) {
+        const response = await permitApplication.update({
+          autosave: false,
+          stepCodeStage: selectedStage,
+        })
+        if (!response.ok) throw new Error("Permit application update failed")
+      } else {
+        const updateValues: Record<string, any> = { currentStage: selectedStage }
         Object.assign(updateValues, {
           fullAddress: values.fullAddress,
           pid: values.pid,
@@ -156,10 +168,10 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
           permitDate: values.permitDate,
           jurisdictionId: values.jurisdictionId,
         })
-      }
 
-      const stepCodeUpdated = await currentStepCode.update(updateValues)
-      if (!stepCodeUpdated) throw new Error("Step Code update failed")
+        const stepCodeUpdated = await currentStepCode.update(updateValues)
+        if (!stepCodeUpdated) throw new Error("Step Code update failed")
+      }
 
       if (!checklist) {
         checklist = await currentStepCode.createChecklist({
@@ -305,7 +317,16 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
           )}
 
           <FormControl>
-            <FormLabel>{t("stepCode.projectInformation.stage")}</FormLabel>
+            <FormLabel>
+              {permitApplicationId
+                ? t("stepCode.projectInformation.permitStage")
+                : t("stepCode.projectInformation.stage")}
+            </FormLabel>
+            {permitApplicationId && (
+              <Text fontSize="sm" color="text.secondary" mb={3}>
+                {t("stepCode.projectInformation.permitStageHelp")}
+              </Text>
+            )}
             <Table variant="simple" size="sm">
               <Tbody>
                 {stageOptions.map((stage) => {

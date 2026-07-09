@@ -607,6 +607,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_07_200600) do
     t.integer "inbox_sort_order"
     t.integer "queue_time_seconds", default: 0, null: false
     t.datetime "queue_clock_started_at"
+    t.string "step_code_stage"
     t.index ["discarded_at"], name: "index_permit_applications_on_discarded_at"
     t.index ["jurisdiction_id"], name: "index_permit_applications_on_jurisdiction_id"
     t.index ["number"], name: "index_permit_applications_on_number", unique: true

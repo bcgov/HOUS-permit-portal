@@ -553,6 +553,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
       :pin,
       :pid,
       :permit_project_id,
+      :step_code_stage,
       submission_data: {
       }
     )
