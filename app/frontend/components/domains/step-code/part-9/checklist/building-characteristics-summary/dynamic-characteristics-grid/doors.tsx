@@ -4,7 +4,7 @@ import React from "react"
 import { Controller, useFieldArray, useFormContext } from "react-hook-form"
 import { useMst } from "../../../../../../../setup/root"
 import { generateUUID } from "../../../../../../../utils/utility-functions"
-import { TextFormControl } from "../../../../../../shared/form/input-form-control"
+import { NumberFormControl } from "../../../../../../shared/form/input-form-control"
 import { GridColumnHeader } from "../../shared/grid/column-header"
 import { GridData } from "../../shared/grid/data"
 import { DetailsInput } from "../details-input"
@@ -58,7 +58,7 @@ export const Doors = observer(function BuildingCharacteristicsSummaryDoors() {
               />
             </GridData>
             <GridData borderRightWidth={1} borderTopWidth={index == 0 ? 1 : 0}>
-              <TextFormControl fieldName={`${fieldArrayName}.${index}.performanceValue`} />
+              <NumberFormControl fieldName={`${fieldArrayName}.${index}.performanceValue`} />
             </GridData>
           </React.Fragment>
         )

@@ -206,6 +206,7 @@ export const Part3StepCodeChecklistModel = types
   }))
   .views((self) => ({
     get canShowResults() {
+      const hasComplianceReport = !!self.complianceReport?.performance
       const baselineIsComplete =
         self.isComplete("baselineOccupancies") &&
         (self.isComplete("baselineDetails") || !self.isRelevant("baselineDetails")) &&
@@ -215,7 +216,7 @@ export const Part3StepCodeChecklistModel = types
         self.isComplete("stepCodeOccupancies") &&
         (self.isComplete("stepCodePerformanceRequirements") || !self.isRelevant("stepCodePerformanceRequirements"))
 
-      return baselineIsComplete && stepCodeIsComplete //&& self.isComplete("modelledOutputs")
+      return hasComplianceReport && baselineIsComplete && stepCodeIsComplete //&& self.isComplete("modelledOutputs")
     },
   }))
   .actions((self) => ({
@@ -240,6 +241,20 @@ export const Part3StepCodeChecklistModel = types
       )
       if (response.ok) {
         self.sectionCompletionStatus = updatedStatus
+        if (key !== "report") {
+          markParentStepCodeReportsStale(self)
+        }
+        return true
+      }
+      return false
+    }),
+    regenerateReport: flow(function* () {
+      const response = yield self.environment.api.updatePart3Checklist(
+        self.id,
+        { sectionCompletionStatus: self.sectionCompletionStatus },
+        { reportGenerationRequested: true }
+      )
+      if (response.ok) {
         markParentStepCodeReportsStale(self)
         return true
       }

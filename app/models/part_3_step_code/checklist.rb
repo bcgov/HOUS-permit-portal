@@ -26,6 +26,7 @@ class Part3StepCode::Checklist < ActiveRecord::Base
     contact
     requirements_summary
     step_code_summary
+    report
   ].freeze
 
   SECTION_COMPLETION_STATUS_PARAMS =
@@ -225,7 +226,7 @@ class Part3StepCode::Checklist < ActiveRecord::Base
   end
 
   def complete?
-    section_completion_status&.dig("step_code_summary", "complete") || false
+    section_completion_status&.dig("report", "complete") || false
   end
 
   private

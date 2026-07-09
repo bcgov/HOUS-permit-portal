@@ -120,7 +120,7 @@ RSpec.describe Api::Part3Building::ChecklistsController, type: :controller do
                 heating_degree_days: 3220,
                 completed_by_email: "energy@example.com",
                 section_completion_status: {
-                  step_code_summary: {
+                  report: {
                     complete: true
                   }
                 }
