@@ -400,6 +400,63 @@ RSpec.describe NotificationService do
     end
   end
 
+  describe ".publish_release_note_publish_event" do
+    it "no-ops when the release note is not published" do
+      release_note = instance_double("ReleaseNote", published?: false)
+      allow(NotificationPushJob).to receive(:perform_async)
+
+      described_class.publish_release_note_publish_event(release_note)
+
+      expect(NotificationPushJob).not_to have_received(:perform_async)
+    end
+
+    it "pushes notifications to every kept user with the preference enabled" do
+      opted_in_a = create(:user, :submitter)
+      opted_in_b = create(:user, :review_manager)
+      opted_out = create(:user, :submitter)
+      opted_out.preference.update!(
+        enable_in_app_release_note_publish_notification: false
+      )
+      discarded = create(:user, :submitter)
+      discarded.discard
+
+      release_note = create(:release_note, status: :published, version: "9.9.9")
+
+      allow(NotificationPushJob).to receive(:perform_async)
+
+      described_class.publish_release_note_publish_event(release_note)
+
+      expected_payload =
+        include(
+          "action_type" =>
+            Constants::NotificationActionTypes::RELEASE_NOTE_PUBLISH,
+          "action_text" => include("9.9.9"),
+          "object_data" =>
+            include("release_note_id" => release_note.id, "version" => "9.9.9")
+        )
+
+      expect(NotificationPushJob).to have_received(:perform_async) do |hash|
+        expect(hash.keys).to match_array([opted_in_a.id, opted_in_b.id])
+        expect(hash.values).to all(match(expected_payload))
+        # All recipients should receive the exact same payload object.
+        expect(hash.values.uniq.size).to eq(1)
+      end
+    end
+
+    it "does not enqueue a job when no users opted in" do
+      user = create(:user, :submitter)
+      user.preference.update!(
+        enable_in_app_release_note_publish_notification: false
+      )
+      release_note = create(:release_note, status: :published)
+      allow(NotificationPushJob).to receive(:perform_async)
+
+      described_class.publish_release_note_publish_event(release_note)
+
+      expect(NotificationPushJob).not_to have_received(:perform_async)
+    end
+  end
+
   describe ".publish_application_submission_event / .publish_application_revisions_request_event" do
     it "creates correct in-app and email notifications for submitters and collaborators" do
       submitter_pref =
@@ -649,6 +706,360 @@ RSpec.describe NotificationService do
       expect(NotificationPushJob).to have_received(:perform_async).with(
         { "u1" => { b: 2 } }
       )
+    end
+  end
+
+  describe ".publish_new_template_version_publish_event" do
+    it "emails managers but not submitters with outdated drafts" do
+      allow(NotificationPushJob).to receive(:perform_async)
+      mail = instance_double("MailerMessage", deliver_later: true)
+      allow(PermitHubMailer).to receive(
+        :notify_new_template_version_published
+      ).and_return(mail)
+
+      jurisdiction = create(:sub_district)
+      manager = create(:user, :review_manager, jurisdiction: jurisdiction)
+      submitter = create(:user, :submitter)
+      requirement_template = create(:requirement_template)
+      old_template_version =
+        create(
+          :template_version,
+          requirement_template: requirement_template,
+          status: :deprecated,
+          deprecation_reason: :new_publish,
+          version_date: Date.new(2026, 1, 1)
+        )
+      new_template_version =
+        create(
+          :template_version,
+          requirement_template: requirement_template,
+          status: :published,
+          version_date: Date.new(2026, 2, 1)
+        )
+
+      create(
+        :permit_application,
+        submitter: submitter,
+        template_version: old_template_version
+      )
+
+      described_class.publish_new_template_version_publish_event(
+        new_template_version
+      )
+
+      expect(NotificationPushJob).to have_received(:perform_async) do |payload|
+        expect(payload.keys).to contain_exactly(manager.id, submitter.id)
+      end
+      expect(PermitHubMailer).to have_received(
+        :notify_new_template_version_published
+      ).with(
+        new_template_version,
+        manager,
+        jurisdiction: jurisdiction,
+        change_type: :no_action,
+        diff_summary: anything
+      )
+      expect(PermitHubMailer).not_to have_received(
+        :notify_new_template_version_published
+      ).with(new_template_version, submitter, any_args)
+    end
+  end
+
+  describe ".publish_customization_update_event" do
+    it "notifies only submitters with drafts in the customizing jurisdiction" do
+      allow(NotificationPushJob).to receive(:perform_async)
+
+      requirement_template = create(:requirement_template)
+      template_version =
+        create(:template_version, requirement_template: requirement_template)
+
+      jurisdiction_customized = create(:sub_district)
+      jurisdiction_other = create(:sub_district)
+
+      customization =
+        create(
+          :jurisdiction_template_version_customization,
+          jurisdiction: jurisdiction_customized,
+          template_version: template_version
+        )
+
+      matching_submitter = create(:user, :submitter)
+      other_submitter = create(:user, :submitter)
+
+      create(
+        :permit_application,
+        submitter: matching_submitter,
+        template_version: template_version,
+        jurisdiction: jurisdiction_customized
+      )
+
+      create(
+        :permit_application,
+        submitter: other_submitter,
+        template_version: template_version,
+        jurisdiction: jurisdiction_other
+      )
+
+      described_class.publish_customization_update_event(customization)
+
+      expect(NotificationPushJob).to have_received(:perform_async) do |payload|
+        expect(payload.keys).to contain_exactly(matching_submitter.id)
+      end
+    end
+
+    it "throttles repeated notifications for the same jurisdiction and template version" do
+      allow(NotificationPushJob).to receive(:perform_async)
+      allow(Rails.cache).to receive(:write).and_return(true, false)
+
+      requirement_template = create(:requirement_template)
+      template_version =
+        create(:template_version, requirement_template: requirement_template)
+      jurisdiction = create(:sub_district)
+      customization =
+        create(
+          :jurisdiction_template_version_customization,
+          jurisdiction: jurisdiction,
+          template_version: template_version
+        )
+      submitter = create(:user, :submitter)
+
+      create(
+        :permit_application,
+        submitter: submitter,
+        template_version: template_version,
+        jurisdiction: jurisdiction
+      )
+
+      2.times do
+        described_class.publish_customization_update_event(customization)
+      end
+
+      expect(Rails.cache).to have_received(:write).with(
+        "customization_update_notification:" \
+          "#{jurisdiction.id}:#{template_version.id}",
+        true,
+        expires_in: 2.hours,
+        unless_exist: true
+      ).twice
+      expect(NotificationPushJob).to have_received(:perform_async).once
+    end
+  end
+
+  describe ".publish_project_meeting_submitted_event" do
+    it "respects submitter email and in-app preferences" do
+      meeting = create(:project_meeting)
+      meeting.requested_by.preference.update!(
+        enable_email_project_meeting_submitted_notification: false,
+        enable_in_app_project_meeting_submitted_notification: true
+      )
+      allow(NotificationPushJob).to receive(:perform_async)
+
+      expect {
+        described_class.publish_project_meeting_submitted_event(meeting)
+      }.not_to have_enqueued_mail(
+        PermitHubMailer,
+        :notify_project_meeting_submitted
+      )
+
+      expect(NotificationPushJob).to have_received(:perform_async) do |payload|
+        expect(payload.keys).to contain_exactly(meeting.requested_by.id)
+      end
+    end
+  end
+
+  describe ".publish_project_meeting_request_received_event" do
+    it "sends only to jurisdiction project meeting notification recipient emails" do
+      meeting = create(:project_meeting)
+      create(
+        :meeting_submission_contact,
+        jurisdiction: meeting.permit_project.jurisdiction,
+        email: "meetings@example.com"
+      )
+
+      expect {
+        described_class.publish_project_meeting_request_received_event(meeting)
+      }.to have_enqueued_mail(
+        PermitHubMailer,
+        :notify_project_meeting_submitted_to_jurisdiction
+      ).with(meeting, "meetings@example.com")
+    end
+
+    it "does not send jurisdiction email when no recipients are configured" do
+      meeting = create(:project_meeting)
+
+      expect {
+        described_class.publish_project_meeting_request_received_event(meeting)
+      }.not_to have_enqueued_mail(
+        PermitHubMailer,
+        :notify_project_meeting_submitted_to_jurisdiction
+      )
+    end
+  end
+
+  describe ".publish_property_information_request_received_event" do
+    it "sends only to confirmed property information recipient emails when enabled and requested" do
+      meeting = create(:project_meeting, request_property_information: true)
+      jurisdiction = meeting.permit_project.jurisdiction
+      create(
+        :property_information_submission_contact,
+        jurisdiction: jurisdiction,
+        email: "property-info@example.com"
+      )
+      jurisdiction.update!(property_information_requests_enabled: true)
+
+      expect {
+        described_class.publish_property_information_request_received_event(
+          meeting
+        )
+      }.to have_enqueued_mail(
+        PermitHubMailer,
+        :notify_property_information_requested
+      ).with(meeting, "property-info@example.com")
+    end
+
+    it "does not send when property information requests are disabled" do
+      meeting = create(:project_meeting, request_property_information: true)
+      create(
+        :property_information_submission_contact,
+        jurisdiction: meeting.permit_project.jurisdiction,
+        email: "property-info@example.com"
+      )
+
+      expect {
+        described_class.publish_property_information_request_received_event(
+          meeting
+        )
+      }.not_to have_enqueued_mail(
+        PermitHubMailer,
+        :notify_property_information_requested
+      )
+    end
+
+    it "does not send when the submitter did not request property information" do
+      meeting = create(:project_meeting, request_property_information: false)
+      jurisdiction = meeting.permit_project.jurisdiction
+      create(
+        :property_information_submission_contact,
+        jurisdiction: jurisdiction,
+        email: "property-info@example.com"
+      )
+      jurisdiction.update!(property_information_requests_enabled: true)
+
+      expect {
+        described_class.publish_property_information_request_received_event(
+          meeting
+        )
+      }.not_to have_enqueued_mail(
+        PermitHubMailer,
+        :notify_property_information_requested
+      )
+    end
+
+    it "does not send when no recipients are configured" do
+      meeting = create(:project_meeting, request_property_information: true)
+      meeting.permit_project.jurisdiction.update_column(
+        :property_information_requests_enabled,
+        true
+      )
+
+      expect {
+        described_class.publish_property_information_request_received_event(
+          meeting
+        )
+      }.not_to have_enqueued_mail(
+        PermitHubMailer,
+        :notify_property_information_requested
+      )
+    end
+  end
+
+  describe ".publish_project_meeting_scheduled_event" do
+    it "sends the scheduled meeting email to the requester" do
+      meeting =
+        create(
+          :project_meeting,
+          :scheduled,
+          contact_method: :phone,
+          meeting_url: nil
+        )
+
+      expect {
+        described_class.publish_project_meeting_scheduled_event(meeting)
+      }.to have_enqueued_mail(
+        PermitHubMailer,
+        :notify_project_meeting_scheduled
+      ).with(meeting)
+    end
+
+    it "sends scheduled meeting emails to jurisdiction project meeting contacts" do
+      meeting =
+        create(
+          :project_meeting,
+          :scheduled,
+          contact_method: :phone,
+          meeting_url: nil
+        )
+      create(
+        :meeting_submission_contact,
+        jurisdiction: meeting.permit_project.jurisdiction,
+        email: "meetings@example.com"
+      )
+
+      expect {
+        described_class.publish_project_meeting_scheduled_event(meeting)
+      }.to have_enqueued_mail(
+        PermitHubMailer,
+        :notify_project_meeting_scheduled_to_jurisdiction
+      ).with(meeting, "meetings@example.com")
+    end
+  end
+
+  describe ".publish_project_meeting_rescheduled_event" do
+    it "sends the rescheduled meeting email to the requester and an in-app notification" do
+      meeting =
+        create(
+          :project_meeting,
+          :scheduled,
+          contact_method: :phone,
+          meeting_url: nil
+        )
+      allow(NotificationPushJob).to receive(:perform_async)
+
+      expect {
+        described_class.publish_project_meeting_rescheduled_event(meeting)
+      }.to have_enqueued_mail(
+        PermitHubMailer,
+        :notify_project_meeting_rescheduled
+      ).with(meeting)
+
+      expect(NotificationPushJob).to have_received(:perform_async) do |payload|
+        expect(payload.keys).to contain_exactly(meeting.requested_by.id)
+        expect(payload[meeting.requested_by.id]["action_type"]).to eq(
+          Constants::NotificationActionTypes::PROJECT_MEETING_RESCHEDULED
+        )
+      end
+    end
+
+    it "sends rescheduled meeting emails to jurisdiction project meeting contacts" do
+      meeting =
+        create(
+          :project_meeting,
+          :scheduled,
+          contact_method: :phone,
+          meeting_url: nil
+        )
+      create(
+        :meeting_submission_contact,
+        jurisdiction: meeting.permit_project.jurisdiction,
+        email: "meetings@example.com"
+      )
+
+      expect {
+        described_class.publish_project_meeting_rescheduled_event(meeting)
+      }.to have_enqueued_mail(
+        PermitHubMailer,
+        :notify_project_meeting_rescheduled_to_jurisdiction
+      ).with(meeting, "meetings@example.com")
     end
   end
 end

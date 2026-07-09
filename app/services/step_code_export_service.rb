@@ -76,12 +76,12 @@ class StepCodeExportService
         "Is Suite Sub Metered"
       ]
 
-      # Get all submitted Part 3 step codes with their checklist
+      # Get all submitted Part 3 step codes with their current checklist
       Part3StepCode
-        .includes(:permit_application, :checklist)
+        .includes(:permit_application, :checklists)
         .where(permit_applications: { status: %i[newly_submitted resubmitted] })
         .find_each do |step_code|
-          checklist = step_code.checklist
+          checklist = step_code.current_checklist
           next unless checklist
 
           csv << [
@@ -170,7 +170,7 @@ class StepCodeExportService
         .includes(:permit_application, :checklists)
         .where(permit_applications: { status: %i[newly_submitted resubmitted] })
         .find_each do |step_code|
-          checklist = step_code.primary_checklist
+          checklist = step_code.current_checklist
           next unless checklist
 
           # Get compliance reports to extract energy and zero carbon steps

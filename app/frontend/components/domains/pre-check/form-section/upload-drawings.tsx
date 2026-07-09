@@ -17,7 +17,6 @@ import {
 import { Trash } from "@phosphor-icons/react"
 import { UppyFile } from "@uppy/core"
 import "@uppy/core/dist/style.min.css"
-import "@uppy/dashboard/dist/style.css"
 import Dashboard from "@uppy/react/lib/Dashboard.js"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -67,6 +66,7 @@ export const UploadDrawings = observer(function UploadDrawings() {
   })
 
   const designDocumentsAttributes = watch("designDocumentsAttributes")
+  const hasUploadedFile = designDocumentsAttributes.some((doc) => !doc._destroy)
 
   const handleUploadSuccess = (file: UppyFile<{}, {}>, response: any) => {
     const parts = response.uploadURL.split("/")
@@ -221,7 +221,17 @@ export const UploadDrawings = observer(function UploadDrawings() {
         </Text>
       </Box>
 
-      <FormFooter<IUploadDrawingsFormData> handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
+      <FormFooter<IUploadDrawingsFormData>
+        handleSubmit={handleSubmit}
+        onSubmit={onSubmit}
+        isLoading={isSubmitting}
+        isDisabled={!hasUploadedFile}
+        disabledMessage={
+          !hasUploadedFile
+            ? t("preCheck.sections.uploadDrawings.uploadRequired", "Please upload a file before continuing.")
+            : undefined
+        }
+      />
     </Box>
   )
 })

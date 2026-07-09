@@ -19,7 +19,7 @@ import {
 import { Download, FileArrowDown, FileZip, Gear } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
-import React, { useEffect } from "react"
+import React, { useEffect, useRef } from "react"
 import { useTranslation } from "react-i18next"
 import { datefnsAppDateFormat } from "../../../constants"
 import { IPermitApplication } from "../../../models/permit-application"
@@ -39,11 +39,18 @@ export const SubmissionDownloadModal = observer(
     const { t } = useTranslation()
     const { permitApplicationStore } = useMst()
     const { allSubmissionVersionCompletedSupportingDocuments, zipfileUrl, zipfileName, stepCode } = permitApplication
-    const checklist = stepCode?.primaryChecklist
+    const checklist = stepCode?.currentChecklist
     const applicationJsonUrl = `/api/permit_applications/${permitApplication.id}/download_application_json`
     const applicationJsonName = `permit-application-${permitApplication.id}.json`
 
     const { isOpen, onOpen, onClose } = useDisclosure()
+    const zipGenerationTriggeredRef = useRef(false)
+
+    useEffect(() => {
+      if (!isOpen) {
+        zipGenerationTriggeredRef.current = false
+      }
+    }, [isOpen])
 
     useEffect(() => {
       if (!isOpen) return
@@ -59,16 +66,26 @@ export const SubmissionDownloadModal = observer(
     }, [checklist?.isLoaded])
 
     useEffect(() => {
-      if (!permitApplication?.isFullyLoaded) {
+      if (!permitApplication?.isFullyLoaded || !isOpen) {
         return
       }
 
-      if (!permitApplication.isSubmitted || !permitApplication.missingPdfs.length) {
+      const needsZipGeneration = permitApplication.isSubmitted && !zipfileUrl && !zipGenerationTriggeredRef.current
+
+      if (!needsZipGeneration) {
         return
       }
 
+      zipGenerationTriggeredRef.current = true
       permitApplication.generateMissingPdfs()
-    }, [permitApplication?.isFullyLoaded, permitApplication?.missingPdfs, checklist?.isLoaded])
+    }, [
+      permitApplication?.isFullyLoaded,
+      permitApplication?.isSubmitted,
+      permitApplication?.missingPdfs,
+      checklist?.isLoaded,
+      isOpen,
+      zipfileUrl,
+    ])
 
     return (
       <>
@@ -89,7 +106,7 @@ export const SubmissionDownloadModal = observer(
               <>
                 <ModalHeader>
                   <VStack w="full" align="start">
-                    <Heading as="h1" fontSize="2xl" textTransform={"capitalize"}>
+                    <Heading as="h1" fontSize="2xl">
                       {t("permitApplication.show.downloadHeading")}
                       <br />
                       <Text as="span" fontSize="lg" color="text.secondary">
@@ -198,7 +215,7 @@ const FileDownloadLink = function ApplicationFileDownloadLink({ url, name, size,
   )
 }
 
-function MissingPdf({ pdfKey }: { pdfKey: "permit_application_pdf" }) {
+function MissingPdf({ pdfKey }: { pdfKey: string }) {
   const { t } = useTranslation()
 
   const getMissingPdfLabel = () => {

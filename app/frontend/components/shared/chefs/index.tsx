@@ -10,8 +10,16 @@ import { FILE_UPLOAD_MAX_SIZE } from "./additional-formio/constant"
 
 const defaultLabelTemplate = Templates.current.label.form
 const defaultButtonsTemplate = Templates.current.button.form
+const chefsTemplateGlobal = globalThis as typeof globalThis & {
+  __housOriginalLabelTemplate?: typeof defaultLabelTemplate
+  __housOriginalButtonsTemplate?: typeof defaultButtonsTemplate
+}
+const originalLabelTemplate = chefsTemplateGlobal.__housOriginalLabelTemplate ?? defaultLabelTemplate
+const originalButtonsTemplate = chefsTemplateGlobal.__housOriginalButtonsTemplate ?? defaultButtonsTemplate
+chefsTemplateGlobal.__housOriginalLabelTemplate = originalLabelTemplate
+chefsTemplateGlobal.__housOriginalButtonsTemplate = originalButtonsTemplate
 
-//container - we can add for main headers like Contact Info
+//container - we can add for main headers like Contact Info.
 //panels - are for section blocks, to put things inside panels, we need to target the components section under the body
 
 Templates.current = {
@@ -30,7 +38,7 @@ Templates.current = {
         )
       }
 
-      template = template.concat(defaultButtonsTemplate(ctx))
+      template = template.concat(originalButtonsTemplate(ctx))
       return template
     },
   },
@@ -40,7 +48,8 @@ Templates.current = {
       if (ctx?.component?.instructions) {
         template = `<div class="form-group-instructions">${ctx.component.instructions}</div>`
       }
-      template = template.concat(defaultLabelTemplate(ctx))
+      const baseLabelTemplate = originalLabelTemplate(ctx)
+      template = template.concat(baseLabelTemplate)
       if (ctx?.component?.computedCompliance) {
         let result = ctx?.component?.computedComplianceResult
         let computedComplianceHtml = ""

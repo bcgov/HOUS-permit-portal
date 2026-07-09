@@ -6,7 +6,7 @@ import React from "react"
 import { Controller, useFieldArray, useFormContext } from "react-hook-form"
 import { useMst } from "../../../../../../../setup/root"
 import { ESpaceHeatingCoolingVariant } from "../../../../../../../types/enums"
-import { TextFormControl } from "../../../../../../shared/form/input-form-control"
+import { NumberFormControl } from "../../../../../../shared/form/input-form-control"
 import { GridColumnHeader } from "../../shared/grid/column-header"
 import { GridData } from "../../shared/grid/data"
 import { DetailsInput } from "../details-input"
@@ -90,7 +90,7 @@ const Fields = observer(({ variant }: IFieldsProps) => {
           />
         </GridData>
         <GridData borderTopWidth={0} borderRightWidth={1}>
-          <TextFormControl fieldName={`${fieldArrayName}.${trueIndex}.performanceValue`} />
+          <NumberFormControl fieldName={`${fieldArrayName}.${trueIndex}.performanceValue`} />
         </GridData>
       </React.Fragment>
     )

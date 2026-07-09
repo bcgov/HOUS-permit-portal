@@ -11,14 +11,13 @@ RSpec.describe RemindReviewerJob, type: :job do
 
   it "emails each confirmed submission contact for the jurisdiction's unviewed applications" do
     apps_relation = double("AppsRelation", any?: true)
-    contact = instance_double("SubmissionContact")
-    contacts_scope = double("ContactsScope", confirmed: [contact])
+    contact = instance_double("ApplicationSubmissionContact")
 
     jurisdiction =
       instance_double(
         "Jurisdiction",
         unviewed_permit_applications: apps_relation,
-        submission_contacts: contacts_scope
+        confirmed_submission_contacts: [contact]
       )
 
     allow(Jurisdiction).to receive(:all).and_return([jurisdiction])
@@ -41,7 +40,7 @@ RSpec.describe RemindReviewerJob, type: :job do
       instance_double(
         "Jurisdiction",
         unviewed_permit_applications: apps_relation,
-        submission_contacts: double("ContactsScope", confirmed: [])
+        confirmed_submission_contacts: []
       )
     allow(Jurisdiction).to receive(:all).and_return([jurisdiction])
     allow(PermitHubMailer).to receive(:remind_reviewer)

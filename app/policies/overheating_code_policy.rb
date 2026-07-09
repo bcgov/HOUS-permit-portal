@@ -1,14 +1,14 @@
 class OverheatingCodePolicy < ApplicationPolicy
   def index?
-    user.present?
+    overheating_tool_enabled? && user.present?
   end
 
   def show?
-    record.creator_id == user.id
+    overheating_tool_enabled? && record.creator_id == user.id
   end
 
   def create?
-    user.present?
+    overheating_tool_enabled? && user.present?
   end
 
   def update?
@@ -23,8 +23,16 @@ class OverheatingCodePolicy < ApplicationPolicy
     show?
   end
 
+  private
+
+  def overheating_tool_enabled?
+    SiteConfiguration.overheating_tool_enabled?
+  end
+
   class Scope < Scope
     def resolve
+      return scope.none unless SiteConfiguration.overheating_tool_enabled?
+
       scope.where(creator_id: user.id)
     end
   end

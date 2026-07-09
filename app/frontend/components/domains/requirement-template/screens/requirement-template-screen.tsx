@@ -1,9 +1,10 @@
 import { Box, Container, Flex, Heading, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 import { useMst } from "../../../../setup/root"
 import { ToggleArchivedButton } from "../../../shared/buttons/toggle-archived-button"
+import { RouterLink } from "../../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
 import { RequirementTemplateGrid } from "../../../shared/requirement-template/requirement-template-grid"
 import { RequirementTemplateActions } from "../requirement-template-actions"
@@ -23,6 +24,20 @@ export const RequirementTemplatesScreen = observer(function RequirementTemplate(
             </Heading>
             <Text color={"text.secondary"} mt={1}>
               {t("requirementTemplate.index.description")}
+            </Text>
+            <Text color={"text.secondary"} mt={1}>
+              <Trans
+                i18nKey="requirementTemplate.index.categoryDescription"
+                components={{
+                  permitCategoriesLink: (
+                    <RouterLink
+                      to="/configuration-management/template-categories"
+                      color="text.link"
+                      textDecoration="underline"
+                    />
+                  ),
+                }}
+              />
             </Text>
           </Box>
           <RouterLinkButton to="new" variant={"primary"} minWidth="fit-content">

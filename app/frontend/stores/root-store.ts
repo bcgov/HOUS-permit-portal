@@ -4,15 +4,19 @@ import { createUserChannelConsumer } from "../channels/user_channel"
 import { withEnvironment } from "../lib/with-environment"
 import { CollaboratorStoreModel, ICollaboratorStore } from "./collaborator-store"
 import { ContactStoreModel, IContactStore } from "./contact-store"
-import { DigitalSealValidatorStoreModel, IDigitalSealValidatorStore } from "./digital-seal-validator-store"
 import { GeocoderStoreModel, IGeocoderStore } from "./geocoder-store"
+import { HelpVideoStoreModel, IHelpVideoStore } from "./help-video-store"
 import { IJurisdictionStore, JurisdictionStoreModel } from "./jurisdiction-store"
+import { INoteStore, NoteStoreModel } from "./note-store"
 import { INotificationStore, NotificationStoreModel } from "./notification-store"
 import { IOverheatingCodeStore, OverheatingCodeStoreModel } from "./overheating-code-store"
 import { IPermitApplicationStore, PermitApplicationStoreModel } from "./permit-application-store"
 import { IPermitProjectStore, PermitProjectStoreModel } from "./permit-project-store"
 import { IPreCheckStore, PreCheckStoreModel } from "./pre-check-store"
 import { IProjectAuditStore, ProjectAuditStoreModel } from "./project-audit-store"
+import { IProjectMeetingInboxStore, ProjectMeetingInboxStoreModel } from "./project-meeting-inbox-store"
+import { IProjectMeetingStore, ProjectMeetingStoreModel } from "./project-meeting-store"
+import { IReleaseNoteStore, ReleaseNoteStoreModel } from "./release-note-store"
 import { IRequirementBlockStoreModel, RequirementBlockStoreModel } from "./requirement-block-store"
 import { IRequirementTemplateStoreModel, RequirementTemplateStoreModel } from "./requirement-template-store"
 import { ISandboxStore, SandboxStoreModel } from "./sandbox-store"
@@ -20,6 +24,7 @@ import { ISessionStore, SessionStoreModel } from "./session-store"
 import { ISiteConfigurationStore, SiteConfigurationStoreModel } from "./site-configuration-store"
 import { IStepCodeStore, StepCodeStoreModel } from "./step-code-store"
 import { ISubmissionInboxStore, SubmissionInboxStoreModel } from "./submission-inbox-store"
+import { ITemplateCategoryStoreModel, TemplateCategoryStoreModel } from "./template-category-store"
 import { ITemplateVersionPreviewStoreModel, TemplateVersionPreviewStoreModel } from "./template-version-preview-store"
 import { ITemplateVersionStoreModel, TemplateVersionStoreModel } from "./template-version-store"
 import { IUIStore, UIStoreModel } from "./ui-store"
@@ -33,23 +38,28 @@ export const RootStoreModel = types
     userStore: types.optional(UserStoreModel, {}),
     permitApplicationStore: types.optional(PermitApplicationStoreModel, {}),
     permitProjectStore: types.optional(PermitProjectStoreModel, {}),
+    noteStore: types.optional(NoteStoreModel, {}),
     projectAuditStore: types.optional(ProjectAuditStoreModel, {}),
     preCheckStore: types.optional(PreCheckStoreModel, {}),
+    projectMeetingStore: types.optional(ProjectMeetingStoreModel, {}),
+    projectMeetingInboxStore: types.optional(ProjectMeetingInboxStoreModel, {}),
     overheatingCodeStore: types.optional(OverheatingCodeStoreModel, {}),
     jurisdictionStore: types.optional(JurisdictionStoreModel, {}),
     requirementBlockStore: types.optional(RequirementBlockStoreModel, {}),
     requirementTemplateStore: types.optional(RequirementTemplateStoreModel, {}),
-    digitalSealValidatorStore: types.optional(DigitalSealValidatorStoreModel, {}),
     templateVersionPreviewStore: types.optional(TemplateVersionPreviewStoreModel, {}),
     collaboratorStore: types.optional(CollaboratorStoreModel, {}),
+    templateCategoryStore: types.optional(TemplateCategoryStoreModel, {}),
     templateVersionStore: types.optional(TemplateVersionStoreModel, {}),
     geocoderStore: types.optional(GeocoderStoreModel, {}),
+    helpVideoStore: types.optional(HelpVideoStoreModel, {}),
     stepCodeStore: types.optional(StepCodeStoreModel, {}),
     siteConfigurationStore: types.optional(SiteConfigurationStoreModel, {}),
     contactStore: types.optional(ContactStoreModel, {}),
     notificationStore: types.optional(NotificationStoreModel, {}),
     sandboxStore: types.optional(SandboxStoreModel, {}),
     submissionInboxStore: types.optional(SubmissionInboxStoreModel, {}),
+    releaseNoteStore: types.optional(ReleaseNoteStoreModel, {}),
   })
   .extend(withEnvironment())
   .volatile((self) => ({
@@ -116,24 +126,29 @@ export interface IRootStore extends IStateTreeNode {
   sessionStore: ISessionStore
   permitApplicationStore: IPermitApplicationStore
   permitProjectStore: IPermitProjectStore
+  noteStore: INoteStore
   projectAuditStore: IProjectAuditStore
   preCheckStore: IPreCheckStore
+  projectMeetingStore: IProjectMeetingStore
+  projectMeetingInboxStore: IProjectMeetingInboxStore
   overheatingCodeStore: IOverheatingCodeStore
   jurisdictionStore: IJurisdictionStore
   userStore: IUserStore
   requirementBlockStore: IRequirementBlockStoreModel
   requirementTemplateStore: IRequirementTemplateStoreModel
-  digitalSealValidatorStore: IDigitalSealValidatorStore
   templateVersionPreviewStore: ITemplateVersionPreviewStoreModel
   templateVersionStore: ITemplateVersionStoreModel
   geocoderStore: IGeocoderStore
+  helpVideoStore: IHelpVideoStore
   stepCodeStore: IStepCodeStore
   siteConfigurationStore: ISiteConfigurationStore
   contactStore: IContactStore
   notificationStore: INotificationStore
   collaboratorStore: ICollaboratorStore
+  templateCategoryStore: ITemplateCategoryStoreModel
   sandboxStore: ISandboxStore
   submissionInboxStore: ISubmissionInboxStore
+  releaseNoteStore: IReleaseNoteStore
   subscribeToUserChannel: () => void
   disconnectUserChannel: () => void
   loadLocalPersistedData: () => void

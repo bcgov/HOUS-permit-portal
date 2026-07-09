@@ -1,7 +1,7 @@
 class PermitProject < ApplicationRecord
   # searchkick must be declared before Discard::Model to ensure auto-callbacks register correctly
   searchkick word_middle: %i[title full_address pid pin number owner_name]
-  audited on: %i[create update], only: %i[title full_address]
+  audited on: %i[create update], only: %i[title full_address state viewed_at]
   has_associated_audits
 
   include Discard::Model
@@ -21,6 +21,7 @@ class PermitProject < ApplicationRecord
 
   has_many :permit_applications
   has_many :project_documents, dependent: :destroy
+  has_many :project_meetings, dependent: :destroy
   has_many :step_codes
   has_many :collaborators, through: :permit_applications
   has_many :pinned_projects, dependent: :destroy
@@ -114,6 +115,14 @@ class PermitProject < ApplicationRecord
       permit_applications.kept.where(status: :approved).count
   end
 
+  def active_project_meeting
+    project_meetings.active.order(created_at: :desc).first
+  end
+
+  def has_active_project_meeting
+    project_meetings.active.exists?
+  end
+
   def days_in_queue
     seconds = queue_time_seconds || 0
     seconds +=
@@ -128,11 +137,15 @@ class PermitProject < ApplicationRecord
   end
 
   def update_viewed_at
-    update(viewed_at: Time.current)
+    return if viewed_at.present?
+
+    update!(viewed_at: Time.current)
   end
 
   def mark_as_unviewed
-    update(viewed_at: nil)
+    return if viewed_at.blank?
+
+    update!(viewed_at: nil)
   end
 
   def broadcast_jurisdiction_projects_count_update
@@ -177,12 +190,13 @@ class PermitProject < ApplicationRecord
       inbox_rollup_status: inbox_rollup_status,
       viewed_at: viewed_at,
       enqueued_at: enqueued_at,
+      has_active_project_meeting: has_active_project_meeting,
       forcasted_completion_date: forcasted_completion_date,
       requirement_template_ids:
         permit_applications
           .kept
-          .map { |pa| pa.requirement_template&.id }
-          .compact
+          .includes(:requirement_template)
+          .filter_map { |pa| pa.requirement_template&.id }
           .uniq,
       total_permits_count: permit_applications.kept.count,
       new_draft_count: permit_applications.kept.where(status: :new_draft).count,
@@ -222,6 +236,7 @@ class PermitProject < ApplicationRecord
   def recent_inbox_permit_applications(limit: 3)
     permit_applications
       .kept
+      .includes(:submitter, :template_version, requirement_template: :taggings)
       .select(&:visible_to_reviewers?)
       .sort_by(&:updated_at)
       .last(limit)
@@ -233,7 +248,13 @@ class PermitProject < ApplicationRecord
     scope =
       permit_applications
         .kept
-        .includes(:submission_versions, :permit_collaborations)
+        .includes(
+          :submission_versions,
+          :permit_collaborations,
+          :submitter,
+          :template_version,
+          requirement_template: :taggings
+        )
         .order(updated_at: :desc)
     return scope.limit(3) if owner_id == user.id
 
@@ -306,19 +327,15 @@ class PermitProject < ApplicationRecord
       &.collaborator
   end
 
-  def designated_reviewer_enabled?
-    SiteConfiguration.allow_designated_reviewer? &&
-      jurisdiction&.allow_designated_reviewer
+  def project_meetings_enabled?
+    SiteConfiguration.project_meetings_enabled? &&
+      jurisdiction&.project_meetings_enabled
   end
 
   # Atomically assigns the project's single review collaborator, replacing any
   # existing assignment. Re-picking the current collaborator is a no-op (no
   # notification churn). Locks existing kept rows to serialize concurrent calls.
   def assign_project_review_collaborator!(collaborator_id)
-    unless designated_reviewer_enabled?
-      raise "Designated reviewer feature is not enabled"
-    end
-
     transaction do
       existing = permit_project_collaborations.kept.lock.first
 

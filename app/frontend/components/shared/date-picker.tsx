@@ -3,10 +3,18 @@ import type { SystemStyleObject } from "@chakra-ui/styled-system"
 import { CalendarBlank, CaretDown } from "@phosphor-icons/react"
 import * as R from "ramda"
 import React, { forwardRef } from "react"
-import ReactDatePicker, { ReactDatePickerProps } from "react-datepicker"
+import ReactDatePickerImport, { ReactDatePickerProps } from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 import { useTranslation } from "react-i18next"
 import { datefnsAppDateFormat } from "../../constants"
+import { interopDefault } from "../../utils/interop-default"
+
+const ReactDatePicker =
+  typeof ReactDatePickerImport === "function"
+    ? ReactDatePickerImport
+    : ((ReactDatePickerImport as { default?: typeof ReactDatePickerImport }).default?.default ??
+      (ReactDatePickerImport as { default?: typeof ReactDatePickerImport }).default ??
+      ReactDatePickerImport)
 
 type IDatePickerPropsBase = {
   containerProps?: Partial<BoxProps>
@@ -71,6 +79,7 @@ const CustomInput = forwardRef<
 
 export function DatePicker({ containerProps, ...datePickerProps }: IDatePickerProps) {
   const sxStyles = containerProps?.sx || {}
+  const ReactDatePickerComponent = interopDefault(ReactDatePicker)
   return (
     <Box
       w={"200px"}
@@ -102,7 +111,7 @@ export function DatePicker({ containerProps, ...datePickerProps }: IDatePickerPr
         ) as SystemStyleObject
       }
     >
-      <ReactDatePicker
+      <ReactDatePickerComponent
         customInput={<CustomInput />}
         dateFormat={datefnsAppDateFormat}
         popperPlacement={"bottom-start"}

@@ -16,6 +16,36 @@ RSpec.describe SiteConfiguration, type: :model do
     end
   end
 
+  describe ".qa_tools_enabled?" do
+    before { SiteConfiguration.delete_all }
+
+    it "returns the global QA tools flag" do
+      described_class.create!(qa_tools_enabled: true)
+
+      expect(described_class.qa_tools_enabled?).to eq(true)
+    end
+  end
+
+  describe ".project_meetings_enabled?" do
+    before { SiteConfiguration.delete_all }
+
+    it "returns the global project meetings flag" do
+      described_class.create!(project_meetings_enabled: true)
+
+      expect(described_class.project_meetings_enabled?).to eq(true)
+    end
+  end
+
+  describe ".overheating_tool_enabled?" do
+    before { SiteConfiguration.delete_all }
+
+    it "returns the global overheating tool flag" do
+      described_class.create!(overheating_tool_enabled: true)
+
+      expect(described_class.overheating_tool_enabled?).to eq(true)
+    end
+  end
+
   describe "singleton enforcement" do
     it "prevents creating a second record" do
       SiteConfiguration.create!

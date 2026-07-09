@@ -20,6 +20,7 @@ interface RequirementTemplateGridProps {
 }
 
 export const RequirementTemplateGrid: React.FC<RequirementTemplateGridProps> = observer(({ renderActions }) => {
+  const { t } = useTranslation()
   const { requirementTemplateStore } = useMst()
   const {
     tableRequirementTemplates,
@@ -36,7 +37,7 @@ export const RequirementTemplateGrid: React.FC<RequirementTemplateGridProps> = o
 
   return (
     <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
-      <SearchGrid templateColumns="1.5fr 1.5fr 2fr 1.5fr 1fr 1fr">
+      <SearchGrid templateColumns="1.5fr 1fr 2.5fr 1.5fr 1fr 7.9rem">
         <GridHeaders />
 
         {isSearching ? (
@@ -48,6 +49,9 @@ export const RequirementTemplateGrid: React.FC<RequirementTemplateGridProps> = o
             <Box key={rt.id} className={"requirements-template-grid-row"} role={"row"} display={"contents"}>
               <SearchGridItem fontWeight="bold">{rt.nickname}</SearchGridItem>
               <SearchGridItem>
+                {rt.templateCategory?.label ?? t("siteConfiguration.templateCategories.uncategorized")}
+              </SearchGridItem>
+              <SearchGridItem>
                 <HStack as="ul" wrap="wrap" spacing={1} gap={1}>
                   {(rt.tags ?? []).map((tag) => (
                     <Tag key={tag} as="li" bg="greys.grey03" color="text.secondary" fontSize="xs">
@@ -56,14 +60,13 @@ export const RequirementTemplateGrid: React.FC<RequirementTemplateGridProps> = o
                   ))}
                 </HStack>
               </SearchGridItem>
-              <SearchGridItem>{rt.description}</SearchGridItem>
               <SearchGridItem>
                 {rt.publishedTemplateVersion?.versionDate ? (
                   <VersionTag versionDate={rt.publishedTemplateVersion.versionDate} />
                 ) : null}
               </SearchGridItem>
               <SearchGridItem>{rt.availableIn}</SearchGridItem>
-              <SearchGridItem>{renderActions(rt)}</SearchGridItem>
+              <SearchGridItem justifyContent="flex-end">{renderActions(rt)}</SearchGridItem>
             </Box>
           ))
         )}
@@ -104,28 +107,33 @@ const GridHeaders = observer(function GridHeaders() {
           bg={"greys.grey10"}
           justifyContent={"space-between"}
           align="center"
+          gap={6}
         >
-          <Text role={"heading"}>{t("requirementTemplate.index.tableHeading")}</Text>
+          <Text role={"heading"} flexShrink={0}>
+            {t("requirementTemplate.index.tableHeading")}
+          </Text>
           <ModelSearchInput searchModel={requirementTemplateStore} />
         </GridItem>
       </Box>
       <Box display={"contents"} role={"row"}>
         {Object.values(ERequirementTemplateSortFields).map((field) => (
-          <GridHeader key={field} role={"columnheader"}>
-            <Flex
-              w={"full"}
-              as={"button"}
-              justifyContent={"space-between"}
-              cursor="pointer"
-              onClick={() => toggleSort(field)}
-              borderRight={"1px solid"}
-              borderColor={"border.light"}
-              px={4}
-            >
-              <Text>{getSortColumnHeader(field)}</Text>
-              <SortIcon<ERequirementTemplateSortFields> field={field} currentSort={sort} />
-            </Flex>
-          </GridHeader>
+          <React.Fragment key={field}>
+            <GridHeader role={"columnheader"}>
+              <Flex
+                w={"full"}
+                as={"button"}
+                justifyContent={"space-between"}
+                cursor="pointer"
+                onClick={() => toggleSort(field)}
+                borderRight={"1px solid"}
+                borderColor={"border.light"}
+                px={4}
+              >
+                <Text>{getSortColumnHeader(field)}</Text>
+                <SortIcon<ERequirementTemplateSortFields> field={field} currentSort={sort} />
+              </Flex>
+            </GridHeader>
+          </React.Fragment>
         ))}
         <GridHeader role={"columnheader"} />
       </Box>

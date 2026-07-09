@@ -1,4 +1,4 @@
-import { Flex, FormControl, GridItem, Heading, HStack, VStack } from "@chakra-ui/react"
+import { Button, Flex, FormControl, GridItem, Heading, HStack, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React from "react"
@@ -12,6 +12,7 @@ import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
 import { ModelSearchInput } from "../../shared/base/model-search-input"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { SearchGrid } from "../../shared/grid/search-grid"
+import { MeetingRequestsFilter } from "../jurisdictions/submission-inbox/filters"
 import { GridHeaders, PROJECTS_GRID_TEMPLATE_COLUMNS } from "./grid-header"
 import { JurisdictionFilter } from "./jurisdiction-filter"
 import { ProjectGridRow } from "./project-grid-row"
@@ -42,18 +43,27 @@ export const ProjectsGrid = observer(() => {
         <FormControl w="full">
           <ModelSearchInput
             searchModel={permitProjectStore}
-            inputProps={{ placeholder: t("ui.search"), width: "full" }}
+            inputProps={{ placeholder: t("permitProject.searchPlaceholder"), width: "full" }}
             inputGroupProps={{ width: "full" }}
           />
         </FormControl>
-        <Flex justifyContent={"space-between"} w="full">
+        <Flex justifyContent="space-between" w="full">
           <HStack>
             {/* currently we do not have the ability to archive projects */}
             {/* <ActiveArchivedFilter searchModel={permitProjectStore} /> */}
             <RequirementTemplateFilter searchModel={permitProjectStore} />
             <RollupStatusFilter searchModel={permitProjectStore} />
             <JurisdictionFilter searchModel={permitProjectStore} />
+            <MeetingRequestsFilter
+              value={permitProjectStore.activeMeetingFilter}
+              onChange={(val) => permitProjectStore.setActiveMeetingFilter(val)}
+              onApply={() => permitProjectStore.searchPermitProjects()}
+              onClear={() => permitProjectStore.searchPermitProjects()}
+            />
           </HStack>
+          <Button variant="link" size="sm" flexShrink={0} ml="auto" onClick={() => permitProjectStore.resetFilters()}>
+            {t("submissionInbox.clearAllFilters")}
+          </Button>
         </Flex>
       </Flex>
 
@@ -61,11 +71,11 @@ export const ProjectsGrid = observer(() => {
         <GridHeaders columns={Object.values(EPermitProjectSortFields)} includeActionColumn />
 
         {isSearching ? (
-          <Flex gridColumn="span 6" justify="center" align="center" minH="200px">
+          <Flex gridColumn="span 7" justify="center" align="center" minH="200px">
             <SharedSpinner />
           </Flex>
         ) : R.isEmpty(tablePermitProjects) ? (
-          <GridItem gridColumn="span 6">
+          <GridItem gridColumn="span 7">
             <CustomMessageBox
               m={4}
               status={EFlashMessageStatus.info}

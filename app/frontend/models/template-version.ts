@@ -10,6 +10,12 @@ import { startBlobDownload } from "../utils/utility-functions"
 import { IIntegrationMapping, IntegrationMappingModel } from "./integration-mapping"
 import { JurisdictionTemplateVersionCustomizationModel } from "./jurisdiction-template-version-customization"
 
+interface ITemplateCategorySummary {
+  id: string
+  label: string
+  sortOrder: number
+}
+
 export const TemplateVersionModel = types
   .model("TemplateVersionModel")
   .props({
@@ -33,8 +39,13 @@ export const TemplateVersionModel = types
     changeSignificance: types.maybeNull(types.string),
     notificationScope: types.maybeNull(types.string),
     publiclyPreviewable: types.optional(types.boolean, false),
+    requiresProjectMeeting: types.optional(types.boolean, false),
+    disabledByJurisdiction: types.optional(types.boolean, false),
     hasUnresolvedFeedbacks: types.optional(types.boolean, false),
     feedbacksCount: types.optional(types.number, 0),
+    templateCategoryId: types.maybeNull(types.string),
+    templateCategory: types.maybeNull(types.frozen<ITemplateCategorySummary>()),
+    templateSortOrder: types.optional(types.number, 0),
     // Preview IDs (populated on extended view for drafts).
     // Stored as string IDs instead of safeReferences to avoid circular dependency:
     // TemplateVersion -> TemplateVersionPreview -> User -> Jurisdiction -> PermitApplication -> TemplateVersion
@@ -93,9 +104,15 @@ export const TemplateVersionModel = types
   .actions((self) => ({
     setJurisdictionTemplateVersionCustomization(
       jurisdictionId: string,
-      customization: IJurisdictionTemplateVersionCustomizationForm
+      customization:
+        | IJurisdictionTemplateVersionCustomizationForm
+        | Instance<typeof JurisdictionTemplateVersionCustomizationModel>
     ) {
-      self.templateVersionCustomizationsByJurisdiction.set(jurisdictionId, customization)
+      const customizationModel = JurisdictionTemplateVersionCustomizationModel.is(customization)
+        ? customization
+        : JurisdictionTemplateVersionCustomizationModel.create(customization)
+
+      self.templateVersionCustomizationsByJurisdiction.set(jurisdictionId, customizationModel)
     },
     setIntegrationMapping(jurisdictionId: string, integrationMapping: IIntegrationMapping) {
       self.integrationMappingByJurisdiction.set(jurisdictionId, integrationMapping)

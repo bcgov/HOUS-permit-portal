@@ -4,7 +4,11 @@ class ProjectAuditPresenter
     "PermitApplication" => ProjectAuditFormatters::PermitApplicationFormatter,
     "PermitCollaboration" =>
       ProjectAuditFormatters::PermitCollaborationFormatter,
-    "PermitBlockStatus" => ProjectAuditFormatters::PermitBlockStatusFormatter
+    "PermitBlockStatus" => ProjectAuditFormatters::PermitBlockStatusFormatter,
+    "PermitProjectCollaboration" =>
+      ProjectAuditFormatters::PermitProjectCollaborationFormatter,
+    "SubmissionVersion" => ProjectAuditFormatters::SubmissionVersionFormatter,
+    "ProjectMeeting" => ProjectAuditFormatters::ProjectMeetingFormatter
   }.freeze
 
   attr_reader :audit, :viewer

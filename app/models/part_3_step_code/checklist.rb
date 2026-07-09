@@ -2,6 +2,46 @@ class Part3StepCode::Checklist < ActiveRecord::Base
   self.table_name = "part_3_step_code_checklists"
 
   include ChecklistReportDocumentConcern
+  include StepCodeChecklistStageCompletion
+
+  SECTION_COMPLETION_STATUS_KEYS = %i[
+    start
+    project_details
+    location_details
+    baseline_occupancies
+    baseline_details
+    district_energy
+    fuel_types
+    additional_fuel_types
+    baseline_performance
+    step_code_occupancies
+    step_code_performance_requirements
+    modelled_outputs
+    renewable_energy
+    overheating_requirements
+    residential_adjustments
+    document_references
+    performance_characteristics
+    hvac
+    contact
+    requirements_summary
+    step_code_summary
+    report
+  ].freeze
+
+  SECTION_COMPLETION_STATUS_PARAMS =
+    SECTION_COMPLETION_STATUS_KEYS.index_with { %i[complete relevant] }.freeze
+
+  DEFAULT_SECTION_COMPLETION_STATUS =
+    SECTION_COMPLETION_STATUS_KEYS
+      .index_with { { complete: false, relevant: true } }
+      .merge(project_details: { complete: false, relevant: false })
+      .deep_stringify_keys
+      .freeze
+
+  def self.section_completion_status_params
+    SECTION_COMPLETION_STATUS_PARAMS
+  end
 
   delegate :newly_submitted_at,
            :reference_number,
@@ -15,10 +55,15 @@ class Part3StepCode::Checklist < ActiveRecord::Base
              optional: true,
              class_name: "Part3StepCode",
              foreign_key: "step_code_id",
-             inverse_of: :checklist,
+             inverse_of: :checklists,
              touch: true
 
   accepts_nested_attributes_for :step_code, update_only: true
+
+  enum :stage, %i[pre_construction mid_construction as_built]
+  enum :status, %i[draft complete], prefix: :status
+
+  validates :stage, uniqueness: { scope: :step_code_id }, if: :step_code_id?
 
   has_many :occupancy_classifications, dependent: :destroy
   has_many :baseline_occupancies,
@@ -157,6 +202,7 @@ class Part3StepCode::Checklist < ActiveRecord::Base
             },
             allow_blank: true
 
+  before_validation :set_default_section_completion_status
   before_create :set_climate_info
 
   def compliance_metrics
@@ -180,7 +226,7 @@ class Part3StepCode::Checklist < ActiveRecord::Base
   end
 
   def complete?
-    section_completion_status.dig("step_code_summary", "complete")
+    section_completion_status&.dig("report", "complete") || false
   end
 
   private
@@ -192,6 +238,13 @@ class Part3StepCode::Checklist < ActiveRecord::Base
     self.climate_zone ||=
       StepCode::Part3::V0::Requirements::References::ClimateZone.value(
         step_code.jurisdiction_heating_degree_days
+      )
+  end
+
+  def set_default_section_completion_status
+    self.section_completion_status =
+      DEFAULT_SECTION_COMPLETION_STATUS.deep_merge(
+        section_completion_status.presence || {}
       )
   end
 end

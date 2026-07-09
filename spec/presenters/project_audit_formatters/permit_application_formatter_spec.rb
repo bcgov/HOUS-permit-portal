@@ -54,6 +54,24 @@ RSpec.describe ProjectAuditFormatters::PermitApplicationFormatter do
       end
     end
 
+    context 'when action is "create" with a scalar status (legacy audits)' do
+      let(:audit) do
+        build_audit_double(
+          user: user,
+          auditable: auditable,
+          auditable_type: "PermitApplication",
+          action: "create",
+          audited_changes: {
+            "status" => PermitApplication.statuses["new_draft"]
+          }
+        )
+      end
+
+      it "returns created the application message" do
+        expect(formatter.description).to eq("Alice created the application")
+      end
+    end
+
     context 'when action is "create" and auditable is nil' do
       let(:audit) do
         build_audit_double(
@@ -159,9 +177,9 @@ RSpec.describe ProjectAuditFormatters::PermitApplicationFormatter do
           )
         end
 
-        it "returns generic status change message" do
+        it "returns from/to status change message" do
           expect(formatter.description).to eq(
-            "Alice changed the application status on the application"
+            "Alice changed status from New draft to Unknown"
           )
         end
       end

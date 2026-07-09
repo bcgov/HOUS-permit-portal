@@ -66,7 +66,7 @@ export const ProjectCollaboratorsSidebar = observer(function ProjectCollaborator
         </DrawerHeader>
 
         <DrawerBody as={Stack} spacing={8}>
-          {designatedReviewerEnabled && <ProjectReviewCollaboratorsSection project={project} />}
+          <ProjectReviewCollaboratorsSection project={project} />
 
           <Stack spacing={4}>
             <Text as="h3" fontSize="md" fontWeight={700}>

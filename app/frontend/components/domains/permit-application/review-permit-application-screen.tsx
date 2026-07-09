@@ -27,6 +27,7 @@ import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { NotFoundScreen } from "../../shared/base/not-found-screen"
 import { EditableInputWithControls } from "../../shared/editable-input-with-controls"
+import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { BrowserSearchPrompt } from "../../shared/permit-applications/browser-search-prompt"
 import { PermitApplicationStatusTag } from "../../shared/permit-applications/permit-application-status-tag"
 import { RequirementForm } from "../../shared/permit-applications/requirement-form"
@@ -142,6 +143,11 @@ export const ReviewPermitApplicationScreen = observer(() => {
   const canStartReview =
     currentPermitApplication.status === EPermitApplicationStatus.newlySubmitted ||
     currentPermitApplication.status === EPermitApplicationStatus.resubmitted
+  const jurisdictionSlug = currentPermitApplication.jurisdiction?.slug
+  const parentProjectPath =
+    currentPermitApplication.projectId && jurisdictionSlug
+      ? `/jurisdictions/${jurisdictionSlug}/submission-inbox/projects/${currentPermitApplication.projectId}/overview`
+      : "/projects"
 
   const handleStartReview = async () => {
     setIsStartingReview(true)
@@ -207,6 +213,9 @@ export const ReviewPermitApplicationScreen = observer(() => {
                 {t("permitApplication.show.contactsSummary")}
               </Button>
               <SubmissionDownloadModal permitApplication={currentPermitApplication} review />
+              <RouterLinkButton to={parentProjectPath} variant="default" rightIcon={<CaretRight />}>
+                {t("permitApplication.show.goToProject")}
+              </RouterLinkButton>
               <Button rightIcon={<CaretRight />} onClick={() => navigate(-1)}>
                 {t("ui.back")}
               </Button>

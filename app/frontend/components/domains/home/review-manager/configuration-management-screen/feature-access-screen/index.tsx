@@ -10,7 +10,7 @@ export const ReviewManagerFeatureAccessScreen = observer(() => {
   const { t } = useTranslation()
   const { currentJurisdiction } = useJurisdiction()
   const { siteConfigurationStore } = useMst()
-  const { allowDesignatedReviewer } = siteConfigurationStore
+  const { allowDesignatedReviewer, projectMeetingsEnabled } = siteConfigurationStore
 
   const features = [
     {
@@ -30,6 +30,14 @@ export const ReviewManagerFeatureAccessScreen = observer(() => {
       label: t(`${i18nPrefix}.designatedReviewer`),
       enabled: currentJurisdiction?.allowDesignatedReviewer,
       route: "limit-who-can-request-revisions-from-submitters",
+    })
+  }
+
+  if (projectMeetingsEnabled) {
+    features.push({
+      label: t(`${i18nPrefix}.projectMeetings`),
+      enabled: currentJurisdiction?.projectMeetingsEnabled,
+      route: "project-meetings",
     })
   }
 

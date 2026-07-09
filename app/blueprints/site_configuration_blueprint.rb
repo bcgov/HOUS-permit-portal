@@ -4,6 +4,9 @@ class SiteConfigurationBlueprint < Blueprinter::Base
          :inbox_enabled,
          :allow_designated_reviewer,
          :code_compliance_enabled,
+         :qa_tools_enabled,
+         :project_meetings_enabled,
+         :overheating_tool_enabled,
          :archistar_enabled_for_all_jurisdictions
 
   field :help_link_items do |site_configuration, _options|

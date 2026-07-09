@@ -5,6 +5,7 @@ RSpec.describe Collaborator, type: :model do
     it { should belong_to(:user) }
     it { should belong_to(:collaboratorable) }
     it { should have_many(:permit_collaborations).dependent(:destroy) }
+    it { should have_many(:permit_project_collaborations).dependent(:destroy) }
   end
 
   describe "validations" do
@@ -123,6 +124,18 @@ RSpec.describe Collaborator, type: :model do
         :once
       )
       collaborator.update!(user: create(:user, :submitter))
+    end
+  end
+
+  describe "dependent destroys" do
+    it "destroys permit project collaborations before deleting the collaborator" do
+      permit_project_collaboration = create(:permit_project_collaboration)
+      collaborator = permit_project_collaboration.collaborator
+
+      expect { collaborator.destroy! }.to change(
+        PermitProjectCollaboration,
+        :count
+      ).by(-1)
     end
   end
 end

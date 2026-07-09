@@ -8,6 +8,7 @@ export const AdminGlobalFeatureAccessScreen = observer(() => {
   const i18nPrefix = "siteConfiguration.globalFeatureAccess"
   const { t } = useTranslation()
   const { siteConfigurationStore } = useMst()
+  const qaModeEnabled = import.meta.env.VITE_QA_MODE === "true"
 
   const features: FeatureItem[] = [
     {
@@ -25,6 +26,25 @@ export const AdminGlobalFeatureAccessScreen = observer(() => {
       enabled: siteConfigurationStore?.codeComplianceEnabled,
       route: "code-compliance",
     },
+    {
+      label: t(`${i18nPrefix}.projectMeetings`),
+      enabled: siteConfigurationStore?.projectMeetingsEnabled,
+      route: "project-meetings",
+    },
+    {
+      label: t(`${i18nPrefix}.overheatingTool`),
+      enabled: siteConfigurationStore?.overheatingToolEnabled,
+      route: "overheating-tool",
+    },
+    ...(qaModeEnabled
+      ? [
+          {
+            label: t(`${i18nPrefix}.qaTools`),
+            enabled: siteConfigurationStore?.qaToolsEnabled,
+            route: "qa-tools",
+          },
+        ]
+      : []),
     // Add more features here as needed
   ]
 

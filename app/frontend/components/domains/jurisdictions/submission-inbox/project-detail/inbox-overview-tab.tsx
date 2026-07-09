@@ -1,4 +1,4 @@
-import { Box, Divider, Flex, Grid, Heading, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
+import { Box, Divider, Flex, Grid, Heading, HStack, Text, Tooltip, useDisclosure, VStack } from "@chakra-ui/react"
 import { CaretRight, Info, SquaresFour, Steps } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -97,14 +97,16 @@ export const InboxOverviewTab = observer(({ permitProject }: IProps) => {
             </VStack>
           </Box>
           <Box>
-            <Box height={{ base: "200px", lg: "250px" }} borderRadius="md" overflow="hidden">
-              <ProjectMap
-                coordinates={permitProject.mapPosition}
-                pid={pid}
-                parcelGeometry={permitProject.parcelGeometry}
-                onOpenFullscreen={onOpenMapFullscreen}
-              />
-            </Box>
+            <Tooltip label={t("permitProject.overview.mapVisualReferenceDisclaimer")} hasArrow>
+              <Box height={{ base: "200px", lg: "250px" }} borderRadius="md" overflow="hidden">
+                <ProjectMap
+                  coordinates={permitProject.mapPosition}
+                  pid={pid}
+                  parcelGeometry={permitProject.parcelGeometry}
+                  onOpenFullscreen={onOpenMapFullscreen}
+                />
+              </Box>
+            </Tooltip>
           </Box>
         </Grid>
       </Box>
@@ -122,7 +124,7 @@ export const InboxOverviewTab = observer(({ permitProject }: IProps) => {
         ) : (
           <>
             <SearchGrid
-              templateColumns="2fr 1.5fr 1.5fr 1.5fr 1.5fr 0.5fr"
+              templateColumns="2.25fr 1.75fr 1fr 1.4fr 1.1fr 1fr 0.5fr"
               gridRowClassName="permit-application-grid-row"
             >
               <PermitApplicationGridHeaders

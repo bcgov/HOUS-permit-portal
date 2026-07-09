@@ -31,7 +31,7 @@ gem "tzinfo-data", platforms: %i[windows jruby]
 gem "bootsnap", require: false
 
 # Authentication
-gem "devise", "5.0.3"
+gem "devise", "5.0.4"
 gem "devise_invitable", "~> 2.0.9"
 gem "devise-jwt", "0.13.0"
 # devise-jwt-cookie functionality is vendored in lib/devise/jwt/cookie/ (see that directory for details)
@@ -57,11 +57,11 @@ gem "pundit", "~> 2.3.1"
 gem "phonelib", "~> 0.8.5"
 gem "roo", "~> 2.10"
 gem "discard", "~> 1.2"
-gem "faraday", "~> 2.14.1"
+gem "faraday", "~> 2.14.3"
 gem "factory_bot", "~> 6.4"
 # The timcop gem mocks Time, it is only used in specs and for seeding a published template version to get around time based validations
 gem "timecop", "~> 0.9.8"
-gem "sidekiq-cron", "~> 1.12"
+gem "sidekiq-cron", "~> 2.4"
 gem "sidekiq-unique-jobs", "~> 8.0"
 gem "rubyzip", "~> 2.3.2"
 gem "anycable-rails", "~> 1.6.0"

@@ -11,7 +11,7 @@ interface ISwitchButton extends SwitchProps {
 export const SwitchButton = ({ isChecked, onChange, size, ...rest }: ISwitchButton) => {
   return (
     <Switch isChecked={isChecked} onChange={onChange} size={size} position="relative" {...rest}>
-      <Flex position="absolute" top="34%" left={isChecked ? "54%" : "15%"} fontSize="20px">
+      <Flex position="absolute" top="34%" left={isChecked ? "56%" : "15%"} fontSize="20px">
         {isChecked ? <Check size={10} color={"black"} /> : <X size={10} color={"black"} />}
       </Flex>
     </Switch>

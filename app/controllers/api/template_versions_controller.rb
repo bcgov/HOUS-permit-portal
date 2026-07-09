@@ -24,16 +24,34 @@ class Api::TemplateVersionsController < Api::ApplicationController
     status = template_version_params[:status] || "published"
     @template_versions =
       policy_scope(TemplateVersion)
-        .order(updated_at: :desc)
         .joins(:requirement_template)
+        .left_joins(requirement_template: :template_category)
+        .includes(requirement_template: :template_category)
         .where(status:)
+        .then do |scope|
+          if template_version_params.key?(:publicly_previewable)
+            scope.where(publicly_previewable: publicly_previewable_param)
+          else
+            scope
+          end
+        end
+        .order(template_category_order_sql)
 
     render_success @template_versions,
                    nil,
                    {
                      blueprint: TemplateVersionBlueprint,
                      blueprint_opts: {
-                       view: :extended
+                       # TODO: This endpoint may be too heavy as the catalog grows (>50 templates). Consider:
+                       # - A lighter :list blueprint view with denormalized_template_json + jurisdiction flags only
+                       #   (drop form_json / requirement_blocks_json from index responses).
+                       # - Batch-loading jurisdiction customizations for blueprint_opts[:jurisdiction_id] and
+                       #   sandbox to avoid N+1 EXISTS queries for requires_project_meeting / disabled_by_jurisdiction.
+                       # - Moving nickname/description/tags to base fields if denormalized_template_json is no longer needed.
+                       view: :extended,
+                       jurisdiction_id:
+                         template_version_params[:jurisdiction_id],
+                       sandbox: current_sandbox
                      }
                    }
   end
@@ -45,9 +63,10 @@ class Api::TemplateVersionsController < Api::ApplicationController
       TemplateVersion
         .where(publicly_previewable: true, status: :draft)
         .joins(:requirement_template)
-        .includes(:requirement_template)
+        .left_joins(requirement_template: :template_category)
+        .includes(requirement_template: :template_category)
         .where(requirement_templates: { discarded_at: nil })
-        .order(updated_at: :desc)
+        .order(template_category_order_sql)
 
     render_success @template_versions,
                    nil,
@@ -67,7 +86,10 @@ class Api::TemplateVersionsController < Api::ApplicationController
                    {
                      blueprint: TemplateVersionBlueprint,
                      blueprint_opts: {
-                       view: :extended
+                       view: :extended,
+                       jurisdiction_id:
+                         template_version_params[:jurisdiction_id],
+                       sandbox: current_sandbox
                      }
                    }
   end
@@ -259,6 +281,80 @@ class Api::TemplateVersionsController < Api::ApplicationController
 
   # ── Draft-specific actions ────────────────────────────────────────────
 
+  def discard_draft
+    authorize @template_version, :discard_draft?
+
+    begin
+      TemplateVersioningService.discard_draft!(@template_version, current_user)
+      render_requirement_template_success(
+        "requirement_template.discard_draft_success"
+      )
+    rescue TemplateVersionDraftError => e
+      render_error "requirement_template.discard_draft_error",
+                   message_opts: {
+                     error_message: e.message
+                   }
+    end
+  end
+
+  def promote_draft
+    skip_date_check =
+      ActiveModel::Type::Boolean.new.cast(
+        promote_draft_params[:skip_date_check]
+      )
+
+    if skip_date_check
+      authorize @template_version, :force_publish_draft?
+    else
+      authorize @template_version, :promote_draft?
+    end
+
+    begin
+      version_date =
+        (Date.parse(promote_draft_params[:version_date]) unless skip_date_check)
+
+      promoted =
+        TemplateVersioningService.promote_draft_to_scheduled!(
+          @template_version,
+          version_date,
+          change_notes: promote_draft_params[:change_notes],
+          change_significance: promote_draft_params[:change_significance],
+          skip_date_check: skip_date_check,
+          current_user: current_user
+        )
+
+      if promote_draft_params[:notification_scope].present?
+        promoted.update!(
+          notification_scope: promote_draft_params[:notification_scope],
+          notified_jurisdiction_ids:
+            promote_draft_params[:notified_jurisdiction_ids] || []
+        )
+      end
+
+      if promote_draft_params[:promote_block_ids].present?
+        TemplateVersioningService.promote_block_changes!(
+          promoted,
+          promote_draft_params[:promote_block_ids]
+        )
+      end
+
+      if !skip_date_check && promote_draft_params[:send_advance_notice]
+        NotificationService.publish_version_scheduled_event(promoted)
+      end
+
+      render_requirement_template_success(
+        "requirement_template.promote_draft_success"
+      )
+    rescue TemplateVersionDraftError,
+           TemplateVersionScheduleError,
+           TemplateVersionForcePublishNowError => e
+      render_error "requirement_template.promote_draft_error",
+                   message_opts: {
+                     error_message: e.message
+                   }
+    end
+  end
+
   def update_draft_block
     authorize @template_version, :update?
 
@@ -389,7 +485,21 @@ class Api::TemplateVersionsController < Api::ApplicationController
   private
 
   def template_version_params
-    params.permit(:status)
+    params.permit(:status, :publicly_previewable, :jurisdiction_id)
+  end
+
+  def publicly_previewable_param
+    ActiveModel::Type::Boolean.new.cast(
+      template_version_params[:publicly_previewable]
+    )
+  end
+
+  def template_category_order_sql
+    Arel.sql(
+      "template_categories.sort_order ASC NULLS LAST, " \
+        "requirement_templates.sort_order ASC, " \
+        "template_versions.updated_at DESC"
+    )
   end
 
   def template_version_sandbox_scope
@@ -441,6 +551,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
   def jurisdiction_template_version_customization_params
     params.require(:jurisdiction_template_version_customization).permit(
       :disabled,
+      :requires_project_meeting,
       customizations: {
         requirement_block_changes: {
         }
@@ -468,5 +579,32 @@ class Api::TemplateVersionsController < Api::ApplicationController
         params.permit(:publicly_previewable)[:publicly_previewable]
       end
     ActiveModel::Type::Boolean.new.cast(raw)
+  end
+
+  def promote_draft_params
+    params.permit(
+      :version_date,
+      :change_notes,
+      :change_significance,
+      :notification_scope,
+      :send_advance_notice,
+      :skip_date_check,
+      notified_jurisdiction_ids: [],
+      promote_block_ids: []
+    )
+  end
+
+  def render_requirement_template_success(message_key)
+    requirement_template = @template_version.requirement_template.reload
+
+    render_success requirement_template,
+                   message_key,
+                   {
+                     blueprint: RequirementTemplateBlueprint,
+                     blueprint_opts: {
+                       view: :extended,
+                       current_user: current_user
+                     }
+                   }
   end
 end

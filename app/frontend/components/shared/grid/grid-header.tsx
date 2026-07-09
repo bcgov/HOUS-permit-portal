@@ -5,6 +5,15 @@ export const GridHeader = styled(GridItem, {
     "& button": {
       fontSize: "inherit",
       fontWeight: "inherit",
+      alignItems: "center",
+      textAlign: "left",
+    },
+    "& p": {
+      width: "100%",
+      textAlign: "left",
+    },
+    "& button > svg": {
+      flexShrink: 0,
     },
   },
 })

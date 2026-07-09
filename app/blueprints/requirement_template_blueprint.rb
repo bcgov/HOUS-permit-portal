@@ -6,7 +6,9 @@ class RequirementTemplateBlueprint < Blueprinter::Base
          :fetched_at,
          :created_at,
          :updated_at,
-         :available_globally
+         :available_globally,
+         :template_category_id,
+         :sort_order
 
   field :used_by do |rt|
     rt.published_customizations_count
@@ -37,6 +39,7 @@ class RequirementTemplateBlueprint < Blueprinter::Base
               blueprint: TemplateVersionBlueprint do |rt, options|
     defaulted_template_version(rt, options)
   end
+  association :template_category, blueprint: TemplateCategoryBlueprint
 
   association :assignee,
               blueprint: UserBlueprint,
@@ -45,7 +48,7 @@ class RequirementTemplateBlueprint < Blueprinter::Base
                 options[:current_user]&.super_admin?
               end
 
-  association :draft_template_version,
+  association :draft_template_versions,
               blueprint: TemplateVersionBlueprint,
               if: ->(_field_name, _rt, options) do
                 options[:current_user]&.super_admin?
@@ -68,7 +71,7 @@ class RequirementTemplateBlueprint < Blueprinter::Base
       defaulted_template_version(rt, options)
     end
 
-    association :draft_template_version,
+    association :draft_template_versions,
                 blueprint: TemplateVersionBlueprint,
                 view: :extended,
                 if: ->(_field_name, _rt, options) do

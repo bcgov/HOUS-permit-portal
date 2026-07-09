@@ -1,0 +1,106 @@
+<!-- START MAIN CONTENT AREA -->
+<tr>
+  <td class="wrapper" style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top; box-sizing: border-box; padding: 56px 32px;" valign="top">
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; width: 100%;" width="100%">
+      <tr>
+        <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top;" valign="top">
+          <h1 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; text-align: left; font-size: 28px; margin-top: 0; margin-bottom: 40px;">
+            Your project meeting has been rescheduled
+          </h1>
+
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 12px;">
+            <strong>Date and time:</strong><br>
+            <%= @meeting_datetime %>
+          </p>
+
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 12px;">
+            A calendar invite is attached to this email.
+          </p>
+
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 12px;">
+            <strong>Project:</strong><br>
+            <%= @permit_project.title %>
+          </p>
+
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 12px;">
+            <strong>Project number:</strong><br>
+            <a href="<%= @project_meeting_url %>" target="_blank" style="color: #1a5a96; text-decoration: underline;"><%= @permit_project.number %></a>
+          </p>
+
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 12px;">
+            <strong>Contact method:</strong><br>
+            <%= @contact_method %>
+          </p>
+
+          <% if @project_meeting.meeting_url.present? %>
+            <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 12px;">
+              <strong>Meeting link:</strong><br>
+              <a href="<%= @project_meeting.meeting_url %>" target="_blank" style="color: #1a5a96; text-decoration: underline;"><%= @project_meeting.meeting_url %></a>
+            </p>
+
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-secondary" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; box-sizing: border-box; width: 100%; margin: 12px auto;" width="100%">
+              <tbody>
+                <tr>
+                  <td align="left" style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top; padding-bottom: 15px;" valign="top">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: auto; width: auto;">
+                      <tbody>
+                        <tr>
+                          <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top; border-radius: 5px; text-align: center; background-color: transparent;" valign="top" align="center" bgcolor="transparent">
+                            <a href="<%= @project_meeting.meeting_url %>" target="_blank" style="border: solid 1px #323130; border-radius: 4px; box-sizing: border-box; cursor: pointer; display: inline-block; font-size: 16px; font-weight: normal; line-height: 26px; margin: 0; padding: 6px 12px; text-decoration: none; background-color: transparent; border-color: #323130; color: #292929;">Join meeting</a>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          <% end %>
+
+          <hr style="border: 0; border-bottom: 1px solid #d9d9d9; margin: 24px 0;">
+
+          <h2 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 0; margin-bottom: 16px; text-align: left; font-size: 22px;">Next steps</h2>
+
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+            You can view the updated meeting details in Building Permit Hub. If you need to change the meeting time or contact method, reach out to your local building authority.
+          </p>
+
+          <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; box-sizing: border-box; width: 100%; margin: 12px auto;" width="100%">
+            <tbody>
+              <tr>
+                <td align="left" style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top; padding-bottom: 15px;" valign="top">
+                  <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: auto; width: auto;">
+                    <tbody>
+                      <tr>
+                        <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top; border-radius: 5px; text-align: center; background-color: transparent;" valign="top" align="center" bgcolor="transparent">
+                          <a href="<%= @project_meeting_url %>" target="_blank" style="border: solid 1px #003366; border-radius: 4px; box-sizing: border-box; cursor: pointer; display: inline-block; font-size: 16px; font-weight: normal; line-height: 26px; margin: 0; padding: 6px 12px; text-decoration: none; background-color: #003366; border-color: #003366; color: #ffffff;">Open project meeting request</a>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <hr style="border: 0; border-bottom: 1px solid #d9d9d9; margin: 24px 0;">
+
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+            If you have any questions or need assistance, reach out to your local building authority
+            <% if @jurisdiction.office_email.present? %>
+              at <a href="mailto:<%= @jurisdiction.office_email %>" style="color: #1a5a96; text-decoration: underline;"><%= @jurisdiction.office_email %></a>
+            <% end %>
+            <% if @jurisdiction.office_telephone.present? %>
+              or call <a href="tel:<%= @jurisdiction.office_telephone %>" style="color: #1a5a96; text-decoration: underline;"><%= @jurisdiction.office_telephone %></a>
+            <% end %>.
+          </p>
+
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+            The Building Permit Hub Team
+          </p>
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<!-- END MAIN CONTENT AREA -->

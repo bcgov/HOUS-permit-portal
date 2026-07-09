@@ -46,6 +46,14 @@ const LoginScreen = lazy(() =>
 
 const HomeScreen = lazy(() => import("../home").then((module) => ({ default: module.HomeScreen })))
 
+const HelpVideosIndexScreen = lazy(() =>
+  import("../help-videos").then((module) => ({ default: module.HelpVideosIndexScreen }))
+)
+
+const HelpVideoScreen = lazy(() =>
+  import("../help-videos/help-video-screen").then((module) => ({ default: module.HelpVideoScreen }))
+)
+
 const StandardizationPreviewScreen = lazy(() =>
   import("../landing/standardization-preview-screen").then((module) => ({
     default: module.StandardizationPreviewScreen,
@@ -105,6 +113,11 @@ const ResourcesScreenLazy = lazy(() =>
     default: module.ResourcesScreen,
   }))
 )
+const HelpVideosManagementScreen = lazy(() =>
+  import("../super-admin/help-videos-management-screen").then((module) => ({
+    default: module.HelpVideosManagementScreen,
+  }))
+)
 const ReviewStaffMyJurisdictionAboutPageScreen = lazy(() =>
   import(
     "../home/review-manager/configuration-management-screen/feature-access-screen/my-jurisdiction-about-page"
@@ -117,6 +130,14 @@ const DesignatedReviewerScreen = lazy(() =>
   import("../home/review-manager/configuration-management-screen/feature-access-screen/designated-reviewer").then(
     (module) => ({
       default: module.DesignatedReviewerScreen,
+    })
+  )
+)
+
+const ProjectMeetingsJurisdictionFeatureAccessScreen = lazy(() =>
+  import("../home/review-manager/configuration-management-screen/feature-access-screen/project-meetings").then(
+    (module) => ({
+      default: module.ProjectMeetingsJurisdictionFeatureAccessScreen,
     })
   )
 )
@@ -143,9 +164,9 @@ const NewJurisdictionScreen = lazy(() =>
 const PrivacyPolicyScreen = lazy(() =>
   import("../misc/privacy-policy-screen").then((module) => ({ default: module.PrivacyPolicyScreen }))
 )
-const JurisdictionSubmissionInboxScreen = lazy(() =>
-  import("../jurisdictions/submission-inbox/jurisdiction-submisson-inbox-screen").then((module) => ({
-    default: module.JurisdictionSubmissionInboxScreen,
+const ReviewerWorkspaceScreen = lazy(() =>
+  import("../jurisdictions/submission-inbox/reviewer-workspace-screen").then((module) => ({
+    default: module.ReviewerWorkspaceScreen,
   }))
 )
 const InboxProjectDetailScreen = lazy(() =>
@@ -258,6 +279,11 @@ const JurisdictionEditDigitalPermitScreen = lazy(() =>
     default: module.JurisdictionEditDigitalPermitScreen,
   }))
 )
+const JurisdictionDigitalPermitSettingsScreen = lazy(() =>
+  import("../requirement-template/screens/jurisdiction-digital-permit-settings-screen").then((module) => ({
+    default: module.JurisdictionDigitalPermitSettingsScreen,
+  }))
+)
 const JurisdictionApiMappingsSetupIndexScreen = lazy(() =>
   import("../requirement-template/screens/jurisdiction-api-mappings-setup-index-screen").then((module) => ({
     default: module.JurisdictionApiMappingsSetupIndexScreen,
@@ -308,6 +334,11 @@ const PreCheckViewer = lazy(() =>
 const OverheatingCodeForm = lazy(() =>
   import("../overheating-code").then((module) => ({ default: module.OverheatingCodeForm }))
 )
+const OverheatingCodeUnavailableScreen = lazy(() =>
+  import("../overheating-code/unavailable-screen").then((module) => ({
+    default: module.OverheatingCodeUnavailableScreen,
+  }))
+)
 
 const StepCodeChecklistPDFViewer = lazy(() =>
   import("../step-code/checklist/pdf-content/viewer").then((module) => ({
@@ -348,6 +379,24 @@ const AdminGlobalFeatureAccessScreen = lazy(() =>
   }))
 )
 
+const ReleaseNotesManagementScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/release-notes-screen").then((module) => ({
+    default: module.ReleaseNotesScreen,
+  }))
+)
+
+const ReleaseNoteFormScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/release-note-form-screen").then((module) => ({
+    default: module.ReleaseNoteFormScreen,
+  }))
+)
+
+const ReleaseNotesScreen = lazy(() =>
+  import("../release-notes/release-notes-screen").then((module) => ({
+    default: module.ReleaseNotesScreen,
+  }))
+)
+
 const AdminSubmissionInboxScreen = lazy(() =>
   import("../super-admin/site-configuration-management/submission-inbox").then((module) => ({
     default: module.AdminSubmissionInboxScreen,
@@ -363,6 +412,29 @@ const AdminDesignatedReviewerScreen = lazy(() =>
 const CodeComplianceSetupScreen = lazy(() =>
   import("../super-admin/site-configuration-management/code-compliance-setup-screen").then((module) => ({
     default: module.CodeComplianceSetupScreen,
+  }))
+)
+
+const QaToolsFeatureAccessScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/qa-tools-feature-access").then((module) => ({
+    default: module.QaToolsFeatureAccessScreen,
+  }))
+)
+const TemplateCategoriesScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/template-categories-screen").then((module) => ({
+    default: module.TemplateCategoriesScreen,
+  }))
+)
+
+const ProjectMeetingsFeatureAccessScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/project-meetings-feature-access").then((module) => ({
+    default: module.ProjectMeetingsFeatureAccessScreen,
+  }))
+)
+
+const OverheatingToolFeatureAccessScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/overheating-tool-feature-access").then((module) => ({
+    default: module.OverheatingToolFeatureAccessScreen,
   }))
 )
 
@@ -382,6 +454,21 @@ const AcceptInvitationScreen = lazy(() =>
 const InviteScreen = lazy(() => import("../users/invite-screen").then((module) => ({ default: module.InviteScreen })))
 const ProfileScreen = lazy(() =>
   import("../users/profile-screen").then((module) => ({ default: module.ProfileScreen }))
+)
+const ProjectMeetingRequestScreen = lazy(() =>
+  import("../project-meeting/project-meeting-request-screen").then((module) => ({
+    default: module.ProjectMeetingRequestScreen,
+  }))
+)
+const ProjectMeetingScreen = lazy(() =>
+  import("../project-meeting/project-meeting-screen").then((module) => ({
+    default: module.ProjectMeetingScreen,
+  }))
+)
+const ProjectMeetingSentScreen = lazy(() =>
+  import("../project-meeting/project-meeting-sent-screen").then((module) => ({
+    default: module.ProjectMeetingSentScreen,
+  }))
 )
 const RedirectScreen = lazy(() =>
   import("../../shared/base/redirect-screen").then((module) => ({ default: module.RedirectScreen }))
@@ -441,7 +528,7 @@ const AppRoutes = observer(() => {
 
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const { allowDesignatedReviewer } = siteConfigurationStore
+  const { allowDesignatedReviewer, overheatingToolEnabled, projectMeetingsEnabled } = siteConfigurationStore
   if (currentUser === undefined) {
     console.log("AppRoutes: currentUser is undefined, rendering LoadingScreen.")
     return <LoadingScreen />
@@ -473,6 +560,7 @@ const AppRoutes = observer(() => {
   const eulaAccepted = currentUser ? currentUser.eulaAccepted : false
   const isSuperAdmin = currentUser ? currentUser.isSuperAdmin : false
   const isUnconfirmed = currentUser ? currentUser.isUnconfirmed : false
+  const qaModeEnabled = import.meta.env.VITE_QA_MODE === "true"
 
   const superAdminOnlyRoutes = (
     <>
@@ -481,15 +569,21 @@ const AppRoutes = observer(() => {
       <Route path="/requirement-templates" element={<RequirementTemplatesScreen />} />
       <Route path="/requirement-templates/new" element={<NewRequirementTemplateScreen />} />
       <Route path="/requirement-templates/:requirementTemplateId/edit" element={<EditRequirementTemplateScreen />} />
+      <Route path="/template-versions" element={<RedirectScreen path="/requirement-templates" />} />
       <Route path="/template-versions/:templateVersionId" element={<TemplateVersionScreen />} />
       <Route path="/configuration-management" element={<SiteConfigurationManagementScreen />} />
       <Route path="/configuration-management/sitewide-message" element={<SitewideMessageScreen />} />
       <Route path="/configuration-management/help-drawer-setup" element={<HelpDrawerSetupScreen />} />
+      <Route path="/configuration-management/help-videos" element={<HelpVideosManagementScreen />} />
+      <Route path="/configuration-management/template-categories" element={<TemplateCategoriesScreen />} />
       <Route path="/configuration-management/revision-reason-setup" element={<RevisionReasonSetupScreen />} />
       {/* DEPRECATED: /configuration-management/standardization-setup route removed.
           Super admins toggle publicly_previewable directly on TemplateVersionScreen. */}
       <Route path="/configuration-management/users" element={<AdminUserIndexScreen />} />
       <Route path="/configuration-management/global-feature-access" element={<AdminGlobalFeatureAccessScreen />} />
+      <Route path="/configuration-management/release-notes" element={<ReleaseNotesManagementScreen />} />
+      <Route path="/configuration-management/release-notes/new" element={<ReleaseNoteFormScreen />} />
+      <Route path="/configuration-management/release-notes/:releaseNoteId" element={<ReleaseNoteFormScreen />} />
       <Route
         path="/configuration-management/global-feature-access/submission-inbox"
         element={<AdminSubmissionInboxScreen />}
@@ -502,6 +596,20 @@ const AppRoutes = observer(() => {
         path="/configuration-management/global-feature-access/code-compliance"
         element={<CodeComplianceSetupScreen />}
       />
+      <Route
+        path="/configuration-management/global-feature-access/project-meetings"
+        element={<ProjectMeetingsFeatureAccessScreen />}
+      />
+      <Route
+        path="/configuration-management/global-feature-access/overheating-tool"
+        element={<OverheatingToolFeatureAccessScreen />}
+      />
+      {qaModeEnabled && (
+        <Route
+          path="/configuration-management/global-feature-access/qa-tools"
+          element={<QaToolsFeatureAccessScreen />}
+        />
+      )}
       <Route path="/configuration-management/users/invite" element={<AdminInviteScreen />} />
       <Route path="/reporting" element={<ReportingScreen />} />
       <Route path="/reporting/export-template-summary" element={<ExportTemplateSummaryScreen />} />
@@ -547,6 +655,12 @@ const AppRoutes = observer(() => {
         path="/jurisdictions/:jurisdictionId/configuration-management"
         element={<ConfigurationManagementScreen />}
       />
+      {projectMeetingsEnabled && (
+        <Route
+          path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/project-meetings"
+          element={<ProjectMeetingsJurisdictionFeatureAccessScreen />}
+        />
+      )}
       <Route path="/jurisdictions/:jurisdictionId/users" element={<JurisdictionUserIndexScreen />} />
       <Route path="/jurisdictions/:jurisdictionId/users/invite" element={<InviteScreen />} />
     </>
@@ -558,7 +672,9 @@ const AppRoutes = observer(() => {
         path="/jurisdictions/:jurisdictionId/submission-inbox/projects/:permitProjectId/*"
         element={<InboxProjectDetailScreen />}
       />
-      <Route path="/jurisdictions/:jurisdictionId/submission-inbox" element={<JurisdictionSubmissionInboxScreen />} />
+      <Route path="/jurisdictions/:jurisdictionId/submission-inbox" element={<ReviewerWorkspaceScreen />} />
+      <Route path="/jurisdictions/:jurisdictionId/meetings/:meetingId" element={<ReviewerWorkspaceScreen />} />
+      <Route path="/jurisdictions/:jurisdictionId/meetings" element={<ReviewerWorkspaceScreen />} />
       <Route
         path="/jurisdictions/:jurisdictionId/configuration-management/feature-access/my-jurisdiction-about-page"
         element={<ReviewStaffMyJurisdictionAboutPageScreen />}
@@ -618,6 +734,10 @@ const AppRoutes = observer(() => {
       <Route
         path="/digital-building-permits/:templateVersionId/edit"
         element={<JurisdictionEditDigitalPermitScreen />}
+      />
+      <Route
+        path="/digital-building-permits/:templateVersionId/settings"
+        element={<JurisdictionDigitalPermitSettingsScreen />}
       />
       <Route
         path="/jurisdictions/:jurisdictionId/configuration-management/feature-access"
@@ -705,17 +825,34 @@ const AppRoutes = observer(() => {
             <Route path="/pre-checks/:preCheckId/edit/" element={<PreCheckForm />} />
             <Route path="/pre-checks/:preCheckId/edit/:section" element={<PreCheckForm />} />
             <Route path="/pre-checks/:preCheckId/viewer" element={<PreCheckViewer />} />
-            <Route path="/overheating-codes" element={<ProjectDashboardScreen />} />
-            <Route path="/overheating-codes/new" element={<OverheatingCodeForm />} />
-            <Route path="/overheating-codes/new/:section" element={<OverheatingCodeForm />} />
-            <Route path="/overheating-codes/:overheatingCodeId/edit/" element={<OverheatingCodeForm />} />
-            <Route path="/overheating-codes/:overheatingCodeId/edit/:section" element={<OverheatingCodeForm />} />
+            {overheatingToolEnabled ? (
+              <>
+                <Route path="/overheating-codes" element={<ProjectDashboardScreen />} />
+                <Route path="/overheating-codes/new" element={<OverheatingCodeForm />} />
+                <Route path="/overheating-codes/new/:section" element={<OverheatingCodeForm />} />
+                <Route path="/overheating-codes/:overheatingCodeId/edit/" element={<OverheatingCodeForm />} />
+                <Route path="/overheating-codes/:overheatingCodeId/edit/:section" element={<OverheatingCodeForm />} />
+              </>
+            ) : (
+              <Route path="/overheating-codes/*" element={<OverheatingCodeUnavailableScreen />} />
+            )}
             <Route path="/documents" element={<ProjectDashboardScreen />} />
             {/* Already handled above with path-based tabs */}
             <Route path="/projects" element={<ProjectDashboardScreen />} />
             <Route path="/projects/new" element={<NewPermitProjectScreen />} />
             <Route path="/projects/:permitProjectId/*" element={<PermitProjectScreen />} />
             <Route path="/projects/:permitProjectId/add-permits" element={<AddPermitApplicationToProjectScreen />} />
+            <Route element={<ProtectedRoute isAllowed={projectMeetingsEnabled} redirectPath="/not-found" />}>
+              <Route path="/projects/:permitProjectId/meetings/new" element={<ProjectMeetingRequestScreen />} />
+              <Route
+                path="/projects/:permitProjectId/meetings/:projectMeetingId/edit/:section"
+                element={<ProjectMeetingScreen />}
+              />
+              <Route
+                path="/projects/:permitProjectId/meetings/:projectMeetingId/sent"
+                element={<ProjectMeetingSentScreen />}
+              />
+            </Route>
             <Route path="/step-codes/*" element={<ProjectDashboardScreen />} />
             {/* Disabled: New Permit Application screen */}
             <Route path="/permit-applications/:permitApplicationId/edit" element={<EditPermitApplicationScreen />} />
@@ -723,13 +860,27 @@ const AppRoutes = observer(() => {
               path="/permit-applications/:permitApplicationId/edit/part-9-step-code"
               element={<Part9StepCodeForm />}
             />
+            <Route
+              path="/permit-applications/:permitApplicationId/edit/part-9-step-code/:section"
+              element={<Part9StepCodeForm />}
+            />
+            <Route
+              path="/permit-applications/:permitApplicationId/edit/part-9-step-code/stages/:stage/:section"
+              element={<Part9StepCodeForm />}
+            />
+            <Route path="/part-9-step-code/new/:section" element={<Part9StepCodeForm />} />
             <Route path="/part-9-step-code/:stepCodeId" element={<Part9StepCodeForm />} />
+            <Route path="/part-9-step-code/:stepCodeId/:section" element={<Part9StepCodeForm />} />
             <Route
               path="/permit-applications/:permitApplicationId/edit/part-3-step-code"
               element={<Part3StepCodeForm />}
             />
             <Route
               path="/permit-applications/:permitApplicationId/edit/part-3-step-code/:section"
+              element={<Part3StepCodeForm />}
+            />
+            <Route
+              path="/permit-applications/:permitApplicationId/edit/part-3-step-code/stages/:stage/:section"
               element={<Part3StepCodeForm />}
             />
             <Route
@@ -746,6 +897,10 @@ const AppRoutes = observer(() => {
 
         <Route element={<ProtectedRoute isAllowed={loggedIn && !isUnconfirmed} />}>
           <Route path="/profile" element={<ProfileScreen />} />
+        </Route>
+
+        <Route element={<ProtectedRoute isAllowed={loggedIn} />}>
+          <Route path="/project-readiness-tools/check-digital-seals" element={<CheckDigitalSealsScreen />} />
         </Route>
 
         <Route element={<ProtectedRoute isAllowed={loggedIn && !currentUser?.isSuperAdmin && !isUnconfirmed} />}>
@@ -814,6 +969,9 @@ const AppRoutes = observer(() => {
         {/* Public Routes */}
         <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
         <Route path="/contact" element={<ContactScreen />} />
+        <Route path="/release-notes" element={<ReleaseNotesScreen />} />
+        <Route path="/videos" element={<HelpVideosIndexScreen />} />
+        <Route path="/videos/:videoId" element={<HelpVideoScreen />} />
         <Route path="/standardization-preview" element={<StandardizationPreviewScreen />} />
         <Route path="/template-versions/:templateVersionId/preview" element={<TemplateVersionPreviewScreen />} />
         <Route path="/project-readiness-tools" element={<ProjectReadinessToolsIndexScreen />} />
@@ -830,7 +988,6 @@ const AppRoutes = observer(() => {
           path="/project-readiness-tools/look-up-step-codes-requirements-for-your-project"
           element={<LookUpStepCodesRequirementsForYourProjectScreen />}
         />
-        <Route path="/project-readiness-tools/check-digital-seals" element={<CheckDigitalSealsScreen />} />
         <Route path="/project-readiness-tools/pre-check" element={<PreCheckInfoScreen />} />
         <Route
           path="/onboarding-checklist-page-for-lg-adopting"
@@ -859,10 +1016,13 @@ const AppRoutes = observer(() => {
           element={loggedIn && isUnconfirmed ? <RedirectScreen path="/" /> : <JurisdictionScreen />}
         />
         <Route path="/part-3-step-code" element={<RedirectScreen path="start" />} />
-        <Route path="/part-3-step-code/:stepCodeId" element={<RedirectScreen path="start" />} />
+        <Route path="/part-3-step-code/:stepCodeId" element={<Part3StepCodeForm />} />
+        <Route path="/part-3-step-code/:stepCodeId/stages/:stage/:section" element={<Part3StepCodeForm />} />
         <Route path="/part-3-step-code/:stepCodeId/:section" element={<Part3StepCodeForm />} />
         <Route path="/part-3-step-code/:section" element={<Part3StepCodeForm />} />
-        <Route path="/part-9-step-code/new" element={<Part9StepCodeForm />} />
+        <Route path="/part-9-step-code/new" element={<RedirectScreen path="/part-9-step-code/new/start" />} />
+        <Route path="/part-9-step-code/:stepCodeId/stages/:stage/:section" element={<Part9StepCodeForm />} />
+        <Route path="/part-9-step-code/:section" element={<Part9StepCodeForm />} />
         <Route path="*" element={<NotFoundScreen />} />
       </Routes>
     </>

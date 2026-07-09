@@ -82,7 +82,7 @@ export interface IBlockConditional {
   whenBlockId: string
   whenRequirementCode: string
   operator: string
-  eq: string
+  eq: string | boolean
   show?: boolean
   hide?: boolean
 }
@@ -119,6 +119,8 @@ export interface IRevisionReasonsAttributes {
 export interface IRequirementTemplateUpdateParams {
   description?: string | null
   nickname?: string | null
+  tags?: string[]
+  templateCategoryId?: string | null
   assigneeId?: string | null
   requirementTemplateSectionsAttributes?: IRequirementTemplateSectionAttributes[]
   availableGlobally?: boolean | null
@@ -129,6 +131,9 @@ export interface ISiteConfigurationUpdateParams {
   inboxEnabled?: boolean | null
   allowDesignatedReviewer?: boolean | null
   codeComplianceEnabled?: boolean | null
+  qaToolsEnabled?: boolean | null
+  projectMeetingsEnabled?: boolean | null
+  overheatingToolEnabled?: boolean | null
   archistarEnabledForAllJurisdictions?: boolean | null
   sitewideMessage?: string | null
   helpLinkItems?: IHelpLinkItems

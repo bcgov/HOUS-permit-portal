@@ -5,7 +5,7 @@ RSpec.describe OrphanCleanupJob, type: :job do
 
   # This job is the final stage of the lifecycle.
   # It deletes records that were "orphaned" (anonymized) a long time ago.
-  # For example, if we keep public records for 4 years after the user is deleted.
+  # For example, if we keep public records for 4 years after the user is deleted
   it "has no unique lock so retries are not suppressed" do
     opts = described_class.get_sidekiq_options
     expect(opts["lock"] || opts[:lock]).to be_nil

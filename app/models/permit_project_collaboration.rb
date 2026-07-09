@@ -1,6 +1,8 @@
 class PermitProjectCollaboration < ApplicationRecord
   include Discard::Model
 
+  audited on: %i[create update], associated_with: :permit_project
+
   belongs_to :permit_project, touch: true
   belongs_to :collaborator
 

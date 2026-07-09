@@ -10,6 +10,7 @@ import {
   IPermitBlockStatusReadyNotificationObjectData,
   IPermitCollaborationNotificationObjectData,
   IPermitNotificationObjectData,
+  IProjectMeetingNotificationObjectData,
   ITemplateVersionNotificationObjectData,
   IUserPushPayload,
 } from "../types/types"
@@ -201,6 +202,33 @@ export const NotificationStoreModel = types
           {
             text: t("ui.show"),
             href: `/jurisdictions/${jurisdictionId}/configuration-management/resources`,
+          },
+        ]
+      } else if (
+        [ENotificationActionType.projectMeetingSubmitted, ENotificationActionType.projectMeetingRescheduled].includes(
+          notification.actionType
+        )
+      ) {
+        const projectMeetingData = notification.objectData as IProjectMeetingNotificationObjectData
+        return [
+          {
+            text: t("ui.show"),
+            href:
+              notification.actionType === ENotificationActionType.projectMeetingSubmitted
+                ? `/projects/${projectMeetingData.permitProjectId}/meetings/${projectMeetingData.projectMeetingId}/sent`
+                : `/projects/${projectMeetingData.permitProjectId}/meetings/${projectMeetingData.projectMeetingId}`,
+          },
+        ]
+      } else if (notification.actionType === ENotificationActionType.releaseNotePublish) {
+        const data = notification.objectData as { releaseNoteId?: string }
+        const releaseNoteId = data?.releaseNoteId
+        if (!releaseNoteId) {
+          return []
+        }
+        return [
+          {
+            text: t("ui.show"),
+            href: `/release-notes#release-note-${releaseNoteId}`,
           },
         ]
       }

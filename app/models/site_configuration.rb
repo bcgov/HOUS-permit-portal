@@ -1,4 +1,6 @@
 class SiteConfiguration < ApplicationRecord
+  audited on: %i[update], only: %i[project_meetings_enabled]
+
   # Ensures that only one SiteConfiguration record can be created
   before_create :ensure_single_record
   validate :validate_help_link_items
@@ -34,6 +36,18 @@ class SiteConfiguration < ApplicationRecord
 
   def self.code_compliance_enabled?
     instance.code_compliance_enabled
+  end
+
+  def self.qa_tools_enabled?
+    instance.qa_tools_enabled
+  end
+
+  def self.project_meetings_enabled?
+    instance.project_meetings_enabled
+  end
+
+  def self.overheating_tool_enabled?
+    instance.overheating_tool_enabled
   end
 
   def self.archistar_enabled_for_jurisdiction?(jurisdiction)

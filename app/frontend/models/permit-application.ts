@@ -84,6 +84,9 @@ export const PermitApplicationModel = types.snapshotProcessor(
       isLoading: types.optional(types.boolean, false),
       usingCurrentTemplateVersion: types.maybeNull(types.boolean),
       templateVersionDisabledByJurisdiction: types.optional(types.boolean, false),
+      requiresProjectMeeting: types.optional(types.boolean, false),
+      hasActiveProjectMeeting: types.optional(types.boolean, false),
+      activeProjectMeetingId: types.maybeNull(types.string),
       showingCompareAfter: types.optional(types.boolean, false),
       revisionMode: types.optional(types.boolean, false),
       diff: types.maybeNull(types.frozen<ITemplateVersionDiff>()),
@@ -112,10 +115,6 @@ export const PermitApplicationModel = types.snapshotProcessor(
       get formattedDaysInQueue(): string {
         if (self.daysInQueue == null) return "—"
         return t("submissionInbox.daysInQueue", { count: self.daysInQueue })
-      },
-      get formattedSubmittedAt(): string {
-        if (!self.submittedAt) return "—"
-        return new Intl.DateTimeFormat("en-CA").format(self.submittedAt)
       },
       get isPart3() {
         // TODO
@@ -889,11 +888,6 @@ export const PermitApplicationModel = types.snapshotProcessor(
       resetCompareAfter: () => {
         self.showingCompareAfter = false
       },
-
-      generateMissingPdfs: flow(function* () {
-        const response = yield self.environment.api.generatePermitApplicationMissingPdfs(self.id)
-        return response.ok
-      }),
     }))
     .actions((self) => ({
       handleSocketSupportingDocsUpdate: (data: IPermitApplicationSupportingDocumentsUpdate) => {

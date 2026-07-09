@@ -282,6 +282,18 @@ RSpec.describe TemplateVersioningService, type: :service, search: true do
     end
   end
 
+  describe "create_draft!" do
+    it "allows multiple draft versions for the same requirement template" do
+      expect {
+        2.times do
+          TemplateVersioningService.create_draft!(requirement_template)
+        end
+      }.to change {
+        requirement_template.template_versions.where(status: :draft).count
+      }.by(2)
+    end
+  end
+
   describe "promote_draft_to_scheduled!" do
     let(:super_admin) { create(:user, :super_admin) }
     let(:draft_version) do
@@ -289,19 +301,44 @@ RSpec.describe TemplateVersioningService, type: :service, search: true do
     end
 
     context "when the version date is valid" do
-      it "promotes the draft to a scheduled version" do
+      it "creates a scheduled version from the draft and keeps the draft" do
         version_date = Date.tomorrow
+        promoted = nil
 
+        draft_version
+
+        expect {
+          promoted =
+            TemplateVersioningService.promote_draft_to_scheduled!(
+              draft_version,
+              version_date,
+              current_user: super_admin
+            )
+        }.to change { requirement_template.template_versions.count }.by(1)
+
+        draft_version.reload
+
+        expect(promoted.id).not_to eq(draft_version.id)
+        expect(draft_version.status).to eq("draft")
+        expect(promoted.status).to eq("scheduled")
+        expect(promoted.version_date).to eq(version_date)
+      end
+
+      it "copies the draft snapshot onto the scheduled version" do
         promoted =
           TemplateVersioningService.promote_draft_to_scheduled!(
             draft_version,
-            version_date,
+            Date.tomorrow,
             current_user: super_admin
           )
 
-        expect(promoted.id).to eq(draft_version.id)
-        expect(promoted.status).to eq("scheduled")
-        expect(promoted.version_date).to eq(version_date)
+        expect(promoted.denormalized_template_json).to eq(
+          draft_version.denormalized_template_json
+        )
+        expect(promoted.form_json).to eq(draft_version.form_json)
+        expect(promoted.requirement_blocks_json).to eq(
+          draft_version.requirement_blocks_json
+        )
       end
 
       it "unschedules sibling scheduled versions on or before the incoming date" do
@@ -379,7 +416,7 @@ RSpec.describe TemplateVersioningService, type: :service, search: true do
           )
         }.to raise_error(
           TemplateVersionDraftError,
-          /Can only promote a draft version/
+          /Can only promote an early access version/
         )
       end
     end
@@ -415,7 +452,7 @@ RSpec.describe TemplateVersioningService, type: :service, search: true do
           allow(WebsocketBroadcaster).to receive(:push_update_to_relevant_users)
         end
 
-        it "publishes the draft inline with today's version_date" do
+        it "publishes a copy inline with today's version_date and keeps the draft" do
           promoted =
             TemplateVersioningService.promote_draft_to_scheduled!(
               draft_version,
@@ -424,6 +461,9 @@ RSpec.describe TemplateVersioningService, type: :service, search: true do
               current_user: super_admin
             )
 
+          draft_version.reload
+          expect(promoted.id).not_to eq(draft_version.id)
+          expect(draft_version.status).to eq("draft")
           expect(promoted.status).to eq("published")
           expect(promoted.version_date).to eq(Date.current)
         end

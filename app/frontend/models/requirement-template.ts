@@ -10,11 +10,27 @@ import { RequirementTemplateSectionModel } from "./requirement-template-section"
 import { TemplateVersionModel } from "./template-version"
 import { UserModel } from "./user"
 
+interface ITemplateCategorySummary {
+  id: string
+  label: string
+  sortOrder: number
+}
+
 function preProcessor(snapshot) {
   const processedSnapShot = {
     ...snapshot,
     publishedTemplateVersion: snapshot.publishedTemplateVersion?.id,
-    draftTemplateVersion: snapshot.draftTemplateVersion?.id,
+  }
+
+  const draftTemplateVersions = snapshot.draftTemplateVersions ?? []
+
+  if (Array.isArray(draftTemplateVersions)) {
+    processedSnapShot.draftTemplateVersions = pluck(
+      "id",
+      draftTemplateVersions as Array<{
+        id: "string"
+      }>
+    )
   }
 
   if (Array.isArray(snapshot.scheduledTemplateVersions)) {
@@ -58,7 +74,7 @@ export const RequirementTemplateModel = types.snapshotProcessor(
       usedBy: types.optional(types.number, 0),
       availableIn: types.optional(types.union(types.string, types.number), 0),
       publishedTemplateVersion: types.maybeNull(types.safeReference(TemplateVersionModel)),
-      draftTemplateVersion: types.maybeNull(types.safeReference(TemplateVersionModel)),
+      draftTemplateVersions: types.array(types.safeReference(TemplateVersionModel)),
       scheduledTemplateVersions: types.array(types.safeReference(TemplateVersionModel)),
       deprecatedTemplateVersions: types.array(types.safeReference(TemplateVersionModel)),
       assignee: types.maybeNull(types.safeReference(UserModel)),
@@ -72,6 +88,9 @@ export const RequirementTemplateModel = types.snapshotProcessor(
       fetchedAt: types.maybeNull(types.Date),
       isFullyLoaded: types.optional(types.boolean, false),
       availableGlobally: types.maybeNull(types.boolean),
+      templateCategoryId: types.maybeNull(types.string),
+      templateCategory: types.maybeNull(types.frozen<ITemplateCategorySummary>()),
+      sortOrder: types.optional(types.number, 0),
       enabledJurisdictions: types.maybe(types.array(types.frozen<IJurisdictionStub>())),
       explicitlyDisabledJurisdictions: types.optional(types.array(types.frozen<IJurisdictionStub>()), []),
     })

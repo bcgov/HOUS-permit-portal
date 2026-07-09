@@ -3,9 +3,12 @@ import { IRevisionRequestForm } from "../../components/domains/permit-applicatio
 import { IJurisdictionTemplateVersionCustomizationForm } from "../../components/domains/requirement-template/screens/jurisdiction-edit-digital-permit-screen"
 import { TContactFormData } from "../../components/shared/contact/create-edit-contact-modal"
 import { IExternalApiKey } from "../../models/external-api-key"
+import { IHelpVideo } from "../../models/help-video"
+import { IHelpVideoSection } from "../../models/help-video-section"
 import { IIntegrationMapping } from "../../models/integration-mapping"
 import { IJurisdiction } from "../../models/jurisdiction"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
+import { INote } from "../../models/note"
 import { IOverheatingCode } from "../../models/overheating-code"
 import { IPart3StepCode } from "../../models/part-3-step-code"
 import { IPart3StepCodeChecklist } from "../../models/part-3-step-code-checklist"
@@ -16,7 +19,10 @@ import { IPermitCollaboration } from "../../models/permit-collaboration"
 import { IPermitProject } from "../../models/permit-project"
 import { IPreCheck } from "../../models/pre-check"
 import { IProjectAudit } from "../../models/project-audit"
+import { IProjectMeeting } from "../../models/project-meeting"
+import { IReleaseNote } from "../../models/release-note-model"
 import { IRequirementTemplate } from "../../models/requirement-template"
+import { ITemplateCategory } from "../../models/template-category"
 import { ITemplateVersion } from "../../models/template-version"
 import { ITemplateVersionPreview } from "../../models/template-version-preview"
 import { IUser } from "../../models/user"
@@ -35,10 +41,13 @@ import {
   IApiResponse,
   ICollaboratorSearchResponse,
   IJurisdictionPermitApplicationResponse,
+  IJurisdictionProjectMeetingResponse,
   IJurisdictionResponse,
+  INoteResponse,
   INotificationResponse,
   IOptionResponse,
   IPageMeta,
+  IProjectMeetingResponse,
   IRequirementBlockResponse,
   IRequirementTemplateResponse,
   IUsersResponse,
@@ -53,6 +62,8 @@ import {
   EPermitProjectSortFields,
   EPreCheckSortFields,
   EProjectAuditSortFields,
+  EProjectMeetingSortFields,
+  EReleaseNoteSortFields,
   ERequirementLibrarySortFields,
   ERequirementTemplateSortFields,
   EStepCodeSortFields,
@@ -70,14 +81,28 @@ import {
   IPermitApplicationSearchFilters,
   IPermitProjectSearchFilters,
   IProjectAuditSearchFilters,
+  IProjectMeetingInboxSearchFilters,
   ITemplateVersionDiff,
   TAutoComplianceModuleConfigurations,
   TCreatePermitApplicationFormData,
   TCreateRequirementTemplateFormData,
+  TReleaseNoteFormData,
+  TReleaseNoteViewerContext,
   TSearchParams,
 } from "../../types/types"
 import { camelizeResponse, decamelizeRequest } from "../../utils"
 import { getCsrfToken } from "../../utils/utility-functions"
+
+interface ITemplateVersionFeedback {
+  id: string
+  sentiment: string
+  body: string
+  resolved: boolean
+  createdAt: Date
+  updatedAt: Date
+  user?: IUser
+  resolvedBy?: IUser | null
+}
 
 export class Api {
   client: ApisauceInstance
@@ -147,6 +172,86 @@ export class Api {
 
   async fetchJurisdiction(id) {
     return this.client.get<ApiResponse<IJurisdiction>>(`/jurisdictions/${id}`)
+  }
+
+  async fetchHelpVideoSections() {
+    return this.client.get<ApiResponse<IHelpVideoSection[]>>(`/help_video_sections`)
+  }
+
+  async createHelpVideoSection(params) {
+    return this.client.post<ApiResponse<IHelpVideoSection>>(`/help_video_sections`, { helpVideoSection: params })
+  }
+
+  async updateHelpVideoSection(id: string, params) {
+    return this.client.patch<ApiResponse<IHelpVideoSection>>(`/help_video_sections/${id}`, { helpVideoSection: params })
+  }
+
+  async deleteHelpVideoSection(id: string) {
+    return this.client.delete<ApiResponse<null>>(`/help_video_sections/${id}`)
+  }
+
+  async reorderHelpVideoSections(orderedIds: string[]) {
+    return this.client.post<ApiResponse<IHelpVideoSection[]>>(`/help_video_sections/reorder`, { orderedIds })
+  }
+
+  async reorderHelpVideosInSection(sectionId: string, orderedIds: string[]) {
+    return this.client.post<ApiResponse<IHelpVideoSection>>(`/help_video_sections/${sectionId}/reorder_videos`, {
+      orderedIds,
+    })
+  }
+
+  async fetchTemplateCategories() {
+    return this.client.get<ApiResponse<ITemplateCategory[]>>(`/template_categories`)
+  }
+
+  async createTemplateCategory(params: { label: string }) {
+    return this.client.post<ApiResponse<ITemplateCategory[]>>(`/template_categories`, {
+      templateCategory: params,
+    })
+  }
+
+  async updateTemplateCategory(id: string, params: { label: string }) {
+    return this.client.patch<ApiResponse<ITemplateCategory[]>>(`/template_categories/${id}`, {
+      templateCategory: params,
+    })
+  }
+
+  async deleteTemplateCategory(id: string) {
+    return this.client.delete<ApiResponse<ITemplateCategory[]>>(`/template_categories/${id}`)
+  }
+
+  async reorderTemplateCategories(orderedIds: string[]) {
+    return this.client.post<ApiResponse<ITemplateCategory[]>>(`/template_categories/reorder`, { orderedIds })
+  }
+
+  async reorderTemplatesInCategory(categoryId: string, orderedIds: string[]) {
+    return this.client.post<ApiResponse<ITemplateCategory[]>>(`/template_categories/${categoryId}/reorder_templates`, {
+      orderedIds,
+    })
+  }
+
+  async fetchHelpVideo(id: string) {
+    return this.client.get<ApiResponse<IHelpVideo>>(`/help_videos/${id}`)
+  }
+
+  async createHelpVideo(params) {
+    return this.client.post<ApiResponse<IHelpVideo>>(`/help_videos`, { helpVideo: params })
+  }
+
+  async updateHelpVideo(id: string, params) {
+    return this.client.patch<ApiResponse<IHelpVideo>>(`/help_videos/${id}`, { helpVideo: params })
+  }
+
+  async deleteHelpVideo(id: string) {
+    return this.client.delete<ApiResponse<null>>(`/help_videos/${id}`)
+  }
+
+  async publishHelpVideo(id: string) {
+    return this.client.post<ApiResponse<IHelpVideo>>(`/help_videos/${id}/publish`)
+  }
+
+  async unpublishHelpVideo(id: string) {
+    return this.client.post<ApiResponse<IHelpVideo>>(`/help_videos/${id}/unpublish`)
   }
 
   async fetchPermitApplication(id: string, review?: boolean) {
@@ -272,8 +377,110 @@ export class Api {
     return this.client.post<ApiResponse<IPermitApplication>>(`/qa_tools/permit_applications/${id}/autofill`)
   }
 
+  async autofillQaPart3StepCode(id: string) {
+    return this.client.post<ApiResponse<IPart3StepCode>>(`/qa_tools/part_3_step_codes/${id}/autofill`)
+  }
+
+  async autofillQaPart9StepCode(id: string) {
+    return this.client.post<ApiResponse<IPart9StepCode>>(`/qa_tools/part_9_step_codes/${id}/autofill`)
+  }
+
   async updatePermitProject(id: string, params: IPermitProjectUpdateParams) {
     return this.client.patch<ApiResponse<IPermitProject>>(`/permit_projects/${id}`, { permitProject: params })
+  }
+
+  async createProjectMeeting(permitProjectId: string) {
+    return this.client.post<ApiResponse<IProjectMeeting>>(`/permit_projects/${permitProjectId}/meetings`)
+  }
+
+  async fetchProjectMeeting(id: string) {
+    return this.client.get<ApiResponse<IProjectMeeting>>(`/project_meetings/${id}`)
+  }
+
+  async fetchProjectMeetingNotes(projectMeetingId: string) {
+    return this.client.get<INoteResponse>(`/project_meetings/${projectMeetingId}/notes`)
+  }
+
+  async createProjectMeetingNote(projectMeetingId: string, body: string) {
+    return this.client.post<ApiResponse<INote>>(`/project_meetings/${projectMeetingId}/notes`, { note: { body } })
+  }
+
+  async downloadProjectMeetingNotesCsv(projectMeetingId: string) {
+    return this.client.get<BlobPart>(`/project_meetings/${projectMeetingId}/notes/download_csv`)
+  }
+
+  async fetchPermitProjectNotes(permitProjectId: string) {
+    return this.client.get<INoteResponse>(`/permit_projects/${permitProjectId}/notes`)
+  }
+
+  async downloadPermitProjectNotesCsv(permitProjectId: string) {
+    return this.client.get<BlobPart>(`/permit_projects/${permitProjectId}/notes/download_csv`)
+  }
+
+  async fetchProjectMeetings(permitProjectId: string, params?: TSearchParams<EProjectMeetingSortFields>) {
+    return this.client.post<IProjectMeetingResponse>(`/permit_projects/${permitProjectId}/meetings/search`, params)
+  }
+
+  async fetchJurisdictionProjectMeetings(
+    jurisdictionId: string,
+    params?: TSearchParams<EProjectMeetingSortFields, IProjectMeetingInboxSearchFilters>
+  ) {
+    return this.client.post<IJurisdictionProjectMeetingResponse>(
+      `/jurisdictions/${jurisdictionId}/project_meetings/search`,
+      params
+    )
+  }
+
+  async updateProjectMeeting(permitProjectId: string, id: string, params: Record<string, unknown>) {
+    return this.client.patch<ApiResponse<IProjectMeeting>>(`/permit_projects/${permitProjectId}/meetings/${id}`, {
+      projectMeeting: params,
+    })
+  }
+
+  async submitProjectMeeting(permitProjectId: string, id: string, params: Record<string, unknown>) {
+    return this.client.post<ApiResponse<IProjectMeeting>>(`/permit_projects/${permitProjectId}/meetings/${id}/submit`, {
+      projectMeeting: params,
+    })
+  }
+
+  async cancelProjectMeeting(permitProjectId: string, id: string) {
+    return this.client.post<ApiResponse<IProjectMeeting>>(`/permit_projects/${permitProjectId}/meetings/${id}/cancel`)
+  }
+
+  async rescheduleProjectMeeting(permitProjectId: string, id: string, params: Record<string, unknown>) {
+    return this.client.post<ApiResponse<IProjectMeeting>>(
+      `/permit_projects/${permitProjectId}/meetings/${id}/reschedule`,
+      {
+        projectMeeting: params,
+      }
+    )
+  }
+
+  async viewProjectMeeting(permitProjectId: string, id: string) {
+    return this.client.post<ApiResponse<IProjectMeeting>>(
+      `/permit_projects/${permitProjectId}/meetings/${id}/mark_as_viewed`
+    )
+  }
+
+  async unviewProjectMeeting(permitProjectId: string, id: string) {
+    return this.client.post<ApiResponse<IProjectMeeting>>(
+      `/permit_projects/${permitProjectId}/meetings/${id}/mark_as_unviewed`
+    )
+  }
+
+  async transitionProjectMeetingStatus(
+    permitProjectId: string,
+    id: string,
+    targetStatus: string,
+    params: Record<string, unknown>
+  ) {
+    return this.client.post<ApiResponse<IProjectMeeting>>(
+      `/permit_projects/${permitProjectId}/meetings/${id}/transition_status`,
+      {
+        targetStatus,
+        projectMeeting: params,
+      }
+    )
   }
 
   async pinPermitProject(id: string) {
@@ -546,8 +753,9 @@ export class Api {
   }
 
   async createRequirementTemplate(params: TCreateRequirementTemplateFormData) {
+    const requirementTemplateParams = { ...params, tagList: params.tags }
     return this.client.post<ApiResponse<IRequirementTemplate>>(`/requirement_templates`, {
-      requirementTemplate: params,
+      requirementTemplate: requirementTemplateParams,
     })
   }
 
@@ -565,8 +773,10 @@ export class Api {
   }
 
   async updateRequirementTemplate(templateId: string, params: IRequirementTemplateUpdateParams) {
+    const { tags, ...rest } = params
+    const requirementTemplateParams = tags ? { ...rest, tagList: tags } : rest
     return this.client.put<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${templateId}`, {
-      requirementTemplate: params,
+      requirementTemplate: requirementTemplateParams,
     })
   }
 
@@ -581,17 +791,25 @@ export class Api {
       versionDate: string
     }
   ) {
+    const { tags, ...rest } = requirementTemplate ?? {}
+    const requirementTemplateParams = requirementTemplate
+      ? tags
+        ? { ...rest, tagList: tags }
+        : rest
+      : requirementTemplate
     return this.client.post<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${templateId}/schedule`, {
-      requirementTemplate,
+      requirementTemplate: requirementTemplateParams,
       versionDate,
     })
   }
 
   async forcePublishRequirementTemplate(templateId: string, requirementTemplate: IRequirementTemplateUpdateParams) {
+    const { tags, ...rest } = requirementTemplate
+    const requirementTemplateParams = tags ? { ...rest, tagList: tags } : rest
     return this.client.post<ApiResponse<IRequirementTemplate>>(
       `/requirement_templates/${templateId}/force_publish_now`,
       {
-        requirementTemplate,
+        requirementTemplate: requirementTemplateParams,
       }
     )
   }
@@ -629,10 +847,15 @@ export class Api {
     return this.client.patch<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${id}/restore`)
   }
 
-  async fetchTemplateVersions(status?: ETemplateVersionStatus, isPubliclyPreviewable?: boolean) {
+  async fetchTemplateVersions(
+    status?: ETemplateVersionStatus,
+    isPubliclyPreviewable?: boolean,
+    jurisdictionId?: string
+  ) {
     return this.client.get<ApiResponse<ITemplateVersion[]>>(`/template_versions`, {
       status,
       publiclyPreviewable: isPubliclyPreviewable,
+      jurisdictionId,
     })
   }
 
@@ -699,12 +922,14 @@ export class Api {
     )
   }
 
-  async discardDraft(templateId: string) {
-    return this.client.delete<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${templateId}/discard_draft`)
+  async discardDraft(templateVersionId: string) {
+    return this.client.delete<ApiResponse<IRequirementTemplate>>(
+      `/template_versions/${templateVersionId}/discard_draft`
+    )
   }
 
   async promoteDraft(
-    templateId: string,
+    templateVersionId: string,
     params: {
       versionDate?: string
       changeNotes?: string
@@ -717,7 +942,7 @@ export class Api {
     }
   ) {
     return this.client.post<ApiResponse<IRequirementTemplate>>(
-      `/requirement_templates/${templateId}/promote_draft`,
+      `/template_versions/${templateVersionId}/promote_draft`,
       params
     )
   }
@@ -834,10 +1059,12 @@ export class Api {
     id: string,
     data: Partial<{
       fullAddress: string
+      pid: string
       referenceNumber: string
       title: string
       permitDate: string
       phase: string
+      currentStage: string
       buildingCodeVersion: string
       jurisdictionId: string
       permitApplicationId: string
@@ -925,10 +1152,22 @@ export class Api {
   }
 
   async updatePart9Checklist(id: string, data: Partial<IPart9StepCodeChecklist>, options?: Record<string, any>) {
-    return this.client.patch<ApiResponse<IPart9StepCode>>(`/part_9_building/checklists/${id}`, {
+    return this.client.patch<ApiResponse<IPart9StepCodeChecklist>>(`/part_9_building/checklists/${id}`, {
       stepCodeChecklist: data,
       ...(options ?? {}),
     })
+  }
+
+  // HUB-5145: Reserved for future Mid-Construction/As-Built creation. This
+  // creates a staged checklist envelope under an existing StepCode report family;
+  // selection should then happen via currentStage or explicit route context.
+  async createPart9Checklist(stepCodeId: string, data: Partial<IPart9StepCodeChecklist>) {
+    return this.client.post<ApiResponse<IPart9StepCodeChecklist>>(
+      `/part_9_building/step_codes/${stepCodeId}/checklists`,
+      {
+        stepCodeChecklist: data,
+      }
+    )
   }
 
   // importing IPart3StepCodeChecklist causes circular dependency typescript error
@@ -936,6 +1175,12 @@ export class Api {
     return this.client.patch<ApiResponse<any>>(`/part_3_building/checklists/${checklistId}`, {
       checklist,
       ...(options ?? {}),
+    })
+  }
+
+  async createPart3Checklist(stepCodeId: string, checklist) {
+    return this.client.post<ApiResponse<any>>(`/part_3_building/step_codes/${stepCodeId}/checklists`, {
+      checklist,
     })
   }
 
@@ -1049,7 +1294,7 @@ export class Api {
   async createPart3StepCode(data: {
     permitApplicationId?: string
     permitProjectId?: string
-    checklistAttributes: { sectionCompletionStatus: Record<string, any> }
+    preConstructionChecklistAttributes: { sectionCompletionStatus: Record<string, any> }
   }) {
     if (data.permitApplicationId) {
       return this.client.post<ApiResponse<IStepCode>>(
@@ -1081,5 +1326,29 @@ export class Api {
     return this.client.post<ApiResponse<{ message: string }>>(
       `/report_documents/${reportDocumentId}/share_with_jurisdiction`
     )
+  }
+
+  async fetchReleaseNotes(params?: TSearchParams<EReleaseNoteSortFields>) {
+    return this.client.post<ApiResponse<IReleaseNote[]>>(`/release_notes/search`, params)
+  }
+
+  async fetchReleaseNote(id: string) {
+    return this.client.get<ApiResponse<IReleaseNote>>(`/release_notes/${id}`)
+  }
+
+  async fetchReleaseNoteViewerContext(id: string, params?: { perPage?: number }) {
+    return this.client.get<ApiResponse<TReleaseNoteViewerContext>>(`/release_notes/${id}/viewer_context`, params)
+  }
+
+  async createReleaseNote(releaseNote: TReleaseNoteFormData) {
+    return this.client.post<ApiResponse<IReleaseNote>>("/release_notes", { releaseNote })
+  }
+
+  async updateReleaseNote(id: string, releaseNote: TReleaseNoteFormData) {
+    return this.client.patch<ApiResponse<IReleaseNote>>(`/release_notes/${id}`, { releaseNote })
+  }
+
+  async publishReleaseNote(id: string, releaseNote: TReleaseNoteFormData) {
+    return this.client.patch<ApiResponse<IReleaseNote>>(`/release_notes/${id}/publish`, { releaseNote })
   }
 }

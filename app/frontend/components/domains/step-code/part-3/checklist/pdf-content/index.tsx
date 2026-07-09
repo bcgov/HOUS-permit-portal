@@ -41,7 +41,7 @@ export const Part3PDFContent = function StepCodePart3ChecklistPDFContent({
         assetDirectoryPath={assetDirectoryPath}
       />
       <Page size="LETTER" style={page}>
-        <ProjectInfo stepCode={stepCode} checklist={checklist} />
+        <ProjectInfo stepCode={stepCode} />
         {/* Placeholder for Step Code Performance Summary */}
         <StepCodePerformanceSummary checklist={checklist} />
         {/* Placeholder for Mixed Use/Baseline Summary (conditional) */}

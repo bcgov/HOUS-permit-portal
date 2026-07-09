@@ -166,8 +166,9 @@ class NotificationService
       NotificationPushJob.perform_async(notification_hash)
     end
 
-    # Send emails to users who have email notifications enabled
-    user_ids = notification_hash.keys
+    # Submitters still receive the in-app draft warning, but this email is
+    # written for jurisdiction managers and API partners.
+    user_ids = manager_ids
     users_with_email_enabled =
       User
         .includes(:jurisdictions)
@@ -318,12 +319,28 @@ class NotificationService
   end
 
   def self.publish_customization_update_event(customization)
+    throttle_key =
+      "customization_update_notification:" \
+        "#{customization.jurisdiction_id}:#{customization.template_version_id}"
+
+    throttle_acquired =
+      Rails.cache.write(
+        throttle_key,
+        true,
+        expires_in: 2.hours,
+        unless_exist: true
+      )
+
+    return unless throttle_acquired
+
     template_version = customization.template_version
+    jurisdiction_id = customization.jurisdiction_id
     relevant_submitter_ids =
       PermitApplication
         .kept
         .joins(:template_version)
         .joins(submitter: :preference)
+        .left_joins(:permit_project)
         .where(
           template_versions: {
             requirement_template_id: template_version.requirement_template_id
@@ -334,6 +351,12 @@ class NotificationService
               enable_in_app_customization_update_notification: true
             }
           }
+        )
+        .where(
+          Arel.sql(
+            "COALESCE(permit_projects.jurisdiction_id, permit_applications.jurisdiction_id) = ?"
+          ),
+          jurisdiction_id
         )
         .pluck(:submitter_id)
         .uniq
@@ -630,6 +653,32 @@ class NotificationService
     end
   end
 
+  def self.publish_release_note_publish_event(release_note)
+    return unless release_note&.published?
+
+    recipient_ids =
+      User
+        .kept
+        .joins(:preference)
+        .where(
+          preferences: {
+            enable_in_app_release_note_publish_notification: true
+          }
+        )
+        .pluck(:id)
+
+    return if recipient_ids.blank?
+
+    notification_data = release_note.publish_event_notification_data
+
+    notification_user_hash =
+      recipient_ids.each_with_object({}) do |user_id, hash|
+        hash[user_id] = notification_data
+      end
+
+    NotificationPushJob.perform_async(notification_user_hash)
+  end
+
   def self.publish_resource_reminder_event(jurisdiction, resource_ids)
     all_managers = jurisdiction.managers
 
@@ -660,6 +709,90 @@ class NotificationService
     unless notification_user_hash.empty?
       NotificationPushJob.perform_async(notification_user_hash)
     end
+  end
+
+  def self.publish_project_meeting_submitted_event(project_meeting)
+    user = project_meeting.requested_by
+    preference = user&.preference
+    return if user.blank? || preference.blank?
+
+    if preference.enable_email_project_meeting_submitted_notification
+      PermitHubMailer.notify_project_meeting_submitted(
+        project_meeting
+      ).deliver_later
+    end
+
+    unless preference.enable_in_app_project_meeting_submitted_notification
+      return
+    end
+
+    NotificationPushJob.perform_async(
+      user.id => project_meeting.submitted_event_notification_data
+    )
+  end
+
+  def self.publish_project_meeting_request_received_event(project_meeting)
+    jurisdiction = project_meeting.jurisdiction
+
+    jurisdiction.confirmed_project_meeting_contacts.each do |contact|
+      PermitHubMailer.notify_project_meeting_submitted_to_jurisdiction(
+        project_meeting,
+        contact.email
+      ).deliver_later
+    end
+  end
+
+  def self.publish_property_information_request_received_event(project_meeting)
+    return unless project_meeting.request_property_information?
+
+    jurisdiction = project_meeting.jurisdiction
+    return unless jurisdiction&.property_information_requests_enabled?
+
+    jurisdiction.confirmed_property_information_contacts.each do |contact|
+      PermitHubMailer.notify_property_information_requested(
+        project_meeting,
+        contact.email
+      ).deliver_later
+    end
+  end
+
+  def self.publish_project_meeting_scheduled_event(project_meeting)
+    PermitHubMailer.notify_project_meeting_scheduled(
+      project_meeting
+    ).deliver_later
+
+    project_meeting
+      .jurisdiction
+      .confirmed_project_meeting_contacts
+      .each do |contact|
+      PermitHubMailer.notify_project_meeting_scheduled_to_jurisdiction(
+        project_meeting,
+        contact.email
+      ).deliver_later
+    end
+  end
+
+  def self.publish_project_meeting_rescheduled_event(project_meeting)
+    PermitHubMailer.notify_project_meeting_rescheduled(
+      project_meeting
+    ).deliver_later
+
+    project_meeting
+      .jurisdiction
+      .confirmed_project_meeting_contacts
+      .each do |contact|
+      PermitHubMailer.notify_project_meeting_rescheduled_to_jurisdiction(
+        project_meeting,
+        contact.email
+      ).deliver_later
+    end
+
+    user = project_meeting.requested_by
+    return if user.blank?
+
+    NotificationPushJob.perform_async(
+      user.id => project_meeting.rescheduled_event_notification_data
+    )
   end
 
   private_class_method :determine_file_owner

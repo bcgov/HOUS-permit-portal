@@ -55,10 +55,7 @@ class Wrappers::Archistar < Wrappers::Base
           else
             doc.file.url(
               response_content_disposition:
-                ActionDispatch::Http::ContentDisposition.format(
-                  disposition: "attachment",
-                  filename: doc.file.original_filename
-                )
+                ContentDisposition.attachment(doc.file.original_filename)
             )
           end
         ),

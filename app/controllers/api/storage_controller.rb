@@ -18,9 +18,14 @@ class Api::StorageController < Api::ApplicationController
     "SupportingDocument" => SupportingDocument,
     "RequirementDocument" => RequirementDocument,
     "ProjectDocument" => ProjectDocument,
+    "MeetingRequestDocument" => MeetingRequestDocument,
     "ResourceDocument" => ResourceDocument,
     "ReportDocument" => ReportDocument,
-    "DesignDocument" => DesignDocument
+    "DesignDocument" => DesignDocument,
+    "HelpVideoDocument" => HelpVideoDocument,
+    "HelpVideoVideoDocument" => HelpVideoVideoDocument,
+    "HelpVideoCaptionDocument" => HelpVideoCaptionDocument,
+    "HelpVideoTranscriptDocument" => HelpVideoTranscriptDocument
   }.freeze
 
   def download

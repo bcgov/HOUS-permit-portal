@@ -1,4 +1,4 @@
-import { Flex, FormControl, FormHelperText, Heading, Input, Text } from "@chakra-ui/react"
+import { Flex, FormHelperText, Heading, Input, Text } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -6,10 +6,7 @@ import { useForm } from "react-hook-form"
 import { Trans } from "react-i18next"
 import { useLocation } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../../hooks/resources/use-part-3-step-code"
-import { EFileUploadAttachmentType } from "../../../../../../types/enums"
 import { isBaselineChecklist, isMixedUseChecklist } from "../../../../../../utils/utility-functions"
-import { FileDownloadButton } from "../../../../../shared/base/file-download-button"
-import { SharedSpinner } from "../../../../../shared/base/shared-spinner"
 import { RouterLink } from "../../../../../shared/navigation/router-link"
 import { Part3FormFooter } from "../shared/form-footer"
 import { SectionHeading } from "../shared/section-heading"
@@ -18,7 +15,7 @@ import { StepCodePerformance } from "./step-code-performance"
 
 export const StepCodeSummary = observer(function StepCodeSummary() {
   const i18nPrefix = "stepCode.part3.stepCodeSummary"
-  const { checklist, currentStepCode } = usePart3StepCode()
+  const { checklist } = usePart3StepCode()
   const location = useLocation()
   const isMixedUse = isMixedUseChecklist(checklist as any)
   const isBaseline = isBaselineChecklist(checklist as any)
@@ -49,10 +46,10 @@ export const StepCodeSummary = observer(function StepCodeSummary() {
             i18nKey={`${i18nPrefix}.missingInfo.message`}
             components={{
               baselineOccupanciesLink: (
-                <RouterLink to={`${location.pathname.replace("requirements-summary", baselineOccupanciesPath)}`} />
+                <RouterLink to={`${location.pathname.replace("step-code-summary", baselineOccupanciesPath)}`} />
               ),
               stepCodeOccupanciesLink: (
-                <RouterLink to={`${location.pathname.replace("requirements-summary", stepCodeOccupanciesPath)}`} />
+                <RouterLink to={`${location.pathname.replace("step-code-summary", stepCodeOccupanciesPath)}`} />
               ),
             }}
           />
@@ -63,6 +60,7 @@ export const StepCodeSummary = observer(function StepCodeSummary() {
     <Flex direction="column" gap={6} rounded="lg" borderWidth={1} borderColor="greys.grey02" py={3} px={6}>
       <Flex direction="column" gap={4}>
         <SectionHeading>{t(`${i18nPrefix}.stepCode.heading`)}</SectionHeading>
+        <Text>{t(`${i18nPrefix}.description`)}</Text>
         <StepCodePerformance />
       </Flex>
       {(isMixedUse || isBaseline) && (
@@ -71,20 +69,7 @@ export const StepCodeSummary = observer(function StepCodeSummary() {
           <MixedUsePerformance />
         </Flex>
       )}
-      <FormControl>
-        <Flex gap={4} align="center">
-          {isSubmitting && <SharedSpinner m={0} />}
-          {!isSubmitting && currentStepCode?.latestReportDocument && (
-            <FileDownloadButton
-              variant="link"
-              modelType={EFileUploadAttachmentType.ReportDocument}
-              document={currentStepCode.latestReportDocument as any}
-              simpleLabel
-            />
-          )}
-        </Flex>
-      </FormControl>
-      <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
+      <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} generatesReport />
     </Flex>
   )
 })

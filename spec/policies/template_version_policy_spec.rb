@@ -113,6 +113,48 @@ RSpec.describe TemplateVersionPolicy, type: :policy do
     expect(policy(user, sandbox:).download_summary_csv?).to be false
   end
 
+  describe "draft mutation actions" do
+    let(:admin) { create(:user, :super_admin) }
+    let(:non_admin) { create(:user) }
+    let(:draft_record) do
+      double("TemplateVersion", draft?: true, publicly_previewable?: false)
+    end
+    let(:published_record) do
+      double("TemplateVersion", draft?: false, publicly_previewable?: false)
+    end
+
+    def draft_policy(user, record)
+      policy_for(described_class, user:, record:, sandbox: nil)
+    end
+
+    it "permits super admins to discard and promote draft versions" do
+      p = draft_policy(admin, draft_record)
+
+      expect(p.discard_draft?).to be true
+      expect(p.promote_draft?).to be true
+    end
+
+    it "denies draft actions for non-admin users and non-draft records" do
+      expect(draft_policy(non_admin, draft_record).promote_draft?).to be false
+      expect(draft_policy(admin, published_record).promote_draft?).to be false
+    end
+
+    it "permits force publishing draft versions only when enabled" do
+      allow(ENV).to receive(:[]).and_call_original
+      allow(ENV).to receive(:[]).with(
+        "ENABLE_TEMPLATE_FORCE_PUBLISH"
+      ).and_return("true")
+
+      expect(draft_policy(admin, draft_record).force_publish_draft?).to be true
+
+      allow(ENV).to receive(:[]).with(
+        "ENABLE_TEMPLATE_FORCE_PUBLISH"
+      ).and_return("false")
+
+      expect(draft_policy(admin, draft_record).force_publish_draft?).to be false
+    end
+  end
+
   it "permits customization update actions for review managers who are members" do
     sandbox = nil
     rm = create(:user, :review_manager)

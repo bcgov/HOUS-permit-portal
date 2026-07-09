@@ -1,44 +1,8 @@
-import { Box, Flex, Text, VStack } from "@chakra-ui/react"
 import React from "react"
-import { CopyLinkButton } from "../base/copy-link-button"
+import { IInfoRowProps, InfoRow } from "../base/info-row"
 
-interface IProjectInfoRowProps {
-  label: React.ReactNode
-  value: React.ReactNode
-  subLabel?: React.ReactNode
-  isCopyable?: boolean
-  isBold?: boolean
-}
+type IProjectInfoRowProps = IInfoRowProps
 
-export const ProjectInfoRow = ({
-  label,
-  value,
-  subLabel = null,
-  isCopyable = false,
-  isBold = false,
-}: IProjectInfoRowProps) => (
-  <Flex
-    justify="space-between"
-    align="center"
-    py={2}
-    borderBottom="1px"
-    borderColor="border.light"
-    _last={{ borderBottom: "none" }}
-    w="full"
-  >
-    <Flex justify="space-between" align="center" w="full" mr={2}>
-      <VStack align="flex-start" spacing={0}>
-        <Text>{label}</Text>
-        {subLabel && (
-          <Text fontSize="sm" color="text.secondary">
-            {subLabel}
-          </Text>
-        )}
-      </VStack>
-      <Box fontWeight={isBold ? "bold" : "normal"}>{value}</Box>
-    </Flex>
-    {isCopyable && <CopyLinkButton value={String(value)} iconOnly />}
-  </Flex>
-)
+export const ProjectInfoRow = (props: IProjectInfoRowProps) => <InfoRow {...props} />
 
 export default ProjectInfoRow

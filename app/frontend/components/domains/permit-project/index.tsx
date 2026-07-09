@@ -17,7 +17,7 @@ interface IProjectDashboardScreenProps {}
 
 export const ProjectDashboardScreen = observer(({}: IProjectDashboardScreenProps) => {
   const { t } = useTranslation()
-  const { preCheckStore, userStore, sandboxStore } = useMst()
+  const { preCheckStore, userStore, sandboxStore, siteConfigurationStore } = useMst()
   const { currentUser } = userStore
   const { isSandboxActive } = sandboxStore
   const location = useLocation()
@@ -34,12 +34,16 @@ export const ProjectDashboardScreen = observer(({}: IProjectDashboardScreenProps
       tabIndex: 2,
       badgeCount: preCheckStore.unviewedCount,
     },
-    {
-      label: t("overheatingCode.index.title", "Overheating Codes"),
-      icon: Thermometer,
-      to: "overheating-codes",
-      tabIndex: 3,
-    },
+    ...(siteConfigurationStore.overheatingToolEnabled
+      ? [
+          {
+            label: t("overheatingCode.index.title", "Overheating"),
+            icon: Thermometer,
+            to: "overheating-codes",
+            tabIndex: 3,
+          },
+        ]
+      : []),
     // Disabled: Documents tab
     // { label: t("document.index.title", "Documents"), icon: File, to: "documents", tabIndex: 4 },
   ]
@@ -51,9 +55,7 @@ export const ProjectDashboardScreen = observer(({}: IProjectDashboardScreenProps
 
   const handleTabChange = (index: number) => {
     startTransition(() => {
-      navigate(`/${TABS_DATA[index].to}`, {
-        replace: true,
-      })
+      navigate(`/${TABS_DATA[index].to}`)
     })
   }
 
@@ -78,7 +80,9 @@ export const ProjectDashboardScreen = observer(({}: IProjectDashboardScreenProps
           <TabPanel p={0}>{isPending ? <LoadingScreen /> : <ProjectTabPanelContent />}</TabPanel>
           <TabPanel p={0}>{isPending ? <LoadingScreen /> : <StepCodeTabPanelContent />}</TabPanel>
           <TabPanel p={0}>{isPending ? <LoadingScreen /> : <PreCheckTabPanelContent />}</TabPanel>
-          <TabPanel p={0}>{isPending ? <LoadingScreen /> : <OverheatingCodeTabPanelContent />}</TabPanel>
+          {siteConfigurationStore.overheatingToolEnabled && (
+            <TabPanel p={0}>{isPending ? <LoadingScreen /> : <OverheatingCodeTabPanelContent />}</TabPanel>
+          )}
           {/* <TabPanel p={0}>{isPending ? <LoadingScreen /> : <ComingSoonPlaceholder />}</TabPanel> */}
         </TabPanels>
       </Tabs>

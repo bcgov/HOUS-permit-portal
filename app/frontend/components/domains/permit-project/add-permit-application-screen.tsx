@@ -20,7 +20,9 @@ import { useNavigate } from "react-router-dom"
 import { usePermitProject } from "../../../hooks/resources/use-permit-project"
 import { useTemplateVersions } from "../../../hooks/resources/use-template-versions"
 import { ITemplateVersion } from "../../../models/template-version"
+import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus } from "../../../types/enums"
+import { groupTemplateVersionsByCategory } from "../../../utils/template-version-grouping"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
@@ -29,6 +31,7 @@ import ProjectInfoRow from "../../shared/project/project-info-row"
 export const AddPermitApplicationToProjectScreen = observer(() => {
   const { t } = useTranslation()
   const { currentPermitProject, error } = usePermitProject()
+  const { siteConfigurationStore } = useMst()
   const navigate = useNavigate()
   const {
     templateVersions,
@@ -36,6 +39,7 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
     isLoading,
   } = useTemplateVersions({
     customErrorMessage: t("errors.fetchBuildingPermits"),
+    jurisdictionId: currentPermitProject?.jurisdiction?.id,
   })
 
   const [selectedTemplateVersionIds, setSelectedTemplateVersionIds] = useState<string[]>([])
@@ -52,6 +56,18 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
       return nickname.includes(q) || desc.includes(q) || tags.includes(q)
     })
   }, [templateVersions, query])
+  const groupedTemplates = useMemo(() => groupTemplateVersionsByCategory(filteredTemplates), [filteredTemplates])
+  const selectedTemplateVersions = useMemo(
+    () => templateVersions.filter((templateVersion) => selectedTemplateVersionIds.includes(templateVersion.id)),
+    [selectedTemplateVersionIds, templateVersions]
+  )
+  const selectedTemplatesRequireProjectMeeting = selectedTemplateVersions.some(
+    (templateVersion) => templateVersion.requiresProjectMeeting
+  )
+  const shouldOfferProjectMeetingAfterAdd =
+    selectedTemplatesRequireProjectMeeting &&
+    siteConfigurationStore.projectMeetingsEnabled &&
+    (currentPermitProject?.jurisdiction?.projectMeetingsEnabled ?? false)
 
   const toggleSelection = (templateVersionId: string) => {
     setSelectedTemplateVersionIds((prev) =>
@@ -71,7 +87,16 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
       const response = await (currentPermitProject as any).bulkCreatePermitApplications(params)
       if (response?.ok) {
         currentPermitProject.resetIsFullyLoaded()
-        navigate(`/projects/${currentPermitProject.id}`)
+        if (shouldOfferProjectMeetingAfterAdd) {
+          const params = new URLSearchParams({
+            source: "add-permits",
+            count: selectedTemplateVersionIds.length.toString(),
+            requiresMeeting: "true",
+          })
+          navigate(`/projects/${currentPermitProject.id}/meetings/new?${params.toString()}`)
+        } else {
+          navigate(`/projects/${currentPermitProject.id}`)
+        }
       }
     } finally {
       setIsSubmitting(false)
@@ -190,55 +215,68 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
           {isLoading ? (
             <Text color="text.secondary">{t("ui.loading")}</Text>
           ) : (
-            <Flex gap={6} wrap="wrap">
-              {filteredTemplates.map((tv: ITemplateVersion) => {
-                const checked = selectedTemplateVersionIds.includes(tv.id)
-                return (
-                  <Box
-                    key={tv.id}
-                    onClick={() => toggleSelection(tv.id)}
-                    borderRadius="lg"
-                    p={6}
-                    border="1px solid"
-                    borderColor={checked ? "theme.blueAlt" : "border.light"}
-                    bg="white"
-                    w={{ base: "100%", md: "48%" }}
-                    transition="all 0.2s ease-in-out"
-                    _hover={{ bg: "hover.blue" }}
-                    cursor="pointer"
-                  >
-                    <Flex direction="column" justify="space-between" align="start" gap={4}>
-                      <Box>
-                        <Heading as="h3" fontSize="lg" mb={2}>
-                          {tv.denormalizedTemplateJson?.nickname || tv.label}
-                        </Heading>
-                        <Text fontSize="sm" color="text.secondary">
-                          {tv.denormalizedTemplateJson?.description}
-                        </Text>
-                      </Box>
-                      <Flex
-                        align="center"
-                        gap={2}
-                        border="1px solid"
-                        borderColor={checked ? "theme.blueAlt" : "border.light"}
-                        bg="white"
-                        px={4}
-                        py={2}
-                        borderRadius="md"
-                        alignSelf="flex-end"
-                      >
-                        <Checkbox isChecked={checked} onChange={() => toggleSelection(tv.id)} pointerEvents="none" />
-                        <Text fontWeight="medium">{t("permitProject.addPermits.addToProject")}</Text>
-                      </Flex>
-                    </Flex>
-                  </Box>
-                )
-              })}
+            <Flex direction="column" gap={8}>
+              {groupedTemplates.map((group) => (
+                <Box key={group.id}>
+                  <Heading as="h3" fontSize="lg" mb={4}>
+                    {group.label}
+                  </Heading>
+                  <Flex gap={6} wrap="wrap">
+                    {group.templateVersions.map((tv: ITemplateVersion) => {
+                      const checked = selectedTemplateVersionIds.includes(tv.id)
+                      return (
+                        <Box
+                          key={tv.id}
+                          onClick={() => toggleSelection(tv.id)}
+                          borderRadius="lg"
+                          p={6}
+                          border="1px solid"
+                          borderColor={checked ? "theme.blueAlt" : "border.light"}
+                          bg="white"
+                          w={{ base: "100%", md: "48%" }}
+                          transition="all 0.2s ease-in-out"
+                          _hover={{ bg: "hover.blue" }}
+                          cursor="pointer"
+                        >
+                          <Flex direction="column" justify="space-between" align="start" gap={4}>
+                            <Box>
+                              <Heading as="h4" fontSize="lg" mb={2}>
+                                {tv.denormalizedTemplateJson?.nickname || tv.label}
+                              </Heading>
+                              <Text fontSize="sm" color="text.secondary">
+                                {tv.denormalizedTemplateJson?.description}
+                              </Text>
+                            </Box>
+                            <Flex
+                              align="center"
+                              gap={2}
+                              border="1px solid"
+                              borderColor={checked ? "theme.blueAlt" : "border.light"}
+                              bg="white"
+                              px={4}
+                              py={2}
+                              borderRadius="md"
+                              alignSelf="flex-end"
+                            >
+                              <Checkbox
+                                isChecked={checked}
+                                onChange={() => toggleSelection(tv.id)}
+                                pointerEvents="none"
+                              />
+                              <Text fontWeight="medium">{t("permitProject.addPermits.addToProject")}</Text>
+                            </Flex>
+                          </Flex>
+                        </Box>
+                      )
+                    })}
+                  </Flex>
+                </Box>
+              ))}
             </Flex>
           )}
 
           {/* Action controls below the template list */}
-          <Flex w="full" gap={4} mt={2}>
+          <Flex w="full" gap={4} mt={8}>
             <Button variant="secondary" onClick={clearSelection} isDisabled={selectedTemplateVersionIds.length === 0}>
               {t("ui.clearSelection")}
             </Button>

@@ -5,6 +5,7 @@ import * as R from "ramda"
 import React, { useEffect } from "react"
 import { useFieldArray, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { useSearchParams } from "react-router-dom"
 import { v4 as uuidv4 } from "uuid"
 import { IRequirementTemplateForm, formScrollToId } from "."
 import { useMst } from "../../../../../setup/root"
@@ -22,7 +23,9 @@ interface IProps {
 
 export const SectionsDisplay = observer(function SectionsDisplay(props: IProps) {
   const { watch } = useFormContext<IRequirementTemplateForm>()
+  const [searchParams] = useSearchParams()
   const watchedSections = watch("requirementTemplateSectionsAttributes")
+  const openRequirementBlockId = searchParams.get("openRequirementBlockId")
   const usedRequirementBlockIds = watchedSections.flatMap((section) =>
     section.templateSectionBlocksAttributes.map((sectionBlock) => sectionBlock.requirementBlockId)
   )
@@ -33,7 +36,6 @@ export const SectionsDisplay = observer(function SectionsDisplay(props: IProps) 
       w={"full"}
       alignItems={"flex-start"}
       spacing={16}
-      mt="8"
       mb="20"
       mx="auto"
       pl="8"
@@ -46,6 +48,7 @@ export const SectionsDisplay = observer(function SectionsDisplay(props: IProps) 
           section={section}
           sectionIndex={index}
           disabledUseForBlockIds={usedRequirementBlockIds}
+          openRequirementBlockId={openRequirementBlockId}
           {...props}
         />
       ))}
@@ -60,12 +63,14 @@ const SectionDisplay = observer(
     isCollapsedAll,
     setSectionRef,
     disabledUseForBlockIds = [],
+    openRequirementBlockId,
   }: {
     section: IRequirementTemplateSectionAttributes
     sectionIndex: number
     isCollapsedAll?: boolean
     setSectionRef: (el: HTMLElement, id: string) => void
     disabledUseForBlockIds?: string[]
+    openRequirementBlockId?: string
   }) => {
     const { requirementBlockStore } = useMst()
     const { control, watch, register, setValue } = useFormContext<IRequirementTemplateForm>()
@@ -172,7 +177,7 @@ const SectionDisplay = observer(
                     onRemove={() => removeSectionBlock(index)}
                     isCollapsedAll={isCollapsedAll}
                     isEditable={true}
-                    showEditWarning
+                    autoOpenEdit={openRequirementBlockId === sectionBlock.requirementBlockId}
                   />
                   <BlockConditionalConfig sectionIndex={sectionIndex} blockIndex={index} />
                 </Box>

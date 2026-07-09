@@ -58,6 +58,25 @@ runs:
         ref: ${{ inputs.branch }}
         lfs: true
 
+    - name: Hydrate and verify Git LFS assets
+      id: hydrate-lfs-assets
+      shell: bash
+      run: |
+        git lfs pull
+        ruby <<'RUBY'
+        pointer_header = "version https://git-lfs.github.com/spec/v1"
+        unhydrated_paths =
+          `git lfs ls-files --name-only`.lines.map(&:chomp).select do |path|
+            File.file?(path) &&
+              File.open(path, "rb") { |file| file.read(pointer_header.bytesize) } ==
+                pointer_header
+          end
+
+        if unhydrated_paths.any?
+          abort("Git LFS files were not hydrated:\n#{unhydrated_paths.join("\n")}")
+        end
+        RUBY
+
     - name: Update GITHUB_SHA with checked-out commit SHA
       id: capture-git-sha
       shell: bash

@@ -8,10 +8,12 @@ export const useTemplateVersions = ({
   customErrorMessage,
   status,
   isPubliclyPreviewable = false,
+  jurisdictionId,
 }: {
   customErrorMessage?: string
   status?: ETemplateVersionStatus
   isPubliclyPreviewable?: boolean
+  jurisdictionId?: string
 }) => {
   const [error, setError] = useState<Error | undefined>(undefined)
   const { templateVersionStore, sandboxStore } = useMst()
@@ -26,7 +28,7 @@ export const useTemplateVersions = ({
     ;(async () => {
       const errorMessage = customErrorMessage ?? t("errors.fetchTemplateVersions")
       try {
-        const isSuccess = await fetchTemplateVersions(status, isPubliclyPreviewable)
+        const isSuccess = await fetchTemplateVersions(status, isPubliclyPreviewable, jurisdictionId)
 
         if (isSuccess) {
           setError(null)
@@ -37,7 +39,7 @@ export const useTemplateVersions = ({
         setError(e instanceof Error ? e : new Error(errorMessage))
       }
     })()
-  }, [currentSandbox?.id])
+  }, [currentSandbox?.id, jurisdictionId])
 
   return { templateVersions, error, isLoading }
 }

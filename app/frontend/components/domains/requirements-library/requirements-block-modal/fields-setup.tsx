@@ -45,12 +45,12 @@ export const FieldsSetup = observer(function FieldsSetup({
   })
   const watchedRequirements = watch("requirementsAttributes")
 
-  const [requirementIdsToEdit, setRequirementIdsToEdit] = useState<Record<string, boolean>>({})
+  const [requirementIdToEdit, setRequirementIdToEdit] = useState<string | undefined>()
 
   const { isOpen: isInReorderMode, onToggle } = useDisclosure()
 
   const toggleRequirementToEdit = (requirementId: string) => {
-    setRequirementIdsToEdit((pastState) => ({ ...pastState, [requirementId]: !pastState[requirementId] }))
+    setRequirementIdToEdit((pastRequirementId) => (pastRequirementId === requirementId ? undefined : requirementId))
   }
 
   const { onUseRequirement, onRemoveRequirement, disabledRequirementTypeOptions } = useRequirementLogic({
@@ -63,7 +63,7 @@ export const FieldsSetup = observer(function FieldsSetup({
   const hasFields = fields.length > 0
 
   function isRequirementInEditMode(id: string) {
-    return !isInReorderMode && !!requirementIdsToEdit[id]
+    return !isInReorderMode && requirementIdToEdit === id
   }
 
   return (

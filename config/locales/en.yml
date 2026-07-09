@@ -36,6 +36,38 @@ en:
       collaborator_change: "%{user} made a change to the collaborators"
       block_change: "%{user} made a change to %{block_name}"
       application_change: "%{user} made a change to the application"
+    actions:
+      changed_project_state: "%{user} changed project state from %{from} to %{to}"
+      changed_application_status: "%{user} changed status from %{from} to %{to}"
+      marked_project_read: "%{user} marked the project as read"
+      marked_project_unread: "%{user} marked the project as unread"
+      marked_application_read: "%{user} marked the application as read"
+      marked_application_unread: "%{user} marked the application as unread"
+      assigned_project_reviewer: "%{user} assigned %{reviewer} as project reviewer"
+      removed_project_reviewer: "%{user} removed %{reviewer} as project reviewer"
+      assigned_application_reviewer: "%{user} assigned %{reviewer} as reviewer"
+      removed_application_reviewer: "%{user} removed %{reviewer} as reviewer"
+    values:
+      unknown: "Unknown"
+      permit_project/state:
+        draft: "Draft"
+        queued: "Queued"
+        waiting: "Waiting"
+        in_progress: "In Progress"
+        ready: "Ready"
+        permit_issued: "Permit Issued"
+        active: "Active"
+        complete: "Complete"
+        closed: "Closed"
+      permit_application/status:
+        new_draft: "New draft"
+        newly_submitted: "Submitted"
+        in_review: "In review"
+        revisions_requested: "Revisions requested"
+        resubmitted: "Resubmitted"
+        approved: "Approved"
+        issued: "Issued"
+        withdrawn: "Withdrawn"
   activerecord:
     attributes:
       contact:
@@ -55,6 +87,10 @@ en:
         jurisdiction:
           no_sandboxes: "Jurisdiction must have at least one sandbox."
           enabled_inbox_requires_setup: "can only be toggled on once all emails are set up."
+          enabled_project_meetings_requires_setup: "can only be toggled on once at least one project meeting contact is confirmed."
+          enabled_property_information_requests_requires_setup: "can only be toggled on once at least one property information contact is confirmed."
+        submission_contact:
+          last_confirmed_contact: "cannot be deleted while %{feature} is enabled. Turn the setting off before deleting the last confirmed contact."
         part3_occupancy_required_step:
           duplicate_pathway: "A pathway with identical energy step and zero carbon step already exists for this occupancy."
         jurisdiction_template_version_customizations:
@@ -83,6 +119,12 @@ en:
               review_staff_requires_sandbox: "review staff cannot own permit projects outside of a sandbox"
             sandbox:
               incorrect_jurisdiction: "must belong to the jurisdiction. Please apply to your own jurisdiction to use this sandbox."
+        project_meeting:
+          attributes:
+            permit_project:
+              active_project_meeting_exists: "can only have one active meeting request"
+            meeting_request_documents:
+              authorization_required: "must include authorization documents when the requester is not the owner"
         permit_project_collaboration:
           attributes:
             permit_project:
@@ -163,6 +205,8 @@ en:
       remind_reviewer: "Your report on outstanding permit applications"
       remind_resource_update: "Reminder: Review your jurisdiction resources"
       submission_contact_confirm: "Confirm submission inbox email"
+      project_meeting_contact_confirm: "Confirm project meeting notification email"
+      property_information_contact_confirm: "Confirm property information request notification email"
       new_jurisdiction_membership: "New jurisdiction membership"
       notify_permit_collaboration: "Welcome you have been invited to Collaborate in the Building Permit Hub"
       notify_project_review_collaboration: "You have been assigned as a review collaborator on a project"
@@ -174,6 +218,13 @@ en:
       notify_batched_integration_mapping: "New API mappings"
       notify_pre_check_submitted: "Your pre-check has been submitted"
       notify_pre_check_completed: "Your pre-check has been completed"
+      notify_project_meeting_submitted: "Your project meeting request has been sent"
+      notify_project_meeting_submitted_to_jurisdiction: "New project meeting request: %{project_number}"
+      notify_property_information_requested: "New property information request: %{project_number}"
+      notify_project_meeting_scheduled: "Your project meeting has been scheduled"
+      notify_project_meeting_scheduled_to_jurisdiction: "Project meeting scheduled: %{project_number}"
+      notify_project_meeting_rescheduled: "Your project meeting has been rescheduled"
+      notify_project_meeting_rescheduled_to_jurisdiction: "Project meeting rescheduled: %{project_number}"
       notify_new_template_version_published: "New version published for %{template_label}"
       notify_template_version_no_action: "Permit template updated - no action required: %{template_label}"
       notify_template_version_action_required: "ACTION REQUIRED: Permit template updated - API mapping review required: %{template_label}"
@@ -214,6 +265,13 @@ en:
       unavailable:
         title: Account not found
         message: Administrator accounts are not available for self-registration. Please contact your administrator to gain access.
+    digital_seal_validator:
+      no_file_error:
+        title: Error
+        message: No file was provided
+      validation_error:
+        title: Error
+        message: Error encountered validating the digital seal
     geocoder:
       site_options_error:
         title: Error
@@ -290,6 +348,50 @@ en:
       pdf_report_unavailable:
         title: Error
         message: "PDF report unavailable"
+    project_meeting:
+      create_success:
+        title: ""
+        message: "Project meeting request created successfully!"
+      create_error:
+        title: Error
+        message: "Project meeting request could not be created"
+      update_success:
+        title: ""
+        message: "Project meeting request updated successfully!"
+      update_error:
+        title: Error
+        message: "Project meeting request could not be updated"
+      submit_success:
+        title: ""
+        message: "Project meeting request sent successfully!"
+      submit_error:
+        title: Error
+        message: "Project meeting request could not be sent"
+      cancel_success:
+        title: ""
+        message: "Project meeting request cancelled successfully!"
+      cancel_error:
+        title: Error
+        message: "Project meeting request could not be cancelled"
+      reschedule_success:
+        title: ""
+        message: "Project meeting details updated successfully!"
+      reschedule_error:
+        title: Error
+        message: "Project meeting details could not be updated"
+      transition_success:
+        title: ""
+        message: "Project meeting request status updated successfully!"
+      invalid_transition:
+        title: Error
+        message: "Project meeting request status could not be updated"
+    note:
+      create_success:
+        title: ""
+        message: "Note added successfully!"
+      create_error:
+        title: Error
+        message: "Note could not be added"
     contact:
       options_error:
         title: Error
@@ -492,25 +594,25 @@ en:
         message: "%{error_message}"
       create_draft_success:
         title: ""
-        message: "Draft version created successfully"
+        message: "Early access version created successfully"
       create_draft_error:
         title: Error
         message: "%{error_message}"
       discard_draft_success:
         title: ""
-        message: "Draft version discarded"
+        message: "Early access version discarded"
       discard_draft_error:
         title: Error
         message: "%{error_message}"
       promote_draft_success:
         title: ""
-        message: "Draft promoted to scheduled version"
+        message: "Early access version promoted to scheduled version"
       promote_draft_error:
         title: Error
         message: "%{error_message}"
       no_draft_error:
         title: Error
-        message: "No draft version exists for this template"
+        message: "No early access version exists for this template"
       delete_error:
         title: Error
         message: "%{error_message}"
@@ -689,6 +791,18 @@ en:
       autofill_permit_application_not_draft:
         title: Error
         message: "Only draft permit applications can be autofilled"
+      autofill_part_3_step_code_success:
+        title: ""
+        message: "Part 3 step code autofilled successfully"
+      autofill_part_3_step_code_error:
+        title: Error
+        message: "%{error_message}"
+      autofill_part_9_step_code_success:
+        title: ""
+        message: "Part 9 step code autofilled successfully"
+      autofill_part_9_step_code_error:
+        title: Error
+        message: "%{error_message}"
     permit_collaboration:
       destroy_success:
         title: ""
@@ -790,6 +904,54 @@ en:
       update_error:
         title: Error
         message: "%{error_message}"
+    help_video_section:
+      create_success:
+        title: ""
+        message: "Video section created successfully."
+      update_success:
+        title: ""
+        message: "Video section updated successfully."
+      destroy_success:
+        title: ""
+        message: "Video section deleted successfully."
+      reorder_success:
+        title: ""
+        message: "Video sections reordered successfully."
+      reorder_videos_success:
+        title: ""
+        message: "Videos reordered successfully."
+    template_category:
+      create_success:
+        title: ""
+        message: "Permit category created successfully."
+      update_success:
+        title: ""
+        message: "Permit category updated successfully."
+      destroy_success:
+        title: ""
+        message: "Permit category deleted successfully."
+      reorder_success:
+        title: ""
+        message: "Permit categories reordered successfully."
+      reorder_templates_success:
+        title: ""
+        message: "Templates reordered successfully."
+    help_video:
+      create_success:
+        title: ""
+        message: "Video created successfully."
+      update_success:
+        title: ""
+        message: "Video updated successfully."
+      destroy_success:
+        title: ""
+        message: "Video deleted successfully."
+      publish_success:
+        title: ""
+        message: "Video published successfully."
+      unpublish_success:
+        title: ""
+        message: "Video unpublished successfully."
     misc:
       user_not_authorized_error:
         title: "Unauthorized"
@@ -803,6 +965,9 @@ en:
       not_found_error:
         title: "Error"
         message: 404 - The requested resource could not be found
+      validation_error:
+        title: "Error"
+        message: "%{error_message}"
     s3:
       multipart_init_failed:
         title: "File Upload Error"
@@ -847,28 +1012,28 @@ en:
     template_version:
       update_draft_block_success:
         title: ""
-        message: "Draft block updated"
+        message: "Early access version block updated"
       update_draft_block_error:
         title: Error
         message: "%{error_message}"
       refresh_draft_success:
         title: ""
-        message: "Draft refreshed from current template"
+        message: "Early access version refreshed from current template"
       refresh_draft_error:
         title: Error
         message: "%{error_message}"
       share_draft_success:
         title: ""
-        message: "Draft shared with %{count} previewer(s)"
+        message: "Early access version shared with %{count} previewer(s)"
       no_previewers_error:
         title: Error
-        message: "No previewers are invited to this draft yet. Invite previewers first."
+        message: "No previewers are invited to this early access version yet. Invite previewers first."
       not_draft_error:
         title: Error
-        message: "This version is not a draft"
+        message: "This version is not an early access version"
       invite_previewers_success:
         title: ""
-        message: "Previewers invited to draft"
+        message: "Previewers invited to early access version"
       invite_previewers_error:
         title: Error
         message: "Could not invite previewers"
@@ -929,6 +1094,25 @@ en:
       not_found_error:
         title: "Error"
         message: 404 - The requested resource could not be found
+    release_note:
+      create_success:
+        title: ""
+        message: "Release note created successfully!"
+      create_error:
+        title: Error
+        message: "%{error_message}"
+      update_success:
+        title: ""
+        message: "Release note updated successfully!"
+      update_error:
+        title: Error
+        message: "%{error_message}"
+      publish_success:
+        title: ""
+        message: "Release note published successfully!"
+      publish_error:
+        title: Error
+        message: "%{error_message}"
   services:
     auto_compliance_configuration:
       digital_seal_validator:
@@ -1077,6 +1261,11 @@ en:
       status_ready_no_user: 'Requirement “%{requirement_block_name}” status set to "ready" for permit application %{number}'
     resource:
       reminder: "Reminder: Review your jurisdiction resources"
+    project_meeting:
+      submitted: "Your project meeting request for project %{project_number} has been sent."
+      rescheduled: "Your project meeting for project %{project_number} has been rescheduled."
+    release_note:
+      publish_notification: "Version %{version} is now available. See what's new."
     integration_mapping:
       published_template_missing_requirements_mapping: "Missing API mapping: A new version of “%{template_label}” has been published on %{version_date}"
       scheduled_template_missing_requirements_mapping: "Missing API Mapping: A new version of “%{template_label}” has been scheduled for %{version_date}, 01:00hrs PST."

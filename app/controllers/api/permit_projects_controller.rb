@@ -24,6 +24,7 @@ class Api::PermitProjectsController < Api::ApplicationController
   def index
     perform_permit_project_search
     compute_project_ids_with_outdated_drafts(@permit_projects)
+    compute_active_project_meeting_ids_by_project_id(@permit_projects)
 
     render_success @permit_projects,
                    nil,
@@ -123,10 +124,6 @@ class Api::PermitProjectsController < Api::ApplicationController
 
   def assign_project_review_collaborator
     authorize @permit_project
-
-    unless @permit_project.designated_reviewer_enabled?
-      return render_error("permit_project.feature_not_enabled", { status: 422 })
-    end
 
     collaborator_id = params.require(:collaborator_id)
     @permit_project.assign_project_review_collaborator!(collaborator_id)
@@ -378,6 +375,7 @@ class Api::PermitProjectsController < Api::ApplicationController
       apply_search_authorization(
         current_user.pinned_permit_projects.includes(:jurisdiction).reload
       )
+    compute_active_project_meeting_ids_by_project_id(@pinned_projects)
   end
 
   def compute_project_ids_with_outdated_drafts(projects)
@@ -394,13 +392,31 @@ class Api::PermitProjectsController < Api::ApplicationController
       outdated_draft_permit_applications.pluck(:permit_project_id).to_set
   end
 
+  def compute_active_project_meeting_ids_by_project_id(projects)
+    project_ids = projects.map(&:id)
+    @active_project_meeting_ids_by_project_id = {}
+    return if project_ids.empty?
+
+    relation =
+      policy_scope(ProjectMeeting).where(permit_project_id: project_ids).active
+
+    rows = relation.pluck(:permit_project_id, :id)
+    @active_project_meeting_ids_by_project_id =
+      rows.each_with_object({}) do |(project_id, meeting_id), hash|
+        hash[project_id] ||= meeting_id
+      end
+  end
+
   def blueprint_options(view: :default)
     {
       view: view,
       current_user: current_user,
       viewer: current_user,
       pinned_project_ids: current_user.pinned_permit_project_ids,
-      project_ids_with_outdated_drafts: @project_ids_with_outdated_drafts
+      project_ids_with_outdated_drafts: @project_ids_with_outdated_drafts,
+      active_project_meeting_ids_by_project_id:
+        @active_project_meeting_ids_by_project_id,
+      notes_scope: policy_scope(Note)
     }
   end
 
@@ -409,6 +425,7 @@ class Api::PermitProjectsController < Api::ApplicationController
     scope = scope.for_sandbox(current_sandbox) unless current_user.super_admin?
     @permit_project = scope.find(params[:id])
     compute_project_ids_with_outdated_drafts([@permit_project])
+    compute_active_project_meeting_ids_by_project_id([@permit_project])
   end
 
   def permit_applications_params

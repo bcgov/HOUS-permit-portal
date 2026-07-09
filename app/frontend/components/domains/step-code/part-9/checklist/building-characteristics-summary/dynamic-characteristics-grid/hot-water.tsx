@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { Controller, useFieldArray, useFormContext } from "react-hook-form"
 import { useMst } from "../../../../../../../setup/root"
-import { TextFormControl } from "../../../../../../shared/form/input-form-control"
+import { NumberFormControl } from "../../../../../../shared/form/input-form-control"
 import { GridColumnHeader } from "../../shared/grid/column-header"
 import { GridData } from "../../shared/grid/data"
 import { DetailsInput } from "../details-input"
@@ -56,7 +56,7 @@ export const HotWater = observer(function BuildingCharacteristicsSummaryHotWater
             />
           </GridData>
           <GridData borderTopWidth={index == 0 ? 1 : 0} borderRightWidth={1}>
-            <TextFormControl fieldName={`${fieldArrayName}.${index}.performanceValue`} />
+            <NumberFormControl fieldName={`${fieldArrayName}.${index}.performanceValue`} />
           </GridData>
         </React.Fragment>
       ))}

@@ -37,8 +37,8 @@ export interface IPublishScheduleModalProps {
   minDate?: Date
   onScheduleConfirm?: (date: Date) => void
   onForcePublishNow?: () => void
-  onCreateDraft?: () => void
   triggerButtonProps?: Partial<ButtonProps>
+  renderTrigger?: (onOpen: () => void) => React.ReactNode
   requirementTemplate?: IRequirementTemplate
   onSaveDraft?: () => void
   /**
@@ -62,8 +62,8 @@ export const PublishScheduleModal = observer(function PublishScheduleModal({
   minDate,
   onScheduleConfirm,
   triggerButtonProps,
+  renderTrigger,
   onForcePublishNow,
-  onCreateDraft,
   requirementTemplate,
   scheduledConflicts,
   translationNamespace = "requirementTemplate.edit",
@@ -132,9 +132,13 @@ export const PublishScheduleModal = observer(function PublishScheduleModal({
           {t("requirementTemplate.access.title", "Manage access")}
         </Button>
       )}
-      <Button variant={"primary"} rightIcon={<CaretRight />} onClick={onOpen} {...triggerButtonProps}>
-        {triggerLabel ?? t("ui.publish")}
-      </Button>
+      {renderTrigger ? (
+        renderTrigger(onOpen)
+      ) : (
+        <Button variant={"primary"} rightIcon={<CaretRight />} onClick={onOpen} {...triggerButtonProps}>
+          {triggerLabel ?? t("ui.publish")}
+        </Button>
+      )}
       {requirementTemplate && (
         <TemplateAccessSidebar
           requirementTemplate={requirementTemplate}
@@ -144,7 +148,7 @@ export const PublishScheduleModal = observer(function PublishScheduleModal({
       )}
       <Modal isOpen={isOpen} onClose={onClose} autoFocus={false}>
         <ModalOverlay />
-        <ModalContent w="full" maxW={onForcePublishNow || onCreateDraft ? "680px" : "436px"} mx={4}>
+        <ModalContent w="full" maxW={onForcePublishNow ? "680px" : "436px"} mx={4}>
           <ModalHeader fontSize={"2xl"} mt={2}>
             {t(nk("scheduleModalTitle"))}
           </ModalHeader>
@@ -213,11 +217,6 @@ export const PublishScheduleModal = observer(function PublishScheduleModal({
             <Button variant={"secondary"} onClick={onCancel}>
               {t("ui.neverMind")}
             </Button>
-            {onCreateDraft && (
-              <Button variant={"secondary"} onClick={onCreateDraft}>
-                Create draft version
-              </Button>
-            )}
             {onForcePublishNow && (
               <Button
                 variant={"secondary"}

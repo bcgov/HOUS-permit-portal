@@ -3,7 +3,7 @@ class Part9StepCode::DataEntry < ApplicationRecord
 
   include H2kFileUploader.Attachment(:h2k_file)
 
-  belongs_to :checklist, class_name: "Part9StepCode::Checklist"
+  belongs_to :checklist, class_name: "Part9StepCode::Checklist", touch: true
   delegate :stage, to: :checklist
 
   def h2k_file_id
@@ -27,7 +27,7 @@ class Part9StepCode::DataEntry < ApplicationRecord
       public: false,
       expires_in: 3600,
       response_content_disposition:
-        "attachment; filename=\"#{h2k_file.original_filename}\""
+        ContentDisposition.attachment(h2k_file.original_filename)
     )
   end
 end

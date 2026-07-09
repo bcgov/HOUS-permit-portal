@@ -8,9 +8,11 @@ class StepCodeBaseBlueprint < Blueprinter::Base
          :title,
          :reference_number,
          :full_address,
+         :pid,
          :jurisdiction_name,
          :permit_date,
          :phase,
+         :current_stage,
          :permit_application_id
 
   association :creator, blueprint: UserBlueprint

@@ -1,11 +1,10 @@
 import {
-  Alert,
-  AlertIcon,
   Box,
   Button,
   Container,
   HStack,
   Heading,
+  Link,
   List,
   ListIcon,
   ListItem,
@@ -13,107 +12,112 @@ import {
   UnorderedList,
   VStack,
 } from "@chakra-ui/react"
-import { CheckCircle, XCircle } from "@phosphor-icons/react"
-import { UppyFile } from "@uppy/core"
+import { CheckCircle } from "@phosphor-icons/react"
+import type { UppyFile } from "@uppy/core"
 import "@uppy/core/dist/style.min.css"
-import "@uppy/dashboard/dist/style.css"
 import Dashboard from "@uppy/react/lib/Dashboard.js"
-import { observer } from "mobx-react-lite"
-import React from "react"
-import { useTranslation } from "react-i18next"
+import * as R from "ramda"
+import React, { useRef, useState } from "react"
+import { Trans, useTranslation } from "react-i18next"
 import useUppyTransient from "../../../hooks/use-uppy-transient"
-import { useMst } from "../../../setup/root"
+import {
+  DIGITAL_SEAL_VALIDATOR_UPLOAD_ENDPOINT,
+  formatDigitalSealDateTime,
+  parseDigitalSealSignature,
+  parseUploadResponseToActionResult,
+  type DigitalSealSignerDisplay,
+  type DigitalSealValidatorActionResult,
+} from "../../../utils/digital-seal-validation"
 
-export const CheckDigitalSealsScreen = observer(() => {
+export const CheckDigitalSealsScreen = () => {
   const { t } = useTranslation()
-  const { digitalSealValidatorStore } = useMst()
-  const {
-    file,
-    validationResult: result,
-    error,
-    setFile,
-    setValidationResult,
-    setError,
-    reset,
-  } = digitalSealValidatorStore
+  const uppyRef = useRef<ReturnType<typeof useUppyTransient> | null>(null)
 
-  const handleUploadSuccess = (uppyFile: UppyFile<{}, {}>, response: any) => {
-    setFile(uppyFile.data as File)
-    setValidationResult(null)
-    setError(null)
+  const [validationResult, setValidationResult] = useState<DigitalSealValidatorActionResult | null>(null)
+  const [fileName, setFileName] = useState<string | null>(null)
+  const [fileLastModified, setFileLastModified] = useState<number | null>(null)
 
-    if (response.body?.meta?.status === "success") {
-      setValidationResult(response.body.meta.signatures)
-    } else {
-      const baseMsg = t("projectReadinessTools.digitalSealValidator.notValidated", {
-        fileName: (uppyFile.data as File)?.name,
-      }) as string
-      setError(baseMsg)
-    }
+  const hasResolvedResult = validationResult != null
+  const uniqueSigners: DigitalSealSignerDisplay[] =
+    validationResult?.status === "found"
+      ? R.uniqBy(
+          (signer) => signer.subjectName,
+          validationResult.signatures.map((signature) => parseDigitalSealSignature(signature))
+        )
+      : []
+  const formattedLastModified = fileLastModified ? formatDigitalSealDateTime(fileLastModified) : ""
+
+  const applyUploadComplete = (uppyFile: UppyFile<{}, {}>, response: unknown) => {
+    const fileData = uppyFile.data as File
+    setFileName(uppyFile.name)
+    setFileLastModified(fileData?.lastModified ?? null)
+    setValidationResult(parseUploadResponseToActionResult(response))
   }
 
-  const handleUploadError = (uppyFile: UppyFile<{}, {}>, error: any, response: any) => {
-    setFile(uppyFile.data as File)
-    setValidationResult(null)
-    const errorMessage =
-      response?.body?.meta?.message?.options?.error_message ||
-      t("projectReadinessTools.digitalSealValidator.notValidated", { fileName: (uppyFile.data as File).name })
-    setError(errorMessage)
+  const applyUploadError = (uppyFile: UppyFile<{}, {}>) => {
+    const fileData = uppyFile.data as File
+    setFileName(uppyFile.name)
+    setFileLastModified(fileData?.lastModified ?? null)
+    setValidationResult({ status: "systemFailure" })
   }
 
-  const handleFileAdded = () => {
-    setError(null)
-    setValidationResult(null)
+  const clearValidation = () => setValidationResult(null)
+
+  const clearFile = () => {
+    setFileName(null)
+    setFileLastModified(null)
   }
 
-  const handleUploadStart = () => {
-    setError(null)
-    setValidationResult(null)
-  }
-
-  const handleFileRemoved = () => {
-    resetValidator()
+  const resetValidator = () => {
+    uppyRef.current?.cancelAll()
+    clearValidation()
+    clearFile()
   }
 
   const uppy = useUppyTransient({
-    endpoint: digitalSealValidatorStore.uploadEndpoint,
-    onUploadSuccess: handleUploadSuccess,
-    onUploadError: handleUploadError,
-    onFileAdded: handleFileAdded,
-    onFileRemoved: handleFileRemoved,
-    onUploadStart: handleUploadStart,
+    endpoint: DIGITAL_SEAL_VALIDATOR_UPLOAD_ENDPOINT,
+    onUploadSuccess: applyUploadComplete,
+    onUploadError: applyUploadError,
+    onFileAdded: clearValidation,
+    onFileRemoved: clearFile,
+    onUploadStart: clearValidation,
     allowedFileTypes: [".pdf"],
     maxNumberOfFiles: 1,
     autoProceed: true,
   })
+  uppyRef.current = uppy
 
-  const formatSignerName = (subjectName: string) => {
-    if (!subjectName) return t("projectReadinessTools.digitalSealValidator.unknownSigner") as string
-
-    const parts = subjectName.split(/[,+]/).map((p) => p.trim())
-    let cn = ""
-    const ous: string[] = []
-
-    parts.forEach((part) => {
-      if (part.startsWith("CN=")) {
-        cn = part.substring(3)
-      } else if (part.startsWith("OU=")) {
-        ous.push(part.substring(3))
-      }
-    })
-
-    if (cn && ous.length > 0) {
-      return `${cn} (${ous.join(", ")})`
-    } else if (cn) {
-      return cn
+  const formatSignerLabel = (signer: DigitalSealSignerDisplay) => {
+    if (!signer.name && !signer.organization) {
+      return signer.subjectName || (t("projectReadinessTools.digitalSealValidator.unknownSigner") as string)
     }
-    return subjectName
+    if (signer.organization) {
+      return `${signer.name} (${signer.organization})`
+    }
+    return signer.name
   }
 
-  const resetValidator = () => {
-    uppy.cancelAll()
-    reset()
-  }
+  const resultCardColorProps =
+    validationResult?.status !== "found"
+      ? {
+          bg: "semantic.warningLight",
+          borderColor: "semantic.warning",
+        }
+      : {
+          bg: "semantic.infoLight",
+          borderColor: "theme.blueActive",
+        }
+
+  const contactEmail = t("site.contactEmail")
+  const systemFailureBody = (
+    <Trans
+      i18nKey="projectReadinessTools.digitalSealValidator.systemFailureMessage"
+      values={{ email: contactEmail }}
+      components={{
+        1: <Link href={`mailto:${contactEmail}`} color="text.link" textDecoration="underline" />,
+      }}
+    />
+  )
 
   return (
     <Container maxW="container.lg" py="16" px="8">
@@ -153,123 +157,74 @@ export const CheckDigitalSealsScreen = observer(() => {
         <ListItem>{t("projectReadinessTools.digitalSealValidator.requirement3") as string}</ListItem>
       </UnorderedList>
 
-      <VStack spacing={6} align="stretch" maxW="full">
-        {result && (
-          <Box bg="blue.50" borderLeft="8px solid" borderColor="blue.500" p={4} borderRadius="sm">
-            {result.length === 0 ? (
-              <Text>
-                {
-                  t("projectReadinessTools.digitalSealValidator.noSignaturesFound", {
-                    defaultValue: "No digital signatures found.",
-                  }) as string
-                }
-              </Text>
+      <VStack spacing={5} align="stretch" maxW="full">
+        {hasResolvedResult && (
+          <Box borderLeft="8px solid" py={8} pr={8} pl={6} borderRadius="sm" {...resultCardColorProps}>
+            {validationResult.status !== "found" ? (
+              <Box>
+                <Heading as="h2" fontSize="2xl" mb={2} fontWeight="bold">
+                  {validationResult.status === "notFound"
+                    ? (t("projectReadinessTools.digitalSealValidator.notFoundTitle") as string)
+                    : (t("projectReadinessTools.digitalSealValidator.systemFailureTitle") as string)}
+                </Heading>
+                <Text fontSize="lg" color="text.primary" mb={2}>
+                  {t("projectReadinessTools.digitalSealValidator.fileLabel") as string} {fileName}
+                </Text>
+                {validationResult.status === "notFound" ? (
+                  <Text fontSize="lg" color="text.primary">
+                    {t("projectReadinessTools.digitalSealValidator.noSignaturesFound") as string}
+                  </Text>
+                ) : (
+                  <Text fontSize="lg" color="text.primary">
+                    {systemFailureBody}
+                  </Text>
+                )}
+              </Box>
             ) : (
               <Box>
-                <Heading as="h2" mb={4} fontWeight="bold">
-                  {t("projectReadinessTools.digitalSealValidator.digitalSignaturesDetected") as string}
+                <Heading as="h2" fontSize="2xl" mb={2} fontWeight="bold">
+                  {t("projectReadinessTools.digitalSealValidator.foundTitle") as string}
                 </Heading>
                 <Box mb={4}>
                   <HStack spacing={2} align="center">
-                    <Text>
-                      {t("projectReadinessTools.digitalSealValidator.fileLabel") as string} {file?.name}
+                    <Text fontSize="lg">
+                      {t("projectReadinessTools.digitalSealValidator.fileLabel") as string} {fileName}
                     </Text>
                   </HStack>
-                  <Text fontSize="sm" color="gray.600">
-                    {t("projectReadinessTools.digitalSealValidator.lastModified") as string}{" "}
-                    {file?.lastModified
-                      ? new Date(file.lastModified).toLocaleString("en-CA", {
-                          year: "numeric",
-                          month: "2-digit",
-                          day: "2-digit",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          second: "2-digit",
-                          hour12: false,
-                        })
-                      : ""}
+                  <Text fontSize="sm" color="text.secondary">
+                    {t("projectReadinessTools.digitalSealValidator.lastModified") as string} {formattedLastModified}
                   </Text>
                 </Box>
                 <List fontSize="lg" spacing={4} pl={0}>
-                  {result
-                    .filter(
-                      (sig: any, index: number, self: any[]) =>
-                        index ===
-                        self.findIndex(
-                          (t) =>
-                            t.signerStatus?.certificateInfo?.subjectName ===
-                            sig.signerStatus?.certificateInfo?.subjectName
-                        )
-                    )
-                    .map((sig: any, index: number) => {
-                      const rawSignerName = sig.signerStatus?.certificateInfo?.subjectName || ""
-                      const signerName = formatSignerName(rawSignerName)
-                      const date = sig.signatureTimestamp?.date
-                        ? new Date(sig.signatureTimestamp.date).toLocaleString("en-CA", {
-                            year: "numeric",
-                            month: "2-digit",
-                            day: "2-digit",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            second: "2-digit",
-                            hour12: false,
-                          }) + " PST" // Mocking PST for display consistency with requirement
-                        : (t("projectReadinessTools.digitalSealValidator.unknownDate") as string)
-                      const isValid = sig.result === "SUCCESS"
+                  {uniqueSigners.map((signer, index) => {
+                    const signedAtLabel = signer.signedAt
+                      ? signer.signedAt
+                      : (t("projectReadinessTools.digitalSealValidator.unknownDate") as string)
 
-                      return (
-                        <ListItem key={rawSignerName || index}>
-                          <VStack align="start" spacing={1}>
-                            <HStack spacing={2}>
-                              <ListIcon
-                                as={isValid ? CheckCircle : XCircle}
-                                color={isValid ? "blue.500" : "red.500"}
-                                m={0}
-                              />
-                              <Text fontWeight="bold">{signerName}</Text>
-                            </HStack>
-                            <Text fontSize="sm" color="gray.600">
-                              {t("projectReadinessTools.digitalSealValidator.signedAt") as string} {date}
-                            </Text>
-                            {!isValid && (
-                              <Text fontSize="sm" color="red.500">
-                                {sig.result}
-                              </Text>
-                            )}
-                          </VStack>
-                        </ListItem>
-                      )
-                    })}
+                    return (
+                      <ListItem key={signer.subjectName || index}>
+                        <VStack align="start" spacing={1}>
+                          <HStack spacing={2}>
+                            <ListIcon as={CheckCircle} color="theme.blueActive" m={0} />
+                            <Text fontWeight="bold">{formatSignerLabel(signer)}</Text>
+                          </HStack>
+                          <Text fontSize="sm" color="text.secondary">
+                            {t("projectReadinessTools.digitalSealValidator.signedAt") as string} {signedAtLabel}
+                          </Text>
+                        </VStack>
+                      </ListItem>
+                    )
+                  })}
                 </List>
               </Box>
             )}
           </Box>
         )}
 
-        {error && (
-          <Alert status="error" borderRadius="md">
-            <AlertIcon />
-            <HStack spacing={2} align="start" flexWrap="wrap">
-              <Text>{error}</Text>
-              <Button
-                variant="link"
-                onClick={resetValidator}
-                color="text.link"
-                textDecoration="underline"
-                fontWeight="normal"
-                _hover={{ textDecoration: "none" }}
-              >
-                {t("projectReadinessTools.digitalSealValidator.uploadAnotherFile") as string}
-              </Button>
-            </HStack>
-          </Alert>
-        )}
-
-        {result && !error && (
+        {hasResolvedResult && (
           <Box display="flex" justifyContent="flex-start" width="100%">
             <Button
               variant="link"
-              mt={4}
               fontSize="lg"
               onClick={resetValidator}
               color="text.link"
@@ -277,74 +232,70 @@ export const CheckDigitalSealsScreen = observer(() => {
               fontWeight="normal"
               _hover={{ textDecoration: "none" }}
             >
-              {
-                // @ts-ignore
-                t("projectReadinessTools.digitalSealValidator.checkAnotherDocument", {
-                  defaultValue: "Check another document",
-                }) as string
-              }
+              {t("projectReadinessTools.digitalSealValidator.checkAnotherDocument") as string}
             </Button>
           </Box>
         )}
 
-        <Box
-          position="relative"
-          mb={6}
-          sx={{
-            ".uppy-Dashboard": {
-              border: "2px dashed var(--chakra-colors-border-light)",
-              borderRadius: "var(--chakra-radii-lg)",
-              borderColor: "var(--chakra-colors-theme-blue)",
-              width: "100%",
-              height: "100%",
-            },
-            ".uppy-Container": {
-              display: result || error ? "none" : "",
-              height: "100%",
-            },
-            ".uppy-Dashboard-inner": {
-              border: "none",
-              borderRadius: "var(--chakra-radii-lg)",
-              backgroundColor: "var(--chakra-colors-theme-blueLight)",
-              width: "100%",
-              height: "100%",
-              display: result || error ? "none" : "",
-            },
-            ".uppy-Dashboard-innerWrap": {
-              display: result || error ? "none" : "",
-            },
-            ".uppy-Dashboard-dropFilesHereHint": {
-              display: "none",
-            },
-            ".uppy-DashboardContent-title": {
-              display: "none",
-            },
-            ".uppy-DashboardContent-back": {
-              display: "none",
-            },
-            ".uppy-DashboardContent-bar": {
-              display: "none",
-            },
-            ".uppy-StatusBar-actionBtn--done": {
-              display: "none",
-            },
-            ".uppy-Informer": {
-              display: "none",
-            },
-            ".uppy-StatusBar-statusPrimary": {
-              display: "none",
-            },
-            ".uppy-StatusBar-statusSecondary": {
-              display: "none",
-            },
-            ".uppy-StatusBar-actionBtn--retry": {
-              display: "none",
-            },
-          }}
-        >
-          <Dashboard uppy={uppy} width="100%" height={250} proudlyDisplayPoweredByUppy={false} />
-        </Box>
+        {!hasResolvedResult && (
+          <Box
+            position="relative"
+            sx={{
+              ".uppy-Dashboard": {
+                border: "2px dashed var(--chakra-colors-border-light)",
+                borderRadius: "var(--chakra-radii-lg)",
+                borderColor: "var(--chakra-colors-theme-blue)",
+                width: "100%",
+                height: "100%",
+              },
+              ".uppy-Container": {
+                display: hasResolvedResult ? "none" : "",
+                height: "100%",
+              },
+              ".uppy-Dashboard-inner": {
+                border: "none",
+                borderRadius: "var(--chakra-radii-lg)",
+                backgroundColor: "var(--chakra-colors-theme-blueLight)",
+                width: "100%",
+                height: "100%",
+                display: hasResolvedResult ? "none" : "",
+              },
+              ".uppy-Dashboard-innerWrap": {
+                display: hasResolvedResult ? "none" : "",
+              },
+              ".uppy-Dashboard-dropFilesHereHint": {
+                display: "none",
+              },
+              ".uppy-DashboardContent-title": {
+                display: "none",
+              },
+              ".uppy-DashboardContent-back": {
+                display: "none",
+              },
+              ".uppy-DashboardContent-bar": {
+                display: "none",
+              },
+              ".uppy-StatusBar-actionBtn--done": {
+                display: "none",
+              },
+              ".uppy-Informer": {
+                display: "none",
+              },
+              ".uppy-StatusBar-statusPrimary": {
+                display: "none",
+              },
+              ".uppy-StatusBar-statusSecondary": {
+                display: "none",
+              },
+              ".uppy-StatusBar-actionBtn--retry": {
+                display: "none",
+              },
+            }}
+          >
+            <Dashboard uppy={uppy} width="100%" height={250} proudlyDisplayPoweredByUppy={false} />
+          </Box>
+        )}
       </VStack>
     </Container>
   )
-})
+}

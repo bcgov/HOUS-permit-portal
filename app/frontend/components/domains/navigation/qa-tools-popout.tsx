@@ -4,38 +4,88 @@ import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { matchPath, useLocation, useNavigate } from "react-router-dom"
+import { IPart9StepCode } from "../../../models/part-9-step-code"
 import { useMst, useServerAPI } from "../../../setup/root"
-import { EFlashMessageStatus } from "../../../types/enums"
+import { EFlashMessageStatus, EStepCodeType } from "../../../types/enums"
 import { IOption } from "../../../types/types"
+import { isUUID } from "../../../utils/utility-functions"
+import { navLinks as part3NavLinks } from "../step-code/part-3/sidebar/nav-sections"
+import { navLinks as part9NavLinks } from "../step-code/part-9/sidebar/nav-sections"
+
+const part3PenultimateSection = part3NavLinks.at(-2)?.location ?? "requirements-summary"
+const part9PenultimateSection = part9NavLinks.at(-2)?.location ?? "review"
 
 export const QaToolsPopout = observer(() => {
   const { t } = useTranslation()
   const location = useLocation()
   const navigate = useNavigate()
   const api = useServerAPI()
-  const { permitApplicationStore, sandboxStore, sessionStore, uiStore, userStore } = useMst()
+  const { permitApplicationStore, stepCodeStore, sessionStore, siteConfigurationStore, uiStore } = useMst()
+  const { currentPermitApplication } = permitApplicationStore
 
-  const { currentUser } = userStore
   const [isOpen, setIsOpen] = useState(false)
   const [jurisdictionOptions, setJurisdictionOptions] = useState<IOption[]>([])
   const [selectedJurisdictionId, setSelectedJurisdictionId] = useState("")
   const [isLoadingJurisdictions, setIsLoadingJurisdictions] = useState(false)
   const [isCreatingProject, setIsCreatingProject] = useState(false)
-  const [isAutofilling, setIsAutofilling] = useState(false)
+  const [isAutofillingPermit, setIsAutofillingPermit] = useState(false)
+  const [isAutofillingPart3, setIsAutofillingPart3] = useState(false)
+  const [isAutofillingPart9, setIsAutofillingPart9] = useState(false)
 
-  const permitApplicationEditMatch = matchPath("/permit-applications/:permitApplicationId/edit", location.pathname)
-  const permitApplicationId = permitApplicationEditMatch?.params.permitApplicationId
+  const permitApplicationEditMatch = matchPath(
+    { path: "/permit-applications/:permitApplicationId/edit", end: true },
+    location.pathname
+  )
+  const part3PermitMatch = matchPath(
+    { path: "/permit-applications/:permitApplicationId/edit/part-3-step-code/*" },
+    location.pathname
+  )
+  const part3StandaloneMatch =
+    matchPath({ path: "/part-3-step-code/:stepCodeId/*" }, location.pathname) ||
+    matchPath({ path: "/part-3-step-code/:stepCodeId", end: true }, location.pathname)
+  const part9PermitMatch = matchPath(
+    { path: "/permit-applications/:permitApplicationId/edit/part-9-step-code/*" },
+    location.pathname
+  )
+  const part9StandaloneMatch =
+    matchPath({ path: "/part-9-step-code/:stepCodeId/*" }, location.pathname) ||
+    matchPath({ path: "/part-9-step-code/:stepCodeId", end: true }, location.pathname)
+
+  const permitApplicationId =
+    permitApplicationEditMatch?.params.permitApplicationId ||
+    part3PermitMatch?.params.permitApplicationId ||
+    part9PermitMatch?.params.permitApplicationId
+  const isPermitApplicationEditOnly = Boolean(permitApplicationEditMatch)
+  const isPart3StepCodePath = Boolean(
+    part3PermitMatch ||
+      part3StandaloneMatch ||
+      matchPath({ path: "/part-3-step-code/*" }, location.pathname) ||
+      matchPath({ path: "/part-3-step-code", end: true }, location.pathname)
+  )
+  const isPart9StepCodePath = Boolean(
+    part9PermitMatch ||
+      part9StandaloneMatch ||
+      matchPath({ path: "/part-9-step-code/*" }, location.pathname) ||
+      matchPath({ path: "/part-9-step-code", end: true }, location.pathname)
+  )
+  const part3StepCodeIdFromUrl = part3StandaloneMatch?.params.stepCodeId
+  const part3StepCodeIdFromPermit =
+    currentPermitApplication?.stepCode?.type === EStepCodeType.part3StepCode
+      ? currentPermitApplication?.stepCode?.id
+      : undefined
+  const part3StepCodeId = isUUID(part3StepCodeIdFromUrl) ? part3StepCodeIdFromUrl : part3StepCodeIdFromPermit
+  const part9StepCodeIdFromUrl = part9StandaloneMatch?.params.stepCodeId
+  const part9StepCodeIdFromPermit =
+    currentPermitApplication?.stepCode?.type === EStepCodeType.part9StepCode
+      ? currentPermitApplication?.stepCode?.id
+      : undefined
+  const part9StepCodeId = isUUID(part9StepCodeIdFromUrl) ? part9StepCodeIdFromUrl : part9StepCodeIdFromPermit
+
   const isProjectsPath = location.pathname === "/projects"
   const isEligible = Boolean(
-    import.meta.env.VITE_QA_MODE === "true" &&
-      sessionStore.loggedIn &&
-      currentUser &&
-      (currentUser.isSubmitter || currentUser.isReviewStaff)
+    import.meta.env.VITE_QA_MODE === "true" && siteConfigurationStore.qaToolsEnabled && sessionStore.loggedIn
   )
-  const hasActions = isProjectsPath || !!permitApplicationId
-  const currentActionRequiresSandbox = Boolean(
-    currentUser?.isReviewStaff && !sandboxStore.currentSandboxId && hasActions
-  )
+  const hasActions = isProjectsPath || isPermitApplicationEditOnly || isPart3StepCodePath || isPart9StepCodePath
 
   useEffect(() => {
     if (!isEligible || !isProjectsPath || jurisdictionOptions.length > 0) return
@@ -76,12 +126,59 @@ export const QaToolsPopout = observer(() => {
   const autofillPermitApplication = async () => {
     if (!permitApplicationId) return
 
-    setIsAutofilling(true)
-    const response = await api.autofillQaPermitApplication(permitApplicationId).finally(() => setIsAutofilling(false))
+    setIsAutofillingPermit(true)
+    const response = await api
+      .autofillQaPermitApplication(permitApplicationId)
+      .finally(() => setIsAutofillingPermit(false))
 
     if (response.ok && response.data?.data) {
       permitApplicationStore.mergeUpdate(response.data.data, "permitApplicationMap")
       uiStore.flashMessage.show(EFlashMessageStatus.success, null, t("qaTools.autofillSuccess"), 3000)
+    }
+  }
+
+  const autofillPart3StepCode = async () => {
+    if (!part3StepCodeId) return
+
+    setIsAutofillingPart3(true)
+    const response = await api.autofillQaPart3StepCode(part3StepCodeId).finally(() => setIsAutofillingPart3(false))
+
+    if (response.ok && response.data?.data) {
+      const autofilledStepCode = response.data.data
+      stepCodeStore.mergeUpdate(autofilledStepCode, "stepCodesMap")
+      stepCodeStore.setCurrentStepCode(autofilledStepCode.id)
+      uiStore.flashMessage.show(EFlashMessageStatus.success, null, t("qaTools.autofillPart3Success"), 3000)
+
+      const summaryPath = autofilledStepCode.permitApplicationId
+        ? `/permit-applications/${autofilledStepCode.permitApplicationId}/edit/part-3-step-code/${part3PenultimateSection}`
+        : `/part-3-step-code/${autofilledStepCode.id}/${part3PenultimateSection}`
+      navigate(summaryPath)
+    }
+  }
+
+  const autofillPart9StepCode = async () => {
+    if (!part9StepCodeId) return
+
+    setIsAutofillingPart9(true)
+    const response = await api.autofillQaPart9StepCode(part9StepCodeId).finally(() => setIsAutofillingPart9(false))
+
+    if (response.ok && response.data?.data) {
+      const autofilledStepCode = response.data.data
+      stepCodeStore.mergeUpdate(autofilledStepCode, "stepCodesMap")
+      stepCodeStore.setCurrentStepCode(autofilledStepCode.id)
+
+      const stepCode = stepCodeStore.getStepCode(autofilledStepCode.id) as IPart9StepCode
+      const checklist = stepCode?.currentChecklist
+      if (checklist) {
+        await checklist.load()
+      }
+
+      uiStore.flashMessage.show(EFlashMessageStatus.success, null, t("qaTools.autofillPart9Success"), 3000)
+
+      const reportPath = autofilledStepCode.permitApplicationId
+        ? `/permit-applications/${autofilledStepCode.permitApplicationId}/edit/part-9-step-code/${part9PenultimateSection}`
+        : `/part-9-step-code/${autofilledStepCode.id}/${part9PenultimateSection}`
+      navigate(reportPath)
     }
   }
 
@@ -122,12 +219,6 @@ export const QaToolsPopout = observer(() => {
                 <Text fontSize="sm">{t("qaTools.description")}</Text>
               </Box>
 
-              {currentActionRequiresSandbox && (
-                <Text color="semantic.error" fontSize="sm">
-                  {t("qaTools.sandboxRequired")}
-                </Text>
-              )}
-
               {isProjectsPath && (
                 <VStack align="stretch" spacing={3}>
                   <FormControl>
@@ -145,7 +236,7 @@ export const QaToolsPopout = observer(() => {
                     </Select>
                   </FormControl>
                   <Button
-                    isDisabled={!selectedJurisdictionId || currentActionRequiresSandbox}
+                    isDisabled={!selectedJurisdictionId}
                     isLoading={isCreatingProject || isLoadingJurisdictions}
                     onClick={createFullPermitProject}
                     variant="primary"
@@ -155,14 +246,31 @@ export const QaToolsPopout = observer(() => {
                 </VStack>
               )}
 
-              {permitApplicationId && (
+              {isPermitApplicationEditOnly && permitApplicationId && (
+                <Button isLoading={isAutofillingPermit} onClick={autofillPermitApplication} variant="primary">
+                  {t("qaTools.autofillApplication")}
+                </Button>
+              )}
+
+              {isPart3StepCodePath && (
                 <Button
-                  isDisabled={currentActionRequiresSandbox}
-                  isLoading={isAutofilling}
-                  onClick={autofillPermitApplication}
+                  isDisabled={!part3StepCodeId}
+                  isLoading={isAutofillingPart3}
+                  onClick={autofillPart3StepCode}
                   variant="primary"
                 >
-                  {t("qaTools.autofillApplication")}
+                  {t("qaTools.autofillPart3StepCode")}
+                </Button>
+              )}
+
+              {isPart9StepCodePath && (
+                <Button
+                  isDisabled={!part9StepCodeId}
+                  isLoading={isAutofillingPart9}
+                  onClick={autofillPart9StepCode}
+                  variant="primary"
+                >
+                  {t("qaTools.autofillPart9StepCode")}
                 </Button>
               )}
             </VStack>

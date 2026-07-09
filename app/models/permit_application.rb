@@ -50,6 +50,9 @@ class PermitApplication < ApplicationRecord
   has_many :collaborators, through: :permit_collaborations
   has_many :permit_block_statuses, dependent: :destroy
 
+  # HUB-5145: Keep one StepCode per permit as the report family. Pre-Construction
+  # and As-Built should become staged child checklists selected by the StepCode's
+  # current_stage rather than competing permit-level StepCode records.
   has_one :step_code, -> { kept }, dependent: :nullify
 
   scope :submitted, -> { joins(:submission_versions).distinct }
@@ -231,6 +234,16 @@ class PermitApplication < ApplicationRecord
     template_version.requirement_template.nickname
   end
 
+  def requires_project_meeting?
+    return false if jurisdiction.blank?
+
+    jurisdiction
+      .jurisdiction_template_version_customizations
+      .for_sandbox(sandbox)
+      .requiring_project_meeting
+      .exists?(template_version: template_version)
+  end
+
   def search_data
     {
       number: number,
@@ -349,16 +362,18 @@ class PermitApplication < ApplicationRecord
   end
 
   def update_viewed_at
-    return unless latest_submission_version.present?
+    version = latest_submission_version
+    return unless version.present?
 
-    latest_submission_version.update(viewed_at: Time.current)
+    version.reload.mark_read!
     reindex
   end
 
   def mark_as_unviewed
-    return unless latest_submission_version.present?
+    version = latest_submission_version
+    return unless version.present?
 
-    latest_submission_version.update(viewed_at: nil)
+    version.reload.clear_read!
     reindex
   end
 
@@ -449,10 +464,11 @@ class PermitApplication < ApplicationRecord
         sandbox_id: sandbox_id
       )
 
-    if customization&.submission_contact&.confirmed?
+    if customization&.submission_contact.is_a?(ApplicationSubmissionContact) &&
+         customization.submission_contact.confirmed?
       [customization.submission_contact]
     else
-      jurisdiction.submission_contacts.confirmed.default_contact
+      jurisdiction.confirmed_submission_contacts.default_contact
     end
   end
 
@@ -852,7 +868,7 @@ class PermitApplication < ApplicationRecord
     return if sandbox.present?
     return unless jurisdiction
 
-    matching_confirmed_contacts = jurisdiction.submission_contacts.confirmed
+    matching_confirmed_contacts = jurisdiction.confirmed_submission_contacts
 
     if matching_confirmed_contacts.empty?
       errors.add(

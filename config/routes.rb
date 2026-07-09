@@ -85,11 +85,7 @@ Rails.application.routes.draw do
       post "copy", on: :collection
 
       # Draft workflow endpoints
-      member do
-        post "create_draft", to: "requirement_templates#create_draft"
-        delete "discard_draft", to: "requirement_templates#discard_draft"
-        post "promote_draft", to: "requirement_templates#promote_draft"
-      end
+      member { post "create_draft", to: "requirement_templates#create_draft" }
       post "jurisdiction_availabilities",
            on: :member,
            to: "requirement_templates#update_jurisdiction_availabilities"
@@ -100,6 +96,8 @@ Rails.application.routes.draw do
       member do
         patch "update_draft_block", to: "template_versions#update_draft_block"
         post "refresh_draft", to: "template_versions#refresh_draft"
+        delete "discard_draft", to: "template_versions#discard_draft"
+        post "promote_draft", to: "template_versions#promote_draft"
         post "invite_draft_previewers",
              to: "template_versions#invite_draft_previewers"
         post "share_draft", to: "template_versions#share_draft"
@@ -171,6 +169,9 @@ Rails.application.routes.draw do
       post "permit_projects/search",
            on: :member,
            to: "jurisdictions#search_permit_projects"
+      post "project_meetings/search",
+           on: :member,
+           to: "jurisdictions#search_project_meetings"
       patch "update_external_api_enabled",
             on: :member,
             to: "jurisdictions#update_external_api_enabled"
@@ -191,6 +192,14 @@ Rails.application.routes.draw do
       get "pin", on: :collection
       get "pid_details", on: :collection
       get "form_bc_addresses", on: :collection
+    end
+
+    resources :project_meetings, only: %i[show] do
+      resources :notes,
+                only: %i[index create],
+                controller: "project_meetings/notes" do
+        get :download_csv, on: :collection
+      end
     end
 
     resources :permit_applications, only: %i[create update show destroy] do
@@ -243,6 +252,19 @@ Rails.application.routes.draw do
     end
 
     resources :permit_projects, only: %i[show index update create] do
+      resources :notes, only: %i[index], controller: "permit_projects/notes" do
+        get :download_csv, on: :collection
+      end
+
+      resources :project_meetings, path: "meetings", only: %i[create update] do
+        post "search", on: :collection, to: "project_meetings#index"
+        post :submit, on: :member
+        post :cancel, on: :member
+        post :reschedule, on: :member
+        post :transition_status, on: :member
+        post :mark_as_viewed, on: :member
+        post :mark_as_unviewed, on: :member
+      end
       get "pinned", on: :collection
       get "jurisdiction_options", on: :collection
       post "search", on: :collection, to: "permit_projects#index"
@@ -273,6 +295,10 @@ Rails.application.routes.draw do
         post "permit_projects/full", to: "qa_tools#create_full_permit_project"
         post "permit_applications/:id/autofill",
              to: "qa_tools#autofill_permit_application"
+        post "part_3_step_codes/:id/autofill",
+             to: "qa_tools#autofill_part_3_step_code"
+        post "part_9_step_codes/:id/autofill",
+             to: "qa_tools#autofill_part_9_step_code"
       end
     end
 
@@ -334,17 +360,38 @@ Rails.application.routes.draw do
            to: "report_documents#share_with_jurisdiction"
     end
 
+    resources :help_video_sections,
+              only: %i[index show create update destroy] do
+      post "reorder", on: :collection
+      post "reorder_videos", on: :member
+    end
+    resources :help_videos, only: %i[index show create update destroy] do
+      post "publish", on: :member
+      post "unpublish", on: :member
+    end
+    resources :template_categories, only: %i[index create update destroy] do
+      post "reorder", on: :collection
+      post "reorder_templates", on: :member
+    end
+
     # Controller namespace is Api::Part9Building::*, but we expose path with underscore for continuity
     namespace :part9_building, path: "part_9_building" do
       resources :checklists, only: %i[show update]
       resources :step_codes, only: %i[index create show] do
         get :select_options, on: :collection
+        # HUB-5145: Reserved for the staged-checklist flow. The future UI should
+        # create Mid-Construction/As-Built envelopes under the existing StepCode
+        # report family, then select them via StepCode.current_stage or route
+        # stage/checklist context instead of creating another StepCode.
+        resources :checklists, only: %i[create], controller: "checklists"
       end
     end
 
     # Controller namespace is Api::Part3Building::*, but we expose path with underscore for continuity
     namespace :part3_building, path: "part_3_building" do
-      resources :step_codes, only: %i[create show]
+      resources :step_codes, only: %i[create show] do
+        resources :checklists, only: %i[create], controller: "checklists"
+      end
       resources :checklists, only: %i[show update]
     end
 
@@ -381,6 +428,12 @@ Rails.application.routes.draw do
     end
 
     resources :digital_seal_validator, only: [:create]
+
+    resources :release_notes, only: %i[index show create update] do
+      get "viewer_context", on: :member, to: "release_notes#viewer_context"
+      patch "publish", on: :member, to: "release_notes#publish"
+      post "search", on: :collection, to: "release_notes#index"
+    end
   end
 
   scope module: :external_api, path: :external_api do

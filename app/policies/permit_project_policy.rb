@@ -99,6 +99,10 @@ class PermitProjectPolicy < ApplicationPolicy
     true
   end
 
+  def download_notes_csv?
+    show?
+  end
+
   private
 
   def user_is_owner?
