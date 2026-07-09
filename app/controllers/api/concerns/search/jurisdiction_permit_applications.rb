@@ -253,8 +253,7 @@ module Api::Concerns::Search::JurisdictionPermitApplications
     if sort[:field] == "days_in_queue"
       nil
     else
-      field = PermitApplication.search_sort_field(sort[:field])
-      { field => { order: sort[:direction], unmapped_type: "long" } }
+      { sort[:field] => { order: sort[:direction], unmapped_type: "long" } }
     end
   end
 

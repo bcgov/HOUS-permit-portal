@@ -67,8 +67,7 @@ module Api::Concerns::Search::ProjectPermitApplications
 
   def permit_application_order
     if (sort = permit_application_search_params[:sort])
-      field = PermitApplication.search_sort_field(sort[:field])
-      { field => { order: sort[:direction], unmapped_type: "long" } }
+      { sort[:field] => { order: sort[:direction], unmapped_type: "long" } }
     else
       { number: { order: :desc, unmapped_type: "long" } }
     end

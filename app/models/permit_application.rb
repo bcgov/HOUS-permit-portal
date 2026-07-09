@@ -22,17 +22,6 @@ class PermitApplication < ApplicationRecord
   include PublicRecordable
   has_parent :permit_project
 
-  SEARCH_SORT_FIELD_ALIASES = {
-    "permit" => "template_nickname",
-    "assigned_to" => "review_delegatee_name",
-    "permit_application_number" => "number",
-    "requirement_template_name" => "template_nickname"
-  }.freeze
-
-  def self.search_sort_field(field)
-    SEARCH_SORT_FIELD_ALIASES.fetch(field.to_s, field.to_s)
-  end
-
   SEARCH_INCLUDES = [
     :submission_versions,
     :step_code,
