@@ -1631,9 +1631,9 @@ Thank you,
           request: {
             title: "Request a project meeting",
             intro:
-              "You can request a meeting with your local building authority to discuss your project before you submit a permit application. Some permit types may require a project meeting before you can submit.",
+              "You can request a meeting with your local authority to discuss your project before you submit a permit application. Some permit types may require a project meeting before you can submit.",
             visibility:
-              "After you request a meeting, your local building authority will be able to view your draft permit applications.",
+              "After you request a meeting, your local authority will be able to view your draft permit applications.",
             chanceTo: "A project meeting is a chance to:",
             discussProposal: "Discuss your project proposal",
             askQuestions: "Ask questions about zoning and building code requirements",
@@ -1647,7 +1647,7 @@ Thank you,
             addPermitsSuccess: {
               title: "{{count}} permit applications added to your project",
               description:
-                "You can now request a project meeting with your local building authority, or continue without requesting one.",
+                "You can now request a project meeting with your local authority, or continue without requesting one.",
             },
             requiredPermits: {
               title: "Your project has permit applications that require a project meeting",
@@ -1678,7 +1678,7 @@ Thank you,
             cancelMeeting: "Cancel meeting",
             cancelConfirmationTitle: "Cancel this meeting request?",
             cancelConfirmationBody:
-              "Cancelling will close this meeting request. The local building authority will not use this request to schedule a meeting about your project.",
+              "Cancelling will close this meeting request. The local authority will not use this request to schedule a meeting about your project.",
             confirmCancelMeeting: "Yes, cancel request",
             keepMeetingRequestOpen: "No, keep request open",
             cancelError: "We couldn't cancel your meeting request. Please try again.",
@@ -1694,7 +1694,7 @@ Thank you,
               open: {
                 title: "Meeting not scheduled yet",
                 description:
-                  "The building authority has received your request and will contact you directly to arrange a meeting time. Once the meeting is scheduled, the date, time, and meeting details will appear here.",
+                  "The local authority has received your request and will contact you directly to arrange a meeting time. Once the meeting is scheduled, the date, time, and meeting details will appear here.",
               },
               scheduled: {
                 title: "Meeting details",
@@ -1787,7 +1787,7 @@ Thank you,
           },
           contactMethods: {
             phone: "We will call the requester",
-            in_person: "In-person meeting at building authority's office",
+            in_person: "In-person meeting at local authority's office",
             videoconference: "Videoconference",
           },
           validation: {
@@ -1811,7 +1811,7 @@ Thank you,
             projectInformation: {
               title: "Request a project meeting",
               description:
-                "Request a meeting with your local building authority to discuss your project. Some permit types may require a project meeting before you can submit an application.",
+                "Request a meeting with your local authority to discuss your project. Some permit types may require a project meeting before you can submit an application.",
             },
             relationship: {
               title: "What is your relationship to this site?",
@@ -1819,22 +1819,22 @@ Thank you,
             contactDetails: {
               title: "Your contact details",
               description:
-                "The local building authority will use these details to contact you about arranging a project meeting.",
+                "The local authority will use these details to contact you about arranging a project meeting.",
             },
             discussion: {
               title: "What you'd like to discuss",
               description:
-                "Provide additional details about your project to help the local building authority direct your request and prepare for your meeting.",
+                "Provide additional details about your project to help the local authority direct your request and prepare for your meeting.",
             },
             documents: {
               title: "Documents to support your request (optional)",
-              description: "Upload any documents that may help the local building authority understand your project.",
+              description: "Upload any documents that may help the local authority understand your project.",
               authorizationTitle: "Authorization documents",
               authorizationDescription:
                 "Because you're not the owner, upload documents showing you're authorized to request this meeting.",
               authorizationResourcesTitle: "What you may need to provide",
               authorizationResourcesDescription:
-                "Review your local building authority's guidance before uploading authorization documents.",
+                "Review your local authority's guidance before uploading authorization documents.",
               noAuthorizationResources: "No authorization guidance has been added for this jurisdiction yet.",
               supportingTitle: "Supporting documents",
               examplesIntro: "Example documents include:",
@@ -1855,10 +1855,9 @@ Thank you,
           },
           sent: {
             title: "Project meeting request sent",
-            description:
-              "Your request has been sent to the local building authority. They'll contact you to book a meeting.",
+            description: "Your request has been sent to the local authority. They'll contact you to book a meeting.",
             whatHappensNext: "What happens next",
-            next1: "The local building authority will contact you to schedule a project meeting",
+            next1: "The local authority will contact you to schedule a project meeting",
             next2: "They may contact you to request more information to help prepare",
             next3: "If you requested property information, they'll follow up with you separately",
             next4: "While your request is under review, the authority may add notes or updates to your project",
@@ -3859,7 +3858,7 @@ Thank you,
                 "These requirements apply to new buildings only. For existing buildings or renovations, contact your local building officials.",
               heatingDegreeDaysTitle: "Climate information for energy modelling",
               heatingDegreeDaysDescription:
-                "The local building authority has set the Heating Degree Days (HDD) to use for each climate zone in this community. Use the value for your project's climate zone when completing energy modelling or creating a Step Codes report.",
+                "The local authority has set the Heating Degree Days (HDD) to use for each climate zone in this community. Use the value for your project's climate zone when completing energy modelling or creating a Step Codes report.",
               climateZoneColumnHeader: "Climate Zone",
               heatingDegreeDaysColumnHeader: "Heating Degree Days (HDD)",
               heatingDegreeDaysNotConfigured: "Not configured",
@@ -4413,7 +4412,7 @@ Thank you,
             foundTitle: "Digital seal found",
             notFoundTitle: "Digital seal not found",
             noSignaturesFound:
-              "We could not find a digital seal from an AIBC or EGBC member on this document. You can still use this document in a permit application. The local building authority may need to review it manually, which could take longer than reviewing documents with valid digital seals.",
+              "We could not find a digital seal from an AIBC or EGBC member on this document. You can still use this document in a permit application. The local authority may need to review it manually, which could take longer than reviewing documents with valid digital seals.",
             systemFailureTitle: "We could not check the digital seal",
             systemFailureMessage:
               "Try uploading the document again. You can still submit permit applications with this document. If you keep seeing this message, contact the team at <1>{{email}}</1>",

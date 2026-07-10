@@ -60,22 +60,26 @@ export const MeetingNotesSection = ({
         </Box>
       )}
 
-      <HStack spacing={3} mb={4}>
-        {canAddNote && (
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={handleAddNote}
-            isDisabled={addNoteDisabled}
-            isLoading={isAddingNote}
-          >
-            {t("projectMeeting.detail.notes.addNote")}
-          </Button>
-        )}
-        <Button variant="secondary" size="sm" leftIcon={<Download size={16} />} onClick={onDownloadNotes}>
-          {t("projectMeeting.detail.notes.downloadAll")}
-        </Button>
-      </HStack>
+      {(canAddNote || notes.length > 0) && (
+        <HStack spacing={3} mb={4}>
+          {canAddNote && (
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={handleAddNote}
+              isDisabled={addNoteDisabled}
+              isLoading={isAddingNote}
+            >
+              {t("projectMeeting.detail.notes.addNote")}
+            </Button>
+          )}
+          {notes.length > 0 && (
+            <Button variant="secondary" size="sm" leftIcon={<Download size={16} />} onClick={onDownloadNotes}>
+              {t("projectMeeting.detail.notes.downloadAll")}
+            </Button>
+          )}
+        </HStack>
+      )}
 
       <Text fontWeight="bold" mb={3}>
         {t("projectMeeting.detail.notes.reviewerNotes")}

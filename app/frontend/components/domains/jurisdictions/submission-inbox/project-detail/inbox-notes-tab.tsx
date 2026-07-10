@@ -29,14 +29,18 @@ export const InboxNotesTab = observer(({ permitProject }: IProps) => {
           <Heading as="h3" size="md" mb={4}>
             {t("submissionInbox.projectDetail.notesInfoTitle")}
           </Heading>
-          <Text mb={5}>{t("submissionInbox.projectDetail.notesInfoDescription")}</Text>
-          <Button
-            variant="secondary"
-            leftIcon={<Download size={16} />}
-            onClick={() => permitProject.downloadNotesCsv()}
-          >
-            {t("projectMeeting.detail.notes.downloadAll")}
-          </Button>
+          <Text mb={permitProject.notes.length > 0 ? 5 : 0}>
+            {t("submissionInbox.projectDetail.notesInfoDescription")}
+          </Text>
+          {permitProject.notes.length > 0 && (
+            <Button
+              variant="secondary"
+              leftIcon={<Download size={16} />}
+              onClick={() => permitProject.downloadNotesCsv()}
+            >
+              {t("projectMeeting.detail.notes.downloadAll")}
+            </Button>
+          )}
         </Box>
 
         <Heading as="h3" size="md" mb={4}>

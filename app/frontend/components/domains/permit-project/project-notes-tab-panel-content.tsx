@@ -27,14 +27,16 @@ export const ProjectNotesTabPanelContent = observer(({ permitProject }: IProps) 
           <Heading as="h3" size="md" mb={4}>
             {t("permitProject.notes.infoTitle")}
           </Heading>
-          <Text mb={5}>{t("permitProject.notes.infoDescription")}</Text>
-          <Button
-            variant="secondary"
-            leftIcon={<Download size={16} />}
-            onClick={() => permitProject.downloadNotesCsv()}
-          >
-            {t("projectMeeting.detail.notes.downloadAll")}
-          </Button>
+          <Text mb={permitProject.notes.length > 0 ? 5 : 0}>{t("permitProject.notes.infoDescription")}</Text>
+          {permitProject.notes.length > 0 && (
+            <Button
+              variant="secondary"
+              leftIcon={<Download size={16} />}
+              onClick={() => permitProject.downloadNotesCsv()}
+            >
+              {t("projectMeeting.detail.notes.downloadAll")}
+            </Button>
+          )}
         </Box>
 
         <Heading as="h3" size="md" mb={4}>
