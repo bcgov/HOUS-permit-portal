@@ -4232,8 +4232,9 @@ Thank you,
               projectMeetingsEmailLabel: "to recipient email(s)",
               projectMeetingsAddEmail: "Add another email",
               projectMeetingsConfirmationRequired: "Action required: please click link in verification email",
+              projectMeetingsResources: "Authorization resources",
               projectMeetingsResourcesDescription:
-                "Add authorization resources to explain what documents non-owner requesters should upload.",
+                "When the meeting requester is not the property owner, they must upload an authorization document. This is a form provided the local authority. Add that form here so requesters can download and submit it with their meeting request.",
               projectMeetingsResourcesLink: "Manage authorization resources",
               propertyInformationRequests: "Enable property information requests",
               propertyInformationRequestsDescription:
