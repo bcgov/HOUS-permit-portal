@@ -7,21 +7,30 @@ import { useProjectMeetingNavigation } from "../../use-project-meeting-navigatio
 
 export const FormActions = observer(({ isSubmitting }: { isSubmitting?: boolean }) => {
   const { t } = useTranslation()
-  const { navigateToPrevious, hasPrevious } = useProjectMeetingNavigation()
+  const { navigateToPrevious, hasPrevious, getMeetingDetailPath, isRequesterEditFlow } = useProjectMeetingNavigation()
   const navigate = useNavigate()
   const { permitProjectId } = useParams<{ permitProjectId: string }>()
 
+  const handleBack = () => {
+    if (hasPrevious) {
+      navigateToPrevious()
+      return
+    }
+
+    const detailPath = getMeetingDetailPath()
+    if (isRequesterEditFlow && detailPath) {
+      navigate(detailPath)
+      return
+    }
+
+    navigate(`/projects/${permitProjectId}/overview`)
+  }
+
   return (
     <HStack spacing={3} mt={8}>
-      {hasPrevious ? (
-        <Button variant="secondary" onClick={navigateToPrevious}>
-          {t("ui.back")}
-        </Button>
-      ) : (
-        <Button variant="secondary" onClick={() => navigate(`/projects/${permitProjectId}/overview`)}>
-          {t("ui.back")}
-        </Button>
-      )}
+      <Button variant="secondary" onClick={handleBack}>
+        {t("ui.back")}
+      </Button>
       <Button type="submit" variant="primary" isLoading={isSubmitting}>
         {t("ui.continue")}
       </Button>

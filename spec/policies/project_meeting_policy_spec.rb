@@ -24,6 +24,22 @@ RSpec.describe ProjectMeetingPolicy, type: :policy do
     expect(policy(owner).submit?).to be true
   end
 
+  it "allows the project owner to update active requests but not resubmit" do
+    open_meeting =
+      create(:project_meeting, :open, permit_project: permit_project)
+
+    expect(policy(owner, open_meeting).update?).to be true
+    expect(policy(owner, open_meeting).submit?).to be false
+  end
+
+  it "blocks the project owner from updating terminal requests" do
+    completed_meeting =
+      create(:project_meeting, :completed, permit_project: permit_project)
+
+    expect(policy(owner, completed_meeting).update?).to be false
+    expect(policy(owner, completed_meeting).submit?).to be false
+  end
+
   it "blocks unrelated submitters" do
     expect(policy(other_user).show?).to be false
     expect(policy(other_user).create?).to be false

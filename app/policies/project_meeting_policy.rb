@@ -39,11 +39,11 @@ class ProjectMeetingPolicy < ApplicationPolicy
   end
 
   def update?
-    user_is_owner? && record.draft? && feature_enabled?
+    user_is_owner? && feature_enabled? && (record.draft? || record.active?)
   end
 
   def submit?
-    update?
+    user_is_owner? && record.draft? && feature_enabled?
   end
 
   def cancel?

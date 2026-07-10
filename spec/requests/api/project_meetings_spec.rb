@@ -389,6 +389,45 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
         )
       ).to eq("supporting")
     end
+
+    it "allows the project owner to update requester details on an open meeting" do
+      meeting = create(:project_meeting, :open, permit_project: permit_project)
+
+      patch "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}",
+            params: {
+              project_meeting: {
+                contact_name: "Updated Requester",
+                contact_email: "updated@example.com",
+                contact_phone_number: "2505559999"
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("data", "contact_name")).to eq(
+        "Updated Requester"
+      )
+      expect(json_response.dig("data", "contact_email")).to eq(
+        "updated@example.com"
+      )
+    end
+
+    it "forbids updating a completed meeting" do
+      meeting =
+        create(:project_meeting, :completed, permit_project: permit_project)
+
+      patch "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}",
+            params: {
+              project_meeting: {
+                contact_name: "Should Not Update"
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:forbidden)
+    end
   end
 
   describe "POST /api/permit_projects/:permit_project_id/meetings/:id/submit" do

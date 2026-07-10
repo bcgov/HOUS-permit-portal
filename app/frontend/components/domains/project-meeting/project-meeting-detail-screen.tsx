@@ -53,6 +53,10 @@ export const SubmitterProjectMeetingDetailContent = observer(
     const canCancelMeeting =
       permitProject.isOwner &&
       [EProjectMeetingStatus.open, EProjectMeetingStatus.scheduled].includes(currentProjectMeeting.status)
+    const requesterEditPath =
+      permitProject.isOwner && currentProjectMeeting.isActive
+        ? `/projects/${permitProjectId}/meetings/${currentProjectMeeting.id}/edit/relationship`
+        : null
 
     const handleCancelMeeting = async (closeModal: () => void) => {
       if (!permitProjectId) return
@@ -123,7 +127,7 @@ export const SubmitterProjectMeetingDetailContent = observer(
           />
 
           <ProjectInformationSection permitProject={permitProject} />
-          <RequesterInformationSection projectMeeting={currentProjectMeeting} />
+          <RequesterInformationSection projectMeeting={currentProjectMeeting} editPath={requesterEditPath} />
           <RequestDetailsSection projectMeeting={currentProjectMeeting} />
           <DocumentsSection documents={documents} />
           <MeetingNotesSection
