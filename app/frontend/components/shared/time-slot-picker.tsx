@@ -25,11 +25,11 @@ export type ITimeSlotPickerProps = {
   value?: TimeSlotValue
   onChange?: (value: TimeSlotValue) => void
   name?: string
-  /** Inclusive start time, "HH:mm". Default "08:00". */
+  /** Inclusive start time, "HH:mm". Default "06:00". */
   startTime?: TimeSlotValue
-  /** Inclusive end time, "HH:mm". Default "17:00". */
+  /** Inclusive end time, "HH:mm". Default "21:00". */
   endTime?: TimeSlotValue
-  /** Minutes between slots. Default 30. */
+  /** Minutes between slots. Default 15. */
   intervalMinutes?: number
   /** Values to disable (still shown). */
   disabledTimes?: TimeSlotValue[]
@@ -40,9 +40,9 @@ export type ITimeSlotPickerProps = {
 }
 
 export function generateTimeSlots(
-  startTime: TimeSlotValue = "08:00",
-  endTime: TimeSlotValue = "17:00",
-  intervalMinutes = 30
+  startTime: TimeSlotValue = "06:00",
+  endTime: TimeSlotValue = "21:00",
+  intervalMinutes = 15
 ): TimeSlotValue[] {
   const referenceDate = new Date(2000, 0, 1)
   const start = parse(startTime, TIME_VALUE_FORMAT, referenceDate)
@@ -59,13 +59,29 @@ function formatTimeLabel(value: TimeSlotValue) {
   return format(parse(value, TIME_VALUE_FORMAT, new Date(2000, 0, 1)), TIME_LABEL_FORMAT)
 }
 
-function TimeSlotTile({ label, isDisabled, ...radioProps }: UseRadioProps & { label: string; isDisabled?: boolean }) {
+function TimeSlotTile({
+  label,
+  isDisabled,
+  onCommit,
+  ...radioProps
+}: UseRadioProps & { label: string; isDisabled?: boolean; onCommit?: () => void }) {
   const { getInputProps, getRadioProps } = useRadio({ ...radioProps, isDisabled })
   const input = getInputProps()
   const checkbox = getRadioProps()
 
   return (
-    <Box as="label" w="full" cursor={isDisabled ? "not-allowed" : "pointer"}>
+    <Box
+      as="label"
+      w="full"
+      cursor={isDisabled ? "not-allowed" : "pointer"}
+      onClick={(e) => {
+        if (isDisabled) return
+        // Arrow-key radio navigation synthesizes a click with detail 0; ignore those.
+        // Real pointer clicks have detail >= 1. Enter/Space confirm via grid keydown.
+        if (e.detail === 0) return
+        onCommit?.()
+      }}
+    >
       <input {...input} />
       <Box
         {...checkbox}
@@ -108,15 +124,16 @@ function TimeSlotTile({ label, isDisabled, ...radioProps }: UseRadioProps & { la
 function TimeSlotGrid({
   value,
   onChange,
+  onCommit,
   name = "time-slot",
-  startTime = "08:00",
-  endTime = "17:00",
-  intervalMinutes = 30,
+  startTime = "06:00",
+  endTime = "21:00",
+  intervalMinutes = 15,
   disabledTimes,
   isDisabled,
   columns = { base: 2, sm: 3 },
   spacing = 2,
-}: Omit<ITimeSlotPickerProps, "placeholder">) {
+}: Omit<ITimeSlotPickerProps, "placeholder"> & { onCommit?: () => void }) {
   const slots = useMemo(
     () => generateTimeSlots(startTime, endTime, intervalMinutes),
     [startTime, endTime, intervalMinutes]
@@ -131,7 +148,17 @@ function TimeSlotGrid({
   })
 
   return (
-    <SimpleGrid columns={columns} spacing={spacing} {...getRootProps()}>
+    <SimpleGrid
+      columns={columns}
+      spacing={spacing}
+      {...getRootProps()}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault()
+          onCommit?.()
+        }
+      }}
+    >
       {slots.map((slot) => {
         const radio = getRadioProps({ value: slot })
         return (
@@ -140,6 +167,7 @@ function TimeSlotGrid({
             {...radio}
             label={formatTimeLabel(slot)}
             isDisabled={isDisabled || disabledSet.has(slot)}
+            onCommit={onCommit}
           />
         )
       })}
@@ -188,16 +216,8 @@ export function TimeSlotPicker({ value, onChange, isDisabled, placeholder, ...gr
               </Text>
             </Button>
           </PopoverTrigger>
-          <PopoverContent w="xs" p={3} borderColor="border.light" boxShadow="lg">
-            <TimeSlotGrid
-              value={value}
-              isDisabled={isDisabled}
-              {...gridProps}
-              onChange={(nextValue) => {
-                onChange?.(nextValue)
-                onClose()
-              }}
-            />
+          <PopoverContent w="xs" p={3} borderColor="border.light" boxShadow="lg" maxH="xs" overflowY="auto">
+            <TimeSlotGrid value={value} isDisabled={isDisabled} {...gridProps} onChange={onChange} onCommit={onClose} />
           </PopoverContent>
         </>
       )}
