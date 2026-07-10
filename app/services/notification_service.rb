@@ -770,6 +770,13 @@ class NotificationService
         contact.email
       ).deliver_later
     end
+
+    user = project_meeting.requested_by
+    return if user.blank?
+
+    NotificationPushJob.perform_async(
+      user.id => project_meeting.scheduled_event_notification_data
+    )
   end
 
   def self.publish_project_meeting_rescheduled_event(project_meeting)

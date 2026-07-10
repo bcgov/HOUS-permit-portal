@@ -1,4 +1,4 @@
-import { Box, Button, Heading, Text } from "@chakra-ui/react"
+import { Box, Button, Heading, HStack, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -26,7 +26,7 @@ export const ReviewSection = observer(({ meeting }: ReviewSectionProps) => {
   const { currentPermitProject } = usePermitProject()
   const { permitProjectId } = useParams<{ permitProjectId: string }>()
   const { projectMeetingStore, uiStore } = useMst()
-  const { navigateToSection } = useProjectMeetingNavigation()
+  const { navigateToSection, navigateToPrevious } = useProjectMeetingNavigation()
   const navigate = useNavigate()
   const authorizationDocuments = activeDocumentsForType(
     [...meeting.meetingRequestDocuments],
@@ -142,9 +142,14 @@ export const ReviewSection = observer(({ meeting }: ReviewSectionProps) => {
           {t("projectMeeting.sendRequest")}
         </Heading>
         <Text mb={4}>{t("projectMeeting.sendRequestDescription")}</Text>
-        <Button variant="primary" onClick={submit} isDisabled={!meeting.isReadyForSubmission}>
-          {t("projectMeeting.acceptAndSend")}
-        </Button>
+        <HStack spacing={3}>
+          <Button variant="secondary" onClick={navigateToPrevious}>
+            {t("ui.back")}
+          </Button>
+          <Button variant="primary" onClick={submit} isDisabled={!meeting.isReadyForSubmission}>
+            {t("projectMeeting.acceptAndSend")}
+          </Button>
+        </HStack>
       </Box>
     </Box>
   )

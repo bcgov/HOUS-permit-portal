@@ -1264,6 +1264,7 @@ en:
       reminder: "Reminder: Review your jurisdiction resources"
     project_meeting:
       submitted: "Your project meeting request for project %{project_number} has been sent."
+      scheduled: "Your project meeting request for project %{project_number} has been accepted and a meeting time has been scheduled."
       rescheduled: "Your project meeting for project %{project_number} has been rescheduled."
     release_note:
       publish_notification: "Version %{version} is now available. See what's new."
