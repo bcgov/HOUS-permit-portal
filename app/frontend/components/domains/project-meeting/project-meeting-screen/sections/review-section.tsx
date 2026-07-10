@@ -58,12 +58,14 @@ export const ReviewSection = observer(({ meeting }: ReviewSectionProps) => {
         title={t("projectMeeting.projectInformation")}
         sectionKey="projectInformation"
         onNavigateToSection={navigateToSection}
+        showChangeLink={false}
       >
-        <ProjectInfoRow label={t("permitProject.overview.address")} value={currentPermitProject?.fullAddress} />
-        <ProjectInfoRow label={t("permitProject.overview.pid")} value={currentPermitProject?.pid} />
+        <ProjectInfoRow label={t("permitProject.overview.address")} value={currentPermitProject?.fullAddress} stacked />
+        <ProjectInfoRow label={t("permitProject.overview.pid")} value={currentPermitProject?.pid} stacked />
         <ProjectInfoRow
           label={t("permitProject.overview.jurisdictionName")}
           value={currentPermitProject?.jurisdiction?.disambiguatedName}
+          stacked
         />
       </ReviewSummarySection>
       <ReviewSummarySection
@@ -80,8 +82,12 @@ export const ReviewSection = observer(({ meeting }: ReviewSectionProps) => {
         sectionKey="discussion"
         onNavigateToSection={navigateToSection}
       >
-        <ProjectInfoRow label={t("projectMeeting.projectDescription")} value={meeting.projectDescription} />
-        <ProjectInfoRow label={t("projectMeeting.meetingNotes")} value={meeting.meetingNotes || t("ui.notProvided")} />
+        <ProjectInfoRow label={t("projectMeeting.projectDescription")} value={meeting.projectDescription} stacked />
+        <ProjectInfoRow
+          label={t("projectMeeting.meetingNotes")}
+          value={meeting.meetingNotes || t("ui.notProvided")}
+          stacked
+        />
       </ReviewSummarySection>
       {isAuthorizationRequired && (
         <ReviewSummarySection
@@ -114,11 +120,12 @@ export const ReviewSection = observer(({ meeting }: ReviewSectionProps) => {
         sectionKey="contactDetails"
         onNavigateToSection={navigateToSection}
       >
-        <ProjectInfoRow label={t("projectMeeting.contactName")} value={meeting.contactName} />
-        <ProjectInfoRow label={t("projectMeeting.contactEmail")} value={meeting.contactEmail} />
+        <ProjectInfoRow label={t("projectMeeting.contactName")} value={meeting.contactName} stacked />
+        <ProjectInfoRow label={t("projectMeeting.contactEmail")} value={meeting.contactEmail} stacked />
         <ProjectInfoRow
           label={t("projectMeeting.contactPhoneNumber")}
           value={meeting.contactPhoneNumber || t("ui.notProvided")}
+          stacked
         />
       </ReviewSummarySection>
       {propertyInformationRequestsEnabled && (
