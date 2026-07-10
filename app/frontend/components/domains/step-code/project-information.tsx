@@ -64,9 +64,15 @@ function checklistHasProgress(checklist: {
   return Object.values(checklist.sectionCompletionStatus ?? {}).some((status) => status.relevant && status.complete)
 }
 
-function checklistButtonLabel(checklist: any) {
+function checklistButtonLabel(
+  checklist: {
+    isMarkedComplete?: boolean
+    status?: EStepCodeChecklistStatus
+    sectionCompletionStatus?: Record<string, { complete: boolean; relevant: boolean }>
+  } | null
+) {
   if (!checklist) return t("stepCode.projectInformation.create")
-  if (checklist.isAllComplete || checklist.isMarkedComplete || checklist.status === EStepCodeChecklistStatus.complete) {
+  if (checklist.isMarkedComplete || checklist.status === EStepCodeChecklistStatus.complete) {
     return t("stepCode.projectInformation.view")
   }
   if (checklistHasProgress(checklist)) return t("stepCode.projectInformation.continue")

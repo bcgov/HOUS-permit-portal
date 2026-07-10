@@ -127,9 +127,8 @@ export const Part3StepCodeChecklistModel = types
     isComplete(key: TPart3NavLinkKey): boolean {
       return self.sectionCompletionStatus[key]?.complete
     },
-    get isAllComplete(): boolean {
-      if (!self.sectionCompletionStatus) return false
-      return Object.values(self.sectionCompletionStatus).every((status) => (status.relevant ? status.complete : true))
+    get isMarkedComplete(): boolean {
+      return self.status === EStepCodeChecklistStatus.complete
     },
     isRelevant(key: TPart3NavLinkKey): boolean {
       return self.sectionCompletionStatus[key]?.relevant

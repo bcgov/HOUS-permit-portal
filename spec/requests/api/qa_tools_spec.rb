@@ -304,7 +304,7 @@ RSpec.describe "Api::QaTools", type: :request do
         )
       ).to be(true)
       expect(
-        checklist.section_completion_status.dig("step_code_summary", "complete")
+        checklist.section_completion_status.dig("report", "complete")
       ).to be(false)
       expect(json_response.dig("data", "id")).to eq(step_code.id)
     end

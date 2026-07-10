@@ -119,7 +119,7 @@ RSpec.describe PermitApplication, type: :model do
         pre_construction = step_code.pre_construction_checklist
         pre_construction.update!(
           section_completion_status: {
-            "step_code_summary" => {
+            "report" => {
               "complete" => true,
               "relevant" => true
             }

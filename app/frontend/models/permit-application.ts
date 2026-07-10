@@ -120,22 +120,8 @@ export const PermitApplicationModel = types.snapshotProcessor(
         if (self.daysInQueue == null) return "—"
         return t("submissionInbox.daysInQueue", { count: self.daysInQueue })
       },
-      get stepCodeChecklist() {
-        const stepCode = self.stepCode as
-          | { checklists?: Array<{ stage?: string; isAllComplete?: boolean; isMarkedComplete?: boolean }> }
-          | null
-          | undefined
-        if (!stepCode) return null
-        const stage = self.stepCodeStage || EStepCodeChecklistStage.preConstruction
-        return stepCode.checklists?.find((checklist) => checklist.stage === stage) ?? null
-      },
       get isStepCodeComplete() {
-        const checklist = this.stepCodeChecklist as {
-          isAllComplete?: boolean
-          isMarkedComplete?: boolean
-        } | null
-        if (!checklist) return false
-        return !!(checklist.isAllComplete || checklist.isMarkedComplete)
+        return !!self.stepCode?.isStageComplete(self.stepCodeStage || EStepCodeChecklistStage.preConstruction)
       },
       get isPart3() {
         // TODO
