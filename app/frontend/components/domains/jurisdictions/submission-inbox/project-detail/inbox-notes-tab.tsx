@@ -1,5 +1,5 @@
 import { Box, Button, Heading, HStack, Text } from "@chakra-ui/react"
-import { ChatText, Download } from "@phosphor-icons/react"
+import { Chat, Download } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -19,7 +19,7 @@ export const InboxNotesTab = observer(({ permitProject }: IProps) => {
     <FlexColumn>
       <Box as="section">
         <HStack align="center" spacing={4} mb={6}>
-          <ChatText size={32} />
+          <Chat size={32} />
           <Heading as="h2" size="lg" mb={0}>
             {t("submissionInbox.projectDetail.notes")}
           </Heading>

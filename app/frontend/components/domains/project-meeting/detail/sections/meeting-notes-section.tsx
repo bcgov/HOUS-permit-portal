@@ -1,5 +1,5 @@
 import { Box, Button, HStack, Text, VStack } from "@chakra-ui/react"
-import { Clock, Download } from "@phosphor-icons/react"
+import { Chat, Download } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -9,6 +9,7 @@ import { EProjectMeetingStatus } from "../../../../../types/enums"
 import { isTipTapEmpty } from "../../../../../utils/utility-functions"
 import { Editor } from "../../../../shared/editor/editor"
 import { SafeTipTapDisplay } from "../../../../shared/editor/safe-tiptap-display"
+import { EmptyResultsBox } from "../../../../shared/grid/empty-results-box"
 import { MeetingNotesVisibilityBanner } from "../banners/meeting-notes-visibility-banner"
 import { DetailSection } from "../detail-section"
 
@@ -85,17 +86,11 @@ export const MeetingNotesSection = ({
         {t("projectMeeting.detail.notes.reviewerNotes")}
       </Text>
       {notes.length === 0 ? (
-        <Box border="1px" borderColor="border.light" borderRadius="md" p={4}>
-          <HStack align="start" spacing={2}>
-            <Clock size={18} />
-            <Box>
-              <Text fontWeight="bold" mb={1}>
-                {t("projectMeeting.detail.notes.emptyTitle")}
-              </Text>
-              <Text fontSize="sm">{t("projectMeeting.detail.notes.emptyDescription")}</Text>
-            </Box>
-          </HStack>
-        </Box>
+        <EmptyResultsBox
+          title={t("projectMeeting.detail.notes.emptyTitle")}
+          description={t("projectMeeting.detail.notes.emptyDescription")}
+          icon={<Chat size={18} />}
+        />
       ) : (
         <VStack align="stretch" spacing={4}>
           {notes.map((note) => (

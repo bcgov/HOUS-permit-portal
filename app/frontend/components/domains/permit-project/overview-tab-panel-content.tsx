@@ -11,20 +11,16 @@ import {
   useDisclosure,
   VStack,
 } from "@chakra-ui/react"
-import { CaretRight, Info, Pencil, SquaresFour, Steps } from "@phosphor-icons/react"
+import { CaretRight, ClipboardText, Info, Pencil, SquaresFour, Steps } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { IPermitProject } from "../../../models/permit-project"
 import { useMst } from "../../../setup/root"
-import {
-  EFlashMessageStatus,
-  EPermitProjectRollupStatus,
-  EProjectPermitApplicationSortFields,
-} from "../../../types/enums"
+import { EPermitProjectRollupStatus, EProjectPermitApplicationSortFields } from "../../../types/enums"
 import { IOption } from "../../../types/types"
-import { CustomMessageBox } from "../../shared/base/custom-message-box"
+import { EmptyResultsBox } from "../../shared/grid/empty-results-box"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { FullscreenMapModal } from "../../shared/module-wrappers/fullscreen-map-modal"
 import { ProjectMap } from "../../shared/module-wrappers/project-map"
@@ -257,7 +253,7 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
           </HStack>
         </Flex>
         {permitProject.rollupStatus === EPermitProjectRollupStatus.empty ? (
-          <CustomMessageBox status={EFlashMessageStatus.info} description={t("permitProject.index.empty")} mt={2} />
+          <EmptyResultsBox description={t("permitProject.index.empty")} icon={<ClipboardText size={18} />} mt={2} />
         ) : (
           <>
             <SearchGrid
