@@ -83,7 +83,6 @@ export const AuthorizationDocumentsSection = observer(({ meeting }: Authorizatio
     onUploadSuccess: handleUploadSuccess(EMeetingRequestDocumentType.authorization),
     maxNumberOfFiles: 10,
     autoProceed: true,
-    maxFileSizeMB: 10,
     allowedFileTypes: ACCEPTED_DOCUMENT_TYPES,
   })
 

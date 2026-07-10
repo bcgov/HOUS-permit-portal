@@ -65,7 +65,6 @@ export const DocumentsSection = observer(({ meeting }: DocumentsSectionProps) =>
     onUploadSuccess: handleUploadSuccess,
     maxNumberOfFiles: 10,
     autoProceed: true,
-    maxFileSizeMB: 10,
     allowedFileTypes: ACCEPTED_DOCUMENT_TYPES,
   })
 

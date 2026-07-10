@@ -1842,7 +1842,7 @@ Thank you,
               photos: "Photographs of similar projects",
               sitePlans: "Site plans",
               floorPlans: "Floor plans",
-              acceptedFormats: "Accepted formats: PDF, JPG, PNG, DOC (max 10MB)",
+              acceptedFormats: "Accepted formats: PDF, JPG, PNG, DOC",
             },
             propertyInformation: {
               title: "Do you want to request property information?",
