@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next"
 import { IProjectMeeting } from "../../../../../models/project-meeting"
 import { EFlashMessageStatus, EProjectMeetingScheduleMode, EProjectMeetingStatus } from "../../../../../types/enums"
 import { CustomMessageBox } from "../../../../shared/base/custom-message-box"
-import { DownloadCalendarInviteButton } from "../download-calendar-invite-button"
 import { MeetingScheduleDetails } from "./meeting-schedule-details"
 import { ScheduleMeetingBanner } from "./schedule-meeting-banner"
 
@@ -48,7 +47,6 @@ export const ReviewerScheduledMeetingBanner = ({ projectMeeting }: ReviewerSched
           </Button>
         )}
       </CustomMessageBox>
-      <DownloadCalendarInviteButton projectMeeting={projectMeeting} mt={4} />
     </Box>
   )
 }

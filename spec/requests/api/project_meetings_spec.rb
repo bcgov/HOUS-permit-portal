@@ -389,6 +389,52 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
       expect(json_response.dig("meta", "unread_count")).to eq(1)
     end
 
+    it "filters by confirmed meeting date range" do
+      in_range =
+        create(
+          :project_meeting,
+          :scheduled,
+          permit_project:
+            create(
+              :permit_project,
+              jurisdiction: jurisdiction,
+              number: "CS-0000-DATE-IN"
+            ),
+          confirmed_date: 3.days.from_now
+        )
+      out_of_range =
+        create(
+          :project_meeting,
+          :scheduled,
+          permit_project:
+            create(
+              :permit_project,
+              jurisdiction: jurisdiction,
+              number: "CS-0000-DATE-OUT"
+            ),
+          confirmed_date: 20.days.from_now
+        )
+      ProjectMeeting.reindex
+
+      post "/api/jurisdictions/#{jurisdiction.id}/project_meetings/search",
+           params: {
+             query: "*",
+             page: 1,
+             per_page: 10,
+             filters: {
+               confirmed_date_from: Time.zone.today.iso8601,
+               confirmed_date_to: 7.days.from_now.to_date.iso8601
+             }
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      ids = json_response["data"].pluck("id")
+      expect(ids).to include(in_range.id, viewed_meeting.id)
+      expect(ids).not_to include(out_of_range.id)
+    end
+
     it "blocks users outside the jurisdiction" do
       sign_in create(:user, :reviewer)
 

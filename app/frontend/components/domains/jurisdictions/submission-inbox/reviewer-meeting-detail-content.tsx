@@ -17,6 +17,7 @@ import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
 import { ProjectMeetingStatusTag } from "../../../shared/project-meetings/project-meeting-status-tag"
 import { ReviewerScheduledMeetingBanner } from "../../project-meeting/detail/banners/reviewer-scheduled-meeting-banner"
 import { ScheduleMeetingBanner } from "../../project-meeting/detail/banners/schedule-meeting-banner"
+import { DownloadCalendarInviteButton } from "../../project-meeting/detail/download-calendar-invite-button"
 import { DocumentsSection } from "../../project-meeting/detail/sections/documents-section"
 import { MeetingNotesSection } from "../../project-meeting/detail/sections/meeting-notes-section"
 import { ProjectInformationSection } from "../../project-meeting/detail/sections/project-information-section"
@@ -132,6 +133,7 @@ export const ReviewerMeetingDetailContent = observer(
             </HStack>
           </Box>
           <HStack spacing={4}>
+            <DownloadCalendarInviteButton projectMeeting={currentProjectMeeting} />
             {currentProjectMeeting.canComplete && (
               <Button variant="secondary" size="sm" onClick={handleCompleteMeeting} isLoading={isCompleting}>
                 {t("projectMeeting.detail.reviewer.markCompleted")}

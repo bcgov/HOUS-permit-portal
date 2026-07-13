@@ -17,6 +17,7 @@ import { ConfirmationModal } from "../../shared/confirmation-modal"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { ProjectMeetingStatusTag } from "../../shared/project-meetings/project-meeting-status-tag"
 import { ProjectMeetingStatusBanner } from "./detail/banners/project-meeting-status-banner"
+import { DownloadCalendarInviteButton } from "./detail/download-calendar-invite-button"
 import { DocumentsSection } from "./detail/sections/documents-section"
 import { MeetingNotesSection } from "./detail/sections/meeting-notes-section"
 import { ProjectInformationSection } from "./detail/sections/project-information-section"
@@ -101,6 +102,7 @@ export const SubmitterProjectMeetingDetailContent = observer(
             </HStack>
           </Box>
           <HStack spacing={4}>
+            <DownloadCalendarInviteButton projectMeeting={currentProjectMeeting} />
             {canWithdrawMeeting && (
               <ConfirmationModal
                 title={t("projectMeeting.detail.withdrawConfirmationTitle")}
