@@ -11,7 +11,7 @@ import { useMst } from "../../../../../setup/root"
 import { EFlashMessageStatus, EMeetingRequestDocumentType } from "../../../../../types/enums"
 import { useProjectMeetingNavigation } from "../../use-project-meeting-navigation"
 import { ACCEPTED_DOCUMENT_TYPES } from "../shared/constants"
-import { activeDocumentsForType } from "../shared/document-utils"
+import { documentsForType } from "../shared/document-utils"
 import { DocumentsTable } from "../shared/documents-table"
 import { FormActions } from "../shared/form-actions"
 import { SectionHeading } from "../shared/section-heading"
@@ -36,7 +36,7 @@ export const DocumentsSection = observer(({ meeting }: DocumentsSectionProps) =>
   })
   const { append, update } = useFieldArray({ control, name: "meetingRequestDocumentsAttributes" })
   const documents = watch("meetingRequestDocumentsAttributes") || []
-  const supportingDocuments = activeDocumentsForType(documents, EMeetingRequestDocumentType.supporting)
+  const supportingDocuments = documentsForType(documents, EMeetingRequestDocumentType.supporting)
 
   const handleUploadSuccess = (file: UppyFile<{}, {}>, response: any) => {
     const uploadUrl = response.uploadURL || response.location || ""
@@ -61,7 +61,7 @@ export const DocumentsSection = observer(({ meeting }: DocumentsSectionProps) =>
     )
   }
 
-  const supportingDocumentsUppy = useUppyS3({
+  const { uppy: supportingDocumentsUppy, isUploading } = useUppyS3({
     onUploadSuccess: handleUploadSuccess,
     maxNumberOfFiles: 10,
     autoProceed: true,
@@ -73,7 +73,14 @@ export const DocumentsSection = observer(({ meeting }: DocumentsSectionProps) =>
     if (index !== -1) update(index, { ...documents[index], _destroy: true })
   }
 
+  const handleUndoRemoveFile = (documentId: string) => {
+    const index = documents.findIndex((doc) => (doc.id || doc.file?.id) === documentId)
+    if (index !== -1) update(index, { ...documents[index], _destroy: false })
+  }
+
   const onSubmit = async (data) => {
+    if (isUploading) return
+
     const response = await projectMeetingStore.updateProjectMeeting(permitProjectId, meeting.id, data)
     if (response.ok) {
       navigateToNext()
@@ -98,12 +105,20 @@ export const DocumentsSection = observer(({ meeting }: DocumentsSectionProps) =>
       <Heading as="h2" size="md" mb={2}>
         {t("projectMeeting.sections.documents.supportingTitle")}
       </Heading>
-      <DocumentsTable documents={supportingDocuments} onRemoveFile={handleRemoveFile} />
+      <DocumentsTable
+        documents={supportingDocuments}
+        onRemoveFile={handleRemoveFile}
+        onUndoRemoveFile={handleUndoRemoveFile}
+      />
       <UppyDashboardField
         uppy={supportingDocumentsUppy}
         acceptedFormatsLabel={t("projectMeeting.sections.documents.acceptedFormats")}
       />
-      <FormActions isSubmitting={formState.isSubmitting} />
+      <FormActions
+        isSubmitting={formState.isSubmitting}
+        isDisabled={isUploading}
+        continueLabel={t("ui.saveAndcontinue")}
+      />
     </form>
   )
 })

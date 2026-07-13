@@ -204,7 +204,7 @@ export const ResourcesScreen = observer(function ResourcesScreen() {
     })
   }
 
-  const modalUppy = useUppyS3({
+  const { uppy: modalUppy } = useUppyS3({
     onUploadSuccess: handleUploadSuccess,
     maxNumberOfFiles: 1,
     autoProceed: true,
