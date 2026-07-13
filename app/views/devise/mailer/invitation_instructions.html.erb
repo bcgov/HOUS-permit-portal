@@ -16,8 +16,7 @@
           <%# Inviting a submitter's email creates a staff user alongside them; accepting promotes the submitter. %>
           <% if @resource.jurisdiction_staff? &&
                User.kept.submitter.where("LOWER(email) = ?", @resource.email.to_s.strip.downcase).where.not(id: @resource.id).exists? %>
-            <p><strong>Important:</strong> If you are currently logged in as a submitter, accepting this invitation will change your account to jurisdiction staff.
-              You will lose access to any existing permit projects you currently own as a submitter.</p>
+            <p><strong>Important:</strong> If you accept this invitation while signed in as a submitter, your account will become jurisdiction staff and you will lose access to any permit projects you currently own.</p>
           <% end %>
 
           <% expires_at = @resource.invitation_created_at + User.invite_for %>
