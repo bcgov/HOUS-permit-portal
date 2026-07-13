@@ -1,13 +1,12 @@
-import { Box, Link, Text, VStack } from "@chakra-ui/react"
+import { Box, Text } from "@chakra-ui/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { IProjectMeeting } from "../../../../../models/project-meeting"
 import { EFlashMessageStatus, EProjectMeetingStatus } from "../../../../../types/enums"
 import { CustomMessageBox } from "../../../../shared/base/custom-message-box"
-import { InfoRow } from "../../../../shared/base/info-row"
 import { RouterLinkButton } from "../../../../shared/navigation/router-link-button"
 import { DownloadCalendarInviteButton } from "../download-calendar-invite-button"
-import { FormattedDateTime } from "../formatted-date-time"
+import { MeetingScheduleDetails } from "./meeting-schedule-details"
 
 interface ProjectMeetingStatusBannerProps {
   projectMeeting: IProjectMeeting
@@ -33,7 +32,11 @@ export const ProjectMeetingStatusBanner = ({
     projectMeeting.status === EProjectMeetingStatus.draft &&
     !!activeProjectMeeting &&
     activeProjectMeeting.id !== projectMeeting.id
-  const showScheduledDetails = projectMeeting.status === EProjectMeetingStatus.scheduled
+  const showMeetingDetails = [EProjectMeetingStatus.scheduled, EProjectMeetingStatus.completed].includes(
+    projectMeeting.status
+  )
+  const detailsBorderColor =
+    projectMeeting.status === EProjectMeetingStatus.completed ? "semantic.success" : "semantic.info"
   const bannerContent = (() => {
     switch (projectMeeting.status) {
       case EProjectMeetingStatus.draft:
@@ -58,7 +61,6 @@ export const ProjectMeetingStatusBanner = ({
       case EProjectMeetingStatus.completed:
         return {
           title: t("projectMeeting.detail.statusBanner.completed.title"),
-          description: t("projectMeeting.detail.statusBanner.completed.description"),
         }
       case EProjectMeetingStatus.withdrawn:
         return {
@@ -73,7 +75,7 @@ export const ProjectMeetingStatusBanner = ({
       <CustomMessageBox
         status={statusMap[projectMeeting.status]}
         title={bannerContent.title}
-        description={showScheduledDetails || showActiveDraftMessage ? undefined : bannerContent.description}
+        description={showMeetingDetails || showActiveDraftMessage ? undefined : bannerContent.description}
         mb={0}
       >
         {showActiveDraftMessage && (
@@ -91,46 +93,11 @@ export const ProjectMeetingStatusBanner = ({
             </RouterLinkButton>
           </Text>
         )}
-        {showScheduledDetails && (
-          <VStack align="stretch" spacing={1}>
-            {projectMeeting.contactMethod && (
-              <InfoRow
-                label={t("projectMeeting.detail.contactMethod")}
-                value={t(`projectMeeting.contactMethods.${projectMeeting.contactMethod}`)}
-                borderColor="semantic.info"
-              />
-            )}
-            {projectMeeting.confirmedDate && (
-              <InfoRow
-                label={t("projectMeeting.detail.confirmedDate")}
-                value={<FormattedDateTime date={projectMeeting.confirmedDate} />}
-                borderColor="semantic.info"
-              />
-            )}
-            {projectMeeting.scheduledAt && (
-              <InfoRow
-                label={t("projectMeeting.detail.scheduledAt")}
-                value={<FormattedDateTime date={projectMeeting.scheduledAt} />}
-                borderColor="semantic.info"
-              />
-            )}
-            {projectMeeting.meetingUrl && (
-              <InfoRow
-                label={t("projectMeeting.detail.meetingUrl")}
-                value={
-                  <Link href={projectMeeting.meetingUrl} isExternal color="text.link">
-                    {projectMeeting.meetingUrl}
-                  </Link>
-                }
-                copyValue={projectMeeting.meetingUrl}
-                isCopyable
-                borderColor="semantic.info"
-              />
-            )}
-          </VStack>
+        {showMeetingDetails && (
+          <MeetingScheduleDetails projectMeeting={projectMeeting} borderColor={detailsBorderColor} />
         )}
       </CustomMessageBox>
-      {showScheduledDetails && <DownloadCalendarInviteButton projectMeeting={projectMeeting} mt={4} />}
+      {showMeetingDetails && <DownloadCalendarInviteButton projectMeeting={projectMeeting} mt={4} />}
     </Box>
   )
 }
