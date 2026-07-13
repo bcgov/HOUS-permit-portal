@@ -48,7 +48,6 @@ export const InfoRow = ({
       py={2}
       borderBottom="1px"
       borderColor="border.light"
-      _last={{ borderBottom: "none" }}
       w="full"
       {...flexProps}
     >
