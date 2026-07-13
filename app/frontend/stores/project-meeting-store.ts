@@ -57,7 +57,7 @@ export const ProjectMeetingStoreModel = types
         confirmedDate: nullableDate(projectMeeting.confirmedDate),
         scheduledAt: nullableDate(projectMeeting.scheduledAt),
         completedAt: nullableDate(projectMeeting.completedAt),
-        closedAt: nullableDate(projectMeeting.closedAt),
+        withdrawnAt: nullableDate(projectMeeting.withdrawnAt),
         viewedAt: nullableDate(projectMeeting.viewedAt),
         createdAt: nullableDate(projectMeeting.createdAt),
         updatedAt: nullableDate(projectMeeting.updatedAt),
@@ -134,8 +134,8 @@ export const ProjectMeetingStoreModel = types
       }
       return { ok: false, error: responseError(response.data, response.problem) }
     }),
-    cancelProjectMeeting: flow(function* (permitProjectId: string, id: string) {
-      const response = yield* toGenerator(self.environment.api.cancelProjectMeeting(permitProjectId, id))
+    withdrawProjectMeeting: flow(function* (permitProjectId: string, id: string) {
+      const response = yield* toGenerator(self.environment.api.withdrawProjectMeeting(permitProjectId, id))
       if (response.ok) {
         self.mergeUpdate(response.data.data, "projectMeetingsMap")
         yield* toGenerator(self.rootStore.permitProjectStore.fetchPermitProject(permitProjectId))

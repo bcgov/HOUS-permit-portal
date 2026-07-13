@@ -212,18 +212,18 @@ RSpec.describe "Project activity auditing", type: :model do
       )
     end
 
-    it "records cancelled meeting requests" do
+    it "records withdrawn meeting requests" do
       Audited.audit_class.as_user(owner) { project_meeting.submit_request! }
 
       project_meeting.reload
-      Audited.audit_class.as_user(owner) { project_meeting.close! }
+      Audited.audit_class.as_user(owner) { project_meeting.withdraw! }
 
-      close_audit =
-        project_meeting_audits.where("audited_changes ? 'closed_at'").last
+      withdraw_audit =
+        project_meeting_audits.where("audited_changes ? 'withdrawn_at'").last
 
-      expect(close_audit).to be_present
-      expect(close_audit.audited_changes["status"]).to eq(
-        [ProjectMeeting.statuses["open"], ProjectMeeting.statuses["closed"]]
+      expect(withdraw_audit).to be_present
+      expect(withdraw_audit.audited_changes["status"]).to eq(
+        [ProjectMeeting.statuses["open"], ProjectMeeting.statuses["withdrawn"]]
       )
     end
 

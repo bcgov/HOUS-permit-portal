@@ -5,23 +5,23 @@ module ProjectMeetingStatus
 
   MANUAL_TRANSITIONS = {
     draft: [],
-    open: %i[scheduled closed],
-    scheduled: %i[completed closed],
+    open: %i[scheduled withdrawn],
+    scheduled: %i[completed withdrawn],
     completed: %i[],
-    closed: []
+    withdrawn: []
   }.freeze
 
   STATUS_EVENT_MAP = {
     "scheduled" => :schedule,
     "completed" => :complete,
-    "closed" => :close
+    "withdrawn" => :withdraw
   }.freeze
 
   included do
     include AASM
 
     enum :status,
-         { draft: 0, open: 1, scheduled: 2, completed: 3, closed: 4 },
+         { draft: 0, open: 1, scheduled: 2, completed: 3, withdrawn: 4 },
          default: 0
 
     validate :validate_schedule_requirements, if: :scheduled?
@@ -38,7 +38,7 @@ module ProjectMeetingStatus
       state :open
       state :scheduled
       state :completed
-      state :closed
+      state :withdrawn
 
       event :submit_request, before: :stamp_submitted_at do
         transitions from: :draft,
@@ -58,8 +58,8 @@ module ProjectMeetingStatus
         transitions from: :scheduled, to: :completed
       end
 
-      event :close, before: :stamp_closed_at do
-        transitions from: %i[open scheduled completed], to: :closed
+      event :withdraw, before: :stamp_withdrawn_at do
+        transitions from: %i[open scheduled completed], to: :withdrawn
       end
     end
 
@@ -72,7 +72,7 @@ module ProjectMeetingStatus
     end
 
     def terminal?
-      completed? || closed?
+      completed? || withdrawn?
     end
 
     def allowed_manual_transitions
@@ -104,8 +104,8 @@ module ProjectMeetingStatus
       self.completed_at ||= Time.current
     end
 
-    def stamp_closed_at
-      self.closed_at ||= Time.current
+    def stamp_withdrawn_at
+      self.withdrawn_at ||= Time.current
     end
 
     def handle_submission

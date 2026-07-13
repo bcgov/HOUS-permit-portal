@@ -16,7 +16,7 @@ class ProjectMeeting < ApplicationRecord
             confirmed_date
             scheduled_at
             completed_at
-            closed_at
+            withdrawn_at
             contact_method
             meeting_url
           ],

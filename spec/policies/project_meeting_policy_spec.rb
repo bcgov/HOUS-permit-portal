@@ -109,7 +109,7 @@ RSpec.describe ProjectMeetingPolicy, type: :policy do
     expect(policy(reviewer, open_meeting).mark_as_unviewed?).to be true
   end
 
-  it "allows jurisdiction review staff to create notes on open, scheduled, completed, and closed requests" do
+  it "allows jurisdiction review staff to create notes on open, scheduled, completed, and withdrawn requests" do
     open_meeting =
       create(:project_meeting, :open, permit_project: permit_project)
     scheduled_meeting =
@@ -124,13 +124,13 @@ RSpec.describe ProjectMeetingPolicy, type: :policy do
         :completed,
         permit_project: create(:permit_project, owner:, jurisdiction:)
       )
-    closed_meeting =
-      create(:project_meeting, :closed, permit_project: permit_project)
+    withdrawn_meeting =
+      create(:project_meeting, :withdrawn, permit_project: permit_project)
 
     expect(policy(reviewer, open_meeting).create_note?).to be true
     expect(policy(reviewer, scheduled_meeting).create_note?).to be true
     expect(policy(reviewer, completed_meeting).create_note?).to be true
-    expect(policy(reviewer, closed_meeting).create_note?).to be true
+    expect(policy(reviewer, withdrawn_meeting).create_note?).to be true
   end
 
   it "allows owners and jurisdiction review staff to view and download meeting notes" do
@@ -147,7 +147,11 @@ RSpec.describe ProjectMeetingPolicy, type: :policy do
     scheduled_meeting =
       create(:project_meeting, :scheduled, permit_project: permit_project)
     open_meeting =
-      create(:project_meeting, :open, permit_project: permit_project)
+      create(
+        :project_meeting,
+        :open,
+        permit_project: create(:permit_project, owner:, jurisdiction:)
+      )
 
     expect(policy(owner, scheduled_meeting).download_calendar?).to be true
     expect(policy(reviewer, scheduled_meeting).download_calendar?).to be true
@@ -185,7 +189,7 @@ RSpec.describe ProjectMeetingPolicy, type: :policy do
     expect(policy(other_reviewer, open_meeting).transition_status?).to be false
   end
 
-  it "allows owners to cancel open and scheduled requests" do
+  it "allows owners to withdraw open and scheduled requests" do
     open_meeting =
       create(:project_meeting, :open, permit_project: permit_project)
     scheduled_meeting =
@@ -195,22 +199,22 @@ RSpec.describe ProjectMeetingPolicy, type: :policy do
         permit_project: create(:permit_project, owner:, jurisdiction:)
       )
 
-    expect(policy(owner, open_meeting).cancel?).to be true
-    expect(policy(owner, scheduled_meeting).cancel?).to be true
+    expect(policy(owner, open_meeting).withdraw?).to be true
+    expect(policy(owner, scheduled_meeting).withdraw?).to be true
   end
 
-  it "blocks review staff from cancelling as a submitter action" do
+  it "blocks review staff from withdrawing as a submitter action" do
     open_meeting =
       create(:project_meeting, :open, permit_project: permit_project)
 
-    expect(policy(reviewer, open_meeting).cancel?).to be false
+    expect(policy(reviewer, open_meeting).withdraw?).to be false
   end
 
   it "blocks manual transitions when no transition is available" do
-    closed_meeting =
-      create(:project_meeting, :closed, permit_project: permit_project)
+    withdrawn_meeting =
+      create(:project_meeting, :withdrawn, permit_project: permit_project)
 
-    expect(policy(reviewer, closed_meeting).transition_status?).to be false
+    expect(policy(reviewer, withdrawn_meeting).transition_status?).to be false
   end
 
   it "blocks creation when the global feature gate is off" do

@@ -109,27 +109,27 @@ RSpec.describe "Api::Notes", type: :request do
       expect(response).to have_http_status(:forbidden)
     end
 
-    it "allows jurisdiction review staff to create notes for closed meetings" do
-      closed_meeting =
-        create(:project_meeting, :closed, permit_project: permit_project)
+    it "allows jurisdiction review staff to create notes for withdrawn meetings" do
+      withdrawn_meeting =
+        create(:project_meeting, :withdrawn, permit_project: permit_project)
       sign_in reviewer
 
       expect do
-        post "/api/project_meetings/#{closed_meeting.id}/notes",
+        post "/api/project_meetings/#{withdrawn_meeting.id}/notes",
              params: {
                note: {
-                 body: "<p>Post-close follow-up.</p>"
+                 body: "<p>Post-withdraw follow-up.</p>"
                }
              },
              headers: headers,
              as: :json
       end.to change(Note, :count).by(1).and change {
-              closed_meeting.reload.notes_count
+              withdrawn_meeting.reload.notes_count
             }.from(0).to(1)
 
       expect(response).to have_http_status(:created)
       expect(json_response.dig("data", "body")).to eq(
-        "<p>Post-close follow-up.</p>"
+        "<p>Post-withdraw follow-up.</p>"
       )
     end
   end
@@ -194,11 +194,15 @@ RSpec.describe "Api::Notes", type: :request do
           noteable: create(:project_meeting, permit_project: permit_project),
           user: reviewer
         )
-      closed_note =
+      withdrawn_note =
         create(
           :note,
           noteable:
-            create(:project_meeting, :closed, permit_project: permit_project),
+            create(
+              :project_meeting,
+              :withdrawn,
+              permit_project: permit_project
+            ),
           user: reviewer
         )
       sign_in reviewer
@@ -206,7 +210,7 @@ RSpec.describe "Api::Notes", type: :request do
       get "/api/permit_projects/#{permit_project.id}/notes", headers: headers
 
       note_ids = json_response.fetch("data").map { |note| note.fetch("id") }
-      expect(note_ids).to include(draft_note.id, closed_note.id)
+      expect(note_ids).to include(draft_note.id, withdrawn_note.id)
     end
   end
 

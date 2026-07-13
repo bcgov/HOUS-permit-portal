@@ -29,8 +29,8 @@ module ProjectAuditFormatters
         "#{user_display} scheduled the project meeting"
       when "completed"
         "#{user_display} completed the project meeting"
-      when "closed"
-        "#{user_display} cancelled the project meeting"
+      when "withdrawn"
+        "#{user_display} withdrew the project meeting"
       else
         "#{user_display} changed the project meeting status"
       end

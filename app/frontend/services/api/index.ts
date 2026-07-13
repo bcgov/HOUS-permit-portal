@@ -447,8 +447,8 @@ export class Api {
     })
   }
 
-  async cancelProjectMeeting(permitProjectId: string, id: string) {
-    return this.client.post<ApiResponse<IProjectMeeting>>(`/permit_projects/${permitProjectId}/meetings/${id}/cancel`)
+  async withdrawProjectMeeting(permitProjectId: string, id: string) {
+    return this.client.post<ApiResponse<IProjectMeeting>>(`/permit_projects/${permitProjectId}/meetings/${id}/withdraw`)
   }
 
   async rescheduleProjectMeeting(permitProjectId: string, id: string, params: Record<string, unknown>) {

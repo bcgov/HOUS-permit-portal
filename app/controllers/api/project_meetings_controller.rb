@@ -8,7 +8,7 @@ class Api::ProjectMeetingsController < Api::ApplicationController
                   download_calendar
                   update
                   submit
-                  cancel
+                  withdraw
                   reschedule
                   transition_status
                   mark_as_viewed
@@ -134,20 +134,20 @@ class Api::ProjectMeetingsController < Api::ApplicationController
     )
   end
 
-  def cancel
+  def withdraw
     authorize @project_meeting
 
-    unless @project_meeting.allowed_manual_transitions.include?(:closed)
+    unless @project_meeting.allowed_manual_transitions.include?(:withdrawn)
       return render_error("project_meeting.invalid_transition", { status: 422 })
     end
 
-    @project_meeting.close!
+    @project_meeting.withdraw!
     render_success @project_meeting,
-                   "project_meeting.cancel_success",
+                   "project_meeting.withdraw_success",
                    { blueprint: ProjectMeetingBlueprint }
   rescue AASM::InvalidTransition, ActiveRecord::RecordInvalid
     render_error(
-      "project_meeting.cancel_error",
+      "project_meeting.withdraw_error",
       {
         status: :unprocessable_entity,
         log_args: {

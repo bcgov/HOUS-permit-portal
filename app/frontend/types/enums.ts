@@ -28,7 +28,7 @@ export enum EProjectMeetingStatus {
   open = "open",
   scheduled = "scheduled",
   completed = "completed",
-  closed = "closed",
+  withdrawn = "withdrawn",
 }
 
 export enum EProjectMeetingContactMethod {

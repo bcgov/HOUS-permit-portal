@@ -20,7 +20,7 @@ const statusMap: Record<EProjectMeetingStatus, EFlashMessageStatus> = {
   [EProjectMeetingStatus.open]: EFlashMessageStatus.info,
   [EProjectMeetingStatus.scheduled]: EFlashMessageStatus.info,
   [EProjectMeetingStatus.completed]: EFlashMessageStatus.success,
-  [EProjectMeetingStatus.closed]: EFlashMessageStatus.warning,
+  [EProjectMeetingStatus.withdrawn]: EFlashMessageStatus.warning,
 }
 
 export const ProjectMeetingStatusBanner = ({
@@ -60,10 +60,10 @@ export const ProjectMeetingStatusBanner = ({
           title: t("projectMeeting.detail.statusBanner.completed.title"),
           description: t("projectMeeting.detail.statusBanner.completed.description"),
         }
-      case EProjectMeetingStatus.closed:
+      case EProjectMeetingStatus.withdrawn:
         return {
-          title: t("projectMeeting.detail.statusBanner.closed.title"),
-          description: t("projectMeeting.detail.statusBanner.closed.description"),
+          title: t("projectMeeting.detail.statusBanner.withdrawn.title"),
+          description: t("projectMeeting.detail.statusBanner.withdrawn.description"),
         }
     }
   })()

@@ -292,13 +292,13 @@ RSpec.describe ProjectMeeting, type: :model do
       expect(meeting.completed_at).to be_present
     end
 
-    it "closes an open meeting request" do
+    it "withdraws an open meeting request" do
       meeting = create(:project_meeting, :open)
 
-      meeting.close!
+      meeting.withdraw!
 
-      expect(meeting.reload).to be_closed
-      expect(meeting.closed_at).to be_present
+      expect(meeting.reload).to be_withdrawn
+      expect(meeting.withdrawn_at).to be_present
     end
 
     it "blocks invalid transitions" do

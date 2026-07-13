@@ -46,7 +46,7 @@ class ProjectMeetingPolicy < ApplicationPolicy
     user_is_owner? && record.draft? && feature_enabled?
   end
 
-  def cancel?
+  def withdraw?
     user_is_owner? && feature_enabled?
   end
 

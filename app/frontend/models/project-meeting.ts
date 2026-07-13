@@ -29,7 +29,7 @@ export const ProjectMeetingModel = types
     confirmedDate: types.maybeNull(types.Date),
     scheduledAt: types.maybeNull(types.Date),
     completedAt: types.maybeNull(types.Date),
-    closedAt: types.maybeNull(types.Date),
+    withdrawnAt: types.maybeNull(types.Date),
     meetingUrl: types.maybeNull(types.string),
     viewedAt: types.maybeNull(types.Date),
     notesCount: types.optional(types.number, 0),
@@ -55,7 +55,7 @@ export const ProjectMeetingModel = types
       return self.status === EProjectMeetingStatus.open || self.status === EProjectMeetingStatus.scheduled
     },
     get isTerminal() {
-      return self.status === EProjectMeetingStatus.completed || self.status === EProjectMeetingStatus.closed
+      return self.status === EProjectMeetingStatus.completed || self.status === EProjectMeetingStatus.withdrawn
     },
     get activeMeetingRequestDocuments() {
       return self.meetingRequestDocuments.filter((document) => !document._destroy)
@@ -75,19 +75,19 @@ export const ProjectMeetingModel = types
         self.allowedManualTransitions.includes(EProjectMeetingStatus.completed)
       )
     },
-    get canCancel() {
-      return self.allowedManualTransitions.includes(EProjectMeetingStatus.closed)
+    get canWithdraw() {
+      return self.allowedManualTransitions.includes(EProjectMeetingStatus.withdrawn)
     },
     get canAddReviewerNote() {
       return [
         EProjectMeetingStatus.open,
         EProjectMeetingStatus.scheduled,
         EProjectMeetingStatus.completed,
-        EProjectMeetingStatus.closed,
+        EProjectMeetingStatus.withdrawn,
       ].includes(self.status)
     },
     get shouldShowScheduledBanner() {
-      if (self.status === EProjectMeetingStatus.closed) return false
+      if (self.status === EProjectMeetingStatus.withdrawn) return false
       if ([EProjectMeetingStatus.scheduled, EProjectMeetingStatus.completed].includes(self.status)) return true
       return !!self.scheduledAt || !!self.confirmedDate || !!self.meetingUrl
     },
