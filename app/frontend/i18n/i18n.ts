@@ -782,6 +782,8 @@ const options = {
           },
           sections: {
             introduction: {
+              attribution:
+                "This form was originally created by the HVAC Designers of Canada and the Thermal Environmental Comfort Association (TECA), and has been digitized with their permission.",
               standardTitle: "B.C. Single Zone Cooling Capacity — BCBC 9.33.3.1.; 9.33.5.1.",
               formVersion: "B.C. SZCG Form Set Ver 1.0",
               title: "Overheating Code Check",
