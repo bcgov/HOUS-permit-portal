@@ -195,6 +195,7 @@ Rails.application.routes.draw do
     end
 
     resources :project_meetings, only: %i[show] do
+      get :download_calendar, on: :member
       resources :notes,
                 only: %i[index create],
                 controller: "project_meetings/notes" do

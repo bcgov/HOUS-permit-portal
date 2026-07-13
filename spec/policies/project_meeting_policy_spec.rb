@@ -143,6 +143,17 @@ RSpec.describe ProjectMeetingPolicy, type: :policy do
     expect(policy(reviewer, open_meeting).download_notes_csv?).to be true
   end
 
+  it "allows owners and jurisdiction review staff to download calendar invites for scheduled meetings" do
+    scheduled_meeting =
+      create(:project_meeting, :scheduled, permit_project: permit_project)
+    open_meeting =
+      create(:project_meeting, :open, permit_project: permit_project)
+
+    expect(policy(owner, scheduled_meeting).download_calendar?).to be true
+    expect(policy(reviewer, scheduled_meeting).download_calendar?).to be true
+    expect(policy(owner, open_meeting).download_calendar?).to be false
+  end
+
   it "allows jurisdiction review staff to view notes on draft meetings" do
     draft_meeting = create(:project_meeting, permit_project: permit_project)
 

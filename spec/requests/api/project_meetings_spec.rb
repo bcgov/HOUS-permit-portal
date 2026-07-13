@@ -120,6 +120,56 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
     end
   end
 
+  describe "GET /api/project_meetings/:id/download_calendar" do
+    it "downloads an ICS invite for a scheduled meeting" do
+      meeting =
+        create(
+          :project_meeting,
+          :scheduled,
+          permit_project: permit_project,
+          confirmed_date: Time.zone.parse("2026-01-20 09:30")
+        )
+
+      get "/api/project_meetings/#{meeting.id}/download_calendar",
+          headers: headers
+
+      expect(response).to have_http_status(:ok)
+      expect(response.headers["Content-Type"]).to include("text/calendar")
+      expect(response.headers["Content-Disposition"]).to include(".ics")
+      expect(response.body).to include("METHOD:REQUEST")
+      expect(response.body).to include("UID:project-meeting-#{meeting.id}@")
+      expect(response.body).to include("mailto:#{owner.email}")
+    end
+
+    it "allows jurisdiction review staff to download the invite" do
+      reviewer = create(:user, :reviewer, jurisdiction: jurisdiction)
+      meeting =
+        create(
+          :project_meeting,
+          :scheduled,
+          permit_project: permit_project,
+          confirmed_date: Time.zone.parse("2026-01-20 09:30")
+        )
+      sign_in reviewer
+
+      get "/api/project_meetings/#{meeting.id}/download_calendar",
+          headers: headers
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("mailto:#{reviewer.email}")
+      expect(response.body).not_to include("mailto:#{owner.email}")
+    end
+
+    it "rejects downloads when no confirmed date is set" do
+      meeting = create(:project_meeting, :open, permit_project: permit_project)
+
+      get "/api/project_meetings/#{meeting.id}/download_calendar",
+          headers: headers
+
+      expect(response).to have_http_status(:forbidden)
+    end
+  end
+
   describe "POST /api/permit_projects/:permit_project_id/meetings/search",
            :search do
     let!(:meeting) do

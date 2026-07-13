@@ -137,6 +137,14 @@ export const ProjectMeetingModel = types
       }
       return response.ok
     }),
+    downloadCalendarInvite: flow(function* () {
+      const response = yield* toGenerator(self.environment.api.downloadProjectMeetingCalendar(self.id))
+      if (response.ok) {
+        const filename = `project-meeting-${self.projectNumber || self.id}.ics`
+        startBlobDownload(response.data, "text/calendar", filename)
+      }
+      return response.ok
+    }),
     markAsViewed: flow(function* () {
       const wasUnread = !self.viewedAt
       const response = yield* toGenerator(self.environment.api.viewProjectMeeting(self.permitProjectId, self.id))

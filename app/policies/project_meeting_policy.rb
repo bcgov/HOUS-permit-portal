@@ -80,6 +80,10 @@ class ProjectMeetingPolicy < ApplicationPolicy
     view_notes?
   end
 
+  def download_calendar?
+    show? && record.confirmed_date.present?
+  end
+
   private
 
   def user_is_owner?

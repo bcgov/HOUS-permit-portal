@@ -1,10 +1,11 @@
 class Api::ProjectMeetingsController < Api::ApplicationController
   include Api::Concerns::Search::ProjectMeetings
 
-  before_action :set_permit_project, except: %i[show]
+  before_action :set_permit_project, except: %i[show download_calendar]
   before_action :set_project_meeting,
                 only: %i[
                   show
+                  download_calendar
                   update
                   submit
                   cancel
@@ -61,6 +62,31 @@ class Api::ProjectMeetingsController < Api::ApplicationController
                        view: :extended
                      }
                    }
+  end
+
+  def download_calendar
+    authorize @project_meeting
+
+    if @project_meeting.confirmed_date.blank?
+      return(
+        render_error(
+          "project_meeting.calendar_unavailable",
+          { status: :unprocessable_entity }
+        )
+      )
+    end
+
+    generator =
+      ProjectMeetingIcsGenerator.new(
+        @project_meeting,
+        hub_meeting_url: calendar_hub_meeting_url,
+        attendee_email: current_user.email
+      )
+
+    send_data generator.generate,
+              filename: generator.filename,
+              type: "text/calendar; method=REQUEST; charset=UTF-8",
+              disposition: "attachment"
   end
 
   def update
@@ -262,5 +288,19 @@ class Api::ProjectMeetingsController < Api::ApplicationController
       :confirmed_date,
       :meeting_url
     )
+  end
+
+  def calendar_hub_meeting_url
+    permit_project = @project_meeting.permit_project
+    if current_user.review_staff? &&
+         current_user.member_of?(permit_project.jurisdiction_id)
+      FrontendUrlHelper.frontend_url(
+        "/jurisdictions/#{permit_project.jurisdiction.slug}/submission-inbox/projects/#{permit_project.id}/meetings/#{@project_meeting.id}"
+      )
+    else
+      FrontendUrlHelper.frontend_url(
+        "/projects/#{permit_project.id}/meetings/#{@project_meeting.id}"
+      )
+    end
   end
 end

@@ -409,6 +409,10 @@ export class Api {
     return this.client.get<BlobPart>(`/project_meetings/${projectMeetingId}/notes/download_csv`)
   }
 
+  async downloadProjectMeetingCalendar(projectMeetingId: string) {
+    return this.client.get<BlobPart>(`/project_meetings/${projectMeetingId}/download_calendar`)
+  }
+
   async fetchPermitProjectNotes(permitProjectId: string) {
     return this.client.get<INoteResponse>(`/permit_projects/${permitProjectId}/notes`)
   }

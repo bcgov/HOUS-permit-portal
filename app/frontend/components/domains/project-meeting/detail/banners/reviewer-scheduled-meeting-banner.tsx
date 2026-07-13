@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next"
 import { IProjectMeeting } from "../../../../../models/project-meeting"
 import { EProjectMeetingScheduleMode, EProjectMeetingStatus } from "../../../../../types/enums"
 import { CopyLinkButton } from "../../../../shared/base/copy-link-button"
+import { DownloadCalendarInviteButton } from "../download-calendar-invite-button"
 import { FormattedDateTime } from "../formatted-date-time"
 import { ScheduleMeetingBanner } from "./schedule-meeting-banner"
 
@@ -26,56 +27,59 @@ export const ReviewerScheduledMeetingBanner = ({ projectMeeting }: ReviewerSched
   }
 
   return (
-    <Box bg="theme.blueLight" borderRadius="lg" p={5} mb={8} maxW="xl">
-      <VStack align="stretch" spacing={4}>
-        <Box>
-          <Text fontWeight="bold" fontSize="lg" mb={2}>
-            {t("projectMeeting.detail.reviewer.scheduledTitle")}
-          </Text>
-          <Text fontSize="lg">{t("projectMeeting.detail.reviewer.scheduledDescription")}</Text>
-        </Box>
-
-        {projectMeeting.contactMethod && (
-          <HStack spacing={4} align="flex-start">
-            <Text fontWeight="bold">{t("projectMeeting.detail.reviewer.contactMethodSummary")}</Text>
-            <Text>{t(`projectMeeting.contactMethods.${projectMeeting.contactMethod}`)}</Text>
-          </HStack>
-        )}
-
-        {projectMeeting.meetingUrl && (
+    <Box mb={8} maxW="xl">
+      <Box bg="theme.blueLight" borderRadius="lg" p={5}>
+        <VStack align="stretch" spacing={4}>
           <Box>
-            <HStack spacing={4} flexWrap="wrap">
-              <CopyLinkButton
-                value={projectMeeting.meetingUrl}
-                label={t("projectMeeting.detail.reviewer.copyMeetingLink")}
-                variant="link"
-                size="sm"
-                px={0}
-                rightIcon={undefined}
-                textDecoration="underline"
-              />
-              <Link href={projectMeeting.meetingUrl} isExternal color="text.link" textDecoration="underline">
-                {t("projectMeeting.detail.reviewer.joinMeeting")}
-              </Link>
-            </HStack>
-          </Box>
-        )}
-
-        {projectMeeting.confirmedDate && (
-          <HStack spacing={4} align="flex-start">
-            <Text fontWeight="bold">{t("projectMeeting.detail.reviewer.dateAndTime")}</Text>
-            <Text>
-              <FormattedDateTime date={projectMeeting.confirmedDate} />
+            <Text fontWeight="bold" fontSize="lg" mb={2}>
+              {t("projectMeeting.detail.reviewer.scheduledTitle")}
             </Text>
-          </HStack>
-        )}
+            <Text fontSize="lg">{t("projectMeeting.detail.reviewer.scheduledDescription")}</Text>
+          </Box>
 
-        {projectMeeting.status === EProjectMeetingStatus.scheduled && (
-          <Button variant="secondary" size="sm" alignSelf="flex-start" onClick={() => setIsEditing(true)}>
-            {t("projectMeeting.detail.reviewer.changeMeetingDetails")}
-          </Button>
-        )}
-      </VStack>
+          {projectMeeting.contactMethod && (
+            <HStack spacing={4} align="flex-start">
+              <Text fontWeight="bold">{t("projectMeeting.detail.reviewer.contactMethodSummary")}</Text>
+              <Text>{t(`projectMeeting.contactMethods.${projectMeeting.contactMethod}`)}</Text>
+            </HStack>
+          )}
+
+          {projectMeeting.meetingUrl && (
+            <Box>
+              <HStack spacing={4} flexWrap="wrap">
+                <CopyLinkButton
+                  value={projectMeeting.meetingUrl}
+                  label={t("projectMeeting.detail.reviewer.copyMeetingLink")}
+                  variant="link"
+                  size="sm"
+                  px={0}
+                  rightIcon={undefined}
+                  textDecoration="underline"
+                />
+                <Link href={projectMeeting.meetingUrl} isExternal color="text.link" textDecoration="underline">
+                  {t("projectMeeting.detail.reviewer.joinMeeting")}
+                </Link>
+              </HStack>
+            </Box>
+          )}
+
+          {projectMeeting.confirmedDate && (
+            <HStack spacing={4} align="flex-start">
+              <Text fontWeight="bold">{t("projectMeeting.detail.reviewer.dateAndTime")}</Text>
+              <Text>
+                <FormattedDateTime date={projectMeeting.confirmedDate} />
+              </Text>
+            </HStack>
+          )}
+
+          {projectMeeting.status === EProjectMeetingStatus.scheduled && (
+            <Button variant="secondary" size="sm" alignSelf="flex-start" onClick={() => setIsEditing(true)}>
+              {t("projectMeeting.detail.reviewer.changeMeetingDetails")}
+            </Button>
+          )}
+        </VStack>
+      </Box>
+      <DownloadCalendarInviteButton projectMeeting={projectMeeting} mt={4} />
     </Box>
   )
 }

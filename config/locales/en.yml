@@ -386,6 +386,9 @@ en:
       invalid_transition:
         title: Error
         message: "Project meeting request status could not be updated"
+      calendar_unavailable:
+        title: Error
+        message: "A calendar invite is only available after a meeting time is confirmed"
     note:
       create_success:
         title: ""
