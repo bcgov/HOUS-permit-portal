@@ -1,4 +1,4 @@
-import { Box, Button, Heading, HStack, Text } from "@chakra-ui/react"
+import { Box, Button, Heading, HStack, Link, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -11,6 +11,7 @@ import {
   EMeetingRequestDocumentType,
   EProjectMeetingRequesterRelationship,
 } from "../../../../../types/enums"
+import { mailtoHref, telHref } from "../../../../../utils/utility-functions"
 import ProjectInfoRow from "../../../../shared/project/project-info-row"
 import { useProjectMeetingNavigation } from "../../use-project-meeting-navigation"
 import { activeDocumentsForType } from "../shared/document-utils"
@@ -121,10 +122,30 @@ export const ReviewSection = observer(({ meeting }: ReviewSectionProps) => {
         onNavigateToSection={navigateToSection}
       >
         <ProjectInfoRow label={t("projectMeeting.contactName")} value={meeting.contactName} stacked />
-        <ProjectInfoRow label={t("projectMeeting.contactEmail")} value={meeting.contactEmail} stacked />
+        <ProjectInfoRow
+          label={t("projectMeeting.contactEmail")}
+          value={
+            meeting.contactEmail ? (
+              <Link href={mailtoHref(meeting.contactEmail)} color="text.link">
+                {meeting.contactEmail}
+              </Link>
+            ) : (
+              t("ui.notProvided")
+            )
+          }
+          stacked
+        />
         <ProjectInfoRow
           label={t("projectMeeting.contactPhoneNumber")}
-          value={meeting.contactPhoneNumber || t("ui.notProvided")}
+          value={
+            meeting.contactPhoneNumber ? (
+              <Link href={telHref(meeting.contactPhoneNumber)} color="text.link">
+                {meeting.contactPhoneNumber}
+              </Link>
+            ) : (
+              t("ui.notProvided")
+            )
+          }
           stacked
         />
       </ReviewSummarySection>

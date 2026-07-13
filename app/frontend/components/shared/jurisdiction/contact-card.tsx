@@ -3,6 +3,7 @@ import { Envelope, Phone } from "@phosphor-icons/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { IContact } from "../../../types/types"
+import { mailtoHref, telHref } from "../../../utils/utility-functions"
 
 interface IContactCardProps extends GridItemProps {
   contact: IContact
@@ -36,7 +37,7 @@ export const ContactCard = ({ contact, ...rest }: IContactCardProps) => {
             <Heading as="h4" fontSize="md" mb="0">
               {t("contact.fields.phone")}
             </Heading>
-            <Link href={`tel:+${contact.phone}`} isExternal>
+            <Link href={telHref(contact.phone)} isExternal>
               {contact.phone}
             </Link>
           </Flex>
@@ -49,7 +50,7 @@ export const ContactCard = ({ contact, ...rest }: IContactCardProps) => {
             <Heading as="h4" fontSize="md" mb="0">
               {t("contact.fields.email")}
             </Heading>
-            <Link href={`mailto:${contact.email}`} isExternal>
+            <Link href={mailtoHref(contact.email)} isExternal>
               {contact.email}
             </Link>
           </Flex>

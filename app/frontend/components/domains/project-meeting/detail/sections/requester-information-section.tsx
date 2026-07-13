@@ -2,6 +2,7 @@ import { Link } from "@chakra-ui/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { IProjectMeeting } from "../../../../../models/project-meeting"
+import { mailtoHref, telHref } from "../../../../../utils/utility-functions"
 import { InfoRow } from "../../../../shared/base/info-row"
 import { RouterLink } from "../../../../shared/navigation/router-link"
 import { DetailSection } from "../detail-section"
@@ -44,7 +45,7 @@ export const RequesterInformationSection = ({ projectMeeting, editPath }: Reques
         label={t("projectMeeting.contactEmail")}
         value={
           projectMeeting.contactEmail ? (
-            <Link href={`mailto:${projectMeeting.contactEmail}`} color="text.link">
+            <Link href={mailtoHref(projectMeeting.contactEmail)} color="text.link">
               {projectMeeting.contactEmail}
             </Link>
           ) : (
@@ -56,7 +57,15 @@ export const RequesterInformationSection = ({ projectMeeting, editPath }: Reques
       />
       <InfoRow
         label={t("projectMeeting.detail.phoneNumber")}
-        value={projectMeeting.contactPhoneNumber || notProvided}
+        value={
+          projectMeeting.contactPhoneNumber ? (
+            <Link href={telHref(projectMeeting.contactPhoneNumber)} color="text.link">
+              {projectMeeting.contactPhoneNumber}
+            </Link>
+          ) : (
+            notProvided
+          )
+        }
         copyValue={projectMeeting.contactPhoneNumber || undefined}
         isCopyable={!!projectMeeting.contactPhoneNumber}
       />
