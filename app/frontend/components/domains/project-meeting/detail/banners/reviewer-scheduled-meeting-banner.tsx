@@ -1,5 +1,5 @@
 import { Box, Button } from "@chakra-ui/react"
-import React from "react"
+import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { IProjectMeeting } from "../../../../../models/project-meeting"
 import { EFlashMessageStatus, EProjectMeetingScheduleMode, EProjectMeetingStatus } from "../../../../../types/enums"
@@ -13,10 +13,16 @@ interface ReviewerScheduledMeetingBannerProps {
 
 export const ReviewerScheduledMeetingBanner = ({ projectMeeting }: ReviewerScheduledMeetingBannerProps) => {
   const { t } = useTranslation()
-  const [isEditing, setIsEditing] = React.useState(false)
+  const [isEditing, setIsEditing] = useState(false)
   const isCompleted = projectMeeting.status === EProjectMeetingStatus.completed
   const status = isCompleted ? EFlashMessageStatus.success : EFlashMessageStatus.info
   const detailsBorderColor = isCompleted ? "semantic.success" : "semantic.info"
+
+  useEffect(() => {
+    if (projectMeeting.status !== EProjectMeetingStatus.scheduled) {
+      setIsEditing(false)
+    }
+  }, [projectMeeting.status])
 
   if (isEditing) {
     return (
