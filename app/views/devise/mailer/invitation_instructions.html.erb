@@ -13,9 +13,7 @@
             <% newest_membership = @resource.jurisdiction_memberships.order(created_at: :desc).first %>
             for <strong><%= newest_membership.jurisdiction.name %></strong><% end %>.</p>
 
-          <%# Inviting a submitter's email creates a staff user alongside them; accepting promotes the submitter. %>
-          <% if @resource.jurisdiction_staff? &&
-               User.kept.submitter.where("LOWER(email) = ?", @resource.email.to_s.strip.downcase).where.not(id: @resource.id).exists? %>
+          <% if @resource.invitation_promotes_existing_submitter? %>
             <p><strong>Important:</strong> If you accept this invitation while signed in as a submitter, your account will become jurisdiction staff and you will lose access to any permit projects you currently own.</p>
           <% end %>
 
