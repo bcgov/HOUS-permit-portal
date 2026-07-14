@@ -17,33 +17,11 @@ class TemplateVersionBlueprint < Blueprinter::Base
     template_version.version_date_in_province_time
   end
 
-  field :has_unresolved_feedbacks do |template_version|
-    template_version.draft? ? template_version.has_unresolved_feedbacks? : false
+  field :summary do |template_version|
+    template_version.snapshot_summary
   end
 
-  field :feedbacks_count do |template_version|
-    if template_version.draft?
-      template_version.template_version_feedbacks.count
-    else
-      0
-    end
-  end
-
-  field :template_category_id do |template_version|
-    template_version.requirement_template&.template_category_id
-  end
-
-  field :template_sort_order do |template_version|
-    template_version.requirement_template&.sort_order
-  end
-
-  association :template_category, blueprint: TemplateCategoryBlueprint do |tv|
-    tv.requirement_template&.template_category
-  end
-
-  view :extended do
-    fields :denormalized_template_json, :form_json, :requirement_blocks_json
-
+  view :list do
     field :requires_project_meeting do |template_version, options|
       template_version.requires_project_meeting_for_jurisdiction?(
         options[:jurisdiction_id],
@@ -56,6 +34,14 @@ class TemplateVersionBlueprint < Blueprinter::Base
         options[:jurisdiction_id],
         options[:sandbox]
       )
+    end
+  end
+
+  view :extended do
+    include_view :list
+
+    field :outline do |template_version|
+      template_version.snapshot_outline(display: template_version.draft?)
     end
 
     field :latest_version_id do |template_version|
@@ -78,6 +64,14 @@ class TemplateVersionBlueprint < Blueprinter::Base
                 end
   end
 
+  view :form_preview do
+    include_view :list
+
+    field :form_json do |template_version|
+      template_version.snapshot_form_json(display: template_version.draft?)
+    end
+  end
+
   view :external_api do
     excludes :deprecation_reason,
              :created_at,
@@ -86,15 +80,11 @@ class TemplateVersionBlueprint < Blueprinter::Base
              :change_notes,
              :change_significance,
              :notification_scope,
-             :publicly_previewable
+             :publicly_previewable,
+             :summary
   end
 
-  # Minimal public-facing view used by the /standardization-preview landing page.
-  # Delegates a few descriptive fields from the owning RequirementTemplate so the
-  # preview list can render without additional lookups.
   view :standardization_preview do
-    field(:nickname) { |tv| tv.requirement_template&.nickname }
-    field(:description) { |tv| tv.requirement_template&.description }
     field(:is_available_for_adoption) do |tv|
       tv.requirement_template&.published_template_version.present?
     end

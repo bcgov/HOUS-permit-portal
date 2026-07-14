@@ -5,6 +5,7 @@ class RequirementBlockBlueprint < Blueprinter::Base
          :description,
          :display_name,
          :display_description,
+         :hide_in_early_access,
          :sign_off_role,
          :reviewer_role,
          :created_at,

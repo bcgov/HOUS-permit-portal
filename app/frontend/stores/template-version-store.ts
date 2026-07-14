@@ -64,9 +64,6 @@ export const TemplateVersionStoreModel = types
       if (response.ok) {
         const templateVersions = response.data.data
 
-        templateVersions.forEach((version) => {
-          version.isFullyLoaded = true
-        })
         self.mergeUpdateAll(templateVersions, "templateVersionMap")
         self.templateVersionsList = cast(templateVersions.map((templateVersion) => templateVersion.id))
       }
@@ -74,8 +71,14 @@ export const TemplateVersionStoreModel = types
       return response.ok
     }),
 
-    fetchTemplateVersion: flow(function* (id: string) {
-      const response = yield* toGenerator(self.environment.api.fetchTemplateVersion(id))
+    fetchTemplateVersion: flow(function* (id: string, projection: "summary" | "detail" | "form" = "detail") {
+      self.getTemplateVersionById(id)?.setIsFullyLoaded(false)
+      const request = {
+        summary: () => self.environment.api.fetchTemplateVersionSummary(id),
+        detail: () => self.environment.api.fetchTemplateVersion(id),
+        form: () => self.environment.api.fetchTemplateVersionFormPreview(id),
+      }[projection]()
+      const response = yield* toGenerator(request)
 
       if (response.ok) {
         const templateVersion = response.data.data

@@ -59,7 +59,7 @@ class IntegrationMappingService
 
     @mapping
       .template_version
-      .requirement_blocks_json
+      .snapshot_blocks
       .each do |requirement_block_id, requirement_block_blueprint|
       requirements = requirement_block_blueprint["requirements"]
       next if requirements.blank?

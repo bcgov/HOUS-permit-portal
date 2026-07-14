@@ -79,8 +79,12 @@ class ExternalPermitApplicationService
             # will be the same as the end of requirement form_json key
             # So, we get the requirement using the ending_key.
             common_ending_key = submitted_field_key.split("|RB").last
+            component =
+              permit_application.template_version.form_component_index[
+                req["id"]
+              ]
 
-            req.dig("form_json", "key").ends_with?(common_ending_key)
+            component&.dig("key")&.ends_with?(common_ending_key)
           end
 
         next unless requirement.present?
@@ -120,7 +124,7 @@ class ExternalPermitApplicationService
   end
 
   def get_requirement_block_json(requirement_block_id)
-    self.permit_application.template_version.requirement_blocks_json[
+    self.permit_application.template_version.snapshot_blocks[
       requirement_block_id
     ]
   end

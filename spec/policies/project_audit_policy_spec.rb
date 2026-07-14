@@ -175,7 +175,7 @@ RSpec.describe ProjectAuditPolicy do
             template_version:
               create(
                 :template_version,
-                requirement_blocks_json: {
+                snapshot_blocks: {
                   "block-1" => {
                     "name" => "Foundation"
                   }

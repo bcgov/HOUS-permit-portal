@@ -42,14 +42,7 @@ class TemplateVersioningService
 
     template_version =
       requirement_template.template_versions.build(
-        denormalized_template_json:
-          RequirementTemplateBlueprint.render_as_hash(
-            requirement_template,
-            view: :template_snapshot
-          ),
-        form_json: requirement_template.to_form_json,
-        requirement_blocks_json:
-          form_requirement_blocks_hash(requirement_template),
+        **snapshot_attributes(requirement_template),
         version_diff: diff_of_current_changes_and_last_version,
         version_date: version_date,
         status: "scheduled"
@@ -99,14 +92,7 @@ class TemplateVersioningService
 
     template_version =
       requirement_template.template_versions.build(
-        denormalized_template_json:
-          RequirementTemplateBlueprint.render_as_hash(
-            requirement_template,
-            view: :template_snapshot
-          ),
-        form_json: requirement_template.to_form_json,
-        requirement_blocks_json:
-          form_requirement_blocks_hash(requirement_template),
+        **snapshot_attributes(requirement_template),
         version_diff: diff_of_current_changes_and_last_version,
         version_date: version_date,
         status: "scheduled"
@@ -132,19 +118,11 @@ class TemplateVersioningService
   # ── Draft workflow methods ──────────────────────────────────────────────
 
   # Creates a new draft TemplateVersion for a RequirementTemplate.
-  # Snapshots the current template state (sections, blocks, form JSON)
-  # into the draft's JSON columns so edits are isolated from canonical records.
+  # Captures immutable canonical and compiled artifacts for early-access display.
   def self.create_draft!(requirement_template, assignee: nil)
     template_version =
       requirement_template.template_versions.build(
-        denormalized_template_json:
-          RequirementTemplateBlueprint.render_as_hash(
-            requirement_template,
-            view: :template_snapshot
-          ),
-        form_json: requirement_template.to_form_json,
-        requirement_blocks_json:
-          form_requirement_blocks_hash(requirement_template),
+        **snapshot_attributes(requirement_template),
         version_date: Date.current,
         status: "draft",
         assignee: assignee
@@ -156,61 +134,6 @@ class TemplateVersioningService
     end
 
     template_version
-  end
-
-  # Updates a specific block within the draft's requirement_blocks_json.
-  # This is copy-on-write: the canonical RequirementBlock record is NOT modified.
-  # block_data should be a hash matching the RequirementBlockBlueprint format.
-  def self.update_draft_block!(draft_version, block_id, block_data)
-    unless draft_version.draft?
-      raise TemplateVersionDraftError,
-            "Can only update blocks on an early access version"
-    end
-
-    blocks_json = draft_version.requirement_blocks_json.deep_dup
-    unless blocks_json.key?(block_id)
-      raise TemplateVersionDraftError,
-            "Block #{block_id} not found in this early access version"
-    end
-
-    blocks_json[block_id] = blocks_json[block_id].merge(block_data)
-    draft_version.update!(requirement_blocks_json: blocks_json)
-
-    # Also regenerate the form_json to reflect the block changes
-    regenerate_draft_form_json!(draft_version)
-
-    draft_version
-  end
-
-  # Refreshes the draft's denormalized snapshots from the current live template state.
-  # Useful when the template's sections have been reorganized but you want to
-  # keep any draft-specific block edits.
-  def self.refresh_draft_snapshot!(draft_version)
-    unless draft_version.draft?
-      raise TemplateVersionDraftError,
-            "Can only refresh an early access version"
-    end
-
-    requirement_template = draft_version.requirement_template
-    fresh_blocks_json = form_requirement_blocks_hash(requirement_template)
-
-    # Preserve any draft-specific block edits (copy-on-write overrides)
-    merged_blocks_json =
-      fresh_blocks_json.merge(
-        draft_version.requirement_blocks_json.slice(*fresh_blocks_json.keys)
-      )
-
-    draft_version.update!(
-      denormalized_template_json:
-        RequirementTemplateBlueprint.render_as_hash(
-          requirement_template,
-          view: :template_snapshot
-        ),
-      requirement_blocks_json: merged_blocks_json,
-      form_json: requirement_template.to_form_json
-    )
-
-    draft_version
   end
 
   # Promotes a copy of a draft to scheduled status with a future version_date.
@@ -268,11 +191,8 @@ class TemplateVersioningService
 
       promoted_version =
         requirement_template.template_versions.build(
-          denormalized_template_json:
-            draft_version.denormalized_template_json.deep_dup,
+          snapshot_json: draft_version.canonical_snapshot.deep_dup,
           form_json: draft_version.form_json.deep_dup,
-          requirement_blocks_json:
-            draft_version.requirement_blocks_json.deep_dup,
           status: "scheduled",
           version_date: version_date,
           change_notes: change_notes,
@@ -322,47 +242,6 @@ class TemplateVersioningService
     scope = scope.where.not(id: exclude_id) if exclude_id.present?
 
     scope.each { |tv| unschedule!(tv, current_user) }
-  end
-
-  # When a draft is published, optionally write block changes back to the
-  # canonical RequirementBlock records so other templates pick them up.
-  # block_ids_to_promote is an array of block IDs whose draft edits should
-  # be written back. If nil/empty, no canonical records are modified.
-  def self.promote_block_changes!(draft_version, block_ids_to_promote = [])
-    return if block_ids_to_promote.blank?
-    unless draft_version.draft? || draft_version.scheduled? ||
-             draft_version.published?
-      raise TemplateVersionDraftError,
-            "Can only promote block changes from a draft, scheduled, or published version"
-    end
-
-    blocks_json = draft_version.requirement_blocks_json
-
-    block_ids_to_promote.each do |block_id|
-      draft_block_data = blocks_json[block_id]
-      next if draft_block_data.blank?
-
-      canonical_block = RequirementBlock.find_by(id: block_id)
-      next if canonical_block.blank?
-
-      # Update requirements on the canonical block from the draft's snapshot
-      draft_requirements = draft_block_data["requirements"]
-      next if draft_requirements.blank?
-
-      draft_requirements.each do |draft_req|
-        requirement = canonical_block.requirements.find_by(id: draft_req["id"])
-        next if requirement.blank?
-
-        # Update mutable fields from the draft snapshot
-        requirement.update(
-          label: draft_req["label"],
-          input_type: draft_req["input_type"],
-          hint: draft_req["hint"],
-          required: draft_req["required"],
-          elective: draft_req["elective"]
-        )
-      end
-    end
   end
 
   # Discards a draft version (sets to deprecated).
@@ -461,23 +340,30 @@ class TemplateVersioningService
     permit_application.update(template_version: new_template_version)
   end
 
-  def self.add_current_section_labels(form_json, requirement_blueprints)
-    find_section_label =
-      lambda do |id|
-        form_json["components"].each do |section|
-          section_label = section["label"]
-          section["components"].each do |block|
-            block["components"].each do |component|
-              return section_label if component["id"] == id
-            end
+  def self.add_current_section_labels(template_version, requirement_blueprints)
+    return requirement_blueprints if template_version.blank?
+
+    section_labels = {}
+    blocks = template_version.snapshot_blocks
+
+    template_version
+      .canonical_snapshot
+      .fetch("sections")
+      .each do |section|
+        section
+          .fetch("blocks")
+          .each do |placement|
+            block = blocks[placement.fetch("block_id")]
+            block
+              &.fetch("requirements", [])
+              &.each do |requirement|
+                section_labels[requirement.fetch("id")] ||= section["name"]
+              end
           end
-        end
-        nil
       end
 
     requirement_blueprints.each do |blueprint|
-      section_label = find_section_label.call(blueprint["id"])
-      blueprint["diff_section_label"] = section_label
+      blueprint["diff_section_label"] = section_labels[blueprint["id"]]
     end
 
     requirement_blueprints
@@ -486,27 +372,17 @@ class TemplateVersioningService
   def self.produce_diff_hash(before_version, template_version)
     before_version ||= template_version.previous_version
 
-    before_json = before_version&.requirement_blocks_json
-    after_json = template_version.requirement_blocks_json
+    before_json = before_version&.snapshot_blocks || {}
+    after_json = template_version.snapshot_blocks
 
     before_requirements =
-      before_json&.values&.flat_map { |block| block["requirements"] }
+      before_json.values.flat_map { |block| block["requirements"] }
 
     after_requirements =
-      after_json&.values&.flat_map { |block| block["requirements"] }
+      after_json.values.flat_map { |block| block["requirements"] }
 
-    before_requirements_components =
-      before_json&.values&.flat_map do |block|
-        block["form_json"]["components"]
-      end || []
-
-    after_requirements_components =
-      after_json&.values&.flat_map do |block|
-        block["form_json"]["components"]
-      end || []
-
-    before_ids = before_requirements&.map { |req| req["id"] } || []
-    after_ids = after_requirements&.map { |req| req["id"] } || []
+    before_ids = before_requirements.map { |req| req["id"] }
+    after_ids = after_requirements.map { |req| req["id"] }
 
     added_ids = after_ids - before_ids
     removed_ids = before_ids - after_ids
@@ -525,40 +401,37 @@ class TemplateVersioningService
       end
 
     added_requirement_blueprints =
-      after_requirements&.select { |req| added_ids.include?(req["id"]) } || []
+      after_requirements.select { |req| added_ids.include?(req["id"]) }
     removed_requirement_blueprints =
-      before_requirements&.select { |req| removed_ids.include?(req["id"]) } ||
-        []
+      before_requirements.select { |req| removed_ids.include?(req["id"]) }
     changed_requirement_blueprints =
-      after_requirements&.select { |req| changed_ids.include?(req["id"]) } || []
+      after_requirements.select { |req| changed_ids.include?(req["id"]) }
 
-    # Workaround: need to add the fully formed form_json into the requirement blueprint
     (
-      changed_requirement_blueprints + added_requirement_blueprints +
-        removed_requirement_blueprints
-    ).each do |blueprint|
-      matching_component =
-        (
-          after_requirements_components + before_requirements_components
-        ).find { |component| component["id"] == blueprint["id"] }
-
-      blueprint["form_json"] = matching_component if matching_component
+      changed_requirement_blueprints + added_requirement_blueprints
+    ).each do |requirement|
+      component = template_version.form_component_index[requirement["id"]]
+      requirement["form_json"] = component.deep_dup if component
+    end
+    removed_requirement_blueprints.each do |requirement|
+      component = before_version&.form_component_index&.[](requirement["id"])
+      requirement["form_json"] = component.deep_dup if component
     end
 
     {
       added:
         add_current_section_labels(
-          template_version.form_json,
+          template_version,
           added_requirement_blueprints
         ),
       changed:
         add_current_section_labels(
-          template_version.form_json,
+          template_version,
           changed_requirement_blueprints
         ),
       removed:
         add_current_section_labels(
-          before_version.form_json,
+          before_version,
           removed_requirement_blueprints
         )
     }
@@ -655,11 +528,10 @@ class TemplateVersioningService
     return if modified_copied_customizations["requirement_block_changes"].blank?
 
     # Remove any requirement_block_changes if the requirement_block is not present in the new template version
+    new_blocks = new_template_version.snapshot_blocks
     modified_copied_customizations[
       "requirement_block_changes"
-    ].delete_if do |key, _value|
-      !new_template_version.requirement_blocks_json.key?(key)
-    end
+    ].delete_if { |key, _value| !new_blocks.key?(key) }
 
     # Remove any enabled_elective_field_ids and reasons that are not present in the new template version's
     # requirement_blocks
@@ -671,7 +543,7 @@ class TemplateVersioningService
       end
 
       available_elective_field_ids =
-        new_template_version.requirement_blocks_json[key]["requirements"]
+        new_blocks[key]["requirements"]
           .select { |r| r["elective"] }
           .map { |r| r["id"] }
 
@@ -779,23 +651,8 @@ class TemplateVersioningService
     )
   end
 
-  def self.form_requirement_blocks_hash(requirement_template)
-    requirement_blocks_json = {}
-
-    requirement_template
-      .requirement_template_sections
-      .each do |template_section|
-      template_section.requirement_blocks.each do |requirement_block|
-        requirement_blocks_json[
-          requirement_block.id
-        ] = RequirementBlockBlueprint.render_as_hash(
-          requirement_block,
-          parent_key: template_section.key
-        )
-      end
-    end
-
-    requirement_blocks_json
+  def self.snapshot_attributes(requirement_template)
+    TemplateVersionSnapshot::Builder.call(requirement_template)
   end
 
   def self.is_valid_schedule_version_date?(requirement_template, version_date)
@@ -828,22 +685,5 @@ class TemplateVersioningService
   rescue StandardError => e
     Rails.logger.error("Failed to compute version diff: #{e.message}")
     {}
-  end
-
-  # Regenerates the form_json on a draft version from its requirement_blocks_json.
-  # Called after draft block edits so the form preview stays in sync.
-  def self.regenerate_draft_form_json!(draft_version)
-    requirement_template = draft_version.requirement_template
-    # Re-generate form_json from the live template structure.
-    # Block-level form_json within requirement_blocks_json is already updated
-    # by update_draft_block!, so the form rendering will pick up those changes.
-    draft_version.update!(
-      form_json: requirement_template.to_form_json,
-      denormalized_template_json:
-        RequirementTemplateBlueprint.render_as_hash(
-          requirement_template,
-          view: :template_snapshot
-        )
-    )
   end
 end

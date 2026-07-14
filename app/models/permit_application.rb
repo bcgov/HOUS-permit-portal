@@ -36,11 +36,6 @@ class PermitApplication < ApplicationRecord
 
   has_one :requirement_template, through: :template_version
 
-  delegate :tag_list,
-           to: :requirement_template,
-           prefix: :template,
-           allow_nil: true
-
   attr_accessor :front_end_form_update
 
   has_many :submission_versions, dependent: :destroy
@@ -209,15 +204,6 @@ class PermitApplication < ApplicationRecord
     result.form_json
   end
 
-  def force_update_published_template_version
-    return unless Rails.env.development?
-
-    current_published_template_version.update(
-      form_json:
-        current_published_template_version.requirement_template.to_form_json
-    )
-  end
-
   def update_with_submission_data_merge(
     permit_application_params:,
     current_user: nil
@@ -231,7 +217,11 @@ class PermitApplication < ApplicationRecord
   end
 
   def template_nickname
-    template_version.requirement_template.nickname
+    template_version.snapshot_summary["nickname"]
+  end
+
+  def template_tag_list
+    template_version.snapshot_summary.fetch("tags", [])
   end
 
   def requires_project_meeting?
@@ -605,7 +595,7 @@ class PermitApplication < ApplicationRecord
   end
 
   def energy_step_code_requirement_block_id
-    blocks = template_version&.requirement_blocks_json
+    blocks = template_version&.snapshot_blocks
     return nil unless blocks
 
     blocks.each do |block_id, block_json|
@@ -644,7 +634,7 @@ class PermitApplication < ApplicationRecord
 
     aggregates =
       PermitApplication
-        .joins(template_version: :requirement_template)
+        .joins(:template_version)
         .joins(:submitter)
         .joins(
           "LEFT OUTER JOIN permit_projects ON permit_projects.id = permit_applications.permit_project_id"
@@ -661,15 +651,17 @@ class PermitApplication < ApplicationRecord
         .where(users: { role: "submitter" })
         .group(
           "jurisdictions.id",
-          "requirement_templates.id",
           "jurisdictions.name",
-          "requirement_templates.id"
+          "template_versions.requirement_template_id",
+          "template_versions.snapshot_json #>> '{template,nickname}'",
+          "template_versions.snapshot_json #> '{template,tags}'"
         )
         .select(
           "jurisdictions.id AS jurisdiction_id",
-          "requirement_templates.id AS requirement_template_id",
+          "template_versions.requirement_template_id AS requirement_template_id",
           "jurisdictions.name AS jurisdiction_name",
-          "requirement_templates.id AS requirement_template_id",
+          "template_versions.snapshot_json #>> '{template,nickname}' AS template_nickname",
+          "template_versions.snapshot_json #> '{template,tags}' AS template_tags",
           "COUNT(CASE WHEN permit_applications.status = 0 THEN 1 END) AS draft_count",
           "COUNT(CASE WHEN permit_applications.status != 0 THEN 1 END) AS submitted_count",
           "AVG(
@@ -686,16 +678,14 @@ class PermitApplication < ApplicationRecord
               ) AS average_time_spent_before_latest_submit"
         )
 
-    requirement_templates = RequirementTemplate.all.index_by(&:id)
-
     aggregates.map do |aggregate|
-      requirement_template =
-        requirement_templates[aggregate.requirement_template_id]
+      template_tags = aggregate.template_tags
+      template_tags = JSON.parse(template_tags) if template_tags.is_a?(String)
       {
         jurisdiction_name:
           aggregate.jurisdiction_name || "Unknown Jurisdiction",
-        template_nickname: requirement_template&.nickname,
-        tags: requirement_template&.tag_list || [],
+        template_nickname: aggregate.template_nickname,
+        tags: template_tags || [],
         draft_applications: aggregate.draft_count.to_i,
         submitted_applications: aggregate.submitted_count.to_i,
         average_time_spent_before_first_submit:
@@ -754,7 +744,7 @@ class PermitApplication < ApplicationRecord
   end
 
   def assign_default_nickname
-    self.nickname = requirement_template.nickname if nickname.blank?
+    self.nickname = template_nickname if nickname.blank?
   end
 
   def assign_unique_number

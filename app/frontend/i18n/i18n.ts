@@ -2346,12 +2346,15 @@ Thank you,
             requirementSku: "Requirement SKU",
             requirementDocuments: "Related documents",
             architecturalDrawing: "Design drawing package",
+            hideInEarlyAccess: "Hide in early access",
           },
           configurationsColumn: "Configurations",
           fieldDescriptions: {
             description: "Provide some context for admins and managers for this fieldset.",
             associations: "Assign a tag to help organize and find this requirement block easier.",
             requirementSku: "Generated unique identifier",
+            hideInEarlyAccess:
+              "When checked, this block is hidden from early access (draft) template version displays.",
           },
           requirementTypeLabels: {
             text: "Short text",

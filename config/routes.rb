@@ -91,11 +91,9 @@ Rails.application.routes.draw do
            to: "requirement_templates#update_jurisdiction_availabilities"
     end
 
-    # Draft version-specific endpoints (feedback, previews, block editing)
+    # Draft version-specific endpoints (feedback and previews)
     resources :template_versions, only: [] do
       member do
-        patch "update_draft_block", to: "template_versions#update_draft_block"
-        post "refresh_draft", to: "template_versions#refresh_draft"
         delete "discard_draft", to: "template_versions#discard_draft"
         post "promote_draft", to: "template_versions#promote_draft"
         post "invite_draft_previewers",
@@ -127,6 +125,8 @@ Rails.application.routes.draw do
       get "publicly_previewable",
           to: "template_versions#publicly_previewable",
           on: :collection
+      get "summary", to: "template_versions#summary", on: :member
+      get "form_preview", to: "template_versions#form_preview", on: :member
       get "compare_requirements",
           to: "template_versions#compare_requirements",
           on: :member

@@ -240,6 +240,7 @@ export interface IDenormalizedRequirementBlock {
   description?: string
   displayName: string
   displayDescription?: string
+  hideInEarlyAccess?: boolean
   requirements: IDenormalizedRequirement[]
   requirementDocuments: IRequirementDocument[]
 }
@@ -268,6 +269,21 @@ export interface IDenormalizedTemplate {
   } | null
   sortOrder?: number
   requirementTemplateSections: IDenormalizedRequirementTemplateSection[]
+}
+
+export interface ITemplateVersionSummary {
+  id: string
+  nickname: string
+  description?: string
+  tags: string[]
+  availableGlobally?: boolean
+  templateCategoryId?: string | null
+  templateCategory?: {
+    id: string
+    label: string
+    sortOrder: number
+  } | null
+  sortOrder?: number
 }
 
 export interface ICompareRequirementsBoxData {

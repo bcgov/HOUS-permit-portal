@@ -4,7 +4,13 @@ import { useLocation, useParams } from "react-router-dom"
 import { useMst } from "../../setup/root"
 import { isUUID } from "../../utils/utility-functions"
 
-export const useTemplateVersion = ({ customErrorMessage }: { customErrorMessage?: string } = {}) => {
+export const useTemplateVersion = ({
+  customErrorMessage,
+  projection = "detail",
+}: {
+  customErrorMessage?: string
+  projection?: "summary" | "detail" | "form"
+} = {}) => {
   const { templateVersionId } = useParams()
   const { pathname } = useLocation()
   const { templateVersionStore, sandboxStore } = useMst()
@@ -22,7 +28,7 @@ export const useTemplateVersion = ({ customErrorMessage }: { customErrorMessage?
 
     ;(async () => {
       try {
-        const isSuccess = await templateVersionStore.fetchTemplateVersion(templateVersionId)
+        const isSuccess = await templateVersionStore.fetchTemplateVersion(templateVersionId, projection)
         setError(null)
 
         !isSuccess && setError(new Error(customErrorMessage ?? t("errors.fetchTemplateVersion")))
@@ -30,7 +36,7 @@ export const useTemplateVersion = ({ customErrorMessage }: { customErrorMessage?
         setError(e instanceof Error ? e : new Error(customErrorMessage ?? t("errors.fetchTemplateVersion")))
       }
     })()
-  }, [templateVersionId, pathname, currentSandbox?.id])
+  }, [templateVersionId, pathname, currentSandbox?.id, projection])
 
   return { templateVersion, error }
 }

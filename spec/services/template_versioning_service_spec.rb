@@ -102,36 +102,35 @@ RSpec.describe TemplateVersioningService, type: :service, search: true do
         TemplateVersioningService.schedule!(requirement_template, version_date)
       end
 
-      it "saves the current requirement template state to denormalized_template_json" do
-        expected_denormalized_template_json =
-          RequirementTemplateBlueprint.render_as_json(
-            requirement_template,
-            view: :template_snapshot
-          )
-
-        expect(template_version.denormalized_template_json).to eq(
-          expected_denormalized_template_json
+      it "saves a canonical snapshot of the current template" do
+        expect(template_version.snapshot_json["schema_version"]).to eq(1)
+        expect(template_version.snapshot_json.dig("template", "id")).to eq(
+          requirement_template.id
+        )
+        expect(template_version.snapshot_json.fetch("sections").size).to eq(
+          requirement_template.requirement_template_sections.size
         )
       end
 
-      it "saves the current requirement template form_json to denormalized_template_json" do
+      it "saves the compiled form artifact" do
         expected_form_json = requirement_template.to_form_json.as_json
 
         expect(template_version.form_json).to eq(expected_form_json)
       end
 
-      it "saves the current requirement_blocks to requirement_blocks_json" do
-        requirement_blocks_json = template_version.requirement_blocks_json
+      it "saves semantic requirement blocks without generated form fragments" do
+        snapshot_blocks = template_version.snapshot_blocks
 
         requirement_template.requirement_template_sections.each do |section|
           section.template_section_blocks.each do |section_block|
-            expect(
-              requirement_blocks_json[section_block.requirement_block.id]
-            ).to eq(
-              RequirementBlockBlueprint.render_as_json(
-                section_block.requirement_block,
-                parent_key: section.key
-              )
+            snapshot_block =
+              snapshot_blocks.fetch(section_block.requirement_block.id)
+            expect(snapshot_block["name"]).to eq(
+              section_block.requirement_block.name
+            )
+            expect(snapshot_block).not_to have_key("form_json")
+            expect(snapshot_block.fetch("requirements")).to all(
+              satisfy { |requirement| requirement.exclude?("form_json") }
             )
           end
         end
@@ -332,13 +331,8 @@ RSpec.describe TemplateVersioningService, type: :service, search: true do
             current_user: super_admin
           )
 
-        expect(promoted.denormalized_template_json).to eq(
-          draft_version.denormalized_template_json
-        )
+        expect(promoted.snapshot_json).to eq(draft_version.snapshot_json)
         expect(promoted.form_json).to eq(draft_version.form_json)
-        expect(promoted.requirement_blocks_json).to eq(
-          draft_version.requirement_blocks_json
-        )
       end
 
       it "unschedules sibling scheduled versions on or before the incoming date" do

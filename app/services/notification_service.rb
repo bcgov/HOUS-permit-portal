@@ -249,7 +249,7 @@ class NotificationService
       "id" => SecureRandom.uuid,
       "action_type" => "template_version_scheduled",
       "action_text" =>
-        "A new version of #{template_version.requirement_template.nickname} is scheduled for #{template_version.version_date}.",
+        "A new version of #{template_version.snapshot_summary["nickname"]} is scheduled for #{template_version.version_date}.",
       "object_data" => {
         "template_version_id" => template_version.id,
         "requirement_template_id" => template_version.requirement_template_id,

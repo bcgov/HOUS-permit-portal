@@ -21,6 +21,7 @@ export const RequirementBlockModel = types
     associations: types.array(types.string),
     description: types.maybeNull(types.string),
     displayDescription: types.maybeNull(types.string),
+    hideInEarlyAccess: types.optional(types.boolean, false),
     sku: types.string,
     createdAt: types.Date,
     updatedAt: types.Date,

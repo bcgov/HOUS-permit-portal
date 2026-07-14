@@ -42,6 +42,7 @@ export const JurisdictionDigitalPermitSettingsScreen = observer(function Jurisdi
   const jurisdiction = currentUser?.jurisdiction
   const { templateVersion, error: templateVersionError } = useTemplateVersion({
     customErrorMessage: t("errors.fetchBuildingPermit"),
+    projection: "summary",
   })
   const { jurisdictionTemplateVersionCustomization, error: customizationError } =
     useJurisdictionTemplateVersionCustomization({
@@ -69,7 +70,7 @@ export const JurisdictionDigitalPermitSettingsScreen = observer(function Jurisdi
     return <ErrorScreen error={templateVersionError || customizationError} />
   if (!templateVersion || !jurisdictionTemplateVersionCustomization) return <LoadingScreen />
 
-  const denormalizedTemplate = templateVersion.denormalizedTemplateJson
+  const templateSummary = templateVersion.summary
 
   const saveSettings = async (patch: Partial<IJurisdictionDigitalPermitSettingsForm>) => {
     const data = { ...getValues(), ...patch }
@@ -104,7 +105,7 @@ export const JurisdictionDigitalPermitSettingsScreen = observer(function Jurisdi
             {t("ui.back")}
           </RouterLinkButton>
           <Heading as="h1" size="2xl" mb={2}>
-            {denormalizedTemplate?.nickname || templateVersion.label}
+            {templateSummary?.nickname || templateVersion.label}
           </Heading>
           <Text>
             {t("digitalBuildingPermits.settings.description")}{" "}

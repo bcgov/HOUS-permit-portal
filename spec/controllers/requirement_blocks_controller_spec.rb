@@ -121,6 +121,22 @@ RSpec.describe Api::RequirementBlocksController,
           "Successfully created requirement block!"
         )
       end
+
+      it "persists hide_in_early_access when provided" do
+        post :create,
+             params: {
+               requirement_block:
+                 valid_attributes.merge(hide_in_early_access: true)
+             }
+
+        expect(response).to have_http_status(:success)
+        expect(json_response["data"]["hide_in_early_access"]).to be(true)
+        expect(
+          RequirementBlock.find(
+            json_response["data"]["id"]
+          ).hide_in_early_access
+        ).to be(true)
+      end
     end
 
     context "with invalid parameters" do
@@ -172,6 +188,20 @@ RSpec.describe Api::RequirementBlocksController,
         expect(response).to have_http_status(:success)
         expect(json_response["data"]["name"]).to eq("Updated Name")
         expect(json_response["meta"]["message"]).to be_nil
+      end
+
+      it "persists hide_in_early_access" do
+        patch :update,
+              params: {
+                id: existing_block.id,
+                requirement_block: {
+                  hide_in_early_access: true
+                }
+              }
+
+        expect(response).to have_http_status(:success)
+        expect(existing_block.reload.hide_in_early_access).to be(true)
+        expect(json_response["data"]["hide_in_early_access"]).to be(true)
       end
     end
 

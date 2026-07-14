@@ -62,7 +62,7 @@ RSpec.describe TemplateReportingService do
       ).and_return(
         "section,tip,question,code,type,optional,elective,enabled,reason"
       )
-      allow(template_version).to receive(:requirement_blocks_json).and_return(
+      allow(template_version).to receive(:snapshot_blocks).and_return(
         {
           "b1" => {
             "name" => "Block 1",

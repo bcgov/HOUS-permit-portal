@@ -19,7 +19,7 @@ class PermitBlockStatus < ApplicationRecord
   attr_accessor :set_by_user
 
   def requirement_block_name
-    permit_application.template_version.requirement_blocks_json.dig(
+    permit_application.template_version.snapshot_blocks.dig(
       requirement_block_id,
       "name"
     )
@@ -81,7 +81,7 @@ class PermitBlockStatus < ApplicationRecord
 
   def block_exists?
     # This can be nil if a new template version was published and the requirement block was deleted
-    permit_application.template_version.requirement_blocks_json&.key?(
+    permit_application.template_version.snapshot_blocks.key?(
       requirement_block_id
     )
   end

@@ -18,9 +18,15 @@ class IntegrationMappingBlueprint < Blueprinter::Base
         options[:sandbox]
       ).to_json
     end
+
+    field :blocks do |integration_mapping|
+      integration_mapping.template_version.snapshot_blocks
+    end
   end
 
   view :external_api do
+    excludes :blocks
+
     field :elective_filtered_requirements_mapping, name: :requirements_mapping
 
     association :template_version,

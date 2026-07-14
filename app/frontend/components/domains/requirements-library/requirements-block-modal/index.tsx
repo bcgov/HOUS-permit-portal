@@ -80,6 +80,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
           description: requirementBlock.description,
           displayName: requirementBlock.displayName,
           displayDescription: requirementBlock.displayDescription,
+          hideInEarlyAccess: (requirementBlock as IRequirementBlock).hideInEarlyAccess ?? false,
           sku: (requirementBlock as IRequirementBlock).sku,
           associationList: (requirementBlock as IRequirementBlock).associations,
           requirementsAttributes: (requirementBlock as IRequirementBlock).requirementFormDefaults,
@@ -89,6 +90,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
           associationList: [],
           requirementsAttributes: [],
           requirementDocumentsAttributes: [],
+          hideInEarlyAccess: false,
         }
   }
   const formProps = useForm<IRequirementBlockForm>({

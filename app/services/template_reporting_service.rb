@@ -72,7 +72,7 @@ class TemplateReportingService
     CSV.generate(headers: true) do |csv|
       csv << I18n.t("export.template_version_csv_headers").split(",")
       template_version
-        .requirement_blocks_json
+        .snapshot_blocks
         .each_pair do |block_id, requirement_block|
         tip = customizations&.dig("requirement_block_changes", block_id, "tip")
         csv << [requirement_block["name"], tip, nil, nil, nil, nil, nil, nil]

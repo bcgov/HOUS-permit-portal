@@ -53,7 +53,9 @@ module Infrastructure
       manifest = {
         exported_at: Time.current.iso8601,
         environment: Rails.env,
-        version: "1.0"
+        version: "2.0",
+        template_snapshot_schema_version:
+          TemplateVersionSnapshot::Builder::SCHEMA_VERSION
       }
       zio.write(manifest.to_json)
     end

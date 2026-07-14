@@ -8,15 +8,15 @@ RSpec.describe PermitApplication::FormJsonService do
 
   def build_service(
     form_json:,
-    requirement_blocks_json:,
+    snapshot_blocks:,
     energy_required: false,
     form_customizations: nil,
     current_user: nil,
     permissions: nil
   )
     allow(template_version).to receive(:form_json).and_return(form_json)
-    allow(template_version).to receive(:requirement_blocks_json).and_return(
-      requirement_blocks_json
+    allow(template_version).to receive(:snapshot_blocks).and_return(
+      snapshot_blocks
     )
     allow(permit_application).to receive(
       :energy_step_code_required?
@@ -43,7 +43,7 @@ RSpec.describe PermitApplication::FormJsonService do
       ]
     }
 
-    requirement_blocks_json = {
+    snapshot_blocks = {
       "rb1" => {
         "requirements" => [{ "id" => "e1", "elective" => true }],
         "sku" => "RB1"
@@ -68,7 +68,7 @@ RSpec.describe PermitApplication::FormJsonService do
     service =
       build_service(
         form_json: form_json,
-        requirement_blocks_json: requirement_blocks_json,
+        snapshot_blocks: snapshot_blocks,
         form_customizations: form_customizations
       )
 
@@ -85,7 +85,7 @@ RSpec.describe PermitApplication::FormJsonService do
       ]
     }
 
-    requirement_blocks_json = {
+    snapshot_blocks = {
       "rb1" => {
         "requirements" => [{ "id" => "r1", "elective" => false }]
       },
@@ -98,7 +98,7 @@ RSpec.describe PermitApplication::FormJsonService do
     service =
       build_service(
         form_json: form_json,
-        requirement_blocks_json: requirement_blocks_json,
+        snapshot_blocks: snapshot_blocks,
         current_user: user,
         permissions: ["rb1"]
       )
@@ -120,12 +120,12 @@ RSpec.describe PermitApplication::FormJsonService do
       ]
     }
 
-    requirement_blocks_json = {}
+    snapshot_blocks = {}
 
     service =
       build_service(
         form_json: form_json,
-        requirement_blocks_json: requirement_blocks_json,
+        snapshot_blocks: snapshot_blocks,
         energy_required: true
       )
 

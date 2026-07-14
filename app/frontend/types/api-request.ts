@@ -67,6 +67,7 @@ export interface IRequirementBlockParams {
   displayName: string
   displayDescription: string
   description?: string
+  hideInEarlyAccess?: boolean
   associationList?: string[]
   requirementsAttributes: IRequirementAttributes[]
   replaceBlockId?: string

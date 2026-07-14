@@ -19,7 +19,6 @@ import React, { useEffect, useState } from "react"
 import { useController, useForm } from "react-hook-form"
 import { Trans, useTranslation } from "react-i18next"
 import { IRequirementBlockMapping } from "../../../../../models/requirement-block-mapping"
-import { ITemplateVersion } from "../../../../../models/template-version"
 import { IRequirementMap, ISimplifiedRequirementsMap } from "../../../../../types/types"
 import { EditableInputWithControls } from "../../../../shared/editable-input-with-controls"
 import { SearchGridItem } from "../../../../shared/grid/search-grid-item"
@@ -28,7 +27,6 @@ import { RequirementFieldDisplay } from "../../../requirements-library/requireme
 
 interface IProps {
   requirementBlockMapping: IRequirementBlockMapping
-  templateVersion: ITemplateVersion
   onSaveLocalMapping: (simplifiedRequirementsMapping: ISimplifiedRequirementsMap) => Promise<void | boolean>
 }
 
@@ -44,14 +42,10 @@ interface IMappingForm {
   localSystemMapping?: string
 }
 
-export const GridAccordion = observer(function GridAccordion({
-  requirementBlockMapping,
-  templateVersion,
-  onSaveLocalMapping,
-}: IProps) {
+export const GridAccordion = observer(function GridAccordion({ requirementBlockMapping, onSaveLocalMapping }: IProps) {
   const { t } = useTranslation()
   const [expandedIndex, setExpandedIndex] = useState(0)
-  const requirementBlockJson = templateVersion.getRequirementBlockJsonById(requirementBlockMapping.id)
+  const requirementBlockJson = requirementBlockMapping.integrationMapping.blocks[requirementBlockMapping.id]
   const isExpanded = expandedIndex === 0
 
   useEffect(() => {

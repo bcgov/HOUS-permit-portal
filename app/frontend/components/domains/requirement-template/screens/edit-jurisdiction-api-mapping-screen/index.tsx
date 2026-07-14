@@ -49,6 +49,7 @@ export const EditJurisdictionApiMappingScreen = observer(function EditJurisdicti
   const { currentUser } = userStore
   const { templateVersion, error: templateVersionError } = useTemplateVersion({
     customErrorMessage: t("errors.fetchBuildingPermit"),
+    projection: "summary",
   })
   const { integrationMapping, error: integrationMapError } = useIntegrationMapping({
     templateVersion: templateVersion,
@@ -97,7 +98,6 @@ export const EditJurisdictionApiMappingScreen = observer(function EditJurisdicti
                 <GridAccordion
                   key={requirementBlockMapping.id}
                   requirementBlockMapping={requirementBlockMapping}
-                  templateVersion={templateVersion}
                   onSaveLocalMapping={integrationMapping.updateRequirementsMapping}
                 />
               )

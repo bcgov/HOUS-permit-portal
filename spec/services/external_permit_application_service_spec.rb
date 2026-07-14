@@ -47,7 +47,7 @@ RSpec.describe ExternalPermitApplicationService do
       end
 
       before do
-        allow(template_version).to receive(:requirement_blocks_json).and_return(
+        allow(template_version).to receive(:snapshot_blocks).and_return(
           {
             "block-1" => {
               "id" => "block-1",
@@ -59,30 +59,34 @@ RSpec.describe ExternalPermitApplicationService do
                   "id" => "r1",
                   "label" => "Field 1",
                   "requirement_code" => "code1",
-                  "input_type" => "text",
-                  "form_json" => {
-                    "key" => "whatever|RBblock-1|field1"
-                  }
+                  "input_type" => "text"
                 },
                 {
                   "id" => "r2",
                   "label" => "Contacts",
                   "requirement_code" => "contacts",
-                  "input_type" => "multi_contact",
-                  "form_json" => {
-                    "key" => "whatever|RBblock-1|multi_contact"
-                  }
+                  "input_type" => "multi_contact"
                 },
                 {
                   "id" => "r3",
                   "label" => "General contact",
                   "requirement_code" => "gc",
-                  "input_type" => "general_contact",
-                  "form_json" => {
-                    "key" => "whatever|RBblock-1|general_contact"
-                  }
+                  "input_type" => "general_contact"
                 }
               ]
+            }
+          }
+        )
+        allow(template_version).to receive(:form_component_index).and_return(
+          {
+            "r1" => {
+              "key" => "whatever|RBblock-1|field1"
+            },
+            "r2" => {
+              "key" => "whatever|RBblock-1|multi_contact"
+            },
+            "r3" => {
+              "key" => "whatever|RBblock-1|general_contact"
             }
           }
         )
@@ -105,7 +109,7 @@ RSpec.describe ExternalPermitApplicationService do
       end
 
       it "formats file requirements into url objects using supporting documents" do
-        allow(template_version).to receive(:requirement_blocks_json).and_return(
+        allow(template_version).to receive(:snapshot_blocks).and_return(
           {
             "block-1" => {
               "id" => "block-1",
@@ -117,13 +121,15 @@ RSpec.describe ExternalPermitApplicationService do
                   "id" => "r1",
                   "label" => "File",
                   "requirement_code" => "file1",
-                  "input_type" => "file",
-                  "form_json" => {
-                    "key" => "whatever|RBblock-1|file_field"
-                  }
+                  "input_type" => "file"
                 }
               ]
             }
+          }
+        )
+        allow(template_version).to receive(:form_component_index).and_return(
+          "r1" => {
+            "key" => "whatever|RBblock-1|file_field"
           }
         )
 

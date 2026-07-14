@@ -13,7 +13,7 @@ import { ChecklistSideBar } from "../../permit-application/checklist-sidebar"
 
 export const TemplateVersionPreviewScreen = observer(() => {
   const { permitApplicationStore } = useMst()
-  const { templateVersion, error } = useTemplateVersion()
+  const { templateVersion, error } = useTemplateVersion({ projection: "form" })
 
   const permitHeaderRef = useRef<HTMLDivElement>(null)
   const formRef = useRef(null)
@@ -45,7 +45,7 @@ export const TemplateVersionPreviewScreen = observer(() => {
             <PermitApplicationStatusTag status={ephemeralPermitApplication.status} />
 
             <Flex direction="column" w="full">
-              <Heading fontSize="xl">{templateVersion.nickname ?? templateVersion.label}</Heading>
+              <Heading fontSize="xl">{templateVersion.summary?.nickname ?? templateVersion.label}</Heading>
               <Text noOfLines={1}>{templateVersion.label}</Text>
             </Flex>
           </HStack>

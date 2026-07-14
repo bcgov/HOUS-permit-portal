@@ -18,25 +18,29 @@ RSpec.describe StepCodePolicy, type: :policy do
   let(:other_block_id) { SecureRandom.uuid }
 
   before do
-    permit_application.template_version.update!(
-      requirement_blocks_json: {
-        step_code_block_id => {
-          "name" => "Energy Step Code",
-          "requirements" => [
-            {
-              "id" => SecureRandom.uuid,
-              "requirement_code" => "energy_step_code_tool_part_9",
-              "input_type" => "energy_step_code"
+    template_version = permit_application.template_version
+    template_version.update_columns(
+      snapshot_json:
+        template_version.snapshot_json.merge(
+          "blocks" => {
+            step_code_block_id => {
+              "name" => "Energy Step Code",
+              "requirements" => [
+                {
+                  "id" => SecureRandom.uuid,
+                  "requirement_code" => "energy_step_code_tool_part_9",
+                  "input_type" => "energy_step_code"
+                }
+              ]
+            },
+            other_block_id => {
+              "name" => "Other Block",
+              "requirements" => [
+                { "id" => SecureRandom.uuid, "input_type" => "text" }
+              ]
             }
-          ]
-        },
-        other_block_id => {
-          "name" => "Other Block",
-          "requirements" => [
-            { "id" => SecureRandom.uuid, "input_type" => "text" }
-          ]
-        }
-      }
+          }
+        )
     )
   end
 

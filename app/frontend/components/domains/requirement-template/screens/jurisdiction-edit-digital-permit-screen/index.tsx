@@ -72,13 +72,13 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
   const { templateVersion, error: templateVersionError } = useTemplateVersion({
     customErrorMessage: t("errors.fetchBuildingPermit"),
   })
-  const denormalizedTemplate = templateVersion?.denormalizedTemplateJson
+  const templateOutline = templateVersion?.outline
 
   const {
     rootContainerRef: rightContainerRef,
     sectionRefs,
     sectionIdToHighlight: currentSectionId,
-  } = useSectionHighlight({ sections: denormalizedTemplate?.requirementTemplateSections })
+  } = useSectionHighlight({ sections: templateOutline?.requirementTemplateSections })
   const [isCollapsedAll, setIsCollapsedAll] = useState(false)
   const [isNavigatingToSettings, setIsNavigatingToSettings] = useState(false)
   const navigate = useNavigate()
@@ -141,7 +141,7 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
     return <ErrorScreen error={templateVersionError || customizationError} />
   if (!templateVersion?.isFullyLoaded) return <LoadingScreen />
 
-  const templateSections = denormalizedTemplate?.requirementTemplateSections ?? []
+  const templateSections = templateOutline?.requirementTemplateSections ?? []
   const hasNoSections = templateSections.length === 0
 
   const onClose = () => {
@@ -196,7 +196,7 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
             title: t("site.breadcrumb.editPermit"),
           },
         ]}
-        requirementTemplate={denormalizedTemplate}
+        requirementTemplate={templateOutline}
         status={templateVersion.status}
         versionDate={templateVersion.versionDate}
         latestVersionId={templateVersion.latestVersionId}

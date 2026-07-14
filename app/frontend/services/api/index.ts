@@ -872,6 +872,14 @@ export class Api {
     return this.client.get<ApiResponse<ITemplateVersion>>(`/template_versions/${id}`)
   }
 
+  async fetchTemplateVersionSummary(id: string) {
+    return this.client.get<ApiResponse<ITemplateVersion>>(`/template_versions/${id}/summary`)
+  }
+
+  async fetchTemplateVersionFormPreview(id: string) {
+    return this.client.get<ApiResponse<ITemplateVersion>>(`/template_versions/${id}/form_preview`)
+  }
+
   async fetchJurisdictionTemplateVersionCustomization(templateId: string, jurisdictionId: string) {
     return this.client.get<ApiResponse<IJurisdictionTemplateVersionCustomization>>(
       `/template_versions/${templateId}/jurisdictions/${jurisdictionId}/jurisdiction_template_version_customization`
@@ -936,7 +944,6 @@ export class Api {
       changeSignificance?: string
       notificationScope?: string
       notifiedJurisdictionIds?: string[]
-      promoteBlockIds?: string[]
       sendAdvanceNotice?: boolean
       skipDateCheck?: boolean
     }
@@ -945,17 +952,6 @@ export class Api {
       `/template_versions/${templateVersionId}/promote_draft`,
       params
     )
-  }
-
-  async updateDraftBlock(templateVersionId: string, blockId: string, blockData: Record<string, unknown>) {
-    return this.client.patch<ApiResponse<ITemplateVersion>>(
-      `/template_versions/${templateVersionId}/update_draft_block`,
-      { blockId, blockData }
-    )
-  }
-
-  async refreshDraft(templateVersionId: string) {
-    return this.client.post<ApiResponse<ITemplateVersion>>(`/template_versions/${templateVersionId}/refresh_draft`)
   }
 
   async shareDraft(templateVersionId: string) {

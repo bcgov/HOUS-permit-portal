@@ -64,10 +64,10 @@ export const StandardizationPreviewScreen = observer(function StandardizationPre
                   <VStack align="start" spacing={4} h="full" justify="space-between">
                     <Box>
                       <Heading as="h4" size="sm" mb={3}>
-                        {template.nickname}
+                        {template.summary?.nickname}
                       </Heading>
                       <Text fontSize="sm" color="text.secondary">
-                        {template.description}
+                        {template.summary?.description}
                       </Text>
                     </Box>
                     <LinkOverlay

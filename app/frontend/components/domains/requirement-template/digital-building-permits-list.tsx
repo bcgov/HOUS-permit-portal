@@ -71,10 +71,10 @@ export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermi
                 <Flex w="full" as="section">
                   <Stack spacing={3} flex={1}>
                     <Text as="h3" color={"text.link"} fontWeight={700} fontSize="xl">
-                      {templateVersion.denormalizedTemplateJson.nickname}
+                      {templateVersion.summary?.nickname}
                     </Text>
                     <Text fontSize={"sm"} color={"text.secondary"}>
-                      {templateVersion.denormalizedTemplateJson?.description}
+                      {templateVersion.summary?.description}
                     </Text>
                     <Text fontSize={"sm"} color={"text.secondary"}>
                       <Text as="span" fontWeight={700}>
@@ -84,9 +84,9 @@ export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermi
                     </Text>
                     <HStack gap={4} align="center">
                       <VersionTag versionDate={templateVersion.versionDate} w="fit-content" />
-                      {(templateVersion.denormalizedTemplateJson?.tags ?? []).length > 0 && (
+                      {(templateVersion.summary?.tags ?? []).length > 0 && (
                         <Text fontSize="sm" color="text.secondary">
-                          {(templateVersion.denormalizedTemplateJson?.tags ?? []).join(", ")}
+                          {(templateVersion.summary?.tags ?? []).join(", ")}
                         </Text>
                       )}
                       {showStatusTag && (

@@ -46,12 +46,16 @@ RSpec.describe PermitCollaboration, type: :model do
           )
 
         assigned_requirement_block_id = SecureRandom.uuid
-        permit_application.template_version.update!(
-          requirement_blocks_json: {
-            assigned_requirement_block_id => {
-              "name" => "Block A"
-            }
-          }
+        template_version = permit_application.template_version
+        template_version.update_columns(
+          snapshot_json:
+            template_version.snapshot_json.merge(
+              "blocks" => {
+                assigned_requirement_block_id => {
+                  "name" => "Block A"
+                }
+              }
+            )
         )
 
         create(
@@ -107,7 +111,7 @@ RSpec.describe PermitCollaboration, type: :model do
         ).to be_present
       end
 
-      it "validates assigned_requirement_block_id exists in template_version.requirement_blocks_json for assignees (on create)" do
+      it "validates assigned_requirement_block_id exists in the template snapshot for assignees (on create)" do
         permit_application =
           create(:permit_application, jurisdiction: jurisdiction)
         collaborator =
@@ -354,12 +358,16 @@ RSpec.describe PermitCollaboration, type: :model do
       it "returns the assigned block name and whether it exists" do
         permit_application = create(:permit_application)
         block_id = SecureRandom.uuid
-        permit_application.template_version.update!(
-          requirement_blocks_json: {
-            block_id => {
-              "name" => "Water Supply System"
-            }
-          }
+        template_version = permit_application.template_version
+        template_version.update_columns(
+          snapshot_json:
+            template_version.snapshot_json.merge(
+              "blocks" => {
+                block_id => {
+                  "name" => "Water Supply System"
+                }
+              }
+            )
         )
 
         collaborator =

@@ -1,20 +1,14 @@
 import { t } from "i18next"
 import { flow } from "mobx"
-import { Instance, toGenerator, types } from "mobx-state-tree"
+import { Instance, SnapshotIn, toGenerator, types } from "mobx-state-tree"
 import { IJurisdictionTemplateVersionCustomizationForm } from "../components/domains/requirement-template/screens/jurisdiction-edit-digital-permit-screen"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { EDeprecationReason, EExportFormat, ETemplateVersionStatus } from "../types/enums"
-import { IDenormalizedRequirementBlock, IDenormalizedTemplate, IFormJson, ITemplateVersionUpdate } from "../types/types"
+import { IDenormalizedTemplate, IFormJson, ITemplateVersionSummary, ITemplateVersionUpdate } from "../types/types"
 import { startBlobDownload } from "../utils/utility-functions"
-import { IIntegrationMapping, IntegrationMappingModel } from "./integration-mapping"
+import { IntegrationMappingModel } from "./integration-mapping"
 import { JurisdictionTemplateVersionCustomizationModel } from "./jurisdiction-template-version-customization"
-
-interface ITemplateCategorySummary {
-  id: string
-  label: string
-  sortOrder: number
-}
 
 export const TemplateVersionModel = types
   .model("TemplateVersionModel")
@@ -24,10 +18,9 @@ export const TemplateVersionModel = types
     deprecationReason: types.maybeNull(types.enumeration(Object.values(EDeprecationReason))),
     versionDate: types.Date,
     label: types.string,
-    tags: types.optional(types.array(types.string), []),
     updatedAt: types.Date,
-    denormalizedTemplateJson: types.maybeNull(types.frozen<IDenormalizedTemplate>()),
-    requirementBlocksJson: types.maybeNull(types.frozen<Record<string, IDenormalizedRequirementBlock>>()),
+    summary: types.maybeNull(types.frozen<ITemplateVersionSummary>()),
+    outline: types.maybeNull(types.frozen<IDenormalizedTemplate>()),
     templateVersionCustomizationsByJurisdiction: types.map(JurisdictionTemplateVersionCustomizationModel),
     integrationMappingByJurisdiction: types.map(IntegrationMappingModel),
     latestVersionId: types.maybeNull(types.string),
@@ -41,21 +34,11 @@ export const TemplateVersionModel = types
     publiclyPreviewable: types.optional(types.boolean, false),
     requiresProjectMeeting: types.optional(types.boolean, false),
     disabledByJurisdiction: types.optional(types.boolean, false),
-    hasUnresolvedFeedbacks: types.optional(types.boolean, false),
-    feedbacksCount: types.optional(types.number, 0),
-    templateCategoryId: types.maybeNull(types.string),
-    templateCategory: types.maybeNull(types.frozen<ITemplateCategorySummary>()),
-    templateSortOrder: types.optional(types.number, 0),
     // Preview IDs (populated on extended view for drafts).
     // Stored as string IDs instead of safeReferences to avoid circular dependency:
     // TemplateVersion -> TemplateVersionPreview -> User -> Jurisdiction -> PermitApplication -> TemplateVersion
     templateVersionPreviewIds: types.optional(types.array(types.string), []),
-    // Fields populated only by the :standardization_preview blueprint view
-    // (delegated from the owning RequirementTemplate). Left undefined for
-    // every other view. Nullable because the owning RequirementTemplate
-    // may have null description/category.
-    nickname: types.maybeNull(types.string),
-    description: types.maybeNull(types.string),
+    // Populated only by the public standardization preview view.
     isAvailableForAdoption: types.maybeNull(types.boolean),
   })
   .extend(withEnvironment())
@@ -97,18 +80,11 @@ export const TemplateVersionModel = types
         `requirementTemplate.versionSidebar.deprecationReasonLabels.${self.deprecationReason as EDeprecationReason}`
       )
     },
-    getRequirementBlockJsonById(id: string) {
-      return self.requirementBlocksJson?.[id]
-    },
     matchesSearchQuery(query: string) {
       const normalizedQuery = query.trim().toLowerCase()
       if (!normalizedQuery) return true
 
-      const searchableText = [
-        self.denormalizedTemplateJson?.nickname,
-        self.denormalizedTemplateJson?.description,
-        ...(self.denormalizedTemplateJson?.tags ?? self.tags),
-      ]
+      const searchableText = [self.summary?.nickname, self.summary?.description, ...(self.summary?.tags ?? [])]
         .filter(Boolean)
         .join(" ")
         .toLowerCase()
@@ -129,7 +105,7 @@ export const TemplateVersionModel = types
 
       self.templateVersionCustomizationsByJurisdiction.set(jurisdictionId, customizationModel)
     },
-    setIntegrationMapping(jurisdictionId: string, integrationMapping: IIntegrationMapping) {
+    setIntegrationMapping(jurisdictionId: string, integrationMapping: SnapshotIn<typeof IntegrationMappingModel>) {
       self.integrationMappingByJurisdiction.set(jurisdictionId, integrationMapping)
     },
     setStatus(status: ETemplateVersionStatus) {
@@ -137,6 +113,9 @@ export const TemplateVersionModel = types
     },
     setDeprecationReason(reason: EDeprecationReason | null) {
       self.deprecationReason = reason
+    },
+    setIsFullyLoaded(isFullyLoaded: boolean) {
+      self.isFullyLoaded = isFullyLoaded
     },
   }))
   .actions((self) => ({
@@ -199,8 +178,7 @@ export const TemplateVersionModel = types
 
       const integrationMapping = response.data.data
 
-      const mappingModel = IntegrationMappingModel.create(integrationMapping)
-      self.setIntegrationMapping(jurisdictionId, mappingModel)
+      self.setIntegrationMapping(jurisdictionId, integrationMapping as SnapshotIn<typeof IntegrationMappingModel>)
 
       return self.getIntegrationMapping(jurisdictionId)
     }),

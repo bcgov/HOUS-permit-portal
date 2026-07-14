@@ -2,6 +2,7 @@ import {
   Box,
   Button,
   Center,
+  Checkbox,
   Flex,
   FormControl,
   FormHelperText,
@@ -116,6 +117,20 @@ export const BlockSetup = observer(function BlockSetup({
           <FormHelperText {...helperTextStyles}>
             {t("requirementsLibrary.fieldDescriptions.description")} <br />
             {t("requirementsLibrary.descriptionMaxLength")}
+          </FormHelperText>
+        </FormControl>
+        <FormControl>
+          <Controller
+            name="hideInEarlyAccess"
+            control={control}
+            render={({ field: { onChange, value, ref } }) => (
+              <Checkbox ref={ref} isChecked={!!value} onChange={(e) => onChange(e.target.checked)}>
+                {t("requirementsLibrary.fields.hideInEarlyAccess")}
+              </Checkbox>
+            )}
+          />
+          <FormHelperText {...helperTextStyles}>
+            {t("requirementsLibrary.fieldDescriptions.hideInEarlyAccess")}
           </FormHelperText>
         </FormControl>
         <FormControl>

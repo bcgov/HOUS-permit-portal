@@ -25,14 +25,14 @@ export const formScrollToId = (id: string) => `${scrollToIdPrefix}${id}`
 
 export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
   const { templateVersion, error } = useTemplateVersion()
-  const denormalizedTemplate = templateVersion?.denormalizedTemplateJson
+  const templateOutline = templateVersion?.outline
   const { t } = useTranslation()
   const { userStore, templateVersionStore, requirementTemplateStore } = useMst()
   const {
     rootContainerRef: rightContainerRef,
     sectionRefs,
     sectionIdToHighlight: currentSectionId,
-  } = useSectionHighlight({ sections: denormalizedTemplate?.requirementTemplateSections })
+  } = useSectionHighlight({ sections: templateOutline?.requirementTemplateSections })
   const [isCollapsedAll, setIsCollapsedAll] = useState(false)
   const [isTogglingPubliclyPreviewable, setIsTogglingPubliclyPreviewable] = useState(false)
   const navigate = useNavigate()
@@ -99,7 +99,7 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
   if (error) return <ErrorScreen error={error} />
   if (!templateVersion?.isFullyLoaded) return <LoadingScreen />
 
-  const templateSections = denormalizedTemplate?.requirementTemplateSections ?? []
+  const templateSections = templateOutline?.requirementTemplateSections ?? []
   const hasNoSections = templateSections.length === 0
 
   const onClose = () => {
@@ -129,7 +129,7 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
             title: t(`requirementTemplate.status.${templateVersion.status}`),
           },
         ]}
-        requirementTemplate={denormalizedTemplate}
+        requirementTemplate={templateOutline}
         status={templateVersion.status}
         versionDate={templateVersion.versionDate}
         latestVersionId={templateVersion.latestVersionId}

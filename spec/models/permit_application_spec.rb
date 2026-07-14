@@ -58,6 +58,45 @@ RSpec.describe PermitApplication, type: :model do
     end
   end
 
+  describe "versioned template metadata" do
+    it "uses the selected version snapshot after the live template changes" do
+      requirement_template =
+        create(:requirement_template, nickname: "Original template")
+      template_version =
+        create(
+          :template_version,
+          requirement_template: requirement_template,
+          snapshot_json: {
+            "schema_version" => 1,
+            "template" => {
+              "id" => requirement_template.id,
+              "nickname" => "Snapshot template",
+              "tags" => ["snapshot-tag"]
+            },
+            "sections" => [],
+            "blocks" => {
+            }
+          }
+        )
+      requirement_template.update!(
+        nickname: "Updated live template",
+        tag_list: ["live-tag"]
+      )
+      permit_application =
+        build(
+          :permit_application,
+          nickname: nil,
+          template_version: template_version
+        )
+
+      permit_application.valid?
+
+      expect(permit_application.template_nickname).to eq("Snapshot template")
+      expect(permit_application.template_tag_list).to eq(["snapshot-tag"])
+      expect(permit_application.nickname).to eq("Snapshot template")
+    end
+  end
+
   describe "Scopes" do
     # Create sandboxed and non-sandboxed permit applications
     let!(:jurisdiction) { create(:sub_district) }

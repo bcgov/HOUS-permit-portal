@@ -57,12 +57,16 @@ RSpec.describe PermitBlockStatus, type: :model do
     it "returns requirement block name from template_version JSON" do
       permit_application = create(:permit_application)
       rb_id = SecureRandom.uuid
-      permit_application.template_version.update!(
-        requirement_blocks_json: {
-          rb_id => {
-            "name" => "Site survey"
-          }
-        }
+      template_version = permit_application.template_version
+      template_version.update_columns(
+        snapshot_json:
+          template_version.snapshot_json.merge(
+            "blocks" => {
+              rb_id => {
+                "name" => "Site survey"
+              }
+            }
+          )
       )
 
       status =
@@ -79,12 +83,16 @@ RSpec.describe PermitBlockStatus, type: :model do
     it "returns true when requirement block key exists" do
       permit_application = create(:permit_application)
       rb_id = SecureRandom.uuid
-      permit_application.template_version.update!(
-        requirement_blocks_json: {
-          rb_id => {
-            "name" => "Block"
-          }
-        }
+      template_version = permit_application.template_version
+      template_version.update_columns(
+        snapshot_json:
+          template_version.snapshot_json.merge(
+            "blocks" => {
+              rb_id => {
+                "name" => "Block"
+              }
+            }
+          )
       )
 
       status =
@@ -96,9 +104,8 @@ RSpec.describe PermitBlockStatus, type: :model do
       expect(status.block_exists?).to be(true)
     end
 
-    it "returns nil/falsey when requirement_blocks_json is nil" do
+    it "returns false when the block is absent from the snapshot" do
       permit_application = create(:permit_application)
-      permit_application.template_version.update!(requirement_blocks_json: nil)
 
       status =
         build(
@@ -106,7 +113,7 @@ RSpec.describe PermitBlockStatus, type: :model do
           permit_application: permit_application,
           requirement_block_id: SecureRandom.uuid
         )
-      expect(status.block_exists?).to be_nil
+      expect(status.block_exists?).to be(false)
     end
   end
 
@@ -114,12 +121,16 @@ RSpec.describe PermitBlockStatus, type: :model do
     it "uses setter text when set_by_user is present" do
       permit_application = create(:permit_application)
       rb_id = SecureRandom.uuid
-      permit_application.template_version.update!(
-        requirement_blocks_json: {
-          rb_id => {
-            "name" => "Block"
-          }
-        }
+      template_version = permit_application.template_version
+      template_version.update_columns(
+        snapshot_json:
+          template_version.snapshot_json.merge(
+            "blocks" => {
+              rb_id => {
+                "name" => "Block"
+              }
+            }
+          )
       )
       setter = create(:user, first_name: "Alex", last_name: "Lee")
 

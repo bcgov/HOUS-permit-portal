@@ -179,16 +179,21 @@ module Infrastructure
       # TemplateVersion fixups
       if model_class == TemplateVersion
         attributes["deprecated_by_id"] = nil
-
-        if attributes["denormalized_template_json"].is_a?(Hash)
-          json = attributes["denormalized_template_json"]
-          json.delete("permit_type")
-          json.delete("permitType")
-          json.delete("activity")
-          json.delete("first_nations")
-          json.delete("firstNations")
-          attributes["denormalized_template_json"] = json
+        if attributes["snapshot_json"].blank?
+          attributes["snapshot_json"] = legacy_template_version_snapshot(
+            attributes
+          )
         end
+
+        TemplateVersionSnapshot::Validator.call(
+          snapshot_json: attributes["snapshot_json"],
+          form_json: attributes["form_json"]
+        )
+
+        attributes.except!(
+          "denormalized_template_json",
+          "requirement_blocks_json"
+        )
       end
 
       # TemplateSectionBlock fixups (Orphan check)
@@ -218,6 +223,19 @@ module Infrastructure
       end
 
       attributes
+    end
+
+    def legacy_template_version_snapshot(attributes)
+      unless attributes["denormalized_template_json"].is_a?(Hash) &&
+               attributes["requirement_blocks_json"].is_a?(Hash)
+        raise ArgumentError,
+              "Template version export is missing snapshot_json and legacy snapshots"
+      end
+
+      TemplateVersionSnapshot::LegacyConverter.call(
+        denormalized_template_json: attributes["denormalized_template_json"],
+        requirement_blocks_json: attributes["requirement_blocks_json"]
+      )
     end
   end
 end

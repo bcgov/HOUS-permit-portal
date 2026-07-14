@@ -38,7 +38,7 @@ export function groupTemplateVersionsByCategory(templateVersions: ITemplateVersi
 function categoryForTemplateVersion(
   templateVersion: ITemplateVersion
 ): Omit<ITemplateVersionGroup, "templateVersions"> {
-  const category = templateVersion.templateCategory ?? templateVersion.denormalizedTemplateJson?.templateCategory
+  const category = templateVersion.summary?.templateCategory
 
   if (!category) return UNCATEGORIZED_GROUP
 
@@ -50,8 +50,8 @@ function categoryForTemplateVersion(
 }
 
 function compareTemplateVersions(a: ITemplateVersion, b: ITemplateVersion) {
-  const aSortOrder = a.templateSortOrder ?? a.denormalizedTemplateJson?.sortOrder ?? 0
-  const bSortOrder = b.templateSortOrder ?? b.denormalizedTemplateJson?.sortOrder ?? 0
+  const aSortOrder = a.summary?.sortOrder ?? 0
+  const bSortOrder = b.summary?.sortOrder ?? 0
 
   return aSortOrder - bSortOrder || a.label.localeCompare(b.label)
 }

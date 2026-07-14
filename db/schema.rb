@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_07_07_200600) do
+ActiveRecord::Schema[7.2].define(version: 2026_07_14_212800) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -607,6 +607,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_07_200600) do
     t.integer "inbox_sort_order"
     t.integer "queue_time_seconds", default: 0, null: false
     t.datetime "queue_clock_started_at"
+    t.string "step_code_stage"
     t.index ["discarded_at"], name: "index_permit_applications_on_discarded_at"
     t.index ["jurisdiction_id"], name: "index_permit_applications_on_jurisdiction_id"
     t.index ["number"], name: "index_permit_applications_on_number", unique: true
@@ -787,14 +788,13 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_07_200600) do
     t.datetime "confirmed_date"
     t.datetime "scheduled_at"
     t.datetime "completed_at"
-    t.datetime "closed_at"
+    t.datetime "withdrawn_at"
     t.string "meeting_url"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.datetime "viewed_at"
     t.integer "contact_method"
     t.integer "notes_count", default: 0, null: false
-    t.index ["closed_at"], name: "index_project_meetings_on_closed_at"
     t.index ["completed_at"], name: "index_project_meetings_on_completed_at"
     t.index ["contact_method"], name: "index_project_meetings_on_contact_method"
     t.index ["permit_project_id"], name: "index_project_meetings_on_active_permit_project", unique: true, where: "(status = ANY (ARRAY[1, 2]))"
@@ -805,6 +805,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_07_200600) do
     t.index ["status"], name: "index_project_meetings_on_status"
     t.index ["submitted_at"], name: "index_project_meetings_on_submitted_at"
     t.index ["viewed_at"], name: "index_project_meetings_on_viewed_at"
+    t.index ["withdrawn_at"], name: "index_project_meetings_on_withdrawn_at"
   end
 
   create_table "release_notes", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -844,6 +845,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_07_200600) do
     t.string "display_name", null: false
     t.string "display_description"
     t.datetime "discarded_at"
+    t.boolean "hide_in_early_access", default: false, null: false
     t.index ["discarded_at"], name: "index_requirement_blocks_on_discarded_at"
     t.index ["name"], name: "index_requirement_blocks_on_name", unique: true, where: "(discarded_at IS NULL)"
     t.index ["sku"], name: "index_requirement_blocks_on_sku", unique: true
@@ -1203,9 +1205,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_07_200600) do
   end
 
   create_table "template_versions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.jsonb "denormalized_template_json", default: {}
-    t.jsonb "form_json", default: {}
-    t.jsonb "requirement_blocks_json", default: {}
+    t.jsonb "form_json", null: false
+    t.jsonb "snapshot_json", null: false
     t.json "version_diff", default: {}
     t.date "version_date", null: false
     t.integer "status", default: 0
@@ -1226,6 +1227,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_07_200600) do
     t.index ["deprecated_by_id"], name: "index_template_versions_on_deprecated_by_id"
     t.index ["requirement_template_id"], name: "index_template_versions_on_requirement_template_id"
     t.index ["site_configuration_id"], name: "index_template_versions_on_site_configuration_id"
+    t.check_constraint "COALESCE(snapshot_json ->> 'schema_version'::text, ''::text) = '1'::text", name: "template_versions_snapshot_schema_v1"
+    t.check_constraint "jsonb_typeof(form_json) = 'object'::text", name: "template_versions_form_json_object"
   end
 
   create_table "thermal_energy_demand_intensity_references", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

@@ -232,10 +232,10 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
                           <Flex direction="column" justify="space-between" align="start" gap={4}>
                             <Box>
                               <Heading as="h4" fontSize="lg" mb={2}>
-                                {tv.denormalizedTemplateJson?.nickname || tv.label}
+                                {tv.summary?.nickname || tv.label}
                               </Heading>
                               <Text fontSize="sm" color="text.secondary">
-                                {tv.denormalizedTemplateJson?.description}
+                                {tv.summary?.description}
                               </Text>
                             </Box>
                             <Flex

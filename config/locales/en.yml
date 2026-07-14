@@ -1010,18 +1010,6 @@ en:
         title: Error
         message: "Could not find a template version to copy from"
     template_version:
-      update_draft_block_success:
-        title: ""
-        message: "Early access version block updated"
-      update_draft_block_error:
-        title: Error
-        message: "%{error_message}"
-      refresh_draft_success:
-        title: ""
-        message: "Early access version refreshed from current template"
-      refresh_draft_error:
-        title: Error
-        message: "%{error_message}"
       share_draft_success:
         title: ""
         message: "Early access version shared with %{count} previewer(s)"

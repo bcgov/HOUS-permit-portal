@@ -50,7 +50,7 @@ class PermitCollaboration < ApplicationRecord
   end
 
   def assigned_requirement_block_name
-    permit_application.template_version.requirement_blocks_json.dig(
+    permit_application.template_version.snapshot_blocks.dig(
       assigned_requirement_block_id,
       "name"
     ) || ""
@@ -143,7 +143,7 @@ class PermitCollaboration < ApplicationRecord
 
   def assigned_block_exists?
     # This can be nil if a new template version was published and the requirement block was deleted
-    permit_application.template_version.requirement_blocks_json&.key?(
+    permit_application.template_version.snapshot_blocks.key?(
       assigned_requirement_block_id
     )
   end
@@ -196,10 +196,9 @@ class PermitCollaboration < ApplicationRecord
   def validate_requirement_block_id
     return unless assignee?
 
-    requirement_blocks_json =
-      permit_application.template_version.requirement_blocks_json || {}
+    requirement_blocks = permit_application.template_version.snapshot_blocks
 
-    return if requirement_blocks_json.key?(assigned_requirement_block_id)
+    return if requirement_blocks.key?(assigned_requirement_block_id)
 
     errors.add(:assigned_requirement_block_id, :does_not_exist)
   end

@@ -15,7 +15,6 @@ class TemplateVersion < ApplicationRecord
   has_many :template_version_previews, dependent: :destroy
 
   delegate :published_template_version, to: :requirement_template
-  delegate :tag_list, to: :requirement_template
 
   enum :status,
        { scheduled: 0, published: 1, deprecated: 2, draft: 3 },
@@ -28,11 +27,14 @@ class TemplateVersion < ApplicationRecord
 
   validates :deprecation_reason, presence: true, if: :deprecated?
   validates :deprecated_by, presence: true, if: :deprecation_reason_unscheduled?
+  validate :snapshot_artifacts_valid, on: :create
+  validate :snapshot_artifacts_immutable, on: :update
 
   before_validation :set_default_deprecation_reason
 
   after_save :reindex_models_if_published, if: :saved_change_to_status?
   after_save :create_integration_mappings
+  after_save :clear_snapshot_presentation, if: :saved_change_to_snapshot_json?
   after_save :clear_published_ids_cache,
              if: -> do
                saved_change_to_status? &&
@@ -92,7 +94,7 @@ class TemplateVersion < ApplicationRecord
 
   def label
     prefix = draft? ? "[Draft] " : ""
-    "#{prefix}#{requirement_template.nickname} (#{version_date})"
+    "#{prefix}#{snapshot_summary["nickname"]} (#{version_date})"
   end
 
   def requires_project_meeting_for_jurisdiction?(jurisdiction_id, sandbox = nil)
@@ -118,9 +120,37 @@ class TemplateVersion < ApplicationRecord
     flatten_requirements_from_form_hash(form_json)
   end
 
+  def snapshot_presentation
+    @snapshot_presentation ||= TemplateVersionSnapshot::Presentation.new(self)
+  end
+
+  def canonical_snapshot
+    snapshot_presentation.snapshot
+  end
+
+  def snapshot_summary
+    snapshot_presentation.summary
+  end
+
+  def snapshot_outline(display: false)
+    snapshot_presentation.outline(display: display)
+  end
+
+  def snapshot_blocks(display: false)
+    snapshot_presentation.blocks(display: display)
+  end
+
+  def snapshot_form_json(display: false)
+    snapshot_presentation.form_json(display: display)
+  end
+
+  def form_component_index
+    snapshot_presentation.form_component_index
+  end
+
   def form_json_requirements
     json_requirements = []
-    requirement_blocks_json.each_pair do |block_id, block_json|
+    snapshot_blocks.each_pair do |block_id, block_json|
       block_json["requirements"].each do |requirement|
         dup_requirement = requirement.dup
 
@@ -162,7 +192,7 @@ class TemplateVersion < ApplicationRecord
   end
 
   def get_requirement_json(requirement_block_id, requirement_id)
-    requirement_blocks_json
+    snapshot_blocks
       .dig(requirement_block_id, "requirements")
       &.find { |req| req["id"] == requirement_id }
   end
@@ -221,6 +251,30 @@ class TemplateVersion < ApplicationRecord
     return unless deprecated? && deprecation_reason.nil?
 
     self.deprecation_reason = "new_publish"
+  end
+
+  def snapshot_artifacts_valid
+    TemplateVersionSnapshot::Validator.call(
+      snapshot_json: snapshot_json,
+      form_json: form_json
+    )
+  rescue ArgumentError, KeyError, TypeError, NoMethodError => e
+    attribute =
+      e.message.start_with?("Compiled form") ? :form_json : :snapshot_json
+    errors.add(attribute, e.message)
+  end
+
+  def snapshot_artifacts_immutable
+    if will_save_change_to_snapshot_json?
+      errors.add(:snapshot_json, "cannot be changed after creation")
+    end
+    if will_save_change_to_form_json?
+      errors.add(:form_json, "cannot be changed after creation")
+    end
+  end
+
+  def clear_snapshot_presentation
+    @snapshot_presentation = nil
   end
 
   def reindex_models_if_published

@@ -106,6 +106,7 @@ class Api::RequirementBlocksController < Api::ApplicationController
       :description,
       :display_name,
       :display_description,
+      :hide_in_early_access,
       :sign_off_role,
       :reviewer_role,
       association_list: [],

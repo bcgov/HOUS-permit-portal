@@ -91,6 +91,89 @@ RSpec.describe Api::TemplateVersionsController,
       expect(template_payload["disabled_by_jurisdiction"]).to be(true)
       expect(template_payload["requires_project_meeting"]).to be(true)
     end
+
+    it "returns summary metadata without snapshot or form payloads" do
+      get :index, params: { status: "published" }
+
+      template_payload =
+        json_response["data"].find do |payload|
+          payload["id"] == source_version.id
+        end
+
+      expect(template_payload.dig("summary", "nickname")).to eq(
+        source_template.nickname
+      )
+      expect(template_payload).not_to have_key("outline")
+      expect(template_payload).not_to have_key("form_json")
+      expect(template_payload).not_to have_key("blocks")
+      expect(template_payload).not_to have_key("snapshot_json")
+    end
+  end
+
+  describe "focused TemplateVersion projections" do
+    it "returns only version metadata and summary from summary" do
+      get :summary, params: { id: source_version.id }
+
+      expect(response).to have_http_status(:success)
+      expect(json_response.dig("data", "summary", "nickname")).to eq(
+        source_template.nickname
+      )
+      expect(json_response["data"]).not_to have_key("outline")
+      expect(json_response["data"]).not_to have_key("form_json")
+      expect(json_response["data"]).not_to have_key("blocks")
+    end
+
+    it "returns outline but not the compiled form from show" do
+      get :show, params: { id: source_version.id }
+
+      expect(response).to have_http_status(:success)
+      expect(json_response["data"]).to have_key("outline")
+      expect(json_response["data"]).not_to have_key("form_json")
+      expect(json_response["data"]).not_to have_key("blocks")
+    end
+
+    it "returns the compiled form without the outline from form_preview" do
+      source_version.update_columns(
+        form_json: {
+          "components" => [{ "id" => "section-1" }]
+        }
+      )
+
+      get :form_preview, params: { id: source_version.id }
+
+      expect(response).to have_http_status(:success)
+      expect(json_response.dig("data", "form_json", "components")).to eq(
+        [{ "id" => "section-1" }]
+      )
+      expect(json_response["data"]).not_to have_key("outline")
+      expect(json_response["data"]).not_to have_key("blocks")
+    end
+
+    it "returns canonical blocks with the integration mapping response" do
+      source_version.update_columns(
+        snapshot_json:
+          source_version.snapshot_json.merge(
+            "blocks" => {
+              "block-1" => {
+                "id" => "block-1",
+                "sku" => "BLOCK",
+                "requirements" => []
+              }
+            }
+          )
+      )
+
+      get :show_integration_mapping,
+          params: {
+            id: source_version.id,
+            jurisdiction_id: jurisdiction.id
+          }
+
+      expect(response).to have_http_status(:success)
+      expect(json_response.dig("data", "blocks").keys).to eq(["block-1"])
+      expect(json_response["data"]).not_to have_key("outline")
+      expect(json_response["data"]).not_to have_key("form_json")
+    end
   end
 
   describe "POST #copy_jurisdiction_template_version_customization" do

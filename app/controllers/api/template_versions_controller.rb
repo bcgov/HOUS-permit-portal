@@ -2,7 +2,8 @@ class Api::TemplateVersionsController < Api::ApplicationController
   # Anonymous access is permitted for the public preview endpoints; the
   # TemplateVersionPolicy#show? check still enforces that only publicly
   # previewable drafts are actually visible without a signed-in user.
-  skip_before_action :authenticate_user!, only: %i[publicly_previewable show]
+  skip_before_action :authenticate_user!,
+                     only: %i[publicly_previewable show form_preview]
   # `publicly_previewable` is a collection action that intentionally returns a
   # hard-coded, non-sensitive filter (draft TVs flagged publicly previewable),
   # so we bypass Pundit's verify_authorized / verify_policy_scoped hooks.
@@ -25,8 +26,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
     @template_versions =
       policy_scope(TemplateVersion)
         .joins(:requirement_template)
-        .left_joins(requirement_template: :template_category)
-        .includes(requirement_template: :template_category)
+        .includes(:requirement_template)
         .where(status:)
         .then do |scope|
           if template_version_params.key?(:publicly_previewable)
@@ -42,13 +42,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
                    {
                      blueprint: TemplateVersionBlueprint,
                      blueprint_opts: {
-                       # TODO: This endpoint may be too heavy as the catalog grows (>50 templates). Consider:
-                       # - A lighter :list blueprint view with denormalized_template_json + jurisdiction flags only
-                       #   (drop form_json / requirement_blocks_json from index responses).
-                       # - Batch-loading jurisdiction customizations for blueprint_opts[:jurisdiction_id] and
-                       #   sandbox to avoid N+1 EXISTS queries for requires_project_meeting / disabled_by_jurisdiction.
-                       # - Moving nickname/description/tags to base fields if denormalized_template_json is no longer needed.
-                       view: :extended,
+                       view: :list,
                        jurisdiction_id:
                          template_version_params[:jurisdiction_id],
                        sandbox: current_sandbox
@@ -63,8 +57,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
       TemplateVersion
         .where(publicly_previewable: true, status: :draft)
         .joins(:requirement_template)
-        .left_joins(requirement_template: :template_category)
-        .includes(requirement_template: :template_category)
+        .includes(:requirement_template)
         .where(requirement_templates: { discarded_at: nil })
         .order(template_category_order_sql)
 
@@ -87,6 +80,38 @@ class Api::TemplateVersionsController < Api::ApplicationController
                      blueprint: TemplateVersionBlueprint,
                      blueprint_opts: {
                        view: :extended,
+                       jurisdiction_id:
+                         template_version_params[:jurisdiction_id],
+                       sandbox: current_sandbox
+                     }
+                   }
+  end
+
+  def summary
+    authorize @template_version, :show?
+
+    render_success @template_version,
+                   nil,
+                   {
+                     blueprint: TemplateVersionBlueprint,
+                     blueprint_opts: {
+                       view: :list,
+                       jurisdiction_id:
+                         template_version_params[:jurisdiction_id],
+                       sandbox: current_sandbox
+                     }
+                   }
+  end
+
+  def form_preview
+    authorize @template_version, :show?
+
+    render_success @template_version,
+                   nil,
+                   {
+                     blueprint: TemplateVersionBlueprint,
+                     blueprint_opts: {
+                       view: :form_preview,
                        jurisdiction_id:
                          template_version_params[:jurisdiction_id],
                        sandbox: current_sandbox
@@ -331,13 +356,6 @@ class Api::TemplateVersionsController < Api::ApplicationController
         )
       end
 
-      if promote_draft_params[:promote_block_ids].present?
-        TemplateVersioningService.promote_block_changes!(
-          promoted,
-          promote_draft_params[:promote_block_ids]
-        )
-      end
-
       if !skip_date_check && promote_draft_params[:send_advance_notice]
         NotificationService.publish_version_scheduled_event(promoted)
       end
@@ -349,54 +367,6 @@ class Api::TemplateVersionsController < Api::ApplicationController
            TemplateVersionScheduleError,
            TemplateVersionForcePublishNowError => e
       render_error "requirement_template.promote_draft_error",
-                   message_opts: {
-                     error_message: e.message
-                   }
-    end
-  end
-
-  def update_draft_block
-    authorize @template_version, :update?
-
-    begin
-      TemplateVersioningService.update_draft_block!(
-        @template_version,
-        draft_block_params[:block_id],
-        draft_block_params[:block_data].to_unsafe_h
-      )
-
-      render_success @template_version,
-                     "template_version.update_draft_block_success",
-                     {
-                       blueprint: TemplateVersionBlueprint,
-                       blueprint_opts: {
-                         view: :extended
-                       }
-                     }
-    rescue TemplateVersionDraftError => e
-      render_error "template_version.update_draft_block_error",
-                   message_opts: {
-                     error_message: e.message
-                   }
-    end
-  end
-
-  def refresh_draft
-    authorize @template_version, :update?
-
-    begin
-      TemplateVersioningService.refresh_draft_snapshot!(@template_version)
-
-      render_success @template_version,
-                     "template_version.refresh_draft_success",
-                     {
-                       blueprint: TemplateVersionBlueprint,
-                       blueprint_opts: {
-                         view: :extended
-                       }
-                     }
-    rescue TemplateVersionDraftError => e
-      render_error "template_version.refresh_draft_error",
                    message_opts: {
                      error_message: e.message
                    }
@@ -496,8 +466,8 @@ class Api::TemplateVersionsController < Api::ApplicationController
 
   def template_category_order_sql
     Arel.sql(
-      "template_categories.sort_order ASC NULLS LAST, " \
-        "requirement_templates.sort_order ASC, " \
+      "(template_versions.snapshot_json #>> '{template,template_category,sort_order}')::integer ASC NULLS LAST, " \
+        "(template_versions.snapshot_json #>> '{template,sort_order}')::integer ASC NULLS LAST, " \
         "template_versions.updated_at DESC"
     )
   end
@@ -559,10 +529,6 @@ class Api::TemplateVersionsController < Api::ApplicationController
     )
   end
 
-  def draft_block_params
-    params.permit(:block_id, block_data: {})
-  end
-
   def draft_previewer_params
     params.permit(emails: [])
   end
@@ -589,8 +555,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
       :notification_scope,
       :send_advance_notice,
       :skip_date_check,
-      notified_jurisdiction_ids: [],
-      promote_block_ids: []
+      notified_jurisdiction_ids: []
     )
   end
 

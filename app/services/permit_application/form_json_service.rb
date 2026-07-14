@@ -67,7 +67,7 @@ class PermitApplication::FormJsonService
     @empty_block_ids ||=
       permit_application
         .template_version
-        .requirement_blocks_json
+        .snapshot_blocks
         .map do |rb_id, requirement_block|
           next if requirement_block["requirements"].blank?
 
@@ -112,7 +112,7 @@ class PermitApplication::FormJsonService
     return @empty_block_ids if permissions == :all
 
     requirement_block_ids =
-      permit_application&.template_version&.requirement_blocks_json&.keys || []
+      permit_application&.template_version&.snapshot_blocks&.keys || []
 
     @empty_block_ids =
       (@empty_block_ids + (requirement_block_ids - permissions)).uniq

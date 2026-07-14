@@ -104,36 +104,81 @@ RSpec.describe Infrastructure::TemplateImportService do
       expect(fixed).not_to have_key("first_nations")
     end
 
-    it "strips removed classification keys from denormalized_template_json for TemplateVersion" do
+    it "converts legacy TemplateVersion exports to snapshot_json v1" do
       attrs = {
         "id" => "v-1",
         "deprecated_by_id" => "x",
         "denormalized_template_json" => {
-          "permit_type" => {
-            "id" => "pt-old"
-          },
-          "permitType" => {
-            "id" => "pt-old"
-          },
-          "activity" => {
-            "id" => "act-old"
-          },
-          "first_nations" => true,
-          "firstNations" => true,
-          "other" => "kept"
+          "id" => "template-1",
+          "nickname" => "Template",
+          "requirement_template_sections" => [
+            {
+              "id" => "section-1",
+              "name" => "Section",
+              "template_section_blocks" => [
+                {
+                  "id" => "placement-1",
+                  "requirement_block" => {
+                    "id" => "block-1"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "requirement_blocks_json" => {
+          "block-1" => {
+            "id" => "block-1",
+            "name" => "Block",
+            "form_json" => {
+              "components" => []
+            },
+            "requirements" => [
+              {
+                "id" => "requirement-1",
+                "form_json" => {
+                  "type" => "textfield"
+                }
+              }
+            ]
+          }
+        },
+        "form_json" => {
+          "components" => [{ "id" => "requirement-1" }]
         }
       }
 
       fixed = service.send(:apply_fixups, TemplateVersion, attrs)
 
       expect(fixed["deprecated_by_id"]).to be_nil
-      json = fixed["denormalized_template_json"]
-      expect(json).not_to have_key("permit_type")
-      expect(json).not_to have_key("permitType")
-      expect(json).not_to have_key("activity")
-      expect(json).not_to have_key("first_nations")
-      expect(json).not_to have_key("firstNations")
-      expect(json["other"]).to eq("kept")
+      expect(fixed).not_to have_key("denormalized_template_json")
+      expect(fixed).not_to have_key("requirement_blocks_json")
+      expect(fixed.dig("snapshot_json", "schema_version")).to eq(1)
+      expect(fixed.dig("snapshot_json", "blocks", "block-1")).not_to have_key(
+        "form_json"
+      )
+      expect(
+        fixed.dig("snapshot_json", "blocks", "block-1", "requirements", 0)
+      ).not_to have_key("form_json")
+    end
+
+    it "rejects TemplateVersion exports without a compiled form artifact" do
+      attrs = {
+        "id" => "v-1",
+        "snapshot_json" => {
+          "schema_version" => 1,
+          "template" => {
+            "id" => "template-1"
+          },
+          "sections" => [],
+          "blocks" => {
+          }
+        }
+      }
+
+      expect do
+        service.send(:apply_fixups, TemplateVersion, attrs)
+      end.to raise_error(ArgumentError, "Compiled form must be a JSON object")
     end
 
     it "upsert_batch uses upsert_all for non-classification models" do

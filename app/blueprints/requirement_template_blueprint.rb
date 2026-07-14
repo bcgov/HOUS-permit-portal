@@ -82,11 +82,6 @@ class RequirementTemplateBlueprint < Blueprinter::Base
   view :filter do
     fields :nickname
   end
-
-  view :template_snapshot do
-    association :requirement_template_sections,
-                blueprint: RequirementTemplateSectionBlueprint
-  end
 end
 
 def defaulted_template_version(rt, options)

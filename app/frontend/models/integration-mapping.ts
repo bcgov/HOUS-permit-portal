@@ -1,7 +1,7 @@
 import { flow } from "mobx"
 import { Instance, toGenerator, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
-import { IRequirementMap, ISimplifiedRequirementsMap } from "../types/types"
+import { IDenormalizedRequirementBlock, IRequirementMap, ISimplifiedRequirementsMap } from "../types/types"
 import { IRequirementBlockMapping, RequirementsMapping } from "./requirement-block-mapping"
 import { TemplateVersionModel } from "./template-version"
 
@@ -17,6 +17,7 @@ export const IntegrationMappingModel = types.snapshotProcessor(
       templateVersion: types.reference(types.late(() => TemplateVersionModel)),
       jurisdictionId: types.string,
       requirementsMapping: RequirementsMapping,
+      blocks: types.optional(types.frozen<Record<string, IDenormalizedRequirementBlock>>(), {}),
       query: types.maybeNull(types.string),
       showOnlyUnmapped: types.optional(types.boolean, false),
       isAllAccordionCollapsed: types.optional(types.boolean, false),

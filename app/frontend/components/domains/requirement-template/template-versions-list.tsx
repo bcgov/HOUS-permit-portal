@@ -80,10 +80,10 @@ export const TemplateVersionsList = observer(function TemplateVersionsList({
               <Flex w="full" as="section">
                 <Stack spacing={3} flex={1}>
                   <Text as="h4" color={"text.link"} fontWeight={700} fontSize="xl">
-                    {tv.denormalizedTemplateJson?.nickname}
+                    {tv.summary?.nickname}
                   </Text>
                   <Text fontSize={"sm"} color={"text.secondary"}>
-                    {tv.denormalizedTemplateJson?.description}
+                    {tv.summary?.description}
                   </Text>
                   <Text fontSize={"sm"} color={"text.secondary"}>
                     <Text as="span" fontWeight={700}>
@@ -93,9 +93,9 @@ export const TemplateVersionsList = observer(function TemplateVersionsList({
                   </Text>
                   <HStack gap={4} align="center">
                     <VersionTag versionDate={tv.versionDate} w="fit-content" />
-                    {(tv.denormalizedTemplateJson?.tags ?? []).length > 0 && (
+                    {(tv.summary?.tags ?? []).length > 0 && (
                       <Text fontSize="sm" color="text.secondary">
-                        {(tv.denormalizedTemplateJson?.tags ?? []).join(", ")}
+                        {(tv.summary?.tags ?? []).join(", ")}
                       </Text>
                     )}
                     {showStatusTag && (

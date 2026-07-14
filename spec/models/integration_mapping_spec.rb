@@ -116,7 +116,7 @@ RSpec.describe IntegrationMapping, type: :model do
         template_version =
           create(
             :template_version,
-            requirement_blocks_json: {
+            snapshot_blocks: {
               "1" => {
                 "id" => "1",
                 "sku" => "sku",
@@ -176,7 +176,7 @@ RSpec.describe IntegrationMapping, type: :model do
       let!(:template_version) do
         create(
           :template_version,
-          requirement_blocks_json: {
+          snapshot_blocks: {
             "1" => {
               "id" => "1",
               "sku" => "sku",

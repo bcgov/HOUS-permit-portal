@@ -64,7 +64,7 @@ RSpec.describe IntegrationMappingService do
     let(:requirements_mapping) { {} }
 
     it "initializes mapping from template_version requirement blocks and copies past mappings when available" do
-      allow(template_version).to receive(:requirement_blocks_json).and_return(
+      allow(template_version).to receive(:snapshot_blocks).and_return(
         {
           "rb1" => {
             "sku" => "rb_sku",
