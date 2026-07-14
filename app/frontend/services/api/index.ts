@@ -936,7 +936,6 @@ export class Api {
       changeSignificance?: string
       notificationScope?: string
       notifiedJurisdictionIds?: string[]
-      promoteBlockIds?: string[]
       sendAdvanceNotice?: boolean
       skipDateCheck?: boolean
     }
@@ -945,17 +944,6 @@ export class Api {
       `/template_versions/${templateVersionId}/promote_draft`,
       params
     )
-  }
-
-  async updateDraftBlock(templateVersionId: string, blockId: string, blockData: Record<string, unknown>) {
-    return this.client.patch<ApiResponse<ITemplateVersion>>(
-      `/template_versions/${templateVersionId}/update_draft_block`,
-      { blockId, blockData }
-    )
-  }
-
-  async refreshDraft(templateVersionId: string) {
-    return this.client.post<ApiResponse<ITemplateVersion>>(`/template_versions/${templateVersionId}/refresh_draft`)
   }
 
   async shareDraft(templateVersionId: string) {

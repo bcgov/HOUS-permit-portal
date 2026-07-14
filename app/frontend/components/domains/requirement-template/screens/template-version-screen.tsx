@@ -1,4 +1,4 @@
-import { Box, Button, Flex, FormControl, FormLabel, HStack, Switch } from "@chakra-ui/react"
+import { Alert, AlertIcon, Box, Button, Flex, FormControl, FormLabel, HStack, Switch, Text } from "@chakra-ui/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo, useState } from "react"
@@ -191,7 +191,7 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
               )}
               {isSuperAdmin && requirementTemplateId && (
                 <RouterLinkButton to={`/requirement-templates/${requirementTemplateId}/edit`} variant="secondary">
-                  {t("templateVersionPreview.goToBuilder")}
+                  {t("templateVersionPreview.reviseInBuilder")}
                 </RouterLinkButton>
               )}
               <RouterLinkButton to={`/template-versions/${templateVersion.id}/preview`} variant="secondary">
@@ -203,6 +203,12 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
             </HStack>
           </Flex>
           <FloatingHelpDrawer />
+          {isDraft && isSuperAdmin && (
+            <Alert status="info" m={6} mb={0} borderRadius="md" alignItems="flex-start">
+              <AlertIcon mt={1} />
+              <Text fontSize="sm">{t("templateVersionPreview.immutableVersionNotice")}</Text>
+            </Alert>
+          )}
 
           <SectionsDisplay
             sections={templateSections}
@@ -222,7 +228,7 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
                       _hover={{ textDecoration: "underline" }}
                       onClick={(e) => e.stopPropagation()}
                     >
-                      {t("templateVersionPreview.openInBuilder")}
+                      {t("templateVersionPreview.editSourceBlock")}
                     </RouterLinkButton>
                   )
                 : undefined
