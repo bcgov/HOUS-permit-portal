@@ -78,6 +78,11 @@ class PermitApplication < ApplicationRecord
   validate :jurisdiction_has_matching_submission_contact
   validates :number, presence: true
   validates :reference_number, length: { maximum: 300 }, allow_nil: true
+  validates :step_code_stage,
+            inclusion: {
+              in: StepCode::STAGES
+            },
+            allow_nil: true
   validate :submission_versions_match_status
 
   delegate :published_template_version, to: :template_version
@@ -109,6 +114,33 @@ class PermitApplication < ApplicationRecord
 
   def public_record?
     !new_draft?
+  end
+
+  # Permit-scoped stage pin: which checklist counts for this permit's completion /
+  # submission snapshot. Independent of StepCode.current_stage (tool navigation).
+  def step_code_checklist
+    return nil unless step_code
+
+    if step_code_stage.present?
+      step_code.checklist_for(stage: step_code_stage)
+    else
+      step_code.current_checklist
+    end
+  end
+
+  def step_code_complete?
+    step_code_checklist&.complete?
+  end
+
+  def ensure_step_code_stage!(stage = nil)
+    return if step_code_stage.present?
+
+    update!(
+      step_code_stage:
+        stage.presence_in(StepCode::STAGES) ||
+          step_code&.current_stage.presence_in(StepCode::STAGES) ||
+          StepCode::STAGES.first
+    )
   end
 
   def inbox_enabled?

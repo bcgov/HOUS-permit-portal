@@ -146,10 +146,6 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
       isComplete(key: TPart9NavLinkKey): boolean {
         return self.sectionCompletionStatus[key]?.complete
       },
-      get isAllComplete() {
-        if (!self.sectionCompletionStatus) return false
-        return Object.values(self.sectionCompletionStatus).every((status) => (status.relevant ? status.complete : true))
-      },
       isRelevant(key: TPart9NavLinkKey): boolean {
         return self.sectionCompletionStatus[key]?.relevant
       },

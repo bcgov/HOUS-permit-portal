@@ -47,6 +47,11 @@ export const StepCodeBaseFields = types
     get isDiscarded(): boolean {
       return self.discardedAt !== null
     },
+    isStageComplete(stage: EStepCodeChecklistStage = self.currentStage) {
+      return self.stageCompletions.some(
+        (entry) => entry.stage === stage && entry.status === EStepCodeStageStatus.complete
+      )
+    },
   }))
   .actions((self) => ({
     setProjectDetails(projectDetails: { title: string; fullAddress: string; referenceNumber?: string }) {

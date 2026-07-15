@@ -58,7 +58,7 @@ export const ChecklistSideBar = observer(({ permitApplication, completedBlocks }
                       const usingStepCodeTool = !!stepCode
                       const showCompleted =
                         usingStepCodeTool && isStepCodeBlock
-                          ? stepCode?.isComplete
+                          ? permitApplication.isStepCodeComplete
                           : completedBlocks[block.key] || false
                       return (
                         <Tab
