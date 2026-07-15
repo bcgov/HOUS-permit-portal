@@ -655,6 +655,8 @@ export interface IPermitApplicationInboxSearchFilters {
 export interface IProjectMeetingInboxSearchFilters {
   status?: EProjectMeetingStatus[]
   unread?: string
+  confirmedDateFrom?: string
+  confirmedDateTo?: string
 }
 
 export interface IProjectAuditSearchFilters {

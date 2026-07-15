@@ -33,10 +33,10 @@ FactoryBot.define do
       completed_at { Time.current }
     end
 
-    trait :closed do
-      status { :closed }
+    trait :withdrawn do
+      status { :withdrawn }
       submitted_at { Time.current }
-      closed_at { Time.current }
+      withdrawn_at { Time.current }
     end
 
     trait :viewed do

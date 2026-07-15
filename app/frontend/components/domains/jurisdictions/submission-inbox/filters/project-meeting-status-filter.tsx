@@ -24,7 +24,7 @@ export const ProjectMeetingStatusFilter = observer(function ProjectMeetingStatus
     EProjectMeetingStatus.open,
     EProjectMeetingStatus.scheduled,
     EProjectMeetingStatus.completed,
-    EProjectMeetingStatus.closed,
+    EProjectMeetingStatus.withdrawn,
   ].map((status) => ({
     value: status,
     label: t(`projectMeeting.status.${status}`),

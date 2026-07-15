@@ -6,12 +6,12 @@ import { useTranslation } from "react-i18next"
 import { useSearch } from "../../../hooks/use-search"
 import { IPermitProject } from "../../../models/permit-project"
 import { useMst } from "../../../setup/root"
-import { EFlashMessageStatus, EProjectAuditSortFields } from "../../../types/enums"
+import { EProjectAuditSortFields } from "../../../types/enums"
 import { ISort } from "../../../types/types"
-import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
+import { EmptyResultsBox } from "../../shared/grid/empty-results-box"
 import { SortIcon } from "../../shared/sort-icon"
 import { ActivityListItem } from "./activity-list-item"
 import { AuditDateRangeFilter } from "./audit-date-range-filter"
@@ -90,7 +90,7 @@ export const ActivityTabPanelContent = observer(({ permitProject, fromInbox = fa
             </Flex>
           ) : tableProjectAudits?.length === 0 ? (
             <Box py={8}>
-              <CustomMessageBox status={EFlashMessageStatus.info} description={t("permitProject.activity.empty")} />
+              <EmptyResultsBox description={t("permitProject.activity.empty")} icon={<TrendUp size={18} />} />
             </Box>
           ) : (
             tableProjectAudits?.map((projectAudit) => (

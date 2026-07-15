@@ -429,10 +429,10 @@ RSpec.describe PermitHubMailer, type: :mailer do
     expect(attachments_hash.keys.first).to end_with(".ics")
     expect(attachments_hash.values.first[:mime_type]).to include(
       "text/calendar"
-    )
+    ).and include("method=REQUEST")
     expect(attachments_hash.values.first[:content]).to include(
       "BEGIN:VCALENDAR"
-    )
+    ).and include("METHOD:REQUEST")
     expect(mailer).to have_received(:send_mail).with(
       email: "jane@example.com",
       template_key: "notify_project_meeting_scheduled"

@@ -30,7 +30,7 @@ export const ProjectMeetingSentScreen = observer(() => {
         {t("projectMeeting.sent.title")}
       </Heading>
       <Text mb={8}>{t("projectMeeting.sent.description")}</Text>
-      <Heading as="h2" size="md" mb={3}>
+      <Heading as="h2" size="lg" variant="yellowline" mb={3}>
         {t("projectMeeting.sent.whatHappensNext")}
       </Heading>
       <UnorderedList mb={8}>
@@ -38,6 +38,8 @@ export const ProjectMeetingSentScreen = observer(() => {
         <ListItem>{t("projectMeeting.sent.next2")}</ListItem>
         <ListItem>{t("projectMeeting.sent.next3")}</ListItem>
         <ListItem>{t("projectMeeting.sent.next4")}</ListItem>
+        <ListItem>{t("projectMeeting.sent.next5")}</ListItem>
+        <ListItem>{t("projectMeeting.sent.next6")}</ListItem>
       </UnorderedList>
       <Button as={RouterLink} to={`/projects/${permitProjectId}/overview`} variant="primary">
         {t("projectMeeting.sent.returnToProject")}

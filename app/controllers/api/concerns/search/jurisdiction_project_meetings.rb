@@ -50,7 +50,12 @@ module Api::Concerns::Search::JurisdictionProjectMeetings
       :query,
       :page,
       :per_page,
-      filters: [{ status: [] }, :unread],
+      filters: [
+        { status: [] },
+        :unread,
+        :confirmed_date_from,
+        :confirmed_date_to
+      ],
       sort: %i[field direction]
     )
   end
@@ -133,6 +138,21 @@ module Api::Concerns::Search::JurisdictionProjectMeetings
       and_conditions << { viewed_at: nil }
     elsif unread == "hide"
       and_conditions << { _not: { viewed_at: nil } }
+    end
+
+    confirmed_date_filter = {}
+    from = search_filters.delete(:confirmed_date_from)
+    to = search_filters.delete(:confirmed_date_to)
+    if from.present?
+      parsed_from = Time.zone.parse(from)
+      confirmed_date_filter[:gte] = parsed_from.beginning_of_day if parsed_from
+    end
+    if to.present?
+      parsed_to = Time.zone.parse(to)
+      confirmed_date_filter[:lte] = parsed_to.end_of_day if parsed_to
+    end
+    if confirmed_date_filter.present?
+      and_conditions << { confirmed_date: confirmed_date_filter }
     end
 
     { _and: and_conditions }

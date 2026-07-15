@@ -39,14 +39,14 @@ class ProjectMeetingPolicy < ApplicationPolicy
   end
 
   def update?
-    user_is_owner? && record.draft? && feature_enabled?
+    user_is_owner? && feature_enabled? && (record.draft? || record.active?)
   end
 
   def submit?
-    update?
+    user_is_owner? && record.draft? && feature_enabled?
   end
 
-  def cancel?
+  def withdraw?
     user_is_owner? && feature_enabled?
   end
 
@@ -78,6 +78,10 @@ class ProjectMeetingPolicy < ApplicationPolicy
 
   def download_notes_csv?
     view_notes?
+  end
+
+  def download_calendar?
+    show? && record.confirmed_date.present?
   end
 
   private

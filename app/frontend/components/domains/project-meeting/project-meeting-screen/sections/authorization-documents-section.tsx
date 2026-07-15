@@ -19,7 +19,7 @@ import {
 import { FileDownloadButton } from "../../../../shared/base/file-download-button"
 import { useProjectMeetingNavigation } from "../../use-project-meeting-navigation"
 import { ACCEPTED_DOCUMENT_TYPES } from "../shared/constants"
-import { activeDocumentsForType } from "../shared/document-utils"
+import { activeDocumentsForType, documentsForType } from "../shared/document-utils"
 import { DocumentsTable } from "../shared/documents-table"
 import { FormActions } from "../shared/form-actions"
 import { SectionHeading } from "../shared/section-heading"
@@ -45,7 +45,7 @@ export const AuthorizationDocumentsSection = observer(({ meeting }: Authorizatio
   })
   const { append, update } = useFieldArray({ control, name: "meetingRequestDocumentsAttributes" })
   const documents = watch("meetingRequestDocumentsAttributes") || []
-  const authorizationDocuments = activeDocumentsForType(documents, EMeetingRequestDocumentType.authorization)
+  const authorizationDocuments = documentsForType(documents, EMeetingRequestDocumentType.authorization)
   const documentError = formState.errors.meetingRequestDocumentsAttributes?.message as string | undefined
   const authorizationResources =
     currentPermitProject?.jurisdiction?.resources?.filter(
@@ -79,11 +79,10 @@ export const AuthorizationDocumentsSection = observer(({ meeting }: Authorizatio
       }
     }
 
-  const authorizationUppy = useUppyS3({
+  const { uppy: authorizationUppy, isUploading } = useUppyS3({
     onUploadSuccess: handleUploadSuccess(EMeetingRequestDocumentType.authorization),
     maxNumberOfFiles: 10,
     autoProceed: true,
-    maxFileSizeMB: 10,
     allowedFileTypes: ACCEPTED_DOCUMENT_TYPES,
   })
 
@@ -92,7 +91,14 @@ export const AuthorizationDocumentsSection = observer(({ meeting }: Authorizatio
     if (index !== -1) update(index, { ...documents[index], _destroy: true })
   }
 
+  const handleUndoRemoveFile = (documentId: string) => {
+    const index = documents.findIndex((doc) => (doc.id || doc.file?.id) === documentId)
+    if (index !== -1) update(index, { ...documents[index], _destroy: false })
+  }
+
   const onSubmit = async (data) => {
+    if (isUploading) return
+
     if (
       activeDocumentsForType(data.meetingRequestDocumentsAttributes, EMeetingRequestDocumentType.authorization)
         .length === 0
@@ -152,7 +158,11 @@ export const AuthorizationDocumentsSection = observer(({ meeting }: Authorizatio
         )}
       </Box>
       <FormControl isRequired isInvalid={!!documentError} mb={8}>
-        <DocumentsTable documents={authorizationDocuments} onRemoveFile={handleRemoveFile} />
+        <DocumentsTable
+          documents={authorizationDocuments}
+          onRemoveFile={handleRemoveFile}
+          onUndoRemoveFile={handleUndoRemoveFile}
+        />
         <UppyDashboardField
           uppy={authorizationUppy}
           acceptedFormatsLabel={t("projectMeeting.sections.documents.acceptedFormats")}
@@ -160,7 +170,11 @@ export const AuthorizationDocumentsSection = observer(({ meeting }: Authorizatio
         />
         <FormErrorMessage>{documentError}</FormErrorMessage>
       </FormControl>
-      <FormActions isSubmitting={formState.isSubmitting} />
+      <FormActions
+        isSubmitting={formState.isSubmitting}
+        isDisabled={isUploading}
+        continueLabel={t("ui.saveAndcontinue")}
+      />
     </form>
   )
 })

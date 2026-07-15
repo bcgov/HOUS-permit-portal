@@ -17,6 +17,7 @@ import { ConfirmationModal } from "../../shared/confirmation-modal"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { ProjectMeetingStatusTag } from "../../shared/project-meetings/project-meeting-status-tag"
 import { ProjectMeetingStatusBanner } from "./detail/banners/project-meeting-status-banner"
+import { DownloadCalendarInviteButton } from "./detail/download-calendar-invite-button"
 import { DocumentsSection } from "./detail/sections/documents-section"
 import { MeetingNotesSection } from "./detail/sections/meeting-notes-section"
 import { ProjectInformationSection } from "./detail/sections/project-information-section"
@@ -33,7 +34,7 @@ export const SubmitterProjectMeetingDetailContent = observer(
     const { permitProjectId: permitProjectIdParam } = useParams<{ permitProjectId: string }>()
     const { currentProjectMeeting, error, isLoading } = useProjectMeeting()
     const { projectMeetingStore, uiStore } = useMst()
-    const [isCancelling, setIsCancelling] = useState(false)
+    const [isWithdrawing, setIsWithdrawing] = useState(false)
 
     const permitProjectId = permitProject.id || permitProjectIdParam || currentProjectMeeting?.permitProjectId
 
@@ -50,21 +51,25 @@ export const SubmitterProjectMeetingDetailContent = observer(
     }
 
     const documents = currentProjectMeeting.meetingRequestDocuments.filter((document) => !document._destroy)
-    const canCancelMeeting =
+    const canWithdrawMeeting =
       permitProject.isOwner &&
       [EProjectMeetingStatus.open, EProjectMeetingStatus.scheduled].includes(currentProjectMeeting.status)
+    const requesterEditPath =
+      permitProject.isOwner && currentProjectMeeting.isActive
+        ? `/projects/${permitProjectId}/meetings/${currentProjectMeeting.id}/edit/relationship`
+        : null
 
-    const handleCancelMeeting = async (closeModal: () => void) => {
+    const handleWithdrawMeeting = async (closeModal: () => void) => {
       if (!permitProjectId) return
 
-      setIsCancelling(true)
-      const response = await projectMeetingStore.cancelProjectMeeting(permitProjectId, currentProjectMeeting.id)
-      setIsCancelling(false)
+      setIsWithdrawing(true)
+      const response = await projectMeetingStore.withdrawProjectMeeting(permitProjectId, currentProjectMeeting.id)
+      setIsWithdrawing(false)
 
       if (response.ok) {
         closeModal()
       } else {
-        uiStore.flashMessage.show(EFlashMessageStatus.error, null, t("projectMeeting.detail.cancelError"), 5000)
+        uiStore.flashMessage.show(EFlashMessageStatus.error, null, t("projectMeeting.detail.withdrawError"), 5000)
       }
     }
 
@@ -97,19 +102,20 @@ export const SubmitterProjectMeetingDetailContent = observer(
             </HStack>
           </Box>
           <HStack spacing={4}>
-            {canCancelMeeting && (
+            <DownloadCalendarInviteButton projectMeeting={currentProjectMeeting} />
+            {canWithdrawMeeting && (
               <ConfirmationModal
-                title={t("projectMeeting.detail.cancelConfirmationTitle")}
-                body={t("projectMeeting.detail.cancelConfirmationBody")}
-                triggerText={t("projectMeeting.detail.cancelMeeting")}
+                title={t("projectMeeting.detail.withdrawConfirmationTitle")}
+                body={t("projectMeeting.detail.withdrawConfirmationBody")}
+                triggerText={t("projectMeeting.detail.withdrawMeeting")}
                 triggerButtonProps={{ variant: "ghost", color: "text.secondary" }}
                 renderConfirmationButton={(props) => (
-                  <Button variant="primary" isLoading={isCancelling} {...props}>
-                    {t("projectMeeting.detail.confirmCancelMeeting")}
+                  <Button variant="primary" isLoading={isWithdrawing} {...props}>
+                    {t("projectMeeting.detail.confirmWithdrawMeeting")}
                   </Button>
                 )}
                 modalContentProps={{ maxW: "604px" }}
-                onConfirm={handleCancelMeeting}
+                onConfirm={handleWithdrawMeeting}
               />
             )}
           </HStack>
@@ -123,7 +129,7 @@ export const SubmitterProjectMeetingDetailContent = observer(
           />
 
           <ProjectInformationSection permitProject={permitProject} />
-          <RequesterInformationSection projectMeeting={currentProjectMeeting} />
+          <RequesterInformationSection projectMeeting={currentProjectMeeting} editPath={requesterEditPath} />
           <RequestDetailsSection projectMeeting={currentProjectMeeting} />
           <DocumentsSection documents={documents} />
           <MeetingNotesSection

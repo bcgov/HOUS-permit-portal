@@ -108,6 +108,7 @@ class Jurisdiction < ApplicationRecord
   validates :office_telephone, phone: true, allow_blank: true
   validate :inbox_enabled_requires_inbox_setup
   validate :project_meetings_enabled_requires_setup
+  validate :project_meetings_enabled_requires_authorization_resource
   validate :property_information_requests_enabled_requires_setup
   validate :no_duplicate_part3_occupancy_pathways
 
@@ -550,6 +551,20 @@ class Jurisdiction < ApplicationRecord
       :project_meetings_enabled,
       I18n.t(
         "activerecord.errors.models.jurisdiction.enabled_project_meetings_requires_setup"
+      )
+    )
+  end
+
+  def project_meetings_enabled_requires_authorization_resource
+    return if new_record?
+    return unless project_meetings_enabled
+    return unless will_save_change_to_project_meetings_enabled?
+    return if resources.project_meeting_authorization.exists?
+
+    errors.add(
+      :project_meetings_enabled,
+      I18n.t(
+        "activerecord.errors.models.jurisdiction.enabled_project_meetings_requires_authorization_resource"
       )
     )
   end

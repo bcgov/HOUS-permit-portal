@@ -104,19 +104,19 @@ export const HelpVideoModal = ({ isOpen, onClose, video, sections, onSubmit }: I
     }
   }
 
-  const videoUppy = useUppyS3({
+  const { uppy: videoUppy } = useUppyS3({
     onUploadSuccess: buildUploadHandler("videoDocumentAttributes"),
     maxNumberOfFiles: 1,
     autoProceed: true,
     allowedFileTypes: ["video/mp4"],
   })
-  const captionUppy = useUppyS3({
+  const { uppy: captionUppy } = useUppyS3({
     onUploadSuccess: buildUploadHandler("captionDocumentAttributes"),
     maxNumberOfFiles: 1,
     autoProceed: true,
     allowedFileTypes: [".vtt", "text/vtt"],
   })
-  const transcriptUppy = useUppyS3({
+  const { uppy: transcriptUppy } = useUppyS3({
     onUploadSuccess: buildUploadHandler("transcriptDocumentAttributes"),
     maxNumberOfFiles: 1,
     autoProceed: true,

@@ -110,7 +110,7 @@ export const UploadDrawings = observer(function UploadDrawings() {
     })
   }
 
-  const uppy = useUppyS3({
+  const { uppy } = useUppyS3({
     onUploadSuccess: handleUploadSuccess,
     maxNumberOfFiles: 1,
     autoProceed: true,

@@ -233,6 +233,11 @@ RSpec.describe Api::JurisdictionsController, type: :controller do
     it "allows jurisdiction managers" do
       manager = create(:user, :review_manager, jurisdiction: jurisdiction)
       create(:meeting_submission_contact, jurisdiction: jurisdiction)
+      create(
+        :resource,
+        jurisdiction: jurisdiction,
+        category: :project_meeting_authorization
+      )
       sign_in manager
 
       patch :update,
@@ -278,6 +283,11 @@ RSpec.describe Api::JurisdictionsController, type: :controller do
       tech = create(:user, role: :technical_support)
       create(:jurisdiction_membership, user: tech, jurisdiction: jurisdiction)
       create(:meeting_submission_contact, jurisdiction: jurisdiction)
+      create(
+        :resource,
+        jurisdiction: jurisdiction,
+        category: :project_meeting_authorization
+      )
       sign_in tech
 
       patch :update,

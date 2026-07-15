@@ -1,12 +1,12 @@
-import { Button, Flex, FormControl, GridItem, Heading, HStack, VStack } from "@chakra-ui/react"
+import { Button, Flex, FormControl, Heading, HStack, VStack } from "@chakra-ui/react"
+import { Buildings } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { IPermitProject } from "../../../models/permit-project"
 import { useMst } from "../../../setup/root"
-import { EFlashMessageStatus, EPermitProjectSortFields } from "../../../types/enums"
-import { CustomMessageBox } from "../../shared/base/custom-message-box"
+import { EPermitProjectSortFields } from "../../../types/enums"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
 import { ModelSearchInput } from "../../shared/base/model-search-input"
@@ -67,21 +67,20 @@ export const ProjectsGrid = observer(() => {
         </Flex>
       </Flex>
 
-      <SearchGrid templateColumns={PROJECTS_GRID_TEMPLATE_COLUMNS} gridRowClassName="project-grid-row">
+      <SearchGrid
+        templateColumns={PROJECTS_GRID_TEMPLATE_COLUMNS}
+        gridRowClassName="project-grid-row"
+        isEmpty={!isSearching && R.isEmpty(tablePermitProjects)}
+        emptyTitle={t("permitProject.noneFound")}
+        emptyDescription={t("permitProject.noneFoundExplanation")}
+        emptyIcon={<Buildings size={18} />}
+      >
         <GridHeaders columns={Object.values(EPermitProjectSortFields)} includeActionColumn />
 
         {isSearching ? (
           <Flex gridColumn="span 7" justify="center" align="center" minH="200px">
             <SharedSpinner />
           </Flex>
-        ) : R.isEmpty(tablePermitProjects) ? (
-          <GridItem gridColumn="span 7">
-            <CustomMessageBox
-              m={4}
-              status={EFlashMessageStatus.info}
-              description={t("permitProject.noneFoundExplanation")}
-            />
-          </GridItem>
         ) : (
           tablePermitProjects.map((project: IPermitProject) => <ProjectGridRow key={project.id} project={project} />)
         )}

@@ -1,5 +1,5 @@
 import { Container, Flex, Heading, IconButton, TabPanel, TabPanels, Tabs, Text } from "@chakra-ui/react"
-import { CalendarBlank, CaretLeft, ChatText, ClipboardText, SquaresFour, TrendUp } from "@phosphor-icons/react"
+import { CalendarBlank, CaretLeft, Chat, ClipboardText, SquaresFour, TrendUp } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo, useTransition } from "react"
 import { useTranslation } from "react-i18next"
@@ -41,7 +41,7 @@ export const InboxProjectDetailScreen = observer(() => {
         ? [
             {
               label: t("submissionInbox.projectDetail.notes"),
-              icon: ChatText,
+              icon: Chat,
               to: "notes",
               tabIndex: 2,
             },

@@ -1,12 +1,16 @@
 # ponytail: default 1-hour duration; add duration field if meetings vary
+# METHOD:REQUEST + stable UID + rising SEQUENCE so reschedule emails replace
+# the existing calendar item (PUBLISH is ignored as an update by most clients)
 class ProjectMeetingIcsGenerator
   DEFAULT_DURATION = 1.hour
   TIME_ZONE = "America/Vancouver"
   PRODID = "-//Building Permit Hub//Project Meeting//EN"
+  ORGANIZER_CN = "Building Permit Hub"
 
-  def initialize(project_meeting, hub_meeting_url:)
+  def initialize(project_meeting, hub_meeting_url:, attendee_email:)
     @project_meeting = project_meeting
     @hub_meeting_url = hub_meeting_url
+    @attendee_email = attendee_email
   end
 
   def filename
@@ -22,7 +26,7 @@ class ProjectMeetingIcsGenerator
       "VERSION:2.0",
       "PRODID:#{PRODID}",
       "CALSCALE:GREGORIAN",
-      "METHOD:PUBLISH",
+      "METHOD:REQUEST",
       event_block,
       "END:VCALENDAR"
     ].join("\r\n")
@@ -30,7 +34,7 @@ class ProjectMeetingIcsGenerator
 
   private
 
-  attr_reader :project_meeting, :hub_meeting_url
+  attr_reader :project_meeting, :hub_meeting_url, :attendee_email
 
   def event_block
     start_at = project_meeting.confirmed_date.in_time_zone(TIME_ZONE)
@@ -44,6 +48,8 @@ class ProjectMeetingIcsGenerator
       "DTEND;TZID=#{TIME_ZONE}:#{local_timestamp(end_at)}",
       "SUMMARY:#{escape(summary)}",
       "DESCRIPTION:#{escape(description)}",
+      "ORGANIZER;CN=#{escape(ORGANIZER_CN)}:mailto:#{organizer_email}",
+      "ATTENDEE;CN=#{escape(attendee_email)};RSVP=FALSE:mailto:#{attendee_email}",
       "SEQUENCE:#{project_meeting.updated_at.to_i}",
       "STATUS:CONFIRMED"
     ]
@@ -56,10 +62,16 @@ class ProjectMeetingIcsGenerator
   end
 
   def uid
-    host =
-      Addressable::URI.parse(FrontendUrlHelper.root_url).host ||
-        "buildingpermithub.gov.bc.ca"
-    "project-meeting-#{project_meeting.id}@#{host}"
+    "project-meeting-#{project_meeting.id}@#{calendar_host}"
+  end
+
+  def calendar_host
+    Addressable::URI.parse(FrontendUrlHelper.root_url).host ||
+      "buildingpermithub.gov.bc.ca"
+  end
+
+  def organizer_email
+    ENV["FROM_EMAIL"].presence || "no-reply@#{calendar_host}"
   end
 
   def summary
