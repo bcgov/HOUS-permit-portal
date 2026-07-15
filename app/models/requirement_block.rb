@@ -14,6 +14,7 @@ class RequirementBlock < ApplicationRecord
   sanitizable :display_description
 
   has_many :requirements, -> { order(position: :asc) }, dependent: :destroy
+  has_many :requirement_questions, through: :requirements
   has_many :requirement_documents,
            dependent: :destroy,
            inverse_of: :requirement_block
@@ -52,7 +53,8 @@ class RequirementBlock < ApplicationRecord
     {
       updated_at: updated_at,
       name: name,
-      requirement_labels: requirements.pluck(:label),
+      requirement_labels:
+        requirements.includes(:requirement_question).map(&:effective_label),
       associations: association_list,
       configurations: configurations_search_list,
       discarded: discarded_at.present?,
