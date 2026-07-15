@@ -864,6 +864,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_09_150000) do
     t.string "hint"
     t.text "instructions"
     t.boolean "shared", default: false, null: false
+    t.string "name"
+    t.text "description"
     t.datetime "discarded_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
