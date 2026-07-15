@@ -25,13 +25,15 @@ RSpec.describe Api::SiteConfigurationController, type: :controller do
           params: {
             site_configuration: {
               display_sitewide_message: true,
-              sitewide_message: "Maintenance window"
+              sitewide_message: "Maintenance window",
+              overheating_tool_enabled: true
             }
           },
           format: :json
 
       expect(response).to have_http_status(:ok)
       expect(SiteConfiguration.instance.display_sitewide_message).to eq(true)
+      expect(SiteConfiguration.instance.overheating_tool_enabled).to eq(true)
     end
   end
 

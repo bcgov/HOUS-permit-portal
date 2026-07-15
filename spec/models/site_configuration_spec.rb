@@ -26,6 +26,16 @@ RSpec.describe SiteConfiguration, type: :model do
     end
   end
 
+  describe ".overheating_tool_enabled?" do
+    before { SiteConfiguration.delete_all }
+
+    it "returns the global overheating tool flag" do
+      described_class.create!(overheating_tool_enabled: true)
+
+      expect(described_class.overheating_tool_enabled?).to eq(true)
+    end
+  end
+
   describe "singleton enforcement" do
     it "prevents creating a second record" do
       SiteConfiguration.create!

@@ -743,6 +743,14 @@ const options = {
             intro:
               "Your overheating code check results are stored here. Use this service to verify compliance with overheating requirements before submitting a permit application.",
           },
+          unavailable: {
+            title: "Overheating Code Check is temporarily unavailable",
+            description:
+              "This tool is currently unavailable while we update and validate it with our partner organizations.",
+            savedWork:
+              "If you started or saved an overheating code check before, your work is still saved and will be available when access is restored.",
+            returnToTools: "Return to Project Readiness Tools",
+          },
           columns: {
             issued_to: "Issued To",
             project_number: "Project #",
@@ -3780,6 +3788,9 @@ Thank you,
               submissionInbox: "Submissions",
               submissionInboxDescription:
                 "Enable review managers to accept and process permit applications. If you turn off this feature, submitters can't submit applications, and review managers won't receive new applications.",
+              overheatingTool: "Overheating tool",
+              overheatingToolDescription:
+                "Enable the Overheating Code Check tool for logged-in users. If turned off, users cannot access existing checks or start new ones.",
               toggleOn: "On",
               toggleOff: "Off",
               acceptPermitApplications: "Accept permit applications",
@@ -4648,6 +4659,9 @@ Thank you,
               jurisdictionsCount_other: "{{count}} jurisdictions enabled",
               searchJurisdictions: "Search and select jurisdictions...",
             },
+            overheatingTool: "Overheating tool",
+            overheatingToolDescription:
+              "Enable the Overheating Code Check tool for logged-in users. If turned off, users cannot access existing checks or start new ones.",
             qaTools: "QA tools",
             qaToolsDescription:
               "Enable QA tools for users who can access test helpers. This setting only applies when QA mode is enabled for the environment.",
@@ -5158,6 +5172,8 @@ Thank you,
             preview: "Preview",
             videos: "Videos",
             helpVideos: "Videos",
+            qaTools: "QA tools",
+            overheatingTool: "Overheating tool",
             templateCategories: "Permit categories",
           },
         },

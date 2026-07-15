@@ -321,6 +321,11 @@ const PreCheckViewer = lazy(() =>
 const OverheatingCodeForm = lazy(() =>
   import("../overheating-code").then((module) => ({ default: module.OverheatingCodeForm }))
 )
+const OverheatingCodeUnavailableScreen = lazy(() =>
+  import("../overheating-code/unavailable-screen").then((module) => ({
+    default: module.OverheatingCodeUnavailableScreen,
+  }))
+)
 
 const StepCodeChecklistPDFViewer = lazy(() =>
   import("../step-code/checklist/pdf-content/viewer").then((module) => ({
@@ -408,6 +413,12 @@ const TemplateCategoriesScreen = lazy(() =>
   }))
 )
 
+const OverheatingToolFeatureAccessScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/overheating-tool-feature-access").then((module) => ({
+    default: module.OverheatingToolFeatureAccessScreen,
+  }))
+)
+
 const ReportingScreen = lazy(() =>
   import("../super-admin/reporting/reporting-screen").then((module) => ({ default: module.ReportingScreen }))
 )
@@ -483,7 +494,7 @@ const AppRoutes = observer(() => {
 
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const { allowDesignatedReviewer } = siteConfigurationStore
+  const { allowDesignatedReviewer, overheatingToolEnabled } = siteConfigurationStore
   if (currentUser === undefined) {
     console.log("AppRoutes: currentUser is undefined, rendering LoadingScreen.")
     return <LoadingScreen />
@@ -549,6 +560,10 @@ const AppRoutes = observer(() => {
       <Route
         path="/configuration-management/global-feature-access/code-compliance"
         element={<CodeComplianceSetupScreen />}
+      />
+      <Route
+        path="/configuration-management/global-feature-access/overheating-tool"
+        element={<OverheatingToolFeatureAccessScreen />}
       />
       {qaModeEnabled && (
         <Route
@@ -759,11 +774,17 @@ const AppRoutes = observer(() => {
             <Route path="/pre-checks/:preCheckId/edit/" element={<PreCheckForm />} />
             <Route path="/pre-checks/:preCheckId/edit/:section" element={<PreCheckForm />} />
             <Route path="/pre-checks/:preCheckId/viewer" element={<PreCheckViewer />} />
-            <Route path="/overheating-codes" element={<ProjectDashboardScreen />} />
-            <Route path="/overheating-codes/new" element={<OverheatingCodeForm />} />
-            <Route path="/overheating-codes/new/:section" element={<OverheatingCodeForm />} />
-            <Route path="/overheating-codes/:overheatingCodeId/edit/" element={<OverheatingCodeForm />} />
-            <Route path="/overheating-codes/:overheatingCodeId/edit/:section" element={<OverheatingCodeForm />} />
+            {overheatingToolEnabled ? (
+              <>
+                <Route path="/overheating-codes" element={<ProjectDashboardScreen />} />
+                <Route path="/overheating-codes/new" element={<OverheatingCodeForm />} />
+                <Route path="/overheating-codes/new/:section" element={<OverheatingCodeForm />} />
+                <Route path="/overheating-codes/:overheatingCodeId/edit/" element={<OverheatingCodeForm />} />
+                <Route path="/overheating-codes/:overheatingCodeId/edit/:section" element={<OverheatingCodeForm />} />
+              </>
+            ) : (
+              <Route path="/overheating-codes/*" element={<OverheatingCodeUnavailableScreen />} />
+            )}
             <Route path="/documents" element={<ProjectDashboardScreen />} />
             {/* Already handled above with path-based tabs */}
             <Route path="/projects" element={<ProjectDashboardScreen />} />
