@@ -509,6 +509,28 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
       )
     end
 
+    it "allows changing relationship to non-owner on an open meeting without auth docs yet" do
+      meeting =
+        create(
+          :project_meeting,
+          :open,
+          permit_project: permit_project,
+          requester_relationship: :owner_or_landholder
+        )
+
+      patch "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}",
+            params: {
+              project_meeting: {
+                requester_relationship: "other"
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("data", "requester_relationship")).to eq("other")
+    end
+
     it "forbids updating a completed meeting" do
       meeting =
         create(:project_meeting, :completed, permit_project: permit_project)
