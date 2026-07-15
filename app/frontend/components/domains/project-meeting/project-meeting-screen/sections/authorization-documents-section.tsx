@@ -18,7 +18,6 @@ import {
 } from "../../../../../types/enums"
 import { FileDownloadButton } from "../../../../shared/base/file-download-button"
 import { useProjectMeetingNavigation } from "../../use-project-meeting-navigation"
-import { ACCEPTED_DOCUMENT_TYPES } from "../shared/constants"
 import { activeDocumentsForType, documentsForType } from "../shared/document-utils"
 import { DocumentsTable } from "../shared/documents-table"
 import { FormActions } from "../shared/form-actions"
@@ -83,7 +82,6 @@ export const AuthorizationDocumentsSection = observer(({ meeting }: Authorizatio
     onUploadSuccess: handleUploadSuccess(EMeetingRequestDocumentType.authorization),
     maxNumberOfFiles: 10,
     autoProceed: true,
-    allowedFileTypes: ACCEPTED_DOCUMENT_TYPES,
   })
 
   const handleRemoveFile = (documentId: string) => {
@@ -163,11 +161,7 @@ export const AuthorizationDocumentsSection = observer(({ meeting }: Authorizatio
           onRemoveFile={handleRemoveFile}
           onUndoRemoveFile={handleUndoRemoveFile}
         />
-        <UppyDashboardField
-          uppy={authorizationUppy}
-          acceptedFormatsLabel={t("projectMeeting.sections.documents.acceptedFormats")}
-          mb={2}
-        />
+        <UppyDashboardField uppy={authorizationUppy} mb={2} />
         <FormErrorMessage>{documentError}</FormErrorMessage>
       </FormControl>
       <FormActions
