@@ -60,6 +60,16 @@ RSpec.describe OverheatingCodePdfService do
       expect(pdf_data).to include("John Q. Engineer")
       expect(pdf_data).to include("john@example.com")
     end
+
+    it "includes HVAC Designers of Canada and TECA attribution" do
+      pdf_data = service.generate
+      contents =
+        HexaPDF::Document.new(io: StringIO.new(pdf_data)).pages[0].contents.to_s
+
+      expect(contents).to include("HVAC Designers of Canada")
+      expect(contents).to include("TECA")
+      expect(contents).to include("digitized with their permission")
+    end
   end
 
   describe "#filename" do

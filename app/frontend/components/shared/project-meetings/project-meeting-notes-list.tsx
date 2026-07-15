@@ -1,5 +1,5 @@
 import { Box, HStack, Text, VStack } from "@chakra-ui/react"
-import { Clock } from "@phosphor-icons/react"
+import { Chat } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next"
 import { datefnsTableDateTimeFormat } from "../../../constants"
 import { INote } from "../../../models/note"
 import { SafeTipTapDisplay } from "../editor/safe-tiptap-display"
+import { EmptyResultsBox } from "../grid/empty-results-box"
 import { RouterLink } from "../navigation/router-link"
 
 interface ProjectMeetingNotesListProps {
@@ -21,17 +22,11 @@ export const ProjectMeetingNotesList = observer(
 
     if (notes.length === 0) {
       return (
-        <Box border="1px" borderColor="border.light" borderRadius="md" p={4}>
-          <HStack align="start" spacing={2}>
-            <Clock size={18} />
-            <Box>
-              <Text fontWeight="bold" mb={1}>
-                {t("projectMeeting.detail.notes.emptyTitle")}
-              </Text>
-              <Text fontSize="sm">{emptyDescription}</Text>
-            </Box>
-          </HStack>
-        </Box>
+        <EmptyResultsBox
+          title={t("projectMeeting.detail.notes.emptyTitle")}
+          description={emptyDescription}
+          icon={<Chat size={18} />}
+        />
       )
     }
 

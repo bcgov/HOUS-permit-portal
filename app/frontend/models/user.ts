@@ -42,6 +42,7 @@ export const UserModel = types
     department: types.maybeNull(types.string),
     preference: types.frozen<IPreference>(),
     invitedToJurisdiction: types.maybeNull(types.frozen<IJurisdiction>()),
+    invitationPromotesExistingSubmitter: types.optional(types.boolean, false),
     licenseAgreements: types.maybeNull(types.frozen<ILicenseAgreement[]>()),
   })
   .extend(withRootStore())

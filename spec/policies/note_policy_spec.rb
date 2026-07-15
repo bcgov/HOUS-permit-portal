@@ -36,17 +36,17 @@ RSpec.describe NotePolicy, type: :policy do
           :note,
           noteable: create(:project_meeting, permit_project: permit_project)
         )
-      closed_note =
+      withdrawn_note =
         create(
           :note,
           noteable:
-            create(:project_meeting, :closed, permit_project: permit_project)
+            create(:project_meeting, :withdrawn, permit_project: permit_project)
         )
 
       expect(resolved_scope_for(reviewer)).to include(
         note,
         draft_note,
-        closed_note
+        withdrawn_note
       )
     end
 
@@ -78,7 +78,11 @@ RSpec.describe NotePolicy, type: :policy do
           create(
             :note,
             noteable:
-              create(:project_meeting, :closed, permit_project: sandbox_project)
+              create(
+                :project_meeting,
+                :withdrawn,
+                permit_project: sandbox_project
+              )
           )
         live_note = note
 

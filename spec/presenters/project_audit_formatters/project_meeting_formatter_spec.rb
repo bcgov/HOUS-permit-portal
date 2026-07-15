@@ -12,7 +12,7 @@ RSpec.describe ProjectAuditFormatters::ProjectMeetingFormatter do
       "open" => "Alice submitted a project meeting request",
       "scheduled" => "Alice scheduled the project meeting",
       "completed" => "Alice completed the project meeting",
-      "closed" => "Alice cancelled the project meeting"
+      "withdrawn" => "Alice withdrew the project meeting"
     }.each do |status, message|
       context "when status changes to #{status}" do
         let(:audit) do

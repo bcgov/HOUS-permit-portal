@@ -120,6 +120,56 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
     end
   end
 
+  describe "GET /api/project_meetings/:id/download_calendar" do
+    it "downloads an ICS invite for a scheduled meeting" do
+      meeting =
+        create(
+          :project_meeting,
+          :scheduled,
+          permit_project: permit_project,
+          confirmed_date: Time.zone.parse("2026-01-20 09:30")
+        )
+
+      get "/api/project_meetings/#{meeting.id}/download_calendar",
+          headers: headers
+
+      expect(response).to have_http_status(:ok)
+      expect(response.headers["Content-Type"]).to include("text/calendar")
+      expect(response.headers["Content-Disposition"]).to include(".ics")
+      expect(response.body).to include("METHOD:REQUEST")
+      expect(response.body).to include("UID:project-meeting-#{meeting.id}@")
+      expect(response.body).to include("mailto:#{owner.email}")
+    end
+
+    it "allows jurisdiction review staff to download the invite" do
+      reviewer = create(:user, :reviewer, jurisdiction: jurisdiction)
+      meeting =
+        create(
+          :project_meeting,
+          :scheduled,
+          permit_project: permit_project,
+          confirmed_date: Time.zone.parse("2026-01-20 09:30")
+        )
+      sign_in reviewer
+
+      get "/api/project_meetings/#{meeting.id}/download_calendar",
+          headers: headers
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("mailto:#{reviewer.email}")
+      expect(response.body).not_to include("mailto:#{owner.email}")
+    end
+
+    it "rejects downloads when no confirmed date is set" do
+      meeting = create(:project_meeting, :open, permit_project: permit_project)
+
+      get "/api/project_meetings/#{meeting.id}/download_calendar",
+          headers: headers
+
+      expect(response).to have_http_status(:forbidden)
+    end
+  end
+
   describe "POST /api/permit_projects/:permit_project_id/meetings/search",
            :search do
     let!(:meeting) do
@@ -339,6 +389,52 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
       expect(json_response.dig("meta", "unread_count")).to eq(1)
     end
 
+    it "filters by confirmed meeting date range" do
+      in_range =
+        create(
+          :project_meeting,
+          :scheduled,
+          permit_project:
+            create(
+              :permit_project,
+              jurisdiction: jurisdiction,
+              number: "CS-0000-DATE-IN"
+            ),
+          confirmed_date: 3.days.from_now
+        )
+      out_of_range =
+        create(
+          :project_meeting,
+          :scheduled,
+          permit_project:
+            create(
+              :permit_project,
+              jurisdiction: jurisdiction,
+              number: "CS-0000-DATE-OUT"
+            ),
+          confirmed_date: 20.days.from_now
+        )
+      ProjectMeeting.reindex
+
+      post "/api/jurisdictions/#{jurisdiction.id}/project_meetings/search",
+           params: {
+             query: "*",
+             page: 1,
+             per_page: 10,
+             filters: {
+               confirmed_date_from: Time.zone.today.iso8601,
+               confirmed_date_to: 7.days.from_now.to_date.iso8601
+             }
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      ids = json_response["data"].pluck("id")
+      expect(ids).to include(in_range.id, viewed_meeting.id)
+      expect(ids).not_to include(out_of_range.id)
+    end
+
     it "blocks users outside the jurisdiction" do
       sign_in create(:user, :reviewer)
 
@@ -388,6 +484,45 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
           "document_type"
         )
       ).to eq("supporting")
+    end
+
+    it "allows the project owner to update requester details on an open meeting" do
+      meeting = create(:project_meeting, :open, permit_project: permit_project)
+
+      patch "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}",
+            params: {
+              project_meeting: {
+                contact_name: "Updated Requester",
+                contact_email: "updated@example.com",
+                contact_phone_number: "2505559999"
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("data", "contact_name")).to eq(
+        "Updated Requester"
+      )
+      expect(json_response.dig("data", "contact_email")).to eq(
+        "updated@example.com"
+      )
+    end
+
+    it "forbids updating a completed meeting" do
+      meeting =
+        create(:project_meeting, :completed, permit_project: permit_project)
+
+      patch "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}",
+            params: {
+              project_meeting: {
+                contact_name: "Should Not Update"
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:forbidden)
     end
   end
 
@@ -482,47 +617,47 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
     end
   end
 
-  describe "POST /api/permit_projects/:permit_project_id/meetings/:id/cancel" do
-    it "allows the project owner to cancel an open meeting request" do
+  describe "POST /api/permit_projects/:permit_project_id/meetings/:id/withdraw" do
+    it "allows the project owner to withdraw an open meeting request" do
       meeting = create(:project_meeting, :open, permit_project: permit_project)
 
-      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/cancel",
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/withdraw",
            headers: headers,
            as: :json
 
       expect(response).to have_http_status(:ok)
-      expect(json_response.dig("data", "status")).to eq("closed")
-      expect(json_response.dig("data", "closed_at")).to be_present
+      expect(json_response.dig("data", "status")).to eq("withdrawn")
+      expect(json_response.dig("data", "withdrawn_at")).to be_present
     end
 
     it "blocks unrelated submitters" do
       meeting = create(:project_meeting, :open, permit_project: permit_project)
       sign_in other_user
 
-      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/cancel",
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/withdraw",
            headers: headers,
            as: :json
 
       expect(response).to have_http_status(:forbidden)
     end
 
-    it "blocks review staff from cancelling through the submitter action" do
+    it "blocks review staff from withdrawing through the submitter action" do
       reviewer = create(:user, :reviewer, jurisdiction: jurisdiction)
       meeting = create(:project_meeting, :open, permit_project: permit_project)
       sign_in reviewer
 
-      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/cancel",
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/withdraw",
            headers: headers,
            as: :json
 
       expect(response).to have_http_status(:forbidden)
     end
 
-    it "returns unprocessable when the meeting cannot be closed" do
+    it "returns unprocessable when the meeting cannot be withdrawn" do
       meeting =
         create(:project_meeting, :completed, permit_project: permit_project)
 
-      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/cancel",
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/withdraw",
            headers: headers,
            as: :json
 
@@ -697,9 +832,9 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
       expect(meeting.reload).to be_completed
     end
 
-    it "does not allow a closed meeting request to be re-opened" do
+    it "does not allow a withdrawn meeting request to be re-opened" do
       meeting =
-        create(:project_meeting, :closed, permit_project: permit_project)
+        create(:project_meeting, :withdrawn, permit_project: permit_project)
       sign_in reviewer
 
       post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/transition_status",
@@ -710,7 +845,7 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
            as: :json
 
       expect(response).to have_http_status(:forbidden)
-      expect(meeting.reload).to be_closed
+      expect(meeting.reload).to be_withdrawn
     end
 
     it "returns validation errors when scheduling without a confirmed date" do
@@ -769,7 +904,7 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
 
       post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/transition_status",
            params: {
-             target_status: "closed"
+             target_status: "withdrawn"
            },
            headers: headers,
            as: :json

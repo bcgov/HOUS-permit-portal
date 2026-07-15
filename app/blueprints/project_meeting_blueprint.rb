@@ -16,7 +16,7 @@ class ProjectMeetingBlueprint < Blueprinter::Base
          :confirmed_date,
          :scheduled_at,
          :completed_at,
-         :closed_at,
+         :withdrawn_at,
          :meeting_url,
          :viewed_at,
          :notes_count,

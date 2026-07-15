@@ -974,7 +974,7 @@ RSpec.describe NotificationService do
   end
 
   describe ".publish_project_meeting_scheduled_event" do
-    it "sends the scheduled meeting email to the requester" do
+    it "sends the scheduled meeting email to the requester and an in-app notification" do
       meeting =
         create(
           :project_meeting,
@@ -982,6 +982,7 @@ RSpec.describe NotificationService do
           contact_method: :phone,
           meeting_url: nil
         )
+      allow(NotificationPushJob).to receive(:perform_async)
 
       expect {
         described_class.publish_project_meeting_scheduled_event(meeting)
@@ -989,6 +990,16 @@ RSpec.describe NotificationService do
         PermitHubMailer,
         :notify_project_meeting_scheduled
       ).with(meeting)
+
+      expect(NotificationPushJob).to have_received(:perform_async) do |payload|
+        expect(payload.keys).to contain_exactly(meeting.requested_by.id)
+        expect(payload[meeting.requested_by.id]["action_type"]).to eq(
+          Constants::NotificationActionTypes::PROJECT_MEETING_SCHEDULED
+        )
+        expect(payload[meeting.requested_by.id]["action_text"]).to include(
+          "has been accepted and a meeting time has been scheduled"
+        )
+      end
     end
 
     it "sends scheduled meeting emails to jurisdiction project meeting contacts" do

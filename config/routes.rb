@@ -195,6 +195,7 @@ Rails.application.routes.draw do
     end
 
     resources :project_meetings, only: %i[show] do
+      get :download_calendar, on: :member
       resources :notes,
                 only: %i[index create],
                 controller: "project_meetings/notes" do
@@ -259,7 +260,7 @@ Rails.application.routes.draw do
       resources :project_meetings, path: "meetings", only: %i[create update] do
         post "search", on: :collection, to: "project_meetings#index"
         post :submit, on: :member
-        post :cancel, on: :member
+        post :withdraw, on: :member
         post :reschedule, on: :member
         post :transition_status, on: :member
         post :mark_as_viewed, on: :member

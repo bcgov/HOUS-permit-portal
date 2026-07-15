@@ -89,7 +89,7 @@ export const BlockSetup = observer(function BlockSetup({
     }
   }
 
-  const uppy = useUppyS3({ onUploadSuccess: handleUploadSuccess, maxNumberOfFiles: 10, autoProceed: true })
+  const { uppy } = useUppyS3({ onUploadSuccess: handleUploadSuccess, maxNumberOfFiles: 10, autoProceed: true })
 
   return (
     <Box as={"section"} w={"350px"} boxShadow={"md"} borderRadius={"xl"} bg={"greys.grey10"} ref={containerRef}>

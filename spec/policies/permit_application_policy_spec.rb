@@ -682,7 +682,7 @@ RSpec.describe PermitApplicationPolicy do
           jurisdiction: jurisdiction,
           sandbox: sandbox
         )
-      draft_with_closed_meeting =
+      draft_with_withdrawn_meeting =
         create(
           :permit_application,
           jurisdiction: jurisdiction,
@@ -696,8 +696,8 @@ RSpec.describe PermitApplicationPolicy do
       )
       create(
         :project_meeting,
-        :closed,
-        permit_project: draft_with_closed_meeting.permit_project
+        :withdrawn,
+        permit_project: draft_with_withdrawn_meeting.permit_project
       )
 
       resolved =
@@ -707,7 +707,7 @@ RSpec.describe PermitApplicationPolicy do
         ).resolve
 
       expect(resolved).to include(draft_with_active_meeting)
-      expect(resolved).not_to include(draft_with_closed_meeting)
+      expect(resolved).not_to include(draft_with_withdrawn_meeting)
     end
   end
 end

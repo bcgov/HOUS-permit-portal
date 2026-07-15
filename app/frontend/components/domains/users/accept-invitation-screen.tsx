@@ -47,9 +47,29 @@ const Content = observer(function Content({ invitedUser }: Readonly<IProps>) {
   const { sessionStore } = useMst()
   const { loggedIn } = sessionStore
 
-  const { invitedByEmail, invitedToJurisdiction, isSuperAdmin, email, role, jurisdiction } = invitedUser
+  const {
+    invitedByEmail,
+    invitedToJurisdiction,
+    isSuperAdmin,
+    email,
+    role,
+    jurisdiction,
+    invitationPromotesExistingSubmitter,
+  } = invitedUser
   const defaultedJurisdiction = invitedToJurisdiction ?? jurisdiction
   const showLoggedInStaffInviteWarning = loggedIn && !isSuperAdmin && role !== EUserRoles.submitter
+  const inviteWarningKey = (() => {
+    if (showLoggedInStaffInviteWarning && invitationPromotesExistingSubmitter) {
+      return "user.loggedInSubmitterStaffInviteWarning"
+    }
+    if (showLoggedInStaffInviteWarning) {
+      return "user.loggedInStaffInviteWarning"
+    }
+    if (invitationPromotesExistingSubmitter) {
+      return "user.submitterPromotionProjectAccessWarning"
+    }
+    return null
+  })()
 
   return (
     <CenterContainer>
@@ -91,16 +111,15 @@ const Content = observer(function Content({ invitedUser }: Readonly<IProps>) {
 
         <Divider my={4} />
 
+        {inviteWarningKey && (
+          <Alert status="warning" borderRadius="md" alignItems="flex-start">
+            <AlertIcon mt={1} />
+            <Text fontSize="sm">{t(inviteWarningKey)}</Text>
+          </Alert>
+        )}
+
         {loggedIn ? (
-          <>
-            {showLoggedInStaffInviteWarning && (
-              <Alert status="warning" borderRadius="md" alignItems="flex-start">
-                <AlertIcon mt={1} />
-                <Text fontSize="sm">{t("user.loggedInStaffInviteWarning")}</Text>
-              </Alert>
-            )}
-            <AcceptInviteForm />
-          </>
+          <AcceptInviteForm />
         ) : (
           <>
             <Heading as="h3" textAlign="center">
