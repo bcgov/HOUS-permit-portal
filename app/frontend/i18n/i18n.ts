@@ -371,6 +371,7 @@ const options = {
           invalidInput: "Invalid input",
           invalidUrl: "Invalid url",
           invalidEmail: "Invalid email",
+          invalidPhone: "Enter a valid phone number",
           selectPlaceholder: "Select",
           selectApplicable: "Select applicable:",
           clickHere: "Click here",
