@@ -3,10 +3,7 @@
 class RequirementBlueprint < Blueprinter::Base
   identifier :id
   fields :requirement_code,
-         :label,
-         :input_type,
-         :hint,
-         :instructions,
+         :requirement_question_id,
          :required,
          :related_content,
          :required_for_in_person_hint,
@@ -15,18 +12,34 @@ class RequirementBlueprint < Blueprinter::Base
          :updated_at,
          :created_at
 
+  association :requirement_question, blueprint: RequirementQuestionBlueprint
+
+  field :label do |requirement|
+    requirement.effective_label
+  end
+
+  field :input_type do |requirement|
+    requirement.effective_input_type
+  end
+
+  field :hint do |requirement|
+    requirement.effective_hint
+  end
+
+  field :instructions do |requirement|
+    requirement.effective_instructions
+  end
+
   field :form_json do |requirement|
     requirement.to_form_json
   end
 
   field :input_options do |requirement|
-    unless requirement
-             .input_options
-             .dig("computed_compliance", "options_map")
-             .is_a?(Hash)
-      requirement.input_options
+    input_options = requirement.effective_input_options
+    unless input_options.dig("computed_compliance", "options_map").is_a?(Hash)
+      input_options
     else
-      input_options_dup = requirement.input_options.deep_dup
+      input_options_dup = input_options.deep_dup
 
       # this needs to be done to prevent camelizing the computed compliance options map keys
       # as conversion results in unexpected behaviour

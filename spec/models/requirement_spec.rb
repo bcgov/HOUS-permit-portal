@@ -4,6 +4,7 @@ RSpec.describe Requirement, type: :model, search: true do
   describe "associations" do
     # Testing direct associations
     it { should belong_to(:requirement_block) }
+    it { should belong_to(:requirement_question).optional }
   end
 
   describe "validations" do

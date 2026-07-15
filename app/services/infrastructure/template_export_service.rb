@@ -11,6 +11,7 @@ module Infrastructure
         filename: "requirement_template_sections.ndjson"
       },
       { model: RequirementBlock, filename: "requirement_blocks.ndjson" },
+      { model: RequirementQuestion, filename: "requirement_questions.ndjson" },
       {
         model: TemplateSectionBlock,
         filename: "template_section_blocks.ndjson"
