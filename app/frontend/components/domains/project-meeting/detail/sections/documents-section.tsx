@@ -15,9 +15,9 @@ export const DocumentsSection = ({ documents }: DocumentsSectionProps) => {
 
   return (
     <DetailSection title={t("projectMeeting.detail.documents")}>
-      <Text mb={3}>{t("projectMeeting.detail.documentsDescription")}</Text>
+      <Text mb={4}>{t("projectMeeting.detail.documentsDescription")}</Text>
       {documents.length > 0 ? (
-        <VStack align="flex-start" spacing={1}>
+        <VStack align="flex-start" spacing={3}>
           {documents.map((document) => (
             <FileDownloadButton
               key={document.id || document.file?.id}

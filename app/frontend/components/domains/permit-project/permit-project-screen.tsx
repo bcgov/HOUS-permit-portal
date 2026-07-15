@@ -1,5 +1,5 @@
 import { Box, Container, Flex, IconButton, TabPanel, TabPanels, Tabs, Text } from "@chakra-ui/react"
-import { CalendarBlank, CaretLeft, ChatText, ClipboardText, Folder, SquaresFour, TrendUp } from "@phosphor-icons/react"
+import { CalendarBlank, CaretLeft, Chat, ClipboardText, Folder, SquaresFour, TrendUp } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo, useTransition } from "react"
 import { useForm } from "react-hook-form"
@@ -37,7 +37,7 @@ export const PermitProjectScreen = observer(() => {
       ...(projectMeetingsEnabled
         ? [
             { label: t("permitProject.details.meetings"), icon: CalendarBlank, to: "meetings", tabIndex: 3 },
-            { label: t("permitProject.details.notes"), icon: ChatText, to: "notes", tabIndex: 4 },
+            { label: t("permitProject.details.notes"), icon: Chat, to: "notes", tabIndex: 4 },
           ]
         : []),
       {

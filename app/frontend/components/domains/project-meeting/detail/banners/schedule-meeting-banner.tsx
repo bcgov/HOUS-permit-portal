@@ -24,6 +24,7 @@ import {
   EProjectMeetingScheduleMode,
 } from "../../../../../types/enums"
 import { DatePicker } from "../../../../shared/date-picker"
+import { TimeSlotPicker } from "../../../../shared/time-slot-picker"
 
 interface ScheduleMeetingBannerProps {
   projectMeeting: IProjectMeeting
@@ -227,12 +228,13 @@ export const ScheduleMeetingBanner = observer(
 
             <FormControl isRequired isInvalid={!!errors.confirmedTime}>
               <FormLabel>{t("projectMeeting.detail.reviewer.meetingTime")}</FormLabel>
-              <Input
-                type="time"
-                bg="white"
-                {...register("confirmedTime", {
-                  required: t("projectMeeting.detail.reviewer.meetingTimeRequired"),
-                })}
+              <Controller
+                name="confirmedTime"
+                control={control}
+                rules={{ required: t("projectMeeting.detail.reviewer.meetingTimeRequired") }}
+                render={({ field }) => (
+                  <TimeSlotPicker value={field.value} onChange={field.onChange} name={field.name} />
+                )}
               />
               <FormErrorMessage>{errors.confirmedTime?.message as string}</FormErrorMessage>
             </FormControl>

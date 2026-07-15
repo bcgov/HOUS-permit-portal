@@ -1,10 +1,16 @@
 import { Grid, GridProps } from "@chakra-ui/react"
 import React, { ReactNode } from "react"
+import { EmptyResultsBox } from "./empty-results-box"
 
 interface ISearchGridProps extends Partial<Omit<GridProps, "templateColumns">> {
   children: ReactNode
   templateColumns: string
   gridRowClassName?: string
+  isEmpty?: boolean
+  emptyTitle?: React.ReactNode
+  emptyDescription?: React.ReactNode
+  emptyIcon?: React.ReactNode
+  emptyState?: React.ReactNode
 }
 
 export const SearchGrid = ({
@@ -12,6 +18,11 @@ export const SearchGrid = ({
   children,
   templateColumns,
   gridRowClassName,
+  isEmpty,
+  emptyTitle,
+  emptyDescription,
+  emptyIcon,
+  emptyState,
   ...containerProps
 }: ISearchGridProps) => {
   return (
@@ -41,6 +52,16 @@ export const SearchGrid = ({
       {...containerProps}
     >
       {children}
+      {isEmpty &&
+        (emptyState ?? (
+          <EmptyResultsBox
+            gridColumn="1 / -1"
+            m={4}
+            title={emptyTitle}
+            description={emptyDescription}
+            icon={emptyIcon}
+          />
+        ))}
     </Grid>
   )
 }

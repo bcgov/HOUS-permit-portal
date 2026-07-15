@@ -1,5 +1,5 @@
 import { Box, Link as ChakraLink, Flex, HStack, Text, VStack } from "@chakra-ui/react"
-import { ChatText } from "@phosphor-icons/react"
+import { CalendarBlank, Chat } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -8,9 +8,8 @@ import { Link, useParams } from "react-router-dom"
 import { datefnsTableDateFormat, datefnsTableDateTimeFormat } from "../../../../constants"
 import { ISearch } from "../../../../lib/create-search-model"
 import { IProjectMeeting } from "../../../../models/project-meeting"
-import { EFlashMessageStatus, EProjectMeetingSortFields } from "../../../../types/enums"
+import { EProjectMeetingSortFields } from "../../../../types/enums"
 import { ISort } from "../../../../types/types"
-import { CustomMessageBox } from "../../../shared/base/custom-message-box"
 import { Paginator } from "../../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../../shared/base/inputs/per-page-select"
 import { SharedSpinner } from "../../../shared/base/shared-spinner"
@@ -27,10 +26,10 @@ interface IProps {
   getSortColumnHeader?: (field: EProjectMeetingSortFields) => string
   getRowPath?: (projectMeeting: IProjectMeeting) => string
   noResultsDescription?: React.ReactNode
+  hideProjectNumber?: boolean
 }
 
-const SORT_FIELDS = [
-  EProjectMeetingSortFields.projectNumber,
+const BASE_SORT_FIELDS = [
   EProjectMeetingSortFields.projectAddress,
   EProjectMeetingSortFields.contactName,
   EProjectMeetingSortFields.submittedAt,
@@ -38,12 +37,20 @@ const SORT_FIELDS = [
   EProjectMeetingSortFields.status,
 ]
 
+const FULL_SORT_FIELDS = [EProjectMeetingSortFields.projectNumber, ...BASE_SORT_FIELDS]
+
+const FULL_TEMPLATE_COLUMNS =
+  "36px minmax(150px, 1.1fr) minmax(190px, 1.4fr) minmax(150px, 1fr) minmax(130px, 0.9fr) minmax(150px, 1fr) minmax(110px, auto) minmax(80px, 0.5fr)"
+const WITHOUT_PROJECT_NUMBER_TEMPLATE_COLUMNS =
+  "36px minmax(190px, 1.4fr) minmax(150px, 1fr) minmax(130px, 0.9fr) minmax(150px, 1fr) minmax(110px, auto) minmax(80px, 0.5fr)"
+
 export const ProjectMeetingInboxTable = observer(function ProjectMeetingInboxTable({
   searchStore,
   projectMeetings,
   getSortColumnHeader,
   getRowPath,
   noResultsDescription,
+  hideProjectNumber = false,
 }: IProps) {
   const { t } = useTranslation()
   const {
@@ -58,6 +65,9 @@ export const ProjectMeetingInboxTable = observer(function ProjectMeetingInboxTab
     isSearching,
   } = searchStore
 
+  const sortFields = hideProjectNumber ? BASE_SORT_FIELDS : FULL_SORT_FIELDS
+  const columnCount = sortFields.length + 2 // unread indicator + notes
+
   const listShowsNoResults = !isSearching && totalCount !== null && totalCount === 0
   const { resetFilters } = searchStore as ISearch & { resetFilters?: () => void }
   const storeGetSortColumnHeader = (
@@ -69,38 +79,21 @@ export const ProjectMeetingInboxTable = observer(function ProjectMeetingInboxTab
   const renderListBody = () => {
     if (isSearching) {
       return (
-        <Flex py={50} gridColumn="span 8">
+        <Flex py={50} gridColumn={`span ${columnCount}`}>
           <SharedSpinner />
         </Flex>
       )
     }
 
-    if (listShowsNoResults) {
-      return (
-        <Flex py={4} gridColumn="span 8" w="full" justify="flex-start">
-          <CustomMessageBox
-            w="full"
-            status={EFlashMessageStatus.info}
-            title={t("submissionInbox.noMatchingMeetingsTitle")}
-            description={
-              resetFilters ? (
-                <Text>
-                  {t("submissionInbox.noMatchingMeetingsDescription")}{" "}
-                  <ChakraLink as="button" onClick={() => resetFilters()} textDecoration="underline">
-                    {t("submissionInbox.clearAllFilters")}
-                  </ChakraLink>
-                </Text>
-              ) : (
-                (noResultsDescription ?? t("submissionInbox.noMatchingMeetingsDescription"))
-              )
-            }
-          />
-        </Flex>
-      )
-    }
+    if (listShowsNoResults) return null
 
     return projectMeetings.map((projectMeeting) => (
-      <ProjectMeetingInboxRow key={projectMeeting.id} projectMeeting={projectMeeting} getRowPath={getRowPath} />
+      <ProjectMeetingInboxRow
+        key={projectMeeting.id}
+        projectMeeting={projectMeeting}
+        getRowPath={getRowPath}
+        hideProjectNumber={hideProjectNumber}
+      />
     ))
   }
 
@@ -123,17 +116,32 @@ export const ProjectMeetingInboxTable = observer(function ProjectMeetingInboxTab
     <Flex direction="column" flex={1} minH={0} minW={0} w="full" align="stretch">
       <Box flex={1} minH={0} overflow="auto">
         <SearchGrid
-          templateColumns="36px minmax(150px, 1.1fr) minmax(190px, 1.4fr) minmax(150px, 1fr) minmax(130px, 0.9fr) minmax(150px, 1fr) minmax(110px, auto) minmax(80px, 0.5fr)"
+          templateColumns={hideProjectNumber ? WITHOUT_PROJECT_NUMBER_TEMPLATE_COLUMNS : FULL_TEMPLATE_COLUMNS}
           gridRowClassName="project-meeting-inbox-grid-row"
           overflow="visible"
           sx={gridStickyHeaderSx}
+          isEmpty={listShowsNoResults}
+          emptyTitle={t("submissionInbox.noMatchingMeetingsTitle")}
+          emptyIcon={<CalendarBlank size={18} />}
+          emptyDescription={
+            resetFilters ? (
+              <Text fontSize="sm">
+                {t("submissionInbox.noMatchingMeetingsDescription")}{" "}
+                <ChakraLink as="button" onClick={() => resetFilters()} textDecoration="underline">
+                  {t("submissionInbox.clearAllFilters")}
+                </ChakraLink>
+              </Text>
+            ) : (
+              (noResultsDescription ?? t("submissionInbox.noMatchingMeetingsDescription"))
+            )
+          }
         >
           <Box display="contents" role="rowgroup">
             <Box display="contents" role="row">
               <GridHeader role="columnheader">
                 <Flex w="full" justifyContent="center" borderRight="1px solid" borderColor="border.light" />
               </GridHeader>
-              {SORT_FIELDS.map((field) => (
+              {sortFields.map((field) => (
                 <SortableHeader
                   key={field}
                   field={field}
@@ -215,9 +223,11 @@ const formatDateTime = (date?: Date | null) => (date ? format(date, datefnsTable
 const ProjectMeetingInboxRow = observer(function ProjectMeetingInboxRow({
   projectMeeting,
   getRowPath,
+  hideProjectNumber = false,
 }: {
   projectMeeting: IProjectMeeting
   getRowPath?: (projectMeeting: IProjectMeeting) => string
+  hideProjectNumber?: boolean
 }) {
   const { jurisdictionId } = useParams()
   const rowPath = getRowPath?.(projectMeeting) ?? `/jurisdictions/${jurisdictionId}/meetings/${projectMeeting.id}`
@@ -236,18 +246,20 @@ const ProjectMeetingInboxRow = observer(function ProjectMeetingInboxRow({
         <UnreadIndicatorDot isUnread={!projectMeeting.viewedAt} />
       </SearchGridItem>
 
-      <SearchGridItem>
-        <VStack align="start" spacing={0}>
-          <Text fontWeight={700} fontSize="sm" color="text.link">
-            {projectMeeting.projectNumber || "—"}
-          </Text>
-          {projectMeeting.projectDescription && (
-            <Text fontSize="xs" color="text.secondary" noOfLines={1}>
-              {projectMeeting.projectDescription}
+      {!hideProjectNumber && (
+        <SearchGridItem>
+          <VStack align="start" spacing={0}>
+            <Text fontWeight={700} fontSize="sm" color="text.link">
+              {projectMeeting.projectNumber || "—"}
             </Text>
-          )}
-        </VStack>
-      </SearchGridItem>
+            {projectMeeting.projectDescription && (
+              <Text fontSize="xs" color="text.secondary" noOfLines={1}>
+                {projectMeeting.projectDescription}
+              </Text>
+            )}
+          </VStack>
+        </SearchGridItem>
+      )}
 
       <SearchGridItem>
         <VStack align="start" spacing={0}>
@@ -286,7 +298,7 @@ const ProjectMeetingInboxRow = observer(function ProjectMeetingInboxRow({
 
       <SearchGridItem>
         <HStack spacing={1} color="text.secondary">
-          <ChatText size={14} />
+          <Chat size={14} />
           <Text fontSize="sm">{projectMeeting.notesCount}</Text>
         </HStack>
       </SearchGridItem>

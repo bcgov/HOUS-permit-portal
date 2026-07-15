@@ -8,7 +8,7 @@ const projectMeetingStatusBgMap: Record<EProjectMeetingStatus, string> = {
   [EProjectMeetingStatus.open]: "semantic.infoLight",
   [EProjectMeetingStatus.scheduled]: "semantic.warningLight",
   [EProjectMeetingStatus.completed]: "semantic.successLight",
-  [EProjectMeetingStatus.closed]: "greys.grey04",
+  [EProjectMeetingStatus.withdrawn]: "greys.grey04",
 }
 
 const projectMeetingStatusBorderColorMap: Record<EProjectMeetingStatus, string> = {
@@ -16,7 +16,7 @@ const projectMeetingStatusBorderColorMap: Record<EProjectMeetingStatus, string> 
   [EProjectMeetingStatus.open]: "semantic.info",
   [EProjectMeetingStatus.scheduled]: "semantic.warning",
   [EProjectMeetingStatus.completed]: "semantic.success",
-  [EProjectMeetingStatus.closed]: "border.light",
+  [EProjectMeetingStatus.withdrawn]: "border.light",
 }
 
 interface IProjectMeetingStatusTagProps extends TagProps {

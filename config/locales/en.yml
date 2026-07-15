@@ -88,6 +88,7 @@ en:
           no_sandboxes: "Jurisdiction must have at least one sandbox."
           enabled_inbox_requires_setup: "can only be toggled on once all emails are set up."
           enabled_project_meetings_requires_setup: "can only be toggled on once at least one project meeting contact is confirmed."
+          enabled_project_meetings_requires_authorization_resource: "can only be toggled on once at least one Project meeting authorization resource has been added."
           enabled_property_information_requests_requires_setup: "can only be toggled on once at least one property information contact is confirmed."
         submission_contact:
           last_confirmed_contact: "cannot be deleted while %{feature} is enabled. Turn the setting off before deleting the last confirmed contact."
@@ -256,6 +257,9 @@ en:
       failure:
         title: Login failed
         message: Please try again or contact your adminstrator for support
+      service_unavailable:
+        title: Login service unavailable
+        message: The login service may be unavailable. Please contact BCeID or BC Services Card for support.
       bceid_failure_with_message:
         title: BCeID login failed
         message: "%{error_message}"
@@ -367,12 +371,12 @@ en:
       submit_error:
         title: Error
         message: "Project meeting request could not be sent"
-      cancel_success:
+      withdraw_success:
         title: ""
-        message: "Project meeting request cancelled successfully!"
-      cancel_error:
+        message: "Project meeting request withdrawn successfully!"
+      withdraw_error:
         title: Error
-        message: "Project meeting request could not be cancelled"
+        message: "Project meeting request could not be withdrawn"
       reschedule_success:
         title: ""
         message: "Project meeting details updated successfully!"
@@ -385,6 +389,9 @@ en:
       invalid_transition:
         title: Error
         message: "Project meeting request status could not be updated"
+      calendar_unavailable:
+        title: Error
+        message: "A calendar invite is only available after a meeting time is confirmed"
     note:
       create_success:
         title: ""
@@ -1251,6 +1258,7 @@ en:
       reminder: "Reminder: Review your jurisdiction resources"
     project_meeting:
       submitted: "Your project meeting request for project %{project_number} has been sent."
+      scheduled: "Your project meeting request for project %{project_number} has been accepted and a meeting time has been scheduled."
       rescheduled: "Your project meeting for project %{project_number} has been rescheduled."
     release_note:
       publish_notification: "Version %{version} is now available. See what's new."

@@ -17,6 +17,8 @@ export const ProjectMeetingInboxStoreModel = types
       unreadCount: types.optional(types.number, 0),
       statusFilter: types.optional(types.array(types.enumeration(Object.values(EProjectMeetingStatus))), []),
       unreadFilter: types.optional(types.enumeration(Object.values(ERadioFilterValue)), ERadioFilterValue.include),
+      confirmedDateFromFilter: types.maybeNull(types.string),
+      confirmedDateToFilter: types.maybeNull(types.string),
     }),
     createSearchModel<EProjectMeetingSortFields>(
       "searchJurisdictionProjectMeetings",
@@ -52,6 +54,14 @@ export const ProjectMeetingInboxStoreModel = types
       self.unreadFilter = value
       setQueryParam("unread", value === ERadioFilterValue.include ? "" : value)
     },
+    setConfirmedDateFromFilter(value: string | null) {
+      self.confirmedDateFromFilter = value
+      setQueryParam("confirmedDateFrom", value ?? "")
+    },
+    setConfirmedDateToFilter(value: string | null) {
+      self.confirmedDateToFilter = value
+      setQueryParam("confirmedDateTo", value ?? "")
+    },
   }))
   .actions((self) => ({
     searchJurisdictionProjectMeetings: flow(function* (opts?: {
@@ -71,6 +81,8 @@ export const ProjectMeetingInboxStoreModel = types
         filters: {
           status: self.statusFilter.length > 0 ? [...self.statusFilter] : undefined,
           unread: self.unreadFilter !== ERadioFilterValue.include ? self.unreadFilter : undefined,
+          confirmedDateFrom: self.confirmedDateFromFilter || undefined,
+          confirmedDateTo: self.confirmedDateToFilter || undefined,
         },
       }
 
@@ -95,15 +107,25 @@ export const ProjectMeetingInboxStoreModel = types
     setJurisdictionProjectMeetingFilters(queryParams: URLSearchParams) {
       const status = queryParams.get("status")?.split(",") as EProjectMeetingStatus[] | undefined
       const unread = queryParams.get("unread") as ERadioFilterValue
+      const confirmedDateFrom = queryParams.get("confirmedDateFrom")
+      const confirmedDateTo = queryParams.get("confirmedDateTo")
       if (status) self.setStatusFilter(status)
       if (unread) self.setUnreadFilter(unread)
+      if (confirmedDateFrom) self.setConfirmedDateFromFilter(confirmedDateFrom)
+      if (confirmedDateTo) self.setConfirmedDateToFilter(confirmedDateTo)
     },
   }))
   .actions((self) => ({
+    setMeetingDateRange(from: string | null, to: string | null) {
+      self.setConfirmedDateFromFilter(from)
+      self.setConfirmedDateToFilter(to)
+    },
     resetFilters() {
       self.setQuery("")
       self.setStatusFilter([])
       self.setUnreadFilter(ERadioFilterValue.include)
+      self.setConfirmedDateFromFilter(null)
+      self.setConfirmedDateToFilter(null)
       self.searchJurisdictionProjectMeetings({ reset: true })
     },
   }))

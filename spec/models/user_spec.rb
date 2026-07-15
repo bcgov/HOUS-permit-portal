@@ -68,4 +68,21 @@ RSpec.describe User, type: :model do
       expect(inviter.invitable_roles).to match_array([])
     end
   end
+
+  describe "#invitation_promotes_existing_submitter?" do
+    it "is true when inviting jurisdiction staff and a kept submitter shares the email" do
+      create(:user, :submitter, email: "shared@example.com")
+      invited =
+        create(:user, :reviewer, email: "shared@example.com", confirmed: false)
+
+      expect(invited.invitation_promotes_existing_submitter?).to be(true)
+    end
+
+    it "is false when no existing submitter shares the email" do
+      invited =
+        create(:user, :reviewer, email: "solo@example.com", confirmed: false)
+
+      expect(invited.invitation_promotes_existing_submitter?).to be(false)
+    end
+  end
 end

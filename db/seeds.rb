@@ -684,7 +684,7 @@ if north_van_projects.size >= 10
       []
     end
 
-  meeting_statuses = %i[open scheduled completed closed].freeze
+  meeting_statuses = %i[open scheduled completed withdrawn].freeze
   seeded_meeting_count = 0
 
   meeting_seed_projects.each_with_index do |project, idx|
@@ -737,7 +737,7 @@ if north_van_projects.size >= 10
         scheduled_at:
           status.in?(%i[scheduled completed]) ? submitted_at + 1.day : nil,
         completed_at: status == :completed ? submitted_at + 3.days : nil,
-        closed_at: status == :closed ? submitted_at + 2.days : nil,
+        withdrawn_at: status == :withdrawn ? submitted_at + 2.days : nil,
         meeting_url:
           (
             if status.in?(%i[scheduled completed])

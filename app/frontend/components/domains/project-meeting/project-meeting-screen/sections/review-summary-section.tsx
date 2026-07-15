@@ -5,6 +5,7 @@ import { SummarySectionProps } from "../shared/types"
 
 interface ReviewSummarySectionProps extends SummarySectionProps {
   onNavigateToSection: (sectionKey: string) => void
+  showChangeLink?: boolean
 }
 
 export const ReviewSummarySection = ({
@@ -12,6 +13,7 @@ export const ReviewSummarySection = ({
   sectionKey,
   children,
   onNavigateToSection,
+  showChangeLink = true,
 }: ReviewSummarySectionProps) => {
   const { t } = useTranslation()
 
@@ -21,9 +23,11 @@ export const ReviewSummarySection = ({
         {title}
       </Heading>
       {children}
-      <Link as="button" type="button" color="text.link" mt={2} onClick={() => onNavigateToSection(sectionKey)}>
-        {t("ui.change")}
-      </Link>
+      {showChangeLink && (
+        <Link as="button" type="button" color="text.link" mt={2} onClick={() => onNavigateToSection(sectionKey)}>
+          {t("ui.change")}
+        </Link>
+      )}
     </Box>
   )
 }

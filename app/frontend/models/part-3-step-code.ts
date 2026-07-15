@@ -41,7 +41,7 @@ export const Part3StepCodeModel = types.snapshotProcessor(
         return self.currentChecklist
       },
       get isComplete() {
-        return self.currentChecklist?.isAllComplete
+        return self.isStageComplete()
       },
       get targetPath() {
         if (self.permitApplicationId) {

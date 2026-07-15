@@ -53,6 +53,7 @@ export const InboxMeetingsTab = observer(({ permitProject }: IProps) => {
           getSortColumnHeader={projectMeetingStore.getProjectMeetingSortColumnHeader}
           getRowPath={getRowPath}
           noResultsDescription={t("permitProject.meetings.empty")}
+          hideProjectNumber
         />
       </Box>
     </Flex>

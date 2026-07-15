@@ -1,5 +1,6 @@
 export { AssignedFilter } from "./assigned-filter"
 export { DaysInQueueFilter } from "./days-in-queue-filter"
+export { MeetingDateFilter } from "./meeting-date-filter"
 export { MeetingRequestsFilter } from "./meeting-requests-filter"
 export { RequirementTemplateInboxFilter } from "./permit-type-filter"
 export { ProjectMeetingStatusFilter } from "./project-meeting-status-filter"

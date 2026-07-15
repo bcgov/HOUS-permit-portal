@@ -71,6 +71,10 @@ class UserBlueprint < Blueprinter::Base
 
     association :jurisdictions, blueprint: JurisdictionBlueprint, view: :minimal
 
+    field :invitation_promotes_existing_submitter do |user, _options|
+      user.invitation_promotes_existing_submitter?
+    end
+
     field :invited_by_email do |user, _options|
       user.invited_by&.email
     end

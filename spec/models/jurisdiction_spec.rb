@@ -224,6 +224,11 @@ RSpec.describe Jurisdiction, type: :model do
       let(:jurisdiction) { create(:sub_district) }
 
       it "requires a confirmed project meeting contact before enabling project meetings" do
+        create(
+          :resource,
+          jurisdiction: jurisdiction,
+          category: :project_meeting_authorization
+        )
         jurisdiction.project_meetings_enabled = true
 
         expect(jurisdiction).not_to be_valid
@@ -234,8 +239,25 @@ RSpec.describe Jurisdiction, type: :model do
         )
       end
 
-      it "allows project meetings to be enabled with a confirmed project meeting contact" do
+      it "requires a project meeting authorization resource before enabling project meetings" do
         create(:meeting_submission_contact, jurisdiction: jurisdiction)
+        jurisdiction.project_meetings_enabled = true
+
+        expect(jurisdiction).not_to be_valid
+        expect(jurisdiction.errors[:project_meetings_enabled]).to include(
+          I18n.t(
+            "activerecord.errors.models.jurisdiction.enabled_project_meetings_requires_authorization_resource"
+          )
+        )
+      end
+
+      it "allows project meetings to be enabled with a confirmed contact and authorization resource" do
+        create(:meeting_submission_contact, jurisdiction: jurisdiction)
+        create(
+          :resource,
+          jurisdiction: jurisdiction,
+          category: :project_meeting_authorization
+        )
 
         jurisdiction.project_meetings_enabled = true
 
@@ -273,6 +295,11 @@ RSpec.describe Jurisdiction, type: :model do
       it "prevents deleting the last confirmed contact through nested attributes when its feature is enabled" do
         contact =
           create(:meeting_submission_contact, jurisdiction: jurisdiction)
+        create(
+          :resource,
+          jurisdiction: jurisdiction,
+          category: :project_meeting_authorization
+        )
         jurisdiction.update!(project_meetings_enabled: true)
 
         expect {

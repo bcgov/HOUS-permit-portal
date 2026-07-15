@@ -5,6 +5,7 @@ import { Control, Controller, ControllerFieldState, useFormContext, useWatch } f
 import { useTranslation } from "react-i18next"
 import { EMAIL_REGEX } from "../../../constants"
 import { TJurisdictionFieldValues } from "../../../types/types"
+import { mailtoHref, telHref } from "../../../utils/utility-functions"
 import { JURISDICTION_ABOUT_OFFICE_ADDRESS_MAX_CHARS } from "./jurisdiction-about-snippet-cards"
 
 const OFFICE_HOURS_MAX = 500
@@ -28,11 +29,6 @@ type TContactInfoFieldKey = "officeAddress" | "officeHours" | "officeTelephone" 
 
 function mapsSearchUrl(address: string): string {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address.trim())}`
-}
-
-function telHref(phone: string): string {
-  const digits = phone.replace(/[^\d+]/g, "")
-  return digits ? `tel:${digits}` : `tel:${phone}`
 }
 
 function getValidationRules(key: TContactInfoFieldKey, t: (k: string, opts?: Record<string, unknown>) => string) {
@@ -347,7 +343,7 @@ function DisplayValue({
   if (fieldKey === "officeEmail") {
     return (
       <Link
-        href={`mailto:${trimmed}`}
+        href={mailtoHref(trimmed)}
         color="text.link"
         textDecoration="underline"
         fontSize="sm"

@@ -1,5 +1,5 @@
 import { HStack, Text } from "@chakra-ui/react"
-import { ChatText } from "@phosphor-icons/react"
+import { Chat } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -34,7 +34,7 @@ export const ProjectMeetingGridRow = observer(({ permitProjectId, projectMeeting
       </SearchGridItem>
       <SearchGridItem>
         <HStack spacing={1} color="text.secondary">
-          <ChatText size={14} />
+          <Chat size={14} />
           <Text>{projectMeeting.notesCount}</Text>
         </HStack>
       </SearchGridItem>

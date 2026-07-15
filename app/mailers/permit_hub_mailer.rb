@@ -303,7 +303,8 @@ class PermitHubMailer < ApplicationMailer
     set_project_meeting_scheduled_variables(project_meeting)
     attach_project_meeting_calendar(
       project_meeting,
-      hub_meeting_url: @project_meeting_url
+      hub_meeting_url: @project_meeting_url,
+      attendee_email: project_meeting.contact_email
     )
     @contact_first_name =
       contact_first_name(project_meeting.contact_name, @user)
@@ -321,7 +322,8 @@ class PermitHubMailer < ApplicationMailer
     set_project_meeting_scheduled_variables(project_meeting)
     attach_project_meeting_calendar(
       project_meeting,
-      hub_meeting_url: @reviewer_project_meeting_url
+      hub_meeting_url: @reviewer_project_meeting_url,
+      attendee_email: recipient_email
     )
 
     send_mail(
@@ -337,7 +339,8 @@ class PermitHubMailer < ApplicationMailer
     set_project_meeting_scheduled_variables(project_meeting)
     attach_project_meeting_calendar(
       project_meeting,
-      hub_meeting_url: @project_meeting_url
+      hub_meeting_url: @project_meeting_url,
+      attendee_email: project_meeting.contact_email
     )
     @contact_first_name =
       contact_first_name(project_meeting.contact_name, @user)
@@ -355,7 +358,8 @@ class PermitHubMailer < ApplicationMailer
     set_project_meeting_scheduled_variables(project_meeting)
     attach_project_meeting_calendar(
       project_meeting,
-      hub_meeting_url: @reviewer_project_meeting_url
+      hub_meeting_url: @reviewer_project_meeting_url,
+      attendee_email: recipient_email
     )
 
     send_mail(
@@ -606,16 +610,21 @@ class PermitHubMailer < ApplicationMailer
     end
   end
 
-  def attach_project_meeting_calendar(project_meeting, hub_meeting_url:)
+  def attach_project_meeting_calendar(
+    project_meeting,
+    hub_meeting_url:,
+    attendee_email:
+  )
     return if project_meeting.confirmed_date.blank?
 
     generator =
       ProjectMeetingIcsGenerator.new(
         project_meeting,
-        hub_meeting_url: hub_meeting_url
+        hub_meeting_url: hub_meeting_url,
+        attendee_email: attendee_email
       )
     attachments[generator.filename] = {
-      mime_type: "text/calendar; method=PUBLISH; charset=UTF-8",
+      mime_type: "text/calendar; method=REQUEST; charset=UTF-8",
       content: generator.generate
     }
   end
