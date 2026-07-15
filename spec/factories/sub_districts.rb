@@ -12,21 +12,15 @@ FactoryBot.define do
 
     transient do
       heating_degree_days { nil }
-      climate_zone { nil }
+      location_name { "General" }
     end
 
     after(:create) do |jurisdiction, evaluator|
       if evaluator.heating_degree_days.present?
-        climate_zone =
-          evaluator.climate_zone ||
-            StepCode::Part3::V0::Requirements::References::ClimateZone.value(
-              evaluator.heating_degree_days
-            )&.downcase || "zone_5"
-
         create(
-          :jurisdiction_climate_zone,
+          :jurisdiction_heating_degree_day,
           jurisdiction: jurisdiction,
-          climate_zone: climate_zone,
+          location_name: evaluator.location_name,
           heating_degree_days: evaluator.heating_degree_days
         )
       end

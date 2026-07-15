@@ -71,11 +71,12 @@ module ProjectItem
       parent&.jurisdiction_id || super
     end
 
-    def jurisdiction_heating_degree_days
+    def default_jurisdiction_heating_degree_days
       jurisdiction
-        &.jurisdiction_climate_zones
-        &.filter_map(&:heating_degree_days)
+        &.jurisdiction_heating_degree_days
+        &.order(:created_at)
         &.first
+        &.heating_degree_days
     end
 
     # Sandbox lives on the parent project. Project items no longer carry

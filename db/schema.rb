@@ -10,7 +10,8 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_07_13_140000) do  # These are extensions that must be enabled in order to support this database
+ActiveRecord::Schema[7.2].define(version: 2026_07_15_111439) do
+  # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
 
@@ -234,14 +235,14 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_13_140000) do  # These are ext
     t.index ["template_version_id"], name: "index_integration_mappings_on_template_version_id"
   end
 
-  create_table "jurisdiction_climate_zones", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+  create_table "jurisdiction_heating_degree_days", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "jurisdiction_id", null: false
-    t.string "climate_zone", null: false
-    t.integer "heating_degree_days"
+    t.integer "heating_degree_days", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["jurisdiction_id", "climate_zone"], name: "idx_jurisdiction_climate_zones_unique", unique: true
-    t.index ["jurisdiction_id"], name: "index_jurisdiction_climate_zones_on_jurisdiction_id"
+    t.string "location_name", null: false
+    t.index ["jurisdiction_id", "location_name"], name: "idx_jurisdiction_heating_degree_days_unique", unique: true
+    t.index ["jurisdiction_id"], name: "index_jurisdiction_heating_degree_days_on_jurisdiction_id"
   end
 
   create_table "jurisdiction_memberships", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1318,7 +1319,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_13_140000) do  # These are ext
   add_foreign_key "integration_mapping_notifications", "template_versions"
   add_foreign_key "integration_mappings", "jurisdictions"
   add_foreign_key "integration_mappings", "template_versions"
-  add_foreign_key "jurisdiction_climate_zones", "jurisdictions", on_delete: :cascade
+  add_foreign_key "jurisdiction_heating_degree_days", "jurisdictions", on_delete: :cascade
   add_foreign_key "jurisdiction_memberships", "jurisdictions"
   add_foreign_key "jurisdiction_memberships", "users"
   add_foreign_key "jurisdiction_requirement_templates", "jurisdictions"

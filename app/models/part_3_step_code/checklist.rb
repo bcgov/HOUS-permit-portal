@@ -234,10 +234,11 @@ class Part3StepCode::Checklist < ActiveRecord::Base
   def set_climate_info
     return unless step_code&.jurisdiction
 
-    self.heating_degree_days ||= step_code.jurisdiction_heating_degree_days
+    self.heating_degree_days ||=
+      step_code.default_jurisdiction_heating_degree_days
     self.climate_zone ||=
       StepCode::Part3::V0::Requirements::References::ClimateZone.value(
-        step_code.jurisdiction_heating_degree_days
+        heating_degree_days
       )
   end
 
