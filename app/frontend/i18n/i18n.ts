@@ -782,6 +782,8 @@ const options = {
           },
           sections: {
             introduction: {
+              attribution:
+                "This form was originally created by the HVAC Designers of Canada and the Thermal Environmental Comfort Association (TECA), and has been digitized with their permission.",
               standardTitle: "B.C. Single Zone Cooling Capacity — BCBC 9.33.3.1.; 9.33.5.1.",
               formVersion: "B.C. SZCG Form Set Ver 1.0",
               title: "Overheating Code Check",
@@ -4676,6 +4678,10 @@ Thank you,
           acceptInstructions: "Enter your login and other user info below to finalize your account creation.",
           loggedInStaffInviteWarning:
             "You are already signed in. Accepting this staff invitation will attach it to your currently signed-in account. If you need to use a different BCeID account, sign out first or open this invitation in a private/incognito window.",
+          submitterPromotionProjectAccessWarning:
+            "If you accept this invitation while signed in as a submitter, your account will become jurisdiction staff and you will lose access to any permit projects you currently own.",
+          loggedInSubmitterStaffInviteWarning:
+            "You are already signed in. Accepting this staff invitation will attach it to your current account and make it jurisdiction staff — you will lose access to any permit projects you currently own as a submitter. If you need to use a different BCeID account, sign out first or open this invitation in a private/incognito window.",
           rolesAndPermissions: "User roles & permissions",
           inviteInstructions:
             "Enter the email addresses of whom you wish to invite below.  For details about permissions for each role, please see",

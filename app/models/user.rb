@@ -226,6 +226,19 @@ class User < ApplicationRecord
     review_staff? || technical_support?
   end
 
+  # Inviting a submitter's email creates a staff user alongside them; accepting
+  # promotes the submitter via PromoteUser.
+  def invitation_promotes_existing_submitter?
+    return false unless jurisdiction_staff?
+
+    User
+      .kept
+      .submitter
+      .where("LOWER(email) = ?", email.to_s.strip.downcase)
+      .where.not(id: id)
+      .exists?
+  end
+
   def role_name
     role.gsub("_", " ")
   end
