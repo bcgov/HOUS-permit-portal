@@ -9,6 +9,8 @@ class RequirementQuestionBlueprint < Blueprinter::Base
          :hint,
          :instructions,
          :shared,
+         :name,
+         :description,
          :discarded_at,
          :created_at,
          :updated_at
@@ -30,5 +32,23 @@ class RequirementQuestionBlueprint < Blueprinter::Base
 
   field :usage_count do |requirement_question|
     requirement_question.usage_count
+  end
+
+  field :association_list, name: :associations
+
+  field :has_data_validation do |requirement_question|
+    requirement_question.has_data_validation?
+  end
+
+  field :has_automated_compliance do |requirement_question|
+    requirement_question.computed_compliance?
+  end
+
+  view :extended do
+    field :requirement_blocks do |requirement_question|
+      requirement_question.requirement_blocks.distinct.map do |block|
+        { id: block.id, name: block.name }
+      end
+    end
   end
 end
