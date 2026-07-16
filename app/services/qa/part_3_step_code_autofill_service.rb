@@ -1,12 +1,14 @@
 # frozen_string_literal: true
 
 class Qa::Part3StepCodeAutofillService
-  def initialize(step_code:, current_user:)
+  def initialize(step_code:, current_user:, stage: nil)
     @step_code = step_code
     @current_user = current_user
+    @stage = (stage.presence || step_code.current_stage).to_s
   end
 
   def call
+    checklist = nil
     Part3StepCode.transaction do
       update_step_code!
       checklist = ensure_checklist!
@@ -20,6 +22,8 @@ class Qa::Part3StepCodeAutofillService
     end
 
     @step_code.reload
+    enqueue_report_generation!(checklist)
+    @step_code
   end
 
   private
@@ -32,8 +36,15 @@ class Qa::Part3StepCodeAutofillService
   end
 
   def ensure_checklist!
-    @step_code.pre_construction_checklist ||
-      @step_code.create_pre_construction_checklist!(stage: :pre_construction)
+    unless StepCode::STAGES.include?(@stage)
+      raise ArgumentError, "Invalid stage: #{@stage}"
+    end
+
+    checklist = @step_code.find_or_create_checklist_for!(stage: @stage)
+    if @step_code.current_stage != @stage
+      @step_code.update!(current_stage: @stage)
+    end
+    checklist
   end
 
   def clear_checklist_associations!(checklist)
@@ -75,11 +86,31 @@ class Qa::Part3StepCodeAutofillService
       Qa::Part3StepCodeAutofillData.checklist_attributes_for(
         heating_degree_days: heating_degree_days
       ).merge(
-        section_completion_status:
-          Qa::Part3StepCodeAutofillData::SECTION_COMPLETION_STATUS
+        status: :draft,
+        section_completion_status: autofill_section_completion_status
       )
 
     checklist.update!(attributes)
+  end
+
+  def autofill_section_completion_status
+    Part3StepCode::Checklist.fully_complete_section_completion_status.deep_merge(
+      "report" => {
+        "complete" => false
+      },
+      "additional_fuel_types" => {
+        "relevant" => false
+      }
+    )
+  end
+
+  def enqueue_report_generation!(checklist)
+    return if checklist.blank?
+
+    StepCodeReportGenerationJob.perform_async(
+      @step_code.id,
+      { "checklist_id" => checklist.id }
+    )
   end
 
   def create_energy_outputs!(checklist, fuel_types)

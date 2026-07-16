@@ -226,7 +226,7 @@ class Part3StepCode::Checklist < ActiveRecord::Base
   end
 
   def complete?
-    section_completion_status&.dig("report", "complete") || false
+    status_complete?
   end
 
   private

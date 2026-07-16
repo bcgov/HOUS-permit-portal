@@ -306,6 +306,8 @@ RSpec.describe "Api::QaTools", type: :request do
       expect(
         checklist.section_completion_status.dig("report", "complete")
       ).to be(false)
+      expect(checklist).not_to be_complete
+      expect(checklist.status).to eq("draft")
       expect(json_response.dig("data", "id")).to eq(step_code.id)
     end
 
@@ -385,6 +387,8 @@ RSpec.describe "Api::QaTools", type: :request do
       expect(
         checklist.section_completion_status.dig("report", "complete")
       ).to be(false)
+      expect(checklist).not_to be_complete
+      expect(checklist.status).to eq("draft")
       expect(json_response.dig("data", "id")).to eq(step_code.id)
     end
 

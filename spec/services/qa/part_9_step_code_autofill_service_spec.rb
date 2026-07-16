@@ -76,13 +76,14 @@ RSpec.describe Qa::Part9StepCodeAutofillService do
       expect(step_code.jurisdiction).to eq(jurisdiction)
     end
 
-    it "marks all sections complete except the final section" do
+    it "fills sections but leaves checklist draft for manual complete" do
       status = checklist.section_completion_status
 
       expect(status.dig("h2k_import", "complete")).to be(true)
       expect(status.dig("review", "complete")).to be(true)
       expect(status.dig("report", "complete")).to be(false)
-      expect(checklist.complete?).to be(false)
+      expect(checklist).not_to be_complete
+      expect(checklist.status).to eq("draft")
     end
 
     it "has passing compliance reports" do

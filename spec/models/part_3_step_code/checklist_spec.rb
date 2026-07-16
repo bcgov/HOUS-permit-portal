@@ -26,24 +26,34 @@ RSpec.describe Part3StepCode::Checklist, type: :model do
   end
 
   describe "#complete?" do
-    it "returns true when the report section is complete" do
-      checklist =
-        build(
-          :part_3_checklist,
-          section_completion_status: {
-            "report" => {
-              "complete" => true
-            }
-          }
-        )
+    it "returns true when status is complete" do
+      checklist = build(:part_3_checklist, :marked_complete)
 
       expect(checklist.complete?).to be(true)
     end
 
-    it "returns false when the report section is incomplete" do
+    it "returns false when status is draft" do
       checklist = build(:part_3_checklist)
 
       expect(checklist.complete?).to be(false)
+    end
+  end
+
+  describe "marking complete" do
+    it "requires all relevant sections to be complete" do
+      checklist = create(:part_3_checklist, status: :draft)
+
+      expect(checklist.update(status: :complete)).to be(false)
+      expect(checklist.errors[:base]).to include(
+        "all relevant sections must be complete"
+      )
+    end
+
+    it "allows complete status when all relevant sections are complete" do
+      checklist = create(:part_3_checklist, :marked_complete)
+
+      expect(checklist).to be_valid
+      expect(checklist.complete?).to be(true)
     end
   end
 
@@ -53,12 +63,9 @@ RSpec.describe Part3StepCode::Checklist, type: :model do
 
       travel_to Time.zone.parse("2026-06-12 10:00") do
         checklist.update!(
-          section_completion_status: {
-            "report" => {
-              "complete" => true,
-              "relevant" => true
-            }
-          }
+          status: :complete,
+          section_completion_status:
+            Part3StepCode::Checklist.fully_complete_section_completion_status
         )
         expect(checklist.stage_completed_at).to eq(
           Time.zone.parse("2026-06-12 10:00")
@@ -66,27 +73,15 @@ RSpec.describe Part3StepCode::Checklist, type: :model do
       end
     end
 
-    it "is cleared when the report section is no longer complete" do
+    it "is cleared when the checklist is no longer complete" do
       checklist =
         create(
           :part_3_checklist,
-          section_completion_status: {
-            "report" => {
-              "complete" => true,
-              "relevant" => true
-            }
-          },
+          :marked_complete,
           stage_completed_at: 1.day.ago
         )
 
-      checklist.update!(
-        section_completion_status: {
-          "report" => {
-            "complete" => false,
-            "relevant" => true
-          }
-        }
-      )
+      checklist.update!(status: :draft)
 
       expect(checklist.stage_completed_at).to be_nil
     end
@@ -131,17 +126,13 @@ RSpec.describe Part3StepCode::Checklist, type: :model do
       expect(report.reload.stale).to be(true)
     end
 
-    it "does not auto-enqueue report generation when a report-complete checklist is updated" do
+    it "does not auto-enqueue report generation when a complete checklist is updated" do
       step_code = create(:part_3_step_code)
       checklist = step_code.pre_construction_checklist
       checklist.update!(
+        status: :complete,
         section_completion_status:
-          checklist.section_completion_status.merge(
-            "report" => {
-              "complete" => true,
-              "relevant" => true
-            }
-          )
+          Part3StepCode::Checklist.fully_complete_section_completion_status
       )
 
       expect(StepCodeReportGenerationJob).not_to receive(:perform_async)

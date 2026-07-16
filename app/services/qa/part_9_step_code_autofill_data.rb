@@ -40,13 +40,6 @@ module Qa
       pid: "123456789"
     }.freeze
 
-    SECTION_COMPLETION_STATUS =
-      Part9StepCode::Checklist::SECTION_COMPLETION_STATUS_KEYS
-        .index_with do |key|
-          { "complete" => key != :report, "relevant" => true }
-        end
-        .freeze
-
     QA_STEP_REQUIREMENT = {
       energy_step_required: 3,
       zero_carbon_step_required: 2

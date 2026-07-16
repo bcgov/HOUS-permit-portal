@@ -421,7 +421,12 @@ const ReportSection = observer(function ReportSection() {
               {t("stepCode.regenerateReport")}
             </Button>
           </Flex>
-          <Part9FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={formState.isSubmitting} />
+          <Part9FormFooter
+            handleSubmit={handleSubmit}
+            onSubmit={onSubmit}
+            isLoading={formState.isSubmitting}
+            isDisabled={!checklist.canMarkComplete}
+          />
         </VStack>
       </form>
     </FormProvider>
