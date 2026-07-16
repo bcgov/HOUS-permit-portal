@@ -2182,6 +2182,46 @@ Thank you,
             scheduledFormsDescription: "Preview and test forms scheduled to be published.",
           },
         },
+        questionBank: {
+          associationsInfo: "Sections, tags, etc...",
+          descriptionMaxLength: "(Max length: 250 characters)",
+          index: {
+            title: "Question Bank",
+            description: "List of all questions in the system that can be used within requirement blocks.",
+            tableHeading: "Questions",
+          },
+          fields: {
+            name: "Internal name",
+            description: "Description",
+            associations: "Associations",
+            requirementBlocks: "Requirements blocks",
+            configurations: "Configuration",
+            updatedAt: "Last updated",
+            questionUuid: "Question UUID:",
+            notConnected: "Not connected",
+            seeMore: "see more",
+          },
+          fieldDescriptions: {
+            description: "Provide some context for admins and managers for this question.",
+            associations: "Assign a tag to help organize and find this Question easier.",
+            questionUuid: "Generated unique identifier",
+          },
+          modals: {
+            unsavedChanges: {
+              title: "Unsaved changes",
+              body: "You have unsaved changes. Are you sure you want to discard them?",
+            },
+            formSetupTitle: "Form setup",
+            internalUse: "For internal use only",
+            configureFields: "Configure the form field below that submitters will see:",
+            noFormFieldsAdded: "No form field have been added yet, start by clicking the Add button.",
+            notConnectedYet: "This question isn't connected to any requirement blocks yet.",
+            create: {
+              triggerButton: "Create new question",
+              title: "New Question",
+            },
+          },
+        },
         requirementsLibrary: {
           hasDataValidation: "Has data validation",
           addAnother: "Add",
@@ -4029,6 +4069,9 @@ Thank you,
           requirementsLibraryTitle: "Requirements library",
           requirementsLibraryDescription:
             "Construct and maintain requirement blocks that form the core structure of permit templates. This library allows you to create, update, and manage the questions that define each requirement block.",
+          questionBankTitle: "Question Bank",
+          questionBankDescription:
+            "Construct and maintain a centralized repository of questions that form the core building blocks of your templates. This bank allows you to create, update, and manage the individual questions used across various requirement blocks.",
           configurationManagement: {
             title: "Configuration",
             reviewManagerDescription:
