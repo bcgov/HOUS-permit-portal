@@ -1,4 +1,15 @@
-import { Box, FormControl, FormHelperText, FormLabel, Input, Text, TextProps, Textarea, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  FormControl,
+  FormErrorMessage,
+  FormHelperText,
+  FormLabel,
+  Input,
+  Text,
+  TextProps,
+  Textarea,
+  VStack,
+} from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { Controller, useFormContext } from "react-hook-form"
@@ -15,7 +26,12 @@ const helperTextStyles: Partial<TextProps> = {
 export const FormSetup = observer(function FormSetup() {
   const { requirementQuestionStore } = useMst()
   const { t } = useTranslation()
-  const { register, control, watch } = useFormContext<IRequirementQuestionForm>()
+  const {
+    register,
+    control,
+    watch,
+    formState: { errors },
+  } = useFormContext<IRequirementQuestionForm>()
 
   const fetchAssociationOptions = async (query: string) => {
     const associations = await requirementQuestionStore.searchAssociations(query)
@@ -35,9 +51,12 @@ export const FormSetup = observer(function FormSetup() {
         <Text color={"text.secondary"} fontSize={"sm"} fontWeight={700}>
           {t("questionBank.modals.internalUse")}
         </Text>
-        <FormControl mt={1}>
+        <FormControl mt={1} isInvalid={!!errors.name}>
           <FormLabel>{t("questionBank.fields.name")}</FormLabel>
           <Input bg={"white"} {...register("name", { required: true })} />
+          {errors.name && (
+            <FormErrorMessage>{t("ui.isRequired", { field: t("questionBank.fields.name") })}</FormErrorMessage>
+          )}
         </FormControl>
         <FormControl>
           <FormLabel>{`${t("questionBank.fields.description")} ${t("ui.optional")}`}</FormLabel>

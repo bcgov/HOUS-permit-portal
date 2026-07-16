@@ -8,7 +8,7 @@ import { IControlProps, TIsOptionalCheckboxProps } from "./types"
 
 export type TPinInfoEditProps<TFieldValues> = {
   editableLabelProps: TEditableLabelProps<TFieldValues>
-  isOptionalCheckboxProps: TIsOptionalCheckboxProps<TFieldValues>
+  isOptionalCheckboxProps?: TIsOptionalCheckboxProps<TFieldValues>
   requirementType: ERequirementType
   fieldItems: Array<{
     type: ERequirementType
@@ -35,7 +35,7 @@ export function PidInfoEdit<TFieldValues>({
         fieldItems={fieldItems}
         renderHeading={() => <EditableLabel {...editableLabelProps} />}
       />
-      <IsOptionalCheckbox {...isOptionalCheckboxProps} />
+      {isOptionalCheckboxProps && <IsOptionalCheckbox {...isOptionalCheckboxProps} />}
     </Stack>
   )
 }

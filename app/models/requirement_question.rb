@@ -23,6 +23,8 @@ class RequirementQuestion < ApplicationRecord
   has_many :requirements, dependent: :restrict_with_error
   has_many :requirement_blocks, through: :requirements
 
+  scope :shared, -> { where(shared: true) }
+
   acts_as_taggable_on :associations
 
   enum :input_type,

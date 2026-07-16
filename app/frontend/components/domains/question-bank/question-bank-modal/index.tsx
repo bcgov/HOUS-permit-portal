@@ -16,6 +16,7 @@ import { v4 as uuidv4 } from "uuid"
 import { useAutoComplianceModuleConfigurations } from "../../../../hooks/resources/use-auto-compliance-module-configurations"
 import { useMst } from "../../../../setup/root"
 import { IRequirementAttributes, IRequirementQuestionParams } from "../../../../types/api-request"
+import { EFlashMessageStatus } from "../../../../types/enums"
 import { FormModal } from "../../../shared/form-modal"
 import { FieldSetup } from "./field-setup"
 import { FormSetup } from "./form-setup"
@@ -34,7 +35,7 @@ export const QuestionBankModal = observer(function QuestionBankModal({
 }: {
   triggerButtonProps?: Partial<ButtonProps>
 }) {
-  const { requirementQuestionStore } = useMst()
+  const { requirementQuestionStore, uiStore } = useMst()
   const { t } = useTranslation()
   const { createRequirementQuestion } = requirementQuestionStore
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -64,19 +65,20 @@ export const QuestionBankModal = observer(function QuestionBankModal({
 
   const onSubmit = async (data: IRequirementQuestionForm) => {
     const field = data.requirementsAttributes[0]
-    if (!data.name || !field?.label || !field?.inputType) return
+    if (!data.name?.trim() || !field?.label?.trim() || !field?.inputType) {
+      uiStore.flashMessage.show(EFlashMessageStatus.error, null, t("questionBank.modals.create.incomplete"))
+      return
+    }
 
     const params: IRequirementQuestionParams = {
       id: data.id,
-      name: data.name,
+      name: data.name.trim(),
       description: data.description,
       associationList: data.associationList,
       label: field.label,
       inputType: field.inputType,
       hint: field.hint,
       instructions: field.instructions,
-      required: field.required,
-      elective: field.elective,
       inputOptions: field.inputOptions,
     }
 
