@@ -236,6 +236,7 @@ export enum ESortDirection {
 export enum ETagType {
   requirementTemplate = "RequirementTemplate",
   requirementBlock = "RequirementBlock",
+  requirementQuestion = "RequirementQuestion",
 }
 
 export enum ERequirementType {

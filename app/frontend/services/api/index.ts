@@ -33,6 +33,7 @@ import {
   IIntegrationMappingUpdateParams,
   IPermitProjectUpdateParams,
   IRequirementBlockParams,
+  IRequirementQuestionParams,
   IRequirementTemplateUpdateParams,
   ITagSearchParams,
 } from "../../types/api-request"
@@ -49,6 +50,7 @@ import {
   IPageMeta,
   IProjectMeetingResponse,
   IRequirementBlockResponse,
+  IRequirementQuestionResponse,
   IRequirementTemplateResponse,
   IUsersResponse,
 } from "../../types/api-responses"
@@ -63,6 +65,7 @@ import {
   EPreCheckSortFields,
   EProjectAuditSortFields,
   EProjectMeetingSortFields,
+  EQuestionBankSortFields,
   EReleaseNoteSortFields,
   ERequirementLibrarySortFields,
   ERequirementTemplateSortFields,
@@ -296,6 +299,10 @@ export class Api {
 
   async fetchRequirementBlocks(params?: TSearchParams<ERequirementLibrarySortFields>) {
     return this.client.post<IRequirementBlockResponse>("/requirement_blocks/search", params)
+  }
+
+  async fetchRequirementQuestions(params?: TSearchParams<EQuestionBankSortFields>) {
+    return this.client.post<IRequirementQuestionResponse>("/requirement_questions/search", params)
   }
 
   async fetchJurisdictionUsers(jurisdictionId, params?: TSearchParams<EUserSortFields>) {
@@ -563,6 +570,18 @@ export class Api {
 
   async createRequirementBlock(params: IRequirementBlockParams) {
     return this.client.post<IRequirementBlockResponse>(`/requirement_blocks`, { requirementBlock: params })
+  }
+
+  async createRequirementQuestion(params: IRequirementQuestionParams) {
+    return this.client.post<IRequirementQuestionResponse>(`/requirement_questions`, { requirementQuestion: params })
+  }
+
+  async archiveRequirementQuestion(id: string) {
+    return this.client.delete<IRequirementQuestionResponse>(`/requirement_questions/${id}`)
+  }
+
+  async restoreRequirementQuestion(id: string) {
+    return this.client.post<IRequirementQuestionResponse>(`/requirement_questions/${id}/restore`)
   }
 
   async updateRequirementBlock(id: string, params: Partial<IRequirementBlockParams>) {

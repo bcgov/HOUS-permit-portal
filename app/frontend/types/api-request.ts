@@ -78,6 +78,20 @@ export interface IRequirementBlockParams {
   }>
 }
 
+export interface IRequirementQuestionParams {
+  id: string
+  name: string
+  description?: string
+  associationList?: string[]
+  label: string
+  inputType: ERequirementType
+  hint?: string
+  instructions?: string
+  required?: boolean
+  elective?: boolean
+  inputOptions?: IRequirementAttributes["inputOptions"]
+}
+
 export interface IBlockConditional {
   whenBlockId: string
   whenRequirementCode: string
