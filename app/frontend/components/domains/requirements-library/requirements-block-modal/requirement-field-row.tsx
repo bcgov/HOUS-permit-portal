@@ -21,6 +21,7 @@ interface RequirementFieldRowProps {
   isEditing: boolean
   toggleEdit: () => void
   onRemove: () => void
+  hideConditional?: boolean
 }
 
 const fieldContainerSharedProps = {
@@ -58,7 +59,14 @@ const getRequirementFieldState = (requirementCode: string | undefined, inputType
   return { disabledMenuOptions, showEditControls }
 }
 
-export const RequirementFieldRow = ({ index, field, isEditing, toggleEdit, onRemove }: RequirementFieldRowProps) => {
+export const RequirementFieldRow = ({
+  index,
+  field,
+  isEditing,
+  toggleEdit,
+  onRemove,
+  hideConditional = false,
+}: RequirementFieldRowProps) => {
   const { t } = useTranslation()
   const {
     setValue,
@@ -239,12 +247,13 @@ export const RequirementFieldRow = ({ index, field, isEditing, toggleEdit, onRem
         toggleRequirementToEdit={showEditControls ? toggleEdit : undefined}
         onRemove={onRemove}
         elective={watchedElective}
-        conditional={watchedConditional as IFormConditional}
+        conditional={hideConditional ? undefined : (watchedConditional as IFormConditional)}
         computedCompliance={watchedComputedCompliance}
         dataValidation={watchedDataValidation}
         requirementType={requirementType}
         index={index}
         disabledMenuOptions={disabledMenuOptions}
+        hideConditional={hideConditional}
       />
     </Box>
   )

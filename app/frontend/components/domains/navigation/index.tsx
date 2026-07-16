@@ -321,6 +321,9 @@ const ExportTemplatesScreen = lazy(() =>
 const RequirementsLibraryScreen = lazy(() =>
   import("../requirements-library").then((module) => ({ default: module.RequirementsLibraryScreen }))
 )
+const QuestionBankScreen = lazy(() =>
+  import("../question-bank").then((module) => ({ default: module.QuestionBankScreen }))
+)
 const Part9StepCodeForm = lazy(() =>
   import("../step-code/part-9").then((module) => ({ default: module.Part9StepCodeForm }))
 )
@@ -566,6 +569,7 @@ const AppRoutes = observer(() => {
     <>
       <Route path="/jurisdictions/new" element={<NewJurisdictionScreen />} />
       <Route path="/requirements-library" element={<RequirementsLibraryScreen />} />
+      <Route path="/question-bank" element={<QuestionBankScreen />} />
       <Route path="/requirement-templates" element={<RequirementTemplatesScreen />} />
       <Route path="/requirement-templates/new" element={<NewRequirementTemplateScreen />} />
       <Route path="/requirement-templates/:requirementTemplateId/edit" element={<EditRequirementTemplateScreen />} />

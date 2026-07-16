@@ -18,6 +18,7 @@ interface IProps {
   requirementCode: string
   onRemove: IRequirementOptionsMenu["onRemove"]
   disabledMenuOptions?: IRequirementOptionsMenu["disabledOptions"]
+  hideConditional?: boolean
   elective?: boolean
   conditional?: IFormConditional
   computedCompliance?: TComputedCompliance
@@ -27,6 +28,7 @@ interface IProps {
 
 export function FieldControlsHeader({
   disabledMenuOptions,
+  hideConditional = false,
   isRequirementInEditMode,
   toggleRequirementToEdit,
   elective,
@@ -51,6 +53,7 @@ export function FieldControlsHeader({
             }}
             onRemove={onRemove}
             disabledOptions={disabledMenuOptions}
+            hideConditional={hideConditional}
             index={index}
             requirementType={requirementType}
           />

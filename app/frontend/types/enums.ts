@@ -133,6 +133,12 @@ export enum ERequirementLibrarySortFields {
   configurations = "configurations",
 }
 
+export enum EQuestionBankSortFields {
+  name = "name",
+  associations = "associations",
+  updatedAt = "updated_at",
+}
+
 export enum EJurisdictionTypes {
   subDistrict = "SubDistrict",
   regionalDistrict = "RegionalDistrict",

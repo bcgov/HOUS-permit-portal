@@ -25,11 +25,14 @@ export interface IRequirementOptionsMenu {
   emitOpenState?: (isOpen: boolean) => void
   index: number
   disabledOptions?: Array<"remove" | "conditional">
+  /** Omit menu items entirely (blocks keep the default and still show conditional). */
+  hideConditional?: boolean
   requirementType?: ERequirementType
 }
 
 export const OptionsMenu = observer(function OptionsMenu({
   disabledOptions = [],
+  hideConditional = false,
   menuButtonProps,
   onRemove,
   emitOpenState,
@@ -77,12 +80,14 @@ export const OptionsMenu = observer(function OptionsMenu({
           </MenuItem>
         )}
 
-        <ConditionalSetupModal
-          index={index}
-          triggerButtonProps={{
-            isDisabled: disabledOptions.includes("conditional"),
-          }}
-        />
+        {!hideConditional && (
+          <ConditionalSetupModal
+            index={index}
+            triggerButtonProps={{
+              isDisabled: disabledOptions.includes("conditional"),
+            }}
+          />
+        )}
         <ComputedComplianceSetupModal requirementIndex={index} />
 
         <MenuDivider />
