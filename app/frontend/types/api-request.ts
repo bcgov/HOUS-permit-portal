@@ -87,8 +87,6 @@ export interface IRequirementQuestionParams {
   inputType: ERequirementType
   hint?: string
   instructions?: string
-  required?: boolean
-  elective?: boolean
   inputOptions?: IRequirementAttributes["inputOptions"]
 }
 

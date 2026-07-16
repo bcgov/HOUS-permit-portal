@@ -56,6 +56,31 @@ RSpec.describe Api::RequirementQuestionsController,
     end
   end
 
+  describe "member actions on private questions" do
+    let!(:private_question) { create(:requirement_question, shared: false) }
+
+    it "does not expose private questions via show" do
+      expect {
+        get :show, params: { id: private_question.id }, format: :json
+      }.to raise_error(ActiveRecord::RecordNotFound)
+    end
+
+    it "does not allow updating private questions" do
+      expect {
+        put :update,
+            params: {
+              id: private_question.id,
+              requirement_question: {
+                name: "Should not apply",
+                label: private_question.label,
+                input_type: private_question.input_type
+              }
+            },
+            format: :json
+      }.to raise_error(ActiveRecord::RecordNotFound)
+    end
+  end
+
   describe "POST #index (search)" do
     let!(:shared_question) { create(:requirement_question, :shared) }
     let!(:private_question) { create(:requirement_question, shared: false) }

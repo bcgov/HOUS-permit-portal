@@ -146,6 +146,7 @@ class Api::RequirementQuestionsController < Api::ApplicationController
   end
 
   def set_requirement_question
-    @requirement_question = RequirementQuestion.find(params[:id])
+    # Bank API is shared-only; private (in-block) mirrors are out of scope here.
+    @requirement_question = RequirementQuestion.shared.find(params[:id])
   end
 end

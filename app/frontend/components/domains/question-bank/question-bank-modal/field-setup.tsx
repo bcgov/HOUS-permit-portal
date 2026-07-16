@@ -95,6 +95,7 @@ export const FieldSetup = observer(function FieldSetup() {
                   toggleEdit={() => toggleRequirementToEdit(field.id)}
                   onRemove={() => onRemoveRequirement(index)}
                   hideConditional
+                  hidePlacementOptions
                 />
               ))}
             </VStack>

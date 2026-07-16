@@ -22,6 +22,8 @@ interface RequirementFieldRowProps {
   toggleEdit: () => void
   onRemove: () => void
   hideConditional?: boolean
+  /** Bank questions: required/elective live on placement, not the catalogue row. */
+  hidePlacementOptions?: boolean
 }
 
 const fieldContainerSharedProps = {
@@ -66,6 +68,7 @@ export const RequirementFieldRow = ({
   toggleEdit,
   onRemove,
   hideConditional = false,
+  hidePlacementOptions = false,
 }: RequirementFieldRowProps) => {
   const { t } = useTranslation()
   const {
@@ -145,19 +148,27 @@ export const RequirementFieldRow = ({
           editableInstructionsTextProps={{
             controlProps: { control, name: `requirementsAttributes.${index}.instructions` },
           }}
-          isOptionalCheckboxProps={{
-            controlProps: {
-              control,
-              name: `requirementsAttributes.${index}.required`,
-              defaultValue: true,
-            },
-          }}
-          isElectiveCheckboxProps={{
-            controlProps: {
-              control,
-              name: `requirementsAttributes.${index}.elective`,
-            },
-          }}
+          isOptionalCheckboxProps={
+            hidePlacementOptions
+              ? undefined
+              : {
+                  controlProps: {
+                    control,
+                    name: `requirementsAttributes.${index}.required`,
+                    defaultValue: true,
+                  },
+                }
+          }
+          isElectiveCheckboxProps={
+            hidePlacementOptions
+              ? undefined
+              : {
+                  controlProps: {
+                    control,
+                    name: `requirementsAttributes.${index}.elective`,
+                  },
+                }
+          }
           unitSelectProps={
             requirementType === ERequirementType.number
               ? {

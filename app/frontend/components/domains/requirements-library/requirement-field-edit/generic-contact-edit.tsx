@@ -11,7 +11,7 @@ import { IControlProps } from "./types"
 
 export type TGenericContactEditProps<TFieldValues> = {
   editableLabelProps: TEditableLabelProps<TFieldValues>
-  isOptionalCheckboxProps: TIsOptionalCheckboxProps<TFieldValues>
+  isOptionalCheckboxProps?: TIsOptionalCheckboxProps<TFieldValues>
 } & TGenericContactDisplayProps<TFieldValues> &
   IControlProps<TFieldValues>
 
@@ -41,7 +41,7 @@ export function GenericContactEdit<TFieldValues>({
         }}
         {...contactDisplayProps}
       />
-      <IsOptionalCheckbox {...isOptionalCheckboxProps} />
+      {isOptionalCheckboxProps && <IsOptionalCheckbox {...isOptionalCheckboxProps} />}
     </Stack>
   )
 }
