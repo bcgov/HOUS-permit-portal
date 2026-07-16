@@ -40,7 +40,8 @@ export const PermitProjectInboxApplicationSearchSlice = types
 
       const searchParams: TSearchParams<EPermitApplicationInboxSortFields, IPermitApplicationInboxSearchFilters> = {
         query: self.query,
-        sort: self.sort,
+        // ponytail: kanban ignores list-column sort — defaults + drag order only
+        sort: isKanban ? undefined : self.sort,
         page: isKanban ? undefined : (opts?.page ?? self.currentPage),
         perPage: isKanban ? undefined : (opts?.countPerPage ?? self.countPerPage),
         mode: isKanban ? "kanban" : "list",
