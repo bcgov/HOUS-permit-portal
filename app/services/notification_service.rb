@@ -442,7 +442,7 @@ class NotificationService
     return if step_code.blank?
 
     # Determine recipient users:
-    # If the step code belongs to a permit application, notify the submitter; otherwise notify the creator
+    # If the Step Code belongs to a permit application, notify the submitter; otherwise notify the creator
     user_ids = []
     if step_code.permit_application.present?
       submitter_id = step_code.permit_application.submitter_id

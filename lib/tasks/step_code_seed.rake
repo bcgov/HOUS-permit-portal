@@ -66,7 +66,7 @@ module StepCodeSeed
 
   def generate_step_requirements_csv(path)
     part9_note =
-      "Energy step: 3-5. Zero carbon: 1-4. Duplicate row for multiple pathways."
+      "Energy Step: 3-5. Zero Carbon: 1-4. Duplicate row for multiple pathways."
 
     CSV.open(path, "wb") do |csv|
       csv << [
@@ -97,11 +97,10 @@ module StepCodeSeed
       # --- Part 3 configurable ---
       PART3_OCCUPANCIES.each do |occ|
         group_label = group_label_for(occ)
-        energy_range =
-          "#{occ[:allowed_energy].min}-#{occ[:allowed_energy].max}"
+        energy_range = "#{occ[:allowed_energy].min}-#{occ[:allowed_energy].max}"
         zc_range = "#{occ[:allowed_zc].min}-#{occ[:allowed_zc].max}"
         note =
-          "Energy: #{energy_range}. Zero carbon: #{zc_range}. Duplicate row for multiple pathways."
+          "Energy: #{energy_range}. Zero Carbon: #{zc_range}. Duplicate row for multiple pathways."
 
         csv << [
           "Part 3",
@@ -307,8 +306,7 @@ module StepCodeSeed
         location_name = row["Location name"]&.strip
         hdd_str =
           (
-            row["Heating Degree Days"] ||
-              row["Heating Degree Days (optional)"]
+            row["Heating Degree Days"] || row["Heating Degree Days (optional)"]
           )&.strip
 
         next if location_name.blank? && hdd_str.blank?
@@ -348,7 +346,7 @@ module StepCodeSeed
 end
 
 namespace :step_code_seed do
-  desc "Generate blank CSV templates for step code requirements and climate zones"
+  desc "Generate blank CSV templates for Step Code requirements and climate zones"
   task generate_templates: [] do
     output_dir = Rails.root.join("data", "step_code_seed")
     FileUtils.mkdir_p(output_dir)
@@ -367,7 +365,7 @@ namespace :step_code_seed do
     puts "  city-of-mission-climate-zones.csv"
   end
 
-  desc "Import step code requirements and climate zones from CSV files in data/step_code_seed/"
+  desc "Import Step Code requirements and climate zones from CSV files in data/step_code_seed/"
   task import: :environment do
     input_dir = Rails.root.join("data", "step_code_seed")
 
@@ -381,7 +379,7 @@ namespace :step_code_seed do
     StepCodeSeed.import_climate_zones_from_dir(input_dir)
   end
 
-  desc "Import step code requirements only from data/step_code_seed/"
+  desc "Import Step Code requirements only from data/step_code_seed/"
   task import_step_requirements: :environment do
     input_dir = Rails.root.join("data", "step_code_seed")
     StepCodeSeed.import_step_requirements_from_dir(input_dir)

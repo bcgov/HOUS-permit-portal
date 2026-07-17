@@ -11,8 +11,8 @@ RSpec.describe Part3StepCode::Checklist, type: :model do
     end
   end
 
-  describe "touching the parent step code" do
-    it "updates step code updated_at when the checklist is saved" do
+  describe "touching the parent Step Code" do
+    it "updates Step Code updated_at when the checklist is saved" do
       step_code = create(:part_3_step_code)
       checklist = step_code.pre_construction_checklist
       step_code.update_column(:updated_at, 2.days.ago)
@@ -92,7 +92,7 @@ RSpec.describe Part3StepCode::Checklist, type: :model do
       create(:part_3_checklist, occupancy_classifications: occupancies)
     end
 
-    context "when the checklist has step code occupancies" do
+    context "when the checklist has Step Code occupancies" do
       let(:occupancies) do
         build_list(:step_code_occupancy, 1, :other_residential)
       end
@@ -106,7 +106,7 @@ RSpec.describe Part3StepCode::Checklist, type: :model do
       end
     end
 
-    context "when the checklist does not have step code occupancies" do
+    context "when the checklist does not have Step Code occupancies" do
       let(:occupancies) { build_list(:step_code_occupancy, 1, :low_industrial) }
 
       it "returns the correct metrics" do

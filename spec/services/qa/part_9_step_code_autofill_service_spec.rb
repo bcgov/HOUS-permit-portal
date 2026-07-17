@@ -69,7 +69,7 @@ RSpec.describe Qa::Part9StepCodeAutofillService do
       expect(checklist.step_requirement_id).to eq(step_requirement.id)
     end
 
-    it "updates step code project details" do
+    it "updates Step Code project details" do
       expect(step_code.full_address).to eq("123 QA Street, Victoria, BC")
       expect(step_code.reference_number).to eq("QA-REF-001")
       expect(step_code.pid).to eq("123456789")
@@ -97,7 +97,7 @@ RSpec.describe Qa::Part9StepCodeAutofillService do
     end
   end
 
-  describe "standalone step codes" do
+  describe "standalone Step Codes" do
     let(:step_code) do
       create(:part_9_step_code, permit_application: nil, creator: submitter)
     end

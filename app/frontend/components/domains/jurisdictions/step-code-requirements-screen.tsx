@@ -143,17 +143,6 @@ export const JurisdictionStepCodeRequirementsScreen = observer(() => {
                     h="46px"
                     px={4}
                   >
-                    {t(`${i18nPrefix}.locationNameColumnHeader`)}
-                  </Th>
-                  <Th
-                    borderBottomWidth={1}
-                    borderColor="border.light"
-                    fontWeight="bold"
-                    fontSize="sm"
-                    w="220px"
-                    h="46px"
-                    px={4}
-                  >
                     {t(`${i18nPrefix}.heatingDegreeDaysColumnHeader`)}
                   </Th>
                   <Th
@@ -167,6 +156,17 @@ export const JurisdictionStepCodeRequirementsScreen = observer(() => {
                   >
                     {t(`${i18nPrefix}.climateZoneColumnHeader`)}
                   </Th>
+                  <Th
+                    borderBottomWidth={1}
+                    borderColor="border.light"
+                    fontWeight="bold"
+                    fontSize="sm"
+                    w="220px"
+                    h="46px"
+                    px={4}
+                  >
+                    {t(`${i18nPrefix}.locationNameColumnHeader`)}
+                  </Th>
                 </Tr>
               </Thead>
               <Tbody>
@@ -176,13 +176,13 @@ export const JurisdictionStepCodeRequirementsScreen = observer(() => {
                   return (
                     <Tr key={row.id ?? `${row.locationName}-${row.heatingDegreeDays}`}>
                       <Td borderTopWidth={1} borderColor="greys.grey02" fontSize="lg" w="220px" minH="68px" px={4}>
-                        {row.locationName}
-                      </Td>
-                      <Td borderTopWidth={1} borderColor="greys.grey02" fontSize="lg" w="220px" minH="68px" px={4}>
                         {row.heatingDegreeDays.toLocaleString()}
                       </Td>
                       <Td borderTopWidth={1} borderColor="greys.grey02" fontSize="lg" w="220px" minH="68px" px={4}>
                         {climateZoneLabelKey ? t(climateZoneLabelKey) : row.climateZone}
+                      </Td>
+                      <Td borderTopWidth={1} borderColor="greys.grey02" fontSize="lg" w="220px" minH="68px" px={4}>
+                        {row.locationName}
                       </Td>
                     </Tr>
                   )

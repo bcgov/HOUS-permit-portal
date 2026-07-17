@@ -255,7 +255,7 @@ class SeededRequirementTemplateService
     large_template(
       nickname: SEEDED_TEMPLATE_NICKNAMES.second,
       description:
-        "Large seeded template covering every requirement type except Part 3 step code.",
+        "Large seeded template covering every requirement type except Part 3 Step Code.",
       step_code_part: :part_9,
       prefix: "part9",
       scheduled_change_notes: "Part 9 template scheduled seed update."
@@ -266,7 +266,7 @@ class SeededRequirementTemplateService
     large_template(
       nickname: SEEDED_TEMPLATE_NICKNAMES.third,
       description:
-        "Large seeded template covering every requirement type except Part 9 step code.",
+        "Large seeded template covering every requirement type except Part 9 Step Code.",
       step_code_part: :part_3,
       prefix: "part3",
       scheduled_change_notes: "Part 3 template scheduled seed update."

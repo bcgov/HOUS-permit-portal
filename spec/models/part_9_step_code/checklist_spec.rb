@@ -87,8 +87,8 @@ RSpec.describe Part9StepCode::Checklist, type: :model do
     end
   end
 
-  describe "touching the parent step code" do
-    it "updates step code updated_at when the checklist is saved" do
+  describe "touching the parent Step Code" do
+    it "updates Step Code updated_at when the checklist is saved" do
       step_code = create(:part_9_step_code)
       checklist = step_code.pre_construction_checklist
       step_code.update_column(:updated_at, 2.days.ago)
@@ -100,7 +100,7 @@ RSpec.describe Part9StepCode::Checklist, type: :model do
       end
     end
 
-    it "updates step code updated_at when a data entry is saved" do
+    it "updates Step Code updated_at when a data entry is saved" do
       step_code = create(:part_9_step_code)
       checklist = step_code.pre_construction_checklist
       step_code.update_column(:updated_at, 2.days.ago)

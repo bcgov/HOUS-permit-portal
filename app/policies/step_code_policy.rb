@@ -14,7 +14,7 @@ class StepCodePolicy < ApplicationPolicy
   def create?
     return false unless user
 
-    # If creating a standalone step code (no permit application), any logged-in user may create
+    # If creating a standalone Step Code (no permit application), any logged-in user may create
     return true if record.permit_application.nil?
 
     record.permit_application.submitter == user ||

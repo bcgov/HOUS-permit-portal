@@ -111,7 +111,7 @@ class Part9StepCode < StepCode
         :plan_version,
         "file is missing. Please upload design package on the permit application first."
       )
-      # EVENTUALLY BRING THIS LOGIC BACK ONCE WE DECIDE BEST WAY TO CONFIGURE IF A STEP CODE REQUIRES A SIGNED DOCUMENT.
+      # EVENTUALLY BRING THIS LOGIC BACK ONCE WE DECIDE BEST WAY TO CONFIGURE IF A Step Code REQUIRES A SIGNED DOCUMENT.
       # elsif permit_application.step_code_plan_document.compliance_data.blank? ||
       #       permit_application.step_code_plan_document.compliance_data.empty?
       #   errors.add(:plan_version, "file is being verified for author and date.")

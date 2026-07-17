@@ -383,7 +383,7 @@ class Api::RequirementTemplatesController < Api::ApplicationController
 
     restore_cleared_block_conditionals(permitted_params)
 
-    # This is a workaround needed to validate step code related errors
+    # This is a workaround needed to validate Step Code related errors
     if permitted_params[:requirement_template_sections_attributes].present?
       permitted_params[
         :requirement_template_sections_attributes_copy

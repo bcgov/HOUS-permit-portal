@@ -43,14 +43,14 @@ const getRequirementFieldState = (requirementCode: string | undefined, inputType
   const disabledMenuOptions: ("remove" | "conditional")[] =
     isStepCodeDependency || isArchitectural ? ["conditional"] : []
 
-  // for step code dependency only the step_code requirement is removable and the other
+  // for Step Code dependency only the step_code requirement is removable and the other
   // dependencies rely on it for removal
   if (isStepCodeDependency && requirementCode !== EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod) {
     disabledMenuOptions.push("remove")
   }
 
   // Architectural drawing is a single standalone requirement that can be edited/removed.
-  // Only step code dependencies restrict edit controls.
+  // Only Step Code dependencies restrict edit controls.
   const showEditControls = !isStepCodeDependency
     ? true
     : requirementCode === EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod
