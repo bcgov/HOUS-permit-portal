@@ -5,6 +5,7 @@ import { IProjectMeeting } from "../../../../../models/project-meeting"
 import { EFlashMessageStatus, EProjectMeetingStatus } from "../../../../../types/enums"
 import { CustomMessageBox } from "../../../../shared/base/custom-message-box"
 import { RouterLinkButton } from "../../../../shared/navigation/router-link-button"
+import { DownloadCalendarInviteButton } from "../download-calendar-invite-button"
 import { MeetingScheduleDetails } from "./meeting-schedule-details"
 
 interface ProjectMeetingStatusBannerProps {
@@ -93,7 +94,10 @@ export const ProjectMeetingStatusBanner = ({
           </Text>
         )}
         {showMeetingDetails && (
-          <MeetingScheduleDetails projectMeeting={projectMeeting} borderColor={detailsBorderColor} />
+          <>
+            <MeetingScheduleDetails projectMeeting={projectMeeting} borderColor={detailsBorderColor} />
+            <DownloadCalendarInviteButton projectMeeting={projectMeeting} mt={4} alignSelf="flex-start" />
+          </>
         )}
       </CustomMessageBox>
     </Box>

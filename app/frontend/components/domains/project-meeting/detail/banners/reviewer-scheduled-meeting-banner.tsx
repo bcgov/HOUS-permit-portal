@@ -1,9 +1,10 @@
-import { Box, Button } from "@chakra-ui/react"
+import { Box, Button, HStack } from "@chakra-ui/react"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { IProjectMeeting } from "../../../../../models/project-meeting"
 import { EFlashMessageStatus, EProjectMeetingScheduleMode, EProjectMeetingStatus } from "../../../../../types/enums"
 import { CustomMessageBox } from "../../../../shared/base/custom-message-box"
+import { DownloadCalendarInviteButton } from "../download-calendar-invite-button"
 import { MeetingScheduleDetails } from "./meeting-schedule-details"
 import { ScheduleMeetingBanner } from "./schedule-meeting-banner"
 
@@ -47,10 +48,15 @@ export const ReviewerScheduledMeetingBanner = ({ projectMeeting }: ReviewerSched
         mb={0}
       >
         <MeetingScheduleDetails projectMeeting={projectMeeting} borderColor={detailsBorderColor} />
-        {projectMeeting.status === EProjectMeetingStatus.scheduled && (
-          <Button variant="secondary" size="sm" alignSelf="flex-start" mt={4} onClick={() => setIsEditing(true)}>
-            {t("projectMeeting.detail.reviewer.changeMeetingDetails")}
-          </Button>
+        {(projectMeeting.status === EProjectMeetingStatus.scheduled || projectMeeting.confirmedDate) && (
+          <HStack spacing={4} mt={4} alignSelf="flex-start" flexWrap="wrap">
+            {projectMeeting.status === EProjectMeetingStatus.scheduled && (
+              <Button variant="secondary" size="sm" onClick={() => setIsEditing(true)}>
+                {t("projectMeeting.detail.reviewer.changeMeetingDetails")}
+              </Button>
+            )}
+            <DownloadCalendarInviteButton projectMeeting={projectMeeting} />
+          </HStack>
         )}
       </CustomMessageBox>
     </Box>
