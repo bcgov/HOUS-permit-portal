@@ -10,7 +10,6 @@ import { IProjectMeeting } from "../../../../../models/project-meeting"
 import { useMst } from "../../../../../setup/root"
 import { EFlashMessageStatus, EMeetingRequestDocumentType } from "../../../../../types/enums"
 import { useProjectMeetingNavigation } from "../../use-project-meeting-navigation"
-import { ACCEPTED_DOCUMENT_TYPES } from "../shared/constants"
 import { documentsForType } from "../shared/document-utils"
 import { DocumentsTable } from "../shared/documents-table"
 import { FormActions } from "../shared/form-actions"
@@ -65,7 +64,6 @@ export const DocumentsSection = observer(({ meeting }: DocumentsSectionProps) =>
     onUploadSuccess: handleUploadSuccess,
     maxNumberOfFiles: 10,
     autoProceed: true,
-    allowedFileTypes: ACCEPTED_DOCUMENT_TYPES,
   })
 
   const handleRemoveFile = (documentId: string) => {
@@ -110,10 +108,7 @@ export const DocumentsSection = observer(({ meeting }: DocumentsSectionProps) =>
         onRemoveFile={handleRemoveFile}
         onUndoRemoveFile={handleUndoRemoveFile}
       />
-      <UppyDashboardField
-        uppy={supportingDocumentsUppy}
-        acceptedFormatsLabel={t("projectMeeting.sections.documents.acceptedFormats")}
-      />
+      <UppyDashboardField uppy={supportingDocumentsUppy} />
       <FormActions
         isSubmitting={formState.isSubmitting}
         isDisabled={isUploading}

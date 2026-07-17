@@ -371,6 +371,7 @@ const options = {
           invalidInput: "Invalid input",
           invalidUrl: "Invalid url",
           invalidEmail: "Invalid email",
+          invalidPhone: "Enter a valid phone number",
           selectPlaceholder: "Select",
           selectApplicable: "Select applicable:",
           clickHere: "Click here",
@@ -1581,7 +1582,7 @@ Thank you,
               "{{jurisdictionName}} has not yet added any local resources. Contact your local government for additional guidance.",
           },
           rollupStatusDescription: {
-            empty: "No permits yet",
+            empty: "No applications yet",
             inProgress: "{{remaining}} of {{total}} permit(s) remaining",
             submitted: "{{count}} permit(s) waiting for response",
             waitingOnYou: "{{count}} permit(s) returned for revision",
@@ -1883,7 +1884,7 @@ Thank you,
         },
         permitApplication: {
           goToApplication: "Go to permit application",
-          noneFound: "No permits yet",
+          noneFound: "No applications yet",
           noneFoundExplanation:
             "Missing permits? You might have used a login option different from the one you used to create the permits. Log out and try logging back in with the BCeID or BC Services Card Account you used to create them.",
           submissionBlockModal: {

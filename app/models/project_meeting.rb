@@ -167,6 +167,11 @@ class ProjectMeeting < ApplicationRecord
       errors.add(:request_property_information, :blank)
     end
 
+    # Requester-edit wizard saves relationship first, then collects auth docs.
+    if persisted? && !draft? && will_save_change_to_requester_relationship?
+      return
+    end
+
     if authorization_required? &&
          active_meeting_request_documents.none?(&:document_type_authorization?)
       errors.add(:meeting_request_documents, :authorization_required)
