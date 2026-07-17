@@ -17,7 +17,6 @@ import { ConfirmationModal } from "../../shared/confirmation-modal"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { ProjectMeetingStatusTag } from "../../shared/project-meetings/project-meeting-status-tag"
 import { ProjectMeetingStatusBanner } from "./detail/banners/project-meeting-status-banner"
-import { DownloadCalendarInviteButton } from "./detail/download-calendar-invite-button"
 import { DocumentsSection } from "./detail/sections/documents-section"
 import { MeetingNotesSection } from "./detail/sections/meeting-notes-section"
 import { ProjectInformationSection } from "./detail/sections/project-information-section"
@@ -101,24 +100,21 @@ export const SubmitterProjectMeetingDetailContent = observer(
               <ProjectMeetingStatusTag status={currentProjectMeeting.status} />
             </HStack>
           </Box>
-          <HStack spacing={4}>
-            <DownloadCalendarInviteButton projectMeeting={currentProjectMeeting} />
-            {canWithdrawMeeting && (
-              <ConfirmationModal
-                title={t("projectMeeting.detail.withdrawConfirmationTitle")}
-                body={t("projectMeeting.detail.withdrawConfirmationBody")}
-                triggerText={t("projectMeeting.detail.withdrawMeeting")}
-                triggerButtonProps={{ variant: "ghost", color: "text.secondary" }}
-                renderConfirmationButton={(props) => (
-                  <Button variant="primary" isLoading={isWithdrawing} {...props}>
-                    {t("projectMeeting.detail.confirmWithdrawMeeting")}
-                  </Button>
-                )}
-                modalContentProps={{ maxW: "604px" }}
-                onConfirm={handleWithdrawMeeting}
-              />
-            )}
-          </HStack>
+          {canWithdrawMeeting && (
+            <ConfirmationModal
+              title={t("projectMeeting.detail.withdrawConfirmationTitle")}
+              body={t("projectMeeting.detail.withdrawConfirmationBody")}
+              triggerText={t("projectMeeting.detail.withdrawMeeting")}
+              triggerButtonProps={{ variant: "ghost", color: "text.secondary" }}
+              renderConfirmationButton={(props) => (
+                <Button variant="primary" isLoading={isWithdrawing} {...props}>
+                  {t("projectMeeting.detail.confirmWithdrawMeeting")}
+                </Button>
+              )}
+              modalContentProps={{ maxW: "604px" }}
+              onConfirm={handleWithdrawMeeting}
+            />
+          )}
         </HStack>
 
         <Box maxW="3xl">
