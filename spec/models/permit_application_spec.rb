@@ -118,12 +118,9 @@ RSpec.describe PermitApplication, type: :model do
           create(:part_3_step_code, permit_application: permit_application)
         pre_construction = step_code.pre_construction_checklist
         pre_construction.update!(
-          section_completion_status: {
-            "report" => {
-              "complete" => true,
-              "relevant" => true
-            }
-          }
+          status: :complete,
+          section_completion_status:
+            Part3StepCode::Checklist.fully_complete_section_completion_status
         )
         create(:part_3_checklist, step_code: step_code, stage: :as_built)
         step_code.update!(current_stage: "as_built")
