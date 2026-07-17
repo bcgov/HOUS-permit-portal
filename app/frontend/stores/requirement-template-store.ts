@@ -247,7 +247,6 @@ export const RequirementTemplateStoreModel = types
         changeSignificance?: string
         notificationScope?: string
         notifiedJurisdictionIds?: string[]
-        promoteBlockIds?: string[]
         sendAdvanceNotice?: boolean
         skipDateCheck?: boolean
       }

@@ -26,7 +26,7 @@ import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { datefnsTableDateFormat } from "../../../constants"
+import { datefnsTableDateTimeFormat } from "../../../constants"
 import { IRequirementTemplate } from "../../../models/requirement-template"
 import { ITemplateVersion } from "../../../models/template-version"
 import { useMst } from "../../../setup/root"
@@ -183,7 +183,7 @@ const BuilderPanel = ({
           <Box>
             <Text fontWeight={700}>{t("requirementTemplate.versionSidebar.builderTitle")}</Text>
             <Text color={"text.secondary"} fontSize={"sm"}>
-              {t("requirementTemplate.versionSidebar.lastUpdated")} {format(updatedAt, datefnsTableDateFormat)}
+              {t("requirementTemplate.versionSidebar.lastUpdated")} {format(updatedAt, datefnsTableDateTimeFormat)}
             </Text>
           </Box>
         </HStack>
@@ -237,7 +237,7 @@ const VersionFlow = observer(function VersionFlow({
               <VersionCard
                 viewRoute={`/template-versions/${templateVersion.id}`}
                 status={ETemplateVersionStatus.draft}
-                updatedAt={templateVersion.updatedAt}
+                publishedAt={templateVersion.createdAt}
                 borderRadius="none"
                 border="none"
               />
@@ -408,13 +408,13 @@ type TVersionCardProps = Partial<FlexProps> & { viewRoute: string; onUnschedule?
     | {
         status: Exclude<ETemplateVersionStatus, ETemplateVersionStatus.draft>
         versionDate: Date
-        updatedAt?: never
+        publishedAt?: never
         deprecationReasonLabel?: string
       }
     | {
         status: ETemplateVersionStatus.draft
         versionDate?: never
-        updatedAt: Date
+        publishedAt: Date
         deprecationReasonLabel?: never
       }
   )
@@ -424,7 +424,7 @@ const VersionCard = observer(function VersionCard({
   onUnschedule,
   status,
   versionDate,
-  updatedAt,
+  publishedAt,
   deprecationReasonLabel,
   ...containerProps
 }: TVersionCardProps) {
@@ -486,9 +486,9 @@ const VersionCard = observer(function VersionCard({
         />
         {status === ETemplateVersionStatus.draft ? (
           <Text>
-            {t("requirementTemplate.versionSidebar.lastUpdated")}
+            {t("requirementTemplate.versionSidebar.publishedAt")}
             <br />
-            {format(updatedAt, datefnsTableDateFormat)}
+            {format(publishedAt, datefnsTableDateTimeFormat)}
           </Text>
         ) : (
           <VersionTag versionDate={versionDate} />
