@@ -377,12 +377,12 @@ export class Api {
     return this.client.post<ApiResponse<IPermitApplication>>(`/qa_tools/permit_applications/${id}/autofill`)
   }
 
-  async autofillQaPart3StepCode(id: string) {
-    return this.client.post<ApiResponse<IPart3StepCode>>(`/qa_tools/part_3_step_codes/${id}/autofill`)
+  async autofillQaPart3StepCode(id: string, params?: { stage?: string }) {
+    return this.client.post<ApiResponse<IPart3StepCode>>(`/qa_tools/part_3_step_codes/${id}/autofill`, params)
   }
 
-  async autofillQaPart9StepCode(id: string) {
-    return this.client.post<ApiResponse<IPart9StepCode>>(`/qa_tools/part_9_step_codes/${id}/autofill`)
+  async autofillQaPart9StepCode(id: string, params?: { stage?: string }) {
+    return this.client.post<ApiResponse<IPart9StepCode>>(`/qa_tools/part_9_step_codes/${id}/autofill`, params)
   }
 
   async updatePermitProject(id: string, params: IPermitProjectUpdateParams) {

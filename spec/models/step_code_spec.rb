@@ -2,7 +2,7 @@ require "rails_helper"
 
 RSpec.describe StepCode, type: :model do
   describe "validations" do
-    it "enforces uniqueness of kept permit application step codes" do
+    it "enforces uniqueness of kept permit application Step Codes" do
       permit_application = create(:permit_application)
 
       Part3StepCode.create!(

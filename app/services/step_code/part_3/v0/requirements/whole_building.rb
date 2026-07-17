@@ -49,8 +49,8 @@ class StepCode::Part3::V0::Requirements::WholeBuilding
     @total_mfa ||= baseline_mfa + step_code_mfa
   end
 
-  # buildings with NO step code occupancies report total energy
-  # if there are ANY step code occupancies, teui/tedi/ghgi is reported
+  # buildings with NO Step Code occupancies report total energy
+  # if there are ANY Step Code occupancies, teui/tedi/ghgi is reported
   def applicable?(metric:)
     compliance_metrics.include?(metric)
   end

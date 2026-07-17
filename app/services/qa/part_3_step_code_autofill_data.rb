@@ -127,15 +127,6 @@ module Qa
       pid: "123456789"
     }.freeze
 
-    SECTION_COMPLETION_STATUS =
-      Part3StepCode::Checklist::SECTION_COMPLETION_STATUS_KEYS
-        .index_with do |key|
-          relevant = key != :additional_fuel_types
-          complete = key != :report
-          { "complete" => complete, "relevant" => relevant }
-        end
-        .freeze
-
     module_function
 
     def checklist_attributes_for(heating_degree_days:)

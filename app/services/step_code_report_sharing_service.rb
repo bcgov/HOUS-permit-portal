@@ -61,7 +61,7 @@ class StepCodeReportSharingService
     true
   rescue => e
     Rails.logger.error(
-      "Failed to send step code report email: #{e.message}\n#{e.backtrace.join("\n")}"
+      "Failed to send Step Code report email: #{e.message}\n#{e.backtrace.join("\n")}"
     )
     @errors << "Failed to send email: #{e.message}"
     false

@@ -69,20 +69,21 @@ RSpec.describe Qa::Part9StepCodeAutofillService do
       expect(checklist.step_requirement_id).to eq(step_requirement.id)
     end
 
-    it "updates step code project details" do
+    it "updates Step Code project details" do
       expect(step_code.full_address).to eq("123 QA Street, Victoria, BC")
       expect(step_code.reference_number).to eq("QA-REF-001")
       expect(step_code.pid).to eq("123456789")
       expect(step_code.jurisdiction).to eq(jurisdiction)
     end
 
-    it "marks all sections complete except the final section" do
+    it "fills sections but leaves checklist draft for manual complete" do
       status = checklist.section_completion_status
 
       expect(status.dig("h2k_import", "complete")).to be(true)
       expect(status.dig("review", "complete")).to be(true)
       expect(status.dig("report", "complete")).to be(false)
-      expect(checklist.complete?).to be(false)
+      expect(checklist).not_to be_complete
+      expect(checklist.status).to eq("draft")
     end
 
     it "has passing compliance reports" do
@@ -96,7 +97,7 @@ RSpec.describe Qa::Part9StepCodeAutofillService do
     end
   end
 
-  describe "standalone step codes" do
+  describe "standalone Step Codes" do
     let(:step_code) do
       create(:part_9_step_code, permit_application: nil, creator: submitter)
     end

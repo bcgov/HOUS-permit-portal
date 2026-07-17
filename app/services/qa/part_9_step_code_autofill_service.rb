@@ -1,12 +1,14 @@
 # frozen_string_literal: true
 
 class Qa::Part9StepCodeAutofillService
-  def initialize(step_code:, current_user:)
+  def initialize(step_code:, current_user:, stage: nil)
     @step_code = step_code
     @current_user = current_user
+    @stage = (stage.presence || step_code.current_stage).to_s
   end
 
   def call
+    checklist = nil
     Part9StepCode.transaction do
       update_step_code!
       checklist = ensure_checklist!
@@ -18,6 +20,8 @@ class Qa::Part9StepCodeAutofillService
     end
 
     @step_code.reload
+    enqueue_report_generation!(checklist)
+    @step_code
   end
 
   private
@@ -31,8 +35,15 @@ class Qa::Part9StepCodeAutofillService
   end
 
   def ensure_checklist!
-    @step_code.pre_construction_checklist ||
-      @step_code.create_pre_construction_checklist!(stage: :pre_construction)
+    unless StepCode::STAGES.include?(@stage)
+      raise ArgumentError, "Invalid stage: #{@stage}"
+    end
+
+    checklist = @step_code.find_or_create_checklist_for!(stage: @stage)
+    if @step_code.current_stage != @stage
+      @step_code.update!(current_stage: @stage)
+    end
+    checklist
   end
 
   def reset_h2k_state!(checklist)
@@ -85,8 +96,25 @@ class Qa::Part9StepCodeAutofillService
       **Qa::Part9StepCodeAutofillData::COMPLETED_BY,
       building_characteristics_summary_attributes:
         Qa::Part9StepCodeAutofillData::BUILDING_CHARACTERISTICS_SUMMARY,
-      section_completion_status:
-        Qa::Part9StepCodeAutofillData::SECTION_COMPLETION_STATUS
+      status: :draft,
+      section_completion_status: autofill_section_completion_status
+    )
+  end
+
+  def autofill_section_completion_status
+    Part9StepCode::Checklist.fully_complete_section_completion_status.deep_merge(
+      "report" => {
+        "complete" => false
+      }
+    )
+  end
+
+  def enqueue_report_generation!(checklist)
+    return if checklist.blank?
+
+    StepCodeReportGenerationJob.perform_async(
+      @step_code.id,
+      { "checklist_id" => checklist.id }
     )
   end
 

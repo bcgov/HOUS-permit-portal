@@ -15,11 +15,11 @@ class StepCodeReportGenerationJob
                   }
 
   def self.lock_args(args)
-    # lock by step code id
+    # lock by Step Code id
     [args[0]]
   end
 
-  # Generates a step code report PDF without requiring a permit application or submission version
+  # Generates a Step Code report PDF without requiring a permit application or submission version
   # For now this is a scaffold that prepares JSON input for the SSR script; it does not invoke rendering yet.
   # Args:
   # - step_code_id: ID of the StepCode record

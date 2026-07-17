@@ -7,7 +7,9 @@ RSpec.describe StepCodeBlueprint do
       pre_construction = step_code.pre_construction_checklist
       pre_construction.update!(
         status: :complete,
-        stage_completed_at: Time.zone.parse("2026-06-12 10:00")
+        stage_completed_at: Time.zone.parse("2026-06-12 10:00"),
+        section_completion_status:
+          Part9StepCode::Checklist.fully_complete_section_completion_status
       )
       step_code.find_or_create_checklist_for!(stage: :mid_construction)
 

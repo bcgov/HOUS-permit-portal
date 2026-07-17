@@ -25,7 +25,7 @@ RSpec.describe StepCode::Part3::V0::LookupRequirements do
       { teui: 100, tedi: 42.5, ghgi: 3.03, total_energy: nil }
     end
 
-    it "returns baseline, step code, and whole building requirements" do
+    it "returns baseline, Step Code, and whole building requirements" do
       allow(StepCode::Part3::V0::Requirements::Baseline).to receive(:new).with(
         checklist: checklist
       ).and_return(

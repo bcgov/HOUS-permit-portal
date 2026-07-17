@@ -80,7 +80,7 @@ RSpec.describe Api::Part9Building::ChecklistsController, type: :controller do
       ).at_least(:once)
     end
 
-    it "returns not found for archived step code checklists" do
+    it "returns not found for archived Step Code checklists" do
       step_code.discard
 
       get :show, params: { id: checklist.id }
@@ -99,7 +99,7 @@ RSpec.describe Api::Part9Building::ChecklistsController, type: :controller do
   end
 
   describe "POST #create" do
-    it "creates a staged checklist under the step code with cloned values" do
+    it "creates a staged checklist under the Step Code with cloned values" do
       checklist.update!(builder: "Original builder")
 
       post :create,
@@ -165,6 +165,8 @@ RSpec.describe Api::Part9Building::ChecklistsController, type: :controller do
                 compliance_path: "step_code_ers",
                 status: "complete",
                 completed_by: "Advisor",
+                section_completion_status:
+                  Part9StepCode::Checklist.fully_complete_section_completion_status,
                 building_characteristics_summary_attributes: {
                   roof_ceilings_lines: [{ details: "Roof", rsi: 6.0 }],
                   doors_lines: [{ details: "Door", performance_value: 1.8 }]
@@ -296,7 +298,7 @@ RSpec.describe Api::Part9Building::ChecklistsController, type: :controller do
       )
     end
 
-    it "returns unprocessable entity for archived step codes" do
+    it "returns unprocessable entity for archived Step Codes" do
       step_code.discard
 
       patch :update,

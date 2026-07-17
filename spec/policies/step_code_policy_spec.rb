@@ -126,7 +126,7 @@ RSpec.describe StepCodePolicy, type: :policy do
     end
   end
 
-  context "for a submission assignee collaborator assigned to the step code block" do
+  context "for a submission assignee collaborator assigned to the Step Code block" do
     let(:collaborator_user) { create(:user, :submitter) }
     let(:collaborator) do
       create(
@@ -267,7 +267,7 @@ RSpec.describe StepCodePolicy, type: :policy do
     end
   end
 
-  context "for a standalone step code (no permit application)" do
+  context "for a standalone Step Code (no permit application)" do
     let(:creator) { create(:user, :submitter) }
     let(:step_code) do
       create(:part_9_step_code, permit_application: nil, creator: creator)
@@ -280,7 +280,7 @@ RSpec.describe StepCodePolicy, type: :policy do
   end
 
   describe "Scope" do
-    it "includes standalone step codes created by the user" do
+    it "includes standalone Step Codes created by the user" do
       visible =
         create(:part_9_step_code, permit_application: nil, creator: submitter)
       hidden =
@@ -300,7 +300,7 @@ RSpec.describe StepCodePolicy, type: :policy do
       expect(resolved).not_to include(hidden)
     end
 
-    it "scopes attached step codes through the permit application policy scope" do
+    it "scopes attached Step Codes through the permit application policy scope" do
       other_submitter = create(:user, :submitter)
       visible_permit_application =
         create(

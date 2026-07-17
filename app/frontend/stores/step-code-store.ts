@@ -24,8 +24,8 @@ export const StepCodeModel = types.union(
         default:
           // It's good practice to have a default, even if you expect it to never be hit.
           // Consider logging an error or throwing a more specific error if an unknown type is encountered.
-          console.error(`Unknown step code snapshot type: ${snapshot.type}`, snapshot)
-          throw new Error(`Unknown step code type: ${snapshot.type}`)
+          console.error(`Unknown Step Code snapshot type: ${snapshot.type}`, snapshot)
+          throw new Error(`Unknown Step Code type: ${snapshot.type}`)
       }
     },
   },
@@ -183,7 +183,7 @@ export const StepCodeStoreModel = types
         return response
       } catch (e) {
         if (import.meta.env.DEV) {
-          console.error(`Failed to delete step code:`, e)
+          console.error(`Failed to delete Step Code:`, e)
         }
         throw e
       }
@@ -203,7 +203,7 @@ export const StepCodeStoreModel = types
         return response
       } catch (error) {
         if (import.meta.env.DEV) {
-          console.error(`Failed to download energy step code configuration by jurisdiction:`, error)
+          console.error(`Failed to download Energy Step Code configuration by jurisdiction:`, error)
         }
         throw error
       }
@@ -223,7 +223,7 @@ export const StepCodeStoreModel = types
         return response
       } catch (error) {
         if (import.meta.env.DEV) {
-          console.error(`Failed to download step code metrics:`, error)
+          console.error(`Failed to download Step Code metrics:`, error)
         }
         throw error
       }

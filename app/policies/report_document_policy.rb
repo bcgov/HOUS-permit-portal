@@ -6,7 +6,7 @@ class ReportDocumentPolicy < ApplicationPolicy
   end
 
   def share?
-    # Only the creator of the step code can share the report
+    # Only the creator of the Step Code can share the report
     return false unless user
 
     record.step_code.creator == user

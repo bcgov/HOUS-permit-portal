@@ -63,6 +63,7 @@ module Part3StepCodeChecklistParamsConcern
       :completed_by_email,
       :completed_by_organization_name,
       :building_code_version,
+      :status,
       {
         section_completion_status:
           Part3StepCode::Checklist.section_completion_status_params

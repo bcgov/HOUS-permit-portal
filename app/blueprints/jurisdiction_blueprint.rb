@@ -71,8 +71,8 @@ class JurisdictionBlueprint < Blueprinter::Base
                 blueprint: JurisdictionStepRequirementBlueprint
     association :part3_occupancy_required_steps,
                 blueprint: Part3OccupancyRequiredStepBlueprint
-    association :jurisdiction_climate_zones,
-                blueprint: JurisdictionClimateZoneBlueprint
+    association :jurisdiction_heating_degree_days,
+                blueprint: JurisdictionHeatingDegreeDayBlueprint
     association :service_partner_enrollments,
                 blueprint: JurisdictionServicePartnerEnrollmentBlueprint
   end

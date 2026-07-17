@@ -13,7 +13,7 @@ RSpec.describe Part9StepCode::Checklist, type: :model do
 
   describe "#complete?" do
     it "returns true when status is complete" do
-      checklist = build(:part_9_checklist, status: :complete)
+      checklist = build(:part_9_checklist, :marked_complete)
 
       expect(checklist.complete?).to be(true)
     end
@@ -25,13 +25,35 @@ RSpec.describe Part9StepCode::Checklist, type: :model do
     end
   end
 
+  describe "marking complete" do
+    it "requires all relevant sections to be complete" do
+      checklist = create(:part_9_checklist, status: :draft)
+
+      expect(checklist.update(status: :complete)).to be(false)
+      expect(checklist.errors[:base]).to include(
+        "all relevant sections must be complete"
+      )
+    end
+
+    it "allows complete status when all relevant sections are complete" do
+      checklist = create(:part_9_checklist, :marked_complete)
+
+      expect(checklist).to be_valid
+      expect(checklist.complete?).to be(true)
+    end
+  end
+
   describe "stage_completed_at" do
     it "is set when the checklist becomes complete" do
       checklist =
         create(:part_9_checklist, status: :draft, stage_completed_at: nil)
 
       travel_to Time.zone.parse("2026-06-12 10:00") do
-        checklist.update!(status: :complete)
+        checklist.update!(
+          status: :complete,
+          section_completion_status:
+            Part9StepCode::Checklist.fully_complete_section_completion_status
+        )
         expect(checklist.stage_completed_at).to eq(
           Time.zone.parse("2026-06-12 10:00")
         )
@@ -42,7 +64,7 @@ RSpec.describe Part9StepCode::Checklist, type: :model do
       checklist =
         create(
           :part_9_checklist,
-          status: :complete,
+          :marked_complete,
           stage_completed_at: 1.day.ago
         )
 
@@ -54,7 +76,7 @@ RSpec.describe Part9StepCode::Checklist, type: :model do
       checklist =
         create(
           :part_9_checklist,
-          status: :complete,
+          :marked_complete,
           stage_completed_at: 2.days.ago
         )
       original_completed_at = checklist.stage_completed_at
@@ -65,8 +87,8 @@ RSpec.describe Part9StepCode::Checklist, type: :model do
     end
   end
 
-  describe "touching the parent step code" do
-    it "updates step code updated_at when the checklist is saved" do
+  describe "touching the parent Step Code" do
+    it "updates Step Code updated_at when the checklist is saved" do
       step_code = create(:part_9_step_code)
       checklist = step_code.pre_construction_checklist
       step_code.update_column(:updated_at, 2.days.ago)
@@ -78,7 +100,7 @@ RSpec.describe Part9StepCode::Checklist, type: :model do
       end
     end
 
-    it "updates step code updated_at when a data entry is saved" do
+    it "updates Step Code updated_at when a data entry is saved" do
       step_code = create(:part_9_step_code)
       checklist = step_code.pre_construction_checklist
       step_code.update_column(:updated_at, 2.days.ago)

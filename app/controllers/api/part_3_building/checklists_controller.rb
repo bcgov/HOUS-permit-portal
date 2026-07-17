@@ -28,7 +28,7 @@ class Api::Part3Building::ChecklistsController < Api::ApplicationController
   end
 
   def show
-    # Prevent viewing checklists of archived step codes
+    # Prevent viewing checklists of archived Step Codes
     if archived_step_code_checklist?(@checklist, action: :show, status: 404)
       return
     end
@@ -44,13 +44,13 @@ class Api::Part3Building::ChecklistsController < Api::ApplicationController
   end
 
   def update
-    # Prevent updating checklists of archived step codes
+    # Prevent updating checklists of archived Step Codes
     if archived_step_code_checklist?(@checklist, action: :update, status: 422)
       return
     end
 
     if @checklist.update(checklist_params)
-      # If the client requested report generation and this step code is standalone (no permit application),
+      # If the client requested report generation and this Step Code is standalone (no permit application),
       # enqueue the standalone report generation job.
       if report_generation_requested?
         enqueue_step_code_report_generation(@checklist)

@@ -6,10 +6,17 @@ interface IPart3FormFooterProps<T> {
   handleSubmit: (onValid: (data: T) => void | Promise<void>, onInvalid?: () => void) => (e?: any) => void
   onSubmit: (data: T) => Promise<void>
   isLoading?: boolean
+  isDisabled?: boolean
   generatesReport?: boolean
 }
 
-export function Part3FormFooter<T>({ handleSubmit, onSubmit, isLoading, generatesReport }: IPart3FormFooterProps<T>) {
+export function Part3FormFooter<T>({
+  handleSubmit,
+  onSubmit,
+  isLoading,
+  isDisabled,
+  generatesReport,
+}: IPart3FormFooterProps<T>) {
   const navigation = usePart3Navigation()
 
   return (
@@ -17,6 +24,7 @@ export function Part3FormFooter<T>({ handleSubmit, onSubmit, isLoading, generate
       handleSubmit={handleSubmit}
       onSubmit={onSubmit}
       isLoading={isLoading}
+      isDisabled={isDisabled}
       generatesReport={generatesReport}
       ctaTranslationKey="stepCode.part3.cta"
       goToStepCodesTranslationKey="stepCode.part3.goToStepCodes"

@@ -54,14 +54,14 @@ RSpec.describe Qa::Part3StepCodeAutofillService do
       expect(checklist.completed_by_email).to eq("qa@example.com")
     end
 
-    it "updates step code project details" do
+    it "updates Step Code project details" do
       expect(step_code.full_address).to eq("123 QA Street, Victoria, BC")
       expect(step_code.reference_number).to eq("QA-REF-001")
       expect(step_code.pid).to eq("123456789")
       expect(step_code.jurisdiction).to eq(jurisdiction)
     end
 
-    it "marks all relevant sections complete except the final section" do
+    it "fills sections but leaves checklist draft for manual complete" do
       status = checklist.section_completion_status
 
       expect(status.dig("baseline_occupancies", "complete")).to be(true)
@@ -70,8 +70,8 @@ RSpec.describe Qa::Part3StepCodeAutofillService do
       expect(status.dig("step_code_summary", "complete")).to be(true)
       expect(status.dig("report", "complete")).to be(false)
       expect(status.dig("additional_fuel_types", "relevant")).to be(false)
-      expect(status.dig("additional_fuel_types", "complete")).to be(true)
-      expect(checklist.complete?).to be(false)
+      expect(checklist).not_to be_complete
+      expect(checklist.status).to eq("draft")
     end
 
     it "passes compliance checks" do
@@ -100,7 +100,33 @@ RSpec.describe Qa::Part3StepCodeAutofillService do
     end
   end
 
-  describe "standalone step codes" do
+  describe "#call with mid_construction stage" do
+    subject(:service) do
+      described_class.new(
+        step_code: step_code,
+        current_user: submitter,
+        stage: "mid_construction"
+      )
+    end
+
+    it "autofills the mid_construction checklist" do
+      service.call
+
+      checklist = step_code.reload.checklist_for(stage: "mid_construction")
+      expect(checklist).to be_present
+      expect(checklist).not_to be_complete
+      expect(checklist.status).to eq("draft")
+      expect(step_code.current_stage).to eq("mid_construction")
+      expect(
+        checklist.section_completion_status.dig("start", "complete")
+      ).to be(true)
+      expect(
+        checklist.section_completion_status.dig("report", "complete")
+      ).to be(false)
+    end
+  end
+
+  describe "standalone Step Codes" do
     let!(:fallback_jurisdiction) do
       create(:sub_district, heating_degree_days: 4180, inbox_enabled: false)
     end

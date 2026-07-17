@@ -34,17 +34,9 @@ export function StepCodeFormFooter<T>({
   navigation,
 }: IStepCodeFormFooterProps<T>) {
   const navigate = useNavigate()
-  const {
-    navigateToNext,
-    navigateToPrevious,
-    hasNext,
-    hasPrevious,
-    goBackPath,
-    infoPagePath,
-    isPermitLinked,
-    exitLinkPath,
-  } = navigation
-  const isButtonDisabled = isDisabled ?? isLoading
+  const { navigateToNext, navigateToPrevious, hasNext, hasPrevious, infoPagePath, isPermitLinked, exitLinkPath } =
+    navigation
+  const isButtonDisabled = Boolean(isDisabled) || Boolean(isLoading)
   const isFinalStep = !hasNext
   const completeLabel = generatesReport ? "stepCode.markAsCompleteAndGenerateReport" : "stepCode.markAsComplete"
   const continueLabel = generatesReport ? completeLabel : ctaTranslationKey
@@ -74,11 +66,15 @@ export function StepCodeFormFooter<T>({
   const handleContinue = () => submitAndNavigate(navigateToNext)
   const handleSaveAndGoBack = () =>
     submitAndNavigate(() => {
-      if (isFinalStep) return navigate(goBackPath)
+      if (isFinalStep) return navigate(infoPagePath)
       if (hasPrevious) return navigateToPrevious()
       return navigate(infoPagePath)
     })
-  const handleExit = () => submitAndNavigate(() => navigate(exitLinkPath))
+  // Exit must stay available even when Complete is gated (e.g. report !canMarkComplete).
+  const handleExit = () => {
+    if (isDisabled) return navigate(exitLinkPath)
+    return submitAndNavigate(() => navigate(exitLinkPath))
+  }
   const exitLabel = isPermitLinked ? t("stepCode.goToPermitApplication") : t(goToStepCodesTranslationKey)
 
   return (
@@ -97,13 +93,7 @@ export function StepCodeFormFooter<T>({
             {t(continueLabel)}
           </Button>
         )}
-        <Link
-          ml="auto"
-          onClick={handleExit}
-          cursor={isButtonDisabled ? "not-allowed" : "pointer"}
-          opacity={isButtonDisabled ? 0.5 : 1}
-          pointerEvents={isButtonDisabled ? "none" : "auto"}
-        >
+        <Link ml="auto" onClick={handleExit} cursor="pointer">
           {exitLabel}
         </Link>
       </Flex>

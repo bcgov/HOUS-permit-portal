@@ -9,7 +9,7 @@ class Jurisdiction < ApplicationRecord
     contacts
     jurisdiction_step_requirements
     part3_occupancy_required_steps
-    jurisdiction_climate_zones
+    jurisdiction_heating_degree_days
   ]
 
   include ActionView::Helpers::SanitizeHelper
@@ -78,7 +78,7 @@ class Jurisdiction < ApplicationRecord
   has_many :integration_mappings
   has_many :jurisdiction_step_requirements, dependent: :destroy
   has_many :part3_occupancy_required_steps, dependent: :destroy
-  has_many :jurisdiction_climate_zones, dependent: :destroy
+  has_many :jurisdiction_heating_degree_days, dependent: :destroy
   has_many :collaborators, as: :collaboratorable, dependent: :destroy
   has_many :sandboxes, dependent: :destroy
   has_many :property_plan_local_jurisdictions, dependent: :destroy
@@ -140,7 +140,8 @@ class Jurisdiction < ApplicationRecord
                                 allow_destroy: true
   accepts_nested_attributes_for :part3_occupancy_required_steps,
                                 allow_destroy: true
-  accepts_nested_attributes_for :jurisdiction_climate_zones, allow_destroy: true
+  accepts_nested_attributes_for :jurisdiction_heating_degree_days,
+                                allow_destroy: true
   accepts_nested_attributes_for :resources, allow_destroy: true
 
   before_create :assign_unique_prefix

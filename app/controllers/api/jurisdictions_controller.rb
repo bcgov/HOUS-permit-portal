@@ -320,9 +320,9 @@ class Api::JurisdictionsController < Api::ApplicationController
         zero_carbon_step_required
         _destroy
       ],
-      jurisdiction_climate_zones_attributes: %i[
+      jurisdiction_heating_degree_days_attributes: %i[
         id
-        climate_zone
+        location_name
         heating_degree_days
         _destroy
       ],
