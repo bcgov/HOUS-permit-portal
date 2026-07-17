@@ -35,7 +35,6 @@ const czPrefix: TCzPrefix = `${i18nPrefix}.climateZones`
 
 const HDD_MIN = 1
 const HDD_MAX = 10000
-const DEFAULT_LOCATION_NAME = "General"
 
 interface ILocationField {
   recordId?: string
@@ -66,7 +65,7 @@ function ClimateZonesForm({ jurisdiction }: IClimateZonesFormProps) {
     const existing = [...jurisdiction.jurisdictionHeatingDegreeDays]
     if (existing.length === 0) {
       return {
-        locations: [{ locationName: DEFAULT_LOCATION_NAME, heatingDegreeDays: null }],
+        locations: [{ locationName: jurisdiction.qualifiedName, heatingDegreeDays: null }],
       }
     }
 
@@ -134,13 +133,15 @@ function ClimateZonesForm({ jurisdiction }: IClimateZonesFormProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
       <VStack spacing={6} align="start" w="full">
+        <Text>{t(`${czPrefix}.locationNameDescription`)}</Text>
+
         <Box w="full" borderWidth={1} borderColor="border.light" rounded="sm" overflow="hidden">
           <Table variant="simple" size="md">
             <Thead>
               <Tr bg="greys.grey03">
-                <Th>{t(`${czPrefix}.tableLocationName`)}</Th>
                 <Th>{t(`${czPrefix}.tableHdd`)}</Th>
                 <Th>{t(`${czPrefix}.tableClimateZone`)}</Th>
+                <Th>{t(`${czPrefix}.tableLocationName`)}</Th>
                 <Th w="100px" />
               </Tr>
             </Thead>
@@ -153,32 +154,6 @@ function ClimateZonesForm({ jurisdiction }: IClimateZonesFormProps) {
 
                 return (
                   <Tr key={field.id} opacity={isMarkedForRemoval ? 0.65 : 1}>
-                    <Td verticalAlign="top">
-                      <FormControl isInvalid={!isMarkedForRemoval && !!nameError}>
-                        <Input
-                          isDisabled={isMarkedForRemoval}
-                          textDecoration={isMarkedForRemoval ? "line-through" : undefined}
-                          {...register(`locations.${index}.locationName`, {
-                            validate: (value) => {
-                              if (watchedLocations?.[index]?._destroy) return true
-                              const trimmed = value.trim()
-                              if (!trimmed) return t(`${czPrefix}.validation.locationNameRequired`)
-                              const duplicates = (watchedLocations || []).filter(
-                                (row, i) =>
-                                  i !== index &&
-                                  !row._destroy &&
-                                  row.locationName.trim().toLowerCase() === trimmed.toLowerCase()
-                              )
-                              if (duplicates.length > 0) return t(`${czPrefix}.validation.locationNameUnique`)
-                              return true
-                            },
-                          })}
-                        />
-                        {!isMarkedForRemoval && nameError && (
-                          <FormErrorMessage fontSize="xs">{nameError.message}</FormErrorMessage>
-                        )}
-                      </FormControl>
-                    </Td>
                     <Td verticalAlign="top">
                       <FormControl isInvalid={!isMarkedForRemoval && !!hddError} maxW="180px">
                         <Controller
@@ -216,6 +191,32 @@ function ClimateZonesForm({ jurisdiction }: IClimateZonesFormProps) {
                     </Td>
                     <Td verticalAlign="top" pt={5}>
                       <ClimateZoneCell hdd={hddValue} isMarkedForRemoval={isMarkedForRemoval} />
+                    </Td>
+                    <Td verticalAlign="top">
+                      <FormControl isInvalid={!isMarkedForRemoval && !!nameError}>
+                        <Input
+                          isDisabled={isMarkedForRemoval}
+                          textDecoration={isMarkedForRemoval ? "line-through" : undefined}
+                          {...register(`locations.${index}.locationName`, {
+                            validate: (value) => {
+                              if (watchedLocations?.[index]?._destroy) return true
+                              const trimmed = value.trim()
+                              if (!trimmed) return t(`${czPrefix}.validation.locationNameRequired`)
+                              const duplicates = (watchedLocations || []).filter(
+                                (row, i) =>
+                                  i !== index &&
+                                  !row._destroy &&
+                                  row.locationName.trim().toLowerCase() === trimmed.toLowerCase()
+                              )
+                              if (duplicates.length > 0) return t(`${czPrefix}.validation.locationNameUnique`)
+                              return true
+                            },
+                          })}
+                        />
+                        {!isMarkedForRemoval && nameError && (
+                          <FormErrorMessage fontSize="xs">{nameError.message}</FormErrorMessage>
+                        )}
+                      </FormControl>
                     </Td>
                     <Td verticalAlign="top" pt={3}>
                       {isMarkedForRemoval ? (

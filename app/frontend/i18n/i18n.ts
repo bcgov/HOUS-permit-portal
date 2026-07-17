@@ -4079,8 +4079,10 @@ Thank you,
                   "Climate zones reflect regional climate conditions that affect building energy performance. Select the climate zones that exist within your jurisdiction.",
                 hddDescription:
                   "For each climate zone, you can set a Heating Degree Days (HDD) value that applicants must use in their energy modelling calculations for Step Code reporting. If you do not set an HDD value for a climate zone, applicants may use any appropriate HDD value for that climate zone when performing their calculations.",
+                locationNameDescription:
+                  "Use a location name to identify each Heating Degree Days (HDD) value. A jurisdiction may have multiple HDD values corresponding to different points within its boundaries.",
                 addClimateZone: "Add climate zone",
-                addAnotherLocation: "Add another location",
+                addAnotherLocation: "Add another HDD and climate zone",
                 bcClimateZone: "BC Climate Zone",
                 heatingDegreeDaysLabel: "Heating degree days (optional)",
                 tableLocationName: "Location name",
