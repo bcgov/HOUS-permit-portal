@@ -53,6 +53,10 @@ class User < ApplicationRecord
            foreign_key: "creator_id",
            inverse_of: :creator,
            dependent: :destroy
+  has_many :overheating_codes,
+           foreign_key: "creator_id",
+           inverse_of: :creator,
+           dependent: :destroy
 
   has_many :permit_projects,
            class_name: "PermitProject",

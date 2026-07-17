@@ -36,11 +36,16 @@ class PromoteUser
     if existing_user.valid?
       ActiveRecord::Base.transaction do
         merge_collaborations
+        merge_overheating_codes
         invited_user.destroy!
         existing_user.jurisdiction_ids = jurisdiction_ids
         existing_user.save!
       end
     end
+  end
+
+  def merge_overheating_codes
+    invited_user.overheating_codes.update_all(creator_id: existing_user.id)
   end
 
   def merge_collaborations
