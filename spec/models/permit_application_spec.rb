@@ -151,7 +151,7 @@ RSpec.describe PermitApplication, type: :model do
     end
 
     describe "#ensure_step_code_stage!" do
-      it "sets step_code_stage from the step code when blank" do
+      it "sets step_code_stage from the Step Code when blank" do
         permit_application = create(:permit_application, step_code_stage: nil)
         step_code =
           create(

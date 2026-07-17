@@ -8,7 +8,7 @@ RSpec.describe StepCodeReportGenerationJob, type: :job do
     expect(described_class.lock_args(%w[sc1 x])).to eq(["sc1"])
   end
 
-  it "no-ops when step code is missing" do
+  it "no-ops when Step Code is missing" do
     allow(StepCode).to receive(:find_by).and_return(nil)
     expect { described_class.new.perform("missing") }.not_to raise_error
   end

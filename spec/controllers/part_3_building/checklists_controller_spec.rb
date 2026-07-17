@@ -50,14 +50,14 @@ RSpec.describe Api::Part3Building::ChecklistsController, type: :controller do
       )
     end
 
-    it "returns not found for archived step code checklists" do
+    it "returns not found for archived Step Code checklists" do
       step_code.discard
 
       get :show, params: { id: checklist.id }
 
       expect(response).to have_http_status(:not_found)
       expect(json_response.dig("meta", "message", "message")).to eq(
-        "Cannot view checklist of archived step code. Please restore the step code first."
+        "Cannot view checklist of archived Step Code. Please restore the Step Code first."
       )
     end
 
@@ -71,7 +71,7 @@ RSpec.describe Api::Part3Building::ChecklistsController, type: :controller do
   end
 
   describe "POST #create" do
-    it "creates a staged checklist under the step code with cloned values" do
+    it "creates a staged checklist under the Step Code with cloned values" do
       stub_part3_compliance_report(checklist: checklist, report_hash: {})
       checklist.update!(
         heating_degree_days: 3220,
@@ -157,7 +157,7 @@ RSpec.describe Api::Part3Building::ChecklistsController, type: :controller do
       )
     end
 
-    it "returns unprocessable entity for archived step codes" do
+    it "returns unprocessable entity for archived Step Codes" do
       step_code.discard
 
       patch :update,

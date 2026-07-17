@@ -54,7 +54,7 @@ RSpec.describe Qa::Part3StepCodeAutofillService do
       expect(checklist.completed_by_email).to eq("qa@example.com")
     end
 
-    it "updates step code project details" do
+    it "updates Step Code project details" do
       expect(step_code.full_address).to eq("123 QA Street, Victoria, BC")
       expect(step_code.reference_number).to eq("QA-REF-001")
       expect(step_code.pid).to eq("123456789")
@@ -100,7 +100,7 @@ RSpec.describe Qa::Part3StepCodeAutofillService do
     end
   end
 
-  describe "standalone step codes" do
+  describe "standalone Step Codes" do
     let!(:fallback_jurisdiction) do
       create(:sub_district, heating_degree_days: 4180, inbox_enabled: false)
     end

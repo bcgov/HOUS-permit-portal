@@ -9,7 +9,7 @@ RSpec.describe ReportDocumentPolicy, type: :policy do
     policy_for(described_class, user:, record:, sandbox:)
   end
 
-  it "permits download/share only for step code creator" do
+  it "permits download/share only for Step Code creator" do
     step_code = instance_double("StepCode", creator: creator)
     record = instance_double("ReportDocument", step_code: step_code)
 

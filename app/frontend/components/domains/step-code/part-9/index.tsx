@@ -56,7 +56,7 @@ export const Part9StepCodeForm = observer(function Part9StepCodeForm() {
     }
   }, [section])
 
-  // Prevent viewing/editing archived step codes
+  // Prevent viewing/editing archived Step Codes
   if (currentStepCode?.isDiscarded) return <NotFoundScreen />
 
   return (

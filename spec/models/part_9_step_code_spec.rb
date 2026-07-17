@@ -1,7 +1,7 @@
 require "rails_helper"
 
 RSpec.describe Part9StepCode, type: :model do
-  # We do not enforce that permit_applications must be present to reserve room for step code model with no permit application, therefore we do not do it { should belong_to(:permit_application) }
+  # We do not enforce that permit_applications must be present to reserve room for Step Code model with no permit application, therefore we do not do it { should belong_to(:permit_application) }
 
   let!(:permit_application) { create(:permit_application) }
   let!(:step_code) do
@@ -180,7 +180,7 @@ RSpec.describe Part9StepCode, type: :model do
         ).and_return(SupportingDocument.all)
       end
 
-      it "sets the step code plan values if there is a supporting doc with compliance" do
+      it "sets the Step Code plan values if there is a supporting doc with compliance" do
         expect(step_code.valid?).to eq true
       end
 
