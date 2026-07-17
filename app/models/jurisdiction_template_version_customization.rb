@@ -16,9 +16,6 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
   belongs_to :jurisdiction
   belongs_to :submission_contact, optional: true
 
-  def effective_submission_contact
-    submission_contact || jurisdiction.submission_contacts.default_contact.first
-  end
   belongs_to :template_version
 
   before_save :sanitize_tip
@@ -36,6 +33,7 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
   scope :live, -> { where(sandbox_id: nil) }
   scope :for_sandbox, ->(sandbox) { where(sandbox_id: sandbox&.id) }
   scope :not_disabled, -> { where(disabled: false) }
+  scope :requiring_project_meeting, -> { where(requires_project_meeting: true) }
 
   ACCEPTED_ENABLED_ELECTIVE_FIELD_REASONS = %w[bylaw policy zoning].freeze
 
@@ -123,6 +121,8 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
         sandbox_id: nil
       )
     target_record.customizations = customizations
+    target_record.disabled = disabled
+    target_record.requires_project_meeting = requires_project_meeting
     target_record.save!
   end
 

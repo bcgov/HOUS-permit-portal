@@ -17,7 +17,6 @@ import {
 import { Trash } from "@phosphor-icons/react"
 import { UppyFile } from "@uppy/core"
 import "@uppy/core/dist/style.min.css"
-import "@uppy/dashboard/dist/style.css"
 import Dashboard from "@uppy/react/lib/Dashboard.js"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -111,7 +110,7 @@ export const UploadDrawings = observer(function UploadDrawings() {
     })
   }
 
-  const uppy = useUppyS3({
+  const { uppy } = useUppyS3({
     onUploadSuccess: handleUploadSuccess,
     maxNumberOfFiles: 1,
     autoProceed: true,

@@ -38,6 +38,7 @@ export const RequirementsSummary = observer(function RequirementsSummary() {
   return (
     <Flex direction="column" gap={6}>
       <SectionHeading>{t(`${i18nPrefix}.heading`)}</SectionHeading>
+      <Text>{t(`${i18nPrefix}.description`)}</Text>
 
       <Flex direction="column" gap={6} pb={4}>
         {!checklist.canShowResults ? (
@@ -93,6 +94,7 @@ export const RequirementsSummary = observer(function RequirementsSummary() {
 
             <FormControl>
               <FormLabel>{t(`${i18nPrefix}.confirm.label`)}</FormLabel>
+              <FormHelperText mb={4}>{t(`${i18nPrefix}.confirm.hint`)}</FormHelperText>
               <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
               <FormHelperText mt={6}>{t(`${i18nPrefix}.help`)}</FormHelperText>
             </FormControl>

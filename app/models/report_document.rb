@@ -16,7 +16,7 @@ class ReportDocument < FileUploadAttachment
       "action_text" =>
         I18n.t(
           "notification.step_code.report_generated",
-          default: "Your step code report is ready to download"
+          default: "Your Step Code report is ready to download"
         ),
       "object_data" => {
         "step_code_id" => step_code_id,

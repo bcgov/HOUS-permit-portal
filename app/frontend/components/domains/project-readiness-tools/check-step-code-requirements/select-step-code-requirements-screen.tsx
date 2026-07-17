@@ -18,6 +18,7 @@ import { useMst } from "../../../../setup/root"
 import { EStepCodeType } from "../../../../types/enums"
 import { BackButton } from "../../../shared/buttons/back-button"
 import { defaultSectionCompletionStatus } from "../../step-code/part-3/sidebar/nav-sections"
+import { defaultSectionCompletionStatus as defaultPart9SectionCompletionStatus } from "../../step-code/part-9/sidebar/nav-sections"
 
 export const SelectStepCodeRequirementsScreen = () => {
   const { t } = useTranslation()
@@ -35,15 +36,22 @@ export const SelectStepCodeRequirementsScreen = () => {
 
     if (stepCodeTypeValue === EStepCodeType.part3StepCode) {
       result = await createPart3StepCode({
-        checklistAttributes: { sectionCompletionStatus: defaultSectionCompletionStatus },
+        preConstructionChecklistAttributes: { sectionCompletionStatus: defaultSectionCompletionStatus },
       })
       if (result?.ok) {
-        navigate(`/part-3-step-code/${result.data.id}/start`)
+        navigate(`/part-3-step-code/${result.data.id}`)
       } else {
         setIsCreating(false)
       }
     } else if (stepCodeTypeValue === EStepCodeType.part9StepCode) {
-      navigate(`/part-9-step-code/new`)
+      result = await createPart9StepCode({
+        preConstructionChecklistAttributes: { sectionCompletionStatus: defaultPart9SectionCompletionStatus },
+      })
+      if (result?.ok) {
+        navigate(`/part-9-step-code/${result.data.id}`)
+      } else {
+        setIsCreating(false)
+      }
     }
   }
 

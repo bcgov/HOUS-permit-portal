@@ -58,24 +58,6 @@ module StepCodeSeed
     }
   ].freeze
 
-  VALID_CLIMATE_ZONES = %w[
-    zone_4
-    zone_5
-    zone_6
-    zone_7a
-    zone_7b
-    zone_8
-  ].freeze
-
-  CLIMATE_ZONE_LABELS = {
-    "zone_4" => "Zone 4",
-    "zone_5" => "Zone 5",
-    "zone_6" => "Zone 6",
-    "zone_7a" => "Zone 7A",
-    "zone_7b" => "Zone 7B",
-    "zone_8" => "Zone 8"
-  }.freeze
-
   PART9_PERMIT_TYPE_CODE = "low_residential".freeze
 
   module_function
@@ -84,7 +66,7 @@ module StepCodeSeed
 
   def generate_step_requirements_csv(path)
     part9_note =
-      "Energy step: 3-5. Zero carbon: 1-4. Duplicate row for multiple pathways."
+      "Energy Step: 3-5. Zero Carbon: 1-4. Duplicate row for multiple pathways."
 
     CSV.open(path, "wb") do |csv|
       csv << [
@@ -115,11 +97,10 @@ module StepCodeSeed
       # --- Part 3 configurable ---
       PART3_OCCUPANCIES.each do |occ|
         group_label = group_label_for(occ)
-        energy_range =
-          "#{occ[:allowed_energy].min}-#{occ[:allowed_energy].max}"
+        energy_range = "#{occ[:allowed_energy].min}-#{occ[:allowed_energy].max}"
         zc_range = "#{occ[:allowed_zc].min}-#{occ[:allowed_zc].max}"
         note =
-          "Energy: #{energy_range}. Zero carbon: #{zc_range}. Duplicate row for multiple pathways."
+          "Energy: #{energy_range}. Zero Carbon: #{zc_range}. Duplicate row for multiple pathways."
 
         csv << [
           "Part 3",
@@ -135,15 +116,8 @@ module StepCodeSeed
 
   def generate_climate_zones_csv(path)
     CSV.open(path, "wb") do |csv|
-      csv << [
-        "Climate Zone",
-        "Heating Degree Days (optional)",
-        "Zone Label (reference - do not edit)"
-      ]
-
-      VALID_CLIMATE_ZONES.each do |zone|
-        csv << [zone, "", CLIMATE_ZONE_LABELS[zone]]
-      end
+      csv << ["Location name", "Heating Degree Days"]
+      csv << ["General", ""]
     end
   end
 
@@ -310,7 +284,7 @@ module StepCodeSeed
       return
     end
 
-    puts "\n=== Importing Climate Zones ==="
+    puts "\n=== Importing Heating Degree Days ==="
     total_created = 0
     total_skipped = 0
     total_errors = 0
@@ -326,35 +300,45 @@ module StepCodeSeed
       end
 
       puts "  Processing: #{slug}..."
-      jurisdiction.jurisdiction_climate_zones.destroy_all
+      jurisdiction.jurisdiction_heating_degree_days.destroy_all
 
       CSV.foreach(file, headers: true, skip_blanks: true) do |row|
-        zone = row["Climate Zone"]&.strip
-        hdd_str = row["Heating Degree Days (optional)"]&.strip
-        next if zone.blank?
+        location_name = row["Location name"]&.strip
+        hdd_str =
+          (
+            row["Heating Degree Days"] || row["Heating Degree Days (optional)"]
+          )&.strip
 
-        unless VALID_CLIMATE_ZONES.include?(zone)
-          puts "    WARN: Invalid climate zone '#{zone}'"
+        next if location_name.blank? && hdd_str.blank?
+
+        if location_name.blank?
+          puts "    WARN: Missing location name"
+          total_errors += 1
+          next
+        end
+
+        if hdd_str.blank?
+          puts "    WARN: Missing HDD for '#{location_name}'"
           total_errors += 1
           next
         end
 
         record =
-          jurisdiction.jurisdiction_climate_zones.build(
-            climate_zone: zone,
-            heating_degree_days: hdd_str.present? ? hdd_str.to_i : nil
+          jurisdiction.jurisdiction_heating_degree_days.build(
+            location_name: location_name,
+            heating_degree_days: hdd_str.to_i
           )
 
         if record.save
           total_created += 1
         else
-          puts "    WARN: Failed to save '#{zone}': #{record.errors.full_messages.join(", ")}"
+          puts "    WARN: Failed to save '#{location_name}': #{record.errors.full_messages.join(", ")}"
           total_errors += 1
         end
       end
     end
 
-    puts "\nClimate Zones Import Summary:"
+    puts "\nHeating Degree Days Import Summary:"
     puts "  Created: #{total_created}"
     puts "  Skipped: #{total_skipped}"
     puts "  Errors:  #{total_errors}"
@@ -362,7 +346,7 @@ module StepCodeSeed
 end
 
 namespace :step_code_seed do
-  desc "Generate blank CSV templates for step code requirements and climate zones"
+  desc "Generate blank CSV templates for Step Code requirements and climate zones"
   task generate_templates: [] do
     output_dir = Rails.root.join("data", "step_code_seed")
     FileUtils.mkdir_p(output_dir)
@@ -381,7 +365,7 @@ namespace :step_code_seed do
     puts "  city-of-mission-climate-zones.csv"
   end
 
-  desc "Import step code requirements and climate zones from CSV files in data/step_code_seed/"
+  desc "Import Step Code requirements and climate zones from CSV files in data/step_code_seed/"
   task import: :environment do
     input_dir = Rails.root.join("data", "step_code_seed")
 
@@ -395,7 +379,7 @@ namespace :step_code_seed do
     StepCodeSeed.import_climate_zones_from_dir(input_dir)
   end
 
-  desc "Import step code requirements only from data/step_code_seed/"
+  desc "Import Step Code requirements only from data/step_code_seed/"
   task import_step_requirements: :environment do
     input_dir = Rails.root.join("data", "step_code_seed")
     StepCodeSeed.import_step_requirements_from_dir(input_dir)

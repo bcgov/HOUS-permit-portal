@@ -1,6 +1,4 @@
 class Api::PermitApplicationsController < Api::ApplicationController
-  include StepCodeParamsConcern
-
   before_action :set_permit_application,
                 only: %i[
                   show
@@ -555,6 +553,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
       :pin,
       :pid,
       :permit_project_id,
+      :step_code_stage,
       submission_data: {
       }
     )

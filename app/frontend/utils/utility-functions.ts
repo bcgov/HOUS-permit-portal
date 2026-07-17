@@ -270,6 +270,22 @@ export function convertPhoneNumberToFormioFormat(phoneNumber: string): string {
   return `(${areaCode}) ${firstThree}-${lastFour}`
 }
 
+export function telHref(phone: string): string {
+  const digits = phone.replace(/[^\d+]/g, "")
+  return digits ? `tel:${digits}` : `tel:${phone}`
+}
+
+/** Optional field: blank is valid; otherwise 7–15 digits (E.164). */
+export function isValidPhoneNumber(value?: string | null): boolean {
+  if (!value?.trim()) return true
+  const digits = value.replace(/\D/g, "")
+  return digits.length >= 7 && digits.length <= 15
+}
+
+export function mailtoHref(email: string): string {
+  return `mailto:${email.trim()}`
+}
+
 export function isValueExtractorModuleConfiguration(moduleConfiguration?: TAutoComplianceModuleConfiguration) {
   return VALUE_EXTRACTION_AUTO_COMPLIANCE_TYPES.includes(moduleConfiguration?.type)
 }

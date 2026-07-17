@@ -10,6 +10,7 @@ export const JurisdictionTemplateVersionCustomizationModel = types
     jurisdictionId: types.string,
     customizations: types.frozen<ITemplateCustomization>({}),
     disabled: types.optional(types.boolean, false),
+    requiresProjectMeeting: types.optional(types.boolean, false),
   })
 
 export interface IJurisdictionTemplateVersionCustomization

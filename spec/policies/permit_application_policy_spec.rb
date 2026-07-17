@@ -105,10 +105,28 @@ RSpec.describe PermitApplicationPolicy do
           jurisdiction: jurisdiction,
           jurisdiction_id: jurisdiction.id,
           new_draft?: true,
-          sandbox: sandbox
+          sandbox: sandbox,
+          permit_project: nil
         )
       policy2 = described_class.new(UserContext.new(reviewer, sandbox), record2)
       expect(policy2.show?).to be false
+    end
+
+    it "show? permits review staff for draft records with active project meetings" do
+      reviewer = create(:user, :review_manager, jurisdiction:)
+      create(
+        :project_meeting,
+        :open,
+        permit_project: draft_permit_application.permit_project
+      )
+
+      policy =
+        described_class.new(
+          UserContext.new(reviewer, sandbox),
+          draft_permit_application
+        )
+
+      expect(policy.show?).to be true
     end
 
     it "update? denies discarded records" do
@@ -654,6 +672,42 @@ RSpec.describe PermitApplicationPolicy do
 
       expect(resolved).to include(submitted)
       expect(resolved).not_to include(draft)
+    end
+
+    it "includes draft applications with active project meetings for review staff" do
+      reviewer = create(:user, :review_manager, jurisdiction:)
+      draft_with_active_meeting =
+        create(
+          :permit_application,
+          jurisdiction: jurisdiction,
+          sandbox: sandbox
+        )
+      draft_with_withdrawn_meeting =
+        create(
+          :permit_application,
+          jurisdiction: jurisdiction,
+          sandbox: sandbox
+        )
+
+      create(
+        :project_meeting,
+        :open,
+        permit_project: draft_with_active_meeting.permit_project
+      )
+      create(
+        :project_meeting,
+        :withdrawn,
+        permit_project: draft_with_withdrawn_meeting.permit_project
+      )
+
+      resolved =
+        described_class.new(
+          UserContext.new(reviewer, sandbox),
+          PermitApplication.all
+        ).resolve
+
+      expect(resolved).to include(draft_with_active_meeting)
+      expect(resolved).not_to include(draft_with_withdrawn_meeting)
     end
   end
 end

@@ -261,6 +261,21 @@ RSpec.describe JurisdictionTemplateVersionCustomization,
           )
         end
       end
+
+      describe ".requiring_project_meeting" do
+        it "returns only customizations requiring a project meeting" do
+          requiring_customization =
+            create(
+              :jurisdiction_template_version_customization,
+              jurisdiction: create(:sub_district),
+              requires_project_meeting: true
+            )
+
+          expect(
+            JurisdictionTemplateVersionCustomization.requiring_project_meeting
+          ).to contain_exactly(requiring_customization)
+        end
+      end
     end
   end
 

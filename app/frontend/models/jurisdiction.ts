@@ -8,7 +8,7 @@ import { IExternalApiKeyParams } from "../types/api-request"
 import { EEnergyStep, EJurisdictionExternalApiState, EPreCheckServicePartner, EZeroCarbonStep } from "../types/enums"
 import {
   IContact,
-  IJurisdictionClimateZone,
+  IJurisdictionHeatingDegreeDay,
   IJurisdictionServicePartnerEnrollment,
   IJurisdictionStepRequirement,
   IOption,
@@ -33,6 +33,10 @@ export const JurisdictionModel = types
     submissionInboxSetUp: types.optional(types.boolean, false),
     showAboutPage: types.optional(types.boolean, false),
     allowDesignatedReviewer: types.optional(types.boolean, false),
+    projectMeetingsEnabled: types.optional(types.boolean, false),
+    propertyInformationRequestsEnabled: types.optional(types.boolean, false),
+    projectMeetingNotificationRecipientEmails: types.optional(types.array(types.string), []),
+    propertyInformationNotificationRecipientEmails: types.optional(types.array(types.string), []),
     reverseQualifiedName: types.maybeNull(types.string),
     regionalDistrictName: types.maybeNull(types.string),
     localityType: types.maybeNull(types.string),
@@ -42,6 +46,7 @@ export const JurisdictionModel = types
     permitApplicationsSize: types.maybeNull(types.number),
     unviewedSubmissionsCount: types.maybeNull(types.number),
     unviewedProjectsCount: types.maybeNull(types.number),
+    unviewedProjectMeetingsCount: types.maybeNull(types.number),
     descriptionHtml: types.maybeNull(types.string),
     checklistHtml: types.maybeNull(types.string),
     lookOutHtml: types.maybeNull(types.string),
@@ -75,10 +80,9 @@ export const JurisdictionModel = types
     firstNation: types.optional(types.boolean, false),
     ltsaMatcher: types.maybeNull(types.string),
     servicePartnerEnrollments: types.array(types.frozen<IJurisdictionServicePartnerEnrollment>()),
-    heatingDegreeDays: types.maybeNull(types.number),
     weatherLocation: types.maybeNull(types.string),
     designSummerTemp: types.maybeNull(types.number),
-    jurisdictionClimateZones: types.array(types.frozen<IJurisdictionClimateZone>()),
+    jurisdictionHeatingDegreeDays: types.array(types.frozen<IJurisdictionHeatingDegreeDay>()),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -168,6 +172,9 @@ export const JurisdictionModel = types
     },
     setUnviewedProjectsCount: (count: number) => {
       self.unviewedProjectsCount = count
+    },
+    setUnviewedProjectMeetingsCount: (count: number) => {
+      self.unviewedProjectMeetingsCount = count
     },
     update: flow(function* (params) {
       const { ok, data: response } = yield* toGenerator(self.environment.api.updateJurisdiction(self.id, params))

@@ -16,7 +16,7 @@ export function applyNotificationSideEffects(payload: IUserPushPayload, rootStor
           } else if (stepCodeType === EStepCodeType.part9StepCode) {
             rootStore.stepCodeStore.fetchPart9StepCode(stepCodeId)
           } else {
-            console.error("Unknown step code type", stepCodeType)
+            console.error("Unknown Step Code type", stepCodeType)
           }
         } catch (e) {
           import.meta.env.DEV && console.warn("Notification effect refresh failed", e)

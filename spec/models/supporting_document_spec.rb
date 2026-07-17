@@ -42,7 +42,7 @@ RSpec.describe SupportingDocument, type: :model do
       )
     end
 
-    it "uses readable names for generated step code checklist PDFs" do
+    it "uses readable names for generated Step Code checklist PDFs" do
       document =
         described_class.new(
           data_key: SupportingDocument::CHECKLIST_PDF_DATA_KEY,

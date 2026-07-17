@@ -1,7 +1,7 @@
 // src/hooks/useUppyS3.ts
 import AwsS3 from "@uppy/aws-s3"
 import Uppy, { UppyFile } from "@uppy/core"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   FILE_UPLOAD_CHUNK_SIZE_IN_BYTES,
   FILE_UPLOAD_MAX_SIZE,
@@ -34,6 +34,7 @@ const useUppyS3 = ({
   allowedFileTypes,
 }: UseUppyS3Props = {}) => {
   const maxFileSize = maxFileSizeMB ? maxFileSizeMB * 1024 * 1024 : MAX_FILE_SIZE_BYTES
+  const [isUploading, setIsUploading] = useState(false)
   const [uppy] = useState(() =>
     new Uppy({
       restrictions: {
@@ -243,7 +244,30 @@ const useUppyS3 = ({
         console.error("[UppyEvent] upload-error:", file?.name, error, "Uppy response:", response)
       })
   )
-  return uppy
+
+  useEffect(() => {
+    const syncUploading = () => {
+      setIsUploading(uppy.getFiles().some((file) => file.progress?.uploadStarted && !file.progress?.uploadComplete))
+    }
+
+    uppy.on("upload", syncUploading)
+    uppy.on("complete", syncUploading)
+    uppy.on("error", syncUploading)
+    uppy.on("cancel-all", syncUploading)
+    uppy.on("upload-error", syncUploading)
+    uppy.on("file-removed", syncUploading)
+
+    return () => {
+      uppy.off("upload", syncUploading)
+      uppy.off("complete", syncUploading)
+      uppy.off("error", syncUploading)
+      uppy.off("cancel-all", syncUploading)
+      uppy.off("upload-error", syncUploading)
+      uppy.off("file-removed", syncUploading)
+    }
+  }, [uppy])
+
+  return { uppy, isUploading }
 }
 
 export default useUppyS3

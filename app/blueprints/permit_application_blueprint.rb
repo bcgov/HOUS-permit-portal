@@ -20,7 +20,8 @@ class PermitApplicationBlueprint < Blueprinter::Base
            :missing_pdfs,
            :template_nickname,
            :discarded_at,
-           :days_in_queue
+           :days_in_queue,
+           :step_code_stage
 
     association :sandbox, blueprint: SandboxBlueprint
 
@@ -99,6 +100,18 @@ class PermitApplicationBlueprint < Blueprinter::Base
 
     field :template_version_disabled_by_jurisdiction do |pa, _options|
       pa.template_version_disabled_by_jurisdiction?
+    end
+
+    field :requires_project_meeting do |pa, _options|
+      pa.requires_project_meeting?
+    end
+
+    field :has_active_project_meeting do |pa, _options|
+      pa.permit_project&.has_active_project_meeting || false
+    end
+
+    field :active_project_meeting_id do |pa, _options|
+      pa.permit_project&.active_project_meeting&.id
     end
 
     association :supporting_documents,

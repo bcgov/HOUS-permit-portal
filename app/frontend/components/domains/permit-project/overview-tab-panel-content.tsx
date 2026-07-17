@@ -11,25 +11,22 @@ import {
   useDisclosure,
   VStack,
 } from "@chakra-ui/react"
-import { CaretRight, Info, Pencil, SquaresFour, Steps } from "@phosphor-icons/react"
+import { CaretRight, ClipboardText, Info, Pencil, SquaresFour, Steps } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { IPermitProject } from "../../../models/permit-project"
 import { useMst } from "../../../setup/root"
-import {
-  EFlashMessageStatus,
-  EPermitProjectRollupStatus,
-  EProjectPermitApplicationSortFields,
-} from "../../../types/enums"
+import { EPermitProjectRollupStatus, EProjectPermitApplicationSortFields } from "../../../types/enums"
 import { IOption } from "../../../types/types"
-import { CustomMessageBox } from "../../shared/base/custom-message-box"
+import { EmptyResultsBox } from "../../shared/grid/empty-results-box"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { FullscreenMapModal } from "../../shared/module-wrappers/fullscreen-map-modal"
 import { ProjectMap } from "../../shared/module-wrappers/project-map"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { AddPermitsButton } from "../../shared/permit-projects/add-permits-button"
+import { ActiveProjectMeetingNotice } from "../../shared/project-meetings/active-project-meeting-notice"
 import ProjectInfoRow from "../../shared/project/project-info-row"
 import { SitesSelect } from "../../shared/select/selectors/sites-select"
 import { PermitApplicationGridHeaders } from "./permit-application-grid-headers"
@@ -48,10 +45,13 @@ interface IProjectInfoForm {
 export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
   const { fullAddress, pid, jurisdiction, number } = permitProject
   const { t } = useTranslation()
-  const { permitProjectStore } = useMst()
+  const { permitProjectStore, siteConfigurationStore } = useMst()
   const [isEditing, setIsEditing] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { isOpen: isMapFullscreen, onOpen: onOpenMapFullscreen, onClose: onCloseMapFullscreen } = useDisclosure()
+  const hasActiveProjectMeeting = !!permitProject.activeProjectMeeting
+  const projectMeetingsEnabled =
+    siteConfigurationStore.projectMeetingsEnabled && permitProject.jurisdiction?.projectMeetingsEnabled
 
   const formMethods = useForm<IProjectInfoForm>({
     defaultValues: {
@@ -65,6 +65,7 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
 
   const { handleSubmit, watch, setValue, reset } = formMethods
   const siteWatch = watch("site")
+  const canRequestProjectMeeting = permitProject.isOwner && projectMeetingsEnabled && !hasActiveProjectMeeting
 
   const handleEditClick = () => {
     // Reset form to current values when entering edit mode
@@ -202,6 +203,19 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
                 >
                   {t("permitProject.overview.lookupStepCode")}
                 </RouterLinkButton>
+                {permitProject.isOwner && projectMeetingsEnabled && (
+                  <RouterLinkButton
+                    variant="link"
+                    to={`/projects/${permitProject.id}/meetings/new`}
+                    leftIcon={<Info size={24} />}
+                    disabled={hasActiveProjectMeeting}
+                  >
+                    {t("permitProject.meetings.requestWithJurisdiction", {
+                      jurisdictionName: jurisdiction?.disambiguatedName,
+                    })}
+                  </RouterLinkButton>
+                )}
+                {hasActiveProjectMeeting && <ActiveProjectMeetingNotice permitProject={permitProject} />}
               </VStack>
             )}
           </Box>
@@ -225,14 +239,25 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
           <Heading as="h3" size="md">
             {t("permitProject.overview.recentPermits")}
           </Heading>
-          <AddPermitsButton permitProject={permitProject} />
+          <HStack spacing={3}>
+            {permitProject.isOwner && projectMeetingsEnabled && (
+              <RouterLinkButton
+                variant="secondary"
+                to={`/projects/${permitProject.id}/meetings/new`}
+                disabled={!canRequestProjectMeeting}
+              >
+                {t("permitProject.meetings.requestButton")}
+              </RouterLinkButton>
+            )}
+            <AddPermitsButton permitProject={permitProject} />
+          </HStack>
         </Flex>
         {permitProject.rollupStatus === EPermitProjectRollupStatus.empty ? (
-          <CustomMessageBox status={EFlashMessageStatus.info} description={t("permitProject.index.empty")} mt={2} />
+          <EmptyResultsBox description={t("permitProject.index.empty")} icon={<ClipboardText size={18} />} mt={2} />
         ) : (
           <>
             <SearchGrid
-              templateColumns="2fr 1.5fr 1.5fr 1.5fr 1.5fr 0.5fr"
+              templateColumns="2.25fr 1.75fr 1fr 1.4fr 1.1fr 1fr 0.5fr"
               gridRowClassName="permit-application-grid-row"
             >
               <PermitApplicationGridHeaders

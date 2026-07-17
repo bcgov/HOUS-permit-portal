@@ -54,7 +54,8 @@ class Wrappers::LtsaParcelMapBc < Wrappers::Base
     response = get("#{HISTORIC_SERVICE}/query", query_params, true)
 
     # Assume if there is a parcel description match not to use LTSA geometry matching
-    if response.success? && JSON.parse(response.body).dig("features").length > 0
+    # features can be missing/null on success (e.g. empty ArcGIS payload)
+    if response.success? && JSON.parse(response.body).dig("features")&.any?
       return parse_attributes_from_response(response)
     end
 

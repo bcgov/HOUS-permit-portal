@@ -17,7 +17,6 @@ import {
 import { ArrowCounterClockwise, Trash, Upload } from "@phosphor-icons/react"
 import { UppyFile } from "@uppy/core"
 import "@uppy/core/dist/style.min.css"
-import "@uppy/dashboard/dist/style.css"
 import Dashboard from "@uppy/react/lib/Dashboard.js"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
@@ -90,7 +89,7 @@ export const BlockSetup = observer(function BlockSetup({
     }
   }
 
-  const uppy = useUppyS3({ onUploadSuccess: handleUploadSuccess, maxNumberOfFiles: 10, autoProceed: true })
+  const { uppy } = useUppyS3({ onUploadSuccess: handleUploadSuccess, maxNumberOfFiles: 10, autoProceed: true })
 
   return (
     <Box as={"section"} w={"350px"} boxShadow={"md"} borderRadius={"xl"} bg={"greys.grey10"} ref={containerRef}>

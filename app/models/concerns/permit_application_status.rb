@@ -217,7 +217,7 @@ module PermitApplicationStatus
     def handle_submission
       update(signed_off_at: Time.current)
 
-      checklist = step_code&.primary_checklist
+      checklist = step_code_checklist
       submission_versions.create!(
         form_json: self.form_json,
         submission_data: self.submission_data,

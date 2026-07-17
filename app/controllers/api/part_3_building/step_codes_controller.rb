@@ -1,5 +1,5 @@
 class Api::Part3Building::StepCodesController < Api::ApplicationController
-  include StepCodeParamsConcern
+  include Part3StepCodeParamsConcern
 
   before_action :set_step_code, only: [:show]
 
@@ -15,6 +15,9 @@ class Api::Part3Building::StepCodesController < Api::ApplicationController
       Part3StepCode.transaction do
         @step_code =
           if step_code_params[:permit_application_id]
+            # HUB-5145: This finds/creates the StepCode report family for the
+            # permit. Part 3 should later create/select staged child checklists
+            # under this record using StepCode.current_stage.
             Part3StepCode
               .kept
               .where(

@@ -57,14 +57,18 @@ Templates.current = {
 
         if (result) {
           if (ctx?.component?.computedCompliance?.module == "DigitalSealValidator") {
-            // For multi-file uploads, show validation for each file
-            const currentFileMessages = result.filter((fileMessage) =>
-              ctx.value?.find((v) => {
-                const idSegments = fileMessage.id.split("/")
-                const fileMessageId = idSegments[idSegments.length - 1]
-                return fileMessageId == v.id
-              })
-            )
+            // For multi-file uploads, show validation for each file.
+            // Normalize ids: compliance messages use full shrine paths, form values often use basename only.
+            const fileIdTail = (id) => (typeof id === "string" ? id.split("/").pop() : id)
+            const currentFiles = Array.isArray(ctx.value) ? ctx.value : []
+            // During websocket triggerRedraw, ctx.value can briefly be empty while result is already set —
+            // fall back to the compliance result (already scoped to active docs server-side).
+            const currentFileMessages =
+              currentFiles.length === 0
+                ? result
+                : result.filter((fileMessage) =>
+                    currentFiles.find((v) => fileIdTail(fileMessage.id) == fileIdTail(v.id))
+                  )
 
             if (currentFileMessages.length > 0) {
               showWarning = currentFileMessages.some((fileMessage) => fileMessage.error)

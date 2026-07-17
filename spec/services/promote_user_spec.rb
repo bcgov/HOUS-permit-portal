@@ -3,8 +3,17 @@ require "rails_helper"
 RSpec.describe PromoteUser do
   before { allow(ActiveRecord::Base).to receive(:transaction).and_yield }
 
+  def stub_overheating_codes(invited_user)
+    overheating_codes = double("OverheatingCodes")
+    allow(invited_user).to receive(:overheating_codes).and_return(
+      overheating_codes
+    )
+    allow(overheating_codes).to receive(:update_all)
+    overheating_codes
+  end
+
   it "merges invitation fields and jurisdictions and destroys invited user when valid" do
-    existing_user = instance_double("User", jurisdiction_ids: ["j1"])
+    existing_user = instance_double("User", jurisdiction_ids: ["j1"], id: "e1")
     invited_user =
       instance_double("User", jurisdiction_ids: ["j2"], submitter?: false)
 
@@ -19,6 +28,7 @@ RSpec.describe PromoteUser do
     allow(invited_user).to receive(:destroy!)
     allow(invited_user).to receive(:reload)
     allow(invited_user).to receive(:collaborations).and_return([])
+    stub_overheating_codes(invited_user)
 
     service =
       described_class.new(
@@ -62,7 +72,8 @@ RSpec.describe PromoteUser do
       instance_double(
         "User",
         jurisdiction_ids: [],
-        collaborations: existing_collabs
+        collaborations: existing_collabs,
+        id: "e1"
       )
     invited_user =
       instance_double(
@@ -80,6 +91,7 @@ RSpec.describe PromoteUser do
     allow(existing_user).to receive(:save!)
     allow(invited_user).to receive(:destroy!)
     allow(invited_user).to receive(:reload)
+    stub_overheating_codes(invited_user)
 
     invited_user_collab =
       instance_double(
@@ -103,5 +115,21 @@ RSpec.describe PromoteUser do
     expect(invited_user_collab).to have_received(:update).with(
       user: existing_user
     )
+  end
+
+  it "reassigns overheating codes from invited user before destroy" do
+    allow(ActiveRecord::Base).to receive(:transaction).and_call_original
+
+    existing_user = create(:user, :submitter)
+    invited_user = create(:user, :review_manager, confirmed: false)
+    overheating_code = create(:overheating_code, creator: invited_user)
+
+    described_class.new(
+      existing_user: existing_user,
+      invited_user: invited_user
+    ).call
+
+    expect(overheating_code.reload.creator_id).to eq(existing_user.id)
+    expect(User.exists?(invited_user.id)).to be false
   end
 end

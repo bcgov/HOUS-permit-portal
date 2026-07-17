@@ -42,7 +42,16 @@ class Api::TemplateVersionsController < Api::ApplicationController
                    {
                      blueprint: TemplateVersionBlueprint,
                      blueprint_opts: {
-                       view: :extended
+                       # TODO: This endpoint may be too heavy as the catalog grows (>50 templates). Consider:
+                       # - A lighter :list blueprint view with denormalized_template_json + jurisdiction flags only
+                       #   (drop form_json / requirement_blocks_json from index responses).
+                       # - Batch-loading jurisdiction customizations for blueprint_opts[:jurisdiction_id] and
+                       #   sandbox to avoid N+1 EXISTS queries for requires_project_meeting / disabled_by_jurisdiction.
+                       # - Moving nickname/description/tags to base fields if denormalized_template_json is no longer needed.
+                       view: :extended,
+                       jurisdiction_id:
+                         template_version_params[:jurisdiction_id],
+                       sandbox: current_sandbox
                      }
                    }
   end
@@ -77,7 +86,10 @@ class Api::TemplateVersionsController < Api::ApplicationController
                    {
                      blueprint: TemplateVersionBlueprint,
                      blueprint_opts: {
-                       view: :extended
+                       view: :extended,
+                       jurisdiction_id:
+                         template_version_params[:jurisdiction_id],
+                       sandbox: current_sandbox
                      }
                    }
   end
@@ -319,13 +331,6 @@ class Api::TemplateVersionsController < Api::ApplicationController
         )
       end
 
-      if promote_draft_params[:promote_block_ids].present?
-        TemplateVersioningService.promote_block_changes!(
-          promoted,
-          promote_draft_params[:promote_block_ids]
-        )
-      end
-
       if !skip_date_check && promote_draft_params[:send_advance_notice]
         NotificationService.publish_version_scheduled_event(promoted)
       end
@@ -337,54 +342,6 @@ class Api::TemplateVersionsController < Api::ApplicationController
            TemplateVersionScheduleError,
            TemplateVersionForcePublishNowError => e
       render_error "requirement_template.promote_draft_error",
-                   message_opts: {
-                     error_message: e.message
-                   }
-    end
-  end
-
-  def update_draft_block
-    authorize @template_version, :update?
-
-    begin
-      TemplateVersioningService.update_draft_block!(
-        @template_version,
-        draft_block_params[:block_id],
-        draft_block_params[:block_data].to_unsafe_h
-      )
-
-      render_success @template_version,
-                     "template_version.update_draft_block_success",
-                     {
-                       blueprint: TemplateVersionBlueprint,
-                       blueprint_opts: {
-                         view: :extended
-                       }
-                     }
-    rescue TemplateVersionDraftError => e
-      render_error "template_version.update_draft_block_error",
-                   message_opts: {
-                     error_message: e.message
-                   }
-    end
-  end
-
-  def refresh_draft
-    authorize @template_version, :update?
-
-    begin
-      TemplateVersioningService.refresh_draft_snapshot!(@template_version)
-
-      render_success @template_version,
-                     "template_version.refresh_draft_success",
-                     {
-                       blueprint: TemplateVersionBlueprint,
-                       blueprint_opts: {
-                         view: :extended
-                       }
-                     }
-    rescue TemplateVersionDraftError => e
-      render_error "template_version.refresh_draft_error",
                    message_opts: {
                      error_message: e.message
                    }
@@ -473,7 +430,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
   private
 
   def template_version_params
-    params.permit(:status, :publicly_previewable)
+    params.permit(:status, :publicly_previewable, :jurisdiction_id)
   end
 
   def publicly_previewable_param
@@ -539,15 +496,12 @@ class Api::TemplateVersionsController < Api::ApplicationController
   def jurisdiction_template_version_customization_params
     params.require(:jurisdiction_template_version_customization).permit(
       :disabled,
+      :requires_project_meeting,
       customizations: {
         requirement_block_changes: {
         }
       }
     )
-  end
-
-  def draft_block_params
-    params.permit(:block_id, block_data: {})
   end
 
   def draft_previewer_params
@@ -576,8 +530,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
       :notification_scope,
       :send_advance_notice,
       :skip_date_check,
-      notified_jurisdiction_ids: [],
-      promote_block_ids: []
+      notified_jurisdiction_ids: []
     )
   end
 

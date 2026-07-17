@@ -110,7 +110,7 @@ RSpec.describe PermitApplication::FormJsonService do
     )
   end
 
-  it "sets energy step code fields required based on permit_application.energy_step_code_required?" do
+  it "sets Energy Step Code fields required based on permit_application.energy_step_code_required?" do
     form_json = {
       "components" => [
         {

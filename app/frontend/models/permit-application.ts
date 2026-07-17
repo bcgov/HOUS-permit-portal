@@ -10,6 +10,7 @@ import {
   EPermitBlockStatus,
   ERequirementChangeAction,
   ERequirementType,
+  EStepCodeChecklistStage,
 } from "../types/enums"
 import {
   ICompareRequirementsBoxData,
@@ -72,6 +73,9 @@ export const PermitApplicationModel = types.snapshotProcessor(
       createdAt: types.Date,
       updatedAt: types.Date,
       stepCode: types.maybeNull(types.reference(types.late(() => StepCodeModel))),
+      stepCodeStage: types.maybeNull(
+        types.enumeration<EStepCodeChecklistStage[]>(Object.values(EStepCodeChecklistStage))
+      ),
       supportingDocuments: types.maybeNull(types.frozen<IDownloadableFile[]>()),
       allSubmissionVersionCompletedSupportingDocuments: types.maybeNull(types.frozen<IDownloadableFile[]>()),
       zipfileSize: types.maybeNull(types.number),
@@ -84,6 +88,9 @@ export const PermitApplicationModel = types.snapshotProcessor(
       isLoading: types.optional(types.boolean, false),
       usingCurrentTemplateVersion: types.maybeNull(types.boolean),
       templateVersionDisabledByJurisdiction: types.optional(types.boolean, false),
+      requiresProjectMeeting: types.optional(types.boolean, false),
+      hasActiveProjectMeeting: types.optional(types.boolean, false),
+      activeProjectMeetingId: types.maybeNull(types.string),
       showingCompareAfter: types.optional(types.boolean, false),
       revisionMode: types.optional(types.boolean, false),
       diff: types.maybeNull(types.frozen<ITemplateVersionDiff>()),
@@ -113,9 +120,8 @@ export const PermitApplicationModel = types.snapshotProcessor(
         if (self.daysInQueue == null) return "—"
         return t("submissionInbox.daysInQueue", { count: self.daysInQueue })
       },
-      get formattedSubmittedAt(): string {
-        if (!self.submittedAt) return "—"
-        return new Intl.DateTimeFormat("en-CA").format(self.submittedAt)
+      get isStepCodeComplete() {
+        return !!self.stepCode?.isStageComplete(self.stepCodeStage || EStepCodeChecklistStage.preConstruction)
       },
       get isPart3() {
         // TODO
@@ -318,7 +324,8 @@ export const PermitApplicationModel = types.snapshotProcessor(
           (R.isNil(self.diff) ? `${self.templateVersion.id}` : `${self.templateVersion.id}-diff`) +
           (self.revisionMode ? "-revision" : "") +
           (self.selectedSubmissionVersion ? `-past-submission-version-${self.selectedSubmissionVersion.id}` : "") +
-          (self.isViewingPastRequests ? "-past-requests" : "")
+          (self.isViewingPastRequests ? "-past-requests" : "") +
+          `-${self.status}`
         )
       },
       indexOfBlockId: (blockId: string) => {
@@ -825,6 +832,9 @@ export const PermitApplicationModel = types.snapshotProcessor(
           self.rootStore.stepCodeStore.mergeUpdate(stepCode, "stepCodesMap")
           self.stepCode = cast(stepCode.id)
           self.rootStore.stepCodeStore.setCurrentStepCode(stepCode.id)
+          if (!self.stepCodeStage && stepCode.currentStage) {
+            self.stepCodeStage = stepCode.currentStage
+          }
         }
         return response.ok
       }),

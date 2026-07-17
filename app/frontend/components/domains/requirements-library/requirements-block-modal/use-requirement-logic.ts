@@ -58,7 +58,7 @@ export const useRequirementLogic = ({
       return
     }
 
-    // Energy step code types use a dependency map pattern (multiple related requirements)
+    // Energy Step Code types use a dependency map pattern (multiple related requirements)
     if (
       requirementType !== ERequirementType.energyStepCodePart9 &&
       requirementType !== ERequirementType.energyStepCodePart3
@@ -151,7 +151,7 @@ export const useRequirementLogic = ({
     }
 
     const stepCodeDependencyIndexes = watchedRequirements.reduce((acc: number[], req, idx) => {
-      // Remove all energy step code dependencies, regardless of whether they are Part 9 or Part 3
+      // Remove all Energy Step Code dependencies, regardless of whether they are Part 9 or Part 3
       // Since only one type (Part 9 OR Part 3) is allowed at a time, this is safe.
       if (isEnergyStepCodeDependencyRequirementCode(req.requirementCode)) {
         acc.push(idx)

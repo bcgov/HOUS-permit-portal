@@ -45,8 +45,12 @@ interface ISelectFormControlProps extends IInputFormControlProps<Partial<SelectP
 }
 
 const isValidUrl = (url: string) => {
-  const regex = /^(https?:\/\/)?([a-z0-9-]+\.)+[a-z]{2,}(\/[\w./%-]*)?\/?$/i
-  return regex.test(url)
+  try {
+    const parsed = new URL(/^https?:\/\//i.test(url) ? url : `https://${url}`)
+    return parsed.protocol === "http:" || parsed.protocol === "https:"
+  } catch {
+    return false
+  }
 }
 
 export const TextFormControl = (props: IInputFormControlProps) => {
@@ -140,6 +144,7 @@ export const DatePickerFormControl = ({
   leftElement,
   rightElement,
   inputProps = {},
+  LabelInfo,
   showOptional = true,
   ...rest
 }: IInputFormControlProps<Partial<IDatePickerProps>>) => {
@@ -162,12 +167,20 @@ export const DatePickerFormControl = ({
     <FormControl isInvalid={!!errorMessage} {...rest}>
       {label && (
         <HStack gap={0}>
-          <FormLabel id={id}>{label} </FormLabel>
+          <FormLabel id={id}>
+            {label}
+            {required && (
+              <Text as="span" color="semantic.error" ml={1}>
+                *
+              </Text>
+            )}
+          </FormLabel>
           {!required && showOptional && (
             <Text ml={-2} mb={2}>
               {t("ui.optional")}
             </Text>
           )}
+          {LabelInfo && <LabelInfo />}
         </HStack>
       )}
 

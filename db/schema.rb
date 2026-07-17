@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_07_07_200600) do
+ActiveRecord::Schema[7.2].define(version: 2026_07_15_111439) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -232,14 +232,14 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_07_200600) do
     t.index ["template_version_id"], name: "index_integration_mappings_on_template_version_id"
   end
 
-  create_table "jurisdiction_climate_zones", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+  create_table "jurisdiction_heating_degree_days", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "jurisdiction_id", null: false
-    t.string "climate_zone", null: false
-    t.integer "heating_degree_days"
+    t.integer "heating_degree_days", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["jurisdiction_id", "climate_zone"], name: "idx_jurisdiction_climate_zones_unique", unique: true
-    t.index ["jurisdiction_id"], name: "index_jurisdiction_climate_zones_on_jurisdiction_id"
+    t.string "location_name", null: false
+    t.index ["jurisdiction_id", "location_name"], name: "idx_jurisdiction_heating_degree_days_unique", unique: true
+    t.index ["jurisdiction_id"], name: "index_jurisdiction_heating_degree_days_on_jurisdiction_id"
   end
 
   create_table "jurisdiction_memberships", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -290,6 +290,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_07_200600) do
     t.uuid "sandbox_id"
     t.boolean "disabled", default: false, null: false
     t.uuid "submission_contact_id"
+    t.boolean "requires_project_meeting", default: false, null: false
     t.index "jurisdiction_id, template_version_id, COALESCE(sandbox_id, '00000000-0000-0000-0000-000000000000'::uuid)", name: "index_jtvcs_unique_on_jurisdiction_template_sandbox", unique: true
     t.index ["jurisdiction_id"], name: "idx_on_jurisdiction_id_57cd0a7ea7"
     t.index ["sandbox_id"], name: "idx_on_sandbox_id_e5e6ef72b0"
@@ -315,7 +316,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_07_200600) do
     t.string "slug"
     t.integer "map_zoom"
     t.string "external_api_state", default: "g_off", null: false
-    t.integer "heating_degree_days"
     t.boolean "inbox_enabled", default: false, null: false
     t.boolean "show_about_page", default: false, null: false
     t.boolean "allow_designated_reviewer", default: false
@@ -334,6 +334,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_07_200600) do
     t.string "office_email"
     t.string "website_url"
     t.boolean "hide_from_search", default: false, null: false
+    t.boolean "project_meetings_enabled", default: false, null: false
+    t.boolean "property_information_requests_enabled", default: false, null: false
     t.index ["ltsa_matcher"], name: "index_jurisdictions_on_ltsa_matcher"
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"], name: "index_jurisdictions_on_regional_district_id"
@@ -359,6 +361,32 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_07_200600) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["hdd", "conditioned_space_percent", "step", "conditioned_space_area"], name: "meui_composite_index", unique: true
+  end
+
+  create_table "meeting_request_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "project_meeting_id", null: false
+    t.integer "document_type", default: 0, null: false
+    t.text "file_data"
+    t.string "scan_status", default: "pending", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["document_type"], name: "index_meeting_request_documents_on_document_type"
+    t.index ["project_meeting_id"], name: "index_meeting_request_documents_on_project_meeting_id"
+    t.index ["scan_status"], name: "index_meeting_request_documents_on_scan_status"
+  end
+
+  create_table "notes", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "user_id", null: false
+    t.uuid "permit_project_id", null: false
+    t.string "noteable_type", null: false
+    t.uuid "noteable_id", null: false
+    t.text "body", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["noteable_type", "noteable_id", "created_at"], name: "index_notes_on_noteable_type_and_noteable_id_and_created_at"
+    t.index ["noteable_type", "noteable_id"], name: "index_notes_on_noteable"
+    t.index ["permit_project_id", "created_at"], name: "index_notes_on_permit_project_id_and_created_at"
+    t.index ["user_id"], name: "index_notes_on_user_id"
   end
 
   create_table "occupancy_classifications", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -491,6 +519,11 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_07_200600) do
     t.string "heating_system_plant_description"
     t.string "cooling_system_plant_description"
     t.integer "is_suite_sub_metered"
+    t.integer "stage", default: 0, null: false
+    t.integer "status", default: 0, null: false
+    t.datetime "stage_completed_at"
+    t.index ["status"], name: "index_part_3_step_code_checklists_on_status"
+    t.index ["step_code_id", "stage"], name: "idx_part_3_checklists_on_step_code_id_and_stage", unique: true, where: "(step_code_id IS NOT NULL)"
     t.index ["step_code_id"], name: "index_part_3_step_code_checklists_on_step_code_id"
   end
 
@@ -533,7 +566,10 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_07_200600) do
     t.integer "status", default: 0, null: false
     t.string "builder"
     t.uuid "step_requirement_id"
+    t.jsonb "section_completion_status", default: {"start"=>{"complete"=>false, "relevant"=>true}, "report"=>{"complete"=>false, "relevant"=>true}, "review"=>{"complete"=>false, "relevant"=>true}, "h2k_import"=>{"complete"=>false, "relevant"=>true}, "completed_by"=>{"complete"=>false, "relevant"=>true}, "project_info"=>{"complete"=>false, "relevant"=>true}, "compliance_summary"=>{"complete"=>false, "relevant"=>true}, "energy_performance"=>{"complete"=>false, "relevant"=>true}, "energy_step_compliance"=>{"complete"=>false, "relevant"=>true}, "zero_carbon_compliance"=>{"complete"=>false, "relevant"=>true}, "building_characteristics"=>{"complete"=>false, "relevant"=>true}}, null: false
+    t.datetime "stage_completed_at"
     t.index ["status"], name: "index_part_9_step_code_checklists_on_status"
+    t.index ["step_code_id", "stage"], name: "idx_part_9_checklists_on_step_code_id_and_stage", unique: true, where: "(step_code_id IS NOT NULL)"
     t.index ["step_code_id"], name: "index_part_9_step_code_checklists_on_step_code_id"
     t.index ["step_requirement_id"], name: "index_part_9_step_code_checklists_on_step_requirement_id"
   end
@@ -568,6 +604,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_07_200600) do
     t.integer "inbox_sort_order"
     t.integer "queue_time_seconds", default: 0, null: false
     t.datetime "queue_clock_started_at"
+    t.string "step_code_stage"
     t.index ["discarded_at"], name: "index_permit_applications_on_discarded_at"
     t.index ["jurisdiction_id"], name: "index_permit_applications_on_jurisdiction_id"
     t.index ["number"], name: "index_permit_applications_on_number", unique: true
@@ -718,6 +755,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_07_200600) do
     t.boolean "enable_in_app_resource_reminder_notification", default: true
     t.boolean "enable_email_resource_reminder_notification", default: true
     t.boolean "enable_in_app_release_note_publish_notification", default: true
+    t.boolean "enable_in_app_project_meeting_submitted_notification", default: true
+    t.boolean "enable_email_project_meeting_submitted_notification", default: true
     t.index ["user_id"], name: "index_preferences_on_user_id"
   end
 
@@ -729,6 +768,41 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_07_200600) do
     t.string "scan_status", default: "pending", null: false
     t.index ["permit_project_id"], name: "index_project_documents_on_permit_project_id"
     t.index ["scan_status"], name: "index_project_documents_on_scan_status"
+  end
+
+  create_table "project_meetings", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "permit_project_id", null: false
+    t.uuid "requested_by_id", null: false
+    t.integer "status", default: 0, null: false
+    t.integer "requester_relationship"
+    t.string "contact_name"
+    t.string "contact_email"
+    t.string "contact_phone_number"
+    t.text "project_description"
+    t.text "meeting_notes"
+    t.boolean "request_property_information"
+    t.datetime "submitted_at"
+    t.datetime "confirmed_date"
+    t.datetime "scheduled_at"
+    t.datetime "completed_at"
+    t.datetime "withdrawn_at"
+    t.string "meeting_url"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.datetime "viewed_at"
+    t.integer "contact_method"
+    t.integer "notes_count", default: 0, null: false
+    t.index ["completed_at"], name: "index_project_meetings_on_completed_at"
+    t.index ["contact_method"], name: "index_project_meetings_on_contact_method"
+    t.index ["permit_project_id"], name: "index_project_meetings_on_active_permit_project", unique: true, where: "(status = ANY (ARRAY[1, 2]))"
+    t.index ["permit_project_id"], name: "index_project_meetings_on_permit_project_id"
+    t.index ["requested_by_id"], name: "index_project_meetings_on_requested_by_id"
+    t.index ["requester_relationship"], name: "index_project_meetings_on_requester_relationship"
+    t.index ["scheduled_at"], name: "index_project_meetings_on_scheduled_at"
+    t.index ["status"], name: "index_project_meetings_on_status"
+    t.index ["submitted_at"], name: "index_project_meetings_on_submitted_at"
+    t.index ["viewed_at"], name: "index_project_meetings_on_viewed_at"
+    t.index ["withdrawn_at"], name: "index_project_meetings_on_withdrawn_at"
   end
 
   create_table "release_notes", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -751,6 +825,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_07_200600) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "scan_status", default: "pending", null: false
+    t.boolean "stale", default: false, null: false
     t.index ["scan_status"], name: "index_report_documents_on_scan_status"
     t.index ["step_code_id"], name: "index_report_documents_on_step_code_id"
   end
@@ -904,6 +979,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_07_200600) do
     t.boolean "code_compliance_enabled", default: false, null: false
     t.boolean "archistar_enabled_for_all_jurisdictions", default: false, null: false
     t.boolean "qa_tools_enabled", default: false, null: false
+    t.boolean "project_meetings_enabled", default: false, null: false
     t.boolean "overheating_tool_enabled", default: false, null: false
   end
 
@@ -997,7 +1073,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_07_200600) do
     t.string "first_name_snapshot"
     t.string "last_name_snapshot"
     t.datetime "orphaned_at"
+    t.string "current_stage", default: "pre_construction", null: false
     t.index ["creator_id"], name: "index_step_codes_on_creator_id"
+    t.index ["current_stage"], name: "index_step_codes_on_current_stage"
     t.index ["discarded_at"], name: "index_step_codes_on_discarded_at"
     t.index ["jurisdiction_id"], name: "index_step_codes_on_jurisdiction_id"
     t.index ["permit_application_id"], name: "index_step_codes_on_permit_application_id"
@@ -1014,7 +1092,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_07_200600) do
     t.boolean "default", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["jurisdiction_id", "email"], name: "index_submission_contacts_on_jurisdiction_id_and_email", unique: true
+    t.string "type", default: "ApplicationSubmissionContact", null: false
+    t.index ["jurisdiction_id", "email", "type"], name: "idx_submission_contacts_on_jurisdiction_email_sti_type", unique: true
     t.index ["jurisdiction_id"], name: "index_submission_contacts_on_jurisdiction_id"
   end
 
@@ -1212,6 +1291,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_07_200600) do
     t.string "omniauth_email"
     t.string "omniauth_username"
     t.string "department"
+    t.string "phone_number"
     t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
     t.index ["discarded_at"], name: "index_users_on_discarded_at"
     t.index ["email"], name: "index_users_on_email"
@@ -1236,7 +1316,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_07_200600) do
   add_foreign_key "integration_mapping_notifications", "template_versions"
   add_foreign_key "integration_mappings", "jurisdictions"
   add_foreign_key "integration_mappings", "template_versions"
-  add_foreign_key "jurisdiction_climate_zones", "jurisdictions", on_delete: :cascade
+  add_foreign_key "jurisdiction_heating_degree_days", "jurisdictions", on_delete: :cascade
   add_foreign_key "jurisdiction_memberships", "jurisdictions"
   add_foreign_key "jurisdiction_memberships", "users"
   add_foreign_key "jurisdiction_requirement_templates", "jurisdictions"
@@ -1249,6 +1329,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_07_200600) do
   add_foreign_key "jurisdiction_template_version_customizations", "template_versions"
   add_foreign_key "jurisdictions", "jurisdictions", column: "regional_district_id"
   add_foreign_key "make_up_air_fuels", "part_3_step_code_checklists", column: "checklist_id", on_delete: :cascade
+  add_foreign_key "meeting_request_documents", "project_meetings"
+  add_foreign_key "notes", "permit_projects"
+  add_foreign_key "notes", "users"
   add_foreign_key "occupancy_classifications", "part_3_step_code_checklists", column: "checklist_id", on_delete: :cascade
   add_foreign_key "overheating_codes", "jurisdictions"
   add_foreign_key "overheating_codes", "users", column: "creator_id"
@@ -1275,6 +1358,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_07_200600) do
   add_foreign_key "pre_checks", "users", column: "creator_id"
   add_foreign_key "preferences", "users"
   add_foreign_key "project_documents", "permit_projects"
+  add_foreign_key "project_meetings", "permit_projects"
+  add_foreign_key "project_meetings", "users", column: "requested_by_id"
   add_foreign_key "requirement_documents", "requirement_blocks"
   add_foreign_key "requirement_template_sections", "requirement_template_sections", column: "copied_from_id"
   add_foreign_key "requirement_template_sections", "requirement_templates"

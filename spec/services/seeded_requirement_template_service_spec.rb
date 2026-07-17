@@ -25,7 +25,7 @@ RSpec.describe SeededRequirementTemplateService, type: :service do
       end
     end
 
-    it "keeps Part 9 and Part 3 step code requirements separated" do
+    it "keeps Part 9 and Part 3 Step Code requirements separated" do
       described_class.seed!
 
       part_9_input_types = requirement_input_types("Large Part 9 Template")

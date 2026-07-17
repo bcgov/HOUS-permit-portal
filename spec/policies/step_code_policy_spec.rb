@@ -126,7 +126,7 @@ RSpec.describe StepCodePolicy, type: :policy do
     end
   end
 
-  context "for a submission assignee collaborator assigned to the step code block" do
+  context "for a submission assignee collaborator assigned to the Step Code block" do
     let(:collaborator_user) { create(:user, :submitter) }
     let(:collaborator) do
       create(
@@ -267,7 +267,7 @@ RSpec.describe StepCodePolicy, type: :policy do
     end
   end
 
-  context "for a standalone step code (no permit application)" do
+  context "for a standalone Step Code (no permit application)" do
     let(:creator) { create(:user, :submitter) }
     let(:step_code) do
       create(:part_9_step_code, permit_application: nil, creator: creator)
@@ -276,6 +276,69 @@ RSpec.describe StepCodePolicy, type: :policy do
     it "permits create for any logged-in user" do
       other_user = create(:user, :submitter)
       expect(policy_for(other_user, step_code).create?).to be true
+    end
+  end
+
+  describe "Scope" do
+    it "includes standalone Step Codes created by the user" do
+      visible =
+        create(:part_9_step_code, permit_application: nil, creator: submitter)
+      hidden =
+        create(
+          :part_9_step_code,
+          permit_application: nil,
+          creator: create(:user, :submitter)
+        )
+
+      resolved =
+        described_class::Scope.new(
+          UserContext.new(submitter, sandbox),
+          StepCode.all
+        ).resolve
+
+      expect(resolved).to include(visible)
+      expect(resolved).not_to include(hidden)
+    end
+
+    it "scopes attached Step Codes through the permit application policy scope" do
+      other_submitter = create(:user, :submitter)
+      visible_permit_application =
+        create(
+          :permit_application,
+          submitter: submitter,
+          jurisdiction: jurisdiction,
+          sandbox: sandbox,
+          with_fake_plan_document: true
+        )
+      hidden_permit_application =
+        create(
+          :permit_application,
+          submitter: other_submitter,
+          jurisdiction: jurisdiction,
+          sandbox: sandbox,
+          with_fake_plan_document: true
+        )
+      visible =
+        create(
+          :part_9_step_code,
+          permit_application: visible_permit_application,
+          creator: other_submitter
+        )
+      hidden =
+        create(
+          :part_9_step_code,
+          permit_application: hidden_permit_application,
+          creator: submitter
+        )
+
+      resolved =
+        described_class::Scope.new(
+          UserContext.new(submitter, sandbox),
+          StepCode.all
+        ).resolve
+
+      expect(resolved).to include(visible)
+      expect(resolved).not_to include(hidden)
     end
   end
 end

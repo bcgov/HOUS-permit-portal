@@ -1,7 +1,11 @@
 class StepCode::Part3::ChecklistBlueprint < Blueprinter::Base
   identifier :id
 
-  fields :section_completion_status,
+  # HUB-5145: Part 3 checklist serialization has no stage/status yet. Add these
+  # when Part 3 moves to staged child checklists selected by StepCode.current_stage.
+  fields :stage,
+         :status,
+         :section_completion_status,
          :total_annual_thermal_energy_demand,
          :total_annual_cooling_energy_demand,
          :step_code_annual_thermal_energy_demand,
@@ -96,6 +100,10 @@ class StepCode::Part3::ChecklistBlueprint < Blueprinter::Base
     StepCode::Part3::ComplianceReportBlueprint.render_as_hash(
       checklist.compliance_report.results
     )
+  end
+
+  field :step_code_type do |checklist, _options|
+    checklist.step_code.class.name
   end
 
   field :overheating_hours_limit do |_checklist, _options|

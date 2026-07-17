@@ -27,6 +27,11 @@ export const AdminGlobalFeatureAccessScreen = observer(() => {
       route: "code-compliance",
     },
     {
+      label: t(`${i18nPrefix}.projectMeetings`),
+      enabled: siteConfigurationStore?.projectMeetingsEnabled,
+      route: "project-meetings",
+    },
+    {
       label: t(`${i18nPrefix}.overheatingTool`),
       enabled: siteConfigurationStore?.overheatingToolEnabled,
       route: "overheating-tool",

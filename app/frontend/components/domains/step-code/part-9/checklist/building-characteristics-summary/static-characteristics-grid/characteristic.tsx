@@ -1,7 +1,7 @@
 import React from "react"
 import { useFieldArray, useFormContext } from "react-hook-form"
 import { generateUUID } from "../../../../../../../utils/utility-functions"
-import { TextFormControl } from "../../../../../../shared/form/input-form-control"
+import { NumberFormControl } from "../../../../../../shared/form/input-form-control"
 import { GridData } from "../../shared/grid/data"
 import { DetailsInput } from "../details-input"
 import { RowHeader } from "../row-header"
@@ -56,7 +56,7 @@ export const Characteristic = function StaticCharacteristic({ fieldArrayName, ro
             borderTopWidth={index == 0 ? 1 : 0}
             borderBottomWidth={isLast && index == fields.length - 1 ? 1 : 0}
           >
-            <TextFormControl fieldName={`${fieldArrayName}.${index}.rsi`} />
+            <NumberFormControl fieldName={`${fieldArrayName}.${index}.rsi`} />
           </GridData>
         </React.Fragment>
       ))}

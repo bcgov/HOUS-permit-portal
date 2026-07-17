@@ -27,10 +27,12 @@ export const UserModel = types
     omniauthProvider: types.maybeNull(types.enumeration(Object.values(OMNIAUTH_PROVIDERS))),
     firstName: types.maybeNull(types.string),
     lastName: types.maybeNull(types.string),
+    phoneNumber: types.maybeNull(types.string),
     certified: types.maybeNull(types.boolean),
     organization: types.maybeNull(types.string),
     jurisdictions: types.array(types.reference(types.late(() => JurisdictionModel))),
     createdAt: types.maybeNull(types.Date),
+    jurisdictionMembershipCreatedAt: types.maybeNull(types.Date),
     confirmationSentAt: types.maybeNull(types.Date),
     confirmedAt: types.maybeNull(types.Date),
     discardedAt: types.maybeNull(types.Date),
@@ -40,6 +42,7 @@ export const UserModel = types
     department: types.maybeNull(types.string),
     preference: types.frozen<IPreference>(),
     invitedToJurisdiction: types.maybeNull(types.frozen<IJurisdiction>()),
+    invitationPromotesExistingSubmitter: types.optional(types.boolean, false),
     licenseAgreements: types.maybeNull(types.frozen<ILicenseAgreement[]>()),
   })
   .extend(withRootStore())
@@ -208,4 +211,7 @@ export interface IPreference {
 
   enableInAppResourceReminderNotification: boolean
   enableEmailResourceReminderNotification: boolean
+
+  enableInAppProjectMeetingSubmittedNotification: boolean
+  enableEmailProjectMeetingSubmittedNotification: boolean
 }

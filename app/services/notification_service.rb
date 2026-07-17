@@ -442,7 +442,7 @@ class NotificationService
     return if step_code.blank?
 
     # Determine recipient users:
-    # If the step code belongs to a permit application, notify the submitter; otherwise notify the creator
+    # If the Step Code belongs to a permit application, notify the submitter; otherwise notify the creator
     user_ids = []
     if step_code.permit_application.present?
       submitter_id = step_code.permit_application.submitter_id
@@ -709,6 +709,97 @@ class NotificationService
     unless notification_user_hash.empty?
       NotificationPushJob.perform_async(notification_user_hash)
     end
+  end
+
+  def self.publish_project_meeting_submitted_event(project_meeting)
+    user = project_meeting.requested_by
+    preference = user&.preference
+    return if user.blank? || preference.blank?
+
+    if preference.enable_email_project_meeting_submitted_notification
+      PermitHubMailer.notify_project_meeting_submitted(
+        project_meeting
+      ).deliver_later
+    end
+
+    unless preference.enable_in_app_project_meeting_submitted_notification
+      return
+    end
+
+    NotificationPushJob.perform_async(
+      user.id => project_meeting.submitted_event_notification_data
+    )
+  end
+
+  def self.publish_project_meeting_request_received_event(project_meeting)
+    jurisdiction = project_meeting.jurisdiction
+
+    jurisdiction.confirmed_project_meeting_contacts.each do |contact|
+      PermitHubMailer.notify_project_meeting_submitted_to_jurisdiction(
+        project_meeting,
+        contact.email
+      ).deliver_later
+    end
+  end
+
+  def self.publish_property_information_request_received_event(project_meeting)
+    return unless project_meeting.request_property_information?
+
+    jurisdiction = project_meeting.jurisdiction
+    return unless jurisdiction&.property_information_requests_enabled?
+
+    jurisdiction.confirmed_property_information_contacts.each do |contact|
+      PermitHubMailer.notify_property_information_requested(
+        project_meeting,
+        contact.email
+      ).deliver_later
+    end
+  end
+
+  def self.publish_project_meeting_scheduled_event(project_meeting)
+    PermitHubMailer.notify_project_meeting_scheduled(
+      project_meeting
+    ).deliver_later
+
+    project_meeting
+      .jurisdiction
+      .confirmed_project_meeting_contacts
+      .each do |contact|
+      PermitHubMailer.notify_project_meeting_scheduled_to_jurisdiction(
+        project_meeting,
+        contact.email
+      ).deliver_later
+    end
+
+    user = project_meeting.requested_by
+    return if user.blank?
+
+    NotificationPushJob.perform_async(
+      user.id => project_meeting.scheduled_event_notification_data
+    )
+  end
+
+  def self.publish_project_meeting_rescheduled_event(project_meeting)
+    PermitHubMailer.notify_project_meeting_rescheduled(
+      project_meeting
+    ).deliver_later
+
+    project_meeting
+      .jurisdiction
+      .confirmed_project_meeting_contacts
+      .each do |contact|
+      PermitHubMailer.notify_project_meeting_rescheduled_to_jurisdiction(
+        project_meeting,
+        contact.email
+      ).deliver_later
+    end
+
+    user = project_meeting.requested_by
+    return if user.blank?
+
+    NotificationPushJob.perform_async(
+      user.id => project_meeting.rescheduled_event_notification_data
+    )
   end
 
   private_class_method :determine_file_owner

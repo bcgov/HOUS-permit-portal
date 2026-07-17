@@ -2,6 +2,36 @@ class Part9StepCode::Checklist < ActiveRecord::Base
   self.table_name = "part_9_step_code_checklists"
 
   include ChecklistReportDocumentConcern
+  include StepCodeChecklistStageCompletion
+
+  SECTION_COMPLETION_STATUS_KEYS = %i[
+    start
+    project_info
+    building_info
+    h2k_import
+    compliance_summary
+    completed_by
+    building_characteristics
+    energy_performance
+    energy_step_compliance
+    zero_carbon_compliance
+    review
+    report
+  ].freeze
+
+  SECTION_COMPLETION_STATUS_PARAMS =
+    SECTION_COMPLETION_STATUS_KEYS.index_with { %i[complete relevant] }.freeze
+
+  DEFAULT_SECTION_COMPLETION_STATUS =
+    SECTION_COMPLETION_STATUS_KEYS
+      .index_with { { complete: false, relevant: true } }
+      .merge(project_info: { complete: false, relevant: false })
+      .deep_stringify_keys
+      .freeze
+
+  def self.section_completion_status_params
+    SECTION_COMPLETION_STATUS_PARAMS
+  end
 
   delegate :permit_application_id, to: :step_code, allow_nil: true
 
@@ -9,6 +39,7 @@ class Part9StepCode::Checklist < ActiveRecord::Base
              optional: true,
              class_name: "Part9StepCode",
              foreign_key: :step_code_id,
+             inverse_of: :checklists,
              touch: true
 
   belongs_to :step_requirement,
@@ -18,15 +49,28 @@ class Part9StepCode::Checklist < ActiveRecord::Base
   has_many :data_entries,
            class_name: "Part9StepCode::DataEntry",
            dependent: :destroy
-  accepts_nested_attributes_for :data_entries
+  accepts_nested_attributes_for :data_entries, allow_destroy: true
   has_one :building_characteristics_summary,
           class_name: "Part9StepCode::BuildingCharacteristicsSummary",
           foreign_key: "checklist_id",
           dependent: :destroy
   accepts_nested_attributes_for :building_characteristics_summary
   after_create :create_building_characteristics_summary
+  before_validation :set_default_section_completion_status
 
-  validates :compliance_path, presence: true, on: :update
+  COMPLIANCE_PATH_REQUIRED_CHANGES = %w[
+    compliance_path
+    hvac_consumption
+    dwh_heating_consumption
+    ref_hvac_consumption
+    ref_dwh_heating_consumption
+    epc_calculation_airtightness
+    epc_calculation_testing_target_type
+    epc_calculation_compliance
+  ].freeze
+
+  validates :compliance_path, presence: true, if: :requires_compliance_path?
+  validates :stage, uniqueness: { scope: :step_code_id }, if: :step_code_id?
 
   delegate :plan_author, :plan_version, :plan_date, to: :step_code
 
@@ -94,10 +138,14 @@ class Part9StepCode::Checklist < ActiveRecord::Base
   end
 
   def compliance_reports
-    StepCode::Compliance::GenerateReports
-      .new(checklist: self, requirements: step_code.step_requirements)
-      .call
-      .reports
+    return [] if data_entries.none?
+
+    reports =
+      StepCode::Compliance::GenerateReports
+        .new(checklist: self, requirements: step_code.step_requirements)
+        .call
+        .reports
+    reports
   end
 
   def passing_compliance_reports
@@ -107,6 +155,26 @@ class Part9StepCode::Checklist < ActiveRecord::Base
   def selected_report
     return unless step_requirement.present?
 
-    compliance_reports.find { |r| r[:requirement_id] == step_requirement_id }
+    reports = compliance_reports
+    reports.find { |r| r[:requirement_id] == step_requirement_id }
+  end
+
+  def complete?
+    status == "complete"
+  end
+
+  private
+
+  def requires_compliance_path?
+    COMPLIANCE_PATH_REQUIRED_CHANGES.any? do |attribute|
+      will_save_change_to_attribute?(attribute)
+    end
+  end
+
+  def set_default_section_completion_status
+    self.section_completion_status =
+      DEFAULT_SECTION_COMPLETION_STATUS.deep_merge(
+        section_completion_status.presence || {}
+      )
   end
 end
