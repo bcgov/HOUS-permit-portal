@@ -58,7 +58,9 @@ export const GridHeaders = observer(function GridHeaders() {
           </Flex>
         </GridHeader>
         <GridHeader role={"columnheader"}>
-          <Text px={4}>{t("questionBank.fields.description")}</Text>
+          <Text px={4} borderRight={"1px solid"} borderColor={"border.light"}>
+            {t("questionBank.fields.description")}
+          </Text>
         </GridHeader>
         <GridHeader role={"columnheader"}>
           <Flex
@@ -85,10 +87,14 @@ export const GridHeaders = observer(function GridHeaders() {
           </Flex>
         </GridHeader>
         <GridHeader role={"columnheader"}>
-          <Text px={4}>{t("questionBank.fields.requirementBlocks")}</Text>
+          <Text px={4} borderRight={"1px solid"} borderColor={"border.light"}>
+            {t("questionBank.fields.requirementBlocks")}
+          </Text>
         </GridHeader>
         <GridHeader role={"columnheader"}>
-          <Text px={4}>{t("questionBank.fields.configurations")}</Text>
+          <Text px={4} borderRight={"1px solid"} borderColor={"border.light"}>
+            {t("questionBank.fields.configurations")}
+          </Text>
         </GridHeader>
         <GridHeader role={"columnheader"}>
           <Flex
