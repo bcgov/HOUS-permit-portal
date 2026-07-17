@@ -65,8 +65,18 @@ export const QuestionsTable = observer(function QuestionsTable({ ...containerPro
                     {question.description}
                   </Text>
                 </SearchGridItem>
-                <SearchGridItem maxW="180px" minW="120px">
-                  <HStack as={"ul"} wrap={"wrap"} spacing={1}>
+                <SearchGridItem maxW="180px" minW="120px" justifyContent="center">
+                  <HStack
+                    as={"ul"}
+                    wrap={"wrap"}
+                    spacing={1}
+                    m={0}
+                    p={0}
+                    listStyleType={"none"}
+                    justifyContent={"center"}
+                    alignItems={"center"}
+                    w={"full"}
+                  >
                     {question.associations.map((association) => (
                       <Tag key={association} as={"li"} bg={"greys.grey03"} color={"text.secondary"} fontSize={"xs"}>
                         {association}
