@@ -2,7 +2,14 @@ import { flow, Instance, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
-import { EEnergyStep, EStepCodeChecklistStage, EStepCodeType, EZeroCarbonStep } from "../types/enums"
+import {
+  EEnergyStep,
+  EStepCodeChecklistStage,
+  EStepCodeStageStatus,
+  EStepCodeType,
+  EZeroCarbonStep,
+} from "../types/enums"
+import { stageStatusFor } from "../utils/step-code-stage-status"
 import { Part3StepCodeChecklistModel } from "./part-3-step-code-checklist"
 import { StepCodeBaseFields } from "./step-code-base"
 
@@ -39,6 +46,12 @@ export const Part3StepCodeModel = types.snapshotProcessor(
       },
       get checklistForPdf() {
         return self.currentChecklist
+      },
+      stageStatus(stage: EStepCodeChecklistStage = self.currentStage) {
+        return stageStatusFor(stage, self.checklists, self.stageCompletions)
+      },
+      isStageComplete(stage: EStepCodeChecklistStage = self.currentStage) {
+        return self.stageStatus(stage) === EStepCodeStageStatus.complete
       },
       get isComplete() {
         return self.isStageComplete()

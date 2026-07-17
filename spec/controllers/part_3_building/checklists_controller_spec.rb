@@ -138,7 +138,10 @@ RSpec.describe Api::Part3Building::ChecklistsController, type: :controller do
         step_code.id,
         { "checklist_id" => checklist.id }
       )
-      expect(checklist.reload.complete?).to be(true)
+      expect(
+        checklist.reload.section_completion_status.dig("report", "complete")
+      ).to be(true)
+      expect(checklist).not_to be_complete
     end
 
     it "returns error for invalid input" do

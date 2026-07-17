@@ -56,7 +56,12 @@ export const Report = observer(function Report() {
           {t("stepCode.regenerateReport")}
         </Button>
       </Flex>
-      <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
+      <Part3FormFooter
+        handleSubmit={handleSubmit}
+        onSubmit={onSubmit}
+        isLoading={isSubmitting}
+        isDisabled={!checklist?.canMarkComplete}
+      />
     </Flex>
   )
 })

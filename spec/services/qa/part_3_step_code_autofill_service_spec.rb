@@ -61,7 +61,7 @@ RSpec.describe Qa::Part3StepCodeAutofillService do
       expect(step_code.jurisdiction).to eq(jurisdiction)
     end
 
-    it "marks all relevant sections complete except the final section" do
+    it "fills sections but leaves checklist draft for manual complete" do
       status = checklist.section_completion_status
 
       expect(status.dig("baseline_occupancies", "complete")).to be(true)
@@ -70,8 +70,8 @@ RSpec.describe Qa::Part3StepCodeAutofillService do
       expect(status.dig("step_code_summary", "complete")).to be(true)
       expect(status.dig("report", "complete")).to be(false)
       expect(status.dig("additional_fuel_types", "relevant")).to be(false)
-      expect(status.dig("additional_fuel_types", "complete")).to be(true)
-      expect(checklist.complete?).to be(false)
+      expect(checklist).not_to be_complete
+      expect(checklist.status).to eq("draft")
     end
 
     it "passes compliance checks" do
@@ -97,6 +97,32 @@ RSpec.describe Qa::Part3StepCodeAutofillService do
       expect(checklist.reload.step_code_occupancies.pluck(:key)).to eq(
         ["residential"]
       )
+    end
+  end
+
+  describe "#call with mid_construction stage" do
+    subject(:service) do
+      described_class.new(
+        step_code: step_code,
+        current_user: submitter,
+        stage: "mid_construction"
+      )
+    end
+
+    it "autofills the mid_construction checklist" do
+      service.call
+
+      checklist = step_code.reload.checklist_for(stage: "mid_construction")
+      expect(checklist).to be_present
+      expect(checklist).not_to be_complete
+      expect(checklist.status).to eq("draft")
+      expect(step_code.current_stage).to eq("mid_construction")
+      expect(
+        checklist.section_completion_status.dig("start", "complete")
+      ).to be(true)
+      expect(
+        checklist.section_completion_status.dig("report", "complete")
+      ).to be(false)
     end
   end
 

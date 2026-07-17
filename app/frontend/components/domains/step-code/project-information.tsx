@@ -25,12 +25,13 @@ import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useNavigate, useParams } from "react-router-dom"
 import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
-import { EStepCodeChecklistStage, EStepCodeChecklistStatus } from "../../../types/enums"
+import { EStepCodeChecklistStage, EStepCodeChecklistStatus, EStepCodeStageStatus } from "../../../types/enums"
 import { IOption } from "../../../types/types"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { DatePickerFormControl } from "../../shared/form/input-form-control"
 import { InfoTooltip } from "../../shared/info-tooltip"
 import { SitesSelect } from "../../shared/select/selectors/sites-select"
+import { StepCodeStageIcon } from "../permit-project/step-code-stage-indicators"
 import { SectionHeading } from "./part-3/form-section/shared/section-heading"
 
 type TStepCodeKind = "part3" | "part9"
@@ -66,13 +67,13 @@ function checklistHasProgress(checklist: {
 
 function checklistButtonLabel(
   checklist: {
-    isMarkedComplete?: boolean
     status?: EStepCodeChecklistStatus
     sectionCompletionStatus?: Record<string, { complete: boolean; relevant: boolean }>
-  } | null
+  } | null,
+  stageIsComplete = false
 ) {
   if (!checklist) return t("stepCode.projectInformation.create")
-  if (checklist.isMarkedComplete || checklist.status === EStepCodeChecklistStatus.complete) {
+  if (stageIsComplete || checklist.status === EStepCodeChecklistStatus.complete) {
     return t("stepCode.projectInformation.view")
   }
   if (checklistHasProgress(checklist)) return t("stepCode.projectInformation.continue")
@@ -340,6 +341,10 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
                   const checklist = currentStepCode?.checklists?.find(
                     (stepCodeChecklist) => stepCodeChecklist.stage === stage
                   )
+                  const stageStatus =
+                    currentStepCode?.stageStatus?.(stage) ??
+                    currentStepCode?.stageCompletions?.find((entry) => entry.stage === stage)?.status ??
+                    EStepCodeStageStatus.notStarted
 
                   return (
                     <Tr
@@ -356,6 +361,9 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
                         />
                       </Td>
                       <Td fontWeight={isSelected ? "bold" : "normal"}>{stageLabel(stage)}</Td>
+                      <Td width="1px" px={2}>
+                        <StepCodeStageIcon status={stageStatus} />
+                      </Td>
                       <Td pr={0} textAlign="right">
                         <Button
                           type="submit"
@@ -363,7 +371,7 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
                           isDisabled={!isSelected}
                           isLoading={isSelected && isSubmitting}
                         >
-                          {checklistButtonLabel(checklist)}
+                          {checklistButtonLabel(checklist, currentStepCode?.isStageComplete(stage))}
                         </Button>
                       </Td>
                     </Tr>

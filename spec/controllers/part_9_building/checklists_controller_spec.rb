@@ -165,6 +165,8 @@ RSpec.describe Api::Part9Building::ChecklistsController, type: :controller do
                 compliance_path: "step_code_ers",
                 status: "complete",
                 completed_by: "Advisor",
+                section_completion_status:
+                  Part9StepCode::Checklist.fully_complete_section_completion_status,
                 building_characteristics_summary_attributes: {
                   roof_ceilings_lines: [{ details: "Roof", rsi: 6.0 }],
                   doors_lines: [{ details: "Door", performance_value: 1.8 }]

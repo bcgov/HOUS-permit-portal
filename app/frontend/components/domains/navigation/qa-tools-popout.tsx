@@ -6,14 +6,14 @@ import { useTranslation } from "react-i18next"
 import { matchPath, useLocation, useNavigate } from "react-router-dom"
 import { IPart9StepCode } from "../../../models/part-9-step-code"
 import { useMst, useServerAPI } from "../../../setup/root"
-import { EFlashMessageStatus, EStepCodeType } from "../../../types/enums"
+import { EFlashMessageStatus, EStepCodeChecklistStage, EStepCodeType } from "../../../types/enums"
 import { IOption } from "../../../types/types"
 import { isUUID } from "../../../utils/utility-functions"
 import { navLinks as part3NavLinks } from "../step-code/part-3/sidebar/nav-sections"
 import { navLinks as part9NavLinks } from "../step-code/part-9/sidebar/nav-sections"
 
-const part3PenultimateSection = part3NavLinks.at(-2)?.location ?? "requirements-summary"
-const part9PenultimateSection = part9NavLinks.at(-2)?.location ?? "review"
+const part3ReportSection = part3NavLinks.at(-1)?.location ?? "report"
+const part9ReportSection = part9NavLinks.at(-1)?.location ?? "report"
 
 export const QaToolsPopout = observer(() => {
   const { t } = useTranslation()
@@ -81,6 +81,25 @@ export const QaToolsPopout = observer(() => {
       : undefined
   const part9StepCodeId = isUUID(part9StepCodeIdFromUrl) ? part9StepCodeIdFromUrl : part9StepCodeIdFromPermit
 
+  const stageFromUrl =
+    matchPath(
+      { path: "/permit-applications/:permitApplicationId/edit/part-3-step-code/stages/:stage/*" },
+      location.pathname
+    )?.params.stage ||
+    matchPath({ path: "/part-3-step-code/:stepCodeId/stages/:stage/*" }, location.pathname)?.params.stage ||
+    matchPath(
+      { path: "/permit-applications/:permitApplicationId/edit/part-9-step-code/stages/:stage/*" },
+      location.pathname
+    )?.params.stage ||
+    matchPath({ path: "/part-9-step-code/:stepCodeId/stages/:stage/*" }, location.pathname)?.params.stage
+
+  const activeStage =
+    (Object.values(EStepCodeChecklistStage).includes(stageFromUrl as EStepCodeChecklistStage)
+      ? (stageFromUrl as EStepCodeChecklistStage)
+      : undefined) ||
+    stepCodeStore.currentStepCode?.currentStage ||
+    EStepCodeChecklistStage.preConstruction
+
   const isProjectsPath = location.pathname === "/projects"
   const isEligible = Boolean(
     import.meta.env.VITE_QA_MODE === "true" && siteConfigurationStore.qaToolsEnabled && sessionStore.loggedIn
@@ -141,7 +160,9 @@ export const QaToolsPopout = observer(() => {
     if (!part3StepCodeId) return
 
     setIsAutofillingPart3(true)
-    const response = await api.autofillQaPart3StepCode(part3StepCodeId).finally(() => setIsAutofillingPart3(false))
+    const response = await api
+      .autofillQaPart3StepCode(part3StepCodeId, { stage: activeStage })
+      .finally(() => setIsAutofillingPart3(false))
 
     if (response.ok && response.data?.data) {
       const autofilledStepCode = response.data.data
@@ -150,8 +171,8 @@ export const QaToolsPopout = observer(() => {
       uiStore.flashMessage.show(EFlashMessageStatus.success, null, t("qaTools.autofillPart3Success"), 3000)
 
       const summaryPath = autofilledStepCode.permitApplicationId
-        ? `/permit-applications/${autofilledStepCode.permitApplicationId}/edit/part-3-step-code/${part3PenultimateSection}`
-        : `/part-3-step-code/${autofilledStepCode.id}/${part3PenultimateSection}`
+        ? `/permit-applications/${autofilledStepCode.permitApplicationId}/edit/part-3-step-code/stages/${activeStage}/${part3ReportSection}`
+        : `/part-3-step-code/${autofilledStepCode.id}/stages/${activeStage}/${part3ReportSection}`
       navigate(summaryPath)
     }
   }
@@ -160,7 +181,9 @@ export const QaToolsPopout = observer(() => {
     if (!part9StepCodeId) return
 
     setIsAutofillingPart9(true)
-    const response = await api.autofillQaPart9StepCode(part9StepCodeId).finally(() => setIsAutofillingPart9(false))
+    const response = await api
+      .autofillQaPart9StepCode(part9StepCodeId, { stage: activeStage })
+      .finally(() => setIsAutofillingPart9(false))
 
     if (response.ok && response.data?.data) {
       const autofilledStepCode = response.data.data
@@ -176,8 +199,8 @@ export const QaToolsPopout = observer(() => {
       uiStore.flashMessage.show(EFlashMessageStatus.success, null, t("qaTools.autofillPart9Success"), 3000)
 
       const reportPath = autofilledStepCode.permitApplicationId
-        ? `/permit-applications/${autofilledStepCode.permitApplicationId}/edit/part-9-step-code/${part9PenultimateSection}`
-        : `/part-9-step-code/${autofilledStepCode.id}/${part9PenultimateSection}`
+        ? `/permit-applications/${autofilledStepCode.permitApplicationId}/edit/part-9-step-code/stages/${activeStage}/${part9ReportSection}`
+        : `/part-9-step-code/${autofilledStepCode.id}/stages/${activeStage}/${part9ReportSection}`
       navigate(reportPath)
     }
   }

@@ -46,13 +46,14 @@ class Api::QaToolsController < Api::ApplicationController
 
     Qa::Part3StepCodeAutofillService.new(
       step_code: @step_code,
-      current_user: current_user
+      current_user: current_user,
+      stage: params[:stage]
     ).call
 
     render_success @step_code,
                    "qa_tools.autofill_part_3_step_code_success",
                    { blueprint: Part3StepCodeBlueprint }
-  rescue ActiveRecord::RecordInvalid => e
+  rescue ActiveRecord::RecordInvalid, ArgumentError => e
     render_error(
       "qa_tools.autofill_part_3_step_code_error",
       {
@@ -70,13 +71,14 @@ class Api::QaToolsController < Api::ApplicationController
 
     Qa::Part9StepCodeAutofillService.new(
       step_code: @step_code,
-      current_user: current_user
+      current_user: current_user,
+      stage: params[:stage]
     ).call
 
     render_success @step_code,
                    "qa_tools.autofill_part_9_step_code_success",
                    { blueprint: Part9StepCodeBlueprint }
-  rescue ActiveRecord::RecordInvalid => e
+  rescue ActiveRecord::RecordInvalid, ArgumentError => e
     render_error(
       "qa_tools.autofill_part_9_step_code_error",
       {
