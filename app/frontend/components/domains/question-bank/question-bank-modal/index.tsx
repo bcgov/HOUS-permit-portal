@@ -1,4 +1,6 @@
 import {
+  Alert,
+  AlertIcon,
   Button,
   ButtonProps,
   HStack,
@@ -6,6 +8,7 @@ import {
   ModalCloseButton,
   ModalHeader,
   Text,
+  VStack,
   useDisclosure,
 } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
@@ -14,9 +17,11 @@ import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { v4 as uuidv4 } from "uuid"
 import { useAutoComplianceModuleConfigurations } from "../../../../hooks/resources/use-auto-compliance-module-configurations"
+import { IRequirementQuestion } from "../../../../models/requirement-question"
 import { useMst } from "../../../../setup/root"
 import { IRequirementAttributes, IRequirementQuestionParams } from "../../../../types/api-request"
 import { EFlashMessageStatus } from "../../../../types/enums"
+import { ConfirmationModal } from "../../../shared/confirmation-modal"
 import { FormModal } from "../../../shared/form-modal"
 import { FieldSetup } from "./field-setup"
 import { FormSetup } from "./form-setup"
@@ -31,23 +36,50 @@ export interface IRequirementQuestionForm {
 }
 
 export const QuestionBankModal = observer(function QuestionBankModal({
+  requirementQuestion,
   triggerButtonProps,
 }: {
+  requirementQuestion?: IRequirementQuestion
   triggerButtonProps?: Partial<ButtonProps>
 }) {
   const { requirementQuestionStore, uiStore } = useMst()
   const { t } = useTranslation()
   const { createRequirementQuestion } = requirementQuestionStore
   const { isOpen, onOpen, onClose } = useDisclosure()
+  const isEditing = !!requirementQuestion
+  const isLinked = (requirementQuestion?.requirementBlocks?.length ?? 0) > 0
 
   // Warm the auto-compliance config cache for the Options → Automated compliance modal.
   useAutoComplianceModuleConfigurations()
 
-  const getDefaultValues = (): IRequirementQuestionForm => ({
-    id: crypto.randomUUID?.() ?? uuidv4(),
-    associationList: [],
-    requirementsAttributes: [],
-  })
+  const getDefaultValues = (): IRequirementQuestionForm => {
+    if (requirementQuestion) {
+      return {
+        id: requirementQuestion.id,
+        name: requirementQuestion.name ?? undefined,
+        description: requirementQuestion.description ?? undefined,
+        associationList: [...requirementQuestion.associations],
+        requirementsAttributes: [
+          {
+            id: requirementQuestion.id,
+            label: requirementQuestion.label,
+            inputType: requirementQuestion.inputType,
+            hint: requirementQuestion.hint ?? undefined,
+            instructions: requirementQuestion.instructions ?? undefined,
+            inputOptions: requirementQuestion.inputOptions ?? {},
+            requirementCode: requirementQuestion.requirementCode,
+            required: true,
+          },
+        ],
+      }
+    }
+
+    return {
+      id: crypto.randomUUID?.() ?? uuidv4(),
+      associationList: [],
+      requirementsAttributes: [],
+    }
+  }
 
   const formProps = useForm<IRequirementQuestionForm>({
     defaultValues: getDefaultValues(),
@@ -67,7 +99,7 @@ export const QuestionBankModal = observer(function QuestionBankModal({
     const field = data.requirementsAttributes[0]
     if (!data.name?.trim() || !field?.label?.trim() || !field?.inputType) {
       uiStore.flashMessage.show(EFlashMessageStatus.error, null, t("questionBank.modals.create.incomplete"))
-      return
+      return false
     }
 
     const params: IRequirementQuestionParams = {
@@ -82,16 +114,30 @@ export const QuestionBankModal = observer(function QuestionBankModal({
       inputOptions: field.inputOptions,
     }
 
-    const isSuccess = await createRequirementQuestion(params)
+    const isSuccess = requirementQuestion
+      ? await requirementQuestion.update(params)
+      : await createRequirementQuestion(params)
+
     if (isSuccess) {
       onClose()
     }
+    return isSuccess
+  }
+
+  const handleSaveClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    handleSubmit(onSubmit)()
   }
 
   return (
     <>
-      <Button variant={"primary"} onClick={handleOpen} {...triggerButtonProps}>
-        {t("questionBank.modals.create.triggerButton")}
+      <Button
+        variant={isEditing ? "link" : "primary"}
+        textDecoration={isEditing ? "underline" : undefined}
+        onClick={handleOpen}
+        {...triggerButtonProps}
+      >
+        {isEditing ? t("ui.edit") : t("questionBank.modals.create.triggerButton")}
       </Button>
 
       {isOpen && (
@@ -108,29 +154,59 @@ export const QuestionBankModal = observer(function QuestionBankModal({
               <ModalCloseButton fontSize={"11px"} />
               <ModalHeader display={"flex"} justifyContent={"space-between"} pt={4} px={"2.75rem"} pb={0}>
                 <Text as={"h2"} fontSize={"2xl"}>
-                  {t("questionBank.modals.create.title")}
+                  {t(`questionBank.modals.${isEditing ? "edit" : "create"}.title`)}
                 </Text>
                 <HStack>
-                  <Button
-                    variant={"primary"}
-                    isLoading={isSubmitting}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleSubmit(onSubmit)()
-                    }}
-                  >
-                    {t("ui.onlySave")}
-                  </Button>
+                  {isLinked ? (
+                    <ConfirmationModal
+                      title={t("questionBank.modals.propagationConfirm.title")}
+                      body={t("questionBank.modals.propagationConfirm.body")}
+                      onConfirm={async (closeConfirm) => {
+                        await handleSubmit(onSubmit)()
+                        closeConfirm()
+                      }}
+                      renderTriggerButton={(props) => (
+                        <Button variant={"primary"} isLoading={isSubmitting} {...props}>
+                          {t("ui.onlySave")}
+                        </Button>
+                      )}
+                      renderConfirmationButton={(props) => (
+                        <Button variant={"primary"} isLoading={isSubmitting} {...props}>
+                          {t("ui.onlySave")}
+                        </Button>
+                      )}
+                      modalProps={{ size: "md" }}
+                    />
+                  ) : (
+                    <Button variant={"primary"} isLoading={isSubmitting} onClick={handleSaveClick}>
+                      {t("ui.onlySave")}
+                    </Button>
+                  )}
                   <Button variant={"secondary"} onClick={closeFormModal} isDisabled={isSubmitting}>
                     {t("ui.cancel")}
                   </Button>
                 </HStack>
               </ModalHeader>
               <ModalBody px={"2.75rem"}>
-                <HStack spacing={9} w={"full"} h={"full"} alignItems={"flex-start"}>
-                  <FormSetup />
-                  <FieldSetup />
-                </HStack>
+                <VStack spacing={6} w={"full"} alignItems={"flex-start"}>
+                  {isLinked && (
+                    <Alert
+                      status="warning"
+                      borderRadius="lg"
+                      borderWidth={1}
+                      borderColor="semantic.warning"
+                      bg="semantic.warningLight"
+                      color="text.primary"
+                    >
+                      <AlertIcon />
+                      <Text>{t("questionBank.modals.propagationWarning")}</Text>
+                    </Alert>
+                  )}
+                  <HStack spacing={9} w={"full"} h={"full"} alignItems={"flex-start"}>
+                    <FormSetup />
+                    <FieldSetup requirementBlocks={requirementQuestion?.requirementBlocks} />
+                  </HStack>
+                </VStack>
               </ModalBody>
             </>
           )}

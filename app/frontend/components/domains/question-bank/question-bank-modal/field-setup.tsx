@@ -1,12 +1,14 @@
-import { Box, Flex, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Flex, SimpleGrid, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { useFieldArray, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { useMst } from "../../../../setup/root"
 import { IRequirementAttributes } from "../../../../types/api-request"
 import { ENumberUnit, ERequirementType } from "../../../../types/enums"
 import { isMultiOptionRequirement } from "../../../../utils/utility-functions"
 import { FieldsSetupDrawer } from "../../requirements-library/fields-setup-drawer"
+import { RequirementsBlockModal } from "../../requirements-library/requirements-block-modal"
 import { RequirementFieldRow } from "../../requirements-library/requirements-block-modal/requirement-field-row"
 import { IRequirementQuestionForm } from "./index"
 
@@ -16,8 +18,13 @@ const MULTI_FIELD_TYPES = [
   ERequirementType.architecturalDrawing,
 ]
 
-export const FieldSetup = observer(function FieldSetup() {
+export const FieldSetup = observer(function FieldSetup({
+  requirementBlocks,
+}: {
+  requirementBlocks?: Array<{ id: string; name: string }>
+}) {
   const { t } = useTranslation()
+  const { requirementBlockStore } = useMst()
   const { control, watch } = useFormContext<IRequirementQuestionForm>()
   const { fields, append, remove } = useFieldArray({
     control,
@@ -25,8 +32,11 @@ export const FieldSetup = observer(function FieldSetup() {
   })
 
   const [requirementIdToEdit, setRequirementIdToEdit] = useState<string | undefined>()
+  const [blockViewer, setBlockViewer] = useState<{ id: string; key: number } | null>(null)
   const watchedRequirements = watch("requirementsAttributes")
   const hasFields = fields.length > 0
+  const linkedBlocks = requirementBlocks ?? []
+  const viewingBlock = blockViewer ? requirementBlockStore.getRequirementBlockById(blockViewer.id) : undefined
 
   const toggleRequirementToEdit = (requirementId: string) => {
     setRequirementIdToEdit((pastRequirementId) => (pastRequirementId === requirementId ? undefined : requirementId))
@@ -67,6 +77,13 @@ export const FieldSetup = observer(function FieldSetup() {
     setRequirementIdToEdit(undefined)
   }
 
+  const openRequirementBlock = async (blockId: string) => {
+    const block = await requirementBlockStore.fetchRequirementBlock(blockId)
+    if (block) {
+      setBlockViewer({ id: blockId, key: Date.now() })
+    }
+  }
+
   return (
     <Flex as={"section"} flexDir={"column"} flex={1} h={"full"} alignItems={"flex-start"} minW={0}>
       <Text color={"text.primary"} fontSize={"sm"}>
@@ -104,15 +121,44 @@ export const FieldSetup = observer(function FieldSetup() {
       </Box>
 
       <Box mt={10} w={"full"} bg={"greys.grey04"} borderRadius={"md"} px={6} py={4}>
-        <VStack alignItems={"flex-start"} spacing={1}>
+        <VStack alignItems={"flex-start"} spacing={2} w={"full"}>
           <Text fontWeight={700} fontSize={"sm"}>
             {t("questionBank.fields.requirementBlocks")}
           </Text>
-          <Text fontSize={"xs"} color={"text.secondary"}>
-            {t("questionBank.modals.notConnectedYet")}
-          </Text>
+          {linkedBlocks.length === 0 ? (
+            <Text fontSize={"xs"} color={"text.secondary"}>
+              {t("questionBank.modals.notConnectedYet")}
+            </Text>
+          ) : (
+            <SimpleGrid columns={{ base: 1, md: 3, lg: 5 }} spacing={2} w={"full"}>
+              {linkedBlocks.map((block) => (
+                <Button
+                  key={block.id}
+                  variant={"link"}
+                  onClick={() => openRequirementBlock(block.id)}
+                  whiteSpace={"normal"}
+                  textAlign={"left"}
+                  height={"auto"}
+                  fontWeight={"normal"}
+                  justifyContent={"flex-start"}
+                >
+                  {block.name}
+                </Button>
+              ))}
+            </SimpleGrid>
+          )}
         </VStack>
       </Box>
+
+      {blockViewer && viewingBlock && (
+        <RequirementsBlockModal
+          key={blockViewer.key}
+          requirementBlock={viewingBlock}
+          isEditable={false}
+          autoOpen
+          triggerButtonProps={{ display: "none" }}
+        />
+      )}
     </Flex>
   )
 })

@@ -1,4 +1,4 @@
-import { Box, Button, Flex, HStack, ListItem, StackProps, Tag, Text, UnorderedList, VStack } from "@chakra-ui/react"
+import { Box, Flex, HStack, ListItem, StackProps, Tag, Text, UnorderedList, VStack } from "@chakra-ui/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
@@ -15,6 +15,7 @@ import { SearchGridItem } from "../../shared/grid/search-grid-item"
 import { HasAutomatedComplianceTag } from "../../shared/has-automated-compliance-tag"
 import { HasDataValidationTag } from "../../shared/has-data-validation-tag"
 import { GridHeaders } from "./grid-header"
+import { QuestionBankModal } from "./question-bank-modal"
 
 const ROW_CLASS_NAME = "question-bank-grid-row"
 
@@ -121,9 +122,10 @@ export const QuestionsTable = observer(function QuestionsTable({ ...containerPro
                   {format(question.updatedAt, datefnsTableDateFormat)}
                 </SearchGridItem>
                 <SearchGridItem justifyContent={"center"} minW="85px" flexShrink={0}>
-                  <Button variant={"link"} size={"sm"} isDisabled>
-                    {t("ui.edit")}
-                  </Button>
+                  <QuestionBankModal
+                    requirementQuestion={question}
+                    triggerButtonProps={{ variant: "link", size: "sm" }}
+                  />
                 </SearchGridItem>
               </Box>
             )
