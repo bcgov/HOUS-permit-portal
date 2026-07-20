@@ -1548,7 +1548,7 @@ Thank you,
               "Some permit types may require a project meeting before you can submit an application.",
             empty: "There are no meeting requests for this project yet.",
             columns: {
-              submitted_at: "Meeting time",
+              confirmed_date: "Meeting time",
               project_description: "Questions or additional details",
               status: "Status",
               notes: "Notes",

@@ -30,11 +30,11 @@ export const ProjectMeetingStoreModel = types
   .views(() => ({
     getProjectMeetingSortColumnHeader(field: EProjectMeetingSortFields) {
       const map = {
-        [EProjectMeetingSortFields.submittedAt]: t("permitProject.meetings.columns.submitted_at"),
+        [EProjectMeetingSortFields.submittedAt]: t("submissionInbox.meetingColumns.submitted_at"),
         [EProjectMeetingSortFields.projectNumber]: t("submissionInbox.meetingColumns.project_number"),
         [EProjectMeetingSortFields.projectAddress]: t("submissionInbox.meetingColumns.project_address"),
         [EProjectMeetingSortFields.contactName]: t("submissionInbox.meetingColumns.contact_name"),
-        [EProjectMeetingSortFields.confirmedDate]: t("submissionInbox.meetingColumns.confirmed_date"),
+        [EProjectMeetingSortFields.confirmedDate]: t("permitProject.meetings.columns.confirmed_date"),
         [EProjectMeetingSortFields.projectDescription]: t("permitProject.meetings.columns.project_description"),
         [EProjectMeetingSortFields.status]: t("permitProject.meetings.columns.status"),
       }

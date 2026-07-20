@@ -61,7 +61,7 @@ export const ProjectMeetingModel = types
       return self.meetingRequestDocuments.filter((document) => !document._destroy)
     },
     get hasScheduledDetails() {
-      return !!self.scheduledAt || !!self.confirmedDate || !!self.meetingUrl
+      return !!self.confirmedDate
     },
     get canSchedule() {
       return (
@@ -89,7 +89,7 @@ export const ProjectMeetingModel = types
     get shouldShowScheduledBanner() {
       if (self.status === EProjectMeetingStatus.withdrawn) return false
       if ([EProjectMeetingStatus.scheduled, EProjectMeetingStatus.completed].includes(self.status)) return true
-      return !!self.scheduledAt || !!self.confirmedDate || !!self.meetingUrl
+      return !!self.confirmedDate
     },
     get authorizationRequired() {
       return (
