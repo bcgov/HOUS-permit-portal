@@ -2217,6 +2217,7 @@ Thank you,
             configureFields: "Configure the form field below that submitters will see:",
             noFormFieldsAdded: "No form fields have been added yet, start by clicking the Add button.",
             notConnectedYet: "This question isn't connected to any requirement blocks yet.",
+            archived: "Archived",
             propagationWarning:
               "Any changes made here will be reflected in all requirement block templates that use this question.",
             propagationConfirm: {
@@ -2230,6 +2231,11 @@ Thank you,
             },
             edit: {
               title: "Edit Question",
+              options: "Options",
+              archiveConfirmationModal: {
+                title: "Confirm you want to archive this question.",
+                body: "Archiving hides this question from the Question Bank catalogue and from new requirement blocks. Existing requirement blocks and permits that already use it will keep working.",
+              },
             },
           },
         },

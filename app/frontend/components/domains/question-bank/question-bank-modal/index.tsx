@@ -7,10 +7,12 @@ import {
   ModalBody,
   ModalCloseButton,
   ModalHeader,
+  Tag,
   Text,
   VStack,
   useDisclosure,
 } from "@chakra-ui/react"
+import { Archive } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useForm } from "react-hook-form"
@@ -152,6 +154,27 @@ export const QuestionBankModal = observer(function QuestionBankModal({
           {({ onClose: closeFormModal }) => (
             <>
               <ModalCloseButton fontSize={"11px"} />
+              {requirementQuestion?.isDiscarded && (
+                <Tag
+                  borderRadius="sm"
+                  border="1px solid"
+                  borderColor={"semantic.error"}
+                  backgroundColor={"semantic.errorLight"}
+                  w={"fit-content"}
+                  py={1}
+                  px={2}
+                  color={"semantic.error"}
+                  ml={"2.75rem"}
+                  mb={2}
+                >
+                  <HStack>
+                    <Archive />
+                    <Text textTransform={"capitalize"} fontSize={"sm"}>
+                      {t("questionBank.modals.archived")}
+                    </Text>
+                  </HStack>
+                </Tag>
+              )}
               <ModalHeader display={"flex"} justifyContent={"space-between"} pt={4} px={"2.75rem"} pb={0}>
                 <Text as={"h2"} fontSize={"2xl"}>
                   {t(`questionBank.modals.${isEditing ? "edit" : "create"}.title`)}
@@ -203,7 +226,7 @@ export const QuestionBankModal = observer(function QuestionBankModal({
                     </Alert>
                   )}
                   <HStack spacing={9} w={"full"} h={"full"} alignItems={"flex-start"}>
-                    <FormSetup />
+                    <FormSetup requirementQuestion={requirementQuestion} />
                     <FieldSetup requirementBlocks={requirementQuestion?.requirementBlocks} />
                   </HStack>
                 </VStack>
