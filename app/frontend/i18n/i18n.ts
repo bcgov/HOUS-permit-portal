@@ -2216,10 +2216,19 @@ Thank you,
             configureFields: "Configure the form field below that submitters will see:",
             noFormFieldsAdded: "No form fields have been added yet, start by clicking the Add button.",
             notConnectedYet: "This question isn't connected to any requirement blocks yet.",
+            propagationWarning:
+              "Any changes made here will be reflected in all requirement block templates that use this question.",
+            propagationConfirm: {
+              title: "Are you sure?",
+              body: "This question is connected to one or more requirement blocks. Saved changes cannot be undone and will automatically apply everywhere this question is used.",
+            },
             create: {
               triggerButton: "Create new question",
               title: "New Question",
               incomplete: "Please add an internal name and a field with a label before saving.",
+            },
+            edit: {
+              title: "Edit Question",
             },
           },
         },
