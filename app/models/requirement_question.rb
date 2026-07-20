@@ -240,6 +240,7 @@ class RequirementQuestion < ApplicationRecord
 
   def refresh_search_index
     reindex(mode: :inline)
+    RequirementQuestion.search_index.refresh
   end
 
   def shared_questions_cannot_have_conditional
