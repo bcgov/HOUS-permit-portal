@@ -169,6 +169,8 @@ function StandardRequestContent({ isSubmitting, onContinue }: IStandardRequestCo
             display="inline"
             fontSize="sm"
             textDecoration="underline"
+            target="_blank"
+            rel="noopener noreferrer"
           >
             {t("projectMeeting.request.checkProjectInformation.link")}
           </Text>

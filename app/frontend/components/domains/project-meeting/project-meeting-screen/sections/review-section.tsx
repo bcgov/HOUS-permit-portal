@@ -83,10 +83,14 @@ export const ReviewSection = observer(({ meeting }: ReviewSectionProps) => {
         sectionKey="discussion"
         onNavigateToSection={navigateToSection}
       >
-        <ProjectInfoRow label={t("projectMeeting.projectDescription")} value={meeting.projectDescription} stacked />
+        <ProjectInfoRow
+          label={t("projectMeeting.projectDescription")}
+          value={<Text whiteSpace="pre-wrap">{meeting.projectDescription}</Text>}
+          stacked
+        />
         <ProjectInfoRow
           label={t("projectMeeting.meetingNotes")}
-          value={meeting.meetingNotes || t("ui.notProvided")}
+          value={<Text whiteSpace="pre-wrap">{meeting.meetingNotes || t("ui.notProvided")}</Text>}
           stacked
         />
       </ReviewSummarySection>
