@@ -16,6 +16,7 @@ import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { useSearchParams } from "react-router-dom"
 import { IPermitProject } from "../../../models/permit-project"
 import { useMst } from "../../../setup/root"
 import { EPermitProjectRollupStatus, EProjectPermitApplicationSortFields } from "../../../types/enums"
@@ -46,7 +47,8 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
   const { fullAddress, pid, jurisdiction, number } = permitProject
   const { t } = useTranslation()
   const { permitProjectStore, siteConfigurationStore } = useMst()
-  const [isEditing, setIsEditing] = useState(false)
+  const [searchParams] = useSearchParams()
+  const [isEditing, setIsEditing] = useState(() => searchParams.get("editProjectInfo") === "true")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { isOpen: isMapFullscreen, onOpen: onOpenMapFullscreen, onClose: onCloseMapFullscreen } = useDisclosure()
   const hasActiveProjectMeeting = !!permitProject.activeProjectMeeting

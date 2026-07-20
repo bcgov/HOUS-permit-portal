@@ -165,7 +165,7 @@ function StandardRequestContent({ isSubmitting, onContinue }: IStandardRequestCo
           {t("projectMeeting.request.checkProjectInformation.description")}{" "}
           <Text
             as={RouterLink}
-            to={`/projects/${currentPermitProject?.id}/overview`}
+            to={`/projects/${currentPermitProject?.id}/overview?editProjectInfo=true`}
             display="inline"
             fontSize="sm"
             textDecoration="underline"
