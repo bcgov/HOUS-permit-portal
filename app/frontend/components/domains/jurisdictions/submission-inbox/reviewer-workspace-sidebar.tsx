@@ -1,5 +1,6 @@
 import { Box, BoxProps, Flex, Icon, Tab, TabList, Text, VStack } from "@chakra-ui/react"
 import React from "react"
+import { Link as RouterLink } from "react-router-dom"
 import { UnreadBadge } from "../../../shared/base/unread-badge"
 
 export interface IReviewerWorkspaceTabItem {
@@ -13,6 +14,12 @@ export interface IReviewerWorkspaceTabItem {
 interface IReviewerWorkspaceSidebarProps extends BoxProps {
   tabsData: IReviewerWorkspaceTabItem[]
   title: string
+}
+
+// Left-click still uses Tabs onChange; href enables Copy Link / Open in New Tab.
+const handleTabLinkClick = (e: React.MouseEvent) => {
+  if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
+  e.preventDefault()
 }
 
 // This component must be rendered inside a Chakra Tabs component.
@@ -38,6 +45,9 @@ export const ReviewerWorkspaceSidebar = ({ tabsData, title, ...rest }: IReviewer
         {tabsData.map((tabData) => (
           <Tab
             key={tabData.to}
+            as={RouterLink}
+            to={tabData.to}
+            onClick={handleTabLinkClick}
             w="full"
             h={9}
             borderRadius={0}
