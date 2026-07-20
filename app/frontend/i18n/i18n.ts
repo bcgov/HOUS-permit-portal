@@ -2200,6 +2200,7 @@ Thank you,
             questionUuid: "Question UUID:",
             notConnected: "Not connected",
             seeMore: "see more",
+            seeLess: "see less",
           },
           fieldDescriptions: {
             description: "Provide some context for admins and managers for this question.",
