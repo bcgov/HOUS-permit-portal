@@ -39,7 +39,6 @@ class Api::RequirementQuestionsController < Api::ApplicationController
     authorize @requirement_question
 
     if @requirement_question.save
-      RequirementQuestion.search_index.refresh
       render_success @requirement_question,
                      "requirement_question.create_success",
                      {
