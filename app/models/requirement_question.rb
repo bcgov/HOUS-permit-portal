@@ -64,7 +64,10 @@ class RequirementQuestion < ApplicationRecord
                         )
                       }
 
-  after_commit :refresh_search_index, if: :saved_change_to_discarded_at?
+  after_commit :refresh_search_index,
+               if: -> do
+                 previously_new_record? || saved_change_to_discarded_at?
+               end
 
   validates :label, presence: true
   validates :input_type, presence: true
@@ -239,7 +242,6 @@ class RequirementQuestion < ApplicationRecord
   end
 
   def refresh_search_index
-    reindex(mode: :inline)
     RequirementQuestion.search_index.refresh
   end
 
