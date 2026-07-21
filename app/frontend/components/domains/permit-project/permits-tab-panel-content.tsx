@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next"
 import { useSearch } from "../../../hooks/use-search"
 import { IPermitProject } from "../../../models/permit-project"
 import { useMst } from "../../../setup/root"
-import { EPermitProjectRollupStatus, EProjectPermitApplicationSortFields } from "../../../types/enums"
+import { EProjectPermitApplicationSortFields } from "../../../types/enums"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
 import { ToggleArchivedButton } from "../../shared/buttons/toggle-archived-button"
@@ -44,7 +44,7 @@ export const PermitsTabPanelContent = observer(({ permitProject }: IProps) => {
           </HStack>
           <AddPermitsButton permitProject={permitProject} />
         </Flex>
-        {permitProject.rollupStatus === EPermitProjectRollupStatus.empty ? (
+        {permitProject.totalPermitsCount === 0 ? (
           <EmptyResultsBox description={t("permitProject.index.empty")} icon={<ClipboardText size={18} />} mt={2} />
         ) : (
           <>

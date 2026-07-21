@@ -10,7 +10,7 @@ import { useMst } from "../../../setup/root"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EditableInputWithControls } from "../../shared/editable-input-with-controls"
-import { RollupStatusBox } from "../../shared/permit-projects/rollup-status-box"
+import { ProjectStateBox } from "../../shared/permit-projects/project-state-box"
 import { ActivityTabPanelContent } from "./activity-tab-panel-content"
 import { LocalResourcesTabPanelContent } from "./local-resources-tab-panel-content"
 import { MeetingsTabPanelContent } from "./meetings-tab-panel-content"
@@ -133,7 +133,7 @@ export const PermitProjectScreen = observer(() => {
               aria-label={t("permitProject.details.editPermitProjectTitle")}
               onChange={(val) => setValue("title", val)}
             />
-            <RollupStatusBox project={currentPermitProject} w="240px" />
+            <ProjectStateBox project={currentPermitProject} w="240px" />
           </Flex>
         </Container>
       </Flex>

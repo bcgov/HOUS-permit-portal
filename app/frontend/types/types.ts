@@ -26,8 +26,8 @@ import {
   ENumberUnit,
   EPermitApplicationSocketEventTypes,
   EPermitApplicationStatus,
-  EPermitProjectRollupStatus,
   EProjectMeetingStatus,
+  EProjectState,
   ERequirementType,
   ESocketDomainTypes,
   ESocketEventTypes,
@@ -628,7 +628,7 @@ export interface IPermitApplicationSearchFilters {
 export interface IPermitProjectSearchFilters {
   query?: string
   showArchived?: boolean
-  rollupStatus?: EPermitProjectRollupStatus[]
+  state?: EProjectState[]
   activeMeeting?: string
   requirementTemplateIds?: string[]
   jurisdictionId?: string[]

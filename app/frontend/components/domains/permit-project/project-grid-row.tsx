@@ -11,7 +11,7 @@ import { useMst } from "../../../setup/root"
 import { SearchGridItem } from "../../shared/grid/search-grid-item"
 import { SearchGridRow } from "../../shared/grid/search-grid-row"
 import { OutdatedFormWarning } from "../../shared/outdated-form-warning"
-import { RollupStatusBox } from "../../shared/permit-projects/rollup-status-box"
+import { ProjectStateBox } from "../../shared/permit-projects/project-state-box"
 import { ActiveProjectMeetingIndicator } from "../../shared/project-meetings/active-project-meeting-indicator"
 
 interface IProjectGridRowProps {
@@ -43,7 +43,7 @@ export const ProjectGridRow = observer(({ project }: IProjectGridRowProps) => {
       </SearchGridItem>
       <SearchGridItem>{project.updatedAt && format(project.updatedAt, datefnsTableDateTimeFormat)}</SearchGridItem>
       <SearchGridItem>
-        <RollupStatusBox project={project} />
+        <ProjectStateBox project={project} />
       </SearchGridItem>
       <SearchGridItem justifyContent="flex-end">
         <Menu>

@@ -78,10 +78,6 @@ export const PermitProjectModel = types
   .extend(withEnvironment())
   .extend(withRootStore())
   .views((self) => ({
-    get rollupStatus(): EPermitProjectRollupStatus {
-      const first = self.sortedApplicationStatuses[0]
-      return (first?.status as EPermitProjectRollupStatus) ?? EPermitProjectRollupStatus.empty
-    },
     get inboxRollupStatus(): EPermitProjectRollupStatus {
       const first = self.inboxSortedApplicationStatuses[0]
       return (first?.status as EPermitProjectRollupStatus) ?? EPermitProjectRollupStatus.empty
@@ -108,28 +104,15 @@ export const PermitProjectModel = types
       if (!self.firstApplicationReceivedAt) return t("permitProject.overview.notAvailable")
       return format(self.firstApplicationReceivedAt, datefnsTableDateFormat)
     },
-    get rollupStatusDescription() {
+    get applicationsSummary() {
       const total = self.totalPermitsCount
-
-      const remainingCount = self.newDraftCount + self.revisionsRequestedCount
-      const submittedCount = self.newlySubmittedCount + self.resubmittedCount
-
-      if (self.rollupStatus === EPermitProjectRollupStatus.empty) {
-        return t("permitProject.rollupStatusDescription.empty")
-      } else if (self.rollupStatus === EPermitProjectRollupStatus.newDraft) {
-        return t("permitProject.rollupStatusDescription.inProgress", { remaining: remainingCount, total })
-      } else if (
-        self.rollupStatus === EPermitProjectRollupStatus.newlySubmitted ||
-        self.rollupStatus === EPermitProjectRollupStatus.resubmitted
-      ) {
-        return t("permitProject.rollupStatusDescription.submitted", { count: submittedCount })
-      } else if (self.rollupStatus === EPermitProjectRollupStatus.revisionsRequested) {
-        return t("permitProject.rollupStatusDescription.waitingOnYou", { count: self.revisionsRequestedCount })
-      } else if (self.rollupStatus === EPermitProjectRollupStatus.approved) {
-        return t("permitProject.rollupStatusDescription.approved", { count: total })
-      } else {
-        return ""
+      if (total === 0) {
+        return t("permitProject.applicationsSummary.empty")
       }
+      return t("permitProject.applicationsSummary.readyToWork", {
+        ready: self.inDraftCount,
+        total,
+      })
     },
     get isOwner() {
       return self.ownerId === self.rootStore.userStore.currentUser?.id
