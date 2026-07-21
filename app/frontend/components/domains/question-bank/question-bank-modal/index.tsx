@@ -77,7 +77,7 @@ export const QuestionBankModal = observer(function QuestionBankModal({
     }
 
     return {
-      id: crypto.randomUUID?.() ?? uuidv4(),
+      id: uuidv4(),
       associationList: [],
       requirementsAttributes: [],
     }

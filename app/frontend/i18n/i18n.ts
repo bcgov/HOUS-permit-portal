@@ -2219,10 +2219,10 @@ Thank you,
             notConnectedYet: "This question isn't connected to any requirement blocks yet.",
             archived: "Archived",
             propagationWarning:
-              "Any changes made here will be reflected in all requirement block templates that use this question.",
+              "Any changes made here will be reflected in all unpublished requirement block templates that use this question.",
             propagationConfirm: {
               title: "Are you sure?",
-              body: "This question is connected to one or more requirement blocks. Saved changes cannot be undone and will automatically apply everywhere this question is used.",
+              body: "This question is connected to one or more requirement blocks. Saved changes cannot be undone and will automatically apply to unpublished templates that use this question.",
             },
             create: {
               triggerButton: "Create new question",

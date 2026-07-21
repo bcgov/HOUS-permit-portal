@@ -4,7 +4,7 @@ import React from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { IFormConditional, IRequirementAttributes } from "../../../../types/api-request"
-import { EEnergyStepCodeDependencyRequirementCode, ENumberUnit, ERequirementType } from "../../../../types/enums"
+import { EEnergyStepCodeDependencyRequirementCode, ERequirementType } from "../../../../types/enums"
 import {
   isArchitecturalDrawingRequirement,
   isContactRequirement,
@@ -176,8 +176,7 @@ export const RequirementFieldRow = ({
                     control: control,
 
                     name: `requirementsAttributes.${index}.inputOptions.numberUnit`,
-                    // @ts-ignore
-                    defaultValue: ENumberUnit.noUnit,
+                    defaultValue: undefined,
                   },
                 }
               : undefined
