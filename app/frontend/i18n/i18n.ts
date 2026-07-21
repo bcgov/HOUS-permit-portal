@@ -2358,10 +2358,16 @@ Thank you,
               dateErrorMessagePlaceholder: "Value must be on or after ...",
               selectionErrorMessagePlaceholder: "Must select at least ...",
               fileTypeErrorMessagePlaceholder: "File type must be ...",
+              unsupportedMessage:
+                "This validation is not supported by the field's current type. Remove it before publishing.",
+              remove: "Remove validation",
             },
             computedComplianceSetup: {
               module: "Module",
               valueExtractionField: "Value extraction field",
+              unsupportedMessage:
+                "This automated compliance configuration is no longer supported. Remove or replace it before publishing.",
+              remove: "Remove automated compliance",
               optionsMapGrid: {
                 title: "Options mapper",
                 externalOption: "External option",
@@ -4790,6 +4796,12 @@ Thank you,
             "This permit is available for early access to help your team get familiar with the application process. You can view and edit your application, but submission is currently disabled. Submissions will be enabled once this permit type is officially launched in your jurisdiction.",
           goToBuilder: "Go to builder",
           openInBuilder: "Open in builder",
+          discardDraft: {
+            triggerButton: "Discard early access version",
+            title: "Discard this early access version?",
+            body: "This ends access to the early access snapshot and its previews. Fix the configuration in the builder, then create a new early access version.",
+            confirmButton: "Discard early access version",
+          },
           schedulePublish: {
             triggerButton: "Promote",
             scheduleModalTitle: "Promote early access version?",

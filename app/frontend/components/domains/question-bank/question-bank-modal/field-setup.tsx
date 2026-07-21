@@ -101,6 +101,7 @@ export const FieldSetup = observer(function FieldSetup({
           )}
           {hasFields && (
             <VStack w={"full"} alignItems={"flex-start"} spacing={2} px={3} pt={4}>
+              {/* HUB-5289: Legacy shared questions with persisted conditionals still require API cleanup. */}
               {fields.map((field, index) => (
                 <RequirementFieldRow
                   key={field.id}

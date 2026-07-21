@@ -38,6 +38,7 @@ interface IProps {
   triggerButtonProps?: Partial<ButtonProps>
   renderTriggerButton?: (props: ButtonProps) => JSX.Element
   index: number
+  isUnsupported?: boolean
   requirementType?: ERequirementType
 }
 
@@ -307,7 +308,7 @@ const ValidationValueInput = ({ requirementType, value, onChange }: IValidationV
 }
 
 export const DataValidationSetupModal = observer(
-  ({ triggerButtonProps, renderTriggerButton, index, requirementType }: IProps) => {
+  ({ triggerButtonProps, renderTriggerButton, index, isUnsupported = false, requirementType }: IProps) => {
     const { isOpen, onOpen, onClose } = useDisclosure()
     const { t } = useTranslation()
 
@@ -317,7 +318,7 @@ export const DataValidationSetupModal = observer(
     const { defaultOperation, operations, valueLabel, errorMessagePlaceholder } = validationConfig as IValidationConfig
 
     useEffect(() => {
-      if (isOpen) {
+      if (isOpen && !isUnsupported) {
         const operationPath = `requirementsAttributes.${index}.inputOptions.dataValidation.operation` as any
         const currentOperation = getValues(operationPath)
 
@@ -329,7 +330,7 @@ export const DataValidationSetupModal = observer(
           })
         }
       }
-    }, [isOpen, defaultOperation, index, setValue, getValues])
+    }, [isOpen, isUnsupported, defaultOperation, index, setValue, getValues])
 
     const onReset = () => {
       setValue(`requirementsAttributes.${index}.inputOptions.dataValidation`, undefined, {
@@ -379,7 +380,10 @@ export const DataValidationSetupModal = observer(
                 },
               }}
             >
-              <Flex direction="column" gap={4}>
+              {/* HUB-5289: Field types cannot currently be changed in this UI, so stale validation is removal-only. */}
+              {isUnsupported ? (
+                <Text>{t("requirementsLibrary.modals.dataValidationSetup.unsupportedMessage")}</Text>
+              ) : (
                 <Flex direction="column" gap={4}>
                   {operations && (
                     <>
@@ -441,21 +445,33 @@ export const DataValidationSetupModal = observer(
                     />
                   </Box>
                 </Flex>
-              </Flex>
+              )}
             </ModalBody>
 
             <ModalFooter justifyContent={"flex-start"}>
-              <ButtonGroup>
-                <Button variant={"primary"} onClick={onClose}>
-                  {t("ui.save")}
+              {isUnsupported ? (
+                <Button
+                  variant={"primary"}
+                  onClick={() => {
+                    onReset()
+                    onClose()
+                  }}
+                >
+                  {t("requirementsLibrary.modals.dataValidationSetup.remove")}
                 </Button>
-                <Button variant={"secondary"} onClick={onClose}>
-                  {t("ui.cancel")}
-                </Button>
-                <Button variant={"ghost"} onClick={onReset} ml="auto">
-                  {t("ui.reset")}
-                </Button>
-              </ButtonGroup>
+              ) : (
+                <ButtonGroup>
+                  <Button variant={"primary"} onClick={onClose}>
+                    {t("ui.save")}
+                  </Button>
+                  <Button variant={"secondary"} onClick={onClose}>
+                    {t("ui.cancel")}
+                  </Button>
+                  <Button variant={"ghost"} onClick={onReset} ml="auto">
+                    {t("ui.reset")}
+                  </Button>
+                </ButtonGroup>
+              )}
             </ModalFooter>
           </ModalContent>
         </Modal>

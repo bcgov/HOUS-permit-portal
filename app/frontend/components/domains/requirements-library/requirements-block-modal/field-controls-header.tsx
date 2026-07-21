@@ -44,9 +44,14 @@ export function FieldControlsHeader({
 
   return (
     <HStack pos={"absolute"} right={0} top={0} spacing={4}>
-      {/*right now there is only two menu options,so if both are disabled we just hide the options menu*/}
+      {/* Keep stale configuration removable even when field removal and conditionals are protected. */}
       {isRequirementInEditMode &&
-        !(disabledMenuOptions.includes("remove") && disabledMenuOptions.includes("conditional")) && (
+        !(
+          disabledMenuOptions.includes("remove") &&
+          disabledMenuOptions.includes("conditional") &&
+          !dataValidation &&
+          !computedCompliance
+        ) && (
           <OptionsMenu
             menuButtonProps={{
               size: "sm",
@@ -55,6 +60,7 @@ export function FieldControlsHeader({
             disabledOptions={disabledMenuOptions}
             hideConditional={hideConditional}
             index={index}
+            hasDataValidation={!!dataValidation}
             requirementType={requirementType}
           />
         )}

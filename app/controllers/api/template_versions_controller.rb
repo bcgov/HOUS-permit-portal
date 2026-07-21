@@ -347,7 +347,8 @@ class Api::TemplateVersionsController < Api::ApplicationController
       )
     rescue TemplateVersionDraftError,
            TemplateVersionScheduleError,
-           TemplateVersionForcePublishNowError => e
+           TemplateVersionForcePublishNowError,
+           TemplateVersionConfigError => e
       render_error "requirement_template.promote_draft_error",
                    message_opts: {
                      error_message: e.message

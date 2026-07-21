@@ -137,6 +137,10 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     ActiveRecord::Base.transaction do
       unless @requirement_template.update(requirement_template_params)
         render_error "requirement_template.schedule_error",
+                     message_opts: {
+                       error_message:
+                         @requirement_template.errors.full_messages.join(", ")
+                     },
                      log_args: {
                        errors: @requirement_template.errors.full_messages
                      }
@@ -150,6 +154,9 @@ class Api::RequirementTemplatesController < Api::ApplicationController
       rescue StandardError => e
         # If there is an error in TemplateVersioningService.schedule!, rollback the transaction
         render_error "requirement_template.schedule_error",
+                     message_opts: {
+                       error_message: e.message
+                     },
                      log_args: {
                        errors: e.message
                      }
@@ -211,6 +218,9 @@ class Api::RequirementTemplatesController < Api::ApplicationController
                      }
     else
       render_error "requirement_template.force_publish_now_error",
+                   message_opts: {
+                     error_message: error_message
+                   },
                    log_args: {
                      errors: [error_message]
                    }

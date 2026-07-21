@@ -27,6 +27,7 @@ export interface IRequirementOptionsMenu {
   disabledOptions?: Array<"remove" | "conditional">
   /** Omit menu items entirely (blocks keep the default and still show conditional). */
   hideConditional?: boolean
+  hasDataValidation?: boolean
   requirementType?: ERequirementType
 }
 
@@ -37,10 +38,16 @@ export const OptionsMenu = observer(function OptionsMenu({
   onRemove,
   emitOpenState,
   index,
+  hasDataValidation = false,
   requirementType,
 }: IRequirementOptionsMenu) {
   const { t } = useTranslation()
   const { isOpen, onOpen, onClose } = useDisclosure()
+  const supportsDataValidation =
+    requirementType === ERequirementType.number ||
+    requirementType === ERequirementType.date ||
+    requirementType === ERequirementType.multiOptionSelect ||
+    requirementType === ERequirementType.file
 
   useEffect(() => {
     emitOpenState?.(isOpen)
@@ -66,11 +73,12 @@ export const OptionsMenu = observer(function OptionsMenu({
         {t("requirementsLibrary.modals.optionsMenu.triggerButton")}
       </MenuButton>
       <MenuList w={"220px"}>
-        {requirementType === ERequirementType.number ||
-        requirementType === ERequirementType.date ||
-        requirementType === ERequirementType.multiOptionSelect ||
-        requirementType === ERequirementType.file ? (
-          <DataValidationSetupModal index={index} requirementType={requirementType} />
+        {supportsDataValidation || hasDataValidation ? (
+          <DataValidationSetupModal
+            index={index}
+            requirementType={requirementType}
+            isUnsupported={!supportsDataValidation}
+          />
         ) : (
           <MenuItem color={"text.primary"} isDisabled>
             <HStack spacing={2} fontSize={"sm"}>

@@ -1,0 +1,2 @@
+class TemplateVersionConfigError < StandardError
+end
