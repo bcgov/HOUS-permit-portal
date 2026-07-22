@@ -104,7 +104,20 @@ RSpec.describe TemplateVersionConfigValidator, type: :service do
     expect { validate! }.to raise_error(
       TemplateVersionConfigError,
       /conditional value "removed" is not an option/
-    )
+    ) do |error|
+      expect(error.config_errors).to contain_exactly(
+        {
+          category: "requirement_conditional",
+          block_id: "dependent-block",
+          block_name: "Dependent block",
+          requirement_id: "dependent-field",
+          requirement_code: "dependent_field",
+          requirement_name: "Dependent field",
+          message:
+            'conditional value "removed" is not an option on Local trigger choice'
+        }
+      )
+    end
   end
 
   it "rejects data validation that is incompatible with the field type" do
@@ -162,6 +175,16 @@ RSpec.describe TemplateVersionConfigValidator, type: :service do
     expect { validate! }.to raise_error(
       TemplateVersionConfigError,
       /conditional value "removed" is not an option/
-    )
+    ) do |error|
+      expect(error.config_errors).to contain_exactly(
+        {
+          category: "block_conditional",
+          block_id: "dependent-block",
+          block_name: "Dependent block",
+          message:
+            'conditional value "removed" is not an option on Trigger choice'
+        }
+      )
+    end
   end
 end

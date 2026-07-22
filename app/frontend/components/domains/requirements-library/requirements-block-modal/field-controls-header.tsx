@@ -1,4 +1,5 @@
 import { Button, HStack } from "@chakra-ui/react"
+import { X } from "@phosphor-icons/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { IDataValidation, IFormConditional } from "../../../../types/api-request"
@@ -19,6 +20,7 @@ interface IProps {
   onRemove: IRequirementOptionsMenu["onRemove"]
   disabledMenuOptions?: IRequirementOptionsMenu["disabledOptions"]
   hideConditional?: boolean
+  hidePlacementConfiguration?: boolean
   elective?: boolean
   conditional?: IFormConditional
   computedCompliance?: TComputedCompliance
@@ -27,8 +29,9 @@ interface IProps {
 }
 
 export function FieldControlsHeader({
-  disabledMenuOptions,
+  disabledMenuOptions = [],
   hideConditional = false,
+  hidePlacementConfiguration = false,
   isRequirementInEditMode,
   toggleRequirementToEdit,
   elective,
@@ -44,8 +47,14 @@ export function FieldControlsHeader({
 
   return (
     <HStack pos={"absolute"} right={0} top={0} spacing={4}>
+      {isRequirementInEditMode && hidePlacementConfiguration && !disabledMenuOptions.includes("remove") && (
+        <Button variant={"ghost"} size={"sm"} color={"semantic.error"} leftIcon={<X />} onClick={onRemove}>
+          {t("requirementsLibrary.modals.optionsMenu.remove")}
+        </Button>
+      )}
       {/* Keep stale configuration removable even when field removal and conditionals are protected. */}
       {isRequirementInEditMode &&
+        !hidePlacementConfiguration &&
         !(
           disabledMenuOptions.includes("remove") &&
           disabledMenuOptions.includes("conditional") &&
@@ -59,6 +68,7 @@ export function FieldControlsHeader({
             onRemove={onRemove}
             disabledOptions={disabledMenuOptions}
             hideConditional={hideConditional}
+            hidePlacementConfiguration={hidePlacementConfiguration}
             index={index}
             hasDataValidation={!!dataValidation}
             requirementType={requirementType}

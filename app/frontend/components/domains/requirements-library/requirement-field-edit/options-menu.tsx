@@ -27,6 +27,8 @@ export interface IRequirementOptionsMenu {
   disabledOptions?: Array<"remove" | "conditional">
   /** Omit menu items entirely (blocks keep the default and still show conditional). */
   hideConditional?: boolean
+  /** Question Bank definitions do not own placement-specific logic. */
+  hidePlacementConfiguration?: boolean
   hasDataValidation?: boolean
   requirementType?: ERequirementType
 }
@@ -34,6 +36,7 @@ export interface IRequirementOptionsMenu {
 export const OptionsMenu = observer(function OptionsMenu({
   disabledOptions = [],
   hideConditional = false,
+  hidePlacementConfiguration = false,
   menuButtonProps,
   onRemove,
   emitOpenState,
@@ -73,30 +76,34 @@ export const OptionsMenu = observer(function OptionsMenu({
         {t("requirementsLibrary.modals.optionsMenu.triggerButton")}
       </MenuButton>
       <MenuList w={"220px"}>
-        {supportsDataValidation || hasDataValidation ? (
-          <DataValidationSetupModal
-            index={index}
-            requirementType={requirementType}
-            isUnsupported={!supportsDataValidation}
-          />
-        ) : (
-          <MenuItem color={"text.primary"} isDisabled>
-            <HStack spacing={2} fontSize={"sm"}>
-              <Warning />
-              <Text as={"span"}>{t("requirementsLibrary.modals.optionsMenu.dataValidation")}</Text>
-            </HStack>
-          </MenuItem>
-        )}
+        {!hidePlacementConfiguration && (
+          <>
+            {supportsDataValidation || hasDataValidation ? (
+              <DataValidationSetupModal
+                index={index}
+                requirementType={requirementType}
+                isUnsupported={!supportsDataValidation}
+              />
+            ) : (
+              <MenuItem color={"text.primary"} isDisabled>
+                <HStack spacing={2} fontSize={"sm"}>
+                  <Warning />
+                  <Text as={"span"}>{t("requirementsLibrary.modals.optionsMenu.dataValidation")}</Text>
+                </HStack>
+              </MenuItem>
+            )}
 
-        {!hideConditional && (
-          <ConditionalSetupModal
-            index={index}
-            triggerButtonProps={{
-              isDisabled: disabledOptions.includes("conditional"),
-            }}
-          />
+            {!hideConditional && (
+              <ConditionalSetupModal
+                index={index}
+                triggerButtonProps={{
+                  isDisabled: disabledOptions.includes("conditional"),
+                }}
+              />
+            )}
+            <ComputedComplianceSetupModal requirementIndex={index} />
+          </>
         )}
-        <ComputedComplianceSetupModal requirementIndex={index} />
 
         <MenuDivider />
         <MenuItem color={"semantic.error"} onClick={onRemove} isDisabled={disabledOptions.includes("remove")}>

@@ -20,8 +20,10 @@ const MULTI_FIELD_TYPES = [
 
 export const FieldSetup = observer(function FieldSetup({
   requirementBlocks,
+  isPersisted,
 }: {
   requirementBlocks?: Array<{ id: string; name: string }>
+  isPersisted: boolean
 }) {
   const { t } = useTranslation()
   const { requirementBlockStore } = useMst()
@@ -101,7 +103,6 @@ export const FieldSetup = observer(function FieldSetup({
           )}
           {hasFields && (
             <VStack w={"full"} alignItems={"flex-start"} spacing={2} px={3} pt={4}>
-              {/* HUB-5289: Legacy shared questions with persisted conditionals still require API cleanup. */}
               {fields.map((field, index) => (
                 <RequirementFieldRow
                   key={field.id}
@@ -112,6 +113,8 @@ export const FieldSetup = observer(function FieldSetup({
                   onRemove={() => onRemoveRequirement(index)}
                   hideConditional
                   hidePlacementOptions
+                  hidePlacementConfiguration
+                  disableRemove={isPersisted}
                 />
               ))}
             </VStack>

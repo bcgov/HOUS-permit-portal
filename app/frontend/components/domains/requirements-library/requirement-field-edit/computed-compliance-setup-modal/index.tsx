@@ -304,6 +304,9 @@ export const ComputedComplianceSetupModal = observer(function ComputedCompliance
               <Button variant={"primary"} onClick={handleSubmit(onDone)} isDisabled={!isValid}>
                 {t("ui.done")}
               </Button>
+              <Button variant={"secondary"} onClick={onClose}>
+                {t("ui.cancel")}
+              </Button>
               {hasExistingComputedCompliance && (
                 <Button variant={"ghost"} color={"semantic.error"} onClick={onRemove}>
                   {t("requirementsLibrary.modals.computedComplianceSetup.remove")}
@@ -400,7 +403,7 @@ export const ComputedComplianceSetupModal = observer(function ComputedCompliance
   }
 
   function onReset() {
-    reset(formFormDefaults())
+    reset(formFormDefaults(watchedComputedCompliance))
   }
 
   function onRemove() {

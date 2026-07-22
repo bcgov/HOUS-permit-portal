@@ -154,6 +154,8 @@ class TemplateVersioningService
         assignee: assignee
       )
 
+    validate_config!(template_version)
+
     unless template_version.save
       raise TemplateVersionDraftError,
             template_version.errors.full_messages.join(", ")

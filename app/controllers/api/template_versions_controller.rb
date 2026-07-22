@@ -345,10 +345,19 @@ class Api::TemplateVersionsController < Api::ApplicationController
       render_requirement_template_success(
         "requirement_template.promote_draft_success"
       )
+    rescue TemplateVersionConfigError => e
+      render_error nil,
+                   {
+                     meta: {
+                       config_errors: e.config_errors
+                     },
+                     log_args: {
+                       errors: e.message
+                     }
+                   }
     rescue TemplateVersionDraftError,
            TemplateVersionScheduleError,
-           TemplateVersionForcePublishNowError,
-           TemplateVersionConfigError => e
+           TemplateVersionForcePublishNowError => e
       render_error "requirement_template.promote_draft_error",
                    message_opts: {
                      error_message: e.message

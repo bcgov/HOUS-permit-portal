@@ -18,7 +18,6 @@ import React from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { v4 as uuidv4 } from "uuid"
-import { useAutoComplianceModuleConfigurations } from "../../../../hooks/resources/use-auto-compliance-module-configurations"
 import { IRequirementQuestion } from "../../../../models/requirement-question"
 import { useMst } from "../../../../setup/root"
 import { IRequirementAttributes, IRequirementQuestionParams } from "../../../../types/api-request"
@@ -50,9 +49,6 @@ export const QuestionBankModal = observer(function QuestionBankModal({
   const { isOpen, onOpen, onClose } = useDisclosure()
   const isEditing = !!requirementQuestion
   const isLinked = (requirementQuestion?.requirementBlocks?.length ?? 0) > 0
-
-  // Warm the auto-compliance config cache for the Options → Automated compliance modal.
-  useAutoComplianceModuleConfigurations()
 
   const getDefaultValues = (): IRequirementQuestionForm => {
     if (requirementQuestion) {
@@ -227,7 +223,7 @@ export const QuestionBankModal = observer(function QuestionBankModal({
                   )}
                   <HStack spacing={9} w={"full"} h={"full"} alignItems={"flex-start"}>
                     <FormSetup requirementQuestion={requirementQuestion} />
-                    <FieldSetup requirementBlocks={requirementQuestion?.requirementBlocks} />
+                    <FieldSetup requirementBlocks={requirementQuestion?.requirementBlocks} isPersisted={isEditing} />
                   </HStack>
                 </VStack>
               </ModalBody>

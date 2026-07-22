@@ -31,8 +31,7 @@ class TemplateVersionConfigValidator
 
     return true if @errors.empty?
 
-    raise TemplateVersionConfigError,
-          "Template configuration is invalid: #{@errors.join("; ")}"
+    raise TemplateVersionConfigError, @errors
   end
 
   private
@@ -91,6 +90,7 @@ class TemplateVersionConfigValidator
         add_requirement_error(
           block,
           requirement,
+          "requirement_conditional",
           "conditional has an unrecognized operator: #{operator}"
         )
         next
@@ -103,6 +103,7 @@ class TemplateVersionConfigValidator
         add_requirement_error(
           block,
           requirement,
+          "requirement_conditional",
           "conditional must have when, operator, and one of show or hide (plus eq for value-based operators)"
         )
         next
@@ -113,6 +114,7 @@ class TemplateVersionConfigValidator
         add_requirement_error(
           block,
           requirement,
+          "requirement_conditional",
           "conditional references missing field code #{when_code.inspect}"
         )
         next
@@ -149,6 +151,7 @@ class TemplateVersionConfigValidator
     add_requirement_error(
       block,
       dependent_requirement,
+      "requirement_conditional",
       "conditional value #{read(conditional, "eq").inspect} is not an option on #{requirement_name(trigger_requirement)}"
     )
   end
@@ -165,6 +168,7 @@ class TemplateVersionConfigValidator
         add_requirement_error(
           block,
           requirement,
+          "data_validation",
           "data validation is not allowed for #{input_type.inspect} inputs"
         )
         next
@@ -175,6 +179,7 @@ class TemplateVersionConfigValidator
         add_requirement_error(
           block,
           requirement,
+          "data_validation",
           "data validation must have operation and value"
         )
         next
@@ -185,6 +190,7 @@ class TemplateVersionConfigValidator
       add_requirement_error(
         block,
         requirement,
+        "data_validation",
         "data validation operation must be one of #{allowed_operations.join(", ")} for #{input_type} inputs"
       )
     end
@@ -219,7 +225,12 @@ class TemplateVersionConfigValidator
         ]
       next if error.blank?
 
-      add_requirement_error(block, requirement, "automated compliance #{error}")
+      add_requirement_error(
+        block,
+        requirement,
+        "computed_compliance",
+        "automated compliance #{error}"
+      )
     end
   end
 
@@ -241,6 +252,7 @@ class TemplateVersionConfigValidator
       unless RequirementBlock::VALID_FORMIO_OPERATORS.include?(operator)
         add_block_error(
           block_id,
+          "block_conditional",
           "conditional has an unrecognized operator: #{operator}"
         )
         next
@@ -250,6 +262,7 @@ class TemplateVersionConfigValidator
            (needs_value && read(conditional, "eq").blank?)
         add_block_error(
           block_id,
+          "block_conditional",
           "conditional must have when_block_id, when_requirement_code, and operator (plus eq for value-based operators)"
         )
         next
@@ -260,6 +273,7 @@ class TemplateVersionConfigValidator
       if show.blank? == hide.blank?
         add_block_error(
           block_id,
+          "block_conditional",
           "conditional must specify exactly one of show or hide"
         )
         next
@@ -268,6 +282,7 @@ class TemplateVersionConfigValidator
       if when_block_id == block_id
         add_block_error(
           block_id,
+          "block_conditional",
           "conditional cannot reference itself; use a field conditional instead"
         )
         next
@@ -276,6 +291,7 @@ class TemplateVersionConfigValidator
       unless block_ids.include?(when_block_id)
         add_block_error(
           block_id,
+          "block_conditional",
           "conditional references a block not in this template"
         )
         next
@@ -288,6 +304,7 @@ class TemplateVersionConfigValidator
       if trigger_requirement.blank?
         add_block_error(
           block_id,
+          "block_conditional",
           "conditional references missing field code #{when_requirement_code.inspect} in #{block_name(@blocks[when_block_id])}"
         )
         next
@@ -343,6 +360,7 @@ class TemplateVersionConfigValidator
 
     add_block_error(
       dependent_block_id,
+      "block_conditional",
       "conditional value #{read(conditional, "eq").inspect} is not an option on #{requirement_name(trigger_requirement)}"
     )
   end
@@ -356,6 +374,7 @@ class TemplateVersionConfigValidator
         if visited.include?(current)
           add_block_error(
             start_id,
+            "block_conditional",
             "conditionals contain a circular dependency"
           )
           return
@@ -367,28 +386,35 @@ class TemplateVersionConfigValidator
     end
   end
 
-  def add_requirement_error(block, requirement, message)
-    @errors << "#{block_name(block)}, field #{requirement_name(requirement)}: #{message}"
+  def add_requirement_error(block, requirement, category, message)
+    @errors << {
+      category: category,
+      block_id: read(block, "id").to_s,
+      block_name: block_name(block),
+      requirement_id: read(requirement, "id").presence&.to_s,
+      requirement_code: read(requirement, "requirement_code"),
+      requirement_name: requirement_name(requirement),
+      message: message
+    }
   end
 
-  def add_block_error(block_id, message)
-    @errors << "#{block_name(@blocks[block_id])}: #{message}"
+  def add_block_error(block_id, category, message)
+    block = @blocks[block_id]
+    @errors << {
+      category: category,
+      block_id: block_id.to_s,
+      block_name: block_name(block),
+      message: message
+    }
   end
 
   def block_name(block)
-    name = read(block, "name")
-    if name.present?
-      "Block #{name.inspect}"
-    else
-      "Block #{read(block, "id").inspect}"
-    end
+    read(block, "name").presence || read(block, "id").to_s
   end
 
   def requirement_name(requirement)
-    (
-      read(requirement, "label").presence ||
-        read(requirement, "requirement_code").presence ||
-        read(requirement, "id")
-    ).inspect
+    read(requirement, "label").presence ||
+      read(requirement, "requirement_code").presence ||
+      read(requirement, "id").to_s
   end
 end
