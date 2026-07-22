@@ -400,4 +400,59 @@ RSpec.describe Jurisdiction, type: :model do
       expect([true, false]).to include(jurisdiction.submission_inbox_set_up?)
     end
   end
+
+  describe "step requirements updated_at" do
+    let(:jurisdiction) { create(:sub_district) }
+
+    describe "#part_9_step_requirements_updated_at" do
+      it "is nil when only an untouched auto-created default exists" do
+        expect(jurisdiction.jurisdiction_step_requirements.count).to eq(1)
+        expect(jurisdiction.part_9_step_requirements_updated_at).to be_nil
+      end
+
+      it "returns the default's updated_at after an admin save" do
+        default_step =
+          jurisdiction.jurisdiction_step_requirements.find_by!(default: true)
+        default_step.update_columns(updated_at: 2.days.ago)
+
+        expect(
+          jurisdiction.reload.part_9_step_requirements_updated_at
+        ).to be_within(1.second).of(default_step.reload.updated_at)
+      end
+
+      it "returns the latest customization updated_at" do
+        customization =
+          jurisdiction.jurisdiction_step_requirements.create!(
+            default: nil,
+            energy_step_required: ENV["PART_9_MIN_ENERGY_STEP"].to_i,
+            zero_carbon_step_required: ENV["PART_9_MIN_ZERO_CARBON_STEP"].to_i
+          )
+        customization.update_columns(updated_at: 3.days.ago)
+
+        expect(
+          jurisdiction.reload.part_9_step_requirements_updated_at
+        ).to be_within(1.second).of(customization.reload.updated_at)
+      end
+    end
+
+    describe "#part_3_step_requirements_updated_at" do
+      it "is nil when no Part 3 occupancy steps exist" do
+        expect(jurisdiction.part_3_step_requirements_updated_at).to be_nil
+      end
+
+      it "returns the latest Part 3 occupancy step updated_at" do
+        step =
+          jurisdiction.part3_occupancy_required_steps.create!(
+            occupancy_key: "offices",
+            energy_step_required: 2,
+            zero_carbon_step_required: 1
+          )
+        step.update_columns(updated_at: 4.days.ago)
+
+        expect(
+          jurisdiction.reload.part_3_step_requirements_updated_at
+        ).to be_within(1.second).of(step.reload.updated_at)
+      end
+    end
+  end
 end

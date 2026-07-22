@@ -16,6 +16,7 @@ import {
   UnorderedList,
   VStack,
 } from "@chakra-ui/react"
+import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
@@ -26,6 +27,8 @@ import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { Part3StepCodeRequirements } from "../../shared/part3-step-code-requirements"
 import { StepCodeRequirementsTable } from "../../shared/step-code-requirements-table"
+
+const requirementsUpdatedAtDateFormat = "MMMM d, yyyy"
 
 type TI18nPrefix = "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen"
 const i18nPrefix: TI18nPrefix = "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen"
@@ -70,6 +73,13 @@ export const JurisdictionStepCodeRequirementsScreen = observer(() => {
 
   const heatingDegreeDays = [...currentJurisdiction.jurisdictionHeatingDegreeDays]
 
+  const requirementsLastUpdatedLabel = (date: Date | null) =>
+    t(`${i18nPrefix}.requirementsLastUpdated`, {
+      date: date
+        ? format(date, requirementsUpdatedAtDateFormat)
+        : t(`${i18nPrefix}.requirementsLastUpdatedNotAvailable`),
+    })
+
   const ActionButtons = (props: React.ComponentProps<typeof HStack>) => (
     <HStack spacing={4} {...props}>
       <Button variant="outline" onClick={handleCheckAnotherAddress}>
@@ -99,6 +109,9 @@ export const JurisdictionStepCodeRequirementsScreen = observer(() => {
         <Heading as="h2" fontSize="2xl">
           {t(`${i18nPrefix}.smallSimpleBuildings`)}
         </Heading>
+        <Text fontSize="sm" color="text.secondary">
+          {requirementsLastUpdatedLabel(currentJurisdiction.part9StepRequirementsUpdatedAt)}
+        </Text>
         <Text fontSize="md">{t(`${i18nPrefix}.smallSimpleBuildingsDescription`)}</Text>
         <Text fontSize="md">{t(`${i18nPrefix}.part9BuildingsAreGenerally`)}</Text>
         <UnorderedList pl={4}>
@@ -113,6 +126,9 @@ export const JurisdictionStepCodeRequirementsScreen = observer(() => {
         <Heading as="h2" fontSize="2xl">
           {t(`${i18nPrefix}.largeComplexBuildings`)}
         </Heading>
+        <Text fontSize="sm" color="text.secondary">
+          {requirementsLastUpdatedLabel(currentJurisdiction.part3StepRequirementsUpdatedAt)}
+        </Text>
         <Text fontSize="md">{t(`${i18nPrefix}.largeComplexBuildingsDescription`)}</Text>
         <Text fontSize="md">{t(`${i18nPrefix}.part3BuildingsAreGenerally`)}</Text>
         <UnorderedList pl={4}>
