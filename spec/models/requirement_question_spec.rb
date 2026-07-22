@@ -38,6 +38,43 @@ RSpec.describe RequirementQuestion, type: :model do
       expect(question.errors[:input_options]).to be_present
     end
 
+    it "rejects computed compliance on shared questions" do
+      question =
+        build(
+          :requirement_question,
+          :shared,
+          input_options: {
+            "computed_compliance" => {
+              "module" => "DigitalSealValidator"
+            }
+          }
+        )
+
+      expect(question).not_to be_valid
+      expect(question.errors[:input_options].join).to include(
+        "computed_compliance must be configured on requirement placements"
+      )
+    end
+
+    it "rejects data validation on shared questions" do
+      question =
+        build(
+          :requirement_question,
+          :shared,
+          input_options: {
+            "data_validation" => {
+              "operation" => "min",
+              "value" => 1
+            }
+          }
+        )
+
+      expect(question).not_to be_valid
+      expect(question.errors[:input_options].join).to include(
+        "data_validation must be configured on requirement placements"
+      )
+    end
+
     it "allows conditional on private questions" do
       question =
         build(
@@ -50,6 +87,26 @@ RSpec.describe RequirementQuestion, type: :model do
             }
           }
         )
+
+      expect(question).to be_valid
+    end
+
+    it "rejects input type changes when a shared question is in use" do
+      question = create(:requirement_question, :shared, input_type: :text)
+      create(:requirement, requirement_question: question, input_type: :text)
+
+      question.input_type = :textarea
+
+      expect(question).not_to be_valid
+      expect(question.errors[:input_type]).to include(
+        "cannot be changed while this question is used in requirement blocks"
+      )
+    end
+
+    it "allows input type changes when a shared question is unused" do
+      question = create(:requirement_question, :shared, input_type: :text)
+
+      question.input_type = :textarea
 
       expect(question).to be_valid
     end
@@ -141,7 +198,7 @@ RSpec.describe RequirementQuestion, type: :model do
       )
     end
 
-    it "converts values and options_map for shared questions" do
+    it "converts values for shared questions" do
       question =
         build(
           :requirement_question,
@@ -151,14 +208,7 @@ RSpec.describe RequirementQuestion, type: :model do
             "value_options" => [
               { "label" => "New Construction", "value" => "New Construction" },
               { "label" => "Renovation", "value" => "Renovation" }
-            ],
-            "computed_compliance" => {
-              "module" => "HistoricSite",
-              "options_map" => {
-                "Y" => "New Construction",
-                "N" => "Renovation"
-              }
-            }
+            ]
           }
         )
 
@@ -166,9 +216,6 @@ RSpec.describe RequirementQuestion, type: :model do
       expect(
         question.input_options["value_options"].map { |o| o["value"] }
       ).to eq(%w[newConstruction renovation])
-      expect(
-        question.input_options.dig("computed_compliance", "options_map")
-      ).to eq({ "Y" => "newConstruction", "N" => "renovation" })
     end
   end
 end

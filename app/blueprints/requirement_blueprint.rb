@@ -30,6 +30,34 @@ class RequirementBlueprint < Blueprinter::Base
     requirement.effective_instructions
   end
 
+  field :uses_shared_question do |requirement|
+    requirement.requirement_question&.shared? || false
+  end
+
+  field :default_hint do |requirement|
+    if requirement.requirement_question&.shared?
+      requirement.requirement_question&.hint
+    end
+  end
+
+  field :default_instructions do |requirement|
+    if requirement.requirement_question&.shared?
+      requirement.requirement_question.instructions
+    end
+  end
+
+  field :hint_override do |requirement|
+    if requirement.requirement_question&.shared?
+      requirement.read_attribute(:hint)
+    end
+  end
+
+  field :instructions_override do |requirement|
+    if requirement.requirement_question&.shared?
+      requirement.read_attribute(:instructions)
+    end
+  end
+
   field :form_json do |requirement|
     requirement.to_form_json
   end

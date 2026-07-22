@@ -14,16 +14,22 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { Controller, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { IRequirementQuestion } from "../../../../models/requirement-question"
 import { useMst } from "../../../../setup/root"
 import { CopyableValue } from "../../../shared/base/copyable-value"
 import { TagsSelect } from "../../../shared/select/selectors/tags-select"
+import { QuestionSetupOptionsMenu } from "../question-setup-options-menu"
 import { IRequirementQuestionForm } from "./index"
 
 const helperTextStyles: Partial<TextProps> = {
   color: "border.base",
 }
 
-export const FormSetup = observer(function FormSetup() {
+export const FormSetup = observer(function FormSetup({
+  requirementQuestion,
+}: {
+  requirementQuestion?: IRequirementQuestion
+}) {
   const { requirementQuestionStore } = useMst()
   const { t } = useTranslation()
   const {
@@ -109,6 +115,7 @@ export const FormSetup = observer(function FormSetup() {
           />
           <FormHelperText {...helperTextStyles}>{t("questionBank.fieldDescriptions.questionUuid")}</FormHelperText>
         </FormControl>
+        {requirementQuestion && <QuestionSetupOptionsMenu requirementQuestion={requirementQuestion} />}
       </VStack>
     </Box>
   )

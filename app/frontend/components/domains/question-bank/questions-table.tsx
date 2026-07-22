@@ -1,7 +1,7 @@
 import { Box, Button, Flex, HStack, ListItem, StackProps, Tag, Text, UnorderedList, VStack } from "@chakra-ui/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { datefnsTableDateFormat } from "../../../constants"
 import { useSearch } from "../../../hooks/use-search"
@@ -15,8 +15,10 @@ import { SearchGridItem } from "../../shared/grid/search-grid-item"
 import { HasAutomatedComplianceTag } from "../../shared/has-automated-compliance-tag"
 import { HasDataValidationTag } from "../../shared/has-data-validation-tag"
 import { GridHeaders } from "./grid-header"
+import { QuestionBankModal } from "./question-bank-modal"
 
 const ROW_CLASS_NAME = "question-bank-grid-row"
+const PREVIEW_BLOCK_COUNT = 3
 
 export const QuestionsTable = observer(function QuestionsTable({ ...containerProps }: Partial<StackProps>) {
   const { t } = useTranslation()
@@ -33,6 +35,7 @@ export const QuestionsTable = observer(function QuestionsTable({ ...containerPro
     isSearching,
     showArchived,
   } = searchModel
+  const [expandedRequirementBlockRows, setExpandedRequirementBlockRows] = useState<Set<string>>(() => new Set())
 
   useEffect(() => {
     return () => {
@@ -41,6 +44,18 @@ export const QuestionsTable = observer(function QuestionsTable({ ...containerPro
   }, [])
 
   useSearch(searchModel as ISearch, [showArchived])
+
+  const toggleRequirementBlocksExpanded = (questionId: string) => {
+    setExpandedRequirementBlockRows((prev) => {
+      const next = new Set(prev)
+      if (next.has(questionId)) {
+        next.delete(questionId)
+      } else {
+        next.add(questionId)
+      }
+      return next
+    })
+  }
 
   return (
     <VStack as={"article"} spacing={5} {...containerProps}>
@@ -53,6 +68,12 @@ export const QuestionsTable = observer(function QuestionsTable({ ...containerPro
           </Flex>
         ) : (
           tableRequirementQuestions.map((question) => {
+            const isBlocksExpanded = expandedRequirementBlockRows.has(question.id)
+            const visibleBlocks = isBlocksExpanded
+              ? question.requirementBlocks
+              : question.requirementBlocks.slice(0, PREVIEW_BLOCK_COUNT)
+            const hasMoreBlocks = question.requirementBlocks.length > PREVIEW_BLOCK_COUNT
+
             return (
               <Box key={question.id} className={ROW_CLASS_NAME} role={"row"} display={"contents"}>
                 <SearchGridItem minW="160px" maxW="200px">
@@ -91,7 +112,7 @@ export const QuestionsTable = observer(function QuestionsTable({ ...containerPro
                     </Text>
                   ) : (
                     <UnorderedList ml={0} pl={0} w={"full"}>
-                      {question.requirementBlocks.slice(0, 3).map((block) => (
+                      {visibleBlocks.map((block) => (
                         <ListItem
                           key={block.id}
                           color={"text.secondary"}
@@ -103,10 +124,17 @@ export const QuestionsTable = observer(function QuestionsTable({ ...containerPro
                           {block.name}
                         </ListItem>
                       ))}
-                      {question.requirementBlocks.length > 3 && (
-                        <Text fontSize={"xs"} color={"text.link"}>
-                          {t("questionBank.fields.seeMore")}
-                        </Text>
+                      {hasMoreBlocks && (
+                        <Button
+                          variant={"link"}
+                          fontSize={"xs"}
+                          fontWeight={"normal"}
+                          height={"auto"}
+                          minW={"unset"}
+                          onClick={() => toggleRequirementBlocksExpanded(question.id)}
+                        >
+                          {t(isBlocksExpanded ? "questionBank.fields.seeLess" : "questionBank.fields.seeMore")}
+                        </Button>
                       )}
                     </UnorderedList>
                   )}
@@ -121,9 +149,10 @@ export const QuestionsTable = observer(function QuestionsTable({ ...containerPro
                   {format(question.updatedAt, datefnsTableDateFormat)}
                 </SearchGridItem>
                 <SearchGridItem justifyContent={"center"} minW="85px" flexShrink={0}>
-                  <Button variant={"link"} size={"sm"} isDisabled>
-                    {t("ui.edit")}
-                  </Button>
+                  <QuestionBankModal
+                    requirementQuestion={question}
+                    triggerButtonProps={{ variant: "link", size: "sm" }}
+                  />
                 </SearchGridItem>
               </Box>
             )
