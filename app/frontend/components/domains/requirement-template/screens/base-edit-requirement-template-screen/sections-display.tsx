@@ -2,7 +2,7 @@ import { Box, Button, HStack, Stack } from "@chakra-ui/react"
 import { X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
-import React, { useEffect } from "react"
+import React, { useCallback, useEffect } from "react"
 import { useFieldArray, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useSearchParams } from "react-router-dom"
@@ -23,9 +23,21 @@ interface IProps {
 
 export const SectionsDisplay = observer(function SectionsDisplay(props: IProps) {
   const { watch } = useFormContext<IRequirementTemplateForm>()
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const watchedSections = watch("requirementTemplateSectionsAttributes")
   const openRequirementBlockId = searchParams.get("openRequirementBlockId")
+  const openRequirementCode = searchParams.get("openRequirementCode")
+  const consumeOpenRequirementTarget = useCallback(() => {
+    setSearchParams(
+      (currentSearchParams) => {
+        const nextSearchParams = new URLSearchParams(currentSearchParams)
+        nextSearchParams.delete("openRequirementBlockId")
+        nextSearchParams.delete("openRequirementCode")
+        return nextSearchParams
+      },
+      { replace: true }
+    )
+  }, [setSearchParams])
   const usedRequirementBlockIds = watchedSections.flatMap((section) =>
     section.templateSectionBlocksAttributes.map((sectionBlock) => sectionBlock.requirementBlockId)
   )
@@ -49,6 +61,8 @@ export const SectionsDisplay = observer(function SectionsDisplay(props: IProps) 
           sectionIndex={index}
           disabledUseForBlockIds={usedRequirementBlockIds}
           openRequirementBlockId={openRequirementBlockId}
+          openRequirementCode={openRequirementCode}
+          onOpenRequirementTargetConsumed={consumeOpenRequirementTarget}
           {...props}
         />
       ))}
@@ -64,6 +78,8 @@ const SectionDisplay = observer(
     setSectionRef,
     disabledUseForBlockIds = [],
     openRequirementBlockId,
+    openRequirementCode,
+    onOpenRequirementTargetConsumed,
   }: {
     section: IRequirementTemplateSectionAttributes
     sectionIndex: number
@@ -71,6 +87,8 @@ const SectionDisplay = observer(
     setSectionRef: (el: HTMLElement, id: string) => void
     disabledUseForBlockIds?: string[]
     openRequirementBlockId?: string
+    openRequirementCode?: string
+    onOpenRequirementTargetConsumed: () => void
   }) => {
     const { requirementBlockStore } = useMst()
     const { control, watch, register, setValue } = useFormContext<IRequirementTemplateForm>()
@@ -178,6 +196,14 @@ const SectionDisplay = observer(
                     isCollapsedAll={isCollapsedAll}
                     isEditable={true}
                     autoOpenEdit={openRequirementBlockId === sectionBlock.requirementBlockId}
+                    autoOpenRequirementCode={
+                      openRequirementBlockId === sectionBlock.requirementBlockId ? openRequirementCode : undefined
+                    }
+                    onAutoOpenConsumed={
+                      openRequirementBlockId === sectionBlock.requirementBlockId
+                        ? onOpenRequirementTargetConsumed
+                        : undefined
+                    }
                   />
                   <BlockConditionalConfig sectionIndex={sectionIndex} blockIndex={index} />
                 </Box>

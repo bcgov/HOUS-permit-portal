@@ -44,8 +44,11 @@ export interface IRequirementAttributes {
   id?: string
   label?: string
   inputType?: ERequirementType
-  hint?: string
-  instructions?: string
+  hint?: string | null
+  instructions?: string | null
+  usesSharedQuestion?: boolean
+  defaultHint?: string | null
+  defaultInstructions?: string | null
   required?: boolean
   requirementCode: string
   elective?: boolean

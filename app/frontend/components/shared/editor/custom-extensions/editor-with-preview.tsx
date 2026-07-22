@@ -17,6 +17,7 @@ type TEditorWithPreviewPresentationProps = {
   onChange?: (htmlValue: string) => void
   editText?: string
   editTextButtonProps?: ButtonProps
+  removeText?: string
 }
 
 export type TEditorWithPreviewProps = Omit<TUseEditorWithPreviewProps, "htmlValue"> & {
@@ -30,9 +31,9 @@ export type {
 } from "./use-editor-with-preview"
 
 export const EditorWithPreview = observer(function EditorWithPreview(props: TEditorWithPreviewProps) {
-  const { label, onChange, editText, editTextButtonProps, ...hookInput } = props
+  const { label, onChange, editText, editTextButtonProps, removeText, ...hookInput } = props
   const { t } = useTranslation()
-  const removeLabel = t("ui.remove")
+  const removeLabel = removeText ?? t("ui.remove")
   const doneLabel = t("ui.done")
 
   const {

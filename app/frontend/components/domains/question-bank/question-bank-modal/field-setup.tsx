@@ -20,8 +20,10 @@ const MULTI_FIELD_TYPES = [
 
 export const FieldSetup = observer(function FieldSetup({
   requirementBlocks,
+  isPersisted,
 }: {
   requirementBlocks?: Array<{ id: string; name: string }>
+  isPersisted: boolean
 }) {
   const { t } = useTranslation()
   const { requirementBlockStore } = useMst()
@@ -111,6 +113,8 @@ export const FieldSetup = observer(function FieldSetup({
                   onRemove={() => onRemoveRequirement(index)}
                   hideConditional
                   hidePlacementOptions
+                  hidePlacementConfiguration
+                  disableRemove={isPersisted}
                 />
               ))}
             </VStack>
