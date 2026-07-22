@@ -7,16 +7,17 @@ import {
   ModalBody,
   ModalCloseButton,
   ModalHeader,
+  Tag,
   Text,
   VStack,
   useDisclosure,
 } from "@chakra-ui/react"
+import { Archive } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { v4 as uuidv4 } from "uuid"
-import { useAutoComplianceModuleConfigurations } from "../../../../hooks/resources/use-auto-compliance-module-configurations"
 import { IRequirementQuestion } from "../../../../models/requirement-question"
 import { useMst } from "../../../../setup/root"
 import { IRequirementAttributes, IRequirementQuestionParams } from "../../../../types/api-request"
@@ -49,9 +50,6 @@ export const QuestionBankModal = observer(function QuestionBankModal({
   const isEditing = !!requirementQuestion
   const isLinked = (requirementQuestion?.requirementBlocks?.length ?? 0) > 0
 
-  // Warm the auto-compliance config cache for the Options → Automated compliance modal.
-  useAutoComplianceModuleConfigurations()
-
   const getDefaultValues = (): IRequirementQuestionForm => {
     if (requirementQuestion) {
       return {
@@ -75,7 +73,7 @@ export const QuestionBankModal = observer(function QuestionBankModal({
     }
 
     return {
-      id: crypto.randomUUID?.() ?? uuidv4(),
+      id: uuidv4(),
       associationList: [],
       requirementsAttributes: [],
     }
@@ -152,6 +150,27 @@ export const QuestionBankModal = observer(function QuestionBankModal({
           {({ onClose: closeFormModal }) => (
             <>
               <ModalCloseButton fontSize={"11px"} />
+              {requirementQuestion?.isDiscarded && (
+                <Tag
+                  borderRadius="sm"
+                  border="1px solid"
+                  borderColor={"semantic.error"}
+                  backgroundColor={"semantic.errorLight"}
+                  w={"fit-content"}
+                  py={1}
+                  px={2}
+                  color={"semantic.error"}
+                  ml={"2.75rem"}
+                  mb={2}
+                >
+                  <HStack>
+                    <Archive />
+                    <Text textTransform={"capitalize"} fontSize={"sm"}>
+                      {t("questionBank.modals.archived")}
+                    </Text>
+                  </HStack>
+                </Tag>
+              )}
               <ModalHeader display={"flex"} justifyContent={"space-between"} pt={4} px={"2.75rem"} pb={0}>
                 <Text as={"h2"} fontSize={"2xl"}>
                   {t(`questionBank.modals.${isEditing ? "edit" : "create"}.title`)}
@@ -203,8 +222,8 @@ export const QuestionBankModal = observer(function QuestionBankModal({
                     </Alert>
                   )}
                   <HStack spacing={9} w={"full"} h={"full"} alignItems={"flex-start"}>
-                    <FormSetup />
-                    <FieldSetup requirementBlocks={requirementQuestion?.requirementBlocks} />
+                    <FormSetup requirementQuestion={requirementQuestion} />
+                    <FieldSetup requirementBlocks={requirementQuestion?.requirementBlocks} isPersisted={isEditing} />
                   </HStack>
                 </VStack>
               </ModalBody>

@@ -68,10 +68,15 @@ export const RequirementBlockModel = types
     get requirementFormDefaults(): IRequirementAttributes[] {
       return self.requirements.map((requirement) => {
         const { inputOptions, conditional, ...baseAttributes } = requirement
+        const formAttributes = {
+          ...baseAttributes,
+          hint: requirement.usesSharedQuestion ? requirement.hintOverride : requirement.hint,
+          instructions: requirement.usesSharedQuestion ? requirement.instructionsOverride : requirement.instructions,
+        }
 
         if (!conditional) {
           return {
-            ...baseAttributes,
+            ...formAttributes,
             inputOptions,
           } as IRequirementAttributes
         }
@@ -86,7 +91,7 @@ export const RequirementBlockModel = types
         )
 
         return {
-          ...baseAttributes,
+          ...formAttributes,
           inputOptions: {
             ...inputOptions,
             conditional: isEnergyStepCodeDependency

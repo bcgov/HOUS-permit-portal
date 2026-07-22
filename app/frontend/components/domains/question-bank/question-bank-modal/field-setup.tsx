@@ -5,7 +5,7 @@ import { useFieldArray, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../../setup/root"
 import { IRequirementAttributes } from "../../../../types/api-request"
-import { ENumberUnit, ERequirementType } from "../../../../types/enums"
+import { ERequirementType } from "../../../../types/enums"
 import { isMultiOptionRequirement } from "../../../../utils/utility-functions"
 import { FieldsSetupDrawer } from "../../requirements-library/fields-setup-drawer"
 import { RequirementsBlockModal } from "../../requirements-library/requirements-block-modal"
@@ -20,8 +20,10 @@ const MULTI_FIELD_TYPES = [
 
 export const FieldSetup = observer(function FieldSetup({
   requirementBlocks,
+  isPersisted,
 }: {
   requirementBlocks?: Array<{ id: string; name: string }>
+  isPersisted: boolean
 }) {
   const { t } = useTranslation()
   const { requirementBlockStore } = useMst()
@@ -66,9 +68,7 @@ export const FieldSetup = observer(function FieldSetup({
               { value: "Option 2", label: "Option 2" },
             ],
           }
-        : requirementType === ERequirementType.number
-          ? { numberUnit: ENumberUnit.noUnit }
-          : {},
+        : {},
     })
   }
 
@@ -113,6 +113,8 @@ export const FieldSetup = observer(function FieldSetup({
                   onRemove={() => onRemoveRequirement(index)}
                   hideConditional
                   hidePlacementOptions
+                  hidePlacementConfiguration
+                  disableRemove={isPersisted}
                 />
               ))}
             </VStack>

@@ -39,7 +39,10 @@ class RequirementBlock < ApplicationRecord
   before_validation :set_sku, on: :create
   before_validation :ensure_unique_name, on: :create
 
-  after_commit :refresh_search_index, if: :saved_change_to_discarded_at?
+  after_commit :refresh_search_index,
+               if: -> do
+                 previously_new_record? || saved_change_to_discarded_at?
+               end
 
   acts_as_taggable_on :associations
 

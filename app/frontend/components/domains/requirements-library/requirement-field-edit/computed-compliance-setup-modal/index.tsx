@@ -68,6 +68,7 @@ export const ComputedComplianceSetupModal = observer(function ComputedCompliance
   const watchedComputedCompliance = watchRequirementBlockForm(
     `requirementsAttributes.${requirementIndex}.inputOptions.computedCompliance`
   )
+  const hasExistingComputedCompliance = !!watchedComputedCompliance && Object.keys(watchedComputedCompliance).length > 0
 
   // have to use useMemo to prevent infinite loop as the default [] is a new reference every time
   // and will cause use effect to run every time
@@ -218,7 +219,13 @@ export const ComputedComplianceSetupModal = observer(function ComputedCompliance
     )
   }, [watchedRequirementValueOptions, watchedOptionsMap])
 
-  const isSetupDisabled = availableAutoComplianceModuleConfigurations.length === 0
+  const hasUnsupportedExistingCompliance =
+    hasExistingComputedCompliance &&
+    !requirementBlockStore.getAutoComplianceModuleConfigurationForRequirementType(
+      watchedComputedCompliance?.module,
+      watchedRequirementType
+    )
+  const isSetupDisabled = availableAutoComplianceModuleConfigurations.length === 0 && !hasExistingComputedCompliance
 
   // prunes the optionsMap if the value options changed
   useEffect(() => {
@@ -266,6 +273,9 @@ export const ComputedComplianceSetupModal = observer(function ComputedCompliance
           </ModalHeader>
           <ModalBody py={4}>
             <Stack direction="column" spacing={6}>
+              {hasUnsupportedExistingCompliance && (
+                <Text>{t("requirementsLibrary.modals.computedComplianceSetup.unsupportedMessage")}</Text>
+              )}
               <ModuleSelect options={moduleSelectOptions} value={selectedModuleOption} onChange={onModuleChange} />
 
               {valueExtractionFieldOptions && (
@@ -294,6 +304,14 @@ export const ComputedComplianceSetupModal = observer(function ComputedCompliance
               <Button variant={"primary"} onClick={handleSubmit(onDone)} isDisabled={!isValid}>
                 {t("ui.done")}
               </Button>
+              <Button variant={"secondary"} onClick={onClose}>
+                {t("ui.cancel")}
+              </Button>
+              {hasExistingComputedCompliance && (
+                <Button variant={"ghost"} color={"semantic.error"} onClick={onRemove}>
+                  {t("requirementsLibrary.modals.computedComplianceSetup.remove")}
+                </Button>
+              )}
             </ButtonGroup>
           </ModalFooter>
         </ModalContent>
@@ -385,7 +403,16 @@ export const ComputedComplianceSetupModal = observer(function ComputedCompliance
   }
 
   function onReset() {
-    reset(formFormDefaults())
+    reset(formFormDefaults(watchedComputedCompliance))
+  }
+
+  function onRemove() {
+    setRequirementBlockFormValue(
+      `requirementsAttributes.${requirementIndex}.inputOptions.computedCompliance`,
+      undefined,
+      { shouldDirty: true }
+    )
+    onClose()
   }
 
   function onDone(form: IComputedComplianceForm) {

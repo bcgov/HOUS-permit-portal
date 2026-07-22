@@ -176,4 +176,40 @@ RSpec.describe Api::RequirementTemplatesController,
       end
     end
   end
+
+  describe "POST #create_draft" do
+    let(:requirement_template) do
+      create(:live_requirement_template_with_sections)
+    end
+    let(:config_errors) do
+      [
+        {
+          category: "data_validation",
+          block_id: "block-id",
+          block_name: "Details",
+          requirement_id: "requirement-id",
+          requirement_code: "project_value",
+          requirement_name: "Project value",
+          message: "data validation must have operation and value"
+        }
+      ]
+    end
+
+    before do
+      sign_in super_admin
+      allow(TemplateVersioningService).to receive(:create_draft!).and_raise(
+        TemplateVersionConfigError.new(config_errors)
+      )
+    end
+
+    it "returns structured configuration errors without a flash message" do
+      post :create_draft, params: { id: requirement_template.id }
+
+      expect(response).to have_http_status(:bad_request)
+      expect(json_response.dig("meta", "config_errors")).to eq(
+        config_errors.map(&:deep_stringify_keys)
+      )
+      expect(json_response.dig("meta", "message")).to be_nil
+    end
+  end
 end

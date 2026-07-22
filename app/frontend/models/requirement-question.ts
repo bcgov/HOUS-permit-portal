@@ -42,10 +42,12 @@ export const RequirementQuestionModel = types
     }),
     destroy: flow(function* () {
       const response = yield self.environment.api.archiveRequirementQuestion(self.id)
+      if (response.ok) applySnapshot(self, response.data.data)
       return response.ok
     }),
     restore: flow(function* () {
       const response = yield self.environment.api.restoreRequirementQuestion(self.id)
+      if (response.ok) applySnapshot(self, response.data.data)
       return response.ok
     }),
   }))

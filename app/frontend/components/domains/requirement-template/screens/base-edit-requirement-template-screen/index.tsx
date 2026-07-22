@@ -20,6 +20,7 @@ import { ErrorScreen } from "../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
 import { FloatingHelpDrawer } from "../../../../shared/floating-help-drawer"
 import { BuilderBottomFloatingButtons } from "../../builder-bottom-floating-buttons"
+import { ConfigErrorsPanel } from "../../config-errors-panel"
 import { SectionsSidebar } from "../../sections-sidebar"
 import { useSectionHighlight } from "../../use-section-highlight"
 import { ControlsHeader } from "./controls-header"
@@ -200,6 +201,7 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
   const stepCodeRelatedWarningBannerErrors = getStepCodeRelatedWarningBannerErrors()
 
   const hasStepCodeDependencyError = !!stepCodeRelatedWarningBannerErrors.find((error) => error.type === "error")
+  const configErrors = requirementTemplateStore.getConfigErrorsByRequirementTemplateId(requirementTemplate.id)
   return (
     <Box as="main" id="admin-edit-permit-template">
       <FormProvider {...formMethods}>
@@ -265,6 +267,7 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
           </Box>
         </Box>
       </FormProvider>
+      <ConfigErrorsPanel errors={configErrors} requirementTemplateId={requirementTemplate.id} />
       <BuilderBottomFloatingButtons isCollapsedAll={isCollapsedAll} setIsCollapsedAll={setIsCollapsedAll} />
     </Box>
   )
