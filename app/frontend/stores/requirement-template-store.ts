@@ -13,12 +13,32 @@ import { ERequirementTemplateSortFields, ETagType } from "../types/enums"
 import { ICopyRequirementTemplateFormData, IOption, TCreateRequirementTemplateFormData } from "../types/types"
 import { toCamelCase } from "../utils/utility-functions"
 
+export interface IRequirementTemplateConfigError {
+  category: string
+  blockId: string
+  blockName: string
+  requirementId?: string
+  requirementCode?: string
+  requirementName?: string
+  message: string
+}
+
+interface IConfigErrorResponse {
+  meta?: {
+    configErrors?: IRequirementTemplateConfigError[]
+  }
+}
+
 export const RequirementTemplateStoreModel = types
   .compose(
     types.model("RequirementTemplateStoreModel").props({
       requirementTemplateMap: types.map(RequirementTemplateModel),
       tableRequirementTemplates: types.array(types.safeReference(RequirementTemplateModel)),
       filterOptions: types.optional(types.array(types.frozen<IOption>()), []),
+      configErrorsByRequirementTemplateId: types.optional(
+        types.map(types.frozen<IRequirementTemplateConfigError[]>()),
+        {}
+      ),
     }),
     createSearchModel<ERequirementTemplateSortFields>("fetchRequirementTemplates")
   )
@@ -30,9 +50,25 @@ export const RequirementTemplateStoreModel = types
     getRequirementTemplateById(id: string) {
       return self.requirementTemplateMap.get(id)
     },
+    getConfigErrorsByRequirementTemplateId(id: string) {
+      return self.configErrorsByRequirementTemplateId.get(id) ?? []
+    },
     getSortColumnHeader(field: ERequirementTemplateSortFields) {
       //@ts-ignore
       return t(`requirementTemplate.fields.${toCamelCase(field)}`)
+    },
+  }))
+  .actions((self) => ({
+    captureConfigErrors(templateId: string, responseData: unknown) {
+      const configErrors = (responseData as IConfigErrorResponse | undefined)?.meta?.configErrors
+      if (configErrors) {
+        self.configErrorsByRequirementTemplateId.set(templateId, configErrors)
+      } else {
+        self.configErrorsByRequirementTemplateId.delete(templateId)
+      }
+    },
+    clearConfigErrors(templateId: string) {
+      self.configErrorsByRequirementTemplateId.delete(templateId)
     },
   }))
   .actions((self) => ({
@@ -156,10 +192,12 @@ export const RequirementTemplateStoreModel = types
         const templateData = response.data.data
         templateData.isFullyLoaded = true
         self.mergeUpdate(templateData, "requirementTemplateMap")
+        self.clearConfigErrors(templateId)
 
         return self.requirementTemplateMap.get(templateData.id) as IRequirementTemplate
       }
 
+      self.captureConfigErrors(templateId, response.data)
       return false
     }),
     forcePublishRequirementTemplate: flow(function* (
@@ -174,10 +212,12 @@ export const RequirementTemplateStoreModel = types
         const templateData = response.data.data
         templateData.isFullyLoaded = true
         self.mergeUpdate(templateData, "requirementTemplateMap")
+        self.clearConfigErrors(templateId)
 
         return self.requirementTemplateMap.get(templateData.id) as IRequirementTemplate
       }
 
+      self.captureConfigErrors(templateId, response.data)
       return false
     }),
     fetchFilterOptions: flow(function* () {
@@ -220,9 +260,11 @@ export const RequirementTemplateStoreModel = types
         const templateData = response.data.data
         templateData.isFullyLoaded = true
         self.mergeUpdate(templateData, "requirementTemplateMap")
+        self.clearConfigErrors(templateId)
         return self.requirementTemplateMap.get(templateData.id) as IRequirementTemplate
       }
 
+      self.captureConfigErrors(templateId, response.data)
       return false
     }),
 
@@ -251,15 +293,21 @@ export const RequirementTemplateStoreModel = types
         skipDateCheck?: boolean
       }
     ) {
+      const requirementTemplateId =
+        self.rootStore.templateVersionStore.getTemplateVersionById(templateVersionId)?.requirementTemplateId
       const response = yield* toGenerator(self.environment.api.promoteDraft(templateVersionId, params))
 
       if (response.ok) {
         const templateData = response.data.data
         templateData.isFullyLoaded = true
         self.mergeUpdate(templateData, "requirementTemplateMap")
+        self.clearConfigErrors(templateData.id)
         return self.requirementTemplateMap.get(templateData.id) as IRequirementTemplate
       }
 
+      if (requirementTemplateId) {
+        self.captureConfigErrors(requirementTemplateId, response.data)
+      }
       return false
     }),
   }))

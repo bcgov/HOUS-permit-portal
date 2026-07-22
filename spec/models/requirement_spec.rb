@@ -7,6 +7,91 @@ RSpec.describe Requirement, type: :model, search: true do
     it { should belong_to(:requirement_question).optional }
   end
 
+  describe "shared question text defaults" do
+    let(:shared_question) do
+      create(
+        :requirement_question,
+        :shared,
+        hint: "<p>Shared help</p>",
+        instructions: "<p>Shared instructions</p>"
+      )
+    end
+
+    it "inherits help and instructions when placement overrides are nil" do
+      requirement =
+        build(
+          :requirement,
+          requirement_question: shared_question,
+          hint: nil,
+          instructions: nil
+        )
+
+      expect(requirement.effective_hint).to eq("<p>Shared help</p>")
+      expect(requirement.effective_instructions).to eq(
+        "<p>Shared instructions</p>"
+      )
+    end
+
+    it "uses placement overrides without detaching the shared question" do
+      requirement =
+        build(
+          :requirement,
+          requirement_question: shared_question,
+          hint: "<p>Block help</p>",
+          instructions: "<p>Block instructions</p>"
+        )
+
+      expect(requirement.effective_hint).to eq("<p>Block help</p>")
+      expect(requirement.effective_instructions).to eq(
+        "<p>Block instructions</p>"
+      )
+      expect(requirement.requirement_question).to eq(shared_question)
+    end
+
+    it "allows an empty placement override to suppress a shared default" do
+      requirement =
+        build(
+          :requirement,
+          requirement_question: shared_question,
+          hint: "",
+          instructions: ""
+        )
+
+      expect(requirement.effective_hint).to eq("")
+      expect(requirement.effective_instructions).to eq("")
+    end
+
+    it "serializes shared defaults separately from placement overrides" do
+      requirement =
+        create(
+          :requirement,
+          requirement_question: shared_question,
+          hint: nil,
+          instructions: "<p>Block instructions</p>"
+        )
+      payload =
+        RequirementBlueprint.render_as_hash(requirement).deep_stringify_keys
+
+      expect(
+        payload.slice(
+          "uses_shared_question",
+          "default_hint",
+          "default_instructions",
+          "hint_override",
+          "instructions_override"
+        )
+      ).to eq(
+        {
+          "uses_shared_question" => true,
+          "default_hint" => "<p>Shared help</p>",
+          "default_instructions" => "<p>Shared instructions</p>",
+          "hint_override" => nil,
+          "instructions_override" => "<p>Block instructions</p>"
+        }
+      )
+    end
+  end
+
   describe "validations" do
     context "number inputs" do
       it "enforces number inputs are valid without a unit" do

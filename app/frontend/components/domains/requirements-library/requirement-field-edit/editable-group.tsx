@@ -17,8 +17,8 @@ export type TEditableGroupProps<TFieldValues extends FieldValues> = {
   requirementType?: ERequirementType
   editableLabelProps: TEditableLabelProps<TFieldValues>
   editableHelperTextProps?: TEditableHelperTextProps<TFieldValues>
-  isOptionalCheckboxProps: TIsOptionalCheckboxProps<TFieldValues>
-  isElectiveCheckboxProps: TIsElectiveCheckboxProps<TFieldValues>
+  isOptionalCheckboxProps?: TIsOptionalCheckboxProps<TFieldValues>
+  isElectiveCheckboxProps?: TIsElectiveCheckboxProps<TFieldValues>
   isMultipleFilesCheckboxProps?: TIsMultipleFilesCheckboxProps<TFieldValues>
   multiOptionEditableInput?: JSX.Element
   label: string
@@ -64,8 +64,8 @@ export function EditableGroup<TFieldValues>({
       {isMultipleFilesCheckboxProps && (
         <IsMultipleFilesCheckbox isDisabled={isEditLimited} mt={2} {...isMultipleFilesCheckboxProps} />
       )}
-      <IsOptionalCheckbox isDisabled={isEditLimited} mt={2} {...isOptionalCheckboxProps} />
-      <IsElectiveCheckbox isDisabled={isEditLimited} mt={2} {...isElectiveCheckboxProps} />
+      {isOptionalCheckboxProps && <IsOptionalCheckbox isDisabled={isEditLimited} mt={2} {...isOptionalCheckboxProps} />}
+      {isElectiveCheckboxProps && <IsElectiveCheckbox isDisabled={isEditLimited} mt={2} {...isElectiveCheckboxProps} />}
     </Stack>
   )
 }

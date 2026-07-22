@@ -230,11 +230,27 @@ class Requirement < ApplicationRecord
   end
 
   def effective_hint
-    requirement_question&.hint || read_attribute(:hint)
+    unless requirement_question&.shared?
+      return requirement_question&.hint || read_attribute(:hint)
+    end
+
+    if read_attribute(:hint).nil?
+      requirement_question.hint
+    else
+      read_attribute(:hint)
+    end
   end
 
   def effective_instructions
-    requirement_question&.instructions || read_attribute(:instructions)
+    unless requirement_question&.shared?
+      return requirement_question&.instructions || read_attribute(:instructions)
+    end
+
+    if read_attribute(:instructions).nil?
+      requirement_question.instructions
+    else
+      read_attribute(:instructions)
+    end
   end
 
   def effective_input_type

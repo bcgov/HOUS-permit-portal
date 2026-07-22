@@ -2,7 +2,7 @@ import { Box, Button, Flex, HStack, Tag, Text, useDisclosure, VStack } from "@ch
 import { Info } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { Controller, useController, useFieldArray, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { IRequirementBlock } from "../../../../models/requirement-block"
@@ -21,9 +21,11 @@ import { useRequirementLogic } from "./use-requirement-logic"
 export const FieldsSetup = observer(function FieldsSetup({
   requirementBlock,
   isEditable = true,
+  autoOpenRequirementCode,
 }: {
   requirementBlock: IRequirementBlock | IDenormalizedRequirementBlock
   isEditable?: boolean
+  autoOpenRequirementCode?: string
 }) {
   const { t } = useTranslation()
   const {
@@ -48,6 +50,16 @@ export const FieldsSetup = observer(function FieldsSetup({
   const [requirementIdToEdit, setRequirementIdToEdit] = useState<string | undefined>()
 
   const { isOpen: isInReorderMode, onToggle } = useDisclosure()
+
+  useEffect(() => {
+    if (!autoOpenRequirementCode) return
+
+    const requirementIndex = watchedRequirements.findIndex(
+      (requirement) => requirement.requirementCode === autoOpenRequirementCode
+    )
+    const requirementFieldId = fields[requirementIndex]?.id
+    if (requirementFieldId) setRequirementIdToEdit(requirementFieldId)
+  }, [autoOpenRequirementCode, fields, watchedRequirements])
 
   const toggleRequirementToEdit = (requirementId: string) => {
     setRequirementIdToEdit((pastRequirementId) => (pastRequirementId === requirementId ? undefined : requirementId))

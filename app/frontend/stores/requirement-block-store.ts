@@ -147,6 +147,17 @@ export const RequirementBlockStoreModel = types
 
       return response.ok
     }),
+    fetchRequirementBlock: flow(function* (id: string) {
+      const existing = self.getRequirementBlockById(id)
+      if (existing) return existing
+
+      const response = yield* toGenerator(self.environment.api.fetchRequirementBlock(id))
+      if (response.ok) {
+        self.requirementBlockMap.put(response.data.data)
+        return self.getRequirementBlockById(id)
+      }
+      return undefined
+    }),
     searchAssociations: flow(function* (query: string) {
       const response = yield* toGenerator(
         self.environment.api.searchTags({

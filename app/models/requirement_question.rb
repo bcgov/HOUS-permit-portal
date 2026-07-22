@@ -1,11 +1,37 @@
 class RequirementQuestion < ApplicationRecord
+  PLACEMENT_INPUT_OPTION_KEYS = %w[
+    conditional
+    computed_compliance
+    data_validation
+  ].freeze
+
+  # searchkick must be declared before Discard::Model to ensure auto-callbacks register correctly
+  searchkick searchable: %i[
+               name
+               description
+               label
+               requirement_code
+               associations
+             ],
+             word_start: %i[
+               name
+               description
+               label
+               requirement_code
+               associations
+             ]
+
   include HtmlSanitizeAttributes
   include Discard::Model
 
-  sanitizable :hint, :instructions
+  sanitizable :hint, :instructions, :description
 
   has_many :requirements, dependent: :restrict_with_error
   has_many :requirement_blocks, through: :requirements
+
+  scope :shared, -> { where(shared: true) }
+
+  acts_as_taggable_on :associations
 
   enum :input_type,
        {
@@ -33,6 +59,7 @@ class RequirementQuestion < ApplicationRecord
        },
        prefix: true
 
+  before_validation :ensure_id, if: :shared?
   before_validation :set_requirement_code
   before_validation :merge_computed_compliance_default_settings
   before_validation :convert_value_options,
@@ -43,9 +70,18 @@ class RequirementQuestion < ApplicationRecord
                         )
                       }
 
+  after_commit :refresh_search_index,
+               if: -> do
+                 previously_new_record? || saved_change_to_discarded_at?
+               end
+
   validates :label, presence: true
   validates :input_type, presence: true
   validates :requirement_code, presence: true
+  validates :name, presence: true, if: :shared?
+  validates :description, length: { maximum: 250 }, allow_blank: true
+  validate :shared_questions_cannot_have_placement_options, if: :shared?
+  validate :input_type_immutable_when_in_use, on: :update
   validate :validate_value_options,
            if:
              Proc.new { |question|
@@ -81,17 +117,50 @@ class RequirementQuestion < ApplicationRecord
     input_options["computed_compliance"].present?
   end
 
+  def has_data_validation?
+    input_options.present? && input_options["data_validation"].present?
+  end
+
   def usage_count
     requirements.count
   end
 
+  def search_data
+    {
+      name: name,
+      description: description,
+      label: label,
+      requirement_code: requirement_code,
+      associations: association_list,
+      shared: shared,
+      discarded: discarded_at.present?,
+      updated_at: updated_at,
+      created_at: created_at
+    }
+  end
+
   private
+
+  def ensure_id
+    self.id ||= SecureRandom.uuid
+  end
 
   def set_requirement_code
     return if requirement_code.present?
     return if label.blank?
 
-    self.requirement_code = label.parameterize(separator: "_")
+    parameterized = label.parameterize(separator: "_")
+    parameterized = "#{parameterized}_file" if input_type_file? &&
+      !parameterized.end_with?("_file")
+
+    self.requirement_code =
+      if shared?
+        return if id.blank?
+
+        "#{id}:#{parameterized}"
+      else
+        parameterized
+      end
   end
 
   def merge_computed_compliance_default_settings
@@ -150,13 +219,6 @@ class RequirementQuestion < ApplicationRecord
     # here desyncs HistoricSite maps. Shared bank rows convert themselves.
     return unless shared?
 
-    inverted_computed_compliance_options_map =
-      computed_compliance[
-        "options_map"
-      ].invert if computed_compliance.present? &&
-      computed_compliance["options_map"].present? &&
-      computed_compliance["options_map"].is_a?(Hash)
-
     input_options["value_options"] = input_options[
       "value_options"
     ].map do |option_json|
@@ -168,14 +230,38 @@ class RequirementQuestion < ApplicationRecord
       words = value.split(" ").map(&:capitalize)
       formatted_value = words.join("").strip.camelize(:lower)
 
-      if inverted_computed_compliance_options_map.present? &&
-           inverted_computed_compliance_options_map[value].present?
-        self.computed_compliance["options_map"][
-          inverted_computed_compliance_options_map[value]
-        ] = formatted_value
-      end
-
       option_json.merge("value" => formatted_value)
     end
+  end
+
+  def refresh_search_index
+    RequirementQuestion.search_index.refresh
+  end
+
+  def shared_questions_cannot_have_placement_options
+    return if input_options.blank?
+
+    options = input_options.deep_stringify_keys
+    invalid_keys =
+      PLACEMENT_INPUT_OPTION_KEYS.select { |key| options[key].present? }
+    return if invalid_keys.empty?
+
+    errors.add(
+      :input_options,
+      "#{invalid_keys.to_sentence} must be configured on requirement placements"
+    )
+  end
+
+  # Input type controls the structure of every linked placement. Use a new
+  # shared question rather than changing that structure in place.
+  def input_type_immutable_when_in_use
+    return unless shared?
+    return unless will_save_change_to_input_type?
+    return unless requirements.exists?
+
+    errors.add(
+      :input_type,
+      "cannot be changed while this question is used in requirement blocks"
+    )
   end
 end

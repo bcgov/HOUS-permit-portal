@@ -10,9 +10,11 @@ import { IRequirementTemplate } from "../../../../models/requirement-template"
 import { useMst } from "../../../../setup/root"
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
+import { ConfirmationModal } from "../../../shared/confirmation-modal"
 import { FloatingHelpDrawer } from "../../../shared/floating-help-drawer"
 import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
 import { BuilderBottomFloatingButtons } from "../builder-bottom-floating-buttons"
+import { ConfigErrorsPanel } from "../config-errors-panel"
 import { PublishScheduleModal } from "../publish-schedule-modal"
 import { SectionsDisplay } from "../sections-display"
 import { SectionsSidebar } from "../sections-sidebar"
@@ -34,6 +36,7 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
     sectionIdToHighlight: currentSectionId,
   } = useSectionHighlight({ sections: denormalizedTemplate?.requirementTemplateSections })
   const [isCollapsedAll, setIsCollapsedAll] = useState(false)
+  const [isDiscardingDraft, setIsDiscardingDraft] = useState(false)
   const [isTogglingPubliclyPreviewable, setIsTogglingPubliclyPreviewable] = useState(false)
   const navigate = useNavigate()
 
@@ -66,6 +69,9 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
   )
 
   const showSchedulePublishControls = isDraft && isSuperAdmin && !!requirementTemplate?.isFullyLoaded
+  const configErrors = requirementTemplateId
+    ? requirementTemplateStore.getConfigErrorsByRequirementTemplateId(requirementTemplateId)
+    : []
 
   const onScheduleConfirm = async (scheduleDate: Date) => {
     if (!templateVersion) return
@@ -113,6 +119,20 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
       await templateVersionStore.togglePubliclyPreviewable(templateVersion.id, !templateVersion.publiclyPreviewable)
     } finally {
       setIsTogglingPubliclyPreviewable(false)
+    }
+  }
+
+  const handleDiscardDraft = async (closeModal: () => void) => {
+    if (!templateVersion || !requirementTemplateId) return
+    setIsDiscardingDraft(true)
+    try {
+      const updated = await requirementTemplateStore.discardDraft(templateVersion.id)
+      if (updated) {
+        closeModal()
+        navigate(`/requirement-templates/${requirementTemplateId}/edit`)
+      }
+    } finally {
+      setIsDiscardingDraft(false)
     }
   }
 
@@ -177,6 +197,24 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
               {templateVersion.isDraft && (
                 <SharePreviewPopover draftTemplateVersion={templateVersion} variant="primary" />
               )}
+              {/* HUB-5289: Draft snapshots still cannot be repaired in place; discard and recreate after fixing the builder. */}
+              {templateVersion.isDraft && isSuperAdmin && (
+                <ConfirmationModal
+                  title={t("templateVersionPreview.discardDraft.title")}
+                  body={t("templateVersionPreview.discardDraft.body")}
+                  onConfirm={handleDiscardDraft}
+                  renderTriggerButton={(props) => (
+                    <Button {...props} variant="ghost" color="semantic.error">
+                      {t("templateVersionPreview.discardDraft.triggerButton")}
+                    </Button>
+                  )}
+                  renderConfirmationButton={(props) => (
+                    <Button {...props} colorScheme="red" isLoading={isDiscardingDraft}>
+                      {t("templateVersionPreview.discardDraft.confirmButton")}
+                    </Button>
+                  )}
+                />
+              )}
               {showSchedulePublishControls && requirementTemplate && (
                 <PublishScheduleModal
                   requirementTemplate={requirementTemplate}
@@ -208,6 +246,9 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
               <AlertIcon mt={1} />
               <Text fontSize="sm">{t("templateVersionPreview.immutableVersionNotice")}</Text>
             </Alert>
+          )}
+          {isDraft && requirementTemplateId && (
+            <ConfigErrorsPanel errors={configErrors} requirementTemplateId={requirementTemplateId} />
           )}
 
           <SectionsDisplay

@@ -55,6 +55,8 @@ class TemplateVersioningService
         status: "scheduled"
       )
 
+    validate_config!(template_version)
+
     if !template_version.save
       raise TemplateVersionScheduleError.new(
               template_version.errors.full_messages.join(", ")
@@ -112,6 +114,8 @@ class TemplateVersioningService
         status: "scheduled"
       )
 
+    validate_config!(template_version)
+
     if !template_version.save
       raise TemplateVersionScheduleError.new(
               template_version.errors.full_messages.join(", ")
@@ -149,6 +153,8 @@ class TemplateVersioningService
         status: "draft",
         assignee: assignee
       )
+
+    validate_config!(template_version)
 
     unless template_version.save
       raise TemplateVersionDraftError,
@@ -226,6 +232,8 @@ class TemplateVersioningService
 
       promoted_version.version_diff = compute_version_diff(promoted_version)
 
+      validate_config!(promoted_version)
+
       unless promoted_version.save
         raise TemplateVersionScheduleError.new(
                 promoted_version.errors.full_messages.join(", ")
@@ -301,6 +309,10 @@ class TemplateVersioningService
               "services.template_versioning_service.publish_before_schedule_date"
             )
     end
+
+    # Scheduled snapshots are validated when created. Recheck here so legacy
+    # or directly-modified versions cannot bypass the publication gate.
+    validate_config!(template_version)
 
     ActiveRecord::Base.transaction do
       # Populate version_diff before publishing (replaces the old TODO)
@@ -702,6 +714,14 @@ class TemplateVersioningService
 
     requirement_blocks_json
   end
+
+  def self.validate_config!(template_version)
+    TemplateVersionConfigValidator.new(
+      requirement_blocks_json: template_version.requirement_blocks_json,
+      denormalized_template_json: template_version.denormalized_template_json
+    ).validate!
+  end
+  private_class_method :validate_config!
 
   def self.is_valid_schedule_version_date?(requirement_template, version_date)
     last_scheduled_version =

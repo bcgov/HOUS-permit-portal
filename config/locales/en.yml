@@ -531,6 +531,28 @@ en:
       restore_error:
         title: "Error"
         message: "There was an error restoring the requirement block"
+    requirement_question:
+      create_success:
+        title: ""
+        message: "Successfully created question!"
+      create_error:
+        title: Error
+        message: "%{error_message}"
+      update_error:
+        title: Error
+        message: "%{error_message}"
+      destroy_success:
+        title: ""
+        message: The question was archived successfully
+      destroy_error:
+        title: Error
+        message: "There was an error archiving the question"
+      restore_success:
+        title: ""
+        message: The question was restored successfully
+      restore_error:
+        title: "Error"
+        message: "There was an error restoring the question"
     external_api_key:
       create_error:
         title: Create Error
@@ -589,7 +611,7 @@ en:
         message: "%{error_message}"
       schedule_error:
         title: Error
-        message: "There was an error scheduling the template"
+        message: "%{error_message}"
       template_unschedule_error:
         title: Error unscheduling template
         message: "There was an error unscheduling the template"

@@ -6,5 +6,13 @@ FactoryBot.define do
     hint { nil }
     instructions { nil }
     shared { false }
+    name { nil }
+    description { nil }
+
+    trait :shared do
+      shared { true }
+      name { Faker::Lorem.unique.words(number: 3).join(" ") }
+      description { Faker::Lorem.sentence }
+    end
   end
 end

@@ -244,6 +244,32 @@ RSpec.describe Api::TemplateVersionsController,
         expect(response).to have_http_status(:forbidden)
       end
 
+      it "returns structured configuration errors without a flash message" do
+        config_errors = [
+          {
+            category: "block_conditional",
+            block_id: "block-id",
+            block_name: "Details",
+            message: "conditional references a block not in this template"
+          }
+        ]
+        allow(TemplateVersioningService).to receive(
+          :promote_draft_to_scheduled!
+        ).and_raise(TemplateVersionConfigError.new(config_errors))
+
+        post :promote_draft,
+             params: {
+               id: draft_version.id,
+               version_date: Date.tomorrow.to_s
+             }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(json_response.dig("meta", "config_errors")).to eq(
+          config_errors.map(&:deep_stringify_keys)
+        )
+        expect(json_response.dig("meta", "message")).to be_nil
+      end
+
       context "with skip_date_check: true" do
         around do |example|
           original = ENV["ENABLE_TEMPLATE_FORCE_PUBLISH"]
