@@ -4,7 +4,7 @@ import React from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { IFormConditional, IRequirementAttributes } from "../../../../types/api-request"
-import { EEnergyStepCodeDependencyRequirementCode, ENumberUnit, ERequirementType } from "../../../../types/enums"
+import { EEnergyStepCodeDependencyRequirementCode, ERequirementType } from "../../../../types/enums"
 import {
   isArchitecturalDrawingRequirement,
   isContactRequirement,
@@ -24,6 +24,10 @@ interface RequirementFieldRowProps {
   hideConditional?: boolean
   /** Bank questions: required/elective live on placement, not the catalogue row. */
   hidePlacementOptions?: boolean
+  /** Bank questions do not own conditionals, compliance, or validation. */
+  hidePlacementConfiguration?: boolean
+  /** Disable removing a field when removal would enable an unsafe type swap. */
+  disableRemove?: boolean
 }
 
 const fieldContainerSharedProps = {
@@ -69,6 +73,8 @@ export const RequirementFieldRow = ({
   onRemove,
   hideConditional = false,
   hidePlacementOptions = false,
+  hidePlacementConfiguration = false,
+  disableRemove = false,
 }: RequirementFieldRowProps) => {
   const { t } = useTranslation()
   const {
@@ -86,8 +92,12 @@ export const RequirementFieldRow = ({
   const watchedRequirementCode = watch(`requirementsAttributes.${index}.requirementCode`)
   const watchedComputedCompliance = watch(`requirementsAttributes.${index}.inputOptions.computedCompliance`)
   const watchedDataValidation = watch(`requirementsAttributes.${index}.inputOptions.dataValidation`)
+  const displayedHint = field.usesSharedQuestion && watchedHint == null ? field.defaultHint : watchedHint
 
   const { disabledMenuOptions, showEditControls } = getRequirementFieldState(watchedRequirementCode, requirementType)
+  if (disableRemove && !disabledMenuOptions.includes("remove")) {
+    disabledMenuOptions.push("remove")
+  }
 
   return (
     <Box
@@ -144,9 +154,15 @@ export const RequirementFieldRow = ({
           }}
           editableHelperTextProps={{
             controlProps: { control, name: `requirementsAttributes.${index}.hint` },
+            defaultValue: field.defaultHint,
+            usesSharedQuestion: field.usesSharedQuestion,
+            isQuestionBankDefault: hidePlacementConfiguration,
           }}
           editableInstructionsTextProps={{
             controlProps: { control, name: `requirementsAttributes.${index}.instructions` },
+            defaultValue: field.defaultInstructions,
+            usesSharedQuestion: field.usesSharedQuestion,
+            isQuestionBankDefault: hidePlacementConfiguration,
           }}
           isOptionalCheckboxProps={
             hidePlacementOptions
@@ -176,8 +192,7 @@ export const RequirementFieldRow = ({
                     control: control,
 
                     name: `requirementsAttributes.${index}.inputOptions.numberUnit`,
-                    // @ts-ignore
-                    defaultValue: ENumberUnit.noUnit,
+                    defaultValue: undefined,
                   },
                 }
               : undefined
@@ -230,7 +245,7 @@ export const RequirementFieldRow = ({
         <RequirementFieldDisplay
           requirementType={requirementType}
           label={watch(`requirementsAttributes.${index}.label`)}
-          helperText={watchedHint}
+          helperText={displayedHint}
           inputOptions={watch(`requirementsAttributes.${index}.inputOptions`)}
           unit={
             requirementType === ERequirementType.number
@@ -259,12 +274,13 @@ export const RequirementFieldRow = ({
         onRemove={onRemove}
         elective={watchedElective}
         conditional={hideConditional ? undefined : (watchedConditional as IFormConditional)}
-        computedCompliance={watchedComputedCompliance}
-        dataValidation={watchedDataValidation}
+        computedCompliance={hidePlacementConfiguration ? undefined : watchedComputedCompliance}
+        dataValidation={hidePlacementConfiguration ? undefined : watchedDataValidation}
         requirementType={requirementType}
         index={index}
         disabledMenuOptions={disabledMenuOptions}
         hideConditional={hideConditional}
+        hidePlacementConfiguration={hidePlacementConfiguration}
       />
     </Box>
   )

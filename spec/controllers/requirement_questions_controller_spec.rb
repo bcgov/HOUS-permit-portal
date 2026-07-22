@@ -43,6 +43,29 @@ RSpec.describe Api::RequirementQuestionsController,
           "Successfully created question!"
         )
       end
+
+      it "does not persist placement-only configuration" do
+        post :create,
+             params: {
+               requirement_question:
+                 valid_attributes.merge(
+                   input_options: {
+                     computed_compliance: {
+                       module: "DigitalSealValidator"
+                     },
+                     data_validation: {
+                       operation: "min",
+                       value: 1
+                     }
+                   }
+                 )
+             }
+
+        expect(response).to have_http_status(:success)
+        expect(
+          RequirementQuestion.find(question_id).input_options
+        ).not_to include("computed_compliance", "data_validation")
+      end
     end
 
     context "when the user is unauthorized" do

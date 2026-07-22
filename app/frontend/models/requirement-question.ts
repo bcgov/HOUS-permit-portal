@@ -1,6 +1,7 @@
-import { Instance, flow, types } from "mobx-state-tree"
+import { applySnapshot, flow, Instance, toGenerator, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
+import { IRequirementQuestionParams } from "../types/api-request"
 import { ERequirementType } from "../types/enums"
 
 export const RequirementQuestionModel = types
@@ -32,12 +33,21 @@ export const RequirementQuestionModel = types
     },
   }))
   .actions((self) => ({
+    update: flow(function* (params: IRequirementQuestionParams) {
+      const response = yield* toGenerator(self.environment.api.updateRequirementQuestion(self.id, params))
+      if (response.ok) {
+        applySnapshot(self, response.data.data)
+      }
+      return response.ok
+    }),
     destroy: flow(function* () {
       const response = yield self.environment.api.archiveRequirementQuestion(self.id)
+      if (response.ok) applySnapshot(self, response.data.data)
       return response.ok
     }),
     restore: flow(function* () {
       const response = yield self.environment.api.restoreRequirementQuestion(self.id)
+      if (response.ok) applySnapshot(self, response.data.data)
       return response.ok
     }),
   }))

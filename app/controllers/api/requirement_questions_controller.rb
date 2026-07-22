@@ -39,7 +39,6 @@ class Api::RequirementQuestionsController < Api::ApplicationController
     authorize @requirement_question
 
     if @requirement_question.save
-      RequirementQuestion.search_index.refresh
       render_success @requirement_question,
                      "requirement_question.create_success",
                      {
@@ -138,9 +137,7 @@ class Api::RequirementQuestionsController < Api::ApplicationController
         :multiple,
         { headers: %i[first_column a quantity ab] },
         { rows: %i[name a] },
-        value_options: [%i[value label]],
-        computed_compliance: [:value, :module, options_map: {}],
-        data_validation: %i[operation value error_message]
+        value_options: [%i[value label]]
       ]
     )
   end
