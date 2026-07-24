@@ -726,7 +726,7 @@ export enum EPermitProjectSortFields {
   location = "location",
   submitter = "submitter",
   updatedAt = "updated_at",
-  rollupStatus = "rollup_status",
+  state = "state",
 }
 
 export enum EProjectAuditSortFields {

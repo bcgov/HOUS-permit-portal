@@ -54,7 +54,7 @@ module Api::Concerns::Search::PermitProjects
         :show_archived,
         :active_meeting,
         { jurisdiction_id: [] },
-        { rollup_status: [] },
+        { state: [] },
         { requirement_template_ids: [] }
       ],
       sort: %i[field direction]

@@ -18,7 +18,7 @@ import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { IPermitProject } from "../../../models/permit-project"
 import { useMst } from "../../../setup/root"
-import { EPermitProjectRollupStatus, EProjectPermitApplicationSortFields } from "../../../types/enums"
+import { EProjectPermitApplicationSortFields } from "../../../types/enums"
 import { IOption } from "../../../types/types"
 import { EmptyResultsBox } from "../../shared/grid/empty-results-box"
 import { SearchGrid } from "../../shared/grid/search-grid"
@@ -252,7 +252,7 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
             <AddPermitsButton permitProject={permitProject} />
           </HStack>
         </Flex>
-        {permitProject.rollupStatus === EPermitProjectRollupStatus.empty ? (
+        {permitProject.totalPermitsCount === 0 ? (
           <EmptyResultsBox description={t("permitProject.index.empty")} icon={<ClipboardText size={18} />} mt={2} />
         ) : (
           <>

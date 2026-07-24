@@ -17,7 +17,7 @@ import { GridHeaders, PROJECTS_GRID_TEMPLATE_COLUMNS } from "./grid-header"
 import { JurisdictionFilter } from "./jurisdiction-filter"
 import { ProjectGridRow } from "./project-grid-row"
 import { RequirementTemplateFilter } from "./requirement-template-filter"
-import { RollupStatusFilter } from "./rollup-status-filter"
+import { StateFilter } from "./state-filter"
 
 export const ProjectsGrid = observer(() => {
   const { t } = useTranslation()
@@ -34,7 +34,7 @@ export const ProjectsGrid = observer(() => {
   } = permitProjectStore
 
   return (
-    <VStack align="stretch" spacing={4} w="full">
+    <VStack align="stretch" spacing={4} w="full" mt={4}>
       <Heading as="h2" size="lg">
         {t("permitProject.index.allProjects", "All projects")}
       </Heading>
@@ -52,7 +52,7 @@ export const ProjectsGrid = observer(() => {
             {/* currently we do not have the ability to archive projects */}
             {/* <ActiveArchivedFilter searchModel={permitProjectStore} /> */}
             <RequirementTemplateFilter searchModel={permitProjectStore} />
-            <RollupStatusFilter searchModel={permitProjectStore} />
+            <StateFilter searchModel={permitProjectStore} />
             <JurisdictionFilter searchModel={permitProjectStore} />
             <MeetingRequestsFilter
               value={permitProjectStore.activeMeetingFilter}
