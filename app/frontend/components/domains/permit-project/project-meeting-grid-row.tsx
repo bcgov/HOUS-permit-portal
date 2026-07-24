@@ -16,7 +16,7 @@ interface IProjectMeetingGridRowProps {
 }
 
 const formatMeetingDate = (projectMeeting: IProjectMeeting) => {
-  const date = projectMeeting.confirmedDate || projectMeeting.submittedAt || projectMeeting.createdAt
+  const date = projectMeeting.confirmedDate
   return date ? format(date, datefnsTableDateTimeFormat) : ""
 }
 

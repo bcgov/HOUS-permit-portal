@@ -12,6 +12,7 @@ import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
+import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { ActiveProjectMeetingNotice } from "../../shared/project-meetings/active-project-meeting-notice"
@@ -123,13 +124,19 @@ const MeetingsListContent = observer(({ permitProject, projectMeetingsEnabled }:
           emptyIcon={<CalendarBlank size={18} />}
         >
           <ProjectMeetingGridHeaders />
-          {tableProjectMeetings.map((projectMeeting) => (
-            <ProjectMeetingGridRow
-              key={projectMeeting.id}
-              permitProjectId={permitProject.id}
-              projectMeeting={projectMeeting}
-            />
-          ))}
+          {isSearching ? (
+            <Flex gridColumn="span 4" justify="center" align="center" minH="200px">
+              <SharedSpinner />
+            </Flex>
+          ) : (
+            tableProjectMeetings.map((projectMeeting) => (
+              <ProjectMeetingGridRow
+                key={projectMeeting.id}
+                permitProjectId={permitProject.id}
+                projectMeeting={projectMeeting}
+              />
+            ))
+          )}
         </SearchGrid>
         {!isEmpty && (
           <Flex w="full" justifyContent="space-between" mt={6}>

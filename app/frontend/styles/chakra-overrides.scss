@@ -358,6 +358,12 @@
   background-color: var(--chakra-colors-theme-blueLight);
 }
 
+// Uppy's default AddFiles drag-drop chrome: 1px dashed #dfdfdf with 3px radius.
+// We already draw the outer dashed border on .uppy-Dashboard — kill the inner one.
+[data-uppy-drag-drop-supported="true"] .uppy-Dashboard-AddFiles {
+  border: none;
+}
+
 .uppy-Dashboard-browse {
   color: $bcgov-link !important;
   background: transparent;
