@@ -511,7 +511,7 @@ if north_van.present?
 
     idx = 0
     while inbox_test_project.reload.permit_applications.kept.count(
-            &:visible_to_reviewers?
+            &:submitted_at_least_once?
           ) < inbox_test_visible_app_target
       break if idx >= 100 # safety: avoid infinite loop if statuses fail to seed
 
@@ -530,7 +530,7 @@ if north_van.present?
       idx += 1
     end
 
-    puts "  ✓ #{inbox_test_project_title}: #{inbox_test_project.permit_applications.kept.count(&:visible_to_reviewers?)} reviewer-visible permit applications"
+    puts "  ✓ #{inbox_test_project_title}: #{inbox_test_project.permit_applications.kept.count(&:submitted_at_least_once?)} reviewer-visible permit applications"
   else
     puts "  (skipped Inbox test project: need submitter, reviewer, and published template versions)"
   end

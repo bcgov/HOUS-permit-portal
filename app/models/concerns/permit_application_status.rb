@@ -121,7 +121,7 @@ module PermitApplicationStatus
       self.class.submitted_statuses.include?(status)
     end
 
-    def visible_to_reviewers?
+    def submitted_at_least_once?
       submitted? || revisions_requested?
     end
 

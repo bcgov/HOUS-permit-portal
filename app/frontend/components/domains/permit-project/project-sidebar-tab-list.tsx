@@ -44,11 +44,21 @@ export const ProjectSidebarTabList = ({ top = 0, tabsData, children, ...rest }: 
       {tabsData ? (
         <VStack align="stretch" spacing={1} w="full" pt={8}>
           {tabsData.map((tabData) => (
-            <Tab key={tabData.label} as={RouterLink} to={tabData.to} onClick={handleTabLinkClick} w="full">
+            <Tab
+              key={tabData.label}
+              as={RouterLink}
+              to={tabData.to}
+              onClick={handleTabLinkClick}
+              w="full"
+              color="text.primary"
+              _visited={{ color: "text.primary" }}
+              _active={{ color: "text.primary" }}
+              _hover={{ color: "text.primary", textDecoration: "none" }}
+            >
               <Flex align="center" justify="space-between" w="full" gap={3}>
                 <Flex align="center" minW={0} flex={1} gap={2}>
-                  <Icon as={tabData.icon} boxSize={5} flexShrink={0} />
-                  <Text as="span" fontSize="md" lineHeight={6} whiteSpace="nowrap">
+                  <Icon as={tabData.icon} boxSize={5} flexShrink={0} color="currentColor" />
+                  <Text as="span" fontSize="md" lineHeight={6} whiteSpace="nowrap" color="currentColor">
                     {tabData.label}
                   </Text>
                 </Flex>

@@ -237,7 +237,7 @@ class PermitProject < ApplicationRecord
     permit_applications
       .kept
       .includes(:submitter, :template_version, requirement_template: :taggings)
-      .select(&:visible_to_reviewers?)
+      .select(&:submitted_at_least_once?)
       .sort_by(&:updated_at)
       .last(limit)
   end
