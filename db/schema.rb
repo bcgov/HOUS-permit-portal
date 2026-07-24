@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_07_15_111439) do
+ActiveRecord::Schema[7.2].define(version: 2026_07_24_100600) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -278,6 +278,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_15_111439) do
     t.boolean "default"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "description"
     t.index ["jurisdiction_id"], name: "index_jurisdiction_step_requirements_on_jurisdiction_id"
   end
 
@@ -458,6 +459,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_15_111439) do
     t.integer "zero_carbon_step_required"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "description"
     t.index ["jurisdiction_id", "occupancy_key"], name: "idx_part3_occ_req_steps_jurisdiction_occupancy"
     t.index ["jurisdiction_id"], name: "index_part3_occupancy_required_steps_on_jurisdiction_id"
   end

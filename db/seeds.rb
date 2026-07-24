@@ -152,7 +152,16 @@ if north_van
     )
   property_information_contact.update!(confirmed_at: Time.now, default: false)
 
-  north_van.reload.update(
+  unless north_van.resources.project_meeting_authorization.exists?
+    north_van.resources.create!(
+      category: :project_meeting_authorization,
+      title: "Project meeting authorization",
+      resource_type: :link,
+      link_url: "https://example.com/project-meeting-authorization"
+    )
+  end
+
+  north_van.reload.update!(
     project_meetings_enabled: true,
     property_information_requests_enabled: true
   )

@@ -737,6 +737,7 @@ export interface IJurisdictionStepRequirement {
   default: boolean
   energyStepRequired: EEnergyStep
   zeroCarbonStepRequired: EZeroCarbonStep
+  description?: string | null
 }
 
 export interface IPart3OccupancyRequiredStep {
@@ -744,6 +745,7 @@ export interface IPart3OccupancyRequiredStep {
   occupancyKey: string
   energyStepRequired: number
   zeroCarbonStepRequired: number | null
+  description?: string | null
 }
 
 export interface IJurisdictionHeatingDegreeDay {
