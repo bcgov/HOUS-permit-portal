@@ -331,7 +331,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                           onSubmit: () => {
                             handleSave()
                           },
-                          "aria-label": "Edit Nickname",
+                          "aria-label": "Edit custom name",
                         }}
                         editablePreviewProps={{
                           fontWeight: 700,
@@ -340,7 +340,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                         onEdit={() => {
                           setIsDirty(true)
                         }}
-                        aria-label={"Edit Nickname"}
+                        aria-label={"Edit custom name"}
                         onCancel={(previousValue) => setValue("nickname", previousValue)}
                       />
                     </Box>
