@@ -6,7 +6,7 @@ import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IRequirementBlock, RequirementBlockModel } from "../models/requirement-block"
 import { IRequirementTemplate } from "../models/requirement-template"
-import { IRequirementBlockParams } from "../types/api-request"
+import { IRequirementAttributes, IRequirementBlockParams } from "../types/api-request"
 import {
   EAutoComplianceModule,
   EAutoComplianceType,
@@ -195,8 +195,11 @@ export const RequirementBlockStoreModel = types
       const clonedParams: IRequirementBlockParams = {
         ...copyableRequirementsAttributes,
         requirementsAttributes: requirementBlock.requirements?.map((attr) => {
-          const { id, ...rest } = attr
-          return rest
+          const { id, requirementQuestionId, usesSharedQuestion, ...rest } = attr
+          if (usesSharedQuestion && requirementQuestionId) {
+            return { ...rest, requirementQuestionId, usesSharedQuestion } as unknown as IRequirementAttributes
+          }
+          return rest as unknown as IRequirementAttributes
         }),
         name: requirementBlock.name,
         replaceBlockId: requirementBlock.id,
