@@ -1,4 +1,4 @@
-import { Box, Text } from "@chakra-ui/react"
+import { Box, Tag, Text } from "@chakra-ui/react"
 import { ErrorMessage } from "@hookform/error-message"
 import React from "react"
 import { useFormContext } from "react-hook-form"
@@ -143,6 +143,11 @@ export const RequirementFieldRow = ({
       pos={"relative"}
       bg={isEditing ? "greys.grey04" : "transparent"}
     >
+      {usesSharedQuestion && (
+        <Tag size="sm" bg="semantic.infoLight" color="text.primary" mb={2}>
+          {t("requirementsLibrary.sharedQuestions.sharedQuestion")}
+        </Tag>
+      )}
       <ErrorMessage
         errors={errors}
         name={`requirementsAttributes.${index}.label`}
