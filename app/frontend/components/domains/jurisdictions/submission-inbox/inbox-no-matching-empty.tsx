@@ -21,7 +21,6 @@ export const InboxNoMatchingEmpty = observer(function InboxNoMatchingEmpty({
 
   return (
     <EmptyResultsBox
-      w="full"
       icon={isProjects ? <Buildings size={18} /> : <ClipboardText size={18} />}
       title={
         isProjects ? t("submissionInbox.noMatchingProjectsTitle") : t("submissionInbox.noMatchingApplicationsTitle")
