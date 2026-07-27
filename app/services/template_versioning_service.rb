@@ -810,13 +810,26 @@ class TemplateVersioningService
     requirement_blocks_json
   end
 
+  # Dry-run validation against the live template's current sections/blocks —
+  # same snapshot shape as schedule! / create_draft!, without persisting a version.
+  def self.validate_requirement_template!(requirement_template)
+    TemplateVersionConfigValidator.new(
+      requirement_blocks_json:
+        form_requirement_blocks_hash(requirement_template),
+      denormalized_template_json:
+        RequirementTemplateBlueprint.render_as_hash(
+          requirement_template,
+          view: :template_snapshot
+        )
+    ).validate!
+  end
+
   def self.validate_config!(template_version)
     TemplateVersionConfigValidator.new(
       requirement_blocks_json: template_version.requirement_blocks_json,
       denormalized_template_json: template_version.denormalized_template_json
     ).validate!
   end
-  private_class_method :validate_config!
 
   def self.is_valid_schedule_version_date?(requirement_template, version_date)
     last_scheduled_version =
