@@ -952,6 +952,14 @@ export class Api {
     )
   }
 
+  async validateRequirementTemplateConfig(templateId: string) {
+    return this.client.post<ApiResponse<unknown>>(`/requirement_templates/${templateId}/validate_config`)
+  }
+
+  async validateTemplateVersionConfig(templateVersionId: string) {
+    return this.client.post<ApiResponse<unknown>>(`/template_versions/${templateVersionId}/validate_config`)
+  }
+
   async discardDraft(templateVersionId: string) {
     return this.client.delete<ApiResponse<IRequirementTemplate>>(
       `/template_versions/${templateVersionId}/discard_draft`
