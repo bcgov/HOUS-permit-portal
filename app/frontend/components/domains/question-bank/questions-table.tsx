@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next"
 import { datefnsTableDateFormat } from "../../../constants"
 import { useSearch } from "../../../hooks/use-search"
 import { ISearch } from "../../../lib/create-search-model"
+import { IRequirementQuestion } from "../../../models/requirement-question"
 import { useMst } from "../../../setup/root"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
@@ -14,13 +15,23 @@ import { SearchGrid } from "../../shared/grid/search-grid"
 import { SearchGridItem } from "../../shared/grid/search-grid-item"
 import { HasAutomatedComplianceTag } from "../../shared/has-automated-compliance-tag"
 import { HasDataValidationTag } from "../../shared/has-data-validation-tag"
+import { RequirementFieldDisplay } from "../requirements-library/requirement-field-display"
 import { GridHeaders } from "./grid-header"
 import { QuestionBankModal } from "./question-bank-modal"
 
 const ROW_CLASS_NAME = "question-bank-grid-row"
 const PREVIEW_BLOCK_COUNT = 3
 
-export const QuestionsTable = observer(function QuestionsTable({ ...containerProps }: Partial<StackProps>) {
+interface IProps extends Partial<StackProps> {
+  onUse?: (question: IRequirementQuestion) => void
+  disabledQuestionIds?: string[]
+}
+
+export const QuestionsTable = observer(function QuestionsTable({
+  onUse,
+  disabledQuestionIds = [],
+  ...containerProps
+}: IProps) {
   const { t } = useTranslation()
   const { requirementQuestionStore } = useMst()
   const searchModel = requirementQuestionStore
@@ -36,6 +47,8 @@ export const QuestionsTable = observer(function QuestionsTable({ ...containerPro
     showArchived,
   } = searchModel
   const [expandedRequirementBlockRows, setExpandedRequirementBlockRows] = useState<Set<string>>(() => new Set())
+  const isPicker = !!onUse
+  const disabledIds = new Set(disabledQuestionIds)
 
   useEffect(() => {
     return () => {
@@ -58,9 +71,17 @@ export const QuestionsTable = observer(function QuestionsTable({ ...containerPro
   }
 
   return (
-    <VStack as={"article"} spacing={5} {...containerProps}>
-      <SearchGrid gridRowClassName={ROW_CLASS_NAME} templateColumns="repeat(7, 1fr)" pos={"relative"}>
-        <GridHeaders />
+    <VStack as={"article"} spacing={isPicker ? 0 : 5} align="stretch" {...containerProps}>
+      <SearchGrid
+        gridRowClassName={ROW_CLASS_NAME}
+        templateColumns="repeat(7, 1fr)"
+        pos={"relative"}
+        flex={isPicker ? 1 : undefined}
+        minH={isPicker ? 0 : undefined}
+        borderRadius={isPicker ? 0 : undefined}
+        border={isPicker ? "none" : undefined}
+      >
+        <GridHeaders isPicker={isPicker} />
 
         {isSearching ? (
           <Flex py={50} gridColumn={"span 7"}>
@@ -73,18 +94,37 @@ export const QuestionsTable = observer(function QuestionsTable({ ...containerPro
               ? question.requirementBlocks
               : question.requirementBlocks.slice(0, PREVIEW_BLOCK_COUNT)
             const hasMoreBlocks = question.requirementBlocks.length > PREVIEW_BLOCK_COUNT
+            const isAlreadyLinked = disabledIds.has(question.id)
 
             return (
               <Box key={question.id} className={ROW_CLASS_NAME} role={"row"} display={"contents"}>
                 <SearchGridItem minW="160px" maxW="200px">
-                  <Text as={"span"} fontWeight={700} noOfLines={2} title={question.name || undefined}>
-                    {question.name}
-                  </Text>
+                  <Flex direction="column" overflow="hidden">
+                    <Text as={"span"} fontWeight={700} noOfLines={2} title={question.name || undefined}>
+                      {question.name}
+                    </Text>
+                    {isPicker && question.description && (
+                      <Text as={"span"} color={"text.secondary"} fontSize={"xs"} noOfLines={2}>
+                        {question.description}
+                      </Text>
+                    )}
+                  </Flex>
                 </SearchGridItem>
                 <SearchGridItem minW="200px" maxW="300px">
-                  <Text as={"span"} noOfLines={3} title={question.description || undefined}>
-                    {question.description}
-                  </Text>
+                  {isPicker ? (
+                    <RequirementFieldDisplay
+                      requirementType={question.inputType}
+                      label={question.label}
+                      helperText={question.hint}
+                      inputOptions={question.inputOptions}
+                      options={question.inputOptions?.valueOptions?.map((option: { label: string }) => option.label)}
+                      required
+                    />
+                  ) : (
+                    <Text as={"span"} noOfLines={3} title={question.description || undefined}>
+                      {question.description}
+                    </Text>
+                  )}
                 </SearchGridItem>
                 <SearchGridItem maxW="180px" minW="120px" justifyContent="center">
                   <HStack
@@ -149,17 +189,31 @@ export const QuestionsTable = observer(function QuestionsTable({ ...containerPro
                   {format(question.updatedAt, datefnsTableDateFormat)}
                 </SearchGridItem>
                 <SearchGridItem justifyContent={"center"} minW="85px" flexShrink={0}>
-                  <QuestionBankModal
-                    requirementQuestion={question}
-                    triggerButtonProps={{ variant: "link", size: "sm" }}
-                  />
+                  {isPicker ? (
+                    <Button size="sm" variant="primary" isDisabled={isAlreadyLinked} onClick={() => onUse?.(question)}>
+                      {t("ui.use")}
+                    </Button>
+                  ) : (
+                    <QuestionBankModal
+                      requirementQuestion={question}
+                      triggerButtonProps={{ variant: "link", size: "sm" }}
+                    />
+                  )}
                 </SearchGridItem>
               </Box>
             )
           })
         )}
       </SearchGrid>
-      <Flex w={"full"} justifyContent={"space-between"}>
+      <Flex
+        w={"full"}
+        justifyContent={"space-between"}
+        shrink={0}
+        px={isPicker ? 6 : 0}
+        py={isPicker ? 4 : 0}
+        borderTop={isPicker ? "1px solid" : undefined}
+        borderColor={isPicker ? "border.light" : undefined}
+      >
         <PerPageSelect
           handleCountPerPageChange={handleCountPerPageChange}
           countPerPage={countPerPage}

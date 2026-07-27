@@ -10,7 +10,7 @@ import { ModelSearchInput } from "../../shared/base/model-search-input"
 import { GridHeader } from "../../shared/grid/grid-header"
 import { SortIcon } from "../../shared/sort-icon"
 
-export const GridHeaders = observer(function GridHeaders() {
+export const GridHeaders = observer(function GridHeaders({ isPicker = false }: { isPicker?: boolean }) {
   const { requirementQuestionStore } = useMst()
   const searchModel = requirementQuestionStore
   const { sort, getSortColumnHeader, toggleSort } = searchModel
@@ -22,8 +22,12 @@ export const GridHeaders = observer(function GridHeaders() {
         <GridItem
           as={Flex}
           gridColumn={"span 7"}
-          p={6}
-          bg={"greys.grey10"}
+          px={6}
+          py={4}
+          h={isPicker ? "72px" : undefined}
+          bg={"greys.grey04"}
+          borderBottom={isPicker ? "1px solid" : undefined}
+          borderColor={isPicker ? "border.light" : undefined}
           justifyContent={"space-between"}
           align="center"
         >
@@ -59,7 +63,7 @@ export const GridHeaders = observer(function GridHeaders() {
         </GridHeader>
         <GridHeader role={"columnheader"}>
           <Text px={4} borderRight={"1px solid"} borderColor={"border.light"}>
-            {t("questionBank.fields.description")}
+            {t(isPicker ? "questionBank.fields.question" : "questionBank.fields.description")}
           </Text>
         </GridHeader>
         <GridHeader role={"columnheader"}>

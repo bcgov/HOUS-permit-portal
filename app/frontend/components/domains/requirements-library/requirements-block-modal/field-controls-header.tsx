@@ -18,6 +18,8 @@ interface IProps {
   requirementType: ERequirementType
   requirementCode: string
   onRemove: IRequirementOptionsMenu["onRemove"]
+  onDetachSharedQuestion?: IRequirementOptionsMenu["onDetachSharedQuestion"]
+  isSharedQuestion?: boolean
   disabledMenuOptions?: IRequirementOptionsMenu["disabledOptions"]
   hideConditional?: boolean
   hidePlacementConfiguration?: boolean
@@ -40,6 +42,8 @@ export function FieldControlsHeader({
   computedCompliance,
   dataValidation,
   onRemove,
+  onDetachSharedQuestion,
+  isSharedQuestion = false,
   index,
   requirementCode,
 }: IProps) {
@@ -55,17 +59,20 @@ export function FieldControlsHeader({
       {/* Keep stale configuration removable even when field removal and conditionals are protected. */}
       {isRequirementInEditMode &&
         !hidePlacementConfiguration &&
-        !(
-          disabledMenuOptions.includes("remove") &&
-          disabledMenuOptions.includes("conditional") &&
-          !dataValidation &&
-          !computedCompliance
-        ) && (
+        (isSharedQuestion ||
+          !(
+            disabledMenuOptions.includes("remove") &&
+            disabledMenuOptions.includes("conditional") &&
+            !dataValidation &&
+            !computedCompliance
+          )) && (
           <OptionsMenu
             menuButtonProps={{
               size: "sm",
             }}
             onRemove={onRemove}
+            onDetachSharedQuestion={onDetachSharedQuestion}
+            isSharedQuestion={isSharedQuestion}
             disabledOptions={disabledMenuOptions}
             hideConditional={hideConditional}
             hidePlacementConfiguration={hidePlacementConfiguration}
