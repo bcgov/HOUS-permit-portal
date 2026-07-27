@@ -255,6 +255,7 @@ export const RequirementFieldRow = ({
               : undefined
           }
           requirementCode={watchedRequirementCode}
+          lockDefinition={!!usesSharedQuestion}
         />
       </Box>
       <Box className={"requirement-display"} display={isEditing ? "none" : "block"} {...fieldContainerSharedProps}>

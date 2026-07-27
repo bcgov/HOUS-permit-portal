@@ -25,6 +25,8 @@ export type TEditableGroupProps<TFieldValues extends FieldValues> = {
   helperText?: string
   editableInput?: ReactNode
   editableInstructionsTextProps?: TEditableInstructionsTextProps<TFieldValues>
+  /** Shared bank questions: definition fields are owned by the Question Bank, not the block. */
+  lockDefinition?: boolean
 } & Partial<StackProps>
 
 export function EditableGroup<TFieldValues>({
@@ -40,6 +42,7 @@ export function EditableGroup<TFieldValues>({
   helperText,
   editableInput,
   editableInstructionsTextProps,
+  lockDefinition = false,
   ...containerProps
 }: TEditableGroupProps<TFieldValues>) {
   const { t } = useTranslation()
@@ -52,7 +55,7 @@ export function EditableGroup<TFieldValues>({
   return (
     <Stack spacing={4} {...containerProps}>
       <EditableInstructionsText {...editableInstructionsTextProps} />
-      <EditableLabel {...editableLabelProps} />
+      <EditableLabel {...editableLabelProps} isDisabled={lockDefinition || editableLabelProps.isDisabled} />
       {editableInput}
       {editableInput && <EditableHelperText {...editableHelperTextProps} />}
       {multiOptionEditableInput && (
@@ -62,7 +65,11 @@ export function EditableGroup<TFieldValues>({
         </Stack>
       )}
       {isMultipleFilesCheckboxProps && (
-        <IsMultipleFilesCheckbox isDisabled={isEditLimited} mt={2} {...isMultipleFilesCheckboxProps} />
+        <IsMultipleFilesCheckbox
+          isDisabled={isEditLimited || lockDefinition}
+          mt={2}
+          {...isMultipleFilesCheckboxProps}
+        />
       )}
       {isOptionalCheckboxProps && <IsOptionalCheckbox isDisabled={isEditLimited} mt={2} {...isOptionalCheckboxProps} />}
       {isElectiveCheckboxProps && <IsElectiveCheckbox isDisabled={isEditLimited} mt={2} {...isElectiveCheckboxProps} />}
