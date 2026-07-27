@@ -21,7 +21,7 @@ export const GridHeaders = observer(function GridHeaders({ isPicker = false }: {
       <Box display={"contents"} role={"row"}>
         <GridItem
           as={Flex}
-          gridColumn={"span 7"}
+          gridColumn={"span 6"}
           px={6}
           py={4}
           h={isPicker ? "72px" : undefined}
@@ -93,11 +93,6 @@ export const GridHeaders = observer(function GridHeaders({ isPicker = false }: {
         <GridHeader role={"columnheader"}>
           <Text px={4} borderRight={"1px solid"} borderColor={"border.light"}>
             {t("questionBank.fields.requirementBlocks")}
-          </Text>
-        </GridHeader>
-        <GridHeader role={"columnheader"}>
-          <Text px={4} borderRight={"1px solid"} borderColor={"border.light"}>
-            {t("questionBank.fields.configurations")}
           </Text>
         </GridHeader>
         <GridHeader role={"columnheader"}>

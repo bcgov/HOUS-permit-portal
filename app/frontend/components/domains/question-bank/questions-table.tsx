@@ -13,8 +13,6 @@ import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { SearchGridItem } from "../../shared/grid/search-grid-item"
-import { HasAutomatedComplianceTag } from "../../shared/has-automated-compliance-tag"
-import { HasDataValidationTag } from "../../shared/has-data-validation-tag"
 import { RequirementFieldDisplay } from "../requirements-library/requirement-field-display"
 import { GridHeaders } from "./grid-header"
 import { QuestionBankModal } from "./question-bank-modal"
@@ -74,7 +72,7 @@ export const QuestionsTable = observer(function QuestionsTable({
     <VStack as={"article"} spacing={isPicker ? 0 : 5} align="stretch" {...containerProps}>
       <SearchGrid
         gridRowClassName={ROW_CLASS_NAME}
-        templateColumns="repeat(7, 1fr)"
+        templateColumns="repeat(6, 1fr)"
         pos={"relative"}
         flex={isPicker ? 1 : undefined}
         minH={isPicker ? 0 : undefined}
@@ -84,7 +82,7 @@ export const QuestionsTable = observer(function QuestionsTable({
         <GridHeaders isPicker={isPicker} />
 
         {isSearching ? (
-          <Flex py={50} gridColumn={"span 7"}>
+          <Flex py={50} gridColumn={"span 6"}>
             <SharedSpinner />
           </Flex>
         ) : (
@@ -98,7 +96,7 @@ export const QuestionsTable = observer(function QuestionsTable({
 
             return (
               <Box key={question.id} className={ROW_CLASS_NAME} role={"row"} display={"contents"}>
-                <SearchGridItem minW="160px" maxW="200px">
+                <SearchGridItem minW="160px">
                   <Flex direction="column" overflow="hidden">
                     <Text as={"span"} fontWeight={700} noOfLines={2} title={question.name || undefined}>
                       {question.name}
@@ -110,7 +108,7 @@ export const QuestionsTable = observer(function QuestionsTable({
                     )}
                   </Flex>
                 </SearchGridItem>
-                <SearchGridItem minW="200px" maxW="300px">
+                <SearchGridItem minW="200px">
                   {isPicker ? (
                     <RequirementFieldDisplay
                       requirementType={question.inputType}
@@ -126,7 +124,7 @@ export const QuestionsTable = observer(function QuestionsTable({
                     </Text>
                   )}
                 </SearchGridItem>
-                <SearchGridItem maxW="180px" minW="120px" justifyContent="center">
+                <SearchGridItem minW="120px" justifyContent="center">
                   <HStack
                     as={"ul"}
                     wrap={"wrap"}
@@ -145,7 +143,7 @@ export const QuestionsTable = observer(function QuestionsTable({
                     ))}
                   </HStack>
                 </SearchGridItem>
-                <SearchGridItem pr={0} minW="180px" maxW="245px">
+                <SearchGridItem pr={0} minW="180px">
                   {question.requirementBlocks.length === 0 ? (
                     <Text color={"text.secondary"} fontSize={"xs"}>
                       {t("questionBank.fields.notConnected")}
@@ -179,13 +177,7 @@ export const QuestionsTable = observer(function QuestionsTable({
                     </UnorderedList>
                   )}
                 </SearchGridItem>
-                <SearchGridItem maxW="200px" minW="150px">
-                  <HStack flexWrap={"wrap"} maxW={"full"} alignSelf={"middle"}>
-                    {question.hasDataValidation && <HasDataValidationTag />}
-                    {question.hasAutomatedCompliance && <HasAutomatedComplianceTag />}
-                  </HStack>
-                </SearchGridItem>
-                <SearchGridItem maxW="150px" minW="100px" fontSize={"sm"}>
+                <SearchGridItem minW="100px" fontSize={"sm"}>
                   {format(question.updatedAt, datefnsTableDateFormat)}
                 </SearchGridItem>
                 <SearchGridItem justifyContent={"center"} minW="85px" flexShrink={0}>
