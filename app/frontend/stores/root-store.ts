@@ -74,6 +74,8 @@ export const RootStoreModel = types
         properties: ["afterLoginPath"],
         storage: localStorage,
       })
+      // Persist hydrates props directly; re-run setter so unsafe paths are dropped
+      self.sessionStore.setAfterLoginPath(self.sessionStore.afterLoginPath)
       yield makePersistable(self.uiStore, {
         name: `${self.userStore.currentUser?.id}-UIStore`,
         properties: ["currentlySelectedJurisdictionId"],

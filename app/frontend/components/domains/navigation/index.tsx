@@ -6,6 +6,7 @@ import { BrowserRouter, Route, Routes, useLocation, useNavigate } from "react-ro
 import useSyncPathWithStore from "../../../hooks/use-sync-path-with-root-store"
 import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus } from "../../../types/enums"
+import { isSafeAppPath } from "../../../utils/utility-functions"
 import { FlashMessage } from "../../shared/base/flash-message"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EULAScreen } from "../onboarding/eula"
@@ -536,7 +537,8 @@ const AppRoutes = observer(() => {
 
   useEffect(() => {
     if (loggedIn && afterLoginPath) {
-      navigate(afterLoginPath)
+      // Defense in depth for after-login redirects
+      if (isSafeAppPath(afterLoginPath)) navigate(afterLoginPath)
       setAfterLoginPath(null)
     }
   }, [loggedIn, afterLoginPath])
@@ -668,10 +670,10 @@ const AppRoutes = observer(() => {
 
   const managerOrReviewerRoutes = (
     <>
-      <Route
-        path="/jurisdictions/:jurisdictionId/submission-inbox/projects/:permitProjectId/*"
-        element={<InboxProjectDetailScreen />}
-      />
+      <Route path="/jurisdictions/:jurisdictionId/submission-inbox/projects/:permitProjectId">
+        <Route index element={<InboxProjectDetailScreen />} />
+        <Route path="*" element={<InboxProjectDetailScreen />} />
+      </Route>
       <Route path="/jurisdictions/:jurisdictionId/submission-inbox" element={<ReviewerWorkspaceScreen />} />
       <Route path="/jurisdictions/:jurisdictionId/meetings/:meetingId" element={<ReviewerWorkspaceScreen />} />
       <Route path="/jurisdictions/:jurisdictionId/meetings" element={<ReviewerWorkspaceScreen />} />
@@ -811,14 +813,23 @@ const AppRoutes = observer(() => {
         >
           {/* Migrate old permit-projects paths to new structure */}
           <Route path="/permit-projects" element={<RedirectScreen path="/projects" />} />
-          <Route path="/permit-projects/projects/*" element={<RedirectScreen path="/projects" />} />
-          <Route path="/permit-projects/step-codes/*" element={<RedirectScreen path="/step-codes" />} />
+          <Route path="/permit-projects/projects">
+            <Route index element={<RedirectScreen path="/projects" />} />
+            <Route path="*" element={<RedirectScreen path="/projects" />} />
+          </Route>
+          <Route path="/permit-projects/step-codes">
+            <Route index element={<RedirectScreen path="/step-codes" />} />
+            <Route path="*" element={<RedirectScreen path="/step-codes" />} />
+          </Route>
           {/* Disabled: New Permit Application screen */}
           <Route path="/permit-applications/:permitApplicationId/edit" element={<EditPermitApplicationScreen />} />
           <Route
             element={<ProtectedRoute isAllowed={loggedIn && !mustAcceptEula} redirectPath={mustAcceptEula && "/"} />}
           >
-            <Route path="/step-codes" element={<ProjectDashboardScreen />} />
+            <Route path="/step-codes">
+              <Route index element={<ProjectDashboardScreen />} />
+              <Route path="*" element={<ProjectDashboardScreen />} />
+            </Route>
             <Route path="/pre-checks" element={<ProjectDashboardScreen />} />
             <Route path="/pre-checks/new" element={<PreCheckForm />} />
             <Route path="/pre-checks/new/:section" element={<PreCheckForm />} />
@@ -834,13 +845,19 @@ const AppRoutes = observer(() => {
                 <Route path="/overheating-codes/:overheatingCodeId/edit/:section" element={<OverheatingCodeForm />} />
               </>
             ) : (
-              <Route path="/overheating-codes/*" element={<OverheatingCodeUnavailableScreen />} />
+              <Route path="/overheating-codes">
+                <Route index element={<OverheatingCodeUnavailableScreen />} />
+                <Route path="*" element={<OverheatingCodeUnavailableScreen />} />
+              </Route>
             )}
             <Route path="/documents" element={<ProjectDashboardScreen />} />
             {/* Already handled above with path-based tabs */}
             <Route path="/projects" element={<ProjectDashboardScreen />} />
             <Route path="/projects/new" element={<NewPermitProjectScreen />} />
-            <Route path="/projects/:permitProjectId/*" element={<PermitProjectScreen />} />
+            <Route path="/projects/:permitProjectId">
+              <Route index element={<PermitProjectScreen />} />
+              <Route path="*" element={<PermitProjectScreen />} />
+            </Route>
             <Route path="/projects/:permitProjectId/add-permits" element={<AddPermitApplicationToProjectScreen />} />
             <Route element={<ProtectedRoute isAllowed={projectMeetingsEnabled} redirectPath="/not-found" />}>
               <Route path="/projects/:permitProjectId/meetings/new" element={<ProjectMeetingRequestScreen />} />
@@ -853,7 +870,6 @@ const AppRoutes = observer(() => {
                 element={<ProjectMeetingSentScreen />}
               />
             </Route>
-            <Route path="/step-codes/*" element={<ProjectDashboardScreen />} />
             {/* Disabled: New Permit Application screen */}
             <Route path="/permit-applications/:permitApplicationId/edit" element={<EditPermitApplicationScreen />} />
             <Route

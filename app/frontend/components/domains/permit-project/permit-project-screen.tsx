@@ -28,27 +28,33 @@ export const PermitProjectScreen = observer(() => {
   const projectMeetingsEnabled = Boolean(
     siteConfigurationStore.projectMeetingsEnabled && currentPermitProject?.jurisdiction?.projectMeetingsEnabled
   )
+  const projectBasePath = currentPermitProject ? `/projects/${currentPermitProject.id}` : null
 
-  const TABS_DATA: ITabItem[] = useMemo(
-    () => [
-      { label: t("permitProject.details.overview"), icon: SquaresFour, to: "overview", tabIndex: 0 },
-      { label: t("permitProject.details.activity"), icon: TrendUp, to: "activity", tabIndex: 1 },
-      { label: t("permitProject.details.permits"), icon: ClipboardText, to: "permits", tabIndex: 2 },
+  const TABS_DATA: ITabItem[] = useMemo(() => {
+    if (!projectBasePath) return []
+    return [
+      { label: t("permitProject.details.overview"), icon: SquaresFour, to: `${projectBasePath}/overview`, tabIndex: 0 },
+      { label: t("permitProject.details.activity"), icon: TrendUp, to: `${projectBasePath}/activity`, tabIndex: 1 },
+      { label: t("permitProject.details.permits"), icon: ClipboardText, to: `${projectBasePath}/permits`, tabIndex: 2 },
       ...(projectMeetingsEnabled
         ? [
-            { label: t("permitProject.details.meetings"), icon: CalendarBlank, to: "meetings", tabIndex: 3 },
-            { label: t("permitProject.details.notes"), icon: Chat, to: "notes", tabIndex: 4 },
+            {
+              label: t("permitProject.details.meetings"),
+              icon: CalendarBlank,
+              to: `${projectBasePath}/meetings`,
+              tabIndex: 3,
+            },
+            { label: t("permitProject.details.notes"), icon: Chat, to: `${projectBasePath}/notes`, tabIndex: 4 },
           ]
         : []),
       {
         label: t("permitProject.details.localResources"),
         icon: Folder,
-        to: "local-resources",
+        to: `${projectBasePath}/local-resources`,
         tabIndex: projectMeetingsEnabled ? 5 : 3,
       },
-    ],
-    [projectMeetingsEnabled, t]
-  )
+    ]
+  }, [projectBasePath, projectMeetingsEnabled, t])
 
   const getDefaultValues = () => {
     return {
@@ -63,12 +69,12 @@ export const PermitProjectScreen = observer(() => {
   const { updatePermitProject } = permitProjectStore
 
   useEffect(() => {
-    if (!currentPermitProject) return
+    if (!currentPermitProject || !projectBasePath) return
 
-    if (!TABS_DATA.some((tab) => location.pathname.includes(tab.to))) {
-      navigate("overview", { replace: true })
+    if (!TABS_DATA.some((tab) => location.pathname === tab.to || location.pathname.startsWith(`${tab.to}/`))) {
+      navigate(`${projectBasePath}/overview`, { replace: true })
     }
-  }, [TABS_DATA, currentPermitProject, location.pathname, navigate])
+  }, [TABS_DATA, currentPermitProject, projectBasePath, location.pathname, navigate])
 
   useEffect(() => {
     reset(getDefaultValues())
@@ -77,7 +83,9 @@ export const PermitProjectScreen = observer(() => {
   const [isPending, startTransition] = useTransition()
 
   const getTabIndex = () => {
-    const tabIndex = TABS_DATA.findIndex((tab) => location.pathname.includes(tab.to))
+    const tabIndex = TABS_DATA.findIndex(
+      (tab) => location.pathname === tab.to || location.pathname.startsWith(`${tab.to}/`)
+    )
     return tabIndex === -1 ? 0 : tabIndex
   }
 

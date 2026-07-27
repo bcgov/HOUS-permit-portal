@@ -1,6 +1,7 @@
 import { flow, Instance, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
+import { isSafeAppPath } from "../utils/utility-functions"
 
 export const SessionStoreModel = types
   .model("SessionStoreModel")
@@ -23,7 +24,8 @@ export const SessionStoreModel = types
       self.rootStore.disconnectUserChannel()
     }),
     setAfterLoginPath(path: string | null) {
-      self.afterLoginPath = path
+      // Drop attacker-crafted / persisted paths that RR 6 can open-redirect or XSS with
+      self.afterLoginPath = path !== null && isSafeAppPath(path) ? path : null
     },
   }))
   .actions((self) => ({
