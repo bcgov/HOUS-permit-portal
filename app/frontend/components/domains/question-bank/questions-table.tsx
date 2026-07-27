@@ -54,7 +54,20 @@ export const QuestionsTable = observer(function QuestionsTable({
     }
   }, [])
 
-  useSearch(searchModel as ISearch, [showArchived])
+  useEffect(() => {
+    if (!isPicker) return
+
+    searchModel.setSyncUrl?.(false)
+    searchModel.resetAll()
+    searchModel.fetchData({ reset: true })
+
+    return () => {
+      searchModel.resetAll()
+      searchModel.setSyncUrl?.(true)
+    }
+  }, [isPicker])
+
+  useSearch(searchModel as ISearch, isPicker ? [null] : [showArchived])
 
   const toggleRequirementBlocksExpanded = (questionId: string) => {
     setExpandedRequirementBlockRows((prev) => {
