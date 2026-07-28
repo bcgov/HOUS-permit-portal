@@ -38,6 +38,7 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
   const [isCollapsedAll, setIsCollapsedAll] = useState(false)
   const [isDiscardingDraft, setIsDiscardingDraft] = useState(false)
   const [isTogglingPubliclyPreviewable, setIsTogglingPubliclyPreviewable] = useState(false)
+  const [isRestoringLayout, setIsRestoringLayout] = useState(false)
   const navigate = useNavigate()
 
   const isSuperAdmin = !!userStore.currentUser?.isSuperAdmin
@@ -138,6 +139,19 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
     }
   }
 
+  const handleRestoreLayout = async () => {
+    if (!templateVersion || !requirementTemplateId) return
+    setIsRestoringLayout(true)
+    try {
+      const updated = await requirementTemplateStore.restoreLayout(templateVersion.id)
+      if (updated) {
+        navigate(`/requirement-templates/${requirementTemplateId}/edit`)
+      }
+    } finally {
+      setIsRestoringLayout(false)
+    }
+  }
+
   return (
     <Box as="main" id="view-template-version">
       <BuilderHeader
@@ -228,6 +242,21 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
                   translationNamespace="templateVersionPreview.schedulePublish"
                   triggerLabel={t("templateVersionPreview.schedulePublish.triggerButton")}
                   hideManageAccessButton
+                />
+              )}
+              {isSuperAdmin && requirementTemplateId && (
+                <ConfirmationModal
+                  promptHeader={t("templateVersionPreview.restoreLayout.confirmTitle")}
+                  promptMessage={
+                    <Text whiteSpace="pre-line">{t("templateVersionPreview.restoreLayout.confirmBody")}</Text>
+                  }
+                  confirmText={t("templateVersionPreview.restoreLayout.confirmButton")}
+                  onConfirm={handleRestoreLayout}
+                  renderTrigger={(onOpen) => (
+                    <Button variant="secondary" onClick={onOpen} isLoading={isRestoringLayout}>
+                      {t("templateVersionPreview.restoreLayout.triggerButton")}
+                    </Button>
+                  )}
                 />
               )}
               {isSuperAdmin && requirementTemplateId && (

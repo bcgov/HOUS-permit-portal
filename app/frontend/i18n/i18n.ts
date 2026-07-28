@@ -4916,6 +4916,13 @@ Thank you,
             body: "This ends access to the early access snapshot and its previews. Fix the configuration in the builder, then create a new early access version.",
             confirmButton: "Discard early access version",
           },
+          restoreLayout: {
+            triggerButton: "Restore layout to builder",
+            confirmTitle: "Restore layout from this version?",
+            confirmBody:
+              "This will replace the current builder layout (sections, block arrangement, and show/hide rules) with the layout from this version.\n\nIt does not rewind the wording or settings inside shared question blocks. If a block from this version is missing or archived in the library, the restore will fail.\n\nAny unsaved builder edits will be lost.",
+            confirmButton: "Restore layout",
+          },
           schedulePublish: {
             triggerButton: "Promote",
             scheduleModalTitle: "Promote early access version?",
