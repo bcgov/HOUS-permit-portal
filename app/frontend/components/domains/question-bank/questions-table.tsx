@@ -7,7 +7,9 @@ import { datefnsTableDateFormat } from "../../../constants"
 import { useSearch } from "../../../hooks/use-search"
 import { ISearch } from "../../../lib/create-search-model"
 import { IRequirementQuestion } from "../../../models/requirement-question"
+import { IRequirementQuestionPickerSearch } from "../../../models/requirement-question-picker-search"
 import { useMst } from "../../../setup/root"
+import { IRequirementQuestionStoreModel } from "../../../stores/requirement-question-store"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
@@ -20,19 +22,25 @@ import { QuestionBankModal } from "./question-bank-modal"
 const ROW_CLASS_NAME = "question-bank-grid-row"
 const PREVIEW_BLOCK_COUNT = 3
 
+type TQuestionsTableSearchModel = IRequirementQuestionStoreModel | IRequirementQuestionPickerSearch
+
 interface IProps extends Partial<StackProps> {
   onUse?: (question: IRequirementQuestion) => void
   disabledQuestionIds?: string[]
+  /** When set (e.g. nested drawer), uses in-memory search and skips URL sync. */
+  searchModel?: TQuestionsTableSearchModel
 }
 
 export const QuestionsTable = observer(function QuestionsTable({
   onUse,
   disabledQuestionIds = [],
+  searchModel: searchModelProp,
   ...containerProps
 }: IProps) {
   const { t } = useTranslation()
   const { requirementQuestionStore } = useMst()
-  const searchModel = requirementQuestionStore
+  const searchModel = searchModelProp ?? requirementQuestionStore
+  const isNested = !!searchModelProp
   const {
     tableRequirementQuestions,
     currentPage,
@@ -54,20 +62,8 @@ export const QuestionsTable = observer(function QuestionsTable({
     }
   }, [])
 
-  useEffect(() => {
-    if (!isPicker) return
-
-    searchModel.setSyncUrl?.(false)
-    searchModel.resetAll()
-    searchModel.fetchData({ reset: true })
-
-    return () => {
-      searchModel.resetAll()
-      searchModel.setSyncUrl?.(true)
-    }
-  }, [isPicker])
-
-  useSearch(searchModel as ISearch, isPicker ? [null] : [showArchived])
+  // Nested pickers skip URL hydration; page search syncs from the query string.
+  useSearch(searchModel as ISearch, isNested ? [] : [showArchived], { nested: isNested })
 
   const toggleRequirementBlocksExpanded = (questionId: string) => {
     setExpandedRequirementBlockRows((prev) => {
@@ -97,7 +93,7 @@ export const QuestionsTable = observer(function QuestionsTable({
           border={isPicker ? "none" : undefined}
           alignContent="start"
         >
-          <GridHeaders isPicker={isPicker} />
+          <GridHeaders isPicker={isPicker} searchModel={searchModel} />
 
           {isSearching ? (
             <Flex py={50} gridColumn={"span 6"}>

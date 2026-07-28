@@ -15,7 +15,9 @@ import { Plus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { Ref, useRef } from "react"
 import { useTranslation } from "react-i18next"
+import { useEphemeralMstModel } from "../../../hooks/use-ephemeral-mst-model"
 import { IRequirementQuestion } from "../../../models/requirement-question"
+import { RequirementQuestionPickerSearchModel } from "../../../models/requirement-question-picker-search"
 import { QuestionBankModal } from "../question-bank/question-bank-modal"
 import { QuestionsTable } from "../question-bank/questions-table"
 
@@ -48,6 +50,7 @@ export const AddQuestionsModal = observer(function AddQuestionsModal({
   const onOpen = onOpenProp ?? disclosure.onOpen
   const onClose = onCloseProp ?? disclosure.onClose
   const btnRef = useRef<HTMLButtonElement>()
+  const pickerSearch = useEphemeralMstModel(RequirementQuestionPickerSearchModel)
 
   return (
     <>
@@ -72,26 +75,29 @@ export const AddQuestionsModal = observer(function AddQuestionsModal({
           </DrawerHeader>
 
           <DrawerBody p={6} display="flex" flexDir="column" minH={0} flex={1}>
-            <Box
-              border="1px solid"
-              borderColor="border.light"
-              borderRadius="sm"
-              overflow="hidden"
-              flex={1}
-              minH={0}
-              display="flex"
-              flexDir="column"
-            >
-              <QuestionsTable
-                onUse={onUse}
-                disabledQuestionIds={disabledQuestionIds}
+            {isOpen && (
+              <Box
+                border="1px solid"
+                borderColor="border.light"
+                borderRadius="sm"
+                overflow="hidden"
                 flex={1}
                 minH={0}
-                p={0}
-                spacing={0}
-                overflow="hidden"
-              />
-            </Box>
+                display="flex"
+                flexDir="column"
+              >
+                <QuestionsTable
+                  searchModel={pickerSearch}
+                  onUse={onUse}
+                  disabledQuestionIds={disabledQuestionIds}
+                  flex={1}
+                  minH={0}
+                  p={0}
+                  spacing={0}
+                  overflow="hidden"
+                />
+              </Box>
+            )}
           </DrawerBody>
 
           <DrawerFooter

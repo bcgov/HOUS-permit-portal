@@ -10,9 +10,19 @@ import { ModelSearchInput } from "../../shared/base/model-search-input"
 import { GridHeader } from "../../shared/grid/grid-header"
 import { SortIcon } from "../../shared/sort-icon"
 
-export const GridHeaders = observer(function GridHeaders({ isPicker = false }: { isPicker?: boolean }) {
+type TQuestionBankSearchModel = ISearch & {
+  getSortColumnHeader: (field: EQuestionBankSortFields) => string
+}
+
+export const GridHeaders = observer(function GridHeaders({
+  isPicker = false,
+  searchModel: searchModelProp,
+}: {
+  isPicker?: boolean
+  searchModel?: TQuestionBankSearchModel
+}) {
   const { requirementQuestionStore } = useMst()
-  const searchModel = requirementQuestionStore
+  const searchModel = searchModelProp ?? requirementQuestionStore
   const { sort, getSortColumnHeader, toggleSort } = searchModel
   const { t } = useTranslation()
 

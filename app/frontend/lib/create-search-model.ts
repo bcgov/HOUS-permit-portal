@@ -9,10 +9,20 @@ interface IFetchOptions {
   countPerPage?: number
 }
 
+interface ICreateSearchModelOptions {
+  /** When false, search state stays in-memory only (e.g. nested drawers). Default true. */
+  syncUrl?: boolean
+}
+
 export const createSearchModel = <TSortField, TFetchOptions extends IFetchOptions = IFetchOptions>(
   fetchDataActionName: string,
-  setFiltersName?: string
+  setFiltersName?: string,
+  { syncUrl = true }: ICreateSearchModelOptions = {}
 ) => {
+  const syncParam = (key: string, value: string | string[] | undefined) => {
+    if (syncUrl) setQueryParam(key, value as string | string[])
+  }
+
   const model = types
     .model()
     .props({
@@ -24,78 +34,63 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
       totalCount: types.maybeNull(types.number),
       countPerPage: types.optional(types.number, 10),
       isSearching: types.optional(types.boolean, false),
-      /** When false, search state stays in-memory only (e.g. nested drawers). */
-      syncUrl: types.optional(types.boolean, true),
     })
-    .actions((self) => {
-      const syncParam = (key: string, value: string | string[]) => {
-        if (self.syncUrl) setQueryParam(key, value)
-      }
-
-      return {
-        setSyncUrl(enabled: boolean) {
-          self.syncUrl = enabled
-        },
-        resetPages() {
-          self.currentPage = 1
-          self.totalPages = null
-          self.totalCount = null
-          syncParam("currentPage", "1")
-        },
-        setPageFields(metadata, opts?: { page?: number; countPerPage?: number }) {
-          self.currentPage = opts?.page ?? metadata.currentPage ?? self.currentPage
-          self.totalPages = metadata.totalPages ?? self.totalPages
-          self.totalCount = metadata.totalCount ?? self.totalCount
-          self.countPerPage = opts?.countPerPage ?? metadata.perPage ?? self.countPerPage
-        },
-        setCountPerPage(countPerPage: number) {
-          syncParam("countPerPage", countPerPage.toString())
-          self.countPerPage = countPerPage
-        },
-        setCurrentPage(currentPage: number) {
-          syncParam("currentPage", currentPage.toString())
-          self.currentPage = currentPage
-        },
-        setQuery(query: string) {
-          syncParam("query", query)
-          self.query = !!query?.trim() ? query : null
-        },
-        setShowArchived(bool) {
-          syncParam("showArchived", bool.toString())
-          self.showArchived = bool
-        },
-        fetchData: flow(function* (opts?: TFetchOptions) {
-          if (fetchDataActionName in self) {
-            self.isSearching = true
-            const result = yield self[fetchDataActionName](opts)
-            self.isSearching = false
-            return result
-          }
-          throw new Error("fetch action must be implemented in the derived model for search to work")
-        }),
-        setFilters: (queryParams: URLSearchParams) => {
-          if (setFiltersName in self) {
-            return self[setFiltersName](queryParams)
-          }
-        },
-      }
-    })
+    .actions((self) => ({
+      resetPages() {
+        self.currentPage = 1
+        self.totalPages = null
+        self.totalCount = null
+        syncParam("currentPage", "1")
+      },
+      setPageFields(metadata, opts?: { page?: number; countPerPage?: number }) {
+        self.currentPage = opts?.page ?? metadata.currentPage ?? self.currentPage
+        self.totalPages = metadata.totalPages ?? self.totalPages
+        self.totalCount = metadata.totalCount ?? self.totalCount
+        self.countPerPage = opts?.countPerPage ?? metadata.perPage ?? self.countPerPage
+      },
+      setCountPerPage(countPerPage: number) {
+        syncParam("countPerPage", countPerPage.toString())
+        self.countPerPage = countPerPage
+      },
+      setCurrentPage(currentPage: number) {
+        syncParam("currentPage", currentPage.toString())
+        self.currentPage = currentPage
+      },
+      setQuery(query: string) {
+        syncParam("query", query)
+        self.query = !!query?.trim() ? query : null
+      },
+      setShowArchived(bool) {
+        syncParam("showArchived", bool.toString())
+        self.showArchived = bool
+      },
+      fetchData: flow(function* (opts?: TFetchOptions) {
+        if (fetchDataActionName in self) {
+          self.isSearching = true
+          const result = yield self[fetchDataActionName](opts)
+          self.isSearching = false
+          return result
+        }
+        throw new Error("fetch action must be implemented in the derived model for search to work")
+      }),
+      setFilters: (queryParams: URLSearchParams) => {
+        if (setFiltersName in self) {
+          return self[setFiltersName](queryParams)
+        }
+      },
+    }))
     .actions((self) => ({
       search: flow(function* (opts?: TFetchOptions) {
         return yield self.fetchData({ reset: true, ...opts })
       }),
       applySort(sort: ISort<TSortField>) {
-        if (self.syncUrl) {
-          setQueryParam("sortDirection", sort.direction)
-          setQueryParam("sortField", sort.field as string)
-        }
+        syncParam("sortDirection", sort.direction)
+        syncParam("sortField", sort.field as string)
         self.sort = sort
       },
       clearSort() {
-        if (self.syncUrl) {
-          setQueryParam("sortField", undefined)
-          setQueryParam("sortDirection", undefined)
-        }
+        syncParam("sortField", undefined)
+        syncParam("sortDirection", undefined)
         self.sort = null
       },
     }))
@@ -181,8 +176,6 @@ export interface ISearch {
   handleCountPerPageChange: (count: number, opts?: any) => Promise<any>
   resetAll: () => void
   syncWithUrl: () => void
-  syncUrl?: boolean
-  setSyncUrl?: (enabled: boolean) => void
   isSearching: boolean
   setFilters: (queryParams: URLSearchParams) => void
   fetchData: (opts?: any) => Promise<any>
