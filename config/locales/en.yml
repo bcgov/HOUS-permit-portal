@@ -134,7 +134,7 @@ en:
           step_code_package_required: '"Energy Step Code" is required to have the Design package Energy Step Code file'
           duplicate_energy_step_code: 'Multiple "Energy Step Code" requirements found. Please ensure there is only one "Energy Step Code" requirement in the template'
           duplicate_step_code_package: 'Multiple "Design package Energy Step Code files" found. Please ensure there is only one "Design package Energy Step Code file" when there is an "Energy Step Code" requirement'
-          nonunique_nickname: "There can only be one live requirement template with this nickname"
+          nonunique_nickname: "There can only be one live requirement template with this custom name"
           taken: "must be unique"
         requirement_block:
           attributes:
