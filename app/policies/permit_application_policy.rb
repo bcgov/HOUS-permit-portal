@@ -129,7 +129,7 @@ class PermitApplicationPolicy < ApplicationPolicy
           .jurisdictions
           .find_by(id: permit_collaboration.permit_application.jurisdiction_id)
           .present? &&
-        permit_collaboration.permit_application.visible_to_reviewers?
+        permit_collaboration.permit_application.submitted_at_least_once?
     else
       false
     end

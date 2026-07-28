@@ -479,7 +479,7 @@ export const RequirementForm = observer(
               status={EFlashMessageStatus.error}
             />
           )}
-          {permitApplication?.isSubmitted || readOnlyProp ? (
+          {permitApplication?.isSubmitted ? (
             <CustomMessageBox
               description={t("permitApplication.show.wasSubmitted", {
                 date: format(permitApplication.submittedAt, "MMM d, yyyy h:mm a"),
@@ -487,7 +487,7 @@ export const RequirementForm = observer(
               })}
               status={EFlashMessageStatus.info}
             />
-          ) : (
+          ) : !readOnlyProp ? (
             <CustomMessageBox
               title={
                 jurisdiction &&
@@ -521,7 +521,7 @@ export const RequirementForm = observer(
               }
               status={EFlashMessageStatus.info}
             />
-          )}
+          ) : null}
           <Box bg="greys.grey03" p={3} borderRadius="sm">
             <Text fontStyle="italic">
               {t("site.foippaWarning")}
