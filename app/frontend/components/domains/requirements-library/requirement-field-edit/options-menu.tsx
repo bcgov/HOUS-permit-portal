@@ -10,7 +10,7 @@ import {
   Text,
   useDisclosure,
 } from "@chakra-ui/react"
-import { CaretDown, Warning, X } from "@phosphor-icons/react"
+import { CaretDown, LinkBreak, Warning, X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
@@ -22,6 +22,8 @@ import { DataValidationSetupModal } from "./data-validation-setup-modal"
 export interface IRequirementOptionsMenu {
   menuButtonProps?: Partial<ButtonProps>
   onRemove?: () => void
+  onDetachSharedQuestion?: () => void
+  isSharedQuestion?: boolean
   emitOpenState?: (isOpen: boolean) => void
   index: number
   disabledOptions?: Array<"remove" | "conditional">
@@ -39,6 +41,8 @@ export const OptionsMenu = observer(function OptionsMenu({
   hidePlacementConfiguration = false,
   menuButtonProps,
   onRemove,
+  onDetachSharedQuestion,
+  isSharedQuestion = false,
   emitOpenState,
   index,
   hasDataValidation = false,
@@ -102,6 +106,18 @@ export const OptionsMenu = observer(function OptionsMenu({
               />
             )}
             <ComputedComplianceSetupModal requirementIndex={index} />
+          </>
+        )}
+
+        {isSharedQuestion && (
+          <>
+            <MenuDivider />
+            <MenuItem color={"text.primary"} onClick={onDetachSharedQuestion}>
+              <HStack spacing={2} fontSize={"sm"}>
+                <LinkBreak />
+                <Text as={"span"}>{t("requirementsLibrary.sharedQuestions.detach")}</Text>
+              </HStack>
+            </MenuItem>
           </>
         )}
 

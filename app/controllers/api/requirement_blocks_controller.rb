@@ -116,6 +116,7 @@ class Api::RequirementBlocksController < Api::ApplicationController
       ],
       requirements_attributes: [
         :id,
+        :requirement_question_id,
         :requirement_code,
         :label,
         :input_type,

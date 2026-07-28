@@ -12,6 +12,7 @@ import { IControlProps } from "./types"
 export type TGenericContactEditProps<TFieldValues> = {
   editableLabelProps: TEditableLabelProps<TFieldValues>
   isOptionalCheckboxProps?: TIsOptionalCheckboxProps<TFieldValues>
+  lockDefinition?: boolean
 } & TGenericContactDisplayProps<TFieldValues> &
   IControlProps<TFieldValues>
 
@@ -19,6 +20,7 @@ export function GenericContactEdit<TFieldValues>({
   controlProps,
   editableLabelProps,
   isOptionalCheckboxProps,
+  lockDefinition = false,
   ...contactDisplayProps
 }: TGenericContactEditProps<TFieldValues>) {
   const {
@@ -31,10 +33,11 @@ export function GenericContactEdit<TFieldValues>({
         containerProps={{
           borderBottomRadius: "none",
         }}
-        renderHeading={() => <EditableLabel {...editableLabelProps} />}
+        renderHeading={() => <EditableLabel {...editableLabelProps} isDisabled={lockDefinition} />}
         addMultipleContactProps={{
           switchProps: {
             isChecked: !!value,
+            isDisabled: lockDefinition,
             ...restField,
           },
           shouldRender: true,
