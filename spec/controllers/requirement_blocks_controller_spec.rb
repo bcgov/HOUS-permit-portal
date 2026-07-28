@@ -121,6 +121,36 @@ RSpec.describe Api::RequirementBlocksController,
           "Successfully created requirement block!"
         )
       end
+
+      it "links a shared requirement question by id without duplicating the definition" do
+        shared_question = create(:requirement_question, :shared)
+
+        attrs =
+          valid_attributes.merge(
+            requirements_attributes: [
+              {
+                requirement_question_id: shared_question.id,
+                requirement_code: shared_question.requirement_code,
+                input_type: shared_question.input_type,
+                label: shared_question.label,
+                required: true,
+                elective: false,
+                position: 0
+              }
+            ]
+          )
+
+        expect { post :create, params: { requirement_block: attrs } }.to change(
+          RequirementBlock,
+          :count
+        ).by(1).and change(RequirementQuestion, :count).by(0)
+
+        created = RequirementBlock.order(:created_at).last
+        requirement = created.requirements.first
+        expect(requirement.requirement_question_id).to eq(shared_question.id)
+        expect(requirement.requirement_question).to eq(shared_question)
+        expect(shared_question.reload.shared).to be(true)
+      end
     end
 
     context "with invalid parameters" do

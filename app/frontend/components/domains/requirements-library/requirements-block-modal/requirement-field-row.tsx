@@ -92,11 +92,27 @@ export const RequirementFieldRow = ({
   const watchedRequirementCode = watch(`requirementsAttributes.${index}.requirementCode`)
   const watchedComputedCompliance = watch(`requirementsAttributes.${index}.inputOptions.computedCompliance`)
   const watchedDataValidation = watch(`requirementsAttributes.${index}.inputOptions.dataValidation`)
-  const displayedHint = field.usesSharedQuestion && watchedHint == null ? field.defaultHint : watchedHint
+  const usesSharedQuestion = watch(`requirementsAttributes.${index}.usesSharedQuestion`)
+  const defaultHint = watch(`requirementsAttributes.${index}.defaultHint`)
+  const defaultInstructions = watch(`requirementsAttributes.${index}.defaultInstructions`)
+  const displayedHint = usesSharedQuestion && watchedHint == null ? defaultHint : watchedHint
 
   const { disabledMenuOptions, showEditControls } = getRequirementFieldState(watchedRequirementCode, requirementType)
   if (disableRemove && !disabledMenuOptions.includes("remove")) {
     disabledMenuOptions.push("remove")
+  }
+
+  const handleDetachSharedQuestion = () => {
+    if (watchedHint == null) {
+      setValue(`requirementsAttributes.${index}.hint`, defaultHint ?? "")
+    }
+    if (watch(`requirementsAttributes.${index}.instructions`) == null) {
+      setValue(`requirementsAttributes.${index}.instructions`, defaultInstructions ?? "")
+    }
+    setValue(`requirementsAttributes.${index}.requirementQuestionId`, null)
+    setValue(`requirementsAttributes.${index}.usesSharedQuestion`, false)
+    setValue(`requirementsAttributes.${index}.defaultHint`, null)
+    setValue(`requirementsAttributes.${index}.defaultInstructions`, null)
   }
 
   return (
@@ -154,14 +170,14 @@ export const RequirementFieldRow = ({
           }}
           editableHelperTextProps={{
             controlProps: { control, name: `requirementsAttributes.${index}.hint` },
-            defaultValue: field.defaultHint,
-            usesSharedQuestion: field.usesSharedQuestion,
+            defaultValue: defaultHint,
+            usesSharedQuestion,
             isQuestionBankDefault: hidePlacementConfiguration,
           }}
           editableInstructionsTextProps={{
             controlProps: { control, name: `requirementsAttributes.${index}.instructions` },
-            defaultValue: field.defaultInstructions,
-            usesSharedQuestion: field.usesSharedQuestion,
+            defaultValue: defaultInstructions,
+            usesSharedQuestion,
             isQuestionBankDefault: hidePlacementConfiguration,
           }}
           isOptionalCheckboxProps={
@@ -239,6 +255,7 @@ export const RequirementFieldRow = ({
               : undefined
           }
           requirementCode={watchedRequirementCode}
+          lockDefinition={!!usesSharedQuestion}
         />
       </Box>
       <Box className={"requirement-display"} display={isEditing ? "none" : "block"} {...fieldContainerSharedProps}>
@@ -272,6 +289,8 @@ export const RequirementFieldRow = ({
         isRequirementInEditMode={isEditing}
         toggleRequirementToEdit={showEditControls ? toggleEdit : undefined}
         onRemove={onRemove}
+        onDetachSharedQuestion={handleDetachSharedQuestion}
+        isSharedQuestion={!!usesSharedQuestion}
         elective={watchedElective}
         conditional={hideConditional ? undefined : (watchedConditional as IFormConditional)}
         computedCompliance={hidePlacementConfiguration ? undefined : watchedComputedCompliance}

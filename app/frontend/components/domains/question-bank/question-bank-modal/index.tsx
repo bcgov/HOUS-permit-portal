@@ -39,9 +39,11 @@ export interface IRequirementQuestionForm {
 export const QuestionBankModal = observer(function QuestionBankModal({
   requirementQuestion,
   triggerButtonProps,
+  triggerButtonLabel,
 }: {
   requirementQuestion?: IRequirementQuestion
   triggerButtonProps?: Partial<ButtonProps>
+  triggerButtonLabel?: string
 }) {
   const { requirementQuestionStore, uiStore } = useMst()
   const { t } = useTranslation()
@@ -135,7 +137,7 @@ export const QuestionBankModal = observer(function QuestionBankModal({
         onClick={handleOpen}
         {...triggerButtonProps}
       >
-        {isEditing ? t("ui.edit") : t("questionBank.modals.create.triggerButton")}
+        {isEditing ? t("ui.edit") : (triggerButtonLabel ?? t("questionBank.modals.create.triggerButton"))}
       </Button>
 
       {isOpen && (
