@@ -1001,6 +1001,10 @@ export class Api {
     return this.client.post<ApiResponse<ITemplateVersion>>(`/template_versions/${templateVersionId}/refresh_draft`)
   }
 
+  async restoreTemplateLayout(templateVersionId: string) {
+    return this.client.post<ApiResponse<IRequirementTemplate>>(`/template_versions/${templateVersionId}/restore_layout`)
+  }
+
   async shareDraft(templateVersionId: string) {
     return this.client.post<ApiResponse<ITemplateVersion>>(`/template_versions/${templateVersionId}/share_draft`)
   }

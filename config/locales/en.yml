@@ -632,6 +632,12 @@ en:
       promote_draft_error:
         title: Error
         message: "%{error_message}"
+      restore_layout_success:
+        title: ""
+        message: "Template layout restored from this version"
+      restore_layout_error:
+        title: Error
+        message: "%{error_message}"
       no_draft_error:
         title: Error
         message: "No early access version exists for this template"
@@ -1175,6 +1181,11 @@ en:
       publish_before_schedule_date: "Version cannot be published before it's scheduled date"
       copy_customizations_error: "Old jurisdiction customizations could not be copied to new template version for jurisdiction_id:%{jurisdiction_id}"
       copy_customizations_log_error: "Error copying customizations to new template version: %{message}"
+    requirement_template_structure_restore_service:
+      template_unavailable: "Cannot restore layout because the template is missing or archived"
+      empty_snapshot: "This version has no layout snapshot to restore from"
+      malformed_snapshot: "This version's layout snapshot is invalid"
+      missing_blocks: "Cannot restore layout. These blocks are missing or archived in the library: %{blocks}"
   formio:
     requirement_template:
       completion_title: "Completion"

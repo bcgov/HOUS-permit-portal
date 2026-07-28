@@ -432,6 +432,22 @@ class Api::TemplateVersionsController < Api::ApplicationController
     end
   end
 
+  def restore_layout
+    authorize @template_version, :restore_layout?
+
+    begin
+      RequirementTemplateStructureRestoreService.new(@template_version).call!
+      render_requirement_template_success(
+        "requirement_template.restore_layout_success"
+      )
+    rescue RequirementTemplateStructureRestoreError => e
+      render_error "requirement_template.restore_layout_error",
+                   message_opts: {
+                     error_message: e.message
+                   }
+    end
+  end
+
   def share_draft
     authorize @template_version, :update?
 

@@ -83,6 +83,11 @@ class TemplateVersionPolicy < ApplicationPolicy
     promote_draft?
   end
 
+  def restore_layout?
+    user&.super_admin? && record&.requirement_template.present? &&
+      !record.requirement_template.discarded?
+  end
+
   def force_publish_draft?
     promote_draft? && ENV["ENABLE_TEMPLATE_FORCE_PUBLISH"] == "true"
   end
