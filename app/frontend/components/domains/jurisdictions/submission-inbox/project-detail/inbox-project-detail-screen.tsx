@@ -25,14 +25,24 @@ export const InboxProjectDetailScreen = observer(() => {
   const projectMeetingsEnabled = Boolean(
     siteConfigurationStore.projectMeetingsEnabled && currentPermitProject?.jurisdiction?.projectMeetingsEnabled
   )
+  const inboxProjectBasePath =
+    jurisdictionId && currentPermitProject
+      ? `/jurisdictions/${jurisdictionId}/submission-inbox/projects/${currentPermitProject.id}`
+      : null
 
-  const TABS_DATA: ITabItem[] = useMemo(
-    () => [
-      { label: t("submissionInbox.projectDetail.overview"), icon: SquaresFour, to: "overview", tabIndex: 0 },
+  const TABS_DATA: ITabItem[] = useMemo(() => {
+    if (!inboxProjectBasePath) return []
+    return [
+      {
+        label: t("submissionInbox.projectDetail.overview"),
+        icon: SquaresFour,
+        to: `${inboxProjectBasePath}/overview`,
+        tabIndex: 0,
+      },
       {
         label: t("submissionInbox.projectDetail.permits"),
         icon: ClipboardText,
-        to: "permits",
+        to: `${inboxProjectBasePath}/permits`,
         tabIndex: 1,
       },
       // Currently, notes are specific to projject meetings and thus will only be shown if project meetings are enabled
@@ -42,7 +52,7 @@ export const InboxProjectDetailScreen = observer(() => {
             {
               label: t("submissionInbox.projectDetail.notes"),
               icon: Chat,
-              to: "notes",
+              to: `${inboxProjectBasePath}/notes`,
               tabIndex: 2,
             },
           ]
@@ -50,7 +60,7 @@ export const InboxProjectDetailScreen = observer(() => {
       {
         label: t("submissionInbox.projectDetail.activity"),
         icon: TrendUp,
-        to: "activity",
+        to: `${inboxProjectBasePath}/activity`,
         tabIndex: projectMeetingsEnabled ? 3 : 2,
       },
       ...(projectMeetingsEnabled
@@ -58,22 +68,21 @@ export const InboxProjectDetailScreen = observer(() => {
             {
               label: t("submissionInbox.projectDetail.meetings"),
               icon: CalendarBlank,
-              to: "meetings",
+              to: `${inboxProjectBasePath}/meetings`,
               tabIndex: 4,
             },
           ]
         : []),
-    ],
-    [projectMeetingsEnabled, t]
-  )
+    ]
+  }, [inboxProjectBasePath, projectMeetingsEnabled, t])
 
   useEffect(() => {
-    if (!currentPermitProject) return
+    if (!currentPermitProject || !inboxProjectBasePath) return
 
-    if (!TABS_DATA.some((tab) => location.pathname.includes(tab.to))) {
-      navigate("overview", { replace: true })
+    if (!TABS_DATA.some((tab) => location.pathname === tab.to || location.pathname.startsWith(`${tab.to}/`))) {
+      navigate(`${inboxProjectBasePath}/overview`, { replace: true })
     }
-  }, [TABS_DATA, currentPermitProject, location.pathname, navigate])
+  }, [TABS_DATA, currentPermitProject, inboxProjectBasePath, location.pathname, navigate])
 
   useEffect(() => {
     if (currentPermitProject) {
@@ -84,7 +93,9 @@ export const InboxProjectDetailScreen = observer(() => {
   const [isPending, startTransition] = useTransition()
 
   const getTabIndex = () => {
-    const tabIndex = TABS_DATA.findIndex((tab) => location.pathname.includes(tab.to))
+    const tabIndex = TABS_DATA.findIndex(
+      (tab) => location.pathname === tab.to || location.pathname.startsWith(`${tab.to}/`)
+    )
     return tabIndex === -1 ? 0 : tabIndex
   }
 

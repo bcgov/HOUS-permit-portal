@@ -377,6 +377,19 @@ export function urlForPath(path: string): string {
   return `${baseUrl}${normalizedPath}`
 }
 
+/**
+ * Same-origin app path only. Rejects open-redirect / XSS shapes in navigation targets
+ * (defense in depth for afterLoginPath; RR 7.18+ also hardens Link/navigate).
+ */
+export function isSafeAppPath(path: string): boolean {
+  if (typeof path !== "string" || path.length === 0) return false
+  if (!path.startsWith("/") || path.startsWith("//")) return false
+  if (path.includes("\\") || path.includes("@")) return false
+  // absolute URLs / scheme navigations (incl. /javascript:… path forms)
+  if (/^[a-z][a-z0-9+.-]*:/i.test(path) || /(?:^|\/)javascript:/i.test(path)) return false
+  return true
+}
+
 export async function downloadFileFromStorage(options: {
   model: string
   modelId?: string

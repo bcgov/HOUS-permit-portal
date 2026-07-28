@@ -3,6 +3,7 @@ import { CaretRight, Info, SquaresFour, Steps } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
+import { useParams } from "react-router-dom"
 import { ISearch } from "../../../../../lib/create-search-model"
 import { IPermitProject } from "../../../../../models/permit-project"
 import { useMst } from "../../../../../setup/root"
@@ -22,6 +23,7 @@ interface IProps {
 }
 
 export const InboxOverviewTab = observer(({ permitProject }: IProps) => {
+  const { jurisdictionId } = useParams<{ jurisdictionId: string }>()
   const {
     fullAddress,
     pid,
@@ -147,7 +149,12 @@ export const InboxOverviewTab = observer(({ permitProject }: IProps) => {
                 ))}
             </SearchGrid>
             <Flex justify="flex-end" mt={4}>
-              <RouterLinkButton variant="tertiary" fontWeight="bold" rightIcon={<CaretRight />} to="permits">
+              <RouterLinkButton
+                variant="tertiary"
+                fontWeight="bold"
+                rightIcon={<CaretRight />}
+                to={`/jurisdictions/${jurisdictionId}/submission-inbox/projects/${permitProject.id}/permits`}
+              >
                 {t("submissionInbox.projectDetail.viewAllPermits")}
               </RouterLinkButton>
             </Flex>
