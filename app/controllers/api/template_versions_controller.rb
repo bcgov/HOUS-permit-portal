@@ -365,25 +365,6 @@ class Api::TemplateVersionsController < Api::ApplicationController
     end
   end
 
-  def validate_config
-    authorize @template_version
-
-    begin
-      TemplateVersioningService.validate_config!(@template_version)
-      render_success nil, nil, { meta: { config_errors: [] } }
-    rescue TemplateVersionConfigError => e
-      render_error nil,
-                   {
-                     meta: {
-                       config_errors: e.config_errors
-                     },
-                     log_args: {
-                       errors: e.message
-                     }
-                   }
-    end
-  end
-
   def update_draft_block
     authorize @template_version, :update?
 

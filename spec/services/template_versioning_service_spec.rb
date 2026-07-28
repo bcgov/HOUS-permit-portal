@@ -532,47 +532,6 @@ RSpec.describe TemplateVersioningService, type: :service, search: true do
       end
     end
 
-    describe ".validate_requirement_template!" do
-      it "raises without creating a template version" do
-        allow(TemplateVersionConfigValidator).to receive(:new).and_return(
-          invalid_validator
-        )
-        version_count = requirement_template.template_versions.count
-
-        expect {
-          described_class.validate_requirement_template!(requirement_template)
-        }.to raise_error(
-          TemplateVersionConfigError,
-          "Template configuration is invalid"
-        )
-        expect(requirement_template.template_versions.count).to eq(
-          version_count
-        )
-      end
-
-      it "returns true when the template is valid" do
-        expect(
-          described_class.validate_requirement_template!(requirement_template)
-        ).to eq(true)
-      end
-    end
-
-    describe ".validate_config!" do
-      it "raises for an invalid draft snapshot" do
-        draft_version = described_class.create_draft!(requirement_template)
-        allow(TemplateVersionConfigValidator).to receive(:new).and_return(
-          invalid_validator
-        )
-
-        expect {
-          described_class.validate_config!(draft_version)
-        }.to raise_error(
-          TemplateVersionConfigError,
-          "Template configuration is invalid"
-        )
-      end
-    end
-
     describe ".schedule!" do
       it "fails before saving the scheduled version" do
         allow(TemplateVersionConfigValidator).to receive(:new).and_return(

@@ -79,10 +79,6 @@ class TemplateVersionPolicy < ApplicationPolicy
     update?
   end
 
-  def validate_config?
-    promote_draft?
-  end
-
   def force_publish_draft?
     promote_draft? && ENV["ENABLE_TEMPLATE_FORCE_PUBLISH"] == "true"
   end

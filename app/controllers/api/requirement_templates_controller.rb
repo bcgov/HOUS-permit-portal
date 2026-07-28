@@ -9,7 +9,6 @@ class Api::RequirementTemplatesController < Api::ApplicationController
                   schedule
                   force_publish_now
                   create_draft
-                  validate_config
                   update_jurisdiction_availabilities
                 ]
   before_action :set_template_version, only: %i[unschedule_template_version]
@@ -315,19 +314,6 @@ class Api::RequirementTemplatesController < Api::ApplicationController
                    message_opts: {
                      error_message: e.message
                    }
-    end
-  end
-
-  def validate_config
-    authorize @requirement_template
-
-    begin
-      TemplateVersioningService.validate_requirement_template!(
-        @requirement_template
-      )
-      render_success nil, nil, { meta: { config_errors: [] } }
-    rescue TemplateVersionConfigError => e
-      render_template_config_error(e)
     end
   end
 

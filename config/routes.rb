@@ -90,10 +90,7 @@ Rails.application.routes.draw do
       post "copy", on: :collection
 
       # Draft workflow endpoints
-      member do
-        post "create_draft", to: "requirement_templates#create_draft"
-        post "validate_config", to: "requirement_templates#validate_config"
-      end
+      member { post "create_draft", to: "requirement_templates#create_draft" }
       post "jurisdiction_availabilities",
            on: :member,
            to: "requirement_templates#update_jurisdiction_availabilities"
@@ -106,7 +103,6 @@ Rails.application.routes.draw do
         post "refresh_draft", to: "template_versions#refresh_draft"
         delete "discard_draft", to: "template_versions#discard_draft"
         post "promote_draft", to: "template_versions#promote_draft"
-        post "validate_config", to: "template_versions#validate_config"
         post "invite_draft_previewers",
              to: "template_versions#invite_draft_previewers"
         post "share_draft", to: "template_versions#share_draft"

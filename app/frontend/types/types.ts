@@ -785,16 +785,6 @@ export interface ICopyRequirementTemplateFormData extends Partial<TCreateRequire
   id?: string
 }
 
-export interface IRequirementTemplateConfigError {
-  category: string
-  blockId: string
-  blockName: string
-  requirementId?: string
-  requirementCode?: string
-  requirementName?: string
-  message: string
-}
-
 export interface IBaselineOccupancy {
   id?: string
   key: EBaselineOccupancyKey
