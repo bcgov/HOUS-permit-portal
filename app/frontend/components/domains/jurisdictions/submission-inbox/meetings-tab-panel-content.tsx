@@ -9,9 +9,9 @@ import { useMst } from "../../../../setup/root"
 import { EProjectMeetingStatus } from "../../../../types/enums"
 import { CalloutBanner } from "../../../shared/base/callout-banner"
 import { MeetingDateFilter, ProjectMeetingStatusFilter, UnreadFilter } from "./filters"
+import { InboxSearchInput } from "./inbox-search-input"
 import { ProjectMeetingInboxTable } from "./project-meeting-inbox-table"
 import { ReviewerMeetingDetailContent } from "./reviewer-meeting-detail-content"
-import { SearchInput } from "./submissions-tab-panel-content"
 
 interface IProps {
   currentJurisdiction: IJurisdiction
@@ -57,13 +57,9 @@ export const MeetingsTabPanelContent = observer(function MeetingsTabPanelContent
 
           {projectMeetingsEnabled && (
             <VStack align="stretch" spacing={4} w="full">
-              <SearchInput
+              <InboxSearchInput
                 placeholder={t("submissionInbox.meetingSearchPlaceholder")}
-                value={projectMeetingInboxStore.query ?? ""}
-                onChange={(value) => {
-                  projectMeetingInboxStore.setQuery(value)
-                  projectMeetingInboxStore.search()
-                }}
+                searchModel={projectMeetingInboxStore}
               />
 
               <Flex w="full" flexWrap="wrap" alignItems="center" gap={3}>
