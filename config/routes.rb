@@ -96,6 +96,7 @@ Rails.application.routes.draw do
       member do
         delete "discard_draft", to: "template_versions#discard_draft"
         post "promote_draft", to: "template_versions#promote_draft"
+        post "restore_layout", to: "template_versions#restore_layout"
         post "invite_draft_previewers",
              to: "template_versions#invite_draft_previewers"
         post "share_draft", to: "template_versions#share_draft"
