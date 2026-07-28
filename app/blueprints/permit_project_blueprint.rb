@@ -118,7 +118,7 @@ class PermitProjectBlueprint < Blueprinter::Base
     association :permit_applications,
                 blueprint: PermitApplicationBlueprint,
                 view: :jurisdiction_review_inbox do |permit_project, _options|
-      permit_project.permit_applications.kept.select(&:visible_to_reviewers?)
+      permit_project.permit_applications.kept.select(&:submitted_at_least_once?)
     end
     association :recent_permit_applications,
                 blueprint: PermitApplicationBlueprint,

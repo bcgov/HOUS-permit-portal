@@ -55,9 +55,15 @@ export const ReviewerWorkspaceSidebar = ({ tabsData, title, ...rest }: IReviewer
             px={4}
             py={0}
             fontWeight="normal"
+            color="text.primary"
+            _visited={{ color: "text.primary" }}
+            _active={{ color: "text.primary" }}
+            _hover={{ color: "text.primary", textDecoration: "none" }}
             _selected={{
               bg: "background.blueLight",
               fontWeight: "bold",
+              color: "text.primary",
+              _visited: { color: "text.primary" },
             }}
           >
             <Flex align="center" justify="space-between" w="full">
