@@ -6,8 +6,7 @@ module Api::Concerns::Search::RequirementQuestions
       order: order,
       match: :word_start,
       where: {
-        discarded: discarded,
-        shared: true
+        discarded: discarded
       },
       page: search_params[:page],
       per_page:

@@ -29,8 +29,6 @@ class RequirementQuestion < ApplicationRecord
   has_many :requirements, dependent: :restrict_with_error
   has_many :requirement_blocks, through: :requirements
 
-  scope :shared, -> { where(shared: true) }
-
   acts_as_taggable_on :associations
 
   enum :input_type,
@@ -59,7 +57,7 @@ class RequirementQuestion < ApplicationRecord
        },
        prefix: true
 
-  before_validation :ensure_id, if: :shared?
+  before_validation :ensure_id
   before_validation :set_requirement_code
   before_validation :merge_computed_compliance_default_settings
   before_validation :convert_value_options,
@@ -78,9 +76,9 @@ class RequirementQuestion < ApplicationRecord
   validates :label, presence: true
   validates :input_type, presence: true
   validates :requirement_code, presence: true
-  validates :name, presence: true, if: :shared?
+  validates :name, presence: true
   validates :description, length: { maximum: 250 }, allow_blank: true
-  validate :shared_questions_cannot_have_placement_options, if: :shared?
+  validate :cannot_have_placement_options
   validate :input_type_immutable_when_in_use, on: :update
   validate :validate_value_options,
            if:
@@ -132,7 +130,6 @@ class RequirementQuestion < ApplicationRecord
       label: label,
       requirement_code: requirement_code,
       associations: association_list,
-      shared: shared,
       discarded: discarded_at.present?,
       updated_at: updated_at,
       created_at: created_at
@@ -148,19 +145,13 @@ class RequirementQuestion < ApplicationRecord
   def set_requirement_code
     return if requirement_code.present?
     return if label.blank?
+    return if id.blank?
 
     parameterized = label.parameterize(separator: "_")
     parameterized = "#{parameterized}_file" if input_type_file? &&
       !parameterized.end_with?("_file")
 
-    self.requirement_code =
-      if shared?
-        return if id.blank?
-
-        "#{id}:#{parameterized}"
-      else
-        parameterized
-      end
+    self.requirement_code = "#{id}:#{parameterized}"
   end
 
   def merge_computed_compliance_default_settings
@@ -214,10 +205,6 @@ class RequirementQuestion < ApplicationRecord
 
   def convert_value_options
     return unless attribute_changed?(:input_options)
-    # Private questions are mirrors of a Requirement placement: the parent
-    # already ran the full convert (including options_map rewrite). Re-running
-    # here desyncs HistoricSite maps. Shared bank rows convert themselves.
-    return unless shared?
 
     input_options["value_options"] = input_options[
       "value_options"
@@ -238,7 +225,7 @@ class RequirementQuestion < ApplicationRecord
     RequirementQuestion.search_index.refresh
   end
 
-  def shared_questions_cannot_have_placement_options
+  def cannot_have_placement_options
     return if input_options.blank?
 
     options = input_options.deep_stringify_keys
@@ -253,9 +240,8 @@ class RequirementQuestion < ApplicationRecord
   end
 
   # Input type controls the structure of every linked placement. Use a new
-  # shared question rather than changing that structure in place.
+  # bank question rather than changing that structure in place.
   def input_type_immutable_when_in_use
-    return unless shared?
     return unless will_save_change_to_input_type?
     return unless requirements.exists?
 

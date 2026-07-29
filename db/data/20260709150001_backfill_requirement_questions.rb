@@ -1,6 +1,18 @@
 # frozen_string_literal: true
 
+# HUB-4234: 1:1 migrate each requirement placement into a bank RequirementQuestion
+# and set requirements.requirement_question_id. Preserves requirement_code (FR-12).
+# No label dedup. Placement-only input_options stay on requirements.
+#
+# Rollback (staging only, before intentional multi-use catalogue edits):
+#   bin/rails question_bank:rollback_backfill
 class BackfillRequirementQuestions < ActiveRecord::Migration[7.2]
+  PLACEMENT_INPUT_OPTION_KEYS = %w[
+    conditional
+    computed_compliance
+    data_validation
+  ].freeze
+
   def up
     unless table_exists?(:requirement_questions) &&
              column_exists?(:requirements, :requirement_question_id)
@@ -27,7 +39,7 @@ class BackfillRequirementQuestions < ActiveRecord::Migration[7.2]
 
     say "Backfilling #{requirements.size} requirement(s) into requirement_questions (1:1, no dedup)..."
 
-    requirements.each { |requirement| create_private_question_for(requirement) }
+    requirements.each { |requirement| create_bank_question_for(requirement) }
 
     remaining = execute(<<~SQL.squish).first["count"].to_i
       SELECT COUNT(*) AS count
@@ -40,12 +52,22 @@ class BackfillRequirementQuestions < ActiveRecord::Migration[7.2]
     SQL
 
     say "BackfillRequirementQuestions complete. bank_rows=#{bank_count}, unlinked_requirements=#{remaining}."
+
+    if defined?(RequirementQuestion) &&
+         RequirementQuestion.respond_to?(:reindex)
+      say "Reindexing RequirementQuestion for Searchkick..."
+      RequirementQuestion.reindex
+    end
   end
 
-  def create_private_question_for(requirement)
+  def create_bank_question_for(requirement)
     question_id = SecureRandom.uuid
     quoted_question_id = quote(question_id)
     quoted_requirement_id = quote(requirement["id"])
+    label = requirement["label"].presence || requirement["requirement_code"]
+    name = label
+    definition_options =
+      bank_definition_input_options(requirement["input_options"])
 
     execute(<<~SQL.squish)
       INSERT INTO requirement_questions (
@@ -56,18 +78,18 @@ class BackfillRequirementQuestions < ActiveRecord::Migration[7.2]
         input_options,
         hint,
         instructions,
-        shared,
+        name,
         created_at,
         updated_at
       ) VALUES (
         #{quoted_question_id},
         #{quote(requirement["requirement_code"])},
-        #{quote(requirement["label"])},
+        #{quote(label)},
         #{requirement["input_type"].to_i},
-        #{quote_json(requirement["input_options"])},
+        #{quote_json(definition_options)},
         #{quote(requirement["hint"])},
         #{quote(requirement["instructions"])},
-        FALSE,
+        #{quote(name)},
         NOW(),
         NOW()
       )
@@ -80,6 +102,24 @@ class BackfillRequirementQuestions < ActiveRecord::Migration[7.2]
       WHERE id = #{quoted_requirement_id}
         AND requirement_question_id IS NULL
     SQL
+  end
+
+  # Bank rows must not carry placement-only config (conditional / compliance /
+  # data_validation). Those remain on requirements and merge at read time.
+  def bank_definition_input_options(raw)
+    options =
+      case raw
+      when Hash
+        raw
+      when String
+        JSON.parse(raw)
+      else
+        {}
+      end
+
+    options.deep_stringify_keys.except(*PLACEMENT_INPUT_OPTION_KEYS)
+  rescue JSON::ParserError
+    {}
   end
 
   def quote(value)
