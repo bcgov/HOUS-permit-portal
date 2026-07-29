@@ -1,0 +1,88 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: crunchydb-backup
+spec:
+  schedule: {{ .Values.cronjob.schedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: s3-backup-archiver
+              image: {{ .Values.cronjob.image }}
+              env:
+                - name: MC_CONFIG_DIR
+                  value: /tmp/.mc
+                - name: S3_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.cronjob.secretName }}
+                      key: s3-key
+                - name: S3_SECRET_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.cronjob.secretName }}
+                      key: s3-key-secret
+              command: ["/bin/bash", "-c"]
+              args:
+                - |
+                  set -e
+
+                  # Ensure MC_CONFIG_DIR exists
+                  mkdir -p "$MC_CONFIG_DIR"
+
+                  # Timestamp for backup folder
+                  NOW=$(date +%Y%m%d%H%M%S)
+
+                  # Variables from values.yaml
+                  BUCKET="{{ .Values.cronjob.bucket }}"
+                  BASE_PATH="{{ .Values.cronjob.basePath | trimSuffix "/" }}"
+                  ENDPOINT="{{ .Values.cronjob.endpoint }}"
+                  RETENTION_SECONDS={{ .Values.cronjob.retentionSeconds }}   # e.g., 57600 for 16 hours
+
+                  # Validate BASE_PATH
+                  if [ -z "$BASE_PATH" ]; then
+                    echo "ERROR: BASE_PATH is empty"
+                    exit 1
+                  fi
+
+                  # Set MinIO alias
+                  mc alias set myminio "$ENDPOINT" "$S3_ACCESS_KEY" "$S3_SECRET_KEY" --api S3v4
+
+                  # Check if source path exists
+                  if ! mc ls "myminio/$BUCKET/$BASE_PATH" > /dev/null 2>&1; then
+                    echo "ERROR: Source path myminio/$BUCKET/$BASE_PATH does not exist"
+                    exit 1
+                  fi
+
+                  # Copy current backup folder to new timestamped folder
+                  mc mirror "myminio/$BUCKET/$BASE_PATH" "myminio/$BUCKET/${BASE_PATH}_$NOW"
+
+                  # Delete old backups based on retention period
+                  now_epoch=$(date +%s)
+                  PREFIX="${BASE_PATH}_"
+
+                  mc ls "myminio/$BUCKET/" | awk '{print $NF}' | grep -E "^${PREFIX}[0-9]{14}/$" | while IFS= read -r folder; do
+                    ts="${folder%/}"
+                    ts="${ts#$PREFIX}"
+                    [[ "$ts" =~ ^[0-9]{14}$ ]] || continue
+                    folder_epoch=$(date -d "${ts:0:8} ${ts:8:2}:${ts:10:2}:${ts:12:2}" +%s 2>/dev/null) || continue
+                    age=$((now_epoch - folder_epoch))
+                    if [ "$age" -ge "$RETENTION_SECONDS" ]; then
+                      # echo "Deleting: myminio/$BUCKET/$folder (age: $((age / 3600)) hours)"
+                      echo "Deleting: myminio/$BUCKET/$folder (age: $((age / 86400)) days)"
+                      mc rm -r --force "myminio/$BUCKET/$folder"
+                    fi
+                  done
+                  
+              volumeMounts:
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: tmp
+              emptyDir: {}

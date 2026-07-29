@@ -1,0 +1,25 @@
+{{- if and .Values.openshift.route.enabled .Values.matomo.tracker.enabled }}
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: matomo-tracker
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: matomo-tracker
+  {{- with .Values.openshift.route.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  host: {{ .Values.matomo.tracker.hostname | quote }}
+  to:
+    kind: Service
+    name: matomo-tracker
+  port:
+    targetPort: 8080
+  {{- if .Values.openshift.route.tls.enabled }}
+  tls:
+    termination: {{ .Values.openshift.route.tls.termination }}
+    insecureEdgeTerminationPolicy: {{ .Values.openshift.route.tls.insecureEdgeTerminationPolicy }}
+  {{- end }}
+{{- end }}

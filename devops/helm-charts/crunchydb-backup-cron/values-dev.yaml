@@ -1,0 +1,15 @@
+cronjob:
+  enabled: true
+  schedule: "0 2 * * *"   # Run every day at 2 AM
+  # image: minio/mc:latest
+  # image: bitnami/minio-client:latest
+  # image:
+  #   registry: image-registry.openshift-image-registry.svc:5000
+  #   repository: bb18ab-dev/minio-client
+  #   tag: 2025.7.21-debian-12-r3
+  image: bitnamilegacy/minio-client:2025.7.21-debian-12-r3
+  secretName: s3-creds
+  bucket: "<REDACTED>"
+  basePath: "habackup"
+  endpoint: "<REDACTED>"
+  retentionSeconds: 2592000 #30days

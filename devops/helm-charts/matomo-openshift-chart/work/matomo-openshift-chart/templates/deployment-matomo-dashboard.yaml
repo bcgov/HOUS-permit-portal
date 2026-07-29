@@ -1,0 +1,196 @@
+---
+{{- if .Values.matomo.dashboard.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: matomo-dashboard
+  namespace: {{.Values.namespace}}
+  labels:
+    app: matomo-dashboard
+{{- if .Values.matomo.extralabels }}
+{{ toYaml .Values.matomo.extralabels | indent 4 }}
+{{- end }}
+spec:
+  replicas: {{.Values.matomo.dashboard.replicas}}
+  selector:
+    matchLabels:
+      app: matomo-dashboard
+  template:
+    metadata:
+      labels:
+        app: matomo-dashboard
+{{- if .Values.matomo.extralabels }}
+{{ toYaml .Values.matomo.extralabels | indent 8 }}
+{{- end }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap-matomo.yaml") . | sha256sum }}
+    spec:
+{{ include "matomo.init" . | nindent 6 }}
+      containers:
+        {{- if .Values.matomo.dashboard.sidecars }}
+{{ toYaml .Values.matomo.dashboard.sidecars | indent 6 }}
+        {{- end }}
+      - name: fpm-metrics
+        securityContext:
+          runAsUser: {{.Values.matomo.runAsUser}}
+          privileged: false
+          allowPrivilegeEscalation: false
+        image: hipages/php-fpm_exporter:2.2.0
+        imagePullPolicy: Always
+        env:
+        - name: PHP_FPM_FIX_PROCESS_COUNT
+          value: "true"
+        resources:
+          limits:
+            memory: 128Mi
+          requests:
+            cpu: 15m
+            memory: 32Mi
+      - name: nginx
+        {{- if .Values.matomo.dashboard.nginx.image }}
+        image: {{.Values.matomo.dashboard.nginx.image}}
+        {{ else }}
+        image: {{.Values.nginx.image}}
+        {{- end }}
+        {{- if .Values.nginx.resources }}
+        resources:
+{{ toYaml .Values.nginx.resources | indent 10 }}
+        {{- end }}
+        {{- with .Values.matomo.dashboard.nginx.readinessProbe }}
+        readinessProbe: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.matomo.dashboard.nginx.livenessProbe }}
+        livenessProbe: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        securityContext:
+          runAsUser: {{.Values.nginx.runAsUser}}
+          privileged: false
+          allowPrivilegeEscalation: false
+        volumeMounts:
+          - name: nginx-conf
+            mountPath: /etc/nginx/nginx.conf
+            subPath: nginx.conf
+            readOnly: true
+          - name: fastcgi-params
+            mountPath: /etc/nginx/fastcgi_params
+            subPath: fastcgi_params
+            readOnly: true
+          - name: mime-types
+            mountPath: /etc/nginx/mime.types
+            subPath: mime.types
+            readOnly: true
+          - name: static-data
+            mountPath: /var/www/html
+            readOnly: true
+        ports:
+        - containerPort: 8080
+      - name: matomo
+        image: {{.Values.matomo.image}}
+        {{- if .Values.matomo.resources }}
+        resources:
+{{ toYaml .Values.matomo.resources | indent 10 }}
+        {{- end }}
+        securityContext:
+          runAsUser: {{.Values.matomo.runAsUser}}
+          privileged: false
+          allowPrivilegeEscalation: false
+        imagePullPolicy: Always
+        env:
+          - name: MATOMO_DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.db.password.secretKeyRef.name }}
+                key: {{ .Values.db.password.secretKeyRef.key }}
+          {{- range .Values.matomo.env }}
+          {{- if .valueFromSecret }}
+          - name: {{ .name }}
+            valueFrom:
+              secretKeyRef:
+                name: {{ .valueFromSecret.secretName | quote }}
+                key: {{ .valueFromSecret.key | quote }}
+          {{- else if .value }}
+          - name: {{ .name }}
+            value: {{ .value | quote }}
+          {{- end }}
+          {{- end }}
+{{- include "matomo.license" . | nindent 10  }}
+        ports:
+        - containerPort: 9000
+        volumeMounts:
+          - name: static-data
+            mountPath: /var/www/html
+          - name: matomo-phpfpm
+            mountPath: /usr/local/etc/php-fpm.d/zz-global.conf
+            subPath: zz-global.conf
+          - name: matomo-dashboard-php
+            mountPath: /usr/local/etc/php/conf.d/zz-global.ini
+            subPath: zz-global.ini
+{{- if .Values.extraVolumeMounts }}
+{{ toYaml .Values.extraVolumeMounts | indent 10 }}
+{{- end }}
+        {{- with .Values.matomo.livenessProbe }}
+        livenessProbe: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.matomo.readinessProbe }}
+        readinessProbe: {{- toYaml . | nindent 10 }}
+        {{- end }}
+{{ include "matomo.images.pullSecrets" ( dict "images" (list .Values.matomo) "global" .Values.global) | nindent 6 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+      - name: nginx-conf
+        configMap:
+          name: nginx-matomo-dashboard
+          items:
+          - key: nginx.conf
+            path: nginx.conf
+      - name: fastcgi-params
+        configMap:
+          name: nginx-matomo-dashboard
+          items:
+          - key: fastcgi_params
+            path: fastcgi_params
+      - name: mime-types
+        configMap:
+          name: nginx-matomo-dashboard
+          items:
+          - key: mime.types
+            path: mime.types
+      - name: matomo-configuration
+        configMap:
+          name: matomo-configuration
+      - name: matomo-phpfpm
+        configMap:
+          name: matomo-phpfpm
+      - name: matomo-dashboard-php
+        configMap:
+          name: matomo-dashboard-php
+      - name: static-data
+        emptyDir: {}
+{{- if .Values.extraVolumes }}
+{{ toYaml .Values.extraVolumes | indent 6 }}
+{{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: matomo-dashboard
+  namespace: {{.Values.namespace}}
+  labels:
+    app: matomo-dashboard
+{{- if .Values.matomo.extralabels }}
+{{ toYaml .Values.matomo.extralabels | indent 4 }}
+{{- end }}
+spec:
+  ports:
+    - port: 8080
+      protocol: TCP
+  selector:
+    app: matomo-dashboard
+{{- end -}}

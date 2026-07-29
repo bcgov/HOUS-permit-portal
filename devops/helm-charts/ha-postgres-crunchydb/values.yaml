@@ -8,7 +8,7 @@ labels:
 
 crunchyImage: # it's not necessary to specify an image as the images specified in the Crunchy Postgres Operator will be pulled by default
 #crunchyImage: artifacts.developer.gov.bc.ca/bcgov-docker-local/crunchy-postgres-gis:ubi8-15.2-3.3-0 # use this image for POSTGIS
-postgresVersion: 16
+postgresVersion: 17
 #postGISVersion: '3.3' # use this version of POSTGIS. both crunchyImage and this property needs to have valid values for POSTGIS to be enabled.
 imagePullPolicy: IfNotPresent
 
@@ -46,7 +46,7 @@ dataSource:
     path: "/habackup"
     s3:
       bucket: "bucketName"
-      endpoint: <REDACTED>
+      endpoint: "https://sector.objectstore.gov.bc.ca"
       region: "not-used"
       uriStyle: "path"
     stanza: db
@@ -55,12 +55,13 @@ pgBackRest:
   image: # it's not necessary to specify an image as the images specified in the Crunchy Postgres Operator will be pulled by default
   # If retention-full-type set to 'count' then the oldest backups will expire when the number of backups reach the number defined in retention
   # If retention-full-type set to 'time' then the number defined in retention will take that many days worth of full backups before expiration
-  retention: "1" # Ideally a number to keep backups for 2 working days
+  # Keep repository growth bounded through pgBackRest retention rather than by deleting files manually.
+  retention: "1" # Keep only the most recent backup chain in repo1
   retentionS3: "30" # Ideally a larger number such as backups for 30 days
   retentionFullType: count # Type of retention for full backups
   retentionFullTypeS3: time # Type of retention for full backups
-  retentionArchive: "1" # Number of backups worth of continuous WAL to retain
-  retentionArchiveType: full # Type of retention for WAL archives
+  retentionArchive: "1" # Number of backup sets worth of continuous WAL to retain in repo1
+  retentionArchiveType: full # Type of retention for WAL archives in repo1
   repos:
     schedules:
       full: 0 6 * * 0 # Full backup every Sunday at 10:00 PM PST
@@ -95,7 +96,7 @@ pgBackRest:
     # bucket specifies the S3 bucket to use,
     bucket: "bucketName"
     # endpoint specifies the S3 endpoint to use.
-    endpoint: <REDACTED>
+    endpoint: "https://sector.objectstore.gov.bc.ca"
     # region specifies the S3 region to use. If your S3 storage system does not
     # use "region", fill this in with a random value.
     region: "not-used"
@@ -120,8 +121,8 @@ patroni:
       shared_buffers: 256MB # default is 128MB; a good tuned default for shared_buffers is 25% of the memory allocated to the pod
       wal_buffers: "-1" # this can be set to -1 to automatically set as 1/32 of shared_buffers or 64kB, whichever is larger
       min_wal_size: 64MB # Sets the minimum size to shrink the WAL files to
-      max_wal_size: 256MB # default is 1GB make sure the mounted volume is large enough for the logging
-      max_slot_wal_keep_size: 256MB # default is -1, allowing unlimited wal growth when replicas fall behind
+      max_wal_size: 128MB # default is 1GB make sure the mounted volume is large enough for the logging
+      max_slot_wal_keep_size: 128MB # default is -1, allowing unlimited wal growth when replicas fall behind
       temp_file_limit: 512MB  # Prevent temp files from filling PVC
       checkpoint_timeout: 15min  # Reduce checkpoint frequency
       checkpoint_completion_target: 0.9  # Smooth checkpointing
@@ -146,21 +147,21 @@ pgmonitor:
       cpu: 1m
       memory: 64Mi
     limits:
-      cpu: 50m
-      memory: 128Mi
+      cpu: 200m #CHANGE BACK TO 50m
+      memory: 256Mi #CHANGE BACK TO 128mi
 
 # Data restore cronjob configuration - reuses dataSource and pgBackRest.s3 patterns
 dataRestore:
   enabled: false
   createS3Secret: true
   schedule: "0 2 * * *" # Run every day at 2 AM
-  image: <REDACTED>
+  image: "artifacts.developer.gov.bc.ca/bcgov-docker-local/crunchy-pgbackrest:ubi8-2.53.1-0"
   secretName: s3-pgbackrest
   repo:
     name: repo2
     path: "/habackup"
     bucket: "bucketName"
-    endpoint: <REDACTED>
+    endpoint: "https://sector.objectstore.gov.bc.ca"
     region: "not-used"
     uriStyle: "path"
   stanza: db
