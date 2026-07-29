@@ -67,3 +67,9 @@ deleteme.*
 .npm/
 
 .cursor/
+.claude/
+
+devops/helm-charts/**/outputs/
+outputs/
+devops/helm-charts/**/work/
+work/
