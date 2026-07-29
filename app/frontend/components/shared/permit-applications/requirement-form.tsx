@@ -400,6 +400,10 @@ export const RequirementForm = observer(
       }
     }
     const showVersionDiffContactWarning = shouldShowDiff && !userShouldSeeDiff
+    const previousSubmissionRequirement =
+      isPreviousSubmissionOpen && previousSubmissionKey && pastVersion?.formJson
+        ? getRequirementByKey(pastVersion.formJson, previousSubmissionKey)
+        : null
     return (
       <>
         <Flex
@@ -576,14 +580,12 @@ export const RequirementForm = observer(
           onSelect={handleSelectExistingStepCode}
         />
 
-        {isPreviousSubmissionOpen && (
+        {previousSubmissionRequirement && (
           <PreviousSubmissionModal
             isOpen={isPreviousSubmissionOpen}
             onOpen={onPreviousSubmissionOpen}
             onClose={onPreviousSubmissionClose}
-            requirementJson={singleRequirementFormJson(
-              getRequirementByKey(pastVersion.formJson, previousSubmissionKey)
-            )}
+            requirementJson={singleRequirementFormJson(previousSubmissionRequirement)}
             submissionData={singleRequirementSubmissionData(pastVersion.submissionData, previousSubmissionKey)}
           />
         )}

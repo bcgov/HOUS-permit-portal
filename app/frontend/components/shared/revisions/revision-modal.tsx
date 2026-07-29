@@ -161,7 +161,7 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
                 onChange={(e) => setComment(e.target.value)}
                 placeholder={t("permitApplication.show.revision.comment")}
                 maxLength={350}
-                isDisabled={disableInput}
+                isDisabled={disableInput || isRevisionsRequested}
                 sx={{
                   _disabled: {
                     color: "text.primary",
@@ -169,7 +169,9 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
                   },
                 }}
               />
-              {!disableInput && <FormHelperText>{t("permitApplication.show.revision.maxCharacters")}</FormHelperText>}
+              {!disableInput && !isRevisionsRequested && (
+                <FormHelperText>{t("permitApplication.show.revision.maxCharacters")}</FormHelperText>
+              )}
             </FormControl>
 
             <Divider />
