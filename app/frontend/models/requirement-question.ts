@@ -14,7 +14,6 @@ export const RequirementQuestionModel = types
     hint: types.maybeNull(types.string),
     instructions: types.maybeNull(types.string),
     requirementCode: types.string,
-    shared: types.boolean,
     associations: types.array(types.string),
     inputOptions: types.frozen(),
     usageCount: types.optional(types.number, 0),
