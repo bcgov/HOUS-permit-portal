@@ -70,3 +70,9 @@ deleteme.*
 
 # Host database configuration template
 !/config/database.yml.local
+.claude/
+
+devops/helm-charts/**/outputs/
+outputs/
+devops/helm-charts/**/work/
+work/
