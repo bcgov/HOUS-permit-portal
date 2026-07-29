@@ -5,14 +5,7 @@ FactoryBot.define do
     input_options { {} }
     hint { nil }
     instructions { nil }
-    shared { false }
-    name { nil }
-    description { nil }
-
-    trait :shared do
-      shared { true }
-      name { Faker::Lorem.unique.words(number: 3).join(" ") }
-      description { Faker::Lorem.sentence }
-    end
+    name { Faker::Lorem.unique.words(number: 3).join(" ") }
+    description { Faker::Lorem.sentence }
   end
 end
