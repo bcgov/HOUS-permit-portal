@@ -53,6 +53,10 @@ class RequirementTemplatePolicy < ApplicationPolicy
     create?
   end
 
+  def validate_config?
+    create?
+  end
+
   def update_jurisdiction_availabilities?
     create?
   end

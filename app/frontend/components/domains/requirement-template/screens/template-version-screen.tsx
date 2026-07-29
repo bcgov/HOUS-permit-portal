@@ -14,7 +14,6 @@ import { ConfirmationModal } from "../../../shared/confirmation-modal"
 import { FloatingHelpDrawer } from "../../../shared/floating-help-drawer"
 import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
 import { BuilderBottomFloatingButtons } from "../builder-bottom-floating-buttons"
-import { ConfigErrorsPanel } from "../config-errors-panel"
 import { PublishScheduleModal } from "../publish-schedule-modal"
 import { SectionsDisplay } from "../sections-display"
 import { SectionsSidebar } from "../sections-sidebar"
@@ -69,9 +68,11 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
   )
 
   const showSchedulePublishControls = isDraft && isSuperAdmin && !!requirementTemplate?.isFullyLoaded
-  const configErrors = requirementTemplateId
-    ? requirementTemplateStore.getConfigErrorsByRequirementTemplateId(requirementTemplateId)
-    : []
+
+  const onSaveAndValidate = async () => {
+    if (!templateVersion) return []
+    return requirementTemplateStore.validateTemplateVersionConfig(templateVersion.id)
+  }
 
   const onScheduleConfirm = async (scheduleDate: Date) => {
     if (!templateVersion) return
@@ -222,6 +223,7 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
                   scheduledConflicts={scheduledConflicts}
                   onScheduleConfirm={onScheduleConfirm}
                   onForcePublishNow={onForcePublishNow}
+                  onSaveAndValidate={onSaveAndValidate}
                   translationNamespace="templateVersionPreview.schedulePublish"
                   triggerLabel={t("templateVersionPreview.schedulePublish.triggerButton")}
                   hideManageAccessButton
@@ -246,9 +248,6 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
               <AlertIcon mt={1} />
               <Text fontSize="sm">{t("templateVersionPreview.immutableVersionNotice")}</Text>
             </Alert>
-          )}
-          {isDraft && requirementTemplateId && (
-            <ConfigErrorsPanel errors={configErrors} requirementTemplateId={requirementTemplateId} />
           )}
 
           <SectionsDisplay

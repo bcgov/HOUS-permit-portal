@@ -5,6 +5,7 @@ import React from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { IRequirementTemplate } from "../../../../../models/requirement-template"
+import { IRequirementTemplateConfigError } from "../../../../../types/types"
 import { BrowserSearchPrompt } from "../../../../shared/permit-applications/browser-search-prompt"
 import { IEditRequirementActionsProps, IEditRequirementOptionsProps, IRequirementTemplateForm } from "./index"
 
@@ -12,6 +13,7 @@ interface IProps {
   onScheduleDate?: (date: Date) => void
   onForcePublishNow?: () => void
   onCreateDraft?: () => void
+  onSaveAndValidate?: () => Promise<IRequirementTemplateConfigError[]>
   onSaveDraft: () => void
   onAddSection: () => void
   requirementTemplate: IRequirementTemplate
@@ -27,6 +29,7 @@ export const ControlsHeader = observer(function ControlsHeader({
   onAddSection,
   onForcePublishNow,
   onCreateDraft,
+  onSaveAndValidate,
   hasStepCodeDependencyError,
   renderOptionsMenu,
   renderActions,
@@ -70,6 +73,7 @@ export const ControlsHeader = observer(function ControlsHeader({
             onScheduleConfirm: onScheduleDate,
             onForcePublishNow: onForcePublishNow,
             onCreateDraft: onCreateDraft,
+            onSaveAndValidate: onSaveAndValidate,
             triggerButtonProps: {
               isDisabled: isSubmitDisabled,
             },
