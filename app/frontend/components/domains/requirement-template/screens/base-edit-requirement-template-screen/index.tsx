@@ -15,12 +15,12 @@ import {
   IRequirementTemplateUpdateParams,
   ITemplateSectionBlockAttributes,
 } from "../../../../../types/api-request"
+import { IRequirementTemplateConfigError } from "../../../../../types/types"
 import { CalloutBanner } from "../../../../shared/base/callout-banner"
 import { ErrorScreen } from "../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
 import { FloatingHelpDrawer } from "../../../../shared/floating-help-drawer"
 import { BuilderBottomFloatingButtons } from "../../builder-bottom-floating-buttons"
-import { ConfigErrorsPanel } from "../../config-errors-panel"
 import { SectionsSidebar } from "../../sections-sidebar"
 import { useSectionHighlight } from "../../use-section-highlight"
 import { ControlsHeader } from "./controls-header"
@@ -39,6 +39,7 @@ export interface IEditRequirementActionsProps {
   onScheduleConfirm?: (date: Date) => void
   onForcePublishNow?: () => void
   onCreateDraft?: () => void
+  onSaveAndValidate?: () => Promise<IRequirementTemplateConfigError[]>
   triggerButtonProps?: Partial<ButtonProps>
   requirementTemplate?: IRequirementTemplate
   onSaveDraft?: () => void
@@ -192,6 +193,20 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
     })()
   }
 
+  const onSaveAndValidate = async (): Promise<IRequirementTemplateConfigError[]> => {
+    let errors: IRequirementTemplateConfigError[] = []
+    await handleSubmit(async (templateFormData) => {
+      const formattedSubmitData = formatSubmitData(templateFormData)
+      const saved = await requirementTemplateStore.updateRequirementTemplate(
+        requirementTemplate.id,
+        formattedSubmitData
+      )
+      if (!saved) return
+      errors = await requirementTemplateStore.validateConfig(requirementTemplate.id)
+    })()
+    return errors
+  }
+
   const hasNoSections = watchedSectionsAttributes.length === 0
 
   const allTemplateSectionBlocks = watchedSectionsAttributes.flatMap(
@@ -201,7 +216,6 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
   const stepCodeRelatedWarningBannerErrors = getStepCodeRelatedWarningBannerErrors()
 
   const hasStepCodeDependencyError = !!stepCodeRelatedWarningBannerErrors.find((error) => error.type === "error")
-  const configErrors = requirementTemplateStore.getConfigErrorsByRequirementTemplateId(requirementTemplate.id)
   return (
     <Box as="main" id="admin-edit-permit-template">
       <FormProvider {...formMethods}>
@@ -235,6 +249,7 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
               onScheduleDate={onSchedule}
               onForcePublishNow={onForcePublishNow}
               onCreateDraft={onCreateDraft}
+              onSaveAndValidate={onSaveAndValidate}
               onAddSection={onAddSection}
               requirementTemplate={requirementTemplate}
               hasStepCodeDependencyError={hasStepCodeDependencyError}
@@ -267,7 +282,6 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
           </Box>
         </Box>
       </FormProvider>
-      <ConfigErrorsPanel errors={configErrors} requirementTemplateId={requirementTemplate.id} />
       <BuilderBottomFloatingButtons isCollapsedAll={isCollapsedAll} setIsCollapsedAll={setIsCollapsedAll} />
     </Box>
   )

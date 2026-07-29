@@ -270,6 +270,39 @@ RSpec.describe Api::TemplateVersionsController,
         expect(json_response.dig("meta", "message")).to be_nil
       end
 
+      describe "POST #validate_config" do
+        it "returns an empty config_errors list when valid" do
+          allow(TemplateVersioningService).to receive(:validate_config!)
+
+          post :validate_config, params: { id: draft_version.id }
+
+          expect(response).to have_http_status(:success)
+          expect(json_response.dig("meta", "config_errors")).to eq([])
+        end
+
+        it "returns structured configuration errors without a flash message" do
+          config_errors = [
+            {
+              category: "block_conditional",
+              block_id: "block-id",
+              block_name: "Details",
+              message: "conditional references a block not in this template"
+            }
+          ]
+          allow(TemplateVersioningService).to receive(
+            :validate_config!
+          ).and_raise(TemplateVersionConfigError.new(config_errors))
+
+          post :validate_config, params: { id: draft_version.id }
+
+          expect(response).to have_http_status(:bad_request)
+          expect(json_response.dig("meta", "config_errors")).to eq(
+            config_errors.map(&:deep_stringify_keys)
+          )
+          expect(json_response.dig("meta", "message")).to be_nil
+        end
+      end
+
       context "with skip_date_check: true" do
         around do |example|
           original = ENV["ENABLE_TEMPLATE_FORCE_PUBLISH"]
