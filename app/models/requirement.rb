@@ -43,10 +43,6 @@ class Requirement < ApplicationRecord
                       Proc.new { |req|
                         TYPES_WITH_VALUE_OPTIONS.include?(req.input_type.to_s)
                       }
-  # Snapshot the bank row after placement options are normalized so private
-  # questions inherit camelCased values + rewritten options_map (HistoricSite).
-  before_validation :ensure_requirement_question
-  before_validation :sync_private_requirement_question_definition
   before_save :set_digital_seal_validator_to_architectural_drawing_file
   validate :validate_value_options,
            if:
@@ -230,9 +226,7 @@ class Requirement < ApplicationRecord
   end
 
   def effective_hint
-    unless requirement_question&.shared?
-      return requirement_question&.hint || read_attribute(:hint)
-    end
+    return read_attribute(:hint) unless requirement_question.present?
 
     if read_attribute(:hint).nil?
       requirement_question.hint
@@ -242,9 +236,7 @@ class Requirement < ApplicationRecord
   end
 
   def effective_instructions
-    unless requirement_question&.shared?
-      return requirement_question&.instructions || read_attribute(:instructions)
-    end
+    return read_attribute(:instructions) unless requirement_question.present?
 
     if read_attribute(:instructions).nil?
       requirement_question.instructions
@@ -298,36 +290,6 @@ class Requirement < ApplicationRecord
   def merge_computed_compliance_default_settings
     configuration_service = AutomatedComplianceConfigurationService.new(self)
     configuration_service.merge_default_settings!
-  end
-
-  def ensure_requirement_question
-    return if requirement_question.present?
-    return if label.blank? || input_type.blank?
-
-    self.requirement_question =
-      RequirementQuestion.new(requirement_question_definition_attributes)
-  end
-
-  def sync_private_requirement_question_definition
-    return unless requirement_question.present?
-    return if requirement_question.shared?
-
-    requirement_question.assign_attributes(
-      requirement_question_definition_attributes
-    )
-  end
-
-  def requirement_question_definition_attributes
-    {
-      requirement_code: requirement_code,
-      label: read_attribute(:label),
-      input_type: read_attribute(:input_type),
-      # deep_dup: avoid sharing the same Hash with the placement so parent/child
-      # callbacks cannot mutate each other's input_options mid-save.
-      input_options: (read_attribute(:input_options) || {}).deep_dup,
-      hint: read_attribute(:hint),
-      instructions: read_attribute(:instructions)
-    }
   end
 
   def validate_architectural_drawing_file

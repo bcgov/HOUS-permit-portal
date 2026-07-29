@@ -8,7 +8,6 @@ class RequirementQuestionBlueprint < Blueprinter::Base
          :input_type,
          :hint,
          :instructions,
-         :shared,
          :name,
          :description,
          :discarded_at,

@@ -887,7 +887,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_21_172453) do
     t.jsonb "input_options", default: {}, null: false
     t.string "hint"
     t.text "instructions"
-    t.boolean "shared", default: false, null: false
     t.string "name"
     t.text "description"
     t.datetime "discarded_at"
@@ -895,7 +894,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_21_172453) do
     t.datetime "updated_at", null: false
     t.index ["discarded_at"], name: "index_requirement_questions_on_discarded_at"
     t.index ["requirement_code"], name: "index_requirement_questions_on_requirement_code"
-    t.index ["shared"], name: "index_requirement_questions_on_shared"
   end
 
   create_table "requirement_template_sections", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

@@ -9,7 +9,6 @@ class CreateRequirementQuestions < ActiveRecord::Migration[7.2]
       t.jsonb :input_options, default: {}, null: false
       t.string :hint
       t.text :instructions
-      t.boolean :shared, default: false, null: false
       t.string :name
       t.text :description
       t.datetime :discarded_at
@@ -18,7 +17,6 @@ class CreateRequirementQuestions < ActiveRecord::Migration[7.2]
     end
 
     add_index :requirement_questions, :discarded_at
-    add_index :requirement_questions, :shared
     add_index :requirement_questions, :requirement_code
 
     # Join: each requirement placement optionally points at a bank question.

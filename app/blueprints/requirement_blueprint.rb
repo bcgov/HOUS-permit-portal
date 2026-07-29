@@ -31,29 +31,29 @@ class RequirementBlueprint < Blueprinter::Base
   end
 
   field :uses_shared_question do |requirement|
-    requirement.requirement_question&.shared? || false
+    requirement.requirement_question_id.present?
   end
 
   field :default_hint do |requirement|
-    if requirement.requirement_question&.shared?
-      requirement.requirement_question&.hint
+    if requirement.requirement_question.present?
+      requirement.requirement_question.hint
     end
   end
 
   field :default_instructions do |requirement|
-    if requirement.requirement_question&.shared?
+    if requirement.requirement_question.present?
       requirement.requirement_question.instructions
     end
   end
 
   field :hint_override do |requirement|
-    if requirement.requirement_question&.shared?
+    if requirement.requirement_question.present?
       requirement.read_attribute(:hint)
     end
   end
 
   field :instructions_override do |requirement|
-    if requirement.requirement_question&.shared?
+    if requirement.requirement_question.present?
       requirement.read_attribute(:instructions)
     end
   end
