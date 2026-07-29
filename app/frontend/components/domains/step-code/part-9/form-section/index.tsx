@@ -212,7 +212,7 @@ const ChecklistRouteSection = observer(function ChecklistRouteSection({
   requiresReport,
   children,
 }: IChecklistRouteSectionProps) {
-  const { currentStepCode, checklist } = usePart9StepCode()
+  const { checklist } = usePart9StepCode()
   const formMethods = useForm({ mode: "onChange" })
   const { handleSubmit, reset, formState } = formMethods
 
