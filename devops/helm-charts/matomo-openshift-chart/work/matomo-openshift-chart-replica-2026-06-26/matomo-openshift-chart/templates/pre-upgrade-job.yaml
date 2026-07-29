@@ -1,0 +1,73 @@
+{{- if .Values.matomo.preUpgradeCommand }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: matomo-pre-upgrade
+  namespace: {{.Values.namespace}}
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    partOf: matomo
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  template:
+    metadata:
+      name: "{{ .Release.Name }}"
+      labels:
+        app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+        app.kubernetes.io/instance: {{ .Release.Name | quote }}
+        helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    spec:
+      restartPolicy: Never
+{{ include "matomo.images.pullSecrets" ( dict "images" (list .Values.matomo) "global" .Values.global) | nindent 6 }}
+      containers:
+      - name: pre-upgrade-matomo
+        image: {{ include "matomo.image" (dict "registry" (.Values.matomo.imageRegistry | default .Values.global.imageRegistry) "image" .Values.matomo.image) }}
+{{ include "matomo.resources" (dict "resources" .Values.matomo.preUpgradeResources "defaultResources" .Values.defaultResources) | nindent 8 }}
+        volumeMounts:
+        - name: matomo-startup-config
+          mountPath: /var/www/html/config/config.ini.php
+          subPath: config.ini.php
+        - name: matomo-pre-upgrade-additional-config-maps
+          mountPath: /var/www/html/config/common.config.ini.php
+          subPath: common.config.ini.php
+        # To do anything with Matomo, we first need to bootstrap it (curl).
+        command:  [ 'bash' , '-c' , 'sleep {{.Values.matomo.preUpgradeSleepTime}}; curl -Il https://{{.Values.matomo.dashboard.hostname}}; {{.Values.matomo.preUpgradeCommand}}' ]
+        env:
+        - name: MATOMO_FIRST_USER_NAME
+          value: {{.Values.matomo.dashboard.firstuser.username}}
+        - name: MATOMO_FIRST_USER_EMAIL
+          value: {{.Values.matomo.dashboard.firstuser.email}}
+        - name: MATOMO_FIRST_USER_PASSWORD
+          value: {{.Values.matomo.dashboard.firstuser.password}}
+        - name: MATOMO_DB_HOST
+          value: {{.Values.db.hostname}}
+        - name: MATOMO_DB_NAME
+          value: {{.Values.db.name}}
+        {{ if .Values.db.prefix }}
+        - name: MATOMO_DB_PREFIX
+          value: {{.Values.db.prefix}}
+        {{ end }}
+        - name: MATOMO_DB_USERNAME
+          value: {{.Values.db.username}}
+        - name: MATOMO_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.db.password.secretKeyRef.name }}
+              key: {{ .Values.db.password.secretKeyRef.key }}
+{{ include "matomo.license" . | nindent 8 }}
+      volumes:
+        - name: matomo-startup-config
+          configMap:
+            name: matomo-startup-config
+{{ if  .Values.extraConfigMaps.create }}
+        - name: matomo-pre-upgrade-additional-config-maps
+          configMap:
+            name: matomo-pre-upgrade-additional-config-maps
+{{- end }}
+{{- end -}}
