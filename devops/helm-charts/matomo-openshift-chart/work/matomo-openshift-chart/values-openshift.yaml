@@ -1,0 +1,139 @@
+# Example OpenShift install overrides.
+# Mirror/import these images into the project first, or change the image names to match your ImageStreams.
+namespace: matomo
+
+global:
+  imageRegistry: image-registry.openshift-image-registry.svc:5000/matomo
+  imagePullSecrets: []
+  storageClass: ""
+
+defaultResources:
+  requests:
+    cpu: 25m
+    memory: 128Mi
+
+matomo:
+  image: matomo:5.11.2-fpm
+  runAsUser: null
+  site:
+    name: Matomo
+    url: https://matomo-dashboard.apps.example.com
+  tracker:
+    phpFpmCommand: /usr/local/sbin/php-fpm
+  ingress:
+    enabled: false
+  dashboard:
+    replicas: 1
+    hostname: matomo-dashboard.apps.example.com
+    tls: true
+    nginx:
+      livenessProbe:
+        httpGet:
+          path: /index.php
+          port: 8080
+        initialDelaySeconds: 15
+        periodSeconds: 10
+        timeoutSeconds: 2
+        failureThreshold: 6
+      readinessProbe:
+        httpGet:
+          path: /index.php
+          port: 8080
+        initialDelaySeconds: 5
+        periodSeconds: 5
+        timeoutSeconds: 2
+        failureThreshold: 6
+    firstuser:
+      username: admin
+      password: change-me-admin-password
+      email: admin@example.com
+  tracker:
+    enabled: true
+    replicas: 1
+    hostname: matomo-tracker.apps.example.com
+    tls: true
+    nginx:
+      livenessProbe:
+        httpGet:
+          path: /matomo.js
+          port: 8080
+        initialDelaySeconds: 15
+        periodSeconds: 10
+        timeoutSeconds: 2
+        failureThreshold: 6
+      readinessProbe:
+        httpGet:
+          path: /matomo.js
+          port: 8080
+        initialDelaySeconds: 5
+        periodSeconds: 5
+        timeoutSeconds: 2
+        failureThreshold: 6
+  cli:
+    enabled: false
+    replicas: 0
+  queuedTrackingMonitor:
+    enabled: false
+  queuedTrackingProcess:
+    enabled: false
+    replicas: 0
+  cronJobs:
+    coreArchive:
+      enabled: false
+    scheduledTasks:
+      enabled: false
+
+nginx:
+  image: nginx:1.21.6
+  runAsUser: null
+
+fpmExporter:
+  image: php-fpm_exporter:2.2.0
+
+db:
+  enabled: true
+  image: mariadb:11.4
+  temp:
+    enabled: true
+    mountPath: /tmp
+    sizeLimit: 256Mi
+  probes:
+    startup:
+      initialDelaySeconds: 60
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 180
+    liveness:
+      initialDelaySeconds: 600
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 6
+    readiness:
+      initialDelaySeconds: 60
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 6
+  storage:
+    size: 1Gi
+    storageClass: ""
+    mountPath: /var/lib/mysql
+  auth:
+    createSecret: true
+    rootPassword: ""
+
+openshift:
+  route:
+    enabled: true
+    tls:
+      enabled: true
+      termination: edge
+      insecureEdgeTerminationPolicy: Redirect
+
+networkPolicy:
+  enabled: true
+  allowOpenShiftIngress: true
+  ingressNamespaceSelector:
+    matchLabels:
+      network.openshift.io/policy-group: ingress
+matomo:
+  installCommand: ""

@@ -7,7 +7,7 @@ shutdown: false # Set to true to enable shutdown of the cluster before upgrading
 labels:
   app.kubernetes.io/instance: ha-postgres-crunchydb
 
-postgresVersion: 16
+postgresVersion: 17
 
 standby:
   enabled: false # Disable for initial bootstrap restore
@@ -40,8 +40,8 @@ dataSource:
   repo:
     path: "/habackup_20251002020011"
     s3:
-      bucket: <REDACTED>
-      endpoint: <REDACTED>
+      bucket: "<REDACTED>"
+      endpoint: "https://<REDACTED>"
 
 pgBackRest:
   global:
@@ -81,9 +81,9 @@ pgBackRest:
     # the path start with /, it will be created under bucket if it doesn't exist
     s3Path: "/habackup"
     # bucket specifies the S3 bucket to use,
-    bucket: <REDACTED>
+    bucket: "<REDACTED>"
     # endpoint specifies the S3 endpoint to use.
-    endpoint: <REDACTED>
+    endpoint: "https://<REDACTED>"
     # Disable backup schedules for repo2 - this is read-only for standby
     fullSchedule: "0 9 * * *"  # Feb 31st never exists - effectively disabled
     incrementalSchedule: "0 0 31 2 *"  # Feb 31st never exists - effectively disabled

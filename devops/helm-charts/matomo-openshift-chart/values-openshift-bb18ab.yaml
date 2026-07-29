@@ -1,0 +1,112 @@
+# Example OpenShift install overrides.
+# Mirror/import these images into the project first, or change the image names to match your ImageStreams.
+# Namespace is taken from `helm -n <namespace>` / --namespace, not from a values key.
+
+global:
+  imageRegistry: image-registry.openshift-image-registry.svc:5000/bb18ab-tools
+  imagePullSecrets: []
+  storageClass: ""
+
+defaultResources:
+  limits:
+    memory: 200Mi
+  requests:
+    cpu: 10m
+    memory: 25Mi
+
+matomo:
+  # image: matomo:5.7.1
+  # matomo:5.11.2-fpm on Docker Hub is mistagged: the code inside it is
+  # actually core 5.12.0 (confirmed via core/Version.php), which made Matomo's
+  # own front controller refuse to run ("codebase running old version 5.11.2
+  # ... database already upgraded to 5.12.0"). Use the correctly-labeled tag.
+  image: matomo:5.12.0-fpm
+  runAsUser: null
+  site:
+    name: Matomo
+    url: https://dev.buildingpermit.gov.bc.ca
+  ingress:
+    enabled: false
+  dashboard:
+    replicas: 1
+    hostname: matomo-<REDACTED>-tools.apps.<REDACTED>
+    tls: true
+    firstuser:
+      username: admin
+      password:  <REDACTED> #change-me-admin-password
+      email: <REDACTED>
+  tracker:
+    enabled: true
+    replicas: 1
+    hostname: matomo-tracker-<REDACTED>-tools.apps.<REDACTED>
+    tls: true
+    phpFpmCommand: /usr/local/sbin/php-fpm
+  cli:
+    enabled: false
+    replicas: 0
+  queuedTrackingMonitor:
+    enabled: false
+  queuedTrackingProcess:
+    enabled: false
+    replicas: 0
+  cronJobs:
+    # values-openshift.yaml's 512Mi requests.memory per job don't fit here:
+    # compute-long-running-quota caps this namespace at 2Gi requests.memory
+    # total, and the always-on dashboard/tracker/db/clamav pods already
+    # commit ~1.25-1.8Gi of that, so a 512Mi cron pod often can't be
+    # scheduled at all (BackoffLimitExceeded). Scale requests down to fit
+    # the remaining headroom; limits can stay generous since only requests
+    # count against the quota.
+    coreArchive:
+      enabled: true
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          memory: 1Gi
+    scheduledTasks:
+      enabled: true
+      resources:
+        requests:
+          cpu: 50m
+          memory: 256Mi
+        limits:
+          memory: 1Gi
+
+nginx:
+  image: nginx:1.21.6
+  runAsUser: null
+
+fpmExporter:
+  image: php-fpm_exporter:2.2.0
+
+db:
+  enabled: true
+  image: mariadb:11.4
+  storage:
+    size: 1Gi
+    storageClass: ""
+    mountPath: /var/lib/mysql
+  temp:
+    enabled: true
+    mountPath: /tmp
+    sizeLimit: 256Mi
+  auth:
+    createSecret: true
+    rootPassword: ""
+
+openshift:
+  route:
+    enabled: true
+    tls:
+      enabled: true
+      termination: edge
+      insecureEdgeTerminationPolicy: Redirect
+
+networkPolicy:
+  enabled: true
+  allowOpenShiftIngress: true
+  ingressNamespaceSelector:
+    matchLabels:
+      network.openshift.io/policy-group: ingress

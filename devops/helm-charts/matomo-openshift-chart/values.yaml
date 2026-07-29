@@ -1,0 +1,457 @@
+## @section Global parameters
+## Global Docker image parameters
+## Please, note that this will override the image parameters, configured to use the global value
+## Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass
+
+## @param global.imageRegistry Global Docker image registry
+## @param global.imagePullSecrets Global Docker registry secret names as an array
+##
+ # -- Globals settings
+global:
+  ## As:
+  ## imageRegistry: "docker.io"
+  # -- Global image registry
+  imageRegistry: ""
+  ## As:
+  ## imagePullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  # -- Global image pull secrets
+  imagePullSecrets: []
+  # -- Global storage class for persistent volumes
+  storageClass: ""
+
+# -- Default container resources used when a component does not set its own resources (e.g. DB).
+# Raise these (and matomo.resources / matomo.php.memory_limit) for larger OpenShift quotas.
+defaultResources:
+  requests:
+    cpu: 50m
+    memory: 256Mi
+
+matomo:
+  # -- Image registry to use.
+  imageRegistry: ""
+  ## As:
+  ## imagePullSecrets:
+  ##   - myRegistryKeySecretName
+  # -- Image pull secrets for Matomo.
+  imagePullSecrets: []
+  # -- Which image to use for Matomo deployment.
+  image: digitalist/matomo:5.7.1
+  # -- run container as user id. Set null/omit on OpenShift restricted SCC.
+  runAsUser: 82
+  # -- Resources for the matomo-init container (copy source + seed config).
+  initResources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  # -- Resources for the dashboard Matomo/PHP-FPM container.
+  # Scale with cluster memory, e.g. requests 1Gi / limits 3Gi on larger OpenShift nodes.
+  resources: {}
+  # -- Not used automatically (see matomo.postInstallCommand for the hook that runs it).
+  # WARNING: the ExtraTools-based command this used to default to
+  # ("./console plugin:activate ExtraTools && ./console matomo:install ...")
+  # only works on the old digitalist/matomo image, which bundled that plugin.
+  # It fails with "Cannot find plugin files for ExtraTools." on the vanilla
+  # matomo:*-fpm image used by values-openshift*.yaml. There is no automated
+  # schema installer for that image — after a fresh install/DB, complete
+  # Matomo's own web Installation wizard once (see "First-time database setup"
+  # in OPENSHIFT-INSTALL.md for exact steps and how to recover if you see
+  # "Matomo is already installed" with a missing-table error).
+  installCommand: ""
+  # -- Default site created at install time (used in install.json).
+  site:
+    name: Localhost
+    url: https://localhost
+  #
+  # Privacy Manager / automatic data retention
+  # ------------------------------------------
+  # Keeps the database from growing without bound by deleting old raw logs and
+  # old aggregated reports on a schedule. Purge is executed by the
+  # matomo-jobs-scheduled-tasks CronJob (must stay enabled).
+  #
+  # Typical profiles:
+  #   small / dev:   deleteLogs.olderThanDays=90,  deleteReports.olderThanMonths=6,  db.storage.size=5-10Gi
+  #   medium:        deleteLogs.olderThanDays=180, deleteReports.olderThanMonths=12, db.storage.size=20-50Gi
+  #   large:         deleteLogs.olderThanDays=365, deleteReports.olderThanMonths=24, db.storage.size=100Gi+
+  #
+  privacy:
+    deleteLogs:
+      # -- Enable automatic raw visitor-log purge (PrivacyManager [Deletelogs]).
+      enable: true
+      # -- Minimum days between purge runs (1 = daily).
+      scheduleLowestInterval: 1
+      # -- Delete raw logs older than this many days.
+      olderThanDays: 180
+      # -- Max rows deleted per SQL batch (protects DB under load).
+      maxRowsPerQuery: 100000
+      # -- Let Matomo estimate DB size for diagnostics / UI.
+      enableAutoDatabaseSizeEstimate: true
+      enableDatabaseSizeEstimate: true
+    deleteReports:
+      # -- Enable automatic old-report purge (PrivacyManager [Deletereports]).
+      enable: true
+      # -- Delete aggregated reports older than this many months.
+      olderThanMonths: 12
+      # -- Keep lightweight basic metrics even when reports are purged.
+      keepBasicMetrics: true
+      keepDayReports: false
+      keepWeekReports: false
+      keepMonthReports: true
+      keepYearReports: true
+      keepRangeReports: false
+      keepSegmentReports: false
+  #
+  # PHP runtime tuning (dashboard + archive cron). Raise memory_limit when the
+  # OpenShift project has larger memory quotas / high-traffic sites.
+  #
+  php:
+    expose_php: "Off"
+    memory_limit: "2G"
+    opcache_memory_consumption: "512"
+    opcache_interned_strings_buffer: "16"
+    opcache_save_comments: "1"
+    opcache_jit_buffer_size: "256M"
+    opcache_jit: "1235"
+    opcache_max_file_upload: "300"
+    max_execution_time: "300"
+    post_max_size: "1500M"
+    upload_max_filesize: "32M"
+    max_input_time: "3600"
+    display_errors: "Off"
+    error_reporting: "22527"
+    mysqli_reconnect: "On"
+    mysqli_allow_local_infile: "On"
+    default_socket_timeout: "20"
+    max_input_vars: "2000"
+  # -- PHP-FPM pool for the dashboard (process count scales with CPU/memory).
+  phpfpm:
+    type: ondemand
+    max_children: 100
+    start_servers: 5
+    min_spare_servers: 5
+    max_spare_servers: 75
+    max_requests: 500
+    process_idle_timeout: "480s"
+    memory_limit: "2048M"
+    status_path: "/status"
+  # Post install for helm chart. Starts a post-install-job.
+  postInstallSleepTime: 5
+  postInstallCommand: ""
+  preUpgradeSleepTime: 5
+  preUpgradeCommand: ""
+  extralabels: {}
+  readinessProbe: {}
+  livenessProbe: {}
+  ## matomo:
+  ##   env:
+  ##     - name: BAR
+  ##       value: foo
+  ##     - name: FOO
+  ##       valueFromSecret:
+  ##         secretName: foo
+  ##         key: bar
+  # -- Env variables to inject, if any.
+  env: []
+  ## If you have a premium license for plugins, set it here.
+  ## you need to create the secret before referring it.
+  ## As:
+  ## license:
+  ##   secretKeyRef:
+  ##     name: matomo-license
+  ##     key: matomo-license
+  license:
+  ingress:
+    enabled: true
+    extralabels: {}
+    annotations: {}
+  cli:
+    replicas: 1
+    enabled: true
+    resources: {}
+  cronJobs:
+    # Archiving must run regularly so reports stay fresh without browser archiving.
+    coreArchive:
+      enabled: true
+      labels:
+        name: matomo-jobs-corearchive
+        instance: matomo
+        component: cronjob
+        partOf: matomo
+        managedBy: helm
+      schedule: "*/60 * * * *"
+      concurrencyPolicy: Forbid
+      activeDeadlineSeconds: 43200
+      command: ./console core:archive --disable-scheduled-tasks
+      resources: {}
+    # scheduled-tasks runs PrivacyManager purge (and other maintenance).
+    # Keep enabled whenever matomo.privacy.deleteLogs/deleteReports are enabled.
+    scheduledTasks:
+      enabled: true
+      labels:
+        name: matomo-jobs-scheduled-tasks
+        instance: matomo
+        component: cronjob
+        partOf: matomo
+        managedBy: helm
+      schedule: "0 * * * *"
+      activeDeadlineSeconds: 43200
+      command: ./console scheduled-tasks:run
+      resources: {}
+      # PHP overrides for the scheduled-tasks job (purge can be memory-heavy).
+      php:
+        memory_limit: "4G"
+        max_execution_time: "0"
+        max_input_time: "3600"
+        max_input_vars: "2000"
+  dashboard:
+    sidecars: []
+    ## added like this:
+    # sidecars:
+    # - name: fpm-metrics
+    #   image: hipages/php-fpm_exporter:2.2.0
+    #   imagePullPolicy: IfNotPresent
+    #   resources:
+    #     limits:
+    #       cpu: 500m
+    #       memory: 256Mi
+    #     requests:
+    #       cpu: 40m
+    #       memory: 32Mi
+    enabled: true
+    replicas: 1
+    loadbalancer: false
+    hostname: my.host
+    tls: false
+    firstuser:
+      username: admin
+      password: admin123
+      email: foo@example.com
+    nginx:
+      nginxWorkerProcesses: 5
+      image: ''
+      # conf:
+      #   nginx.conf: |
+      #     worker_processes 5;
+      #     load_module modules/ngx_http_geoip2_module.so;
+      #     ...
+      #   fastcgi_params: |
+      #     fastcgi_param   COUNTRY_CODE            $geoip2_data_country_code;
+      #     fastcgi_param   QUERY_STRING            $query_string;
+      #     fastcgi_param   REQUEST_METHOD          $request_method;
+      #     ...
+      #   mime.types: |
+      #     types {
+      #       text/html                                        html htm shtml;
+      #       text/css                                         css;
+      #       text/xml                                         xml;
+      #       ...
+      conf: ''
+      livenessProbe:
+        exec:
+          command:
+          - /bin/sh
+          - -c
+          - "[ -f /tmp/nginx.pid ] && ps -A | grep nginx"
+        initialDelaySeconds: 10
+        periodSeconds: 5
+      readinessProbe:
+        httpGet:
+          scheme: HTTP
+          path: /index.php
+          port: 8080
+        initialDelaySeconds: 10
+        periodSeconds: 5
+    ingressClassName: ""
+    ingress:
+      annotations:
+        digitalist.cloud/instance: "matomo"
+  queuedTrackingMonitor:
+    enabled: true
+  queuedTrackingProcess:
+    enabled: true
+    replicas: 1
+  tracker:
+    enabled: true
+    replicas: 1
+    hostname: my.host
+    tls: false
+    loadbalancer: false
+    phpFpmCommand: /usr/local/sbin/php-fpm
+    # -- Resources for the tracker Matomo/PHP-FPM container.
+    resources: {}
+    nginx:
+      resources: {}
+      nginxWorkerProcesses: 5
+      livenessProbe:
+        exec:
+          command:
+          - /bin/sh
+          - -c
+          - "[ -f /tmp/nginx.pid ] && ps -A | grep nginx"
+        initialDelaySeconds: 10
+        periodSeconds: 5
+      readinessProbe:
+        httpGet:
+          scheme: HTTP
+          path: /matomo.js
+          port: 8080
+        initialDelaySeconds: 10
+        periodSeconds: 5
+    phpfpm:
+      type: ondemand
+      max_children: 75
+      process_idle_timeout: 600s
+      max_requests: 500
+      start_servers: 5
+      min_spare_servers: 5
+      max_spare_servers: 75
+      memory_limit: "2048M"
+      status_path: "/status"
+    ingressClassName: ""
+    ingress:
+      annotations:
+        digitalist.cloud/instance: "matomo"
+
+nginx:
+  imageRegistry: ""
+  image: digitalist/nginx:1.21.6
+  imagePullSecrets: []
+  runAsUser: 100
+  resources: {}
+
+fpmExporter:
+  imageRegistry: ""
+  image: hipages/php-fpm_exporter:2.2.0
+  resources:
+    requests:
+      cpu: 15m
+      memory: 32Mi
+    limits:
+      memory: 128Mi
+
+db:
+  # -- Deploy the bundled MariaDB StatefulSet. Set false to use an external DB.
+  enabled: false
+  imageRegistry: ""
+  image: mariadb:11.4
+  imagePullSecrets: []
+  temp:
+    enabled: true
+    mountPath: /tmp
+    sizeLimit: 256Mi
+  probes:
+    startup:
+      initialDelaySeconds: 60
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 180
+    liveness:
+      initialDelaySeconds: 600
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 6
+    readiness:
+      initialDelaySeconds: 60
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 6
+  # -- PVC size for bundled MariaDB. Size for retention + growth headroom.
+  # Rule of thumb: raw logs dominate size; shorter deleteLogs.olderThanDays => smaller DB.
+  storage:
+    size: 8Gi
+    storageClass: ""
+    mountPath: /var/lib/mysql
+  resources: {}
+  auth:
+    createSecret: true
+    rootPassword: ""
+  hostname: matomo-db-mysql
+  password:
+    secretKeyRef:
+      name: matomo-db-mysql
+      key: mysql-root-password
+  name: matomo
+  username: root
+  prefix: matomo_
+
+openshift:
+  route:
+    enabled: false
+    annotations: {}
+    tls:
+      enabled: true
+      termination: edge
+      insecureEdgeTerminationPolicy: Redirect
+
+networkPolicy:
+  enabled: false
+  allowOpenShiftIngress: true
+  ingressNamespaceSelector:
+    matchLabels:
+      network.openshift.io/policy-group: ingress
+
+# -- Extra secrets
+extraSecrets:
+  create: false
+  data: {}
+# * secrets need to base64 encoded.
+#  data:
+#    name: Zm9vCg==
+#    bar: YmFyCg==
+# -- Extra services
+extraServices: {}
+#  - name: foo
+    ## Service port type
+#    type: ClusterIP
+    ## Service protocol
+#    protocol: TCP
+    ## The container target port
+#    containerPort: 12001
+    ## The service port
+#    port: 12001
+#    selector:
+#      app: matomo-dashboard
+    ## The node port (only relevant for type LoadBalancer or NodePort)
+#    nodePort:
+    ## The cluster ip address (only relevant for type LoadBalancer or NodePort)
+#    clusterIP:
+    ## The loadbalancer ip address (only relevant for type LoadBalancer)
+#    loadBalancerIP:
+# -- Extra configMaps
+extraConfigMaps:
+  create: false
+  data: {}
+# data:
+#   my.ini: |
+#     extension=foo.so
+#     foo.socket=tcp://bar:9309
+# -- Extra volumes
+extraVolumes: []
+# extraVolumes:
+# - name: mySecretVolume
+#   secret:
+#     secretName: matomo-extra-secrets
+# - name: my.ini
+#   configMap:
+#     name: matomo-additional-config-maps
+#     items:
+#     - key: "my.ini"
+#       path: "my.ini"
+# -- Extra volumes to mount
+extraVolumeMounts: []
+# extraVolumeMounts:
+# - name: mySecretVolume
+#   mountPath: /foo/secrets/mySecretVolume/
+# - name: my.ini
+#   mountPath: /usr/local/etc/php/conf.d/my.ini
+#   subPath: my.ini
+
+# -- Node labels for pod assignment.
+nodeSelector: {}
+
+# -- Tolerations for pod assignment
+tolerations: []

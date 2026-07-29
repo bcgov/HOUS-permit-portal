@@ -1,0 +1,112 @@
+# Apply base configuration from values.yaml and make the necessary overrides in custom-values-example.yaml
+# helm upgrade --install new-hippo-ha . -f values.yaml -f custom-values-example.yaml
+
+fullnameOverride: ha-postgres-crunchydb
+shutdown: false # Set to true to enable shutdown of the cluster before upgrading postgres major versions.
+
+labels:
+  app.kubernetes.io/instance: ha-postgres-crunchydb
+
+postgresVersion: 17
+
+standby:
+  enabled: false # Disable for initial bootstrap restore
+  repoName: repo2
+
+# instances:
+#   replicas: 3
+#   dataVolumeClaimSpec:
+#     storage: 2Gi
+
+instances:
+  replicas: 1
+  dataVolumeClaimSpec:
+    storage: 1Gi
+  requests:
+    cpu: 200m
+    memory: 256Mi
+  limits: # wanted to just leave limits blank here, but the underlying chart speciffies it, so instead just specify a large number
+    cpu: 1
+    memory: 4Gi
+  replicaCertCopy:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+
+dataSource:
+  enabled: false  # Enable for initial bootstrap restore
+  createS3Secret: false  # External Secrets will manage the secret
+  secretName: s3-pgbackrest
+  repo:
+    path: "/habackup_20251002020011"
+    s3:
+      bucket: "housing-bssb-ex-permithub-dbbk-test-bkt"
+      endpoint: "https://housing-bssb-ex.objectstore.gov.bc.ca"
+
+pgBackRest:
+  global:
+    repo2-s3-verify-tls: "n"  # Add this to disable TLS verification issues
+    repo2-retention-archive: "1"  # Number of backups worth of WAL to retain
+    repo2-retention-archive-type: full  # Base retention on full backups
+  retention: "1"
+  retentionFullType: count
+  retentionS3: "1"
+  retentionFullTypeS3: time
+  repos:
+    schedules:
+      full: "0 4 * * *"  # Feb 31st never exists - effectively disabled
+      incremental: "0 0,6,12,16,20 * * *"  # Feb 31st never exists - effectively disabled
+    volume:
+      storage: 256Mi
+  repoHost:
+    requests:
+      cpu: 1m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 512Mi
+  sidecars:
+    requests:
+      cpu: 1m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+  # repo2 - S3 configuration for WAL archive access from source system
+  s3:
+    enabled: true  # Disable repo2 for standby - read-only access no WAL archiving
+    createS3Secret: false  # External Secrets will manage the secret
+    s3Secret: s3-pgbackrest
+    # the path start with /, it will be created under bucket if it doesn't exist
+    s3Path: "/habackup"
+    # bucket specifies the S3 bucket to use,
+    bucket: "housing-bssb-ex-permithub-dbbk-test-bkt"
+    # endpoint specifies the S3 endpoint to use.
+    endpoint: "https://housing-bssb-ex.objectstore.gov.bc.ca"
+    # Disable backup schedules for repo2 - this is read-only for standby
+    fullSchedule: "0 9 * * *"  # Feb 31st never exists - effectively disabled
+    incrementalSchedule: "0 0 31 2 *"  # Feb 31st never exists - effectively disabled
+
+patroni:
+  postgresql:
+    parameters:
+      shared_buffers: 16MB # default is 128MB; a good tuned default for shared_buffers is 25% of the memory allocated to the pod
+      wal_buffers: "64kB" # this can be set to -1 to automatically set as 1/32 of shared_buffers or 64kB, whichever is larger
+      min_wal_size: 32MB
+      max_wal_size: 64MB # default is 1GB
+      max_slot_wal_keep_size: 128MB # default is -1, allowing unlimited wal growth when replicas fall behind
+      temp_file_limit: 200MB  # Prevent temp files from filling PVC
+      checkpoint_timeout: 15min  # Reduce checkpoint frequency
+      checkpoint_completion_target: 0.9  # Smooth checkpointing
+
+
+proxy:
+    pgBouncer:
+      replicas: 1
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        cpu: 500m
+        memory: 256Mi

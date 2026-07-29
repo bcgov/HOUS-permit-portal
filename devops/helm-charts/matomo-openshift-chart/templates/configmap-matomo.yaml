@@ -1,0 +1,164 @@
+{{- /*
+  Matomo install + shared runtime config.
+
+  - install.json: used by ExtraTools matomo:install (first-time / reinstall).
+  - common.config.ini.php: merged by Matomo on every request/CLI run, so
+    privacy purge settings stay in force even when config.ini.php is minimal
+    or recreated on emptyDir pods.
+*/ -}}
+{{- $privacy := .Values.matomo.privacy | default dict -}}
+{{- $deleteLogs := $privacy.deleteLogs | default dict -}}
+{{- $deleteReports := $privacy.deleteReports | default dict -}}
+{{- $site := .Values.matomo.site | default dict -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: matomo-configuration
+  namespace: {{ .Release.Namespace }}
+{{- if .Values.matomo.config }}
+data:
+  install.json: |-
+{{ .Values.matomo.config | toJson | indent 4 }}
+  common.config.ini.php: |
+{{ include "matomo.commonConfigIni" . | indent 4 }}
+{{- else }}
+data:
+  install.json: |
+    {
+      "PluginsInstalled": [
+        "Diagnostics",
+        "DBStats",
+        "Login",
+        "CoreAdminHome",
+        "UsersManager",
+        "SitesManager",
+        "Installation",
+        "Monolog",
+        "Intl",
+        "CorePluginsAdmin",
+        "CoreHome",
+        "WebsiteMeasurable",
+        "CoreVisualizations",
+        "Proxy",
+        "API",
+        "Transitions",
+        "Actions",
+        "Referrers",
+        "UserLanguage",
+        "DevicesDetection",
+        "Goals",
+        "SEO",
+        "Events",
+        "UserCountry",
+        "GeoIp2",
+        "VisitsSummary",
+        "VisitFrequency",
+        "VisitTime",
+        "VisitorInterest",
+        "CoreUpdater",
+        "CoreConsole",
+        "UserCountryMap",
+        "Live",
+        "ImageGraph",
+        "Annotations",
+        "Insights",
+        "Morpheus",
+        "Contents",
+        "DevicePlugins",
+        "UserId",
+        "CustomJsTracker",
+        "ExtraTools",
+        "LanguagesManager",
+        "SegmentEditor",
+        "Dashboard",
+        "ScheduledReports",
+        "PrivacyManager",
+        "CustomVariables",
+        "IntranetMeasurable",
+        "Widgetize",
+        "MultiSites",
+        "Ecommerce",
+        "RssWidget",
+        "Feedback",
+        "TwoFactorAuth",
+        "MobileMessaging",
+        "Overlay",
+        "BulkTracking",
+        "Resolution",
+        "Heartbeat",
+        "Marketplace",
+        "ProfessionalServices",
+        "UserConsole"
+      ],
+      "Site": {
+        "name": {{ $site.name | default "Localhost" | quote }},
+        "url": {{ $site.url | default "https://localhost" | quote }}
+      },
+      "Config": {
+        "log": {
+          "log_level": "ERROR"
+        },
+        "General": {
+          "show_update_notification_to_superusers_only": 1,
+          "noreply_email_address": "noreply@digitalistgroup.com",
+          "enable_framed_pages": 1,
+          "enable_framed_settings": 1,
+          "enable_trusted_host_check": 0,
+          "enable_plugin_update_communication": 0,
+          "enable_auto_update": 0,
+          "enable_installer": 0,
+          "enable_internet_features": 0,
+          "enable_plugins_admin": 0,
+          "enable_plugin_upload": 0,
+          "enable_geolocation_admin": 1,
+          "proxy_client_headers[]": "HTTP_X_FORWARDED_FOR",
+          "browser_archiving_disabled_enforce": 1,
+          "enable_browser_archiving_triggering": 0,
+          "archiving_range_force_on_browser_request": 0,
+          "enable_sql_optimize_queries": 0,
+          "enabled_periods_UI": "day,week,month,year,range",
+          "enabled_periods_API": "day,week,month,year,range",
+          "session_save_handler": "dbtable",
+          "enable_marketplace": 0,
+          "enable_general_settings_admin": 0,
+          "piwik_pro_ads_enabled": 0,
+          "assume_secure_protocol": 1,
+          "cors_domains[]": "*",
+          "datatable_archiving_maximum_rows_referrers": 2000,
+          "datatable_archiving_maximum_rows_subtable_referrers": 2000,
+          "datatable_archiving_maximum_rows_actions": 2000,
+          "datatable_archiving_maximum_rows_subtable_actions": 2000,
+          "datatable_archiving_maximum_rows_events": 2000,
+          "datatable_archiving_maximum_rows_subtable_events": 2000,
+          "datatable_archiving_maximum_rows_custom_variables": 2000,
+          "datatable_archiving_maximum_rows_subtable_custom_variables": 2000,
+          "time_before_today_archive_considered_outdated": 2700,
+          "time_before_week_archive_considered_outdated": 10800,
+          "time_before_month_archive_considered_outdated": 32400,
+          "time_before_year_archive_considered_outdated": 64800,
+          "time_before_range_archive_considered_outdated": 10800
+        },
+        "Deletelogs": {
+          "delete_logs_enable": {{ include "matomo.bool01" ($deleteLogs.enable | default true) }},
+          "delete_logs_schedule_lowest_interval": {{ $deleteLogs.scheduleLowestInterval | default 1 }},
+          "delete_logs_older_than": {{ $deleteLogs.olderThanDays | default 180 }},
+          "delete_logs_max_rows_per_query": {{ $deleteLogs.maxRowsPerQuery | default 100000 }},
+          "enable_auto_database_size_estimate": {{ include "matomo.bool01" ($deleteLogs.enableAutoDatabaseSizeEstimate | default true) }},
+          "enable_database_size_estimate": {{ include "matomo.bool01" ($deleteLogs.enableDatabaseSizeEstimate | default true) }}
+        },
+        "Deletereports": {
+          "delete_reports_enable": {{ include "matomo.bool01" ($deleteReports.enable | default true) }},
+          "delete_reports_older_than": {{ $deleteReports.olderThanMonths | default 12 }},
+          "delete_reports_keep_basic_metrics": {{ include "matomo.bool01" ($deleteReports.keepBasicMetrics | default true) }},
+          "delete_reports_keep_day_reports": {{ include "matomo.bool01" ($deleteReports.keepDayReports | default false) }},
+          "delete_reports_keep_week_reports": {{ include "matomo.bool01" ($deleteReports.keepWeekReports | default false) }},
+          "delete_reports_keep_month_reports": {{ include "matomo.bool01" ($deleteReports.keepMonthReports | default true) }},
+          "delete_reports_keep_year_reports": {{ include "matomo.bool01" ($deleteReports.keepYearReports | default true) }},
+          "delete_reports_keep_range_reports": {{ include "matomo.bool01" ($deleteReports.keepRangeReports | default false) }},
+          "delete_reports_keep_segment_reports": {{ include "matomo.bool01" ($deleteReports.keepSegmentReports | default false) }}
+        }
+      }
+    }
+  common.config.ini.php: |
+{{ include "matomo.commonConfigIni" . | indent 4 }}
+{{- end }}

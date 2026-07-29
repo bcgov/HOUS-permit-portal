@@ -1,0 +1,161 @@
+---
+{{- if .Values.matomo.tracker.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: matomo-tracker
+  namespace: {{.Release.Namespace}}
+  labels:
+    app: matomo-tracker
+{{- if .Values.matomo.extralabels }}
+{{ toYaml .Values.matomo.extralabels | indent 4 }}
+{{- end }}
+spec:
+  replicas: {{.Values.matomo.tracker.replicas}}
+  # Recreate avoids needing surge capacity on every deploy; with replicas=1
+  # RollingUpdate provides no HA benefit anyway. Reconsider if replicas > 1.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: matomo-tracker
+  template:
+    metadata:
+      labels:
+        app: matomo-tracker
+{{- if .Values.matomo.extralabels }}
+{{ toYaml .Values.matomo.extralabels | indent 8 }}
+{{- end }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap-matomo.yaml") . | sha256sum }}
+    spec:
+{{ include "matomo.init" . | nindent 6 }}
+      containers:
+      - name: fpm-metrics
+        {{- include "matomo.securityContext" (dict "runAsUser" .Values.matomo.runAsUser) | nindent 8 }}
+        image: {{ include "matomo.image" (dict "registry" (.Values.fpmExporter.imageRegistry | default .Values.global.imageRegistry) "image" (.Values.fpmExporter.image | default "hipages/php-fpm_exporter:2.2.0")) }}
+        imagePullPolicy: Always
+        {{- include "matomo.resources" (dict "resources" .Values.fpmExporter.resources "defaultResources" .Values.defaultResources) | nindent 8 }}
+      - name: nginx
+        image: {{ include "matomo.image" (dict "registry" (.Values.nginx.imageRegistry | default .Values.global.imageRegistry) "image" .Values.nginx.image) }}
+        {{- include "matomo.resources" (dict "resources" (.Values.matomo.tracker.nginx.resources | default .Values.nginx.resources) "defaultResources" .Values.defaultResources) | nindent 8 }}
+        {{- with .Values.matomo.tracker.nginx.readinessProbe }}
+        readinessProbe: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.matomo.tracker.nginx.livenessProbe }}
+        livenessProbe: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- include "matomo.securityContext" (dict "runAsUser" .Values.nginx.runAsUser) | nindent 8 }}
+        volumeMounts:
+          - name: nginx-conf
+            mountPath: /etc/nginx/nginx.conf
+            subPath: nginx.conf
+            readOnly: true
+          - name: fastcgi-params
+            mountPath: /etc/nginx/fastcgi_params
+            subPath: fastcgi_params
+            readOnly: true
+          - name: mime-types
+            mountPath: /etc/nginx/mime.types
+            subPath: mime.types
+            readOnly: true
+          - name: static-data
+            mountPath: /var/www/html
+            readOnly: true
+        ports:
+        - containerPort: 8080
+      - name: matomo
+        image: {{ include "matomo.image" (dict "registry" (.Values.matomo.imageRegistry | default .Values.global.imageRegistry) "image" .Values.matomo.image) }}
+        {{- include "matomo.resources" (dict "resources" .Values.matomo.tracker.resources "defaultResources" .Values.defaultResources) | nindent 8 }}
+        {{- include "matomo.securityContext" (dict "runAsUser" .Values.matomo.runAsUser) | nindent 8 }}
+        imagePullPolicy: Always
+        env:
+        - name: MATOMO_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.db.password.secretKeyRef.name }}
+              key: {{ .Values.db.password.secretKeyRef.key }}
+        {{- range .Values.matomo.env }}
+        {{- if .valueFromSecret }}
+        - name: {{ .name }}
+          valueFrom:
+            secretKeyRef:
+              name: {{ .valueFromSecret.secretName | quote }}
+              key: {{ .valueFromSecret.key | quote }}
+        {{- else if .value }}
+        - name: {{ .name }}
+          value: {{ .value | quote }}
+        {{- end }}
+        {{- end }}
+        volumeMounts:
+          - name: static-data
+            mountPath: /var/www/html
+          - name: matomo-common-config
+            mountPath: /var/www/html/config/common.config.ini.php
+            subPath: common.config.ini.php
+            readOnly: true
+          - name: matomo-phpfpm-tracker
+            mountPath: /usr/local/etc/php-fpm.d/zz-global.conf
+            subPath: zz-global.conf
+        {{- with .Values.matomo.livenessProbe }}
+        livenessProbe: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.matomo.readinessProbe }}
+        readinessProbe: {{- toYaml . | nindent 10 }}
+        {{- end }}
+{{ include "matomo.images.pullSecrets" ( dict "images" (list .Values.matomo) "global" .Values.global) | nindent 6 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+      - name: nginx-conf
+        configMap:
+          name: nginx-matomo-tracker
+          items:
+          - key: nginx.conf
+            path: nginx.conf
+      - name: fastcgi-params
+        configMap:
+          name: nginx-matomo-tracker
+          items:
+          - key: fastcgi_params
+            path: fastcgi_params
+      - name: mime-types
+        configMap:
+          name: nginx-matomo-tracker
+          items:
+          - key: mime.types
+            path: mime.types
+      - name: matomo-configuration
+        configMap:
+          name: matomo-configuration
+      - name: matomo-common-config
+        configMap:
+          name: matomo-configuration
+          items:
+          - key: common.config.ini.php
+            path: common.config.ini.php
+      - name: static-data
+        emptyDir: {}
+      - name: matomo-phpfpm-tracker
+        configMap:
+          name: matomo-phpfpm-tracker
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: matomo-tracker
+  labels:
+    app: matomo-tracker
+spec:
+  ports:
+    - port: 8080
+      protocol: TCP
+  selector:
+    app: matomo-tracker
+{{- end -}}
