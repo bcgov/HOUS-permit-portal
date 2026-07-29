@@ -1,0 +1,25 @@
+{{- if and .Values.openshift.route.enabled .Values.matomo.dashboard.enabled }}
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: matomo-dashboard
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: matomo-dashboard
+  {{- with .Values.openshift.route.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  host: {{ .Values.matomo.dashboard.hostname | quote }}
+  to:
+    kind: Service
+    name: matomo-dashboard
+  port:
+    targetPort: 8080
+  {{- if .Values.openshift.route.tls.enabled }}
+  tls:
+    termination: {{ .Values.openshift.route.tls.termination }}
+    insecureEdgeTerminationPolicy: {{ .Values.openshift.route.tls.insecureEdgeTerminationPolicy }}
+  {{- end }}
+{{- end }}

@@ -1,9 +1,17 @@
 redis:
+  image:
+    registry: image-registry.openshift-image-registry.svc:5000
+    repository: bb18ab-dev/redis
+    tag: 7.2.4-debian-12-r9
   sentinel:
     resources:
       requests:
         memory: "128Mi"
         cpu: "100m"
+    image:
+      registry: image-registry.openshift-image-registry.svc:5000
+      repository: "bb18ab-dev/redis-sentinel"
+      tag: "7.2.4-debian-12-r7"
   replica:
     replicaCount: 1
     persistence:
