@@ -52,7 +52,11 @@ export const useNoteAttachments = ({ maxNumberOfFiles = DEFAULT_MAX_FILES }: Use
     (files: File[]) => {
       if (files.length === 0) return
 
-      uppy.addFiles(files.map((file) => ({ name: file.name, type: file.type, data: file })))
+      try {
+        uppy.addFiles(files.map((file) => ({ name: file.name, type: file.type, data: file })))
+      } catch {
+        // Restriction toast comes from useUppyS3's restriction-failed listener.
+      }
     },
     [uppy]
   )
