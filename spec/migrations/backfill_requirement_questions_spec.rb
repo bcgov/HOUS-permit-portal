@@ -66,6 +66,32 @@ RSpec.describe BackfillRequirementQuestions, type: :migration do
       expect(other.requirement_question.label).to eq("Owner Name")
       expect(other.requirement_question.requirement_code).to eq("owner_name_2")
     end
+
+    it "skips energy step and architectural drawing package fields" do
+      block = create(:valid_energy_step_code_requirement_block)
+      energy_reqs = block.requirements.to_a
+      expect(energy_reqs.map(&:requirement_code)).to include(
+        "energy_step_code_method",
+        "energy_step_code_tool_part_9"
+      )
+
+      arch =
+        create(
+          :architectural_drawing_file_requirement,
+          requirement_block: create(:requirement_block),
+          requirement_question: nil,
+          label: "Architectural Drawing"
+        )
+
+      bank_count_before = RequirementQuestion.count
+      described_class.new.up
+
+      expect(RequirementQuestion.count).to eq(bank_count_before)
+      energy_reqs.each do |req|
+        expect(req.reload.requirement_question_id).to be_nil
+      end
+      expect(arch.reload.requirement_question_id).to be_nil
+    end
   end
 end
 

@@ -142,6 +142,39 @@ RSpec.describe RequirementQuestion, type: :model do
     end
   end
 
+  describe "bank-excluded package types" do
+    it "rejects energy step and architectural drawing input types" do
+      question =
+        build(
+          :requirement_question,
+          label: "Energy Step Code",
+          input_type: :energy_step_code
+        )
+
+      expect(question).not_to be_valid
+      expect(question.errors[:input_type].join).to match(/cannot be used/)
+    end
+
+    it "rejects energy step dependency requirement codes" do
+      question =
+        build(
+          :requirement_question,
+          label: "Energy step method",
+          input_type: :radio,
+          requirement_code: "energy_step_code_method",
+          input_options: {
+            "value_options" => [
+              { "label" => "Tool", "value" => "tool" },
+              { "label" => "File", "value" => "file" }
+            ]
+          }
+        )
+
+      expect(question).not_to be_valid
+      expect(question.errors[:input_type].join).to match(/cannot be used/)
+    end
+  end
+
   describe "convert_value_options" do
     it "converts values for bank questions" do
       question =

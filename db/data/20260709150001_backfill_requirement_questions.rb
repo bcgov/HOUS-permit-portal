@@ -4,6 +4,9 @@
 # and set requirements.requirement_question_id. Preserves requirement_code (FR-12).
 # No label dedup. Placement-only input_options stay on requirements.
 #
+# Skips energy step code packages and architectural drawing — those stay
+# block-local and are not question-bank catalogue rows.
+#
 # Rollback (staging only, before intentional multi-use catalogue edits):
 #   bin/rails question_bank:rollback_backfill
 class BackfillRequirementQuestions < ActiveRecord::Migration[7.2]
@@ -12,6 +15,19 @@ class BackfillRequirementQuestions < ActiveRecord::Migration[7.2]
     computed_compliance
     data_validation
   ].freeze
+
+  # Keep in sync with RequirementQuestion::BANK_EXCLUDED_INPUT_TYPES (enum ints).
+  EXCLUDED_INPUT_TYPES = [
+    16, # energy_step_code
+    20, # energy_step_code_part_3
+    22 # architectural_drawing
+  ].freeze
+
+  EXCLUDED_REQUIREMENT_CODES =
+    (
+      Requirement::ENERGY_STEP_CODE_REQUIRED_DEPENDENCY_CODES +
+        Requirement::ARCHITECTURAL_DRAWING_REQUIRED_DEPENDENCY_CODES
+    ).freeze
 
   def up
     unless table_exists?(:requirement_questions) &&
@@ -31,13 +47,20 @@ class BackfillRequirementQuestions < ActiveRecord::Migration[7.2]
   private
 
   def backfill_missing_requirement_questions
+    excluded_types_sql = EXCLUDED_INPUT_TYPES.join(", ")
+    excluded_codes_sql =
+      EXCLUDED_REQUIREMENT_CODES.map { |code| quote(code) }.join(", ")
+
     requirements = execute(<<~SQL.squish).to_a
       SELECT id, requirement_code, label, input_type, input_options, hint, instructions
       FROM requirements
       WHERE requirement_question_id IS NULL
+        AND input_type NOT IN (#{excluded_types_sql})
+        AND requirement_code NOT IN (#{excluded_codes_sql})
     SQL
 
     say "Backfilling #{requirements.size} requirement(s) into requirement_questions (1:1, no dedup)..."
+    say "Excluded energy step / architectural drawing package fields from bank backfill."
 
     requirements.each { |requirement| create_bank_question_for(requirement) }
 

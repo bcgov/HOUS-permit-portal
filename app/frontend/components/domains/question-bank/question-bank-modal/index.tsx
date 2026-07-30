@@ -95,6 +95,13 @@ export const QuestionBankModal = observer(function QuestionBankModal({
     onOpen()
   }
 
+  const toBankInputOptions = (inputOptions?: IRequirementAttributes["inputOptions"]) => {
+    if (!inputOptions) return {}
+    // Conditionals / compliance / validation belong on placements, not bank definitions.
+    const { conditional: _c, computedCompliance: _cc, dataValidation: _dv, ...definitionOptions } = inputOptions
+    return definitionOptions
+  }
+
   const onSubmit = async (data: IRequirementQuestionForm) => {
     const field = data.requirementsAttributes[0]
     if (!data.name?.trim() || !field?.label?.trim() || !field?.inputType) {
@@ -111,7 +118,7 @@ export const QuestionBankModal = observer(function QuestionBankModal({
       inputType: field.inputType,
       hint: field.hint,
       instructions: field.instructions,
-      inputOptions: field.inputOptions,
+      inputOptions: toBankInputOptions(field.inputOptions),
     }
 
     const isSuccess = requirementQuestion
