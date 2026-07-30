@@ -1679,6 +1679,7 @@ Thank you,
           acceptAndSend: "Accept and send",
           detail: {
             title: "Meeting request",
+            viewProject: "View project",
             backToMeetings: "Back to meetings",
             withdrawMeeting: "Withdraw meeting",
             withdrawConfirmationTitle: "Withdraw this meeting request?",
@@ -1876,6 +1877,17 @@ Thank you,
         document: {
           index: {
             title: "Documents",
+          },
+        },
+        note: {
+          attachments: {
+            label: "Attachments",
+            attachFiles: "Attach files",
+            dropHint: "Drag and drop files onto the note, or",
+            dropActive: "Drop files to attach them to this note",
+            uploading: "Uploading files...",
+            remove: "Remove {{fileName}}",
+            unavailable: "Attachment unavailable",
           },
         },
         permitApplication: {

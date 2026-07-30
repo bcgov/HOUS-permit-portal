@@ -1,8 +1,10 @@
 import { Link } from "@chakra-ui/react"
+import { ArrowRight } from "@phosphor-icons/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { Link as RouterLink } from "react-router-dom"
 import { InfoRow } from "../../../../shared/base/info-row"
+import { RouterLinkButton } from "../../../../shared/navigation/router-link-button"
 import { DetailSection } from "../detail-section"
 
 type PermitProjectSource = {
@@ -49,7 +51,16 @@ export const ProjectInformationSection = ({
   }
 
   return (
-    <DetailSection title={t("projectMeeting.projectInformation")}>
+    <DetailSection
+      title={t("projectMeeting.projectInformation")}
+      action={
+        projectLink ? (
+          <RouterLinkButton to={projectLink} variant="secondary" size="sm" rightIcon={<ArrowRight size={16} />}>
+            {t("projectMeeting.detail.viewProject")}
+          </RouterLinkButton>
+        ) : undefined
+      }
+    >
       <InfoRow
         label={t("projectMeeting.detail.projectNumber")}
         value={renderLinkedValue(projectNumber, projectLink)}
