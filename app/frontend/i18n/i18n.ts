@@ -2268,6 +2268,7 @@ Thank you,
             addFormField: "Add form field",
             addQuestionsTitle: "Add one or more questions",
             sharedQuestion: "Question Bank",
+            openInQuestionBank: "Open in Question Bank",
             detach: "Detach and edit locally",
           },
 

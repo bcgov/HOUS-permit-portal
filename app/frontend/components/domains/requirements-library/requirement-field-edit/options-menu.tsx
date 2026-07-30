@@ -10,7 +10,7 @@ import {
   Text,
   useDisclosure,
 } from "@chakra-ui/react"
-import { CaretDown, LinkBreak, Warning, X } from "@phosphor-icons/react"
+import { BookOpen, CaretDown, LinkBreak, Warning, X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
@@ -23,6 +23,7 @@ export interface IRequirementOptionsMenu {
   menuButtonProps?: Partial<ButtonProps>
   onRemove?: () => void
   onDetachSharedQuestion?: () => void
+  onOpenSharedQuestion?: () => void
   isSharedQuestion?: boolean
   emitOpenState?: (isOpen: boolean) => void
   index: number
@@ -42,6 +43,7 @@ export const OptionsMenu = observer(function OptionsMenu({
   menuButtonProps,
   onRemove,
   onDetachSharedQuestion,
+  onOpenSharedQuestion,
   isSharedQuestion = false,
   emitOpenState,
   index,
@@ -112,6 +114,12 @@ export const OptionsMenu = observer(function OptionsMenu({
         {isSharedQuestion && (
           <>
             <MenuDivider />
+            <MenuItem color={"text.primary"} onClick={onOpenSharedQuestion}>
+              <HStack spacing={2} fontSize={"sm"}>
+                <BookOpen />
+                <Text as={"span"}>{t("requirementsLibrary.sharedQuestions.openInQuestionBank")}</Text>
+              </HStack>
+            </MenuItem>
             <MenuItem color={"text.primary"} onClick={onDetachSharedQuestion}>
               <HStack spacing={2} fontSize={"sm"}>
                 <LinkBreak />

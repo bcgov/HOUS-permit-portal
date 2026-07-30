@@ -14,11 +14,12 @@ import { IRequirementOptionsMenu, OptionsMenu } from "../requirement-field-edit/
 
 interface IProps {
   isRequirementInEditMode: boolean
-  toggleRequirementToEdit: () => void
+  toggleRequirementToEdit?: () => void
   requirementType: ERequirementType
   requirementCode: string
   onRemove: IRequirementOptionsMenu["onRemove"]
   onDetachSharedQuestion?: IRequirementOptionsMenu["onDetachSharedQuestion"]
+  onOpenSharedQuestion?: IRequirementOptionsMenu["onOpenSharedQuestion"]
   isSharedQuestion?: boolean
   disabledMenuOptions?: IRequirementOptionsMenu["disabledOptions"]
   hideConditional?: boolean
@@ -43,6 +44,7 @@ export function FieldControlsHeader({
   dataValidation,
   onRemove,
   onDetachSharedQuestion,
+  onOpenSharedQuestion,
   isSharedQuestion = false,
   index,
   requirementCode,
@@ -72,6 +74,7 @@ export function FieldControlsHeader({
             }}
             onRemove={onRemove}
             onDetachSharedQuestion={onDetachSharedQuestion}
+            onOpenSharedQuestion={onOpenSharedQuestion}
             isSharedQuestion={isSharedQuestion}
             disabledOptions={disabledMenuOptions}
             hideConditional={hideConditional}
@@ -95,17 +98,17 @@ export function FieldControlsHeader({
         {!isRequirementInEditMode && (
           <RequirementTypeTag type={requirementType} className={"requirement-edit-controls"} />
         )}
-        <Button
-          variant={"primary"}
-          size={"sm"}
-          onClick={() => {
-            toggleRequirementToEdit()
-          }}
-          className={"requirement-edit-controls"}
-          display={isRequirementInEditMode ? "flex" : "none"}
-        >
-          {t(isRequirementInEditMode ? "ui.done" : "ui.edit")}
-        </Button>
+        {toggleRequirementToEdit && (
+          <Button
+            variant={"primary"}
+            size={"sm"}
+            onClick={toggleRequirementToEdit}
+            className={"requirement-edit-controls"}
+            display={isRequirementInEditMode ? "flex" : "none"}
+          >
+            {t(isRequirementInEditMode ? "ui.done" : "ui.edit")}
+          </Button>
+        )}
       </HStack>
     </HStack>
   )
