@@ -165,6 +165,11 @@ export const SafeTipTapDisplay: React.FC<SafeTipTapDisplayProps> = ({
         },
         // Override any box props styling
         ...boxProps.sx,
+        // TipTap stores blank lines as empty <p></p>; without content they collapse.
+        // Applied after boxProps.sx so callers overriding `& p` (e.g. margin: 0) don't wipe it.
+        "& p:empty::before": {
+          content: '"\\00a0"',
+        },
       }}
     />
   )
