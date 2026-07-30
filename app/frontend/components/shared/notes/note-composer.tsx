@@ -85,16 +85,12 @@ export const NoteComposer = ({
       <NoteAttachmentChips attachments={attachments} onRemove={onRemoveAttachment} />
 
       <HStack spacing={2} mt={2} align="center">
+        <Paperclip size={14} />
         <Text fontSize="sm" color="text.secondary">
           {isDraggingOver ? t("note.attachments.dropActive") : t("note.attachments.dropHint")}
         </Text>
         {!isDraggingOver && (
-          <Button
-            variant="link"
-            size="sm"
-            leftIcon={<Paperclip size={14} />}
-            onClick={() => fileInputRef.current?.click()}
-          >
+          <Button variant="link" ml={-1} size="sm" onClick={() => fileInputRef.current?.click()} fontSize="sm">
             {t("note.attachments.attachFiles")}
           </Button>
         )}
