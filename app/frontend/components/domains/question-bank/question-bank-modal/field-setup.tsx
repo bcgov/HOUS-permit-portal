@@ -12,7 +12,8 @@ import { RequirementsBlockModal } from "../../requirements-library/requirements-
 import { RequirementFieldRow } from "../../requirements-library/requirements-block-modal/requirement-field-row"
 import { IRequirementQuestionForm } from "./index"
 
-const MULTI_FIELD_TYPES = [
+// Package field types are not supported as bank questions — keep them in blocks only.
+const EXCLUDED_BANK_REQUIREMENT_TYPES = [
   ERequirementType.energyStepCodePart9,
   ERequirementType.energyStepCodePart3,
   ERequirementType.architecturalDrawing,
@@ -46,8 +47,7 @@ export const FieldSetup = observer(function FieldSetup({
 
   const isRequirementInEditMode = (id: string) => requirementIdToEdit === id
 
-  const onUseRequirement = (requirementType: ERequirementType) => {
-    // Single-field bank question: replace any existing field.
+  const onUseRequirement = (requirementType: ERequirementType, closeDrawer?: () => void) => {
     if (fields.length > 0) {
       remove(0)
     }
@@ -70,6 +70,7 @@ export const FieldSetup = observer(function FieldSetup({
           }
         : {},
     })
+    closeDrawer?.()
   }
 
   const onRemoveRequirement = (index: number) => {
@@ -95,10 +96,7 @@ export const FieldSetup = observer(function FieldSetup({
           {!hasFields && (
             <Flex w={"full"} justifyContent={"space-between"} px={6} pt={6}>
               <Text>{t("questionBank.modals.noFormFieldsAdded")}</Text>
-              <FieldsSetupDrawer
-                onUse={onUseRequirement}
-                disabledRequirementTypeOptions={MULTI_FIELD_TYPES.map((requirementType) => ({ requirementType }))}
-              />
+              <FieldsSetupDrawer onUse={onUseRequirement} excludedRequirementTypes={EXCLUDED_BANK_REQUIREMENT_TYPES} />
             </Flex>
           )}
           {hasFields && (

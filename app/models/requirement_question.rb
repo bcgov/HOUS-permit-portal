@@ -79,6 +79,7 @@ class RequirementQuestion < ApplicationRecord
   validates :name, presence: true
   validates :description, length: { maximum: 250 }, allow_blank: true
   validate :cannot_have_placement_options
+  validate :input_type_not_excluded_from_bank
   validate :input_type_immutable_when_in_use, on: :update
   validate :validate_value_options,
            if:
@@ -90,6 +91,19 @@ class RequirementQuestion < ApplicationRecord
   validate :validate_unit_for_number_inputs
   validate :validate_can_add_multiple_contacts
   validate :validate_computed_compliance
+
+  # Energy step packages and architectural drawing stay block-local only.
+  BANK_EXCLUDED_INPUT_TYPES = %w[
+    energy_step_code
+    energy_step_code_part_3
+    architectural_drawing
+  ].freeze
+
+  BANK_EXCLUDED_REQUIREMENT_CODES =
+    (
+      Requirement::ENERGY_STEP_CODE_REQUIRED_DEPENDENCY_CODES +
+        Requirement::ARCHITECTURAL_DRAWING_REQUIRED_DEPENDENCY_CODES
+    ).freeze
 
   def value_options
     return nil if input_options.blank? || input_options["value_options"].blank?
@@ -157,6 +171,20 @@ class RequirementQuestion < ApplicationRecord
   def merge_computed_compliance_default_settings
     configuration_service = AutomatedComplianceConfigurationService.new(self)
     configuration_service.merge_default_settings!
+  end
+
+  def input_type_not_excluded_from_bank
+    excluded_type = BANK_EXCLUDED_INPUT_TYPES.include?(input_type.to_s)
+    excluded_code =
+      requirement_code.present? &&
+        BANK_EXCLUDED_REQUIREMENT_CODES.include?(requirement_code)
+
+    return unless excluded_type || excluded_code
+
+    errors.add(
+      :input_type,
+      "cannot be used for question bank questions (block-local package fields only)"
+    )
   end
 
   def validate_value_options
