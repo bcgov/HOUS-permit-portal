@@ -109,6 +109,30 @@ RSpec.describe "Api::Notes", type: :request do
       expect(response).to have_http_status(:forbidden)
     end
 
+    it "attaches uploaded files to the created note" do
+      sign_in reviewer
+      cached_file = TestData.cached_file_data
+
+      expect do
+        post "/api/project_meetings/#{meeting.id}/notes",
+             params: {
+               note: {
+                 body: "<p>See attached.</p>",
+                 note_attachment_documents_attributes: [{ file: cached_file }]
+               }
+             },
+             headers: headers,
+             as: :json
+      end.to change(NoteAttachmentDocument, :count).by(1)
+
+      expect(response).to have_http_status(:created)
+      attachment = json_response.dig("data", "note_attachment_documents", 0)
+      expect(attachment.dig("file", "metadata", "filename")).to eq(
+        "site-plan.pdf"
+      )
+      expect(NoteAttachmentDocument.last.note).to eq(Note.last)
+    end
+
     it "allows jurisdiction review staff to create notes for withdrawn meetings" do
       withdrawn_meeting =
         create(:project_meeting, :withdrawn, permit_project: permit_project)
@@ -153,10 +177,22 @@ RSpec.describe "Api::Notes", type: :request do
           "Related item type",
           "Related item id",
           "Project number",
-          "Body"
+          "Body",
+          "Attachments"
         ]
       )
-      expect(CSV.parse(response.body).last.length).to eq(6)
+      expect(CSV.parse(response.body).last.length).to eq(7)
+    end
+
+    it "lists attachment filenames in the CSV" do
+      note = create(:note, noteable: meeting, user: reviewer)
+      create(:note_attachment_document, note: note)
+      sign_in owner
+
+      get "/api/project_meetings/#{meeting.id}/notes/download_csv",
+          headers: headers
+
+      expect(CSV.parse(response.body).last.last).to eq("test.jpg")
     end
   end
 

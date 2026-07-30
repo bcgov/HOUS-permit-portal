@@ -31,7 +31,8 @@ class Api::PermitProjects::NotesController < Api::ApplicationController
   def notes_scope
     policy_scope(Note).where(permit_project: @permit_project).preload(
       :user,
-      :permit_project
+      :permit_project,
+      :note_attachment_documents
     )
   end
 end

@@ -7,7 +7,7 @@ class Api::ProjectMeetings::NotesController < Api::ApplicationController
     notes =
       policy_scope(Note)
         .where(noteable: @project_meeting)
-        .preload(:user, :permit_project)
+        .preload(:user, :permit_project, :note_attachment_documents)
         .order(created_at: :desc)
 
     render_success notes, nil, { blueprint: NoteBlueprint }
@@ -16,8 +16,7 @@ class Api::ProjectMeetings::NotesController < Api::ApplicationController
   def create
     authorize @project_meeting, :create_note?
 
-    note =
-      @project_meeting.notes.build(user: current_user, body: note_params[:body])
+    note = @project_meeting.notes.build(note_params.merge(user: current_user))
 
     if note.save
       render_success note,
@@ -43,7 +42,7 @@ class Api::ProjectMeetings::NotesController < Api::ApplicationController
     notes =
       policy_scope(Note)
         .where(noteable: @project_meeting)
-        .preload(:user, :permit_project)
+        .preload(:user, :permit_project, :note_attachment_documents)
         .order(created_at: :asc)
 
     send_data NotesExportService.new(notes).to_csv,
@@ -60,6 +59,11 @@ class Api::ProjectMeetings::NotesController < Api::ApplicationController
   end
 
   def note_params
-    params.require(:note).permit(:body)
+    params.require(:note).permit(
+      :body,
+      note_attachment_documents_attributes: [
+        file: [:id, :storage, { metadata: %i[size filename mime_type] }]
+      ]
+    )
   end
 end

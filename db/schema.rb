@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_07_24_100600) do
+ActiveRecord::Schema[7.2].define(version: 2026_07_30_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -98,6 +98,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_24_100600) do
     t.uuid "contactable_id"
     t.string "contact_type"
     t.index ["contactable_type", "contactable_id"], name: "index_contacts_on_contactable"
+  end
+
+  create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
   end
 
   create_table "design_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -374,6 +377,16 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_24_100600) do
     t.index ["document_type"], name: "index_meeting_request_documents_on_document_type"
     t.index ["project_meeting_id"], name: "index_meeting_request_documents_on_project_meeting_id"
     t.index ["scan_status"], name: "index_meeting_request_documents_on_scan_status"
+  end
+
+  create_table "note_attachment_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "note_id", null: false
+    t.jsonb "file_data"
+    t.string "scan_status", default: "pending", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["note_id"], name: "index_note_attachment_documents_on_note_id"
+    t.index ["scan_status"], name: "index_note_attachment_documents_on_scan_status"
   end
 
   create_table "notes", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -859,6 +872,24 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_24_100600) do
     t.index ["scan_status"], name: "index_requirement_documents_on_scan_status"
   end
 
+  create_table "requirement_questions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "requirement_code", null: false
+    t.string "label"
+    t.integer "input_type", null: false
+    t.jsonb "input_options", default: {}, null: false
+    t.string "hint"
+    t.text "instructions"
+    t.boolean "shared", default: false, null: false
+    t.string "name"
+    t.text "description"
+    t.datetime "discarded_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["discarded_at"], name: "index_requirement_questions_on_discarded_at"
+    t.index ["requirement_code"], name: "index_requirement_questions_on_requirement_code"
+    t.index ["shared"], name: "index_requirement_questions_on_shared"
+  end
+
   create_table "requirement_template_sections", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name"
     t.uuid "requirement_template_id", null: false
@@ -903,7 +934,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_24_100600) do
     t.integer "position"
     t.boolean "elective", default: false
     t.text "instructions"
+    t.uuid "requirement_question_id"
     t.index ["requirement_block_id"], name: "index_requirements_on_requirement_block_id"
+    t.index ["requirement_question_id"], name: "index_requirements_on_requirement_question_id"
   end
 
   create_table "resource_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1332,6 +1365,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_24_100600) do
   add_foreign_key "jurisdictions", "jurisdictions", column: "regional_district_id"
   add_foreign_key "make_up_air_fuels", "part_3_step_code_checklists", column: "checklist_id", on_delete: :cascade
   add_foreign_key "meeting_request_documents", "project_meetings"
+  add_foreign_key "note_attachment_documents", "notes"
   add_foreign_key "notes", "permit_projects"
   add_foreign_key "notes", "users"
   add_foreign_key "occupancy_classifications", "part_3_step_code_checklists", column: "checklist_id", on_delete: :cascade
@@ -1368,6 +1402,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_24_100600) do
   add_foreign_key "requirement_templates", "requirement_templates", column: "copied_from_id"
   add_foreign_key "requirement_templates", "template_categories"
   add_foreign_key "requirements", "requirement_blocks"
+  add_foreign_key "requirements", "requirement_questions"
   add_foreign_key "resource_documents", "resources"
   add_foreign_key "resources", "jurisdictions"
   add_foreign_key "revision_reasons", "site_configurations"

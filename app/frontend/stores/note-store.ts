@@ -3,6 +3,7 @@ import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { INote, NoteModel } from "../models/note"
+import { INoteAttachmentDraft } from "../types/types"
 import { convertToDate } from "../utils/utility-functions"
 
 const nullableDate = (value: unknown) => (value ? convertToDate(value) : null)
@@ -46,8 +47,14 @@ export const NoteStoreModel = types
       }
       return []
     }),
-    createProjectMeetingNote: flow(function* (projectMeetingId: string, body: string) {
-      const response = yield* toGenerator(self.environment.api.createProjectMeetingNote(projectMeetingId, body))
+    createProjectMeetingNote: flow(function* (
+      projectMeetingId: string,
+      body: string,
+      attachments: INoteAttachmentDraft[] = []
+    ) {
+      const response = yield* toGenerator(
+        self.environment.api.createProjectMeetingNote(projectMeetingId, body, attachments)
+      )
       if (response.ok) {
         self.mergeUpdate(response.data.data, "notesMap")
 

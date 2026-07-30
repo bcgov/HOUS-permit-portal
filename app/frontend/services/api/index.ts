@@ -76,6 +76,7 @@ import {
   ICopyRequirementTemplateFormData,
   IJurisdictionFilters,
   IJurisdictionSearchFilters,
+  INoteAttachmentDraft,
   IPart9ChecklistSelectOptions,
   IPermitApplicationInboxSearchFilters,
   IPermitApplicationSearchFilters,
@@ -401,8 +402,13 @@ export class Api {
     return this.client.get<INoteResponse>(`/project_meetings/${projectMeetingId}/notes`)
   }
 
-  async createProjectMeetingNote(projectMeetingId: string, body: string) {
-    return this.client.post<ApiResponse<INote>>(`/project_meetings/${projectMeetingId}/notes`, { note: { body } })
+  async createProjectMeetingNote(projectMeetingId: string, body: string, attachments: INoteAttachmentDraft[] = []) {
+    return this.client.post<ApiResponse<INote>>(`/project_meetings/${projectMeetingId}/notes`, {
+      note: {
+        body,
+        noteAttachmentDocumentsAttributes: attachments.map(({ file }) => ({ file })),
+      },
+    })
   }
 
   async downloadProjectMeetingNotesCsv(projectMeetingId: string) {
