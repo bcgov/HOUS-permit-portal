@@ -389,8 +389,9 @@ class TemplateVersioningService
 
   def self.produce_diff_hash(before_version, template_version)
     before_version ||= template_version.previous_version
+    return { added: [], changed: [], removed: [] } if before_version.blank?
 
-    before_json = before_version&.requirement_blocks_json
+    before_json = before_version.requirement_blocks_json
     after_json = template_version.requirement_blocks_json
 
     before_requirements =
