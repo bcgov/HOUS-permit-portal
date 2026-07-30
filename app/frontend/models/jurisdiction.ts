@@ -64,6 +64,8 @@ export const JurisdictionModel = types
     externalApiKeysMap: types.map(ExternalApiKeyModel),
     createdAt: types.maybeNull(types.Date),
     updatedAt: types.maybeNull(types.Date),
+    part9StepRequirementsUpdatedAt: types.maybeNull(types.Date),
+    part3StepRequirementsUpdatedAt: types.maybeNull(types.Date),
     tablePermitApplications: types.array(types.reference(PermitApplicationModel)),
     boundaryPoints: types.optional(types.array(types.frozen<TLatLngTuple>()), []),
     mapPosition: types.frozen<TLatLngTuple>(),

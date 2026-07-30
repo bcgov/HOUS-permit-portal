@@ -408,6 +408,21 @@ class Jurisdiction < ApplicationRecord
     jurisdiction_step_requirements
   end
 
+  # Last time Part 9 Step Code config was modified. Untouched auto-created
+  # defaults do not count — applicants should see "Not available" until an admin save.
+  def part_9_step_requirements_updated_at
+    steps = jurisdiction_step_requirements
+    return nil if steps.empty?
+
+    meaningful =
+      steps.reject { |s| s.default? && s.updated_at.to_i == s.created_at.to_i }
+    meaningful.map(&:updated_at).max
+  end
+
+  def part_3_step_requirements_updated_at
+    part3_occupancy_required_steps.maximum(:updated_at)
+  end
+
   def create_integration_mappings
     return unless external_api_enabled?
 
