@@ -69,6 +69,17 @@ export const RequirementQuestionStoreModel = types
 
       return response.ok
     }),
+    fetchRequirementQuestion: flow(function* (id: string) {
+      const existing = self.getRequirementQuestionById(id)
+      if (existing) return existing
+
+      const response = yield* toGenerator(self.environment.api.fetchRequirementQuestion(id))
+      if (response.ok) {
+        self.requirementQuestionMap.put(response.data.data)
+        return self.getRequirementQuestionById(id)
+      }
+      return undefined
+    }),
     searchAssociations: flow(function* (query: string) {
       const response = yield* toGenerator(
         self.environment.api.searchTags({

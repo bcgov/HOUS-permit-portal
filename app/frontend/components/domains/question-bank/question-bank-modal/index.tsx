@@ -14,7 +14,7 @@ import {
 } from "@chakra-ui/react"
 import { Archive } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { v4 as uuidv4 } from "uuid"
@@ -22,6 +22,7 @@ import { IRequirementQuestion } from "../../../../models/requirement-question"
 import { useMst } from "../../../../setup/root"
 import { IRequirementAttributes, IRequirementQuestionParams } from "../../../../types/api-request"
 import { EFlashMessageStatus } from "../../../../types/enums"
+import { toBankDefinitionInputOptions } from "../../../../utils/utility-functions"
 import { ConfirmationModal } from "../../../shared/confirmation-modal"
 import { FormModal } from "../../../shared/form-modal"
 import { FieldSetup } from "./field-setup"
@@ -40,15 +41,20 @@ export const QuestionBankModal = observer(function QuestionBankModal({
   requirementQuestion,
   triggerButtonProps,
   triggerButtonLabel,
+  autoOpen,
+  onSaved,
 }: {
   requirementQuestion?: IRequirementQuestion
   triggerButtonProps?: Partial<ButtonProps>
   triggerButtonLabel?: string
+  autoOpen?: boolean
+  onSaved?: (question: IRequirementQuestion) => void
 }) {
   const { requirementQuestionStore, uiStore } = useMst()
   const { t } = useTranslation()
   const { createRequirementQuestion } = requirementQuestionStore
   const { isOpen, onOpen, onClose } = useDisclosure()
+  const hasAutoOpenedRef = React.useRef(false)
   const isEditing = !!requirementQuestion
   const isLinked = (requirementQuestion?.requirementBlocks?.length ?? 0) > 0
 
@@ -95,12 +101,17 @@ export const QuestionBankModal = observer(function QuestionBankModal({
     onOpen()
   }
 
-  const toBankInputOptions = (inputOptions?: IRequirementAttributes["inputOptions"]) => {
-    if (!inputOptions) return {}
-    // Conditionals / compliance / validation belong on placements, not bank definitions.
-    const { conditional: _c, computedCompliance: _cc, dataValidation: _dv, ...definitionOptions } = inputOptions
-    return definitionOptions
-  }
+  useEffect(() => {
+    if (!autoOpen) {
+      hasAutoOpenedRef.current = false
+      return
+    }
+
+    if (!hasAutoOpenedRef.current) {
+      hasAutoOpenedRef.current = true
+      handleOpen()
+    }
+  }, [autoOpen])
 
   const onSubmit = async (data: IRequirementQuestionForm) => {
     const field = data.requirementsAttributes[0]
@@ -118,7 +129,7 @@ export const QuestionBankModal = observer(function QuestionBankModal({
       inputType: field.inputType,
       hint: field.hint,
       instructions: field.instructions,
-      inputOptions: toBankInputOptions(field.inputOptions),
+      inputOptions: toBankDefinitionInputOptions(field.inputOptions as Record<string, unknown> | undefined),
     }
 
     const isSuccess = requirementQuestion
@@ -126,6 +137,8 @@ export const QuestionBankModal = observer(function QuestionBankModal({
       : await createRequirementQuestion(params)
 
     if (isSuccess) {
+      const saved = requirementQuestionStore.getRequirementQuestionById(params.id)
+      if (saved) onSaved?.(saved)
       onClose()
     }
     return isSuccess
