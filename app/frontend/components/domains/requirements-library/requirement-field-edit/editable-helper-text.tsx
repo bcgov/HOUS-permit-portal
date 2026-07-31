@@ -3,6 +3,7 @@ import { Info, Pencil } from "@phosphor-icons/react"
 import React from "react"
 import { FieldValues, useController } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { isTipTapEmpty } from "../../../../utils/utility-functions"
 import { EditorWithPreview } from "../../../shared/editor/custom-extensions/editor-with-preview"
 import { TEditableRichTextProps } from "./types"
 
@@ -20,6 +21,17 @@ export function EditableHelperText<TFieldValues extends FieldValues>({
   const { t } = useTranslation()
   const isUsingSharedDefault = usesSharedQuestion && value == null
   const htmlValue = (isUsingSharedDefault ? defaultValue : value) ?? ""
+  // Shared/bank defaults belong in the field itself — skip the empty-state "Add ..." CTA.
+  const skipInitialTrigger = usesSharedQuestion || isQuestionBankDefault
+
+  // TipTap writes "" on open when empty; keep null so we stay on the shared default.
+  const handleChange = (html: string) => {
+    if (usesSharedQuestion && isTipTapEmpty(html) && isTipTapEmpty(defaultValue ?? "")) {
+      onChange(null)
+      return
+    }
+    onChange(html)
+  }
 
   return (
     <Box>
@@ -49,7 +61,7 @@ export function EditableHelperText<TFieldValues extends FieldValues>({
             : "requirementsLibrary.modals.addHelpTextLabel"
         )}
         htmlValue={htmlValue}
-        onChange={onChange}
+        onChange={handleChange}
         onRemove={
           usesSharedQuestion && !isUsingSharedDefault
             ? (setEditMode) => {
@@ -59,17 +71,15 @@ export function EditableHelperText<TFieldValues extends FieldValues>({
             : undefined
         }
         removeText={t("requirementsLibrary.modals.useSharedDefault")}
-        renderInitialTrigger={(buttonProps) => (
-          <Button variant={"link"} rightIcon={<Pencil size={14} />} fontSize={"md"} {...buttonProps}>
-            {t(
-              isQuestionBankDefault
-                ? "questionBank.modals.addDefaultHelpText"
-                : usesSharedQuestion
-                  ? "requirementsLibrary.modals.addCustomHelpText"
-                  : "requirementsLibrary.modals.addHelpText"
-            )}
-          </Button>
-        )}
+        {...(skipInitialTrigger
+          ? {}
+          : {
+              renderInitialTrigger: (buttonProps) => (
+                <Button variant={"link"} rightIcon={<Pencil size={14} />} fontSize={"md"} {...buttonProps}>
+                  {t("requirementsLibrary.modals.addHelpText")}
+                </Button>
+              ),
+            })}
         editText={t(
           isQuestionBankDefault
             ? "questionBank.modals.editDefaultHelpText"
