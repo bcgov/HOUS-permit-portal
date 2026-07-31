@@ -122,16 +122,20 @@ export const QuestionsTable = observer(function QuestionsTable({
                       )}
                     </Flex>
                   </SearchGridItem>
-                  <SearchGridItem minW="200px">
+                  <SearchGridItem minW={0} overflowX="auto" alignItems="flex-start">
                     {isPicker ? (
-                      <RequirementFieldDisplay
-                        requirementType={question.inputType}
-                        label={question.label}
-                        helperText={question.hint}
-                        inputOptions={question.inputOptions}
-                        options={question.inputOptions?.valueOptions?.map((option: { label: string }) => option.label)}
-                        required
-                      />
+                      <Box w="full" minW={0}>
+                        <RequirementFieldDisplay
+                          requirementType={question.inputType}
+                          label={question.label}
+                          helperText={question.hint}
+                          inputOptions={question.inputOptions}
+                          options={question.inputOptions?.valueOptions?.map(
+                            (option: { label: string }) => option.label
+                          )}
+                          required
+                        />
+                      </Box>
                     ) : (
                       <Text as={"span"} noOfLines={3} title={question.description || undefined}>
                         {question.description}
