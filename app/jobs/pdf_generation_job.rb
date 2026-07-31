@@ -1,9 +1,11 @@
-require "open3"
-require "json"
-require "fileutils"
+require_relative "concerns/step_code_checklist_pdf"
+require_relative "concerns/permit_application_pdf"
 
 class PdfGenerationJob
   include Sidekiq::Worker
+  include StepCodeChecklistPdf
+  include PermitApplicationPdf
+
   sidekiq_options lock: :until_executed,
                   queue: :file_processing,
                   on_conflict: {
@@ -12,8 +14,6 @@ class PdfGenerationJob
                   }
 
   def self.lock_args(args)
-    # only lock on the first argument, which is the permit application id
-    # this will prevent multiple jobs from running for the same permit application
     [args[0]]
   end
 
@@ -21,250 +21,37 @@ class PdfGenerationJob
     permit_application = PermitApplication.find(permit_application_id)
     return if permit_application.blank?
 
-    generation_directory_path = Rails.root.join("tmp/files")
-    asset_directory_path = Rails.root.join("public")
-
-    # Check if the directory exists, and if not, create it
-    unless File.directory?(generation_directory_path)
-      FileUtils.mkdir_p(generation_directory_path)
-      puts "Directory created: #{generation_directory_path}"
-    end
-
-    submission_version_with_missing_pdfs =
-      permit_application.submission_versions.select(&:missing_pdfs?)
-
-    submission_versions_data =
-      submission_version_with_missing_pdfs.map do |submission_version|
+    permit_application
+      .submission_versions
+      .select(&:missing_pdfs?)
+      .each do |submission_version|
         file_namer =
           PermitApplicationGeneratedFileNamer.new(
             permit_application,
             date: submission_version.created_at
           )
-        application_filename =
-          file_namer.permit_application_pdf(
-            version_number: submission_version.version_number
-          )
-        step_code_filename =
-          file_namer.step_code_checklist_pdf(
-            version_number: submission_version.version_number
-          )
 
-        should_permit_application_pdf_be_generated =
-          submission_version.missing_permit_application_pdf?
-        should_checklist_pdf_be_generated =
-          submission_version.missing_step_code_checklist_pdf?
-
-        step_code = permit_application.step_code
-        pdf_json_data = {
-          permitApplication:
-            camelize_response(
-              PermitApplicationBlueprint.render_as_json(
-                permit_application,
-                view: :pdf_generation,
-                form_json: submission_version.form_json,
-                submission_data: submission_version.formatted_submission_data,
-                submitted_at: submission_version.created_at
+        if submission_version.missing_step_code_checklist_pdf?
+          attach_checklist_pdf_to_submission_version!(
+            submission_version: submission_version,
+            permit_application: permit_application,
+            filename:
+              file_namer.step_code_checklist_pdf(
+                version_number: submission_version.version_number
               )
-            ),
-          checklist:
-            submission_version.has_step_code_checklist? &&
-              camelize_response(submission_version.step_code_checklist_json),
-          # Part 3 checklist PDF reads project fields from stepCode (Part 9 builds them from checklist)
-          stepCode:
-            (
-              if should_checklist_pdf_be_generated && step_code.present?
-                camelize_response(
-                  {
-                    id: step_code.id,
-                    type: step_code.class.name,
-                    full_address: step_code.full_address,
-                    reference_number: step_code.reference_number,
-                    title: step_code.title,
-                    phase: step_code.phase,
-                    current_stage: step_code.current_stage,
-                    permit_date: step_code.permit_date,
-                    pid: step_code.pid,
-                    jurisdiction_name:
-                      (
-                        step_code.respond_to?(:jurisdiction_name) &&
-                          step_code.jurisdiction_name
-                      )
-                  }.compact
-                )
-              end
-            ),
-          meta: {
-            generationPaths: {
-              permitApplication:
-                should_permit_application_pdf_be_generated &&
-                  generation_directory_path.join(application_filename).to_s,
-              stepCodeChecklist:
-                should_checklist_pdf_be_generated &&
-                  generation_directory_path.join(step_code_filename).to_s
-            },
-            assetDirectoryPath: asset_directory_path.to_s
-          }
-        }.to_json
+          )
+        end
 
-        {
-          submission_version: submission_version,
-          pdf_json_data: pdf_json_data,
-          application_filename: application_filename,
-          step_code_filename: step_code_filename,
-          should_permit_application_pdf_be_generated:
-            should_permit_application_pdf_be_generated,
-          should_checklist_pdf_be_generated: should_checklist_pdf_be_generated
-        }
-      end
-
-    submission_versions_data.each do |submission_version_data|
-      generate_pdfs(submission_version_data, generation_directory_path)
-    end
-  end
-
-  def generate_pdfs(submission_version_data, generation_directory_path)
-    submission_version = submission_version_data[:submission_version]
-    pdf_json_data = submission_version_data[:pdf_json_data]
-    application_filename = submission_version_data[:application_filename]
-    step_code_filename = submission_version_data[:step_code_filename]
-    should_permit_application_pdf_be_generated =
-      submission_version_data[:should_permit_application_pdf_be_generated]
-    should_checklist_pdf_be_generated =
-      submission_version_data[:should_checklist_pdf_be_generated]
-
-    json_filename =
-      "#{generation_directory_path}/pdf_json_data_#{submission_version.id}.json"
-
-    File.open(json_filename, "w") { |file| file.write(pdf_json_data) }
-
-    # REMOVE THIS FOR PRODUCTION
-    # begin
-    #   parsed_json = JSON.parse(pdf_json_data)
-    #   Rails.logger.error "############################### Failing PDF JSON data:\n"
-    #   Rails.logger.error "#{JSON.pretty_generate(parsed_json)}"
-    #   Rails.logger.error "###############################"
-    # rescue JSON::ParserError
-    #   Rails.logger.error "Failing PDF JSON data (could not be parsed):\n#{pdf_json_data}"
-    #   Rails.logger.error "###############################"
-    # end
-    # Pre-remove any existing target PDFs to avoid reusing stale files
-
-    if should_permit_application_pdf_be_generated
-      application_path = "#{generation_directory_path}/#{application_filename}"
-      FileUtils.rm_f(application_path)
-    end
-    if should_checklist_pdf_be_generated
-      step_code_path = "#{generation_directory_path}/#{step_code_filename}"
-      FileUtils.rm_f(step_code_path)
-    end
-
-    # Run Node.js script as a child process, passing JSON data as an argument
-    stdout, stderr, status =
-      Open3.popen3(
-        "npm",
-        "run",
-        NodeScripts::GENERATE_PDF_SCRIPT_NAME,
-        json_filename,
-        chdir: Rails.root.to_s
-      ) do |stdin, stdout, stderr, wait_thr|
-        # Read and print the standard output continuously until the process exits
-        stdout.each_line { |line| puts line }
-
-        stderr.each_line { |line| puts line }
-
-        # Wait for the process to exit and get the exit status
-        exit_status = wait_thr.value
-        File.delete(json_filename) if Rails.env.production?
-
-        # Check for errors or handle output based on the exit status
-        if exit_status.success?
-          pdfs = []
-          if should_permit_application_pdf_be_generated
-            pdfs << {
-              fname: application_filename,
-              key: PermitApplication::PERMIT_APP_PDF_DATA_KEY
-            }
-          end
-          if should_checklist_pdf_be_generated
-            pdfs << {
-              fname: step_code_filename,
-              key: PermitApplication::CHECKLIST_PDF_DATA_KEY
-            }
-          end
-
-          pdfs.each do |pdf|
-            path = "#{generation_directory_path}/#{pdf[:fname]}"
-            file = File.open(path)
-            doc =
-              submission_version
-                .supporting_documents
-                .where(
-                  permit_application_id:
-                    submission_version.permit_application_id,
-                  data_key: pdf[:key]
-                )
-                .first_or_initialize
-
-            doc.update(file:) if doc.file.blank?
-
-            File.delete(path) if Rails.env.production?
-          end
-        else
-          err = "Pdf generation process failed: #{exit_status}"
-          Rails.logger.error err
-
-          # Ensure no failed or partial PDFs remain
-          if should_permit_application_pdf_be_generated
-            application_path =
-              "#{generation_directory_path}/#{application_filename}"
-            FileUtils.rm_f(application_path)
-          end
-          if should_checklist_pdf_be_generated
-            step_code_path =
-              "#{generation_directory_path}/#{step_code_filename}"
-            FileUtils.rm_f(step_code_path)
-          end
-
-          # this will raise an error and retry the job
-          raise err
+        if submission_version.missing_permit_application_pdf?
+          attach_permit_application_pdf_to_submission_version!(
+            submission_version: submission_version,
+            permit_application: permit_application,
+            filename:
+              file_namer.permit_application_pdf(
+                version_number: submission_version.version_number
+              )
+          )
         end
       end
-  end
-
-  SUBMISSION_DATA_PREFIX = "formSubmissionData"
-  FORMIO_SECTION_REGEX =
-    /^section[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-  SECTION_COMPLETION = "section-completion-key"
-
-  def camelize_response(data)
-    camelize_hash(data)
-  end
-
-  def camelize_hash(obj)
-    case obj
-    when Hash
-      obj.each_with_object({}) do |(k, v), result|
-        camelized_key = camelize_key(k)
-        result[camelized_key] = camelize_hash(v)
-      end
-    when Array
-      obj.map { |v| camelize_hash(v) }
-    else
-      obj
-    end
-  end
-
-  def camelize_key(key)
-    if key == SECTION_COMPLETION || key.start_with?(SUBMISSION_DATA_PREFIX)
-      return key
-    end
-
-    return key if key.match?(FORMIO_SECTION_REGEX)
-
-    key
-      .split("_")
-      .map
-      .with_index { |word, index| index.zero? ? word : word.capitalize }
-      .join
   end
 end

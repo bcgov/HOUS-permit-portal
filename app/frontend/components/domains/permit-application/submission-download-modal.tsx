@@ -131,6 +131,28 @@ export const SubmissionDownloadModal = observer(
                 <ModalBody>
                   <Flex direction="column" gap={3} borderRadius="lg" borderWidth={1} borderColor="border.light" p={4}>
                     <VStack align="flex-start" w="full" spacing={3}>
+                      {stepCode && (
+                        <Button
+                          as={Link}
+                          href={`/permit-applications/${permitApplication.id}/step-code/print`}
+                          variant="link"
+                          leftIcon={<FileArrowDown size={16} />}
+                          isExternal
+                        >
+                          {t("permitApplication.show.printerFriendlyChecklist")}
+                        </Button>
+                      )}
+                      <Button
+                        as={Link}
+                        href={`/permit-applications/${permitApplication.id}/print`}
+                        variant="link"
+                        leftIcon={<FileArrowDown size={16} />}
+                        isExternal
+                      >
+                        {t("permitApplication.show.printerFriendlyApplication", {
+                          defaultValue: "Printer-friendly application form",
+                        })}
+                      </Button>
                       {permitApplication.missingPdfs.map((pdfKey) => (
                         <MissingPdf key={pdfKey} pdfKey={pdfKey} />
                       ))}

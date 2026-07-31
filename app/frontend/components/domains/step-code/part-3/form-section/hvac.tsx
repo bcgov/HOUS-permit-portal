@@ -1,4 +1,4 @@
-import { Heading, Radio, RadioGroup, Stack, StackProps, Text } from "@chakra-ui/react"
+import { Heading, HStack, Radio, RadioGroup, Stack, StackProps, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import { path } from "ramda"
 import React, { useEffect, useMemo } from "react"
@@ -13,7 +13,6 @@ import {
   EHeatingSystemType,
 } from "../../../../../types/enums"
 import { TextFormControl } from "../../../../shared/form/input-form-control"
-import { HStack } from "../../part-9/checklist/pdf-content/shared/h-stack"
 import { Part3FormFooter } from "./shared/form-footer"
 
 const i18nPrefix = "stepCode.part3.hvac"

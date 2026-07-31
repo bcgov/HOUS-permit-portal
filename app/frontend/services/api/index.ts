@@ -1289,6 +1289,23 @@ export class Api {
     return this.client.get<ApiResponse<IPart3StepCode>>(`/part_3_building/step_codes/${id}`)
   }
 
+  async fetchPrintStepCodeChecklist(printToken: string) {
+    return this.client.get<
+      ApiResponse<{
+        stepCode: IPart3StepCode | IPart9StepCode
+        checklist: IPart3StepCodeChecklist | IPart9StepCodeChecklist
+        permitApplication?: IPermitApplication
+        submissionVersionId?: string
+      }>
+    >(`/print/step_code_checklist`, { printToken })
+  }
+
+  async fetchPrintPermitApplication(printToken: string) {
+    return this.client.get<ApiResponse<IPermitApplication>>(`/print/permit_application`, {
+      printToken,
+    })
+  }
+
   async createPart3StepCode(data: {
     permitApplicationId?: string
     permitProjectId?: string

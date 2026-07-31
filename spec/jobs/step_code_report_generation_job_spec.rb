@@ -20,9 +20,8 @@ RSpec.describe StepCodeReportGenerationJob, type: :job do
     described_class.new.perform("sc1")
   end
 
-  it "renders PDF and attaches report document on success" do
-    checklist_blueprint = double("Blueprint", render_as_hash: { "k" => "v" })
-    checklist = instance_double("Checklist")
+  it "renders PDF via HtmlPdfService and attaches report document on success" do
+    checklist = instance_double("Checklist", id: "cl1")
     report_documents_assoc = double("ReportDocumentsAssoc")
     report_doc = double("ReportDocument", save!: true)
     allow(report_doc).to receive(:file=)
@@ -32,41 +31,15 @@ RSpec.describe StepCodeReportGenerationJob, type: :job do
       instance_double(
         "StepCode",
         id: "sc1",
-        full_address: "a",
-        reference_number: "r",
-        title: "t",
-        phase: "p",
-        permit_date: nil,
-        pid: nil,
-        pin: nil,
-        current_stage: "pre_construction",
         current_checklist: checklist,
         checklist_for: checklist,
-        checklist_blueprint: checklist_blueprint,
-        report_documents: report_documents_assoc,
-        is_a?: true
+        report_documents: report_documents_assoc
       )
-    allow(step_code).to receive(:respond_to?).and_return(false)
-    allow(step_code).to receive(:class).and_return(Part9StepCode)
-    allow(step_code).to receive(:is_a?).with(Part9StepCode).and_return(true)
     allow(StepCode).to receive(:find_by).with(id: "sc1").and_return(step_code)
 
-    exit_status = instance_double(Process::Status, success?: true, to_s: "0")
     allow_any_instance_of(described_class).to receive(
-      :write_json_to_tmp
-    ).and_return(
-      Rails.root.join("tmp/files/pdf_json_data_step_code_sc1.json").to_s
-    )
-    allow_any_instance_of(described_class).to receive(:ensure_directory_exists)
-
-    pdf_path = Rails.root.join("tmp/files/step_code_report_sc1.pdf")
-    FileUtils.mkdir_p(pdf_path.dirname)
-    allow_any_instance_of(described_class).to receive(
-      :run_node_pdf_renderer
-    ) do |_job, _json|
-      File.write(pdf_path, "%PDF-1.4")
-      exit_status
-    end
+      :render_checklist_pdf_bytes
+    ).and_return("%PDF-1.4 checklist")
 
     allow(NotificationService).to receive(
       :publish_step_code_report_generated_event
@@ -79,53 +52,31 @@ RSpec.describe StepCodeReportGenerationJob, type: :job do
     expect(NotificationService).to have_received(
       :publish_step_code_report_generated_event
     ).with(report_doc)
-  ensure
-    FileUtils.rm_f(pdf_path)
   end
 
-  it "raises on renderer failure" do
-    checklist_blueprint = double("Blueprint", render_as_hash: { "k" => "v" })
-    checklist = instance_double("Checklist")
+  it "raises when HtmlPdfService fails" do
+    checklist = instance_double("Checklist", id: "cl1")
     step_code =
-      double(
+      instance_double(
         "StepCode",
         id: "sc1",
-        full_address: "a",
-        reference_number: "r",
-        title: "t",
-        phase: "p",
-        permit_date: nil,
-        pid: nil,
-        pin: nil,
-        current_stage: "pre_construction",
         current_checklist: checklist,
-        checklist_for: checklist,
-        checklist_blueprint: checklist_blueprint,
-        is_a?: false
+        checklist_for: checklist
       )
     allow(StepCode).to receive(:find_by).and_return(step_code)
-    allow(step_code).to receive(:class).and_return(Part3StepCode)
-    allow_any_instance_of(described_class).to receive(:ensure_directory_exists)
-    allow_any_instance_of(described_class).to receive(
-      :write_json_to_tmp
-    ).and_return(
-      Rails.root.join("tmp/files/pdf_json_data_step_code_sc1.json").to_s
-    )
 
-    exit_status = instance_double(Process::Status, success?: false, to_s: "1")
     allow_any_instance_of(described_class).to receive(
-      :run_node_pdf_renderer
-    ).and_return(exit_status)
+      :render_checklist_pdf_bytes
+    ).and_raise(HtmlPdfService::Error, "boom")
 
     expect { described_class.new.perform("sc1", {}) }.to raise_error(
-      RuntimeError,
-      /StepCode report PDF generation failed/
+      HtmlPdfService::Error,
+      /boom/
     )
   end
 
   it "renders an explicitly requested checklist id" do
-    checklist_blueprint = double("Blueprint", render_as_hash: { "k" => "v" })
-    checklist = instance_double("Checklist")
+    checklist = instance_double("Checklist", id: "checklist-1")
     report_documents_assoc = double("ReportDocumentsAssoc")
     report_doc = double("ReportDocument", save!: true)
     allow(report_doc).to receive(:file=)
@@ -135,39 +86,15 @@ RSpec.describe StepCodeReportGenerationJob, type: :job do
       instance_double(
         "StepCode",
         id: "sc1",
-        full_address: "a",
-        reference_number: "r",
-        title: "t",
-        phase: "p",
-        current_stage: "as_built",
-        permit_date: nil,
-        pid: nil,
-        pin: nil,
+        current_checklist: nil,
         checklist_for: checklist,
-        checklist_blueprint: checklist_blueprint,
-        report_documents: report_documents_assoc,
-        is_a?: false
+        report_documents: report_documents_assoc
       )
-    allow(step_code).to receive(:respond_to?).and_return(false)
-    allow(step_code).to receive(:class).and_return(Part3StepCode)
     allow(StepCode).to receive(:find_by).with(id: "sc1").and_return(step_code)
 
-    exit_status = instance_double(Process::Status, success?: true, to_s: "0")
     allow_any_instance_of(described_class).to receive(
-      :write_json_to_tmp
-    ).and_return(
-      Rails.root.join("tmp/files/pdf_json_data_step_code_sc1.json").to_s
-    )
-    allow_any_instance_of(described_class).to receive(:ensure_directory_exists)
-
-    pdf_path = Rails.root.join("tmp/files/step_code_report_sc1.pdf")
-    FileUtils.mkdir_p(pdf_path.dirname)
-    allow_any_instance_of(described_class).to receive(
-      :run_node_pdf_renderer
-    ) do |_job, _json|
-      File.write(pdf_path, "%PDF-1.4")
-      exit_status
-    end
+      :render_checklist_pdf_bytes
+    ).and_return("%PDF-1.4")
 
     allow(NotificationService).to receive(
       :publish_step_code_report_generated_event
@@ -177,7 +104,5 @@ RSpec.describe StepCodeReportGenerationJob, type: :job do
 
     expect(step_code).to have_received(:checklist_for).with(id: "checklist-1")
     expect(report_doc).to have_received(:save!)
-  ensure
-    FileUtils.rm_f(pdf_path)
   end
 end

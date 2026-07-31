@@ -78,7 +78,7 @@ export function StepCodeFormFooter<T>({
   const exitLabel = isPermitLinked ? t("stepCode.goToPermitApplication") : t(goToStepCodesTranslationKey)
 
   return (
-    <Flex direction="column" gap={3} pt={8} w="full">
+    <Flex direction="column" gap={3} pt={8} w="full" data-print-hide>
       <Flex gap={3} w="full" align="center">
         <Button
           variant={hasNext ? "secondary" : "primary"}

@@ -32,9 +32,9 @@ const NotFoundScreen = lazy(() =>
   import("../../shared/base/not-found-screen").then((module) => ({ default: module.NotFoundScreen }))
 )
 
-const PermitApplicationPDFViewer = lazy(() =>
-  import("../../shared/permit-applications/pdf-content/viewer").then((module) => ({
-    default: module.PermitApplicationPDFViewer,
+const PermitApplicationPrintScreen = lazy(() =>
+  import("../../shared/permit-applications/print").then((module) => ({
+    default: module.PermitApplicationPrintScreen,
   }))
 )
 
@@ -341,9 +341,9 @@ const OverheatingCodeUnavailableScreen = lazy(() =>
   }))
 )
 
-const StepCodeChecklistPDFViewer = lazy(() =>
-  import("../step-code/checklist/pdf-content/viewer").then((module) => ({
-    default: module.StepCodeChecklistPDFViewer,
+const StepCodeChecklistPrintScreen = lazy(() =>
+  import("../step-code/checklist/print").then((module) => ({
+    default: module.StepCodeChecklistPrintScreen,
   }))
 )
 const SiteConfigurationManagementScreen = lazy(() =>
@@ -492,29 +492,54 @@ export const Navigation = observer(() => {
 
   return (
     <BrowserRouter>
+      <NavigationShell
+        displaySitewideMessage={displaySitewideMessage}
+        sitewideMessage={sitewideMessage}
+        isValidating={isValidating}
+        validatingMessage={t("site.validating")}
+      />
+    </BrowserRouter>
+  )
+})
+
+const NavigationShell = observer(function NavigationShell({
+  displaySitewideMessage,
+  sitewideMessage,
+  isValidating,
+  validatingMessage,
+}: {
+  displaySitewideMessage: boolean
+  sitewideMessage: string
+  isValidating: boolean
+  validatingMessage: string
+}) {
+  const location = useLocation()
+  const isPrintPath = /\/print$/.test(location.pathname)
+
+  return (
+    <>
       <Box pos="relative" w="full">
         <Box pos="absolute" top={0} zIndex="toast" w="full">
           <FlashMessage />
         </Box>
       </Box>
-      {displaySitewideMessage && (
+      {displaySitewideMessage && !isPrintPath && (
         <Center h={16} bg="theme.yellowLight" zIndex={1500}>
           {sitewideMessage}
         </Center>
       )}
-      <NavBar />
-      <QaToolsPopout />
+      {!isPrintPath && <NavBar />}
+      {!isPrintPath && <QaToolsPopout />}
 
       {isValidating ? (
-        <LoadingScreen message={t("site.validating")} />
+        <LoadingScreen message={validatingMessage} />
       ) : (
         <Suspense fallback={<LoadingScreen />}>
           <AppRoutes />
-
-          <Footer />
+          {!isPrintPath && <Footer />}
         </Suspense>
       )}
-    </BrowserRouter>
+    </>
   )
 })
 
@@ -708,26 +733,6 @@ const AppRoutes = observer(() => {
         element={<ClimateZonesScreen />}
       />
       <Route path="/permit-applications/:permitApplicationId" element={<ReviewPermitApplicationScreen />} />
-      {import.meta.env.DEV && (
-        <>
-          <Route
-            path="/permit-applications/:permitApplicationId/pdf-content"
-            element={<PermitApplicationPDFViewer mode={"pdf"} />}
-          />
-          <Route
-            path="/permit-applications/:permitApplicationId/pdf-html"
-            element={<PermitApplicationPDFViewer mode={"html"} />}
-          />
-          <Route
-            path="/permit-applications/:permitApplicationId/step-code-pdf-content"
-            element={<StepCodeChecklistPDFViewer mode={"pdf"} />}
-          />
-          <Route
-            path="/permit-applications/:permitApplicationId/step-code-pdf-html"
-            element={<StepCodeChecklistPDFViewer mode={"html"} />}
-          />
-        </>
-      )}
     </>
   )
 
@@ -1032,6 +1037,13 @@ const AppRoutes = observer(() => {
           element={loggedIn && isUnconfirmed ? <RedirectScreen path="/" /> : <JurisdictionScreen />}
         />
         <Route path="/part-3-step-code" element={<RedirectScreen path="start" />} />
+        <Route
+          path="/permit-applications/:permitApplicationId/step-code/print"
+          element={<StepCodeChecklistPrintScreen />}
+        />
+        <Route path="/permit-applications/:permitApplicationId/print" element={<PermitApplicationPrintScreen />} />
+        <Route path="/part-3-step-code/:stepCodeId/print" element={<StepCodeChecklistPrintScreen />} />
+        <Route path="/part-9-step-code/:stepCodeId/print" element={<StepCodeChecklistPrintScreen />} />
         <Route path="/part-3-step-code/:stepCodeId" element={<Part3StepCodeForm />} />
         <Route path="/part-3-step-code/:stepCodeId/stages/:stage/:section" element={<Part3StepCodeForm />} />
         <Route path="/part-3-step-code/:stepCodeId/:section" element={<Part3StepCodeForm />} />

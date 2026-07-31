@@ -13,6 +13,9 @@ x-env-vars: &default-env-vars
   DEVISE_JWT_SECRET_KEY: supersecret
   DATABASE_URL: postgres://postgres:password@postgres:5432/app_development
   ELASTICSEARCH_URL: http://elasticsearch:9200
+  GOTENBERG_URL: http://gotenberg:3000
+  # Host machine Rails as seen from Gotenberg container (macOS Docker Desktop)
+  PRINT_APP_URL: http://host.docker.internal:3000
 
 services:
   app:
@@ -125,6 +128,14 @@ services:
       - "9200:9200"
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
+
+  # Chromium HTML→PDF for step-code checklist print routes (see HtmlPdfService).
+  # Sidekiq/app need GOTENBERG_URL=http://gotenberg:3000 and
+  # PRINT_APP_URL reachable from this container (e.g. http://host.docker.internal:3000).
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    ports:
+      - "3100:3000"
 
 volumes:
   postgres_data:

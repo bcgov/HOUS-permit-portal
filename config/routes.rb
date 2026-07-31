@@ -324,6 +324,15 @@ Rails.application.routes.draw do
 
     resources :end_user_license_agreement, only: %i[index]
 
+    namespace :print do
+      resource :step_code_checklist,
+               only: %i[show],
+               controller: "step_code_checklists"
+      resource :permit_application,
+               only: %i[show],
+               controller: "permit_applications"
+    end
+
     resources :step_codes,
               only: %i[index create destroy update],
               shallow: true do

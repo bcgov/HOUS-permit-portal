@@ -52,7 +52,7 @@ export const BuildingTypeSelect = observer(function BuildingTypeSelect({ onChang
           <Portal>
             <PopoverContent bg="white" minW={320} zIndex="popover">
               <VStack align="start" spacing={0} divider={<StackDivider borderColor="border.light" />}>
-                {selectOptions.buildingTypes.map((value) => (
+                {selectOptions.buildingTypes?.map((value) => (
                   <Flex
                     key={value}
                     onClick={() => {
