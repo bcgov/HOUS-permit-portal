@@ -50,7 +50,7 @@ export const FormSetup = observer(function FormSetup({
     <Box as={"section"} w={"350px"} boxShadow={"md"} borderRadius={"xl"} bg={"greys.grey10"} flexShrink={0}>
       <Box as={"header"} w={"full"} px={6} py={3} bg={"theme.blueAlt"}>
         <Text as={"h3"} fontSize={"xl"} color={"greys.white"} fontWeight={700}>
-          {t("questionBank.modals.formSetupTitle")}
+          {t("questionBank.modals.questionSetupTitle")}
         </Text>
       </Box>
       <VStack spacing={4} w={"full"} alignItems={"flex-start"} px={6} pb={6} pt={3}>
