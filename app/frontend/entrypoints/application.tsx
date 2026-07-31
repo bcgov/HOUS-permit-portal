@@ -7,7 +7,7 @@ import { Helmet } from "react-helmet"
 import { Navigation } from "../components/domains/navigation"
 import "../i18n/i18n"
 import { useLanguageChange } from "../i18n/use-language-change"
-import { setupReactotron } from "../setup/reactotron"
+import { isReactotronEnabled, setupReactotron } from "../setup/reactotron"
 import { Provider, setupRootStore } from "../setup/root"
 import { GlobalStyles } from "../styles"
 import { theme } from "../styles/theme"
@@ -63,13 +63,12 @@ const renderApp = (rootStore) => {
 
 document.addEventListener("DOMContentLoaded", () => {
   const rootStore = setupRootStore()
-  if (import.meta.env.PROD) {
+  if (import.meta.env.PROD || !isReactotronEnabled()) {
     renderApp(rootStore)
-  } else if (import.meta.env.DEV) {
+  } else {
     setupReactotron(rootStore.environment.api).then((reactotron) => {
       // @ts-expect-error: trackMstNode is not part of the official Reactotron type definitions
       reactotron.trackMstNode(rootStore)
-      // set reactotron into console
       window.console.tron = reactotron
       renderApp(rootStore)
     })
