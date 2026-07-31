@@ -1,15 +1,15 @@
 import { Box, Button, HStack, Text, VStack } from "@chakra-ui/react"
 import { Chat, Download } from "@phosphor-icons/react"
-import { format } from "date-fns"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { datefnsTableDateTimeFormat } from "../../../../../constants"
 import { INote } from "../../../../../models/note"
 import { EProjectMeetingStatus } from "../../../../../types/enums"
+import { INoteAttachmentDraft } from "../../../../../types/types"
 import { isTipTapEmpty } from "../../../../../utils/utility-functions"
-import { Editor } from "../../../../shared/editor/editor"
-import { SafeTipTapDisplay } from "../../../../shared/editor/safe-tiptap-display"
 import { EmptyResultsBox } from "../../../../shared/grid/empty-results-box"
+import { NoteCard } from "../../../../shared/notes/note-card"
+import { NoteComposer } from "../../../../shared/notes/note-composer"
+import { useNoteAttachments } from "../../../../shared/notes/use-note-attachments"
 import { MeetingNotesVisibilityBanner } from "../banners/meeting-notes-visibility-banner"
 import { DetailSection } from "../detail-section"
 
@@ -19,7 +19,7 @@ interface MeetingNotesSectionProps {
   showVisibilityBanner?: boolean
   canAddNote?: boolean
   isAddingNote?: boolean
-  onAddNote?: (body: string) => Promise<boolean>
+  onAddNote?: (body: string, attachments: INoteAttachmentDraft[]) => Promise<boolean>
   onDownloadNotes?: () => void
 }
 
@@ -34,13 +34,17 @@ export const MeetingNotesSection = ({
 }: MeetingNotesSectionProps) => {
   const { t } = useTranslation()
   const [body, setBody] = useState("")
-  const addNoteDisabled = isAddingNote || isTipTapEmpty(body)
+  const { attachments, isUploading, addFiles, removeAttachment, clearAttachments } = useNoteAttachments()
+  const addNoteDisabled = isAddingNote || isUploading || isTipTapEmpty(body)
 
   const handleAddNote = async () => {
     if (!onAddNote || addNoteDisabled) return
 
-    const ok = await onAddNote(body)
-    if (ok) setBody("")
+    const ok = await onAddNote(body, attachments)
+    if (ok) {
+      setBody("")
+      clearAttachments()
+    }
   }
 
   return (
@@ -52,11 +56,14 @@ export const MeetingNotesSection = ({
           <Text fontWeight="bold" mb={2}>
             {t("projectMeeting.detail.notes.addNote")}
           </Text>
-          <Editor
-            htmlValue={body}
+          <NoteComposer
+            body={body}
             onChange={setBody}
             placeholder={t("projectMeeting.detail.notes.addNotePlaceholder")}
-            shouldContainRichTextToolbarItem={(item) => item !== "image"}
+            attachments={attachments}
+            isUploading={isUploading}
+            onAddFiles={addFiles}
+            onRemoveAttachment={removeAttachment}
           />
         </Box>
       )}
@@ -99,25 +106,5 @@ export const MeetingNotesSection = ({
         </VStack>
       )}
     </DetailSection>
-  )
-}
-
-const NoteCard = ({ note }: { note: INote }) => {
-  const createdAt = note.createdAt ? format(note.createdAt, datefnsTableDateTimeFormat) : null
-
-  return (
-    <Box border="1px" borderColor="border.light" borderRadius="md" p={4}>
-      <VStack align="stretch" spacing={2}>
-        <HStack spacing={4} align="baseline">
-          <Text fontWeight="bold">{note.authorName}</Text>
-          {createdAt && (
-            <Text color="text.secondary" fontSize="sm">
-              {createdAt}
-            </Text>
-          )}
-        </HStack>
-        <SafeTipTapDisplay htmlContent={note.body} fontSize="md" />
-      </VStack>
-    </Box>
   )
 }

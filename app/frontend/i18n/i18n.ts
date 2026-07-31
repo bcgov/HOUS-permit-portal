@@ -428,6 +428,7 @@ const options = {
           asc: "Ascending",
           desc: "Descending",
           returnHome: "Return to home",
+          returnToProject: "Return to project",
           copied: "Copied!",
           failedToCopy: "Something went wrong while trying to copy",
           fileUnavailable: "File unavailable",
@@ -1679,6 +1680,7 @@ Thank you,
           acceptAndSend: "Accept and send",
           detail: {
             title: "Meeting request",
+            viewProject: "View project",
             backToMeetings: "Back to meetings",
             withdrawMeeting: "Withdraw meeting",
             withdrawConfirmationTitle: "Withdraw this meeting request?",
@@ -1876,6 +1878,17 @@ Thank you,
         document: {
           index: {
             title: "Documents",
+          },
+        },
+        note: {
+          attachments: {
+            label: "Attachments",
+            attachFiles: "choose files",
+            dropHint: "Attach files: drag and drop files onto the note, or",
+            dropActive: "Drop files to attach them to this note",
+            uploading: "Uploading files...",
+            remove: "Remove {{fileName}}",
+            unavailable: "Attachment unavailable",
           },
         },
         permitApplication: {

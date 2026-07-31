@@ -6,6 +6,8 @@ import {
   FILE_UPLOAD_CHUNK_SIZE_IN_BYTES,
   FILE_UPLOAD_MAX_SIZE,
 } from "../components/shared/chefs/additional-formio/constant"
+import { useMst } from "../setup/root"
+import { EFlashMessageStatus } from "../types/enums"
 import { getCsrfToken } from "../utils/utility-functions"
 
 // Calculate max file size in bytes
@@ -33,6 +35,7 @@ const useUppyS3 = ({
   maxFileSizeMB,
   allowedFileTypes,
 }: UseUppyS3Props = {}) => {
+  const { uiStore } = useMst()
   const maxFileSize = maxFileSizeMB ? maxFileSizeMB * 1024 * 1024 : MAX_FILE_SIZE_BYTES
   const [isUploading, setIsUploading] = useState(false)
   const [uppy] = useState(() =>
@@ -249,6 +252,11 @@ const useUppyS3 = ({
     const syncUploading = () => {
       setIsUploading(uppy.getFiles().some((file) => file.progress?.uploadStarted && !file.progress?.uploadComplete))
     }
+    const onRestrictionFailed = (_file: UppyFile<{}, {}> | undefined, error: Error) => {
+      if (error?.message) {
+        uiStore.flashMessage.show(EFlashMessageStatus.error, null, error.message, 5000)
+      }
+    }
 
     uppy.on("upload", syncUploading)
     uppy.on("complete", syncUploading)
@@ -256,6 +264,7 @@ const useUppyS3 = ({
     uppy.on("cancel-all", syncUploading)
     uppy.on("upload-error", syncUploading)
     uppy.on("file-removed", syncUploading)
+    uppy.on("restriction-failed", onRestrictionFailed)
 
     return () => {
       uppy.off("upload", syncUploading)
@@ -264,8 +273,9 @@ const useUppyS3 = ({
       uppy.off("cancel-all", syncUploading)
       uppy.off("upload-error", syncUploading)
       uppy.off("file-removed", syncUploading)
+      uppy.off("restriction-failed", onRestrictionFailed)
     }
-  }, [uppy])
+  }, [uppy, uiStore])
 
   return { uppy, isUploading }
 }

@@ -1,5 +1,6 @@
 import { Instance, types } from "mobx-state-tree"
 import { ENoteableType } from "../types/enums"
+import { INoteAttachmentDocument } from "../types/types"
 
 export const NoteModel = types
   .model("Note", {
@@ -13,6 +14,7 @@ export const NoteModel = types
     projectAddress: types.maybeNull(types.string),
     createdAt: types.maybeNull(types.Date),
     updatedAt: types.maybeNull(types.Date),
+    noteAttachmentDocuments: types.optional(types.array(types.frozen<INoteAttachmentDocument>()), []),
   })
   .views((self) => ({
     get projectMeetingId() {

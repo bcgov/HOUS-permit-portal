@@ -10,6 +10,7 @@ import { useProjectMeeting } from "../../../../hooks/resources/use-project-meeti
 import { IPermitProject } from "../../../../models/permit-project"
 import { useMst } from "../../../../setup/root"
 import { EFlashMessageStatus, EProjectMeetingStatus } from "../../../../types/enums"
+import { INoteAttachmentDraft } from "../../../../types/types"
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
 import { ConfirmationModal } from "../../../shared/confirmation-modal"
@@ -79,8 +80,8 @@ export const ReviewerMeetingDetailContent = observer(
       }
     }
 
-    const handleAddNote = async (body: string) => {
-      const response = await noteStore.createProjectMeetingNote(currentProjectMeeting.id, body)
+    const handleAddNote = async (body: string, attachments: INoteAttachmentDraft[]) => {
+      const response = await noteStore.createProjectMeetingNote(currentProjectMeeting.id, body, attachments)
       return response.ok
     }
 

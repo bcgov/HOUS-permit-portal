@@ -11,7 +11,7 @@ export const DetailSection = ({
   children: React.ReactNode
 }) => (
   <Box as="section" mb={8}>
-    <HStack justify="space-between" align="baseline" mb={4}>
+    <HStack justify="space-between" align="center" mb={4}>
       <Heading as="h2" size="lg">
         {title}
       </Heading>

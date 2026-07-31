@@ -240,14 +240,17 @@ class Api::ProjectMeetingsController < Api::ApplicationController
       @project_meeting =
         @permit_project
           .project_meetings
-          .includes(:meeting_request_documents, notes: %i[user permit_project])
+          .includes(
+            :meeting_request_documents,
+            notes: %i[user permit_project note_attachment_documents]
+          )
           .find(params[:id])
     else
       @project_meeting =
         policy_scope(ProjectMeeting).includes(
           :permit_project,
           :meeting_request_documents,
-          notes: %i[user permit_project]
+          notes: %i[user permit_project note_attachment_documents]
         ).find(params[:id])
     end
   end

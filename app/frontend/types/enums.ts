@@ -18,6 +18,7 @@ export enum EFileUploadAttachmentType {
   SupportingDocument = "SupportingDocument",
   ProjectDocument = "ProjectDocument",
   MeetingRequestDocument = "MeetingRequestDocument",
+  NoteAttachmentDocument = "NoteAttachmentDocument",
   ReportDocument = "ReportDocument",
   ResourceDocument = "ResourceDocument",
   DesignDocument = "DesignDocument",

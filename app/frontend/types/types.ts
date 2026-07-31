@@ -382,6 +382,17 @@ export interface IMeetingRequestDocument extends IBaseFileAttachment {
   documentType?: EMeetingRequestDocumentType
 }
 
+export interface INoteAttachmentDocument extends IBaseFileAttachment {
+  noteId?: string
+  scanStatus?: EFileScanStatus
+}
+
+// A file uploaded to S3 cache but not yet persisted against a note.
+export interface INoteAttachmentDraft {
+  uppyFileId: string
+  file: IFileData
+}
+
 export interface IRequirementBlockCustomization {
   tip?: string
   resourceIds?: string[]

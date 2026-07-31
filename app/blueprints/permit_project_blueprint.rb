@@ -152,7 +152,7 @@ class PermitProjectBlueprint < Blueprinter::Base
 
     scope
       .where(permit_project: permit_project)
-      .preload(:user, :permit_project)
+      .preload(:user, :permit_project, :note_attachment_documents)
       .order(created_at: :desc)
   end
 end
