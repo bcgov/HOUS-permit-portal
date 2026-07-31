@@ -117,7 +117,7 @@ export const OptionsMenu = observer(function OptionsMenu({
             <MenuItem color={"text.primary"} onClick={onOpenSharedQuestion}>
               <HStack spacing={2} fontSize={"sm"}>
                 <BookOpen />
-                <Text as={"span"}>{t("requirementsLibrary.sharedQuestions.openInQuestionBank")}</Text>
+                <Text as={"span"}>{t("requirementsLibrary.sharedQuestions.viewQuestionInQuestionBank")}</Text>
               </HStack>
             </MenuItem>
             <MenuItem color={"text.primary"} onClick={onDetachSharedQuestion}>
