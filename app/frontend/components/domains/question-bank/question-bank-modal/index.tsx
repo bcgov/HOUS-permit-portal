@@ -113,6 +113,20 @@ export const QuestionBankModal = observer(function QuestionBankModal({
     }
   }, [autoOpen])
 
+  // When the user edits a block/template in another tab, refresh usage on return.
+  useEffect(() => {
+    if (!isOpen || !requirementQuestion) return
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        requirementQuestion.refresh()
+      }
+    }
+
+    document.addEventListener("visibilitychange", onVisibilityChange)
+    return () => document.removeEventListener("visibilitychange", onVisibilityChange)
+  }, [isOpen, requirementQuestion])
+
   const onSubmit = async (data: IRequirementQuestionForm) => {
     const field = data.requirementsAttributes[0]
     if (!data.name?.trim() || !field?.label?.trim() || !field?.inputType) {
