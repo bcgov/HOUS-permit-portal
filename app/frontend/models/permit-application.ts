@@ -281,15 +281,20 @@ export const PermitApplicationModel = types.snapshotProcessor(
             self.latestSubmissionVersion.submissionData
           )
         }
-        const changedMarkedFormJson = combineChangeMarkers(
-          diffColoredFormJson,
-          self.isSubmitted || self.isViewingPastRequests,
-          changedKeys
-        )
-        const revisionModeFormJson =
-          self.revisionMode || self.isRevisionsRequested
-            ? combineRevisionButtons(changedMarkedFormJson, self.isSubmitted, revisionRequestsToUse)
-            : changedMarkedFormJson // Use changedMarkedFormJson if not in revision mode
+        // Review staff on revisions_requested: lock fields the same way in_review does via
+        // isSubmitted. Submitters must still edit on the edit screen.
+        const disableRequirementFields =
+          self.isSubmitted ||
+          self.isViewingPastRequests ||
+          (self.isRevisionsRequested && !!self.rootStore.userStore.currentUser?.isReviewStaff)
+        const changedMarkedFormJson = combineChangeMarkers(diffColoredFormJson, disableRequirementFields, changedKeys)
+        // Review staff: buttons only after "View revision requests" (revisionMode).
+        // Submitters: always show while revisions are outstanding (sidebar is always open).
+        const showRevisionButtons =
+          self.revisionMode || (self.isRevisionsRequested && !self.rootStore.userStore.currentUser?.isReviewStaff)
+        const revisionModeFormJson = showRevisionButtons
+          ? combineRevisionButtons(changedMarkedFormJson, self.isSubmitted, revisionRequestsToUse)
+          : changedMarkedFormJson
 
         return revisionModeFormJson
       },

@@ -10,7 +10,7 @@ import {
   ITemplateVersionDiff,
 } from "../types/types"
 import { formatFileSize, getFileExtension } from "./file-utils"
-import { isNonRequirementKey } from "./formio-helpers"
+import { isNonRequirementKey, isRequirementInputComponent } from "./formio-helpers"
 import { escapeForSingleQuotedJsString } from "./utility-functions"
 
 const findComponentsByType = (components, type) => {
@@ -362,10 +362,12 @@ export const combineChangeMarkers = (formJson: IFormJson, isInReview: boolean, c
       for (let i = 0; i < block.components.length; i++) {
         const requirement = block.components[i]
         requirement.disabled ||= isInReview
-        if (section.id === COMPLETTION_SECTION_ID || !changedKeys.includes(requirement.key)) continue
+        if (section.id === COMPLETTION_SECTION_ID) continue
+        if (!isRequirementInputComponent(requirement)) continue
+        if (!changedKeys.includes(requirement.key)) continue
 
         const changeMarker = convertToChangeMarker(requirement)
-        // Insert the revision button before the current requirement
+        // Insert the change marker before the current requirement
         block.components.splice(i, 0, changeMarker)
         // Move the index to the next requirement to skip the newly added marker
         i++

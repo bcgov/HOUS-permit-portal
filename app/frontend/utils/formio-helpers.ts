@@ -14,9 +14,20 @@ export const singleRequirementFormJson = (requirementJson: IFormIORequirement): 
 }
 
 export const isNonRequirementKey = (key: string) => {
+  if (!key) return true
   const nonRequirementSuffixes = ["revision-button", "change-marker"]
+  if (nonRequirementSuffixes.some((suf) => key.endsWith(suf))) return true
+  // Injected jurisdiction resources (link/document buttons + labels)
+  if (key.includes("-resource-")) return true
+  return false
+}
 
-  return nonRequirementSuffixes.some((suf) => key.endsWith(suf))
+/** True for actual answered fields — not content, resource buttons, documents chrome, etc. */
+export const isRequirementInputComponent = (requirement: { key?: string; type?: string; input?: boolean }) => {
+  if (isNonRequirementKey(requirement?.key)) return false
+  if (!requirement?.input) return false
+  if (requirement.type === "button" || requirement.type === "content") return false
+  return true
 }
 
 export const singleRequirementSubmissionData = (submissionData: any, requirementKey: string) => {
