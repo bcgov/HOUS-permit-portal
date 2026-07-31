@@ -45,8 +45,39 @@ class RequirementQuestionBlueprint < Blueprinter::Base
 
   view :extended do
     field :requirement_blocks do |requirement_question|
-      requirement_question.requirement_blocks.distinct.map do |block|
-        { id: block.id, name: block.name }
+      blocks =
+        requirement_question
+          .requirement_blocks
+          .kept
+          .distinct
+          .includes(
+            requirement_template_sections: {
+              requirement_template: :template_category
+            }
+          )
+          .sort_by { |block| block.name.to_s.downcase }
+
+      blocks.map do |block|
+        templates =
+          block
+            .requirement_template_sections
+            .filter_map(&:requirement_template)
+            .select(&:kept?)
+            .uniq(&:id)
+            .sort_by { |rt| rt.nickname.to_s.downcase }
+
+        {
+          id: block.id,
+          name: block.name,
+          requirement_templates:
+            templates.map do |rt|
+              {
+                id: rt.id,
+                nickname: rt.nickname,
+                template_category_label: rt.template_category&.label
+              }
+            end
+        }
       end
     end
   end
