@@ -26,14 +26,14 @@ const COMPACT_PREVIEW_COUNT = 3
 
 type TViewMode = "hierarchy" | "compact"
 
+const requirementBlockEditHref = (blockId: string) => `/requirements-library?openRequirementBlockId=${blockId}`
+
 interface IQuestionUsageSectionProps {
   linkedBlocks: TQuestionUsageBlock[]
-  onOpenRequirementBlock: (blockId: string) => void
 }
 
 export const QuestionUsageSection = observer(function QuestionUsageSection({
   linkedBlocks,
-  onOpenRequirementBlock,
 }: IQuestionUsageSectionProps) {
   const { t } = useTranslation()
   const [viewMode, setViewMode] = useState<TViewMode>("hierarchy")
@@ -156,17 +156,7 @@ export const QuestionUsageSection = observer(function QuestionUsageSection({
                                 <Icon as={isExpanded ? CaretDown : CaretRight} boxSize={4} />
                               </Button>
                             )}
-                            <Button
-                              variant={"link"}
-                              onClick={() => onOpenRequirementBlock(block.id)}
-                              whiteSpace={"normal"}
-                              textAlign={"left"}
-                              height={"auto"}
-                              fontWeight={"normal"}
-                              fontSize={"sm"}
-                            >
-                              {block.name}
-                            </Button>
+                            <BlockLink blockId={block.id} name={block.name} />
                             <Text fontSize={"xs"} color={"text.secondary"} flexShrink={0}>
                               {t("questionBank.modals.usage.usedInTemplates", { count: templates.length })}
                             </Text>
@@ -215,17 +205,7 @@ export const QuestionUsageSection = observer(function QuestionUsageSection({
                           py={3}
                         >
                           <HStack spacing={2} alignItems={"center"} flexWrap={"wrap"}>
-                            <Button
-                              variant={"link"}
-                              onClick={() => onOpenRequirementBlock(block.id)}
-                              whiteSpace={"normal"}
-                              textAlign={"left"}
-                              height={"auto"}
-                              fontWeight={"normal"}
-                              fontSize={"sm"}
-                            >
-                              {block.name}
-                            </Button>
+                            <BlockLink blockId={block.id} name={block.name} />
                             <Text fontSize={"xs"} color={"text.secondary"}>
                               {t("questionBank.modals.usage.usedInTemplates", { count: templates.length })}
                             </Text>
@@ -281,6 +261,26 @@ export const QuestionUsageSection = observer(function QuestionUsageSection({
     </Box>
   )
 })
+
+function BlockLink({ blockId, name }: { blockId: string; name: string }) {
+  return (
+    <Link
+      href={requirementBlockEditHref(blockId)}
+      isExternal
+      display={"inline-flex"}
+      alignItems={"center"}
+      gap={1.5}
+      fontSize={"sm"}
+      color={"text.link"}
+      whiteSpace={"normal"}
+      textAlign={"left"}
+      fontWeight={"normal"}
+    >
+      <Text as={"span"}>{name}</Text>
+      <ArrowSquareOut size={14} />
+    </Link>
+  )
+}
 
 function TemplateLink({ template, showSecondary }: { template: TQuestionUsageTemplate; showSecondary?: boolean }) {
   const label = template.nickname || template.id

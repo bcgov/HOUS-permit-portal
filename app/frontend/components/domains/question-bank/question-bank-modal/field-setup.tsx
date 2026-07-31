@@ -4,12 +4,10 @@ import React, { useState } from "react"
 import { useFieldArray, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { TQuestionUsageBlock } from "../../../../models/requirement-question"
-import { useMst } from "../../../../setup/root"
 import { IRequirementAttributes } from "../../../../types/api-request"
 import { ERequirementType } from "../../../../types/enums"
 import { isMultiOptionRequirement } from "../../../../utils/utility-functions"
 import { FieldsSetupDrawer } from "../../requirements-library/fields-setup-drawer"
-import { RequirementsBlockModal } from "../../requirements-library/requirements-block-modal"
 import { RequirementFieldRow } from "../../requirements-library/requirements-block-modal/requirement-field-row"
 import { IRequirementQuestionForm } from "./index"
 import { QuestionUsageSection } from "./question-usage-section"
@@ -29,7 +27,6 @@ export const FieldSetup = observer(function FieldSetup({
   isPersisted: boolean
 }) {
   const { t } = useTranslation()
-  const { requirementBlockStore } = useMst()
   const { control, watch } = useFormContext<IRequirementQuestionForm>()
   const { fields, append, remove } = useFieldArray({
     control,
@@ -37,11 +34,9 @@ export const FieldSetup = observer(function FieldSetup({
   })
 
   const [requirementIdToEdit, setRequirementIdToEdit] = useState<string | undefined>()
-  const [blockViewer, setBlockViewer] = useState<{ id: string; key: number } | null>(null)
   const watchedRequirements = watch("requirementsAttributes")
   const hasFields = fields.length > 0
   const linkedBlocks = requirementBlocks ?? []
-  const viewingBlock = blockViewer ? requirementBlockStore.getRequirementBlockById(blockViewer.id) : undefined
 
   const toggleRequirementToEdit = (requirementId: string) => {
     setRequirementIdToEdit((pastRequirementId) => (pastRequirementId === requirementId ? undefined : requirementId))
@@ -80,13 +75,6 @@ export const FieldSetup = observer(function FieldSetup({
     setRequirementIdToEdit(undefined)
   }
 
-  const openRequirementBlock = async (blockId: string) => {
-    const block = await requirementBlockStore.fetchRequirementBlock(blockId)
-    if (block) {
-      setBlockViewer({ id: blockId, key: Date.now() })
-    }
-  }
-
   return (
     <Flex as={"section"} flexDir={"column"} flex={1} h={"full"} alignItems={"flex-start"} minW={0}>
       <Text color={"text.primary"} fontSize={"sm"}>
@@ -122,17 +110,7 @@ export const FieldSetup = observer(function FieldSetup({
         </Box>
       </Box>
 
-      <QuestionUsageSection linkedBlocks={linkedBlocks} onOpenRequirementBlock={openRequirementBlock} />
-
-      {blockViewer && viewingBlock && (
-        <RequirementsBlockModal
-          key={blockViewer.key}
-          requirementBlock={viewingBlock}
-          isEditable={false}
-          autoOpen
-          triggerButtonProps={{ display: "none" }}
-        />
-      )}
+      <QuestionUsageSection linkedBlocks={linkedBlocks} />
     </Flex>
   )
 })
