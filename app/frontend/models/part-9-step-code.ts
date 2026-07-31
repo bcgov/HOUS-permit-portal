@@ -90,10 +90,13 @@ export const Part9StepCodeModel = types.snapshotProcessor(
     preProcessor(snapshot: any) {
       const processed = { ...snapshot }
       if (Array.isArray(processed.checklists)) {
-        const map = processed.checklists.reduce((acc: Record<string, any>, checklist: any) => {
-          if (checklist && checklist.id) acc[checklist.id] = checklist
-          return acc
-        }, {})
+        // Deep-merge each checklist so PA/list payloads (summary fields only) do not
+        // wipe extended client state (complianceReports, dataEntries, isLoaded).
+        const map: Record<string, any> = { ...(processed.checklistsMap || {}) }
+        processed.checklists.forEach((checklist: any) => {
+          if (!checklist?.id) return
+          map[checklist.id] = { ...(map[checklist.id] || {}), ...checklist }
+        })
         processed.checklistsMap = map
         delete processed.checklists
       } else if (processed.checklistsMap == null) {

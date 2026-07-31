@@ -64,8 +64,12 @@ export const TextFormControl = (props: IInputFormControlProps) => {
       ...inputProps,
     },
     validate: {
-      satisfiesLength: (str) =>
-        (!props.required && !str) || (str?.length >= 1 && str?.length <= effectiveMax) || t("ui.invalidInput"),
+      // Values may arrive as numbers (e.g. H2K-populated building characteristics).
+      satisfiesLength: (value) => {
+        if (!props.required && (value === null || value === undefined || value === "")) return true
+        const str = String(value)
+        return (str.length >= 1 && str.length <= effectiveMax) || t("ui.invalidInput")
+      },
       ...validate,
     },
   }
@@ -115,9 +119,10 @@ export const UrlFormControl = (props: IInputFormControlProps) => {
 }
 
 export const NumberFormControl = (props: IInputFormControlProps) => {
+  // step "any" accepts H2K-sourced values with >2 decimal places (e.g. 34.9241 L/s).
   return (
     <InputFormControl
-      {...(R.mergeDeepRight({ inputProps: { type: "number", step: 0.01 } }, props) as IInputFormControlProps)}
+      {...(R.mergeDeepRight({ inputProps: { type: "number", step: "any" } }, props) as IInputFormControlProps)}
     />
   )
 }
