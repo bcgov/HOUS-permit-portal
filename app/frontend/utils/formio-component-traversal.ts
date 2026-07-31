@@ -10,7 +10,12 @@ import {
   ITemplateVersionDiff,
 } from "../types/types"
 import { formatFileSize, getFileExtension } from "./file-utils"
-import { isNonRequirementKey, isRequirementInputComponent } from "./formio-helpers"
+import {
+  ENERGY_STEP_CODE_METHOD_REQUIREMENT_CODE,
+  isNonRequirementKey,
+  isRequirementInputComponent,
+  keyHasRequirementCode,
+} from "./formio-helpers"
 import { escapeForSingleQuotedJsString } from "./utility-functions"
 
 const findComponentsByType = (components, type) => {
@@ -65,13 +70,31 @@ export const getNestedComponentsIncomplete = (components) => {
   return invalidComponents
 }
 
-export const getCompletedBlocksFromForm = (rootComponent) => {
+const findEnergyStepCodeMethodValue = (components): "tool" | "file" | null => {
+  for (const comp of components || []) {
+    const key = comp?.component?.key || comp?.key
+    if (keyHasRequirementCode(key, ENERGY_STEP_CODE_METHOD_REQUIREMENT_CODE)) {
+      const value = typeof comp?.getValue === "function" ? comp.getValue() : comp?.dataValue
+      if (value === "tool" || value === "file") return value
+    }
+    const nested = findEnergyStepCodeMethodValue(comp?.components)
+    if (nested) return nested
+  }
+  return null
+}
+
+export const getCompletedBlocksFromForm = (rootComponent, options?: { isStepCodeComplete?: boolean }) => {
   const blocksList = findPanelComponents(rootComponent.components)
   let completedBlocks = {}
   blocksList.forEach((panelComponent) => {
     const incompleteComponents = getNestedComponentsIncomplete(panelComponent.components)
 
-    const complete = incompleteComponents.length == 0 //if there are any components with errors OR required fields with no value
+    // Digital tool field is a button container (input:false) so Form.io never marks it incomplete.
+    // When method is "tool", section completion must follow the selected stage checklist instead.
+    const toolSelected = findEnergyStepCodeMethodValue(panelComponent.components) === "tool"
+    const toolIncomplete = toolSelected && options?.isStepCodeComplete === false
+
+    const complete = incompleteComponents.length == 0 && !toolIncomplete
 
     return (completedBlocks[panelComponent?.component?.key] = complete)
   })

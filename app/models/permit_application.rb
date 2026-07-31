@@ -663,6 +663,31 @@ class PermitApplication < ApplicationRecord
       end
   end
 
+  # Value of the Energy Step Code method radio: "tool" | "file" | nil
+  def energy_step_code_method
+    data = submission_data&.dig("data") || {}
+    data.each_value do |section|
+      next unless section.is_a?(Hash)
+
+      section.each do |key, value|
+        unless key.to_s.end_with?(
+                 "|#{Requirement::ENERGY_STEP_CODE_SELECT_REQUIREMENT_CODE}"
+               ) ||
+                 key.to_s ==
+                   Requirement::ENERGY_STEP_CODE_SELECT_REQUIREMENT_CODE
+          next
+        end
+
+        return value if value == "tool" || value == "file"
+      end
+    end
+    nil
+  end
+
+  def using_digital_energy_step_code_tool?
+    energy_step_code_method == "tool"
+  end
+
   def self.stats_by_template_jurisdiction_and_status
     sv_min =
       SubmissionVersion.select(

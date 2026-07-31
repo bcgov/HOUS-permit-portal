@@ -31,6 +31,7 @@ RSpec.describe PdfGenerationJob, type: :job do
     allow(PermitApplication).to receive(:find).with("pa1").and_return(
       permit_application
     )
+    allow(permit_application).to receive(:step_code).and_return(nil)
 
     submission_version =
       instance_double(
@@ -104,6 +105,7 @@ RSpec.describe PdfGenerationJob, type: :job do
     allow(PermitApplication).to receive(:find).with("pa1").and_return(
       permit_application
     )
+    allow(permit_application).to receive(:step_code).and_return(nil)
 
     submission_version =
       instance_double(

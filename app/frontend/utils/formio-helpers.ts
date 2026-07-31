@@ -22,6 +22,33 @@ export const isNonRequirementKey = (key: string) => {
   return false
 }
 
+export const ENERGY_STEP_CODE_METHOD_REQUIREMENT_CODE = "energy_step_code_method"
+
+export const keyHasRequirementCode = (key: string | undefined | null, requirementCode: string) => {
+  if (!key) return false
+  return key === requirementCode || key.endsWith(`|${requirementCode}`) || key.includes(`|${requirementCode}|`)
+}
+
+/** Selected Energy Step Code method from form submission section data ("tool" | "file"). */
+export const getEnergyStepCodeMethodFromData = (
+  data: Record<string, any> | null | undefined
+): "tool" | "file" | null => {
+  if (!data) return null
+
+  for (const section of Object.values(data)) {
+    if (!section || typeof section !== "object") continue
+    for (const [key, value] of Object.entries(section)) {
+      if (
+        keyHasRequirementCode(key, ENERGY_STEP_CODE_METHOD_REQUIREMENT_CODE) &&
+        (value === "tool" || value === "file")
+      ) {
+        return value
+      }
+    }
+  }
+  return null
+}
+
 /** True for actual answered fields — not content, resource buttons, documents chrome, etc. */
 export const isRequirementInputComponent = (requirement: { key?: string; type?: string; input?: boolean }) => {
   if (isNonRequirementKey(requirement?.key)) return false

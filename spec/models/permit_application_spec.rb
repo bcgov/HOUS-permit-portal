@@ -183,14 +183,28 @@ RSpec.describe PermitApplication, type: :model do
     end
 
     describe "submission snapshot" do
-      it "snapshots the permit-pinned checklist" do
+      def submission_data_with_method(method)
+        {
+          "data" => {
+            "sectionabc" => {
+              "formSubmissionDataRSTsectionabc|RBxyz|energy_step_code_method" =>
+                method
+            }
+          }
+        }
+      end
+
+      it "snapshots the permit-pinned checklist when method is the digital tool" do
         permit_application = create(:permit_application)
         step_code =
           create(:part_3_step_code, permit_application: permit_application)
         pre_construction = step_code.pre_construction_checklist
         create(:part_3_checklist, step_code: step_code, stage: :as_built)
         step_code.update!(current_stage: "as_built")
-        permit_application.update!(step_code_stage: "pre_construction")
+        permit_application.update!(
+          step_code_stage: "pre_construction",
+          submission_data: submission_data_with_method("tool")
+        )
 
         allow(permit_application).to receive(
           :zip_and_upload_supporting_documents
@@ -206,6 +220,83 @@ RSpec.describe PermitApplication, type: :model do
           permit_application.submission_versions.last.step_code_checklist_json
         expect(snapshot["id"]).to eq(pre_construction.id)
         expect(snapshot["stage"]).to eq("pre_construction")
+      end
+
+      it "does not snapshot the checklist when method is file upload" do
+        permit_application = create(:permit_application)
+        create(:part_3_step_code, permit_application: permit_application)
+        permit_application.update!(
+          submission_data: submission_data_with_method("file")
+        )
+
+        allow(permit_application).to receive(
+          :zip_and_upload_supporting_documents
+        )
+        allow(permit_application).to receive(:send_submit_notifications)
+        allow(permit_application).to receive(:form_json).and_return(
+          { "components" => [] }
+        )
+
+        permit_application.send(:handle_submission)
+
+        expect(
+          permit_application.submission_versions.last.step_code_checklist_json
+        ).to be_blank
+      end
+    end
+
+    describe "#energy_step_code_method" do
+      it "reads tool or file from submission data" do
+        permit_application =
+          create(
+            :permit_application,
+            submission_data: {
+              "data" => {
+                "section1" => {
+                  "formSubmissionDataRSTsection1|RB1|energy_step_code_method" =>
+                    "tool"
+                }
+              }
+            }
+          )
+
+        expect(permit_application.energy_step_code_method).to eq("tool")
+        expect(permit_application.using_digital_energy_step_code_tool?).to be(
+          true
+        )
+      end
+    end
+
+    describe "#can_submit?" do
+      it "is false when digital tool method is selected but step code is incomplete" do
+        permit_application =
+          create(
+            :permit_application,
+            submission_data: {
+              "data" => {
+                "section-completion-key" => {
+                  "signed" => true
+                },
+                "section1" => {
+                  "formSubmissionDataRSTsection1|RB1|energy_step_code_method" =>
+                    "tool"
+                }
+              }
+            }
+          )
+        create(:part_3_step_code, permit_application: permit_application)
+        allow(permit_application).to receive(:inbox_enabled?).and_return(true)
+        allow(permit_application).to receive(
+          :template_version_disabled_by_jurisdiction?
+        ).and_return(false)
+        allow(permit_application).to receive(
+          :using_current_template_version
+        ).and_return(true)
+        allow(permit_application).to receive(:step_code_complete?).and_return(
+          false
+        )
+
+        expect(permit_application.can_submit?).to be(false)
       end
     end
   end

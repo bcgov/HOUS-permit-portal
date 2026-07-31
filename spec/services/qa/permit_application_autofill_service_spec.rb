@@ -71,4 +71,29 @@ RSpec.describe Qa::PermitApplicationAutofillService do
       ).to eq(1)
     end
   end
+
+  it "prefers file for energy_step_code_method since autofill uploads report files" do
+    service =
+      described_class.new(
+        permit_application: permit_application,
+        current_user: user
+      )
+
+    value =
+      service.send(
+        :select_value,
+        {
+          "key" => "section-a|RBblock|energy_step_code_method",
+          "values" => [
+            {
+              "label" => "Utilizing the digital Step Code tool",
+              "value" => "tool"
+            },
+            { "label" => "By file upload", "value" => "file" }
+          ]
+        }
+      )
+
+    expect(value).to eq("file")
+  end
 end

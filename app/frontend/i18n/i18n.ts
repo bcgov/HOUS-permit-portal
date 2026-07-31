@@ -2077,6 +2077,8 @@ Thank you,
             fullAddress: "Full address",
             pidPin: "PID / PIN",
             clickToWriteNickname: "Click to write a custom name",
+            stepCodeToolIncomplete:
+              "Complete the digital Step Code tool for the selected Energy Step Code method before submitting",
           },
           show: {
             wasSubmitted: "Application was submitted on {{ date }} to {{ jurisdictionName }}",

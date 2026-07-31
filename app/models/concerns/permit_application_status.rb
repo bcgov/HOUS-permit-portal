@@ -186,6 +186,9 @@ module PermitApplicationStatus
     def can_submit?
       return false unless inbox_enabled? || sandbox.present?
       return false if template_version_disabled_by_jurisdiction?
+      if using_digital_energy_step_code_tool? && !step_code_complete?
+        return false
+      end
 
       signed =
         submission_data.dig("data", "section-completion-key", "signed").present?
@@ -218,12 +221,15 @@ module PermitApplicationStatus
       update(signed_off_at: Time.current)
 
       checklist = step_code_checklist
+      # Only snapshot / generate digital checklist PDF when the selected method is the tool
+      snapshot_checklist =
+        checklist.present? && using_digital_energy_step_code_tool?
       submission_versions.create!(
         form_json: self.form_json,
         submission_data: self.submission_data,
         step_code_checklist_json:
           (
-            if checklist.present?
+            if snapshot_checklist
               step_code.checklist_blueprint.render_as_hash(
                 checklist,
                 view: :extended
