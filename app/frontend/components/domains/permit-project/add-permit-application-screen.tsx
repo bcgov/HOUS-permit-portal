@@ -57,6 +57,7 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
   )
   const shouldOfferProjectMeetingAfterAdd =
     selectedTemplatesRequireProjectMeeting &&
+    !currentPermitProject?.activeProjectMeeting &&
     siteConfigurationStore.projectMeetingsEnabled &&
     (currentPermitProject?.jurisdiction?.projectMeetingsEnabled ?? false)
 
