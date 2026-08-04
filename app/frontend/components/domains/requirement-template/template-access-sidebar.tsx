@@ -88,7 +88,7 @@ export const TemplateAccessSidebar = observer(function TemplateAccessSidebar({
   return (
     <Drawer isOpen={isOpen} placement="right" onClose={onClose} size="md">
       <DrawerOverlay />
-      <DrawerContent pt="var(--app-navbar-height)">
+      <DrawerContent pt="var(--app-navbar-offset)">
         <DrawerCloseButton />
         <DrawerHeader borderBottomWidth="1px">
           <VStack align="start" spacing={1}>

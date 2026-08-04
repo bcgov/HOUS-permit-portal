@@ -39,12 +39,28 @@ $error: #d9292f;
 
 html {
   --app-navbar-height: 58px;
+  // Vertical space the navbar currently occupies at the top of the viewport. Anything
+  // pinned below the navbar, or sized against the space left over by it, reads this
+  // rather than --app-navbar-height so it follows the bar as it peeks in and out.
+  --app-navbar-offset: var(--app-navbar-height);
+  --app-navbar-transition: 180ms ease-in-out;
+  scroll-padding-top: var(--app-navbar-height);
   --app-sidebar-width: 368px;
   --app-sidebar-remaining-width: calc(100vw - var(--app-sidebar-width));
   --app-permit-form-right-white-space: 170px; // space for floating greyButtons
   --app-permit-grey-controlbar-height: 72px;
   --app-permit-fieldset-right-white-space: 140px;
   --app-permit-input-field-short: 339px;
+}
+
+html[data-navbar-hidden="true"] {
+  --app-navbar-offset: 0px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    --app-navbar-transition: 0ms;
+  }
 }
 
 // Uncomment this for debugging purposes
