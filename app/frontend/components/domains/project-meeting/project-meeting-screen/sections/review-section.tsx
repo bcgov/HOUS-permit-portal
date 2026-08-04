@@ -46,7 +46,7 @@ export const ReviewSection = observer(({ meeting }: ReviewSectionProps) => {
   const submit = async () => {
     const response = await projectMeetingStore.submitProjectMeeting(permitProjectId, meeting.id)
     if (response.ok) {
-      navigate(`/projects/${permitProjectId}/meetings/${meeting.id}/sent`)
+      navigate(`/projects/${permitProjectId}/meetings/${meeting.id}/sent`, { replace: true })
     } else {
       uiStore.flashMessage.show(EFlashMessageStatus.error, null, t("projectMeeting.validation.submitError"), 5000)
     }
