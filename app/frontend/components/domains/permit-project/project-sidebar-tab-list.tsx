@@ -1,5 +1,6 @@
 import { Badge, Box, BoxProps, Flex, Icon, Tab, TabList, Text, VStack } from "@chakra-ui/react"
 import React from "react"
+import { stickyBelowNavBar } from "../../../styles/nav-bar-offset"
 
 // THS COMPOENENT MUST BE USED INSIDE OF A TABS COMPONENT
 // https://v2.chakra-ui.com/docs/components/tabs/usage
@@ -13,11 +14,10 @@ export interface ITabItem {
 }
 
 interface IProjectSidebarTabListProps extends BoxProps {
-  top?: number | string
   tabsData?: ITabItem[]
 }
 
-export const ProjectSidebarTabList = ({ top = 0, tabsData, children, ...rest }: IProjectSidebarTabListProps) => {
+export const ProjectSidebarTabList = ({ tabsData, children, ...rest }: IProjectSidebarTabListProps) => {
   const navHeight = document.getElementById("mainNav")?.offsetHeight
 
   return (
@@ -27,8 +27,8 @@ export const ProjectSidebarTabList = ({ top = 0, tabsData, children, ...rest }: 
       borderRight="1px"
       borderColor="border.light"
       position="sticky"
-      top={top}
-      h="100vh"
+      {...stickyBelowNavBar()}
+      h="calc(100vh - var(--app-navbar-offset))"
       alignSelf="flex-start"
       pb={navHeight}
       as={tabsData ? TabList : "div"}

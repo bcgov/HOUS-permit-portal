@@ -6,6 +6,7 @@ import React from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { useLocation } from "react-router-dom"
 import { PopoverProvider, useNotificationPopover } from "../../../hooks/use-notification-popover"
+import { useScrollAwareNavBar } from "../../../hooks/use-scroll-aware-nav-bar"
 import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
 import { INotification, IPermitNotificationObjectData } from "../../../types/types"
@@ -16,9 +17,6 @@ import { NotificationsPopover } from "../home/notifications/notifications-popove
 import { NavBarMenu } from "./nav-bar-menu"
 import { RegionalRMJurisdictionSelect } from "./regional-rm-jurisdiction-select"
 import { SubNavBar } from "./sub-nav-bar"
-
-import { OverheatingCodeNavBar } from "../overheating-code/overheating-code-nav-bar"
-import { PreCheckNavBar } from "../pre-check/pre-check-nav-bar"
 
 function isTemplateEditPath(path: string): boolean {
   const regex = /^\/requirement-templates\/([a-f\d-]+)\/edit$/
@@ -108,11 +106,6 @@ function isOverheatingCodePath(path: string): boolean {
   return regex.test(path)
 }
 
-function isOverheatingCodeSubPath(path: string): boolean {
-  const regex = /^\/overheating-codes\/[a-f\d-]+/
-  return regex.test(path)
-}
-
 function isWelcomePath(path: string): boolean {
   const regex = /^\/welcome/
   return regex.test(path)
@@ -156,17 +149,7 @@ function shouldHideSubNavbarForPath(path: string): boolean {
 }
 
 export const NavBar = observer(function NavBar() {
-  const location = useLocation()
-  const { siteConfigurationStore } = useMst()
-  const path = location.pathname
-
-  if (isPreCheckPath(path)) {
-    return <PreCheckNavBar />
-  }
-
-  if (siteConfigurationStore.overheatingToolEnabled && isOverheatingCodeSubPath(path)) {
-    return <OverheatingCodeNavBar />
-  }
+  useScrollAwareNavBar()
 
   return (
     <PopoverProvider>
@@ -198,7 +181,10 @@ const NavBarContent = observer(function NavBarContent() {
         color={currentUser?.isSubmitter || !loggedIn ? "theme.blue" : "greys.white"}
         zIndex={1500}
         shadow="elevations.elevation01"
-        position="relative"
+        position="sticky"
+        top={0}
+        transform="translateY(calc(var(--app-navbar-offset) - var(--app-navbar-height)))"
+        transition="transform var(--app-navbar-transition)"
       >
         <Container maxW="container.lg" p={2} px={{ base: 4, md: 8 }}>
           <Flex align="center" gap={2} w="full">
