@@ -11,15 +11,15 @@ export type TEditableInstructionsTextProps<TFieldValues extends FieldValues> = T
 export function EditableInstructionsText<TFieldValues extends FieldValues>({
   controlProps,
   defaultValue,
-  usesSharedQuestion = false,
+  usesBankQuestion = false,
   isQuestionBankDefault = false,
 }: TEditableInstructionsTextProps<TFieldValues>) {
   const {
     field: { onChange, value },
   } = useController({ ...controlProps })
   const { t } = useTranslation()
-  const isUsingSharedDefault = usesSharedQuestion && value == null
-  const htmlValue = (isUsingSharedDefault ? defaultValue : value) ?? ""
+  const isUsingBankDefault = usesBankQuestion && value == null
+  const htmlValue = (isUsingBankDefault ? defaultValue : value) ?? ""
 
   return (
     <Box>
@@ -33,10 +33,10 @@ export function EditableInstructionsText<TFieldValues extends FieldValues>({
           </Tooltip>
         </HStack>
       )}
-      {usesSharedQuestion && (
+      {usesBankQuestion && (
         <Text fontSize={"xs"} mb={1} color={"text.secondary"}>
           {t(
-            isUsingSharedDefault
+            isUsingBankDefault
               ? "requirementsLibrary.modals.usingSharedDefault"
               : "requirementsLibrary.modals.customizedForBlock"
           )}
@@ -51,7 +51,7 @@ export function EditableInstructionsText<TFieldValues extends FieldValues>({
         htmlValue={htmlValue}
         onChange={onChange}
         onRemove={
-          usesSharedQuestion && !isUsingSharedDefault
+          usesBankQuestion && !isUsingBankDefault
             ? (setEditMode) => {
                 onChange(null)
                 setEditMode(false)
@@ -64,7 +64,7 @@ export function EditableInstructionsText<TFieldValues extends FieldValues>({
             {t(
               isQuestionBankDefault
                 ? "questionBank.modals.addDefaultInstructions"
-                : usesSharedQuestion
+                : usesBankQuestion
                   ? "requirementsLibrary.modals.addCustomInstructions"
                   : "requirementsLibrary.modals.addInstructions"
             )}
@@ -73,7 +73,7 @@ export function EditableInstructionsText<TFieldValues extends FieldValues>({
         editText={t(
           isQuestionBankDefault
             ? "questionBank.modals.editDefaultInstructions"
-            : isUsingSharedDefault
+            : isUsingBankDefault
               ? "requirementsLibrary.modals.customizeInstructions"
               : "requirementsLibrary.modals.editInstructionsLabel"
         )}

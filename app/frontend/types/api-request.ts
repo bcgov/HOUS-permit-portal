@@ -47,7 +47,6 @@ export interface IRequirementAttributes {
   hint?: string | null
   instructions?: string | null
   requirementQuestionId?: string | null
-  usesSharedQuestion?: boolean
   defaultHint?: string | null
   defaultInstructions?: string | null
   required?: boolean

@@ -11,15 +11,15 @@ export type TEditableHelperTextProps<TFieldValues extends FieldValues> = TEditab
 export function EditableHelperText<TFieldValues extends FieldValues>({
   controlProps,
   defaultValue,
-  usesSharedQuestion = false,
+  usesBankQuestion = false,
   isQuestionBankDefault = false,
 }: TEditableHelperTextProps<TFieldValues>) {
   const {
     field: { onChange, value },
   } = useController(controlProps)
   const { t } = useTranslation()
-  const isUsingSharedDefault = usesSharedQuestion && value == null
-  const htmlValue = (isUsingSharedDefault ? defaultValue : value) ?? ""
+  const isUsingBankDefault = usesBankQuestion && value == null
+  const htmlValue = (isUsingBankDefault ? defaultValue : value) ?? ""
 
   return (
     <Box>
@@ -33,10 +33,10 @@ export function EditableHelperText<TFieldValues extends FieldValues>({
           </Tooltip>
         </HStack>
       )}
-      {usesSharedQuestion && (
+      {usesBankQuestion && (
         <Text fontSize={"xs"} mb={1} color={"text.secondary"}>
           {t(
-            isUsingSharedDefault
+            isUsingBankDefault
               ? "requirementsLibrary.modals.usingSharedDefault"
               : "requirementsLibrary.modals.customizedForBlock"
           )}
@@ -51,7 +51,7 @@ export function EditableHelperText<TFieldValues extends FieldValues>({
         htmlValue={htmlValue}
         onChange={onChange}
         onRemove={
-          usesSharedQuestion && !isUsingSharedDefault
+          usesBankQuestion && !isUsingBankDefault
             ? (setEditMode) => {
                 onChange(null)
                 setEditMode(false)
@@ -64,7 +64,7 @@ export function EditableHelperText<TFieldValues extends FieldValues>({
             {t(
               isQuestionBankDefault
                 ? "questionBank.modals.addDefaultHelpText"
-                : usesSharedQuestion
+                : usesBankQuestion
                   ? "requirementsLibrary.modals.addCustomHelpText"
                   : "requirementsLibrary.modals.addHelpText"
             )}
@@ -73,7 +73,7 @@ export function EditableHelperText<TFieldValues extends FieldValues>({
         editText={t(
           isQuestionBankDefault
             ? "questionBank.modals.editDefaultHelpText"
-            : isUsingSharedDefault
+            : isUsingBankDefault
               ? "requirementsLibrary.modals.customizeHelpText"
               : "requirementsLibrary.modals.editHelpTextLabel"
         )}

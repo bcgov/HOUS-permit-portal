@@ -8,7 +8,6 @@ export const RequirementModel = types
     label: types.string,
     requirementCode: types.string,
     requirementQuestionId: types.maybeNull(types.string),
-    usesSharedQuestion: types.optional(types.boolean, false),
     hint: types.maybeNull(types.string),
     instructions: types.maybeNull(types.string),
     defaultHint: types.maybeNull(types.string),
