@@ -30,7 +30,7 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
   const { userStore, templateVersionStore, requirementTemplateStore } = useMst()
   const {
     rootContainerRef: rightContainerRef,
-    sectionRefs,
+    setSectionRef,
     sectionIdToHighlight: currentSectionId,
   } = useSectionHighlight({ sections: denormalizedTemplate?.requirementTemplateSections })
   const [isCollapsedAll, setIsCollapsedAll] = useState(false)
@@ -254,9 +254,5 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
 
   function builderBlockPath(requirementBlockId: string) {
     return `/requirement-templates/${requirementTemplateId}/edit?openRequirementBlockId=${requirementBlockId}`
-  }
-
-  function setSectionRef(el: HTMLElement, id: string) {
-    sectionRefs.current[id] = el
   }
 })
