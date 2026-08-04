@@ -2317,12 +2317,12 @@ Thank you,
           hasAutomatedCompliance: "Has automated compliance",
           inputNotSupported: "Input type not yet supported",
           associationsInfo: "Sections, tags, etc...",
-          sharedQuestions: {
+          bankQuestions: {
             addQuestion: "Add question",
             addFormField: "Add form field",
             addQuestionsTitle: "Add one or more questions",
-            sharedQuestion: "Question Bank",
-            viewQuestionInQuestionBank: "View question in question bank",
+            bankLinked: "Question Bank",
+            openInQuestionBank: "Open in Question Bank",
             detach: "Detach and edit locally",
           },
 

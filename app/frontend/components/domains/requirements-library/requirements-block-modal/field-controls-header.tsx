@@ -18,9 +18,9 @@ interface IProps {
   requirementType: ERequirementType
   requirementCode: string
   onRemove: IRequirementOptionsMenu["onRemove"]
-  onDetachSharedQuestion?: IRequirementOptionsMenu["onDetachSharedQuestion"]
-  onOpenSharedQuestion?: IRequirementOptionsMenu["onOpenSharedQuestion"]
-  isSharedQuestion?: boolean
+  onDetachBankQuestion?: IRequirementOptionsMenu["onDetachBankQuestion"]
+  onOpenBankQuestion?: IRequirementOptionsMenu["onOpenBankQuestion"]
+  isBankLinked?: boolean
   disabledMenuOptions?: IRequirementOptionsMenu["disabledOptions"]
   hideConditional?: boolean
   hidePlacementConfiguration?: boolean
@@ -43,9 +43,9 @@ export function FieldControlsHeader({
   computedCompliance,
   dataValidation,
   onRemove,
-  onDetachSharedQuestion,
-  onOpenSharedQuestion,
-  isSharedQuestion = false,
+  onDetachBankQuestion,
+  onOpenBankQuestion,
+  isBankLinked = false,
   index,
   requirementCode,
 }: IProps) {
@@ -61,7 +61,7 @@ export function FieldControlsHeader({
       {/* Keep stale configuration removable even when field removal and conditionals are protected. */}
       {isRequirementInEditMode &&
         !hidePlacementConfiguration &&
-        (isSharedQuestion ||
+        (isBankLinked ||
           !(
             disabledMenuOptions.includes("remove") &&
             disabledMenuOptions.includes("conditional") &&
@@ -73,9 +73,9 @@ export function FieldControlsHeader({
               size: "sm",
             }}
             onRemove={onRemove}
-            onDetachSharedQuestion={onDetachSharedQuestion}
-            onOpenSharedQuestion={onOpenSharedQuestion}
-            isSharedQuestion={isSharedQuestion}
+            onDetachBankQuestion={onDetachBankQuestion}
+            onOpenBankQuestion={onOpenBankQuestion}
+            isBankLinked={isBankLinked}
             disabledOptions={disabledMenuOptions}
             hideConditional={hideConditional}
             hidePlacementConfiguration={hidePlacementConfiguration}

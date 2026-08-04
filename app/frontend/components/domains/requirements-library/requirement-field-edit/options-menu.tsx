@@ -22,9 +22,10 @@ import { DataValidationSetupModal } from "./data-validation-setup-modal"
 export interface IRequirementOptionsMenu {
   menuButtonProps?: Partial<ButtonProps>
   onRemove?: () => void
-  onDetachSharedQuestion?: () => void
-  onOpenSharedQuestion?: () => void
-  isSharedQuestion?: boolean
+  onDetachBankQuestion?: () => void
+  onOpenBankQuestion?: () => void
+  // Placement is linked to a bank question (requirementQuestionId set).
+  isBankLinked?: boolean
   emitOpenState?: (isOpen: boolean) => void
   index: number
   disabledOptions?: Array<"remove" | "conditional">
@@ -42,9 +43,9 @@ export const OptionsMenu = observer(function OptionsMenu({
   hidePlacementConfiguration = false,
   menuButtonProps,
   onRemove,
-  onDetachSharedQuestion,
-  onOpenSharedQuestion,
-  isSharedQuestion = false,
+  onDetachBankQuestion,
+  onOpenBankQuestion,
+  isBankLinked = false,
   emitOpenState,
   index,
   hasDataValidation = false,
@@ -111,19 +112,19 @@ export const OptionsMenu = observer(function OptionsMenu({
           </>
         )}
 
-        {isSharedQuestion && (
+        {isBankLinked && (
           <>
             <MenuDivider />
-            <MenuItem color={"text.primary"} onClick={onOpenSharedQuestion}>
+            <MenuItem color={"text.primary"} onClick={onOpenBankQuestion}>
               <HStack spacing={2} fontSize={"sm"}>
                 <BookOpen />
-                <Text as={"span"}>{t("requirementsLibrary.sharedQuestions.viewQuestionInQuestionBank")}</Text>
+                <Text as={"span"}>{t("requirementsLibrary.bankQuestions.openInQuestionBank")}</Text>
               </HStack>
             </MenuItem>
-            <MenuItem color={"text.primary"} onClick={onDetachSharedQuestion}>
+            <MenuItem color={"text.primary"} onClick={onDetachBankQuestion}>
               <HStack spacing={2} fontSize={"sm"}>
                 <LinkBreak />
-                <Text as={"span"}>{t("requirementsLibrary.sharedQuestions.detach")}</Text>
+                <Text as={"span"}>{t("requirementsLibrary.bankQuestions.detach")}</Text>
               </HStack>
             </MenuItem>
           </>
