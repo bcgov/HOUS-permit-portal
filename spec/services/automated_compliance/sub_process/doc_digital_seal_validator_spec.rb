@@ -9,6 +9,25 @@ RSpec.describe AutomatedCompliance::SubProcess::DocDigitalSealValidator do
 
   context "document provided" do
     let(:supporting_document) { create(:supporting_document) }
+    let(:approved_signature) do
+      {
+        "signerStatus" => {
+          "certificateInfo" => {
+            "subjectName" =>
+              "CN=Signer, OU=Engineers and Geoscientists British Columbia"
+          }
+        }
+      }
+    end
+    let(:unapproved_signature) do
+      {
+        "signerStatus" => {
+          "certificateInfo" => {
+            "subjectName" => "CN=Signer, OU=Some Other Organization"
+          }
+        }
+      }
+    end
 
     context "the integration call has an error" do
       it "updates the status of the supporting document with failure" do
@@ -24,17 +43,38 @@ RSpec.describe AutomatedCompliance::SubProcess::DocDigitalSealValidator do
       end
     end
 
-    context "the integration call succeeds" do
-      it "updates the document to have successful information" do
+    context "the integration call returns UNSIGNED" do
+      it "stores an empty success result like the standalone not-found state" do
         allow_any_instance_of(Wrappers::DigitalSealValidator).to receive(
           :call
         ).and_return(
-          OpenStruct.new(success: true, signatures: [{ test: "payload" }])
+          OpenStruct.new(success: false, error: "UNSIGNED", signatures: [])
         )
         AutomatedCompliance::SubProcess::DocDigitalSealValidator.new.call(
           supporting_document
         )
         expect(supporting_document.compliance_data["status"]).to eq "success"
+        expect(supporting_document.compliance_data["result"]).to eq([])
+      end
+    end
+
+    context "the integration call succeeds" do
+      it "stores only approved organization signatures" do
+        allow_any_instance_of(Wrappers::DigitalSealValidator).to receive(
+          :call
+        ).and_return(
+          OpenStruct.new(
+            success: true,
+            signatures: [approved_signature, unapproved_signature]
+          )
+        )
+        AutomatedCompliance::SubProcess::DocDigitalSealValidator.new.call(
+          supporting_document
+        )
+        expect(supporting_document.compliance_data["status"]).to eq "success"
+        expect(supporting_document.compliance_data["result"]).to eq(
+          [approved_signature]
+        )
       end
     end
   end
