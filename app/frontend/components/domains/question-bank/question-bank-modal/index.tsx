@@ -99,6 +99,8 @@ export const QuestionBankModal = observer(function QuestionBankModal({
   const handleOpen = () => {
     reset(getDefaultValues())
     onOpen()
+    // Index only has block names; show loads the template tree for the usage panel.
+    requirementQuestion?.refresh()
   }
 
   useEffect(() => {
@@ -112,20 +114,6 @@ export const QuestionBankModal = observer(function QuestionBankModal({
       handleOpen()
     }
   }, [autoOpen])
-
-  // When the user edits a block/template in another tab, refresh usage on return.
-  useEffect(() => {
-    if (!isOpen || !requirementQuestion) return
-
-    const onVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        requirementQuestion.refresh()
-      }
-    }
-
-    document.addEventListener("visibilitychange", onVisibilityChange)
-    return () => document.removeEventListener("visibilitychange", onVisibilityChange)
-  }, [isOpen, requirementQuestion])
 
   const onSubmit = async (data: IRequirementQuestionForm) => {
     const field = data.requirementsAttributes[0]

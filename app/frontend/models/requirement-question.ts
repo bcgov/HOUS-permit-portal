@@ -14,7 +14,8 @@ export type TQuestionUsageTemplate = {
 export type TQuestionUsageBlock = {
   id: string
   name: string
-  requirementTemplates: TQuestionUsageTemplate[]
+  // Present on show (:with_usage); list/search omits this to keep the index light.
+  requirementTemplates?: TQuestionUsageTemplate[]
 }
 
 export const RequirementQuestionModel = types
@@ -52,7 +53,8 @@ export const RequirementQuestionModel = types
       }
       return response.ok
     }),
-    // Refetch server state (usage, labels, etc.) without touching the open form.
+    // Show endpoint (:with_usage) — pulls nested templates. RHF form state is separate,
+    // so this only refreshes MST fields the usage panel / banners read.
     refresh: flow(function* () {
       const response = yield* toGenerator(self.environment.api.fetchRequirementQuestion(self.id))
       if (response.ok) {

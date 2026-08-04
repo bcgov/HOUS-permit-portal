@@ -31,6 +31,7 @@ const expandableBlockIds = (blocks: TQuestionUsageBlock[]) =>
   new Set(blocks.filter((block) => (block.requirementTemplates ?? []).length > 0).map((block) => block.id))
 
 interface IQuestionUsageSectionProps {
+  // From MST: names arrive with the list; nested templates arrive after modal refresh (show).
   linkedBlocks: TQuestionUsageBlock[]
 }
 
