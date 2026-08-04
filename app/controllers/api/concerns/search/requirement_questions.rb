@@ -17,16 +17,8 @@ module Api::Concerns::Search::RequirementQuestions
             nil
           end
         ),
-      includes: [
-        :taggings,
-        {
-          requirement_blocks: {
-            requirement_template_sections: {
-              requirement_template: :template_category
-            }
-          }
-        }
-      ],
+      # Index only needs block id/name (:extended). Templates load on show (:with_usage).
+      includes: %i[taggings requirement_blocks],
       scope_results: ->(relation) { policy_scope(relation) }
     }
 
