@@ -8,6 +8,7 @@ export type TQuestionUsageTemplate = {
   id: string
   nickname: string | null
   templateCategoryLabel?: string | null
+  published?: boolean
 }
 
 export type TQuestionUsageBlock = {

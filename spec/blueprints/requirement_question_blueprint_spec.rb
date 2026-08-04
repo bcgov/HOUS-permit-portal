@@ -75,8 +75,24 @@ RSpec.describe RequirementQuestionBlueprint do
         {
           id: kept_template.id,
           nickname: "Residential - Part 9 - New Build",
-          template_category_label: "Residential"
+          template_category_label: "Residential",
+          published: false
         }
+      )
+
+      create(
+        :template_version,
+        requirement_template: kept_template,
+        status: :published
+      )
+      published_payload =
+        described_class.render_as_hash(question, view: :extended)[
+          :requirement_blocks
+        ]
+      published_agent =
+        published_payload.find { |block| block[:name] == "Agent authorization" }
+      expect(published_agent[:requirement_templates].first[:published]).to eq(
+        true
       )
 
       orphan_block = payload.find { |block| block[:name] == "Orphan block" }

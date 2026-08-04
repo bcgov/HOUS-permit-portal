@@ -52,7 +52,10 @@ class RequirementQuestionBlueprint < Blueprinter::Base
           .distinct
           .includes(
             requirement_template_sections: {
-              requirement_template: :template_category
+              requirement_template: %i[
+                template_category
+                published_template_version
+              ]
             }
           )
           .sort_by { |block| block.name.to_s.downcase }
@@ -74,7 +77,9 @@ class RequirementQuestionBlueprint < Blueprinter::Base
               {
                 id: rt.id,
                 nickname: rt.nickname,
-                template_category_label: rt.template_category&.label
+                template_category_label: rt.template_category&.label,
+                # Template-level: has a live published version (not a snapshot check).
+                published: rt.published_template_version.present?
               }
             end
         }
