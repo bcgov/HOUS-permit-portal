@@ -264,7 +264,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
                   </Button>
                 </HStack>
               </ModalHeader>
-              <ModalBody px={"2.75rem"}>
+              <ModalBody px={"2.75rem"} pb={4}>
                 <HStack spacing={9} w={"full"} h={"full"} alignItems={"flex-start"}>
                   <BlockSetup
                     requirementBlock={
