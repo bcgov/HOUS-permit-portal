@@ -147,6 +147,10 @@ export class Api {
     return this.client.post<ApiResponse<IUser>>(`/users/${userId}/reinvite`)
   }
 
+  async login(params: { email: string; password: string }) {
+    return this.client.post("/login", { user: params })
+  }
+
   async logout() {
     return this.client.delete("/logout")
   }
