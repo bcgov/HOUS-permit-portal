@@ -110,7 +110,7 @@ export const FieldSetup = observer(function FieldSetup({
         </Box>
       </Box>
 
-      <QuestionUsageSection linkedBlocks={linkedBlocks} />
+      {isPersisted && <QuestionUsageSection linkedBlocks={linkedBlocks} />}
     </Flex>
   )
 })
