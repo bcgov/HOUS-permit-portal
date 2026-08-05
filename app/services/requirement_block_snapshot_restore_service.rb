@@ -1,6 +1,7 @@
 # Overwrites a shared RequirementBlock (and its requirements) from a
 # TemplateVersion snapshot. Does not restore requirement documents / file
-# attachments. Affects every template that uses the block.
+# attachments. Never mutates RequirementQuestion bank rows.
+# Affects every template that uses the block.
 class RequirementBlockSnapshotRestoreService
   COMPLIANCE_OPTIONS_MAP_PREFIX = "compliance-options-map-prefix-".freeze
 
@@ -13,12 +14,8 @@ class RequirementBlockSnapshotRestoreService
     reviewer_role
   ].freeze
 
-  REQUIREMENT_ATTRS = %w[
+  PLACEMENT_ATTRS = %w[
     requirement_code
-    label
-    input_type
-    hint
-    instructions
     required
     related_content
     required_for_in_person_hint
@@ -29,7 +26,10 @@ class RequirementBlockSnapshotRestoreService
   def initialize(template_version, requirement_block_id)
     @template_version = template_version
     @requirement_block_id = requirement_block_id.to_s
+    @detached_requirement_codes = []
   end
+
+  attr_reader :detached_requirement_codes
 
   def call!
     if @requirement_block_id.blank?
@@ -106,8 +106,6 @@ class RequirementBlockSnapshotRestoreService
     snapshot_ids =
       snapshot_requirements.map { |req| dig_key(req, "id") }.compact.map(&:to_s)
 
-    # Update / create from snapshot first so uniqueness checks stay valid,
-    # then remove live requirements that are no longer in the snapshot.
     snapshot_requirements.each_with_index do |req_payload, index|
       attrs = requirement_attributes(req_payload, index)
       req_id = dig_key(req_payload, "id")&.to_s
@@ -130,15 +128,74 @@ class RequirementBlockSnapshotRestoreService
   def requirement_attributes(req_payload, position)
     attrs = { position: position }
 
-    REQUIREMENT_ATTRS.each do |attr|
+    PLACEMENT_ATTRS.each do |attr|
       value = dig_key(req_payload, attr)
       attrs[attr] = value unless value.nil?
     end
 
-    input_options = dig_key(req_payload, "input_options")
-    attrs["input_options"] = normalize_input_options(input_options || {})
+    question_id = dig_key(req_payload, "requirement_question_id")&.to_s
+    bank =
+      question_id.present? ? RequirementQuestion.find_by(id: question_id) : nil
+
+    if question_id.present? && bank.present? && !bank.discarded?
+      apply_linked_attributes!(attrs, req_payload, question_id)
+    elsif question_id.present?
+      apply_detached_attributes!(attrs, req_payload)
+    else
+      apply_local_attributes!(attrs, req_payload)
+    end
 
     attrs
+  end
+
+  # Bank kept: re-link FK, restore override columns (nil = inherit), placement-only options.
+  # Label/input_type copied from effective for DB presence; display still prefers bank.
+  def apply_linked_attributes!(attrs, req_payload, question_id)
+    attrs["requirement_question_id"] = question_id
+    attrs["label"] = dig_key(req_payload, "label")
+    attrs["input_type"] = dig_key(req_payload, "input_type")
+    attrs["hint"] = override_or_inherit(req_payload, "hint_override")
+    attrs["instructions"] = override_or_inherit(
+      req_payload,
+      "instructions_override"
+    )
+    attrs["input_options"] = placement_only_input_options(
+      dig_key(req_payload, "input_options")
+    )
+  end
+
+  # Bank missing/discarded: detach and materialize effective snapshot wording locally.
+  def apply_detached_attributes!(attrs, req_payload)
+    code = dig_key(req_payload, "requirement_code")
+    @detached_requirement_codes << code if code.present?
+
+    attrs["requirement_question_id"] = nil
+    apply_local_attributes!(attrs, req_payload)
+  end
+
+  def apply_local_attributes!(attrs, req_payload)
+    attrs["requirement_question_id"] = nil
+    attrs["label"] = dig_key(req_payload, "label")
+    attrs["input_type"] = dig_key(req_payload, "input_type")
+    attrs["hint"] = dig_key(req_payload, "hint")
+    attrs["instructions"] = dig_key(req_payload, "instructions")
+    attrs["input_options"] = normalize_input_options(
+      dig_key(req_payload, "input_options") || {}
+    )
+  end
+
+  # When override key is present (including JSON null), use it. Otherwise inherit (nil).
+  def override_or_inherit(req_payload, override_key)
+    if key_present?(req_payload, override_key)
+      return dig_key(req_payload, override_key)
+    end
+
+    nil
+  end
+
+  def placement_only_input_options(input_options)
+    opts = normalize_input_options(input_options || {})
+    opts.slice(*RequirementQuestion::PLACEMENT_INPUT_OPTION_KEYS)
   end
 
   def normalize_input_options(input_options)
@@ -165,5 +222,14 @@ class RequirementBlockSnapshotRestoreService
     key = snake_key.to_s
     camel_key = key.camelize(:lower)
     hash[key] || hash[key.to_sym] || hash[camel_key] || hash[camel_key.to_sym]
+  end
+
+  def key_present?(hash, snake_key)
+    return false unless hash.is_a?(Hash)
+
+    key = snake_key.to_s
+    camel_key = key.camelize(:lower)
+    hash.key?(key) || hash.key?(key.to_sym) || hash.key?(camel_key) ||
+      hash.key?(camel_key.to_sym)
   end
 end

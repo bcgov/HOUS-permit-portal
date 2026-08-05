@@ -49,7 +49,7 @@ export const TemplateVersionBlockActionsMenu = observer(function TemplateVersion
       </MenuButton>
       <MenuList onClick={(e) => e.stopPropagation()}>
         <MenuItem as={RouterLink} to={editPath} target="_blank" rel="noopener noreferrer">
-          {t("templateVersionPreview.blockActions.editSourceBlock")}
+          {t("templateVersionPreview.openInBuilder")}
         </MenuItem>
         <ConfirmationModal
           promptHeader={t("templateVersionPreview.blockActions.restoreConfirmTitle")}

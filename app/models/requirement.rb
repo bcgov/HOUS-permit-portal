@@ -401,9 +401,19 @@ class Requirement < ApplicationRecord
   end
 
   def validate_value_options
-    if input_options.blank? || input_options["value_options"].blank? ||
-         !input_options["value_options"].is_a?(Array) ||
-         !input_options["value_options"].all? { |option|
+    # Bank-linked placements keep value_options on the question; use merged options.
+    options =
+      (
+        if requirement_question_id.present?
+          effective_input_options
+        else
+          input_options
+        end
+      )
+
+    if options.blank? || options["value_options"].blank? ||
+         !options["value_options"].is_a?(Array) ||
+         !options["value_options"].all? { |option|
            option.is_a?(Hash) &&
              (option.key?("label") && option["label"].is_a?(String)) &&
              (option.key?("value") && option["value"].is_a?(String))
@@ -436,6 +446,8 @@ class Requirement < ApplicationRecord
 
   def convert_value_options
     return unless attribute_changed?(:input_options)
+    # Placement-only updates (e.g. linked bank restore) may omit value_options.
+    return if input_options.blank? || input_options["value_options"].blank?
 
     inverted_computed_compliance_options_map =
       computed_compliance[
@@ -533,44 +545,72 @@ class Requirement < ApplicationRecord
       return
     end
 
-    current_attributes_of_interest =
-      self
-        .attributes
-        .slice("requirement_code", "input_type", "input_options")
-        .deep_dup
+    # Use effective options so bank-linked placements (value_options on the question)
+    # still satisfy the schema. Exact Hash== was too brittle for QB + restore.
+    actual_options = (effective_input_options || {}).deep_dup
 
     # The front-end sends the conditional as an empty object due to the form setup when conditionals are not added.
-    # Since the energy_step_code_method does not have any conditionals, the schema wouldn't match.
-    # The easiest way to handle this is to remove the conditional key for energy_step_code_method
-    # if it is an empty hash as we don't care about it. if it as it will have no effect to conditionals.
-    # Note we don't want to remove the key if it has other conditionals, as we want the validation below
-    # to catch that, as it is an invalid schema. Also the key is only removed from the duplicated attributes.
+    # Since the energy_step_code_method does not have any conditionals, ignore blank conditionals.
     if requirement_code == ENERGY_STEP_CODE_SELECT_REQUIREMENT_CODE &&
-         (
-           current_attributes_of_interest.dig(
-             "input_options",
-             "conditional"
-           ).present? &&
-             current_attributes_of_interest.dig(
-               "input_options",
-               "conditional"
-             ).empty?
-         )
-      current_attributes_of_interest["input_options"].delete("conditional")
+         actual_options["conditional"].blank?
+      actual_options.delete("conditional")
     end
 
-    unless ENERGY_STEP_CODE_PART_9_DEPENDENCY_REQUIRED_SCHEMA[
-             requirement_code.to_sym
-           ] == current_attributes_of_interest ||
-             ENERGY_STEP_CODE_PART_3_DEPENDENCY_REQUIRED_SCHEMA[
-               requirement_code.to_sym
-             ] == current_attributes_of_interest
-      errors.add(
-        :base,
-        :incorrect_requirement_schema,
-        requirement_code: requirement_code
-      )
+    actual = {
+      "requirement_code" => requirement_code,
+      "input_type" => effective_input_type.to_s,
+      "input_options" => actual_options
+    }
+
+    matches =
+      energy_step_code_schema_match?(
+        ENERGY_STEP_CODE_PART_9_DEPENDENCY_REQUIRED_SCHEMA[
+          requirement_code.to_sym
+        ],
+        actual
+      ) ||
+        energy_step_code_schema_match?(
+          ENERGY_STEP_CODE_PART_3_DEPENDENCY_REQUIRED_SCHEMA[
+            requirement_code.to_sym
+          ],
+          actual
+        )
+
+    return if matches
+
+    errors.add(
+      :base,
+      :incorrect_requirement_schema,
+      requirement_code: requirement_code
+    )
+  end
+
+  # Required keys/values must match; labels may differ; extra actual keys allowed.
+  def energy_step_code_schema_match?(expected, actual)
+    return false if expected.blank?
+    unless expected["requirement_code"] == actual["requirement_code"]
+      return false
     end
+    return false unless expected["input_type"].to_s == actual["input_type"].to_s
+
+    expected_opts = expected["input_options"] || {}
+    actual_opts = actual["input_options"] || {}
+
+    if expected_opts["value_options"].present?
+      expected_values =
+        expected_opts["value_options"].filter_map do |o|
+          o["value"] if o.is_a?(Hash)
+        end
+      actual_values =
+        Array(actual_opts["value_options"]).filter_map do |o|
+          o["value"] if o.is_a?(Hash)
+        end
+      return false unless expected_values == actual_values
+    end
+
+    expected_opts
+      .except("value_options")
+      .all? { |key, value| actual_opts[key] == value }
   end
 
   def validate_architectural_drawing_related_requirements_schema
