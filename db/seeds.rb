@@ -89,6 +89,20 @@ User.find_or_create_by(omniauth_username: "reviewer") do |user|
   user.omniauth_email = "reviewer@example.com"
 end
 
+User.find_or_create_by(omniauth_username: "technical_support") do |user|
+  user.role = :technical_support
+  user.first_name = "TechnicalSupport"
+  user.last_name = "McUser"
+  user.email = "technical_support@example.com"
+  user.password = "P@ssword1"
+  user.jurisdictions = [north_van]
+  user.confirmed_at = Time.now
+  user.omniauth_uid = "B7F3C2A19E8D4F6A9C1E5B0D8472A3F1"
+  user.omniauth_provider = "bceidbasic"
+  user.omniauth_email = "technical_support@example.com"
+  user.omniauth_username = "techsupport1"
+end
+
 User.find_or_create_by(omniauth_username: "submitter") do |user|
   user.role = :submitter
   user.first_name = "Submitter"

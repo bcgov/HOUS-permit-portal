@@ -27,7 +27,7 @@ To make things easier to develop on various platforms locally, there is a `docke
 - Make sure that you can run both `docker` and `docker compose` in your terminal and this is working correctly
 - Since some prefer to run this locally without Docker (see section below) this setup is aimed to preserve the ability to run this application both ways. As such, this uses a separate `Dockerfile.dev` and ENV file `.env.docker_compose` that we will use for the purposes of running locally only
 - Ensure that you have a local copy of `.env.docker_compose` - an example is provided in `.env_example.docker_compose` which provides the minimal ENV configuration to start the app without some services (see first point in Caveats section for more info)
-- We currently ONLY allow keycloak login have removed the ability to login via e-mail. To ensure you can login to the app make sure you have a valid Keycloak development ENV secrets set up so that you can properly log in. (See `.env_example.docker_compose` and [What is Keycloak at BC Government](https://developer.gov.bc.ca/docs/default/component/css-docs/What-is-Keycloak-at-BC-Government/))
+- Production login is Keycloak-only. For local development you can optionally enable email/password login (see **Local password authentication** below). Keycloak still works if you have valid development secrets (see `.env_example.docker_compose` and [What is Keycloak at BC Government](https://developer.gov.bc.ca/docs/default/component/css-docs/What-is-Keycloak-at-BC-Government/))
 
 **Instructions**
 
@@ -57,6 +57,28 @@ To make things easier to develop on various platforms locally, there is a `docke
 - (_Only first time or if there are changes_) Generate seed data: `rails db:seed`
 - Start the server: `rails s`
 - Start the front-end dev server for hot-reloading: `npm run dev`
+
+### Local password authentication
+
+For local development (and browser agents) without Keycloak, set both:
+
+```
+ENABLE_LOCAL_PASSWORD_AUTH=true
+VITE_ENABLE_LOCAL_PASSWORD_AUTH=true
+```
+
+This is never honored when `RAILS_ENV=production`, even if the flags are set. When enabled, `/login` and `/admin` show a "Local development login" form that posts to `POST /api/login`.
+
+Seeded users (password for all: `P@ssword1`):
+
+| Role                    | Email                                 |
+| ----------------------- | ------------------------------------- |
+| submitter               | `submitter@example.com`               |
+| review_manager          | `review_manager@example.com`          |
+| reviewer                | `reviewer@example.com`                |
+| super_admin             | `super_admin@example.com`             |
+| regional_review_manager | `regional_review_manager@example.com` |
+| technical_support       | `technical_support@example.com`       |
 
 ### Workers (Sidekiq)
 

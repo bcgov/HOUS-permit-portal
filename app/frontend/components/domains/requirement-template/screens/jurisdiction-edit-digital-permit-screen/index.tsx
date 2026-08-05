@@ -76,7 +76,7 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
 
   const {
     rootContainerRef: rightContainerRef,
-    sectionRefs,
+    setSectionRef,
     sectionIdToHighlight: currentSectionId,
   } = useSectionHighlight({ sections: denormalizedTemplate?.requirementTemplateSections })
   const [isCollapsedAll, setIsCollapsedAll] = useState(false)
@@ -360,9 +360,5 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
     if (element) {
       element.scrollIntoView({ behavior: "smooth", block: "start" })
     }
-  }
-
-  function setSectionRef(el: HTMLElement, id: string) {
-    sectionRefs.current[id] = el
   }
 })

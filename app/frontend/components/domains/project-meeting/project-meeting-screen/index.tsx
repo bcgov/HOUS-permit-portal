@@ -37,6 +37,7 @@ export const ProjectMeetingScreen = observer(() => {
   }
 
   const meetingDetailPath = `/projects/${currentPermitProject.id}/meetings/${currentProjectMeeting.id}`
+  const meetingSentPath = `${meetingDetailPath}/sent`
   const backPath = currentProjectMeeting.isSubmitted
     ? meetingDetailPath
     : `/projects/${currentPermitProject.id}/overview`
@@ -44,7 +45,10 @@ export const ProjectMeetingScreen = observer(() => {
   if (currentProjectMeeting.isSubmitted) {
     const sectionConfig = projectMeetingNavSections.find((navSection) => navSection.location === section)
     if (!sectionConfig?.requesterEditStep || !currentProjectMeeting.isActive) {
-      return <Navigate to={meetingDetailPath} replace />
+      // review is not a requesterEditStep; after submit MobX flips isSubmitted while
+      // still on /edit/review. Send that transition to /sent so it cannot flash the
+      // project Meetings tab / detail before the intentional post-submit navigate.
+      return <Navigate to={section === "review" ? meetingSentPath : meetingDetailPath} replace />
     }
   }
 

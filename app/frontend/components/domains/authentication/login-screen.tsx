@@ -17,7 +17,13 @@ import {
 } from "@chakra-ui/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { BceidLoginForm, BcscLoginForm, IdirLoginForm } from "../../shared/auth/login-forms"
+import {
+  BceidLoginForm,
+  BcscLoginForm,
+  IdirLoginForm,
+  isLocalPasswordAuthEnabled,
+  LocalPasswordLoginForm,
+} from "../../shared/auth/login-forms"
 import { CenterContainer } from "../../shared/containers/center-container"
 import { HelpDrawer } from "../../shared/help-drawer"
 import { EntityBasicBCeIDInfo } from "../../shared/keycloak/basicbceid/entity-basic-bceid-info"
@@ -47,6 +53,8 @@ export const LoginScreen = ({ isAdmin }: ILoginScreenProps) => {
         bg="greys.white"
       >
         <Heading as="h1">{t("auth.loginTitle")}</Heading>
+
+        {isLocalPasswordAuthEnabled && <LocalPasswordLoginForm />}
 
         <Flex direction="column" flex={1} gap={isAdmin ? 6 : 12}>
           {isAdmin ? (
