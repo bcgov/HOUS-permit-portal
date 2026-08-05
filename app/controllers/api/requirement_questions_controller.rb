@@ -15,6 +15,7 @@ class Api::RequirementQuestionsController < Api::ApplicationController
                      meta: page_meta(@search),
                      blueprint: RequirementQuestionBlueprint,
                      blueprint_opts: {
+                       # Block names only — nested templates are show/modal (:with_usage).
                        view: :extended
                      }
                    }
@@ -28,7 +29,8 @@ class Api::RequirementQuestionsController < Api::ApplicationController
                    {
                      blueprint: RequirementQuestionBlueprint,
                      blueprint_opts: {
-                       view: :extended
+                       # Modal "where used" panel needs nested templates.
+                       view: :with_usage
                      }
                    }
   end
@@ -44,7 +46,7 @@ class Api::RequirementQuestionsController < Api::ApplicationController
                      {
                        blueprint: RequirementQuestionBlueprint,
                        blueprint_opts: {
-                         view: :extended
+                         view: :with_usage
                        }
                      }
     else
@@ -64,7 +66,7 @@ class Api::RequirementQuestionsController < Api::ApplicationController
                      {
                        blueprint: RequirementQuestionBlueprint,
                        blueprint_opts: {
-                         view: :extended
+                         view: :with_usage
                        }
                      }
     else
@@ -85,7 +87,7 @@ class Api::RequirementQuestionsController < Api::ApplicationController
                      {
                        blueprint: RequirementQuestionBlueprint,
                        blueprint_opts: {
-                         view: :extended
+                         view: :with_usage
                        }
                      }
     else
@@ -106,7 +108,7 @@ class Api::RequirementQuestionsController < Api::ApplicationController
                      {
                        blueprint: RequirementQuestionBlueprint,
                        blueprint_opts: {
-                         view: :extended
+                         view: :with_usage
                        }
                      }
     else
