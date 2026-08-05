@@ -1,11 +1,12 @@
 import { Box, Container, Flex, IconButton, TabPanel, TabPanels, Tabs, Text } from "@chakra-ui/react"
 import { CalendarBlank, CaretLeft, Chat, ClipboardText, Folder, SquaresFour, TrendUp } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useEffect, useMemo, useTransition } from "react"
+import React, { useEffect, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { Link as RouterLink, useLocation, useNavigate, useParams } from "react-router-dom"
+import { Link as RouterLink, useParams } from "react-router-dom"
 import { usePermitProject } from "../../../hooks/resources/use-permit-project"
+import { useProjectDetailTabs } from "../../../hooks/use-project-detail-tabs"
 import { useMst } from "../../../setup/root"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
@@ -23,10 +24,7 @@ export const PermitProjectScreen = observer(() => {
   const { currentPermitProject, error } = usePermitProject()
   const { permitProjectId } = useParams<{ permitProjectId: string }>()
   const { permitProjectStore, siteConfigurationStore } = useMst()
-  const location = useLocation()
   const { t } = useTranslation()
-  const navigate = useNavigate()
-  const projectMatchesRoute = currentPermitProject?.id === permitProjectId
   const projectMeetingsEnabled = Boolean(
     siteConfigurationStore.projectMeetingsEnabled && currentPermitProject?.jurisdiction?.projectMeetingsEnabled
   )
@@ -59,6 +57,13 @@ export const PermitProjectScreen = observer(() => {
     ]
   }, [projectBasePath, projectMeetingsEnabled, t])
 
+  const { projectMatchesRoute, tabIndex, handleTabChange, isPending } = useProjectDetailTabs({
+    basePath: projectBasePath,
+    tabs: TABS_DATA,
+    routeProjectId: permitProjectId,
+    currentProjectId: currentPermitProject?.id,
+  })
+
   const getDefaultValues = () => {
     return {
       title: currentPermitProject?.title,
@@ -72,40 +77,8 @@ export const PermitProjectScreen = observer(() => {
   const { updatePermitProject } = permitProjectStore
 
   useEffect(() => {
-    if (!projectBasePath) return
-
-    // Bare /projects/:id → overview for the URL project only (never store current).
-    if (location.pathname === projectBasePath) {
-      navigate(`${projectBasePath}/overview`, { replace: true })
-      return
-    }
-
-    // Unknown subpath canonicalize only once store matches the route (avoids cross-project redirects).
-    if (!projectMatchesRoute || TABS_DATA.length === 0) return
-
-    if (!TABS_DATA.some((tab) => location.pathname === tab.to || location.pathname.startsWith(`${tab.to}/`))) {
-      navigate(`${projectBasePath}/overview`, { replace: true })
-    }
-  }, [TABS_DATA, projectMatchesRoute, projectBasePath, location.pathname, navigate])
-
-  useEffect(() => {
     reset(getDefaultValues())
   }, [currentPermitProject, reset]) // Recalculate if title changes, as it might affect height
-
-  const [isPending, startTransition] = useTransition()
-
-  const getTabIndex = () => {
-    const tabIndex = TABS_DATA.findIndex(
-      (tab) => location.pathname === tab.to || location.pathname.startsWith(`${tab.to}/`)
-    )
-    return tabIndex === -1 ? 0 : tabIndex
-  }
-
-  const handleTabChange = (index: number) => {
-    startTransition(() => {
-      navigate(TABS_DATA[index].to)
-    })
-  }
 
   const onSubmit = async (data: { title: string }) => {
     if (!currentPermitProject) return
@@ -157,15 +130,7 @@ export const PermitProjectScreen = observer(() => {
           </Flex>
         </Container>
       </Flex>
-      <Tabs
-        w="full"
-        flexGrow={1}
-        index={getTabIndex()}
-        onChange={handleTabChange}
-        display="flex"
-        isLazy
-        variant="sidebar"
-      >
+      <Tabs w="full" flexGrow={1} index={tabIndex} onChange={handleTabChange} display="flex" isLazy variant="sidebar">
         <ProjectSidebarTabList p={0} tabsData={TABS_DATA} />
         <TabPanels>
           <TabPanel>
