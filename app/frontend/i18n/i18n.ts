@@ -4908,7 +4908,15 @@ Thank you,
             "This permit is available for early access to help your team get familiar with the application process. You can view and edit your application, but submission is currently disabled. Submissions will be enabled once this permit type is officially launched in your jurisdiction.",
           goToBuilder: "Go to builder",
           openInBuilder: "Open in builder",
-          reviseInBuilder: "Revise in builder",
+          actions: {
+            menuLabel: "Actions",
+          },
+          goTo: {
+            menuLabel: "Go to",
+            formPreview: "Form preview",
+            builder: "Builder",
+            catalogue: "Catalogue",
+          },
           immutableVersionNotice:
             "This early access version is an immutable snapshot. To revise it, update the source template in the builder and create a new early access version. Existing preview links will continue to show this version.",
           discardDraft: {
