@@ -43,11 +43,75 @@ class RequirementQuestionBlueprint < Blueprinter::Base
     requirement_question.computed_compliance?
   end
 
+  # List/search: block names only. Nesting templates here made every index row
+  # pull the full blast radius (slow + fat JSON the table never reads).
   view :extended do
     field :requirement_blocks do |requirement_question|
-      requirement_question.requirement_blocks.distinct.map do |block|
-        { id: block.id, name: block.name }
-      end
+      RequirementQuestionBlueprint.serialize_usage_blocks(
+        requirement_question,
+        include_templates: false
+      )
     end
+  end
+
+  # Show/modal: blocks + the permit templates that use them.
+  view :with_usage do
+    field :requirement_blocks do |requirement_question|
+      RequirementQuestionBlueprint.serialize_usage_blocks(
+        requirement_question,
+        include_templates: true
+      )
+    end
+  end
+
+  def self.serialize_usage_blocks(requirement_question, include_templates:)
+    blocks =
+      if include_templates
+        # Fresh query so we can eager-load the template tree in one go.
+        requirement_question
+          .requirement_blocks
+          .kept
+          .distinct
+          .includes(
+            requirement_templates: %i[
+              template_category
+              published_template_version
+            ]
+          )
+          .to_a
+      elsif requirement_question.association(:requirement_blocks).loaded?
+        # Searchkick already includes requirement_blocks — don't re-query.
+        requirement_question.requirement_blocks.select(&:kept?).uniq(&:id)
+      else
+        requirement_question.requirement_blocks.kept.distinct.to_a
+      end
+
+    blocks
+      .sort_by { |block| block.name.to_s.downcase }
+      .map do |block|
+        payload = { id: block.id, name: block.name }
+        next payload unless include_templates
+
+        # Through-assoc includes discarded templates; drop them here (usually few).
+        templates =
+          block
+            .requirement_templates
+            .select(&:kept?)
+            .uniq(&:id)
+            .sort_by { |rt| rt.nickname.to_s.downcase }
+
+        payload.merge(
+          requirement_templates:
+            templates.map do |rt|
+              {
+                id: rt.id,
+                nickname: rt.nickname,
+                template_category_label: rt.template_category&.label,
+                # Live published version on the template (not a historical snapshot).
+                published: rt.published_template_version.present?
+              }
+            end
+        )
+      end
   end
 end

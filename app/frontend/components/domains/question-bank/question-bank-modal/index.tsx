@@ -99,6 +99,8 @@ export const QuestionBankModal = observer(function QuestionBankModal({
   const handleOpen = () => {
     reset(getDefaultValues())
     onOpen()
+    // Index only has block names; show loads the template tree for the usage panel.
+    requirementQuestion?.refresh()
   }
 
   useEffect(() => {
@@ -228,7 +230,7 @@ export const QuestionBankModal = observer(function QuestionBankModal({
                   </Button>
                 </HStack>
               </ModalHeader>
-              <ModalBody px={"2.75rem"}>
+              <ModalBody px={"2.75rem"} pb={4}>
                 <VStack spacing={6} w={"full"} alignItems={"flex-start"}>
                   {isLinked && (
                     <Alert

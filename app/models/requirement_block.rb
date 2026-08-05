@@ -21,6 +21,8 @@ class RequirementBlock < ApplicationRecord
 
   has_many :template_section_blocks, dependent: :destroy
   has_many :requirement_template_sections, through: :template_section_blocks
+  # Used by question-bank "where used" (block → templates that include it).
+  has_many :requirement_templates, through: :requirement_template_sections
 
   accepts_nested_attributes_for :requirements, allow_destroy: true
   accepts_nested_attributes_for :requirement_documents, allow_destroy: true
