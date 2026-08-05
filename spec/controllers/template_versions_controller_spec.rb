@@ -450,4 +450,61 @@ RSpec.describe Api::TemplateVersionsController,
       end
     end
   end
+
+  describe "POST #restore_requirement_block" do
+    let!(:requirement_template) do
+      create(:full_requirement_template, sections_count: 1)
+    end
+    let!(:block) do
+      requirement_template
+        .requirement_template_sections
+        .first
+        .requirement_blocks
+        .first
+    end
+    let!(:template_version) do
+      blocks_json = {
+        block.id =>
+          RequirementBlockBlueprint.render_as_hash(block, parent_key: "section")
+      }
+      create(
+        :template_version,
+        requirement_template: requirement_template,
+        status: :published,
+        requirement_blocks_json: blocks_json
+      )
+    end
+
+    context "as a super admin" do
+      let!(:super_admin) { create(:user, :super_admin) }
+
+      before { sign_in super_admin }
+
+      it "restores the shared requirement block from the version snapshot" do
+        original_name = block.name
+        block.update!(name: "Changed")
+
+        post :restore_requirement_block,
+             params: {
+               id: template_version.id,
+               requirement_block_id: block.id
+             }
+
+        expect(response).to have_http_status(:success)
+        expect(block.reload.name).to eq(original_name)
+      end
+    end
+
+    context "as a non-admin user" do
+      it "denies access" do
+        post :restore_requirement_block,
+             params: {
+               id: template_version.id,
+               requirement_block_id: block.id
+             }
+
+        expect(response).to have_http_status(:forbidden)
+      end
+    end
+  end
 end

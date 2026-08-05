@@ -305,6 +305,19 @@ export const RequirementTemplateStoreModel = types
 
       return false
     }),
+
+    restoreRequirementBlockFromVersion: flow(function* (templateVersionId: string, requirementBlockId: string) {
+      const response = yield* toGenerator(
+        self.environment.api.restoreRequirementBlockFromVersion(templateVersionId, requirementBlockId)
+      )
+
+      if (response.ok) {
+        self.rootStore.requirementBlockStore.mergeUpdate(response.data.data, "requirementBlockMap")
+        return self.rootStore.requirementBlockStore.getRequirementBlockById(requirementBlockId)
+      }
+
+      return false
+    }),
   }))
 
 export interface IRequirementTemplateStoreModel extends Instance<typeof RequirementTemplateStoreModel> {}

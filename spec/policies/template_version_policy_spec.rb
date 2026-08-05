@@ -151,6 +151,10 @@ RSpec.describe TemplateVersionPolicy, type: :policy do
       expect(draft_policy(admin, version).restore_layout?).to be true
       expect(draft_policy(non_admin, version).restore_layout?).to be false
       expect(draft_policy(admin, discarded_version).restore_layout?).to be false
+      expect(draft_policy(admin, version).restore_requirement_block?).to be true
+      expect(
+        draft_policy(non_admin, version).restore_requirement_block?
+      ).to be false
     end
 
     it "permits force publishing draft versions only when enabled" do

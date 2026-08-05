@@ -448,6 +448,27 @@ class Api::TemplateVersionsController < Api::ApplicationController
     end
   end
 
+  def restore_requirement_block
+    authorize @template_version, :restore_requirement_block?
+
+    begin
+      block =
+        RequirementBlockSnapshotRestoreService.new(
+          @template_version,
+          restore_requirement_block_params[:requirement_block_id]
+        ).call!
+
+      render_success block,
+                     "requirement_template.restore_requirement_block_success",
+                     { blueprint: RequirementBlockBlueprint }
+    rescue RequirementBlockSnapshotRestoreError => e
+      render_error "requirement_template.restore_requirement_block_error",
+                   message_opts: {
+                     error_message: e.message
+                   }
+    end
+  end
+
   def share_draft
     authorize @template_version, :update?
 
@@ -637,6 +658,10 @@ class Api::TemplateVersionsController < Api::ApplicationController
       notified_jurisdiction_ids: [],
       promote_block_ids: []
     )
+  end
+
+  def restore_requirement_block_params
+    params.permit(:requirement_block_id)
   end
 
   def render_requirement_template_success(message_key)
