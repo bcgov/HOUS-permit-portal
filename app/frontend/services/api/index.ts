@@ -740,6 +740,14 @@ export class Api {
     return this.client.post<never>(`/permit_applications/${id}/generate_missing_pdfs`)
   }
 
+  async downloadSupportingDocumentsZip(id: string, supportingDocumentIds: string[]) {
+    return this.client.post<BlobPart>(
+      `/permit_applications/${id}/download_supporting_documents_zip`,
+      { supportingDocumentIds },
+      { responseType: "blob", headers: { Accept: "application/zip" } }
+    )
+  }
+
   async submitPermitApplication(id, params) {
     return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/submit`, {
       permitApplication: params,

@@ -1,5 +1,5 @@
 import { t } from "i18next"
-import { cast, flow, Instance, types } from "mobx-state-tree"
+import { cast, flow, Instance, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
@@ -36,7 +36,7 @@ import {
 import { format } from "date-fns"
 import { StepCodeModel } from "../stores/step-code-store"
 import { compareSubmissionData } from "../utils/formio-helpers"
-import { convertResourceArrayToRecord } from "../utils/utility-functions"
+import { convertResourceArrayToRecord, startBlobDownload } from "../utils/utility-functions"
 import { ICollaborator } from "./collaborator"
 import { JurisdictionModel } from "./jurisdiction"
 import { IPermitBlockStatus, PermitBlockStatusModel } from "./permit-block-status"
@@ -917,6 +917,16 @@ export const PermitApplicationModel = types.snapshotProcessor(
       generateMissingPdfs: flow(function* () {
         const response = yield self.environment.api.generatePermitApplicationMissingPdfs(self.id)
         return response.ok
+      }),
+
+      downloadSupportingDocumentsZip: flow(function* (supportingDocumentIds: string[]) {
+        const response = yield* toGenerator(
+          self.environment.api.downloadSupportingDocumentsZip(self.id, supportingDocumentIds)
+        )
+        if (!response.ok) return false
+
+        startBlobDownload(response.data, "application/zip", `permit-application-${self.number || self.id}-files.zip`)
+        return true
       }),
 
       unassignPermitCollaboration: flow(function* (collaborationId: string) {
