@@ -12,7 +12,11 @@ import { IPermitApplication } from "../../../models/permit-application"
 import { EFileUploadAttachmentType, EFlashMessageStatus, EStepCodeType } from "../../../types/enums"
 import { IErrorsBoxData } from "../../../types/types"
 import { getCompletedBlocksFromForm, getRequirementByKey } from "../../../utils/formio-component-traversal"
-import { singleRequirementFormJson, singleRequirementSubmissionData } from "../../../utils/formio-helpers"
+import {
+  getEnergyStepCodeMethodFromData,
+  singleRequirementFormJson,
+  singleRequirementSubmissionData,
+} from "../../../utils/formio-helpers"
 import { downloadFileFromStorage } from "../../../utils/utility-functions"
 import { CompareRequirementsBox } from "../../domains/permit-application/compare-requirements-box"
 import { ErrorsBox } from "../../domains/permit-application/errors-box"
@@ -65,7 +69,10 @@ export const RequirementForm = observer(
       isViewingPastRequests,
       inboxEnabled,
       sandbox,
+      isStepCodeComplete,
     } = permitApplication
+
+    const stepCodeCompletionOptions = { isStepCodeComplete }
 
     const shouldShowDiff = permitApplication?.shouldShowApplicationDiff(isEditing)
     const userShouldSeeDiff = permitApplication?.currentUserShouldSeeApplicationDiff
@@ -134,6 +141,13 @@ export const RequirementForm = observer(
       setUnsavedSubmissionData(displayedSubmissionData)
       // We don't want to trigger a re-render if the permitApplication itself changes, only if the derived data changes
     }, [displayedSubmissionData])
+
+    // Recompute block completion when the digital Step Code checklist completion flips
+    useEffect(() => {
+      if (onCompletedBlocksChange && formRef.current) {
+        onCompletedBlocksChange(getCompletedBlocksFromForm(formRef.current, stepCodeCompletionOptions))
+      }
+    }, [isStepCodeComplete])
 
     useEffect(() => {
       // The box observers need to be re-registered whenever a panel is collapsed
@@ -308,6 +322,18 @@ export const RequirementForm = observer(
     }
 
     const onFormSubmit = async (submission: any) => {
+      // Form.io does not validate the digital Step Code tool (button container, input:false).
+      if (getEnergyStepCodeMethodFromData(submission?.data) === "tool" && !isStepCodeComplete) {
+        setHasErrors(true)
+        setErrorBoxData([
+          {
+            label: t("permitApplication.edit.stepCodeToolIncomplete"),
+            id: "energy-step-code-tool",
+            class: "",
+          },
+        ])
+        return
+      }
       setHasErrors(null)
       setImminentSubmission(submission)
       onOpen()
@@ -321,7 +347,7 @@ export const RequirementForm = observer(
 
     const onBlur = (containerComponent) => {
       if (onCompletedBlocksChange) {
-        onCompletedBlocksChange(getCompletedBlocksFromForm(containerComponent.root))
+        onCompletedBlocksChange(getCompletedBlocksFromForm(containerComponent.root, stepCodeCompletionOptions))
       }
     }
     const onScroll = (event) => {
@@ -339,9 +365,10 @@ export const RequirementForm = observer(
 
       const componentType = component.type
 
-      if (componentType === "selectboxes" || componentType === "simplefile") {
+      // radio: energy_step_code_method toggles tool vs file visibility / completion rules
+      if (componentType === "selectboxes" || componentType === "simplefile" || componentType === "radio") {
         if (onCompletedBlocksChange) {
-          onCompletedBlocksChange(getCompletedBlocksFromForm(root))
+          onCompletedBlocksChange(getCompletedBlocksFromForm(root, stepCodeCompletionOptions))
         }
         setErrorBoxData(mapErrorBoxData(root.errors))
 
@@ -361,7 +388,7 @@ export const RequirementForm = observer(
       updateCollaborationAssignmentNodes?.()
 
       if (onCompletedBlocksChange) {
-        onCompletedBlocksChange(getCompletedBlocksFromForm(formRef.current))
+        onCompletedBlocksChange(getCompletedBlocksFromForm(formRef.current, stepCodeCompletionOptions))
       }
     }
 

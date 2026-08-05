@@ -12,7 +12,7 @@ import {
   EStepCodeType,
 } from "../types/enums"
 import { IPart9NavLink, IPart9SectionCompletionStatus, TPart9NavLinkKey } from "../types/types"
-import { canMarkChecklistComplete } from "../utils/can-mark-checklist-complete"
+import { areRelevantSectionsCompleteExcept, canMarkChecklistComplete } from "../utils/can-mark-checklist-complete"
 import { renameKeys } from "../utils/utility-functions"
 import { markParentStepCodeReportsStale } from "./step-code-base"
 import { StepCodeBuildingCharacteristicsSummaryModel } from "./step-code-building-characteristic-summary"
@@ -154,6 +154,12 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
         return self.status == EStepCodeChecklistStatus.complete
       },
       get canMarkComplete() {
+        return canMarkChecklistComplete(self.sectionCompletionStatus)
+      },
+      get canAccessReview() {
+        return areRelevantSectionsCompleteExcept(self.sectionCompletionStatus, ["review", "report"])
+      },
+      get canAccessReport() {
         return canMarkChecklistComplete(self.sectionCompletionStatus)
       },
       get stepRequirementId() {

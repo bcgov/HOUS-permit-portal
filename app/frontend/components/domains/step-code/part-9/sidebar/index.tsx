@@ -3,6 +3,7 @@ import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { usePart9StepCode } from "../../../../../hooks/resources/use-part-9-step-code"
+import { TPart9NavLinkKey } from "../../../../../types/types"
 import { ProjectInfoSidebarLink } from "../../sidebar/project-info-sidebar-link"
 import { usePart9Navigation } from "../use-part-9-navigation"
 import { navSections, reportDependentSectionKeys } from "./nav-sections"
@@ -15,6 +16,13 @@ export const Sidebar = observer(function Part9StepCodeSidebar() {
   const { infoPagePath } = usePart9Navigation()
   const reportAvailable = Boolean(checklist?.selectedReport)
 
+  const isSectionDisabled = (key: TPart9NavLinkKey) => {
+    if (reportDependentSectionKeys.includes(key) && !reportAvailable) return true
+    if (key === "review" && !checklist?.canAccessReview) return true
+    if (key === "report" && !checklist?.canAccessReport) return true
+    return false
+  }
+
   return (
     <VStack w="full" align="stretch" pt={4}>
       <ProjectInfoSidebarLink to={infoPagePath} />
@@ -22,7 +30,7 @@ export const Sidebar = observer(function Part9StepCodeSidebar() {
         <React.Fragment key={section.key}>
           <SectionHeader title={t(`stepCode.part9.sidebar.${section.key}`)} />
           {section.navLinks.map((navLink) => {
-            const isDisabled = reportDependentSectionKeys.includes(navLink.key) && !reportAvailable
+            const isDisabled = isSectionDisabled(navLink.key)
 
             return (
               checklist?.isRelevant(navLink.key) && (
@@ -31,11 +39,7 @@ export const Sidebar = observer(function Part9StepCodeSidebar() {
                   {navLink.subLinks.map(
                     (subLink) =>
                       checklist.isRelevant(subLink.key) && (
-                        <SubLink
-                          key={subLink.key}
-                          subLink={subLink}
-                          isDisabled={reportDependentSectionKeys.includes(subLink.key) && !reportAvailable}
-                        />
+                        <SubLink key={subLink.key} subLink={subLink} isDisabled={isSectionDisabled(subLink.key)} />
                       )
                   )}
                 </React.Fragment>

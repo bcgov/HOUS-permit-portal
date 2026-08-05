@@ -321,6 +321,7 @@ const MissingReportSection = function MissingReportSection() {
 
 const ReviewSection = observer(function ReviewSection() {
   const { checklist } = usePart9StepCode()
+  const { pathname } = useLocation()
   const formMethods = useForm({ mode: "onChange" })
   const { handleSubmit, formState } = formMethods
 
@@ -331,6 +332,10 @@ const ReviewSection = observer(function ReviewSection() {
 
   if (!checklist) return <SharedSpinner />
   if (!checklist.selectedReport) return <MissingReportSection />
+  if (!checklist.canAccessReview) {
+    const target = checklist.currentNavLink?.location ?? "start"
+    return <Navigate to={pathname.replace(/\/review$/, `/${target}`)} replace />
+  }
 
   return (
     <FormProvider {...formMethods}>
@@ -370,6 +375,7 @@ const ReviewSection = observer(function ReviewSection() {
 
 const ReportSection = observer(function ReportSection() {
   const { currentStepCode, checklist } = usePart9StepCode()
+  const { pathname } = useLocation()
   const formMethods = useForm({ mode: "onChange" })
   const { handleSubmit, formState } = formMethods
   const [isRegenerating, setIsRegenerating] = useState(false)
@@ -391,6 +397,10 @@ const ReportSection = observer(function ReportSection() {
 
   if (!checklist) return <SharedSpinner />
   if (!checklist.selectedReport) return <MissingReportSection />
+  if (!checklist.canAccessReport) {
+    const target = checklist.currentNavLink?.location ?? "start"
+    return <Navigate to={pathname.replace(/\/report$/, `/${target}`)} replace />
+  }
 
   return (
     <FormProvider {...formMethods}>

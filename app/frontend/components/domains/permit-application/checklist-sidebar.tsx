@@ -10,7 +10,7 @@ interface IChecklistSideBarProps {
 }
 
 export const ChecklistSideBar = observer(({ permitApplication, completedBlocks }: IChecklistSideBarProps) => {
-  const { formJson, stepCode } = permitApplication
+  const { formJson } = permitApplication
   const { selectedTabIndex, setSelectedTabIndex, indexOfBlockId, getBlockClass } = permitApplication
 
   const navHeight = document.getElementById("mainNav")?.offsetHeight
@@ -51,15 +51,9 @@ export const ChecklistSideBar = observer(({ permitApplication, completedBlocks }
                       {section.title}
                     </Heading>
                     {section?.components?.map((block) => {
-                      // todo: some better way to signify something is a Step Code block
-                      const isStepCodeBlock = block.components.some((component) =>
-                        component.key.includes("|energy_step_code")
-                      )
-                      const usingStepCodeTool = !!stepCode
-                      const showCompleted =
-                        usingStepCodeTool && isStepCodeBlock
-                          ? permitApplication.isStepCodeComplete
-                          : completedBlocks[block.key] || false
+                      // Completion for Energy Step Code blocks is decided in getCompletedBlocksFromForm
+                      // (digital tool method → stage checklist; file method → Form.io visible fields).
+                      const showCompleted = completedBlocks[block.key] || false
                       return (
                         <Tab
                           key={block.key}
