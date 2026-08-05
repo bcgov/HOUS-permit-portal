@@ -79,6 +79,13 @@ const options = {
           bceidLogin: "Log in with BCeID",
           bcscLogin: "Log in with BC Services Card Account",
           idirLogin: "Log in with IDIR",
+          localPassword: {
+            title: "Local development login",
+            description: "Dev-only email/password login. Disabled in production.",
+            passwordLabel: "Password",
+            submit: "Log in with password",
+            error: "Invalid email or password",
+          },
           role: "Role",
           emailLabel: "Email address",
           userFirstNameLabel: "First name",
