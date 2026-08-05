@@ -71,28 +71,37 @@ Templates.current = {
                   )
 
             if (currentFileMessages.length > 0) {
-              showWarning = currentFileMessages.some((fileMessage) => fileMessage.error)
+              showWarning = currentFileMessages.some((fileMessage) => fileMessage.error || !fileMessage.signers?.length)
 
-              // Build enhanced list format
+              const contactEmail = t("site.contactEmail")
+              const systemFailureBody = t("projectReadinessTools.digitalSealValidator.systemFailureMessage", {
+                email: contactEmail,
+              })
+                .replace("<1>", `<a href="mailto:${contactEmail}">`)
+                .replace("</1>", "</a>")
+              const signedAtLabel = t("projectReadinessTools.digitalSealValidator.signedAt")
+
+              // Keep existing tooltip layout; only align copy with the standalone tool.
               const fileItems = currentFileMessages
                 .map((fileMessage) => {
                   const hasError = fileMessage.error
                   const fileName = fileMessage.filename || "File"
+                  const hasSigners = fileMessage.signers && fileMessage.signers.length > 0
 
                   if (hasError) {
                     return `
                       <div class="compliance-file-item compliance-file-error">
-                        <div class="compliance-file-name">• ${fileName}</div>
-                        <div class="compliance-file-error-message">${fileMessage.message}</div>
+                        <div class="compliance-file-name">• ${fileName} — ${t("projectReadinessTools.digitalSealValidator.systemFailureTitle")}</div>
+                        <div class="compliance-file-error-message">${systemFailureBody}</div>
                       </div>
                     `
-                  } else if (fileMessage.signers && fileMessage.signers.length > 0) {
+                  } else if (hasSigners) {
                     const signersHtml = fileMessage.signers
                       .map(
                         (signer) => `
                         <div class="compliance-signer">
                           <div class="compliance-signer-name">✓ ${signer.name}${signer.organization ? ` (${signer.organization})` : ""}</div>
-                          <div class="compliance-signer-date">Signed: ${signer.date}</div>
+                          <div class="compliance-signer-date">${signedAtLabel} ${signer.date}</div>
                         </div>
                       `
                       )
@@ -100,14 +109,14 @@ Templates.current = {
 
                     return `
                       <div class="compliance-file-item">
-                        <div class="compliance-file-name">• ${fileName}</div>
+                        <div class="compliance-file-name">• ${fileName} — ${t("projectReadinessTools.digitalSealValidator.foundTitle")}</div>
                         ${signersHtml}
                       </div>
                     `
                   } else {
                     return `
                       <div class="compliance-file-item">
-                        <div class="compliance-file-name">• ${fileName}</div>
+                        <div class="compliance-file-name">• ${fileName} — ${t("projectReadinessTools.digitalSealValidator.notFoundTitle")}</div>
                         <div class="compliance-file-message">${t("projectReadinessTools.digitalSealValidator.noSignaturesFound")}</div>
                       </div>
                     `
@@ -117,7 +126,11 @@ Templates.current = {
 
               computedComplianceHtml = `
                 <div class="compliance-digital-signatures">
-                  <div class="compliance-section-title"><i class="ph-fill ph-lightning-a"></i>${t("projectReadinessTools.digitalSealValidator.digitalSignaturesDetected")}:</div>
+                  <div class="compliance-section-title"><i class="ph-fill ph-lightning-a"></i>${
+                    showWarning
+                      ? t("projectReadinessTools.digitalSealValidator.notFoundTitle")
+                      : t("projectReadinessTools.digitalSealValidator.foundTitle")
+                  }</div>
                   ${fileItems}
                 </div>
               `

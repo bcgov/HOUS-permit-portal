@@ -583,12 +583,19 @@
           font-size: var(--chakra-fontSizes-xs);
           color: $bcgov-font;
           font-style: italic;
+          line-height: 1.4;
         }
 
         .compliance-file-error-message {
           margin-left: 16px;
           font-size: var(--chakra-fontSizes-xs);
           color: $bcgov-font;
+          line-height: 1.4;
+
+          a {
+            color: $bcgov-link;
+            text-decoration: underline;
+          }
         }
 
         &.compliance-file-error {
