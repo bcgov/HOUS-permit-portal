@@ -4,7 +4,7 @@ import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo, useTransition } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom"
+import { Link as RouterLink, useLocation, useNavigate, useParams } from "react-router-dom"
 import { usePermitProject } from "../../../hooks/resources/use-permit-project"
 import { useMst } from "../../../setup/root"
 import { ErrorScreen } from "../../shared/base/error-screen"
@@ -21,14 +21,17 @@ import { ITabItem, ProjectSidebarTabList } from "./project-sidebar-tab-list"
 
 export const PermitProjectScreen = observer(() => {
   const { currentPermitProject, error } = usePermitProject()
+  const { permitProjectId } = useParams<{ permitProjectId: string }>()
   const { permitProjectStore, siteConfigurationStore } = useMst()
   const location = useLocation()
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const projectMatchesRoute = currentPermitProject?.id === permitProjectId
   const projectMeetingsEnabled = Boolean(
     siteConfigurationStore.projectMeetingsEnabled && currentPermitProject?.jurisdiction?.projectMeetingsEnabled
   )
-  const projectBasePath = currentPermitProject ? `/projects/${currentPermitProject.id}` : null
+  // Derive from the URL, not store current — store lags during project switches and was redirecting to the wrong project.
+  const projectBasePath = permitProjectId ? `/projects/${permitProjectId}` : null
 
   const TABS_DATA: ITabItem[] = useMemo(() => {
     if (!projectBasePath) return []
@@ -69,12 +72,21 @@ export const PermitProjectScreen = observer(() => {
   const { updatePermitProject } = permitProjectStore
 
   useEffect(() => {
-    if (!currentPermitProject || !projectBasePath) return
+    if (!projectBasePath) return
+
+    // Bare /projects/:id → overview for the URL project only (never store current).
+    if (location.pathname === projectBasePath) {
+      navigate(`${projectBasePath}/overview`, { replace: true })
+      return
+    }
+
+    // Unknown subpath canonicalize only once store matches the route (avoids cross-project redirects).
+    if (!projectMatchesRoute || TABS_DATA.length === 0) return
 
     if (!TABS_DATA.some((tab) => location.pathname === tab.to || location.pathname.startsWith(`${tab.to}/`))) {
       navigate(`${projectBasePath}/overview`, { replace: true })
     }
-  }, [TABS_DATA, currentPermitProject, projectBasePath, location.pathname, navigate])
+  }, [TABS_DATA, projectMatchesRoute, projectBasePath, location.pathname, navigate])
 
   useEffect(() => {
     reset(getDefaultValues())
@@ -101,7 +113,7 @@ export const PermitProjectScreen = observer(() => {
   }
 
   if (error) return <ErrorScreen error={error} />
-  if (!currentPermitProject && !error) return <LoadingScreen />
+  if (!projectMatchesRoute && !error) return <LoadingScreen />
   if (!currentPermitProject) return <Text>{t("permitProject.details.notFound")}</Text>
 
   return (

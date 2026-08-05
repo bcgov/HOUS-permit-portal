@@ -17,17 +17,19 @@ import { InboxPermitsTab } from "./inbox-permits-tab"
 
 export const InboxProjectDetailScreen = observer(() => {
   const { currentPermitProject, error } = usePermitProject()
-  const { jurisdictionId } = useParams<{ jurisdictionId: string }>()
+  const { jurisdictionId, permitProjectId } = useParams<{ jurisdictionId: string; permitProjectId: string }>()
   const location = useLocation()
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { siteConfigurationStore } = useMst()
+  const projectMatchesRoute = currentPermitProject?.id === permitProjectId
   const projectMeetingsEnabled = Boolean(
     siteConfigurationStore.projectMeetingsEnabled && currentPermitProject?.jurisdiction?.projectMeetingsEnabled
   )
+  // Derive from the URL, not store current — store lags during project switches and was redirecting to the wrong project.
   const inboxProjectBasePath =
-    jurisdictionId && currentPermitProject
-      ? `/jurisdictions/${jurisdictionId}/submission-inbox/projects/${currentPermitProject.id}`
+    jurisdictionId && permitProjectId
+      ? `/jurisdictions/${jurisdictionId}/submission-inbox/projects/${permitProjectId}`
       : null
 
   const TABS_DATA: ITabItem[] = useMemo(() => {
@@ -77,12 +79,19 @@ export const InboxProjectDetailScreen = observer(() => {
   }, [inboxProjectBasePath, projectMeetingsEnabled, t])
 
   useEffect(() => {
-    if (!currentPermitProject || !inboxProjectBasePath) return
+    if (!inboxProjectBasePath) return
+
+    if (location.pathname === inboxProjectBasePath) {
+      navigate(`${inboxProjectBasePath}/overview`, { replace: true })
+      return
+    }
+
+    if (!projectMatchesRoute || TABS_DATA.length === 0) return
 
     if (!TABS_DATA.some((tab) => location.pathname === tab.to || location.pathname.startsWith(`${tab.to}/`))) {
       navigate(`${inboxProjectBasePath}/overview`, { replace: true })
     }
-  }, [TABS_DATA, currentPermitProject, inboxProjectBasePath, location.pathname, navigate])
+  }, [TABS_DATA, projectMatchesRoute, inboxProjectBasePath, location.pathname, navigate])
 
   useEffect(() => {
     if (currentPermitProject) {
@@ -106,7 +115,7 @@ export const InboxProjectDetailScreen = observer(() => {
   }
 
   if (error) return <ErrorScreen error={error} />
-  if (!currentPermitProject && !error) return <LoadingScreen />
+  if (!projectMatchesRoute && !error) return <LoadingScreen />
   if (!currentPermitProject) return <Text>{t("permitProject.details.notFound")}</Text>
 
   return (
