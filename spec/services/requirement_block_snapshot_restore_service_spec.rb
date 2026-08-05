@@ -6,8 +6,17 @@ RSpec.describe RequirementBlockSnapshotRestoreService do
     template.requirement_template_sections.first.requirement_blocks.first
   end
   let!(:template_version) do
+    create(
+      :template_version,
+      requirement_template: template,
+      status: :published,
+      requirement_blocks_json: snapshot_blocks_json(template)
+    )
+  end
+
+  def snapshot_blocks_json(requirement_template)
     blocks_json = {}
-    template.requirement_template_sections.each do |section|
+    requirement_template.requirement_template_sections.each do |section|
       section.requirement_blocks.each do |requirement_block|
         blocks_json[
           requirement_block.id
@@ -17,17 +26,12 @@ RSpec.describe RequirementBlockSnapshotRestoreService do
         )
       end
     end
+    blocks_json
+  end
 
-    create(
-      :template_version,
-      requirement_template: template,
-      status: :published,
-      requirement_blocks_json: blocks_json,
-      denormalized_template_json:
-        RequirementTemplateBlueprint.render_as_hash(
-          template,
-          view: :template_snapshot
-        )
+  def refresh_version_snapshot!
+    template_version.update!(
+      requirement_blocks_json: snapshot_blocks_json(template.reload)
     )
   end
 
@@ -76,7 +80,6 @@ RSpec.describe RequirementBlockSnapshotRestoreService do
 
     it "raises when the live block was hard-deleted" do
       block_id = block.id
-      # destroy join rows then the block record itself
       TemplateSectionBlock.where(requirement_block_id: block_id).delete_all
       Requirement.where(requirement_block_id: block_id).delete_all
       RequirementBlock.where(id: block_id).delete_all
@@ -99,19 +102,7 @@ RSpec.describe RequirementBlockSnapshotRestoreService do
           }
         }
       )
-
-      snapshot =
-        RequirementBlockBlueprint.render_as_hash(
-          block.reload,
-          parent_key: "section"
-        )
-      template_version.update!(
-        requirement_blocks_json: {
-          block.id => snapshot
-        }
-      )
-
-      # Mutate live options so restore has something to reverse
+      refresh_version_snapshot!
       req.update!(input_options: {})
 
       result = described_class.new(template_version, block.id).call!
@@ -120,6 +111,122 @@ RSpec.describe RequirementBlockSnapshotRestoreService do
       expect(
         restored_req.input_options.dig("computed_compliance", "options_map")
       ).to eq({ "raw_key" => "mapped" })
+    end
+
+    context "with question bank links" do
+      let!(:bank_question) do
+        create(
+          :requirement_question,
+          label: "Bank label",
+          hint: "Bank default hint",
+          instructions: "Bank default instructions",
+          input_type: :text,
+          input_options: {
+            "value_options" => []
+          }
+        )
+      end
+      let!(:req) { block.requirements.order(:position).first }
+      let!(:sibling_req) { block.requirements.order(:position).second }
+
+      before do
+        # Conditional must reference a real sibling requirement_code in this block
+        req.update!(
+          requirement_question: bank_question,
+          label: "Bank label",
+          input_type: :text,
+          hint: nil,
+          instructions: nil,
+          input_options: {
+            "conditional" => {
+              "when" => sibling_req.requirement_code,
+              "eq" => "yes",
+              "show" => true,
+              "operator" => "isEqual"
+            }
+          }
+        )
+        refresh_version_snapshot!
+      end
+
+      it "re-links the bank question and restores nil overrides as inherit" do
+        req.update!(
+          hint: "Temporary override",
+          instructions: "Temporary instructions",
+          requirement_question_id: nil
+        )
+
+        result = described_class.new(template_version.reload, block.id).call!
+        restored = result.requirements.find(req.id)
+
+        expect(restored.requirement_question_id).to eq(bank_question.id)
+        expect(restored.read_attribute(:hint)).to be_nil
+        expect(restored.read_attribute(:instructions)).to be_nil
+        expect(restored.effective_hint).to eq("Bank default hint")
+        expect(restored.input_options.dig("conditional", "when")).to eq(
+          sibling_req.requirement_code
+        )
+        # Bank row unchanged
+        expect(bank_question.reload.hint).to eq("Bank default hint")
+        expect(bank_question.label).to eq("Bank label")
+      end
+
+      it "restores placement hint/instructions overrides without mutating the bank" do
+        req.update!(
+          hint: "Placement override",
+          instructions: "Placement instructions"
+        )
+        refresh_version_snapshot!
+
+        req.update!(hint: nil, instructions: nil)
+        bank_question.update!(
+          hint: "Live bank changed",
+          label: "Live bank label"
+        )
+
+        result = described_class.new(template_version.reload, block.id).call!
+        restored = result.requirements.find(req.id)
+
+        expect(restored.requirement_question_id).to eq(bank_question.id)
+        expect(restored.read_attribute(:hint)).to eq("Placement override")
+        expect(restored.read_attribute(:instructions)).to eq(
+          "Placement instructions"
+        )
+        expect(bank_question.reload.hint).to eq("Live bank changed")
+        expect(bank_question.label).to eq("Live bank label")
+        expect(restored.effective_label).to eq("Live bank label")
+      end
+
+      it "detaches and materializes effective wording when the bank question is gone" do
+        refresh_version_snapshot!
+        bank_id = bank_question.id
+        req.update!(requirement_question_id: nil) # allow destroy
+        RequirementQuestion.where(id: bank_id).delete_all
+
+        service = described_class.new(template_version.reload, block.id)
+        result = service.call!
+        restored = result.requirements.find(req.id)
+
+        expect(restored.requirement_question_id).to be_nil
+        expect(restored.label).to eq("Bank label")
+        expect(restored.hint).to eq("Bank default hint")
+        expect(restored.instructions).to eq("Bank default instructions")
+        expect(service.detached_requirement_codes).to include(
+          restored.requirement_code
+        )
+      end
+
+      it "detaches and materializes when the bank question is discarded" do
+        refresh_version_snapshot!
+        bank_question.discard
+
+        result = described_class.new(template_version.reload, block.id).call!
+        restored = result.requirements.find(req.id)
+
+        expect(restored.requirement_question_id).to be_nil
+        expect(restored.label).to eq("Bank label")
+        expect(restored.hint).to eq("Bank default hint")
+      end
     end
   end
 end

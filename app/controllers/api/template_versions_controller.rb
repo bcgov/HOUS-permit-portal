@@ -406,11 +406,10 @@ class Api::TemplateVersionsController < Api::ApplicationController
       render_success block,
                      "requirement_template.restore_requirement_block_success",
                      { blueprint: RequirementBlockBlueprint }
-    rescue RequirementBlockSnapshotRestoreError => e
+    rescue RequirementBlockSnapshotRestoreError, StandardError => e
       render_error "requirement_template.restore_requirement_block_error",
-                   message_opts: {
-                     error_message: e.message
-                   }
+                   { message_opts: { error_message: e.message } },
+                   e
     end
   end
 
