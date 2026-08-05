@@ -102,6 +102,10 @@ class PermitApplicationPolicy < ApplicationPolicy
       ((user.review_staff?) && user.member_of?(record.jurisdiction_id))
   end
 
+  def download_supporting_documents_zip?
+    generate_missing_pdfs?
+  end
+
   def finalize_revision_requests?
     return false unless user.review_staff? && record.submitted?
 

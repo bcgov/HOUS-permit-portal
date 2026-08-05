@@ -9,6 +9,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
                   mark_as_viewed
                   update_version
                   generate_missing_pdfs
+                  download_supporting_documents_zip
                   update_revision_requests
                   create_permit_collaboration
                   invite_new_collaborator
@@ -383,6 +384,20 @@ class Api::PermitApplicationsController < Api::ApplicationController
     ZipfileJob.perform_async(@permit_application.id)
 
     head :ok
+  end
+
+  def download_supporting_documents_zip
+    authorize @permit_application
+
+    document_ids = Array(params[:supporting_document_ids]).presence
+    SupportingDocumentsZipper
+      .new(@permit_application.id, document_ids: document_ids)
+      .with_zip do |path|
+        send_data File.binread(path),
+                  filename: File.basename(path),
+                  type: "application/zip",
+                  disposition: "attachment"
+      end
   end
 
   def finalize_revision_requests
