@@ -102,6 +102,33 @@ RSpec.describe SupportingDocumentsZipper do
       expect(FileUtils).to have_received(:rm_f).at_least(:once)
     end
 
+    it "zips only the requested document ids" do
+      zipper =
+        described_class.new(permit_application.id, document_ids: [document2.id])
+
+      allow(zipper).to receive(:download_file).with(document2).and_return(
+        "/tmp/f2.pdf"
+      )
+      allow(File).to receive(:binread).and_return("zip-bytes")
+
+      zipper.with_zip do |path|
+        expect(path.to_s).to end_with(
+          "PA-0001_2026-04-29_supporting-documents.zip"
+        )
+      end
+
+      expect(zip_entry_zipfile).not_to have_received(:add).with(
+        "Original File.pdf",
+        anything
+      )
+      expect(zip_entry_zipfile).to have_received(:add).with(
+        "Other Original.pdf",
+        "/tmp/f2.pdf"
+      )
+      expect(zipfile_uploader).not_to have_received(:upload)
+      expect(FileUtils).to have_received(:rm_f).at_least(:once)
+    end
+
     it "skips adding documents that fail to download" do
       zipper = described_class.new(permit_application.id)
 
