@@ -13,6 +13,7 @@ import { ErrorScreen } from "../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
 import { ConfirmationModal } from "../../../shared/confirmation-modal"
 import { FloatingHelpDrawer } from "../../../shared/floating-help-drawer"
+import { ConfirmationModal as PromptConfirmationModal } from "../../../shared/modals/confirmation-modal"
 import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
 import { BuilderBottomFloatingButtons } from "../builder-bottom-floating-buttons"
 import { PublishScheduleModal } from "../publish-schedule-modal"
@@ -21,6 +22,7 @@ import { SectionsSidebar } from "../sections-sidebar"
 import { SharePreviewPopover } from "../share-preview-popover"
 import { useSectionHighlight } from "../use-section-highlight"
 import { BuilderHeader } from "./base-edit-requirement-template-screen/builder-header"
+import { TemplateVersionBlockActionsMenu } from "./template-version-block-actions-menu"
 
 const scrollToIdPrefix = "template-version-scroll-to-id-"
 export const formScrollToId = (id: string) => `${scrollToIdPrefix}${id}`
@@ -245,7 +247,7 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
                 />
               )}
               {isSuperAdmin && requirementTemplateId && (
-                <ConfirmationModal
+                <PromptConfirmationModal
                   promptHeader={t("templateVersionPreview.restoreLayout.confirmTitle")}
                   promptMessage={
                     <Text whiteSpace="pre-line">{t("templateVersionPreview.restoreLayout.confirmBody")}</Text>
@@ -286,20 +288,13 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
             setSectionRef={setSectionRef}
             formScrollToId={formScrollToId}
             renderEdit={
-              isSuperAdmin && requirementTemplateId
+              isSuperAdmin && requirementTemplateId && templateVersion
                 ? ({ denormalizedRequirementBlock }) => (
-                    <RouterLinkButton
-                      to={builderBlockPath(denormalizedRequirementBlock.id)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      variant="link"
-                      color="text.primary"
-                      textDecoration="none"
-                      _hover={{ textDecoration: "underline" }}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {t("templateVersionPreview.editSourceBlock")}
-                    </RouterLinkButton>
+                    <TemplateVersionBlockActionsMenu
+                      templateVersionId={templateVersion.id}
+                      requirementTemplateId={requirementTemplateId}
+                      requirementBlockId={denormalizedRequirementBlock.id}
+                    />
                   )
                 : undefined
             }
@@ -320,9 +315,5 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
     if (element) {
       element.scrollIntoView({ behavior: "smooth", block: "start" })
     }
-  }
-
-  function builderBlockPath(requirementBlockId: string) {
-    return `/requirement-templates/${requirementTemplateId}/edit?openRequirementBlockId=${requirementBlockId}`
   }
 })

@@ -106,6 +106,8 @@ Rails.application.routes.draw do
         post "promote_draft", to: "template_versions#promote_draft"
         post "validate_config", to: "template_versions#validate_config"
         post "restore_layout", to: "template_versions#restore_layout"
+        post "restore_requirement_block",
+             to: "template_versions#restore_requirement_block"
         post "invite_draft_previewers",
              to: "template_versions#invite_draft_previewers"
         post "share_draft", to: "template_versions#share_draft"

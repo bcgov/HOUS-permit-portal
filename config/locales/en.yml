@@ -645,6 +645,12 @@ en:
       restore_layout_error:
         title: Error
         message: "%{error_message}"
+      restore_requirement_block_success:
+        title: ""
+        message: "Requirement block restored from this version"
+      restore_requirement_block_error:
+        title: Error
+        message: "%{error_message}"
       no_draft_error:
         title: Error
         message: "No early access version exists for this template"
@@ -1181,6 +1187,11 @@ en:
       empty_snapshot: "This version has no layout snapshot to restore from"
       malformed_snapshot: "This version's layout snapshot is invalid"
       missing_blocks: "Cannot restore layout. These blocks are missing or archived in the library: %{blocks}"
+    requirement_block_snapshot_restore_service:
+      missing_block_id: "A requirement block id is required"
+      block_not_found: "This requirement block no longer exists in the library"
+      block_not_in_snapshot: "This requirement block is not present in the selected version snapshot"
+      malformed_snapshot: "This version's block snapshot is invalid"
   formio:
     requirement_template:
       completion_title: "Completion"

@@ -4923,6 +4923,15 @@ Thank you,
               "This will replace the current builder layout (sections, block arrangement, and show/hide rules) with the layout from this version.\n\nIt does not rewind the wording or settings inside shared question blocks. If a block from this version is missing or archived in the library, the restore will fail.\n\nAny unsaved builder edits will be lost.",
             confirmButton: "Restore layout",
           },
+          blockActions: {
+            menuLabel: "Block actions",
+            editSourceBlock: "Edit source block",
+            restoreSourceBlock: "Restore source block",
+            restoreConfirmTitle: "Restore this shared block from the version?",
+            restoreConfirmBody:
+              "This overwrites the live shared requirement block in the library so it matches this version’s snapshot (name, fields, labels, required/optional, conditionals, and related settings).\n\nImportant limitations:\n• Every permit template builder that uses this block will get these restored field definitions — not only the template you are viewing.\n• Attached requirement documents / downloadable files are not restored.\n• Already-submitted applications stay on their frozen template version; this changes the library going forward.\n• If the block was archived, it will be un-archived in the library (re-adding it to a template’s layout is separate — use Restore layout if needed).\n• If the block was permanently deleted from the library, restore cannot recreate it.",
+            restoreConfirmButton: "Overwrite shared block",
+          },
           schedulePublish: {
             triggerButton: "Promote",
             scheduleModalTitle: "Promote early access version?",
