@@ -195,9 +195,10 @@ export const RequirementBlockStoreModel = types
       const clonedParams: IRequirementBlockParams = {
         ...copyableRequirementsAttributes,
         requirementsAttributes: requirementBlock.requirements?.map((attr) => {
-          const { id, requirementQuestionId, usesSharedQuestion, ...rest } = attr
-          if (usesSharedQuestion && requirementQuestionId) {
-            return { ...rest, requirementQuestionId, usesSharedQuestion } as unknown as IRequirementAttributes
+          const { id, requirementQuestionId, ...rest } = attr
+          // Keep the bank link on copy; local (detached) fields omit the FK.
+          if (requirementQuestionId) {
+            return { ...rest, requirementQuestionId } as unknown as IRequirementAttributes
           }
           return rest as unknown as IRequirementAttributes
         }),

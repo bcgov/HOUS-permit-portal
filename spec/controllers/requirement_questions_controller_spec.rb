@@ -25,7 +25,7 @@ RSpec.describe Api::RequirementQuestionsController,
 
   describe "POST #create" do
     context "with valid parameters" do
-      it "creates a shared requirement question with uuid-scoped requirement_code" do
+      it "creates a requirement question with uuid-scoped requirement_code" do
         expect {
           post :create, params: { requirement_question: valid_attributes }
         }.to change(RequirementQuestion, :count).by(1)
@@ -33,7 +33,6 @@ RSpec.describe Api::RequirementQuestionsController,
         expect(response).to have_http_status(:success)
 
         question = RequirementQuestion.find(question_id)
-        expect(question.shared).to eq(true)
         expect(question.name).to eq("Property owner name")
         expect(question.requirement_code).to eq(
           "#{question_id}:property_owner_name"
@@ -79,36 +78,10 @@ RSpec.describe Api::RequirementQuestionsController,
     end
   end
 
-  describe "member actions on private questions" do
-    let!(:private_question) { create(:requirement_question, shared: false) }
-
-    it "does not expose private questions via show" do
-      expect {
-        get :show, params: { id: private_question.id }, format: :json
-      }.to raise_error(ActiveRecord::RecordNotFound)
-    end
-
-    it "does not allow updating private questions" do
-      expect {
-        put :update,
-            params: {
-              id: private_question.id,
-              requirement_question: {
-                name: "Should not apply",
-                label: private_question.label,
-                input_type: private_question.input_type
-              }
-            },
-            format: :json
-      }.to raise_error(ActiveRecord::RecordNotFound)
-    end
-  end
-
   describe "POST #index (search)" do
-    let!(:shared_question) { create(:requirement_question, :shared) }
-    let!(:private_question) { create(:requirement_question, shared: false) }
+    let!(:bank_question) { create(:requirement_question) }
     let!(:archived_question) do
-      create(:requirement_question, :shared, discarded_at: Time.current)
+      create(:requirement_question, discarded_at: Time.current)
     end
 
     before do
@@ -116,13 +89,12 @@ RSpec.describe Api::RequirementQuestionsController,
       RequirementQuestion.search_index.refresh
     end
 
-    it "returns only shared, non-archived questions" do
+    it "returns only non-archived questions" do
       post :index, params: { query: "", page: 1, per_page: 20 }, format: :json
 
       expect(response).to have_http_status(:success)
       ids = json_response["data"].map { |row| row["id"] }
-      expect(ids).to include(shared_question.id)
-      expect(ids).not_to include(private_question.id)
+      expect(ids).to include(bank_question.id)
       expect(ids).not_to include(archived_question.id)
     end
 

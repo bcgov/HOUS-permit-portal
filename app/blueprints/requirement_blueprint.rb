@@ -30,30 +30,22 @@ class RequirementBlueprint < Blueprinter::Base
     requirement.effective_instructions
   end
 
-  field :uses_shared_question do |requirement|
-    requirement.requirement_question&.shared? || false
-  end
-
+  # Bank defaults / placement overrides — only when linked (FK present).
+  # Linked vs local is requirement_question_id; no separate "shared" flag.
   field :default_hint do |requirement|
-    if requirement.requirement_question&.shared?
-      requirement.requirement_question&.hint
-    end
+    requirement.requirement_question&.hint
   end
 
   field :default_instructions do |requirement|
-    if requirement.requirement_question&.shared?
-      requirement.requirement_question.instructions
-    end
+    requirement.requirement_question&.instructions
   end
 
   field :hint_override do |requirement|
-    if requirement.requirement_question&.shared?
-      requirement.read_attribute(:hint)
-    end
+    requirement.read_attribute(:hint) if requirement.requirement_question
   end
 
   field :instructions_override do |requirement|
-    if requirement.requirement_question&.shared?
+    if requirement.requirement_question
       requirement.read_attribute(:instructions)
     end
   end

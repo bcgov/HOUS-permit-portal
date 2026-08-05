@@ -33,7 +33,7 @@ export const useRequirementLogic = ({
 }: UseRequirementLogicProps) => {
   const { t } = useTranslation()
 
-  const onUseSharedQuestion = (question: IRequirementQuestion) => {
+  const onUseBankQuestion = (question: IRequirementQuestion) => {
     const requirementCodeAlreadyUsed = watchedRequirements?.some(
       (requirement) => requirement.requirementCode === question.requirementCode
     )
@@ -41,7 +41,6 @@ export const useRequirementLogic = ({
     append({
       id: `dummy-${uuidv4()}`,
       requirementQuestionId: question.id,
-      usesSharedQuestion: true,
       defaultHint: question.hint ?? null,
       defaultInstructions: question.instructions ?? null,
       requirementCode: requirementCodeAlreadyUsed ? `dummy-${uuidv4()}` : question.requirementCode,
@@ -216,7 +215,7 @@ export const useRequirementLogic = ({
 
   return {
     onUseRequirement,
-    onUseSharedQuestion,
+    onUseBankQuestion,
     onRemoveRequirement,
     disabledRequirementTypeOptions,
   }

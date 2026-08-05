@@ -3,6 +3,7 @@ import { Info, Pencil } from "@phosphor-icons/react"
 import React from "react"
 import { FieldValues, useController } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { isTipTapEmpty } from "../../../../utils/utility-functions"
 import { EditorWithPreview } from "../../../shared/editor/custom-extensions/editor-with-preview"
 import { TEditableRichTextProps } from "./types"
 
@@ -11,15 +12,26 @@ export type TEditableHelperTextProps<TFieldValues extends FieldValues> = TEditab
 export function EditableHelperText<TFieldValues extends FieldValues>({
   controlProps,
   defaultValue,
-  usesSharedQuestion = false,
+  usesBankQuestion = false,
   isQuestionBankDefault = false,
 }: TEditableHelperTextProps<TFieldValues>) {
   const {
     field: { onChange, value },
   } = useController(controlProps)
   const { t } = useTranslation()
-  const isUsingSharedDefault = usesSharedQuestion && value == null
-  const htmlValue = (isUsingSharedDefault ? defaultValue : value) ?? ""
+  const isUsingBankDefault = usesBankQuestion && value == null
+  const htmlValue = (isUsingBankDefault ? defaultValue : value) ?? ""
+  // Shared/bank defaults belong in the field itself — skip the empty-state "Add ..." CTA.
+  const skipInitialTrigger = usesBankQuestion || isQuestionBankDefault
+
+  // TipTap writes "" on open when empty; keep null so we stay on the shared default.
+  const handleChange = (html: string) => {
+    if (usesBankQuestion && isTipTapEmpty(html) && isTipTapEmpty(defaultValue ?? "")) {
+      onChange(null)
+      return
+    }
+    onChange(html)
+  }
 
   return (
     <Box>
@@ -33,10 +45,10 @@ export function EditableHelperText<TFieldValues extends FieldValues>({
           </Tooltip>
         </HStack>
       )}
-      {usesSharedQuestion && (
+      {usesBankQuestion && (
         <Text fontSize={"xs"} mb={1} color={"text.secondary"}>
           {t(
-            isUsingSharedDefault
+            isUsingBankDefault
               ? "requirementsLibrary.modals.usingSharedDefault"
               : "requirementsLibrary.modals.customizedForBlock"
           )}
@@ -49,9 +61,9 @@ export function EditableHelperText<TFieldValues extends FieldValues>({
             : "requirementsLibrary.modals.addHelpTextLabel"
         )}
         htmlValue={htmlValue}
-        onChange={onChange}
+        onChange={handleChange}
         onRemove={
-          usesSharedQuestion && !isUsingSharedDefault
+          usesBankQuestion && !isUsingBankDefault
             ? (setEditMode) => {
                 onChange(null)
                 setEditMode(false)
@@ -59,21 +71,19 @@ export function EditableHelperText<TFieldValues extends FieldValues>({
             : undefined
         }
         removeText={t("requirementsLibrary.modals.useSharedDefault")}
-        renderInitialTrigger={(buttonProps) => (
-          <Button variant={"link"} rightIcon={<Pencil size={14} />} fontSize={"md"} {...buttonProps}>
-            {t(
-              isQuestionBankDefault
-                ? "questionBank.modals.addDefaultHelpText"
-                : usesSharedQuestion
-                  ? "requirementsLibrary.modals.addCustomHelpText"
-                  : "requirementsLibrary.modals.addHelpText"
-            )}
-          </Button>
-        )}
+        {...(skipInitialTrigger
+          ? {}
+          : {
+              renderInitialTrigger: (buttonProps) => (
+                <Button variant={"link"} rightIcon={<Pencil size={14} />} fontSize={"md"} {...buttonProps}>
+                  {t("requirementsLibrary.modals.addHelpText")}
+                </Button>
+              ),
+            })}
         editText={t(
           isQuestionBankDefault
             ? "questionBank.modals.editDefaultHelpText"
-            : isUsingSharedDefault
+            : isUsingBankDefault
               ? "requirementsLibrary.modals.customizeHelpText"
               : "requirementsLibrary.modals.editHelpTextLabel"
         )}

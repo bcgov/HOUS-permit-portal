@@ -22,6 +22,7 @@ import { IProjectAudit } from "../../models/project-audit"
 import { IProjectMeeting } from "../../models/project-meeting"
 import { IReleaseNote } from "../../models/release-note-model"
 import { IRequirementBlock } from "../../models/requirement-block"
+import { IRequirementQuestion } from "../../models/requirement-question"
 import { IRequirementTemplate } from "../../models/requirement-template"
 import { ITemplateCategory } from "../../models/template-category"
 import { ITemplateVersion } from "../../models/template-version"
@@ -308,6 +309,10 @@ export class Api {
 
   async fetchRequirementQuestions(params?: TSearchParams<EQuestionBankSortFields>) {
     return this.client.post<IRequirementQuestionResponse>("/requirement_questions/search", params)
+  }
+
+  async fetchRequirementQuestion(id: string) {
+    return this.client.get<ApiResponse<IRequirementQuestion>>(`/requirement_questions/${id}`)
   }
 
   async fetchJurisdictionUsers(jurisdictionId, params?: TSearchParams<EUserSortFields>) {

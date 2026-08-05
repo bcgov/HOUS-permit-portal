@@ -4,6 +4,20 @@ import { withRootStore } from "../lib/with-root-store"
 import { IRequirementQuestionParams } from "../types/api-request"
 import { ERequirementType } from "../types/enums"
 
+export type TQuestionUsageTemplate = {
+  id: string
+  nickname: string | null
+  templateCategoryLabel?: string | null
+  published?: boolean
+}
+
+export type TQuestionUsageBlock = {
+  id: string
+  name: string
+  // Present on show (:with_usage); list/search omits this to keep the index light.
+  requirementTemplates?: TQuestionUsageTemplate[]
+}
+
 export const RequirementQuestionModel = types
   .model("RequirementQuestionModel", {
     id: types.identifier,
@@ -14,13 +28,12 @@ export const RequirementQuestionModel = types
     hint: types.maybeNull(types.string),
     instructions: types.maybeNull(types.string),
     requirementCode: types.string,
-    shared: types.boolean,
     associations: types.array(types.string),
     inputOptions: types.frozen(),
     usageCount: types.optional(types.number, 0),
     hasDataValidation: types.optional(types.boolean, false),
     hasAutomatedCompliance: types.optional(types.boolean, false),
-    requirementBlocks: types.optional(types.array(types.frozen<{ id: string; name: string }>()), []),
+    requirementBlocks: types.optional(types.array(types.frozen<TQuestionUsageBlock>()), []),
     createdAt: types.Date,
     updatedAt: types.Date,
     discardedAt: types.maybeNull(types.Date),
@@ -35,6 +48,15 @@ export const RequirementQuestionModel = types
   .actions((self) => ({
     update: flow(function* (params: IRequirementQuestionParams) {
       const response = yield* toGenerator(self.environment.api.updateRequirementQuestion(self.id, params))
+      if (response.ok) {
+        applySnapshot(self, response.data.data)
+      }
+      return response.ok
+    }),
+    // Show endpoint (:with_usage) — pulls nested templates. RHF form state is separate,
+    // so this only refreshes MST fields the usage panel / banners read.
+    refresh: flow(function* () {
+      const response = yield* toGenerator(self.environment.api.fetchRequirementQuestion(self.id))
       if (response.ok) {
         applySnapshot(self, response.data.data)
       }

@@ -70,8 +70,9 @@ export const RequirementBlockModel = types
         const { inputOptions, conditional, ...baseAttributes } = requirement
         const formAttributes = {
           ...baseAttributes,
-          hint: requirement.usesSharedQuestion ? requirement.hintOverride : requirement.hint,
-          instructions: requirement.usesSharedQuestion ? requirement.instructionsOverride : requirement.instructions,
+          // Linked placements store overrides separately; local fields use hint/instructions directly.
+          hint: requirement.requirementQuestionId ? requirement.hintOverride : requirement.hint,
+          instructions: requirement.requirementQuestionId ? requirement.instructionsOverride : requirement.instructions,
         }
 
         if (!conditional) {

@@ -7,11 +7,10 @@ RSpec.describe Requirement, type: :model, search: true do
     it { should belong_to(:requirement_question).optional }
   end
 
-  describe "shared question text defaults" do
-    let(:shared_question) do
+  describe "bank question text defaults" do
+    let(:bank_question) do
       create(
         :requirement_question,
-        :shared,
         hint: "<p>Shared help</p>",
         instructions: "<p>Shared instructions</p>"
       )
@@ -21,7 +20,7 @@ RSpec.describe Requirement, type: :model, search: true do
       requirement =
         build(
           :requirement,
-          requirement_question: shared_question,
+          requirement_question: bank_question,
           hint: nil,
           instructions: nil
         )
@@ -32,11 +31,11 @@ RSpec.describe Requirement, type: :model, search: true do
       )
     end
 
-    it "uses placement overrides without detaching the shared question" do
+    it "uses placement overrides without detaching the bank question" do
       requirement =
         build(
           :requirement,
-          requirement_question: shared_question,
+          requirement_question: bank_question,
           hint: "<p>Block help</p>",
           instructions: "<p>Block instructions</p>"
         )
@@ -45,14 +44,14 @@ RSpec.describe Requirement, type: :model, search: true do
       expect(requirement.effective_instructions).to eq(
         "<p>Block instructions</p>"
       )
-      expect(requirement.requirement_question).to eq(shared_question)
+      expect(requirement.requirement_question).to eq(bank_question)
     end
 
-    it "allows an empty placement override to suppress a shared default" do
+    it "allows an empty placement override to suppress a bank default" do
       requirement =
         build(
           :requirement,
-          requirement_question: shared_question,
+          requirement_question: bank_question,
           hint: "",
           instructions: ""
         )
@@ -61,20 +60,20 @@ RSpec.describe Requirement, type: :model, search: true do
       expect(requirement.effective_instructions).to eq("")
     end
 
-    it "serializes shared defaults separately from placement overrides" do
+    it "serializes bank defaults separately from placement overrides" do
       requirement =
         create(
           :requirement,
-          requirement_question: shared_question,
+          requirement_question: bank_question,
           hint: nil,
           instructions: "<p>Block instructions</p>"
         )
       payload =
         RequirementBlueprint.render_as_hash(requirement).deep_stringify_keys
 
+      expect(payload["requirement_question_id"]).to eq(bank_question.id)
       expect(
         payload.slice(
-          "uses_shared_question",
           "default_hint",
           "default_instructions",
           "hint_override",
@@ -82,13 +81,31 @@ RSpec.describe Requirement, type: :model, search: true do
         )
       ).to eq(
         {
-          "uses_shared_question" => true,
           "default_hint" => "<p>Shared help</p>",
           "default_instructions" => "<p>Shared instructions</p>",
           "hint_override" => nil,
           "instructions_override" => "<p>Block instructions</p>"
         }
       )
+      expect(payload).not_to have_key("uses_shared_question")
+    end
+
+    it "does not create a requirement question when the FK is nil" do
+      requirement =
+        create(
+          :requirement,
+          requirement_question: nil,
+          label: "Local field",
+          hint: "<p>Local help</p>"
+        )
+
+      expect(requirement.requirement_question_id).to be_nil
+      expect(requirement.effective_hint).to eq("<p>Local help</p>")
+      payload =
+        RequirementBlueprint.render_as_hash(requirement).deep_stringify_keys
+      expect(payload["requirement_question_id"]).to be_nil
+      expect(payload["default_hint"]).to be_nil
+      expect(payload).not_to have_key("uses_shared_question")
     end
   end
 

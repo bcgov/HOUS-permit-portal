@@ -6,8 +6,7 @@ module Api::Concerns::Search::RequirementQuestions
       order: order,
       match: :word_start,
       where: {
-        discarded: discarded,
-        shared: true
+        discarded: discarded
       },
       page: search_params[:page],
       per_page:
@@ -18,6 +17,7 @@ module Api::Concerns::Search::RequirementQuestions
             nil
           end
         ),
+      # Index only needs block id/name (:extended). Templates load on show (:with_usage).
       includes: %i[taggings requirement_blocks],
       scope_results: ->(relation) { policy_scope(relation) }
     }

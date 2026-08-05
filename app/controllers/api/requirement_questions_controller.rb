@@ -15,6 +15,7 @@ class Api::RequirementQuestionsController < Api::ApplicationController
                      meta: page_meta(@search),
                      blueprint: RequirementQuestionBlueprint,
                      blueprint_opts: {
+                       # Block names only — nested templates are show/modal (:with_usage).
                        view: :extended
                      }
                    }
@@ -28,14 +29,15 @@ class Api::RequirementQuestionsController < Api::ApplicationController
                    {
                      blueprint: RequirementQuestionBlueprint,
                      blueprint_opts: {
-                       view: :extended
+                       # Modal "where used" panel needs nested templates.
+                       view: :with_usage
                      }
                    }
   end
 
   def create
     @requirement_question =
-      RequirementQuestion.build(requirement_question_params.merge(shared: true))
+      RequirementQuestion.build(requirement_question_params)
     authorize @requirement_question
 
     if @requirement_question.save
@@ -44,7 +46,7 @@ class Api::RequirementQuestionsController < Api::ApplicationController
                      {
                        blueprint: RequirementQuestionBlueprint,
                        blueprint_opts: {
-                         view: :extended
+                         view: :with_usage
                        }
                      }
     else
@@ -64,7 +66,7 @@ class Api::RequirementQuestionsController < Api::ApplicationController
                      {
                        blueprint: RequirementQuestionBlueprint,
                        blueprint_opts: {
-                         view: :extended
+                         view: :with_usage
                        }
                      }
     else
@@ -85,7 +87,7 @@ class Api::RequirementQuestionsController < Api::ApplicationController
                      {
                        blueprint: RequirementQuestionBlueprint,
                        blueprint_opts: {
-                         view: :extended
+                         view: :with_usage
                        }
                      }
     else
@@ -106,7 +108,7 @@ class Api::RequirementQuestionsController < Api::ApplicationController
                      {
                        blueprint: RequirementQuestionBlueprint,
                        blueprint_opts: {
-                         view: :extended
+                         view: :with_usage
                        }
                      }
     else
@@ -143,7 +145,6 @@ class Api::RequirementQuestionsController < Api::ApplicationController
   end
 
   def set_requirement_question
-    # Bank API is shared-only; private (in-block) mirrors are out of scope here.
-    @requirement_question = RequirementQuestion.shared.find(params[:id])
+    @requirement_question = RequirementQuestion.find(params[:id])
   end
 end

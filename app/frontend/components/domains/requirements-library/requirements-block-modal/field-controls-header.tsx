@@ -14,12 +14,13 @@ import { IRequirementOptionsMenu, OptionsMenu } from "../requirement-field-edit/
 
 interface IProps {
   isRequirementInEditMode: boolean
-  toggleRequirementToEdit: () => void
+  toggleRequirementToEdit?: () => void
   requirementType: ERequirementType
   requirementCode: string
   onRemove: IRequirementOptionsMenu["onRemove"]
-  onDetachSharedQuestion?: IRequirementOptionsMenu["onDetachSharedQuestion"]
-  isSharedQuestion?: boolean
+  onDetachBankQuestion?: IRequirementOptionsMenu["onDetachBankQuestion"]
+  onOpenBankQuestion?: IRequirementOptionsMenu["onOpenBankQuestion"]
+  isBankLinked?: boolean
   disabledMenuOptions?: IRequirementOptionsMenu["disabledOptions"]
   hideConditional?: boolean
   hidePlacementConfiguration?: boolean
@@ -42,8 +43,9 @@ export function FieldControlsHeader({
   computedCompliance,
   dataValidation,
   onRemove,
-  onDetachSharedQuestion,
-  isSharedQuestion = false,
+  onDetachBankQuestion,
+  onOpenBankQuestion,
+  isBankLinked = false,
   index,
   requirementCode,
 }: IProps) {
@@ -59,7 +61,7 @@ export function FieldControlsHeader({
       {/* Keep stale configuration removable even when field removal and conditionals are protected. */}
       {isRequirementInEditMode &&
         !hidePlacementConfiguration &&
-        (isSharedQuestion ||
+        (isBankLinked ||
           !(
             disabledMenuOptions.includes("remove") &&
             disabledMenuOptions.includes("conditional") &&
@@ -71,8 +73,9 @@ export function FieldControlsHeader({
               size: "sm",
             }}
             onRemove={onRemove}
-            onDetachSharedQuestion={onDetachSharedQuestion}
-            isSharedQuestion={isSharedQuestion}
+            onDetachBankQuestion={onDetachBankQuestion}
+            onOpenBankQuestion={onOpenBankQuestion}
+            isBankLinked={isBankLinked}
             disabledOptions={disabledMenuOptions}
             hideConditional={hideConditional}
             hidePlacementConfiguration={hidePlacementConfiguration}
@@ -95,17 +98,17 @@ export function FieldControlsHeader({
         {!isRequirementInEditMode && (
           <RequirementTypeTag type={requirementType} className={"requirement-edit-controls"} />
         )}
-        <Button
-          variant={"primary"}
-          size={"sm"}
-          onClick={() => {
-            toggleRequirementToEdit()
-          }}
-          className={"requirement-edit-controls"}
-          display={isRequirementInEditMode ? "flex" : "none"}
-        >
-          {t(isRequirementInEditMode ? "ui.done" : "ui.edit")}
-        </Button>
+        {toggleRequirementToEdit && (
+          <Button
+            variant={"primary"}
+            size={"sm"}
+            onClick={toggleRequirementToEdit}
+            className={"requirement-edit-controls"}
+            display={isRequirementInEditMode ? "flex" : "none"}
+          >
+            {t(isRequirementInEditMode ? "ui.done" : "ui.edit")}
+          </Button>
+        )}
       </HStack>
     </HStack>
   )
