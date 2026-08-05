@@ -60,10 +60,10 @@ export const AddQuestionsModal = observer(function AddQuestionsModal({
             leftIcon={<Plus size={12} />}
             variant={"primary"}
             onClick={onOpen}
-            aria-label={t("requirementsLibrary.sharedQuestions.addQuestion")}
+            aria-label={t("requirementsLibrary.bankQuestions.addQuestion")}
             {...defaultButtonProps}
           >
-            {t("requirementsLibrary.sharedQuestions.addQuestion")}
+            {t("requirementsLibrary.bankQuestions.addQuestion")}
           </Button>
         ))}
       <Drawer isOpen={isOpen} placement="left" onClose={onClose} finalFocusRef={btnRef}>
@@ -71,7 +71,7 @@ export const AddQuestionsModal = observer(function AddQuestionsModal({
         <DrawerContent maxW="min(1320px, 95vw)" display="flex" flexDir="column">
           <DrawerCloseButton fontSize={"xs"} color={"greys.white"} top={5} right={4} zIndex={1} />
           <DrawerHeader color={"greys.white"} backgroundColor={"theme.blueAlt"} p={6} pt={10} fontSize={"2xl"}>
-            {t("requirementsLibrary.sharedQuestions.addQuestionsTitle")}
+            {t("requirementsLibrary.bankQuestions.addQuestionsTitle")}
           </DrawerHeader>
 
           <DrawerBody p={6} display="flex" flexDir="column" minH={0} flex={1}>

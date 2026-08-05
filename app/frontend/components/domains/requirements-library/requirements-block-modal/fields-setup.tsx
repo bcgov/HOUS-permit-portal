@@ -67,7 +67,7 @@ export const FieldsSetup = observer(function FieldsSetup({
     setRequirementIdToEdit((pastRequirementId) => (pastRequirementId === requirementId ? undefined : requirementId))
   }
 
-  const { onUseRequirement, onUseSharedQuestion, onRemoveRequirement, disabledRequirementTypeOptions } =
+  const { onUseRequirement, onUseBankQuestion, onRemoveRequirement, disabledRequirementTypeOptions } =
     useRequirementLogic({
       append,
       remove,
@@ -80,7 +80,7 @@ export const FieldsSetup = observer(function FieldsSetup({
   const linkedQuestionIds = useMemo(
     () =>
       (watchedRequirements as IRequirementAttributes[] | undefined)
-        ?.filter((requirement) => requirement.usesSharedQuestion && requirement.requirementQuestionId)
+        ?.filter((requirement) => requirement.requirementQuestionId)
         .map((requirement) => requirement.requirementQuestionId as string) ?? [],
     [watchedRequirements]
   )
@@ -95,9 +95,9 @@ export const FieldsSetup = observer(function FieldsSetup({
         leftIcon={<Plus size={12} />}
         variant={"primary"}
         onClick={onOpenAddQuestions}
-        aria-label={t("requirementsLibrary.sharedQuestions.addQuestion")}
+        aria-label={t("requirementsLibrary.bankQuestions.addQuestion")}
       >
-        {t("requirementsLibrary.sharedQuestions.addQuestion")}
+        {t("requirementsLibrary.bankQuestions.addQuestion")}
       </Button>
       <FieldsSetupDrawer
         disabledRequirementTypeOptions={disabledRequirementTypeOptions}
@@ -106,10 +106,10 @@ export const FieldsSetup = observer(function FieldsSetup({
           <Button
             leftIcon={<Plus size={12} />}
             variant={"primary"}
-            aria-label={t("requirementsLibrary.sharedQuestions.addFormField")}
+            aria-label={t("requirementsLibrary.bankQuestions.addFormField")}
             {...props}
           >
-            {t("requirementsLibrary.sharedQuestions.addFormField")}
+            {t("requirementsLibrary.bankQuestions.addFormField")}
           </Button>
         )}
       />
@@ -232,7 +232,7 @@ export const FieldsSetup = observer(function FieldsSetup({
         isOpen={isAddQuestionsOpen}
         onOpen={onOpenAddQuestions}
         onClose={onCloseAddQuestions}
-        onUse={onUseSharedQuestion}
+        onUse={onUseBankQuestion}
         disabledQuestionIds={linkedQuestionIds}
       />
     </Box>

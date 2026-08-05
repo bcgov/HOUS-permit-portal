@@ -99,11 +99,12 @@ export const RequirementFieldRow = ({
   const watchedRequirementCode = watch(`requirementsAttributes.${index}.requirementCode`)
   const watchedComputedCompliance = watch(`requirementsAttributes.${index}.inputOptions.computedCompliance`)
   const watchedDataValidation = watch(`requirementsAttributes.${index}.inputOptions.dataValidation`)
-  const usesSharedQuestion = watch(`requirementsAttributes.${index}.usesSharedQuestion`)
   const requirementQuestionId = watch(`requirementsAttributes.${index}.requirementQuestionId`)
+  // Linked vs local is just the FK — no separate "shared" flag on the form.
+  const usesBankQuestion = !!requirementQuestionId
   const defaultHint = watch(`requirementsAttributes.${index}.defaultHint`)
   const defaultInstructions = watch(`requirementsAttributes.${index}.defaultInstructions`)
-  const displayedHint = usesSharedQuestion && watchedHint == null ? defaultHint : watchedHint
+  const displayedHint = usesBankQuestion && watchedHint == null ? defaultHint : watchedHint
 
   const [questionViewer, setQuestionViewer] = useState<{ id: string; key: number } | null>(null)
   // Editable inputs use defaultValue / useFieldArray local state — remount after bank sync.
@@ -117,7 +118,8 @@ export const RequirementFieldRow = ({
     disabledMenuOptions.push("remove")
   }
 
-  const handleDetachSharedQuestion = () => {
+  const handleDetachBankQuestion = () => {
+    // Copy bank defaults onto the placement, then drop the FK (local-only field).
     if (watchedHint == null) {
       setValue(`requirementsAttributes.${index}.hint`, defaultHint ?? "")
     }
@@ -125,12 +127,11 @@ export const RequirementFieldRow = ({
       setValue(`requirementsAttributes.${index}.instructions`, defaultInstructions ?? "")
     }
     setValue(`requirementsAttributes.${index}.requirementQuestionId`, null)
-    setValue(`requirementsAttributes.${index}.usesSharedQuestion`, false)
     setValue(`requirementsAttributes.${index}.defaultHint`, null)
     setValue(`requirementsAttributes.${index}.defaultInstructions`, null)
   }
 
-  const handleOpenSharedQuestion = async () => {
+  const handleOpenBankQuestion = async () => {
     if (!requirementQuestionId) return
     const question = await requirementQuestionStore.fetchRequirementQuestion(requirementQuestionId)
     if (question) {
@@ -138,7 +139,7 @@ export const RequirementFieldRow = ({
     }
   }
 
-  const handleSharedQuestionSaved = (question: IRequirementQuestion) => {
+  const handleBankQuestionSaved = (question: IRequirementQuestion) => {
     const currentOptions = getValues(`requirementsAttributes.${index}.inputOptions`) ?? {}
     setValue(`requirementsAttributes.${index}.label`, question.label)
     setValue(`requirementsAttributes.${index}.inputType`, question.inputType)
@@ -180,9 +181,9 @@ export const RequirementFieldRow = ({
       pos={"relative"}
       bg={isEditing ? "greys.grey04" : "transparent"}
     >
-      {usesSharedQuestion && (
+      {usesBankQuestion && (
         <Tag size="sm" bg="semantic.infoLight" color="text.primary" mb={2}>
-          {t("requirementsLibrary.sharedQuestions.sharedQuestion")}
+          {t("requirementsLibrary.bankQuestions.bankLinked")}
         </Tag>
       )}
       <ErrorMessage
@@ -216,13 +217,13 @@ export const RequirementFieldRow = ({
             editableHelperTextProps={{
               controlProps: { control, name: `requirementsAttributes.${index}.hint` },
               defaultValue: defaultHint,
-              usesSharedQuestion,
+              usesBankQuestion,
               isQuestionBankDefault: hidePlacementConfiguration,
             }}
             editableInstructionsTextProps={{
               controlProps: { control, name: `requirementsAttributes.${index}.instructions` },
               defaultValue: defaultInstructions,
-              usesSharedQuestion,
+              usesBankQuestion,
               isQuestionBankDefault: hidePlacementConfiguration,
             }}
             isOptionalCheckboxProps={
@@ -300,7 +301,7 @@ export const RequirementFieldRow = ({
                 : undefined
             }
             requirementCode={watchedRequirementCode}
-            lockDefinition={!!usesSharedQuestion}
+            lockDefinition={usesBankQuestion}
           />
         </Box>
       )}
@@ -335,9 +336,9 @@ export const RequirementFieldRow = ({
         isRequirementInEditMode={isEditing}
         toggleRequirementToEdit={showEditControls ? toggleEdit : undefined}
         onRemove={onRemove}
-        onDetachSharedQuestion={handleDetachSharedQuestion}
-        onOpenSharedQuestion={handleOpenSharedQuestion}
-        isSharedQuestion={!!usesSharedQuestion}
+        onDetachBankQuestion={handleDetachBankQuestion}
+        onOpenBankQuestion={handleOpenBankQuestion}
+        isBankLinked={usesBankQuestion}
         elective={watchedElective}
         conditional={hideConditional ? undefined : (watchedConditional as IFormConditional)}
         computedCompliance={hidePlacementConfiguration ? undefined : watchedComputedCompliance}
@@ -354,7 +355,7 @@ export const RequirementFieldRow = ({
           requirementQuestion={viewingQuestion}
           autoOpen
           triggerButtonProps={{ display: "none" }}
-          onSaved={handleSharedQuestionSaved}
+          onSaved={handleBankQuestionSaved}
         />
       )}
     </Box>

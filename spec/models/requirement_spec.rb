@@ -71,9 +71,9 @@ RSpec.describe Requirement, type: :model, search: true do
       payload =
         RequirementBlueprint.render_as_hash(requirement).deep_stringify_keys
 
+      expect(payload["requirement_question_id"]).to eq(bank_question.id)
       expect(
         payload.slice(
-          "uses_shared_question",
           "default_hint",
           "default_instructions",
           "hint_override",
@@ -81,13 +81,13 @@ RSpec.describe Requirement, type: :model, search: true do
         )
       ).to eq(
         {
-          "uses_shared_question" => true,
           "default_hint" => "<p>Shared help</p>",
           "default_instructions" => "<p>Shared instructions</p>",
           "hint_override" => nil,
           "instructions_override" => "<p>Block instructions</p>"
         }
       )
+      expect(payload).not_to have_key("uses_shared_question")
     end
 
     it "does not create a requirement question when the FK is nil" do
@@ -103,7 +103,9 @@ RSpec.describe Requirement, type: :model, search: true do
       expect(requirement.effective_hint).to eq("<p>Local help</p>")
       payload =
         RequirementBlueprint.render_as_hash(requirement).deep_stringify_keys
-      expect(payload["uses_shared_question"]).to eq(false)
+      expect(payload["requirement_question_id"]).to be_nil
+      expect(payload["default_hint"]).to be_nil
+      expect(payload).not_to have_key("uses_shared_question")
     end
   end
 

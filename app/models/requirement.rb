@@ -226,7 +226,7 @@ class Requirement < ApplicationRecord
   end
 
   def effective_hint
-    return read_attribute(:hint) unless requirement_question.present?
+    return read_attribute(:hint) unless requirement_question
 
     if read_attribute(:hint).nil?
       requirement_question.hint
@@ -236,7 +236,7 @@ class Requirement < ApplicationRecord
   end
 
   def effective_instructions
-    return read_attribute(:instructions) unless requirement_question.present?
+    return read_attribute(:instructions) unless requirement_question
 
     if read_attribute(:instructions).nil?
       requirement_question.instructions
