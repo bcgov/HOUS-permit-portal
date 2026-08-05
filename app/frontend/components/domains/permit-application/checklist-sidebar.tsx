@@ -3,6 +3,7 @@ import { CheckCircle, CircleDashed } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { IPermitApplication } from "../../../models/permit-application"
+import { stickyBelowNavBar } from "../../../styles/nav-bar-offset"
 
 interface IChecklistSideBarProps {
   permitApplication: IPermitApplication
@@ -14,7 +15,7 @@ export const ChecklistSideBar = observer(({ permitApplication, completedBlocks }
   const { selectedTabIndex, setSelectedTabIndex, indexOfBlockId, getBlockClass } = permitApplication
 
   const navHeight = document.getElementById("mainNav")?.offsetHeight
-  const permitHeaderHeight = document.getElementById("permitHeader")?.offsetHeight
+  const permitHeaderHeight = document.getElementById("permitHeader")?.offsetHeight ?? 0
 
   // TODO: We should probably switch to use link anchors instead so we have the ability to bring someone directly and also focus on a specific block on the page.
   const handleTabsChange = (index: number, sectionId: string, blockId: string) => {
@@ -35,9 +36,9 @@ export const ChecklistSideBar = observer(({ permitApplication, completedBlocks }
         borderRightColor="greys.grey02"
         width={"sidebar.width"}
         position="sticky"
-        top={permitHeaderHeight}
+        {...stickyBelowNavBar(`${permitHeaderHeight}px`)}
         bottom="0"
-        height={`calc(100vh - ${permitHeaderHeight}px)`}
+        height={`calc(100vh - ${permitHeaderHeight}px - var(--app-navbar-offset))`}
         float="left"
         id="permit-checklist-sidebar"
       >

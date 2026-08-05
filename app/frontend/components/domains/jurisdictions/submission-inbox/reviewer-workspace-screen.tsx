@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next"
 import { Navigate, useLocation, useNavigate, useParams } from "react-router-dom"
 import { useJurisdiction } from "../../../../hooks/resources/use-jurisdiction"
 import { useMst } from "../../../../setup/root"
+import { belowNavBarInFlow } from "../../../../styles/nav-bar-offset"
 import { EInboxViewMode } from "../../../../types/enums"
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
@@ -78,7 +79,7 @@ export const ReviewerWorkspaceScreen = observer(function ReviewerWorkspaceScreen
   }
 
   return (
-    <Flex as="main" h="calc(100vh - var(--app-navbar-height, 0px))" overflow="hidden">
+    <Flex as="main" {...belowNavBarInFlow} overflow="hidden">
       <Tabs
         w="full"
         flexGrow={1}
