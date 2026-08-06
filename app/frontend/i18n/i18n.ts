@@ -4837,11 +4837,38 @@ Thank you,
             "This permit is available for early access to help your team get familiar with the application process. You can view and edit your application, but submission is currently disabled. Submissions will be enabled once this permit type is officially launched in your jurisdiction.",
           goToBuilder: "Go to builder",
           openInBuilder: "Open in builder",
+          actions: {
+            menuLabel: "Actions",
+          },
+          goTo: {
+            menuLabel: "Go to",
+            formPreview: "Form preview",
+            builder: "Builder",
+            catalogue: "Catalogue",
+          },
+
+          immutableVersionNotice:
+            "This early access version is an immutable snapshot. To revise it, update the source template in the builder and create a new early access version. Existing preview links will continue to show this version.",
           discardDraft: {
-            triggerButton: "Discard early access version",
-            title: "Discard this early access version?",
-            body: "This ends access to the early access snapshot and its previews. Fix the configuration in the builder, then create a new early access version.",
-            confirmButton: "Discard early access version",
+            triggerButton: "Discard",
+            title: "Discard early access version?",
+            body: "This will permanently discard this early access version. Previewers will lose access. This cannot be undone.",
+            confirmButton: "Discard",
+          },
+          restoreLayout: {
+            triggerButton: "Restore layout to builder",
+            confirmTitle: "Restore layout from this version?",
+            confirmBody:
+              "This will replace the current builder layout (sections, block arrangement, and show/hide rules) with the layout from this version.\n\nIt does not rewind the wording or settings inside shared question blocks. If a block from this version is missing or archived in the library, the restore will fail.\n\nAny unsaved builder edits will be lost.",
+            confirmButton: "Restore layout",
+          },
+          blockActions: {
+            menuLabel: "Block actions",
+            restoreSourceBlock: "Restore source block",
+            restoreConfirmTitle: "Restore this shared block from the version?",
+            restoreConfirmBody:
+              "This overwrites the live shared requirement block in the library so it matches this version’s snapshot (field arrangement, required/optional, conditionals, and related placement settings).\n\nImportant limitations:\n• Every permit template that uses this block will get these restored placements — not only the template you are viewing.\n• Question bank definitions are not rewritten. Bank-linked fields keep following the live question bank wording unless this version stored a placement-specific hint/instructions override.\n• If a linked bank question no longer exists (or is archived), that field is restored as block-only using the wording frozen in this version.\n• Attached requirement documents / downloadable files are not restored.\n• Already-submitted applications stay on their frozen template version; this changes the library going forward.\n• If the block was archived, it will be un-archived in the library (re-adding it to a template’s layout is separate — use Restore layout if needed).\n• If the block was permanently deleted from the library, restore cannot recreate it.",
+            restoreConfirmButton: "Overwrite shared block",
           },
           schedulePublish: {
             triggerButton: "Promote",

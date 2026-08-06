@@ -375,4 +375,136 @@ RSpec.describe Api::TemplateVersionsController,
       end
     end
   end
+
+  describe "POST #restore_layout" do
+    let!(:requirement_template) do
+      create(:full_requirement_template, sections_count: 1)
+    end
+    let!(:template_version) do
+      create(
+        :template_version,
+        requirement_template: requirement_template,
+        status: :published,
+        denormalized_template_json:
+          RequirementTemplateBlueprint.render_as_hash(
+            requirement_template,
+            view: :template_snapshot
+          )
+      )
+    end
+
+    context "as a super admin" do
+      let!(:super_admin) { create(:user, :super_admin) }
+
+      before { sign_in super_admin }
+
+      it "restores the template layout from the version snapshot" do
+        original_names =
+          requirement_template
+            .requirement_template_sections
+            .order(:position)
+            .pluck(:name)
+        requirement_template.requirement_template_sections.destroy_all
+        requirement_template.requirement_template_sections.create!(
+          name: "Changed",
+          position: 0
+        )
+
+        post :restore_layout, params: { id: template_version.id }
+
+        expect(response).to have_http_status(:success)
+        expect(
+          requirement_template
+            .reload
+            .requirement_template_sections
+            .order(:position)
+            .pluck(:name)
+        ).to eq(original_names)
+      end
+
+      it "returns an error when blocks are missing" do
+        snapshot = template_version.denormalized_template_json.deep_dup
+        snapshot["requirement_template_sections"].first[
+          "template_section_blocks"
+        ].first[
+          "requirement_block"
+        ][
+          "id"
+        ] = SecureRandom.uuid
+        template_version.update!(denormalized_template_json: snapshot)
+
+        post :restore_layout, params: { id: template_version.id }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(json_response.dig("meta", "message", "message")).to match(
+          /missing or archived/i
+        )
+      end
+    end
+
+    context "as a non-admin user" do
+      it "denies access" do
+        post :restore_layout, params: { id: template_version.id }
+
+        expect(response).to have_http_status(:forbidden)
+      end
+    end
+  end
+
+  describe "POST #restore_requirement_block" do
+    let!(:requirement_template) do
+      create(:full_requirement_template, sections_count: 1)
+    end
+    let!(:block) do
+      requirement_template
+        .requirement_template_sections
+        .first
+        .requirement_blocks
+        .first
+    end
+    let!(:template_version) do
+      blocks_json = {
+        block.id =>
+          RequirementBlockBlueprint.render_as_hash(block, parent_key: "section")
+      }
+      create(
+        :template_version,
+        requirement_template: requirement_template,
+        status: :published,
+        requirement_blocks_json: blocks_json
+      )
+    end
+
+    context "as a super admin" do
+      let!(:super_admin) { create(:user, :super_admin) }
+
+      before { sign_in super_admin }
+
+      it "restores the shared requirement block from the version snapshot" do
+        original_name = block.name
+        block.update!(name: "Changed")
+
+        post :restore_requirement_block,
+             params: {
+               id: template_version.id,
+               requirement_block_id: block.id
+             }
+
+        expect(response).to have_http_status(:success)
+        expect(block.reload.name).to eq(original_name)
+      end
+    end
+
+    context "as a non-admin user" do
+      it "denies access" do
+        post :restore_requirement_block,
+             params: {
+               id: template_version.id,
+               requirement_block_id: block.id
+             }
+
+        expect(response).to have_http_status(:forbidden)
+      end
+    end
+  end
 end

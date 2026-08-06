@@ -1,4 +1,4 @@
-import { Box, Button, Flex, FormControl, FormLabel, HStack, Switch } from "@chakra-ui/react"
+import { Box, Flex, HStack } from "@chakra-ui/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo, useState } from "react"
@@ -11,16 +11,16 @@ import { useMst } from "../../../../setup/root"
 import { stickyBelowNavBar } from "../../../../styles/nav-bar-offset"
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
-import { ConfirmationModal } from "../../../shared/confirmation-modal"
 import { FloatingHelpDrawer } from "../../../shared/floating-help-drawer"
-import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
 import { BuilderBottomFloatingButtons } from "../builder-bottom-floating-buttons"
-import { PublishScheduleModal } from "../publish-schedule-modal"
 import { SectionsDisplay } from "../sections-display"
 import { SectionsSidebar } from "../sections-sidebar"
 import { SharePreviewPopover } from "../share-preview-popover"
 import { useSectionHighlight } from "../use-section-highlight"
 import { BuilderHeader } from "./base-edit-requirement-template-screen/builder-header"
+import { TemplateVersionActionsMenu } from "./template-version-actions-menu"
+import { TemplateVersionBlockActionsMenu } from "./template-version-block-actions-menu"
+import { TemplateVersionGoToMenu } from "./template-version-go-to-menu"
 
 const scrollToIdPrefix = "template-version-scroll-to-id-"
 export const formScrollToId = (id: string) => `${scrollToIdPrefix}${id}`
@@ -29,15 +29,13 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
   const { templateVersion, error } = useTemplateVersion()
   const denormalizedTemplate = templateVersion?.denormalizedTemplateJson
   const { t } = useTranslation()
-  const { userStore, templateVersionStore, requirementTemplateStore } = useMst()
+  const { userStore, requirementTemplateStore } = useMst()
   const {
     rootContainerRef: rightContainerRef,
     sectionRefs,
     sectionIdToHighlight: currentSectionId,
   } = useSectionHighlight({ sections: denormalizedTemplate?.requirementTemplateSections })
   const [isCollapsedAll, setIsCollapsedAll] = useState(false)
-  const [isDiscardingDraft, setIsDiscardingDraft] = useState(false)
-  const [isTogglingPubliclyPreviewable, setIsTogglingPubliclyPreviewable] = useState(false)
   const navigate = useNavigate()
 
   const isSuperAdmin = !!userStore.currentUser?.isSuperAdmin
@@ -69,6 +67,8 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
   )
 
   const showSchedulePublishControls = isDraft && isSuperAdmin && !!requirementTemplate?.isFullyLoaded
+  // Restore layout applies to any status; Promote/Discard stay draft-only inside the menu.
+  const showActionsMenu = isSuperAdmin && !!requirementTemplateId
 
   const onSaveAndValidate = async () => {
     if (!templateVersion) return []
@@ -109,34 +109,6 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
 
   const templateSections = denormalizedTemplate?.requirementTemplateSections ?? []
   const hasNoSections = templateSections.length === 0
-
-  const onClose = () => {
-    window.history.state && window.history.state.idx > 0 ? navigate(-1) : navigate(`/requirement-templates`)
-  }
-
-  const handleTogglePubliclyPreviewable = async () => {
-    if (!templateVersion) return
-    setIsTogglingPubliclyPreviewable(true)
-    try {
-      await templateVersionStore.togglePubliclyPreviewable(templateVersion.id, !templateVersion.publiclyPreviewable)
-    } finally {
-      setIsTogglingPubliclyPreviewable(false)
-    }
-  }
-
-  const handleDiscardDraft = async (closeModal: () => void) => {
-    if (!templateVersion || !requirementTemplateId) return
-    setIsDiscardingDraft(true)
-    try {
-      const updated = await requirementTemplateStore.discardDraft(templateVersion.id)
-      if (updated) {
-        closeModal()
-        navigate(`/requirement-templates/${requirementTemplateId}/edit`)
-      }
-    } finally {
-      setIsDiscardingDraft(false)
-    }
-  }
 
   return (
     <Box as="main" id="view-template-version">
@@ -183,64 +155,26 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
             boxShadow={"elevations.elevation02"}
           >
             <HStack spacing={3}>
-              {templateVersion.isDraft && isSuperAdmin && (
-                <FormControl display="flex" alignItems="center" width="auto" mr={2}>
-                  <FormLabel htmlFor="publicly-previewable-toggle" mb="0" mr={2} fontSize="sm">
-                    {t("requirementTemplate.publiclyPreviewable.toggleLabel")}
-                  </FormLabel>
-                  <Switch
-                    id="publicly-previewable-toggle"
-                    isChecked={templateVersion.publiclyPreviewable}
-                    isDisabled={isTogglingPubliclyPreviewable}
-                    onChange={handleTogglePubliclyPreviewable}
-                  />
-                </FormControl>
-              )}
               {templateVersion.isDraft && (
                 <SharePreviewPopover draftTemplateVersion={templateVersion} variant="primary" />
               )}
-              {/* HUB-5289: Draft snapshots still cannot be repaired in place; discard and recreate after fixing the builder. */}
-              {templateVersion.isDraft && isSuperAdmin && (
-                <ConfirmationModal
-                  title={t("templateVersionPreview.discardDraft.title")}
-                  body={t("templateVersionPreview.discardDraft.body")}
-                  onConfirm={handleDiscardDraft}
-                  renderTriggerButton={(props) => (
-                    <Button {...props} variant="ghost" color="semantic.error">
-                      {t("templateVersionPreview.discardDraft.triggerButton")}
-                    </Button>
-                  )}
-                  renderConfirmationButton={(props) => (
-                    <Button {...props} colorScheme="red" isLoading={isDiscardingDraft}>
-                      {t("templateVersionPreview.discardDraft.confirmButton")}
-                    </Button>
-                  )}
-                />
-              )}
-              {showSchedulePublishControls && requirementTemplate && (
-                <PublishScheduleModal
+              {showActionsMenu && (
+                <TemplateVersionActionsMenu
+                  templateVersion={templateVersion}
                   requirementTemplate={requirementTemplate}
-                  minDate={requirementTemplate.nextAvailableScheduleDate}
+                  showSchedulePublish={showSchedulePublishControls}
+                  showDiscard={isDraft}
                   scheduledConflicts={scheduledConflicts}
                   onScheduleConfirm={onScheduleConfirm}
                   onForcePublishNow={onForcePublishNow}
                   onSaveAndValidate={onSaveAndValidate}
-                  translationNamespace="templateVersionPreview.schedulePublish"
-                  triggerLabel={t("templateVersionPreview.schedulePublish.triggerButton")}
-                  hideManageAccessButton
                 />
               )}
-              {isSuperAdmin && requirementTemplateId && (
-                <RouterLinkButton to={`/requirement-templates/${requirementTemplateId}/edit`} variant="secondary">
-                  {t("templateVersionPreview.goToBuilder")}
-                </RouterLinkButton>
-              )}
-              <RouterLinkButton to={`/template-versions/${templateVersion.id}/preview`} variant="secondary">
-                {t("ui.previewForm")}
-              </RouterLinkButton>
-              <Button variant={"secondary"} onClick={onClose}>
-                {t("ui.close")}
-              </Button>
+              <TemplateVersionGoToMenu
+                templateVersionId={templateVersion.id}
+                requirementTemplateId={requirementTemplateId}
+                showBuilder={isSuperAdmin && !!requirementTemplateId}
+              />
             </HStack>
           </Flex>
           <FloatingHelpDrawer />
@@ -251,20 +185,13 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
             setSectionRef={setSectionRef}
             formScrollToId={formScrollToId}
             renderEdit={
-              isSuperAdmin && requirementTemplateId
+              isSuperAdmin && requirementTemplateId && templateVersion
                 ? ({ denormalizedRequirementBlock }) => (
-                    <RouterLinkButton
-                      to={builderBlockPath(denormalizedRequirementBlock.id)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      variant="link"
-                      color="text.primary"
-                      textDecoration="none"
-                      _hover={{ textDecoration: "underline" }}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {t("templateVersionPreview.openInBuilder")}
-                    </RouterLinkButton>
+                    <TemplateVersionBlockActionsMenu
+                      templateVersionId={templateVersion.id}
+                      requirementTemplateId={requirementTemplateId}
+                      requirementBlockId={denormalizedRequirementBlock.id}
+                    />
                   )
                 : undefined
             }
@@ -275,20 +202,12 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
     </Box>
   )
 
-  function scrollToTop() {
-    rightContainerRef.current?.scrollTo({ behavior: "smooth", top: 0 })
-  }
-
   function scrollIntoView(id: string) {
     const element = document.getElementById(formScrollToId(id))
 
     if (element) {
       element.scrollIntoView({ behavior: "smooth", block: "start" })
     }
-  }
-
-  function builderBlockPath(requirementBlockId: string) {
-    return `/requirement-templates/${requirementTemplateId}/edit?openRequirementBlockId=${requirementBlockId}`
   }
 
   function setSectionRef(el: HTMLElement, id: string) {

@@ -292,6 +292,32 @@ export const RequirementTemplateStoreModel = types
       return ((response.data as IConfigErrorResponse | undefined)?.meta?.configErrors ??
         []) as IRequirementTemplateConfigError[]
     }),
+
+    restoreLayout: flow(function* (templateVersionId: string) {
+      const response = yield* toGenerator(self.environment.api.restoreTemplateLayout(templateVersionId))
+
+      if (response.ok) {
+        const templateData = response.data.data
+        templateData.isFullyLoaded = true
+        self.mergeUpdate(templateData, "requirementTemplateMap")
+        return self.requirementTemplateMap.get(templateData.id) as IRequirementTemplate
+      }
+
+      return false
+    }),
+
+    restoreRequirementBlockFromVersion: flow(function* (templateVersionId: string, requirementBlockId: string) {
+      const response = yield* toGenerator(
+        self.environment.api.restoreRequirementBlockFromVersion(templateVersionId, requirementBlockId)
+      )
+
+      if (response.ok) {
+        self.rootStore.requirementBlockStore.mergeUpdate(response.data.data, "requirementBlockMap")
+        return self.rootStore.requirementBlockStore.getRequirementBlockById(requirementBlockId)
+      }
+
+      return false
+    }),
   }))
 
 export interface IRequirementTemplateStoreModel extends Instance<typeof RequirementTemplateStoreModel> {}
