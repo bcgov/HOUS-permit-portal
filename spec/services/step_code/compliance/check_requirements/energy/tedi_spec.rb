@@ -41,7 +41,8 @@ RSpec.describe StepCode::Compliance::CheckRequirements::Energy::TEDI do
     let(:data_entries_attributes) do
       [
         {
-          aux_energy_required: 35065.98,
+          # High enough that calculated TEDI exceeds Rev. 7 Zone 4 TEDIadjusted
+          aux_energy_required: 80_000,
           above_grade_heated_floor_area: 117.9,
           below_grade_heated_floor_area: 59.9,
           building_volume: 624.9,
@@ -60,7 +61,7 @@ RSpec.describe StepCode::Compliance::CheckRequirements::Energy::TEDI do
     let(:data_entries_attributes) do
       [
         {
-          aux_energy_required: 35065.98,
+          aux_energy_required: 80_000,
           above_grade_heated_floor_area: 117.9,
           below_grade_heated_floor_area: 59.9,
           building_volume: 624.9,
@@ -97,6 +98,26 @@ RSpec.describe StepCode::Compliance::CheckRequirements::Energy::TEDI do
       end
 
       it_behaves_like FAILED_STEP_CODE
+    end
+  end
+
+  describe "#tedi_requirement" do
+    let(:data_entries_attributes) do
+      [
+        {
+          aux_energy_required: 1000,
+          above_grade_heated_floor_area: 100,
+          below_grade_heated_floor_area: 80,
+          hdd: 3500,
+          building_volume: 400,
+          proposed_gshl: 40,
+          ref_gshl: 60
+        }
+      ]
+    end
+
+    it "computes Rev. 7 TEDIadjusted from HDD and heated floor area" do
+      expect(compliance_checker.tedi_requirement).to be_within(0.01).of(47)
     end
   end
 end

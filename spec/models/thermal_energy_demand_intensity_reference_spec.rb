@@ -1,10 +1,10 @@
 require "rails_helper"
 
 RSpec.describe ThermalEnergyDemandIntensityReference, type: :model do
-  fixtures :thermal_energy_demand_intensity_references
+  before { StepCode::Part9::TEDIReferencesSeeder.seed! }
 
   describe "reference data lookups" do
-    it "finds the correct TEDI reference by range and step" do
+    it "computes TEDIadjusted for the climate band and step" do
       checklist = create(:part_9_checklist, compliance_path: :step_code_ers)
       Part9StepCode::DataEntry.create!(
         checklist: checklist,
@@ -23,7 +23,8 @@ RSpec.describe ThermalEnergyDemandIntensityReference, type: :model do
           step: 3
         )
 
-      expect(requirement.tedi_requirement).to eq(15)
+      # 40 + (50-40)*(3500-3000)/1000 + 0.004*(3500-3000) = 47
+      expect(requirement.tedi_requirement).to be_within(0.01).of(47)
     end
   end
 

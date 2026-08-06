@@ -14,7 +14,12 @@ class StepCode::Compliance::CheckRequirements::Energy::TEDI < StepCode::Complian
   end
 
   def tedi_requirement
-    @tedi_requirement ||= tedi_reference.hdd_adjusted_tedi
+    @tedi_requirement ||=
+      StepCode::Compliance::CheckRequirements::Energy::TEDIAdjusted.call(
+        hdd: total(:hdd),
+        step: step,
+        heated_floor_area: total_heated_floor_area
+      )
   end
 
   def tedi_hlr_percent_requirement
