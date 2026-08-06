@@ -2,9 +2,13 @@
 # EF: Emission Factor
 
 class StepCode::Compliance::CheckRequirements::ZeroCarbon::Base
-  ELECTRICITY_EF = 0.011
-  NATURAL_GAS_EF = 0.18
-  PROPANE_EF = 0.2155
+  # HUB-5472-follow-up (SME): We treat Hot2000 fuel consumption as GJ/year and
+  # multiply by the checklist’s kg CO₂e/GJ factors (electricity ≈ 3.056,
+  # gas ≈ 50, propane 59.87). Does that match how energy advisors expect GHG
+  # to be calculated for Part 9 Zero Carbon compliance?
+  ELECTRICITY_EF = 0.011 * 277.78
+  NATURAL_GAS_EF = 0.18 * 277.78
+  PROPANE_EF = 59.87
 
   attr_reader :checklist, :step
 

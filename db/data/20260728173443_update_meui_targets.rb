@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
 class UpdateMEUITargets < ActiveRecord::Migration[7.2]
+  # HUB-5472-follow-up (SME): For HDD "More than 6999", cooling "More than 50%",
+  # Step 3, area "121 to 165", is the Rev. 7 Table 9.36.6.3.-H value 175
+  # kWh/m²·year? (An earlier paste had 157; 175 matches the surrounding row
+  # pattern.) Step 2 absolute MEUI is stored as null ("Reserved").
+  #
   # Representative points inside each seeded range (same ranges as
   # StepCode::Part9::MEUIReferencesSeeder::MAPPINGS).
   HDD_POINT = {

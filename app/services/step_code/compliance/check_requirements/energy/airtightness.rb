@@ -23,7 +23,6 @@ class StepCode::Compliance::CheckRequirements::Energy::Airtightness < StepCode::
     @nla_requirement ||= tedi_reference.nla
   end
 
-  # Excel Calculator: each suite line computes NLR, Proposed total = AVERAGE of those.
   def nlr
     return @nlr if @nlr
 

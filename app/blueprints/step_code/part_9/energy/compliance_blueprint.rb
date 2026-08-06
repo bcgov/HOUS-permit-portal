@@ -9,7 +9,6 @@ class StepCode::Part9::Energy::ComplianceBlueprint < Blueprinter::Base
   field :min_required_step, name: :min_step
   field :max_step
 
-  # Ratio — Excel-style average across suite/model rows (not summed).
   field :fwdr do |compliance, _options|
     compliance.checklist.data_entries.average(:fwdr)
   end
@@ -18,7 +17,6 @@ class StepCode::Part9::Energy::ComplianceBlueprint < Blueprinter::Base
     compliance.checklist.data_entries.pluck(:weather_location).join(", ")
   end
 
-  # Climate — one site; never sum HDD across H2K rows.
   field :heating_degree_days do |compliance, _options|
     compliance.checklist.data_entries.maximum(:hdd)
   end

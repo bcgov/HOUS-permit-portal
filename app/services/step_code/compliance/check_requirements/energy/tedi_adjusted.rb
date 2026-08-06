@@ -1,7 +1,18 @@
 # frozen_string_literal: true
 
 # Rev. 7 Sentence 9.36.6.3.(4) — TEDIadjusted from actual HDD + heated floor area.
-# Zone 8 (≥7000) keeps the pre–Rev.7 TEDIlower extrapolation slope + Small Home.
+#
+# HUB-5472-follow-up (SME):
+# - Which published BCBC amendment / effective date should this formula track?
+#   We mirrored the August 2025 checklist References sheet (it still cites older
+#   amendment text but already includes small-home / colder-climate terms).
+# - Zone 4 (<3000 HDD): is the checklist right to use (HDD − 2500) / 500 with
+#   no small-home adder? (At HDD 2500 the target equals the Zone 4 table value.)
+# - Zone 8 (>6999 HDD): should we keep extrapolating past the last table row
+#   using the 7B→8 slope + small-home (as the checklist does), or freeze at the
+#   Zone 8 table value?
+# - Small-home adder 0.004×(HDD−3000): confirm it applies only when heated floor
+#   area is under 210 m² (exactly 210 m² gets no adder, matching the checklist).
 class StepCode::Compliance::CheckRequirements::Energy::TEDIAdjusted
   SMALL_HOME_AREA_M2 = 210
   SMALL_HOME_ADJ = 0.004
@@ -10,7 +21,7 @@ class StepCode::Compliance::CheckRequirements::Energy::TEDIAdjusted
   BANDS = [
     {
       max_hdd: 2999,
-      hdd_lowest: 0,
+      hdd_lowest: 2500,
       probe: 0,
       next_probe: 3500,
       divisor: 500,
@@ -108,6 +119,6 @@ class StepCode::Compliance::CheckRequirements::Energy::TEDIAdjusted
   end
 
   def small_home_adj
-    @heated_floor_area <= SMALL_HOME_AREA_M2 ? SMALL_HOME_ADJ : 0
+    @heated_floor_area < SMALL_HOME_AREA_M2 ? SMALL_HOME_ADJ : 0
   end
 end

@@ -24,9 +24,9 @@ class StepCode::Compliance::CheckRequirements::Energy::TEDI < StepCode::Complian
 
   def tedi_hlr_percent_requirement
     if total(:building_volume) > 300
-      tedi_reference.gshl_under_300
-    else
       tedi_reference.gshl_over_300
+    else
+      tedi_reference.gshl_under_300
     end
   end
 
