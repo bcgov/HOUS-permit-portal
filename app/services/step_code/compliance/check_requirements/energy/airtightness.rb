@@ -8,7 +8,7 @@ class StepCode::Compliance::CheckRequirements::Energy::Airtightness < StepCode::
   end
 
   def ach
-    @ach ||= total(:ach)
+    @ach ||= average(:ach)
   end
 
   def ach_requirement
@@ -16,17 +16,27 @@ class StepCode::Compliance::CheckRequirements::Energy::Airtightness < StepCode::
   end
 
   def nla
-    @nla ||= total(:nla)
+    @nla ||= average(:nla)
   end
 
   def nla_requirement
     @nla_requirement ||= tedi_reference.nla
   end
 
+  # Excel Calculator: each suite line computes NLR, Proposed total = AVERAGE of those.
   def nlr
     return @nlr if @nlr
-    return 0 if total_heated_floor_area <= 0
-    @nlr = volume * total(:ach) * 1000 / 3600 / surface_area
+
+    values =
+      checklist.data_entries.filter_map do |entry|
+        entry_surface = entry.building_envelope_surface_area.to_f
+        entry_volume = entry.building_volume.to_f
+        next if entry_surface <= 0 || entry_volume <= 0
+
+        entry_volume * entry.ach.to_f * 1000 / 3600 / entry_surface
+      end
+
+    @nlr = values.empty? ? 0 : values.sum / values.size
   end
 
   def surface_area

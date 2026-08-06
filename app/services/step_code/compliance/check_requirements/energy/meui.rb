@@ -2,7 +2,8 @@
 
 class StepCode::Compliance::CheckRequirements::Energy::MEUI < StepCode::Compliance::CheckRequirements::Energy::Base
   def requirements_met?
-    (meui != 0 && meui <= meui_requirement) ||
+    # ponytail: step 2 MEUI absolute targets are Reserved (null) — fall through to % improvement
+    (meui_requirement.present? && meui != 0 && meui <= meui_requirement) ||
       meui_percent_improvement >= meui_percent_improvement_requirement
   end
 
@@ -17,11 +18,11 @@ class StepCode::Compliance::CheckRequirements::Energy::MEUI < StepCode::Complian
   def meui_requirement
     MechanicalEnergyUseIntensityReference.find_by(
       "hdd @> (:hdd)::int AND conditioned_space_percent @> (:conditioned_percent)::numeric AND step = (:step)::int AND conditioned_space_area @> (:conditioned_area)::int",
-      hdd: total(:hdd),
+      hdd: hdd,
       step: step,
       conditioned_percent:,
       conditioned_area: total_heated_floor_area.round
-    ).meui
+    )&.meui
   end
 
   def conditioned_percent
