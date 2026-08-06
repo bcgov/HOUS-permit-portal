@@ -23,7 +23,13 @@ class StepCode::Compliance::CheckRequirements::ZeroCarbon::Prescriptive < StepCo
   end
 
   def prescriptive_hot_water
-    @prescriptive_hot_water ||= total(:hot_water) > 1 ? :carbon : :zero_carbon
+    # EnergySource code per suite/model — not additive (Excel Fuel Type column).
+    @prescriptive_hot_water ||=
+      begin
+        min_result =
+          min("CASE WHEN hot_water > 1 THEN 'carbon' ELSE 'zero_carbon' END")
+        min_result ? min_result.to_sym : nil
+      end
   end
 
   def prescriptive_hot_water_requirement

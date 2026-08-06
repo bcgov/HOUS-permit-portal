@@ -119,5 +119,35 @@ RSpec.describe StepCode::Compliance::CheckRequirements::Energy::TEDI do
     it "computes Rev. 7 TEDIadjusted from HDD and heated floor area" do
       expect(compliance_checker.tedi_requirement).to be_within(0.01).of(47)
     end
+
+    context "with multiple data entries sharing the same HDD" do
+      let(:data_entries_attributes) do
+        [
+          {
+            aux_energy_required: 500,
+            above_grade_heated_floor_area: 50,
+            below_grade_heated_floor_area: 40,
+            hdd: 3500,
+            building_volume: 200,
+            proposed_gshl: 20,
+            ref_gshl: 30
+          },
+          {
+            aux_energy_required: 500,
+            above_grade_heated_floor_area: 50,
+            below_grade_heated_floor_area: 40,
+            hdd: 3500,
+            building_volume: 200,
+            proposed_gshl: 20,
+            ref_gshl: 30
+          }
+        ]
+      end
+
+      it "does not sum HDD across data entries" do
+        expect(compliance_checker.hdd).to eq(3500)
+        expect(compliance_checker.tedi_requirement).to be_within(0.01).of(47)
+      end
+    end
   end
 end

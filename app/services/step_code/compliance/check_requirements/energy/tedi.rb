@@ -16,7 +16,7 @@ class StepCode::Compliance::CheckRequirements::Energy::TEDI < StepCode::Complian
   def tedi_requirement
     @tedi_requirement ||=
       StepCode::Compliance::CheckRequirements::Energy::TEDIAdjusted.call(
-        hdd: total(:hdd),
+        hdd: hdd,
         step: step,
         heated_floor_area: total_heated_floor_area
       )

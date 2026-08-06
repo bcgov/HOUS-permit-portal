@@ -18,7 +18,7 @@ class StepCode::Compliance::CheckRequirements::Energy::MEUI < StepCode::Complian
   def meui_requirement
     MechanicalEnergyUseIntensityReference.find_by(
       "hdd @> (:hdd)::int AND conditioned_space_percent @> (:conditioned_percent)::numeric AND step = (:step)::int AND conditioned_space_area @> (:conditioned_area)::int",
-      hdd: total(:hdd),
+      hdd: hdd,
       step: step,
       conditioned_percent:,
       conditioned_area: total_heated_floor_area.round
