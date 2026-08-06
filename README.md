@@ -47,6 +47,29 @@ To make things easier to develop on various platforms locally, there is a `docke
 - This local dockerized version does not contain a service for `Consigno Verifio Notarius Server` which is proprietary licensed software that helps with validating PDFs. Therefore all functionality around this will not work. You can either run the service manually outside Docker and refer to it using the ENV vars, or find a private repository that has the image that you can then run in `docker-compose`
 - The local dockerized version does not setup Minio (which can be used to locally to mock Object Storage as it is S3 compatible - see instructions for local setup below). You can set this up manually outside the docker setup or add your own docker compose service for it. Just hook it up via the ENV vars (see `.env.example`) or simply switch the app to use actual `BCGOV_OBJECT_STORAGE` if you have a bucket allocation already.
 
+## Supporting services only (hybrid local)
+
+If you run Rails / Sidekiq / Vite / AnyCable RPC on the host but want Docker for the supporting daemons, use `docker-compose.services.yml`. This starts Elasticsearch (`:9200`), Minio (API `:9001`, console `:9002`), and `anycable-go` (`:8080`). It does **not** start Redis, Postgres, Rails, Sidekiq, Vite, or AnyCable RPC.
+
+```bash
+docker compose -f docker-compose.services.yml up -d
+```
+
+Then on the host (with Redis already running):
+
+```bash
+bundle exec anycable          # RPC on :50051 — required by the anycable-go container
+npm run dev
+bundle exec sidekiq ...
+bundle exec rails s
+```
+
+Notes:
+
+- `anycable-go` reaches host Redis at `host.docker.internal:6379` (db `1`) and host AnyCable RPC at `host.docker.internal:50051`. Keep Redis on `:6379` and start `bundle exec anycable` before relying on websockets.
+- Point host `.env` at these services, e.g. `ELASTICSEARCH_URL=http://localhost:9200` and Minio via `BCGOV_OBJECT_STORAGE_ENDPOINT=http://127.0.0.1:9001` with access key / secret matching the compose defaults (`minioadmin` / `minioadmin`). Create a bucket once in the Minio console at `http://127.0.0.1:9002` if needed.
+- Stop infra with `docker compose -f docker-compose.services.yml down` (add `-v` only if you want to wipe Elasticsearch / Minio data volumes).
+
 ## Running the application locally (non-dockerized)
 
 - Install Dependencies: `bundle install` and `npm install`
@@ -95,13 +118,13 @@ The app uses the [Sidekiq](https://github.com/sidekiq/sidekiq) library for backg
 The app uses [Anycable](https://anycable.io/) to serve websockets in a scalable way. To run the websocket server locally:
 
 - Ensure to `bundle install`
-- [Download the `anycable-go` websocket server on OSX: `brew install anycable-go`](https://docs.anycable.io/anycable-go/getting_started)
-- Add an ENV var `ANYCABLE_REDIS_URL=redis://localhost:6379/2`. It is recommended to set this value to a different Redis db than Sidekiq.
+- Either run `anycable-go` via [Supporting services only (hybrid local)](#supporting-services-only-hybrid-local), or [install it on OSX with `brew install anycable-go`](https://docs.anycable.io/anycable-go/getting_started)
+- Host AnyCable Redis should use db `1` (see `ANYCABLE_DEV_REDIS_URL` in `.env_example`), a different Redis db than Sidekiq
 
-After installation run both the `anycable-go` websocket server as well as the RPC server
+After installation run the RPC server (and `anycable-go` if you are not using the services compose):
 
 - RPC Server: `bundle exec anycable`
-- Anycable-Go Sockets: `anycable-go --port=8080`
+- Anycable-Go Sockets: `anycable-go --port=8080` (or the `anycable-go` service in `docker-compose.services.yml`)
 
 ### Notorius - Digital Seal Validation
 
@@ -110,7 +133,8 @@ After installation run both the `anycable-go` websocket server as well as the RP
 ### Local - File storage setup
 
 - For the local environment, if you want to test the full file upload process, you would want to run a local version of minio to simulate the object storage environment.
-- Install minio:
+- Easiest: start Minio via [Supporting services only (hybrid local)](#supporting-services-only-hybrid-local) (`docker-compose.services.yml`), then use the console at `http://127.0.0.1:9002` (defaults `minioadmin` / `minioadmin`).
+- Or install and run Minio on the host:
 
 ```
 brew install minio
