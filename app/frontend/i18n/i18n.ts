@@ -2261,7 +2261,7 @@ Thank you,
               copy: "Copy this block",
               removeConfirmationModal: {
                 title: "Confirm you want to archive this requirement block.",
-                body: "Archiving this requirement blocks will remove it from all early access templates. This action cannot be undone.",
+                body: "Archiving this requirement block will remove it from all templates. This action cannot be undone.",
               },
             },
             clickToWriteDisplayName: "Click to write display name",
