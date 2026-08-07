@@ -13,10 +13,6 @@ class StepCode::Compliance::CheckRequirements::Energy::Base
         total(:below_grade_heated_floor_area)
   end
 
-  # HUB-5472-follow-up (SME): The August 2025 checklist lets users enter HDD for
-  # target lookups and separately shows modeled HDD from HOT2000. We currently
-  # use only modeled HDD (highest across suite/model files). Should submitters
-  # be able to override with a user-entered HDD, and if so which value wins?
   def hdd
     @hdd ||= checklist.data_entries.maximum(:hdd)
   end

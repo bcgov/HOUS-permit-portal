@@ -27,18 +27,17 @@ RSpec.describe StepCode::Compliance::CheckRequirements::Energy::TEDIAdjusted do
     expect(call(hdd: 2900, heated_floor_area: 180)).to be_within(0.01).of(38)
   end
 
-  it "does not apply Small Home at exactly 210 m² (checklist: area >= 210 → 0)" do
-    # 40 + (50-40)*(3500-3000)/1000 = 45 (no 0.004 term)
-    expect(call(hdd: 3500, heated_floor_area: 210)).to be_within(0.01).of(45)
+  it "applies Small Home at exactly 210 m² (DOCX: adj is 0 only when > 210)" do
+    # 40 + (50-40)*(3500-3000)/1000 + 0.004*(3500-3000) = 47
+    expect(call(hdd: 3500, heated_floor_area: 210)).to be_within(0.01).of(47)
   end
 
-  it "extrapolates Zone 8 with TEDIlower and no Small Home when >210 m²" do
-    # 105 + (105-90)*(8000-7000)/1000 = 120
-    expect(call(hdd: 8000, heated_floor_area: 250)).to be_within(0.01).of(120)
+  it "freezes Zone 8 at the table TEDIstep with no Small Home when > 210 m²" do
+    expect(call(hdd: 8000, heated_floor_area: 250)).to be_within(0.01).of(105)
   end
 
-  it "extrapolates Zone 8 with TEDIlower and Small Home when floor area under 210 m²" do
-    # 120 + 0.004*(8000-3000) = 140
-    expect(call(hdd: 8000, heated_floor_area: 180)).to be_within(0.01).of(140)
+  it "freezes Zone 8 at the table TEDIstep plus Small Home when floor area ≤ 210 m²" do
+    # 105 + 0.004*(8000-3000) = 125
+    expect(call(hdd: 8000, heated_floor_area: 180)).to be_within(0.01).of(125)
   end
 end
