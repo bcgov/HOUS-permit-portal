@@ -499,6 +499,41 @@ RSpec.describe "ReleaseNotes", type: :request do
       expect(response).to have_http_status(:not_found)
     end
 
+    it "distinguishes same-day software and content notes by created_at" do
+      release_date = Time.zone.local(2025, 6, 15, 12, 0, 0)
+      earlier =
+        create(
+          :release_note,
+          :content,
+          status: :published,
+          name: "Earlier content update",
+          release_date: release_date,
+          created_at: release_date - 1.hour
+        )
+      later =
+        create(
+          :release_note,
+          status: :published,
+          version: "9.9.9",
+          release_date: release_date,
+          created_at: release_date
+        )
+
+      get viewer_context_release_note_path(earlier.id), params: { per_page: 1 }
+      expect(json_response.fetch("data")).to include(
+        "release_note_id" => earlier.id,
+        "year" => 2025,
+        "page" => 2
+      )
+
+      get viewer_context_release_note_path(later.id), params: { per_page: 1 }
+      expect(json_response.fetch("data")).to include(
+        "release_note_id" => later.id,
+        "year" => 2025,
+        "page" => 1
+      )
+    end
+
     it_behaves_like A_NOT_FOUND_RESPONSE,
                     ->(payload) do
                       get viewer_context_release_note_path(payload[:id])
