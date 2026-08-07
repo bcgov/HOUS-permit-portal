@@ -10,6 +10,7 @@ import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { ReleaseNoteEntry } from "./release-note-entry"
+import { ReleaseNoteTypeFilter } from "./release-note-type-filter"
 import { ReleaseNoteYearNav } from "./release-note-year-nav"
 
 export const ReleaseNotesScreen = observer(function ReleaseNotesScreen() {
@@ -34,6 +35,8 @@ export const ReleaseNotesScreen = observer(function ReleaseNotesScreen() {
     isSearching,
     initializeViewingPage,
     selectViewingYear,
+    selectReleaseTypeFilter,
+    selectedReleaseType,
     viewingYearInitialized,
     availableYears,
     getReleaseNoteAnchorId,
@@ -54,7 +57,8 @@ export const ReleaseNotesScreen = observer(function ReleaseNotesScreen() {
     }
   }, [initializeViewingPage, location.hash])
 
-  useSearch(releaseNoteStore, [viewingYearInitialized ? selectedYear : null])
+  // selectedReleaseType ?? "all": useSearch skips any null dep, so "all types" needs a sentinel
+  useSearch(releaseNoteStore, [viewingYearInitialized ? selectedYear : null, selectedReleaseType ?? "all"])
 
   useLayoutEffect(() => {
     const updateAvailableHeight = () => {
@@ -127,6 +131,9 @@ export const ReleaseNotesScreen = observer(function ReleaseNotesScreen() {
   ])
 
   const reportIssueMailto = `mailto:${t("site.contactEmail")}`
+  const showingTypeLabel = selectedReleaseType
+    ? t(`releaseNote.types.${selectedReleaseType}`)
+    : t("releaseNote.viewing.allTypes")
 
   const releaseNotesContent =
     viewingReleaseNotes.length === 0 ? (
@@ -167,6 +174,23 @@ export const ReleaseNotesScreen = observer(function ReleaseNotesScreen() {
           <ReleaseNoteYearNav years={availableYears} selectedYear={selectedYear} onSelectYear={selectViewingYear} />
 
           <Flex direction="column" flex={1} minW={0} minH={0} overflow="hidden">
+            <Flex
+              align="center"
+              justify="space-between"
+              gap={4}
+              flexWrap="wrap"
+              bg="greys.grey03"
+              px={4}
+              py={3}
+              mb={6}
+              flexShrink={0}
+            >
+              <ReleaseNoteTypeFilter value={selectedReleaseType} onChange={selectReleaseTypeFilter} />
+              <Text fontSize="sm" color="text.secondary" m={0}>
+                {t("releaseNote.viewing.showingType", { type: showingTypeLabel })}
+              </Text>
+            </Flex>
+
             <Box flex={1} minH={0} overflowY="auto" pr={1}>
               {isSearching ? <SharedSpinner /> : releaseNotesContent}
             </Box>
