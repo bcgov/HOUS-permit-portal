@@ -57,6 +57,7 @@ export const TemplateVersionBlockActionsMenu = observer(function TemplateVersion
             <Text whiteSpace="pre-line">{t("templateVersionPreview.blockActions.restoreConfirmBody")}</Text>
           }
           confirmText={t("templateVersionPreview.blockActions.restoreConfirmButton")}
+          confirmButtonBg="semantic.error"
           onConfirm={handleRestore}
           renderTrigger={(onOpen) => (
             <MenuItem onClick={onOpen}>{t("templateVersionPreview.blockActions.restoreSourceBlock")}</MenuItem>
