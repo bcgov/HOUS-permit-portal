@@ -290,22 +290,22 @@ RSpec.describe "ReleaseNotes", type: :request do
       ReleaseNote.reindex
 
       sign_in super_admin
-      get release_notes_path, params: { release_type: "software" }
 
+      get release_notes_path, params: { release_type: "software" }
       expect(response).to have_http_status(:success)
-      expect(subject.pluck("id")).to contain_exactly(
+      expect(json_response.fetch("data").pluck("id")).to contain_exactly(
         earliest_release_note.id,
         latest_release_note.id
       )
 
       get release_notes_path, params: { release_type: "content" }
-
       expect(response).to have_http_status(:success)
-      expect(subject.pluck("id")).to contain_exactly(content_release_note.id)
+      expect(json_response.fetch("data").pluck("id")).to contain_exactly(
+        content_release_note.id
+      )
 
       get release_notes_path
-
-      expect(subject.pluck("id")).to contain_exactly(
+      expect(json_response.fetch("data").pluck("id")).to contain_exactly(
         earliest_release_note.id,
         latest_release_note.id,
         content_release_note.id
