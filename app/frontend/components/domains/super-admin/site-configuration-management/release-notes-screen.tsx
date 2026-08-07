@@ -15,11 +15,12 @@ import { PerPageSelect } from "../../../shared/base/inputs/per-page-select"
 import { SharedSpinner } from "../../../shared/base/shared-spinner"
 import { SearchGrid } from "../../../shared/grid/search-grid"
 import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
+import { ReleaseNoteTypeBadge } from "../../release-notes/release-note-type-badge"
 import { ReleaseNoteTypeFilter } from "../../release-notes/release-note-type-filter"
 import { ReleaseNotesGridCell } from "./release-notes-grid-cell"
 import { ReleaseNotesGridHeaders } from "./release-notes-grid-header"
 
-const TABLE_TEMPLATE = ["6fr", "14fr", "10fr", "20fr", "5fr"].join(" ")
+const TABLE_TEMPLATE = ["6fr", "10fr", "10fr", "8fr", "12fr", "5fr"].join(" ")
 
 const ReleaseNoteStatusBadge = observer(function ReleaseNoteStatusBadge({ status }: { status: EReleaseNoteStatus }) {
   const isPublished = status === EReleaseNoteStatus.published
@@ -81,6 +82,9 @@ export const ReleaseNotesScreen = observer(function ReleaseNotesScreen() {
       tableReleaseNotes.map((note: IReleaseNote) => (
         <Box key={note.id} display="contents" role="row">
           <ReleaseNotesGridCell>{note.displayLabel}</ReleaseNotesGridCell>
+          <ReleaseNotesGridCell py={0}>
+            <ReleaseNoteTypeBadge releaseType={note.releaseType} />
+          </ReleaseNotesGridCell>
           <ReleaseNotesGridCell color="text.secondary">{format(note.releaseDate, "MMMM d, yyyy")}</ReleaseNotesGridCell>
           <ReleaseNotesGridCell py={0}>
             <ReleaseNoteStatusBadge status={note.status as EReleaseNoteStatus} />
