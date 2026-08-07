@@ -13,22 +13,19 @@ import {
 import { Minus, Plus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
-import { FormProvider, useController, useForm, useFormContext } from "react-hook-form"
+import { FormProvider, useController, useForm, useFormContext, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { matchPath, useLocation, useNavigate, useParams } from "react-router-dom"
+import { RELEASE_NOTE_TYPES } from "../../../../constants/release-note-type-config"
 import { useMst } from "../../../../setup/root"
-import { EReleaseNoteStatus } from "../../../../types/enums"
+import { EReleaseNoteStatus, EReleaseNoteType } from "../../../../types/enums"
 import { TReleaseNoteFormData } from "../../../../types/types"
 import { isTipTapEmpty } from "../../../../utils/utility-functions"
 import { SharedSpinner } from "../../../shared/base/shared-spinner"
 import { Editor } from "../../../shared/editor/editor"
-import { DatePickerFormControl, TextFormControl, UrlFormControl } from "../../../shared/form/input-form-control"
+import { DatePickerFormControl, SelectFormControl } from "../../../shared/form/input-form-control"
 import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
-
-// Mirrors `ReleaseNote::SEMVER_REGEX` in app/models/release_note.rb
-// https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
-const releaseNoteSemverRegex =
-  /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
+import { ReleaseNoteTypeFields } from "../../release-notes/release-note-type-fields"
 
 const releaseNoteEditorChrome = {
   ".tiptap-wrapper": {
@@ -136,7 +133,9 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
     mode: "onTouched",
     reValidateMode: "onChange",
     defaultValues: {
+      releaseType: EReleaseNoteType.software,
       version: "",
+      name: "",
       releaseDate: null,
       content: "",
       releaseNotesUrl: "",
@@ -144,7 +143,8 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
     },
   })
 
-  const { handleSubmit, reset, setValue } = formMethods
+  const { handleSubmit, reset, setValue, control } = formMethods
+  const releaseType = useWatch({ control, name: "releaseType" })
 
   useEffect(() => {
     if (isCreate) {
@@ -174,7 +174,9 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
         setCurrentReleaseNote(id)
         const issuesHtml = note.issues ?? ""
         reset({
-          version: note.version,
+          releaseType: note.releaseType,
+          version: note.version ?? "",
+          name: note.name ?? "",
           releaseDate: note.releaseDate ? new Date(note.releaseDate as unknown as string) : null,
           content: note.content ?? "",
           releaseNotesUrl: note.releaseNotesUrl ?? "",
@@ -287,16 +289,17 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
       <FormProvider {...formMethods}>
         <Box as="form" onSubmit={onFormSubmit}>
           <VStack align="stretch" spacing={8}>
-            <TextFormControl
-              label={t("releaseNote.form.version")}
-              fieldName="version"
+            <SelectFormControl
+              label={t("releaseNote.form.releaseType")}
+              fieldName="releaseType"
               required
-              inputProps={{ w: "252px", maxW: "252px", isDisabled: isAlreadyPublished }}
-              validate={{
-                semver: (v: string) =>
-                  !v || releaseNoteSemverRegex.test(v) || t("releaseNote.form.versionInvalidSemver"),
-              }}
+              inputProps={{ w: "252px", maxW: "252px", isDisabled: !isCreate }}
+              options={RELEASE_NOTE_TYPES.map((type) => ({
+                value: type,
+                label: t(`releaseNote.types.${type}`),
+              }))}
             />
+            {releaseType && <ReleaseNoteTypeFields releaseType={releaseType} isAlreadyPublished={isAlreadyPublished} />}
             <DatePickerFormControl
               label={t("releaseNote.form.releaseDate")}
               fieldName="releaseDate"
@@ -315,7 +318,6 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
                 dateFormat: "yyyy/MM/dd h:mm aa",
               }}
             />
-            <UrlFormControl label={t("releaseNote.form.releaseNotesUrl")} fieldName="releaseNotesUrl" required />
             <ReleaseNoteHtmlField name="content" label={t("releaseNote.form.content")} required />
             <VStack align="stretch" spacing={4}>
               <Flex justifyContent="flex-end">
