@@ -7,10 +7,11 @@ import {
   FormErrorMessage,
   FormLabel,
   Heading,
+  Link,
   Text,
   VStack,
 } from "@chakra-ui/react"
-import { Minus, Plus } from "@phosphor-icons/react"
+import { CheckCircle, Minus, Plus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { FormProvider, useController, useForm, useFormContext, useWatch } from "react-hook-form"
@@ -118,6 +119,7 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
     publishReleaseNote,
     resetCurrentReleaseNote,
     setCurrentReleaseNote,
+    getReleaseNoteShareUrl,
   } = releaseNoteStore
 
   const isCreate = Boolean(
@@ -282,9 +284,41 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
 
   return (
     <Container maxW="container.lg" py={6} px={8} as="main">
-      <Heading color="text.primary" mb={8}>
-        {isCreate ? t("releaseNote.form.newTitle") : t("releaseNote.form.editTitle")}
-      </Heading>
+      <Flex justify="space-between" align="flex-start" gap={4} mb={8} flexWrap="wrap">
+        <Heading color="text.primary" mb={0}>
+          {isCreate ? t("releaseNote.form.newTitle") : t("releaseNote.form.editTitle")}
+        </Heading>
+        {isAlreadyPublished && releaseNoteId && (
+          <VStack align="flex-end" spacing={1}>
+            <Flex
+              as="span"
+              align="center"
+              gap={1}
+              px={2}
+              py={1}
+              borderRadius="sm"
+              bg="semantic.successLight"
+              color="semantic.success"
+              fontSize="xs"
+              fontWeight="bold"
+            >
+              <CheckCircle size={14} weight="fill" />
+              <Text as="span" m={0}>
+                {t("releaseNote.status.published")}
+              </Text>
+            </Flex>
+            <Link
+              href={getReleaseNoteShareUrl(releaseNoteId)}
+              isExternal
+              color="text.link"
+              fontSize="sm"
+              textDecoration="underline"
+            >
+              {t("releaseNote.form.viewPublishedNote")}
+            </Link>
+          </VStack>
+        )}
+      </Flex>
 
       <FormProvider {...formMethods}>
         <Box as="form" onSubmit={onFormSubmit}>
@@ -293,6 +327,7 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
               label={t("releaseNote.form.releaseType")}
               fieldName="releaseType"
               required
+              hint={isCreate ? t("releaseNote.form.releaseTypeHint") : null}
               inputProps={{ w: "252px", maxW: "252px", isDisabled: !isCreate }}
               options={RELEASE_NOTE_TYPES.map((type) => ({
                 value: type,
@@ -377,7 +412,7 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
                 isLoading={submittingIntent === "publish"}
                 isDisabled={submittingIntent === "saveDraft"}
               >
-                {t("releaseNote.form.publish")}
+                {isAlreadyPublished ? t("releaseNote.form.update") : t("releaseNote.form.publish")}
               </Button>
             </Flex>
           </VStack>
