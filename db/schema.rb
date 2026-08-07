@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_07_30_120000) do
+ActiveRecord::Schema[7.2].define(version: 2026_08_07_161100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -829,9 +829,13 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_30_120000) do
     t.integer "status", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "release_type", null: false
+    t.string "name"
     t.index ["release_date"], name: "index_release_notes_on_release_date"
+    t.index ["release_type"], name: "index_release_notes_on_release_type"
     t.index ["status"], name: "index_release_notes_on_status"
     t.index ["updated_at"], name: "index_release_notes_on_updated_at"
+    t.index ["version"], name: "index_release_notes_on_version_for_software", unique: true, where: "((release_type)::text = 'software'::text)"
   end
 
   create_table "report_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
