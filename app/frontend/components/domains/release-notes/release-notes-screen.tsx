@@ -131,9 +131,6 @@ export const ReleaseNotesScreen = observer(function ReleaseNotesScreen() {
   ])
 
   const reportIssueMailto = `mailto:${t("site.contactEmail")}`
-  const showingTypeLabel = selectedReleaseType
-    ? t(`releaseNote.types.${selectedReleaseType}`)
-    : t("releaseNote.viewing.allTypes")
 
   const releaseNotesContent =
     viewingReleaseNotes.length === 0 ? (
@@ -186,9 +183,6 @@ export const ReleaseNotesScreen = observer(function ReleaseNotesScreen() {
               flexShrink={0}
             >
               <ReleaseNoteTypeFilter value={selectedReleaseType} onChange={selectReleaseTypeFilter} />
-              <Text fontSize="sm" color="text.secondary" m={0}>
-                {t("releaseNote.viewing.showingType", { type: showingTypeLabel })}
-              </Text>
             </Flex>
 
             <Box flex={1} minH={0} overflowY="auto" pr={1}>
