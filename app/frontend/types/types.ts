@@ -28,6 +28,7 @@ import {
   EPermitApplicationStatus,
   EProjectMeetingStatus,
   EProjectState,
+  EReleaseNoteType,
   ERequirementType,
   ESocketDomainTypes,
   ESocketEventTypes,
@@ -137,6 +138,8 @@ export type TSearchParams<IModelSortFields, IModelFilterFields = {}> = {
   perPage?: number
   showArchived?: boolean
   publishedOnly?: boolean
+  releaseType?: EReleaseNoteType
+  year?: number
   filters?: IModelFilterFields
   mode?: "list" | "kanban"
   perColumn?: number
@@ -784,7 +787,9 @@ export type TCreatePermitApplicationFormData = {
 }
 
 export type TReleaseNoteFormData = {
+  releaseType: EReleaseNoteType
   version: string
+  name: string
   releaseDate: Date | null
   content: string
   releaseNotesUrl: string

@@ -5,7 +5,7 @@ import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IReleaseNote, ReleaseNoteModel } from "../models/release-note-model"
-import { EReleaseNoteSortFields } from "../types/enums"
+import { EReleaseNoteSortFields, EReleaseNoteType } from "../types/enums"
 import { TReleaseNoteFormData, TSearchParams } from "../types/types"
 import { urlForPath } from "../utils/utility-functions"
 
@@ -27,6 +27,7 @@ export const ReleaseNoteStoreModel = types
       viewingYearInitialized: types.optional(types.boolean, false),
       applyYearFilterInSearch: types.optional(types.boolean, false),
       publishedOnlyInSearch: types.optional(types.boolean, false),
+      selectedReleaseType: types.maybeNull(types.enumeration(Object.values(EReleaseNoteType))),
       availableYears: types.array(types.number),
     }),
     createSearchModel<EReleaseNoteSortFields>("searchReleaseNotes")
@@ -72,6 +73,9 @@ export const ReleaseNoteStoreModel = types
     setPublishedOnlyInSearch(apply: boolean) {
       self.publishedOnlyInSearch = apply
     },
+    setSelectedReleaseType(releaseType: EReleaseNoteType | null) {
+      self.selectedReleaseType = releaseType
+    },
     setAvailableYears(years: number[]) {
       self.availableYears = cast(years)
     },
@@ -79,6 +83,7 @@ export const ReleaseNoteStoreModel = types
       self.viewingYearInitialized = false
       self.applyYearFilterInSearch = false
       self.publishedOnlyInSearch = false
+      self.selectedReleaseType = null
       self.availableYears = cast([])
     },
   }))
@@ -99,7 +104,7 @@ export const ReleaseNoteStoreModel = types
         self.resetPages()
       }
 
-      const searchParams: TSearchParams<EReleaseNoteSortFields> & { year?: number } = {
+      const searchParams: TSearchParams<EReleaseNoteSortFields> = {
         query: self.query,
         sort: self.sort,
         page: opts?.page ?? self.currentPage,
@@ -112,6 +117,10 @@ export const ReleaseNoteStoreModel = types
 
       if (self.publishedOnlyInSearch) {
         searchParams.publishedOnly = true
+      }
+
+      if (self.selectedReleaseType) {
+        searchParams.releaseType = self.selectedReleaseType
       }
 
       const response = yield self.environment.api.fetchReleaseNotes(searchParams)
@@ -171,6 +180,12 @@ export const ReleaseNoteStoreModel = types
       self.setSelectedYear(year)
       yield self.searchReleaseNotes({ reset: true, page: 1 })
     }),
+
+    // useSearch depends on selectedReleaseType — only reset page here, let it fetch
+    selectReleaseTypeFilter(releaseType: EReleaseNoteType | null) {
+      self.setSelectedReleaseType(releaseType)
+      self.resetPages()
+    },
 
     ensureReleaseNoteVisibleInList: flow(function* (releaseNoteId: string) {
       const contextResponse = yield self.environment.api.fetchReleaseNoteViewerContext(releaseNoteId, {
