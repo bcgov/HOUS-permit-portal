@@ -156,25 +156,33 @@ export const SubmissionDownloadModal = observer(
       allSelected: boolean
       knownFileUrls: string[]
     } | null>(null)
+    const pendingSelectiveZipRequestIdRef = useRef<string | null>(null)
     const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set())
     const [generationFailed, setGenerationFailed] = useState(false)
     const [awaitingGeneration, setAwaitingGeneration] = useState(false)
+    const [awaitingSelectiveZip, setAwaitingSelectiveZip] = useState(false)
+    const [selectiveZipFailed, setSelectiveZipFailed] = useState(false)
 
-    const onClose = () => {
+    const resetDownloadState = () => {
       setSelectedKeys(new Set())
       setGenerationFailed(false)
       setAwaitingGeneration(false)
+      setAwaitingSelectiveZip(false)
+      setSelectiveZipFailed(false)
       pendingDownloadRef.current = null
+      pendingSelectiveZipRequestIdRef.current = null
+      permitApplication.clearSelectiveZipResult()
+    }
+
+    const onClose = () => {
+      resetDownloadState()
       disclosureOnClose()
     }
 
     useEffect(() => {
       if (!isOpen) {
         zipGenerationTriggeredRef.current = false
-        setSelectedKeys(new Set())
-        setGenerationFailed(false)
-        setAwaitingGeneration(false)
-        pendingDownloadRef.current = null
+        resetDownloadState()
       }
     }, [isOpen])
 
@@ -227,12 +235,13 @@ export const SubmissionDownloadModal = observer(
       })
     }, [allKeys])
 
+    // true = download started immediately; "pending" = waiting on selective zip socket; false = failed
     const performDownload = async (
       fileUrls: string[],
       wasAllSelected: boolean,
       missingKeys: string[] = [],
       knownFileUrls: string[] = []
-    ) => {
+    ): Promise<true | false | "pending"> => {
       const selected = wasAllSelected
         ? documents
         : documents.filter(
@@ -248,16 +257,23 @@ export const SubmissionDownloadModal = observer(
         a.href = doc.fileUrl
         a.download = doc.fileName
         a.click()
-      } else if (wasAllSelected && zipfileUrl) {
+        return true
+      }
+
+      if (wasAllSelected && zipfileUrl) {
         const a = document.createElement("a")
         a.href = zipfileUrl
         a.download = zipfileName || `permit-application-${permitApplication.number}.zip`
         a.click()
-      } else {
-        const ok = await permitApplication.downloadSupportingDocumentsZip(selectedIds)
-        if (!ok) return false
+        return true
       }
-      return true
+
+      const requestId = await permitApplication.downloadSupportingDocumentsZip(selectedIds)
+      if (!requestId) return false
+
+      pendingSelectiveZipRequestIdRef.current = requestId
+      setAwaitingSelectiveZip(true)
+      return "pending"
     }
 
     // After missing PDFs finish, continue the download that was waiting
@@ -270,15 +286,38 @@ export const SubmissionDownloadModal = observer(
       pendingDownloadRef.current = null
       setAwaitingGeneration(false)
       ;(async () => {
-        const ok = await performDownload(
+        const result = await performDownload(
           pending.fileUrls,
           pending.allSelected,
           pending.missingKeys,
           pending.knownFileUrls
         )
-        if (ok) onClose()
+        if (result === true) onClose()
+        if (result === false) setSelectiveZipFailed(true)
       })()
     }, [awaitingGeneration, hasMissingPdfs, generationFailed, isOpen, documents, zipfileUrl])
+
+    // Selective zip ready via websocket — auto-download when requestId matches
+    useEffect(() => {
+      if (!isOpen || !awaitingSelectiveZip || !pendingSelectiveZipRequestIdRef.current) return
+
+      const result = permitApplication.selectiveZipResult
+      if (!result || result.requestId !== pendingSelectiveZipRequestIdRef.current) return
+
+      if (result.error || !result.zipfileUrl) {
+        setSelectiveZipFailed(true)
+        setAwaitingSelectiveZip(false)
+        return
+      }
+
+      const a = document.createElement("a")
+      a.href = result.zipfileUrl
+      a.download = result.zipfileName || `permit-application-${permitApplication.number}.zip`
+      a.click()
+      pendingSelectiveZipRequestIdRef.current = null
+      permitApplication.clearSelectiveZipResult()
+      onClose()
+    }, [isOpen, awaitingSelectiveZip, permitApplication.selectiveZipResult])
 
     const allSelected = allKeys.length > 0 && selectedKeys.size === allKeys.length
     const someSelected = selectedKeys.size > 0 && selectedKeys.size < allKeys.length
@@ -322,15 +361,16 @@ export const SubmissionDownloadModal = observer(
         return
       }
 
-      const ok = await performDownload(
+      const result = await performDownload(
         selectedReady.map((doc) => doc.fileUrl),
         allSelected
       )
-      if (ok) onClose()
+      if (result === true) onClose()
+      if (result === false) setSelectiveZipFailed(true)
     }
 
-    const showPreparing = awaitingGeneration && hasMissingPdfs
-    const showError = awaitingGeneration && generationFailed
+    const showPreparing = awaitingSelectiveZip || (awaitingGeneration && hasMissingPdfs && !selectiveZipFailed)
+    const showError = selectiveZipFailed || (awaitingGeneration && generationFailed)
 
     return (
       <>
@@ -467,13 +507,10 @@ function PreparingView({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation()
   return (
     <VStack align="stretch" spacing={6} p={10} w="full">
-      <VStack align="start" spacing="10px" w="full">
-        <Heading as="h1" fontSize="4xl" fontWeight="bold" lineHeight="normal" m={0} mb={0}>
-          {t("permitApplication.show.preparingFilesHeading")}
-        </Heading>
+      <VStack align="center" spacing={3} w="full" py={6}>
         <Spinner size="md" color="theme.blue" thickness="3px" emptyColor="border.light" />
-        <Text fontSize="lg" lineHeight="1.68">
-          {t("permitApplication.show.preparingFilesBody")}
+        <Text fontSize="md" color="text.secondary">
+          {t("permitApplication.show.generating")}
         </Text>
       </VStack>
       <Flex justify="flex-end" w="full">

@@ -2118,9 +2118,7 @@ Thank you,
             downloadSectionGenerated: "Application documents",
             downloadSectionOther: "Other",
             downloadSubmitted: "Submitted {{date}}",
-            preparingFilesHeading: "Preparing your files...",
-            preparingFilesBody:
-              "Your files are being prepared and will be available to download shortly. This usually takes less than two minutes.",
+            generating: "Generating...",
             errorPreparingHeading: "Error preparing files",
             errorPreparingTitle: "We couldn’t prepare your files for download",
             errorPreparingBody:
