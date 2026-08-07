@@ -390,14 +390,16 @@ class Api::PermitApplicationsController < Api::ApplicationController
     authorize @permit_application
 
     document_ids = Array(params[:supporting_document_ids]).presence
-    SupportingDocumentsZipper
-      .new(@permit_application.id, document_ids: document_ids)
-      .with_zip do |path|
-        send_data File.binread(path),
-                  filename: File.basename(path),
-                  type: "application/zip",
-                  disposition: "attachment"
-      end
+    request_id = SecureRandom.uuid
+
+    SupportingDocumentsZipDownloadJob.perform_async(
+      @permit_application.id,
+      document_ids,
+      request_id,
+      current_user.id
+    )
+
+    render json: { data: { request_id: request_id } }, status: :accepted
   end
 
   def finalize_revision_requests

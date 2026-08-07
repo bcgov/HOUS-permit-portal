@@ -18,6 +18,7 @@ import {
   IDownloadableFile,
   IFormIOBlock,
   IFormJson,
+  IPermitApplicationSelectiveZipReady,
   IPermitApplicationSupportingDocumentsUpdate,
   ISubmissionData,
   ISubmissionVersion,
@@ -36,7 +37,7 @@ import {
 import { format } from "date-fns"
 import { StepCodeModel } from "../stores/step-code-store"
 import { compareSubmissionData } from "../utils/formio-helpers"
-import { convertResourceArrayToRecord, startBlobDownload } from "../utils/utility-functions"
+import { convertResourceArrayToRecord } from "../utils/utility-functions"
 import { ICollaborator } from "./collaborator"
 import { JurisdictionModel } from "./jurisdiction"
 import { IPermitBlockStatus, PermitBlockStatusModel } from "./permit-block-status"
@@ -81,6 +82,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       zipfileSize: types.maybeNull(types.number),
       zipfileName: types.maybeNull(types.string),
       zipfileUrl: types.maybeNull(types.string),
+      selectiveZipResult: types.maybeNull(types.frozen<IPermitApplicationSelectiveZipReady>()),
       referenceNumber: types.maybeNull(types.string),
       missingPdfs: types.maybeNull(types.array(types.string)),
       isFullyLoaded: types.optional(types.boolean, false),
@@ -914,19 +916,25 @@ export const PermitApplicationModel = types.snapshotProcessor(
         self.zipfileName = data.zipfileName
         self.zipfileUrl = data.zipfileUrl
       },
+      handleSocketSelectiveZipReady: (data: IPermitApplicationSelectiveZipReady) => {
+        self.selectiveZipResult = data
+      },
+      clearSelectiveZipResult: () => {
+        self.selectiveZipResult = null
+      },
       generateMissingPdfs: flow(function* () {
         const response = yield self.environment.api.generatePermitApplicationMissingPdfs(self.id)
         return response.ok
       }),
 
       downloadSupportingDocumentsZip: flow(function* (supportingDocumentIds: string[]) {
+        self.selectiveZipResult = null
         const response = yield* toGenerator(
           self.environment.api.downloadSupportingDocumentsZip(self.id, supportingDocumentIds)
         )
-        if (!response.ok) return false
+        if (!response.ok) return null
 
-        startBlobDownload(response.data, "application/zip", `permit-application-${self.number || self.id}-files.zip`)
-        return true
+        return response.data?.data?.requestId ?? null
       }),
 
       unassignPermitCollaboration: flow(function* (collaborationId: string) {

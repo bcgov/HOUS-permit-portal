@@ -315,6 +315,25 @@ RSpec.describe PermitApplicationPolicy do
       ).to be false
     end
 
+    it "download_supporting_documents_zip? mirrors generate_missing_pdfs?" do
+      record =
+        double(
+          "PermitApplication",
+          submitter: submitter,
+          jurisdiction_id: jurisdiction.id
+        )
+      policy = described_class.new(UserContext.new(submitter, sandbox), record)
+      expect(policy.download_supporting_documents_zip?).to eq(
+        policy.generate_missing_pdfs?
+      )
+
+      stranger_policy =
+        described_class.new(UserContext.new(create(:user), sandbox), record)
+      expect(stranger_policy.download_supporting_documents_zip?).to eq(
+        stranger_policy.generate_missing_pdfs?
+      )
+    end
+
     it "finalize_revision_requests? respects designated reviewer feature" do
       reviewer = create(:user, :review_manager, jurisdiction:)
       delegatee_rel = double("DelegateeRel", first: nil)

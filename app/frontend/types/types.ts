@@ -495,13 +495,6 @@ export interface IReportDocumentNotificationObjectData {
   downloadUrl?: string
 }
 
-export type TSocketEventData =
-  | IPermitApplicationComplianceUpdate
-  | IPermitApplicationSupportingDocumentsUpdate
-  | IPermitBlockStatus
-  | INotification
-  | ITemplateVersionUpdate
-
 export interface IPermitApplicationSupportingDocumentsUpdate {
   id: string
   supportingDocuments: IPermitApplication["supportingDocuments"]
@@ -511,6 +504,22 @@ export interface IPermitApplicationSupportingDocumentsUpdate {
   zipfileUrl: null | string
   allSubmissionVersionCompletedSupportingDocuments?: IDownloadableFile[]
 }
+
+export interface IPermitApplicationSelectiveZipReady {
+  id: string
+  requestId: string
+  zipfileUrl?: string | null
+  zipfileName?: string | null
+  error?: boolean
+}
+
+export type TSocketEventData =
+  | IPermitApplicationComplianceUpdate
+  | IPermitApplicationSupportingDocumentsUpdate
+  | IPermitApplicationSelectiveZipReady
+  | IPermitBlockStatus
+  | INotification
+  | ITemplateVersionUpdate
 
 export interface IUserPushPayload {
   data: TSocketEventData

@@ -425,6 +425,7 @@ export enum EPermitApplicationSocketEventTypes {
   updateCompliance = "update_compliance",
   updateSupportingDocuments = "update_supporting_documents",
   updatePermitBlockStatus = "update_permit_block_status",
+  selectiveZipReady = "selective_zip_ready",
 }
 
 export enum EJurisdictionSocketEventTypes {

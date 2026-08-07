@@ -741,10 +741,9 @@ export class Api {
   }
 
   async downloadSupportingDocumentsZip(id: string, supportingDocumentIds: string[]) {
-    return this.client.post<BlobPart>(
+    return this.client.post<IApiResponse<{ requestId: string }, {}>>(
       `/permit_applications/${id}/download_supporting_documents_zip`,
-      { supportingDocumentIds },
-      { responseType: "blob", headers: { Accept: "application/zip" } }
+      { supportingDocumentIds }
     )
   }
 
