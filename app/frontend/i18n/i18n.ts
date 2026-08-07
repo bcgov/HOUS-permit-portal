@@ -1504,9 +1504,6 @@ Thank you,
             fn: "These are First Nations specific permits",
             sandboxWarning: "Training sandbox permits can only be added into your own jurisdiction's training sandbox",
             button: "Add applications",
-            bcbcPartHeading: "Tags",
-            bcbcPart:
-              "Right now, you can apply for permits for small-scale projects. This includes residential buildings, small structures, trades permits, and site work.",
             noPermitsAvailable: "No permits are available",
             noPermitsAvailableDescription:
               "There are currently no permits available for this jurisdiction. Contact your local government for more information.",
