@@ -247,18 +247,17 @@ RSpec.describe PermitApplication, type: :model do
 
     describe "#energy_step_code_method" do
       it "reads tool or file from submission data" do
-        permit_application =
-          create(
-            :permit_application,
-            submission_data: {
-              "data" => {
-                "section1" => {
-                  "formSubmissionDataRSTsection1|RB1|energy_step_code_method" =>
-                    "tool"
-                }
+        permit_application = create(:permit_application)
+        permit_application.update!(
+          submission_data: {
+            "data" => {
+              "section1" => {
+                "formSubmissionDataRSTsection1|RB1|energy_step_code_method" =>
+                  "tool"
               }
             }
-          )
+          }
+        )
 
         expect(permit_application.energy_step_code_method).to eq("tool")
         expect(permit_application.using_digital_energy_step_code_tool?).to be(
@@ -269,21 +268,20 @@ RSpec.describe PermitApplication, type: :model do
 
     describe "#can_submit?" do
       it "is false when digital tool method is selected but step code is incomplete" do
-        permit_application =
-          create(
-            :permit_application,
-            submission_data: {
-              "data" => {
-                "section-completion-key" => {
-                  "signed" => true
-                },
-                "section1" => {
-                  "formSubmissionDataRSTsection1|RB1|energy_step_code_method" =>
-                    "tool"
-                }
+        permit_application = create(:permit_application)
+        permit_application.update!(
+          submission_data: {
+            "data" => {
+              "section-completion-key" => {
+                "signed" => true
+              },
+              "section1" => {
+                "formSubmissionDataRSTsection1|RB1|energy_step_code_method" =>
+                  "tool"
               }
             }
-          )
+          }
+        )
         create(:part_3_step_code, permit_application: permit_application)
         allow(permit_application).to receive(:inbox_enabled?).and_return(true)
         allow(permit_application).to receive(
