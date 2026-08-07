@@ -99,6 +99,7 @@ export const TemplateVersionActionsMenu = observer(function TemplateVersionActio
             promptHeader={t("templateVersionPreview.restoreLayout.confirmTitle")}
             promptMessage={<Text whiteSpace="pre-line">{t("templateVersionPreview.restoreLayout.confirmBody")}</Text>}
             confirmText={t("templateVersionPreview.restoreLayout.confirmButton")}
+            confirmButtonBg="semantic.error"
             onConfirm={handleRestoreLayout}
             renderTrigger={(onOpen) => (
               <MenuItem onClick={onOpen}>{t("templateVersionPreview.restoreLayout.triggerButton")}</MenuItem>
