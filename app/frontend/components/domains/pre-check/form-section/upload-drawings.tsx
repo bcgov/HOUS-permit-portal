@@ -103,20 +103,20 @@ export const UploadDrawings = observer(function UploadDrawings() {
     }
   }
 
-  const onSubmit = async (data: IUploadDrawingsFormData) => {
-    if (!currentPreCheck) return
-    await updatePreCheck(currentPreCheck.id, {
-      designDocumentsAttributes: data.designDocumentsAttributes,
-    })
-  }
-
-  const { uppy } = useUppyS3({
+  const { uppy, isUploading } = useUppyS3({
     onUploadSuccess: handleUploadSuccess,
     maxNumberOfFiles: 1,
     autoProceed: true,
     maxFileSizeMB: 200,
     allowedFileTypes: ["application/pdf", ".pdf", ".chk"],
   })
+
+  const onSubmit = async (data: IUploadDrawingsFormData) => {
+    if (isUploading || !currentPreCheck) return
+    await updatePreCheck(currentPreCheck.id, {
+      designDocumentsAttributes: data.designDocumentsAttributes,
+    })
+  }
 
   return (
     <Box>
@@ -225,7 +225,7 @@ export const UploadDrawings = observer(function UploadDrawings() {
         handleSubmit={handleSubmit}
         onSubmit={onSubmit}
         isLoading={isSubmitting}
-        isDisabled={!hasUploadedFile}
+        isDisabled={!hasUploadedFile || isUploading}
         disabledMessage={
           !hasUploadedFile
             ? t("preCheck.sections.uploadDrawings.uploadRequired", "Please upload a file before continuing.")

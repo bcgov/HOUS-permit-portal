@@ -204,14 +204,14 @@ export const ResourcesScreen = observer(function ResourcesScreen() {
     })
   }
 
-  const { uppy: modalUppy } = useUppyS3({
+  const { uppy: modalUppy, isUploading } = useUppyS3({
     onUploadSuccess: handleUploadSuccess,
     maxNumberOfFiles: 1,
     autoProceed: true,
   })
 
   const onModalSubmit = async (formData: IResourceModalForm) => {
-    if (!currentJurisdiction) return
+    if (isUploading || !currentJurisdiction) return
 
     setIsSubmitting(true)
     try {
@@ -373,7 +373,7 @@ export const ResourcesScreen = observer(function ResourcesScreen() {
               <Button variant="ghost" mr={3} onClick={handleCloseModal} isDisabled={isSubmitting}>
                 {t("ui.cancel")}
               </Button>
-              <Button type="submit" variant="primary" isLoading={isSubmitting}>
+              <Button type="submit" variant="primary" isLoading={isSubmitting} isDisabled={isSubmitting || isUploading}>
                 {t("ui.save")}
               </Button>
             </ModalFooter>

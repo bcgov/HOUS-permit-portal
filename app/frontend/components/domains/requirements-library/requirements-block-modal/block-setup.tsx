@@ -20,7 +20,7 @@ import "@uppy/core/dist/style.min.css"
 import Dashboard from "@uppy/react/lib/Dashboard.js"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
-import React, { useRef } from "react"
+import React, { useEffect, useRef } from "react"
 import { Controller, useFieldArray, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import useUppyS3 from "../../../../hooks/use-uppy-s3"
@@ -37,9 +37,11 @@ const helperTextStyles: Partial<TextProps> = {
 export const BlockSetup = observer(function BlockSetup({
   requirementBlock,
   withOptionsMenu,
+  onIsUploadingChange,
 }: {
   requirementBlock?: IRequirementBlock
   withOptionsMenu?: boolean
+  onIsUploadingChange?: (isUploading: boolean) => void
 }) {
   const { requirementBlockStore } = useMst()
   const { t } = useTranslation()
@@ -89,7 +91,16 @@ export const BlockSetup = observer(function BlockSetup({
     }
   }
 
-  const { uppy } = useUppyS3({ onUploadSuccess: handleUploadSuccess, maxNumberOfFiles: 10, autoProceed: true })
+  const { uppy, isUploading } = useUppyS3({
+    onUploadSuccess: handleUploadSuccess,
+    maxNumberOfFiles: 10,
+    autoProceed: true,
+  })
+
+  useEffect(() => {
+    onIsUploadingChange?.(isUploading)
+    return () => onIsUploadingChange?.(false)
+  }, [isUploading, onIsUploadingChange])
 
   return (
     <Box as={"section"} w={"350px"} boxShadow={"md"} borderRadius={"xl"} bg={"greys.grey10"} ref={containerRef}>

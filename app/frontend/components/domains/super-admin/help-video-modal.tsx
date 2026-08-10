@@ -104,24 +104,25 @@ export const HelpVideoModal = ({ isOpen, onClose, video, sections, onSubmit }: I
     }
   }
 
-  const { uppy: videoUppy } = useUppyS3({
+  const { uppy: videoUppy, isUploading: isVideoUploading } = useUppyS3({
     onUploadSuccess: buildUploadHandler("videoDocumentAttributes"),
     maxNumberOfFiles: 1,
     autoProceed: true,
     allowedFileTypes: ["video/mp4"],
   })
-  const { uppy: captionUppy } = useUppyS3({
+  const { uppy: captionUppy, isUploading: isCaptionUploading } = useUppyS3({
     onUploadSuccess: buildUploadHandler("captionDocumentAttributes"),
     maxNumberOfFiles: 1,
     autoProceed: true,
     allowedFileTypes: [".vtt", "text/vtt"],
   })
-  const { uppy: transcriptUppy } = useUppyS3({
+  const { uppy: transcriptUppy, isUploading: isTranscriptUploading } = useUppyS3({
     onUploadSuccess: buildUploadHandler("transcriptDocumentAttributes"),
     maxNumberOfFiles: 1,
     autoProceed: true,
     allowedFileTypes: [".txt", ".pdf", "text/plain", "application/pdf"],
   })
+  const isUploading = isVideoUploading || isCaptionUploading || isTranscriptUploading
 
   useEffect(() => {
     if (!isOpen) return
@@ -147,6 +148,7 @@ export const HelpVideoModal = ({ isOpen, onClose, video, sections, onSubmit }: I
   }, [captionUppy, isOpen, reset, sections, transcriptUppy, video, videoUppy])
 
   const submit = handleSubmit(async (data) => {
+    if (isUploading) return
     const success = await onSubmit(data)
     if (success) onClose()
   })
@@ -218,7 +220,7 @@ export const HelpVideoModal = ({ isOpen, onClose, video, sections, onSubmit }: I
           </VStack>
         </ModalBody>
         <ModalFooter gap={4} justifyContent="flex-start">
-          <Button variant="primary" type="submit" isLoading={isSubmitting} isDisabled={!hasSections}>
+          <Button variant="primary" type="submit" isLoading={isSubmitting} isDisabled={!hasSections || isUploading}>
             {translate("ui.save")}
           </Button>
           <Button variant="secondary" onClick={onClose} isDisabled={isSubmitting}>
