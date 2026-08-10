@@ -16,8 +16,6 @@ import {
 } from "@chakra-ui/react"
 import { Trash } from "@phosphor-icons/react"
 import { UppyFile } from "@uppy/core"
-import "@uppy/core/dist/style.min.css"
-import Dashboard from "@uppy/react/lib/Dashboard.js"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useFieldArray, useForm } from "react-hook-form"
@@ -28,6 +26,7 @@ import { useMst } from "../../../../setup/root"
 import { EFileUploadAttachmentType } from "../../../../types/enums"
 import { IDesignDocument } from "../../../../types/types"
 import { FileDownloadButton } from "../../../shared/base/file-download-button"
+import { UppyDashboard } from "../../../shared/uppy-dashboard"
 import { PreCheckBackLink } from "../pre-check-back-link"
 import { FormFooter } from "./form-footer"
 
@@ -60,7 +59,7 @@ export const UploadDrawings = observer(function UploadDrawings() {
     },
   })
 
-  const { fields, append, update } = useFieldArray({
+  const { fields, append, update, remove } = useFieldArray({
     control,
     name: "designDocumentsAttributes",
   })
@@ -103,8 +102,24 @@ export const UploadDrawings = observer(function UploadDrawings() {
     }
   }
 
+  const handleUppyFileRemoved = (file: UppyFile<{}, {}>) => {
+    const key = file.uploadURL?.split("/").pop()
+    const index = designDocumentsAttributes.findIndex(
+      (doc) => (key && doc.file?.id === key) || (!doc.id && doc.file?.metadata?.filename === file.name)
+    )
+    if (index === -1) return
+
+    const doc = designDocumentsAttributes[index]
+    if (doc.id) {
+      update(index, { ...doc, _destroy: true })
+    } else {
+      remove(index)
+    }
+  }
+
   const { uppy, isUploading } = useUppyS3({
     onUploadSuccess: handleUploadSuccess,
+    onFileRemoved: handleUppyFileRemoved,
     maxNumberOfFiles: 1,
     autoProceed: true,
     maxFileSizeMB: 200,
@@ -200,7 +215,7 @@ export const UploadDrawings = observer(function UploadDrawings() {
 
       {!currentPreCheck?.isSubmitted && !currentPreCheck?.isUploadDrawingsComplete && (
         <Box position="relative" mb={6}>
-          <Dashboard uppy={uppy} width="100%" height={276} proudlyDisplayPoweredByUppy={false} />
+          <UppyDashboard uppy={uppy} width="100%" height={276} />
         </Box>
       )}
 
