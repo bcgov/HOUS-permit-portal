@@ -334,11 +334,6 @@ export enum EStepCodeBuildingType {
   other = "other",
 }
 
-export enum ESpaceHeatingCoolingVariant {
-  principal = "principal",
-  secondary = "secondary",
-}
-
 export enum EWindowsGlazedDoorsPerformanceType {
   usi = "usi",
   uimp = "u_imp",
