@@ -17,6 +17,9 @@ services:
       - xpack.security.transport.ssl.enabled=false
       - xpack.security.http.ssl.enabled=false
       - cluster.routing.allocation.disk.threshold_enabled=false
+      # Apple Silicon (esp. M4): JVM SIGILL without this — see docker/for-mac#7505
+      - ES_JAVA_OPTS=-XX:UseSVE=0
+      - CLI_JAVA_OPTS=-XX:UseSVE=0
     ports:
       - "9200:9200"
     volumes:
@@ -26,8 +29,9 @@ services:
     image: minio/minio:latest
     command: server /data --address ":9001" --console-address ":9002"
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+      # From host `.env` — same keys Rails uses for object storage
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     ports:
       - "9001:9001"
       - "9002:9002"
