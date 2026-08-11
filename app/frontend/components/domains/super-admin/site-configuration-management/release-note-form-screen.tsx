@@ -23,6 +23,7 @@ import { EReleaseNoteStatus, EReleaseNoteType } from "../../../../types/enums"
 import { TReleaseNoteFormData } from "../../../../types/types"
 import { isTipTapEmpty } from "../../../../utils/utility-functions"
 import { SharedSpinner } from "../../../shared/base/shared-spinner"
+import { ConfirmationModal } from "../../../shared/confirmation-modal"
 import { Editor } from "../../../shared/editor/editor"
 import { DatePickerFormControl, SelectFormControl } from "../../../shared/form/input-form-control"
 import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
@@ -241,21 +242,14 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
   const onFormSubmit = handleSubmit(async (data: TReleaseNoteFormData, event?: React.BaseSyntheticEvent) => {
     const submitter = (event?.nativeEvent as SubmitEvent)?.submitter as HTMLButtonElement | null
     const intentValue = submitter?.name === "intent" ? submitter.value : undefined
-    if (intentValue !== "saveDraft" && intentValue !== "publish") {
-      return
-    }
-    const intent = intentValue
-    if (intent === "saveDraft" && isAlreadyPublished) {
+    // Publish is confirmed via modal; only save-draft submits through the form.
+    if (intentValue !== "saveDraft" || isAlreadyPublished) {
       return
     }
 
-    setSubmittingIntent(intent)
+    setSubmittingIntent("saveDraft")
     try {
-      if (intent === "saveDraft") {
-        await saveDraft(data)
-      } else {
-        await publishFlow(data)
-      }
+      await saveDraft(data)
     } finally {
       setSubmittingIntent(null)
     }
@@ -403,17 +397,45 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
               >
                 {t("releaseNote.form.saveDraft")}
               </Button>
-              <Button
-                type="submit"
-                name="intent"
-                value="publish"
-                variant="primary"
-                size="sm"
-                isLoading={submittingIntent === "publish"}
-                isDisabled={submittingIntent === "saveDraft"}
-              >
-                {isAlreadyPublished ? t("releaseNote.form.update") : t("releaseNote.form.publish")}
-              </Button>
+              <ConfirmationModal
+                title={
+                  isAlreadyPublished
+                    ? t("releaseNote.form.updateConfirmation.title")
+                    : t("releaseNote.form.publishConfirmation.title")
+                }
+                body={
+                  isAlreadyPublished
+                    ? t("releaseNote.form.updateConfirmation.body")
+                    : t("releaseNote.form.publishConfirmation.body")
+                }
+                triggerText={isAlreadyPublished ? t("releaseNote.form.update") : t("releaseNote.form.publish")}
+                confirmButtonProps={{
+                  isLoading: submittingIntent === "publish",
+                }}
+                renderTriggerButton={({ onClick, ...props }) => (
+                  <Button
+                    type="button"
+                    variant="primary"
+                    size="sm"
+                    isDisabled={submittingIntent === "saveDraft"}
+                    {...props}
+                    onClick={(e) => void handleSubmit(() => onClick?.(e))()}
+                  >
+                    {isAlreadyPublished ? t("releaseNote.form.update") : t("releaseNote.form.publish")}
+                  </Button>
+                )}
+                onConfirm={async (closeModal) => {
+                  setSubmittingIntent("publish")
+                  try {
+                    await handleSubmit(async (data) => {
+                      await publishFlow(data)
+                    })()
+                  } finally {
+                    setSubmittingIntent(null)
+                    closeModal()
+                  }
+                }}
+              />
             </Flex>
           </VStack>
         </Box>
