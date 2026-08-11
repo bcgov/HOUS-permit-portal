@@ -30,6 +30,7 @@ function ReleaseNoteTypeFieldControl({
           label={t("releaseNote.form.version")}
           fieldName="version"
           required
+          hint={t("releaseNote.form.versionHint")}
           inputProps={{ w: "252px", maxW: "252px", isDisabled: isAlreadyPublished }}
           validate={{
             semver: (v: string) => !v || releaseNoteSemverRegex.test(v) || t("releaseNote.form.versionInvalidSemver"),
@@ -42,6 +43,7 @@ function ReleaseNoteTypeFieldControl({
           label={t("releaseNote.form.name")}
           fieldName="name"
           required
+          hint={t("releaseNote.form.nameHint")}
           inputProps={{ w: "252px", maxW: "252px" }}
         />
       )
