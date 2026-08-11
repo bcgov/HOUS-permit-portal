@@ -175,6 +175,11 @@ export enum EReleaseNoteStatus {
   published = "published",
 }
 
+export enum EReleaseNoteType {
+  software = "software",
+  content = "content",
+}
+
 export enum EPreCheckSortFields {
   fullAddress = "full_address",
   title = "title",

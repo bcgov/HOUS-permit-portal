@@ -432,7 +432,11 @@ RSpec.describe NotificationService do
             Constants::NotificationActionTypes::RELEASE_NOTE_PUBLISH,
           "action_text" => include("9.9.9"),
           "object_data" =>
-            include("release_note_id" => release_note.id, "version" => "9.9.9")
+            include(
+              "release_note_id" => release_note.id,
+              "release_type" => "software",
+              "label" => "9.9.9"
+            )
         )
 
       expect(NotificationPushJob).to have_received(:perform_async) do |hash|
