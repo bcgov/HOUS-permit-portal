@@ -43,7 +43,7 @@ User.find_or_create_by(omniauth_username: "super_admin") do |user|
   user.password = "P@ssword1"
   user.confirmed_at = Time.now
   user.omniauth_uid = "A41927C69D6549B8A396FCA748F53502"
-  user.omniauth_provider = "bceidbasic"
+  user.omniauth_provider = "idir"
   user.omniauth_email = "super_admin@example.com"
   user.omniauth_username = "super_admin"
 end

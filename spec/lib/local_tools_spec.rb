@@ -18,4 +18,28 @@ RSpec.describe LocalTools do
       )
     end
   end
+
+  describe ".searchkick_models" do
+    it "re-resolves Searchkick.models through constants so stale reload copies are dropped" do
+      allow(Rails.application).to receive(:eager_load!)
+
+      stale =
+        Class.new do
+          def self.name
+            "StepCode"
+          end
+        end
+
+      original = Searchkick.models.dup
+      Searchkick.models << stale
+
+      models = described_class.send(:searchkick_models)
+
+      expect(models).to include(StepCode)
+      expect(models).not_to include(stale)
+      expect(models.count { |m| m.name == "StepCode" }).to eq(1)
+    ensure
+      Searchkick.models.replace(original) if original
+    end
+  end
 end

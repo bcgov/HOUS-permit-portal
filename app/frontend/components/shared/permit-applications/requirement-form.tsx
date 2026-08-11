@@ -11,7 +11,12 @@ import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
 import { EFileUploadAttachmentType, EFlashMessageStatus, EStepCodeType } from "../../../types/enums"
 import { IErrorsBoxData } from "../../../types/types"
-import { getCompletedBlocksFromForm, getRequirementByKey } from "../../../utils/formio-component-traversal"
+import {
+  getCompletedBlocksFromForm,
+  getRequirementByKey,
+  reconcileSelectedTabIndex,
+  scrollAdjustmentForHiddenBlocks,
+} from "../../../utils/formio-component-traversal"
 import {
   getEnergyStepCodeMethodFromData,
   singleRequirementFormJson,
@@ -58,7 +63,7 @@ export const RequirementForm = observer(
       jurisdiction,
       submissionData,
       setSelectedTabIndex,
-      indexOfBlockId,
+      selectedTabIndex,
       formJson,
       blockClasses,
       formattedFormJson,
@@ -73,6 +78,66 @@ export const RequirementForm = observer(
     } = permitApplication
 
     const stepCodeCompletionOptions = { isStepCodeComplete }
+    const previousVisibleBlockKeysRef = useRef<string[]>([])
+    const previousCompletedBlocksRef = useRef<Record<string, boolean>>({})
+    const previousBlockLayoutsRef = useRef<{ key: string; absTop: number; height: number }[]>([])
+    const [visibilityVersion, setVisibilityVersion] = useState(0)
+
+    const captureBlockLayouts = () =>
+      blockClasses.flatMap((className) => {
+        const el = document.getElementsByClassName(className)[0] as HTMLElement | undefined
+        if (!el || el.classList.contains("formio-hidden")) return []
+        const rect = el.getBoundingClientRect()
+        return [
+          {
+            key: className.replace(/^formio-component-/, ""),
+            absTop: rect.top + window.scrollY,
+            height: rect.height,
+          },
+        ]
+      })
+
+    const syncCompletedBlocksFromForm = (root) => {
+      if (!root || !onCompletedBlocksChange) return
+
+      const previousKeys = previousVisibleBlockKeysRef.current
+      const nextCompleted = getCompletedBlocksFromForm(root, stepCodeCompletionOptions)
+      const nextKeys = Object.keys(nextCompleted)
+      const keysChanged = previousKeys.length !== nextKeys.length || previousKeys.some((key, i) => key !== nextKeys[i])
+      const completionChanged =
+        keysChanged || nextKeys.some((key) => previousCompletedBlocksRef.current[key] !== nextCompleted[key])
+
+      if (keysChanged && previousKeys.length > 0) {
+        const hiddenKeys = new Set(previousKeys.filter((key) => !nextKeys.includes(key)))
+        // Bonus: counteract layout collapse when a tall block above the viewport hides.
+        if (hiddenKeys.size > 0) {
+          const adjustment = scrollAdjustmentForHiddenBlocks(
+            previousBlockLayoutsRef.current,
+            hiddenKeys,
+            window.scrollY
+          )
+          if (adjustment > 0) window.scrollBy(0, -adjustment)
+        }
+
+        const nextIndex = reconcileSelectedTabIndex(previousKeys, nextKeys, selectedTabIndex)
+        if (nextIndex !== selectedTabIndex) setSelectedTabIndex(nextIndex)
+      }
+
+      previousVisibleBlockKeysRef.current = nextKeys
+      if (completionChanged) {
+        previousCompletedBlocksRef.current = nextCompleted
+        onCompletedBlocksChange(nextCompleted)
+      }
+      if (keysChanged) {
+        requestAnimationFrame(() => {
+          previousBlockLayoutsRef.current = captureBlockLayouts()
+        })
+        setVisibilityVersion((v) => v + 1)
+      }
+    }
+
+    const syncCompletedBlocksFromFormRef = useRef(syncCompletedBlocksFromForm)
+    syncCompletedBlocksFromFormRef.current = syncCompletedBlocksFromForm
 
     const shouldShowDiff = permitApplication?.shouldShowApplicationDiff(isEditing)
     const userShouldSeeDiff = permitApplication?.currentUserShouldSeeApplicationDiff
@@ -144,9 +209,7 @@ export const RequirementForm = observer(
 
     // Recompute block completion when the digital Step Code checklist completion flips
     useEffect(() => {
-      if (onCompletedBlocksChange && formRef.current) {
-        onCompletedBlocksChange(getCompletedBlocksFromForm(formRef.current, stepCodeCompletionOptions))
-      }
+      if (formRef.current) syncCompletedBlocksFromFormRef.current(formRef.current)
     }, [isStepCodeComplete])
 
     useEffect(() => {
@@ -185,8 +248,10 @@ export const RequirementForm = observer(
 
       const formComponentNodes = document.querySelectorAll(".formio-component")
 
-      const blockNodes = Array.from(formComponentNodes).filter((node) =>
-        Array.from(node.classList).some((className) => blockClasses.includes(className))
+      const blockNodes = Array.from(formComponentNodes).filter(
+        (node) =>
+          !node.classList.contains("formio-hidden") &&
+          Array.from(node.classList).some((className) => blockClasses.includes(className))
       )
       const viewportHeight = window.innerHeight // Get the viewport height
       const topValue = -viewportHeight / 2 + 5
@@ -205,10 +270,12 @@ export const RequirementForm = observer(
         }
       })
 
+      previousBlockLayoutsRef.current = captureBlockLayouts()
+
       return () => {
         blockObserver.disconnect()
       }
-    }, [formJson, isMounted, window.innerHeight, wrapperClickCount])
+    }, [formJson, isMounted, window.innerHeight, wrapperClickCount, visibilityVersion])
 
     const handleOpenStepCodePart3 = async (_event) => {
       await triggerSave?.()
@@ -308,17 +375,14 @@ export const RequirementForm = observer(
       const entry = entries.filter((en) => en.isIntersecting)[0]
       if (!entry) return
 
-      const itemWithSectionClassName = Array.from(entry.target.classList).find(
-        (className) =>
-          className.includes("formio-component-formSubmissionDataRSTsection") ||
-          className.includes("formio-component-section-signoff-key")
+      // Index among currently visible blocks so sidebar tabs stay aligned after conditionals hide panels.
+      const visibleBlockNodes = Array.from(document.querySelectorAll(".formio-component")).filter(
+        (node) =>
+          !node.classList.contains("formio-hidden") &&
+          Array.from(node.classList).some((className) => blockClasses.includes(className))
       )
-
-      if (itemWithSectionClassName) {
-        const classNameParts = itemWithSectionClassName.split("|")
-        const blockId = classNameParts[classNameParts.length - 1].slice(-36)
-        setSelectedTabIndex(indexOfBlockId(blockId))
-      }
+      const index = visibleBlockNodes.indexOf(entry.target)
+      if (index >= 0) setSelectedTabIndex(index)
     }
 
     const onFormSubmit = async (submission: any) => {
@@ -346,9 +410,7 @@ export const RequirementForm = observer(
     }
 
     const onBlur = (containerComponent) => {
-      if (onCompletedBlocksChange) {
-        onCompletedBlocksChange(getCompletedBlocksFromForm(containerComponent.root, stepCodeCompletionOptions))
-      }
+      syncCompletedBlocksFromForm(containerComponent.root)
     }
     const onScroll = (event) => {
       setFloatErrorBox(hasErrors && isFirstComponentNearTopOfView(firstComponentKey))
@@ -363,33 +425,21 @@ export const RequirementForm = observer(
         return // Exit if necessary objects are not available
       }
 
-      const componentType = component.type
-
-      // radio: energy_step_code_method toggles tool vs file visibility / completion rules
-      if (componentType === "selectboxes" || componentType === "simplefile" || componentType === "radio") {
-        if (onCompletedBlocksChange) {
-          onCompletedBlocksChange(getCompletedBlocksFromForm(root, stepCodeCompletionOptions))
-        }
-        setErrorBoxData(mapErrorBoxData(root.errors))
-
-        if (componentType === "simplefile") {
-          // https://github.com/formio/formio.js/blob/4.19.x/src/components/file/File.unit.js
-          // formio `pristine` is not set for file updates
-          // using `setPristine(false)` causes the entire form to validate so instead, we use a separate dirty state
-          // trigger save to rerun compliance and save file
-          triggerSave?.({ autosave: true, skipPristineCheck: true })
-        }
+      // Visibility/completion for all field types (incl. block conditionals) is synced in formReady's change listener.
+      if (component.type === "simplefile") {
+        // https://github.com/formio/formio.js/blob/4.19.x/src/components/file/File.unit.js
+        // formio `pristine` is not set for file updates
+        // using `setPristine(false)` causes the entire form to validate so instead, we use a separate dirty state
+        // trigger save to rerun compliance and save file
+        triggerSave?.({ autosave: true, skipPristineCheck: true })
       }
     }
 
-    const onInitialized = (event) => {
+    const onInitialized = (_event) => {
       if (!formRef.current) return
 
       updateCollaborationAssignmentNodes?.()
-
-      if (onCompletedBlocksChange) {
-        onCompletedBlocksChange(getCompletedBlocksFromForm(formRef.current, stepCodeCompletionOptions))
-      }
+      syncCompletedBlocksFromForm(formRef.current)
     }
 
     const formReady = (rootComponent) => {
@@ -398,6 +448,8 @@ export const RequirementForm = observer(
       rootComponent.on("change", (_) => {
         // whenever a form data changes, we update the state of ErrorBox with the new error information
         setErrorBoxData(mapErrorBoxData(formRef.current.errors))
+        // Keep CONTENTS sidebar in sync with Form.io conditionals (any field type can toggle a block).
+        syncCompletedBlocksFromFormRef.current(formRef.current)
       })
 
       rootComponent.on("submitError", (error) => {
