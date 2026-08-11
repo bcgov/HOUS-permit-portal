@@ -244,6 +244,48 @@ RSpec.describe "ReleaseNotes", type: :request do
     it_behaves_like A_NOT_FOUND_RESPONSE, publish_with_payload
   end
 
+  describe "#years" do
+    let!(:note_2024) do
+      create(
+        :release_note,
+        status: :published,
+        release_date: Date.new(2024, 6, 1)
+      )
+    end
+    let!(:note_2025) do
+      create(
+        :release_note,
+        status: :published,
+        release_date: Date.new(2025, 3, 1)
+      )
+    end
+    let!(:draft_note_2026) do
+      create(:release_note, status: :draft, release_date: Date.new(2026, 1, 1))
+    end
+
+    it "returns distinct release years for published notes only" do
+      get years_release_notes_path
+
+      expect(response).to have_http_status(:success)
+      expect(json_response.fetch("data")).to eq([2025, 2024])
+    end
+
+    it "is available to unauthenticated users" do
+      get years_release_notes_path
+
+      expect(response).to have_http_status(:success)
+      expect(json_response.fetch("data")).to include(2024, 2025)
+    end
+
+    it "excludes draft-only years for super admins" do
+      sign_in super_admin
+      get years_release_notes_path
+
+      expect(response).to have_http_status(:success)
+      expect(json_response.fetch("data")).to eq([2025, 2024])
+    end
+  end
+
   describe "#index" do
     let!(:earliest_release_note) do
       create(

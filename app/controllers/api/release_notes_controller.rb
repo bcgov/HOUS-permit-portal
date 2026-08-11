@@ -1,8 +1,8 @@
 class Api::ReleaseNotesController < Api::ApplicationController
   include Api::Concerns::Search::ReleaseNotes
 
-  skip_before_action :authenticate_user!, only: %i[index viewer_context]
-  skip_before_action :require_confirmation, only: %i[index viewer_context]
+  skip_before_action :authenticate_user!, only: %i[index years viewer_context]
+  skip_before_action :require_confirmation, only: %i[index years viewer_context]
 
   before_action :set_release_note, only: %i[update publish show viewer_context]
 
@@ -74,6 +74,19 @@ class Api::ReleaseNotesController < Api::ApplicationController
                      }
                    }
     end
+  end
+
+  def years
+    authorize :release_note, :index?
+    release_years =
+      policy_scope(ReleaseNote)
+        .published
+        .order(release_date: :desc)
+        .pluck(:release_date)
+        .map(&:year)
+        .uniq
+
+    render json: { data: release_years, meta: default_meta(nil) }, status: :ok
   end
 
   def index
