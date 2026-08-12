@@ -65,13 +65,11 @@ class LocalTools
     end
 
     # Searchkick registers models lazily; eager load so the list is complete.
+    # Re-resolve through the constant table so we never reindex a class object
+    # left behind by a reload (stale STI parents raise SubclassNotFound).
     def searchkick_models
-      if Rails.respond_to?(:autoloaders) && Rails.autoloaders.zeitwerk_enabled?
-        Zeitwerk::Loader.eager_load_all
-      else
-        Rails.application.eager_load!
-      end
-      Searchkick.models
+      Rails.application.eager_load!
+      Searchkick.models.map { |model| model.name.constantize }.uniq
     end
   end
 end
