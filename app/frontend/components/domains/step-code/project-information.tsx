@@ -25,8 +25,14 @@ import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useNavigate, useParams } from "react-router-dom"
 import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
-import { EStepCodeChecklistStage, EStepCodeChecklistStatus, EStepCodeStageStatus } from "../../../types/enums"
+import {
+  EFlashMessageStatus,
+  EStepCodeChecklistStage,
+  EStepCodeChecklistStatus,
+  EStepCodeStageStatus,
+} from "../../../types/enums"
 import { IOption } from "../../../types/types"
+import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { DatePickerFormControl } from "../../shared/form/input-form-control"
 import { InfoTooltip } from "../../shared/info-tooltip"
@@ -379,6 +385,13 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
                 })}
               </Tbody>
             </Table>
+            {permitApplicationId && selectedStage !== EStepCodeChecklistStage.preConstruction && (
+              <CustomMessageBox
+                status={EFlashMessageStatus.warning}
+                description={t("stepCode.projectInformation.nonPreConstructionStageWarning")}
+                mt={3}
+              />
+            )}
           </FormControl>
 
           {showPermitDate && (
