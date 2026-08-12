@@ -23,8 +23,6 @@ import {
 } from "@chakra-ui/react"
 import { CaretLeft, Link, Pencil, Plus, Trash, X } from "@phosphor-icons/react"
 import { UppyFile } from "@uppy/core"
-import "@uppy/core/dist/style.min.css"
-import Dashboard from "@uppy/react/lib/Dashboard.js"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useRef, useState } from "react"
@@ -53,6 +51,7 @@ import {
   TextFormControl,
   UrlFormControl,
 } from "../../../../shared/form/input-form-control"
+import { UppyDashboard } from "../../../../shared/uppy-dashboard"
 
 interface IResourceModalForm {
   category: string
@@ -204,14 +203,15 @@ export const ResourcesScreen = observer(function ResourcesScreen() {
     })
   }
 
-  const { uppy: modalUppy } = useUppyS3({
+  const { uppy: modalUppy, isUploading } = useUppyS3({
     onUploadSuccess: handleUploadSuccess,
+    onFileRemoved: () => modalSetValue("resourceDocumentAttributes", undefined),
     maxNumberOfFiles: 1,
     autoProceed: true,
   })
 
   const onModalSubmit = async (formData: IResourceModalForm) => {
-    if (!currentJurisdiction) return
+    if (isUploading || !currentJurisdiction) return
 
     setIsSubmitting(true)
     try {
@@ -357,7 +357,7 @@ export const ResourcesScreen = observer(function ResourcesScreen() {
                   <Box ref={modalContainerRef}>
                     <FormLabel>{t("home.configurationManagement.resources.file")}</FormLabel>
                     <Box position="relative" mt={2}>
-                      <Dashboard uppy={modalUppy} height={300} width="100%" proudlyDisplayPoweredByUppy={false} />
+                      <UppyDashboard uppy={modalUppy} height={300} width="100%" />
                     </Box>
                   </Box>
                 ) : (
@@ -373,7 +373,7 @@ export const ResourcesScreen = observer(function ResourcesScreen() {
               <Button variant="ghost" mr={3} onClick={handleCloseModal} isDisabled={isSubmitting}>
                 {t("ui.cancel")}
               </Button>
-              <Button type="submit" variant="primary" isLoading={isSubmitting}>
+              <Button type="submit" variant="primary" isLoading={isSubmitting} isDisabled={isSubmitting || isUploading}>
                 {t("ui.save")}
               </Button>
             </ModalFooter>

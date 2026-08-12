@@ -12,7 +12,7 @@ import {
 import { Archive } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useAutoComplianceModuleConfigurations } from "../../../../hooks/resources/use-auto-compliance-module-configurations"
@@ -58,6 +58,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
   const { createRequirementBlock } = requirementBlockStore
   const { isOpen, onOpen, onClose } = useDisclosure()
   const hasAutoOpenedRef = React.useRef(false)
+  const [isUploadingDocuments, setIsUploadingDocuments] = useState(false)
 
   const { autoComplianceModuleConfigurations, error } = useAutoComplianceModuleConfigurations()
 
@@ -101,6 +102,8 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
   } = formProps
 
   const onSubmit = async (data: IRequirementBlockForm) => {
+    if (isUploadingDocuments) return
+
     let isSuccess = false
 
     const mappedRequirementAttributes = data.requirementsAttributes.map((ra, index) => {
@@ -240,6 +243,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
                   <Button
                     variant={"primary"}
                     isLoading={isSubmitting}
+                    isDisabled={isUploadingDocuments}
                     onClick={(e) => {
                       e.stopPropagation()
                       handleSubmit(onSubmit)()
@@ -261,6 +265,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
                         : undefined
                     }
                     withOptionsMenu={withOptionsMenu}
+                    onIsUploadingChange={setIsUploadingDocuments}
                   />
 
                   <FieldsSetup requirementBlock={requirementBlock} isEditable={isEditable} />
