@@ -2384,7 +2384,6 @@ Thank you,
             requirementDocuments: "Related documents",
             architecturalDrawing: "Design drawing package",
           },
-          configurationsColumn: "Configurations",
           fieldDescriptions: {
             description: "Provide some context for admins and managers for this fieldset.",
             associations: "Assign a tag to help organize and find this requirement block easier.",
