@@ -63,15 +63,9 @@ class ReleaseNote < ApplicationRecord
     {
       "id" => SecureRandom.uuid,
       "action_type" => Constants::NotificationActionTypes::RELEASE_NOTE_PUBLISH,
-      "action_text" =>
-        I18n.t(
-          "notification.release_note.publish_notification.#{release_type}",
-          label: display_label
-        ),
+      "action_text" => I18n.t("notification.release_note.publish_notification"),
       "object_data" => {
-        "release_note_id" => id,
-        "release_type" => release_type,
-        "label" => display_label
+        "release_note_id" => id
       }
     }
   end

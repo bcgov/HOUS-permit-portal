@@ -483,6 +483,9 @@ const options = {
           noUnread: "No unread notifications",
           file_upload_failed:
             "A file you uploaded could not be processed and has been removed. Please try uploading the file again.",
+          releaseNotePublish: {
+            viewReleaseNotes: "View release notes",
+          },
         },
         eula: {
           title: "End-User License Agreement",

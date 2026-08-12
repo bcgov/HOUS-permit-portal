@@ -420,7 +420,7 @@ RSpec.describe NotificationService do
       discarded = create(:user, :submitter)
       discarded.discard
 
-      release_note = create(:release_note, status: :published, version: "9.9.9")
+      release_note = create(:release_note, status: :published)
 
       allow(NotificationPushJob).to receive(:perform_async)
 
@@ -430,13 +430,11 @@ RSpec.describe NotificationService do
         include(
           "action_type" =>
             Constants::NotificationActionTypes::RELEASE_NOTE_PUBLISH,
-          "action_text" => include("9.9.9"),
-          "object_data" =>
-            include(
-              "release_note_id" => release_note.id,
-              "release_type" => "software",
-              "label" => "9.9.9"
-            )
+          "action_text" =>
+            "Building Permit Hub has been updated. Read about changes and improvements in the release notes.",
+          "object_data" => {
+            "release_note_id" => release_note.id
+          }
         )
 
       expect(NotificationPushJob).to have_received(:perform_async) do |hash|
