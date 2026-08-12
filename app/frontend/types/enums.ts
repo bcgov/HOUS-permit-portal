@@ -180,6 +180,12 @@ export enum EReleaseNoteType {
   content = "content",
 }
 
+export enum EReleaseNoteNotificationAudience {
+  allUsers = "all_users",
+  submitters = "submitters",
+  staff = "staff",
+}
+
 export enum EPreCheckSortFields {
   fullAddress = "full_address",
   title = "title",

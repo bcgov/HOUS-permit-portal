@@ -459,6 +459,48 @@ RSpec.describe NotificationService do
 
       expect(NotificationPushJob).not_to have_received(:perform_async)
     end
+
+    it "limits recipients to submitters when the audience is submitters" do
+      submitter = create(:user, :submitter)
+      create(:user, :review_manager)
+      create(:user, :super_admin)
+      release_note = create(:release_note, status: :published)
+      allow(NotificationPushJob).to receive(:perform_async)
+
+      described_class.publish_release_note_publish_event(
+        release_note,
+        "submitters"
+      )
+
+      expect(NotificationPushJob).to have_received(:perform_async) do |hash|
+        expect(hash.keys).to eq([submitter.id])
+      end
+    end
+
+    it "limits recipients to non-submitters when the audience is staff" do
+      create(:user, :submitter)
+      review_manager = create(:user, :review_manager)
+      super_admin = create(:user, :super_admin)
+      release_note = create(:release_note, status: :published)
+      allow(NotificationPushJob).to receive(:perform_async)
+
+      described_class.publish_release_note_publish_event(release_note, "staff")
+
+      expect(NotificationPushJob).to have_received(:perform_async) do |hash|
+        expect(hash.keys).to match_array([review_manager.id, super_admin.id])
+      end
+    end
+
+    it "does not notify anyone for an unknown audience" do
+      create(:user, :submitter)
+      create(:user, :review_manager)
+      release_note = create(:release_note, status: :published)
+      allow(NotificationPushJob).to receive(:perform_async)
+
+      described_class.publish_release_note_publish_event(release_note, "admins")
+
+      expect(NotificationPushJob).not_to have_received(:perform_async)
+    end
   end
 
   describe ".publish_application_submission_event / .publish_application_revisions_request_event" do

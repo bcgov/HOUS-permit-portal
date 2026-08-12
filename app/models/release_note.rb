@@ -10,6 +10,9 @@ class ReleaseNote < ApplicationRecord
        { software: "software", content: "content" },
        validate: true
 
+  # One-shot publish param, not persisted. nil / omitted means all_users.
+  NOTIFICATION_AUDIENCES = %w[all_users submitters staff].freeze
+
   url_validatable :release_notes_url
 
   before_validation :clear_inactive_type_specific_attributes

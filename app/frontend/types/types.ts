@@ -28,6 +28,7 @@ import {
   EPermitApplicationStatus,
   EProjectMeetingStatus,
   EProjectState,
+  EReleaseNoteNotificationAudience,
   EReleaseNoteType,
   ERequirementType,
   ESocketDomainTypes,
@@ -788,6 +789,7 @@ export type TCreatePermitApplicationFormData = {
 
 export type TReleaseNoteFormData = {
   releaseType: EReleaseNoteType
+  notificationAudience: EReleaseNoteNotificationAudience
   version: string
   name: string
   releaseDate: Date | null

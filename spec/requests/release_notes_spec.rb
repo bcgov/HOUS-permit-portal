@@ -212,11 +212,45 @@ RSpec.describe "ReleaseNotes", type: :request do
       setup
       expect(NotificationService).to receive(
         :publish_release_note_publish_event
-      ).with(an_instance_of(ReleaseNote))
+      ).with(an_instance_of(ReleaseNote), nil)
 
       patch publish_release_note_path(@release_note.id)
 
       expect(response).to have_http_status(:success)
+    end
+
+    it "passes notification audience to the publish event" do
+      setup
+      expect(NotificationService).to receive(
+        :publish_release_note_publish_event
+      ).with(an_instance_of(ReleaseNote), "staff")
+
+      patch publish_release_note_path(@release_note.id),
+            params: {
+              release_note: {
+                notification_audience: "staff"
+              }
+            }
+
+      expect(response).to have_http_status(:success)
+    end
+
+    it "rejects an invalid notification audience without publishing" do
+      setup
+      expect(NotificationService).not_to receive(
+        :publish_release_note_publish_event
+      )
+
+      patch publish_release_note_path(@release_note.id),
+            params: {
+              release_note: {
+                notification_audience: "admins"
+              }
+            }
+
+      expect(response).to have_http_status(:bad_request)
+      expect(error_message).to match(/invalid notification audience/i)
+      expect(@release_note.reload).to be_draft
     end
 
     it "updates an already published release note without publishing again" do
