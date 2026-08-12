@@ -452,6 +452,8 @@ class PermitApplication < ApplicationRecord
   end
 
   def populate_base_form_data
+    return if submission_data.present?
+
     self.submission_data = { data: {} }
   end
 

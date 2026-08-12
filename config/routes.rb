@@ -207,6 +207,9 @@ Rails.application.routes.draw do
       post "generate_missing_pdfs",
            on: :member,
            to: "permit_applications#generate_missing_pdfs"
+      post "download_supporting_documents_zip",
+           on: :member,
+           to: "permit_applications#download_supporting_documents_zip"
       post "permit_collaborations",
            on: :member,
            to: "permit_applications#create_permit_collaboration"

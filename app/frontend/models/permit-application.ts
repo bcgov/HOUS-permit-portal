@@ -1,5 +1,5 @@
 import { t } from "i18next"
-import { cast, flow, Instance, types } from "mobx-state-tree"
+import { cast, flow, Instance, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
@@ -18,6 +18,7 @@ import {
   IDownloadableFile,
   IFormIOBlock,
   IFormJson,
+  IPermitApplicationSelectiveZipReady,
   IPermitApplicationSupportingDocumentsUpdate,
   ISubmissionData,
   ISubmissionVersion,
@@ -81,6 +82,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       zipfileSize: types.maybeNull(types.number),
       zipfileName: types.maybeNull(types.string),
       zipfileUrl: types.maybeNull(types.string),
+      selectiveZipResult: types.maybeNull(types.frozen<IPermitApplicationSelectiveZipReady>()),
       referenceNumber: types.maybeNull(types.string),
       missingPdfs: types.maybeNull(types.array(types.string)),
       isFullyLoaded: types.optional(types.boolean, false),
@@ -914,9 +916,25 @@ export const PermitApplicationModel = types.snapshotProcessor(
         self.zipfileName = data.zipfileName
         self.zipfileUrl = data.zipfileUrl
       },
+      handleSocketSelectiveZipReady: (data: IPermitApplicationSelectiveZipReady) => {
+        self.selectiveZipResult = data
+      },
+      clearSelectiveZipResult: () => {
+        self.selectiveZipResult = null
+      },
       generateMissingPdfs: flow(function* () {
         const response = yield self.environment.api.generatePermitApplicationMissingPdfs(self.id)
         return response.ok
+      }),
+
+      downloadSupportingDocumentsZip: flow(function* (supportingDocumentIds: string[]) {
+        self.selectiveZipResult = null
+        const response = yield* toGenerator(
+          self.environment.api.downloadSupportingDocumentsZip(self.id, supportingDocumentIds)
+        )
+        if (!response.ok) return null
+
+        return response.data?.data?.requestId ?? null
       }),
 
       unassignPermitCollaboration: flow(function* (collaborationId: string) {
