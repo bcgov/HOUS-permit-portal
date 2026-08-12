@@ -1,16 +1,4 @@
-import {
-  Box,
-  Button,
-  ButtonGroup,
-  Flex,
-  Grid,
-  Heading,
-  HStack,
-  Text,
-  Tooltip,
-  useDisclosure,
-  VStack,
-} from "@chakra-ui/react"
+import { Box, Button, ButtonGroup, Flex, Grid, Heading, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import { CaretRight, ClipboardText, Info, Pencil, SquaresFour, Steps } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
@@ -222,16 +210,14 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
             )}
           </Box>
           <Box>
-            <Tooltip label={t("permitProject.overview.mapVisualReferenceDisclaimer")} hasArrow>
-              <Box height={{ base: "200px", lg: "250px" }} borderRadius="md" overflow="hidden">
-                <ProjectMap
-                  coordinates={permitProject.mapPosition}
-                  pid={pid}
-                  parcelGeometry={permitProject.parcelGeometry}
-                  onOpenFullscreen={onOpenMapFullscreen}
-                />
-              </Box>
-            </Tooltip>
+            <Box height={{ base: "200px", lg: "250px" }} borderRadius="md" overflow="hidden">
+              <ProjectMap
+                coordinates={permitProject.mapPosition}
+                pid={pid}
+                parcelGeometry={permitProject.parcelGeometry}
+                onOpenFullscreen={onOpenMapFullscreen}
+              />
+            </Box>
           </Box>
         </Grid>
       </Box>

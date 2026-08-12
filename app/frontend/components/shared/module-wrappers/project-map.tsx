@@ -7,7 +7,7 @@ import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer"
 import SimpleFillSymbol from "@arcgis/core/symbols/SimpleFillSymbol"
 import SimpleMarkerSymbol from "@arcgis/core/symbols/SimpleMarkerSymbol"
 import MapView from "@arcgis/core/views/MapView"
-import { Box, Center, IconButton, Text } from "@chakra-ui/react"
+import { Box, Center, IconButton, Text, Tooltip } from "@chakra-ui/react"
 import { ArrowsOut, MapTrifold, Warning } from "@phosphor-icons/react"
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -164,9 +164,10 @@ export const ProjectMap = ({ coordinates, pid, parcelGeometry, onOpenFullscreen 
     updateGraphics()
   }, [isMapReady, updateGraphics])
 
-  // Error state
+  let mapContent: React.ReactNode
+
   if (hasError) {
-    return (
+    mapContent = (
       <Center
         h="100%"
         w="100%"
@@ -182,11 +183,8 @@ export const ProjectMap = ({ coordinates, pid, parcelGeometry, onOpenFullscreen 
         </Text>
       </Center>
     )
-  }
-
-  // No location data state
-  if (!coordinates && !parcelGeometry && pid) {
-    return (
+  } else if (!coordinates && !parcelGeometry && pid) {
+    mapContent = (
       <Center
         h="100%"
         w="100%"
@@ -202,43 +200,49 @@ export const ProjectMap = ({ coordinates, pid, parcelGeometry, onOpenFullscreen 
         </Text>
       </Center>
     )
+  } else {
+    mapContent = (
+      <Box position="relative" h="100%" w="100%" minH={{ base: "200px", lg: "300px" }}>
+        {!isMapReady && (
+          <Center position="absolute" inset={0} bg="greys.grey03" zIndex={1} borderRadius="md">
+            <SharedSpinner my={0} />
+          </Center>
+        )}
+
+        {onOpenFullscreen && isMapReady && (
+          <IconButton
+            aria-label={t("permitProject.map.openFullscreen")}
+            icon={<ArrowsOut size={18} />}
+            size="sm"
+            position="absolute"
+            top={2}
+            right={2}
+            zIndex={1}
+            bg="white"
+            shadow="md"
+            borderRadius="md"
+            _hover={{ bg: "gray.100" }}
+            onClick={onOpenFullscreen}
+          />
+        )}
+
+        <Box
+          ref={mapDiv}
+          h="100%"
+          w="100%"
+          borderRadius="md"
+          role="application"
+          aria-label={pid ? t("permitProject.map.ariaLabelWithPid", { pid }) : t("permitProject.map.ariaLabel")}
+        />
+      </Box>
+    )
   }
 
   return (
-    <Box position="relative" h="100%" w="100%" minH={{ base: "200px", lg: "300px" }}>
-      {/* Loading overlay */}
-      {!isMapReady && (
-        <Center position="absolute" inset={0} bg="greys.grey03" zIndex={1} borderRadius="md">
-          <SharedSpinner my={0} />
-        </Center>
-      )}
-
-      {/* Fullscreen button */}
-      {onOpenFullscreen && isMapReady && (
-        <IconButton
-          aria-label={t("permitProject.map.openFullscreen")}
-          icon={<ArrowsOut size={18} />}
-          size="sm"
-          position="absolute"
-          top={2}
-          right={2}
-          zIndex={1}
-          bg="white"
-          shadow="md"
-          borderRadius="md"
-          _hover={{ bg: "gray.100" }}
-          onClick={onOpenFullscreen}
-        />
-      )}
-
-      <Box
-        ref={mapDiv}
-        h="100%"
-        w="100%"
-        borderRadius="md"
-        role="application"
-        aria-label={pid ? t("permitProject.map.ariaLabelWithPid", { pid }) : t("permitProject.map.ariaLabel")}
-      />
-    </Box>
+    <Tooltip label={t("map.visualReferenceDisclaimer")} hasArrow>
+      <Box h="100%" w="100%">
+        {mapContent}
+      </Box>
+    </Tooltip>
   )
 }
