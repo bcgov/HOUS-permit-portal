@@ -7,7 +7,7 @@ import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer"
 import SimpleFillSymbol from "@arcgis/core/symbols/SimpleFillSymbol"
 import SimpleMarkerSymbol from "@arcgis/core/symbols/SimpleMarkerSymbol"
 import MapView from "@arcgis/core/views/MapView"
-import { Box, Center, IconButton, Text } from "@chakra-ui/react"
+import { Box, Center, IconButton, Text, Tooltip } from "@chakra-ui/react"
 import { ArrowsOut, MapTrifold, Warning } from "@phosphor-icons/react"
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -164,81 +164,62 @@ export const ProjectMap = ({ coordinates, pid, parcelGeometry, onOpenFullscreen 
     updateGraphics()
   }, [isMapReady, updateGraphics])
 
-  // Error state
-  if (hasError) {
-    return (
-      <Center
-        h="100%"
-        w="100%"
-        minH={{ base: "200px", lg: "300px" }}
-        bg="greys.grey03"
-        borderRadius="md"
-        flexDirection="column"
-        gap={2}
-      >
-        <Warning size={32} />
-        <Text fontSize="sm" color="text.secondary" textAlign="center">
-          {t("permitProject.map.errorLoading")}
-        </Text>
-      </Center>
-    )
-  }
-
-  // No location data state
-  if (!coordinates && !parcelGeometry && pid) {
-    return (
-      <Center
-        h="100%"
-        w="100%"
-        minH={{ base: "200px", lg: "300px" }}
-        bg="greys.grey03"
-        borderRadius="md"
-        flexDirection="column"
-        gap={2}
-      >
-        <MapTrifold size={32} />
-        <Text fontSize="sm" color="text.secondary" textAlign="center">
-          {t("permitProject.map.noLocation")}
-        </Text>
-      </Center>
-    )
-  }
+  const noLocation = !coordinates && !parcelGeometry && pid
 
   return (
-    <Box position="relative" h="100%" w="100%" minH={{ base: "200px", lg: "300px" }}>
-      {/* Loading overlay */}
-      {!isMapReady && (
-        <Center position="absolute" inset={0} bg="greys.grey03" zIndex={1} borderRadius="md">
-          <SharedSpinner my={0} />
-        </Center>
-      )}
+    <Tooltip label={t("map.visualReferenceDisclaimer")} hasArrow>
+      <Box h="100%" w="100%">
+        {hasError || noLocation ? (
+          <Center
+            h="100%"
+            w="100%"
+            minH={{ base: "200px", lg: "300px" }}
+            bg="greys.grey03"
+            borderRadius="md"
+            flexDirection="column"
+            gap={2}
+          >
+            {hasError ? <Warning size={32} /> : <MapTrifold size={32} />}
+            <Text fontSize="sm" color="text.secondary" textAlign="center">
+              {t(hasError ? "permitProject.map.errorLoading" : "permitProject.map.noLocation")}
+            </Text>
+          </Center>
+        ) : (
+          <Box position="relative" h="100%" w="100%" minH={{ base: "200px", lg: "300px" }}>
+            {!isMapReady && (
+              <Center position="absolute" inset={0} bg="greys.grey03" zIndex={1} borderRadius="md">
+                <SharedSpinner my={0} />
+              </Center>
+            )}
 
-      {/* Fullscreen button */}
-      {onOpenFullscreen && isMapReady && (
-        <IconButton
-          aria-label={t("permitProject.map.openFullscreen")}
-          icon={<ArrowsOut size={18} />}
-          size="sm"
-          position="absolute"
-          top={2}
-          right={2}
-          zIndex={1}
-          bg="white"
-          shadow="md"
-          borderRadius="md"
-          _hover={{ bg: "gray.100" }}
-          onClick={onOpenFullscreen}
-        />
-      )}
+            {onOpenFullscreen && isMapReady && (
+              <IconButton
+                aria-label={t("permitProject.map.openFullscreen")}
+                icon={<ArrowsOut size={18} />}
+                size="sm"
+                position="absolute"
+                top={2}
+                right={2}
+                zIndex={1}
+                bg="white"
+                shadow="md"
+                borderRadius="md"
+                _hover={{ bg: "gray.100" }}
+                onClick={onOpenFullscreen}
+              />
+            )}
 
-      <Box
-        ref={mapDiv}
-        h="100%"
-        w="100%"
-        borderRadius="md"
-        role="application"
-        aria-label={pid ? t("permitProject.map.ariaLabelWithPid", { pid }) : t("permitProject.map.ariaLabel")}
-      />
-    </Box>
+            <Box
+              ref={mapDiv}
+              h="100%"
+              w="100%"
+              borderRadius="md"
+              role="application"
+              aria-label={pid ? t("permitProject.map.ariaLabelWithPid", { pid }) : t("permitProject.map.ariaLabel")}
+            />
+          </Box>
+        )}
+      </Box>
+    </Tooltip>
   )
 }
