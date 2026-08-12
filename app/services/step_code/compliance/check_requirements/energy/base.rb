@@ -1,5 +1,6 @@
 class StepCode::Compliance::CheckRequirements::Energy::Base
-  KWH_PER_GJ = 227.78
+  # 1 GJ = 277.78 kWh (MEUI/TEDI reported in kWh/m²·year; Hot2000 totals in GJ).
+  KWH_PER_GJ = 277.78
 
   def initialize(checklist:, step:)
     @checklist = checklist
@@ -12,7 +13,6 @@ class StepCode::Compliance::CheckRequirements::Energy::Base
         total(:below_grade_heated_floor_area)
   end
 
-  # Climate / weather — same site across suite/models; never sum.
   def hdd
     @hdd ||= checklist.data_entries.maximum(:hdd)
   end
@@ -25,12 +25,10 @@ class StepCode::Compliance::CheckRequirements::Energy::Base
     @stage ||= checklist.stage == :as_built ? :as_built : :proposed
   end
 
-  # Matches Excel Calculator "Proposed total": SUM for additive quantities.
   def total(field)
     checklist.data_entries.sum(field)
   end
 
-  # Matches Excel Calculator "Proposed total": AVERAGE for rate metrics (ACH, NLA, …).
   def average(field)
     checklist.data_entries.average(field).to_f
   end

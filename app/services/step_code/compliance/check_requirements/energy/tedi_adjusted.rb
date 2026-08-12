@@ -1,16 +1,25 @@
 # frozen_string_literal: true
 
-# Rev. 7 Sentence 9.36.6.3.(4) — TEDIadjusted from actual HDD + heated floor area.
-# Zone 8 (≥7000) keeps the pre–Rev.7 TEDIlower extrapolation slope + Small Home.
+# Rev. 7 (not yet published/enacted) — TEDIadjusted from actual HDD + heated floor area.
+# Piece together from emails + "Smaller homes in colder climates" public-review DOCX.
+# The August 2025 checklist XLSX reflects current in-force logic and is not the
+# source of truth for these amendments yet.
+#
+# - Zone 4 (<3000): (HDD − 2500) / 500; no small-home adder (MEUI has Zone 4
+#   size relaxations; TEDI does not).
+# - Zones 5–7B (3000–6999): /1000 + small-home when heated floor area ≤ 210 m².
+# - Zone 8 (≥7000): freeze at Zone 8 table TEDIstep (+ small-home if ≤ 210);
+#   do not extrapolate past the last table row (checklist does; we do not).
+# - Exactly 210 m²: small-home adder applies (DOCX: adj is 0 only when > 210).
 class StepCode::Compliance::CheckRequirements::Energy::TEDIAdjusted
   SMALL_HOME_AREA_M2 = 210
   SMALL_HOME_ADJ = 0.004
 
-  # probe / next_probe / prev_probe: representative HDD points inside seeded ranges
+  # probe / next_probe: representative HDD points inside seeded ranges
   BANDS = [
     {
       max_hdd: 2999,
-      hdd_lowest: 0,
+      hdd_lowest: 2500,
       probe: 0,
       next_probe: 3500,
       divisor: 500,
@@ -48,15 +57,7 @@ class StepCode::Compliance::CheckRequirements::Energy::TEDIAdjusted
       divisor: 1000,
       small_home: true
     },
-    {
-      max_hdd: Float::INFINITY,
-      hdd_lowest: 7000,
-      probe: 8000,
-      prev_probe: 6500,
-      divisor: 1000,
-      small_home: true,
-      extrapolate: true
-    }
+    { max_hdd: Float::INFINITY, probe: 8000, small_home: true, freeze: true }
   ].freeze
 
   def self.call(hdd:, step:, heated_floor_area:)
@@ -72,18 +73,7 @@ class StepCode::Compliance::CheckRequirements::Energy::TEDIAdjusted
   def call
     band = band_for(@hdd)
     tedi_step = reference_tedi(band.fetch(:probe))
-
-    climate =
-      if band[:extrapolate]
-        tedi_lower = reference_tedi(band.fetch(:prev_probe))
-        (tedi_step - tedi_lower) * (@hdd - band.fetch(:hdd_lowest)) /
-          band.fetch(:divisor)
-      else
-        tedi_higher = reference_tedi(band.fetch(:next_probe))
-        (tedi_higher - tedi_step) * (@hdd - band.fetch(:hdd_lowest)) /
-          band.fetch(:divisor)
-      end
-
+    climate = climate_adj(band, tedi_step)
     small_home = (band[:small_home] ? small_home_adj * (@hdd - 3000) : 0)
 
     tedi_step + climate + small_home
@@ -94,6 +84,14 @@ class StepCode::Compliance::CheckRequirements::Energy::TEDIAdjusted
   def band_for(hdd)
     BANDS.find { |band| hdd <= band.fetch(:max_hdd) } ||
       raise(ArgumentError, "No TEDI climate band for HDD=#{hdd}")
+  end
+
+  def climate_adj(band, tedi_step)
+    return 0 if band[:freeze]
+
+    tedi_higher = reference_tedi(band.fetch(:next_probe))
+    (tedi_higher - tedi_step) * (@hdd - band.fetch(:hdd_lowest)) /
+      band.fetch(:divisor)
   end
 
   def reference_tedi(probe_hdd)

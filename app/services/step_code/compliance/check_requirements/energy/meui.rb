@@ -2,7 +2,6 @@
 
 class StepCode::Compliance::CheckRequirements::Energy::MEUI < StepCode::Compliance::CheckRequirements::Energy::Base
   def requirements_met?
-    # ponytail: step 2 MEUI absolute targets are Reserved (null) — fall through to % improvement
     (meui_requirement.present? && meui != 0 && meui <= meui_requirement) ||
       meui_percent_improvement >= meui_percent_improvement_requirement
   end
