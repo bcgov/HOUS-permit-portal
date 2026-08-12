@@ -66,12 +66,11 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
   })
   const { t } = useTranslation()
   const [isCollapsedAll, setIsCollapsedAll] = useState(false)
-  const [sectionsInViewStatuses, setSectionsInViewStatuses] = useState<Record<string, boolean>>({})
 
   const watchedSectionsAttributes = watch("requirementTemplateSectionsAttributes")
   const {
     rootContainerRef: rightContainerRef,
-    sectionRefs,
+    setSectionRef,
     sectionIdToHighlight: currentSectionId,
   } = useSectionHighlight({ sections: watchedSectionsAttributes })
 
@@ -83,26 +82,6 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
       requirementBlock: requirementBlockStore.getRequirementBlockById(sectionBlock.requirementBlockId),
     })),
   }))
-
-  useEffect(() => {
-    const options = {
-      root: rightContainerRef?.current,
-      rootMargin: "0px",
-      threshold: 0.1,
-    }
-
-    const observer = new IntersectionObserver(handleSectionIntersection, options)
-
-    Object.values(sectionRefs.current).forEach((ref) => {
-      if (ref) {
-        observer.observe(ref)
-      }
-    })
-
-    return () => {
-      observer.disconnect()
-    }
-  }, [watchedSectionsAttributes])
 
   useEffect(() => {
     if (requirementTemplate?.isFullyLoaded) {
@@ -459,29 +438,6 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
     setTimeout(() => {
       scrollIntoView(sectionAttributes.id)
     }, 200)
-  }
-
-  function setSectionRef(el: HTMLElement, id: string) {
-    sectionRefs.current[id] = el
-  }
-
-  // modified use case from https://stackoverflow.com/questions/57992340/how-to-get-first-visible-body-element-on-screen-with-pure-javascript
-  function handleSectionIntersection(entries: IntersectionObserverEntry[]) {
-    setSectionsInViewStatuses((pastState) => {
-      const newState = { ...pastState }
-
-      entries.forEach((entry) => {
-        const sectionId = entry.target.getAttribute("data-section-id")
-
-        if (entry.isIntersecting) {
-          newState[sectionId] = true
-        } else {
-          newState[sectionId] = false
-        }
-      })
-
-      return newState
-    })
   }
 })
 

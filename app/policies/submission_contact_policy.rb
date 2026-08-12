@@ -1,15 +1,11 @@
 class SubmissionContactPolicy < ApplicationPolicy
   def index?
-    true
-  end
-
-  def confirm?
-    true
+    privileged?
   end
 
   def create?
-    user&.super_admin? || user&.review_manager? ||
-      user&.regional_review_manager?
+    privileged? &&
+      (user.super_admin? || user.member_of?(record.jurisdiction_id))
   end
 
   def update?
@@ -20,9 +16,23 @@ class SubmissionContactPolicy < ApplicationPolicy
     create?
   end
 
+  private
+
+  def privileged?
+    user&.super_admin? || user&.manager?
+  end
+
   class Scope < Scope
     def resolve
-      SubmissionContact.all
+      unless user&.super_admin? || user&.manager?
+        raise Pundit::NotAuthorizedError
+      end
+
+      if user.super_admin?
+        scope.all
+      else
+        scope.where(jurisdiction_id: user.jurisdictions.select(:id))
+      end
     end
   end
 end

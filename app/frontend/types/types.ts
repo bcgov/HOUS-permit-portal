@@ -21,11 +21,14 @@ import {
   EHotWaterPerformanceType,
   EJurisdictionSocketEventTypes,
   EJurisdictionTypes,
+  EMeetingRequestDocumentType,
   ENotificationActionType,
   ENumberUnit,
   EPermitApplicationSocketEventTypes,
   EPermitApplicationStatus,
-  EPermitProjectRollupStatus,
+  EProjectMeetingStatus,
+  EProjectState,
+  EReleaseNoteType,
   ERequirementType,
   ESocketDomainTypes,
   ESocketEventTypes,
@@ -36,6 +39,7 @@ import {
   EStepCodeCompliancePath,
   EStepCodeEPCTestingTargetType,
   EStepCodeOccupancyKey,
+  ESubmissionContactClass,
   ETemplateVersionStatus,
   EUserRoles,
   EWindowsGlazedDoorsPerformanceType,
@@ -100,6 +104,7 @@ export interface ISubmissionContact {
   confirmedAt: string
   default: boolean
   confirmationSentAt?: string
+  type: ESubmissionContactClass
 }
 
 export interface IHelpVideoNavigationNeighbor {
@@ -133,6 +138,8 @@ export type TSearchParams<IModelSortFields, IModelFilterFields = {}> = {
   perPage?: number
   showArchived?: boolean
   publishedOnly?: boolean
+  releaseType?: EReleaseNoteType
+  year?: number
   filters?: IModelFilterFields
   mode?: "list" | "kanban"
   perColumn?: number
@@ -348,6 +355,7 @@ export interface IJurisdictionStub {
 
 export interface IReportDocument extends IBaseFileAttachment {
   stepCodeId: string
+  stale?: boolean
 }
 
 export interface IResourceDocument extends IBaseFileAttachment {
@@ -372,6 +380,22 @@ export interface IProjectDocument extends IBaseFileAttachment {
   permitProjectId: string // Foreign key to link to PermitProject
 }
 
+export interface IMeetingRequestDocument extends IBaseFileAttachment {
+  projectMeetingId?: string
+  documentType?: EMeetingRequestDocumentType
+}
+
+export interface INoteAttachmentDocument extends IBaseFileAttachment {
+  noteId?: string
+  scanStatus?: EFileScanStatus
+}
+
+// A file uploaded to S3 cache but not yet persisted against a note.
+export interface INoteAttachmentDraft {
+  uppyFileId: string
+  file: IFileData
+}
+
 export interface IRequirementBlockCustomization {
   tip?: string
   resourceIds?: string[]
@@ -385,6 +409,8 @@ export interface ITemplateCustomization {
 }
 
 export interface IDownloadableFile {
+  id: string
+  dataKey?: string
   fileUrl: string
   fileName: string
   fileSize: number
@@ -453,6 +479,12 @@ export interface INotification {
     | ITemplateVersionNotificationObjectData
     | IRequirementTemplateNotificationObjectData
     | IReportDocumentNotificationObjectData
+    | IProjectMeetingNotificationObjectData
+}
+
+export interface IProjectMeetingNotificationObjectData {
+  permitProjectId: string
+  projectMeetingId: string
 }
 
 export interface ITemplateVersionUpdate {
@@ -466,13 +498,6 @@ export interface IReportDocumentNotificationObjectData {
   downloadUrl?: string
 }
 
-export type TSocketEventData =
-  | IPermitApplicationComplianceUpdate
-  | IPermitApplicationSupportingDocumentsUpdate
-  | IPermitBlockStatus
-  | INotification
-  | ITemplateVersionUpdate
-
 export interface IPermitApplicationSupportingDocumentsUpdate {
   id: string
   supportingDocuments: IPermitApplication["supportingDocuments"]
@@ -482,6 +507,22 @@ export interface IPermitApplicationSupportingDocumentsUpdate {
   zipfileUrl: null | string
   allSubmissionVersionCompletedSupportingDocuments?: IDownloadableFile[]
 }
+
+export interface IPermitApplicationSelectiveZipReady {
+  id: string
+  requestId: string
+  zipfileUrl?: string | null
+  zipfileName?: string | null
+  error?: boolean
+}
+
+export type TSocketEventData =
+  | IPermitApplicationComplianceUpdate
+  | IPermitApplicationSupportingDocumentsUpdate
+  | IPermitApplicationSelectiveZipReady
+  | IPermitBlockStatus
+  | INotification
+  | ITemplateVersionUpdate
 
 export interface IUserPushPayload {
   data: TSocketEventData
@@ -612,7 +653,8 @@ export interface IPermitApplicationSearchFilters {
 export interface IPermitProjectSearchFilters {
   query?: string
   showArchived?: boolean
-  rollupStatus?: EPermitProjectRollupStatus[]
+  state?: EProjectState[]
+  activeMeeting?: string
   requirementTemplateIds?: string[]
   jurisdictionId?: string[]
 }
@@ -633,6 +675,13 @@ export interface IPermitApplicationInboxSearchFilters {
   meetingRequest?: string
   daysInQueue?: { operator: string; days: number }
   assigned?: string[]
+}
+
+export interface IProjectMeetingInboxSearchFilters {
+  status?: EProjectMeetingStatus[]
+  unread?: string
+  confirmedDateFrom?: string
+  confirmedDateTo?: string
 }
 
 export interface IProjectAuditSearchFilters {
@@ -693,6 +742,7 @@ export interface IMinimalFrozenUser {
   role: EUserRoles
   firstName: string
   lastName: string
+  phoneNumber?: string
   organization?: string
   certified: boolean
   discardedAt?: Date
@@ -712,6 +762,7 @@ export interface IJurisdictionStepRequirement {
   default: boolean
   energyStepRequired: EEnergyStep
   zeroCarbonStepRequired: EZeroCarbonStep
+  description?: string | null
 }
 
 export interface IPart3OccupancyRequiredStep {
@@ -719,12 +770,14 @@ export interface IPart3OccupancyRequiredStep {
   occupancyKey: string
   energyStepRequired: number
   zeroCarbonStepRequired: number | null
+  description?: string | null
 }
 
-export interface IJurisdictionClimateZone {
+export interface IJurisdictionHeatingDegreeDay {
   id?: string
-  climateZone: string
-  heatingDegreeDays: number | null
+  locationName: string
+  heatingDegreeDays: number
+  climateZone?: string | null
 }
 
 export type TCreateRequirementTemplateFormData = {
@@ -745,7 +798,9 @@ export type TCreatePermitApplicationFormData = {
 }
 
 export type TReleaseNoteFormData = {
+  releaseType: EReleaseNoteType
   version: string
+  name: string
   releaseDate: Date | null
   content: string
   releaseNotesUrl: string
@@ -824,6 +879,18 @@ export interface IPart3NavSection {
   navLinks: IPart3NavLink[]
 }
 
+export interface IPart9NavLink {
+  key: TPart9NavLinkKey
+  location: string
+  subLinks: IPart9NavLink[]
+  section?: TNavLinkSection
+}
+
+export interface IPart9NavSection {
+  key: TPart9NavSectionKey
+  navLinks: IPart9NavLink[]
+}
+
 export interface IPart3SectionCompletionStatusEntry {
   complete: boolean
   relevant: boolean
@@ -851,10 +918,31 @@ export interface IPart3SectionCompletionStatus {
   contact: IPart3SectionCompletionStatusEntry
   requirementsSummary: IPart3SectionCompletionStatusEntry
   stepCodeSummary: IPart3SectionCompletionStatusEntry
+  report: IPart3SectionCompletionStatusEntry
 }
 
 export type TPart3NavLinkKey = keyof IPart3SectionCompletionStatus
 export type TPart3NavSectionKey = "overview" | "compliance" | "results"
+
+export type IPart9SectionCompletionStatusEntry = IPart3SectionCompletionStatusEntry
+
+export interface IPart9SectionCompletionStatus {
+  start: IPart9SectionCompletionStatusEntry
+  projectInfo: IPart9SectionCompletionStatusEntry
+  buildingInfo: IPart9SectionCompletionStatusEntry
+  h2kImport: IPart9SectionCompletionStatusEntry
+  complianceSummary: IPart9SectionCompletionStatusEntry
+  completedBy: IPart9SectionCompletionStatusEntry
+  buildingCharacteristics: IPart9SectionCompletionStatusEntry
+  energyPerformance: IPart9SectionCompletionStatusEntry
+  energyStepCompliance: IPart9SectionCompletionStatusEntry
+  zeroCarbonCompliance: IPart9SectionCompletionStatusEntry
+  review: IPart9SectionCompletionStatusEntry
+  report: IPart9SectionCompletionStatusEntry
+}
+
+export type TPart9NavLinkKey = keyof IPart9SectionCompletionStatus
+export type TPart9NavSectionKey = "overview" | "compliance" | "results"
 
 // Define the base structure shared by both metric types
 interface IPart3ComplianceMetricsBase {

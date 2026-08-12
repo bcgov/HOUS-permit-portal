@@ -1,6 +1,5 @@
 import {
   Box,
-  Circle,
   Flex,
   HStack,
   Icon,
@@ -15,10 +14,12 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { Info, Swap } from "@phosphor-icons/react"
+import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useNavigate } from "react-router-dom"
+import { datefnsTableDateFormat } from "../../../../constants"
 import { IPermitApplication } from "../../../../models/permit-application"
 import { IPermitProject } from "../../../../models/permit-project"
 import { IPermitApplicationInboxStore } from "../../../../stores/submission-inbox-store"
@@ -27,6 +28,7 @@ import { ISort } from "../../../../types/types"
 import { Paginator } from "../../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../../shared/base/inputs/per-page-select"
 import { SharedSpinner } from "../../../shared/base/shared-spinner"
+import { UnreadIndicatorDot } from "../../../shared/base/unread-indicator-dot"
 import { GridHeader } from "../../../shared/grid/grid-header"
 import { SearchGrid } from "../../../shared/grid/search-grid"
 import { SearchGridItem } from "../../../shared/grid/search-grid-item"
@@ -41,6 +43,8 @@ interface IProps {
   searchStore: IPermitApplicationInboxStore | IPermitProject
   applications: IPermitApplication[]
 }
+
+const formatTableDate = (date?: Date | null) => (date ? format(date, datefnsTableDateFormat) : "—")
 
 export const ApplicationInboxTable = observer(function ApplicationInboxTable({ searchStore, applications }: IProps) {
   const { t } = useTranslation()
@@ -67,16 +71,8 @@ export const ApplicationInboxTable = observer(function ApplicationInboxTable({ s
         </Flex>
       )
     }
-    if (listShowsNoResults) {
-      return (
-        <Flex py={4} gridColumn="span 8" w="full" justify="flex-start">
-          <InboxNoMatchingEmpty
-            viewMode={EInboxViewMode.applications}
-            onClearFilters={() => searchStore.resetFilters()}
-          />
-        </Flex>
-      )
-    }
+    if (listShowsNoResults) return null
+
     return applications.map((application) => <ApplicationInboxRow key={application.id} application={application} />)
   }
 
@@ -96,6 +92,15 @@ export const ApplicationInboxTable = observer(function ApplicationInboxTable({ s
           templateColumns="36px minmax(160px, 1.5fr) minmax(180px, 1.3fr) minmax(140px, 1fr) minmax(140px, 1fr) minmax(160px, 1.1fr) minmax(120px, auto) 72px"
           gridRowClassName="application-inbox-grid-row"
           overflow="visible"
+          isEmpty={listShowsNoResults}
+          emptyState={
+            <InboxNoMatchingEmpty
+              gridColumn="1 / -1"
+              m={4}
+              viewMode={EInboxViewMode.applications}
+              onClearFilters={() => searchStore.resetFilters()}
+            />
+          }
           sx={gridStickyHeaderSx}
         >
           <Box display="contents" role="rowgroup">
@@ -233,7 +238,7 @@ const ApplicationInboxRow = observer(function ApplicationInboxRow({
       _active={{ bg: "background.blueLight" }}
     >
       <SearchGridItem justifyContent="center" px={2}>
-        <Circle size="8px" bg={!application.isViewed ? "theme.blueActive" : "transparent"} flexShrink={0} />
+        <UnreadIndicatorDot isUnread={!application.isViewed} />
       </SearchGridItem>
 
       <SearchGridItem>
@@ -290,7 +295,7 @@ const ApplicationInboxRow = observer(function ApplicationInboxRow({
               {t("submissionInbox.waitingSince")}
             </Text>
             <Text fontSize="xs" color="text.secondary">
-              {application.formattedSubmittedAt}
+              {formatTableDate(application.submittedAt)}
             </Text>
           </VStack>
         ) : (

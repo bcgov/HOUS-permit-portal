@@ -50,6 +50,9 @@ class PermitApplication < ApplicationRecord
   has_many :collaborators, through: :permit_collaborations
   has_many :permit_block_statuses, dependent: :destroy
 
+  # HUB-5145: Keep one StepCode per permit as the report family. Pre-Construction
+  # and As-Built should become staged child checklists selected by the StepCode's
+  # current_stage rather than competing permit-level StepCode records.
   has_one :step_code, -> { kept }, dependent: :nullify
 
   scope :submitted, -> { joins(:submission_versions).distinct }
@@ -75,6 +78,11 @@ class PermitApplication < ApplicationRecord
   validate :jurisdiction_has_matching_submission_contact
   validates :number, presence: true
   validates :reference_number, length: { maximum: 300 }, allow_nil: true
+  validates :step_code_stage,
+            inclusion: {
+              in: StepCode::STAGES
+            },
+            allow_nil: true
   validate :submission_versions_match_status
 
   delegate :published_template_version, to: :template_version
@@ -106,6 +114,33 @@ class PermitApplication < ApplicationRecord
 
   def public_record?
     !new_draft?
+  end
+
+  # Permit-scoped stage pin: which checklist counts for this permit's completion /
+  # submission snapshot. Independent of StepCode.current_stage (tool navigation).
+  def step_code_checklist
+    return nil unless step_code
+
+    if step_code_stage.present?
+      step_code.checklist_for(stage: step_code_stage)
+    else
+      step_code.current_checklist
+    end
+  end
+
+  def step_code_complete?
+    step_code_checklist&.complete?
+  end
+
+  def ensure_step_code_stage!(stage = nil)
+    return if step_code_stage.present?
+
+    update!(
+      step_code_stage:
+        stage.presence_in(StepCode::STAGES) ||
+          step_code&.current_stage.presence_in(StepCode::STAGES) ||
+          StepCode::STAGES.first
+    )
   end
 
   def inbox_enabled?
@@ -231,12 +266,23 @@ class PermitApplication < ApplicationRecord
     template_version.requirement_template.nickname
   end
 
+  def requires_project_meeting?
+    return false if jurisdiction.blank?
+
+    jurisdiction
+      .jurisdiction_template_version_customizations
+      .for_sandbox(sandbox)
+      .requiring_project_meeting
+      .exists?(template_version: template_version)
+  end
+
   def search_data
     {
       number: number,
       nickname: nickname,
       full_address: full_address,
       template_tags: template_tag_list&.join(", "),
+      template_nickname: template_nickname,
       submitter: "#{submitter.name} #{submitter.email}",
       submitted_at: submitted_at,
       resubmitted_at: resubmitted_at,
@@ -406,6 +452,8 @@ class PermitApplication < ApplicationRecord
   end
 
   def populate_base_form_data
+    return if submission_data.present?
+
     self.submission_data = { data: {} }
   end
 
@@ -451,10 +499,11 @@ class PermitApplication < ApplicationRecord
         sandbox_id: sandbox_id
       )
 
-    if customization&.submission_contact&.confirmed?
+    if customization&.submission_contact.is_a?(ApplicationSubmissionContact) &&
+         customization.submission_contact.confirmed?
       [customization.submission_contact]
     else
-      jurisdiction.submission_contacts.confirmed.default_contact
+      jurisdiction.confirmed_submission_contacts.default_contact
     end
   end
 
@@ -614,6 +663,31 @@ class PermitApplication < ApplicationRecord
       custom_requirements.any? do |r|
         r.energy_step_required || r.zero_carbon_step_required
       end
+  end
+
+  # Value of the Energy Step Code method radio: "tool" | "file" | nil
+  def energy_step_code_method
+    data = submission_data&.dig("data") || {}
+    data.each_value do |section|
+      next unless section.is_a?(Hash)
+
+      section.each do |key, value|
+        unless key.to_s.end_with?(
+                 "|#{Requirement::ENERGY_STEP_CODE_SELECT_REQUIREMENT_CODE}"
+               ) ||
+                 key.to_s ==
+                   Requirement::ENERGY_STEP_CODE_SELECT_REQUIREMENT_CODE
+          next
+        end
+
+        return value if value == "tool" || value == "file"
+      end
+    end
+    nil
+  end
+
+  def using_digital_energy_step_code_tool?
+    energy_step_code_method == "tool"
   end
 
   def self.stats_by_template_jurisdiction_and_status
@@ -854,7 +928,7 @@ class PermitApplication < ApplicationRecord
     return if sandbox.present?
     return unless jurisdiction
 
-    matching_confirmed_contacts = jurisdiction.submission_contacts.confirmed
+    matching_confirmed_contacts = jurisdiction.confirmed_submission_contacts
 
     if matching_confirmed_contacts.empty?
       errors.add(

@@ -1,8 +1,9 @@
-import { Box, Divider, Flex, Grid, Heading, HStack, Text, Tooltip, useDisclosure, VStack } from "@chakra-ui/react"
+import { Box, Divider, Flex, Grid, Heading, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import { CaretRight, Info, SquaresFour, Steps } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
+import { useParams } from "react-router-dom"
 import { ISearch } from "../../../../../lib/create-search-model"
 import { IPermitProject } from "../../../../../models/permit-project"
 import { useMst } from "../../../../../setup/root"
@@ -22,6 +23,7 @@ interface IProps {
 }
 
 export const InboxOverviewTab = observer(({ permitProject }: IProps) => {
+  const { jurisdictionId } = useParams<{ jurisdictionId: string }>()
   const {
     fullAddress,
     pid,
@@ -97,16 +99,14 @@ export const InboxOverviewTab = observer(({ permitProject }: IProps) => {
             </VStack>
           </Box>
           <Box>
-            <Tooltip label={t("permitProject.overview.mapVisualReferenceDisclaimer")} hasArrow>
-              <Box height={{ base: "200px", lg: "250px" }} borderRadius="md" overflow="hidden">
-                <ProjectMap
-                  coordinates={permitProject.mapPosition}
-                  pid={pid}
-                  parcelGeometry={permitProject.parcelGeometry}
-                  onOpenFullscreen={onOpenMapFullscreen}
-                />
-              </Box>
-            </Tooltip>
+            <Box height={{ base: "200px", lg: "250px" }} borderRadius="md" overflow="hidden">
+              <ProjectMap
+                coordinates={permitProject.mapPosition}
+                pid={pid}
+                parcelGeometry={permitProject.parcelGeometry}
+                onOpenFullscreen={onOpenMapFullscreen}
+              />
+            </Box>
           </Box>
         </Grid>
       </Box>
@@ -124,7 +124,7 @@ export const InboxOverviewTab = observer(({ permitProject }: IProps) => {
         ) : (
           <>
             <SearchGrid
-              templateColumns="2fr 1.5fr 1.5fr 1.5fr 1.5fr 0.5fr"
+              templateColumns="2.25fr 1.75fr 1fr 1.4fr 1.1fr 1fr 0.5fr"
               gridRowClassName="permit-application-grid-row"
             >
               <PermitApplicationGridHeaders
@@ -147,7 +147,12 @@ export const InboxOverviewTab = observer(({ permitProject }: IProps) => {
                 ))}
             </SearchGrid>
             <Flex justify="flex-end" mt={4}>
-              <RouterLinkButton variant="tertiary" fontWeight="bold" rightIcon={<CaretRight />} to="permits">
+              <RouterLinkButton
+                variant="tertiary"
+                fontWeight="bold"
+                rightIcon={<CaretRight />}
+                to={`/jurisdictions/${jurisdictionId}/submission-inbox/projects/${permitProject.id}/permits`}
+              >
                 {t("submissionInbox.projectDetail.viewAllPermits")}
               </RouterLinkButton>
             </Flex>

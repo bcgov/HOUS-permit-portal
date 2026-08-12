@@ -4,7 +4,7 @@ Hi,
 
 We need to collect Step Code configuration data for each jurisdiction.
 
-**The easiest way to do this** is to request an invite to the BC Building Permit Hub and use our interactive configuration tool directly. The tool walks you through selecting your climate zones, setting HDD values, and configuring your step code requirements — no spreadsheets required. If you'd like an invite, just let us know and we'll get you set up.
+**The easiest way to do this** is to request an invite to the BC Building Permit Hub and use our interactive configuration tool directly. The tool walks you through selecting your climate zones, setting HDD values, and configuring your Step Code requirements — no spreadsheets required. If you'd like an invite, just let us know and we'll get you set up.
 
 If you'd prefer to provide the data via CSV instead, we've attached **two files** for your jurisdiction. Please fill them out and return them.
 

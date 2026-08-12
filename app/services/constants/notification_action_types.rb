@@ -20,6 +20,9 @@ module Constants
     PRE_CHECK_COMPLETED = "pre_check_completed"
     FILE_UPLOAD_FAILED = "file_upload_failed"
     RESOURCE_REMINDER = "resource_reminder"
+    PROJECT_MEETING_SUBMITTED = "project_meeting_submitted"
+    PROJECT_MEETING_SCHEDULED = "project_meeting_scheduled"
+    PROJECT_MEETING_RESCHEDULED = "project_meeting_rescheduled"
     PROJECT_REVIEW_COLLABORATION_ASSIGNMENT =
       "project_review_collaboration_assignment"
     PROJECT_REVIEW_COLLABORATION_UNASSIGNMENT =

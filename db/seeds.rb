@@ -43,12 +43,12 @@ User.find_or_create_by(omniauth_username: "super_admin") do |user|
   user.password = "P@ssword1"
   user.confirmed_at = Time.now
   user.omniauth_uid = "A41927C69D6549B8A396FCA748F53502"
-  user.omniauth_provider = "bceidbasic"
+  user.omniauth_provider = "idir"
   user.omniauth_email = "super_admin@example.com"
   user.omniauth_username = "super_admin"
 end
 
-User.find_or_create_by(omniauth_username: "review_manager") do |user|
+User.find_or_create_by(omniauth_username: "reviewman1") do |user|
   user.role = :review_manager
   user.first_name = "ReviewManager"
   user.last_name = "McUser"
@@ -56,9 +56,10 @@ User.find_or_create_by(omniauth_username: "review_manager") do |user|
   user.password = "P@ssword1"
   user.jurisdictions = [north_van]
   user.confirmed_at = Time.now
-  user.omniauth_uid = "85EEC5B6F05A4DB7BB5BB97FBC6985B1"
+  user.omniauth_uid = "4EC1D0E766CB4F39BA9657030D665C79"
   user.omniauth_provider = "bceidbasic"
   user.omniauth_email = "review_manager@example.com"
+  user.omniauth_username = "reviewman1"
 end
 
 User.find_or_create_by(omniauth_username: "regional_review_manager") do |user|
@@ -86,6 +87,20 @@ User.find_or_create_by(omniauth_username: "reviewer") do |user|
   user.omniauth_uid = "8505910FBD594495AC899BC6653F3544"
   user.omniauth_provider = "bceidbasic"
   user.omniauth_email = "reviewer@example.com"
+end
+
+User.find_or_create_by(omniauth_username: "technical_support") do |user|
+  user.role = :technical_support
+  user.first_name = "TechnicalSupport"
+  user.last_name = "McUser"
+  user.email = "technical_support@example.com"
+  user.password = "P@ssword1"
+  user.jurisdictions = [north_van]
+  user.confirmed_at = Time.now
+  user.omniauth_uid = "B7F3C2A19E8D4F6A9C1E5B0D8472A3F1"
+  user.omniauth_provider = "bceidbasic"
+  user.omniauth_email = "technical_support@example.com"
+  user.omniauth_username = "techsupport1"
 end
 
 User.find_or_create_by(omniauth_username: "submitter") do |user|
@@ -137,6 +152,35 @@ Jurisdiction.all.each do |j|
     )
   j.update(inbox_enabled: true, show_about_page: true)
 end
+
+if north_van
+  meeting_contact =
+    north_van.meeting_submission_contacts.find_or_initialize_by(
+      email: "north-van-project-meetings@laterolabs.com"
+    )
+  meeting_contact.update!(confirmed_at: Time.now, default: false)
+
+  property_information_contact =
+    north_van.property_information_submission_contacts.find_or_initialize_by(
+      email: "north-van-property-information@laterolabs.com"
+    )
+  property_information_contact.update!(confirmed_at: Time.now, default: false)
+
+  unless north_van.resources.project_meeting_authorization.exists?
+    north_van.resources.create!(
+      category: :project_meeting_authorization,
+      title: "Project meeting authorization",
+      resource_type: :link,
+      link_url: "https://example.com/project-meeting-authorization"
+    )
+  end
+
+  north_van.reload.update!(
+    project_meetings_enabled: true,
+    property_information_requests_enabled: true
+  )
+end
+
 if PermitApplication.first.blank?
   jurisdictions
     .first(10)
@@ -365,6 +409,7 @@ if Rails.env.development?
     inbox_enabled: true,
     code_compliance_enabled: true,
     qa_tools_enabled: true,
+    project_meetings_enabled: true,
     allow_designated_reviewer: true
   )
 end
@@ -489,7 +534,7 @@ if north_van.present?
 
     idx = 0
     while inbox_test_project.reload.permit_applications.kept.count(
-            &:visible_to_reviewers?
+            &:submitted_at_least_once?
           ) < inbox_test_visible_app_target
       break if idx >= 100 # safety: avoid infinite loop if statuses fail to seed
 
@@ -508,7 +553,7 @@ if north_van.present?
       idx += 1
     end
 
-    puts "  ✓ #{inbox_test_project_title}: #{inbox_test_project.permit_applications.kept.count(&:visible_to_reviewers?)} reviewer-visible permit applications"
+    puts "  ✓ #{inbox_test_project_title}: #{inbox_test_project.permit_applications.kept.count(&:submitted_at_least_once?)} reviewer-visible permit applications"
   else
     puts "  (skipped Inbox test project: need submitter, reviewer, and published template versions)"
   end
@@ -627,7 +672,7 @@ if north_van_projects.size >= 10
   reviewer_collab = north_van.collaborators.find_by(user: reviewer_user)
   rm_collab =
     north_van.collaborators.find_by(
-      user: User.find_by(omniauth_username: "review_manager")
+      user: User.find_by(omniauth_username: "reviewman1")
     )
 
   collab_projects =
@@ -649,10 +694,97 @@ if north_van_projects.size >= 10
   end
 
   puts "  ✓ Assigned review collaborators to #{collab_projects.size} projects"
+
+  puts "Seeding project meeting requests..."
+  submitter = User.find_by(omniauth_username: "submitter")
+  meeting_seed_projects =
+    if submitter
+      north_van_projects
+        .select { |project| project.owner_id == submitter.id }
+        .reject { |project| project.title == inbox_test_project_title }
+        .first(18)
+    else
+      []
+    end
+
+  meeting_statuses = %i[open scheduled completed withdrawn].freeze
+  seeded_meeting_count = 0
+
+  meeting_seed_projects.each_with_index do |project, idx|
+    next if project.project_meetings.exists?
+
+    status = meeting_statuses[idx % meeting_statuses.size]
+    submitted_at = (idx + 2).days.ago
+    requested_by = submitter
+    confirmed_date =
+      case status
+      when :scheduled
+        (idx + 1).days.from_now.change(hour: 10 + (idx % 5), min: 0)
+      when :completed
+        (idx + 1).days.ago.change(hour: 10 + (idx % 5), min: 0)
+      else
+        nil
+      end
+
+    meeting =
+      project.project_meetings.build(
+        requested_by: requested_by,
+        status: status,
+        requester_relationship: :owner_or_landholder,
+        contact_name: requested_by.name,
+        contact_email: requested_by.email,
+        contact_phone_number:
+          requested_by.phone_number.presence || "250555#{format("%04d", idx)}",
+        project_description:
+          [
+            "Discuss zoning constraints before submitting revised drawings.",
+            "Review proposed coach house siting and access requirements.",
+            "Confirm documentation needed for the next permit submission.",
+            "Walk through servicing questions for the proposed renovation."
+          ][
+            idx % 4
+          ],
+        meeting_notes:
+          [
+            "Applicant asked for clarification on setbacks.",
+            "Bring latest site plan and project context.",
+            "Review staff should confirm next steps after the meeting.",
+            "Potential follow-up with engineering may be required."
+          ][
+            idx % 4
+          ],
+        request_property_information: idx.even?,
+        submitted_at: submitted_at,
+        viewed_at: idx % 3 == 0 ? submitted_at + 2.hours : nil,
+        confirmed_date: confirmed_date,
+        scheduled_at:
+          status.in?(%i[scheduled completed]) ? submitted_at + 1.day : nil,
+        completed_at: status == :completed ? submitted_at + 3.days : nil,
+        withdrawn_at: status == :withdrawn ? submitted_at + 2.days : nil,
+        meeting_url:
+          (
+            if status.in?(%i[scheduled completed])
+              "https://meet.example.com/project-meeting-#{idx + 1}"
+            else
+              nil
+            end
+          )
+      )
+
+    meeting.save!
+    seeded_meeting_count += 1
+  rescue => e
+    Rails.logger.warn(
+      "Seed: failed to create project meeting for project #{project.id}: #{e.message}"
+    )
+  end
+
+  puts "  ✓ Seeded #{seeded_meeting_count} project meeting requests for submitter (#{submitter&.omniauth_username || "n/a"})"
 end
 
 PermitApplication.reindex
 PermitProject.reindex
+ProjectMeeting.reindex
 
 puts "Running pending data migrations..."
 DataMigrate::DatabaseTasks.migrate

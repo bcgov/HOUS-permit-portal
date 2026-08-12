@@ -3,7 +3,7 @@ import { ArrowSquareOut, WarningCircle } from "@phosphor-icons/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { EFileUploadAttachmentType, EResourceType } from "../../../types/enums"
-import { IRequirementDocument, IResource, IResourceDocument } from "../../../types/types"
+import { IBaseFileAttachment, IResource } from "../../../types/types"
 import { formatFileSize, getFileExtension } from "../../../utils/file-utils"
 import { FileDownloadButton } from "./file-download-button"
 
@@ -12,7 +12,7 @@ export const DownloadLinkButton = ({
   modelType,
   title,
 }: {
-  document: IRequirementDocument | IResourceDocument
+  document: IBaseFileAttachment
   modelType: EFileUploadAttachmentType
   title?: string
 }) => {

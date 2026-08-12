@@ -219,6 +219,7 @@ interface ICompliancePathway {
   recordId?: string
   energyStep: number | undefined
   zeroCarbonLevel: number | undefined
+  description: string
 }
 
 interface IFormValues {
@@ -254,6 +255,7 @@ function ConfigurableCompliancePathways({ occupancy, jurisdiction }: IConfigurab
       recordId: s.id,
       energyStep: s.energyStepRequired,
       zeroCarbonLevel: s.zeroCarbonStepRequired ?? undefined,
+      description: s.description ?? "",
     })),
   })
 
@@ -284,6 +286,7 @@ function ConfigurableCompliancePathways({ occupancy, jurisdiction }: IConfigurab
         occupancyKey: occupancy.key,
         energyStepRequired: p.energyStep,
         zeroCarbonStepRequired: p.zeroCarbonLevel,
+        description: p.description?.trim() || null,
       })),
       ...removedRecordIds.map((id) => ({ id, _destroy: true })),
     ]
@@ -300,7 +303,7 @@ function ConfigurableCompliancePathways({ occupancy, jurisdiction }: IConfigurab
   }
 
   const onAdd = () => {
-    append({ energyStep: undefined, zeroCarbonLevel: undefined })
+    append({ energyStep: undefined, zeroCarbonLevel: undefined, description: "" })
   }
 
   return (
@@ -356,7 +359,23 @@ function ConfigurableCompliancePathways({ occupancy, jurisdiction }: IConfigurab
                         />
                       </FormControl>
                     </Box>
-                    <Box flex={1} />
+                    <Box flex={1}>
+                      <FormControl>
+                        <FormLabel fontSize="sm">{t(`${d}.pathwayDescriptionLabel`)}</FormLabel>
+                        <Controller
+                          control={control}
+                          name={`pathways.${index}.description`}
+                          render={({ field }) => (
+                            <Input
+                              {...field}
+                              bg="white"
+                              borderColor="gray.200"
+                              placeholder={t(`${d}.pathwayDescriptionPlaceholder`)}
+                            />
+                          )}
+                        />
+                      </FormControl>
+                    </Box>
                     <Button
                       variant="link"
                       size="sm"

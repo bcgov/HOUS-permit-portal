@@ -1,5 +1,14 @@
-class Part3StepCodeBlueprint < StepCodeBaseBlueprint
-  association :checklist, blueprint: StepCode::Part3::ChecklistBlueprint
+class Part3StepCodeBlueprint < StepCodeBlueprint
+  association :checklist,
+              blueprint:
+                StepCode::Part3::ChecklistBlueprint do |step_code, _options|
+    step_code.current_checklist
+  end
+  association :checklists,
+              blueprint:
+                StepCode::Part3::ChecklistSummaryBlueprint do |step_code, _options|
+    step_code.checklists
+  end
 
   field :is_fully_loaded do |_step_code, _options|
     true

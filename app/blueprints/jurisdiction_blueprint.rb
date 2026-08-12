@@ -29,6 +29,8 @@ class JurisdictionBlueprint < Blueprinter::Base
            :inbox_enabled,
            :show_about_page,
            :allow_designated_reviewer,
+           :project_meetings_enabled,
+           :property_information_requests_enabled,
            :map_zoom,
            :regional_district_name,
            :created_at,
@@ -36,8 +38,15 @@ class JurisdictionBlueprint < Blueprinter::Base
            :external_api_state,
            :first_nation,
            :ltsa_matcher,
-           :heating_degree_days,
            :weather_location
+
+    field :part_9_step_requirements_updated_at do |jurisdiction, _options|
+      jurisdiction.part_9_step_requirements_updated_at
+    end
+
+    field :part_3_step_requirements_updated_at do |jurisdiction, _options|
+      jurisdiction.part_3_step_requirements_updated_at
+    end
 
     field :design_summer_temp do |jurisdiction, _options|
       jurisdiction.design_summer_temp&.to_f
@@ -50,6 +59,14 @@ class JurisdictionBlueprint < Blueprinter::Base
     field :submission_inbox_set_up do |jurisdiction, _options|
       jurisdiction.submission_inbox_set_up?
     end
+    field :project_meeting_notification_recipient_emails,
+          if: ->(_field_name, jurisdiction, options) do
+            options[:current_user]&.jurisdictions&.include?(jurisdiction)
+          end
+    field :property_information_notification_recipient_emails,
+          if: ->(_field_name, jurisdiction, options) do
+            options[:current_user]&.jurisdictions&.include?(jurisdiction)
+          end
     association :contacts, blueprint: ContactBlueprint
     association :submission_contacts,
                 blueprint: SubmissionContactBlueprint,
@@ -62,8 +79,8 @@ class JurisdictionBlueprint < Blueprinter::Base
                 blueprint: JurisdictionStepRequirementBlueprint
     association :part3_occupancy_required_steps,
                 blueprint: Part3OccupancyRequiredStepBlueprint
-    association :jurisdiction_climate_zones,
-                blueprint: JurisdictionClimateZoneBlueprint
+    association :jurisdiction_heating_degree_days,
+                blueprint: JurisdictionHeatingDegreeDayBlueprint
     association :service_partner_enrollments,
                 blueprint: JurisdictionServicePartnerEnrollmentBlueprint
   end
@@ -91,6 +108,12 @@ class JurisdictionBlueprint < Blueprinter::Base
 
     field :unviewed_projects_count do |jurisdiction, options|
       jurisdiction.unviewed_projects_count(sandbox: options[:current_sandbox])
+    end
+
+    field :unviewed_project_meetings_count do |jurisdiction, options|
+      jurisdiction.unviewed_project_meetings_count(
+        sandbox: options[:current_sandbox]
+      )
     end
   end
 end

@@ -158,6 +158,26 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitApplications,
             revisions_requested_permit_applications
         )
       end
+
+      it "excludes new_draft from ES totals so pages are not policy-stripped" do
+        controller.perform_jurisdiction_permit_application_search
+        search =
+          controller.instance_variable_get(
+            :@jurisdiction_permit_application_search
+          )
+        meta =
+          controller.instance_variable_get(
+            :@jurisdiction_permit_application_meta
+          )
+
+        expect(search.results.map(&:status)).not_to include("new_draft")
+        expect(meta[:total_count]).to eq(
+          submitted_permit_applications.size +
+            resubmitted_permit_applications.size +
+            revisions_requested_permit_applications.size
+        )
+        expect(meta[:status_counts].values.sum).to eq(meta[:total_count])
+      end
     end
 
     context "when searching for the jurisdictions permit applications as a review manager" do
@@ -408,6 +428,39 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitApplications,
         # (newly_submitted, no viewed_at). The unread count should be scoped
         # to the project, not jurisdiction-wide.
         expect(meta[:unread_count]).to eq(submitted_permit_applications.size)
+      end
+
+      context "when the scoped permit project has an active meeting" do
+        let(:target_project) { draft_permit_applications.first.permit_project }
+
+        before do
+          create(:project_meeting, :open, permit_project: target_project)
+        end
+
+        it "includes draft applications for that permit project" do
+          controller.perform_jurisdiction_permit_application_search
+          results =
+            controller.instance_variable_get(
+              :@jurisdiction_permit_application_search
+            ).results
+
+          expect(results).to match_array(draft_permit_applications)
+        end
+      end
+
+      context "when the scoped permit project has no active meeting" do
+        let(:target_project) { draft_permit_applications.first.permit_project }
+
+        it "excludes draft applications for that permit project" do
+          controller.perform_jurisdiction_permit_application_search
+          results =
+            controller.instance_variable_get(
+              :@jurisdiction_permit_application_search
+            ).results
+
+          expect(results).to be_empty
+          expect(results).not_to include(*draft_permit_applications)
+        end
       end
     end
 

@@ -27,6 +27,7 @@ import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { NotFoundScreen } from "../../shared/base/not-found-screen"
 import { EditableInputWithControls } from "../../shared/editable-input-with-controls"
+import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { BrowserSearchPrompt } from "../../shared/permit-applications/browser-search-prompt"
 import { PermitApplicationStatusTag } from "../../shared/permit-applications/permit-application-status-tag"
 import { RequirementForm } from "../../shared/permit-applications/requirement-form"
@@ -136,12 +137,33 @@ export const ReviewPermitApplicationScreen = observer(() => {
   // @ts-ignore
   const permitHeaderHeight = permitHeaderRef?.current?.offsetHeight ?? 0
 
-  if (currentPermitApplication.status === EPermitApplicationStatus.newDraft) return <NotFoundScreen />
+  // Meeting drafts are policy-visible for review staff; open them read-only so
+  // RMs can inspect form contents during an active project meeting.
+  const isMeetingDraft =
+    currentPermitApplication.status === EPermitApplicationStatus.newDraft &&
+    currentPermitApplication.hasActiveProjectMeeting
+  if (currentPermitApplication.status === EPermitApplicationStatus.newDraft && !isMeetingDraft) {
+    return <NotFoundScreen />
+  }
 
-  const isReadOnly = currentPermitApplication.isReviewReadOnly
+  // Form fields: locked except while actively in_review (combineChangeMarkers disables
+  // inputs then; revision buttons still need FormIO not globally readOnly).
+  // Once revisions are requested, keep FormIO readOnly until revisionMode — then drop it
+  // so revision buttons are clickable; fields stay locked via combineChangeMarkers.
+  const isReadOnly =
+    currentPermitApplication.isReviewReadOnly ||
+    isMeetingDraft ||
+    (currentPermitApplication.isRevisionsRequested && !revisionMode)
+  // Revision sidebar / "request revisions" chrome — available during and after review.
+  const canManageRevisions = currentPermitApplication.isInReview || currentPermitApplication.isRevisionsRequested
   const canStartReview =
     currentPermitApplication.status === EPermitApplicationStatus.newlySubmitted ||
     currentPermitApplication.status === EPermitApplicationStatus.resubmitted
+  const jurisdictionSlug = currentPermitApplication.jurisdiction?.slug
+  const parentProjectPath =
+    currentPermitApplication.projectId && jurisdictionSlug
+      ? `/jurisdictions/${jurisdictionSlug}/submission-inbox/projects/${currentPermitApplication.projectId}/overview`
+      : "/projects"
 
   const handleStartReview = async () => {
     setIsStartingReview(true)
@@ -207,6 +229,9 @@ export const ReviewPermitApplicationScreen = observer(() => {
                 {t("permitApplication.show.contactsSummary")}
               </Button>
               <SubmissionDownloadModal permitApplication={currentPermitApplication} review />
+              <RouterLinkButton to={parentProjectPath} variant="default" rightIcon={<CaretRight />}>
+                {t("permitApplication.show.goToProject")}
+              </RouterLinkButton>
               <Button rightIcon={<CaretRight />} onClick={() => navigate(-1)}>
                 {t("ui.back")}
               </Button>
@@ -232,7 +257,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
             )}
           </Flex>
         </Flex>
-        {!isReadOnly && revisionMode && (
+        {canManageRevisions && revisionMode && (
           <Flex
             position="sticky"
             zIndex={11}
@@ -268,7 +293,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
         )}
       </Flex>
       <Box id="sidebar-and-form-container" sx={{ "&:after": { content: `""`, display: "block", clear: "both" } }}>
-        {!isReadOnly && revisionMode && !hideRevisionList ? (
+        {canManageRevisions && revisionMode && !hideRevisionList ? (
           <RevisionSideBar
             permitApplication={currentPermitApplication}
             onCancel={() => setRevisionMode(false)}
@@ -296,18 +321,16 @@ export const ReviewPermitApplicationScreen = observer(() => {
                   />
                 )
 
-                if (isReadOnly) {
+                if (canManageRevisions) {
                   return (
                     <HStack spacing={6}>
-                      {canStartReview && (
-                        <Button
-                          variant="callout"
-                          leftIcon={<Swap />}
-                          onClick={handleStartReview}
-                          isLoading={isStartingReview}
-                          loadingText={t("permitApplication.show.startingReview")}
-                        >
-                          {t("permitApplication.show.readyForReview")}
+                      {!revisionMode && (
+                        <Button variant="callout" leftIcon={<NotePencil />} onClick={() => setRevisionMode(true)}>
+                          {currentPermitApplication.isRevisionsRequested
+                            ? t("permitApplication.show.viewRevisionRequests")
+                            : t("permitApplication.show.requestRevisions")}{" "}
+                          {currentPermitApplication?.latestRevisionRequests?.length > 0 &&
+                            `(${currentPermitApplication.latestRevisionRequests.length})`}
                         </Button>
                       )}
                       {collaboratorsButton}
@@ -317,13 +340,15 @@ export const ReviewPermitApplicationScreen = observer(() => {
 
                 return (
                   <HStack spacing={6}>
-                    {!revisionMode && (
-                      <Button variant="callout" leftIcon={<NotePencil />} onClick={() => setRevisionMode(true)}>
-                        {currentPermitApplication.isRevisionsRequested
-                          ? t("permitApplication.show.viewRevisionRequests")
-                          : t("permitApplication.show.requestRevisions")}{" "}
-                        {currentPermitApplication?.latestRevisionRequests?.length > 0 &&
-                          `(${currentPermitApplication.latestRevisionRequests.length})`}
+                    {canStartReview && (
+                      <Button
+                        variant="callout"
+                        leftIcon={<Swap />}
+                        onClick={handleStartReview}
+                        isLoading={isStartingReview}
+                        loadingText={t("permitApplication.show.startingReview")}
+                      >
+                        {t("permitApplication.show.readyForReview")}
                       </Button>
                     )}
                     {collaboratorsButton}

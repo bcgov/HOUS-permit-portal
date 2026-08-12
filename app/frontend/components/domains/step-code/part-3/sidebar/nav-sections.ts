@@ -8,12 +8,6 @@ export const navLinks: IPart3NavLink[] = [
     section: "overview",
   },
   {
-    key: "projectDetails",
-    location: "project-details",
-    subLinks: [],
-    section: "overview",
-  },
-  {
     key: "locationDetails",
     location: "location-details",
     subLinks: [],
@@ -128,6 +122,12 @@ export const navLinks: IPart3NavLink[] = [
     subLinks: [],
     section: "results",
   },
+  {
+    key: "report",
+    location: "report",
+    subLinks: [],
+    section: "results",
+  },
 ]
 
 export const navSections: IPart3NavSection[] = [
@@ -147,7 +147,7 @@ export const navSections: IPart3NavSection[] = [
 
 export const defaultSectionCompletionStatus = {
   start: { complete: false, relevant: true },
-  projectDetails: { complete: false, relevant: true },
+  projectDetails: { complete: false, relevant: false },
   locationDetails: { complete: false, relevant: true },
   baselineOccupancies: { complete: false, relevant: true },
   baselineDetails: { complete: false, relevant: false },
@@ -167,4 +167,5 @@ export const defaultSectionCompletionStatus = {
   contact: { complete: false, relevant: true },
   requirementsSummary: { complete: false, relevant: true },
   stepCodeSummary: { complete: false, relevant: true },
+  report: { complete: false, relevant: true },
 }

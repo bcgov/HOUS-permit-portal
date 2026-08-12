@@ -45,8 +45,12 @@ interface ISelectFormControlProps extends IInputFormControlProps<Partial<SelectP
 }
 
 const isValidUrl = (url: string) => {
-  const regex = /^(https?:\/\/)?([a-z0-9-]+\.)+[a-z]{2,}(\/[\w./%-]*)?\/?$/i
-  return regex.test(url)
+  try {
+    const parsed = new URL(/^https?:\/\//i.test(url) ? url : `https://${url}`)
+    return parsed.protocol === "http:" || parsed.protocol === "https:"
+  } catch {
+    return false
+  }
 }
 
 export const TextFormControl = (props: IInputFormControlProps) => {
@@ -60,8 +64,12 @@ export const TextFormControl = (props: IInputFormControlProps) => {
       ...inputProps,
     },
     validate: {
-      satisfiesLength: (str) =>
-        (!props.required && !str) || (str?.length >= 1 && str?.length <= effectiveMax) || t("ui.invalidInput"),
+      // Values may arrive as numbers (e.g. H2K-populated building characteristics).
+      satisfiesLength: (value) => {
+        if (!props.required && (value === null || value === undefined || value === "")) return true
+        const str = String(value)
+        return (str.length >= 1 && str.length <= effectiveMax) || t("ui.invalidInput")
+      },
       ...validate,
     },
   }
@@ -111,9 +119,10 @@ export const UrlFormControl = (props: IInputFormControlProps) => {
 }
 
 export const NumberFormControl = (props: IInputFormControlProps) => {
+  // step "any" accepts H2K-sourced values with >2 decimal places (e.g. 34.9241 L/s).
   return (
     <InputFormControl
-      {...(R.mergeDeepRight({ inputProps: { type: "number", step: 0.01 } }, props) as IInputFormControlProps)}
+      {...(R.mergeDeepRight({ inputProps: { type: "number", step: "any" } }, props) as IInputFormControlProps)}
     />
   )
 }
@@ -140,6 +149,7 @@ export const DatePickerFormControl = ({
   leftElement,
   rightElement,
   inputProps = {},
+  LabelInfo,
   showOptional = true,
   ...rest
 }: IInputFormControlProps<Partial<IDatePickerProps>>) => {
@@ -162,12 +172,20 @@ export const DatePickerFormControl = ({
     <FormControl isInvalid={!!errorMessage} {...rest}>
       {label && (
         <HStack gap={0}>
-          <FormLabel id={id}>{label} </FormLabel>
+          <FormLabel id={id}>
+            {label}
+            {required && (
+              <Text as="span" color="semantic.error" ml={1}>
+                *
+              </Text>
+            )}
+          </FormLabel>
           {!required && showOptional && (
             <Text ml={-2} mb={2}>
               {t("ui.optional")}
             </Text>
           )}
+          {LabelInfo && <LabelInfo />}
         </HStack>
       )}
 

@@ -7,6 +7,9 @@ class OverheatingCodePdfService
       .join("lib", "assets", "pdf_templates", "BC-SZCG-FormSetFill-Ver1.0a.pdf")
       .freeze
 
+  ATTRIBUTION =
+    "This form was originally created by the HVAC Designers of Canada and the Thermal Environmental Comfort Association (TECA), and has been digitized with their permission.".freeze
+
   KW_TO_BTUH = 3412.142
 
   FIELD_MAP = {
@@ -84,6 +87,8 @@ class OverheatingCodePdfService
     form.create_appearances(force: true)
     form.flatten
 
+    stamp_attribution!(doc)
+
     io = StringIO.new
     doc.write(io)
     io.string
@@ -95,6 +100,31 @@ class OverheatingCodePdfService
   end
 
   private
+
+  def stamp_attribution!(doc)
+    page = doc.pages[0]
+    canvas = page.canvas(type: :overlay)
+    box = page.box
+    margin_x = 20
+    strip_height = 22
+
+    canvas.fill_color(0.95, 0.95, 0.95)
+    canvas.rectangle(0, 0, box.width, strip_height).fill
+
+    fragment =
+      HexaPDF::Layout::TextFragment.create(
+        ATTRIBUTION,
+        font: doc.fonts.add("Helvetica"),
+        font_size: 7
+      )
+    result =
+      HexaPDF::Layout::TextLayouter.new.fit(
+        [fragment],
+        box.width - (margin_x * 2),
+        strip_height - 4
+      )
+    result.draw(canvas, margin_x, strip_height - 6)
+  end
 
   def resolve_value(source)
     case source

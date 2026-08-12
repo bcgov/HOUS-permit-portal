@@ -18,7 +18,7 @@ namespace :db do
     JurisdictionSeeder.seed
     Jurisdiction.reindex
 
-    puts "Seeding step code reference tables..."
+    puts "Seeding Step Code reference tables..."
     StepCode::Part9::MEUIReferencesSeeder.seed!
     StepCode::Part9::TEDIReferencesSeeder.seed!
 

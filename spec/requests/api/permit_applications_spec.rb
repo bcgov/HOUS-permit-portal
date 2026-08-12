@@ -127,6 +127,21 @@ RSpec.describe "Api::PermitApplications", type: :request do
       expect(response).to have_http_status(:forbidden)
       expect(json_response.dig("meta", "message", "message")).to be_present
     end
+
+    it "returns active project meeting metadata for the submitter" do
+      active_meeting =
+        create(:project_meeting, :open, permit_project: permit_project)
+
+      get "/api/permit_applications/#{permit_application.id}", headers: headers
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("data", "has_active_project_meeting")).to be(
+        true
+      )
+      expect(json_response.dig("data", "active_project_meeting_id")).to eq(
+        active_meeting.id
+      )
+    end
   end
 
   describe "GET /api/permit_applications/:id/download_application_json" do
@@ -185,6 +200,21 @@ RSpec.describe "Api::PermitApplications", type: :request do
       expect(json_response.dig("data", "nickname")).to eq("Updated Draft")
     end
 
+    it "updates step_code_stage" do
+      patch "/api/permit_applications/#{permit_application.id}",
+            params: {
+              permit_application: {
+                step_code_stage: "as_built"
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("data", "step_code_stage")).to eq("as_built")
+      expect(permit_application.reload.step_code_stage).to eq("as_built")
+    end
+
     it "does not allow submitter_id updates" do
       patch "/api/permit_applications/#{permit_application.id}",
             params: {
@@ -234,6 +264,33 @@ RSpec.describe "Api::PermitApplications", type: :request do
 
       expect(response).to have_http_status(:ok)
       expect(json_response).to include("data", "meta")
+    end
+
+    it "submits when the permit type advises a project meeting" do
+      create(
+        :jurisdiction_template_version_customization,
+        jurisdiction: jurisdiction,
+        template_version: template_version,
+        requires_project_meeting: true
+      )
+
+      post "/api/permit_applications/#{permit_application.id}/submit",
+           params: {
+             permit_application: {
+               submission_data: {
+                 data: {
+                   "section-completion-key" => {
+                     signed: true
+                   }
+                 }
+               }
+             }
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("data", "requires_project_meeting")).to be(true)
     end
   end
 
@@ -527,6 +584,45 @@ RSpec.describe "Api::PermitApplications", type: :request do
       expect(response).to have_http_status(:ok)
       expect(ZipfileJob).to have_received(:perform_async).with(
         permit_application.id
+      )
+    end
+  end
+
+  describe "POST /api/permit_applications/:id/download_supporting_documents_zip" do
+    let(:document_ids) { %w[doc-1 doc-2] }
+
+    it "enqueues a selective zip job and returns a request_id" do
+      allow(SupportingDocumentsZipDownloadJob).to receive(:perform_async)
+
+      post "/api/permit_applications/#{permit_application.id}/download_supporting_documents_zip",
+           params: {
+             supporting_document_ids: document_ids
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:accepted)
+      request_id = json_response.dig("data", "request_id")
+      expect(request_id).to be_present
+      expect(SupportingDocumentsZipDownloadJob).to have_received(
+        :perform_async
+      ).with(permit_application.id, document_ids, request_id, submitter.id)
+    end
+
+    it "forbids users who cannot download" do
+      sign_in other_user
+      allow(SupportingDocumentsZipDownloadJob).to receive(:perform_async)
+
+      post "/api/permit_applications/#{permit_application.id}/download_supporting_documents_zip",
+           params: {
+             supporting_document_ids: document_ids
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(SupportingDocumentsZipDownloadJob).not_to have_received(
+        :perform_async
       )
     end
   end

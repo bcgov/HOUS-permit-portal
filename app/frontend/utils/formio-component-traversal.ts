@@ -10,7 +10,12 @@ import {
   ITemplateVersionDiff,
 } from "../types/types"
 import { formatFileSize, getFileExtension } from "./file-utils"
-import { isNonRequirementKey } from "./formio-helpers"
+import {
+  ENERGY_STEP_CODE_METHOD_REQUIREMENT_CODE,
+  isNonRequirementKey,
+  isRequirementInputComponent,
+  keyHasRequirementCode,
+} from "./formio-helpers"
 import { escapeForSingleQuotedJsString } from "./utility-functions"
 
 const findComponentsByType = (components, type) => {
@@ -65,13 +70,80 @@ export const getNestedComponentsIncomplete = (components) => {
   return invalidComponents
 }
 
-export const getCompletedBlocksFromForm = (rootComponent) => {
+const findEnergyStepCodeMethodValue = (components): "tool" | "file" | null => {
+  for (const comp of components || []) {
+    const key = comp?.component?.key || comp?.key
+    if (keyHasRequirementCode(key, ENERGY_STEP_CODE_METHOD_REQUIREMENT_CODE)) {
+      const value = typeof comp?.getValue === "function" ? comp.getValue() : comp?.dataValue
+      if (value === "tool" || value === "file") return value
+    }
+    const nested = findEnergyStepCodeMethodValue(comp?.components)
+    if (nested) return nested
+  }
+  return null
+}
+
+/** Form.io sets `_visible` false when a panel is hidden by conditionals; treat unset as visible. */
+export const isFormioComponentVisible = (component: { _visible?: boolean } | null | undefined) =>
+  component?._visible !== false
+
+/**
+ * When the selected sidebar tab's block is hidden, keep highlight on the nearest still-visible
+ * predecessor (else the next remaining block). Returns the current index if it still maps cleanly.
+ */
+export const reconcileSelectedTabIndex = (
+  previousVisibleKeys: string[],
+  nextVisibleKeys: string[],
+  selectedTabIndex: number
+) => {
+  if (nextVisibleKeys.length === 0) return 0
+  const prevKey = previousVisibleKeys[selectedTabIndex]
+  if (prevKey) {
+    const stillVisibleIndex = nextVisibleKeys.indexOf(prevKey)
+    if (stillVisibleIndex !== -1) return stillVisibleIndex
+  }
+  for (let i = selectedTabIndex - 1; i >= 0; i--) {
+    const idx = nextVisibleKeys.indexOf(previousVisibleKeys[i])
+    if (idx !== -1) return idx
+  }
+  for (let i = selectedTabIndex + 1; i < previousVisibleKeys.length; i++) {
+    const idx = nextVisibleKeys.indexOf(previousVisibleKeys[i])
+    if (idx !== -1) return idx
+  }
+  return Math.min(selectedTabIndex, nextVisibleKeys.length - 1)
+}
+
+/** Pixels to subtract from scrollY after blocks above the viewport collapse out of layout. */
+export const scrollAdjustmentForHiddenBlocks = (
+  previousLayouts: { key: string; absTop: number; height: number }[],
+  hiddenKeys: Set<string>,
+  scrollY: number
+) => {
+  let adjustment = 0
+  for (const { key, absTop, height } of previousLayouts) {
+    if (!hiddenKeys.has(key) || height <= 0) continue
+    if (absTop < scrollY) {
+      adjustment += Math.min(height, scrollY - absTop)
+    }
+  }
+  return adjustment
+}
+
+export const getCompletedBlocksFromForm = (rootComponent, options?: { isStepCodeComplete?: boolean }) => {
   const blocksList = findPanelComponents(rootComponent.components)
   let completedBlocks = {}
   blocksList.forEach((panelComponent) => {
+    // Omit conditionally hidden blocks so CONTENTS sidebar / completion state match the live form.
+    if (!isFormioComponentVisible(panelComponent)) return
+
     const incompleteComponents = getNestedComponentsIncomplete(panelComponent.components)
 
-    const complete = incompleteComponents.length == 0 //if there are any components with errors OR required fields with no value
+    // Digital tool field is a button container (input:false) so Form.io never marks it incomplete.
+    // When method is "tool", section completion must follow the selected stage checklist instead.
+    const toolSelected = findEnergyStepCodeMethodValue(panelComponent.components) === "tool"
+    const toolIncomplete = toolSelected && options?.isStepCodeComplete === false
+
+    const complete = incompleteComponents.length == 0 && !toolIncomplete
 
     return (completedBlocks[panelComponent?.component?.key] = complete)
   })
@@ -362,10 +434,12 @@ export const combineChangeMarkers = (formJson: IFormJson, isInReview: boolean, c
       for (let i = 0; i < block.components.length; i++) {
         const requirement = block.components[i]
         requirement.disabled ||= isInReview
-        if (section.id === COMPLETTION_SECTION_ID || !changedKeys.includes(requirement.key)) continue
+        if (section.id === COMPLETTION_SECTION_ID) continue
+        if (!isRequirementInputComponent(requirement)) continue
+        if (!changedKeys.includes(requirement.key)) continue
 
         const changeMarker = convertToChangeMarker(requirement)
-        // Insert the revision button before the current requirement
+        // Insert the change marker before the current requirement
         block.components.splice(i, 0, changeMarker)
         // Move the index to the next requirement to skip the newly added marker
         i++
@@ -483,12 +557,12 @@ export const traverseFormIOComponents = (
 }
 
 export const processFieldsForEphemeral = (formJson: IFormJson) => {
+  // Keep conditionals: preview must exercise show/hide the same as live applications.
+  // Only disable upload/submit affordances that don't make sense on an ephemeral PA.
   traverseFormIORequirements(formJson, (requirement) => {
     if (["simplefile"].includes(requirement.type) || ["submit"].includes(requirement.key)) {
       requirement.disabled = true
     }
-    requirement.conditional = false
-    requirement.customConditional = null
   })
   return formJson
 }

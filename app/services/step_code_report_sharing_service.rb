@@ -27,7 +27,7 @@ class StepCodeReportSharingService
   end
 
   def self.confirmed_contact_email_for_jurisdiction(jurisdiction_id)
-    SubmissionContact
+    ApplicationSubmissionContact
       .where(jurisdiction_id: jurisdiction_id)
       .confirmed
       .default_contact
@@ -38,7 +38,7 @@ class StepCodeReportSharingService
   private
 
   def get_confirmed_submission_contact(jurisdiction)
-    jurisdiction.submission_contacts.confirmed.default_contact.first
+    jurisdiction.confirmed_submission_contacts.default_contact.first
   end
 
   def send_email_to_contact(jurisdiction, submission_contact)
@@ -61,7 +61,7 @@ class StepCodeReportSharingService
     true
   rescue => e
     Rails.logger.error(
-      "Failed to send step code report email: #{e.message}\n#{e.backtrace.join("\n")}"
+      "Failed to send Step Code report email: #{e.message}\n#{e.backtrace.join("\n")}"
     )
     @errors << "Failed to send email: #{e.message}"
     false

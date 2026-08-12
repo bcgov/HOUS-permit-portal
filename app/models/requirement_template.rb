@@ -59,7 +59,7 @@ class RequirementTemplate < ApplicationRecord
   has_many :draft_template_versions,
            -> do
              where(template_versions: { status: "draft" }).order(
-               updated_at: :desc
+               created_at: :desc
              )
            end,
            class_name: "TemplateVersion"

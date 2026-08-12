@@ -10,12 +10,14 @@ class AutomatedCompliance::SubProcess::DocDigitalSealValidator < AutomatedCompli
           uploaded_file.download,
           uploaded_file.mime_type
         )
-      if response.success
+      # Match standalone tool: UNSIGNED / no approved seals => empty success result (not found),
+      # not a system failure. Filter to AIBC/EGBC the same way as the standalone API.
+      if response.success || response.error.to_s == "UNSIGNED"
         return(
           supporting_document.update(
             compliance_data: {
               status: "success",
-              result: response.signatures
+              result: DigitalSealSignatureFilter.call(response.signatures)
             }
           )
         )

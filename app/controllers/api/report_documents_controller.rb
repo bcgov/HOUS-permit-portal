@@ -15,7 +15,7 @@ class Api::ReportDocumentsController < Api::ApplicationController
           {
             status: :unprocessable_entity,
             log_args: {
-              errors: ["Step code has no associated jurisdiction"],
+              errors: ["Step Code has no associated jurisdiction"],
               params: {
                 report_document_id: @report_document.id
               }

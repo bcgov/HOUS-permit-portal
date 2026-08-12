@@ -56,6 +56,7 @@ RSpec.describe Api::Part9Building::ChecklistsController, type: :controller do
 
   describe "GET #show" do
     it "returns the checklist with compliance report" do
+      Part9StepCode::DataEntry.create!(checklist: checklist)
       report = {
         requirement_id: step_requirement.id,
         energy: {
@@ -79,7 +80,7 @@ RSpec.describe Api::Part9Building::ChecklistsController, type: :controller do
       ).at_least(:once)
     end
 
-    it "returns not found for archived step code checklists" do
+    it "returns not found for archived Step Code checklists" do
       step_code.discard
 
       get :show, params: { id: checklist.id }
@@ -94,6 +95,50 @@ RSpec.describe Api::Part9Building::ChecklistsController, type: :controller do
       get :show, params: { id: checklist.id }
 
       expect(response).to have_http_status(:forbidden)
+    end
+  end
+
+  describe "POST #create" do
+    it "creates a staged checklist under the Step Code with cloned values" do
+      checklist.update!(builder: "Original builder")
+
+      post :create,
+           params: {
+             step_code_id: step_code.id,
+             step_code_checklist: {
+               stage: "as_built",
+               section_completion_status: {
+                 start: {
+                   complete: false,
+                   relevant: true
+                 }
+               }
+             }
+           },
+           as: :json
+
+      expect(response).to have_http_status(:success)
+      expect(json_response.dig("data", "stage")).to eq("as_built")
+      expect(json_response.dig("data", "builder")).to eq("Original builder")
+      expect(step_code.checklists.as_built).to exist
+    end
+
+    it "returns the existing checklist for an already-created stage" do
+      create(:part_9_checklist, step_code: step_code, stage: :as_built)
+
+      expect do
+        post :create,
+             params: {
+               step_code_id: step_code.id,
+               step_code_checklist: {
+                 stage: "as_built"
+               }
+             },
+             as: :json
+      end.not_to change { step_code.checklists.reload.count }
+
+      expect(response).to have_http_status(:success)
+      expect(json_response.dig("data", "stage")).to eq("as_built")
     end
   end
 
@@ -120,6 +165,8 @@ RSpec.describe Api::Part9Building::ChecklistsController, type: :controller do
                 compliance_path: "step_code_ers",
                 status: "complete",
                 completed_by: "Advisor",
+                section_completion_status:
+                  Part9StepCode::Checklist.fully_complete_section_completion_status,
                 building_characteristics_summary_attributes: {
                   roof_ceilings_lines: [{ details: "Roof", rsi: 6.0 }],
                   doors_lines: [{ details: "Door", performance_value: 1.8 }]
@@ -133,9 +180,106 @@ RSpec.describe Api::Part9Building::ChecklistsController, type: :controller do
         json_response.dig("data", "building_characteristics_summary")
       ).to be_present
       expect(StepCodeReportGenerationJob).to have_received(:perform_async).with(
-        step_code.id
+        step_code.id,
+        { "checklist_id" => checklist.id }
       )
       expect(step_code.reload.complete?).to be(true)
+    end
+
+    it "persists section completion status without compliance path" do
+      checklist.update_columns(compliance_path: nil, step_requirement_id: nil)
+
+      patch :update,
+            params: {
+              id: checklist.id,
+              step_code_checklist: {
+                section_completion_status: {
+                  start: {
+                    complete: true,
+                    relevant: true
+                  }
+                }
+              }
+            },
+            as: :json
+
+      expect(response).to have_http_status(:success)
+      expect(
+        checklist.reload.section_completion_status.dig("start", "complete")
+      ).to be(true)
+    end
+
+    it "persists section completion status" do
+      report = {
+        requirement_id: step_requirement.id,
+        energy: {
+        },
+        zero_carbon: {
+        }
+      }
+      stub_part9_compliance_reports(checklist: checklist, reports: [report])
+      allow(StepCode::Part9::ComplianceReportBlueprint).to receive(
+        :render_as_hash
+      ).and_return(report_payload)
+
+      patch :update,
+            params: {
+              id: checklist.id,
+              step_code_checklist: {
+                section_completion_status: {
+                  h2k_import: {
+                    complete: true,
+                    relevant: true
+                  }
+                }
+              }
+            },
+            as: :json
+
+      expect(response).to have_http_status(:success)
+      expect(
+        checklist.reload.section_completion_status.dig("h2k_import", "complete")
+      ).to be(true)
+      expect(
+        json_response.dig(
+          "data",
+          "section_completion_status",
+          "h2k_import",
+          "complete"
+        )
+      ).to be(true)
+    end
+
+    it "reprocesses H2K files when data entries are updated" do
+      report = {
+        requirement_id: step_requirement.id,
+        energy: {
+        },
+        zero_carbon: {
+        }
+      }
+      stub_part9_compliance_reports(checklist: checklist, reports: [report])
+      allow(StepCode::Part9::ComplianceReportBlueprint).to receive(
+        :render_as_hash
+      ).and_return(report_payload)
+      expect_any_instance_of(Part9StepCode).to receive(
+        :process_current_h2k_files
+      ).with(checklist)
+
+      patch :update,
+            params: {
+              id: checklist.id,
+              step_code_checklist: {
+                compliance_path: "step_code_ers",
+                data_entries_attributes: [
+                  { district_energy_ef: 12.5, district_energy_consumption: 100 }
+                ]
+              }
+            },
+            as: :json
+
+      expect(response).to have_http_status(:success)
+      expect(checklist.reload.data_entries.count).to eq(1)
     end
 
     it "returns error for invalid input" do
@@ -154,7 +298,7 @@ RSpec.describe Api::Part9Building::ChecklistsController, type: :controller do
       )
     end
 
-    it "returns unprocessable entity for archived step codes" do
+    it "returns unprocessable entity for archived Step Codes" do
       step_code.discard
 
       patch :update,

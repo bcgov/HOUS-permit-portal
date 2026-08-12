@@ -63,13 +63,13 @@ export const EditableBuilderHeader = observer(function EditableBuilderHeader({ r
                 message: t("ui.invalidInput"),
               },
             }),
-            "aria-label": "Edit Nickname",
+            "aria-label": "Edit custom name",
           }}
           editablePreviewProps={{
             fontWeight: 700,
             fontSize: "3xl",
           }}
-          aria-label={"Edit Nickname"}
+          aria-label={"Edit custom name"}
           onChange={onNicknameChange}
           onSubmit={onNicknameChange}
           onCancel={onNicknameChange}

@@ -49,6 +49,16 @@ class PermitProjectBlueprint < Blueprinter::Base
     field :has_outdated_draft_applications do |permit_project, options|
       options[:project_ids_with_outdated_drafts]&.include?(permit_project.id)
     end
+
+    field :has_active_project_meeting do |permit_project, options|
+      options[:active_project_meeting_ids_by_project_id]&.key?(
+        permit_project.id
+      ) || false
+    end
+
+    field :active_project_meeting_id do |permit_project, options|
+      options[:active_project_meeting_ids_by_project_id]&.[](permit_project.id)
+    end
   end
 
   view :jurisdiction_review_inbox do
@@ -89,7 +99,11 @@ class PermitProjectBlueprint < Blueprinter::Base
                 blueprint: ProjectDocumentBlueprint do |permit_project, options|
       permit_project.project_documents(options[:current_user])
     end
+    association :active_project_meeting, blueprint: ProjectMeetingBlueprint
     association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
+    association :notes, blueprint: NoteBlueprint do |permit_project, options|
+      PermitProjectBlueprint.notes_for(permit_project, options)
+    end
   end
 
   view :inbox_extended do
@@ -104,7 +118,7 @@ class PermitProjectBlueprint < Blueprinter::Base
     association :permit_applications,
                 blueprint: PermitApplicationBlueprint,
                 view: :jurisdiction_review_inbox do |permit_project, _options|
-      permit_project.permit_applications.kept.select(&:visible_to_reviewers?)
+      permit_project.permit_applications.kept.select(&:submitted_at_least_once?)
     end
     association :recent_permit_applications,
                 blueprint: PermitApplicationBlueprint,
@@ -117,6 +131,9 @@ class PermitProjectBlueprint < Blueprinter::Base
       permit_project.association(:project_documents).reader
     end
     association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
+    association :notes, blueprint: NoteBlueprint do |permit_project, options|
+      PermitProjectBlueprint.notes_for(permit_project, options)
+    end
     association :recent_audits,
                 blueprint: ProjectAuditBlueprint,
                 view: :base do |permit_project, options|
@@ -128,5 +145,14 @@ class PermitProjectBlueprint < Blueprinter::Base
     return false unless current_user
 
     return true if permit_project.owner_id == current_user.id
+  end
+
+  def self.notes_for(permit_project, options)
+    scope = options[:notes_scope] || Note.all
+
+    scope
+      .where(permit_project: permit_project)
+      .preload(:user, :permit_project, :note_attachment_documents)
+      .order(created_at: :desc)
   end
 end

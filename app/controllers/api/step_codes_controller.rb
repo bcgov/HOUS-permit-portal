@@ -6,13 +6,13 @@ class Api::StepCodesController < Api::ApplicationController
   # PATCH /api/step_codes/:id
 
   before_action :set_step_code, only: %i[update destroy restore]
-  skip_after_action :verify_policy_scoped, only: %i[index]
 
   # GET /api/step_codes (or POST /api/step_codes/search similar to other controllers)
   def index
     perform_step_code_search
-    authorized_results = apply_search_authorization(@step_code_search, :index)
-    render_success authorized_results,
+    results = @step_code_search.results
+    StepCode.preload_checklists(results)
+    render_success results,
                    nil,
                    {
                      meta: page_meta(@step_code_search),
@@ -23,21 +23,21 @@ class Api::StepCodesController < Api::ApplicationController
   def update
     authorize @step_code
 
-    # Prevent updating archived step codes
+    # Prevent updating archived Step Codes
     if @step_code.discarded?
       return(
         render_error "step_code.update_archived_error",
                      {
                        status: 422,
                        log_args: {
-                         errors: "Cannot update archived step code"
+                         errors: "Cannot update archived Step Code"
                        }
                      }
       )
     end
 
     begin
-      # disallow updating step code if it's tied to a permit application and the user is not the submitter (for now)
+      # disallow updating Step Code if it's tied to a permit application and the user is not the submitter (for now)
       if step_code_params[:permit_application_id].present?
         target_pa =
           PermitApplication.find_by(
@@ -51,15 +51,18 @@ class Api::StepCodesController < Api::ApplicationController
                          status: 403,
                          log_args: {
                            errors:
-                             "User not authorized to reassign step code to permit application"
+                             "User not authorized to reassign Step Code to permit application"
                          }
                        } and return
         end
       end
 
       StepCode.transaction do
-        # If assigning to a permit application that already has a different step code,
+        # If assigning to a permit application that already has a different Step Code,
         # detach the previous one so this update can succeed (overtake behavior).
+        # HUB-5145: Keep one StepCode per permit as the report family. Additional
+        # lifecycle reports should be child checklists selected by current_stage,
+        # so this overtake behavior should not be used for staged reports.
         if step_code_params[:permit_application_id].present?
           existing =
             StepCode
@@ -140,7 +143,7 @@ class Api::StepCodesController < Api::ApplicationController
       when "Part9StepCode"
         service.part_9_metrics_csv
       else
-        raise ActionController::BadRequest, "Invalid step code type"
+        raise ActionController::BadRequest, "Invalid Step Code type"
       end
 
     send_data csv_data, type: "text/csv"

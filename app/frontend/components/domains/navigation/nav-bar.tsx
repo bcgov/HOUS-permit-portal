@@ -19,8 +19,6 @@ import { SubNavBar } from "./sub-nav-bar"
 
 import { OverheatingCodeNavBar } from "../overheating-code/overheating-code-nav-bar"
 import { PreCheckNavBar } from "../pre-check/pre-check-nav-bar"
-import { StepCodeNavBar } from "../step-code/nav-bar"
-import { Part9NavLinks } from "../step-code/nav-bar/part-9-nav-links"
 
 function isTemplateEditPath(path: string): boolean {
   const regex = /^\/requirement-templates\/([a-f\d-]+)\/edit$/
@@ -29,7 +27,7 @@ function isTemplateEditPath(path: string): boolean {
 }
 
 function isDigitalPermitEditPath(path: string): boolean {
-  const regex = /^\/digital-building-permits\/([a-f\d-]+)\/edit$/
+  const regex = /^\/digital-building-permits\/([a-f\d-]+)\/(edit|settings)$/
 
   return regex.test(path)
 }
@@ -70,12 +68,17 @@ function isAdminPath(path: string): boolean {
 }
 
 function isProjectDetailPath(path: string): boolean {
-  const regex = /^\/projects\/[a-f\d-]+/
+  const regex = /^\/projects\/[a-f\d-]+(?:\/.*)?$/
   return regex.test(path)
 }
 
 function isProjectPath(path: string): boolean {
   const regex = /^\/projects/
+  return regex.test(path)
+}
+
+function isProjectMeetingPath(path: string): boolean {
+  const regex = /^\/projects\/[a-f\d-]+\/meetings/
   return regex.test(path)
 }
 
@@ -120,6 +123,11 @@ function isSubmissionInboxPath(path: string): boolean {
   return regex.test(path)
 }
 
+function isMeetingPath(path: string): boolean {
+  const regex = /^\/jurisdictions\/[a-z\d-]+\/meetings/
+  return regex.test(path)
+}
+
 function shouldHideSubNavbarForPath(path: string): boolean {
   const matchers: Array<(path: string) => boolean> = [
     (path) => path === "/",
@@ -141,36 +149,19 @@ function shouldHideSubNavbarForPath(path: string): boolean {
     isOverheatingCodePath,
     isWelcomePath,
     isSubmissionInboxPath,
+    isMeetingPath,
   ]
 
   return matchers.some((matcher) => matcher(path))
 }
 
 export const NavBar = observer(function NavBar() {
-  const { t } = useTranslation()
   const location = useLocation()
   const { siteConfigurationStore } = useMst()
   const path = location.pathname
 
   if (isPreCheckPath(path)) {
     return <PreCheckNavBar />
-  }
-
-  if (isStepCodePath(path)) {
-    if (path.includes("part-9")) {
-      return <StepCodeNavBar title={t("stepCode.title")} NavLinks={<Part9NavLinks />} />
-    } else {
-      return (
-        <StepCodeNavBar
-          title={t("stepCode.part3.title")}
-          NavLinks={
-            <RouterLinkButton to="/step-codes" variant="link">
-              {t("stepCode.part3.goToStepCodes", "Back to step codes")}
-            </RouterLinkButton>
-          }
-        />
-      )
-    }
   }
 
   if (siteConfigurationStore.overheatingToolEnabled && isOverheatingCodeSubPath(path)) {

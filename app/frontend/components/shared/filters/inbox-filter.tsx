@@ -1,5 +1,4 @@
 import {
-  Badge,
   Button,
   Checkbox,
   Divider,
@@ -19,9 +18,11 @@ import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { IOption } from "../../../types/types"
+import { UnreadBadge } from "../base/unread-badge"
 
 interface IInboxFilterProps {
   title: string
+  leftIcon?: React.ReactNode
   /** Unread (or similar) result count — only rendered when `showResultsBadge` is true. */
   badgeCount?: number
   /** When true, `badgeCount` is shown as the blue results pill (unread filter only). */
@@ -36,22 +37,9 @@ interface IInboxFilterProps {
   isDisabled?: boolean
 }
 
-interface IUnreadBadgeProps {
-  count?: number
-}
-
-export function UnreadBadge({ count }: IUnreadBadgeProps) {
-  if (count == null || count <= 0) return null
-
-  return (
-    <Badge bg="theme.blueActive" color="white" borderRadius="full" px={2} fontSize="xs" minW="20px" textAlign="center">
-      {count}
-    </Badge>
-  )
-}
-
 export const InboxFilter = observer(function InboxFilter({
   title,
+  leftIcon,
   badgeCount,
   showResultsBadge,
   isMulti,
@@ -141,6 +129,7 @@ export const InboxFilter = observer(function InboxFilter({
           opacity={isDisabled ? 0.5 : 1}
         >
           <HStack spacing={2}>
+            {leftIcon}
             <Text>{title}</Text>
             {showSelectionParens && (
               <Text as="span" fontSize="sm">

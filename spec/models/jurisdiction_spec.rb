@@ -146,6 +146,177 @@ RSpec.describe Jurisdiction, type: :model do
         expect(jurisdiction).to be_valid
       end
     end
+
+    describe "project meeting notification recipient emails" do
+      let(:jurisdiction) { create(:sub_district) }
+
+      it "returns confirmed project meeting contact emails" do
+        create(
+          :meeting_submission_contact,
+          jurisdiction: jurisdiction,
+          email: "meetings@example.com"
+        )
+        create(
+          :meeting_submission_contact,
+          jurisdiction: jurisdiction,
+          email: "unconfirmed@example.com",
+          confirmed_at: nil
+        )
+        create(
+          :submission_contact,
+          jurisdiction: jurisdiction,
+          email: "submission@example.com"
+        )
+
+        expect(
+          jurisdiction.project_meeting_notification_recipient_emails
+        ).to eq(["meetings@example.com"])
+      end
+
+      it "exposes confirmed project meeting contacts" do
+        contact =
+          create(:meeting_submission_contact, jurisdiction: jurisdiction)
+
+        expect(jurisdiction.confirmed_project_meeting_contacts).to eq([contact])
+      end
+    end
+
+    describe "property information notification recipient emails" do
+      let(:jurisdiction) { create(:sub_district) }
+
+      it "returns confirmed property information contact emails" do
+        create(
+          :property_information_submission_contact,
+          jurisdiction: jurisdiction,
+          email: "property-info@example.com"
+        )
+        create(
+          :property_information_submission_contact,
+          jurisdiction: jurisdiction,
+          email: "unconfirmed@example.com",
+          confirmed_at: nil
+        )
+        create(
+          :meeting_submission_contact,
+          jurisdiction: jurisdiction,
+          email: "meetings@example.com"
+        )
+
+        expect(
+          jurisdiction.property_information_notification_recipient_emails
+        ).to eq(["property-info@example.com"])
+      end
+
+      it "exposes confirmed property information contacts" do
+        contact =
+          create(
+            :property_information_submission_contact,
+            jurisdiction: jurisdiction
+          )
+
+        expect(jurisdiction.confirmed_property_information_contacts).to eq(
+          [contact]
+        )
+      end
+    end
+
+    describe "feature setup requirements" do
+      let(:jurisdiction) { create(:sub_district) }
+
+      it "requires a confirmed project meeting contact before enabling project meetings" do
+        create(
+          :resource,
+          jurisdiction: jurisdiction,
+          category: :project_meeting_authorization
+        )
+        jurisdiction.project_meetings_enabled = true
+
+        expect(jurisdiction).not_to be_valid
+        expect(jurisdiction.errors[:project_meetings_enabled]).to include(
+          I18n.t(
+            "activerecord.errors.models.jurisdiction.enabled_project_meetings_requires_setup"
+          )
+        )
+      end
+
+      it "requires a project meeting authorization resource before enabling project meetings" do
+        create(:meeting_submission_contact, jurisdiction: jurisdiction)
+        jurisdiction.project_meetings_enabled = true
+
+        expect(jurisdiction).not_to be_valid
+        expect(jurisdiction.errors[:project_meetings_enabled]).to include(
+          I18n.t(
+            "activerecord.errors.models.jurisdiction.enabled_project_meetings_requires_authorization_resource"
+          )
+        )
+      end
+
+      it "allows project meetings to be enabled with a confirmed contact and authorization resource" do
+        create(:meeting_submission_contact, jurisdiction: jurisdiction)
+        create(
+          :resource,
+          jurisdiction: jurisdiction,
+          category: :project_meeting_authorization
+        )
+
+        jurisdiction.project_meetings_enabled = true
+
+        expect(jurisdiction).to be_valid
+      end
+
+      it "requires a confirmed property information contact before enabling property information requests" do
+        jurisdiction.property_information_requests_enabled = true
+
+        expect(jurisdiction).not_to be_valid
+        expect(
+          jurisdiction.errors[:property_information_requests_enabled]
+        ).to include(
+          I18n.t(
+            "activerecord.errors.models.jurisdiction.enabled_property_information_requests_requires_setup"
+          )
+        )
+      end
+
+      it "allows property information requests to be enabled with a confirmed property information contact" do
+        create(
+          :property_information_submission_contact,
+          jurisdiction: jurisdiction
+        )
+
+        jurisdiction.property_information_requests_enabled = true
+
+        expect(jurisdiction).to be_valid
+      end
+    end
+
+    describe "submission contact deletion" do
+      let(:jurisdiction) { create(:sub_district) }
+
+      it "prevents deleting the last confirmed contact through nested attributes when its feature is enabled" do
+        contact =
+          create(:meeting_submission_contact, jurisdiction: jurisdiction)
+        create(
+          :resource,
+          jurisdiction: jurisdiction,
+          category: :project_meeting_authorization
+        )
+        jurisdiction.update!(project_meetings_enabled: true)
+
+        expect {
+          jurisdiction.update(
+            submission_contacts_attributes: [
+              {
+                id: contact.id,
+                type: "MeetingSubmissionContact",
+                _destroy: true
+              }
+            ]
+          )
+        }.to raise_error(ActiveRecord::RecordNotDestroyed)
+
+        expect(MeetingSubmissionContact.exists?(contact.id)).to be(true)
+      end
+    end
   end
 
   describe "#should_index?" do
@@ -227,6 +398,61 @@ RSpec.describe Jurisdiction, type: :model do
 
     it "returns a boolean" do
       expect([true, false]).to include(jurisdiction.submission_inbox_set_up?)
+    end
+  end
+
+  describe "step requirements updated_at" do
+    let(:jurisdiction) { create(:sub_district) }
+
+    describe "#part_9_step_requirements_updated_at" do
+      it "is nil when only an untouched auto-created default exists" do
+        expect(jurisdiction.jurisdiction_step_requirements.count).to eq(1)
+        expect(jurisdiction.part_9_step_requirements_updated_at).to be_nil
+      end
+
+      it "returns the default's updated_at after an admin save" do
+        default_step =
+          jurisdiction.jurisdiction_step_requirements.find_by!(default: true)
+        default_step.update_columns(updated_at: 2.days.ago)
+
+        expect(
+          jurisdiction.reload.part_9_step_requirements_updated_at
+        ).to be_within(1.second).of(default_step.reload.updated_at)
+      end
+
+      it "returns the latest customization updated_at" do
+        customization =
+          jurisdiction.jurisdiction_step_requirements.create!(
+            default: nil,
+            energy_step_required: ENV["PART_9_MIN_ENERGY_STEP"].to_i,
+            zero_carbon_step_required: ENV["PART_9_MIN_ZERO_CARBON_STEP"].to_i
+          )
+        customization.update_columns(updated_at: 3.days.ago)
+
+        expect(
+          jurisdiction.reload.part_9_step_requirements_updated_at
+        ).to be_within(1.second).of(customization.reload.updated_at)
+      end
+    end
+
+    describe "#part_3_step_requirements_updated_at" do
+      it "is nil when no Part 3 occupancy steps exist" do
+        expect(jurisdiction.part_3_step_requirements_updated_at).to be_nil
+      end
+
+      it "returns the latest Part 3 occupancy step updated_at" do
+        step =
+          jurisdiction.part3_occupancy_required_steps.create!(
+            occupancy_key: "offices",
+            energy_step_required: 2,
+            zero_carbon_step_required: 1
+          )
+        step.update_columns(updated_at: 4.days.ago)
+
+        expect(
+          jurisdiction.reload.part_3_step_requirements_updated_at
+        ).to be_within(1.second).of(step.reload.updated_at)
+      end
     end
   end
 end

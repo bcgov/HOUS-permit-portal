@@ -73,6 +73,48 @@ RSpec.describe "Api::Storage", type: :request do
 
       expect(response).to have_http_status(:forbidden)
     end
+
+    context "with a note attachment" do
+      let(:note) do
+        create(
+          :note,
+          noteable:
+            create(
+              :project_meeting,
+              :open,
+              permit_project: create(:permit_project, owner: user)
+            )
+        )
+      end
+      let(:note_attachment) { create(:note_attachment_document, note: note) }
+
+      it "returns a download url for someone who can see the note" do
+        get "/api/s3/params/download",
+            params: {
+              model: "NoteAttachmentDocument",
+              modelId: note_attachment.id
+            },
+            headers: headers,
+            as: :json
+
+        expect(response).to have_http_status(:ok)
+        expect(json_response["url"]).to be_present
+      end
+
+      it "forbids access for users who cannot see the note" do
+        sign_in other_user
+
+        get "/api/s3/params/download",
+            params: {
+              model: "NoteAttachmentDocument",
+              modelId: note_attachment.id
+            },
+            headers: headers,
+            as: :json
+
+        expect(response).to have_http_status(:forbidden)
+      end
+    end
   end
 
   describe "POST /api/s3/params/multipart" do

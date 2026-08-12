@@ -1,8 +1,8 @@
-import { Box, Button, ButtonGroup, Checkbox, Flex, Spacer } from "@chakra-ui/react"
-import { ArrowUp, CaretRight } from "@phosphor-icons/react"
+import { Box, Button, ButtonGroup, Flex, Spacer } from "@chakra-ui/react"
+import { ArrowUp, CaretRight, SlidersHorizontal } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
-import { Controller, useForm } from "react-hook-form"
+import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { useJurisdictionTemplateVersionCustomization } from "../../../../../hooks/resources/use-jurisdiction-template-version-customization"
@@ -40,6 +40,7 @@ export interface IJurisdictionTemplateVersionCustomizationForm {
   jurisdictionId?: string
   customizations: ITemplateCustomization
   disabled?: boolean
+  requiresProjectMeeting?: boolean
 }
 
 function formFormDefaults(
@@ -51,18 +52,20 @@ function formFormDefaults(
         requirementBlockChanges: {},
       },
       disabled: false,
+      requiresProjectMeeting: false,
     }
   }
 
   return {
     customizations: { requirementBlockChanges: {}, ...jurisdictionTemplateVersionCustomization.customizations },
     disabled: jurisdictionTemplateVersionCustomization.disabled ?? false,
+    requiresProjectMeeting: jurisdictionTemplateVersionCustomization.requiresProjectMeeting ?? false,
   }
 }
 
 export const JurisdictionEditDigitalPermitScreen = observer(function JurisdictionEditDigitalPermitScreen() {
   const { t } = useTranslation()
-  const { userStore, sandboxStore } = useMst()
+  const { userStore, sandboxStore, uiStore } = useMst()
   const { currentSandbox } = sandboxStore
   const { isSandboxActive } = sandboxStore
   const { currentUser } = userStore
@@ -73,10 +76,11 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
 
   const {
     rootContainerRef: rightContainerRef,
-    sectionRefs,
+    setSectionRef,
     sectionIdToHighlight: currentSectionId,
   } = useSectionHighlight({ sections: denormalizedTemplate?.requirementTemplateSections })
   const [isCollapsedAll, setIsCollapsedAll] = useState(false)
+  const [isNavigatingToSettings, setIsNavigatingToSettings] = useState(false)
   const navigate = useNavigate()
   const { jurisdictionTemplateVersionCustomization, error: customizationError } =
     useJurisdictionTemplateVersionCustomization({
@@ -88,7 +92,7 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
   const formMethods = useForm<IJurisdictionTemplateVersionCustomizationForm>({
     defaultValues: formFormDefaults(jurisdictionTemplateVersionCustomization),
   })
-  const { formState, handleSubmit, setValue, reset, watch, control } = formMethods
+  const { formState, handleSubmit, setValue, reset, watch } = formMethods
 
   const { isSubmitting, isValid } = formState
 
@@ -148,13 +152,35 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
     setValue(`customizations.requirementBlockChanges.${requirementBlockId}`, data)
   }
 
-  const onSubmit = handleSubmit((data) => {
-    return templateVersion.createOrUpdateJurisdictionTemplateVersionCustomization(currentUser.jurisdiction.id, data)
-  })
+  const persistCustomization = (data: IJurisdictionTemplateVersionCustomizationForm) =>
+    templateVersion.createOrUpdateJurisdictionTemplateVersionCustomization(currentUser.jurisdiction.id, data)
+
+  const saveCustomization = handleSubmit(persistCustomization)
 
   const onPromote = async () => {
-    await onSubmit()
+    await saveCustomization()
     return templateVersion.promoteJurisdictionTemplateVersionCustomization(currentUser.jurisdiction.id)
+  }
+
+  const handleNavigateToSettings = async () => {
+    setIsNavigatingToSettings(true)
+    try {
+      await handleSubmit(async (data) => {
+        const result = await persistCustomization(data)
+        if (result) {
+          navigate(`/digital-building-permits/${templateVersion.id}/settings`)
+        } else {
+          uiStore.flashMessage.show(
+            EFlashMessageStatus.error,
+            null,
+            t("digitalBuildingPermits.settings.saveError"),
+            5000
+          )
+        }
+      })()
+    } finally {
+      setIsNavigatingToSettings(false)
+    }
   }
 
   return (
@@ -208,17 +234,6 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
             justifyContent="space-between"
             boxShadow="elevations.elevation02"
           >
-            {jurisdictionTemplateVersionCustomization && (
-              <Controller
-                name="disabled"
-                control={control}
-                render={({ field: { value, onChange } }) => (
-                  <Checkbox isChecked={!value} onChange={(e) => onChange(!e.target.checked)} fontWeight="medium">
-                    {t("requirementTemplate.edit.availableToApplicants")}
-                  </Checkbox>
-                )}
-              />
-            )}
             <Spacer />
             <ButtonGroup>
               <BrowserSearchPrompt color="text.primary" />
@@ -238,7 +253,7 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
                       variant={"primary"}
                       rightIcon={<ArrowUp />}
                       onClick={onOpen}
-                      isDisabled={isSubmitting || !isValid}
+                      isDisabled={isSubmitting || isNavigatingToSettings || !isValid}
                       isLoading={isSubmitting}
                     >
                       {t("requirementTemplate.edit.promoteElectives")}
@@ -255,16 +270,26 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
                     variant={"primary"}
                     rightIcon={<CaretRight />}
                     onClick={onOpen}
-                    isDisabled={isSubmitting || !isValid}
-                    isLoading={isSubmitting}
+                    isDisabled={isSubmitting || isNavigatingToSettings || !isValid}
+                    isLoading={isSubmitting && !isNavigatingToSettings}
                   >
                     {t("ui.save")}
                   </Button>
                 )}
-                onConfirm={onSubmit}
+                onConfirm={saveCustomization}
               />
 
-              <Button variant={"secondary"} onClick={onClose} isDisabled={isSubmitting}>
+              <Button
+                variant={"secondary"}
+                leftIcon={<SlidersHorizontal size={20} />}
+                onClick={handleNavigateToSettings}
+                isDisabled={isSubmitting || isNavigatingToSettings || !isValid}
+                isLoading={isNavigatingToSettings}
+              >
+                {t("ui.settings")}
+              </Button>
+
+              <Button variant={"secondary"} onClick={onClose} isDisabled={isSubmitting || isNavigatingToSettings}>
                 {t("ui.close")}
               </Button>
             </ButtonGroup>
@@ -335,9 +360,5 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
     if (element) {
       element.scrollIntoView({ behavior: "smooth", block: "start" })
     }
-  }
-
-  function setSectionRef(el: HTMLElement, id: string) {
-    sectionRefs.current[id] = el
   }
 })

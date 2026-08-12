@@ -1,0 +1,23 @@
+import { Box } from "@chakra-ui/react"
+import { Uppy } from "@uppy/core"
+import React from "react"
+import { UppyDashboard } from "../../../../shared/uppy-dashboard"
+
+const uppyDashboardSx = {
+  ".uppy-Dashboard": { width: "100%" },
+  ".uppy-Container": { width: "100%" },
+  ".uppy-Dashboard-inner": { width: "100%" },
+  ".uppy-Dashboard-innerWrap": { width: "100%" },
+  ".uppy-Dashboard-AddFiles": { width: "100%" },
+}
+
+interface UppyDashboardFieldProps {
+  uppy: Uppy
+  mb?: number
+}
+
+export const UppyDashboardField = ({ uppy, mb = 6 }: UppyDashboardFieldProps) => (
+  <Box position="relative" w="100%" mb={mb} sx={uppyDashboardSx}>
+    <UppyDashboard uppy={uppy} width="100%" height={220} />
+  </Box>
+)

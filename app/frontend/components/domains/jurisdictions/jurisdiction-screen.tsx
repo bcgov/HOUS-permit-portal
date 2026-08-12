@@ -243,17 +243,6 @@ const JurisdictionScreenBody = observer(
                         <Text fontSize="md" color="text.primary">
                           {t("jurisdiction.edit.stepCode.aboutPageNotice")}
                         </Text>
-                        <Link
-                          as={RouterLink}
-                          to={`/jurisdictions/${currentJurisdiction.slug}/step-code-requirements`}
-                          color="text.link"
-                          textDecoration="underline"
-                          _hover={{ textDecoration: "none" }}
-                          fontWeight="bold"
-                        >
-                          {t("jurisdiction.edit.stepCode.viewStepCodeRequirements")}{" "}
-                          <ArrowSquareOut style={{ display: "inline" }} />
-                        </Link>
 
                         <VStack align="start" spacing={4} mt={4}>
                           <Heading as="h3" fontSize="lg">
@@ -284,6 +273,23 @@ const JurisdictionScreenBody = observer(
                             </ListItem>
                           </UnorderedList>
                           <StepCodeRequirementsTable currentJurisdiction={currentJurisdiction} />
+                          <Text fontSize="md">
+                            {t(
+                              "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.smallSimpleBuildingsLinkPrefix"
+                            )}{" "}
+                            <Link
+                              as={RouterLink}
+                              to={`/jurisdictions/${currentJurisdiction.slug}/step-code-requirements`}
+                              color="text.link"
+                              textDecoration="underline"
+                              _hover={{ textDecoration: "none" }}
+                            >
+                              {t(
+                                "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.checkStepCodesRequirementsInThisCommunity"
+                              )}
+                            </Link>
+                            .
+                          </Text>
                         </VStack>
 
                         <VStack align="start" spacing={4} mt={6}>

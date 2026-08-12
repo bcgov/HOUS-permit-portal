@@ -1,7 +1,9 @@
 import { ICollaborator } from "../models/collaborator"
 import { IJurisdiction } from "../models/jurisdiction"
+import { INote } from "../models/note"
 import { IPermitApplication } from "../models/permit-application"
 import { IPreCheck } from "../models/pre-check"
+import { IProjectMeeting } from "../models/project-meeting"
 import { IRequirementBlock } from "../models/requirement-block"
 import { IRequirementTemplate } from "../models/requirement-template"
 import { IUser } from "../models/user"
@@ -29,6 +31,18 @@ export interface IJurisdictionResponse extends IApiResponse<IJurisdiction[], IPa
 export interface IUsersResponse extends IApiResponse<IUser[], IPageMeta> {}
 
 export interface IJurisdictionPermitApplicationResponse extends IApiResponse<IPermitApplication[], IPageMeta> {}
+
+export interface IProjectMeetingResponse extends IApiResponse<IProjectMeeting[], IPageMeta> {}
+
+export interface INoteResponse extends IApiResponse<INote[], IPageMeta> {}
+
+export interface IJurisdictionProjectMeetingMeta extends IPageMeta {
+  statusCounts?: Record<string, number>
+  unreadCount?: number
+}
+
+export interface IJurisdictionProjectMeetingResponse
+  extends IApiResponse<IProjectMeeting[], IJurisdictionProjectMeetingMeta> {}
 
 export interface ICollaboratorSearchResponse extends IApiResponse<ICollaborator[], IPageMeta> {}
 

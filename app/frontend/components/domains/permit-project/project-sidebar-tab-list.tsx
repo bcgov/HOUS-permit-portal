@@ -1,8 +1,10 @@
 import { Badge, Box, BoxProps, Flex, Icon, Tab, TabList, Text, VStack } from "@chakra-ui/react"
 import React from "react"
+import { Link as RouterLink } from "react-router-dom"
 
-// THS COMPOENENT MUST BE USED INSIDE OF A TABS COMPONENT
+// THIS COMPONENT MUST BE USED INSIDE OF A TABS COMPONENT
 // https://v2.chakra-ui.com/docs/components/tabs/usage
+// Tabs are RouterLinks for native Copy Link / Open in New Tab; left-click still uses Tabs onChange.
 
 export interface ITabItem {
   label: string
@@ -15,6 +17,11 @@ export interface ITabItem {
 interface IProjectSidebarTabListProps extends BoxProps {
   top?: number | string
   tabsData?: ITabItem[]
+}
+
+const handleTabLinkClick = (e: React.MouseEvent) => {
+  if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
+  e.preventDefault()
 }
 
 export const ProjectSidebarTabList = ({ top = 0, tabsData, children, ...rest }: IProjectSidebarTabListProps) => {
@@ -37,11 +44,21 @@ export const ProjectSidebarTabList = ({ top = 0, tabsData, children, ...rest }: 
       {tabsData ? (
         <VStack align="stretch" spacing={1} w="full" pt={8}>
           {tabsData.map((tabData) => (
-            <Tab key={tabData.label} w="full">
+            <Tab
+              key={tabData.label}
+              as={RouterLink}
+              to={tabData.to}
+              onClick={handleTabLinkClick}
+              w="full"
+              color="text.primary"
+              _visited={{ color: "text.primary" }}
+              _active={{ color: "text.primary" }}
+              _hover={{ color: "text.primary", textDecoration: "none" }}
+            >
               <Flex align="center" justify="space-between" w="full" gap={3}>
                 <Flex align="center" minW={0} flex={1} gap={2}>
-                  <Icon as={tabData.icon} boxSize={5} flexShrink={0} />
-                  <Text as="span" fontSize="md" lineHeight={6} whiteSpace="nowrap">
+                  <Icon as={tabData.icon} boxSize={5} flexShrink={0} color="currentColor" />
+                  <Text as="span" fontSize="md" lineHeight={6} whiteSpace="nowrap" color="currentColor">
                     {tabData.label}
                   </Text>
                 </Flex>

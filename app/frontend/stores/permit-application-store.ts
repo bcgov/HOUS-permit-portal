@@ -22,6 +22,7 @@ import {
 import {
   IPermitApplicationComplianceUpdate,
   IPermitApplicationSearchFilters,
+  IPermitApplicationSelectiveZipReady,
   IPermitApplicationSupportingDocumentsUpdate,
   IUserPushPayload,
   TCreatePermitApplicationFormData,
@@ -68,6 +69,7 @@ export const PermitApplicationStoreModel = types
     getProjectPermitApplicationSortColumnHeader(field: EProjectPermitApplicationSortFields) {
       const map = {
         [EProjectPermitApplicationSortFields.permit]: t("permitProject.overview.permit"),
+        [EProjectPermitApplicationSortFields.applicationNickname]: t("permitProject.overview.applicationNickname"),
         [EProjectPermitApplicationSortFields.assignedTo]: t("permitProject.overview.assignedTo"),
         [EProjectPermitApplicationSortFields.permitApplicationNumber]: t(
           "permitProject.overview.permitApplicationNumber"
@@ -316,6 +318,7 @@ export const PermitApplicationStoreModel = types
         zipfileSize: overrides.zipfileSize || null,
         zipfileName: overrides.zipfileName || null,
         zipfileUrl: overrides.zipfileUrl || null,
+        selectiveZipResult: overrides.selectiveZipResult || null,
         referenceNumber: overrides.referenceNumber || null,
         missingPdfs: overrides.missingPdfs || null,
         isFullyLoaded: overrides.isFullyLoaded ?? false,
@@ -422,6 +425,10 @@ export const PermitApplicationStoreModel = types
           payloadData = payload.data as IPermitApplicationSupportingDocumentsUpdate
 
           self.permitApplicationMap.get(payloadData?.id)?.handleSocketSupportingDocsUpdate(payloadData)
+          break
+        case EPermitApplicationSocketEventTypes.selectiveZipReady:
+          payloadData = payload.data as IPermitApplicationSelectiveZipReady
+          self.permitApplicationMap.get(payloadData?.id)?.handleSocketSelectiveZipReady(payloadData)
           break
         case EPermitApplicationSocketEventTypes.updatePermitBlockStatus:
           payloadData = payload.data as IPermitBlockStatus

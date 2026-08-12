@@ -4,6 +4,7 @@ import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { Trans, useTranslation } from "react-i18next"
+import { datefnsTableDateFormat } from "../../../constants"
 import { IPermitProject } from "../../../models/permit-project"
 import { useMst } from "../../../setup/root"
 import { YellowLineSmall } from "../../shared/base/decorative/yellow-line-small"
@@ -154,7 +155,7 @@ export const PermitProjectCard = observer(({ permitProject }: IPermitProjectCard
                 <Show below="md">
                   <br />
                 </Show>
-                {format(new Date(createdAt), "MMM d, yyyy")}
+                {format(new Date(createdAt), datefnsTableDateFormat)}
               </Text>
             )}
             <Show above="md">{createdAt && updatedAt && <Text>{"  |  "}</Text>}</Show>
@@ -166,7 +167,7 @@ export const PermitProjectCard = observer(({ permitProject }: IPermitProjectCard
                 <Show below="md">
                   <br />
                 </Show>
-                {format(new Date(updatedAt), "MMM d, yyyy")}
+                {format(new Date(updatedAt), datefnsTableDateFormat)}
               </Text>
             )}
             {viewedAt && (
@@ -183,7 +184,7 @@ export const PermitProjectCard = observer(({ permitProject }: IPermitProjectCard
                   <Show below="md">
                     <br />
                   </Show>
-                  {format(new Date(viewedAt), "MMM d, yyyy")}
+                  {format(new Date(viewedAt), datefnsTableDateFormat)}
                 </Text>
               </>
             )}

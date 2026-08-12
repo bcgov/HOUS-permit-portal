@@ -1,12 +1,12 @@
-import { Flex, FormControl, GridItem, Heading, StackProps, VStack } from "@chakra-ui/react"
+import { Flex, FormControl, Heading, StackProps, VStack } from "@chakra-ui/react"
+import { ListMagnifyingGlass } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { IPreCheck } from "../../../models/pre-check"
 import { useMst } from "../../../setup/root"
-import { EFlashMessageStatus, EPreCheckSortFields } from "../../../types/enums"
-import { CustomMessageBox } from "../../shared/base/custom-message-box"
+import { EPreCheckSortFields } from "../../../types/enums"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
 import { ModelSearchInput } from "../../shared/base/model-search-input"
@@ -44,21 +44,19 @@ export const PreChecksGrid = observer(({ ...restProps }: StackProps) => {
         </FormControl>
       </Flex>
 
-      <SearchGrid templateColumns={PRE_CHECKS_GRID_TEMPLATE_COLUMNS} gridRowClassName="pre-check-grid-row">
+      <SearchGrid
+        templateColumns={PRE_CHECKS_GRID_TEMPLATE_COLUMNS}
+        gridRowClassName="pre-check-grid-row"
+        isEmpty={!isSearching && R.isEmpty(tablePreChecks)}
+        emptyDescription={t("preCheck.noneFoundExplanation", "No pre-checks found")}
+        emptyIcon={<ListMagnifyingGlass size={18} />}
+      >
         <PreCheckGridHeaders columns={Object.values(EPreCheckSortFields)} includeActionColumn />
 
         {isSearching ? (
           <Flex gridColumn="span 5" justify="center" align="center" minH="200px">
             <SharedSpinner />
           </Flex>
-        ) : R.isEmpty(tablePreChecks) ? (
-          <GridItem gridColumn="span 5">
-            <CustomMessageBox
-              m={4}
-              status={EFlashMessageStatus.info}
-              description={t("preCheck.noneFoundExplanation", "No pre-checks found")}
-            />
-          </GridItem>
         ) : (
           tablePreChecks.map((preCheck: IPreCheck) => <PreCheckGridRow key={preCheck.id} preCheck={preCheck} />)
         )}

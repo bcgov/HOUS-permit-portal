@@ -53,9 +53,12 @@ export const CheckboxFilter = observer(function CheckboxFilter({ value, onChange
     >
       <MenuButton
         as={Button}
-        variant="outline"
+        variant="secondary"
         rightIcon={<CaretDown />}
         bg={hasSelection ? "background.blueLight" : undefined}
+        borderColor={hasSelection ? "theme.blueActive" : undefined}
+        size="sm"
+        fontWeight="normal"
         _expanded={{ bg: "background.blueLight" }}
       >
         {title}

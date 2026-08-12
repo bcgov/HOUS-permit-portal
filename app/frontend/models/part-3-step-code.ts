@@ -1,45 +1,100 @@
-import { Instance, types } from "mobx-state-tree"
+import { flow, Instance, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
-import { EEnergyStep, EStepCodeType, EZeroCarbonStep } from "../types/enums"
+import {
+  EEnergyStep,
+  EStepCodeChecklistStage,
+  EStepCodeStageStatus,
+  EStepCodeType,
+  EZeroCarbonStep,
+} from "../types/enums"
+import { stageStatusFor } from "../utils/step-code-stage-status"
 import { Part3StepCodeChecklistModel } from "./part-3-step-code-checklist"
 import { StepCodeBaseFields } from "./step-code-base"
 
-export const Part3StepCodeModel = types
-  .compose(
-    "Part3StepCodeModel",
-    StepCodeBaseFields,
-    types.model({
-      id: types.identifier,
-      type: types.literal(EStepCodeType.part3StepCode),
-      checklist: types.maybeNull(types.late(() => Part3StepCodeChecklistModel)),
-      zeroCarbonSteps: types.array(types.enumeration(Object.values(EZeroCarbonStep))),
-      energySteps: types.array(types.enumeration(Object.values(EEnergyStep))),
-      isFullyLoaded: types.optional(types.boolean, false),
-    })
-  )
-  .extend(withEnvironment())
-  .extend(withRootStore())
-  .extend(withMerge())
-  .views((self) => ({
-    get primaryChecklist() {
-      return self.checklist
-    },
-    get checklistForPdf() {
-      return self.checklist
-    },
-    get isComplete() {
-      return self.checklist?.isAllComplete
-    },
-    get targetPath() {
-      if (self.permitApplicationId) {
-        return `/permit-applications/${self.permitApplicationId}/edit/part-3-step-code`
+export const Part3StepCodeModel = types.snapshotProcessor(
+  types
+    .compose(
+      "Part3StepCodeModel",
+      StepCodeBaseFields,
+      types.model({
+        id: types.identifier,
+        type: types.literal(EStepCodeType.part3StepCode),
+        checklist: types.maybeNull(types.late(() => Part3StepCodeChecklistModel)),
+        checklistsMap: types.map(Part3StepCodeChecklistModel),
+        zeroCarbonSteps: types.array(types.enumeration(Object.values(EZeroCarbonStep))),
+        energySteps: types.array(types.enumeration(Object.values(EEnergyStep))),
+        isFullyLoaded: types.optional(types.boolean, false),
+      })
+    )
+    .extend(withEnvironment())
+    .extend(withRootStore())
+    .extend(withMerge())
+    .views((self) => ({
+      get checklists() {
+        return Array.from(self.checklistsMap.values())
+      },
+      getChecklist(id: string) {
+        return self.checklistsMap.get(id)
+      },
+    }))
+    .views((self) => ({
+      get currentChecklist() {
+        const stage = self.currentStage || EStepCodeChecklistStage.preConstruction
+        return self.checklists.find((checklist) => checklist.stage === stage) || self.checklist
+      },
+      get checklistForPdf() {
+        return self.currentChecklist
+      },
+      stageStatus(stage: EStepCodeChecklistStage = self.currentStage) {
+        return stageStatusFor(stage, self.checklists, self.stageCompletions)
+      },
+      isStageComplete(stage: EStepCodeChecklistStage = self.currentStage) {
+        return self.stageStatus(stage) === EStepCodeStageStatus.complete
+      },
+      get isComplete() {
+        return self.isStageComplete()
+      },
+      get targetPath() {
+        if (self.permitApplicationId) {
+          return `/permit-applications/${self.permitApplicationId}/edit/part-3-step-code`
+        }
+        return `/part-3-step-code/${self.id}`
+      },
+    }))
+    .actions((self) => ({
+      createChecklist: flow(function* (values: Record<string, any>) {
+        const response = yield self.environment.api.createPart3Checklist(self.id, values)
+        if (response.ok) {
+          self.mergeUpdate(response.data.data, "checklistsMap")
+          return response.data.data
+        }
+      }),
+    })),
+  {
+    preProcessor(snapshot: any) {
+      const processed = { ...snapshot }
+      const map: Record<string, any> = {}
+
+      if (Array.isArray(processed.checklists)) {
+        processed.checklists.forEach((checklist: any) => {
+          if (checklist?.id) map[checklist.id] = checklist
+        })
+        delete processed.checklists
       }
-      return `/part-3-step-code/${self.id}`
+
+      if (processed.checklist?.id) {
+        map[processed.checklist.id] = processed.checklist
+      }
+
+      processed.checklistsMap = {
+        ...(processed.checklistsMap || {}),
+        ...map,
+      }
+      return processed
     },
-  }))
-  .views((self) => ({}))
-  .actions((self) => ({}))
+  }
+)
 
 export interface IPart3StepCode extends Instance<typeof Part3StepCodeModel> {}
