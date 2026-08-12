@@ -176,7 +176,9 @@ export const JurisdictionMap = ({
 
   return (
     <Tooltip label={t("map.visualReferenceDisclaimer")} hasArrow>
-      <Box ref={mapDiv} h="250px" w="100%" zIndex={0} />
+      <Box>
+        <Box ref={mapDiv} h="250px" w="100%" zIndex={0} />
+      </Box>
     </Tooltip>
   )
 }

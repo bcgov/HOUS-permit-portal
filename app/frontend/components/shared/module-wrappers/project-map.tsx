@@ -164,84 +164,61 @@ export const ProjectMap = ({ coordinates, pid, parcelGeometry, onOpenFullscreen 
     updateGraphics()
   }, [isMapReady, updateGraphics])
 
-  let mapContent: React.ReactNode
-
-  if (hasError) {
-    mapContent = (
-      <Center
-        h="100%"
-        w="100%"
-        minH={{ base: "200px", lg: "300px" }}
-        bg="greys.grey03"
-        borderRadius="md"
-        flexDirection="column"
-        gap={2}
-      >
-        <Warning size={32} />
-        <Text fontSize="sm" color="text.secondary" textAlign="center">
-          {t("permitProject.map.errorLoading")}
-        </Text>
-      </Center>
-    )
-  } else if (!coordinates && !parcelGeometry && pid) {
-    mapContent = (
-      <Center
-        h="100%"
-        w="100%"
-        minH={{ base: "200px", lg: "300px" }}
-        bg="greys.grey03"
-        borderRadius="md"
-        flexDirection="column"
-        gap={2}
-      >
-        <MapTrifold size={32} />
-        <Text fontSize="sm" color="text.secondary" textAlign="center">
-          {t("permitProject.map.noLocation")}
-        </Text>
-      </Center>
-    )
-  } else {
-    mapContent = (
-      <Box position="relative" h="100%" w="100%" minH={{ base: "200px", lg: "300px" }}>
-        {!isMapReady && (
-          <Center position="absolute" inset={0} bg="greys.grey03" zIndex={1} borderRadius="md">
-            <SharedSpinner my={0} />
-          </Center>
-        )}
-
-        {onOpenFullscreen && isMapReady && (
-          <IconButton
-            aria-label={t("permitProject.map.openFullscreen")}
-            icon={<ArrowsOut size={18} />}
-            size="sm"
-            position="absolute"
-            top={2}
-            right={2}
-            zIndex={1}
-            bg="white"
-            shadow="md"
-            borderRadius="md"
-            _hover={{ bg: "gray.100" }}
-            onClick={onOpenFullscreen}
-          />
-        )}
-
-        <Box
-          ref={mapDiv}
-          h="100%"
-          w="100%"
-          borderRadius="md"
-          role="application"
-          aria-label={pid ? t("permitProject.map.ariaLabelWithPid", { pid }) : t("permitProject.map.ariaLabel")}
-        />
-      </Box>
-    )
-  }
+  const noLocation = !coordinates && !parcelGeometry && pid
 
   return (
     <Tooltip label={t("map.visualReferenceDisclaimer")} hasArrow>
       <Box h="100%" w="100%">
-        {mapContent}
+        {hasError || noLocation ? (
+          <Center
+            h="100%"
+            w="100%"
+            minH={{ base: "200px", lg: "300px" }}
+            bg="greys.grey03"
+            borderRadius="md"
+            flexDirection="column"
+            gap={2}
+          >
+            {hasError ? <Warning size={32} /> : <MapTrifold size={32} />}
+            <Text fontSize="sm" color="text.secondary" textAlign="center">
+              {t(hasError ? "permitProject.map.errorLoading" : "permitProject.map.noLocation")}
+            </Text>
+          </Center>
+        ) : (
+          <Box position="relative" h="100%" w="100%" minH={{ base: "200px", lg: "300px" }}>
+            {!isMapReady && (
+              <Center position="absolute" inset={0} bg="greys.grey03" zIndex={1} borderRadius="md">
+                <SharedSpinner my={0} />
+              </Center>
+            )}
+
+            {onOpenFullscreen && isMapReady && (
+              <IconButton
+                aria-label={t("permitProject.map.openFullscreen")}
+                icon={<ArrowsOut size={18} />}
+                size="sm"
+                position="absolute"
+                top={2}
+                right={2}
+                zIndex={1}
+                bg="white"
+                shadow="md"
+                borderRadius="md"
+                _hover={{ bg: "gray.100" }}
+                onClick={onOpenFullscreen}
+              />
+            )}
+
+            <Box
+              ref={mapDiv}
+              h="100%"
+              w="100%"
+              borderRadius="md"
+              role="application"
+              aria-label={pid ? t("permitProject.map.ariaLabelWithPid", { pid }) : t("permitProject.map.ariaLabel")}
+            />
+          </Box>
+        )}
       </Box>
     </Tooltip>
   )
