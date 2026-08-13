@@ -489,6 +489,17 @@ RSpec.describe NotificationService do
       end
     end
 
+    it "does not notify anyone when the audience is none" do
+      create(:user, :submitter)
+      create(:user, :review_manager)
+      release_note = create(:release_note, status: :published)
+      allow(NotificationPushJob).to receive(:perform_async)
+
+      described_class.publish_release_note_publish_event(release_note, "none")
+
+      expect(NotificationPushJob).not_to have_received(:perform_async)
+    end
+
     it "does not notify anyone for an unknown audience" do
       create(:user, :submitter)
       create(:user, :review_manager)

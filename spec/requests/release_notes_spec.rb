@@ -235,6 +235,23 @@ RSpec.describe "ReleaseNotes", type: :request do
       expect(response).to have_http_status(:success)
     end
 
+    it "passes none as a valid notification audience" do
+      setup
+      expect(NotificationService).to receive(
+        :publish_release_note_publish_event
+      ).with(an_instance_of(ReleaseNote), "none")
+
+      patch publish_release_note_path(@release_note.id),
+            params: {
+              release_note: {
+                notification_audience: "none"
+              }
+            }
+
+      expect(response).to have_http_status(:success)
+      expect(@release_note.reload).to be_published
+    end
+
     it "rejects an invalid notification audience without publishing" do
       setup
       expect(NotificationService).not_to receive(

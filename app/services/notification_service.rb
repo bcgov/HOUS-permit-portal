@@ -810,6 +810,8 @@ class NotificationService
     end
 
     case audience_key
+    when "none"
+      users.none
     when "submitters"
       users.submitter
     when "staff"
