@@ -10,7 +10,8 @@ class StepCode::Compliance::CheckRequirements::Energy::TEDIAdjusted
   BANDS = [
     {
       max_hdd: 2999,
-      hdd_lowest: 0,
+      # Rev. 7 References R11: (TEDIstep+(TEDIhigher-TEDIstep)*(HDD-2500)/500)
+      hdd_lowest: 2500,
       probe: 0,
       next_probe: 3500,
       divisor: 500,
@@ -107,7 +108,8 @@ class StepCode::Compliance::CheckRequirements::Energy::TEDIAdjusted
       .to_f
   end
 
+  # Rev. 7: IF(area>=210, 0, 0.004*(HDD-3000)) — 210 m² is not Small Home.
   def small_home_adj
-    @heated_floor_area <= SMALL_HOME_AREA_M2 ? SMALL_HOME_ADJ : 0
+    @heated_floor_area < SMALL_HOME_AREA_M2 ? SMALL_HOME_ADJ : 0
   end
 end
