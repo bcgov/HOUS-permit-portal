@@ -10,12 +10,6 @@ import { TReleaseNoteFormData, TSearchParams } from "../types/types"
 import { urlForPath } from "../utils/utility-functions"
 
 const RELEASE_NOTE_ANCHOR_PREFIX = "release-note-"
-const RELEASE_NOTE_YEAR_COUNT = 10
-
-const recentReleaseNoteYears = () => {
-  const currentYear = new Date().getFullYear()
-  return Array.from({ length: RELEASE_NOTE_YEAR_COUNT }, (_, index) => currentYear - index)
-}
 
 export const ReleaseNoteStoreModel = types
   .compose(
@@ -88,11 +82,17 @@ export const ReleaseNoteStoreModel = types
     },
   }))
   .actions((self) => ({
-    initializeViewingYear() {
-      const years = recentReleaseNoteYears()
-      self.setAvailableYears(years)
-      self.setSelectedYear(years[0])
-    },
+    initializeViewingYear: flow(function* () {
+      const response = yield self.environment.api.fetchReleaseNoteYears()
+
+      if (response.ok && response.data?.data?.length) {
+        const years = response.data.data
+        self.setAvailableYears(years)
+        self.setSelectedYear(years[0])
+      } else {
+        self.setAvailableYears([])
+      }
+    }),
 
     searchReleaseNotes: flow(function* (opts?: {
       reset?: boolean
@@ -213,7 +213,7 @@ export const ReleaseNoteStoreModel = types
       self.syncWithUrl()
       self.setApplyYearFilterInSearch(true)
       self.setPublishedOnlyInSearch(true)
-      self.initializeViewingYear()
+      yield self.initializeViewingYear()
 
       const releaseNoteId = self.parseReleaseNoteIdFromHash(hash)
       if (releaseNoteId) {

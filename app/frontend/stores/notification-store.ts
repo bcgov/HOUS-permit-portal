@@ -163,7 +163,12 @@ const linkGenerators: Partial<Record<ENotificationActionType, LinkGenerator>> = 
   [ENotificationActionType.releaseNotePublish]: (notification) => {
     const releaseNoteId = (notification.objectData as { releaseNoteId?: string })?.releaseNoteId
     if (!releaseNoteId) return []
-    return showLink(`/release-notes#release-note-${releaseNoteId}`)
+    return [
+      {
+        text: t("notification.releaseNotePublish.viewReleaseNotes"),
+        href: `/release-notes#release-note-${releaseNoteId}`,
+      },
+    ]
   },
 }
 

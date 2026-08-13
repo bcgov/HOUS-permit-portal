@@ -26,7 +26,7 @@ import { useMst } from "../../../setup/root"
 import { ICustomEventMap } from "../../../types/dom"
 import { ECollaborationType, ECustomEvents, ERequirementType } from "../../../types/enums"
 import { findPidComponentKey } from "../../../utils/formio-component-traversal"
-import { handleScrollToBottom } from "../../../utils/utility-functions"
+import { handleScrollToBottom, handleScrollToTop } from "../../../utils/utility-functions"
 import { CopyableValue } from "../../shared/base/copyable-value"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
@@ -235,6 +235,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const handleClickFinishLater = async () => {
     const success = await handleSave()
     if (success) {
+      handleScrollToTop()
       navigate(parentProjectPath)
     }
   }

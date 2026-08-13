@@ -131,7 +131,6 @@ export enum ERequirementLibrarySortFields {
   associations = "associations",
   requirementLabels = "requirement_labels",
   updatedAt = "updated_at",
-  configurations = "configurations",
 }
 
 export enum EJurisdictionTypes {
@@ -178,6 +177,13 @@ export enum EReleaseNoteStatus {
 export enum EReleaseNoteType {
   software = "software",
   content = "content",
+}
+
+export enum EReleaseNoteNotificationAudience {
+  allUsers = "all_users",
+  submitters = "submitters",
+  staff = "staff",
+  none = "none",
 }
 
 export enum EPreCheckSortFields {

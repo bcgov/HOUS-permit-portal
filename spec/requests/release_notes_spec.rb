@@ -212,11 +212,62 @@ RSpec.describe "ReleaseNotes", type: :request do
       setup
       expect(NotificationService).to receive(
         :publish_release_note_publish_event
-      ).with(an_instance_of(ReleaseNote))
+      ).with(an_instance_of(ReleaseNote), nil)
 
       patch publish_release_note_path(@release_note.id)
 
       expect(response).to have_http_status(:success)
+    end
+
+    it "passes notification audience to the publish event" do
+      setup
+      expect(NotificationService).to receive(
+        :publish_release_note_publish_event
+      ).with(an_instance_of(ReleaseNote), "staff")
+
+      patch publish_release_note_path(@release_note.id),
+            params: {
+              release_note: {
+                notification_audience: "staff"
+              }
+            }
+
+      expect(response).to have_http_status(:success)
+    end
+
+    it "passes none as a valid notification audience" do
+      setup
+      expect(NotificationService).to receive(
+        :publish_release_note_publish_event
+      ).with(an_instance_of(ReleaseNote), "none")
+
+      patch publish_release_note_path(@release_note.id),
+            params: {
+              release_note: {
+                notification_audience: "none"
+              }
+            }
+
+      expect(response).to have_http_status(:success)
+      expect(@release_note.reload).to be_published
+    end
+
+    it "rejects an invalid notification audience without publishing" do
+      setup
+      expect(NotificationService).not_to receive(
+        :publish_release_note_publish_event
+      )
+
+      patch publish_release_note_path(@release_note.id),
+            params: {
+              release_note: {
+                notification_audience: "admins"
+              }
+            }
+
+      expect(response).to have_http_status(:bad_request)
+      expect(error_message).to match(/invalid notification audience/i)
+      expect(@release_note.reload).to be_draft
     end
 
     it "updates an already published release note without publishing again" do
@@ -242,6 +293,48 @@ RSpec.describe "ReleaseNotes", type: :request do
 
     it_behaves_like AN_INVALID_PAYLOAD_RESPONSE, publish_with_payload
     it_behaves_like A_NOT_FOUND_RESPONSE, publish_with_payload
+  end
+
+  describe "#years" do
+    let!(:note_2024) do
+      create(
+        :release_note,
+        status: :published,
+        release_date: Date.new(2024, 6, 1)
+      )
+    end
+    let!(:note_2025) do
+      create(
+        :release_note,
+        status: :published,
+        release_date: Date.new(2025, 3, 1)
+      )
+    end
+    let!(:draft_note_2026) do
+      create(:release_note, status: :draft, release_date: Date.new(2026, 1, 1))
+    end
+
+    it "returns distinct release years for published notes only" do
+      get years_release_notes_path
+
+      expect(response).to have_http_status(:success)
+      expect(json_response.fetch("data")).to eq([2025, 2024])
+    end
+
+    it "is available to unauthenticated users" do
+      get years_release_notes_path
+
+      expect(response).to have_http_status(:success)
+      expect(json_response.fetch("data")).to include(2024, 2025)
+    end
+
+    it "excludes draft-only years for super admins" do
+      sign_in super_admin
+      get years_release_notes_path
+
+      expect(response).to have_http_status(:success)
+      expect(json_response.fetch("data")).to eq([2025, 2024])
+    end
   end
 
   describe "#index" do

@@ -3,6 +3,15 @@ import { createMultiStyleConfigHelpers } from "@chakra-ui/react"
 
 const { definePartsStyle, defineMultiStyleConfig } = createMultiStyleConfigHelpers(radioAnatomy.keys)
 
+const baseStyle = definePartsStyle({
+  control: {
+    bg: "greys.white",
+    _disabled: {
+      bg: "greys.grey03",
+    },
+  },
+})
+
 const binary = definePartsStyle({
   container: {
     py: 3,
@@ -17,4 +26,4 @@ const binary = definePartsStyle({
   },
 })
 
-export const Radio = defineMultiStyleConfig({ variants: { binary } })
+export const Radio = defineMultiStyleConfig({ baseStyle, variants: { binary } })

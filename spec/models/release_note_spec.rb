@@ -135,40 +135,18 @@ RSpec.describe ReleaseNote, type: :model do
   end
 
   describe "#publish_event_notification_data" do
-    it "returns notification payload with software label" do
-      release_note = create(:release_note, status: :published, version: "1.2.3")
+    it "returns a type-agnostic notification payload" do
+      release_note = create(:release_note, status: :published)
 
       data = release_note.publish_event_notification_data
 
       expect(data).to include(
         "action_type" =>
-          Constants::NotificationActionTypes::RELEASE_NOTE_PUBLISH
+          Constants::NotificationActionTypes::RELEASE_NOTE_PUBLISH,
+        "action_text" =>
+          "Building Permit Hub has been updated. Read about changes and improvements in the release notes."
       )
-      expect(data["action_text"]).to include("1.2.3")
-      expect(data["object_data"]).to include(
-        "release_note_id" => release_note.id,
-        "release_type" => "software",
-        "label" => "1.2.3"
-      )
-    end
-
-    it "returns notification payload with content label" do
-      release_note =
-        create(
-          :release_note,
-          :content,
-          status: :published,
-          name: "Step Code wording"
-        )
-
-      data = release_note.publish_event_notification_data
-
-      expect(data["action_text"]).to include("Step Code wording")
-      expect(data["object_data"]).to include(
-        "release_note_id" => release_note.id,
-        "release_type" => "content",
-        "label" => "Step Code wording"
-      )
+      expect(data["object_data"]).to eq("release_note_id" => release_note.id)
     end
   end
 end
