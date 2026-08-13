@@ -357,14 +357,7 @@ function DisplayValue({
   }
 
   return (
-    <Text
-      as="span"
-      fontSize="sm"
-      color="text.link"
-      textDecoration="underline"
-      whiteSpace="pre-wrap"
-      wordBreak="break-word"
-    >
+    <Text fontSize="sm" color="text.primary" whiteSpace="pre-wrap" wordBreak="break-word">
       {text}
     </Text>
   )
