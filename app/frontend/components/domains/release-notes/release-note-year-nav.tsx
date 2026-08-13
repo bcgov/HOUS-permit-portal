@@ -14,7 +14,7 @@ export const ReleaseNoteYearNav = observer(function ReleaseNoteYearNav({
   onSelectYear,
 }: ReleaseNoteYearNavProps) {
   return (
-    <VStack align="stretch" spacing={0} w="180px" flexShrink={0} alignSelf="flex-start" maxH="full" overflowY="auto">
+    <VStack align="stretch" spacing={0} w="180px" flexShrink={0} alignSelf="flex-start">
       {years.map((year) => {
         const isSelected = year === selectedYear
         return (

@@ -179,6 +179,13 @@ export enum EReleaseNoteType {
   content = "content",
 }
 
+export enum EReleaseNoteNotificationAudience {
+  allUsers = "all_users",
+  submitters = "submitters",
+  staff = "staff",
+  none = "none",
+}
+
 export enum EPreCheckSortFields {
   fullAddress = "full_address",
   title = "title",
