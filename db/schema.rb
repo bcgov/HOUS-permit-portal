@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_07_15_111439) do
+ActiveRecord::Schema[7.2].define(version: 2026_08_10_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -994,7 +994,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_15_111439) do
     t.jsonb "windows_glazed_doors", default: {"lines"=>[{}], "performance_type"=>"usi"}
     t.jsonb "doors_lines", default: [{"performance_type"=>"rsi"}]
     t.jsonb "airtightness", default: {}
-    t.jsonb "space_heating_cooling_lines", default: [{"variant"=>"principal"}, {"variant"=>"secondary"}]
+    t.jsonb "space_heating_cooling_lines", default: [{}, {}, {}, {}]
     t.jsonb "hot_water_lines", default: [{"performance_type"=>"ef"}]
     t.jsonb "ventilation_lines", default: [{}]
     t.jsonb "other_lines", default: [{}]

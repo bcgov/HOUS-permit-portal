@@ -115,7 +115,7 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
       },
       get defaultFormValues() {
         const snapshot = getSnapshot(self)
-        return renameKeys(
+        const values = renameKeys(
           { buildingCharacteristicsSummary: "buildingCharacteristicsSummaryAttributes" },
           R.pick(
             [
@@ -143,6 +143,24 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
             snapshot
           )
         )
+
+        // HUB-5472: Rev. 7 four open heating/cooling lines — pad without dropping existing rows.
+        const OPEN_LINE_COUNT = 4
+        const bcs = values.buildingCharacteristicsSummaryAttributes
+        if (!bcs) return values
+
+        const lines = [...(bcs.spaceHeatingCoolingLines || [])]
+        while (lines.length < OPEN_LINE_COUNT) {
+          lines.push({ details: null, performanceType: null, performanceValue: null })
+        }
+
+        return {
+          ...values,
+          buildingCharacteristicsSummaryAttributes: {
+            ...bcs,
+            spaceHeatingCoolingLines: lines,
+          },
+        }
       },
       isComplete(key: TPart9NavLinkKey): boolean {
         return self.sectionCompletionStatus[key]?.complete

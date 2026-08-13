@@ -155,20 +155,17 @@ RSpec.describe StepCode::Part9::BuildingCharacteristicsHot2000Mapper do
       expect(mappings[:space_heating_cooling_lines]).to include(
         {
           details: "Furnace - Natural gas - Condensing",
-          variant: :principal,
           performance_type: :afue,
           performance_value: 90.0
         },
         {
           details: "Air heat pump - Central split system - Heating/Cooling",
-          variant: :secondary,
           performance_type: :hspf,
           performance_value: 9.0
         },
         {
           details:
             "Air heat pump - Central split system - Heating/Cooling cooling",
-          variant: :secondary,
           performance_type: :seer,
           performance_value: 16.0
         }

@@ -23,7 +23,6 @@ class StepCode::Compliance::CheckRequirements::ZeroCarbon::Prescriptive < StepCo
   end
 
   def prescriptive_hot_water
-    # EnergySource code per suite/model — not additive (Excel Fuel Type column).
     @prescriptive_hot_water ||=
       begin
         min_result =
