@@ -1261,9 +1261,7 @@ en:
       scheduled: "Your project meeting request for project %{project_number} has been accepted and a meeting time has been scheduled."
       rescheduled: "Your project meeting for project %{project_number} has been rescheduled."
     release_note:
-      publish_notification:
-        software: "Version %{label} is now available. See what's new."
-        content: "%{label} is now available. See what's new."
+      publish_notification: "Building Permit Hub has been updated. Read about changes and improvements in the release notes."
     integration_mapping:
       published_template_missing_requirements_mapping: "Missing API mapping: A new version of “%{template_label}” has been published on %{version_date}"
       scheduled_template_missing_requirements_mapping: "Missing API Mapping: A new version of “%{template_label}” has been scheduled for %{version_date}, 01:00hrs PST."

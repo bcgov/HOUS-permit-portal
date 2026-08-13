@@ -24,7 +24,7 @@ export interface IConfirmationModalProps {
   renderTriggerButton?: (props: ButtonProps) => JSX.Element
   renderConfirmationButton?: (props: ButtonProps) => JSX.Element
   title?: string
-  body?: string
+  body?: React.ReactNode
   onConfirm?: (closeModal: () => void) => void | Promise<void>
   modalProps?: Partial<ModalProps>
   modalContentProps?: Partial<ModalContentProps>

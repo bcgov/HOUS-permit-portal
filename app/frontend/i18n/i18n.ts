@@ -483,6 +483,9 @@ const options = {
           noUnread: "No unread notifications",
           file_upload_failed:
             "A file you uploaded could not be processed and has been removed. Please try uploading the file again.",
+          releaseNotePublish: {
+            viewReleaseNotes: "View release notes",
+          },
         },
         eula: {
           title: "End-User License Agreement",
@@ -5753,6 +5756,13 @@ Thank you,
             editTitle: "Edit release note",
             releaseType: "Release type",
             releaseTypeHint: "Determines which fields are required. This can't be changed once the note is saved.",
+            notificationAudience: "Who to notify",
+            notificationAudiences: {
+              all_users: "All users",
+              submitters: "Submitters",
+              staff: "Staff",
+              none: "No one",
+            },
             version: "Version",
             name: "Name",
             versionHint: "Semantic version, e.g. 0.1.3. Must be unique among Software Platform releases.",
@@ -5768,8 +5778,10 @@ Thank you,
             publish: "Publish",
             update: "Update",
             publishConfirmation: {
-              title: "Publish release note?",
-              body: "Are you sure you want to publish this release note? It will become visible to users.",
+              title: "Publish this release note?",
+              body: "Choose who receives an in-app notification. This is only sent once.",
+              contentTemplateNotice:
+                "Please note that any template publish automatically sends both email and in-app notifications to Jurisdiction staff.",
             },
             updateConfirmation: {
               title: "Update release note?",
