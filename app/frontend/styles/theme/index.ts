@@ -22,6 +22,9 @@ const styles = {
   global: {
     html: {
       scrollBehaviour: "smooth",
+      "&:has(.chakra-modal__content-container)": {
+        overflow: "hidden",
+      },
     },
     body: {
       color: "text.primary",
@@ -87,7 +90,19 @@ const styles = {
     },
   },
 }
-const components = { Button, FormLabel, Heading, Input, Link, Select, Text, Table, Radio, Tag, Tabs }
+const Drawer = {
+  baseStyle: {
+    dialogContainer: {
+      position: "fixed",
+      inset: 0,
+      width: "auto",
+      height: "auto",
+      overflow: "hidden",
+    },
+  },
+}
+
+const components = { Button, FormLabel, Heading, Input, Link, Select, Text, Table, Radio, Tag, Tabs, Drawer }
 const overrides = { styles, colors, fonts, fontSizes, sizes, radii, space, shadows, components }
 
 export const theme = extendTheme(overrides)
