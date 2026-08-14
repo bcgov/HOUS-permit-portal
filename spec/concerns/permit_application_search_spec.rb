@@ -187,6 +187,50 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitApplications,
           requirement_template: unused,
           status: :published
         )
+
+        # Factory template_versions reuse RequirementTemplate.first, so drafts
+        # and other-jurisdiction apps share the inbox template unless we
+        # attach dedicated ones here.
+        draft_only =
+          create(:requirement_template, nickname: "Draft only permit")
+        create(
+          :permit_application,
+          status: :new_draft,
+          submitter: submitter,
+          permit_project:
+            create(
+              :permit_project,
+              jurisdiction: jurisdiction,
+              owner: submitter
+            ),
+          template_version:
+            create(
+              :template_version,
+              requirement_template: draft_only,
+              status: :published
+            )
+        )
+
+        other_jur_only =
+          create(:requirement_template, nickname: "Other city permit")
+        create(
+          :permit_application,
+          :newly_submitted,
+          submitter: submitter,
+          permit_project:
+            create(
+              :permit_project,
+              jurisdiction: other_jurisdiction,
+              owner: submitter
+            ),
+          template_version:
+            create(
+              :template_version,
+              requirement_template: other_jur_only,
+              status: :published
+            )
+        )
+
         PermitApplication.reindex
 
         controller.perform_jurisdiction_permit_application_search
@@ -204,20 +248,13 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitApplications,
             submitted_permit_applications + resubmitted_permit_applications +
               revisions_requested_permit_applications
           ).map { |pa| pa.template_version.requirement_template_id }.uniq
-        draft_template_ids =
-          draft_permit_applications.map do |pa|
-            pa.template_version.requirement_template_id
-          end
-        other_jur_template_ids =
-          (
-            submitted_permit_applications_different_jur +
-              resubmitted_permit_applications_different_jur
-          ).map { |pa| pa.template_version.requirement_template_id }
 
         expect(option_ids).to match_array(inbox_template_ids)
-        expect(option_ids).not_to include(*draft_template_ids)
-        expect(option_ids).not_to include(*other_jur_template_ids)
-        expect(option_ids).not_to include(unused.id)
+        expect(option_ids).not_to include(
+          draft_only.id,
+          other_jur_only.id,
+          unused.id
+        )
       end
     end
 
