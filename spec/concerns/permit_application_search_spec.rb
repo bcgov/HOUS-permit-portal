@@ -178,6 +178,47 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitApplications,
         )
         expect(meta[:status_counts].values.sum).to eq(meta[:total_count])
       end
+
+      it "returns requirement_template_options for inbox applications only" do
+        unused =
+          create(:requirement_template, nickname: "Unused published permit")
+        create(
+          :template_version,
+          requirement_template: unused,
+          status: :published
+        )
+        PermitApplication.reindex
+
+        controller.perform_jurisdiction_permit_application_search
+        meta =
+          controller.instance_variable_get(
+            :@jurisdiction_permit_application_meta
+          )
+        option_ids =
+          meta[:requirement_template_options].map do |option|
+            option.with_indifferent_access[:value]
+          end
+
+        inbox_template_ids =
+          (
+            submitted_permit_applications + resubmitted_permit_applications +
+              revisions_requested_permit_applications
+          ).map { |pa| pa.template_version.requirement_template_id }.uniq
+        draft_template_ids =
+          draft_permit_applications.map do |pa|
+            pa.template_version.requirement_template_id
+          end
+        other_jur_template_ids =
+          (
+            submitted_permit_applications_different_jur +
+              resubmitted_permit_applications_different_jur
+          ).map { |pa| pa.template_version.requirement_template_id }
+
+        expect(option_ids).to match_array(inbox_template_ids)
+        expect(option_ids).not_to include(*draft_template_ids)
+        expect(option_ids).not_to include(*other_jur_template_ids)
+        expect(option_ids).not_to include(unused.id)
+      end
     end
 
     context "when searching for the jurisdictions permit applications as a review manager" do
@@ -416,6 +457,24 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitApplications,
         # Regression: status_counts must use the same permit_project scope as the
         # list search (not jurisdiction-wide aggregates).
         expect(meta[:status_counts].values.sum).to eq(meta[:total_count])
+      end
+
+      it "scopes requirement_template_options in meta to that permit project" do
+        controller.perform_jurisdiction_permit_application_search
+        meta =
+          controller.instance_variable_get(
+            :@jurisdiction_permit_application_meta
+          )
+        option_ids =
+          meta[:requirement_template_options].map do |option|
+            option.with_indifferent_access[:value]
+          end
+        project_template_ids =
+          submitted_permit_applications
+            .map { |pa| pa.template_version.requirement_template_id }
+            .uniq
+
+        expect(option_ids).to match_array(project_template_ids)
       end
 
       it "scopes unread_count in meta to that permit project" do

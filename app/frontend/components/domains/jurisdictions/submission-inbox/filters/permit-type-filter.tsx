@@ -1,7 +1,7 @@
 import { observer } from "mobx-react-lite"
-import React, { useEffect } from "react"
+import React from "react"
 import { useTranslation } from "react-i18next"
-import { useMst } from "../../../../../setup/root"
+import { IOption } from "../../../../../types/types"
 import { InboxFilter } from "../../../../shared/filters/inbox-filter"
 
 interface IProps {
@@ -9,6 +9,7 @@ interface IProps {
   onChange: (value: string[]) => void
   onApply: () => void
   onClear: () => void
+  options: IOption[]
 }
 
 export const RequirementTemplateInboxFilter = observer(function RequirementTemplateInboxFilter({
@@ -16,13 +17,9 @@ export const RequirementTemplateInboxFilter = observer(function RequirementTempl
   onChange,
   onApply,
   onClear,
+  options,
 }: IProps) {
   const { t } = useTranslation()
-  const { requirementTemplateStore } = useMst()
-
-  useEffect(() => {
-    requirementTemplateStore.fetchFilterOptions()
-  }, [])
 
   return (
     <InboxFilter
@@ -30,7 +27,7 @@ export const RequirementTemplateInboxFilter = observer(function RequirementTempl
       isMulti={true}
       value={value}
       onChange={(val) => onChange(val as string[])}
-      options={[...requirementTemplateStore.filterOptions]}
+      options={options}
       onApply={onApply}
       onClear={onClear}
     />
