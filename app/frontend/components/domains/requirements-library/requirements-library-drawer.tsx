@@ -52,7 +52,7 @@ export const RequirementsLibraryDrawer = observer(function RequirementsLibraryDr
       )}
       <Drawer id="add-requirement-drawer" isOpen={isOpen} onClose={onClose} finalFocusRef={btnRef} placement={"right"}>
         <DrawerOverlay />
-        <DrawerContent display={"flex"} flexDir={"column"} maxW={"720px"} h={"full"} p={8}>
+        <DrawerContent display={"flex"} flexDir={"column"} maxW={"container.lg"} h={"full"} p={8}>
           <DrawerCloseButton fontSize={"xs"} />
           {isOpen && (
             <RequirementBlocksTable

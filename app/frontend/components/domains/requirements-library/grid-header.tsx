@@ -59,7 +59,7 @@ export const GridHeaders = observer(function GridHeaders({
               borderColor={"border.light"}
               px={4}
             >
-              <Text>{getSortColumnHeader(field)}</Text>
+              <Text whiteSpace="nowrap">{getSortColumnHeader(field)}</Text>
               {field === ERequirementLibrarySortFields.associations ? (
                 <HStack w={"fit-content"} spacing={3}>
                   <SortIcon<ERequirementLibrarySortFields>
