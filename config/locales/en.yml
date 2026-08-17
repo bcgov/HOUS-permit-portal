@@ -130,6 +130,11 @@ en:
           attributes:
             permit_project:
               only_one_review_collaborator_allowed: "can only have one review collaborator assigned at a time"
+        project_membership:
+          attributes:
+            user:
+              already_a_member: "is already a collaborator on this project"
+              is_project_owner: "is the project owner and already has full access"
         requirement_template:
           step_code_package_required: '"Energy Step Code" is required to have the Design package Energy Step Code file'
           duplicate_energy_step_code: 'Multiple "Energy Step Code" requirements found. Please ensure there is only one "Energy Step Code" requirement in the template'
@@ -782,6 +787,35 @@ en:
       feature_not_enabled:
         title: Error
         message: "Designated reviewer is not enabled for this project"
+    project_membership:
+      create_success:
+        title: ""
+        message: "Collaborator added to the project"
+      create_error:
+        title: Error
+        message: "%{error_message}"
+      update_success:
+        title: ""
+        message: "Collaborator role updated"
+      update_error:
+        title: Error
+        message: "Collaborator role could not be updated"
+      destroy_success:
+        title: ""
+        message: "Collaborator removed from the project"
+      destroy_error:
+        title: Error
+        message: "Collaborator could not be removed"
+      reinvite_success:
+        title: ""
+        message: "Invitation resent"
+    project_team:
+      update_success:
+        title: ""
+        message: "Team permissions updated"
+      update_error:
+        title: Error
+        message: "Team permissions could not be updated"
     qa_tools:
       full_permit_project_success:
         title: ""
@@ -1142,6 +1176,12 @@ en:
         assign_collaborator_error: "Failed to assign collaborator: %{error_message}"
         create_user_error: "Failed to invite user to collaborate: %{error_message}"
         submission_collaborator_must_be_submitter: "Ineligible user for submission collaboration"
+    project_membership:
+      invite:
+        email_required: "An email address is required to invite a collaborator"
+        owner_already_member: "The project owner already has full access"
+        create_user_error: "Failed to invite user to the project: %{error_message}"
+        membership_error: "Failed to add collaborator to the project: %{error_message}"
     template_versioning_service:
       invalid_schedule_date: "Version date must be in the future and after latest scheduled version date"
       force_publish_disabled: "Force publish is not enabled"

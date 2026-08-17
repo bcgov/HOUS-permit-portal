@@ -20,6 +20,8 @@ import { IPermitProject } from "../../models/permit-project"
 import { IPreCheck } from "../../models/pre-check"
 import { IProjectAudit } from "../../models/project-audit"
 import { IProjectMeeting } from "../../models/project-meeting"
+import { IProjectMembership } from "../../models/project-membership"
+import { IProjectTeam } from "../../models/project-team"
 import { IReleaseNote } from "../../models/release-note-model"
 import { IRequirementTemplate } from "../../models/requirement-template"
 import { ITemplateCategory } from "../../models/template-category"
@@ -54,6 +56,7 @@ import {
 } from "../../types/api-responses"
 import {
   ECollaborationType,
+  ECollaboratorAccess,
   ECollaboratorType,
   EJurisdictionSortFields,
   EPermitApplicationInboxSortFields,
@@ -61,13 +64,16 @@ import {
   EPermitBlockStatus,
   EPermitProjectSortFields,
   EPreCheckSortFields,
+  EProjectAccess,
   EProjectAuditSortFields,
   EProjectMeetingSortFields,
+  EProjectMembershipRole,
   EReleaseNoteSortFields,
   ERequirementLibrarySortFields,
   ERequirementTemplateSortFields,
   EStepCodeSortFields,
   EStepCodeType,
+  ETeamAccess,
   ETemplateVersionStatus,
   EUserSortFields,
 } from "../../types/enums"
@@ -331,6 +337,57 @@ export class Api {
 
   async fetchPermitProject(id: string) {
     return this.client.get<ApiResponse<IPermitProject>>(`/permit_projects/${id}`)
+  }
+
+  async fetchProjectMemberships(projectId: string) {
+    return this.client.get<ApiResponse<IProjectMembership[]>>(`/permit_projects/${projectId}/memberships`)
+  }
+
+  async createProjectMembership(
+    projectId: string,
+    params: {
+      role: EProjectMembershipRole
+      userId?: string
+      user?: { email: string; firstName?: string; lastName?: string }
+    }
+  ) {
+    return this.client.post<ApiResponse<IProjectMembership>>(`/permit_projects/${projectId}/memberships`, {
+      projectMembership: { role: params.role, userId: params.userId },
+      user: params.user,
+    })
+  }
+
+  async updateProjectMembership(projectId: string, membershipId: string, params: { role: EProjectMembershipRole }) {
+    return this.client.patch<ApiResponse<IProjectMembership>>(
+      `/permit_projects/${projectId}/memberships/${membershipId}`,
+      { projectMembership: params }
+    )
+  }
+
+  async destroyProjectMembership(projectId: string, membershipId: string) {
+    return this.client.delete<ApiResponse<IProjectMembership>>(
+      `/permit_projects/${projectId}/memberships/${membershipId}`
+    )
+  }
+
+  async reinviteProjectMembership(projectId: string, membershipId: string) {
+    return this.client.post<ApiResponse<IProjectMembership>>(
+      `/permit_projects/${projectId}/memberships/${membershipId}/reinvite`
+    )
+  }
+
+  async fetchProjectTeams(projectId: string) {
+    return this.client.get<ApiResponse<IProjectTeam[]>>(`/permit_projects/${projectId}/teams`)
+  }
+
+  async updateProjectTeam(
+    projectId: string,
+    teamId: string,
+    params: { projectAccess?: EProjectAccess; collaboratorAccess?: ECollaboratorAccess; teamAccess?: ETeamAccess }
+  ) {
+    return this.client.patch<ApiResponse<IProjectTeam>>(`/permit_projects/${projectId}/teams/${teamId}`, {
+      projectTeam: params,
+    })
   }
 
   async assignProjectReviewCollaborator(projectId: string, collaboratorId: string) {

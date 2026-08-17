@@ -258,6 +258,19 @@ Rails.application.routes.draw do
         get :download_csv, on: :collection
       end
 
+      resources :project_memberships,
+                path: "memberships",
+                only: %i[index create update destroy],
+                controller: "permit_projects/memberships" do
+        post :reinvite, on: :member
+      end
+
+      # TODO(phase 2): create/destroy for custom teams and explicit team membership.
+      resources :project_teams,
+                path: "teams",
+                only: %i[index update],
+                controller: "permit_projects/teams"
+
       resources :project_meetings, path: "meetings", only: %i[create update] do
         post "search", on: :collection, to: "project_meetings#index"
         post :submit, on: :member

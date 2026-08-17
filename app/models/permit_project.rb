@@ -19,6 +19,10 @@ class PermitProject < ApplicationRecord
            through: :permit_project_collaborations,
            source: :collaborator
 
+  has_many :project_memberships, dependent: :destroy
+  has_many :members, through: :project_memberships, source: :user
+  has_many :project_teams, dependent: :destroy
+
   has_many :permit_applications
   has_many :project_documents, dependent: :destroy
   has_many :project_meetings, dependent: :destroy
@@ -39,6 +43,8 @@ class PermitProject < ApplicationRecord
   before_save :fetch_coordinates, if: -> { pid_changed? }
 
   delegate :name, to: :owner, prefix: true
+
+  after_create :create_auto_teams
 
   after_commit :reindex
   after_commit :broadcast_jurisdiction_projects_count_update,
@@ -64,6 +70,56 @@ class PermitProject < ApplicationRecord
 
   def public_record?
     permit_applications.any?(&:public_record?)
+  end
+
+  # Effective project-wide permissions: the per-domain max across every team the
+  # user's membership puts them in. The owner is locked at full permissions.
+  def permissions_for(user)
+    permissions_for_user_id(user&.id)
+  end
+
+  def permissions_for_user_id(user_id)
+    @permissions_for ||= {}
+    @permissions_for[user_id] ||= compute_permissions_for(user_id)
+  end
+
+  def membership_for(user)
+    membership_for_user_id(user&.id)
+  end
+
+  def membership_for_user_id(user_id)
+    return nil if user_id.blank?
+
+    project_memberships.kept.find_by(user_id: user_id)
+  end
+
+  # "owner" is not a ProjectMembership role, so the tabs need it derived.
+  def project_role_for(user)
+    return nil if user.blank?
+    return "owner" if owner_id == user.id
+
+    membership_for(user)&.role
+  end
+
+  def auto_teams
+    ProjectTeam::AUTO_TEAM_DEFAULTS.keys.filter_map do |kind|
+      project_teams.detect { |team| team.kind == kind.to_s }
+    end
+  end
+
+  # Users with at least read access, for the search index.
+  def readable_user_ids
+    readable_roles =
+      ProjectMembership.roles.keys.select do |role|
+        ProjectPermissions.from_teams(
+          project_teams.for_role(role)
+        ).project_read?
+      end
+
+    ids = [owner_id]
+    ids += project_memberships.kept.where(role: readable_roles).pluck(:user_id)
+    ids += legacy_submission_collaborations.pluck("collaborators.user_id")
+    ids.compact.uniq
   end
 
   def total_permits_count
@@ -181,6 +237,7 @@ class PermitProject < ApplicationRecord
       jurisdiction_id: jurisdiction_id,
       sandbox_id: sandbox_id,
       collaborator_ids: collaborators.pluck(:user_id).uniq,
+      readable_user_ids: readable_user_ids,
       review_collaborator_user_ids: compute_review_collaborator_user_ids,
       created_at: created_at,
       updated_at: updated_at,
@@ -369,6 +426,51 @@ class PermitProject < ApplicationRecord
   end
 
   private
+
+  def compute_permissions_for(user_id)
+    return ProjectPermissions.none if user_id.blank?
+    return ProjectPermissions.owner if owner_id == user_id
+
+    membership = membership_for_user_id(user_id)
+    permissions =
+      if membership
+        ProjectPermissions.from_teams(membership.teams)
+      else
+        ProjectPermissions.none
+      end
+
+    permissions.at_least(project_access: legacy_collaboration_access(user_id))
+  end
+
+  # ponytail: temporary bridge so submission collaborators created under the old
+  # model keep read access after the swap onto team permissions. Their per-block
+  # edit rights still come from PermitCollaboration itself. Remove together with
+  # the phase 2 migration of collaborations onto project teams.
+  def legacy_collaboration_access(user_id)
+    if legacy_submission_collaborations.exists?(
+         collaborators: {
+           user_id: user_id
+         }
+       )
+      :read
+    else
+      :none
+    end
+  end
+
+  def legacy_submission_collaborations
+    PermitCollaboration
+      .kept
+      .submission
+      .joins(:collaborator)
+      .where(permit_application_id: permit_applications.kept.select(:id))
+  end
+
+  def create_auto_teams
+    ProjectTeam::AUTO_TEAM_DEFAULTS.each do |kind, attributes|
+      project_teams.create!(attributes.merge(kind: kind))
+    end
+  end
 
   # Recompute the jurisdiction-wide unviewed projects badge whenever a change
   # could affect membership in the set counted by

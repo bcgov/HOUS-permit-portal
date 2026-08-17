@@ -104,10 +104,9 @@ module Api::Concerns::Search::PermitProjects
 
     search_filters[:discarded] = show_archived
 
-    or_conditions = [
-      { owner_id: current_user.id },
-      { collaborator_ids: current_user.id }
-    ]
+    # readable_user_ids already covers the owner and the legacy collaboration
+    # bridge, so team-derived read access is the only condition needed here.
+    or_conditions = [{ readable_user_ids: current_user.id }]
 
     final_where = { _and: [{ _or: or_conditions }] }
 

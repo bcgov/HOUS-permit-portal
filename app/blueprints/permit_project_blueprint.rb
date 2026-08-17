@@ -90,6 +90,36 @@ class PermitProjectBlueprint < Blueprinter::Base
       true
     end
 
+    field :current_user_role do |permit_project, options|
+      permit_project.project_role_for(options[:current_user])
+    end
+
+    field :current_user_permissions do |permit_project, options|
+      permit_project.permissions_for(options[:current_user]).to_h
+    end
+
+    association :project_memberships,
+                blueprint: ProjectMembershipBlueprint,
+                view: :base,
+                if: ->(_field_name, permit_project, options) do
+                  permit_project.permissions_for(
+                    options[:current_user]
+                  ).collaborators_view?
+                end do |permit_project, _options|
+      permit_project.project_memberships.kept.includes(:user, :invited_by)
+    end
+
+    association :project_teams,
+                blueprint: ProjectTeamBlueprint,
+                view: :base,
+                if: ->(_field_name, permit_project, options) do
+                  permit_project.permissions_for(
+                    options[:current_user]
+                  ).teams_view?
+                end do |permit_project, _options|
+      permit_project.auto_teams
+    end
+
     association :recent_permit_applications,
                 blueprint: PermitApplicationBlueprint,
                 view: :project_base do |permit_project, options|

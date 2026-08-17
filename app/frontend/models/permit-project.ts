@@ -1,10 +1,20 @@
 import { format } from "date-fns"
 import { t } from "i18next"
-import { cast, flow, Instance, toGenerator, types } from "mobx-state-tree"
+import { cast, flow, getSnapshot, Instance, toGenerator, types } from "mobx-state-tree"
 import { datefnsTableDateFormat } from "../constants"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import { EInboxDisplayMode, EPermitProjectRollupStatus, EProjectState } from "../types/enums"
+import {
+  ECollaboratorAccess,
+  EInboxDisplayMode,
+  EPermitProjectRollupStatus,
+  EProjectAccess,
+  EProjectMembershipRole,
+  EProjectRole,
+  EProjectState,
+  EProjectTeamKind,
+  ETeamAccess,
+} from "../types/enums"
 import { IParcelGeometry, IProjectAuditSummary, IProjectDocument } from "../types/types"
 import { startBlobDownload } from "../utils/utility-functions"
 import { CollaboratorModel } from "./collaborator"
@@ -14,6 +24,16 @@ import { IPermitApplication, PermitApplicationModel } from "./permit-application
 import { PermitProjectCollaborationModel } from "./permit-project-collaboration"
 import { PermitProjectInboxApplicationSearchSlice } from "./permit-project-inbox-application-search"
 import { IProjectMeeting } from "./project-meeting"
+import { ProjectMembershipModel } from "./project-membership"
+import {
+  atLeastLevel,
+  COLLABORATOR_ACCESS_ORDER,
+  EMPTY_PROJECT_PERMISSIONS,
+  IProjectPermissions,
+  PROJECT_ACCESS_ORDER,
+  TEAM_ACCESS_ORDER,
+} from "./project-permissions"
+import { ProjectTeamModel } from "./project-team"
 
 const PermitProjectCoreModel = types.model("PermitProjectCore", {
   id: types.identifier,
@@ -71,6 +91,10 @@ const PermitProjectCoreModel = types.model("PermitProjectCore", {
   permitProjectCollaborations: types.optional(types.array(PermitProjectCollaborationModel), []),
   activeProjectMeeting: types.maybeNull(types.frozen<IProjectMeeting>()),
   displayMode: types.optional(types.enumeration(Object.values(EInboxDisplayMode)), EInboxDisplayMode.list),
+  currentUserRole: types.maybeNull(types.enumeration(Object.values(EProjectRole))),
+  currentUserPermissions: types.optional(types.frozen<IProjectPermissions>(), EMPTY_PROJECT_PERMISSIONS),
+  projectMemberships: types.optional(types.array(ProjectMembershipModel), []),
+  projectTeams: types.optional(types.array(ProjectTeamModel), []),
 })
 
 export const PermitProjectModel = types
@@ -117,6 +141,45 @@ export const PermitProjectModel = types
     get isOwner() {
       return self.ownerId === self.rootStore.userStore.currentUser?.id
     },
+    get canEditProject() {
+      return atLeastLevel(PROJECT_ACCESS_ORDER, self.currentUserPermissions?.projectAccess, EProjectAccess.edit)
+    },
+    get canViewCollaborators() {
+      return atLeastLevel(
+        COLLABORATOR_ACCESS_ORDER,
+        self.currentUserPermissions?.collaboratorAccess,
+        ECollaboratorAccess.view
+      )
+    },
+    get canInviteCollaborators() {
+      return atLeastLevel(
+        COLLABORATOR_ACCESS_ORDER,
+        self.currentUserPermissions?.collaboratorAccess,
+        ECollaboratorAccess.invite
+      )
+    },
+    get canManageCollaborators() {
+      return atLeastLevel(
+        COLLABORATOR_ACCESS_ORDER,
+        self.currentUserPermissions?.collaboratorAccess,
+        ECollaboratorAccess.manage
+      )
+    },
+    get canViewTeams() {
+      return atLeastLevel(TEAM_ACCESS_ORDER, self.currentUserPermissions?.teamAccess, ETeamAccess.view)
+    },
+    get canManageTeams() {
+      return atLeastLevel(TEAM_ACCESS_ORDER, self.currentUserPermissions?.teamAccess, ETeamAccess.manage)
+    },
+    get autoTeams() {
+      const order = [EProjectTeamKind.leads, EProjectTeamKind.contributors, EProjectTeamKind.allMembers]
+      return order.map((kind) => self.projectTeams.find((team) => team.kind === kind)).filter(Boolean)
+    },
+    membershipsForTeam(teamKind: EProjectTeamKind) {
+      if (teamKind === EProjectTeamKind.allMembers) return self.projectMemberships.slice()
+
+      return self.projectMemberships.filter((membership) => membership.teamKinds.includes(teamKind))
+    },
     get jurisdictionDifferentFromSandbox() {
       if (!self.rootStore.sandboxStore.currentSandbox) return false
       return self.jurisdiction?.id !== self.rootStore.sandboxStore.currentSandbox?.jurisdictionId
@@ -149,6 +212,12 @@ export const PermitProjectModel = types
     },
     prependNote(note: INote) {
       self.notes = cast([note.id, ...self.notes.map((existingNote) => existingNote.id).filter((id) => id !== note.id)])
+    },
+    setProjectMemberships(memberships: any[]) {
+      self.projectMemberships = cast(memberships)
+    },
+    setProjectTeams(teams: any[]) {
+      self.projectTeams = cast(teams)
     },
     downloadNotesCsv: flow(function* () {
       const response = yield* toGenerator(self.environment.api.downloadPermitProjectNotesCsv(self.id))
@@ -240,6 +309,63 @@ export const PermitProjectModel = types
     }),
   }))
   .actions((self) => ({
+    fetchProjectMemberships: flow(function* () {
+      const response = yield* toGenerator(self.environment.api.fetchProjectMemberships(self.id))
+      if (response.ok) self.setProjectMemberships(response.data.data)
+      return response.ok
+    }),
+    fetchProjectTeams: flow(function* () {
+      const response = yield* toGenerator(self.environment.api.fetchProjectTeams(self.id))
+      if (response.ok) self.setProjectTeams(response.data.data)
+      return response.ok
+    }),
+    inviteProjectMembership: flow(function* (params: {
+      role: EProjectMembershipRole
+      userId?: string
+      user?: { email: string; firstName?: string; lastName?: string }
+    }) {
+      const response = yield* toGenerator(self.environment.api.createProjectMembership(self.id, params))
+      if (response.ok) {
+        const listResponse = yield* toGenerator(self.environment.api.fetchProjectMemberships(self.id))
+        if (listResponse.ok) self.setProjectMemberships(listResponse.data.data)
+      }
+      return response
+    }),
+    updateProjectMembershipRole: flow(function* (membershipId: string, role: EProjectMembershipRole) {
+      const response = yield* toGenerator(self.environment.api.updateProjectMembership(self.id, membershipId, { role }))
+      if (response.ok) {
+        self.setProjectMemberships(
+          self.projectMemberships.map((membership) =>
+            membership.id === membershipId ? response.data.data : getSnapshot(membership)
+          )
+        )
+      }
+      return response
+    }),
+    removeProjectMembership: flow(function* (membershipId: string) {
+      const response = yield* toGenerator(self.environment.api.destroyProjectMembership(self.id, membershipId))
+      if (response.ok) {
+        self.setProjectMemberships(
+          self.projectMemberships.filter((membership) => membership.id !== membershipId).map((m) => getSnapshot(m))
+        )
+      }
+      return response
+    }),
+    reinviteProjectMembership: flow(function* (membershipId: string) {
+      return yield* toGenerator(self.environment.api.reinviteProjectMembership(self.id, membershipId))
+    }),
+    updateProjectTeam: flow(function* (
+      teamId: string,
+      params: { projectAccess?: EProjectAccess; collaboratorAccess?: ECollaboratorAccess; teamAccess?: ETeamAccess }
+    ) {
+      const response = yield* toGenerator(self.environment.api.updateProjectTeam(self.id, teamId, params))
+      if (response.ok) {
+        self.setProjectTeams(
+          self.projectTeams.map((team) => (team.id === teamId ? response.data.data : getSnapshot(team)))
+        )
+      }
+      return response
+    }),
     bulkCreatePermitApplications: flow(function* (
       params: Array<{ templateVersionId: string; jurisdictionId?: string }>
     ) {

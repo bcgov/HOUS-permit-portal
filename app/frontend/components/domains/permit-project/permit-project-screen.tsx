@@ -1,5 +1,15 @@
 import { Box, Container, Flex, IconButton, TabPanel, TabPanels, Tabs, Text } from "@chakra-ui/react"
-import { CalendarBlank, CaretLeft, Chat, ClipboardText, Folder, SquaresFour, TrendUp } from "@phosphor-icons/react"
+import {
+  CalendarBlank,
+  CaretLeft,
+  Chat,
+  ClipboardText,
+  Folder,
+  SquaresFour,
+  TrendUp,
+  Users,
+  UsersThree,
+} from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo } from "react"
 import { useForm } from "react-hook-form"
@@ -13,12 +23,14 @@ import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EditableInputWithControls } from "../../shared/editable-input-with-controls"
 import { ProjectStateBox } from "../../shared/permit-projects/project-state-box"
 import { ActivityTabPanelContent } from "./activity-tab-panel-content"
+import { CollaboratorsTabPanelContent } from "./collaborators-tab-panel-content"
 import { LocalResourcesTabPanelContent } from "./local-resources-tab-panel-content"
 import { MeetingsTabPanelContent } from "./meetings-tab-panel-content"
 import { OverviewTabPanelContent } from "./overview-tab-panel-content"
 import { PermitsTabPanelContent } from "./permits-tab-panel-content"
 import { ProjectNotesTabPanelContent } from "./project-notes-tab-panel-content"
 import { ITabItem, ProjectSidebarTabList } from "./project-sidebar-tab-list"
+import { TeamsTabPanelContent } from "./teams-tab-panel-content"
 
 export const PermitProjectScreen = observer(() => {
   const { currentPermitProject, error } = usePermitProject()
@@ -31,31 +43,40 @@ export const PermitProjectScreen = observer(() => {
   // Derive from the URL, not store current — store lags during project switches and was redirecting to the wrong project.
   const projectBasePath = permitProjectId ? `/projects/${permitProjectId}` : null
 
+  const canViewCollaborators = Boolean(currentPermitProject?.canViewCollaborators)
+  const canViewTeams = Boolean(currentPermitProject?.canViewTeams)
+
   const TABS_DATA: ITabItem[] = useMemo(() => {
     if (!projectBasePath) return []
+    // Tab indices follow position, so they stay aligned with the conditionally
+    // rendered panels below.
     return [
-      { label: t("permitProject.details.overview"), icon: SquaresFour, to: `${projectBasePath}/overview`, tabIndex: 0 },
-      { label: t("permitProject.details.activity"), icon: TrendUp, to: `${projectBasePath}/activity`, tabIndex: 1 },
-      { label: t("permitProject.details.permits"), icon: ClipboardText, to: `${projectBasePath}/permits`, tabIndex: 2 },
+      { label: t("permitProject.details.overview"), icon: SquaresFour, to: `${projectBasePath}/overview` },
+      { label: t("permitProject.details.activity"), icon: TrendUp, to: `${projectBasePath}/activity` },
+      { label: t("permitProject.details.permits"), icon: ClipboardText, to: `${projectBasePath}/permits` },
       ...(projectMeetingsEnabled
         ? [
             {
               label: t("permitProject.details.meetings"),
               icon: CalendarBlank,
               to: `${projectBasePath}/meetings`,
-              tabIndex: 3,
             },
-            { label: t("permitProject.details.notes"), icon: Chat, to: `${projectBasePath}/notes`, tabIndex: 4 },
+            { label: t("permitProject.details.notes"), icon: Chat, to: `${projectBasePath}/notes` },
           ]
         : []),
       {
         label: t("permitProject.details.localResources"),
         icon: Folder,
         to: `${projectBasePath}/local-resources`,
-        tabIndex: projectMeetingsEnabled ? 5 : 3,
       },
-    ]
-  }, [projectBasePath, projectMeetingsEnabled, t])
+      ...(canViewCollaborators
+        ? [{ label: t("permitProject.details.collaborators"), icon: Users, to: `${projectBasePath}/collaborators` }]
+        : []),
+      ...(canViewTeams
+        ? [{ label: t("permitProject.details.teams"), icon: UsersThree, to: `${projectBasePath}/teams` }]
+        : []),
+    ].map((tab, index) => ({ ...tab, tabIndex: index }))
+  }, [projectBasePath, projectMeetingsEnabled, canViewCollaborators, canViewTeams, t])
 
   const { projectMatchesRoute, tabIndex, handleTabChange, isPending } = useProjectDetailTabs({
     basePath: projectBasePath,
@@ -155,6 +176,16 @@ export const PermitProjectScreen = observer(() => {
           <TabPanel>
             {isPending ? <LoadingScreen /> : <LocalResourcesTabPanelContent permitProject={currentPermitProject} />}
           </TabPanel>
+          {canViewCollaborators && (
+            <TabPanel>
+              {isPending ? <LoadingScreen /> : <CollaboratorsTabPanelContent permitProject={currentPermitProject} />}
+            </TabPanel>
+          )}
+          {canViewTeams && (
+            <TabPanel>
+              {isPending ? <LoadingScreen /> : <TeamsTabPanelContent permitProject={currentPermitProject} />}
+            </TabPanel>
+          )}
         </TabPanels>
       </Tabs>
     </Box>

@@ -337,18 +337,22 @@ class PermitApplication < ApplicationRecord
     collaborators.any?
   end
 
+  # Returns :all, a list of requirement block ids, or nil for no edit rights.
+  # Single chokepoint for submitter-side edit rights: project-wide edit access
+  # grants everything, otherwise the legacy per-collaboration rights apply until
+  # granular team permissions replace them in phase 2.
   def submission_requirement_block_edit_permissions(user_id:)
-    if submitter_id != user_id &&
-         !collaborator?(user_id:, collaboration_type: :submission)
-      return nil
+    if permit_project&.permissions_for_user_id(user_id)&.project_edit?
+      return :all
     end
 
-    if submitter_id == user_id ||
-         collaborator?(
-           user_id:,
-           collaboration_type: :submission,
-           collaborator_type: :delegatee
-         )
+    return nil unless collaborator?(user_id:, collaboration_type: :submission)
+
+    if collaborator?(
+         user_id:,
+         collaboration_type: :submission,
+         collaborator_type: :delegatee
+       )
       return :all
     end
 
