@@ -65,7 +65,7 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
   return (
     <VStack as={"article"} spacing={5} {...containerProps}>
       <SearchGrid
-        templateColumns="minmax(0, 3fr) minmax(140px, 1fr) 180px 170px 88px"
+        templateColumns="minmax(12rem, 3fr) minmax(140px, 1fr) 180px 170px 88px"
         pos={"relative"}
         sx={{
           "[role='row']:not(:last-child) > [role='cell']": { borderBottom: "none" },
