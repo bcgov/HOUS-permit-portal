@@ -107,17 +107,12 @@ class PermitProject < ApplicationRecord
     end
   end
 
-  # Users with at least read access, for the search index.
+  # Users who can find this project in search: owner, every kept member, and
+  # legacy submission collaborators. Application visibility is still gated by
+  # project_read? (Full read), not by presence in this list.
   def readable_user_ids
-    readable_roles =
-      ProjectMembership.roles.keys.select do |role|
-        ProjectPermissions.from_teams(
-          project_teams.for_role(role)
-        ).project_read?
-      end
-
     ids = [owner_id]
-    ids += project_memberships.kept.where(role: readable_roles).pluck(:user_id)
+    ids += project_memberships.kept.pluck(:user_id)
     ids += legacy_submission_collaborations.pluck("collaborators.user_id")
     ids.compact.uniq
   end

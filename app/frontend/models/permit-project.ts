@@ -128,7 +128,19 @@ export const PermitProjectModel = types
       if (!self.firstApplicationReceivedAt) return t("permitProject.overview.notAvailable")
       return format(self.firstApplicationReceivedAt, datefnsTableDateFormat)
     },
+    // ponytail: Full read is the only application-visibility grant today, so this
+    // is a project-wide on/off. Ceiling: per-application viewing. Then this
+    // cannot stay "has Full read" — callers that skip search/grid entirely would
+    // hide apps the user is allowed to see. Upgrade: delete this getter (or make
+    // it "has any visible application") and let PermitApplicationPolicy::Scope
+    // return the subset.
+    get canViewApplications() {
+      return atLeastLevel(PROJECT_ACCESS_ORDER, self.currentUserPermissions?.projectAccess, EProjectAccess.read)
+    },
     get applicationsSummary() {
+      if (!atLeastLevel(PROJECT_ACCESS_ORDER, self.currentUserPermissions?.projectAccess, EProjectAccess.read)) {
+        return ""
+      }
       const total = self.totalPermitsCount
       if (total === 0) {
         return t("permitProject.applicationsSummary.empty")
@@ -319,17 +331,29 @@ export const PermitProjectModel = types
       if (response.ok) self.setProjectTeams(response.data.data)
       return response.ok
     }),
-    inviteProjectMembership: flow(function* (params: {
-      role: EProjectMembershipRole
-      userId?: string
-      user?: { email: string; firstName?: string; lastName?: string }
-    }) {
-      const response = yield* toGenerator(self.environment.api.createProjectMembership(self.id, params))
-      if (response.ok) {
+    inviteProjectMemberships: flow(function* (
+      users: {
+        membership: EProjectMembershipRole
+        email: string
+        firstName?: string
+        lastName?: string
+      }[]
+    ) {
+      let anyOk = false
+      for (const user of users) {
+        const response = yield* toGenerator(
+          self.environment.api.createProjectMembership(self.id, {
+            role: user.membership,
+            user: { email: user.email, firstName: user.firstName, lastName: user.lastName },
+          })
+        )
+        if (response.ok) anyOk = true
+      }
+      if (anyOk) {
         const listResponse = yield* toGenerator(self.environment.api.fetchProjectMemberships(self.id))
         if (listResponse.ok) self.setProjectMemberships(listResponse.data.data)
       }
-      return response
+      return anyOk
     }),
     updateProjectMembershipRole: flow(function* (membershipId: string, role: EProjectMembershipRole) {
       const response = yield* toGenerator(self.environment.api.updateProjectMembership(self.id, membershipId, { role }))

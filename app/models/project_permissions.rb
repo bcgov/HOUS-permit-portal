@@ -42,6 +42,8 @@ class ProjectPermissions
     )
   end
 
+  # Full read: see applications inside the project. Listing the project itself
+  # is membership, not this flag.
   def project_read?
     at_least?(:project_access, :read)
   end

@@ -222,7 +222,7 @@ class PermitApplicationPolicy < ApplicationPolicy
 
       # Base access rules (ORed together later):
       # - owner of the parent permit project
-      # - team-derived read access on the parent permit project
+      # - Full read (project_access >= read) on the parent permit project
       # - legacy submission collaborator bridge
       clauses = [
         owner_exists_sql,

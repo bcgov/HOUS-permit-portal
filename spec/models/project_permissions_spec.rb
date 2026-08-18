@@ -115,7 +115,7 @@ RSpec.describe ProjectPermissions, type: :model do
   end
 
   describe "#readable_user_ids" do
-    it "includes the owner and members whose teams grant read" do
+    it "includes the owner and every kept member" do
       lead = create(:user, :submitter)
       contributor = create(:user, :submitter)
       create(:project_membership, permit_project:, user: lead, role: :lead)
@@ -125,16 +125,6 @@ RSpec.describe ProjectPermissions, type: :model do
         user: contributor,
         role: :contributor
       )
-      permit_project.reload
-
-      expect(permit_project.readable_user_ids).to match_array(
-        [owner.id, lead.id]
-      )
-
-      permit_project
-        .project_teams
-        .find_by(kind: :all_members)
-        .update!(project_access: :read)
       permit_project.reload
 
       expect(permit_project.readable_user_ids).to match_array(

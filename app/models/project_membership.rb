@@ -22,9 +22,25 @@ class ProjectMembership < ApplicationRecord
 
   scope :for_user, ->(user) { where(user_id: user.id) }
 
+  # SQL predicate for "this user has a kept membership on the project referenced
+  # by `project_id_sql`". Membership is the floor for listing/showing a project.
+  # `:uid` must be bound by the caller.
+  def self.kept_for_user_sql(project_id_sql:)
+    <<-SQL.squish
+      EXISTS (
+        SELECT 1 FROM project_memberships pm
+        WHERE pm.permit_project_id = #{project_id_sql}
+          AND pm.user_id = :uid
+          AND pm.discarded_at IS NULL
+      )
+    SQL
+  end
+
   # SQL predicate for "this user reaches at least `minimum` project access on the
-  # project referenced by `project_id_sql`", used by policy scopes so access is
-  # decided the same way in Ruby and in SQL. `:uid` must be bound by the caller.
+  # project referenced by `project_id_sql`", used by application policy scopes so
+  # access is decided the same way in Ruby and in SQL. `:uid` must be bound by
+  # the caller. Default `:read` is Full read: seeing applications, not just the
+  # project shell.
   def self.project_access_sql(project_id_sql:, minimum: :read)
     <<-SQL.squish
       EXISTS (

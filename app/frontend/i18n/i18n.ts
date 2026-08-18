@@ -1488,6 +1488,7 @@ Thank you,
           },
           permits: {
             title: "Applications",
+            noAccess: "You don't have access to view applications on this project.",
           },
           map: {
             errorLoading: "Unable to load map",
@@ -1588,20 +1589,14 @@ Thank you,
           collaborators: {
             title: "Collaborators",
             description:
-              "Invite people to work on this project. What they can do is set by the teams their role puts them in.",
+              "Invite people to work on this project. What they can do is set by the teams their membership puts them in.",
             invite: {
-              title: "Invite a collaborator",
-              firstName: "First name",
-              lastName: "Last name",
-              email: "Email",
-              role: "Role",
-              submit: "Send invite",
-              success: "Invite sent",
+              title: "Invite collaborators",
             },
             table: {
               name: "Name",
               email: "Email",
-              role: "Role",
+              membership: "Membership",
               teams: "Teams",
               status: "Status",
               actions: "Actions",
@@ -1610,12 +1605,12 @@ Thank you,
               active: "Active",
               pending: "Invite pending",
             },
-            role: {
-              owner: "Owner",
+            membership: {
+              owner: "Steward",
               lead: "Lead",
               contributor: "Contributor",
             },
-            ownerHint: "The project creator always has full access.",
+            ownerHint: "The project steward always has full access.",
             resendInvite: "Resend invite",
             remove: "Remove",
             removeConfirmation: {
@@ -1629,7 +1624,7 @@ Thank you,
             description:
               "Permissions are additive: each collaborator gets the sum of the permissions of every team they belong to.",
             autoTeamsHint:
-              "Members of these teams are set by each collaborator's role, so they cannot be added or removed here.",
+              "Members of these teams are set by each collaborator's membership, so they cannot be added or removed here.",
             kind: {
               leads: "Leads",
               contributors: "Contributors",
@@ -1645,7 +1640,7 @@ Thank you,
             },
             projectAccess: {
               none: "No access",
-              read: "View project",
+              read: "Full read",
               edit: "Edit project",
             },
             collaboratorAccess: {

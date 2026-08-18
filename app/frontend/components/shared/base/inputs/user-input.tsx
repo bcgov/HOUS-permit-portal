@@ -10,41 +10,64 @@ import { EmailFormControl } from "../../form/email-form-control"
 import { TextFormControl } from "../../form/input-form-control"
 import { SharedSpinner } from "../shared-spinner"
 
+export interface IUserInputTypeOption {
+  value: string
+  label: string
+}
+
 interface IUserInputProps {
   index: number
   remove?: (index: number) => any
   adminOnly?: boolean
+  // Defaults to user.role (review staff). Pass typeOptions to reuse this row for
+  // other invite flows, e.g. project membership.
+  typeFieldName?: string
+  typeLabel?: string
+  typeOptions?: IUserInputTypeOption[]
 }
 
-export const UserInput = observer(({ index, remove, adminOnly }: IUserInputProps) => {
-  const { formState, control, watch } = useFormContext()
-  const { isSubmitting } = formState
-  const { t } = useTranslation()
+export const UserInput = observer(
+  ({ index, remove, adminOnly, typeFieldName = "role", typeLabel, typeOptions }: IUserInputProps) => {
+    const { formState, control, watch } = useFormContext()
+    const { isSubmitting } = formState
+    const { t } = useTranslation()
 
-  const emailWatch = watch(`users.${index}.email`)
+    const emailWatch = watch(`users.${index}.email`)
 
-  const { userStore } = useMst()
-  const { reinvitedEmails, invitedEmails, takenEmails, failedEmails } = userStore
-  const reinvited = reinvitedEmails?.includes(emailWatch)
-  const invited = invitedEmails?.includes(emailWatch)
-  const taken = takenEmails?.includes(emailWatch)
-  const failed = failedEmails?.includes(emailWatch)
+    const { userStore } = useMst()
+    const { reinvitedEmails, invitedEmails, takenEmails, failedEmails } = userStore
+    const reinvited = reinvitedEmails?.includes(emailWatch)
+    const invited = invitedEmails?.includes(emailWatch)
+    const taken = takenEmails?.includes(emailWatch)
+    const failed = failedEmails?.includes(emailWatch)
 
-  return (
-    <Flex bg="greys.grey03" p={4} borderRadius="md" flexWrap="wrap">
-      <HStack spacing={4} w="full">
-        <FormControl>
-          <FormLabel>{t("auth.role")}</FormLabel>
+    return (
+      <Flex bg="greys.grey03" p={4} borderRadius="md" flexWrap="wrap">
+        <HStack spacing={4} w="full">
+          <FormControl>
+            <FormLabel>{typeLabel || t("auth.role")}</FormLabel>
 
-          <Controller
-            name={`users.${index}.role`}
-            control={control}
-            rules={{ required: true }} // Inline validation rule
-            render={({ field }) => {
-              return (
-                <>
-                  <Select bg="greys.white" placeholder={t("ui.pleaseSelect")} {...field}>
-                    {adminOnly ? (
+            <Controller
+              name={`users.${index}.${typeFieldName}`}
+              control={control}
+              rules={{ required: true }} // Inline validation rule
+              render={({ field }) => {
+                return (
+                  <Select bg="greys.white" {...field}>
+                    {/* Native selects can't have a true placeholder; hide the empty
+                        option from the list so it only shows when nothing is chosen. */}
+                    {!field.value && (
+                      <option value="" disabled hidden>
+                        {t("ui.pleaseSelect")}
+                      </option>
+                    )}
+                    {typeOptions ? (
+                      typeOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))
+                    ) : adminOnly ? (
                       <option value={EUserRoles.superAdmin}>{t(`user.roles.${EUserRoles.superAdmin}`)}</option>
                     ) : (
                       <>
@@ -59,60 +82,60 @@ export const UserInput = observer(({ index, remove, adminOnly }: IUserInputProps
                       </>
                     )}
                   </Select>
-                </>
-              )
-            }}
-          />
-        </FormControl>
-        <EmailFormControl fieldName={`users.${index}.email`} validate required />
-        {/* Names come from IDIR/BCeID on accept; invite-time first/last are optional. */}
-        <TextFormControl label={t("user.firstName")} fieldName={`users.${index}.firstName`} />
-        <TextFormControl label={t("user.lastName")} fieldName={`users.${index}.lastName`} />
-        <Box alignSelf="flex-end" minW={150}>
-          {isSubmitting ? (
-            <SharedSpinner position="relative" top={4} left={5} minW="fit-content" />
-          ) : (
-            <>
-              {reinvited && (
-                <IInviteResultTag
-                  bg="semantic.successLight"
-                  text={t("user.reinviteSuccess")}
-                  icon={<CheckCircle size={20} />}
-                />
-              )}
-              {invited && (
-                <IInviteResultTag
-                  bg="semantic.successLight"
-                  text={t("user.inviteSuccess")}
-                  icon={<CheckCircle size={20} />}
-                />
-              )}
-              {taken && (
-                <IInviteResultTag
-                  bg="semantic.errorLight"
-                  text={t("user.inviteTakenError")}
-                  icon={<WarningCircle size={20} />}
-                />
-              )}
-              {failed && (
-                <IInviteResultTag
-                  bg="semantic.errorLight"
-                  text={t("user.inviteError")}
-                  icon={<WarningCircle size={20} />}
-                />
-              )}
-            </>
-          )}
-          {!invited && !taken && !reinvited && !failed && remove && !isSubmitting && (
-            <Button onClick={() => remove(index)} variant="tertiary" leftIcon={<X size={16} />}>
-              {t("ui.remove")}
-            </Button>
-          )}
-        </Box>
-      </HStack>
-    </Flex>
-  )
-})
+                )
+              }}
+            />
+          </FormControl>
+          <EmailFormControl fieldName={`users.${index}.email`} validate required />
+          {/* Names come from IDIR/BCeID on accept; invite-time first/last are optional. */}
+          <TextFormControl label={t("user.firstName")} fieldName={`users.${index}.firstName`} />
+          <TextFormControl label={t("user.lastName")} fieldName={`users.${index}.lastName`} />
+          <Box alignSelf="flex-end" minW={150}>
+            {isSubmitting ? (
+              <SharedSpinner position="relative" top={4} left={5} minW="fit-content" />
+            ) : (
+              <>
+                {reinvited && (
+                  <IInviteResultTag
+                    bg="semantic.successLight"
+                    text={t("user.reinviteSuccess")}
+                    icon={<CheckCircle size={20} />}
+                  />
+                )}
+                {invited && (
+                  <IInviteResultTag
+                    bg="semantic.successLight"
+                    text={t("user.inviteSuccess")}
+                    icon={<CheckCircle size={20} />}
+                  />
+                )}
+                {taken && (
+                  <IInviteResultTag
+                    bg="semantic.errorLight"
+                    text={t("user.inviteTakenError")}
+                    icon={<WarningCircle size={20} />}
+                  />
+                )}
+                {failed && (
+                  <IInviteResultTag
+                    bg="semantic.errorLight"
+                    text={t("user.inviteError")}
+                    icon={<WarningCircle size={20} />}
+                  />
+                )}
+              </>
+            )}
+            {!invited && !taken && !reinvited && !failed && remove && !isSubmitting && (
+              <Button onClick={() => remove(index)} variant="tertiary" leftIcon={<X size={16} />}>
+                {t("ui.remove")}
+              </Button>
+            )}
+          </Box>
+        </HStack>
+      </Flex>
+    )
+  }
+)
 
 interface IInviteResultTagProps extends TagProps {
   icon: ReactNode

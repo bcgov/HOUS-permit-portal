@@ -7,7 +7,7 @@ class Api::ProjectAuditsController < Api::ApplicationController
   before_action :set_permit_project
 
   def index
-    authorize @permit_project, :show?
+    authorize @permit_project, :search_activities?
     perform_project_audit_search
 
     render_success @search,

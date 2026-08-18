@@ -24,6 +24,7 @@ RSpec.describe PermitProjectPolicy, type: :policy do
       expect(p.pin?).to be true
       expect(p.unpin?).to be true
       expect(p.search_permit_applications?).to be true
+      expect(p.search_activities?).to be true
       expect(p.create_permit_applications?).to be true
       expect(p.submission_collaborator_options?).to be true
       expect(p.download_notes_csv?).to be true
@@ -53,19 +54,24 @@ RSpec.describe PermitProjectPolicy, type: :policy do
       permit_project.reload
     end
 
-    it "denies everything while the contributors team grants nothing" do
+    it "lists the project for a contributor even when teams grant no project access" do
       p = policy(member)
-      expect(p.index?).to be false
-      expect(p.show?).to be false
+      expect(p.index?).to be true
+      expect(p.show?).to be true
+      expect(p.pin?).to be true
+      expect(p.search_permit_applications?).to be false
+      expect(p.search_activities?).to be false
       expect(p.update?).to be false
     end
 
-    it "permits show once a team the contributor belongs to grants read" do
+    it "lets a contributor search applications and activity once a team grants full read" do
       team(:all_members).update!(project_access: :read)
       permit_project.reload
 
       p = policy(member)
       expect(p.show?).to be true
+      expect(p.search_permit_applications?).to be true
+      expect(p.search_activities?).to be true
       expect(p.update?).to be false
     end
   end
@@ -94,13 +100,13 @@ RSpec.describe PermitProjectPolicy, type: :policy do
       expect(resolved_ids(owner)).not_to include(other_project.id)
     end
 
-    it "excludes projects where the membership grants no read access" do
+    it "includes projects the user is a member of even without full read" do
       create(:project_membership, permit_project:, user: member)
 
-      expect(resolved_ids(member)).not_to include(permit_project.id)
+      expect(resolved_ids(member)).to include(permit_project.id)
     end
 
-    it "includes projects where a team grants read access" do
+    it "includes projects where a team grants full read" do
       create(:project_membership, :lead, permit_project:, user: member)
 
       expect(resolved_ids(member)).to include(permit_project.id)

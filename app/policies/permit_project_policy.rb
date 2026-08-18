@@ -18,7 +18,7 @@ class PermitProjectPolicy < ApplicationPolicy
     def resolve
       clauses = [
         "permit_projects.owner_id = :uid",
-        ProjectMembership.project_access_sql(
+        ProjectMembership.kept_for_user_sql(
           project_id_sql: "permit_projects.id"
         ),
         LEGACY_SUBMISSION_COLLABORATION_SQL
@@ -40,7 +40,7 @@ class PermitProjectPolicy < ApplicationPolicy
 
   # Check if the user can index/list projects (relies on the Scope above for actual filtering)
   def index?
-    permissions.project_read?
+    project_listed?
   end
 
   def pinned?
@@ -49,7 +49,7 @@ class PermitProjectPolicy < ApplicationPolicy
 
   # This is for authorizing a specific project instance (e.g., in a show action).
   def show?
-    permissions.project_read? || user_is_review_staff_for_jurisdiction?
+    project_listed? || user_is_review_staff_for_jurisdiction?
   end
 
   def create?
@@ -65,15 +65,19 @@ class PermitProjectPolicy < ApplicationPolicy
   end
 
   def pin?
-    permissions.project_read?
+    project_listed?
   end
 
   def unpin?
-    permissions.project_read?
+    project_listed?
   end
 
   def search_permit_applications?
     permissions.project_read?
+  end
+
+  def search_activities?
+    permissions.project_read? || user_is_review_staff_for_jurisdiction?
   end
 
   def mark_as_viewed?
@@ -134,6 +138,18 @@ class PermitProjectPolicy < ApplicationPolicy
     return false unless user && record.respond_to?(:owner_id)
 
     record.owner_id == user.id
+  end
+
+  # Membership is the floor: a kept member (or owner) can find and open the
+  # project shell. Full read (`project_read?`) is required to see applications.
+  def project_listed?
+    user_is_owner? || membership_present? || permissions.project_read?
+  end
+
+  def membership_present?
+    return false unless user && record.respond_to?(:membership_for)
+
+    record.membership_for(user).present?
   end
 
   def user_is_review_staff_for_jurisdiction?

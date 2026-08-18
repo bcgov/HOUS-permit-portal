@@ -45,6 +45,7 @@ export const PermitProjectScreen = observer(() => {
 
   const canViewCollaborators = Boolean(currentPermitProject?.canViewCollaborators)
   const canViewTeams = Boolean(currentPermitProject?.canViewTeams)
+  const canViewActivity = Boolean(currentPermitProject?.canViewApplications)
 
   const TABS_DATA: ITabItem[] = useMemo(() => {
     if (!projectBasePath) return []
@@ -52,7 +53,9 @@ export const PermitProjectScreen = observer(() => {
     // rendered panels below.
     return [
       { label: t("permitProject.details.overview"), icon: SquaresFour, to: `${projectBasePath}/overview` },
-      { label: t("permitProject.details.activity"), icon: TrendUp, to: `${projectBasePath}/activity` },
+      ...(canViewActivity
+        ? [{ label: t("permitProject.details.activity"), icon: TrendUp, to: `${projectBasePath}/activity` }]
+        : []),
       { label: t("permitProject.details.permits"), icon: ClipboardText, to: `${projectBasePath}/permits` },
       ...(projectMeetingsEnabled
         ? [
@@ -76,7 +79,7 @@ export const PermitProjectScreen = observer(() => {
         ? [{ label: t("permitProject.details.teams"), icon: UsersThree, to: `${projectBasePath}/teams` }]
         : []),
     ].map((tab, index) => ({ ...tab, tabIndex: index }))
-  }, [projectBasePath, projectMeetingsEnabled, canViewCollaborators, canViewTeams, t])
+  }, [projectBasePath, projectMeetingsEnabled, canViewActivity, canViewCollaborators, canViewTeams, t])
 
   const { projectMatchesRoute, tabIndex, handleTabChange, isPending } = useProjectDetailTabs({
     basePath: projectBasePath,
@@ -157,9 +160,11 @@ export const PermitProjectScreen = observer(() => {
           <TabPanel>
             {isPending ? <LoadingScreen /> : <OverviewTabPanelContent permitProject={currentPermitProject} />}
           </TabPanel>
-          <TabPanel>
-            {isPending ? <LoadingScreen /> : <ActivityTabPanelContent permitProject={currentPermitProject} />}
-          </TabPanel>
+          {canViewActivity && (
+            <TabPanel>
+              {isPending ? <LoadingScreen /> : <ActivityTabPanelContent permitProject={currentPermitProject} />}
+            </TabPanel>
+          )}
           <TabPanel>
             {isPending ? <LoadingScreen /> : <PermitsTabPanelContent permitProject={currentPermitProject} />}
           </TabPanel>
