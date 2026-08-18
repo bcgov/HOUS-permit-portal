@@ -8,6 +8,7 @@ import { useMst } from "../../../../setup/root"
 import { EUserRoles } from "../../../../types/enums"
 import { EmailFormControl } from "../../form/email-form-control"
 import { TextFormControl } from "../../form/input-form-control"
+import { InfoTooltip } from "../../info-tooltip"
 import { SharedSpinner } from "../shared-spinner"
 
 export interface IUserInputTypeOption {
@@ -23,6 +24,7 @@ interface IUserInputProps {
   // other invite flows, e.g. project membership.
   typeFieldName?: string
   typeLabel?: string
+  typeTooltip?: string
   typeOptions?: IUserInputTypeOption[]
   showNameFields?: boolean
 }
@@ -34,6 +36,7 @@ export const UserInput = observer(
     adminOnly,
     typeFieldName = "role",
     typeLabel,
+    typeTooltip,
     typeOptions,
     showNameFields = true,
   }: IUserInputProps) => {
@@ -54,7 +57,19 @@ export const UserInput = observer(
       <Flex bg="greys.grey03" p={4} borderRadius="md" flexWrap="wrap">
         <HStack spacing={4} w="full">
           <FormControl>
-            <FormLabel>{typeLabel || t("auth.role")}</FormLabel>
+            <HStack spacing={1} align="center" mb={2}>
+              <FormLabel mb={0}>{typeLabel || t("auth.role")}</FormLabel>
+              {typeTooltip && (
+                <InfoTooltip
+                  hasArrow
+                  placement="top"
+                  maxW="320px"
+                  whiteSpace="normal"
+                  label={typeTooltip}
+                  ariaLabel={typeTooltip}
+                />
+              )}
+            </HStack>
 
             <Controller
               name={`users.${index}.${typeFieldName}`}

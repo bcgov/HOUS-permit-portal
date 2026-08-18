@@ -30,6 +30,7 @@ import { IProjectMembership } from "../../../models/project-membership"
 import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus, EProjectMembershipRole, EProjectTeamKind } from "../../../types/enums"
 import { UserInput } from "../../shared/base/inputs/user-input"
+import { InfoTooltip } from "../../shared/info-tooltip"
 import { RemoveConfirmationModal } from "../../shared/modals/remove-confirmation-modal"
 import { RequestLoadingButton } from "../../shared/request-loading-button"
 
@@ -71,7 +72,7 @@ export const CollaboratorsTabPanelContent = observer(({ permitProject }: IProps)
 const InviteSection = observer(({ permitProject }: IProps) => {
   const { t } = useTranslation()
   const defaultUserValues = {
-    membership: EProjectMembershipRole.contributor,
+    membership: EProjectMembershipRole.lead,
     email: "",
     firstName: "",
     lastName: "",
@@ -119,6 +120,7 @@ const InviteSection = observer(({ permitProject }: IProps) => {
                 remove={remove}
                 typeFieldName="membership"
                 typeLabel={t("permitProject.collaborators.table.membership")}
+                typeTooltip={t("permitProject.collaborators.invite.membershipTooltip")}
                 typeOptions={membershipOptions}
                 showNameFields={false}
               />
@@ -160,9 +162,24 @@ const CollaboratorsTable = observer(({ permitProject }: IProps) => {
           <Tr>
             <Th>{t("permitProject.collaborators.table.name")}</Th>
             <Th>{t("permitProject.collaborators.table.email")}</Th>
-            <Th>{t("permitProject.collaborators.table.membership")}</Th>
-            <Th>{t("permitProject.collaborators.table.teams")}</Th>
-            <Th>{t("permitProject.collaborators.table.status")}</Th>
+            <Th>
+              <HeaderWithTooltip
+                label={t("permitProject.collaborators.table.membership")}
+                tooltip={t("permitProject.collaborators.table.membershipTooltip")}
+              />
+            </Th>
+            <Th>
+              <HeaderWithTooltip
+                label={t("permitProject.collaborators.table.teams")}
+                tooltip={t("permitProject.collaborators.table.teamsTooltip")}
+              />
+            </Th>
+            <Th>
+              <HeaderWithTooltip
+                label={t("permitProject.collaborators.table.status")}
+                tooltip={t("permitProject.collaborators.table.statusTooltip")}
+              />
+            </Th>
             <Th>{t("permitProject.collaborators.table.actions")}</Th>
           </Tr>
         </Thead>
@@ -192,7 +209,17 @@ const OwnerRow = observer(({ permitProject }: IProps) => {
       <Td>{permitProject.ownerName}</Td>
       <Td />
       <Td>
-        <Badge>{t("permitProject.collaborators.membership.owner")}</Badge>
+        <HStack spacing={1} align="center">
+          <Badge>{t("permitProject.collaborators.membership.owner")}</Badge>
+          <InfoTooltip
+            hasArrow
+            placement="top"
+            maxW="320px"
+            whiteSpace="normal"
+            label={t("permitProject.collaborators.membership.ownerTooltip")}
+            ariaLabel={t("permitProject.collaborators.membership.ownerTooltip")}
+          />
+        </HStack>
       </Td>
       <Td />
       <Td>{t("permitProject.collaborators.status.active")}</Td>
@@ -269,6 +296,13 @@ const MembershipRow = observer(({ permitProject, membership }: IProps & { member
     </Tr>
   )
 })
+
+const HeaderWithTooltip = ({ label, tooltip }: { label: string; tooltip: string }) => (
+  <HStack spacing={1} align="center">
+    <Text as="span">{label}</Text>
+    <InfoTooltip hasArrow placement="top" maxW="320px" whiteSpace="normal" label={tooltip} ariaLabel={tooltip} />
+  </HStack>
+)
 
 const MembershipActionsMenu = observer(({ permitProject, membership }: IProps & { membership: IProjectMembership }) => {
   const { t } = useTranslation()

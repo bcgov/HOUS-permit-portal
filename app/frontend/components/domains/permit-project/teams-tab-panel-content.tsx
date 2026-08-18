@@ -8,6 +8,7 @@ import { COLLABORATOR_ACCESS_ORDER, PROJECT_ACCESS_ORDER, TEAM_ACCESS_ORDER } fr
 import { IProjectTeam } from "../../../models/project-team"
 import { EFlashMessageStatus, EProjectTeamKind } from "../../../types/enums"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
+import { InfoTooltip } from "../../shared/info-tooltip"
 
 interface IProps {
   permitProject: IPermitProject
@@ -55,9 +56,21 @@ const TeamCard = observer(({ permitProject, team }: IProps & { team: IProjectTea
     <Box border="1px solid" borderColor="border.light" borderRadius="sm" p={6}>
       <Flex justify="space-between" align="baseline" mb={4} gap={4} wrap="wrap">
         <Box>
-          <Heading as="h3" size="md" mb={1}>
-            {t(`permitProject.teams.kind.${team.kind as EProjectTeamKind}`)}
-          </Heading>
+          <HStack spacing={1} align="center" mb={1}>
+            <Heading as="h3" size="md" mb={0}>
+              {t(`permitProject.teams.kind.${team.kind as EProjectTeamKind}`)}
+            </Heading>
+            {team.kind !== EProjectTeamKind.custom && (
+              <InfoTooltip
+                hasArrow
+                placement="top"
+                maxW="320px"
+                whiteSpace="normal"
+                label={t(`permitProject.teams.kindTooltip.${team.kind as EProjectTeamKind}`)}
+                ariaLabel={t(`permitProject.teams.kindTooltip.${team.kind as EProjectTeamKind}`)}
+              />
+            )}
+          </HStack>
           <Text fontSize="sm" color="text.secondary">
             {t("permitProject.teams.memberCount", { count: members.length })}
           </Text>

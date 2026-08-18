@@ -1589,16 +1589,23 @@ Thank you,
           collaborators: {
             title: "Collaborators",
             description:
-              "Invite people to work on this project. What they can do is set by the teams their membership puts them in.",
+              "Invite people to work on this project. Lead is the default and starts with full access; choose Contributor for a more limited starting point. What each group can do is set on the Teams tab.",
             invite: {
               title: "Invite collaborators",
+              membershipTooltip:
+                "Lead starts with full access; Contributor starts with none. Adjust either on the Teams tab.",
             },
             table: {
               name: "Name",
               email: "Email",
               membership: "Membership",
+              membershipTooltip:
+                "Membership chooses the Leads or Contributors team. Changing it updates their access immediately.",
               teams: "Teams",
+              teamsTooltip:
+                "Auto-teams follow membership. Pending invitations are not on a team until they are accepted.",
               status: "Status",
+              statusTooltip: "Pending invitations grant no access until they are accepted.",
               actions: "Actions",
             },
             status: {
@@ -1607,6 +1614,8 @@ Thank you,
             },
             membership: {
               owner: "Steward",
+              ownerTooltip:
+                "The steward owns this project and always has full access. They are not assigned a Lead or Contributor membership.",
               lead: "Lead",
               contributor: "Contributor",
             },
@@ -1644,6 +1653,14 @@ Thank you,
               contributors: "Contributors",
               all_members: "All members",
               custom: "Team",
+            },
+            kindTooltip: {
+              leads:
+                "Everyone invited as a Lead is on this team. By default, Leads can edit the project and manage collaborators and teams.",
+              contributors:
+                "Everyone invited as a Contributor is on this team. By default they have no access—raise these permissions to grant them any.",
+              all_members:
+                "Every accepted collaborator is on this team, whether they are a Lead or a Contributor. Use this for permissions everyone should share.",
             },
             memberCount_one: "{{count}} member",
             memberCount_other: "{{count}} members",
