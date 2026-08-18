@@ -7,7 +7,7 @@ class Api::PermitProjects::TeamsController < Api::ApplicationController
   def index
     authorize @permit_project, :index?, policy_class: ProjectTeamPolicy
 
-    # TODO(phase 2): custom teams (e.g. viewers, plumbers) with explicit
+    # COLLAB TODO(phase 2): custom teams (e.g. viewers, plumbers) with explicit
     # membership and granular per-record permissions.
     render_success @permit_project.auto_teams,
                    nil,

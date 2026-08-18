@@ -2,7 +2,7 @@ class CreateProjectMembershipsAndTeams < ActiveRecord::Migration[7.2]
   def change
     create_table :project_memberships, id: :uuid do |t|
       t.references :permit_project, null: false, foreign_key: true, type: :uuid
-      t.references :user, null: false, foreign_key: true, type: :uuid
+      t.references :user, null: true, foreign_key: true, type: :uuid
       t.references :invited_by,
                    null: true,
                    foreign_key: {
@@ -10,6 +10,10 @@ class CreateProjectMembershipsAndTeams < ActiveRecord::Migration[7.2]
                    },
                    type: :uuid
       t.integer :role, null: false, default: 0
+      t.string :invited_email, null: false
+      t.datetime :accepted_at
+      t.string :invitation_token_digest
+      t.datetime :invitation_sent_at
       t.datetime :discarded_at
 
       t.timestamps
@@ -19,8 +23,18 @@ class CreateProjectMembershipsAndTeams < ActiveRecord::Migration[7.2]
     add_index :project_memberships,
               %i[permit_project_id user_id],
               unique: true,
+              where: "discarded_at IS NULL AND user_id IS NOT NULL",
+              name: "index_project_memberships_unique_kept_user_per_project"
+    add_index :project_memberships,
+              %i[permit_project_id invited_email],
+              unique: true,
               where: "discarded_at IS NULL",
-              name: "index_project_memberships_unique_kept_per_project"
+              name: "index_project_memberships_unique_kept_email_per_project"
+    add_index :project_memberships,
+              :invitation_token_digest,
+              unique: true,
+              where: "invitation_token_digest IS NOT NULL",
+              name: "index_project_memberships_unique_invitation_token"
 
     create_table :project_teams, id: :uuid do |t|
       t.references :permit_project, null: false, foreign_key: true, type: :uuid

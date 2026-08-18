@@ -6,7 +6,7 @@ class ProjectTeam < ApplicationRecord
   TEAM_ACCESS_LEVELS = { none: 0, view: 1, manage: 2 }.freeze
   ACCESS_DOMAINS = %i[project_access collaborator_access team_access].freeze
 
-  # TODO(phase 2): an owner team (single member, all domains locked at max) once
+  # COLLAB TODO(phase 3): an owner team (single member, all domains locked at max) once
   # ownership transfer and jurisdiction-as-owner land.
   AUTO_TEAM_DEFAULTS = {
     leads: {
@@ -47,8 +47,9 @@ class ProjectTeam < ApplicationRecord
 
   # ponytail: auto team membership is derived from ProjectMembership#role rather
   # than stored, so there is no join table and no sync to drift. Ceiling: custom
-  # teams need explicit membership -- adding project_team_memberships in phase 2
-  # means one extra OR branch here and in ProjectMembership.project_access_sql.
+  # teams need explicit membership. COLLAB TODO(phase 2): adding
+  # project_team_memberships means one extra OR branch here and in
+  # ProjectMembership.project_access_sql.
   scope :for_role,
         ->(role) { where(kind: [:all_members, kind_for_role(role)].compact) }
 
@@ -70,7 +71,7 @@ class ProjectTeam < ApplicationRecord
   def members
     return ProjectMembership.none if custom?
 
-    scope = permit_project.project_memberships.kept
+    scope = permit_project.project_memberships.kept.accepted
     all_members? ? scope : scope.where(role: role_for_kind)
   end
 

@@ -452,6 +452,11 @@ const ExportTemplateSummaryScreen = lazy(() =>
 const AcceptInvitationScreen = lazy(() =>
   import("../users/accept-invitation-screen").then((module) => ({ default: module.AcceptInvitationScreen }))
 )
+const AcceptProjectInvitationScreen = lazy(() =>
+  import("../permit-project/accept-project-invitation-screen").then((module) => ({
+    default: module.AcceptProjectInvitationScreen,
+  }))
+)
 const InviteScreen = lazy(() => import("../users/invite-screen").then((module) => ({ default: module.InviteScreen })))
 const ProfileScreen = lazy(() =>
   import("../users/profile-screen").then((module) => ({ default: module.ProfileScreen }))
@@ -984,6 +989,7 @@ const AppRoutes = observer(() => {
         </Route>
         {/* Public Routes */}
         <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
+        <Route path="/accept-project-invitation" element={<AcceptProjectInvitationScreen />} />
         <Route path="/contact" element={<ContactScreen />} />
         <Route path="/release-notes" element={<ReleaseNotesScreen />} />
         <Route path="/videos" element={<HelpVideosIndexScreen />} />

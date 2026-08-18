@@ -15,16 +15,36 @@ export const ProjectMembershipModel = types
     id: types.identifier,
     permitProjectId: types.string,
     role: types.enumeration(Object.values(EProjectMembershipRole)),
-    user: types.frozen<IProjectMemberUser>(),
+    user: types.optional(types.maybeNull(types.frozen<IProjectMemberUser>()), null),
+    invitedEmail: types.maybeNull(types.string),
     teamKinds: types.optional(types.array(types.enumeration(Object.values(EProjectTeamKind))), []),
     isInvitationPending: types.optional(types.boolean, false),
     invitedByName: types.maybeNull(types.string),
     createdAt: types.maybeNull(types.Date),
   })
   .views((self) => ({
+    get email() {
+      return self.invitedEmail || self.user?.email || ""
+    },
     get name() {
-      return [self.user?.firstName, self.user?.lastName].filter(Boolean).join(" ") || self.user?.email
+      if (self.isInvitationPending) return ""
+      return (
+        [self.user?.firstName, self.user?.lastName].filter(Boolean).join(" ") ||
+        self.invitedEmail ||
+        self.user?.email ||
+        ""
+      )
     },
   }))
 
 export interface IProjectMembership extends Instance<typeof ProjectMembershipModel> {}
+
+export interface IProjectMembershipInvitation {
+  id: string
+  role: EProjectMembershipRole
+  invitedEmail: string
+  expired: boolean
+  projectId: string
+  projectTitle: string
+  inviterName?: string | null
+}

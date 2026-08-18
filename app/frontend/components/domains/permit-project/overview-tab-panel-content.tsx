@@ -222,7 +222,7 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
         </Grid>
       </Box>
 
-      {/* ponytail: same Full-read on/off as the Applications tab; drop this gate
+      {/* COLLAB TODO(phase 4): same Full-read on/off as the Applications tab; drop this gate
           when per-application viewing can populate recent apps from scope. */}
       {permitProject.canViewApplications && (
         <Box as="section">

@@ -772,7 +772,7 @@ export enum EProjectState {
 
 // Project collaborators: "owner" is derived from the project owner rather than
 // being a ProjectMembership role.
-// TODO(phase 2): ownership transfer, and jurisdictions as owners.
+// COLLAB TODO(phase 3): ownership transfer, and jurisdictions as owners.
 export enum EProjectRole {
   owner = "owner",
   lead = "lead",

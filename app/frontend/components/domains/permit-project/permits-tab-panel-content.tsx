@@ -29,7 +29,7 @@ export const PermitsTabPanelContent = observer(({ permitProject }: IProps) => {
     permitApplicationStore
   const canViewApplications = permitProject.canViewApplications
 
-  // ponytail: skipping search without Full read is correct until per-application
+  // COLLAB TODO(phase 4): skipping search without Full read is correct until per-application
   // viewing exists. Then always search — you should not need project-wide Full
   // read to see any results; policy_scope returns the apps the user can see.
   useSearch(permitApplicationStore, canViewApplications ? [permitProject.id] : [null])
@@ -48,7 +48,7 @@ export const PermitsTabPanelContent = observer(({ permitProject }: IProps) => {
           </HStack>
           <AddPermitsButton permitProject={permitProject} />
         </Flex>
-        {/* ponytail: this "no Full read → no results at all" branch goes away when
+        {/* COLLAB TODO(phase 4): this "no Full read → no results at all" branch goes away when
             per-application viewing lands; render the grid from search results even
             if the user lacks project-wide Full read. */}
         {!canViewApplications ? (

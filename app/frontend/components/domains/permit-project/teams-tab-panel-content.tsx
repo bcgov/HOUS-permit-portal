@@ -30,7 +30,7 @@ export const TeamsTabPanelContent = observer(({ permitProject }: IProps) => {
 
       <CustomMessageBox status={EFlashMessageStatus.info} description={t("permitProject.teams.autoTeamsHint")} />
 
-      {/* TODO(phase 2): add custom teams (e.g. viewers, plumbers) with explicit
+      {/* COLLAB TODO(phase 2): add custom teams (e.g. viewers, plumbers) with explicit
           membership and granular per-record permissions. */}
       <Stack spacing={6}>
         {permitProject.autoTeams.map((team) => (

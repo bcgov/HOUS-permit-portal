@@ -135,6 +135,8 @@ en:
             user:
               already_a_member: "is already a collaborator on this project"
               is_project_owner: "is the project owner and already has full access"
+            invited_email:
+              already_invited: "already has an invitation or membership on this project"
         requirement_template:
           step_code_package_required: '"Energy Step Code" is required to have the Design package Energy Step Code file'
           duplicate_energy_step_code: 'Multiple "Energy Step Code" requirements found. Please ensure there is only one "Energy Step Code" requirement in the template'
@@ -215,6 +217,7 @@ en:
       property_information_contact_confirm: "Confirm property information request notification email"
       new_jurisdiction_membership: "New jurisdiction membership"
       notify_permit_collaboration: "Welcome you have been invited to Collaborate in the Building Permit Hub"
+      notify_project_membership_invitation: "You’ve been invited to %{project_title}"
       notify_project_review_collaboration: "You have been assigned as a review collaborator on a project"
       notify_new_or_unconfirmed_permit_collaboration: "You’re Invited to Collaborate on a Building Permit Application"
       notify_new_or_unconfirmed_preview: "You’re Invited to Preview a Building Permit Template"
@@ -790,7 +793,7 @@ en:
     project_membership:
       create_success:
         title: ""
-        message: "Collaborator added to the project"
+        message: "Invitation sent"
       create_error:
         title: Error
         message: "%{error_message}"
@@ -809,6 +812,12 @@ en:
       reinvite_success:
         title: ""
         message: "Invitation resent"
+      accept_success:
+        title: ""
+        message: "You have joined the project"
+      accept_error:
+        title: Error
+        message: "%{error_message}"
     project_team:
       update_success:
         title: ""
@@ -1180,8 +1189,14 @@ en:
       invite:
         email_required: "An email address is required to invite a collaborator"
         owner_already_member: "The project owner already has full access"
-        create_user_error: "Failed to invite user to the project: %{error_message}"
+        already_invited: "This email already has an invitation or membership on this project"
+        already_accepted: "This collaborator has already joined the project"
         membership_error: "Failed to add collaborator to the project: %{error_message}"
+      accept:
+        expired: "This invitation has expired. Ask the project steward to send it again."
+        already_accepted: "This invitation has already been accepted"
+        owner_already_member: "The project owner already has full access"
+        already_a_member: "You already have access to this project"
     template_versioning_service:
       invalid_schedule_date: "Version date must be in the future and after latest scheduled version date"
       force_publish_disabled: "Force publish is not enabled"

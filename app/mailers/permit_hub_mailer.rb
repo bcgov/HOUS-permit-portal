@@ -69,6 +69,25 @@ class PermitHubMailer < ApplicationMailer
     )
   end
 
+  def notify_project_membership_invitation(project_membership:, raw_token:)
+    @project_membership = project_membership
+    @permit_project = project_membership.permit_project
+    @inviter = project_membership.invited_by
+    @raw_token = raw_token
+    @accept_url =
+      FrontendUrlHelper.frontend_url(
+        "/accept-project-invitation?token=#{raw_token}"
+      )
+
+    send_mail(
+      email: project_membership.invited_email,
+      template_key: :notify_project_membership_invitation,
+      subject_i18n_params: {
+        project_title: @permit_project.title
+      }
+    )
+  end
+
   def notify_permit_collaboration(permit_collaboration:)
     @permit_collaboration = permit_collaboration
     @user = permit_collaboration.collaborator.user

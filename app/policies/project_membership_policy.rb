@@ -1,4 +1,8 @@
 class ProjectMembershipPolicy < ApplicationPolicy
+  def accept?
+    user.present?
+  end
+
   def index?
     permissions.collaborators_view?
   end

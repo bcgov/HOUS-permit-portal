@@ -90,7 +90,7 @@ class PermitProject < ApplicationRecord
   def membership_for_user_id(user_id)
     return nil if user_id.blank?
 
-    project_memberships.kept.find_by(user_id: user_id)
+    project_memberships.kept.accepted.find_by(user_id: user_id)
   end
 
   # "owner" is not a ProjectMembership role, so the tabs need it derived.
@@ -112,7 +112,7 @@ class PermitProject < ApplicationRecord
   # project_read? (Full read), not by presence in this list.
   def readable_user_ids
     ids = [owner_id]
-    ids += project_memberships.kept.pluck(:user_id)
+    ids += project_memberships.kept.accepted.pluck(:user_id)
     ids += legacy_submission_collaborations.pluck("collaborators.user_id")
     ids.compact.uniq
   end
@@ -437,10 +437,10 @@ class PermitProject < ApplicationRecord
     permissions.at_least(project_access: legacy_collaboration_access(user_id))
   end
 
-  # ponytail: temporary bridge so submission collaborators created under the old
+  # COLLAB TODO(phase 5): temporary bridge so submission collaborators created under the old
   # model keep read access after the swap onto team permissions. Their per-block
   # edit rights still come from PermitCollaboration itself. Remove together with
-  # the phase 2 migration of collaborations onto project teams.
+  # the migration of collaborations onto project teams.
   def legacy_collaboration_access(user_id)
     if legacy_submission_collaborations.exists?(
          collaborators: {

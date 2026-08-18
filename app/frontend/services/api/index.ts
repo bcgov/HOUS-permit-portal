@@ -20,7 +20,7 @@ import { IPermitProject } from "../../models/permit-project"
 import { IPreCheck } from "../../models/pre-check"
 import { IProjectAudit } from "../../models/project-audit"
 import { IProjectMeeting } from "../../models/project-meeting"
-import { IProjectMembership } from "../../models/project-membership"
+import { IProjectMembership, IProjectMembershipInvitation } from "../../models/project-membership"
 import { IProjectTeam } from "../../models/project-team"
 import { IReleaseNote } from "../../models/release-note-model"
 import { IRequirementTemplate } from "../../models/requirement-template"
@@ -347,12 +347,11 @@ export class Api {
     projectId: string,
     params: {
       role: EProjectMembershipRole
-      userId?: string
-      user?: { email: string; firstName?: string; lastName?: string }
+      user?: { email: string }
     }
   ) {
     return this.client.post<ApiResponse<IProjectMembership>>(`/permit_projects/${projectId}/memberships`, {
-      projectMembership: { role: params.role, userId: params.userId },
+      projectMembership: { role: params.role },
       user: params.user,
     })
   }
@@ -373,6 +372,18 @@ export class Api {
   async reinviteProjectMembership(projectId: string, membershipId: string) {
     return this.client.post<ApiResponse<IProjectMembership>>(
       `/permit_projects/${projectId}/memberships/${membershipId}/reinvite`
+    )
+  }
+
+  async fetchProjectMembershipInvitation(token: string) {
+    return this.client.get<ApiResponse<IProjectMembershipInvitation>>(
+      `/project_membership_invitations/${encodeURIComponent(token)}`
+    )
+  }
+
+  async acceptProjectMembershipInvitation(token: string) {
+    return this.client.post<ApiResponse<IProjectMembership>>(
+      `/project_membership_invitations/${encodeURIComponent(token)}/accept`
     )
   }
 

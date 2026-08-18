@@ -40,6 +40,8 @@ class BackfillProjectMembershipsFromCollaborations < ActiveRecord::Migration[
           )
         membership.discarded_at = nil
         membership.role = role
+        membership.invited_email = membership.user.email
+        membership.accepted_at ||= Time.current
         membership.save!
       end
     end

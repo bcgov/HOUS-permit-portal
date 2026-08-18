@@ -82,6 +82,18 @@ RSpec.describe PermitProjectPolicy, type: :policy do
       expect(p.index?).to be false
       expect(p.show?).to be false
     end
+
+    it "does not list the project for a pending invite to that user's email" do
+      create(
+        :project_membership,
+        :pending,
+        permit_project:,
+        invited_email: member.email
+      )
+
+      expect(policy(member).show?).to be false
+      expect(policy(member).index?).to be false
+    end
   end
 
   describe "#create? and #jurisdiction_options?" do
@@ -106,13 +118,24 @@ RSpec.describe PermitProjectPolicy, type: :policy do
       expect(resolved_ids(member)).to include(permit_project.id)
     end
 
+    it "does not include projects with only a pending invite" do
+      create(
+        :project_membership,
+        :pending,
+        permit_project:,
+        invited_email: member.email
+      )
+
+      expect(resolved_ids(member)).not_to include(permit_project.id)
+    end
+
     it "includes projects where a team grants full read" do
       create(:project_membership, :lead, permit_project:, user: member)
 
       expect(resolved_ids(member)).to include(permit_project.id)
     end
 
-    # ponytail bridge: remove alongside the legacy submission collaborations.
+    # COLLAB TODO(phase 5): remove alongside the legacy submission collaborations.
     it "includes projects reached through a legacy submission collaboration" do
       permit_application =
         create(:permit_application, permit_project:, submitter: owner)

@@ -197,9 +197,9 @@ class PermitApplicationPolicy < ApplicationPolicy
       submission_type =
         PermitCollaboration.collaboration_types.fetch(:submission)
 
-      # ponytail: mirrors the legacy bridge in PermitProject#permissions_for so a
+      # COLLAB TODO(phase 5): mirrors the legacy bridge in PermitProject#permissions_for so a
       # submission collaborator created under the old model keeps read access.
-      # Remove with the phase 2 migration of collaborations onto project teams.
+      # Remove with the migration of collaborations onto project teams.
       legacy_collaboration_exists_sql = <<-SQL.squish
         EXISTS (
           SELECT 1 FROM permit_collaborations pc

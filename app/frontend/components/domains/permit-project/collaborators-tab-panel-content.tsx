@@ -27,7 +27,8 @@ import { FormProvider, useFieldArray, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { IPermitProject } from "../../../models/permit-project"
 import { IProjectMembership } from "../../../models/project-membership"
-import { EProjectMembershipRole, EProjectTeamKind } from "../../../types/enums"
+import { useMst } from "../../../setup/root"
+import { EFlashMessageStatus, EProjectMembershipRole, EProjectTeamKind } from "../../../types/enums"
 import { UserInput } from "../../shared/base/inputs/user-input"
 import { RemoveConfirmationModal } from "../../shared/modals/remove-confirmation-modal"
 import { RequestLoadingButton } from "../../shared/request-loading-button"
@@ -90,8 +91,6 @@ const InviteSection = observer(({ permitProject }: IProps) => {
         .map((user) => ({
           membership: user.membership,
           email: user.email as string,
-          firstName: user.firstName,
-          lastName: user.lastName,
         }))
     )
     if (ok) reset({ users: [defaultUserValues] })
@@ -107,7 +106,9 @@ const InviteSection = observer(({ permitProject }: IProps) => {
       <Heading as="h3" size="md" mb={4}>
         {t("permitProject.collaborators.invite.title")}
       </Heading>
-      {/* TODO(phase 2): pick a starting team here once custom teams exist. */}
+      {/* COLLAB TODO(phase 2): each invite row needs a multi-select of custom
+          teams the membership starts on (check off any number). 
+          Maybe we can pass in some kind of renderAuxillary prop? */}
       <FormProvider {...formMethods}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Flex direction="column" gap={4}>
@@ -119,6 +120,7 @@ const InviteSection = observer(({ permitProject }: IProps) => {
                 typeFieldName="membership"
                 typeLabel={t("permitProject.collaborators.table.membership")}
                 typeOptions={membershipOptions}
+                showNameFields={false}
               />
             ))}
             <Button
@@ -181,7 +183,7 @@ const CollaboratorsTable = observer(({ permitProject }: IProps) => {
 })
 
 // The owner has no membership row: full access comes from being the project
-// owner. TODO(phase 2): ownership transfer, and jurisdictions as owners.
+// owner. COLLAB TODO(phase 3): ownership transfer, and jurisdictions as owners.
 const OwnerRow = observer(({ permitProject }: IProps) => {
   const { t } = useTranslation()
 
@@ -195,11 +197,29 @@ const OwnerRow = observer(({ permitProject }: IProps) => {
       <Td />
       <Td>{t("permitProject.collaborators.status.active")}</Td>
       <Td>
-        <Text fontSize="sm" color="text.secondary">
-          {t("permitProject.collaborators.ownerHint")}
-        </Text>
+        <OwnerActionsMenu permitProject={permitProject} />
       </Td>
     </Tr>
+  )
+})
+
+const OwnerActionsMenu = observer(({ permitProject }: IProps) => {
+  const { t } = useTranslation()
+  const { uiStore } = useMst()
+
+  if (!permitProject.canManageCollaborators) return null
+
+  return (
+    <Menu>
+      <MenuButton as={IconButton} aria-label={t("ui.options")} icon={<DotsThreeVertical size={24} />} variant="ghost" />
+      <Portal>
+        <MenuList>
+          <MenuItem onClick={() => uiStore.flashMessage.show(EFlashMessageStatus.error, null, "COLLAB TODO(phase 3)")}>
+            {t("permitProject.collaborators.transferStewardship")}
+          </MenuItem>
+        </MenuList>
+      </Portal>
+    </Menu>
   )
 })
 
@@ -209,8 +229,8 @@ const MembershipRow = observer(({ permitProject, membership }: IProps & { member
 
   return (
     <Tr>
-      <Td>{membership.name}</Td>
-      <Td>{membership.user?.email}</Td>
+      <Td>{membership.name || "—"}</Td>
+      <Td>{membership.email}</Td>
       <Td>
         {canManage ? (
           <Select

@@ -629,7 +629,7 @@ RSpec.describe PermitApplicationPolicy do
       ).to eq(:all)
     end
 
-    # ponytail bridge: a backfilled assignee keeps read through the bridge and
+    # COLLAB TODO(phase 5): a backfilled assignee keeps read through the bridge and
     # block-scoped edit through the untouched legacy collaboration logic.
     it "keeps read and block-scoped edit for a backfilled submission assignee" do
       block_id = SecureRandom.uuid

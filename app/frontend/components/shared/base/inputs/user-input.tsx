@@ -24,10 +24,19 @@ interface IUserInputProps {
   typeFieldName?: string
   typeLabel?: string
   typeOptions?: IUserInputTypeOption[]
+  showNameFields?: boolean
 }
 
 export const UserInput = observer(
-  ({ index, remove, adminOnly, typeFieldName = "role", typeLabel, typeOptions }: IUserInputProps) => {
+  ({
+    index,
+    remove,
+    adminOnly,
+    typeFieldName = "role",
+    typeLabel,
+    typeOptions,
+    showNameFields = true,
+  }: IUserInputProps) => {
     const { formState, control, watch } = useFormContext()
     const { isSubmitting } = formState
     const { t } = useTranslation()
@@ -87,9 +96,13 @@ export const UserInput = observer(
             />
           </FormControl>
           <EmailFormControl fieldName={`users.${index}.email`} validate required />
-          {/* Names come from IDIR/BCeID on accept; invite-time first/last are optional. */}
-          <TextFormControl label={t("user.firstName")} fieldName={`users.${index}.firstName`} />
-          <TextFormControl label={t("user.lastName")} fieldName={`users.${index}.lastName`} />
+          {showNameFields && (
+            <>
+              {/* Names come from IDIR/BCeID on accept; invite-time first/last are optional. */}
+              <TextFormControl label={t("user.firstName")} fieldName={`users.${index}.firstName`} />
+              <TextFormControl label={t("user.lastName")} fieldName={`users.${index}.lastName`} />
+            </>
+          )}
           <Box alignSelf="flex-end" minW={150}>
             {isSubmitting ? (
               <SharedSpinner position="relative" top={4} left={5} minW="fit-content" />

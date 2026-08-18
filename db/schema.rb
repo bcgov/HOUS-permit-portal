@@ -822,15 +822,21 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_17_150000) do
 
   create_table "project_memberships", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "permit_project_id", null: false
-    t.uuid "user_id", null: false
+    t.uuid "user_id"
     t.uuid "invited_by_id"
     t.integer "role", default: 0, null: false
+    t.string "invited_email", null: false
+    t.datetime "accepted_at"
+    t.string "invitation_token_digest"
+    t.datetime "invitation_sent_at"
     t.datetime "discarded_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["discarded_at"], name: "index_project_memberships_on_discarded_at"
+    t.index ["invitation_token_digest"], name: "index_project_memberships_unique_invitation_token", unique: true, where: "(invitation_token_digest IS NOT NULL)"
     t.index ["invited_by_id"], name: "index_project_memberships_on_invited_by_id"
-    t.index ["permit_project_id", "user_id"], name: "index_project_memberships_unique_kept_per_project", unique: true, where: "(discarded_at IS NULL)"
+    t.index ["permit_project_id", "invited_email"], name: "index_project_memberships_unique_kept_email_per_project", unique: true, where: "(discarded_at IS NULL)"
+    t.index ["permit_project_id", "user_id"], name: "index_project_memberships_unique_kept_user_per_project", unique: true, where: "((discarded_at IS NULL) AND (user_id IS NOT NULL))"
     t.index ["permit_project_id"], name: "index_project_memberships_on_permit_project_id"
     t.index ["user_id"], name: "index_project_memberships_on_user_id"
   end

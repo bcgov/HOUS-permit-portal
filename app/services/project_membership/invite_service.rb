@@ -1,6 +1,5 @@
-# Adds a user to a project as a lead or contributor, creating and inviting the
-# user when they are not in the system yet. Mirrors the find-or-create-submitter
-# flow of PermitCollaboration::CollaborationManagementService.
+# Creates a pending project membership addressed to an email. No User is
+# attached (and no project access is granted) until the invitee accepts.
 class ProjectMembership::InviteService
   class Error < StandardError
   end
@@ -12,50 +11,52 @@ class ProjectMembership::InviteService
     @inviter = inviter
   end
 
-  def invite!(role:, user_params: nil, user_id: nil)
-    ActiveRecord::Base.transaction do
-      user =
-        (
-          if user_id.present?
-            User.find(user_id)
-          else
-            find_or_create_user!(user_params)
-          end
-        )
-
-      if user.id == permit_project.owner_id
-        raise Error,
-              I18n.t("services.project_membership.invite.owner_already_member")
-      end
-
-      membership = upsert_membership!(user, role)
-      send_invitation_email(user)
-      membership
+  def invite!(role:, user_params: nil)
+    email = normalize_email(user_params&.[](:email) || user_params&.[]("email"))
+    if email.blank?
+      raise Error, I18n.t("services.project_membership.invite.email_required")
     end
+    if owner_email?(email)
+      raise Error,
+            I18n.t("services.project_membership.invite.owner_already_member")
+    end
+
+    membership = upsert_pending_membership!(email, role)
+    raw = membership.issue_invitation_token!
+    send_invitation_email(membership, raw)
+    membership
   end
 
-  # Resends the registration invitation to someone who has not signed up yet.
   def reinvite!(membership)
-    user = membership.user
-
-    unless user.confirmed?
-      user.skip_confirmation_notification!
-      user.invite!(inviter)
+    unless membership.pending?
+      raise Error, I18n.t("services.project_membership.invite.already_accepted")
     end
 
+    raw = membership.issue_invitation_token!
+    send_invitation_email(membership, raw)
     membership
   end
 
   private
 
-  def upsert_membership!(user, role)
-    # Reuse a previously removed membership so re-adding someone does not leave
-    # two rows behind.
+  def upsert_pending_membership!(email, role)
     membership =
-      permit_project.project_memberships.find_or_initialize_by(user_id: user.id)
-    membership.discarded_at = nil
-    membership.role = role
-    membership.invited_by = inviter
+      permit_project.project_memberships.kept.find_by(invited_email: email) ||
+        permit_project.project_memberships.discarded.find_by(
+          invited_email: email
+        ) || permit_project.project_memberships.new(invited_email: email)
+
+    if membership.kept? && membership.accepted?
+      raise Error, I18n.t("services.project_membership.invite.already_invited")
+    end
+
+    membership.assign_attributes(
+      role: role,
+      invited_by: inviter,
+      discarded_at: nil,
+      user: nil,
+      accepted_at: nil
+    )
 
     return membership if membership.save
 
@@ -66,41 +67,23 @@ class ProjectMembership::InviteService
           )
   end
 
-  def find_or_create_user!(user_params)
-    if user_params.blank? || user_params[:email].blank?
-      raise Error, I18n.t("services.project_membership.invite.email_required")
-    end
-
-    email = user_params[:email].strip
-    existing =
-      User.where(omniauth_email: email).or(User.where(email: email)).first
-    return existing if existing
-
-    user =
-      User.new(
-        first_name: user_params[:first_name],
-        last_name: user_params[:last_name],
-        email: email,
-        role: :submitter
-      )
-    user.skip_confirmation_notification!
-
-    return user if user.save
-
-    raise Error,
-          I18n.t(
-            "services.project_membership.invite.create_user_error",
-            error_message: user.errors.full_messages.join(", ")
-          )
+  def send_invitation_email(membership, raw_token)
+    PermitHubMailer.notify_project_membership_invitation(
+      project_membership: membership,
+      raw_token: raw_token
+    ).deliver_later
   end
 
-  # TODO(phase 1 follow-up): notify users who already have a confirmed account
-  # that they were added to a project (needs a new mailer template, and an
-  # in-app notification once membership notification types exist).
-  def send_invitation_email(user)
-    return if user.confirmed?
+  def normalize_email(email)
+    email.to_s.strip.downcase.presence
+  end
 
-    user.skip_confirmation_notification!
-    user.invite!(inviter)
+  def owner_email?(email)
+    owner = permit_project.owner
+    return false if owner.blank?
+
+    [owner.email, owner.omniauth_email].compact.any? do |owner_email|
+      owner_email.to_s.strip.downcase == email
+    end
   end
 end

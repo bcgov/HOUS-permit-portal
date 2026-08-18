@@ -5,7 +5,7 @@ class ProjectTeamBlueprint < Blueprinter::Base
     fields :name, :kind, :project_access, :collaborator_access, :team_access
 
     # Auto teams derive their members from role, so the UI cannot edit membership
-    # directly. TODO(phase 2): custom teams with explicit membership.
+    # directly. COLLAB TODO(phase 2): custom teams with explicit membership.
     field :is_auto do |project_team, _options|
       project_team.auto?
     end

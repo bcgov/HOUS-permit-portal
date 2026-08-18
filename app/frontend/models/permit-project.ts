@@ -128,7 +128,7 @@ export const PermitProjectModel = types
       if (!self.firstApplicationReceivedAt) return t("permitProject.overview.notAvailable")
       return format(self.firstApplicationReceivedAt, datefnsTableDateFormat)
     },
-    // ponytail: Full read is the only application-visibility grant today, so this
+    // COLLAB TODO(phase 4): Full read is the only application-visibility grant today, so this
     // is a project-wide on/off. Ceiling: per-application viewing. Then this
     // cannot stay "has Full read" — callers that skip search/grid entirely would
     // hide apps the user is allowed to see. Upgrade: delete this getter (or make
@@ -188,9 +188,10 @@ export const PermitProjectModel = types
       return order.map((kind) => self.projectTeams.find((team) => team.kind === kind)).filter(Boolean)
     },
     membershipsForTeam(teamKind: EProjectTeamKind) {
-      if (teamKind === EProjectTeamKind.allMembers) return self.projectMemberships.slice()
+      const memberships = self.projectMemberships.filter((membership) => !membership.isInvitationPending)
+      if (teamKind === EProjectTeamKind.allMembers) return memberships
 
-      return self.projectMemberships.filter((membership) => membership.teamKinds.includes(teamKind))
+      return memberships.filter((membership) => membership.teamKinds.includes(teamKind))
     },
     get jurisdictionDifferentFromSandbox() {
       if (!self.rootStore.sandboxStore.currentSandbox) return false
@@ -335,8 +336,6 @@ export const PermitProjectModel = types
       users: {
         membership: EProjectMembershipRole
         email: string
-        firstName?: string
-        lastName?: string
       }[]
     ) {
       let anyOk = false
@@ -344,7 +343,7 @@ export const PermitProjectModel = types
         const response = yield* toGenerator(
           self.environment.api.createProjectMembership(self.id, {
             role: user.membership,
-            user: { email: user.email, firstName: user.firstName, lastName: user.lastName },
+            user: { email: user.email },
           })
         )
         if (response.ok) anyOk = true

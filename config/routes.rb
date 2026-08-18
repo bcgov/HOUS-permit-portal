@@ -253,6 +253,11 @@ Rails.application.routes.draw do
            to: "part9_building/step_codes#create"
     end
 
+    get "project_membership_invitations/:token",
+        to: "project_membership_invitations#show"
+    post "project_membership_invitations/:token/accept",
+         to: "project_membership_invitations#accept"
+
     resources :permit_projects, only: %i[show index update create] do
       resources :notes, only: %i[index], controller: "permit_projects/notes" do
         get :download_csv, on: :collection
@@ -265,7 +270,7 @@ Rails.application.routes.draw do
         post :reinvite, on: :member
       end
 
-      # TODO(phase 2): create/destroy for custom teams and explicit team membership.
+      # COLLAB TODO(phase 2): create/destroy for custom teams and explicit team membership.
       resources :project_teams,
                 path: "teams",
                 only: %i[index update],
@@ -477,6 +482,8 @@ Rails.application.routes.draw do
   get "/login" => "home#index", :as => :login
   get "/confirmed" => "home#index", :as => :confirmed
   get "/accept-invitation" => "home#index", :as => :accept_invitation
+  get "/accept-project-invitation" => "home#index",
+      :as => :accept_project_invitation
   get "/*path",
       to: "home#index",
       format: false,

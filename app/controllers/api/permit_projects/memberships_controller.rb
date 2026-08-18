@@ -24,11 +24,7 @@ class Api::PermitProjects::MembershipsController < Api::ApplicationController
       ProjectMembership::InviteService.new(
         permit_project: @permit_project,
         inviter: current_user
-      ).invite!(
-        role: membership_params[:role],
-        user_id: membership_params[:user_id],
-        user_params: user_params
-      )
+      ).invite!(role: membership_params[:role], user_params: user_params)
 
     render_success membership,
                    "project_membership.create_success",
@@ -138,10 +134,10 @@ class Api::PermitProjects::MembershipsController < Api::ApplicationController
   end
 
   def membership_params
-    params.require(:project_membership).permit(:role, :user_id)
+    params.require(:project_membership).permit(:role)
   end
 
   def user_params
-    params[:user]&.permit(:email, :first_name, :last_name)
+    params[:user]&.permit(:email)
   end
 end

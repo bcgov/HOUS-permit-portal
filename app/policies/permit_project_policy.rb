@@ -1,7 +1,7 @@
 class PermitProjectPolicy < ApplicationPolicy
-  # ponytail: mirrors the legacy bridge in PermitProject#permissions_for so a
+  # COLLAB TODO(phase 5): mirrors the legacy bridge in PermitProject#permissions_for so a
   # submission collaborator created under the old model still lists their
-  # projects. Remove with the phase 2 migration of collaborations onto teams.
+  # projects. Remove with the migration of collaborations onto teams.
   LEGACY_SUBMISSION_COLLABORATION_SQL = <<-SQL.squish
     EXISTS (
       SELECT 1 FROM collaborators c

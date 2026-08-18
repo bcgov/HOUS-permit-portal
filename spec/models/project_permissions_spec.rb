@@ -93,7 +93,7 @@ RSpec.describe ProjectPermissions, type: :model do
       expect(permit_project.permissions_for(member).project_read?).to be false
     end
 
-    # ponytail bridge: remove alongside the legacy submission collaborations.
+    # COLLAB TODO(phase 5): remove alongside the legacy submission collaborations.
     it "grants read to a legacy submission collaborator with no membership" do
       permit_application =
         create(:permit_application, permit_project:, submitter: owner)
@@ -130,6 +130,17 @@ RSpec.describe ProjectPermissions, type: :model do
       expect(permit_project.readable_user_ids).to match_array(
         [owner.id, lead.id, contributor.id]
       )
+    end
+
+    it "excludes pending invites" do
+      create(
+        :project_membership,
+        :pending,
+        permit_project:,
+        invited_email: member.email
+      )
+
+      expect(permit_project.readable_user_ids).to eq([owner.id])
     end
   end
 
