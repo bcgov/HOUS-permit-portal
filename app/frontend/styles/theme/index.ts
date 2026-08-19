@@ -1,5 +1,6 @@
 import { extendTheme } from "@chakra-ui/react"
 import { Button } from "./components/button"
+import { Drawer } from "./components/drawer"
 import { FormLabel } from "./components/form-label"
 import { Heading } from "./components/heading"
 import { Input } from "./components/input"
@@ -87,17 +88,6 @@ const styles = {
       width: "100vw",
       height: "100vh",
       zIndex: "0",
-    },
-  },
-}
-const Drawer = {
-  baseStyle: {
-    dialogContainer: {
-      position: "fixed",
-      inset: 0,
-      width: "auto",
-      height: "auto",
-      overflow: "hidden",
     },
   },
 }
