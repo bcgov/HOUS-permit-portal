@@ -3,7 +3,12 @@ class ProjectMeetingPolicy < ApplicationPolicy
     def resolve
       return scope.none unless user
 
-      clauses = ["permit_projects.owner_id = :uid"]
+      clauses = [
+        "permit_projects.owner_id = :uid",
+        ProjectMembership.meeting_access_sql(
+          project_id_sql: "permit_projects.id"
+        )
+      ]
       values = { uid: user.id }
 
       if user.review_staff?
@@ -30,24 +35,23 @@ class ProjectMeetingPolicy < ApplicationPolicy
   end
 
   def show?
-    # TODO: confirm if collaborators can see all meeting details including documents
-    user_is_owner? || user_is_review_staff_for_jurisdiction?
+    meetings_view? || user_is_review_staff_for_jurisdiction?
   end
 
   def create?
-    user_is_owner? && feature_enabled?
+    meetings_manage? && feature_enabled?
   end
 
   def update?
-    user_is_owner? && feature_enabled? && (record.draft? || record.active?)
+    meetings_manage? && feature_enabled? && (record.draft? || record.active?)
   end
 
   def submit?
-    user_is_owner? && record.draft? && feature_enabled?
+    meetings_manage? && record.draft? && feature_enabled?
   end
 
   def withdraw?
-    user_is_owner? && feature_enabled?
+    meetings_manage? && feature_enabled?
   end
 
   def reschedule?
@@ -73,7 +77,7 @@ class ProjectMeetingPolicy < ApplicationPolicy
   end
 
   def view_notes?
-    user_is_owner? || user_is_review_staff_for_jurisdiction_in_active_sandbox?
+    meetings_view? || user_is_review_staff_for_jurisdiction_in_active_sandbox?
   end
 
   def download_notes_csv?
@@ -86,8 +90,16 @@ class ProjectMeetingPolicy < ApplicationPolicy
 
   private
 
-  def user_is_owner?
-    user.present? && record.owner&.id == user.id
+  def meetings_view?
+    project_permissions.meetings_view?
+  end
+
+  def meetings_manage?
+    project_permissions.meetings_manage?
+  end
+
+  def project_permissions
+    record.permit_project&.permissions_for(user) || ProjectPermissions.none
   end
 
   def user_is_review_staff_for_jurisdiction?

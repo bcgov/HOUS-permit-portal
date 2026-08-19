@@ -11,7 +11,7 @@ class ProjectMembership::InviteService
     @inviter = inviter
   end
 
-  def invite!(role:, user_params: nil)
+  def invite!(role:, user_params: nil, project_team_ids: nil)
     email = normalize_email(user_params&.[](:email) || user_params&.[]("email"))
     if email.blank?
       raise Error, I18n.t("services.project_membership.invite.email_required")
@@ -22,6 +22,7 @@ class ProjectMembership::InviteService
     end
 
     membership = upsert_pending_membership!(email, role)
+    assign_custom_teams(membership, project_team_ids)
     raw = membership.issue_invitation_token!
     send_invitation_email(membership, raw)
     membership
@@ -38,6 +39,16 @@ class ProjectMembership::InviteService
   end
 
   private
+
+  # Pre-assigning a pending invitation to a custom team grants nothing until it
+  # is accepted; ids are resolved through this project's custom teams, so an id
+  # from elsewhere is dropped.
+  def assign_custom_teams(membership, project_team_ids)
+    return if project_team_ids.blank?
+
+    membership.custom_team_ids =
+      permit_project.project_teams.custom.where(id: project_team_ids).ids
+  end
 
   def upsert_pending_membership!(email, role)
     membership =

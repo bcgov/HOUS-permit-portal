@@ -3,7 +3,12 @@ class NotePolicy < ApplicationPolicy
     def resolve
       return scope.none unless user
 
-      clauses = ["permit_projects.owner_id = :uid"]
+      clauses = [
+        "permit_projects.owner_id = :uid",
+        ProjectMembership.meeting_access_sql(
+          project_id_sql: "permit_projects.id"
+        )
+      ]
       values = { uid: user.id }
 
       if user.review_staff?

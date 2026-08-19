@@ -1594,6 +1594,7 @@ Thank you,
               title: "Invite collaborators",
               membershipTooltip:
                 "Lead starts with full access; Contributor starts with none. Adjust either on the Teams tab.",
+              teamsLabel: "Add to custom teams (optional)",
             },
             table: {
               name: "Name",
@@ -1603,7 +1604,7 @@ Thank you,
                 "Membership chooses the Leads or Contributors team. Changing it updates their access immediately.",
               teams: "Teams",
               teamsTooltip:
-                "Auto-teams follow membership. Pending invitations are not on a team until they are accepted.",
+                "Leads and Contributors follow membership; custom teams are assigned on the Teams tab. Pending invitations are on no team until they are accepted.",
               status: "Status",
               statusTooltip: "Pending invitations grant no access until they are accepted.",
               actions: "Actions",
@@ -1646,8 +1647,28 @@ Thank you,
             title: "Teams",
             description:
               "Permissions are additive: each collaborator gets the sum of the permissions of every team they belong to.",
+            autoTeamsTitle: "Default teams",
+            customTeamsTitle: "Custom teams",
             autoTeamsHint:
               "Members of these teams are set by each collaborator's membership, so they cannot be added or removed here.",
+            customTeamsHint:
+              "Create a custom team to give a specific group its own permissions, on top of whatever their membership already grants.",
+            customTeamsEmpty: "No custom teams yet.",
+            addTeam: "Add team",
+            newTeamName: "Team name",
+            newTeamNamePlaceholder: "e.g. Plumbing subtrades",
+            saveTeam: "Create team",
+            renameTeam: "Team name",
+            members: "Members",
+            addMember: "Add a member",
+            noMembers: "No members yet. Add collaborators to give them this team's permissions.",
+            removeMember: "Remove from team",
+            allCollaboratorsAssigned: "Every collaborator is already on this team",
+            removeTeam: "Remove team",
+            removeConfirmation: {
+              title: "Remove team",
+              body: "Members lose any access that only this team gave them. Their membership on the project is not affected.",
+            },
             kind: {
               leads: "Leads",
               contributors: "Contributors",
@@ -1656,7 +1677,7 @@ Thank you,
             },
             kindTooltip: {
               leads:
-                "Everyone invited as a Lead is on this team. By default, Leads can edit the project and manage collaborators and teams.",
+                "Everyone invited as a Lead is on this team. By default, Leads can edit the project, manage collaborators and teams, and manage meetings—lower these permissions to hold them back.",
               contributors:
                 "Everyone invited as a Contributor is on this team. By default they have no access—raise these permissions to grant them any.",
               all_members:
@@ -1666,24 +1687,23 @@ Thank you,
             memberCount_other: "{{count}} members",
             permissions: {
               projectAccess: "Project",
-              collaboratorAccess: "Collaborators",
-              teamAccess: "Teams",
+              collaboratorAccess: "Collaborators and teams",
+              meetingAccess: "Meetings",
             },
             projectAccess: {
-              none: "No access",
+              base: "Base access",
               read: "Full read",
-              edit: "Edit project",
+              edit: "Edit",
             },
             collaboratorAccess: {
               none: "No access",
-              view: "View collaborators",
-              invite: "Invite collaborators",
-              manage: "Manage collaborators",
+              view: "View",
+              manage: "Manage",
             },
-            teamAccess: {
+            meetingAccess: {
               none: "No access",
-              view: "View teams",
-              manage: "Manage teams and permissions",
+              view: "View",
+              manage: "Manage",
             },
           },
           localResources: {

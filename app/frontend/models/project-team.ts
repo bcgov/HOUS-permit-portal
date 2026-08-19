@@ -1,5 +1,5 @@
 import { Instance, types } from "mobx-state-tree"
-import { ECollaboratorAccess, EProjectAccess, EProjectTeamKind, ETeamAccess } from "../types/enums"
+import { ECollaboratorAccess, EMeetingAccess, EProjectAccess, EProjectTeamKind } from "../types/enums"
 
 export const ProjectTeamModel = types.model("ProjectTeamModel", {
   id: types.identifier,
@@ -7,11 +7,22 @@ export const ProjectTeamModel = types.model("ProjectTeamModel", {
   kind: types.enumeration(Object.values(EProjectTeamKind)),
   projectAccess: types.enumeration(Object.values(EProjectAccess)),
   collaboratorAccess: types.enumeration(Object.values(ECollaboratorAccess)),
-  teamAccess: types.enumeration(Object.values(ETeamAccess)),
-  // Auto teams derive their members from role, so membership is not editable.
-  // COLLAB TODO(phase 2): custom teams with explicit membership.
+  meetingAccess: types.enumeration(Object.values(EMeetingAccess)),
+  // Auto teams derive their members from role, so only custom teams have an
+  // editable membership list.
   isAuto: types.optional(types.boolean, true),
+  projectMembershipIds: types.optional(types.array(types.string), []),
   memberIds: types.optional(types.array(types.string), []),
 })
 
 export interface IProjectTeam extends Instance<typeof ProjectTeamModel> {}
+
+// projectMembershipIds only applies to custom teams; auto team membership is
+// derived from each collaborator's role.
+export type TProjectTeamParams = {
+  name?: string
+  projectAccess?: EProjectAccess
+  collaboratorAccess?: ECollaboratorAccess
+  meetingAccess?: EMeetingAccess
+  projectMembershipIds?: string[]
+}

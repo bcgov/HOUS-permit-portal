@@ -2,7 +2,11 @@ import {
   Badge,
   Box,
   Button,
+  Checkbox,
+  CheckboxGroup,
   Flex,
+  FormControl,
+  FormLabel,
   Heading,
   HStack,
   IconButton,
@@ -23,10 +27,11 @@ import {
 import { DotsThreeVertical, PaperPlaneTilt, Plus, Users } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
-import { FormProvider, useFieldArray, useForm } from "react-hook-form"
+import { Controller, FormProvider, useFieldArray, useForm, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { IPermitProject } from "../../../models/permit-project"
 import { IProjectMembership } from "../../../models/project-membership"
+import { IProjectTeam } from "../../../models/project-team"
 import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus, EProjectMembershipRole, EProjectTeamKind } from "../../../types/enums"
 import { UserInput } from "../../shared/base/inputs/user-input"
@@ -44,6 +49,7 @@ type TInviteFormData = {
     lastName?: string
     email?: string
     membership: EProjectMembershipRole
+    projectTeamIds?: string[]
   }[]
 }
 
@@ -62,7 +68,7 @@ export const CollaboratorsTabPanelContent = observer(({ permitProject }: IProps)
         <Text color="text.secondary">{t("permitProject.collaborators.description")}</Text>
       </Box>
 
-      {permitProject.canInviteCollaborators && <InviteSection permitProject={permitProject} />}
+      {permitProject.canManageCollaborators && <InviteSection permitProject={permitProject} />}
 
       <CollaboratorsTable permitProject={permitProject} />
     </Flex>
@@ -71,11 +77,13 @@ export const CollaboratorsTabPanelContent = observer(({ permitProject }: IProps)
 
 const InviteSection = observer(({ permitProject }: IProps) => {
   const { t } = useTranslation()
+  const customTeams = permitProject.customTeams
   const defaultUserValues = {
     membership: EProjectMembershipRole.lead,
     email: "",
     firstName: "",
     lastName: "",
+    projectTeamIds: [],
   }
   const formMethods = useForm<TInviteFormData>({
     mode: "onChange",
@@ -92,6 +100,7 @@ const InviteSection = observer(({ permitProject }: IProps) => {
         .map((user) => ({
           membership: user.membership,
           email: user.email as string,
+          projectTeamIds: user.projectTeamIds ?? [],
         }))
     )
     if (ok) reset({ users: [defaultUserValues] })
@@ -107,9 +116,6 @@ const InviteSection = observer(({ permitProject }: IProps) => {
       <Heading as="h3" size="md" mb={4}>
         {t("permitProject.collaborators.invite.title")}
       </Heading>
-      {/* COLLAB TODO(phase 2): each invite row needs a multi-select of custom
-          teams the membership starts on (check off any number). 
-          Maybe we can pass in some kind of renderAuxillary prop? */}
       <FormProvider {...formMethods}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Flex direction="column" gap={4}>
@@ -123,6 +129,11 @@ const InviteSection = observer(({ permitProject }: IProps) => {
                 typeTooltip={t("permitProject.collaborators.invite.membershipTooltip")}
                 typeOptions={membershipOptions}
                 showNameFields={false}
+                renderAuxiliary={
+                  customTeams.length > 0
+                    ? (rowIndex) => <InviteTeamsField index={rowIndex} teams={customTeams} />
+                    : undefined
+                }
               />
             ))}
             <Button
@@ -148,6 +159,34 @@ const InviteSection = observer(({ permitProject }: IProps) => {
         </form>
       </FormProvider>
     </Box>
+  )
+})
+
+// Custom teams the invitation starts on. They grant nothing until the
+// invitation is accepted.
+const InviteTeamsField = observer(({ index, teams }: { index: number; teams: IProjectTeam[] }) => {
+  const { t } = useTranslation()
+  const { control } = useFormContext<TInviteFormData>()
+
+  return (
+    <FormControl>
+      <FormLabel>{t("permitProject.collaborators.invite.teamsLabel")}</FormLabel>
+      <Controller
+        control={control}
+        name={`users.${index}.projectTeamIds`}
+        render={({ field: { value, onChange } }) => (
+          <CheckboxGroup value={value ?? []} onChange={onChange}>
+            <HStack spacing={4} wrap="wrap">
+              {teams.map((team) => (
+                <Checkbox key={team.id} value={team.id}>
+                  {team.name}
+                </Checkbox>
+              ))}
+            </HStack>
+          </CheckboxGroup>
+        )}
+      />
+    </FormControl>
   )
 })
 
@@ -278,9 +317,11 @@ const MembershipRow = observer(({ permitProject, membership }: IProps & { member
       </Td>
       <Td>
         <HStack spacing={1} wrap="wrap">
-          {membership.teamKinds.map((kind) => (
-            <Badge key={kind} colorScheme="blue">
-              {t(`permitProject.teams.kind.${kind as EProjectTeamKind}`)}
+          {membership.teams.map((team) => (
+            <Badge key={team.id} colorScheme={team.kind === EProjectTeamKind.custom ? "blue" : "gray"}>
+              {team.kind === EProjectTeamKind.custom
+                ? team.name
+                : t(`permitProject.teams.kind.${team.kind as EProjectTeamKind}`)}
             </Badge>
           ))}
         </HStack>
@@ -306,7 +347,7 @@ const HeaderWithTooltip = ({ label, tooltip }: { label: string; tooltip: string 
 
 const MembershipActionsMenu = observer(({ permitProject, membership }: IProps & { membership: IProjectMembership }) => {
   const { t } = useTranslation()
-  const canReinvite = membership.isInvitationPending && permitProject.canInviteCollaborators
+  const canReinvite = membership.isInvitationPending && permitProject.canManageCollaborators
   const canManage = permitProject.canManageCollaborators
 
   if (!canReinvite && !canManage) return null

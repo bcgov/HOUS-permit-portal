@@ -101,11 +101,13 @@ class PermitApplication::FormJsonService
         end
         .compact || []
 
-    # If the user is not passed in then we don't remove requirement blocks based on further collaboration permissions.
+    # If the user is not passed in then we don't remove requirement blocks based
+    # on collaboration. View permissions (Full read / assigned blocks) decide
+    # what remains; edit is enforced on save.
     return @empty_block_ids if current_user.blank?
 
     permissions =
-      permit_application.submission_requirement_block_edit_permissions(
+      permit_application.submission_requirement_block_view_permissions(
         user_id: current_user.id
       ) || []
 

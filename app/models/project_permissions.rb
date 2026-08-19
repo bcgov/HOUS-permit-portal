@@ -5,7 +5,7 @@ class ProjectPermissions
   LEVELS = {
     project_access: ProjectTeam::PROJECT_ACCESS_LEVELS,
     collaborator_access: ProjectTeam::COLLABORATOR_ACCESS_LEVELS,
-    team_access: ProjectTeam::TEAM_ACCESS_LEVELS
+    meeting_access: ProjectTeam::MEETING_ACCESS_LEVELS
   }.freeze
 
   def self.none
@@ -52,24 +52,22 @@ class ProjectPermissions
     at_least?(:project_access, :edit)
   end
 
+  # Covers both the Collaborators and Teams surfaces; see
+  # ProjectTeam::COLLABORATOR_ACCESS_LEVELS.
   def collaborators_view?
     at_least?(:collaborator_access, :view)
-  end
-
-  def collaborators_invite?
-    at_least?(:collaborator_access, :invite)
   end
 
   def collaborators_manage?
     at_least?(:collaborator_access, :manage)
   end
 
-  def teams_view?
-    at_least?(:team_access, :view)
+  def meetings_view?
+    at_least?(:meeting_access, :view)
   end
 
-  def teams_manage?
-    at_least?(:team_access, :manage)
+  def meetings_manage?
+    at_least?(:meeting_access, :manage)
   end
 
   def at_least?(domain, level)

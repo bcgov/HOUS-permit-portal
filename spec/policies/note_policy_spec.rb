@@ -30,6 +30,18 @@ RSpec.describe NotePolicy, type: :policy do
       expect(resolved_scope_for(owner)).to contain_exactly(note)
     end
 
+    it "includes notes for a member whose team grants meeting view" do
+      note
+      member = create(:user, :submitter)
+      create(:project_membership, permit_project:, user: member)
+      permit_project
+        .project_teams
+        .find_by(kind: :all_members)
+        .update!(meeting_access: :view)
+
+      expect(resolved_scope_for(member)).to include(note)
+    end
+
     it "includes all meeting notes in the active sandbox for jurisdiction review staff regardless of status" do
       draft_note =
         create(

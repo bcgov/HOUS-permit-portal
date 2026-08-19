@@ -27,7 +27,7 @@ RSpec.describe PermitApplication::SubmissionDataService do
         submission_data
       )
       allow(permit_application).to receive(
-        :submission_requirement_block_edit_permissions
+        :submission_requirement_block_view_permissions
       ).with(user_id: "u1").and_return(["allowed"])
 
       result = service.formatted_submission_data(current_user: user)

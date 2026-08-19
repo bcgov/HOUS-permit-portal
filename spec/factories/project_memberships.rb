@@ -13,6 +13,7 @@ FactoryBot.define do
     trait :pending do
       user { nil }
       accepted_at { nil }
+      invitation_sent_at { Time.current }
       sequence(:invited_email) { |n| "pending-invite-#{n}@example.com" }
     end
   end

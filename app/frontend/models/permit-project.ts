@@ -7,13 +7,13 @@ import { withRootStore } from "../lib/with-root-store"
 import {
   ECollaboratorAccess,
   EInboxDisplayMode,
+  EMeetingAccess,
   EPermitProjectRollupStatus,
   EProjectAccess,
   EProjectMembershipRole,
   EProjectRole,
   EProjectState,
   EProjectTeamKind,
-  ETeamAccess,
 } from "../types/enums"
 import { IParcelGeometry, IProjectAuditSummary, IProjectDocument } from "../types/types"
 import { startBlobDownload } from "../utils/utility-functions"
@@ -30,10 +30,10 @@ import {
   COLLABORATOR_ACCESS_ORDER,
   EMPTY_PROJECT_PERMISSIONS,
   IProjectPermissions,
+  MEETING_ACCESS_ORDER,
   PROJECT_ACCESS_ORDER,
-  TEAM_ACCESS_ORDER,
 } from "./project-permissions"
-import { ProjectTeamModel } from "./project-team"
+import { IProjectTeam, ProjectTeamModel, TProjectTeamParams } from "./project-team"
 
 const PermitProjectCoreModel = types.model("PermitProjectCore", {
   id: types.identifier,
@@ -156,18 +156,12 @@ export const PermitProjectModel = types
     get canEditProject() {
       return atLeastLevel(PROJECT_ACCESS_ORDER, self.currentUserPermissions?.projectAccess, EProjectAccess.edit)
     },
+    // One domain gates both the Collaborators and Teams tabs.
     get canViewCollaborators() {
       return atLeastLevel(
         COLLABORATOR_ACCESS_ORDER,
         self.currentUserPermissions?.collaboratorAccess,
         ECollaboratorAccess.view
-      )
-    },
-    get canInviteCollaborators() {
-      return atLeastLevel(
-        COLLABORATOR_ACCESS_ORDER,
-        self.currentUserPermissions?.collaboratorAccess,
-        ECollaboratorAccess.invite
       )
     },
     get canManageCollaborators() {
@@ -177,21 +171,25 @@ export const PermitProjectModel = types
         ECollaboratorAccess.manage
       )
     },
-    get canViewTeams() {
-      return atLeastLevel(TEAM_ACCESS_ORDER, self.currentUserPermissions?.teamAccess, ETeamAccess.view)
+    get canViewMeetings() {
+      return atLeastLevel(MEETING_ACCESS_ORDER, self.currentUserPermissions?.meetingAccess, EMeetingAccess.view)
     },
-    get canManageTeams() {
-      return atLeastLevel(TEAM_ACCESS_ORDER, self.currentUserPermissions?.teamAccess, ETeamAccess.manage)
+    get canManageMeetings() {
+      return atLeastLevel(MEETING_ACCESS_ORDER, self.currentUserPermissions?.meetingAccess, EMeetingAccess.manage)
     },
     get autoTeams() {
       const order = [EProjectTeamKind.leads, EProjectTeamKind.contributors, EProjectTeamKind.allMembers]
       return order.map((kind) => self.projectTeams.find((team) => team.kind === kind)).filter(Boolean)
     },
-    membershipsForTeam(teamKind: EProjectTeamKind) {
-      const memberships = self.projectMemberships.filter((membership) => !membership.isInvitationPending)
-      if (teamKind === EProjectTeamKind.allMembers) return memberships
-
-      return memberships.filter((membership) => membership.teamKinds.includes(teamKind))
+    get customTeams() {
+      return self.projectTeams.filter((team) => team.kind === EProjectTeamKind.custom)
+    },
+    // The team payload carries its membership ids for every kind, auto teams
+    // included, so display does not need to know how membership was derived.
+    membershipsForTeam(team: IProjectTeam) {
+      return team.projectMembershipIds
+        .map((membershipId) => self.projectMemberships.find((membership) => membership.id === membershipId))
+        .filter(Boolean)
     },
     get jurisdictionDifferentFromSandbox() {
       if (!self.rootStore.sandboxStore.currentSandbox) return false
@@ -336,6 +334,7 @@ export const PermitProjectModel = types
       users: {
         membership: EProjectMembershipRole
         email: string
+        projectTeamIds?: string[]
       }[]
     ) {
       let anyOk = false
@@ -343,6 +342,7 @@ export const PermitProjectModel = types
         const response = yield* toGenerator(
           self.environment.api.createProjectMembership(self.id, {
             role: user.membership,
+            projectTeamIds: user.projectTeamIds,
             user: { email: user.email },
           })
         )
@@ -351,6 +351,12 @@ export const PermitProjectModel = types
       if (anyOk) {
         const listResponse = yield* toGenerator(self.environment.api.fetchProjectMemberships(self.id))
         if (listResponse.ok) self.setProjectMemberships(listResponse.data.data)
+        // Pre-assignment puts the new membership on a custom team, so the Teams
+        // tab's member lists are stale too.
+        if (users.some((user) => user.projectTeamIds?.length)) {
+          const teamsResponse = yield* toGenerator(self.environment.api.fetchProjectTeams(self.id))
+          if (teamsResponse.ok) self.setProjectTeams(teamsResponse.data.data)
+        }
       }
       return anyOk
     }),
@@ -362,6 +368,10 @@ export const PermitProjectModel = types
             membership.id === membershipId ? response.data.data : getSnapshot(membership)
           )
         )
+        // A role change moves the person between the Leads and Contributors
+        // teams, so the Teams tab's member lists move with it.
+        const teamsResponse = yield* toGenerator(self.environment.api.fetchProjectTeams(self.id))
+        if (teamsResponse.ok) self.setProjectTeams(teamsResponse.data.data)
       }
       return response
     }),
@@ -371,21 +381,40 @@ export const PermitProjectModel = types
         self.setProjectMemberships(
           self.projectMemberships.filter((membership) => membership.id !== membershipId).map((m) => getSnapshot(m))
         )
+        const teamsResponse = yield* toGenerator(self.environment.api.fetchProjectTeams(self.id))
+        if (teamsResponse.ok) self.setProjectTeams(teamsResponse.data.data)
       }
       return response
     }),
     reinviteProjectMembership: flow(function* (membershipId: string) {
       return yield* toGenerator(self.environment.api.reinviteProjectMembership(self.id, membershipId))
     }),
-    updateProjectTeam: flow(function* (
-      teamId: string,
-      params: { projectAccess?: EProjectAccess; collaboratorAccess?: ECollaboratorAccess; teamAccess?: ETeamAccess }
-    ) {
+    createProjectTeam: flow(function* (params: TProjectTeamParams) {
+      const response = yield* toGenerator(self.environment.api.createProjectTeam(self.id, params))
+      if (response.ok) {
+        self.setProjectTeams([...self.projectTeams.map((team) => getSnapshot(team)), response.data.data])
+      }
+      return response
+    }),
+    updateProjectTeam: flow(function* (teamId: string, params: TProjectTeamParams) {
       const response = yield* toGenerator(self.environment.api.updateProjectTeam(self.id, teamId, params))
       if (response.ok) {
         self.setProjectTeams(
           self.projectTeams.map((team) => (team.id === teamId ? response.data.data : getSnapshot(team)))
         )
+        // Membership changes move people between teams, so the collaborator
+        // rows and their team badges are stale too.
+        const listResponse = yield* toGenerator(self.environment.api.fetchProjectMemberships(self.id))
+        if (listResponse.ok) self.setProjectMemberships(listResponse.data.data)
+      }
+      return response
+    }),
+    destroyProjectTeam: flow(function* (teamId: string) {
+      const response = yield* toGenerator(self.environment.api.destroyProjectTeam(self.id, teamId))
+      if (response.ok) {
+        self.setProjectTeams(self.projectTeams.filter((team) => team.id !== teamId).map((team) => getSnapshot(team)))
+        const listResponse = yield* toGenerator(self.environment.api.fetchProjectMemberships(self.id))
+        if (listResponse.ok) self.setProjectMemberships(listResponse.data.data)
       }
       return response
     }),

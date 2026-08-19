@@ -119,7 +119,7 @@ class PermitProjectPolicy < ApplicationPolicy
   end
 
   def download_notes_csv?
-    show?
+    permissions.meetings_view? || user_is_review_staff_for_jurisdiction?
   end
 
   private

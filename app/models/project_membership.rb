@@ -8,6 +8,11 @@ class ProjectMembership < ApplicationRecord
   belongs_to :user, optional: true
   belongs_to :invited_by, class_name: "User", optional: true
 
+  has_many :project_team_memberships, dependent: :destroy
+  has_many :custom_teams,
+           through: :project_team_memberships,
+           source: :project_team
+
   enum :role, { lead: 0, contributor: 1 }, default: :contributor
 
   attr_accessor :raw_invitation_token
@@ -120,12 +125,34 @@ class ProjectMembership < ApplicationRecord
     SQL
   end
 
-  # SQL predicate for "this user reaches at least `minimum` project access on the
-  # project referenced by `project_id_sql`", used by application policy scopes so
-  # access is decided the same way in Ruby and in SQL. `:uid` must be bound by
-  # the caller. Default `:read` is Full read: seeing applications, not just the
-  # project shell.
+  # SQL predicate for "this user reaches at least `minimum` on `domain` for the
+  # project referenced by `project_id_sql`". Twin of ProjectTeam.for_membership:
+  # auto kinds plus explicit custom-team join rows. `:uid` must be bound by the
+  # caller. `project_access_sql` defaults to Full read.
   def self.project_access_sql(project_id_sql:, minimum: :read)
+    access_sql(
+      project_id_sql: project_id_sql,
+      domain: :project_access,
+      minimum: minimum
+    )
+  end
+
+  def self.meeting_access_sql(project_id_sql:, minimum: :view)
+    access_sql(
+      project_id_sql: project_id_sql,
+      domain: :meeting_access,
+      minimum: minimum
+    )
+  end
+
+  def self.access_sql(project_id_sql:, domain:, minimum:)
+    domain = domain.to_s
+    unless ProjectTeam::ACCESS_DOMAINS.map(&:to_s).include?(domain)
+      raise ArgumentError, "unknown access domain #{domain}"
+    end
+
+    min_value = ProjectTeam.public_send(domain.pluralize).fetch(minimum.to_s)
+
     <<-SQL.squish
       EXISTS (
         SELECT 1 FROM project_memberships pm
@@ -134,18 +161,23 @@ class ProjectMembership < ApplicationRecord
           AND pm.user_id = :uid
           AND pm.discarded_at IS NULL
           AND pm.accepted_at IS NOT NULL
-          AND pt.project_access >= #{ProjectTeam.project_accesses.fetch(minimum.to_s)}
+          AND pt.#{domain} >= #{min_value}
           AND (
             pt.kind = #{ProjectTeam.kinds.fetch("all_members")}
             OR (pt.kind = #{ProjectTeam.kinds.fetch("leads")} AND pm.role = #{roles.fetch("lead")})
             OR (pt.kind = #{ProjectTeam.kinds.fetch("contributors")} AND pm.role = #{roles.fetch("contributor")})
+            OR EXISTS (
+              SELECT 1 FROM project_team_memberships ptm
+              WHERE ptm.project_team_id = pt.id
+                AND ptm.project_membership_id = pm.id
+            )
           )
       )
     SQL
   end
 
   def teams
-    permit_project.project_teams.for_role(role)
+    permit_project.project_teams.for_membership(self)
   end
 
   private

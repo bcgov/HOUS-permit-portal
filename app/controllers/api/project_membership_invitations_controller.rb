@@ -1,6 +1,6 @@
 class Api::ProjectMembershipInvitationsController < Api::ApplicationController
   skip_before_action :authenticate_user!, only: %i[show]
-  skip_before_action :require_confirmation, only: %i[show]
+  skip_before_action :require_confirmation, only: %i[show accept]
   skip_after_action :verify_authorized, only: %i[show]
   skip_after_action :verify_policy_scoped, only: %i[show]
 

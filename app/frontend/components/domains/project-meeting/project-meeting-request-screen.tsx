@@ -40,7 +40,7 @@ export const ProjectMeetingRequestScreen = observer(function ProjectMeetingReque
   const hasMeetingRequiredPermits = searchParams.get("requiresMeeting") === "true"
   const projectMeetingsAvailable =
     projectIsLoaded &&
-    currentPermitProject.isOwner &&
+    currentPermitProject.canManageMeetings &&
     siteConfigurationStore.projectMeetingsEnabled &&
     currentPermitProject.jurisdiction?.projectMeetingsEnabled
 

@@ -107,6 +107,15 @@ class PermitProject < ApplicationRecord
     end
   end
 
+  def custom_teams
+    project_teams.select(&:custom?).sort_by { |team| team.name.downcase }
+  end
+
+  # Auto teams first, in their canonical order, then custom teams by name.
+  def ordered_teams
+    auto_teams + custom_teams
+  end
+
   # Users who can find this project in search: owner, every kept member, and
   # legacy submission collaborators. Application visibility is still gated by
   # project_read? (Full read), not by presence in this list.
@@ -449,7 +458,7 @@ class PermitProject < ApplicationRecord
        )
       :read
     else
-      :none
+      :base
     end
   end
 

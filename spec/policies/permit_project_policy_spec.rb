@@ -45,6 +45,7 @@ RSpec.describe PermitProjectPolicy, type: :policy do
 
       expect(p.destroy?).to be false
       expect(p.submission_collaborator_options?).to be false
+      expect(p.download_notes_csv?).to be true
     end
   end
 
@@ -62,6 +63,7 @@ RSpec.describe PermitProjectPolicy, type: :policy do
       expect(p.search_permit_applications?).to be false
       expect(p.search_activities?).to be false
       expect(p.update?).to be false
+      expect(p.download_notes_csv?).to be false
     end
 
     it "lets a contributor search applications and activity once a team grants full read" do

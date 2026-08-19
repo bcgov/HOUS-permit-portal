@@ -26,7 +26,7 @@ RSpec.describe PermitApplication::FormJsonService do
     )
     if current_user
       allow(permit_application).to receive(
-        :submission_requirement_block_edit_permissions
+        :submission_requirement_block_view_permissions
       ).with(user_id: current_user.id).and_return(permissions)
     end
     described_class.new(
@@ -107,6 +107,38 @@ RSpec.describe PermitApplication::FormJsonService do
 
     expect(service.form_json.dig("components", 0, "components")).to eq(
       [{ "id" => "rb1" }]
+    )
+  end
+
+  it "does not strip blocks when the user has project-wide view" do
+    form_json = {
+      "components" => [
+        { "components" => [{ "id" => "rb1" }, { "id" => "rb2" }] }
+      ]
+    }
+
+    requirement_blocks_json = {
+      "rb1" => {
+        "requirements" => [{ "id" => "r1", "elective" => false }]
+      },
+      "rb2" => {
+        "requirements" => [{ "id" => "r2", "elective" => false }]
+      }
+    }
+
+    user = instance_double("User", id: "u1")
+    service =
+      build_service(
+        form_json: form_json,
+        requirement_blocks_json: requirement_blocks_json,
+        current_user: user,
+        permissions: :all
+      )
+
+    service.call
+
+    expect(service.form_json.dig("components", 0, "components")).to eq(
+      [{ "id" => "rb1" }, { "id" => "rb2" }]
     )
   end
 

@@ -1,14 +1,23 @@
 class ProjectTeamPolicy < ApplicationPolicy
   def index?
-    permissions.teams_view?
+    permissions.collaborators_view?
   end
 
   def show?
-    permissions.teams_view?
+    permissions.collaborators_view?
+  end
+
+  def create?
+    permissions.collaborators_manage?
   end
 
   def update?
-    permissions.teams_manage?
+    permissions.collaborators_manage?
+  end
+
+  # Auto teams are role-derived singletons, so only custom teams can be removed.
+  def destroy?
+    permissions.collaborators_manage? && record.custom?
   end
 
   private

@@ -629,6 +629,25 @@ RSpec.describe PermitApplicationPolicy do
       ).to eq(:all)
     end
 
+    it "lets a full-read member view every block without granting edit" do
+      permit_project
+        .project_teams
+        .find_by(kind: :all_members)
+        .update!(project_access: :read)
+      create(:project_membership, permit_project:, user: member)
+
+      expect(
+        draft_permit_application.submission_requirement_block_view_permissions(
+          user_id: member.id
+        )
+      ).to eq(:all)
+      expect(
+        draft_permit_application.submission_requirement_block_edit_permissions(
+          user_id: member.id
+        )
+      ).to be_nil
+    end
+
     # COLLAB TODO(phase 5): a backfilled assignee keeps read through the bridge and
     # block-scoped edit through the untouched legacy collaboration logic.
     it "keeps read and block-scoped edit for a backfilled submission assignee" do
@@ -657,6 +676,11 @@ RSpec.describe PermitApplicationPolicy do
       expect(resolved_scope_for(member)).to include(draft_permit_application)
       expect(
         draft_permit_application.submission_requirement_block_edit_permissions(
+          user_id: member.id
+        )
+      ).to eq([block_id])
+      expect(
+        draft_permit_application.submission_requirement_block_view_permissions(
           user_id: member.id
         )
       ).to eq([block_id])

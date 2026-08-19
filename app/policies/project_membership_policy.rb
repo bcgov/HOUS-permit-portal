@@ -8,11 +8,11 @@ class ProjectMembershipPolicy < ApplicationPolicy
   end
 
   def create?
-    permissions.collaborators_invite?
+    permissions.collaborators_manage?
   end
 
   def reinvite?
-    permissions.collaborators_invite?
+    permissions.collaborators_manage?
   end
 
   def update?

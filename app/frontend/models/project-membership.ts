@@ -10,6 +10,13 @@ export interface IProjectMemberUser {
   confirmedAt?: number | null
 }
 
+// Custom teams are named, so a kind alone cannot label them.
+export interface IProjectMembershipTeam {
+  id: string
+  name: string
+  kind: EProjectTeamKind
+}
+
 export const ProjectMembershipModel = types
   .model("ProjectMembershipModel", {
     id: types.identifier,
@@ -17,7 +24,7 @@ export const ProjectMembershipModel = types
     role: types.enumeration(Object.values(EProjectMembershipRole)),
     user: types.optional(types.maybeNull(types.frozen<IProjectMemberUser>()), null),
     invitedEmail: types.maybeNull(types.string),
-    teamKinds: types.optional(types.array(types.enumeration(Object.values(EProjectTeamKind))), []),
+    teams: types.optional(types.array(types.frozen<IProjectMembershipTeam>()), []),
     isInvitationPending: types.optional(types.boolean, false),
     invitedByName: types.maybeNull(types.string),
     createdAt: types.maybeNull(types.Date),

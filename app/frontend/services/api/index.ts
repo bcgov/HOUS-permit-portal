@@ -21,7 +21,7 @@ import { IPreCheck } from "../../models/pre-check"
 import { IProjectAudit } from "../../models/project-audit"
 import { IProjectMeeting } from "../../models/project-meeting"
 import { IProjectMembership, IProjectMembershipInvitation } from "../../models/project-membership"
-import { IProjectTeam } from "../../models/project-team"
+import { IProjectTeam, TProjectTeamParams } from "../../models/project-team"
 import { IReleaseNote } from "../../models/release-note-model"
 import { IRequirementTemplate } from "../../models/requirement-template"
 import { ITemplateCategory } from "../../models/template-category"
@@ -56,7 +56,6 @@ import {
 } from "../../types/api-responses"
 import {
   ECollaborationType,
-  ECollaboratorAccess,
   ECollaboratorType,
   EJurisdictionSortFields,
   EPermitApplicationInboxSortFields,
@@ -64,7 +63,6 @@ import {
   EPermitBlockStatus,
   EPermitProjectSortFields,
   EPreCheckSortFields,
-  EProjectAccess,
   EProjectAuditSortFields,
   EProjectMeetingSortFields,
   EProjectMembershipRole,
@@ -73,7 +71,6 @@ import {
   ERequirementTemplateSortFields,
   EStepCodeSortFields,
   EStepCodeType,
-  ETeamAccess,
   ETemplateVersionStatus,
   EUserSortFields,
 } from "../../types/enums"
@@ -347,11 +344,12 @@ export class Api {
     projectId: string,
     params: {
       role: EProjectMembershipRole
+      projectTeamIds?: string[]
       user?: { email: string }
     }
   ) {
     return this.client.post<ApiResponse<IProjectMembership>>(`/permit_projects/${projectId}/memberships`, {
-      projectMembership: { role: params.role },
+      projectMembership: { role: params.role, projectTeamIds: params.projectTeamIds },
       user: params.user,
     })
   }
@@ -391,14 +389,20 @@ export class Api {
     return this.client.get<ApiResponse<IProjectTeam[]>>(`/permit_projects/${projectId}/teams`)
   }
 
-  async updateProjectTeam(
-    projectId: string,
-    teamId: string,
-    params: { projectAccess?: EProjectAccess; collaboratorAccess?: ECollaboratorAccess; teamAccess?: ETeamAccess }
-  ) {
+  async createProjectTeam(projectId: string, params: TProjectTeamParams) {
+    return this.client.post<ApiResponse<IProjectTeam>>(`/permit_projects/${projectId}/teams`, {
+      projectTeam: params,
+    })
+  }
+
+  async updateProjectTeam(projectId: string, teamId: string, params: TProjectTeamParams) {
     return this.client.patch<ApiResponse<IProjectTeam>>(`/permit_projects/${projectId}/teams/${teamId}`, {
       projectTeam: params,
     })
+  }
+
+  async destroyProjectTeam(projectId: string, teamId: string) {
+    return this.client.delete<ApiResponse<IProjectTeam>>(`/permit_projects/${projectId}/teams/${teamId}`)
   }
 
   async assignProjectReviewCollaborator(projectId: string, collaboratorId: string) {

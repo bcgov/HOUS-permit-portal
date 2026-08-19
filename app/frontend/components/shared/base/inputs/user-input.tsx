@@ -27,6 +27,9 @@ interface IUserInputProps {
   typeTooltip?: string
   typeOptions?: IUserInputTypeOption[]
   showNameFields?: boolean
+  // Extra fields for one invite flow, e.g. the custom teams a project
+  // membership starts on.
+  renderAuxiliary?: (index: number) => ReactNode
 }
 
 export const UserInput = observer(
@@ -39,6 +42,7 @@ export const UserInput = observer(
     typeTooltip,
     typeOptions,
     showNameFields = true,
+    renderAuxiliary,
   }: IUserInputProps) => {
     const { formState, control, watch } = useFormContext()
     const { isSubmitting } = formState
@@ -160,6 +164,11 @@ export const UserInput = observer(
             )}
           </Box>
         </HStack>
+        {renderAuxiliary && (
+          <Box w="full" mt={4}>
+            {renderAuxiliary(index)}
+          </Box>
+        )}
       </Flex>
     )
   }

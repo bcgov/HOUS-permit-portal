@@ -17,10 +17,24 @@ RSpec.describe ProjectPermissions, type: :model do
 
       expect(team(:leads).project_access).to eq("edit")
       expect(team(:leads).collaborator_access).to eq("manage")
-      expect(team(:leads).team_access).to eq("manage")
+      expect(team(:leads).meeting_access).to eq("manage")
 
-      expect(team(:contributors).project_access).to eq("none")
-      expect(team(:all_members).project_access).to eq("none")
+      expect(team(:contributors).project_access).to eq("base")
+      expect(team(:all_members).project_access).to eq("base")
+    end
+
+    it "cannot be renamed, converted to a custom team, or destroyed" do
+      leads = team(:leads)
+
+      expect(leads.update(name: "Bosses")).to be false
+      expect(leads.update(kind: :custom, name: "Bosses")).to be false
+      expect(leads.destroy).to be false
+      expect(leads.reload.name).to eq("Leads")
+      expect(leads.kind).to eq("leads")
+    end
+
+    it "still accepts permission changes" do
+      expect(team(:contributors).update(project_access: :read)).to be true
     end
   end
 
@@ -30,7 +44,7 @@ RSpec.describe ProjectPermissions, type: :model do
 
       expect(permissions.project_edit?).to be true
       expect(permissions.collaborators_manage?).to be true
-      expect(permissions.teams_manage?).to be true
+      expect(permissions.meetings_manage?).to be true
       expect(permissions).to eq(described_class.owner)
     end
 
@@ -50,7 +64,7 @@ RSpec.describe ProjectPermissions, type: :model do
       permissions = permit_project.permissions_for(member)
       expect(permissions.project_read?).to be false
       expect(permissions.collaborators_view?).to be false
-      expect(permissions.teams_view?).to be false
+      expect(permissions.meetings_view?).to be false
     end
 
     it "gives a lead the leads team permissions" do
@@ -59,7 +73,7 @@ RSpec.describe ProjectPermissions, type: :model do
       permissions = permit_project.permissions_for(member)
       expect(permissions.project_edit?).to be true
       expect(permissions.collaborators_manage?).to be true
-      expect(permissions.teams_manage?).to be true
+      expect(permissions.meetings_manage?).to be true
     end
 
     it "takes the per-domain max across the role team and all_members" do
@@ -77,7 +91,7 @@ RSpec.describe ProjectPermissions, type: :model do
       expect(permissions.project_read?).to be true
       expect(permissions.project_edit?).to be false
       expect(permissions.collaborators_view?).to be true
-      expect(permissions.collaborators_invite?).to be false
+      expect(permissions.collaborators_manage?).to be false
     end
 
     it "does not leak a team's permissions to the other role" do
@@ -149,12 +163,13 @@ RSpec.describe ProjectPermissions, type: :model do
       permissions =
         described_class.none.at_least(
           project_access: :edit,
-          collaborator_access: :manage
+          collaborator_access: :manage,
+          meeting_access: :manage
         )
 
       expect(permissions.project_read?).to be true
-      expect(permissions.collaborators_invite?).to be true
-      expect(permissions.teams_view?).to be false
+      expect(permissions.collaborators_view?).to be true
+      expect(permissions.meetings_view?).to be true
     end
 
     it "never lowers a level" do
@@ -169,15 +184,135 @@ RSpec.describe ProjectPermissions, type: :model do
 
     it "serializes level names for the API" do
       expect(described_class.none.to_h).to eq(
-        project_access: "none",
+        project_access: "base",
         collaborator_access: "none",
-        team_access: "none"
+        meeting_access: "none"
       )
       expect(described_class.owner.to_h).to eq(
         project_access: "edit",
         collaborator_access: "manage",
-        team_access: "manage"
+        meeting_access: "manage"
       )
+    end
+  end
+
+  describe "custom teams" do
+    let(:custom_team) do
+      permit_project.project_teams.create!(
+        name: "Plumbers",
+        kind: :custom,
+        project_access: :read
+      )
+    end
+
+    it "grants its permissions only to its explicit members" do
+      outsider = create(:user, :submitter)
+      membership =
+        create(
+          :project_membership,
+          permit_project:,
+          user: member,
+          role: :contributor
+        )
+      create(
+        :project_membership,
+        permit_project:,
+        user: outsider,
+        role: :contributor
+      )
+      custom_team.project_memberships << membership
+      permit_project.reload
+
+      expect(permit_project.permissions_for(member).project_read?).to be true
+      expect(permit_project.permissions_for(outsider).project_read?).to be false
+    end
+
+    it "grants nothing until the invitation is accepted" do
+      membership =
+        create(
+          :project_membership,
+          :pending,
+          permit_project:,
+          invited_email: member.email
+        )
+      custom_team.project_memberships << membership
+
+      # permissions_for memoizes per instance, so each read starts from a fresh
+      # project the way a real request would.
+      expect(
+        PermitProject.find(permit_project.id).permissions_for(member)
+      ).to eq(ProjectPermissions.none)
+
+      membership.accept!(member)
+
+      expect(
+        PermitProject
+          .find(permit_project.id)
+          .permissions_for(member)
+          .project_read?
+      ).to be true
+    end
+
+    # ProjectTeam.for_membership and ProjectMembership.project_access_sql have to
+    # agree, or a user sees a project they cannot open (or the reverse).
+    it "resolves the same way in Ruby and in SQL" do
+      membership =
+        create(
+          :project_membership,
+          permit_project:,
+          user: member,
+          role: :contributor
+        )
+      custom_team.project_memberships << membership
+      permit_project.reload
+
+      sql =
+        ProjectMembership.project_access_sql(
+          project_id_sql: "permit_projects.id"
+        )
+      visible_in_sql =
+        PermitProject.where(sql, uid: member.id).exists?(id: permit_project.id)
+
+      expect(permit_project.permissions_for(member).project_read?).to eq(
+        visible_in_sql
+      )
+      expect(visible_in_sql).to be true
+    end
+
+    it "rejects a membership from another project" do
+      other_membership = create(:project_membership, user: member)
+
+      join =
+        ProjectTeamMembership.new(
+          project_team: custom_team,
+          project_membership: other_membership
+        )
+
+      expect(join).not_to be_valid
+      expect(join.errors[:project_membership]).to be_present
+    end
+
+    it "rejects explicit membership on an auto team" do
+      membership =
+        create(:project_membership, permit_project:, user: member, role: :lead)
+
+      join =
+        ProjectTeamMembership.new(
+          project_team: team(:leads),
+          project_membership: membership
+        )
+
+      expect(join).not_to be_valid
+      expect(join.errors[:project_team]).to be_present
+    end
+
+    it "requires a name unique within the project, case-insensitively" do
+      custom_team
+
+      duplicate =
+        permit_project.project_teams.new(name: "plumbers", kind: :custom)
+
+      expect(duplicate).not_to be_valid
     end
   end
 end

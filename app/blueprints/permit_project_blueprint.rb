@@ -122,12 +122,20 @@ class PermitProjectBlueprint < Blueprinter::Base
     end
 
     field :has_active_project_meeting do |permit_project, options|
+      unless PermitProjectBlueprint.can_view_meetings?(permit_project, options)
+        next false
+      end
+
       options[:active_project_meeting_ids_by_project_id]&.key?(
         permit_project.id
       ) || false
     end
 
     field :active_project_meeting_id do |permit_project, options|
+      unless PermitProjectBlueprint.can_view_meetings?(permit_project, options)
+        next nil
+      end
+
       options[:active_project_meeting_ids_by_project_id]&.[](permit_project.id)
     end
   end
@@ -186,9 +194,9 @@ class PermitProjectBlueprint < Blueprinter::Base
                 if: ->(_field_name, permit_project, options) do
                   permit_project.permissions_for(
                     options[:current_user]
-                  ).teams_view?
+                  ).collaborators_view?
                 end do |permit_project, _options|
-      permit_project.auto_teams
+      permit_project.ordered_teams
     end
 
     association :recent_permit_applications,
@@ -207,9 +215,20 @@ class PermitProjectBlueprint < Blueprinter::Base
                 blueprint: ProjectDocumentBlueprint do |permit_project, options|
       permit_project.project_documents(options[:current_user])
     end
-    association :active_project_meeting, blueprint: ProjectMeetingBlueprint
+    association :active_project_meeting,
+                blueprint: ProjectMeetingBlueprint do |permit_project, options|
+      unless PermitProjectBlueprint.can_view_meetings?(permit_project, options)
+        next nil
+      end
+
+      permit_project.active_project_meeting
+    end
     association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
     association :notes, blueprint: NoteBlueprint do |permit_project, options|
+      unless PermitProjectBlueprint.can_view_meetings?(permit_project, options)
+        next []
+      end
+
       PermitProjectBlueprint.notes_for(permit_project, options)
     end
   end
@@ -240,6 +259,10 @@ class PermitProjectBlueprint < Blueprinter::Base
     end
     association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
     association :notes, blueprint: NoteBlueprint do |permit_project, options|
+      unless PermitProjectBlueprint.can_view_meetings?(permit_project, options)
+        next []
+      end
+
       PermitProjectBlueprint.notes_for(permit_project, options)
     end
     association :recent_audits,
@@ -263,6 +286,14 @@ class PermitProjectBlueprint < Blueprinter::Base
     return true if user.review_staff_of?(permit_project.jurisdiction_id)
 
     permit_project.permissions_for(user).project_read?
+  end
+
+  def self.can_view_meetings?(permit_project, options)
+    user = options[:current_user]
+    return false unless user
+    return true if user.review_staff_of?(permit_project.jurisdiction_id)
+
+    permit_project.permissions_for(user).meetings_view?
   end
 
   def self.application_field(permit_project, options, method, fallback)

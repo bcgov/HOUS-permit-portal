@@ -11,10 +11,14 @@ class ProjectMembershipBlueprint < Blueprinter::Base
                   project_membership.accepted?
                 end
 
-    field :team_kinds do |project_membership, _options|
+    # Pending invitations are on no team until accepted, so they report none.
+    # Custom teams are named, so the kind alone is not enough to label them.
+    field :teams do |project_membership, _options|
       next [] unless project_membership.accepted?
 
-      project_membership.teams.map(&:kind)
+      project_membership.teams.map do |team|
+        { id: team.id, name: team.name, kind: team.kind }
+      end
     end
 
     field :is_invitation_pending do |project_membership, _options|

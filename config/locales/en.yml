@@ -137,6 +137,14 @@ en:
               is_project_owner: "is the project owner and already has full access"
             invited_email:
               already_invited: "already has an invitation or membership on this project"
+        project_team:
+          auto_team_immutable: "Default teams cannot be renamed or removed"
+        project_team_membership:
+          attributes:
+            project_team:
+              must_be_custom: "membership is set by each collaborator's role for default teams"
+            project_membership:
+              different_project: "belongs to a different project"
         requirement_template:
           step_code_package_required: '"Energy Step Code" is required to have the Design package Energy Step Code file'
           duplicate_energy_step_code: 'Multiple "Energy Step Code" requirements found. Please ensure there is only one "Energy Step Code" requirement in the template'
@@ -819,12 +827,24 @@ en:
         title: Error
         message: "%{error_message}"
     project_team:
+      create_success:
+        title: ""
+        message: "Team created"
+      create_error:
+        title: Error
+        message: "Team could not be created"
       update_success:
         title: ""
-        message: "Team permissions updated"
+        message: "Team updated"
       update_error:
         title: Error
-        message: "Team permissions could not be updated"
+        message: "Team could not be updated"
+      destroy_success:
+        title: ""
+        message: "Team removed"
+      destroy_error:
+        title: Error
+        message: "Team could not be removed"
     qa_tools:
       full_permit_project_success:
         title: ""

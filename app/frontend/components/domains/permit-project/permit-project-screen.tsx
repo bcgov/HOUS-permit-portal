@@ -44,8 +44,8 @@ export const PermitProjectScreen = observer(() => {
   const projectBasePath = permitProjectId ? `/projects/${permitProjectId}` : null
 
   const canViewCollaborators = Boolean(currentPermitProject?.canViewCollaborators)
-  const canViewTeams = Boolean(currentPermitProject?.canViewTeams)
   const canViewActivity = Boolean(currentPermitProject?.canViewApplications)
+  const canViewMeetings = Boolean(projectMeetingsEnabled && currentPermitProject?.canViewMeetings)
 
   const TABS_DATA: ITabItem[] = useMemo(() => {
     if (!projectBasePath) return []
@@ -57,7 +57,7 @@ export const PermitProjectScreen = observer(() => {
         ? [{ label: t("permitProject.details.activity"), icon: TrendUp, to: `${projectBasePath}/activity` }]
         : []),
       { label: t("permitProject.details.permits"), icon: ClipboardText, to: `${projectBasePath}/permits` },
-      ...(projectMeetingsEnabled
+      ...(canViewMeetings
         ? [
             {
               label: t("permitProject.details.meetings"),
@@ -75,11 +75,11 @@ export const PermitProjectScreen = observer(() => {
       ...(canViewCollaborators
         ? [{ label: t("permitProject.details.collaborators"), icon: Users, to: `${projectBasePath}/collaborators` }]
         : []),
-      ...(canViewTeams
+      ...(canViewCollaborators
         ? [{ label: t("permitProject.details.teams"), icon: UsersThree, to: `${projectBasePath}/teams` }]
         : []),
     ].map((tab, index) => ({ ...tab, tabIndex: index }))
-  }, [projectBasePath, projectMeetingsEnabled, canViewActivity, canViewCollaborators, canViewTeams, t])
+  }, [projectBasePath, canViewMeetings, canViewActivity, canViewCollaborators, t])
 
   const { projectMatchesRoute, tabIndex, handleTabChange, isPending } = useProjectDetailTabs({
     basePath: projectBasePath,
@@ -128,7 +128,13 @@ export const PermitProjectScreen = observer(() => {
             />
             <EditableInputWithControls
               w="full"
-              initialHint={t("permitProject.details.editPermitProjectTitleHint")}
+              isDisabled={!currentPermitProject.canEditProject}
+              initialHint={
+                currentPermitProject.canEditProject ? t("permitProject.details.editPermitProjectTitleHint") : undefined
+              }
+              controlsProps={
+                currentPermitProject.canEditProject ? undefined : { CustomPreviewModeControls: () => null }
+              }
               value={watch("title") || ""}
               editableInputProps={{
                 fontWeight: 700,
@@ -168,12 +174,12 @@ export const PermitProjectScreen = observer(() => {
           <TabPanel>
             {isPending ? <LoadingScreen /> : <PermitsTabPanelContent permitProject={currentPermitProject} />}
           </TabPanel>
-          {projectMeetingsEnabled && (
+          {canViewMeetings && (
             <TabPanel p={0}>
               {isPending ? <LoadingScreen /> : <MeetingsTabPanelContent permitProject={currentPermitProject} />}
             </TabPanel>
           )}
-          {projectMeetingsEnabled && (
+          {canViewMeetings && (
             <TabPanel p={0}>
               {isPending ? <LoadingScreen /> : <ProjectNotesTabPanelContent permitProject={currentPermitProject} />}
             </TabPanel>
@@ -186,7 +192,7 @@ export const PermitProjectScreen = observer(() => {
               {isPending ? <LoadingScreen /> : <CollaboratorsTabPanelContent permitProject={currentPermitProject} />}
             </TabPanel>
           )}
-          {canViewTeams && (
+          {canViewCollaborators && (
             <TabPanel>
               {isPending ? <LoadingScreen /> : <TeamsTabPanelContent permitProject={currentPermitProject} />}
             </TabPanel>

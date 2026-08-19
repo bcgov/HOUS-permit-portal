@@ -786,19 +786,19 @@ export enum EProjectMembershipRole {
 
 // Progressive permission levels: each implies every level before it.
 export enum EProjectAccess {
-  none = "none",
+  base = "base",
   read = "read",
   edit = "edit",
 }
 
+// Covers both the Collaborators and Teams tabs: `manage` is access-admin.
 export enum ECollaboratorAccess {
   none = "none",
   view = "view",
-  invite = "invite",
   manage = "manage",
 }
 
-export enum ETeamAccess {
+export enum EMeetingAccess {
   none = "none",
   view = "view",
   manage = "manage",

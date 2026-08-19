@@ -270,10 +270,9 @@ Rails.application.routes.draw do
         post :reinvite, on: :member
       end
 
-      # COLLAB TODO(phase 2): create/destroy for custom teams and explicit team membership.
       resources :project_teams,
                 path: "teams",
-                only: %i[index update],
+                only: %i[index create update destroy],
                 controller: "permit_projects/teams"
 
       resources :project_meetings, path: "meetings", only: %i[create update] do

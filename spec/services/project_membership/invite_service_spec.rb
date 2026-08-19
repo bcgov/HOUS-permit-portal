@@ -18,7 +18,7 @@ RSpec.describe ProjectMembership::InviteService, type: :service do
     expect { invite!("already@example.com") }.to have_enqueued_mail(
       PermitHubMailer,
       :notify_project_membership_invitation
-    ).and not_change(User, :count)
+    ).and change(User, :count).by(0)
 
     membership = permit_project.project_memberships.kept.last
     expect(membership.user).to be_nil
@@ -101,5 +101,43 @@ RSpec.describe ProjectMembership::InviteService, type: :service do
       :count
     )
     expect(permit_project.project_memberships.kept.last.user_id).to be_nil
+  end
+
+  describe "custom team pre-assignment" do
+    let(:custom_team) do
+      permit_project.project_teams.create!(name: "Plumbers", kind: :custom)
+    end
+
+    it "pre-assigns the pending membership to the given custom teams" do
+      membership =
+        service.invite!(
+          role: :contributor,
+          user_params: {
+            email: "plumber@example.com"
+          },
+          project_team_ids: [custom_team.id]
+        )
+
+      expect(membership.custom_teams).to eq([custom_team])
+    end
+
+    it "drops a team id belonging to another project" do
+      other_team =
+        create(:permit_project).project_teams.create!(
+          name: "Elsewhere",
+          kind: :custom
+        )
+
+      membership =
+        service.invite!(
+          role: :contributor,
+          user_params: {
+            email: "outsider@example.com"
+          },
+          project_team_ids: [other_team.id]
+        )
+
+      expect(membership.custom_teams).to be_empty
+    end
   end
 end

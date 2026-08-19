@@ -36,6 +36,7 @@ import { Trans, useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus, EUserRoles } from "../../../types/enums"
+import { clearPendingInviteEmail, pendingInviteEmail } from "../../../utils/utility-functions"
 import { EmailFormControl } from "../../shared/form/email-form-control"
 import { TextFormControl } from "../../shared/form/input-form-control"
 import { UserEulas } from "../../shared/user-eulas"
@@ -56,8 +57,18 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
     currentUser.unconfirmedEmail || (currentUser.isUnconfirmed && currentUser.confirmationSentAt)
 
   const getDefaults = () => {
-    const { firstName, lastName, certified, organization, preference, department, phoneNumber } = currentUser
-    return { firstName, lastName, certified, organization, preferenceAttributes: preference, department, phoneNumber }
+    const { firstName, lastName, certified, organization, preference, department, phoneNumber, email } = currentUser
+    const needsEmail = currentUser.isUnconfirmed && !currentUser.confirmationSentAt
+    return {
+      firstName,
+      lastName,
+      certified,
+      organization,
+      preferenceAttributes: preference,
+      department,
+      phoneNumber,
+      ...(needsEmail ? { email: email || pendingInviteEmail() } : {}),
+    }
   }
   const formMethods = useForm({ mode: "onSubmit", defaultValues: getDefaults() })
   const { handleSubmit, formState, control, reset, setValue } = formMethods
@@ -66,7 +77,8 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
   const navigate = useNavigate()
 
   const onSubmit = async (formData) => {
-    await updateProfile(formData)
+    const ok = await updateProfile(formData)
+    if (ok) clearPendingInviteEmail()
     setIsEditingEmail(false)
     reset(getDefaults())
   }

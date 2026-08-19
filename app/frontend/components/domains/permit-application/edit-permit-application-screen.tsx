@@ -136,6 +136,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
     skipPristineCheck?: boolean
   } = {}) => {
     if (currentPermitApplication.isSubmitted || isStepCode || isContactsOpen) return
+    if (!currentPermitApplication.canEditSubmission) return
     const formio = formRef.current
     if (formio.pristine && !skipPristineCheck && !isDirty) return true
 
@@ -274,7 +275,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
     currentUser?.id === currentPermitApplication?.designatedSubmitter?.collaborator?.user?.id
   const canEditPermitApplication =
     currentPermitApplication.isDraft &&
-    doesUserHaveSubmissionPermission &&
+    currentPermitApplication.canEditSubmission &&
     !currentPermitApplication.isViewingPastRequests
 
   const parentProjectPath = currentPermitApplication.projectId
@@ -394,30 +395,36 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                   permitApplication={currentPermitApplication}
                   collaborationType={ECollaborationType.submission}
                 />
-                <Button
-                  variant="primary"
-                  onClick={handleClickFinishLater}
-                  isDisabled={currentPermitApplication.isViewingPastRequests}
-                >
-                  {t("permitApplication.edit.saveDraft")}
-                </Button>
-                <Button
-                  rightIcon={<CaretRight />}
-                  onClick={
-                    currentPermitApplication.canUserSubmit(currentUser)
-                      ? handleScrollToBottom
-                      : onSubmitBlockedModalOpen
-                  }
-                >
-                  {t("permitApplication.edit.submit")}
-                </Button>
-                {!currentPermitApplication.canUserSubmit(currentUser) && isSubmitBlockedModalOpen && (
-                  <PermitApplicationSubmitModal
-                    permitApplication={currentPermitApplication}
-                    isOpen={isSubmitBlockedModalOpen}
-                    onClose={onSubmitBlockedModalClose}
-                  />
+                {canEditPermitApplication && (
+                  <Button
+                    variant="primary"
+                    onClick={handleClickFinishLater}
+                    isDisabled={currentPermitApplication.isViewingPastRequests}
+                  >
+                    {t("permitApplication.edit.saveDraft")}
+                  </Button>
                 )}
+                {canEditPermitApplication && (
+                  <Button
+                    rightIcon={<CaretRight />}
+                    onClick={
+                      currentPermitApplication.canUserSubmit(currentUser)
+                        ? handleScrollToBottom
+                        : onSubmitBlockedModalOpen
+                    }
+                  >
+                    {t("permitApplication.edit.submit")}
+                  </Button>
+                )}
+                {canEditPermitApplication &&
+                  !currentPermitApplication.canUserSubmit(currentUser) &&
+                  isSubmitBlockedModalOpen && (
+                    <PermitApplicationSubmitModal
+                      permitApplication={currentPermitApplication}
+                      isOpen={isSubmitBlockedModalOpen}
+                      onClose={onSubmitBlockedModalClose}
+                    />
+                  )}
               </HStack>
             )}
             <FloatingHelpDrawer top="250px" />
@@ -471,13 +478,16 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
               onCompletedBlocksChange={setCompletedBlocks}
               triggerSave={handleSave}
               showHelpButton
-              isEditing={currentPermitApplication?.isDraft}
-              renderSaveButton={() => (
-                <SaveButton
-                  handleSave={handleSave}
-                  isViewingPastRequests={currentPermitApplication?.isViewingPastRequests}
-                />
-              )}
+              isEditing={canEditPermitApplication}
+              readOnly={!canEditPermitApplication}
+              renderSaveButton={() =>
+                canEditPermitApplication ? (
+                  <SaveButton
+                    handleSave={handleSave}
+                    isViewingPastRequests={currentPermitApplication?.isViewingPastRequests}
+                  />
+                ) : null
+              }
               updateCollaborationAssignmentNodes={updateRequirementBlockAssignmentNode}
             />
           </Flex>

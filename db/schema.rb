@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_08_17_150000) do
+ActiveRecord::Schema[7.2].define(version: 2026_08_18_210000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -841,15 +841,26 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_17_150000) do
     t.index ["user_id"], name: "index_project_memberships_on_user_id"
   end
 
+  create_table "project_team_memberships", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "project_team_id", null: false
+    t.uuid "project_membership_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["project_membership_id"], name: "index_project_team_memberships_on_project_membership_id"
+    t.index ["project_team_id", "project_membership_id"], name: "index_project_team_memberships_unique_pair", unique: true
+    t.index ["project_team_id"], name: "index_project_team_memberships_on_project_team_id"
+  end
+
   create_table "project_teams", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "permit_project_id", null: false
     t.string "name", null: false
     t.integer "kind", default: 3, null: false
     t.integer "project_access", default: 0, null: false
     t.integer "collaborator_access", default: 0, null: false
-    t.integer "team_access", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "meeting_access", default: 0, null: false
+    t.index "permit_project_id, lower((name)::text)", name: "index_project_teams_unique_name_per_project", unique: true
     t.index ["permit_project_id", "kind"], name: "index_project_teams_unique_auto_team_per_project", unique: true, where: "(kind < 3)"
     t.index ["permit_project_id"], name: "index_project_teams_on_permit_project_id"
   end
@@ -1437,6 +1448,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_17_150000) do
   add_foreign_key "project_memberships", "permit_projects"
   add_foreign_key "project_memberships", "users"
   add_foreign_key "project_memberships", "users", column: "invited_by_id"
+  add_foreign_key "project_team_memberships", "project_memberships"
+  add_foreign_key "project_team_memberships", "project_teams"
   add_foreign_key "project_teams", "permit_projects"
   add_foreign_key "requirement_documents", "requirement_blocks"
   add_foreign_key "requirement_template_sections", "requirement_template_sections", column: "copied_from_id"

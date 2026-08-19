@@ -16,7 +16,7 @@ import { CaretLeft, MagnifyingGlass } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useNavigate } from "react-router-dom"
+import { Navigate, useNavigate } from "react-router-dom"
 import { usePermitProject } from "../../../hooks/resources/use-permit-project"
 import { useTemplateVersions } from "../../../hooks/resources/use-template-versions"
 import { ITemplateVersion } from "../../../models/template-version"
@@ -55,6 +55,7 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
   )
   const shouldOfferProjectMeetingAfterAdd =
     selectedTemplatesRequireProjectMeeting &&
+    currentPermitProject?.canManageMeetings &&
     !currentPermitProject?.activeProjectMeeting &&
     siteConfigurationStore.projectMeetingsEnabled &&
     (currentPermitProject?.jurisdiction?.projectMeetingsEnabled ?? false)
@@ -99,6 +100,9 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
 
   if (error) return <ErrorScreen error={error} />
   if (templateError) return <ErrorScreen error={templateError} />
+  if (currentPermitProject?.isFullyLoaded && !currentPermitProject.canEditProject) {
+    return <Navigate to={`/projects/${currentPermitProject.id}/permits`} replace />
+  }
 
   return (
     <Container maxW="container.lg" py={10}>

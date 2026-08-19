@@ -6,6 +6,7 @@ import { useNavigate, useSearchParams } from "react-router-dom"
 import { IProjectMembershipInvitation } from "../../../models/project-membership"
 import { useMst, useServerAPI } from "../../../setup/root"
 import { EProjectMembershipRole } from "../../../types/enums"
+import { rememberPendingInviteEmail } from "../../../utils/utility-functions"
 import {
   BceidLoginForm,
   BcscLoginForm,
@@ -34,7 +35,9 @@ export const AcceptProjectInvitationScreen = observer(() => {
       }
       const response = await api.fetchProjectMembershipInvitation(token)
       if (response.ok) {
-        setInvitation(response.data.data)
+        const data = response.data.data
+        rememberPendingInviteEmail(data.invitedEmail)
+        setInvitation(data)
       } else {
         setInvalidToken(true)
       }

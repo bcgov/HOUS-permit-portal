@@ -9,6 +9,8 @@ class PermitApplicationPolicy < ApplicationPolicy
       return true unless record.new_draft?
 
       record.permit_project&.project_meetings&.active&.exists? == true
+    else
+      false
     end
   end
 

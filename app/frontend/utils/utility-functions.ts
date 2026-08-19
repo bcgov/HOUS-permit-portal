@@ -529,3 +529,19 @@ export function escapeForSingleQuotedJsString(str: string | null | undefined): s
   if (!str) return ""
   return str.replace(/\\/g, "\\\\").replace(/'/g, "\\'")
 }
+
+// ponytail: same-tab sessionStorage only — lost if they paste the invite into another browser.
+// Upgrade: persist invited email on the user at omniauth create time (watch uniqueness).
+const PENDING_INVITE_EMAIL_KEY = "pendingInviteEmail"
+
+export function rememberPendingInviteEmail(email?: string | null) {
+  if (email) sessionStorage.setItem(PENDING_INVITE_EMAIL_KEY, email)
+}
+
+export function pendingInviteEmail(): string {
+  return sessionStorage.getItem(PENDING_INVITE_EMAIL_KEY) || ""
+}
+
+export function clearPendingInviteEmail() {
+  sessionStorage.removeItem(PENDING_INVITE_EMAIL_KEY)
+}

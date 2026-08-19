@@ -124,7 +124,7 @@ class SubmissionVersion < ApplicationRecord
     return revision_requests if user.blank?
 
     permissions =
-      permit_application.submission_requirement_block_edit_permissions(
+      permit_application.submission_requirement_block_view_permissions(
         user_id: user.id
       )
 
