@@ -482,7 +482,21 @@ const RedirectScreen = lazy(() =>
 
 const Footer = lazy(() => import("../../shared/base/footer").then((module) => ({ default: module.Footer })))
 
-export const Navigation = observer(() => {
+// Dev-only component preview: swapped in at module load so /__preview skips the
+// router, token validation, NavBar and Footer without a runtime branch here.
+const isPreviewRoute = import.meta.env.DEV && window.location.pathname === "/__preview"
+
+const PreviewRoute = () => {
+  const PreviewHarness = lazy(() => import("../../../previews"))
+
+  return (
+    <Suspense fallback={<LoadingScreen />}>
+      <PreviewHarness />
+    </Suspense>
+  )
+}
+
+const AppNavigation = observer(() => {
   const { sessionStore, siteConfigurationStore, subscribeToUserChannel } = useMst()
   const { isLoggingOut } = sessionStore
   const { displaySitewideMessage, sitewideMessage } = siteConfigurationStore
@@ -522,6 +536,8 @@ export const Navigation = observer(() => {
     </BrowserRouter>
   )
 })
+
+export const Navigation = isPreviewRoute ? PreviewRoute : AppNavigation
 
 const AppRoutes = observer(() => {
   const rootStore = useMst()

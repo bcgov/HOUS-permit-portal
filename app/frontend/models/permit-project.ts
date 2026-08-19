@@ -156,7 +156,7 @@ export const PermitProjectModel = types
     get canEditProject() {
       return atLeastLevel(PROJECT_ACCESS_ORDER, self.currentUserPermissions?.projectAccess, EProjectAccess.edit)
     },
-    // One domain gates both the Collaborators and Teams tab content.
+    // One domain gates the People & access screen.
     get canViewCollaborators() {
       return atLeastLevel(
         COLLABORATOR_ACCESS_ORDER,
@@ -351,8 +351,8 @@ export const PermitProjectModel = types
       if (anyOk) {
         const listResponse = yield* toGenerator(self.environment.api.fetchProjectMemberships(self.id))
         if (listResponse.ok) self.setProjectMemberships(listResponse.data.data)
-        // Pre-assignment puts the new membership on a custom team, so the Teams
-        // tab's member lists are stale too.
+        // Pre-assignment puts the new membership on a custom team, so People &
+        // access member lists are stale too.
         if (users.some((user) => user.projectTeamIds?.length)) {
           const teamsResponse = yield* toGenerator(self.environment.api.fetchProjectTeams(self.id))
           if (teamsResponse.ok) self.setProjectTeams(teamsResponse.data.data)
@@ -369,7 +369,7 @@ export const PermitProjectModel = types
           )
         )
         // A role change moves the person between the Leads and Contributors
-        // teams, so the Teams tab's member lists move with it.
+        // groups, so People & access member lists move with it.
         const teamsResponse = yield* toGenerator(self.environment.api.fetchProjectTeams(self.id))
         if (teamsResponse.ok) self.setProjectTeams(teamsResponse.data.data)
       }

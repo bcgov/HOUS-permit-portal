@@ -8,7 +8,6 @@ import {
   SquaresFour,
   TrendUp,
   Users,
-  UsersThree,
 } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo } from "react"
@@ -30,7 +29,6 @@ import { OverviewTabPanelContent } from "./overview-tab-panel-content"
 import { PermitsTabPanelContent } from "./permits-tab-panel-content"
 import { ProjectNotesTabPanelContent } from "./project-notes-tab-panel-content"
 import { ITabItem, ProjectSidebarTabList } from "./project-sidebar-tab-list"
-import { TeamsTabPanelContent } from "./teams-tab-panel-content"
 
 export const PermitProjectScreen = observer(() => {
   const { currentPermitProject, error } = usePermitProject()
@@ -68,7 +66,6 @@ export const PermitProjectScreen = observer(() => {
         to: `${projectBasePath}/local-resources`,
       },
       { label: t("permitProject.details.collaborators"), icon: Users, to: `${projectBasePath}/collaborators` },
-      { label: t("permitProject.details.teams"), icon: UsersThree, to: `${projectBasePath}/teams` },
     ].map((tab, index) => ({ ...tab, tabIndex: index }))
   }, [projectBasePath, projectMeetingsEnabled, t])
 
@@ -153,7 +150,8 @@ export const PermitProjectScreen = observer(() => {
       </Flex>
       <Tabs w="full" flexGrow={1} index={tabIndex} onChange={handleTabChange} display="flex" isLazy variant="sidebar">
         <ProjectSidebarTabList p={0} tabsData={TABS_DATA} />
-        <TabPanels>
+        {/* minW=0 so wide panel content scrolls inside the panel instead of widening the page. */}
+        <TabPanels flex={1} minW={0}>
           <TabPanel>
             {isPending ? <LoadingScreen /> : <OverviewTabPanelContent permitProject={currentPermitProject} />}
           </TabPanel>
@@ -178,9 +176,6 @@ export const PermitProjectScreen = observer(() => {
           </TabPanel>
           <TabPanel>
             {isPending ? <LoadingScreen /> : <CollaboratorsTabPanelContent permitProject={currentPermitProject} />}
-          </TabPanel>
-          <TabPanel>
-            {isPending ? <LoadingScreen /> : <TeamsTabPanelContent permitProject={currentPermitProject} />}
           </TabPanel>
         </TabPanels>
       </Tabs>
