@@ -90,6 +90,10 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
     onClose()
   }, [location.pathname])
 
+  const closeOnLinkClick = (event: React.MouseEvent) => {
+    if ((event.target as HTMLElement).closest("a[href]")) onClose()
+  }
+
   // Close menu when clicking outside (including the navbar above the drawer)
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -235,7 +239,7 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
           flexDirection="column"
           h="auto"
         >
-          <DrawerBody flex="1" minH={0} overflow="auto">
+          <DrawerBody flex="1" minH={0} overflow="auto" onClick={closeOnLinkClick}>
             <MenuCloseProvider value={onClose}>
               <Container maxW="container.lg" px={8}>
                 <Grid templateColumns={{ base: "1fr", md: "3fr 3fr 2fr" }} gap={8} py={5}>
