@@ -473,6 +473,7 @@ export const RequirementForm = observer(
           isOpen={isStepCodeSelectOpen}
           onClose={() => setIsStepCodeSelectOpen(false)}
           stepCodeType={stepCodeSelectType}
+          attachedStepCode={permitApplication.stepCode}
           onSelect={handleSelectExistingStepCode}
         />
 

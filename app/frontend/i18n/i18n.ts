@@ -2495,6 +2495,7 @@ Thank you,
             noReportAvailable: "No report generated yet",
             reportOutOfDate: "Report out of date — regenerate from the report section",
             downloadStageReport: "Download {{stage}} report",
+            attached: "Attached",
           },
           shareReport: {
             action: "Share with jurisdiction",
@@ -2533,6 +2534,7 @@ Thank you,
           },
 
           noneFound: "No Step Codes found",
+          attached: "Attached",
           columns: {
             project: "Project",
             type: "Type",
