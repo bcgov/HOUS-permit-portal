@@ -317,7 +317,10 @@ class PermitProject < ApplicationRecord
           requirement_template: :taggings
         )
         .order(updated_at: :desc)
-    return scope.limit(3) if owner_id == user.id
+    # Owner and any membership with Full read see the project's apps.
+    # Without project-wide read, fall back to the legacy per-application
+    # submission-collaborator bridge.
+    return scope.limit(3) if permissions_for(user).project_read?
 
     scope
       .joins(permit_collaborations: :collaborator)

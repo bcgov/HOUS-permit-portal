@@ -209,6 +209,53 @@ RSpec.describe PermitProject, type: :model do
         )
         expect(project.recent_permit_applications(owner)).not_to include(older)
       end
+
+      it "returns last 3 when a collaborator has project-wide full read" do
+        owner = create(:user, :submitter)
+        member = create(:user, :submitter)
+        project = create(:permit_project, owner: owner)
+        create(
+          :project_membership,
+          :lead,
+          permit_project: project,
+          user: member
+        )
+        project.reload
+
+        older =
+          create(
+            :permit_application,
+            permit_project: project,
+            created_at: 3.days.ago,
+            updated_at: 3.days.ago
+          )
+        middle =
+          create(
+            :permit_application,
+            permit_project: project,
+            created_at: 2.days.ago,
+            updated_at: 2.days.ago
+          )
+        newer =
+          create(
+            :permit_application,
+            permit_project: project,
+            created_at: 1.day.ago,
+            updated_at: 1.day.ago
+          )
+        newest =
+          create(
+            :permit_application,
+            permit_project: project,
+            created_at: Time.current,
+            updated_at: Time.current
+          )
+
+        expect(project.recent_permit_applications(member)).to eq(
+          [newest, newer, middle]
+        )
+        expect(project.recent_permit_applications(member)).not_to include(older)
+      end
     end
 
     describe "#submission_collaborators" do
