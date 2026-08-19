@@ -4746,7 +4746,7 @@ Thank you,
           submitterPromotionProjectAccessWarning:
             "If you accept this invitation while signed in as a submitter, your account will become jurisdiction staff and you will lose access to any permit projects you currently own.",
           loggedInSubmitterStaffInviteWarning:
-            "You are already signed in. Accepting this staff invitation will attach it to your current account and make it jurisdiction staff — you will lose access to any permit projects you currently own as a submitter. If you need to use a different BCeID account, sign out first or open this invitation in a private/incognito window.",
+            "You're already signed in. If you accept, this account becomes jurisdiction staff and you'll lose access to any permit projects you own as a submitter. If this isn't the BCeID you wanted, sign out first or open the invite in an incognito window.",
           rolesAndPermissions: "User roles & permissions",
           inviteInstructions:
             "Enter the email addresses of whom you wish to invite below.  For details about permissions for each role, please see",
