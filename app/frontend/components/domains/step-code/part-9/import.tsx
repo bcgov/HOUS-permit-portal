@@ -205,7 +205,7 @@ export const H2KImport = observer(function StepCodeH2kImport() {
                 <VStack key={`step-code-data-entry-${index}`} w="full" spacing={4}>
                   <HStack w="full" align="start">
                     <FileFormControl
-                      inputProps={{ borderWidth: 0, p: 0 }}
+                      inputProps={{ borderWidth: 0, p: 0, accept: ".h2k" }}
                       label={t("stepCode.import.selectFile")}
                       fieldName={`dataEntriesAttributes.${index}.h2kLocal`}
                       onChange={(e) => {
