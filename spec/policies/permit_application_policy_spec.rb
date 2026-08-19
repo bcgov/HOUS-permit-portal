@@ -36,6 +36,18 @@ RSpec.describe PermitApplicationPolicy do
       expect(subject.show?).to be true
     end
 
+    it "permits show for the project owner who is not the submitter" do
+      owner = create(:user, :submitter)
+      draft_permit_application.permit_project.update!(owner: owner)
+      policy =
+        described_class.new(
+          UserContext.new(owner, sandbox),
+          draft_permit_application
+        )
+
+      expect(policy.show?).to be true
+    end
+
     it "permits create when under a project owned by the submitter" do
       expect(subject.create?).to be true
     end
