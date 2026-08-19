@@ -32,10 +32,8 @@ class Api::RequirementTemplatesController < Api::ApplicationController
 
   def for_filter
     authorize :requirement_template, :for_filter?
-    templates = RequirementTemplate.with_published_version.kept
-    render_success templates,
-                   nil,
-                   { blueprint: OptionsBlueprint, view: :default }
+    templates = filter_requirement_templates
+    render_success templates, nil, { blueprint: OptionsBlueprint }
   end
 
   def show
@@ -394,6 +392,24 @@ class Api::RequirementTemplatesController < Api::ApplicationController
 
   def set_template_version
     @template_version = TemplateVersion.find(params[:id])
+  end
+
+  def filter_requirement_templates
+    apps =
+      policy_scope(
+        PermitApplication.kept.joins(
+          :permit_project,
+          template_version: :requirement_template
+        )
+      )
+
+    if params[:permit_project_id].present?
+      project = PermitProject.find(params[:permit_project_id])
+      authorize project, :show?
+      apps = apps.where(permit_project_id: project.id)
+    end
+
+    RequirementTemplate.where(id: apps.select("requirement_templates.id"))
   end
 
   def requirement_template_params

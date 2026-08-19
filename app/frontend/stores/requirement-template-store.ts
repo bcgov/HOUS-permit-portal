@@ -191,12 +191,11 @@ export const RequirementTemplateStoreModel = types
 
       return false
     }),
-    fetchFilterOptions: flow(function* () {
-      const response = yield* toGenerator(self.environment.api.fetchRequirementTemplatesForFilter())
+    fetchFilterOptions: flow(function* (params?: { permitProjectId?: string }) {
+      const response = yield* toGenerator(self.environment.api.fetchRequirementTemplatesForFilter(params))
       if (response.ok) {
         self.filterOptions = cast(response.data.data)
       }
-      return response.ok
     }),
     searchTagOptions: flow(function* (query: string) {
       const response = yield* toGenerator(
