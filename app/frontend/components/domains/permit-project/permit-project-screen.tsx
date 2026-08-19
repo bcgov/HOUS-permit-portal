@@ -43,21 +43,16 @@ export const PermitProjectScreen = observer(() => {
   // Derive from the URL, not store current — store lags during project switches and was redirecting to the wrong project.
   const projectBasePath = permitProjectId ? `/projects/${permitProjectId}` : null
 
-  const canViewCollaborators = Boolean(currentPermitProject?.canViewCollaborators)
-  const canViewActivity = Boolean(currentPermitProject?.canViewApplications)
-  const canViewMeetings = Boolean(projectMeetingsEnabled && currentPermitProject?.canViewMeetings)
-
   const TABS_DATA: ITabItem[] = useMemo(() => {
     if (!projectBasePath) return []
     // Tab indices follow position, so they stay aligned with the conditionally
-    // rendered panels below.
+    // rendered panels below. Permission gates live in the panel (no-access
+    // message), not here — only the meetings feature flag hides tabs.
     return [
       { label: t("permitProject.details.overview"), icon: SquaresFour, to: `${projectBasePath}/overview` },
-      ...(canViewActivity
-        ? [{ label: t("permitProject.details.activity"), icon: TrendUp, to: `${projectBasePath}/activity` }]
-        : []),
+      { label: t("permitProject.details.activity"), icon: TrendUp, to: `${projectBasePath}/activity` },
       { label: t("permitProject.details.permits"), icon: ClipboardText, to: `${projectBasePath}/permits` },
-      ...(canViewMeetings
+      ...(projectMeetingsEnabled
         ? [
             {
               label: t("permitProject.details.meetings"),
@@ -72,14 +67,10 @@ export const PermitProjectScreen = observer(() => {
         icon: Folder,
         to: `${projectBasePath}/local-resources`,
       },
-      ...(canViewCollaborators
-        ? [{ label: t("permitProject.details.collaborators"), icon: Users, to: `${projectBasePath}/collaborators` }]
-        : []),
-      ...(canViewCollaborators
-        ? [{ label: t("permitProject.details.teams"), icon: UsersThree, to: `${projectBasePath}/teams` }]
-        : []),
+      { label: t("permitProject.details.collaborators"), icon: Users, to: `${projectBasePath}/collaborators` },
+      { label: t("permitProject.details.teams"), icon: UsersThree, to: `${projectBasePath}/teams` },
     ].map((tab, index) => ({ ...tab, tabIndex: index }))
-  }, [projectBasePath, canViewMeetings, canViewActivity, canViewCollaborators, t])
+  }, [projectBasePath, projectMeetingsEnabled, t])
 
   const { projectMatchesRoute, tabIndex, handleTabChange, isPending } = useProjectDetailTabs({
     basePath: projectBasePath,
@@ -166,20 +157,18 @@ export const PermitProjectScreen = observer(() => {
           <TabPanel>
             {isPending ? <LoadingScreen /> : <OverviewTabPanelContent permitProject={currentPermitProject} />}
           </TabPanel>
-          {canViewActivity && (
-            <TabPanel>
-              {isPending ? <LoadingScreen /> : <ActivityTabPanelContent permitProject={currentPermitProject} />}
-            </TabPanel>
-          )}
+          <TabPanel>
+            {isPending ? <LoadingScreen /> : <ActivityTabPanelContent permitProject={currentPermitProject} />}
+          </TabPanel>
           <TabPanel>
             {isPending ? <LoadingScreen /> : <PermitsTabPanelContent permitProject={currentPermitProject} />}
           </TabPanel>
-          {canViewMeetings && (
+          {projectMeetingsEnabled && (
             <TabPanel p={0}>
               {isPending ? <LoadingScreen /> : <MeetingsTabPanelContent permitProject={currentPermitProject} />}
             </TabPanel>
           )}
-          {canViewMeetings && (
+          {projectMeetingsEnabled && (
             <TabPanel p={0}>
               {isPending ? <LoadingScreen /> : <ProjectNotesTabPanelContent permitProject={currentPermitProject} />}
             </TabPanel>
@@ -187,16 +176,12 @@ export const PermitProjectScreen = observer(() => {
           <TabPanel>
             {isPending ? <LoadingScreen /> : <LocalResourcesTabPanelContent permitProject={currentPermitProject} />}
           </TabPanel>
-          {canViewCollaborators && (
-            <TabPanel>
-              {isPending ? <LoadingScreen /> : <CollaboratorsTabPanelContent permitProject={currentPermitProject} />}
-            </TabPanel>
-          )}
-          {canViewCollaborators && (
-            <TabPanel>
-              {isPending ? <LoadingScreen /> : <TeamsTabPanelContent permitProject={currentPermitProject} />}
-            </TabPanel>
-          )}
+          <TabPanel>
+            {isPending ? <LoadingScreen /> : <CollaboratorsTabPanelContent permitProject={currentPermitProject} />}
+          </TabPanel>
+          <TabPanel>
+            {isPending ? <LoadingScreen /> : <TeamsTabPanelContent permitProject={currentPermitProject} />}
+          </TabPanel>
         </TabPanels>
       </Tabs>
     </Box>

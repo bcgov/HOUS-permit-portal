@@ -28,6 +28,7 @@ import { IProjectTeam } from "../../../models/project-team"
 import { EFlashMessageStatus, EProjectTeamKind } from "../../../types/enums"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { EditableInputWithControls } from "../../shared/editable-input-with-controls"
+import { EmptyResultsBox } from "../../shared/grid/empty-results-box"
 import { InfoTooltip } from "../../shared/info-tooltip"
 import { RemoveConfirmationModal } from "../../shared/modals/remove-confirmation-modal"
 import { RequestLoadingButton } from "../../shared/request-loading-button"
@@ -48,22 +49,30 @@ export const TeamsTabPanelContent = observer(({ permitProject }: IProps) => {
             {t("permitProject.teams.title")}
           </Heading>
         </HStack>
-        <Text color="text.secondary">{t("permitProject.teams.description")}</Text>
+        {!permitProject.canViewCollaborators ? (
+          <EmptyResultsBox description={t("permitProject.teams.noAccess")} icon={<UsersThree size={18} />} mt={2} />
+        ) : (
+          <Text color="text.secondary">{t("permitProject.teams.description")}</Text>
+        )}
       </Box>
 
-      <Box as="section">
-        <Heading as="h3" size="md" mb={4}>
-          {t("permitProject.teams.autoTeamsTitle")}
-        </Heading>
-        <CustomMessageBox status={EFlashMessageStatus.info} description={t("permitProject.teams.autoTeamsHint")} />
-        <Stack spacing={6} mt={4}>
-          {permitProject.autoTeams.map((team) => (
-            <TeamCard key={team.id} permitProject={permitProject} team={team} />
-          ))}
-        </Stack>
-      </Box>
+      {permitProject.canViewCollaborators && (
+        <>
+          <Box as="section">
+            <Heading as="h3" size="md" mb={4}>
+              {t("permitProject.teams.autoTeamsTitle")}
+            </Heading>
+            <CustomMessageBox status={EFlashMessageStatus.info} description={t("permitProject.teams.autoTeamsHint")} />
+            <Stack spacing={6} mt={4}>
+              {permitProject.autoTeams.map((team) => (
+                <TeamCard key={team.id} permitProject={permitProject} team={team} />
+              ))}
+            </Stack>
+          </Box>
 
-      <CustomTeamsSection permitProject={permitProject} />
+          <CustomTeamsSection permitProject={permitProject} />
+        </>
+      )}
     </Flex>
   )
 })

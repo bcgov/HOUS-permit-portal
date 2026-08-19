@@ -35,6 +35,7 @@ import { IProjectTeam } from "../../../models/project-team"
 import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus, EProjectMembershipRole, EProjectTeamKind } from "../../../types/enums"
 import { UserInput } from "../../shared/base/inputs/user-input"
+import { EmptyResultsBox } from "../../shared/grid/empty-results-box"
 import { InfoTooltip } from "../../shared/info-tooltip"
 import { RemoveConfirmationModal } from "../../shared/modals/remove-confirmation-modal"
 import { RequestLoadingButton } from "../../shared/request-loading-button"
@@ -65,12 +66,19 @@ export const CollaboratorsTabPanelContent = observer(({ permitProject }: IProps)
             {t("permitProject.collaborators.title")}
           </Heading>
         </HStack>
-        <Text color="text.secondary">{t("permitProject.collaborators.description")}</Text>
+        {!permitProject.canViewCollaborators ? (
+          <EmptyResultsBox description={t("permitProject.collaborators.noAccess")} icon={<Users size={18} />} mt={2} />
+        ) : (
+          <Text color="text.secondary">{t("permitProject.collaborators.description")}</Text>
+        )}
       </Box>
 
-      {permitProject.canManageCollaborators && <InviteSection permitProject={permitProject} />}
-
-      <CollaboratorsTable permitProject={permitProject} />
+      {permitProject.canViewCollaborators && (
+        <>
+          {permitProject.canManageCollaborators && <InviteSection permitProject={permitProject} />}
+          <CollaboratorsTable permitProject={permitProject} />
+        </>
+      )}
     </Flex>
   )
 })

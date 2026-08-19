@@ -23,7 +23,8 @@ interface IProps {
 
 export const ActivityTabPanelContent = observer(({ permitProject, fromInbox = false }: IProps) => {
   const { projectAuditStore } = useMst()
-  useSearch(projectAuditStore, [permitProject.id])
+  const canViewActivity = fromInbox || permitProject.canViewApplications
+  useSearch(projectAuditStore, canViewActivity ? [permitProject.id] : [null])
 
   const { t } = useTranslation()
   const {
@@ -47,75 +48,81 @@ export const ActivityTabPanelContent = observer(({ permitProject, fromInbox = fa
           </Heading>
         </HStack>
       </Box>
-      <Text color="text.secondary" mb={8} flexShrink={0}>
-        {t("permitProject.activity.description")}
-      </Text>
-      <Flex direction="column" flex={1} minH={0} w="full">
-        <Flex justifyContent="space-between" align="flex-end" flexWrap="wrap" gap={4} flexShrink={0}>
-          <HStack
-            align="flex-end"
-            spacing={4}
-            flex={1}
-            justifyContent="space-between"
-            borderBottom="1px solid"
-            borderColor="border.light"
-            pb={5}
-          >
-            <AuditDateRangeFilter searchModel={projectAuditStore} />
-            <Flex
-              as="button"
-              align="center"
-              gap={2}
-              cursor="pointer"
-              onClick={() => projectAuditStore.toggleSort(EProjectAuditSortFields.createdAt)}
-              fontSize="sm"
-              fontWeight="bold"
-              color="text.secondary"
-              h="40px"
-              minW="40px"
-              px={3}
-            >
-              <Text>{t("permitProject.activity.columns.createdAt")}</Text>
-              <SortIcon<EProjectAuditSortFields>
-                field={EProjectAuditSortFields.createdAt}
-                currentSort={projectAuditStore.sort as ISort<EProjectAuditSortFields>}
+      {!canViewActivity ? (
+        <EmptyResultsBox description={t("permitProject.activity.noAccess")} icon={<TrendUp size={18} />} />
+      ) : (
+        <>
+          <Text color="text.secondary" mb={8} flexShrink={0}>
+            {t("permitProject.activity.description")}
+          </Text>
+          <Flex direction="column" flex={1} minH={0} w="full">
+            <Flex justifyContent="space-between" align="flex-end" flexWrap="wrap" gap={4} flexShrink={0}>
+              <HStack
+                align="flex-end"
+                spacing={4}
+                flex={1}
+                justifyContent="space-between"
+                borderBottom="1px solid"
+                borderColor="border.light"
+                pb={5}
+              >
+                <AuditDateRangeFilter searchModel={projectAuditStore} />
+                <Flex
+                  as="button"
+                  align="center"
+                  gap={2}
+                  cursor="pointer"
+                  onClick={() => projectAuditStore.toggleSort(EProjectAuditSortFields.createdAt)}
+                  fontSize="sm"
+                  fontWeight="bold"
+                  color="text.secondary"
+                  h="40px"
+                  minW="40px"
+                  px={3}
+                >
+                  <Text>{t("permitProject.activity.columns.createdAt")}</Text>
+                  <SortIcon<EProjectAuditSortFields>
+                    field={EProjectAuditSortFields.createdAt}
+                    currentSort={projectAuditStore.sort as ISort<EProjectAuditSortFields>}
+                  />
+                </Flex>
+              </HStack>
+            </Flex>
+            <Box as="ul" listStyleType="none" p={0} m={0} flex={1} minH={0} overflowY="auto">
+              {isSearching ? (
+                <Flex py={50} justify="center">
+                  <SharedSpinner />
+                </Flex>
+              ) : tableProjectAudits?.length === 0 ? (
+                <Box py={8}>
+                  <EmptyResultsBox description={t("permitProject.activity.empty")} icon={<TrendUp size={18} />} />
+                </Box>
+              ) : (
+                tableProjectAudits?.map((projectAudit) => (
+                  <Box as="li" key={projectAudit.id} borderBottom="1px solid" borderColor="border.light" mb={0}>
+                    <ActivityListItem projectAudit={projectAudit} fromInbox={fromInbox} />
+                  </Box>
+                ))
+              )}
+            </Box>
+            <Flex w="full" justifyContent="space-between" mt={4} flexShrink={0}>
+              <PerPageSelect
+                handleCountPerPageChange={handleCountPerPageChange}
+                countPerPage={countPerPage}
+                totalCount={totalCount ?? 0}
+              />
+              <Paginator
+                current={currentPage}
+                total={totalCount ?? 0}
+                totalPages={totalPages ?? 1}
+                pageSize={countPerPage}
+                handlePageChange={handlePageChange}
+                showLessItems
               />
             </Flex>
-          </HStack>
-        </Flex>
-        <Box as="ul" listStyleType="none" p={0} m={0} flex={1} minH={0} overflowY="auto">
-          {isSearching ? (
-            <Flex py={50} justify="center">
-              <SharedSpinner />
-            </Flex>
-          ) : tableProjectAudits?.length === 0 ? (
-            <Box py={8}>
-              <EmptyResultsBox description={t("permitProject.activity.empty")} icon={<TrendUp size={18} />} />
-            </Box>
-          ) : (
-            tableProjectAudits?.map((projectAudit) => (
-              <Box as="li" key={projectAudit.id} borderBottom="1px solid" borderColor="border.light" mb={0}>
-                <ActivityListItem projectAudit={projectAudit} fromInbox={fromInbox} />
-              </Box>
-            ))
-          )}
-        </Box>
-        <Flex w="full" justifyContent="space-between" mt={4} flexShrink={0}>
-          <PerPageSelect
-            handleCountPerPageChange={handleCountPerPageChange}
-            countPerPage={countPerPage}
-            totalCount={totalCount ?? 0}
-          />
-          <Paginator
-            current={currentPage}
-            total={totalCount ?? 0}
-            totalPages={totalPages ?? 1}
-            pageSize={countPerPage}
-            handlePageChange={handlePageChange}
-            showLessItems
-          />
-        </Flex>
-      </Flex>
+          </Flex>
+        </>
+      )}
     </Flex>
   )
 })

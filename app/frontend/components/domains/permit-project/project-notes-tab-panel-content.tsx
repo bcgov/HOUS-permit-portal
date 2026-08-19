@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next"
 import { IPermitProject } from "../../../models/permit-project"
 import { EFlashMessageStatus } from "../../../types/enums"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
+import { EmptyResultsBox } from "../../shared/grid/empty-results-box"
 import { ProjectMeetingNotesList } from "../../shared/project-meetings/project-meeting-notes-list"
 
 interface IProps {
@@ -25,32 +26,38 @@ export const ProjectNotesTabPanelContent = observer(({ permitProject }: IProps) 
           </Heading>
         </HStack>
 
-        <CustomMessageBox
-          status={EFlashMessageStatus.info}
-          title={t("permitProject.notes.infoTitle")}
-          description={t("permitProject.notes.infoDescription")}
-          mb={6}
-        >
-          {permitProject.notes.length > 0 && (
-            <Button
-              variant="secondary"
-              leftIcon={<Download size={16} />}
-              onClick={() => permitProject.downloadNotesCsv()}
+        {!permitProject.canViewMeetings ? (
+          <EmptyResultsBox description={t("permitProject.notes.noAccess")} icon={<Chat size={18} />} mt={2} />
+        ) : (
+          <>
+            <CustomMessageBox
+              status={EFlashMessageStatus.info}
+              title={t("permitProject.notes.infoTitle")}
+              description={t("permitProject.notes.infoDescription")}
+              mb={6}
             >
-              {t("projectMeeting.detail.notes.downloadAll")}
-            </Button>
-          )}
-        </CustomMessageBox>
+              {permitProject.notes.length > 0 && (
+                <Button
+                  variant="secondary"
+                  leftIcon={<Download size={16} />}
+                  onClick={() => permitProject.downloadNotesCsv()}
+                >
+                  {t("projectMeeting.detail.notes.downloadAll")}
+                </Button>
+              )}
+            </CustomMessageBox>
 
-        <Heading as="h3" size="md" mb={4}>
-          {t("submissionInbox.projectDetail.projectMeetingNotes")}
-        </Heading>
+            <Heading as="h3" size="md" mb={4}>
+              {t("submissionInbox.projectDetail.projectMeetingNotes")}
+            </Heading>
 
-        <ProjectMeetingNotesList
-          notes={permitProject.notes}
-          emptyDescription={t("permitProject.notes.emptyDescription")}
-          getMeetingPath={(note) => `/projects/${permitProject.id}/meetings/${note.projectMeetingId}`}
-        />
+            <ProjectMeetingNotesList
+              notes={permitProject.notes}
+              emptyDescription={t("permitProject.notes.emptyDescription")}
+              getMeetingPath={(note) => `/projects/${permitProject.id}/meetings/${note.projectMeetingId}`}
+            />
+          </>
+        )}
       </Box>
     </Flex>
   )

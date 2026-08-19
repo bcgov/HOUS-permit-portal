@@ -156,7 +156,7 @@ export const PermitProjectModel = types
     get canEditProject() {
       return atLeastLevel(PROJECT_ACCESS_ORDER, self.currentUserPermissions?.projectAccess, EProjectAccess.edit)
     },
-    // One domain gates both the Collaborators and Teams tabs.
+    // One domain gates both the Collaborators and Teams tab content.
     get canViewCollaborators() {
       return atLeastLevel(
         COLLABORATOR_ACCESS_ORDER,
