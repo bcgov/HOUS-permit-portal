@@ -1,5 +1,5 @@
 namespace :step_codes do
-  desc "Generate standalone PDF reports for Step Codes without permit applications and without existing reports"
+  desc "Generate standalone PDF reports for complete checklists without a report"
   task generate_missing_reports: :environment do
     scope = StepCode.where(permit_application_id: nil)
     total = scope.count
@@ -7,18 +7,25 @@ namespace :step_codes do
 
     processed = 0
     scope.find_each(batch_size: 100) do |step_code|
-      next if step_code.report_documents.exists?
+      StepCode.preload_checklists([step_code])
+      step_code.checklists.each do |checklist|
+        next unless checklist.complete?
+        next if checklist.report_document.present?
 
-      begin
-        StepCodeReportGenerationJob.perform_async(step_code.id, {})
-        processed += 1
-      rescue => e
-        Rails.logger.error(
-          "Failed to enqueue report generation for StepCode #{step_code.id}: #{e.message}"
-        )
+        begin
+          StepCodeReportGenerationJob.perform_async(
+            step_code.id,
+            { "checklist_id" => checklist.id }
+          )
+          processed += 1
+        rescue => e
+          Rails.logger.error(
+            "Failed to enqueue report generation for StepCode #{step_code.id} checklist #{checklist.id}: #{e.message}"
+          )
+        end
       end
     end
 
-    puts "Enqueued report generation for #{processed} Step Codes."
+    puts "Enqueued report generation for #{processed} checklists."
   end
 end

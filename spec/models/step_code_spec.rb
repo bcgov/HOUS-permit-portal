@@ -65,7 +65,8 @@ RSpec.describe StepCode, type: :model do
       step_code = create(:part_9_step_code)
 
       expect(StepCodeReportGenerationJob).to receive(:perform_async).with(
-        step_code.id
+        step_code.id,
+        { "checklist_id" => step_code.current_checklist.id }
       )
 
       step_code.generate_report_document

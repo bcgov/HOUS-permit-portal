@@ -11,10 +11,9 @@ import {
   EStepCodeEPCTestingTargetType,
   EStepCodeType,
 } from "../types/enums"
-import { IPart9NavLink, IPart9SectionCompletionStatus, TPart9NavLinkKey } from "../types/types"
+import { IPart9NavLink, IPart9SectionCompletionStatus, IReportDocument, TPart9NavLinkKey } from "../types/types"
 import { areRelevantSectionsCompleteExcept, canMarkChecklistComplete } from "../utils/can-mark-checklist-complete"
 import { renameKeys } from "../utils/utility-functions"
-import { markParentStepCodeReportsStale } from "./step-code-base"
 import { StepCodeBuildingCharacteristicsSummaryModel } from "./step-code-building-characteristic-summary"
 import { StepCodeComplianceReportModel } from "./step-code-compliance-report"
 
@@ -101,6 +100,7 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
       complianceReports: types.array(StepCodeComplianceReportModel),
       selectedReportRequirementId: types.maybeNull(types.string),
       updatedAt: types.maybeNull(types.Date),
+      reportDocument: types.maybeNull(types.frozen<IReportDocument>()),
     })
     .extend(withEnvironment())
     .views((self) => ({
@@ -178,8 +178,16 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
       get currentNavLink(): IPart9NavLink | undefined {
         return navLinks.find((l) => self.isRelevant(l.key) && !self.isComplete(l.key))
       },
+      get freshReportDocument(): IReportDocument | null {
+        if (!self.reportDocument || self.reportDocument.stale) return null
+        return self.reportDocument
+      },
     }))
     .actions((self) => ({
+      markReportDocumentStale() {
+        if (!self.reportDocument || self.reportDocument.stale) return
+        self.reportDocument = { ...self.reportDocument, stale: true }
+      },
       load: flow(function* () {
         const response = yield self.environment.api.fetchPart9Checklist(self.id)
         if (response.ok) {
@@ -210,7 +218,7 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
           const snapshotData = { ...preProcessor(response.data.data), isLoaded: true }
           applySnapshot(self, snapshotData)
           if (key !== "report") {
-            markParentStepCodeReportsStale(self)
+            self.markReportDocumentStale()
           }
           return true
         }
@@ -225,7 +233,7 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
         if (response.ok) {
           const snapshotData = { ...preProcessor(response.data.data), isLoaded: true }
           applySnapshot(self, snapshotData)
-          markParentStepCodeReportsStale(self)
+          self.markReportDocumentStale()
           return true
         }
         return false
@@ -239,7 +247,7 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
         if (response.ok) {
           const snapshotData = { ...preProcessor(response.data.data), isLoaded: true }
           applySnapshot(self, snapshotData)
-          markParentStepCodeReportsStale(self)
+          self.markReportDocumentStale()
           return true
         }
         return false
@@ -249,7 +257,7 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
         if (response.ok) {
           const snapshotData = { ...preProcessor(response.data.data), isLoaded: true }
           applySnapshot(self, snapshotData)
-          markParentStepCodeReportsStale(self)
+          self.markReportDocumentStale()
           return true
         }
         return false

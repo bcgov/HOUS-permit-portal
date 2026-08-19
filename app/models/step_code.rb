@@ -141,7 +141,10 @@ class StepCode < ApplicationRecord
   end
 
   def generate_report_document
-    StepCodeReportGenerationJob.perform_async(id)
+    options = {}
+    checklist = current_checklist
+    options["checklist_id"] = checklist.id if checklist
+    StepCodeReportGenerationJob.perform_async(id, options)
   end
 
   def public_record?

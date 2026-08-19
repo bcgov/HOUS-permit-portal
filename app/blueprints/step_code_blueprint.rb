@@ -20,6 +20,4 @@ class StepCodeBlueprint < Blueprinter::Base
   association :creator, blueprint: UserBlueprint
 
   association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
-
-  association :report_documents, blueprint: ReportDocumentBlueprint
 end

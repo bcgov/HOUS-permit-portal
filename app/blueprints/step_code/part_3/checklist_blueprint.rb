@@ -59,6 +59,8 @@ class StepCode::Part3::ChecklistBlueprint < Blueprinter::Base
          :completed_by_organization_name,
          :updated_at
 
+  association :report_document, blueprint: ReportDocumentBlueprint
+
   field :building_code_version do |checklist, _options|
     if checklist.newly_submitted_at.present?
       Constants::Part3StepCode::BUILDING_CODE_VERSION_LOOKUP

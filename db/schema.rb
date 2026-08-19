@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_08_19_110000) do
+ActiveRecord::Schema[7.2].define(version: 2026_08_19_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -846,6 +846,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_19_110000) do
     t.datetime "updated_at", null: false
     t.string "scan_status", default: "pending", null: false
     t.boolean "stale", default: false, null: false
+    t.string "checklist_type"
+    t.uuid "checklist_id"
+    t.index ["checklist_type", "checklist_id"], name: "index_report_documents_on_checklist", unique: true, where: "(checklist_id IS NOT NULL)"
     t.index ["scan_status"], name: "index_report_documents_on_scan_status"
     t.index ["step_code_id"], name: "index_report_documents_on_step_code_id"
   end

@@ -6,9 +6,14 @@ import {
   FormErrorMessage,
   FormLabel,
   HStack,
+  IconButton,
   Input,
   InputGroup,
   InputLeftElement,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
   Radio,
   Table,
   Tag,
@@ -17,7 +22,7 @@ import {
   Text,
   Tr,
 } from "@chakra-ui/react"
-import { MapPin } from "@phosphor-icons/react"
+import { DotsThreeVertical, Download, MapPin, ShareNetwork } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
@@ -28,12 +33,14 @@ import { datefnsAppDateFormat } from "../../../constants"
 import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
 import {
+  EFileUploadAttachmentType,
   EFlashMessageStatus,
   EStepCodeChecklistStage,
   EStepCodeChecklistStatus,
   EStepCodeStageStatus,
 } from "../../../types/enums"
-import { IOption } from "../../../types/types"
+import { IOption, IReportDocument } from "../../../types/types"
+import { downloadFileFromStorage } from "../../../utils/utility-functions"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { DatePickerFormControl } from "../../shared/form/input-form-control"
@@ -396,19 +403,28 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
                         <StepCodeStageIcon status={stageStatus} />
                       </Td>
                       <Td pr={0} textAlign="right">
-                        <Button
-                          type={isLockedBySubmittedPermit ? "button" : "submit"}
-                          variant="primary"
-                          isDisabled={isLockedBySubmittedPermit ? !checklist : !isSelected}
-                          isLoading={!isLockedBySubmittedPermit && isSelected && isSubmitting}
-                          onClick={
-                            isLockedBySubmittedPermit ? () => handleOpenExistingChecklist(stage, checklist) : undefined
-                          }
-                        >
-                          {isLockedBySubmittedPermit && checklist
-                            ? t("stepCode.projectInformation.view")
-                            : checklistButtonLabel(checklist, currentStepCode?.isStageComplete(stage))}
-                        </Button>
+                        <HStack justify="flex-end" spacing={1} onClick={(e) => e.stopPropagation()}>
+                          <Button
+                            type={isLockedBySubmittedPermit ? "button" : "submit"}
+                            variant="primary"
+                            isDisabled={isLockedBySubmittedPermit ? !checklist : !isSelected}
+                            isLoading={!isLockedBySubmittedPermit && isSelected && isSubmitting}
+                            onClick={
+                              isLockedBySubmittedPermit
+                                ? () => handleOpenExistingChecklist(stage, checklist)
+                                : undefined
+                            }
+                          >
+                            {isLockedBySubmittedPermit && checklist
+                              ? t("stepCode.projectInformation.view")
+                              : checklistButtonLabel(checklist, currentStepCode?.isStageComplete(stage))}
+                          </Button>
+                          <StageReportMenu
+                            checklist={checklist}
+                            stageLabel={stageLabel(stage)}
+                            stepCode={currentStepCode}
+                          />
+                        </HStack>
                       </Td>
                     </Tr>
                   )
@@ -516,3 +532,73 @@ const Field = function Field({ label, value, tooltip }: IFieldProps) {
     </FormControl>
   )
 }
+
+const StageReportMenu = observer(function StageReportMenu({
+  checklist,
+  stageLabel,
+  stepCode,
+}: {
+  checklist?: {
+    reportDocument?: IReportDocument | null
+    freshReportDocument?: IReportDocument | null
+  } | null
+  stageLabel: string
+  stepCode: any
+}) {
+  const [isSharing, setIsSharing] = useState(false)
+  const freshReport = checklist?.freshReportDocument ?? null
+  const reportDocument = checklist?.reportDocument ?? null
+  const hasStaleReport = !!reportDocument?.stale && !freshReport
+
+  const handleDownload = () => {
+    if (!freshReport) return
+    downloadFileFromStorage({
+      model: EFileUploadAttachmentType.ReportDocument,
+      modelId: freshReport.id,
+      filename: freshReport.file?.metadata?.filename,
+    })
+  }
+
+  const handleShare = async () => {
+    if (!freshReport) return
+    setIsSharing(true)
+    try {
+      await stepCode?.shareReportWithJurisdiction(freshReport.id)
+    } finally {
+      setIsSharing(false)
+    }
+  }
+
+  return (
+    <Menu>
+      <MenuButton
+        as={IconButton}
+        type="button"
+        aria-label={t("ui.options")}
+        icon={<DotsThreeVertical size={20} />}
+        variant="ghost"
+        size="sm"
+      />
+      <MenuList>
+        {freshReport ? (
+          <MenuItem icon={<Download size={16} />} onClick={handleDownload}>
+            {t("stepCode.index.downloadStageReport", { stage: stageLabel })}
+          </MenuItem>
+        ) : hasStaleReport ? (
+          <MenuItem isDisabled>
+            <Text>{t("stepCode.index.reportOutOfDate")}</Text>
+          </MenuItem>
+        ) : (
+          <MenuItem isDisabled>
+            <Text>{t("stepCode.index.noReportAvailable")}</Text>
+          </MenuItem>
+        )}
+        {freshReport && stepCode?.jurisdiction && (
+          <MenuItem icon={<ShareNetwork size={16} />} onClick={handleShare} isDisabled={isSharing}>
+            {isSharing ? t("stepCode.shareReport.sharing") : t("stepCode.shareReport.action")}
+          </MenuItem>
+        )}
+      </MenuList>
+    </Menu>
+  )
+})

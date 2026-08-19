@@ -18,13 +18,7 @@ module Api::Concerns::Search::StepCodes
           end
         ),
       load: {
-        includes: %i[
-          creator
-          permit_application
-          jurisdiction
-          permit_project
-          report_documents
-        ]
+        includes: %i[creator permit_application jurisdiction permit_project]
       },
       scope_results: ->(relation) { policy_scope(relation) }
     }
