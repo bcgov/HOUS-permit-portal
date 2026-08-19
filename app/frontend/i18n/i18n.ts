@@ -2531,6 +2531,8 @@ Thank you,
             continue: "Continue checklist",
             view: "View checklist",
             error: "There was a problem opening this checklist. Please try again.",
+            lockedBySubmittedPermit:
+              "This Step Code is not editable because the attached permit application is under review. You can view existing checklists or return to the application.",
           },
 
           noneFound: "No Step Codes found",

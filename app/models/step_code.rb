@@ -46,6 +46,11 @@ class StepCode < ApplicationRecord
             allow_nil: true
   validates :current_stage, inclusion: { in: STAGES }
 
+  def permit_date
+    return permit_application.permit_date if permit_application
+    self[:permit_date]
+  end
+
   delegate :submitter,
            :newly_submitted_at,
            :status,

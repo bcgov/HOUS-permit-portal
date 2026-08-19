@@ -191,7 +191,7 @@ export const DatePickerFormControl = ({
 
       <InputGroup w="full" display="flex" flexDirection="column" zIndex={1}>
         <DatePicker
-          selected={value}
+          selected={value || null}
           onChange={onChange}
           containerProps={{
             zIndex: "dropdown",

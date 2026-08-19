@@ -18,11 +18,13 @@ import {
   Tr,
 } from "@chakra-ui/react"
 import { MapPin } from "@phosphor-icons/react"
+import { format } from "date-fns"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo, useState } from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useNavigate, useParams } from "react-router-dom"
+import { datefnsAppDateFormat } from "../../../constants"
 import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
 import {
@@ -45,7 +47,7 @@ type TStepCodeKind = "part3" | "part9"
 interface IProjectInformationForm {
   fullAddress?: string
   referenceNumber?: string
-  permitDate?: string
+  permitDate?: string | Date | null
   pid?: string
   site?: IOption
   jurisdictionId?: string
@@ -101,6 +103,7 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const isEditable = !permitApplicationId
+  const isLockedBySubmittedPermit = !!permitApplication && !permitApplication.isDraft
 
   const stageChecklist = useMemo(
     () => currentStepCode?.checklists?.find((checklist) => checklist.stage === selectedStage),
@@ -135,8 +138,6 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
 
   const stageLabel = (stage: EStepCodeChecklistStage) => t(`stepCodeChecklist.edit.projectInfo.stages.${stage}`)
   const showPermitDate = selectedStage !== EStepCodeChecklistStage.preConstruction
-  const isPermitDateEditable = isEditable
-  const permitDateInputProps = isPermitDateEditable ? undefined : { readOnly: true }
 
   const handleStageSelect = (stage: EStepCodeChecklistStage) => {
     setSelectedStage(stage)
@@ -203,6 +204,8 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
   }
 
   const onSubmit = async (values: IProjectInformationForm) => {
+    if (isLockedBySubmittedPermit) return
+
     const checklist = await saveProjectInformation(values)
     if (!checklist) return
 
@@ -223,6 +226,22 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
 
     navigate(`/permit-applications/${permitApplicationId}/edit`)
   })
+
+  const handleGoToPermitApplication = () => {
+    if (isLockedBySubmittedPermit) {
+      navigate(`/permit-applications/${permitApplicationId}/edit`)
+      return
+    }
+    handleSaveAndGoToPermitApplication()
+  }
+
+  const handleOpenExistingChecklist = (
+    stage: EStepCodeChecklistStage,
+    checklist: { currentNavLink?: { location?: string } } | null
+  ) => {
+    if (!checklist) return
+    navigate(checklistPath(stage, checklist.currentNavLink?.location || "start"))
+  }
   const stepCodeKindLabel =
     stepCodeKind === "part3"
       ? t("stepCode.projectInformation.types.part3")
@@ -248,6 +267,12 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
               </Tag>
             </HStack>
             <Text fontSize="md">{t("stepCode.projectInformation.instructions")}</Text>
+            {isLockedBySubmittedPermit && (
+              <CustomMessageBox
+                status={EFlashMessageStatus.warning}
+                description={t("stepCode.projectInformation.lockedBySubmittedPermit")}
+              />
+            )}
           </Flex>
 
           {!isEditable && <Field label={t("stepCode.projectInformation.name")} value={currentStepCode.title} />}
@@ -372,12 +397,17 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
                       </Td>
                       <Td pr={0} textAlign="right">
                         <Button
-                          type="submit"
+                          type={isLockedBySubmittedPermit ? "button" : "submit"}
                           variant="primary"
-                          isDisabled={!isSelected}
-                          isLoading={isSelected && isSubmitting}
+                          isDisabled={isLockedBySubmittedPermit ? !checklist : !isSelected}
+                          isLoading={!isLockedBySubmittedPermit && isSelected && isSubmitting}
+                          onClick={
+                            isLockedBySubmittedPermit ? () => handleOpenExistingChecklist(stage, checklist) : undefined
+                          }
                         >
-                          {checklistButtonLabel(checklist, currentStepCode?.isStageComplete(stage))}
+                          {isLockedBySubmittedPermit && checklist
+                            ? t("stepCode.projectInformation.view")
+                            : checklistButtonLabel(checklist, currentStepCode?.isStageComplete(stage))}
                         </Button>
                       </Td>
                     </Tr>
@@ -385,29 +415,36 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
                 })}
               </Tbody>
             </Table>
-            {permitApplicationId && selectedStage !== EStepCodeChecklistStage.preConstruction && (
-              <CustomMessageBox
-                status={EFlashMessageStatus.warning}
-                description={t("stepCode.projectInformation.nonPreConstructionStageWarning")}
-                mt={3}
-              />
-            )}
+            {permitApplicationId &&
+              !isLockedBySubmittedPermit &&
+              selectedStage !== EStepCodeChecklistStage.preConstruction && (
+                <CustomMessageBox
+                  status={EFlashMessageStatus.warning}
+                  description={t("stepCode.projectInformation.nonPreConstructionStageWarning")}
+                  mt={3}
+                />
+              )}
           </FormControl>
 
-          {showPermitDate && (
-            <DatePickerFormControl
-              flex={1}
-              maxW={{ base: "none", xl: "430px" }}
-              label={t("stepCode.projectInformation.date") as string}
-              fieldName="permitDate"
-              showOptional={false}
-              inputProps={permitDateInputProps}
-              isReadOnly={!isPermitDateEditable}
-              LabelInfo={() => (
-                <InfoTooltip {...fieldTooltipProps} label={t("stepCode.projectInformation.dateTooltip") as string} />
-              )}
-            />
-          )}
+          {showPermitDate &&
+            (isEditable ? (
+              <DatePickerFormControl
+                flex={1}
+                maxW={{ base: "none", xl: "430px" }}
+                label={t("stepCode.projectInformation.date") as string}
+                fieldName="permitDate"
+                showOptional={false}
+                LabelInfo={() => (
+                  <InfoTooltip {...fieldTooltipProps} label={t("stepCode.projectInformation.dateTooltip") as string} />
+                )}
+              />
+            ) : (
+              <Field
+                label={t("stepCode.projectInformation.date") as string}
+                tooltip={t("stepCode.projectInformation.dateTooltip") as string}
+                value={formatPermitDate(permitApplication?.issuedAt)}
+              />
+            ))}
 
           {(isEditable || permitApplicationId) && (
             <Flex justify="flex-start">
@@ -425,7 +462,7 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
                 <Button
                   type="button"
                   variant="link"
-                  onClick={handleSaveAndGoToPermitApplication}
+                  onClick={handleGoToPermitApplication}
                   isDisabled={isSubmitting}
                   isLoading={isSubmitting}
                 >
@@ -440,11 +477,17 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
   )
 })
 
+function formatPermitDate(value: Date | string | null | undefined) {
+  if (!value) return ""
+  const date = value instanceof Date ? value : new Date(value)
+  return Number.isNaN(date.getTime()) ? "" : format(date, datefnsAppDateFormat)
+}
+
 function getDefaultValues(currentStepCode): IProjectInformationForm {
   return {
     fullAddress: currentStepCode?.fullAddress || "",
     referenceNumber: currentStepCode?.referenceNumber || "",
-    permitDate: currentStepCode?.permitDate || "",
+    permitDate: currentStepCode?.permitDate || null,
     pid: currentStepCode?.pid || "",
     jurisdictionId: currentStepCode?.jurisdiction?.id || "",
     site: currentStepCode?.fullAddress

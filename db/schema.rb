@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_08_07_161100) do
+ActiveRecord::Schema[7.2].define(version: 2026_08_19_110000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -620,6 +620,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_07_161100) do
     t.integer "queue_time_seconds", default: 0, null: false
     t.datetime "queue_clock_started_at"
     t.string "step_code_stage"
+    t.datetime "issued_at"
     t.index ["discarded_at"], name: "index_permit_applications_on_discarded_at"
     t.index ["jurisdiction_id"], name: "index_permit_applications_on_jurisdiction_id"
     t.index ["number"], name: "index_permit_applications_on_number", unique: true

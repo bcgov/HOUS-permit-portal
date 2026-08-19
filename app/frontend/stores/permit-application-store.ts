@@ -308,6 +308,7 @@ export const PermitApplicationStoreModel = types
         submittedAt: overrides.submittedAt || null,
         resubmittedAt: overrides.resubmittedAt || null,
         revisionsRequestedAt: overrides.revisionsRequestedAt || null,
+        issuedAt: overrides.issuedAt || null,
         selectedTabIndex: overrides.selectedTabIndex ?? 0,
         createdAt: overrides.createdAt || new Date(),
         updatedAt: overrides.updatedAt || new Date(),

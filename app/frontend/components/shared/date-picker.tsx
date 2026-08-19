@@ -61,14 +61,14 @@ const CustomInput = forwardRef<
         "&:focus": { borderColor: "focus" },
       }}
       leftIcon={<CalendarBlank color={"var(--chakra-colors-text-secondary)"} size={20} />}
-      rightIcon={<CaretDown color={"var(--chakra-colors-text-secondary)"} size={20} />}
+      rightIcon={readOnly ? undefined : <CaretDown color={"var(--chakra-colors-text-secondary)"} size={20} />}
       color={value ? "text.primary" : "greys.grey01"}
       aria-label={"Select date"}
       role={"date-picker"}
-      onClick={onClick}
+      {...rest}
+      onClick={readOnly ? undefined : onClick}
       ref={ref}
       isDisabled={readOnly}
-      {...rest}
     >
       <Text as={"span"} textAlign={"start"} flex={1}>
         {value || (!readOnly && t("ui.select"))}

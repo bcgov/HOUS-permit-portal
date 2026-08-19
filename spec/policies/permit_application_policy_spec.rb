@@ -104,7 +104,8 @@ RSpec.describe PermitApplicationPolicy do
           jurisdiction: jurisdiction,
           jurisdiction_id: jurisdiction.id,
           new_draft?: false,
-          sandbox: sandbox
+          sandbox: sandbox,
+          permit_project: nil
         )
       policy = described_class.new(UserContext.new(reviewer, sandbox), record)
       expect(policy.show?).to be true
