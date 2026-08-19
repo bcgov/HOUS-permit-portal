@@ -77,5 +77,44 @@ RSpec.describe "Api::ProjectMembershipInvitations", type: :request do
 
       expect(response).to have_http_status(:unauthorized)
     end
+
+    it "succeeds when the signed-in user already has access" do
+      create(
+        :project_membership,
+        permit_project: permit_project,
+        user: invitee,
+        invited_email: invitee.email
+      )
+      membership =
+        create(
+          :project_membership,
+          :pending,
+          permit_project: permit_project,
+          invited_by: owner,
+          invited_email: "other-address@example.com"
+        )
+      raw = membership.issue_invitation_token!
+      sign_in invitee
+
+      post "/api/project_membership_invitations/#{raw}/accept",
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(membership.reload.pending?).to be true
+      expect(membership.user).to be_nil
+    end
+
+    it "succeeds when the signed-in user is the project owner" do
+      membership, raw = create_pending_invite
+      sign_in owner
+
+      post "/api/project_membership_invitations/#{raw}/accept",
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(membership.reload.pending?).to be true
+    end
   end
 end

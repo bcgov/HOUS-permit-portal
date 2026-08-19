@@ -90,16 +90,10 @@ class ProjectMembership < ApplicationRecord
       raise ProjectMembership::InviteService::Error,
             I18n.t("services.project_membership.accept.already_accepted")
     end
-    if permit_project.owner_id == other_user.id
-      raise ProjectMembership::InviteService::Error,
-            I18n.t("services.project_membership.accept.owner_already_member")
-    end
-    if permit_project.project_memberships.kept.accepted.exists?(
-         user_id: other_user.id
-       )
-      raise ProjectMembership::InviteService::Error,
-            I18n.t("services.project_membership.accept.already_a_member")
-    end
+    # Already on the project (owner or accepted member). Leave this invite
+    # pending — it may be addressed to someone else — and let the client send
+    # them to the project instead of an error toast.
+    return self if other_user_already_has_access?(other_user)
 
     update!(
       user: other_user,
@@ -181,6 +175,13 @@ class ProjectMembership < ApplicationRecord
   end
 
   private
+
+  def other_user_already_has_access?(other_user)
+    permit_project.owner_id == other_user.id ||
+      permit_project.project_memberships.kept.accepted.exists?(
+        user_id: other_user.id
+      )
+  end
 
   def normalize_invited_email
     self.invited_email = invited_email.to_s.strip.downcase.presence
