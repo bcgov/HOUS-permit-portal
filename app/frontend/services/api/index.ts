@@ -765,8 +765,8 @@ export class Api {
     return this.client.post<IRequirementTemplateResponse>(`/requirement_templates/search`, params)
   }
 
-  async fetchRequirementTemplatesForFilter() {
-    return this.client.get<IApiResponse<{ id: string; nickname: string }[], {}>>(`/requirement_templates/for_filter`)
+  async fetchRequirementTemplatesForFilter(params?: { permitProjectId?: string }) {
+    return this.client.get<IOptionResponse>(`/requirement_templates/for_filter`, params)
   }
 
   async fetchRequirementTemplate(id: string) {

@@ -176,4 +176,112 @@ RSpec.describe Api::RequirementTemplatesController,
       end
     end
   end
+
+  describe "GET #for_filter" do
+    let(:jurisdiction) { create(:sub_district) }
+    let(:other_jurisdiction) { create(:sub_district) }
+    let(:submitter) { create(:user, :submitter) }
+
+    let!(:inbox_template) do
+      create(:requirement_template, nickname: "Plumbing permit")
+    end
+    let!(:draft_only_template) do
+      create(:requirement_template, nickname: "Draft only permit")
+    end
+    let!(:other_jurisdiction_template) do
+      create(:requirement_template, nickname: "Other city permit")
+    end
+    let!(:unused_published_template) do
+      create(:requirement_template, nickname: "Unused published permit")
+    end
+
+    let!(:inbox_version) do
+      create(
+        :template_version,
+        requirement_template: inbox_template,
+        status: :published
+      )
+    end
+    let!(:draft_version) do
+      create(
+        :template_version,
+        requirement_template: draft_only_template,
+        status: :published
+      )
+    end
+    let!(:other_version) do
+      create(
+        :template_version,
+        requirement_template: other_jurisdiction_template,
+        status: :published
+      )
+    end
+    let!(:unused_version) do
+      create(
+        :template_version,
+        requirement_template: unused_published_template,
+        status: :published
+      )
+    end
+
+    let!(:inbox_project) do
+      create(:permit_project, jurisdiction: jurisdiction, owner: submitter)
+    end
+
+    before do
+      create(
+        :permit_application,
+        status: :newly_submitted,
+        submitter: submitter,
+        permit_project: inbox_project,
+        template_version: inbox_version
+      )
+      create(
+        :permit_application,
+        status: :new_draft,
+        submitter: submitter,
+        permit_project: inbox_project,
+        template_version: draft_version
+      )
+      create(
+        :permit_application,
+        status: :newly_submitted,
+        submitter: submitter,
+        permit_project:
+          create(
+            :permit_project,
+            jurisdiction: other_jurisdiction,
+            owner: submitter
+          ),
+        template_version: other_version
+      )
+    end
+
+    def option_labels
+      json_response["data"].map { |option| option["label"] }
+    end
+
+    it "returns only templates on the current user's applications when unscoped" do
+      sign_in submitter
+      get :for_filter
+
+      expect(response).to have_http_status(:success)
+      expect(option_labels).to contain_exactly(
+        "Plumbing permit",
+        "Draft only permit",
+        "Other city permit"
+      )
+    end
+
+    it "returns only templates on a submitter's project, including drafts" do
+      sign_in submitter
+      get :for_filter, params: { permit_project_id: inbox_project.id }
+
+      expect(response).to have_http_status(:success)
+      expect(option_labels).to contain_exactly(
+        "Plumbing permit",
+        "Draft only permit"
+      )
+    end
+  end
 end
