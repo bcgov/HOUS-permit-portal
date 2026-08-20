@@ -29,7 +29,7 @@ export const TemplateVersionGoToMenu = observer(function TemplateVersionGoToMenu
         </MenuItem>
         {showBuilder && requirementTemplateId && (
           <MenuItem as={RouterLink} to={`/requirement-templates/${requirementTemplateId}/edit`}>
-            {t("templateVersionPreview.goTo.builder")}
+            {t("templateVersionPreview.reviseInBuilder")}
           </MenuItem>
         )}
         <MenuItem as={RouterLink} to="/requirement-templates">

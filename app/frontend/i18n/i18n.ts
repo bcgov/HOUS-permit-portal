@@ -4906,15 +4906,14 @@ Thank you,
           earlyAccessTitle: "Early access – submissions not yet enabled",
           earlyAccessDescription:
             "This permit is available for early access to help your team get familiar with the application process. You can view and edit your application, but submission is currently disabled. Submissions will be enabled once this permit type is officially launched in your jurisdiction.",
-          goToBuilder: "Go to builder",
-          openInBuilder: "Open in builder",
+          reviseInBuilder: "Revise in builder",
+          editSourceBlock: "Edit source block",
           actions: {
             menuLabel: "Actions",
           },
           goTo: {
             menuLabel: "Go to",
             formPreview: "Form preview",
-            builder: "Builder",
             catalogue: "Template catalogue",
           },
           immutableVersionNotice:
