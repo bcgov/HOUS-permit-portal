@@ -1107,7 +1107,7 @@ const options = {
           lookOut: "Things to look out for",
           resources: {
             title: "Resources",
-            sectionTitle: "Local Resources",
+            sectionTitle: "Local resources",
             description: "Additional resources and reference materials to help you with your application:",
             emptyForStaff: "No local resources have been configured yet.",
             configureResourcesLink: "Add resources in Configuration.",
@@ -1573,9 +1573,9 @@ Thank you,
             permits: "Applications",
             meetings: "Meetings",
             notes: "Notes",
-            collaborators: "People & access",
+            collaborators: "Collaborators & teams",
             teams: "Teams",
-            localResources: "Local Resources",
+            localResources: "Local resources",
             notFound: "Permit project not found.",
             backToProjects: "Back to projects",
             editPermitProjectTitleHint: "Click to edit project name",
@@ -1590,7 +1590,7 @@ Thank you,
             noAccess: "You don't have access to view notes on this project.",
           },
           collaborators: {
-            title: "People & access",
+            title: "Collaborators & teams",
             description:
               "Invite people to this project. Lead or Contributor is their starting group; permissions add up across that group and any extra teams you add.",
             invite: {
@@ -1712,7 +1712,7 @@ Thank you,
             },
           },
           localResources: {
-            title: "Local Resources",
+            title: "Local resources",
             description:
               "Access planning documents, bylaws, and reference materials from {{jurisdictionName}} to help you prepare your permit application.",
             empty:

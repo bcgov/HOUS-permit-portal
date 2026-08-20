@@ -35,7 +35,7 @@ export const useProjectDetailTabs = ({
       return
     }
 
-    // Teams merged into People & access; keep old links from landing on Overview.
+    // Teams merged into Collaborators & teams; keep old links from landing on Overview.
     const collaboratorsPath = `${basePath}/collaborators`
     if (location.pathname === `${basePath}/teams` && tabs.some((tab) => tab.to === collaboratorsPath)) {
       navigate(collaboratorsPath, { replace: true })

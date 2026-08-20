@@ -8,6 +8,11 @@ import {
   Box,
   Button,
   Divider,
+  Drawer,
+  DrawerBody,
+  DrawerCloseButton,
+  DrawerContent,
+  DrawerOverlay,
   Flex,
   FormControl,
   FormLabel,
@@ -122,6 +127,22 @@ const effectiveAccessFor = (permitProject: IPermitProject, membership: IProjectM
 export const CollaboratorsTabPanelContent = observer(({ permitProject }: IProps) => {
   const { t } = useTranslation()
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const { isOpen, onOpen, onClose } = useDisclosure()
+
+  const openPerson = (id: string) => {
+    setSelectedId(id)
+    onOpen()
+  }
+
+  const openAccess = () => {
+    setSelectedId(null)
+    onOpen()
+  }
+
+  const closeDrawer = () => {
+    onClose()
+    setSelectedId(null)
+  }
 
   return (
     <Flex direction="column" flex={1} bg="greys.white" p={10} gap={8}>
@@ -133,7 +154,14 @@ export const CollaboratorsTabPanelContent = observer(({ permitProject }: IProps)
               {t("permitProject.collaborators.title")}
             </Heading>
           </HStack>
-          {permitProject.canViewCollaborators && <InviteButton permitProject={permitProject} />}
+          {permitProject.canViewCollaborators && (
+            <HStack spacing={3}>
+              <Button variant="secondary" onClick={openAccess}>
+                {t("permitProject.teams.accessTitle")}
+              </Button>
+              <InviteButton permitProject={permitProject} />
+            </HStack>
+          )}
         </Flex>
         {!permitProject.canViewCollaborators ? (
           <EmptyResultsBox description={t("permitProject.collaborators.noAccess")} icon={<Users size={18} />} mt={2} />
@@ -142,31 +170,21 @@ export const CollaboratorsTabPanelContent = observer(({ permitProject }: IProps)
         )}
       </Box>
 
-      {/* Side by side only from xl: below that the roster columns get too narrow next to the pane. */}
       {permitProject.canViewCollaborators && (
-        <Flex align="flex-start" gap={8} direction={{ base: "column", xl: "row" }}>
-          <Box as="section" flex={1} minW={0} w="full">
-            <PeopleTable permitProject={permitProject} selectedId={selectedId} onSelect={setSelectedId} />
-          </Box>
-          <Box
-            as="section"
-            w={{ base: "full", xl: "400px" }}
-            flexShrink={0}
-            border="1px solid"
-            borderColor="border.light"
-            borderRadius="md"
-            p={6}
-            position={{ base: "static", xl: "sticky" }}
-            top={4}
-          >
-            <DetailPane
-              permitProject={permitProject}
-              selectedId={selectedId}
-              onClearSelection={() => setSelectedId(null)}
-            />
-          </Box>
-        </Flex>
+        <Box as="section">
+          <PeopleTable permitProject={permitProject} selectedId={isOpen ? selectedId : null} onSelect={openPerson} />
+        </Box>
       )}
+
+      <Drawer isOpen={isOpen} placement="right" onClose={closeDrawer} size="md">
+        <DrawerOverlay />
+        <DrawerContent maxW="430px" pt="var(--app-navbar-height)">
+          <DrawerCloseButton />
+          <DrawerBody px={6} pt={4} pb={8}>
+            <DetailPane permitProject={permitProject} selectedId={selectedId} onClearSelection={openAccess} />
+          </DrawerBody>
+        </DrawerContent>
+      </Drawer>
     </Flex>
   )
 })

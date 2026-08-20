@@ -156,7 +156,7 @@ export const PermitProjectModel = types
     get canEditProject() {
       return atLeastLevel(PROJECT_ACCESS_ORDER, self.currentUserPermissions?.projectAccess, EProjectAccess.edit)
     },
-    // One domain gates the People & access screen.
+    // One domain gates the Collaborators & teams screen.
     get canViewCollaborators() {
       return atLeastLevel(
         COLLABORATOR_ACCESS_ORDER,
@@ -369,7 +369,7 @@ export const PermitProjectModel = types
           )
         )
         // A role change moves the person between the Leads and Contributors
-        // groups, so People & access member lists move with it.
+        // groups, so Collaborators & teams member lists move with it.
         const teamsResponse = yield* toGenerator(self.environment.api.fetchProjectTeams(self.id))
         if (teamsResponse.ok) self.setProjectTeams(teamsResponse.data.data)
       }
