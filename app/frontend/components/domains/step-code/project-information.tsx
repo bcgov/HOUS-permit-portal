@@ -368,10 +368,13 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
                 <FormLabel htmlFor="referenceNumber" mb={0}>
                   {t("stepCode.projectInformation.identifier")}
                 </FormLabel>
-                <InfoTooltip
-                  {...fieldTooltipProps}
-                  label={t("stepCode.projectInformation.identifierTooltip") as string}
-                />
+                <Text>{t("ui.optional")}</Text>
+                <Flex ml={2}>
+                  <InfoTooltip
+                    {...fieldTooltipProps}
+                    label={t("stepCode.projectInformation.identifierTooltip") as string}
+                  />
+                </Flex>
               </HStack>
               <Input id="referenceNumber" {...register("referenceNumber")} />
             </FormControl>
@@ -497,9 +500,13 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
                 maxW={{ base: "none", xl: "430px" }}
                 label={t("stepCode.projectInformation.date") as string}
                 fieldName="permitDate"
-                showOptional={false}
                 LabelInfo={() => (
-                  <InfoTooltip {...fieldTooltipProps} label={t("stepCode.projectInformation.dateTooltip") as string} />
+                  <Flex ml={2}>
+                    <InfoTooltip
+                      {...fieldTooltipProps}
+                      label={t("stepCode.projectInformation.dateTooltip") as string}
+                    />
+                  </Flex>
                 )}
               />
             ) : (
@@ -562,7 +569,11 @@ const Field = function Field({ label, value, tooltip }: IFieldProps) {
     <FormControl>
       <HStack gap={1} mb={2}>
         <FormLabel mb={0}>{label}</FormLabel>
-        {tooltip && <InfoTooltip hasArrow placement="top" maxW="400px" whiteSpace="normal" label={tooltip} />}
+        {tooltip && (
+          <Flex ml={2}>
+            <InfoTooltip hasArrow placement="top" maxW="400px" whiteSpace="normal" label={tooltip} />
+          </Flex>
+        )}
       </HStack>
       <Input isDisabled value={value || ""} textOverflow="ellipsis" textAlign="left" />
     </FormControl>
