@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   Center,
   Flex,
@@ -7,7 +8,6 @@ import {
   HStack,
   Heading,
   IconButton,
-  Text,
   VStack,
 } from "@chakra-ui/react"
 import { Plus, X } from "@phosphor-icons/react"
@@ -17,24 +17,11 @@ import React, { useEffect, useState } from "react"
 import { Controller, FormProvider, useFieldArray, useForm } from "react-hook-form"
 import { usePart9StepCode } from "../../../../hooks/resources/use-part-9-step-code"
 import { EStepCodeCompliancePath } from "../../../../types/enums"
-import { uploadFile } from "../../../../utils/uploads"
 import { SharedSpinner } from "../../../shared/base/shared-spinner"
-import { FileFormControl, NumberFormControl } from "../../../shared/form/input-form-control"
+import { NumberFormControl } from "../../../shared/form/input-form-control"
 import { CompliancePathSelect } from "./compliance-path-select"
 import { Part9FormFooter } from "./form-section/shared/form-footer"
-
-type TH2kFileFormValue = {
-  id: string
-  storage?: string | null
-  metadata?: {
-    filename?: string | null
-    size?: number | null
-    mimeType?: string | null
-    mime_type?: string | null
-    contentDisposition?: string | null
-    content_disposition?: string | null
-  } | null
-}
+import { H2kFileUpload, TH2kFileFormValue } from "./h2k-file-upload"
 
 type TDataEntryFormValue = {
   id?: string
@@ -44,7 +31,6 @@ type TDataEntryFormValue = {
   otherGhgEf: number | null
   otherGhgConsumption: number | null
   h2kFile: TH2kFileFormValue | null
-  h2kLocal: FileList | null
 }
 
 type TH2KImportForm = {
@@ -64,7 +50,6 @@ export const H2KImport = observer(function StepCodeH2kImport() {
     otherGhgEf: null,
     otherGhgConsumption: null,
     h2kFile: null,
-    h2kLocal: null,
   }
 
   const formMethods = useForm<TH2KImportForm>({
@@ -75,7 +60,7 @@ export const H2KImport = observer(function StepCodeH2kImport() {
     },
   })
 
-  const { control, handleSubmit, reset, setValue, setError, clearErrors, formState, watch } = formMethods
+  const { control, handleSubmit, reset, setValue, formState, watch } = formMethods
   const { isValid, isSubmitting } = formState
   const watchedDataEntries = watch("dataEntriesAttributes")
   const visibleDataEntries = watchedDataEntries?.filter((entry) => !entry?._destroy) || []
@@ -106,7 +91,6 @@ export const H2KImport = observer(function StepCodeH2kImport() {
           otherGhgEf: entry.otherGhgEf ?? null,
           otherGhgConsumption: entry.otherGhgConsumption ?? null,
           h2kFile: entry.h2kFile ?? null,
-          h2kLocal: null,
         }))
       : [dataEntryAttributes]
     const resetPayload = {
@@ -137,36 +121,8 @@ export const H2KImport = observer(function StepCodeH2kImport() {
     if (!sectionCompleted) throw new Error("Save failed")
   }
 
-  const onUploadFile = async (event, index) => {
-    const file = event.target.files[0]
-    try {
-      setIsUploading({ ...isUploading, [index]: true })
-      const presignedData = await uploadFile(file, file.name)
-
-      setValue(
-        `dataEntriesAttributes.${index}.h2kFile`,
-        {
-          id: presignedData?.key.replace(/^cache\//, ""),
-          storage: "cache",
-          metadata: {
-            filename: file.name,
-            size: file.size,
-            mime_type: file.type,
-            content_disposition: presignedData?.headers?.["Content-Disposition"],
-          },
-        },
-        { shouldValidate: true }
-      )
-
-      clearErrors(`dataEntriesAttributes.${index}.h2kLocal`)
-    } catch (e) {
-      setError(`dataEntriesAttributes.${index}.h2kLocal`, {
-        type: "manual",
-        message: "Failed to upload file.",
-      })
-    } finally {
-      setIsUploading({ ...isUploading, [index]: false })
-    }
+  const handleUploadingChange = (index: number, uploading: boolean) => {
+    setIsUploading((prev) => ({ ...prev, [index]: uploading }))
   }
 
   if (!checklist?.isLoaded) {
@@ -204,21 +160,20 @@ export const H2KImport = observer(function StepCodeH2kImport() {
               return (
                 <VStack key={`step-code-data-entry-${index}`} w="full" spacing={4}>
                   <HStack w="full" align="start">
-                    <FileFormControl
-                      inputProps={{ borderWidth: 0, p: 0, accept: ".h2k" }}
-                      label={t("stepCode.import.selectFile")}
-                      fieldName={`dataEntriesAttributes.${index}.h2kLocal`}
-                      onChange={(e) => {
-                        onUploadFile(e, index)
-                      }}
-                    />
-                    {watchedDataEntries?.[index]?.h2kFile?.metadata?.filename && (
-                      <Text fontSize="sm" color="text.secondary" pt={9}>
-                        {watchedDataEntries[index].h2kFile.metadata.filename}
-                      </Text>
-                    )}
+                    <Box flex={1} minW={0} w="full">
+                      <H2kFileUpload
+                        existingFilename={watchedDataEntries?.[index]?.h2kFile?.metadata?.filename}
+                        onUploaded={(file) =>
+                          setValue(`dataEntriesAttributes.${index}.h2kFile`, file, { shouldValidate: true })
+                        }
+                        onRemoved={() =>
+                          setValue(`dataEntriesAttributes.${index}.h2kFile`, null, { shouldValidate: true })
+                        }
+                        onUploadingChange={(uploading) => handleUploadingChange(index, uploading)}
+                      />
+                    </Box>
 
-                    {(index != 0 || field.id) && (
+                    {index !== 0 && (
                       <IconButton
                         onClick={() => handleRemoveData(index)}
                         variant="ghost"

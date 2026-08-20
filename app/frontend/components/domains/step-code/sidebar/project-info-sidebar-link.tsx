@@ -20,7 +20,7 @@ export function ProjectInfoSidebarLink({ to }: IProps) {
         textAlign="left"
         color="text.primary"
       >
-        <Text>{t("stepCode.projectInformation.heading")}</Text>
+        <Text>{t("stepCode.goToStepCodePage")}</Text>
       </Flex>
     </RouterLink>
   )
