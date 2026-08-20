@@ -377,54 +377,6 @@ class Api::TemplateVersionsController < Api::ApplicationController
     end
   end
 
-  def update_draft_block
-    authorize @template_version, :update?
-
-    begin
-      TemplateVersioningService.update_draft_block!(
-        @template_version,
-        draft_block_params[:block_id],
-        draft_block_params[:block_data].to_unsafe_h
-      )
-
-      render_success @template_version,
-                     "template_version.update_draft_block_success",
-                     {
-                       blueprint: TemplateVersionBlueprint,
-                       blueprint_opts: {
-                         view: :extended
-                       }
-                     }
-    rescue TemplateVersionDraftError => e
-      render_error "template_version.update_draft_block_error",
-                   message_opts: {
-                     error_message: e.message
-                   }
-    end
-  end
-
-  def refresh_draft
-    authorize @template_version, :update?
-
-    begin
-      TemplateVersioningService.refresh_draft_snapshot!(@template_version)
-
-      render_success @template_version,
-                     "template_version.refresh_draft_success",
-                     {
-                       blueprint: TemplateVersionBlueprint,
-                       blueprint_opts: {
-                         view: :extended
-                       }
-                     }
-    rescue TemplateVersionDraftError => e
-      render_error "template_version.refresh_draft_error",
-                   message_opts: {
-                     error_message: e.message
-                   }
-    end
-  end
-
   def restore_layout
     authorize @template_version, :restore_layout?
 

@@ -613,20 +613,6 @@ class Requirement < ApplicationRecord
       .all? { |key, value| actual_opts[key] == value }
   end
 
-  # Labels are display-only; conditionals key off values. Ignore label drift in stored data.
-  def schema_without_option_labels(attrs)
-    return attrs if attrs.blank?
-
-    normalized = attrs.deep_dup
-    options = normalized.dig("input_options", "value_options")
-    return normalized unless options.is_a?(Array)
-
-    normalized["input_options"]["value_options"] = options.map do |option|
-      option.is_a?(Hash) ? option.except("label") : option
-    end
-    normalized
-  end
-
   def validate_architectural_drawing_related_requirements_schema
     unless ARCHITECTURAL_DRAWING_REQUIRED_DEPENDENCY_CODES.include?(
              requirement_code

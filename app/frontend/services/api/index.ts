@@ -1010,17 +1010,6 @@ export class Api {
     )
   }
 
-  async updateDraftBlock(templateVersionId: string, blockId: string, blockData: Record<string, unknown>) {
-    return this.client.patch<ApiResponse<ITemplateVersion>>(
-      `/template_versions/${templateVersionId}/update_draft_block`,
-      { blockId, blockData }
-    )
-  }
-
-  async refreshDraft(templateVersionId: string) {
-    return this.client.post<ApiResponse<ITemplateVersion>>(`/template_versions/${templateVersionId}/refresh_draft`)
-  }
-
   async restoreTemplateLayout(templateVersionId: string) {
     return this.client.post<ApiResponse<IRequirementTemplate>>(`/template_versions/${templateVersionId}/restore_layout`)
   }
