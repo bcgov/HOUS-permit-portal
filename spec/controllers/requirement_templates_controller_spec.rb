@@ -176,4 +176,39 @@ RSpec.describe Api::RequirementTemplatesController,
       end
     end
   end
+
+  describe "POST #force_publish_now" do
+    let(:requirement_template) do
+      create(:live_full_requirement_template, sections_count: 1)
+    end
+    let!(:draft_version) do
+      TemplateVersioningService.create_draft!(requirement_template)
+    end
+
+    before { sign_in super_admin }
+
+    around do |example|
+      original = ENV["ENABLE_TEMPLATE_FORCE_PUBLISH"]
+      ENV["ENABLE_TEMPLATE_FORCE_PUBLISH"] = "true"
+      example.run
+    ensure
+      ENV["ENABLE_TEMPLATE_FORCE_PUBLISH"] = original
+    end
+
+    it "includes draft_template_versions for super admins" do
+      post :force_publish_now,
+           params: {
+             id: requirement_template.id,
+             requirement_template: {
+               description: requirement_template.description,
+               nickname: requirement_template.nickname
+             }
+           }
+
+      expect(response).to have_http_status(:success)
+      expect(
+        json_response.dig("data", "draft_template_versions").pluck("id")
+      ).to include(draft_version.id)
+    end
+  end
 end
