@@ -2,24 +2,21 @@ require "rails_helper"
 
 RSpec.describe PermitProjectPolicy, type: :policy do
   let(:sandbox) { nil }
-  let(:owner) { create(:user) }
-  let(:collaborator_user) { create(:user) }
+  let(:owner) { create(:user, :submitter) }
+  let(:member) { create(:user, :submitter) }
+  let!(:permit_project) { create(:permit_project, owner: owner) }
 
-  def policy(user, record)
+  def policy(user, record = permit_project)
     policy_for(described_class, user:, record:, sandbox:)
   end
 
-  describe "owner access" do
-    let(:record) do
-      instance_double(
-        "PermitProject",
-        owner_id: owner.id,
-        permit_applications: []
-      )
-    end
+  def team(kind)
+    permit_project.project_teams.find_by(kind: kind)
+  end
 
+  describe "owner access" do
     it "permits index/show/update/destroy for owner" do
-      p = policy(owner, record)
+      p = policy(owner)
       expect(p.index?).to be true
       expect(p.show?).to be true
       expect(p.update?).to be true
@@ -27,99 +24,141 @@ RSpec.describe PermitProjectPolicy, type: :policy do
       expect(p.pin?).to be true
       expect(p.unpin?).to be true
       expect(p.search_permit_applications?).to be true
+      expect(p.search_activities?).to be true
       expect(p.create_permit_applications?).to be true
       expect(p.submission_collaborator_options?).to be true
       expect(p.download_notes_csv?).to be true
     end
   end
 
-  describe "collaborator access" do
-    it "permits index/show/pin/unpin/search but denies update/destroy when collaborator on any app" do
-      app =
-        instance_double(
-          "PermitApplication",
-          collaborators: [
-            instance_double("Collaborator", user_id: collaborator_user.id)
-          ]
-        )
-      record =
-        instance_double(
-          "PermitProject",
-          owner_id: owner.id,
-          permit_applications: [app]
-        )
+  describe "lead access" do
+    before do
+      create(:project_membership, :lead, permit_project:, user: member)
+      permit_project.reload
+    end
 
-      p = policy(collaborator_user, record)
-      expect(p.index?).to be true
+    it "permits show and update but not destroy" do
+      p = policy(member)
       expect(p.show?).to be true
-      expect(p.pin?).to be true
-      expect(p.unpin?).to be true
-      expect(p.search_permit_applications?).to be true
+      expect(p.update?).to be true
+      expect(p.create_permit_applications?).to be true
 
-      expect(p.update?).to be false
       expect(p.destroy?).to be false
-      expect(p.create_permit_applications?).to be false
       expect(p.submission_collaborator_options?).to be false
+      expect(p.download_notes_csv?).to be true
     end
   end
 
-  describe "non-collaborator access" do
-    it "denies index/show when not owner and no collaborator match" do
-      app =
-        instance_double(
-          "PermitApplication",
-          collaborators: [
-            instance_double("Collaborator", user_id: "someone-else")
-          ]
-        )
-      record =
-        instance_double(
-          "PermitProject",
-          owner_id: owner.id,
-          permit_applications: [app]
-        )
+  describe "contributor access" do
+    before do
+      create(:project_membership, permit_project:, user: member)
+      permit_project.reload
+    end
 
-      p = policy(create(:user), record)
+    it "lists the project for a contributor even when teams grant no project access" do
+      p = policy(member)
+      expect(p.index?).to be true
+      expect(p.show?).to be true
+      expect(p.pin?).to be true
+      expect(p.search_permit_applications?).to be false
+      expect(p.search_activities?).to be false
+      expect(p.update?).to be false
+      expect(p.download_notes_csv?).to be false
+    end
+
+    it "lets a contributor search applications and activity once a team grants full read" do
+      team(:all_members).update!(project_access: :read)
+      permit_project.reload
+
+      p = policy(member)
+      expect(p.show?).to be true
+      expect(p.search_permit_applications?).to be true
+      expect(p.search_activities?).to be true
+      expect(p.update?).to be false
+    end
+  end
+
+  describe "non-member access" do
+    it "denies index/show" do
+      p = policy(create(:user, :submitter))
       expect(p.index?).to be false
       expect(p.show?).to be false
+    end
+
+    it "does not list the project for a pending invite to that user's email" do
+      create(
+        :project_membership,
+        :pending,
+        permit_project:,
+        invited_email: member.email
+      )
+
+      expect(policy(member).show?).to be false
+      expect(policy(member).index?).to be false
     end
   end
 
   describe "#create? and #jurisdiction_options?" do
     it "permits create and jurisdiction_options for anyone" do
-      record =
-        instance_double(
-          "PermitProject",
-          owner_id: owner.id,
-          permit_applications: []
-        )
-      p = policy(create(:user), record)
+      p = policy(create(:user, :submitter))
       expect(p.create?).to be true
       expect(p.jurisdiction_options?).to be true
     end
   end
 
   describe "Scope" do
-    it "builds a where/distinct query for owner or collaborator (EXISTS subquery, no joins)" do
-      relation = instance_double("ActiveRecord::Relation")
-      where_rel = instance_double("ActiveRecord::Relation")
-      distinct_rel = instance_double("ActiveRecord::Relation")
+    let!(:other_project) { create(:permit_project) }
 
-      expect(relation).to receive(:where) do |sql, binds|
-        expect(sql).to include("permit_projects.owner_id = :uid")
-        expect(sql).to include("EXISTS")
-        expect(sql).to include("permit_collaborations")
-        expect(binds).to eq(uid: owner.id)
-        where_rel
-      end
-      expect(where_rel).to receive(:distinct).and_return(distinct_rel)
+    it "resolves projects the user owns" do
+      expect(resolved_ids(owner)).to include(permit_project.id)
+      expect(resolved_ids(owner)).not_to include(other_project.id)
+    end
 
-      resolved =
-        described_class::Scope.new(
-          UserContext.new(owner, sandbox),
-          relation
-        ).resolve
-      expect(resolved).to eq(distinct_rel)
+    it "includes projects the user is a member of even without full read" do
+      create(:project_membership, permit_project:, user: member)
+
+      expect(resolved_ids(member)).to include(permit_project.id)
+    end
+
+    it "does not include projects with only a pending invite" do
+      create(
+        :project_membership,
+        :pending,
+        permit_project:,
+        invited_email: member.email
+      )
+
+      expect(resolved_ids(member)).not_to include(permit_project.id)
+    end
+
+    it "includes projects where a team grants full read" do
+      create(:project_membership, :lead, permit_project:, user: member)
+
+      expect(resolved_ids(member)).to include(permit_project.id)
+    end
+
+    # COLLAB TODO(phase 5): remove alongside the legacy submission collaborations.
+    it "includes projects reached through a legacy submission collaboration" do
+      permit_application =
+        create(:permit_application, permit_project:, submitter: owner)
+      collaborator =
+        create(:collaborator, user: member, collaboratorable: owner)
+      create(
+        :permit_collaboration,
+        :submission,
+        :delegatee,
+        collaborator: collaborator,
+        permit_application: permit_application
+      )
+
+      expect(resolved_ids(member)).to include(permit_project.id)
+    end
+
+    def resolved_ids(user)
+      described_class::Scope
+        .new(UserContext.new(user, sandbox), PermitProject.all)
+        .resolve
+        .pluck(:id)
     end
   end
 end

@@ -95,6 +95,13 @@ class PermitApplicationBlueprint < Blueprinter::Base
       pa.formatted_submission_data(current_user: options[:current_user])
     end
 
+    field :can_edit_submission do |pa, options|
+      user_id = options[:current_user]&.id
+      next false if user_id.blank?
+
+      pa.submission_requirement_block_edit_permissions(user_id:).present?
+    end
+
     association :template_version, blueprint: TemplateVersionBlueprint
     association :published_template_version, blueprint: TemplateVersionBlueprint
 

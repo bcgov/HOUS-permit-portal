@@ -13,6 +13,8 @@ interface IProps {
 
 export const AddPermitsButton = observer(({ permitProject }: IProps) => {
   const { t } = useTranslation()
+  if (!permitProject.canEditProject) return null
+
   const isDisabled = permitProject.jurisdictionDifferentFromSandbox
 
   const preventWhenDisabled = (e: React.MouseEvent) => {

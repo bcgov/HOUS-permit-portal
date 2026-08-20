@@ -35,6 +35,13 @@ export const useProjectDetailTabs = ({
       return
     }
 
+    // Teams merged into Teams & collaborators; keep old links from landing on Overview.
+    const collaboratorsPath = `${basePath}/collaborators`
+    if (location.pathname === `${basePath}/teams` && tabs.some((tab) => tab.to === collaboratorsPath)) {
+      navigate(collaboratorsPath, { replace: true })
+      return
+    }
+
     // Unknown subpath canonicalize only once store matches the route (avoids cross-project redirects).
     if (!projectMatchesRoute || tabs.length === 0) return
 

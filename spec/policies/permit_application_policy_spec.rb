@@ -201,29 +201,31 @@ RSpec.describe PermitApplicationPolicy do
       expect(submitter_policy.download_application_json?).to be false
     end
 
-    it "update_version? permits draft submitter or designated submitter" do
-      designated = create(:user, :submitter)
-      record = double("PermitApplication", draft?: true, submitter: submitter)
-      allow(record).to receive(:users_by_collaboration_options).and_return(
-        [designated]
+    it "update_version? permits draft applications for users who can edit the project" do
+      lead = create(:user, :submitter)
+      create(
+        :project_membership,
+        :lead,
+        permit_project: draft_permit_application.permit_project,
+        user: lead
       )
 
       expect(
         described_class.new(
           UserContext.new(submitter, sandbox),
-          record
+          draft_permit_application
         ).update_version?
       ).to be true
       expect(
         described_class.new(
-          UserContext.new(designated, sandbox),
-          record
+          UserContext.new(lead, sandbox),
+          draft_permit_application
         ).update_version?
       ).to be true
       expect(
         described_class.new(
-          UserContext.new(create(:user), sandbox),
-          record
+          UserContext.new(create(:user, :submitter), sandbox),
+          draft_permit_application
         ).update_version?
       ).to be false
     end
@@ -279,13 +281,8 @@ RSpec.describe PermitApplicationPolicy do
       ).to be true
     end
 
-    it "generate_missing_pdfs? permits admin, submitter, or review staff member" do
-      record =
-        double(
-          "PermitApplication",
-          submitter: submitter,
-          jurisdiction_id: jurisdiction.id
-        )
+    it "generate_missing_pdfs? permits admin, project readers, or review staff member" do
+      record = draft_permit_application
       expect(
         described_class.new(
           UserContext.new(submitter, sandbox),
@@ -306,7 +303,7 @@ RSpec.describe PermitApplicationPolicy do
           record
         ).generate_missing_pdfs?
       ).to be true
-      stranger = create(:user)
+      stranger = create(:user, :submitter)
       expect(
         described_class.new(
           UserContext.new(stranger, sandbox),
@@ -576,19 +573,124 @@ RSpec.describe PermitApplicationPolicy do
       ).to be true
     end
 
-    it "destroy? permits only submitter for drafts; restore? permits submitter" do
-      record = double("PermitApplication", draft?: true, submitter: submitter)
-      policy = described_class.new(UserContext.new(submitter, sandbox), record)
+    it "destroy? permits project editors for drafts; restore? permits project editors" do
+      policy =
+        described_class.new(
+          UserContext.new(submitter, sandbox),
+          draft_permit_application
+        )
       expect(policy.destroy?).to be true
       expect(policy.restore?).to be true
 
       other = create(:user, :submitter)
+      other_policy =
+        described_class.new(
+          UserContext.new(other, sandbox),
+          draft_permit_application
+        )
+      expect(other_policy.destroy?).to be false
+      expect(other_policy.restore?).to be false
+    end
+  end
+
+  describe "project permissions" do
+    let(:user) { submitter }
+    let(:permit_project) { draft_permit_application.permit_project }
+    let(:member) { create(:user, :submitter) }
+
+    def policy_for_user(some_user, record = draft_permit_application)
+      described_class.new(UserContext.new(some_user, sandbox), record)
+    end
+
+    it "denies show to a contributor while the contributors team grants nothing" do
+      create(:project_membership, permit_project:, user: member)
+
+      expect(policy_for_user(member).show?).to be false
+      expect(resolved_scope_for(member)).not_to include(
+        draft_permit_application
+      )
+    end
+
+    it "permits show and update to a lead" do
+      create(:project_membership, :lead, permit_project:, user: member)
+
+      expect(policy_for_user(member).show?).to be true
+      expect(policy_for_user(member).update?).to be true
+      expect(resolved_scope_for(member)).to include(draft_permit_application)
+    end
+
+    it "grants a project editor edit rights on every requirement block" do
+      create(:project_membership, :lead, permit_project:, user: member)
+
       expect(
-        described_class.new(UserContext.new(other, sandbox), record).destroy?
-      ).to be false
+        draft_permit_application.submission_requirement_block_edit_permissions(
+          user_id: member.id
+        )
+      ).to eq(:all)
+    end
+
+    it "lets a full-read member view every block without granting edit" do
+      permit_project
+        .project_teams
+        .find_by(kind: :all_members)
+        .update!(project_access: :read)
+      create(:project_membership, permit_project:, user: member)
+
       expect(
-        described_class.new(UserContext.new(other, sandbox), record).restore?
-      ).to be false
+        draft_permit_application.submission_requirement_block_view_permissions(
+          user_id: member.id
+        )
+      ).to eq(:all)
+      expect(
+        draft_permit_application.submission_requirement_block_edit_permissions(
+          user_id: member.id
+        )
+      ).to be_nil
+    end
+
+    # COLLAB TODO(phase 5): a backfilled assignee keeps read through the bridge and
+    # block-scoped edit through the untouched legacy collaboration logic.
+    it "keeps read and block-scoped edit for a backfilled submission assignee" do
+      block_id = SecureRandom.uuid
+      draft_permit_application.template_version.update!(
+        requirement_blocks_json: {
+          block_id => {
+            "name" => "Block",
+            "requirements" => []
+          }
+        }
+      )
+      collaborator =
+        create(:collaborator, user: member, collaboratorable: submitter)
+      create(
+        :permit_collaboration,
+        :submission,
+        :assignee,
+        collaborator: collaborator,
+        permit_application: draft_permit_application,
+        assigned_requirement_block_id: block_id
+      )
+      create(:project_membership, permit_project:, user: member)
+
+      expect(policy_for_user(member).show?).to be true
+      expect(resolved_scope_for(member)).to include(draft_permit_application)
+      expect(
+        draft_permit_application.submission_requirement_block_edit_permissions(
+          user_id: member.id
+        )
+      ).to eq([block_id])
+      expect(
+        draft_permit_application.submission_requirement_block_view_permissions(
+          user_id: member.id
+        )
+      ).to eq([block_id])
+    end
+
+    def resolved_scope_for(some_user)
+      described_class::Scope.new(
+        UserContext.new(some_user, sandbox),
+        PermitApplication.all
+      ).resolve
     end
   end
 

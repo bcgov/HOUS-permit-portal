@@ -90,6 +90,23 @@ RSpec.describe "Api::ProjectAudits (project activities)", type: :request do
       expect(response).to have_http_status(:forbidden)
     end
 
+    it "returns forbidden for a member without full read" do
+      create(
+        :project_membership,
+        permit_project: permit_project,
+        user: other_user
+      )
+      sign_in other_user
+
+      post "/api/permit_projects/#{permit_project.id}/activities",
+           params: {
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:forbidden)
+    end
+
     it "returns not found for non-existent project" do
       post "/api/permit_projects/#{SecureRandom.uuid}/activities",
            params: {

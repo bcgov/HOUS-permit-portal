@@ -104,10 +104,9 @@ module Api::Concerns::Search::PermitProjects
 
     search_filters[:discarded] = show_archived
 
-    or_conditions = [
-      { owner_id: current_user.id },
-      { collaborator_ids: current_user.id }
-    ]
+    # readable_user_ids covers the owner, kept members, and the legacy
+    # collaboration bridge. Application visibility is a separate Full read check.
+    or_conditions = [{ readable_user_ids: current_user.id }]
 
     final_where = { _and: [{ _or: or_conditions }] }
 

@@ -116,12 +116,18 @@ User.find_or_create_by(omniauth_username: "submitter") do |user|
 end
 
 4.times do |i|
-  User.find_or_create_by(email: "submitter_#{i + 1}@example.com") do |user|
+  n = i + 1
+  email = "submitter#{n}@example.com"
+  User.find_or_create_by(email:) do |user|
     user.role = :submitter
     user.first_name = "Submitter"
-    user.last_name = "Number#{i + 1}"
+    user.last_name = "Number#{n}"
     user.password = "P@ssword1"
     user.confirmed_at = Time.now
+    user.omniauth_uid = "D1E4BB1178625FFEC698D22149F548F#{n}"
+    user.omniauth_provider = "bceidbasic"
+    user.omniauth_email = email
+    user.omniauth_username = "submitter#{n}"
   end
 end
 
@@ -342,14 +348,16 @@ if PermitApplication.first.blank?
     project_type = project_types.sample
 
     permit_project =
-      PermitProject.create!(
-        owner: submitter_user,
-        jurisdiction: current_jurisdiction,
-        title: "#{project_type} — #{street_num}",
-        full_address: "#{street_num} #{street}, North Vancouver, BC, #{postal}",
-        pid: format("%09d", rand(1..999_999_999)),
-        pin: format("PIN%06d", index + 1)
-      )
+      permit_project =
+        PermitProject.create!(
+          owner: submitter_user,
+          jurisdiction: current_jurisdiction,
+          title: "#{project_type} — #{street_num}",
+          full_address:
+            "#{street_num} #{street}, North Vancouver, BC, #{postal}",
+          pid: format("%09d", rand(1..999_999_999)),
+          pin: format("PIN%06d", index + 1)
+        )
 
     num_apps = rand(1..4)
     num_apps.times do |app_idx|

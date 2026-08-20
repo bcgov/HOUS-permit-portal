@@ -13,6 +13,7 @@ import { ErrorScreen } from "../../shared/base/error-screen"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
+import { EmptyResultsBox } from "../../shared/grid/empty-results-box"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { ActiveProjectMeetingNotice } from "../../shared/project-meetings/active-project-meeting-notice"
@@ -41,8 +42,29 @@ const useProjectMeetingsEnabled = (permitProject: IPermitProject) => {
 }
 
 export const MeetingsTabPanelContent = observer(({ permitProject }: IProps) => {
+  const { t } = useTranslation()
   const projectMeetingDetailMatch = useMatch("/projects/:permitProjectId/meetings/:projectMeetingId")
   const projectMeetingsEnabled = useProjectMeetingsEnabled(permitProject)
+
+  if (!permitProject.canViewMeetings) {
+    return (
+      <Flex direction="column" flex={1} bg="greys.white" p={10}>
+        <Box as="section">
+          <HStack align="center" spacing={4} mb={6}>
+            <CalendarBlank size={32} />
+            <Heading as="h2" size="lg" mb={0}>
+              {t("permitProject.meetings.tabTitle")}
+            </Heading>
+          </HStack>
+          <EmptyResultsBox
+            description={t("permitProject.meetings.noAccess")}
+            icon={<CalendarBlank size={18} />}
+            mt={2}
+          />
+        </Box>
+      </Flex>
+    )
+  }
 
   if (projectMeetingDetailMatch?.params.projectMeetingId) {
     if (!projectMeetingsEnabled) return <ProjectMeetingFeatureUnavailable />
@@ -75,7 +97,7 @@ const MeetingsListContent = observer(({ permitProject, projectMeetingsEnabled }:
     totalPages,
   } = projectMeetingStore
   const hasActiveProjectMeeting = !!permitProject.activeProjectMeeting
-  const canRequestProjectMeeting = permitProject.isOwner && projectMeetingsEnabled && !hasActiveProjectMeeting
+  const canRequestProjectMeeting = permitProject.canManageMeetings && projectMeetingsEnabled && !hasActiveProjectMeeting
   const isEmpty = !isSearching && tableProjectMeetings.length === 0
 
   useSearch(projectMeetingStore, [permitProject.id])

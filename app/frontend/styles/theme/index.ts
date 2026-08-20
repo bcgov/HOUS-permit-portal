@@ -1,5 +1,6 @@
 import { extendTheme } from "@chakra-ui/react"
 import { Button } from "./components/button"
+import { Checkbox } from "./components/checkbox"
 import { FormLabel } from "./components/form-label"
 import { Heading } from "./components/heading"
 import { Input } from "./components/input"
@@ -87,7 +88,7 @@ const styles = {
     },
   },
 }
-const components = { Button, FormLabel, Heading, Input, Link, Select, Text, Table, Radio, Tag, Tabs }
+const components = { Button, Checkbox, FormLabel, Heading, Input, Link, Select, Text, Table, Radio, Tag, Tabs }
 const overrides = { styles, colors, fonts, fontSizes, sizes, radii, space, shadows, components }
 
 export const theme = extendTheme(overrides)

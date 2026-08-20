@@ -29,7 +29,7 @@ export const ProjectMeetingScreen = observer(() => {
   if (projectError || meetingError) return <ErrorScreen />
   if (isLoading || !currentProjectMeeting || !currentPermitProject) return <LoadingScreen />
   if (
-    !currentPermitProject.isOwner ||
+    !currentPermitProject.canManageMeetings ||
     !siteConfigurationStore.projectMeetingsEnabled ||
     !currentPermitProject.jurisdiction?.projectMeetingsEnabled
   ) {

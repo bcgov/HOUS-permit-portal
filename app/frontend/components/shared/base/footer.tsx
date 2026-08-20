@@ -11,6 +11,7 @@ export const Footer = observer(() => {
   const onlyShowFooterOnRoutes = [
     "/reset-password",
     "/accept-invitation",
+    "/accept-project-invitation",
     "/login",
     "/forgot-password",
     "/welcome",

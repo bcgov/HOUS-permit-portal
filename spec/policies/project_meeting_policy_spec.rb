@@ -46,6 +46,33 @@ RSpec.describe ProjectMeetingPolicy, type: :policy do
     expect(policy(other_user).update?).to be false
   end
 
+  it "allows a lead to view and manage meetings" do
+    create(:project_membership, :lead, permit_project:, user: other_user)
+
+    expect(policy(other_user).show?).to be true
+    expect(policy(other_user).create?).to be true
+    expect(policy(other_user).update?).to be true
+  end
+
+  it "blocks a contributor while teams grant no meeting access" do
+    create(:project_membership, permit_project:, user: other_user)
+
+    expect(policy(other_user).show?).to be false
+    expect(policy(other_user).create?).to be false
+  end
+
+  it "allows a contributor to view but not manage when a team grants view" do
+    create(:project_membership, permit_project:, user: other_user)
+    permit_project
+      .project_teams
+      .find_by(kind: :all_members)
+      .update!(meeting_access: :view)
+
+    expect(policy(other_user).show?).to be true
+    expect(policy(other_user).create?).to be false
+    expect(policy(other_user).update?).to be false
+  end
+
   it "blocks submitter collaborators during the submitter phase" do
     permit_application =
       create(
@@ -261,6 +288,17 @@ RSpec.describe ProjectMeetingPolicy, type: :policy do
       meeting
 
       expect(resolved_scope_for(collaborator_user)).to be_empty
+    end
+
+    it "includes meetings for a member whose team grants view" do
+      meeting
+      create(:project_membership, permit_project:, user: other_user)
+      permit_project
+        .project_teams
+        .find_by(kind: :all_members)
+        .update!(meeting_access: :view)
+
+      expect(resolved_scope_for(other_user)).to include(meeting)
     end
   end
 end

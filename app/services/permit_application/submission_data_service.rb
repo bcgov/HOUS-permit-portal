@@ -11,7 +11,12 @@ class PermitApplication::SubmissionDataService
     filtered_submission =
       filter_submission_data_based_on_user_permissions(
         submission_data: submission_data,
-        user: current_user
+        user: current_user,
+        permissions:
+          current_user &&
+            permit_application.submission_requirement_block_view_permissions(
+              user_id: current_user.id
+            )
       )
 
     completion_section_value =
@@ -66,13 +71,17 @@ class PermitApplication::SubmissionDataService
 
   private
 
-  def filter_submission_data_based_on_user_permissions(submission_data:, user:)
+  def filter_submission_data_based_on_user_permissions(
+    submission_data:,
+    user:,
+    permissions: nil
+  )
     formatted_data = submission_data&.deep_dup || { "data" => {} }
     formatted_data["data"] ||= {}
 
     return formatted_data unless user.present?
 
-    permissions =
+    permissions ||=
       permit_application.submission_requirement_block_edit_permissions(
         user_id: user.id
       )

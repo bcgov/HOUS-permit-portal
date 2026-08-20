@@ -158,7 +158,7 @@ class PermitApplication < ApplicationRecord
     return supporting_documents if user.blank?
 
     permissions =
-      submission_requirement_block_edit_permissions(user_id: user.id)
+      submission_requirement_block_view_permissions(user_id: user.id)
 
     return supporting_documents if permissions == :all
 
@@ -337,18 +337,31 @@ class PermitApplication < ApplicationRecord
     collaborators.any?
   end
 
+  # Returns :all, a list of requirement block ids, or nil. Full read from a
+  # project team sees every block; per-block filtering is only for legacy
+  # submission collaborators who do not also have team Full read.
+  def submission_requirement_block_view_permissions(user_id:)
+    return :all if team_grants_project_read?(user_id)
+
+    submission_requirement_block_edit_permissions(user_id:)
+  end
+
+  # Returns :all, a list of requirement block ids, or nil for no edit rights.
+  # Single chokepoint for submitter-side edit rights: project-wide edit access
+  # grants everything, otherwise the legacy per-collaboration rights apply.
+  # COLLAB TODO(phase 4): granular team permissions replace those collaborations.
   def submission_requirement_block_edit_permissions(user_id:)
-    if submitter_id != user_id &&
-         !collaborator?(user_id:, collaboration_type: :submission)
-      return nil
+    if permit_project&.permissions_for_user_id(user_id)&.project_edit?
+      return :all
     end
 
-    if submitter_id == user_id ||
-         collaborator?(
-           user_id:,
-           collaboration_type: :submission,
-           collaborator_type: :delegatee
-         )
+    return nil unless collaborator?(user_id:, collaboration_type: :submission)
+
+    if collaborator?(
+         user_id:,
+         collaboration_type: :submission,
+         collaborator_type: :delegatee
+       )
       return :all
     end
 
@@ -357,6 +370,13 @@ class PermitApplication < ApplicationRecord
       .where(collaboration_type: :submission, collaborators: { user_id: })
       .map(&:assigned_requirement_block_id)
       .compact
+  end
+
+  def team_grants_project_read?(user_id)
+    membership = permit_project&.membership_for_user_id(user_id)
+    return false unless membership
+
+    ProjectPermissions.from_teams(membership.teams).project_read?
   end
 
   def user_can_edit_block?(user_id:, requirement_block_id:)

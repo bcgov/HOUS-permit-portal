@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next"
 import { OMNIAUTH_PROVIDERS } from "../../../models/user"
 import { useServerAPI } from "../../../setup/root"
 
-export const IdirLoginForm: React.FC = () => {
+export const IdirLoginForm: React.FC<{ origin?: string }> = ({ origin }) => {
   // @ts-ignore
   const csrfToken = document.querySelector("[name=csrf-token]")?.content
   const { t } = useTranslation()
@@ -13,13 +13,14 @@ export const IdirLoginForm: React.FC = () => {
     <form action="/api/auth/keycloak" method="post">
       <input type="hidden" name="kc_idp_hint" value={OMNIAUTH_PROVIDERS.idir} />
       <input type="hidden" name="authenticity_token" value={csrfToken} />
+      {origin && <input type="hidden" name="origin" value={origin} />}
       <Button variant="primary" w="full" type="submit">
         {t("auth.idirLogin")}
       </Button>
     </form>
   )
 }
-export const BcscLoginForm: React.FC = () => {
+export const BcscLoginForm: React.FC<{ origin?: string }> = ({ origin }) => {
   // @ts-ignore
   const csrfToken = document.querySelector("[name=csrf-token]")?.content
   const { t } = useTranslation()
@@ -28,13 +29,14 @@ export const BcscLoginForm: React.FC = () => {
     <form action="/api/auth/keycloak" method="post">
       <input type="hidden" name="kc_idp_hint" value={OMNIAUTH_PROVIDERS.bcsc} />
       <input type="hidden" name="authenticity_token" value={csrfToken} />
+      {origin && <input type="hidden" name="origin" value={origin} />}
       <Button variant="primary" w="full" type="submit">
         {t("auth.bcscLogin")}
       </Button>
     </form>
   )
 }
-export const BceidLoginForm: React.FC = () => {
+export const BceidLoginForm: React.FC<{ origin?: string }> = ({ origin }) => {
   // @ts-ignore
   const csrfToken = document.querySelector("[name=csrf-token]")?.content
   const { t } = useTranslation()
@@ -43,6 +45,7 @@ export const BceidLoginForm: React.FC = () => {
     <form action="/api/auth/keycloak" method="post">
       <input type="hidden" name="kc_idp_hint" value={OMNIAUTH_PROVIDERS.bceid} />
       <input type="hidden" name="authenticity_token" value={csrfToken} />
+      {origin && <input type="hidden" name="origin" value={origin} />}
       <Button variant="primary" w="full" type="submit">
         {t("auth.bceidLogin")}
       </Button>
@@ -53,7 +56,7 @@ export const BceidLoginForm: React.FC = () => {
 export const isLocalPasswordAuthEnabled =
   import.meta.env.DEV && import.meta.env.VITE_ENABLE_LOCAL_PASSWORD_AUTH === "true"
 
-export const LocalPasswordLoginForm: React.FC = () => {
+export const LocalPasswordLoginForm: React.FC<{ afterLoginPath?: string }> = ({ afterLoginPath }) => {
   const { t } = useTranslation()
   const api = useServerAPI()
   const [email, setEmail] = useState("")
@@ -68,7 +71,7 @@ export const LocalPasswordLoginForm: React.FC = () => {
     try {
       const response = await api.login({ email, password })
       if (response.ok) {
-        window.location.replace("/")
+        window.location.replace(afterLoginPath || "/")
         return
       }
       setError(t("auth.localPassword.error"))

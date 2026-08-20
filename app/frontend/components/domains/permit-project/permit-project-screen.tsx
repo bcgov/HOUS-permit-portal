@@ -1,5 +1,14 @@
 import { Box, Container, Flex, IconButton, TabPanel, TabPanels, Tabs, Text } from "@chakra-ui/react"
-import { CalendarBlank, CaretLeft, Chat, ClipboardText, Folder, SquaresFour, TrendUp } from "@phosphor-icons/react"
+import {
+  CalendarBlank,
+  CaretLeft,
+  Chat,
+  ClipboardText,
+  Folder,
+  SquaresFour,
+  TrendUp,
+  Users,
+} from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo } from "react"
 import { useForm } from "react-hook-form"
@@ -13,6 +22,7 @@ import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EditableInputWithControls } from "../../shared/editable-input-with-controls"
 import { ProjectStateBox } from "../../shared/permit-projects/project-state-box"
 import { ActivityTabPanelContent } from "./activity-tab-panel-content"
+import { CollaboratorsTabPanelContent } from "./collaborators-tab-panel-content"
 import { LocalResourcesTabPanelContent } from "./local-resources-tab-panel-content"
 import { MeetingsTabPanelContent } from "./meetings-tab-panel-content"
 import { OverviewTabPanelContent } from "./overview-tab-panel-content"
@@ -33,28 +43,30 @@ export const PermitProjectScreen = observer(() => {
 
   const TABS_DATA: ITabItem[] = useMemo(() => {
     if (!projectBasePath) return []
+    // Tab indices follow position, so they stay aligned with the conditionally
+    // rendered panels below. Permission gates live in the panel (no-access
+    // message), not here — only the meetings feature flag hides tabs.
     return [
-      { label: t("permitProject.details.overview"), icon: SquaresFour, to: `${projectBasePath}/overview`, tabIndex: 0 },
-      { label: t("permitProject.details.activity"), icon: TrendUp, to: `${projectBasePath}/activity`, tabIndex: 1 },
-      { label: t("permitProject.details.permits"), icon: ClipboardText, to: `${projectBasePath}/permits`, tabIndex: 2 },
+      { label: t("permitProject.details.overview"), icon: SquaresFour, to: `${projectBasePath}/overview` },
+      { label: t("permitProject.details.activity"), icon: TrendUp, to: `${projectBasePath}/activity` },
+      { label: t("permitProject.details.permits"), icon: ClipboardText, to: `${projectBasePath}/permits` },
       ...(projectMeetingsEnabled
         ? [
             {
               label: t("permitProject.details.meetings"),
               icon: CalendarBlank,
               to: `${projectBasePath}/meetings`,
-              tabIndex: 3,
             },
-            { label: t("permitProject.details.notes"), icon: Chat, to: `${projectBasePath}/notes`, tabIndex: 4 },
+            { label: t("permitProject.details.notes"), icon: Chat, to: `${projectBasePath}/notes` },
           ]
         : []),
       {
         label: t("permitProject.details.localResources"),
         icon: Folder,
         to: `${projectBasePath}/local-resources`,
-        tabIndex: projectMeetingsEnabled ? 5 : 3,
       },
-    ]
+      { label: t("permitProject.details.collaborators"), icon: Users, to: `${projectBasePath}/collaborators` },
+    ].map((tab, index) => ({ ...tab, tabIndex: index }))
   }, [projectBasePath, projectMeetingsEnabled, t])
 
   const { projectMatchesRoute, tabIndex, handleTabChange, isPending } = useProjectDetailTabs({
@@ -104,7 +116,13 @@ export const PermitProjectScreen = observer(() => {
             />
             <EditableInputWithControls
               w="full"
-              initialHint={t("permitProject.details.editPermitProjectTitleHint")}
+              isDisabled={!currentPermitProject.canEditProject}
+              initialHint={
+                currentPermitProject.canEditProject ? t("permitProject.details.editPermitProjectTitleHint") : undefined
+              }
+              controlsProps={
+                currentPermitProject.canEditProject ? undefined : { CustomPreviewModeControls: () => null }
+              }
               value={watch("title") || ""}
               editableInputProps={{
                 fontWeight: 700,
@@ -132,7 +150,8 @@ export const PermitProjectScreen = observer(() => {
       </Flex>
       <Tabs w="full" flexGrow={1} index={tabIndex} onChange={handleTabChange} display="flex" isLazy variant="sidebar">
         <ProjectSidebarTabList p={0} tabsData={TABS_DATA} />
-        <TabPanels>
+        {/* minW=0 so wide panel content scrolls inside the panel instead of widening the page. */}
+        <TabPanels flex={1} minW={0}>
           <TabPanel>
             {isPending ? <LoadingScreen /> : <OverviewTabPanelContent permitProject={currentPermitProject} />}
           </TabPanel>
@@ -154,6 +173,9 @@ export const PermitProjectScreen = observer(() => {
           )}
           <TabPanel>
             {isPending ? <LoadingScreen /> : <LocalResourcesTabPanelContent permitProject={currentPermitProject} />}
+          </TabPanel>
+          <TabPanel>
+            {isPending ? <LoadingScreen /> : <CollaboratorsTabPanelContent permitProject={currentPermitProject} />}
           </TabPanel>
         </TabPanels>
       </Tabs>

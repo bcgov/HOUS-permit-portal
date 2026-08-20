@@ -1107,7 +1107,7 @@ const options = {
           lookOut: "Things to look out for",
           resources: {
             title: "Resources",
-            sectionTitle: "Local Resources",
+            sectionTitle: "Local resources",
             description: "Additional resources and reference materials to help you with your application:",
             emptyForStaff: "No local resources have been configured yet.",
             configureResourcesLink: "Add resources in Configuration.",
@@ -1483,11 +1483,13 @@ Thank you,
             fromFilter: "From date",
             toFilter: "To date",
             empty: "No activity found",
+            noAccess: "You don't have access to view activity on this project.",
             description: "What’s happened on this project and its permit applications.",
             unsubmittedPermitApplication: "This application has not been submitted yet.",
           },
           permits: {
             title: "Applications",
+            noAccess: "You don't have access to view applications on this project.",
           },
           map: {
             errorLoading: "Unable to load map",
@@ -1557,6 +1559,7 @@ Thank you,
             requestCalloutDescription:
               "Some permit types may require a project meeting before you can submit an application.",
             empty: "There are no meeting requests for this project yet.",
+            noAccess: "You don't have access to view meetings on this project.",
             columns: {
               confirmed_date: "Meeting time",
               project_description: "Questions or additional details",
@@ -1570,7 +1573,9 @@ Thank you,
             permits: "Applications",
             meetings: "Meetings",
             notes: "Notes",
-            localResources: "Local Resources",
+            collaborators: "Teams & collaborators",
+            teams: "Teams",
+            localResources: "Local resources",
             notFound: "Permit project not found.",
             backToProjects: "Back to projects",
             editPermitProjectTitleHint: "Click to edit project name",
@@ -1582,9 +1587,148 @@ Thank you,
             infoDescription:
               "Reviewer notes shared from project meetings are visible to the meeting requester and project collaborators.",
             emptyDescription: "Notes shared from project meetings will appear here.",
+            noAccess: "You don't have access to view notes on this project.",
+          },
+          collaborators: {
+            title: "Teams & collaborators",
+            description:
+              "Invite people to this project. Lead or Contributor is their starting team; permissions add up across all teams they belong to.",
+            invite: {
+              title: "Invite people",
+              membershipTooltip:
+                "Lead starts with full access; Contributor starts with none. Adjust what each team can do under Access.",
+              teamsPlaceholder: "Add teams",
+              addAnother: "Add another",
+            },
+            table: {
+              name: "Name",
+              role: "Role",
+              roleTooltip: "Role chooses the Leads or Contributors team. Changing it updates their access immediately.",
+              extraTeams: "Teams",
+              extraTeamsTooltip:
+                "Teams on top of Lead or Contributor. Type to add an existing team or create a new one.",
+              status: "Status",
+              statusTooltip: "Pending invitations grant no access until they are accepted.",
+            },
+            detail: {
+              backToAccess: "Back to access",
+              effectiveAccess: "Effective access",
+              effectiveAccessHint:
+                "What this person can actually do: the highest level granted by any team they belong to.",
+              pendingHint: "Access starts once they accept the invitation.",
+            },
+            status: {
+              active: "Active",
+              pending: "Invite pending",
+            },
+            membership: {
+              owner: "Project head",
+              ownerTooltip:
+                "The project head owns this project and always has full access. They are not assigned a Lead or Contributor membership.",
+              lead: "Lead",
+              contributor: "Contributor",
+            },
+            transferProjectHead: "Transfer project head",
+            resendInvite: "Resend invite",
+            remove: "Remove",
+            removeConfirmation: {
+              title: "Remove collaborator",
+              body: "They will immediately lose the access their teams give them on this project.",
+            },
+            empty: "No collaborators have been invited yet.",
+            noAccess: "You don't have access to view people and access on this project.",
+          },
+          membershipInvitation: {
+            title: "Project invitation",
+            invitedBy: "{{name}} invited you to join {{title}}",
+            invitedAs: "Invited as",
+            sentTo: "This invitation was sent to {{email}}",
+            signInToAccept: "Log in with BCeID or BC Services Card Account to accept",
+            accept: "Accept invitation",
+            someone: "A collaborator",
+            expired: "This invitation has expired. Ask the person who invited you to send it again.",
+            invalidToken: {
+              title: "Invitation not found",
+              message: "This invitation link is invalid or has already been used.",
+            },
+          },
+          teams: {
+            accessTitle: "Configure access",
+            accessDescription: "What each team can do. Permissions add up across all teams a person belongs to.",
+            createTeam: 'Create "{{name}}"',
+            customTeamsTitle: "Created teams",
+            customTeamsHint:
+              "Create a team to give people their own permissions, on top of whatever their membership already grants.",
+            customTeamsEmpty: "No teams yet.",
+            addTeam: "Add team",
+            newTeamName: "Team name",
+            newTeamNamePlaceholder: "e.g. Plumbing subtrades",
+            saveTeam: "Create team",
+            renameTeam: "Team name",
+            members: "Members",
+            addMember: "Add a member",
+            noMembers: "No members yet. Add collaborators to give them this team's permissions.",
+            removeTeam: "Remove team",
+            removeConfirmation: {
+              title: "Remove team",
+              body: "Members lose any access that only this team gave them. Their membership on the project is not affected.",
+            },
+            kind: {
+              leads: "Leads",
+              contributors: "Contributors",
+              all_members: "All members",
+              custom: "Team",
+            },
+            kindTooltip: {
+              leads:
+                "Everyone invited as a Lead is on this team. By default, Leads can edit the project, manage collaborators and teams, and manage meetings—lower these permissions to hold them back.",
+              contributors:
+                "Everyone invited as a Contributor is on this team. By default they have no access—raise these permissions to grant them any.",
+              all_members:
+                "Every accepted collaborator is on this team, whether they are a Lead or a Contributor. Use this for permissions everyone should share.",
+            },
+            memberCount_one: "{{count}} member",
+            memberCount_other: "{{count}} members",
+            permissions: {
+              projectAccess: "Project",
+              collaboratorAccess: "Collaborators and teams",
+              meetingAccess: "Meetings",
+            },
+            projectAccess: {
+              base: "Base access",
+              read: "View all",
+              edit: "Edit",
+            },
+            collaboratorAccess: {
+              none: "No access",
+              view: "View",
+              manage: "Manage",
+            },
+            meetingAccess: {
+              none: "No access",
+              view: "View",
+              manage: "Manage",
+            },
+            permissionHint: {
+              projectAccess: {
+                base: "See the project overview only",
+                read: "View all applications in this project",
+                edit: "Change project details and applications",
+              },
+              collaboratorAccess: {
+                none: "Cannot view collaborators or teams",
+                view: "See collaborators and their teams",
+                manage: "Invite people and change access",
+              },
+              meetingAccess: {
+                none: "Cannot see meetings or notes",
+                view: "See meetings and shared notes",
+                manage: "Request and manage project meetings",
+              },
+            },
           },
           localResources: {
-            title: "Local Resources",
+            title: "Local resources",
             description:
               "Access planning documents, bylaws, and reference materials from {{jurisdictionName}} to help you prepare your permit application.",
             empty:
@@ -5723,6 +5867,7 @@ Thank you,
             qaTools: "QA tools",
             overheatingTool: "Overheating tool",
             templateCategories: "Permit categories",
+            acceptProjectInvitation: "Accept project invitation",
           },
         },
         automatedCompliance: {

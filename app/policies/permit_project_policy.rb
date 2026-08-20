@@ -1,18 +1,33 @@
 class PermitProjectPolicy < ApplicationPolicy
+  # COLLAB TODO(phase 5): mirrors the legacy bridge in PermitProject#permissions_for so a
+  # submission collaborator created under the old model still lists their
+  # projects. Remove with the migration of collaborations onto teams.
+  LEGACY_SUBMISSION_COLLABORATION_SQL = <<-SQL.squish
+    EXISTS (
+      SELECT 1 FROM collaborators c
+      JOIN permit_collaborations pc ON pc.collaborator_id = c.id
+      JOIN permit_applications pa ON pa.id = pc.permit_application_id
+      WHERE pa.permit_project_id = permit_projects.id
+        AND pc.collaboration_type = :submission_type
+        AND pc.discarded_at IS NULL
+        AND c.user_id = :uid
+    )
+  SQL
+
   class Scope < Scope
     def resolve
-      collaborator_exists_sql = <<-SQL.squish
-        EXISTS (
-          SELECT 1 FROM collaborators c
-          JOIN permit_collaborations pc ON pc.collaborator_id = c.id
-          JOIN permit_applications pa ON pa.id = pc.permit_application_id
-          WHERE pa.permit_project_id = permit_projects.id
-            AND c.user_id = :uid
-        )
-      SQL
-
-      clauses = ["permit_projects.owner_id = :uid", collaborator_exists_sql]
-      values = { uid: user.id }
+      clauses = [
+        "permit_projects.owner_id = :uid",
+        ProjectMembership.kept_for_user_sql(
+          project_id_sql: "permit_projects.id"
+        ),
+        LEGACY_SUBMISSION_COLLABORATION_SQL
+      ]
+      values = {
+        uid: user.id,
+        submission_type:
+          PermitCollaboration.collaboration_types.fetch(:submission)
+      }
 
       if user.review_staff?
         clauses << "permit_projects.jurisdiction_id IN (:jur_ids)"
@@ -25,7 +40,7 @@ class PermitProjectPolicy < ApplicationPolicy
 
   # Check if the user can index/list projects (relies on the Scope above for actual filtering)
   def index?
-    user_is_owner_or_collaborator?
+    project_listed?
   end
 
   def pinned?
@@ -34,7 +49,7 @@ class PermitProjectPolicy < ApplicationPolicy
 
   # This is for authorizing a specific project instance (e.g., in a show action).
   def show?
-    user_is_owner_or_collaborator? || user_is_review_staff_for_jurisdiction?
+    project_listed? || user_is_review_staff_for_jurisdiction?
   end
 
   def create?
@@ -42,7 +57,7 @@ class PermitProjectPolicy < ApplicationPolicy
   end
 
   def update?
-    user_is_owner?
+    permissions.project_edit?
   end
 
   def destroy?
@@ -50,15 +65,19 @@ class PermitProjectPolicy < ApplicationPolicy
   end
 
   def pin?
-    user_is_owner_or_collaborator?
+    project_listed?
   end
 
   def unpin?
-    user_is_owner_or_collaborator?
+    project_listed?
   end
 
   def search_permit_applications?
-    user_is_owner_or_collaborator?
+    permissions.project_read?
+  end
+
+  def search_activities?
+    permissions.project_read? || user_is_review_staff_for_jurisdiction?
   end
 
   def mark_as_viewed?
@@ -75,7 +94,7 @@ class PermitProjectPolicy < ApplicationPolicy
 
   # Allow bulk creation of permit applications under a project
   def create_permit_applications?
-    user_is_owner?
+    permissions.project_edit?
   end
 
   def submission_collaborator_options?
@@ -100,26 +119,42 @@ class PermitProjectPolicy < ApplicationPolicy
   end
 
   def download_notes_csv?
-    show?
+    permissions.meetings_view? || user_is_review_staff_for_jurisdiction?
   end
 
   private
 
+  # Collection actions authorize the class rather than a record, so every helper
+  # has to tolerate a record that is not a project instance.
+  def permissions
+    unless user && record.respond_to?(:permissions_for)
+      return ProjectPermissions.none
+    end
+
+    record.permissions_for(user)
+  end
+
   def user_is_owner?
-    return false unless user && record # Ensure user and record exist
+    return false unless user && record.respond_to?(:owner_id)
 
     record.owner_id == user.id
   end
 
-  def user_is_owner_or_collaborator?
-    return true if user_is_owner?
+  # Membership is the floor: a kept member (or owner) can find and open the
+  # project shell. Full read (`project_read?`) is required to see applications.
+  def project_listed?
+    user_is_owner? || membership_present? || permissions.project_read?
+  end
 
-    record.permit_applications.any? do |app|
-      app.collaborators.any? { |collaborator| collaborator.user_id == user.id }
-    end
+  def membership_present?
+    return false unless user && record.respond_to?(:membership_for)
+
+    record.membership_for(user).present?
   end
 
   def user_is_review_staff_for_jurisdiction?
+    return false unless record.respond_to?(:jurisdiction_id)
+
     user&.review_staff? && user.member_of?(record.jurisdiction_id)
   end
 

@@ -19,17 +19,81 @@ class PermitProjectBlueprint < Blueprinter::Base
            :parcel_geometry
 
     field :days_in_queue
-    field :total_permits_count, default: 0
-    field :new_draft_count, default: 0
-    field :newly_submitted_count, default: 0
-    field :in_review_count, default: 0
-    field :revisions_requested_count, default: 0
-    field :resubmitted_count, default: 0
-    field :approved_count, default: 0
+    field :total_permits_count, default: 0 do |permit_project, options|
+      PermitProjectBlueprint.application_field(
+        permit_project,
+        options,
+        :total_permits_count,
+        0
+      )
+    end
+    field :new_draft_count, default: 0 do |permit_project, options|
+      PermitProjectBlueprint.application_field(
+        permit_project,
+        options,
+        :new_draft_count,
+        0
+      )
+    end
+    field :newly_submitted_count, default: 0 do |permit_project, options|
+      PermitProjectBlueprint.application_field(
+        permit_project,
+        options,
+        :newly_submitted_count,
+        0
+      )
+    end
+    field :in_review_count, default: 0 do |permit_project, options|
+      PermitProjectBlueprint.application_field(
+        permit_project,
+        options,
+        :in_review_count,
+        0
+      )
+    end
+    field :revisions_requested_count, default: 0 do |permit_project, options|
+      PermitProjectBlueprint.application_field(
+        permit_project,
+        options,
+        :revisions_requested_count,
+        0
+      )
+    end
+    field :resubmitted_count, default: 0 do |permit_project, options|
+      PermitProjectBlueprint.application_field(
+        permit_project,
+        options,
+        :resubmitted_count,
+        0
+      )
+    end
+    field :approved_count, default: 0 do |permit_project, options|
+      PermitProjectBlueprint.application_field(
+        permit_project,
+        options,
+        :approved_count,
+        0
+      )
+    end
     field :flag_list, default: []
     field :allowed_manual_transitions, default: []
-    field :sorted_application_statuses, default: []
-    field :inbox_sorted_application_statuses, default: []
+    field :sorted_application_statuses, default: [] do |permit_project, options|
+      PermitProjectBlueprint.application_field(
+        permit_project,
+        options,
+        :sorted_application_statuses,
+        []
+      )
+    end
+    field :inbox_sorted_application_statuses,
+          default: [] do |permit_project, options|
+      PermitProjectBlueprint.application_field(
+        permit_project,
+        options,
+        :inbox_sorted_application_statuses,
+        []
+      )
+    end
     field :owner_name, default: nil
     field :inbox_sort_order, default: nil
 
@@ -47,16 +111,31 @@ class PermitProjectBlueprint < Blueprinter::Base
     end
 
     field :has_outdated_draft_applications do |permit_project, options|
+      unless PermitProjectBlueprint.can_view_applications?(
+               permit_project,
+               options
+             )
+        next false
+      end
+
       options[:project_ids_with_outdated_drafts]&.include?(permit_project.id)
     end
 
     field :has_active_project_meeting do |permit_project, options|
+      unless PermitProjectBlueprint.can_view_meetings?(permit_project, options)
+        next false
+      end
+
       options[:active_project_meeting_ids_by_project_id]&.key?(
         permit_project.id
       ) || false
     end
 
     field :active_project_meeting_id do |permit_project, options|
+      unless PermitProjectBlueprint.can_view_meetings?(permit_project, options)
+        next nil
+      end
+
       options[:active_project_meeting_ids_by_project_id]&.[](permit_project.id)
     end
   end
@@ -90,18 +169,66 @@ class PermitProjectBlueprint < Blueprinter::Base
       true
     end
 
+    field :current_user_role do |permit_project, options|
+      permit_project.project_role_for(options[:current_user])
+    end
+
+    field :current_user_permissions do |permit_project, options|
+      permit_project.permissions_for(options[:current_user]).to_h
+    end
+
+    association :project_memberships,
+                blueprint: ProjectMembershipBlueprint,
+                view: :base,
+                if: ->(_field_name, permit_project, options) do
+                  permit_project.permissions_for(
+                    options[:current_user]
+                  ).collaborators_view?
+                end do |permit_project, _options|
+      permit_project.project_memberships.kept.includes(:user, :invited_by)
+    end
+
+    association :project_teams,
+                blueprint: ProjectTeamBlueprint,
+                view: :base,
+                if: ->(_field_name, permit_project, options) do
+                  permit_project.permissions_for(
+                    options[:current_user]
+                  ).collaborators_view?
+                end do |permit_project, _options|
+      permit_project.ordered_teams
+    end
+
     association :recent_permit_applications,
                 blueprint: PermitApplicationBlueprint,
                 view: :project_base do |permit_project, options|
+      unless PermitProjectBlueprint.can_view_applications?(
+               permit_project,
+               options
+             )
+        next []
+      end
+
       permit_project.recent_permit_applications(options[:current_user])
     end
     association :project_documents,
                 blueprint: ProjectDocumentBlueprint do |permit_project, options|
       permit_project.project_documents(options[:current_user])
     end
-    association :active_project_meeting, blueprint: ProjectMeetingBlueprint
+    association :active_project_meeting,
+                blueprint: ProjectMeetingBlueprint do |permit_project, options|
+      unless PermitProjectBlueprint.can_view_meetings?(permit_project, options)
+        next nil
+      end
+
+      permit_project.active_project_meeting
+    end
     association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
     association :notes, blueprint: NoteBlueprint do |permit_project, options|
+      unless PermitProjectBlueprint.can_view_meetings?(permit_project, options)
+        next []
+      end
+
       PermitProjectBlueprint.notes_for(permit_project, options)
     end
   end
@@ -132,6 +259,10 @@ class PermitProjectBlueprint < Blueprinter::Base
     end
     association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
     association :notes, blueprint: NoteBlueprint do |permit_project, options|
+      unless PermitProjectBlueprint.can_view_meetings?(permit_project, options)
+        next []
+      end
+
       PermitProjectBlueprint.notes_for(permit_project, options)
     end
     association :recent_audits,
@@ -145,6 +276,30 @@ class PermitProjectBlueprint < Blueprinter::Base
     return false unless current_user
 
     return true if permit_project.owner_id == current_user.id
+  end
+
+  # Full read (or review staff) sees application counts and lists. Membership
+  # alone is the project-shell floor and must not leak that applications exist.
+  def self.can_view_applications?(permit_project, options)
+    user = options[:current_user]
+    return false unless user
+    return true if user.review_staff_of?(permit_project.jurisdiction_id)
+
+    permit_project.permissions_for(user).project_read?
+  end
+
+  def self.can_view_meetings?(permit_project, options)
+    user = options[:current_user]
+    return false unless user
+    return true if user.review_staff_of?(permit_project.jurisdiction_id)
+
+    permit_project.permissions_for(user).meetings_view?
+  end
+
+  def self.application_field(permit_project, options, method, fallback)
+    return fallback unless can_view_applications?(permit_project, options)
+
+    permit_project.public_send(method)
   end
 
   def self.notes_for(permit_project, options)

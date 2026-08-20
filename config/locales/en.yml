@@ -130,6 +130,21 @@ en:
           attributes:
             permit_project:
               only_one_review_collaborator_allowed: "can only have one review collaborator assigned at a time"
+        project_membership:
+          attributes:
+            user:
+              already_a_member: "is already a collaborator on this project"
+              is_project_owner: "is the project owner and already has full access"
+            invited_email:
+              already_invited: "already has an invitation or membership on this project"
+        project_team:
+          auto_team_immutable: "Default teams cannot be renamed or removed"
+        project_team_membership:
+          attributes:
+            project_team:
+              must_be_custom: "membership is set by each collaborator's role for default teams"
+            project_membership:
+              different_project: "belongs to a different project"
         requirement_template:
           step_code_package_required: '"Energy Step Code" is required to have the Design package Energy Step Code file'
           duplicate_energy_step_code: 'Multiple "Energy Step Code" requirements found. Please ensure there is only one "Energy Step Code" requirement in the template'
@@ -210,6 +225,7 @@ en:
       property_information_contact_confirm: "Confirm property information request notification email"
       new_jurisdiction_membership: "New jurisdiction membership"
       notify_permit_collaboration: "Welcome you have been invited to Collaborate in the Building Permit Hub"
+      notify_project_membership_invitation: "You’ve been invited to %{project_title}"
       notify_project_review_collaboration: "You have been assigned as a review collaborator on a project"
       notify_new_or_unconfirmed_permit_collaboration: "You’re Invited to Collaborate on a Building Permit Application"
       notify_new_or_unconfirmed_preview: "You’re Invited to Preview a Building Permit Template"
@@ -782,6 +798,53 @@ en:
       feature_not_enabled:
         title: Error
         message: "Designated reviewer is not enabled for this project"
+    project_membership:
+      create_success:
+        title: ""
+        message: "Invitation sent"
+      create_error:
+        title: Error
+        message: "%{error_message}"
+      update_success:
+        title: ""
+        message: "Collaborator role updated"
+      update_error:
+        title: Error
+        message: "Collaborator role could not be updated"
+      destroy_success:
+        title: ""
+        message: "Collaborator removed from the project"
+      destroy_error:
+        title: Error
+        message: "Collaborator could not be removed"
+      reinvite_success:
+        title: ""
+        message: "Invitation resent"
+      accept_success:
+        title: ""
+        message: "You have joined the project"
+      accept_error:
+        title: Error
+        message: "%{error_message}"
+    project_team:
+      create_success:
+        title: ""
+        message: "Team created"
+      create_error:
+        title: Error
+        message: "Team could not be created"
+      update_success:
+        title: ""
+        message: "Team updated"
+      update_error:
+        title: Error
+        message: "Team could not be updated"
+      destroy_success:
+        title: ""
+        message: "Team removed"
+      destroy_error:
+        title: Error
+        message: "Team could not be removed"
     qa_tools:
       full_permit_project_success:
         title: ""
@@ -1142,6 +1205,18 @@ en:
         assign_collaborator_error: "Failed to assign collaborator: %{error_message}"
         create_user_error: "Failed to invite user to collaborate: %{error_message}"
         submission_collaborator_must_be_submitter: "Ineligible user for submission collaboration"
+    project_membership:
+      invite:
+        email_required: "An email address is required to invite a collaborator"
+        owner_already_member: "The project owner already has full access"
+        already_invited: "This email already has an invitation or membership on this project"
+        already_accepted: "This collaborator has already joined the project"
+        membership_error: "Failed to add collaborator to the project: %{error_message}"
+      accept:
+        expired: "This invitation has expired. Ask the project head to send it again."
+        already_accepted: "This invitation has already been accepted"
+        owner_already_member: "The project owner already has full access"
+        already_a_member: "You already have access to this project"
     template_versioning_service:
       invalid_schedule_date: "Version date must be in the future and after latest scheduled version date"
       force_publish_disabled: "Force publish is not enabled"

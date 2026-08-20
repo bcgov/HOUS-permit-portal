@@ -56,13 +56,8 @@ class Api::PermitProjectsController < Api::ApplicationController
   # and view variants. Worth doing as a dedicated refactor rather than piecemeal.
   def show
     authorize @permit_project
-    is_owner_or_collaborator =
-      @permit_project.owner_id == current_user.id ||
-        @permit_project.permit_applications.any? do |app|
-          app.collaborators.any? { |c| c.user_id == current_user.id }
-        end
     view =
-      if is_owner_or_collaborator
+      if @permit_project.permissions_for(current_user).project_read?
         :extended
       elsif current_user.review_staff?
         :inbox_extended

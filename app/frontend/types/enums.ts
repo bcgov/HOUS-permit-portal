@@ -770,6 +770,47 @@ export enum EProjectState {
   closed = "closed",
 }
 
+// Project collaborators: "owner" is derived from the project owner rather than
+// being a ProjectMembership role.
+// COLLAB TODO(phase 3): ownership transfer, and jurisdictions as owners.
+export enum EProjectRole {
+  owner = "owner",
+  lead = "lead",
+  contributor = "contributor",
+}
+
+export enum EProjectMembershipRole {
+  lead = "lead",
+  contributor = "contributor",
+}
+
+// Progressive permission levels: each implies every level before it.
+export enum EProjectAccess {
+  base = "base",
+  read = "read",
+  edit = "edit",
+}
+
+// Covers the Teams & collaborators screen: `manage` is access-admin.
+export enum ECollaboratorAccess {
+  none = "none",
+  view = "view",
+  manage = "manage",
+}
+
+export enum EMeetingAccess {
+  none = "none",
+  view = "view",
+  manage = "manage",
+}
+
+export enum EProjectTeamKind {
+  leads = "leads",
+  contributors = "contributors",
+  allMembers = "all_members",
+  custom = "custom",
+}
+
 export enum EPermitProjectInboxSortFields {
   projectNumber = "number",
   address = "full_address",

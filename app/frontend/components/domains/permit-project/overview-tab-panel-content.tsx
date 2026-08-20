@@ -36,7 +36,9 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
   const { t } = useTranslation()
   const { permitProjectStore, siteConfigurationStore } = useMst()
   const [searchParams] = useSearchParams()
-  const [isEditing, setIsEditing] = useState(() => searchParams.get("editProjectInfo") === "true")
+  const [isEditing, setIsEditing] = useState(
+    () => permitProject.canEditProject && searchParams.get("editProjectInfo") === "true"
+  )
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { isOpen: isMapFullscreen, onOpen: onOpenMapFullscreen, onClose: onCloseMapFullscreen } = useDisclosure()
   const hasActiveProjectMeeting = !!permitProject.activeProjectMeeting
@@ -55,7 +57,7 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
 
   const { handleSubmit, watch, setValue, reset } = formMethods
   const siteWatch = watch("site")
-  const canRequestProjectMeeting = permitProject.isOwner && projectMeetingsEnabled && !hasActiveProjectMeeting
+  const canRequestProjectMeeting = permitProject.canManageMeetings && projectMeetingsEnabled && !hasActiveProjectMeeting
 
   const handleEditClick = () => {
     // Reset form to current values when entering edit mode
@@ -116,7 +118,7 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
               <Heading as="h3" size="md" mb={0}>
                 {t("permitProject.overview.projectInformation")}
               </Heading>
-              {!isEditing && (
+              {!isEditing && permitProject.canEditProject && (
                 <Button variant="link" leftIcon={<Pencil size={16} />} onClick={handleEditClick} color="text.link">
                   {t("permitProject.overview.editProjectInfo")}
                 </Button>
@@ -193,7 +195,7 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
                 >
                   {t("permitProject.overview.lookupStepCode")}
                 </RouterLinkButton>
-                {permitProject.isOwner && projectMeetingsEnabled && (
+                {permitProject.canManageMeetings && projectMeetingsEnabled && (
                   <RouterLinkButton
                     variant="link"
                     to={`/projects/${permitProject.id}/meetings/new`}
@@ -222,61 +224,65 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
         </Grid>
       </Box>
 
-      <Box as="section">
-        <Flex justify="space-between" align="center" mb={6}>
-          <Heading as="h3" size="md">
-            {t("permitProject.overview.recentPermits")}
-          </Heading>
-          <HStack spacing={3}>
-            {permitProject.isOwner && projectMeetingsEnabled && (
-              <RouterLinkButton
-                variant="secondary"
-                to={`/projects/${permitProject.id}/meetings/new`}
-                disabled={!canRequestProjectMeeting}
+      {/* COLLAB TODO(phase 4): same Full-read on/off as the Applications tab; drop this gate
+          when per-application viewing can populate recent apps from scope. */}
+      {permitProject.canViewApplications && (
+        <Box as="section">
+          <Flex justify="space-between" align="center" mb={6}>
+            <Heading as="h3" size="md">
+              {t("permitProject.overview.recentPermits")}
+            </Heading>
+            <HStack spacing={3}>
+              {permitProject.canManageMeetings && projectMeetingsEnabled && (
+                <RouterLinkButton
+                  variant="secondary"
+                  to={`/projects/${permitProject.id}/meetings/new`}
+                  disabled={!canRequestProjectMeeting}
+                >
+                  {t("permitProject.meetings.requestButton")}
+                </RouterLinkButton>
+              )}
+              <AddPermitsButton permitProject={permitProject} />
+            </HStack>
+          </Flex>
+          {permitProject.totalPermitsCount === 0 ? (
+            <EmptyResultsBox description={t("permitProject.index.empty")} icon={<ClipboardText size={18} />} mt={2} />
+          ) : (
+            <>
+              <SearchGrid
+                templateColumns="2.25fr 1.75fr 1fr 1.4fr 1.1fr 1fr 0.5fr"
+                gridRowClassName="permit-application-grid-row"
               >
-                {t("permitProject.meetings.requestButton")}
-              </RouterLinkButton>
-            )}
-            <AddPermitsButton permitProject={permitProject} />
-          </HStack>
-        </Flex>
-        {permitProject.totalPermitsCount === 0 ? (
-          <EmptyResultsBox description={t("permitProject.index.empty")} icon={<ClipboardText size={18} />} mt={2} />
-        ) : (
-          <>
-            <SearchGrid
-              templateColumns="2.25fr 1.75fr 1fr 1.4fr 1.1fr 1fr 0.5fr"
-              gridRowClassName="permit-application-grid-row"
-            >
-              <PermitApplicationGridHeaders
-                columns={Object.values(EProjectPermitApplicationSortFields)}
-                includeActionColumn
-              />
-              {permitProject.recentPermitApplications
-                .filter((pa) => !pa.isDiscarded)
-                .map((permitApplication) => (
-                  <PermitApplicationGridRow
-                    key={permitApplication.id}
-                    permitApplication={permitApplication}
-                    searchModel={{
-                      search: () => permitProjectStore.fetchPermitProject(permitProject.id),
-                    }}
-                  />
-                ))}
-            </SearchGrid>
-            <Flex justify="flex-end" mt={4}>
-              <RouterLinkButton
-                variant="tertiary"
-                fontWeight="bold"
-                rightIcon={<CaretRight />}
-                to={`/projects/${permitProject.id}/permits`}
-              >
-                {t("permitProject.overview.allPermits")}
-              </RouterLinkButton>
-            </Flex>
-          </>
-        )}
-      </Box>
+                <PermitApplicationGridHeaders
+                  columns={Object.values(EProjectPermitApplicationSortFields)}
+                  includeActionColumn
+                />
+                {permitProject.recentPermitApplications
+                  .filter((pa) => !pa.isDiscarded)
+                  .map((permitApplication) => (
+                    <PermitApplicationGridRow
+                      key={permitApplication.id}
+                      permitApplication={permitApplication}
+                      searchModel={{
+                        search: () => permitProjectStore.fetchPermitProject(permitProject.id),
+                      }}
+                    />
+                  ))}
+              </SearchGrid>
+              <Flex justify="flex-end" mt={4}>
+                <RouterLinkButton
+                  variant="tertiary"
+                  fontWeight="bold"
+                  rightIcon={<CaretRight />}
+                  to={`/projects/${permitProject.id}/permits`}
+                >
+                  {t("permitProject.overview.allPermits")}
+                </RouterLinkButton>
+              </Flex>
+            </>
+          )}
+        </Box>
+      )}
 
       <FullscreenMapModal
         isOpen={isMapFullscreen}

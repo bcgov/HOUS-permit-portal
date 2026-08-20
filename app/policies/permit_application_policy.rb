@@ -1,7 +1,6 @@
 class PermitApplicationPolicy < ApplicationPolicy
   def show?
-    if record.submitter == user ||
-         record.collaborator?(user_id: user.id, collaboration_type: :submission)
+    if project_permissions.project_read?
       true
     elsif user.review_staff?
       return false unless user.member_of?(record.jurisdiction.id)
@@ -10,13 +9,15 @@ class PermitApplicationPolicy < ApplicationPolicy
       return true unless record.new_draft?
 
       record.permit_project&.project_meetings&.active&.exists? == true
+    else
+      false
     end
   end
 
   def create?
-    # Only allow creating a permit application if it is under a permit project
-    # owned by the current user
-    record.permit_project.present? && record.permit_project.owner_id == user.id
+    # Only allow creating a permit application if the user can edit the parent
+    # permit project
+    project_permissions.project_edit?
   end
 
   def mark_as_viewed?
@@ -56,14 +57,7 @@ class PermitApplicationPolicy < ApplicationPolicy
   end
 
   def update_version?
-    permit_application = record
-    designated_submitter =
-      permit_application.users_by_collaboration_options(
-        collaboration_type: :submission,
-        collaborator_type: :delegatee
-      ).first
-
-    record.draft? && (record.submitter == user || designated_submitter == user)
+    record.draft? && project_permissions.project_edit?
   end
 
   def update_revision_requests?
@@ -98,7 +92,7 @@ class PermitApplicationPolicy < ApplicationPolicy
   end
 
   def generate_missing_pdfs?
-    user.super_admin? || record.submitter == user ||
+    user.super_admin? || project_permissions.project_read? ||
       ((user.review_staff?) && user.member_of?(record.jurisdiction_id))
   end
 
@@ -190,11 +184,11 @@ class PermitApplicationPolicy < ApplicationPolicy
   end
 
   def destroy?
-    record.draft? && record.submitter == user
+    record.draft? && project_permissions.project_edit?
   end
 
   def restore?
-    record.submitter == user
+    project_permissions.project_edit?
   end
 
   # we may want to separate an admin update to a secondary policy
@@ -205,9 +199,10 @@ class PermitApplicationPolicy < ApplicationPolicy
       submission_type =
         PermitCollaboration.collaboration_types.fetch(:submission)
 
-      # Access rule 1: user is a submission collaborator on the permit application.
-      # Uses EXISTS to avoid JOINs that could duplicate rows.
-      exists_sql = <<-SQL.squish
+      # COLLAB TODO(phase 5): mirrors the legacy bridge in PermitProject#permissions_for so a
+      # submission collaborator created under the old model keeps read access.
+      # Remove with the migration of collaborations onto project teams.
+      legacy_collaboration_exists_sql = <<-SQL.squish
         EXISTS (
           SELECT 1 FROM permit_collaborations pc
           JOIN collaborators c ON c.id = pc.collaborator_id
@@ -218,7 +213,7 @@ class PermitApplicationPolicy < ApplicationPolicy
         )
       SQL
 
-      # Access rule 2: user owns the parent permit project.
+      # Access rule 1: user owns the parent permit project.
       owner_exists_sql = <<-SQL.squish
         EXISTS (
           SELECT 1 FROM permit_projects pp
@@ -228,13 +223,15 @@ class PermitApplicationPolicy < ApplicationPolicy
       SQL
 
       # Base access rules (ORed together later):
-      # - submitter of the application
-      # - submission collaborator
       # - owner of the parent permit project
+      # - Full read (project_access >= read) on the parent permit project
+      # - legacy submission collaborator bridge
       clauses = [
-        "permit_applications.submitter_id = :uid",
-        exists_sql,
-        owner_exists_sql
+        owner_exists_sql,
+        ProjectMembership.project_access_sql(
+          project_id_sql: "permit_applications.permit_project_id"
+        ),
+        legacy_collaboration_exists_sql
       ]
 
       # Values for parameterized SQL.
@@ -292,5 +289,20 @@ class PermitApplicationPolicy < ApplicationPolicy
       # Combine all access rules with OR and de-duplicate results.
       scope.where(clauses.map { |c| "(#{c})" }.join(" OR "), values).distinct
     end
+  end
+
+  private
+
+  # Submitter-side access to an application is decided by the parent project's
+  # effective permissions.
+  def project_permissions
+    permit_project =
+      record.respond_to?(:permit_project) ? record.permit_project : nil
+
+    unless user && permit_project.respond_to?(:permissions_for)
+      return ProjectPermissions.none
+    end
+
+    permit_project.permissions_for(user)
   end
 end
