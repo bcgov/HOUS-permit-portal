@@ -415,14 +415,14 @@ const ReportSection = observer(function ReportSection() {
               ? t("stepCode.part9.report.ready", { address: checklist.fullAddress })
               : t("stepCode.part9.report.pending")}
           </Text>
-          <Flex gap={3} align="start">
+          <Flex gap={3} align="center">
             {checklist.freshReportDocument ? (
               <FileDownloadButton
-                variant="link"
+                variant="primary"
+                size="md"
                 modelType={EFileUploadAttachmentType.ReportDocument}
                 document={checklist.freshReportDocument as any}
                 simpleLabel
-                mt={2}
               />
             ) : (
               <SharedSpinner m={0} />

@@ -40,14 +40,14 @@ export const Report = observer(function Report() {
     <Flex direction="column" gap={6}>
       <SectionHeading>{t(`${i18nPrefix}.heading`)}</SectionHeading>
       <Text>{t(`${i18nPrefix}.description`)}</Text>
-      <Flex gap={3} align="start">
+      <Flex gap={3} align="center">
         {checklist?.freshReportDocument ? (
           <FileDownloadButton
-            variant="link"
+            variant="primary"
+            size="md"
             modelType={EFileUploadAttachmentType.ReportDocument}
             document={checklist.freshReportDocument as any}
             simpleLabel
-            mt={2}
           />
         ) : (
           <SharedSpinner m={0} />
