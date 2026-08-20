@@ -562,6 +562,10 @@ class PermitApplication < ApplicationRecord
     latest_submission_version&.viewed_at
   end
 
+  def permit_date
+    issued_at&.to_date
+  end
+
   def submitted_at
     return nil if submission_versions.length < 1
     return earliest_submission_version.created_at

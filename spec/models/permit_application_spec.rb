@@ -1,6 +1,7 @@
 require "rails_helper"
 
 RSpec.describe PermitApplication, type: :model do
+  include ActiveSupport::Testing::TimeHelpers
   describe "associations" do
     subject { build_stubbed(:permit_application) }
 
@@ -295,6 +296,25 @@ RSpec.describe PermitApplication, type: :model do
         )
 
         expect(permit_application.can_submit?).to be(false)
+      end
+    end
+  end
+
+  describe "#issue_permit!" do
+    it "records issued_at and uses it as permit_date" do
+      permit_application = create(:permit_application, :newly_submitted)
+      permit_application.update_columns(
+        status: PermitApplication.statuses[:approved]
+      )
+
+      freeze_time do
+        permit_application.issue_permit!
+
+        expect(permit_application).to be_issued
+        expect(permit_application.issued_at).to be_within(1.second).of(
+          Time.current
+        )
+        expect(permit_application.permit_date).to eq(Time.current.to_date)
       end
     end
   end

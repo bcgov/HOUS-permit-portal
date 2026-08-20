@@ -9,6 +9,7 @@ RSpec.describe Part3StepCode::Checklist, type: :model do
                .optional
                .touch(true)
     end
+    it { should have_one(:report_document).dependent(:destroy) }
   end
 
   describe "touching the parent Step Code" do
@@ -119,11 +120,63 @@ RSpec.describe Part3StepCode::Checklist, type: :model do
     it "marks existing report documents stale when the checklist is updated" do
       step_code = create(:part_3_step_code)
       checklist = step_code.pre_construction_checklist
-      report = create(:report_document, step_code: step_code, stale: false)
+      report =
+        create(
+          :report_document,
+          step_code: step_code,
+          checklist: checklist,
+          stale: false
+        )
 
       checklist.update!(completed_by_email: "energy@example.com")
 
       expect(report.reload.stale).to be(true)
+    end
+
+    it "does not mark another checklist's report stale" do
+      step_code = create(:part_3_step_code)
+      pre_construction = step_code.pre_construction_checklist
+      mid_construction =
+        step_code.find_or_create_checklist_for!(stage: :mid_construction)
+      pre_report =
+        create(
+          :report_document,
+          step_code: step_code,
+          checklist: pre_construction,
+          stale: false
+        )
+      mid_report =
+        create(
+          :report_document,
+          step_code: step_code,
+          checklist: mid_construction,
+          stale: false
+        )
+
+      mid_construction.update!(completed_by_email: "energy@example.com")
+
+      expect(pre_report.reload.stale).to be(false)
+      expect(mid_report.reload.stale).to be(true)
+    end
+
+    it "does not mark the report stale when the checklist is completed" do
+      step_code = create(:part_3_step_code)
+      checklist = step_code.pre_construction_checklist
+      report =
+        create(
+          :report_document,
+          step_code: step_code,
+          checklist: checklist,
+          stale: false
+        )
+
+      checklist.update!(
+        status: :complete,
+        section_completion_status:
+          Part3StepCode::Checklist.fully_complete_section_completion_status
+      )
+
+      expect(report.reload.stale).to be(false)
     end
 
     it "does not auto-enqueue report generation when a complete checklist is updated" do

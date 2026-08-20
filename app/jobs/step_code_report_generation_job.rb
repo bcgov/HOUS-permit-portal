@@ -15,8 +15,10 @@ class StepCodeReportGenerationJob
                   }
 
   def self.lock_args(args)
-    # lock by Step Code id
-    [args[0]]
+    options = args[1]
+    checklist_id =
+      options.is_a?(Hash) ? options.stringify_keys["checklist_id"] : nil
+    [args[0], checklist_id]
   end
 
   # Generates a Step Code report PDF without requiring a permit application or submission version
@@ -37,27 +39,21 @@ class StepCodeReportGenerationJob
     output_filename =
       options["outputFilename"].presence ||
         "step_code_report_#{step_code.id}.pdf"
-    # Build checklist JSON using the checklist blueprint in extended view if available
-    checklist_json =
+    checklist =
       begin
-        checklist =
-          if options[:checklist_id].present?
-            step_code.checklist_for(id: options[:checklist_id])
-          elsif options[:stage].present?
-            step_code.checklist_for(stage: options[:stage])
-          else
-            step_code.current_checklist
-          end
-        if checklist.present?
-          step_code.checklist_blueprint.render_as_hash(
-            checklist,
-            view: :extended
-          )
+        if options[:checklist_id].present?
+          step_code.checklist_for(id: options[:checklist_id])
+        elsif options[:stage].present?
+          step_code.checklist_for(stage: options[:stage])
         else
-          nil
+          step_code.current_checklist
         end
       rescue NotImplementedError
         nil
+      end
+    checklist_json =
+      if checklist.present?
+        step_code.checklist_blueprint.render_as_hash(checklist, view: :extended)
       end
 
     # Guard: SSR requires checklist data; skip generation if checklist is absent
@@ -119,9 +115,9 @@ class StepCodeReportGenerationJob
 
     if exit_status.success?
       if File.exist?(pdf_path)
-        # Ensure the association exists before attaching the file so uploader paths can include parent IDs
-        report_doc = step_code.report_documents.build
+        report_doc = find_or_build_report_document(step_code, checklist)
         File.open(pdf_path) { |file| report_doc.file = file }
+        report_doc.stale = false
         report_doc.save!
 
         # Notify relevant users that report is ready for download
@@ -139,6 +135,16 @@ class StepCodeReportGenerationJob
       Rails.logger.error(err)
       raise err
     end
+  end
+
+  private
+
+  def find_or_build_report_document(step_code, checklist)
+    report_doc =
+      checklist.report_document ||
+        checklist.build_report_document(step_code: step_code)
+    report_doc.step_code = step_code
+    report_doc
   end
 
   # camelize_response and helpers provided by PdfRenderer

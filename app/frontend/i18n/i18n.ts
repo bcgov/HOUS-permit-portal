@@ -2495,6 +2495,7 @@ Thank you,
             noReportAvailable: "No report generated yet",
             reportOutOfDate: "Report out of date — regenerate from the report section",
             downloadStageReport: "Download {{stage}} report",
+            attached: "Attached",
           },
           shareReport: {
             action: "Share with jurisdiction",
@@ -2530,9 +2531,12 @@ Thank you,
             continue: "Continue checklist",
             view: "View checklist",
             error: "There was a problem opening this checklist. Please try again.",
+            lockedBySubmittedPermit:
+              "This Step Code is not editable because the attached permit application is under review. You can view existing checklists or return to the application.",
           },
 
           noneFound: "No Step Codes found",
+          attached: "Attached",
           columns: {
             project: "Project",
             type: "Type",
@@ -2550,9 +2554,9 @@ Thank you,
               "Icons are shown left to right in this order. A green check means complete, a half-filled circle means in progress, and a dashed circle means not started.",
           },
           part3: {
-            title: "Energy and Zero Carbon Step Codes for Step 3 Buildings",
+            title: "Energy and Zero Carbon Step Codes for Part 3 Buildings",
             errorTitle: "There is a problem",
-            goToStepCodes: "Go to Step Codes",
+            goToStepCodes: "Go to Step Code search",
             cta: "Save and continue",
             sidebar: {
               responsiveButton: "Sections",
@@ -2583,7 +2587,7 @@ Thank you,
               report: "Report",
             },
             startPage: {
-              heading: "Energy and Zero Carbon Step Codes for Step 3 Buildings",
+              heading: "Energy and Zero Carbon Step Codes for Part 3 Buildings",
               description:
                 "You can use this tool to generate a report about your project’s compliance. After you've submitted your application, local officials will review it. They may ask you to fix issues or show that your application meets requirements before approving it.",
               info: {
@@ -2954,7 +2958,7 @@ Thank you,
               isRelevant: "Is the project subject to overheating limits?",
               limit: {
                 label: "Overheating hours limit",
-                hint: "This value is set according to City of Vancouver Energy Modeling Guidelines, Section 4",
+                hint: "This value is set according to City of Vancouver Energy Modelling Guidelines, Version 2, Section 4",
               },
               worstCase: {
                 label: "Overheating hours for worst case suite/zone",
@@ -3378,7 +3382,7 @@ Thank you,
             },
           },
           part9: {
-            goToStepCodes: "Go to Step Codes",
+            goToStepCodes: "Go to Step Code search",
             cta: "Save and continue",
             sidebar: {
               responsiveButton: "Sections",
@@ -3424,6 +3428,7 @@ Thank you,
           helpLinkText: "What does each Step Code level mean?",
           saveAndGoBack: "Save and go back",
           goToPermitApplication: "Go to permit application",
+          goToStepCodePage: "Go to Step Code information page",
           markAsComplete: "Mark as complete",
           markAsCompleteAndGenerateReport: "Generate report and continue",
           regenerateReport: "Regenerate report",
@@ -4221,7 +4226,7 @@ Thank you,
                 notFound: "Occupancy not found.",
               },
               setMinimum:
-                "Set the minimum acceptable levels of Energy Step Code and Zero Carbon Step Code for BCBC part 9 buildings below:",
+                "Set the minimum acceptable levels of Energy Step Code and Zero Carbon Step Code for BCBC Part 9 buildings below:",
               part9Tab: "Part 9",
               part3Tab: "Part 3",
               part9Building: "Part 9 Building",
@@ -4746,7 +4751,7 @@ Thank you,
           submitterPromotionProjectAccessWarning:
             "If you accept this invitation while signed in as a submitter, your account will become jurisdiction staff and you will lose access to any permit projects you currently own.",
           loggedInSubmitterStaffInviteWarning:
-            "You are already signed in. Accepting this staff invitation will attach it to your current account and make it jurisdiction staff — you will lose access to any permit projects you currently own as a submitter. If you need to use a different BCeID account, sign out first or open this invitation in a private/incognito window.",
+            "You're already signed in. If you accept, this account becomes jurisdiction staff and you'll lose access to any permit projects you own as a submitter. If this isn't the BCeID you wanted, sign out first or open the invite in an incognito window.",
           rolesAndPermissions: "User roles & permissions",
           inviteInstructions:
             "Enter the email addresses of whom you wish to invite below.  For details about permissions for each role, please see",
@@ -4924,7 +4929,7 @@ Thank you,
             },
             stepCodeWarnings: {
               energyStepCodeRecommended:
-                'Warning:"Design drawing Energy Step Code file" is present in the template, but there is no "Energy Step Code part 9" requirement.',
+                'Warning:"Design drawing Energy Step Code file" is present in the template, but there is no "Energy Step Code Part 9" requirement.',
 
               duplicateStepCodePackage:
                 'Warning: Multiple "Design drawing Energy Step Code fields" found. Please ensure there is only one "Design drawing field".',
@@ -5771,8 +5776,8 @@ Thank you,
             notificationAudiences: {
               all_users: "All users",
               submitters: "Submitters",
-              staff: "Staff",
-              none: "No one",
+              staff: "Jurisdiction staff",
+              none: "Do not send",
             },
             version: "Version",
             name: "Name",

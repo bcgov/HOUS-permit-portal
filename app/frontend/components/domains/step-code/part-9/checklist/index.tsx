@@ -37,7 +37,7 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
         await checklist.load()
       })()
     }
-  }, [checklist?.id, checklist?.isLoaded, currentStepCode?.id, currentStepCode?.reportDocuments?.length])
+  }, [checklist?.id, checklist?.isLoaded, currentStepCode?.id])
 
   useEffect(() => {
     checklist?.isLoaded && reset(checklist.defaultFormValues)
@@ -170,11 +170,11 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
             </Accordion>
           </form>
         </FormProvider>
-        {checklist.isMarkedComplete && !isSubmitting && currentStepCode?.latestReportDocument && (
+        {checklist.isMarkedComplete && !isSubmitting && checklist.freshReportDocument && (
           <FileDownloadButton
             variant="link"
             modelType={EFileUploadAttachmentType.ReportDocument}
-            document={currentStepCode.latestReportDocument as any}
+            document={checklist.freshReportDocument as any}
             simpleLabel
           />
         )}
