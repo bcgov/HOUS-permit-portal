@@ -1622,13 +1622,13 @@ Thank you,
               pending: "Invite pending",
             },
             membership: {
-              owner: "Steward",
+              owner: "Project head",
               ownerTooltip:
-                "The steward owns this project and always has full access. They are not assigned a Lead or Contributor membership.",
+                "The project head owns this project and always has full access. They are not assigned a Lead or Contributor membership.",
               lead: "Lead",
               contributor: "Contributor",
             },
-            transferStewardship: "Transfer stewardship",
+            transferProjectHead: "Transfer project head",
             resendInvite: "Resend invite",
             remove: "Remove",
             removeConfirmation: {

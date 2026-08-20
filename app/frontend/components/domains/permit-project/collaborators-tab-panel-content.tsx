@@ -5,6 +5,7 @@ import {
   AccordionItem,
   AccordionPanel,
   Badge,
+  BadgeProps,
   Box,
   Button,
   Divider,
@@ -85,8 +86,24 @@ type TAutoTeamKind = Exclude<EProjectTeamKind, EProjectTeamKind.custom>
 
 const ACCESS_DOMAINS = Object.keys(ACCESS_ORDER_BY_DOMAIN) as TAccessDomain[]
 
-// The steward is not a membership, so selection needs an id no membership can own.
-const STEWARD_SELECTION = "steward"
+const RoleBadge = ({ role, ...rest }: { role: "owner" | EProjectMembershipRole } & BadgeProps) => {
+  const { t } = useTranslation()
+  const colorProps =
+    role === "owner"
+      ? { bg: "theme.gold" }
+      : role === EProjectMembershipRole.lead
+        ? { bg: "semantic.successLight", color: "semantic.success" }
+        : {}
+
+  return (
+    <Badge {...colorProps} {...rest}>
+      {t(`permitProject.collaborators.membership.${role}`)}
+    </Badge>
+  )
+}
+
+// The project head is not a membership, so selection needs an id no membership can own.
+const PROJECT_HEAD_SELECTION = "project-head"
 
 const customTeamsOf = (membership: IProjectMembership) =>
   membership.teams.filter((team) => team.kind === EProjectTeamKind.custom)
@@ -378,9 +395,9 @@ const PeopleTable = observer(({ permitProject, selectedId, onSelect }: IProps & 
         <Tbody>
           <PersonRow
             name={permitProject.ownerName}
-            isSelected={selectedId === STEWARD_SELECTION}
-            onSelect={() => onSelect(STEWARD_SELECTION)}
-            roleNode={<Badge>{t("permitProject.collaborators.membership.owner")}</Badge>}
+            isSelected={selectedId === PROJECT_HEAD_SELECTION}
+            onSelect={() => onSelect(PROJECT_HEAD_SELECTION)}
+            roleNode={<RoleBadge role="owner" />}
             teamsNode={<Text color="text.secondary">—</Text>}
             statusNode={<Badge variant="success">{t("permitProject.collaborators.status.active")}</Badge>}
           />
@@ -393,11 +410,7 @@ const PeopleTable = observer(({ permitProject, selectedId, onSelect }: IProps & 
                 email={membership.name ? membership.email : undefined}
                 isSelected={selectedId === membership.id}
                 onSelect={() => onSelect(membership.id)}
-                roleNode={
-                  <Badge>
-                    {t(`permitProject.collaborators.membership.${membership.role as EProjectMembershipRole}`)}
-                  </Badge>
-                }
+                roleNode={<RoleBadge role={membership.role} />}
                 teamsNode={
                   extraTeams.length === 0 ? (
                     <Text color="text.secondary">—</Text>
@@ -484,8 +497,8 @@ const DetailPane = observer(
   }: IProps & { selectedId: string | null; onClearSelection: () => void }) => {
     const selectedMembership = permitProject.projectMemberships.find((membership) => membership.id === selectedId)
 
-    if (selectedId === STEWARD_SELECTION) {
-      return <StewardDetail permitProject={permitProject} onClearSelection={onClearSelection} />
+    if (selectedId === PROJECT_HEAD_SELECTION) {
+      return <ProjectHeadDetail permitProject={permitProject} onClearSelection={onClearSelection} />
     }
     if (selectedMembership) {
       return (
@@ -510,7 +523,7 @@ const BackToAccessButton = ({ onClick }: { onClick: () => void }) => {
   )
 }
 
-const StewardDetail = observer(({ permitProject, onClearSelection }: IProps & { onClearSelection: () => void }) => {
+const ProjectHeadDetail = observer(({ permitProject, onClearSelection }: IProps & { onClearSelection: () => void }) => {
   const { t } = useTranslation()
   const { uiStore } = useMst()
 
@@ -520,9 +533,7 @@ const StewardDetail = observer(({ permitProject, onClearSelection }: IProps & { 
       <Heading as="h3" size="md" mb={1}>
         {permitProject.ownerName}
       </Heading>
-      <Badge alignSelf="start" mb={4}>
-        {t("permitProject.collaborators.membership.owner")}
-      </Badge>
+      <RoleBadge role="owner" alignSelf="start" mb={4} />
       <Text fontSize="sm" color="text.secondary" mb={6}>
         {t("permitProject.collaborators.membership.ownerTooltip")}
       </Text>
@@ -535,7 +546,7 @@ const StewardDetail = observer(({ permitProject, onClearSelection }: IProps & { 
           alignSelf="start"
           onClick={() => uiStore.flashMessage.show(EFlashMessageStatus.error, null, "COLLAB TODO(phase 3)")}
         >
-          {t("permitProject.collaborators.transferStewardship")}
+          {t("permitProject.collaborators.transferProjectHead")}
         </Button>
       )}
     </Flex>
@@ -583,7 +594,7 @@ const PersonDetail = observer(
               ))}
             </Select>
           ) : (
-            <Badge>{t(`permitProject.collaborators.membership.${membership.role}`)}</Badge>
+            <RoleBadge role={membership.role} />
           )}
         </FormControl>
 

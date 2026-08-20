@@ -1213,7 +1213,7 @@ en:
         already_accepted: "This collaborator has already joined the project"
         membership_error: "Failed to add collaborator to the project: %{error_message}"
       accept:
-        expired: "This invitation has expired. Ask the project steward to send it again."
+        expired: "This invitation has expired. Ask the project head to send it again."
         already_accepted: "This invitation has already been accepted"
         owner_already_member: "The project owner already has full access"
         already_a_member: "You already have access to this project"
