@@ -791,7 +791,7 @@ export enum EProjectAccess {
   edit = "edit",
 }
 
-// Covers the Collaborators & teams screen: `manage` is access-admin.
+// Covers the Teams & collaborators screen: `manage` is access-admin.
 export enum ECollaboratorAccess {
   none = "none",
   view = "view",

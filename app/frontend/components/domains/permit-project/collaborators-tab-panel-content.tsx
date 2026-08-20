@@ -42,6 +42,7 @@ import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { Controller, FormProvider, useFieldArray, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import ReactSelect, { components, OptionProps } from "react-select"
 import { IPermitProject } from "../../../models/permit-project"
 import { IProjectMembership } from "../../../models/project-membership"
 import {
@@ -97,7 +98,7 @@ const filterOptions = (options: IOption[], query: string) => {
 }
 
 // Permissions are additive, so a person's real access is the highest level any
-// of their teams grants — the thing the per-group matrix makes you work out.
+// of their teams grants — the thing the per-team matrix makes you work out.
 const highestAccessOf = (teams: IProjectTeam[]) =>
   Object.fromEntries(
     ACCESS_DOMAINS.map((domain) => {
@@ -260,7 +261,7 @@ const InviteForm = observer(({ permitProject, onSuccess }: IProps & { onSuccess:
               display="grid"
               gridTemplateColumns="minmax(0, 1.4fr) 140px minmax(0, 1fr) 40px"
               gap={3}
-              alignItems="end"
+              alignItems="start"
             >
               <EmailFormControl
                 fieldName={`users.${index}.email`}
@@ -305,7 +306,7 @@ const InviteForm = observer(({ permitProject, onSuccess }: IProps & { onSuccess:
                   icon={<X size={16} />}
                   variant="ghost"
                   size="sm"
-                  mb={1}
+                  mt={index === 0 ? 8 : 1}
                   onClick={() => remove(index)}
                 />
               ) : (
@@ -703,7 +704,7 @@ const AccessPane = observer(({ permitProject }: IProps) => {
         {t("permitProject.teams.accessDescription")}
       </Text>
       {permitProject.autoTeams.map((team) => (
-        <GroupAccessBlock key={team.id} permitProject={permitProject} team={team} />
+        <TeamAccessBlock key={team.id} permitProject={permitProject} team={team} />
       ))}
       <Divider my={4} />
       <CustomTeamsSection permitProject={permitProject} />
@@ -711,7 +712,7 @@ const AccessPane = observer(({ permitProject }: IProps) => {
   )
 })
 
-const GroupAccessBlock = observer(({ permitProject, team }: IProps & { team: IProjectTeam }) => {
+const TeamAccessBlock = observer(({ permitProject, team }: IProps & { team: IProjectTeam }) => {
   const { t } = useTranslation()
   const tooltip = t(`permitProject.teams.kindTooltip.${team.kind as TAutoTeamKind}`)
 
@@ -737,7 +738,7 @@ const PermissionRows = observer(({ permitProject, team }: IProps & { team: IProj
           <Text fontSize="sm" color="text.secondary">
             {t(`permitProject.teams.permissions.${domain}`)}
           </Text>
-          <Box w="150px" flexShrink={0}>
+          <Box w="200px" flexShrink={0}>
             <PermissionSelect
               team={team}
               domain={domain}
@@ -750,6 +751,21 @@ const PermissionRows = observer(({ permitProject, team }: IProps & { team: IProj
     </Stack>
   )
 })
+
+const PermissionOption = (props: OptionProps<IOption, false>) => (
+  <components.Option {...props}>
+    <Box py={0.5}>
+      <Text fontSize="sm" fontWeight="bold">
+        {props.data.label}
+      </Text>
+      {props.data.description && (
+        <Text fontSize="xs" color="text.secondary" lineHeight="short">
+          {props.data.description}
+        </Text>
+      )}
+    </Box>
+  </components.Option>
+)
 
 const PermissionSelect = observer(
   ({
@@ -765,6 +781,12 @@ const PermissionSelect = observer(
   }) => {
     const { t } = useTranslation()
     const value = team[domain]
+    const options: IOption[] = ACCESS_ORDER_BY_DOMAIN[domain].map((level) => ({
+      value: level,
+      label: t(`permitProject.teams.${domain}.${level}` as any),
+      description: t(`permitProject.teams.permissionHint.${domain}.${level}` as any),
+    }))
+    const selected = options.find((option) => option.value === value) ?? null
 
     if (!canManage) {
       return (
@@ -775,18 +797,43 @@ const PermissionSelect = observer(
     }
 
     return (
-      <Select
-        size="sm"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
+      <ReactSelect<IOption, false>
+        isSearchable={false}
+        isClearable={false}
+        options={options}
+        value={selected}
+        onChange={(option) => option && onChange(option.value)}
         aria-label={t(`permitProject.teams.permissions.${domain}`)}
-      >
-        {ACCESS_ORDER_BY_DOMAIN[domain].map((level) => (
-          <option key={level} value={level}>
-            {t(`permitProject.teams.${domain}.${level}` as any)}
-          </option>
-        ))}
-      </Select>
+        menuPortalTarget={document.body}
+        menuPosition="fixed"
+        components={{ Option: PermissionOption, IndicatorSeparator: () => null }}
+        styles={{
+          control: (css, state) => ({
+            ...css,
+            minHeight: "var(--chakra-sizes-8)",
+            borderColor: state.isFocused ? "var(--chakra-colors-focus)" : "var(--chakra-colors-border-light)",
+            borderRadius: "6px",
+            boxShadow: "none",
+            fontSize: "var(--chakra-fontSizes-sm)",
+            ":hover": {
+              borderColor: "var(--chakra-colors-border-base)",
+            },
+          }),
+          valueContainer: (css) => ({ ...css, padding: "0 8px" }),
+          dropdownIndicator: (css) => ({ ...css, padding: "0 8px" }),
+          option: (css, state) => ({
+            ...css,
+            cursor: "pointer",
+            color: "var(--chakra-colors-text-primary)",
+            backgroundColor: state.isSelected
+              ? "var(--chakra-colors-semantic-infoLight)"
+              : state.isFocused
+                ? "var(--chakra-colors-gray-100)"
+                : undefined,
+          }),
+          menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+        }}
+      />
     )
   }
 )
@@ -1019,6 +1066,20 @@ const CustomTeamTagsSelect = observer(
         fetchOptions={async (query) => filterOptions(teamOptions, query)}
         onChange={(options) => onChange(options)}
         formatCreateLabel={(input) => t("permitProject.teams.createTeam", { name: input })}
+        menuPortalTarget={document.body}
+        menuPosition="fixed"
+        styles={{
+          menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+          valueContainer: (css) => ({ ...css, flexWrap: "nowrap" }),
+        }}
+        stylesToMerge={{
+          control: {
+            height: "var(--chakra-sizes-10)",
+            minHeight: "var(--chakra-sizes-10)",
+            paddingInline: "0.75rem",
+            overflow: "hidden",
+          },
+        }}
       />
     )
   }
