@@ -1,7 +1,10 @@
 class PermitApplicationPolicy < ApplicationPolicy
   def show?
     if record.submitter == user ||
-         record.collaborator?(user_id: user.id, collaboration_type: :submission)
+         record.collaborator?(
+           user_id: user.id,
+           collaboration_type: :submission
+         ) || record.permit_project&.owner_id == user.id
       true
     elsif user.review_staff?
       return false unless user.member_of?(record.jurisdiction.id)

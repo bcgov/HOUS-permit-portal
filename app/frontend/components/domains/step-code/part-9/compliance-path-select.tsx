@@ -6,6 +6,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
+  Portal,
   StackDivider,
   VStack,
 } from "@chakra-ui/react"
@@ -27,7 +28,7 @@ export const CompliancePathSelect = observer(function CompliancePathSelect({ onC
   } = useMst()
 
   return (
-    <Popover placement="bottom-end">
+    <Popover placement="bottom-start" matchWidth>
       {({ onClose }) => (
         <>
           <PopoverTrigger>
@@ -48,26 +49,28 @@ export const CompliancePathSelect = observer(function CompliancePathSelect({ onC
               <InputRightElement children={<CaretDown color="gray.300" />} pointerEvents={"none"} />
             </InputGroup>
           </PopoverTrigger>
-          <PopoverContent>
-            <VStack align="start" spacing={0} divider={<StackDivider borderColor="border.light" />}>
-              {selectOptions.compliancePaths.map((path) => (
-                <Flex
-                  key={path}
-                  onClick={() => {
-                    onChange(path)
-                    onClose()
-                  }}
-                  px={2}
-                  py={1.5}
-                  w="full"
-                  cursor="pointer"
-                  _hover={{ bg: "hover.blue" }}
-                >
-                  {t(`stepCode.import.compliancePath.options.${path}`)}
-                </Flex>
-              ))}
-            </VStack>
-          </PopoverContent>
+          <Portal>
+            <PopoverContent w="full" maxW="none" zIndex="popover">
+              <VStack align="start" spacing={0} divider={<StackDivider borderColor="border.light" />}>
+                {selectOptions.compliancePaths.map((path) => (
+                  <Flex
+                    key={path}
+                    onClick={() => {
+                      onChange(path)
+                      onClose()
+                    }}
+                    px={2}
+                    py={1.5}
+                    w="full"
+                    cursor="pointer"
+                    _hover={{ bg: "hover.blue" }}
+                  >
+                    {t(`stepCode.import.compliancePath.options.${path}`)}
+                  </Flex>
+                ))}
+              </VStack>
+            </PopoverContent>
+          </Portal>
         </>
       )}
     </Popover>

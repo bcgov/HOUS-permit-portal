@@ -250,6 +250,13 @@ in this document.
                   "Datetime in milliseconds since the epoch (Unix time). This is the timestamp when the permit application was last resubmitted due to a revision request. Note: there might be multiple resubmissions for a permit application, but this date is the last resubmission date.",
                 nullable: true
               },
+              issued_at: {
+                type: :number,
+                format: :int64,
+                description:
+                  "Datetime in milliseconds since the epoch (Unix time). This is the timestamp when the permit application was issued.",
+                nullable: true
+              },
               template_tags: {
                 type: :array,
                 items: {

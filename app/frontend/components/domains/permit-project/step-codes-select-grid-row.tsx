@@ -1,4 +1,5 @@
-import { Button } from "@chakra-ui/react"
+import { Button, HStack, Text } from "@chakra-ui/react"
+import { CheckCircle } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -11,12 +12,20 @@ import { SearchGridRow } from "../../shared/grid/search-grid-row"
 import { StepCodeStageIndicators } from "./step-code-stage-indicators"
 
 export const StepCodesSelectGridRow = observer(
-  ({ stepCode, onSelect }: { stepCode: IStepCode; onSelect: (stepCodeId: string) => Promise<void> }) => {
+  ({
+    stepCode,
+    onSelect,
+    isAttached = false,
+  }: {
+    stepCode: IStepCode
+    onSelect: (stepCodeId: string) => Promise<void>
+    isAttached?: boolean
+  }) => {
     const { t } = useTranslation()
     const { type, permitProjectTitle, fullAddress, updatedAt } = stepCode as any
 
     return (
-      <SearchGridRow>
+      <SearchGridRow bg={isAttached ? "theme.blueLight" : undefined} aria-current={isAttached ? "true" : undefined}>
         <SearchGridItem>{t(`stepCode.types.${type as EStepCodeType}`)}</SearchGridItem>
         <SearchGridItem>{permitProjectTitle}</SearchGridItem>
         <SearchGridItem>{fullAddress}</SearchGridItem>
@@ -25,9 +34,18 @@ export const StepCodesSelectGridRow = observer(
           <StepCodeStageIndicators stageCompletions={stepCode.stageCompletions} />
         </SearchGridItem>
         <SearchGridItem justifyContent="flex-end" px={2}>
-          <Button size="md" variant="primary" onClick={() => onSelect(stepCode.id)}>
-            {t("ui.select")}
-          </Button>
+          {isAttached ? (
+            <HStack color="theme.blueAlt" spacing={1}>
+              <CheckCircle size={18} weight="fill" />
+              <Text fontSize="sm" fontWeight="bold">
+                {t("stepCode.index.attached")}
+              </Text>
+            </HStack>
+          ) : (
+            <Button size="md" variant="primary" onClick={() => onSelect(stepCode.id)}>
+              {t("ui.select")}
+            </Button>
+          )}
         </SearchGridItem>
       </SearchGridRow>
     )

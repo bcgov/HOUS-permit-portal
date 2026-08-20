@@ -113,6 +113,7 @@ export const RequirementForm = observer(
     const [hasErrors, setHasErrors] = useState(false)
     const [firstComponentKey, setFirstComponentKey] = useState(null)
     const [isCollapsedAll, setIsCollapsedAllState] = useState(false)
+    const stepCodeToolErrorRef = useRef<IErrorsBoxData[] | null>(null)
 
     const currentSubmissionData = useMemo(() => {
       return R.clone(submissionData)
@@ -208,16 +209,20 @@ export const RequirementForm = observer(
     const onFormSubmit = async (submission: any) => {
       // Form.io does not validate the digital Step Code tool (button container, input:false).
       if (getEnergyStepCodeMethodFromData(submission?.data) === "tool" && !isStepCodeComplete) {
-        setHasErrors(true)
-        setErrorBoxData([
+        const customError = [
           {
             label: t("permitApplication.edit.stepCodeToolIncomplete"),
             id: "energy-step-code-tool",
             class: "",
           },
-        ])
+        ]
+        // Keep this error across the Form.io `change` that follows a successful submit.
+        stepCodeToolErrorRef.current = customError
+        setHasErrors(true)
+        setErrorBoxData(customError)
         return
       }
+      stepCodeToolErrorRef.current = null
       setHasErrors(null)
       setImminentSubmission(submission)
       onOpen()
@@ -264,7 +269,18 @@ export const RequirementForm = observer(
 
       rootComponent.on("change", (_) => {
         // whenever a form data changes, we update the state of ErrorBox with the new error information
-        setErrorBoxData(mapErrorBoxData(formRef.current.errors))
+        const nextErrors = formRef.current.errors
+        const mapped = mapErrorBoxData(nextErrors)
+        const keepStepCodeError =
+          mapped.length === 0 &&
+          !!stepCodeToolErrorRef.current &&
+          getEnergyStepCodeMethodFromData(formRef.current?.data) === "tool" &&
+          !permitApplication.isStepCodeComplete
+        const nextErrorBoxData = keepStepCodeError ? stepCodeToolErrorRef.current : mapped
+        if (!keepStepCodeError && mapped.length === 0) {
+          stepCodeToolErrorRef.current = null
+        }
+        setErrorBoxData(nextErrorBoxData)
         // Keep CONTENTS sidebar in sync with Form.io conditionals (any field type can toggle a block).
         syncCompletedBlocksFromFormRef.current(formRef.current)
       })
@@ -473,6 +489,7 @@ export const RequirementForm = observer(
           isOpen={isStepCodeSelectOpen}
           onClose={() => setIsStepCodeSelectOpen(false)}
           stepCodeType={stepCodeSelectType}
+          attachedStepCode={permitApplication.stepCode}
           onSelect={handleSelectExistingStepCode}
         />
 

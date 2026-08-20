@@ -356,6 +356,7 @@ export interface IJurisdictionStub {
 
 export interface IReportDocument extends IBaseFileAttachment {
   stepCodeId: string
+  checklistId?: string
   stale?: boolean
 }
 
@@ -494,6 +495,7 @@ export interface ITemplateVersionUpdate {
 
 export interface IReportDocumentNotificationObjectData {
   stepCodeId?: string
+  checklistId?: string
   reportDocumentId: string
   filename?: string
   downloadUrl?: string

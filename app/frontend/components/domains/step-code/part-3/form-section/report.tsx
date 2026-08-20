@@ -12,7 +12,7 @@ import { SectionHeading } from "./shared/section-heading"
 
 export const Report = observer(function Report() {
   const i18nPrefix = "stepCode.part3.report"
-  const { checklist, currentStepCode } = usePart3StepCode()
+  const { checklist } = usePart3StepCode()
   const { handleSubmit, formState } = useForm()
   const { isSubmitting } = formState
   const [isRegenerating, setIsRegenerating] = useState(false)
@@ -40,14 +40,14 @@ export const Report = observer(function Report() {
     <Flex direction="column" gap={6}>
       <SectionHeading>{t(`${i18nPrefix}.heading`)}</SectionHeading>
       <Text>{t(`${i18nPrefix}.description`)}</Text>
-      <Flex gap={3} align="start">
-        {currentStepCode?.latestReportDocument ? (
+      <Flex gap={3} align="center">
+        {checklist?.freshReportDocument ? (
           <FileDownloadButton
-            variant="link"
+            variant="primary"
+            size="md"
             modelType={EFileUploadAttachmentType.ReportDocument}
-            document={currentStepCode.latestReportDocument as any}
+            document={checklist.freshReportDocument as any}
             simpleLabel
-            mt={2}
           />
         ) : (
           <SharedSpinner m={0} />

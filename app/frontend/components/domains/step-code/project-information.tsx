@@ -6,9 +6,14 @@ import {
   FormErrorMessage,
   FormLabel,
   HStack,
+  IconButton,
   Input,
   InputGroup,
   InputLeftElement,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
   Radio,
   Table,
   Tag,
@@ -17,21 +22,25 @@ import {
   Text,
   Tr,
 } from "@chakra-ui/react"
-import { MapPin } from "@phosphor-icons/react"
+import { DotsThreeVertical, Download, MapPin, ShareNetwork } from "@phosphor-icons/react"
+import { format } from "date-fns"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo, useState } from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useNavigate, useParams } from "react-router-dom"
+import { datefnsAppDateFormat } from "../../../constants"
 import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
 import {
+  EFileUploadAttachmentType,
   EFlashMessageStatus,
   EStepCodeChecklistStage,
   EStepCodeChecklistStatus,
   EStepCodeStageStatus,
 } from "../../../types/enums"
-import { IOption } from "../../../types/types"
+import { IOption, IReportDocument } from "../../../types/types"
+import { downloadFileFromStorage } from "../../../utils/utility-functions"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { DatePickerFormControl } from "../../shared/form/input-form-control"
@@ -45,7 +54,7 @@ type TStepCodeKind = "part3" | "part9"
 interface IProjectInformationForm {
   fullAddress?: string
   referenceNumber?: string
-  permitDate?: string
+  permitDate?: string | Date | null
   pid?: string
   site?: IOption
   jurisdictionId?: string
@@ -101,6 +110,7 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const isEditable = !permitApplicationId
+  const isLockedBySubmittedPermit = !!permitApplication && !permitApplication.isDraft
 
   const stageChecklist = useMemo(
     () => currentStepCode?.checklists?.find((checklist) => checklist.stage === selectedStage),
@@ -135,8 +145,6 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
 
   const stageLabel = (stage: EStepCodeChecklistStage) => t(`stepCodeChecklist.edit.projectInfo.stages.${stage}`)
   const showPermitDate = selectedStage !== EStepCodeChecklistStage.preConstruction
-  const isPermitDateEditable = isEditable
-  const permitDateInputProps = isPermitDateEditable ? undefined : { readOnly: true }
 
   const handleStageSelect = (stage: EStepCodeChecklistStage) => {
     setSelectedStage(stage)
@@ -203,6 +211,8 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
   }
 
   const onSubmit = async (values: IProjectInformationForm) => {
+    if (isLockedBySubmittedPermit) return
+
     const checklist = await saveProjectInformation(values)
     if (!checklist) return
 
@@ -223,6 +233,22 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
 
     navigate(`/permit-applications/${permitApplicationId}/edit`)
   })
+
+  const handleGoToPermitApplication = () => {
+    if (isLockedBySubmittedPermit) {
+      navigate(`/permit-applications/${permitApplicationId}/edit`)
+      return
+    }
+    handleSaveAndGoToPermitApplication()
+  }
+
+  const handleOpenExistingChecklist = (
+    stage: EStepCodeChecklistStage,
+    checklist: { currentNavLink?: { location?: string } } | null
+  ) => {
+    if (!checklist) return
+    navigate(checklistPath(stage, checklist.currentNavLink?.location || "start"))
+  }
   const stepCodeKindLabel =
     stepCodeKind === "part3"
       ? t("stepCode.projectInformation.types.part3")
@@ -241,13 +267,33 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
       <form onSubmit={handleSubmit(onSubmit)}>
         <Flex direction="column" gap={6} pb={4}>
           <Flex direction="column" gap={2}>
-            <HStack align="flex-end" spacing={3}>
-              <SectionHeading>{t("stepCode.projectInformation.heading")}</SectionHeading>
-              <Tag bg="theme.blueLight" color="text.primary" fontWeight="bold" mb={2}>
-                {stepCodeKindLabel}
-              </Tag>
-            </HStack>
+            <Flex justify="space-between" align="flex-end" gap={4} w="full">
+              <HStack align="flex-end" spacing={3}>
+                <SectionHeading>{t("stepCode.projectInformation.heading")}</SectionHeading>
+                <Tag bg="theme.blueLight" color="text.primary" fontWeight="bold" mb={2}>
+                  {stepCodeKindLabel}
+                </Tag>
+              </HStack>
+              {permitApplicationId && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={handleGoToPermitApplication}
+                  isDisabled={isSubmitting}
+                  isLoading={isSubmitting}
+                  flexShrink={0}
+                >
+                  {t("stepCode.goToPermitApplication")}
+                </Button>
+              )}
+            </Flex>
             <Text fontSize="md">{t("stepCode.projectInformation.instructions")}</Text>
+            {isLockedBySubmittedPermit && (
+              <CustomMessageBox
+                status={EFlashMessageStatus.warning}
+                description={t("stepCode.projectInformation.lockedBySubmittedPermit")}
+              />
+            )}
           </Flex>
 
           {!isEditable && <Field label={t("stepCode.projectInformation.name")} value={currentStepCode.title} />}
@@ -357,12 +403,24 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
                       key={stage}
                       cursor="pointer"
                       bg={isSelected ? "theme.blueLight" : undefined}
-                      onClick={() => handleStageSelect(stage)}
+                      onClickCapture={(event) => {
+                        const target = event.target as HTMLElement
+                        if (target.closest(".chakra-radio") && (target as HTMLInputElement).type !== "radio") {
+                          event.preventDefault()
+                        }
+                      }}
+                      onClick={(event) => {
+                        const target = event.target as HTMLElement
+                        if ((target as HTMLInputElement).type === "radio") return
+                        handleStageSelect(stage)
+                      }}
                     >
                       <Td pl={0} width="1px">
                         <Radio
                           isChecked={isSelected}
                           onChange={() => handleStageSelect(stage)}
+                          id={`step-code-stage-${stage}`}
+                          value={stage}
                           aria-label={stageLabel(stage)}
                         />
                       </Td>
@@ -371,67 +429,76 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
                         <StepCodeStageIcon status={stageStatus} />
                       </Td>
                       <Td pr={0} textAlign="right">
-                        <Button
-                          type="submit"
-                          variant="primary"
-                          isDisabled={!isSelected}
-                          isLoading={isSelected && isSubmitting}
-                        >
-                          {checklistButtonLabel(checklist, currentStepCode?.isStageComplete(stage))}
-                        </Button>
+                        <HStack justify="flex-end" spacing={1} onClick={(e) => e.stopPropagation()}>
+                          <Button
+                            type={isLockedBySubmittedPermit ? "button" : "submit"}
+                            variant="primary"
+                            isDisabled={isLockedBySubmittedPermit ? !checklist : !isSelected}
+                            isLoading={!isLockedBySubmittedPermit && isSelected && isSubmitting}
+                            onClick={
+                              isLockedBySubmittedPermit
+                                ? () => handleOpenExistingChecklist(stage, checklist)
+                                : undefined
+                            }
+                          >
+                            {isLockedBySubmittedPermit && checklist
+                              ? t("stepCode.projectInformation.view")
+                              : checklistButtonLabel(checklist, currentStepCode?.isStageComplete(stage))}
+                          </Button>
+                          <StageReportMenu
+                            checklist={checklist}
+                            stageLabel={stageLabel(stage)}
+                            stepCode={currentStepCode}
+                          />
+                        </HStack>
                       </Td>
                     </Tr>
                   )
                 })}
               </Tbody>
             </Table>
-            {permitApplicationId && selectedStage !== EStepCodeChecklistStage.preConstruction && (
-              <CustomMessageBox
-                status={EFlashMessageStatus.warning}
-                description={t("stepCode.projectInformation.nonPreConstructionStageWarning")}
-                mt={3}
-              />
-            )}
+            {permitApplicationId &&
+              !isLockedBySubmittedPermit &&
+              selectedStage !== EStepCodeChecklistStage.preConstruction && (
+                <CustomMessageBox
+                  status={EFlashMessageStatus.warning}
+                  description={t("stepCode.projectInformation.nonPreConstructionStageWarning")}
+                  mt={3}
+                />
+              )}
           </FormControl>
 
-          {showPermitDate && (
-            <DatePickerFormControl
-              flex={1}
-              maxW={{ base: "none", xl: "430px" }}
-              label={t("stepCode.projectInformation.date") as string}
-              fieldName="permitDate"
-              showOptional={false}
-              inputProps={permitDateInputProps}
-              isReadOnly={!isPermitDateEditable}
-              LabelInfo={() => (
-                <InfoTooltip {...fieldTooltipProps} label={t("stepCode.projectInformation.dateTooltip") as string} />
-              )}
-            />
-          )}
+          {showPermitDate &&
+            (isEditable ? (
+              <DatePickerFormControl
+                flex={1}
+                maxW={{ base: "none", xl: "430px" }}
+                label={t("stepCode.projectInformation.date") as string}
+                fieldName="permitDate"
+                showOptional={false}
+                LabelInfo={() => (
+                  <InfoTooltip {...fieldTooltipProps} label={t("stepCode.projectInformation.dateTooltip") as string} />
+                )}
+              />
+            ) : (
+              <Field
+                label={t("stepCode.projectInformation.date") as string}
+                tooltip={t("stepCode.projectInformation.dateTooltip") as string}
+                value={formatPermitDate(permitApplication?.issuedAt)}
+              />
+            ))}
 
-          {(isEditable || permitApplicationId) && (
+          {isEditable && (
             <Flex justify="flex-start">
-              {isEditable ? (
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={handleSaveAndGoBack}
-                  isDisabled={isSubmitting}
-                  isLoading={isSubmitting}
-                >
-                  {t("stepCode.saveAndGoBack")}
-                </Button>
-              ) : (
-                <Button
-                  type="button"
-                  variant="link"
-                  onClick={handleSaveAndGoToPermitApplication}
-                  isDisabled={isSubmitting}
-                  isLoading={isSubmitting}
-                >
-                  {t("stepCode.goToPermitApplication")}
-                </Button>
-              )}
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={handleSaveAndGoBack}
+                isDisabled={isSubmitting}
+                isLoading={isSubmitting}
+              >
+                {t("stepCode.saveAndGoBack")}
+              </Button>
             </Flex>
           )}
         </Flex>
@@ -440,11 +507,17 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
   )
 })
 
+function formatPermitDate(value: Date | string | null | undefined) {
+  if (!value) return ""
+  const date = value instanceof Date ? value : new Date(value)
+  return Number.isNaN(date.getTime()) ? "" : format(date, datefnsAppDateFormat)
+}
+
 function getDefaultValues(currentStepCode): IProjectInformationForm {
   return {
     fullAddress: currentStepCode?.fullAddress || "",
     referenceNumber: currentStepCode?.referenceNumber || "",
-    permitDate: currentStepCode?.permitDate || "",
+    permitDate: currentStepCode?.permitDate || null,
     pid: currentStepCode?.pid || "",
     jurisdictionId: currentStepCode?.jurisdiction?.id || "",
     site: currentStepCode?.fullAddress
@@ -473,3 +546,73 @@ const Field = function Field({ label, value, tooltip }: IFieldProps) {
     </FormControl>
   )
 }
+
+const StageReportMenu = observer(function StageReportMenu({
+  checklist,
+  stageLabel,
+  stepCode,
+}: {
+  checklist?: {
+    reportDocument?: IReportDocument | null
+    freshReportDocument?: IReportDocument | null
+  } | null
+  stageLabel: string
+  stepCode: any
+}) {
+  const [isSharing, setIsSharing] = useState(false)
+  const freshReport = checklist?.freshReportDocument ?? null
+  const reportDocument = checklist?.reportDocument ?? null
+  const hasStaleReport = !!reportDocument?.stale && !freshReport
+
+  const handleDownload = () => {
+    if (!freshReport) return
+    downloadFileFromStorage({
+      model: EFileUploadAttachmentType.ReportDocument,
+      modelId: freshReport.id,
+      filename: freshReport.file?.metadata?.filename,
+    })
+  }
+
+  const handleShare = async () => {
+    if (!freshReport) return
+    setIsSharing(true)
+    try {
+      await stepCode?.shareReportWithJurisdiction(freshReport.id)
+    } finally {
+      setIsSharing(false)
+    }
+  }
+
+  return (
+    <Menu>
+      <MenuButton
+        as={IconButton}
+        type="button"
+        aria-label={t("ui.options")}
+        icon={<DotsThreeVertical size={20} />}
+        variant="ghost"
+        size="sm"
+      />
+      <MenuList>
+        {freshReport ? (
+          <MenuItem icon={<Download size={16} />} onClick={handleDownload}>
+            {t("stepCode.index.downloadStageReport", { stage: stageLabel })}
+          </MenuItem>
+        ) : hasStaleReport ? (
+          <MenuItem isDisabled>
+            <Text>{t("stepCode.index.reportOutOfDate")}</Text>
+          </MenuItem>
+        ) : (
+          <MenuItem isDisabled>
+            <Text>{t("stepCode.index.noReportAvailable")}</Text>
+          </MenuItem>
+        )}
+        {freshReport && stepCode?.jurisdiction && (
+          <MenuItem icon={<ShareNetwork size={16} />} onClick={handleShare} isDisabled={isSharing}>
+            {isSharing ? t("stepCode.shareReport.sharing") : t("stepCode.shareReport.action")}
+          </MenuItem>
+        )}
+      </MenuList>
+    </Menu>
+  )
+})

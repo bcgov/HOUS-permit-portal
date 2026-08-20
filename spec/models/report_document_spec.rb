@@ -5,6 +5,21 @@ RSpec.describe ReportDocument, type: :model do
     subject { build(:report_document) }
 
     it { should belong_to(:step_code) }
+    it { should belong_to(:checklist).optional }
+  end
+
+  describe "validations" do
+    it "does not allow two reports for the same checklist" do
+      step_code = create(:part_9_step_code)
+      checklist = step_code.pre_construction_checklist
+      create(:report_document, step_code: step_code, checklist: checklist)
+
+      duplicate =
+        build(:report_document, step_code: step_code, checklist: checklist)
+
+      expect(duplicate).not_to be_valid
+      expect(duplicate.errors[:checklist_id]).to be_present
+    end
   end
 
   describe "instance methods" do
@@ -31,6 +46,7 @@ RSpec.describe ReportDocument, type: :model do
         )
         expect(data["object_data"]["step_code_id"]).to eq(doc.step_code_id)
         expect(data["object_data"]["report_document_id"]).to eq(doc.id)
+        expect(data["object_data"]["checklist_id"]).to eq(doc.checklist_id)
         expect(data["object_data"]["filename"]).to eq("report.pdf")
         expect(data["object_data"]["download_url"]).to eq(
           "https://example.com/download"

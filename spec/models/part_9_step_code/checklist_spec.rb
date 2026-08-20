@@ -9,6 +9,7 @@ RSpec.describe Part9StepCode::Checklist, type: :model do
                .optional
                .touch(true)
     end
+    it { should have_one(:report_document).dependent(:destroy) }
   end
 
   describe "#complete?" do

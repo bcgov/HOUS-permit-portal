@@ -17,6 +17,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
            :submitted_at,
            :resubmitted_at,
            :revisions_requested_at,
+           :issued_at,
            :missing_pdfs,
            :template_nickname,
            :discarded_at,
@@ -199,7 +200,8 @@ class PermitApplicationBlueprint < Blueprinter::Base
            :pin,
            :reference_number,
            :submitted_at,
-           :resubmitted_at
+           :resubmitted_at,
+           :issued_at
 
     field :submission_data do |pa, _options|
       pa.formatted_submission_data_for_external_use

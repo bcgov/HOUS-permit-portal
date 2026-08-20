@@ -374,7 +374,7 @@ const ReviewSection = observer(function ReviewSection() {
 })
 
 const ReportSection = observer(function ReportSection() {
-  const { currentStepCode, checklist } = usePart9StepCode()
+  const { checklist } = usePart9StepCode()
   const { pathname } = useLocation()
   const formMethods = useForm({ mode: "onChange" })
   const { handleSubmit, formState } = formMethods
@@ -411,18 +411,18 @@ const ReportSection = observer(function ReportSection() {
           </Heading>
           <Text>{t("stepCode.part9.report.description")}</Text>
           <Text>
-            {currentStepCode?.latestReportDocument
+            {checklist.freshReportDocument
               ? t("stepCode.part9.report.ready", { address: checklist.fullAddress })
               : t("stepCode.part9.report.pending")}
           </Text>
-          <Flex gap={3} align="start">
-            {currentStepCode?.latestReportDocument ? (
+          <Flex gap={3} align="center">
+            {checklist.freshReportDocument ? (
               <FileDownloadButton
-                variant="link"
+                variant="primary"
+                size="md"
                 modelType={EFileUploadAttachmentType.ReportDocument}
-                document={currentStepCode.latestReportDocument as any}
+                document={checklist.freshReportDocument as any}
                 simpleLabel
-                mt={2}
               />
             ) : (
               <SharedSpinner m={0} />
