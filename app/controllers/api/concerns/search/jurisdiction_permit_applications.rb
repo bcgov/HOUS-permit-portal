@@ -50,7 +50,11 @@ module Api::Concerns::Search::JurisdictionPermitApplications
       total_count: @jurisdiction_permit_application_search.total_count,
       status_counts: jurisdiction_application_status_counts,
       unread_count: unread_status_counts.values.sum,
-      unread_status_counts: unread_status_counts
+      unread_status_counts: unread_status_counts,
+      requirement_template_options:
+        jurisdiction_requirement_template_options(
+          jurisdiction_permit_application_search_params[:permit_project_id]
+        )
     }
 
     @jurisdiction_permit_applications =
@@ -114,7 +118,11 @@ module Api::Concerns::Search::JurisdictionPermitApplications
       status_counts: jurisdiction_application_status_counts,
       column_totals: column_totals,
       unread_count: unread_status_counts.values.sum,
-      unread_status_counts: unread_status_counts
+      unread_status_counts: unread_status_counts,
+      requirement_template_options:
+        jurisdiction_requirement_template_options(
+          jurisdiction_permit_application_search_params[:permit_project_id]
+        )
     }
   end
 
@@ -205,6 +213,44 @@ module Api::Concerns::Search::JurisdictionPermitApplications
       "Failed to compute application status counts: #{e.message}"
     )
     {}
+  end
+
+  # Permit types represented in the inbox, independent of current filters/query.
+  def jurisdiction_requirement_template_options(permit_project_id = nil)
+    and_conditions = []
+    and_conditions << { jurisdiction_id: @jurisdiction.id }
+    and_conditions << { discarded: false }
+    and_conditions << { status: { not: "new_draft" } }
+    unless current_user.super_admin?
+      and_conditions << { sandbox_id: current_sandbox&.id }
+    end
+
+    if permit_project_id.present?
+      and_conditions << { permit_project_id: permit_project_id }
+    end
+
+    buckets =
+      PermitApplication
+        .search(
+          "*",
+          where: {
+            _and: and_conditions
+          },
+          aggs: [:requirement_template_id],
+          body_options: {
+            size: 0
+          }
+        )
+        .aggs
+        .dig("requirement_template_id", "buckets") || []
+
+    ids = buckets.map { |bucket| bucket["key"] }
+    OptionsBlueprint.render_as_hash(RequirementTemplate.where(id: ids))
+  rescue => e
+    Rails.logger.warn(
+      "Failed to compute requirement template options: #{e.message}"
+    )
+    []
   end
 
   def jurisdiction_permit_application_search_params
@@ -312,12 +358,23 @@ module Api::Concerns::Search::JurisdictionPermitApplications
     and_conditions << { jurisdiction_id: @jurisdiction.id }
     and_conditions << { discarded: jurisdiction_permit_application_discarded }
 
+    permit_project_id =
+      jurisdiction_permit_application_search_params[:permit_project_id]
+    # Project Permits tab may include new_draft when the project has an active
+    # meeting (matches PermitApplicationPolicy::Scope). Jurisdiction Applications
+    # list never does — drafts there ghost-page after scope_results.
+    active_meeting_request =
+      permit_project_id.present? &&
+        PermitProject.find_by(id: permit_project_id)&.has_active_project_meeting
+
     statuses = search_filters.delete(:status)
 
     if status_filter
       and_conditions << { status: status_filter }
     elsif statuses.present?
       and_conditions << { status: statuses }
+    elsif !active_meeting_request
+      and_conditions << { status: { not: "new_draft" } }
     end
 
     unless current_user.super_admin?
@@ -343,8 +400,6 @@ module Api::Concerns::Search::JurisdictionPermitApplications
       and_conditions << { review_collaborator_user_ids: assigned }
     end
 
-    permit_project_id =
-      jurisdiction_permit_application_search_params[:permit_project_id]
     if permit_project_id.present?
       and_conditions << { permit_project_id: permit_project_id }
     end

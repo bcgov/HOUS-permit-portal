@@ -109,27 +109,51 @@ RSpec.describe "Api::Notes", type: :request do
       expect(response).to have_http_status(:forbidden)
     end
 
-    it "allows jurisdiction review staff to create notes for closed meetings" do
-      closed_meeting =
-        create(:project_meeting, :closed, permit_project: permit_project)
+    it "attaches uploaded files to the created note" do
+      sign_in reviewer
+      cached_file = TestData.cached_file_data
+
+      expect do
+        post "/api/project_meetings/#{meeting.id}/notes",
+             params: {
+               note: {
+                 body: "<p>See attached.</p>",
+                 note_attachment_documents_attributes: [{ file: cached_file }]
+               }
+             },
+             headers: headers,
+             as: :json
+      end.to change(NoteAttachmentDocument, :count).by(1)
+
+      expect(response).to have_http_status(:created)
+      attachment = json_response.dig("data", "note_attachment_documents", 0)
+      expect(attachment.dig("file", "metadata", "filename")).to eq(
+        "site-plan.pdf"
+      )
+      expect(NoteAttachmentDocument.last.note).to eq(Note.last)
+    end
+
+    it "allows jurisdiction review staff to create notes for withdrawn meetings" do
+      withdrawn_meeting =
+        create(:project_meeting, :withdrawn, permit_project: permit_project)
       sign_in reviewer
 
       expect do
-        post "/api/project_meetings/#{closed_meeting.id}/notes",
+        post "/api/project_meetings/#{withdrawn_meeting.id}/notes",
              params: {
                note: {
-                 body: "<p>Post-close follow-up.</p>"
+                 body: "<p>Post-withdraw follow-up.</p>"
                }
              },
              headers: headers,
              as: :json
       end.to change(Note, :count).by(1).and change {
-              closed_meeting.reload.notes_count
+              withdrawn_meeting.reload.notes_count
             }.from(0).to(1)
 
       expect(response).to have_http_status(:created)
       expect(json_response.dig("data", "body")).to eq(
-        "<p>Post-close follow-up.</p>"
+        "<p>Post-withdraw follow-up.</p>"
       )
     end
   end
@@ -153,10 +177,22 @@ RSpec.describe "Api::Notes", type: :request do
           "Related item type",
           "Related item id",
           "Project number",
-          "Body"
+          "Body",
+          "Attachments"
         ]
       )
-      expect(CSV.parse(response.body).last.length).to eq(6)
+      expect(CSV.parse(response.body).last.length).to eq(7)
+    end
+
+    it "lists attachment filenames in the CSV" do
+      note = create(:note, noteable: meeting, user: reviewer)
+      create(:note_attachment_document, note: note)
+      sign_in owner
+
+      get "/api/project_meetings/#{meeting.id}/notes/download_csv",
+          headers: headers
+
+      expect(CSV.parse(response.body).last.last).to eq("test.jpg")
     end
   end
 
@@ -194,11 +230,15 @@ RSpec.describe "Api::Notes", type: :request do
           noteable: create(:project_meeting, permit_project: permit_project),
           user: reviewer
         )
-      closed_note =
+      withdrawn_note =
         create(
           :note,
           noteable:
-            create(:project_meeting, :closed, permit_project: permit_project),
+            create(
+              :project_meeting,
+              :withdrawn,
+              permit_project: permit_project
+            ),
           user: reviewer
         )
       sign_in reviewer
@@ -206,7 +246,7 @@ RSpec.describe "Api::Notes", type: :request do
       get "/api/permit_projects/#{permit_project.id}/notes", headers: headers
 
       note_ids = json_response.fetch("data").map { |note| note.fetch("id") }
-      expect(note_ids).to include(draft_note.id, closed_note.id)
+      expect(note_ids).to include(draft_note.id, withdrawn_note.id)
     end
   end
 

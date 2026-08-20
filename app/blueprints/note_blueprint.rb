@@ -19,4 +19,7 @@ class NoteBlueprint < Blueprinter::Base
   field :project_address do |note, _options|
     note.permit_project&.full_address
   end
+
+  association :note_attachment_documents,
+              blueprint: NoteAttachmentDocumentBlueprint
 end

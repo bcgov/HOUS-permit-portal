@@ -1,4 +1,4 @@
-class Part3StepCodeBlueprint < StepCodeBaseBlueprint
+class Part3StepCodeBlueprint < StepCodeBlueprint
   association :checklist,
               blueprint:
                 StepCode::Part3::ChecklistBlueprint do |step_code, _options|

@@ -200,6 +200,21 @@ RSpec.describe "Api::PermitApplications", type: :request do
       expect(json_response.dig("data", "nickname")).to eq("Updated Draft")
     end
 
+    it "updates step_code_stage" do
+      patch "/api/permit_applications/#{permit_application.id}",
+            params: {
+              permit_application: {
+                step_code_stage: "as_built"
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("data", "step_code_stage")).to eq("as_built")
+      expect(permit_application.reload.step_code_stage).to eq("as_built")
+    end
+
     it "does not allow submitter_id updates" do
       patch "/api/permit_applications/#{permit_application.id}",
             params: {
@@ -569,6 +584,45 @@ RSpec.describe "Api::PermitApplications", type: :request do
       expect(response).to have_http_status(:ok)
       expect(ZipfileJob).to have_received(:perform_async).with(
         permit_application.id
+      )
+    end
+  end
+
+  describe "POST /api/permit_applications/:id/download_supporting_documents_zip" do
+    let(:document_ids) { %w[doc-1 doc-2] }
+
+    it "enqueues a selective zip job and returns a request_id" do
+      allow(SupportingDocumentsZipDownloadJob).to receive(:perform_async)
+
+      post "/api/permit_applications/#{permit_application.id}/download_supporting_documents_zip",
+           params: {
+             supporting_document_ids: document_ids
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:accepted)
+      request_id = json_response.dig("data", "request_id")
+      expect(request_id).to be_present
+      expect(SupportingDocumentsZipDownloadJob).to have_received(
+        :perform_async
+      ).with(permit_application.id, document_ids, request_id, submitter.id)
+    end
+
+    it "forbids users who cannot download" do
+      sign_in other_user
+      allow(SupportingDocumentsZipDownloadJob).to receive(:perform_async)
+
+      post "/api/permit_applications/#{permit_application.id}/download_supporting_documents_zip",
+           params: {
+             supporting_document_ids: document_ids
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(SupportingDocumentsZipDownloadJob).not_to have_received(
+        :perform_async
       )
     end
   end

@@ -9,6 +9,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
                   mark_as_viewed
                   update_version
                   generate_missing_pdfs
+                  download_supporting_documents_zip
                   update_revision_requests
                   create_permit_collaboration
                   invite_new_collaborator
@@ -385,6 +386,22 @@ class Api::PermitApplicationsController < Api::ApplicationController
     head :ok
   end
 
+  def download_supporting_documents_zip
+    authorize @permit_application
+
+    document_ids = Array(params[:supporting_document_ids]).presence
+    request_id = SecureRandom.uuid
+
+    SupportingDocumentsZipDownloadJob.perform_async(
+      @permit_application.id,
+      document_ids,
+      request_id,
+      current_user.id
+    )
+
+    render json: { data: { request_id: request_id } }, status: :accepted
+  end
+
   def finalize_revision_requests
     authorize @permit_application
     if @permit_application.finalize_revision_requests!
@@ -553,6 +570,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
       :pin,
       :pid,
       :permit_project_id,
+      :step_code_stage,
       submission_data: {
       }
     )

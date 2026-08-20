@@ -25,6 +25,8 @@ export const StepCodeBaseFields = types
     ),
     permitProjectTitle: types.maybeNull(types.string),
     reportDocuments: types.maybeNull(types.array(types.frozen<IReportDocument>())),
+    // API snapshot for list/index rows without checklists loaded. Detail UIs
+    // should prefer stageStatus()/isStageComplete() which derive from checklists.
     stageCompletions: types.optional(
       types.array(
         types.frozen<{
@@ -46,6 +48,11 @@ export const StepCodeBaseFields = types
     },
     get isDiscarded(): boolean {
       return self.discardedAt !== null
+    },
+    isStageComplete(stage: EStepCodeChecklistStage = self.currentStage) {
+      return self.stageCompletions.some(
+        (entry) => entry.stage === stage && entry.status === EStepCodeStageStatus.complete
+      )
     },
   }))
   .actions((self) => ({

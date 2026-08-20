@@ -1,8 +1,7 @@
-import { Box, Text } from "@chakra-ui/react"
+import { Box } from "@chakra-ui/react"
 import { Uppy } from "@uppy/core"
-import "@uppy/core/dist/style.min.css"
-import Dashboard from "@uppy/react/lib/Dashboard.js"
 import React from "react"
+import { UppyDashboard } from "../../../../shared/uppy-dashboard"
 
 const uppyDashboardSx = {
   ".uppy-Dashboard": { width: "100%" },
@@ -14,19 +13,11 @@ const uppyDashboardSx = {
 
 interface UppyDashboardFieldProps {
   uppy: Uppy
-  acceptedFormatsLabel?: string
   mb?: number
 }
 
-export const UppyDashboardField = ({ uppy, acceptedFormatsLabel, mb = 6 }: UppyDashboardFieldProps) => (
-  <>
-    <Box position="relative" w="100%" mb={2} sx={uppyDashboardSx}>
-      <Dashboard uppy={uppy} width="100%" height={220} proudlyDisplayPoweredByUppy={false} />
-    </Box>
-    {acceptedFormatsLabel && (
-      <Text fontSize="sm" color="text.secondary" mt={2} mb={mb}>
-        {acceptedFormatsLabel}
-      </Text>
-    )}
-  </>
+export const UppyDashboardField = ({ uppy, mb = 6 }: UppyDashboardFieldProps) => (
+  <Box position="relative" w="100%" mb={mb} sx={uppyDashboardSx}>
+    <UppyDashboard uppy={uppy} width="100%" height={220} />
+  </Box>
 )

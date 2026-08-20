@@ -19,6 +19,7 @@ export const useProjectMeetingNavigation = () => {
 
   const getVisibleSections = () =>
     projectMeetingNavSections.filter((section) => {
+      if (currentProjectMeeting?.isSubmitted && !section.requesterEditStep) return false
       if (section.nonOwnerOnly && getRequesterIsOwner()) return false
       if (section.propertyInformationRequestsOnly && !getPropertyInformationRequestsEnabled()) return false
       return true
@@ -58,11 +59,22 @@ export const useProjectMeetingNavigation = () => {
     return visibleSections[currentIndex - 1]
   }
 
+  const getMeetingDetailPath = () => {
+    if (!currentPermitProject || !currentProjectMeeting) return null
+    return `/projects/${currentPermitProject.id}/meetings/${currentProjectMeeting.id}`
+  }
+
   const navigateToNext = () => {
     const nextSection = getNextSection()
     if (nextSection) {
       const baseUrl = R.pipe(R.split("/"), R.dropLast(1), R.join("/"))(pathname)
       navigate(`${baseUrl}/${nextSection.location}`)
+      return
+    }
+
+    const detailPath = getMeetingDetailPath()
+    if (currentProjectMeeting?.isSubmitted && detailPath) {
+      navigate(detailPath)
     }
   }
 
@@ -88,6 +100,8 @@ export const useProjectMeetingNavigation = () => {
     navigateToPrevious,
     navigateToSection,
     getCurrentSectionKey,
+    getMeetingDetailPath,
     hasPrevious: getPreviousSection() !== null,
+    isRequesterEditFlow: !!currentProjectMeeting?.isSubmitted,
   }
 }

@@ -88,11 +88,12 @@ en:
           no_sandboxes: "Jurisdiction must have at least one sandbox."
           enabled_inbox_requires_setup: "can only be toggled on once all emails are set up."
           enabled_project_meetings_requires_setup: "can only be toggled on once at least one project meeting contact is confirmed."
+          enabled_project_meetings_requires_authorization_resource: "can only be toggled on once at least one Project meeting authorization resource has been added."
           enabled_property_information_requests_requires_setup: "can only be toggled on once at least one property information contact is confirmed."
         submission_contact:
           last_confirmed_contact: "cannot be deleted while %{feature} is enabled. Turn the setting off before deleting the last confirmed contact."
         part3_occupancy_required_step:
-          duplicate_pathway: "A pathway with identical energy step and zero carbon step already exists for this occupancy."
+          duplicate_pathway: "A pathway with identical Energy step and Zero Carbon step already exists for this occupancy."
         jurisdiction_template_version_customizations:
           uniqueness: "already exists for this jurisdiction and template version."
         site_configuration:
@@ -130,30 +131,30 @@ en:
             permit_project:
               only_one_review_collaborator_allowed: "can only have one review collaborator assigned at a time"
         requirement_template:
-          step_code_package_required: '"Energy step code" is required to have the Design package energy step code file'
-          duplicate_energy_step_code: 'Multiple "Energy step code" requirements found. Please ensure there is only one "Energy step code" requirement in the template'
-          duplicate_step_code_package: 'Multiple "Design package energy step code files" found. Please ensure there is only one "Design package energy step code file" when there is an "Energy step code" requirement'
-          nonunique_nickname: "There can only be one live requirement template with this nickname"
+          step_code_package_required: '"Energy Step Code" is required to have the Design package Energy Step Code file'
+          duplicate_energy_step_code: 'Multiple "Energy Step Code" requirements found. Please ensure there is only one "Energy Step Code" requirement in the template'
+          duplicate_step_code_package: 'Multiple "Design package Energy Step Code files" found. Please ensure there is only one "Design package Energy Step Code file" when there is an "Energy Step Code" requirement'
+          nonunique_nickname: "There can only be one live requirement template with this custom name"
           taken: "must be unique"
         requirement_block:
           attributes:
             requirements:
-              incorrect_energy_step_code_dependencies: "missing or duplicate energy step code dependencies"
-              duplicate_architectural_drawing_file: "must have only one design package file for energy step code per requirement block"
+              incorrect_energy_step_code_dependencies: "missing or duplicate Energy Step Code dependencies"
+              duplicate_architectural_drawing_file: "must have only one design package file for Energy Step Code per requirement block"
         requirement:
           incorrect_requirement_schema: "Incorrect schema for %{requirement_code}"
           attributes:
             requirement_code:
-              incorrect_energy_requirement_code: "must be %{correct_requirement_code} for energy step code requirements, but received %{incorrect_requirement_code}"
+              incorrect_energy_requirement_code: "must be %{correct_requirement_code} for Energy Step Code requirements, but received %{incorrect_requirement_code}"
               incorrect_architectural_requirement_code: "must be %{correct_requirement_code} for architectural drawing requirements, but received %{incorrect_requirement_code}"
-              incorrect_architectural_drawing_file_attributes: "must have input type file, required true, and elective false for design package file for energy step code"
+              incorrect_architectural_drawing_file_attributes: "must have input type file, required true, and elective false for design package file for Energy Step Code"
         supporting_document:
           attributes:
             file:
               max_size: "must not be larger than %{max_size} bytes"
             data_key:
               duplicate: "file already exists for this permit application"
-              submission_version_data_key: "data key must be permit application pdf key or step code checklist pdf key if it belongs to a submission version"
+              submission_version_data_key: "data key must be permit application pdf key or Step Code checklist pdf key if it belongs to a submission version"
         user:
           attributes:
             base:
@@ -256,6 +257,9 @@ en:
       failure:
         title: Login failed
         message: Please try again or contact your adminstrator for support
+      service_unavailable:
+        title: Login service unavailable
+        message: The login service may be unavailable. Please contact BCeID or BC Services Card for support.
       bceid_failure_with_message:
         title: BCeID login failed
         message: "%{error_message}"
@@ -294,7 +298,7 @@ en:
     step_code:
       update_archived_error:
         title: Error
-        message: "Cannot update archived step code. Please restore it first."
+        message: "Cannot update archived Step Code. Please restore it first."
       jurisdiction_ltsa_error:
         title: Error
         message: Jurisdiction could not be determined. Please check back later.
@@ -367,12 +371,12 @@ en:
       submit_error:
         title: Error
         message: "Project meeting request could not be sent"
-      cancel_success:
+      withdraw_success:
         title: ""
-        message: "Project meeting request cancelled successfully!"
-      cancel_error:
+        message: "Project meeting request withdrawn successfully!"
+      withdraw_error:
         title: Error
-        message: "Project meeting request could not be cancelled"
+        message: "Project meeting request could not be withdrawn"
       reschedule_success:
         title: ""
         message: "Project meeting details updated successfully!"
@@ -385,6 +389,9 @@ en:
       invalid_transition:
         title: Error
         message: "Project meeting request status could not be updated"
+      calendar_unavailable:
+        title: Error
+        message: "A calendar invite is only available after a meeting time is confirmed"
     note:
       create_success:
         title: ""
@@ -827,13 +834,13 @@ en:
         message: "Only draft permit applications can be autofilled"
       autofill_part_3_step_code_success:
         title: ""
-        message: "Part 3 step code autofilled successfully"
+        message: "Part 3 Step Code autofilled successfully"
       autofill_part_3_step_code_error:
         title: Error
         message: "%{error_message}"
       autofill_part_9_step_code_success:
         title: ""
-        message: "Part 9 step code autofilled successfully"
+        message: "Part 9 Step Code autofilled successfully"
       autofill_part_9_step_code_error:
         title: Error
         message: "%{error_message}"
@@ -869,7 +876,7 @@ en:
     step_code:
       create_success:
         title: ""
-        message: "Step code created successfully!"
+        message: "Step Code created successfully!"
       create_error:
         title: Error
         message: "%{error_message}"
@@ -878,25 +885,25 @@ en:
         message: "Your Hot2000 file has been successfully imported. Please review the imported fields."
       update_success:
         title: ""
-        message: "Step code updated successfully!"
+        message: "Step Code updated successfully!"
       update_error:
         title: Error
         message: "%{error_message}"
       update_archived_error:
         title: Error
-        message: "Cannot update archived step code. Please restore it first."
+        message: "Cannot update archived Step Code. Please restore it first."
       restore_success:
         title: ""
-        message: "Step code restored successfully!"
+        message: "Step Code restored successfully!"
       restore_error:
         title: Error
-        message: "There was an error restoring the step code"
+        message: "There was an error restoring the Step Code"
       destroy_success:
         title: ""
-        message: "Step code archived successfully!"
+        message: "Step Code archived successfully!"
       destroy_error:
         title: Error
-        message: "There was an error archiving the step code"
+        message: "There was an error archiving the Step Code"
     report_document:
       share_success:
         title: ""
@@ -906,13 +913,13 @@ en:
         message: "Failed to share report: %{errors}"
       no_jurisdiction:
         title: Error
-        message: "This step code has no associated jurisdiction"
+        message: "This Step Code has no associated jurisdiction"
       not_found:
         title: Error
         message: "Report document not found"
       update_archived_error:
         title: Error
-        message: "Cannot update archived step code. Please restore it first."
+        message: "Cannot update archived Step Code. Please restore it first."
       destroy_success:
         title: ""
         message: "Report archived successfully"
@@ -928,13 +935,13 @@ en:
     step_code_checklist:
       show_archived_error:
         title: Error
-        message: "Cannot view checklist of archived step code. Please restore the step code first."
+        message: "Cannot view checklist of archived Step Code. Please restore the Step Code first."
       update_archived_error:
         title: Error
-        message: "Cannot update checklist of archived step code. Please restore the step code first."
+        message: "Cannot update checklist of archived Step Code. Please restore the Step Code first."
       update_success:
         title: ""
-        message: "Step code checklist updated!"
+        message: "Step Code checklist updated!"
       update_error:
         title: Error
         message: "%{error_message}"
@@ -1044,18 +1051,6 @@ en:
         title: Error
         message: "Could not find a template version to copy from"
     template_version:
-      update_draft_block_success:
-        title: ""
-        message: "Early access version block updated"
-      update_draft_block_error:
-        title: Error
-        message: "%{error_message}"
-      refresh_draft_success:
-        title: ""
-        message: "Early access version refreshed from current template"
-      refresh_draft_error:
-        title: Error
-        message: "%{error_message}"
       share_draft_success:
         title: ""
         message: "Early access version shared with %{count} previewer(s)"
@@ -1207,7 +1202,7 @@ en:
       energy_step_code: "Open or resume tool"
       select_energy_step_code: "Find and attach your report instead"
       autofill_contact: "Autofill"
-      or_use_existing_html: 'Started a report outside this permit application? <a href="#">use existing step code</a>'
+      or_use_existing_html: 'Started a report outside this permit application? <a href="#">use existing Step Code</a>'
       started_report_outside: "Started a report outside this permit application? "
     requirement_block:
       optional_block_confirmation_requirement_label: "I acknowledge that all fields in this block are either complete, or not applicable."
@@ -1295,7 +1290,7 @@ en:
       assignment_notification: "You have been assigned as a review collaborator on project %{project_number}."
       unassignment_notification: "You have been removed as a review collaborator on project %{project_number}."
     step_code:
-      report_generated: "Your step code report is ready to download"
+      report_generated: "Your Step Code report is ready to download"
     pre_check:
       completed_passed: "Your BC Code compliance pre-check for %{address} is now available."
       completed_failed: "Your BC Code compliance pre-check for %{address} is now available."
@@ -1307,9 +1302,10 @@ en:
       reminder: "Reminder: Review your jurisdiction resources"
     project_meeting:
       submitted: "Your project meeting request for project %{project_number} has been sent."
+      scheduled: "Your project meeting request for project %{project_number} has been accepted and a meeting time has been scheduled."
       rescheduled: "Your project meeting for project %{project_number} has been rescheduled."
     release_note:
-      publish_notification: "Version %{version} is now available. See what's new."
+      publish_notification: "Building Permit Hub has been updated. Read about changes and improvements in the release notes."
     integration_mapping:
       published_template_missing_requirements_mapping: "Missing API mapping: A new version of “%{template_label}” has been published on %{version_date}"
       scheduled_template_missing_requirements_mapping: "Missing API Mapping: A new version of “%{template_label}” has been scheduled for %{version_date}, 01:00hrs PST."
@@ -1317,5 +1313,5 @@ en:
   export:
     template_version_csv_headers: "Requirement Block,Requirement block tip,Question,Requirement code,Input type,Optional,Is elective,Elective enabled,Elective reason"
     requirement_summary_csv_headers: "Field Name,Is Elective,Used By (Number of Jurisdictions),Reason: Bylaw Count, Reason: Zoning count,Reason: Policy Count"
-    step_code_summary_csv_headers: "Jurisdiction,Permit type,Enabled/disabled,Energy step code level,Zero carbon level"
+    step_code_summary_csv_headers: "Jurisdiction,Permit type,Enabled/disabled,Energy Step Code level,Zero Carbon level"
     application_metrics_csv_headers: "Jurisdiction,Template,Tags,In draft,In inbox,Average days before first submit,Average days before latest submit"

@@ -1,4 +1,4 @@
-import { Box, Button, Heading, Text } from "@chakra-ui/react"
+import { Box, Button, Heading, HStack, Link, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -11,6 +11,7 @@ import {
   EMeetingRequestDocumentType,
   EProjectMeetingRequesterRelationship,
 } from "../../../../../types/enums"
+import { mailtoHref, telHref } from "../../../../../utils/utility-functions"
 import ProjectInfoRow from "../../../../shared/project/project-info-row"
 import { useProjectMeetingNavigation } from "../../use-project-meeting-navigation"
 import { activeDocumentsForType } from "../shared/document-utils"
@@ -26,7 +27,7 @@ export const ReviewSection = observer(({ meeting }: ReviewSectionProps) => {
   const { currentPermitProject } = usePermitProject()
   const { permitProjectId } = useParams<{ permitProjectId: string }>()
   const { projectMeetingStore, uiStore } = useMst()
-  const { navigateToSection } = useProjectMeetingNavigation()
+  const { navigateToSection, navigateToPrevious } = useProjectMeetingNavigation()
   const navigate = useNavigate()
   const authorizationDocuments = activeDocumentsForType(
     [...meeting.meetingRequestDocuments],
@@ -45,7 +46,7 @@ export const ReviewSection = observer(({ meeting }: ReviewSectionProps) => {
   const submit = async () => {
     const response = await projectMeetingStore.submitProjectMeeting(permitProjectId, meeting.id)
     if (response.ok) {
-      navigate(`/projects/${permitProjectId}/meetings/${meeting.id}/sent`)
+      navigate(`/projects/${permitProjectId}/meetings/${meeting.id}/sent`, { replace: true })
     } else {
       uiStore.flashMessage.show(EFlashMessageStatus.error, null, t("projectMeeting.validation.submitError"), 5000)
     }
@@ -58,12 +59,14 @@ export const ReviewSection = observer(({ meeting }: ReviewSectionProps) => {
         title={t("projectMeeting.projectInformation")}
         sectionKey="projectInformation"
         onNavigateToSection={navigateToSection}
+        showChangeLink={false}
       >
-        <ProjectInfoRow label={t("permitProject.overview.address")} value={currentPermitProject?.fullAddress} />
-        <ProjectInfoRow label={t("permitProject.overview.pid")} value={currentPermitProject?.pid} />
+        <ProjectInfoRow label={t("permitProject.overview.address")} value={currentPermitProject?.fullAddress} stacked />
+        <ProjectInfoRow label={t("permitProject.overview.pid")} value={currentPermitProject?.pid} stacked />
         <ProjectInfoRow
           label={t("permitProject.overview.jurisdictionName")}
           value={currentPermitProject?.jurisdiction?.disambiguatedName}
+          stacked
         />
       </ReviewSummarySection>
       <ReviewSummarySection
@@ -80,8 +83,16 @@ export const ReviewSection = observer(({ meeting }: ReviewSectionProps) => {
         sectionKey="discussion"
         onNavigateToSection={navigateToSection}
       >
-        <ProjectInfoRow label={t("projectMeeting.projectDescription")} value={meeting.projectDescription} />
-        <ProjectInfoRow label={t("projectMeeting.meetingNotes")} value={meeting.meetingNotes || t("ui.notProvided")} />
+        <ProjectInfoRow
+          label={t("projectMeeting.projectDescription")}
+          value={<Text whiteSpace="pre-wrap">{meeting.projectDescription}</Text>}
+          stacked
+        />
+        <ProjectInfoRow
+          label={t("projectMeeting.meetingNotes")}
+          value={<Text whiteSpace="pre-wrap">{meeting.meetingNotes || t("ui.notProvided")}</Text>}
+          stacked
+        />
       </ReviewSummarySection>
       {isAuthorizationRequired && (
         <ReviewSummarySection
@@ -114,11 +125,32 @@ export const ReviewSection = observer(({ meeting }: ReviewSectionProps) => {
         sectionKey="contactDetails"
         onNavigateToSection={navigateToSection}
       >
-        <ProjectInfoRow label={t("projectMeeting.contactName")} value={meeting.contactName} />
-        <ProjectInfoRow label={t("projectMeeting.contactEmail")} value={meeting.contactEmail} />
+        <ProjectInfoRow label={t("projectMeeting.contactName")} value={meeting.contactName} stacked />
+        <ProjectInfoRow
+          label={t("projectMeeting.contactEmail")}
+          value={
+            meeting.contactEmail ? (
+              <Link href={mailtoHref(meeting.contactEmail)} color="text.link">
+                {meeting.contactEmail}
+              </Link>
+            ) : (
+              t("ui.notProvided")
+            )
+          }
+          stacked
+        />
         <ProjectInfoRow
           label={t("projectMeeting.contactPhoneNumber")}
-          value={meeting.contactPhoneNumber || t("ui.notProvided")}
+          value={
+            meeting.contactPhoneNumber ? (
+              <Link href={telHref(meeting.contactPhoneNumber)} color="text.link">
+                {meeting.contactPhoneNumber}
+              </Link>
+            ) : (
+              t("ui.notProvided")
+            )
+          }
+          stacked
         />
       </ReviewSummarySection>
       {propertyInformationRequestsEnabled && (
@@ -135,9 +167,14 @@ export const ReviewSection = observer(({ meeting }: ReviewSectionProps) => {
           {t("projectMeeting.sendRequest")}
         </Heading>
         <Text mb={4}>{t("projectMeeting.sendRequestDescription")}</Text>
-        <Button variant="primary" onClick={submit} isDisabled={!meeting.isReadyForSubmission}>
-          {t("projectMeeting.acceptAndSend")}
-        </Button>
+        <HStack spacing={3}>
+          <Button variant="secondary" onClick={navigateToPrevious}>
+            {t("ui.back")}
+          </Button>
+          <Button variant="primary" onClick={submit} isDisabled={!meeting.isReadyForSubmission}>
+            {t("projectMeeting.acceptAndSend")}
+          </Button>
+        </HStack>
       </Box>
     </Box>
   )

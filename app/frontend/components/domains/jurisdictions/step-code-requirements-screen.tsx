@@ -16,10 +16,11 @@ import {
   UnorderedList,
   VStack,
 } from "@chakra-ui/react"
+import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
-import { useNavigate, useSearchParams } from "react-router-dom"
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom"
 import { useJurisdiction } from "../../../hooks/resources/use-jurisdiction"
 import { EClimateZone } from "../../../types/enums"
 import { ErrorScreen } from "../../shared/base/error-screen"
@@ -27,9 +28,11 @@ import { LoadingScreen } from "../../shared/base/loading-screen"
 import { Part3StepCodeRequirements } from "../../shared/part3-step-code-requirements"
 import { StepCodeRequirementsTable } from "../../shared/step-code-requirements-table"
 
+const requirementsUpdatedAtDateFormat = "MMMM d, yyyy"
+
 type TI18nPrefix = "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen"
 const i18nPrefix: TI18nPrefix = "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen"
-const climateZoneOrder = Object.values(EClimateZone)
+const HDD_SECTION_ID = "heating-degree-days"
 const climateZoneLabelKeys = {
   [EClimateZone.zone4]: `${i18nPrefix}.climateZoneLabels.zone4`,
   [EClimateZone.zone5]: `${i18nPrefix}.climateZoneLabels.zone5`,
@@ -39,17 +42,24 @@ const climateZoneLabelKeys = {
   [EClimateZone.zone8]: `${i18nPrefix}.climateZoneLabels.zone8`,
 } as const
 
-function getClimateZoneSortIndex(climateZone: string) {
-  const index = climateZoneOrder.indexOf(climateZone as EClimateZone)
-  return index === -1 ? climateZoneOrder.length : index
-}
-
 export const JurisdictionStepCodeRequirementsScreen = observer(() => {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const location = useLocation()
   const { currentJurisdiction, error } = useJurisdiction()
   const [searchParams] = useSearchParams()
   const addressSearched = searchParams.get("address")
+
+  useEffect(() => {
+    if (!currentJurisdiction || location.hash !== `#${HDD_SECTION_ID}`) return
+
+    // Content mounts after jurisdiction fetch; defer scroll until the section exists.
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById(HDD_SECTION_ID)?.scrollIntoView({ behavior: "smooth", block: "start" })
+    })
+
+    return () => window.cancelAnimationFrame(frame)
+  }, [currentJurisdiction, location.hash])
 
   const handleCheckAnotherAddress = () => {
     navigate("/project-readiness-tools/look-up-step-codes-requirements-for-your-project/")
@@ -61,9 +71,14 @@ export const JurisdictionStepCodeRequirementsScreen = observer(() => {
     return <LoadingScreen />
   }
 
-  const climateZones = [...currentJurisdiction.jurisdictionClimateZones].sort(
-    (a, b) => getClimateZoneSortIndex(a.climateZone) - getClimateZoneSortIndex(b.climateZone)
-  )
+  const heatingDegreeDays = [...currentJurisdiction.jurisdictionHeatingDegreeDays]
+
+  const requirementsLastUpdatedLabel = (date: Date | null) =>
+    t(`${i18nPrefix}.requirementsLastUpdated`, {
+      date: date
+        ? format(date, requirementsUpdatedAtDateFormat)
+        : t(`${i18nPrefix}.requirementsLastUpdatedNotAvailable`),
+    })
 
   const ActionButtons = (props: React.ComponentProps<typeof HStack>) => (
     <HStack spacing={4} {...props}>
@@ -94,6 +109,9 @@ export const JurisdictionStepCodeRequirementsScreen = observer(() => {
         <Heading as="h2" fontSize="2xl">
           {t(`${i18nPrefix}.smallSimpleBuildings`)}
         </Heading>
+        <Text fontSize="sm" color="text.secondary">
+          {requirementsLastUpdatedLabel(currentJurisdiction.part9StepRequirementsUpdatedAt)}
+        </Text>
         <Text fontSize="md">{t(`${i18nPrefix}.smallSimpleBuildingsDescription`)}</Text>
         <Text fontSize="md">{t(`${i18nPrefix}.part9BuildingsAreGenerally`)}</Text>
         <UnorderedList pl={4}>
@@ -108,6 +126,9 @@ export const JurisdictionStepCodeRequirementsScreen = observer(() => {
         <Heading as="h2" fontSize="2xl">
           {t(`${i18nPrefix}.largeComplexBuildings`)}
         </Heading>
+        <Text fontSize="sm" color="text.secondary">
+          {requirementsLastUpdatedLabel(currentJurisdiction.part3StepRequirementsUpdatedAt)}
+        </Text>
         <Text fontSize="md">{t(`${i18nPrefix}.largeComplexBuildingsDescription`)}</Text>
         <Text fontSize="md">{t(`${i18nPrefix}.part3BuildingsAreGenerally`)}</Text>
         <UnorderedList pl={4}>
@@ -119,16 +140,27 @@ export const JurisdictionStepCodeRequirementsScreen = observer(() => {
 
       <ActionButtons pt={8} />
 
-      <VStack align="start" spacing={5} mt={10}>
+      <VStack align="start" spacing={5} mt={10} id={HDD_SECTION_ID}>
         <Heading as="h2" fontSize="2xl">
           {t(`${i18nPrefix}.heatingDegreeDaysTitle`)}
         </Heading>
         <Text fontSize="lg">{t(`${i18nPrefix}.heatingDegreeDaysDescription`)}</Text>
-        {climateZones.length > 0 ? (
+        {heatingDegreeDays.length > 0 ? (
           <Box borderWidth={1} borderColor="border.light" borderRadius="sm" overflow="hidden" w="fit-content">
             <Table variant="simple" size="md">
               <Thead>
                 <Tr bg="greys.grey04">
+                  <Th
+                    borderBottomWidth={1}
+                    borderColor="border.light"
+                    fontWeight="bold"
+                    fontSize="sm"
+                    w="220px"
+                    h="46px"
+                    px={4}
+                  >
+                    {t(`${i18nPrefix}.heatingDegreeDaysColumnHeader`)}
+                  </Th>
                   <Th
                     borderBottomWidth={1}
                     borderColor="border.light"
@@ -149,29 +181,24 @@ export const JurisdictionStepCodeRequirementsScreen = observer(() => {
                     h="46px"
                     px={4}
                   >
-                    {t(`${i18nPrefix}.heatingDegreeDaysColumnHeader`)}
+                    {t(`${i18nPrefix}.locationNameColumnHeader`)}
                   </Th>
                 </Tr>
               </Thead>
               <Tbody>
-                {climateZones.map((zone) => {
-                  const climateZoneLabelKey = climateZoneLabelKeys[zone.climateZone as EClimateZone]
+                {heatingDegreeDays.map((row) => {
+                  const climateZoneLabelKey = climateZoneLabelKeys[row.climateZone as EClimateZone]
 
                   return (
-                    <Tr key={zone.id ?? zone.climateZone}>
+                    <Tr key={row.id ?? `${row.locationName}-${row.heatingDegreeDays}`}>
                       <Td borderTopWidth={1} borderColor="greys.grey02" fontSize="lg" w="220px" minH="68px" px={4}>
-                        {climateZoneLabelKey ? t(climateZoneLabelKey) : zone.climateZone}
+                        {row.heatingDegreeDays.toLocaleString()}
                       </Td>
-                      <Td
-                        borderTopWidth={1}
-                        borderColor="greys.grey02"
-                        fontSize="lg"
-                        w="220px"
-                        minH="68px"
-                        px={4}
-                        color={zone.heatingDegreeDays ? "text.primary" : "text.secondary"}
-                      >
-                        {zone.heatingDegreeDays?.toLocaleString() ?? t(`${i18nPrefix}.heatingDegreeDaysNotConfigured`)}
+                      <Td borderTopWidth={1} borderColor="greys.grey02" fontSize="lg" w="220px" minH="68px" px={4}>
+                        {climateZoneLabelKey ? t(climateZoneLabelKey) : row.climateZone}
+                      </Td>
+                      <Td borderTopWidth={1} borderColor="greys.grey02" fontSize="lg" w="220px" minH="68px" px={4}>
+                        {row.locationName}
                       </Td>
                     </Tr>
                   )

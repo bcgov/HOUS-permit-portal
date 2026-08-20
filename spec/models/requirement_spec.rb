@@ -195,7 +195,7 @@ RSpec.describe Requirement, type: :model, search: true do
         end
       end
 
-      context "energy step code related requirements" do
+      context "Energy Step Code related requirements" do
         it "ensures the requirement_code for an energy_step_code input_type is 'energy_step_code_tool_part_9'" do
           valid_requirement = build(:energy_step_code_tool_part_9_requirement)
           invalid_requirement =
@@ -293,7 +293,7 @@ RSpec.describe Requirement, type: :model, search: true do
             input_options: {
               "value_options" => [
                 {
-                  "label" => "Utilizing the digital step code tool",
+                  "label" => "Utilizing the digital Step Code tool",
                   "value" => "tool"
                 }
               ]
@@ -312,6 +312,24 @@ RSpec.describe Requirement, type: :model, search: true do
         end
       end
 
+      it "allows energy_step_code_method value_option label drift" do
+        requirement =
+          build(
+            :energy_step_code_method_requirement,
+            input_options: {
+              "value_options" => [
+                {
+                  "label" => "Utilizing the digital step code tool",
+                  "value" => "tool"
+                },
+                { "label" => "By file upload", "value" => "file" }
+              ]
+            }
+          )
+
+        expect(requirement).to be_valid
+      end
+
       it "ensures energy_step_code_report_file has correct required schema" do
         valid_requirement = build(:energy_step_code_report_file_requirement)
         invalid_requirements = [
@@ -328,7 +346,7 @@ RSpec.describe Requirement, type: :model, search: true do
             input_options: {
               "value_options" => [
                 {
-                  "label" => "Utilizing the digital step code tool",
+                  "label" => "Utilizing the digital Step Code tool",
                   "value" => "tool"
                 }
               ]

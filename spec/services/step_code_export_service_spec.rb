@@ -46,7 +46,7 @@ RSpec.describe StepCodeExportService do
   end
 
   describe "#part_3_metrics_csv" do
-    it "outputs a row for each submitted step code with a checklist" do
+    it "outputs a row for each submitted Step Code with a checklist" do
       checklist =
         instance_double(
           "Part3StepCode::Checklist",

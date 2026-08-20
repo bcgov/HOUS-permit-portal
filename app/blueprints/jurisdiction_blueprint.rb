@@ -40,6 +40,14 @@ class JurisdictionBlueprint < Blueprinter::Base
            :ltsa_matcher,
            :weather_location
 
+    field :part_9_step_requirements_updated_at do |jurisdiction, _options|
+      jurisdiction.part_9_step_requirements_updated_at
+    end
+
+    field :part_3_step_requirements_updated_at do |jurisdiction, _options|
+      jurisdiction.part_3_step_requirements_updated_at
+    end
+
     field :design_summer_temp do |jurisdiction, _options|
       jurisdiction.design_summer_temp&.to_f
     end
@@ -71,8 +79,8 @@ class JurisdictionBlueprint < Blueprinter::Base
                 blueprint: JurisdictionStepRequirementBlueprint
     association :part3_occupancy_required_steps,
                 blueprint: Part3OccupancyRequiredStepBlueprint
-    association :jurisdiction_climate_zones,
-                blueprint: JurisdictionClimateZoneBlueprint
+    association :jurisdiction_heating_degree_days,
+                blueprint: JurisdictionHeatingDegreeDayBlueprint
     association :service_partner_enrollments,
                 blueprint: JurisdictionServicePartnerEnrollmentBlueprint
   end

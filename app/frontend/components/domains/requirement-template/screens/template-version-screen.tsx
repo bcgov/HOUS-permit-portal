@@ -1,4 +1,4 @@
-import { Box, Flex, HStack } from "@chakra-ui/react"
+import { Alert, AlertIcon, Box, Flex, HStack, Text } from "@chakra-ui/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo, useState } from "react"
@@ -32,7 +32,7 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
   const { userStore, requirementTemplateStore } = useMst()
   const {
     rootContainerRef: rightContainerRef,
-    sectionRefs,
+    setSectionRef,
     sectionIdToHighlight: currentSectionId,
   } = useSectionHighlight({ sections: denormalizedTemplate?.requirementTemplateSections })
   const [isCollapsedAll, setIsCollapsedAll] = useState(false)
@@ -178,6 +178,12 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
             </HStack>
           </Flex>
           <FloatingHelpDrawer />
+          {isDraft && isSuperAdmin && (
+            <Alert status="info" m={6} mb={0} borderRadius="md" alignItems="flex-start">
+              <AlertIcon mt={1} />
+              <Text fontSize="sm">{t("templateVersionPreview.immutableVersionNotice")}</Text>
+            </Alert>
+          )}
 
           <SectionsDisplay
             sections={templateSections}
@@ -208,9 +214,5 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
     if (element) {
       element.scrollIntoView({ behavior: "smooth", block: "start" })
     }
-  }
-
-  function setSectionRef(el: HTMLElement, id: string) {
-    sectionRefs.current[id] = el
   }
 })

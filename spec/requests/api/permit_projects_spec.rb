@@ -73,7 +73,7 @@ RSpec.describe "Api::PermitProjects", type: :request, search: true do
     it "hides projects with active meetings when active_meeting is hide" do
       inactive_project = create(:permit_project, owner: owner)
       create(:project_meeting, :scheduled, permit_project: permit_project)
-      create(:project_meeting, :closed, permit_project: inactive_project)
+      create(:project_meeting, :withdrawn, permit_project: inactive_project)
       PermitProject.reindex
 
       post "/api/permit_projects/search",

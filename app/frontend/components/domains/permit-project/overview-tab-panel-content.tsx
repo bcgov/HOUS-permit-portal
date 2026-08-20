@@ -1,30 +1,15 @@
-import {
-  Box,
-  Button,
-  ButtonGroup,
-  Flex,
-  Grid,
-  Heading,
-  HStack,
-  Text,
-  Tooltip,
-  useDisclosure,
-  VStack,
-} from "@chakra-ui/react"
-import { CaretRight, Info, Pencil, SquaresFour, Steps } from "@phosphor-icons/react"
+import { Box, Button, ButtonGroup, Flex, Grid, Heading, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
+import { CaretRight, ClipboardText, Info, Pencil, SquaresFour, Steps } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { useSearchParams } from "react-router-dom"
 import { IPermitProject } from "../../../models/permit-project"
 import { useMst } from "../../../setup/root"
-import {
-  EFlashMessageStatus,
-  EPermitProjectRollupStatus,
-  EProjectPermitApplicationSortFields,
-} from "../../../types/enums"
+import { EProjectPermitApplicationSortFields } from "../../../types/enums"
 import { IOption } from "../../../types/types"
-import { CustomMessageBox } from "../../shared/base/custom-message-box"
+import { EmptyResultsBox } from "../../shared/grid/empty-results-box"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { FullscreenMapModal } from "../../shared/module-wrappers/fullscreen-map-modal"
 import { ProjectMap } from "../../shared/module-wrappers/project-map"
@@ -50,7 +35,8 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
   const { fullAddress, pid, jurisdiction, number } = permitProject
   const { t } = useTranslation()
   const { permitProjectStore, siteConfigurationStore } = useMst()
-  const [isEditing, setIsEditing] = useState(false)
+  const [searchParams] = useSearchParams()
+  const [isEditing, setIsEditing] = useState(() => searchParams.get("editProjectInfo") === "true")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { isOpen: isMapFullscreen, onOpen: onOpenMapFullscreen, onClose: onCloseMapFullscreen } = useDisclosure()
   const hasActiveProjectMeeting = !!permitProject.activeProjectMeeting
@@ -224,16 +210,14 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
             )}
           </Box>
           <Box>
-            <Tooltip label={t("permitProject.overview.mapVisualReferenceDisclaimer")} hasArrow>
-              <Box height={{ base: "200px", lg: "250px" }} borderRadius="md" overflow="hidden">
-                <ProjectMap
-                  coordinates={permitProject.mapPosition}
-                  pid={pid}
-                  parcelGeometry={permitProject.parcelGeometry}
-                  onOpenFullscreen={onOpenMapFullscreen}
-                />
-              </Box>
-            </Tooltip>
+            <Box height={{ base: "200px", lg: "250px" }} borderRadius="md" overflow="hidden">
+              <ProjectMap
+                coordinates={permitProject.mapPosition}
+                pid={pid}
+                parcelGeometry={permitProject.parcelGeometry}
+                onOpenFullscreen={onOpenMapFullscreen}
+              />
+            </Box>
           </Box>
         </Grid>
       </Box>
@@ -256,8 +240,8 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
             <AddPermitsButton permitProject={permitProject} />
           </HStack>
         </Flex>
-        {permitProject.rollupStatus === EPermitProjectRollupStatus.empty ? (
-          <CustomMessageBox status={EFlashMessageStatus.info} description={t("permitProject.index.empty")} mt={2} />
+        {permitProject.totalPermitsCount === 0 ? (
+          <EmptyResultsBox description={t("permitProject.index.empty")} icon={<ClipboardText size={18} />} mt={2} />
         ) : (
           <>
             <SearchGrid

@@ -1,5 +1,5 @@
 import { Box, Button, ButtonGroup, Circle, Flex, Heading, HStack, Icon, Text, VStack } from "@chakra-ui/react"
-import { ClipboardText, Columns, ListDashes, MagnifyingGlass } from "@phosphor-icons/react"
+import { ClipboardText, Columns, ListDashes } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -19,6 +19,7 @@ import {
   StatusFilter,
   UnreadFilter,
 } from "../filters"
+import { InboxSearchInput } from "../inbox-search-input"
 
 interface IProps {
   permitProject: IPermitProject
@@ -52,34 +53,7 @@ export const InboxPermitsTab = observer(function InboxPermitsTab({ permitProject
         </HStack>
 
         <VStack align="stretch" spacing={4}>
-          <Flex
-            w="full"
-            align="center"
-            gap={2}
-            border="1px solid"
-            borderColor="border.light"
-            borderRadius="md"
-            bg="white"
-            px={3}
-          >
-            <MagnifyingGlass size={18} weight="bold" color="var(--chakra-colors-gray-500)" aria-hidden />
-            <Box
-              as="input"
-              flex={1}
-              minW={0}
-              py={2}
-              border="none"
-              outline="none"
-              fontSize="sm"
-              placeholder={t("permitProject.searchPlaceholder")}
-              _placeholder={{ color: "text.secondary" }}
-              value={permitProject.query ?? ""}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                permitProject.setQuery(e.target.value)
-                permitProject.search()
-              }}
-            />
-          </Flex>
+          <InboxSearchInput placeholder={t("permitProject.searchPlaceholder")} searchModel={permitProject} />
 
           <Flex w="full" flexWrap="wrap" alignItems="center" columnGap={3} rowGap={3}>
             <ButtonGroup isAttached variant="outline" size="sm" flexShrink={0}>
@@ -130,6 +104,7 @@ export const InboxPermitsTab = observer(function InboxPermitsTab({ permitProject
                   permitProject.setRequirementTemplateIdFilter([])
                   permitProject.search()
                 }}
+                options={[...permitProject.requirementTemplateOptions]}
               />
               {permitProject.displayMode === EInboxDisplayMode.list && (
                 <StatusFilter

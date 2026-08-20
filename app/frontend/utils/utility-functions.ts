@@ -291,6 +291,22 @@ export function convertPhoneNumberToFormioFormat(phoneNumber: string): string {
   return `(${areaCode}) ${firstThree}-${lastFour}`
 }
 
+export function telHref(phone: string): string {
+  const digits = phone.replace(/[^\d+]/g, "")
+  return digits ? `tel:${digits}` : `tel:${phone}`
+}
+
+/** Optional field: blank is valid; otherwise 7–15 digits (E.164). */
+export function isValidPhoneNumber(value?: string | null): boolean {
+  if (!value?.trim()) return true
+  const digits = value.replace(/\D/g, "")
+  return digits.length >= 7 && digits.length <= 15
+}
+
+export function mailtoHref(email: string): string {
+  return `mailto:${email.trim()}`
+}
+
 export function isValueExtractorModuleConfiguration(moduleConfiguration?: TAutoComplianceModuleConfiguration) {
   return VALUE_EXTRACTION_AUTO_COMPLIANCE_TYPES.includes(moduleConfiguration?.type)
 }
@@ -380,6 +396,19 @@ export function urlForPath(path: string): string {
   const baseUrl = `${window.location.protocol}//${window.location.host}`
 
   return `${baseUrl}${normalizedPath}`
+}
+
+/**
+ * Same-origin app path only. Rejects open-redirect / XSS shapes in navigation targets
+ * (defense in depth for afterLoginPath; RR 7.18+ also hardens Link/navigate).
+ */
+export function isSafeAppPath(path: string): boolean {
+  if (typeof path !== "string" || path.length === 0) return false
+  if (!path.startsWith("/") || path.startsWith("//")) return false
+  if (path.includes("\\") || path.includes("@")) return false
+  // absolute URLs / scheme navigations (incl. /javascript:… path forms)
+  if (/^[a-z][a-z0-9+.-]*:/i.test(path) || /(?:^|\/)javascript:/i.test(path)) return false
+  return true
 }
 
 export async function downloadFileFromStorage(options: {

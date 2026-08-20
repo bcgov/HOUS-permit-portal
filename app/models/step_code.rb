@@ -25,6 +25,8 @@ class StepCode < ApplicationRecord
   public_recordable user_association: :creator
 
   after_commit :refresh_search_index, if: :saved_change_to_discarded_at
+  after_commit :ensure_permit_application_step_code_stage,
+               if: :saved_change_to_permit_application_id?
 
   # Associations
   belongs_to :permit_application, optional: true
@@ -139,5 +141,13 @@ class StepCode < ApplicationRecord
 
   def public_record?
     permit_application&.public_record? || false
+  end
+
+  private
+
+  def ensure_permit_application_step_code_stage
+    return if permit_application_id.blank? || discarded?
+
+    permit_application&.ensure_step_code_stage!(current_stage)
   end
 end

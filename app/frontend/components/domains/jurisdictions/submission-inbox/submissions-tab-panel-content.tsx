@@ -1,5 +1,5 @@
 import { Box, Button, ButtonGroup, Circle, Flex, Heading, Icon, Link, Text, VStack } from "@chakra-ui/react"
-import { Buildings, Columns, FileText, ListDashes, MagnifyingGlass } from "@phosphor-icons/react"
+import { Buildings, Columns, FileText, ListDashes } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useCallback, useEffect, useRef } from "react"
 import { useTranslation } from "react-i18next"
@@ -24,6 +24,7 @@ import {
   UnreadFilter,
 } from "./filters"
 import { InboxNoMatchingEmpty } from "./inbox-no-matching-empty"
+import { InboxSearchInput } from "./inbox-search-input"
 import { ProjectInboxTable } from "./project-inbox-table"
 import { ProjectKanbanBoard } from "./project-kanban-board"
 
@@ -150,14 +151,7 @@ export const SubmissionsTabPanelContent = observer(function SubmissionsTabPanelC
 
           {submissionInboxConfigured && (
             <VStack align="stretch" spacing={4} w="full">
-              <SearchInput
-                placeholder={t("submissionInbox.searchPlaceholder")}
-                value={activeSearchStore.query ?? ""}
-                onChange={(value) => {
-                  activeSearchStore.setQuery(value)
-                  activeSearchStore.search()
-                }}
-              />
+              <InboxSearchInput placeholder={t("submissionInbox.searchPlaceholder")} searchModel={activeSearchStore} />
 
               <Flex w="full" flexWrap="wrap" alignItems="center" gap={3}>
                 <ButtonGroup isAttached variant="outline" size="sm">
@@ -230,6 +224,7 @@ export const SubmissionsTabPanelContent = observer(function SubmissionsTabPanelC
                     activeSearchStore.setRequirementTemplateIdFilter([])
                     activeSearchStore.search()
                   }}
+                  options={[...activeSearchStore.requirementTemplateOptions]}
                 />
                 {displayMode === EInboxDisplayMode.list && viewMode === EInboxViewMode.applications && (
                   <StatusFilter
@@ -314,42 +309,6 @@ export const SubmissionsTabPanelContent = observer(function SubmissionsTabPanelC
     </Flex>
   )
 })
-
-export const SearchInput = ({
-  placeholder,
-  value,
-  onChange,
-}: {
-  placeholder: string
-  value: string
-  onChange: (value: string) => void
-}) => (
-  <Flex
-    w="full"
-    align="center"
-    gap={2}
-    border="1px solid"
-    borderColor="border.light"
-    borderRadius="md"
-    bg="white"
-    px={3}
-  >
-    <MagnifyingGlass size={18} weight="bold" color="var(--chakra-colors-gray-500)" aria-hidden />
-    <Box
-      as="input"
-      flex={1}
-      minW={0}
-      py={2}
-      border="none"
-      outline="none"
-      fontSize="sm"
-      placeholder={placeholder}
-      _placeholder={{ color: "text.secondary" }}
-      value={value}
-      onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
-    />
-  </Flex>
-)
 
 function RadioDot({ active }: { active: boolean }) {
   return (
@@ -446,9 +405,9 @@ const InboxContent = observer(function InboxContent({
 
     if (submissionInboxStore.inboxShowsNoResultsKanban) {
       return (
-        <Flex w="full" justify="flex-start" align="flex-start" minH="200px">
+        <Box w="full" minH="200px">
           <InboxNoMatchingEmpty viewMode={viewMode} onClearFilters={() => activeSearch.resetFilters()} />
-        </Flex>
+        </Box>
       )
     }
 

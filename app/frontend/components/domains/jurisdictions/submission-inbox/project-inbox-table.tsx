@@ -83,13 +83,8 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
         </Flex>
       )
     }
-    if (listShowsNoResults) {
-      return (
-        <Flex py={4} gridColumn="span 7" w="full" justify="flex-start">
-          <InboxNoMatchingEmpty viewMode={EInboxViewMode.projects} onClearFilters={() => searchStore.resetFilters()} />
-        </Flex>
-      )
-    }
+    if (listShowsNoResults) return null
+
     return projects.map((project) => (
       <Box
         key={project.id}
@@ -216,6 +211,15 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
           templateColumns="minmax(160px, 2fr) minmax(180px, 1.5fr) minmax(160px, 1fr) minmax(140px, 1fr) minmax(160px, 1fr) minmax(120px, 1fr) 72px"
           gridRowClassName="project-inbox-grid-row"
           overflow="visible"
+          isEmpty={listShowsNoResults}
+          emptyState={
+            <InboxNoMatchingEmpty
+              gridColumn="1 / -1"
+              m={4}
+              viewMode={EInboxViewMode.projects}
+              onClearFilters={() => searchStore.resetFilters()}
+            />
+          }
           sx={{
             ...gridStickyHeaderSx,
             ".project-inbox-grid-row:hover > div": {

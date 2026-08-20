@@ -158,6 +158,104 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitApplications,
             revisions_requested_permit_applications
         )
       end
+
+      it "excludes new_draft from ES totals so pages are not policy-stripped" do
+        controller.perform_jurisdiction_permit_application_search
+        search =
+          controller.instance_variable_get(
+            :@jurisdiction_permit_application_search
+          )
+        meta =
+          controller.instance_variable_get(
+            :@jurisdiction_permit_application_meta
+          )
+
+        expect(search.results.map(&:status)).not_to include("new_draft")
+        expect(meta[:total_count]).to eq(
+          submitted_permit_applications.size +
+            resubmitted_permit_applications.size +
+            revisions_requested_permit_applications.size
+        )
+        expect(meta[:status_counts].values.sum).to eq(meta[:total_count])
+      end
+
+      it "returns requirement_template_options for inbox applications only" do
+        unused =
+          create(:requirement_template, nickname: "Unused published permit")
+        create(
+          :template_version,
+          requirement_template: unused,
+          status: :published
+        )
+
+        # Factory template_versions reuse RequirementTemplate.first, so drafts
+        # and other-jurisdiction apps share the inbox template unless we
+        # attach dedicated ones here.
+        draft_only =
+          create(:requirement_template, nickname: "Draft only permit")
+        create(
+          :permit_application,
+          status: :new_draft,
+          submitter: submitter,
+          permit_project:
+            create(
+              :permit_project,
+              jurisdiction: jurisdiction,
+              owner: submitter
+            ),
+          template_version:
+            create(
+              :template_version,
+              requirement_template: draft_only,
+              status: :published
+            )
+        )
+
+        other_jur_only =
+          create(:requirement_template, nickname: "Other city permit")
+        create(
+          :permit_application,
+          :newly_submitted,
+          submitter: submitter,
+          permit_project:
+            create(
+              :permit_project,
+              jurisdiction: other_jurisdiction,
+              owner: submitter
+            ),
+          template_version:
+            create(
+              :template_version,
+              requirement_template: other_jur_only,
+              status: :published
+            )
+        )
+
+        PermitApplication.reindex
+
+        controller.perform_jurisdiction_permit_application_search
+        meta =
+          controller.instance_variable_get(
+            :@jurisdiction_permit_application_meta
+          )
+        option_ids =
+          meta[:requirement_template_options].map do |option|
+            option.with_indifferent_access[:value]
+          end
+
+        inbox_template_ids =
+          (
+            submitted_permit_applications + resubmitted_permit_applications +
+              revisions_requested_permit_applications
+          ).map { |pa| pa.template_version.requirement_template_id }.uniq
+
+        expect(option_ids).to match_array(inbox_template_ids)
+        expect(option_ids).not_to include(
+          draft_only.id,
+          other_jur_only.id,
+          unused.id
+        )
+      end
     end
 
     context "when searching for the jurisdictions permit applications as a review manager" do
@@ -398,6 +496,24 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitApplications,
         expect(meta[:status_counts].values.sum).to eq(meta[:total_count])
       end
 
+      it "scopes requirement_template_options in meta to that permit project" do
+        controller.perform_jurisdiction_permit_application_search
+        meta =
+          controller.instance_variable_get(
+            :@jurisdiction_permit_application_meta
+          )
+        option_ids =
+          meta[:requirement_template_options].map do |option|
+            option.with_indifferent_access[:value]
+          end
+        project_template_ids =
+          submitted_permit_applications
+            .map { |pa| pa.template_version.requirement_template_id }
+            .uniq
+
+        expect(option_ids).to match_array(project_template_ids)
+      end
+
       it "scopes unread_count in meta to that permit project" do
         controller.perform_jurisdiction_permit_application_search
         meta =
@@ -425,6 +541,21 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitApplications,
             ).results
 
           expect(results).to match_array(draft_permit_applications)
+        end
+      end
+
+      context "when the scoped permit project has no active meeting" do
+        let(:target_project) { draft_permit_applications.first.permit_project }
+
+        it "excludes draft applications for that permit project" do
+          controller.perform_jurisdiction_permit_application_search
+          results =
+            controller.instance_variable_get(
+              :@jurisdiction_permit_application_search
+            ).results
+
+          expect(results).to be_empty
+          expect(results).not_to include(*draft_permit_applications)
         end
       end
     end

@@ -26,8 +26,8 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
   const { currentPermitApplication } = usePermitApplication()
 
   useEffect(() => {
-    if (stepCodeId) return // step code was already created in the previous screen
-    if (!!currentStepCode) return // step code already exists
+    if (stepCodeId) return // Step Code was already created in the previous screen
+    if (!!currentStepCode) return // Step Code already exists
     if (!isStandaloneStepCode && !currentPermitApplication?.isFullyLoaded) return // wait for permit application to load
 
     if (!currentStepCode) {
@@ -35,7 +35,7 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
       // family and its pre-construction checklist. Later, expose staged
       // checklist creation/selection through StepCode.currentStage.
       createPart3StepCode({
-        permitApplicationId, // nil when the step code is not attached to a permit application
+        permitApplicationId, // nil when the Step Code is not attached to a permit application
         preConstructionChecklistAttributes: { sectionCompletionStatus: defaultSectionCompletionStatus },
       })
     }
@@ -49,7 +49,7 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
     }
   }, [section])
 
-  // Prevent viewing/editing archived step codes
+  // Prevent viewing/editing archived Step Codes
   if (currentStepCode?.isDiscarded) return <NotFoundScreen />
 
   return (
@@ -107,5 +107,5 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
   )
 })
 
-// base styles for step code form
+// base styles for Step Code form
 FormLabel.defaultProps = { fontWeight: "bold" }

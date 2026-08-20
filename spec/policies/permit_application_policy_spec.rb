@@ -315,6 +315,25 @@ RSpec.describe PermitApplicationPolicy do
       ).to be false
     end
 
+    it "download_supporting_documents_zip? mirrors generate_missing_pdfs?" do
+      record =
+        double(
+          "PermitApplication",
+          submitter: submitter,
+          jurisdiction_id: jurisdiction.id
+        )
+      policy = described_class.new(UserContext.new(submitter, sandbox), record)
+      expect(policy.download_supporting_documents_zip?).to eq(
+        policy.generate_missing_pdfs?
+      )
+
+      stranger_policy =
+        described_class.new(UserContext.new(create(:user), sandbox), record)
+      expect(stranger_policy.download_supporting_documents_zip?).to eq(
+        stranger_policy.generate_missing_pdfs?
+      )
+    end
+
     it "finalize_revision_requests? respects designated reviewer feature" do
       reviewer = create(:user, :review_manager, jurisdiction:)
       delegatee_rel = double("DelegateeRel", first: nil)
@@ -377,7 +396,7 @@ RSpec.describe PermitApplicationPolicy do
               "PermitApplication",
               jurisdiction_id: jurisdiction.id,
               submitted?: true,
-              visible_to_reviewers?: true
+              submitted_at_least_once?: true
             )
         )
       expect(
@@ -682,7 +701,7 @@ RSpec.describe PermitApplicationPolicy do
           jurisdiction: jurisdiction,
           sandbox: sandbox
         )
-      draft_with_closed_meeting =
+      draft_with_withdrawn_meeting =
         create(
           :permit_application,
           jurisdiction: jurisdiction,
@@ -696,8 +715,8 @@ RSpec.describe PermitApplicationPolicy do
       )
       create(
         :project_meeting,
-        :closed,
-        permit_project: draft_with_closed_meeting.permit_project
+        :withdrawn,
+        permit_project: draft_with_withdrawn_meeting.permit_project
       )
 
       resolved =
@@ -707,7 +726,7 @@ RSpec.describe PermitApplicationPolicy do
         ).resolve
 
       expect(resolved).to include(draft_with_active_meeting)
-      expect(resolved).not_to include(draft_with_closed_meeting)
+      expect(resolved).not_to include(draft_with_withdrawn_meeting)
     end
   end
 end

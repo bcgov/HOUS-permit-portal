@@ -343,12 +343,12 @@ class ExternalPermitApplicationService
     {
       id: "energy_step_code_tool",
       requirement_block_code: "energy_step_code_tool",
-      name: "Energy step code",
+      name: "Energy Step Code",
       description: "",
       requirements: [
         {
           id: "energy_step_code_documents",
-          name: "Energy step code documents",
+          name: "Energy Step Code documents",
           requirement_code: "energy_step_code_documents",
           type: :file,
           value: file_values

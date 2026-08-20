@@ -3,7 +3,14 @@ import { Instance, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
-import { EEnergyStep, EStepCodeChecklistStage, EStepCodeType, EZeroCarbonStep } from "../types/enums"
+import {
+  EEnergyStep,
+  EStepCodeChecklistStage,
+  EStepCodeStageStatus,
+  EStepCodeType,
+  EZeroCarbonStep,
+} from "../types/enums"
+import { stageStatusFor } from "../utils/step-code-stage-status"
 import { Part9StepCodeChecklistModel } from "./part-9-step-code-checklist"
 import { StepCodeBaseFields } from "./step-code-base"
 
@@ -46,8 +53,14 @@ export const Part9StepCodeModel = types.snapshotProcessor(
       get checklistForPdf() {
         return self.currentChecklist
       },
+      stageStatus(stage: EStepCodeChecklistStage = self.currentStage) {
+        return stageStatusFor(stage, self.checklists, self.stageCompletions)
+      },
+      isStageComplete(stage: EStepCodeChecklistStage = self.currentStage) {
+        return self.stageStatus(stage) === EStepCodeStageStatus.complete
+      },
       get isComplete() {
-        return self.currentChecklist?.isAllComplete
+        return self.isStageComplete()
       },
       get targetPath() {
         if (self.permitApplicationId) {
@@ -77,10 +90,13 @@ export const Part9StepCodeModel = types.snapshotProcessor(
     preProcessor(snapshot: any) {
       const processed = { ...snapshot }
       if (Array.isArray(processed.checklists)) {
-        const map = processed.checklists.reduce((acc: Record<string, any>, checklist: any) => {
-          if (checklist && checklist.id) acc[checklist.id] = checklist
-          return acc
-        }, {})
+        // Deep-merge each checklist so PA/list payloads (summary fields only) do not
+        // wipe extended client state (complianceReports, dataEntries, isLoaded).
+        const map: Record<string, any> = { ...(processed.checklistsMap || {}) }
+        processed.checklists.forEach((checklist: any) => {
+          if (!checklist?.id) return
+          map[checklist.id] = { ...(map[checklist.id] || {}), ...checklist }
+        })
         processed.checklistsMap = map
         delete processed.checklists
       } else if (processed.checklistsMap == null) {

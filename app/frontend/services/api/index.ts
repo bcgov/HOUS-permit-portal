@@ -81,6 +81,7 @@ import {
   ICopyRequirementTemplateFormData,
   IJurisdictionFilters,
   IJurisdictionSearchFilters,
+  INoteAttachmentDraft,
   IPart9ChecklistSelectOptions,
   IPermitApplicationInboxSearchFilters,
   IPermitApplicationSearchFilters,
@@ -149,6 +150,10 @@ export class Api {
 
   async reinviteUser(userId: string) {
     return this.client.post<ApiResponse<IUser>>(`/users/${userId}/reinvite`)
+  }
+
+  async login(params: { email: string; password: string }) {
+    return this.client.post("/login", { user: params })
   }
 
   async logout() {
@@ -394,12 +399,12 @@ export class Api {
     return this.client.post<ApiResponse<IPermitApplication>>(`/qa_tools/permit_applications/${id}/autofill`)
   }
 
-  async autofillQaPart3StepCode(id: string) {
-    return this.client.post<ApiResponse<IPart3StepCode>>(`/qa_tools/part_3_step_codes/${id}/autofill`)
+  async autofillQaPart3StepCode(id: string, params?: { stage?: string }) {
+    return this.client.post<ApiResponse<IPart3StepCode>>(`/qa_tools/part_3_step_codes/${id}/autofill`, params)
   }
 
-  async autofillQaPart9StepCode(id: string) {
-    return this.client.post<ApiResponse<IPart9StepCode>>(`/qa_tools/part_9_step_codes/${id}/autofill`)
+  async autofillQaPart9StepCode(id: string, params?: { stage?: string }) {
+    return this.client.post<ApiResponse<IPart9StepCode>>(`/qa_tools/part_9_step_codes/${id}/autofill`, params)
   }
 
   async updatePermitProject(id: string, params: IPermitProjectUpdateParams) {
@@ -418,12 +423,21 @@ export class Api {
     return this.client.get<INoteResponse>(`/project_meetings/${projectMeetingId}/notes`)
   }
 
-  async createProjectMeetingNote(projectMeetingId: string, body: string) {
-    return this.client.post<ApiResponse<INote>>(`/project_meetings/${projectMeetingId}/notes`, { note: { body } })
+  async createProjectMeetingNote(projectMeetingId: string, body: string, attachments: INoteAttachmentDraft[] = []) {
+    return this.client.post<ApiResponse<INote>>(`/project_meetings/${projectMeetingId}/notes`, {
+      note: {
+        body,
+        noteAttachmentDocumentsAttributes: attachments.map(({ file }) => ({ file })),
+      },
+    })
   }
 
   async downloadProjectMeetingNotesCsv(projectMeetingId: string) {
     return this.client.get<BlobPart>(`/project_meetings/${projectMeetingId}/notes/download_csv`)
+  }
+
+  async downloadProjectMeetingCalendar(projectMeetingId: string) {
+    return this.client.get<BlobPart>(`/project_meetings/${projectMeetingId}/download_calendar`)
   }
 
   async fetchPermitProjectNotes(permitProjectId: string) {
@@ -460,8 +474,8 @@ export class Api {
     })
   }
 
-  async cancelProjectMeeting(permitProjectId: string, id: string) {
-    return this.client.post<ApiResponse<IProjectMeeting>>(`/permit_projects/${permitProjectId}/meetings/${id}/cancel`)
+  async withdrawProjectMeeting(permitProjectId: string, id: string) {
+    return this.client.post<ApiResponse<IProjectMeeting>>(`/permit_projects/${permitProjectId}/meetings/${id}/withdraw`)
   }
 
   async rescheduleProjectMeeting(permitProjectId: string, id: string, params: Record<string, unknown>) {
@@ -761,6 +775,13 @@ export class Api {
     return this.client.post<never>(`/permit_applications/${id}/generate_missing_pdfs`)
   }
 
+  async downloadSupportingDocumentsZip(id: string, supportingDocumentIds: string[]) {
+    return this.client.post<IApiResponse<{ requestId: string }, {}>>(
+      `/permit_applications/${id}/download_supporting_documents_zip`,
+      { supportingDocumentIds }
+    )
+  }
+
   async submitPermitApplication(id, params) {
     return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/submit`, {
       permitApplication: params,
@@ -779,8 +800,8 @@ export class Api {
     return this.client.post<IRequirementTemplateResponse>(`/requirement_templates/search`, params)
   }
 
-  async fetchRequirementTemplatesForFilter() {
-    return this.client.get<IApiResponse<{ id: string; nickname: string }[], {}>>(`/requirement_templates/for_filter`)
+  async fetchRequirementTemplatesForFilter(params?: { permitProjectId?: string }) {
+    return this.client.get<IOptionResponse>(`/requirement_templates/for_filter`, params)
   }
 
   async fetchRequirementTemplate(id: string) {
@@ -979,7 +1000,6 @@ export class Api {
       changeSignificance?: string
       notificationScope?: string
       notifiedJurisdictionIds?: string[]
-      promoteBlockIds?: string[]
       sendAdvanceNotice?: boolean
       skipDateCheck?: boolean
     }
@@ -1384,6 +1404,10 @@ export class Api {
 
   async fetchReleaseNotes(params?: TSearchParams<EReleaseNoteSortFields>) {
     return this.client.post<ApiResponse<IReleaseNote[]>>(`/release_notes/search`, params)
+  }
+
+  async fetchReleaseNoteYears() {
+    return this.client.get<ApiResponse<number[]>>(`/release_notes/years`)
   }
 
   async fetchReleaseNote(id: string) {

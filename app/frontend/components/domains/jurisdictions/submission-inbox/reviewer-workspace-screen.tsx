@@ -35,10 +35,12 @@ export const ReviewerWorkspaceScreen = observer(function ReviewerWorkspaceScreen
   const meetingsUnreadCount = currentJurisdiction?.unviewedProjectMeetingsCount ?? 0
 
   const tabsData: IReviewerWorkspaceTabItem[] = useMemo(() => {
+    if (!jurisdictionId) return []
+
     const submissionsTab: IReviewerWorkspaceTabItem = {
       label: t("submissionInbox.submissions"),
       icon: Tray,
-      to: "submission-inbox",
+      to: `/jurisdictions/${jurisdictionId}/submission-inbox`,
       tabIndex: 0,
       badgeCount: submissionsUnreadCount,
     }
@@ -50,12 +52,12 @@ export const ReviewerWorkspaceScreen = observer(function ReviewerWorkspaceScreen
       {
         label: t("submissionInbox.meetings"),
         icon: CalendarBlank,
-        to: "meetings",
+        to: `/jurisdictions/${jurisdictionId}/meetings`,
         tabIndex: 1,
         badgeCount: meetingsUnreadCount,
       },
     ]
-  }, [projectMeetingsEnabled, submissionsUnreadCount, meetingsUnreadCount, t])
+  }, [jurisdictionId, projectMeetingsEnabled, submissionsUnreadCount, meetingsUnreadCount, t])
 
   if (error) return <ErrorScreen error={error} />
   if (!currentJurisdiction || !jurisdictionId) return <LoadingScreen />
@@ -65,16 +67,16 @@ export const ReviewerWorkspaceScreen = observer(function ReviewerWorkspaceScreen
 
   const getTabIndex = () => {
     if (location.pathname.includes(`/jurisdictions/${jurisdictionId}/meetings`)) {
-      return tabsData.find((tab) => tab.to === "meetings")?.tabIndex ?? 0
+      return tabsData.find((tab) => tab.to.endsWith("/meetings"))?.tabIndex ?? 0
     }
 
-    const tabIndex = tabsData.find((tab) => location.pathname.endsWith(`/${tab.to}`))?.tabIndex
+    const tabIndex = tabsData.find((tab) => location.pathname.startsWith(tab.to))?.tabIndex
     return tabIndex ?? 0
   }
 
   const handleTabChange = (index: number) => {
     startTransition(() => {
-      navigate(`/jurisdictions/${jurisdictionId}/${tabsData[index].to}`)
+      navigate(tabsData[index].to)
     })
   }
 

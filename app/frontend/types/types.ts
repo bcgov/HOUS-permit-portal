@@ -26,8 +26,10 @@ import {
   ENumberUnit,
   EPermitApplicationSocketEventTypes,
   EPermitApplicationStatus,
-  EPermitProjectRollupStatus,
   EProjectMeetingStatus,
+  EProjectState,
+  EReleaseNoteNotificationAudience,
+  EReleaseNoteType,
   ERequirementType,
   ESocketDomainTypes,
   ESocketEventTypes,
@@ -137,6 +139,8 @@ export type TSearchParams<IModelSortFields, IModelFilterFields = {}> = {
   perPage?: number
   showArchived?: boolean
   publishedOnly?: boolean
+  releaseType?: EReleaseNoteType
+  year?: number
   filters?: IModelFilterFields
   mode?: "list" | "kanban"
   perColumn?: number
@@ -382,6 +386,17 @@ export interface IMeetingRequestDocument extends IBaseFileAttachment {
   documentType?: EMeetingRequestDocumentType
 }
 
+export interface INoteAttachmentDocument extends IBaseFileAttachment {
+  noteId?: string
+  scanStatus?: EFileScanStatus
+}
+
+// A file uploaded to S3 cache but not yet persisted against a note.
+export interface INoteAttachmentDraft {
+  uppyFileId: string
+  file: IFileData
+}
+
 export interface IRequirementBlockCustomization {
   tip?: string
   resourceIds?: string[]
@@ -395,6 +410,8 @@ export interface ITemplateCustomization {
 }
 
 export interface IDownloadableFile {
+  id: string
+  dataKey?: string
   fileUrl: string
   fileName: string
   fileSize: number
@@ -482,13 +499,6 @@ export interface IReportDocumentNotificationObjectData {
   downloadUrl?: string
 }
 
-export type TSocketEventData =
-  | IPermitApplicationComplianceUpdate
-  | IPermitApplicationSupportingDocumentsUpdate
-  | IPermitBlockStatus
-  | INotification
-  | ITemplateVersionUpdate
-
 export interface IPermitApplicationSupportingDocumentsUpdate {
   id: string
   supportingDocuments: IPermitApplication["supportingDocuments"]
@@ -498,6 +508,22 @@ export interface IPermitApplicationSupportingDocumentsUpdate {
   zipfileUrl: null | string
   allSubmissionVersionCompletedSupportingDocuments?: IDownloadableFile[]
 }
+
+export interface IPermitApplicationSelectiveZipReady {
+  id: string
+  requestId: string
+  zipfileUrl?: string | null
+  zipfileName?: string | null
+  error?: boolean
+}
+
+export type TSocketEventData =
+  | IPermitApplicationComplianceUpdate
+  | IPermitApplicationSupportingDocumentsUpdate
+  | IPermitApplicationSelectiveZipReady
+  | IPermitBlockStatus
+  | INotification
+  | ITemplateVersionUpdate
 
 export interface IUserPushPayload {
   data: TSocketEventData
@@ -628,7 +654,7 @@ export interface IPermitApplicationSearchFilters {
 export interface IPermitProjectSearchFilters {
   query?: string
   showArchived?: boolean
-  rollupStatus?: EPermitProjectRollupStatus[]
+  state?: EProjectState[]
   activeMeeting?: string
   requirementTemplateIds?: string[]
   jurisdictionId?: string[]
@@ -655,6 +681,8 @@ export interface IPermitApplicationInboxSearchFilters {
 export interface IProjectMeetingInboxSearchFilters {
   status?: EProjectMeetingStatus[]
   unread?: string
+  confirmedDateFrom?: string
+  confirmedDateTo?: string
 }
 
 export interface IProjectAuditSearchFilters {
@@ -735,6 +763,7 @@ export interface IJurisdictionStepRequirement {
   default: boolean
   energyStepRequired: EEnergyStep
   zeroCarbonStepRequired: EZeroCarbonStep
+  description?: string | null
 }
 
 export interface IPart3OccupancyRequiredStep {
@@ -742,12 +771,14 @@ export interface IPart3OccupancyRequiredStep {
   occupancyKey: string
   energyStepRequired: number
   zeroCarbonStepRequired: number | null
+  description?: string | null
 }
 
-export interface IJurisdictionClimateZone {
+export interface IJurisdictionHeatingDegreeDay {
   id?: string
-  climateZone: string
-  heatingDegreeDays: number | null
+  locationName: string
+  heatingDegreeDays: number
+  climateZone?: string | null
 }
 
 export type TCreateRequirementTemplateFormData = {
@@ -768,7 +799,10 @@ export type TCreatePermitApplicationFormData = {
 }
 
 export type TReleaseNoteFormData = {
+  releaseType: EReleaseNoteType
+  notificationAudience: EReleaseNoteNotificationAudience
   version: string
+  name: string
   releaseDate: Date | null
   content: string
   releaseNotesUrl: string

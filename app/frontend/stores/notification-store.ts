@@ -15,6 +15,163 @@ import {
   IUserPushPayload,
 } from "../types/types"
 
+type LinkGenerator = (notification: INotification, currentUser: any) => ILinkData[]
+
+const showLink = (href: string): ILinkData[] => [{ text: t("ui.show"), href }]
+
+const linkGenerators: Partial<Record<ENotificationActionType, LinkGenerator>> = {
+  [ENotificationActionType.newTemplateVersionPublish]: (notification, currentUser) => {
+    const objectData = notification.objectData as ITemplateVersionNotificationObjectData
+    const linkData = [
+      {
+        text: t("permitApplication.reviewOutdatedSubmissionLink"),
+        href: `/projects`,
+      },
+    ]
+    if (currentUser?.isReviewStaff && currentUser.jurisdiction?.slug) {
+      linkData.push({
+        text: t("permitApplication.configureStepCodePageLink"),
+        href: `/jurisdictions/${currentUser.jurisdiction.slug}/configuration-management/energy-step`,
+      })
+    }
+    if (currentUser?.isManager) {
+      linkData.push({
+        text: t("permitApplication.reviewUpdatedEditLink"),
+        href: `/digital-building-permits/${objectData.templateVersionId}/edit?compare=true`,
+      })
+    }
+    return linkData
+  },
+
+  [ENotificationActionType.customizationUpdate]: () => [
+    {
+      text: t("permitApplication.reviewCustomizedSubmissionLink"),
+      href: `/projects`,
+    },
+  ],
+
+  [ENotificationActionType.submissionCollaborationAssignment]: (notification) => {
+    const { permitApplicationId } = notification.objectData as IPermitCollaborationNotificationObjectData
+    return showLink(`/permit-applications/${permitApplicationId}/edit`)
+  },
+
+  [ENotificationActionType.reviewCollaborationAssignment]: (notification) => {
+    const { permitApplicationId } = notification.objectData as IPermitCollaborationNotificationObjectData
+    return showLink(`/permit-applications/${permitApplicationId}`)
+  },
+
+  [ENotificationActionType.submissionCollaborationUnassignment]: () => [],
+  [ENotificationActionType.reviewCollaborationUnassignment]: () => [],
+
+  [ENotificationActionType.projectReviewCollaborationAssignment]: (notification) => {
+    const { permitProjectId, jurisdictionSlug } = notification.objectData as {
+      permitProjectId: string
+      jurisdictionSlug: string
+    }
+    return showLink(`/jurisdictions/${jurisdictionSlug}/submission-inbox/projects/${permitProjectId}/overview`)
+  },
+
+  [ENotificationActionType.projectReviewCollaborationUnassignment]: () => [],
+
+  [ENotificationActionType.permitBlockStatusReady]: (notification) => {
+    const data = notification.objectData as IPermitBlockStatusReadyNotificationObjectData
+    const href =
+      data?.collaborationType === ECollaborationType.review
+        ? `/permit-applications/${data.permitApplicationId}`
+        : `/permit-applications/${data.permitApplicationId}/edit`
+    return showLink(href)
+  },
+
+  [ENotificationActionType.publishedTemplateMissingRequirementsMapping]: (notification) => [
+    {
+      text: "View integration mapping",
+      href: `/api-settings/api-mappings/digital-building-permits/${(notification.objectData as ITemplateVersionNotificationObjectData).templateVersionId}/edit`,
+    },
+  ],
+
+  [ENotificationActionType.scheduledTemplateMissingRequirementsMapping]: (notification) => [
+    {
+      text: "View integration mapping",
+      href: `/api-settings/api-mappings/digital-building-permits/${(notification.objectData as ITemplateVersionNotificationObjectData).templateVersionId}/edit`,
+    },
+  ],
+
+  [ENotificationActionType.applicationSubmission]: (notification) =>
+    showLink(
+      `/permit-applications/${(notification.objectData as IPermitNotificationObjectData).permitApplicationId}/edit`
+    ),
+
+  [ENotificationActionType.applicationRevisionsRequest]: (notification) =>
+    showLink(
+      `/permit-applications/${(notification.objectData as IPermitNotificationObjectData).permitApplicationId}/edit`
+    ),
+
+  [ENotificationActionType.reviewStarted]: (notification) =>
+    showLink(
+      `/permit-applications/${(notification.objectData as IPermitNotificationObjectData).permitApplicationId}/edit`
+    ),
+
+  [ENotificationActionType.stepCodeReportGenerated]: (notification) => {
+    const reportData = notification.objectData as any
+    const filename = reportData?.filename || t("ui.download")
+    const href = reportData?.downloadUrl || "/step-codes"
+    return [{ text: `${t("ui.download")} ${filename}`, href }]
+  },
+
+  [ENotificationActionType.preCheckSubmitted]: (notification) => {
+    const { preCheckId } = notification.objectData as any
+    return showLink(`/pre-checks/${preCheckId}/edit/results-summary`)
+  },
+
+  [ENotificationActionType.preCheckCompleted]: (notification) => {
+    const { preCheckId } = notification.objectData as any
+    return showLink(`/pre-checks/${preCheckId}/edit/results-summary`)
+  },
+
+  [ENotificationActionType.fileUploadFailed]: (notification) => {
+    const permitApplicationId = (notification.objectData as any)?.permitApplicationId
+    if (!permitApplicationId) return []
+    return [
+      {
+        text: t("permitApplication.goToApplication"),
+        href: `/permit-applications/${permitApplicationId}/edit`,
+      },
+    ]
+  },
+
+  [ENotificationActionType.resourceReminder]: (notification) => {
+    const jurisdictionId = (notification.objectData as any)?.jurisdictionId
+    if (!jurisdictionId) return []
+    return showLink(`/jurisdictions/${jurisdictionId}/configuration-management/resources`)
+  },
+
+  [ENotificationActionType.projectMeetingSubmitted]: (notification) => {
+    const { permitProjectId, projectMeetingId } = notification.objectData as IProjectMeetingNotificationObjectData
+    return showLink(`/projects/${permitProjectId}/meetings/${projectMeetingId}/sent`)
+  },
+
+  [ENotificationActionType.projectMeetingScheduled]: (notification) => {
+    const { permitProjectId, projectMeetingId } = notification.objectData as IProjectMeetingNotificationObjectData
+    return showLink(`/projects/${permitProjectId}/meetings/${projectMeetingId}`)
+  },
+
+  [ENotificationActionType.projectMeetingRescheduled]: (notification) => {
+    const { permitProjectId, projectMeetingId } = notification.objectData as IProjectMeetingNotificationObjectData
+    return showLink(`/projects/${permitProjectId}/meetings/${projectMeetingId}`)
+  },
+
+  [ENotificationActionType.releaseNotePublish]: (notification) => {
+    const releaseNoteId = (notification.objectData as { releaseNoteId?: string })?.releaseNoteId
+    if (!releaseNoteId) return []
+    return [
+      {
+        text: t("notification.releaseNotePublish.viewReleaseNotes"),
+        href: `/release-notes#release-note-${releaseNoteId}`,
+      },
+    ]
+  },
+}
+
 export const NotificationStoreModel = types
   .model("NotificationStoreModel")
   .props({
@@ -48,190 +205,7 @@ export const NotificationStoreModel = types
         .filter((n) => criticalNotificationTypes.includes(n.actionType))
     },
     generateSpecificLinkData(notification: INotification): ILinkData[] {
-      const currentUser = self.rootStore.userStore.currentUser
-      const jurisdiction = currentUser.jurisdiction
-      let objectData = notification.objectData
-      if (notification.actionType === ENotificationActionType.newTemplateVersionPublish) {
-        const linkData = [
-          {
-            text: t("permitApplication.reviewOutdatedSubmissionLink"),
-            href: `/projects`,
-          },
-        ]
-        if (currentUser?.isReviewStaff && currentUser.jurisdiction?.slug) {
-          linkData.push({
-            text: t("permitApplication.configureStepCodePageLink"),
-            href: `/jurisdictions/${jurisdiction.slug}/configuration-management/energy-step`,
-          })
-        }
-        if (currentUser.isManager) {
-          linkData.push({
-            text: t("permitApplication.reviewUpdatedEditLink"),
-            href: `/digital-building-permits/${(objectData as ITemplateVersionNotificationObjectData).templateVersionId}/edit?compare=true`,
-          })
-        }
-
-        return linkData
-      } else if (notification.actionType === ENotificationActionType.customizationUpdate) {
-        return [
-          {
-            text: t("permitApplication.reviewCustomizedSubmissionLink"),
-            href: `/projects`,
-          },
-        ]
-      } else if (
-        [
-          ENotificationActionType.submissionCollaborationAssignment,
-          ENotificationActionType.submissionCollaborationUnassignment,
-          ENotificationActionType.reviewCollaborationAssignment,
-          ENotificationActionType.reviewCollaborationUnassignment,
-        ].includes(notification.actionType)
-      ) {
-        const collaborationData = objectData as IPermitCollaborationNotificationObjectData
-        return [
-          ENotificationActionType.submissionCollaborationAssignment,
-          ENotificationActionType.reviewCollaborationAssignment,
-        ].includes(notification.actionType)
-          ? [
-              {
-                text: t("ui.show"),
-                href:
-                  notification.actionType === ENotificationActionType.submissionCollaborationAssignment
-                    ? `/permit-applications/${collaborationData.permitApplicationId}/edit`
-                    : `/permit-applications/${collaborationData.permitApplicationId}`,
-              },
-            ]
-          : []
-      } else if (
-        [
-          ENotificationActionType.projectReviewCollaborationAssignment,
-          ENotificationActionType.projectReviewCollaborationUnassignment,
-        ].includes(notification.actionType)
-      ) {
-        const projectData = objectData as { permitProjectId: string; jurisdictionSlug: string }
-        return notification.actionType === ENotificationActionType.projectReviewCollaborationAssignment
-          ? [
-              {
-                text: t("ui.show"),
-                href: `/jurisdictions/${projectData.jurisdictionSlug}/submission-inbox/projects/${projectData.permitProjectId}/overview`,
-              },
-            ]
-          : []
-      } else if (notification.actionType === ENotificationActionType.permitBlockStatusReady) {
-        const collaborationData = objectData as IPermitBlockStatusReadyNotificationObjectData
-        return [
-          {
-            text: t("ui.show"),
-            href:
-              collaborationData?.collaborationType === ECollaborationType.review
-                ? `/permit-applications/${collaborationData.permitApplicationId}`
-                : `/permit-applications/${collaborationData.permitApplicationId}/edit`,
-          },
-        ]
-      } else if (
-        [
-          ENotificationActionType.publishedTemplateMissingRequirementsMapping,
-          ENotificationActionType.scheduledTemplateMissingRequirementsMapping,
-        ].includes(notification.actionType)
-      ) {
-        return [
-          {
-            text: "View integration mapping",
-            href: `/api-settings/api-mappings/digital-building-permits/${(objectData as ITemplateVersionNotificationObjectData).templateVersionId}/edit`,
-          },
-        ]
-      } else if (
-        notification.actionType === ENotificationActionType.applicationSubmission ||
-        notification.actionType === ENotificationActionType.applicationRevisionsRequest ||
-        notification.actionType === ENotificationActionType.reviewStarted
-      ) {
-        return [
-          {
-            text: t("ui.show"),
-            href: `/permit-applications/${(notification.objectData as IPermitNotificationObjectData).permitApplicationId}/edit`,
-          },
-        ]
-      } else if (notification.actionType === ENotificationActionType.stepCodeReportGenerated) {
-        const reportData = notification.objectData as any
-        const filename = reportData?.filename || t("ui.download")
-        // Use direct S3 url if provided, otherwise route to step-codes listing where latest report shows a Download button
-        const href = reportData?.downloadUrl || "/step-codes"
-        return [
-          {
-            text: `${t("ui.download")} ${filename}`,
-            href,
-          },
-        ]
-      } else if (notification.actionType === ENotificationActionType.preCheckSubmitted) {
-        const preCheckData = notification.objectData as any
-        return [
-          {
-            text: t("ui.show"),
-            href: `/pre-checks/${preCheckData?.preCheckId}/edit/results-summary`,
-          },
-        ]
-      } else if (notification.actionType === ENotificationActionType.preCheckCompleted) {
-        const preCheckData = notification.objectData as any
-        return [
-          {
-            text: t("ui.show"),
-            href: `/pre-checks/${preCheckData?.preCheckId}/edit/results-summary`,
-          },
-        ]
-      } else if (notification.actionType === ENotificationActionType.fileUploadFailed) {
-        const fileUploadData = notification.objectData as any
-        const permitApplicationId = fileUploadData?.permitApplicationId
-        if (!permitApplicationId) {
-          return []
-        }
-
-        return [
-          {
-            text: t("permitApplication.goToApplication"),
-            href: `/permit-applications/${permitApplicationId}/edit`,
-          },
-        ]
-      } else if (notification.actionType === ENotificationActionType.resourceReminder) {
-        const data = notification.objectData as any
-        const jurisdictionId = data?.jurisdictionId
-        if (!jurisdictionId) {
-          return []
-        }
-        // Assuming link goes to jurisdiction resources page
-        return [
-          {
-            text: t("ui.show"),
-            href: `/jurisdictions/${jurisdictionId}/configuration-management/resources`,
-          },
-        ]
-      } else if (
-        [ENotificationActionType.projectMeetingSubmitted, ENotificationActionType.projectMeetingRescheduled].includes(
-          notification.actionType
-        )
-      ) {
-        const projectMeetingData = notification.objectData as IProjectMeetingNotificationObjectData
-        return [
-          {
-            text: t("ui.show"),
-            href:
-              notification.actionType === ENotificationActionType.projectMeetingSubmitted
-                ? `/projects/${projectMeetingData.permitProjectId}/meetings/${projectMeetingData.projectMeetingId}/sent`
-                : `/projects/${projectMeetingData.permitProjectId}/meetings/${projectMeetingData.projectMeetingId}`,
-          },
-        ]
-      } else if (notification.actionType === ENotificationActionType.releaseNotePublish) {
-        const data = notification.objectData as { releaseNoteId?: string }
-        const releaseNoteId = data?.releaseNoteId
-        if (!releaseNoteId) {
-          return []
-        }
-        return [
-          {
-            text: t("ui.show"),
-            href: `/release-notes#release-note-${releaseNoteId}`,
-          },
-        ]
-      }
+      return linkGenerators[notification.actionType]?.(notification, self.rootStore.userStore.currentUser) ?? []
     },
   }))
   .actions((self) => ({

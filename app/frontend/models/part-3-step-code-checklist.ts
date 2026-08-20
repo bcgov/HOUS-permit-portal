@@ -34,6 +34,7 @@ import {
   IStepCodeOccupancy,
   TPart3NavLinkKey,
 } from "../types/types"
+import { canMarkChecklistComplete } from "../utils/can-mark-checklist-complete"
 import { markParentStepCodeReportsStale } from "./step-code-base"
 
 export const Part3StepCodeChecklistModel = types
@@ -127,9 +128,11 @@ export const Part3StepCodeChecklistModel = types
     isComplete(key: TPart3NavLinkKey): boolean {
       return self.sectionCompletionStatus[key]?.complete
     },
-    get isAllComplete(): boolean {
-      if (!self.sectionCompletionStatus) return false
-      return Object.values(self.sectionCompletionStatus).every((status) => (status.relevant ? status.complete : true))
+    get isMarkedComplete(): boolean {
+      return self.status === EStepCodeChecklistStatus.complete
+    },
+    get canMarkComplete(): boolean {
+      return canMarkChecklistComplete(self.sectionCompletionStatus)
     },
     isRelevant(key: TPart3NavLinkKey): boolean {
       return self.sectionCompletionStatus[key]?.relevant
@@ -232,15 +235,21 @@ export const Part3StepCodeChecklistModel = types
       let updatedStatus = R.clone(self.sectionCompletionStatus)
       updatedStatus[key] = { complete: true, relevant: true }
 
+      if (key === "report" && !self.canMarkComplete) return false
+
+      const values: Record<string, any> = { sectionCompletionStatus: updatedStatus }
+      if (key === "report") {
+        values.status = EStepCodeChecklistStatus.complete
+      }
+
       const requestOptions = key === "stepCodeSummary" ? { reportGenerationRequested: true } : undefined
 
-      const response = yield self.environment.api.updatePart3Checklist(
-        self.id,
-        { sectionCompletionStatus: updatedStatus },
-        requestOptions
-      )
+      const response = yield self.environment.api.updatePart3Checklist(self.id, values, requestOptions)
       if (response.ok) {
         self.sectionCompletionStatus = updatedStatus
+        if (key === "report") {
+          self.status = EStepCodeChecklistStatus.complete
+        }
         if (key !== "report") {
           markParentStepCodeReportsStale(self)
         }

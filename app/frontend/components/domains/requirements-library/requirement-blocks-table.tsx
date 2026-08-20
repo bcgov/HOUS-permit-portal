@@ -4,6 +4,11 @@ import {
   Flex,
   HStack,
   ListItem,
+  Popover,
+  PopoverBody,
+  PopoverContent,
+  PopoverTrigger,
+  Portal,
   StackProps,
   Tag,
   Text,
@@ -23,12 +28,9 @@ import { IRequirementBlockStoreModel } from "../../../stores/requirement-block-s
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
-import { ElectiveTag } from "../../shared/elective-tag"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { SearchGridItem } from "../../shared/grid/search-grid-item"
-import { HasAutomatedComplianceTag } from "../../shared/has-automated-compliance-tag"
-import { HasConditionalTag } from "../../shared/has-conditional-tag"
-import { HasDataValidationTag } from "../../shared/has-data-validation-tag"
+import { SearchGridRow } from "../../shared/grid/search-grid-row"
 import { GridHeaders } from "./grid-header"
 import { RequirementsBlockModal } from "./requirements-block-modal"
 
@@ -39,8 +41,6 @@ interface IProps extends Partial<StackProps> {
   /** When set (e.g. nested drawer), uses in-memory search and skips URL sync. */
   searchModel?: TRequirementBlocksTableSearchModel
 }
-
-const ROW_CLASS_NAME = "requirements-library-grid-row"
 
 export const RequirementBlocksTable = observer(function RequirementBlocksTable({
   renderActionButton,
@@ -72,18 +72,24 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
 
   return (
     <VStack as={"article"} spacing={5} {...containerProps}>
-      <SearchGrid gridRowClassName={ROW_CLASS_NAME} templateColumns="repeat(6, 1fr)" pos={"relative"}>
+      <SearchGrid
+        templateColumns="minmax(12rem, 3fr) minmax(140px, 1fr) 180px 170px 88px"
+        pos={"relative"}
+        sx={{
+          "[role='row']:not(:last-child) > [role='cell']": { borderBottom: "none" },
+        }}
+      >
         <GridHeaders searchModel={searchModel} />
 
         {isSearching ? (
-          <Flex py={50} gridColumn={"span 6"}>
+          <Flex py={50} gridColumn={"span 5"}>
             <SharedSpinner />
           </Flex>
         ) : (
           tableRequirementBlocks.map((requirementBlock) => {
             return (
-              <Box key={requirementBlock.id} className={ROW_CLASS_NAME} role={"row"} display={"contents"}>
-                <SearchGridItem minW="250px" maxW="280px">
+              <SearchGridRow key={requirementBlock.id}>
+                <SearchGridItem>
                   <Flex direction="column" overflow="hidden">
                     <Text as={"span"} fontWeight={700} noOfLines={2} title={requirementBlock.name}>
                       {requirementBlock.name}
@@ -93,7 +99,7 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
                     </Text>
                   </Flex>
                 </SearchGridItem>
-                <SearchGridItem maxW="150px" minW="120px">
+                <SearchGridItem>
                   <HStack as={"ul"} wrap={"wrap"} spacing={1}>
                     {requirementBlock.associations.map((association) => (
                       <Tag key={association} as={"li"} bg={"greys.grey03"} color={"text.secondary"} fontSize={"xs"}>
@@ -102,43 +108,20 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
                     ))}
                   </HStack>
                 </SearchGridItem>
-                <SearchGridItem pr={0} minW="180px" maxW="220px">
-                  <UnorderedList ml={0} pl={0} w={"full"}>
-                    {requirementBlock.requirements.map((requirement) => {
-                      return (
-                        <ListItem
-                          key={requirement.id}
-                          color={"text.secondary"}
-                          fontSize={"xs"}
-                          mb="1"
-                          noOfLines={1}
-                          title={requirement.label}
-                        >
-                          {requirement.label}
-                        </ListItem>
-                      )
-                    })}
-                  </UnorderedList>
+                <SearchGridItem justifyContent="center">
+                  <FormFieldsCountCell requirementBlock={requirementBlock} />
                 </SearchGridItem>
-                <SearchGridItem maxW="120px" minW="100px" fontSize={"sm"}>
+                <SearchGridItem fontSize={"sm"}>
                   {format(requirementBlock.updatedAt, datefnsTableDateFormat)}
                 </SearchGridItem>
-                <SearchGridItem maxW="180px" minW="150px">
-                  <HStack flexWrap={"wrap"} maxW={"full"} alignSelf={"middle"}>
-                    {requirementBlock.hasAnyElective && <ElectiveTag hasElective />}
-                    {requirementBlock.hasAnyConditional && <HasConditionalTag />}
-                    {requirementBlock.hasAnyDataValidation && <HasDataValidationTag />}
-                    {requirementBlock.hasAutomatedCompliance && <HasAutomatedComplianceTag />}
-                  </HStack>
-                </SearchGridItem>
-                <SearchGridItem justifyContent={"center"} minW="100px" flexShrink={0}>
+                <SearchGridItem justifyContent={"center"}>
                   {renderActionButton ? (
                     renderActionButton({ requirementBlock })
                   ) : (
                     <RequirementsBlockModal withOptionsMenu requirementBlock={requirementBlock} />
                   )}
                 </SearchGridItem>
-              </Box>
+              </SearchGridRow>
             )
           })
         )}
@@ -161,3 +144,51 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
     </VStack>
   )
 })
+
+function FormFieldsCountCell({ requirementBlock }: { requirementBlock: IRequirementBlock }) {
+  const count = requirementBlock.requirements.length
+  const countTag = (
+    <Tag
+      bg="greys.grey03"
+      color="text.secondary"
+      fontSize="xs"
+      cursor={count > 0 ? "help" : undefined}
+      _hover={count > 0 ? { bg: "greys.grey02" } : undefined}
+    >
+      {count}
+    </Tag>
+  )
+
+  if (count === 0) return countTag
+
+  return (
+    <Popover trigger="hover" placement="left-start" isLazy openDelay={200} closeDelay={100}>
+      <PopoverTrigger>
+        <Box as="span" display="inline-block">
+          {countTag}
+        </Box>
+      </PopoverTrigger>
+      <Portal>
+        <PopoverContent
+          // chakra-overrides.scss sets .chakra-popover__popper to z-index 20 !important, below Drawer (1400)
+          rootProps={{ sx: { zIndex: "1500 !important" } }}
+          w="auto"
+          minW="200px"
+          maxW="320px"
+          maxH="240px"
+          overflowY="auto"
+        >
+          <PopoverBody p={3}>
+            <UnorderedList ml={0} pl={4} spacing={1}>
+              {requirementBlock.requirements.map((requirement) => (
+                <ListItem key={requirement.id} color="text.secondary" fontSize="xs">
+                  {requirement.label}
+                </ListItem>
+              ))}
+            </UnorderedList>
+          </PopoverBody>
+        </PopoverContent>
+      </Portal>
+    </Popover>
+  )
+}

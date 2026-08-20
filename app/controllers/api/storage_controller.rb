@@ -19,6 +19,7 @@ class Api::StorageController < Api::ApplicationController
     "RequirementDocument" => RequirementDocument,
     "ProjectDocument" => ProjectDocument,
     "MeetingRequestDocument" => MeetingRequestDocument,
+    "NoteAttachmentDocument" => NoteAttachmentDocument,
     "ResourceDocument" => ResourceDocument,
     "ReportDocument" => ReportDocument,
     "DesignDocument" => DesignDocument,

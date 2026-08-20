@@ -10,7 +10,7 @@ module StepCodeChecklistControllerConcern
                  {
                    status: status,
                    log_args: {
-                     errors: "Cannot #{action} checklist of archived step code"
+                     errors: "Cannot #{action} checklist of archived Step Code"
                    }
                  }
     true

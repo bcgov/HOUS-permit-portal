@@ -12,6 +12,7 @@ import {
   EStepCodeType,
 } from "../types/enums"
 import { IPart9NavLink, IPart9SectionCompletionStatus, TPart9NavLinkKey } from "../types/types"
+import { areRelevantSectionsCompleteExcept, canMarkChecklistComplete } from "../utils/can-mark-checklist-complete"
 import { renameKeys } from "../utils/utility-functions"
 import { markParentStepCodeReportsStale } from "./step-code-base"
 import { StepCodeBuildingCharacteristicsSummaryModel } from "./step-code-building-characteristic-summary"
@@ -146,15 +147,20 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
       isComplete(key: TPart9NavLinkKey): boolean {
         return self.sectionCompletionStatus[key]?.complete
       },
-      get isAllComplete() {
-        if (!self.sectionCompletionStatus) return false
-        return Object.values(self.sectionCompletionStatus).every((status) => (status.relevant ? status.complete : true))
-      },
       isRelevant(key: TPart9NavLinkKey): boolean {
         return self.sectionCompletionStatus[key]?.relevant
       },
       get isMarkedComplete() {
         return self.status == EStepCodeChecklistStatus.complete
+      },
+      get canMarkComplete() {
+        return canMarkChecklistComplete(self.sectionCompletionStatus)
+      },
+      get canAccessReview() {
+        return areRelevantSectionsCompleteExcept(self.sectionCompletionStatus, ["review", "report"])
+      },
+      get canAccessReport() {
+        return canMarkChecklistComplete(self.sectionCompletionStatus)
       },
       get stepRequirementId() {
         const report =
@@ -194,7 +200,8 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
 
         const values: Record<string, any> = { sectionCompletionStatus: updatedStatus }
         const requestOptions = key === "review" ? { reportGenerationRequested: true } : undefined
-        if (key === "review") {
+        if (key === "report") {
+          if (!self.canMarkComplete) return false
           values.status = EStepCodeChecklistStatus.complete
         }
 

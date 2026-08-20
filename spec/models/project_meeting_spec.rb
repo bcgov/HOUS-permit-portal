@@ -72,6 +72,34 @@ RSpec.describe ProjectMeeting, type: :model do
       expect(meeting).to be_valid
     end
 
+    it "allows changing requester relationship on a submitted meeting before auth docs are uploaded" do
+      meeting =
+        create(
+          :project_meeting,
+          :open,
+          requester_relationship: :owner_or_landholder
+        )
+
+      meeting.requester_relationship = :other
+
+      expect(meeting).to be_valid
+    end
+
+    it "still requires authorization documents after relationship is changed to non-owner" do
+      meeting =
+        create(
+          :project_meeting,
+          :open,
+          requester_relationship: :owner_or_landholder
+        )
+      meeting.update!(requester_relationship: :other)
+
+      meeting.contact_name = "Still Missing Auth Docs"
+
+      expect(meeting).not_to be_valid
+      expect(meeting.errors[:meeting_request_documents]).to be_present
+    end
+
     it "does not require property information when jurisdiction has requests disabled" do
       meeting =
         build(:project_meeting, :open, request_property_information: nil)
@@ -292,13 +320,13 @@ RSpec.describe ProjectMeeting, type: :model do
       expect(meeting.completed_at).to be_present
     end
 
-    it "closes an open meeting request" do
+    it "withdraws an open meeting request" do
       meeting = create(:project_meeting, :open)
 
-      meeting.close!
+      meeting.withdraw!
 
-      expect(meeting.reload).to be_closed
-      expect(meeting.closed_at).to be_present
+      expect(meeting.reload).to be_withdrawn
+      expect(meeting.withdrawn_at).to be_present
     end
 
     it "blocks invalid transitions" do

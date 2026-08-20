@@ -1,13 +1,12 @@
-import { Box, HStack, Text, VStack } from "@chakra-ui/react"
-import { Clock } from "@phosphor-icons/react"
-import { format } from "date-fns"
+import { VStack } from "@chakra-ui/react"
+import { Chat } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { datefnsTableDateTimeFormat } from "../../../constants"
 import { INote } from "../../../models/note"
-import { SafeTipTapDisplay } from "../editor/safe-tiptap-display"
+import { EmptyResultsBox } from "../grid/empty-results-box"
 import { RouterLink } from "../navigation/router-link"
+import { NoteCard } from "../notes/note-card"
 
 interface ProjectMeetingNotesListProps {
   notes: INote[]
@@ -21,56 +20,34 @@ export const ProjectMeetingNotesList = observer(
 
     if (notes.length === 0) {
       return (
-        <Box border="1px" borderColor="border.light" borderRadius="md" p={4}>
-          <HStack align="start" spacing={2}>
-            <Clock size={18} />
-            <Box>
-              <Text fontWeight="bold" mb={1}>
-                {t("projectMeeting.detail.notes.emptyTitle")}
-              </Text>
-              <Text fontSize="sm">{emptyDescription}</Text>
-            </Box>
-          </HStack>
-        </Box>
+        <EmptyResultsBox
+          title={t("projectMeeting.detail.notes.emptyTitle")}
+          description={emptyDescription}
+          icon={<Chat size={18} />}
+        />
       )
     }
 
     return (
       <VStack align="stretch" spacing={4}>
-        {notes.map((note) => (
-          <ProjectMeetingNoteCard
-            key={note.id}
-            note={note}
-            meetingPath={note.projectMeetingId ? getMeetingPath(note) : undefined}
-          />
-        ))}
+        {notes.map((note) => {
+          const meetingPath = note.projectMeetingId ? getMeetingPath(note) : undefined
+
+          return (
+            <NoteCard
+              key={note.id}
+              note={note}
+              footer={
+                meetingPath && (
+                  <RouterLink to={meetingPath} color="text.link" fontSize="sm">
+                    {t("submissionInbox.projectDetail.viewProjectMeeting")}
+                  </RouterLink>
+                )
+              }
+            />
+          )
+        })}
       </VStack>
     )
   }
 )
-
-const ProjectMeetingNoteCard = ({ note, meetingPath }: { note: INote; meetingPath?: string }) => {
-  const { t } = useTranslation()
-  const createdAt = note.createdAt ? format(note.createdAt, datefnsTableDateTimeFormat) : null
-
-  return (
-    <Box border="1px" borderColor="border.light" borderRadius="md" p={4}>
-      <VStack align="stretch" spacing={2}>
-        <HStack spacing={4} align="baseline">
-          <Text fontWeight="bold">{note.authorName}</Text>
-          {createdAt && (
-            <Text color="text.secondary" fontSize="sm">
-              {createdAt}
-            </Text>
-          )}
-        </HStack>
-        <SafeTipTapDisplay htmlContent={note.body} fontSize="md" />
-        {meetingPath && (
-          <RouterLink to={meetingPath} color="text.link" fontSize="sm">
-            {t("submissionInbox.projectDetail.viewProjectMeeting")}
-          </RouterLink>
-        )}
-      </VStack>
-    </Box>
-  )
-}

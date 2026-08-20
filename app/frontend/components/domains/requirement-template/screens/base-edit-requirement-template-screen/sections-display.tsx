@@ -18,7 +18,7 @@ import { BlockConditionalConfig } from "./block-conditional-config"
 
 interface IProps {
   isCollapsedAll?: boolean
-  setSectionRef: (el: HTMLElement, id: string) => void
+  setSectionRef: (el: HTMLElement | null, id: string) => void
 }
 
 export const SectionsDisplay = observer(function SectionsDisplay(props: IProps) {
@@ -84,7 +84,7 @@ const SectionDisplay = observer(
     section: IRequirementTemplateSectionAttributes
     sectionIndex: number
     isCollapsedAll?: boolean
-    setSectionRef: (el: HTMLElement, id: string) => void
+    setSectionRef: (el: HTMLElement | null, id: string) => void
     disabledUseForBlockIds?: string[]
     openRequirementBlockId?: string
     openRequirementCode?: string

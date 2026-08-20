@@ -33,7 +33,7 @@ export const SubmitterProjectMeetingDetailContent = observer(
     const { permitProjectId: permitProjectIdParam } = useParams<{ permitProjectId: string }>()
     const { currentProjectMeeting, error, isLoading } = useProjectMeeting()
     const { projectMeetingStore, uiStore } = useMst()
-    const [isCancelling, setIsCancelling] = useState(false)
+    const [isWithdrawing, setIsWithdrawing] = useState(false)
 
     const permitProjectId = permitProject.id || permitProjectIdParam || currentProjectMeeting?.permitProjectId
 
@@ -50,21 +50,25 @@ export const SubmitterProjectMeetingDetailContent = observer(
     }
 
     const documents = currentProjectMeeting.meetingRequestDocuments.filter((document) => !document._destroy)
-    const canCancelMeeting =
+    const canWithdrawMeeting =
       permitProject.isOwner &&
       [EProjectMeetingStatus.open, EProjectMeetingStatus.scheduled].includes(currentProjectMeeting.status)
+    const requesterEditPath =
+      permitProject.isOwner && currentProjectMeeting.isActive
+        ? `/projects/${permitProjectId}/meetings/${currentProjectMeeting.id}/edit/relationship`
+        : null
 
-    const handleCancelMeeting = async (closeModal: () => void) => {
+    const handleWithdrawMeeting = async (closeModal: () => void) => {
       if (!permitProjectId) return
 
-      setIsCancelling(true)
-      const response = await projectMeetingStore.cancelProjectMeeting(permitProjectId, currentProjectMeeting.id)
-      setIsCancelling(false)
+      setIsWithdrawing(true)
+      const response = await projectMeetingStore.withdrawProjectMeeting(permitProjectId, currentProjectMeeting.id)
+      setIsWithdrawing(false)
 
       if (response.ok) {
         closeModal()
       } else {
-        uiStore.flashMessage.show(EFlashMessageStatus.error, null, t("projectMeeting.detail.cancelError"), 5000)
+        uiStore.flashMessage.show(EFlashMessageStatus.error, null, t("projectMeeting.detail.withdrawError"), 5000)
       }
     }
 
@@ -96,23 +100,21 @@ export const SubmitterProjectMeetingDetailContent = observer(
               <ProjectMeetingStatusTag status={currentProjectMeeting.status} />
             </HStack>
           </Box>
-          <HStack spacing={4}>
-            {canCancelMeeting && (
-              <ConfirmationModal
-                title={t("projectMeeting.detail.cancelConfirmationTitle")}
-                body={t("projectMeeting.detail.cancelConfirmationBody")}
-                triggerText={t("projectMeeting.detail.cancelMeeting")}
-                triggerButtonProps={{ variant: "ghost", color: "text.secondary" }}
-                renderConfirmationButton={(props) => (
-                  <Button variant="primary" isLoading={isCancelling} {...props}>
-                    {t("projectMeeting.detail.confirmCancelMeeting")}
-                  </Button>
-                )}
-                modalContentProps={{ maxW: "604px" }}
-                onConfirm={handleCancelMeeting}
-              />
-            )}
-          </HStack>
+          {canWithdrawMeeting && (
+            <ConfirmationModal
+              title={t("projectMeeting.detail.withdrawConfirmationTitle")}
+              body={t("projectMeeting.detail.withdrawConfirmationBody")}
+              triggerText={t("projectMeeting.detail.withdrawMeeting")}
+              triggerButtonProps={{ variant: "ghost", color: "text.secondary" }}
+              renderConfirmationButton={(props) => (
+                <Button variant="primary" isLoading={isWithdrawing} {...props}>
+                  {t("projectMeeting.detail.confirmWithdrawMeeting")}
+                </Button>
+              )}
+              modalContentProps={{ maxW: "604px" }}
+              onConfirm={handleWithdrawMeeting}
+            />
+          )}
         </HStack>
 
         <Box maxW="3xl">
@@ -123,7 +125,7 @@ export const SubmitterProjectMeetingDetailContent = observer(
           />
 
           <ProjectInformationSection permitProject={permitProject} />
-          <RequesterInformationSection projectMeeting={currentProjectMeeting} />
+          <RequesterInformationSection projectMeeting={currentProjectMeeting} editPath={requesterEditPath} />
           <RequestDetailsSection projectMeeting={currentProjectMeeting} />
           <DocumentsSection documents={documents} />
           <MeetingNotesSection

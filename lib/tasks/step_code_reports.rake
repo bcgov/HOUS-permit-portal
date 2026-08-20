@@ -1,9 +1,9 @@
 namespace :step_codes do
-  desc "Generate standalone PDF reports for step codes without permit applications and without existing reports"
+  desc "Generate standalone PDF reports for Step Codes without permit applications and without existing reports"
   task generate_missing_reports: :environment do
     scope = StepCode.where(permit_application_id: nil)
     total = scope.count
-    puts "Scanning #{total} standalone step codes for missing reports..."
+    puts "Scanning #{total} standalone Step Codes for missing reports..."
 
     processed = 0
     scope.find_each(batch_size: 100) do |step_code|
@@ -19,6 +19,6 @@ namespace :step_codes do
       end
     end
 
-    puts "Enqueued report generation for #{processed} step codes."
+    puts "Enqueued report generation for #{processed} Step Codes."
   end
 end

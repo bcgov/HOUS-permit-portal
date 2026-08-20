@@ -10,6 +10,7 @@ import { useProjectMeeting } from "../../../../hooks/resources/use-project-meeti
 import { IPermitProject } from "../../../../models/permit-project"
 import { useMst } from "../../../../setup/root"
 import { EFlashMessageStatus, EProjectMeetingStatus } from "../../../../types/enums"
+import { INoteAttachmentDraft } from "../../../../types/types"
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
 import { ConfirmationModal } from "../../../shared/confirmation-modal"
@@ -37,7 +38,7 @@ export const ReviewerMeetingDetailContent = observer(
     )
     const { noteStore, projectMeetingStore, uiStore, userStore } = useMst()
     const { currentUser } = userStore
-    const [isCancelling, setIsCancelling] = useState(false)
+    const [isWithdrawing, setIsWithdrawing] = useState(false)
     const [isCompleting, setIsCompleting] = useState(false)
 
     useEffect(() => {
@@ -58,14 +59,14 @@ export const ReviewerMeetingDetailContent = observer(
     const projectLink = `/jurisdictions/${jurisdictionId}/submission-inbox/projects/${currentProjectMeeting.permitProjectId}/overview`
     const canAddNote = currentUser?.isReviewStaff && currentProjectMeeting.canAddReviewerNote
 
-    const handleCancelMeeting = async (closeModal: () => void) => {
-      setIsCancelling(true)
+    const handleWithdrawMeeting = async (closeModal: () => void) => {
+      setIsWithdrawing(true)
       const response = await projectMeetingStore.transitionProjectMeetingStatus(
         currentProjectMeeting.permitProjectId,
         currentProjectMeeting.id,
-        EProjectMeetingStatus.closed
+        EProjectMeetingStatus.withdrawn
       )
-      setIsCancelling(false)
+      setIsWithdrawing(false)
 
       if (response.ok) {
         closeModal()
@@ -73,14 +74,14 @@ export const ReviewerMeetingDetailContent = observer(
         uiStore.flashMessage.show(
           EFlashMessageStatus.error,
           null,
-          t("projectMeeting.detail.reviewer.cancelError"),
+          t("projectMeeting.detail.reviewer.withdrawError"),
           5000
         )
       }
     }
 
-    const handleAddNote = async (body: string) => {
-      const response = await noteStore.createProjectMeetingNote(currentProjectMeeting.id, body)
+    const handleAddNote = async (body: string, attachments: INoteAttachmentDraft[]) => {
+      const response = await noteStore.createProjectMeetingNote(currentProjectMeeting.id, body, attachments)
       return response.ok
     }
 
@@ -137,19 +138,19 @@ export const ReviewerMeetingDetailContent = observer(
                 {t("projectMeeting.detail.reviewer.markCompleted")}
               </Button>
             )}
-            {currentProjectMeeting.canCancel && (
+            {currentProjectMeeting.canWithdraw && (
               <ConfirmationModal
-                title={t("projectMeeting.detail.reviewer.cancelConfirmationTitle")}
-                body={t("projectMeeting.detail.reviewer.cancelConfirmationBody")}
-                triggerText={t("projectMeeting.detail.reviewer.cancelMeeting")}
+                title={t("projectMeeting.detail.reviewer.withdrawConfirmationTitle")}
+                body={t("projectMeeting.detail.reviewer.withdrawConfirmationBody")}
+                triggerText={t("projectMeeting.detail.reviewer.withdrawMeeting")}
                 triggerButtonProps={{ variant: "ghost", color: "text.secondary" }}
                 renderConfirmationButton={(props) => (
-                  <Button variant="primary" isLoading={isCancelling} {...props}>
-                    {t("projectMeeting.detail.reviewer.confirmCancelMeeting")}
+                  <Button variant="primary" isLoading={isWithdrawing} {...props}>
+                    {t("projectMeeting.detail.reviewer.confirmWithdrawMeeting")}
                   </Button>
                 )}
                 modalContentProps={{ maxW: "604px" }}
-                onConfirm={handleCancelMeeting}
+                onConfirm={handleWithdrawMeeting}
               />
             )}
           </HStack>

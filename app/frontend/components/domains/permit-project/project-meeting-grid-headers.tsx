@@ -9,7 +9,7 @@ import { GridHeader } from "../../shared/grid/grid-header"
 import { SortIcon } from "../../shared/sort-icon"
 
 const sortableColumns = [
-  EProjectMeetingSortFields.submittedAt,
+  EProjectMeetingSortFields.confirmedDate,
   EProjectMeetingSortFields.projectDescription,
   EProjectMeetingSortFields.status,
 ]

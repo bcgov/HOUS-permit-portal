@@ -1,5 +1,5 @@
 import { HStack, Text } from "@chakra-ui/react"
-import { ChatText } from "@phosphor-icons/react"
+import { Chat } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -16,7 +16,7 @@ interface IProjectMeetingGridRowProps {
 }
 
 const formatMeetingDate = (projectMeeting: IProjectMeeting) => {
-  const date = projectMeeting.confirmedDate || projectMeeting.submittedAt || projectMeeting.createdAt
+  const date = projectMeeting.confirmedDate
   return date ? format(date, datefnsTableDateTimeFormat) : ""
 }
 
@@ -34,7 +34,7 @@ export const ProjectMeetingGridRow = observer(({ permitProjectId, projectMeeting
       </SearchGridItem>
       <SearchGridItem>
         <HStack spacing={1} color="text.secondary">
-          <ChatText size={14} />
+          <Chat size={14} />
           <Text>{projectMeeting.notesCount}</Text>
         </HStack>
       </SearchGridItem>

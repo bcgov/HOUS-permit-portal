@@ -8,6 +8,9 @@ class Note < ApplicationRecord
   belongs_to :user
   belongs_to :permit_project
   belongs_to :noteable, polymorphic: true, counter_cache: true
+  has_many :note_attachment_documents, dependent: :destroy, inverse_of: :note
+
+  accepts_nested_attributes_for :note_attachment_documents
 
   before_validation :assign_permit_project
 

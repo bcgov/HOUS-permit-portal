@@ -8,10 +8,10 @@ import { IJurisdiction } from "../../../../models/jurisdiction"
 import { useMst } from "../../../../setup/root"
 import { EProjectMeetingStatus } from "../../../../types/enums"
 import { CalloutBanner } from "../../../shared/base/callout-banner"
-import { ProjectMeetingStatusFilter, UnreadFilter } from "./filters"
+import { MeetingDateFilter, ProjectMeetingStatusFilter, UnreadFilter } from "./filters"
+import { InboxSearchInput } from "./inbox-search-input"
 import { ProjectMeetingInboxTable } from "./project-meeting-inbox-table"
 import { ReviewerMeetingDetailContent } from "./reviewer-meeting-detail-content"
-import { SearchInput } from "./submissions-tab-panel-content"
 
 interface IProps {
   currentJurisdiction: IJurisdiction
@@ -57,13 +57,9 @@ export const MeetingsTabPanelContent = observer(function MeetingsTabPanelContent
 
           {projectMeetingsEnabled && (
             <VStack align="stretch" spacing={4} w="full">
-              <SearchInput
+              <InboxSearchInput
                 placeholder={t("submissionInbox.meetingSearchPlaceholder")}
-                value={projectMeetingInboxStore.query ?? ""}
-                onChange={(value) => {
-                  projectMeetingInboxStore.setQuery(value)
-                  projectMeetingInboxStore.search()
-                }}
+                searchModel={projectMeetingInboxStore}
               />
 
               <Flex w="full" flexWrap="wrap" alignItems="center" gap={3}>
@@ -79,6 +75,18 @@ export const MeetingsTabPanelContent = observer(function MeetingsTabPanelContent
                   onApply={() => projectMeetingInboxStore.search()}
                   onClear={() => {
                     projectMeetingInboxStore.setStatusFilter([] as EProjectMeetingStatus[])
+                    projectMeetingInboxStore.search()
+                  }}
+                />
+                <MeetingDateFilter
+                  value={{
+                    from: projectMeetingInboxStore.confirmedDateFromFilter,
+                    to: projectMeetingInboxStore.confirmedDateToFilter,
+                  }}
+                  onChange={({ from, to }) => projectMeetingInboxStore.setMeetingDateRange(from, to)}
+                  onApply={() => projectMeetingInboxStore.search()}
+                  onClear={() => {
+                    projectMeetingInboxStore.setMeetingDateRange(null, null)
                     projectMeetingInboxStore.search()
                   }}
                 />

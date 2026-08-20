@@ -53,6 +53,10 @@ class User < ApplicationRecord
            foreign_key: "creator_id",
            inverse_of: :creator,
            dependent: :destroy
+  has_many :overheating_codes,
+           foreign_key: "creator_id",
+           inverse_of: :creator,
+           dependent: :destroy
 
   has_many :permit_projects,
            class_name: "PermitProject",
@@ -224,6 +228,19 @@ class User < ApplicationRecord
 
   def jurisdiction_staff?
     review_staff? || technical_support?
+  end
+
+  # Inviting a submitter's email creates a staff user alongside them; accepting
+  # promotes the submitter via PromoteUser.
+  def invitation_promotes_existing_submitter?
+    return false unless jurisdiction_staff?
+
+    User
+      .kept
+      .submitter
+      .where("LOWER(email) = ?", email.to_s.strip.downcase)
+      .where.not(id: id)
+      .exists?
   end
 
   def role_name

@@ -68,7 +68,7 @@ const main = async () => {
       }
       if (!ChecklistComponent) {
         throw new Error(
-          `Checklist PDF generation failed: No checklist component found for step code type '${stepCodeType}'.`
+          `Checklist PDF generation failed: No checklist component found for Step Code type '${stepCodeType}'.`
         )
       }
 

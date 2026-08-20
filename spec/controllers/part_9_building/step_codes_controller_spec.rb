@@ -159,7 +159,7 @@ RSpec.describe Api::Part9Building::StepCodesController, type: :controller do
       )
     end
 
-    it "returns the step code for the creator" do
+    it "returns the Step Code for the creator" do
       get :show, params: { id: step_code.id }
 
       expect(response).to have_http_status(:success)

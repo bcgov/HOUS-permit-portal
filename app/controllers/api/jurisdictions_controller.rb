@@ -311,6 +311,7 @@ class Api::JurisdictionsController < Api::ApplicationController
         default
         energy_step_required
         zero_carbon_step_required
+        description
         _destroy
       ],
       part3_occupancy_required_steps_attributes: %i[
@@ -318,11 +319,12 @@ class Api::JurisdictionsController < Api::ApplicationController
         occupancy_key
         energy_step_required
         zero_carbon_step_required
+        description
         _destroy
       ],
-      jurisdiction_climate_zones_attributes: %i[
+      jurisdiction_heating_degree_days_attributes: %i[
         id
-        climate_zone
+        location_name
         heating_degree_days
         _destroy
       ],

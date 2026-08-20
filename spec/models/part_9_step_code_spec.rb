@@ -1,7 +1,7 @@
 require "rails_helper"
 
 RSpec.describe Part9StepCode, type: :model do
-  # We do not enforce that permit_applications must be present to reserve room for step code model with no permit application, therefore we do not do it { should belong_to(:permit_application) }
+  # We do not enforce that permit_applications must be present to reserve room for Step Code model with no permit application, therefore we do not do it { should belong_to(:permit_application) }
 
   let!(:permit_application) { create(:permit_application) }
   let!(:step_code) do
@@ -106,17 +106,28 @@ RSpec.describe Part9StepCode, type: :model do
       expect(summary.fossil_fuels.presence).to eq("yes")
     end
 
-    it "does not duplicate generated rows or overwrite non-empty manual fields on re-import" do
+    it "overwrites H2K-mapped fields on re-import without duplicating rows" do
       step_code.process_current_h2k_files(checklist)
       summary = checklist.reload.building_characteristics_summary
       roof_count = summary.roof_ceilings_lines.count
-      summary.update!(airtightness: { details: "Manual air barrier" })
+      summary.update!(
+        airtightness: {
+          details: "Manual air barrier"
+        },
+        ventilation_lines: [
+          { details: "Stale HRV", percent_eff: 50, liters_per_sec: 10 }
+        ]
+      )
 
       step_code.process_current_h2k_files(checklist)
 
       summary.reload
       expect(summary.roof_ceilings_lines.count).to eq(roof_count)
-      expect(summary.airtightness.details).to eq("Manual air barrier")
+      expect(summary.airtightness.details).not_to eq("Manual air barrier")
+      expect(summary.ventilation_lines.map(&:details)).not_to include(
+        "Stale HRV"
+      )
+      expect(summary.ventilation_lines.map(&:details)).to include("HRV - VanEE")
     end
   end
 
@@ -180,7 +191,7 @@ RSpec.describe Part9StepCode, type: :model do
         ).and_return(SupportingDocument.all)
       end
 
-      it "sets the step code plan values if there is a supporting doc with compliance" do
+      it "sets the Step Code plan values if there is a supporting doc with compliance" do
         expect(step_code.valid?).to eq true
       end
 

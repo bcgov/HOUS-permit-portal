@@ -358,6 +358,12 @@
   background-color: var(--chakra-colors-theme-blueLight);
 }
 
+// Uppy's default AddFiles drag-drop chrome: 1px dashed #dfdfdf with 3px radius.
+// We already draw the outer dashed border on .uppy-Dashboard — kill the inner one.
+[data-uppy-drag-drop-supported="true"] .uppy-Dashboard-AddFiles {
+  border: none;
+}
+
 .uppy-Dashboard-browse {
   color: $bcgov-link !important;
   background: transparent;
@@ -406,40 +412,80 @@
   .uppy-StatusBar:not([aria-hidden="true"]) {
     height: 40px;
   }
+
+  // StatusBar already shows "Complete". Uppy also parks a check on the preview's
+  // top-right — the same corner as the remove control on our compact thumbs.
+  .uppy-Dashboard-Item.is-complete .uppy-Dashboard-Item-progress {
+    display: none;
+  }
 }
 
-.uppy-Dashboard .uppy-size--md {
+// uppy-size--* is on .uppy-Dashboard itself — must be a compound selector, not a descendant.
+// Keep a compact list row (small thumb + meta) at every breakpoint instead of Uppy's
+// large floated cards, and pin the remove control to the thumbnail's top-right.
+.uppy-Dashboard.uppy-size--md,
+.uppy-Dashboard.uppy-size--lg,
+.uppy-Dashboard.uppy-size--xl {
   .uppy-Dashboard-Item {
-    height: 185px;
+    float: none;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    margin: 0;
+    padding: 12px;
   }
 
   .uppy-Dashboard-Item-preview {
-    width: 100%;
-    height: 125px;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
   }
 
   .uppy-Dashboard-Item-previewIcon {
-    width: 36px;
-    height: 36px;
+    width: 22px;
+    height: 22px;
+  }
+
+  .uppy-Dashboard-Item-fileInfoAndButtons {
+    padding-top: 0;
+    padding-inline-start: 12px;
+    align-items: center;
+  }
+
+  // actionWrapper overlays the 44×44 preview so remove can sit on its corner
+  .uppy-Dashboard-Item-actionWrapper {
+    position: absolute;
+    top: 12px;
+    inset-inline-start: 12px;
+    width: 44px;
+    height: 44px;
+    margin: 0;
+    z-index: 2;
+  }
+
+  .uppy-Dashboard-Item-action--remove {
+    position: absolute;
+    top: -6px;
+    inset-inline-end: -6px;
+    width: 18px;
+    height: 18px;
+    padding: 0;
   }
 }
 
-.uppy-Dashboard .uppy-size--lg {
-  .uppy-Dashboard-Item {
-    height: 175px;
-  }
-
-  .uppy-Dashboard-Item-preview {
-    height: 115px;
-  }
+[dir="ltr"] .uppy-Dashboard.uppy-size--md .uppy-Dashboard-Item-action--remove,
+[dir="ltr"] .uppy-Dashboard.uppy-size--lg .uppy-Dashboard-Item-action--remove,
+[dir="ltr"] .uppy-Dashboard.uppy-size--xl .uppy-Dashboard-Item-action--remove {
+  right: -6px;
+  left: auto;
 }
 
-.uppy-Dashboard .uppy-size--xl {
-  .uppy-Dashboard-Item {
-    height: 185px;
-  }
-
-  .uppy-Dashboard-Item-preview {
-    height: 125px;
-  }
+[dir="rtl"] .uppy-Dashboard.uppy-size--md .uppy-Dashboard-Item-action--remove,
+[dir="rtl"] .uppy-Dashboard.uppy-size--lg .uppy-Dashboard-Item-action--remove,
+[dir="rtl"] .uppy-Dashboard.uppy-size--xl .uppy-Dashboard-Item-action--remove {
+  left: -6px;
+  right: auto;
 }

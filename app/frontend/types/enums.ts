@@ -18,6 +18,7 @@ export enum EFileUploadAttachmentType {
   SupportingDocument = "SupportingDocument",
   ProjectDocument = "ProjectDocument",
   MeetingRequestDocument = "MeetingRequestDocument",
+  NoteAttachmentDocument = "NoteAttachmentDocument",
   ReportDocument = "ReportDocument",
   ResourceDocument = "ResourceDocument",
   DesignDocument = "DesignDocument",
@@ -28,7 +29,7 @@ export enum EProjectMeetingStatus {
   open = "open",
   scheduled = "scheduled",
   completed = "completed",
-  closed = "closed",
+  withdrawn = "withdrawn",
 }
 
 export enum EProjectMeetingContactMethod {
@@ -130,7 +131,6 @@ export enum ERequirementLibrarySortFields {
   associations = "associations",
   requirementLabels = "requirement_labels",
   updatedAt = "updated_at",
-  configurations = "configurations",
 }
 
 export enum EQuestionBankSortFields {
@@ -178,6 +178,18 @@ export enum EReleaseNoteSortFields {
 export enum EReleaseNoteStatus {
   draft = "draft",
   published = "published",
+}
+
+export enum EReleaseNoteType {
+  software = "software",
+  content = "content",
+}
+
+export enum EReleaseNoteNotificationAudience {
+  allUsers = "all_users",
+  submitters = "submitters",
+  staff = "staff",
+  none = "none",
 }
 
 export enum EPreCheckSortFields {
@@ -431,6 +443,7 @@ export enum EPermitApplicationSocketEventTypes {
   updateCompliance = "update_compliance",
   updateSupportingDocuments = "update_supporting_documents",
   updatePermitBlockStatus = "update_permit_block_status",
+  selectiveZipReady = "selective_zip_ready",
 }
 
 export enum EJurisdictionSocketEventTypes {
@@ -522,6 +535,7 @@ export enum ENotificationActionType {
   fileUploadFailed = "file_upload_failed",
   resourceReminder = "resource_reminder",
   projectMeetingSubmitted = "project_meeting_submitted",
+  projectMeetingScheduled = "project_meeting_scheduled",
   projectMeetingRescheduled = "project_meeting_rescheduled",
   projectReviewCollaborationAssignment = "project_review_collaboration_assignment",
   projectReviewCollaborationUnassignment = "project_review_collaboration_unassignment",
@@ -732,7 +746,7 @@ export enum EPermitProjectSortFields {
   location = "location",
   submitter = "submitter",
   updatedAt = "updated_at",
-  rollupStatus = "rollup_status",
+  state = "state",
 }
 
 export enum EProjectAuditSortFields {

@@ -11,10 +11,20 @@ RSpec.describe "ReleaseNotes", type: :request do
   let(:submitter) { create(:user, :submitter) }
   let(:params) do
     {
+      release_type: "software",
       version: Faker::App.semantic_version,
       release_date: Faker::Date.between(from: 1.year.ago, to: Time.current),
       content: Faker::Lorem.paragraph,
       release_notes_url: Faker::Internet.url,
+      issues: Faker::Lorem.paragraph
+    }
+  end
+  let(:content_params) do
+    {
+      release_type: "content",
+      name: "Step Code wording",
+      release_date: Faker::Date.between(from: 1.year.ago, to: Time.current),
+      content: Faker::Lorem.paragraph,
       issues: Faker::Lorem.paragraph
     }
   end
@@ -66,12 +76,13 @@ RSpec.describe "ReleaseNotes", type: :request do
   end
 
   describe "#create" do
-    it "creates a release note" do
+    it "creates a software release note" do
       sign_in super_admin
       post release_notes_path, params: { release_note: params }
 
       expect(response).to have_http_status(:success)
       expect(subject).to include(
+        "release_type" => "software",
         "version" => params[:version],
         "content" => params[:content],
         "release_notes_url" => params[:release_notes_url],
@@ -81,6 +92,48 @@ RSpec.describe "ReleaseNotes", type: :request do
       expect(Time.zone.at(subject["release_date"] / 1000).to_date).to eq(
         params[:release_date]
       )
+    end
+
+    it "creates a content release note" do
+      sign_in super_admin
+      post release_notes_path, params: { release_note: content_params }
+
+      expect(response).to have_http_status(:success)
+      expect(subject).to include(
+        "release_type" => "content",
+        "name" => content_params[:name],
+        "version" => nil,
+        "release_notes_url" => nil,
+        "content" => content_params[:content]
+      )
+    end
+
+    it "rejects a content note without a name" do
+      sign_in super_admin
+      post release_notes_path,
+           params: {
+             release_note: content_params.merge(name: nil)
+           }
+
+      expect(response).to have_http_status(:bad_request)
+      expect(error_message).to match(/name.*blank/i)
+    end
+
+    it "allows software and content notes on the same release date" do
+      sign_in super_admin
+      release_date = Date.new(2026, 6, 15)
+
+      post release_notes_path,
+           params: {
+             release_note: params.merge(release_date: release_date)
+           }
+      expect(response).to have_http_status(:success)
+
+      post release_notes_path,
+           params: {
+             release_note: content_params.merge(release_date: release_date)
+           }
+      expect(response).to have_http_status(:success)
     end
 
     it_behaves_like AN_INVALID_PAYLOAD_RESPONSE,
@@ -106,6 +159,20 @@ RSpec.describe "ReleaseNotes", type: :request do
 
       expect(response).to have_http_status(:success)
       expect(subject).to include("version" => params[:version])
+    end
+
+    it "ignores attempts to change release type" do
+      setup
+      patch release_note_path(@release_note.id),
+            params: {
+              release_note: {
+                release_type: "content",
+                name: "Step Code wording"
+              }
+            }
+
+      expect(response).to have_http_status(:success)
+      expect(@release_note.reload.release_type).to eq("software")
     end
 
     it "does not allow a published release note to be saved as a draft" do
@@ -145,11 +212,62 @@ RSpec.describe "ReleaseNotes", type: :request do
       setup
       expect(NotificationService).to receive(
         :publish_release_note_publish_event
-      ).with(an_instance_of(ReleaseNote))
+      ).with(an_instance_of(ReleaseNote), nil)
 
       patch publish_release_note_path(@release_note.id)
 
       expect(response).to have_http_status(:success)
+    end
+
+    it "passes notification audience to the publish event" do
+      setup
+      expect(NotificationService).to receive(
+        :publish_release_note_publish_event
+      ).with(an_instance_of(ReleaseNote), "staff")
+
+      patch publish_release_note_path(@release_note.id),
+            params: {
+              release_note: {
+                notification_audience: "staff"
+              }
+            }
+
+      expect(response).to have_http_status(:success)
+    end
+
+    it "passes none as a valid notification audience" do
+      setup
+      expect(NotificationService).to receive(
+        :publish_release_note_publish_event
+      ).with(an_instance_of(ReleaseNote), "none")
+
+      patch publish_release_note_path(@release_note.id),
+            params: {
+              release_note: {
+                notification_audience: "none"
+              }
+            }
+
+      expect(response).to have_http_status(:success)
+      expect(@release_note.reload).to be_published
+    end
+
+    it "rejects an invalid notification audience without publishing" do
+      setup
+      expect(NotificationService).not_to receive(
+        :publish_release_note_publish_event
+      )
+
+      patch publish_release_note_path(@release_note.id),
+            params: {
+              release_note: {
+                notification_audience: "admins"
+              }
+            }
+
+      expect(response).to have_http_status(:bad_request)
+      expect(error_message).to match(/invalid notification audience/i)
+      expect(@release_note.reload).to be_draft
     end
 
     it "updates an already published release note without publishing again" do
@@ -175,6 +293,48 @@ RSpec.describe "ReleaseNotes", type: :request do
 
     it_behaves_like AN_INVALID_PAYLOAD_RESPONSE, publish_with_payload
     it_behaves_like A_NOT_FOUND_RESPONSE, publish_with_payload
+  end
+
+  describe "#years" do
+    let!(:note_2024) do
+      create(
+        :release_note,
+        status: :published,
+        release_date: Date.new(2024, 6, 1)
+      )
+    end
+    let!(:note_2025) do
+      create(
+        :release_note,
+        status: :published,
+        release_date: Date.new(2025, 3, 1)
+      )
+    end
+    let!(:draft_note_2026) do
+      create(:release_note, status: :draft, release_date: Date.new(2026, 1, 1))
+    end
+
+    it "returns distinct release years for published notes only" do
+      get years_release_notes_path
+
+      expect(response).to have_http_status(:success)
+      expect(json_response.fetch("data")).to eq([2025, 2024])
+    end
+
+    it "is available to unauthenticated users" do
+      get years_release_notes_path
+
+      expect(response).to have_http_status(:success)
+      expect(json_response.fetch("data")).to include(2024, 2025)
+    end
+
+    it "excludes draft-only years for super admins" do
+      sign_in super_admin
+      get years_release_notes_path
+
+      expect(response).to have_http_status(:success)
+      expect(json_response.fetch("data")).to eq([2025, 2024])
+    end
   end
 
   describe "#index" do
@@ -209,6 +369,40 @@ RSpec.describe "ReleaseNotes", type: :request do
         expect(release_note).not_to include("internal_notes")
         expect(release_note).not_to include("debug_info")
       end
+    end
+
+    it "filters by release type" do
+      content_release_note =
+        create(
+          :release_note,
+          :content,
+          status: :published,
+          name: "Step Code wording",
+          release_date: 3.days.ago
+        )
+      ReleaseNote.reindex
+
+      sign_in super_admin
+
+      get release_notes_path, params: { release_type: "software" }
+      expect(response).to have_http_status(:success)
+      expect(json_response.fetch("data").pluck("id")).to contain_exactly(
+        earliest_release_note.id,
+        latest_release_note.id
+      )
+
+      get release_notes_path, params: { release_type: "content" }
+      expect(response).to have_http_status(:success)
+      expect(json_response.fetch("data").pluck("id")).to contain_exactly(
+        content_release_note.id
+      )
+
+      get release_notes_path
+      expect(json_response.fetch("data").pluck("id")).to contain_exactly(
+        earliest_release_note.id,
+        latest_release_note.id,
+        content_release_note.id
+      )
     end
 
     it "returns only published release notes when requested by super admins" do
@@ -289,7 +483,7 @@ RSpec.describe "ReleaseNotes", type: :request do
 
   describe "#index with no release notes" do
     before do
-      ReleaseNote.delete_all
+      ReleaseNote.find_each(&:destroy)
       ReleaseNote.reindex
     end
 
@@ -396,6 +590,41 @@ RSpec.describe "ReleaseNotes", type: :request do
       get viewer_context_release_note_path(draft_in_2025.id)
 
       expect(response).to have_http_status(:not_found)
+    end
+
+    it "distinguishes same-day software and content notes by created_at" do
+      release_date = Time.zone.local(2025, 6, 15, 12, 0, 0)
+      earlier =
+        create(
+          :release_note,
+          :content,
+          status: :published,
+          name: "Earlier content update",
+          release_date: release_date,
+          created_at: release_date - 1.hour
+        )
+      later =
+        create(
+          :release_note,
+          status: :published,
+          version: "9.9.9",
+          release_date: release_date,
+          created_at: release_date
+        )
+
+      get viewer_context_release_note_path(earlier.id), params: { per_page: 1 }
+      expect(json_response.fetch("data")).to include(
+        "release_note_id" => earlier.id,
+        "year" => 2025,
+        "page" => 2
+      )
+
+      get viewer_context_release_note_path(later.id), params: { per_page: 1 }
+      expect(json_response.fetch("data")).to include(
+        "release_note_id" => later.id,
+        "year" => 2025,
+        "page" => 1
+      )
     end
 
     it_behaves_like A_NOT_FOUND_RESPONSE,

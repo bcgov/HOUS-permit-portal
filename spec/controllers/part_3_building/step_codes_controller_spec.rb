@@ -134,7 +134,7 @@ RSpec.describe Api::Part3Building::StepCodesController, type: :controller do
       )
     end
 
-    it "returns the step code with compliance report" do
+    it "returns the Step Code with compliance report" do
       report_hash = {
         "performance" => {
           "energy" => {

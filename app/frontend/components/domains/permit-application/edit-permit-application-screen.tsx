@@ -27,7 +27,7 @@ import { stickyBelowNavBar } from "../../../styles/nav-bar-offset"
 import { ICustomEventMap } from "../../../types/dom"
 import { ECollaborationType, ECustomEvents, ERequirementType } from "../../../types/enums"
 import { findPidComponentKey } from "../../../utils/formio-component-traversal"
-import { handleScrollToBottom } from "../../../utils/utility-functions"
+import { handleScrollToBottom, handleScrollToTop } from "../../../utils/utility-functions"
 import { CopyableValue } from "../../shared/base/copyable-value"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
@@ -236,6 +236,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const handleClickFinishLater = async () => {
     const success = await handleSave()
     if (success) {
+      handleScrollToTop()
       navigate(parentProjectPath)
     }
   }
@@ -339,7 +340,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                           onSubmit: () => {
                             handleSave()
                           },
-                          "aria-label": "Edit Nickname",
+                          "aria-label": "Edit custom name",
                         }}
                         editablePreviewProps={{
                           fontWeight: 700,
@@ -348,7 +349,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                         onEdit={() => {
                           setIsDirty(true)
                         }}
-                        aria-label={"Edit Nickname"}
+                        aria-label={"Edit custom name"}
                         onCancel={(previousValue) => setValue("nickname", previousValue)}
                       />
                     </Box>

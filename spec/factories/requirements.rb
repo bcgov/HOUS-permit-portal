@@ -51,7 +51,7 @@ FactoryBot.define do
         {
           "value_options" => [
             {
-              "label" => "Utilizing the digital step code tool",
+              "label" => "Utilizing the digital Step Code tool",
               "value" => "tool"
             },
             { "label" => "By file upload", "value" => "file" }

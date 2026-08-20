@@ -54,7 +54,7 @@ module Api::Concerns::Search::PermitProjects
         :show_archived,
         :active_meeting,
         { jurisdiction_id: [] },
-        { rollup_status: [] },
+        { state: [] },
         { requirement_template_ids: [] }
       ],
       sort: %i[field direction]
@@ -100,7 +100,6 @@ module Api::Concerns::Search::PermitProjects
     jurisdiction_ids = search_filters.delete(:jurisdiction_id)
     if jurisdiction_ids.present?
       search_filters[:jurisdiction_id] = jurisdiction_ids
-      search_filters[:state] = { not: "draft" }
     end
 
     search_filters[:discarded] = show_archived

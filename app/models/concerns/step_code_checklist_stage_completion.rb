@@ -12,10 +12,28 @@ module StepCodeChecklistStageCompletion
     STAGE_STATUS_IN_PROGRESS
   end
 
-  included { before_save :sync_stage_completed_at }
+  included do
+    before_save :sync_stage_completed_at
+    validate :all_relevant_sections_complete_when_marking_complete
+  end
+
+  class_methods do
+    def fully_complete_section_completion_status
+      self::DEFAULT_SECTION_COMPLETION_STATUS.transform_values do |section|
+        section.merge("complete" => true)
+      end
+    end
+  end
 
   def stage_status
     StepCodeChecklistStageCompletion.status_for(self)
+  end
+
+  def all_relevant_sections_complete?
+    (section_completion_status || {}).all? do |_key, value|
+      value = value.with_indifferent_access
+      !value[:relevant] || value[:complete]
+    end
   end
 
   private
@@ -26,5 +44,13 @@ module StepCodeChecklistStageCompletion
     else
       self.stage_completed_at = nil
     end
+  end
+
+  def all_relevant_sections_complete_when_marking_complete
+    return unless will_save_change_to_status?
+    return unless complete?
+    return if all_relevant_sections_complete?
+
+    errors.add(:base, "all relevant sections must be complete")
   end
 end

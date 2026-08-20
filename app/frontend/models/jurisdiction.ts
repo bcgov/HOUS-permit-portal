@@ -8,7 +8,7 @@ import { IExternalApiKeyParams } from "../types/api-request"
 import { EEnergyStep, EJurisdictionExternalApiState, EPreCheckServicePartner, EZeroCarbonStep } from "../types/enums"
 import {
   IContact,
-  IJurisdictionClimateZone,
+  IJurisdictionHeatingDegreeDay,
   IJurisdictionServicePartnerEnrollment,
   IJurisdictionStepRequirement,
   IOption,
@@ -64,6 +64,8 @@ export const JurisdictionModel = types
     externalApiKeysMap: types.map(ExternalApiKeyModel),
     createdAt: types.maybeNull(types.Date),
     updatedAt: types.maybeNull(types.Date),
+    part9StepRequirementsUpdatedAt: types.maybeNull(types.Date),
+    part3StepRequirementsUpdatedAt: types.maybeNull(types.Date),
     tablePermitApplications: types.array(types.reference(PermitApplicationModel)),
     boundaryPoints: types.optional(types.array(types.frozen<TLatLngTuple>()), []),
     mapPosition: types.frozen<TLatLngTuple>(),
@@ -82,7 +84,7 @@ export const JurisdictionModel = types
     servicePartnerEnrollments: types.array(types.frozen<IJurisdictionServicePartnerEnrollment>()),
     weatherLocation: types.maybeNull(types.string),
     designSummerTemp: types.maybeNull(types.number),
-    jurisdictionClimateZones: types.array(types.frozen<IJurisdictionClimateZone>()),
+    jurisdictionHeatingDegreeDays: types.array(types.frozen<IJurisdictionHeatingDegreeDay>()),
   })
   .extend(withEnvironment())
   .extend(withRootStore())

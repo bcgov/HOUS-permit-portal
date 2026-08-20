@@ -282,7 +282,7 @@ RSpec.describe "Api::QaTools", type: :request do
       expect(response).to have_http_status(:not_found)
     end
 
-    it "autofills a Part 3 step code checklist" do
+    it "autofills a Part 3 Step Code checklist" do
       allow(ENV).to receive(:[]).and_call_original
       allow(ENV).to receive(:[]).with("VITE_QA_MODE").and_return("true")
       sign_in submitter
@@ -304,12 +304,14 @@ RSpec.describe "Api::QaTools", type: :request do
         )
       ).to be(true)
       expect(
-        checklist.section_completion_status.dig("step_code_summary", "complete")
+        checklist.section_completion_status.dig("report", "complete")
       ).to be(false)
+      expect(checklist).not_to be_complete
+      expect(checklist.status).to eq("draft")
       expect(json_response.dig("data", "id")).to eq(step_code.id)
     end
 
-    it "requires update permission to autofill a Part 3 step code" do
+    it "requires update permission to autofill a Part 3 Step Code" do
       allow(ENV).to receive(:[]).and_call_original
       allow(ENV).to receive(:[]).with("VITE_QA_MODE").and_return("true")
       sign_in create(:user, :super_admin)
@@ -365,7 +367,7 @@ RSpec.describe "Api::QaTools", type: :request do
       expect(response).to have_http_status(:not_found)
     end
 
-    it "autofills a Part 9 step code checklist" do
+    it "autofills a Part 9 Step Code checklist" do
       allow(ENV).to receive(:[]).and_call_original
       allow(ENV).to receive(:[]).with("VITE_QA_MODE").and_return("true")
       sign_in submitter
@@ -385,10 +387,12 @@ RSpec.describe "Api::QaTools", type: :request do
       expect(
         checklist.section_completion_status.dig("report", "complete")
       ).to be(false)
+      expect(checklist).not_to be_complete
+      expect(checklist.status).to eq("draft")
       expect(json_response.dig("data", "id")).to eq(step_code.id)
     end
 
-    it "requires update permission to autofill a Part 9 step code" do
+    it "requires update permission to autofill a Part 9 Step Code" do
       allow(ENV).to receive(:[]).and_call_original
       allow(ENV).to receive(:[]).with("VITE_QA_MODE").and_return("true")
       sign_in create(:user, :super_admin)

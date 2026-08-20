@@ -292,6 +292,52 @@ RSpec.describe TemplateVersioningService, type: :service, search: true do
         requirement_template.template_versions.where(status: :draft).count
       }.by(2)
     end
+
+    it "creates a new snapshot without changing earlier drafts" do
+      requirement = requirement_template.requirements.first
+      original_label = requirement.label
+      first_draft =
+        TemplateVersioningService.create_draft!(requirement_template)
+
+      requirement.update!(label: "Revised requirement label")
+      requirement_template.reload
+      second_draft =
+        TemplateVersioningService.create_draft!(requirement_template)
+
+      first_requirement =
+        first_draft
+          .requirement_blocks_json
+          .fetch(requirement.requirement_block_id)
+          .fetch("requirements")
+          .find { |snapshot| snapshot["id"] == requirement.id }
+      second_requirement =
+        second_draft
+          .requirement_blocks_json
+          .fetch(requirement.requirement_block_id)
+          .fetch("requirements")
+          .find { |snapshot| snapshot["id"] == requirement.id }
+
+      expect(first_requirement["label"]).to eq(original_label)
+      expect(second_requirement["label"]).to eq("Revised requirement label")
+    end
+
+    it "orders drafts by newest creation time" do
+      older_draft = nil
+      newer_draft = nil
+
+      Timecop.freeze(Time.zone.parse("2026-07-14 09:00")) do
+        older_draft =
+          TemplateVersioningService.create_draft!(requirement_template)
+      end
+      Timecop.freeze(Time.zone.parse("2026-07-14 10:00")) do
+        newer_draft =
+          TemplateVersioningService.create_draft!(requirement_template)
+      end
+
+      expect(requirement_template.reload.draft_template_versions).to eq(
+        [newer_draft, older_draft]
+      )
+    end
   end
 
   describe "promote_draft_to_scheduled!" do

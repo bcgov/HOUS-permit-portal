@@ -12,6 +12,7 @@ import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
+import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { ActiveProjectMeetingNotice } from "../../shared/project-meetings/active-project-meeting-notice"
@@ -75,6 +76,7 @@ const MeetingsListContent = observer(({ permitProject, projectMeetingsEnabled }:
   } = projectMeetingStore
   const hasActiveProjectMeeting = !!permitProject.activeProjectMeeting
   const canRequestProjectMeeting = permitProject.isOwner && projectMeetingsEnabled && !hasActiveProjectMeeting
+  const isEmpty = !isSearching && tableProjectMeetings.length === 0
 
   useSearch(projectMeetingStore, [permitProject.id])
 
@@ -93,11 +95,12 @@ const MeetingsListContent = observer(({ permitProject, projectMeetingsEnabled }:
           <ActiveProjectMeetingNotice permitProject={permitProject} />
         ) : (
           canRequestProjectMeeting && (
-            <Box bg="theme.blueLight" borderRadius="md" p={6} mb={8}>
-              <Heading as="h3" size="sm" mb={3}>
-                {t("permitProject.meetings.requestCalloutTitle")}
-              </Heading>
-              <Text mb={4}>{t("permitProject.meetings.requestCalloutDescription")}</Text>
+            <CustomMessageBox
+              status={EFlashMessageStatus.info}
+              title={t("permitProject.meetings.requestCalloutTitle")}
+              description={t("permitProject.meetings.requestCalloutDescription")}
+              mb={8}
+            >
               <RouterLinkButton
                 to={`/projects/${permitProject.id}/meetings/new`}
                 variant="primary"
@@ -105,7 +108,7 @@ const MeetingsListContent = observer(({ permitProject, projectMeetingsEnabled }:
               >
                 {t("permitProject.meetings.requestButton")}
               </RouterLinkButton>
-            </Box>
+            </CustomMessageBox>
           )
         )}
         {!canRequestProjectMeeting && !hasActiveProjectMeeting && (
@@ -113,43 +116,44 @@ const MeetingsListContent = observer(({ permitProject, projectMeetingsEnabled }:
             {t("permitProject.meetings.tabDescription")}
           </Text>
         )}
-        {!isSearching && tableProjectMeetings.length === 0 ? (
-          <CustomMessageBox
-            status={EFlashMessageStatus.info}
-            description={t("permitProject.meetings.empty")}
-            mt={hasActiveProjectMeeting ? 6 : 2}
-          />
-        ) : (
-          <>
-            <SearchGrid
-              templateColumns="minmax(160px, 1fr) minmax(260px, 3fr) minmax(120px, 1fr) minmax(100px, 0.75fr)"
-              mt={hasActiveProjectMeeting || canRequestProjectMeeting ? 8 : 0}
-            >
-              <ProjectMeetingGridHeaders />
-              {tableProjectMeetings.map((projectMeeting) => (
-                <ProjectMeetingGridRow
-                  key={projectMeeting.id}
-                  permitProjectId={permitProject.id}
-                  projectMeeting={projectMeeting}
-                />
-              ))}
-            </SearchGrid>
-            <Flex w="full" justifyContent="space-between" mt={6}>
-              <PerPageSelect
-                handleCountPerPageChange={handleCountPerPageChange}
-                countPerPage={countPerPage}
-                totalCount={totalCount}
-              />
-              <Paginator
-                current={currentPage}
-                total={totalCount}
-                totalPages={totalPages}
-                pageSize={countPerPage}
-                handlePageChange={handlePageChange}
-                showLessItems={true}
-              />
+        <SearchGrid
+          templateColumns="minmax(160px, 1fr) minmax(260px, 3fr) minmax(120px, 1fr) minmax(100px, 0.75fr)"
+          mt={hasActiveProjectMeeting || canRequestProjectMeeting ? 8 : 2}
+          isEmpty={isEmpty}
+          emptyDescription={t("permitProject.meetings.empty")}
+          emptyIcon={<CalendarBlank size={18} />}
+        >
+          <ProjectMeetingGridHeaders />
+          {isSearching ? (
+            <Flex gridColumn="span 4" justify="center" align="center" minH="200px">
+              <SharedSpinner />
             </Flex>
-          </>
+          ) : (
+            tableProjectMeetings.map((projectMeeting) => (
+              <ProjectMeetingGridRow
+                key={projectMeeting.id}
+                permitProjectId={permitProject.id}
+                projectMeeting={projectMeeting}
+              />
+            ))
+          )}
+        </SearchGrid>
+        {!isEmpty && (
+          <Flex w="full" justifyContent="space-between" mt={6}>
+            <PerPageSelect
+              handleCountPerPageChange={handleCountPerPageChange}
+              countPerPage={countPerPage}
+              totalCount={totalCount}
+            />
+            <Paginator
+              current={currentPage}
+              total={totalCount}
+              totalPages={totalPages}
+              pageSize={countPerPage}
+              handlePageChange={handlePageChange}
+              showLessItems={true}
+            />
+          </Flex>
         )}
       </Box>
     </Flex>

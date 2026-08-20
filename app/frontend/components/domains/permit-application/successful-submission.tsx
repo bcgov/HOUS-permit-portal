@@ -17,7 +17,7 @@ export const SuccessfulSubmissionScreen = observer(() => {
   if (error) return <ErrorScreen error={error} />
   if (!currentPermitApplication?.isFullyLoaded) return <LoadingScreen />
 
-  const { jurisdiction, number } = currentPermitApplication
+  const { jurisdiction, number, projectId } = currentPermitApplication
   const { qualifiedName, primaryContact } = jurisdiction
   return (
     <Container maxW="container.lg">
@@ -41,9 +41,9 @@ export const SuccessfulSubmissionScreen = observer(() => {
             src="/images/timeline/timeline-graphic-4.png"
             alt="graphic for timeline"
             w="950px"
-            h="425px"
+            h="475px"
             bg="semantic.infoLight"
-            objectFit="cover"
+            objectFit="contain"
           />
           <Divider borderColor="greys.grey02" />
           <Flex direction="column" gap={4}>
@@ -57,8 +57,8 @@ export const SuccessfulSubmissionScreen = observer(() => {
           </Flex>
         </Flex>
 
-        <RouterLinkButton to={`/`} variant="primary">
-          {t("ui.returnHome")}
+        <RouterLinkButton to={projectId ? `/projects/${projectId}/overview` : `/`} variant="primary">
+          {t("ui.returnToProject")}
         </RouterLinkButton>
       </Flex>
     </Container>

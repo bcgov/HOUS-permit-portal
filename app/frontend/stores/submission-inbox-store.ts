@@ -20,7 +20,12 @@ import {
   EProjectState,
   ERadioFilterValue,
 } from "../types/enums"
-import { IPermitApplicationInboxSearchFilters, IPermitProjectInboxSearchFilters, TSearchParams } from "../types/types"
+import {
+  IOption,
+  IPermitApplicationInboxSearchFilters,
+  IPermitProjectInboxSearchFilters,
+  TSearchParams,
+} from "../types/types"
 import { pushQueryParams, setQueryParam } from "../utils/utility-functions"
 
 const KANBAN_PER_COLUMN = 10
@@ -38,6 +43,7 @@ export const PermitProjectInboxStoreModel = types
       unreadColumnCounts: types.optional(types.frozen<Record<string, number>>(), {}),
       /** Jurisdiction-wide count of unread projects (ignores current filters/query). */
       unreadCount: types.optional(types.number, 0),
+      requirementTemplateOptions: types.optional(types.array(types.frozen<IOption>()), []),
       requirementTemplateIdFilter: types.optional(types.array(types.string), []),
       stateFilter: types.optional(types.array(types.string), []),
       unreadFilter: types.optional(types.enumeration(Object.values(ERadioFilterValue)), ERadioFilterValue.include),
@@ -76,6 +82,9 @@ export const PermitProjectInboxStoreModel = types
     },
     setUnreadCount(count: number) {
       self.unreadCount = count ?? 0
+    },
+    setRequirementTemplateOptions(options: IOption[]) {
+      self.requirementTemplateOptions = cast(options ?? [])
     },
     adjustUnreadCountForColumn(columnKey: string, delta: number) {
       const counts = { ...self.unreadColumnCounts }
@@ -140,7 +149,8 @@ export const PermitProjectInboxStoreModel = types
 
       const searchParams: TSearchParams<EPermitProjectInboxSortFields, IPermitProjectInboxSearchFilters> = {
         query: self.query,
-        sort: self.sort,
+        // ponytail: kanban ignores list-column sort — defaults + drag order only
+        sort: isKanban ? undefined : self.sort,
         page: isKanban ? undefined : (opts?.page ?? self.currentPage),
         perPage: isKanban ? undefined : (opts?.countPerPage ?? self.countPerPage),
         mode: isKanban ? "kanban" : "list",
@@ -178,6 +188,9 @@ export const PermitProjectInboxStoreModel = types
         }
         if (response.data.meta?.unreadStateCounts) {
           self.setUnreadColumnCounts(response.data.meta.unreadStateCounts)
+        }
+        if (response.data.meta?.requirementTemplateOptions) {
+          self.setRequirementTemplateOptions(response.data.meta.requirementTemplateOptions)
         }
       }
       return response.ok
@@ -274,7 +287,8 @@ export const PermitApplicationInboxStoreModel = types
 
       const searchParams: TSearchParams<EPermitApplicationInboxSortFields, IPermitApplicationInboxSearchFilters> = {
         query: self.query,
-        sort: self.sort,
+        // ponytail: kanban ignores list-column sort — defaults + drag order only
+        sort: isKanban ? undefined : self.sort,
         page: isKanban ? undefined : (opts?.page ?? self.currentPage),
         perPage: isKanban ? undefined : (opts?.countPerPage ?? self.countPerPage),
         mode: isKanban ? "kanban" : "list",
@@ -305,6 +319,9 @@ export const PermitApplicationInboxStoreModel = types
         }
         if (response.data.meta?.unreadStatusCounts) {
           self.setUnreadColumnCounts(response.data.meta.unreadStatusCounts)
+        }
+        if (response.data.meta?.requirementTemplateOptions) {
+          self.setRequirementTemplateOptions(response.data.meta.requirementTemplateOptions)
         }
       }
       return response.ok

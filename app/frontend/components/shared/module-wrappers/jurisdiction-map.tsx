@@ -6,7 +6,9 @@ import * as reactiveUtils from "@arcgis/core/core/reactiveUtils"
 import Polyline from "@arcgis/core/geometry/Polyline"
 import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer"
 import MapView from "@arcgis/core/views/MapView"
+import { Box, Tooltip } from "@chakra-ui/react"
 import React, { useEffect, useRef } from "react"
+import { useTranslation } from "react-i18next"
 import { TLatLngTuple } from "../../../types/types"
 
 interface IJurisdictionMapProps {
@@ -26,6 +28,7 @@ export const JurisdictionMap = ({
   onZoomChange,
   isEditingMap = false,
 }: IJurisdictionMapProps) => {
+  const { t } = useTranslation()
   const mapDiv = useRef<HTMLDivElement>(null)
   const viewRef = useRef<MapView | null>(null)
   const graphicsLayerRef = useRef<GraphicsLayer | null>(null)
@@ -171,5 +174,11 @@ export const JurisdictionMap = ({
     view.ui.add("zoom", "top-left")
   }, [])
 
-  return <div ref={mapDiv} style={{ height: "250px", width: "100%", zIndex: 0 }} />
+  return (
+    <Tooltip label={t("map.visualReferenceDisclaimer")} hasArrow>
+      <Box>
+        <Box ref={mapDiv} h="250px" w="100%" zIndex={0} />
+      </Box>
+    </Tooltip>
+  )
 }

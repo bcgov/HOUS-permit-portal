@@ -22,11 +22,17 @@ export const ProjectInformationSection = observer(() => {
       <Heading as="h2" size="md" mb={4}>
         {t("projectMeeting.projectInformation")}
       </Heading>
-      <ProjectInfoRow label={t("permitProject.overview.address")} value={currentPermitProject?.fullAddress} isBold />
-      <ProjectInfoRow label={t("permitProject.overview.pid")} value={currentPermitProject?.pid} />
+      <ProjectInfoRow
+        label={t("permitProject.overview.address")}
+        value={currentPermitProject?.fullAddress}
+        isBold
+        stacked
+      />
+      <ProjectInfoRow label={t("permitProject.overview.pid")} value={currentPermitProject?.pid} stacked />
       <ProjectInfoRow
         label={t("permitProject.overview.jurisdictionName")}
         value={currentPermitProject?.jurisdiction?.disambiguatedName}
+        stacked
       />
       <HStack spacing={3} mt={8}>
         <Button variant="secondary" as={RouterLink} to={`/projects/${currentPermitProject?.id}/overview`}>

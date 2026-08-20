@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   Checkbox,
   Divider,
@@ -63,8 +64,15 @@ export const CheckboxFilter = observer(function CheckboxFilter({ value, onChange
       >
         {title}
       </MenuButton>
-      <MenuList p={4} zIndex="dropdown">
-        <VStack align="start" spacing={4}>
+      <MenuList
+        p={4}
+        zIndex="dropdown"
+        maxH="min(420px, calc(100vh - 96px))"
+        display="flex"
+        flexDirection="column"
+        overflow="hidden"
+      >
+        <VStack align="stretch" spacing={4} flex={1} minH={0} overflow="hidden">
           <InputGroup>
             <InputLeftElement pointerEvents="none">
               <MagnifyingGlass />
@@ -72,20 +80,24 @@ export const CheckboxFilter = observer(function CheckboxFilter({ value, onChange
             <Input placeholder={t("ui.search")} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
           </InputGroup>
           <Divider />
-          {filteredOptions.length === 0 ? (
-            <Text color="greys.grey01" fontSize="sm" px={2} w="full" textAlign="center">
-              {t("ui.noOptionsFound")}
-            </Text>
-          ) : (
-            filteredOptions.map((option) => {
-              const checkboxProps = getCheckboxProps({ value: option.value })
-              return (
-                <Checkbox key={option.value} {...checkboxProps}>
-                  {option.label}
-                </Checkbox>
-              )
-            })
-          )}
+          <Box overflowY="auto" minH={0} flex={1} w="full">
+            {filteredOptions.length === 0 ? (
+              <Text color="greys.grey01" fontSize="sm" px={2} w="full" textAlign="center">
+                {t("ui.noOptionsFound")}
+              </Text>
+            ) : (
+              <VStack align="start" spacing={4}>
+                {filteredOptions.map((option) => {
+                  const checkboxProps = getCheckboxProps({ value: option.value })
+                  return (
+                    <Checkbox key={option.value} {...checkboxProps}>
+                      {option.label}
+                    </Checkbox>
+                  )
+                })}
+              </VStack>
+            )}
+          </Box>
           <Divider />
           <Button
             onClick={onReset}

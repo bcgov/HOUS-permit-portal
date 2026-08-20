@@ -3,11 +3,13 @@ import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
+import { RELEASE_NOTE_TYPE_CONFIG } from "../../../constants/release-note-type-config"
 import { IReleaseNote } from "../../../models/release-note-model"
 import { useMst } from "../../../setup/root"
 import { CopyLinkButton } from "../../shared/base/copy-link-button"
 import { SafeTipTapDisplay } from "../../shared/editor/safe-tiptap-display"
-import { ReleaseNoteVersionBadge } from "./release-note-version-badge"
+import { ReleaseNoteLabelBadge } from "./release-note-label-badge"
+import { ReleaseNoteTypeBadge } from "./release-note-type-badge"
 
 type ReleaseNoteEntryProps = {
   releaseNote: IReleaseNote
@@ -21,6 +23,7 @@ export const ReleaseNoteEntry = observer(function ReleaseNoteEntry({
   const { t } = useTranslation()
   const { releaseNoteStore } = useMst()
   const { getReleaseNoteAnchorId, getReleaseNoteShareUrl } = releaseNoteStore
+  const { showVersionPrefix } = RELEASE_NOTE_TYPE_CONFIG[releaseNote.releaseType]
 
   return (
     <VStack id={getReleaseNoteAnchorId(releaseNote.id)} align="stretch" spacing={10} w="full" scrollMarginTop={8}>
@@ -36,7 +39,10 @@ export const ReleaseNoteEntry = observer(function ReleaseNoteEntry({
         <Heading as="h2" fontSize="2xl" m={0}>
           {format(releaseNote.releaseDate, "MMMM d, yyyy")}
         </Heading>
-        <ReleaseNoteVersionBadge version={releaseNote.version} />
+        {releaseNote.displayLabel && (
+          <ReleaseNoteLabelBadge label={releaseNote.displayLabel} showVersionPrefix={showVersionPrefix} />
+        )}
+        <ReleaseNoteTypeBadge releaseType={releaseNote.releaseType} />
         <CopyLinkButton
           value={getReleaseNoteShareUrl(releaseNote.id)}
           iconOnly

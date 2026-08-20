@@ -71,16 +71,8 @@ export const ApplicationInboxTable = observer(function ApplicationInboxTable({ s
         </Flex>
       )
     }
-    if (listShowsNoResults) {
-      return (
-        <Flex py={4} gridColumn="span 8" w="full" justify="flex-start">
-          <InboxNoMatchingEmpty
-            viewMode={EInboxViewMode.applications}
-            onClearFilters={() => searchStore.resetFilters()}
-          />
-        </Flex>
-      )
-    }
+    if (listShowsNoResults) return null
+
     return applications.map((application) => <ApplicationInboxRow key={application.id} application={application} />)
   }
 
@@ -100,6 +92,15 @@ export const ApplicationInboxTable = observer(function ApplicationInboxTable({ s
           templateColumns="36px minmax(160px, 1.5fr) minmax(180px, 1.3fr) minmax(140px, 1fr) minmax(140px, 1fr) minmax(160px, 1.1fr) minmax(120px, auto) 72px"
           gridRowClassName="application-inbox-grid-row"
           overflow="visible"
+          isEmpty={listShowsNoResults}
+          emptyState={
+            <InboxNoMatchingEmpty
+              gridColumn="1 / -1"
+              m={4}
+              viewMode={EInboxViewMode.applications}
+              onClearFilters={() => searchStore.resetFilters()}
+            />
+          }
           sx={gridStickyHeaderSx}
         >
           <Box display="contents" role="rowgroup">

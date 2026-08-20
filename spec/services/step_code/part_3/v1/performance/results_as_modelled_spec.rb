@@ -20,7 +20,7 @@ RSpec.describe StepCode::Part3::V1::Performance::ResultsAsModelled do
     subject.call
   end
 
-  context "when the building has step code occupancies" do
+  context "when the building has Step Code occupancies" do
     let(:occupancies) do
       build_list(:step_code_occupancy, 1, :other_residential)
     end
@@ -28,7 +28,7 @@ RSpec.describe StepCode::Part3::V1::Performance::ResultsAsModelled do
     it_behaves_like PART_3_COMPLIANCE_RESULTS
   end
 
-  context "when the building does not have step code occupancies" do
+  context "when the building does not have Step Code occupancies" do
     let(:occupancies) { build_list(:step_code_occupancy, 1, :low_industrial) }
 
     it_behaves_like PART_3_COMPLIANCE_RESULTS

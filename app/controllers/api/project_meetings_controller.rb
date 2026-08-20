@@ -1,13 +1,14 @@
 class Api::ProjectMeetingsController < Api::ApplicationController
   include Api::Concerns::Search::ProjectMeetings
 
-  before_action :set_permit_project, except: %i[show]
+  before_action :set_permit_project, except: %i[show download_calendar]
   before_action :set_project_meeting,
                 only: %i[
                   show
+                  download_calendar
                   update
                   submit
-                  cancel
+                  withdraw
                   reschedule
                   transition_status
                   mark_as_viewed
@@ -63,6 +64,31 @@ class Api::ProjectMeetingsController < Api::ApplicationController
                    }
   end
 
+  def download_calendar
+    authorize @project_meeting
+
+    if @project_meeting.confirmed_date.blank?
+      return(
+        render_error(
+          "project_meeting.calendar_unavailable",
+          { status: :unprocessable_entity }
+        )
+      )
+    end
+
+    generator =
+      ProjectMeetingIcsGenerator.new(
+        @project_meeting,
+        hub_meeting_url: calendar_hub_meeting_url,
+        attendee_email: current_user.email
+      )
+
+    send_data generator.generate,
+              filename: generator.filename,
+              type: "text/calendar; method=REQUEST; charset=UTF-8",
+              disposition: "attachment"
+  end
+
   def update
     authorize @project_meeting
 
@@ -108,20 +134,20 @@ class Api::ProjectMeetingsController < Api::ApplicationController
     )
   end
 
-  def cancel
+  def withdraw
     authorize @project_meeting
 
-    unless @project_meeting.allowed_manual_transitions.include?(:closed)
+    unless @project_meeting.allowed_manual_transitions.include?(:withdrawn)
       return render_error("project_meeting.invalid_transition", { status: 422 })
     end
 
-    @project_meeting.close!
+    @project_meeting.withdraw!
     render_success @project_meeting,
-                   "project_meeting.cancel_success",
+                   "project_meeting.withdraw_success",
                    { blueprint: ProjectMeetingBlueprint }
   rescue AASM::InvalidTransition, ActiveRecord::RecordInvalid
     render_error(
-      "project_meeting.cancel_error",
+      "project_meeting.withdraw_error",
       {
         status: :unprocessable_entity,
         log_args: {
@@ -214,14 +240,17 @@ class Api::ProjectMeetingsController < Api::ApplicationController
       @project_meeting =
         @permit_project
           .project_meetings
-          .includes(:meeting_request_documents, notes: %i[user permit_project])
+          .includes(
+            :meeting_request_documents,
+            notes: %i[user permit_project note_attachment_documents]
+          )
           .find(params[:id])
     else
       @project_meeting =
         policy_scope(ProjectMeeting).includes(
           :permit_project,
           :meeting_request_documents,
-          notes: %i[user permit_project]
+          notes: %i[user permit_project note_attachment_documents]
         ).find(params[:id])
     end
   end
@@ -262,5 +291,19 @@ class Api::ProjectMeetingsController < Api::ApplicationController
       :confirmed_date,
       :meeting_url
     )
+  end
+
+  def calendar_hub_meeting_url
+    permit_project = @project_meeting.permit_project
+    if current_user.review_staff? &&
+         current_user.member_of?(permit_project.jurisdiction_id)
+      FrontendUrlHelper.frontend_url(
+        "/jurisdictions/#{permit_project.jurisdiction.slug}/submission-inbox/projects/#{permit_project.id}/meetings/#{@project_meeting.id}"
+      )
+    else
+      FrontendUrlHelper.frontend_url(
+        "/projects/#{permit_project.id}/meetings/#{@project_meeting.id}"
+      )
+    end
   end
 end

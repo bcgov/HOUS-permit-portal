@@ -1,7 +1,7 @@
 import { t } from "i18next"
 import React from "react"
 import { useFieldArray, useFormContext } from "react-hook-form"
-import { NumberFormControl, TextFormControl } from "../../../../../../shared/form/input-form-control"
+import { NumberFormControl } from "../../../../../../shared/form/input-form-control"
 import { GridColumnHeader } from "../../shared/grid/column-header"
 import { GridData } from "../../shared/grid/data"
 import { DetailsInput } from "../details-input"
@@ -46,7 +46,7 @@ export const Ventilation = function BuildingCharacteristicsSummaryVentilation() 
               />
             </GridData>
             <GridData borderRightWidth={1} borderTopWidth={borderTopWidth}>
-              <TextFormControl
+              <NumberFormControl
                 fieldName={`${fieldArrayName}.${index}.litersPerSec`}
                 hint={index == fields.length - 1 && t(`${i18nPrefix}.litersPerSec`)}
               />

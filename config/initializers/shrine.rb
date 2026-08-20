@@ -33,7 +33,13 @@ if SHRINE_USE_S3
     region: ENV["BCGOV_OBJECT_STORAGE_REGION"] || "no-region-needed", # We are using Object Storage which does not require this, put in a dummy variable.  For dev testing will need a region.
     access_key_id: ENV["BCGOV_OBJECT_STORAGE_ACCESS_KEY_ID"],
     secret_access_key: ENV["BCGOV_OBJECT_STORAGE_SECRET_ACCESS_KEY"],
-    force_path_style: true
+    force_path_style: true,
+    # aws-sdk-s3 >= 1.178 defaults to flexible checksums that BCGOV Object Storage
+    # rejects ("x-amz-sdk-checksum-algorithm specified, but no corresponding
+    # x-amz-checksum-* are found"). Only send checksums when the API requires them.
+    # https://github.com/aws/aws-sdk-ruby/discussions/3165
+    request_checksum_calculation: "when_required",
+    response_checksum_validation: "when_required"
   }
   Shrine.storages = {
     cache:

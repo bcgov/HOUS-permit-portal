@@ -1,11 +1,13 @@
 // src/hooks/useUppyS3.ts
 import AwsS3 from "@uppy/aws-s3"
 import Uppy, { UppyFile } from "@uppy/core"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import {
   FILE_UPLOAD_CHUNK_SIZE_IN_BYTES,
   FILE_UPLOAD_MAX_SIZE,
 } from "../components/shared/chefs/additional-formio/constant"
+import { useMst } from "../setup/root"
+import { EFlashMessageStatus } from "../types/enums"
 import { getCsrfToken } from "../utils/utility-functions"
 
 // Calculate max file size in bytes
@@ -13,6 +15,7 @@ const MAX_FILE_SIZE_BYTES = FILE_UPLOAD_MAX_SIZE * 1024 * 1024
 
 interface UseUppyS3Props {
   onUploadSuccess?: (file: UppyFile<{}, {}>, response: any) => void
+  onFileRemoved?: (file: UppyFile<{}, {}>) => void
   maxNumberOfFiles?: number
   autoProceed?: boolean
   maxFileSizeMB?: number
@@ -28,12 +31,17 @@ interface UppyError {
 
 const useUppyS3 = ({
   onUploadSuccess,
+  onFileRemoved,
   maxNumberOfFiles = 1,
   autoProceed = false,
   maxFileSizeMB,
   allowedFileTypes,
 }: UseUppyS3Props = {}) => {
+  const { uiStore } = useMst()
   const maxFileSize = maxFileSizeMB ? maxFileSizeMB * 1024 * 1024 : MAX_FILE_SIZE_BYTES
+  const [isUploading, setIsUploading] = useState(false)
+  const onFileRemovedRef = useRef(onFileRemoved)
+  onFileRemovedRef.current = onFileRemoved
   const [uppy] = useState(() =>
     new Uppy({
       restrictions: {
@@ -243,7 +251,50 @@ const useUppyS3 = ({
         console.error("[UppyEvent] upload-error:", file?.name, error, "Uppy response:", response)
       })
   )
-  return uppy
+
+  useEffect(() => {
+    // Any file that hasn't finished counts as uploading — including the gap after
+    // file-added / before uploadStarted flips true (autoProceed still leaves Save
+    // clickable with the old uploadStarted && !uploadComplete check).
+    const syncUploading = () => {
+      setIsUploading(uppy.getFiles().some((file) => !file.progress?.uploadComplete))
+    }
+    const handleFileRemoved = (file: UppyFile<{}, {}>) => {
+      syncUploading()
+      onFileRemovedRef.current?.(file)
+    }
+    const onRestrictionFailed = (_file: UppyFile<{}, {}> | undefined, error: Error) => {
+      if (error?.message) {
+        uiStore.flashMessage.show(EFlashMessageStatus.error, null, error.message, 5000)
+      }
+    }
+
+    uppy.on("file-added", syncUploading)
+    uppy.on("upload", syncUploading)
+    uppy.on("upload-progress", syncUploading)
+    uppy.on("upload-success", syncUploading)
+    uppy.on("complete", syncUploading)
+    uppy.on("error", syncUploading)
+    uppy.on("cancel-all", syncUploading)
+    uppy.on("upload-error", syncUploading)
+    uppy.on("file-removed", handleFileRemoved)
+    uppy.on("restriction-failed", onRestrictionFailed)
+
+    return () => {
+      uppy.off("file-added", syncUploading)
+      uppy.off("upload", syncUploading)
+      uppy.off("upload-progress", syncUploading)
+      uppy.off("upload-success", syncUploading)
+      uppy.off("complete", syncUploading)
+      uppy.off("error", syncUploading)
+      uppy.off("cancel-all", syncUploading)
+      uppy.off("upload-error", syncUploading)
+      uppy.off("file-removed", handleFileRemoved)
+      uppy.off("restriction-failed", onRestrictionFailed)
+    }
+  }, [uppy, uiStore])
+
+  return { uppy, isUploading }
 }
 
 export default useUppyS3

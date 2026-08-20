@@ -160,7 +160,7 @@ RSpec.describe RequirementFormJsonService do
       )
     end
 
-    it "includes the openExistingStepCode action for energy step code" do
+    it "includes the openExistingStepCode action for Energy Step Code" do
       requirement =
         build_requirement(
           input_type: "energy_step_code",
@@ -267,7 +267,7 @@ RSpec.describe RequirementFormJsonService do
       expect(datagrid.dig(:validate, :minLength)).to eq(1)
     end
 
-    it "builds file component with tooltip for energy step code report file key" do
+    it "builds file component with tooltip for Energy Step Code report file key" do
       requirement = build_requirement(input_type: "file", input_options: {})
       allow(requirement).to receive(:key).with("block_key").and_return(
         "x_energy_step_code_report_file"

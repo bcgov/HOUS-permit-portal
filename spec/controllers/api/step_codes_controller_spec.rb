@@ -27,7 +27,7 @@ RSpec.describe Api::StepCodesController, type: :controller do
   end
 
   describe "PATCH #update" do
-    it "updates the step code for the creator" do
+    it "updates the Step Code for the creator" do
       standalone_step_code =
         create(
           :part_3_step_code,
@@ -49,7 +49,7 @@ RSpec.describe Api::StepCodesController, type: :controller do
       expect(json_response.dig("data", "title")).to eq("Updated Title")
     end
 
-    it "rejects updates to archived step codes" do
+    it "rejects updates to archived Step Codes" do
       step_code.update!(discarded_at: Time.current)
 
       patch :update,
@@ -63,7 +63,7 @@ RSpec.describe Api::StepCodesController, type: :controller do
 
       expect(response).to have_http_status(422)
       expect(json_response.dig("meta", "message", "message")).to eq(
-        "Cannot update archived step code. Please restore it first."
+        "Cannot update archived Step Code. Please restore it first."
       )
     end
 
@@ -117,7 +117,7 @@ RSpec.describe Api::StepCodesController, type: :controller do
         sign_in collaborator_user
       end
 
-      it "allows an assignee collaborator to reassign their step code to the collaborating permit application" do
+      it "allows an assignee collaborator to reassign their Step Code to the collaborating permit application" do
         create(
           :permit_collaboration,
           permit_application: permit_application,
@@ -146,7 +146,7 @@ RSpec.describe Api::StepCodesController, type: :controller do
         expect(response).to have_http_status(:success)
       end
 
-      it "allows a delegatee collaborator to reassign their step code to the collaborating permit application" do
+      it "allows a delegatee collaborator to reassign their Step Code to the collaborating permit application" do
         create(
           :permit_collaboration,
           permit_application: permit_application,
@@ -200,7 +200,7 @@ RSpec.describe Api::StepCodesController, type: :controller do
   end
 
   describe "DELETE #destroy" do
-    it "discards the step code" do
+    it "discards the Step Code" do
       delete :destroy, params: { id: step_code.id }
 
       expect(response).to have_http_status(:success)
@@ -217,7 +217,7 @@ RSpec.describe Api::StepCodesController, type: :controller do
   end
 
   describe "PATCH #restore" do
-    it "restores a discarded step code" do
+    it "restores a discarded Step Code" do
       step_code.update!(discarded_at: Time.current)
 
       patch :restore, params: { id: step_code.id }
@@ -262,7 +262,7 @@ RSpec.describe Api::StepCodesController, type: :controller do
       expect(response.body).to eq("p3-csv")
     end
 
-    it "returns bad request for invalid step code type" do
+    it "returns bad request for invalid Step Code type" do
       sign_in create(:user, :super_admin)
 
       expect {
@@ -270,7 +270,7 @@ RSpec.describe Api::StepCodesController, type: :controller do
             params: {
               step_code_type: "Invalid"
             }
-      }.to raise_error(ActionController::BadRequest, "Invalid step code type")
+      }.to raise_error(ActionController::BadRequest, "Invalid Step Code type")
     end
   end
 end

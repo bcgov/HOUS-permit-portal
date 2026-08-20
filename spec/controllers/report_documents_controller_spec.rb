@@ -12,7 +12,7 @@ RSpec.describe Api::ReportDocumentsController, type: :controller do
       expect(response).to have_http_status(:not_found)
     end
 
-    it "returns unprocessable entity when the step code has no jurisdiction" do
+    it "returns unprocessable entity when the Step Code has no jurisdiction" do
       report_document =
         create(:report_document, step_code: create(:step_code, creator: user))
 

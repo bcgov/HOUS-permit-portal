@@ -7,23 +7,28 @@ import * as R from "ramda"
 import React, { useEffect, useMemo, useRef, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
-import { useMountStatus } from "../../../hooks/use-mount-status"
-import { IPermitApplication } from "../../../models/permit-application"
-import { EFileUploadAttachmentType, EFlashMessageStatus, EStepCodeType } from "../../../types/enums"
-import { IErrorsBoxData } from "../../../types/types"
-import { getCompletedBlocksFromForm, getRequirementByKey } from "../../../utils/formio-component-traversal"
-import { singleRequirementFormJson, singleRequirementSubmissionData } from "../../../utils/formio-helpers"
-import { downloadFileFromStorage } from "../../../utils/utility-functions"
-import { CompareRequirementsBox } from "../../domains/permit-application/compare-requirements-box"
-import { ErrorsBox } from "../../domains/permit-application/errors-box"
-import { BuilderBottomFloatingButtons } from "../../domains/requirement-template/builder-bottom-floating-buttons"
-import { CustomMessageBox } from "../base/custom-message-box"
-import { SharedSpinner } from "../base/shared-spinner"
-import { Form, defaultOptions } from "../chefs"
-import { ContactModal } from "../contact/contact-modal"
-import { PreviousSubmissionModal } from "../revisions/previous-submission-modal"
-import { PermitApplicationSubmitModal } from "./permit-application-submit-modal"
-import { StepCodeSelectModal } from "./step-code-select-modal"
+import { IPermitApplication } from "../../../../models/permit-application"
+import { EFlashMessageStatus } from "../../../../types/enums"
+import { IErrorsBoxData } from "../../../../types/types"
+import { getRequirementByKey } from "../../../../utils/formio-component-traversal"
+import {
+  getEnergyStepCodeMethodFromData,
+  singleRequirementFormJson,
+  singleRequirementSubmissionData,
+} from "../../../../utils/formio-helpers"
+import { CompareRequirementsBox } from "../../../domains/permit-application/compare-requirements-box"
+import { ErrorsBox } from "../../../domains/permit-application/errors-box"
+import { BuilderBottomFloatingButtons } from "../../../domains/requirement-template/builder-bottom-floating-buttons"
+import { CustomMessageBox } from "../../base/custom-message-box"
+import { SharedSpinner } from "../../base/shared-spinner"
+import { Form, defaultOptions } from "../../chefs"
+import { ContactModal } from "../../contact/contact-modal"
+import { PreviousSubmissionModal } from "../../revisions/previous-submission-modal"
+import { PermitApplicationSubmitModal } from "../permit-application-submit-modal"
+import { StepCodeSelectModal } from "../step-code-select-modal"
+import { useBlockScrollSpy } from "./hooks/use-block-scroll-spy"
+import { useChecklistVisibility } from "./hooks/use-checklist-visibility"
+import { useRequirementFormEvents } from "./hooks/use-requirement-form-events"
 
 interface IRequirementFormProps {
   permitApplication?: IPermitApplication
@@ -54,7 +59,7 @@ export const RequirementForm = observer(
       jurisdiction,
       submissionData,
       setSelectedTabIndex,
-      indexOfBlockId,
+      selectedTabIndex,
       formJson,
       blockClasses,
       formattedFormJson,
@@ -65,25 +70,47 @@ export const RequirementForm = observer(
       isViewingPastRequests,
       inboxEnabled,
       sandbox,
+      isStepCodeComplete,
     } = permitApplication
+
+    const {
+      visibilityVersion,
+      syncCompletedBlocksFromForm,
+      syncCompletedBlocksFromFormRef,
+      previousBlockLayoutsRef,
+      captureBlockLayouts,
+    } = useChecklistVisibility({
+      formRef,
+      blockClasses,
+      selectedTabIndex,
+      setSelectedTabIndex,
+      isStepCodeComplete,
+      onCompletedBlocksChange,
+    })
 
     const shouldShowDiff = permitApplication?.shouldShowApplicationDiff(isEditing)
     const userShouldSeeDiff = permitApplication?.currentUserShouldSeeApplicationDiff
 
     const pastVersion = previousToSelectedSubmissionVersion || previousSubmissionVersion
-    const isMounted = useMountStatus()
     const { t } = useTranslation()
     const navigate = useNavigate()
     const { isOpen, onOpen, onClose } = useDisclosure()
     const boxRef = useRef<HTMLDivElement>(null)
 
-    const [wrapperClickCount, setWrapperClickCount] = useState(0)
+    useBlockScrollSpy({
+      boxRef,
+      formJson,
+      blockClasses,
+      visibilityVersion,
+      setSelectedTabIndex,
+      previousBlockLayoutsRef,
+      captureBlockLayouts,
+    })
+
     const [errorBoxData, setErrorBoxData] = useState<IErrorsBoxData[]>([]) // an array of Labels and links to the component
     const [imminentSubmission, setImminentSubmission] = useState(null)
     const [floatErrorBox, setFloatErrorBox] = useState(false)
     const [hasErrors, setHasErrors] = useState(false)
-    const [autofillContactKey, setAutofillContactKey] = useState(null)
-    const [previousSubmissionKey, setPreviousSubmissionKey] = useState(null)
     const [firstComponentKey, setFirstComponentKey] = useState(null)
     const [isCollapsedAll, setIsCollapsedAllState] = useState(false)
 
@@ -122,6 +149,20 @@ export const RequirementForm = observer(
       onClose: onPreviousSubmissionClose,
     } = useDisclosure()
 
+    const {
+      autofillContactKey,
+      previousSubmissionKey,
+      isStepCodeSelectOpen,
+      setIsStepCodeSelectOpen,
+      stepCodeSelectType,
+      handleSelectExistingStepCode,
+    } = useRequirementFormEvents({
+      permitApplication,
+      triggerSave,
+      onContactsOpen,
+      onPreviousSubmissionOpen,
+    })
+
     const infoBoxData = permitApplication.diffToInfoBoxData
 
     useEffect(() => {
@@ -135,20 +176,9 @@ export const RequirementForm = observer(
       // We don't want to trigger a re-render if the permitApplication itself changes, only if the derived data changes
     }, [displayedSubmissionData])
 
-    useEffect(() => {
-      // The box observers need to be re-registered whenever a panel is collapsed
-      // This triggers a re-registration whenever the body of the box is clicked
-      // Click listener must be registered this way because formIO prevents bubbling
-
-      const box = boxRef.current
-      const handleClick = () => {
-        setWrapperClickCount((n) => n + 1)
-      }
-      box?.addEventListener("click", handleClick)
-      return () => {
-        box?.removeEventListener("click", handleClick)
-      }
-    }, [])
+    const onScroll = (_event) => {
+      setFloatErrorBox(hasErrors && isFirstComponentNearTopOfView(firstComponentKey))
+    }
 
     useEffect(() => {
       if (hasErrors) {
@@ -160,121 +190,6 @@ export const RequirementForm = observer(
         window.removeEventListener("scroll", onScroll)
       }
     }, [hasErrors])
-
-    useEffect(() => {
-      // This useEffect registers the intersection observers for the panels
-      // It uses a thin line running across the middle of the screen
-      // and detects when this line covers at least a small percentage of the panel
-
-      // Problems with render timing necessitates the use of this isMounted state
-      if (!isMounted) return
-
-      const formComponentNodes = document.querySelectorAll(".formio-component")
-
-      const blockNodes = Array.from(formComponentNodes).filter((node) =>
-        Array.from(node.classList).some((className) => blockClasses.includes(className))
-      )
-      const viewportHeight = window.innerHeight // Get the viewport height
-      const topValue = -viewportHeight / 2 + 5
-      const bottomValue = -viewportHeight / 2 + 5
-      const rootMarginValue = `${topValue}px 0px ${bottomValue}px 0px`
-      const blockOptions = {
-        rootMargin: rootMarginValue,
-        threshold: 0.0001, // Adjust threshold based on needs
-      }
-
-      const blockObserver = new IntersectionObserver(handleBlockIntersection, blockOptions)
-
-      Object.values(blockNodes).forEach((ref) => {
-        if (ref) {
-          blockObserver.observe(ref)
-        }
-      })
-
-      return () => {
-        blockObserver.disconnect()
-      }
-    }, [formJson, isMounted, window.innerHeight, wrapperClickCount])
-
-    const handleOpenStepCodePart3 = async (_event) => {
-      await triggerSave?.()
-      navigate("part-3-step-code")
-    }
-
-    const handleOpenStepCodePart9 = async (_event) => {
-      await triggerSave?.()
-      navigate("part-9-step-code")
-    }
-
-    const handleOpenContactAutofill = async (event) => {
-      setAutofillContactKey(event.detail.key)
-      onContactsOpen()
-    }
-
-    const handleOpenPreviousSubmission = async (event) => {
-      setPreviousSubmissionKey(event.detail.key)
-      onPreviousSubmissionOpen()
-    }
-
-    const [isStepCodeSelectOpen, setIsStepCodeSelectOpen] = useState(false)
-    const [stepCodeSelectType, setStepCodeSelectType] = useState<EStepCodeType>(EStepCodeType.part9StepCode)
-    const handleOpenExistingStepCode = async (event) => {
-      const incoming = event?.detail?.stepCodeType as EStepCodeType
-      setStepCodeSelectType(
-        incoming === EStepCodeType.part3StepCode ? EStepCodeType.part3StepCode : EStepCodeType.part9StepCode
-      )
-      setIsStepCodeSelectOpen(true)
-    }
-
-    const handleSelectExistingStepCode = async (stepCodeId: string) => {
-      await triggerSave?.()
-      // Assign by updating the StepCode's permitApplicationId (belongs_to association)
-      // @ts-ignore method added on model
-      const ok = await permitApplication.assignExistingStepCode(stepCodeId)
-      if (ok) setIsStepCodeSelectOpen(false)
-    }
-
-    const handleDownloadRequirementDocument = async (event) => {
-      downloadFileFromStorage({
-        model: EFileUploadAttachmentType.RequirementDocument,
-        modelId: event.detail.id,
-        filename: event.detail.filename,
-      })
-    }
-
-    const handleOpenResourceLink = (event) => {
-      window.open(event.detail.url, "_blank", "noopener,noreferrer")
-    }
-
-    const handleDownloadResourceDocument = async (event) => {
-      downloadFileFromStorage({
-        model: EFileUploadAttachmentType.ResourceDocument,
-        modelId: event.detail.id,
-        filename: event.detail.filename,
-      })
-    }
-
-    useEffect(() => {
-      document.addEventListener("openStepCode", handleOpenStepCodePart9)
-      document.addEventListener("openStepCodePart3", handleOpenStepCodePart3)
-      document.addEventListener("openAutofillContact", handleOpenContactAutofill)
-      document.addEventListener("openPreviousSubmission", handleOpenPreviousSubmission)
-      document.addEventListener("openExistingStepCode", handleOpenExistingStepCode)
-      document.addEventListener("downloadRequirementDocument", handleDownloadRequirementDocument)
-      document.addEventListener("openResourceLink", handleOpenResourceLink)
-      document.addEventListener("downloadResourceDocument", handleDownloadResourceDocument)
-
-      return () => {
-        document.removeEventListener("openStepCode", handleOpenStepCodePart9)
-        document.removeEventListener("openStepCodePart3", handleOpenStepCodePart3)
-        document.removeEventListener("openAutofillContact", handleOpenContactAutofill)
-        document.removeEventListener("openPreviousSubmission", handleOpenPreviousSubmission)
-        document.removeEventListener("openExistingStepCode", handleOpenExistingStepCode)
-        document.removeEventListener("downloadRequirementDocument", handleDownloadRequirementDocument)
-        document.removeEventListener("openResourceLink", handleOpenResourceLink)
-        document.removeEventListener("downloadResourceDocument", handleDownloadResourceDocument)
-      }
-    }, [])
 
     const setIsCollapsedAll = (isCollapsedAll: boolean) => {
       if (isCollapsedAll) {
@@ -290,24 +205,19 @@ export const RequirementForm = observer(
         return { label: error.component.label, id: error.component.id, class: error.component.class }
       })
 
-    function handleBlockIntersection(entries: IntersectionObserverEntry[]) {
-      const entry = entries.filter((en) => en.isIntersecting)[0]
-      if (!entry) return
-
-      const itemWithSectionClassName = Array.from(entry.target.classList).find(
-        (className) =>
-          className.includes("formio-component-formSubmissionDataRSTsection") ||
-          className.includes("formio-component-section-signoff-key")
-      )
-
-      if (itemWithSectionClassName) {
-        const classNameParts = itemWithSectionClassName.split("|")
-        const blockId = classNameParts[classNameParts.length - 1].slice(-36)
-        setSelectedTabIndex(indexOfBlockId(blockId))
-      }
-    }
-
     const onFormSubmit = async (submission: any) => {
+      // Form.io does not validate the digital Step Code tool (button container, input:false).
+      if (getEnergyStepCodeMethodFromData(submission?.data) === "tool" && !isStepCodeComplete) {
+        setHasErrors(true)
+        setErrorBoxData([
+          {
+            label: t("permitApplication.edit.stepCodeToolIncomplete"),
+            id: "energy-step-code-tool",
+            class: "",
+          },
+        ])
+        return
+      }
       setHasErrors(null)
       setImminentSubmission(submission)
       onOpen()
@@ -320,12 +230,7 @@ export const RequirementForm = observer(
     }
 
     const onBlur = (containerComponent) => {
-      if (onCompletedBlocksChange) {
-        onCompletedBlocksChange(getCompletedBlocksFromForm(containerComponent.root))
-      }
-    }
-    const onScroll = (event) => {
-      setFloatErrorBox(hasErrors && isFirstComponentNearTopOfView(firstComponentKey))
+      syncCompletedBlocksFromForm(containerComponent.root)
     }
 
     const onChange = (changedEvent) => {
@@ -337,32 +242,21 @@ export const RequirementForm = observer(
         return // Exit if necessary objects are not available
       }
 
-      const componentType = component.type
-
-      if (componentType === "selectboxes" || componentType === "simplefile") {
-        if (onCompletedBlocksChange) {
-          onCompletedBlocksChange(getCompletedBlocksFromForm(root))
-        }
-        setErrorBoxData(mapErrorBoxData(root.errors))
-
-        if (componentType === "simplefile") {
-          // https://github.com/formio/formio.js/blob/4.19.x/src/components/file/File.unit.js
-          // formio `pristine` is not set for file updates
-          // using `setPristine(false)` causes the entire form to validate so instead, we use a separate dirty state
-          // trigger save to rerun compliance and save file
-          triggerSave?.({ autosave: true, skipPristineCheck: true })
-        }
+      // Visibility/completion for all field types (incl. block conditionals) is synced in formReady's change listener.
+      if (component.type === "simplefile") {
+        // https://github.com/formio/formio.js/blob/4.19.x/src/components/file/File.unit.js
+        // formio `pristine` is not set for file updates
+        // using `setPristine(false)` causes the entire form to validate so instead, we use a separate dirty state
+        // trigger save to rerun compliance and save file
+        triggerSave?.({ autosave: true, skipPristineCheck: true })
       }
     }
 
-    const onInitialized = (event) => {
+    const onInitialized = (_event) => {
       if (!formRef.current) return
 
       updateCollaborationAssignmentNodes?.()
-
-      if (onCompletedBlocksChange) {
-        onCompletedBlocksChange(getCompletedBlocksFromForm(formRef.current))
-      }
+      syncCompletedBlocksFromForm(formRef.current)
     }
 
     const formReady = (rootComponent) => {
@@ -371,9 +265,11 @@ export const RequirementForm = observer(
       rootComponent.on("change", (_) => {
         // whenever a form data changes, we update the state of ErrorBox with the new error information
         setErrorBoxData(mapErrorBoxData(formRef.current.errors))
+        // Keep CONTENTS sidebar in sync with Form.io conditionals (any field type can toggle a block).
+        syncCompletedBlocksFromFormRef.current(formRef.current)
       })
 
-      rootComponent.on("submitError", (error) => {
+      rootComponent.on("submitError", (_error) => {
         // when the form attempts to submit but has validation errors, we set a flag to show ErrorBox
         setHasErrors(true)
         setErrorBoxData(mapErrorBoxData(formRef.current.errors))
@@ -400,6 +296,10 @@ export const RequirementForm = observer(
       }
     }
     const showVersionDiffContactWarning = shouldShowDiff && !userShouldSeeDiff
+    const previousSubmissionRequirement =
+      isPreviousSubmissionOpen && previousSubmissionKey && pastVersion?.formJson
+        ? getRequirementByKey(pastVersion.formJson, previousSubmissionKey)
+        : null
     return (
       <>
         <Flex
@@ -479,7 +379,7 @@ export const RequirementForm = observer(
               status={EFlashMessageStatus.error}
             />
           )}
-          {permitApplication?.isSubmitted || readOnlyProp ? (
+          {permitApplication?.isSubmitted ? (
             <CustomMessageBox
               description={t("permitApplication.show.wasSubmitted", {
                 date: format(permitApplication.submittedAt, "MMM d, yyyy h:mm a"),
@@ -487,7 +387,7 @@ export const RequirementForm = observer(
               })}
               status={EFlashMessageStatus.info}
             />
-          ) : (
+          ) : !readOnlyProp ? (
             <CustomMessageBox
               title={
                 jurisdiction &&
@@ -521,7 +421,7 @@ export const RequirementForm = observer(
               }
               status={EFlashMessageStatus.info}
             />
-          )}
+          ) : null}
           <Box bg="greys.grey03" p={3} borderRadius="sm">
             <Text fontStyle="italic">
               {t("site.foippaWarning")}
@@ -576,14 +476,12 @@ export const RequirementForm = observer(
           onSelect={handleSelectExistingStepCode}
         />
 
-        {isPreviousSubmissionOpen && (
+        {previousSubmissionRequirement && (
           <PreviousSubmissionModal
             isOpen={isPreviousSubmissionOpen}
             onOpen={onPreviousSubmissionOpen}
             onClose={onPreviousSubmissionClose}
-            requirementJson={singleRequirementFormJson(
-              getRequirementByKey(pastVersion.formJson, previousSubmissionKey)
-            )}
+            requirementJson={singleRequirementFormJson(previousSubmissionRequirement)}
             submissionData={singleRequirementSubmissionData(pastVersion.submissionData, previousSubmissionKey)}
           />
         )}

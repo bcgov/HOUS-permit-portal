@@ -7,6 +7,7 @@ import { useParams } from "react-router-dom"
 import { IProjectMeeting } from "../../../../../models/project-meeting"
 import { useMst } from "../../../../../setup/root"
 import { EFlashMessageStatus } from "../../../../../types/enums"
+import { isValidPhoneNumber } from "../../../../../utils/utility-functions"
 import { useProjectMeetingNavigation } from "../../use-project-meeting-navigation"
 import { FormActions } from "../shared/form-actions"
 import { SectionHeading } from "../shared/section-heading"
@@ -60,9 +61,14 @@ export const ContactDetailsSection = observer(({ meeting }: ContactDetailsSectio
           />
           <FormErrorMessage>{errors.contactEmail?.message as string}</FormErrorMessage>
         </FormControl>
-        <FormControl>
+        <FormControl isInvalid={!!errors.contactPhoneNumber}>
           <FormLabel>{t("projectMeeting.contactPhoneNumber")}</FormLabel>
-          <Input {...register("contactPhoneNumber")} />
+          <Input
+            {...register("contactPhoneNumber", {
+              validate: (str) => !str || isValidPhoneNumber(str) || t("ui.invalidPhone"),
+            })}
+          />
+          <FormErrorMessage>{errors.contactPhoneNumber?.message as string}</FormErrorMessage>
         </FormControl>
       </VStack>
       <FormActions isSubmitting={formState.isSubmitting} />

@@ -8,7 +8,15 @@ class AutomatedCompliance::AutopopulateJob
     unfilled = permit_application.automated_compliance_unique_unfilled_modules
 
     if unfilled.length > 0
-      unfilled.each { |cm_name| match(cm_name, permit_application) }
+      unfilled.each do |cm_name|
+        begin
+          match(cm_name, permit_application)
+        rescue StandardError => e
+          Rails.logger.error(
+            "Autopopulate module #{cm_name} failed for permit_application #{permit_application_id}: #{e.class} #{e.message}"
+          )
+        end
+      end
       # In the future start a sidekiq batch to kick these things off
 
       # set front end form updates, force these to get picked up for processing

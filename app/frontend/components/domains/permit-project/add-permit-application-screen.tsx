@@ -21,9 +21,7 @@ import { usePermitProject } from "../../../hooks/resources/use-permit-project"
 import { useTemplateVersions } from "../../../hooks/resources/use-template-versions"
 import { ITemplateVersion } from "../../../models/template-version"
 import { useMst } from "../../../setup/root"
-import { EFlashMessageStatus } from "../../../types/enums"
 import { groupTemplateVersionsByCategory } from "../../../utils/template-version-grouping"
-import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import ProjectInfoRow from "../../shared/project/project-info-row"
@@ -57,6 +55,7 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
   )
   const shouldOfferProjectMeetingAfterAdd =
     selectedTemplatesRequireProjectMeeting &&
+    !currentPermitProject?.activeProjectMeeting &&
     siteConfigurationStore.projectMeetingsEnabled &&
     (currentPermitProject?.jurisdiction?.projectMeetingsEnabled ?? false)
 
@@ -174,13 +173,6 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
           <Heading as="h2" variant="yellowline">
             {t("permitProject.addPermits.permits.heading")}
           </Heading>
-
-          <CustomMessageBox
-            status={EFlashMessageStatus.info}
-            title={t("permitProject.addPermits.bcbcPartHeading")}
-            description={t("permitProject.addPermits.bcbcPart")}
-            mb={6}
-          />
 
           {/* Search bar */}
           <InputGroup mb={6} maxW="full">

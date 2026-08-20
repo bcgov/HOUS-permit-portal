@@ -331,13 +331,6 @@ class Api::TemplateVersionsController < Api::ApplicationController
         )
       end
 
-      if promote_draft_params[:promote_block_ids].present?
-        TemplateVersioningService.promote_block_changes!(
-          promoted,
-          promote_draft_params[:promote_block_ids]
-        )
-      end
-
       if !skip_date_check && promote_draft_params[:send_advance_notice]
         NotificationService.publish_version_scheduled_event(promoted)
       end
@@ -624,10 +617,6 @@ class Api::TemplateVersionsController < Api::ApplicationController
     )
   end
 
-  def draft_block_params
-    params.permit(:block_id, block_data: {})
-  end
-
   def draft_previewer_params
     params.permit(emails: [])
   end
@@ -654,8 +643,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
       :notification_scope,
       :send_advance_notice,
       :skip_date_check,
-      notified_jurisdiction_ids: [],
-      promote_block_ids: []
+      notified_jurisdiction_ids: []
     )
   end
 

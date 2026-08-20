@@ -75,12 +75,20 @@ export const ProjectMeetingsJurisdictionFeatureAccessScreen = observer(() => {
                 {t(`${i18nPrefix}.${projectMeetingsEnabled ? "turnOffProjectMeetings" : "turnOnProjectMeetings"}`)}
               </Button>
             </Flex>
+          </Flex>
+
+          <Flex align="flex-start" w="100%" direction="column" gap={2}>
+            <Heading as="h2" fontSize="lg" fontWeight="bold" m={0}>
+              {t(`${i18nPrefix}.projectMeetingsResources`)}
+            </Heading>
+            <Text color="text.secondary" fontSize="md">
+              {t(`${i18nPrefix}.projectMeetingsResourcesDescription`)}
+            </Text>
             <Link
               color="text.link"
-              mt={4}
               onClick={() =>
                 navigate(
-                  `/jurisdictions/${currentJurisdiction.slug || currentJurisdiction.id}/configuration-management/resources`
+                  `/jurisdictions/${currentJurisdiction.slug || currentJurisdiction.id}/configuration-management/resources?openAddResource=project_meeting_authorization`
                 )
               }
             >

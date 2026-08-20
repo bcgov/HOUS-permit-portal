@@ -9,6 +9,7 @@ import { useProjectMeeting } from "../../../../hooks/resources/use-project-meeti
 import { useMst } from "../../../../setup/root"
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
+import { projectMeetingNavSections } from "../nav-sections"
 import { AuthorizationDocumentsSection } from "./sections/authorization-documents-section"
 import { ContactDetailsSection } from "./sections/contact-details-section"
 import { DiscussionSection } from "./sections/discussion-section"
@@ -33,6 +34,22 @@ export const ProjectMeetingScreen = observer(() => {
     !currentPermitProject.jurisdiction?.projectMeetingsEnabled
   ) {
     return <ErrorScreen error={new Error(t("projectMeeting.validation.featureUnavailable"))} />
+  }
+
+  const meetingDetailPath = `/projects/${currentPermitProject.id}/meetings/${currentProjectMeeting.id}`
+  const meetingSentPath = `${meetingDetailPath}/sent`
+  const backPath = currentProjectMeeting.isSubmitted
+    ? meetingDetailPath
+    : `/projects/${currentPermitProject.id}/overview`
+
+  if (currentProjectMeeting.isSubmitted) {
+    const sectionConfig = projectMeetingNavSections.find((navSection) => navSection.location === section)
+    if (!sectionConfig?.requesterEditStep || !currentProjectMeeting.isActive) {
+      // review is not a requesterEditStep; after submit MobX flips isSubmitted while
+      // still on /edit/review. Send that transition to /sent so it cannot flash the
+      // project Meetings tab / detail before the intentional post-submit navigate.
+      return <Navigate to={section === "review" ? meetingSentPath : meetingDetailPath} replace />
+    }
   }
 
   if (section === "authorization-documents" && !currentProjectMeeting.authorizationRequired) {
@@ -75,14 +92,8 @@ export const ProjectMeetingScreen = observer(() => {
 
   return (
     <Container maxW="container.lg" p={8} as="main">
-      <Button
-        variant="link"
-        as={RouterLink}
-        to={`/projects/${currentPermitProject.id}/overview`}
-        leftIcon={<CaretLeft size={20} />}
-        mb={6}
-      >
-        {t("projectMeeting.backToProjectOverview")}
+      <Button variant="link" as={RouterLink} to={backPath} leftIcon={<CaretLeft size={20} />} mb={6}>
+        {currentProjectMeeting.isSubmitted ? t("ui.back") : t("projectMeeting.backToProjectOverview")}
       </Button>
       {renderSection()}
     </Container>

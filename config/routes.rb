@@ -99,11 +99,9 @@ Rails.application.routes.draw do
            to: "requirement_templates#update_jurisdiction_availabilities"
     end
 
-    # Draft version-specific endpoints (feedback, previews, block editing)
+    # Draft version-specific endpoints (feedback and previews)
     resources :template_versions, only: [] do
       member do
-        patch "update_draft_block", to: "template_versions#update_draft_block"
-        post "refresh_draft", to: "template_versions#refresh_draft"
         delete "discard_draft", to: "template_versions#discard_draft"
         post "promote_draft", to: "template_versions#promote_draft"
         post "validate_config", to: "template_versions#validate_config"
@@ -207,6 +205,7 @@ Rails.application.routes.draw do
     end
 
     resources :project_meetings, only: %i[show] do
+      get :download_calendar, on: :member
       resources :notes,
                 only: %i[index create],
                 controller: "project_meetings/notes" do
@@ -220,6 +219,9 @@ Rails.application.routes.draw do
       post "generate_missing_pdfs",
            on: :member,
            to: "permit_applications#generate_missing_pdfs"
+      post "download_supporting_documents_zip",
+           on: :member,
+           to: "permit_applications#download_supporting_documents_zip"
       post "permit_collaborations",
            on: :member,
            to: "permit_applications#create_permit_collaboration"
@@ -271,7 +273,7 @@ Rails.application.routes.draw do
       resources :project_meetings, path: "meetings", only: %i[create update] do
         post "search", on: :collection, to: "project_meetings#index"
         post :submit, on: :member
-        post :cancel, on: :member
+        post :withdraw, on: :member
         post :reschedule, on: :member
         post :transition_status, on: :member
         post :mark_as_viewed, on: :member
@@ -442,6 +444,7 @@ Rails.application.routes.draw do
     resources :digital_seal_validator, only: [:create]
 
     resources :release_notes, only: %i[index show create update] do
+      get "years", on: :collection, to: "release_notes#years"
       get "viewer_context", on: :member, to: "release_notes#viewer_context"
       patch "publish", on: :member, to: "release_notes#publish"
       post "search", on: :collection, to: "release_notes#index"

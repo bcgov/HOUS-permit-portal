@@ -20,7 +20,8 @@ class PermitApplicationBlueprint < Blueprinter::Base
            :missing_pdfs,
            :template_nickname,
            :discarded_at,
-           :days_in_queue
+           :days_in_queue,
+           :step_code_stage
 
     association :sandbox, blueprint: SandboxBlueprint
 

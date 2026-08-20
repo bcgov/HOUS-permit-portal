@@ -16,7 +16,7 @@ class ProjectMeeting < ApplicationRecord
             confirmed_date
             scheduled_at
             completed_at
-            closed_at
+            withdrawn_at
             contact_method
             meeting_url
           ],
@@ -92,37 +92,24 @@ class ProjectMeeting < ApplicationRecord
   end
 
   def submitted_event_notification_data
-    {
-      "id" => SecureRandom.uuid,
-      "action_text" =>
-        I18n.t(
-          "notification.project_meeting.submitted",
-          project_number: permit_project&.number
-        ),
-      "action_type" =>
-        Constants::NotificationActionTypes::PROJECT_MEETING_SUBMITTED,
-      "object_data" => {
-        "permit_project_id" => permit_project.id,
-        "project_meeting_id" => id
-      }
-    }
+    project_meeting_event_notification_data(
+      "notification.project_meeting.submitted",
+      Constants::NotificationActionTypes::PROJECT_MEETING_SUBMITTED
+    )
+  end
+
+  def scheduled_event_notification_data
+    project_meeting_event_notification_data(
+      "notification.project_meeting.scheduled",
+      Constants::NotificationActionTypes::PROJECT_MEETING_SCHEDULED
+    )
   end
 
   def rescheduled_event_notification_data
-    {
-      "id" => SecureRandom.uuid,
-      "action_text" =>
-        I18n.t(
-          "notification.project_meeting.rescheduled",
-          project_number: permit_project&.number
-        ),
-      "action_type" =>
-        Constants::NotificationActionTypes::PROJECT_MEETING_RESCHEDULED,
-      "object_data" => {
-        "permit_project_id" => permit_project.id,
-        "project_meeting_id" => id
-      }
-    }
+    project_meeting_event_notification_data(
+      "notification.project_meeting.rescheduled",
+      Constants::NotificationActionTypes::PROJECT_MEETING_RESCHEDULED
+    )
   end
 
   def search_data
@@ -153,6 +140,18 @@ class ProjectMeeting < ApplicationRecord
 
   private
 
+  def project_meeting_event_notification_data(i18n_key, action_type)
+    {
+      "id" => SecureRandom.uuid,
+      "action_text" => I18n.t(i18n_key, project_number: permit_project&.number),
+      "action_type" => action_type,
+      "object_data" => {
+        "permit_project_id" => permit_project.id,
+        "project_meeting_id" => id
+      }
+    }
+  end
+
   def validate_submission_requirements
     %i[
       requester_relationship
@@ -166,6 +165,11 @@ class ProjectMeeting < ApplicationRecord
     if request_property_information.nil? &&
          permit_project.jurisdiction.property_information_requests_enabled?
       errors.add(:request_property_information, :blank)
+    end
+
+    # Requester-edit wizard saves relationship first, then collects auth docs.
+    if persisted? && !draft? && will_save_change_to_requester_relationship?
+      return
     end
 
     if authorization_required? &&

@@ -43,7 +43,7 @@ User.find_or_create_by(omniauth_username: "super_admin") do |user|
   user.password = "P@ssword1"
   user.confirmed_at = Time.now
   user.omniauth_uid = "A41927C69D6549B8A396FCA748F53502"
-  user.omniauth_provider = "bceidbasic"
+  user.omniauth_provider = "idir"
   user.omniauth_email = "super_admin@example.com"
   user.omniauth_username = "super_admin"
 end
@@ -87,6 +87,20 @@ User.find_or_create_by(omniauth_username: "reviewer") do |user|
   user.omniauth_uid = "8505910FBD594495AC899BC6653F3544"
   user.omniauth_provider = "bceidbasic"
   user.omniauth_email = "reviewer@example.com"
+end
+
+User.find_or_create_by(omniauth_username: "technical_support") do |user|
+  user.role = :technical_support
+  user.first_name = "TechnicalSupport"
+  user.last_name = "McUser"
+  user.email = "technical_support@example.com"
+  user.password = "P@ssword1"
+  user.jurisdictions = [north_van]
+  user.confirmed_at = Time.now
+  user.omniauth_uid = "B7F3C2A19E8D4F6A9C1E5B0D8472A3F1"
+  user.omniauth_provider = "bceidbasic"
+  user.omniauth_email = "technical_support@example.com"
+  user.omniauth_username = "techsupport1"
 end
 
 User.find_or_create_by(omniauth_username: "submitter") do |user|
@@ -152,7 +166,16 @@ if north_van
     )
   property_information_contact.update!(confirmed_at: Time.now, default: false)
 
-  north_van.reload.update(
+  unless north_van.resources.project_meeting_authorization.exists?
+    north_van.resources.create!(
+      category: :project_meeting_authorization,
+      title: "Project meeting authorization",
+      resource_type: :link,
+      link_url: "https://example.com/project-meeting-authorization"
+    )
+  end
+
+  north_van.reload.update!(
     project_meetings_enabled: true,
     property_information_requests_enabled: true
   )
@@ -511,7 +534,7 @@ if north_van.present?
 
     idx = 0
     while inbox_test_project.reload.permit_applications.kept.count(
-            &:visible_to_reviewers?
+            &:submitted_at_least_once?
           ) < inbox_test_visible_app_target
       break if idx >= 100 # safety: avoid infinite loop if statuses fail to seed
 
@@ -530,7 +553,7 @@ if north_van.present?
       idx += 1
     end
 
-    puts "  ✓ #{inbox_test_project_title}: #{inbox_test_project.permit_applications.kept.count(&:visible_to_reviewers?)} reviewer-visible permit applications"
+    puts "  ✓ #{inbox_test_project_title}: #{inbox_test_project.permit_applications.kept.count(&:submitted_at_least_once?)} reviewer-visible permit applications"
   else
     puts "  (skipped Inbox test project: need submitter, reviewer, and published template versions)"
   end
@@ -684,7 +707,7 @@ if north_van_projects.size >= 10
       []
     end
 
-  meeting_statuses = %i[open scheduled completed closed].freeze
+  meeting_statuses = %i[open scheduled completed withdrawn].freeze
   seeded_meeting_count = 0
 
   meeting_seed_projects.each_with_index do |project, idx|
@@ -737,7 +760,7 @@ if north_van_projects.size >= 10
         scheduled_at:
           status.in?(%i[scheduled completed]) ? submitted_at + 1.day : nil,
         completed_at: status == :completed ? submitted_at + 3.days : nil,
-        closed_at: status == :closed ? submitted_at + 2.days : nil,
+        withdrawn_at: status == :withdrawn ? submitted_at + 2.days : nil,
         meeting_url:
           (
             if status.in?(%i[scheduled completed])

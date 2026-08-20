@@ -30,11 +30,11 @@ export const ProjectMeetingStoreModel = types
   .views(() => ({
     getProjectMeetingSortColumnHeader(field: EProjectMeetingSortFields) {
       const map = {
-        [EProjectMeetingSortFields.submittedAt]: t("permitProject.meetings.columns.submitted_at"),
+        [EProjectMeetingSortFields.submittedAt]: t("submissionInbox.meetingColumns.submitted_at"),
         [EProjectMeetingSortFields.projectNumber]: t("submissionInbox.meetingColumns.project_number"),
         [EProjectMeetingSortFields.projectAddress]: t("submissionInbox.meetingColumns.project_address"),
         [EProjectMeetingSortFields.contactName]: t("submissionInbox.meetingColumns.contact_name"),
-        [EProjectMeetingSortFields.confirmedDate]: t("submissionInbox.meetingColumns.confirmed_date"),
+        [EProjectMeetingSortFields.confirmedDate]: t("permitProject.meetings.columns.confirmed_date"),
         [EProjectMeetingSortFields.projectDescription]: t("permitProject.meetings.columns.project_description"),
         [EProjectMeetingSortFields.status]: t("permitProject.meetings.columns.status"),
       }
@@ -57,7 +57,7 @@ export const ProjectMeetingStoreModel = types
         confirmedDate: nullableDate(projectMeeting.confirmedDate),
         scheduledAt: nullableDate(projectMeeting.scheduledAt),
         completedAt: nullableDate(projectMeeting.completedAt),
-        closedAt: nullableDate(projectMeeting.closedAt),
+        withdrawnAt: nullableDate(projectMeeting.withdrawnAt),
         viewedAt: nullableDate(projectMeeting.viewedAt),
         createdAt: nullableDate(projectMeeting.createdAt),
         updatedAt: nullableDate(projectMeeting.updatedAt),
@@ -134,8 +134,8 @@ export const ProjectMeetingStoreModel = types
       }
       return { ok: false, error: responseError(response.data, response.problem) }
     }),
-    cancelProjectMeeting: flow(function* (permitProjectId: string, id: string) {
-      const response = yield* toGenerator(self.environment.api.cancelProjectMeeting(permitProjectId, id))
+    withdrawProjectMeeting: flow(function* (permitProjectId: string, id: string) {
+      const response = yield* toGenerator(self.environment.api.withdrawProjectMeeting(permitProjectId, id))
       if (response.ok) {
         self.mergeUpdate(response.data.data, "projectMeetingsMap")
         yield* toGenerator(self.rootStore.permitProjectStore.fetchPermitProject(permitProjectId))

@@ -25,6 +25,7 @@ export const TemplateVersionModel = types
     versionDate: types.Date,
     label: types.string,
     tags: types.optional(types.array(types.string), []),
+    createdAt: types.Date,
     updatedAt: types.Date,
     denormalizedTemplateJson: types.maybeNull(types.frozen<IDenormalizedTemplate>()),
     requirementBlocksJson: types.maybeNull(types.frozen<Record<string, IDenormalizedRequirementBlock>>()),

@@ -3,6 +3,7 @@ import { Envelope, Phone } from "@phosphor-icons/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { IContact } from "../../../types/types"
+import { mailtoHref, telHref } from "../../../utils/utility-functions"
 
 export interface IJurisdictionAboutContactCardProps extends BoxProps {
   contact: IContact
@@ -29,7 +30,7 @@ export const JurisdictionAboutContactCard = ({ contact, ...rest }: IJurisdiction
               {t("contact.fields.telephone")}
             </Text>
             {contact.phone ? (
-              <Link href={`tel:${contact.phone}`} color="text.link" textDecoration="underline" isExternal>
+              <Link href={telHref(contact.phone)} color="text.link" textDecoration="underline" isExternal>
                 {contact.phone}
               </Link>
             ) : null}
@@ -44,7 +45,7 @@ export const JurisdictionAboutContactCard = ({ contact, ...rest }: IJurisdiction
               {t("contact.fields.email")}
             </Text>
             {contact.email ? (
-              <Link href={`mailto:${contact.email}`} color="text.link" textDecoration="underline" isExternal>
+              <Link href={mailtoHref(contact.email)} color="text.link" textDecoration="underline" isExternal>
                 {contact.email}
               </Link>
             ) : null}

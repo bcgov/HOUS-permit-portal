@@ -442,7 +442,7 @@ class NotificationService
     return if step_code.blank?
 
     # Determine recipient users:
-    # If the step code belongs to a permit application, notify the submitter; otherwise notify the creator
+    # If the Step Code belongs to a permit application, notify the submitter; otherwise notify the creator
     user_ids = []
     if step_code.permit_application.present?
       submitter_id = step_code.permit_application.submitter_id
@@ -653,19 +653,10 @@ class NotificationService
     end
   end
 
-  def self.publish_release_note_publish_event(release_note)
+  def self.publish_release_note_publish_event(release_note, audience = nil)
     return unless release_note&.published?
 
-    recipient_ids =
-      User
-        .kept
-        .joins(:preference)
-        .where(
-          preferences: {
-            enable_in_app_release_note_publish_notification: true
-          }
-        )
-        .pluck(:id)
+    recipient_ids = release_note_publish_recipients(audience).pluck(:id)
 
     return if recipient_ids.blank?
 
@@ -770,6 +761,13 @@ class NotificationService
         contact.email
       ).deliver_later
     end
+
+    user = project_meeting.requested_by
+    return if user.blank?
+
+    NotificationPushJob.perform_async(
+      user.id => project_meeting.scheduled_event_notification_data
+    )
   end
 
   def self.publish_project_meeting_rescheduled_event(project_meeting)
@@ -795,9 +793,38 @@ class NotificationService
     )
   end
 
+  def self.release_note_publish_recipients(audience)
+    users =
+      User
+        .kept
+        .joins(:preference)
+        .where(
+          preferences: {
+            enable_in_app_release_note_publish_notification: true
+          }
+        )
+
+    audience_key = audience.to_s.presence || "all_users"
+    unless ReleaseNote::NOTIFICATION_AUDIENCES.include?(audience_key)
+      return users.none
+    end
+
+    case audience_key
+    when "none"
+      users.none
+    when "submitters"
+      users.submitter
+    when "staff"
+      users.where.not(role: :submitter)
+    else
+      users
+    end
+  end
+
   private_class_method :determine_file_owner
   private_class_method :send_external_api_key_notifications
   private_class_method :available_jurisdiction_ids_for
+  private_class_method :release_note_publish_recipients
 
   # Determines which review managers to notify based on the template version's
   # notification_scope. This is the core targeting logic.

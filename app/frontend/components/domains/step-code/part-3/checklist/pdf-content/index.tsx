@@ -31,17 +31,21 @@ export const Part3PDFContent = function StepCodePart3ChecklistPDFContent({
   // Use views from MST model (hardened helpers)
   const isMixedUse = isMixedUseChecklist(checklist as any)
   const isBaseline = isBaselineChecklist(checklist as any)
-  stepCode.updatedAt = checklist.updatedAt
+  // PdfGenerationJob may omit stepCode; never mutate the prop (Part 9 builds locally too)
+  const stepCodeForPdf = {
+    ...(stepCode ?? {}),
+    updatedAt: checklist.updatedAt ?? stepCode?.updatedAt,
+  }
   return (
     <PDFDocument assetDirectoryPath={assetDirectoryPath}>
       <CoverPage
         permitApplication={permitApplication}
-        stepCode={stepCode}
+        stepCode={stepCodeForPdf}
         subTitle={t("stepCodeChecklist.pdf.forPart3")}
         assetDirectoryPath={assetDirectoryPath}
       />
       <Page size="LETTER" style={page}>
-        <ProjectInfo stepCode={stepCode} />
+        <ProjectInfo stepCode={stepCodeForPdf} />
         {/* Placeholder for Step Code Performance Summary */}
         <StepCodePerformanceSummary checklist={checklist} />
         {/* Placeholder for Mixed Use/Baseline Summary (conditional) */}

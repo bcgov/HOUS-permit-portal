@@ -9,7 +9,7 @@ class Jurisdiction < ApplicationRecord
     contacts
     jurisdiction_step_requirements
     part3_occupancy_required_steps
-    jurisdiction_climate_zones
+    jurisdiction_heating_degree_days
   ]
 
   include ActionView::Helpers::SanitizeHelper
@@ -78,7 +78,7 @@ class Jurisdiction < ApplicationRecord
   has_many :integration_mappings
   has_many :jurisdiction_step_requirements, dependent: :destroy
   has_many :part3_occupancy_required_steps, dependent: :destroy
-  has_many :jurisdiction_climate_zones, dependent: :destroy
+  has_many :jurisdiction_heating_degree_days, dependent: :destroy
   has_many :collaborators, as: :collaboratorable, dependent: :destroy
   has_many :sandboxes, dependent: :destroy
   has_many :property_plan_local_jurisdictions, dependent: :destroy
@@ -108,6 +108,7 @@ class Jurisdiction < ApplicationRecord
   validates :office_telephone, phone: true, allow_blank: true
   validate :inbox_enabled_requires_inbox_setup
   validate :project_meetings_enabled_requires_setup
+  validate :project_meetings_enabled_requires_authorization_resource
   validate :property_information_requests_enabled_requires_setup
   validate :no_duplicate_part3_occupancy_pathways
 
@@ -139,7 +140,8 @@ class Jurisdiction < ApplicationRecord
                                 allow_destroy: true
   accepts_nested_attributes_for :part3_occupancy_required_steps,
                                 allow_destroy: true
-  accepts_nested_attributes_for :jurisdiction_climate_zones, allow_destroy: true
+  accepts_nested_attributes_for :jurisdiction_heating_degree_days,
+                                allow_destroy: true
   accepts_nested_attributes_for :resources, allow_destroy: true
 
   before_create :assign_unique_prefix
@@ -406,6 +408,21 @@ class Jurisdiction < ApplicationRecord
     jurisdiction_step_requirements
   end
 
+  # Last time Part 9 Step Code config was modified. Untouched auto-created
+  # defaults do not count — applicants should see "Not available" until an admin save.
+  def part_9_step_requirements_updated_at
+    steps = jurisdiction_step_requirements
+    return nil if steps.empty?
+
+    meaningful =
+      steps.reject { |s| s.default? && s.updated_at.to_i == s.created_at.to_i }
+    meaningful.map(&:updated_at).max
+  end
+
+  def part_3_step_requirements_updated_at
+    part3_occupancy_required_steps.maximum(:updated_at)
+  end
+
   def create_integration_mappings
     return unless external_api_enabled?
 
@@ -550,6 +567,20 @@ class Jurisdiction < ApplicationRecord
       :project_meetings_enabled,
       I18n.t(
         "activerecord.errors.models.jurisdiction.enabled_project_meetings_requires_setup"
+      )
+    )
+  end
+
+  def project_meetings_enabled_requires_authorization_resource
+    return if new_record?
+    return unless project_meetings_enabled
+    return unless will_save_change_to_project_meetings_enabled?
+    return if resources.project_meeting_authorization.exists?
+
+    errors.add(
+      :project_meetings_enabled,
+      I18n.t(
+        "activerecord.errors.models.jurisdiction.enabled_project_meetings_requires_authorization_resource"
       )
     )
   end

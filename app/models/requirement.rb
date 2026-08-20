@@ -91,7 +91,7 @@ class Requirement < ApplicationRecord
     "input_options" => {
       "value_options" => [
         {
-          "label" => "Utilizing the digital step code tool",
+          "label" => "Utilizing the digital Step Code tool",
           "value" => "tool"
         },
         { "label" => "By file upload", "value" => "file" }
@@ -364,9 +364,9 @@ class Requirement < ApplicationRecord
       )
 
     # this happens when the label is "Drawing File" as the generated requirement code
-    # will clash with the step code package file requirement code. This needs to be handled only
+    # will clash with the Step Code package file requirement code. This needs to be handled only
     # when the requirement code is generated from the label, because if it was intended to be used
-    # as a step code package file requirement code, it would have been set as such from the front-end.
+    # as a Step Code package file requirement code, it would have been set as such from the front-end.
     new_code_clashes_with_step_code_package =
       using_dummy &&
         new_requirement_code == ARCHITECTURAL_DRAWING_REQUIREMENT_CODE
@@ -611,6 +611,20 @@ class Requirement < ApplicationRecord
     expected_opts
       .except("value_options")
       .all? { |key, value| actual_opts[key] == value }
+  end
+
+  # Labels are display-only; conditionals key off values. Ignore label drift in stored data.
+  def schema_without_option_labels(attrs)
+    return attrs if attrs.blank?
+
+    normalized = attrs.deep_dup
+    options = normalized.dig("input_options", "value_options")
+    return normalized unless options.is_a?(Array)
+
+    normalized["input_options"]["value_options"] = options.map do |option|
+      option.is_a?(Hash) ? option.except("label") : option
+    end
+    normalized
   end
 
   def validate_architectural_drawing_related_requirements_schema
