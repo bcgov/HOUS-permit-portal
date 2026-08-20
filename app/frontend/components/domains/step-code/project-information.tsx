@@ -20,6 +20,8 @@ import {
   Tbody,
   Td,
   Text,
+  Th,
+  Thead,
   Tr,
 } from "@chakra-ui/react"
 import { DotsThreeVertical, Download, MapPin, ShareNetwork } from "@phosphor-icons/react"
@@ -71,6 +73,18 @@ const stageOptions = [
   EStepCodeChecklistStage.midConstruction,
   EStepCodeChecklistStage.asBuilt,
 ]
+
+const stageTableHeaderProps = {
+  py: 2,
+  textTransform: "none" as const,
+  letterSpacing: "normal",
+  fontSize: "md",
+  fontWeight: "semibold",
+  color: "text.primary",
+  lineHeight: "27px",
+  borderBottom: "1px solid",
+  borderColor: "border.light",
+}
 
 const stepCodesPath = "/step-codes?currentPage=1"
 
@@ -376,17 +390,25 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
           )}
 
           <FormControl>
-            <FormLabel>
-              {permitApplicationId
-                ? t("stepCode.projectInformation.permitStage")
-                : t("stepCode.projectInformation.stage")}
-            </FormLabel>
             {permitApplicationId && (
               <Text fontSize="sm" color="text.secondary" mb={3}>
                 {t("stepCode.projectInformation.permitStageHelp")}
               </Text>
             )}
             <Table variant="simple" size="sm">
+              <Thead>
+                <Tr borderTop="none">
+                  <Th colSpan={2} pl={0} {...stageTableHeaderProps}>
+                    {permitApplicationId
+                      ? t("stepCode.projectInformation.permitStage")
+                      : t("stepCode.projectInformation.stage")}
+                  </Th>
+                  <Th width="1px" px={2} textAlign="center" whiteSpace="nowrap" {...stageTableHeaderProps}>
+                    {t("stepCode.projectInformation.progress")}
+                  </Th>
+                  <Th pr={0} {...stageTableHeaderProps}></Th>
+                </Tr>
+              </Thead>
               <Tbody>
                 {stageOptions.map((stage) => {
                   const isSelected = selectedStage === stage
@@ -425,7 +447,7 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
                         />
                       </Td>
                       <Td fontWeight={isSelected ? "bold" : "normal"}>{stageLabel(stage)}</Td>
-                      <Td width="1px" px={2}>
+                      <Td width="1px" px={2} textAlign="center">
                         <StepCodeStageIcon status={stageStatus} />
                       </Td>
                       <Td pr={0} textAlign="right">
