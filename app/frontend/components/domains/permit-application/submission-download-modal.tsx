@@ -292,7 +292,6 @@ export const SubmissionDownloadModal = observer(
           pending.missingKeys,
           pending.knownFileUrls
         )
-        if (result === true) onClose()
         if (result === false) setSelectiveZipFailed(true)
       })()
     }, [awaitingGeneration, hasMissingPdfs, generationFailed, isOpen, documents, zipfileUrl])
@@ -316,7 +315,7 @@ export const SubmissionDownloadModal = observer(
       a.click()
       pendingSelectiveZipRequestIdRef.current = null
       permitApplication.clearSelectiveZipResult()
-      onClose()
+      setAwaitingSelectiveZip(false)
     }, [isOpen, awaitingSelectiveZip, permitApplication.selectiveZipResult])
 
     const allSelected = allKeys.length > 0 && selectedKeys.size === allKeys.length
@@ -365,7 +364,6 @@ export const SubmissionDownloadModal = observer(
         selectedReady.map((doc) => doc.fileUrl),
         allSelected
       )
-      if (result === true) onClose()
       if (result === false) setSelectiveZipFailed(true)
     }
 
