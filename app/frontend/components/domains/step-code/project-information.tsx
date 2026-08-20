@@ -267,12 +267,26 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
       <form onSubmit={handleSubmit(onSubmit)}>
         <Flex direction="column" gap={6} pb={4}>
           <Flex direction="column" gap={2}>
-            <HStack align="flex-end" spacing={3}>
-              <SectionHeading>{t("stepCode.projectInformation.heading")}</SectionHeading>
-              <Tag bg="theme.blueLight" color="text.primary" fontWeight="bold" mb={2}>
-                {stepCodeKindLabel}
-              </Tag>
-            </HStack>
+            <Flex justify="space-between" align="flex-end" gap={4} w="full">
+              <HStack align="flex-end" spacing={3}>
+                <SectionHeading>{t("stepCode.projectInformation.heading")}</SectionHeading>
+                <Tag bg="theme.blueLight" color="text.primary" fontWeight="bold" mb={2}>
+                  {stepCodeKindLabel}
+                </Tag>
+              </HStack>
+              {permitApplicationId && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={handleGoToPermitApplication}
+                  isDisabled={isSubmitting}
+                  isLoading={isSubmitting}
+                  flexShrink={0}
+                >
+                  {t("stepCode.goToPermitApplication")}
+                </Button>
+              )}
+            </Flex>
             <Text fontSize="md">{t("stepCode.projectInformation.instructions")}</Text>
             {isLockedBySubmittedPermit && (
               <CustomMessageBox
@@ -389,12 +403,24 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
                       key={stage}
                       cursor="pointer"
                       bg={isSelected ? "theme.blueLight" : undefined}
-                      onClick={() => handleStageSelect(stage)}
+                      onClickCapture={(event) => {
+                        const target = event.target as HTMLElement
+                        if (target.closest(".chakra-radio") && (target as HTMLInputElement).type !== "radio") {
+                          event.preventDefault()
+                        }
+                      }}
+                      onClick={(event) => {
+                        const target = event.target as HTMLElement
+                        if ((target as HTMLInputElement).type === "radio") return
+                        handleStageSelect(stage)
+                      }}
                     >
                       <Td pl={0} width="1px">
                         <Radio
                           isChecked={isSelected}
                           onChange={() => handleStageSelect(stage)}
+                          id={`step-code-stage-${stage}`}
+                          value={stage}
                           aria-label={stageLabel(stage)}
                         />
                       </Td>
@@ -462,29 +488,17 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
               />
             ))}
 
-          {(isEditable || permitApplicationId) && (
+          {isEditable && (
             <Flex justify="flex-start">
-              {isEditable ? (
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={handleSaveAndGoBack}
-                  isDisabled={isSubmitting}
-                  isLoading={isSubmitting}
-                >
-                  {t("stepCode.saveAndGoBack")}
-                </Button>
-              ) : (
-                <Button
-                  type="button"
-                  variant="link"
-                  onClick={handleGoToPermitApplication}
-                  isDisabled={isSubmitting}
-                  isLoading={isSubmitting}
-                >
-                  {t("stepCode.goToPermitApplication")}
-                </Button>
-              )}
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={handleSaveAndGoBack}
+                isDisabled={isSubmitting}
+                isLoading={isSubmitting}
+              >
+                {t("stepCode.saveAndGoBack")}
+              </Button>
             </Flex>
           )}
         </Flex>
