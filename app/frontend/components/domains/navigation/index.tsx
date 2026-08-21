@@ -119,6 +119,11 @@ const HelpVideosManagementScreen = lazy(() =>
     default: module.HelpVideosManagementScreen,
   }))
 )
+const InfoDocumentsManagementScreen = lazy(() =>
+  import("../super-admin/info-documents-management-screen").then((module) => ({
+    default: module.InfoDocumentsManagementScreen,
+  }))
+)
 const ReviewStaffMyJurisdictionAboutPageScreen = lazy(() =>
   import(
     "../home/review-manager/configuration-management-screen/feature-access-screen/my-jurisdiction-about-page"
@@ -581,6 +586,7 @@ const AppRoutes = observer(() => {
       <Route path="/configuration-management/sitewide-message" element={<SitewideMessageScreen />} />
       <Route path="/configuration-management/help-drawer-setup" element={<HelpDrawerSetupScreen />} />
       <Route path="/configuration-management/help-videos" element={<HelpVideosManagementScreen />} />
+      <Route path="/configuration-management/info-documents" element={<InfoDocumentsManagementScreen />} />
       <Route path="/configuration-management/template-categories" element={<TemplateCategoriesScreen />} />
       <Route path="/configuration-management/revision-reason-setup" element={<RevisionReasonSetupScreen />} />
       {/* DEPRECATED: /configuration-management/standardization-setup route removed.

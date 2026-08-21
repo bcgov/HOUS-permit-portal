@@ -4479,6 +4479,11 @@ Thank you,
           auditLogTitle: "Audit log",
           stepCodes: "Step Codes",
         },
+        infoDocuments: {
+          management: {
+            title: "Guides and fact sheets",
+          },
+        },
         helpVideos: {
           fetchError: "There was an error loading this video.",
           index: {
@@ -5400,6 +5405,10 @@ Thank you,
             title: "Videos",
             description: "Manage public help videos, captions, transcripts, and video sections",
           },
+          infoDocuments: {
+            title: "Guides and fact sheets",
+            description: "Manage public guides and fact sheets",
+          },
           templateCategories: {
             title: "Permit categories",
             cardDescription: "Choose which permit applications appear in each category and the order they appear in",
@@ -5866,6 +5875,7 @@ Thank you,
             preview: "Preview",
             videos: "Videos",
             helpVideos: "Videos",
+            infoDocuments: "Guides and fact sheets",
             qaTools: "QA tools",
             overheatingTool: "Overheating tool",
             templateCategories: "Permit categories",
