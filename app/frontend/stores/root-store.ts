@@ -18,6 +18,7 @@ import { IProjectMeetingInboxStore, ProjectMeetingInboxStoreModel } from "./proj
 import { IProjectMeetingStore, ProjectMeetingStoreModel } from "./project-meeting-store"
 import { IReleaseNoteStore, ReleaseNoteStoreModel } from "./release-note-store"
 import { IRequirementBlockStoreModel, RequirementBlockStoreModel } from "./requirement-block-store"
+import { IRequirementQuestionStoreModel, RequirementQuestionStoreModel } from "./requirement-question-store"
 import { IRequirementTemplateStoreModel, RequirementTemplateStoreModel } from "./requirement-template-store"
 import { ISandboxStore, SandboxStoreModel } from "./sandbox-store"
 import { ISessionStore, SessionStoreModel } from "./session-store"
@@ -46,6 +47,7 @@ export const RootStoreModel = types
     overheatingCodeStore: types.optional(OverheatingCodeStoreModel, {}),
     jurisdictionStore: types.optional(JurisdictionStoreModel, {}),
     requirementBlockStore: types.optional(RequirementBlockStoreModel, {}),
+    requirementQuestionStore: types.optional(RequirementQuestionStoreModel, {}),
     requirementTemplateStore: types.optional(RequirementTemplateStoreModel, {}),
     templateVersionPreviewStore: types.optional(TemplateVersionPreviewStoreModel, {}),
     collaboratorStore: types.optional(CollaboratorStoreModel, {}),
@@ -137,6 +139,7 @@ export interface IRootStore extends IStateTreeNode {
   jurisdictionStore: IJurisdictionStore
   userStore: IUserStore
   requirementBlockStore: IRequirementBlockStoreModel
+  requirementQuestionStore: IRequirementQuestionStoreModel
   requirementTemplateStore: IRequirementTemplateStoreModel
   templateVersionPreviewStore: ITemplateVersionPreviewStoreModel
   templateVersionStore: ITemplateVersionStoreModel

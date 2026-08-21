@@ -6,18 +6,18 @@ class AddCustomizationsCountToTemplateVersions < ActiveRecord::Migration[7.2]
                default: 0,
                null: false
 
-    return unless column_exists?(:template_versions, :change_significance)
-
-    # Reset column information so ActiveRecord knows about the new column
-    TemplateVersion.reset_column_information
-
-    # Backfill the counter cache for existing records
-    TemplateVersion.find_each do |tv|
-      TemplateVersion.reset_counters(
-        tv.id,
-        :jurisdiction_template_version_customizations
-      )
-    end
+    # SQL backfill: avoid loading ::TemplateVersion — the app model may declare
+    # columns (e.g. change_significance) that do not exist yet at this version.
+    execute <<~SQL.squish
+      UPDATE template_versions tv
+      SET jurisdiction_template_version_customizations_count = counts.cnt
+      FROM (
+        SELECT template_version_id, COUNT(*) AS cnt
+        FROM jurisdiction_template_version_customizations
+        GROUP BY template_version_id
+      ) AS counts
+      WHERE tv.id = counts.template_version_id
+    SQL
   end
 
   def down

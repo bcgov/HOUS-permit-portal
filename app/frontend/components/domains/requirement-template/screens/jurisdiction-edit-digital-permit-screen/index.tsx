@@ -10,6 +10,7 @@ import { useTemplateVersion } from "../../../../../hooks/resources/use-template-
 import { IJurisdictionTemplateVersionCustomization } from "../../../../../models/jurisdiction-template-version-customization"
 import { IRequirement } from "../../../../../models/requirement"
 import { useMst } from "../../../../../setup/root"
+import { stickyBelowNavBar } from "../../../../../styles/nav-bar-offset"
 import { EFlashMessageStatus, ERequirementChangeAction } from "../../../../../types/enums"
 import {
   ICompareRequirementsBoxData,
@@ -226,7 +227,7 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
             zIndex="1"
             left="0"
             right="0"
-            top="0"
+            {...stickyBelowNavBar()}
             px="6"
             py="4"
             bg="greys.grey03"

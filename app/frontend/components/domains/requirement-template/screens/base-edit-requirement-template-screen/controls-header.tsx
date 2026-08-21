@@ -5,6 +5,8 @@ import React from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { IRequirementTemplate } from "../../../../../models/requirement-template"
+import { stickyBelowNavBar } from "../../../../../styles/nav-bar-offset"
+import { IRequirementTemplateConfigError } from "../../../../../types/types"
 import { BrowserSearchPrompt } from "../../../../shared/permit-applications/browser-search-prompt"
 import { IEditRequirementActionsProps, IEditRequirementOptionsProps, IRequirementTemplateForm } from "./index"
 
@@ -12,6 +14,7 @@ interface IProps {
   onScheduleDate?: (date: Date) => void
   onForcePublishNow?: () => void
   onCreateDraft?: () => void
+  onSaveAndValidate?: () => Promise<IRequirementTemplateConfigError[]>
   onSaveDraft: () => void
   onAddSection: () => void
   requirementTemplate: IRequirementTemplate
@@ -27,6 +30,7 @@ export const ControlsHeader = observer(function ControlsHeader({
   onAddSection,
   onForcePublishNow,
   onCreateDraft,
+  onSaveAndValidate,
   hasStepCodeDependencyError,
   renderOptionsMenu,
   renderActions,
@@ -43,7 +47,7 @@ export const ControlsHeader = observer(function ControlsHeader({
       zIndex="1"
       left="0"
       right="0"
-      top="0"
+      {...stickyBelowNavBar()}
       px="6"
       py="4"
       bg="greys.grey03"
@@ -70,6 +74,7 @@ export const ControlsHeader = observer(function ControlsHeader({
             onScheduleConfirm: onScheduleDate,
             onForcePublishNow: onForcePublishNow,
             onCreateDraft: onCreateDraft,
+            onSaveAndValidate: onSaveAndValidate,
             triggerButtonProps: {
               isDisabled: isSubmitDisabled,
             },

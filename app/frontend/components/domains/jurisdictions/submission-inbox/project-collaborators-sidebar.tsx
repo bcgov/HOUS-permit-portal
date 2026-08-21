@@ -55,7 +55,7 @@ export const ProjectCollaboratorsSidebar = observer(function ProjectCollaborator
   return (
     <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
       <DrawerOverlay />
-      <DrawerContent maxW="430px" pt="var(--app-navbar-height)">
+      <DrawerContent maxW="430px" pt="var(--app-navbar-offset)">
         <DrawerCloseButton />
         <DrawerHeader gap={2} alignItems="center" display="flex" mt={7} px={8} pb={0}>
           <Users size={23} />

@@ -531,6 +531,28 @@ en:
       restore_error:
         title: "Error"
         message: "There was an error restoring the requirement block"
+    requirement_question:
+      create_success:
+        title: ""
+        message: "Successfully created question!"
+      create_error:
+        title: Error
+        message: "%{error_message}"
+      update_error:
+        title: Error
+        message: "%{error_message}"
+      destroy_success:
+        title: ""
+        message: The question was archived successfully
+      destroy_error:
+        title: Error
+        message: "There was an error archiving the question"
+      restore_success:
+        title: ""
+        message: The question was restored successfully
+      restore_error:
+        title: "Error"
+        message: "There was an error restoring the question"
     external_api_key:
       create_error:
         title: Create Error
@@ -589,7 +611,7 @@ en:
         message: "%{error_message}"
       schedule_error:
         title: Error
-        message: "There was an error scheduling the template"
+        message: "%{error_message}"
       template_unschedule_error:
         title: Error unscheduling template
         message: "There was an error unscheduling the template"
@@ -615,6 +637,18 @@ en:
         title: ""
         message: "Early access version promoted to scheduled version"
       promote_draft_error:
+        title: Error
+        message: "%{error_message}"
+      restore_layout_success:
+        title: ""
+        message: "Template layout restored from this version"
+      restore_layout_error:
+        title: Error
+        message: "%{error_message}"
+      restore_requirement_block_success:
+        title: ""
+        message: "Requirement block restored from this version"
+      restore_requirement_block_error:
         title: Error
         message: "%{error_message}"
       no_draft_error:
@@ -1148,6 +1182,16 @@ en:
       publish_before_schedule_date: "Version cannot be published before it's scheduled date"
       copy_customizations_error: "Old jurisdiction customizations could not be copied to new template version for jurisdiction_id:%{jurisdiction_id}"
       copy_customizations_log_error: "Error copying customizations to new template version: %{message}"
+    requirement_template_structure_restore_service:
+      template_unavailable: "Cannot restore layout because the template is missing or archived"
+      empty_snapshot: "This version has no layout snapshot to restore from"
+      malformed_snapshot: "This version's layout snapshot is invalid"
+      missing_blocks: "Cannot restore layout. These blocks are missing or archived in the library: %{blocks}"
+    requirement_block_snapshot_restore_service:
+      missing_block_id: "A requirement block id is required"
+      block_not_found: "This requirement block no longer exists in the library"
+      block_not_in_snapshot: "This requirement block is not present in the selected version snapshot"
+      malformed_snapshot: "This version's block snapshot is invalid"
   formio:
     requirement_template:
       completion_title: "Completion"

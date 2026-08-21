@@ -9,6 +9,7 @@ class Api::RequirementTemplatesController < Api::ApplicationController
                   schedule
                   force_publish_now
                   create_draft
+                  validate_config
                   update_jurisdiction_availabilities
                 ]
   before_action :set_template_version, only: %i[unschedule_template_version]
@@ -135,6 +136,10 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     ActiveRecord::Base.transaction do
       unless @requirement_template.update(requirement_template_params)
         render_error "requirement_template.schedule_error",
+                     message_opts: {
+                       error_message:
+                         @requirement_template.errors.full_messages.join(", ")
+                     },
                      log_args: {
                        errors: @requirement_template.errors.full_messages
                      }
@@ -145,9 +150,15 @@ class Api::RequirementTemplatesController < Api::ApplicationController
           @requirement_template,
           Date.parse(schedule_params)
         )
+      rescue TemplateVersionConfigError => e
+        render_template_config_error(e)
+        raise ActiveRecord::Rollback
       rescue StandardError => e
         # If there is an error in TemplateVersioningService.schedule!, rollback the transaction
         render_error "requirement_template.schedule_error",
+                     message_opts: {
+                       error_message: e.message
+                     },
                      log_args: {
                        errors: e.message
                      }
@@ -175,6 +186,7 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     error_message = ""
 
     published_template_version = nil
+    config_error = nil
 
     ActiveRecord::Base.transaction do
       unless @requirement_template.update(requirement_template_params)
@@ -186,6 +198,9 @@ class Api::RequirementTemplatesController < Api::ApplicationController
       begin
         published_template_version =
           TemplateVersioningService.force_publish_now!(@requirement_template)
+      rescue TemplateVersionConfigError => e
+        config_error = e
+        raise ActiveRecord::Rollback
       rescue StandardError => e
         # If there is an error in TemplateVersioningService.schedule!, rollback the transaction
         error_message = e.message
@@ -207,8 +222,13 @@ class Api::RequirementTemplatesController < Api::ApplicationController
                          published_template_version: published_template_version
                        }
                      }
+    elsif config_error
+      render_template_config_error(config_error)
     else
       render_error "requirement_template.force_publish_now_error",
+                   message_opts: {
+                     error_message: error_message
+                   },
                    log_args: {
                      errors: [error_message]
                    }
@@ -286,11 +306,26 @@ class Api::RequirementTemplatesController < Api::ApplicationController
                          current_user: current_user
                        }
                      }
+    rescue TemplateVersionConfigError => e
+      render_template_config_error(e)
     rescue TemplateVersionDraftError => e
       render_error "requirement_template.create_draft_error",
                    message_opts: {
                      error_message: e.message
                    }
+    end
+  end
+
+  def validate_config
+    authorize @requirement_template
+
+    begin
+      TemplateVersioningService.validate_requirement_template!(
+        @requirement_template
+      )
+      render_success nil, nil, { meta: { config_errors: [] } }
+    rescue TemplateVersionConfigError => e
+      render_template_config_error(e)
     end
   end
 
@@ -328,6 +363,18 @@ class Api::RequirementTemplatesController < Api::ApplicationController
   end
 
   private
+
+  def render_template_config_error(error)
+    render_error nil,
+                 {
+                   meta: {
+                     config_errors: error.config_errors
+                   },
+                   log_args: {
+                     errors: error.message
+                   }
+                 }
+  end
 
   def set_requirement_template
     # eager loading of associations as most of the time we return the extended view

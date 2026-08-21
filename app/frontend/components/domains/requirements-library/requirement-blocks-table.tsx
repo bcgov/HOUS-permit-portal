@@ -22,7 +22,9 @@ import { datefnsTableDateFormat } from "../../../constants"
 import { useSearch } from "../../../hooks/use-search"
 import { ISearch } from "../../../lib/create-search-model"
 import { IRequirementBlock } from "../../../models/requirement-block"
+import { IRequirementBlockPickerSearch } from "../../../models/requirement-block-picker-search"
 import { useMst } from "../../../setup/root"
+import { IRequirementBlockStoreModel } from "../../../stores/requirement-block-store"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
@@ -32,16 +34,22 @@ import { SearchGridRow } from "../../shared/grid/search-grid-row"
 import { GridHeaders } from "./grid-header"
 import { RequirementsBlockModal } from "./requirements-block-modal"
 
+type TRequirementBlocksTableSearchModel = IRequirementBlockStoreModel | IRequirementBlockPickerSearch
+
 interface IProps extends Partial<StackProps> {
   renderActionButton?: (props: ButtonProps & { requirementBlock: IRequirementBlock }) => JSX.Element
+  /** When set (e.g. nested drawer), uses in-memory search and skips URL sync. */
+  searchModel?: TRequirementBlocksTableSearchModel
 }
 
 export const RequirementBlocksTable = observer(function RequirementBlocksTable({
   renderActionButton,
+  searchModel: searchModelProp,
   ...containerProps
 }: IProps) {
   const { requirementBlockStore } = useMst()
-  const searchModel = requirementBlockStore
+  const searchModel = searchModelProp ?? requirementBlockStore
+  const isNested = !!searchModelProp
   const {
     tableRequirementBlocks,
     currentPage,
@@ -60,7 +68,7 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
     }
   }, [])
 
-  useSearch(searchModel as ISearch, [showArchived])
+  useSearch(searchModel as ISearch, isNested ? [] : [showArchived], { nested: isNested })
 
   return (
     <VStack as={"article"} spacing={5} {...containerProps}>
@@ -71,7 +79,7 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
           "[role='row']:not(:last-child) > [role='cell']": { borderBottom: "none" },
         }}
       >
-        <GridHeaders />
+        <GridHeaders searchModel={searchModel} />
 
         {isSearching ? (
           <Flex py={50} gridColumn={"span 5"}>

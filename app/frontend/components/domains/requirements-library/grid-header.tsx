@@ -10,9 +10,17 @@ import { ModelSearchInput } from "../../shared/base/model-search-input"
 import { GridHeader } from "../../shared/grid/grid-header"
 import { SortIcon } from "../../shared/sort-icon"
 
-export const GridHeaders = observer(function GridHeaders() {
+type TRequirementLibrarySearchModel = ISearch & {
+  getSortColumnHeader: (field: ERequirementLibrarySortFields) => string
+}
+
+export const GridHeaders = observer(function GridHeaders({
+  searchModel: searchModelProp,
+}: {
+  searchModel?: TRequirementLibrarySearchModel
+}) {
   const { requirementBlockStore } = useMst()
-  const searchModel = requirementBlockStore
+  const searchModel = searchModelProp ?? requirementBlockStore
 
   const { sort, getSortColumnHeader, toggleSort } = searchModel
   const { t } = useTranslation()

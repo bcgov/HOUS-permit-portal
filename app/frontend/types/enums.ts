@@ -133,6 +133,12 @@ export enum ERequirementLibrarySortFields {
   updatedAt = "updated_at",
 }
 
+export enum EQuestionBankSortFields {
+  name = "name",
+  associations = "associations",
+  updatedAt = "updated_at",
+}
+
 export enum EJurisdictionTypes {
   subDistrict = "SubDistrict",
   regionalDistrict = "RegionalDistrict",
@@ -248,6 +254,7 @@ export enum ESortDirection {
 export enum ETagType {
   requirementTemplate = "RequirementTemplate",
   requirementBlock = "RequirementBlock",
+  requirementQuestion = "RequirementQuestion",
 }
 
 export enum ERequirementType {
