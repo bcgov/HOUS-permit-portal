@@ -20,6 +20,8 @@ import {
   Tbody,
   Td,
   Text,
+  Th,
+  Thead,
   Tr,
 } from "@chakra-ui/react"
 import { DotsThreeVertical, Download, MapPin, ShareNetwork } from "@phosphor-icons/react"
@@ -71,6 +73,18 @@ const stageOptions = [
   EStepCodeChecklistStage.midConstruction,
   EStepCodeChecklistStage.asBuilt,
 ]
+
+const stageTableHeaderProps = {
+  py: 2,
+  textTransform: "none" as const,
+  letterSpacing: "normal",
+  fontSize: "md",
+  fontWeight: "semibold",
+  color: "text.primary",
+  lineHeight: "27px",
+  borderBottom: "1px solid",
+  borderColor: "border.light",
+}
 
 const stepCodesPath = "/step-codes?currentPage=1"
 
@@ -354,10 +368,13 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
                 <FormLabel htmlFor="referenceNumber" mb={0}>
                   {t("stepCode.projectInformation.identifier")}
                 </FormLabel>
-                <InfoTooltip
-                  {...fieldTooltipProps}
-                  label={t("stepCode.projectInformation.identifierTooltip") as string}
-                />
+                <Text>{t("ui.optional")}</Text>
+                <Flex ml={2}>
+                  <InfoTooltip
+                    {...fieldTooltipProps}
+                    label={t("stepCode.projectInformation.identifierTooltip") as string}
+                  />
+                </Flex>
               </HStack>
               <Input id="referenceNumber" {...register("referenceNumber")} />
             </FormControl>
@@ -376,17 +393,25 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
           )}
 
           <FormControl>
-            <FormLabel>
-              {permitApplicationId
-                ? t("stepCode.projectInformation.permitStage")
-                : t("stepCode.projectInformation.stage")}
-            </FormLabel>
             {permitApplicationId && (
               <Text fontSize="sm" color="text.secondary" mb={3}>
                 {t("stepCode.projectInformation.permitStageHelp")}
               </Text>
             )}
             <Table variant="simple" size="sm">
+              <Thead>
+                <Tr borderTop="none">
+                  <Th colSpan={2} pl={0} {...stageTableHeaderProps}>
+                    {permitApplicationId
+                      ? t("stepCode.projectInformation.permitStage")
+                      : t("stepCode.projectInformation.stage")}
+                  </Th>
+                  <Th width="1px" px={2} textAlign="center" whiteSpace="nowrap" {...stageTableHeaderProps}>
+                    {t("stepCode.projectInformation.progress")}
+                  </Th>
+                  <Th pr={0} {...stageTableHeaderProps}></Th>
+                </Tr>
+              </Thead>
               <Tbody>
                 {stageOptions.map((stage) => {
                   const isSelected = selectedStage === stage
@@ -425,7 +450,7 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
                         />
                       </Td>
                       <Td fontWeight={isSelected ? "bold" : "normal"}>{stageLabel(stage)}</Td>
-                      <Td width="1px" px={2}>
+                      <Td width="1px" px={2} textAlign="center">
                         <StepCodeStageIcon status={stageStatus} />
                       </Td>
                       <Td pr={0} textAlign="right">
@@ -475,9 +500,13 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
                 maxW={{ base: "none", xl: "430px" }}
                 label={t("stepCode.projectInformation.date") as string}
                 fieldName="permitDate"
-                showOptional={false}
                 LabelInfo={() => (
-                  <InfoTooltip {...fieldTooltipProps} label={t("stepCode.projectInformation.dateTooltip") as string} />
+                  <Flex ml={2}>
+                    <InfoTooltip
+                      {...fieldTooltipProps}
+                      label={t("stepCode.projectInformation.dateTooltip") as string}
+                    />
+                  </Flex>
                 )}
               />
             ) : (
@@ -540,7 +569,11 @@ const Field = function Field({ label, value, tooltip }: IFieldProps) {
     <FormControl>
       <HStack gap={1} mb={2}>
         <FormLabel mb={0}>{label}</FormLabel>
-        {tooltip && <InfoTooltip hasArrow placement="top" maxW="400px" whiteSpace="normal" label={tooltip} />}
+        {tooltip && (
+          <Flex ml={2}>
+            <InfoTooltip hasArrow placement="top" maxW="400px" whiteSpace="normal" label={tooltip} />
+          </Flex>
+        )}
       </HStack>
       <Input isDisabled value={value || ""} textOverflow="ellipsis" textAlign="left" />
     </FormControl>

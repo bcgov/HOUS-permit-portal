@@ -40,12 +40,15 @@ const StepCodeAddressSearch = observer(
     })
     const { control } = methods
 
+    const goToStepCodeRequirements = (jurisdiction: IJurisdiction, address: string) => {
+      navigate(`/jurisdictions/${jurisdiction.slug}/step-code-requirements?address=${encodeURIComponent(address)}`)
+    }
+
     const handleCheckAddress = async () => {
       if (!selectedSite) {
         onJurisdictionFound?.(null)
         setShowError(true)
         setSelectedSite(null)
-        //onJurisdictionFound?.(null)
         return
       }
 
@@ -66,13 +69,10 @@ const StepCodeAddressSearch = observer(
         setSelectedSite(null)
         setSelectedOption(null)
       } else if (onJurisdictionFound) {
-        // If parent provided a callback (like in StepCodeLookupTool), call it
+        // Landing (and other inline lookups) keep the 3-link panel on-page
         onJurisdictionFound(jurisdiction, addressLabel)
-        // We don't clear state or navigate here if we're using the lookup tool inline
       } else {
-        navigate(
-          `/jurisdictions/${jurisdiction.slug}/step-code-requirements?address=${encodeURIComponent(addressLabel)}`
-        )
+        goToStepCodeRequirements(jurisdiction, addressLabel)
       }
     }
 
@@ -111,7 +111,11 @@ const StepCodeAddressSearch = observer(
                       if (value) addJurisdiction(value)
                       setManualJurisdiction(value)
                       const addressLabel = selectedOption?.label || ""
-                      onJurisdictionFound?.(value, addressLabel)
+                      if (onJurisdictionFound) {
+                        onJurisdictionFound(value, addressLabel)
+                      } else if (value) {
+                        goToStepCodeRequirements(value, addressLabel)
+                      }
                       setShowError(false) // hide the error and dropdown once selected
                     }}
                     selectedOption={{ label: manualJurisdiction?.reverseQualifiedName, value: manualJurisdiction }}
