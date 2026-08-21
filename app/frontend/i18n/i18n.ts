@@ -2530,6 +2530,7 @@ Thank you,
             start: "Start checklist",
             continue: "Continue checklist",
             view: "View checklist",
+            viewReport: "View report",
             error: "There was a problem opening this checklist. Please try again.",
             lockedBySubmittedPermit:
               "This Step Code is not editable because the attached permit application is under review. You can view existing checklists or return to the application.",

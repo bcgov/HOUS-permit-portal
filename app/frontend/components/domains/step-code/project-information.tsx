@@ -74,10 +74,18 @@ const stageOptions = [
 
 const stepCodesPath = "/step-codes?currentPage=1"
 
+// ponytail: both Part 3 and Part 9 end on `report`. If a part gets a different
+// results landing, look it up from that part's navLinks instead of hardcoding.
+const REPORT_SECTION = "report"
+
 function checklistHasProgress(checklist: {
   sectionCompletionStatus?: Record<string, { complete: boolean; relevant: boolean }>
 }) {
   return Object.values(checklist.sectionCompletionStatus ?? {}).some((status) => status.relevant && status.complete)
+}
+
+function isChecklistComplete(checklist: { status?: EStepCodeChecklistStatus } | null, stageIsComplete = false) {
+  return stageIsComplete || checklist?.status === EStepCodeChecklistStatus.complete
 }
 
 function checklistButtonLabel(
@@ -85,14 +93,27 @@ function checklistButtonLabel(
     status?: EStepCodeChecklistStatus
     sectionCompletionStatus?: Record<string, { complete: boolean; relevant: boolean }>
   } | null,
-  stageIsComplete = false
+  stageIsComplete = false,
+  isLocked = false
 ) {
   if (!checklist) return t("stepCode.projectInformation.create")
-  if (stageIsComplete || checklist.status === EStepCodeChecklistStatus.complete) {
-    return t("stepCode.projectInformation.view")
+  if (isChecklistComplete(checklist, stageIsComplete)) {
+    return t("stepCode.projectInformation.viewReport")
   }
+  if (isLocked) return t("stepCode.projectInformation.view")
   if (checklistHasProgress(checklist)) return t("stepCode.projectInformation.continue")
   return t("stepCode.projectInformation.start")
+}
+
+function checklistSectionToOpen(
+  checklist: {
+    status?: EStepCodeChecklistStatus
+    currentNavLink?: { location?: string }
+  } | null,
+  stageIsComplete = false
+) {
+  if (isChecklistComplete(checklist, stageIsComplete)) return REPORT_SECTION
+  return checklist?.currentNavLink?.location || "start"
 }
 
 export const ProjectInformation = observer(function StepCodeProjectInformation({
@@ -216,7 +237,7 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
     const checklist = await saveProjectInformation(values)
     if (!checklist) return
 
-    const nextSection = checklist.currentNavLink?.location || "start"
+    const nextSection = checklistSectionToOpen(checklist, currentStepCode?.isStageComplete(selectedStage))
     navigate(checklistPath(selectedStage, nextSection))
   }
 
@@ -244,10 +265,13 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
 
   const handleOpenExistingChecklist = (
     stage: EStepCodeChecklistStage,
-    checklist: { currentNavLink?: { location?: string } } | null
+    checklist: {
+      status?: EStepCodeChecklistStatus
+      currentNavLink?: { location?: string }
+    } | null
   ) => {
     if (!checklist) return
-    navigate(checklistPath(stage, checklist.currentNavLink?.location || "start"))
+    navigate(checklistPath(stage, checklistSectionToOpen(checklist, currentStepCode?.isStageComplete(stage))))
   }
   const stepCodeKindLabel =
     stepCodeKind === "part3"
@@ -441,9 +465,11 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
                                 : undefined
                             }
                           >
-                            {isLockedBySubmittedPermit && checklist
-                              ? t("stepCode.projectInformation.view")
-                              : checklistButtonLabel(checklist, currentStepCode?.isStageComplete(stage))}
+                            {checklistButtonLabel(
+                              checklist,
+                              currentStepCode?.isStageComplete(stage),
+                              isLockedBySubmittedPermit
+                            )}
                           </Button>
                           <StageReportMenu
                             checklist={checklist}
