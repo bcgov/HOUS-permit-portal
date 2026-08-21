@@ -77,7 +77,6 @@ class Api::SubmissionContactsController < Api::ApplicationController
       :jurisdiction_id,
       :email,
       :title,
-      :default,
       :type
     )
   end

@@ -503,7 +503,7 @@ class PermitApplication < ApplicationRecord
          customization.submission_contact.confirmed?
       [customization.submission_contact]
     else
-      jurisdiction.confirmed_submission_contacts.default_contact
+      jurisdiction.confirmed_submission_contacts
     end
   end
 
