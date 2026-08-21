@@ -66,7 +66,7 @@ export function StepCodeFormFooter<T>({
   const handleContinue = () => submitAndNavigate(navigateToNext)
   const handleSaveAndGoBack = () =>
     submitAndNavigate(() => {
-      if (isFinalStep) return navigate(infoPagePath)
+      if (isFinalStep) return navigate("/step-codes?currentPage=1")
       if (hasPrevious) return navigateToPrevious()
       return navigate(infoPagePath)
     })
