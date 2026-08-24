@@ -4482,6 +4482,48 @@ Thank you,
         infoDocuments: {
           management: {
             title: "Guides and fact sheets",
+            documentsTitle: "Documents",
+            add: "Add document",
+            addTitle: "Add document",
+            editTitle: "Edit document",
+            emptyTitle: "No documents yet",
+            emptyBody: "Add your first guide or fact sheet. It stays hidden from the public page until you publish it.",
+            introTitle: "Introductory text",
+            introDefault:
+              "Short guides and one-page summaries about Building Permit Hub. Use them to answer questions about cost, functionality, security, and privacy. Filter by topic to find what you need.",
+            introHelp: "Appears at the top of the public guides and fact sheets page.",
+            introEditTitle: "Edit introductory text",
+            dragHandle: "Drag to reorder document",
+            deleteTitle: "Delete document",
+            deleteBody:
+              "Are you sure you want to delete this document? It will be removed from the admin list and the public page.",
+            table: {
+              title: "Title",
+              topic: "Topic",
+              status: "Status",
+              updated: "Updated",
+              actions: "Actions",
+            },
+            status: {
+              published: "Published",
+              draft: "Draft",
+            },
+            fields: {
+              title: "Title",
+              shortDescription: "Short description",
+              shortDescriptionHelp: "Appears on the public card. Maximum 256 characters.",
+              topics: "Topic(s)",
+              topicsHelp: "Search existing topics or create new ones. Drives the public topic filter.",
+              topicsPlaceholder: "Select...",
+              published: "Published — visible on the public page",
+              file: "File",
+              currentFile: "Current file: {{fileName}}",
+            },
+            errors: {
+              title: "Enter a title. This appears on the public page.",
+              topics: "Select at least one topic.",
+              file: "Upload a file before publishing.",
+            },
           },
         },
         helpVideos: {
