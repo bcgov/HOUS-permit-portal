@@ -22,7 +22,7 @@ import {
   Text,
   Tr,
 } from "@chakra-ui/react"
-import { DotsThreeVertical, Download, MapPin, ShareNetwork } from "@phosphor-icons/react"
+import { ArrowRight, DotsThreeVertical, Download, MapPin, ShareNetwork } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
@@ -43,8 +43,10 @@ import { IOption, IReportDocument } from "../../../types/types"
 import { downloadFileFromStorage } from "../../../utils/utility-functions"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
+import { ConfirmationModal } from "../../shared/confirmation-modal"
 import { DatePickerFormControl } from "../../shared/form/input-form-control"
 import { InfoTooltip } from "../../shared/info-tooltip"
+import { RouterLink } from "../../shared/navigation/router-link"
 import { SitesSelect } from "../../shared/select/selectors/sites-select"
 import { StepCodeStageIcon } from "../permit-project/step-code-stage-indicators"
 import { SectionHeading } from "./part-3/form-section/shared/section-heading"
@@ -475,6 +477,7 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
                             checklist={checklist}
                             stageLabel={stageLabel(stage)}
                             stepCode={currentStepCode}
+                            reportPath={checklistPath(stage, REPORT_SECTION)}
                           />
                         </HStack>
                       </Td>
@@ -577,6 +580,7 @@ const StageReportMenu = observer(function StageReportMenu({
   checklist,
   stageLabel,
   stepCode,
+  reportPath,
 }: {
   checklist?: {
     reportDocument?: IReportDocument | null
@@ -584,6 +588,7 @@ const StageReportMenu = observer(function StageReportMenu({
   } | null
   stageLabel: string
   stepCode: any
+  reportPath: string
 }) {
   const [isSharing, setIsSharing] = useState(false)
   const freshReport = checklist?.freshReportDocument ?? null
@@ -625,8 +630,8 @@ const StageReportMenu = observer(function StageReportMenu({
             {t("stepCode.index.downloadStageReport", { stage: stageLabel })}
           </MenuItem>
         ) : hasStaleReport ? (
-          <MenuItem isDisabled>
-            <Text>{t("stepCode.index.reportOutOfDate")}</Text>
+          <MenuItem as={RouterLink} to={reportPath} icon={<ArrowRight size={16} />}>
+            {t("stepCode.index.reportOutOfDate")}
           </MenuItem>
         ) : (
           <MenuItem isDisabled>
@@ -634,9 +639,24 @@ const StageReportMenu = observer(function StageReportMenu({
           </MenuItem>
         )}
         {freshReport && stepCode?.jurisdiction && (
-          <MenuItem icon={<ShareNetwork size={16} />} onClick={handleShare} isDisabled={isSharing}>
-            {isSharing ? t("stepCode.shareReport.sharing") : t("stepCode.shareReport.action")}
-          </MenuItem>
+          <ConfirmationModal
+            title={t("stepCode.shareReport.confirmTitle")}
+            body={t("stepCode.shareReport.confirmBody")}
+            onConfirm={async (closeModal) => {
+              await handleShare()
+              closeModal()
+            }}
+            renderTriggerButton={(props) => (
+              <MenuItem icon={<ShareNetwork size={16} />} isDisabled={isSharing} {...props}>
+                {t("stepCode.shareReport.action")}
+              </MenuItem>
+            )}
+            renderConfirmationButton={(props) => (
+              <Button {...props} variant="primary" isLoading={isSharing}>
+                {t("stepCode.shareReport.confirm")}
+              </Button>
+            )}
+          />
         )}
       </MenuList>
     </Menu>
