@@ -4497,6 +4497,13 @@ Thank you,
             deleteTitle: "Delete document",
             deleteBody:
               "Are you sure you want to delete this document? It will be removed from the admin list and the public page.",
+            replaceTitle: "Replace Document?",
+            replaceBody:
+              "You are replacing the document for {{title}}. The new file goes live on the public page as soon as the document is saved.",
+            replaceWarning:
+              "The current document will not be kept. Building Permit Hub does not store previous versions, so this cannot be undone.",
+            replaceConfirm: "Yes, replace",
+            replaceFile: "Replace file",
             table: {
               title: "Title",
               topic: "Topic",

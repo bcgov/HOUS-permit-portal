@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   Checkbox,
   FormControl,
@@ -16,14 +17,17 @@ import {
   Text,
   Textarea,
   VStack,
+  useDisclosure,
 } from "@chakra-ui/react"
 import { UppyFile } from "@uppy/core"
-import React, { useEffect, useRef } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import useUppyS3 from "../../../hooks/use-uppy-s3"
 import { IInfoDocument } from "../../../models/info-document"
 import { useMst } from "../../../setup/root"
+import { CalloutBanner } from "../../shared/base/callout-banner"
+import { ConfirmationModal } from "../../shared/confirmation-modal"
 import { TagsSelect } from "../../shared/select/selectors/tags-select"
 import { UppyDashboard } from "../../shared/uppy-dashboard"
 
@@ -77,7 +81,10 @@ export const InfoDocumentModal = ({ isOpen, onClose, document, onSubmit }: IInfo
     shouldFocusError: false,
   })
   const documentFileIdRef = useRef<string | undefined>()
+  const [fileReplaceUnlocked, setFileReplaceUnlocked] = useState(false)
+  const replaceConfirm = useDisclosure()
   const isPublished = watch("isPublished")
+  const title = watch("title")
 
   const { uppy, isUploading } = useUppyS3({
     onUploadSuccess: (file: UppyFile<{}, {}>, response: any) => {
@@ -106,6 +113,8 @@ export const InfoDocumentModal = ({ isOpen, onClose, document, onSubmit }: IInfo
     if (!isOpen) return
 
     resetUppy(uppy)
+    setFileReplaceUnlocked(false)
+    replaceConfirm.onClose()
     documentFileIdRef.current = document?.documentFile?.id
     reset({
       title: document?.title ?? "",
@@ -122,6 +131,7 @@ export const InfoDocumentModal = ({ isOpen, onClose, document, onSubmit }: IInfo
 
   const currentFileName = fileNameFor(document?.documentFile?.file)
   const hasExistingFile = Boolean(currentFileName)
+  const requireReplaceConfirmation = Boolean(document?.publishedAt) && hasExistingFile && !fileReplaceUnlocked
 
   const submit = handleSubmit(async (data) => {
     if (isUploading) return
@@ -218,7 +228,50 @@ export const InfoDocumentModal = ({ isOpen, onClose, document, onSubmit }: IInfo
                   {translate("infoDocuments.management.fields.currentFile", { fileName: currentFileName })}
                 </Text>
               )}
-              <UppyDashboard uppy={uppy} height={180} width="100%" />
+              <Box position="relative">
+                <UppyDashboard uppy={uppy} height={180} width="100%" />
+                {requireReplaceConfirmation && (
+                  <Box
+                    as="button"
+                    type="button"
+                    position="absolute"
+                    inset={0}
+                    zIndex={1}
+                    bg="transparent"
+                    border="none"
+                    p={0}
+                    cursor="pointer"
+                    aria-label={translate("infoDocuments.management.replaceFile")}
+                    onClick={replaceConfirm.onOpen}
+                    onDragOver={(event) => event.preventDefault()}
+                    onDrop={(event) => {
+                      event.preventDefault()
+                      replaceConfirm.onOpen()
+                    }}
+                  />
+                )}
+              </Box>
+              <ConfirmationModal
+                modalProps={{ size: "lg" }}
+                modalControlProps={replaceConfirm}
+                renderTriggerButton={() => null}
+                title={translate("infoDocuments.management.replaceTitle")}
+                body={
+                  <VStack align="stretch" spacing={4}>
+                    <Text>
+                      {translate("infoDocuments.management.replaceBody", {
+                        title: title?.trim() || document?.title,
+                      })}
+                    </Text>
+                    <CalloutBanner type="warning" title={translate("infoDocuments.management.replaceWarning")} my={0} />
+                  </VStack>
+                }
+                triggerText={translate("infoDocuments.management.replaceConfirm")}
+                onConfirm={(closeModal) => {
+                  setFileReplaceUnlocked(true)
+                  closeModal()
+                }}
+              />
               <FormErrorMessage>{errors.documentFileAttributes?.message as string}</FormErrorMessage>
             </FormControl>
           </VStack>
