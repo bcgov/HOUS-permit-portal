@@ -22,7 +22,7 @@ import {
   Text,
   Tr,
 } from "@chakra-ui/react"
-import { ArrowRight, DotsThreeVertical, Download, MapPin, ShareNetwork } from "@phosphor-icons/react"
+import { ArrowRight, CaretLeft, DotsThreeVertical, Download, MapPin, PaperPlaneRight } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
@@ -98,7 +98,7 @@ function checklistButtonLabel(
   stageIsComplete = false,
   isLocked = false
 ) {
-  if (!checklist) return t("stepCode.projectInformation.create")
+  if (!checklist) return t("stepCode.projectInformation.start")
   if (isChecklistComplete(checklist, stageIsComplete)) {
     return t("stepCode.projectInformation.viewReport")
   }
@@ -250,21 +250,6 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
     navigate(stepCodesPath)
   })
 
-  const handleSaveAndGoToPermitApplication = handleSubmit(async (values) => {
-    const checklist = await saveProjectInformation(values)
-    if (!checklist) return
-
-    navigate(`/permit-applications/${permitApplicationId}/edit`)
-  })
-
-  const handleGoToPermitApplication = () => {
-    if (isLockedBySubmittedPermit) {
-      navigate(`/permit-applications/${permitApplicationId}/edit`)
-      return
-    }
-    handleSaveAndGoToPermitApplication()
-  }
-
   const handleOpenExistingChecklist = (
     stage: EStepCodeChecklistStage,
     checklist: {
@@ -300,18 +285,6 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
                   {stepCodeKindLabel}
                 </Tag>
               </HStack>
-              {permitApplicationId && (
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={handleGoToPermitApplication}
-                  isDisabled={isSubmitting}
-                  isLoading={isSubmitting}
-                  flexShrink={0}
-                >
-                  {t("stepCode.goToPermitApplication")}
-                </Button>
-              )}
             </Flex>
             <Text fontSize="md">{t("stepCode.projectInformation.instructions")}</Text>
             {isLockedBySubmittedPermit && (
@@ -525,8 +498,9 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
                 onClick={handleSaveAndGoBack}
                 isDisabled={isSubmitting}
                 isLoading={isSubmitting}
+                leftIcon={<CaretLeft size={16} />}
               >
-                {t("stepCode.saveAndGoBack")}
+                {t("ui.back")}
               </Button>
             </Flex>
           )}
@@ -647,7 +621,7 @@ const StageReportMenu = observer(function StageReportMenu({
               closeModal()
             }}
             renderTriggerButton={(props) => (
-              <MenuItem icon={<ShareNetwork size={16} />} isDisabled={isSharing} {...props}>
+              <MenuItem icon={<PaperPlaneRight size={16} />} isDisabled={isSharing} {...props}>
                 {t("stepCode.shareReport.action")}
               </MenuItem>
             )}
