@@ -24,7 +24,7 @@ export const addApiErrorMonitor = (api: Api, uiStore: IUIStore) => {
     if (response.problem) {
       const err = API_ERROR_TYPES[response.problem]
       if (err) {
-        uiStore.flashMessage.show(err.type, err.message, null)
+        uiStore.flashMessage.show(err.type, null, err.message)
       }
     }
   })
