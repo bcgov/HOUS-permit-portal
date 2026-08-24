@@ -1557,6 +1557,7 @@ Thank you,
             requestCalloutDescription:
               "Some permit types may require a project meeting before you can submit an application.",
             empty: "There are no meeting requests for this project yet.",
+            pendingTime: "Pending",
             columns: {
               confirmed_date: "Meeting time",
               project_description: "Questions or additional details",
