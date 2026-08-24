@@ -255,6 +255,7 @@ export enum ETagType {
   requirementTemplate = "RequirementTemplate",
   requirementBlock = "RequirementBlock",
   requirementQuestion = "RequirementQuestion",
+  infoDocument = "InfoDocument",
 }
 
 export enum ERequirementType {
