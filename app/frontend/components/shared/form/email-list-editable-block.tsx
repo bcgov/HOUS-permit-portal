@@ -16,7 +16,6 @@ interface IEmailListItem {
   id?: string | null
   email?: string | null
   title?: string | null
-  default?: boolean
   _destroy?: boolean
   confirmedAt?: string | null
 }

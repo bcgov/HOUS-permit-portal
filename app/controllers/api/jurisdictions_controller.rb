@@ -305,7 +305,7 @@ class Api::JurisdictionsController < Api::ApplicationController
         cell
         email
       ],
-      submission_contacts_attributes: %i[id email title default type _destroy],
+      submission_contacts_attributes: %i[id email title type _destroy],
       jurisdiction_step_requirements_attributes: %i[
         id
         default
