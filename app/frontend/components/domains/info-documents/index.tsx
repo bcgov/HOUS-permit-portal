@@ -7,6 +7,7 @@ import { EFlashMessageStatus } from "../../../types/enums"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { RouterLink } from "../../shared/navigation/router-link"
+import { InfoDocumentCard } from "./info-document-card"
 
 export const InfoDocumentsIndexScreen = observer(function InfoDocumentsIndexScreen() {
   const { infoDocumentStore, siteConfigurationStore } = useMst()
@@ -71,7 +72,11 @@ export const InfoDocumentsIndexScreen = observer(function InfoDocumentsIndexScre
             spacing={5}
             as="section"
             aria-label={translate("infoDocuments.index.documentList")}
-          />
+          >
+            {infoDocuments.map((document) => (
+              <InfoDocumentCard key={document.id} document={document} />
+            ))}
+          </SimpleGrid>
         )}
       </VStack>
     </Container>

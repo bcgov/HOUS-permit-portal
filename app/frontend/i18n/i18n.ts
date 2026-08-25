@@ -4490,6 +4490,9 @@ Thank you,
             errorBody:
               "Something went wrong on our end. Try reloading the page. If the problem continues, contact us and we will help you find the document you need.",
             reload: "Reload page",
+            downloadAria: "Download {{title}} PDF",
+            openAria: "Open {{title}} PDF",
+            updated: "Updated {{date}}",
           },
           management: {
             title: "Guides and fact sheets",
