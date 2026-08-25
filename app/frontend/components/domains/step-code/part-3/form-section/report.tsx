@@ -9,7 +9,7 @@ import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step
 import { EFileUploadAttachmentType } from "../../../../../types/enums"
 import { FileDownloadButton } from "../../../../shared/base/file-download-button"
 import { ConfirmationModal } from "../../../../shared/confirmation-modal"
-import { usePart3Navigation } from "../../use-part-3-navigation"
+import { usePart3Navigation } from "../use-part-3-navigation"
 import { SectionHeading } from "./shared/section-heading"
 
 export const Report = observer(function Report() {
