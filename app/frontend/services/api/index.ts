@@ -265,8 +265,8 @@ export class Api {
     return this.client.post<ApiResponse<IHelpVideo>>(`/help_videos/${id}/unpublish`)
   }
 
-  async fetchInfoDocuments() {
-    return this.client.get<ApiResponse<IInfoDocument[]>>(`/info_documents`)
+  async fetchInfoDocuments(params?: { publishedOnly?: boolean }) {
+    return this.client.get<ApiResponse<IInfoDocument[]>>(`/info_documents`, params)
   }
 
   async fetchInfoDocument(id: string) {

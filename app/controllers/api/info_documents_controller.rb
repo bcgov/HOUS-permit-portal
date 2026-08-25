@@ -7,7 +7,7 @@ class Api::InfoDocumentsController < Api::ApplicationController
 
   def index
     documents =
-      policy_scope(InfoDocument).ordered.includes(:document_file, :topics)
+      info_documents_scope.ordered.includes(:document_file, :topics)
 
     render_success(documents, nil, { blueprint: InfoDocumentBlueprint })
   end
@@ -96,6 +96,17 @@ class Api::InfoDocumentsController < Api::ApplicationController
   end
 
   private
+
+  def info_documents_scope
+    documents = policy_scope(InfoDocument)
+    return documents.published if published_only?
+
+    documents
+  end
+
+  def published_only?
+    ActiveModel::Type::Boolean.new.cast(params[:published_only])
+  end
 
   def set_info_document
     @info_document =
