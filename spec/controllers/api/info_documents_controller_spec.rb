@@ -25,6 +25,17 @@ RSpec.describe Api::InfoDocumentsController, type: :controller do
         draft.id
       )
     end
+
+    it "returns only published documents to super admins when published_only is requested" do
+      published = create(:info_document, :published)
+      create(:info_document, :with_file)
+      sign_in create(:user, :super_admin)
+
+      get :index, params: { published_only: true }, format: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response["data"].pluck("id")).to contain_exactly(published.id)
+    end
   end
 
   describe "POST #publish" do
