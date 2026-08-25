@@ -147,8 +147,7 @@ Jurisdiction.all.each do |j|
     .where(email: "#{j.name.parameterize}@laterolabs.com")
     .first_or_create!(
       email: "#{j.name.parameterize}@laterolabs.com",
-      confirmed_at: Time.now,
-      default: true
+      confirmed_at: Time.now
     )
   j.update(inbox_enabled: true, show_about_page: true)
 end
@@ -158,13 +157,13 @@ if north_van
     north_van.meeting_submission_contacts.find_or_initialize_by(
       email: "north-van-project-meetings@laterolabs.com"
     )
-  meeting_contact.update!(confirmed_at: Time.now, default: false)
+  meeting_contact.update!(confirmed_at: Time.now)
 
   property_information_contact =
     north_van.property_information_submission_contacts.find_or_initialize_by(
       email: "north-van-property-information@laterolabs.com"
     )
-  property_information_contact.update!(confirmed_at: Time.now, default: false)
+  property_information_contact.update!(confirmed_at: Time.now)
 
   unless north_van.resources.project_meeting_authorization.exists?
     north_van.resources.create!(
@@ -201,8 +200,7 @@ if PermitApplication.first.blank?
         if jurisdiction.submission_contacts.blank?
           jurisdiction.submission_contacts.create!(
             email: jurisdiction.contacts.first.email,
-            confirmed_at: Time.now,
-            default: true
+            confirmed_at: Time.now
           )
         end
       end

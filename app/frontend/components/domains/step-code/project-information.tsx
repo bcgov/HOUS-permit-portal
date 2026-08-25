@@ -24,7 +24,7 @@ import {
   Thead,
   Tr,
 } from "@chakra-ui/react"
-import { DotsThreeVertical, Download, MapPin, ShareNetwork } from "@phosphor-icons/react"
+import { ArrowRight, CaretLeft, DotsThreeVertical, Download, MapPin, PaperPlaneRight } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
@@ -45,8 +45,10 @@ import { IOption, IReportDocument } from "../../../types/types"
 import { downloadFileFromStorage } from "../../../utils/utility-functions"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
+import { ConfirmationModal } from "../../shared/confirmation-modal"
 import { DatePickerFormControl } from "../../shared/form/input-form-control"
 import { InfoTooltip } from "../../shared/info-tooltip"
+import { RouterLink } from "../../shared/navigation/router-link"
 import { SitesSelect } from "../../shared/select/selectors/sites-select"
 import { StepCodeStageIcon } from "../permit-project/step-code-stage-indicators"
 import { SectionHeading } from "./part-3/form-section/shared/section-heading"
@@ -88,10 +90,18 @@ const stageTableHeaderProps = {
 
 const stepCodesPath = "/step-codes?currentPage=1"
 
+// ponytail: both Part 3 and Part 9 end on `report`. If a part gets a different
+// results landing, look it up from that part's navLinks instead of hardcoding.
+const REPORT_SECTION = "report"
+
 function checklistHasProgress(checklist: {
   sectionCompletionStatus?: Record<string, { complete: boolean; relevant: boolean }>
 }) {
   return Object.values(checklist.sectionCompletionStatus ?? {}).some((status) => status.relevant && status.complete)
+}
+
+function isChecklistComplete(checklist: { status?: EStepCodeChecklistStatus } | null, stageIsComplete = false) {
+  return stageIsComplete || checklist?.status === EStepCodeChecklistStatus.complete
 }
 
 function checklistButtonLabel(
@@ -99,14 +109,27 @@ function checklistButtonLabel(
     status?: EStepCodeChecklistStatus
     sectionCompletionStatus?: Record<string, { complete: boolean; relevant: boolean }>
   } | null,
-  stageIsComplete = false
+  stageIsComplete = false,
+  isLocked = false
 ) {
-  if (!checklist) return t("stepCode.projectInformation.create")
-  if (stageIsComplete || checklist.status === EStepCodeChecklistStatus.complete) {
-    return t("stepCode.projectInformation.view")
+  if (!checklist) return t("stepCode.projectInformation.start")
+  if (isChecklistComplete(checklist, stageIsComplete)) {
+    return t("stepCode.projectInformation.viewReport")
   }
+  if (isLocked) return t("stepCode.projectInformation.view")
   if (checklistHasProgress(checklist)) return t("stepCode.projectInformation.continue")
   return t("stepCode.projectInformation.start")
+}
+
+function checklistSectionToOpen(
+  checklist: {
+    status?: EStepCodeChecklistStatus
+    currentNavLink?: { location?: string }
+  } | null,
+  stageIsComplete = false
+) {
+  if (isChecklistComplete(checklist, stageIsComplete)) return REPORT_SECTION
+  return checklist?.currentNavLink?.location || "start"
 }
 
 export const ProjectInformation = observer(function StepCodeProjectInformation({
@@ -230,7 +253,7 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
     const checklist = await saveProjectInformation(values)
     if (!checklist) return
 
-    const nextSection = checklist.currentNavLink?.location || "start"
+    const nextSection = checklistSectionToOpen(checklist, currentStepCode?.isStageComplete(selectedStage))
     navigate(checklistPath(selectedStage, nextSection))
   }
 
@@ -241,27 +264,15 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
     navigate(stepCodesPath)
   })
 
-  const handleSaveAndGoToPermitApplication = handleSubmit(async (values) => {
-    const checklist = await saveProjectInformation(values)
-    if (!checklist) return
-
-    navigate(`/permit-applications/${permitApplicationId}/edit`)
-  })
-
-  const handleGoToPermitApplication = () => {
-    if (isLockedBySubmittedPermit) {
-      navigate(`/permit-applications/${permitApplicationId}/edit`)
-      return
-    }
-    handleSaveAndGoToPermitApplication()
-  }
-
   const handleOpenExistingChecklist = (
     stage: EStepCodeChecklistStage,
-    checklist: { currentNavLink?: { location?: string } } | null
+    checklist: {
+      status?: EStepCodeChecklistStatus
+      currentNavLink?: { location?: string }
+    } | null
   ) => {
     if (!checklist) return
-    navigate(checklistPath(stage, checklist.currentNavLink?.location || "start"))
+    navigate(checklistPath(stage, checklistSectionToOpen(checklist, currentStepCode?.isStageComplete(stage))))
   }
   const stepCodeKindLabel =
     stepCodeKind === "part3"
@@ -288,18 +299,6 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
                   {stepCodeKindLabel}
                 </Tag>
               </HStack>
-              {permitApplicationId && (
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={handleGoToPermitApplication}
-                  isDisabled={isSubmitting}
-                  isLoading={isSubmitting}
-                  flexShrink={0}
-                >
-                  {t("stepCode.goToPermitApplication")}
-                </Button>
-              )}
             </Flex>
             <Text fontSize="md">{t("stepCode.projectInformation.instructions")}</Text>
             {isLockedBySubmittedPermit && (
@@ -466,14 +465,17 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
                                 : undefined
                             }
                           >
-                            {isLockedBySubmittedPermit && checklist
-                              ? t("stepCode.projectInformation.view")
-                              : checklistButtonLabel(checklist, currentStepCode?.isStageComplete(stage))}
+                            {checklistButtonLabel(
+                              checklist,
+                              currentStepCode?.isStageComplete(stage),
+                              isLockedBySubmittedPermit
+                            )}
                           </Button>
                           <StageReportMenu
                             checklist={checklist}
                             stageLabel={stageLabel(stage)}
                             stepCode={currentStepCode}
+                            reportPath={checklistPath(stage, REPORT_SECTION)}
                           />
                         </HStack>
                       </Td>
@@ -525,8 +527,9 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
                 onClick={handleSaveAndGoBack}
                 isDisabled={isSubmitting}
                 isLoading={isSubmitting}
+                leftIcon={<CaretLeft size={16} />}
               >
-                {t("stepCode.saveAndGoBack")}
+                {t("ui.back")}
               </Button>
             </Flex>
           )}
@@ -584,6 +587,7 @@ const StageReportMenu = observer(function StageReportMenu({
   checklist,
   stageLabel,
   stepCode,
+  reportPath,
 }: {
   checklist?: {
     reportDocument?: IReportDocument | null
@@ -591,6 +595,7 @@ const StageReportMenu = observer(function StageReportMenu({
   } | null
   stageLabel: string
   stepCode: any
+  reportPath: string
 }) {
   const [isSharing, setIsSharing] = useState(false)
   const freshReport = checklist?.freshReportDocument ?? null
@@ -632,8 +637,8 @@ const StageReportMenu = observer(function StageReportMenu({
             {t("stepCode.index.downloadStageReport", { stage: stageLabel })}
           </MenuItem>
         ) : hasStaleReport ? (
-          <MenuItem isDisabled>
-            <Text>{t("stepCode.index.reportOutOfDate")}</Text>
+          <MenuItem as={RouterLink} to={reportPath} icon={<ArrowRight size={16} />}>
+            {t("stepCode.index.reportOutOfDate")}
           </MenuItem>
         ) : (
           <MenuItem isDisabled>
@@ -641,9 +646,24 @@ const StageReportMenu = observer(function StageReportMenu({
           </MenuItem>
         )}
         {freshReport && stepCode?.jurisdiction && (
-          <MenuItem icon={<ShareNetwork size={16} />} onClick={handleShare} isDisabled={isSharing}>
-            {isSharing ? t("stepCode.shareReport.sharing") : t("stepCode.shareReport.action")}
-          </MenuItem>
+          <ConfirmationModal
+            title={t("stepCode.shareReport.confirmTitle")}
+            body={t("stepCode.shareReport.confirmBody")}
+            onConfirm={async (closeModal) => {
+              await handleShare()
+              closeModal()
+            }}
+            renderTriggerButton={(props) => (
+              <MenuItem icon={<PaperPlaneRight size={16} />} isDisabled={isSharing} {...props}>
+                {t("stepCode.shareReport.action")}
+              </MenuItem>
+            )}
+            renderConfirmationButton={(props) => (
+              <Button {...props} variant="primary" isLoading={isSharing}>
+                {t("stepCode.shareReport.confirm")}
+              </Button>
+            )}
+          />
         )}
       </MenuList>
     </Menu>

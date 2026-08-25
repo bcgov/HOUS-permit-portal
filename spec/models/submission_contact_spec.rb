@@ -38,34 +38,6 @@ RSpec.describe SubmissionContact, type: :model do
       expect(contact).not_to be_valid
     end
 
-    it "does not apply default contact uniqueness to project meeting contacts" do
-      create(
-        :meeting_submission_contact,
-        jurisdiction: jurisdiction,
-        default: true
-      )
-
-      contact =
-        build(
-          :meeting_submission_contact,
-          jurisdiction: jurisdiction,
-          default: true
-        )
-
-      expect(contact).to be_valid
-    end
-
-    it "does not allow multiple default application submission contacts" do
-      contact =
-        build(
-          :application_submission_contact,
-          jurisdiction: jurisdiction,
-          default: true
-        )
-
-      expect(contact).not_to be_valid
-    end
-
     it "uses a distinct property information contact class" do
       contact = build(:property_information_submission_contact)
 

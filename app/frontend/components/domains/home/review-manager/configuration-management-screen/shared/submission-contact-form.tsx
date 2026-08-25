@@ -19,7 +19,6 @@ interface ISubmissionContactField {
   id: string | null
   email: string | null
   title?: string | null
-  default?: boolean
   type: ESubmissionContactClass
   _destroy?: boolean
 }
@@ -44,10 +43,9 @@ export const SubmissionContactForm = observer(function SubmissionContactForm({
           id: contact.id,
           email: contact.email,
           title: contact.title ?? null,
-          default: contact.default ?? false,
           type: contactClass,
         }))
-      : [{ id: null, email: null, title: null, default: false, type: contactClass }]
+      : [{ id: null, email: null, title: null, type: contactClass }]
 
   const fieldArrayName = "submissionContactsAttributes"
   const formMethods = useForm<IFormValues>({
@@ -96,7 +94,7 @@ export const SubmissionContactForm = observer(function SubmissionContactForm({
           addEmailLabel={addEmailLabel}
           confirmationRequiredLabel={confirmationRequiredLabel}
           getItem={(id) => jurisdiction.getSubmissionContact(id)}
-          buildNewItem={() => ({ id: null, email: null, title: null, default: false, type: contactClass })}
+          buildNewItem={() => ({ id: null, email: null, title: null, type: contactClass })}
           buildDestroyedItem={(contact) => ({ _destroy: true, id: contact.id, type: contactClass })}
           showConfirmationWarning
         />

@@ -9,10 +9,12 @@ import { NotFoundScreen } from "../../../shared/base/not-found-screen"
 import { SharedSpinner } from "../../../shared/base/shared-spinner"
 import { FloatingHelpDrawer } from "../../../shared/floating-help-drawer"
 import { ProjectInformation } from "../project-information"
+import { StepCodeSubNavBar } from "../step-code-sub-nav-bar"
 import { FormSection } from "./form-section"
 import { Sidebar } from "./sidebar"
 import { defaultSectionCompletionStatus } from "./sidebar/nav-sections"
 import { SideBarDrawer } from "./sidebar/side-bar-drawer"
+import { usePart3Navigation } from "./use-part-3-navigation"
 
 export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
   const { permitApplicationId, section, stepCodeId } = useParams()
@@ -20,6 +22,7 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
     stepCodeStore: { createPart3StepCode },
   } = useMst()
   const { currentStepCode } = usePart3StepCode()
+  const { infoPagePath, isPermitLinked, exitLinkPath } = usePart3Navigation()
   const isStandaloneStepCode = !permitApplicationId
 
   const { currentPermitApplication } = usePermitApplication()
@@ -53,6 +56,9 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
 
   return (
     <Flex direction="column" h="calc(100vh - var(--app-navbar-height))" w="full" bg="white">
+      {section && (
+        <StepCodeSubNavBar infoPagePath={infoPagePath} isPermitLinked={isPermitLinked} exitLinkPath={exitLinkPath} />
+      )}
       <Suspense
         fallback={
           <Center p={50}>
@@ -61,7 +67,7 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
         }
       >
         {currentStepCode && !section && (
-          <Flex flex={1} overflow="auto" id="stepCodeScroll" px={6} py={10}>
+          <Flex flex={1} minH={0} overflow="auto" id="stepCodeScroll" px={6} py={10}>
             <Flex direction="column" flex={1} maxW="780px" mx="auto" w="full">
               <FloatingHelpDrawer />
               <ProjectInformation
@@ -73,7 +79,7 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
           </Flex>
         )}
         {currentStepCode && section && (
-          <Flex flex={1} w="full" overflow="hidden" position="relative">
+          <Flex flex={1} minH={0} w="full" overflow="hidden" position="relative">
             <Show above="lg">
               <Flex w={"sidebar.width"} boxShadow="md" borderRightWidth={1} borderColor="greys.grey02" overflow="auto">
                 <Sidebar />

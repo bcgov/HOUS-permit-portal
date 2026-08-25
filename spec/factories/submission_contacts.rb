@@ -3,7 +3,6 @@ FactoryBot.define do
     association :jurisdiction
     email { Faker::Internet.email }
     title { "Building Inspector" }
-    default { false }
     confirmation_token { Devise.friendly_token }
     confirmation_sent_at { Time.now.utc - 1.day }
     confirmed_at { Time.now.utc }
@@ -11,13 +10,9 @@ FactoryBot.define do
     factory :application_submission_contact,
             class: "ApplicationSubmissionContact"
 
-    factory :meeting_submission_contact, class: "MeetingSubmissionContact" do
-      default { false }
-    end
+    factory :meeting_submission_contact, class: "MeetingSubmissionContact"
 
     factory :property_information_submission_contact,
-            class: "PropertyInformationSubmissionContact" do
-      default { false }
-    end
+            class: "PropertyInformationSubmissionContact"
   end
 end

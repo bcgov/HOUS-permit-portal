@@ -3,6 +3,7 @@ import { Chat } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React from "react"
+import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { datefnsTableDateTimeFormat } from "../../../constants"
 import { IProjectMeeting } from "../../../models/project-meeting"
@@ -15,17 +16,16 @@ interface IProjectMeetingGridRowProps {
   projectMeeting: IProjectMeeting
 }
 
-const formatMeetingDate = (projectMeeting: IProjectMeeting) => {
-  const date = projectMeeting.confirmedDate
-  return date ? format(date, datefnsTableDateTimeFormat) : ""
-}
-
 export const ProjectMeetingGridRow = observer(({ permitProjectId, projectMeeting }: IProjectMeetingGridRowProps) => {
   const navigate = useNavigate()
+  const { t } = useTranslation()
+  const meetingTime = projectMeeting.confirmedDate
+    ? format(projectMeeting.confirmedDate, datefnsTableDateTimeFormat)
+    : t("permitProject.meetings.pendingTime")
 
   return (
     <SearchGridRow onClick={() => navigate(`/projects/${permitProjectId}/meetings/${projectMeeting.id}`)}>
-      <SearchGridItem>{formatMeetingDate(projectMeeting)}</SearchGridItem>
+      <SearchGridItem>{meetingTime}</SearchGridItem>
       <SearchGridItem>
         <Text noOfLines={1}>{projectMeeting.projectDescription || "—"}</Text>
       </SearchGridItem>

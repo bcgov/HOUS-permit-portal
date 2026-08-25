@@ -103,7 +103,6 @@ export interface ISubmissionContact {
   email: string
   title?: string
   confirmedAt: string
-  default: boolean
   confirmationSentAt?: string
   type: ESubmissionContactClass
 }
