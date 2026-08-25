@@ -218,7 +218,6 @@ const SortableHeader = ({
 )
 
 const formatDate = (date?: Date | null) => (date ? format(date, datefnsTableDateFormat) : "—")
-const formatDateTime = (date?: Date | null) => (date ? format(date, datefnsTableDateTimeFormat) : "—")
 
 const ProjectMeetingInboxRow = observer(function ProjectMeetingInboxRow({
   projectMeeting,
@@ -229,8 +228,12 @@ const ProjectMeetingInboxRow = observer(function ProjectMeetingInboxRow({
   getRowPath?: (projectMeeting: IProjectMeeting) => string
   hideProjectNumber?: boolean
 }) {
+  const { t } = useTranslation()
   const { jurisdictionId } = useParams()
   const rowPath = getRowPath?.(projectMeeting) ?? `/jurisdictions/${jurisdictionId}/meetings/${projectMeeting.id}`
+  const meetingTime = projectMeeting.confirmedDate
+    ? format(projectMeeting.confirmedDate, datefnsTableDateTimeFormat)
+    : t("permitProject.meetings.pendingTime")
 
   return (
     <Box
@@ -289,7 +292,7 @@ const ProjectMeetingInboxRow = observer(function ProjectMeetingInboxRow({
       </SearchGridItem>
 
       <SearchGridItem>
-        <Text fontSize="sm">{formatDateTime(projectMeeting.confirmedDate)}</Text>
+        <Text fontSize="sm">{meetingTime}</Text>
       </SearchGridItem>
 
       <SearchGridItem>

@@ -26,8 +26,6 @@ export function Part9FormFooter<T>({
       isLoading={isLoading}
       isDisabled={isDisabled}
       generatesReport={generatesReport}
-      ctaTranslationKey="stepCode.part9.cta"
-      goToStepCodesTranslationKey="stepCode.part9.goToStepCodes"
       navigation={navigation}
     />
   )
