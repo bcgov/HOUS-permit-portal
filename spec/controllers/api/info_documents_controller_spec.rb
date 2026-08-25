@@ -36,6 +36,51 @@ RSpec.describe Api::InfoDocumentsController, type: :controller do
       expect(response).to have_http_status(:ok)
       expect(json_response["data"].pluck("id")).to contain_exactly(published.id)
     end
+
+    it "returns published documents in display order" do
+      later = create(:info_document, :published)
+      earlier = create(:info_document, :published)
+      later.update_column(:sort_order, 1)
+      earlier.update_column(:sort_order, 0)
+
+      get :index, format: :json
+
+      expect(json_response["data"].pluck("id")).to eq(
+        [earlier.id, later.id]
+      )
+    end
+
+    it "includes open and download urls for published files" do
+      create(:info_document, :published)
+      allow_any_instance_of(InfoDocumentFile).to receive(:file_url).with(
+        disposition: "inline"
+      ).and_return("https://example.com/guide.pdf")
+      allow_any_instance_of(InfoDocumentFile).to receive(:file_url).with(
+        disposition: "attachment"
+      ).and_return("https://example.com/guide-download.pdf")
+
+      get :index, format: :json
+
+      file = json_response["data"].first["document_file"]
+      expect(file["file_url"]).to eq("https://example.com/guide.pdf")
+      expect(file["download_url"]).to eq(
+        "https://example.com/guide-download.pdf"
+      )
+    end
+
+    it "omits file urls when the file is unavailable" do
+      published = create(:info_document, :published)
+      published.document_file.update_columns(
+        file_data: nil,
+        scan_status: "infected"
+      )
+
+      get :index, format: :json
+
+      file = json_response["data"].first["document_file"]
+      expect(file["file_url"]).to be_nil
+      expect(file["download_url"]).to be_nil
+    end
   end
 
   describe "POST #publish" do
