@@ -140,42 +140,44 @@ export const Part9EnergyStepEditableBlock = observer(function Part9EnergyStepEdi
             bg={isEditing && !isCustomizing ? "greys.white" : "transparent"}
           >
             <Text fontWeight="bold">{t(`${i18nPrefix}.stepRequired.standardToPass`)}</Text>
-            <Flex gap={14} flex={1}>
-              <Input type="hidden" {...register(`${fieldArrayName}.${defaultIndex}.id`)} />
-              <Input type="hidden" {...register(`${fieldArrayName}.${defaultIndex}.default`)} />
-              <FormControl>
-                <FormLabel noOfLines={1}>{t(`${i18nPrefix}.stepRequired.energy.title`)}</FormLabel>
-                <Controller
-                  control={control}
-                  rules={{ required: !isCustomizing }}
-                  name={`${fieldArrayName}.${defaultIndex}.energyStepRequired`}
-                  render={({ field: { onChange, value } }) => {
-                    return (
-                      <EnergyStepSelect onChange={onChange} value={value} isDisabled={!isEditing || isCustomizing} />
-                    )
-                  }}
-                />
-              </FormControl>
-              <FormControl>
-                <FormLabel noOfLines={1}>{t(`${i18nPrefix}.stepRequired.zeroCarbon.title`)}</FormLabel>
-                <Controller
-                  control={control}
-                  rules={{ required: !isCustomizing }}
-                  name={`${fieldArrayName}.${defaultIndex}.zeroCarbonStepRequired`}
-                  render={({ field: { onChange, value } }) => {
-                    return (
-                      <ZeroCarbonStepSelect
-                        onChange={onChange}
-                        value={value}
-                        isDisabled={!isEditing || isCustomizing}
-                        portal
-                      />
-                    )
-                  }}
-                />
-              </FormControl>
+            <Flex direction="column" gap={4} flex={1}>
+              <Flex gap={14} flex={1}>
+                <Input type="hidden" {...register(`${fieldArrayName}.${defaultIndex}.id`)} />
+                <Input type="hidden" {...register(`${fieldArrayName}.${defaultIndex}.default`)} />
+                <FormControl>
+                  <FormLabel noOfLines={1}>{t(`${i18nPrefix}.stepRequired.energy.title`)}</FormLabel>
+                  <Controller
+                    control={control}
+                    rules={{ required: !isCustomizing }}
+                    name={`${fieldArrayName}.${defaultIndex}.energyStepRequired`}
+                    render={({ field: { onChange, value } }) => {
+                      return (
+                        <EnergyStepSelect onChange={onChange} value={value} isDisabled={!isEditing || isCustomizing} />
+                      )
+                    }}
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel noOfLines={1}>{t(`${i18nPrefix}.stepRequired.zeroCarbon.title`)}</FormLabel>
+                  <Controller
+                    control={control}
+                    rules={{ required: !isCustomizing }}
+                    name={`${fieldArrayName}.${defaultIndex}.zeroCarbonStepRequired`}
+                    render={({ field: { onChange, value } }) => {
+                      return (
+                        <ZeroCarbonStepSelect
+                          onChange={onChange}
+                          value={value}
+                          isDisabled={!isEditing || isCustomizing}
+                          portal
+                        />
+                      )
+                    }}
+                  />
+                </FormControl>
+              </Flex>
               {!isCustomizing && (
-                <FormControl flex={1}>
+                <FormControl>
                   <FormLabel noOfLines={1}>{t(`${i18nPrefix}.stepRequired.description.title`)}</FormLabel>
                   <Input
                     {...register(`${fieldArrayName}.${defaultIndex}.description`)}

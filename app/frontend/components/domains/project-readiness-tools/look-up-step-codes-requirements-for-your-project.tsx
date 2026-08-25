@@ -17,7 +17,7 @@ export const LookUpStepCodesRequirementsForYourProjectScreen = () => {
       <Text fontSize="lg" color="text.primary" mb="8">
         {t("home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.enterYourProjectAddress")}
       </Text>
-      <StepCodeLookupTool showJurisdictionOnPage={true} />
+      <StepCodeLookupTool />
       <Box>
         <Heading as="h2" size="lg" mb={5}>
           {t("home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.generateAStepCodesReport")}

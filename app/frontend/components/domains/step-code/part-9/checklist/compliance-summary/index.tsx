@@ -73,13 +73,13 @@ export const ComplianceSummary = observer(function ComplianceSummary({
             </FormHelperText>
           </FormControl>
           {R.isNil(report.energy.proposedStep) && (
-            <StepNotMetWarning i18nKey="energyStepNotMet" scrollToSection={scrollToEnergyCompliance} fontSize="xs" />
+            <StepNotMetWarning i18nKey="energyStepNotMet" scrollToSection={scrollToEnergyCompliance} fontSize="md" />
           )}
           {R.isNil(report.zeroCarbon.proposedStep) && (
             <StepNotMetWarning
               i18nKey="zeroCarbonStepNotMet"
               scrollToSection={scrollToZeroCarbonCompliance}
-              fontSize="xs"
+              fontSize="md"
             />
           )}
         </VStack>

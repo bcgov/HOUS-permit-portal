@@ -2521,6 +2521,7 @@ Thank you,
             date: "Building permit date",
             dateTooltip: "The date on which the building permit was issued by the issuing jurisdiction.",
             stage: "Step Code stage",
+            progress: "Progress",
             permitStage: "Permit application Step Code stage",
             permitStageHelp:
               "This selects which stage checklist counts for this permit application (completion status, sidebar, and submission). Changing stage here does not change the Step Code’s own stage used when opening the tool outside this permit.",
