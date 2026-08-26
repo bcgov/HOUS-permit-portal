@@ -2,18 +2,17 @@ module Api::Concerns::Search::ReleaseNotes
   extend ActiveSupport::Concern
 
   def perform_release_note_search
-    where_clause = release_note_where_clause
-    order = release_note_order
-    release_note_policy_scope = policy_scope(ReleaseNote)
-
     @release_note_search =
-      ReleaseNote.search(
-        "*",
-        where: where_clause,
-        order: order,
-        page: release_note_page,
-        per_page: release_note_per_page,
-        scope_results: ->(_relation) { release_note_policy_scope }
+      ensure_searchkick_policy_scoped!(
+        ReleaseNote,
+        ReleaseNote.search(
+          "*",
+          where: release_note_where_clause,
+          order: release_note_order,
+          page: release_note_page,
+          per_page: release_note_per_page,
+          scope_results: ->(relation) { policy_scope(relation) }
+        )
       )
   end
 
@@ -25,6 +24,7 @@ module Api::Concerns::Search::ReleaseNotes
       :per_page,
       :year,
       :published_only,
+      :release_type,
       sort: %i[field direction]
     )
   end
@@ -34,6 +34,11 @@ module Api::Concerns::Search::ReleaseNotes
 
     if release_note_published_only? || !current_user&.super_admin?
       filters[:status] = "published"
+    end
+
+    release_type = release_note_search_params[:release_type].presence
+    if release_type && ReleaseNote.release_types.key?(release_type)
+      filters[:release_type] = release_type
     end
 
     year = release_note_search_params[:year].presence

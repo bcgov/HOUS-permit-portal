@@ -1,8 +1,9 @@
-import { Button, Center, Flex, HStack, Stack, Text } from "@chakra-ui/react"
+import { Box, Button, Center, Flex, HStack, Stack, Text } from "@chakra-ui/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
-import React, { useMemo } from "react"
+import React from "react"
 import { useTranslation } from "react-i18next"
+import { datefnsTableDateFormat } from "../../../constants"
 import { useTemplateVersions } from "../../../hooks/resources/use-template-versions"
 import { ITemplateVersion } from "../../../models/template-version"
 import { ETemplateVersionStatus } from "../../../types/enums"
@@ -19,6 +20,7 @@ interface IProps {
   renderButton?: (templateVersion: ITemplateVersion) => React.ReactNode
   status?: ETemplateVersionStatus
   isPubliclyPreviewable?: boolean
+  jurisdictionId?: string
   statusDisplayOptions?: {
     showStatus?: boolean
     showVersionDate?: boolean
@@ -30,16 +32,18 @@ export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermi
   status,
   statusDisplayOptions,
   isPubliclyPreviewable,
+  jurisdictionId,
 }: IProps) {
   const { t } = useTranslation()
   const { error, templateVersions, isLoading } = useTemplateVersions({
     customErrorMessage: t("errors.fetchBuildingPermits"),
     status,
     isPubliclyPreviewable,
+    jurisdictionId,
   })
   const { showStatus = false, showVersionDate = true } = statusDisplayOptions || {}
   const showStatusTag = showStatus || can("requirementTemplate:manage")
-  const groupedTemplateVersions = useMemo(() => groupTemplateVersionsByCategory(templateVersions), [templateVersions])
+  const groupedTemplateVersions = groupTemplateVersionsByCategory(templateVersions)
 
   if (error) return <ErrorScreen error={error} />
   if (isLoading)
@@ -63,7 +67,7 @@ export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermi
           </Text>
           {group.templateVersions.map((templateVersion) => {
             return (
-              <SectionBox key={templateVersion.id} w="full">
+              <SectionBox key={templateVersion.id} w="full" enableCardClick={!!renderButton}>
                 <Flex w="full" as="section">
                   <Stack spacing={3} flex={1}>
                     <Text as="h3" color={"text.link"} fontWeight={700} fontSize="xl">
@@ -76,7 +80,7 @@ export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermi
                       <Text as="span" fontWeight={700}>
                         {t("digitalBuildingPermits.index.lastUpdated")}:{" "}
                       </Text>
-                      {format(templateVersion.updatedAt, "MMM d, yyyy")}
+                      {format(templateVersion.updatedAt, datefnsTableDateFormat)}
                     </Text>
                     <HStack gap={4} align="center">
                       <VersionTag versionDate={templateVersion.versionDate} w="fit-content" />
@@ -98,20 +102,45 @@ export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermi
                         />
                       )}
                     </HStack>
+                    {jurisdictionId && (
+                      <HStack gap={2}>
+                        <Box
+                          as="span"
+                          w={2.5}
+                          h={2.5}
+                          borderRadius="full"
+                          bg={templateVersion.disabledByJurisdiction ? "transparent" : "semantic.success"}
+                          border="1px solid"
+                          borderColor={templateVersion.disabledByJurisdiction ? "border.light" : "semantic.success"}
+                        />
+                        <Text fontSize="sm" color="text.secondary">
+                          {templateVersion.disabledByJurisdiction
+                            ? t("digitalBuildingPermits.index.notAvailableToApplicants")
+                            : t("digitalBuildingPermits.index.availableToApplicants")}
+                        </Text>
+                      </HStack>
+                    )}
                   </Stack>
 
                   {renderButton ? (
                     renderButton(templateVersion)
                   ) : (
-                    <Button
-                      to={`/digital-building-permits/${templateVersion.id}/edit`}
-                      as={RouterLink}
-                      variant={"primary"}
-                      ml={4}
-                      alignSelf={"center"}
-                    >
-                      {t("ui.manage")}
-                    </Button>
+                    <HStack ml={4} alignSelf="center">
+                      <Button
+                        to={`/digital-building-permits/${templateVersion.id}/settings`}
+                        as={RouterLink}
+                        variant="secondary"
+                      >
+                        {t("ui.settings")}
+                      </Button>
+                      <Button
+                        to={`/digital-building-permits/${templateVersion.id}/edit`}
+                        as={RouterLink}
+                        variant="primary"
+                      >
+                        {t("ui.open")}
+                      </Button>
+                    </HStack>
                   )}
                 </Flex>
               </SectionBox>

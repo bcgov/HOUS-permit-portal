@@ -4,7 +4,7 @@ RSpec.describe Api::Part3Building::ChecklistsController, type: :controller do
   render_views
 
   let(:submitter) { create(:user, :submitter) }
-  let(:jurisdiction) { create(:sub_district, heating_degree_days: 2910) }
+  let(:jurisdiction) { create(:sub_district) }
   let(:permit_application) do
     create(
       :permit_application,
@@ -50,14 +50,14 @@ RSpec.describe Api::Part3Building::ChecklistsController, type: :controller do
       )
     end
 
-    it "returns not found for archived step code checklists" do
+    it "returns not found for archived Step Code checklists" do
       step_code.discard
 
       get :show, params: { id: checklist.id }
 
       expect(response).to have_http_status(:not_found)
       expect(json_response.dig("meta", "message", "message")).to eq(
-        "Cannot view checklist of archived step code. Please restore the step code first."
+        "Cannot view checklist of archived Step Code. Please restore the Step Code first."
       )
     end
 
@@ -67,6 +67,33 @@ RSpec.describe Api::Part3Building::ChecklistsController, type: :controller do
       get :show, params: { id: checklist.id }
 
       expect(response).to have_http_status(:forbidden)
+    end
+  end
+
+  describe "POST #create" do
+    it "creates a staged checklist under the Step Code with cloned values" do
+      stub_part3_compliance_report(checklist: checklist, report_hash: {})
+      checklist.update!(
+        heating_degree_days: 3220,
+        completed_by_email: "energy@example.com"
+      )
+
+      post :create,
+           params: {
+             step_code_id: step_code.id,
+             checklist: {
+               stage: "as_built"
+             }
+           },
+           as: :json
+
+      expect(response).to have_http_status(:success)
+      expect(json_response.dig("data", "stage")).to eq("as_built")
+      expect(json_response.dig("data", "heating_degree_days")).to eq(3220)
+      expect(step_code.checklists.as_built).to exist
+      expect(step_code.checklists.as_built.first.completed_by_email).to eq(
+        "energy@example.com"
+      )
     end
   end
 
@@ -93,7 +120,7 @@ RSpec.describe Api::Part3Building::ChecklistsController, type: :controller do
                 heating_degree_days: 3220,
                 completed_by_email: "energy@example.com",
                 section_completion_status: {
-                  step_code_summary: {
+                  report: {
                     complete: true
                   }
                 }
@@ -108,9 +135,13 @@ RSpec.describe Api::Part3Building::ChecklistsController, type: :controller do
         expected_climate_zone
       )
       expect(StepCodeReportGenerationJob).to have_received(:perform_async).with(
-        step_code.id
+        step_code.id,
+        { "checklist_id" => checklist.id }
       )
-      expect(checklist.reload.complete?).to be(true)
+      expect(
+        checklist.reload.section_completion_status.dig("report", "complete")
+      ).to be(true)
+      expect(checklist).not_to be_complete
     end
 
     it "returns error for invalid input" do
@@ -129,7 +160,7 @@ RSpec.describe Api::Part3Building::ChecklistsController, type: :controller do
       )
     end
 
-    it "returns unprocessable entity for archived step codes" do
+    it "returns unprocessable entity for archived Step Codes" do
       step_code.discard
 
       patch :update,

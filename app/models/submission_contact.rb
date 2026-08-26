@@ -1,11 +1,15 @@
 class SubmissionContact < ApplicationRecord
   belongs_to :jurisdiction
 
-  validates :email, presence: true, uniqueness: { scope: :jurisdiction_id }
-  validate :only_one_default_per_jurisdiction
+  before_destroy :ensure_enabled_feature_remains_configured
+
+  validates :email,
+            presence: true,
+            uniqueness: {
+              scope: %i[jurisdiction_id type]
+            }
 
   scope :confirmed, -> { where.not(confirmed_at: nil) }
-  scope :default_contact, -> { where(default: true) }
 
   after_commit :send_confirmation, on: :create, unless: :confirmed?
 
@@ -24,21 +28,54 @@ class SubmissionContact < ApplicationRecord
     update!(confirmed_at: Time.current, confirmation_token: nil)
   end
 
+  def confirmation_subject_key
+    raise NotImplementedError,
+          "#{self.class} must implement #confirmation_subject_key"
+  end
+
+  def confirmation_heading
+    raise NotImplementedError,
+          "#{self.class} must implement #confirmation_heading"
+  end
+
+  def confirmation_configured_feature
+    raise NotImplementedError,
+          "#{self.class} must implement #confirmation_configured_feature"
+  end
+
+  def feature_enabled_attribute
+    raise NotImplementedError,
+          "#{self.class} must implement #feature_enabled_attribute"
+  end
+
   private
 
-  def only_one_default_per_jurisdiction
-    return unless default?
+  def ensure_enabled_feature_remains_configured
+    return if destroyed_by_association.present?
+    return unless confirmed?
+    return unless associated_feature_enabled?
+    return if another_confirmed_contact_exists?
 
-    existing_default =
-      SubmissionContact
-        .where(jurisdiction_id: jurisdiction_id, default: true)
-        .where.not(id: id)
-
-    if existing_default.exists?
-      errors.add(
-        :default,
-        "another default contact already exists for this jurisdiction"
+    errors.add(
+      :base,
+      I18n.t(
+        "activerecord.errors.models.submission_contact.last_confirmed_contact",
+        feature: confirmation_heading.downcase
       )
-    end
+    )
+    throw(:abort)
+  end
+
+  def associated_feature_enabled?
+    jurisdiction&.public_send(feature_enabled_attribute)
+  end
+
+  def another_confirmed_contact_exists?
+    self
+      .class
+      .confirmed
+      .where(jurisdiction_id: jurisdiction_id)
+      .where.not(id: id)
+      .exists?
   end
 end

@@ -13,38 +13,6 @@ RSpec.describe StepCodeReportSharingService do
     )
   end
 
-  describe ".confirmed_contact_email_for_jurisdiction" do
-    it "returns nil when no confirmed default contact exists" do
-      jurisdiction = create(:sub_district)
-      jurisdiction.submission_contacts.destroy_all
-
-      expect(
-        described_class.confirmed_contact_email_for_jurisdiction(
-          jurisdiction.id
-        )
-      ).to be_nil
-    end
-
-    it "returns confirmed email when a default contact exists" do
-      jurisdiction = create(:sub_district)
-      jurisdiction.submission_contacts.destroy_all
-      contact =
-        create(
-          :submission_contact,
-          jurisdiction: jurisdiction,
-          email: "x@example.com",
-          default: true,
-          confirmed_at: Time.current
-        )
-
-      expect(
-        described_class.confirmed_contact_email_for_jurisdiction(
-          jurisdiction.id
-        )
-      ).to eq(contact.email)
-    end
-  end
-
   describe "#send_to_jurisdiction" do
     before do
       # Never let ActionMailer/ActiveJob try to serialize RSpec doubles.
@@ -76,15 +44,20 @@ RSpec.describe StepCodeReportSharingService do
       )
     end
 
-    it "enqueues an email and logs when successful" do
+    it "enqueues an email for each confirmed contact and logs when successful" do
       jurisdiction = create(:sub_district)
-      jurisdiction.submission_contacts.destroy_all
+      jurisdiction.submission_contacts.delete_all
       allow(jurisdiction).to receive(:qualified_name).and_return("Jur Name")
       create(
         :submission_contact,
         jurisdiction: jurisdiction,
-        email: "to@example.com",
-        default: true,
+        email: "a@example.com",
+        confirmed_at: Time.current
+      )
+      create(
+        :submission_contact,
+        jurisdiction: jurisdiction,
+        email: "b@example.com",
         confirmed_at: Time.current
       )
       mailer = instance_double("MailerMessage", deliver_later: true)
@@ -104,7 +77,7 @@ RSpec.describe StepCodeReportSharingService do
       expect(service.send_to_jurisdiction(jurisdiction.id)).to eq(true)
       expect(PermitHubMailer).to have_received(
         :send_step_code_report_to_jurisdiction
-      )
+      ).twice
       expect(Rails.logger).to have_received(:info).with(
         /Step Code Report Shared/
       )
@@ -112,12 +85,11 @@ RSpec.describe StepCodeReportSharingService do
 
     it "captures errors when mailer raises" do
       jurisdiction = create(:sub_district)
-      jurisdiction.submission_contacts.destroy_all
+      jurisdiction.submission_contacts.delete_all
       create(
         :submission_contact,
         jurisdiction: jurisdiction,
         email: "to@example.com",
-        default: true,
         confirmed_at: Time.current
       )
 

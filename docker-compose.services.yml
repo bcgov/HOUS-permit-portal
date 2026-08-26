@@ -1,0 +1,56 @@
+# LOCAL development only — supporting infra for a host-run Rails app.
+# Does not start Rails, Sidekiq, Vite, AnyCable RPC, Redis, or Postgres.
+#
+# Usage:
+#   docker compose -f docker-compose.services.yml up -d
+#   docker compose -f docker-compose.services.yml down
+#
+# Host still runs: redis, bundle exec anycable, npm run dev, sidekiq, rails s
+# anycable-go expects host Redis on :6379 and host AnyCable RPC on :50051.
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - cluster.routing.allocation.disk.threshold_enabled=false
+      # Apple Silicon (esp. M4): JVM SIGILL without this — see docker/for-mac#7505
+      - ES_JAVA_OPTS=-XX:UseSVE=0
+      - CLI_JAVA_OPTS=-XX:UseSVE=0
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --address ":9001" --console-address ":9002"
+    environment:
+      # From host `.env` — same keys Rails uses for object storage
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    ports:
+      - "9001:9001"
+      - "9002:9002"
+    volumes:
+      - minio_data:/data
+
+  anycable-go:
+    image: anycable/anycable-go:1.4.8
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      ANYCABLE_HOST: "0.0.0.0"
+      ANYCABLE_PORT: "8080"
+      ANYCABLE_RPC_HOST: host.docker.internal:50051
+      ANYCABLE_REDIS_URL: redis://host.docker.internal:6379/1
+      ANYCABLE_LOG_LEVEL: debug
+    ports:
+      - "8080:8080"
+
+volumes:
+  elasticsearch_data:
+  minio_data:

@@ -41,7 +41,6 @@ export const PermitProjectInboxStoreModel = types
       requirementTemplateIdFilter: types.optional(types.array(types.string), []),
       stateFilter: types.optional(types.array(types.string), []),
       unreadFilter: types.optional(types.enumeration(Object.values(ERadioFilterValue)), ERadioFilterValue.include),
-      // ### SUBMISSION INDEX STUB FEATURE
       meetingRequestFilter: types.optional(
         types.enumeration(Object.values(ERadioFilterValue)),
         ERadioFilterValue.include
@@ -96,9 +95,9 @@ export const PermitProjectInboxStoreModel = types
       self.unreadFilter = value
       setQueryParam("unread", value === ERadioFilterValue.include ? "" : value)
     },
-    // ### SUBMISSION INDEX STUB FEATURE
     setMeetingRequestFilter(value: ERadioFilterValue) {
       self.meetingRequestFilter = value
+      setQueryParam("meetingRequest", value === ERadioFilterValue.include ? "" : value)
     },
     setDaysInQueueFilter(value: { operator: string; days: number } | null) {
       self.daysInQueueFilter = value
@@ -141,7 +140,8 @@ export const PermitProjectInboxStoreModel = types
 
       const searchParams: TSearchParams<EPermitProjectInboxSortFields, IPermitProjectInboxSearchFilters> = {
         query: self.query,
-        sort: self.sort,
+        // ponytail: kanban ignores list-column sort — defaults + drag order only
+        sort: isKanban ? undefined : self.sort,
         page: isKanban ? undefined : (opts?.page ?? self.currentPage),
         perPage: isKanban ? undefined : (opts?.countPerPage ?? self.countPerPage),
         mode: isKanban ? "kanban" : "list",
@@ -187,11 +187,13 @@ export const PermitProjectInboxStoreModel = types
       const requirementTemplateIds = queryParams.get("requirementTemplateIds")?.split(",")
       const state = queryParams.get("state")?.split(",")
       const unread = queryParams.get("unread") as ERadioFilterValue
+      const meetingRequest = queryParams.get("meetingRequest") as ERadioFilterValue
       const daysInQueueOp = queryParams.get("daysInQueueOp")
       const daysInQueueDays = queryParams.get("daysInQueueDays")
       if (requirementTemplateIds) self.setRequirementTemplateIdFilter(requirementTemplateIds)
       if (state) self.setStateFilter(state)
       if (unread) self.setUnreadFilter(unread)
+      if (meetingRequest) self.setMeetingRequestFilter(meetingRequest)
       if (daysInQueueOp && daysInQueueDays) {
         self.setDaysInQueueFilter({ operator: daysInQueueOp, days: parseInt(daysInQueueDays) })
       }
@@ -273,7 +275,8 @@ export const PermitApplicationInboxStoreModel = types
 
       const searchParams: TSearchParams<EPermitApplicationInboxSortFields, IPermitApplicationInboxSearchFilters> = {
         query: self.query,
-        sort: self.sort,
+        // ponytail: kanban ignores list-column sort — defaults + drag order only
+        sort: isKanban ? undefined : self.sort,
         page: isKanban ? undefined : (opts?.page ?? self.currentPage),
         perPage: isKanban ? undefined : (opts?.countPerPage ?? self.countPerPage),
         mode: isKanban ? "kanban" : "list",

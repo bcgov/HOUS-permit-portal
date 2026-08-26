@@ -19,6 +19,8 @@ RSpec.describe PdfGenerationJob, type: :job do
         "formSubmissionDataFoo"
       )
       expect(job.camelize_key("a_b_c")).to eq("aBC")
+      expect(job.camelize_key(:id)).to eq("id")
+      expect(job.camelize_key(:full_address)).to eq("fullAddress")
 
       section_uuid = "section123e4567-e89b-12d3-a456-426614174000"
       expect(job.camelize_key(section_uuid)).to eq(section_uuid)
@@ -31,6 +33,7 @@ RSpec.describe PdfGenerationJob, type: :job do
     allow(PermitApplication).to receive(:find).with("pa1").and_return(
       permit_application
     )
+    allow(permit_application).to receive(:step_code).and_return(nil)
 
     submission_version =
       instance_double(
@@ -104,6 +107,7 @@ RSpec.describe PdfGenerationJob, type: :job do
     allow(PermitApplication).to receive(:find).with("pa1").and_return(
       permit_application
     )
+    allow(permit_application).to receive(:step_code).and_return(nil)
 
     submission_version =
       instance_double(

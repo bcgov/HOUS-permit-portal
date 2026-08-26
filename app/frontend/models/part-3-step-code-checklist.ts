@@ -16,6 +16,8 @@ import {
   EPart3BuildingType,
   EPart3StepCodeSoftware,
   EProjectStage,
+  EStepCodeChecklistStage,
+  EStepCodeChecklistStatus,
   EStepCodeType,
 } from "../types/enums"
 import {
@@ -29,15 +31,29 @@ import {
   IPart3ComplianceReport,
   IPart3NavLink,
   IPart3SectionCompletionStatus,
+  IReportDocument,
   IStepCodeOccupancy,
   TPart3NavLinkKey,
 } from "../types/types"
+import { canMarkChecklistComplete } from "../utils/can-mark-checklist-complete"
 
 export const Part3StepCodeChecklistModel = types
   .model("Part3StepCodeChecklistModel", {
     id: types.identifier,
     isLoaded: types.maybeNull(types.boolean),
+    stage: types.optional(
+      types.enumeration<EStepCodeChecklistStage[]>(Object.values(EStepCodeChecklistStage)),
+      EStepCodeChecklistStage.preConstruction
+    ),
+    status: types.optional(
+      types.enumeration<EStepCodeChecklistStatus[]>(Object.values(EStepCodeChecklistStatus)),
+      EStepCodeChecklistStatus.draf
+    ),
+    reportDocument: types.maybeNull(types.frozen<IReportDocument>()),
     sectionCompletionStatus: types.maybeNull(types.frozen<IPart3SectionCompletionStatus>()),
+    // HUB-5145: This appears to be stale permit-status terminology. Part 3
+    // should gain checklist.stage and use StepCode.currentStage for selection
+    // instead of building lifecycle behavior on projectStage.
     projectStage: types.maybeNull(types.enumeration<EProjectStage[]>(Object.values(EProjectStage))),
     buildingCodeVersion: types.maybeNull(
       types.enumeration<EBuildingCodeVersion[]>(Object.values(EBuildingCodeVersion))
@@ -113,9 +129,11 @@ export const Part3StepCodeChecklistModel = types
     isComplete(key: TPart3NavLinkKey): boolean {
       return self.sectionCompletionStatus[key]?.complete
     },
-    get isAllComplete(): boolean {
-      if (!self.sectionCompletionStatus) return false
-      return Object.values(self.sectionCompletionStatus).every((status) => (status.relevant ? status.complete : true))
+    get isMarkedComplete(): boolean {
+      return self.status === EStepCodeChecklistStatus.complete
+    },
+    get canMarkComplete(): boolean {
+      return canMarkChecklistComplete(self.sectionCompletionStatus)
     },
     isRelevant(key: TPart3NavLinkKey): boolean {
       return self.sectionCompletionStatus[key]?.relevant
@@ -189,9 +207,14 @@ export const Part3StepCodeChecklistModel = types
     get totalMFA(): number {
       return self.baselineMFA + self.stepCodeMFA
     },
+    get freshReportDocument(): IReportDocument | null {
+      if (!self.reportDocument || self.reportDocument.stale) return null
+      return self.reportDocument
+    },
   }))
   .views((self) => ({
     get canShowResults() {
+      const hasComplianceReport = !!self.complianceReport?.performance
       const baselineIsComplete =
         self.isComplete("baselineOccupancies") &&
         (self.isComplete("baselineDetails") || !self.isRelevant("baselineDetails")) &&
@@ -201,10 +224,14 @@ export const Part3StepCodeChecklistModel = types
         self.isComplete("stepCodeOccupancies") &&
         (self.isComplete("stepCodePerformanceRequirements") || !self.isRelevant("stepCodePerformanceRequirements"))
 
-      return baselineIsComplete && stepCodeIsComplete //&& self.isComplete("modelledOutputs")
+      return hasComplianceReport && baselineIsComplete && stepCodeIsComplete //&& self.isComplete("modelledOutputs")
     },
   }))
   .actions((self) => ({
+    markReportDocumentStale() {
+      if (!self.reportDocument || self.reportDocument.stale) return
+      self.reportDocument = { ...self.reportDocument, stale: true }
+    },
     load: flow(function* () {
       const response = yield self.environment.api.fetchPart3Checklist(self.id)
       if (response.ok) {
@@ -217,15 +244,36 @@ export const Part3StepCodeChecklistModel = types
       let updatedStatus = R.clone(self.sectionCompletionStatus)
       updatedStatus[key] = { complete: true, relevant: true }
 
+      if (key === "report" && !self.canMarkComplete) return false
+
+      const values: Record<string, any> = { sectionCompletionStatus: updatedStatus }
+      if (key === "report") {
+        values.status = EStepCodeChecklistStatus.complete
+      }
+
       const requestOptions = key === "stepCodeSummary" ? { reportGenerationRequested: true } : undefined
 
-      const response = yield self.environment.api.updatePart3Checklist(
-        self.id,
-        { sectionCompletionStatus: updatedStatus },
-        requestOptions
-      )
+      const response = yield self.environment.api.updatePart3Checklist(self.id, values, requestOptions)
       if (response.ok) {
         self.sectionCompletionStatus = updatedStatus
+        if (key === "report") {
+          self.status = EStepCodeChecklistStatus.complete
+        }
+        if (key !== "report") {
+          self.markReportDocumentStale()
+        }
+        return true
+      }
+      return false
+    }),
+    regenerateReport: flow(function* () {
+      const response = yield self.environment.api.updatePart3Checklist(
+        self.id,
+        { sectionCompletionStatus: self.sectionCompletionStatus },
+        { reportGenerationRequested: true }
+      )
+      if (response.ok) {
+        self.markReportDocumentStale()
         return true
       }
       return false
@@ -238,6 +286,7 @@ export const Part3StepCodeChecklistModel = types
       })
       if (response.ok) {
         self.sectionCompletionStatus = updatedStatus
+        self.markReportDocumentStale()
         return true
       }
     }),
@@ -245,6 +294,7 @@ export const Part3StepCodeChecklistModel = types
       const response = yield self.environment.api.updatePart3Checklist(self.id, values)
       if (response.ok) {
         applySnapshot(self, response.data.data)
+        self.markReportDocumentStale()
         return true
       }
     }),

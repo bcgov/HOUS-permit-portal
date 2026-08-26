@@ -1,5 +1,10 @@
 class StepCode::Part9::ComplianceReportBlueprint < Blueprinter::Base
   identifier :requirement_id
+
+  field :description do |report, _options|
+    report[:description]
+  end
+
   field :energy do |report, _options|
     StepCode::Part9::Energy::ComplianceBlueprint.render_as_hash(report[:energy])
   end

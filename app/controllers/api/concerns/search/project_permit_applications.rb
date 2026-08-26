@@ -32,7 +32,10 @@ module Api::Concerns::Search::ProjectPermitApplications
     }
 
     @permit_application_search =
-      PermitApplication.search(permit_application_query, **search_conditions)
+      ensure_searchkick_policy_scoped!(
+        PermitApplication,
+        PermitApplication.search(permit_application_query, **search_conditions)
+      )
   end
 
   private

@@ -22,7 +22,7 @@ import { ZeroCarbonStepCodeCompliance } from "./zero-carbon-step-code-compliance
 export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
   const { currentStepCode } = usePart9StepCode()
   const { permitApplicationId } = useParams()
-  const checklist = currentStepCode.preConstructionChecklist
+  const checklist = currentStepCode.currentChecklist
   const navigate = useNavigate()
   const [index, setIndex] = useState([0, 1, 2, 3, 4])
   const [scrollRef, setScrollRef] = useState<null | HTMLDivElement>()
@@ -37,7 +37,7 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
         await checklist.load()
       })()
     }
-  }, [checklist?.id, checklist?.isLoaded, currentStepCode?.id, currentStepCode?.reportDocuments?.length])
+  }, [checklist?.id, checklist?.isLoaded, currentStepCode?.id])
 
   useEffect(() => {
     checklist?.isLoaded && reset(checklist.defaultFormValues)
@@ -80,7 +80,7 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
 
     // timeout to allow for accordion transition to complete so scroll position can be determined accurately
     setTimeout(() => {
-      const yOffset = (document.getElementById("stepCodeNav")?.offsetHeight || 0) + 20
+      const yOffset = (document.getElementById("mainNav")?.offsetHeight || 0) + 20
       const scrollParent = document.getElementById("stepCodeScroll")
 
       if (scrollParent) {
@@ -112,8 +112,8 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
           </Heading>
           <Tag
             p={1}
-            bg={checklist.isComplete ? "theme.blue" : "greys.grey03"}
-            color={checklist.isComplete ? "greys.white" : "text.primary"}
+            bg={checklist.isMarkedComplete ? "theme.blue" : "greys.grey03"}
+            color={checklist.isMarkedComplete ? "greys.white" : "text.primary"}
             fontWeight="bold"
             border="1px solid"
             borderColor="border.base"
@@ -144,7 +144,7 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
           </Alert>
         </VStack>
         <FormProvider {...formMethods}>
-          <form onSubmit={handleSubmit(onSubmit)} name="stepCodeChecklistForm">
+          <form onSubmit={handleSubmit(onSubmit)}>
             <Accordion
               allowMultiple
               defaultIndex={[0, 1, 2, 3, 4]}
@@ -170,11 +170,11 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
             </Accordion>
           </form>
         </FormProvider>
-        {checklist.isComplete && !isSubmitting && currentStepCode?.latestReportDocument && (
+        {checklist.isMarkedComplete && !isSubmitting && checklist.freshReportDocument && (
           <FileDownloadButton
             variant="link"
             modelType={EFileUploadAttachmentType.ReportDocument}
-            document={currentStepCode.latestReportDocument as any}
+            document={checklist.freshReportDocument as any}
             simpleLabel
           />
         )}

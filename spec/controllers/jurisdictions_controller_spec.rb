@@ -59,6 +59,23 @@ RSpec.describe Api::JurisdictionsController, type: :controller do
         )
       end
     end
+
+    it "returns jurisdiction membership created_at for the current jurisdiction" do
+      user = review_managers.first
+      membership =
+        user.jurisdiction_memberships.find_by!(jurisdiction: jurisdiction)
+      user.update_column(:created_at, 2.years.ago)
+      membership.update_column(:created_at, 1.week.ago)
+      User.reindex
+
+      post :search_users, params: { id: jurisdiction.id, query: user.email }
+
+      user_json =
+        json_response["data"].find { |record| record["id"] == user.id }
+      expect(user_json["jurisdiction_membership_created_at"]).to eq(
+        membership.created_at.to_i * 1000
+      )
+    end
   end
 
   describe "logged in as super_admin" do
@@ -209,6 +226,177 @@ RSpec.describe Api::JurisdictionsController, type: :controller do
 
       expect(response).to have_http_status(:ok)
       expect(json_response["data"]).not_to be_empty
+    end
+  end
+
+  describe "PATCH #update project meetings flag" do
+    it "allows jurisdiction managers" do
+      manager = create(:user, :review_manager, jurisdiction: jurisdiction)
+      create(:meeting_submission_contact, jurisdiction: jurisdiction)
+      create(
+        :resource,
+        jurisdiction: jurisdiction,
+        category: :project_meeting_authorization
+      )
+      sign_in manager
+
+      patch :update,
+            params: {
+              id: jurisdiction.id,
+              jurisdiction: {
+                project_meetings_enabled: true
+              }
+            },
+            format: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(jurisdiction.reload.project_meetings_enabled).to eq(true)
+    end
+
+    it "updates property information request access" do
+      manager = create(:user, :review_manager, jurisdiction: jurisdiction)
+      create(
+        :property_information_submission_contact,
+        jurisdiction: jurisdiction
+      )
+      sign_in manager
+
+      patch :update,
+            params: {
+              id: jurisdiction.id,
+              jurisdiction: {
+                property_information_requests_enabled: true
+              }
+            },
+            format: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(jurisdiction.reload.property_information_requests_enabled).to eq(
+        true
+      )
+      expect(
+        json_response["data"]["property_information_requests_enabled"]
+      ).to eq(true)
+    end
+
+    it "allows technical support members" do
+      tech = create(:user, role: :technical_support)
+      create(:jurisdiction_membership, user: tech, jurisdiction: jurisdiction)
+      create(:meeting_submission_contact, jurisdiction: jurisdiction)
+      create(
+        :resource,
+        jurisdiction: jurisdiction,
+        category: :project_meeting_authorization
+      )
+      sign_in tech
+
+      patch :update,
+            params: {
+              id: jurisdiction.id,
+              jurisdiction: {
+                project_meetings_enabled: true
+              }
+            },
+            format: :json
+
+      expect(response).to have_http_status(:ok)
+    end
+
+    it "updates project meeting notification recipient contacts" do
+      manager = create(:user, :review_manager, jurisdiction: jurisdiction)
+      sign_in manager
+
+      patch :update,
+            params: {
+              id: jurisdiction.id,
+              jurisdiction: {
+                submission_contacts_attributes: [
+                  {
+                    email: "meetings@example.com",
+                    type: "MeetingSubmissionContact"
+                  }
+                ]
+              }
+            },
+            format: :json
+
+      expect(response).to have_http_status(:ok)
+      contact = jurisdiction.reload.project_meeting_contacts.first
+      expect(contact.email).to eq("meetings@example.com")
+      expect(contact).to be_a(MeetingSubmissionContact)
+      expect(json_response["data"]["submission_contacts"]).to include(
+        a_hash_including(
+          "email" => "meetings@example.com",
+          "type" => "MeetingSubmissionContact"
+        )
+      )
+    end
+
+    it "updates property information request notification recipient contacts" do
+      manager = create(:user, :review_manager, jurisdiction: jurisdiction)
+      sign_in manager
+
+      patch :update,
+            params: {
+              id: jurisdiction.id,
+              jurisdiction: {
+                submission_contacts_attributes: [
+                  {
+                    email: "property-info@example.com",
+                    type: "PropertyInformationSubmissionContact"
+                  }
+                ]
+              }
+            },
+            format: :json
+
+      expect(response).to have_http_status(:ok)
+      contact = jurisdiction.reload.property_information_contacts.first
+      expect(contact.email).to eq("property-info@example.com")
+      expect(contact).to be_a(PropertyInformationSubmissionContact)
+      expect(json_response["data"]["submission_contacts"]).to include(
+        a_hash_including(
+          "email" => "property-info@example.com",
+          "type" => "PropertyInformationSubmissionContact"
+        )
+      )
+    end
+
+    it "blocks reviewers" do
+      reviewer = create(:user, :reviewer, jurisdiction: jurisdiction)
+      sign_in reviewer
+
+      patch :update,
+            params: {
+              id: jurisdiction.id,
+              jurisdiction: {
+                project_meetings_enabled: true
+              }
+            },
+            format: :json
+
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it "blocks reviewers from updating project meeting notification recipients" do
+      reviewer = create(:user, :reviewer, jurisdiction: jurisdiction)
+      sign_in reviewer
+
+      patch :update,
+            params: {
+              id: jurisdiction.id,
+              jurisdiction: {
+                submission_contacts_attributes: [
+                  {
+                    email: "meetings@example.com",
+                    type: "MeetingSubmissionContact"
+                  }
+                ]
+              }
+            },
+            format: :json
+
+      expect(response).to have_http_status(:forbidden)
     end
   end
 end

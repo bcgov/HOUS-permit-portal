@@ -1,5 +1,6 @@
-import { Instance, applySnapshot, flow, getSnapshot, types } from "mobx-state-tree"
+import { DeepPartial, Instance, applySnapshot, flow, getSnapshot, types } from "mobx-state-tree"
 import * as R from "ramda"
+import { defaultSectionCompletionStatus, navLinks } from "../components/domains/step-code/part-9/sidebar/nav-sections"
 import { withEnvironment } from "../lib/with-environment"
 import {
   EStepCodeAirtightnessValue,
@@ -10,14 +11,41 @@ import {
   EStepCodeEPCTestingTargetType,
   EStepCodeType,
 } from "../types/enums"
+import { IPart9NavLink, IPart9SectionCompletionStatus, IReportDocument, TPart9NavLinkKey } from "../types/types"
+import { areRelevantSectionsCompleteExcept, canMarkChecklistComplete } from "../utils/can-mark-checklist-complete"
 import { renameKeys } from "../utils/utility-functions"
 import { StepCodeBuildingCharacteristicsSummaryModel } from "./step-code-building-characteristic-summary"
 import { StepCodeComplianceReportModel } from "./step-code-compliance-report"
 
+type TPart9StepCodeDataEntry = {
+  id?: string
+  districtEnergyEf?: number | null
+  districtEnergyConsumption?: number | null
+  otherGhgEf?: number | null
+  otherGhgConsumption?: number | null
+  h2kFile?: {
+    id: string
+    storage?: string | null
+    metadata?: {
+      size?: number | null
+      filename?: string | null
+      mimeType?: string | null
+    } | null
+  } | null
+}
+
 function preProcessor(snapshot) {
+  const sectionCompletionStatus = R.mergeDeepRight(
+    defaultSectionCompletionStatus,
+    snapshot.sectionCompletionStatus || {}
+  ) as IPart9SectionCompletionStatus
+  sectionCompletionStatus.projectInfo = { complete: false, relevant: false }
+
   return {
     ...snapshot,
+    dataEntries: snapshot.dataEntries || [],
     selectedReportRequirementId: snapshot.selectedReport?.requirementId,
+    sectionCompletionStatus,
   }
 }
 
@@ -44,6 +72,7 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
       compliancePath: types.maybeNull(
         types.enumeration<EStepCodeCompliancePath[]>(Object.values(EStepCodeCompliancePath))
       ),
+      dataEntries: types.frozen<TPart9StepCodeDataEntry[]>(),
       completedBy: types.maybeNull(types.string),
       completedAt: types.maybeNull(types.Date),
       completedByCompany: types.maybeNull(types.string),
@@ -67,9 +96,11 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
       ),
       epcCalculationCompliance: types.maybeNull(types.boolean),
       // calculated / pre-populated fields
+      sectionCompletionStatus: types.frozen<IPart9SectionCompletionStatus>(),
       complianceReports: types.array(StepCodeComplianceReportModel),
       selectedReportRequirementId: types.maybeNull(types.string),
       updatedAt: types.maybeNull(types.Date),
+      reportDocument: types.maybeNull(types.frozen<IReportDocument>()),
     })
     .extend(withEnvironment())
     .views((self) => ({
@@ -113,8 +144,23 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
           )
         )
       },
-      get isComplete() {
+      isComplete(key: TPart9NavLinkKey): boolean {
+        return self.sectionCompletionStatus[key]?.complete
+      },
+      isRelevant(key: TPart9NavLinkKey): boolean {
+        return self.sectionCompletionStatus[key]?.relevant
+      },
+      get isMarkedComplete() {
         return self.status == EStepCodeChecklistStatus.complete
+      },
+      get canMarkComplete() {
+        return canMarkChecklistComplete(self.sectionCompletionStatus)
+      },
+      get canAccessReview() {
+        return areRelevantSectionsCompleteExcept(self.sectionCompletionStatus, ["review", "report"])
+      },
+      get canAccessReport() {
+        return canMarkChecklistComplete(self.sectionCompletionStatus)
       },
       get stepRequirementId() {
         const report =
@@ -129,8 +175,19 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
         const found = self.complianceReports.find((r) => r.requirementId == self.selectedReportRequirementId)
         return found || self.complianceReports[0]
       },
+      get currentNavLink(): IPart9NavLink | undefined {
+        return navLinks.find((l) => self.isRelevant(l.key) && !self.isComplete(l.key))
+      },
+      get freshReportDocument(): IReportDocument | null {
+        if (!self.reportDocument || self.reportDocument.stale) return null
+        return self.reportDocument
+      },
     }))
     .actions((self) => ({
+      markReportDocumentStale() {
+        if (!self.reportDocument || self.reportDocument.stale) return
+        self.reportDocument = { ...self.reportDocument, stale: true }
+      },
       load: flow(function* () {
         const response = yield self.environment.api.fetchPart9Checklist(self.id)
         if (response.ok) {
@@ -145,6 +202,66 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
       setSelectedReport(requirementId: string) {
         self.selectedReportRequirementId = requirementId
       },
+      completeSection: flow(function* (key: TPart9NavLinkKey) {
+        let updatedStatus = R.clone(self.sectionCompletionStatus)
+        updatedStatus[key] = { complete: true, relevant: true }
+
+        const values: Record<string, any> = { sectionCompletionStatus: updatedStatus }
+        const requestOptions = key === "review" ? { reportGenerationRequested: true } : undefined
+        if (key === "report") {
+          if (!self.canMarkComplete) return false
+          values.status = EStepCodeChecklistStatus.complete
+        }
+
+        const response = yield self.environment.api.updatePart9Checklist(self.id, values, requestOptions)
+        if (response.ok) {
+          const snapshotData = { ...preProcessor(response.data.data), isLoaded: true }
+          applySnapshot(self, snapshotData)
+          if (key !== "report") {
+            self.markReportDocumentStale()
+          }
+          return true
+        }
+        return false
+      }),
+      regenerateReport: flow(function* () {
+        const response = yield self.environment.api.updatePart9Checklist(
+          self.id,
+          { sectionCompletionStatus: self.sectionCompletionStatus },
+          { reportGenerationRequested: true }
+        )
+        if (response.ok) {
+          const snapshotData = { ...preProcessor(response.data.data), isLoaded: true }
+          applySnapshot(self, snapshotData)
+          self.markReportDocumentStale()
+          return true
+        }
+        return false
+      }),
+      bulkUpdateCompletionStatus: flow(function* (updatedSections: DeepPartial<IPart9SectionCompletionStatus>) {
+        let updatedStatus = R.clone(self.sectionCompletionStatus)
+        updatedStatus = R.mergeDeepRight(updatedStatus, updatedSections) as IPart9SectionCompletionStatus
+        const response = yield self.environment.api.updatePart9Checklist(self.id, {
+          sectionCompletionStatus: updatedStatus,
+        })
+        if (response.ok) {
+          const snapshotData = { ...preProcessor(response.data.data), isLoaded: true }
+          applySnapshot(self, snapshotData)
+          self.markReportDocumentStale()
+          return true
+        }
+        return false
+      }),
+      update: flow(function* (values, options?: Record<string, any>) {
+        const response = yield self.environment.api.updatePart9Checklist(self.id, values, options)
+        if (response.ok) {
+          const snapshotData = { ...preProcessor(response.data.data), isLoaded: true }
+          applySnapshot(self, snapshotData)
+          self.markReportDocumentStale()
+          return true
+        }
+        return false
+      }),
     })),
   { preProcessor }
 )

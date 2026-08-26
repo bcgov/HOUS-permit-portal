@@ -12,7 +12,7 @@ import {
 import { Archive } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useAutoComplianceModuleConfigurations } from "../../../../hooks/resources/use-auto-compliance-module-configurations"
@@ -28,7 +28,6 @@ import {
 import { IDenormalizedRequirementBlock, TAutoComplianceModuleConfigurations } from "../../../../types/types"
 import { AUTO_COMPLIANCE_OPTIONS_MAP_KEY_PREFIX } from "../../../../utils"
 import { isOptionsMapperModuleConfiguration } from "../../../../utils/utility-functions"
-import { CalloutBanner } from "../../../shared/base/callout-banner"
 import { FormModal } from "../../../shared/form-modal"
 import { BlockSetup } from "./block-setup"
 import { FieldsSetup } from "./fields-setup"
@@ -39,18 +38,18 @@ export interface IRequirementBlockForm extends IRequirementBlockParams {
 
 interface IRequirementsBlockProps {
   requirementBlock?: IRequirementBlock | IDenormalizedRequirementBlock
-  showEditWarning?: boolean
   triggerButtonProps?: Partial<ButtonProps>
   withOptionsMenu?: boolean
   isEditable?: boolean
+  autoOpen?: boolean
 }
 
 export const RequirementsBlockModal = observer(function RequirementsBlockModal({
   requirementBlock,
-  showEditWarning,
   triggerButtonProps,
   withOptionsMenu,
   isEditable,
+  autoOpen,
 }: IRequirementsBlockProps) {
   const { requirementBlockStore } = useMst()
   const searchModel = requirementBlockStore
@@ -58,8 +57,22 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
   const { fetchData } = searchModel
   const { createRequirementBlock } = requirementBlockStore
   const { isOpen, onOpen, onClose } = useDisclosure()
+  const hasAutoOpenedRef = React.useRef(false)
+  const [isUploadingDocuments, setIsUploadingDocuments] = useState(false)
 
   const { autoComplianceModuleConfigurations, error } = useAutoComplianceModuleConfigurations()
+
+  useEffect(() => {
+    if (!autoOpen) {
+      hasAutoOpenedRef.current = false
+      return
+    }
+
+    if (!hasAutoOpenedRef.current) {
+      hasAutoOpenedRef.current = true
+      onOpen()
+    }
+  }, [autoOpen, onOpen])
 
   const getDefaultValues = (): Partial<IRequirementBlockForm> => {
     return requirementBlock
@@ -89,6 +102,8 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
   } = formProps
 
   const onSubmit = async (data: IRequirementBlockForm) => {
+    if (isUploadingDocuments) return
+
     let isSuccess = false
 
     const mappedRequirementAttributes = data.requirementsAttributes.map((ra, index) => {
@@ -228,6 +243,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
                   <Button
                     variant={"primary"}
                     isLoading={isSubmitting}
+                    isDisabled={isUploadingDocuments}
                     onClick={(e) => {
                       e.stopPropagation()
                       handleSubmit(onSubmit)()
@@ -241,9 +257,6 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
                 </HStack>
               </ModalHeader>
               <ModalBody px={"2.75rem"}>
-                {showEditWarning && (
-                  <CalloutBanner type={"warning"} title={t("requirementsLibrary.modals.templateEditWarning")} />
-                )}
                 <HStack spacing={9} w={"full"} h={"full"} alignItems={"flex-start"}>
                   <BlockSetup
                     requirementBlock={
@@ -252,6 +265,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
                         : undefined
                     }
                     withOptionsMenu={withOptionsMenu}
+                    onIsUploadingChange={setIsUploadingDocuments}
                   />
 
                   <FieldsSetup requirementBlock={requirementBlock} isEditable={isEditable} />

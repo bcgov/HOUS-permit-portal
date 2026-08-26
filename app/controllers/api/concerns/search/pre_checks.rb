@@ -19,7 +19,11 @@ module Api::Concerns::Search::PreChecks
         ),
       scope_results: ->(relation) { policy_scope(relation) }
     }
-    @pre_check_search = PreCheck.search(pre_check_query, **search_conditions)
+    @pre_check_search =
+      ensure_searchkick_policy_scoped!(
+        PreCheck,
+        PreCheck.search(pre_check_query, **search_conditions)
+      )
   end
 
   private

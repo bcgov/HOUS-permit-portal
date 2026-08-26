@@ -1,4 +1,5 @@
 import { Button, Container, Flex, FormControl, FormLabel, Heading } from "@chakra-ui/react"
+import { ClipboardText } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React from "react"
@@ -8,17 +9,13 @@ import { useQuery } from "../../../hooks/use-query"
 import { useSearch } from "../../../hooks/use-search"
 import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
-import {
-  EFlashMessageStatus,
-  EPermitApplicationStatusGroup,
-  EPermitApplicationSubmitterSortFields,
-} from "../../../types/enums"
+import { EPermitApplicationStatusGroup, EPermitApplicationSubmitterSortFields } from "../../../types/enums"
 import { BlueTitleBar } from "../../shared/base/blue-title-bar"
-import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
 import { ModelSearchInput } from "../../shared/base/model-search-input"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
+import { EmptyResultsBox } from "../../shared/grid/empty-results-box"
 import { PermitApplicationCard } from "../../shared/permit-applications/permit-application-card"
 import { PermitApplicationStatusTabs } from "../../shared/permit-applications/permit-application-status-tabs"
 import { SortSelect } from "../../shared/select/selectors/sort-select"
@@ -98,10 +95,10 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
               <SharedSpinner h={50} w={50} />
             </Flex>
           ) : R.isEmpty(tablePermitApplications) ? (
-            <CustomMessageBox
-              status={EFlashMessageStatus.info}
+            <EmptyResultsBox
               title={t("permitApplication.noneFound")}
               description={t("permitApplication.noneFoundExplanation")}
+              icon={<ClipboardText size={18} />}
             />
           ) : (
             tablePermitApplications.map((pa) => (

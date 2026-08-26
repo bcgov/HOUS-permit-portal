@@ -26,6 +26,19 @@ RSpec.describe Resource, type: :model do
       expect(resource.errors[:link_url]).to include("can't be blank")
     end
 
+    it "allows project meeting authorization resources" do
+      resource =
+        described_class.new(
+          jurisdiction: create(:sub_district),
+          category: "project_meeting_authorization",
+          title: "Authorization guide",
+          resource_type: "link",
+          link_url: "https://example.com/authorization"
+        )
+
+      expect(resource).to be_valid
+    end
+
     it "requires a resource_document when resource_type is file" do
       resource =
         described_class.new(

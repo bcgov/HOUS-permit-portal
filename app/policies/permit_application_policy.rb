@@ -1,11 +1,18 @@
 class PermitApplicationPolicy < ApplicationPolicy
   def show?
     if record.submitter == user ||
-         record.collaborator?(user_id: user.id, collaboration_type: :submission)
+         record.collaborator?(
+           user_id: user.id,
+           collaboration_type: :submission
+         ) || record.permit_project&.owner_id == user.id
       true
     elsif user.review_staff?
-      user.member_of?(record.jurisdiction.id) && !record.new_draft? &&
-        record.sandbox == sandbox
+      return false unless user.member_of?(record.jurisdiction.id)
+      return false unless record.sandbox == sandbox
+
+      return true unless record.new_draft?
+
+      record.permit_project&.project_meetings&.active&.exists? == true
     end
   end
 
@@ -39,13 +46,7 @@ class PermitApplicationPolicy < ApplicationPolicy
     return false unless ENV["VITE_QA_MODE"] == "true"
     return false unless SiteConfiguration.qa_tools_enabled?
 
-    is_draft = record.draft?
-    update_allowed = is_draft && update?
-    review_staff_allowed =
-      user.review_staff? && sandbox.present? &&
-        user.member_of?(record.jurisdiction_id) && record.sandbox == sandbox
-
-    update_allowed || review_staff_allowed
+    update?
   end
 
   def retrigger_submission_webhook?
@@ -104,6 +105,10 @@ class PermitApplicationPolicy < ApplicationPolicy
       ((user.review_staff?) && user.member_of?(record.jurisdiction_id))
   end
 
+  def download_supporting_documents_zip?
+    generate_missing_pdfs?
+  end
+
   def finalize_revision_requests?
     return false unless user.review_staff? && record.submitted?
 
@@ -131,7 +136,7 @@ class PermitApplicationPolicy < ApplicationPolicy
           .jurisdictions
           .find_by(id: permit_collaboration.permit_application.jurisdiction_id)
           .present? &&
-        permit_collaboration.permit_application.visible_to_reviewers?
+        permit_collaboration.permit_application.submitted_at_least_once?
     else
       false
     end
@@ -240,9 +245,10 @@ class PermitApplicationPolicy < ApplicationPolicy
 
       if user.review_staff?
         # Access rule 3 (review staff only):
-        # user can see applications for their jurisdictions, but only once
-        # they have reached a submitted status. In sandbox mode, the sandbox
-        # filter lives on the parent project now.
+        # user can see applications for their jurisdictions once they have
+        # reached a submitted status, or while still new draft if the parent
+        # project has an active meeting. In sandbox mode, the sandbox filter
+        # lives on the parent project now.
         pp_clauses = [
           "pp.id = permit_applications.permit_project_id",
           "pp.jurisdiction_id IN (:jur_ids)"
@@ -256,11 +262,33 @@ class PermitApplicationPolicy < ApplicationPolicy
           )
         SQL
 
-        clauses << "#{review_exists_sql} AND permit_applications.status IN (:visible_statuses)"
+        active_meeting_exists_sql = <<-SQL.squish
+          EXISTS (
+            SELECT 1 FROM project_meetings pm
+            WHERE pm.permit_project_id = permit_applications.permit_project_id
+              AND pm.status IN (:active_meeting_statuses)
+          )
+        SQL
+
+        visible_status_sql = <<-SQL.squish
+          permit_applications.status IN (:visible_statuses)
+          OR (
+            permit_applications.status = :new_draft_status
+            AND #{active_meeting_exists_sql}
+          )
+        SQL
+
+        clauses << "#{review_exists_sql} AND (#{visible_status_sql})"
         values[:jur_ids] = user.jurisdictions.pluck(:id)
         values[:visible_statuses] = PermitApplication
           .kanban_statuses
           .map { |name| PermitApplication.statuses.fetch(name) }
+        values[:new_draft_status] = PermitApplication.statuses.fetch(
+          "new_draft"
+        )
+        values[:active_meeting_statuses] = ProjectMeeting.statuses.values_at(
+          *ProjectMeeting.active_statuses
+        )
         values[:sandbox_id] = sandbox.id if sandbox.present?
       end
 

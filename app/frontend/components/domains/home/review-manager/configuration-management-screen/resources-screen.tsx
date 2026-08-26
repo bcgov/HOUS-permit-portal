@@ -23,15 +23,12 @@ import {
 } from "@chakra-ui/react"
 import { CaretLeft, Link, Pencil, Plus, Trash, X } from "@phosphor-icons/react"
 import { UppyFile } from "@uppy/core"
-import "@uppy/core/dist/style.min.css"
-import "@uppy/dashboard/dist/style.css"
-import Dashboard from "@uppy/react/lib/Dashboard.js"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
-import React, { useRef, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { useJurisdiction } from "../../../../../hooks/resources/use-jurisdiction"
 import useUppyS3 from "../../../../../hooks/use-uppy-s3"
 import {
@@ -54,6 +51,7 @@ import {
   TextFormControl,
   UrlFormControl,
 } from "../../../../shared/form/input-form-control"
+import { UppyDashboard } from "../../../../shared/uppy-dashboard"
 
 interface IResourceModalForm {
   category: string
@@ -79,11 +77,13 @@ interface IResourceModalForm {
 export const ResourcesScreen = observer(function ResourcesScreen() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const { currentJurisdiction, error } = useJurisdiction()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [editingResource, setEditingResource] = useState<IResource | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const modalContainerRef = useRef<HTMLDivElement>(null)
+  const hasAutoOpenedAddRef = useRef(false)
 
   const modalFormMethods = useForm<IResourceModalForm>({
     mode: "onChange",
@@ -105,7 +105,7 @@ export const ResourcesScreen = observer(function ResourcesScreen() {
 
   const resourceType = modalWatch("resourceType")
 
-  const handleOpenModal = (resource?: IResource) => {
+  const handleOpenModal = (resource?: IResource, defaultCategory?: EResourceCategory) => {
     // Reset Uppy whenever opening the modal to ensure a clean state
     modalUppy.cancelAll()
     // Clear all files from Uppy
@@ -131,7 +131,7 @@ export const ResourcesScreen = observer(function ResourcesScreen() {
     } else {
       setEditingResource(null)
       modalReset({
-        category: EResourceCategory.additionalResources,
+        category: defaultCategory ?? EResourceCategory.additionalResources,
         resourceType: EResourceType.file,
         title: "",
         description: "",
@@ -140,6 +140,23 @@ export const ResourcesScreen = observer(function ResourcesScreen() {
     }
     onOpen()
   }
+
+  useEffect(() => {
+    if (hasAutoOpenedAddRef.current || !currentJurisdiction) return
+
+    const openAddResource = searchParams.get("openAddResource")
+    if (!openAddResource) return
+
+    const isValidCategory = Object.values(EResourceCategory).includes(openAddResource as EResourceCategory)
+    if (!isValidCategory) return
+
+    hasAutoOpenedAddRef.current = true
+    handleOpenModal(undefined, openAddResource as EResourceCategory)
+
+    const nextParams = new URLSearchParams(searchParams)
+    nextParams.delete("openAddResource")
+    setSearchParams(nextParams, { replace: true })
+  }, [currentJurisdiction, searchParams, setSearchParams])
 
   const handleCloseModal = () => {
     // Reset form to default values
@@ -186,14 +203,15 @@ export const ResourcesScreen = observer(function ResourcesScreen() {
     })
   }
 
-  const modalUppy = useUppyS3({
+  const { uppy: modalUppy, isUploading } = useUppyS3({
     onUploadSuccess: handleUploadSuccess,
+    onFileRemoved: () => modalSetValue("resourceDocumentAttributes", undefined),
     maxNumberOfFiles: 1,
     autoProceed: true,
   })
 
   const onModalSubmit = async (formData: IResourceModalForm) => {
-    if (!currentJurisdiction) return
+    if (isUploading || !currentJurisdiction) return
 
     setIsSubmitting(true)
     try {
@@ -339,7 +357,7 @@ export const ResourcesScreen = observer(function ResourcesScreen() {
                   <Box ref={modalContainerRef}>
                     <FormLabel>{t("home.configurationManagement.resources.file")}</FormLabel>
                     <Box position="relative" mt={2}>
-                      <Dashboard uppy={modalUppy} height={300} width="100%" proudlyDisplayPoweredByUppy={false} />
+                      <UppyDashboard uppy={modalUppy} height={300} width="100%" />
                     </Box>
                   </Box>
                 ) : (
@@ -355,7 +373,7 @@ export const ResourcesScreen = observer(function ResourcesScreen() {
               <Button variant="ghost" mr={3} onClick={handleCloseModal} isDisabled={isSubmitting}>
                 {t("ui.cancel")}
               </Button>
-              <Button type="submit" variant="primary" isLoading={isSubmitting}>
+              <Button type="submit" variant="primary" isLoading={isSubmitting} isDisabled={isSubmitting || isUploading}>
                 {t("ui.save")}
               </Button>
             </ModalFooter>

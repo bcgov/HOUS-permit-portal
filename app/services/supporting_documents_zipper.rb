@@ -3,10 +3,11 @@ require "zip"
 require "fileutils"
 
 class SupportingDocumentsZipper
-  attr_reader :permit_application, :temp_files, :file_path
+  attr_reader :permit_application, :temp_files, :file_path, :document_ids
 
-  def initialize(permit_application_id)
+  def initialize(permit_application_id, document_ids: nil)
     @permit_application = PermitApplication.find(permit_application_id)
+    @document_ids = Array(document_ids).presence
     @temp_files = []
     # Ensure tmp/zipfiles directory exists
     zipfiles_directory = Rails.root.join("tmp", "zipfiles")
@@ -27,6 +28,14 @@ class SupportingDocumentsZipper
     cleanup_temp_files
   end
 
+  # Builds a zip without uploading. Yields the path; cleans up afterward.
+  def with_zip
+    create_zip_file
+    yield file_path
+  ensure
+    cleanup_temp_files
+  end
+
   private
 
   def create_zip_file
@@ -35,9 +44,7 @@ class SupportingDocumentsZipper
     used_entry_names = Hash.new(0)
 
     Zip::File.open(file_path, Zip::File::CREATE) do |zipfile|
-      permit_application
-        .all_submission_version_completed_supporting_documents
-        .each do |document|
+      documents_to_zip.each do |document|
         file_path = download_file(document)
         if file_path
           zipfile.add(
@@ -47,6 +54,14 @@ class SupportingDocumentsZipper
         end
       end
     end
+  end
+
+  def documents_to_zip
+    docs =
+      permit_application.all_submission_version_completed_supporting_documents
+    return docs if document_ids.blank?
+
+    docs.select { |document| document_ids.include?(document.id) }
   end
 
   def unique_zip_entry_name(document, used_entry_names)

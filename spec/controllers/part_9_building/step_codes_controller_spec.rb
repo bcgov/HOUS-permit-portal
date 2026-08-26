@@ -70,6 +70,42 @@ RSpec.describe Api::Part9Building::StepCodesController, type: :controller do
           JSON.parse(response.body).dig("data", "checklists")
         ).to be_present
       end
+
+      it "creates a blank pre-construction checklist shell with section state" do
+        fake_doc =
+          Struct.new(:last_signer, :file_data).new(
+            { name: "Signer", date: Time.current },
+            { "metadata" => { "filename" => "plan.pdf" } }
+          )
+        allow_any_instance_of(PermitApplication).to receive(
+          :step_code_plan_document
+        ).and_return(fake_doc)
+
+        post :create,
+             params: {
+               step_code: {
+                 permit_application_id:
+                   permit_application_with_fake_plan_document.id,
+                 pre_construction_checklist_attributes: {
+                   section_completion_status: {
+                     start: {
+                       complete: false,
+                       relevant: true
+                     }
+                   }
+                 }
+               }
+             },
+             as: :json
+
+        expect(response).to have_http_status(:success)
+        checklist =
+          Part9StepCode.find(json_response.dig("data", "id")).current_checklist
+        expect(checklist.compliance_path).to be_nil
+        expect(
+          checklist.section_completion_status.dig("start", "relevant")
+        ).to be(true)
+      end
     end
 
     context "standalone creation (no permit_application_id)" do
@@ -123,7 +159,7 @@ RSpec.describe Api::Part9Building::StepCodesController, type: :controller do
       )
     end
 
-    it "returns the step code for the creator" do
+    it "returns the Step Code for the creator" do
       get :show, params: { id: step_code.id }
 
       expect(response).to have_http_status(:success)

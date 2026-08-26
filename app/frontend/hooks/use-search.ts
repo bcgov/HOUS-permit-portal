@@ -38,7 +38,7 @@ export const useSearch = (searchModel: ISearch, dependencyArray: any[] = []) => 
       searchModel.setCurrentPage(1)
     }
     if (countPerPage) searchModel.setCountPerPage(parseInt(decodeURIComponent(countPerPage)))
-    if (showArchived) searchModel.setShowArchived(parseBoolean(showArchived))
+    searchModel.setShowArchived(showArchived ? parseBoolean(showArchived) : false)
 
     if (sortDirection && sortField) {
       searchModel.applySort({ direction: sortDirection, field: sortField })

@@ -6,6 +6,7 @@ class UserBlueprint < Blueprinter::Base
            :role,
            :first_name,
            :last_name,
+           :phone_number,
            :organization,
            :certified,
            :confirmed_at,
@@ -51,10 +52,28 @@ class UserBlueprint < Blueprinter::Base
                 options: ->(_user, options) { options }
   end
 
+  view :jurisdiction_users do
+    include_view :base
+
+    field :jurisdiction_membership_created_at do |user, options|
+      jurisdiction_id = options[:jurisdiction_id]
+      next unless jurisdiction_id
+
+      user
+        .jurisdiction_memberships
+        .find { |membership| membership.jurisdiction_id == jurisdiction_id }
+        &.created_at
+    end
+  end
+
   view :invited_user do
     fields :email, :role
 
     association :jurisdictions, blueprint: JurisdictionBlueprint, view: :minimal
+
+    field :invitation_promotes_existing_submitter do |user, _options|
+      user.invitation_promotes_existing_submitter?
+    end
 
     field :invited_by_email do |user, _options|
       user.invited_by&.email

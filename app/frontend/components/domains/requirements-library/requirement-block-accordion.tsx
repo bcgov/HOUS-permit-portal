@@ -41,25 +41,19 @@ type TProps = {
   onRemove?: () => void
   isCollapsedAll?: boolean
   renderEdit?: () => JSX.Element
+  autoOpenEdit?: boolean
   requirementBlockCustomization?: IRequirementBlockCustomization
   hideElectiveField?: (requirementBlockId: string, requirement: IDenormalizedRequirement) => boolean
-} & Partial<AccordionProps> &
-  (
-    | { isEditable?: boolean; showEditWarning?: never }
-    | { isEditable: boolean; showEditWarning?: boolean }
-    | {
-        isEditable: false
-        showEditWarning?: never
-      }
-  )
+  isEditable?: boolean
+} & Partial<AccordionProps>
 
 export const RequirementBlockAccordion = observer(function RequirementBlockAccordion({
   requirementBlock,
   onRemove,
   isEditable,
-  showEditWarning,
   isCollapsedAll,
   renderEdit,
+  autoOpenEdit,
   requirementBlockCustomization,
   hideElectiveField,
   ...accordionProps
@@ -157,11 +151,11 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
             </HStack>
 
             <HStack spacing={2}>
-              {isOpen && isEditable && !renderEdit && (
+              {(isOpen || autoOpenEdit) && isEditable && !renderEdit && (
                 <RequirementsBlockModal
-                  showEditWarning={showEditWarning}
                   isEditable={isEditable}
                   requirementBlock={requirementBlock}
+                  autoOpen={autoOpenEdit}
                   triggerButtonProps={{
                     color: "text.primary",
                     textDecoration: "none",

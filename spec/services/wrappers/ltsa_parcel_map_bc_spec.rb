@@ -25,6 +25,32 @@ RSpec.describe Wrappers::LtsaParcelMapBc, type: :service do
     end
   end
 
+  describe "#historic_site_by_pid" do
+    it "falls through when success response has no features key" do
+      empty_response =
+        instance_double(
+          Faraday::Response,
+          success?: true,
+          body: { error: "layer not found" }.to_json
+        )
+      geometry_response =
+        instance_double(
+          Faraday::Response,
+          success?: true,
+          body: { features: [] }.to_json
+        )
+
+      allow(wrapper).to receive(:get).and_return(
+        empty_response,
+        geometry_response
+      )
+
+      expect { wrapper.historic_site_by_pid(pid: "031562868") }.to raise_error(
+        Errors::GeometryError
+      )
+    end
+  end
+
   describe "#get_feature_attributes_by_pid_or_pin" do
     it "raises when both pid and pin are blank" do
       expect {

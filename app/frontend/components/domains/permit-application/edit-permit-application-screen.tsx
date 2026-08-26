@@ -26,12 +26,13 @@ import { useMst } from "../../../setup/root"
 import { ICustomEventMap } from "../../../types/dom"
 import { ECollaborationType, ECustomEvents, ERequirementType } from "../../../types/enums"
 import { findPidComponentKey } from "../../../utils/formio-component-traversal"
-import { handleScrollToBottom } from "../../../utils/utility-functions"
+import { handleScrollToBottom, handleScrollToTop } from "../../../utils/utility-functions"
 import { CopyableValue } from "../../shared/base/copyable-value"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EditableInputWithControls } from "../../shared/editable-input-with-controls"
 import { FloatingHelpDrawer } from "../../shared/floating-help-drawer"
+import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { BrowserSearchPrompt } from "../../shared/permit-applications/browser-search-prompt"
 import { PermitApplicationStatusTag } from "../../shared/permit-applications/permit-application-status-tag"
 import { PermitApplicationSubmitModal } from "../../shared/permit-applications/permit-application-submit-modal"
@@ -234,6 +235,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const handleClickFinishLater = async () => {
     const success = await handleSave()
     if (success) {
+      handleScrollToTop()
       navigate(parentProjectPath)
     }
   }
@@ -270,6 +272,10 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const doesUserHaveSubmissionPermission =
     currentUser?.id === currentPermitApplication.submitter?.id ||
     currentUser?.id === currentPermitApplication?.designatedSubmitter?.collaborator?.user?.id
+  const canEditPermitApplication =
+    currentPermitApplication.isDraft &&
+    doesUserHaveSubmissionPermission &&
+    !currentPermitApplication.isViewingPastRequests
 
   const parentProjectPath = currentPermitApplication.projectId
     ? `/projects/${currentPermitApplication.projectId}/permits`
@@ -295,17 +301,21 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
               <PermitApplicationStatusTag status={currentPermitApplication.status} />
               <Flex direction="column" w="full">
                 <form>
-                  <Tooltip label={t("permitApplication.edit.clickToWriteNickname")} placement="top-start">
+                  <Tooltip
+                    label={t("permitApplication.edit.clickToWriteNickname")}
+                    placement="top-start"
+                    isDisabled={!canEditPermitApplication}
+                  >
                     <Box>
                       <EditableInputWithControls
                         w="full"
                         initialHint={t("permitApplication.edit.clickToWriteNickname")}
                         value={nicknameWatch || ""}
-                        isDisabled={!doesUserHaveSubmissionPermission || isSubmitted}
+                        isDisabled={!canEditPermitApplication}
                         controlsProps={{
                           iconButtonProps: {
                             color: "greys.white",
-                            display: !doesUserHaveSubmissionPermission || isSubmitted ? "none" : "block",
+                            display: canEditPermitApplication ? "block" : "none",
                           },
                         }}
                         editableInputProps={{
@@ -322,7 +332,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                           onSubmit: () => {
                             handleSave()
                           },
-                          "aria-label": "Edit Nickname",
+                          "aria-label": "Edit custom name",
                         }}
                         editablePreviewProps={{
                           fontWeight: 700,
@@ -331,7 +341,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                         onEdit={() => {
                           setIsDirty(true)
                         }}
-                        aria-label={"Edit Nickname"}
+                        aria-label={"Edit custom name"}
                         onCancel={(previousValue) => setValue("nickname", previousValue)}
                       />
                     </Box>
@@ -364,6 +374,9 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                 {doesUserHaveSubmissionPermission && (
                   <SubmissionDownloadModal permitApplication={currentPermitApplication} />
                 )}
+                <RouterLinkButton to={parentProjectPath} variant="default" rightIcon={<CaretRight />}>
+                  {t("permitApplication.show.goToProject")}
+                </RouterLinkButton>
                 <Link to={parentProjectPath}>
                   <Button rightIcon={<CaretRight />}>{t("ui.back")}</Button>
                 </Link>

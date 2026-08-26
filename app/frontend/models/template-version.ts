@@ -25,6 +25,7 @@ export const TemplateVersionModel = types
     versionDate: types.Date,
     label: types.string,
     tags: types.optional(types.array(types.string), []),
+    createdAt: types.Date,
     updatedAt: types.Date,
     denormalizedTemplateJson: types.maybeNull(types.frozen<IDenormalizedTemplate>()),
     requirementBlocksJson: types.maybeNull(types.frozen<Record<string, IDenormalizedRequirementBlock>>()),
@@ -39,6 +40,8 @@ export const TemplateVersionModel = types
     changeSignificance: types.maybeNull(types.string),
     notificationScope: types.maybeNull(types.string),
     publiclyPreviewable: types.optional(types.boolean, false),
+    requiresProjectMeeting: types.optional(types.boolean, false),
+    disabledByJurisdiction: types.optional(types.boolean, false),
     hasUnresolvedFeedbacks: types.optional(types.boolean, false),
     feedbacksCount: types.optional(types.number, 0),
     templateCategoryId: types.maybeNull(types.string),
@@ -98,13 +101,34 @@ export const TemplateVersionModel = types
     getRequirementBlockJsonById(id: string) {
       return self.requirementBlocksJson?.[id]
     },
+    matchesSearchQuery(query: string) {
+      const normalizedQuery = query.trim().toLowerCase()
+      if (!normalizedQuery) return true
+
+      const searchableText = [
+        self.denormalizedTemplateJson?.nickname,
+        self.denormalizedTemplateJson?.description,
+        ...(self.denormalizedTemplateJson?.tags ?? self.tags),
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
+
+      return searchableText.includes(normalizedQuery)
+    },
   }))
   .actions((self) => ({
     setJurisdictionTemplateVersionCustomization(
       jurisdictionId: string,
-      customization: IJurisdictionTemplateVersionCustomizationForm
+      customization:
+        | IJurisdictionTemplateVersionCustomizationForm
+        | Instance<typeof JurisdictionTemplateVersionCustomizationModel>
     ) {
-      self.templateVersionCustomizationsByJurisdiction.set(jurisdictionId, customization)
+      const customizationModel = JurisdictionTemplateVersionCustomizationModel.is(customization)
+        ? customization
+        : JurisdictionTemplateVersionCustomizationModel.create(customization)
+
+      self.templateVersionCustomizationsByJurisdiction.set(jurisdictionId, customizationModel)
     },
     setIntegrationMapping(jurisdictionId: string, integrationMapping: IIntegrationMapping) {
       self.integrationMappingByJurisdiction.set(jurisdictionId, integrationMapping)

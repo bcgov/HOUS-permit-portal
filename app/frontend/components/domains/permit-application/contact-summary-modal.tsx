@@ -18,6 +18,7 @@ import React from "react"
 import { useTranslation } from "react-i18next"
 import { IPermitApplication } from "../../../models/permit-application"
 import { EContactSortFields } from "../../../types/enums"
+import { mailtoHref, telHref } from "../../../utils/utility-functions"
 import { GridHeader } from "../../shared/grid/grid-header"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { SearchGridItem } from "../../shared/grid/search-grid-item"
@@ -93,7 +94,7 @@ export const ContactSummaryModal = ({ isOpen, onOpen, onClose, permitApplication
                 />
               )
             })}
-            {permitApplication.stepCode && <EnergyAdvisor checklist={permitApplication.stepCode.primaryChecklist} />}
+            {permitApplication.stepCode && <EnergyAdvisor checklist={permitApplication.stepCode.currentChecklist} />}
           </SearchGrid>
         </ModalBody>
       </ModalContent>
@@ -122,12 +123,12 @@ function Contact({ title, name, email, phone, address }) {
       <SearchGridItem fontWeight="bold">{title}</SearchGridItem>
       <SearchGridItem>{name}</SearchGridItem>
       <SearchGridItem>
-        <Link href={`mailto:${email}`} isExternal>
+        <Link href={mailtoHref(email)} isExternal>
           {email}
         </Link>
       </SearchGridItem>
       <SearchGridItem>
-        <Link href={`tel:${phone}`} isExternal>
+        <Link href={telHref(phone)} isExternal>
           {phone}
         </Link>
       </SearchGridItem>

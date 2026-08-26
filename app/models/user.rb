@@ -53,12 +53,20 @@ class User < ApplicationRecord
            foreign_key: "creator_id",
            inverse_of: :creator,
            dependent: :destroy
+  has_many :overheating_codes,
+           foreign_key: "creator_id",
+           inverse_of: :creator,
+           dependent: :destroy
 
   has_many :permit_projects,
            class_name: "PermitProject",
            foreign_key: :owner_id,
            dependent: :destroy,
            inverse_of: :owner
+  has_many :project_meetings,
+           foreign_key: :requested_by_id,
+           dependent: :destroy,
+           inverse_of: :requested_by
 
   has_many :pinned_projects, dependent: :destroy
   has_many :pinned_permit_projects,
@@ -117,6 +125,10 @@ class User < ApplicationRecord
 
   # Validations
   validates :role, presence: true
+  validates :phone_number,
+            phone: true,
+            allow_blank: true,
+            if: :phone_number_attribute?
   validate :valid_role_change, if: :role_changed?, on: :update
   validate :jurisdiction_must_belong_to_correct_roles
   validate :confirmed_user_has_fields
@@ -129,6 +141,7 @@ class User < ApplicationRecord
   after_commit :reindex_jurisdiction_user_size,
                :reindex_jurisdiction_review_manager_email
   before_save :create_default_preference
+  before_validation :normalize_phone_number, if: :phone_number_attribute?
 
   # Stub this for now since we do not want to use IP Tracking at the moment - Jan 30, 2024
   attr_accessor :current_sign_in_ip, :last_sign_in_ip
@@ -171,6 +184,10 @@ class User < ApplicationRecord
       last_name: last_name,
       email: email,
       jurisdiction_ids: jurisdictions.pluck(:id),
+      jurisdiction_membership_created_ats:
+        jurisdiction_memberships.each_with_object({}) do |membership, hash|
+          hash[membership.jurisdiction_id] = membership.created_at
+        end,
       discarded: discarded_at.present?,
       last_sign_in_at: last_sign_in_at
     }
@@ -211,6 +228,19 @@ class User < ApplicationRecord
 
   def jurisdiction_staff?
     review_staff? || technical_support?
+  end
+
+  # Inviting a submitter's email creates a staff user alongside them; accepting
+  # promotes the submitter via PromoteUser.
+  def invitation_promotes_existing_submitter?
+    return false unless jurisdiction_staff?
+
+    User
+      .kept
+      .submitter
+      .where("LOWER(email) = ?", email.to_s.strip.downcase)
+      .where.not(id: id)
+      .exists?
   end
 
   def role_name
@@ -336,6 +366,17 @@ class User < ApplicationRecord
 
   def refresh_search_index
     User.search_index.refresh
+  end
+
+  def normalize_phone_number
+    return if phone_number.blank?
+
+    parsed = Phonelib.parse(phone_number)
+    self.phone_number = parsed.e164 if parsed.valid?
+  end
+
+  def phone_number_attribute?
+    has_attribute?(:phone_number)
   end
 
   def confirmed_user_has_fields

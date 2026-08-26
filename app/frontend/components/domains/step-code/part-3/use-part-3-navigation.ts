@@ -13,8 +13,8 @@ const allNavLinks = flattenNavLinks(navLinks)
 export const usePart3Navigation = () => {
   const navigate = useNavigate()
   const { pathname } = useLocation()
-  const { permitApplicationId } = useParams()
-  const { checklist } = usePart3StepCode()
+  const { permitApplicationId, stepCodeId } = useParams()
+  const { checklist, currentStepCode } = usePart3StepCode()
 
   // Computed lazily so callers always see the latest relevance state
   // (sections like baseline-occupancies update relevance flags mid-save)
@@ -42,6 +42,9 @@ export const usePart3Navigation = () => {
   }
 
   const getBaseUrl = () => R.pipe(R.split("/"), R.dropLast(1), R.join("/"))(pathname)
+  const infoPagePath = permitApplicationId
+    ? `/permit-applications/${permitApplicationId}/edit/part-3-step-code`
+    : `/part-3-step-code/${stepCodeId ?? currentStepCode?.id ?? ""}`
 
   const navigateToNext = () => {
     const nextSection = getNextSection()
@@ -64,7 +67,9 @@ export const usePart3Navigation = () => {
     }
   }
 
-  const goBackPath = permitApplicationId ? `/permit-applications/${permitApplicationId}/edit` : "/step-codes"
+  const isPermitLinked = !!permitApplicationId
+  const goBackPath = isPermitLinked ? `/permit-applications/${permitApplicationId}/edit` : "/step-codes"
+  const exitLinkPath = isPermitLinked ? goBackPath : "/step-codes?currentPage=1"
 
   return {
     navigateToNext,
@@ -76,5 +81,8 @@ export const usePart3Navigation = () => {
     hasNext: getNextSection() !== null,
     hasPrevious: getPreviousSection() !== null,
     goBackPath,
+    infoPagePath,
+    isPermitLinked,
+    exitLinkPath,
   }
 }

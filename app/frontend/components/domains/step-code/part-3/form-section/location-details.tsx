@@ -1,22 +1,13 @@
-import {
-  Flex,
-  FormControl,
-  FormErrorMessage,
-  FormHelperText,
-  FormLabel,
-  Input,
-  Radio,
-  RadioGroup,
-  Stack,
-  Text,
-} from "@chakra-ui/react"
+import { Flex, FormControl, FormHelperText, FormLabel, Input, Link, Text } from "@chakra-ui/react"
 import { ErrorMessage } from "@hookform/error-message"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
-import { Controller, useForm } from "react-hook-form"
+import { useForm, useWatch } from "react-hook-form"
+import { Trans } from "react-i18next"
 import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step-code"
-import { EClimateZone, EFlashMessageStatus } from "../../../../../types/enums"
+import { EFlashMessageStatus } from "../../../../../types/enums"
+import { climateZoneFromHdd } from "../../../../../utils/climate-zone"
 import { CustomMessageBox } from "../../../../shared/base/custom-message-box"
 import { Part3FormFooter } from "./shared/form-footer"
 import { SectionHeading } from "./shared/section-heading"
@@ -28,16 +19,28 @@ export const LocationDetails = observer(function Part3StepCodeFormLocationDetail
   const { handleSubmit, formState, register, control, reset } = useForm({
     defaultValues: {
       buildingHeight: checklist.buildingHeight && parseFloat(checklist.buildingHeight),
-      heatingDegreeDays: checklist.heatingDegreeDays ?? currentStepCode?.jurisdiction?.heatingDegreeDays ?? null,
-      climateZone: checklist.climateZone,
+      heatingDegreeDays: checklist.heatingDegreeDays ?? null,
     },
   })
   const { isSubmitting, isValid, isSubmitted, errors } = formState
+  const heatingDegreeDays = useWatch({ control, name: "heatingDegreeDays" })
+  const derivedClimateZone = climateZoneFromHdd(
+    heatingDegreeDays === "" || heatingDegreeDays === null || heatingDegreeDays === undefined
+      ? null
+      : Number(heatingDegreeDays)
+  )
 
   const onSubmit = async (values) => {
     if (!checklist) return
 
-    const updated = await checklist.update(values)
+    const climateZone = climateZoneFromHdd(
+      values.heatingDegreeDays === "" || values.heatingDegreeDays === null ? null : Number(values.heatingDegreeDays)
+    )
+
+    const updated = await checklist.update({
+      ...values,
+      climateZone,
+    })
     if (!updated) throw new Error("Save failed")
 
     await checklist.completeSection("locationDetails")
@@ -48,6 +51,11 @@ export const LocationDetails = observer(function Part3StepCodeFormLocationDetail
       reset(undefined, { keepDirtyValues: true, keepErrors: true })
     }
   }, [isValid])
+
+  const jurisdictionSlugOrId = currentStepCode?.jurisdiction?.slug || currentStepCode?.jurisdiction?.id
+  const hddReferenceHref = jurisdictionSlugOrId
+    ? `/jurisdictions/${jurisdictionSlugOrId}/step-code-requirements#heating-degree-days`
+    : null
 
   return (
     <>
@@ -77,9 +85,24 @@ export const LocationDetails = observer(function Part3StepCodeFormLocationDetail
         </FormControl>
         <FormControl>
           <FormLabel>{t(`${i18nPrefix}.hdd.label`)}</FormLabel>
-          <FormHelperText mb={1} mt={0}>
-            {t(`${i18nPrefix}.hdd.hint`)}
-          </FormHelperText>
+          {hddReferenceHref && (
+            <FormHelperText mb={2} mt={0}>
+              <Trans
+                i18nKey={`${i18nPrefix}.hdd.jurisdictionReference`}
+                components={{
+                  a: (
+                    <Link
+                      href={hddReferenceHref}
+                      color="text.link"
+                      isExternal
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    />
+                  ),
+                }}
+              />
+            </FormHelperText>
+          )}
           <FormHelperText mb={1} mt={0} color="semantic.error">
             <ErrorMessage errors={errors} name="heatingDegreeDays" />
           </FormHelperText>
@@ -92,25 +115,14 @@ export const LocationDetails = observer(function Part3StepCodeFormLocationDetail
         </FormControl>
         <FormControl>
           <FormLabel pb={1}>{t(`${i18nPrefix}.climateZone.label`)}</FormLabel>
-          <FormErrorMessage mb={1} mt={0} color="semantic.error">
-            <ErrorMessage errors={errors} name="climateZone" />
-          </FormErrorMessage>
-          <Controller
-            name="climateZone"
-            control={control}
-            rules={{ required: t(`${i18nPrefix}.climateZone.error`) }}
-            render={({ field: { onChange, value } }) => (
-              <RadioGroup defaultValue={value} onChange={onChange}>
-                <Stack spacing={1}>
-                  {Object.values(EClimateZone).map((zone) => (
-                    <Radio key={zone} value={zone}>
-                      {t(`${i18nPrefix}.climateZones.${zone}`)}
-                    </Radio>
-                  ))}
-                </Stack>
-              </RadioGroup>
-            )}
-          />
+          <FormHelperText mb={1} mt={0}>
+            {t(`${i18nPrefix}.climateZone.hint`)}
+          </FormHelperText>
+          <Text fontSize="md" fontWeight="medium">
+            {derivedClimateZone
+              ? t(`${i18nPrefix}.climateZones.${derivedClimateZone}`)
+              : t(`${i18nPrefix}.climateZone.pending`)}
+          </Text>
         </FormControl>
         <Part3FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={isSubmitting} />
       </Flex>

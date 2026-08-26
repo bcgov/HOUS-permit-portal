@@ -31,7 +31,7 @@ RSpec.describe Api::Part3Building::StepCodesController, type: :controller do
              params: {
                step_code: {
                  permit_application_id: permit_application.id,
-                 checklist_attributes: {
+                 pre_construction_checklist_attributes: {
                    section_completion_status: {
                    }
                  }
@@ -49,7 +49,7 @@ RSpec.describe Api::Part3Building::StepCodesController, type: :controller do
                params: {
                  step_code: {
                    permit_application_id: permit_application.id,
-                   checklist_attributes: {
+                   pre_construction_checklist_attributes: {
                      section_completion_status: {
                      }
                    }
@@ -69,7 +69,7 @@ RSpec.describe Api::Part3Building::StepCodesController, type: :controller do
           post :create,
                params: {
                  step_code: {
-                   checklist_attributes: {
+                   pre_construction_checklist_attributes: {
                      section_completion_status: {
                      }
                    }
@@ -81,14 +81,12 @@ RSpec.describe Api::Part3Building::StepCodesController, type: :controller do
         expect(response).to have_http_status(:success)
       end
 
-      it "sets climate zone based on heating degree days" do
-        jurisdiction.update!(heating_degree_days: 2910)
-
+      it "does not populate climate info until location details are provided" do
         post :create,
              params: {
                step_code: {
                  jurisdiction_id: jurisdiction.id,
-                 checklist_attributes: {
+                 pre_construction_checklist_attributes: {
                    section_completion_status: {
                    }
                  }
@@ -98,14 +96,8 @@ RSpec.describe Api::Part3Building::StepCodesController, type: :controller do
 
         body = JSON.parse(response.body)
         checklist = body.dig("data", "checklist")
-        expected_climate_zone =
-          StepCode::Part3::V0::Requirements::References::ClimateZone.value(
-            jurisdiction.heating_degree_days
-          )
-        expect(checklist["heating_degree_days"]).to eq(
-          jurisdiction.heating_degree_days
-        )
-        expect(checklist["climate_zone"]).to eq(expected_climate_zone)
+        expect(checklist["heating_degree_days"]).to be_nil
+        expect(checklist["climate_zone"]).to be_nil
       end
 
       it "renders error when model raises validation error" do
@@ -118,7 +110,7 @@ RSpec.describe Api::Part3Building::StepCodesController, type: :controller do
         post :create,
              params: {
                step_code: {
-                 checklist_attributes: {
+                 pre_construction_checklist_attributes: {
                    section_completion_status: {
                    }
                  }
@@ -142,7 +134,7 @@ RSpec.describe Api::Part3Building::StepCodesController, type: :controller do
       )
     end
 
-    it "returns the step code with compliance report" do
+    it "returns the Step Code with compliance report" do
       report_hash = {
         "performance" => {
           "energy" => {
@@ -163,6 +155,24 @@ RSpec.describe Api::Part3Building::StepCodesController, type: :controller do
       )
       expect(StepCode::Part3::V1::GenerateReport).to have_received(:new).with(
         checklist: step_code.checklist
+      )
+    end
+
+    it "serializes the checklist for the current stage" do
+      as_built_checklist =
+        create(:part_3_checklist, step_code: step_code, stage: :as_built)
+      step_code.update!(current_stage: "as_built")
+      stub_part3_compliance_report(
+        checklist: as_built_checklist,
+        report_hash: {
+        }
+      )
+
+      get :show, params: { id: step_code.id }
+
+      expect(response).to have_http_status(:success)
+      expect(json_response.dig("data", "checklist", "id")).to eq(
+        as_built_checklist.id
       )
     end
 

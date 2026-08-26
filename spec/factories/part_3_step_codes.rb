@@ -1,5 +1,5 @@
 FactoryBot.define do
   factory :part_3_step_code, class: "Part3StepCode" do
-    association :checklist, factory: :part_3_checklist
+    association :pre_construction_checklist, factory: :part_3_checklist
   end
 end

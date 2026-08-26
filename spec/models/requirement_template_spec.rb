@@ -136,7 +136,7 @@ RSpec.describe RequirementTemplate, type: :model do
       )
     end
 
-    it "requires architectural drawing when step code requirements are present" do
+    it "requires architectural drawing when Step Code requirements are present" do
       template = build(:live_requirement_template)
       block = create(:requirement_block)
       create(
@@ -159,7 +159,7 @@ RSpec.describe RequirementTemplate, type: :model do
       )
     end
 
-    it "rejects duplicate energy step code requirements" do
+    it "rejects duplicate Energy Step Code requirements" do
       template = build(:live_requirement_template)
       energy_block_1 = create(:requirement_block)
       energy_block_2 = create(:requirement_block)

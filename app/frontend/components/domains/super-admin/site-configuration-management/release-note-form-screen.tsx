@@ -7,28 +7,36 @@ import {
   FormErrorMessage,
   FormLabel,
   Heading,
+  Link,
+  Radio,
+  RadioGroup,
+  Stack,
   Text,
   VStack,
 } from "@chakra-ui/react"
-import { Minus, Plus } from "@phosphor-icons/react"
+import { CheckCircle, Minus, Plus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
-import { FormProvider, useController, useForm, useFormContext } from "react-hook-form"
+import { FormProvider, useController, useForm, useFormContext, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { matchPath, useLocation, useNavigate, useParams } from "react-router-dom"
+import { RELEASE_NOTE_TYPES } from "../../../../constants/release-note-type-config"
 import { useMst } from "../../../../setup/root"
-import { EReleaseNoteStatus } from "../../../../types/enums"
+import {
+  EFlashMessageStatus,
+  EReleaseNoteNotificationAudience,
+  EReleaseNoteStatus,
+  EReleaseNoteType,
+} from "../../../../types/enums"
 import { TReleaseNoteFormData } from "../../../../types/types"
 import { isTipTapEmpty } from "../../../../utils/utility-functions"
+import { CustomMessageBox } from "../../../shared/base/custom-message-box"
 import { SharedSpinner } from "../../../shared/base/shared-spinner"
+import { ConfirmationModal } from "../../../shared/confirmation-modal"
 import { Editor } from "../../../shared/editor/editor"
-import { DatePickerFormControl, TextFormControl, UrlFormControl } from "../../../shared/form/input-form-control"
+import { DatePickerFormControl, SelectFormControl } from "../../../shared/form/input-form-control"
 import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
-
-// Mirrors `ReleaseNote::SEMVER_REGEX` in app/models/release_note.rb
-// https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
-const releaseNoteSemverRegex =
-  /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
+import { ReleaseNoteTypeFields } from "../../release-notes/release-note-type-fields"
 
 const releaseNoteEditorChrome = {
   ".tiptap-wrapper": {
@@ -108,6 +116,27 @@ function ReleaseNoteHtmlField({ name, label, required }: TReleaseNoteHtmlFieldPr
   )
 }
 
+function ReleaseNoteNotificationAudienceField() {
+  const { t } = useTranslation()
+  const { control } = useFormContext<TReleaseNoteFormData>()
+  const { field } = useController({ name: "notificationAudience", control })
+
+  return (
+    <FormControl>
+      <FormLabel>{t("releaseNote.form.notificationAudience")}</FormLabel>
+      <RadioGroup value={field.value} onChange={field.onChange}>
+        <Stack spacing={2}>
+          {Object.values(EReleaseNoteNotificationAudience).map((audience) => (
+            <Radio key={audience} value={audience}>
+              {t(`releaseNote.form.notificationAudiences.${audience}`)}
+            </Radio>
+          ))}
+        </Stack>
+      </RadioGroup>
+    </FormControl>
+  )
+}
+
 export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -121,6 +150,7 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
     publishReleaseNote,
     resetCurrentReleaseNote,
     setCurrentReleaseNote,
+    getReleaseNoteShareUrl,
   } = releaseNoteStore
 
   const isCreate = Boolean(
@@ -136,7 +166,10 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
     mode: "onTouched",
     reValidateMode: "onChange",
     defaultValues: {
+      releaseType: EReleaseNoteType.software,
+      notificationAudience: EReleaseNoteNotificationAudience.allUsers,
       version: "",
+      name: "",
       releaseDate: null,
       content: "",
       releaseNotesUrl: "",
@@ -144,7 +177,8 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
     },
   })
 
-  const { handleSubmit, reset, setValue } = formMethods
+  const { handleSubmit, reset, setValue, control } = formMethods
+  const releaseType = useWatch({ control, name: "releaseType" })
 
   useEffect(() => {
     if (isCreate) {
@@ -174,7 +208,10 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
         setCurrentReleaseNote(id)
         const issuesHtml = note.issues ?? ""
         reset({
-          version: note.version,
+          releaseType: note.releaseType,
+          notificationAudience: EReleaseNoteNotificationAudience.allUsers,
+          version: note.version ?? "",
+          name: note.name ?? "",
           releaseDate: note.releaseDate ? new Date(note.releaseDate as unknown as string) : null,
           content: note.content ?? "",
           releaseNotesUrl: note.releaseNotesUrl ?? "",
@@ -210,6 +247,18 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
 
   const isSaveDraftDisabled = submittingIntent === "publish" || isAlreadyPublished
 
+  const confirmPublish = async (closeModal: () => void) => {
+    await handleSubmit(async (data) => {
+      setSubmittingIntent("publish")
+      try {
+        await publishFlow(data)
+      } finally {
+        setSubmittingIntent(null)
+        closeModal()
+      }
+    })()
+  }
+
   const publishFlow = async (data: TReleaseNoteFormData) => {
     if (isCreate) {
       const createResult = await createReleaseNote(data)
@@ -236,22 +285,14 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
 
   const onFormSubmit = handleSubmit(async (data: TReleaseNoteFormData, event?: React.BaseSyntheticEvent) => {
     const submitter = (event?.nativeEvent as SubmitEvent)?.submitter as HTMLButtonElement | null
-    const intentValue = submitter?.name === "intent" ? submitter.value : undefined
-    if (intentValue !== "saveDraft" && intentValue !== "publish") {
-      return
-    }
-    const intent = intentValue
-    if (intent === "saveDraft" && isAlreadyPublished) {
+    // Publish/update is confirmed via modal; only save-draft submits through the form.
+    if (submitter?.name !== "intent" || submitter.value !== "saveDraft" || isAlreadyPublished) {
       return
     }
 
-    setSubmittingIntent(intent)
+    setSubmittingIntent("saveDraft")
     try {
-      if (intent === "saveDraft") {
-        await saveDraft(data)
-      } else {
-        await publishFlow(data)
-      }
+      await saveDraft(data)
     } finally {
       setSubmittingIntent(null)
     }
@@ -280,23 +321,57 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
 
   return (
     <Container maxW="container.lg" py={6} px={8} as="main">
-      <Heading color="text.primary" mb={8}>
-        {isCreate ? t("releaseNote.form.newTitle") : t("releaseNote.form.editTitle")}
-      </Heading>
+      <Flex justify="space-between" align="flex-start" gap={4} mb={8} flexWrap="wrap">
+        <Heading color="text.primary" mb={0}>
+          {isCreate ? t("releaseNote.form.newTitle") : t("releaseNote.form.editTitle")}
+        </Heading>
+        {isAlreadyPublished && releaseNoteId && (
+          <VStack align="flex-end" spacing={1}>
+            <Flex
+              as="span"
+              align="center"
+              gap={1}
+              px={2}
+              py={1}
+              borderRadius="sm"
+              bg="semantic.successLight"
+              color="semantic.success"
+              fontSize="xs"
+              fontWeight="bold"
+            >
+              <CheckCircle size={14} weight="fill" />
+              <Text as="span" m={0}>
+                {t("releaseNote.status.published")}
+              </Text>
+            </Flex>
+            <Link
+              href={getReleaseNoteShareUrl(releaseNoteId)}
+              isExternal
+              color="text.link"
+              fontSize="sm"
+              textDecoration="underline"
+            >
+              {t("releaseNote.form.viewPublishedNote")}
+            </Link>
+          </VStack>
+        )}
+      </Flex>
 
       <FormProvider {...formMethods}>
         <Box as="form" onSubmit={onFormSubmit}>
           <VStack align="stretch" spacing={8}>
-            <TextFormControl
-              label={t("releaseNote.form.version")}
-              fieldName="version"
+            <SelectFormControl
+              label={t("releaseNote.form.releaseType")}
+              fieldName="releaseType"
               required
-              inputProps={{ w: "252px", maxW: "252px", isDisabled: isAlreadyPublished }}
-              validate={{
-                semver: (v: string) =>
-                  !v || releaseNoteSemverRegex.test(v) || t("releaseNote.form.versionInvalidSemver"),
-              }}
+              hint={isCreate ? t("releaseNote.form.releaseTypeHint") : null}
+              inputProps={{ w: "252px", maxW: "252px", isDisabled: !isCreate }}
+              options={RELEASE_NOTE_TYPES.map((type) => ({
+                value: type,
+                label: t(`releaseNote.types.${type}`),
+              }))}
             />
+            {releaseType && <ReleaseNoteTypeFields releaseType={releaseType} isAlreadyPublished={isAlreadyPublished} />}
             <DatePickerFormControl
               label={t("releaseNote.form.releaseDate")}
               fieldName="releaseDate"
@@ -315,7 +390,6 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
                 dateFormat: "yyyy/MM/dd h:mm aa",
               }}
             />
-            <UrlFormControl label={t("releaseNote.form.releaseNotesUrl")} fieldName="releaseNotesUrl" required />
             <ReleaseNoteHtmlField name="content" label={t("releaseNote.form.content")} required />
             <VStack align="stretch" spacing={4}>
               <Flex justifyContent="flex-end">
@@ -366,17 +440,54 @@ export const ReleaseNoteFormScreen = observer(function ReleaseNoteFormScreen() {
               >
                 {t("releaseNote.form.saveDraft")}
               </Button>
-              <Button
-                type="submit"
-                name="intent"
-                value="publish"
-                variant="primary"
-                size="sm"
-                isLoading={submittingIntent === "publish"}
-                isDisabled={submittingIntent === "saveDraft"}
-              >
-                {t("releaseNote.form.publish")}
-              </Button>
+              <ConfirmationModal
+                title={
+                  isAlreadyPublished
+                    ? t("releaseNote.form.updateConfirmation.title")
+                    : t("releaseNote.form.publishConfirmation.title")
+                }
+                triggerText={isAlreadyPublished ? t("releaseNote.form.update") : t("releaseNote.form.publish")}
+                body={
+                  isAlreadyPublished ? (
+                    t("releaseNote.form.updateConfirmation.body")
+                  ) : (
+                    <VStack align="stretch" spacing={4}>
+                      <Text>{t("releaseNote.form.publishConfirmation.body")}</Text>
+                      <ReleaseNoteNotificationAudienceField />
+                      {releaseType === EReleaseNoteType.content && (
+                        <CustomMessageBox
+                          status={EFlashMessageStatus.info}
+                          description={t("releaseNote.form.publishConfirmation.contentTemplateNotice")}
+                        />
+                      )}
+                    </VStack>
+                  )
+                }
+                renderTriggerButton={({ onClick, ...props }) => (
+                  <Button
+                    type="button"
+                    variant="primary"
+                    size="sm"
+                    isDisabled={submittingIntent === "saveDraft"}
+                    {...props}
+                    onClick={(e) =>
+                      void handleSubmit(() => {
+                        if (!isAlreadyPublished) {
+                          setValue("notificationAudience", EReleaseNoteNotificationAudience.allUsers)
+                        }
+                        onClick?.(e)
+                      })()
+                    }
+                  >
+                    {isAlreadyPublished ? t("releaseNote.form.update") : t("releaseNote.form.publish")}
+                  </Button>
+                )}
+                confirmButtonProps={{
+                  isLoading: submittingIntent === "publish",
+                  isDisabled: submittingIntent === "publish",
+                }}
+                onConfirm={confirmPublish}
+              />
             </Flex>
           </VStack>
         </Box>

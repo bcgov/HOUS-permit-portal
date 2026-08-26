@@ -9,7 +9,7 @@ class Jurisdiction < ApplicationRecord
     contacts
     jurisdiction_step_requirements
     part3_occupancy_required_steps
-    jurisdiction_climate_zones
+    jurisdiction_heating_degree_days
   ]
 
   include ActionView::Helpers::SanitizeHelper
@@ -55,6 +55,7 @@ class Jurisdiction < ApplicationRecord
   has_one :preference
   has_many :permit_projects
   has_many :permit_applications, through: :permit_projects
+  has_many :project_meetings, through: :permit_projects
   has_many :contacts, as: :contactable, dependent: :destroy
   has_many :jurisdiction_memberships, dependent: :destroy
   has_many :users, through: :jurisdiction_memberships
@@ -68,11 +69,16 @@ class Jurisdiction < ApplicationRecord
            through: :jurisdiction_template_version_customizations
   has_many :requirement_templates, through: :template_versions
   has_many :submission_contacts, dependent: :destroy
+  has_many :application_submission_contacts,
+           class_name: "ApplicationSubmissionContact"
+  has_many :meeting_submission_contacts, class_name: "MeetingSubmissionContact"
+  has_many :property_information_submission_contacts,
+           class_name: "PropertyInformationSubmissionContact"
   has_many :external_api_keys, dependent: :destroy
   has_many :integration_mappings
   has_many :jurisdiction_step_requirements, dependent: :destroy
   has_many :part3_occupancy_required_steps, dependent: :destroy
-  has_many :jurisdiction_climate_zones, dependent: :destroy
+  has_many :jurisdiction_heating_degree_days, dependent: :destroy
   has_many :collaborators, as: :collaboratorable, dependent: :destroy
   has_many :sandboxes, dependent: :destroy
   has_many :property_plan_local_jurisdictions, dependent: :destroy
@@ -84,9 +90,9 @@ class Jurisdiction < ApplicationRecord
   # Scopes
   scope :with_confirmed_submission_contacts,
         lambda {
-          joins(:submission_contacts)
-            .where.not(submission_contacts: { confirmed_at: nil })
-            .distinct
+          joins(:application_submission_contacts).merge(
+            ApplicationSubmissionContact.confirmed
+          ).distinct
         }
 
   validates :name, uniqueness: { scope: :locality_type, case_sensitive: false }
@@ -101,6 +107,9 @@ class Jurisdiction < ApplicationRecord
             allow_blank: true
   validates :office_telephone, phone: true, allow_blank: true
   validate :inbox_enabled_requires_inbox_setup
+  validate :project_meetings_enabled_requires_setup
+  validate :project_meetings_enabled_requires_authorization_resource
+  validate :property_information_requests_enabled_requires_setup
   validate :no_duplicate_part3_occupancy_pathways
 
   # Validation to ensure at least one sandbox exists
@@ -131,7 +140,8 @@ class Jurisdiction < ApplicationRecord
                                 allow_destroy: true
   accepts_nested_attributes_for :part3_occupancy_required_steps,
                                 allow_destroy: true
-  accepts_nested_attributes_for :jurisdiction_climate_zones, allow_destroy: true
+  accepts_nested_attributes_for :jurisdiction_heating_degree_days,
+                                allow_destroy: true
   accepts_nested_attributes_for :resources, allow_destroy: true
 
   before_create :assign_unique_prefix
@@ -153,6 +163,14 @@ class Jurisdiction < ApplicationRecord
 
   def managers
     review_managers + regional_review_managers
+  end
+
+  def project_meeting_notification_recipient_emails
+    confirmed_project_meeting_contacts.pluck(:email).uniq
+  end
+
+  def property_information_notification_recipient_emails
+    confirmed_property_information_contacts.pluck(:email).uniq
   end
 
   def manager_emails
@@ -323,20 +341,55 @@ class Jurisdiction < ApplicationRecord
       .count
   end
 
+  # Mirrors the jurisdiction project meeting search unread count:
+  # submitted meeting requests only (status != draft), scoped to the current
+  # jurisdiction and sandbox, with meeting-level viewed_at still unset.
+  def unviewed_project_meetings_count(sandbox: nil)
+    project_meetings
+      .where(permit_projects: { discarded_at: nil, sandbox_id: sandbox&.id })
+      .where.not(status: ProjectMeeting.statuses[:draft])
+      .where(viewed_at: nil)
+      .count
+  end
+
   def unviewed_permit_applications
     permit_applications.kept.unviewed
   end
 
   def submission_inbox_set_up?
-    submission_contacts.confirmed.exists?
+    confirmed_submission_contacts.exists?
   end
 
   def confirmed_submission_emails
-    submission_contacts.confirmed.pluck(:email).uniq
+    confirmed_submission_contacts.pluck(:email).uniq
   end
 
   def has_confirmed_submission_contacts?
-    submission_contacts.confirmed.exists?
+    confirmed_submission_contacts.exists?
+  end
+
+  def submission_inbox_contacts
+    application_submission_contacts
+  end
+
+  def confirmed_submission_contacts
+    submission_inbox_contacts.confirmed
+  end
+
+  def project_meeting_contacts
+    meeting_submission_contacts
+  end
+
+  def confirmed_project_meeting_contacts
+    project_meeting_contacts.confirmed
+  end
+
+  def property_information_contacts
+    property_information_submission_contacts
+  end
+
+  def confirmed_property_information_contacts
+    property_information_contacts.confirmed
   end
 
   def self.class_for_locality_type(locality_type)
@@ -353,6 +406,21 @@ class Jurisdiction < ApplicationRecord
 
   def active_step_requirements
     jurisdiction_step_requirements
+  end
+
+  # Last time Part 9 Step Code config was modified. Untouched auto-created
+  # defaults do not count — applicants should see "Not available" until an admin save.
+  def part_9_step_requirements_updated_at
+    steps = jurisdiction_step_requirements
+    return nil if steps.empty?
+
+    meaningful =
+      steps.reject { |s| s.default? && s.updated_at.to_i == s.created_at.to_i }
+    meaningful.map(&:updated_at).max
+  end
+
+  def part_3_step_requirements_updated_at
+    part3_occupancy_required_steps.maximum(:updated_at)
   end
 
   def create_integration_mappings
@@ -487,6 +555,48 @@ class Jurisdiction < ApplicationRecord
         )
       )
     end
+  end
+
+  def project_meetings_enabled_requires_setup
+    return if new_record?
+    return unless project_meetings_enabled
+    return unless will_save_change_to_project_meetings_enabled?
+    return if confirmed_project_meeting_contacts.exists?
+
+    errors.add(
+      :project_meetings_enabled,
+      I18n.t(
+        "activerecord.errors.models.jurisdiction.enabled_project_meetings_requires_setup"
+      )
+    )
+  end
+
+  def project_meetings_enabled_requires_authorization_resource
+    return if new_record?
+    return unless project_meetings_enabled
+    return unless will_save_change_to_project_meetings_enabled?
+    return if resources.project_meeting_authorization.exists?
+
+    errors.add(
+      :project_meetings_enabled,
+      I18n.t(
+        "activerecord.errors.models.jurisdiction.enabled_project_meetings_requires_authorization_resource"
+      )
+    )
+  end
+
+  def property_information_requests_enabled_requires_setup
+    return if new_record?
+    return unless property_information_requests_enabled
+    return unless will_save_change_to_property_information_requests_enabled?
+    return if confirmed_property_information_contacts.exists?
+
+    errors.add(
+      :property_information_requests_enabled,
+      I18n.t(
+        "activerecord.errors.models.jurisdiction.enabled_property_information_requests_requires_setup"
+      )
+    )
   end
 
   def no_duplicate_part3_occupancy_pathways

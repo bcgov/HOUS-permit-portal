@@ -19,9 +19,6 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { UppyFile } from "@uppy/core"
-import "@uppy/core/dist/style.min.css"
-import "@uppy/dashboard/dist/style.css"
-import Dashboard from "@uppy/react/lib/Dashboard.js"
 import React, { useEffect, useRef } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -29,6 +26,7 @@ import useUppyS3 from "../../../hooks/use-uppy-s3"
 import { IHelpVideo } from "../../../models/help-video"
 import { IHelpVideoSection } from "../../../models/help-video-section"
 import { Editor } from "../../shared/editor/editor"
+import { UppyDashboard } from "../../shared/uppy-dashboard"
 
 const DEFAULT_ABOUT_HTML = "<p>Add about text</p><h3><b>Topics covered</b></h3><ul><li>...</li></ul>"
 
@@ -104,24 +102,32 @@ export const HelpVideoModal = ({ isOpen, onClose, video, sections, onSubmit }: I
     }
   }
 
-  const videoUppy = useUppyS3({
+  const buildFileRemovedHandler = (fieldName: TDocumentFieldName) => () => {
+    setValue(fieldName, undefined)
+  }
+
+  const { uppy: videoUppy, isUploading: isVideoUploading } = useUppyS3({
     onUploadSuccess: buildUploadHandler("videoDocumentAttributes"),
+    onFileRemoved: buildFileRemovedHandler("videoDocumentAttributes"),
     maxNumberOfFiles: 1,
     autoProceed: true,
     allowedFileTypes: ["video/mp4"],
   })
-  const captionUppy = useUppyS3({
+  const { uppy: captionUppy, isUploading: isCaptionUploading } = useUppyS3({
     onUploadSuccess: buildUploadHandler("captionDocumentAttributes"),
+    onFileRemoved: buildFileRemovedHandler("captionDocumentAttributes"),
     maxNumberOfFiles: 1,
     autoProceed: true,
     allowedFileTypes: [".vtt", "text/vtt"],
   })
-  const transcriptUppy = useUppyS3({
+  const { uppy: transcriptUppy, isUploading: isTranscriptUploading } = useUppyS3({
     onUploadSuccess: buildUploadHandler("transcriptDocumentAttributes"),
+    onFileRemoved: buildFileRemovedHandler("transcriptDocumentAttributes"),
     maxNumberOfFiles: 1,
     autoProceed: true,
     allowedFileTypes: [".txt", ".pdf", "text/plain", "application/pdf"],
   })
+  const isUploading = isVideoUploading || isCaptionUploading || isTranscriptUploading
 
   useEffect(() => {
     if (!isOpen) return
@@ -147,6 +153,7 @@ export const HelpVideoModal = ({ isOpen, onClose, video, sections, onSubmit }: I
   }, [captionUppy, isOpen, reset, sections, transcriptUppy, video, videoUppy])
 
   const submit = handleSubmit(async (data) => {
+    if (isUploading) return
     const success = await onSubmit(data)
     if (success) onClose()
   })
@@ -218,7 +225,7 @@ export const HelpVideoModal = ({ isOpen, onClose, video, sections, onSubmit }: I
           </VStack>
         </ModalBody>
         <ModalFooter gap={4} justifyContent="flex-start">
-          <Button variant="primary" type="submit" isLoading={isSubmitting} isDisabled={!hasSections}>
+          <Button variant="primary" type="submit" isLoading={isSubmitting} isDisabled={!hasSections || isUploading}>
             {translate("ui.save")}
           </Button>
           <Button variant="secondary" onClick={onClose} isDisabled={isSubmitting}>
@@ -243,7 +250,7 @@ const UploadField = ({ label, currentFileName, uppy }: { label: string; currentF
           {(t as any)("helpVideos.management.fields.currentFile", { fileName: currentFileName })}
         </Text>
       )}
-      <Dashboard uppy={uppy} height={180} width="100%" proudlyDisplayPoweredByUppy={false} />
+      <UppyDashboard uppy={uppy} height={180} width="100%" />
     </Box>
   )
 }

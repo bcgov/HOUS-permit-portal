@@ -1,5 +1,5 @@
 import { t } from "i18next"
-import { cast, flow, Instance, types } from "mobx-state-tree"
+import { cast, flow, Instance, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
@@ -10,6 +10,7 @@ import {
   EPermitBlockStatus,
   ERequirementChangeAction,
   ERequirementType,
+  EStepCodeChecklistStage,
 } from "../types/enums"
 import {
   ICompareRequirementsBoxData,
@@ -17,6 +18,7 @@ import {
   IDownloadableFile,
   IFormIOBlock,
   IFormJson,
+  IPermitApplicationSelectiveZipReady,
   IPermitApplicationSupportingDocumentsUpdate,
   ISubmissionData,
   ISubmissionVersion,
@@ -68,15 +70,20 @@ export const PermitApplicationModel = types.snapshotProcessor(
       submittedAt: types.maybeNull(types.Date),
       resubmittedAt: types.maybeNull(types.Date),
       revisionsRequestedAt: types.maybeNull(types.Date),
+      issuedAt: types.maybeNull(types.Date),
       selectedTabIndex: types.optional(types.number, 0),
       createdAt: types.Date,
       updatedAt: types.Date,
       stepCode: types.maybeNull(types.reference(types.late(() => StepCodeModel))),
+      stepCodeStage: types.maybeNull(
+        types.enumeration<EStepCodeChecklistStage[]>(Object.values(EStepCodeChecklistStage))
+      ),
       supportingDocuments: types.maybeNull(types.frozen<IDownloadableFile[]>()),
       allSubmissionVersionCompletedSupportingDocuments: types.maybeNull(types.frozen<IDownloadableFile[]>()),
       zipfileSize: types.maybeNull(types.number),
       zipfileName: types.maybeNull(types.string),
       zipfileUrl: types.maybeNull(types.string),
+      selectiveZipResult: types.maybeNull(types.frozen<IPermitApplicationSelectiveZipReady>()),
       referenceNumber: types.maybeNull(types.string),
       missingPdfs: types.maybeNull(types.array(types.string)),
       isFullyLoaded: types.optional(types.boolean, false),
@@ -84,6 +91,9 @@ export const PermitApplicationModel = types.snapshotProcessor(
       isLoading: types.optional(types.boolean, false),
       usingCurrentTemplateVersion: types.maybeNull(types.boolean),
       templateVersionDisabledByJurisdiction: types.optional(types.boolean, false),
+      requiresProjectMeeting: types.optional(types.boolean, false),
+      hasActiveProjectMeeting: types.optional(types.boolean, false),
+      activeProjectMeetingId: types.maybeNull(types.string),
       showingCompareAfter: types.optional(types.boolean, false),
       revisionMode: types.optional(types.boolean, false),
       diff: types.maybeNull(types.frozen<ITemplateVersionDiff>()),
@@ -113,9 +123,8 @@ export const PermitApplicationModel = types.snapshotProcessor(
         if (self.daysInQueue == null) return "—"
         return t("submissionInbox.daysInQueue", { count: self.daysInQueue })
       },
-      get formattedSubmittedAt(): string {
-        if (!self.submittedAt) return "—"
-        return new Intl.DateTimeFormat("en-CA").format(self.submittedAt)
+      get isStepCodeComplete() {
+        return !!self.stepCode?.isStageComplete(self.stepCodeStage || EStepCodeChecklistStage.preConstruction)
       },
       get isPart3() {
         // TODO
@@ -275,15 +284,20 @@ export const PermitApplicationModel = types.snapshotProcessor(
             self.latestSubmissionVersion.submissionData
           )
         }
-        const changedMarkedFormJson = combineChangeMarkers(
-          diffColoredFormJson,
-          self.isSubmitted || self.isViewingPastRequests,
-          changedKeys
-        )
-        const revisionModeFormJson =
-          self.revisionMode || self.isRevisionsRequested
-            ? combineRevisionButtons(changedMarkedFormJson, self.isSubmitted, revisionRequestsToUse)
-            : changedMarkedFormJson // Use changedMarkedFormJson if not in revision mode
+        // Review staff on revisions_requested: lock fields the same way in_review does via
+        // isSubmitted. Submitters must still edit on the edit screen.
+        const disableRequirementFields =
+          self.isSubmitted ||
+          self.isViewingPastRequests ||
+          (self.isRevisionsRequested && !!self.rootStore.userStore.currentUser?.isReviewStaff)
+        const changedMarkedFormJson = combineChangeMarkers(diffColoredFormJson, disableRequirementFields, changedKeys)
+        // Review staff: buttons only after "View revision requests" (revisionMode).
+        // Submitters: always show while revisions are outstanding (sidebar is always open).
+        const showRevisionButtons =
+          self.revisionMode || (self.isRevisionsRequested && !self.rootStore.userStore.currentUser?.isReviewStaff)
+        const revisionModeFormJson = showRevisionButtons
+          ? combineRevisionButtons(changedMarkedFormJson, self.isSubmitted, revisionRequestsToUse)
+          : changedMarkedFormJson
 
         return revisionModeFormJson
       },
@@ -318,7 +332,8 @@ export const PermitApplicationModel = types.snapshotProcessor(
           (R.isNil(self.diff) ? `${self.templateVersion.id}` : `${self.templateVersion.id}-diff`) +
           (self.revisionMode ? "-revision" : "") +
           (self.selectedSubmissionVersion ? `-past-submission-version-${self.selectedSubmissionVersion.id}` : "") +
-          (self.isViewingPastRequests ? "-past-requests" : "")
+          (self.isViewingPastRequests ? "-past-requests" : "") +
+          `-${self.status}`
         )
       },
       indexOfBlockId: (blockId: string) => {
@@ -825,6 +840,9 @@ export const PermitApplicationModel = types.snapshotProcessor(
           self.rootStore.stepCodeStore.mergeUpdate(stepCode, "stepCodesMap")
           self.stepCode = cast(stepCode.id)
           self.rootStore.stepCodeStore.setCurrentStepCode(stepCode.id)
+          if (!self.stepCodeStage && stepCode.currentStage) {
+            self.stepCodeStage = stepCode.currentStage
+          }
         }
         return response.ok
       }),
@@ -899,9 +917,25 @@ export const PermitApplicationModel = types.snapshotProcessor(
         self.zipfileName = data.zipfileName
         self.zipfileUrl = data.zipfileUrl
       },
+      handleSocketSelectiveZipReady: (data: IPermitApplicationSelectiveZipReady) => {
+        self.selectiveZipResult = data
+      },
+      clearSelectiveZipResult: () => {
+        self.selectiveZipResult = null
+      },
       generateMissingPdfs: flow(function* () {
         const response = yield self.environment.api.generatePermitApplicationMissingPdfs(self.id)
         return response.ok
+      }),
+
+      downloadSupportingDocumentsZip: flow(function* (supportingDocumentIds: string[]) {
+        self.selectiveZipResult = null
+        const response = yield* toGenerator(
+          self.environment.api.downloadSupportingDocumentsZip(self.id, supportingDocumentIds)
+        )
+        if (!response.ok) return null
+
+        return response.data?.data?.requestId ?? null
       }),
 
       unassignPermitCollaboration: flow(function* (collaborationId: string) {

@@ -1,11 +1,17 @@
 class StepCode::Part9::ChecklistBlueprint < Blueprinter::Base
   identifier :id
 
-  fields :stage, :status, :updated_at
+  # HUB-5145: Part 9 already exposes checklist identity (`stage`) and state
+  # (`status`). Consumers should select through StepCode.current_stage or an
+  # explicit checklist id instead of hard-coding pre-construction.
+  fields :stage, :status, :section_completion_status, :updated_at
+
+  association :report_document, blueprint: ReportDocumentBlueprint
 
   view :extended do
     include_view :project_info
     include_view :compliance_summary
+    include_view :h2k_import
     include_view :completed_by
     include_view :building_characteristics_summary
     include_view :mid_construction_testing_results
@@ -35,6 +41,35 @@ class StepCode::Part9::ChecklistBlueprint < Blueprinter::Base
     fields :compliance_path
 
     fields :plan_author, :plan_version, :plan_date
+  end
+
+  view :h2k_import do
+    field :data_entries do |checklist, _options|
+      checklist.data_entries.map do |data_entry|
+        h2k_file_data = data_entry.h2k_file_data || {}
+        h2k_file =
+          if data_entry.h2k_file_attacher&.attached?
+            {
+              id: h2k_file_data["id"],
+              storage: h2k_file_data["storage"],
+              metadata: {
+                size: h2k_file_data.dig("metadata", "size"),
+                filename: h2k_file_data.dig("metadata", "filename"),
+                mime_type: h2k_file_data.dig("metadata", "mime_type")
+              }
+            }
+          end
+
+        {
+          id: data_entry.id,
+          district_energy_ef: data_entry.district_energy_ef,
+          district_energy_consumption: data_entry.district_energy_consumption,
+          other_ghg_ef: data_entry.other_ghg_ef,
+          other_ghg_consumption: data_entry.other_ghg_consumption,
+          h2k_file: h2k_file
+        }
+      end
+    end
   end
 
   view :completed_by do
@@ -90,6 +125,8 @@ class StepCode::Part9::ChecklistBlueprint < Blueprinter::Base
       report =
         checklist.selected_report || checklist.passing_compliance_reports[0] ||
           checklist.compliance_reports[0]
+      next unless report
+
       StepCode::Part9::ComplianceReportBlueprint.render_as_hash(report)
     end
   end

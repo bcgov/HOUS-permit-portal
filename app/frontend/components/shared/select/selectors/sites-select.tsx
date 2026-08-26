@@ -91,6 +91,16 @@ export const SitesSelect = observer(function ({
   const pidWatch = watch(pidName)
   const siteWatch = watch(siteName)
 
+  const preserveExistingJurisdiction = () => {
+    const existingJurisdiction =
+      jurisdiction || (jurisdictionField.value === initialJurisdiction?.id ? initialJurisdiction : null)
+    if (!existingJurisdiction || !jurisdictionField.value) return false
+
+    setValue(jurisdictionIdFieldName, existingJurisdiction.id, { shouldValidate: true })
+    setJurisdiction(existingJurisdiction)
+    return true
+  }
+
   const fetchSiteOptions = (address: string, callback: (options) => void) => {
     if (address.length > 3) {
       fetchOptions(address).then((options: IOption[]) => {
@@ -159,12 +169,18 @@ export const SitesSelect = observer(function ({
           setValue(jurisdictionIdFieldName, matchedJurisdiction.id, { shouldValidate: true })
           setJurisdiction(matchedJurisdiction)
         } else {
+          const preservedExistingJurisdiction = preserveExistingJurisdiction()
+          if (!preservedExistingJurisdiction) {
+            setValue(jurisdictionIdFieldName, null, { shouldValidate: true })
+            setJurisdiction(null)
+          }
+        }
+      } catch (_e) {
+        const preservedExistingJurisdiction = preserveExistingJurisdiction()
+        if (!preservedExistingJurisdiction) {
           setValue(jurisdictionIdFieldName, null, { shouldValidate: true })
           setJurisdiction(null)
         }
-      } catch (_e) {
-        setValue(jurisdictionIdFieldName, null, { shouldValidate: true })
-        setJurisdiction(null)
         if (onLtsaMatcherFound) {
           onLtsaMatcherFound(null)
         }

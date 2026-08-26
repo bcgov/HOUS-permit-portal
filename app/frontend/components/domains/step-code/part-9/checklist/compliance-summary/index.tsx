@@ -42,6 +42,11 @@ export const ComplianceSummary = observer(function ComplianceSummary({
   return (
     <ChecklistSection heading={t(`${i18nPrefix}.heading`)}>
       <TextFormControl
+        label={t("stepCodeChecklist.edit.projectInfo.dwellingUnits")}
+        inputProps={{ isDisabled: true, value: checklist.dwellingUnitsCount ?? "-" }}
+      />
+
+      <TextFormControl
         label={t(`${i18nPrefix}.compliancePath.label`)}
         inputProps={{
           isDisabled: true,
@@ -68,13 +73,13 @@ export const ComplianceSummary = observer(function ComplianceSummary({
             </FormHelperText>
           </FormControl>
           {R.isNil(report.energy.proposedStep) && (
-            <StepNotMetWarning i18nKey="energyStepNotMet" scrollToSection={scrollToEnergyCompliance} fontSize="xs" />
+            <StepNotMetWarning i18nKey="energyStepNotMet" scrollToSection={scrollToEnergyCompliance} fontSize="md" />
           )}
           {R.isNil(report.zeroCarbon.proposedStep) && (
             <StepNotMetWarning
               i18nKey="zeroCarbonStepNotMet"
               scrollToSection={scrollToZeroCarbonCompliance}
-              fontSize="xs"
+              fontSize="md"
             />
           )}
         </VStack>

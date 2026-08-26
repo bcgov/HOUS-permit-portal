@@ -3,6 +3,7 @@ class Api::JurisdictionsController < Api::ApplicationController
   include Api::Concerns::Search::JurisdictionUsers
   include Api::Concerns::Search::JurisdictionPermitApplications
   include Api::Concerns::Search::JurisdictionPermitProjects
+  include Api::Concerns::Search::JurisdictionProjectMeetings
 
   before_action :set_jurisdiction,
                 only: %i[
@@ -11,6 +12,7 @@ class Api::JurisdictionsController < Api::ApplicationController
                   search_users
                   search_permit_applications
                   search_permit_projects
+                  search_project_meetings
                   update_external_api_enabled
                 ]
   skip_after_action :verify_policy_scoped,
@@ -19,6 +21,7 @@ class Api::JurisdictionsController < Api::ApplicationController
                       search_users
                       search_permit_applications
                       search_permit_projects
+                      search_project_meetings
                     ]
   skip_before_action :authenticate_user!,
                      only: %i[show index jurisdiction_options]
@@ -42,10 +45,12 @@ class Api::JurisdictionsController < Api::ApplicationController
 
   def update
     authorize @jurisdiction
-    if jurisdiction_params[:contacts_attributes]
+    permitted_params = jurisdiction_params
+
+    if permitted_params[:contacts_attributes]
       # Get current contact ids from the params
       payload_record_ids =
-        jurisdiction_params[:contacts_attributes].map { |c| c[:id] }
+        permitted_params[:contacts_attributes].map { |c| c[:id] }
       # Mark contacts not included in the current payload for destruction
       @jurisdiction.contacts.each do |contact|
         unless payload_record_ids.include?(contact.id.to_s)
@@ -53,22 +58,34 @@ class Api::JurisdictionsController < Api::ApplicationController
         end
       end
     end
-    if @jurisdiction.update(jurisdiction_params)
-      render_success @jurisdiction,
-                     "jurisdiction.update_success",
-                     {
-                       blueprint: JurisdictionBlueprint,
-                       blueprint_opts: {
-                         view: :base,
-                         current_user: current_user
+    begin
+      if @jurisdiction.update(permitted_params)
+        render_success @jurisdiction,
+                       "jurisdiction.update_success",
+                       {
+                         blueprint: JurisdictionBlueprint,
+                         blueprint_opts: {
+                           view: :base,
+                           current_user: current_user
+                         }
                        }
+      else
+        render_error "jurisdiction.update_error",
+                     message_opts: {
+                       error_message:
+                         @jurisdiction.errors.full_messages.join(", ")
                      }
-    else
-      render_error "jurisdiction.update_error",
-                   message_opts: {
-                     error_message:
-                       @jurisdiction.errors.full_messages.join(", ")
-                   }
+      end
+    rescue ActiveRecord::RecordNotDestroyed => e
+      record = e.respond_to?(:record) ? e.record : nil
+      error_message =
+        record&.errors&.full_messages&.to_sentence.presence || e.message
+
+      render_error(
+        "jurisdiction.update_error",
+        { message_opts: { error_message: error_message } },
+        e
+      )
     end
   end
 
@@ -168,13 +185,15 @@ class Api::JurisdictionsController < Api::ApplicationController
         @user_search.results,
         "search_jurisdiction_users"
       )
+    preload_jurisdiction_memberships(authorized_results)
     render_success authorized_results,
                    nil,
                    {
                      meta: page_meta(@user_search),
                      blueprint: UserBlueprint,
                      blueprint_opts: {
-                       view: :base
+                       view: :jurisdiction_users,
+                       jurisdiction_id: @jurisdiction.id
                      }
                    }
   end
@@ -206,9 +225,23 @@ class Api::JurisdictionsController < Api::ApplicationController
                        view: :jurisdiction_review_inbox,
                        current_user: current_user,
                        pinned_project_ids:
-                         current_user.pinned_permit_project_ids
+                         current_user.pinned_permit_project_ids,
+                       active_project_meeting_ids_by_project_id:
+                         @active_project_meeting_ids_by_project_id
                      },
                      meta: @jurisdiction_permit_project_meta
+                   }
+  end
+
+  # POST /api/jurisdictions/:id/project_meetings/search
+  def search_project_meetings
+    authorize @jurisdiction
+    perform_jurisdiction_project_meeting_search
+    render_success @jurisdiction_project_meetings,
+                   nil,
+                   {
+                     blueprint: ProjectMeetingBlueprint,
+                     meta: @jurisdiction_project_meeting_meta
                    }
   end
 
@@ -246,6 +279,8 @@ class Api::JurisdictionsController < Api::ApplicationController
       :look_out_html,
       :show_about_page,
       :allow_designated_reviewer,
+      :project_meetings_enabled,
+      :property_information_requests_enabled,
       :contact_summary_html,
       :processing_time_html,
       :key_stages_html,
@@ -258,7 +293,6 @@ class Api::JurisdictionsController < Api::ApplicationController
       :map_zoom,
       :inbox_enabled,
       :ltsa_matcher,
-      :heating_degree_days,
       map_position: [],
       users_attributes: %i[first_name last_name role email],
       contacts_attributes: %i[
@@ -271,12 +305,13 @@ class Api::JurisdictionsController < Api::ApplicationController
         cell
         email
       ],
-      submission_contacts_attributes: %i[id email title default _destroy],
+      submission_contacts_attributes: %i[id email title type _destroy],
       jurisdiction_step_requirements_attributes: %i[
         id
         default
         energy_step_required
         zero_carbon_step_required
+        description
         _destroy
       ],
       part3_occupancy_required_steps_attributes: %i[
@@ -284,11 +319,12 @@ class Api::JurisdictionsController < Api::ApplicationController
         occupancy_key
         energy_step_required
         zero_carbon_step_required
+        description
         _destroy
       ],
-      jurisdiction_climate_zones_attributes: %i[
+      jurisdiction_heating_degree_days_attributes: %i[
         id
-        climate_zone
+        location_name
         heating_degree_days
         _destroy
       ],
@@ -322,5 +358,12 @@ class Api::JurisdictionsController < Api::ApplicationController
         .find(params[:id])
   rescue ActiveRecord::RecordNotFound => e
     render_error("misc.not_found_error", { status: :not_found }, e)
+  end
+
+  def preload_jurisdiction_memberships(users)
+    ActiveRecord::Associations::Preloader.new(
+      records: users,
+      associations: :jurisdiction_memberships
+    ).call
   end
 end

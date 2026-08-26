@@ -8,7 +8,6 @@ import { Controller, useFieldArray, useForm } from "react-hook-form"
 import { IJurisdiction } from "../../../../../../../models/jurisdiction"
 import { EFlashMessageStatus } from "../../../../../../../types/enums"
 import { IJurisdictionStepRequirement } from "../../../../../../../types/types"
-import { generateUUID } from "../../../../../../../utils/utility-functions"
 import { CustomMessageBox } from "../../../../../../shared/base/custom-message-box"
 import { EditableBlockContainer, EditableBlockHeading } from "../../shared/editable-block"
 import { i18nPrefix } from "../i18n-prefix"
@@ -49,7 +48,13 @@ export const Part9EnergyStepEditableBlock = observer(function Part9EnergyStepEdi
   })
 
   const onSubmit = async (values) => {
-    await jurisdiction.update(values)
+    const normalized = {
+      jurisdictionStepRequirementsAttributes: values.jurisdictionStepRequirementsAttributes.map((attr) => ({
+        ...attr,
+        description: attr.description?.trim() || null,
+      })),
+    }
+    await jurisdiction.update(normalized)
     reset(getDefaultValues())
     setIsEditing(false)
   }
@@ -80,7 +85,7 @@ export const Part9EnergyStepEditableBlock = observer(function Part9EnergyStepEdi
   }
 
   const onAdd = () => {
-    append({ energyStepRequired: undefined, zeroCarbonStepRequired: undefined, default: false })
+    append({ energyStepRequired: undefined, zeroCarbonStepRequired: undefined, default: false, description: "" })
   }
 
   const onRemove = (index: number, field?: TJurisdictionStepRequirementField) => {
@@ -135,40 +140,53 @@ export const Part9EnergyStepEditableBlock = observer(function Part9EnergyStepEdi
             bg={isEditing && !isCustomizing ? "greys.white" : "transparent"}
           >
             <Text fontWeight="bold">{t(`${i18nPrefix}.stepRequired.standardToPass`)}</Text>
-            <Flex gap={14} flex={1}>
-              <Input type="hidden" {...register(`${fieldArrayName}.${defaultIndex}.id`)} />
-              <Input type="hidden" {...register(`${fieldArrayName}.${defaultIndex}.default`)} />
-              <FormControl>
-                <FormLabel noOfLines={1}>{t(`${i18nPrefix}.stepRequired.energy.title`)}</FormLabel>
-                <Controller
-                  control={control}
-                  rules={{ required: !isCustomizing }}
-                  name={`${fieldArrayName}.${defaultIndex}.energyStepRequired`}
-                  render={({ field: { onChange, value } }) => {
-                    return (
-                      <EnergyStepSelect onChange={onChange} value={value} isDisabled={!isEditing || isCustomizing} />
-                    )
-                  }}
-                />
-              </FormControl>
-              <FormControl>
-                <FormLabel noOfLines={1}>{t(`${i18nPrefix}.stepRequired.zeroCarbon.title`)}</FormLabel>
-                <Controller
-                  control={control}
-                  rules={{ required: !isCustomizing }}
-                  name={`${fieldArrayName}.${defaultIndex}.zeroCarbonStepRequired`}
-                  render={({ field: { onChange, value } }) => {
-                    return (
-                      <ZeroCarbonStepSelect
-                        onChange={onChange}
-                        value={value}
-                        isDisabled={!isEditing || isCustomizing}
-                        portal
-                      />
-                    )
-                  }}
-                />
-              </FormControl>
+            <Flex direction="column" gap={4} flex={1}>
+              <Flex gap={14} flex={1}>
+                <Input type="hidden" {...register(`${fieldArrayName}.${defaultIndex}.id`)} />
+                <Input type="hidden" {...register(`${fieldArrayName}.${defaultIndex}.default`)} />
+                <FormControl>
+                  <FormLabel noOfLines={1}>{t(`${i18nPrefix}.stepRequired.energy.title`)}</FormLabel>
+                  <Controller
+                    control={control}
+                    rules={{ required: !isCustomizing }}
+                    name={`${fieldArrayName}.${defaultIndex}.energyStepRequired`}
+                    render={({ field: { onChange, value } }) => {
+                      return (
+                        <EnergyStepSelect onChange={onChange} value={value} isDisabled={!isEditing || isCustomizing} />
+                      )
+                    }}
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel noOfLines={1}>{t(`${i18nPrefix}.stepRequired.zeroCarbon.title`)}</FormLabel>
+                  <Controller
+                    control={control}
+                    rules={{ required: !isCustomizing }}
+                    name={`${fieldArrayName}.${defaultIndex}.zeroCarbonStepRequired`}
+                    render={({ field: { onChange, value } }) => {
+                      return (
+                        <ZeroCarbonStepSelect
+                          onChange={onChange}
+                          value={value}
+                          isDisabled={!isEditing || isCustomizing}
+                          portal
+                        />
+                      )
+                    }}
+                  />
+                </FormControl>
+              </Flex>
+              {!isCustomizing && (
+                <FormControl>
+                  <FormLabel noOfLines={1}>{t(`${i18nPrefix}.stepRequired.description.title`)}</FormLabel>
+                  <Input
+                    {...register(`${fieldArrayName}.${defaultIndex}.description`)}
+                    isDisabled={!isEditing}
+                    placeholder={t(`${i18nPrefix}.stepRequired.description.placeholder`)}
+                    bg="white"
+                  />
+                </FormControl>
+              )}
             </Flex>
             {isCustomizing && (
               <CustomMessageBox
@@ -196,57 +214,73 @@ export const Part9EnergyStepEditableBlock = observer(function Part9EnergyStepEdi
               {R.filter((f) => !f._destroy, customFields).map((f, index) => {
                 const trueIndex = getIndex(f)
                 return (
-                  <React.Fragment key={f.id || generateUUID()}>
+                  <React.Fragment key={f.key}>
                     <Input type="hidden" name={`${fieldArrayName}.${trueIndex}.id`} value={f?.id || ""} />
-                    <Flex gap={4}>
-                      <Flex gap={4} flex={1}>
-                        <FormControl flex={1}>
-                          <FormLabel noOfLines={1}>{t(`${i18nPrefix}.stepRequired.energy.title`)}</FormLabel>
-                          <Controller
-                            control={control}
-                            rules={{ validate: (value) => value !== undefined }}
-                            name={`${fieldArrayName}.${trueIndex}.energyStepRequired`}
-                            render={({ field: { onChange, value } }) => {
-                              return (
-                                <EnergyStepSelect onChange={onChange} value={value} isDisabled={!isEditing} allowNull />
-                              )
-                            }}
+                    <Flex gap={4} direction="column" flex={1}>
+                      <Flex gap={4} align="end">
+                        <Flex gap={4} flex={1} align="end">
+                          <FormControl flex={1}>
+                            <FormLabel noOfLines={1}>{t(`${i18nPrefix}.stepRequired.energy.title`)}</FormLabel>
+                            <Controller
+                              control={control}
+                              rules={{ validate: (value) => value !== undefined }}
+                              name={`${fieldArrayName}.${trueIndex}.energyStepRequired`}
+                              render={({ field: { onChange, value } }) => {
+                                return (
+                                  <EnergyStepSelect
+                                    onChange={onChange}
+                                    value={value}
+                                    isDisabled={!isEditing}
+                                    allowNull
+                                  />
+                                )
+                              }}
+                            />
+                          </FormControl>
+                          <Text color="text.secondary" fontStyle="italic" alignSelf="flex-end" mb={2}>
+                            {t("ui.and")}
+                          </Text>
+                          <FormControl flex={1}>
+                            <FormLabel noOfLines={1}>{t(`${i18nPrefix}.stepRequired.zeroCarbon.title`)}</FormLabel>
+                            <Controller
+                              control={control}
+                              rules={{ validate: (value) => value !== undefined }}
+                              name={`${fieldArrayName}.${trueIndex}.zeroCarbonStepRequired`}
+                              render={({ field: { onChange, value } }) => {
+                                return (
+                                  <ZeroCarbonStepSelect
+                                    onChange={onChange}
+                                    value={value}
+                                    isDisabled={!isEditing}
+                                    allowNull
+                                    portal
+                                  />
+                                )
+                              }}
+                            />
+                          </FormControl>
+                        </Flex>
+                        {isEditing && customFields.length > 1 ? (
+                          <IconButton
+                            alignSelf="flex-end"
+                            variant="ghost"
+                            icon={<X />}
+                            onClick={() => onRemove(trueIndex, f)}
+                            aria-label={"remove customization"}
                           />
-                        </FormControl>
-                        <Text color="text.secondary" fontStyle="italic" alignSelf="flex-end" mb={2}>
-                          {t("ui.and")}
-                        </Text>
-                        <FormControl flex={1}>
-                          <FormLabel noOfLines={1}>{t(`${i18nPrefix}.stepRequired.zeroCarbon.title`)}</FormLabel>
-                          <Controller
-                            control={control}
-                            rules={{ validate: (value) => value !== undefined }}
-                            name={`${fieldArrayName}.${trueIndex}.zeroCarbonStepRequired`}
-                            render={({ field: { onChange, value } }) => {
-                              return (
-                                <ZeroCarbonStepSelect
-                                  onChange={onChange}
-                                  value={value}
-                                  isDisabled={!isEditing}
-                                  allowNull
-                                  portal
-                                />
-                              )
-                            }}
-                          />
-                        </FormControl>
+                        ) : (
+                          <Box w={10} />
+                        )}
                       </Flex>
-                      {isEditing && customFields.length > 1 ? (
-                        <IconButton
-                          alignSelf="flex-end"
-                          variant="ghost"
-                          icon={<X />}
-                          onClick={() => onRemove(trueIndex, f)}
-                          aria-label={"remove customization"}
+                      <FormControl>
+                        <FormLabel noOfLines={1}>{t(`${i18nPrefix}.stepRequired.description.title`)}</FormLabel>
+                        <Input
+                          {...register(`${fieldArrayName}.${trueIndex}.description`)}
+                          isDisabled={!isEditing}
+                          placeholder={t(`${i18nPrefix}.stepRequired.description.placeholder`)}
+                          bg="white"
                         />
-                      ) : (
-                        <Box w={10} />
-                      )}
+                      </FormControl>
                     </Flex>
                     <Text fontWeight="bold" textTransform="uppercase" my={2}>
                       {index !== customFields.length - 1 && t("ui.or")}

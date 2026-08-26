@@ -24,7 +24,8 @@ class StepCode::Compliance::GenerateReports
       @reports << {
         zero_carbon: zero_carbon_result,
         energy: energy_result,
-        requirement_id: requirement.id
+        requirement_id: requirement.id,
+        description: requirement.try(:description)
       }
     end
 

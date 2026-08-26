@@ -26,6 +26,16 @@ RSpec.describe SiteConfiguration, type: :model do
     end
   end
 
+  describe ".project_meetings_enabled?" do
+    before { SiteConfiguration.delete_all }
+
+    it "returns the global project meetings flag" do
+      described_class.create!(project_meetings_enabled: true)
+
+      expect(described_class.project_meetings_enabled?).to eq(true)
+    end
+  end
+
   describe ".overheating_tool_enabled?" do
     before { SiteConfiguration.delete_all }
 

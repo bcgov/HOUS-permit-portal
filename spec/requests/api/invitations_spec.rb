@@ -83,6 +83,32 @@ RSpec.describe "Api::Invitations", type: :request do
 
       expect(response).to have_http_status(:ok)
       expect(json_response.dig("data", "id")).to eq(invited_user.id)
+      expect(
+        json_response.dig("data", "invitation_promotes_existing_submitter")
+      ).to eq(false)
+    end
+
+    it "flags when accepting would promote an existing submitter" do
+      email = "promote-me@example.com"
+      create(:user, :submitter, email: email)
+      # Same as Jurisdiction::UserInviter: create a second staff user alongside
+      # the submitter. User.invite! alone would find the existing submitter.
+      invited_user =
+        create(
+          :user,
+          :reviewer,
+          email: email,
+          confirmed: false,
+          jurisdiction: jurisdiction
+        )
+      invited_user.invite!(inviter)
+
+      get "/api/invitations/#{invited_user.raw_invitation_token}"
+
+      expect(response).to have_http_status(:ok)
+      expect(
+        json_response.dig("data", "invitation_promotes_existing_submitter")
+      ).to eq(true)
     end
 
     it "returns not found for an invalid token" do

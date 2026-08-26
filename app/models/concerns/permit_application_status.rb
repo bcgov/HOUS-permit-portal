@@ -49,7 +49,7 @@ module PermitApplicationStatus
       %w[newly_submitted resubmitted in_review]
     end
 
-    aasm column: "status", enum: true, timestamp: true do
+    aasm column: "status", enum: true, timestamps: true do
       state :new_draft, initial: true
       state :newly_submitted
       state :in_review
@@ -121,7 +121,7 @@ module PermitApplicationStatus
       self.class.submitted_statuses.include?(status)
     end
 
-    def visible_to_reviewers?
+    def submitted_at_least_once?
       submitted? || revisions_requested?
     end
 
@@ -186,6 +186,9 @@ module PermitApplicationStatus
     def can_submit?
       return false unless inbox_enabled? || sandbox.present?
       return false if template_version_disabled_by_jurisdiction?
+      if using_digital_energy_step_code_tool? && !step_code_complete?
+        return false
+      end
 
       signed =
         submission_data.dig("data", "section-completion-key", "signed").present?
@@ -217,13 +220,16 @@ module PermitApplicationStatus
     def handle_submission
       update(signed_off_at: Time.current)
 
-      checklist = step_code&.primary_checklist
+      checklist = step_code_checklist
+      # Only snapshot / generate digital checklist PDF when the selected method is the tool
+      snapshot_checklist =
+        checklist.present? && using_digital_energy_step_code_tool?
       submission_versions.create!(
         form_json: self.form_json,
         submission_data: self.submission_data,
         step_code_checklist_json:
           (
-            if checklist.present?
+            if snapshot_checklist
               step_code.checklist_blueprint.render_as_hash(
                 checklist,
                 view: :extended

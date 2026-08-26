@@ -35,9 +35,12 @@ module Api::Concerns::Search::JurisdictionPermitApplications
     search_conditions[:body_options] = body_opts if body_opts.present?
 
     @jurisdiction_permit_application_search =
-      PermitApplication.search(
-        jurisdiction_permit_application_query,
-        **search_conditions
+      ensure_searchkick_policy_scoped!(
+        PermitApplication,
+        PermitApplication.search(
+          jurisdiction_permit_application_query,
+          **search_conditions
+        )
       )
 
     unread_status_counts = jurisdiction_application_unread_status_counts
@@ -309,14 +312,23 @@ module Api::Concerns::Search::JurisdictionPermitApplications
     and_conditions << { jurisdiction_id: @jurisdiction.id }
     and_conditions << { discarded: jurisdiction_permit_application_discarded }
 
+    permit_project_id =
+      jurisdiction_permit_application_search_params[:permit_project_id]
+    # Project Permits tab may include new_draft when the project has an active
+    # meeting (matches PermitApplicationPolicy::Scope). Jurisdiction Applications
+    # list never does — drafts there ghost-page after scope_results.
+    active_meeting_request =
+      permit_project_id.present? &&
+        PermitProject.find_by(id: permit_project_id)&.has_active_project_meeting
+
     statuses = search_filters.delete(:status)
 
     if status_filter
       and_conditions << { status: status_filter }
-    else
-      and_conditions << {
-        status: statuses.present? ? statuses : { not: "new_draft" }
-      }
+    elsif statuses.present?
+      and_conditions << { status: statuses }
+    elsif !active_meeting_request
+      and_conditions << { status: { not: "new_draft" } }
     end
 
     unless current_user.super_admin?
@@ -342,8 +354,6 @@ module Api::Concerns::Search::JurisdictionPermitApplications
       and_conditions << { review_collaborator_user_ids: assigned }
     end
 
-    permit_project_id =
-      jurisdiction_permit_application_search_params[:permit_project_id]
     if permit_project_id.present?
       and_conditions << { permit_project_id: permit_project_id }
     end

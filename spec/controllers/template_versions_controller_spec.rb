@@ -47,6 +47,52 @@ RSpec.describe Api::TemplateVersionsController,
   end
   before { sign_in review_manager }
 
+  describe "GET #show_jurisdiction_template_version_customization" do
+    it "returns requires_project_meeting after it is updated" do
+      post :create_or_update_jurisdiction_template_version_customization,
+           params: {
+             id: source_version.id,
+             jurisdiction_id: jurisdiction.id,
+             jurisdiction_template_version_customization: {
+               requires_project_meeting: true
+             }
+           }
+
+      expect(response).to have_http_status(:success)
+      expect(json_response.dig("data", "requires_project_meeting")).to be(true)
+
+      get :show_jurisdiction_template_version_customization,
+          params: {
+            id: source_version.id,
+            jurisdiction_id: jurisdiction.id
+          }
+
+      expect(response).to have_http_status(:success)
+      expect(json_response.dig("data", "requires_project_meeting")).to be(true)
+    end
+  end
+
+  describe "GET #index" do
+    it "serializes jurisdiction-scoped settings for template versions" do
+      customization.update!(disabled: true, requires_project_meeting: true)
+
+      get :index,
+          params: {
+            status: "published",
+            jurisdiction_id: jurisdiction.id
+          }
+
+      expect(response).to have_http_status(:success)
+      template_payload =
+        json_response["data"].find do |payload|
+          payload["id"] == source_version.id
+        end
+
+      expect(template_payload["disabled_by_jurisdiction"]).to be(true)
+      expect(template_payload["requires_project_meeting"]).to be(true)
+    end
+  end
+
   describe "POST #copy_jurisdiction_template_version_customization" do
     context "when include_electives is true" do
       it "copies the elective fields" do

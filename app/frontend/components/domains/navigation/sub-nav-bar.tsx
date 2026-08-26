@@ -68,8 +68,12 @@ const DynamicBreadcrumb = observer(({ path }: IDynamicBreadcrumbProps) => {
       const currentResourceMap: Record<string, string | undefined> = {
         jurisdictions: rootStore.jurisdictionStore.currentJurisdiction?.name,
         "permit-applications": rootStore.permitApplicationStore.currentPermitApplication?.number,
+        projects:
+          rootStore.permitProjectStore.currentPermitProject?.shortAddress ||
+          rootStore.permitProjectStore.currentPermitProject?.number,
+        meetings: t("site.breadcrumb.requestProjectMeeting"),
         videos: rootStore.helpVideoStore.currentHelpVideo?.title,
-        "release-notes": rootStore.releaseNoteStore.currentReleaseNote?.version,
+        "release-notes": rootStore.releaseNoteStore.currentReleaseNote?.displayLabel,
       }
 
       const title = resourceNeeded
@@ -83,9 +87,10 @@ const DynamicBreadcrumb = observer(({ path }: IDynamicBreadcrumbProps) => {
     setBreadcrumbs(breadcrumbSegments)
   }, [
     path,
-    rootStore.helpVideoStore.currentHelpVideo?.title,
-    rootStore.jurisdictionStore.currentJurisdiction,
+    rootStore.jurisdictionStore.currentJurisdiction?.id,
+    rootStore.helpVideoStore.currentHelpVideo?.id,
     rootStore.permitApplicationStore.currentPermitApplication?.number,
+    rootStore.permitProjectStore.currentPermitProject?.number,
     rootStore.releaseNoteStore.currentReleaseNote,
   ])
 

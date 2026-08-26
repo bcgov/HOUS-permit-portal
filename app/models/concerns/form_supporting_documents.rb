@@ -79,7 +79,7 @@ module FormSupportingDocuments
     # compliance data on the permit_applicaiton itself
     joined = compliance_data
 
-    # compliance data for energy step code
+    # compliance data for Energy Step Code
     # fetch the energy step_code from json
     if requirement_energy_step_code_key_value && step_code.is_a?(Part9StepCode)
       if step_code.plan_out_of_date

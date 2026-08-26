@@ -27,12 +27,12 @@ FactoryBot.define do
           {
             "requirement_code" => "energy_step_code_method",
             "label" =>
-              "Which method do you want to do use for the energy step code:",
+              "Which method do you want to do use for the Energy Step Code:",
             "input_type" => "radio",
             "input_options" => {
               "value_options" => [
                 {
-                  "label" => "Utilizing the digital step code tool",
+                  "label" => "Utilizing the digital Step Code tool",
                   "value" => "tool"
                 },
                 { "label" => "By file upload", "value" => "file" }
@@ -45,7 +45,7 @@ FactoryBot.define do
           {
             "requirement_code" => "energy_step_code_tool_part_9",
             "label" =>
-              "Please use this tool to do your fill in your step code details and it will populate onto the application.",
+              "Please use this tool to do your fill in your Step Code details and it will populate onto the application.",
             "input_type" => "energy_step_code",
             "input_options" => {
               "conditional" => {

@@ -14,9 +14,6 @@ import {
 } from "@chakra-ui/react"
 import { CheckCircle } from "@phosphor-icons/react"
 import type { UppyFile } from "@uppy/core"
-import "@uppy/core/dist/style.min.css"
-import "@uppy/dashboard/dist/style.css"
-import Dashboard from "@uppy/react/lib/Dashboard.js"
 import * as R from "ramda"
 import React, { useRef, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
@@ -29,6 +26,7 @@ import {
   type DigitalSealSignerDisplay,
   type DigitalSealValidatorActionResult,
 } from "../../../utils/digital-seal-validation"
+import { UppyDashboard } from "../../shared/uppy-dashboard"
 
 export const CheckDigitalSealsScreen = () => {
   const { t } = useTranslation()
@@ -293,7 +291,7 @@ export const CheckDigitalSealsScreen = () => {
               },
             }}
           >
-            <Dashboard uppy={uppy} width="100%" height={250} proudlyDisplayPoweredByUppy={false} />
+            <UppyDashboard uppy={uppy} width="100%" height={250} />
           </Box>
         )}
       </VStack>

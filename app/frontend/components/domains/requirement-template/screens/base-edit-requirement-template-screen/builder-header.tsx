@@ -1,4 +1,4 @@
-import { Button, Container, Heading, HStack, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Container, Heading, HStack, Text, VStack } from "@chakra-ui/react"
 import { CaretLeft, CaretRight } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -68,12 +68,22 @@ export const BuilderHeader = observer(function BuilderHeader({
         </Text>
       </HStack>
       <VStack spacing={2} w={"full"} alignItems={"flex-start"} py={5}>
-        {showBackButton && (
-          <Button variant="link" onClick={handleBack} leftIcon={<CaretLeft size={20} />} textDecoration="none">
-            {t("ui.back")}
-          </Button>
-        )}
-        {renderHeading ? renderHeading() : <Heading as="h1">{requirementTemplate.nickname}</Heading>}
+        <HStack w="full" justifyContent="space-between" alignItems="flex-start" spacing={4}>
+          <Box flex={1} minW={0}>
+            {renderHeading ? renderHeading() : <Heading as="h1">{requirementTemplate.nickname}</Heading>}
+          </Box>
+          {showBackButton && (
+            <Button
+              flexShrink={0}
+              variant="link"
+              onClick={handleBack}
+              leftIcon={<CaretLeft size={20} />}
+              textDecoration="none"
+            >
+              {t("ui.back")}
+            </Button>
+          )}
+        </HStack>
         <HStack>
           <Text fontWeight={700}>{t("requirementTemplate.fields.description")}:</Text>
           {renderDescription ? renderDescription() : <Text as="span">{requirementTemplate.description}</Text>}

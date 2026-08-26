@@ -54,6 +54,7 @@ class PdfGenerationJob
         should_checklist_pdf_be_generated =
           submission_version.missing_step_code_checklist_pdf?
 
+        step_code = permit_application.step_code
         pdf_json_data = {
           permitApplication:
             camelize_response(
@@ -68,6 +69,30 @@ class PdfGenerationJob
           checklist:
             submission_version.has_step_code_checklist? &&
               camelize_response(submission_version.step_code_checklist_json),
+          # Part 3 checklist PDF reads project fields from stepCode (Part 9 builds them from checklist)
+          stepCode:
+            (
+              if should_checklist_pdf_be_generated && step_code.present?
+                camelize_response(
+                  {
+                    id: step_code.id,
+                    type: step_code.class.name,
+                    full_address: step_code.full_address,
+                    reference_number: step_code.reference_number,
+                    title: step_code.title,
+                    phase: step_code.phase,
+                    current_stage: step_code.current_stage,
+                    permit_date: step_code.permit_date,
+                    pid: step_code.pid,
+                    jurisdiction_name:
+                      (
+                        step_code.respond_to?(:jurisdiction_name) &&
+                          step_code.jurisdiction_name
+                      )
+                  }.compact
+                )
+              end
+            ),
           meta: {
             generationPaths: {
               permitApplication:
@@ -230,6 +255,7 @@ class PdfGenerationJob
   end
 
   def camelize_key(key)
+    key = key.to_s
     if key == SECTION_COMPLETION || key.start_with?(SUBMISSION_DATA_PREFIX)
       return key
     end

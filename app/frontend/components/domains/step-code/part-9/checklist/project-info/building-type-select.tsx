@@ -6,6 +6,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
+  Portal,
   StackDivider,
   VStack,
 } from "@chakra-ui/react"
@@ -20,9 +21,10 @@ import { i18nPrefix } from "./i18n-prefix"
 interface IProps {
   onChange: (event: any) => void
   value: EStepCodeBuildingType
+  isInvalid?: boolean
 }
 
-export const BuildingTypeSelect = observer(function BuildingTypeSelect({ onChange, value }: IProps) {
+export const BuildingTypeSelect = observer(function BuildingTypeSelect({ onChange, value, isInvalid }: IProps) {
   const {
     stepCodeStore: { selectOptions },
   } = useMst()
@@ -38,7 +40,7 @@ export const BuildingTypeSelect = observer(function BuildingTypeSelect({ onChang
                 align="center"
                 bg="white"
                 cursor="pointer"
-                borderColor="gray.200"
+                borderColor={isInvalid ? "semantic.error" : "gray.200"}
                 borderWidth={1}
                 rounded="base"
                 shadow="base"
@@ -48,26 +50,28 @@ export const BuildingTypeSelect = observer(function BuildingTypeSelect({ onChang
               <InputRightElement children={<CaretDown color="gray.300" />} />
             </InputGroup>
           </PopoverTrigger>
-          <PopoverContent minW={320}>
-            <VStack align="start" spacing={0} divider={<StackDivider borderColor="border.light" />}>
-              {selectOptions.buildingTypes.map((value) => (
-                <Flex
-                  key={value}
-                  onClick={() => {
-                    onChange(value)
-                    onClose()
-                  }}
-                  px={2}
-                  py={1.5}
-                  w="full"
-                  cursor="pointer"
-                  _hover={{ bg: "hover.blue" }}
-                >
-                  {t(`${i18nPrefix}.buildingType.options.${value}`)}
-                </Flex>
-              ))}
-            </VStack>
-          </PopoverContent>
+          <Portal>
+            <PopoverContent bg="white" minW={320} zIndex="popover">
+              <VStack align="start" spacing={0} divider={<StackDivider borderColor="border.light" />}>
+                {selectOptions.buildingTypes.map((value) => (
+                  <Flex
+                    key={value}
+                    onClick={() => {
+                      onChange(value)
+                      onClose()
+                    }}
+                    px={2}
+                    py={1.5}
+                    w="full"
+                    cursor="pointer"
+                    _hover={{ bg: "hover.blue" }}
+                  >
+                    {t(`${i18nPrefix}.buildingType.options.${value}`)}
+                  </Flex>
+                ))}
+              </VStack>
+            </PopoverContent>
+          </Portal>
         </>
       )}
     </Popover>

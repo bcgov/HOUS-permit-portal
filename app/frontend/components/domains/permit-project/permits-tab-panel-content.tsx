@@ -6,15 +6,11 @@ import { useTranslation } from "react-i18next"
 import { useSearch } from "../../../hooks/use-search"
 import { IPermitProject } from "../../../models/permit-project"
 import { useMst } from "../../../setup/root"
-import {
-  EFlashMessageStatus,
-  EPermitProjectRollupStatus,
-  EProjectPermitApplicationSortFields,
-} from "../../../types/enums"
-import { CustomMessageBox } from "../../shared/base/custom-message-box"
+import { EProjectPermitApplicationSortFields } from "../../../types/enums"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
 import { ToggleArchivedButton } from "../../shared/buttons/toggle-archived-button"
+import { EmptyResultsBox } from "../../shared/grid/empty-results-box"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { AddPermitsButton } from "../../shared/permit-projects/add-permits-button"
 import { PermitApplicationGridHeaders } from "./permit-application-grid-headers"
@@ -48,8 +44,8 @@ export const PermitsTabPanelContent = observer(({ permitProject }: IProps) => {
           </HStack>
           <AddPermitsButton permitProject={permitProject} />
         </Flex>
-        {permitProject.rollupStatus === EPermitProjectRollupStatus.empty ? (
-          <CustomMessageBox status={EFlashMessageStatus.info} description={t("permitProject.index.empty")} mt={2} />
+        {permitProject.totalPermitsCount === 0 ? (
+          <EmptyResultsBox description={t("permitProject.index.empty")} icon={<ClipboardText size={18} />} mt={2} />
         ) : (
           <>
             <Flex gap={2} mb={2}>
@@ -60,7 +56,7 @@ export const PermitsTabPanelContent = observer(({ permitProject }: IProps) => {
               )}
             </Flex>
             <SearchGrid
-              templateColumns="2fr 1.5fr 1.5fr 1.5fr 1.5fr 0.5fr"
+              templateColumns="2.25fr 1.75fr 1fr 1.4fr 1.1fr 1fr 0.5fr"
               gridRowClassName="permit-application-grid-row"
             >
               <PermitApplicationGridHeaders

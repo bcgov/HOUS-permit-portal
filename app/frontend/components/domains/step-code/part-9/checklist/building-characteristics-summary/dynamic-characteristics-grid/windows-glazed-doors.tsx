@@ -4,7 +4,7 @@ import React from "react"
 import { Controller, useFieldArray, useFormContext } from "react-hook-form"
 import { useMst } from "../../../../../../../setup/root"
 import { generateUUID } from "../../../../../../../utils/utility-functions"
-import { TextFormControl } from "../../../../../../shared/form/input-form-control"
+import { NumberFormControl, TextFormControl } from "../../../../../../shared/form/input-form-control"
 import { GridColumnHeader } from "../../shared/grid/column-header"
 import { GridData } from "../../shared/grid/data"
 import { DetailsInput } from "../details-input"
@@ -59,10 +59,10 @@ export const WindowsGlazedDoors = observer(function WindowsGlazedDoors() {
             />
           </GridData>
           <GridData borderTopWidth={index == 0 ? 1 : 0}>
-            <TextFormControl fieldName={`${fieldArrayName}.${index}.performanceValue`} />
+            <NumberFormControl fieldName={`${fieldArrayName}.${index}.performanceValue`} />
           </GridData>
           <GridData borderTopWidth={index == 0 ? 1 : 0} borderRightWidth={1}>
-            <TextFormControl fieldName={`${fieldArrayName}.${index}.shgc`} />
+            <NumberFormControl fieldName={`${fieldArrayName}.${index}.shgc`} />
           </GridData>
         </React.Fragment>
       ))}

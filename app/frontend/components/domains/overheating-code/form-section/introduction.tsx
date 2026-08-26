@@ -45,6 +45,15 @@ export const Introduction = observer(function Introduction() {
     <Box>
       <CustomMessageBox
         status={EFlashMessageStatus.info}
+        description={t(
+          "overheatingCode.sections.introduction.attribution",
+          "This form was originally created by the HVAC Designers of Canada and the Thermal Environmental Comfort Association (TECA), and has been digitized with their permission."
+        )}
+        mb={6}
+      />
+
+      <CustomMessageBox
+        status={EFlashMessageStatus.info}
         title={t(
           "overheatingCode.sections.introduction.standardTitle",
           "B.C. Single Zone Cooling Capacity — BCBC 9.33.3.1.; 9.33.5.1."

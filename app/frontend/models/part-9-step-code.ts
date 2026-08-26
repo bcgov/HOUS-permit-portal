@@ -3,7 +3,14 @@ import { Instance, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
-import { EEnergyStep, EStepCodeType, EZeroCarbonStep } from "../types/enums"
+import {
+  EEnergyStep,
+  EStepCodeChecklistStage,
+  EStepCodeStageStatus,
+  EStepCodeType,
+  EZeroCarbonStep,
+} from "../types/enums"
+import { stageStatusFor } from "../utils/step-code-stage-status"
 import { Part9StepCodeChecklistModel } from "./part-9-step-code-checklist"
 import { StepCodeBaseFields } from "./step-code-base"
 
@@ -19,6 +26,7 @@ export const Part9StepCodeModel = types.snapshotProcessor(
         zeroCarbonSteps: types.array(types.enumeration(Object.values(EZeroCarbonStep))),
         energySteps: types.array(types.enumeration(Object.values(EEnergyStep))),
         permitApplicationId: types.maybeNull(types.string),
+        isFullyLoaded: types.optional(types.boolean, false),
       })
     )
     .extend(withEnvironment())
@@ -33,19 +41,26 @@ export const Part9StepCodeModel = types.snapshotProcessor(
       },
     }))
     .views((self) => ({
-      get primaryChecklist() {
-        return self.checklists[0]
+      get currentChecklist() {
+        const stage = self.currentStage || EStepCodeChecklistStage.preConstruction
+        return self.checklists.find((checklist) => checklist.stage === stage)
       },
       get preConstructionChecklist() {
-        return self.checklists[0]
+        return self.currentChecklist
       },
     }))
     .views((self) => ({
       get checklistForPdf() {
-        return self.preConstructionChecklist
+        return self.currentChecklist
+      },
+      stageStatus(stage: EStepCodeChecklistStage = self.currentStage) {
+        return stageStatusFor(stage, self.checklists, self.stageCompletions)
+      },
+      isStageComplete(stage: EStepCodeChecklistStage = self.currentStage) {
+        return self.stageStatus(stage) === EStepCodeStageStatus.complete
       },
       get isComplete() {
-        return self.preConstructionChecklist?.isComplete
+        return self.isStageComplete()
       },
       get targetPath() {
         if (self.permitApplicationId) {
@@ -62,15 +77,25 @@ export const Part9StepCodeModel = types.snapshotProcessor(
           return true
         }
       }),
+      createChecklist: flow(function* (values: Record<string, any>) {
+        const response = yield self.environment.api.createPart9Checklist(self.id, values)
+        if (response.ok) {
+          self.mergeUpdate(response.data.data, "checklistsMap")
+          return response.data.data
+        }
+      }),
     })),
   {
     preProcessor(snapshot: any) {
       const processed = { ...snapshot }
       if (Array.isArray(processed.checklists)) {
-        const map = processed.checklists.reduce((acc: Record<string, any>, checklist: any) => {
-          if (checklist && checklist.id) acc[checklist.id] = checklist
-          return acc
-        }, {})
+        // Deep-merge each checklist so PA/list payloads (summary fields only) do not
+        // wipe extended client state (complianceReports, dataEntries, isLoaded).
+        const map: Record<string, any> = { ...(processed.checklistsMap || {}) }
+        processed.checklists.forEach((checklist: any) => {
+          if (!checklist?.id) return
+          map[checklist.id] = { ...(map[checklist.id] || {}), ...checklist }
+        })
         processed.checklistsMap = map
         delete processed.checklists
       } else if (processed.checklistsMap == null) {

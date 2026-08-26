@@ -168,7 +168,7 @@
     width: 28px;
     height: 28px;
     padding: 4px;
-    
+
     &:hover {
       background-color: #edf2f7;
     }
@@ -237,12 +237,12 @@
     margin: 0.5em 0;
   }
 
-.tiptap-editor,
-.tiptap-editor-readonly {
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  word-break: break-word;
-}
+  .tiptap-editor,
+  .tiptap-editor-readonly {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
 
   li {
     margin: 0.25em 0;
@@ -358,10 +358,134 @@
   background-color: var(--chakra-colors-theme-blueLight);
 }
 
+// Uppy's default AddFiles drag-drop chrome: 1px dashed #dfdfdf with 3px radius.
+// We already draw the outer dashed border on .uppy-Dashboard — kill the inner one.
+[data-uppy-drag-drop-supported="true"] .uppy-Dashboard-AddFiles {
+  border: none;
+}
+
+.uppy-Dashboard-browse {
+  color: $bcgov-link !important;
+  background: transparent;
+
+  &:hover,
+  &:focus,
+  &:focus-visible {
+    color: $bcgov-link !important;
+    background: transparent;
+  }
+}
+
 .uppy-Dashboard-dropFilesHereHint,
 .uppy-DashboardContent-title,
 .uppy-DashboardContent-back,
 .uppy-DashboardContent-bar,
 .uppy-StatusBar-actionBtn--done {
   display: none !important;
+}
+
+// File thumbnail sizing — balanced to fill the dashboard box without clipping file info
+.uppy-Dashboard {
+  .uppy-Dashboard-Item-preview {
+    width: 44px;
+    height: 44px;
+  }
+
+  .uppy-Dashboard-Item-previewIconWrap {
+    height: 100%;
+    max-height: 100%;
+  }
+
+  .uppy-Dashboard-Item-previewIcon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .uppy-Dashboard-Item-fileInfoAndButtons {
+    padding-top: 6px;
+  }
+
+  .uppy-Dashboard-Item-name {
+    margin-bottom: 3px;
+  }
+
+  .uppy-StatusBar:not([aria-hidden="true"]) {
+    height: 40px;
+  }
+
+  // StatusBar already shows "Complete". Uppy also parks a check on the preview's
+  // top-right — the same corner as the remove control on our compact thumbs.
+  .uppy-Dashboard-Item.is-complete .uppy-Dashboard-Item-progress {
+    display: none;
+  }
+}
+
+// uppy-size--* is on .uppy-Dashboard itself — must be a compound selector, not a descendant.
+// Keep a compact list row (small thumb + meta) at every breakpoint instead of Uppy's
+// large floated cards, and pin the remove control to the thumbnail's top-right.
+.uppy-Dashboard.uppy-size--md,
+.uppy-Dashboard.uppy-size--lg,
+.uppy-Dashboard.uppy-size--xl {
+  .uppy-Dashboard-Item {
+    float: none;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    margin: 0;
+    padding: 12px;
+  }
+
+  .uppy-Dashboard-Item-preview {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+  }
+
+  .uppy-Dashboard-Item-previewIcon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .uppy-Dashboard-Item-fileInfoAndButtons {
+    padding-top: 0;
+    padding-inline-start: 12px;
+    align-items: center;
+  }
+
+  // actionWrapper overlays the 44×44 preview so remove can sit on its corner
+  .uppy-Dashboard-Item-actionWrapper {
+    position: absolute;
+    top: 12px;
+    inset-inline-start: 12px;
+    width: 44px;
+    height: 44px;
+    margin: 0;
+    z-index: 2;
+  }
+
+  .uppy-Dashboard-Item-action--remove {
+    position: absolute;
+    top: -6px;
+    inset-inline-end: -6px;
+    width: 18px;
+    height: 18px;
+    padding: 0;
+  }
+}
+
+[dir="ltr"] .uppy-Dashboard.uppy-size--md .uppy-Dashboard-Item-action--remove,
+[dir="ltr"] .uppy-Dashboard.uppy-size--lg .uppy-Dashboard-Item-action--remove,
+[dir="ltr"] .uppy-Dashboard.uppy-size--xl .uppy-Dashboard-Item-action--remove {
+  right: -6px;
+  left: auto;
+}
+
+[dir="rtl"] .uppy-Dashboard.uppy-size--md .uppy-Dashboard-Item-action--remove,
+[dir="rtl"] .uppy-Dashboard.uppy-size--lg .uppy-Dashboard-Item-action--remove,
+[dir="rtl"] .uppy-Dashboard.uppy-size--xl .uppy-Dashboard-Item-action--remove {
+  left: -6px;
+  right: auto;
 }

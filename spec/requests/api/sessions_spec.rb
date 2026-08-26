@@ -33,22 +33,62 @@ RSpec.describe "Api::Sessions", type: :request do
     Warden::JWTAuth::TokenEncoder.new.call(payload)
   end
 
+  def with_local_password_auth(enabled:)
+    original = ENV["ENABLE_LOCAL_PASSWORD_AUTH"]
+    ENV["ENABLE_LOCAL_PASSWORD_AUTH"] = enabled ? "true" : nil
+    yield
+  ensure
+    ENV["ENABLE_LOCAL_PASSWORD_AUTH"] = original
+  end
+
   describe "POST /api/login" do
     before { stub_jwt_auth(user: user) }
 
-    it "sets session and csrf cookies on success" do
-      login_as(user)
+    context "when local password auth is enabled" do
+      around do |example|
+        with_local_password_auth(enabled: true) { example.run }
+      end
 
-      expect(response).to have_http_status(:created)
-      set_cookie = response.headers["Set-Cookie"]
-      expect(set_cookie.join("; ")).to include("access_token=")
-      expect(set_cookie.join("; ")).to include("CSRF-TOKEN=")
+      it "sets session and csrf cookies on success" do
+        login_as(user)
+
+        expect(response).to have_http_status(:created)
+        set_cookie = response.headers["Set-Cookie"]
+        expect(set_cookie.join("; ")).to include("access_token=")
+        expect(set_cookie.join("; ")).to include("CSRF-TOKEN=")
+      end
+
+      it "returns unauthorized on invalid credentials" do
+        login_as(user, password: "wrong-password")
+
+        expect(response).to have_http_status(:unauthorized)
+      end
     end
 
-    it "returns unauthorized on invalid credentials" do
-      login_as(user, password: "wrong-password")
+    context "when local password auth is disabled" do
+      around do |example|
+        with_local_password_auth(enabled: false) { example.run }
+      end
 
-      expect(response).to have_http_status(:unauthorized)
+      it "returns not found" do
+        login_as(user)
+
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+
+    context "when Rails env is production" do
+      around do |example|
+        with_local_password_auth(enabled: true) { example.run }
+      end
+
+      it "returns not found even if the env flag is set" do
+        allow(Rails.env).to receive(:production?).and_return(true)
+
+        login_as(user)
+
+        expect(response).to have_http_status(:not_found)
+      end
     end
   end
 
@@ -70,7 +110,7 @@ RSpec.describe "Api::Sessions", type: :request do
     it "returns current user when authenticated" do
       stub_jwt_auth(user: user)
 
-      login_as(user)
+      with_local_password_auth(enabled: true) { login_as(user) }
 
       get "/api/validate_token", headers: cookie_header_from_response
 
@@ -116,6 +156,13 @@ RSpec.describe "Api::Sessions", type: :request do
           cookie.include?("id_token=")
         end
       ).to be(true)
+    end
+
+    it "returns success with app redirect when id_token is absent" do
+      get "/api/logout"
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("logout_url")).to eq("https://app.example.com")
     end
   end
 end

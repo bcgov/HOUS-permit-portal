@@ -21,12 +21,15 @@ RSpec.describe Api::SiteConfigurationController, type: :controller do
     end
 
     it "updates site configuration fields for super admins" do
+      site_configuration = SiteConfiguration.instance
+
       put :update,
           params: {
             site_configuration: {
               display_sitewide_message: true,
               sitewide_message: "Maintenance window",
-              overheating_tool_enabled: true
+              overheating_tool_enabled: true,
+              project_meetings_enabled: true
             }
           },
           format: :json
@@ -34,6 +37,17 @@ RSpec.describe Api::SiteConfigurationController, type: :controller do
       expect(response).to have_http_status(:ok)
       expect(SiteConfiguration.instance.display_sitewide_message).to eq(true)
       expect(SiteConfiguration.instance.overheating_tool_enabled).to eq(true)
+      expect(SiteConfiguration.instance.project_meetings_enabled).to eq(true)
+      audit =
+        ApplicationAudit.where(
+          auditable_type: "SiteConfiguration",
+          auditable_id: site_configuration.id,
+          action: "update"
+        ).last
+      expect(audit.audited_changes["project_meetings_enabled"]).to eq(
+        [false, true]
+      )
+      expect(audit.user).to eq(super_admin)
     end
   end
 

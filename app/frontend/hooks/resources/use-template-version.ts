@@ -30,7 +30,7 @@ export const useTemplateVersion = ({ customErrorMessage }: { customErrorMessage?
         setError(e instanceof Error ? e : new Error(customErrorMessage ?? t("errors.fetchTemplateVersion")))
       }
     })()
-  }, [templateVersionId, templateVersion, pathname, currentSandbox?.id])
+  }, [templateVersionId, pathname, currentSandbox?.id])
 
   return { templateVersion, error }
 }

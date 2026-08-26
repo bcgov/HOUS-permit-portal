@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useLocation, useParams } from "react-router-dom"
+import { useParams } from "react-router-dom"
 import { useMst } from "../../setup/root"
 import { isUUID } from "../../utils/utility-functions"
 
 export const usePermitApplication = ({ review }: { review?: boolean } = {}) => {
   const { permitApplicationId } = useParams()
-  const { pathname } = useLocation()
   const { permitApplicationStore, sandboxStore } = useMst()
   const { currentSandbox } = sandboxStore
 
@@ -35,7 +34,9 @@ export const usePermitApplication = ({ review }: { review?: boolean } = {}) => {
         setError(new Error(t("errors.fetchPermitApplication")))
       }
     })()
-  }, [pathname, currentSandbox?.id])
+    // Refetch only when the permit application identity or sandbox changes — not on every
+    // nested route segment (e.g. part-9 section navigation), which would wipe loaded Step Code checklists.
+  }, [permitApplicationId, currentSandbox?.id, review])
 
   return { currentPermitApplication, error }
 }

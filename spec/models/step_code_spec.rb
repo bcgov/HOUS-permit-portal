@@ -2,7 +2,7 @@ require "rails_helper"
 
 RSpec.describe StepCode, type: :model do
   describe "validations" do
-    it "enforces uniqueness of kept permit application step codes" do
+    it "enforces uniqueness of kept permit application Step Codes" do
       permit_application = create(:permit_application)
 
       Part3StepCode.create!(
@@ -39,12 +39,34 @@ RSpec.describe StepCode, type: :model do
     end
   end
 
+  describe "#permit_date" do
+    it "uses the attached permit application's issued_at, not the step code column" do
+      permit_application =
+        create(:permit_application, issued_at: Time.zone.parse("2026-08-19"))
+      step_code =
+        Part3StepCode.create!(
+          permit_application: permit_application,
+          creator: create(:user),
+          permit_date: Date.new(2020, 1, 1)
+        )
+
+      expect(step_code.permit_date).to eq(Date.new(2026, 8, 19))
+    end
+
+    it "uses the step code column when detached" do
+      step_code = create(:part_9_step_code, permit_date: Date.new(2020, 1, 1))
+
+      expect(step_code.permit_date).to eq(Date.new(2020, 1, 1))
+    end
+  end
+
   describe "#generate_report_document" do
     it "enqueues a report generation job" do
       step_code = create(:part_9_step_code)
 
       expect(StepCodeReportGenerationJob).to receive(:perform_async).with(
-        step_code.id
+        step_code.id,
+        { "checklist_id" => step_code.current_checklist.id }
       )
 
       step_code.generate_report_document
@@ -56,7 +78,7 @@ RSpec.describe StepCode, type: :model do
       step_code = described_class.new
 
       expect { step_code.complete? }.to raise_error(NotImplementedError)
-      expect { step_code.primary_checklist }.to raise_error(NotImplementedError)
+      expect { step_code.current_checklist }.to raise_error(NotImplementedError)
       expect { step_code.blueprint }.to raise_error(NotImplementedError)
       expect { step_code.checklist_blueprint }.to raise_error(
         NotImplementedError
@@ -65,30 +87,6 @@ RSpec.describe StepCode, type: :model do
   end
 
   describe "climate zone mapping" do
-    it "maps HDD values to climate zones on checklist creation" do
-      jurisdiction = create(:sub_district, heating_degree_days: 4000)
-      step_code =
-        Part3StepCode.create!(
-          creator: create(:user),
-          jurisdiction: jurisdiction
-        )
-
-      allow_any_instance_of(Part3StepCode::Checklist).to receive(
-        :complete?
-      ).and_return(false)
-
-      checklist =
-        create(
-          :part_3_checklist,
-          step_code: step_code,
-          heating_degree_days: nil,
-          climate_zone: nil
-        )
-
-      expect(checklist.heating_degree_days).to eq(4000)
-      expect(checklist.climate_zone).to eq("zone_6")
-    end
-
     it "handles boundary HDD values" do
       expect(
         StepCode::Part3::V0::Requirements::References::ClimateZone.value(2999)

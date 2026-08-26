@@ -1,4 +1,4 @@
-class Part9StepCodeBlueprint < StepCodeBaseBlueprint
+class Part9StepCodeBlueprint < StepCodeBlueprint
   association :checklists, blueprint: StepCode::Part9::ChecklistBlueprint
 
   field :energy_steps do |_step_code, _options|
