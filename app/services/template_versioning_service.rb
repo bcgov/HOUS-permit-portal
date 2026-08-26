@@ -31,7 +31,7 @@ class TemplateVersioningService
     raise TemplateVersionsPublishError, errors unless errors.empty?
   end
 
-  def self.schedule!(requirement_template, version_date)
+  def self.schedule!(requirement_template, version_date, change_notes: nil)
     if !is_valid_schedule_version_date?(requirement_template, version_date)
       raise TemplateVersionScheduleError.new(
               I18n.t(
@@ -52,7 +52,8 @@ class TemplateVersioningService
           form_requirement_blocks_hash(requirement_template),
         version_diff: diff_of_current_changes_and_last_version,
         version_date: version_date,
-        status: "scheduled"
+        status: "scheduled",
+        change_notes: change_notes.presence
       )
 
     validate_config!(template_version)
@@ -88,7 +89,7 @@ class TemplateVersioningService
     template_version
   end
 
-  def self.force_publish_now!(requirement_template)
+  def self.force_publish_now!(requirement_template, change_notes: nil)
     unless ENV["ENABLE_TEMPLATE_FORCE_PUBLISH"] == "true"
       raise TemplateVersionForcePublishNowError.new(
               I18n.t(
@@ -111,7 +112,8 @@ class TemplateVersioningService
           form_requirement_blocks_hash(requirement_template),
         version_diff: diff_of_current_changes_and_last_version,
         version_date: version_date,
-        status: "scheduled"
+        status: "scheduled",
+        change_notes: change_notes.presence
       )
 
     validate_config!(template_version)
@@ -138,7 +140,7 @@ class TemplateVersioningService
   # Creates a new draft TemplateVersion for a RequirementTemplate.
   # Snapshots the current template state (sections, blocks, form JSON)
   # so later builder edits do not change the early access version.
-  def self.create_draft!(requirement_template, assignee: nil)
+  def self.create_draft!(requirement_template, assignee: nil, change_notes: nil)
     template_version =
       requirement_template.template_versions.build(
         denormalized_template_json:
@@ -151,7 +153,8 @@ class TemplateVersioningService
           form_requirement_blocks_hash(requirement_template),
         version_date: Date.current,
         status: "draft",
-        assignee: assignee
+        assignee: assignee,
+        change_notes: change_notes.presence
       )
 
     validate_config!(template_version)
@@ -226,7 +229,7 @@ class TemplateVersioningService
             draft_version.requirement_blocks_json.deep_dup,
           status: "scheduled",
           version_date: version_date,
-          change_notes: change_notes,
+          change_notes: change_notes.presence,
           change_significance: change_significance
         )
 

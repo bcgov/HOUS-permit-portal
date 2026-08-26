@@ -154,12 +154,14 @@ export const RequirementTemplateStoreModel = types
     scheduleRequirementTemplate: flow(function* (
       templateId: string,
       requirementParams: IRequirementTemplateUpdateParams,
-      scheduleDate: Date
+      scheduleDate: Date,
+      changeNotes?: string
     ) {
       const response = yield* toGenerator(
         self.environment.api.scheduleRequirementTemplate(templateId, {
           requirementTemplate: requirementParams,
           versionDate: format(scheduleDate, datefnsAppDateFormat),
+          changeNotes,
         })
       )
 
@@ -175,10 +177,11 @@ export const RequirementTemplateStoreModel = types
     }),
     forcePublishRequirementTemplate: flow(function* (
       templateId: string,
-      requirementParams: IRequirementTemplateUpdateParams
+      requirementParams: IRequirementTemplateUpdateParams,
+      changeNotes?: string
     ) {
       const response = yield* toGenerator(
-        self.environment.api.forcePublishRequirementTemplate(templateId, requirementParams)
+        self.environment.api.forcePublishRequirementTemplate(templateId, requirementParams, changeNotes)
       )
 
       if (response.ok) {
@@ -221,10 +224,8 @@ export const RequirementTemplateStoreModel = types
     }),
 
     // Draft workflow actions
-    createDraft: flow(function* (templateId: string, assigneeId?: string) {
-      const response = yield* toGenerator(
-        self.environment.api.createDraft(templateId, assigneeId ? { assigneeId } : undefined)
-      )
+    createDraft: flow(function* (templateId: string, params?: { assigneeId?: string; changeNotes?: string }) {
+      const response = yield* toGenerator(self.environment.api.createDraft(templateId, params))
 
       if (response.ok) {
         const templateData = response.data.data

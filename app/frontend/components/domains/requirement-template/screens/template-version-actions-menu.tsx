@@ -17,8 +17,8 @@ interface IProps {
   showSchedulePublish: boolean
   showDiscard: boolean
   scheduledConflicts: Array<{ id: string; versionDate: Date }>
-  onScheduleConfirm: (scheduleDate: Date) => Promise<void>
-  onForcePublishNow?: () => Promise<void>
+  onScheduleConfirm: (scheduleDate: Date, changeNotes?: string) => Promise<void>
+  onForcePublishNow?: (changeNotes?: string) => Promise<void>
   onSaveAndValidate: () => Promise<any[]>
 }
 

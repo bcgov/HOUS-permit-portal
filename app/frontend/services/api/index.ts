@@ -842,9 +842,11 @@ export class Api {
     {
       requirementTemplate,
       versionDate,
+      changeNotes,
     }: {
       requirementTemplate?: IRequirementTemplateUpdateParams
       versionDate: string
+      changeNotes?: string
     }
   ) {
     const { tags, ...rest } = requirementTemplate ?? {}
@@ -856,16 +858,22 @@ export class Api {
     return this.client.post<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${templateId}/schedule`, {
       requirementTemplate: requirementTemplateParams,
       versionDate,
+      changeNotes,
     })
   }
 
-  async forcePublishRequirementTemplate(templateId: string, requirementTemplate: IRequirementTemplateUpdateParams) {
+  async forcePublishRequirementTemplate(
+    templateId: string,
+    requirementTemplate: IRequirementTemplateUpdateParams,
+    changeNotes?: string
+  ) {
     const { tags, ...rest } = requirementTemplate
     const requirementTemplateParams = tags ? { ...rest, tagList: tags } : rest
     return this.client.post<ApiResponse<IRequirementTemplate>>(
       `/requirement_templates/${templateId}/force_publish_now`,
       {
         requirementTemplate: requirementTemplateParams,
+        changeNotes,
       }
     )
   }
@@ -971,7 +979,7 @@ export class Api {
 
   // ── Draft workflow API methods ──────────────────────────────────────
 
-  async createDraft(templateId: string, params?: { assigneeId?: string }) {
+  async createDraft(templateId: string, params?: { assigneeId?: string; changeNotes?: string }) {
     return this.client.post<ApiResponse<IRequirementTemplate>>(
       `/requirement_templates/${templateId}/create_draft`,
       params

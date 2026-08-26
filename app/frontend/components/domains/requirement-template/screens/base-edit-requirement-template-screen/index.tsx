@@ -36,9 +36,9 @@ export interface IEditRequirementOptionsProps {
 
 export interface IEditRequirementActionsProps {
   minDate?: Date
-  onScheduleConfirm?: (date: Date) => void
-  onForcePublishNow?: () => void
-  onCreateDraft?: () => void
+  onScheduleConfirm?: (date: Date, changeNotes?: string) => void
+  onForcePublishNow?: (changeNotes?: string) => void
+  onCreateDraft?: (changeNotes?: string) => void
   onSaveAndValidate?: () => Promise<IRequirementTemplateConfigError[]>
   triggerButtonProps?: Partial<ButtonProps>
   requirementTemplate?: IRequirementTemplate
@@ -105,14 +105,15 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
     updatedTemplate && formFormDefaults(updatedTemplate as IRequirementTemplate)
   })
 
-  const onSchedule = async (date: Date) => {
+  const onSchedule = async (date: Date, changeNotes?: string) => {
     await handleSubmit(async (templateFormData) => {
       const formattedSubmitData = formatSubmitData(templateFormData)
 
       const updatedRequirementTemplate = await requirementTemplateStore.scheduleRequirementTemplate(
         requirementTemplate.id,
         formattedSubmitData,
-        date
+        date,
+        changeNotes
       )
 
       if (updatedRequirementTemplate) {
@@ -130,13 +131,14 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
 
   const onForcePublishNow =
     import.meta.env.VITE_ENABLE_TEMPLATE_FORCE_PUBLISH === "true"
-      ? async () => {
+      ? async (changeNotes?: string) => {
           await handleSubmit(async (templateFormData) => {
             const formattedSubmitData = formatSubmitData(templateFormData)
 
             const updatedRequirementTemplate = (await requirementTemplateStore.forcePublishRequirementTemplate(
               requirementTemplate.id,
-              formattedSubmitData
+              formattedSubmitData,
+              changeNotes
             )) as IRequirementTemplate | false
 
             if (updatedRequirementTemplate) {
@@ -150,7 +152,7 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
         }
       : undefined
 
-  const onCreateDraft = async () => {
+  const onCreateDraft = async (changeNotes?: string) => {
     await handleSubmit(async (templateFormData) => {
       const formattedSubmitData = formatSubmitData(templateFormData)
       const updatedTemplate = await requirementTemplateStore.updateRequirementTemplate(
@@ -160,9 +162,10 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
 
       if (!updatedTemplate) return
 
-      const templateWithDraft = (await requirementTemplateStore.createDraft(requirementTemplate.id)) as
-        | IRequirementTemplate
-        | false
+      const templateWithDraft = (await requirementTemplateStore.createDraft(
+        requirementTemplate.id,
+        changeNotes ? { changeNotes } : undefined
+      )) as IRequirementTemplate | false
       if (!templateWithDraft) return
 
       const draftTemplateVersion = templateWithDraft.draftTemplateVersions[0]

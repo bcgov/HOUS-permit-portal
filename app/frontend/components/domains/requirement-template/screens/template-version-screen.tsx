@@ -75,10 +75,11 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
     return requirementTemplateStore.validateTemplateVersionConfig(templateVersion.id)
   }
 
-  const onScheduleConfirm = async (scheduleDate: Date) => {
+  const onScheduleConfirm = async (scheduleDate: Date, changeNotes?: string) => {
     if (!templateVersion) return
     const updated = await requirementTemplateStore.promoteDraft(templateVersion.id, {
       versionDate: format(scheduleDate, datefnsAppDateFormat),
+      changeNotes,
     })
     if (updated) {
       const scheduledTemplateVersion = (updated as IRequirementTemplate).scheduledTemplateVersions?.[0]
@@ -90,10 +91,11 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
 
   const onForcePublishNow =
     import.meta.env.VITE_ENABLE_TEMPLATE_FORCE_PUBLISH === "true"
-      ? async () => {
+      ? async (changeNotes?: string) => {
           if (!templateVersion) return
           const updated = await requirementTemplateStore.promoteDraft(templateVersion.id, {
             skipDateCheck: true,
+            changeNotes,
           })
           if (updated) {
             const publishedTemplateVersion = (updated as IRequirementTemplate).publishedTemplateVersion

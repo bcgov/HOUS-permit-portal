@@ -148,7 +148,8 @@ class Api::RequirementTemplatesController < Api::ApplicationController
       begin
         TemplateVersioningService.schedule!(
           @requirement_template,
-          Date.parse(schedule_params)
+          Date.parse(schedule_params[:version_date]),
+          change_notes: schedule_params[:change_notes]
         )
       rescue TemplateVersionConfigError => e
         render_template_config_error(e)
@@ -197,7 +198,10 @@ class Api::RequirementTemplatesController < Api::ApplicationController
       @requirement_template.touch
       begin
         published_template_version =
-          TemplateVersioningService.force_publish_now!(@requirement_template)
+          TemplateVersioningService.force_publish_now!(
+            @requirement_template,
+            change_notes: force_publish_params[:change_notes]
+          )
       rescue TemplateVersionConfigError => e
         config_error = e
         raise ActiveRecord::Rollback
@@ -292,7 +296,8 @@ class Api::RequirementTemplatesController < Api::ApplicationController
               else
                 nil
               end
-            )
+            ),
+          change_notes: draft_params[:change_notes]
         )
 
       @requirement_template.reload
@@ -480,10 +485,16 @@ class Api::RequirementTemplatesController < Api::ApplicationController
   end
 
   def schedule_params
-    params.require(:version_date)
+    params
+      .permit(:version_date, :change_notes)
+      .tap { |permitted| permitted.require(:version_date) }
+  end
+
+  def force_publish_params
+    params.permit(:change_notes)
   end
 
   def draft_params
-    params.permit(:assignee_id)
+    params.permit(:assignee_id, :change_notes)
   end
 end

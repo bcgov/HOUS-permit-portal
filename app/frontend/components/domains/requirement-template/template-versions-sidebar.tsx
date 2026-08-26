@@ -183,7 +183,7 @@ const BuilderPanel = ({
           <Box>
             <Text fontWeight={700}>{t("requirementTemplate.versionSidebar.builderTitle")}</Text>
             <Text color={"text.secondary"} fontSize={"sm"}>
-              {t("requirementTemplate.versionSidebar.lastUpdated")} {format(updatedAt, datefnsTableDateTimeFormat)}
+              {format(updatedAt, datefnsTableDateTimeFormat)}
             </Text>
           </Box>
         </HStack>
@@ -238,6 +238,7 @@ const VersionFlow = observer(function VersionFlow({
                 viewRoute={`/template-versions/${templateVersion.id}`}
                 status={ETemplateVersionStatus.draft}
                 publishedAt={templateVersion.createdAt}
+                changeNotes={templateVersion.changeNotes}
                 borderRadius="none"
                 border="none"
               />
@@ -404,7 +405,11 @@ const VersionsList = observer(function VersionsList({
   )
 })
 
-type TVersionCardProps = Partial<FlexProps> & { viewRoute: string; onUnschedule?: () => Promise<boolean> } & (
+type TVersionCardProps = Partial<FlexProps> & {
+  viewRoute: string
+  onUnschedule?: () => Promise<boolean>
+  changeNotes?: string
+} & (
     | {
         status: Exclude<ETemplateVersionStatus, ETemplateVersionStatus.draft>
         versionDate: Date
@@ -426,6 +431,7 @@ const VersionCard = observer(function VersionCard({
   versionDate,
   publishedAt,
   deprecationReasonLabel,
+  changeNotes,
   ...containerProps
 }: TVersionCardProps) {
   const { t } = useTranslation()
@@ -478,18 +484,21 @@ const VersionCard = observer(function VersionCard({
       gap={4}
       {...containerProps}
     >
-      <HStack spacing={16}>
+      <HStack spacing={6} flex={1} minW={0}>
         <TemplateStatusTag
           status={status}
           scheduledFor={status === ETemplateVersionStatus.scheduled && versionDate ? versionDate : undefined}
           subText={status === ETemplateVersionStatus.deprecated ? deprecationReasonLabel : undefined}
         />
         {status === ETemplateVersionStatus.draft ? (
-          <Text>
-            {t("requirementTemplate.versionSidebar.publishedAt")}
-            <br />
-            {format(publishedAt, datefnsTableDateTimeFormat)}
-          </Text>
+          <Box minW="110px" flex={1} overflow="hidden">
+            <Text fontSize="xs">{format(publishedAt, datefnsTableDateTimeFormat)}</Text>
+            {changeNotes && (
+              <Text fontSize="xs" noOfLines={1} title={changeNotes}>
+                {changeNotes}
+              </Text>
+            )}
+          </Box>
         ) : (
           <VersionTag versionDate={versionDate} />
         )}

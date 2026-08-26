@@ -9,6 +9,7 @@ import {
   ModalHeader,
   ModalOverlay,
   Spinner,
+  Stack,
   Text,
   useDisclosure,
 } from "@chakra-ui/react"
@@ -17,9 +18,10 @@ import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { IRequirementTemplateConfigError } from "../../../types/types"
 import { ConfigErrorsList } from "./config-errors-list"
+import { VersionNoteField, normalizedVersionNote } from "./version-note-field"
 
 interface ICreateEarlyAccessVersionModalProps {
-  onCreateEarlyAccessVersion?: () => Promise<void> | void
+  onCreateEarlyAccessVersion?: (changeNotes?: string) => Promise<void> | void
   onSaveAndValidate?: () => Promise<IRequirementTemplateConfigError[]>
   requirementTemplateId?: string
   triggerButtonProps?: Partial<ButtonProps>
@@ -38,6 +40,7 @@ export const CreateEarlyAccessVersionModal = observer(function CreateEarlyAccess
   const [isCreating, setIsCreating] = useState(false)
   const [isValidating, setIsValidating] = useState(false)
   const [configErrors, setConfigErrors] = useState<IRequirementTemplateConfigError[]>([])
+  const [versionNote, setVersionNote] = useState("")
 
   const hasConfigErrors = configErrors.length > 0
   const actionsDisabled = isValidating || hasConfigErrors || isCreating
@@ -47,6 +50,7 @@ export const CreateEarlyAccessVersionModal = observer(function CreateEarlyAccess
       setConfigErrors([])
       setIsValidating(false)
       setIsCreating(false)
+      setVersionNote("")
       return
     }
 
@@ -74,7 +78,7 @@ export const CreateEarlyAccessVersionModal = observer(function CreateEarlyAccess
   const onConfirm = async () => {
     setIsCreating(true)
     try {
-      await onCreateEarlyAccessVersion?.()
+      await onCreateEarlyAccessVersion?.(normalizedVersionNote(versionNote))
       onClose()
     } finally {
       setIsCreating(false)
@@ -102,8 +106,9 @@ export const CreateEarlyAccessVersionModal = observer(function CreateEarlyAccess
                 <Spinner size="lg" />
               </Center>
             ) : (
-              <>
+              <Stack spacing={6}>
                 <Text>{t("requirementTemplate.edit.earlyAccessModalBody")}</Text>
+                <VersionNoteField value={versionNote} onChange={setVersionNote} />
                 {requirementTemplateId && (
                   <ConfigErrorsList
                     errors={configErrors}
@@ -111,7 +116,7 @@ export const CreateEarlyAccessVersionModal = observer(function CreateEarlyAccess
                     onNavigate={onClose}
                   />
                 )}
-              </>
+              </Stack>
             )}
           </ModalBody>
           <ModalFooter justifyContent={"flex-start"} mt={4} gap={3}>
