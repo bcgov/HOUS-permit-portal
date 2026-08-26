@@ -255,6 +255,7 @@ class PdfGenerationJob
   end
 
   def camelize_key(key)
+    key = key.to_s
     if key == SECTION_COMPLETION || key.start_with?(SUBMISSION_DATA_PREFIX)
       return key
     end
