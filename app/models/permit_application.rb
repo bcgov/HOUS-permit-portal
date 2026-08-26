@@ -503,7 +503,7 @@ class PermitApplication < ApplicationRecord
          customization.submission_contact.confirmed?
       [customization.submission_contact]
     else
-      jurisdiction.confirmed_submission_contacts.default_contact
+      jurisdiction.confirmed_submission_contacts
     end
   end
 
@@ -560,6 +560,10 @@ class PermitApplication < ApplicationRecord
 
   def viewed_at
     latest_submission_version&.viewed_at
+  end
+
+  def permit_date
+    issued_at&.to_date
   end
 
   def submitted_at

@@ -5,6 +5,7 @@ import {
   Center,
   Flex,
   FormControl,
+  FormErrorMessage,
   FormLabel,
   Heading,
   HStack,
@@ -13,17 +14,18 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react"
-import { LightningA } from "@phosphor-icons/react"
+import { LightningA, PaperPlaneRight } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { ReactNode, useEffect, useState } from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
-import { Navigate, useLocation, useParams } from "react-router-dom"
+import { Navigate, useLocation, useNavigate, useParams } from "react-router-dom"
 import { usePart9StepCode } from "../../../../../hooks/resources/use-part-9-step-code"
 import { EFileUploadAttachmentType, EFlashMessageStatus } from "../../../../../types/enums"
 import { TPart9NavLinkKey } from "../../../../../types/types"
 import { FileDownloadButton } from "../../../../shared/base/file-download-button"
 import { SharedSpinner } from "../../../../shared/base/shared-spinner"
+import { ConfirmationModal } from "../../../../shared/confirmation-modal"
 import { TextFormControl } from "../../../../shared/form/input-form-control"
 import { BuildingCharacteristicsSummary } from "../checklist/building-characteristics-summary"
 import { CompletedBy } from "../checklist/completed-by"
@@ -148,6 +150,7 @@ const BuildingInfoSection = observer(function BuildingInfoSection() {
   const { checklist } = usePart9StepCode()
   const formMethods = useForm({ mode: "onChange" })
   const { control, handleSubmit, reset, formState } = formMethods
+  const { errors } = formState
 
   useEffect(() => {
     if (!checklist) return
@@ -189,16 +192,31 @@ const BuildingInfoSection = observer(function BuildingInfoSection() {
             {t("stepCode.part9.buildingInfo.heading")}
           </Heading>
           <Text>{t("stepCode.part9.buildingInfo.instructions")}</Text>
-          <TextFormControl label={t("stepCodeChecklist.edit.projectInfo.builder")} fieldName="builder" />
-          <FormControl>
-            <FormLabel>{t("stepCodeChecklist.edit.projectInfo.buildingType.label")}</FormLabel>
+          <TextFormControl label={t("stepCodeChecklist.edit.projectInfo.builder")} fieldName="builder" required />
+          <FormControl isInvalid={!!errors.buildingType}>
+            <HStack gap={0}>
+              <FormLabel>
+                {t("stepCodeChecklist.edit.projectInfo.buildingType.label")}
+                <Text as="span" color="semantic.error" ml={1}>
+                  *
+                </Text>
+              </FormLabel>
+            </HStack>
             <InputGroup>
               <Controller
                 control={control}
                 name="buildingType"
-                render={({ field: { onChange, value } }) => <BuildingTypeSelect onChange={onChange} value={value} />}
+                rules={{
+                  required: t("ui.isRequired", {
+                    field: t("stepCodeChecklist.edit.projectInfo.buildingType.label"),
+                  }),
+                }}
+                render={({ field: { onChange, value } }) => (
+                  <BuildingTypeSelect onChange={onChange} value={value} isInvalid={!!errors.buildingType} />
+                )}
               />
             </InputGroup>
+            <FormErrorMessage>{errors.buildingType?.message as string}</FormErrorMessage>
           </FormControl>
           <Part9FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={formState.isSubmitting} />
         </VStack>
@@ -374,24 +392,48 @@ const ReviewSection = observer(function ReviewSection() {
 })
 
 const ReportSection = observer(function ReportSection() {
-  const { currentStepCode, checklist } = usePart9StepCode()
+  const { checklist, currentStepCode } = usePart9StepCode()
   const { pathname } = useLocation()
+  const { exitLinkPath } = usePart9Navigation()
+  const navigate = useNavigate()
   const formMethods = useForm({ mode: "onChange" })
   const { handleSubmit, formState } = formMethods
   const [isRegenerating, setIsRegenerating] = useState(false)
+  const [isSharing, setIsSharing] = useState(false)
+  const freshReport = checklist?.freshReportDocument
+
+  useEffect(() => {
+    if (freshReport) setIsRegenerating(false)
+  }, [freshReport])
 
   const onSubmit = async () => {
     const updated = await checklist.completeSection("report")
     if (!updated) throw new Error("Save failed")
   }
 
+  const handleSaveAndExit = handleSubmit(async () => {
+    await onSubmit()
+    navigate(exitLinkPath)
+  })
+
   const handleRegenerateReport = async () => {
     setIsRegenerating(true)
     try {
       const updated = await checklist.regenerateReport()
-      if (!updated) throw new Error("Regenerate report failed")
-    } finally {
+      if (!updated) setIsRegenerating(false)
+    } catch {
       setIsRegenerating(false)
+    }
+  }
+
+  const handleShare = async () => {
+    const reportId = checklist?.freshReportDocument?.id
+    if (!reportId) return
+    setIsSharing(true)
+    try {
+      await currentStepCode?.shareReportWithJurisdiction(reportId)
+    } finally {
+      setIsSharing(false)
     }
   }
 
@@ -402,6 +444,10 @@ const ReportSection = observer(function ReportSection() {
     return <Navigate to={pathname.replace(/\/report$/, `/${target}`)} replace />
   }
 
+  const isStale = !!checklist.reportDocument?.stale && !freshReport
+  const canShare = !!freshReport && !!currentStepCode?.jurisdiction
+  const reportStatusKey = freshReport ? "ready" : isStale ? "stale" : "missing"
+
   return (
     <FormProvider {...formMethods}>
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -409,34 +455,66 @@ const ReportSection = observer(function ReportSection() {
           <Heading as="h2" fontSize="2xl">
             {t("stepCode.part9.sidebar.report")}
           </Heading>
-          <Text>{t("stepCode.part9.report.description")}</Text>
-          <Text>
-            {currentStepCode?.latestReportDocument
-              ? t("stepCode.part9.report.ready", { address: checklist.fullAddress })
-              : t("stepCode.part9.report.pending")}
-          </Text>
-          <Flex gap={3} align="start">
-            {currentStepCode?.latestReportDocument ? (
-              <FileDownloadButton
-                variant="link"
-                modelType={EFileUploadAttachmentType.ReportDocument}
-                document={currentStepCode.latestReportDocument as any}
-                simpleLabel
-                mt={2}
-              />
-            ) : (
-              <SharedSpinner m={0} />
-            )}
-            <Button variant="secondary" onClick={handleRegenerateReport} isLoading={isRegenerating}>
+          {!freshReport && <Text>{t("stepCode.part9.report.description")}</Text>}
+          {!isRegenerating && (
+            <Text>
+              {reportStatusKey === "ready"
+                ? t("stepCode.part9.report.ready", { address: checklist.fullAddress })
+                : t(`stepCode.part9.report.${reportStatusKey}`)}
+            </Text>
+          )}
+          <VStack align="start" spacing={3}>
+            <Flex gap={3} align="center" wrap="wrap">
+              {freshReport && (
+                <FileDownloadButton
+                  variant="secondary"
+                  size="md"
+                  modelType={EFileUploadAttachmentType.ReportDocument}
+                  document={freshReport as any}
+                  simpleLabel
+                />
+              )}
+              {canShare && (
+                <ConfirmationModal
+                  title={t("stepCode.shareReport.confirmTitle")}
+                  body={t("stepCode.shareReport.confirmBody")}
+                  onConfirm={async (closeModal) => {
+                    await handleShare()
+                    closeModal()
+                  }}
+                  renderTriggerButton={(props) => (
+                    <Button
+                      {...props}
+                      type="button"
+                      variant="secondary"
+                      size="md"
+                      leftIcon={<PaperPlaneRight size={16} />}
+                      isLoading={isSharing}
+                    >
+                      {t("stepCode.shareReport.action")}
+                    </Button>
+                  )}
+                  renderConfirmationButton={(props) => (
+                    <Button {...props} variant="primary" isLoading={isSharing}>
+                      {t("stepCode.shareReport.confirm")}
+                    </Button>
+                  )}
+                />
+              )}
+              <Button
+                type="button"
+                variant="primary"
+                onClick={handleSaveAndExit}
+                isLoading={formState.isSubmitting}
+                isDisabled={!checklist.canMarkComplete}
+              >
+                {t("stepCode.saveAndExit")}
+              </Button>
+            </Flex>
+            <Button type="button" variant="link" onClick={handleRegenerateReport} isLoading={isRegenerating}>
               {t("stepCode.regenerateReport")}
             </Button>
-          </Flex>
-          <Part9FormFooter
-            handleSubmit={handleSubmit}
-            onSubmit={onSubmit}
-            isLoading={formState.isSubmitting}
-            isDisabled={!checklist.canMarkComplete}
-          />
+          </VStack>
         </VStack>
       </form>
     </FormProvider>

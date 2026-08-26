@@ -173,7 +173,8 @@ class Api::RequirementTemplatesController < Api::ApplicationController
                      {
                        blueprint: RequirementTemplateBlueprint,
                        blueprint_opts: {
-                         view: :extended
+                         view: :extended,
+                         current_user: current_user
                        }
                      }
     end
@@ -219,7 +220,8 @@ class Api::RequirementTemplatesController < Api::ApplicationController
                        blueprint: RequirementTemplateBlueprint,
                        blueprint_opts: {
                          view: :extended,
-                         published_template_version: published_template_version
+                         published_template_version: published_template_version,
+                         current_user: current_user
                        }
                      }
     elsif config_error

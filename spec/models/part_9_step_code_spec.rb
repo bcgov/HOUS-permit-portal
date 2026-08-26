@@ -157,7 +157,7 @@ RSpec.describe Part9StepCode, type: :model do
         ).and_return(SupportingDocument.all)
       end
 
-      #this is true for part 9, but may need to chagne for part 3
+      # This is true for Part 9, but may need to change for Part 3
       it "is still valid" do
         step_code.save
         step_code.valid?

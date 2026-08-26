@@ -103,7 +103,6 @@ export interface ISubmissionContact {
   email: string
   title?: string
   confirmedAt: string
-  default: boolean
   confirmationSentAt?: string
   type: ESubmissionContactClass
 }
@@ -356,6 +355,7 @@ export interface IJurisdictionStub {
 
 export interface IReportDocument extends IBaseFileAttachment {
   stepCodeId: string
+  checklistId?: string
   stale?: boolean
 }
 
@@ -494,6 +494,7 @@ export interface ITemplateVersionUpdate {
 
 export interface IReportDocumentNotificationObjectData {
   stepCodeId?: string
+  checklistId?: string
   reportDocumentId: string
   filename?: string
   downloadUrl?: string

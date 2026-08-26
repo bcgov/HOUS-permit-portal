@@ -1,6 +1,6 @@
 import { Badge, Box, BoxProps, Flex, Icon, Tab, TabList, Text, VStack } from "@chakra-ui/react"
 import React from "react"
-import { Link as RouterLink } from "react-router-dom"
+import { Link as RouterLink, useLocation } from "react-router-dom"
 import { stickyBelowNavBar } from "../../../styles/nav-bar-offset"
 
 // THIS COMPONENT MUST BE USED INSIDE OF A TABS COMPONENT
@@ -19,12 +19,16 @@ interface IProjectSidebarTabListProps extends BoxProps {
   tabsData?: ITabItem[]
 }
 
-const handleTabLinkClick = (e: React.MouseEvent) => {
+export const handleSidebarTabLinkClick = (e: React.MouseEvent, tabTo: string, pathname: string) => {
   if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
-  e.preventDefault()
+  // Already on this tab's root: swallow the click. Nested routes (meeting detail)
+  // keep the tab selected, so Chakra Tabs onChange never fires — leave default
+  // alone so the link returns to the search list.
+  if (pathname === tabTo) e.preventDefault()
 }
 
 export const ProjectSidebarTabList = ({ top = 0, tabsData, children, ...rest }: IProjectSidebarTabListProps) => {
+  const location = useLocation()
   const navHeight = document.getElementById("mainNav")?.offsetHeight
 
   return (
@@ -48,7 +52,7 @@ export const ProjectSidebarTabList = ({ top = 0, tabsData, children, ...rest }: 
               key={tabData.label}
               as={RouterLink}
               to={tabData.to}
-              onClick={handleTabLinkClick}
+              onClick={(e) => handleSidebarTabLinkClick(e, tabData.to, location.pathname)}
               w="full"
               color="text.primary"
               _visited={{ color: "text.primary" }}

@@ -70,6 +70,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       submittedAt: types.maybeNull(types.Date),
       resubmittedAt: types.maybeNull(types.Date),
       revisionsRequestedAt: types.maybeNull(types.Date),
+      issuedAt: types.maybeNull(types.Date),
       selectedTabIndex: types.optional(types.number, 0),
       createdAt: types.Date,
       updatedAt: types.Date,

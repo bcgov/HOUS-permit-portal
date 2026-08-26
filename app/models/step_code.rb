@@ -46,6 +46,11 @@ class StepCode < ApplicationRecord
             allow_nil: true
   validates :current_stage, inclusion: { in: STAGES }
 
+  def permit_date
+    return permit_application.permit_date if permit_application
+    self[:permit_date]
+  end
+
   delegate :submitter,
            :newly_submitted_at,
            :status,
@@ -136,7 +141,10 @@ class StepCode < ApplicationRecord
   end
 
   def generate_report_document
-    StepCodeReportGenerationJob.perform_async(id)
+    options = {}
+    checklist = current_checklist
+    options["checklist_id"] = checklist.id if checklist
+    StepCodeReportGenerationJob.perform_async(id, options)
   end
 
   def public_record?

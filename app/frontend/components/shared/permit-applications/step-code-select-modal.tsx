@@ -13,6 +13,7 @@ import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
+import { IStepCode } from "../../../stores/step-code-store"
 import { EStepCodeType } from "../../../types/enums"
 import { StepCodesSelectGrid } from "../../domains/permit-project/step-codes-select-grid"
 import { ModelSearchInput } from "../base/model-search-input"
@@ -21,6 +22,7 @@ interface IProps {
   isOpen: boolean
   onClose: () => void
   stepCodeType: EStepCodeType
+  attachedStepCode?: IStepCode | null
   onSelect: (stepCodeId: string) => Promise<void>
 }
 
@@ -28,6 +30,7 @@ export const StepCodeSelectModal = observer(function StepCodeSelectModal({
   isOpen,
   onClose,
   stepCodeType,
+  attachedStepCode,
   onSelect,
 }: IProps) {
   const { t } = useTranslation()
@@ -56,7 +59,7 @@ export const StepCodeSelectModal = observer(function StepCodeSelectModal({
                 inputGroupProps={{ width: "full" }}
               />
             </FormControl>
-            <StepCodesSelectGrid onSelect={onSelect} />
+            <StepCodesSelectGrid onSelect={onSelect} attachedStepCode={attachedStepCode} />
 
             <Flex justify="flex-end" gap={2} mt={4}>
               <Button onClick={onClose}>{t("ui.close")}</Button>

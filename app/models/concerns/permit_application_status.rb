@@ -49,7 +49,7 @@ module PermitApplicationStatus
       %w[newly_submitted resubmitted in_review]
     end
 
-    aasm column: "status", enum: true, timestamp: true do
+    aasm column: "status", enum: true, timestamps: true do
       state :new_draft, initial: true
       state :newly_submitted
       state :in_review

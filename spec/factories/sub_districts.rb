@@ -27,8 +27,7 @@ FactoryBot.define do
       create(
         :submission_contact,
         jurisdiction: jurisdiction,
-        confirmed_at: Time.current,
-        default: true
+        confirmed_at: Time.current
       )
       jurisdiction.update_column(:inbox_enabled, true)
     end
