@@ -6,6 +6,7 @@ import {
   Heading,
   Link,
   Modal,
+  ModalBody,
   ModalCloseButton,
   ModalContent,
   ModalOverlay,
@@ -157,6 +158,7 @@ export const SubmissionDownloadModal = observer(
       knownFileUrls: string[]
     } | null>(null)
     const pendingSelectiveZipRequestIdRef = useRef<string | null>(null)
+    const listScrollRef = useRef<HTMLDivElement>(null)
     const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set())
     const [generationFailed, setGenerationFailed] = useState(false)
     const [awaitingGeneration, setAwaitingGeneration] = useState(false)
@@ -184,6 +186,20 @@ export const SubmissionDownloadModal = observer(
         zipGenerationTriggeredRef.current = false
         resetDownloadState()
       }
+    }, [isOpen])
+
+    // ponytail: window capture runs before the navbar's document-capture listener, so this
+    // list can fill the modal without the size heuristic hiding the bar. Upgrade: data-*
+    // opt-out in isPageLevelScroller.
+    useEffect(() => {
+      if (!isOpen) return
+
+      const onScroll = (event: Event) => {
+        if (event.target === listScrollRef.current) event.stopPropagation()
+      }
+
+      window.addEventListener("scroll", onScroll, true)
+      return () => window.removeEventListener("scroll", onScroll, true)
     }, [isOpen])
 
     useEffect(() => {
@@ -382,7 +398,15 @@ export const SubmissionDownloadModal = observer(
 
         <Modal onClose={onClose} isOpen={isOpen} size="lg" scrollBehavior="inside">
           <ModalOverlay />
-          <ModalContent maxW="648px" borderRadius="md" p={0}>
+          <ModalContent
+            maxW="648px"
+            maxH="calc(100vh - 7.5rem)"
+            borderRadius="md"
+            p={0}
+            overflow="hidden"
+            display="flex"
+            flexDirection="column"
+          >
             <ModalCloseButton top={2} right={2} />
             {!permitApplication?.isFullyLoaded ? (
               <Flex p={10} justify="center">
@@ -393,8 +417,8 @@ export const SubmissionDownloadModal = observer(
             ) : showPreparing ? (
               <PreparingView onClose={onClose} />
             ) : (
-              <VStack align="stretch" spacing={6} p={10} w="full">
-                <VStack w="full" align="start" spacing="10px">
+              <>
+                <VStack w="full" align="start" spacing="10px" p={10} pb={0} flexShrink={0}>
                   <Heading as="h1" fontSize="4xl" fontWeight="bold" lineHeight="normal" m={0} mb={0}>
                     {t("permitApplication.show.downloadHeading")}
                   </Heading>
@@ -403,96 +427,109 @@ export const SubmissionDownloadModal = observer(
                   </Text>
                 </VStack>
 
-                <VStack align="stretch" spacing="10px" w="full">
-                  <Checkbox
-                    isChecked={allSelected}
-                    isIndeterminate={someSelected}
-                    onChange={toggleAll}
-                    isDisabled={allKeys.length === 0}
-                    pl="14px"
-                    spacing={2}
-                  >
-                    {t("permitApplication.show.selectOrDeselectAll")}
-                  </Checkbox>
-
-                  <VStack align="stretch" spacing={4} w="full" borderTopWidth="1px" borderColor="border.light" py={4}>
-                    {sections.map((section) => {
-                      const sectionKeys = section.items.map((item) => item.key)
-                      const sectionSelectedCount = sectionKeys.filter((key) => selectedKeys.has(key)).length
-                      const sectionAllSelected = sectionKeys.length > 0 && sectionSelectedCount === sectionKeys.length
-                      const sectionSomeSelected = sectionSelectedCount > 0 && sectionSelectedCount < sectionKeys.length
-
-                      return (
-                        <VStack key={section.id} align="stretch" spacing={1} w="full">
-                          <Checkbox
-                            isChecked={sectionAllSelected}
-                            isIndeterminate={sectionSomeSelected}
-                            onChange={() => toggleSection(sectionKeys)}
-                            pl="14px"
-                            spacing={2}
-                          >
-                            <Text
-                              as="span"
-                              fontSize="sm"
-                              fontWeight="bold"
-                              textTransform="uppercase"
-                              letterSpacing="0.02em"
-                            >
-                              {section.title}
-                            </Text>
-                          </Checkbox>
-                          <VStack align="stretch" spacing={1} w="full" pl="14px">
-                            {section.items.map((item) =>
-                              item.kind === "missing" ? (
-                                <MissingPdfSelectRow
-                                  key={item.key}
-                                  pdfKey={item.pdfKey}
-                                  isSelected={selectedKeys.has(item.key)}
-                                  onToggle={() => toggleOne(item.key)}
-                                />
-                              ) : (
-                                <FileSelectRow
-                                  key={item.key}
-                                  doc={item.doc}
-                                  isSelected={selectedKeys.has(item.key)}
-                                  onToggle={() => toggleOne(item.key)}
-                                />
-                              )
-                            )}
-                          </VStack>
-                        </VStack>
-                      )
-                    })}
-                  </VStack>
-                </VStack>
-
-                <Flex gap={4} w="full" align="stretch">
-                  <Button
-                    variant="primary"
+                <ModalBody px={10} py={6} flex={1} minH={0} overflow="hidden" display="flex" flexDirection="column">
+                  <VStack
+                    ref={listScrollRef}
+                    align="stretch"
+                    spacing="10px"
+                    w="full"
                     flex={1}
-                    minH="40px"
-                    onClick={handleDownloadSelected}
-                    isDisabled={selectedKeys.size === 0}
+                    minH={0}
+                    overflowY="auto"
                   >
-                    {t("permitApplication.show.downloadSelectedFiles")}
-                  </Button>
-                  <Button variant="secondary" minH="40px" onClick={onClose}>
-                    {t("ui.cancel")}
-                  </Button>
-                </Flex>
+                    <Checkbox
+                      isChecked={allSelected}
+                      isIndeterminate={someSelected}
+                      onChange={toggleAll}
+                      isDisabled={allKeys.length === 0}
+                      pl="14px"
+                      spacing={2}
+                    >
+                      {t("permitApplication.show.selectOrDeselectAll")}
+                    </Checkbox>
 
-                {review && (
-                  <Link
-                    href={applicationJsonUrl}
-                    download={applicationJsonName}
-                    color="text.link"
-                    textDecoration="underline"
-                    fontSize="md"
-                  >
-                    {t("permitApplication.show.downloadJson")}
-                  </Link>
-                )}
-              </VStack>
+                    <VStack align="stretch" spacing={4} w="full" borderTopWidth="1px" borderColor="border.light" py={4}>
+                      {sections.map((section) => {
+                        const sectionKeys = section.items.map((item) => item.key)
+                        const sectionSelectedCount = sectionKeys.filter((key) => selectedKeys.has(key)).length
+                        const sectionAllSelected = sectionKeys.length > 0 && sectionSelectedCount === sectionKeys.length
+                        const sectionSomeSelected =
+                          sectionSelectedCount > 0 && sectionSelectedCount < sectionKeys.length
+
+                        return (
+                          <VStack key={section.id} align="stretch" spacing={1} w="full">
+                            <Checkbox
+                              isChecked={sectionAllSelected}
+                              isIndeterminate={sectionSomeSelected}
+                              onChange={() => toggleSection(sectionKeys)}
+                              pl="14px"
+                              spacing={2}
+                            >
+                              <Text
+                                as="span"
+                                fontSize="sm"
+                                fontWeight="bold"
+                                textTransform="uppercase"
+                                letterSpacing="0.02em"
+                              >
+                                {section.title}
+                              </Text>
+                            </Checkbox>
+                            <VStack align="stretch" spacing={1} w="full" pl="14px">
+                              {section.items.map((item) =>
+                                item.kind === "missing" ? (
+                                  <MissingPdfSelectRow
+                                    key={item.key}
+                                    pdfKey={item.pdfKey}
+                                    isSelected={selectedKeys.has(item.key)}
+                                    onToggle={() => toggleOne(item.key)}
+                                  />
+                                ) : (
+                                  <FileSelectRow
+                                    key={item.key}
+                                    doc={item.doc}
+                                    isSelected={selectedKeys.has(item.key)}
+                                    onToggle={() => toggleOne(item.key)}
+                                  />
+                                )
+                              )}
+                            </VStack>
+                          </VStack>
+                        )
+                      })}
+                    </VStack>
+                  </VStack>
+                </ModalBody>
+
+                <VStack align="stretch" spacing={4} px={10} pb={10} pt={0} w="full" flexShrink={0}>
+                  <Flex gap={4} w="full" align="stretch">
+                    <Button
+                      variant="primary"
+                      flex={1}
+                      minH="40px"
+                      onClick={handleDownloadSelected}
+                      isDisabled={selectedKeys.size === 0}
+                    >
+                      {t("permitApplication.show.downloadSelectedFiles")}
+                    </Button>
+                    <Button variant="secondary" minH="40px" onClick={onClose}>
+                      {t("ui.cancel")}
+                    </Button>
+                  </Flex>
+
+                  {review && (
+                    <Link
+                      href={applicationJsonUrl}
+                      download={applicationJsonName}
+                      color="text.link"
+                      textDecoration="underline"
+                      fontSize="md"
+                    >
+                      {t("permitApplication.show.downloadJson")}
+                    </Link>
+                  )}
+                </VStack>
+              </>
             )}
           </ModalContent>
         </Modal>
