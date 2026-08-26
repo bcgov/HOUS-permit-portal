@@ -2,11 +2,13 @@ import { Box, Button, Container, Heading, SimpleGrid, Text, VStack } from "@chak
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { useSearchParams } from "react-router-dom"
 import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus } from "../../../types/enums"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { RouterLink } from "../../shared/navigation/router-link"
+import { FilterPills } from "./filter-pills"
 import { InfoDocumentCard } from "./info-document-card"
 
 export const InfoDocumentsIndexScreen = observer(function InfoDocumentsIndexScreen() {
@@ -15,15 +17,41 @@ export const InfoDocumentsIndexScreen = observer(function InfoDocumentsIndexScre
   const { infoDocumentsIntroText } = siteConfigurationStore
   const { t } = useTranslation()
   const translate = t as any
+  const [searchParams, setSearchParams] = useSearchParams()
   const [hasFetched, setHasFetched] = useState(false)
   const [fetchFailed, setFetchFailed] = useState(false)
+  const topicParam = searchParams.get("topic")
 
-  useEffect(() => {
+  const loadDocuments = () => {
     fetchInfoDocuments(true).then((ok) => {
       setFetchFailed(!ok)
       setHasFetched(true)
     })
+  }
+
+  useEffect(() => {
+    loadDocuments()
   }, [])
+
+  const topics = Array.from(new Set(infoDocuments.flatMap((document) => Array.from(document.topics)))).sort((a, b) =>
+    a.localeCompare(b)
+  )
+  const selectedTopic = topicParam && topics.includes(topicParam) ? topicParam : null
+  const visibleDocuments = selectedTopic
+    ? infoDocuments.filter((document) => document.topics.includes(selectedTopic))
+    : infoDocuments
+
+  const setSelectedTopic = (topic: string | null) => {
+    setSearchParams(
+      (current) => {
+        const next = new URLSearchParams(current)
+        if (topic) next.set("topic", topic)
+        else next.delete("topic")
+        return next
+      },
+      { replace: true }
+    )
+  }
 
   const introText = infoDocumentsIntroText?.trim() || translate("infoDocuments.management.introDefault")
   const isLoading = !hasFetched || isLoadingInfoDocuments
@@ -48,8 +76,8 @@ export const InfoDocumentsIndexScreen = observer(function InfoDocumentsIndexScre
             title={translate("infoDocuments.index.errorTitle")}
             description={translate("infoDocuments.index.errorBody")}
           >
-            <Button variant="link" onClick={() => window.location.reload()}>
-              {translate("infoDocuments.index.reload")}
+            <Button variant="link" onClick={loadDocuments}>
+              {translate("infoDocuments.index.retry")}
             </Button>
           </CustomMessageBox>
         ) : infoDocuments.length === 0 ? (
@@ -67,16 +95,33 @@ export const InfoDocumentsIndexScreen = observer(function InfoDocumentsIndexScre
             </VStack>
           </Box>
         ) : (
-          <SimpleGrid
-            columns={{ base: 1, md: 2 }}
-            spacing={5}
-            as="section"
-            aria-label={translate("infoDocuments.index.documentList")}
-          >
-            {infoDocuments.map((document) => (
-              <InfoDocumentCard key={document.id} document={document} />
-            ))}
-          </SimpleGrid>
+          <VStack align="stretch" spacing={10}>
+            {topics.length > 0 && (
+              <FilterPills
+                label={translate("infoDocuments.index.filterByTopic")}
+                value={selectedTopic}
+                options={topics}
+                allLabel={translate("infoDocuments.index.allTopics")}
+                onChange={setSelectedTopic}
+              />
+            )}
+            <Text color="text.secondary">
+              {translate("infoDocuments.index.showingCount", {
+                shown: visibleDocuments.length,
+                total: infoDocuments.length,
+              })}
+            </Text>
+            <SimpleGrid
+              columns={{ base: 1, md: 2 }}
+              spacing={5}
+              as="section"
+              aria-label={translate("infoDocuments.index.documentList")}
+            >
+              {visibleDocuments.map((document) => (
+                <InfoDocumentCard key={document.id} document={document} />
+              ))}
+            </SimpleGrid>
+          </VStack>
         )}
       </VStack>
     </Container>
