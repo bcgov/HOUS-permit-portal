@@ -12,7 +12,9 @@ import { Plus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { Ref, useRef } from "react"
 import { useTranslation } from "react-i18next"
+import { useEphemeralMstModel } from "../../../hooks/use-ephemeral-mst-model"
 import { IRequirementBlock } from "../../../models/requirement-block"
+import { RequirementBlockPickerSearchModel } from "../../../models/requirement-block-picker-search"
 import { RequirementBlocksTable } from "./requirement-blocks-table"
 
 interface IProps {
@@ -33,6 +35,7 @@ export const RequirementsLibraryDrawer = observer(function RequirementsLibraryDr
   const { t } = useTranslation()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const btnRef = useRef<HTMLButtonElement>()
+  const pickerSearch = useEphemeralMstModel(RequirementBlockPickerSearchModel)
 
   return (
     <>
@@ -51,31 +54,34 @@ export const RequirementsLibraryDrawer = observer(function RequirementsLibraryDr
         <DrawerOverlay />
         <DrawerContent display={"flex"} flexDir={"column"} maxW={"container.lg"} h={"full"} p={8}>
           <DrawerCloseButton fontSize={"xs"} />
-          <RequirementBlocksTable
-            h={"calc(100% - 120px)"}
-            flex={1}
-            p={0}
-            renderActionButton={({ requirementBlock }) => {
-              const isDisabled = disabledUseForBlockIds.has(requirementBlock.id)
-              const shouldShowDisabledReason = isDisabled && disabledReason
+          {isOpen && (
+            <RequirementBlocksTable
+              searchModel={pickerSearch}
+              h={"calc(100% - 120px)"}
+              flex={1}
+              p={0}
+              renderActionButton={({ requirementBlock }) => {
+                const isDisabled = disabledUseForBlockIds.has(requirementBlock.id)
+                const shouldShowDisabledReason = isDisabled && disabledReason
 
-              const buttonProps = {
-                size: "sm",
-                variant: "primary",
-                onClick: () => onUse(requirementBlock, onClose),
-                isDisabled,
-                children: t("ui.use"),
-              }
+                const buttonProps = {
+                  size: "sm",
+                  variant: "primary",
+                  onClick: () => onUse(requirementBlock, onClose),
+                  isDisabled,
+                  children: t("ui.use"),
+                }
 
-              return shouldShowDisabledReason ? (
-                <Tooltip label={disabledReason}>
+                return shouldShowDisabledReason ? (
+                  <Tooltip label={disabledReason}>
+                    <Button {...buttonProps} />
+                  </Tooltip>
+                ) : (
                   <Button {...buttonProps} />
-                </Tooltip>
-              ) : (
-                <Button {...buttonProps} />
-              )
-            }}
-          />
+                )
+              }}
+            />
+          )}
         </DrawerContent>
       </Drawer>
     </>

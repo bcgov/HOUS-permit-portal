@@ -5,6 +5,7 @@ class Requirement < ApplicationRecord
   scope :electives, -> { where(elective: true) }
 
   belongs_to :requirement_block, touch: true
+  belongs_to :requirement_question, optional: true, autosave: true
 
   acts_as_list scope: :requirement_block, top_of_list: 0
 
@@ -37,7 +38,6 @@ class Requirement < ApplicationRecord
   # This needs to run before validation because we have validations related to the requirement_code
   before_validation :set_requirement_code
   before_validation :merge_computed_compliance_default_settings
-
   before_validation :convert_value_options,
                     if:
                       Proc.new { |req|
@@ -195,23 +195,64 @@ class Requirement < ApplicationRecord
     ARCHITECTURAL_DRAWING_DEPENDENCY_REQUIRED_SCHEMA.keys.map(&:to_s).freeze
 
   def value_options
-    return nil if input_options.blank? || input_options["value_options"].blank?
-
-    input_options["value_options"]
-  end
-
-  def number_unit
-    return nil if input_options.blank? || input_options["number_unit"].blank?
-
-    input_options["number_unit"]
-  end
-
-  def computed_compliance
-    if input_options.blank? || input_options["computed_compliance"].blank?
+    if effective_input_options.blank? ||
+         effective_input_options["value_options"].blank?
       return nil
     end
 
-    input_options["computed_compliance"]
+    effective_input_options["value_options"]
+  end
+
+  def number_unit
+    if effective_input_options.blank? ||
+         effective_input_options["number_unit"].blank?
+      return nil
+    end
+
+    effective_input_options["number_unit"]
+  end
+
+  def computed_compliance
+    if effective_input_options.blank? ||
+         effective_input_options["computed_compliance"].blank?
+      return nil
+    end
+
+    effective_input_options["computed_compliance"]
+  end
+
+  def effective_label
+    requirement_question&.label || read_attribute(:label)
+  end
+
+  def effective_hint
+    return read_attribute(:hint) unless requirement_question
+
+    if read_attribute(:hint).nil?
+      requirement_question.hint
+    else
+      read_attribute(:hint)
+    end
+  end
+
+  def effective_instructions
+    return read_attribute(:instructions) unless requirement_question
+
+    if read_attribute(:instructions).nil?
+      requirement_question.instructions
+    else
+      read_attribute(:instructions)
+    end
+  end
+
+  def effective_input_type
+    requirement_question&.input_type || input_type
+  end
+
+  def effective_input_options
+    question_options = requirement_question&.input_options || {}
+    placement_options = read_attribute(:input_options) || {}
+    question_options.deep_merge(placement_options)
   end
 
   def key(requirement_block_key)
@@ -225,15 +266,15 @@ class Requirement < ApplicationRecord
   end
 
   def computed_compliance?
-    input_options["computed_compliance"].present?
+    effective_input_options["computed_compliance"].present?
   end
 
   def has_conditional?
-    input_options["conditional"].present?
+    effective_input_options["conditional"].present?
   end
 
   def has_data_validation?
-    input_options["data_validation"].present?
+    effective_input_options["data_validation"].present?
   end
 
   def self.extract_requirement_id_from_submission_key(key)
@@ -360,9 +401,19 @@ class Requirement < ApplicationRecord
   end
 
   def validate_value_options
-    if input_options.blank? || input_options["value_options"].blank? ||
-         !input_options["value_options"].is_a?(Array) ||
-         !input_options["value_options"].all? { |option|
+    # Bank-linked placements keep value_options on the question; use merged options.
+    options =
+      (
+        if requirement_question_id.present?
+          effective_input_options
+        else
+          input_options
+        end
+      )
+
+    if options.blank? || options["value_options"].blank? ||
+         !options["value_options"].is_a?(Array) ||
+         !options["value_options"].all? { |option|
            option.is_a?(Hash) &&
              (option.key?("label") && option["label"].is_a?(String)) &&
              (option.key?("value") && option["value"].is_a?(String))
@@ -395,6 +446,8 @@ class Requirement < ApplicationRecord
 
   def convert_value_options
     return unless attribute_changed?(:input_options)
+    # Placement-only updates (e.g. linked bank restore) may omit value_options.
+    return if input_options.blank? || input_options["value_options"].blank?
 
     inverted_computed_compliance_options_map =
       computed_compliance[
@@ -492,67 +545,72 @@ class Requirement < ApplicationRecord
       return
     end
 
-    current_attributes_of_interest =
-      self
-        .attributes
-        .slice("requirement_code", "input_type", "input_options")
-        .deep_dup
+    # Use effective options so bank-linked placements (value_options on the question)
+    # still satisfy the schema. Exact Hash== was too brittle for QB + restore.
+    actual_options = (effective_input_options || {}).deep_dup
 
     # The front-end sends the conditional as an empty object due to the form setup when conditionals are not added.
-    # Since the energy_step_code_method does not have any conditionals, the schema wouldn't match.
-    # The easiest way to handle this is to remove the conditional key for energy_step_code_method
-    # if it is an empty hash as we don't care about it. if it as it will have no effect to conditionals.
-    # Note we don't want to remove the key if it has other conditionals, as we want the validation below
-    # to catch that, as it is an invalid schema. Also the key is only removed from the duplicated attributes.
+    # Since the energy_step_code_method does not have any conditionals, ignore blank conditionals.
     if requirement_code == ENERGY_STEP_CODE_SELECT_REQUIREMENT_CODE &&
-         (
-           current_attributes_of_interest.dig(
-             "input_options",
-             "conditional"
-           ).present? &&
-             current_attributes_of_interest.dig(
-               "input_options",
-               "conditional"
-             ).empty?
-         )
-      current_attributes_of_interest["input_options"].delete("conditional")
+         actual_options["conditional"].blank?
+      actual_options.delete("conditional")
     end
 
-    current = schema_without_option_labels(current_attributes_of_interest)
-    part_9 =
-      schema_without_option_labels(
+    actual = {
+      "requirement_code" => requirement_code,
+      "input_type" => effective_input_type.to_s,
+      "input_options" => actual_options
+    }
+
+    matches =
+      energy_step_code_schema_match?(
         ENERGY_STEP_CODE_PART_9_DEPENDENCY_REQUIRED_SCHEMA[
           requirement_code.to_sym
-        ]
-      )
-    part_3 =
-      schema_without_option_labels(
-        ENERGY_STEP_CODE_PART_3_DEPENDENCY_REQUIRED_SCHEMA[
-          requirement_code.to_sym
-        ]
-      )
+        ],
+        actual
+      ) ||
+        energy_step_code_schema_match?(
+          ENERGY_STEP_CODE_PART_3_DEPENDENCY_REQUIRED_SCHEMA[
+            requirement_code.to_sym
+          ],
+          actual
+        )
 
-    unless current == part_9 || current == part_3
-      errors.add(
-        :base,
-        :incorrect_requirement_schema,
-        requirement_code: requirement_code
-      )
-    end
+    return if matches
+
+    errors.add(
+      :base,
+      :incorrect_requirement_schema,
+      requirement_code: requirement_code
+    )
   end
 
-  # Labels are display-only; conditionals key off values. Ignore label drift in stored data.
-  def schema_without_option_labels(attrs)
-    return attrs if attrs.blank?
-
-    normalized = attrs.deep_dup
-    options = normalized.dig("input_options", "value_options")
-    return normalized unless options.is_a?(Array)
-
-    normalized["input_options"]["value_options"] = options.map do |option|
-      option.is_a?(Hash) ? option.except("label") : option
+  # Required keys/values must match; labels may differ; extra actual keys allowed.
+  def energy_step_code_schema_match?(expected, actual)
+    return false if expected.blank?
+    unless expected["requirement_code"] == actual["requirement_code"]
+      return false
     end
-    normalized
+    return false unless expected["input_type"].to_s == actual["input_type"].to_s
+
+    expected_opts = expected["input_options"] || {}
+    actual_opts = actual["input_options"] || {}
+
+    if expected_opts["value_options"].present?
+      expected_values =
+        expected_opts["value_options"].filter_map do |o|
+          o["value"] if o.is_a?(Hash)
+        end
+      actual_values =
+        Array(actual_opts["value_options"]).filter_map do |o|
+          o["value"] if o.is_a?(Hash)
+        end
+      return false unless expected_values == actual_values
+    end
+
+    expected_opts
+      .except("value_options")
+      .all? { |key, value| actual_opts[key] == value }
   end
 
   def validate_architectural_drawing_related_requirements_schema

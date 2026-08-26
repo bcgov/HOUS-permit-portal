@@ -1,5 +1,6 @@
 import { extendTheme } from "@chakra-ui/react"
 import { Button } from "./components/button"
+import { Drawer } from "./components/drawer"
 import { FormLabel } from "./components/form-label"
 import { Heading } from "./components/heading"
 import { Input } from "./components/input"
@@ -22,6 +23,9 @@ const styles = {
   global: {
     html: {
       scrollBehaviour: "smooth",
+      "&:has(.chakra-modal__content-container)": {
+        overflow: "hidden",
+      },
     },
     body: {
       color: "text.primary",
@@ -87,7 +91,8 @@ const styles = {
     },
   },
 }
-const components = { Button, FormLabel, Heading, Input, Link, Select, Text, Table, Radio, Tag, Tabs }
+
+const components = { Button, FormLabel, Heading, Input, Link, Select, Text, Table, Radio, Tag, Tabs, Drawer }
 const overrides = { styles, colors, fonts, fontSizes, sizes, radii, space, shadows, components }
 
 export const theme = extendTheme(overrides)

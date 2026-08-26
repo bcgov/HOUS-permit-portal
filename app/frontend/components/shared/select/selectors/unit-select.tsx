@@ -8,9 +8,10 @@ import { ENumberUnit } from "../../../../types/enums"
 interface IProps {
   value: ENumberUnit
   onChange: (value: ENumberUnit) => void
+  isDisabled?: boolean
 }
 
-export const UnitSelect = observer(function UnitSelect({ value, onChange }: IProps) {
+export const UnitSelect = observer(function UnitSelect({ value, onChange, isDisabled }: IProps) {
   const unitGroupEntries = Object.entries(unitGroups)
   return (
     <Menu>
@@ -22,6 +23,7 @@ export const UnitSelect = observer(function UnitSelect({ value, onChange }: IPro
         borderRadius="sm"
         px={3}
         py={"0.375rem"}
+        isDisabled={isDisabled}
         _disabled={{
           bg: "greys.grey10",
         }}

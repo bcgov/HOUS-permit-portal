@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom"
 import { usePart9StepCode } from "../../../../hooks/resources/use-part-9-step-code"
 import { usePermitApplication } from "../../../../hooks/resources/use-permit-application"
 import { useMst } from "../../../../setup/root"
+import { belowNavBarInFlow } from "../../../../styles/nav-bar-offset"
 import { EFlashMessageStatus } from "../../../../types/enums"
 import { CustomMessageBox } from "../../../shared/base/custom-message-box"
 import { NotFoundScreen } from "../../../shared/base/not-found-screen"
@@ -63,7 +64,7 @@ export const Part9StepCodeForm = observer(function Part9StepCodeForm() {
   if (currentStepCode?.isDiscarded) return <NotFoundScreen />
 
   return (
-    <Flex direction="column" h="calc(100vh - var(--app-navbar-height))" w="full" bg="white">
+    <Flex direction="column" {...belowNavBarInFlow} w="full" bg="white">
       {section && (
         <StepCodeSubNavBar infoPagePath={infoPagePath} isPermitLinked={isPermitLinked} exitLinkPath={exitLinkPath} />
       )}

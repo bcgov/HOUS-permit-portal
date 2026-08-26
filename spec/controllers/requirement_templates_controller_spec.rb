@@ -211,4 +211,194 @@ RSpec.describe Api::RequirementTemplatesController,
       ).to include(draft_version.id)
     end
   end
+
+  describe "POST #create_draft" do
+    let(:requirement_template) do
+      create(:live_requirement_template_with_sections)
+    end
+    let(:config_errors) do
+      [
+        {
+          category: "data_validation",
+          block_id: "block-id",
+          block_name: "Details",
+          requirement_id: "requirement-id",
+          requirement_code: "project_value",
+          requirement_name: "Project value",
+          message: "data validation must have operation and value"
+        }
+      ]
+    end
+
+    before do
+      sign_in super_admin
+      allow(TemplateVersioningService).to receive(:create_draft!).and_raise(
+        TemplateVersionConfigError.new(config_errors)
+      )
+    end
+
+    it "returns structured configuration errors without a flash message" do
+      post :create_draft, params: { id: requirement_template.id }
+
+      expect(response).to have_http_status(:bad_request)
+      expect(json_response.dig("meta", "config_errors")).to eq(
+        config_errors.map(&:deep_stringify_keys)
+      )
+      expect(json_response.dig("meta", "message")).to be_nil
+    end
+  end
+
+  describe "POST #validate_config" do
+    let(:requirement_template) do
+      create(:live_requirement_template_with_sections)
+    end
+    let(:config_errors) do
+      [
+        {
+          category: "data_validation",
+          block_id: "block-id",
+          block_name: "Details",
+          requirement_id: "requirement-id",
+          requirement_code: "project_value",
+          requirement_name: "Project value",
+          message: "data validation must have operation and value"
+        }
+      ]
+    end
+
+    before { sign_in super_admin }
+
+    it "returns an empty config_errors list when valid" do
+      allow(TemplateVersioningService).to receive(
+        :validate_requirement_template!
+      )
+
+      post :validate_config, params: { id: requirement_template.id }
+
+      expect(response).to have_http_status(:success)
+      expect(json_response.dig("meta", "config_errors")).to eq([])
+    end
+
+    it "returns structured configuration errors without a flash message" do
+      allow(TemplateVersioningService).to receive(
+        :validate_requirement_template!
+      ).and_raise(TemplateVersionConfigError.new(config_errors))
+
+      post :validate_config, params: { id: requirement_template.id }
+
+      expect(response).to have_http_status(:bad_request)
+      expect(json_response.dig("meta", "config_errors")).to eq(
+        config_errors.map(&:deep_stringify_keys)
+      )
+      expect(json_response.dig("meta", "message")).to be_nil
+    end
+  end
+
+  describe "GET #for_filter" do
+    let(:jurisdiction) { create(:sub_district) }
+    let(:other_jurisdiction) { create(:sub_district) }
+    let(:submitter) { create(:user, :submitter) }
+
+    let!(:inbox_template) do
+      create(:requirement_template, nickname: "Plumbing permit")
+    end
+    let!(:draft_only_template) do
+      create(:requirement_template, nickname: "Draft only permit")
+    end
+    let!(:other_jurisdiction_template) do
+      create(:requirement_template, nickname: "Other city permit")
+    end
+    let!(:unused_published_template) do
+      create(:requirement_template, nickname: "Unused published permit")
+    end
+
+    let!(:inbox_version) do
+      create(
+        :template_version,
+        requirement_template: inbox_template,
+        status: :published
+      )
+    end
+    let!(:draft_version) do
+      create(
+        :template_version,
+        requirement_template: draft_only_template,
+        status: :published
+      )
+    end
+    let!(:other_version) do
+      create(
+        :template_version,
+        requirement_template: other_jurisdiction_template,
+        status: :published
+      )
+    end
+    let!(:unused_version) do
+      create(
+        :template_version,
+        requirement_template: unused_published_template,
+        status: :published
+      )
+    end
+
+    let!(:inbox_project) do
+      create(:permit_project, jurisdiction: jurisdiction, owner: submitter)
+    end
+
+    before do
+      create(
+        :permit_application,
+        status: :newly_submitted,
+        submitter: submitter,
+        permit_project: inbox_project,
+        template_version: inbox_version
+      )
+      create(
+        :permit_application,
+        status: :new_draft,
+        submitter: submitter,
+        permit_project: inbox_project,
+        template_version: draft_version
+      )
+      create(
+        :permit_application,
+        status: :newly_submitted,
+        submitter: submitter,
+        permit_project:
+          create(
+            :permit_project,
+            jurisdiction: other_jurisdiction,
+            owner: submitter
+          ),
+        template_version: other_version
+      )
+    end
+
+    def option_labels
+      json_response["data"].map { |option| option["label"] }
+    end
+
+    it "returns only templates on the current user's applications when unscoped" do
+      sign_in submitter
+      get :for_filter
+
+      expect(response).to have_http_status(:success)
+      expect(option_labels).to contain_exactly(
+        "Plumbing permit",
+        "Draft only permit",
+        "Other city permit"
+      )
+    end
+
+    it "returns only templates on a submitter's project, including drafts" do
+      sign_in submitter
+      get :for_filter, params: { permit_project_id: inbox_project.id }
+
+      expect(response).to have_http_status(:success)
+      expect(option_labels).to contain_exactly(
+        "Plumbing permit",
+        "Draft only permit"
+      )
+    end
+  end
 end

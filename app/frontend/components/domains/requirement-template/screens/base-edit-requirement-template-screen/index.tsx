@@ -15,6 +15,7 @@ import {
   IRequirementTemplateUpdateParams,
   ITemplateSectionBlockAttributes,
 } from "../../../../../types/api-request"
+import { IRequirementTemplateConfigError } from "../../../../../types/types"
 import { CalloutBanner } from "../../../../shared/base/callout-banner"
 import { ErrorScreen } from "../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
@@ -38,6 +39,7 @@ export interface IEditRequirementActionsProps {
   onScheduleConfirm?: (date: Date) => void
   onForcePublishNow?: () => void
   onCreateDraft?: () => void
+  onSaveAndValidate?: () => Promise<IRequirementTemplateConfigError[]>
   triggerButtonProps?: Partial<ButtonProps>
   requirementTemplate?: IRequirementTemplate
   onSaveDraft?: () => void
@@ -170,6 +172,20 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
     })()
   }
 
+  const onSaveAndValidate = async (): Promise<IRequirementTemplateConfigError[]> => {
+    let errors: IRequirementTemplateConfigError[] = []
+    await handleSubmit(async (templateFormData) => {
+      const formattedSubmitData = formatSubmitData(templateFormData)
+      const saved = await requirementTemplateStore.updateRequirementTemplate(
+        requirementTemplate.id,
+        formattedSubmitData
+      )
+      if (!saved) return
+      errors = await requirementTemplateStore.validateConfig(requirementTemplate.id)
+    })()
+    return errors
+  }
+
   const hasNoSections = watchedSectionsAttributes.length === 0
 
   const allTemplateSectionBlocks = watchedSectionsAttributes.flatMap(
@@ -212,6 +228,7 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
               onScheduleDate={onSchedule}
               onForcePublishNow={onForcePublishNow}
               onCreateDraft={onCreateDraft}
+              onSaveAndValidate={onSaveAndValidate}
               onAddSection={onAddSection}
               requirementTemplate={requirementTemplate}
               hasStepCodeDependencyError={hasStepCodeDependencyError}

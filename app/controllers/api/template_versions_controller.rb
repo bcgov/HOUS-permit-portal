@@ -338,6 +338,16 @@ class Api::TemplateVersionsController < Api::ApplicationController
       render_requirement_template_success(
         "requirement_template.promote_draft_success"
       )
+    rescue TemplateVersionConfigError => e
+      render_error nil,
+                   {
+                     meta: {
+                       config_errors: e.config_errors
+                     },
+                     log_args: {
+                       errors: e.message
+                     }
+                   }
     rescue TemplateVersionDraftError,
            TemplateVersionScheduleError,
            TemplateVersionForcePublishNowError => e
@@ -345,6 +355,61 @@ class Api::TemplateVersionsController < Api::ApplicationController
                    message_opts: {
                      error_message: e.message
                    }
+    end
+  end
+
+  def validate_config
+    authorize @template_version
+
+    begin
+      TemplateVersioningService.validate_config!(@template_version)
+      render_success nil, nil, { meta: { config_errors: [] } }
+    rescue TemplateVersionConfigError => e
+      render_error nil,
+                   {
+                     meta: {
+                       config_errors: e.config_errors
+                     },
+                     log_args: {
+                       errors: e.message
+                     }
+                   }
+    end
+  end
+
+  def restore_layout
+    authorize @template_version, :restore_layout?
+
+    begin
+      RequirementTemplateStructureRestoreService.new(@template_version).call!
+      render_requirement_template_success(
+        "requirement_template.restore_layout_success"
+      )
+    rescue RequirementTemplateStructureRestoreError => e
+      render_error "requirement_template.restore_layout_error",
+                   message_opts: {
+                     error_message: e.message
+                   }
+    end
+  end
+
+  def restore_requirement_block
+    authorize @template_version, :restore_requirement_block?
+
+    begin
+      block =
+        RequirementBlockSnapshotRestoreService.new(
+          @template_version,
+          restore_requirement_block_params[:requirement_block_id]
+        ).call!
+
+      render_success block,
+                     "requirement_template.restore_requirement_block_success",
+                     { blueprint: RequirementBlockBlueprint }
+    rescue RequirementBlockSnapshotRestoreError, StandardError => e
+      render_error "requirement_template.restore_requirement_block_error",
+                   { message_opts: { error_message: e.message } },
+                   e
     end
   end
 
@@ -532,6 +597,10 @@ class Api::TemplateVersionsController < Api::ApplicationController
       :skip_date_check,
       notified_jurisdiction_ids: []
     )
+  end
+
+  def restore_requirement_block_params
+    params.permit(:requirement_block_id)
   end
 
   def render_requirement_template_success(message_key)

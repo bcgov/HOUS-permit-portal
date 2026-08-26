@@ -24,6 +24,7 @@ import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
+import { stickyBelowNavBar } from "../../../styles/nav-bar-offset"
 import { IRevisionRequestsAttributes } from "../../../types/api-request"
 import { IFormIORequirement, IRevisionRequest, ISubmissionVersion } from "../../../types/types"
 import { getRequirementByKey } from "../../../utils/formio-component-traversal"
@@ -246,9 +247,9 @@ export const RevisionSideBar = observer(
             borderRightColor="border.light"
             width={"sidebar.width"}
             position="sticky"
-            top={topHeight}
+            {...stickyBelowNavBar(`${topHeight ?? 0}px`)}
             bottom="0"
-            height={`calc(100vh - ${topHeight}px)`}
+            height={`calc(100vh - ${topHeight ?? 0}px - var(--app-navbar-offset))`}
             float="left"
             id="permit-revision-sidebar"
             bg="theme.yellowLight"

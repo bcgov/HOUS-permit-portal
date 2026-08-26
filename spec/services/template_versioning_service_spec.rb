@@ -549,6 +549,169 @@ RSpec.describe TemplateVersioningService, type: :service, search: true do
     end
   end
 
+  describe "configuration validation" do
+    let(:config_error) do
+      TemplateVersionConfigError.new("Template configuration is invalid")
+    end
+    let(:invalid_validator) { instance_double(TemplateVersionConfigValidator) }
+
+    before do
+      allow(invalid_validator).to receive(:validate!).and_raise(config_error)
+    end
+
+    describe ".create_draft!" do
+      it "fails before saving the draft version" do
+        allow(TemplateVersionConfigValidator).to receive(:new).and_return(
+          invalid_validator
+        )
+        draft_count = requirement_template.template_versions.draft.count
+
+        expect {
+          described_class.create_draft!(requirement_template)
+        }.to raise_error(
+          TemplateVersionConfigError,
+          "Template configuration is invalid"
+        )
+        expect(requirement_template.template_versions.draft.count).to eq(
+          draft_count
+        )
+      end
+    end
+
+    describe ".validate_requirement_template!" do
+      it "raises without creating a template version" do
+        allow(TemplateVersionConfigValidator).to receive(:new).and_return(
+          invalid_validator
+        )
+        version_count = requirement_template.template_versions.count
+
+        expect {
+          described_class.validate_requirement_template!(requirement_template)
+        }.to raise_error(
+          TemplateVersionConfigError,
+          "Template configuration is invalid"
+        )
+        expect(requirement_template.template_versions.count).to eq(
+          version_count
+        )
+      end
+
+      it "returns true when the template is valid" do
+        expect(
+          described_class.validate_requirement_template!(requirement_template)
+        ).to eq(true)
+      end
+    end
+
+    describe ".validate_config!" do
+      it "raises for an invalid draft snapshot" do
+        draft_version = described_class.create_draft!(requirement_template)
+        allow(TemplateVersionConfigValidator).to receive(:new).and_return(
+          invalid_validator
+        )
+
+        expect {
+          described_class.validate_config!(draft_version)
+        }.to raise_error(
+          TemplateVersionConfigError,
+          "Template configuration is invalid"
+        )
+      end
+    end
+
+    describe ".schedule!" do
+      it "fails before saving the scheduled version" do
+        allow(TemplateVersionConfigValidator).to receive(:new).and_return(
+          invalid_validator
+        )
+        scheduled_count = requirement_template.template_versions.scheduled.count
+
+        expect {
+          described_class.schedule!(requirement_template, Date.tomorrow)
+        }.to raise_error(
+          TemplateVersionConfigError,
+          "Template configuration is invalid"
+        )
+        expect(requirement_template.template_versions.scheduled.count).to eq(
+          scheduled_count
+        )
+      end
+    end
+
+    describe ".force_publish_now!" do
+      around do |example|
+        original = ENV["ENABLE_TEMPLATE_FORCE_PUBLISH"]
+        ENV["ENABLE_TEMPLATE_FORCE_PUBLISH"] = "true"
+        example.run
+      ensure
+        ENV["ENABLE_TEMPLATE_FORCE_PUBLISH"] = original
+      end
+
+      it "fails before saving or enqueueing the publish job" do
+        allow(TemplateVersionConfigValidator).to receive(:new).and_return(
+          invalid_validator
+        )
+        allow(ModelCallbackJob).to receive(:perform_async)
+        scheduled_count = requirement_template.template_versions.scheduled.count
+
+        expect {
+          described_class.force_publish_now!(requirement_template)
+        }.to raise_error(
+          TemplateVersionConfigError,
+          "Template configuration is invalid"
+        )
+        expect(requirement_template.template_versions.scheduled.count).to eq(
+          scheduled_count
+        )
+        expect(ModelCallbackJob).not_to have_received(:perform_async)
+      end
+    end
+
+    describe ".promote_draft_to_scheduled!" do
+      it "fails before saving the promoted version" do
+        draft_version = described_class.create_draft!(requirement_template)
+        allow(TemplateVersionConfigValidator).to receive(:new).and_return(
+          invalid_validator
+        )
+        scheduled_count = requirement_template.template_versions.scheduled.count
+
+        expect {
+          described_class.promote_draft_to_scheduled!(
+            draft_version,
+            Date.tomorrow
+          )
+        }.to raise_error(
+          TemplateVersionConfigError,
+          "Template configuration is invalid"
+        )
+        expect(requirement_template.template_versions.scheduled.count).to eq(
+          scheduled_count
+        )
+      end
+    end
+
+    describe ".publish_version!" do
+      it "leaves an invalid legacy version scheduled" do
+        template_version =
+          described_class.schedule!(requirement_template, Date.tomorrow)
+        allow(TemplateVersionConfigValidator).to receive(:new).and_return(
+          invalid_validator
+        )
+
+        Timecop.freeze(Date.tomorrow) do
+          expect {
+            described_class.publish_version!(template_version)
+          }.to raise_error(
+            TemplateVersionConfigError,
+            "Template configuration is invalid"
+          )
+        end
+
+        expect(template_version.reload).to be_scheduled
+      end
+    end
+  end
+
   context "publish_versions_publishable_now!" do
     it "publishes latest version publishable now and deprecates all older versions with correct reason" do
       expected_published_versions = []
@@ -616,6 +779,45 @@ RSpec.describe TemplateVersioningService, type: :service, search: true do
 
         expect(expected_scheduled_version.status).to eq("scheduled")
       end
+    end
+
+    it "publishes valid versions and reports invalid versions" do
+      invalid_template = requirement_template
+      valid_template =
+        create(:live_full_requirement_template, sections_count: 1)
+      invalid_version = nil
+      valid_version = nil
+
+      Timecop.freeze(Date.yesterday) do
+        invalid_version =
+          described_class.schedule!(invalid_template, Date.current + 1)
+        valid_version =
+          described_class.schedule!(valid_template, Date.current + 1)
+      end
+
+      invalid_blocks = invalid_version.requirement_blocks_json
+      allow(TemplateVersionConfigValidator).to receive(
+        :new
+      ) do |requirement_blocks_json:, **|
+        validator =
+          instance_double(TemplateVersionConfigValidator, validate!: true)
+        if requirement_blocks_json == invalid_blocks
+          allow(validator).to receive(:validate!).and_raise(
+            TemplateVersionConfigError,
+            "invalid snapshot"
+          )
+        end
+        validator
+      end
+
+      expect {
+        described_class.publish_versions_publishable_now!
+      }.to raise_error(TemplateVersionsPublishError) { |error|
+        expect(error.errors.pluck(:error)).to include("invalid snapshot")
+      }
+
+      expect(invalid_version.reload).to be_scheduled
+      expect(valid_version.reload).to be_published
     end
   end
 end

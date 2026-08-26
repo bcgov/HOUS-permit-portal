@@ -6,6 +6,7 @@ import {
   Flex,
   FormControl,
   FormHelperText,
+  FormLabel,
   HStack,
   Heading,
   IconButton,
@@ -16,6 +17,7 @@ import {
   PopoverContent,
   PopoverHeader,
   PopoverTrigger,
+  Switch,
   Text,
   Textarea,
   VStack,
@@ -271,8 +273,10 @@ export const SharePreviewPopover: React.FC<ISharePreviewPopoverProps> = observer
     const { isOpen, onOpen, onClose } = useDisclosure()
     const { t } = useTranslation()
     const [isInviting, setIsInviting] = useState(false)
-    const { uiStore } = useMst()
+    const [isTogglingPubliclyPreviewable, setIsTogglingPubliclyPreviewable] = useState(false)
+    const { uiStore, userStore, templateVersionStore } = useMst()
 
+    const isSuperAdmin = !!userStore.currentUser?.isSuperAdmin
     const previews: ITemplateVersionPreview[] = (dtv.templateVersionPreviews as ITemplateVersionPreview[]) ?? []
     const previewerCount = previews.length
 
@@ -303,12 +307,23 @@ export const SharePreviewPopover: React.FC<ISharePreviewPopoverProps> = observer
       setIsInviting(false)
     }
 
+    const handleTogglePubliclyPreviewable = async () => {
+      setIsTogglingPubliclyPreviewable(true)
+      try {
+        await templateVersionStore.togglePubliclyPreviewable(dtv.id, !dtv.publiclyPreviewable)
+      } finally {
+        setIsTogglingPubliclyPreviewable(false)
+      }
+    }
+
     return (
       <Box>
         <Popover isOpen={isOpen} onClose={onClose}>
           <PopoverTrigger>
             <Button variant="link" onClick={onOpen} {...rest}>
-              {t("templateVersionPreview.sharing.sharePreviewLink", { n: previewerCount.toString() })}
+              {t("templateVersionPreview.sharing.sharePreviewLink", {
+                n: dtv.publiclyPreviewable ? "public" : previewerCount.toString(),
+              })}
             </Button>
           </PopoverTrigger>
           <PopoverContent width="lg">
@@ -353,10 +368,27 @@ export const SharePreviewPopover: React.FC<ISharePreviewPopoverProps> = observer
                     {t("templateVersionPreview.sharing.inviteToPreviewButton")}
                   </Button>
                 </Box>
-              ) : !R.isEmpty(previews) ? (
-                previews.map((preview) => <PreviewCard key={preview.id} templateVersionPreview={preview} />)
               ) : (
-                <Box color="greys.grey01">{t("templateVersionPreview.sharing.noPreviewersYet")}</Box>
+                <VStack align="stretch" spacing={3}>
+                  {isSuperAdmin && (
+                    <FormControl display="flex" alignItems="center">
+                      <FormLabel htmlFor="publicly-previewable-toggle" mb="0" mr={3} fontSize="sm" flex="1">
+                        {t("requirementTemplate.publiclyPreviewable.toggleLabel")}
+                      </FormLabel>
+                      <Switch
+                        id="publicly-previewable-toggle"
+                        isChecked={dtv.publiclyPreviewable}
+                        isDisabled={isTogglingPubliclyPreviewable}
+                        onChange={handleTogglePubliclyPreviewable}
+                      />
+                    </FormControl>
+                  )}
+                  {!R.isEmpty(previews) ? (
+                    previews.map((preview) => <PreviewCard key={preview.id} templateVersionPreview={preview} />)
+                  ) : (
+                    <Box color="greys.grey01">{t("templateVersionPreview.sharing.noPreviewersYet")}</Box>
+                  )}
+                </VStack>
               )}
             </PopoverBody>
           </PopoverContent>

@@ -1,6 +1,7 @@
 import { Badge, Box, BoxProps, Flex, Icon, Tab, TabList, Text, VStack } from "@chakra-ui/react"
 import React from "react"
 import { Link as RouterLink, useLocation } from "react-router-dom"
+import { stickyBelowNavBar } from "../../../styles/nav-bar-offset"
 
 // THIS COMPONENT MUST BE USED INSIDE OF A TABS COMPONENT
 // https://v2.chakra-ui.com/docs/components/tabs/usage
@@ -15,7 +16,6 @@ export interface ITabItem {
 }
 
 interface IProjectSidebarTabListProps extends BoxProps {
-  top?: number | string
   tabsData?: ITabItem[]
 }
 
@@ -38,8 +38,8 @@ export const ProjectSidebarTabList = ({ top = 0, tabsData, children, ...rest }: 
       borderRight="1px"
       borderColor="border.light"
       position="sticky"
-      top={top}
-      h="100vh"
+      {...stickyBelowNavBar()}
+      h="calc(100vh - var(--app-navbar-offset))"
       alignSelf="flex-start"
       pb={navHeight}
       as={tabsData ? TabList : "div"}
