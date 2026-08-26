@@ -5,6 +5,7 @@ import {
   Center,
   Flex,
   FormControl,
+  FormErrorMessage,
   FormLabel,
   Heading,
   HStack,
@@ -149,6 +150,7 @@ const BuildingInfoSection = observer(function BuildingInfoSection() {
   const { checklist } = usePart9StepCode()
   const formMethods = useForm({ mode: "onChange" })
   const { control, handleSubmit, reset, formState } = formMethods
+  const { errors } = formState
 
   useEffect(() => {
     if (!checklist) return
@@ -190,16 +192,31 @@ const BuildingInfoSection = observer(function BuildingInfoSection() {
             {t("stepCode.part9.buildingInfo.heading")}
           </Heading>
           <Text>{t("stepCode.part9.buildingInfo.instructions")}</Text>
-          <TextFormControl label={t("stepCodeChecklist.edit.projectInfo.builder")} fieldName="builder" />
-          <FormControl>
-            <FormLabel>{t("stepCodeChecklist.edit.projectInfo.buildingType.label")}</FormLabel>
+          <TextFormControl label={t("stepCodeChecklist.edit.projectInfo.builder")} fieldName="builder" required />
+          <FormControl isInvalid={!!errors.buildingType}>
+            <HStack gap={0}>
+              <FormLabel>
+                {t("stepCodeChecklist.edit.projectInfo.buildingType.label")}
+                <Text as="span" color="semantic.error" ml={1}>
+                  *
+                </Text>
+              </FormLabel>
+            </HStack>
             <InputGroup>
               <Controller
                 control={control}
                 name="buildingType"
-                render={({ field: { onChange, value } }) => <BuildingTypeSelect onChange={onChange} value={value} />}
+                rules={{
+                  required: t("ui.isRequired", {
+                    field: t("stepCodeChecklist.edit.projectInfo.buildingType.label"),
+                  }),
+                }}
+                render={({ field: { onChange, value } }) => (
+                  <BuildingTypeSelect onChange={onChange} value={value} isInvalid={!!errors.buildingType} />
+                )}
               />
             </InputGroup>
+            <FormErrorMessage>{errors.buildingType?.message as string}</FormErrorMessage>
           </FormControl>
           <Part9FormFooter handleSubmit={handleSubmit} onSubmit={onSubmit} isLoading={formState.isSubmitting} />
         </VStack>

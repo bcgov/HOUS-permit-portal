@@ -21,9 +21,10 @@ import { i18nPrefix } from "./i18n-prefix"
 interface IProps {
   onChange: (event: any) => void
   value: EStepCodeBuildingType
+  isInvalid?: boolean
 }
 
-export const BuildingTypeSelect = observer(function BuildingTypeSelect({ onChange, value }: IProps) {
+export const BuildingTypeSelect = observer(function BuildingTypeSelect({ onChange, value, isInvalid }: IProps) {
   const {
     stepCodeStore: { selectOptions },
   } = useMst()
@@ -39,7 +40,7 @@ export const BuildingTypeSelect = observer(function BuildingTypeSelect({ onChang
                 align="center"
                 bg="white"
                 cursor="pointer"
-                borderColor="gray.200"
+                borderColor={isInvalid ? "semantic.error" : "gray.200"}
                 borderWidth={1}
                 rounded="base"
                 shadow="base"

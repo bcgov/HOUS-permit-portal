@@ -181,10 +181,15 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
   }, [currentStepCode?.id, currentStepCode?.currentStage, reset])
 
   const stageLabel = (stage: EStepCodeChecklistStage) => t(`stepCodeChecklist.edit.projectInfo.stages.${stage}`)
-  const showPermitDate = selectedStage !== EStepCodeChecklistStage.preConstruction
+  // ponytail: standalone only — permit-linked dates come from the application.
+  const permitDateRequired = isEditable && selectedStage !== EStepCodeChecklistStage.preConstruction
+  const showPermitDate = isEditable || selectedStage !== EStepCodeChecklistStage.preConstruction
 
   const handleStageSelect = (stage: EStepCodeChecklistStage) => {
     setSelectedStage(stage)
+    if (stage === EStepCodeChecklistStage.preConstruction) {
+      formMethods.clearErrors("permitDate")
+    }
   }
 
   const fieldTooltipProps = {
@@ -247,8 +252,20 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
     }
   }
 
+  const ensurePermitDateIfRequired = (values: IProjectInformationForm) => {
+    if (!permitDateRequired || !isBlankPermitDate(values.permitDate)) return true
+
+    formMethods.setError("permitDate", {
+      type: "required",
+      message: t("ui.isRequired", { field: t("stepCode.projectInformation.date") }),
+    })
+    formMethods.setFocus("permitDate")
+    return false
+  }
+
   const onSubmit = async (values: IProjectInformationForm) => {
     if (isLockedBySubmittedPermit) return
+    if (!ensurePermitDateIfRequired(values)) return
 
     const checklist = await saveProjectInformation(values)
     if (!checklist) return
@@ -258,6 +275,8 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
   }
 
   const handleSaveAndGoBack = handleSubmit(async (values) => {
+    if (!ensurePermitDateIfRequired(values)) return
+
     const checklist = await saveProjectInformation(values)
     if (!checklist) return
 
@@ -498,10 +517,12 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
           {showPermitDate &&
             (isEditable ? (
               <DatePickerFormControl
+                key={permitDateRequired ? "permit-date-required" : "permit-date-optional"}
                 flex={1}
                 maxW={{ base: "none", xl: "430px" }}
                 label={t("stepCode.projectInformation.date") as string}
                 fieldName="permitDate"
+                required={permitDateRequired}
                 LabelInfo={() => (
                   <Flex ml={2}>
                     <InfoTooltip
@@ -543,6 +564,10 @@ function formatPermitDate(value: Date | string | null | undefined) {
   if (!value) return ""
   const date = value instanceof Date ? value : new Date(value)
   return Number.isNaN(date.getTime()) ? "" : format(date, datefnsAppDateFormat)
+}
+
+function isBlankPermitDate(value: Date | string | null | undefined) {
+  return !formatPermitDate(value)
 }
 
 function getDefaultValues(currentStepCode): IProjectInformationForm {
