@@ -24,11 +24,13 @@ export const InfoDocumentCard = observer(function InfoDocumentCard({ document }:
     <Flex
       direction="column"
       border="1px solid"
-      borderColor="border.light"
+      borderColor="border.base"
       p={5}
       bg="white"
       h="full"
       gap={4}
+      transition="border-color 0.2s ease"
+      _hover={{ borderColor: "text.link" }}
     >
       {document.topics.length > 0 && (
         <HStack spacing={2} wrap="wrap">
@@ -76,6 +78,7 @@ export const InfoDocumentCard = observer(function InfoDocumentCard({ document }:
               as="a"
               href={downloadUrl}
               variant="secondary"
+              size="sm"
               leftIcon={<Download size={16} aria-hidden />}
               aria-label={translate("infoDocuments.index.downloadAria", { title: document.title })}
             >
