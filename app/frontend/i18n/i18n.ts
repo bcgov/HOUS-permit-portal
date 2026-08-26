@@ -3408,7 +3408,7 @@ Thank you,
             },
             buildingInfo: {
               heading: "Building information",
-              instructions: "Confirm the builder and building type for this Step Code stage.",
+              instructions: "Confirm the applicant and building type for this Step Code stage.",
             },
             review: {
               description:
@@ -3514,7 +3514,7 @@ Thank you,
               },
               heading: "A: Project Information",
               permitNum: "Permit reference number",
-              builder: "Builder",
+              builder: "Applicant",
               address: "Project address",
               postalCode: "Postal code",
               jurisdiction: "Municipality / District",
