@@ -7,14 +7,10 @@ class InfoDocumentFileBlueprint < Blueprinter::Base
   field :file, transformer: Transformers::FileAttachmentTransformer
 
   field :file_url do |file, _options|
-    file.file_url(disposition: "inline") if file.file_available?
-  rescue StandardError
-    nil
+    file.file_url_safe(disposition: "inline")
   end
 
   field :download_url do |file, _options|
-    file.file_url(disposition: "attachment") if file.file_available?
-  rescue StandardError
-    nil
+    file.file_url_safe(disposition: "attachment")
   end
 end
