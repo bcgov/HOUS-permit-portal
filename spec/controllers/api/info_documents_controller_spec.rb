@@ -52,10 +52,10 @@ RSpec.describe Api::InfoDocumentsController, type: :controller do
 
     it "includes open and download urls for published files" do
       create(:info_document, :published)
-      allow_any_instance_of(InfoDocumentFile).to receive(:file_url).with(
+      allow_any_instance_of(InfoDocumentFile).to receive(:file_url_safe).with(
         disposition: "inline"
       ).and_return("https://example.com/guide.pdf")
-      allow_any_instance_of(InfoDocumentFile).to receive(:file_url).with(
+      allow_any_instance_of(InfoDocumentFile).to receive(:file_url_safe).with(
         disposition: "attachment"
       ).and_return("https://example.com/guide-download.pdf")
 
