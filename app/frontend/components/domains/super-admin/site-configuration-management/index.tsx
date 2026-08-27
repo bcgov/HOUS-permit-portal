@@ -2,6 +2,7 @@ import { Container, Grid, GridItem, Heading, VStack } from "@chakra-ui/react"
 import {
   File,
   FileText,
+  Files,
   FlagBanner,
   NotePencil,
   Question,
@@ -85,6 +86,16 @@ export const SiteConfigurationManagementScreen = observer(function SiteConfigura
               linkText={t("ui.edit")}
               icon={<VideoCamera size="24px" color="var(--chakra-colors-text-link)" />}
               href="help-videos"
+              h="full"
+            />
+          </GridItem>
+          <GridItem>
+            <HomeScreenBox
+              title={t(`${i18nPrefix}.infoDocuments.title`)}
+              description={t(`${i18nPrefix}.infoDocuments.description`)}
+              linkText={t("ui.edit")}
+              icon={<Files size="24px" color="var(--chakra-colors-text-link)" />}
+              href="info-documents"
               h="full"
             />
           </GridItem>
