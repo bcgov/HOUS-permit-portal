@@ -322,8 +322,8 @@ function documentPayload(formData: IInfoDocumentFormData) {
     publish: formData.isPublished,
   }
 
-  if (formData.documentFileAttributes) {
-    payload.documentFileAttributes = formData.documentFileAttributes
+  if (formData.file) {
+    payload.file = formData.file
   }
 
   return payload

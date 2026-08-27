@@ -20,13 +20,15 @@ import {
   useDisclosure,
 } from "@chakra-ui/react"
 import { UppyFile } from "@uppy/core"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import useUppyS3 from "../../../hooks/use-uppy-s3"
 import { IInfoDocument } from "../../../models/info-document"
 import { useMst } from "../../../setup/root"
+import { EFileUploadAttachmentType } from "../../../types/enums"
 import { CalloutBanner } from "../../shared/base/callout-banner"
+import { FileDownloadButton } from "../../shared/base/file-download-button"
 import { ConfirmationModal } from "../../shared/confirmation-modal"
 import { TagsSelect } from "../../shared/select/selectors/tags-select"
 import { UppyDashboard } from "../../shared/uppy-dashboard"
@@ -36,16 +38,13 @@ export interface IInfoDocumentFormData {
   description?: string | null
   topics: string[]
   isPublished: boolean
-  documentFileAttributes?: {
-    id?: string
-    file?: {
-      id: string
-      storage: string
-      metadata: {
-        size: number
-        filename: string
-        mimeType: string
-      }
+  file?: {
+    id: string
+    storage: string
+    metadata: {
+      size: number
+      filename: string
+      mimeType: string
     }
   }
 }
@@ -80,7 +79,6 @@ export const InfoDocumentModal = ({ isOpen, onClose, document, onSubmit }: IInfo
     },
     shouldFocusError: false,
   })
-  const documentFileIdRef = useRef<string | undefined>()
   const [fileReplaceUnlocked, setFileReplaceUnlocked] = useState(false)
   const replaceConfirm = useDisclosure()
   const isPublished = watch("isPublished")
@@ -88,22 +86,19 @@ export const InfoDocumentModal = ({ isOpen, onClose, document, onSubmit }: IInfo
 
   const { uppy, isUploading } = useUppyS3({
     onUploadSuccess: (file: UppyFile<{}, {}>, response: any) => {
-      setValue("documentFileAttributes", {
-        id: documentFileIdRef.current,
-        file: {
-          id: extractUploadedFileKey(file, response),
-          storage: "cache",
-          metadata: {
-            size: file.size || 0,
-            filename: file.name,
-            mimeType: file.type || "application/octet-stream",
-          },
+      setValue("file", {
+        id: extractUploadedFileKey(file, response),
+        storage: "cache",
+        metadata: {
+          size: file.size || 0,
+          filename: file.name,
+          mimeType: file.type || "application/octet-stream",
         },
       })
-      clearErrors("documentFileAttributes")
+      clearErrors("file")
     },
     onFileRemoved: () => {
-      setValue("documentFileAttributes", undefined)
+      setValue("file", undefined)
     },
     maxNumberOfFiles: 1,
     autoProceed: true,
@@ -115,7 +110,6 @@ export const InfoDocumentModal = ({ isOpen, onClose, document, onSubmit }: IInfo
     resetUppy(uppy)
     setFileReplaceUnlocked(false)
     replaceConfirm.onClose()
-    documentFileIdRef.current = document?.documentFile?.id
     reset({
       title: document?.title ?? "",
       description: document?.description ?? "",
@@ -129,16 +123,16 @@ export const InfoDocumentModal = ({ isOpen, onClose, document, onSubmit }: IInfo
     return (topics || []).map((topic: string) => ({ value: topic, label: topic }))
   }
 
-  const currentFileName = fileNameFor(document?.documentFile?.file)
+  const currentFileName = fileNameFor(document?.file)
   const hasExistingFile = Boolean(currentFileName)
   const requireReplaceConfirmation = Boolean(document?.publishedAt) && hasExistingFile && !fileReplaceUnlocked
 
   const submit = handleSubmit(async (data) => {
     if (isUploading) return
 
-    const hasFile = Boolean(data.documentFileAttributes?.file) || hasExistingFile
+    const hasFile = Boolean(data.file) || hasExistingFile
     if (data.isPublished && !hasFile) {
-      setError("documentFileAttributes", {
+      setError("file", {
         type: "required",
         message: translate("infoDocuments.management.errors.file"),
       })
@@ -218,15 +212,21 @@ export const InfoDocumentModal = ({ isOpen, onClose, document, onSubmit }: IInfo
               <Checkbox {...register("isPublished")}>{translate("infoDocuments.management.fields.published")}</Checkbox>
             </FormControl>
 
-            <FormControl isInvalid={!!errors.documentFileAttributes}>
+            <FormControl isInvalid={!!errors.file}>
               <FormLabel>
                 {translate("infoDocuments.management.fields.file")}
                 {isPublished && <RequiredMark />}
               </FormLabel>
-              {currentFileName && (
-                <Text fontSize="sm" color="text.secondary" mb={2}>
-                  {translate("infoDocuments.management.fields.currentFile", { fileName: currentFileName })}
-                </Text>
+              {document?.file && currentFileName && (
+                <FileDownloadButton
+                  document={{
+                    id: document.id,
+                    file: document.file,
+                    createdAt: document.createdAt ?? new Date(),
+                  }}
+                  modelType={EFileUploadAttachmentType.InfoDocument}
+                  mb={2}
+                />
               )}
               <Box position="relative">
                 <UppyDashboard uppy={uppy} height={180} width="100%" />
@@ -272,7 +272,7 @@ export const InfoDocumentModal = ({ isOpen, onClose, document, onSubmit }: IInfo
                   closeModal()
                 }}
               />
-              <FormErrorMessage>{errors.documentFileAttributes?.message as string}</FormErrorMessage>
+              <FormErrorMessage>{errors.file?.message as string}</FormErrorMessage>
             </FormControl>
           </VStack>
         </ModalBody>

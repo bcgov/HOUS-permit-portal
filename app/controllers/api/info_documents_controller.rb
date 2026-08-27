@@ -6,8 +6,7 @@ class Api::InfoDocumentsController < Api::ApplicationController
                 only: %i[show update destroy publish unpublish]
 
   def index
-    documents =
-      info_documents_scope.ordered.includes(:document_file, :topics)
+    documents = info_documents_scope.ordered.includes(:topics)
 
     render_success(documents, nil, { blueprint: InfoDocumentBlueprint })
   end
@@ -89,7 +88,7 @@ class Api::InfoDocumentsController < Api::ApplicationController
     end
 
     render_success(
-      InfoDocument.ordered.includes(:document_file, :topics),
+      InfoDocument.ordered.includes(:topics),
       "info_document.reorder_success",
       { blueprint: InfoDocumentBlueprint }
     )
@@ -109,8 +108,7 @@ class Api::InfoDocumentsController < Api::ApplicationController
   end
 
   def set_info_document
-    @info_document =
-      InfoDocument.includes(:document_file, :topics).find(params[:id])
+    @info_document = InfoDocument.includes(:topics).find(params[:id])
   rescue ActiveRecord::RecordNotFound => e
     render_error "misc.not_found_error", { status: :not_found }, e
   end
@@ -121,22 +119,12 @@ class Api::InfoDocumentsController < Api::ApplicationController
       :description,
       :publish,
       topic_list: [],
-      document_file_attributes: document_attributes
+      file: [
+        :id,
+        :storage,
+        { metadata: %i[filename size mime_type content_disposition] }
+      ]
     )
-  end
-
-  def document_attributes
-    [
-      :id,
-      :_destroy,
-      {
-        file: [
-          :id,
-          :storage,
-          { metadata: %i[filename size mime_type content_disposition] }
-        ]
-      }
-    ]
   end
 
   def render_validation_error(record)

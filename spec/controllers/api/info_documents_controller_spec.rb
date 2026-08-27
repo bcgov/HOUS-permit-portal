@@ -45,41 +45,36 @@ RSpec.describe Api::InfoDocumentsController, type: :controller do
 
       get :index, format: :json
 
-      expect(json_response["data"].pluck("id")).to eq(
-        [earlier.id, later.id]
-      )
+      expect(json_response["data"].pluck("id")).to eq([earlier.id, later.id])
     end
 
     it "includes open and download urls for published files" do
       create(:info_document, :published)
-      allow_any_instance_of(InfoDocumentFile).to receive(:file_url_safe).with(
+      allow_any_instance_of(InfoDocument).to receive(:file_url_safe).with(
         disposition: "inline"
       ).and_return("https://example.com/guide.pdf")
-      allow_any_instance_of(InfoDocumentFile).to receive(:file_url_safe).with(
+      allow_any_instance_of(InfoDocument).to receive(:file_url_safe).with(
         disposition: "attachment"
       ).and_return("https://example.com/guide-download.pdf")
 
       get :index, format: :json
 
-      file = json_response["data"].first["document_file"]
-      expect(file["file_url"]).to eq("https://example.com/guide.pdf")
-      expect(file["download_url"]).to eq(
+      document = json_response["data"].first
+      expect(document["file_url"]).to eq("https://example.com/guide.pdf")
+      expect(document["download_url"]).to eq(
         "https://example.com/guide-download.pdf"
       )
     end
 
     it "omits file urls when the file is unavailable" do
       published = create(:info_document, :published)
-      published.document_file.update_columns(
-        file_data: nil,
-        scan_status: "infected"
-      )
+      published.update_columns(file_data: nil, scan_status: "infected")
 
       get :index, format: :json
 
-      file = json_response["data"].first["document_file"]
-      expect(file["file_url"]).to be_nil
-      expect(file["download_url"]).to be_nil
+      document = json_response["data"].first
+      expect(document["file_url"]).to be_nil
+      expect(document["download_url"]).to be_nil
     end
   end
 

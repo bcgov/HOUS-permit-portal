@@ -213,24 +213,17 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_21_190000) do
     t.index ["slug"], name: "index_help_videos_on_slug", unique: true
   end
 
-  create_table "info_document_files", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.uuid "info_document_id", null: false
+  create_table "info_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "title", null: false
+    t.string "description", limit: 256
+    t.integer "sort_order", default: 0, null: false
+    t.datetime "published_at"
     t.jsonb "file_data"
     t.string "scan_status", default: "pending", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["info_document_id"], name: "index_info_document_files_on_info_document_id", unique: true
-    t.index ["scan_status"], name: "index_info_document_files_on_scan_status"
-  end
-
-  create_table "info_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.string "title", null: false
-    t.string "description"
-    t.integer "sort_order", default: 0, null: false
-    t.datetime "published_at"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
     t.index ["published_at"], name: "index_info_documents_on_published_at"
+    t.index ["scan_status"], name: "index_info_documents_on_scan_status"
     t.index ["sort_order"], name: "index_info_documents_on_sort_order"
   end
 
@@ -1372,7 +1365,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_21_190000) do
   add_foreign_key "fuel_types", "part_3_step_code_checklists", column: "checklist_id", on_delete: :cascade
   add_foreign_key "help_video_documents", "help_videos"
   add_foreign_key "help_videos", "help_video_sections"
-  add_foreign_key "info_document_files", "info_documents"
   add_foreign_key "integration_mapping_notifications", "template_versions"
   add_foreign_key "integration_mappings", "jurisdictions"
   add_foreign_key "integration_mappings", "template_versions"

@@ -11,9 +11,9 @@ import { formatFileSize, getFileExtension } from "../../../utils/file-utils"
 export const InfoDocumentCard = observer(function InfoDocumentCard({ document }: { document: IInfoDocument }) {
   const { t } = useTranslation()
   const translate = t as any
-  const openUrl = document.documentFile?.fileUrl
-  const downloadUrl = document.documentFile?.downloadUrl
-  const file = document.documentFile?.file
+  const openUrl = document.fileUrl
+  const downloadUrl = document.downloadUrl
+  const file = document.file
   const filename = file?.metadata?.filename
   const fileDetails = fileDetailsLabel(filename, file?.metadata?.mimeType, file?.metadata?.size)
   const updatedLabel = document.updatedAt
