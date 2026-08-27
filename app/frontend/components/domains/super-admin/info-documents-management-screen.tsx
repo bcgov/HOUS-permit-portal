@@ -234,10 +234,11 @@ export const InfoDocumentsManagementScreen = observer(function InfoDocumentsMana
         document={editingDocument}
         onSubmit={handleSubmit}
       />
+      {/* Don't seed the editor with introDefault — saving would persist the placeholder copy. */}
       <InfoDocumentIntroModal
         isOpen={introModal.isOpen}
         onClose={introModal.onClose}
-        introText={displayedIntroText}
+        introText={infoDocumentsIntroText ?? ""}
         onSubmit={handleIntroSubmit}
       />
     </Container>

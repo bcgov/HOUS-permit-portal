@@ -2,6 +2,7 @@ class CreateInfoDocuments < ActiveRecord::Migration[7.2]
   def change
     create_table :info_documents, id: :uuid do |t|
       t.string :title, null: false
+      # Default t.string is varchar(255); UI/model allow 256 chars (same as help_videos).
       t.string :description, limit: 256
       t.integer :sort_order, null: false, default: 0
       t.datetime :published_at

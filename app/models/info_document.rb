@@ -6,6 +6,7 @@ class InfoDocument < FileUploadAttachment
   acts_as_taggable_on :topics
 
   validates :title, presence: true
+  # Match the varchar(256) column; a 256-char description would fail at varchar(255).
   validates :description, length: { maximum: 256 }, allow_blank: true
   validates :sort_order, numericality: { only_integer: true }
   validate :required_fields_exist_when_published

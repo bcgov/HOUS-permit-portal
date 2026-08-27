@@ -24,6 +24,8 @@ export const addApiErrorMonitor = (api: Api, uiStore: IUIStore) => {
     if (response.problem) {
       const err = API_ERROR_TYPES[response.problem]
       if (err) {
+        // FlashMessageModel.show is visible only when description is set.
+        // Put the error copy there so 5xx/network toasts actually appear.
         uiStore.flashMessage.show(err.type, null, err.message)
       }
     }
