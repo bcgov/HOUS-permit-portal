@@ -57,6 +57,26 @@ RSpec.describe Api::SiteConfigurationController, type: :controller do
     end
   end
 
+  describe "PUT #update as a non-super admin" do
+    it "prevents non-super admins from updating intro text" do
+      SiteConfiguration.instance
+      sign_in create(:user)
+
+      put :update,
+          params: {
+            site_configuration: {
+              info_documents_intro_text: "Should not persist."
+            }
+          },
+          format: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(SiteConfiguration.instance.info_documents_intro_text).not_to eq(
+        "Should not persist."
+      )
+    end
+  end
+
   describe "POST #update_jurisdiction_enrollments" do
     let(:super_admin) { create(:user, :super_admin) }
     let!(:existing_jurisdiction) { create(:sub_district) }

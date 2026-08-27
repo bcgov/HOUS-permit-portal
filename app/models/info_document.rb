@@ -1,21 +1,23 @@
-class InfoDocument < ApplicationRecord
-  has_one :document_file,
-          class_name: "InfoDocumentFile",
-          dependent: :destroy,
-          inverse_of: :info_document
-
-  accepts_nested_attributes_for :document_file, allow_destroy: true
+class InfoDocument < FileUploadAttachment
+  include FileUploader.Attachment(:file)
+  prepend FilenamePreservingFileUrl
 
   acts_as_list column: :sort_order, top_of_list: 0
   acts_as_taggable_on :topics
 
   validates :title, presence: true
+  # Match the varchar(256) column; a 256-char description would fail at varchar(255).
   validates :description, length: { maximum: 256 }, allow_blank: true
   validates :sort_order, numericality: { only_integer: true }
   validate :required_fields_exist_when_published
 
   scope :published, -> { where.not(published_at: nil) }
   scope :ordered, -> { order(:sort_order, :created_at) }
+
+  # FileUploadAttachment expects a parent; this record is the file.
+  def attached_to
+    self
+  end
 
   def published?
     published_at.present?
@@ -51,13 +53,8 @@ class InfoDocument < ApplicationRecord
       errors.add(:topics, "must be selected before publishing")
     end
 
-    unless publishable_document?(document_file)
+    unless file_available?
       errors.add(:base, "File must exist before publishing")
     end
-  end
-
-  def publishable_document?(document)
-    document.present? && !document.marked_for_destruction? &&
-      document.file_available?
   end
 end

@@ -6,31 +6,13 @@ FactoryBot.define do
     published_at { nil }
 
     trait :with_file do
-      after(:build) do |document|
-        document.document_file ||=
-          build(:info_document_file, info_document: document)
-      end
+      file_data { TestData.file_data }
+      scan_status { "clean" }
     end
 
     trait :published do
       with_file
       published_at { Time.current }
     end
-  end
-
-  factory :info_document_file do
-    association :info_document
-    file_data do
-      {
-        "id" => SecureRandom.uuid,
-        "storage" => "cache",
-        "metadata" => {
-          "size" => 1.kilobyte,
-          "filename" => "guide.pdf",
-          "mime_type" => "application/pdf"
-        }
-      }
-    end
-    scan_status { "clean" }
   end
 end

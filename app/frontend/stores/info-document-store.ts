@@ -23,12 +23,13 @@ export const InfoDocumentStoreModel = types
     },
   }))
   .actions((self) => ({
-    fetchInfoDocuments: flow(function* () {
+    fetchInfoDocuments: flow(function* (publishedOnly = false) {
       self.isLoadingInfoDocuments = true
 
       try {
-        const { ok, data: response } = yield* toGenerator(self.environment.api.fetchInfoDocuments())
-        if (ok) {
+        const { ok, data: response } = yield* toGenerator(self.environment.api.fetchInfoDocuments({ publishedOnly }))
+        if (ok && Array.isArray(response.data)) {
+          self.infoDocumentMap.clear()
           self.mergeUpdateAll(response.data, "infoDocumentMap")
         }
         return ok

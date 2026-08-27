@@ -234,10 +234,11 @@ export const InfoDocumentsManagementScreen = observer(function InfoDocumentsMana
         document={editingDocument}
         onSubmit={handleSubmit}
       />
+      {/* Don't seed the editor with introDefault — saving would persist the placeholder copy. */}
       <InfoDocumentIntroModal
         isOpen={introModal.isOpen}
         onClose={introModal.onClose}
-        introText={displayedIntroText}
+        introText={infoDocumentsIntroText ?? ""}
         onSubmit={handleIntroSubmit}
       />
     </Container>
@@ -322,8 +323,8 @@ function documentPayload(formData: IInfoDocumentFormData) {
     publish: formData.isPublished,
   }
 
-  if (formData.documentFileAttributes) {
-    payload.documentFileAttributes = formData.documentFileAttributes
+  if (formData.file) {
+    payload.file = formData.file
   }
 
   return payload

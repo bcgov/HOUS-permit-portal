@@ -51,6 +51,10 @@ const HelpVideosIndexScreen = lazy(() =>
   import("../help-videos").then((module) => ({ default: module.HelpVideosIndexScreen }))
 )
 
+const InfoDocumentsIndexScreen = lazy(() =>
+  import("../info-documents").then((module) => ({ default: module.InfoDocumentsIndexScreen }))
+)
+
 const HelpVideoScreen = lazy(() =>
   import("../help-videos/help-video-screen").then((module) => ({ default: module.HelpVideoScreen }))
 )
@@ -998,6 +1002,7 @@ const AppRoutes = observer(() => {
         <Route path="/release-notes" element={<ReleaseNotesScreen />} />
         <Route path="/videos" element={<HelpVideosIndexScreen />} />
         <Route path="/videos/:videoId" element={<HelpVideoScreen />} />
+        <Route path="/info-documents" element={<InfoDocumentsIndexScreen />} />
         <Route path="/standardization-preview" element={<StandardizationPreviewScreen />} />
         <Route path="/template-versions/:templateVersionId/preview" element={<TemplateVersionPreviewScreen />} />
         <Route path="/project-readiness-tools" element={<ProjectReadinessToolsIndexScreen />} />
