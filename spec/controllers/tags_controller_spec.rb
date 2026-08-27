@@ -23,5 +23,23 @@ RSpec.describe Api::TagsController, type: :controller do
       expect(response).to have_http_status(:ok)
       expect(JSON.parse(response.body)).to include("alphaTag")
     end
+
+    it "returns matching info document topics" do
+      document = create(:info_document)
+      document.topic_list.add("Getting started")
+      document.save!
+
+      post :index,
+           params: {
+             search: {
+               query: "Getting",
+               taggable_types: ["InfoDocument"]
+             }
+           },
+           format: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(JSON.parse(response.body)).to include("Getting started")
+    end
   end
 end
