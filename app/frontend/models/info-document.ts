@@ -1,6 +1,5 @@
 import { applySnapshot, getSnapshot, Instance, types } from "mobx-state-tree"
 import * as R from "ramda"
-import { InfoDocumentFileModel } from "./info-document-file"
 
 export const InfoDocumentModel = types
   .model("InfoDocumentModel", {
@@ -12,7 +11,10 @@ export const InfoDocumentModel = types
     publishedAt: types.maybeNull(types.Date),
     createdAt: types.optional(types.maybeNull(types.Date), null),
     updatedAt: types.optional(types.maybeNull(types.Date), null),
-    documentFile: types.optional(types.maybeNull(InfoDocumentFileModel), null),
+    scanStatus: types.maybeNull(types.string),
+    file: types.maybeNull(types.frozen()),
+    fileUrl: types.optional(types.maybeNull(types.string), null),
+    downloadUrl: types.optional(types.maybeNull(types.string), null),
   })
   .actions((self) => ({
     __mergeUpdate(resourceData: Record<string, unknown>) {

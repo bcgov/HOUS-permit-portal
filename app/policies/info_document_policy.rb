@@ -31,6 +31,10 @@ class InfoDocumentPolicy < ApplicationPolicy
     update?
   end
 
+  def download?
+    show?
+  end
+
   class Scope < Scope
     def resolve
       return scope.all if user&.super_admin?

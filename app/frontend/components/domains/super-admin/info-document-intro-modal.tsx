@@ -37,6 +37,7 @@ export const InfoDocumentIntroModal = ({ isOpen, onClose, introText, onSubmit }:
 
   useEffect(() => {
     if (!isOpen) return
+    // Caller must pass the stored value, not the public placeholder fallback.
     reset({ introText })
   }, [introText, isOpen, reset])
 

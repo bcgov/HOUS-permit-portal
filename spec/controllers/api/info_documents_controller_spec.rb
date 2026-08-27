@@ -45,41 +45,36 @@ RSpec.describe Api::InfoDocumentsController, type: :controller do
 
       get :index, format: :json
 
-      expect(json_response["data"].pluck("id")).to eq(
-        [earlier.id, later.id]
-      )
+      expect(json_response["data"].pluck("id")).to eq([earlier.id, later.id])
     end
 
     it "includes open and download urls for published files" do
       create(:info_document, :published)
-      allow_any_instance_of(InfoDocumentFile).to receive(:file_url_safe).with(
+      allow_any_instance_of(InfoDocument).to receive(:file_url_safe).with(
         disposition: "inline"
       ).and_return("https://example.com/guide.pdf")
-      allow_any_instance_of(InfoDocumentFile).to receive(:file_url_safe).with(
+      allow_any_instance_of(InfoDocument).to receive(:file_url_safe).with(
         disposition: "attachment"
       ).and_return("https://example.com/guide-download.pdf")
 
       get :index, format: :json
 
-      file = json_response["data"].first["document_file"]
-      expect(file["file_url"]).to eq("https://example.com/guide.pdf")
-      expect(file["download_url"]).to eq(
+      document = json_response["data"].first
+      expect(document["file_url"]).to eq("https://example.com/guide.pdf")
+      expect(document["download_url"]).to eq(
         "https://example.com/guide-download.pdf"
       )
     end
 
     it "omits file urls when the file is unavailable" do
       published = create(:info_document, :published)
-      published.document_file.update_columns(
-        file_data: nil,
-        scan_status: "infected"
-      )
+      published.update_columns(file_data: nil, scan_status: "infected")
 
       get :index, format: :json
 
-      file = json_response["data"].first["document_file"]
-      expect(file["file_url"]).to be_nil
-      expect(file["download_url"]).to be_nil
+      document = json_response["data"].first
+      expect(document["file_url"]).to be_nil
+      expect(document["download_url"]).to be_nil
     end
   end
 
@@ -146,6 +141,23 @@ RSpec.describe Api::InfoDocumentsController, type: :controller do
         "Cost"
       )
     end
+
+    it "attaches an uploaded file" do
+      sign_in create(:user, :super_admin)
+
+      post :create,
+           params: {
+             info_document: {
+               title: "Cost guide",
+               topic_list: ["Cost"],
+               file: TestData.cached_file_data(filename: "guide.pdf")
+             }
+           },
+           format: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(InfoDocument.last.file_name).to eq("guide.pdf")
+    end
   end
 
   describe "PATCH #update" do
@@ -162,6 +174,99 @@ RSpec.describe Api::InfoDocumentsController, type: :controller do
             format: :json
 
       expect(response).to have_http_status(:unauthorized)
+    end
+
+    it "replaces the file on a published document" do
+      document = create(:info_document, :published)
+      sign_in create(:user, :super_admin)
+
+      patch :update,
+            params: {
+              id: document.id,
+              info_document: {
+                file: TestData.cached_file_data(filename: "replacement.pdf")
+              }
+            },
+            format: :json
+
+      expect(response).to have_http_status(:ok)
+      document.reload
+      expect(document.file_name).to eq("replacement.pdf")
+      expect(document).to be_published
+    end
+  end
+
+  describe "GET #show" do
+    it "returns a published document without authentication" do
+      document = create(:info_document, :published)
+
+      get :show, params: { id: document.id }, format: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("data", "id")).to eq(document.id)
+    end
+
+    it "does not return an unpublished document to public users" do
+      document = create(:info_document, :with_file)
+
+      get :show, params: { id: document.id }, format: :json
+
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it "returns an unpublished document to super admins" do
+      document = create(:info_document, :with_file)
+      sign_in create(:user, :super_admin)
+
+      get :show, params: { id: document.id }, format: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("data", "id")).to eq(document.id)
+    end
+  end
+
+  describe "POST #unpublish" do
+    it "unpublishes a published document" do
+      document = create(:info_document, :published)
+      sign_in create(:user, :super_admin)
+
+      post :unpublish, params: { id: document.id }, format: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(document.reload).not_to be_published
+    end
+  end
+
+  describe "POST #reorder" do
+    it "allows super admins to reorder documents" do
+      sign_in create(:user, :super_admin)
+      first = create(:info_document, :with_file, sort_order: 0)
+      second = create(:info_document, :with_file, sort_order: 1)
+
+      post :reorder,
+           params: {
+             ordered_ids: [second.id, first.id]
+           },
+           format: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(first.reload.sort_order).to eq(1)
+      expect(second.reload.sort_order).to eq(0)
+    end
+
+    it "prevents non-super admins from reordering" do
+      sign_in create(:user)
+      first = create(:info_document, :with_file, sort_order: 0)
+      second = create(:info_document, :with_file, sort_order: 1)
+
+      post :reorder,
+           params: {
+             ordered_ids: [second.id, first.id]
+           },
+           format: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(first.reload.sort_order).to eq(0)
     end
   end
 end
