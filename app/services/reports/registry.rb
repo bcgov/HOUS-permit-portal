@@ -8,7 +8,8 @@ module Reports
       "accounts" => "Reports::Accounts",
       "submitter_adoption" => "Reports::SubmitterAdoption",
       "draft_completion" => "Reports::DraftCompletion",
-      "review_process" => "Reports::ReviewProcess"
+      "review_process" => "Reports::ReviewProcess",
+      "platform_health" => "Reports::PlatformHealth"
     }.freeze
 
     module_function

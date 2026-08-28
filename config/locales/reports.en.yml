@@ -279,6 +279,44 @@ en:
         queue_independent: "The queue snapshot is the current in-review count and does not follow the selected time range. Its as-of time is on the headline."
         timing_start: "Time to resolution uses PermitApplication status audits. The start of that series is shown on the excluded-timing figure. Time to first review uses submission_versions.viewed_at."
         timing_exclusions: "Applications without viewed_at or without a resolution audit are excluded from the corresponding median. The excluded count is shown."
+    platform_health:
+      title: "Platform health"
+      description: "Collaboration, uploaded documents, and stated gaps in error capture"
+      columns:
+        metric: "Metric"
+        value: "Value"
+      metrics:
+        documents: "Documents"
+        average_documents: "Average documents per application"
+        average_size: "Average total size per application (bytes)"
+        maximum_size: "Maximum total size on one application (bytes)"
+      figures:
+        collaborated_applications:
+          label: "Applications with collaboration"
+          help: "Live applications created in %{range} with at least one kept application or project collaboration."
+        collaboration_rate:
+          label: "Collaboration rate"
+          help: "Share of live applications created in %{range} with at least one kept collaboration."
+        application_collaborations:
+          label: "Application collaborations"
+          help: "Kept permit collaborations on applications created in %{range}."
+        project_collaborations:
+          label: "Project collaborations"
+          help: "Kept project collaborations on projects of applications created in %{range}."
+        average_documents:
+          label: "Average documents per application"
+          help: "Supporting documents on live applications created in %{range}, including applications with none."
+        average_total_size_bytes:
+          label: "Average total size (bytes)"
+          help: "Average per-application sum of Shrine file_data metadata size, for applications created in %{range}."
+        maximum_total_size_bytes:
+          label: "Maximum total size (bytes)"
+          help: "Largest per-application sum of Shrine file_data metadata size, for applications created in %{range}."
+      notes:
+        collaboration_scope: "Collaboration includes kept permit_collaborations and permit_project_collaborations. Discarded assignments are excluded."
+        shrine_sizes: "Document sizes come from Shrine file_data metadata size. This app does not use Active Storage."
+        failed_submissions: "Failed submission counts are not measured. There is no failed-submission log table, so a zero would mean no capture rather than no failures."
+        errors: "Error counts are not measured. There is no application error log table, so a zero would mean no capture rather than no errors."
   arbitrary_message_construct:
     report:
       refresh_success:
