@@ -374,6 +374,9 @@ Rails.application.routes.draw do
            to: "report_documents#share_with_jurisdiction"
     end
 
+    get "reports", to: "reports#index"
+    get "reports/:key", to: "reports#show"
+
     resources :help_video_sections,
               only: %i[index show create update destroy] do
       post "reorder", on: :collection

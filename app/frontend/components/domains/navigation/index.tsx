@@ -446,6 +446,10 @@ const ReportingScreen = lazy(() =>
   import("../super-admin/reporting/reporting-screen").then((module) => ({ default: module.ReportingScreen }))
 )
 
+const ReportScreen = lazy(() =>
+  import("../super-admin/reporting/report-screen").then((module) => ({ default: module.ReportScreen }))
+)
+
 const ExportTemplateSummaryScreen = lazy(() =>
   import("../super-admin/reporting/export-template-summary-screen").then((module) => ({
     default: module.ExportTemplateSummaryScreen,
@@ -619,6 +623,7 @@ const AppRoutes = observer(() => {
       <Route path="/configuration-management/users/invite" element={<AdminInviteScreen />} />
       <Route path="/reporting" element={<ReportingScreen />} />
       <Route path="/reporting/export-template-summary" element={<ExportTemplateSummaryScreen />} />
+      <Route path="/reporting/:reportKey" element={<ReportScreen />} />
     </>
   )
 

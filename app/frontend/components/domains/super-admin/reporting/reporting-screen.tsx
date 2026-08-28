@@ -1,7 +1,7 @@
 import { Box, Button, Container, Flex, Heading, Input, Menu, MenuButton, MenuList, VStack } from "@chakra-ui/react"
 import { FileCsv } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../../setup/root"
 import { EStepCodeType } from "../../../../types/enums"
@@ -12,12 +12,16 @@ import { GridHeaders } from "./grid-header"
 
 export const ReportingScreen = observer(() => {
   const { t } = useTranslation()
-  const { stepCodeStore, permitApplicationStore, preCheckStore } = useMst()
+  const { stepCodeStore, permitApplicationStore, preCheckStore, reportStore } = useMst()
   const { downloadStepCodeSummary, downloadStepCodeMetrics } = stepCodeStore
   const { downloadApplicationMetrics } = permitApplicationStore
   const { downloadPreCheckUserConsent } = preCheckStore
 
   const [filter, setFilter] = useState("")
+
+  useEffect(() => {
+    reportStore.fetchSummaries()
+  }, [])
 
   interface IReportBase {
     name: string
@@ -31,6 +35,11 @@ export const ReportingScreen = observer(() => {
 
   type TReport = IReportBase
   const reportTypes: TReport[] = [
+    ...reportStore.summaries.map((summary) => ({
+      name: summary.title,
+      description: summary.description,
+      dropdown: [{ text: t("ui.open"), href: summary.key }],
+    })),
     {
       name: t("reporting.templateSummary.name"),
       description: t("reporting.templateSummary.description"),

@@ -17,6 +17,7 @@ import { IProjectAuditStore, ProjectAuditStoreModel } from "./project-audit-stor
 import { IProjectMeetingInboxStore, ProjectMeetingInboxStoreModel } from "./project-meeting-inbox-store"
 import { IProjectMeetingStore, ProjectMeetingStoreModel } from "./project-meeting-store"
 import { IReleaseNoteStore, ReleaseNoteStoreModel } from "./release-note-store"
+import { IReportStore, ReportStoreModel } from "./report-store"
 import { IRequirementBlockStoreModel, RequirementBlockStoreModel } from "./requirement-block-store"
 import { IRequirementQuestionStoreModel, RequirementQuestionStoreModel } from "./requirement-question-store"
 import { IRequirementTemplateStoreModel, RequirementTemplateStoreModel } from "./requirement-template-store"
@@ -62,6 +63,7 @@ export const RootStoreModel = types
     sandboxStore: types.optional(SandboxStoreModel, {}),
     submissionInboxStore: types.optional(SubmissionInboxStoreModel, {}),
     releaseNoteStore: types.optional(ReleaseNoteStoreModel, {}),
+    reportStore: types.optional(ReportStoreModel, {}),
   })
   .extend(withEnvironment())
   .volatile((self) => ({
@@ -154,6 +156,7 @@ export interface IRootStore extends IStateTreeNode {
   sandboxStore: ISandboxStore
   submissionInboxStore: ISubmissionInboxStore
   releaseNoteStore: IReleaseNoteStore
+  reportStore: IReportStore
   subscribeToUserChannel: () => void
   disconnectUserChannel: () => void
   loadLocalPersistedData: () => void

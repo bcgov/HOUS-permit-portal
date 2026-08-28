@@ -76,6 +76,7 @@ import {
   ETemplateVersionStatus,
   EUserSortFields,
 } from "../../types/enums"
+import { IReportPayload, IReportSummary } from "../../types/report"
 import {
   IContact,
   ICopyRequirementTemplateFormData,
@@ -1417,5 +1418,21 @@ export class Api {
 
   async publishReleaseNote(id: string, releaseNote: TReleaseNoteFormData) {
     return this.client.patch<ApiResponse<IReleaseNote>>(`/release_notes/${id}/publish`, { releaseNote })
+  }
+
+  async fetchReportSummaries() {
+    return this.client.get<IApiResponse<IReportSummary[], {}>>(`/reports`)
+  }
+
+  async fetchReport(key: string, range: string) {
+    return this.client.get<IApiResponse<IReportPayload, {}>>(`/reports/${key}`, { range })
+  }
+
+  async refreshReport(key: string, range: string) {
+    return this.client.post<IApiResponse<IReportPayload, {}>>(`/reports/${key}/refresh`, { range })
+  }
+
+  async downloadReportExport(key: string, range: string) {
+    return this.client.get<BlobPart>(`/reports/${key}/export`, { range })
   }
 }

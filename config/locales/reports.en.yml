@@ -1,0 +1,59 @@
+en:
+  reports:
+    ranges:
+      "3_months": "Last 3 months"
+      "6_months": "Last 6 months"
+      "12_months": "Last 12 months"
+      all_time: "All time"
+    small_n: "Too few records (%{count}) for a meaningful chart. The table below is the source of truth."
+    growth:
+      suppressed: "Percentage omitted; previous period too small to be meaningful."
+    application_growth:
+      title: "Platform growth"
+      description: "Application volumes, cumulative totals, and growth rates"
+      series:
+        created: "Applications created"
+        submitted: "Applications submitted"
+      columns:
+        period: "Month"
+        created: "Applications created"
+        submitted: "Applications submitted"
+        status: "Status"
+        count: "Count"
+      figures:
+        total_created:
+          label: "Applications created"
+          help: "Applications created in %{range}, including drafts. Live (non-sandbox) records only."
+        total_submitted:
+          label: "Applications submitted"
+          help: "Applications with a first submission in %{range}. Live (non-sandbox) records only."
+        cumulative_processed:
+          label: "Cumulative permits processed"
+          help: "Applications submitted at least once since launch. This figure does not change with the selected range."
+        mom_submissions:
+          label: "Submissions, month over month"
+          help: "Change in first submissions versus the previous month. %{change}"
+        qoq_submissions:
+          label: "Submissions, quarter over quarter"
+          help: "Change in first submissions versus the previous quarter. %{change}"
+        mom_accounts:
+          label: "New accounts, month over month"
+          help: "Change in newly created accounts versus the previous month. %{change}"
+        qoq_accounts:
+          label: "New accounts, quarter over quarter"
+          help: "Change in newly created accounts versus the previous quarter. %{change}"
+      notes:
+        created_not_submitted: "Created counts include drafts. They are not submission counts."
+        cumulative_independent: "Cumulative permits processed is counted since launch and ignores the selected range."
+        growth_small_base: "Where the previous period has fewer than 10 records, the percentage is omitted and raw counts are shown."
+  arbitrary_message_construct:
+    report:
+      refresh_success:
+        title: "Report refreshed"
+        message: "The figures on this report are current."
+      refresh_error:
+        title: "Refresh failed"
+        message: "Previous figures are still shown. Try again."
+      not_found_error:
+        title: "Not found"
+        message: "That report does not exist."
