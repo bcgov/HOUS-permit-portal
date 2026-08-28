@@ -36,10 +36,17 @@ export interface IReportTableColumn {
   label: string
 }
 
+export interface IReportSort {
+  key: string
+  direction: "asc" | "desc"
+}
+
 export interface IReportTable {
   key: string
   columns: IReportTableColumn[]
   rows: Record<string, string | number | null>[]
+  sortable?: boolean
+  defaultSort?: IReportSort
 }
 
 export interface IReportNote {

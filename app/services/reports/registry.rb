@@ -4,6 +4,7 @@ module Reports
       "application_growth" => "Reports::ApplicationGrowth",
       "step_code_part_9" => "Reports::StepCodePart9",
       "jurisdiction_enablement" => "Reports::JurisdictionEnablement",
+      "jurisdiction_volume" => "Reports::JurisdictionVolume",
       "template_usage" => "Reports::TemplateUsage",
       "accounts" => "Reports::Accounts",
       "submitter_adoption" => "Reports::SubmitterAdoption",

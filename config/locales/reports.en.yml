@@ -89,8 +89,8 @@ en:
         enablement: "Jurisdictions with no Step Code submissions are listed separately from jurisdictions that have not been configured with Step Code requirements."
         small_n: "When fewer than 10 submissions are in range, the tables lead and charts are omitted so a small count is not read as a trend."
     jurisdiction_enablement:
-      title: "Jurisdiction inbox enablement"
-      description: "Inbox enablement history, active jurisdictions, and time to first submission"
+      title: "Never-activated, live, and churned jurisdictions"
+      description: "Inbox enablement history so never-activated, live, and churned jurisdictions are distinct"
       "yes": "Yes"
       "no": "No"
       series:
@@ -132,6 +132,28 @@ en:
         approximate: "Dates and cumulative days are marked approximate when any contributing event was seeded from the programme dataset or inferred from the earliest membership date."
         enabled_time: "Days to first submission counts only time the inbox was enabled. Gaps while the inbox was off are excluded. An open enabled interval is closed at now."
         churned_kept: "Jurisdictions that turned the inbox off stay in the table as previously enabled."
+    jurisdiction_volume:
+      title: "Permit volume and concentration"
+      description: "Permits received per jurisdiction, and how much of that volume sits with the largest few"
+      columns:
+        jurisdiction: "Jurisdiction"
+        drafts: "Drafts"
+        submitted: "Submitted"
+        revisions: "Revisions"
+        total: "Total"
+      figures:
+        total_submitted:
+          label: "Submissions"
+          help: "First submissions in %{range}. Live (non-sandbox) records only."
+        top_five_concentration:
+          label: "Concentration (top five jurisdictions)"
+          help: "Share of first submissions in %{range} that came from the five jurisdictions with the most submissions. This is a concentration measure: a high figure means volume depends on a few sources."
+      notes:
+        drafts: "Drafts are live applications created in the selected range that have never been submitted."
+        submitted: "Submitted counts the first submission in the selected range. Later versions of the same application are revisions, not additional submissions."
+        revisions: "Revisions are submission versions created in the selected range after the first submission. A revision can fall in range even when the first submission did not."
+        concentration: "Concentration is the top-five share of first submissions, not of drafts or revisions."
+        zeros: "Jurisdictions with no activity in range remain in the table so the quietest sources are as visible as the busiest. Sort any volume column to find either end."
     template_usage:
       title: "Template usage"
       description: "How published permit templates are used, by jurisdiction and combined"

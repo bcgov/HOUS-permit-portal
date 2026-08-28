@@ -14,7 +14,7 @@ module Reports
     attr_reader :range
 
     def self.key
-      name.demodulize.underscore
+      Registry::REPORTS.key(name) || name.demodulize.underscore
     end
 
     def self.title
@@ -126,23 +126,23 @@ module Reports
       }
     end
 
-    def chart(key, type, x_key:, series:, data:, record_count:)
-      suppressed = record_count < SMALL_N
+    def chart(key, type, x_key:, series:, data:, record_count:, suppressed: nil)
+      is_suppressed = suppressed.nil? ? record_count < SMALL_N : suppressed
       {
         key: key,
         type: type,
         x_key: x_key,
         series: series,
-        data: suppressed ? [] : data,
-        suppressed: suppressed,
+        data: is_suppressed ? [] : data,
+        suppressed: is_suppressed,
         suppression_reason:
-          (I18n.t("reports.small_n", count: record_count) if suppressed),
+          (I18n.t("reports.small_n", count: record_count) if is_suppressed),
         record_count: record_count
       }
     end
 
-    def table(key, columns, rows)
-      {
+    def table(key, columns, rows, sortable: false, default_sort: nil)
+      payload = {
         key: key,
         columns:
           columns.map do |column|
@@ -151,8 +151,11 @@ module Reports
         rows:
           rows.map do |row|
             row.respond_to?(:stringify_keys) ? row.stringify_keys : row
-          end
+          end,
+        sortable: sortable
       }
+      payload[:default_sort] = default_sort if default_sort
+      payload
     end
 
     def note(key, kind)

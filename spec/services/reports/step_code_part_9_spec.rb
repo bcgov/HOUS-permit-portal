@@ -4,6 +4,12 @@ RSpec.describe Reports::StepCodePart9 do
   let(:range) { Reports::Range.parse("12_months") }
   let(:payload) { described_class.new(range: range).call }
 
+  it "uses the registry key so locale strings resolve" do
+    expect(described_class.key).to eq("step_code_part_9")
+    expect(described_class.title).to eq("Energy Step Code Part 9")
+    expect(described_class.description).not_to include("Translation missing")
+  end
+
   def create_submitted_part_9
     application =
       create(
