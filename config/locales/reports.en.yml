@@ -132,6 +132,30 @@ en:
         approximate: "Dates and cumulative days are marked approximate when any contributing event was seeded from the programme dataset or inferred from the earliest membership date."
         enabled_time: "Days to first submission counts only time the inbox was enabled. Gaps while the inbox was off are excluded. An open enabled interval is closed at now."
         churned_kept: "Jurisdictions that turned the inbox off stay in the table as previously enabled."
+    template_usage:
+      title: "Template usage"
+      description: "How published permit templates are used, by jurisdiction and combined"
+      series:
+        applications: "Applications"
+      columns:
+        jurisdiction: "Jurisdiction"
+        template: "Template"
+        category: "Category"
+        count: "Applications"
+        version_date: "Published version date"
+      figures:
+        applications:
+          label: "Applications in range"
+          help: "Live applications created in %{range}."
+        templates_used:
+          label: "Templates used"
+          help: "Distinct templates on live applications created in %{range}."
+        published_never_used:
+          label: "Published, never used"
+          help: "Published template versions on kept templates with no live applications since launch."
+      notes:
+        permit_type_proxy: "There is no separate permit-type model. Template nickname and category are the permit-type stand-in on this report."
+        never_used: "Published template versions with zero live applications are listed explicitly. They are not shown as zero on the usage chart."
   arbitrary_message_construct:
     report:
       refresh_success:

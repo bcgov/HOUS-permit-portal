@@ -3,7 +3,8 @@ module Reports
     REPORTS = {
       "application_growth" => "Reports::ApplicationGrowth",
       "step_code_part_9" => "Reports::StepCodePart9",
-      "jurisdiction_enablement" => "Reports::JurisdictionEnablement"
+      "jurisdiction_enablement" => "Reports::JurisdictionEnablement",
+      "template_usage" => "Reports::TemplateUsage"
     }.freeze
 
     module_function

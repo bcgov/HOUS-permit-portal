@@ -240,6 +240,17 @@ module Reports
       (seconds.to_f / 1.day).round(1)
     end
 
+    def percent(part, whole)
+      return nil if whole.to_i <= 0
+
+      ((part.to_f / whole) * 100).round(1)
+    end
+
+    def percent_value(part, whole)
+      value = percent(part, whole)
+      value.nil? ? nil : "#{value}%"
+    end
+
     private
 
     def numeric_presence?(value)
