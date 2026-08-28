@@ -1,6 +1,9 @@
 module Reports
   module Registry
-    REPORTS = { "application_growth" => "Reports::ApplicationGrowth" }.freeze
+    REPORTS = {
+      "application_growth" => "Reports::ApplicationGrowth",
+      "step_code_part_9" => "Reports::StepCodePart9"
+    }.freeze
 
     module_function
 

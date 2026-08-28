@@ -46,6 +46,48 @@ en:
         created_not_submitted: "Created counts include drafts. They are not submission counts."
         cumulative_independent: "Cumulative permits processed is counted since launch and ignores the selected range."
         growth_small_base: "Where the previous period has fewer than 10 records, the percentage is omitted and raw counts are shown."
+    step_code_part_9:
+      title: "Energy Step Code Part 9"
+      description: "Part 9 submission volumes and compliance outcomes"
+      unknown_jurisdiction: "Unknown jurisdiction"
+      series:
+        submissions: "Submissions"
+      columns:
+        period: "Month"
+        count: "Count"
+        submissions: "Submissions"
+        jurisdiction: "Jurisdiction"
+        enablement: "Step Code enablement"
+        outcome: "Compliance outcome"
+        energy_step: "Energy step achieved"
+        zero_carbon_step: "Zero carbon step achieved"
+      outcomes:
+        pass: "Pass"
+        fail: "Fail"
+        incomplete: "Incomplete compliance data"
+      energy_step: "Energy step %{step}"
+      zero_carbon_step: "Zero carbon step %{step}"
+      enablement:
+        has_submissions: "Enabled, submissions in range"
+        enabled_no_submissions: "Enabled, no submissions"
+        not_enabled: "Not enabled"
+      figures:
+        total_submissions:
+          label: "Part 9 submissions"
+          help: "Part 9 Step Code submissions first submitted in %{range}. Live (non-sandbox) records only."
+        pass_count:
+          label: "Passed"
+          help: "Submissions in %{range} where both energy and zero carbon proposed steps were achieved."
+        fail_count:
+          label: "Failed"
+          help: "Submissions in %{range} with enough data to evaluate that did not achieve both required tracks. Incomplete records are counted separately."
+        incomplete_count:
+          label: "Incomplete compliance data"
+          help: "Submissions in %{range} without enough checklist data to evaluate pass or fail. These are not counted as failures."
+      notes:
+        incomplete_not_fail: "Submissions with incomplete compliance data are counted on their own. They are not folded into failures."
+        enablement: "Jurisdictions with no Step Code submissions are listed separately from jurisdictions that have not been configured with Step Code requirements."
+        small_n: "When fewer than 10 submissions are in range, the tables lead and charts are omitted so a small count is not read as a trend."
   arbitrary_message_construct:
     report:
       refresh_success:
