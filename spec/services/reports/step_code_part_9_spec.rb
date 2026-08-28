@@ -5,7 +5,12 @@ RSpec.describe Reports::StepCodePart9 do
   let(:payload) { described_class.new(range: range).call }
 
   def create_submitted_part_9
-    application = create(:permit_application, :newly_submitted)
+    application =
+      create(
+        :permit_application,
+        :newly_submitted,
+        with_fake_plan_document: true
+      )
     create(:part_9_step_code, permit_application: application)
   end
 

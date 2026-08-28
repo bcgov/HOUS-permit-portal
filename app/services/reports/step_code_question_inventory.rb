@@ -23,12 +23,14 @@ module Reports
 
       checklist_fields.each { |row| lines << table_row(row) }
       data_entry_fields.each { |row| lines << table_row(row) }
-      lines +
-        [
-          "",
-          "Checklist enums: building type, compliance path, and stage are stored as integers with the names above.",
-          "Characteristics not captured for a submission are exported as empty cells, never as zero."
-        ]
+      (
+        lines +
+          [
+            "",
+            "Checklist enums: building type, compliance path, and stage are stored as integers with the names above.",
+            "Characteristics not captured for a submission are exported as empty cells, never as zero."
+          ]
+      ).join("\n") + "\n"
     end
 
     private

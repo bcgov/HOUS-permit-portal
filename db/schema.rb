@@ -100,6 +100,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_28_180000) do
     t.index ["contactable_type", "contactable_id"], name: "index_contacts_on_contactable"
   end
 
+  create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
+  end
+
   create_table "design_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "pre_check_id", null: false
     t.text "file_data"
@@ -210,6 +213,20 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_28_180000) do
     t.index ["slug"], name: "index_help_videos_on_slug", unique: true
   end
 
+  create_table "info_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "title", null: false
+    t.string "description", limit: 256
+    t.integer "sort_order", default: 0, null: false
+    t.datetime "published_at"
+    t.jsonb "file_data"
+    t.string "scan_status", default: "pending", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["published_at"], name: "index_info_documents_on_published_at"
+    t.index ["scan_status"], name: "index_info_documents_on_scan_status"
+    t.index ["sort_order"], name: "index_info_documents_on_sort_order"
+  end
+
   create_table "integration_mapping_notifications", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "notifiable_type", null: false
     t.uuid "notifiable_id", null: false
@@ -232,16 +249,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_28_180000) do
     t.index ["template_version_id"], name: "index_integration_mappings_on_template_version_id"
   end
 
-  create_table "jurisdiction_heating_degree_days", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.uuid "jurisdiction_id", null: false
-    t.integer "heating_degree_days", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "location_name", null: false
-    t.index ["jurisdiction_id", "location_name"], name: "idx_jurisdiction_heating_degree_days_unique", unique: true
-    t.index ["jurisdiction_id"], name: "index_jurisdiction_heating_degree_days_on_jurisdiction_id"
-  end
-
   create_table "jurisdiction_enablement_events", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "jurisdiction_id", null: false
     t.integer "feature", default: 0, null: false
@@ -252,6 +259,16 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_28_180000) do
     t.datetime "updated_at", null: false
     t.index ["jurisdiction_id", "feature", "occurred_at"], name: "idx_enablement_events_on_jurisdiction_feature_occurred"
     t.index ["jurisdiction_id"], name: "index_jurisdiction_enablement_events_on_jurisdiction_id"
+  end
+
+  create_table "jurisdiction_heating_degree_days", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "jurisdiction_id", null: false
+    t.integer "heating_degree_days", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "location_name", null: false
+    t.index ["jurisdiction_id", "location_name"], name: "idx_jurisdiction_heating_degree_days_unique", unique: true
+    t.index ["jurisdiction_id"], name: "index_jurisdiction_heating_degree_days_on_jurisdiction_id"
   end
 
   create_table "jurisdiction_memberships", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -830,6 +847,51 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_28_180000) do
     t.index ["withdrawn_at"], name: "index_project_meetings_on_withdrawn_at"
   end
 
+  create_table "project_memberships", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "permit_project_id", null: false
+    t.uuid "user_id"
+    t.uuid "invited_by_id"
+    t.integer "role", default: 0, null: false
+    t.string "invited_email", null: false
+    t.datetime "accepted_at"
+    t.string "invitation_token_digest"
+    t.datetime "invitation_sent_at"
+    t.datetime "discarded_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["discarded_at"], name: "index_project_memberships_on_discarded_at"
+    t.index ["invitation_token_digest"], name: "index_project_memberships_unique_invitation_token", unique: true, where: "(invitation_token_digest IS NOT NULL)"
+    t.index ["invited_by_id"], name: "index_project_memberships_on_invited_by_id"
+    t.index ["permit_project_id", "invited_email"], name: "index_project_memberships_unique_kept_email_per_project", unique: true, where: "(discarded_at IS NULL)"
+    t.index ["permit_project_id", "user_id"], name: "index_project_memberships_unique_kept_user_per_project", unique: true, where: "((discarded_at IS NULL) AND (user_id IS NOT NULL))"
+    t.index ["permit_project_id"], name: "index_project_memberships_on_permit_project_id"
+    t.index ["user_id"], name: "index_project_memberships_on_user_id"
+  end
+
+  create_table "project_team_memberships", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "project_team_id", null: false
+    t.uuid "project_membership_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["project_membership_id"], name: "index_project_team_memberships_on_project_membership_id"
+    t.index ["project_team_id", "project_membership_id"], name: "index_project_team_memberships_unique_pair", unique: true
+    t.index ["project_team_id"], name: "index_project_team_memberships_on_project_team_id"
+  end
+
+  create_table "project_teams", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "permit_project_id", null: false
+    t.string "name", null: false
+    t.integer "kind", default: 3, null: false
+    t.integer "project_access", default: 0, null: false
+    t.integer "collaborator_access", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "meeting_access", default: 0, null: false
+    t.index "permit_project_id, lower((name)::text)", name: "index_project_teams_unique_name_per_project", unique: true
+    t.index ["permit_project_id", "kind"], name: "index_project_teams_unique_auto_team_per_project", unique: true, where: "(kind < 3)"
+    t.index ["permit_project_id"], name: "index_project_teams_on_permit_project_id"
+  end
+
   create_table "release_notes", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "version"
     t.datetime "release_date"
@@ -896,6 +958,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_28_180000) do
     t.jsonb "input_options", default: {}, null: false
     t.string "hint"
     t.text "instructions"
+    t.boolean "shared", default: false, null: false
     t.string "name"
     t.text "description"
     t.datetime "discarded_at"
@@ -903,6 +966,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_28_180000) do
     t.datetime "updated_at", null: false
     t.index ["discarded_at"], name: "index_requirement_questions_on_discarded_at"
     t.index ["requirement_code"], name: "index_requirement_questions_on_requirement_code"
+    t.index ["shared"], name: "index_requirement_questions_on_shared"
   end
 
   create_table "requirement_template_sections", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1031,6 +1095,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_28_180000) do
     t.boolean "qa_tools_enabled", default: false, null: false
     t.boolean "project_meetings_enabled", default: false, null: false
     t.boolean "overheating_tool_enabled", default: false, null: false
+    t.text "info_documents_intro_text"
   end
 
   create_table "step_code_building_characteristics_summaries", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1365,8 +1430,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_28_180000) do
   add_foreign_key "integration_mapping_notifications", "template_versions"
   add_foreign_key "integration_mappings", "jurisdictions"
   add_foreign_key "integration_mappings", "template_versions"
-  add_foreign_key "jurisdiction_heating_degree_days", "jurisdictions", on_delete: :cascade
   add_foreign_key "jurisdiction_enablement_events", "jurisdictions"
+  add_foreign_key "jurisdiction_heating_degree_days", "jurisdictions", on_delete: :cascade
   add_foreign_key "jurisdiction_memberships", "jurisdictions"
   add_foreign_key "jurisdiction_memberships", "users"
   add_foreign_key "jurisdiction_requirement_templates", "jurisdictions"
@@ -1411,6 +1476,12 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_28_180000) do
   add_foreign_key "project_documents", "permit_projects"
   add_foreign_key "project_meetings", "permit_projects"
   add_foreign_key "project_meetings", "users", column: "requested_by_id"
+  add_foreign_key "project_memberships", "permit_projects"
+  add_foreign_key "project_memberships", "users"
+  add_foreign_key "project_memberships", "users", column: "invited_by_id"
+  add_foreign_key "project_team_memberships", "project_memberships"
+  add_foreign_key "project_team_memberships", "project_teams"
+  add_foreign_key "project_teams", "permit_projects"
   add_foreign_key "requirement_documents", "requirement_blocks"
   add_foreign_key "requirement_template_sections", "requirement_template_sections", column: "copied_from_id"
   add_foreign_key "requirement_template_sections", "requirement_templates"

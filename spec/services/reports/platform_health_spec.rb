@@ -8,6 +8,14 @@ RSpec.describe Reports::PlatformHealth do
     payload[:headline_figures].find { |row| row[:key] == key }
   end
 
+  def document_with_size(application, size)
+    document = create(:supporting_document, permit_application: application)
+    data = document.file_data.deep_dup
+    data["metadata"] ||= {}
+    data["metadata"]["size"] = size
+    document.update_column(:file_data, data)
+  end
+
   it "counts collaboration from project collaborations" do
     application = create(:permit_application)
     create(
@@ -23,24 +31,8 @@ RSpec.describe Reports::PlatformHealth do
 
   it "profiles document counts and shrine metadata sizes" do
     application = create(:permit_application)
-    create(
-      :supporting_document,
-      permit_application: application,
-      file_data: {
-        "metadata" => {
-          "size" => 2048
-        }
-      }
-    )
-    create(
-      :supporting_document,
-      permit_application: application,
-      file_data: {
-        "metadata" => {
-          "size" => 1024
-        }
-      }
-    )
+    document_with_size(application, 2048)
+    document_with_size(application, 1024)
     create(:permit_application)
 
     expect(figure("average_documents")[:value]).to eq(1.0)

@@ -31,10 +31,12 @@ module Reports
     end
 
     def apply(scope, column)
+      # Hash-style where() quotes the key as an identifier, which breaks SQL
+      # expressions such as the first-submitted-at subquery.
       if all_time?
         scope.where("#{column} <= ?", end_date)
       else
-        scope.where(column => start_date..end_date)
+        scope.where("#{column} BETWEEN ? AND ?", start_date, end_date)
       end
     end
 

@@ -11,6 +11,19 @@ RSpec.describe Reports::Range do
     end
   end
 
+  describe "#apply" do
+    it "keeps SQL expressions unquoted so subqueries can be ranged" do
+      sql =
+        described_class
+          .parse("12_months")
+          .apply(PermitApplication.all, Reports::Base::FIRST_SUBMITTED_AT_SQL)
+          .to_sql
+
+      expect(sql).to include("BETWEEN")
+      expect(sql).not_to include('"(SELECT')
+    end
+  end
+
   describe "#time_range" do
     it "covers the last 12 months by default" do
       range = described_class.parse("12_months")

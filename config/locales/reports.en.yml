@@ -91,8 +91,8 @@ en:
     jurisdiction_enablement:
       title: "Jurisdiction inbox enablement"
       description: "Inbox enablement history, active jurisdictions, and time to first submission"
-      yes: "Yes"
-      no: "No"
+      "yes": "Yes"
+      "no": "No"
       series:
         enabled_by_quarter: "Jurisdictions first enabled"
         submission_cohorts: "Jurisdictions with a first submission"
