@@ -175,6 +175,41 @@ en:
         accounts_not_activity: "These figures count registered accounts, not sign-ins or other activity."
         discarded_excluded: "Accounts with a discarded date are excluded from every figure and table."
         active_users: "Daily, weekly, and monthly active users are not measured. The application does not keep a login history beyond the current and last sign-in timestamps, so active users cannot be computed for a past range."
+    submitter_adoption:
+      title: "Submitter adoption"
+      description: "First-time and returning submitters, and accounts that never started an application"
+      series:
+        submitters: "Submitters"
+      columns:
+        group: "Group"
+        count: "Count"
+        share: "Share"
+      groups:
+        first_time: "First-time submitters"
+        returning: "Returning submitters"
+      figures:
+        first_time:
+          label: "First-time submitters"
+          help: "Submitters who created a live application in %{range} and have exactly one live application since launch."
+        returning:
+          label: "Returning submitters"
+          help: "Submitters who created a live application in %{range} and have two or more live applications since launch."
+        first_time_share:
+          label: "First-time share"
+          help: "Share of submitters in %{range} who have exactly one live application."
+        returning_share:
+          label: "Returning share"
+          help: "Share of submitters in %{range} who have two or more live applications."
+        never_started:
+          label: "Never started"
+          help: "Registered submitter accounts with no applications."
+        mean_applications:
+          label: "Mean applications per active submitter"
+          help: "Live applications divided by submitters who have at least one live application."
+      notes:
+        returning_definition: "Returning means two or more live applications since launch, among submitters who created an application in the selected range."
+        never_started: "Never started counts registered submitter accounts with no permit applications at all."
+        active_submitter: "An active submitter is a submitter with at least one live (non-sandbox) application."
   arbitrary_message_construct:
     report:
       refresh_success:

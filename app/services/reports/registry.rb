@@ -5,7 +5,8 @@ module Reports
       "step_code_part_9" => "Reports::StepCodePart9",
       "jurisdiction_enablement" => "Reports::JurisdictionEnablement",
       "template_usage" => "Reports::TemplateUsage",
-      "accounts" => "Reports::Accounts"
+      "accounts" => "Reports::Accounts",
+      "submitter_adoption" => "Reports::SubmitterAdoption"
     }.freeze
 
     module_function
