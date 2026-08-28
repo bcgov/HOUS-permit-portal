@@ -6,7 +6,8 @@ module Reports
       "jurisdiction_enablement" => "Reports::JurisdictionEnablement",
       "template_usage" => "Reports::TemplateUsage",
       "accounts" => "Reports::Accounts",
-      "submitter_adoption" => "Reports::SubmitterAdoption"
+      "submitter_adoption" => "Reports::SubmitterAdoption",
+      "draft_completion" => "Reports::DraftCompletion"
     }.freeze
 
     module_function

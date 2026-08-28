@@ -210,6 +210,35 @@ en:
         returning_definition: "Returning means two or more live applications since launch, among submitters who created an application in the selected range."
         never_started: "Never started counts registered submitter accounts with no permit applications at all."
         active_submitter: "An active submitter is a submitter with at least one live (non-sandbox) application."
+    draft_completion:
+      title: "Draft completion"
+      description: "How drafts become submissions, how long that takes, and which drafts go stale"
+      series:
+        drafts: "Drafts"
+      columns:
+        bucket: "Bucket"
+        count: "Count"
+      buckets:
+        stale_30: "Untouched 30-59 days"
+        stale_60: "Untouched 60-89 days"
+        stale_90: "Untouched 90+ days"
+      figures:
+        completion_rate:
+          label: "Completion rate"
+          help: "Share of live applications created in %{range} that also had a first submission in %{range}."
+        median_draft_to_submit_days:
+          label: "Median days, draft to submit"
+          help: "Median elapsed days from created_at to first submission, for applications first submitted in %{range}."
+        abandonment_rate:
+          label: "Abandonment rate"
+          help: "Share of applications created in %{range} that are still drafts and have not been updated in 90 days or more."
+        created_before_submitted_in_range:
+          label: "Created before range, submitted in range"
+          help: "Applications created before %{range} whose first submission falls inside it. They are included in the median and excluded from the completion-rate denominator."
+      notes:
+        completion_definition: "Completion rate is first submissions in the selected range among applications created in the selected range."
+        range_boundary: "Drafts created before the selected range and first submitted inside it are counted in the median and in the created-before headline. They are not in the completion-rate denominator, which is applications created in the range."
+        abandonment_definition: "Abandonment is a draft created in the selected range that has never been submitted and has not been updated in 90 days or more, divided by applications created in the range."
   arbitrary_message_construct:
     report:
       refresh_success:
