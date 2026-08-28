@@ -7,7 +7,8 @@ module Reports
       "template_usage" => "Reports::TemplateUsage",
       "accounts" => "Reports::Accounts",
       "submitter_adoption" => "Reports::SubmitterAdoption",
-      "draft_completion" => "Reports::DraftCompletion"
+      "draft_completion" => "Reports::DraftCompletion",
+      "review_process" => "Reports::ReviewProcess"
     }.freeze
 
     module_function

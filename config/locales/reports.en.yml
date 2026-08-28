@@ -239,6 +239,46 @@ en:
         completion_definition: "Completion rate is first submissions in the selected range among applications created in the selected range."
         range_boundary: "Drafts created before the selected range and first submitted inside it are counted in the median and in the created-before headline. They are not in the completion-rate denominator, which is applications created in the range."
         abandonment_definition: "Abandonment is a draft created in the selected range that has never been submitted and has not been updated in 90 days or more, divided by applications created in the range."
+    review_process:
+      title: "Review process"
+      description: "Queue snapshot, revision and withdrawal rates, and review timings"
+      timing_unavailable: "not yet available"
+      series:
+        applications: "Applications"
+      columns:
+        outcome: "Outcome"
+        count: "Count"
+      figures:
+        queue:
+          label: "In review queue"
+          help: "Live applications currently newly submitted, resubmitted, or in review, as of %{as_of}. This snapshot ignores the selected range."
+        revision_request_rate:
+          label: "Revision request rate"
+          help: "Share of resolved applications first submitted in %{range} that had more than one submission version. In-flight applications are excluded."
+        mean_revision_rounds:
+          label: "Mean revision rounds"
+          help: "Mean extra submission versions after the first, among resolved applications first submitted in %{range}."
+        resubmission_success_rate:
+          label: "Resubmission success"
+          help: "Share of resolved applications with a resubmission that were approved or issued."
+        withdrawal_rate:
+          label: "Withdrawal rate"
+          help: "Share of resolved applications first submitted in %{range} that were withdrawn."
+        median_days_to_first_review:
+          label: "Median days to first review"
+          help: "Median days from first submission to the earliest submission version viewed_at, for applications with that timestamp."
+        median_days_to_resolution:
+          label: "Median days to resolution"
+          help: "Median days from first submission to the first audit that records approved, issued, or withdrawn."
+        excluded_timing:
+          label: "Excluded from timings"
+          help: "Applications missing viewed_at or a resolution audit. Timing data starts on %{start_date}."
+      notes:
+        aggregate_only: "Revision, resubmission, and withdrawal figures are aggregates. Reviewer names and reviewer-level attribution are not included."
+        in_flight_excluded: "Applications still newly submitted, resubmitted, or in review are omitted from outcome rates."
+        queue_independent: "The queue snapshot is the current in-review count and does not follow the selected time range. Its as-of time is on the headline."
+        timing_start: "Time to resolution uses PermitApplication status audits. The start of that series is shown on the excluded-timing figure. Time to first review uses submission_versions.viewed_at."
+        timing_exclusions: "Applications without viewed_at or without a resolution audit are excluded from the corresponding median. The excluded count is shown."
   arbitrary_message_construct:
     report:
       refresh_success:
