@@ -124,7 +124,149 @@ module Reports
       rows.empty?
     end
 
-    protected
+    def csv_from_payload(_payload)
+      CSV.generate do |csv|
+        csv << DETAIL_COLUMNS.map { |column| column[:label] }
+        each_export_context do |ctx|
+          csv << DETAIL_COLUMNS.map do |column|
+            csv_cell(instance_exec(ctx, &column[:value]))
+          end
+        end
+      end
+    end
+
+    DETAIL_COLUMNS = [
+      {
+        label: "Application number",
+        value: ->(ctx) { ctx[:step_code].permit_application_number },
+        feeds_report: false
+      },
+      {
+        label: "Jurisdiction",
+        value: ->(ctx) { ctx[:jurisdiction_name] },
+        feeds_report: true
+      },
+      {
+        label: "Submission date",
+        value: ->(ctx) { ctx[:submitted_at]&.to_date&.iso8601 },
+        feeds_report: true
+      },
+      {
+        label: "Address",
+        value: ->(ctx) { ctx[:step_code].full_address },
+        feeds_report: false
+      },
+      {
+        label: "Building type",
+        value: ->(ctx) { ctx[:checklist]&.building_type },
+        feeds_report: false
+      },
+      {
+        label: "Compliance path",
+        value: ->(ctx) { ctx[:checklist]&.compliance_path },
+        feeds_report: false
+      },
+      {
+        label: "Compliance outcome",
+        value: ->(ctx) { ctx[:outcome] },
+        feeds_report: true
+      },
+      {
+        label: "Energy step achieved",
+        value: ->(ctx) { ctx[:energy_step] },
+        feeds_report: true
+      },
+      {
+        label: "Zero carbon step achieved",
+        value: ->(ctx) { ctx[:zero_carbon_step] },
+        feeds_report: true
+      },
+      {
+        label: "Dwelling units",
+        value: ->(ctx) { entry_value(ctx, :dwelling_units_count) },
+        feeds_report: false
+      },
+      {
+        label: "Above grade heated floor area",
+        value: ->(ctx) { entry_value(ctx, :above_grade_heated_floor_area) },
+        feeds_report: false
+      },
+      {
+        label: "Below grade heated floor area",
+        value: ->(ctx) { entry_value(ctx, :below_grade_heated_floor_area) },
+        feeds_report: false
+      },
+      {
+        label: "Heating degree days",
+        value: ->(ctx) { entry_value(ctx, :hdd) },
+        feeds_report: false
+      },
+      {
+        label: "Air changes per hour",
+        value: ->(ctx) { entry_value(ctx, :ach) },
+        feeds_report: false
+      },
+      {
+        label: "Normalized leakage area",
+        value: ->(ctx) { entry_value(ctx, :nla) },
+        feeds_report: false
+      },
+      {
+        label: "Annual energy consumption",
+        value: ->(ctx) { entry_value(ctx, :aec) },
+        feeds_report: false
+      },
+      {
+        label: "Reference annual energy consumption",
+        value: ->(ctx) { entry_value(ctx, :ref_aec) },
+        feeds_report: false
+      },
+      {
+        label: "Building volume",
+        value: ->(ctx) { entry_value(ctx, :building_volume) },
+        feeds_report: false
+      },
+      {
+        label: "Building envelope surface area",
+        value: ->(ctx) { entry_value(ctx, :building_envelope_surface_area) },
+        feeds_report: false
+      },
+      {
+        label: "Electrical consumption",
+        value: ->(ctx) { entry_value(ctx, :electrical_consumption) },
+        feeds_report: false
+      },
+      {
+        label: "Natural gas consumption",
+        value: ->(ctx) { entry_value(ctx, :natural_gas_consumption) },
+        feeds_report: false
+      },
+      {
+        label: "Propane consumption",
+        value: ->(ctx) { entry_value(ctx, :propane_consumption) },
+        feeds_report: false
+      },
+      {
+        label: "Hot water energy",
+        value: ->(ctx) { entry_value(ctx, :hot_water) },
+        feeds_report: false
+      },
+      {
+        label: "Software model",
+        value: ->(ctx) { entry_value(ctx, :model) },
+        feeds_report: false
+      },
+      {
+        label: "Weather location",
+        value: ->(ctx) { entry_value(ctx, :weather_location) },
+        feeds_report: false
+      },
+      {
+        label: "Fossil fuels present",
+        value: ->(ctx) { fossil_fuels_presence(ctx) },
+        feeds_report: false
+      }
+    ].freeze
 
     def rows
       @rows ||= load_rows
@@ -303,6 +445,56 @@ module Reports
             }
           end
         end
+    end
+
+    def each_export_context
+      first_submitted =
+        SubmissionVersion
+          .where(
+            permit_application_id:
+              submitted_scope.select("permit_applications.id")
+          )
+          .group(:permit_application_id)
+          .minimum(:created_at)
+
+      Part9StepCode
+        .where(id: submitted_scope.select("step_codes.id"))
+        .includes(
+          :jurisdiction,
+          checklists: %i[data_entries building_characteristics_summary],
+          permit_application: {
+            permit_project: :jurisdiction
+          }
+        )
+        .find_each do |step_code|
+          submitted_at = first_submitted[step_code.permit_application_id]
+          next unless submitted_at
+
+          checklist = step_code.current_checklist
+          outcome, energy_step, zero_carbon_step = classify(checklist)
+          yield(
+            {
+              step_code: step_code,
+              checklist: checklist,
+              data_entry: checklist&.data_entries&.first,
+              submitted_at: submitted_at,
+              jurisdiction_name:
+                step_code.jurisdiction&.name ||
+                  I18n.t("reports.step_code_part_9.unknown_jurisdiction"),
+              outcome: outcome,
+              energy_step: energy_step,
+              zero_carbon_step: zero_carbon_step
+            }
+          )
+        end
+    end
+
+    def entry_value(ctx, field)
+      ctx[:data_entry]&.public_send(field)
+    end
+
+    def fossil_fuels_presence(ctx)
+      ctx[:checklist]&.building_characteristics_summary&.fossil_fuels&.presence
     end
 
     def column(key, i18n_key = nil)

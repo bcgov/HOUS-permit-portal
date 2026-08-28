@@ -56,4 +56,15 @@ RSpec.describe Reports::StepCodePart9 do
     expect(payload[:charts].first[:record_count]).to eq(1)
     expect(payload[:tables]).to be_present
   end
+
+  it "exports missing characteristics as empty cells rather than zero" do
+    create_submitted_part_9
+    csv = described_class.new(range: range).export_csv
+    row = CSV.parse(csv, headers: true).first
+
+    expect(row["Jurisdiction"]).to be_present
+    expect(row["Air changes per hour"]).to be_blank
+    expect(row["Air changes per hour"]).not_to eq("0")
+    expect(row["Dwelling units"]).to be_blank
+  end
 end
