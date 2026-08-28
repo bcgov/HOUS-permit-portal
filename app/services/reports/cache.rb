@@ -21,7 +21,10 @@ module Reports
       )
       raise e if previous.blank?
 
-      previous.merge(refresh_failed: true, refresh_error: e.message)
+      previous.with_indifferent_access.merge(
+        "refresh_failed" => true,
+        "refresh_error" => e.message
+      )
     end
 
     def key_for(key, range)

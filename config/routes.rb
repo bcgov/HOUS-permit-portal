@@ -376,6 +376,8 @@ Rails.application.routes.draw do
 
     get "reports", to: "reports#index"
     get "reports/:key", to: "reports#show"
+    post "reports/:key/refresh", to: "reports#refresh"
+    get "reports/:key/export", to: "reports#export"
 
     resources :help_video_sections,
               only: %i[index show create update destroy] do

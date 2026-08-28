@@ -45,12 +45,20 @@ module Reports
     end
 
     def export_csv
+      csv_from_payload(call)
+    end
+
+    def csv_from_payload(payload)
+      payload = payload.with_indifferent_access
       CSV.generate do |csv|
+        tables = Array(payload[:tables])
         tables.each_with_index do |tbl, index|
           csv << [tbl[:key]] if tables.length > 1
-          csv << tbl[:columns].map { |column| column[:label] }
-          tbl[:rows].each do |row|
-            csv << tbl[:columns].map { |column| csv_cell(row[column[:key]]) }
+          columns = Array(tbl[:columns])
+          csv << columns.map { |column| column[:label] }
+          Array(tbl[:rows]).each do |row|
+            row = row.with_indifferent_access
+            csv << columns.map { |column| csv_cell(row[column[:key]]) }
           end
           csv << [] if index < tables.length - 1
         end
