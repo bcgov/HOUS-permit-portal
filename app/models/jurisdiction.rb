@@ -77,6 +77,7 @@ class Jurisdiction < ApplicationRecord
   has_many :external_api_keys, dependent: :destroy
   has_many :integration_mappings
   has_many :jurisdiction_step_requirements, dependent: :destroy
+  has_many :jurisdiction_enablement_events, dependent: :destroy
   has_many :part3_occupancy_required_steps, dependent: :destroy
   has_many :jurisdiction_heating_degree_days, dependent: :destroy
   has_many :collaborators, as: :collaboratorable, dependent: :destroy
@@ -127,6 +128,8 @@ class Jurisdiction < ApplicationRecord
   before_save :sanitize_html_fields
 
   after_create :create_default_step_requirements
+  after_update :record_inbox_enablement_change,
+               if: :saved_change_to_inbox_enabled?
 
   accepts_nested_attributes_for :contacts
   accepts_nested_attributes_for :submission_contacts,
@@ -555,6 +558,15 @@ class Jurisdiction < ApplicationRecord
         )
       )
     end
+  end
+
+  def record_inbox_enablement_change
+    jurisdiction_enablement_events.create!(
+      feature: :inbox,
+      enabled: inbox_enabled,
+      occurred_at: Time.current,
+      source: :observed
+    )
   end
 
   def project_meetings_enabled_requires_setup

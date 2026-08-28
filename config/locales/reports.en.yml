@@ -88,6 +88,50 @@ en:
         incomplete_not_fail: "Submissions with incomplete compliance data are counted on their own. They are not folded into failures."
         enablement: "Jurisdictions with no Step Code submissions are listed separately from jurisdictions that have not been configured with Step Code requirements."
         small_n: "When fewer than 10 submissions are in range, the tables lead and charts are omitted so a small count is not read as a trend."
+    jurisdiction_enablement:
+      title: "Jurisdiction inbox enablement"
+      description: "Inbox enablement history, active jurisdictions, and time to first submission"
+      yes: "Yes"
+      no: "No"
+      series:
+        enabled_by_quarter: "Jurisdictions first enabled"
+        submission_cohorts: "Jurisdictions with a first submission"
+      columns:
+        jurisdiction: "Jurisdiction"
+        status: "Status"
+        currently_enabled: "Currently enabled"
+        first_enabled_on: "First enabled"
+        last_changed_on: "Most recent change"
+        cumulative_days: "Cumulative days enabled"
+        submissions_in_range: "Submissions in range"
+        days_to_first_submission: "Days to first submission (enabled time)"
+        approximate: "Approximate"
+      status:
+        active: "Active"
+        enabled_no_submissions: "Enabled, no submissions in range"
+        previously_enabled: "Previously enabled"
+        never_enabled: "Never enabled"
+      figures:
+        currently_enabled:
+          label: "Currently enabled"
+          help: "Jurisdictions whose inbox is on today."
+        previously_enabled:
+          label: "Previously enabled"
+          help: "Jurisdictions that were enabled in the past and are off today. They remain in the table."
+        never_enabled:
+          label: "Never enabled"
+          help: "Jurisdictions with no recorded inbox enablement."
+        active:
+          label: "Active"
+          help: "Currently enabled and with at least one live submission in %{range}."
+        enabled_never_submitted:
+          label: "Enabled, never submitted"
+          help: "Currently enabled jurisdictions with no live submissions since launch."
+      notes:
+        active_definition: "Active means the inbox is currently enabled and the jurisdiction has at least one live submission in the selected range."
+        approximate: "Dates and cumulative days are marked approximate when any contributing event was seeded from the programme dataset or inferred from the earliest membership date."
+        enabled_time: "Days to first submission counts only time the inbox was enabled. Gaps while the inbox was off are excluded. An open enabled interval is closed at now."
+        churned_kept: "Jurisdictions that turned the inbox off stay in the table as previously enabled."
   arbitrary_message_construct:
     report:
       refresh_success:

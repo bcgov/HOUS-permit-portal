@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_08_21_172453) do
+ActiveRecord::Schema[7.2].define(version: 2026_08_28_180000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -240,6 +240,18 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_21_172453) do
     t.string "location_name", null: false
     t.index ["jurisdiction_id", "location_name"], name: "idx_jurisdiction_heating_degree_days_unique", unique: true
     t.index ["jurisdiction_id"], name: "index_jurisdiction_heating_degree_days_on_jurisdiction_id"
+  end
+
+  create_table "jurisdiction_enablement_events", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "jurisdiction_id", null: false
+    t.integer "feature", default: 0, null: false
+    t.boolean "enabled", null: false
+    t.datetime "occurred_at", null: false
+    t.integer "source", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["jurisdiction_id", "feature", "occurred_at"], name: "idx_enablement_events_on_jurisdiction_feature_occurred"
+    t.index ["jurisdiction_id"], name: "index_jurisdiction_enablement_events_on_jurisdiction_id"
   end
 
   create_table "jurisdiction_memberships", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1354,6 +1366,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_21_172453) do
   add_foreign_key "integration_mappings", "jurisdictions"
   add_foreign_key "integration_mappings", "template_versions"
   add_foreign_key "jurisdiction_heating_degree_days", "jurisdictions", on_delete: :cascade
+  add_foreign_key "jurisdiction_enablement_events", "jurisdictions"
   add_foreign_key "jurisdiction_memberships", "jurisdictions"
   add_foreign_key "jurisdiction_memberships", "users"
   add_foreign_key "jurisdiction_requirement_templates", "jurisdictions"
