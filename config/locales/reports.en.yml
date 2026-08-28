@@ -156,6 +156,25 @@ en:
       notes:
         permit_type_proxy: "There is no separate permit-type model. Template nickname and category are the permit-type stand-in on this report."
         never_used: "Published template versions with zero live applications are listed explicitly. They are not shown as zero on the usage chart."
+    accounts:
+      title: "Accounts"
+      description: "Registered accounts by role and jurisdiction"
+      columns:
+        period: "Month"
+        jurisdiction: "Jurisdiction"
+        role: "Role"
+        count: "Accounts"
+      figures:
+        total_accounts:
+          label: "Accounts"
+          help: "Registered accounts that have not been discarded. This is a count of accounts, not of people who signed in."
+        new_accounts:
+          label: "New accounts"
+          help: "Accounts created in %{range}, excluding discarded accounts."
+      notes:
+        accounts_not_activity: "These figures count registered accounts, not sign-ins or other activity."
+        discarded_excluded: "Accounts with a discarded date are excluded from every figure and table."
+        active_users: "Daily, weekly, and monthly active users are not measured. The application does not keep a login history beyond the current and last sign-in timestamps, so active users cannot be computed for a past range."
   arbitrary_message_construct:
     report:
       refresh_success:

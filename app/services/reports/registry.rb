@@ -4,7 +4,8 @@ module Reports
       "application_growth" => "Reports::ApplicationGrowth",
       "step_code_part_9" => "Reports::StepCodePart9",
       "jurisdiction_enablement" => "Reports::JurisdictionEnablement",
-      "template_usage" => "Reports::TemplateUsage"
+      "template_usage" => "Reports::TemplateUsage",
+      "accounts" => "Reports::Accounts"
     }.freeze
 
     module_function
