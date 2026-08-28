@@ -339,6 +339,46 @@ en:
         shrine_sizes: "Document sizes come from Shrine file_data metadata size. This app does not use Active Storage."
         failed_submissions: "Failed submission counts are not measured. There is no failed-submission log table, so a zero would mean no capture rather than no failures."
         errors: "Error counts are not measured. There is no application error log table, so a zero would mean no capture rather than no errors."
+    storage_footprint:
+      title: "Storage footprint and forecast"
+      description: "Current uploaded footprint, where it sits, and a stated projection of what comes next"
+      unattributed: "Unattributed"
+      series:
+        bytes_added: "Storage added (bytes)"
+      types:
+        supporting_documents: "Supporting documents"
+        project_documents: "Project documents"
+        report_documents: "Step Code reports"
+        design_documents: "Design documents"
+        meeting_request_documents: "Meeting request documents"
+        note_attachment_documents: "Note attachments"
+        requirement_documents: "Requirement block documents"
+        resource_documents: "Resource documents"
+      columns:
+        document_type: "Document type"
+        jurisdiction: "Jurisdiction"
+        bytes: "Bytes"
+        period: "Month"
+      figures:
+        total_bytes:
+          label: "Current total storage (bytes)"
+          help: "Sum of Shrine uploaded sizes on kept, live records. Submission zipfiles are excluded. This snapshot ignores the selected range."
+        average_bytes_per_application:
+          label: "Average storage per application (bytes)"
+          help: "Current total storage divided by live applications. Ignores the selected range."
+        projected_next_12_months:
+          label: "Projected storage added, next 12 months (bytes)"
+          help: "Average monthly storage added over the last three calendar months (including the current partial month), times 12. This does not follow the selected range."
+        excluded_zipfile_bytes:
+          label: "Excluded zipfile bytes"
+          help: "Shrine size of permit application submission zipfiles. Excluded from the total because those zipfiles bundle supporting documents already counted."
+      notes:
+        zipfiles: "Submission zipfiles (permit_applications.zipfile_data) are excluded from the total. They bundle supporting documents at submit, so including them would count those bytes twice. Their combined Shrine size is the excluded-zipfile figure."
+        discarded: "Documents attached to discarded permit applications, discarded projects, or discarded Step Codes are excluded. Requirement-block documents on discarded requirement blocks are excluded."
+        billed: "Sizes come from Shrine file_data metadata size (uploaded bytes). That is not what the storage backend bills: orphans, packing, and provider overhead are excluded."
+        sandbox: "Sandbox (non-live) projects are excluded."
+        projection: "The forward projection is last-three-calendar-month average bytes added, including the current incomplete month, multiplied by 12. It assumes recent additions continue at that average. It is not a capacity booking."
+        unattributed: "Requirement-block documents have no jurisdiction. They appear as Unattributed on the jurisdiction table and are included in the total."
   arbitrary_message_construct:
     report:
       refresh_success:

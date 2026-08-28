@@ -10,7 +10,8 @@ module Reports
       "submitter_adoption" => "Reports::SubmitterAdoption",
       "draft_completion" => "Reports::DraftCompletion",
       "review_process" => "Reports::ReviewProcess",
-      "platform_health" => "Reports::PlatformHealth"
+      "platform_health" => "Reports::PlatformHealth",
+      "storage_footprint" => "Reports::StorageFootprint"
     }.freeze
 
     module_function
