@@ -27,7 +27,7 @@ jobs:
 
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Check if user is authorized
       run: |
@@ -50,9 +50,13 @@ jobs:
         oc version
 
     - name: Install Helm
-      uses: azure/setup-helm@v3
-      with:
-        version: 'v3.14.0'
+      env:
+        HELM_VERSION: 'v3.14.0'
+      run: |
+        curl -LO "https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz"
+        tar -xzf "helm-${HELM_VERSION}-linux-amd64.tar.gz"
+        sudo mv linux-amd64/helm /usr/local/bin/helm
+        helm version
 
     - name: Authenticate with OpenShift
       env:
