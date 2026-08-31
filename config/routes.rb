@@ -348,6 +348,9 @@ Rails.application.routes.draw do
       get "download_step_code_metrics_csv",
           on: :collection,
           to: "step_codes#download_step_code_metrics_csv"
+      get "download_part_9_step_code_checklists_csv",
+          on: :collection,
+          to: "step_codes#download_part_9_step_code_checklists_csv"
       post "search", on: :collection, to: "step_codes#index"
       patch "update", on: :member, to: "step_codes#update"
       patch "restore", on: :member, to: "step_codes#restore"

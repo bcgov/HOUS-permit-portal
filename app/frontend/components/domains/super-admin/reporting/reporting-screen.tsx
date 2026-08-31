@@ -43,6 +43,11 @@ export const ReportingScreen = observer(() => {
       href: "export-template-summary",
     },
     {
+      name: t("reporting.stepCodeData.name"),
+      description: t("reporting.stepCodeData.description"),
+      href: "step-code-data",
+    },
+    {
       name: t("reporting.stepCodeSummary.name"),
       description: t("reporting.stepCodeSummary.description"),
       downloads: [

@@ -5444,6 +5444,15 @@ Thank you,
             description: "A summary of template usage by jurisdictions",
             title: "Export Template Summary",
           },
+          stepCodeData: {
+            name: "Part 9 Step Code checklist data",
+            description:
+              "Every Part 9 Step Code checklist in the selected range, with repeating building-characteristic lines flattened to numbered columns",
+            title: "Part 9 Step Code checklist data",
+            filename: "Part 9 Step Code checklists",
+            rangeHelp:
+              "Includes checklists created in the selected range. Repeating line columns are sized from twice the all-time maximum so every download has the same headers.",
+          },
           stepCodeSummary: {
             name: "Energy Step Code configuration by jurisdiction",
             description: "A summary of Step Code requirements by jurisdictions",
@@ -5917,6 +5926,7 @@ Thank you,
             exportTemplates: "Export templates",
             reporting: "Reporting",
             exportTemplateSummary: "Export template summary",
+            stepCodeData: "Part 9 Step Code checklist data",
             applicationGrowth: "Platform growth",
             stepCodePart9: "Energy Step Code Part 9",
             jurisdictionEnablement: "Never-activated, live, and churned jurisdictions",

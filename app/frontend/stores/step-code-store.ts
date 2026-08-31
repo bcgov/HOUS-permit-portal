@@ -10,7 +10,7 @@ import { IPart9StepCode, Part9StepCodeModel } from "../models/part-9-step-code"
 import { IPart9StepCodeChecklist } from "../models/part-9-step-code-checklist"
 import { EEnergyStep, EStepCodeSortFields, EStepCodeType, EZeroCarbonStep } from "../types/enums"
 import { IPart3ChecklistSelectOptions, IPart9ChecklistSelectOptions, TSearchParams } from "../types/types"
-import { convertToDate, setQueryParam, startBlobDownload } from "../utils/utility-functions"
+import { convertToDate, downloadFromApi, setQueryParam, startBlobDownload } from "../utils/utility-functions"
 
 export const StepCodeModel = types.union(
   {
@@ -224,6 +224,23 @@ export const StepCodeStoreModel = types
       } catch (error) {
         if (import.meta.env.DEV) {
           console.error(`Failed to download Step Code metrics:`, error)
+        }
+        throw error
+      }
+    }),
+    downloadPart9StepCodeChecklistsCsv: flow(function* () {
+      try {
+        const range = self.rootStore.reportStore.rangePreset
+        const fileName = `${t("reporting.stepCodeData.filename")}_${range}_${new Date().toISOString().slice(0, 10)}.csv`
+        yield* toGenerator(
+          downloadFromApi(
+            `/api/step_codes/download_part_9_step_code_checklists_csv?range=${encodeURIComponent(range)}`,
+            fileName
+          )
+        )
+      } catch (error) {
+        if (import.meta.env.DEV) {
+          console.error(`Failed to download Part 9 Step Code checklists:`, error)
         }
         throw error
       }

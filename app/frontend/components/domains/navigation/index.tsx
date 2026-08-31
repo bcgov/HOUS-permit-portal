@@ -456,6 +456,12 @@ const ExportTemplateSummaryScreen = lazy(() =>
   }))
 )
 
+const StepCodeDataScreen = lazy(() =>
+  import("../super-admin/reporting/step-code-data-screen").then((module) => ({
+    default: module.StepCodeDataScreen,
+  }))
+)
+
 const AcceptInvitationScreen = lazy(() =>
   import("../users/accept-invitation-screen").then((module) => ({ default: module.AcceptInvitationScreen }))
 )
@@ -623,6 +629,7 @@ const AppRoutes = observer(() => {
       <Route path="/configuration-management/users/invite" element={<AdminInviteScreen />} />
       <Route path="/reporting" element={<ReportingScreen />} />
       <Route path="/reporting/export-template-summary" element={<ExportTemplateSummaryScreen />} />
+      <Route path="/reporting/step-code-data" element={<StepCodeDataScreen />} />
       <Route path="/reporting/:reportKey" element={<ReportScreen />} />
     </>
   )
