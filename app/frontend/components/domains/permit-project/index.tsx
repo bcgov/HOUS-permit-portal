@@ -25,12 +25,12 @@ export const ProjectDashboardScreen = observer(({}: IProjectDashboardScreenProps
   const [isPending, startTransition] = useTransition()
 
   const TABS_DATA: ITabItem[] = [
-    { label: t("permitProject.index.title", "Projects"), icon: Buildings, to: "projects", tabIndex: 0 },
-    { label: t("stepCode.index.title", "Step Codes"), icon: ClipboardText, to: "step-codes", tabIndex: 1 },
+    { label: t("permitProject.index.title", "Projects"), icon: Buildings, to: "/projects", tabIndex: 0 },
+    { label: t("stepCode.index.title", "Step Codes"), icon: ClipboardText, to: "/step-codes", tabIndex: 1 },
     {
       label: t("preCheck.index.title", "Pre-checks"),
       icon: ListMagnifyingGlass,
-      to: "pre-checks",
+      to: "/pre-checks",
       tabIndex: 2,
       badgeCount: preCheckStore.unviewedCount,
     },
@@ -39,7 +39,7 @@ export const ProjectDashboardScreen = observer(({}: IProjectDashboardScreenProps
           {
             label: t("overheatingCode.index.title", "Overheating"),
             icon: Thermometer,
-            to: "overheating-codes",
+            to: "/overheating-codes",
             tabIndex: 3,
           },
         ]
@@ -49,13 +49,13 @@ export const ProjectDashboardScreen = observer(({}: IProjectDashboardScreenProps
   ]
 
   const getTabIndex = () => {
-    const tabIndex = TABS_DATA.find((tab) => location.pathname.endsWith(tab.to))?.tabIndex
+    const tabIndex = TABS_DATA.find((tab) => location.pathname === tab.to)?.tabIndex
     return tabIndex ?? 0
   }
 
   const handleTabChange = (index: number) => {
     startTransition(() => {
-      navigate(`/${TABS_DATA[index].to}`)
+      navigate(TABS_DATA[index].to)
     })
   }
 
