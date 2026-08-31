@@ -94,7 +94,9 @@ export function ReportShell({ payload, isLoading, controls }: IProps) {
             payload.tables.map((table) => (
               <Box key={`lead-${table.key}`}>
                 <Heading as="h2" size="md" mb={3}>
-                  {t("reporting.shell.tableHeading")}
+                  {t(`reporting.shell.tables.${table.key}`, {
+                    defaultValue: t("reporting.shell.tableHeading"),
+                  })}
                 </Heading>
                 <ReportTable table={table} />
               </Box>
@@ -120,7 +122,9 @@ export function ReportShell({ payload, isLoading, controls }: IProps) {
             payload.tables.map((table) => (
               <Box key={table.key}>
                 <Heading as="h2" size="md" mb={3}>
-                  {t("reporting.shell.tableHeading")}
+                  {t(`reporting.shell.tables.${table.key}`, {
+                    defaultValue: t("reporting.shell.tableHeading"),
+                  })}
                 </Heading>
                 <ReportTable table={table} />
               </Box>

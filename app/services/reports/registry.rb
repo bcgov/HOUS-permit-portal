@@ -6,6 +6,7 @@ module Reports
       "jurisdiction_enablement" => "Reports::JurisdictionEnablement",
       "jurisdiction_volume" => "Reports::JurisdictionVolume",
       "template_usage" => "Reports::TemplateUsage",
+      "template_stall" => "Reports::TemplateStall",
       "accounts" => "Reports::Accounts",
       "submitter_adoption" => "Reports::SubmitterAdoption",
       "draft_completion" => "Reports::DraftCompletion",
