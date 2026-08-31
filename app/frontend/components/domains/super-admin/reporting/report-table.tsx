@@ -1,4 +1,18 @@
-import { Box, HStack, Table, TableContainer, Tbody, Td, Text, Th, Thead, Tr, Wrap, WrapItem } from "@chakra-ui/react"
+import {
+  Box,
+  HStack,
+  Table,
+  TableContainer,
+  Tag,
+  Tbody,
+  Td,
+  Text,
+  Th,
+  Thead,
+  Tr,
+  Wrap,
+  WrapItem,
+} from "@chakra-ui/react"
 import { CaretDown, CaretUp } from "@phosphor-icons/react"
 import React, { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -103,14 +117,20 @@ export function ReportTable({ table }: IProps) {
                       py={3}
                       textAlign={isNumericColumn(column.key) ? "end" : "start"}
                     >
-                      <Text as="span" fontWeight={column.key === "template" ? "medium" : "normal"}>
-                        {formatCell(rowValue(row, column.key))}
-                      </Text>
-                      {column.key === "template" && mixColumn ? (
-                        <Box mt={2}>
-                          <MixTags value={String(rowValue(row, mixColumn.key) ?? "")} />
-                        </Box>
-                      ) : null}
+                      {isEnablementColumn(column.key) ? (
+                        <EnablementTag value={rowValue(row, column.key)} />
+                      ) : (
+                        <>
+                          <Text as="span" fontWeight={column.key === "template" ? "medium" : "normal"}>
+                            {formatCell(rowValue(row, column.key))}
+                          </Text>
+                          {column.key === "template" && mixColumn ? (
+                            <Box mt={2}>
+                              <MixTags value={String(rowValue(row, mixColumn.key) ?? "")} />
+                            </Box>
+                          ) : null}
+                        </>
+                      )}
                     </Td>
                   ))}
                 </Tr>
@@ -127,6 +147,10 @@ function isMixColumn(key: string) {
   return key === "status_mix" || key === "statusMix"
 }
 
+function isEnablementColumn(key: string) {
+  return key === "enablement"
+}
+
 function isNumericColumn(key: string) {
   return (
     key !== "template" &&
@@ -141,7 +165,8 @@ function isNumericColumn(key: string) {
     key !== "period" &&
     key !== "label" &&
     key !== "document_type" &&
-    key !== "documentType"
+    key !== "documentType" &&
+    key !== "enablement"
   )
 }
 
@@ -167,6 +192,28 @@ function ariaSort(sort: IReportSort | null, key: string) {
 function formatCell(value: string | number | null | undefined) {
   if (value === null || value === undefined || value === "") return "—"
   return value
+}
+
+function EnablementTag({ value }: { value: string | number | null | undefined }) {
+  if (value === null || value === undefined || value === "") return <Text as="span">—</Text>
+
+  const label = String(value)
+  const enabled = !/^not enabled$/i.test(label)
+
+  return (
+    <Tag
+      size="sm"
+      variant={enabled ? "success" : undefined}
+      bg={enabled ? undefined : "greys.grey03"}
+      color={enabled ? undefined : "text.secondary"}
+      border={enabled ? undefined : "1px solid"}
+      borderColor={enabled ? undefined : "border.light"}
+      fontWeight="medium"
+      textTransform="none"
+    >
+      {label}
+    </Tag>
+  )
 }
 
 function MixTags({ value }: { value: string }) {

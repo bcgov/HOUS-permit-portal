@@ -1,8 +1,4 @@
 import {
-  Alert,
-  AlertDescription,
-  AlertIcon,
-  AlertTitle,
   Box,
   Heading,
   SimpleGrid,
@@ -15,9 +11,12 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react"
+import { ArrowFatLinesRight } from "@phosphor-icons/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { IReportPayload } from "../../../types/report"
+import { EFlashMessageStatus } from "../../../../types/enums"
+import { IReportNote, IReportPayload } from "../../../../types/report"
+import { CustomMessageBox } from "../../../shared/base/custom-message-box"
 import { ReportChart } from "./report-chart"
 import { ReportTable } from "./report-table"
 
@@ -46,12 +45,7 @@ export function ReportShell({ payload, isLoading, controls }: IProps) {
   }
 
   if (!payload) {
-    return (
-      <Alert status="error" variant="subtle">
-        <AlertIcon />
-        <AlertTitle>{t("reporting.shell.unavailableTitle")}</AlertTitle>
-      </Alert>
-    )
+    return <CustomMessageBox status={EFlashMessageStatus.error} title={t("reporting.shell.unavailableTitle")} />
   }
 
   const tableLeads = payload.charts.some((chart) => chart.suppressed) || payload.empty
@@ -72,8 +66,7 @@ export function ReportShell({ payload, isLoading, controls }: IProps) {
           <Stat key={figure.key} borderWidth="1px" borderColor="border.light" borderRadius="md" p={4} bg="greys.white">
             <StatLabel>{figure.label}</StatLabel>
             <StatNumber>
-              {formatValue(figure.value)}
-              {figure.approximate ? ` ${t("reporting.shell.approximate")}` : ""}
+              {formatHeadline(figure.value, figure.approximate ? t("reporting.shell.approximate") : null)}
             </StatNumber>
             <StatHelpText>{figure.helpText}</StatHelpText>
           </Stat>
@@ -81,13 +74,12 @@ export function ReportShell({ payload, isLoading, controls }: IProps) {
       </SimpleGrid>
 
       {payload.empty ? (
-        <Alert status="info" variant="subtle" data-testid="report-empty">
-          <AlertIcon />
-          <Box>
-            <AlertTitle>{t("reporting.shell.emptyTitle")}</AlertTitle>
-            <AlertDescription>{t("reporting.shell.emptyBody")}</AlertDescription>
-          </Box>
-        </Alert>
+        <CustomMessageBox
+          status={EFlashMessageStatus.info}
+          title={t("reporting.shell.emptyTitle")}
+          description={t("reporting.shell.emptyBody")}
+          data-testid="report-empty"
+        />
       ) : (
         <>
           {tableLeads &&
@@ -104,14 +96,17 @@ export function ReportShell({ payload, isLoading, controls }: IProps) {
 
           {payload.charts.map((chart) =>
             chart.suppressed ? (
-              <Alert key={chart.key} status="warning" variant="subtle">
-                <AlertIcon />
-                <AlertDescription>{chart.suppressionReason}</AlertDescription>
-              </Alert>
+              <CustomMessageBox
+                key={chart.key}
+                status={EFlashMessageStatus.warning}
+                description={chart.suppressionReason ?? undefined}
+              />
             ) : (
               <Box key={chart.key} borderWidth="1px" borderColor="border.light" borderRadius="md" p={4}>
                 <Heading as="h2" size="md" mb={3}>
-                  {t("reporting.shell.chartHeading")}
+                  {t(`reporting.shell.charts.${chart.key}`, {
+                    defaultValue: t("reporting.shell.chartHeading"),
+                  })}
                 </Heading>
                 <ReportChart chart={chart} />
               </Box>
@@ -132,20 +127,56 @@ export function ReportShell({ payload, isLoading, controls }: IProps) {
         </>
       )}
 
-      {payload.notes.length > 0 && (
-        <Stack spacing={2}>
-          {payload.notes.map((note) => (
-            <Text key={note.key} fontSize="sm" color="text.secondary">
-              {note.text}
-            </Text>
-          ))}
-        </Stack>
-      )}
+      <ReportNotes notes={payload.notes} />
     </VStack>
   )
 }
 
-function formatValue(value: string | number | null) {
+function formatHeadline(value: string | number | null, approximate: string | null) {
   if (value === null || value === undefined || value === "") return "—"
-  return value
+
+  const suffix = approximate ? ` ${approximate}` : ""
+  if (typeof value !== "string" || !value.includes(" -> ")) return `${value}${suffix}`
+
+  const parts = value.split(" -> ")
+  if (parts.length !== 2) return `${value}${suffix}`
+
+  return (
+    <>
+      {parts[0]}
+      <Box as="span" display="inline-block" mx={1} verticalAlign="-0.15em" lineHeight={0}>
+        <ArrowFatLinesRight size="0.85em" weight="fill" aria-hidden />
+      </Box>
+      {parts[1]}
+      {suffix}
+    </>
+  )
+}
+
+const NOTE_GROUPS = [
+  { kind: "definition", status: EFlashMessageStatus.info, titleKey: "reporting.shell.notesTitle" },
+  { kind: "caveat", status: EFlashMessageStatus.warning, titleKey: "reporting.shell.caveatsTitle" },
+  { kind: "not_measured", status: EFlashMessageStatus.warning, titleKey: "reporting.shell.notMeasuredTitle" },
+] as const
+
+function ReportNotes({ notes }: { notes: IReportNote[] }) {
+  const { t } = useTranslation()
+  if (notes.length === 0) return null
+
+  return (
+    <Stack spacing={3}>
+      {NOTE_GROUPS.map((group) => {
+        const items = notes.filter((note) => note.kind === group.kind)
+        if (items.length === 0) return null
+        return (
+          <CustomMessageBox
+            key={group.kind}
+            status={group.status}
+            title={t(group.titleKey)}
+            description={items.map((note) => note.text).join("\n\n")}
+          />
+        )
+      })}
+    </Stack>
+  )
 }

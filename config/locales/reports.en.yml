@@ -68,8 +68,7 @@ en:
       energy_step: "Energy step %{step}"
       zero_carbon_step: "Zero carbon step %{step}"
       enablement:
-        has_submissions: "Enabled, submissions in range"
-        enabled_no_submissions: "Enabled, no submissions"
+        enabled: "Enabled"
         not_enabled: "Not enabled"
       figures:
         total_submissions:
@@ -86,7 +85,7 @@ en:
           help: "Submissions in %{range} without enough checklist data to evaluate pass or fail. These are not counted as failures."
       notes:
         incomplete_not_fail: "Submissions with incomplete compliance data are counted on their own. They are not folded into failures."
-        enablement: "Jurisdictions with no Step Code submissions are listed separately from jurisdictions that have not been configured with Step Code requirements."
+        enablement: "Enablement is whether the jurisdiction has Step Code requirements configured. Submission counts are in their own column."
         small_n: "When fewer than 10 submissions are in range, the tables lead and charts are omitted so a small count is not read as a trend."
     jurisdiction_enablement:
       title: "Never-activated, live, and churned jurisdictions"

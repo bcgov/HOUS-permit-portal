@@ -56,8 +56,8 @@ RSpec.describe Reports::StepCodePart9 do
     not_enabled_row =
       table[:rows].find { |row| row["jurisdiction"] == not_enabled.name }
 
-    expect(enabled_row["enablement"]).to include("no submissions")
-    expect(not_enabled_row["enablement"]).to include("Not enabled")
+    expect(enabled_row["enablement"]).to eq("Enabled")
+    expect(not_enabled_row["enablement"]).to eq("Not enabled")
   end
 
   it "suppresses charts when volume is below the small-N threshold" do

@@ -418,19 +418,13 @@ module Reports
       Jurisdiction
         .order(:name)
         .map do |jurisdiction|
-          enabled = enabled_ids.include?(jurisdiction.id)
-          count = submission_counts[jurisdiction.id].to_i
-          enablement =
-            if enabled
-              count.positive? ? "has_submissions" : "enabled_no_submissions"
-            else
-              "not_enabled"
-            end
           {
             "jurisdiction" => jurisdiction.name,
-            "submissions" => count,
+            "submissions" => submission_counts[jurisdiction.id].to_i,
             "enablement" =>
-              I18n.t("reports.step_code_part_9.enablement.#{enablement}")
+              I18n.t(
+                "reports.step_code_part_9.enablement.#{enabled_ids.include?(jurisdiction.id) ? "enabled" : "not_enabled"}"
+              )
           }
         end
         .tap do |list|
@@ -441,7 +435,7 @@ module Reports
                 I18n.t("reports.step_code_part_9.unknown_jurisdiction"),
               "submissions" => unknown,
               "enablement" =>
-                I18n.t("reports.step_code_part_9.enablement.has_submissions")
+                I18n.t("reports.step_code_part_9.enablement.enabled")
             }
           end
         end
