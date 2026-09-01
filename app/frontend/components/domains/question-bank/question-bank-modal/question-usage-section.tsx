@@ -17,7 +17,7 @@ import {
 } from "@chakra-ui/react"
 import { ArrowSquareOut, CaretDown, CaretRight, FileText } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useMemo, useState } from "react"
+import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { TQuestionUsageBlock, TQuestionUsageTemplate } from "../../../../models/requirement-question"
 import { ETemplateVersionStatus } from "../../../../types/enums"
@@ -42,13 +42,9 @@ export const QuestionUsageSection = observer(function QuestionUsageSection({
   const [viewMode, setViewMode] = useState<TViewMode>("hierarchy")
   const [expandedBlockIds, setExpandedBlockIds] = useState<Set<string>>(() => expandableBlockIds(linkedBlocks))
 
-  const uniqueTemplateCount = useMemo(() => {
-    const ids = new Set<string>()
-    linkedBlocks.forEach((block) => {
-      ;(block.requirementTemplates ?? []).forEach((template) => ids.add(template.id))
-    })
-    return ids.size
-  }, [linkedBlocks])
+  const templateCount = new Set(
+    linkedBlocks.flatMap((block) => (block.requirementTemplates ?? []).map((template) => template.id))
+  ).size
 
   const setMode = (mode: TViewMode) => {
     setViewMode(mode)
@@ -80,7 +76,7 @@ export const QuestionUsageSection = observer(function QuestionUsageSection({
                 <Text fontSize={"xs"} color={"text.secondary"} whiteSpace={"nowrap"}>
                   {t("questionBank.modals.usage.summary", {
                     blockCount: linkedBlocks.length,
-                    templateCount: uniqueTemplateCount,
+                    templateCount,
                   })}
                 </Text>
               )}
