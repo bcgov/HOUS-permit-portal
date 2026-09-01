@@ -12,32 +12,26 @@ RSpec.describe Reports::JurisdictionEnablement do
     payload[:tables].find { |tbl| tbl[:key] == "jurisdictions" }[:rows]
   end
 
+  def record_inbox_change(jurisdiction, enabled:, at:, comment: nil)
+    ApplicationAudit.create!(
+      auditable: jurisdiction,
+      action: "update",
+      audited_changes: {
+        "inbox_enabled" => [!enabled, enabled]
+      },
+      created_at: at,
+      comment: comment
+    )
+  end
+
   it "separates currently enabled, previously enabled, and never enabled" do
     enabled = create(:sub_district)
-    create(
-      :jurisdiction_enablement_event,
-      jurisdiction: enabled,
-      enabled: true,
-      occurred_at: 2.months.ago,
-      source: :observed
-    )
+    record_inbox_change(enabled, enabled: true, at: 2.months.ago)
 
     churned = create(:sub_district)
     churned.update_column(:inbox_enabled, false)
-    create(
-      :jurisdiction_enablement_event,
-      jurisdiction: churned,
-      enabled: true,
-      occurred_at: 6.months.ago,
-      source: :observed
-    )
-    create(
-      :jurisdiction_enablement_event,
-      jurisdiction: churned,
-      enabled: false,
-      occurred_at: 1.month.ago,
-      source: :observed
-    )
+    record_inbox_change(churned, enabled: true, at: 6.months.ago)
+    record_inbox_change(churned, enabled: false, at: 1.month.ago)
 
     never_enabled = create(:sub_district)
     never_enabled.update_column(:inbox_enabled, false)
@@ -54,12 +48,11 @@ RSpec.describe Reports::JurisdictionEnablement do
 
   it "marks seeded or inferred history as approximate" do
     jurisdiction = create(:sub_district)
-    create(
-      :jurisdiction_enablement_event,
-      jurisdiction: jurisdiction,
+    record_inbox_change(
+      jurisdiction,
       enabled: true,
-      occurred_at: 3.months.ago,
-      source: :inferred
+      at: 3.months.ago,
+      comment: "inferred"
     )
 
     row = table_rows.find { |r| r["jurisdiction"].include?(jurisdiction.name) }
@@ -69,13 +62,7 @@ RSpec.describe Reports::JurisdictionEnablement do
 
   it "treats currently enabled jurisdictions with a submission in range as active" do
     jurisdiction = create(:sub_district)
-    create(
-      :jurisdiction_enablement_event,
-      jurisdiction: jurisdiction,
-      enabled: true,
-      occurred_at: 2.months.ago,
-      source: :observed
-    )
+    record_inbox_change(jurisdiction, enabled: true, at: 2.months.ago)
     create(:permit_application, :newly_submitted, jurisdiction: jurisdiction)
 
     expect(figure("active")[:value]).to eq(1)

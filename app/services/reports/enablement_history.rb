@@ -1,5 +1,38 @@
 module Reports
   class EnablementHistory
+    APPROXIMATE_COMMENTS = %w[seeded inferred].freeze
+
+    Event =
+      Struct.new(
+        :occurred_at,
+        :created_at,
+        :enabled,
+        :approximate,
+        keyword_init: true
+      ) do
+        def enabled?
+          enabled
+        end
+      end
+
+    def self.from_audits(audits, now: Time.current)
+      new(audits.map { |audit| event_from(audit) }, now: now)
+    end
+
+    def self.event_from(audit)
+      Event.new(
+        occurred_at: audit.created_at,
+        created_at: audit.created_at,
+        enabled: enabled_from(audit),
+        approximate: APPROXIMATE_COMMENTS.include?(audit.comment)
+      )
+    end
+
+    def self.enabled_from(audit)
+      raw = Array.wrap(audit.audited_changes["inbox_enabled"]).last
+      ActiveModel::Type::Boolean.new.cast(raw)
+    end
+
     def initialize(events, now: Time.current)
       @events =
         Array(events).sort_by { |event| [event.occurred_at, event.created_at] }
@@ -27,7 +60,7 @@ module Reports
     end
 
     def approximate?
-      @events.any? { |event| event.seeded? || event.inferred? }
+      @events.any?(&:approximate)
     end
 
     def cumulative_days

@@ -166,7 +166,9 @@ module Reports
 
     def row_for(jurisdiction)
       history =
-        EnablementHistory.new(events_by_jurisdiction[jurisdiction.id] || [])
+        EnablementHistory.from_audits(
+          audits_by_jurisdiction[jurisdiction.id] || []
+        )
       currently = jurisdiction.inbox_enabled?
       first_enabled_at = history.first_enabled_at
       first_submitted_at = first_submitted_at_by_jurisdiction[jurisdiction.id]
@@ -211,11 +213,13 @@ module Reports
       end
     end
 
-    def events_by_jurisdiction
-      @events_by_jurisdiction ||=
-        JurisdictionEnablementEvent.inbox.chronological.group_by(
-          &:jurisdiction_id
-        )
+    def audits_by_jurisdiction
+      @audits_by_jurisdiction ||=
+        ApplicationAudit
+          .where(auditable_type: "Jurisdiction")
+          .where("audited_changes ? 'inbox_enabled'")
+          .order(:created_at, :id)
+          .group_by(&:auditable_id)
     end
 
     def submissions_in_range_by_jurisdiction

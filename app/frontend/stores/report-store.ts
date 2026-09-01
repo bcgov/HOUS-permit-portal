@@ -1,8 +1,5 @@
-import { t } from "i18next"
 import { flow, Instance, toGenerator, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
-import { withRootStore } from "../lib/with-root-store"
-import { EFlashMessageStatus } from "../types/enums"
 import { IReportPayload, IReportSummary, TReportRangePreset } from "../types/report"
 import { startBlobDownload } from "../utils/utility-functions"
 
@@ -28,7 +25,6 @@ export const ReportStoreModel = types
     summaries: [] as IReportSummary[],
   }))
   .extend(withEnvironment())
-  .extend(withRootStore())
   .views((self) => ({
     get rangePresets(): TReportRangePreset[] {
       return RANGE_PRESETS
@@ -75,13 +71,6 @@ export const ReportStoreModel = types
         const response = yield* toGenerator(self.environment.api.refreshReport(key, self.rangePreset))
         if (response.ok && response.data?.data) {
           self.setPayload(response.data.data)
-          if (response.data.data.refreshFailed) {
-            self.rootStore.uiStore.flashMessage.show(
-              EFlashMessageStatus.error,
-              t("reporting.controls.refreshFailedTitle"),
-              t("reporting.controls.refreshFailedBody")
-            )
-          }
         }
       } finally {
         self.isRefreshing = false
