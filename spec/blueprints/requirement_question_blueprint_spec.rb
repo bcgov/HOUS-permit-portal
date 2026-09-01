@@ -5,7 +5,6 @@ require "rails_helper"
 RSpec.describe RequirementQuestionBlueprint do
   def build_usage_graph
     question = create(:requirement_question)
-    category = create(:template_category, label: "Residential")
     used_block = create(:requirement_block, name: "Agent authorization")
     unused_block = create(:requirement_block, name: "Orphan block")
     discarded_block = create(:requirement_block, name: "Archived block")
@@ -30,8 +29,7 @@ RSpec.describe RequirementQuestionBlueprint do
     kept_template =
       create(
         :requirement_template,
-        nickname: "Residential - Part 9 - New Build",
-        template_category: category
+        nickname: "Residential - Part 9 - New Build"
       )
     discarded_template =
       create(:requirement_template, nickname: "Retired template")
@@ -98,7 +96,6 @@ RSpec.describe RequirementQuestionBlueprint do
         {
           id: kept_template.id,
           nickname: "Residential - Part 9 - New Build",
-          template_category_label: "Residential",
           published: false
         }
       )

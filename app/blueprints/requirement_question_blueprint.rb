@@ -72,12 +72,7 @@ class RequirementQuestionBlueprint < Blueprinter::Base
           .requirement_blocks
           .kept
           .distinct
-          .includes(
-            requirement_templates: %i[
-              template_category
-              published_template_version
-            ]
-          )
+          .includes(requirement_templates: :published_template_version)
           .to_a
       elsif requirement_question.association(:requirement_blocks).loaded?
         # Searchkick already includes requirement_blocks — don't re-query.
@@ -106,7 +101,6 @@ class RequirementQuestionBlueprint < Blueprinter::Base
               {
                 id: rt.id,
                 nickname: rt.nickname,
-                template_category_label: rt.template_category&.label,
                 # Live published version on the template (not a historical snapshot).
                 published: rt.published_template_version.present?
               }

@@ -87,11 +87,7 @@ export const QuestionUsageSection = observer(function QuestionUsageSection({
                 </Text>
 
                 {hasExpandableBlocks && (
-                  <Button
-                    size={"sm"}
-                    variant={"secondary"}
-                    onClick={() => setIsCollapsedAll(!isCollapsedAll)}
-                  >
+                  <Button size={"sm"} variant={"secondary"} onClick={() => setIsCollapsedAll(!isCollapsedAll)}>
                     {isCollapsedAll ? t("ui.expandAll") : t("ui.collapseAll")}
                   </Button>
                 )}
@@ -153,9 +149,9 @@ function BlockUsageRow({ block, isCollapsedAll }: { block: TQuestionUsageBlock; 
         </Text>
       ) : (
         <Collapse in={isExpanded} animateOpacity>
-          <VStack alignItems={"flex-start"} spacing={2} px={4} pb={3} pt={1} bg={"greys.grey04"} pl={10}>
+          <VStack alignItems={"flex-start"} spacing={2} px={4} pb={3} pt={3} bg={"greys.grey04"} pl={10}>
             {templates.map((template) => (
-              <TemplateLink key={template.id} template={template} showSecondary />
+              <TemplateLink key={template.id} template={template} />
             ))}
           </VStack>
         </Collapse>
@@ -184,32 +180,25 @@ function BlockLink({ blockId, name }: { blockId: string; name: string }) {
   )
 }
 
-function TemplateLink({ template, showSecondary }: { template: TQuestionUsageTemplate; showSecondary?: boolean }) {
+function TemplateLink({ template }: { template: TQuestionUsageTemplate }) {
   const label = template.nickname || template.id
 
   return (
-    <Box>
-      <HStack spacing={2} alignItems={"center"} flexWrap={"wrap"}>
-        <Link
-          href={`/requirement-templates/${template.id}/edit`}
-          isExternal
-          display={"inline-flex"}
-          alignItems={"center"}
-          gap={1.5}
-          fontSize={"sm"}
-          color={"text.link"}
-        >
-          <FileText size={14} />
-          <Text as={"span"}>{label}</Text>
-          <ArrowSquareOut size={14} />
-        </Link>
-        {template.published && <TemplateStatusTag status={ETemplateVersionStatus.published} />}
-      </HStack>
-      {showSecondary && template.templateCategoryLabel && (
-        <Text fontSize={"xs"} color={"text.secondary"} pl={5}>
-          {template.templateCategoryLabel}
-        </Text>
-      )}
-    </Box>
+    <HStack spacing={2} alignItems={"center"} flexWrap={"wrap"}>
+      <Link
+        href={`/requirement-templates/${template.id}/edit`}
+        isExternal
+        display={"inline-flex"}
+        alignItems={"center"}
+        gap={1.5}
+        fontSize={"sm"}
+        color={"text.link"}
+      >
+        <FileText size={14} />
+        <Text as={"span"}>{label}</Text>
+        <ArrowSquareOut size={14} />
+      </Link>
+      {template.published && <TemplateStatusTag status={ETemplateVersionStatus.published} />}
+    </HStack>
   )
 }
