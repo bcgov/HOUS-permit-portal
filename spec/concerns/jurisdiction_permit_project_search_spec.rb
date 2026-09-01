@@ -182,15 +182,9 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitProjects,
           :current_page,
           :total_count,
           :state_counts,
-          :unread_count,
-          :requirement_template_options
+          :unread_count
         )
         expect(meta[:total_count]).to eq(3)
-        option_ids =
-          meta[:requirement_template_options].map do |option|
-            option.with_indifferent_access[:value]
-          end
-        expect(option_ids).to contain_exactly(template_a.id, template_b.id)
       end
 
       it "populates meta with unread_count for all unread projects in the jurisdiction" do

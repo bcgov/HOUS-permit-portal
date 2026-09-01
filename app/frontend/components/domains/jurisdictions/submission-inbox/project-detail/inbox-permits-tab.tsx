@@ -104,7 +104,6 @@ export const InboxPermitsTab = observer(function InboxPermitsTab({ permitProject
                   permitProject.setRequirementTemplateIdFilter([])
                   permitProject.search()
                 }}
-                options={[...permitProject.requirementTemplateOptions]}
               />
               {permitProject.displayMode === EInboxDisplayMode.list && (
                 <StatusFilter

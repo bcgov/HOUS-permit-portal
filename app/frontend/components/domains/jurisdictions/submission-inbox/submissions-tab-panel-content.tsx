@@ -224,7 +224,6 @@ export const SubmissionsTabPanelContent = observer(function SubmissionsTabPanelC
                     activeSearchStore.setRequirementTemplateIdFilter([])
                     activeSearchStore.search()
                   }}
-                  options={[...activeSearchStore.requirementTemplateOptions]}
                 />
                 {displayMode === EInboxDisplayMode.list && viewMode === EInboxViewMode.applications && (
                   <StatusFilter

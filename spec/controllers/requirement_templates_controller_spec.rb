@@ -400,5 +400,55 @@ RSpec.describe Api::RequirementTemplatesController,
         "Draft only permit"
       )
     end
+
+    it "returns inbox templates for review staff scoped to a jurisdiction" do
+      review_manager =
+        create(:user, :review_manager, jurisdiction: jurisdiction)
+      sign_in review_manager
+      get :for_filter, params: { jurisdiction_id: jurisdiction.id }
+
+      expect(response).to have_http_status(:success)
+      expect(option_labels).to contain_exactly("Plumbing permit")
+    end
+
+    it "accepts a jurisdiction slug from the inbox URL" do
+      review_manager =
+        create(:user, :review_manager, jurisdiction: jurisdiction)
+      sign_in review_manager
+      get :for_filter, params: { jurisdiction_id: jurisdiction.slug }
+
+      expect(response).to have_http_status(:success)
+      expect(option_labels).to contain_exactly("Plumbing permit")
+    end
+
+    it "returns project-scoped inbox templates for review staff" do
+      review_manager =
+        create(:user, :review_manager, jurisdiction: jurisdiction)
+      sign_in review_manager
+      get :for_filter,
+          params: {
+            jurisdiction_id: jurisdiction.id,
+            permit_project_id: inbox_project.id
+          }
+
+      expect(response).to have_http_status(:success)
+      expect(option_labels).to contain_exactly("Plumbing permit")
+    end
+
+    it "denies review staff from another jurisdiction" do
+      other_manager =
+        create(:user, :review_manager, jurisdiction: other_jurisdiction)
+      sign_in other_manager
+      get :for_filter, params: { jurisdiction_id: jurisdiction.id }
+
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it "denies submitters from using jurisdiction_id" do
+      sign_in submitter
+      get :for_filter, params: { jurisdiction_id: jurisdiction.id }
+
+      expect(response).to have_http_status(:forbidden)
+    end
   end
 end

@@ -2,7 +2,7 @@ import * as humps from "humps"
 import { t } from "i18next"
 import { cast, types } from "mobx-state-tree"
 import { EPermitApplicationInboxSortFields, EPermitApplicationStatus, ERadioFilterValue } from "../types/enums"
-import { IOption, IPermitApplicationInboxSearchFilters } from "../types/types"
+import { IPermitApplicationInboxSearchFilters } from "../types/types"
 import { setQueryParam } from "../utils/utility-functions"
 
 export function decamelizeHashKeys(hash: Record<string, number>): Record<string, number> {
@@ -21,7 +21,6 @@ export const PermitApplicationInboxSearchSharedFragment = types
     unreadColumnCounts: types.optional(types.frozen<Record<string, number>>(), {}),
     /** Jurisdiction-wide (or project-scoped) count of unread applications — ignores current filters/query. */
     unreadCount: types.optional(types.number, 0),
-    requirementTemplateOptions: types.optional(types.array(types.frozen<IOption>()), []),
     requirementTemplateIdFilter: types.optional(types.array(types.string), []),
     statusFilter: types.optional(types.array(types.enumeration(Object.values(EPermitApplicationStatus))), []),
     unreadFilter: types.optional(types.enumeration(Object.values(ERadioFilterValue)), ERadioFilterValue.include),
@@ -50,9 +49,6 @@ export const PermitApplicationInboxSearchSharedFragment = types
     },
     setUnreadCount(count: number) {
       self.unreadCount = count ?? 0
-    },
-    setRequirementTemplateOptions(options: IOption[]) {
-      self.requirementTemplateOptions = cast(options ?? [])
     },
     adjustUnreadCountForColumn(columnKey: string, delta: number) {
       const counts = { ...self.unreadColumnCounts }
