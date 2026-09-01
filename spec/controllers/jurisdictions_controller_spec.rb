@@ -399,4 +399,34 @@ RSpec.describe Api::JurisdictionsController, type: :controller do
       expect(response).to have_http_status(:forbidden)
     end
   end
+
+  describe "PATCH #update contacts" do
+    it "persists contact extension" do
+      manager = create(:user, :review_manager, jurisdiction: jurisdiction)
+      sign_in manager
+
+      patch :update,
+            params: {
+              id: jurisdiction.id,
+              jurisdiction: {
+                contacts_attributes: [
+                  {
+                    first_name: "Ada",
+                    last_name: "Lovelace",
+                    title: "Director",
+                    department: "Planning",
+                    email: "ada@example.com",
+                    phone: "604-555-0100",
+                    extension: "123"
+                  }
+                ]
+              }
+            },
+            format: :json
+
+      expect(response).to have_http_status(:ok)
+      contact = jurisdiction.reload.contacts.first
+      expect(contact.extension).to eq("123")
+    end
+  end
 end

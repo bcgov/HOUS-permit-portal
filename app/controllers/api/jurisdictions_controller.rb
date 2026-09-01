@@ -302,6 +302,7 @@ class Api::JurisdictionsController < Api::ApplicationController
         department
         title
         phone
+        extension
         cell
         email
       ],
