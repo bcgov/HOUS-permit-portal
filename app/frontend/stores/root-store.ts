@@ -5,7 +5,8 @@ import { withEnvironment } from "../lib/with-environment"
 import { CollaboratorStoreModel, ICollaboratorStore } from "./collaborator-store"
 import { ContactStoreModel, IContactStore } from "./contact-store"
 import { GeocoderStoreModel, IGeocoderStore } from "./geocoder-store"
-import { HelpVideoStoreModel, IHelpVideoStore } from "./help-video-store"
+import { IHelpVideoStore, HelpVideoStoreModel } from "./help-video-store"
+import { IInfoDocumentStore, InfoDocumentStoreModel } from "./info-document-store"
 import { IJurisdictionStore, JurisdictionStoreModel } from "./jurisdiction-store"
 import { INoteStore, NoteStoreModel } from "./note-store"
 import { INotificationStore, NotificationStoreModel } from "./notification-store"
@@ -56,6 +57,7 @@ export const RootStoreModel = types
     templateVersionStore: types.optional(TemplateVersionStoreModel, {}),
     geocoderStore: types.optional(GeocoderStoreModel, {}),
     helpVideoStore: types.optional(HelpVideoStoreModel, {}),
+    infoDocumentStore: types.optional(InfoDocumentStoreModel, {}),
     stepCodeStore: types.optional(StepCodeStoreModel, {}),
     siteConfigurationStore: types.optional(SiteConfigurationStoreModel, {}),
     contactStore: types.optional(ContactStoreModel, {}),
@@ -147,6 +149,7 @@ export interface IRootStore extends IStateTreeNode {
   templateVersionStore: ITemplateVersionStoreModel
   geocoderStore: IGeocoderStore
   helpVideoStore: IHelpVideoStore
+  infoDocumentStore: IInfoDocumentStore
   stepCodeStore: IStepCodeStore
   siteConfigurationStore: ISiteConfigurationStore
   contactStore: IContactStore

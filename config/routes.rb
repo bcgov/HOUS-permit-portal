@@ -388,6 +388,11 @@ Rails.application.routes.draw do
       post "publish", on: :member
       post "unpublish", on: :member
     end
+    resources :info_documents, only: %i[index show create update destroy] do
+      post "publish", on: :member
+      post "unpublish", on: :member
+      post "reorder", on: :collection
+    end
     resources :template_categories, only: %i[index create update destroy] do
       post "reorder", on: :collection
       post "reorder_templates", on: :member

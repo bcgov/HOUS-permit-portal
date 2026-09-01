@@ -3,6 +3,7 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
+import { RouterLink } from "../../shared/navigation/router-link"
 
 export const OnboardingChecklistPageForLgAdoptingScreen = observer(() => {
   const { t } = useTranslation()
@@ -202,6 +203,14 @@ export const OnboardingChecklistPageForLgAdoptingScreen = observer(() => {
         <ListItem fontSize="md">{t(`${prefix}.learnMore.options.technicalQuestions`)}</ListItem>
         <ListItem fontSize="md">{t(`${prefix}.learnMore.options.share`)}</ListItem>
       </UnorderedList>
+      <Text fontSize="md" color="gray.700" mb="4">
+        <Trans
+          i18nKey={`${prefix}.learnMore.infoDocuments`}
+          components={{
+            infoDocumentsLink: <RouterLink to="/info-documents" color="text.link" textDecoration="underline" />,
+          }}
+        />
+      </Text>
       <Text fontSize="md" color="gray.700" mb="8">
         <Trans
           i18nKey={`${prefix}.learnMore.contact`}

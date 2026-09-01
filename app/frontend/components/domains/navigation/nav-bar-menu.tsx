@@ -167,6 +167,11 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
           to="/videos"
           description={t("site.navMenu.about.videos.description")}
         />
+        <StaticLinkItem
+          label={t("site.navMenu.about.infoDocuments.label")}
+          to="/info-documents"
+          description={t("site.navMenu.about.infoDocuments.description")}
+        />
       </MenuSection>
     </VStack>
   )
