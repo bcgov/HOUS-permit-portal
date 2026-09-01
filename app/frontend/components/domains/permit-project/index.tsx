@@ -20,6 +20,7 @@ export const ProjectDashboardScreen = observer(({}: IProjectDashboardScreenProps
   const { preCheckStore, userStore, sandboxStore, siteConfigurationStore } = useMst()
   const { currentUser } = userStore
   const { isSandboxActive } = sandboxStore
+  const { codeComplianceEnabled, overheatingToolEnabled } = siteConfigurationStore
   const location = useLocation()
   const navigate = useNavigate()
   const [isPending, startTransition] = useTransition()
@@ -27,20 +28,24 @@ export const ProjectDashboardScreen = observer(({}: IProjectDashboardScreenProps
   const TABS_DATA: ITabItem[] = [
     { label: t("permitProject.index.title", "Projects"), icon: Buildings, to: "/projects", tabIndex: 0 },
     { label: t("stepCode.index.title", "Step Codes"), icon: ClipboardText, to: "/step-codes", tabIndex: 1 },
-    {
-      label: t("preCheck.index.title", "Pre-checks"),
-      icon: ListMagnifyingGlass,
-      to: "/pre-checks",
-      tabIndex: 2,
-      badgeCount: preCheckStore.unviewedCount,
-    },
-    ...(siteConfigurationStore.overheatingToolEnabled
+    ...(codeComplianceEnabled
+      ? [
+          {
+            label: t("preCheck.index.title", "Pre-checks"),
+            icon: ListMagnifyingGlass,
+            to: "/pre-checks",
+            tabIndex: 2,
+            badgeCount: preCheckStore.unviewedCount,
+          },
+        ]
+      : []),
+    ...(overheatingToolEnabled
       ? [
           {
             label: t("overheatingCode.index.title", "Overheating"),
             icon: Thermometer,
             to: "/overheating-codes",
-            tabIndex: 3,
+            tabIndex: codeComplianceEnabled ? 3 : 2,
           },
         ]
       : []),
@@ -79,8 +84,10 @@ export const ProjectDashboardScreen = observer(({}: IProjectDashboardScreenProps
         <TabPanels>
           <TabPanel p={0}>{isPending ? <LoadingScreen /> : <ProjectTabPanelContent />}</TabPanel>
           <TabPanel p={0}>{isPending ? <LoadingScreen /> : <StepCodeTabPanelContent />}</TabPanel>
-          <TabPanel p={0}>{isPending ? <LoadingScreen /> : <PreCheckTabPanelContent />}</TabPanel>
-          {siteConfigurationStore.overheatingToolEnabled && (
+          {codeComplianceEnabled && (
+            <TabPanel p={0}>{isPending ? <LoadingScreen /> : <PreCheckTabPanelContent />}</TabPanel>
+          )}
+          {overheatingToolEnabled && (
             <TabPanel p={0}>{isPending ? <LoadingScreen /> : <OverheatingCodeTabPanelContent />}</TabPanel>
           )}
           {/* <TabPanel p={0}>{isPending ? <LoadingScreen /> : <ComingSoonPlaceholder />}</TabPanel> */}
