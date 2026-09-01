@@ -13,6 +13,7 @@ export const JurisdictionAboutContactCard = ({ contact, ...rest }: IJurisdiction
   const { t } = useTranslation()
   const phone = contact.phone?.trim()
   const email = contact.email?.trim()
+  const extension = contact.extension?.trim()
   const subtitle = [contact.department, contact.title].filter(Boolean).join(" — ")
   const hasContactMethods = !!(phone || email)
 
@@ -40,6 +41,11 @@ export const JurisdictionAboutContactCard = ({ contact, ...rest }: IJurisdiction
                 <Link href={telHref(phone)} color="text.link" textDecoration="underline" isExternal>
                   {phone}
                 </Link>
+                {extension ? (
+                  <Text color="text.primary">
+                    {t("contact.fields.extension")} {extension}
+                  </Text>
+                ) : null}
               </Flex>
             </Flex>
           ) : null}
