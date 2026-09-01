@@ -1,7 +1,7 @@
 FactoryBot.define do
   factory :info_document do
     sequence(:title) { |n| "Info document #{n}" }
-    description { "A short public guide or fact sheet." }
+    description { "A short public information sheet." }
     topic_list { %w[cost] }
     published_at { nil }
 

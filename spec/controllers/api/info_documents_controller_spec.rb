@@ -52,17 +52,19 @@ RSpec.describe Api::InfoDocumentsController, type: :controller do
       create(:info_document, :published)
       allow_any_instance_of(InfoDocument).to receive(:file_url_safe).with(
         disposition: "inline"
-      ).and_return("https://example.com/guide.pdf")
+      ).and_return("https://example.com/information-sheet.pdf")
       allow_any_instance_of(InfoDocument).to receive(:file_url_safe).with(
         disposition: "attachment"
-      ).and_return("https://example.com/guide-download.pdf")
+      ).and_return("https://example.com/information-sheet-download.pdf")
 
       get :index, format: :json
 
       document = json_response["data"].first
-      expect(document["file_url"]).to eq("https://example.com/guide.pdf")
+      expect(document["file_url"]).to eq(
+        "https://example.com/information-sheet.pdf"
+      )
       expect(document["download_url"]).to eq(
-        "https://example.com/guide-download.pdf"
+        "https://example.com/information-sheet-download.pdf"
       )
     end
 
@@ -129,7 +131,7 @@ RSpec.describe Api::InfoDocumentsController, type: :controller do
       post :create,
            params: {
              info_document: {
-               title: "Cost guide",
+               title: "Cost information sheet",
                topic_list: ["Getting started", "Cost"]
              }
            },
@@ -148,15 +150,16 @@ RSpec.describe Api::InfoDocumentsController, type: :controller do
       post :create,
            params: {
              info_document: {
-               title: "Cost guide",
+               title: "Cost information sheet",
                topic_list: ["Cost"],
-               file: TestData.cached_file_data(filename: "guide.pdf")
+               file:
+                 TestData.cached_file_data(filename: "information-sheet.pdf")
              }
            },
            format: :json
 
       expect(response).to have_http_status(:ok)
-      expect(InfoDocument.last.file_name).to eq("guide.pdf")
+      expect(InfoDocument.last.file_name).to eq("information-sheet.pdf")
     end
   end
 
