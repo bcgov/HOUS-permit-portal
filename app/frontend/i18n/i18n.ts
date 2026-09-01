@@ -2263,8 +2263,6 @@ Thank you,
               description:
                 "Derived from the requirement blocks that reference this question, and the permit templates that include those blocks.",
               summary: "{{blockCount}} requirement blocks · {{templateCount}} permit templates",
-              fullHierarchy: "Full hierarchy",
-              compact: "Compact",
               toggleBlockTemplates: "Show or hide permit templates for this requirement block",
               usedInTemplates_one: "Used in {{count}} permit template",
               usedInTemplates_other: "Used in {{count}} permit templates",
