@@ -4,14 +4,14 @@ class ReportPolicy < ApplicationPolicy
   end
 
   def show?
-    user.super_admin?
+    index?
   end
 
   def refresh?
-    user.super_admin?
+    index?
   end
 
   def export?
-    user.super_admin?
+    index?
   end
 end

@@ -77,18 +77,18 @@ RSpec.describe Api::ReportsController, type: :controller do
       expect(response).to have_http_status(:forbidden)
     end
 
-    it "returns the previous payload when refresh fails" do
+    it "returns a success flash when refresh succeeds" do
       sign_in super_admin
-      previous = {
-        "key" => "application_growth",
-        "computed_at" => "2026-01-01T00:00:00Z",
-        "headline_figures" => [],
-        "charts" => [],
-        "tables" => [],
-        "empty" => true
-      }
+      post :refresh, params: { key: "application_growth" }, format: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("meta", "message", "type")).to eq("success")
+    end
+
+    it "returns an error flash when refresh fails" do
+      sign_in super_admin
       allow(Reports::Cache).to receive(:fetch).and_return(
-        previous.merge("refresh_failed" => true)
+        { "refresh_failed" => true }
       )
 
       post :refresh,
@@ -98,11 +98,7 @@ RSpec.describe Api::ReportsController, type: :controller do
            },
            format: :json
 
-      expect(response).to have_http_status(:ok)
-      expect(json_response.dig("data", "refresh_failed")).to eq(true)
-      expect(json_response.dig("data", "computed_at")).to eq(
-        "2026-01-01T00:00:00Z"
-      )
+      expect(response).to have_http_status(:bad_request)
       expect(json_response.dig("meta", "message", "type")).to eq("error")
     end
   end

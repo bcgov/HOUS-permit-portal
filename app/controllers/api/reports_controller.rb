@@ -3,14 +3,14 @@ class Api::ReportsController < Api::ApplicationController
 
   def index
     authorize :report, :index?
-    render json: { data: Reports::Registry.summaries }
+    render_success Reports::Registry.summaries
   end
 
   def show
     authorize :report, :show?
     return render_unknown_report unless registered?
 
-    render json: { data: Reports::Cache.fetch(params[:key], report_range) }
+    render_success Reports::Cache.fetch(params[:key], report_range)
   end
 
   def refresh
@@ -18,24 +18,11 @@ class Api::ReportsController < Api::ApplicationController
     return render_unknown_report unless registered?
 
     payload = Reports::Cache.fetch(params[:key], report_range, force: true)
-    failed = payload[:refresh_failed] || payload["refresh_failed"]
-    render json: {
-             data: payload,
-             meta: {
-               message:
-                 ArbitraryMessageConstruct.message(
-                   key:
-                     (
-                       if failed
-                         "report.refresh_error"
-                       else
-                         "report.refresh_success"
-                       end
-                     ),
-                   type: failed ? "error" : "success"
-                 )
-             }
-           }
+    if payload.with_indifferent_access[:refresh_failed]
+      render_error "report.refresh_error"
+    else
+      render_success payload, "report.refresh_success"
+    end
   end
 
   def export
