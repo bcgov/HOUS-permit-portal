@@ -5447,11 +5447,13 @@ Thank you,
           stepCodeData: {
             name: "Part 9 Step Code checklist data",
             description:
-              "Every Part 9 Step Code checklist in the selected range, with repeating building-characteristic lines flattened to numbered columns",
+              'Download Part 9 Step Code checklists as CSV, or a zip of supporting documents uploaded via the Step Code "By file upload" option',
             title: "Part 9 Step Code checklist data",
             filename: "Part 9 Step Code checklists",
+            filenameFileUploads: "Step Code file uploads",
+            downloadFileUploads: "Download file uploads",
             rangeHelp:
-              "Includes checklists created in the selected range. Repeating line columns are sized from twice the all-time maximum so every download has the same headers.",
+              "The CSV includes checklists created in the selected range. Repeating line columns are sized from twice the all-time maximum so every download has the same headers. The zip includes Energy Step Code report and HOT2000 files uploaded on permit applications in that range.",
           },
           stepCodeSummary: {
             name: "Energy Step Code configuration by jurisdiction",

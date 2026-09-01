@@ -301,4 +301,29 @@ RSpec.describe Api::StepCodesController, type: :controller do
       expect(response).to have_http_status(:forbidden)
     end
   end
+
+  describe "GET #download_step_code_file_uploads_zip" do
+    it "returns a zip for super admins" do
+      sign_in create(:user, :super_admin)
+      service =
+        instance_double(
+          StepCodeFileUploadZipService,
+          zip: "zip-bytes",
+          zip_filename: "step_code_file_uploads_12_months_2026-08-31.zip"
+        )
+      allow(StepCodeFileUploadZipService).to receive(:new).and_return(service)
+
+      get :download_step_code_file_uploads_zip, params: { range: "12_months" }
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to eq("zip-bytes")
+      expect(response.media_type).to eq("application/zip")
+    end
+
+    it "returns forbidden for non-admins" do
+      get :download_step_code_file_uploads_zip
+
+      expect(response).to have_http_status(:forbidden)
+    end
+  end
 end

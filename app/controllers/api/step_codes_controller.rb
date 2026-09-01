@@ -162,6 +162,19 @@ class Api::StepCodesController < Api::ApplicationController
               disposition: "attachment"
   end
 
+  def download_step_code_file_uploads_zip
+    authorize :step_code, :download_step_code_file_uploads_zip?
+
+    service =
+      StepCodeFileUploadZipService.new(
+        range: Reports::Range.parse(params[:range])
+      )
+    send_data service.zip,
+              type: "application/zip",
+              filename: service.zip_filename,
+              disposition: "attachment"
+  end
+
   private
 
   def set_step_code

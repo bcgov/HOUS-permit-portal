@@ -245,6 +245,23 @@ export const StepCodeStoreModel = types
         throw error
       }
     }),
+    downloadStepCodeFileUploadsZip: flow(function* () {
+      try {
+        const range = self.rootStore.reportStore.rangePreset
+        const fileName = `${t("reporting.stepCodeData.filenameFileUploads")}_${range}_${new Date().toISOString().slice(0, 10)}.zip`
+        yield* toGenerator(
+          downloadFromApi(
+            `/api/step_codes/download_step_code_file_uploads_zip?range=${encodeURIComponent(range)}`,
+            fileName
+          )
+        )
+      } catch (error) {
+        if (import.meta.env.DEV) {
+          console.error(`Failed to download Step Code file uploads:`, error)
+        }
+        throw error
+      }
+    }),
     createPart3StepCode: flow(function* (values: {
       permitApplicationId?: string
       preConstructionChecklistAttributes: { sectionCompletionStatus: Record<string, any> }

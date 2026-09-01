@@ -1,5 +1,5 @@
-import { Box, Button, Container, FormControl, FormLabel, Heading, Select, Text, VStack } from "@chakra-ui/react"
-import { FileCsv } from "@phosphor-icons/react"
+import { Box, Button, Container, FormControl, FormLabel, Heading, HStack, Select, Text, VStack } from "@chakra-ui/react"
+import { FileCsv, FileZip } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -12,14 +12,24 @@ export const StepCodeDataScreen = observer(function StepCodeDataScreen() {
   const { t } = useTranslation()
   const { reportStore, stepCodeStore } = useMst()
   const { rangePreset, setRangePreset, rangePresets } = reportStore
-  const [downloading, setDownloading] = useState(false)
+  const [downloadingCsv, setDownloadingCsv] = useState(false)
+  const [downloadingZip, setDownloadingZip] = useState(false)
 
-  const handleDownload = async () => {
-    setDownloading(true)
+  const handleDownloadCsv = async () => {
+    setDownloadingCsv(true)
     try {
       await stepCodeStore.downloadPart9StepCodeChecklistsCsv()
     } finally {
-      setDownloading(false)
+      setDownloadingCsv(false)
+    }
+  }
+
+  const handleDownloadZip = async () => {
+    setDownloadingZip(true)
+    try {
+      await stepCodeStore.downloadStepCodeFileUploadsZip()
+    } finally {
+      setDownloadingZip(false)
     }
   }
 
@@ -53,17 +63,26 @@ export const StepCodeDataScreen = observer(function StepCodeDataScreen() {
 
         <CustomMessageBox status={EFlashMessageStatus.info} description={t("reporting.stepCodeData.rangeHelp")} />
 
-        <Box>
+        <HStack spacing={3} flexWrap="wrap">
           <Button
             variant="primary"
             leftIcon={<FileCsv />}
-            onClick={handleDownload}
-            isLoading={downloading}
+            onClick={handleDownloadCsv}
+            isLoading={downloadingCsv}
             loadingText={t("reporting.controls.exportCsv")}
           >
             {t("reporting.controls.exportCsv")}
           </Button>
-        </Box>
+          <Button
+            variant="primary"
+            leftIcon={<FileZip />}
+            onClick={handleDownloadZip}
+            isLoading={downloadingZip}
+            loadingText={t("reporting.stepCodeData.downloadFileUploads")}
+          >
+            {t("reporting.stepCodeData.downloadFileUploads")}
+          </Button>
+        </HStack>
       </VStack>
     </Container>
   )
