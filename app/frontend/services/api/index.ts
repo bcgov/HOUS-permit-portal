@@ -5,6 +5,7 @@ import { TContactFormData } from "../../components/shared/contact/create-edit-co
 import { IExternalApiKey } from "../../models/external-api-key"
 import { IHelpVideo } from "../../models/help-video"
 import { IHelpVideoSection } from "../../models/help-video-section"
+import { IInfoDocument } from "../../models/info-document"
 import { IIntegrationMapping } from "../../models/integration-mapping"
 import { IJurisdiction } from "../../models/jurisdiction"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
@@ -263,6 +264,38 @@ export class Api {
 
   async unpublishHelpVideo(id: string) {
     return this.client.post<ApiResponse<IHelpVideo>>(`/help_videos/${id}/unpublish`)
+  }
+
+  async fetchInfoDocuments(params?: { publishedOnly?: boolean }) {
+    return this.client.get<ApiResponse<IInfoDocument[]>>(`/info_documents`, params)
+  }
+
+  async fetchInfoDocument(id: string) {
+    return this.client.get<ApiResponse<IInfoDocument>>(`/info_documents/${id}`)
+  }
+
+  async createInfoDocument(params) {
+    return this.client.post<ApiResponse<IInfoDocument>>(`/info_documents`, { infoDocument: params })
+  }
+
+  async updateInfoDocument(id: string, params) {
+    return this.client.patch<ApiResponse<IInfoDocument>>(`/info_documents/${id}`, { infoDocument: params })
+  }
+
+  async deleteInfoDocument(id: string) {
+    return this.client.delete<ApiResponse<null>>(`/info_documents/${id}`)
+  }
+
+  async publishInfoDocument(id: string) {
+    return this.client.post<ApiResponse<IInfoDocument>>(`/info_documents/${id}/publish`)
+  }
+
+  async unpublishInfoDocument(id: string) {
+    return this.client.post<ApiResponse<IInfoDocument>>(`/info_documents/${id}/unpublish`)
+  }
+
+  async reorderInfoDocuments(orderedIds: string[]) {
+    return this.client.post<ApiResponse<IInfoDocument[]>>(`/info_documents/reorder`, { orderedIds })
   }
 
   async fetchPermitApplication(id: string, review?: boolean) {

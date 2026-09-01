@@ -977,6 +977,25 @@ en:
       reorder_templates_success:
         title: ""
         message: "Templates reordered successfully."
+    info_document:
+      create_success:
+        title: ""
+        message: "Document created successfully."
+      update_success:
+        title: ""
+        message: "Document updated successfully."
+      destroy_success:
+        title: ""
+        message: "Document deleted successfully."
+      publish_success:
+        title: ""
+        message: "Document published successfully."
+      unpublish_success:
+        title: ""
+        message: "Document unpublished successfully."
+      reorder_success:
+        title: ""
+        message: "Documents reordered successfully."
     help_video:
       create_success:
         title: ""

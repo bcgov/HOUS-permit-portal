@@ -51,6 +51,10 @@ const HelpVideosIndexScreen = lazy(() =>
   import("../help-videos").then((module) => ({ default: module.HelpVideosIndexScreen }))
 )
 
+const InfoDocumentsIndexScreen = lazy(() =>
+  import("../info-documents").then((module) => ({ default: module.InfoDocumentsIndexScreen }))
+)
+
 const HelpVideoScreen = lazy(() =>
   import("../help-videos/help-video-screen").then((module) => ({ default: module.HelpVideoScreen }))
 )
@@ -117,6 +121,11 @@ const ResourcesScreenLazy = lazy(() =>
 const HelpVideosManagementScreen = lazy(() =>
   import("../super-admin/help-videos-management-screen").then((module) => ({
     default: module.HelpVideosManagementScreen,
+  }))
+)
+const InfoDocumentsManagementScreen = lazy(() =>
+  import("../super-admin/info-documents-management-screen").then((module) => ({
+    default: module.InfoDocumentsManagementScreen,
   }))
 )
 const ReviewStaffMyJurisdictionAboutPageScreen = lazy(() =>
@@ -591,6 +600,7 @@ const AppRoutes = observer(() => {
       <Route path="/configuration-management/sitewide-message" element={<SitewideMessageScreen />} />
       <Route path="/configuration-management/help-drawer-setup" element={<HelpDrawerSetupScreen />} />
       <Route path="/configuration-management/help-videos" element={<HelpVideosManagementScreen />} />
+      <Route path="/configuration-management/info-documents" element={<InfoDocumentsManagementScreen />} />
       <Route path="/configuration-management/template-categories" element={<TemplateCategoriesScreen />} />
       <Route path="/configuration-management/revision-reason-setup" element={<RevisionReasonSetupScreen />} />
       {/* DEPRECATED: /configuration-management/standardization-setup route removed.
@@ -1004,6 +1014,7 @@ const AppRoutes = observer(() => {
         <Route path="/release-notes" element={<ReleaseNotesScreen />} />
         <Route path="/videos" element={<HelpVideosIndexScreen />} />
         <Route path="/videos/:videoId" element={<HelpVideoScreen />} />
+        <Route path="/info-documents" element={<InfoDocumentsIndexScreen />} />
         <Route path="/standardization-preview" element={<StandardizationPreviewScreen />} />
         <Route path="/template-versions/:templateVersionId/preview" element={<TemplateVersionPreviewScreen />} />
         <Route path="/project-readiness-tools" element={<ProjectReadinessToolsIndexScreen />} />

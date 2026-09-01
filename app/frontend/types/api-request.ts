@@ -151,6 +151,7 @@ export interface ISiteConfigurationUpdateParams {
   overheatingToolEnabled?: boolean | null
   archistarEnabledForAllJurisdictions?: boolean | null
   sitewideMessage?: string | null
+  infoDocumentsIntroText?: string | null
   helpLinkItems?: IHelpLinkItems
   revisionReasonsMap?: { [key: string]: IRevisionReason }
   revisionReasonsAttributes?: IRevisionReasonsAttributes[]
