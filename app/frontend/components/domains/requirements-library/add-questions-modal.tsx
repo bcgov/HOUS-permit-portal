@@ -111,6 +111,7 @@ export const AddQuestionsModal = observer(function AddQuestionsModal({
             <QuestionBankModal
               triggerButtonProps={{ variant: "ghost", fontWeight: "normal" }}
               triggerButtonLabel={t("questionBank.modals.create.newSharedQuestion")}
+              onSaved={() => pickerSearch.search()}
             />
             <Button variant="primary" onClick={onClose}>
               {t("ui.close")}
