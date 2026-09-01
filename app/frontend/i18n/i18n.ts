@@ -4184,6 +4184,8 @@ Thank you,
                 technicalQuestions: "Answer technical questions",
                 share: "Share what other communities have done",
               },
+              infoDocuments:
+                "You can also browse <infoDocumentsLink>guides and fact sheets</infoDocumentsLink> for one-page summaries about Building Permit Hub.",
               contact: "You can reach our team by sending an email to <mailTo>{{email}}</mailTo>",
               email: "digital.codes.permits@gov.bc.ca",
               emailText: "digital.codes.permits@gov.bc.ca",
