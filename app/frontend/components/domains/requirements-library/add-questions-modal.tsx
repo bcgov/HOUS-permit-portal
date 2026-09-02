@@ -69,7 +69,13 @@ export const AddQuestionsModal = observer(function AddQuestionsModal({
       <Drawer isOpen={isOpen} placement="left" onClose={onClose} finalFocusRef={btnRef}>
         <DrawerOverlay />
         <DrawerContent maxW="min(1320px, 95vw)" display="flex" flexDir="column">
-          <DrawerCloseButton fontSize={"xs"} color={"greys.white"} top={5} right={4} zIndex={1} />
+          <DrawerCloseButton
+            fontSize={"xs"}
+            color={"greys.white"}
+            top="calc(var(--app-navbar-offset) + var(--chakra-space-5))"
+            right={4}
+            zIndex={1}
+          />
           <DrawerHeader color={"greys.white"} backgroundColor={"theme.blueAlt"} p={6} pt={10} fontSize={"2xl"}>
             {t("requirementsLibrary.bankQuestions.addQuestionsTitle")}
           </DrawerHeader>
