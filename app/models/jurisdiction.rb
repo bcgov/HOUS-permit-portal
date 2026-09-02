@@ -218,6 +218,27 @@ class Jurisdiction < ApplicationRecord
     is_regional_district ? regional_district : municipality
   end
 
+  def self.normalize_ltsa_matcher(value)
+    value.to_s.downcase.gsub(/\bthe\b/, "").gsub(/[^a-z0-9]+/, " ").squish
+  end
+
+  def self.find_by_normalized_ltsa_matcher(scope, ltsa_matcher)
+    # ponytail: O(n) scan of jurisdictions (~200). Upgrade to a generated
+    # normalized column or Searchkick analyzer if this path is hot.
+    target = normalize_ltsa_matcher(ltsa_matcher)
+    return if target.blank?
+
+    scope.find do |jurisdiction|
+      [
+        jurisdiction.ltsa_matcher,
+        jurisdiction.reverse_qualified_name,
+        jurisdiction.qualified_name
+      ].any? do |candidate|
+        candidate.present? && normalize_ltsa_matcher(candidate) == target
+      end
+    end
+  end
+
   def self.fuzzy_find_by_ltsa_feature_attributes(attributes)
     ltsa_matcher = ltsa_matcher_from_ltsa_attributes(attributes)
 
@@ -228,14 +249,11 @@ class Jurisdiction < ApplicationRecord
       }
     }
     is_regional_district = attributes["MUNICIPALITY"] == "Rural"
+    scope = is_regional_district ? RegionalDistrict : SubDistrict
 
-    return(
-      if is_regional_district
-        RegionalDistrict.search(ltsa_matcher, **ltsa_matcher_params).first
-      else
-        SubDistrict.search(ltsa_matcher, **ltsa_matcher_params).first
-      end
-    )
+    scope.find_by(ltsa_matcher: ltsa_matcher) ||
+      scope.search(ltsa_matcher, **ltsa_matcher_params).first
+    # || find_by_normalized_ltsa_matcher(scope, ltsa_matcher)
   end
 
   def search_data
