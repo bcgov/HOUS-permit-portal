@@ -17,6 +17,7 @@ type TJurisdictionSelectProps = {
   selectedOption: IOption<IJurisdiction>
   title?: string
   filters?: IJurisdictionFilters
+  initialInputValue?: string
 } & Partial<TAsyncSelectProps>
 
 export const JurisdictionSelect = observer(function ({
@@ -27,6 +28,7 @@ export const JurisdictionSelect = observer(function ({
   title,
   components = {},
   filters = {},
+  initialInputValue,
   ...rest
 }: TJurisdictionSelectProps) {
   const { jurisdictionStore } = useMst()
@@ -35,11 +37,14 @@ export const JurisdictionSelect = observer(function ({
   const { t } = useTranslation()
 
   const fetchJurisdictionOptions = (name: string, callback: (options) => void) => {
-    if (name.length > 3 || !R.isEmpty(filters)) {
-      fetchOptions(!R.isEmpty(name) ? { name, ...filters } : filters).then((options: IOption<IJurisdiction>[]) => {
-        onFetch && onFetch()
-        callback(options)
-      })
+    const query = name.length > 0 ? name : (initialInputValue ?? "")
+    if (query.length > 3 || !R.isEmpty(filters)) {
+      fetchOptions(!R.isEmpty(query) ? { name: query, ...filters } : filters).then(
+        (options: IOption<IJurisdiction>[]) => {
+          onFetch && onFetch()
+          callback(options)
+        }
+      )
     } else callback([])
   }
 
@@ -102,6 +107,7 @@ export const JurisdictionSelect = observer(function ({
       isClearable
       defaultOptions
       placeholder={t("ui.typeToSearch")}
+      defaultInputValue={initialInputValue}
       {...rest}
     />
   )

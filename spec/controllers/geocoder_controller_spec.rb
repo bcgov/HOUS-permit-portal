@@ -15,12 +15,15 @@ RSpec.describe Api::GeocoderController, type: :controller do
     it "returns options for a provided address" do
       allow(geocoder_wrapper).to receive(:site_options).with(
         "123 Main St"
-      ).and_return([{ label: "123 Main St", value: "site-1" }])
+      ).and_return(
+        [{ label: "123 Main St", value: "site-1", coordinates: [-123.1, 49.7] }]
+      )
 
       get :site_options, params: { address: "123 Main St" }, format: :json
 
       expect(response).to have_http_status(:ok)
       expect(json_response["data"].first["value"]).to eq("site-1")
+      expect(json_response["data"].first["coordinates"]).to eq([-123.1, 49.7])
     end
 
     it "returns an empty array when address is blank" do

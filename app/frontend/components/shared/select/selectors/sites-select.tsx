@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   Input as ChakraInput,
   Flex,
@@ -20,15 +21,16 @@ import { ControlProps, InputProps, OptionProps, components } from "react-select"
 import CreatableSelect from "react-select/creatable"
 import { IJurisdiction } from "../../../../models/jurisdiction"
 import { useMst } from "../../../../setup/root"
-import { IOption } from "../../../../types/types"
+import { IOption, ISiteOption } from "../../../../types/types"
 import { formatPidLabel, formatPidValue } from "../../../../utils/utility-functions"
 import { fieldArrayCompatibleErrorMessage } from "../../form/form-helpers"
+import { ProjectMap } from "../../module-wrappers/project-map"
 import { AsyncSelect, TAsyncSelectProps } from "../async-select"
 import { JurisdictionSelect } from "./jurisdiction-select"
 
 export type TSitesSelectProps = {
-  onChange: (option: IOption) => void
-  selectedOption: IOption
+  onChange: (option: ISiteOption) => void
+  selectedOption: ISiteOption
   pidName?: string
   siteName?: string
   pidRequired?: boolean
@@ -40,7 +42,7 @@ export type TSitesSelectProps = {
   initialJurisdiction?: IJurisdiction | null
   isDisabled?: boolean
   jurisdictionRequired?: boolean
-} & Partial<TAsyncSelectProps>
+} & Partial<TAsyncSelectProps<ISiteOption>>
 
 // Please be advised that this is expected to be used within a form context!
 // This component now includes integrated jurisdiction matching and manual mode functionality
@@ -72,6 +74,7 @@ export const SitesSelect = observer(function ({
     fetchPids,
     fetchSiteDetailsFromPid,
     fetchGeocodedJurisdiction,
+    fetchingPids,
   } = geocoderStore
   const { addJurisdiction, getJurisdictionById } = jurisdictionStore
   const pidSelectRef = useRef(null)
@@ -91,6 +94,23 @@ export const SitesSelect = observer(function ({
 
   const pidWatch = watch(pidName)
   const siteWatch = watch(siteName)
+  const siteCoordinates = selectedOption?.coordinates
+  const showNoPidMap =
+    Boolean(selectedOption) &&
+    !fetchingPids &&
+    !pidWatch &&
+    Array.isArray(siteCoordinates) &&
+    siteCoordinates.length >= 2
+  const addressParts =
+    selectedOption?.label
+      ?.split(",")
+      .map((part) => part.trim())
+      .filter(Boolean) ?? []
+  const jurisdictionSearchPrefill = addressParts.length >= 2 ? addressParts[addressParts.length - 2] : ""
+
+  useEffect(() => {
+    if (showNoPidMap) setManualMode(true)
+  }, [showNoPidMap])
 
   const preserveExistingJurisdiction = () => {
     const existingJurisdiction =
@@ -104,7 +124,7 @@ export const SitesSelect = observer(function ({
 
   const fetchSiteOptions = (address: string, callback: (options) => void) => {
     if (address.length > 3) {
-      fetchOptions(address).then((options: IOption[]) => {
+      fetchOptions(address).then((options: ISiteOption[]) => {
         setValue(pidName, null)
         setValue(siteName, null)
         callback(options)
@@ -112,7 +132,7 @@ export const SitesSelect = observer(function ({
     } else callback([])
   }
 
-  const handleChange = (option: IOption) => {
+  const handleChange = (option: ISiteOption) => {
     setPidOptions([])
     onChange(option)
     setValue(pidName, null)
@@ -206,7 +226,7 @@ export const SitesSelect = observer(function ({
         <FormControl>
           <FormLabel>{t("permitApplication.addressLabel")}</FormLabel>
           <InputGroup>
-            <AsyncSelect<IOption, boolean>
+            <AsyncSelect<ISiteOption, boolean>
               isClearable={true}
               onChange={handleChange}
               placeholder="Search Addresses"
@@ -303,6 +323,15 @@ export const SitesSelect = observer(function ({
         </FormControl>
       </Flex>
 
+      {showNoPidMap && (
+        <Flex direction="column" gap={2} w="full" flexShrink={0}>
+          <Text fontSize="sm">{t("permitApplication.noPidConfirmSiteLocation")}</Text>
+          <Box h="240px" minH="240px" maxH="240px" w="full" overflow="hidden" borderRadius="md" position="relative">
+            <ProjectMap coordinates={siteCoordinates} />
+          </Box>
+        </Flex>
+      )}
+
       {/* Auto-matched Jurisdiction Display - Only in automatic mode */}
       {!manualMode && showJurisdiction && (
         <Flex bg="greys.grey03" px={6} py={2} gap={2} w="full" direction="column">
@@ -321,6 +350,8 @@ export const SitesSelect = observer(function ({
             <FormLabel>{t("permitProject.new.jurisdictionTitle")}</FormLabel>
             <InputGroup w="full">
               <JurisdictionSelect
+                key={jurisdictionSearchPrefill || "manual"}
+                initialInputValue={jurisdictionSearchPrefill || undefined}
                 onChange={(selectValue) => {
                   if (selectValue) addJurisdiction(selectValue)
                   jurisdictionField.onChange(selectValue?.id)
@@ -353,7 +384,7 @@ export const SitesSelect = observer(function ({
   )
 })
 
-const Option = (props: OptionProps<IOption>) => {
+const Option = (props: OptionProps<ISiteOption>) => {
   return (
     <components.Option {...props}>
       <HStack color={"text.secondary"} fontSize={"xs"}>
@@ -364,7 +395,7 @@ const Option = (props: OptionProps<IOption>) => {
   )
 }
 
-const Control = ({ children, ...props }: ControlProps<IOption>) => {
+const Control = ({ children, ...props }: ControlProps<ISiteOption>) => {
   return (
     <components.Control {...props}>
       <MapPin size={"16.7px"} />
