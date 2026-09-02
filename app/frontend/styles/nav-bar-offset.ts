@@ -2,7 +2,7 @@
  * Geometry for regions that fill the viewport underneath the nav bar.
  *
  * Both read --app-navbar-offset rather than --app-navbar-height, so the region reclaims
- * the bar's space as it scrolls away instead of leaving a strip of empty viewport behind.
+ * the bar's space 1:1 as it slides away instead of leaving a strip of empty viewport behind.
  */
 
 /** For a region pinned with `position: fixed`. */
