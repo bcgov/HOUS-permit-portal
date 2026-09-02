@@ -252,8 +252,8 @@ class Jurisdiction < ApplicationRecord
     scope = is_regional_district ? RegionalDistrict : SubDistrict
 
     scope.find_by(ltsa_matcher: ltsa_matcher) ||
-      scope.search(ltsa_matcher, **ltsa_matcher_params).first
-    # || find_by_normalized_ltsa_matcher(scope, ltsa_matcher)
+      scope.search(ltsa_matcher, **ltsa_matcher_params).first ||
+      find_by_normalized_ltsa_matcher(scope, ltsa_matcher)
   end
 
   def search_data
