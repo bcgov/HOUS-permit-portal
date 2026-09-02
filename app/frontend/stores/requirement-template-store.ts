@@ -191,7 +191,7 @@ export const RequirementTemplateStoreModel = types
 
       return false
     }),
-    fetchFilterOptions: flow(function* (params?: { permitProjectId?: string }) {
+    fetchFilterOptions: flow(function* (params?: { permitProjectId?: string; jurisdictionId?: string }) {
       const response = yield* toGenerator(self.environment.api.fetchRequirementTemplatesForFilter(params))
       if (response.ok) {
         self.filterOptions = cast(response.data.data)

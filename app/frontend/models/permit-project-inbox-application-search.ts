@@ -68,9 +68,6 @@ export const PermitProjectInboxApplicationSearchSlice = types
         if (response.data.meta?.unreadStatusCounts) {
           self.setUnreadColumnCounts(response.data.meta.unreadStatusCounts)
         }
-        if (response.data.meta?.requirementTemplateOptions) {
-          self.setRequirementTemplateOptions(response.data.meta.requirementTemplateOptions)
-        }
       }
       return response.ok
     }),

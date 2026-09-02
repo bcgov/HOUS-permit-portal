@@ -76,8 +76,7 @@ module Api::Concerns::Search::JurisdictionPermitProjects
       total_count: @jurisdiction_permit_project_search.total_count,
       state_counts: jurisdiction_state_counts,
       unread_count: unread_state_counts.values.sum,
-      unread_state_counts: unread_state_counts,
-      requirement_template_options: jurisdiction_requirement_template_options
+      unread_state_counts: unread_state_counts
     }
   end
 
@@ -147,8 +146,7 @@ module Api::Concerns::Search::JurisdictionPermitProjects
       state_counts: jurisdiction_state_counts,
       column_totals: column_totals,
       unread_count: unread_state_counts.values.sum,
-      unread_state_counts: unread_state_counts,
-      requirement_template_options: jurisdiction_requirement_template_options
+      unread_state_counts: unread_state_counts
     }
   end
 
@@ -235,39 +233,6 @@ module Api::Concerns::Search::JurisdictionPermitProjects
   rescue => e
     Rails.logger.warn("Failed to compute state counts: #{e.message}")
     {}
-  end
-
-  # Permit types represented in the inbox, independent of current filters/query.
-  def jurisdiction_requirement_template_options
-    where = {
-      jurisdiction_id: @jurisdiction.id,
-      discarded: false,
-      status: {
-        not: "new_draft"
-      }
-    }
-    where[:sandbox_id] = current_sandbox&.id unless current_user.super_admin?
-
-    buckets =
-      PermitApplication
-        .search(
-          "*",
-          where: where,
-          aggs: [:requirement_template_id],
-          body_options: {
-            size: 0
-          }
-        )
-        .aggs
-        .dig("requirement_template_id", "buckets") || []
-
-    ids = buckets.map { |bucket| bucket["key"] }
-    OptionsBlueprint.render_as_hash(RequirementTemplate.where(id: ids))
-  rescue => e
-    Rails.logger.warn(
-      "Failed to compute requirement template options: #{e.message}"
-    )
-    []
   end
 
   def jurisdiction_permit_project_search_params
