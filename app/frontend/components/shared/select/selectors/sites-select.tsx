@@ -112,12 +112,8 @@ export const SitesSelect = observer(function ({
   const jurisdictionSearchPrefill = addressParts.length >= 2 ? addressParts[addressParts.length - 2] : ""
 
   useEffect(() => {
-    if (pidWatch) {
-      setManualMode(false)
-      return
-    }
     if (showNoPidMap) setManualMode(true)
-  }, [pidWatch, showNoPidMap])
+  }, [showNoPidMap])
 
   const preserveExistingJurisdiction = () => {
     const existingJurisdiction =
