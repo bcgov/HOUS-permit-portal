@@ -31,7 +31,7 @@ export interface IRequirementOptionsMenu {
   disabledOptions?: Array<"remove" | "conditional">
   /** Omit menu items entirely (blocks keep the default and still show conditional). */
   hideConditional?: boolean
-  /** Question Bank definitions do not own placement-specific logic. */
+  /** Question bank definitions do not own placement-specific logic. */
   hidePlacementConfiguration?: boolean
   hasDataValidation?: boolean
   requirementType?: ERequirementType

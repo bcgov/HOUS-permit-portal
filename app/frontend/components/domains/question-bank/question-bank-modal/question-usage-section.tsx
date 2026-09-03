@@ -6,7 +6,6 @@ import {
   AccordionPanel,
   Box,
   Button,
-  ButtonGroup,
   Collapse,
   Flex,
   HStack,
@@ -14,21 +13,17 @@ import {
   Link,
   Text,
   VStack,
+  useDisclosure,
 } from "@chakra-ui/react"
 import { ArrowSquareOut, CaretDown, CaretRight, FileText } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useMemo, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { TQuestionUsageBlock, TQuestionUsageTemplate } from "../../../../models/requirement-question"
 import { ETemplateVersionStatus } from "../../../../types/enums"
 import { TemplateStatusTag } from "../../../shared/requirement-template/template-status-tag"
 
-type TViewMode = "hierarchy" | "compact"
-
 const requirementBlockEditHref = (blockId: string) => `/requirements-library?openRequirementBlockId=${blockId}`
-
-const expandableBlockIds = (blocks: TQuestionUsageBlock[]) =>
-  new Set(blocks.filter((block) => (block.requirementTemplates ?? []).length > 0).map((block) => block.id))
 
 interface IQuestionUsageSectionProps {
   // From MST: names arrive with the list; nested templates arrive after modal refresh (show).
@@ -39,30 +34,12 @@ export const QuestionUsageSection = observer(function QuestionUsageSection({
   linkedBlocks,
 }: IQuestionUsageSectionProps) {
   const { t } = useTranslation()
-  const [viewMode, setViewMode] = useState<TViewMode>("hierarchy")
-  const [expandedBlockIds, setExpandedBlockIds] = useState<Set<string>>(() => expandableBlockIds(linkedBlocks))
+  const [isCollapsedAll, setIsCollapsedAll] = useState(false)
+  const hasExpandableBlocks = linkedBlocks.some((block) => (block.requirementTemplates ?? []).length > 0)
 
-  const uniqueTemplateCount = useMemo(() => {
-    const ids = new Set<string>()
-    linkedBlocks.forEach((block) => {
-      ;(block.requirementTemplates ?? []).forEach((template) => ids.add(template.id))
-    })
-    return ids.size
-  }, [linkedBlocks])
-
-  const setMode = (mode: TViewMode) => {
-    setViewMode(mode)
-    setExpandedBlockIds(mode === "hierarchy" ? expandableBlockIds(linkedBlocks) : new Set())
-  }
-
-  const toggleBlock = (blockId: string) => {
-    setExpandedBlockIds((prev) => {
-      const next = new Set(prev)
-      if (next.has(blockId)) next.delete(blockId)
-      else next.add(blockId)
-      return next
-    })
-  }
+  const templateCount = new Set(
+    linkedBlocks.flatMap((block) => (block.requirementTemplates ?? []).map((template) => template.id))
+  ).size
 
   return (
     <Box mt={10} w={"full"} border={"1px solid"} borderColor={"border.light"} borderRadius={"md"} bg={"white"}>
@@ -80,7 +57,7 @@ export const QuestionUsageSection = observer(function QuestionUsageSection({
                 <Text fontSize={"xs"} color={"text.secondary"} whiteSpace={"nowrap"}>
                   {t("questionBank.modals.usage.summary", {
                     blockCount: linkedBlocks.length,
-                    templateCount: uniqueTemplateCount,
+                    templateCount,
                   })}
                 </Text>
               )}
@@ -109,77 +86,16 @@ export const QuestionUsageSection = observer(function QuestionUsageSection({
                   {t("questionBank.modals.usage.description")}
                 </Text>
 
-                <ButtonGroup size={"sm"} spacing={2}>
-                  <Button
-                    variant={viewMode === "hierarchy" ? "primary" : "secondary"}
-                    onClick={() => setMode("hierarchy")}
-                  >
-                    {t("questionBank.modals.usage.fullHierarchy")}
+                {hasExpandableBlocks && (
+                  <Button size={"sm"} variant={"secondary"} onClick={() => setIsCollapsedAll(!isCollapsedAll)}>
+                    {isCollapsedAll ? t("ui.expandAll") : t("ui.collapseAll")}
                   </Button>
-                  <Button variant={viewMode === "compact" ? "primary" : "secondary"} onClick={() => setMode("compact")}>
-                    {t("questionBank.modals.usage.compact")}
-                  </Button>
-                </ButtonGroup>
+                )}
 
                 <VStack alignItems={"stretch"} spacing={2} w={"full"}>
-                  {linkedBlocks.map((block) => {
-                    const templates = block.requirementTemplates ?? []
-                    const hasNoTemplates = templates.length === 0
-                    const isExpanded = hasNoTemplates || expandedBlockIds.has(block.id)
-
-                    return (
-                      <Box
-                        key={block.id}
-                        border={"1px solid"}
-                        borderColor={"border.light"}
-                        borderRadius={"md"}
-                        overflow={"hidden"}
-                      >
-                        <Flex alignItems={"center"} gap={2} px={3} py={3} w={"full"}>
-                          {!hasNoTemplates && (
-                            <Button
-                              variant={"ghost"}
-                              size={"xs"}
-                              minW={"unset"}
-                              h={"auto"}
-                              p={0}
-                              aria-expanded={isExpanded}
-                              aria-label={t("questionBank.modals.usage.toggleBlockTemplates")}
-                              onClick={() => toggleBlock(block.id)}
-                            >
-                              <Icon as={isExpanded ? CaretDown : CaretRight} boxSize={4} />
-                            </Button>
-                          )}
-                          <BlockLink blockId={block.id} name={block.name} />
-                          <Text fontSize={"xs"} color={"text.secondary"} flexShrink={0}>
-                            {t("questionBank.modals.usage.usedInTemplates", { count: templates.length })}
-                          </Text>
-                        </Flex>
-
-                        {hasNoTemplates ? (
-                          <Text fontSize={"sm"} color={"text.secondary"} px={3} pb={3}>
-                            {t("questionBank.modals.usage.noTemplates")}
-                          </Text>
-                        ) : (
-                          <Collapse in={isExpanded} animateOpacity>
-                            <VStack
-                              alignItems={"flex-start"}
-                              spacing={2}
-                              px={4}
-                              pb={3}
-                              pt={1}
-                              bg={"greys.grey04"}
-                              pl={10}
-                            >
-                              {templates.map((template) => (
-                                <TemplateLink key={template.id} template={template} showSecondary />
-                              ))}
-                            </VStack>
-                          </Collapse>
-                        )}
-                      </Box>
-                    )
-                  })}
+                  {linkedBlocks.map((block) => (
+                    <BlockUsageRow key={block.id} block={block} isCollapsedAll={isCollapsedAll} />
+                  ))}
                 </VStack>
               </VStack>
             )}
@@ -189,6 +105,60 @@ export const QuestionUsageSection = observer(function QuestionUsageSection({
     </Box>
   )
 })
+
+function BlockUsageRow({ block, isCollapsedAll }: { block: TQuestionUsageBlock; isCollapsedAll: boolean }) {
+  const { t } = useTranslation()
+  const templates = block.requirementTemplates ?? []
+  const hasNoTemplates = templates.length === 0
+  const { isOpen, onToggle, onClose, onOpen } = useDisclosure({ defaultIsOpen: true })
+
+  useEffect(() => {
+    if (hasNoTemplates) return
+    if (isCollapsedAll) onClose()
+    else onOpen()
+  }, [isCollapsedAll])
+
+  const isExpanded = hasNoTemplates || isOpen
+
+  return (
+    <Box border={"1px solid"} borderColor={"border.light"} borderRadius={"md"} overflow={"hidden"}>
+      <Flex alignItems={"center"} gap={2} px={3} py={3} w={"full"}>
+        {!hasNoTemplates && (
+          <Button
+            variant={"ghost"}
+            size={"xs"}
+            minW={"unset"}
+            h={"auto"}
+            p={0}
+            aria-expanded={isExpanded}
+            aria-label={t("questionBank.modals.usage.toggleBlockTemplates")}
+            onClick={onToggle}
+          >
+            <Icon as={isExpanded ? CaretDown : CaretRight} boxSize={4} />
+          </Button>
+        )}
+        <BlockLink blockId={block.id} name={block.name} />
+        <Text fontSize={"xs"} color={"text.secondary"} flexShrink={0}>
+          {t("questionBank.modals.usage.usedInTemplates", { count: templates.length })}
+        </Text>
+      </Flex>
+
+      {hasNoTemplates ? (
+        <Text fontSize={"sm"} color={"text.secondary"} px={3} pb={3}>
+          {t("questionBank.modals.usage.noTemplates")}
+        </Text>
+      ) : (
+        <Collapse in={isExpanded} animateOpacity>
+          <VStack alignItems={"flex-start"} spacing={2} px={4} pb={3} pt={3} bg={"greys.grey04"} pl={10}>
+            {templates.map((template) => (
+              <TemplateLink key={template.id} template={template} />
+            ))}
+          </VStack>
+        </Collapse>
+      )}
+    </Box>
+  )
+}
 
 function BlockLink({ blockId, name }: { blockId: string; name: string }) {
   return (
@@ -210,32 +180,25 @@ function BlockLink({ blockId, name }: { blockId: string; name: string }) {
   )
 }
 
-function TemplateLink({ template, showSecondary }: { template: TQuestionUsageTemplate; showSecondary?: boolean }) {
+function TemplateLink({ template }: { template: TQuestionUsageTemplate }) {
   const label = template.nickname || template.id
 
   return (
-    <Box>
-      <HStack spacing={2} alignItems={"center"} flexWrap={"wrap"}>
-        <Link
-          href={`/requirement-templates/${template.id}/edit`}
-          isExternal
-          display={"inline-flex"}
-          alignItems={"center"}
-          gap={1.5}
-          fontSize={"sm"}
-          color={"text.link"}
-        >
-          <FileText size={14} />
-          <Text as={"span"}>{label}</Text>
-          <ArrowSquareOut size={14} />
-        </Link>
-        {template.published && <TemplateStatusTag status={ETemplateVersionStatus.published} />}
-      </HStack>
-      {showSecondary && template.templateCategoryLabel && (
-        <Text fontSize={"xs"} color={"text.secondary"} pl={5}>
-          {template.templateCategoryLabel}
-        </Text>
-      )}
-    </Box>
+    <HStack spacing={2} alignItems={"center"} flexWrap={"wrap"}>
+      <Link
+        href={`/requirement-templates/${template.id}/edit`}
+        isExternal
+        display={"inline-flex"}
+        alignItems={"center"}
+        gap={1.5}
+        fontSize={"sm"}
+        color={"text.link"}
+      >
+        <FileText size={14} />
+        <Text as={"span"}>{label}</Text>
+        <ArrowSquareOut size={14} />
+      </Link>
+      {template.published && <TemplateStatusTag status={ETemplateVersionStatus.published} />}
+    </HStack>
   )
 }

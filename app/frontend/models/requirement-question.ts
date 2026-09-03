@@ -7,7 +7,6 @@ import { ERequirementType } from "../types/enums"
 export type TQuestionUsageTemplate = {
   id: string
   nickname: string | null
-  templateCategoryLabel?: string | null
   published?: boolean
 }
 

@@ -25,7 +25,7 @@ export type TEditableGroupProps<TFieldValues extends FieldValues> = {
   helperText?: string
   editableInput?: ReactNode
   editableInstructionsTextProps?: TEditableInstructionsTextProps<TFieldValues>
-  /** Shared bank questions: definition fields are owned by the Question Bank, not the block. */
+  /** Shared bank questions: definition fields are owned by the Question bank, not the block. */
   lockDefinition?: boolean
 } & Partial<StackProps>
 
