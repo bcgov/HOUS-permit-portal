@@ -72,11 +72,10 @@ module ProjectItem
     end
 
     def default_jurisdiction_heating_degree_days
-      jurisdiction
-        &.jurisdiction_heating_degree_days
-        &.order(:created_at)
-        &.first
-        &.heating_degree_days
+      rows = jurisdiction&.jurisdiction_heating_degree_days
+      return unless rows&.one?
+
+      rows.first.heating_degree_days
     end
 
     # Sandbox lives on the parent project. Project items no longer carry

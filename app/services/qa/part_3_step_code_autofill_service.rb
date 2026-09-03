@@ -79,8 +79,7 @@ class Qa::Part3StepCodeAutofillService
   end
 
   def update_checklist!(checklist, _fuel_types)
-    heating_degree_days =
-      @step_code.default_jurisdiction_heating_degree_days || 4180
+    heating_degree_days = autofill_heating_degree_days
 
     attributes =
       Qa::Part3StepCodeAutofillData.checklist_attributes_for(
@@ -91,6 +90,16 @@ class Qa::Part3StepCodeAutofillService
       )
 
     checklist.update!(attributes)
+  end
+
+  def autofill_heating_degree_days
+    @step_code.default_jurisdiction_heating_degree_days ||
+      @step_code
+        .jurisdiction
+        &.jurisdiction_heating_degree_days
+        &.order(:created_at)
+        &.first
+        &.heating_degree_days || 4180
   end
 
   def autofill_section_completion_status

@@ -55,4 +55,40 @@ RSpec.describe Part3StepCode, type: :model do
       expect(as_built.completed_by_email).to eq("mid@example.com")
     end
   end
+
+  describe "#default_jurisdiction_heating_degree_days" do
+    let(:jurisdiction) { create(:sub_district) }
+    let(:step_code) { create(:part_3_step_code, jurisdiction: jurisdiction) }
+
+    it "returns nil when the jurisdiction has no HDD rows" do
+      expect(step_code.default_jurisdiction_heating_degree_days).to be_nil
+    end
+
+    it "returns the HDD when the jurisdiction has exactly one row" do
+      create(
+        :jurisdiction_heating_degree_day,
+        jurisdiction: jurisdiction,
+        heating_degree_days: 2825
+      )
+
+      expect(step_code.default_jurisdiction_heating_degree_days).to eq(2825)
+    end
+
+    it "returns nil when the jurisdiction has multiple HDD rows" do
+      create(
+        :jurisdiction_heating_degree_day,
+        jurisdiction: jurisdiction,
+        location_name: "Waterfront",
+        heating_degree_days: 2825
+      )
+      create(
+        :jurisdiction_heating_degree_day,
+        jurisdiction: jurisdiction,
+        location_name: "Lynn Valley",
+        heating_degree_days: 3100
+      )
+
+      expect(step_code.default_jurisdiction_heating_degree_days).to be_nil
+    end
+  end
 end

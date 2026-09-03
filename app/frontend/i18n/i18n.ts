@@ -2749,9 +2749,14 @@ Thank you,
               hdd: {
                 label: "Heating degree days below 18°C",
                 hint: "HDD is specified by the AHJ",
+                selectHint: "Select the location that matches this project.",
                 jurisdictionReference:
                   "Refer to HDD <a>values set by the jurisdiction</a> (link will open in a new tab)",
                 error: "Enter the heating degree days below 18°C for this project.",
+                selectError: "Select the heating degree days for this project.",
+                tableHdd: "Heating degree days (HDD)",
+                tableClimateZone: "Climate zone",
+                tableLocation: "Location name",
               },
               climateZone: {
                 label: "Climate zone",
