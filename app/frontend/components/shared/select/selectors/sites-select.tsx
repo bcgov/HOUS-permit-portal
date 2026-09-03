@@ -75,6 +75,7 @@ export const SitesSelect = observer(function ({
     fetchSiteDetailsFromPid,
     fetchGeocodedJurisdiction,
     fetchingPids,
+    fetchingJurisdiction,
   } = geocoderStore
   const { addJurisdiction, getJurisdictionById } = jurisdictionStore
   const pidSelectRef = useRef(null)
@@ -98,7 +99,9 @@ export const SitesSelect = observer(function ({
   const showNoPidMap =
     Boolean(selectedOption) &&
     !fetchingPids &&
+    !fetchingJurisdiction &&
     !pidWatch &&
+    pidOptions.length === 0 &&
     Array.isArray(siteCoordinates) &&
     siteCoordinates.length >= 2
   const addressParts =
@@ -109,8 +112,12 @@ export const SitesSelect = observer(function ({
   const jurisdictionSearchPrefill = addressParts.length >= 2 ? addressParts[addressParts.length - 2] : ""
 
   useEffect(() => {
+    if (pidWatch) {
+      setManualMode(false)
+      return
+    }
     if (showNoPidMap) setManualMode(true)
-  }, [showNoPidMap])
+  }, [pidWatch, showNoPidMap])
 
   const preserveExistingJurisdiction = () => {
     const existingJurisdiction =
@@ -134,6 +141,7 @@ export const SitesSelect = observer(function ({
 
   const handleChange = (option: ISiteOption) => {
     setPidOptions([])
+    setManualMode(false)
     onChange(option)
     setValue(pidName, null)
     if (option && option.value) {
@@ -182,7 +190,7 @@ export const SitesSelect = observer(function ({
     let isActive = true
     ;(async () => {
       try {
-        const response = await fetchGeocodedJurisdiction(siteValue, undefined, Boolean(onLtsaMatcherFound))
+        const response = await fetchGeocodedJurisdiction(siteValue, pidWatch || undefined, Boolean(onLtsaMatcherFound))
         const matchedJurisdiction = response?.jurisdiction
         const foundLtsaMatcher = response?.ltsaMatcher ?? null
         if (onLtsaMatcherFound) {
@@ -215,7 +223,7 @@ export const SitesSelect = observer(function ({
     return () => {
       isActive = false
     }
-  }, [siteWatch?.value, manualMode])
+  }, [siteWatch?.value, pidWatch, manualMode])
 
   const debouncedFetchOptions = useCallback(debounce(fetchSiteOptions, 1000), [])
 
@@ -375,7 +383,7 @@ export const SitesSelect = observer(function ({
       )}
 
       {/* Manual Mode Toggle */}
-      {showManualModeToggle && showJurisdiction && (
+      {showManualModeToggle && showJurisdiction && !showNoPidMap && (
         <Button isDisabled={isDisabled} variant="link" size="sm" onClick={() => setManualMode((prev) => !prev)}>
           {manualMode ? t("ui.switchToAutomaticMode") : t("ui.switchToManualMode")}
         </Button>

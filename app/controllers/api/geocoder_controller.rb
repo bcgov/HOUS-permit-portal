@@ -61,11 +61,9 @@ class Api::GeocoderController < Api::ApplicationController
     authorize :geocoder, :jurisdiction?
     begin
       wrapper = Wrappers::Geocoder.new
-      if geocoder_params[:site_id].present?
-        pids = wrapper.pids(geocoder_params[:site_id])
-        pid = pids.first
-      elsif geocoder_params[:pid].present?
-        pid = geocoder_params[:pid]
+      pid = geocoder_params[:pid].presence
+      if pid.blank? && geocoder_params[:site_id].present?
+        pid = wrapper.pids(geocoder_params[:site_id]).first
       end
       raise StandardError unless pid.present?
 

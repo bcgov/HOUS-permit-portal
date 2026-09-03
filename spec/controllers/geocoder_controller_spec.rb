@@ -75,6 +75,26 @@ RSpec.describe Api::GeocoderController, type: :controller do
       expect(json_response["data"]["id"]).to eq(jurisdiction.id)
       expect(json_response["meta"]["ltsa_matcher"]).to eq("matched_by_pid")
     end
+
+    it "uses the supplied pid over the site's first pid" do
+      expect(geocoder_wrapper).not_to receive(:pids)
+      allow(ltsa_wrapper).to receive(:get_feature_attributes_by_pid).with(
+        pid: "999-000-111"
+      ).and_return({ "pid" => "999-000-111" })
+      allow(Jurisdiction).to receive(
+        :fuzzy_find_by_ltsa_feature_attributes
+      ).and_return(jurisdiction)
+
+      get :jurisdiction,
+          params: {
+            site_id: "site-1",
+            pid: "999-000-111"
+          },
+          format: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response["data"]["id"]).to eq(jurisdiction.id)
+    end
   end
 
   describe "GET #pin" do

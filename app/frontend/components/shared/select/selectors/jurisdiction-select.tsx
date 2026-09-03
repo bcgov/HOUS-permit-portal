@@ -49,6 +49,15 @@ export const JurisdictionSelect = observer(function ({
   }
 
   const debouncedFetchOptions = useCallback(debounce(fetchJurisdictionOptions, 1000), [])
+  const openPrefillMenu = Boolean(initialInputValue) && !selectedOption
+  const loadOptions = (name: string, callback: (options) => void) => {
+    // Prefill mount: skip the 1s debounce so the open menu fills immediately
+    if (!name && initialInputValue) {
+      fetchJurisdictionOptions(name, callback)
+      return
+    }
+    debouncedFetchOptions(name, callback)
+  }
 
   const customStyles: StylesConfig<IOption<IJurisdiction>, boolean> = {
     container: (provided) => ({
@@ -102,10 +111,13 @@ export const JurisdictionSelect = observer(function ({
         ...components,
       }}
       styles={customStyles}
-      loadOptions={debouncedFetchOptions}
+      loadOptions={loadOptions}
       isCreatable={false}
       isClearable
       defaultOptions
+      defaultMenuIsOpen={openPrefillMenu}
+      openMenuOnFocus={openPrefillMenu}
+      autoFocus={openPrefillMenu}
       placeholder={t("ui.typeToSearch")}
       defaultInputValue={initialInputValue}
       {...rest}
