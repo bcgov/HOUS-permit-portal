@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_08_21_172453) do
+ActiveRecord::Schema[7.2].define(version: 2026_09_04_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -98,6 +98,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_21_172453) do
     t.uuid "contactable_id"
     t.string "contact_type"
     t.index ["contactable_type", "contactable_id"], name: "index_contacts_on_contactable"
+  end
+
+  create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
   end
 
   create_table "design_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -962,6 +965,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_21_172453) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.datetime "last_reminder_sent_at"
+    t.boolean "show_on_about", default: true, null: false
+    t.integer "about_position"
+    t.index ["jurisdiction_id", "about_position"], name: "index_resources_on_jurisdiction_id_and_about_position"
     t.index ["jurisdiction_id", "category"], name: "index_resources_on_jurisdiction_id_and_category"
     t.index ["jurisdiction_id"], name: "index_resources_on_jurisdiction_id"
     t.index ["last_reminder_sent_at"], name: "index_resources_on_last_reminder_sent_at"

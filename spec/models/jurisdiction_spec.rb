@@ -482,4 +482,21 @@ RSpec.describe Jurisdiction, type: :model do
       end
     end
   end
+
+  describe "resources nested attributes" do
+    it "updates show_on_about and about_position" do
+      jurisdiction = create(:sub_district)
+      resource = create(:resource, jurisdiction: jurisdiction)
+
+      jurisdiction.update!(
+        resources_attributes: [
+          { id: resource.id, show_on_about: false, about_position: 4 }
+        ]
+      )
+
+      resource.reload
+      expect(resource.show_on_about).to be(false)
+      expect(resource.about_position).to eq(4)
+    end
+  end
 end
