@@ -2,8 +2,6 @@ import { useEffect, useRef } from "react"
 import { useLocation } from "react-router-dom"
 import { IScrollPeekState, nextScrollPeekState } from "./scroll-peek-state"
 
-const ROOT_ATTRIBUTE = "data-navbar-hidden"
-const TRAVEL_THRESHOLD_PX = 8
 const FALLBACK_NAVBAR_HEIGHT_PX = 58
 
 /**
@@ -22,9 +20,10 @@ function isPageLevelScroller(target: EventTarget | null): boolean {
   return target.clientWidth >= window.innerWidth * 0.5 && target.clientHeight >= window.innerHeight * 0.5
 }
 
-function scrollTopOf(target: EventTarget): number {
-  if (target === document || target === window) return window.scrollY
-  return (target as HTMLElement).scrollTop ?? 0
+function scrollMetricsOf(target: EventTarget): { scrollTop: number; maxScroll: number } {
+  const el = target === document || target === window ? document.documentElement : (target as HTMLElement)
+  const scrollTop = target === document || target === window ? window.scrollY : (el.scrollTop ?? 0)
+  return { scrollTop, maxScroll: Math.max(0, el.scrollHeight - el.clientHeight) }
 }
 
 function readNavBarHeight(): number {
@@ -33,10 +32,9 @@ function readNavBarHeight(): number {
 }
 
 /**
- * Hides the top nav bar while the user scrolls down and brings it back as soon as they
- * scroll up, from any depth. Listens on the capture phase so the one listener covers the
- * window plus every nested scroll container in the app, and reports through the
- * `data-navbar-hidden` attribute so scrolling never re-renders React.
+ * Tucks the top nav bar 1:1 with page scroll (Amazon-style): 5px down hides 5px of
+ * the bar, then it parks just off-screen; 5px up reveals 5px from any depth.
+ * Writes --app-navbar-offset so scrolling never re-renders React.
  */
 export function useScrollAwareNavBar() {
   const location = useLocation()
@@ -44,23 +42,19 @@ export function useScrollAwareNavBar() {
 
   useEffect(() => {
     const root = document.documentElement
-    const anchorDepth = readNavBarHeight()
+    const barHeight = readNavBarHeight()
     const lastScrollTops = new WeakMap<EventTarget, number>()
 
-    let state: IScrollPeekState = { hidden: false, travel: 0 }
+    let state: IScrollPeekState = { hiddenPx: 0 }
     let frame = 0
     let pendingTarget: EventTarget | null = null
 
     const apply = () => {
-      if (state.hidden) {
-        root.setAttribute(ROOT_ATTRIBUTE, "true")
-      } else {
-        root.removeAttribute(ROOT_ATTRIBUTE)
-      }
+      root.style.setProperty("--app-navbar-offset", `${barHeight - state.hiddenPx}px`)
     }
 
     const reveal = () => {
-      state = { hidden: false, travel: 0 }
+      state = { hiddenPx: 0 }
       apply()
     }
     revealRef.current = reveal
@@ -71,15 +65,15 @@ export function useScrollAwareNavBar() {
       pendingTarget = null
       if (!target) return
 
-      const scrollTop = scrollTopOf(target)
+      const { scrollTop, maxScroll } = scrollMetricsOf(target)
       const previous = lastScrollTops.get(target)
       lastScrollTops.set(target, scrollTop)
 
       state = nextScrollPeekState(state, {
         delta: previous === undefined ? 0 : scrollTop - previous,
         scrollTop,
-        anchorDepth,
-        threshold: TRAVEL_THRESHOLD_PX,
+        maxScroll,
+        barHeight,
       })
       apply()
     }
@@ -102,7 +96,7 @@ export function useScrollAwareNavBar() {
       document.removeEventListener("scroll", onScroll, true)
       document.removeEventListener("focusin", onFocusIn)
       if (frame) cancelAnimationFrame(frame)
-      root.removeAttribute(ROOT_ATTRIBUTE)
+      root.style.removeProperty("--app-navbar-offset")
     }
   }, [])
 

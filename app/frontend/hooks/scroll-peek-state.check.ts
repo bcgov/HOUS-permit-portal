@@ -3,46 +3,68 @@ import assert from "node:assert/strict"
 import type { IScrollPeekState } from "./scroll-peek-state.ts"
 import { nextScrollPeekState } from "./scroll-peek-state.ts"
 
-const ANCHOR = 58
-const THRESHOLD = 8
+const BAR = 58
+const TALL = 10000
 
-/** Replays a sequence of scrollTop samples and returns whether the bar ends up hidden. */
-function replay(scrollTops: number[], start: IScrollPeekState = { hidden: false, travel: 0 }): IScrollPeekState {
+function replay(scrollTops: number[], start: IScrollPeekState = { hiddenPx: 0 }, maxScroll = TALL): IScrollPeekState {
   return scrollTops.reduce((state, scrollTop, index) => {
     const previous = index === 0 ? scrollTop : scrollTops[index - 1]
     return nextScrollPeekState(state, {
       delta: scrollTop - previous,
       scrollTop,
-      anchorDepth: ANCHOR,
-      threshold: THRESHOLD,
+      maxScroll,
+      barHeight: BAR,
     })
   }, start)
 }
 
-assert.equal(replay([0, 200, 400, 600]).hidden, true, "scrolling down hides the bar")
+assert.equal(replay([0, 5, 10, 15]).hiddenPx, 15, "5px down tucks 5px of the bar")
 
-assert.equal(replay([0, 600, 590]).hidden, false, "a small scroll up reveals the bar again")
+assert.equal(replay([0, 5, 10, 5]).hiddenPx, 5, "5px up reveals 5px of the bar")
+
+assert.equal(replay([0, 200, 400, 600]).hiddenPx, BAR, "the bar parks once it is fully off-screen")
+
+assert.equal(replay([0, 600, 595]).hiddenPx, 53, "5px up from fully hidden reveals 5px")
+
+assert.equal(replay([0, 9000, 8995]).hiddenPx, 53, "a reveal costs the same pixels no matter how far down the page")
+
+assert.equal(replay([0, 600, 0]).hiddenPx, 0, "returning to the top always shows the bar")
+
+assert.equal(replay([0, 30]).hiddenPx, 30, "shallow scrolling tucks the bar by the same amount")
 
 assert.equal(
-  replay([0, 9000, 8990]).hidden,
-  false,
-  "a reveal costs the same small gesture no matter how far down the page"
+  replay([0, 20, 40, 50], { hiddenPx: 0 }, 50).hiddenPx,
+  50,
+  "short pages still tuck 1:1 for as far as they can scroll"
 )
 
-assert.equal(replay([0, 600, 20]).hidden, false, "returning near the top always shows the bar")
-
-assert.equal(replay([0, 30]).hidden, false, "shallow scrolling within the anchor depth leaves the bar shown")
-
-// Sub-threshold jitter around a fixed position must not flip the bar in either direction.
-const jitter = [0, 600, 603, 599, 604, 600, 602, 598, 601]
-assert.equal(replay(jitter).hidden, true, "jitter does not reveal a hidden bar")
-assert.equal(replay(jitter, { hidden: true, travel: 0 }).hidden, true, "jitter does not flicker a hidden bar")
-
-// A gradual upward drag delivered in many tiny frames still adds up to a reveal.
+const tucked = replay([0, 200, 400])
+assert.equal(tucked.hiddenPx, BAR, "setup: tall page parks the bar on the way down")
 assert.equal(
-  replay([0, 600, 598, 596, 594, 592, 590]).hidden,
-  false,
-  "upward travel accumulates across frames to reach the threshold"
+  nextScrollPeekState(tucked, {
+    delta: -BAR,
+    scrollTop: 400 - BAR,
+    maxScroll: 400 - BAR,
+    barHeight: BAR,
+  }).hiddenPx,
+  BAR,
+  "bottom clamp after tuck does not reveal"
 )
+
+assert.equal(
+  nextScrollPeekState(
+    { hiddenPx: 20 },
+    {
+      delta: -20,
+      scrollTop: 0,
+      maxScroll: 0,
+      barHeight: BAR,
+    }
+  ).hiddenPx,
+  20,
+  "clamp that eats leftover overflow is not a return to the top"
+)
+
+assert.equal(replay([0, 400, 390], { hiddenPx: 0 }, 400).hiddenPx, 48, "a real scroll up from the bottom still reveals")
 
 console.log("scroll-peek-state: all checks passed")

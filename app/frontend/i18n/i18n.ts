@@ -5073,10 +5073,10 @@ Thank you,
             },
             stepCodeWarnings: {
               energyStepCodeRecommended:
-                'Warning:"Design drawing Energy Step Code file" is present in the template, but there is no "Energy Step Code Part 9" requirement.',
+                'Design drawing Energy Step Code file" is present in the template, but there is no "Energy Step Code Part 9" requirement.',
 
               duplicateStepCodePackage:
-                'Warning: Multiple "Design drawing Energy Step Code fields" found. Please ensure there is only one "Design drawing field".',
+                'Multiple "Design drawing Energy Step Code fields" found. Please ensure there is only one "Design drawing field".',
             },
             stepCodeErrors: {
               duplicateEnergyStepCode:

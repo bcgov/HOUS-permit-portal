@@ -327,6 +327,33 @@ RSpec.describe Jurisdiction, type: :model do
     end
   end
 
+  describe ".fuzzy_find_by_ltsa_feature_attributes" do
+    it "matches when LTSA includes The/City but the stored matcher is reverse_qualified_name" do
+      jurisdiction =
+        create(
+          :sub_district,
+          name: "North Vancouver",
+          locality_type: "corporation of the city",
+          ltsa_matcher: "North Vancouver, Corporation of the city of"
+        )
+      create(
+        :sub_district,
+        name: "North Vancouver",
+        locality_type: "corporation of the district",
+        ltsa_matcher: "North Vancouver, Corporation of the district of"
+      )
+      allow(SubDistrict).to receive(:search).and_return([])
+
+      result =
+        described_class.fuzzy_find_by_ltsa_feature_attributes(
+          "MUNICIPALITY" => "North Vancouver, The Corporation of the City of",
+          "REGIONAL_DISTRICT" => "Metro Vancouver Regional District"
+        )
+
+      expect(result).to eq(jurisdiction)
+    end
+  end
+
   describe "callbacks" do
     let(:super_admin) { create(:user, :super_admin) }
     let(:manager) { create(:user, :review_manager) }
