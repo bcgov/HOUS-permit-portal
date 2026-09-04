@@ -16,6 +16,23 @@ class Wrappers::LtsaParcelMapBc < Wrappers::Base
     { "Content-Type" => "application/json" }
   end
 
+  def search_pid_from_coordinates(coord_array: [], fields: "*")
+    query_params = {
+      f: "json",
+      returnIdsOnly: false,
+      returnCountOnly: false,
+      where: "PID IS NOT NULL",
+      geometry: coord_array.join(","),
+      geometryType: "esriGeometryPoint",
+      inSR: 4326,
+      spatialRel: "esriSpatialRelIntersects",
+      returnGeometry: true,
+      outFields: fields
+    }
+
+    get("#{PARCEL_SERVICE}/query", query_params, true)
+  end
+
   def get_details_by_pid(pid:, fields: "*")
     query_params = {
       f: "json",

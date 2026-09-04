@@ -111,6 +111,25 @@ RSpec.describe "Api::PermitProjects", type: :request, search: true do
       expect(json_response.dig("data", "owner_id")).to eq(owner.id)
     end
 
+    it "persists geocoder coordinates when pid is blank" do
+      post "/api/permit_projects",
+           params: {
+             permit_project: {
+               title: "No PID Project",
+               jurisdiction_id: permit_project.jurisdiction_id,
+               latitude: 49.691403,
+               longitude: -123.147794
+             }
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:created)
+      created = PermitProject.find(json_response.dig("data", "id"))
+      expect(created.latitude).to eq(BigDecimal("49.691403"))
+      expect(created.longitude).to eq(BigDecimal("-123.147794"))
+    end
+
     it "returns validation errors for invalid payloads" do
       allow(ArbitraryMessageConstruct).to receive(:message).and_return(
         { message: "error" }

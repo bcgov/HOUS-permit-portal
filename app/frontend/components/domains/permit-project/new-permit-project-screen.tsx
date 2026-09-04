@@ -7,7 +7,7 @@ import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus } from "../../../types/enums"
-import { IOption } from "../../../types/types"
+import { ISiteOption } from "../../../types/types"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { BackButton } from "../../shared/buttons/back-button"
 import { TextFormControl } from "../../shared/form/input-form-control"
@@ -19,7 +19,7 @@ import { NewPermitProjectSandboxSelect } from "./new-permit-project-sandbox-sele
 type TCreatePermitProjectFormData = {
   title: string
   pid?: string
-  site?: IOption
+  site?: ISiteOption
   jurisdictionId?: string
 }
 
@@ -30,7 +30,7 @@ export const NewPermitProjectScreen = observer(() => {
     defaultValues: {
       title: "",
       pid: "",
-      site: null as IOption,
+      site: null as ISiteOption,
       jurisdictionId: "",
     },
   })
@@ -55,11 +55,15 @@ export const NewPermitProjectScreen = observer(() => {
   }, [jurisdictionId])
 
   const onSubmit = async (values: TCreatePermitProjectFormData) => {
+    const siteCoordinates = values.site?.coordinates
     const params = {
       title: values.title,
       fullAddress: values.site?.label,
       pid: values.pid,
       jurisdictionId: values.jurisdictionId,
+      ...(!values.pid && siteCoordinates?.length >= 2
+        ? { longitude: siteCoordinates[0], latitude: siteCoordinates[1] }
+        : {}),
     }
     const result = await permitProjectStore.createPermitProject(params)
     if (result.ok && result.data) {
