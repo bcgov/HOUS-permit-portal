@@ -28,6 +28,62 @@ RSpec.describe PermitProject, type: :model do
       expect { project.update!(number: nil) }.not_to raise_error
       expect(project.reload.number).to be_present
     end
+
+    describe "staff-owned live projects must be discarded" do
+      let(:jurisdiction) { create(:sub_district) }
+      let(:sandbox) { jurisdiction.sandboxes.published.first }
+      let(:staff) { create(:user, :reviewer, jurisdiction: jurisdiction) }
+      let(:submitter) { create(:user, :submitter) }
+
+      it "rejects an active live project owned by review staff" do
+        project =
+          build(
+            :permit_project,
+            owner: staff,
+            jurisdiction: jurisdiction,
+            sandbox: nil
+          )
+
+        expect(project).not_to be_valid
+        expect(project.errors[:base]).to be_present
+      end
+
+      it "allows a discarded live project owned by review staff" do
+        project =
+          build(
+            :permit_project,
+            owner: staff,
+            jurisdiction: jurisdiction,
+            sandbox: nil,
+            discarded_at: Time.current
+          )
+
+        expect(project).to be_valid
+      end
+
+      it "allows an active sandboxed project owned by review staff" do
+        project =
+          build(
+            :permit_project,
+            owner: staff,
+            jurisdiction: jurisdiction,
+            sandbox: sandbox
+          )
+
+        expect(project).to be_valid
+      end
+
+      it "prevents undiscarding a staff-owned live project" do
+        project =
+          create(:permit_project, owner: submitter, jurisdiction: jurisdiction)
+        submitter.update_column(:role, User.roles[:reviewer])
+        project.discard!
+        project.reload
+
+        expect(project.undiscard).to eq(false)
+        expect(project.reload).to be_discarded
+      end
+    end
   end
 
   describe "callbacks" do

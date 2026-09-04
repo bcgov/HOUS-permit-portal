@@ -115,9 +115,8 @@ en:
               no_jurisdiction: "must be present if not associated with a project."
             pid_or_pin: "must have a PID or PIN."
         permit_project:
+          staff_owned_live_must_be_discarded: "review staff cannot own an active permit project outside of a sandbox"
           attributes:
-            owner:
-              review_staff_requires_sandbox: "review staff cannot own permit projects outside of a sandbox"
             sandbox:
               incorrect_jurisdiction: "must belong to the jurisdiction. Please apply to your own jurisdiction to use this sandbox."
         project_meeting:
