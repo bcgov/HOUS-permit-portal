@@ -36,7 +36,15 @@ export const DownloadLinkButton = ({
     : `${displayTitle} (${getFileExtension(document.file.metadata.filename, document.file.metadata.mimeType)}, ${formatFileSize(document.file.metadata.size)})`
 
   return (
-    <FileDownloadButton document={document} modelType={modelType} variant="link" color="semantic.info" size="sm" px={0}>
+    <FileDownloadButton
+      document={document}
+      modelType={modelType}
+      variant="link"
+      color={simpleTitle ? "text.link" : "semantic.info"}
+      size="sm"
+      px={0}
+      textDecoration={simpleTitle ? "underline" : undefined}
+    >
       {titleWithMetadata}
     </FileDownloadButton>
   )
@@ -61,13 +69,14 @@ export const ResourceItem = ({ resource, simpleTitle }: IResourceItemProps) => {
         <Link
           href={resource.linkUrl}
           isExternal
-          color="semantic.info"
+          color={simpleTitle ? "text.link" : "semantic.info"}
           fontSize="md"
           display="inline-flex"
           alignItems="center"
           gap={1}
+          textDecoration={simpleTitle ? "underline" : undefined}
         >
-          <ArrowSquareOut size={16} />
+          {!simpleTitle && <ArrowSquareOut size={16} />}
           {resource.title}
         </Link>
       ) : null}

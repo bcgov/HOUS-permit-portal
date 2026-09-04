@@ -1,4 +1,4 @@
-import { Box, Button, Checkbox, Flex, Heading, IconButton, VStack } from "@chakra-ui/react"
+import { Box, Button, Checkbox, Flex, Heading, VStack } from "@chakra-ui/react"
 import {
   closestCenter,
   DndContext,
@@ -16,9 +16,9 @@ import {
   useSortable,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable"
-import { ArrowSquareOut, List as ListIcon } from "@phosphor-icons/react"
+import { ArrowSquareOut, DotsSixVertical } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { CSSProperties } from "react"
+import React, { CSSProperties, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link as RouterLink } from "react-router-dom"
 import { IJurisdiction } from "../../../models/jurisdiction"
@@ -42,9 +42,17 @@ export const JurisdictionResourcesGridSection = observer(function JurisdictionRe
 }: IJurisdictionResourcesGridSectionProps) {
   const { t } = useTranslation()
   const isManaging = !!configureResourcesPath
-  const orderedResources = sortByAboutPosition(jurisdiction.resources ?? [])
+  const storeResources = jurisdiction.resources ?? []
+  const storeSignature = storeResources
+    .map((resource) => `${resource.id}:${resource.aboutPosition ?? 0}:${resource.showOnAbout !== false}`)
+    .join("|")
+  const [orderedResources, setOrderedResources] = useState(() => sortByAboutPosition(storeResources))
   const visibleResources = orderedResources.filter((resource) => resource.showOnAbout !== false)
   const displayResources = isManaging ? orderedResources : visibleResources
+
+  useEffect(() => {
+    setOrderedResources(sortByAboutPosition(jurisdiction.resources ?? []))
+  }, [storeSignature])
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -69,11 +77,18 @@ export const JurisdictionResourcesGridSection = observer(function JurisdictionRe
     const newIndex = orderedResources.findIndex((resource) => resource.id === String(over.id))
     if (oldIndex === -1 || newIndex === -1) return
 
-    persistAboutList(arrayMove(orderedResources, oldIndex, newIndex))
+    const next = arrayMove(orderedResources, oldIndex, newIndex).map((resource, index) => ({
+      ...resource,
+      aboutPosition: index,
+    }))
+    setOrderedResources(next)
+    persistAboutList(next)
   }
 
   const handleShowOnAboutChange = (resource: IResource, showOnAbout: boolean) => {
-    persistAboutList(orderedResources.map((item) => (item.id === resource.id ? { ...item, showOnAbout } : item)))
+    const next = orderedResources.map((item) => (item.id === resource.id ? { ...item, showOnAbout } : item))
+    setOrderedResources(next)
+    persistAboutList(next)
   }
 
   if (!isManaging && visibleResources.length === 0) {
@@ -126,11 +141,11 @@ export const JurisdictionResourcesGridSection = observer(function JurisdictionRe
               items={displayResources.map((resource) => resource.id)}
               strategy={verticalListSortingStrategy}
             >
-              <VStack align="stretch" spacing={3}>
+              <VStack align="stretch" spacing={0}>
                 {displayResources.map((resource) => (
                   <SortableItem<IAboutResourceRowProps>
                     key={resource.id}
-                    sortableArguments={{ id: resource.id }}
+                    sortableArguments={{ id: resource.id, animateLayoutChanges: () => false }}
                     Component={AboutResourceRow}
                     componentProps={{
                       resource,
@@ -174,21 +189,16 @@ function AboutResourceRow({
     <Flex
       ref={sortableProps.setNodeRef}
       style={dragMotionStyles}
-      align="flex-start"
-      gap={3}
+      align="center"
+      gap={4}
+      py={4}
+      px={2}
+      bg="white"
+      borderBottom="1px solid"
+      borderColor="border.light"
       opacity={showOnAbout ? 1 : 0.5}
     >
-      <IconButton
-        type="button"
-        aria-label={t("jurisdiction.resources.dragHandle")}
-        variant="ghost"
-        size="sm"
-        icon={<ListIcon />}
-        {...sortableProps.listeners}
-        {...sortableProps.attributes}
-      />
       <Checkbox
-        mt={1}
         isChecked={showOnAbout}
         onChange={(event) => onShowOnAboutChange(resource, event.target.checked)}
         aria-label={t("jurisdiction.resources.showOnAbout")}
@@ -196,6 +206,21 @@ function AboutResourceRow({
       <Box flex={1} minW={0}>
         <ResourceItem resource={resource} simpleTitle />
       </Box>
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        fontWeight="normal"
+        color="text.secondary"
+        rightIcon={<DotsSixVertical size={20} />}
+        cursor="grab"
+        flexShrink={0}
+        aria-label={t("jurisdiction.resources.dragHandle")}
+        {...sortableProps.listeners}
+        {...sortableProps.attributes}
+      >
+        {t("ui.reorder")}
+      </Button>
     </Flex>
   )
 }
