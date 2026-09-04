@@ -14,6 +14,7 @@ import { theme } from "../styles/theme"
 
 import { useTranslation } from "react-i18next"
 import "../i18n/i18n"
+import { getCurrentSandboxId, syncMatomoSandboxFlag } from "../utils/utility-functions"
 
 const renderApp = (rootStore) => {
   const container = document.getElementById("app")
@@ -29,6 +30,8 @@ const renderApp = (rootStore) => {
         return
       }
 
+      // Seed before mtm.Start so the first pageview can be suppressed in training.
+      syncMatomoSandboxFlag(Boolean(getCurrentSandboxId()))
       const _mtm = ((window as any)._mtm = (window as any)._mtm || [])
       _mtm.push({ "mtm.startTime": new Date().getTime(), event: "mtm.Start" })
       const d = document

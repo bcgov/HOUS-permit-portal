@@ -366,6 +366,11 @@ export function getCurrentSandboxId() {
   }
 }
 
+export function syncMatomoSandboxFlag(isSandbox: boolean) {
+  const _mtm = ((window as any)._mtm = (window as any)._mtm || [])
+  _mtm.push({ isSandbox })
+}
+
 export function convertToDate(property: any) {
   if (!(property instanceof Date)) {
     return new Date(property)
