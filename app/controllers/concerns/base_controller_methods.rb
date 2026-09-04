@@ -32,7 +32,7 @@ module BaseControllerMethods
         end
       )
     meta = opts[:meta].deep_merge(default_meta(message))
-    if resource.blank?
+    if resource.blank? || (opts[:blueprint].blank? && hash_payload?(resource))
       success_payload = { data: resource, meta: meta }
       status = opts[:status] || :ok
       render json: success_payload, status: status
@@ -118,5 +118,10 @@ module BaseControllerMethods
     meta = {}
     meta[:message] = ArbitraryMessageConstruct.message(**message) if message
     meta
+  end
+
+  def hash_payload?(resource)
+    resource.is_a?(Hash) ||
+      (resource.is_a?(Array) && resource.first.is_a?(Hash))
   end
 end

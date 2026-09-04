@@ -4,6 +4,8 @@ class Jurisdiction < ApplicationRecord
   include JurisdictionExternalApiState
   include ValidateUrlAttributes
 
+  audited on: %i[update], only: %i[inbox_enabled]
+
   BASE_INCLUDES = %i[
     submission_contacts
     contacts

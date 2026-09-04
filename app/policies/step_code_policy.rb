@@ -11,6 +11,14 @@ class StepCodePolicy < ApplicationPolicy
     user.super_admin?
   end
 
+  def download_part_9_step_code_checklists_csv?
+    user.super_admin?
+  end
+
+  def download_step_code_file_uploads_zip?
+    user.super_admin?
+  end
+
   def create?
     return false unless user
 
