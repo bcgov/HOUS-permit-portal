@@ -19,6 +19,17 @@ RSpec.describe TemplateVersioningService, type: :service, search: true do
         expect(template_version.status).to eq("scheduled")
       end
 
+      it "persists change_notes on the scheduled version" do
+        template_version =
+          TemplateVersioningService.schedule!(
+            requirement_template,
+            Date.tomorrow,
+            change_notes: "Ready for June publish"
+          )
+
+        expect(template_version.change_notes).to eq("Ready for June publish")
+      end
+
       it "schedules a new template version for the future and and after last version" do
         version_date = Date.tomorrow
         template_version =
@@ -337,6 +348,26 @@ RSpec.describe TemplateVersioningService, type: :service, search: true do
       expect(requirement_template.reload.draft_template_versions).to eq(
         [newer_draft, older_draft]
       )
+    end
+
+    it "persists change_notes on the draft" do
+      draft =
+        TemplateVersioningService.create_draft!(
+          requirement_template,
+          change_notes: "Short description of changes"
+        )
+
+      expect(draft.change_notes).to eq("Short description of changes")
+    end
+
+    it "stores blank change_notes as nil" do
+      draft =
+        TemplateVersioningService.create_draft!(
+          requirement_template,
+          change_notes: "  "
+        )
+
+      expect(draft.change_notes).to be_nil
     end
   end
 

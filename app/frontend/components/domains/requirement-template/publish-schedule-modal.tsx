@@ -34,13 +34,14 @@ import { IRequirementTemplateConfigError } from "../../../types/types"
 import { DatePicker } from "../../shared/date-picker"
 import { ConfigErrorsList } from "./config-errors-list"
 import { TemplateAccessSidebar } from "./template-access-sidebar"
+import { VersionNoteField, normalizedVersionNote } from "./version-note-field"
 
 export type TPublishScheduleTranslationNamespace = "requirementTemplate.edit" | "templateVersionPreview.schedulePublish"
 
 export interface IPublishScheduleModalProps {
   minDate?: Date
-  onScheduleConfirm?: (date: Date) => void
-  onForcePublishNow?: () => void
+  onScheduleConfirm?: (date: Date, changeNotes?: string) => void
+  onForcePublishNow?: (changeNotes?: string) => void
   triggerButtonProps?: Partial<ButtonProps>
   renderTrigger?: (onOpen: () => void) => React.ReactNode
   requirementTemplate?: IRequirementTemplate
@@ -84,6 +85,7 @@ export const PublishScheduleModal = observer(function PublishScheduleModal({
   const overrideDialog = useDisclosure()
   const overrideCancelRef = useRef<HTMLButtonElement>(null)
   const [scheduleDate, setScheduleDate] = React.useState<Date | null>(null)
+  const [versionNote, setVersionNote] = React.useState("")
   const [isValidating, setIsValidating] = React.useState(false)
   const [configErrors, setConfigErrors] = React.useState<IRequirementTemplateConfigError[]>([])
   const { uiStore } = useMst()
@@ -113,13 +115,13 @@ export const PublishScheduleModal = observer(function PublishScheduleModal({
   }
 
   const commitSchedule = () => {
-    onScheduleConfirm(scheduleDate)
+    onScheduleConfirm(scheduleDate, normalizedVersionNote(versionNote))
     overrideDialog.onClose()
     onClose()
   }
 
   const commitForcePublish = () => {
-    onForcePublishNow?.()
+    onForcePublishNow?.(normalizedVersionNote(versionNote))
     onClose()
   }
 
@@ -131,6 +133,7 @@ export const PublishScheduleModal = observer(function PublishScheduleModal({
   useEffect(() => {
     if (!isOpen) {
       setScheduleDate(null)
+      setVersionNote("")
       setConfigErrors([])
       setIsValidating(false)
       return
@@ -224,6 +227,10 @@ export const PublishScheduleModal = observer(function PublishScheduleModal({
                     />
                   </Box>
                 </Stack>
+
+                <Box mt={6}>
+                  <VersionNoteField value={versionNote} onChange={setVersionNote} isDisabled={hasConfigErrors} />
+                </Box>
 
                 {requirementTemplate && (
                   <ConfigErrorsList

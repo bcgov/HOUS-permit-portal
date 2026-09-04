@@ -11,9 +11,9 @@ import { BrowserSearchPrompt } from "../../../../shared/permit-applications/brow
 import { IEditRequirementActionsProps, IEditRequirementOptionsProps, IRequirementTemplateForm } from "./index"
 
 interface IProps {
-  onScheduleDate?: (date: Date) => void
-  onForcePublishNow?: () => void
-  onCreateDraft?: () => void
+  onScheduleDate?: (date: Date, changeNotes?: string) => void
+  onForcePublishNow?: (changeNotes?: string) => void
+  onCreateDraft?: (changeNotes?: string) => void
   onSaveAndValidate?: () => Promise<IRequirementTemplateConfigError[]>
   onSaveDraft: () => void
   onAddSection: () => void
