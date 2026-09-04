@@ -1,50 +1,56 @@
 import { Box, Button, Container, Flex, Heading, Input, Menu, MenuButton, MenuList, VStack } from "@chakra-ui/react"
 import { FileCsv } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../../setup/root"
 import { EStepCodeType } from "../../../../types/enums"
-import { ManageMenuItem, ManageMenuItemButton } from "../../../shared/base/manage-menu-item"
+import { ManageMenuItemButton } from "../../../shared/base/manage-menu-item"
 import { SearchGrid } from "../../../shared/grid/search-grid"
 import { SearchGridItem } from "../../../shared/grid/search-grid-item"
+import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
 import { GridHeaders } from "./grid-header"
 
 export const ReportingScreen = observer(() => {
   const { t } = useTranslation()
-  const { stepCodeStore, permitApplicationStore, preCheckStore } = useMst()
+  const { stepCodeStore, permitApplicationStore, preCheckStore, reportStore } = useMst()
   const { downloadStepCodeSummary, downloadStepCodeMetrics } = stepCodeStore
   const { downloadApplicationMetrics } = permitApplicationStore
   const { downloadPreCheckUserConsent } = preCheckStore
 
   const [filter, setFilter] = useState("")
 
-  interface IReportBase {
+  useEffect(() => {
+    reportStore.fetchSummaries()
+  }, [])
+
+  interface IReportRow {
     name: string
     description: string
-    dropdown: Array<{
-      text: string
-      onClick?: () => void
-      href?: string
-    }>
+    href?: string
+    downloads?: Array<{ text: string; onClick: () => void }>
   }
 
-  type TReport = IReportBase
-  const reportTypes: TReport[] = [
+  const reportTypes: IReportRow[] = [
+    ...reportStore.summaries.map((summary) => ({
+      name: summary.title,
+      description: summary.description,
+      href: summary.key,
+    })),
     {
       name: t("reporting.templateSummary.name"),
       description: t("reporting.templateSummary.description"),
-      dropdown: [
-        {
-          text: t("ui.open"),
-          href: "export-template-summary",
-        },
-      ],
+      href: "export-template-summary",
+    },
+    {
+      name: t("reporting.stepCodeData.name"),
+      description: t("reporting.stepCodeData.description"),
+      href: "step-code-data",
     },
     {
       name: t("reporting.stepCodeSummary.name"),
       description: t("reporting.stepCodeSummary.description"),
-      dropdown: [
+      downloads: [
         {
           text: t("ui.download"),
           onClick: downloadStepCodeSummary,
@@ -54,7 +60,7 @@ export const ReportingScreen = observer(() => {
     {
       name: t("reporting.applicationMetrics.name"),
       description: t("reporting.applicationMetrics.description"),
-      dropdown: [
+      downloads: [
         {
           text: t("ui.download"),
           onClick: downloadApplicationMetrics,
@@ -64,7 +70,7 @@ export const ReportingScreen = observer(() => {
     {
       name: t("reporting.stepCodeMetrics.name"),
       description: t("reporting.stepCodeMetrics.description"),
-      dropdown: [
+      downloads: [
         {
           text: t("reporting.stepCodeMetrics.downloadPart3"),
           onClick: () => downloadStepCodeMetrics(EStepCodeType.part3StepCode),
@@ -78,7 +84,7 @@ export const ReportingScreen = observer(() => {
     {
       name: t("reporting.preCheckUserConsent.name"),
       description: t("reporting.preCheckUserConsent.description"),
-      dropdown: [
+      downloads: [
         {
           text: t("ui.download"),
           onClick: downloadPreCheckUserConsent,
@@ -119,26 +125,24 @@ export const ReportingScreen = observer(() => {
                 <SearchGridItem>{reportType.name}</SearchGridItem>
                 <SearchGridItem>{reportType.description}</SearchGridItem>
                 <SearchGridItem>
-                  {
+                  {reportType.href ? (
+                    <RouterLinkButton variant="link" to={reportType.href}>
+                      {t("ui.view")}
+                    </RouterLinkButton>
+                  ) : (
                     <Menu>
                       <MenuButton as={Button} aria-label="manage" variant="link">
                         {t("ui.manage")}
                       </MenuButton>
                       <MenuList>
-                        {reportType.dropdown.map((item, index) =>
-                          item.href ? (
-                            <ManageMenuItem key={index} icon={<FileCsv size={24} />} to={item.href}>
-                              {item.text}
-                            </ManageMenuItem>
-                          ) : (
-                            <ManageMenuItemButton key={index} leftIcon={<FileCsv size={24} />} onClick={item.onClick}>
-                              {item.text}
-                            </ManageMenuItemButton>
-                          )
-                        )}
+                        {reportType.downloads?.map((item, index) => (
+                          <ManageMenuItemButton key={index} leftIcon={<FileCsv size={24} />} onClick={item.onClick}>
+                            {item.text}
+                          </ManageMenuItemButton>
+                        ))}
                       </MenuList>
                     </Menu>
-                  }
+                  )}
                 </SearchGridItem>
               </Box>
             )
