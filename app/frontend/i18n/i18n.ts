@@ -1111,6 +1111,8 @@ const options = {
             description: "Additional resources and reference materials to help you with your application:",
             emptyForStaff: "No local resources have been configured yet.",
             configureResourcesLink: "Add resources in Configuration.",
+            showOnAbout: "Show on about page",
+            dragHandle: "Drag to reorder",
             categories: {
               planning_zoning: "Planning & zoning",
               bylaws_requirements: "Bylaws & requirements",

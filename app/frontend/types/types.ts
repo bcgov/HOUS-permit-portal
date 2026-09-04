@@ -372,6 +372,8 @@ export interface IResource {
   description?: string
   resourceType: string
   linkUrl?: string
+  showOnAbout?: boolean
+  aboutPosition?: number
   updatedAt: string
   createdAt: string
   resourceDocument?: IResourceDocument

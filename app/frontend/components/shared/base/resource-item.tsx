@@ -11,10 +11,12 @@ export const DownloadLinkButton = ({
   document,
   modelType,
   title,
+  simpleTitle,
 }: {
   document: IBaseFileAttachment
   modelType: EFileUploadAttachmentType
   title?: string
+  simpleTitle?: boolean
 }) => {
   const { t } = useTranslation()
 
@@ -28,10 +30,10 @@ export const DownloadLinkButton = ({
     )
   }
 
-  const fileExt = getFileExtension(document.file.metadata.filename, document.file.metadata.mimeType)
-  const fileSize = formatFileSize(document.file.metadata.size)
   const displayTitle = title || document.file.metadata.filename
-  const titleWithMetadata = `${displayTitle} (${fileExt}, ${fileSize})`
+  const titleWithMetadata = simpleTitle
+    ? displayTitle
+    : `${displayTitle} (${getFileExtension(document.file.metadata.filename, document.file.metadata.mimeType)}, ${formatFileSize(document.file.metadata.size)})`
 
   return (
     <FileDownloadButton document={document} modelType={modelType} variant="link" color="semantic.info" size="sm" px={0}>
@@ -42,9 +44,10 @@ export const DownloadLinkButton = ({
 
 interface IResourceItemProps {
   resource: IResource
+  simpleTitle?: boolean
 }
 
-export const ResourceItem = ({ resource }: IResourceItemProps) => {
+export const ResourceItem = ({ resource, simpleTitle }: IResourceItemProps) => {
   return (
     <Box w="full">
       {resource.resourceType === EResourceType.file && resource.resourceDocument ? (
@@ -52,6 +55,7 @@ export const ResourceItem = ({ resource }: IResourceItemProps) => {
           document={resource.resourceDocument}
           modelType={EFileUploadAttachmentType.ResourceDocument}
           title={resource.title}
+          simpleTitle={simpleTitle}
         />
       ) : resource.resourceType === EResourceType.link && resource.linkUrl ? (
         <Link

@@ -337,6 +337,8 @@ class Api::JurisdictionsController < Api::ApplicationController
         :description,
         :resource_type,
         :link_url,
+        :show_on_about,
+        :about_position,
         :_destroy,
         resource_document_attributes: [
           :id,
