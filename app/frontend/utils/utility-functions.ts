@@ -366,9 +366,9 @@ export function getCurrentSandboxId() {
   }
 }
 
-export function syncMatomoSandboxMode(isSandbox: boolean) {
+export function syncMatomoSandboxFlag(isSandbox: boolean) {
   const _mtm = ((window as any)._mtm = (window as any)._mtm || [])
-  _mtm.push({ sandboxMode: isSandbox ? "training" : "live" })
+  _mtm.push({ isSandbox })
 }
 
 export function convertToDate(property: any) {
