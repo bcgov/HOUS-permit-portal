@@ -41,7 +41,7 @@ export const StepCodeLookupAddressSelect = observer(function ({
   const { t } = useTranslation()
   const location = useLocation()
 
-  const isHomePage = location.pathname === "/welcome"
+  const isHomePage = location.pathname === "/about"
   const placeholderText = isHomePage ? t("ui.projectAddress") : t("ui.enterAddress")
 
   const isMobile = useBreakpointValue({ base: true, md: false })

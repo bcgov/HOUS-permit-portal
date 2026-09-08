@@ -806,7 +806,7 @@ const AppRoutes = observer(() => {
           </>
         )}
         {loggedIn && !isUnconfirmed && <Route path="/" element={<HomeScreen />} />}
-        {!loggedIn && <Route path="/" element={<RedirectScreen path="/welcome" />} />}
+        {!loggedIn && <Route path="/" element={<RedirectScreen path="/about" />} />}
         <Route
           element={
             <ProtectedRoute
@@ -1014,7 +1014,7 @@ const AppRoutes = observer(() => {
           element={<OnboardingChecklistPageForLgAdoptingScreen />}
         />
         <Route path="/confirmed" element={<EmailConfirmedScreen />} />
-        <Route path="/welcome" element={<LandingScreen />} />
+        <Route path="/about" element={<LandingScreen />} />
         <Route
           path="/jurisdictions"
           element={
