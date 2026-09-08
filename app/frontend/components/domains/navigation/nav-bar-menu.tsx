@@ -134,7 +134,7 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
         {siteConfigurationStore.codeComplianceEnabled && (
           <StaticLinkItem
             label={t("site.navMenu.projectReadiness.bcBuildingCode.label")}
-            to="/pre-checks"
+            to="/project-readiness-tools/pre-check"
             description={t("site.navMenu.projectReadiness.bcBuildingCode.description")}
           />
         )}
