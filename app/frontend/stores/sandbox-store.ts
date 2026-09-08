@@ -4,7 +4,7 @@ import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { SandboxModel } from "../models/sandbox"
-import { syncMatomoSandboxFlag } from "../utils/utility-functions"
+import { syncMatomoSandboxMode } from "../utils/utility-functions"
 
 export const SandboxStoreModel = types
   .model("SandboxStoreModel")
@@ -63,7 +63,7 @@ export const SandboxStoreModel = types
       reaction(
         () => self.isSandboxActive,
         (isSandboxActive) => {
-          syncMatomoSandboxFlag(isSandboxActive)
+          syncMatomoSandboxMode(isSandboxActive)
         }
       )
     },
