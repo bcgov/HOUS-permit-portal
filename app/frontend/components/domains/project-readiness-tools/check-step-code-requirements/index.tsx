@@ -23,7 +23,7 @@ export const CheckStepCodeRequirementsScreen = () => {
           variant="primary"
           mt={4}
           ml={4}
-          to="/project-readiness-tools/create-a-step-codes-compliance-report/select"
+          to="/project-readiness-tools/create-a-step-codes-compliance-report/building-categories"
         >
           {currentUser ? t("ui.start") : t("projectReadinessTools.checkStepCodeRequirementsScreen.loginButton")}
         </RouterLinkButton>
