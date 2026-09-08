@@ -39,7 +39,7 @@ export const StepCodeTabPanelContent = observer(() => {
               </Text>
               <RouterLinkButton
                 rightIcon={<CaretRight />}
-                to="/project-readiness-tools/check-step-code-requirements/select"
+                to="/project-readiness-tools/create-a-step-codes-compliance-report/select"
               >
                 {t("stepCode.createButton")}
               </RouterLinkButton>

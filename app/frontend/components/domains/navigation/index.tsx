@@ -908,7 +908,7 @@ const AppRoutes = observer(() => {
               element={<SuccessfulSubmissionScreen />}
             />
             <Route
-              path="/project-readiness-tools/check-step-code-requirements/select"
+              path="/project-readiness-tools/create-a-step-codes-compliance-report/select"
               element={<SelectStepCodeRequirementsScreen />}
             />
             <Route path="/project-readiness-tools/pre-check" element={<PreCheckInfoScreen />} />
@@ -1001,7 +1001,7 @@ const AppRoutes = observer(() => {
           element={<LettersOfAssuranceScreen />}
         />
         <Route
-          path="/project-readiness-tools/check-step-code-requirements"
+          path="/project-readiness-tools/create-a-step-codes-compliance-report"
           element={<CheckStepCodeRequirementsScreen />}
         />
         <Route

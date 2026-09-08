@@ -24,7 +24,7 @@ export const LookUpStepCodesRequirementsForYourProjectScreen = () => {
         </Heading>
         <Text fontSize="lg">
           {t("home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.ifYoureReadyToCreateA")}{" "}
-          <Link href="/project-readiness-tools/check-step-code-requirements/" color="text.link">
+          <Link href="/project-readiness-tools/create-a-step-codes-compliance-report/" color="text.link">
             {t(
               "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.checkIfYourProjectMeetsBCsStepCodesRequirements"
             )}

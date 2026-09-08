@@ -223,7 +223,7 @@ export const JurisdictionStepCodeRequirementsScreen = observer(() => {
         <Text>
           {t(`${i18nPrefix}.generateStepCodesReportDescription`)}{" "}
           <Link
-            href="/project-readiness-tools/check-step-code-requirements/"
+            href="/project-readiness-tools/create-a-step-codes-compliance-report/"
             color="text.link"
             textDecoration="underline"
             _hover={{ textDecoration: "none" }}

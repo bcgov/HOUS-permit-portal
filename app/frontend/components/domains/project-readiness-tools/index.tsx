@@ -23,7 +23,7 @@ export const ProjectReadinessToolsIndexScreen = () => {
         {
           linkText: t("projectReadinessTools.meetStepCodeLink"),
           description: t("projectReadinessTools.meetStepCodeDescription"),
-          href: "/project-readiness-tools/check-step-code-requirements",
+          href: "/project-readiness-tools/create-a-step-codes-compliance-report",
         },
         ...(codeComplianceEnabled
           ? [
