@@ -1005,7 +1005,7 @@ const AppRoutes = observer(() => {
           element={<CheckStepCodeRequirementsScreen />}
         />
         <Route
-          path="/project-readiness-tools/look-up-step-codes-requirements-for-your-project"
+          path="/project-readiness-tools/look-up-step-codes-requirements"
           element={<LookUpStepCodesRequirementsForYourProjectScreen />}
         />
         <Route path="/project-readiness-tools/pre-check" element={<PreCheckInfoScreen />} />

@@ -51,7 +51,7 @@ export const StepCodeTabPanelContent = observer(() => {
                 {t("stepCode.index.lookupDescriptionPrefix")}{" "}
                 <Link
                   as={RouterLink}
-                  to="/project-readiness-tools/look-up-step-codes-requirements-for-your-project"
+                  to="/project-readiness-tools/look-up-step-codes-requirements"
                   color="text.link"
                   textDecoration="underline"
                 >

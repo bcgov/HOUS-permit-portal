@@ -18,7 +18,7 @@ export const ProjectReadinessToolsIndexScreen = () => {
         {
           linkText: t("home.projectReadinessTools.lookUpStepCodesRequirementsForYourProject"),
           description: t("home.projectReadinessTools.lookUpToolProjectDescription"),
-          href: "/project-readiness-tools/look-up-step-codes-requirements-for-your-project",
+          href: "/project-readiness-tools/look-up-step-codes-requirements",
         },
         {
           linkText: t("projectReadinessTools.meetStepCodeLink"),

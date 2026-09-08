@@ -128,7 +128,7 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
         />
         <StaticLinkItem
           label={t("site.navMenu.projectReadiness.stepCodes.label")}
-          to="/project-readiness-tools/look-up-step-codes-requirements-for-your-project"
+          to="/project-readiness-tools/look-up-step-codes-requirements"
           description={t("site.navMenu.projectReadiness.stepCodes.description")}
         />
         {siteConfigurationStore.codeComplianceEnabled && (
