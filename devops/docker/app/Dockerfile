@@ -1,5 +1,5 @@
 # Make sure RUBY_VERSION matches the Ruby version in .ruby-version and Gemfile
-ARG RUBY_VERSION=3.2.5-bullseye
+ARG RUBY_VERSION=3.2.5-bookworm
 FROM docker.io/library/ruby:$RUBY_VERSION
 
 # Rails app lives here
