@@ -273,4 +273,57 @@ RSpec.describe Api::StepCodesController, type: :controller do
       }.to raise_error(ActionController::BadRequest, "Invalid Step Code type")
     end
   end
+
+  describe "GET #download_part_9_step_code_checklists_csv" do
+    it "returns csv data for super admins" do
+      sign_in create(:user, :super_admin)
+      service =
+        instance_double(
+          StepCodeChecklistDumpService,
+          part_9_csv: "csv-data",
+          csv_filename: "part_9_step_code_checklists_12_months_2026-08-31.csv"
+        )
+      allow(StepCodeChecklistDumpService).to receive(:new).and_return(service)
+
+      get :download_part_9_step_code_checklists_csv,
+          params: {
+            range: "12_months"
+          }
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to eq("csv-data")
+      expect(response.media_type).to eq("text/csv")
+    end
+
+    it "returns forbidden for non-admins" do
+      get :download_part_9_step_code_checklists_csv
+
+      expect(response).to have_http_status(:forbidden)
+    end
+  end
+
+  describe "GET #download_step_code_file_uploads_zip" do
+    it "returns a zip for super admins" do
+      sign_in create(:user, :super_admin)
+      service =
+        instance_double(
+          StepCodeFileUploadZipService,
+          zip: "zip-bytes",
+          zip_filename: "step_code_file_uploads_12_months_2026-08-31.zip"
+        )
+      allow(StepCodeFileUploadZipService).to receive(:new).and_return(service)
+
+      get :download_step_code_file_uploads_zip, params: { range: "12_months" }
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to eq("zip-bytes")
+      expect(response.media_type).to eq("application/zip")
+    end
+
+    it "returns forbidden for non-admins" do
+      get :download_step_code_file_uploads_zip
+
+      expect(response).to have_http_status(:forbidden)
+    end
+  end
 end

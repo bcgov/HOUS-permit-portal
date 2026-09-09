@@ -9,6 +9,7 @@ RSpec.describe Api::SiteConfigurationController, type: :controller do
 
       expect(response).to have_http_status(:ok)
       expect(json_response["data"]).to be_present
+      expect(json_response["data"]).to have_key("info_documents_intro_text")
     end
   end
 
@@ -28,6 +29,8 @@ RSpec.describe Api::SiteConfigurationController, type: :controller do
             site_configuration: {
               display_sitewide_message: true,
               sitewide_message: "Maintenance window",
+              info_documents_intro_text:
+                "Short information sheets about Building Permit Hub.",
               overheating_tool_enabled: true,
               project_meetings_enabled: true
             }
@@ -36,6 +39,9 @@ RSpec.describe Api::SiteConfigurationController, type: :controller do
 
       expect(response).to have_http_status(:ok)
       expect(SiteConfiguration.instance.display_sitewide_message).to eq(true)
+      expect(SiteConfiguration.instance.info_documents_intro_text).to eq(
+        "Short information sheets about Building Permit Hub."
+      )
       expect(SiteConfiguration.instance.overheating_tool_enabled).to eq(true)
       expect(SiteConfiguration.instance.project_meetings_enabled).to eq(true)
       audit =
@@ -48,6 +54,26 @@ RSpec.describe Api::SiteConfigurationController, type: :controller do
         [false, true]
       )
       expect(audit.user).to eq(super_admin)
+    end
+  end
+
+  describe "PUT #update as a non-super admin" do
+    it "prevents non-super admins from updating intro text" do
+      SiteConfiguration.instance
+      sign_in create(:user)
+
+      put :update,
+          params: {
+            site_configuration: {
+              info_documents_intro_text: "Should not persist."
+            }
+          },
+          format: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(SiteConfiguration.instance.info_documents_intro_text).not_to eq(
+        "Should not persist."
+      )
     end
   end
 

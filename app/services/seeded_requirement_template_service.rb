@@ -187,7 +187,7 @@ class SeededRequirementTemplateService
       nickname: SEEDED_TEMPLATE_NICKNAMES.first,
       description:
         "Small seeded template with simple inputs and basic conditionals.",
-      tags: %w[Sandbox Small Seeded],
+      tags: ["Sandbox", "Small", "Seeded", "New construction"],
       scheduled_change_notes: "Small template scheduled seed update.",
       sections: [
         {
@@ -258,6 +258,7 @@ class SeededRequirementTemplateService
         "Large seeded template covering every requirement type except Part 3 Step Code.",
       step_code_part: :part_9,
       prefix: "part9",
+      category_tag: "New construction",
       scheduled_change_notes: "Part 9 template scheduled seed update."
     )
   end
@@ -269,6 +270,7 @@ class SeededRequirementTemplateService
         "Large seeded template covering every requirement type except Part 9 Step Code.",
       step_code_part: :part_3,
       prefix: "part3",
+      category_tag: "Buildings And Structures",
       scheduled_change_notes: "Part 3 template scheduled seed update."
     )
   end
@@ -278,13 +280,20 @@ class SeededRequirementTemplateService
     description:,
     step_code_part:,
     prefix:,
+    category_tag:,
     scheduled_change_notes:
   )
     trigger_block_name = "#{prefix.upcase} Project Basics"
     {
       nickname:,
       description:,
-      tags: ["Sandbox", "Large", "Seeded", step_code_part.to_s.camelize],
+      tags: [
+        "Sandbox",
+        "Large",
+        "Seeded",
+        step_code_part.to_s.camelize,
+        category_tag
+      ],
       scheduled_change_notes:,
       sections: [
         {

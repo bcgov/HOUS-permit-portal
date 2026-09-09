@@ -5,7 +5,8 @@ import { withEnvironment } from "../lib/with-environment"
 import { CollaboratorStoreModel, ICollaboratorStore } from "./collaborator-store"
 import { ContactStoreModel, IContactStore } from "./contact-store"
 import { GeocoderStoreModel, IGeocoderStore } from "./geocoder-store"
-import { HelpVideoStoreModel, IHelpVideoStore } from "./help-video-store"
+import { IHelpVideoStore, HelpVideoStoreModel } from "./help-video-store"
+import { IInfoDocumentStore, InfoDocumentStoreModel } from "./info-document-store"
 import { IJurisdictionStore, JurisdictionStoreModel } from "./jurisdiction-store"
 import { INoteStore, NoteStoreModel } from "./note-store"
 import { INotificationStore, NotificationStoreModel } from "./notification-store"
@@ -17,6 +18,7 @@ import { IProjectAuditStore, ProjectAuditStoreModel } from "./project-audit-stor
 import { IProjectMeetingInboxStore, ProjectMeetingInboxStoreModel } from "./project-meeting-inbox-store"
 import { IProjectMeetingStore, ProjectMeetingStoreModel } from "./project-meeting-store"
 import { IReleaseNoteStore, ReleaseNoteStoreModel } from "./release-note-store"
+import { IReportStore, ReportStoreModel } from "./report-store"
 import { IRequirementBlockStoreModel, RequirementBlockStoreModel } from "./requirement-block-store"
 import { IRequirementTemplateStoreModel, RequirementTemplateStoreModel } from "./requirement-template-store"
 import { ISandboxStore, SandboxStoreModel } from "./sandbox-store"
@@ -53,6 +55,7 @@ export const RootStoreModel = types
     templateVersionStore: types.optional(TemplateVersionStoreModel, {}),
     geocoderStore: types.optional(GeocoderStoreModel, {}),
     helpVideoStore: types.optional(HelpVideoStoreModel, {}),
+    infoDocumentStore: types.optional(InfoDocumentStoreModel, {}),
     stepCodeStore: types.optional(StepCodeStoreModel, {}),
     siteConfigurationStore: types.optional(SiteConfigurationStoreModel, {}),
     contactStore: types.optional(ContactStoreModel, {}),
@@ -60,6 +63,7 @@ export const RootStoreModel = types
     sandboxStore: types.optional(SandboxStoreModel, {}),
     submissionInboxStore: types.optional(SubmissionInboxStoreModel, {}),
     releaseNoteStore: types.optional(ReleaseNoteStoreModel, {}),
+    reportStore: types.optional(ReportStoreModel, {}),
   })
   .extend(withEnvironment())
   .volatile((self) => ({
@@ -142,6 +146,7 @@ export interface IRootStore extends IStateTreeNode {
   templateVersionStore: ITemplateVersionStoreModel
   geocoderStore: IGeocoderStore
   helpVideoStore: IHelpVideoStore
+  infoDocumentStore: IInfoDocumentStore
   stepCodeStore: IStepCodeStore
   siteConfigurationStore: ISiteConfigurationStore
   contactStore: IContactStore
@@ -151,6 +156,7 @@ export interface IRootStore extends IStateTreeNode {
   sandboxStore: ISandboxStore
   submissionInboxStore: ISubmissionInboxStore
   releaseNoteStore: IReleaseNoteStore
+  reportStore: IReportStore
   subscribeToUserChannel: () => void
   disconnectUserChannel: () => void
   loadLocalPersistedData: () => void
