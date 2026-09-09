@@ -483,7 +483,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
               renderSaveButton={() => (
                 <SaveButton
                   handleSave={handleSave}
-                  isViewingPastRequests={currentPermitApplication?.isViewingPastRequests}
+                  isDisabled={isSubmitted || currentPermitApplication.isViewingPastRequests}
                 />
               )}
               updateCollaborationAssignmentNodes={updateRequirementBlockAssignmentNode}
@@ -513,7 +513,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   )
 })
 
-function SaveButton({ handleSave, isViewingPastRequests }) {
+function SaveButton({ handleSave, isDisabled }) {
   const { handleSubmit, formState } = useForm()
   const { isSubmitting } = formState
 
@@ -527,7 +527,7 @@ function SaveButton({ handleSave, isViewingPastRequests }) {
         leftIcon={<FloppyDiskBack />}
         type="submit"
         isLoading={isSubmitting}
-        isDisabled={isSubmitting || isViewingPastRequests}
+        isDisabled={isSubmitting || isDisabled}
       >
         {t("ui.onlySave")}
       </Button>
