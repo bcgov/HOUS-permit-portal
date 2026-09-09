@@ -1059,7 +1059,7 @@ const options = {
             externalApiKeys: "API settings",
             exportTemplates: "Export templates",
             about: "About",
-            rename: "Edit name & location",
+            rename: "Edit details",
           },
           fields: {
             reverseQualifiedName: "Name",
