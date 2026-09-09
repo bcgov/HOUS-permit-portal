@@ -1055,7 +1055,7 @@ const options = {
             createButton: "Create new jurisdiction",
             tableHeading: "Local governments",
             users: "Users",
-            energyStepRequirements: "Energy step requirements",
+            energyStepRequirements: "Step Codes requirements",
             externalApiKeys: "API settings",
             exportTemplates: "Export templates",
             about: "About",
