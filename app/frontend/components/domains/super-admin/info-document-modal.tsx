@@ -1,5 +1,4 @@
 import {
-  Box,
   Button,
   Checkbox,
   FormControl,
@@ -20,7 +19,7 @@ import {
   useDisclosure,
 } from "@chakra-ui/react"
 import { UppyFile } from "@uppy/core"
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useRef } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import useUppyS3 from "../../../hooks/use-uppy-s3"
@@ -79,8 +78,8 @@ export const InfoDocumentModal = ({ isOpen, onClose, document, onSubmit }: IInfo
     },
     shouldFocusError: false,
   })
-  const [fileReplaceUnlocked, setFileReplaceUnlocked] = useState(false)
   const replaceConfirm = useDisclosure()
+  const replaceConfirmedRef = useRef(false)
   const isPublished = watch("isPublished")
   const title = watch("title")
 
@@ -108,7 +107,7 @@ export const InfoDocumentModal = ({ isOpen, onClose, document, onSubmit }: IInfo
     if (!isOpen) return
 
     resetUppy(uppy)
-    setFileReplaceUnlocked(false)
+    replaceConfirmedRef.current = false
     replaceConfirm.onClose()
     reset({
       title: document?.title ?? "",
@@ -125,7 +124,11 @@ export const InfoDocumentModal = ({ isOpen, onClose, document, onSubmit }: IInfo
 
   const currentFileName = fileNameFor(document?.file)
   const hasExistingFile = Boolean(currentFileName)
-  const requireReplaceConfirmation = Boolean(document?.publishedAt) && hasExistingFile && !fileReplaceUnlocked
+
+  const save = async (data: IInfoDocumentFormData) => {
+    const success = await onSubmit(data)
+    if (success) onClose()
+  }
 
   const submit = handleSubmit(async (data) => {
     if (isUploading) return
@@ -139,153 +142,142 @@ export const InfoDocumentModal = ({ isOpen, onClose, document, onSubmit }: IInfo
       return
     }
 
-    const success = await onSubmit(data)
-    if (success) onClose()
+    const replacingLiveSheet = Boolean(document?.publishedAt) && data.isPublished && Boolean(data.file)
+    if (replacingLiveSheet && !replaceConfirmedRef.current) {
+      replaceConfirm.onOpen()
+      return
+    }
+
+    replaceConfirmedRef.current = false
+    await save(data)
   })
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="3xl" scrollBehavior="inside">
-      <ModalOverlay />
-      <ModalContent
-        as="form"
-        noValidate
-        onSubmit={(event) => {
-          event.preventDefault()
-          void submit(event)
-        }}
-      >
-        <ModalHeader>
-          {document ? translate("infoDocuments.management.editTitle") : translate("infoDocuments.management.addTitle")}
-        </ModalHeader>
-        <ModalCloseButton />
-        <ModalBody>
-          <VStack spacing={5} align="stretch">
-            <FormControl isInvalid={!!errors.title}>
-              <FormLabel>
-                {translate("infoDocuments.management.fields.title")}
-                <RequiredMark />
-              </FormLabel>
-              <Input
-                {...register("title", {
-                  validate: (value) => Boolean(value?.trim()) || translate("infoDocuments.management.errors.title"),
-                })}
-              />
-              <FormErrorMessage>{errors.title?.message}</FormErrorMessage>
-            </FormControl>
-
-            <FormControl>
-              <FormLabel>{translate("infoDocuments.management.fields.shortDescription")}</FormLabel>
-              <Textarea rows={3} maxLength={256} {...register("description", { maxLength: 256 })} />
-              <FormHelperText>{translate("infoDocuments.management.fields.shortDescriptionHelp")}</FormHelperText>
-            </FormControl>
-
-            <FormControl isInvalid={!!errors.topics}>
-              <FormLabel>
-                {translate("infoDocuments.management.fields.topics")}
-                <RequiredMark />
-              </FormLabel>
-              <Controller
-                name="topics"
-                control={control}
-                rules={{
-                  validate: (value) => value?.length > 0 || translate("infoDocuments.management.errors.topics"),
-                }}
-                render={({ field: { onChange, value } }) => (
-                  <TagsSelect
-                    onChange={(options) => onChange(options.map((option) => option.value))}
-                    fetchOptions={fetchTopicOptions}
-                    placeholder={translate("infoDocuments.management.fields.topicsPlaceholder")}
-                    selectedOptions={(value || []).map((topic) => ({ value: topic, label: topic }))}
-                    styles={{
-                      container: (css) => ({ ...css, width: "100%" }),
-                      menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-                    }}
-                    menuPortalTarget={window.document.body}
-                  />
-                )}
-              />
-              <FormHelperText>{translate("infoDocuments.management.fields.topicsHelp")}</FormHelperText>
-              <FormErrorMessage>{errors.topics?.message as string}</FormErrorMessage>
-            </FormControl>
-
-            <FormControl>
-              <Checkbox {...register("isPublished")}>{translate("infoDocuments.management.fields.published")}</Checkbox>
-            </FormControl>
-
-            <FormControl isInvalid={!!errors.file}>
-              <FormLabel>
-                {translate("infoDocuments.management.fields.file")}
-                {isPublished && <RequiredMark />}
-              </FormLabel>
-              {document?.file && currentFileName && (
-                <FileDownloadButton
-                  document={{
-                    id: document.id,
-                    file: document.file,
-                    createdAt: document.createdAt ?? new Date(),
-                  }}
-                  modelType={EFileUploadAttachmentType.InfoDocument}
-                  mb={2}
+    <>
+      <Modal isOpen={isOpen} onClose={onClose} size="3xl" scrollBehavior="inside">
+        <ModalOverlay />
+        <ModalContent
+          as="form"
+          noValidate
+          onSubmit={(event) => {
+            event.preventDefault()
+            void submit(event)
+          }}
+        >
+          <ModalHeader>
+            {document ? translate("infoDocuments.management.editTitle") : translate("infoDocuments.management.addTitle")}
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <VStack spacing={5} align="stretch">
+              <FormControl isInvalid={!!errors.title}>
+                <FormLabel>
+                  {translate("infoDocuments.management.fields.title")}
+                  <RequiredMark />
+                </FormLabel>
+                <Input
+                  {...register("title", {
+                    validate: (value) => Boolean(value?.trim()) || translate("infoDocuments.management.errors.title"),
+                  })}
                 />
-              )}
-              <Box position="relative">
-                <UppyDashboard uppy={uppy} height={180} width="100%" />
-                {requireReplaceConfirmation && (
-                  <Box
-                    as="button"
-                    type="button"
-                    position="absolute"
-                    inset={0}
-                    zIndex={1}
-                    bg="transparent"
-                    border="none"
-                    p={0}
-                    cursor="pointer"
-                    aria-label={translate("infoDocuments.management.replaceFile")}
-                    onClick={replaceConfirm.onOpen}
-                    onDragOver={(event) => event.preventDefault()}
-                    onDrop={(event) => {
-                      event.preventDefault()
-                      replaceConfirm.onOpen()
+                <FormErrorMessage>{errors.title?.message}</FormErrorMessage>
+              </FormControl>
+
+              <FormControl>
+                <FormLabel>{translate("infoDocuments.management.fields.shortDescription")}</FormLabel>
+                <Textarea rows={3} maxLength={256} {...register("description", { maxLength: 256 })} />
+                <FormHelperText>{translate("infoDocuments.management.fields.shortDescriptionHelp")}</FormHelperText>
+              </FormControl>
+
+              <FormControl isInvalid={!!errors.topics}>
+                <FormLabel>
+                  {translate("infoDocuments.management.fields.topics")}
+                  <RequiredMark />
+                </FormLabel>
+                <Controller
+                  name="topics"
+                  control={control}
+                  rules={{
+                    validate: (value) => value?.length > 0 || translate("infoDocuments.management.errors.topics"),
+                  }}
+                  render={({ field: { onChange, value } }) => (
+                    <TagsSelect
+                      onChange={(options) => onChange(options.map((option) => option.value))}
+                      fetchOptions={fetchTopicOptions}
+                      placeholder={translate("infoDocuments.management.fields.topicsPlaceholder")}
+                      selectedOptions={(value || []).map((topic) => ({ value: topic, label: topic }))}
+                      styles={{
+                        container: (css) => ({ ...css, width: "100%" }),
+                        menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                      }}
+                      menuPortalTarget={window.document.body}
+                    />
+                  )}
+                />
+                <FormHelperText>{translate("infoDocuments.management.fields.topicsHelp")}</FormHelperText>
+                <FormErrorMessage>{errors.topics?.message as string}</FormErrorMessage>
+              </FormControl>
+
+              <FormControl>
+                <Checkbox {...register("isPublished")}>
+                  {translate("infoDocuments.management.fields.published")}
+                </Checkbox>
+              </FormControl>
+
+              <FormControl isInvalid={!!errors.file}>
+                <FormLabel>
+                  {translate("infoDocuments.management.fields.file")}
+                  {isPublished && <RequiredMark />}
+                </FormLabel>
+                {document?.file && currentFileName && (
+                  <FileDownloadButton
+                    document={{
+                      id: document.id,
+                      file: document.file,
+                      createdAt: document.createdAt ?? new Date(),
                     }}
+                    modelType={EFileUploadAttachmentType.InfoDocument}
+                    mb={2}
                   />
                 )}
-              </Box>
-              <ConfirmationModal
-                modalProps={{ size: "lg" }}
-                modalControlProps={replaceConfirm}
-                renderTriggerButton={() => null}
-                title={translate("infoDocuments.management.replaceTitle")}
-                body={
-                  <VStack align="stretch" spacing={4}>
-                    <Text>
-                      {translate("infoDocuments.management.replaceBody", {
-                        title: title?.trim() || document?.title,
-                      })}
-                    </Text>
-                    <CalloutBanner type="warning" title={translate("infoDocuments.management.replaceWarning")} my={0} />
-                  </VStack>
-                }
-                triggerText={translate("infoDocuments.management.replaceConfirm")}
-                onConfirm={(closeModal) => {
-                  setFileReplaceUnlocked(true)
-                  closeModal()
-                }}
-              />
-              <FormErrorMessage>{errors.file?.message as string}</FormErrorMessage>
-            </FormControl>
+                <UppyDashboard uppy={uppy} height={180} width="100%" />
+                <FormErrorMessage>{errors.file?.message as string}</FormErrorMessage>
+              </FormControl>
+            </VStack>
+          </ModalBody>
+          <ModalFooter gap={4} justifyContent="flex-start">
+            <Button variant="secondary" type="button" onClick={onClose} isDisabled={isSubmitting}>
+              {translate("ui.cancel")}
+            </Button>
+            <Button variant="primary" type="submit" isLoading={isSubmitting} isDisabled={isUploading}>
+              {translate("ui.save")}
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+      <ConfirmationModal
+        modalProps={{ size: "lg" }}
+        modalControlProps={replaceConfirm}
+        renderTriggerButton={() => <></>}
+        title={translate("infoDocuments.management.replaceTitle")}
+        body={
+          <VStack align="stretch" spacing={4}>
+            <Text>
+              {translate("infoDocuments.management.replaceBody", {
+                title: title?.trim() || document?.title,
+              })}
+            </Text>
+            <CalloutBanner type="warning" title={translate("infoDocuments.management.replaceWarning")} my={0} />
           </VStack>
-        </ModalBody>
-        <ModalFooter gap={4} justifyContent="flex-start">
-          <Button variant="secondary" type="button" onClick={onClose} isDisabled={isSubmitting}>
-            {translate("ui.cancel")}
-          </Button>
-          <Button variant="primary" type="submit" isLoading={isSubmitting} isDisabled={isUploading}>
-            {translate("ui.save")}
-          </Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+        }
+        triggerText={translate("infoDocuments.management.replaceConfirm")}
+        onConfirm={(closeModal) => {
+          replaceConfirmedRef.current = true
+          closeModal()
+          void submit()
+        }}
+      />
+    </>
   )
 }
 
