@@ -14,7 +14,7 @@ import { SharedSpinner } from "../../../../shared/base/shared-spinner"
 import { SearchGrid } from "../../../../shared/grid/search-grid"
 import { FloatingButtons } from "./floating-buttons"
 import { GridAccordion } from "./grid-accordion"
-import { GridHeaders } from "./grid-headers"
+import { ApiMappingsTableToolbar, GridHeaders } from "./grid-headers"
 import { Header } from "./header"
 
 const scrollToIdPrefix = "jurisdiction-edit-template-version-scroll-to-id-"
@@ -83,8 +83,12 @@ export const EditJurisdictionApiMappingScreen = observer(function EditJurisdicti
     >
       <Header templateVersion={templateVersion} />
 
-      <SearchGrid w={"full"} templateColumns="minmax(300px, 510px) minmax(100px, 300px) minmax(100px, auto)">
-        {integrationMapping && <GridHeaders integrationMapping={integrationMapping} />}
+      <SearchGrid
+        w={"full"}
+        templateColumns="minmax(300px, 510px) minmax(100px, 300px) minmax(100px, auto)"
+        toolbar={integrationMapping ? <ApiMappingsTableToolbar integrationMapping={integrationMapping} /> : undefined}
+      >
+        <GridHeaders />
 
         {!integrationMapping ? (
           <Flex py={50} gridColumn={"1/-1"}>

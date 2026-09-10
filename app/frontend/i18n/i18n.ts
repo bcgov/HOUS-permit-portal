@@ -1053,7 +1053,7 @@ const options = {
             title: "Jurisdictions",
             description: "Search or sort to check if a community is accepting permit application submissions",
             createButton: "Create new jurisdiction",
-            tableHeading: "Local governments",
+            searchLabel: "Search for a city, First Nation, municipality, or other jurisdiction",
             users: "Users",
             energyStepRequirements: "Step Codes requirements",
             externalApiKeys: "API settings",
@@ -2231,7 +2231,7 @@ Thank you,
           index: {
             title: "Question bank",
             description: "List of all questions in the system that can be used within requirement blocks.",
-            tableHeading: "Question bank",
+            searchLabel: "Search for questions",
           },
           fields: {
             name: "Internal name",
@@ -2330,7 +2330,7 @@ Thank you,
           index: {
             title: "Requirements library",
             description: "List of all Requirement Blocks in the system that can be used inside Templates.",
-            tableHeading: "Requirement blocks",
+            searchLabel: "Search for requirement blocks",
             createButton: "Create new requirement block",
           },
           fieldsDrawer: {
@@ -4797,7 +4797,7 @@ Thank you,
             lastSignInAt: "Last sign in",
           },
           index: {
-            tableHeading: "User accounts",
+            searchLabel: "Search for user accounts",
             inviteButton: "Invite users",
           },
           changeRole: "Change role",
@@ -5146,7 +5146,7 @@ Thank you,
           },
 
           index: {
-            tableHeading: "Templates",
+            searchLabel: "Search for templates",
             title: "Permit templates catalogue",
             description:
               "View all permit templates and manage which ones are available to jurisdictions and applicants. Only published templates are visible to jurisdictions and applicants.",
@@ -5223,7 +5223,7 @@ Thank you,
                 showAll: "Show all",
                 showOnlyUnmapped: "Show only unmapped",
               },
-              title: "API mappings",
+              searchLabel: "Search for API mappings",
               headers: {
                 localField: "Your local field name",
                 localFieldInfo: "Local field mapping info",
@@ -5437,8 +5437,7 @@ Thank you,
 
         reporting: {
           title: "Reporting",
-          tableHeading: "Available reports",
-          filterPlaceholder: "Filter reports by name",
+          searchLabel: "Search for available reports",
           stepCodeSummaryName: "Energy Step Code configuration by jurisdiction",
           stepCodeSummaryDescription: "Energy Step Code configuration by jurisdiction",
           templateSummary: {

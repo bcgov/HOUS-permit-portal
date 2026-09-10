@@ -1,4 +1,4 @@
-import { Box, Button, Container, Flex, Heading, Input, Menu, MenuButton, MenuList, VStack } from "@chakra-ui/react"
+import { Box, Button, Container, Flex, Heading, Menu, MenuButton, MenuList, VStack } from "@chakra-ui/react"
 import { FileCsv } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next"
 import { useMst } from "../../../../setup/root"
 import { EStepCodeType } from "../../../../types/enums"
 import { ManageMenuItem, ManageMenuItemButton } from "../../../shared/base/manage-menu-item"
+import { SearchInput } from "../../../shared/base/search-input"
 import { SearchGrid } from "../../../shared/grid/search-grid"
 import { SearchGridItem } from "../../../shared/grid/search-grid-item"
 import { GridHeaders } from "./grid-header"
@@ -98,20 +99,17 @@ export const ReportingScreen = observer(() => {
           </Box>
         </Flex>
 
-        <SearchGrid templateColumns="repeat(3, 1fr)">
-          <GridHeaders
-            renderFilterInput={() => {
-              return (
-                <Input
-                  maxW="50%"
-                  bg="white"
-                  value={filter}
-                  onChange={(e) => setFilter(e.target.value)}
-                  placeholder={t("reporting.filterPlaceholder")}
-                />
-              )
-            }}
-          />
+        <SearchGrid
+          templateColumns="repeat(3, 1fr)"
+          toolbar={
+            <SearchInput
+              query={filter}
+              onQueryChange={(query) => setFilter(query ?? "")}
+              label={t("reporting.searchLabel")}
+            />
+          }
+        >
+          <GridHeaders />
 
           {filteredReportTypes.map((reportType) => {
             return (
