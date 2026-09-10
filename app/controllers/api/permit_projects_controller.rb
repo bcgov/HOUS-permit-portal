@@ -452,6 +452,8 @@ class Api::PermitProjectsController < Api::ApplicationController
       :full_address,
       :pid,
       :pin,
+      :latitude,
+      :longitude,
       :jurisdiction_id,
       project_documents_attributes: [
         :id,

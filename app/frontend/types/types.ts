@@ -129,6 +129,10 @@ export interface IOption<TValue = string> {
   description?: string
 }
 
+export interface ISiteOption extends IOption {
+  coordinates?: TLatLngTuple
+}
+
 export type TDebouncedFunction<T extends (...args: any[]) => any> = (...args: Parameters<T>) => void
 
 export type TSearchParams<IModelSortFields, IModelFilterFields = {}> = {
