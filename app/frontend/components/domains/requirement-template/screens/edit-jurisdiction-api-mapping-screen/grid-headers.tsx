@@ -1,4 +1,4 @@
-import { Box, Flex, GridItem, HStack, Text } from "@chakra-ui/react"
+import { Box, Flex, Text, VStack } from "@chakra-ui/react"
 import { Info } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useCallback, useState } from "react"
@@ -10,19 +10,41 @@ import { FormSwitch } from "../../../../shared/form-switch"
 import { GridHeader } from "../../../../shared/grid/grid-header"
 import { IconLink } from "../../../../shared/icon-link"
 
-export const GridHeaders = observer(function GridHeaders({
+export const ApiMappingsTableToolbar = observer(function ApiMappingsTableToolbar({
   integrationMapping,
 }: {
   integrationMapping: IIntegrationMapping
 }) {
   const { t } = useTranslation()
-  const [searchQuery, setSearchQuery] = useState<string>("")
+  const [searchQuery, setSearchQuery] = useState("")
   const debouncedSetQuery = useCallback(debounce(integrationMapping.setQuery, 500), [integrationMapping.setQuery])
 
-  const onQueryChange = (query: string) => {
-    setSearchQuery(query)
-    debouncedSetQuery(query)
+  const onQueryChange = (query: string | null | undefined) => {
+    const next = query ?? ""
+    setSearchQuery(next)
+    debouncedSetQuery(next)
   }
+
+  return (
+    <VStack align="flex-start" spacing={5} w="full">
+      <SearchInput
+        query={searchQuery}
+        onQueryChange={onQueryChange}
+        label={t("apiMappingsSetup.edit.table.searchLabel")}
+      />
+      <FormSwitch
+        switchIdForAccessibility={"integrationMappingShowOnlyUnmappedSwitch"}
+        isChecked={integrationMapping.showOnlyUnmapped}
+        onChange={(e) => integrationMapping.setShowOnlyUnmapped(!!e.target.checked)}
+        checkedText={t("apiMappingsSetup.edit.table.filter.showAll")}
+        uncheckedText={t("apiMappingsSetup.edit.table.filter.showOnlyUnmapped")}
+      />
+    </VStack>
+  )
+})
+
+export const GridHeaders = observer(function GridHeaders() {
+  const { t } = useTranslation()
 
   const headers = [
     {
@@ -53,31 +75,6 @@ export const GridHeaders = observer(function GridHeaders({
 
   return (
     <Box display={"contents"} role={"rowgroup"} w={"full"}>
-      <Box display={"contents"} role={"row"}>
-        <GridItem
-          as={Flex}
-          gridColumn={"1/-1"}
-          p={6}
-          bg={"greys.grey10"}
-          justifyContent={"space-between"}
-          align="center"
-        >
-          <HStack>
-            <Text role={"heading"} fontSize={"sm"} as={"h2"}>
-              {t("apiMappingsSetup.edit.table.title")}
-            </Text>
-            <FormSwitch
-              switchIdForAccessibility={"integrationMappingShowOnlyUnmappedSwitch"}
-              isChecked={integrationMapping?.showOnlyUnmapped}
-              onChange={(e) => integrationMapping?.setShowOnlyUnmapped(!!e.target.checked)}
-              checkedText={t("apiMappingsSetup.edit.table.filter.showAll")}
-              uncheckedText={t("apiMappingsSetup.edit.table.filter.showOnlyUnmapped")}
-            />
-          </HStack>
-
-          <SearchInput query={searchQuery} onQueryChange={onQueryChange} />
-        </GridItem>
-      </Box>
       <Box display={"contents"} role={"row"} w={"full"}>
         {headers.map((header) => (
           // @ts-ignore

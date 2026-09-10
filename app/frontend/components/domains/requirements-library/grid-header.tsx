@@ -1,4 +1,4 @@
-import { Box, Flex, GridItem, HStack, Text, Tooltip } from "@chakra-ui/react"
+import { Box, Flex, HStack, Text, Tooltip } from "@chakra-ui/react"
 import { Info } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next"
 import { ISearch } from "../../../lib/create-search-model"
 import { useMst } from "../../../setup/root"
 import { ERequirementLibrarySortFields } from "../../../types/enums"
-import { ModelSearchInput } from "../../shared/base/model-search-input"
 import { GridHeader } from "../../shared/grid/grid-header"
 import { SortIcon } from "../../shared/sort-icon"
 
@@ -27,25 +26,6 @@ export const GridHeaders = observer(function GridHeaders({
 
   return (
     <Box display={"contents"} role={"rowgroup"} position="fixed">
-      <Box display={"contents"} role={"row"}>
-        <GridItem
-          as={Flex}
-          gridColumn={"span 5"}
-          p={6}
-          bg={"greys.grey10"}
-          justifyContent={"space-between"}
-          align="center"
-        >
-          <Text role={"heading"}>{t("requirementsLibrary.index.tableHeading")}</Text>
-          <ModelSearchInput
-            inputGroupProps={{
-              position: "sticky",
-              right: 6,
-            }}
-            searchModel={searchModel as ISearch}
-          />
-        </GridItem>
-      </Box>
       <Box display={"contents"} role={"row"}>
         {Object.values(ERequirementLibrarySortFields).map((field) => (
           <GridHeader key={field} role={"columnheader"}>

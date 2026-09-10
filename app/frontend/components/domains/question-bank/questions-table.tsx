@@ -79,148 +79,145 @@ export const QuestionsTable = observer(function QuestionsTable({
 
   return (
     <VStack as={"article"} spacing={isPicker ? 0 : 5} align="stretch" {...containerProps}>
-      <Box
+      <SearchGrid
+        gridRowClassName={ROW_CLASS_NAME}
+        templateColumns="repeat(6, 1fr)"
+        pos={"relative"}
+        borderRadius={isPicker ? 0 : undefined}
+        border={isPicker ? "none" : undefined}
+        alignContent="start"
+        searchModel={searchModel as ISearch}
+        searchLabel={t("questionBank.index.searchLabel")}
         flex={isPicker ? 1 : undefined}
         minH={isPicker ? 0 : undefined}
-        overflow={isPicker ? "auto" : undefined}
-        w="full"
       >
-        <SearchGrid
-          gridRowClassName={ROW_CLASS_NAME}
-          templateColumns="repeat(6, 1fr)"
-          pos={"relative"}
-          borderRadius={isPicker ? 0 : undefined}
-          border={isPicker ? "none" : undefined}
-          alignContent="start"
-        >
-          <GridHeaders isPicker={isPicker} searchModel={searchModel} />
+        <GridHeaders isPicker={isPicker} searchModel={searchModel} />
 
-          {isSearching ? (
-            <Flex py={50} gridColumn={"span 6"}>
-              <SharedSpinner />
-            </Flex>
-          ) : (
-            tableRequirementQuestions.map((question) => {
-              const isBlocksExpanded = expandedRequirementBlockRows.has(question.id)
-              const visibleBlocks = isBlocksExpanded
-                ? question.requirementBlocks
-                : question.requirementBlocks.slice(0, PREVIEW_BLOCK_COUNT)
-              const hasMoreBlocks = question.requirementBlocks.length > PREVIEW_BLOCK_COUNT
-              const isAlreadyLinked = disabledIds.has(question.id)
+        {isSearching ? (
+          <Flex py={50} gridColumn={"span 6"}>
+            <SharedSpinner />
+          </Flex>
+        ) : (
+          tableRequirementQuestions.map((question) => {
+            const isBlocksExpanded = expandedRequirementBlockRows.has(question.id)
+            const visibleBlocks = isBlocksExpanded
+              ? question.requirementBlocks
+              : question.requirementBlocks.slice(0, PREVIEW_BLOCK_COUNT)
+            const hasMoreBlocks = question.requirementBlocks.length > PREVIEW_BLOCK_COUNT
+            const isAlreadyLinked = disabledIds.has(question.id)
 
-              return (
-                <Box key={question.id} className={ROW_CLASS_NAME} role={"row"} display={"contents"}>
-                  <SearchGridItem minW="160px">
-                    <Flex direction="column" overflow="hidden">
-                      <Text as={"span"} fontWeight={700} noOfLines={2} title={question.name || undefined}>
-                        {question.name}
-                      </Text>
-                      {isPicker && question.description && (
-                        <Text as={"span"} color={"text.secondary"} fontSize={"xs"} noOfLines={2}>
-                          {question.description}
-                        </Text>
-                      )}
-                    </Flex>
-                  </SearchGridItem>
-                  <SearchGridItem minW={0} overflowX="auto" alignItems="flex-start">
-                    {isPicker ? (
-                      <Box w="full" minW={0}>
-                        <RequirementFieldDisplay
-                          requirementType={question.inputType}
-                          label={question.label}
-                          helperText={question.hint}
-                          inputOptions={question.inputOptions}
-                          options={question.inputOptions?.valueOptions?.map(
-                            (option: { label: string }) => option.label
-                          )}
-                          required
-                        />
-                      </Box>
-                    ) : (
-                      <Text as={"span"} noOfLines={3} title={question.description || undefined}>
+            return (
+              <Box key={question.id} className={ROW_CLASS_NAME} role={"row"} display={"contents"}>
+                <SearchGridItem minW="160px">
+                  <Flex direction="column" overflow="hidden">
+                    <Text as={"span"} fontWeight={700} noOfLines={2} title={question.name || undefined}>
+                      {question.name}
+                    </Text>
+                    {isPicker && question.description && (
+                      <Text as={"span"} color={"text.secondary"} fontSize={"xs"} noOfLines={2}>
                         {question.description}
                       </Text>
                     )}
-                  </SearchGridItem>
-                  <SearchGridItem minW="120px" justifyContent="center">
-                    <HStack
-                      as={"ul"}
-                      wrap={"wrap"}
-                      spacing={1}
-                      m={0}
-                      p={0}
-                      listStyleType={"none"}
-                      justifyContent={"center"}
-                      alignItems={"center"}
-                      w={"full"}
-                    >
-                      {question.associations.map((association) => (
-                        <Tag key={association} as={"li"} bg={"greys.grey03"} color={"text.secondary"} fontSize={"xs"}>
-                          {association}
-                        </Tag>
-                      ))}
-                    </HStack>
-                  </SearchGridItem>
-                  <SearchGridItem pr={0} minW="180px">
-                    {question.requirementBlocks.length === 0 ? (
-                      <Text color={"text.secondary"} fontSize={"xs"}>
-                        {t("questionBank.fields.notConnected")}
-                      </Text>
-                    ) : (
-                      <UnorderedList ml={0} pl={0} w={"full"}>
-                        {visibleBlocks.map((block) => (
-                          <ListItem
-                            key={block.id}
-                            color={"text.secondary"}
-                            fontSize={"xs"}
-                            mb="1"
-                            noOfLines={1}
-                            title={block.name}
-                          >
-                            {block.name}
-                          </ListItem>
-                        ))}
-                        {hasMoreBlocks && (
-                          <Button
-                            variant={"link"}
-                            fontSize={"xs"}
-                            fontWeight={"normal"}
-                            height={"auto"}
-                            minW={"unset"}
-                            onClick={() => toggleRequirementBlocksExpanded(question.id)}
-                          >
-                            {t(isBlocksExpanded ? "questionBank.fields.seeLess" : "questionBank.fields.seeMore")}
-                          </Button>
+                  </Flex>
+                </SearchGridItem>
+                <SearchGridItem minW={0} overflowX="auto" alignItems="flex-start">
+                  {isPicker ? (
+                    <Box w="full" minW={0}>
+                      <RequirementFieldDisplay
+                        requirementType={question.inputType}
+                        label={question.label}
+                        helperText={question.hint}
+                        inputOptions={question.inputOptions}
+                        options={question.inputOptions?.valueOptions?.map(
+                          (option: { label: string }) => option.label
                         )}
-                      </UnorderedList>
-                    )}
-                  </SearchGridItem>
-                  <SearchGridItem minW="100px" fontSize={"sm"}>
-                    {format(question.updatedAt, datefnsTableDateFormat)}
-                  </SearchGridItem>
-                  <SearchGridItem justifyContent={"center"} minW="85px" flexShrink={0}>
-                    {isPicker ? (
-                      <Button
-                        size="sm"
-                        variant="primary"
-                        isDisabled={isAlreadyLinked}
-                        onClick={() => onUse?.(question)}
-                      >
-                        {t("ui.use")}
-                      </Button>
-                    ) : (
-                      <QuestionBankModal
-                        requirementQuestion={question}
-                        triggerButtonProps={{ variant: "link", size: "sm" }}
+                        required
                       />
-                    )}
-                  </SearchGridItem>
-                </Box>
-              )
-            })
-          )}
-        </SearchGrid>
-      </Box>
+                    </Box>
+                  ) : (
+                    <Text as={"span"} noOfLines={3} title={question.description || undefined}>
+                      {question.description}
+                    </Text>
+                  )}
+                </SearchGridItem>
+                <SearchGridItem minW="120px" justifyContent="center">
+                  <HStack
+                    as={"ul"}
+                    wrap={"wrap"}
+                    spacing={1}
+                    m={0}
+                    p={0}
+                    listStyleType={"none"}
+                    justifyContent={"center"}
+                    alignItems={"center"}
+                    w={"full"}
+                  >
+                    {question.associations.map((association) => (
+                      <Tag key={association} as={"li"} bg={"greys.grey03"} color={"text.secondary"} fontSize={"xs"}>
+                        {association}
+                      </Tag>
+                    ))}
+                  </HStack>
+                </SearchGridItem>
+                <SearchGridItem pr={0} minW="180px">
+                  {question.requirementBlocks.length === 0 ? (
+                    <Text color={"text.secondary"} fontSize={"xs"}>
+                      {t("questionBank.fields.notConnected")}
+                    </Text>
+                  ) : (
+                    <UnorderedList ml={0} pl={0} w={"full"}>
+                      {visibleBlocks.map((block) => (
+                        <ListItem
+                          key={block.id}
+                          color={"text.secondary"}
+                          fontSize={"xs"}
+                          mb="1"
+                          noOfLines={1}
+                          title={block.name}
+                        >
+                          {block.name}
+                        </ListItem>
+                      ))}
+                      {hasMoreBlocks && (
+                        <Button
+                          variant={"link"}
+                          fontSize={"xs"}
+                          fontWeight={"normal"}
+                          height={"auto"}
+                          minW={"unset"}
+                          onClick={() => toggleRequirementBlocksExpanded(question.id)}
+                        >
+                          {t(isBlocksExpanded ? "questionBank.fields.seeLess" : "questionBank.fields.seeMore")}
+                        </Button>
+                      )}
+                    </UnorderedList>
+                  )}
+                </SearchGridItem>
+                <SearchGridItem minW="100px" fontSize={"sm"}>
+                  {format(question.updatedAt, datefnsTableDateFormat)}
+                </SearchGridItem>
+                <SearchGridItem justifyContent={"center"} minW="85px" flexShrink={0}>
+                  {isPicker ? (
+                    <Button
+                      size="sm"
+                      variant="primary"
+                      isDisabled={isAlreadyLinked}
+                      onClick={() => onUse?.(question)}
+                    >
+                      {t("ui.use")}
+                    </Button>
+                  ) : (
+                    <QuestionBankModal
+                      requirementQuestion={question}
+                      triggerButtonProps={{ variant: "link", size: "sm" }}
+                    />
+                  )}
+                </SearchGridItem>
+              </Box>
+            )
+          })
+        )}
+      </SearchGrid>
       <Flex
         w={"full"}
         justifyContent={"space-between"}

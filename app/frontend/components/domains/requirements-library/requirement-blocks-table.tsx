@@ -18,6 +18,7 @@ import {
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
+import { useTranslation } from "react-i18next"
 import { datefnsTableDateFormat } from "../../../constants"
 import { useSearch } from "../../../hooks/use-search"
 import { ISearch } from "../../../lib/create-search-model"
@@ -47,6 +48,7 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
   searchModel: searchModelProp,
   ...containerProps
 }: IProps) {
+  const { t } = useTranslation()
   const { requirementBlockStore } = useMst()
   const searchModel = searchModelProp ?? requirementBlockStore
   const isNested = !!searchModelProp
@@ -75,6 +77,8 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
       <SearchGrid
         templateColumns="minmax(12rem, 3fr) minmax(140px, 1fr) 180px 170px 88px"
         pos={"relative"}
+        searchModel={searchModel as ISearch}
+        searchLabel={t("requirementsLibrary.index.searchLabel")}
         sx={{
           "[role='row']:not(:last-child) > [role='cell']": { borderBottom: "none" },
         }}
