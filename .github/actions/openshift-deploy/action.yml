@@ -53,7 +53,7 @@ runs:
 
     - name: Checkout Code
       id: checkout-code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
       with:
         ref: ${{ inputs.branch }}
         lfs: true
@@ -93,7 +93,7 @@ runs:
 
     - name: Build Docker Image
       id: build-image
-      uses: redhat-actions/buildah-build@v2
+      uses: redhat-actions/buildah-build@v3
       with:
         image: ${{ inputs.image_name }}
         tags: latest ${{ env.GITHUB_SHA }}
@@ -105,7 +105,7 @@ runs:
 
     - name: Push to Openshift Registry using Service Account
       id: push-image
-      uses: redhat-actions/push-to-registry@v2.7
+      uses: redhat-actions/push-to-registry@v3
       with:
         image: ${{ inputs.image_name }}
         registry: ${{ inputs.registry_url }}
