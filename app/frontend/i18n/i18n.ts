@@ -1055,11 +1055,11 @@ const options = {
             createButton: "Create new jurisdiction",
             tableHeading: "Local governments",
             users: "Users",
-            energyStepRequirements: "Energy step requirements",
+            energyStepRequirements: "Step Codes requirements",
             externalApiKeys: "API settings",
             exportTemplates: "Export templates",
             about: "About",
-            rename: "Edit name & location",
+            rename: "Edit details",
           },
           fields: {
             reverseQualifiedName: "Name",
