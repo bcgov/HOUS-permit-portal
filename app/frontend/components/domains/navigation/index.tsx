@@ -806,7 +806,7 @@ const AppRoutes = observer(() => {
           </>
         )}
         {loggedIn && !isUnconfirmed && <Route path="/" element={<HomeScreen />} />}
-        {!loggedIn && <Route path="/" element={<RedirectScreen path="/welcome" />} />}
+        {!loggedIn && <Route path="/" element={<RedirectScreen path="/about" />} />}
         <Route
           element={
             <ProtectedRoute
@@ -908,10 +908,9 @@ const AppRoutes = observer(() => {
               element={<SuccessfulSubmissionScreen />}
             />
             <Route
-              path="/project-readiness-tools/check-step-code-requirements/select"
+              path="/project-readiness-tools/create-a-step-codes-compliance-report/building-categories"
               element={<SelectStepCodeRequirementsScreen />}
             />
-            <Route path="/project-readiness-tools/pre-check" element={<PreCheckInfoScreen />} />
           </Route>
         </Route>
 
@@ -1001,11 +1000,11 @@ const AppRoutes = observer(() => {
           element={<LettersOfAssuranceScreen />}
         />
         <Route
-          path="/project-readiness-tools/check-step-code-requirements"
+          path="/project-readiness-tools/create-a-step-codes-compliance-report"
           element={<CheckStepCodeRequirementsScreen />}
         />
         <Route
-          path="/project-readiness-tools/look-up-step-codes-requirements-for-your-project"
+          path="/project-readiness-tools/look-up-step-codes-requirements"
           element={<LookUpStepCodesRequirementsForYourProjectScreen />}
         />
         <Route path="/project-readiness-tools/pre-check" element={<PreCheckInfoScreen />} />
@@ -1014,7 +1013,7 @@ const AppRoutes = observer(() => {
           element={<OnboardingChecklistPageForLgAdoptingScreen />}
         />
         <Route path="/confirmed" element={<EmailConfirmedScreen />} />
-        <Route path="/welcome" element={<LandingScreen />} />
+        <Route path="/about" element={<LandingScreen />} />
         <Route
           path="/jurisdictions"
           element={

@@ -29,7 +29,7 @@ const StepCodeAddressSearch = observer(
     const [searchKey, setSearchKey] = useState(0)
     const [manualJurisdiction, setManualJurisdiction] = useState<IJurisdiction | null>(null)
     const isMobile = useBreakpointValue({ base: true, md: false })
-    const isHomePage = location.pathname === "/welcome" ? true : false
+    const isHomePage = location.pathname === "/about"
     const { geocoderStore, jurisdictionStore } = useMst()
     const { addJurisdiction } = jurisdictionStore
 

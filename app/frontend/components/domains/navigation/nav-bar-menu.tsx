@@ -128,13 +128,13 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
         />
         <StaticLinkItem
           label={t("site.navMenu.projectReadiness.stepCodes.label")}
-          to="/project-readiness-tools/look-up-step-codes-requirements-for-your-project"
+          to="/project-readiness-tools/look-up-step-codes-requirements"
           description={t("site.navMenu.projectReadiness.stepCodes.description")}
         />
         {siteConfigurationStore.codeComplianceEnabled && (
           <StaticLinkItem
             label={t("site.navMenu.projectReadiness.bcBuildingCode.label")}
-            to="/pre-checks"
+            to="/project-readiness-tools/pre-check"
             description={t("site.navMenu.projectReadiness.bcBuildingCode.description")}
           />
         )}
@@ -146,7 +146,7 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
   const aboutColumn = (
     <VStack align="flex-start" spacing={4} w="full">
       <MenuSection title={t("site.navMenu.sections.about")}>
-        <StaticLinkItem label={t("site.navMenu.about.aboutHub.label")} to="/welcome" />
+        <StaticLinkItem label={t("site.navMenu.about.aboutHub.label")} to="/about" />
         <StaticLinkItem
           label={t("site.navMenu.about.participatingCommunities.label")}
           to="/jurisdictions"
