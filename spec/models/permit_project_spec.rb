@@ -98,6 +98,17 @@ RSpec.describe PermitProject, type: :model do
       expect(project.title).to eq("123 Main St")
     end
 
+    it "sets default title from full_address when title is whitespace" do
+      project =
+        create(
+          :permit_project,
+          title: " ",
+          full_address: "123 Main St, Anytown, USA"
+        )
+
+      expect(project.title).to eq("123 Main St")
+    end
+
     it "assigns a unique number on create when missing" do
       project = create(:permit_project, number: nil)
       expect(project.number).to be_present
