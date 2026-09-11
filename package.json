@@ -4,14 +4,14 @@
   "license": "Apache-2.0",
   "private": true,
   "engines": {
-    "node": "^20.19.0"
+    "node": "^24.21.0"
   },
   "devDependencies": {
     "@chakra-ui/cli": "^2.4.1",
     "@emnapi/core": "^1.11.3",
     "@emnapi/runtime": "^1.11.3",
     "@types/leaflet": "^1.9.8",
-    "@types/node": "^20.12.2",
+    "@types/node": "^24.13.4",
     "@types/ramda": "^0.29.9",
     "@typescript-eslint/eslint-plugin": "^8.49.0",
     "@typescript-eslint/parser": "^8.49.0",

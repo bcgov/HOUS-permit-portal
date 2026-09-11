@@ -28,7 +28,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: "20.19.0"
+          node-version-file: ".nvmrc"
           cache: "npm"
       - name: Install Dependencies
         run: |
@@ -36,6 +36,8 @@ jobs:
           npm ci
       - name: Build Frontend
         run: npm run build
+      - name: Build PDF Renderer
+        run: npm run build:ssr
 
   test:
     runs-on: ubuntu-latest

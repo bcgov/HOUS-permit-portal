@@ -11,7 +11,7 @@ Ensure you have the following:
 - Ruby 3.2.2
 - Postgres 13+
 - Redis
-- Node 20.19+
+- Node 24 LTS (use the exact version in `.nvmrc`)
 
 (Alternatively run this locally with `docker compose` see section further down)
 
@@ -72,7 +72,8 @@ Notes:
 
 ## Running the application locally (non-dockerized)
 
-- Install Dependencies: `bundle install` and `npm install`
+- Select Node: `nvm install && nvm use` (uses `.nvmrc` and its bundled npm).
+- Install Dependencies: `bundle install` and `npm ci`. After switching Node major versions, use a fresh install rather than reusing `node_modules`.
 - Ensure you have a `.env` file with required variables (reference `.env.example`)
 - Set up Database credentials following [the official Rails guide](https://guides.rubyonrails.org/v2.3/getting_started.html#configuring-a-database). One of the ways is to have an environment variable called `DATABASE_URL`
 - (_Only first time_) Create a database: `rails db:create`
