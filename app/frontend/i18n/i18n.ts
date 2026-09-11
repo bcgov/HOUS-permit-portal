@@ -4416,7 +4416,7 @@ Thank you,
             emptyBody: "Add your first information sheet. It stays hidden from the public page until you publish it.",
             introTitle: "Introductory text",
             introDefault:
-              "Short information sheets and one-page summaries about Building Permit Hub. Use them to answer questions about cost, functionality, security, and privacy. Filter by topic to find what you need.",
+              "Downloadable summaries about Building Permit Hub functionality, adoption, service costs, and upcoming plans.",
             introHelp: "Appears at the top of the public information sheets page.",
             introEditTitle: "Edit introductory text",
             dragHandle: "Drag to reorder document",
@@ -4429,7 +4429,6 @@ Thank you,
             replaceWarning:
               "The current document will not be kept. Building Permit Hub does not store previous versions, so this cannot be undone.",
             replaceConfirm: "Yes, replace",
-            replaceFile: "Replace file",
             table: {
               title: "Title",
               topic: "Topic",
@@ -5593,7 +5592,8 @@ Thank you,
               },
               infoDocuments: {
                 label: "Information sheets",
-                description: "Short information sheets and one-page summaries about Building Permit Hub",
+                description:
+                  "Downloadable summaries about Building Permit Hub functionality, adoption, service costs, and upcoming plans",
               },
               standardPermitApplicationMaterials: {
                 label: "Standard permit application materials",
