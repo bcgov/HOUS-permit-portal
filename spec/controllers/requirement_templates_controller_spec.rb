@@ -435,6 +435,46 @@ RSpec.describe Api::RequirementTemplatesController,
       expect(option_labels).to contain_exactly("Plumbing permit")
     end
 
+    it "returns category grouping fields ordered by category" do
+      building =
+        create(:template_category, label: "Building", sort_order: 0)
+      trades = create(:template_category, label: "Trades", sort_order: 1)
+      inbox_template.update!(template_category: building)
+
+      electrical =
+        create(
+          :requirement_template,
+          nickname: "Electrical permit",
+          template_category: trades
+        )
+      electrical_version =
+        create(
+          :template_version,
+          requirement_template: electrical,
+          status: :published
+        )
+      create(
+        :permit_application,
+        status: :newly_submitted,
+        submitter: submitter,
+        permit_project: inbox_project,
+        template_version: electrical_version
+      )
+
+      review_manager =
+        create(:user, :review_manager, jurisdiction: jurisdiction)
+      sign_in review_manager
+      get :for_filter, params: { jurisdiction_id: jurisdiction.id }
+
+      expect(response).to have_http_status(:success)
+      expect(json_response["data"].map { |option| option["label"] }).to eq(
+        ["Plumbing permit", "Electrical permit"]
+      )
+      expect(
+        json_response["data"].map { |option| option["group_label"] }
+      ).to eq(["Building", "Trades"])
+    end
+
     it "denies review staff from another jurisdiction" do
       other_manager =
         create(:user, :review_manager, jurisdiction: other_jurisdiction)
