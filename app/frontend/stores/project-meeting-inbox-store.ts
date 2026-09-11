@@ -105,11 +105,16 @@ export const ProjectMeetingInboxStoreModel = types
       return response.ok
     }),
     setJurisdictionProjectMeetingFilters(queryParams: URLSearchParams) {
-      const status = queryParams.get("status")?.split(",") as EProjectMeetingStatus[] | undefined
+      const status = queryParams
+        .get("status")
+        ?.split(",")
+        .filter((value): value is EProjectMeetingStatus =>
+          (Object.values(EProjectMeetingStatus) as string[]).includes(value)
+        )
       const unread = queryParams.get("unread") as ERadioFilterValue
       const confirmedDateFrom = queryParams.get("confirmedDateFrom")
       const confirmedDateTo = queryParams.get("confirmedDateTo")
-      if (status) self.setStatusFilter(status)
+      if (status?.length) self.setStatusFilter(status)
       if (unread) self.setUnreadFilter(unread)
       if (confirmedDateFrom) self.setConfirmedDateFromFilter(confirmedDateFrom)
       if (confirmedDateTo) self.setConfirmedDateToFilter(confirmedDateTo)

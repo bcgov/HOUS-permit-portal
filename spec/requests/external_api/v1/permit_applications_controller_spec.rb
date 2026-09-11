@@ -113,4 +113,14 @@ RSpec.describe "External API v1 permit applications", type: :request do
       expect(response).to have_http_status(:ok)
     end
   end
+
+  describe "PATCH /external_api/v1/permit_applications/:id/status" do
+    it "does not expose status write-back in V1" do
+      patch "/external_api/v1/permit_applications/#{SecureRandom.uuid}/status",
+            params: { status: "in_review" }.to_json,
+            headers: auth_headers
+
+      expect(response).to have_http_status(:not_found)
+    end
+  end
 end

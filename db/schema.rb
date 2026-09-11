@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_09_04_120000) do
+ActiveRecord::Schema[7.2].define(version: 2026_09_11_174500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -160,6 +160,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_04_120000) do
     t.string "connecting_application", null: false
     t.string "notification_email"
     t.uuid "sandbox_id"
+    t.string "api_version", default: "v1", null: false
     t.index ["jurisdiction_id"], name: "index_external_api_keys_on_jurisdiction_id"
     t.index ["sandbox_id"], name: "index_external_api_keys_on_sandbox_id"
     t.index ["token"], name: "index_external_api_keys_on_token", unique: true

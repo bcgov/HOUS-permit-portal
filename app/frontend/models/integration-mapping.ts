@@ -117,9 +117,11 @@ export const IntegrationMappingModel = types.snapshotProcessor(
 )
 
 function preProcessor(snapshot) {
-  let requirementsMapping = snapshot.requirementsMappingJson
+  const rawMapping = snapshot.requirementsMappingJson
     ? JSON.parse(snapshot.requirementsMappingJson)
     : snapshot.requirementsMapping
+  // MST getSnapshot is frozen; clone before writing sku/requirementCode.
+  const requirementsMapping = rawMapping ? JSON.parse(JSON.stringify(rawMapping)) : {}
 
   for (let [sku, requirementBlockMapping] of Object.entries(requirementsMapping)) {
     ;(requirementBlockMapping as any).sku = sku
@@ -135,7 +137,7 @@ function preProcessor(snapshot) {
     ...snapshot,
     // hack so to get uncamelized codes
     requirementsMapping,
-    templateVersion: snapshot.templateVersionId,
+    templateVersion: snapshot.templateVersionId ?? snapshot.templateVersion,
   }
 }
 

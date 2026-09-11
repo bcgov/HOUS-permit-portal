@@ -2,6 +2,7 @@ module AuditDoubleHelpers
   def build_audit_double(attrs = {})
     defaults = {
       user: instance_double(User, name: "Test User", blank?: false),
+      username: nil,
       auditable_type: "PermitProject",
       auditable_id: "audit-123",
       auditable: nil,

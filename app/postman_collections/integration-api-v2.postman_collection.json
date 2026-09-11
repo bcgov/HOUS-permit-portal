@@ -1,0 +1,166 @@
+{
+  "info": {
+    "_postman_id": "d76764f2-5509-4e1f-bcb6-8bf8821ebf57",
+    "name": "Integration API V2",
+    "description": "Option B bidirectional contract. A V2 API key selected at key creation is required. The partner owns durable permit-package storage; BPH provides one-hour signed URLs and supports re-GET for refreshed URLs. Current status events are not package-completeness signals. Meeting requests remain in BPH and are outside External API V2. Partners write canonical application statuses and are authoritative; project-state write-back and manual-status conflict UX are deferred.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Permit applications",
+      "description": "Application statuses: `new_draft` (Draft), `newly_submitted` (Submitted), `in_review` (In review), `revisions_requested` (Revisions requested), `resubmitted` (Resubmitted), `approved` (Approved), `issued` (Issued), `withdrawn` (Withdrawn). Partner-writable statuses: `in_review`, `approved`, `issued`, `withdrawn`.",
+      "item": [
+        {
+          "name": "Search Permit Applications",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/external_api/v2/permit_applications/search",
+              "host": ["{{base_url}}"],
+              "path": ["external_api", "v2", "permit_applications", "search"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Permit Application by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/external_api/v2/permit_applications/{{permit_application_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["external_api", "v2", "permit_applications", "{{permit_application_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Permit Application Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"in_review\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/external_api/v2/permit_applications/{{permit_application_id}}/status",
+              "host": ["{{base_url}}"],
+              "path": [
+                "external_api",
+                "v2",
+                "permit_applications",
+                "{{permit_application_id}}",
+                "status"
+              ]
+            },
+            "description": "Uses canonical BPH status codes. Lifecycle transitions are enforced and repeated writes of the current status are idempotent. Invalid, reserved, or unavailable transitions return 422 with the allowed write set."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Integration Mapping by Version ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/external_api/v2/permit_applications/versions/{{template_version_id}}/integration_mapping",
+              "host": ["{{base_url}}"],
+              "path": [
+                "external_api",
+                "v2",
+                "permit_applications",
+                "versions",
+                "{{template_version_id}}",
+                "integration_mapping"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Webhook events",
+      "item": [
+        {
+          "name": "Inspect local webhook deliveries",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{webhook_url}}",
+              "host": ["{{webhook_url}}"]
+            },
+            "description": "Development only. Point a V2 key webhook URL at this same address, then GET it to see the last deliveries."
+          },
+          "response": []
+        }
+      ],
+      "description": "V2 emits exactly one `permit_application_status_changed` event for each externally visible application status transition, including submission and resubmission. Payload: `{ permit_application_id, permit_project_id, submission_version_id, status, status_label, occurred_at }`. V2 also emits `permit_project_state_changed` with `{ permit_project_id, state, state_label, occurred_at }`. Project states: `draft` (Draft), `queued` (Queued), `waiting` (Waiting), `in_progress` (In progress), `ready` (Ready), `permit_issued` (Permit issued), `active` (Active), `complete` (Completed), `closed` (Closed). Timestamps are Unix epoch milliseconds. All bodies use the `{ event, payload }` envelope and `X-Webhook-Signature` HMAC-SHA256 header. In development, set the key webhook URL to `{{webhook_url}}`."
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{api_key}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "webhook_url",
+      "value": "http://localhost:3000/webhooks/dev"
+    },
+    {
+      "key": "api_key",
+      "value": ""
+    },
+    {
+      "key": "permit_application_id",
+      "value": ""
+    },
+    {
+      "key": "template_version_id",
+      "value": ""
+    }
+  ]
+}
