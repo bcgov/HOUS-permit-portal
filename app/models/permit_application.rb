@@ -94,7 +94,8 @@ class PermitApplication < ApplicationRecord
   before_save :take_form_customizations_snapshot_if_submitted
 
   after_commit :reindex_jurisdiction_permit_application_size
-  after_commit :send_submitted_webhook, if: :saved_change_to_status?
+  after_commit :send_status_changed_webhook,
+               if: :status_changed_for_external_api?
   after_commit :reindex_permit_project, if: :saved_change_to_status?
   after_commit :broadcast_jurisdiction_count_update,
                if: :status_changed_to_intake?
@@ -524,21 +525,22 @@ class PermitApplication < ApplicationRecord
   def send_submitted_webhook
     return unless submitted?
 
+    send_status_changed_webhook(resend_submission: true)
+  end
+
+  def send_status_changed_webhook(resend_submission: false)
     jurisdiction
       .active_external_api_keys
+      .where(sandbox_id: sandbox_id)
       .where.not(webhook_url: [nil, ""])
       .each do |external_api_key|
-        PermitWebhookJob.perform_async(
-          external_api_key.id,
-          (
-            if newly_submitted?
-              Constants::Webhooks::Events::PermitApplication::PERMIT_SUBMITTED
-            else
-              Constants::Webhooks::Events::PermitApplication::PERMIT_RESUBMITTED
-            end
-          ),
-          id
-        )
+        if external_api_key.api_version == "v1"
+          next unless resend_submission || intake?
+
+          enqueue_v1_submission_webhook(external_api_key)
+        else
+          enqueue_v2_status_webhook(external_api_key)
+        end
       end
   end
 
@@ -884,6 +886,40 @@ class PermitApplication < ApplicationRecord
     saved_change_to_status? && intake?
   end
 
+  def status_changed_for_external_api?
+    saved_change_to_status? && submitted_at_least_once?
+  end
+
+  def enqueue_v1_submission_webhook(external_api_key)
+    event =
+      if resubmitted_at.present?
+        Constants::Webhooks::Events::PermitApplication::PERMIT_RESUBMITTED
+      else
+        Constants::Webhooks::Events::PermitApplication::PERMIT_SUBMITTED
+      end
+    payload = { "permit_id" => id, "submitted_at" => submitted_at&.as_json }
+
+    PermitWebhookJob.perform_async(external_api_key.id, event, payload)
+  end
+
+  def enqueue_v2_status_webhook(external_api_key)
+    payload = {
+      "permit_application_id" => id,
+      "permit_project_id" => permit_project_id,
+      "submission_version_id" => latest_submission_version&.id,
+      "status" => status,
+      "status_label" =>
+        Constants::ExternalApi::APPLICATION_STATUS_LABELS.fetch(status),
+      "occurred_at" => updated_at.to_i * 1000
+    }
+
+    PermitWebhookJob.perform_async(
+      external_api_key.id,
+      Constants::Webhooks::Events::PermitApplication::STATUS_CHANGED,
+      payload
+    )
+  end
+
   def reindex_jurisdiction_permit_application_size
     return unless permit_project&.jurisdiction.present?
     unless new_record? || destroyed? || saved_change_to_permit_project_id?
@@ -947,7 +983,7 @@ class PermitApplication < ApplicationRecord
   def submission_versions_match_status
     return if new_record?
 
-    sv_count = submission_versions.size
+    sv_count = submission_versions.count
 
     if new_draft? && sv_count > 0
       errors.add(:base, "Draft applications must not have submission versions")

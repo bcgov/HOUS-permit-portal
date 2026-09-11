@@ -8,6 +8,10 @@ class ExternalApi::PermitApplicationPolicy < ExternalApi::ApplicationPolicy
     index?
   end
 
+  def update_status?
+    index?
+  end
+
   def show_integration_mapping?
     external_api_key.jurisdiction == record.jurisdiction
   end

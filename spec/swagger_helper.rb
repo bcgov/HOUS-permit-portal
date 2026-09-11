@@ -86,7 +86,8 @@ limits will result in a 429 response. If this occurs, we recommend spacing out y
 may necessitate further contact with the building permit hub team.
 
 ### Api base path:
-The base path for all API endpoints is `/external_api/v1`.
+The base path for all API endpoints is `/external_api/v2`.
+A V2 API key selected at key creation is required; V1 keys cannot call V2 endpoints and V2 keys cannot call V1 endpoints.
 
 ### Server information for testing:
 By default the requests from the documentation will be sent to the current environment servers. For testing purposes, you can specify a different server using the {serverUrl} variable.
@@ -94,13 +95,25 @@ During your integration testing phase, you have the flexibility to use custom UR
 tailor the API environment to better suit your development needs. Ensure that your custom URLs are configured correctly to avoid any connectivity or data access issues.
 
 ### Special considerations:
-A returned permit application will have a status of either `newly_submitted` for permit applications submitted for the first time, or `resubmitted` for
-permit applications that have been resubmitted due to revision requests. The `resubmitted_at` field will indicate the timestamp of the latest resubmission.
-While there may be multiple resubmissions, the submission data payload returned will reflect the most recent submission data. 
+The submission data payload reflects the most recent submission. The complete application status and project state dictionaries are documented in
+the component schemas.
 
 For security purposes, any API response that includes a file URL will have a signed URL. These files will be available for download for a limited time (1 hour).
 We recommend downloading the file immediately upon receiving the URL to avoid any issues. If necessary, you can always call the API again to retrieve a
 new file URL.
+
+### Option B CityWorks contract:
+The partner owns durable storage of the permit review package. Building Permit Hub supplies time-limited download URLs and supports re-fetching the
+application to refresh expired URLs. The `permit_application_status_changed` event does not guarantee package completeness; an explicit package-completeness
+signal will be introduced by the review-package foundation story before partners rely on an event as ready for durable ingestion.
+
+Meeting requests remain in Building Permit Hub and are outside the Option B v2 External API contract.
+
+### Status authority:
+Partners write canonical Building Permit Hub application status codes. An accepted partner write becomes the current status shown in Building Permit Hub.
+During the pilot, manual Building Permit Hub status controls remain available; the partner should re-send its authoritative state during reconciliation.
+Product will decide whether to warn or disable manual status changes in the Phase 3 conflict-UX story. Project state write-back is deferred from the pilot,
+but project state changes are emitted as webhooks.
 
 ### Visual aids and examples:
 For a better understanding of how our APIs work, including webhook setups and request handling, please refer to the code examples included later
@@ -171,6 +184,58 @@ in this document.
               }
             }
           }
+        },
+        permit_application_status_changed: {
+          tags: ["Webhooks"],
+          post: {
+            parameters: [
+              { "$ref" => "#/components/parameters/WebhookSignature" }
+            ],
+            requestBody: {
+              description:
+                "Emitted after any submitted permit application's status changes, including submission, resubmission, and changes made through the External API. V2 does not emit the legacy permit_submitted or permit_resubmitted events.",
+              content: {
+                "application/json" => {
+                  schema: {
+                    "$ref" =>
+                      "#/components/schemas/PermitApplicationStatusChangedWebhook"
+                  }
+                }
+              }
+            },
+            responses: {
+              "200" => {
+                description:
+                  "The external integrator should return 200 to acknowledge receipt."
+              }
+            }
+          }
+        },
+        permit_project_state_changed: {
+          tags: ["Webhooks"],
+          post: {
+            parameters: [
+              { "$ref" => "#/components/parameters/WebhookSignature" }
+            ],
+            requestBody: {
+              description:
+                "Emitted when the state of a project containing a submitted permit application changes. Project state write-back is not available in the pilot.",
+              content: {
+                "application/json" => {
+                  schema: {
+                    "$ref" =>
+                      "#/components/schemas/PermitProjectStateChangedWebhook"
+                  }
+                }
+              }
+            },
+            responses: {
+              "200" => {
+                description:
+                  "The external integrator should return 200 to acknowledge receipt."
+              }
+            }
+          }
         }
       },
       paths: {
@@ -204,11 +269,40 @@ in this document.
           }
         },
         schemas: {
+          ApplicationStatus: {
+            :type => :string,
+            :enum => Constants::ExternalApi::APPLICATION_STATUS_LABELS.keys,
+            "x-enum-labels" =>
+              Constants::ExternalApi::APPLICATION_STATUS_LABELS.values,
+            :description =>
+              Constants::ExternalApi::APPLICATION_STATUS_LABELS
+                .map { |code, label| "`#{code}` — #{label}" }
+                .join("\n")
+          },
+          PartnerWritableApplicationStatus: {
+            type: :string,
+            enum: Constants::ExternalApi::PARTNER_WRITABLE_APPLICATION_STATUSES,
+            description:
+              "Statuses accepted by the partner write-back endpoint. Submission, resubmission, and revision-request statuses remain owned by their dedicated Building Permit Hub workflows."
+          },
+          ProjectState: {
+            :type => :string,
+            :enum => Constants::ExternalApi::PROJECT_STATE_LABELS.keys,
+            "x-enum-labels" =>
+              Constants::ExternalApi::PROJECT_STATE_LABELS.values,
+            :description =>
+              Constants::ExternalApi::PROJECT_STATE_LABELS
+                .map { |code, label| "`#{code}` — #{label}" }
+                .join("\n")
+          },
           PermitApplication: {
             type: :object,
             properties: {
               id: {
                 type: :string
+              },
+              status: {
+                "$ref" => "#/components/schemas/ApplicationStatus"
               },
               full_address: {
                 type: :string,
@@ -591,12 +685,127 @@ in this document.
                 }
               }
             }
+          },
+          PermitApplicationStatusChangedWebhook: {
+            type: :object,
+            required: %w[event payload],
+            properties: {
+              event: {
+                type: :string,
+                enum: %w[permit_application_status_changed]
+              },
+              payload: {
+                type: :object,
+                required: %w[
+                  permit_application_id
+                  permit_project_id
+                  status
+                  status_label
+                  occurred_at
+                ],
+                properties: {
+                  permit_application_id: {
+                    type: :string,
+                    format: :uuid
+                  },
+                  permit_project_id: {
+                    type: %i[string null],
+                    format: :uuid
+                  },
+                  submission_version_id: {
+                    type: %i[string null],
+                    format: :uuid
+                  },
+                  status: {
+                    "$ref" => "#/components/schemas/ApplicationStatus"
+                  },
+                  status_label: {
+                    type: :string
+                  },
+                  occurred_at: {
+                    type: :integer,
+                    format: :int64,
+                    description:
+                      "Event timestamp in milliseconds since the Unix epoch."
+                  }
+                }
+              }
+            }
+          },
+          PermitProjectStateChangedWebhook: {
+            type: :object,
+            required: %w[event payload],
+            properties: {
+              event: {
+                type: :string,
+                enum: %w[permit_project_state_changed]
+              },
+              payload: {
+                type: :object,
+                required: %w[permit_project_id state state_label occurred_at],
+                properties: {
+                  permit_project_id: {
+                    type: :string,
+                    format: :uuid
+                  },
+                  state: {
+                    "$ref" => "#/components/schemas/ProjectState"
+                  },
+                  state_label: {
+                    type: :string
+                  },
+                  occurred_at: {
+                    type: :integer,
+                    format: :int64,
+                    description:
+                      "Event timestamp in milliseconds since the Unix epoch."
+                  }
+                }
+              }
+            }
           }
         }
       },
       formats: %w[json yaml],
       security: [{ Bearer: [] }]
     }
+  }
+
+  v1_spec = config.openapi_specs.fetch("external_api/v1/swagger.yaml")
+  v2_spec = v1_spec.deep_dup
+
+  v1_spec[:info][:description] = <<~DESC
+    ### API documentation overview
+    Integration API V1 provides jurisdiction- and sandbox-scoped read access to submitted permit applications and integration mappings.
+
+    V1 webhook keys receive the legacy `permit_submitted` and `permit_resubmitted` events. V1 does not support status write-back,
+    application status-change events, or project state-change events.
+
+    File URLs are signed for one hour. Re-fetch an application to refresh expired URLs.
+  DESC
+  v1_spec[:webhooks].select! do |event, _definition|
+    %i[permit_submitted permit_resubmitted].include?(event)
+  end
+  v1_spec[:components][:schemas].except!(
+    :PartnerWritableApplicationStatus,
+    :PermitApplicationStatusChangedWebhook,
+    :PermitProjectStateChangedWebhook
+  )
+
+  v2_spec[:info][:title] = "Integration API V2"
+  v2_spec[:info][:version] = "v2"
+  v2_spec[:servers] = v2_spec[:servers].map do |server|
+    server.merge(url: server[:url].sub("/external_api/v1", "/external_api/v2"))
+  end
+  v2_spec[:webhooks].select! do |event, _definition|
+    %i[permit_application_status_changed permit_project_state_changed].include?(
+      event
+    )
+  end
+
+  config.openapi_specs = {
+    "external_api/v1/swagger.yaml" => v1_spec,
+    "external_api/v2/swagger.yaml" => v2_spec
   }
 
   # Specify the format of the output Swagger file when running 'rswag:specs:swaggerize'.

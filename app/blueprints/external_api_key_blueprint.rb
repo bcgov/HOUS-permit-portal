@@ -9,6 +9,7 @@ class ExternalApiKeyBlueprint < Blueprinter::Base
          :expired_at,
          :webhook_url,
          :status_scope,
+         :api_version,
          :revoked_at,
          :updated_at,
          :created_at

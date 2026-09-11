@@ -54,9 +54,10 @@ RSpec.describe "external_api/v1/permit_applications",
                     },
                     status: {
                       type: :string,
-                      enum: %w[newly_submitted resubmitted],
+                      enum:
+                        Constants::ExternalApi::APPLICATION_STATUS_LABELS.keys,
                       description:
-                        "Filters by submitted status. Newly submitted: permit applications submitted for the first time. Resubmitted: permit applications resubmitted after a revision request."
+                        "Filters by canonical application status. Without a status filter, search remains limited to newly submitted and resubmitted applications."
                     },
                     submitted_at: {
                       type: :object,

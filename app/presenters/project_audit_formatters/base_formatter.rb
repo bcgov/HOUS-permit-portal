@@ -39,17 +39,19 @@ module ProjectAuditFormatters
     private
 
     def user_display
-      user = audit.user
-      return "System" if user.blank?
+      actor = audit.user.presence || audit.try(:username)
+      return "System" if actor.blank?
+      # Audited stores partner/system actors as a username string, not a User.
+      return actor.to_s unless actor.respond_to?(:name)
 
-      if viewer.present? && viewer.submitter? && user.jurisdiction_staff?
+      if viewer&.submitter? && actor.try(:jurisdiction_staff?)
         jurisdiction = resolve_jurisdiction
-        if jurisdiction.present? && user.member_of?(jurisdiction.id)
+        if jurisdiction.present? && actor.member_of?(jurisdiction.id)
           return jurisdiction.qualified_name
         end
       end
 
-      user.name
+      actor.name
     end
 
     def resolve_jurisdiction_via_associated

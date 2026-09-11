@@ -3,7 +3,9 @@ require "rails_helper"
 RSpec.describe ExternalApi::PermitApplicationPolicy, type: :policy do
   let(:jurisdiction) { create(:sub_district) }
   let(:sandbox) { jurisdiction.sandboxes.first }
-  let(:external_api_key) { create(:external_api_key, jurisdiction:, sandbox:) }
+  let(:external_api_key) do
+    create(:external_api_key, jurisdiction:, sandbox:, api_version: "v2")
+  end
 
   def policy(record)
     external_api_policy_for(
@@ -13,7 +15,7 @@ RSpec.describe ExternalApi::PermitApplicationPolicy, type: :policy do
     )
   end
 
-  describe "#index?/#show?" do
+  describe "#index?/#show?/#update_status?" do
     it "permits when jurisdiction matches, record is submitted, and sandbox matches" do
       record =
         instance_double(
@@ -24,6 +26,7 @@ RSpec.describe ExternalApi::PermitApplicationPolicy, type: :policy do
         )
       expect(policy(record).index?).to be true
       expect(policy(record).show?).to be true
+      expect(policy(record).update_status?).to be true
     end
 
     it "denies when record is not submitted" do
@@ -35,6 +38,7 @@ RSpec.describe ExternalApi::PermitApplicationPolicy, type: :policy do
           sandbox: sandbox
         )
       expect(policy(record).index?).to be false
+      expect(policy(record).update_status?).to be false
     end
 
     it "denies when jurisdiction differs" do

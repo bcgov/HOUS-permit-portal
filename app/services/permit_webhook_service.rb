@@ -31,7 +31,7 @@ and name: #{external_api_key.name}"
       end
   end
 
-  def send_submitted_event(permit_id)
+  def send_submitted_event(permit_id, event_type = nil)
     permit_application = PermitApplication.find(permit_id)
 
     unless permit_application.submitted?
@@ -40,22 +40,21 @@ and name: #{external_api_key.name}"
             )
     end
 
-    payload = {
-      event:
-        (
-          if permit_application.newly_submitted?
-            Constants::Webhooks::Events::PermitApplication::PERMIT_SUBMITTED
-          else
-            Constants::Webhooks::Events::PermitApplication::PERMIT_RESUBMITTED
-          end
-        ),
-      payload: {
-        permit_id: permit_id,
-        submitted_at: permit_application.submitted_at
-      }
-    }
+    event_type ||=
+      if permit_application.resubmitted_at.present?
+        Constants::Webhooks::Events::PermitApplication::PERMIT_RESUBMITTED
+      else
+        Constants::Webhooks::Events::PermitApplication::PERMIT_SUBMITTED
+      end
 
-    send_webhook(payload)
+    send_event(
+      event_type,
+      { permit_id: permit_id, submitted_at: permit_application.submitted_at }
+    )
+  end
+
+  def send_event(event_type, event_payload)
+    send_webhook(event: event_type, payload: event_payload)
   end
 
   def send_webhook(payload)

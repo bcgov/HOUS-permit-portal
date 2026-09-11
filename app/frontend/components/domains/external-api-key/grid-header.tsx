@@ -13,6 +13,7 @@ export const GridHeaders = observer(function GridHeaders() {
   const columnHeaders: string[] = [
     t("externalApiKey.fieldLabels.name"),
     t("externalApiKey.fieldLabels.connectingApplication"),
+    t("externalApiKey.fieldLabels.apiVersion"),
     t("externalApiKey.fieldLabels.status"),
     t("externalApiKey.fieldLabels.sandbox"),
     t("externalApiKey.fieldLabels.createdAt"),
