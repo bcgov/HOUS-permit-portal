@@ -459,6 +459,7 @@ class PermitProject < ApplicationRecord
   end
 
   def set_default_title
+    self.title = title&.strip
     self.title = shortened_address if title.blank? && full_address.present?
   end
 

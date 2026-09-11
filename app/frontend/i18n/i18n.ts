@@ -1641,6 +1641,7 @@ Thank you,
             descriptionLabel: "Description",
             fullAddressHeading: "Enter your project location",
             jurisdictionTitle: "Jurisdiction",
+            nameHint: "If you leave this blank, we'll use the project address to create a name.",
           },
         },
         projectMeeting: {
