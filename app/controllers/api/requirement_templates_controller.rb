@@ -422,7 +422,10 @@ class Api::RequirementTemplatesController < Api::ApplicationController
       apps = apps.where(permit_project_id: project.id)
     end
 
-    RequirementTemplate.where(id: apps.select("requirement_templates.id"))
+    RequirementTemplate
+      .preload(:template_category)
+      .where(id: apps.select("requirement_templates.id"))
+      .ordered_by_template_category
   end
 
   def requirement_template_params
