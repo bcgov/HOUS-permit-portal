@@ -19,9 +19,10 @@ class ExternalApi::PermitApplicationPolicy < ExternalApi::ApplicationPolicy
   class Scope < Scope
     def resolve
       scope.joins(:permit_project).where(
-        submitter: user,
+        status: PermitApplication.submitted_statuses,
         permit_projects: {
-          sandbox_id: sandbox&.id
+          jurisdiction_id: external_api_key.jurisdiction_id,
+          sandbox_id: external_api_key.sandbox_id
         }
       )
     end

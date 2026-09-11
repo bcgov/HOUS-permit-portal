@@ -26,12 +26,6 @@ class ExternalApi::ApplicationController < ActionController::API
 
   protected
 
-  def apply_search_authorization(results, policy_action = action_name)
-    results.select do |result|
-      policy([:external_api, result]).send("#{policy_action}?".to_sym)
-    end
-  end
-
   def store_currents
     Current.external_api_key = current_external_api_key
   end

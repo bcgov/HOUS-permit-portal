@@ -18,6 +18,23 @@ RSpec.describe "External API v2 permit applications", type: :request do
     }
   end
 
+  def stub_permit_application_search(*records)
+    allow(PermitApplication).to receive(:search) do |_query, **kwargs|
+      relation = PermitApplication.where(id: records.map(&:id))
+      scoped = kwargs.fetch(:scope_results).call(relation)
+      results = scoped.to_a
+
+      double(
+        "PermitApplicationSearch",
+        results: results,
+        total_pages: 1,
+        total_count: results.size,
+        current_page: 1,
+        limit_value: 10
+      )
+    end
+  end
+
   def update_status(
     status,
     application: permit_application,
@@ -26,6 +43,30 @@ RSpec.describe "External API v2 permit applications", type: :request do
     patch "/external_api/v2/permit_applications/#{application.id}/status",
           params: { status: status }.to_json,
           headers: headers
+  end
+
+  describe "POST /external_api/v2/permit_applications/search" do
+    it "returns results scoped by policy (jurisdiction + submitted + sandbox)" do
+      allowed = permit_application
+      disallowed_draft =
+        create(:permit_application, jurisdiction: external_api_key.jurisdiction)
+      disallowed_other_jurisdiction =
+        create(:permit_application, :newly_submitted)
+
+      stub_permit_application_search(
+        allowed,
+        disallowed_draft,
+        disallowed_other_jurisdiction
+      )
+
+      post "/external_api/v2/permit_applications/search",
+           params: {}.to_json,
+           headers: auth_headers
+
+      expect(response).to have_http_status(:ok)
+      ids = JSON.parse(response.body).fetch("data").map { |row| row["id"] }
+      expect(ids).to contain_exactly(allowed.id)
+    end
   end
 
   it "returns 401 without an API key" do

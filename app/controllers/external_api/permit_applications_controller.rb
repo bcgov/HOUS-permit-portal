@@ -6,9 +6,7 @@ class ExternalApi::PermitApplicationsController < ExternalApi::ApplicationContro
 
   def index
     perform_permit_application_search
-    authorized_results =
-      apply_search_authorization(@permit_application_search.results)
-    render_success authorized_results,
+    render_success @permit_application_search.results,
                    nil,
                    {
                      meta: page_meta(@permit_application_search),
