@@ -382,6 +382,9 @@ if PermitApplication.first.blank?
 end
 PermitApplication.reindex
 
+puts "Seeding template categories..."
+TemplateCategorySeeder.seed!
+
 puts "Seeding jurisdiction customizations..."
 TemplateVersion
   .limit(3)
@@ -780,8 +783,134 @@ if north_van_projects.size >= 10
   puts "  ✓ Seeded #{seeded_meeting_count} project meeting requests for submitter (#{submitter&.omniauth_username || "n/a"})"
 end
 
+# Charts omit themselves below Reports::Base::SMALL_N. After db:reset the rest of
+# this file leaves one submitter, one submitting jurisdiction, and no Part 9
+# step codes — which is why Super Admin reporting shows "Too few records (1)".
+puts "Seeding reporting chart sample data..."
+reporting_chart_min = Reports::Base::SMALL_N
+reporting_templates = TemplateVersion.published_on_kept_templates
+reporting_submitter = User.find_by(omniauth_username: "submitter")
+
+if reporting_templates.none? || reporting_submitter.blank? || north_van.blank?
+  puts "  (skipped reporting samples: need published templates, submitter, and North Vancouver)"
+else
+  seed_reporting_application =
+    lambda do |owner, jurisdiction|
+      project =
+        PermitProject.create!(
+          owner: owner,
+          jurisdiction: jurisdiction,
+          title: "Reporting sample — #{jurisdiction.name}",
+          full_address: "100 Seed St, #{jurisdiction.name}, BC, V0A 1A1",
+          pid: format("%09d", rand(1..999_999_999)),
+          pin: "RPT#{SecureRandom.hex(4)}"
+        )
+      application =
+        PermitApplication.create!(
+          nickname: "Reporting sample",
+          submitter: owner,
+          permit_project: project,
+          template_version: reporting_templates.sample
+        )
+      seed_pa_status.call(application, :newly_submitted)
+      application
+    end
+
+  submitter_ids_with_apps =
+    PermitApplication.kept.live.distinct.pluck(:submitter_id)
+  jurisdiction_ids_with_submissions =
+    SubmissionVersion
+      .joins(permit_application: :permit_project)
+      .merge(PermitApplication.kept)
+      .merge(PermitProject.live)
+      .distinct
+      .pluck("permit_projects.jurisdiction_id")
+
+  needed_submitters = [
+    reporting_chart_min - submitter_ids_with_apps.length,
+    0
+  ].max
+  needed_jurisdictions = [
+    reporting_chart_min - jurisdiction_ids_with_submissions.length,
+    0
+  ].max
+  extra_pairs = [needed_submitters, needed_jurisdictions].max
+
+  unused_submitters =
+    if submitter_ids_with_apps.empty?
+      User.kept.submitter.to_a
+    else
+      User.kept.submitter.where.not(id: submitter_ids_with_apps).to_a
+    end
+  unused_jurisdictions =
+    if jurisdiction_ids_with_submissions.empty?
+      Jurisdiction.order(:name).to_a
+    else
+      Jurisdiction
+        .where.not(id: jurisdiction_ids_with_submissions)
+        .order(:name)
+        .to_a
+    end
+
+  extra_pairs.times do |index|
+    owner =
+      unused_submitters[index] ||
+        User.find_or_create_by!(
+          email: "reporting_submitter_#{index + 1}@example.com"
+        ) do |user|
+          user.role = :submitter
+          user.first_name = "Reporting"
+          user.last_name = "Submitter#{index + 1}"
+          user.password = "P@ssword1"
+          user.confirmed_at = Time.current
+        end
+    jurisdiction = unused_jurisdictions[index] || north_van
+    seed_reporting_application.call(owner, jurisdiction)
+  end
+
+  existing_part_9 =
+    Part9StepCode
+      .kept
+      .joins(permit_application: :permit_project)
+      .merge(PermitApplication.kept)
+      .where(permit_projects: { sandbox_id: nil })
+      .where(
+        "EXISTS (SELECT 1 FROM submission_versions sv WHERE sv.permit_application_id = permit_applications.id)"
+      )
+      .count
+  needed_part_9 = [reporting_chart_min - existing_part_9, 0].max
+
+  needed_part_9.times do
+    host =
+      PermitApplication
+        .kept
+        .live
+        .joins(:submission_versions)
+        .where
+        .missing(:step_code)
+        .first
+    host ||= seed_reporting_application.call(reporting_submitter, north_van)
+
+    # ponytail: reporting only needs a live submitted Part 9 row. Plan-document
+    # validation requires a supporting doc the rest of seeds never attach.
+    step_code =
+      Part9StepCode.new(creator: host.submitter, permit_application: host)
+    step_code.save!(validate: false)
+  end
+
+  puts "  ✓ Reporting samples at or above #{reporting_chart_min} records for charted reports"
+end
+
+Reports::Registry.keys.each do |key|
+  %w[3_months 6_months 12_months all_time].each do |preset|
+    Rails.cache.delete("reports/#{key}/#{preset}")
+  end
+end
+
+User.reindex
 PermitApplication.reindex
 PermitProject.reindex
+StepCode.reindex
 ProjectMeeting.reindex
 
 puts "Running pending data migrations..."

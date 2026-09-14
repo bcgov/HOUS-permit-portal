@@ -100,9 +100,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_04_120000) do
     t.index ["contactable_type", "contactable_id"], name: "index_contacts_on_contactable"
   end
 
-  create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
-  end
-
   create_table "design_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "pre_check_id", null: false
     t.text "file_data"
@@ -211,6 +208,20 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_04_120000) do
     t.index ["help_video_section_id"], name: "index_help_videos_on_help_video_section_id"
     t.index ["published_at"], name: "index_help_videos_on_published_at"
     t.index ["slug"], name: "index_help_videos_on_slug", unique: true
+  end
+
+  create_table "info_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "title", null: false
+    t.string "description", limit: 256
+    t.integer "sort_order", default: 0, null: false
+    t.datetime "published_at"
+    t.jsonb "file_data"
+    t.string "scan_status", default: "pending", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["published_at"], name: "index_info_documents_on_published_at"
+    t.index ["scan_status"], name: "index_info_documents_on_scan_status"
+    t.index ["sort_order"], name: "index_info_documents_on_sort_order"
   end
 
   create_table "integration_mapping_notifications", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1025,6 +1036,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_04_120000) do
     t.boolean "qa_tools_enabled", default: false, null: false
     t.boolean "project_meetings_enabled", default: false, null: false
     t.boolean "overheating_tool_enabled", default: false, null: false
+    t.text "info_documents_intro_text"
   end
 
   create_table "step_code_building_characteristics_summaries", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

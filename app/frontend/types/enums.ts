@@ -22,6 +22,7 @@ export enum EFileUploadAttachmentType {
   ReportDocument = "ReportDocument",
   ResourceDocument = "ResourceDocument",
   DesignDocument = "DesignDocument",
+  InfoDocument = "InfoDocument",
 }
 
 export enum EProjectMeetingStatus {
@@ -254,6 +255,7 @@ export enum ESortDirection {
 export enum ETagType {
   requirementTemplate = "RequirementTemplate",
   requirementBlock = "RequirementBlock",
+  infoDocument = "InfoDocument",
   requirementQuestion = "RequirementQuestion",
 }
 

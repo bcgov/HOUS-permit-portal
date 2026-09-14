@@ -348,6 +348,12 @@ Rails.application.routes.draw do
       get "download_step_code_metrics_csv",
           on: :collection,
           to: "step_codes#download_step_code_metrics_csv"
+      get "download_part_9_step_code_checklists_csv",
+          on: :collection,
+          to: "step_codes#download_part_9_step_code_checklists_csv"
+      get "download_step_code_file_uploads_zip",
+          on: :collection,
+          to: "step_codes#download_step_code_file_uploads_zip"
       post "search", on: :collection, to: "step_codes#index"
       patch "update", on: :member, to: "step_codes#update"
       patch "restore", on: :member, to: "step_codes#restore"
@@ -374,6 +380,11 @@ Rails.application.routes.draw do
            to: "report_documents#share_with_jurisdiction"
     end
 
+    get "reports", to: "reports#index"
+    get "reports/:key", to: "reports#show"
+    post "reports/:key/refresh", to: "reports#refresh"
+    get "reports/:key/export", to: "reports#export"
+
     resources :help_video_sections,
               only: %i[index show create update destroy] do
       post "reorder", on: :collection
@@ -382,6 +393,11 @@ Rails.application.routes.draw do
     resources :help_videos, only: %i[index show create update destroy] do
       post "publish", on: :member
       post "unpublish", on: :member
+    end
+    resources :info_documents, only: %i[index show create update destroy] do
+      post "publish", on: :member
+      post "unpublish", on: :member
+      post "reorder", on: :collection
     end
     resources :template_categories, only: %i[index create update destroy] do
       post "reorder", on: :collection
