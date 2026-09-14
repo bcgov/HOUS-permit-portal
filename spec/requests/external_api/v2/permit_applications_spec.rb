@@ -78,6 +78,39 @@ RSpec.describe "external_api/v2/permit_applications",
     end
   end
 
+  path "/permit_applications/{id}/submission_versions/{submission_version_id}" do
+    get "Retrieves a frozen submission version, including form data and files for that version." do
+      tags "Permit applications"
+      produces "application/json"
+      parameter name: "id",
+                in: :path,
+                type: :string,
+                format: :uuid,
+                description: "Submitted permit application ID"
+      parameter name: "submission_version_id",
+                in: :path,
+                type: :string,
+                format: :uuid,
+                description: "Submission version ID"
+      let(:id) { permit_application.id }
+      let(:submission_version_id) do
+        permit_application.latest_submission_version.id
+      end
+
+      response(200, "Successful") do
+        schema type: :object,
+               properties: {
+                 data: {
+                   "$ref" => "#/components/schemas/SubmissionVersion"
+                 }
+               },
+               required: %w[data]
+
+        run_test!
+      end
+    end
+  end
+
   path "/permit_applications/{id}/status" do
     patch(
       "Updates a submitted permit application's status using a canonical Building Permit Hub code."

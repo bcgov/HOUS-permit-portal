@@ -28,6 +28,14 @@ RSpec.describe SupportingDocumentsZipper do
       )
     end
 
+    let(:submission_version) do
+      instance_double(
+        "SubmissionVersion",
+        save: true,
+        errors: double("Errors", full_messages: [])
+      )
+    end
+
     let(:permit_application) do
       instance_double(
         "PermitApplication",
@@ -38,8 +46,7 @@ RSpec.describe SupportingDocumentsZipper do
           document1,
           document2
         ],
-        save: true,
-        errors: double("Errors", full_messages: [])
+        latest_submission_version: submission_version
       )
     end
 
@@ -67,7 +74,7 @@ RSpec.describe SupportingDocumentsZipper do
         instance_double("File", path: "/tmp/test.zip")
       )
 
-      allow(permit_application).to receive(:zipfile_data=)
+      allow(submission_version).to receive(:zipfile_data=)
     end
 
     it "creates a zip, uploads it, and cleans up temp files" do
@@ -95,10 +102,10 @@ RSpec.describe SupportingDocumentsZipper do
         end_with("PA-0001_2026-04-29_supporting-documents.zip"),
         "rb"
       )
-      expect(permit_application).to have_received(:zipfile_data=).with(
+      expect(submission_version).to have_received(:zipfile_data=).with(
         { "id" => "zip-1" }
       )
-      expect(permit_application).to have_received(:save)
+      expect(submission_version).to have_received(:save)
       expect(FileUtils).to have_received(:rm_f).at_least(:once)
     end
 
@@ -173,9 +180,9 @@ RSpec.describe SupportingDocumentsZipper do
       )
     end
 
-    it "logs an error if permit application fails to save" do
-      allow(permit_application).to receive(:save).and_return(false)
-      allow(permit_application).to receive(:errors).and_return(
+    it "logs an error if submission version fails to save" do
+      allow(submission_version).to receive(:save).and_return(false)
+      allow(submission_version).to receive(:errors).and_return(
         double("Errors", full_messages: ["nope"])
       )
       allow(Rails.logger).to receive(:error)
@@ -188,6 +195,23 @@ RSpec.describe SupportingDocumentsZipper do
       expect(Rails.logger).to have_received(:error).with(
         /Failed to upload zip file:/
       )
+    end
+
+    it "logs an error if there is no submission version" do
+      allow(permit_application).to receive(
+        :latest_submission_version
+      ).and_return(nil)
+      allow(Rails.logger).to receive(:error)
+
+      zipper = described_class.new(permit_application.id)
+      allow(zipper).to receive(:download_file).and_return("/tmp/f.pdf")
+
+      zipper.perform
+
+      expect(Rails.logger).to have_received(:error).with(
+        /Failed to upload zip file: no submission version/
+      )
+      expect(zipfile_uploader).not_to have_received(:upload)
     end
   end
 

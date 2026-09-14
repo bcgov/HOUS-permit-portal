@@ -98,6 +98,84 @@ RSpec.describe "External API v2 permit applications", type: :request do
     expect(response).to have_http_status(:forbidden)
   end
 
+  describe "GET /external_api/v2/permit_applications/:id" do
+    it "returns a slim application with version index and no submission_data" do
+      get "/external_api/v2/permit_applications/#{permit_application.id}",
+          headers: auth_headers
+
+      expect(response).to have_http_status(:ok)
+      json = JSON.parse(response.body).fetch("data")
+      expect(json).not_to have_key("submission_data")
+      expect(json).not_to have_key("raw_h2k_files")
+      expect(json).to include(
+        "id" => permit_application.id,
+        "permit_project_id" => permit_application.permit_project_id,
+        "number" => permit_application.number
+      )
+      expect(json).not_to have_key("zipfile_url")
+      expect(json).not_to have_key("latest_zipfile_url")
+      versions = json.fetch("submission_versions")
+      expect(versions.length).to eq(1)
+      expect(versions.first).to include(
+        "id" => permit_application.latest_submission_version.id,
+        "version_number" => 1
+      )
+      expect(versions.first).to have_key("package_ready_at")
+    end
+  end
+
+  describe "GET /external_api/v2/permit_applications/:id/submission_versions/:submission_version_id" do
+    it "returns the frozen version snapshot rather than live form data" do
+      version = permit_application.latest_submission_version
+      version.update!(
+        submission_data: {
+          "data" => {
+            "s1" => {
+              "prefix|RBmissing|field1" => "from-version"
+            }
+          }
+        }
+      )
+      permit_application.update_columns(
+        submission_data: {
+          "data" => {
+            "s1" => {
+              "prefix|RBmissing|field1" => "from-live"
+            }
+          }
+        }
+      )
+
+      get "/external_api/v2/permit_applications/#{permit_application.id}/submission_versions/#{version.id}",
+          headers: auth_headers
+
+      expect(response).to have_http_status(:ok)
+      json = JSON.parse(response.body).fetch("data")
+      expect(json["id"]).to eq(version.id)
+      expect(json["permit_application_id"]).to eq(permit_application.id)
+      expect(json).to have_key("submission_data")
+      expect(json).to have_key("generated_documents")
+      expect(json).to have_key("zipfile")
+      expect(json).not_to have_key("zipfile_url")
+      expect(json).to have_key("raw_h2k_files")
+      expect(json["submission_data"]).to eq({})
+    end
+
+    it "returns 404 when the version does not belong to the application" do
+      other =
+        create(
+          :permit_application,
+          :newly_submitted,
+          jurisdiction: external_api_key.jurisdiction
+        )
+
+      get "/external_api/v2/permit_applications/#{permit_application.id}/submission_versions/#{other.latest_submission_version.id}",
+          headers: auth_headers
+
+      expect(response).to have_http_status(:not_found)
+    end
+  end
+
   it "updates an allowed status and attributes the audit to the partner" do
     update_status("in_review")
 

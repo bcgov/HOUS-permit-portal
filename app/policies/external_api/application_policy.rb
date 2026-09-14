@@ -49,4 +49,11 @@ class ExternalApi::ApplicationPolicy
       scope.all
     end
   end
+
+  protected
+
+  def same_jurisdiction_and_sandbox?
+    external_api_key.jurisdiction == record.jurisdiction &&
+      record.sandbox == sandbox
+  end
 end

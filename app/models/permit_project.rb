@@ -402,7 +402,7 @@ class PermitProject < ApplicationRecord
 
   def state_changed_for_external_api?
     saved_change_to_state? &&
-      permit_applications.kept.where.not(status: :new_draft).exists?
+      permit_applications.kept.submitted_at_least_once.exists?
   end
 
   # Recompute the jurisdiction-wide unviewed projects badge whenever a change
