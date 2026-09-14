@@ -19,6 +19,12 @@ import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { IOption } from "../../../types/types"
+import {
+  filterGroupSelectionState,
+  groupFilterOptions,
+  shouldShowFilterGroupLabels,
+  toggleFilterGroupValues,
+} from "../../../utils/group-filter-options"
 import { UnreadBadge } from "../base/unread-badge"
 
 interface IInboxFilterProps {
@@ -110,6 +116,14 @@ export const InboxFilter = observer(function InboxFilter({
     }
   }
 
+  const handleSelectGroup = (groupValues: string[]) => {
+    const current = Array.isArray(localValue) ? localValue : []
+    setLocalValue(toggleFilterGroupValues(current, groupValues))
+  }
+
+  const groupedOptions = groupFilterOptions(options, t("siteConfiguration.templateCategories.uncategorized"))
+  const showGroupLabels = shouldShowFilterGroupLabels(groupedOptions)
+
   return (
     <Popover
       isOpen={!isDisabled && isOpen}
@@ -164,16 +178,38 @@ export const InboxFilter = observer(function InboxFilter({
                 {t("ui.selectAll")}
               </Checkbox>
               <Box overflowY="auto" minH={0} flex={1}>
-                <VStack align="start" spacing={3}>
-                  {options.map((option) => (
-                    <Checkbox
-                      key={option.value}
-                      isChecked={Array.isArray(localValue) && localValue.includes(option.value)}
-                      onChange={() => handleCheckboxToggle(option.value)}
-                    >
-                      {option.label}
-                    </Checkbox>
-                  ))}
+                <VStack align="stretch" spacing={4}>
+                  {groupedOptions.map((group) => {
+                    const groupValues = group.options.map((option) => option.value)
+                    const current = Array.isArray(localValue) ? localValue : []
+                    const { isChecked, isIndeterminate } = filterGroupSelectionState(current, groupValues)
+
+                    return (
+                      <VStack key={group.id} align="start" spacing={3}>
+                        {showGroupLabels && (
+                          <Checkbox
+                            isChecked={isChecked}
+                            isIndeterminate={isIndeterminate}
+                            onChange={() => handleSelectGroup(groupValues)}
+                          >
+                            <Text fontSize="sm" fontWeight="bold" color="text.secondary">
+                              {group.label}
+                            </Text>
+                          </Checkbox>
+                        )}
+                        {group.options.map((option) => (
+                          <Checkbox
+                            key={option.value}
+                            pl={showGroupLabels ? 6 : 0}
+                            isChecked={current.includes(option.value)}
+                            onChange={() => handleCheckboxToggle(option.value)}
+                          >
+                            {option.label}
+                          </Checkbox>
+                        ))}
+                      </VStack>
+                    )
+                  })}
                 </VStack>
               </Box>
               <Divider />
@@ -193,11 +229,20 @@ export const InboxFilter = observer(function InboxFilter({
                   value={typeof localValue === "string" ? localValue : ""}
                   onChange={(val) => setLocalValue(val)}
                 >
-                  <VStack align="start" spacing={3}>
-                    {options.map((option) => (
-                      <Radio key={option.value} value={option.value}>
-                        {option.label}
-                      </Radio>
+                  <VStack align="stretch" spacing={4}>
+                    {groupedOptions.map((group) => (
+                      <VStack key={group.id} align="start" spacing={3}>
+                        {showGroupLabels && (
+                          <Text fontSize="sm" fontWeight="bold" color="text.secondary">
+                            {group.label}
+                          </Text>
+                        )}
+                        {group.options.map((option) => (
+                          <Radio key={option.value} value={option.value}>
+                            {option.label}
+                          </Radio>
+                        ))}
+                      </VStack>
                     ))}
                   </VStack>
                 </RadioGroup>

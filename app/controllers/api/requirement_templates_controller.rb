@@ -33,7 +33,9 @@ class Api::RequirementTemplatesController < Api::ApplicationController
   def for_filter
     authorize :requirement_template, :for_filter?
     templates = filter_requirement_templates
-    render_success templates, nil, { blueprint: OptionsBlueprint }
+    render_success templates,
+                   nil,
+                   { blueprint: RequirementTemplateOptionBlueprint }
   end
 
   def show
@@ -422,7 +424,10 @@ class Api::RequirementTemplatesController < Api::ApplicationController
       apps = apps.where(permit_project_id: project.id)
     end
 
-    RequirementTemplate.where(id: apps.select("requirement_templates.id"))
+    RequirementTemplate
+      .preload(:template_category)
+      .where(id: apps.select("requirement_templates.id"))
+      .ordered_by_template_category
   end
 
   def requirement_template_params

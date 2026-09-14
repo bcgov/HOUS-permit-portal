@@ -127,6 +127,9 @@ export interface IOption<TValue = string> {
   label: string
   value: TValue
   description?: string
+  groupId?: string | null
+  groupLabel?: string | null
+  groupSortOrder?: number | null
 }
 
 export type TDebouncedFunction<T extends (...args: any[]) => any> = (...args: Parameters<T>) => void
