@@ -11,6 +11,23 @@ class SubmissionVersion < ApplicationRecord
 
   accepts_nested_attributes_for :revision_requests, allow_destroy: true
 
+  def zipfile_size
+    zipfile_data&.dig("metadata", "size")
+  end
+
+  def zipfile_name
+    zipfile_data&.dig("metadata", "filename")
+  end
+
+  def zipfile_url
+    zipfile&.url(
+      public: false,
+      expires_in: 3600,
+      response_content_disposition:
+        ContentDisposition.attachment(zipfile.original_filename)
+    )
+  end
+
   def mark_read!
     return if viewed_at.present?
 

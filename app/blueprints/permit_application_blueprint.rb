@@ -236,10 +236,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
            :submitted_at,
            :resubmitted_at,
            :issued_at,
-           :permit_project_id,
-           :zipfile_size,
-           :zipfile_name,
-           :zipfile_url
+           :permit_project_id
 
     field :tags do |pa, _options|
       pa.template_tag_list

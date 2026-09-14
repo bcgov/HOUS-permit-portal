@@ -95,7 +95,7 @@ During your integration testing phase, you have the flexibility to use custom UR
 tailor the API environment to better suit your development needs. Ensure that your custom URLs are configured correctly to avoid any connectivity or data access issues.
 
 ### Special considerations:
-Application GET returns identity, zip package fields, and a submission version index. Frozen form data and files live on
+Application GET returns identity and a submission version index. Frozen form data, generated PDFs, and the version zip live on
 `GET /permit_applications/{id}/submission_versions/{submission_version_id}`. `raw_h2k_files` are current step-code tool
 state, not snapshotted per version.
 
@@ -905,6 +905,14 @@ in this document.
                   "$ref" => "#/components/schemas/File"
                 }
               },
+              zipfile: {
+                anyOf: [
+                  { "$ref" => "#/components/schemas/File" },
+                  { type: "null" }
+                ],
+                description:
+                  "Supporting-documents zip for this version. Present after package_ready; null on older versions that never received a zip. Signed URL expires after 1 hour."
+              },
               raw_h2k_files: {
                 description:
                   "Current step-code H2K files (not snapshotted per version). Signed URLs expire after 1 hour.",
@@ -967,21 +975,6 @@ in this document.
     permit_project_id: {
       type: %i[string null],
       format: :uuid
-    },
-    zipfile_url: {
-      type: :string,
-      format: :url,
-      nullable: true,
-      description:
-        "Signed URL for the latest submission version's supporting-documents zip. Expires after 1 hour."
-    },
-    zipfile_name: {
-      type: :string,
-      nullable: true
-    },
-    zipfile_size: {
-      type: :integer,
-      nullable: true
     },
     submission_versions: {
       type: :array,

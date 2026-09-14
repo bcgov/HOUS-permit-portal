@@ -69,5 +69,18 @@ class SubmissionVersionBlueprint < Blueprinter::Base
           }
         end
     end
+    field :zipfile do |submission_version, _options|
+      next nil unless submission_version.zipfile_data.present?
+
+      {
+        id: submission_version.zipfile_data["id"],
+        name: submission_version.zipfile_name,
+        type:
+          submission_version.zipfile_data.dig("metadata", "mime_type") ||
+            "application/zip",
+        size: submission_version.zipfile_size,
+        url: submission_version.zipfile_url
+      }
+    end
   end
 end

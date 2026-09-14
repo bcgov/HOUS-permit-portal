@@ -45,8 +45,8 @@ info:
     configuring the serverUrl variable. This allows you to\ntailor the API environment
     to better suit your development needs. Ensure that your custom URLs are configured
     correctly to avoid any connectivity or data access issues.\n\n### Special considerations:\nApplication
-    GET returns identity, zip package fields, and a submission version index. Frozen
-    form data and files live on GET /permit_applications/{id}/submission_versions/{submission_version_id}.
+    GET returns identity and a submission version index. Frozen
+    form data, generated PDFs, and the version zip live on GET /permit_applications/{id}/submission_versions/{submission_version_id}.
     raw_h2k_files are current step-code tool state, not snapshotted per version.\n\nFor
     security purposes, any API response that
     includes a file URL will have a signed URL. These files will be available for
@@ -833,18 +833,6 @@ components:
           - string
           - 'null'
           format: uuid
-        zipfile_url:
-          type: string
-          format: url
-          nullable: true
-          description: Signed URL for the latest submission version's supporting-documents
-            zip. Expires after 1 hour.
-        zipfile_name:
-          type: string
-          nullable: true
-        zipfile_size:
-          type: integer
-          nullable: true
         submission_versions:
           type: array
           items:
@@ -1317,6 +1305,13 @@ components:
           type: array
           items:
             "$ref": "#/components/schemas/File"
+        zipfile:
+          anyOf:
+          - "$ref": "#/components/schemas/File"
+          - type: 'null'
+          description: Supporting-documents zip for this version. Present after package_ready;
+            null on older versions that never received a zip. Signed URL expires after
+            1 hour.
         raw_h2k_files:
           description: Current step-code H2K files (not snapshotted per version).
             Signed URLs expire after 1 hour.

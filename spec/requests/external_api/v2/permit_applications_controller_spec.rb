@@ -112,7 +112,8 @@ RSpec.describe "External API v2 permit applications", type: :request do
         "permit_project_id" => permit_application.permit_project_id,
         "number" => permit_application.number
       )
-      expect(json).to have_key("zipfile_url")
+      expect(json).not_to have_key("zipfile_url")
+      expect(json).not_to have_key("latest_zipfile_url")
       versions = json.fetch("submission_versions")
       expect(versions.length).to eq(1)
       expect(versions.first).to include(
@@ -154,6 +155,8 @@ RSpec.describe "External API v2 permit applications", type: :request do
       expect(json["permit_application_id"]).to eq(permit_application.id)
       expect(json).to have_key("submission_data")
       expect(json).to have_key("generated_documents")
+      expect(json).to have_key("zipfile")
+      expect(json).not_to have_key("zipfile_url")
       expect(json).to have_key("raw_h2k_files")
       expect(json["submission_data"]).to eq({})
     end

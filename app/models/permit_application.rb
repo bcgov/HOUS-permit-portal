@@ -228,6 +228,9 @@ class PermitApplication < ApplicationRecord
 
   delegate :zipfile,
            :zipfile_data,
+           :zipfile_size,
+           :zipfile_name,
+           :zipfile_url,
            to: :latest_submission_version,
            allow_nil: true
 

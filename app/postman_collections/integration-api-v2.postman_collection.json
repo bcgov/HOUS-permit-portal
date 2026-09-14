@@ -48,7 +48,7 @@
               "host": ["{{base_url}}"],
               "path": ["external_api", "v2", "permit_applications", "{{permit_application_id}}"]
             },
-            "description": "Slim application resource: identity, zip package fields (latest submission version), and submission version index. Does not include submission_data."
+            "description": "Slim application resource: identity and submission version index. Does not include submission_data or zip files."
           },
           "response": []
         },
@@ -69,7 +69,7 @@
                 "{{submission_version_id}}"
               ]
             },
-            "description": "Frozen submission snapshot for one version, including form data, generated PDFs, and signed file URLs. Ingest after permit_application_package_ready. URLs expire in one hour; re-GET to refresh."
+            "description": "Frozen submission snapshot for one version, including form data, generated PDFs, zipfile (File object, null if that version never received a zip), and signed file URLs. Ingest after permit_application_package_ready. URLs expire in one hour; re-GET to refresh."
           },
           "response": []
         },

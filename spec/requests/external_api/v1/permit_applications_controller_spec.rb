@@ -185,6 +185,7 @@ RSpec.describe "External API v1 permit applications", type: :request do
       expect(json).to have_key("submission_data")
       expect(json).not_to have_key("submission_versions")
       expect(json).not_to have_key("zipfile_url")
+      expect(json).not_to have_key("latest_zipfile_url")
     end
   end
 
