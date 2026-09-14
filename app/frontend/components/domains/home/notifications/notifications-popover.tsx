@@ -120,7 +120,7 @@ export const NotificationsPopover: React.FC<INotificationsPopoverProps> = observ
         </Box>
       </PopoverTrigger>
       <Portal>
-        <PopoverContent color="black" w={500}>
+        <PopoverContent color="black" w={500} mt={3}>
           <PopoverArrow />
           <PopoverCloseButton mt={1} />
           <PopoverHeader>
