@@ -8,7 +8,7 @@ The codebase uses Rails on the back-end, and React/MST stack on the front-end.
 
 Ensure you have the following:
 
-- Ruby 3.2.2
+- Ruby 4.0.6 (see `.ruby-version`)
 - Postgres 13+
 - Redis
 - Node 24 LTS (use the exact version in `.nvmrc`)
@@ -30,6 +30,8 @@ To make things easier to develop on various platforms locally, there is a `docke
 - Production login is Keycloak-only. For local development you can optionally enable email/password login (see **Local password authentication** below). Keycloak still works if you have valid development secrets (see `.env_example.docker_compose` and [What is Keycloak at BC Government](https://developer.gov.bc.ca/docs/default/component/css-docs/What-is-Keycloak-at-BC-Government/))
 
 **Instructions**
+
+The application images use Ruby 4.0.6 on Debian Trixie. After upgrading Ruby, rebuild with `docker compose build app` before starting the services so native gems and Bootsnap caches use the new interpreter.
 
 1. Clone this repo with git to your local machine
 2. Run: `docker compose up` (this will start up all related services including Vite for HMR)
@@ -72,6 +74,7 @@ Notes:
 
 ## Running the application locally (non-dockerized)
 
+- Install Ruby with `rbenv install -s 4.0.6`, then install Bundler with `gem install bundler -v 2.5.22` from the project directory. Install GEOS and PROJ before gems (`brew install geos proj` on macOS). Run `bundle _2.5.22_ install` under Ruby 4 to rebuild native extensions; do not reuse Ruby 3.2 bundle directories or Bootsnap caches.
 - Select Node: `nvm install && nvm use` (uses `.nvmrc` and its bundled npm).
 - Install Dependencies: `bundle install` and `npm ci`. After switching Node major versions, use a fresh install rather than reusing `node_modules`.
 - Ensure you have a `.env` file with required variables (reference `.env.example`)
