@@ -6,10 +6,10 @@
  */
 
 /** For a region pinned with `position: fixed`. */
-export function belowNavBarFixed(additionalOffset: string = "0px") {
+export function belowNavBarFixed() {
   return {
-    top: `calc(var(--app-navbar-offset) + ${additionalOffset})`,
-    h: `calc(100vh - var(--app-navbar-offset) - ${additionalOffset})`,
+    top: "var(--app-navbar-offset)",
+    h: "calc(100vh - var(--app-navbar-offset))",
     transition: "top var(--app-navbar-transition), height var(--app-navbar-transition)",
   }
 }

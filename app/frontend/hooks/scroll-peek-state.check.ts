@@ -1,19 +1,25 @@
 // Run with: node --experimental-strip-types app/frontend/hooks/scroll-peek-state.check.ts
 import assert from "node:assert/strict"
 import type { IScrollPeekState } from "./scroll-peek-state.ts"
-import { nextScrollPeekState } from "./scroll-peek-state.ts"
+import { nextBarHeightState, nextScrollPeekState } from "./scroll-peek-state.ts"
 
 const BAR = 58
+const CHROME = 82
 const TALL = 10000
 
-function replay(scrollTops: number[], start: IScrollPeekState = { hiddenPx: 0 }, maxScroll = TALL): IScrollPeekState {
+function replay(
+  scrollTops: number[],
+  start: IScrollPeekState = { hiddenPx: 0 },
+  maxScroll = TALL,
+  barHeight = BAR
+): IScrollPeekState {
   return scrollTops.reduce((state, scrollTop, index) => {
     const previous = index === 0 ? scrollTop : scrollTops[index - 1]
     return nextScrollPeekState(state, {
       delta: scrollTop - previous,
       scrollTop,
       maxScroll,
-      barHeight: BAR,
+      barHeight,
     })
   }, start)
 }
@@ -66,5 +72,32 @@ assert.equal(
 )
 
 assert.equal(replay([0, 400, 390], { hiddenPx: 0 }, 400).hiddenPx, 48, "a real scroll up from the bottom still reveals")
+
+assert.equal(
+  replay([0, 200, 400, 600], { hiddenPx: 0 }, TALL, CHROME).hiddenPx,
+  CHROME,
+  "a taller chrome still parks fully off-screen"
+)
+assert.equal(
+  replay([0, 600, 595], { hiddenPx: 0 }, TALL, CHROME).hiddenPx,
+  CHROME - 5,
+  "5px up from a tucked taller chrome reveals 5px"
+)
+
+assert.equal(
+  nextBarHeightState({ hiddenPx: BAR }, BAR, CHROME).hiddenPx,
+  CHROME,
+  "a fully tucked bar stays tucked when the training banner lands"
+)
+assert.equal(
+  nextBarHeightState({ hiddenPx: 20 }, BAR, CHROME).hiddenPx,
+  20,
+  "a partially tucked bar keeps its offset when chrome grows"
+)
+assert.equal(
+  nextBarHeightState({ hiddenPx: CHROME }, CHROME, BAR).hiddenPx,
+  BAR,
+  "leaving training mode while tucked stays tucked at the new height"
+)
 
 console.log("scroll-peek-state: all checks passed")

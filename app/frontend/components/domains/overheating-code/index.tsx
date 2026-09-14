@@ -17,11 +17,8 @@ export const OverheatingCodeForm = observer(function OverheatingCodeForm() {
   const {
     overheatingCodeStore: { createOverheatingCode },
     siteConfigurationStore,
-    sandboxStore,
-    userStore,
   } = useMst()
   const { displaySitewideMessage } = siteConfigurationStore
-  const hasSandboxBanner = userStore.currentUser?.isReviewStaff && sandboxStore.isSandboxActive
   const { currentOverheatingCode } = useOverheatingCode()
 
   // Create overheating code if this is /new route
@@ -55,7 +52,7 @@ export const OverheatingCodeForm = observer(function OverheatingCodeForm() {
     <RemoveScroll>
       <Flex
         direction="column"
-        {...belowNavBarFixed(hasSandboxBanner ? "24px" : "0px")}
+        {...belowNavBarFixed()}
         w="100vw"
         pos="fixed"
         left="0"
