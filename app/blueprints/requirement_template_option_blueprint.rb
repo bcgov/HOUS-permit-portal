@@ -1,5 +1,5 @@
-class OptionsBlueprint < Blueprinter::Base
-  identifier :value do |record, _options|
+class RequirementTemplateOptionBlueprint < OptionBlueprint
+  field :value do |record, _options|
     record.id
   end
 

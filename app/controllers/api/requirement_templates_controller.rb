@@ -33,7 +33,9 @@ class Api::RequirementTemplatesController < Api::ApplicationController
   def for_filter
     authorize :requirement_template, :for_filter?
     templates = filter_requirement_templates
-    render_success templates, nil, { blueprint: OptionsBlueprint }
+    render_success templates,
+                   nil,
+                   { blueprint: RequirementTemplateOptionBlueprint }
   end
 
   def show
