@@ -1,6 +1,10 @@
 source "https://rubygems.org"
 
-ruby "3.2.5"
+ruby "4.0.6"
+
+# Explicit standard-library dependencies for Ruby 4.
+gem "csv", "~> 3.3"
+gem "ostruct", "~> 0.6"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
 gem "rails", "7.2.3.2"
@@ -78,10 +82,10 @@ gem "rswag-api", "~> 2.13"
 gem "rswag-ui", "~> 2.13"
 
 # brew install geos
-# bundle config build.rgeo --with-geos-dir=/usr/local/opt/geos
-gem "rgeo", "~> 3.0.1"
+# bundle config build.rgeo --with-geos-dir="$(brew --prefix geos)"
+gem "rgeo", "~> 3.1.0"
 # brew install proj
-gem "rgeo-proj4", "~> 4.0.0"
+gem "rgeo-proj4", "~> 5.0.0"
 gem "aasm", "~> 5.5.0"
 
 # Virus scanning via ClamAV daemon
@@ -89,8 +93,10 @@ gem "clamav-client", "~> 3.2", require: "clamav/client"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
-  gem "debug", platforms: %i[mri windows]
+  gem "debug", "~> 1.11.1", platforms: %i[mri windows]
   gem "pry-byebug", "~> 3.10.1"
+  # Byebug still requires the readline compatibility library.
+  gem "readline", "~> 0.0.4"
   gem "rspec-rails", "~> 6.1.0"
   gem "rswag-specs", "~> 2.13"
   gem "factory_bot_rails", "~> 6.4.2"
@@ -99,6 +105,9 @@ group :development, :test do
   gem "database_cleaner-active_record"
   gem "vcr", "~> 6.2"
   gem "bullet", "~> 8.0"
+
+  # FactoryBot requires observer, which is no longer a default Ruby gem.
+  gem "observer", "~> 0.1"
 end
 
 group :test do

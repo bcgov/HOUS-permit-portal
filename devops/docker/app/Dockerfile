@@ -1,5 +1,5 @@
 # Make sure RUBY_VERSION matches the Ruby version in .ruby-version and Gemfile
-ARG RUBY_VERSION=3.2.5-bookworm
+ARG RUBY_VERSION=4.0.6-trixie
 FROM docker.io/library/ruby:$RUBY_VERSION
 
 # Rails app lives here
@@ -60,10 +60,12 @@ COPY config/database.yml.docker_precompile_dummy /app/config/database.yml
 RUN SECRET_KEY_BASE_DUMMY=1 IS_DOCKER_BUILD=true VITE_RUBY_SSR_BUILD_ENABLED=true VITE_ENABLE_TEMPLATE_FORCE_PUBLISH=${VITE_ENABLE_TEMPLATE_FORCE_PUBLISH} VITE_BCEID_URL=${VITE_BCEID_URL} VITE_BUSINESS_BCEID_REGISTRATION_URL=${VITE_BUSINESS_BCEID_REGISTRATION_URL} VITE_BASIC_BCEID_REGISTRATION_URL=${VITE_BASIC_BCEID_REGISTRATION_URL} VITE_BCSC_REGISTRATION_URL=${VITE_BCSC_REGISTRATION_URL} VITE_RELEASE_VERSION=${VITE_RELEASE_VERSION} VITE_BCEID_PARTNER_URL=${VITE_BCEID_PARTNER_URL} VITE_MATOMO_URL=${VITE_MATOMO_URL} VITE_QA_MODE=${VITE_QA_MODE} ./bin/rails assets:precompile
 
 # Run and own only the runtime files as a non-root user for security
+# Gem archives may have restrictive modes; the Rails user needs read access.
 RUN useradd rails --create-home --shell /bin/bash && \
     mkdir -p log tmp db storage && \
     chown -R rails:rails /app && \
-    chmod -R 777 log tmp db storage
+    chmod -R 777 log tmp db storage && \
+    chmod -R a+rX "${BUNDLE_PATH}"
 
 USER rails:rails
 
