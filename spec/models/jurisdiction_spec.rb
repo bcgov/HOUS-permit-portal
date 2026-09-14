@@ -455,4 +455,12 @@ RSpec.describe Jurisdiction, type: :model do
       end
     end
   end
+
+  it "audits inbox_enabled changes" do
+    jurisdiction = create(:sub_district)
+
+    expect { jurisdiction.update!(inbox_enabled: false) }.to change {
+      jurisdiction.audits.where("audited_changes ? 'inbox_enabled'").count
+    }.by(1)
+  end
 end

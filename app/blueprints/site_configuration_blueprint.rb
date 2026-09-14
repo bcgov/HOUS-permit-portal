@@ -2,6 +2,7 @@ class SiteConfigurationBlueprint < Blueprinter::Base
   #
   fields :display_sitewide_message,
          :sitewide_message,
+         :info_documents_intro_text,
          :inbox_enabled,
          :allow_designated_reviewer,
          :code_compliance_enabled,

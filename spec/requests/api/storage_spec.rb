@@ -115,6 +115,51 @@ RSpec.describe "Api::Storage", type: :request do
         expect(response).to have_http_status(:forbidden)
       end
     end
+
+    context "with an info document" do
+      let(:published) { create(:info_document, :published) }
+      let(:draft) { create(:info_document, :with_file) }
+
+      it "returns a download url for a published document" do
+        get "/api/s3/params/download",
+            params: {
+              model: "InfoDocument",
+              modelId: published.id
+            },
+            headers: headers,
+            as: :json
+
+        expect(response).to have_http_status(:ok)
+        expect(json_response["url"]).to be_present
+      end
+
+      it "forbids downloading a draft unless the user is a super admin" do
+        get "/api/s3/params/download",
+            params: {
+              model: "InfoDocument",
+              modelId: draft.id
+            },
+            headers: headers,
+            as: :json
+
+        expect(response).to have_http_status(:forbidden)
+      end
+
+      it "allows a super admin to download a draft" do
+        sign_in create(:user, :super_admin)
+
+        get "/api/s3/params/download",
+            params: {
+              model: "InfoDocument",
+              modelId: draft.id
+            },
+            headers: headers,
+            as: :json
+
+        expect(response).to have_http_status(:ok)
+        expect(json_response["url"]).to be_present
+      end
+    end
   end
 
   describe "POST /api/s3/params/multipart" do

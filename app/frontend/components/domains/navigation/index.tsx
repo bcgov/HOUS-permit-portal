@@ -51,6 +51,10 @@ const HelpVideosIndexScreen = lazy(() =>
   import("../help-videos").then((module) => ({ default: module.HelpVideosIndexScreen }))
 )
 
+const InfoDocumentsIndexScreen = lazy(() =>
+  import("../info-documents").then((module) => ({ default: module.InfoDocumentsIndexScreen }))
+)
+
 const HelpVideoScreen = lazy(() =>
   import("../help-videos/help-video-screen").then((module) => ({ default: module.HelpVideoScreen }))
 )
@@ -117,6 +121,11 @@ const ResourcesScreenLazy = lazy(() =>
 const HelpVideosManagementScreen = lazy(() =>
   import("../super-admin/help-videos-management-screen").then((module) => ({
     default: module.HelpVideosManagementScreen,
+  }))
+)
+const InfoDocumentsManagementScreen = lazy(() =>
+  import("../super-admin/info-documents-management-screen").then((module) => ({
+    default: module.InfoDocumentsManagementScreen,
   }))
 )
 const ReviewStaffMyJurisdictionAboutPageScreen = lazy(() =>
@@ -443,9 +452,19 @@ const ReportingScreen = lazy(() =>
   import("../super-admin/reporting/reporting-screen").then((module) => ({ default: module.ReportingScreen }))
 )
 
+const ReportScreen = lazy(() =>
+  import("../super-admin/reporting/report-screen").then((module) => ({ default: module.ReportScreen }))
+)
+
 const ExportTemplateSummaryScreen = lazy(() =>
   import("../super-admin/reporting/export-template-summary-screen").then((module) => ({
     default: module.ExportTemplateSummaryScreen,
+  }))
+)
+
+const StepCodeDataScreen = lazy(() =>
+  import("../super-admin/reporting/step-code-data-screen").then((module) => ({
+    default: module.StepCodeDataScreen,
   }))
 )
 
@@ -577,6 +596,7 @@ const AppRoutes = observer(() => {
       <Route path="/configuration-management/sitewide-message" element={<SitewideMessageScreen />} />
       <Route path="/configuration-management/help-drawer-setup" element={<HelpDrawerSetupScreen />} />
       <Route path="/configuration-management/help-videos" element={<HelpVideosManagementScreen />} />
+      <Route path="/configuration-management/info-documents" element={<InfoDocumentsManagementScreen />} />
       <Route path="/configuration-management/template-categories" element={<TemplateCategoriesScreen />} />
       <Route path="/configuration-management/revision-reason-setup" element={<RevisionReasonSetupScreen />} />
       {/* DEPRECATED: /configuration-management/standardization-setup route removed.
@@ -615,6 +635,8 @@ const AppRoutes = observer(() => {
       <Route path="/configuration-management/users/invite" element={<AdminInviteScreen />} />
       <Route path="/reporting" element={<ReportingScreen />} />
       <Route path="/reporting/export-template-summary" element={<ExportTemplateSummaryScreen />} />
+      <Route path="/reporting/step-code-data" element={<StepCodeDataScreen />} />
+      <Route path="/reporting/:reportKey" element={<ReportScreen />} />
     </>
   )
 
@@ -988,6 +1010,7 @@ const AppRoutes = observer(() => {
         <Route path="/release-notes" element={<ReleaseNotesScreen />} />
         <Route path="/videos" element={<HelpVideosIndexScreen />} />
         <Route path="/videos/:videoId" element={<HelpVideoScreen />} />
+        <Route path="/info-documents" element={<InfoDocumentsIndexScreen />} />
         <Route path="/standardization-preview" element={<StandardizationPreviewScreen />} />
         <Route path="/template-versions/:templateVersionId/preview" element={<TemplateVersionPreviewScreen />} />
         <Route path="/project-readiness-tools" element={<ProjectReadinessToolsIndexScreen />} />

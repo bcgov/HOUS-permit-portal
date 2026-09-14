@@ -1,0 +1,423 @@
+en:
+  reports:
+    ranges:
+      "3_months": "Last 3 months"
+      "6_months": "Last 6 months"
+      "12_months": "Last 12 months"
+      all_time: "All time"
+    small_n: "Too few records (%{count}) for a meaningful chart. The table below is the source of truth."
+    growth:
+      suppressed: "Percentage omitted; previous period too small to be meaningful."
+    application_growth:
+      title: "Platform growth"
+      description: "Application volumes, cumulative totals, and growth rates"
+      series:
+        created: "Applications created"
+        submitted: "Applications submitted"
+      columns:
+        period: "Month"
+        created: "Applications created"
+        submitted: "Applications submitted"
+        status: "Status"
+        count: "Count"
+      figures:
+        total_created:
+          label: "Applications created"
+          help: "Applications created in %{range}, including drafts. Live (non-sandbox) records only."
+        total_submitted:
+          label: "Applications submitted"
+          help: "Applications with a first submission in %{range}. Live (non-sandbox) records only."
+        cumulative_processed:
+          label: "Cumulative permits processed"
+          help: "Applications submitted at least once since launch. This figure does not change with the selected range."
+        mom_submissions:
+          label: "Submissions, month over month"
+          help: "Change in first submissions versus the previous month. %{change}"
+        qoq_submissions:
+          label: "Submissions, quarter over quarter"
+          help: "Change in first submissions versus the previous quarter. %{change}"
+        mom_accounts:
+          label: "New accounts, month over month"
+          help: "Change in newly created accounts versus the previous month. %{change}"
+        qoq_accounts:
+          label: "New accounts, quarter over quarter"
+          help: "Change in newly created accounts versus the previous quarter. %{change}"
+      notes:
+        created_not_submitted: "Created counts include drafts. They are not submission counts."
+        cumulative_independent: "Cumulative permits processed is counted since launch and ignores the selected range."
+        growth_small_base: "Where the previous period has fewer than 10 records, the percentage is omitted and raw counts are shown."
+    step_code_part_9:
+      title: "Energy Step Code Part 9"
+      description: "Part 9 submission volumes and compliance outcomes"
+      unknown_jurisdiction: "Unknown jurisdiction"
+      series:
+        submissions: "Submissions"
+      columns:
+        period: "Month"
+        count: "Count"
+        submissions: "Submissions"
+        jurisdiction: "Jurisdiction"
+        enablement: "Step Code enablement"
+        outcome: "Compliance outcome"
+        energy_step: "Energy step achieved"
+        zero_carbon_step: "Zero carbon step achieved"
+      outcomes:
+        pass: "Pass"
+        fail: "Fail"
+        incomplete: "Incomplete compliance data"
+      energy_step: "Energy step %{step}"
+      zero_carbon_step: "Zero carbon step %{step}"
+      enablement:
+        enabled: "Enabled"
+        not_enabled: "Not enabled"
+      figures:
+        total_submissions:
+          label: "Part 9 submissions"
+          help: "Part 9 Step Code submissions first submitted in %{range}. Live (non-sandbox) records only."
+        pass_count:
+          label: "Passed"
+          help: "Submissions in %{range} where both energy and zero carbon proposed steps were achieved."
+        fail_count:
+          label: "Failed"
+          help: "Submissions in %{range} with enough data to evaluate that did not achieve both required tracks. Incomplete records are counted separately."
+        incomplete_count:
+          label: "Incomplete compliance data"
+          help: "Submissions in %{range} without enough checklist data to evaluate pass or fail. These are not counted as failures."
+      notes:
+        incomplete_not_fail: "Submissions with incomplete compliance data are counted on their own. They are not folded into failures."
+        enablement: "Enablement is whether the jurisdiction has Step Code requirements configured. Submission counts are in their own column."
+        small_n: "When fewer than 10 submissions are in range, the tables lead and charts are omitted so a small count is not read as a trend."
+    jurisdiction_enablement:
+      title: "Never-activated, live, and churned jurisdictions"
+      description: "Inbox enablement history so never-activated, live, and churned jurisdictions are distinct"
+      "yes": "Yes"
+      "no": "No"
+      series:
+        enabled_by_quarter: "Jurisdictions first enabled"
+        submission_cohorts: "Jurisdictions with a first submission"
+      columns:
+        jurisdiction: "Jurisdiction"
+        status: "Status"
+        currently_enabled: "Currently enabled"
+        first_enabled_on: "First enabled"
+        last_changed_on: "Most recent change"
+        cumulative_days: "Cumulative days enabled"
+        submissions_in_range: "Submissions in range"
+        days_to_first_submission: "Days to first submission (enabled time)"
+        approximate: "Approximate"
+      status:
+        active: "Active"
+        enabled_no_submissions: "Enabled, no submissions in range"
+        previously_enabled: "Previously enabled"
+        never_enabled: "Never enabled"
+      figures:
+        currently_enabled:
+          label: "Currently enabled"
+          help: "Jurisdictions whose inbox is on today."
+        previously_enabled:
+          label: "Previously enabled"
+          help: "Jurisdictions that were enabled in the past and are off today. They remain in the table."
+        never_enabled:
+          label: "Never enabled"
+          help: "Jurisdictions with no recorded inbox enablement."
+        active:
+          label: "Active"
+          help: "Currently enabled and with at least one live submission in %{range}."
+        enabled_never_submitted:
+          label: "Enabled, never submitted"
+          help: "Currently enabled jurisdictions with no live submissions since launch."
+      notes:
+        active_definition: "Active means the inbox is currently enabled and the jurisdiction has at least one live submission in the selected range."
+        approximate: "Dates and cumulative days are marked approximate when any contributing event was seeded from the programme dataset or inferred from the earliest membership date."
+        enabled_time: "Days to first submission counts only time the inbox was enabled. Gaps while the inbox was off are excluded. An open enabled interval is closed at now."
+        churned_kept: "Jurisdictions that turned the inbox off stay in the table as previously enabled."
+    jurisdiction_volume:
+      title: "Permit volume and concentration"
+      description: "Permits received per jurisdiction, and how much of that volume sits with the largest few"
+      columns:
+        jurisdiction: "Jurisdiction"
+        drafts: "Drafts"
+        submitted: "Submitted"
+        revisions: "Revisions"
+        total: "Total"
+      figures:
+        total_submitted:
+          label: "Submissions"
+          help: "First submissions in %{range}. Live (non-sandbox) records only."
+        top_five_concentration:
+          label: "Concentration (top five jurisdictions)"
+          help: "Share of first submissions in %{range} that came from the five jurisdictions with the most submissions. This is a concentration measure: a high figure means volume depends on a few sources."
+      notes:
+        drafts: "Drafts are live applications created in the selected range that have never been submitted."
+        submitted: "Submitted counts the first submission in the selected range. Later versions of the same application are revisions, not additional submissions."
+        revisions: "Revisions are submission versions created in the selected range after the first submission. A revision can fall in range even when the first submission did not."
+        concentration: "Concentration is the top-five share of first submissions, not of drafts or revisions."
+        zeros: "Jurisdictions with no activity in range remain in the table so the quietest sources are as visible as the busiest. Sort any volume column to find either end."
+    template_usage:
+      title: "Template usage"
+      description: "How published permit templates are used, by jurisdiction and combined"
+      series:
+        applications: "Applications"
+      columns:
+        jurisdiction: "Jurisdiction"
+        template: "Template"
+        category: "Category"
+        count: "Applications"
+        version_date: "Published version date"
+      figures:
+        applications:
+          label: "Applications in range"
+          help: "Live applications created in %{range}."
+        templates_used:
+          label: "Templates used"
+          help: "Distinct templates on live applications created in %{range}."
+        published_never_used:
+          label: "Published, never used"
+          help: "Published template versions on kept templates with no live applications since launch."
+      notes:
+        permit_type_proxy: "There is no separate permit-type model. Template nickname and category are the permit-type stand-in on this report."
+        never_used: "Published template versions with zero live applications are listed explicitly. They are not shown as zero on the usage chart."
+    template_stall:
+      title: "Template stall and withdrawal"
+      description: "Which templates stall, abandon, or withdraw applications, by nickname and version"
+      columns:
+        template: "Template"
+        version_date: "Version date"
+        applications: "Apps"
+        status_mix: "Status mix"
+        withdrawal_rate: "Withdrawn"
+        abandoned_rate: "Abandoned"
+        median_our_court_days: "Median days (our court)"
+        stuck_our_court: "Stuck our court"
+        stuck_revisions: "Stuck revisions"
+      figures:
+        applications:
+          label: "Applications in range"
+          help: "Live applications created in %{range}."
+        stuck_our_court:
+          label: "Stuck in our court"
+          help: "In our court 30 days or more. Current snapshot, not the selected range."
+        stuck_revisions:
+          label: "Stuck in revisions"
+          help: "Revisions requested 30 days or more. Current snapshot, not the selected range."
+        withdrawal_rate:
+          label: "Withdrawal rate"
+          help: "Share of live applications created in %{range} that are withdrawn."
+      notes:
+        queue_clock: "Our-court time only runs while an application is newly submitted, resubmitted, or in review. Draft and revisions-requested time is the applicant's court and is not included."
+        stuck_thresholds: "Stuck in our court means 30 or more days of our-court time right now. Stuck in revisions means revisions have been requested for 30 or more days. Abandoned drafts are new drafts in the selected range with no update for 90 days, the same rule as draft completion. Stuck counts ignore the selected range."
+        no_cancelled: "There is no cancelled status. Withdrawal is the withdrawn status."
+        small_n: "Rates on templates with few applications are easy to overread. Small counts are still listed."
+        failed_submissions: "Failed submissions are not captured. There is no failed-submission log, so this report ranks stall, abandonment, and withdrawal from kept live applications only."
+    accounts:
+      title: "Accounts"
+      description: "Registered accounts by role and jurisdiction"
+      columns:
+        period: "Month"
+        jurisdiction: "Jurisdiction"
+        role: "Role"
+        count: "Accounts"
+      figures:
+        total_accounts:
+          label: "Accounts"
+          help: "Registered accounts that have not been discarded. This is a count of accounts, not of people who signed in."
+        new_accounts:
+          label: "New accounts"
+          help: "Accounts created in %{range}, excluding discarded accounts."
+      notes:
+        accounts_not_activity: "These figures count registered accounts, not sign-ins or other activity."
+        discarded_excluded: "Accounts with a discarded date are excluded from every figure and table."
+        active_users: "Daily, weekly, and monthly active users are not measured. The application does not keep a login history beyond the current and last sign-in timestamps, so active users cannot be computed for a past range."
+    submitter_adoption:
+      title: "Submitter adoption"
+      description: "First-time and returning submitters, and accounts that never started an application"
+      series:
+        submitters: "Submitters"
+      columns:
+        group: "Group"
+        count: "Count"
+        share: "Share"
+      groups:
+        first_time: "First-time submitters"
+        returning: "Returning submitters"
+      figures:
+        first_time:
+          label: "First-time submitters"
+          help: "Submitters who created a live application in %{range} and have exactly one live application since launch."
+        returning:
+          label: "Returning submitters"
+          help: "Submitters who created a live application in %{range} and have two or more live applications since launch."
+        first_time_share:
+          label: "First-time share"
+          help: "Share of submitters in %{range} who have exactly one live application."
+        returning_share:
+          label: "Returning share"
+          help: "Share of submitters in %{range} who have two or more live applications."
+        never_started:
+          label: "Never started"
+          help: "Registered submitter accounts with no applications."
+        mean_applications:
+          label: "Mean applications per active submitter"
+          help: "Live applications divided by submitters who have at least one live application."
+      notes:
+        returning_definition: "Returning means two or more live applications since launch, among submitters who created an application in the selected range."
+        never_started: "Never started counts registered submitter accounts with no permit applications at all."
+        active_submitter: "An active submitter is a submitter with at least one live (non-sandbox) application."
+    draft_completion:
+      title: "Draft completion"
+      description: "How drafts become submissions, how long that takes, and which drafts go stale"
+      series:
+        drafts: "Drafts"
+      columns:
+        bucket: "Bucket"
+        count: "Count"
+      buckets:
+        stale_30: "Untouched 30-59 days"
+        stale_60: "Untouched 60-89 days"
+        stale_90: "Untouched 90+ days"
+      figures:
+        completion_rate:
+          label: "Completion rate"
+          help: "Share of live applications created in %{range} that also had a first submission in %{range}."
+        median_draft_to_submit_days:
+          label: "Median days, draft to submit"
+          help: "Median elapsed days from created_at to first submission, for applications first submitted in %{range}."
+        abandonment_rate:
+          label: "Abandonment rate"
+          help: "Share of applications created in %{range} that are still drafts and have not been updated in 90 days or more."
+        created_before_submitted_in_range:
+          label: "Created before range, submitted in range"
+          help: "Applications created before %{range} whose first submission falls inside it. They are included in the median and excluded from the completion-rate denominator."
+      notes:
+        completion_definition: "Completion rate is first submissions in the selected range among applications created in the selected range."
+        range_boundary: "Drafts created before the selected range and first submitted inside it are counted in the median and in the created-before headline. They are not in the completion-rate denominator, which is applications created in the range."
+        abandonment_definition: "Abandonment is a draft created in the selected range that has never been submitted and has not been updated in 90 days or more, divided by applications created in the range."
+    review_process:
+      title: "Review process"
+      description: "Queue snapshot, revision and withdrawal rates, and review timings"
+      timing_unavailable: "not yet available"
+      series:
+        applications: "Applications"
+      columns:
+        outcome: "Outcome"
+        count: "Count"
+      figures:
+        queue:
+          label: "In review queue"
+          help: "Live applications currently newly submitted, resubmitted, or in review, as of %{as_of}. This snapshot ignores the selected range."
+        revision_request_rate:
+          label: "Revision request rate"
+          help: "Share of resolved applications first submitted in %{range} that had more than one submission version. In-flight applications are excluded."
+        mean_revision_rounds:
+          label: "Mean revision rounds"
+          help: "Mean extra submission versions after the first, among resolved applications first submitted in %{range}."
+        resubmission_success_rate:
+          label: "Resubmission success"
+          help: "Share of resolved applications with a resubmission that were approved or issued."
+        withdrawal_rate:
+          label: "Withdrawal rate"
+          help: "Share of resolved applications first submitted in %{range} that were withdrawn."
+        median_days_to_first_review:
+          label: "Median days to first review"
+          help: "Median days from first submission to the earliest submission version viewed_at, for applications with that timestamp."
+        median_days_to_resolution:
+          label: "Median days to resolution"
+          help: "Median days from first submission to the first audit that records approved, issued, or withdrawn."
+        excluded_timing:
+          label: "Excluded from timings"
+          help: "Applications missing viewed_at or a resolution audit. Timing data starts on %{start_date}."
+      notes:
+        aggregate_only: "Revision, resubmission, and withdrawal figures are aggregates. Reviewer names and reviewer-level attribution are not included."
+        in_flight_excluded: "Applications still newly submitted, resubmitted, or in review are omitted from outcome rates."
+        queue_independent: "The queue snapshot is the current in-review count and does not follow the selected time range. Its as-of time is on the headline."
+        timing_start: "Time to resolution uses PermitApplication status audits. The start of that series is shown on the excluded-timing figure. Time to first review uses submission_versions.viewed_at."
+        timing_exclusions: "Applications without viewed_at or without a resolution audit are excluded from the corresponding median. The excluded count is shown."
+    platform_health:
+      title: "Platform health"
+      description: "Collaboration, uploaded documents, and stated gaps in error capture"
+      columns:
+        metric: "Metric"
+        value: "Value"
+      metrics:
+        documents: "Documents"
+        average_documents: "Average documents per application"
+        average_size: "Average total size per application (bytes)"
+        maximum_size: "Maximum total size on one application (bytes)"
+      figures:
+        collaborated_applications:
+          label: "Applications with collaboration"
+          help: "Live applications created in %{range} with at least one kept application or project collaboration."
+        collaboration_rate:
+          label: "Collaboration rate"
+          help: "Share of live applications created in %{range} with at least one kept collaboration."
+        application_collaborations:
+          label: "Application collaborations"
+          help: "Kept permit collaborations on applications created in %{range}."
+        project_collaborations:
+          label: "Project collaborations"
+          help: "Kept project collaborations on projects of applications created in %{range}."
+        average_documents:
+          label: "Average documents per application"
+          help: "Supporting documents on live applications created in %{range}, including applications with none."
+        average_total_size_bytes:
+          label: "Average total size (bytes)"
+          help: "Average per-application sum of Shrine file_data metadata size, for applications created in %{range}."
+        maximum_total_size_bytes:
+          label: "Maximum total size (bytes)"
+          help: "Largest per-application sum of Shrine file_data metadata size, for applications created in %{range}."
+      notes:
+        collaboration_scope: "Collaboration includes kept permit_collaborations and permit_project_collaborations. Discarded assignments are excluded."
+        shrine_sizes: "Document sizes come from Shrine file_data metadata size. This app does not use Active Storage."
+        failed_submissions: "Failed submission counts are not measured. There is no failed-submission log table, so a zero would mean no capture rather than no failures."
+        errors: "Error counts are not measured. There is no application error log table, so a zero would mean no capture rather than no errors."
+    storage_footprint:
+      title: "Storage footprint and forecast"
+      description: "Current uploaded footprint, where it sits, and a stated projection of what comes next"
+      unattributed: "Unattributed"
+      series:
+        bytes_added: "Storage added (bytes)"
+      types:
+        supporting_documents: "Supporting documents"
+        project_documents: "Project documents"
+        report_documents: "Step Code reports"
+        design_documents: "Design documents"
+        meeting_request_documents: "Meeting request documents"
+        note_attachment_documents: "Note attachments"
+        requirement_documents: "Requirement block documents"
+        resource_documents: "Resource documents"
+      columns:
+        document_type: "Document type"
+        jurisdiction: "Jurisdiction"
+        bytes: "Bytes"
+        period: "Month"
+      figures:
+        total_bytes:
+          label: "Current total storage (bytes)"
+          help: "Sum of Shrine uploaded sizes on kept, live records. Submission zipfiles are excluded. This snapshot ignores the selected range."
+        average_bytes_per_application:
+          label: "Average storage per application (bytes)"
+          help: "Current total storage divided by live applications. Ignores the selected range."
+        projected_next_12_months:
+          label: "Projected storage added, next 12 months (bytes)"
+          help: "Average monthly storage added over the last three calendar months (including the current partial month), times 12. This does not follow the selected range."
+        excluded_zipfile_bytes:
+          label: "Excluded zipfile bytes"
+          help: "Shrine size of permit application submission zipfiles. Excluded from the total because those zipfiles bundle supporting documents already counted."
+      notes:
+        zipfiles: "Submission zipfiles (permit_applications.zipfile_data) are excluded from the total. They bundle supporting documents at submit, so including them would count those bytes twice. Their combined Shrine size is the excluded-zipfile figure."
+        discarded: "Documents attached to discarded permit applications, discarded projects, or discarded Step Codes are excluded. Requirement-block documents on discarded requirement blocks are excluded."
+        billed: "Sizes come from Shrine file_data metadata size (uploaded bytes). That is not what the storage backend bills: orphans, packing, and provider overhead are excluded."
+        sandbox: "Sandbox (non-live) projects are excluded."
+        projection: "The forward projection is last-three-calendar-month average bytes added, including the current incomplete month, multiplied by 12. It assumes recent additions continue at that average. It is not a capacity booking."
+        unattributed: "Requirement-block documents have no jurisdiction. They appear as Unattributed on the jurisdiction table and are included in the total."
+  arbitrary_message_construct:
+    report:
+      refresh_success:
+        title: "Report refreshed"
+        message: "The figures on this report are current."
+      refresh_error:
+        title: "Refresh failed"
+        message: "Previous figures are still shown. Try again."
+      not_found_error:
+        title: "Not found"
+        message: "That report does not exist."
