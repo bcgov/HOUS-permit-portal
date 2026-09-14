@@ -45,9 +45,12 @@ export const JurisdictionIndexScreen = observer(function JurisdictionIndex() {
           </RouterLinkButton>
         </Flex>
 
-        <SearchGrid templateColumns="3fr repeat(5, 1fr)">
+        <SearchGrid
+          templateColumns="3fr repeat(5, 1fr)"
+          searchModel={jurisdictionStore}
+          searchLabel={t("jurisdiction.index.searchLabel")}
+        >
           <GridHeaders
-            span={6}
             includeActionColumn
             columns={Object.values(EJurisdictionSortFields).filter(
               (field) => field !== EJurisdictionSortFields.regionalDistrict

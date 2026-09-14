@@ -20,9 +20,10 @@ import {
 import { SlidersHorizontal } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo, useState } from "react"
-import { Controller, useFormContext } from "react-hook-form"
+import { Controller, FormProvider, useForm, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import Select from "react-select"
+import { IFormConditional } from "../../../../types/api-request"
 import { EConditionalOperator, EConditionalThen } from "../../../../types/enums"
 import { IOption } from "../../../../types/types"
 import { DatePickerFormControl, NumberFormControl, TextFormControl } from "../../../shared/form/input-form-control"
@@ -33,6 +34,20 @@ interface IProps {
   triggerButtonProps?: Partial<ButtonProps>
   renderTriggerButton?: (props: ButtonProps) => JSX.Element
   index: number
+}
+
+interface IConditionalDraft {
+  when?: string | null
+  operator?: EConditionalOperator | null
+  operand?: string | null
+  then?: EConditionalThen | null
+}
+
+const emptyConditional: IConditionalDraft = {
+  when: null,
+  operator: null,
+  operand: null,
+  then: null,
 }
 
 const textInputTypes = ["text", "textarea", "phone", "email", "address", "bcaddress"]
@@ -79,21 +94,25 @@ export const ConditionalSetupModal = observer(({ triggerButtonProps, renderTrigg
 
   const formMethods = useFormContext<IRequirementBlockForm>()
 
-  const { control, watch, setValue } = formMethods
+  const { watch: watchParent, setValue: setParentValue, getValues: getParentValues } = formMethods
+  const draftFormMethods = useForm<IConditionalDraft>({ defaultValues: emptyConditional })
+  const { control, watch, setValue, reset, getValues } = draftFormMethods
 
-  const watchedLabel = watch(`requirementsAttributes.${index}.label`)
+  const watchedLabel = watchParent(`requirementsAttributes.${index}.label`)
 
-  const watchedWhen = watch(`requirementsAttributes.${index}.inputOptions.conditional.when`)
-  const watchedOperator = watch(`requirementsAttributes.${index}.inputOptions.conditional.operator`)
-  const watchedOperand = watch(`requirementsAttributes.${index}.inputOptions.conditional.operand`)
-  const watchedThen = watch(`requirementsAttributes.${index}.inputOptions.conditional.then`)
+  const watchedWhen = watch("when")
+  const watchedOperator = watch("operator")
+  const watchedOperand = watch("operand")
+  const watchedThen = watch("then")
+  const watchedConditional = watchParent(`requirementsAttributes.${index}.inputOptions.conditional`)
+  const hasExistingConditional = !!watchedConditional && Object.keys(watchedConditional).length > 0
 
   const currentOperator = watchedOperator || EConditionalOperator.isEqual
   const isValueless = VALUELESS_OPERATORS.includes(currentOperator as EConditionalOperator)
   const allFieldsProvided = watchedWhen && watchedThen && currentOperator && (isValueless || watchedOperand)
 
-  const watchedRequirements = watch(`requirementsAttributes`)
-  const watchedRequirementCode = watch(`requirementsAttributes.${index}.requirementCode`)
+  const watchedRequirements = watchParent(`requirementsAttributes`)
+  const watchedRequirementCode = watchParent(`requirementsAttributes.${index}.requirementCode`)
   const selectedRequirementAttr = watchedRequirements?.find((reqAttr) => reqAttr.requirementCode === watchedWhen)
 
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false)
@@ -103,10 +122,7 @@ export const ConditionalSetupModal = observer(({ triggerButtonProps, renderTrigg
   const [requirementOptions, setRequirementOptions] = useState<IOption[]>(null)
 
   const onReset = () => {
-    setValue(`requirementsAttributes.${index}.inputOptions.conditional.when`, null)
-    setValue(`requirementsAttributes.${index}.inputOptions.conditional.operator`, null)
-    setValue(`requirementsAttributes.${index}.inputOptions.conditional.operand`, null)
-    setValue(`requirementsAttributes.${index}.inputOptions.conditional.then`, null)
+    reset()
   }
 
   const getOperandOptions = () => {
@@ -160,19 +176,19 @@ export const ConditionalSetupModal = observer(({ triggerButtonProps, renderTrigg
     label: t(`requirementsLibrary.modals.conditionalSetup.${value}`),
   }))
 
-  const getOperandSelectFormControl = (fieldName: keyof IRequirementBlockForm) => {
+  const getOperandSelectFormControl = () => {
     if (!watchedWhen || isValueless) return <></>
 
     if (textInputTypes.includes(inputType)) {
-      return <TextFormControl fieldName={fieldName} />
+      return <TextFormControl fieldName="operand" />
     } else if (inputType === numberInputType) {
-      return <NumberFormControl fieldName={fieldName} />
+      return <NumberFormControl fieldName="operand" />
     } else if (inputType === dateInputType) {
-      return <DatePickerFormControl fieldName={fieldName} />
+      return <DatePickerFormControl fieldName="operand" />
     } else if (optionInputTypes.includes(inputType)) {
       return (
         <Controller
-          name={fieldName}
+          name="operand"
           control={control}
           render={({ field: { onChange, value } }) => {
             return (
@@ -191,22 +207,37 @@ export const ConditionalSetupModal = observer(({ triggerButtonProps, renderTrigg
   }
 
   const handleWhenChange = (opt: IOption, onChange: (val: string) => void) => {
-    setValue(`requirementsAttributes.${index}.inputOptions.conditional.operand`, null)
+    setValue("operand", null)
     const targetReq = watchedRequirements?.find((r) => r.requirementCode === opt.value)
     const ops = getOperatorsForInputType(targetReq?.inputType)
-    setValue(
-      `requirementsAttributes.${index}.inputOptions.conditional.operator`,
-      ops[0] || EConditionalOperator.isEqual
-    )
+    setValue("operator", ops[0] || EConditionalOperator.isEqual)
     onChange(opt.value)
+  }
+
+  const openModal = () => {
+    const conditional = getParentValues(`requirementsAttributes.${index}.inputOptions.conditional`)
+    reset(conditional ? ({ ...conditional } as IConditionalDraft) : emptyConditional)
+    onOpen()
+  }
+
+  const onDone = () => {
+    setParentValue(`requirementsAttributes.${index}.inputOptions.conditional`, getValues() as IFormConditional, {
+      shouldDirty: true,
+    })
+    onClose()
+  }
+
+  const onRemove = () => {
+    setParentValue(`requirementsAttributes.${index}.inputOptions.conditional`, undefined, { shouldDirty: true })
+    onClose()
   }
 
   return (
     <>
       {renderTriggerButton ? (
-        renderTriggerButton({ onClick: onOpen })
+        renderTriggerButton({ onClick: openModal })
       ) : (
-        <MenuItem color={"text.primary"} onClick={onOpen} {...triggerButtonProps}>
+        <MenuItem color={"text.primary"} onClick={openModal} {...triggerButtonProps}>
           <HStack spacing={2} fontSize={"sm"}>
             <SlidersHorizontal />
             <Text as={"span"}>{t("requirementsLibrary.modals.optionsMenu.conditionalLogic")}</Text>
@@ -248,7 +279,7 @@ export const ConditionalSetupModal = observer(({ triggerButtonProps, renderTrigg
                 </FormLabel>
                 <Box px={4}>
                   <Controller
-                    name={`requirementsAttributes.${index}.inputOptions.conditional.when`}
+                    name="when"
                     control={control}
                     render={({ field: { onChange, value } }) => (
                       <RequirementSelect
@@ -268,7 +299,7 @@ export const ConditionalSetupModal = observer(({ triggerButtonProps, renderTrigg
                   </FormLabel>
                   <Box px={4}>
                     <Controller
-                      name={`requirementsAttributes.${index}.inputOptions.conditional.operator`}
+                      name="operator"
                       control={control}
                       render={({ field: { onChange, value } }) => (
                         <Select
@@ -277,7 +308,7 @@ export const ConditionalSetupModal = observer(({ triggerButtonProps, renderTrigg
                           onChange={(opt) => {
                             const newOp = opt?.value
                             if (VALUELESS_OPERATORS.includes(newOp as EConditionalOperator)) {
-                              setValue(`requirementsAttributes.${index}.inputOptions.conditional.operand`, null)
+                              setValue("operand", null)
                             }
                             onChange(newOp)
                           }}
@@ -294,9 +325,7 @@ export const ConditionalSetupModal = observer(({ triggerButtonProps, renderTrigg
                     {t("requirementsLibrary.modals.conditionalSetup.satisfies")}
                   </FormLabel>
                   <Flex px={4} gap={4} align="center">
-                    {getOperandSelectFormControl(
-                      `requirementsAttributes.${index}.inputOptions.conditional.operand` as keyof IRequirementBlockForm
-                    )}
+                    <FormProvider {...draftFormMethods}>{getOperandSelectFormControl()}</FormProvider>
                   </Flex>
                 </Flex>
               )}
@@ -311,7 +340,7 @@ export const ConditionalSetupModal = observer(({ triggerButtonProps, renderTrigg
                   </Text>
                   <Box px={4}>
                     <Controller
-                      name={`requirementsAttributes.${index}.inputOptions.conditional.then`}
+                      name="then"
                       control={control}
                       render={({ field: { onChange, value } }) => (
                         <EffectSelect
@@ -340,11 +369,19 @@ export const ConditionalSetupModal = observer(({ triggerButtonProps, renderTrigg
               </Button>
               <Button
                 variant={"primary"}
-                onClick={onClose}
+                onClick={onDone}
                 isDisabled={!allFieldsProvided || !isSupportedInputType(inputType)}
               >
                 {t("ui.done")}
               </Button>
+              <Button variant={"secondary"} onClick={onClose}>
+                {t("ui.cancel")}
+              </Button>
+              {hasExistingConditional && (
+                <Button variant={"ghost"} color={"semantic.error"} onClick={onRemove}>
+                  {t("ui.remove")}
+                </Button>
+              )}
             </ButtonGroup>
           </ModalFooter>
         </ModalContent>

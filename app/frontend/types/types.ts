@@ -372,6 +372,8 @@ export interface IResource {
   description?: string
   resourceType: string
   linkUrl?: string
+  showOnAbout?: boolean
+  aboutPosition?: number
   updatedAt: string
   createdAt: string
   resourceDocument?: IResourceDocument
@@ -818,6 +820,16 @@ export type TReleaseNoteViewerContext = {
 
 export interface ICopyRequirementTemplateFormData extends Partial<TCreateRequirementTemplateFormData> {
   id?: string
+}
+
+export interface IRequirementTemplateConfigError {
+  category: string
+  blockId: string
+  blockName: string
+  requirementId?: string
+  requirementCode?: string
+  requirementName?: string
+  message: string
 }
 
 export interface IBaselineOccupancy {

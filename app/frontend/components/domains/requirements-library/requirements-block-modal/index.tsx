@@ -42,6 +42,8 @@ interface IRequirementsBlockProps {
   withOptionsMenu?: boolean
   isEditable?: boolean
   autoOpen?: boolean
+  autoOpenRequirementCode?: string
+  onAutoOpenConsumed?: () => void
 }
 
 export const RequirementsBlockModal = observer(function RequirementsBlockModal({
@@ -50,6 +52,8 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
   withOptionsMenu,
   isEditable,
   autoOpen,
+  autoOpenRequirementCode,
+  onAutoOpenConsumed,
 }: IRequirementsBlockProps) {
   const { requirementBlockStore } = useMst()
   const searchModel = requirementBlockStore
@@ -58,6 +62,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
   const { createRequirementBlock } = requirementBlockStore
   const { isOpen, onOpen, onClose } = useDisclosure()
   const hasAutoOpenedRef = React.useRef(false)
+  const autoOpenRequirementCodeRef = React.useRef(autoOpenRequirementCode)
   const [isUploadingDocuments, setIsUploadingDocuments] = useState(false)
 
   const { autoComplianceModuleConfigurations, error } = useAutoComplianceModuleConfigurations()
@@ -68,11 +73,18 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
       return
     }
 
+    autoOpenRequirementCodeRef.current = autoOpenRequirementCode
     if (!hasAutoOpenedRef.current) {
       hasAutoOpenedRef.current = true
       onOpen()
+      onAutoOpenConsumed?.()
     }
-  }, [autoOpen, onOpen])
+  }, [autoOpen, autoOpenRequirementCode, onAutoOpenConsumed, onOpen])
+
+  const closeModal = () => {
+    autoOpenRequirementCodeRef.current = undefined
+    onClose()
+  }
 
   const getDefaultValues = (): Partial<IRequirementBlockForm> => {
     return requirementBlock
@@ -175,7 +187,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
     }
     if (isSuccess) {
       fetchData()
-      onClose()
+      closeModal()
     }
   }
 
@@ -204,7 +216,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
       {/*this is so that the modal children unmount on close to reset their states*/}
       {isOpen && (
         <FormModal
-          onClose={onClose}
+          onClose={closeModal}
           isOpen
           formProps={formProps}
           confirmCloseTitle={t("requirementsLibrary.modals.unsavedChanges.title")}
@@ -256,7 +268,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
                   </Button>
                 </HStack>
               </ModalHeader>
-              <ModalBody px={"2.75rem"}>
+              <ModalBody px={"2.75rem"} pb={4}>
                 <HStack spacing={9} w={"full"} h={"full"} alignItems={"flex-start"}>
                   <BlockSetup
                     requirementBlock={
@@ -268,7 +280,11 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
                     onIsUploadingChange={setIsUploadingDocuments}
                   />
 
-                  <FieldsSetup requirementBlock={requirementBlock} isEditable={isEditable} />
+                  <FieldsSetup
+                    requirementBlock={requirementBlock}
+                    isEditable={isEditable}
+                    autoOpenRequirementCode={autoOpenRequirementCodeRef.current}
+                  />
                 </HStack>
               </ModalBody>
             </>

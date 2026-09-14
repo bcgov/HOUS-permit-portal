@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   Checkbox,
   Divider,
@@ -140,41 +141,54 @@ export const InboxFilter = observer(function InboxFilter({
           </HStack>
         </Button>
       </PopoverTrigger>
-      <PopoverContent w="auto" minW="200px" p={4} zIndex="dropdown">
-        <PopoverBody p={0}>
-          <VStack align="start" spacing={3}>
-            {isMulti ? (
-              <>
-                <Checkbox
-                  isChecked={Array.isArray(localValue) && localValue.length === options.length && options.length > 0}
-                  isIndeterminate={
-                    Array.isArray(localValue) && localValue.length > 0 && localValue.length < options.length
-                  }
-                  onChange={handleSelectAll}
-                >
-                  {t("ui.selectAll")}
-                </Checkbox>
-                {options.map((option) => (
-                  <Checkbox
-                    key={option.value}
-                    isChecked={Array.isArray(localValue) && localValue.includes(option.value)}
-                    onChange={() => handleCheckboxToggle(option.value)}
-                  >
-                    {option.label}
-                  </Checkbox>
-                ))}
-                <Divider />
-                <HStack w="full" justifyContent="space-between">
-                  <Button variant="link" size="sm" onClick={handleClear}>
-                    {t("ui.clear")}
-                  </Button>
-                  <Button variant="primary" size="sm" onClick={handleApply}>
-                    {t("ui.apply")}
-                  </Button>
-                </HStack>
-              </>
-            ) : (
-              <>
+      <PopoverContent
+        w="auto"
+        minW="200px"
+        p={4}
+        zIndex="dropdown"
+        maxH="min(420px, calc(100vh - 96px))"
+        display="flex"
+        flexDirection="column"
+        overflow="hidden"
+      >
+        <PopoverBody p={0} display="flex" flexDirection="column" minH={0} overflow="hidden">
+          {isMulti ? (
+            <VStack align="stretch" spacing={3} flex={1} minH={0} overflow="hidden">
+              <Checkbox
+                isChecked={Array.isArray(localValue) && localValue.length === options.length && options.length > 0}
+                isIndeterminate={
+                  Array.isArray(localValue) && localValue.length > 0 && localValue.length < options.length
+                }
+                onChange={handleSelectAll}
+              >
+                {t("ui.selectAll")}
+              </Checkbox>
+              <Box overflowY="auto" minH={0} flex={1}>
+                <VStack align="start" spacing={3}>
+                  {options.map((option) => (
+                    <Checkbox
+                      key={option.value}
+                      isChecked={Array.isArray(localValue) && localValue.includes(option.value)}
+                      onChange={() => handleCheckboxToggle(option.value)}
+                    >
+                      {option.label}
+                    </Checkbox>
+                  ))}
+                </VStack>
+              </Box>
+              <Divider />
+              <HStack w="full" justifyContent="space-between">
+                <Button variant="link" size="sm" onClick={handleClear}>
+                  {t("ui.clear")}
+                </Button>
+                <Button variant="primary" size="sm" onClick={handleApply}>
+                  {t("ui.apply")}
+                </Button>
+              </HStack>
+            </VStack>
+          ) : (
+            <VStack align="stretch" spacing={3} flex={1} minH={0} overflow="hidden">
+              <Box overflowY="auto" minH={0} flex={1}>
                 <RadioGroup
                   value={typeof localValue === "string" ? localValue : ""}
                   onChange={(val) => setLocalValue(val)}
@@ -187,13 +201,13 @@ export const InboxFilter = observer(function InboxFilter({
                     ))}
                   </VStack>
                 </RadioGroup>
-                <Divider />
-                <Button variant="primary" size="sm" w="full" onClick={handleApply}>
-                  {t("ui.apply")}
-                </Button>
-              </>
-            )}
-          </VStack>
+              </Box>
+              <Divider />
+              <Button variant="primary" size="sm" w="full" onClick={handleApply}>
+                {t("ui.apply")}
+              </Button>
+            </VStack>
+          )}
         </PopoverBody>
       </PopoverContent>
     </Popover>

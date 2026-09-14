@@ -1,0 +1,2 @@
+class RequirementBlockSnapshotRestoreError < StandardError
+end

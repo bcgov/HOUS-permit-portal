@@ -31,7 +31,9 @@ class PermitProject < ApplicationRecord
   validates :title, presence: true
   validates :number, presence: true, on: :update
   validate :sandbox_belongs_to_jurisdiction
-  validate :owner_cannot_be_jurisdiction_staff_without_sandbox
+  validate :staff_owned_live_must_be_discarded
+  # Discard#undiscard uses update_attribute and skips validations.
+  before_undiscard :reject_undiscard_if_staff_owned_live
   before_validation :set_default_title
 
   before_validation :assign_unique_number, if: -> { number.blank? }
@@ -64,6 +66,10 @@ class PermitProject < ApplicationRecord
 
   def public_record?
     permit_applications.any?(&:public_record?)
+  end
+
+  def staff_owned_live?
+    sandbox_id.blank? && owner&.jurisdiction_staff?
   end
 
   def total_permits_count
@@ -394,16 +400,20 @@ class PermitProject < ApplicationRecord
     )
   end
 
-  def owner_cannot_be_jurisdiction_staff_without_sandbox
-    return unless owner&.jurisdiction_staff?
-    return if sandbox_id.present?
+  def staff_owned_live_must_be_discarded
+    return unless staff_owned_live?
+    return if discarded?
 
     errors.add(
-      :owner,
+      :base,
       I18n.t(
-        "activerecord.errors.models.permit_project.attributes.owner.review_staff_requires_sandbox"
+        "activerecord.errors.models.permit_project.staff_owned_live_must_be_discarded"
       )
     )
+  end
+
+  def reject_undiscard_if_staff_owned_live
+    throw :abort if staff_owned_live?
   end
 
   def compute_review_collaborator_user_ids

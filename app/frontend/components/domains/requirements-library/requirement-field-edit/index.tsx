@@ -150,7 +150,11 @@ const requirementsComponentMap = {
             <Controller<TFieldValues>
               {...unitSelectControlProps}
               render={({ field: { onChange, value } }) => (
-                <UnitSelect value={value as ENumberUnit} onChange={onChange} />
+                <UnitSelect
+                  value={value as ENumberUnit}
+                  onChange={onChange}
+                  isDisabled={editableGroupProps.lockDefinition}
+                />
               )}
             />
           </HStack>
@@ -185,6 +189,7 @@ const requirementsComponentMap = {
     const { fields, append, remove } = useFieldArray<TFieldValues>(useFieldArrayProps)
 
     const isLockedOptions =
+      editableGroupProps.lockDefinition ||
       editableGroupProps.requirementCode === EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod
 
     return (
@@ -278,6 +283,7 @@ const requirementsComponentMap = {
     const { useFieldArrayProps, onOptionValueChange, getOptionValue } = multiOptionProps
 
     const { fields, append, remove } = useFieldArray<TFieldValues>({ ...useFieldArrayProps })
+    const isLockedOptions = !!editableGroupProps.lockDefinition
 
     return (
       <EditableGroup
@@ -299,18 +305,25 @@ const requirementsComponentMap = {
                   value={getOptionValue(idx)?.label}
                   onChange={(e) => onOptionValueChange(idx, e.target.value)}
                   w={"150px"}
+                  isDisabled={isLockedOptions}
                 />
                 <IconButton
                   aria-label={"remove option"}
                   variant={"unstyled"}
                   icon={<X />}
                   onClick={() => remove(idx)}
+                  isDisabled={isLockedOptions}
                 />
               </HStack>
             ))}
 
             {/*  @ts-ignore*/}
-            <Button variant={"link"} textDecoration={"underline"} onClick={() => append({ value: "", label: "" })}>
+            <Button
+              variant={"link"}
+              textDecoration={"underline"}
+              onClick={() => append({ value: "", label: "" })}
+              isDisabled={isLockedOptions}
+            >
               {t("requirementsLibrary.modals.addOptionButton")}
             </Button>
           </>
@@ -334,7 +347,8 @@ const requirementsComponentMap = {
 
     const { fields, append, remove } = useFieldArray<TFieldValues>(useFieldArrayProps)
 
-    const isEnergyStepCodeDependency =
+    const isLockedOptions =
+      editableGroupProps.lockDefinition ||
       String(editableGroupProps.requirementCode) === EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod
 
     return (
@@ -349,14 +363,14 @@ const requirementsComponentMap = {
                   value={getOptionValue(idx)?.label}
                   onChange={(e) => onOptionValueChange(idx, e.target.value)}
                   w={"150px"}
-                  isDisabled={isEnergyStepCodeDependency}
+                  isDisabled={isLockedOptions}
                 />
                 <IconButton
                   aria-label={"remove option"}
                   variant={"unstyled"}
                   icon={<X />}
                   onClick={() => remove(idx)}
-                  isDisabled={isEnergyStepCodeDependency}
+                  isDisabled={isLockedOptions}
                 />
               </HStack>
             ))}
@@ -366,7 +380,7 @@ const requirementsComponentMap = {
               textDecoration={"underline"}
               //  @ts-ignore
               onClick={() => append({ value: "", label: "" })}
-              isDisabled={isEnergyStepCodeDependency}
+              isDisabled={isLockedOptions}
             >
               {t("requirementsLibrary.modals.addOptionButton")}
             </Button>
@@ -576,12 +590,16 @@ const requirementsComponentMap = {
                 quantity: quantity.field.value as any,
                 ab: ab.field.value as any,
               }}
-              controls={{
-                firstColumn: { value: first.field.value as any, onChange: first.field.onChange },
-                a: { value: a.field.value as any, onChange: a.field.onChange },
-                quantity: { value: quantity.field.value as any, onChange: quantity.field.onChange },
-                ab: { value: ab.field.value as any, onChange: ab.field.onChange },
-              }}
+              controls={
+                props.lockDefinition
+                  ? undefined
+                  : {
+                      firstColumn: { value: first.field.value as any, onChange: first.field.onChange },
+                      a: { value: a.field.value as any, onChange: a.field.onChange },
+                      quantity: { value: quantity.field.value as any, onChange: quantity.field.onChange },
+                      ab: { value: ab.field.value as any, onChange: ab.field.onChange },
+                    }
+              }
             />
             <Stack spacing={2}>
               <Grid templateColumns="2fr 2fr 1fr 1fr" gap={2}>
@@ -598,6 +616,7 @@ const requirementsComponentMap = {
                             value={`${field.value ?? ""}`}
                             onChange={field.onChange}
                             w="100%"
+                            isDisabled={props.lockDefinition}
                           />
                         )}
                       />
@@ -614,12 +633,19 @@ const requirementsComponentMap = {
                             value={`${field.value ?? ""}`}
                             onChange={(e) => field.onChange(e.target.value === "" ? "" : Number(e.target.value))}
                             w="100%"
+                            isDisabled={props.lockDefinition}
                           />
                         )}
                       />
                     </GridItem>
                     <GridItem display="flex" alignItems="right" justifyContent="flex-start">
-                      <IconButton aria-label="Remove" icon={<X />} variant="ghost" onClick={() => remove(idx)} />
+                      <IconButton
+                        aria-label="Remove"
+                        icon={<X />}
+                        variant="ghost"
+                        onClick={() => remove(idx)}
+                        isDisabled={props.lockDefinition}
+                      />
                     </GridItem>
                     <GridItem />
                   </React.Fragment>
@@ -630,6 +656,7 @@ const requirementsComponentMap = {
                 variant="secondary"
                 onClick={() => append({ name: "", a: "" } as any)}
                 alignSelf="flex-start"
+                isDisabled={props.lockDefinition}
               >
                 {t("requirementsLibrary.multiplySumGrid.addRow")}
               </Button>

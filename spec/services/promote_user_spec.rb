@@ -13,7 +13,13 @@ RSpec.describe PromoteUser do
   end
 
   it "merges invitation fields and jurisdictions and destroys invited user when valid" do
-    existing_user = instance_double("User", jurisdiction_ids: ["j1"], id: "e1")
+    existing_user =
+      instance_double(
+        "User",
+        jurisdiction_ids: ["j1"],
+        id: "e1",
+        permit_projects: PermitProject.none
+      )
     invited_user =
       instance_double("User", jurisdiction_ids: ["j2"], submitter?: false)
 
@@ -73,7 +79,8 @@ RSpec.describe PromoteUser do
         "User",
         jurisdiction_ids: [],
         collaborations: existing_collabs,
-        id: "e1"
+        id: "e1",
+        permit_projects: PermitProject.none
       )
     invited_user =
       instance_double(
@@ -123,6 +130,7 @@ RSpec.describe PromoteUser do
     existing_user = create(:user, :submitter)
     invited_user = create(:user, :review_manager, confirmed: false)
     overheating_code = create(:overheating_code, creator: invited_user)
+    live_project = create(:permit_project, owner: existing_user)
 
     described_class.new(
       existing_user: existing_user,
@@ -131,5 +139,6 @@ RSpec.describe PromoteUser do
 
     expect(overheating_code.reload.creator_id).to eq(existing_user.id)
     expect(User.exists?(invited_user.id)).to be false
+    expect(live_project.reload).to be_discarded
   end
 end

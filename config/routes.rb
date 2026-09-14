@@ -59,6 +59,11 @@ Rails.application.routes.draw do
           to: "requirement_blocks#auto_compliance_module_configurations"
     end
 
+    resources :requirement_questions, only: %i[create show update destroy] do
+      post "restore", on: :member, to: "requirement_questions#restore"
+      post "search", on: :collection, to: "requirement_questions#index"
+    end
+
     resources :notifications, only: %i[index] do
       post "reset_last_read",
            on: :collection,
@@ -85,7 +90,10 @@ Rails.application.routes.draw do
       post "copy", on: :collection
 
       # Draft workflow endpoints
-      member { post "create_draft", to: "requirement_templates#create_draft" }
+      member do
+        post "create_draft", to: "requirement_templates#create_draft"
+        post "validate_config", to: "requirement_templates#validate_config"
+      end
       post "jurisdiction_availabilities",
            on: :member,
            to: "requirement_templates#update_jurisdiction_availabilities"
@@ -96,6 +104,10 @@ Rails.application.routes.draw do
       member do
         delete "discard_draft", to: "template_versions#discard_draft"
         post "promote_draft", to: "template_versions#promote_draft"
+        post "validate_config", to: "template_versions#validate_config"
+        post "restore_layout", to: "template_versions#restore_layout"
+        post "restore_requirement_block",
+             to: "template_versions#restore_requirement_block"
         post "invite_draft_previewers",
              to: "template_versions#invite_draft_previewers"
         post "share_draft", to: "template_versions#share_draft"
