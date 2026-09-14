@@ -8,6 +8,10 @@ class ExternalApi::PermitApplicationPolicy < ExternalApi::ApplicationPolicy
     index?
   end
 
+  def show_submission_version?
+    show?
+  end
+
   def update_status?
     index?
   end

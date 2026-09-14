@@ -27,4 +27,47 @@ class SubmissionVersionBlueprint < Blueprinter::Base
                 blueprint: RevisionRequestBlueprint,
                 view: :extended
   end
+
+  view :external_api_index do
+    identifier :id
+    fields :created_at, :package_ready_at
+    field :version_number
+  end
+
+  view :external_api do
+    identifier :id
+    fields :created_at, :package_ready_at, :permit_application_id
+    field :version_number
+    field :permit_project_id do |submission_version, _options|
+      submission_version.permit_application.permit_project_id
+    end
+    field :submission_data do |submission_version, _options|
+      submission_version.permit_application.formatted_submission_data_for_external_use(
+        submission_version: submission_version
+      )
+    end
+    field :raw_h2k_files do |submission_version, _options|
+      ExternalPermitApplicationService.new(
+        submission_version.permit_application
+      ).get_raw_h2k_files
+    end
+    field :generated_documents do |submission_version, _options|
+      submission_version
+        .supporting_documents
+        .select do |doc|
+          SupportingDocument::STATIC_DOCUMENT_DATA_KEYS.include?(
+            doc.data_key
+          ) && doc.file.present?
+        end
+        .map do |doc|
+          {
+            id: doc.id,
+            name: doc.file_name,
+            type: doc.file_type,
+            size: doc.file_size,
+            url: doc.file_url
+          }
+        end
+    end
+  end
 end

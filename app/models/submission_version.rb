@@ -3,6 +3,8 @@ class SubmissionVersion < ApplicationRecord
           only: %i[viewed_at],
           associated_with: :permit_application
 
+  include ZipfileUploader.Attachment(:zipfile)
+
   belongs_to :permit_application
   has_many :revision_requests, dependent: :destroy
   has_many :supporting_documents, dependent: :destroy

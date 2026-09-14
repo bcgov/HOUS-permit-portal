@@ -254,8 +254,6 @@ module PermitApplicationStatus
           )
       )
 
-      zip_and_upload_supporting_documents
-
       send_submit_notifications
     end
 

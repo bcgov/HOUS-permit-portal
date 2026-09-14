@@ -172,7 +172,7 @@ RSpec.describe "External API v1 permit applications", type: :request do
       expect(response).to have_http_status(:forbidden)
     end
 
-    it "returns 200 for an allowed record" do
+    it "returns 200 for an allowed record with live submission_data" do
       pa =
         create(
           :permit_application,
@@ -181,6 +181,10 @@ RSpec.describe "External API v1 permit applications", type: :request do
         )
       get "/external_api/v1/permit_applications/#{pa.id}", headers: auth_headers
       expect(response).to have_http_status(:ok)
+      json = JSON.parse(response.body).fetch("data")
+      expect(json).to have_key("submission_data")
+      expect(json).not_to have_key("submission_versions")
+      expect(json).not_to have_key("zipfile_url")
     end
   end
 

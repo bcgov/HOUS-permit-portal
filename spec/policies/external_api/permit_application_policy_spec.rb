@@ -26,12 +26,13 @@ RSpec.describe ExternalApi::PermitApplicationPolicy, type: :policy do
     create(:permit_application, jurisdiction:, sandbox:, status:)
   end
 
-  describe "#index?/#show?/#update_status?" do
+  describe "#index?/#show?/#update_status?/#show_submission_version?" do
     it "permits when jurisdiction matches, record is submitted, and sandbox matches" do
       record = create_application(status: :newly_submitted)
 
       expect(policy(record).index?).to be true
       expect(policy(record).show?).to be true
+      expect(policy(record).show_submission_version?).to be true
       expect(policy(record).update_status?).to be true
     end
 

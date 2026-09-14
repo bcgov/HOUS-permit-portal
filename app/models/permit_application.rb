@@ -15,7 +15,6 @@ class PermitApplication < ApplicationRecord
   include FormSupportingDocuments
   include AutomatedComplianceUtils
   include StepCodeFieldExtraction
-  include ZipfileUploader.Attachment(:zipfile)
   include PermitApplicationStatus
   include ProjectItem
   include Discard::Model
@@ -96,6 +95,8 @@ class PermitApplication < ApplicationRecord
   after_commit :reindex_jurisdiction_permit_application_size
   after_commit :send_status_changed_webhook,
                if: :status_changed_for_external_api?
+  after_commit :zip_and_upload_supporting_documents,
+               if: :should_enqueue_package_build?
   after_commit :reindex_permit_project, if: :saved_change_to_status?
   after_commit :broadcast_jurisdiction_count_update,
                if: :status_changed_to_intake?
@@ -224,6 +225,11 @@ class PermitApplication < ApplicationRecord
   def latest_submission_version
     submission_versions.order(created_at: :desc).first
   end
+
+  delegate :zipfile,
+           :zipfile_data,
+           to: :latest_submission_version,
+           allow_nil: true
 
   def earliest_submission_version
     submission_versions.order(created_at: :desc).last
@@ -512,9 +518,10 @@ class PermitApplication < ApplicationRecord
     NotificationService.publish_application_submission_event(self)
   end
 
-  def formatted_submission_data_for_external_use
+  def formatted_submission_data_for_external_use(submission_version: nil)
     ExternalPermitApplicationService.new(
-      self
+      self,
+      submission_version: submission_version
     ).formatted_submission_data_for_external_use
   end
 
@@ -526,6 +533,33 @@ class PermitApplication < ApplicationRecord
     return unless submitted?
 
     send_status_changed_webhook(resend_submission: true)
+  end
+
+  def mark_submission_packages_ready!
+    return [] unless zipfile_data.present?
+
+    newly_ready = []
+    submission_versions
+      .order(:created_at)
+      .each do |submission_version|
+        next if submission_version.package_ready_at.present?
+        next if submission_version.missing_pdfs?
+
+        submission_version.update!(package_ready_at: Time.current)
+        newly_ready << submission_version
+      end
+    newly_ready
+  end
+
+  def enqueue_package_ready_webhooks(submission_version)
+    jurisdiction
+      .active_external_api_keys
+      .where(sandbox_id: sandbox_id)
+      .where(api_version: "v2")
+      .where.not(webhook_url: [nil, ""])
+      .each do |external_api_key|
+        enqueue_v2_package_ready_webhook(external_api_key, submission_version)
+      end
   end
 
   def send_status_changed_webhook(resend_submission: false)
@@ -886,6 +920,10 @@ class PermitApplication < ApplicationRecord
     saved_change_to_status? && intake?
   end
 
+  def should_enqueue_package_build?
+    status_changed_to_intake? && submission_versions.exists?
+  end
+
   def status_changed_for_external_api?
     saved_change_to_status? && submitted_at_least_once?
   end
@@ -916,6 +954,24 @@ class PermitApplication < ApplicationRecord
     PermitWebhookJob.perform_async(
       external_api_key.id,
       Constants::Webhooks::Events::PermitApplication::STATUS_CHANGED,
+      payload
+    )
+  end
+
+  def enqueue_v2_package_ready_webhook(external_api_key, submission_version)
+    occurred_at = submission_version.package_ready_at || Time.current
+    payload = {
+      "permit_application_id" => id,
+      "permit_project_id" => permit_project_id,
+      "submission_version_id" => submission_version.id,
+      "number" => number,
+      "reference_number" => reference_number,
+      "occurred_at" => occurred_at.to_i * 1000
+    }
+
+    PermitWebhookJob.perform_async(
+      external_api_key.id,
+      Constants::Webhooks::Events::PermitApplication::PACKAGE_READY,
       payload
     )
   end

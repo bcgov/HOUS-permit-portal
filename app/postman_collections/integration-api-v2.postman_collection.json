@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "d76764f2-5509-4e1f-bcb6-8bf8821ebf57",
     "name": "Integration API V2",
-    "description": "Option B bidirectional contract. A V2 API key selected at key creation is required. The partner owns durable permit-package storage; BPH provides one-hour signed URLs and supports re-GET for refreshed URLs. Current status events are not package-completeness signals. Meeting requests remain in BPH and are outside External API V2. Partners write canonical application statuses and are authoritative; project-state write-back and manual-status conflict UX are deferred.",
+    "description": "Option B bidirectional contract. A V2 API key selected at key creation is required. The partner owns durable permit-package storage; BPH provides one-hour signed URLs and supports re-GET for refreshed URLs. Ingest on `permit_application_package_ready`, not on `permit_application_status_changed`. Meeting requests remain in BPH and are outside External API V2. Partners write canonical application statuses and are authoritative; project-state write-back and manual-status conflict UX are deferred.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -47,7 +47,29 @@
               "raw": "{{base_url}}/external_api/v2/permit_applications/{{permit_application_id}}",
               "host": ["{{base_url}}"],
               "path": ["external_api", "v2", "permit_applications", "{{permit_application_id}}"]
-            }
+            },
+            "description": "Slim application resource: identity, zip package fields (latest submission version), and submission version index. Does not include submission_data."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Submission Version by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/external_api/v2/permit_applications/{{permit_application_id}}/submission_versions/{{submission_version_id}}",
+              "host": ["{{base_url}}"],
+              "path": [
+                "external_api",
+                "v2",
+                "permit_applications",
+                "{{permit_application_id}}",
+                "submission_versions",
+                "{{submission_version_id}}"
+              ]
+            },
+            "description": "Frozen submission snapshot for one version, including form data, generated PDFs, and signed file URLs. Ingest after permit_application_package_ready. URLs expire in one hour; re-GET to refresh."
           },
           "response": []
         },
@@ -128,7 +150,7 @@
           "response": []
         }
       ],
-      "description": "V2 emits exactly one `permit_application_status_changed` event for each externally visible application status transition, including submission and resubmission. Payload: `{ permit_application_id, permit_project_id, submission_version_id, status, status_label, occurred_at }`. V2 also emits `permit_project_state_changed` with `{ permit_project_id, state, state_label, occurred_at }`. Project states: `draft` (Draft), `queued` (Queued), `waiting` (Waiting), `in_progress` (In progress), `ready` (Ready), `permit_issued` (Permit issued), `active` (Active), `complete` (Completed), `closed` (Closed). Timestamps are Unix epoch milliseconds. All bodies use the `{ event, payload }` envelope and `X-Webhook-Signature` HMAC-SHA256 header. In development, set the key webhook URL to `{{webhook_url}}`."
+      "description": "V2 emits `permit_application_status_changed` for each externally visible application status transition, including submission and resubmission. Payload: `{ permit_application_id, permit_project_id, submission_version_id, status, status_label, occurred_at }`. Durable ingest waits for `permit_application_package_ready` (`{ permit_application_id, permit_project_id, submission_version_id, number, reference_number, occurred_at }`), which fires once per submission version after generated PDFs exist and the application zip is rebuilt. V2 also emits `permit_project_state_changed` with `{ permit_project_id, state, state_label, occurred_at }`. Project states: `draft` (Draft), `queued` (Queued), `waiting` (Waiting), `in_progress` (In progress), `ready` (Ready), `permit_issued` (Permit issued), `active` (Active), `complete` (Completed), `closed` (Closed). Timestamps are Unix epoch milliseconds. All bodies use the `{ event, payload }` envelope and `X-Webhook-Signature` HMAC-SHA256 header. File URLs are not included in webhooks; fetch them after package_ready. In development, set the key webhook URL to `{{webhook_url}}`."
     }
   ],
   "auth": {
@@ -156,6 +178,10 @@
     },
     {
       "key": "permit_application_id",
+      "value": ""
+    },
+    {
+      "key": "submission_version_id",
       "value": ""
     },
     {
