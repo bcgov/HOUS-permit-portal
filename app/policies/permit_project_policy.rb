@@ -15,8 +15,9 @@ class PermitProjectPolicy < ApplicationPolicy
       values = { uid: user.id }
 
       if user.review_staff?
-        clauses << "permit_projects.jurisdiction_id IN (:jur_ids)"
+        clauses << "permit_projects.jurisdiction_id IN (:jur_ids) AND permit_projects.sandbox_id IS NOT DISTINCT FROM :sandbox_id"
         values[:jur_ids] = user.jurisdictions.pluck(:id)
+        values[:sandbox_id] = sandbox&.id
       end
 
       scope.where(clauses.map { |c| "(#{c})" }.join(" OR "), values).distinct
@@ -120,7 +121,8 @@ class PermitProjectPolicy < ApplicationPolicy
   end
 
   def user_is_review_staff_for_jurisdiction?
-    user&.review_staff? && user.member_of?(record.jurisdiction_id)
+    user&.review_staff? && user.member_of?(record.jurisdiction_id) &&
+      record.sandbox == sandbox
   end
 
   # user_context is still useful if you need to check policies of associated items for more granular permissions.

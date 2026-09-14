@@ -131,6 +131,26 @@
       ]
     },
     {
+      "name": "Permit projects",
+      "description": "Project GET follows `permit_project_id` from application reads and webhooks. Child summaries omit drafts and include `revisions_requested`. Meetings, collaborators, notes, and documents stay in BPH.",
+      "item": [
+        {
+          "name": "Get Permit Project by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/external_api/v2/permit_projects/{{permit_project_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["external_api", "v2", "permit_projects", "{{permit_project_id}}"]
+            },
+            "description": "Project identity, state, address, and sibling application summaries (id, number, status, status_label, tags)."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "Webhook events",
       "item": [
         {
@@ -182,6 +202,10 @@
     },
     {
       "key": "submission_version_id",
+      "value": ""
+    },
+    {
+      "key": "permit_project_id",
       "value": ""
     },
     {

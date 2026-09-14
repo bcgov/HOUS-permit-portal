@@ -99,6 +99,50 @@ RSpec.describe PermitProjectPolicy, type: :policy do
     end
   end
 
+  describe "review staff access" do
+    let(:jurisdiction) { create(:sub_district) }
+    let(:reviewer) { create(:user, :review_manager, jurisdiction:) }
+    let(:published_sandbox) { jurisdiction.sandboxes.published.first }
+
+    it "permits show and inbox actions for a live project when the request is live" do
+      record = create(:permit_project, jurisdiction:, sandbox: nil)
+      p = policy(reviewer, record)
+
+      expect(p.show?).to be true
+      expect(p.mark_as_viewed?).to be true
+      expect(p.mark_as_unviewed?).to be true
+      expect(p.assign_project_review_collaborator?).to be true
+      expect(p.download_notes_csv?).to be true
+    end
+
+    it "denies show and inbox actions when the project is in another sandbox" do
+      record =
+        create(:permit_project, jurisdiction:, sandbox: published_sandbox)
+      p = policy(reviewer, record)
+
+      expect(p.show?).to be false
+      expect(p.mark_as_viewed?).to be false
+      expect(p.mark_as_unviewed?).to be false
+      expect(p.assign_project_review_collaborator?).to be false
+      expect(p.download_notes_csv?).to be false
+    end
+
+    it "permits show for a sandboxed project when the request uses that sandbox" do
+      record =
+        create(:permit_project, jurisdiction:, sandbox: published_sandbox)
+      p =
+        policy_for(
+          described_class,
+          user: reviewer,
+          record:,
+          sandbox: published_sandbox
+        )
+
+      expect(p.show?).to be true
+      expect(p.mark_as_viewed?).to be true
+    end
+  end
+
   describe "Scope" do
     it "builds a where/distinct query for owner or collaborator (EXISTS subquery, no joins)" do
       relation = instance_double("ActiveRecord::Relation")
@@ -117,6 +161,33 @@ RSpec.describe PermitProjectPolicy, type: :policy do
       resolved =
         described_class::Scope.new(
           UserContext.new(owner, sandbox),
+          relation
+        ).resolve
+      expect(resolved).to eq(distinct_rel)
+    end
+
+    it "scopes review staff to their jurisdictions and the current sandbox" do
+      jurisdiction = create(:sub_district)
+      reviewer = create(:user, :review_manager, jurisdiction:)
+      published_sandbox = jurisdiction.sandboxes.published.first
+      relation = instance_double("ActiveRecord::Relation")
+      where_rel = instance_double("ActiveRecord::Relation")
+      distinct_rel = instance_double("ActiveRecord::Relation")
+
+      expect(relation).to receive(:where) do |sql, binds|
+        expect(sql).to include("permit_projects.jurisdiction_id IN (:jur_ids)")
+        expect(sql).to include(
+          "permit_projects.sandbox_id IS NOT DISTINCT FROM :sandbox_id"
+        )
+        expect(binds[:jur_ids]).to include(jurisdiction.id)
+        expect(binds[:sandbox_id]).to eq(published_sandbox.id)
+        where_rel
+      end
+      expect(where_rel).to receive(:distinct).and_return(distinct_rel)
+
+      resolved =
+        described_class::Scope.new(
+          UserContext.new(reviewer, published_sandbox),
           relation
         ).resolve
       expect(resolved).to eq(distinct_rel)

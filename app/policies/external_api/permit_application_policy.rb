@@ -1,7 +1,6 @@
 class ExternalApi::PermitApplicationPolicy < ExternalApi::ApplicationPolicy
   def index?
-    external_api_key.jurisdiction == record.jurisdiction && record.submitted? &&
-      record.sandbox == sandbox
+    same_jurisdiction_and_sandbox? && record.submitted?
   end
 
   def show?

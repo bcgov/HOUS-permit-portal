@@ -47,7 +47,9 @@ info:
     correctly to avoid any connectivity or data access issues.\n\n### Special considerations:\nApplication
     GET returns identity and a submission version index. Frozen
     form data, generated PDFs, and the version zip live on GET /permit_applications/{id}/submission_versions/{submission_version_id}.
-    raw_h2k_files are current step-code tool state, not snapshotted per version.\n\nFor
+    raw_h2k_files are current step-code tool state, not snapshotted per version.
+    GET /permit_projects/{id} returns project state, address, and sibling application
+    summaries (drafts omitted). Follow permit_project_id from application reads and webhooks.\n\nFor
     security purposes, any API response that
     includes a file URL will have a signed URL. These files will be available for
     download for a limited time (1 hour).\nDownload files when you receive `permit_application_package_ready`.
@@ -668,6 +670,43 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/ResponseError"
+  "/permit_projects/{id}":
+    get:
+      summary: Retrieves a permit project with sibling application summaries.
+      tags:
+      - Permit projects
+      parameters:
+      - name: id
+        in: path
+        description: Permit project ID
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    "$ref": "#/components/schemas/PermitProject"
+                required:
+                - data
+        '403':
+          description: Accessing a permit project for an unauthorized jurisdiction
+            or a draft-only project
+        '404':
+          description: Accessing a permit project which does not exist in this key's
+            sandbox
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ResponseError"
 servers:
 - url: "/external_api/v2"
   description: Current environment server
@@ -679,6 +718,9 @@ servers:
 tags:
 - name: Permit applications
   description: Submitted permit applications (scoped to API key jurisdiction)
+- name: Permit projects
+  description: Permit projects in the API key's jurisdiction and sandbox. Draft-only
+    projects are not readable.
 components:
   securitySchemes:
     Bearer:
@@ -774,6 +816,54 @@ components:
         `active` — Active
         `complete` — Completed
         `closed` — Closed
+    PermitApplicationSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        number:
+          type: string
+          nullable: true
+        status:
+          "$ref": "#/components/schemas/ApplicationStatus"
+        status_label:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+          description: Tags associated with the permit application's requirement template.
+    PermitProject:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        number:
+          type: string
+          nullable: true
+        title:
+          type: string
+        state:
+          "$ref": "#/components/schemas/ProjectState"
+        state_label:
+          type: string
+        full_address:
+          type: string
+          nullable: true
+        pid:
+          type: string
+          nullable: true
+        pin:
+          type: string
+          nullable: true
+        permit_applications:
+          type: array
+          items:
+            "$ref": "#/components/schemas/PermitApplicationSummary"
+          description: Sibling applications that have been submitted at least once.
+            Drafts are omitted; revisions_requested is included.
     PermitApplication:
       type: object
       properties:

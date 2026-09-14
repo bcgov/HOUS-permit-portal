@@ -225,6 +225,19 @@ class PermitApplicationBlueprint < Blueprinter::Base
                 name: :account_holder
   end
 
+  view :external_api_summary do
+    identifier :id
+    fields :number, :status
+
+    field :status_label do |pa, _options|
+      Constants::ExternalApi::APPLICATION_STATUS_LABELS.fetch(pa.status)
+    end
+
+    field :tags do |pa, _options|
+      pa.template_tag_list
+    end
+  end
+
   view :external_api_v2 do
     identifier :id
     fields :status,

@@ -97,7 +97,8 @@ tailor the API environment to better suit your development needs. Ensure that yo
 ### Special considerations:
 Application GET returns identity and a submission version index. Frozen form data, generated PDFs, and the version zip live on
 `GET /permit_applications/{id}/submission_versions/{submission_version_id}`. `raw_h2k_files` are current step-code tool
-state, not snapshotted per version.
+state, not snapshotted per version. `GET /permit_projects/{id}` returns project state, address, and sibling application
+summaries (drafts omitted). Follow `permit_project_id` from application reads and webhooks.
 
 For security purposes, any API response that includes a file URL will have a signed URL. These files will be available for download for a limited time (1 hour).
 Download files when you receive `permit_application_package_ready`. If a URL expires, call the API again to retrieve a
@@ -983,6 +984,82 @@ in this document.
       }
     }
   )
+  v2_spec[:components][:schemas].merge!(
+    PermitApplicationSummary: {
+      type: :object,
+      properties: {
+        id: {
+          type: :string,
+          format: :uuid
+        },
+        number: {
+          type: :string,
+          nullable: true
+        },
+        status: {
+          "$ref" => "#/components/schemas/ApplicationStatus"
+        },
+        status_label: {
+          type: :string
+        },
+        tags: {
+          type: :array,
+          items: {
+            type: :string
+          },
+          description:
+            "Tags associated with the permit application's requirement template."
+        }
+      }
+    },
+    PermitProject: {
+      type: :object,
+      properties: {
+        id: {
+          type: :string,
+          format: :uuid
+        },
+        number: {
+          type: :string,
+          nullable: true
+        },
+        title: {
+          type: :string
+        },
+        state: {
+          "$ref" => "#/components/schemas/ProjectState"
+        },
+        state_label: {
+          type: :string
+        },
+        full_address: {
+          type: :string,
+          nullable: true
+        },
+        pid: {
+          type: :string,
+          nullable: true
+        },
+        pin: {
+          type: :string,
+          nullable: true
+        },
+        permit_applications: {
+          type: :array,
+          items: {
+            "$ref" => "#/components/schemas/PermitApplicationSummary"
+          },
+          description:
+            "Sibling applications that have been submitted at least once. Drafts are omitted; revisions_requested is included."
+        }
+      }
+    }
+  )
+  v2_spec[:tags] << {
+    name: "Permit projects",
+    description:
+      "Permit projects in the API key's jurisdiction and sandbox. Draft-only projects are not readable."
+  }
   v2_spec[:components][:schemas].except!(:WebhookPayload)
 
   config.openapi_specs = {
