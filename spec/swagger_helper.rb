@@ -95,17 +95,20 @@ During your integration testing phase, you have the flexibility to use custom UR
 tailor the API environment to better suit your development needs. Ensure that your custom URLs are configured correctly to avoid any connectivity or data access issues.
 
 ### Special considerations:
-The submission data payload reflects the most recent submission. The complete application status and project state dictionaries are documented in
-the component schemas.
+Application GET returns identity and a submission version index. Frozen form data, generated PDFs, and the version zip live on
+`GET /permit_applications/{id}/submission_versions/{submission_version_id}`. `raw_h2k_files` are current step-code tool
+state, not snapshotted per version. `GET /permit_projects/{id}` returns project state, address, and sibling application
+summaries (drafts omitted). Follow `permit_project_id` from application reads and webhooks.
 
 For security purposes, any API response that includes a file URL will have a signed URL. These files will be available for download for a limited time (1 hour).
-We recommend downloading the file immediately upon receiving the URL to avoid any issues. If necessary, you can always call the API again to retrieve a
+Download files when you receive `permit_application_package_ready`. If a URL expires, call the API again to retrieve a
 new file URL.
 
 ### Option B CityWorks contract:
 The partner owns durable storage of the permit review package. Building Permit Hub supplies time-limited download URLs and supports re-fetching the
-application to refresh expired URLs. The `permit_application_status_changed` event does not guarantee package completeness; an explicit package-completeness
-signal will be introduced by the review-package foundation story before partners rely on an event as ready for durable ingestion.
+application or submission version to refresh expired URLs. Ingest on `permit_application_package_ready`, not on
+`permit_application_status_changed`. The status event only means the application status changed; generated PDFs and the
+application zip may still be incomplete.
 
 Meeting requests remain in Building Permit Hub and are outside the Option B v2 External API contract.
 
@@ -225,6 +228,32 @@ in this document.
                   schema: {
                     "$ref" =>
                       "#/components/schemas/PermitProjectStateChangedWebhook"
+                  }
+                }
+              }
+            },
+            responses: {
+              "200" => {
+                description:
+                  "The external integrator should return 200 to acknowledge receipt."
+              }
+            }
+          }
+        },
+        permit_application_package_ready: {
+          tags: ["Webhooks"],
+          post: {
+            parameters: [
+              { "$ref" => "#/components/parameters/WebhookSignature" }
+            ],
+            requestBody: {
+              description:
+                "Emitted once for each submission version after its generated PDFs exist and the application zip has been rebuilt. Payload is identifiers only; fetch signed file URLs from the version GET. Download immediately — URLs expire in one hour.",
+              content: {
+                "application/json" => {
+                  schema: {
+                    "$ref" =>
+                      "#/components/schemas/PermitApplicationPackageReadyWebhook"
                   }
                 }
               }
@@ -763,6 +792,138 @@ in this document.
                 }
               }
             }
+          },
+          PermitApplicationPackageReadyWebhook: {
+            type: :object,
+            required: %w[event payload],
+            properties: {
+              event: {
+                type: :string,
+                enum: %w[permit_application_package_ready]
+              },
+              payload: {
+                type: :object,
+                required: %w[
+                  permit_application_id
+                  permit_project_id
+                  submission_version_id
+                  number
+                  occurred_at
+                ],
+                properties: {
+                  permit_application_id: {
+                    type: :string,
+                    format: :uuid
+                  },
+                  permit_project_id: {
+                    type: %i[string null],
+                    format: :uuid
+                  },
+                  submission_version_id: {
+                    type: :string,
+                    format: :uuid
+                  },
+                  number: {
+                    type: :string,
+                    nullable: true
+                  },
+                  reference_number: {
+                    type: :string,
+                    nullable: true
+                  },
+                  occurred_at: {
+                    type: :integer,
+                    format: :int64,
+                    description:
+                      "Event timestamp in milliseconds since the Unix epoch."
+                  }
+                }
+              }
+            }
+          },
+          SubmissionVersionIndex: {
+            type: :object,
+            properties: {
+              id: {
+                type: :string,
+                format: :uuid
+              },
+              version_number: {
+                type: :integer
+              },
+              created_at: {
+                type: :number,
+                format: :int64,
+                description:
+                  "Datetime in milliseconds since the epoch (Unix time)."
+              },
+              package_ready_at: {
+                type: :number,
+                format: :int64,
+                description:
+                  "Datetime in milliseconds since the epoch (Unix time). Set when generated PDFs exist and the zip is rebuilt.",
+                nullable: true
+              }
+            }
+          },
+          SubmissionVersion: {
+            type: :object,
+            properties: {
+              id: {
+                type: :string,
+                format: :uuid
+              },
+              permit_application_id: {
+                type: :string,
+                format: :uuid
+              },
+              permit_project_id: {
+                type: %i[string null],
+                format: :uuid
+              },
+              version_number: {
+                type: :integer
+              },
+              created_at: {
+                type: :number,
+                format: :int64,
+                description:
+                  "Datetime in milliseconds since the epoch (Unix time)."
+              },
+              package_ready_at: {
+                type: :number,
+                format: :int64,
+                description:
+                  "Datetime in milliseconds since the epoch (Unix time). Set when generated PDFs exist and the zip is rebuilt.",
+                nullable: true
+              },
+              submission_data: {
+                "$ref" => "#/components/schemas/SubmissionData"
+              },
+              generated_documents: {
+                type: :array,
+                items: {
+                  "$ref" => "#/components/schemas/File"
+                }
+              },
+              zipfile: {
+                anyOf: [
+                  { "$ref" => "#/components/schemas/File" },
+                  { type: "null" }
+                ],
+                description:
+                  "Supporting-documents zip for this version. Present after package_ready; null on older versions that never received a zip. Signed URL expires after 1 hour."
+              },
+              raw_h2k_files: {
+                description:
+                  "Current step-code H2K files (not snapshotted per version). Signed URLs expire after 1 hour.",
+                type: :array,
+                items: {
+                  "$ref" => "#/components/schemas/File"
+                },
+                nullable: true
+              }
+            }
           }
         }
       },
@@ -789,7 +950,10 @@ in this document.
   v1_spec[:components][:schemas].except!(
     :PartnerWritableApplicationStatus,
     :PermitApplicationStatusChangedWebhook,
-    :PermitProjectStateChangedWebhook
+    :PermitProjectStateChangedWebhook,
+    :PermitApplicationPackageReadyWebhook,
+    :SubmissionVersionIndex,
+    :SubmissionVersion
   )
 
   v2_spec[:info][:title] = "Integration API V2"
@@ -798,10 +962,105 @@ in this document.
     server.merge(url: server[:url].sub("/external_api/v1", "/external_api/v2"))
   end
   v2_spec[:webhooks].select! do |event, _definition|
-    %i[permit_application_status_changed permit_project_state_changed].include?(
-      event
-    )
+    %i[
+      permit_application_status_changed
+      permit_project_state_changed
+      permit_application_package_ready
+    ].include?(event)
   end
+  v2_spec[:components][:schemas][:PermitApplication][:properties].except!(
+    :submission_data,
+    :raw_h2k_files
+  )
+  v2_spec[:components][:schemas][:PermitApplication][:properties].merge!(
+    permit_project_id: {
+      type: %i[string null],
+      format: :uuid
+    },
+    submission_versions: {
+      type: :array,
+      items: {
+        "$ref" => "#/components/schemas/SubmissionVersionIndex"
+      }
+    }
+  )
+  v2_spec[:components][:schemas].merge!(
+    PermitApplicationSummary: {
+      type: :object,
+      properties: {
+        id: {
+          type: :string,
+          format: :uuid
+        },
+        number: {
+          type: :string,
+          nullable: true
+        },
+        status: {
+          "$ref" => "#/components/schemas/ApplicationStatus"
+        },
+        status_label: {
+          type: :string
+        },
+        tags: {
+          type: :array,
+          items: {
+            type: :string
+          },
+          description:
+            "Tags associated with the permit application's requirement template."
+        }
+      }
+    },
+    PermitProject: {
+      type: :object,
+      properties: {
+        id: {
+          type: :string,
+          format: :uuid
+        },
+        number: {
+          type: :string,
+          nullable: true
+        },
+        title: {
+          type: :string
+        },
+        state: {
+          "$ref" => "#/components/schemas/ProjectState"
+        },
+        state_label: {
+          type: :string
+        },
+        full_address: {
+          type: :string,
+          nullable: true
+        },
+        pid: {
+          type: :string,
+          nullable: true
+        },
+        pin: {
+          type: :string,
+          nullable: true
+        },
+        permit_applications: {
+          type: :array,
+          items: {
+            "$ref" => "#/components/schemas/PermitApplicationSummary"
+          },
+          description:
+            "Sibling applications that have been submitted at least once. Drafts are omitted; revisions_requested is included."
+        }
+      }
+    }
+  )
+  v2_spec[:tags] << {
+    name: "Permit projects",
+    description:
+      "Permit projects in the API key's jurisdiction and sandbox. Draft-only projects are not readable."
+  }
+  v2_spec[:components][:schemas].except!(:WebhookPayload)
 
   config.openapi_specs = {
     "external_api/v1/swagger.yaml" => v1_spec,

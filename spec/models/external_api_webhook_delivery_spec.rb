@@ -125,6 +125,17 @@ RSpec.describe "External API webhook delivery", type: :model do
     )
   end
 
+  it "does not emit package_ready from the status webhook path" do
+    permit_application =
+      create(:permit_application, :newly_submitted, jurisdiction: jurisdiction)
+    PermitWebhookJob.clear
+    permit_application.send_status_changed_webhook
+
+    expect(PermitWebhookJob.jobs.map { |job| job["args"][1] }).not_to include(
+      Constants::Webhooks::Events::PermitApplication::PACKAGE_READY
+    )
+  end
+
   it "emits project state changes only to matching V2 keys" do
     permit_application =
       create(:permit_application, :newly_submitted, jurisdiction: jurisdiction)

@@ -8,6 +8,7 @@ module Constants
         PERMIT_SUBMITTED = "permit_submitted"
         PERMIT_RESUBMITTED = "permit_resubmitted"
         STATUS_CHANGED = "permit_application_status_changed"
+        PACKAGE_READY = "permit_application_package_ready"
       end
 
       module PermitProject

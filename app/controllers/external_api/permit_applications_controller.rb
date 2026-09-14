@@ -12,7 +12,7 @@ class ExternalApi::PermitApplicationsController < ExternalApi::ApplicationContro
                      meta: page_meta(@permit_application_search),
                      blueprint: PermitApplicationBlueprint,
                      blueprint_opts: {
-                       view: :external_api
+                       view: permit_application_blueprint_view
                      }
                    }
   end
@@ -97,9 +97,13 @@ class ExternalApi::PermitApplicationsController < ExternalApi::ApplicationContro
                    {
                      blueprint: PermitApplicationBlueprint,
                      blueprint_opts: {
-                       view: :external_api
+                       view: permit_application_blueprint_view
                      }
                    }
+  end
+
+  def permit_application_blueprint_view
+    :external_api
   end
 
   def render_status_error(message)

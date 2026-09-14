@@ -464,9 +464,13 @@ Rails.application.routes.draw do
       end
     end
     namespace :v2 do
+      resources :permit_projects, only: %i[show]
       resources :permit_applications, only: %i[show] do
         post "search", on: :collection, to: "permit_applications#index"
         patch "status", on: :member, to: "permit_applications#update_status"
+        get "submission_versions/:submission_version_id",
+            on: :member,
+            to: "permit_applications#show_submission_version"
         collection do
           resources :versions, as: "template_versions", only: [] do
             get "integration_mapping",
