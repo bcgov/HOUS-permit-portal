@@ -63,12 +63,8 @@ export const EmailFormControl = ({
                   *
                 </Text>
               )}
+              {!required && showOptional && ` ${t("ui.optional")}`}
             </FormLabel>
-            {!required && showOptional && (
-              <Text ml={-2} mb={1}>
-                {t("ui.optional")}
-              </Text>
-            )}
           </>
         )}
       </HStack>
