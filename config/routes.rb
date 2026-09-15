@@ -479,11 +479,33 @@ Rails.application.routes.draw do
         end
       end
     end
+    namespace :v2 do
+      resources :permit_projects, only: %i[show]
+      resources :revision_reasons, only: %i[index]
+      resources :permit_applications, only: %i[show] do
+        post "search", on: :collection, to: "permit_applications#index"
+        patch "status", on: :member, to: "permit_applications#update_status"
+        get "submission_versions/:submission_version_id",
+            on: :member,
+            to: "permit_applications#show_submission_version"
+        collection do
+          resources :versions, as: "template_versions", only: [] do
+            get "integration_mapping",
+                to: "permit_applications#show_integration_mapping"
+          end
+        end
+      end
+    end
   end
 
   # Webhook routes (outside API scope for external webhook access)
   namespace :webhooks do
     post "archistar", to: "archistar#receive"
+
+    if Rails.env.development?
+      get "dev", to: "dev#index"
+      post "dev", to: "dev#receive"
+    end
   end
 
   root to: "home#index"

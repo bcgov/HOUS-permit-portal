@@ -49,6 +49,8 @@ module PermitApplicationStatus
       %w[newly_submitted resubmitted in_review]
     end
 
+    scope :submitted_at_least_once, -> { where.not(status: :new_draft) }
+
     aasm column: "status", enum: true, timestamp: true do
       before_all_events :reject_if_discarded
 
@@ -253,8 +255,6 @@ module PermitApplicationStatus
             end
           )
       )
-
-      zip_and_upload_supporting_documents
 
       send_submit_notifications
     end

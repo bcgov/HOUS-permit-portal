@@ -15,7 +15,6 @@ class PermitApplication < ApplicationRecord
   include FormSupportingDocuments
   include AutomatedComplianceUtils
   include StepCodeFieldExtraction
-  include ZipfileUploader.Attachment(:zipfile)
   include PermitApplicationStatus
   include ProjectItem
   include Discard::Model
@@ -94,7 +93,10 @@ class PermitApplication < ApplicationRecord
   before_save :take_form_customizations_snapshot_if_submitted
 
   after_commit :reindex_jurisdiction_permit_application_size
-  after_commit :send_submitted_webhook, if: :saved_change_to_status?
+  after_commit :send_status_changed_webhook,
+               if: :status_changed_for_external_api?
+  after_commit :zip_and_upload_supporting_documents,
+               if: :should_enqueue_package_build?
   after_commit :reindex_permit_project, if: :saved_change_to_status?
   after_commit :broadcast_jurisdiction_count_update,
                if: :status_changed_to_intake?
@@ -223,6 +225,14 @@ class PermitApplication < ApplicationRecord
   def latest_submission_version
     submission_versions.order(created_at: :desc).first
   end
+
+  delegate :zipfile,
+           :zipfile_data,
+           :zipfile_size,
+           :zipfile_name,
+           :zipfile_url,
+           to: :latest_submission_version,
+           allow_nil: true
 
   def earliest_submission_version
     submission_versions.order(created_at: :desc).last
@@ -511,9 +521,10 @@ class PermitApplication < ApplicationRecord
     NotificationService.publish_application_submission_event(self)
   end
 
-  def formatted_submission_data_for_external_use
+  def formatted_submission_data_for_external_use(submission_version: nil)
     ExternalPermitApplicationService.new(
-      self
+      self,
+      submission_version: submission_version
     ).formatted_submission_data_for_external_use
   end
 
@@ -524,21 +535,49 @@ class PermitApplication < ApplicationRecord
   def send_submitted_webhook
     return unless submitted?
 
+    send_status_changed_webhook(resend_submission: true)
+  end
+
+  def mark_submission_packages_ready!
+    return [] unless zipfile_data.present?
+
+    newly_ready = []
+    submission_versions
+      .order(:created_at)
+      .each do |submission_version|
+        next if submission_version.package_ready_at.present?
+        next if submission_version.missing_pdfs?
+
+        submission_version.update!(package_ready_at: Time.current)
+        newly_ready << submission_version
+      end
+    newly_ready
+  end
+
+  def enqueue_package_ready_webhooks(submission_version)
     jurisdiction
       .active_external_api_keys
+      .where(sandbox_id: sandbox_id)
+      .where(api_version: "v2")
       .where.not(webhook_url: [nil, ""])
       .each do |external_api_key|
-        PermitWebhookJob.perform_async(
-          external_api_key.id,
-          (
-            if newly_submitted?
-              Constants::Webhooks::Events::PermitApplication::PERMIT_SUBMITTED
-            else
-              Constants::Webhooks::Events::PermitApplication::PERMIT_RESUBMITTED
-            end
-          ),
-          id
-        )
+        enqueue_v2_package_ready_webhook(external_api_key, submission_version)
+      end
+  end
+
+  def send_status_changed_webhook(resend_submission: false)
+    jurisdiction
+      .active_external_api_keys
+      .where(sandbox_id: sandbox_id)
+      .where.not(webhook_url: [nil, ""])
+      .each do |external_api_key|
+        if external_api_key.api_version == "v1"
+          next unless resend_submission || intake?
+
+          enqueue_v1_submission_webhook(external_api_key)
+        else
+          enqueue_v2_status_webhook(external_api_key)
+        end
       end
   end
 
@@ -884,6 +923,62 @@ class PermitApplication < ApplicationRecord
     saved_change_to_status? && intake?
   end
 
+  def should_enqueue_package_build?
+    status_changed_to_intake? && submission_versions.exists?
+  end
+
+  def status_changed_for_external_api?
+    saved_change_to_status? && submitted_at_least_once?
+  end
+
+  def enqueue_v1_submission_webhook(external_api_key)
+    event =
+      if resubmitted_at.present?
+        Constants::Webhooks::Events::PermitApplication::PERMIT_RESUBMITTED
+      else
+        Constants::Webhooks::Events::PermitApplication::PERMIT_SUBMITTED
+      end
+    payload = { "permit_id" => id, "submitted_at" => submitted_at&.as_json }
+
+    PermitWebhookJob.perform_async(external_api_key.id, event, payload)
+  end
+
+  def enqueue_v2_status_webhook(external_api_key)
+    payload = {
+      "permit_application_id" => id,
+      "permit_project_id" => permit_project_id,
+      "submission_version_id" => latest_submission_version&.id,
+      "status" => status,
+      "status_label" =>
+        Constants::ExternalApi::APPLICATION_STATUS_LABELS.fetch(status),
+      "occurred_at" => updated_at.to_i * 1000
+    }
+
+    PermitWebhookJob.perform_async(
+      external_api_key.id,
+      Constants::Webhooks::Events::PermitApplication::STATUS_CHANGED,
+      payload
+    )
+  end
+
+  def enqueue_v2_package_ready_webhook(external_api_key, submission_version)
+    occurred_at = submission_version.package_ready_at || Time.current
+    payload = {
+      "permit_application_id" => id,
+      "permit_project_id" => permit_project_id,
+      "submission_version_id" => submission_version.id,
+      "number" => number,
+      "reference_number" => reference_number,
+      "occurred_at" => occurred_at.to_i * 1000
+    }
+
+    PermitWebhookJob.perform_async(
+      external_api_key.id,
+      Constants::Webhooks::Events::PermitApplication::PACKAGE_READY,
+      payload
+    )
+  end
+
   def reindex_jurisdiction_permit_application_size
     return unless permit_project&.jurisdiction.present?
     unless new_record? || destroyed? || saved_change_to_permit_project_id?
@@ -947,7 +1042,7 @@ class PermitApplication < ApplicationRecord
   def submission_versions_match_status
     return if new_record?
 
-    sv_count = submission_versions.size
+    sv_count = submission_versions.count
 
     if new_draft? && sv_count > 0
       errors.add(:base, "Draft applications must not have submission versions")

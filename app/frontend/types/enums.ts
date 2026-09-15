@@ -118,6 +118,11 @@ export enum ExternalApiKeyStatus {
   notActive = "notActive",
 }
 
+export enum EExternalApiVersion {
+  v1 = "v1",
+  v2 = "v2",
+}
+
 export enum EUserRoles {
   submitter = "submitter",
   regionalReviewManager = "regional_review_manager",

@@ -43,6 +43,7 @@ class PermitProject < ApplicationRecord
   delegate :name, to: :owner, prefix: true
 
   after_commit :reindex
+  after_commit :send_state_changed_webhook, if: :state_changed_for_external_api?
   after_commit :broadcast_jurisdiction_projects_count_update,
                if: :should_broadcast_projects_count_update?
 
@@ -375,6 +376,34 @@ class PermitProject < ApplicationRecord
   end
 
   private
+
+  def send_state_changed_webhook
+    payload = {
+      "permit_project_id" => id,
+      "state" => state,
+      "state_label" =>
+        Constants::ExternalApi::PROJECT_STATE_LABELS.fetch(state),
+      "occurred_at" => updated_at.to_i * 1000
+    }
+
+    jurisdiction
+      .active_external_api_keys
+      .where(sandbox_id: sandbox_id)
+      .where(api_version: "v2")
+      .where.not(webhook_url: [nil, ""])
+      .each do |external_api_key|
+        PermitWebhookJob.perform_async(
+          external_api_key.id,
+          Constants::Webhooks::Events::PermitProject::STATE_CHANGED,
+          payload
+        )
+      end
+  end
+
+  def state_changed_for_external_api?
+    saved_change_to_state? &&
+      permit_applications.kept.submitted_at_least_once.exists?
+  end
 
   # Recompute the jurisdiction-wide unviewed projects badge whenever a change
   # could affect membership in the set counted by

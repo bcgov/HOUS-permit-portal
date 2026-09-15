@@ -3,6 +3,7 @@ import {
   EConditionalOperator,
   EConditionalThen,
   EDataValidationOperation,
+  EExternalApiVersion,
   ENumberUnit,
   ERequirementType,
   ETagType,
@@ -165,6 +166,7 @@ export interface ITagSearchParams {
 export interface IExternalApiKeyParams {
   name?: string
   connectingApplication?: string
+  apiVersion?: EExternalApiVersion
   webhookUrl?: string
   expiredAt?: Date
   jurisdictionId?: string
