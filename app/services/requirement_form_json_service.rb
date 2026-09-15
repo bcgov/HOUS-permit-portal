@@ -250,38 +250,37 @@ class RequirementFormJsonService
   end
 
   def to_form_json(requirement_block_key = requirement&.requirement_block&.key)
-    return nil unless requirement&.input_type.present?
+    return nil unless effective_input_type.present?
     json =
-      if requirement.input_type_general_contact? ||
-           requirement.input_type_professional_contact?
+      if input_type?(:general_contact) || input_type?(:professional_contact)
         get_contact_form_json(requirement_block_key)
-      elsif requirement.input_type_pid_info?
+      elsif input_type?(:pid_info)
         get_pid_info_components(requirement_block_key, requirement.required)
-      elsif requirement.input_type_multiply_sum_grid?
+      elsif input_type?(:multiply_sum_grid)
         get_multiply_sum_grid_form_json(requirement_block_key)
       else
         {
           id: requirement.id,
           key: requirement.key(requirement_block_key),
-          type: requirement.input_type,
-          requirementInputType: requirement.input_type,
+          type: effective_input_type,
+          requirementInputType: effective_input_type,
           input: true,
-          label: requirement.label,
+          label: effective_label,
           widget: {
             type: "input"
           }
         }.merge!(formio_type_options)
       end
 
-    json.merge!({ description: requirement.hint }) if requirement.hint
-    if requirement.instructions
-      json.merge!({ instructions: requirement.instructions })
+    json.merge!({ description: effective_hint }) if effective_hint
+    if effective_instructions
+      json.merge!({ instructions: effective_instructions })
     end
 
     json.merge!({ validate: { required: true } }) if requirement.required
 
-    if requirement.input_options["data_validation"].present?
-      data_validation = requirement.input_options["data_validation"]
+    if effective_input_options["data_validation"].present?
+      data_validation = effective_input_options["data_validation"]
       validate_json = json[:validate] || {}
 
       if data_validation["operation"] == "min"
@@ -327,20 +326,19 @@ class RequirementFormJsonService
     # assume all electives use a customConditional that defaults to false.  The customConditional works in tandem with the conditionals
     json.merge!({ elective: requirement.elective }) if requirement.elective
 
-    if requirement.input_type_select?
+    if input_type?(:select)
       json.merge!(
-        { data: { values: requirement.input_options["value_options"] } }
+        { data: { values: effective_input_options["value_options"] } }
       )
     end
 
-    if requirement.input_type_multi_option_select? ||
-         requirement.input_type_radio?
-      json.merge!({ values: requirement.input_options["value_options"] })
+    if input_type?(:multi_option_select) || input_type?(:radio)
+      json.merge!({ values: effective_input_options["value_options"] })
     end
 
     if requirement.computed_compliance?
       json.merge!(
-        { computedCompliance: requirement.input_options["computed_compliance"] }
+        { computedCompliance: effective_input_options["computed_compliance"] }
       )
 
       unless json[:tooltip].present?
@@ -350,21 +348,21 @@ class RequirementFormJsonService
       end
     end
 
-    if requirement.input_type.to_sym == :energy_step_code
+    if input_type?(:energy_step_code)
       json.merge!(
-        { energyStepCode: requirement.input_options["energy_step_code"] }
+        { energyStepCode: effective_input_options["energy_step_code"] }
       )
       # Inject the requirement key into the link below the primary button
       inject_step_code_existing_link!(json, "Part9StepCode", json[:key])
     end
 
-    if requirement.input_type.to_sym == :energy_step_code_part_3
+    if input_type?(:energy_step_code_part_3)
       # Inject the requirement key into the link below the primary button
       inject_step_code_existing_link!(json, "Part3StepCode", json[:key])
     end
 
-    if requirement.input_options["conditional"].present?
-      conditional = requirement.input_options["conditional"].clone
+    if effective_input_options["conditional"].present?
+      conditional = effective_input_options["conditional"].clone
       section = PermitApplication.section_from_key(requirement_block_key)
       component_path =
         if conditional["when"].present?
@@ -390,9 +388,9 @@ class RequirementFormJsonService
     end
 
     # indicates code-based conditionals.  Always merge elective show = false to end.
-    if requirement.input_options["customConditional"].present?
+    if effective_input_options["customConditional"].present?
       json.merge!(
-        { customConditional: requirement.input_options["customConditional"] }
+        { customConditional: effective_input_options["customConditional"] }
       )
     end
     if requirement.elective
@@ -406,18 +404,41 @@ class RequirementFormJsonService
 
   private
 
+  def effective_label
+    requirement.effective_label
+  end
+
+  def effective_hint
+    requirement.effective_hint
+  end
+
+  def effective_instructions
+    requirement.effective_instructions
+  end
+
+  def effective_input_type
+    requirement.effective_input_type
+  end
+
+  def effective_input_options
+    requirement.effective_input_options
+  end
+
+  def input_type?(type)
+    effective_input_type.to_s == type.to_s
+  end
+
   def get_contact_form_json(
     requirement_block_key = requirement&.requirement_block&.key
   )
-    unless requirement.input_type_general_contact? ||
-             requirement.input_type_professional_contact?
+    unless input_type?(:general_contact) || input_type?(:professional_contact)
       return {}
     end
 
-    if requirement.input_options["can_add_multiple_contacts"].blank?
+    if effective_input_options["can_add_multiple_contacts"].blank?
       return(
         get_contact_field_set_form_json(
-          "#{requirement.key(requirement_block_key)}|#{requirement.input_type}",
+          "#{requirement.key(requirement_block_key)}|#{effective_input_type}",
           false
         )
       )
@@ -479,14 +500,13 @@ class RequirementFormJsonService
   end
 
   def get_contact_field_set_form_json(key, is_multi)
-    unless requirement.input_type_general_contact? ||
-             requirement.input_type_professional_contact?
+    unless input_type?(:general_contact) || input_type?(:professional_contact)
       return {}
     end
 
     contact_components =
       (
-        if requirement.input_type_general_contact?
+        if input_type?(:general_contact)
           get_general_contact_field_components(key)
         else
           get_professional_contact_field_components(key)
@@ -494,11 +514,11 @@ class RequirementFormJsonService
       )
 
     form_json = {
-      legend: requirement.label,
+      legend: effective_label,
       key: key,
       type: "fieldset",
       custom_class: "contact-field-set",
-      label: requirement.label,
+      label: effective_label,
       hideLabel: true,
       input: false,
       tableView: false,
@@ -508,7 +528,7 @@ class RequirementFormJsonService
         )
     }
 
-    form_json[:id] = requirement.id if requirement.input_options[
+    form_json[:id] = requirement.id if effective_input_options[
       "can_add_multiple_contacts"
     ].blank?
 
@@ -601,14 +621,13 @@ class RequirementFormJsonService
   def get_multi_contact_datagrid_form_json(
     requirement_block_key = requirement&.requirement_block&.key
   )
-    unless requirement.input_type_general_contact? ||
-             requirement.input_type_professional_contact?
+    unless input_type?(:general_contact) || input_type?(:professional_contact)
       return {}
     end
 
     key = "#{requirement.key(requirement_block_key)}|multi_contact"
     {
-      label: requirement.label,
+      label: effective_label,
       id: requirement.id,
       reorder: false,
       addAnother: I18n.t("formio.requirement.contact.add_person_button"),
@@ -623,10 +642,7 @@ class RequirementFormJsonService
       type: "datagrid",
       input: false,
       components: [
-        get_contact_field_set_form_json(
-          "#{key}|#{requirement.input_type}",
-          true
-        )
+        get_contact_field_set_form_json("#{key}|#{effective_input_type}", true)
       ]
     }
   end
@@ -690,15 +706,15 @@ class RequirementFormJsonService
     requirement_block_key = requirement&.requirement_block&.key,
     required = false
   )
-    return {} unless requirement.input_type_pid_info?
+    return {} unless input_type?(:pid_info)
 
     key = "#{requirement.key(requirement_block_key)}|additional_pid_info"
     component = {
-      legend: requirement.label,
+      legend: effective_label,
       key: key,
       type: "fieldset",
       custom_class: "multi-field-set",
-      label: requirement.label,
+      label: effective_label,
       hideLabel: true,
       input: false,
       tableView: false,
@@ -712,7 +728,7 @@ class RequirementFormJsonService
               "PID",
               required,
               nil,
-              requirement.input_options["computed_compliance"]
+              effective_input_options["computed_compliance"]
             ),
             get_nested_info_component(
               :folio_number,
@@ -731,13 +747,13 @@ class RequirementFormJsonService
         )
       ]
     }
-    multi_data_grid_form_json(key, component, true, "Add #{requirement.label}")
+    multi_data_grid_form_json(key, component, true, "Add #{effective_label}")
   end
 
   def get_multiply_sum_grid_form_json(
     requirement_block_key = requirement&.requirement_block&.key
   )
-    return {} unless requirement.input_type_multiply_sum_grid?
+    return {} unless input_type?(:multiply_sum_grid)
 
     grid_key = "#{requirement.key(requirement_block_key)}|grid"
     total_key = "#{requirement.key(requirement_block_key)}|totalLoad"
@@ -747,7 +763,7 @@ class RequirementFormJsonService
 
     # Allow rows to be provided via input_options["rows"]. Each row should
     # be a hash with { name: String, : Number }.
-    configured_rows = requirement.input_options["rows"]
+    configured_rows = effective_input_options["rows"]
     # Do not force defaults; rows are fully configurable from the editor UI
     default_rows = []
     rows =
@@ -762,7 +778,7 @@ class RequirementFormJsonService
     datagrid_default_value =
       rows.map { |r| { "name" => r["name"], "a" => r["a"] } }
 
-    headers = requirement.input_options["headers"] || {}
+    headers = effective_input_options["headers"] || {}
     first_col_label = headers["first_column"].presence || "Item name"
     a_col_label = "#{headers["a"].presence} (A)"
     quantity_col_label = "#{headers["quantity"].presence} (B)"
@@ -789,7 +805,7 @@ class RequirementFormJsonService
     end
 
     datagrid_component = {
-      label: requirement.label,
+      label: effective_label,
       id: requirement.id,
       reorder: false,
       layoutFixed: false,
@@ -888,9 +904,9 @@ class RequirementFormJsonService
       id: requirement.id,
       key: requirement.key(requirement_block_key),
       type: "fieldset",
-      legend: requirement.label,
+      legend: effective_label,
       custom_class: "multiply-sum-grid",
-      label: requirement.label,
+      label: effective_label,
       hideLabel: true,
       input: false,
       tableView: false,
@@ -910,7 +926,7 @@ class RequirementFormJsonService
     addMoreText = I18n.t("formio.requirement.multi_grid.default_add")
   )
     {
-      label: requirement.label,
+      label: effective_label,
       id: requirement.id,
       reorder: false,
       addAnother: addMoreText,
@@ -929,10 +945,10 @@ class RequirementFormJsonService
   end
 
   def formio_type_options
-    return {} unless requirement.input_type.present?
+    return {} unless effective_input_type.present?
 
-    input_type = requirement.input_type
-    input_options = requirement.input_options
+    input_type = effective_input_type
+    input_options = effective_input_options
 
     if input_options["value_options"].is_a?(Array)
       input_options["value_options"].select! do |option|

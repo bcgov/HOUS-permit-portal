@@ -1,4 +1,4 @@
-import { Box, Flex, GridItem, Text, Tooltip } from "@chakra-ui/react"
+import { Box, Flex, Text, Tooltip } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -9,9 +9,6 @@ import { GridHeader } from "../../shared/grid/grid-header"
 import { RemoveConfirmationModal } from "../../shared/modals/remove-confirmation-modal"
 
 export const GridHeaders = observer(function GridHeaders() {
-  const { userStore } = useMst()
-  const { currentUser } = userStore
-
   const { t } = useTranslation()
   const columnHeaders: string[] = [
     t("externalApiKey.fieldLabels.name"),
@@ -25,28 +22,6 @@ export const GridHeaders = observer(function GridHeaders() {
 
   return (
     <Box display={"contents"} role={"rowgroup"}>
-      <Box display={"contents"} role={"row"}>
-        <GridItem
-          as={Flex}
-          gridColumn={"span 8"}
-          p={6}
-          bg={"greys.grey10"}
-          justifyContent={"space-between"}
-          align="center"
-        >
-          <Text role={"heading"}>{t("externalApiKey.index.table.heading")}</Text>
-
-          {currentUser.isManager && currentUser.jurisdiction.externalApiState === EJurisdictionExternalApiState.gOff ? (
-            <Tooltip label={t("externalApiKey.index.disabledTooltipLabel")}>
-              <Box>
-                <ExternalApiEnabledSwitchWithConfirmation />
-              </Box>
-            </Tooltip>
-          ) : (
-            <ExternalApiEnabledSwitchWithConfirmation />
-          )}
-        </GridItem>
-      </Box>
       <Box display={"contents"} role={"row"}>
         {columnHeaders.map((heading) => (
           <GridHeader key={heading} role={"columnheader"}>
@@ -67,6 +42,28 @@ export const GridHeaders = observer(function GridHeaders() {
         <GridHeader role={"columnheader"} />
       </Box>
     </Box>
+  )
+})
+
+export const ApiKeysTableToolbar = observer(function ApiKeysTableToolbar() {
+  const { userStore } = useMst()
+  const { currentUser } = userStore
+  const { t } = useTranslation()
+
+  return (
+    <Flex direction="column" align="flex-start" gap={4}>
+      <Text role="heading">{t("externalApiKey.index.table.heading")}</Text>
+
+      {currentUser.isManager && currentUser.jurisdiction.externalApiState === EJurisdictionExternalApiState.gOff ? (
+        <Tooltip label={t("externalApiKey.index.disabledTooltipLabel")}>
+          <Box>
+            <ExternalApiEnabledSwitchWithConfirmation />
+          </Box>
+        </Tooltip>
+      ) : (
+        <ExternalApiEnabledSwitchWithConfirmation />
+      )}
+    </Flex>
   )
 })
 

@@ -22,6 +22,8 @@ import { IPreCheck } from "../../models/pre-check"
 import { IProjectAudit } from "../../models/project-audit"
 import { IProjectMeeting } from "../../models/project-meeting"
 import { IReleaseNote } from "../../models/release-note-model"
+import { IRequirementBlock } from "../../models/requirement-block"
+import { IRequirementQuestion } from "../../models/requirement-question"
 import { IRequirementTemplate } from "../../models/requirement-template"
 import { ITemplateCategory } from "../../models/template-category"
 import { ITemplateVersion } from "../../models/template-version"
@@ -34,6 +36,7 @@ import {
   IIntegrationMappingUpdateParams,
   IPermitProjectUpdateParams,
   IRequirementBlockParams,
+  IRequirementQuestionParams,
   IRequirementTemplateUpdateParams,
   ITagSearchParams,
 } from "../../types/api-request"
@@ -50,6 +53,7 @@ import {
   IPageMeta,
   IProjectMeetingResponse,
   IRequirementBlockResponse,
+  IRequirementQuestionResponse,
   IRequirementTemplateResponse,
   IUsersResponse,
 } from "../../types/api-responses"
@@ -64,6 +68,7 @@ import {
   EPreCheckSortFields,
   EProjectAuditSortFields,
   EProjectMeetingSortFields,
+  EQuestionBankSortFields,
   EReleaseNoteSortFields,
   ERequirementLibrarySortFields,
   ERequirementTemplateSortFields,
@@ -335,6 +340,18 @@ export class Api {
 
   async fetchRequirementBlocks(params?: TSearchParams<ERequirementLibrarySortFields>) {
     return this.client.post<IRequirementBlockResponse>("/requirement_blocks/search", params)
+  }
+
+  async fetchRequirementBlock(id: string) {
+    return this.client.get<ApiResponse<IRequirementBlock>>(`/requirement_blocks/${id}`)
+  }
+
+  async fetchRequirementQuestions(params?: TSearchParams<EQuestionBankSortFields>) {
+    return this.client.post<IRequirementQuestionResponse>("/requirement_questions/search", params)
+  }
+
+  async fetchRequirementQuestion(id: string) {
+    return this.client.get<ApiResponse<IRequirementQuestion>>(`/requirement_questions/${id}`)
   }
 
   async fetchJurisdictionUsers(jurisdictionId, params?: TSearchParams<EUserSortFields>) {
@@ -613,6 +630,24 @@ export class Api {
     return this.client.post<IRequirementBlockResponse>(`/requirement_blocks`, { requirementBlock: params })
   }
 
+  async createRequirementQuestion(params: IRequirementQuestionParams) {
+    return this.client.post<IRequirementQuestionResponse>(`/requirement_questions`, { requirementQuestion: params })
+  }
+
+  async updateRequirementQuestion(id: string, params: IRequirementQuestionParams) {
+    return this.client.put<IRequirementQuestionResponse>(`/requirement_questions/${id}`, {
+      requirementQuestion: params,
+    })
+  }
+
+  async archiveRequirementQuestion(id: string) {
+    return this.client.delete<IRequirementQuestionResponse>(`/requirement_questions/${id}`)
+  }
+
+  async restoreRequirementQuestion(id: string) {
+    return this.client.post<IRequirementQuestionResponse>(`/requirement_questions/${id}/restore`)
+  }
+
   async updateRequirementBlock(id: string, params: Partial<IRequirementBlockParams>) {
     return this.client.put<IRequirementBlockResponse>(`/requirement_blocks/${id}`, { requirementBlock: params })
   }
@@ -799,8 +834,8 @@ export class Api {
     return this.client.post<IRequirementTemplateResponse>(`/requirement_templates/search`, params)
   }
 
-  async fetchRequirementTemplatesForFilter() {
-    return this.client.get<IApiResponse<{ id: string; nickname: string }[], {}>>(`/requirement_templates/for_filter`)
+  async fetchRequirementTemplatesForFilter(params?: { permitProjectId?: string; jurisdictionId?: string }) {
+    return this.client.get<IOptionResponse>(`/requirement_templates/for_filter`, params)
   }
 
   async fetchRequirementTemplate(id: string) {
@@ -841,9 +876,11 @@ export class Api {
     {
       requirementTemplate,
       versionDate,
+      changeNotes,
     }: {
       requirementTemplate?: IRequirementTemplateUpdateParams
       versionDate: string
+      changeNotes?: string
     }
   ) {
     const { tags, ...rest } = requirementTemplate ?? {}
@@ -855,16 +892,22 @@ export class Api {
     return this.client.post<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${templateId}/schedule`, {
       requirementTemplate: requirementTemplateParams,
       versionDate,
+      changeNotes,
     })
   }
 
-  async forcePublishRequirementTemplate(templateId: string, requirementTemplate: IRequirementTemplateUpdateParams) {
+  async forcePublishRequirementTemplate(
+    templateId: string,
+    requirementTemplate: IRequirementTemplateUpdateParams,
+    changeNotes?: string
+  ) {
     const { tags, ...rest } = requirementTemplate
     const requirementTemplateParams = tags ? { ...rest, tagList: tags } : rest
     return this.client.post<ApiResponse<IRequirementTemplate>>(
       `/requirement_templates/${templateId}/force_publish_now`,
       {
         requirementTemplate: requirementTemplateParams,
+        changeNotes,
       }
     )
   }
@@ -970,11 +1013,19 @@ export class Api {
 
   // ── Draft workflow API methods ──────────────────────────────────────
 
-  async createDraft(templateId: string, params?: { assigneeId?: string }) {
+  async createDraft(templateId: string, params?: { assigneeId?: string; changeNotes?: string }) {
     return this.client.post<ApiResponse<IRequirementTemplate>>(
       `/requirement_templates/${templateId}/create_draft`,
       params
     )
+  }
+
+  async validateRequirementTemplateConfig(templateId: string) {
+    return this.client.post<ApiResponse<unknown>>(`/requirement_templates/${templateId}/validate_config`)
+  }
+
+  async validateTemplateVersionConfig(templateVersionId: string) {
+    return this.client.post<ApiResponse<unknown>>(`/template_versions/${templateVersionId}/validate_config`)
   }
 
   async discardDraft(templateVersionId: string) {
@@ -998,6 +1049,17 @@ export class Api {
     return this.client.post<ApiResponse<IRequirementTemplate>>(
       `/template_versions/${templateVersionId}/promote_draft`,
       params
+    )
+  }
+
+  async restoreTemplateLayout(templateVersionId: string) {
+    return this.client.post<ApiResponse<IRequirementTemplate>>(`/template_versions/${templateVersionId}/restore_layout`)
+  }
+
+  async restoreRequirementBlockFromVersion(templateVersionId: string, requirementBlockId: string) {
+    return this.client.post<IRequirementBlockResponse>(
+      `/template_versions/${templateVersionId}/restore_requirement_block`,
+      { requirementBlockId }
     )
   }
 

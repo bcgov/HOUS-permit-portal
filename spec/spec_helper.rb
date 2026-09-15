@@ -107,6 +107,7 @@ RSpec.configure do |config|
     Jurisdiction.reindex
     PermitApplication.reindex
     RequirementBlock.reindex
+    RequirementQuestion.reindex
     RequirementTemplate.reindex
     User.reindex
     Contact.reindex

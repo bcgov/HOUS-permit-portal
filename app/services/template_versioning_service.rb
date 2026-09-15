@@ -31,7 +31,7 @@ class TemplateVersioningService
     raise TemplateVersionsPublishError, errors unless errors.empty?
   end
 
-  def self.schedule!(requirement_template, version_date)
+  def self.schedule!(requirement_template, version_date, change_notes: nil)
     if !is_valid_schedule_version_date?(requirement_template, version_date)
       raise TemplateVersionScheduleError.new(
               I18n.t(
@@ -52,8 +52,11 @@ class TemplateVersioningService
           form_requirement_blocks_hash(requirement_template),
         version_diff: diff_of_current_changes_and_last_version,
         version_date: version_date,
-        status: "scheduled"
+        status: "scheduled",
+        change_notes: change_notes.presence
       )
+
+    validate_config!(template_version)
 
     if !template_version.save
       raise TemplateVersionScheduleError.new(
@@ -86,7 +89,7 @@ class TemplateVersioningService
     template_version
   end
 
-  def self.force_publish_now!(requirement_template)
+  def self.force_publish_now!(requirement_template, change_notes: nil)
     unless ENV["ENABLE_TEMPLATE_FORCE_PUBLISH"] == "true"
       raise TemplateVersionForcePublishNowError.new(
               I18n.t(
@@ -109,8 +112,11 @@ class TemplateVersioningService
           form_requirement_blocks_hash(requirement_template),
         version_diff: diff_of_current_changes_and_last_version,
         version_date: version_date,
-        status: "scheduled"
+        status: "scheduled",
+        change_notes: change_notes.presence
       )
+
+    validate_config!(template_version)
 
     if !template_version.save
       raise TemplateVersionScheduleError.new(
@@ -134,7 +140,7 @@ class TemplateVersioningService
   # Creates a new draft TemplateVersion for a RequirementTemplate.
   # Snapshots the current template state (sections, blocks, form JSON)
   # so later builder edits do not change the early access version.
-  def self.create_draft!(requirement_template, assignee: nil)
+  def self.create_draft!(requirement_template, assignee: nil, change_notes: nil)
     template_version =
       requirement_template.template_versions.build(
         denormalized_template_json:
@@ -147,8 +153,11 @@ class TemplateVersioningService
           form_requirement_blocks_hash(requirement_template),
         version_date: Date.current,
         status: "draft",
-        assignee: assignee
+        assignee: assignee,
+        change_notes: change_notes.presence
       )
+
+    validate_config!(template_version)
 
     unless template_version.save
       raise TemplateVersionDraftError,
@@ -220,11 +229,13 @@ class TemplateVersioningService
             draft_version.requirement_blocks_json.deep_dup,
           status: "scheduled",
           version_date: version_date,
-          change_notes: change_notes,
+          change_notes: change_notes.presence,
           change_significance: change_significance
         )
 
       promoted_version.version_diff = compute_version_diff(promoted_version)
+
+      validate_config!(promoted_version)
 
       unless promoted_version.save
         raise TemplateVersionScheduleError.new(
@@ -301,6 +312,10 @@ class TemplateVersioningService
               "services.template_versioning_service.publish_before_schedule_date"
             )
     end
+
+    # Scheduled snapshots are validated when created. Recheck here so legacy
+    # or directly-modified versions cannot bypass the publication gate.
+    validate_config!(template_version)
 
     ActiveRecord::Base.transaction do
       # Populate version_diff before publishing (replaces the old TODO)
@@ -701,6 +716,27 @@ class TemplateVersioningService
     end
 
     requirement_blocks_json
+  end
+
+  # Dry-run validation against the live template's current sections/blocks —
+  # same snapshot shape as schedule! / create_draft!, without persisting a version.
+  def self.validate_requirement_template!(requirement_template)
+    TemplateVersionConfigValidator.new(
+      requirement_blocks_json:
+        form_requirement_blocks_hash(requirement_template),
+      denormalized_template_json:
+        RequirementTemplateBlueprint.render_as_hash(
+          requirement_template,
+          view: :template_snapshot
+        )
+    ).validate!
+  end
+
+  def self.validate_config!(template_version)
+    TemplateVersionConfigValidator.new(
+      requirement_blocks_json: template_version.requirement_blocks_json,
+      denormalized_template_json: template_version.denormalized_template_json
+    ).validate!
   end
 
   def self.is_valid_schedule_version_date?(requirement_template, version_date)

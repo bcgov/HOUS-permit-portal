@@ -9,10 +9,20 @@ interface IFetchOptions {
   countPerPage?: number
 }
 
+interface ICreateSearchModelOptions {
+  /** When false, search state stays in-memory only (e.g. nested drawers). Default true. */
+  syncUrl?: boolean
+}
+
 export const createSearchModel = <TSortField, TFetchOptions extends IFetchOptions = IFetchOptions>(
   fetchDataActionName: string,
-  setFiltersName?: string
+  setFiltersName?: string,
+  { syncUrl = true }: ICreateSearchModelOptions = {}
 ) => {
+  const syncParam = (key: string, value: string | string[] | undefined) => {
+    if (syncUrl) setQueryParam(key, value as string | string[])
+  }
+
   const model = types
     .model()
     .props({
@@ -30,7 +40,7 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
         self.currentPage = 1
         self.totalPages = null
         self.totalCount = null
-        setQueryParam("currentPage", "1")
+        syncParam("currentPage", "1")
       },
       setPageFields(metadata, opts?: { page?: number; countPerPage?: number }) {
         self.currentPage = opts?.page ?? metadata.currentPage ?? self.currentPage
@@ -39,19 +49,19 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
         self.countPerPage = opts?.countPerPage ?? metadata.perPage ?? self.countPerPage
       },
       setCountPerPage(countPerPage: number) {
-        setQueryParam("countPerPage", countPerPage.toString())
+        syncParam("countPerPage", countPerPage.toString())
         self.countPerPage = countPerPage
       },
       setCurrentPage(currentPage: number) {
-        setQueryParam("currentPage", currentPage.toString())
+        syncParam("currentPage", currentPage.toString())
         self.currentPage = currentPage
       },
       setQuery(query: string) {
-        setQueryParam("query", query)
+        syncParam("query", query)
         self.query = !!query?.trim() ? query : null
       },
       setShowArchived(bool) {
-        setQueryParam("showArchived", bool.toString())
+        syncParam("showArchived", bool.toString())
         self.showArchived = bool
       },
       fetchData: flow(function* (opts?: TFetchOptions) {
@@ -74,13 +84,13 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
         return yield self.fetchData({ reset: true, ...opts })
       }),
       applySort(sort: ISort<TSortField>) {
-        setQueryParam("sortDirection", sort.direction)
-        setQueryParam("sortField", sort.field as string)
+        syncParam("sortDirection", sort.direction)
+        syncParam("sortField", sort.field as string)
         self.sort = sort
       },
       clearSort() {
-        setQueryParam("sortField", undefined)
-        setQueryParam("sortDirection", undefined)
+        syncParam("sortField", undefined)
+        syncParam("sortDirection", undefined)
         self.sort = null
       },
     }))
@@ -105,13 +115,11 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
         self.setShowArchived(!self.showArchived)
       }),
       handlePageChange: flow(function* (page: number, opts?: TFetchOptions) {
-        setQueryParam("currentPage", page.toString())
-        self.currentPage = page
+        self.setCurrentPage(page)
         return yield self.fetchData({ page, ...opts })
       }),
       handleCountPerPageChange: flow(function* (countPerPage: number, opts?: TFetchOptions) {
-        setQueryParam("countPerPage", countPerPage.toString())
-        self.countPerPage = countPerPage
+        self.setCountPerPage(countPerPage)
         return yield self.fetchData({ countPerPage, ...opts })
       }),
       resetAll() {

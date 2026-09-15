@@ -26,6 +26,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
 
 const EditRequirementTemplateActions = observer(function EditRequirementTemplateActions({
   onCreateDraft,
+  onSaveAndValidate,
   ...publishScheduleProps
 }: IEditRequirementActionsProps) {
   const { t } = useTranslation()
@@ -68,6 +69,8 @@ const EditRequirementTemplateActions = observer(function EditRequirementTemplate
           {onCreateDraft && (
             <CreateEarlyAccessVersionModal
               onCreateEarlyAccessVersion={onCreateDraft}
+              onSaveAndValidate={onSaveAndValidate}
+              requirementTemplateId={publishScheduleProps.requirementTemplate?.id}
               renderTrigger={(onOpen) => (
                 <MenuItem onClick={onOpen}>{t("requirementTemplate.edit.earlyAccess")}</MenuItem>
               )}
@@ -75,6 +78,7 @@ const EditRequirementTemplateActions = observer(function EditRequirementTemplate
           )}
           <PublishScheduleModal
             {...publishScheduleProps}
+            onSaveAndValidate={onSaveAndValidate}
             hideManageAccessButton
             renderTrigger={(onOpen) => (
               <MenuItem onClick={onOpen}>{t("requirementTemplate.versionSidebar.listTitles.scheduled")}</MenuItem>

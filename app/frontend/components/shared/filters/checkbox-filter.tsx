@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   Checkbox,
   Divider,
@@ -16,11 +17,13 @@ import { CaretDown, MagnifyingGlass } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
-
-interface IOption {
-  value: string
-  label: string
-}
+import { IOption } from "../../../types/types"
+import {
+  filterGroupSelectionState,
+  groupFilterOptions,
+  shouldShowFilterGroupLabels,
+  toggleFilterGroupValues,
+} from "../../../utils/group-filter-options"
 
 interface IProps {
   value: string[]
@@ -38,6 +41,8 @@ export const CheckboxFilter = observer(function CheckboxFilter({ value, onChange
   const hasSelection = !!value && value.length > 0
 
   const filteredOptions = options.filter((option) => option.label?.toLowerCase().includes(searchTerm.toLowerCase()))
+  const groupedOptions = groupFilterOptions(filteredOptions, t("siteConfiguration.templateCategories.uncategorized"))
+  const showGroupLabels = shouldShowFilterGroupLabels(groupedOptions)
 
   const { getCheckboxProps } = useCheckboxGroup({
     value,
@@ -63,8 +68,15 @@ export const CheckboxFilter = observer(function CheckboxFilter({ value, onChange
       >
         {title}
       </MenuButton>
-      <MenuList p={4} zIndex="dropdown">
-        <VStack align="start" spacing={4}>
+      <MenuList
+        p={4}
+        zIndex="dropdown"
+        maxH="min(420px, calc(100vh - 96px))"
+        display="flex"
+        flexDirection="column"
+        overflow="hidden"
+      >
+        <VStack align="stretch" spacing={4} flex={1} minH={0} overflow="hidden">
           <InputGroup>
             <InputLeftElement pointerEvents="none">
               <MagnifyingGlass />
@@ -72,20 +84,45 @@ export const CheckboxFilter = observer(function CheckboxFilter({ value, onChange
             <Input placeholder={t("ui.search")} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
           </InputGroup>
           <Divider />
-          {filteredOptions.length === 0 ? (
-            <Text color="greys.grey01" fontSize="sm" px={2} w="full" textAlign="center">
-              {t("ui.noOptionsFound")}
-            </Text>
-          ) : (
-            filteredOptions.map((option) => {
-              const checkboxProps = getCheckboxProps({ value: option.value })
-              return (
-                <Checkbox key={option.value} {...checkboxProps}>
-                  {option.label}
-                </Checkbox>
-              )
-            })
-          )}
+          <Box overflowY="auto" minH={0} flex={1} w="full">
+            {filteredOptions.length === 0 ? (
+              <Text color="greys.grey01" fontSize="sm" px={2} w="full" textAlign="center">
+                {t("ui.noOptionsFound")}
+              </Text>
+            ) : (
+              <VStack align="stretch" spacing={4}>
+                {groupedOptions.map((group) => {
+                  const groupValues = group.options.map((option) => option.value)
+                  const selected = value ?? []
+                  const { isChecked, isIndeterminate } = filterGroupSelectionState(selected, groupValues)
+
+                  return (
+                    <VStack key={group.id} align="start" spacing={4} w="full">
+                      {showGroupLabels && (
+                        <Checkbox
+                          isChecked={isChecked}
+                          isIndeterminate={isIndeterminate}
+                          onChange={() => onChange(toggleFilterGroupValues(selected, groupValues))}
+                        >
+                          <Text fontSize="sm" fontWeight="bold" color="text.secondary">
+                            {group.label}
+                          </Text>
+                        </Checkbox>
+                      )}
+                      {group.options.map((option) => {
+                        const checkboxProps = getCheckboxProps({ value: option.value })
+                        return (
+                          <Checkbox key={option.value} pl={showGroupLabels ? 6 : 0} {...checkboxProps}>
+                            {option.label}
+                          </Checkbox>
+                        )
+                      })}
+                    </VStack>
+                  )
+                })}
+              </VStack>
+            )}
+          </Box>
           <Divider />
           <Button
             onClick={onReset}

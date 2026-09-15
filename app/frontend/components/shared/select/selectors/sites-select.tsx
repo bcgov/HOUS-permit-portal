@@ -87,6 +87,7 @@ export const SitesSelect = observer(function ({
   const jurisdictionErrorMessage = fieldArrayCompatibleErrorMessage(jurisdictionIdFieldName, formState.errors) as
     | string
     | undefined
+  const pidErrorMessage = fieldArrayCompatibleErrorMessage(pidName, formState.errors) as string | undefined
 
   const pidWatch = watch(pidName)
   const siteWatch = watch(siteName)
@@ -119,6 +120,10 @@ export const SitesSelect = observer(function ({
       fetchPids(option.value).then((pids: string[]) => {
         if (pids) {
           setPidOptions(pids.map((pid) => ({ value: pid, label: formatPidLabel(pid) })))
+          if (pids.length === 1) {
+            setValue(pidName, formatPidValue(pids[0]), { shouldValidate: true })
+            return
+          }
           const selectControl = pidSelectRef?.current?.controlRef
           if (selectControl && !R.isEmpty(pids)) {
             selectControl.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }))
@@ -246,7 +251,7 @@ export const SitesSelect = observer(function ({
           </InputGroup>
         </FormControl>
 
-        <FormControl>
+        <FormControl isInvalid={!!pidErrorMessage}>
           <FormLabel>{t("permitApplication.pidLabel")}</FormLabel>
           <InputGroup>
             <Flex w="full" direction="column">
@@ -254,10 +259,9 @@ export const SitesSelect = observer(function ({
                 name={pidName}
                 control={control}
                 rules={{
-                  required:
-                    pidRequired || pidOptions.length > 0
-                      ? String(t("ui.isRequired", { field: t("permitApplication.pidLabel") }))
-                      : false,
+                  required: pidRequired
+                    ? String(t("ui.isRequired", { field: t("permitApplication.pidLabel") }))
+                    : false,
                 }}
                 render={({ field: { onChange, value } }) => {
                   return (
@@ -270,9 +274,6 @@ export const SitesSelect = observer(function ({
                         value: formatPidValue(value),
                       }}
                       onChange={(option) => {
-                        if (!option) {
-                          setValue(siteName, null)
-                        }
                         onChange(formatPidValue(option?.value))
                       }}
                       onCreateOption={(inputValue: string) => {
@@ -296,6 +297,7 @@ export const SitesSelect = observer(function ({
                   )
                 }}
               />
+              {pidErrorMessage && <FormErrorMessage>{pidErrorMessage}</FormErrorMessage>}
             </Flex>
           </InputGroup>
         </FormControl>

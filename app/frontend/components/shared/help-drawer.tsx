@@ -57,7 +57,7 @@ export function HelpDrawer({ defaultButtonProps, renderTriggerButton }: IProps) 
       )}
       <Drawer isOpen={isOpen} onClose={onClose} finalFocusRef={btnRef} placement={"right"}>
         <DrawerOverlay />
-        <DrawerContent display={"flex"} flexDir={"column"} h={"full"} maxW={"430px"}>
+        <DrawerContent display={"flex"} flexDir={"column"} h={"full"} maxW={"430px"} pt="var(--app-navbar-offset)">
           <DrawerCloseButton fontSize={"xs"} />
           <DrawerHeader display={"flex"} alignItems={"center"} p={6} pt={10} fontSize={"2xl"}>
             {t("ui.help")}

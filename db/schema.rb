@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_08_21_190000) do
+ActiveRecord::Schema[7.2].define(version: 2026_09_04_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -898,7 +898,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_21_190000) do
     t.jsonb "input_options", default: {}, null: false
     t.string "hint"
     t.text "instructions"
-    t.boolean "shared", default: false, null: false
     t.string "name"
     t.text "description"
     t.datetime "discarded_at"
@@ -906,7 +905,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_21_190000) do
     t.datetime "updated_at", null: false
     t.index ["discarded_at"], name: "index_requirement_questions_on_discarded_at"
     t.index ["requirement_code"], name: "index_requirement_questions_on_requirement_code"
-    t.index ["shared"], name: "index_requirement_questions_on_shared"
   end
 
   create_table "requirement_template_sections", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -978,6 +976,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_21_190000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.datetime "last_reminder_sent_at"
+    t.boolean "show_on_about", default: true, null: false
+    t.integer "about_position"
+    t.index ["jurisdiction_id", "about_position"], name: "index_resources_on_jurisdiction_id_and_about_position"
     t.index ["jurisdiction_id", "category"], name: "index_resources_on_jurisdiction_id_and_category"
     t.index ["jurisdiction_id"], name: "index_resources_on_jurisdiction_id"
     t.index ["last_reminder_sent_at"], name: "index_resources_on_last_reminder_sent_at"

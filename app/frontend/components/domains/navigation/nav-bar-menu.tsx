@@ -90,6 +90,10 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
     onClose()
   }, [location.pathname])
 
+  const closeOnLinkClick = (event: React.MouseEvent) => {
+    if ((event.target as HTMLElement).closest("a[href]")) onClose()
+  }
+
   // Close menu when clicking outside (including the navbar above the drawer)
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -124,13 +128,13 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
         />
         <StaticLinkItem
           label={t("site.navMenu.projectReadiness.stepCodes.label")}
-          to="/project-readiness-tools/look-up-step-codes-requirements-for-your-project"
+          to="/project-readiness-tools/look-up-step-codes-requirements"
           description={t("site.navMenu.projectReadiness.stepCodes.description")}
         />
         {siteConfigurationStore.codeComplianceEnabled && (
           <StaticLinkItem
             label={t("site.navMenu.projectReadiness.bcBuildingCode.label")}
-            to="/pre-checks"
+            to="/project-readiness-tools/pre-check"
             description={t("site.navMenu.projectReadiness.bcBuildingCode.description")}
           />
         )}
@@ -142,7 +146,7 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
   const aboutColumn = (
     <VStack align="flex-start" spacing={4} w="full">
       <MenuSection title={t("site.navMenu.sections.about")}>
-        <StaticLinkItem label={t("site.navMenu.about.aboutHub.label")} to="/welcome" />
+        <StaticLinkItem label={t("site.navMenu.about.aboutHub.label")} to="/about" />
         <StaticLinkItem
           label={t("site.navMenu.about.participatingCommunities.label")}
           to="/jurisdictions"
@@ -240,7 +244,7 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
           flexDirection="column"
           h="auto"
         >
-          <DrawerBody flex="1" minH={0} overflow="auto">
+          <DrawerBody flex="1" minH={0} overflow="auto" onClick={closeOnLinkClick}>
             <MenuCloseProvider value={onClose}>
               <Container maxW="container.lg" px={8}>
                 <Grid templateColumns={{ base: "1fr", md: "3fr 3fr 2fr" }} gap={8} py={5}>

@@ -15,7 +15,7 @@ import { CaretLeft } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { Link as RouterLink, useNavigate, useParams, useSearchParams } from "react-router-dom"
+import { Navigate, Link as RouterLink, useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { usePermitProject } from "../../../hooks/resources/use-permit-project"
 import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus } from "../../../types/enums"
@@ -46,6 +46,9 @@ export const ProjectMeetingRequestScreen = observer(function ProjectMeetingReque
 
   if (projectError || createError) return <ErrorScreen />
   if (!projectIsLoaded) return <LoadingScreen />
+  if (currentPermitProject.activeProjectMeeting) {
+    return <Navigate to={`/projects/${permitProjectId}/meetings`} replace />
+  }
   if (!permitProjectId || !projectMeetingsAvailable) {
     return <ErrorScreen error={new Error(t("projectMeeting.validation.featureUnavailable"))} />
   }

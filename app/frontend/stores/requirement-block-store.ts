@@ -6,7 +6,7 @@ import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IRequirementBlock, RequirementBlockModel } from "../models/requirement-block"
 import { IRequirementTemplate } from "../models/requirement-template"
-import { IRequirementBlockParams } from "../types/api-request"
+import { IRequirementAttributes, IRequirementBlockParams } from "../types/api-request"
 import {
   EAutoComplianceModule,
   EAutoComplianceType,
@@ -147,6 +147,17 @@ export const RequirementBlockStoreModel = types
 
       return response.ok
     }),
+    fetchRequirementBlock: flow(function* (id: string) {
+      const existing = self.getRequirementBlockById(id)
+      if (existing) return existing
+
+      const response = yield* toGenerator(self.environment.api.fetchRequirementBlock(id))
+      if (response.ok) {
+        self.requirementBlockMap.put(response.data.data)
+        return self.getRequirementBlockById(id)
+      }
+      return undefined
+    }),
     searchAssociations: flow(function* (query: string) {
       const response = yield* toGenerator(
         self.environment.api.searchTags({
@@ -182,8 +193,12 @@ export const RequirementBlockStoreModel = types
       const clonedParams: IRequirementBlockParams = {
         ...copyableRequirementsAttributes,
         requirementsAttributes: requirementBlock.requirements?.map((attr) => {
-          const { id, ...rest } = attr
-          return rest
+          const { id, requirementQuestionId, ...rest } = attr
+          // Keep the bank link on copy; local (detached) fields omit the FK.
+          if (requirementQuestionId) {
+            return { ...rest, requirementQuestionId } as unknown as IRequirementAttributes
+          }
+          return rest as unknown as IRequirementAttributes
         }),
         name: requirementBlock.name,
         replaceBlockId: requirementBlock.id,
