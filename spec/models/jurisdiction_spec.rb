@@ -490,7 +490,7 @@ RSpec.describe Jurisdiction, type: :model do
       jurisdiction.audits.where("audited_changes ? 'inbox_enabled'").count
     }.by(1)
   end
-    
+
   describe "resources nested attributes" do
     it "updates show_on_about and about_position" do
       jurisdiction = create(:sub_district)

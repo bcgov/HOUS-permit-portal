@@ -23,17 +23,19 @@ RSpec.describe Contact, type: :model do
 
   describe "extension" do
     it "clears extension when phone is blank" do
-      contact = Contact.new(email: "test@example.com", phone: "", extension: "123")
+      contact =
+        Contact.new(email: "test@example.com", phone: "", extension: "123")
       contact.valid?
       expect(contact.extension).to be_blank
     end
 
     it "keeps extension when phone is present" do
-      contact = Contact.new(
-        email: "test@example.com",
-        phone: "604-456-7890",
-        extension: "123"
-      )
+      contact =
+        Contact.new(
+          email: "test@example.com",
+          phone: "604-456-7890",
+          extension: "123"
+        )
       contact.valid?
       expect(contact.extension).to eq("123")
     end

@@ -436,8 +436,7 @@ RSpec.describe Api::RequirementTemplatesController,
     end
 
     it "returns category grouping fields ordered by category" do
-      building =
-        create(:template_category, label: "Building", sort_order: 0)
+      building = create(:template_category, label: "Building", sort_order: 0)
       trades = create(:template_category, label: "Trades", sort_order: 1)
       inbox_template.update!(template_category: building)
 
@@ -472,7 +471,7 @@ RSpec.describe Api::RequirementTemplatesController,
       )
       expect(
         json_response["data"].map { |option| option["group_label"] }
-      ).to eq(["Building", "Trades"])
+      ).to eq(%w[Building Trades])
     end
 
     it "denies review staff from another jurisdiction" do

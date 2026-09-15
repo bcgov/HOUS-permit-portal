@@ -128,9 +128,7 @@ export const QuestionsTable = observer(function QuestionsTable({
                         label={question.label}
                         helperText={question.hint}
                         inputOptions={question.inputOptions}
-                        options={question.inputOptions?.valueOptions?.map(
-                          (option: { label: string }) => option.label
-                        )}
+                        options={question.inputOptions?.valueOptions?.map((option: { label: string }) => option.label)}
                         required
                       />
                     </Box>
@@ -198,12 +196,7 @@ export const QuestionsTable = observer(function QuestionsTable({
                 </SearchGridItem>
                 <SearchGridItem justifyContent={"center"} minW="85px" flexShrink={0}>
                   {isPicker ? (
-                    <Button
-                      size="sm"
-                      variant="primary"
-                      isDisabled={isAlreadyLinked}
-                      onClick={() => onUse?.(question)}
-                    >
+                    <Button size="sm" variant="primary" isDisabled={isAlreadyLinked} onClick={() => onUse?.(question)}>
                       {t("ui.use")}
                     </Button>
                   ) : (
