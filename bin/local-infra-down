@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -euo pipefail
+source "$(dirname "$0")/local-infra-common"
+exec "${compose[@]}" down --remove-orphans "$@"

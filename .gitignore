@@ -67,3 +67,6 @@ deleteme.*
 .npm/
 
 .cursor/
+
+# Host database configuration template
+!/config/database.yml.local

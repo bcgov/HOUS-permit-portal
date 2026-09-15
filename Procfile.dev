@@ -1,5 +1,4 @@
-
-vite: bin/vite dev
-web: bin/rails s
-anycable: bundle exec anycable
-ws: bin/anycable-go --port=8080
+web: bundle exec rails server -b 127.0.0.1 -p 3000
+vite: VITE_RUBY_HOST=127.0.0.1 VITE_RUBY_PORT=3036 bin/vite dev
+worker: bundle exec sidekiq
+rpc: ANYCABLE_RPC_HOST=0.0.0.0:50051 bundle exec anycable
