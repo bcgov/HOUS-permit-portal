@@ -12,7 +12,8 @@ class ExternalApi::PermitApplicationPolicy < ExternalApi::ApplicationPolicy
   end
 
   def update_status?
-    index?
+    same_jurisdiction_and_sandbox? &&
+      (record.submitted? || record.revisions_requested?)
   end
 
   def show_integration_mapping?

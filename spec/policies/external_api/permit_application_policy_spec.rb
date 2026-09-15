@@ -36,12 +36,24 @@ RSpec.describe ExternalApi::PermitApplicationPolicy, type: :policy do
       expect(policy(record).update_status?).to be true
     end
 
-    it "denies drafts and revisions_requested" do
+    it "denies drafts and revisions_requested for reads" do
       %i[new_draft revisions_requested].each do |status|
         record = create_application(status:)
         expect(policy(record).index?).to be(false), status.to_s
-        expect(policy(record).update_status?).to be(false), status.to_s
+        expect(policy(record).show?).to be(false), status.to_s
       end
+    end
+
+    it "allows update_status? on revisions_requested so partner retries are idempotent" do
+      record = create_application(status: :revisions_requested)
+
+      expect(policy(record).update_status?).to be true
+    end
+
+    it "denies update_status? on drafts" do
+      record = create_application(status: :new_draft)
+
+      expect(policy(record).update_status?).to be false
     end
 
     it "denies when jurisdiction differs" do

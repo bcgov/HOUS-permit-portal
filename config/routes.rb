@@ -465,6 +465,7 @@ Rails.application.routes.draw do
     end
     namespace :v2 do
       resources :permit_projects, only: %i[show]
+      resources :revision_reasons, only: %i[index]
       resources :permit_applications, only: %i[show] do
         post "search", on: :collection, to: "permit_applications#index"
         patch "status", on: :member, to: "permit_applications#update_status"
