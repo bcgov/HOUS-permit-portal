@@ -37,29 +37,47 @@ class ExternalApi::PermitApplicationsController < ExternalApi::ApplicationContro
       )
     end
 
+    if target_status != "revisions_requested" && params.key?(:revision_requests)
+      return(
+        render_status_error(
+          "revision_requests is only accepted when status is 'revisions_requested'."
+        )
+      )
+    end
+
     @permit_application.with_lock do
       if @permit_application.status == target_status
         return render_permit_application
-      end
-
-      event = PermitApplicationStatus::STATUS_EVENT_MAP[target_status]
-      unless event && @permit_application.aasm.may_fire_event?(event)
-        return(
-          render_status_error(
-            "Cannot transition status from '#{@permit_application.status}' to '#{target_status}'. Allowed partner status codes: #{partner_writable_statuses}."
-          )
-        )
       end
 
       @permit_application.inbox_sort_order = nil
       Audited
         .audit_class
         .as_user(Constants::ExternalApi::PARTNER_SYSTEM_ACTOR) do
-          @permit_application.public_send(:"#{event}!")
+          if target_status == "revisions_requested"
+            ExternalApi::ApplyRevisionRequests.new(
+              @permit_application,
+              params[:revision_requests]
+            ).call
+            @permit_application.finalize_revision_requests!
+          else
+            event = PermitApplicationStatus::STATUS_EVENT_MAP[target_status]
+            unless event && @permit_application.aasm.may_fire_event?(event)
+              return(
+                render_status_error(
+                  "Cannot transition status from '#{@permit_application.status}' to '#{target_status}'. Allowed partner status codes: #{partner_writable_statuses}."
+                )
+              )
+            end
+
+            @permit_application.public_send(:"#{event}!")
+          end
         end
     end
 
     render_permit_application
+  rescue ExternalApi::ApplyRevisionRequests::Error => e
+    render_status_error(e.message)
   rescue AASM::InvalidTransition, ActiveRecord::RecordInvalid
     render_status_error(
       "Cannot transition status to '#{target_status}'. Allowed partner status codes: #{partner_writable_statuses}."

@@ -8,7 +8,7 @@
   "item": [
     {
       "name": "Permit applications",
-      "description": "Application statuses: `new_draft` (Draft), `newly_submitted` (Submitted), `in_review` (In review), `revisions_requested` (Revisions requested), `resubmitted` (Resubmitted), `approved` (Approved), `issued` (Issued), `withdrawn` (Withdrawn). Partner-writable statuses: `in_review`, `approved`, `issued`, `withdrawn`.",
+      "description": "Application statuses: `new_draft` (Draft), `newly_submitted` (Submitted), `in_review` (In review), `revisions_requested` (Revisions requested), `resubmitted` (Resubmitted), `approved` (Approved), `issued` (Issued), `withdrawn` (Withdrawn). Partner-writable statuses: `in_review`, `approved`, `issued`, `withdrawn`, `revisions_requested`.",
       "item": [
         {
           "name": "Search Permit Applications",
@@ -104,7 +104,42 @@
                 "status"
               ]
             },
-            "description": "Uses canonical BPH status codes. Lifecycle transitions are enforced and repeated writes of the current status are idempotent. Invalid, reserved, or unavailable transitions return 422 with the allowed write set."
+            "description": "Uses canonical BPH status codes. Lifecycle transitions are enforced and repeated writes of the current status are idempotent. For `revisions_requested`, send a non-empty `revision_requests` array of field-level items (`requirement_block_code`, `requirement_code`, `reason_code`, `comment`) copied from the submission version payload. `revision_requests` must be omitted for every other status. Invalid, reserved, or unavailable transitions return 422 with the allowed write set."
+          },
+          "response": []
+        },
+        {
+          "name": "Request Revisions",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"revisions_requested\",\n  \"revision_requests\": [\n    {\n      \"requirement_block_code\": \"all_input_types_demo_example\",\n      \"requirement_code\": \"demo_text\",\n      \"reason_code\": \"inaccurate_documentation\",\n      \"comment\": \"Does not match civic record\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/external_api/v2/permit_applications/{{permit_application_id}}/status",
+              "host": ["{{base_url}}"],
+              "path": [
+                "external_api",
+                "v2",
+                "permit_applications",
+                "{{permit_application_id}}",
+                "status"
+              ]
+            },
+            "description": "One-call revision request: creates field-level revision requests on the latest submission version and moves the application to `revisions_requested`, notifying the submitter. Target fields with `requirement_block_code` + `requirement_code` from GET submission version. Reason codes come from GET /revision_reasons."
           },
           "response": []
         },
@@ -145,6 +180,26 @@
               "path": ["external_api", "v2", "permit_projects", "{{permit_project_id}}"]
             },
             "description": "Project identity, state, address, and sibling application summaries (id, number, status, status_label, tags)."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Revision reasons",
+      "description": "Site-configured revision reason codes. The list is dynamic; do not hard-code a static enum.",
+      "item": [
+        {
+          "name": "List Revision Reasons",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/external_api/v2/revision_reasons",
+              "host": ["{{base_url}}"],
+              "path": ["external_api", "v2", "revision_reasons"]
+            },
+            "description": "Kept (non-discarded) reason codes accepted on revision_requests."
           },
           "response": []
         }

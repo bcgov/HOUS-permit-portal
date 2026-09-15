@@ -550,7 +550,8 @@ paths:
   "/permit_applications/{id}/status":
     patch:
       summary: Updates a submitted permit application's status using a canonical Building
-        Permit Hub code.
+        Permit Hub code. For `revisions_requested`, include field-level `revision_requests`
+        copied from the submission version payload (`requirement_block_code` + `requirement_code`).
       tags:
       - Permit applications
       parameters:
@@ -572,6 +573,12 @@ paths:
               properties:
                 status:
                   "$ref": "#/components/schemas/PartnerWritableApplicationStatus"
+                revision_requests:
+                  type: array
+                  items:
+                    "$ref": "#/components/schemas/RevisionRequestItem"
+                  description: Required and non-empty when status is `revisions_requested`.
+                    Must be omitted for every other status.
       responses:
         '200':
           description: Status updated
@@ -670,6 +677,31 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/ResponseError"
+  "/revision_reasons":
+    get:
+      summary: Lists the current site-configured revision reason codes.
+      tags:
+      - Revision reasons
+      responses:
+        '200':
+          description: Successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      "$ref": "#/components/schemas/RevisionReason"
+                required:
+                - data
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ResponseError"
   "/permit_projects/{id}":
     get:
       summary: Retrieves a permit project with sibling application summaries.
@@ -721,6 +753,9 @@ tags:
 - name: Permit projects
   description: Permit projects in the API key's jurisdiction and sandbox. Draft-only
     projects are not readable.
+- name: Revision reasons
+  description: Site-configured revision reason codes accepted on partner revision
+    requests. The list is dynamic.
 components:
   securitySchemes:
     Bearer:
@@ -781,9 +816,11 @@ components:
       - approved
       - issued
       - withdrawn
-      description: Statuses accepted by the partner write-back endpoint. Submission,
-        resubmission, and revision-request statuses remain owned by their dedicated
-        Building Permit Hub workflows.
+      - revisions_requested
+      description: Statuses accepted by the partner write-back endpoint. `revisions_requested`
+        requires a non-empty `revision_requests` array of field-level items (`requirement_block_code`,
+        `requirement_code`, `reason_code`, `comment`). Submission and resubmission
+        statuses remain owned by Building Permit Hub workflows.
     ProjectState:
       type: string
       enum:
@@ -1409,6 +1446,43 @@ components:
           items:
             "$ref": "#/components/schemas/File"
           nullable: true
+    RevisionReason:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        reason_code:
+          type: string
+        description:
+          type: string
+      required:
+      - id
+      - reason_code
+      - description
+    RevisionRequestItem:
+      type: object
+      required:
+      - requirement_block_code
+      - requirement_code
+      - reason_code
+      - comment
+      properties:
+        requirement_block_code:
+          type: string
+          description: Requirement block SKU from submission_data on GET submission
+            version.
+        requirement_code:
+          type: string
+          description: Field code unique within that block, from the same submission_data
+            payload.
+        reason_code:
+          type: string
+          description: A currently active code from GET /revision_reasons. The list
+            is site-configured and not a fixed enum.
+        comment:
+          type: string
+          maxLength: 350
 formats:
 - json
 - yaml

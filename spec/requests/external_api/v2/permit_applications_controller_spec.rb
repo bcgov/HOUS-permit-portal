@@ -38,10 +38,11 @@ RSpec.describe "External API v2 permit applications", type: :request do
   def update_status(
     status,
     application: permit_application,
-    headers: auth_headers
+    headers: auth_headers,
+    **extra
   )
     patch "/external_api/v2/permit_applications/#{application.id}/status",
-          params: { status: status }.to_json,
+          params: { status: status, **extra }.to_json,
           headers: headers
   end
 
@@ -242,12 +243,12 @@ RSpec.describe "External API v2 permit applications", type: :request do
   end
 
   it "rejects BPH-owned and unknown statuses with the frozen write set" do
-    %w[newly_submitted revisions_requested not_a_status].each do |status|
+    %w[newly_submitted not_a_status].each do |status|
       update_status(status)
 
       expect(response).to have_http_status(:unprocessable_content)
       expect(JSON.parse(response.body).dig("meta", "message")).to include(
-        "in_review, approved, issued, withdrawn"
+        "in_review, approved, issued, withdrawn, revisions_requested"
       )
     end
     expect(permit_application.reload).to be_newly_submitted
@@ -284,5 +285,162 @@ RSpec.describe "External API v2 permit applications", type: :request do
 
     expect(response).to have_http_status(:not_found)
     expect(sandbox_application.reload).to be_newly_submitted
+  end
+
+  describe "requesting revisions via PATCH /status" do
+    let(:block_id) { "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa" }
+    let(:requirement_id) { "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb" }
+    let(:block_code) { "site_information" }
+    let(:requirement_code) { "site_address" }
+    let(:form_key) do
+      "formSubmissionDataRSTsection1|RB#{block_id}|#{requirement_code}"
+    end
+    let!(:revision_reason) do
+      RevisionReason.find_or_create_by!(
+        reason_code: "inaccurate_documentation"
+      ) do |reason|
+        reason.site_configuration = SiteConfiguration.instance
+        reason.description = "Inaccurate documentation"
+      end
+    end
+    let(:revision_item) do
+      {
+        requirement_block_code: block_code,
+        requirement_code: requirement_code,
+        reason_code: revision_reason.reason_code,
+        comment: "Does not match civic record"
+      }
+    end
+
+    before do
+      permit_application.template_version.update!(
+        requirement_blocks_json: {
+          block_id => {
+            "id" => block_id,
+            "sku" => block_code,
+            "name" => "Site information",
+            "requirements" => [
+              {
+                "id" => requirement_id,
+                "requirement_code" => requirement_code,
+                "label" => "Site address",
+                "form_json" => {
+                  "id" => requirement_id,
+                  "key" => form_key,
+                  "label" => "Site address",
+                  "type" => "simpletextfield"
+                }
+              }
+            ]
+          }
+        }
+      )
+      permit_application.latest_submission_version.update!(
+        submission_data: {
+          "data" => {
+            "s1" => {
+              form_key => "123 Main St"
+            }
+          }
+        }
+      )
+    end
+
+    it "creates field-level requests, finalizes, and notifies" do
+      expect(NotificationService).to receive(
+        :publish_application_revisions_request_event
+      ).and_call_original
+
+      update_status("revisions_requested", revision_requests: [revision_item])
+
+      expect(response).to have_http_status(:ok)
+      permit_application.reload
+      expect(permit_application).to be_revisions_requested
+      expect(permit_application.revisions_requested_at).to be_present
+      expect(JSON.parse(response.body).dig("data", "status")).to eq(
+        "revisions_requested"
+      )
+
+      requests = permit_application.latest_submission_version.revision_requests
+      expect(requests.count).to eq(1)
+      request = requests.first
+      expect(request.reason_code).to eq(revision_reason.reason_code)
+      expect(request.comment).to eq("Does not match civic record")
+      expect(request.user_id).to be_nil
+      expect(request.requirement_json["key"]).to eq(form_key)
+      expect(request.submission_data).to eq(
+        { "data" => { form_key => "123 Main St" } }
+      )
+    end
+
+    it "treats a repeated write of revisions_requested as an idempotent success" do
+      update_status("revisions_requested", revision_requests: [revision_item])
+      expect(response).to have_http_status(:ok)
+      request_id =
+        permit_application.latest_submission_version.revision_requests.first.id
+
+      update_status(
+        "revisions_requested",
+        revision_requests: [revision_item.merge(comment: "Changed")]
+      )
+
+      expect(response).to have_http_status(:ok)
+      expect(permit_application.reload).to be_revisions_requested
+      expect(
+        permit_application
+          .latest_submission_version
+          .revision_requests
+          .reload
+          .ids
+      ).to eq([request_id])
+    end
+
+    it "rejects revisions_requested without items" do
+      update_status("revisions_requested")
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(JSON.parse(response.body).dig("meta", "message")).to include(
+        "revision_requests must be a non-empty array"
+      )
+      expect(permit_application.reload).to be_newly_submitted
+    end
+
+    it "rejects revision_requests on a non-revision status write" do
+      update_status("in_review", revision_requests: [revision_item])
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(JSON.parse(response.body).dig("meta", "message")).to include(
+        "revision_requests is only accepted when status is 'revisions_requested'"
+      )
+      expect(permit_application.reload).to be_newly_submitted
+    end
+
+    it "rejects an unknown requirement code" do
+      update_status(
+        "revisions_requested",
+        revision_requests: [
+          revision_item.merge(requirement_code: "not_a_field")
+        ]
+      )
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(JSON.parse(response.body).dig("meta", "message")).to include(
+        "Unknown requirement_code 'not_a_field'"
+      )
+      expect(permit_application.reload).to be_newly_submitted
+    end
+
+    it "rejects revisions from a status that cannot request them" do
+      permit_application.start_review!
+      permit_application.approve!
+
+      update_status("revisions_requested", revision_requests: [revision_item])
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(JSON.parse(response.body).dig("meta", "message")).to include(
+        "Cannot transition status from 'approved' to 'revisions_requested'"
+      )
+      expect(permit_application.reload).to be_approved
+    end
   end
 end

@@ -18,6 +18,7 @@ module Constants
       approved
       issued
       withdrawn
+      revisions_requested
     ].freeze
 
     PROJECT_STATE_LABELS = {

@@ -312,7 +312,7 @@ in this document.
             type: :string,
             enum: Constants::ExternalApi::PARTNER_WRITABLE_APPLICATION_STATUSES,
             description:
-              "Statuses accepted by the partner write-back endpoint. Submission, resubmission, and revision-request statuses remain owned by their dedicated Building Permit Hub workflows."
+              "Statuses accepted by the partner write-back endpoint. `revisions_requested` requires a non-empty `revision_requests` array of field-level items (`requirement_block_code`, `requirement_code`, `reason_code`, `comment`). Submission and resubmission statuses remain owned by Building Permit Hub workflows."
           },
           ProjectState: {
             :type => :string,
@@ -1053,12 +1053,58 @@ in this document.
             "Sibling applications that have been submitted at least once. Drafts are omitted; revisions_requested is included."
         }
       }
+    },
+    RevisionReason: {
+      type: :object,
+      properties: {
+        id: {
+          type: :string,
+          format: :uuid
+        },
+        reason_code: {
+          type: :string
+        },
+        description: {
+          type: :string
+        }
+      },
+      required: %w[id reason_code description]
+    },
+    RevisionRequestItem: {
+      type: :object,
+      required: %w[requirement_block_code requirement_code reason_code comment],
+      properties: {
+        requirement_block_code: {
+          type: :string,
+          description:
+            "Requirement block SKU from submission_data on GET submission version."
+        },
+        requirement_code: {
+          type: :string,
+          description:
+            "Field code unique within that block, from the same submission_data payload."
+        },
+        reason_code: {
+          type: :string,
+          description:
+            "A currently active code from GET /revision_reasons. The list is site-configured and not a fixed enum."
+        },
+        comment: {
+          type: :string,
+          maxLength: 350
+        }
+      }
     }
   )
   v2_spec[:tags] << {
     name: "Permit projects",
     description:
       "Permit projects in the API key's jurisdiction and sandbox. Draft-only projects are not readable."
+  }
+  v2_spec[:tags] << {
+    name: "Revision reasons",
+    description:
+      "Site-configured revision reason codes accepted on partner revision requests. The list is dynamic."
   }
   v2_spec[:components][:schemas].except!(:WebhookPayload)
 
