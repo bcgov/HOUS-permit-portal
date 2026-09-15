@@ -364,6 +364,7 @@ GEM
     net-smtp (0.5.1)
       net-protocol
     nio4r (2.7.5)
+    nkf (0.2.0)
     nokogiri (1.19.4-aarch64-linux-gnu)
       racc (~> 1.4)
     nokogiri (1.19.4-arm64-darwin)
@@ -752,6 +753,7 @@ DEPENDENCIES
   json-jwt (>= 1.16.6)
   kaminari (~> 1.2.2)
   letter_opener (~> 1.8)
+  nkf (~> 0.2)
   nokogiri (>= 1.18.9)
   observer (~> 0.1)
   omniauth-keycloak (= 1.5.2)
@@ -800,7 +802,7 @@ DEPENDENCIES
   web-console
 
 RUBY VERSION
-   ruby 4.0.6p0
+  ruby 4.0.6p0
 
 BUNDLED WITH
-   2.5.22
+  4.0.20

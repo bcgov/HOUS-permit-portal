@@ -129,6 +129,7 @@ group :development do
   gem "syntax_tree-haml", "~> 4.0"
   gem "syntax_tree-rbs", "~> 1.0"
   gem "letter_opener", "~> 1.8"
+  gem "nkf", "~> 0.2" # letter_opener requires kconv, extracted from Ruby stdlib.
   gem "rails-erd", "~> 1.5"
   gem "rubocop", "~> 1.67", require: false
   gem "rubocop-rails", "~> 2.26", require: false

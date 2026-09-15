@@ -1,6 +1,6 @@
 # Ruby 4 / Debian Trixie upgrade (HUB-5580)
 
-Ruby moves from 3.2.5 to 4.0.6. Both application Dockerfiles use the verified `ruby:4.0.6-trixie` image. Node remains 24.21.0 and Bundler remains 2.5.22. All 13 Rails gems remain locked to 7.2.3.2; AnyCable and Rails configuration defaults are unchanged. Production retains jemalloc and YJIT.
+Ruby moves from 3.2.5 to 4.0.6. Both application Dockerfiles use the verified `ruby:4.0.6-trixie` image. Node remains 24.21.0. The original upgrade used Bundler 2.5.22; the lockfile now selects 4.0.20 to avoid duplicate platform-constant warnings with Ruby 4. All 13 Rails gems remain locked to 7.2.3.2; AnyCable and Rails configuration defaults are unchanged. Production retains jemalloc and YJIT.
 
 The development image uses Trixie's `libgdk-pixbuf-2.0-0` package name. The old `libgdk-pixbuf2.0-0` name failed package installation. The production build also grants read/traverse access to installed gems for the non-root Rails user. The locked `colored2` archive contains mode-0640 Ruby files, reproduced in the old Ruby 3.2 installation as well; without this build fix, production boot fails with LoadError. The gem version and application container structure are preserved.
 
@@ -41,7 +41,7 @@ Validation was performed on Apple Silicon with Ruby 4.0.6, using fresh Ruby 4 na
 - AnyCable: RPC startup and a gRPC connection request reach the application's authentication code, returning its existing missing-token error. This is not an authenticated websocket end-to-end test.
 - RuboCop without autocorrection: baseline 963 offenses in 956 files; Ruby 4 target 966. Four new block/argument forwarding suggestions in the existing `lib/multi_logger.rb` become applicable with TargetRubyVersion 4.0; one existing block-alignment offense in `app/blueprints/permit_project_blueprint.rb` disappears under the Ruby 4 parser. No unrelated style rewriting was performed.
 - Syntax Tree formatter (`stree check`, no rewriting): both interpreters report only the same existing formatting issue in `spec/models/contact_spec.rb`. This comparison was run against unchanged tracked Ruby source after the runtime edits.
-- Bundler 2.5.22 installation and resolution work. It emits duplicate Gem::Platform constant warnings with Ruby 4's RubyGems; warnings have not been suppressed.
+- Original validation used Bundler 2.5.22, which emitted duplicate Gem::Platform constant warnings with Ruby 4's RubyGems. The subsequent lockfile update to Bundler 4.0.20 addresses these warnings without suppressing them.
 
 Application review covered removed APIs, keyword/block forwarding, implicit standard-library loading, exception/backtrace handling, JSON/YAML serialization, HTTP wrappers and job payloads. No application source or test assertion changes were needed. Automated service tests use the existing stubs/VCR recordings; they do not establish live external-service compatibility.
 
@@ -56,7 +56,7 @@ An intermediate run with the final dependencies produced 1,068 failures after Do
 - The production web process returns HTTP 200 from `/up`. The production AnyCable process starts with gRPC 1.78.1 and responds to a real RPC connection request through the application's authentication code.
 - Temporary PostgreSQL, Redis, Redis Sentinel, web and RPC containers were used for these checks. They are separate from the application's existing local services.
 
-Reproduce builds with `docker build --platform linux/arm64 -f devops/docker/app/Dockerfile.dev .` and `docker build --platform linux/amd64 -f devops/docker/app/Dockerfile .`. Run the suite with `RAILS_ENV=test bundle _2.5.22_ exec rspec`. The local build tags are `hub-5580-ruby4:dev-arm64` and `hub-5580-ruby4:prod-amd64`.
+The development image above records historical upgrade validation. Local development now uses host Ruby/Node and `bin/local-infra-up`; see the README. Reproduce production builds with `docker build --platform linux/amd64 -f devops/docker/app/Dockerfile .`. Run the suite with `RAILS_ENV=test bundle exec rspec`. The local build tags are `hub-5580-ruby4:dev-arm64` and `hub-5580-ruby4:prod-amd64`.
 
 ## Staging acceptance and rollout
 
