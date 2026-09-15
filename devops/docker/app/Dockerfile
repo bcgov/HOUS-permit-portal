@@ -1,5 +1,5 @@
 # Make sure RUBY_VERSION matches the Ruby version in .ruby-version and Gemfile
-ARG RUBY_VERSION=3.2.5-bullseye
+ARG RUBY_VERSION=3.2.5-bookworm
 FROM docker.io/library/ruby:$RUBY_VERSION
 
 # Rails app lives here
@@ -15,7 +15,7 @@ ENV RAILS_ENV="production" \
 
 # Install packages needed for both building and running the application
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential curl git libpq-dev libvips node-gyp pkg-config python libjemalloc2 postgresql-client libproj-dev libgeos-dev proj-bin netcat && \
+    apt-get install --no-install-recommends -y build-essential curl git libpq-dev libvips node-gyp pkg-config python3 libjemalloc2 postgresql-client libproj-dev libgeos-dev proj-bin netcat-openbsd && \
     rm -rf /var/lib/apt/lists/*
 
 # Use jemalloc to improve memory management

@@ -171,6 +171,19 @@ RSpec.describe FileUploadAttachment, type: :model do
       expect(document.file_available?).to eq(true)
       expect(document.file_url_safe).to be_nil
     end
+
+    it "passes disposition through to file_url" do
+      document.update_columns(
+        scan_status: "clean",
+        file_data: { "id" => SecureRandom.uuid, "metadata" => {} }.to_json
+      )
+      allow(document).to receive(:file_url).and_return("https://example.com/file")
+
+      expect(document.file_url_safe(disposition: "inline")).to eq(
+        "https://example.com/file"
+      )
+      expect(document).to have_received(:file_url).with(disposition: "inline")
+    end
   end
 
   describe "#upload_failed_notification_data" do
