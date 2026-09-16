@@ -404,7 +404,7 @@ en:
           label: "Excluded zipfile bytes"
           help: "Shrine size of permit application submission zipfiles. Excluded from the total because those zipfiles bundle supporting documents already counted."
       notes:
-        zipfiles: "Submission zipfiles (permit_applications.zipfile_data) are excluded from the total. They bundle supporting documents at submit, so including them would count those bytes twice. Their combined Shrine size is the excluded-zipfile figure."
+        zipfiles: "Submission zipfiles (submission_versions.zipfile_data) are excluded from the total. They bundle supporting documents at submit, so including them would count those bytes twice. Their combined Shrine size is the excluded-zipfile figure."
         discarded: "Documents attached to discarded permit applications, discarded projects, or discarded Step Codes are excluded. Requirement-block documents on discarded requirement blocks are excluded."
         billed: "Sizes come from Shrine file_data metadata size (uploaded bytes). That is not what the storage backend bills: orphans, packing, and provider overhead are excluded."
         sandbox: "Sandbox (non-live) projects are excluded."
