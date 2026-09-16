@@ -85,9 +85,13 @@ RSpec.describe RequirementTemplateStructureRestoreService do
       end
 
       restored_first_tsb =
-        restored.first.template_section_blocks.find_by(
-          requirement_block_id: first_block_id
-        )
+        restored
+          .filter_map do |section|
+            section.template_section_blocks.find_by(
+              requirement_block_id: first_block_id
+            )
+          end
+          .first
       expect(restored_first_tsb.conditional).to eq(conditional)
     end
 
