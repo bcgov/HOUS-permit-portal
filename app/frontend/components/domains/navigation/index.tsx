@@ -6,6 +6,7 @@ import { BrowserRouter, Route, Routes, useLocation, useNavigate } from "react-ro
 import useSyncPathWithStore from "../../../hooks/use-sync-path-with-root-store"
 import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus } from "../../../types/enums"
+import { shouldTrackMatomoSpaPageview, trackMatomoSpaPageview } from "../../../utils/matomo"
 import { isSafeAppPath } from "../../../utils/utility-functions"
 import { FlashMessage } from "../../shared/base/flash-message"
 import { LoadingScreen } from "../../shared/base/loading-screen"
@@ -514,6 +515,7 @@ export const Navigation = observer(() => {
 
   return (
     <BrowserRouter>
+      <MatomoSpaPageviews />
       <Box pos="relative" w="full">
         <Box pos="absolute" top={0} zIndex="toast" w="full">
           <FlashMessage />
@@ -538,6 +540,18 @@ export const Navigation = observer(() => {
       )}
     </BrowserRouter>
   )
+})
+
+const MatomoSpaPageviews = observer(function MatomoSpaPageviews() {
+  const { pathname } = useLocation()
+  const { isValidating, loggedIn } = useMst().sessionStore
+
+  useEffect(() => {
+    if (!shouldTrackMatomoSpaPageview(pathname, { isValidating, loggedIn })) return
+    trackMatomoSpaPageview(pathname)
+  }, [pathname, isValidating, loggedIn])
+
+  return null
 })
 
 const AppRoutes = observer(() => {
