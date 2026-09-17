@@ -14,7 +14,6 @@ export const ChecklistSideBar = observer(({ permitApplication, completedBlocks }
   const { formJson } = permitApplication
   const { selectedTabIndex, setSelectedTabIndex, getBlockClass } = permitApplication
 
-  const navHeight = document.getElementById("mainNav")?.offsetHeight
   const permitHeaderHeight = document.getElementById("permitHeader")?.offsetHeight ?? 0
 
   // completedBlocks is keyed by live Form.io panel keys (hidden panels omitted once the form is ready).
@@ -49,7 +48,7 @@ export const ChecklistSideBar = observer(({ permitApplication, completedBlocks }
       >
         <Box overflowY="auto">
           <Tabs orientation="vertical" index={selectedTabIndex} w="full">
-            <TabList w="full" border={0} py="4" pb={navHeight}>
+            <TabList w="full" border={0} py="4" pb="var(--app-navbar-height)">
               {formJson.components.map((section) => {
                 const visibleBlocks = (section?.components || []).filter(
                   (block) => !visibilityReady || block.key in completedBlocks

@@ -6,7 +6,7 @@ import React from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { useLocation } from "react-router-dom"
 import { PopoverProvider, useNotificationPopover } from "../../../hooks/use-notification-popover"
-import { useScrollAwareNavBar } from "../../../hooks/use-scroll-aware-nav-bar"
+import { APP_NAV_CHROME_ID, useScrollAwareNavBar } from "../../../hooks/use-scroll-aware-nav-bar"
 import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
 import { INotification, IPermitNotificationObjectData } from "../../../types/types"
@@ -173,12 +173,8 @@ const NavBarContent = observer(function NavBarContent() {
   return (
     <>
       <Box
-        as="nav"
-        id="mainNav"
+        id={APP_NAV_CHROME_ID}
         w="full"
-        maxH="var(--app-navbar-height)"
-        bg={currentUser?.isSubmitter || !loggedIn ? "greys.white" : "theme.blue"}
-        color={currentUser?.isSubmitter || !loggedIn ? "theme.blue" : "greys.white"}
         zIndex={1500}
         shadow="elevations.elevation01"
         position="sticky"
@@ -186,104 +182,112 @@ const NavBarContent = observer(function NavBarContent() {
         transform="translateY(calc(var(--app-navbar-offset) - var(--app-navbar-height)))"
         transition="transform var(--app-navbar-transition)"
       >
-        <Container maxW="container.lg" p={2} px={{ base: 4, md: 8 }}>
-          <Flex align="center" gap={2} w="full">
-            <RouterLink to="/">
-              <Box w={120} mr={2}>
-                <Image
-                  fit="contain"
-                  htmlHeight="64px"
-                  htmlWidth="166px"
-                  alt={t("site.linkHome")}
-                  src={currentUser?.isSubmitter || !loggedIn ? "/images/logo.svg" : "/images/logo-light.svg"}
-                />
-              </Box>
-            </RouterLink>
-            <Show above="lg">
-              <Flex direction="column" w="full">
-                <HStack>
-                  <Text fontSize="2xl" fontWeight="normal" mb="0" whiteSpace="nowrap">
-                    {t("site.title")}
-                  </Text>
+        <Box
+          as="nav"
+          w="full"
+          maxH="var(--app-navbar-bar-height)"
+          bg={currentUser?.isSubmitter || !loggedIn ? "greys.white" : "theme.blue"}
+          color={currentUser?.isSubmitter || !loggedIn ? "theme.blue" : "greys.white"}
+        >
+          <Container maxW="container.lg" p={2} px={{ base: 4, md: 8 }}>
+            <Flex align="center" gap={2} w="full">
+              <RouterLink to="/">
+                <Box w={120} mr={2}>
+                  <Image
+                    fit="contain"
+                    htmlHeight="64px"
+                    htmlWidth="166px"
+                    alt={t("site.linkHome")}
+                    src={currentUser?.isSubmitter || !loggedIn ? "/images/logo.svg" : "/images/logo-light.svg"}
+                  />
+                </Box>
+              </RouterLink>
+              <Show above="lg">
+                <Flex direction="column" w="full">
+                  <HStack>
+                    <Text fontSize="2xl" fontWeight="normal" mb="0" whiteSpace="nowrap">
+                      {t("site.title")}
+                    </Text>
 
-                  <Text fontSize="sm" textTransform="uppercase" color="theme.yellow" fontWeight="bold" mb={2} ml={1}>
-                    {t("site.beta")}
-                  </Text>
-                </HStack>
-              </Flex>
-              <Spacer />
-            </Show>
-            <HStack gap={3} w="full" justify="flex-end">
-              {(currentUser?.isReviewStaff || currentUser?.isTechnicalSupport) &&
-                !currentUser.isRegionalReviewManager && (
-                  <Flex direction="column">
-                    <Text color="greys.white">{currentUser.jurisdiction.name}</Text>
-                    <Text color="whiteAlpha.700" textAlign="right" variant="tiny_uppercase">
+                    <Text fontSize="sm" textTransform="uppercase" color="theme.yellow" fontWeight="bold" mb={2} ml={1}>
+                      {t("site.beta")}
+                    </Text>
+                  </HStack>
+                </Flex>
+                <Spacer />
+              </Show>
+              <HStack gap={3} w="full" justify="flex-end">
+                {(currentUser?.isReviewStaff || currentUser?.isTechnicalSupport) &&
+                  !currentUser.isRegionalReviewManager && (
+                    <Flex direction="column">
+                      <Text color="greys.white">{currentUser.jurisdiction.name}</Text>
+                      <Text color="whiteAlpha.700" textAlign="right" variant="tiny_uppercase">
+                        {t(`user.roles.${currentUser.role as EUserRoles}`)}
+                      </Text>
+                    </Flex>
+                  )}
+
+                {currentUser?.isRegionalReviewManager && (
+                  <VStack align="flex-end" gap={1}>
+                    <Text color="whiteAlpha.700" textAlign="right" variant="tiny_uppercase" whiteSpace="nowrap">
                       {t(`user.roles.${currentUser.role as EUserRoles}`)}
                     </Text>
-                  </Flex>
+                    <RegionalRMJurisdictionSelect key={rmJurisdictionSelectKey} />
+                  </VStack>
                 )}
-
-              {currentUser?.isRegionalReviewManager && (
-                <VStack align="flex-end" gap={1}>
-                  <Text color="whiteAlpha.700" textAlign="right" variant="tiny_uppercase" whiteSpace="nowrap">
+                {currentUser?.isSuperAdmin && (
+                  <Text color="greys.white" textTransform="capitalize">
                     {t(`user.roles.${currentUser.role as EUserRoles}`)}
                   </Text>
-                  <RegionalRMJurisdictionSelect key={rmJurisdictionSelectKey} />
-                </VStack>
-              )}
-              {currentUser?.isSuperAdmin && (
-                <Text color="greys.white" textTransform="capitalize">
-                  {t(`user.roles.${currentUser.role as EUserRoles}`)}
-                </Text>
-              )}
-              {(!loggedIn || currentUser?.isSubmitter) && (
-                <Show above="md">
-                  <RouterLinkButton variant="tertiary" to="/jurisdictions">
-                    {t("home.jurisdictionsTitle")}
+                )}
+                {(!loggedIn || currentUser?.isSubmitter) && (
+                  <Show above="md">
+                    <RouterLinkButton variant="tertiary" to="/jurisdictions">
+                      {t("home.jurisdictionsTitle")}
+                    </RouterLinkButton>
+                  </Show>
+                )}
+                {loggedIn && (
+                  <NotificationsPopover
+                    aria-label="notifications popover"
+                    color={currentUser?.isSubmitter || !loggedIn ? "theme.blue" : "greys.white"}
+                  />
+                )}
+                {currentUser?.isReviewStaff && (
+                  <RouterLinkButton
+                    px={2}
+                    to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/submission-inbox`}
+                    variant="ghost"
+                    color="greys.white"
+                  >
+                    <Tray size={24} />
+                    <Show above="xl">
+                      <Box as="span" ml={2}>
+                        {t("home.submissionsInboxTitle")}
+                      </Box>
+                    </Show>
                   </RouterLinkButton>
-                </Show>
-              )}
-              {loggedIn && (
-                <NotificationsPopover
-                  aria-label="notifications popover"
-                  color={currentUser?.isSubmitter || !loggedIn ? "theme.blue" : "greys.white"}
-                />
-              )}
-              {currentUser?.isReviewStaff && (
-                <RouterLinkButton
-                  px={2}
-                  to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/submission-inbox`}
-                  variant="ghost"
-                  color="greys.white"
-                >
-                  <Tray size={24} />
-                  <Show above="xl">
-                    <Box as="span" ml={2}>
-                      {t("home.submissionsInboxTitle")}
-                    </Box>
-                  </Show>
-                </RouterLinkButton>
-              )}
-              {currentUser?.isSubmitter && !currentUser.isUnconfirmed && (
-                <RouterLinkButton px={2} to={`/projects`} variant="ghost">
-                  <Buildings size={24} />
-                  <Show above="xl">
-                    <Box as="span" ml={2}>
-                      {t("site.myProjects")}
-                    </Box>
-                  </Show>
-                </RouterLinkButton>
-              )}
-              <NavBarMenu />
-            </HStack>
-          </Flex>
-        </Container>
+                )}
+                {currentUser?.isSubmitter && !currentUser.isUnconfirmed && (
+                  <RouterLinkButton px={2} to={`/projects`} variant="ghost">
+                    <Buildings size={24} />
+                    <Show above="xl">
+                      <Box as="span" ml={2}>
+                        {t("site.myProjects")}
+                      </Box>
+                    </Show>
+                  </RouterLinkButton>
+                )}
+                <NavBarMenu />
+              </HStack>
+            </Flex>
+          </Container>
+        </Box>
+        {!R.isEmpty(criticalNotifications) && <ActionRequiredBox notification={criticalNotifications[0]} />}
+        {currentUser?.isReviewStaff && (
+          <SandboxHeader justify="center" align="center" position="static" borderTopRadius={0} color="text.primary" />
+        )}
       </Box>
-      {!R.isEmpty(criticalNotifications) && <ActionRequiredBox notification={criticalNotifications[0]} />}
-      {currentUser?.isReviewStaff && (
-        <SandboxHeader justify="center" align="center" position="static" borderTopRadius={0} color="text.primary" />
-      )}
       {!shouldHideSubNavbarForPath(path) && <SubNavBar />}
     </>
   )

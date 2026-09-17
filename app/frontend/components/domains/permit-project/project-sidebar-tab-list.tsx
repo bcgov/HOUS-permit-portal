@@ -29,7 +29,6 @@ export const handleSidebarTabLinkClick = (e: React.MouseEvent, tabTo: string, pa
 
 export const ProjectSidebarTabList = ({ top = 0, tabsData, children, ...rest }: IProjectSidebarTabListProps) => {
   const location = useLocation()
-  const navHeight = document.getElementById("mainNav")?.offsetHeight
 
   return (
     <Box
@@ -41,7 +40,7 @@ export const ProjectSidebarTabList = ({ top = 0, tabsData, children, ...rest }: 
       {...stickyBelowNavBar()}
       h="calc(100vh - var(--app-navbar-offset))"
       alignSelf="flex-start"
-      pb={navHeight}
+      pb="var(--app-navbar-height)"
       as={tabsData ? TabList : "div"}
       {...rest}
     >

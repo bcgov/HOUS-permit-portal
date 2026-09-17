@@ -19,6 +19,7 @@ import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LinkProps, useLocation } from "react-router-dom"
+import { APP_NAV_CHROME_ID } from "../../../hooks/use-scroll-aware-nav-bar"
 import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
 import { RouterLink } from "../../shared/navigation/router-link"
@@ -77,7 +78,7 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
 
   const handleToggle = () => {
     if (!isOpen) {
-      const nav = document.getElementById("mainNav")
+      const nav = document.getElementById(APP_NAV_CHROME_ID)
       if (nav) {
         setMenuOffset(`${nav.getBoundingClientRect().bottom}px`)
       }
