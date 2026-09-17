@@ -417,6 +417,9 @@ class Api::PermitApplicationsController < Api::ApplicationController
     else
       render_error "permit_application.revision_request_finalize_error"
     end
+  rescue AASM::InvalidTransition
+    render_error "permit_application.revision_request_finalize_error",
+                 { status: 422 }
   end
 
   def remove_collaborator_collaborations
@@ -634,6 +637,29 @@ class Api::PermitApplicationsController < Api::ApplicationController
         },
         submission_data: {
         }
+      ],
+      supporting_information_requests_attributes: [
+        :id,
+        :user_id,
+        :_destroy,
+        :title,
+        :comment,
+        project_documents_attributes: [
+          :id,
+          :permit_project_id,
+          :uploaded_by_id,
+          :kind,
+          :_destroy,
+          file: [:id, :storage, metadata: %i[size filename mime_type]]
+        ]
+      ],
+      additional_permit_requests_attributes: %i[
+        id
+        user_id
+        _destroy
+        requirement_template_id
+        name_snapshot
+        comment
       ]
     )
   end

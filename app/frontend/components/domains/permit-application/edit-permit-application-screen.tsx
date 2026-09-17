@@ -467,6 +467,9 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
       )}
       <Box id="sidebar-and-form-container" sx={{ "&:after": { content: `""`, display: "block", clear: "both" } }}>
         {isRevisionsRequested && !hideRevisionList ? (
+          // SUBMITTER REVISION TODO: package-level reviewer message + attachments, progress n of N,
+          // supporting-info / additional-permit rows, status chip on additional-permit items,
+          // and “I’ve addressed this” checkboxes. Previous-submission compare stays as today.
           <RevisionSideBar permitApplication={currentPermitApplication} forSubmitter />
         ) : (
           <ChecklistSideBar permitApplication={currentPermitApplication} completedBlocks={completedBlocks} />

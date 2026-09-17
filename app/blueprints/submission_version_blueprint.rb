@@ -15,9 +15,25 @@ class SubmissionVersionBlueprint < Blueprinter::Base
     association :revision_requests,
                 blueprint: RevisionRequestBlueprint,
                 view: :base do |submission_version, options|
+      next [] unless submission_version.request_package_visible_to_submitter?
+
       submission_version.revision_requests_for_submitter_based_on_user_permissions(
         user: options[:current_user]
       )
+    end
+    association :supporting_information_requests,
+                blueprint: SupportingInformationRequestBlueprint,
+                view: :base do |submission_version, _options|
+      next [] unless submission_version.request_package_visible_to_submitter?
+
+      submission_version.supporting_information_requests
+    end
+    association :additional_permit_requests,
+                blueprint: AdditionalPermitRequestBlueprint,
+                view: :base do |submission_version, _options|
+      next [] unless submission_version.request_package_visible_to_submitter?
+
+      submission_version.additional_permit_requests
     end
   end
 
@@ -25,6 +41,12 @@ class SubmissionVersionBlueprint < Blueprinter::Base
     include_view :extended
     association :revision_requests,
                 blueprint: RevisionRequestBlueprint,
+                view: :extended
+    association :supporting_information_requests,
+                blueprint: SupportingInformationRequestBlueprint,
+                view: :extended
+    association :additional_permit_requests,
+                blueprint: AdditionalPermitRequestBlueprint,
                 view: :extended
   end
 

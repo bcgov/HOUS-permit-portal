@@ -215,6 +215,23 @@ export const PermitApplicationModel = types.snapshotProcessor(
       get latestRevisionRequests() {
         return (self.latestSubmissionVersion?.revisionRequests || []).slice().sort((a, b) => a.createdAt - b.createdAt)
       },
+      get latestSupportingInformationRequests() {
+        return (self.latestSubmissionVersion?.supportingInformationRequests || [])
+          .slice()
+          .sort((a, b) => a.createdAt - b.createdAt)
+      },
+      get latestAdditionalPermitRequests() {
+        return (self.latestSubmissionVersion?.additionalPermitRequests || [])
+          .slice()
+          .sort((a, b) => a.createdAt - b.createdAt)
+      },
+      get latestRequestPackageCount() {
+        return (
+          (self.latestSubmissionVersion?.revisionRequests || []).length +
+          (self.latestSubmissionVersion?.supportingInformationRequests || []).length +
+          (self.latestSubmissionVersion?.additionalPermitRequests || []).length
+        )
+      },
       get inboxEnabled() {
         return self.jurisdiction?.inboxEnabled && self.rootStore.siteConfigurationStore.inboxEnabled
       },
@@ -257,9 +274,11 @@ export const PermitApplicationModel = types.snapshotProcessor(
 
         // Disable certain fields if this is an ephemeral preview
         const ephemeralProcessedFormJson = self.isEphemeral ? processFieldsForEphemeral(clonedFormJson) : clonedFormJson
+        const revisionRequestsForAnnotations =
+          self.revisionMode || self.isRevisionsRequested ? self.latestRevisionRequests : []
         const revisionAnnotatedFormJson = combineRevisionAnnotations(
           ephemeralProcessedFormJson,
-          self.latestRevisionRequests
+          revisionRequestsForAnnotations
         )
         //merge the formattedComliance data.  This should trigger a form redraw when it is updated
         const complianceHintedFormJson = combineCustomizations(

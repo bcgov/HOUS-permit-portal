@@ -7,9 +7,18 @@ class SubmissionVersion < ApplicationRecord
 
   belongs_to :permit_application
   has_many :revision_requests, dependent: :destroy
+  has_many :supporting_information_requests,
+           dependent: :destroy,
+           inverse_of: :submission_version
+  has_many :additional_permit_requests,
+           dependent: :destroy,
+           inverse_of: :submission_version
   has_many :supporting_documents, dependent: :destroy
 
   accepts_nested_attributes_for :revision_requests, allow_destroy: true
+  accepts_nested_attributes_for :supporting_information_requests,
+                                allow_destroy: true
+  accepts_nested_attributes_for :additional_permit_requests, allow_destroy: true
 
   def zipfile_size
     zipfile_data&.dig("metadata", "size")
@@ -137,6 +146,17 @@ class SubmissionVersion < ApplicationRecord
       .order(:created_at)
       .pluck(:id)
       .index(id) + 1
+  end
+
+  def has_request_package_items?
+    revision_requests.exists? || supporting_information_requests.exists? ||
+      additional_permit_requests.exists?
+  end
+
+  def request_package_visible_to_submitter?
+    return true if permit_application.revisions_requested?
+
+    permit_application.latest_submission_version&.id != id
   end
 
   def revision_requests_for_submitter_based_on_user_permissions(user: nil)

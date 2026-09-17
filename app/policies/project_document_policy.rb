@@ -1,9 +1,12 @@
 class ProjectDocumentPolicy < ApplicationPolicy
   def download?
-    # record is the ProjectDocument instance
-    # user is the current_user
     return false unless user && record&.permit_project
 
-    record.permit_project.owner == user
+    project = record.permit_project
+    return true if user.review_staff_of?(project.jurisdiction_id)
+    return false unless project.owner_id == user.id
+    return false if record.hidden_from_submitter?
+
+    true
   end
 end

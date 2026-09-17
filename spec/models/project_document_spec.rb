@@ -5,6 +5,8 @@ RSpec.describe ProjectDocument, type: :model do
     subject { build(:project_document) }
 
     it { should belong_to(:permit_project) }
+    it { should belong_to(:supporting_information_request).optional }
+    it { should belong_to(:uploaded_by).class_name("User").optional }
   end
 
   describe "validations" do

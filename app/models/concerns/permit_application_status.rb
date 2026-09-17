@@ -217,7 +217,7 @@ module PermitApplicationStatus
     end
 
     def can_finalize_requests?
-      latest_submission_version.revision_requests.any?
+      latest_submission_version&.has_request_package_items?
     end
 
     def stamp_issued_at

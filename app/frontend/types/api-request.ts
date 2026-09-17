@@ -9,10 +9,13 @@ import {
   ETagType,
 } from "./enums"
 import {
+  IAdditionalPermitRequest,
   IHelpLinkItems,
   IOption,
+  IProjectDocument,
   IRevisionRequest,
   ISimplifiedRequirementsMap,
+  ISupportingInformationRequest,
   TComputedCompliance,
   TConditional,
 } from "./types"
@@ -121,6 +124,17 @@ export interface IRequirementTemplateSectionAttributes {
 }
 
 export interface IRevisionRequestsAttributes extends Partial<IRevisionRequest> {
+  _destroy?: true
+  userId?: string
+}
+
+export interface ISupportingInformationRequestsAttributes extends Partial<ISupportingInformationRequest> {
+  _destroy?: true
+  userId?: string
+  projectDocumentsAttributes?: Array<Partial<IProjectDocument> & { _destroy?: boolean; uploadedById?: string }>
+}
+
+export interface IAdditionalPermitRequestsAttributes extends Partial<IAdditionalPermitRequest> {
   _destroy?: true
   userId?: string
 }

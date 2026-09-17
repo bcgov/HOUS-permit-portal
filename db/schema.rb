@@ -10,10 +10,28 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_09_14_180000) do
+ActiveRecord::Schema[7.2].define(version: 2026_09_17_140000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
+
+  create_table "additional_permit_requests", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "submission_version_id", null: false
+    t.uuid "user_id"
+    t.uuid "requirement_template_id", null: false
+    t.string "name_snapshot", null: false
+    t.text "comment"
+    t.string "omniauth_username_snapshot"
+    t.string "first_name_snapshot"
+    t.string "last_name_snapshot"
+    t.datetime "orphaned_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["requirement_template_id"], name: "index_additional_permit_requests_on_requirement_template_id"
+    t.index ["submission_version_id", "requirement_template_id"], name: "idx_additional_permit_requests_on_sv_and_template", unique: true
+    t.index ["submission_version_id"], name: "index_additional_permit_requests_on_submission_version_id"
+    t.index ["user_id"], name: "index_additional_permit_requests_on_user_id"
+  end
 
   create_table "allowlisted_jwts", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "jti", null: false
@@ -793,8 +811,13 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_14_180000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "scan_status", default: "pending", null: false
+    t.uuid "supporting_information_request_id"
+    t.uuid "uploaded_by_id"
+    t.string "kind", default: "reference", null: false
     t.index ["permit_project_id"], name: "index_project_documents_on_permit_project_id"
     t.index ["scan_status"], name: "index_project_documents_on_scan_status"
+    t.index ["supporting_information_request_id"], name: "index_project_documents_on_supporting_information_request_id"
+    t.index ["uploaded_by_id"], name: "index_project_documents_on_uploaded_by_id"
   end
 
   create_table "project_meetings", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1179,6 +1202,21 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_14_180000) do
     t.index ["submission_version_id"], name: "index_supporting_documents_on_submission_version_id"
   end
 
+  create_table "supporting_information_requests", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "submission_version_id", null: false
+    t.uuid "user_id"
+    t.string "title", null: false
+    t.text "comment"
+    t.string "omniauth_username_snapshot"
+    t.string "first_name_snapshot"
+    t.string "last_name_snapshot"
+    t.datetime "orphaned_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["submission_version_id"], name: "index_supporting_information_requests_on_submission_version_id"
+    t.index ["user_id"], name: "index_supporting_information_requests_on_user_id"
+  end
+
   create_table "taggings", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "tag_id"
     t.string "taggable_type"
@@ -1359,6 +1397,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_14_180000) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "additional_permit_requests", "requirement_templates"
+  add_foreign_key "additional_permit_requests", "submission_versions"
+  add_foreign_key "additional_permit_requests", "users"
   add_foreign_key "allowlisted_jwts", "users", on_delete: :cascade
   add_foreign_key "api_key_expiration_notifications", "external_api_keys"
   add_foreign_key "collaborators", "users"
@@ -1416,6 +1457,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_14_180000) do
   add_foreign_key "pre_checks", "users", column: "creator_id"
   add_foreign_key "preferences", "users"
   add_foreign_key "project_documents", "permit_projects"
+  add_foreign_key "project_documents", "supporting_information_requests"
+  add_foreign_key "project_documents", "users", column: "uploaded_by_id"
   add_foreign_key "project_meetings", "permit_projects"
   add_foreign_key "project_meetings", "users", column: "requested_by_id"
   add_foreign_key "requirement_documents", "requirement_blocks"
@@ -1441,6 +1484,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_14_180000) do
   add_foreign_key "submission_versions", "permit_applications"
   add_foreign_key "supporting_documents", "permit_applications"
   add_foreign_key "supporting_documents", "submission_versions"
+  add_foreign_key "supporting_information_requests", "submission_versions"
+  add_foreign_key "supporting_information_requests", "users"
   add_foreign_key "taggings", "tags"
   add_foreign_key "template_section_blocks", "requirement_blocks"
   add_foreign_key "template_section_blocks", "requirement_template_sections"

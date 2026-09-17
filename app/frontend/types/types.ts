@@ -383,7 +383,10 @@ export interface IResource {
 }
 
 export interface IProjectDocument extends IBaseFileAttachment {
-  permitProjectId: string // Foreign key to link to PermitProject
+  permitProjectId: string
+  supportingInformationRequestId?: string
+  uploadedById?: string
+  kind?: "reference" | "fulfillment"
 }
 
 export interface IMeetingRequestDocument extends IBaseFileAttachment {
@@ -743,6 +746,24 @@ export interface IRevisionRequest {
   createdAt: number
 }
 
+export interface ISupportingInformationRequest {
+  id: string
+  title: string
+  comment?: string
+  projectDocuments?: IProjectDocument[]
+  user?: IMinimalFrozenUser
+  createdAt: number
+}
+
+export interface IAdditionalPermitRequest {
+  id: string
+  requirementTemplateId: string
+  nameSnapshot: string
+  comment?: string
+  user?: IMinimalFrozenUser
+  createdAt: number
+}
+
 export interface IMinimalFrozenUser {
   id: string
   email: string
@@ -760,6 +781,8 @@ export interface ISubmissionVersion {
   formJson: IFormJson
   submissionData: ISubmissionData
   revisionRequests: IRevisionRequest[]
+  supportingInformationRequests?: ISupportingInformationRequest[]
+  additionalPermitRequests?: IAdditionalPermitRequest[]
   viewedAt?: Date
   createdAt: number
 }

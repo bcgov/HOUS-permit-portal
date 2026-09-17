@@ -331,4 +331,28 @@ RSpec.describe PermitApplication, type: :model do
       end
     end
   end
+
+  describe "#can_finalize_requests?" do
+    let(:permit_application) { create(:permit_application, :newly_submitted) }
+    let(:submission_version) { permit_application.latest_submission_version }
+
+    it "is false with an empty package" do
+      expect(permit_application.can_finalize_requests?).to be_falsey
+    end
+
+    it "is true with only a supporting information request" do
+      create(
+        :supporting_information_request,
+        submission_version: submission_version
+      )
+
+      expect(permit_application.can_finalize_requests?).to be true
+    end
+
+    it "is true with only an additional permit request" do
+      create(:additional_permit_request, submission_version: submission_version)
+
+      expect(permit_application.can_finalize_requests?).to be true
+    end
+  end
 end

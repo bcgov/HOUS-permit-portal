@@ -281,7 +281,9 @@ export const ReviewPermitApplicationScreen = observer(() => {
             <Flex width={"sidebar.width"} align="center" gap={2}>
               <NotePencil size={24} />
               <Heading fontSize="lg" mt={2}>
-                {t("permitApplication.show.requestingRevisions")}
+                {currentPermitApplication.isRevisionsRequested
+                  ? t("permitApplication.show.requestingRevisions")
+                  : t("permitApplication.show.addingRequests")}
               </Heading>
               <Spacer />
               <Button
@@ -337,8 +339,8 @@ export const ReviewPermitApplicationScreen = observer(() => {
                           {currentPermitApplication.isRevisionsRequested
                             ? t("permitApplication.show.viewRevisionRequests")
                             : t("permitApplication.show.requestRevisions")}{" "}
-                          {currentPermitApplication?.latestRevisionRequests?.length > 0 &&
-                            `(${currentPermitApplication.latestRevisionRequests.length})`}
+                          {currentPermitApplication?.latestRequestPackageCount > 0 &&
+                            `(${currentPermitApplication.latestRequestPackageCount})`}
                         </Button>
                       )}
                       {collaboratorsButton}

@@ -344,6 +344,84 @@ RSpec.describe "Api::PermitApplications", type: :request do
       expect(response).to have_http_status(:ok)
       expect(json_response.dig("data", "id")).to eq(submitted_application.id)
     end
+
+    it "persists supporting information requests with a reference file" do
+      sign_in reviewer
+
+      patch "/api/permit_applications/#{submitted_application.id}/revision_requests",
+            params: {
+              submission_version: {
+                supporting_information_requests_attributes: [
+                  {
+                    user_id: reviewer.id,
+                    title: "Site plan",
+                    comment: "Please provide a current site plan.",
+                    project_documents_attributes: [
+                      { file: cached_file_data, kind: "reference" }
+                    ]
+                  }
+                ]
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:ok)
+      request =
+        submitted_application
+          .reload
+          .latest_submission_version
+          .supporting_information_requests
+          .last
+      expect(request.title).to eq("Site plan")
+      expect(request.project_documents.count).to eq(1)
+      expect(request.project_documents.first).to be_reference
+      expect(request.project_documents.first.permit_project_id).to eq(
+        submitted_application.permit_project_id
+      )
+    end
+
+    it "hides draft package items from the submitter until finalize" do
+      create(
+        :supporting_information_request,
+        submission_version: submitted_application.latest_submission_version
+      )
+      create(
+        :additional_permit_request,
+        submission_version: submitted_application.latest_submission_version
+      )
+
+      sign_in submitter
+      get "/api/permit_applications/#{submitted_application.id}",
+          headers: headers
+
+      expect(response).to have_http_status(:ok)
+      version =
+        json_response
+          .dig("data", "submission_versions")
+          &.find do |sv|
+            sv["id"] == submitted_application.latest_submission_version.id
+          end
+      expect(version.fetch("supporting_information_requests", [])).to eq([])
+      expect(version.fetch("additional_permit_requests", [])).to eq([])
+
+      allow(NotificationService).to receive(
+        :publish_application_revisions_request_event
+      )
+      submitted_application.finalize_revision_requests!
+
+      get "/api/permit_applications/#{submitted_application.id}",
+          headers: headers
+
+      version =
+        json_response
+          .dig("data", "submission_versions")
+          &.find do |sv|
+            sv["id"] == submitted_application.latest_submission_version.id
+          end
+      expect(version["supporting_information_requests"].length).to eq(1)
+      expect(version["additional_permit_requests"].length).to eq(1)
+    end
   end
 
   describe "PATCH /api/permit_applications/:id/update_version" do
@@ -381,6 +459,15 @@ RSpec.describe "Api::PermitApplications", type: :request do
            headers: headers
 
       expect(response).to have_http_status(:ok)
+    end
+
+    it "returns 422 when the package is empty" do
+      sign_in reviewer
+
+      post "/api/permit_applications/#{submitted_application.id}/revision_requests/finalize",
+           headers: headers
+
+      expect(response).to have_http_status(:unprocessable_content)
     end
   end
 

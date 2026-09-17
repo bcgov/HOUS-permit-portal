@@ -169,6 +169,14 @@ en:
           attributes:
             user:
               incorrect_role: "User must be review staff"
+        supporting_information_request:
+          attributes:
+            user:
+              incorrect_role: "User must be review staff"
+        additional_permit_request:
+          attributes:
+            user:
+              incorrect_role: "User must be review staff"
         permit_collaboration:
           attributes:
             base:

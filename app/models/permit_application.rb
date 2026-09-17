@@ -1059,10 +1059,10 @@ class PermitApplication < ApplicationRecord
           :base,
           "Revisions-requested applications must have at least one submission version"
         )
-      elsif latest_submission_version.revision_requests.empty?
+      elsif !latest_submission_version.has_request_package_items?
         errors.add(
           :base,
-          "Revisions-requested applications must have at least one revision request"
+          "Revisions-requested applications must have at least one request"
         )
       end
     elsif resubmitted? && sv_count < 2
