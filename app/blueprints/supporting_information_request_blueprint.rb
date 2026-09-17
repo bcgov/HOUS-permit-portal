@@ -2,7 +2,7 @@ class SupportingInformationRequestBlueprint < Blueprinter::Base
   identifier :id
 
   view :base do
-    fields :title, :comment, :created_at
+    fields :title, :comment, :created_at, :addressed_at
     association :project_documents, blueprint: ProjectDocumentBlueprint
   end
 

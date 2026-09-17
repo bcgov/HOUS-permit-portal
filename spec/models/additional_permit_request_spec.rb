@@ -35,4 +35,41 @@ RSpec.describe AdditionalPermitRequest, type: :model do
       expect(duplicate.errors[:requirement_template_id]).to be_present
     end
   end
+
+  describe "#sibling_application" do
+    it "is nil when the project has no matching sibling" do
+      request = create(:additional_permit_request)
+      expect(request.sibling_application).to be_nil
+    end
+
+    it "returns the latest matching sibling on the same project" do
+      request = create(:additional_permit_request)
+      project = request.submission_version.permit_application.permit_project
+      sibling_template_version =
+        create(
+          :template_version,
+          requirement_template: request.requirement_template
+        )
+      older =
+        create(
+          :permit_application,
+          permit_project: project,
+          template_version: sibling_template_version
+        )
+      older.update_column(:updated_at, 2.days.ago)
+      newer =
+        create(
+          :permit_application,
+          permit_project: project,
+          template_version: sibling_template_version
+        )
+
+      expect(request.sibling_application).to eq(newer)
+      expect(
+        AdditionalPermitRequestBlueprint.render_as_hash(request, view: :base)[
+          :sibling_status
+        ]
+      ).to eq(newer.status)
+    end
+  end
 end

@@ -20,6 +20,28 @@ class AdditionalPermitRequest < ApplicationRecord
     true
   end
 
+  # UX DISCUSSION ASSUMPTION: #4 request-only (no auto-create); #7 allow already-on-project duplicates.
+  # Guess: chip = latest sibling of that template, else Not started.
+  # Lapse: chip can stay Not started forever; multiple matches are a guess.
+  def sibling_application
+    project = submission_version&.permit_application&.permit_project
+    current_id = submission_version&.permit_application_id
+    return if project.blank?
+
+    project
+      .permit_applications
+      .kept
+      .where.not(id: current_id)
+      .joins(:template_version)
+      .where(
+        template_versions: {
+          requirement_template_id: requirement_template_id
+        }
+      )
+      .order(updated_at: :desc)
+      .first
+  end
+
   private
 
   def set_name_snapshot

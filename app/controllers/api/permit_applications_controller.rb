@@ -11,6 +11,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
                   generate_missing_pdfs
                   download_supporting_documents_zip
                   update_revision_requests
+                  request_item_addressed
                   create_permit_collaboration
                   invite_new_collaborator
                   remove_collaborator_collaborations
@@ -182,6 +183,29 @@ class Api::PermitApplicationsController < Api::ApplicationController
                      error_message:
                        @permit_application.errors.full_messages.join(", ")
                    }
+    end
+  end
+
+  # UX DISCUSSION ASSUMPTION: #8 honor-system ticks; do not reuse update_revision_requests
+  # (submitters must not edit/destroy reviewer comments).
+  def request_item_addressed
+    authorize @permit_application
+    if @permit_application.set_request_item_addressed(
+         request_type: params[:request_type],
+         request_item_id: params[:request_item_id],
+         addressed: params[:addressed]
+       )
+      render_success @permit_application,
+                     nil,
+                     {
+                       blueprint: PermitApplicationBlueprint,
+                       blueprint_opts: {
+                         view: :extended,
+                         current_user: current_user
+                       }
+                     }
+    else
+      render_error "permit_application.update_error"
     end
   end
 

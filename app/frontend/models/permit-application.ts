@@ -832,6 +832,23 @@ export const PermitApplicationModel = types.snapshotProcessor(
         self.isLoading = false
         return response
       }),
+      // UX DISCUSSION ASSUMPTION: #8 honor-system ticks; does not gate Submit.
+      toggleRequestItemAddressed: flow(function* (
+        requestType: "revision_request" | "supporting_information_request" | "additional_permit_request",
+        requestItemId: string,
+        addressed: boolean
+      ) {
+        const response = yield self.environment.api.toggleRequestItemAddressed(self.id, {
+          requestType,
+          requestItemId,
+          addressed,
+        })
+        if (response.ok) {
+          const { data: permitApplication } = response.data
+          self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
+        }
+        return response
+      }),
       fetchDiff: flow(function* () {
         const diffData = yield self.publishedTemplateVersion.fetchTemplateVersionCompare(self.templateVersion.id)
         self.diff = diffData.data

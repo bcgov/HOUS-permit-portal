@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_09_17_140000) do
+ActiveRecord::Schema[7.2].define(version: 2026_09_17_150000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -25,6 +25,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_17_140000) do
     t.string "first_name_snapshot"
     t.string "last_name_snapshot"
     t.datetime "orphaned_at"
+    t.datetime "addressed_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["requirement_template_id"], name: "index_additional_permit_requests_on_requirement_template_id"
@@ -1032,6 +1033,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_17_140000) do
     t.string "first_name_snapshot"
     t.string "last_name_snapshot"
     t.datetime "orphaned_at"
+    t.datetime "addressed_at"
     t.index ["submission_version_id"], name: "index_revision_requests_on_submission_version_id"
     t.index ["user_id"], name: "index_revision_requests_on_user_id"
   end
@@ -1211,6 +1213,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_17_140000) do
     t.string "first_name_snapshot"
     t.string "last_name_snapshot"
     t.datetime "orphaned_at"
+    t.datetime "addressed_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["submission_version_id"], name: "index_supporting_information_requests_on_submission_version_id"

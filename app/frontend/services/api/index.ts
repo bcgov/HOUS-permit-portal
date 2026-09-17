@@ -703,6 +703,16 @@ export class Api {
     })
   }
 
+  async toggleRequestItemAddressed(
+    id: string,
+    params: { requestType: string; requestItemId: string; addressed: boolean }
+  ) {
+    return this.client.patch<ApiResponse<IPermitApplication>>(
+      `/permit_applications/${id}/request_item_addressed`,
+      params
+    )
+  }
+
   async updatePermitApplicationVersion(id) {
     return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/update_version`)
   }

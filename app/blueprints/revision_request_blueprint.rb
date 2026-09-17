@@ -6,7 +6,8 @@ class RevisionRequestBlueprint < Blueprinter::Base
            :reason_code,
            :requirement_json,
            :submission_data,
-           :created_at
+           :created_at,
+           :addressed_at
   end
 
   view :extended do

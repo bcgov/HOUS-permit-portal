@@ -141,9 +141,17 @@ export const SupportingInformationModal = observer(
               )}
               {existingDocuments.length > 0 && (
                 <Flex direction="column" gap={1}>
+                  {/* UX DISCUSSION ASSUMPTION: supporting-info View is reference-only.
+                      Lapse: no fulfillment upload; ticking addressed does not attach the asked-for file. */}
                   {existingDocuments.map((doc) => (
                     <Flex key={doc.id} justify="space-between" align="center">
-                      <Text fontSize="sm">{doc.file?.metadata?.filename}</Text>
+                      {doc.fileUrl ? (
+                        <Button as="a" href={doc.fileUrl} target="_blank" rel="noopener" variant="link" fontSize="sm">
+                          {doc.file?.metadata?.filename}
+                        </Button>
+                      ) : (
+                        <Text fontSize="sm">{doc.file?.metadata?.filename}</Text>
+                      )}
                       {!disableInput && (
                         <Button
                           variant="link"

@@ -421,6 +421,119 @@ RSpec.describe "Api::PermitApplications", type: :request do
           end
       expect(version["supporting_information_requests"].length).to eq(1)
       expect(version["additional_permit_requests"].length).to eq(1)
+      expect(
+        version["supporting_information_requests"].first["addressed_at"]
+      ).to be_nil
+      expect(
+        version["additional_permit_requests"].first["sibling_status"]
+      ).to be_nil
+    end
+  end
+
+  describe "PATCH /api/permit_applications/:id/request_item_addressed" do
+    let(:revision_application) do
+      create(
+        :permit_application,
+        :revisions_requested,
+        submitter: submitter,
+        template_version: template_version,
+        jurisdiction: jurisdiction
+      )
+    end
+    let(:revision_item) do
+      revision_application.latest_submission_version.revision_requests.first
+    end
+
+    it "lets the submitter toggle addressed_at" do
+      patch "/api/permit_applications/#{revision_application.id}/request_item_addressed",
+            params: {
+              request_type: "revision_request",
+              request_item_id: revision_item.id,
+              addressed: true
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(revision_item.reload.addressed_at).to be_present
+
+      version =
+        json_response
+          .dig("data", "submission_versions")
+          &.find do |sv|
+            sv["id"] == revision_application.latest_submission_version.id
+          end
+      expect(version["revision_requests"].first["addressed_at"]).to be_present
+    end
+
+    it "does not change the reviewer comment" do
+      original_comment = revision_item.comment
+
+      patch "/api/permit_applications/#{revision_application.id}/request_item_addressed",
+            params: {
+              request_type: "revision_request",
+              request_item_id: revision_item.id,
+              addressed: true,
+              comment: "tampered"
+            },
+            headers: headers,
+            as: :json
+
+      expect(revision_item.reload.comment).to eq(original_comment)
+    end
+
+    it "forbids an unrelated submitter" do
+      sign_in other_user
+
+      patch "/api/permit_applications/#{revision_application.id}/request_item_addressed",
+            params: {
+              request_type: "revision_request",
+              request_item_id: revision_item.id,
+              addressed: true
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(revision_item.reload.addressed_at).to be_nil
+    end
+
+    it "forbids review staff from using the submitter toggle" do
+      reviewer = create(:user, :reviewer, jurisdiction: jurisdiction)
+      sign_in reviewer
+
+      patch "/api/permit_applications/#{revision_application.id}/request_item_addressed",
+            params: {
+              request_type: "revision_request",
+              request_item_id: revision_item.id,
+              addressed: true
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it "does not gate can_submit? on addressed_at" do
+      revision_application.update!(
+        submission_data: {
+          "data" => {
+            "section-completion-key" => {
+              "signed" => true
+            }
+          }
+        }
+      )
+      allow(revision_application).to receive(:inbox_enabled?).and_return(true)
+      allow(revision_application).to receive(
+        :template_version_disabled_by_jurisdiction?
+      ).and_return(false)
+      allow(revision_application).to receive(
+        :using_current_template_version
+      ).and_return(true)
+
+      expect(revision_item.addressed_at).to be_nil
+      expect(revision_application.can_submit?).to be(true)
     end
   end
 

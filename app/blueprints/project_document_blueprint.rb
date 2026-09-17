@@ -8,6 +8,6 @@ class ProjectDocumentBlueprint < Blueprinter::Base
   field :permit_project_id
   field :supporting_information_request_id
   field :kind
-
+  field :file_url
   field :file, transformer: Transformers::FileAttachmentTransformer
 end

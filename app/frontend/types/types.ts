@@ -387,6 +387,7 @@ export interface IProjectDocument extends IBaseFileAttachment {
   supportingInformationRequestId?: string
   uploadedById?: string
   kind?: "reference" | "fulfillment"
+  fileUrl?: string
 }
 
 export interface IMeetingRequestDocument extends IBaseFileAttachment {
@@ -744,6 +745,7 @@ export interface IRevisionRequest {
   comment: string
   user?: IMinimalFrozenUser
   createdAt: number
+  addressedAt?: number | string | null
 }
 
 export interface ISupportingInformationRequest {
@@ -753,6 +755,7 @@ export interface ISupportingInformationRequest {
   projectDocuments?: IProjectDocument[]
   user?: IMinimalFrozenUser
   createdAt: number
+  addressedAt?: number | string | null
 }
 
 export interface IAdditionalPermitRequest {
@@ -762,6 +765,8 @@ export interface IAdditionalPermitRequest {
   comment?: string
   user?: IMinimalFrozenUser
   createdAt: number
+  addressedAt?: number | string | null
+  siblingStatus?: EPermitApplicationStatus | null
 }
 
 export interface IMinimalFrozenUser {
