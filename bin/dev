@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+[[ -f .env ]] || { echo 'Missing .env. Run: cp .env_example .env' >&2; exit 1; }
+[[ -f config/database.yml ]] || { echo 'Missing database configuration. Run bin/setup first.' >&2; exit 1; }
+export RAILS_ENV=development
+export PORT=3000
+if command -v overmind >/dev/null 2>&1; then
+  exec overmind start -f Procfile.dev "$@"
+elif command -v hivemind >/dev/null 2>&1; then
+  exec hivemind Procfile.dev "$@"
+fi
+if ! gem list --installed --exact --silent foreman >/dev/null; then
+  echo 'Installing Foreman for local process management...'
+  gem install foreman --no-document
+fi
+exec foreman start -f Procfile.dev "$@"

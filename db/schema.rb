@@ -593,7 +593,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_14_180000) do
     t.integer "status", default: 0, null: false
     t.string "builder"
     t.uuid "step_requirement_id"
-    t.jsonb "section_completion_status", default: {"start"=>{"complete"=>false, "relevant"=>true}, "report"=>{"complete"=>false, "relevant"=>true}, "review"=>{"complete"=>false, "relevant"=>true}, "h2k_import"=>{"complete"=>false, "relevant"=>true}, "completed_by"=>{"complete"=>false, "relevant"=>true}, "project_info"=>{"complete"=>false, "relevant"=>true}, "compliance_summary"=>{"complete"=>false, "relevant"=>true}, "energy_performance"=>{"complete"=>false, "relevant"=>true}, "energy_step_compliance"=>{"complete"=>false, "relevant"=>true}, "zero_carbon_compliance"=>{"complete"=>false, "relevant"=>true}, "building_characteristics"=>{"complete"=>false, "relevant"=>true}}, null: false
+    t.jsonb "section_completion_status", default: {"start" => {"complete" => false, "relevant" => true}, "report" => {"complete" => false, "relevant" => true}, "review" => {"complete" => false, "relevant" => true}, "h2k_import" => {"complete" => false, "relevant" => true}, "completed_by" => {"complete" => false, "relevant" => true}, "project_info" => {"complete" => false, "relevant" => true}, "compliance_summary" => {"complete" => false, "relevant" => true}, "energy_performance" => {"complete" => false, "relevant" => true}, "energy_step_compliance" => {"complete" => false, "relevant" => true}, "zero_carbon_compliance" => {"complete" => false, "relevant" => true}, "building_characteristics" => {"complete" => false, "relevant" => true}}, null: false
     t.datetime "stage_completed_at"
     t.index ["status"], name: "index_part_9_step_code_checklists_on_status"
     t.index ["step_code_id", "stage"], name: "idx_part_9_checklists_on_step_code_id_and_stage", unique: true, where: "(step_code_id IS NOT NULL)"
@@ -1027,7 +1027,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_14_180000) do
     t.text "sitewide_message"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.jsonb "help_link_items", default: {"dictionary_link_item"=>{"href"=>"", "show"=>false, "title"=>"Dictionary of terms", "description"=>"See detailed explanations of terms that appear on building permits"}, "user_guide_link_item"=>{"href"=>"", "show"=>false, "title"=>"User and role guides", "description"=>"Step-by-step instructions on how to make the most out of the platform"}, "get_started_link_item"=>{"href"=>"", "show"=>false, "title"=>"Get started on Building Permit Hub", "description"=>"How to submit a building permit application through a streamlined and standardized approach across BC"}, "best_practices_link_item"=>{"href"=>"", "show"=>false, "title"=>"Best practices", "description"=>"How to use the Building Permit Hub efficiently for application submission"}}, null: false
+    t.jsonb "help_link_items", default: {"dictionary_link_item" => {"href" => "", "show" => false, "title" => "Dictionary of terms", "description" => "See detailed explanations of terms that appear on building permits"}, "user_guide_link_item" => {"href" => "", "show" => false, "title" => "User and role guides", "description" => "Step-by-step instructions on how to make the most out of the platform"}, "get_started_link_item" => {"href" => "", "show" => false, "title" => "Get started on Building Permit Hub", "description" => "How to submit a building permit application through a streamlined and standardized approach across BC"}, "best_practices_link_item" => {"href" => "", "show" => false, "title" => "Best practices", "description" => "How to use the Building Permit Hub efficiently for application submission"}}, null: false
     t.jsonb "revision_reason_options"
     t.boolean "inbox_enabled", default: false, null: false
     t.boolean "allow_designated_reviewer", default: false, null: false
@@ -1047,11 +1047,11 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_14_180000) do
     t.jsonb "unheated_floors_lines", default: [{}]
     t.jsonb "below_grade_walls_lines", default: [{}]
     t.jsonb "slabs_lines", default: [{}]
-    t.jsonb "windows_glazed_doors", default: {"lines"=>[{}], "performance_type"=>"usi"}
-    t.jsonb "doors_lines", default: [{"performance_type"=>"rsi"}]
+    t.jsonb "windows_glazed_doors", default: {"lines" => [{}], "performance_type" => "usi"}
+    t.jsonb "doors_lines", default: [{"performance_type" => "rsi"}]
     t.jsonb "airtightness", default: {}
-    t.jsonb "space_heating_cooling_lines", default: [{"variant"=>"principal"}, {"variant"=>"secondary"}]
-    t.jsonb "hot_water_lines", default: [{"performance_type"=>"ef"}]
+    t.jsonb "space_heating_cooling_lines", default: [{"variant" => "principal"}, {"variant" => "secondary"}]
+    t.jsonb "hot_water_lines", default: [{"performance_type" => "ef"}]
     t.jsonb "ventilation_lines", default: [{}]
     t.jsonb "other_lines", default: [{}]
     t.jsonb "fossil_fuels", default: {}
