@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Shared by local-infra-up/down. Never source the application .env.
+set -euo pipefail
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+if [[ ! -f .env.compose ]]; then
+  echo 'Missing .env.compose. Run: cp .env_example.compose .env.compose' >&2
+  exit 1
+fi
+if ! command -v docker >/dev/null || ! docker compose version >/dev/null 2>&1; then
+  echo 'Docker with Compose v2 is required. Install Docker Desktop or the Compose plugin.' >&2
+  exit 1
+fi
+if ! docker info >/dev/null 2>&1; then
+  echo 'Docker is unavailable. Start Docker Desktop or your Docker daemon.' >&2
+  exit 1
+fi
+compose=(docker compose --project-name hous-permit-portal-local --file compose.yml --env-file .env.compose)
+"${compose[@]}" config --quiet

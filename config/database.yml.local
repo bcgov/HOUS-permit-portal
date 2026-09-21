@@ -1,0 +1,15 @@
+# Copied by bin/setup for host development only. Do not use in deployments.
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  host: <%= ENV.fetch("POSTGRES_HOST", "127.0.0.1").inspect %>
+  port: <%= ENV.fetch("POSTGRES_PORT", "15432") %>
+  username: <%= ENV.fetch("POSTGRES_USER", "hous").inspect %>
+  password: <%= ENV.fetch("POSTGRES_PASSWORD", "hous-local-password").inspect %>
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS", "5") %>
+development:
+  <<: *default
+  database: hous_permit_portal_development
+test:
+  <<: *default
+  database: hous_permit_portal_test

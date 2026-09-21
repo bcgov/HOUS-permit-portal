@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -euo pipefail
+source "$(dirname "$0")/local-infra-common"
+command -v curl >/dev/null || { echo 'curl is required for the gateway health check.' >&2; exit 1; }
+if ! "${compose[@]}" up --detach --remove-orphans --wait --wait-timeout 180 postgres redis elasticsearch seaweedfs anycable-go; then
+  echo 'Infrastructure did not become ready. Check Docker resources and published port conflicts.' >&2
+  "${compose[@]}" ps --all
+  "${compose[@]}" logs --tail 40
+  exit 1
+fi
+# The minimal gateway image has no curl/wget. Probe its published /health
+# from the host; this endpoint does not require the host Ruby RPC server.
+gateway=$("${compose[@]}" port anycable-go 8080)
+ready=false
+for ((attempt=0; attempt<30; attempt++)); do
+  if curl --noproxy '*' --connect-timeout 1 --max-time 2 --fail --silent "http://${gateway}/health" >/dev/null; then
+    ready=true
+    break
+  fi
+  sleep 1
+done
+if [[ "$ready" != true ]]; then
+  "${compose[@]}" logs --tail 40 anycable-go
+  echo 'AnyCable-Go did not become ready.' >&2
+  exit 1
+fi
+echo 'Local infrastructure ready. Run bin/setup (first time), then bin/dev.'
+echo 'Published endpoints:'
+"${compose[@]}" ps
