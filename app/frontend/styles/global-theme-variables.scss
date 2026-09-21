@@ -38,7 +38,11 @@ $error: #d9292f;
 }
 
 html {
-  --app-navbar-height: 58px;
+  // Blue bar only. The training banner sits in the same sticky chrome, so JS may
+  // write a larger --app-navbar-height; this one must stay put or max-height on
+  // the bar grows with the banner and the height observer loops.
+  --app-navbar-bar-height: 58px;
+  --app-navbar-height: var(--app-navbar-bar-height);
   // Vertical space the navbar currently occupies at the top of the viewport. Anything
   // pinned below the navbar, or sized against the space left over by it, reads this
   // rather than --app-navbar-height so it follows the bar as it slides with scroll.

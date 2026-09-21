@@ -28,3 +28,14 @@ export function nextScrollPeekState(state: IScrollPeekState, input: IScrollPeekI
 
   return { hiddenPx: Math.min(barHeight, Math.max(0, state.hiddenPx + delta)) }
 }
+
+/** Keep a fully tucked bar tucked when chrome grows (training banner, action-required). */
+export function nextBarHeightState(
+  state: IScrollPeekState,
+  previousBarHeight: number,
+  nextBarHeight: number
+): IScrollPeekState {
+  if (nextBarHeight === previousBarHeight) return state
+  if (state.hiddenPx >= previousBarHeight) return { hiddenPx: nextBarHeight }
+  return { hiddenPx: Math.min(nextBarHeight, state.hiddenPx) }
+}
