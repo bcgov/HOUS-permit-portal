@@ -1,0 +1,212 @@
+body:has(.print-report) > :not(.print-report-portal):not(script):not(style) {
+  display: none !important;
+}
+.print-report *,
+.print-report *::before,
+.print-report *::after {
+  box-sizing: border-box;
+}
+.print-report {
+  background: #e9edf2;
+  min-height: 100vh;
+  padding: var(--report-space-large);
+}
+.print-report .report-document {
+  max-width: 8.5in;
+  margin: auto;
+  background: white;
+  padding: var(--report-paper-margin);
+}
+.print-report .report-toolbar {
+  max-width: 8.5in;
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.print-report .report-toolbar button {
+  background: #193c65;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 4px;
+  font: inherit;
+  cursor: pointer;
+}
+.print-report .report-toolbar button:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+.print-report .report-cover {
+  padding: 0.5in 0;
+  min-height: 8.8in;
+  break-after: page;
+}
+.print-report .report-cover img {
+  width: 150px;
+  margin-bottom: var(--report-space-large);
+}
+.print-report .report-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--report-muted);
+  font-size: 9pt;
+}
+.print-report h1 {
+  font-size: 24pt;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 18px 0 28px;
+}
+.print-report h2 {
+  font-size: 14pt;
+  font-weight: 700;
+  margin: 24px 0 12px;
+  padding-bottom: 7px;
+  border-bottom: 3px solid var(--report-accent);
+  break-after: avoid;
+}
+.print-report h3 {
+  font-size: 11pt;
+  font-weight: 700;
+  margin: 16px 0 8px;
+  break-after: avoid;
+}
+.print-report .report-cover dl {
+  margin: 28px 0;
+  border-top: 1px solid var(--report-line);
+}
+.print-report .report-field {
+  padding: 9px 0;
+  border-bottom: 1px solid var(--report-line);
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.print-report .report-field dt {
+  font-size: 10pt;
+  color: var(--report-muted);
+  font-weight: 600;
+  break-after: avoid;
+}
+.print-report .report-field dd {
+  margin: 3px 0 0;
+  white-space: pre-wrap;
+}
+.print-report .report-section {
+  margin-bottom: var(--report-space-large);
+}
+.print-report .report-group {
+  margin: 12px 0;
+  padding-left: 12px;
+  border-left: 2px solid var(--report-line);
+}
+.print-report p,
+.print-report li {
+  orphans: 3;
+  widows: 3;
+  overflow-wrap: anywhere;
+}
+.print-report table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  margin: 12px 0;
+}
+.print-report th,
+.print-report td {
+  padding: var(--report-space-small);
+  text-align: left;
+  vertical-align: top;
+  border: 1px solid var(--report-line);
+  overflow-wrap: anywhere;
+}
+.print-report th {
+  background: var(--report-tint);
+  font-size: 10pt;
+  font-weight: 700;
+}
+.print-report #print-ready {
+  display: none;
+}
+.print-report thead {
+  display: table-header-group;
+}
+.print-report tr {
+  break-inside: avoid;
+}
+.print-report .report-row-record {
+  margin: 12px 0;
+}
+.print-report .report-note {
+  color: var(--report-muted);
+  font-size: 10pt;
+}
+.print-report .report-error {
+  border: 1px solid #a92323;
+  padding: 20px;
+  background: #fff3f3;
+}
+.print-report .report-value {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.print-report .report-stack {
+  min-width: 0;
+  max-width: 100%;
+}
+.print-report .report-stack > * {
+  min-width: 0;
+}
+.print-report .report-rule {
+  border-top: 1px solid var(--report-line);
+  margin: 16px 0;
+}
+.print-report .report-check {
+  font-weight: 600;
+}
+@media print {
+  @page permit-report {
+    size: letter portrait;
+    /* Keep in sync with --report-paper-margin; @page has no report element scope. */
+    margin: 0.5in;
+  }
+  html:has(.print-report),
+  body:has(.print-report) {
+    height: auto !important;
+    min-height: 0 !important;
+    page: permit-report;
+    margin: 0 !important;
+    background: white !important;
+  }
+  body:has(.print-report) > :not(.print-report-portal) {
+    display: none !important;
+  }
+  .print-report {
+    padding: 0;
+    background: white;
+    min-height: 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .print-report .report-document {
+    max-width: none;
+    padding: 0;
+  }
+  .print-report [data-test-result],
+  .print-report .report-toolbar {
+    display: none !important;
+  }
+  .print-report .report-cover {
+    min-height: 0;
+    padding-top: 0.5in;
+    padding-bottom: 0.5in;
+  }
+  .print-report .report-section:last-child,
+  .print-report .report-section > :last-child,
+  .print-report .report-document table:last-child {
+    margin-bottom: 0;
+  }
+  .print-report .report-error {
+    display: block;
+  }
+}

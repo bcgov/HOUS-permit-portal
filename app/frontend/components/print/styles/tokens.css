@@ -1,0 +1,18 @@
+.print-report {
+  --report-ink: #253247;
+  --report-muted: #526176;
+  --report-line: #d5dce5;
+  --report-tint: #f2f5f8;
+  --report-accent: #e7ab21;
+  --report-body-size: 11pt;
+  --report-font-family: "BCSans", "BC Sans", Arial, sans-serif;
+  --report-line-height: 1.5;
+  --report-space-small: 8px;
+  --report-space-medium: 12px;
+  --report-space-large: 24px;
+  --report-paper-margin: 0.5in;
+  color: var(--report-ink);
+  font-family: var(--report-font-family);
+  font-size: var(--report-body-size);
+  line-height: var(--report-line-height);
+}
