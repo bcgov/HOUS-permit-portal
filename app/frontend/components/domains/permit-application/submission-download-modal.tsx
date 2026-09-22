@@ -188,20 +188,6 @@ export const SubmissionDownloadModal = observer(
       }
     }, [isOpen])
 
-    // ponytail: window capture runs before the navbar's document-capture listener, so this
-    // list can fill the modal without the size heuristic hiding the bar. Upgrade: data-*
-    // opt-out in isPageLevelScroller.
-    useEffect(() => {
-      if (!isOpen) return
-
-      const onScroll = (event: Event) => {
-        if (event.target === listScrollRef.current) event.stopPropagation()
-      }
-
-      window.addEventListener("scroll", onScroll, true)
-      return () => window.removeEventListener("scroll", onScroll, true)
-    }, [isOpen])
-
     useEffect(() => {
       if (!isOpen) return
 
