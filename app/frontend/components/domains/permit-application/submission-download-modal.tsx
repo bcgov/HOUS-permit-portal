@@ -25,6 +25,7 @@ import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
 import { IDownloadableFile, IFormIOSection } from "../../../types/types"
 import { formatBytes } from "../../../utils/utility-functions"
+import { PrintPreviewLink } from "../../print/components/print-preview-link"
 import { CalloutBanner } from "../../shared/base/callout-banner"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 
@@ -488,6 +489,7 @@ export const SubmissionDownloadModal = observer(
                                   <FileSelectRow
                                     key={item.key}
                                     doc={item.doc}
+                                    application={permitApplication}
                                     isSelected={selectedKeys.has(item.key)}
                                     onToggle={() => toggleOne(item.key)}
                                   />
@@ -629,10 +631,12 @@ function MissingPdfSelectRow({
 
 function FileSelectRow({
   doc,
+  application,
   isSelected,
   onToggle,
 }: {
   doc: IDownloadableFile
+  application: IPermitApplication
   isSelected: boolean
   onToggle: () => void
 }) {
@@ -641,7 +645,6 @@ function FileSelectRow({
 
   return (
     <HStack
-      as="label"
       w="full"
       align="flex-start"
       spacing={2}
@@ -652,23 +655,31 @@ function FileSelectRow({
       borderStyle="solid"
       borderColor="transparent"
       borderRadius="sm"
-      cursor="pointer"
       _hover={{ borderColor: "border.base" }}
     >
-      <Checkbox isChecked={isSelected} onChange={onToggle} spacing={2} mt="2px" />
-      <VStack flex={1} align="start" spacing={0} minW={0}>
-        <Text fontSize="md" lineHeight="normal" noOfLines={1} w="full">
-          {doc.fileName}
-        </Text>
-        <Text fontSize="xs" color="text.secondary" lineHeight="normal">
-          {[
-            formatBytes(doc.fileSize),
-            submittedDate && t("permitApplication.show.downloadSubmitted", { date: submittedDate }),
-          ]
-            .filter(Boolean)
-            .join(" · ")}
-        </Text>
-      </VStack>
+      <HStack as="label" flex={1} minW={0} align="flex-start" cursor="pointer">
+        <Checkbox isChecked={isSelected} onChange={onToggle} spacing={2} mt="2px" />
+        <VStack flex={1} align="start" spacing={0} minW={0}>
+          <Text fontSize="md" lineHeight="normal" overflowWrap="anywhere" w="full">
+            {doc.fileName}
+          </Text>
+          <Text fontSize="xs" color="text.secondary" lineHeight="normal">
+            {[
+              formatBytes(doc.fileSize),
+              submittedDate && t("permitApplication.show.downloadSubmitted", { date: submittedDate }),
+            ]
+              .filter(Boolean)
+              .join(" · ")}
+          </Text>
+        </VStack>
+      </HStack>
+      {doc.submissionVersionId && isGeneratedDocumentKey(doc.dataKey) && (
+        <PrintPreviewLink
+          application={application}
+          submissionVersionId={doc.submissionVersionId}
+          associatedStepCode={doc.dataKey.startsWith("step_code_checklist_pdf")}
+        />
+      )}
     </HStack>
   )
 }

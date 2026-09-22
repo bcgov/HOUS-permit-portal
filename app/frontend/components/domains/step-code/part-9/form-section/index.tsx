@@ -23,6 +23,7 @@ import { Navigate, useLocation, useNavigate, useParams } from "react-router-dom"
 import { usePart9StepCode } from "../../../../../hooks/resources/use-part-9-step-code"
 import { EFileUploadAttachmentType, EFlashMessageStatus } from "../../../../../types/enums"
 import { TPart9NavLinkKey } from "../../../../../types/types"
+import { PrintPreviewLink } from "../../../../print/components/print-preview-link"
 import { FileDownloadButton } from "../../../../shared/base/file-download-button"
 import { SharedSpinner } from "../../../../shared/base/shared-spinner"
 import { ConfirmationModal } from "../../../../shared/confirmation-modal"
@@ -349,7 +350,13 @@ const ReviewSection = observer(function ReviewSection() {
   }
 
   if (!checklist) return <SharedSpinner />
-  if (!checklist.selectedReport) return <MissingReportSection />
+  if (!checklist.selectedReport)
+    return (
+      <>
+        <PrintPreviewLink stepCode={currentStepCode} checklist={checklist} />
+        <MissingReportSection />
+      </>
+    )
   if (!checklist.canAccessReview) {
     const target = checklist.currentNavLink?.location ?? "start"
     return <Navigate to={pathname.replace(/\/review$/, `/${target}`)} replace />
@@ -438,7 +445,13 @@ const ReportSection = observer(function ReportSection() {
   }
 
   if (!checklist) return <SharedSpinner />
-  if (!checklist.selectedReport) return <MissingReportSection />
+  if (!checklist.selectedReport)
+    return (
+      <>
+        <PrintPreviewLink stepCode={currentStepCode} checklist={checklist} />
+        <MissingReportSection />
+      </>
+    )
   if (!checklist.canAccessReport) {
     const target = checklist.currentNavLink?.location ?? "start"
     return <Navigate to={pathname.replace(/\/report$/, `/${target}`)} replace />
@@ -511,6 +524,7 @@ const ReportSection = observer(function ReportSection() {
                 {t("stepCode.saveAndExit")}
               </Button>
             </Flex>
+            <PrintPreviewLink stepCode={currentStepCode} checklist={checklist} />
             <Button type="button" variant="link" onClick={handleRegenerateReport} isLoading={isRegenerating}>
               {t("stepCode.regenerateReport")}
             </Button>

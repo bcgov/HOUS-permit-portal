@@ -14,6 +14,15 @@ import { NavBar } from "./nav-bar"
 import { ProtectedRoute } from "./protected-route"
 import { QaToolsPopout } from "./qa-tools-popout"
 
+const BrowserPrintFixtures = import.meta.env.DEV
+  ? lazy(() =>
+      import("../../print/__tests__/browser-fixtures").then((module) => ({ default: module.BrowserPrintFixtures }))
+    )
+  : () => null
+const PrintReportPage = lazy(() =>
+  import("../../print/report-page").then((module) => ({ default: module.PrintReportPage }))
+)
+
 const ExternalApiKeysIndexScreen = lazy(() =>
   import("../external-api-key").then((module) => ({ default: module.ExternalApiKeysIndexScreen }))
 )
@@ -837,6 +846,17 @@ const AppRoutes = observer(() => {
             />
           }
         >
+          <Route
+            path="/permit-applications/:permitApplicationId/print"
+            element={<PrintReportPage kind="application" />}
+          />
+          <Route
+            path="/permit-applications/:permitApplicationId/step-code/print"
+            element={<PrintReportPage kind="application-step-code" />}
+          />
+          <Route path="/part-3-step-code/:stepCodeId/print" element={<PrintReportPage kind="part3" />} />
+          <Route path="/part-9-step-code/:stepCodeId/print" element={<PrintReportPage kind="part9" />} />
+          {import.meta.env.DEV && <Route path="/__print-tests" element={<BrowserPrintFixtures />} />}
           {/* Migrate old permit-projects paths to new structure */}
           <Route path="/permit-projects" element={<RedirectScreen path="/projects" />} />
           <Route path="/permit-projects/projects">

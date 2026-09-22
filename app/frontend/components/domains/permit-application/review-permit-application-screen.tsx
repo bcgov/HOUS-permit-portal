@@ -23,6 +23,7 @@ import { useNavigate } from "react-router-dom"
 import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
 import { stickyBelowNavBar } from "../../../styles/nav-bar-offset"
 import { ECollaborationType, EPermitApplicationStatus } from "../../../types/enums"
+import { PrintPreviewLink } from "../../print/components/print-preview-link"
 import { CopyableValue } from "../../shared/base/copyable-value"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
@@ -237,6 +238,10 @@ export const ReviewPermitApplicationScreen = observer(() => {
                 {t("permitApplication.show.contactsSummary")}
               </Button>
               <SubmissionDownloadModal permitApplication={currentPermitApplication} review />
+              <PrintPreviewLink application={currentPermitApplication} />
+              {currentPermitApplication.stepCode && (
+                <PrintPreviewLink application={currentPermitApplication} associatedStepCode />
+              )}
               <RouterLinkButton to={parentProjectPath} variant="default" rightIcon={<CaretRight />}>
                 {t("permitApplication.show.goToProject")}
               </RouterLinkButton>

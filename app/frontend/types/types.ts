@@ -416,6 +416,7 @@ export interface ITemplateCustomization {
 
 export interface IDownloadableFile {
   id: string
+  submissionVersionId?: string
   dataKey?: string
   fileUrl: string
   fileName: string
