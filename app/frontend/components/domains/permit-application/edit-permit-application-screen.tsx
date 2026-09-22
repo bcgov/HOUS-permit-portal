@@ -28,6 +28,7 @@ import { ICustomEventMap } from "../../../types/dom"
 import { ECollaborationType, ECustomEvents, ERequirementType } from "../../../types/enums"
 import { findPidComponentKey } from "../../../utils/formio-component-traversal"
 import { handleScrollToBottom, handleScrollToTop } from "../../../utils/utility-functions"
+import { PrintPreviewLink } from "../../print/components/print-preview-link"
 import { CopyableValue } from "../../shared/base/copyable-value"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
@@ -376,6 +377,17 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
               </Flex>
             </HStack>
 
+            <HStack>
+              <PrintPreviewLink application={currentPermitApplication} />
+              {currentPermitApplication.stepCode && (
+                <PrintPreviewLink
+                  application={currentPermitApplication.latestSubmissionVersion ? currentPermitApplication : undefined}
+                  associatedStepCode={!!currentPermitApplication.latestSubmissionVersion}
+                  stepCode={currentPermitApplication.stepCode}
+                  checklist={currentPermitApplication.stepCode.currentChecklist}
+                />
+              )}
+            </HStack>
             {isSubmitted ? (
               <Stack direction={{ base: "column", lg: "row" }} align={{ base: "flex-end", lg: "center" }}>
                 <BrowserSearchPrompt />

@@ -310,6 +310,12 @@ Rails.application.routes.draw do
       collection { patch :reorder }
     end
 
+    get "permit_applications/:id/print_report", to: "print_reports#application"
+    get "permit_applications/:id/step_code_print_report",
+        to: "print_reports#application_step_code"
+    get "part_3_step_codes/:id/print_report", to: "print_reports#part3"
+    get "part_9_step_codes/:id/print_report", to: "print_reports#part9"
+
     resources :qa_tools, only: [] do
       collection do
         post "permit_projects/full", to: "qa_tools#create_full_permit_project"

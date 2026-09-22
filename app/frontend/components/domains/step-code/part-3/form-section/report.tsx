@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form"
 import { useNavigate } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step-code"
 import { EFileUploadAttachmentType } from "../../../../../types/enums"
+import { PrintPreviewLink } from "../../../../print/components/print-preview-link"
 import { FileDownloadButton } from "../../../../shared/base/file-download-button"
 import { ConfirmationModal } from "../../../../shared/confirmation-modal"
 import { usePart3Navigation } from "../use-part-3-navigation"
@@ -66,6 +67,7 @@ export const Report = observer(function Report() {
   return (
     <Flex direction="column" gap={6}>
       <SectionHeading>{t(`${i18nPrefix}.heading`)}</SectionHeading>
+      <PrintPreviewLink stepCode={currentStepCode} checklist={checklist} />
       {!freshReport && <Text>{t(`${i18nPrefix}.description`)}</Text>}
       <VStack align="start" spacing={3}>
         <Flex gap={3} align="center" wrap="wrap">
