@@ -151,6 +151,49 @@ RSpec.describe PermitProject, type: :model do
   end
 
   describe "instance methods" do
+    describe "#search_data" do
+      it "indexes all kept templates and submitted-only templates for inbox" do
+        project = create(:permit_project)
+        submitted_template = create(:live_requirement_template)
+        draft_template = create(:live_requirement_template)
+        submitted_version =
+          create(
+            :template_version,
+            requirement_template: submitted_template,
+            status: "published",
+            form_json: submitted_template.to_form_json
+          )
+        draft_version =
+          create(
+            :template_version,
+            requirement_template: draft_template,
+            status: "published",
+            form_json: draft_template.to_form_json
+          )
+        create(
+          :permit_application,
+          :newly_submitted,
+          permit_project: project,
+          template_version: submitted_version
+        )
+        create(
+          :permit_application,
+          status: :new_draft,
+          permit_project: project,
+          template_version: draft_version
+        )
+
+        data = project.search_data
+        expect(data[:requirement_template_ids]).to contain_exactly(
+          submitted_template.id,
+          draft_template.id
+        )
+        expect(data[:inbox_requirement_template_ids]).to contain_exactly(
+          submitted_template.id
+        )
+      end
+    end
+
     describe "#approved_count" do
       it "returns 0 when approved status is not supported" do
         project = create(:permit_project)

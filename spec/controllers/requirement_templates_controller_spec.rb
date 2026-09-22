@@ -435,6 +435,17 @@ RSpec.describe Api::RequirementTemplatesController,
       expect(option_labels).to contain_exactly("Plumbing permit")
     end
 
+    it "excludes meeting drafts from the inbox menu" do
+      create(:project_meeting, :open, permit_project: inbox_project)
+      review_manager =
+        create(:user, :review_manager, jurisdiction: jurisdiction)
+      sign_in review_manager
+      get :for_filter, params: { jurisdiction_id: jurisdiction.id }
+
+      expect(response).to have_http_status(:success)
+      expect(option_labels).to contain_exactly("Plumbing permit")
+    end
+
     it "returns category grouping fields ordered by category" do
       building = create(:template_category, label: "Building", sort_order: 0)
       trades = create(:template_category, label: "Trades", sort_order: 1)
