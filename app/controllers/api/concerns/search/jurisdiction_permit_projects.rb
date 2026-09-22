@@ -338,7 +338,9 @@ module Api::Concerns::Search::JurisdictionPermitProjects
 
     requirement_template_ids = search_filters.delete(:requirement_template_ids)
     if requirement_template_ids.present?
-      and_conditions << { requirement_template_ids: requirement_template_ids }
+      and_conditions << {
+        inbox_requirement_template_ids: requirement_template_ids
+      }
     end
 
     unread = search_filters.delete(:unread)
