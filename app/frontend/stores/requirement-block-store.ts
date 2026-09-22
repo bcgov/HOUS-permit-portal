@@ -52,6 +52,8 @@ export const RequirementBlockStoreModel = types
           return t("requirementsLibrary.fields.formFields")
         case ERequirementLibrarySortFields.updatedAt:
           return t("requirementsLibrary.fields.updatedAt")
+        case ERequirementLibrarySortFields.configurations:
+          return t("requirementsLibrary.configurationsColumn")
       }
     },
   }))
