@@ -14,6 +14,7 @@ function sourceDigest() {
   for (const path of [
     ...walk("app/frontend/components/print"),
     "app/frontend/i18n/i18n.ts",
+    "app/frontend/styles/brand.ts",
     "vite.print.config.mjs",
   ].sort()) {
     hash
@@ -24,7 +25,7 @@ function sourceDigest() {
   return hash.digest("hex")
 }
 
-// An isolated browser bundle, not SSR: ReportShell uses effects and a body portal.
+// Standalone PDF document: never imported by the application entrypoint.
 export default defineConfig({
   publicDir: false,
   plugins: [
@@ -49,7 +50,7 @@ export default defineConfig({
       name: "BPHReport",
       formats: ["iife"],
       fileName: () => "report.js",
-      cssFileName: "report",
+      cssFileName: "print",
     },
   },
 })

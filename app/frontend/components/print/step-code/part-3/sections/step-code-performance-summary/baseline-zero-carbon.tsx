@@ -1,22 +1,17 @@
 import React from "react"
 import { reportTranslation as t } from "../../../../components/report-translation"
-import { Text, View } from "../../../../components/step-code-primitives"
+import { ReportBlock, ReportText } from "../../../../components/step-code-layout"
 import { zeroCarbonI18nPrefix } from "./i18n-prefix"
-import { styles } from "./styles"
-
-interface IProps {
-  // Remove zeroCarbonPrefix: string;
-}
-
+interface IProps {}
 export const BaselineZeroCarbonPdf = (_props: IProps) => (
   <>
-    <View style={styles.fieldInputContainer}>
-      <Text style={styles.fieldLabel}>{t(`${zeroCarbonI18nPrefix}.levelRequired`)}</Text>
-      <Text style={{ fontWeight: "bold", fontSize: 12 }}>{t(`${zeroCarbonI18nPrefix}.notRequired`)}</Text>
-    </View>
-    <View style={styles.fieldInputContainer}>
-      <Text style={styles.fieldLabel}>{t(`${zeroCarbonI18nPrefix}.achieved`)}</Text>
-      <Text style={{ fontWeight: "bold", fontSize: 12 }}>{t(`${zeroCarbonI18nPrefix}.notRequired`)}</Text>
-    </View>
+    <ReportBlock className="report-summary-field">
+      <ReportText className="report-label">{t(`${zeroCarbonI18nPrefix}.levelRequired`)}</ReportText>
+      <ReportText className="report-strong">{t(`${zeroCarbonI18nPrefix}.notRequired`)}</ReportText>
+    </ReportBlock>
+    <ReportBlock className="report-summary-field">
+      <ReportText className="report-label">{t(`${zeroCarbonI18nPrefix}.achieved`)}</ReportText>
+      <ReportText className="report-strong">{t(`${zeroCarbonI18nPrefix}.notRequired`)}</ReportText>
+    </ReportBlock>
   </>
 )

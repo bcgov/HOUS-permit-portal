@@ -1,63 +1,32 @@
 import React from "react"
 import { IPart9StepCodeChecklist } from "../../../../../../../models/part-9-step-code-checklist"
-import { theme } from "../../../../../../../styles/theme"
 import { EFossilFuelsPresence } from "../../../../../../../types/enums"
 import { i18nPrefix } from "../../../../../../domains/step-code/part-9/checklist/building-characteristics-summary/i18n-prefix"
 import { reportTranslation as t } from "../../../../../components/report-translation"
-import { Field, GridItem, HStack, Text } from "../../../../../components/step-code-primitives"
-
+import { ReportCell, ReportMetric, ReportRow, ReportText } from "../../../../../components/step-code-layout"
 interface IProps {
   checklist: IPart9StepCodeChecklist
 }
-
 export function FossilFuels({ checklist }: IProps) {
   const { fossilFuels } = checklist.buildingCharacteristicsSummary
-
   return (
     <>
-      <HStack
-        style={{
-          width: "100%",
-          alignItems: "stretch",
-          backgroundColor: theme.colors.greys.grey03,
-          borderBottomWidth: 0.75,
-          borderColor: theme.colors.border.light,
-          gap: 0,
-        }}
-      >
-        <GridItem
-          style={{
-            flexBasis: "100%",
-            maxWidth: "100%",
-            borderRightWidth: 0,
-          }}
-        >
-          <Text style={{ fontSize: 10.5 }}>{t(`${i18nPrefix}.fossilFuels.label`)}</Text>
-        </GridItem>
-      </HStack>
+      <ReportRow>
+        <ReportCell colSpan={4}>
+          <ReportText>{t(`${i18nPrefix}.fossilFuels.label`)}</ReportText>
+        </ReportCell>
+      </ReportRow>
 
-      <HStack
-        style={{
-          width: "100%",
-          alignItems: "stretch",
-          gap: 0,
-        }}
-      >
-        <GridItem style={{ flexBasis: "100%", minWidth: "100%", borderRightWidth: 0 }}>
-          <Field value={t(`${i18nPrefix}.fossilFuels.${fossilFuels.presence as EFossilFuelsPresence}`)} />
-        </GridItem>
-      </HStack>
-      <HStack
-        style={{
-          width: "100%",
-          alignItems: "stretch",
-          gap: 0,
-        }}
-      >
-        <GridItem style={{ flexBasis: "100%", minWidth: "100%", borderRightWidth: 0 }}>
-          <Field value={fossilFuels.details} />
-        </GridItem>
-      </HStack>
+      <ReportRow>
+        <ReportCell colSpan={4}>
+          <ReportMetric value={t(`${i18nPrefix}.fossilFuels.${fossilFuels.presence as EFossilFuelsPresence}`)} />
+        </ReportCell>
+      </ReportRow>
+      <ReportRow>
+        <ReportCell colSpan={4}>
+          <ReportMetric value={fossilFuels.details} />
+        </ReportCell>
+      </ReportRow>
     </>
   )
 }

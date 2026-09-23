@@ -1,4 +1,5 @@
 web: bundle exec rails server -b 127.0.0.1 -p 3000
 vite: VITE_RUBY_HOST=127.0.0.1 VITE_RUBY_PORT=3036 bin/vite dev
+print: npm run dev:print
 worker: bundle exec sidekiq
 rpc: ANYCABLE_RPC_HOST=0.0.0.0:50051 bundle exec anycable

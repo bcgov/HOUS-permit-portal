@@ -1,16 +1,12 @@
 import React from "react"
 import { IPart3StepCodeChecklist } from "../../../../../../models/part-3-step-code-checklist"
-import { theme } from "../../../../../../styles/theme"
 import { IBaselineOccupancy } from "../../../../../../types/types"
 import { reportTranslation as t } from "../../../../components/report-translation"
-import { Input, Text, View } from "../../../../components/step-code-primitives"
+import { ReportBlock, ReportText, ReportValue } from "../../../../components/step-code-layout"
 import { energyI18nPrefix } from "./i18n-prefix"
-import { styles } from "./styles"
-
 interface IProps {
   checklist: IPart3StepCodeChecklist
 }
-
 export const BaselineEnergyPdf = ({ checklist }: IProps) => {
   const occupancy: IBaselineOccupancy | undefined = Array.isArray(checklist?.baselineOccupancies)
     ? checklist.baselineOccupancies[0]
@@ -20,40 +16,24 @@ export const BaselineEnergyPdf = ({ checklist }: IProps) => {
   const achievedValue = stepAchieved
     ? t(`stepCode.part3.performanceRequirements.${stepAchieved}`)
     : t("stepCode.part3.stepCodeSummary.stepCode.performanceRequirement.notAchieved")
-
   return (
     <>
-      <View style={styles.fieldInputContainer}>
-        <Text style={styles.fieldLabel}>{t(`${energyI18nPrefix}.stepRequired`)}</Text>
-        <Input
+      <ReportBlock className="report-summary-field">
+        <ReportText className="report-label">{t(`${energyI18nPrefix}.stepRequired`)}</ReportText>
+        <ReportValue
           value={
             occupancy?.performanceRequirement
               ? t(`stepCode.part3.performanceRequirements.${occupancy.performanceRequirement}`)
               : "-"
           }
-          inputStyles={styles.fieldInput}
+          className="report-summary-value"
         />
-      </View>
-      <View style={styles.fieldInputContainer}>
-        <Text style={styles.fieldLabel}>{t(`${energyI18nPrefix}.achieved`)}</Text>
-        <Input
-          value={achievedValue}
-          inputStyles={{
-            ...styles.fieldInput,
-            fontWeight: "bold",
-            backgroundColor:
-              resultKey === "success"
-                ? theme.colors.semantic.infoLight // Or successLight if defined
-                : theme.colors.semantic.errorLight,
-            borderColor:
-              resultKey === "success"
-                ? theme.colors.semantic.info // Or success if defined
-                : theme.colors.semantic.error,
-            borderWidth: 0.75,
-          }}
-        />
-      </View>
-      <Text style={styles.resultText}>{t(`${energyI18nPrefix}.result.${resultKey}`)}</Text>
+      </ReportBlock>
+      <ReportBlock className="report-summary-field">
+        <ReportText className="report-label">{t(`${energyI18nPrefix}.achieved`)}</ReportText>
+        <ReportValue value={achievedValue} className="report-summary-value report-strong" />
+      </ReportBlock>
+      <ReportText className="report-result-note">{t(`${energyI18nPrefix}.result.${resultKey}`)}</ReportText>
     </>
   )
 }

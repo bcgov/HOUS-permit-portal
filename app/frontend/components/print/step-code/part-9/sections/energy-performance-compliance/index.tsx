@@ -1,10 +1,15 @@
 import React from "react"
 import { IPart9StepCodeChecklist } from "../../../../../../models/part-9-step-code-checklist"
-import { theme } from "../../../../../../styles/theme"
 import { i18nPrefix } from "../../../../../domains/step-code/part-9/checklist/energy-performance-compliance/i18n-prefix"
 import { reportTranslation as t } from "../../../../components/report-translation"
-import { CheckBox, Divider, Field, HStack, Panel, Text } from "../../../../components/step-code-primitives"
-
+import {
+  ReportBoolean,
+  ReportDivider,
+  ReportMetric,
+  ReportPanel,
+  ReportRow,
+  ReportText,
+} from "../../../../components/step-code-layout"
 interface IProps {
   checklist: IPart9StepCodeChecklist
 }
@@ -13,19 +18,23 @@ export const EnergyPerformanceCompliance = function StepCodeChecklistPDFEnergyPe
 }: IProps) {
   const report = checklist.selectedReport?.energy
   return (
-    <Panel heading={t(`${i18nPrefix}.heading`)} break>
-      <Text style={{ fontSize: 12, fontWeight: 700 }}>{t(`${i18nPrefix}.proposedHouseEnergyConsumption`)}</Text>
+    <ReportPanel heading={t(`${i18nPrefix}.heading`)}>
+      <ReportText className="report-strong">{t(`${i18nPrefix}.proposedHouseEnergyConsumption`)}</ReportText>
 
-      <HStack style={{ width: "100%" }}>
-        <Field value={checklist.hvacConsumption} hint={t(`${i18nPrefix}.energyUnit`)} label={t(`${i18nPrefix}.hvac`)} />
-        <Text style={{ fontWeight: 700, fontSize: 18, marginRight: 6 }}>+</Text>
-        <Field
+      <ReportRow className="report-equation">
+        <ReportMetric
+          value={checklist.hvacConsumption}
+          hint={t(`${i18nPrefix}.energyUnit`)}
+          label={t(`${i18nPrefix}.hvac`)}
+        />
+        <ReportText className="report-strong">+</ReportText>
+        <ReportMetric
           label={t(`${i18nPrefix}.dwhHeating`)}
           value={checklist.dhwHeatingConsumption}
           hint={t(`${i18nPrefix}.energyUnit`)}
         />
-        <Text style={{ fontWeight: 700, fontSize: 18, marginRight: 6 }}>=</Text>
-        <Field
+        <ReportText className="report-strong">=</ReportText>
+        <ReportMetric
           label={t(`${i18nPrefix}.sum`)}
           value={
             [checklist.dhwHeatingConsumption, checklist.hvacConsumption].every(
@@ -36,24 +45,26 @@ export const EnergyPerformanceCompliance = function StepCodeChecklistPDFEnergyPe
           }
           hint={t(`${i18nPrefix}.energyUnit`)}
         />
-      </HStack>
+      </ReportRow>
 
-      <Divider />
+      <ReportDivider />
 
-      <HStack style={{ width: "100%", gap: 3.5 }}>
-        <Field
+      <ReportRow>
+        <ReportMetric
           label={t(`${i18nPrefix}.calculationAirtightness`)}
           value={t(`${i18nPrefix}.airtightnessValue.options.${checklist.epcCalculationAirtightness}`)}
         />
-      </HStack>
-      <HStack style={{ width: "100%", alignItems: "flex-end" }}>
-        <Field label={t(`${i18nPrefix}.calculationTestingTarget`)} value={report?.ach} />
-        <Field value={t(`${i18nPrefix}.epcTestingTargetType.options.${checklist.epcCalculationTestingTargetType}`)} />
-      </HStack>
-      <HStack style={{ width: "100%", gap: 3.5 }}>
-        <CheckBox isChecked={checklist.epcCalculationCompliance} />
-        <Text style={{ fontSize: 10.5, color: theme.colors.text.primary }}>{t(`${i18nPrefix}.compliance`)}</Text>
-      </HStack>
-    </Panel>
+      </ReportRow>
+      <ReportRow>
+        <ReportMetric label={t(`${i18nPrefix}.calculationTestingTarget`)} value={report?.ach} />
+        <ReportMetric
+          value={t(`${i18nPrefix}.epcTestingTargetType.options.${checklist.epcCalculationTestingTargetType}`)}
+        />
+      </ReportRow>
+      <ReportRow>
+        <ReportBoolean isChecked={checklist.epcCalculationCompliance} />
+        <ReportText>{t(`${i18nPrefix}.compliance`)}</ReportText>
+      </ReportRow>
+    </ReportPanel>
   )
 }

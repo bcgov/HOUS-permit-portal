@@ -10,8 +10,9 @@ toolbars, or browser fixture screens.
 - `report-content.tsx` selects the application, Part 3, or Part 9 report.
 - `form/` renders application schema fields and saved answers.
 - `components/` provides shared report primitives, cover, and readiness handling.
-- `styles/report.css` defines layout and print rules; `styles/tokens.css` defines
-  report fonts, colours, and spacing. Step-code components also use inline styles.
+- `styles/print.css` defines layout and print rules; `styles/tokens.css` defines
+  report defaults. Foundational BC blue, gold, and font identity come from the
+  dependency-free shared `styles/brand.ts`; app theme values are unchanged.
 - `__tests__/fixtures/` contains synthetic data used by automated PDF tests.
 
 Rails `PrintReports::Data.for_generation` requires explicit submission/checklist
@@ -22,8 +23,10 @@ Historical step-code reports use the saved checklist snapshot, not the current o
 
 ## Build and readiness
 
-Run `npm run build:print`, or `npm run dev:print` to watch changes. Vite writes
-`public/vite-print/report.js`, `report.css`, and a source digest manifest. Rails
+`npm run build` builds both the application and report bundles; `bin/dev` watches
+both automatically. Rails asset precompilation also includes reports. The internal
+`build:print` and `dev:print` scripts remain available for report-only work. Vite writes
+`public/vite-print/report.js`, `print.css`, and a source digest manifest. Rails
 rejects missing or stale assets and packages the bundle, fonts, logo, and data
 for Gotenberg. Keep layout changes here rather than adding another report layout.
 
@@ -41,3 +44,26 @@ clipping, overlap, missing answers, and unexpected blank pages.
 When adding field renderers, preserve raw schema keys, false, zero, repeating
 entries, and saved option labels. Do not load current answers or mutate form data.
 See the root README for local setup and the job/attachment/ZIP workflow.
+
+## Report design
+
+Letter portrait uses half-inch top/side margins and a three-quarter-inch footer
+margin. The dedicated cover is counted but has no footer. Content pages show the
+saved reference and version/stage, with Page X of Y in CSS page-margin boxes.
+Dynamic footer text is hex-escaped before insertion into CSS.
+
+Application layout wrappers retain their visibility/data scopes but do not add
+visual nesting. A repeated enclosing heading is suppressed, never an answer.
+Short scalar fields are paired inside their logical group (labels <=60 and values
+<=80 characters); multiline, compound, address and long fields stay full width.
+Wide/complex repeating grids become labelled records. Empty answers remain explicit.
+
+Step-code sections use semantic report blocks and explicit table spans, without
+React-PDF style conversion or imports of the interactive application's theme.
+Use typed table layout/keepTogether options and report classes rather than inline
+presentation styles. Long tables repeat headers, and oversized records may split;
+readability and preserving every answer take priority over minimizing page count.
+
+The live renderer specs cover historical source handling, nesting/conditions,
+long records, repeated headers, footer escaping/page counts, populated Part 9
+(including distinct TEDI/MEUI values), and Part 3 standard/baseline/mixed-use cases.

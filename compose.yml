@@ -2,7 +2,7 @@
 name: hous-permit-portal-local
 services:
   gotenberg:
-    image: gotenberg/gotenberg:8.32.0@sha256:a40c5a46b79d812ce2f5e139278163142a054050bfd1e5f162da36d3d11c7138
+    image: gotenberg/gotenberg:8.32.0
     ports:
       - "127.0.0.1:${GOTENBERG_HOST_PORT:-13000}:3000"
     command:
