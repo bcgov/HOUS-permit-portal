@@ -428,6 +428,8 @@ export interface IDownloadableFile {
   fileName: string
   fileSize: number
   createdAt: Date
+  submissionVersionId?: string | null
+  revisionRequestId?: string | null
 }
 
 export interface IEULA {
