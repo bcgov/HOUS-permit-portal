@@ -1,6 +1,27 @@
 # Local infrastructure only; Ruby and Node run on the host.
 name: hous-permit-portal-local
 services:
+  gotenberg:
+    image: gotenberg/gotenberg:8.32.0@sha256:a40c5a46b79d812ce2f5e139278163142a054050bfd1e5f162da36d3d11c7138
+    ports:
+      - "127.0.0.1:${GOTENBERG_HOST_PORT:-13000}:3000"
+    command:
+      - gotenberg
+      - --chromium-max-concurrency=1
+      - --chromium-max-queue-size=5
+      - --api-timeout=60s
+      - --api-body-limit=50MB
+      - --chromium-deny-list=^https?://,^file:(?!///tmp/).*
+      - --libreoffice-disable-routes=true
+      - --api-disable-download-from=true
+      - --webhook-disable=true
+    mem_limit: 2g
+    healthcheck:
+      test: [CMD, curl, -fsS, http://localhost:3000/health]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
   postgres:
     image: postgres:15.10-alpine
     environment:

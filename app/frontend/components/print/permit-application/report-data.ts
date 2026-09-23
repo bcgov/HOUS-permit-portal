@@ -19,23 +19,3 @@ export interface ReportData {
   checklist?: Record<string, any>
   step_code?: Record<string, any>
 }
-/** Preserve FormIO schema keys exactly; the normal API camelizer rewrites nested schema keys. */
-export async function fetchReportData(endpoint: string, signal: AbortSignal): Promise<ReportData> {
-  const sandbox = JSON.parse(localStorage.getItem("SandboxStore") || "null")?.currentSandboxId
-  const response = await fetch(`/api/${endpoint}`, {
-    credentials: "same-origin",
-    signal,
-    cache: "no-store",
-    headers: sandbox ? { "X-Sandbox-ID": sandbox } : {},
-  })
-  if (!response.ok) {
-    const failure = await response.json().catch(() => ({}))
-    throw new Error(
-      response.status === 403
-        ? "You do not have access to this report."
-        : failure.error || "The requested report or saved snapshot is unavailable."
-    )
-  }
-  const { data } = await response.json()
-  return data
-}

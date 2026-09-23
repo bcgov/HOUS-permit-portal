@@ -2,21 +2,15 @@ module PrintReports
   class Data
     class Unavailable < StandardError
     end
-    def initialize(user)
-      @user = user
+    # Only background generation consumes report data; there is no browser API.
+    def self.for_generation
+      new
     end
 
     def application(record, version_id = nil)
       version = selected_version(record, version_id)
-      schema =
-        (
-          if version
-            version.form_json
-          else
-            record.form_json(current_user: report_field_user(record))
-          end
-        )
-      answers = version ? version.submission_data : record.submission_data
+      schema = version.form_json
+      answers = version.submission_data
       unless schema.is_a?(Hash) && schema["components"].is_a?(Array) &&
                answers.is_a?(Hash)
         raise ActiveRecord::RecordNotFound
@@ -25,16 +19,12 @@ module PrintReports
       {
         kind: "application",
         identity: application_identity(record, version),
-        form_json:
-          presentation_schema(
-            record,
-            permitted_schema(record, schema.deep_dup)
-          ),
+        form_json: presentation_schema(record, schema.deep_dup),
         submission_data:
           PermitApplication::SubmissionDataService.new(
             record
           ).formatted_submission_data(
-            current_user: report_field_user(record),
+            current_user: nil,
             submission_data: answers
           )
       }
@@ -73,14 +63,10 @@ module PrintReports
     end
 
     def step_code(record, checklist_id = nil)
-      checklist =
-        (
-          if checklist_id.present?
-            record.checklists.find(checklist_id)
-          else
-            record.current_checklist
-          end
-        )
+      if checklist_id.blank?
+        raise ArgumentError, "Explicit checklist ID required"
+      end
+      checklist = record.checklists.find(checklist_id)
       raise ActiveRecord::RecordNotFound unless checklist
       data =
         record
@@ -115,8 +101,10 @@ module PrintReports
     private
 
     def selected_version(record, id)
-      return record.submission_versions.find(id) if id.present?
-      record.submission_versions.order(created_at: :desc, id: :desc).first
+      if id.blank?
+        raise ArgumentError, "Explicit submission version ID required"
+      end
+      record.submission_versions.find(id)
     end
 
     def application_identity(record, version)
@@ -124,9 +112,9 @@ module PrintReports
         number: record.number,
         # Address/title are current application metadata; historical answers below
         # always come from the selected snapshot and are never substituted.
-        title: version ? "Submitted application" : record.nickname,
-        address: version ? nil : record.full_address,
-        status: version ? "Submitted" : "Draft",
+        title: "Submitted application",
+        address: nil,
+        status: "Submitted",
         version_number: version&.version_number,
         submission_version_id: version&.id,
         submitted_at: version&.created_at,
@@ -172,44 +160,6 @@ module PrintReports
           end
         end
       visit.call(schema)
-      schema
-    end
-
-    # Match PermitApplicationBlueprint's jurisdiction_review_extended view:
-    # reviewers can read the complete form after controller authorization.
-    def report_field_user(record)
-      if @user.review_staff? && @user.member_of?(record.jurisdiction_id)
-        return nil
-      end
-      @user
-    end
-
-    def permitted_schema(record, schema)
-      return schema if report_field_user(record).nil?
-      permissions =
-        record.submission_requirement_block_edit_permissions(user_id: @user.id)
-      return schema if permissions == :all
-      permissions = Array(permissions)
-      filter =
-        lambda do |components|
-          Array(components).filter_map do |component|
-            block_id = component["key"].to_s[/\|RB([^|]+)/, 1]
-            next if block_id && !permissions.include?(block_id)
-            component["components"] = filter.call(
-              component["components"]
-            ) if component["components"]
-            Array(component["columns"]).each do |column|
-              column["components"] = filter.call(column["components"])
-            end
-            Array(component["rows"]).flatten.each do |cell|
-              cell["components"] = filter.call(
-                cell["components"]
-              ) if cell.is_a?(Hash)
-            end
-            component
-          end
-        end
-      schema["components"] = filter.call(schema["components"])
       schema
     end
   end
