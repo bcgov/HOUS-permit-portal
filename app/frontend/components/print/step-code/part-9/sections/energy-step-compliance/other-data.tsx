@@ -1,30 +1,19 @@
 import React from "react"
 import { IStepCodeEnergyComplianceReport } from "../../../../../../models/step-code-energy-compliance-report"
-import { theme } from "../../../../../../styles/theme"
 import { i18nPrefix } from "../../../../../domains/step-code/part-9/checklist/energy-step-code-compliance/i18n-prefix"
 import { reportTranslation as t } from "../../../../components/report-translation"
-import { GridItem, HStack, Text, VStack } from "../../../../components/step-code-primitives"
-
+import { ReportCell, ReportRow, ReportStack, ReportText } from "../../../../components/step-code-layout"
 interface IProps {
   report: IStepCodeEnergyComplianceReport
 }
 export function OtherData({ report }: IProps) {
   return (
-    <VStack style={{ width: "100%", borderWidth: 0.75, borderColor: theme.colors.border.light, gap: 0 }} wrap={false}>
-      <HStack
-        style={{
-          width: "100%",
-          alignItems: "stretch",
-          backgroundColor: theme.colors.greys.grey03,
-          borderBottomWidth: 0.75,
-          borderColor: theme.colors.border.light,
-          gap: 0,
-        }}
-      >
-        <GridItem style={{ flexBasis: "100%", minWidth: "100%" }}>
-          <Text style={{ fontSize: 10.5, fontWeight: 700 }}>{t(`${i18nPrefix}.otherData.header`)}</Text>
-        </GridItem>
-      </HStack>
+    <ReportStack>
+      <ReportRow>
+        <ReportCell colSpan={4}>
+          <ReportText className="report-strong">{t(`${i18nPrefix}.otherData.header`)}</ReportText>
+        </ReportCell>
+      </ReportRow>
 
       <Row label={t(`${i18nPrefix}.otherData.software`)} value={report.softwareName} />
       <Row label={t(`${i18nPrefix}.otherData.softwareVersion`)} value={report.softwareVersion} />
@@ -35,27 +24,18 @@ export function OtherData({ report }: IProps) {
       <Row label={t(`${i18nPrefix}.otherData.climateLocation`)} value={report.location} />
       <Row label={t(`${i18nPrefix}.otherData.hdd`)} value={report.heatingDegreeDays} />
       <Row label={t(`${i18nPrefix}.otherData.spaceCooled`)} value={report.conditionedPercent} isLast />
-    </VStack>
+    </ReportStack>
   )
 }
-
 function Row({ label, value, isLast = false }) {
   return (
-    <HStack
-      style={{
-        width: "100%",
-        alignItems: "stretch",
-        borderBottomWidth: isLast ? 0 : 0.75,
-        borderColor: theme.colors.border.light,
-        gap: 0,
-      }}
-    >
-      <GridItem style={{ flexBasis: "50%", minWidth: "50%" }}>
-        <Text style={{ fontSize: 10.5 }}>{label}</Text>
-      </GridItem>
-      <GridItem style={{ flexBasis: "50%", minWidth: "50%" }}>
-        <Text style={{ fontSize: 10.5 }}>{value}</Text>
-      </GridItem>
-    </HStack>
+    <ReportRow>
+      <ReportCell colSpan={2}>
+        <ReportText>{label}</ReportText>
+      </ReportCell>
+      <ReportCell colSpan={2}>
+        <ReportText>{value}</ReportText>
+      </ReportCell>
+    </ReportRow>
   )
 }

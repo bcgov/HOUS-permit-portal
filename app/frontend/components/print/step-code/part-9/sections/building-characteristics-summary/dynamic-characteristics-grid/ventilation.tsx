@@ -1,11 +1,9 @@
 import React from "react"
 import { IPart9StepCodeChecklist } from "../../../../../../../models/part-9-step-code-checklist"
-import { theme } from "../../../../../../../styles/theme"
 import { generateUUID } from "../../../../../../../utils/utility-functions"
 import { i18nPrefix } from "../../../../../../domains/step-code/part-9/checklist/building-characteristics-summary/i18n-prefix"
 import { reportTranslation as t } from "../../../../../components/report-translation"
-import { Field, GridItem, HStack, Text } from "../../../../../components/step-code-primitives"
-
+import { ReportCell, ReportMetric, ReportRow, ReportText } from "../../../../../components/step-code-layout"
 interface IProps {
   checklist: IPart9StepCodeChecklist
 }
@@ -13,53 +11,26 @@ export function Ventilation({ checklist }: IProps) {
   const lines = checklist.buildingCharacteristicsSummary.ventilationLines
   return (
     <>
-      <HStack
-        style={{
-          width: "100%",
-          alignItems: "stretch",
-          backgroundColor: theme.colors.greys.grey03,
-          borderBottomWidth: 0.75,
-          borderColor: theme.colors.border.light,
-          gap: 0,
-        }}
-      >
-        <GridItem
-          style={{
-            flexBasis: "100%",
-            maxWidth: "100%",
-            borderRightWidth: 0,
-          }}
-        >
-          <Text style={{ fontSize: 10.5 }}>{t(`${i18nPrefix}.ventilation`)}</Text>
-        </GridItem>
-      </HStack>
+      <ReportRow>
+        <ReportCell colSpan={4}>
+          <ReportText>{t(`${i18nPrefix}.ventilation`)}</ReportText>
+        </ReportCell>
+      </ReportRow>
       {lines.map((line, index) => (
-        <HStack
-          key={generateUUID()}
-          style={{
-            width: "100%",
-            alignItems: "stretch",
-            gap: 0,
-          }}
-        >
-          <GridItem style={{ flexBasis: "50%", minWidth: "50%", alignItems: "flex-start" }}>
-            <Field value={line.details} />
-          </GridItem>
-          <GridItem style={{ flexBasis: "25%", minWidth: "25%" }}>
-            <Field
-              value={line.percent_eff}
-              hint={index == lines.length - 1 && t(`${i18nPrefix}.percent_eff`)}
-              inputStyle={{ justifyContent: "center" }}
-            />
-          </GridItem>
-          <GridItem style={{ flexBasis: "25%", minWidth: "25%", borderRightWidth: 0 }}>
-            <Field
+        <ReportRow key={generateUUID()}>
+          <ReportCell colSpan={2}>
+            <ReportMetric value={line.details} />
+          </ReportCell>
+          <ReportCell colSpan={1}>
+            <ReportMetric value={line.percent_eff} hint={index == lines.length - 1 && t(`${i18nPrefix}.percent_eff`)} />
+          </ReportCell>
+          <ReportCell colSpan={1}>
+            <ReportMetric
               value={line.litersPerSec}
               hint={index == lines.length - 1 && t(`${i18nPrefix}.litersPerSec`)}
-              inputStyle={{ justifyContent: "center" }}
             />
-          </GridItem>
-        </HStack>
+          </ReportCell>
+        </ReportRow>
       ))}
     </>
   )

@@ -1,8 +1,7 @@
 import React from "react"
 import { IPart3StepCode } from "../../../../../../models/part-3-step-code"
 import { reportTranslation as t } from "../../../../components/report-translation"
-import { Field, Panel, View } from "../../../../components/step-code-primitives"
-
+import { ReportBlock, ReportMetric, ReportPanel } from "../../../../components/step-code-layout"
 interface IProps {
   stepCode: Partial<IPart3StepCode>
 }
@@ -10,21 +9,20 @@ export const ProjectInfo = function StepCodePart3ChecklistPDFProjectInfo({ stepC
   type TPrefix = "stepCode.part3.projectDetails"
   const i18nPrefix: TPrefix = "stepCode.part3.projectDetails"
   return (
-    <Panel heading={t(`${i18nPrefix}.heading`)}>
-      <Field label={t(`${i18nPrefix}.name`)} value={stepCode.title} />
-      <View style={{ display: "flex", flexDirection: "row", gap: 6 }}>
-        <Field label={t(`${i18nPrefix}.address`)} value={stepCode.fullAddress} style={{ flex: 1 }} />
-        <Field label={t(`${i18nPrefix}.jurisdiction`)} value={stepCode.jurisdictionName} style={{ flex: 1 }} />
-      </View>
-      <View style={{ display: "flex", flexDirection: "row", gap: 6 }}>
-        <Field label={t(`${i18nPrefix}.identifier`)} value={stepCode.referenceNumber} style={{ flex: 1 }} />
-        <Field
+    <ReportPanel heading={t(`${i18nPrefix}.heading`)}>
+      <ReportMetric label={t(`${i18nPrefix}.name`)} value={stepCode.title} />
+      <ReportBlock className="report-columns">
+        <ReportMetric label={t(`${i18nPrefix}.address`)} value={stepCode.fullAddress} />
+        <ReportMetric label={t(`${i18nPrefix}.jurisdiction`)} value={stepCode.jurisdictionName} />
+      </ReportBlock>
+      <ReportBlock className="report-columns">
+        <ReportMetric label={t(`${i18nPrefix}.identifier`)} value={stepCode.referenceNumber} />
+        <ReportMetric
           label={t(`${i18nPrefix}.stage`)}
           value={stepCode.currentStage ? t(`${i18nPrefix}.stages.${stepCode.currentStage}`) : ""}
-          style={{ flex: 1 }}
         />
-        <Field label={t(`${i18nPrefix}.date`)} value={stepCode.permitDate || ""} style={{ flex: 1 }} />
-      </View>
-    </Panel>
+        <ReportMetric label={t(`${i18nPrefix}.date`)} value={stepCode.permitDate || ""} />
+      </ReportBlock>
+    </ReportPanel>
   )
 }

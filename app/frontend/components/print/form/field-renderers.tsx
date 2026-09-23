@@ -99,7 +99,7 @@ Object.entries(aliases).forEach(([alias, base]) => {
 fieldRenderers.signature = fieldRenderers.simplesignatureadvanced = ({ value }) => {
   // Only raster data URLs; never execute or fetch an arbitrary saved signature URL.
   if (typeof value === "string" && /^data:image\/(png|jpeg);base64,[A-Za-z0-9+/=\s]+$/.test(value)) {
-    return <img src={value} alt="Submitted signature" style={{ maxWidth: "100%", width: "3in", height: "auto" }} />
+    return <img src={value} alt="Submitted signature" className="report-signature" />
   }
   return <>{displayValue(value)}</>
 }

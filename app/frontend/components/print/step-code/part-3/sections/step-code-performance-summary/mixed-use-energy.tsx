@@ -1,27 +1,22 @@
 import React from "react"
 import { reportTranslation as t } from "../../../../components/report-translation"
-import { Input, Text, View } from "../../../../components/step-code-primitives"
+import { ReportBlock, ReportText, ReportValue } from "../../../../components/step-code-layout"
 import { energyI18nPrefix } from "./i18n-prefix"
-import { styles } from "./styles"
-
-interface IProps {
-  // Remove energyPrefix: string;
-}
-
+interface IProps {}
 export const MixedUseEnergyPdf = (_props: IProps) => {
   return (
     <>
-      <Text style={{ fontSize: 10.5, textAlign: "center" }}>{t(`${energyI18nPrefix}.multiOccupancy`)}</Text>
-      <View style={styles.fieldInputContainer}>
-        <Text style={styles.fieldLabel}>{t(`${energyI18nPrefix}.stepRequired`)}</Text>
-        <Input value="-" inputStyles={styles.fieldInput} />
-      </View>
+      <ReportText>{t(`${energyI18nPrefix}.multiOccupancy`)}</ReportText>
+      <ReportBlock className="report-summary-field">
+        <ReportText className="report-label">{t(`${energyI18nPrefix}.stepRequired`)}</ReportText>
+        <ReportValue value="-" className="report-summary-value" />
+      </ReportBlock>
       {/* Step result is expressed in text for printing. */}
 
-      <View style={styles.fieldInputContainer}>
-        <Text style={styles.fieldLabel}>{t(`${energyI18nPrefix}.achieved`)}</Text>
-        <Input value="-" inputStyles={styles.fieldInput} />
-      </View>
+      <ReportBlock className="report-summary-field">
+        <ReportText className="report-label">{t(`${energyI18nPrefix}.achieved`)}</ReportText>
+        <ReportValue value="-" className="report-summary-value" />
+      </ReportBlock>
     </>
   )
 }

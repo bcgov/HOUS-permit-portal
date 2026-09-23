@@ -33,10 +33,8 @@ jobs:
         run: |
           bundle install
           npm ci
-      - name: Build Frontend
+      - name: Build Frontend and PDF Reports
         run: npm run build
-      - name: Build PDF Renderer
-        run: npm run build:print
 
   test:
     runs-on: ubuntu-latest

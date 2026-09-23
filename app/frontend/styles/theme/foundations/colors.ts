@@ -1,3 +1,4 @@
+import { brand } from "../../brand"
 export const colors = {
   text: {
     primary: "#292929",
@@ -5,7 +6,7 @@ export const colors = {
     link: "#1A5A96",
   },
   theme: {
-    blue: "#003366",
+    blue: brand.blue,
     blueAlt: "#38598A",
     blueLight: "#F6F9FC",
 
@@ -13,7 +14,7 @@ export const colors = {
       "var(--Gradient-Blue-Background, linear-gradient(125deg, #142B43 -52.7%, #142B43 -52.68%, #054277 47.38%, #142B43 137.55%))",
     blueShadedDark: "rgba(1, 51, 102, 0.90)",
     blueShadedLight: "rgba(1, 51, 102, 0.40)",
-    yellow: "#FCBA19",
+    yellow: brand.yellow,
     yellowLight: "#FEF2D6",
     gold: "#FEF8E8",
     green: {

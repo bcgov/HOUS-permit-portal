@@ -46,7 +46,7 @@ COPY . .
 # Precompile bootsnap code for faster boot times
 RUN bundle exec bootsnap precompile app/ lib/
 
-# Precompiling assets for production without requiring secret RAILS_MASTER_KEY and the HTML report bundle
+# Precompile application and report assets without requiring secret RAILS_MASTER_KEY
 ARG VITE_ENABLE_TEMPLATE_FORCE_PUBLISH
 ARG VITE_BCEID_URL
 ARG VITE_BUSINESS_BCEID_REGISTRATION_URL
@@ -58,7 +58,6 @@ ARG VITE_MATOMO_URL
 ARG VITE_QA_MODE
 COPY config/database.yml.docker_precompile_dummy /app/config/database.yml
 RUN SECRET_KEY_BASE_DUMMY=1 IS_DOCKER_BUILD=true VITE_ENABLE_TEMPLATE_FORCE_PUBLISH=${VITE_ENABLE_TEMPLATE_FORCE_PUBLISH} VITE_BCEID_URL=${VITE_BCEID_URL} VITE_BUSINESS_BCEID_REGISTRATION_URL=${VITE_BUSINESS_BCEID_REGISTRATION_URL} VITE_BASIC_BCEID_REGISTRATION_URL=${VITE_BASIC_BCEID_REGISTRATION_URL} VITE_BCSC_REGISTRATION_URL=${VITE_BCSC_REGISTRATION_URL} VITE_RELEASE_VERSION=${VITE_RELEASE_VERSION} VITE_BCEID_PARTNER_URL=${VITE_BCEID_PARTNER_URL} VITE_MATOMO_URL=${VITE_MATOMO_URL} VITE_QA_MODE=${VITE_QA_MODE} ./bin/rails assets:precompile
-RUN npm run build:print
 
 # Gem archives may have restrictive modes; the Rails user needs read access.
 RUN useradd rails --create-home --shell /bin/bash && \

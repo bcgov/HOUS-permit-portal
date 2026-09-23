@@ -16,6 +16,7 @@ export const StepCodeWholeBuildingPdf = ({
   const prefix = "stepCode.part3.stepCodeSummary.mixedUse.wholeBuilding"
   return (
     <ReportTable
+      layout="metrics"
       headers={[
         "",
         <>
