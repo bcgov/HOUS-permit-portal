@@ -147,3 +147,5 @@ gem "hexapdf"
 gem "data_migrate", "~> 11.3"
 
 gem "audited", "~> 5.4"
+
+gem "pdf-reader", "~> 2.15"

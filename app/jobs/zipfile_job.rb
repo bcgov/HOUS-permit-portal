@@ -20,8 +20,7 @@ class ZipfileJob
 
     version_ids_at_start = permit_application.submission_versions.pluck(:id)
 
-    PdfGenerationJob.new.perform(permit_application_id)
-    SupportingDocumentsZipper.new(permit_application_id).perform
+    build_packages(permit_application, version_ids_at_start)
 
     permit_application.reload
     newly_ready = permit_application.mark_submission_packages_ready!
@@ -48,6 +47,33 @@ class ZipfileJob
       (
         permit_application.submission_versions.pluck(:id) - version_ids_at_start
       ).any?
+  end
+
+  def build_packages(application, version_ids)
+    versions =
+      application
+        .submission_versions
+        .where(id: version_ids)
+        .order(:created_at, :id)
+        .to_a
+    rebuild_ids =
+      versions
+        .select do |v|
+          v.missing_pdfs? || v.zipfile_data.blank? || v.package_ready_at.blank?
+        end
+        .map(&:id)
+    PdfGenerationJob.new.perform(application.id, version_ids)
+    cumulative_ids = []
+    versions.each do |version|
+      cumulative_ids << version.id
+      next unless rebuild_ids.include?(version.id)
+      raise "Required PDFs are missing" if version.reload.missing_pdfs?
+      SupportingDocumentsZipper.new(
+        application.id,
+        submission_version: version,
+        version_ids: cumulative_ids.dup
+      ).perform
+    end
   end
 
   def after_unlock

@@ -7,7 +7,7 @@ const date = (value?: string) =>
 export function ReportCover({ identity, title }: { identity: ReportIdentity; title: string }) {
   return (
     <header className="report-cover">
-      <img src="/images/logo.png" alt="Government of British Columbia" />
+      <img src="logo.png" alt="Government of British Columbia" />
       <p className="report-eyebrow">Building Permit Hub · Record copy</p>
       <h1>{title}</h1>
       <p>{identity.address || identity.title}</p>

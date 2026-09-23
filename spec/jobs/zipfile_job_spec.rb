@@ -4,13 +4,6 @@ require "sidekiq/testing"
 RSpec.describe ZipfileJob, type: :job do
   before { Sidekiq::Testing.fake! }
 
-  def stub_package_pipeline(pa)
-    versions = double("Versions")
-    allow(pa).to receive(:submission_versions).and_return(versions)
-    allow(versions).to receive(:pluck).with(:id).and_return([])
-    allow(pa).to receive(:mark_submission_packages_ready!).and_return([])
-  end
-
   it "locks by permit_application_id" do
     expect(described_class.lock_args(%w[pa1 x])).to eq(["pa1"])
   end
@@ -24,24 +17,24 @@ RSpec.describe ZipfileJob, type: :job do
       zipper
     )
 
-    pa =
-      instance_double(
-        "PermitApplication",
-        notifiable_users: double("UsersRel", pluck: ["u1"]),
-        reload: true,
-        mark_submission_packages_ready!: [],
-        enqueue_package_ready_webhooks: true
-      )
-    stub_package_pipeline(pa)
-    allow(PermitApplication).to receive(:find_by_id).with("pa1").and_return(pa)
+    pa = create(:permit_application, :newly_submitted)
+    version = pa.latest_submission_version
+    allow_any_instance_of(SubmissionVersion).to receive(
+      :missing_pdfs?
+    ).and_return(false)
+    allow(SupportingDocumentsZipper).to receive(:new).with(
+      pa.id,
+      submission_version: version,
+      version_ids: [version.id]
+    ).and_return(zipper)
     allow(PermitApplicationBlueprint).to receive(:render_as_hash).and_return(
       { "p" => 1 }
     )
     allow(WebsocketBroadcaster).to receive(:push_update_to_relevant_users)
 
-    described_class.new.perform("pa1")
+    described_class.new.perform(pa.id)
 
-    expect(pdf_job).to have_received(:perform).with("pa1")
+    expect(pdf_job).to have_received(:perform).with(pa.id, [version.id])
     expect(zipper).to have_received(:perform)
     expect(WebsocketBroadcaster).to have_received(
       :push_update_to_relevant_users

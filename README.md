@@ -155,7 +155,7 @@ ANYCABLE_RPC_HOST=0.0.0.0:50051 bundle exec anycable
 - If a published port is occupied, stop the conflicting service or change the port and its matching application setting in the table above. Restart affected processes after configuration changes.
 - If readiness times out, inspect logs and Docker memory/disk availability. Elasticsearch keeps the Apple Silicon JVM workaround and uses a 512 MB heap.
 - The gateway can start before Ruby RPC, but authenticated WebSockets need the RPC process running.
-- After changing PDF renderer code, run `npm run build:ssr` again.
+- After changing PDF renderer code, run `npm run build:print` again.
 - If initial seeding fails, fix the reported error and run `bin/rails db:seed`, then rerun `./bin/setup` to finish preparation. You can also run seeds explicitly when needed; they are not part of daily startup. Keep infrastructure running while seeding.
 
 ## DevOps
@@ -202,3 +202,71 @@ then in your User VSCode settings add:
 "solargraph.useBundler": true
 
 ensure that you are using rbenv and it is set up correctly.
+
+## Local Gotenberg PDF generation
+
+The application and standalone step-code jobs can render the shared HTML reports
+through local Gotenberg. Rails still owns attachment storage, ZIPs and notifications.
+Existing PDFs are reused and remain downloadable. Gotenberg is the sole PDF
+renderer; the overheating AcroForm service is unchanged.
+
+```sh
+docker compose --env-file .env.compose up -d gotenberg
+npm run build:print
+```
+
+Set these in the host application's `.env`, then restart Rails and Sidekiq:
+
+```dotenv
+GOTENBERG_URL=http://127.0.0.1:13000
+```
+
+If overriding `GOTENBERG_HOST_PORT` in `.env.compose`, adjust `GOTENBERG_URL` too.
+The service port is loopback-only. No login token or container-to-Vite connection
+is required: each request uploads the report bundle, saved data, fonts and images.
+Chromium is blocked from fetching HTTP/HTTPS resources. It waits for the report's
+readiness marker and matching payload digest; conversion errors fail the job.
+
+Use `npm run dev:print` while editing reports; this watches the dedicated bundle.
+Missing/stale assets fail with a rebuild instruction. The report build deliberately
+uses production React transforms even on a development machine. Reports are built separately from the normal application; browser preview routes
+and their APIs have been removed.
+
+Submit a new application or generate a standalone report through the normal UI to
+exercise the jobs. Download application still prepares missing PDFs and full/selective
+ZIPs. ZIPs now fail on missing members instead of silently skipping them. Full packages are saved against explicit versions, and generated attachments
+are promoted before readiness. Standalone reports retain the existing virus-scan
+policy: enable a reachable ClamAV or use the project's existing local scan-disable
+configuration; this integration does not bypass scan failures.
+
+To compare an existing historical submission without replacing its stored PDF:
+
+```sh
+GOTENBERG_URL=http://127.0.0.1:13000 bundle exec rails runner '
+  version = SubmissionVersion.find("YOUR_SUBMISSION_VERSION_ID")
+  report = PrintReports::Data.for_generation.application(version.permit_application, version.id)
+  PrintReports::Renderer.new.render(report) { |path| FileUtils.cp(path, Rails.root.join("tmp/comparison.pdf")) }
+'
+```
+
+Comparison PDFs contain application data: keep them local and delete after review.
+Historical elective visibility deliberately matches the existing pipeline: saved
+schema/answers plus the application's customization snapshot, not an invented
+per-version customization history. New schema fields are not introduced by this change.
+
+The modal refreshes while waiting and times out after three minutes. Closing and
+reopening lets the user retry; a timeout does not cancel a Sidekiq job already running.
+
+Run ordinary regression tests and optional live-container checks:
+
+```sh
+bundle exec rspec spec/services/print_reports_data_spec.rb spec/jobs/pdf_generation_job_spec.rb spec/jobs/zipfile_job_spec.rb spec/jobs/step_code_report_generation_job_spec.rb spec/services/supporting_documents_zipper_spec.rb spec/services/print_reports_generation_spec.rb spec/services/print_reports_renderer_spec.rb
+RUN_GOTENBERG_SPECS=true bundle exec rspec spec/services/print_reports_renderer_spec.rb
+```
+
+Gotenberg is required for new PDF generation. There is no legacy renderer or
+fallback. The application Docker build includes the HTML report bundle. Before
+deploying this version to OpenShift, provision an internal Gotenberg service and
+set GOTENBERG_URL for the workers; that infrastructure is not provisioned here.
+Browser print previews, their APIs, and development fixture screens have been
+removed. Report validation uses generated PDFs and automated tests.

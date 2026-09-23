@@ -74,7 +74,7 @@ begin
     )
 
     puts "== Building PDF renderer =="
-    run!({ "RAILS_ENV" => "development" }, "npm", "run", "build:ssr")
+    run!({ "RAILS_ENV" => "development" }, "npm", "run", "build:print")
     puts "Setup complete. Start the application with bin/dev."
   end
 rescue Errno::ENOENT => e

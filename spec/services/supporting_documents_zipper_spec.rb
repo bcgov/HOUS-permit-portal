@@ -136,24 +136,11 @@ RSpec.describe SupportingDocumentsZipper do
       expect(FileUtils).to have_received(:rm_f).at_least(:once)
     end
 
-    it "skips adding documents that fail to download" do
+    it "fails without uploading an incomplete ZIP" do
       zipper = described_class.new(permit_application.id)
-
       allow(zipper).to receive(:download_file).with(document1).and_return(nil)
-      allow(zipper).to receive(:download_file).with(document2).and_return(
-        "/tmp/f2.pdf"
-      )
-
-      zipper.perform
-
-      expect(zip_entry_zipfile).not_to have_received(:add).with(
-        "Original File.pdf",
-        anything
-      )
-      expect(zip_entry_zipfile).to have_received(:add).with(
-        "Other Original.pdf",
-        "/tmp/f2.pdf"
-      )
+      expect { zipper.perform }.to raise_error(/Required ZIP member/)
+      expect(zipfile_uploader).not_to have_received(:upload)
     end
 
     it "deduplicates original filenames inside the zip" do
@@ -180,7 +167,7 @@ RSpec.describe SupportingDocumentsZipper do
       )
     end
 
-    it "logs an error if submission version fails to save" do
+    it "raises if submission version fails to save" do
       allow(submission_version).to receive(:save).and_return(false)
       allow(submission_version).to receive(:errors).and_return(
         double("Errors", full_messages: ["nope"])
@@ -190,14 +177,10 @@ RSpec.describe SupportingDocumentsZipper do
       zipper = described_class.new(permit_application.id)
       allow(zipper).to receive(:download_file).and_return("/tmp/f.pdf")
 
-      zipper.perform
-
-      expect(Rails.logger).to have_received(:error).with(
-        /Failed to upload zip file:/
-      )
+      expect { zipper.perform }.to raise_error(/Failed to save ZIP attachment/)
     end
 
-    it "logs an error if there is no submission version" do
+    it "raises if there is no submission version" do
       allow(permit_application).to receive(
         :latest_submission_version
       ).and_return(nil)
@@ -206,11 +189,7 @@ RSpec.describe SupportingDocumentsZipper do
       zipper = described_class.new(permit_application.id)
       allow(zipper).to receive(:download_file).and_return("/tmp/f.pdf")
 
-      zipper.perform
-
-      expect(Rails.logger).to have_received(:error).with(
-        /Failed to upload zip file: no submission version/
-      )
+      expect { zipper.perform }.to raise_error(/no submission version/)
       expect(zipfile_uploader).not_to have_received(:upload)
     end
   end
@@ -228,6 +207,7 @@ RSpec.describe SupportingDocumentsZipper do
         submitter: submitter,
         all_submission_version_completed_supporting_documents: [],
         save: true,
+        latest_submission_version: nil,
         errors: double("Errors", full_messages: [])
       )
     end
@@ -253,7 +233,7 @@ RSpec.describe SupportingDocumentsZipper do
     it "downloads a file and tracks the temp file path" do
       zipper = described_class.new(permit_application.id)
 
-      response = instance_double("Net::HTTPResponse", read_body: nil)
+      response = Net::HTTPOK.new("1.1", "200", "OK")
       allow(response).to receive(:read_body).and_yield("%PDF-1.4")
 
       http = instance_double("Net::HTTP")
@@ -268,16 +248,14 @@ RSpec.describe SupportingDocumentsZipper do
       expect(zipper.temp_files.map(&:path)).to include(path)
     end
 
-    it "returns nil and logs when download fails" do
+    it "raises and logs a sanitized error when download fails" do
       zipper = described_class.new(permit_application.id)
       allow(Net::HTTP).to receive(:start).and_raise(StandardError.new("nope"))
       allow(Rails.logger).to receive(:error)
 
-      path = zipper.send(:download_file, document)
-
-      expect(path).to be_nil
+      expect { zipper.send(:download_file, document) }.to raise_error("nope")
       expect(Rails.logger).to have_received(:error).with(
-        /Failed to download file:/
+        /Failed to download ZIP member/
       )
     end
   end

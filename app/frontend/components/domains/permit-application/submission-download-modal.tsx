@@ -25,7 +25,6 @@ import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
 import { IDownloadableFile, IFormIOSection, ISubmissionVersion } from "../../../types/types"
 import { formatBytes } from "../../../utils/utility-functions"
-import { PrintPreviewLink } from "../../print/components/print-preview-link"
 import { CalloutBanner } from "../../shared/base/callout-banner"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 
@@ -336,6 +335,22 @@ export const SubmissionDownloadModal = observer(
       return "pending"
     }
 
+    // A lost websocket or exhausted job must not leave the modal spinning forever.
+    useEffect(() => {
+      if (!isOpen || (!awaitingGeneration && !awaitingSelectiveZip)) return
+      const timeout = window.setTimeout(() => {
+        if (awaitingGeneration) setGenerationFailed(true)
+        if (awaitingSelectiveZip) setSelectiveZipFailed(true)
+      }, 180000)
+      const poll = window.setInterval(() => {
+        permitApplicationStore.fetchPermitApplication(permitApplication.id, review)
+      }, 10000)
+      return () => {
+        window.clearTimeout(timeout)
+        window.clearInterval(poll)
+      }
+    }, [isOpen, awaitingGeneration, awaitingSelectiveZip])
+
     // After missing PDFs finish, continue the download that was waiting
     useEffect(() => {
       if (!isOpen || !awaitingGeneration || hasMissingPdfs || !pendingDownloadRef.current) return
@@ -559,7 +574,6 @@ export const SubmissionDownloadModal = observer(
                                   <FileSelectRow
                                     key={item.key}
                                     doc={item.doc}
-                                    application={permitApplication}
                                     isSelected={selectedKeys.has(item.key)}
                                     onToggle={() => toggleOne(item.key)}
                                   />
@@ -701,12 +715,10 @@ function MissingPdfSelectRow({
 
 function FileSelectRow({
   doc,
-  application,
   isSelected,
   onToggle,
 }: {
   doc: IDownloadableFile
-  application: IPermitApplication
   isSelected: boolean
   onToggle: () => void
 }) {
@@ -743,13 +755,6 @@ function FileSelectRow({
           </Text>
         </VStack>
       </HStack>
-      {doc.submissionVersionId && isGeneratedDocumentKey(doc.dataKey) && (
-        <PrintPreviewLink
-          application={application}
-          submissionVersionId={doc.submissionVersionId}
-          associatedStepCode={doc.dataKey.startsWith("step_code_checklist_pdf")}
-        />
-      )}
     </HStack>
   )
 }
