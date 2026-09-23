@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react"
-import { createPortal } from "react-dom"
 import "../styles/report.css"
 import "../styles/tokens.css"
 
@@ -30,26 +29,22 @@ export function ReportShell({
   error?: string
   loading?: boolean
 }) {
-  const [portal] = useState(() => {
-    const node = document.createElement("div")
-    node.className = "print-report-portal"
-    return node
-  })
   const [ready, setReady] = useState(false)
   const [assetError, setAssetError] = useState<string>()
   const documentRef = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    document.body.appendChild(portal)
-    return () => {
-      portal.remove()
-    }
-  }, [portal])
   useEffect(() => {
     let cancelled = false
     setReady(false)
     setAssetError(undefined)
     if (loading || error || !children) return
     const wait = async () => {
+      if (document.documentElement.dataset.reportAssets === "packaged") {
+        for (const weight of [400, 700]) {
+          const faces = await document.fonts.load(`${weight} 11pt BCSans`)
+          if (!faces.length || faces.some((face) => face.status !== "loaded"))
+            throw new Error("Required font unavailable")
+        }
+      }
       await document.fonts.ready
       await Promise.all(Array.from(documentRef.current?.querySelectorAll("img") || []).map((img) => img.decode()))
       await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
@@ -74,17 +69,15 @@ export function ReportShell({
     }
   }, [children, loading, error])
   const failure = error || assetError
-  return createPortal(
+  useEffect(() => {
+    if (document.documentElement.dataset.reportAssets !== "packaged") return
+    document.documentElement.dataset.reportState = failure ? "error" : ready ? "ready" : "loading"
+    return () => {
+      delete document.documentElement.dataset.reportState
+    }
+  }, [ready, failure])
+  return (
     <main className="print-report">
-      <div className="report-toolbar">
-        <div>
-          <strong>Print preview · Saved data</strong>
-          <p className="report-note">Letter paper (8.5 × 11 in) · Pages are split in Print / Save as PDF.</p>
-        </div>
-        <button disabled={!ready || !!failure} onClick={() => window.print()}>
-          Print / Save as PDF
-        </button>
-      </div>
       <div className="report-document" ref={documentRef}>
         {failure ? (
           <div role="alert" className="report-error">
@@ -97,7 +90,6 @@ export function ReportShell({
         )}
         {ready && !failure && <span id="print-ready" aria-hidden="true" />}
       </div>
-    </main>,
-    portal
+    </main>
   )
 }

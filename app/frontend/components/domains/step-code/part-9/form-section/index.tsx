@@ -23,7 +23,6 @@ import { Navigate, useLocation, useNavigate, useParams } from "react-router-dom"
 import { usePart9StepCode } from "../../../../../hooks/resources/use-part-9-step-code"
 import { EFileUploadAttachmentType, EFlashMessageStatus } from "../../../../../types/enums"
 import { TPart9NavLinkKey } from "../../../../../types/types"
-import { PrintPreviewLink } from "../../../../print/components/print-preview-link"
 import { FileDownloadButton } from "../../../../shared/base/file-download-button"
 import { SharedSpinner } from "../../../../shared/base/shared-spinner"
 import { ConfirmationModal } from "../../../../shared/confirmation-modal"
@@ -353,7 +352,6 @@ const ReviewSection = observer(function ReviewSection() {
   if (!checklist.selectedReport)
     return (
       <>
-        <PrintPreviewLink stepCode={currentStepCode} checklist={checklist} />
         <MissingReportSection />
       </>
     )
@@ -448,7 +446,6 @@ const ReportSection = observer(function ReportSection() {
   if (!checklist.selectedReport)
     return (
       <>
-        <PrintPreviewLink stepCode={currentStepCode} checklist={checklist} />
         <MissingReportSection />
       </>
     )
@@ -524,7 +521,6 @@ const ReportSection = observer(function ReportSection() {
                 {t("stepCode.saveAndExit")}
               </Button>
             </Flex>
-            <PrintPreviewLink stepCode={currentStepCode} checklist={checklist} />
             <Button type="button" variant="link" onClick={handleRegenerateReport} isLoading={isRegenerating}>
               {t("stepCode.regenerateReport")}
             </Button>

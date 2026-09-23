@@ -16,15 +16,6 @@ import { NavBar } from "./nav-bar"
 import { ProtectedRoute } from "./protected-route"
 import { QaToolsPopout } from "./qa-tools-popout"
 
-const BrowserPrintFixtures = import.meta.env.DEV
-  ? lazy(() =>
-      import("../../print/__tests__/browser-fixtures").then((module) => ({ default: module.BrowserPrintFixtures }))
-    )
-  : () => null
-const PrintReportPage = lazy(() =>
-  import("../../print/report-page").then((module) => ({ default: module.PrintReportPage }))
-)
-
 const ExternalApiKeysIndexScreen = lazy(() =>
   import("../external-api-key").then((module) => ({ default: module.ExternalApiKeysIndexScreen }))
 )
@@ -41,12 +32,6 @@ const ExternalApiKeyModalSubRoute = lazy(() =>
 
 const NotFoundScreen = lazy(() =>
   import("../../shared/base/not-found-screen").then((module) => ({ default: module.NotFoundScreen }))
-)
-
-const PermitApplicationPDFViewer = lazy(() =>
-  import("../../shared/permit-applications/pdf-content/viewer").then((module) => ({
-    default: module.PermitApplicationPDFViewer,
-  }))
 )
 
 const EmailConfirmedScreen = lazy(() =>
@@ -364,11 +349,6 @@ const OverheatingCodeUnavailableScreen = lazy(() =>
   }))
 )
 
-const StepCodeChecklistPDFViewer = lazy(() =>
-  import("../step-code/checklist/pdf-content/viewer").then((module) => ({
-    default: module.StepCodeChecklistPDFViewer,
-  }))
-)
 const SiteConfigurationManagementScreen = lazy(() =>
   import("../super-admin/site-configuration-management").then((module) => ({
     default: module.SiteConfigurationManagementScreen,
@@ -748,26 +728,6 @@ const AppRoutes = observer(() => {
         element={<ClimateZonesScreen />}
       />
       <Route path="/permit-applications/:permitApplicationId" element={<ReviewPermitApplicationScreen />} />
-      {import.meta.env.DEV && (
-        <>
-          <Route
-            path="/permit-applications/:permitApplicationId/pdf-content"
-            element={<PermitApplicationPDFViewer mode={"pdf"} />}
-          />
-          <Route
-            path="/permit-applications/:permitApplicationId/pdf-html"
-            element={<PermitApplicationPDFViewer mode={"html"} />}
-          />
-          <Route
-            path="/permit-applications/:permitApplicationId/step-code-pdf-content"
-            element={<StepCodeChecklistPDFViewer mode={"pdf"} />}
-          />
-          <Route
-            path="/permit-applications/:permitApplicationId/step-code-pdf-html"
-            element={<StepCodeChecklistPDFViewer mode={"html"} />}
-          />
-        </>
-      )}
     </>
   )
 
@@ -851,17 +811,6 @@ const AppRoutes = observer(() => {
             />
           }
         >
-          <Route
-            path="/permit-applications/:permitApplicationId/print"
-            element={<PrintReportPage kind="application" />}
-          />
-          <Route
-            path="/permit-applications/:permitApplicationId/step-code/print"
-            element={<PrintReportPage kind="application-step-code" />}
-          />
-          <Route path="/part-3-step-code/:stepCodeId/print" element={<PrintReportPage kind="part3" />} />
-          <Route path="/part-9-step-code/:stepCodeId/print" element={<PrintReportPage kind="part9" />} />
-          {import.meta.env.DEV && <Route path="/__print-tests" element={<BrowserPrintFixtures />} />}
           {/* Migrate old permit-projects paths to new structure */}
           <Route path="/permit-projects" element={<RedirectScreen path="/projects" />} />
           <Route path="/permit-projects/projects">
