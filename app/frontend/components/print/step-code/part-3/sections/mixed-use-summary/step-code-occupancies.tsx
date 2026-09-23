@@ -5,6 +5,7 @@ import { reportTranslation as t } from "../../../../components/report-translatio
 const prefix = "stepCode.part3.stepCodeSummary.mixedUse.occupancies"
 export const StepCodeOccupanciesPdf = ({ checklist }: { checklist: IPart3StepCodeChecklist }) => (
   <ReportTable
+    layout="metrics"
     headers={[t(`${prefix}.occupancy`), t(`${prefix}.energy`), t(`${prefix}.ghgi`)]}
     rows={[
       ...(checklist.stepCodeOccupancies || []).map((oc) => [

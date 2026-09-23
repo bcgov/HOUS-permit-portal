@@ -10,7 +10,7 @@ module PrintReports
     # Caller consumes the validated file within this block. No payloads are logged.
     def render(report, filename: "report.pdf")
       bundle = Rails.root.join("public/vite-print")
-      unless %w[report.js report.css manifest.json].all? { |name|
+      unless %w[report.js print.css manifest.json].all? { |name|
                bundle.join(name).file?
              }
         raise Error,
@@ -25,7 +25,7 @@ module PrintReports
       Dir.mktmpdir("bph-report-") do |dir|
         assets = {
           "report.js" => bundle.join("report.js"),
-          "report.css" => bundle.join("report.css"),
+          "print.css" => bundle.join("print.css"),
           "logo.png" => Rails.root.join("public/images/logo.png"),
           "regular.ttf" =>
             Rails.root.join("public/fonts/2023_01_01_BCSans-Regular_2f.ttf"),
@@ -109,9 +109,11 @@ module PrintReports
           )
           .reject { |p| p.include?("/__tests__/") }
       paths +=
-        %w[app/frontend/i18n/i18n.ts vite.print.config.mjs].map do |p|
-          Rails.root.join(p).to_s
-        end
+        %w[
+          app/frontend/i18n/i18n.ts
+          app/frontend/styles/brand.ts
+          vite.print.config.mjs
+        ].map { |p| Rails.root.join(p).to_s }
       hash = Digest::SHA256.new
       paths.sort.each do |path|
         relative = Pathname.new(path).relative_path_from(Rails.root).to_s
@@ -138,10 +140,10 @@ module PrintReports
       <<~HTML
         <!doctype html><html lang="en" data-report-assets="packaged" data-report-digest="#{digest}">
         <head><meta charset="utf-8"><title>Building Permit Hub report</title>
-        <link rel="stylesheet" href="report.css">
+        <link rel="stylesheet" href="print.css">
         <style>
-          @font-face { font-family: BCSans; src: url('regular.ttf'); font-weight: 400; }
-          @font-face { font-family: BCSans; src: url('bold.ttf'); font-weight: 700; }
+          @font-face { font-family: "BC Sans"; src: url('regular.ttf'); font-weight: 400; }
+          @font-face { font-family: "BC Sans"; src: url('bold.ttf'); font-weight: 700; }
         </style></head><body><div id="report-root"></div>
         <script id="report-data" type="application/json">#{payload}</script>
         <script src="report.js"></script></body></html>

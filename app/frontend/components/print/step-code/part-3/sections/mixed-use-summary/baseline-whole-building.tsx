@@ -16,6 +16,7 @@ export const BaselineWholeBuildingPdf = ({
   const prefix = "stepCode.part3.stepCodeSummary.mixedUse.wholeBuilding"
   return (
     <ReportTable
+      layout="metrics"
       headers={[
         "",
         `${t("stepCode.part3.metrics.totalEnergy.label")} (${t("stepCode.part3.metrics.totalEnergy.units")})`,

@@ -1,7 +1,23 @@
 import React from "react"
-export function ReportTable({ headers, rows }: { headers: React.ReactNode[]; rows: React.ReactNode[][] }) {
+export type TableLayout = "records" | "metrics" | "details"
+export function ReportTable({
+  headers,
+  rows,
+  layout = "records",
+  keepTogether = true,
+}: {
+  headers: React.ReactNode[]
+  rows: React.ReactNode[][]
+  layout?: TableLayout
+  keepTogether?: boolean
+}) {
   return (
-    <table>
+    <table className={`report-table report-table--${layout} ${keepTogether ? "report-keep" : "report-split"}`}>
+      <colgroup>
+        {headers.map((_, index) => (
+          <col key={index} className={`report-table-column-${index}`} />
+        ))}
+      </colgroup>
       <thead>
         <tr>
           {headers.map((h, i) => (

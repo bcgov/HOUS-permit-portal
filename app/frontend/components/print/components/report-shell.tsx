@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react"
-import "../styles/report.css"
+import "../styles/print.css"
 import "../styles/tokens.css"
 
 export class ReportErrorBoundary extends React.Component<
@@ -40,13 +40,31 @@ export function ReportShell({
     const wait = async () => {
       if (document.documentElement.dataset.reportAssets === "packaged") {
         for (const weight of [400, 700]) {
-          const faces = await document.fonts.load(`${weight} 11pt BCSans`)
+          const faces = await document.fonts.load(`${weight} 11pt "BC Sans"`)
           if (!faces.length || faces.some((face) => face.status !== "loaded"))
             throw new Error("Required font unavailable")
         }
       }
       await document.fonts.ready
       await Promise.all(Array.from(documentRef.current?.querySelectorAll("img") || []).map((img) => img.decode()))
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+      // Measure at the actual Letter content width after fonts/images settle. Oversized
+      // blocks must flow immediately, rather than waste a page trying to stay together.
+      const reportElement = documentRef.current
+      if (reportElement) {
+        const ruler = window.document.createElement("div")
+        ruler.className = "report-page-measure"
+        reportElement.appendChild(ruler)
+        const pageHeight = ruler.getBoundingClientRect().height
+        ruler.remove()
+        reportElement
+          .querySelectorAll<HTMLElement>(
+            ".report-field, .report-field-pair, .report-record, .report-summary, .report-columns, .report-keep, .report-table, tr"
+          )
+          .forEach((block) => {
+            block.classList.toggle("report-fragmentable", block.getBoundingClientRect().height > pageHeight - 24)
+          })
+      }
       await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
     }
     const timer = window.setTimeout(() => {

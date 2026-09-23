@@ -1,7 +1,7 @@
 import React from "react"
 import { IPart3StepCodeChecklist } from "../../../../../../models/part-3-step-code-checklist"
 import { reportTranslation as t } from "../../../../components/report-translation"
-import { Field, Panel, Text, View } from "../../../../components/step-code-primitives"
+import { ReportBlock, ReportMetric, ReportPanel, ReportText } from "../../../../components/step-code-layout"
 import { BaselineEnergyPdf } from "./baseline-energy"
 import { BaselineZeroCarbonPdf } from "./baseline-zero-carbon"
 import { i18nPrefix } from "./i18n-prefix"
@@ -9,12 +9,9 @@ import { MixedUseEnergyPdf } from "./mixed-use-energy"
 import { MixedUseZeroCarbonPdf } from "./mixed-use-zero-carbon"
 import { StepCodeEnergyPdf } from "./step-code-energy"
 import { StepCodeZeroCarbonPdf } from "./step-code-zero-carbon"
-import { styles } from "./styles"
-
 interface IProps {
   checklist: IPart3StepCodeChecklist
 }
-
 export const StepCodePerformanceSummary = function StepCodePart3ChecklistPDFStepCodePerformanceSummary({
   checklist,
 }: IProps) {
@@ -22,13 +19,13 @@ export const StepCodePerformanceSummary = function StepCodePart3ChecklistPDFStep
   const baselineOccs = Array.isArray(checklist?.baselineOccupancies) ? checklist.baselineOccupancies : []
   if (!stepCodeOccs.length && !baselineOccs.length)
     return (
-      <Panel heading={t(`${i18nPrefix}.heading`)}>
-        <Field
+      <ReportPanel heading={t(`${i18nPrefix}.heading`)}>
+        <ReportMetric
           label={t(`${i18nPrefix}.compliancePath`)}
           value={t(`stepCode.part3.projectDetails.buildingCodeVersions.${checklist.buildingCodeVersion}`)}
         />
         <p>Not provided — no occupancy data is saved for this checklist.</p>
-      </Panel>
+      </ReportPanel>
     )
   const isMixedUse = stepCodeOccs.length + baselineOccs.length > 1
   const isBaseline = stepCodeOccs.length === 0
@@ -41,21 +38,21 @@ export const StepCodePerformanceSummary = function StepCodePart3ChecklistPDFStep
     }
   }
   return (
-    <Panel heading={t(`${i18nPrefix}.heading`)} break>
-      <Field
+    <ReportPanel heading={t(`${i18nPrefix}.heading`)}>
+      <ReportMetric
         label={t(`${i18nPrefix}.compliancePath`)}
         value={t(`stepCode.part3.projectDetails.buildingCodeVersions.${checklist.buildingCodeVersion}`)}
       />
-      <Field
+      <ReportMetric
         label={t(`${i18nPrefix}.stepCodeOccupancy.label`)}
         value={occupancyName || t(`${i18nPrefix}.stepCodeOccupancy.mixedUse`)}
       />
 
       {/* Performance Details - Mimic HStack */}
-      <View style={{ display: "flex", flexDirection: "row", gap: 12, marginTop: 12 }}>
+      <ReportBlock className="report-columns">
         {/* Energy Column */}
-        <View style={styles.column}>
-          <Text style={styles.columnHeader}>{t(`${i18nPrefix}.energy.title`)}</Text>
+        <ReportBlock className="report-summary">
+          <ReportText className="report-subheading">{t(`${i18nPrefix}.energy.title`)}</ReportText>
           {isBaseline ? (
             <BaselineEnergyPdf checklist={checklist} />
           ) : isMixedUse ? (
@@ -63,11 +60,11 @@ export const StepCodePerformanceSummary = function StepCodePart3ChecklistPDFStep
           ) : (
             <StepCodeEnergyPdf checklist={checklist} />
           )}
-        </View>
+        </ReportBlock>
 
         {/* Zero Carbon Column */}
-        <View style={styles.column}>
-          <Text style={styles.columnHeader}>{t(`${i18nPrefix}.zeroCarbon.title`)}</Text>
+        <ReportBlock className="report-summary">
+          <ReportText className="report-subheading">{t(`${i18nPrefix}.zeroCarbon.title`)}</ReportText>
           {isBaseline ? (
             <BaselineZeroCarbonPdf />
           ) : isMixedUse ? (
@@ -75,8 +72,8 @@ export const StepCodePerformanceSummary = function StepCodePart3ChecklistPDFStep
           ) : (
             <StepCodeZeroCarbonPdf checklist={checklist} />
           )}
-        </View>
-      </View>
-    </Panel>
+        </ReportBlock>
+      </ReportBlock>
+    </ReportPanel>
   )
 }

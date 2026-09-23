@@ -8,6 +8,7 @@ export function StaticCharacteristicsGrid({ checklist }: { checklist: IPart9Step
   const groups = ["roofCeilings", "aboveGradeWalls", "framings", "unheatedFloors", "belowGradeWalls", "slabs"]
   return (
     <ReportTable
+      layout="details"
       headers={["Building element", t(`${i18nPrefix}.details`), t(`${i18nPrefix}.averageRSI`)]}
       rows={groups.flatMap((key) => {
         const lines = checklist.buildingCharacteristicsSummary?.[`${key}Lines`]

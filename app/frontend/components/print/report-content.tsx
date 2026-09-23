@@ -1,6 +1,7 @@
 import React from "react"
 import { camelizeResponse } from "../../utils"
 import { ReportCover } from "./components/report-cover"
+import { ReportFooter } from "./components/report-footer"
 import { PermitApplicationReport } from "./permit-application/report"
 import { ReportData } from "./permit-application/report-data"
 import { Part3Report } from "./step-code/part-3/report"
@@ -13,6 +14,7 @@ export function ReportContent({ report }: { report: ReportData }) {
   const project = report.step_code ? camelizeResponse(report.step_code) : {}
   return (
     <>
+      <ReportFooter identity={report.identity} />
       <ReportCover identity={report.identity} title={title} />
       {report.kind === "application" ? (
         <PermitApplicationReport report={report} />

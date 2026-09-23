@@ -16,6 +16,7 @@ export const StepCodePortionsPdf = ({
   const prefix = "stepCode.part3.stepCodeSummary.mixedUse.stepCode"
   return (
     <ReportTable
+      layout="metrics"
       headers={["", "TEUI", "TEDI", "GHGI"]}
       rows={[
         [t(`${prefix}.requirement`), "—", numberValue(requirements?.stepCodePortions?.areaWeightedTotals?.tedi), "—"],

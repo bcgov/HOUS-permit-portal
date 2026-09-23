@@ -1,80 +1,43 @@
 import React from "react"
 import { IPart9StepCodeChecklist } from "../../../../../../../models/part-9-step-code-checklist"
-import { theme } from "../../../../../../../styles/theme"
 import { EWindowsGlazedDoorsPerformanceType } from "../../../../../../../types/enums"
 import { generateUUID } from "../../../../../../../utils/utility-functions"
 import { i18nPrefix } from "../../../../../../domains/step-code/part-9/checklist/building-characteristics-summary/i18n-prefix"
 import { reportTranslation as t } from "../../../../../components/report-translation"
-import { Field, GridItem, HStack, Text } from "../../../../../components/step-code-primitives"
-
+import { ReportCell, ReportMetric, ReportRow, ReportText } from "../../../../../components/step-code-layout"
 interface IProps {
   checklist: IPart9StepCodeChecklist
 }
 export function WindowsGlazedDoors({ checklist }: IProps) {
   return (
     <>
-      <HStack
-        style={{
-          width: "100%",
-          alignItems: "stretch",
-          backgroundColor: theme.colors.greys.grey03,
-          borderBottomWidth: 0.75,
-          borderColor: theme.colors.border.light,
-          gap: 0,
-        }}
-      >
-        <GridItem
-          style={{
-            flexBasis: "50%",
-            maxWidth: "50%",
-            justifyContent: "flex-start",
-          }}
-        >
-          <Text style={{ fontSize: 10.5 }}>{t(`${i18nPrefix}.windowsGlazedDoors`)}</Text>
-        </GridItem>
-        <GridItem
-          style={{
-            flexBasis: "25%",
-            maxWidth: "25%",
-            justifyContent: "center",
-          }}
-        >
-          <Text style={{ fontSize: 10.5 }}>
+      <ReportRow>
+        <ReportCell colSpan={2}>
+          <ReportText>{t(`${i18nPrefix}.windowsGlazedDoors`)}</ReportText>
+        </ReportCell>
+        <ReportCell colSpan={1}>
+          <ReportText>
             {t(
               `${i18nPrefix}.${checklist.buildingCharacteristicsSummary.windowsGlazedDoors.performanceType as EWindowsGlazedDoorsPerformanceType}`
             )}
-          </Text>
-        </GridItem>
-        <GridItem
-          style={{
-            flexBasis: "25%",
-            maxWidth: "25%",
-            borderRightWidth: 0,
-            justifyContent: "center",
-          }}
-        >
-          <Text style={{ fontSize: 10.5 }}>{t(`${i18nPrefix}.shgc`)}</Text>
-        </GridItem>
-      </HStack>
+          </ReportText>
+        </ReportCell>
+        <ReportCell colSpan={1}>
+          <ReportText>{t(`${i18nPrefix}.shgc`)}</ReportText>
+        </ReportCell>
+      </ReportRow>
       {checklist.buildingCharacteristicsSummary.windowsGlazedDoors.lines.map((line, index) => (
-        <HStack
-          key={generateUUID()}
-          style={{
-            width: "100%",
-            alignItems: "stretch",
-            gap: 0,
-          }}
-        >
-          <GridItem style={{ flexBasis: "50%", minWidth: "50%" }}>
-            <Field value={line.details} />
-          </GridItem>
-          <GridItem style={{ flexBasis: "25%", minWidth: "25%" }}>
-            <Field value={line.performanceValue} inputStyle={{ justifyContent: "center" }} />
-          </GridItem>
-          <GridItem style={{ flexBasis: "25%", minWidth: "25%", borderRightWidth: 0 }}>
-            <Field value={line.shgc} inputStyle={{ justifyContent: "center" }} />
-          </GridItem>
-        </HStack>
+        <ReportRow key={generateUUID()}>
+          <ReportCell colSpan={2}>
+            <ReportMetric value={line.details} />
+          </ReportCell>
+          <ReportCell colSpan={1}>
+            <ReportMetric value={line.performanceValue} />
+          </ReportCell>
+          <ReportCell colSpan={1}>
+            <ReportMetric value={line.shgc} />
+          </ReportCell>
+        </ReportRow>
       ))}
     </>
   )

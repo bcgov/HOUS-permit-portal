@@ -1,9 +1,17 @@
 import React from "react"
-export function ReportContact({ title, children }: { title?: React.ReactNode; children: React.ReactNode }) {
+export function ReportContact({
+  title,
+  children,
+  record = false,
+}: {
+  title?: React.ReactNode
+  children: React.ReactNode
+  record?: boolean
+}) {
   return (
-    <section className="report-group">
+    <section className={record ? "report-record" : "report-group"}>
       {title && <h3>{title}</h3>}
-      <dl>{children}</dl>
+      {children}
     </section>
   )
 }
