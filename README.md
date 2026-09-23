@@ -48,7 +48,7 @@ The two example files are tracked; the copied files are ignored. Copy them only 
 
 `bin/local-infra-up` waits for infrastructure health and creates the private `hous-local` SeaweedFS bucket automatically. `bin/setup` installs gems and npm packages, copies `config/database.yml.local` to `config/database.yml` if missing, verifies development/test database names differ, prepares the development and test databases, loads initial development seeds through Rails’ standard `db:prepare` task, and builds the PDF renderer. Repeated setup preserves data; Rails only seeds when initializing the development database.
 
-`bin/dev` starts Rails, Vite, Sidekiq, and Ruby AnyCable RPC. It uses Overmind if installed, then Hivemind, otherwise Foreman (installed automatically if absent). All processes inherit your selected Ruby/Node runtimes.
+`bin/dev` starts Rails, Vite, the PDF report bundle watcher, Sidekiq, and Ruby AnyCable RPC. It uses Overmind if installed, then Hivemind, otherwise Foreman (installed automatically if absent). All processes inherit your selected Ruby/Node runtimes.
 
 ### Daily use
 
@@ -147,6 +147,7 @@ Run these in separate terminals instead of `bin/dev` when you need direct debugg
 ```bash
 bundle exec rails server -b 127.0.0.1 -p 3000
 VITE_RUBY_HOST=127.0.0.1 VITE_RUBY_PORT=3036 bin/vite dev
+npm run dev:print
 bundle exec sidekiq
 ANYCABLE_RPC_HOST=0.0.0.0:50051 bundle exec anycable
 ```
@@ -155,7 +156,7 @@ ANYCABLE_RPC_HOST=0.0.0.0:50051 bundle exec anycable
 - If a published port is occupied, stop the conflicting service or change the port and its matching application setting in the table above. Restart affected processes after configuration changes.
 - If readiness times out, inspect logs and Docker memory/disk availability. Elasticsearch keeps the Apple Silicon JVM workaround and uses a 512 MB heap.
 - The gateway can start before Ruby RPC, but authenticated WebSockets need the RPC process running.
-- After changing PDF renderer code, run `npm run build:print` again.
+- `bin/dev` rebuilds report assets automatically. Wait for the `print` process to finish its initial build before generating PDFs.
 - If initial seeding fails, fix the reported error and run `bin/rails db:seed`, then rerun `./bin/setup` to finish preparation. You can also run seeds explicitly when needed; they are not part of daily startup. Keep infrastructure running while seeding.
 
 ## DevOps
@@ -211,8 +212,8 @@ Existing PDFs are reused and remain downloadable. Gotenberg is the sole PDF
 renderer; the overheating AcroForm service is unchanged.
 
 ```sh
-docker compose --env-file .env.compose up -d gotenberg
-npm run build:print
+bin/local-infra-up
+bin/dev
 ```
 
 Set these in the host application's `.env`, then restart Rails and Sidekiq:
@@ -227,10 +228,14 @@ is required: each request uploads the report bundle, saved data, fonts and image
 Chromium is blocked from fetching HTTP/HTTPS resources. It waits for the report's
 readiness marker and matching payload digest; conversion errors fail the job.
 
-Use `npm run dev:print` while editing reports; this watches the dedicated bundle.
-Missing/stale assets fail with a rebuild instruction. The report build deliberately
-uses production React transforms even on a development machine. Reports are built separately from the normal application; browser preview routes
-and their APIs have been removed.
+`bin/dev` watches report changes automatically. `npm run build` builds both the
+application and report bundles, and Rails asset precompilation includes both for
+Docker builds. The bundles remain separate: report CSS is loaded only in the
+standalone PDF document, never in the interactive app. The report build uses
+production React transforms even on a development machine. Missing/stale assets
+fail with a rebuild instruction. `npm run build:print` and `npm run dev:print`
+remain available for report-only work. Browser preview routes and their APIs have
+been removed.
 
 Submit a new application or generate a standalone report through the normal UI to
 exercise the jobs. Download application still prepares missing PDFs and full/selective

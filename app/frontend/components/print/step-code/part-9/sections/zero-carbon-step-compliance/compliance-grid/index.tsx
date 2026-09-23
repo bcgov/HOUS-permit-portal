@@ -2,16 +2,14 @@ import React from "react"
 import { IStepCodeZeroCarbonComplianceReport } from "../../../../../../../models/step-code-zero-carbon-compliance-report"
 import { i18nPrefix } from "../../../../../../domains/step-code/part-9/checklist/zero-carbon-step-code-compliance/i18n-prefix"
 import { reportTranslation as t } from "../../../../../components/report-translation"
-import { GridItem, HStack, ReportGrid, RequirementsMetTag, Text } from "../../../../../components/step-code-primitives"
+import { ReportCell, ReportGrid, ReportResult, ReportRow, ReportText } from "../../../../../components/step-code-layout"
 import { CO2 } from "./co2"
 import { Prescriptive } from "./prescriptive"
 import { TotalGHG } from "./total-ghg"
 import { ZeroCarbonStep } from "./zero-carbon-step"
-
 interface IProps {
   report: IStepCodeZeroCarbonComplianceReport
 }
-
 export const ZeroCarbonComplianceGrid = function ZeroCarbonComplianceGrid({ report }: IProps) {
   return (
     <ReportGrid
@@ -27,20 +25,14 @@ export const ZeroCarbonComplianceGrid = function ZeroCarbonComplianceGrid({ repo
       <CO2 report={report} />
       <Prescriptive report={report} />
 
-      <HStack
-        style={{
-          width: "100%",
-          alignItems: "stretch",
-          gap: 0,
-        }}
-      >
-        <GridItem style={{ flexBasis: "75%", minWidth: "75%" }}>
-          <Text style={{ fontWeight: 700, fontSize: 10.5 }}>{t(`${i18nPrefix}.requirementsMet`)}</Text>
-        </GridItem>
-        <GridItem style={{ flexBasis: "25%", minWidth: "25%", justifyContent: "center" }}>
-          <RequirementsMetTag success={report.co2Passed && report.ghgPassed && report.prescriptivePassed} />
-        </GridItem>
-      </HStack>
+      <ReportRow>
+        <ReportCell colSpan={3}>
+          <ReportText className="report-strong">{t(`${i18nPrefix}.requirementsMet`)}</ReportText>
+        </ReportCell>
+        <ReportCell colSpan={1}>
+          <ReportResult success={report.co2Passed && report.ghgPassed && report.prescriptivePassed} />
+        </ReportCell>
+      </ReportRow>
     </ReportGrid>
   )
 }

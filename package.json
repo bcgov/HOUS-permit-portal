@@ -114,7 +114,7 @@
   },
   "scripts": {
     "dev": "bin/vite dev",
-    "build": "bundle exec vite build",
+    "build": "npm run build:print && bundle exec vite build",
     "lint": "eslint app/frontend/**/*.ts[x]",
     "prepare": "husky install",
     "gen:theme-typings": "chakra-cli tokens app/frontend/styles/theme/index.ts",
