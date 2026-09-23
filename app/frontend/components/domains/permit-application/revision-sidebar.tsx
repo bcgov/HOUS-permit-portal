@@ -1,11 +1,11 @@
 import {
   Box,
   Button,
-  Checkbox,
   Flex,
   Heading,
   Hide,
   IconButton,
+  Link,
   ListItem,
   OrderedList,
   Portal,
@@ -15,41 +15,26 @@ import {
   TabPanel,
   TabPanels,
   Tabs,
-  Tag,
   Text,
   useDisclosure,
 } from "@chakra-ui/react"
-import { CaretRight, ChatDots, PaperPlaneTilt, Plus } from "@phosphor-icons/react"
+import { CaretRight, CheckCircle, Plus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { MutableRefObject, useEffect, useMemo, useState } from "react"
 import { useFieldArray, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
 import { stickyBelowNavBar } from "../../../styles/nav-bar-offset"
-import {
-  IAdditionalPermitRequestsAttributes,
-  IRevisionRequestsAttributes,
-  ISupportingInformationRequestsAttributes,
-} from "../../../types/api-request"
-import { EFlashMessageStatus, EPermitApplicationStatus } from "../../../types/enums"
-import {
-  IAdditionalPermitRequest,
-  IFormIORequirement,
-  IProjectDocument,
-  IRevisionRequest,
-  ISubmissionVersion,
-  ISupportingInformationRequest,
-} from "../../../types/types"
+import { IRevisionRequestsAttributes } from "../../../types/api-request"
+import { EFlashMessageStatus, ERevisionRequestType } from "../../../types/enums"
+import { IFormIORequirement, IRevisionRequest, ISubmissionVersion } from "../../../types/types"
 import { getRequirementByKey } from "../../../utils/formio-component-traversal"
+import { compareSubmissionData } from "../../../utils/formio-helpers"
 import { getSinglePreviousSubmissionData } from "../../../utils/formio-submission-traversal"
 import { handleScrollToBottom } from "../../../utils/utility-functions"
-import ConfirmationModal from "../../shared/modals/confirmation-modal"
-import { PermitApplicationStatusTag } from "../../shared/permit-applications/permit-application-status-tag"
 import { ScrollLink } from "../../shared/permit-applications/scroll-link"
-import { AdditionalPermitRequestModal } from "../../shared/revisions/additional-permit-request-modal"
 import { RevisionModal } from "../../shared/revisions/revision-modal"
 import { SupportingInformationModal } from "../../shared/revisions/supporting-information-modal"
 import SubmissionVersionSelect from "../../shared/select/selectors/submission-version-select"
@@ -58,18 +43,18 @@ import { DesignatedReviewerModal } from "./designated-reviewer-modal"
 interface IRevisionSideBarProps {
   permitApplication: IPermitApplication
   onCancel?: () => void
+  onReviewSend?: () => void
   sendRevisionContainerRef?: MutableRefObject<HTMLDivElement>
   forSubmitter?: boolean
 }
 
 export interface IRevisionRequestForm {
   revisionRequestsAttributes: IRevisionRequestsAttributes[]
-  supportingInformationRequestsAttributes: ISupportingInformationRequestsAttributes[]
-  additionalPermitRequestsAttributes: IAdditionalPermitRequestsAttributes[]
+  applicantNote?: string
 }
 
 export const RevisionSideBar = observer(
-  ({ permitApplication, onCancel, sendRevisionContainerRef, forSubmitter }: IRevisionSideBarProps) => {
+  ({ permitApplication, onCancel, onReviewSend, sendRevisionContainerRef, forSubmitter }: IRevisionSideBarProps) => {
     const { t } = useTranslation()
     const { uiStore } = useMst()
     const isMounted = useMountStatus()
@@ -98,14 +83,9 @@ export const RevisionSideBar = observer(
     }
 
     const inNewRequest = tabIndex === 0
-    const navigate = useNavigate()
 
     const getDefaultRevisionRequestValues = (): IRevisionRequestForm => ({
       revisionRequestsAttributes: permitApplication.latestRevisionRequests as IRevisionRequestsAttributes[],
-      supportingInformationRequestsAttributes:
-        permitApplication.latestSupportingInformationRequests as ISupportingInformationRequestsAttributes[],
-      additionalPermitRequestsAttributes:
-        permitApplication.latestAdditionalPermitRequests as IAdditionalPermitRequestsAttributes[],
     })
 
     const revisionFormMethods = useForm<IRevisionRequestForm>({
@@ -121,26 +101,10 @@ export const RevisionSideBar = observer(
     })
 
     const { fields } = useFieldArrayMethods
-    const supportingInfoFieldArrayMethods = useFieldArray({
-      control,
-      name: "supportingInformationRequestsAttributes",
-      keyName: "fieldId",
-    })
-    const additionalPermitFieldArrayMethods = useFieldArray({
-      control,
-      name: "additionalPermitRequestsAttributes",
-      keyName: "fieldId",
-    })
-    const { fields: supportingInfoFields } = supportingInfoFieldArrayMethods
-    const { fields: additionalPermitFields } = additionalPermitFieldArrayMethods
 
     useEffect(() => {
       reset(getDefaultRevisionRequestValues())
-    }, [
-      permitApplication?.latestRevisionRequests?.length,
-      permitApplication?.latestSupportingInformationRequests?.length,
-      permitApplication?.latestAdditionalPermitRequests?.length,
-    ])
+    }, [permitApplication?.latestRevisionRequests?.length])
 
     useEffect(() => {
       setSelectedSubmissionVersion(latestSubmissionVersion)
@@ -182,28 +146,13 @@ export const RevisionSideBar = observer(
       onOpen: onSupportingInfoOpen,
       onClose: onSupportingInfoClose,
     } = useDisclosure()
-    const {
-      isOpen: isAdditionalPermitOpen,
-      onOpen: onAdditionalPermitOpen,
-      onClose: onAdditionalPermitClose,
-    } = useDisclosure()
-    const [supportingInformationRequest, setSupportingInformationRequest] = useState<ISupportingInformationRequest>()
-    const [additionalPermitRequest, setAdditionalPermitRequest] = useState<IAdditionalPermitRequest>()
+    const [supportingInformationRequest, setSupportingInformationRequest] = useState<IRevisionRequest>()
 
-    const visibleRevisionFields = fields.filter((field) => !field._destroy)
-    const visibleSupportingInfoFields = supportingInfoFields.filter((field) => !field._destroy)
-    const visibleAdditionalPermitFields = additionalPermitFields.filter((field) => !field._destroy)
-    const packageItemCount =
-      visibleRevisionFields.length + visibleSupportingInfoFields.length + visibleAdditionalPermitFields.length
-
-    const requestedTemplateIds = visibleAdditionalPermitFields
-      .map((field) => field.requirementTemplateId)
-      .filter(Boolean) as string[]
-
-    const onFinalizeRevisions = async () => {
-      const ok = await permitApplication.finalizeRevisionRequests()
-      if (ok) navigate(`/jurisdictions/${permitApplication.jurisdiction.slug}/submission-inbox`)
-    }
+    const isSupportingDocumentRequest = (field: { type?: string }) =>
+      field.type === ERevisionRequestType.SupportingDocumentRevisionRequest
+    const visibleRevisionFields = fields.filter((field) => !field._destroy && !isSupportingDocumentRequest(field))
+    const visibleSupportingInfoFields = fields.filter((field) => !field._destroy && isSupportingDocumentRequest(field))
+    const packageItemCount = visibleRevisionFields.length + visibleSupportingInfoFields.length
 
     const handleOpenRequestRevision = async (event, upToDateFields) => {
       if (!permitApplication.formJson) return
@@ -237,7 +186,24 @@ export const RevisionSideBar = observer(
       }
     }
 
-    const renderButtons = () => {
+    const revisionsSent = !forSubmitter && permitApplication.isRevisionsRequested
+    const sentButtonProps = revisionsSent
+      ? {
+          color: "white",
+          borderColor: "white",
+          bg: "transparent",
+          _hover: { bg: "whiteAlpha.200", color: "white" },
+          _disabled: {
+            color: "white",
+            borderColor: "white",
+            bg: "transparent",
+            opacity: 0.7,
+            cursor: "not-allowed",
+          },
+        }
+      : {}
+
+    const renderButtons = (onDark = false) => {
       if (forSubmitter) {
         return (
           <Button rightIcon={<CaretRight />} onClick={handleScrollToBottom} variant="primary">
@@ -246,7 +212,7 @@ export const RevisionSideBar = observer(
         )
       }
 
-      const handleSendClick = (onConfirmationModalOpen: () => void) => {
+      const handleSendClick = () => {
         if (packageItemCount === 0) {
           uiStore.flashMessage.show(EFlashMessageStatus.error, null, t("permitApplication.show.revision.emptySend"))
           return
@@ -254,36 +220,48 @@ export const RevisionSideBar = observer(
         if (permitApplication.shouldShowDesignatedReviewerModal) {
           onDesignatedReviewerModalOpen()
         } else {
-          onConfirmationModalOpen()
+          onReviewSend?.()
         }
       }
 
       return (
         <Flex gap={4}>
-          <ConfirmationModal
-            promptHeader={t("permitApplication.show.revision.confirmHeader")}
-            promptMessage={t("permitApplication.show.revision.confirmMessage")}
-            renderTrigger={(onConfirmationModalOpen) => (
-              <Button
-                variant="primary"
-                border={0}
-                rightIcon={<PaperPlaneTilt />}
-                onClick={() => handleSendClick(onConfirmationModalOpen)}
-                isDisabled={permitApplication.isRevisionsRequested}
+          <Button
+            variant={onDark ? "secondary" : "primary"}
+            border={onDark ? undefined : 0}
+            onClick={handleSendClick}
+            isDisabled={permitApplication.isRevisionsRequested}
+            {...(onDark ? sentButtonProps : {})}
+          >
+            <Flex as="span" align="center" gap={2}>
+              {t("permitApplication.show.revision.send")}
+              <Flex
+                as="span"
+                align="center"
+                justify="center"
+                bg="white"
+                color="text.primary"
+                borderRadius="full"
+                minW={6}
+                h={6}
+                px={1}
+                fontSize="sm"
               >
-                {t("permitApplication.show.revision.send")}
-              </Button>
-            )}
-            onConfirm={onFinalizeRevisions}
-          />
+                {packageItemCount}
+              </Flex>
+            </Flex>
+          </Button>
           {onCancel && (
-            <Button variant="secondary" onClick={onCancel}>
+            <Button variant="secondary" onClick={onCancel} {...(onDark ? sentButtonProps : {})}>
               {t("permitApplication.show.revision.saveAndExit")}
             </Button>
           )}
         </Flex>
       )
     }
+
+    const panelBg = revisionsSent ? "semantic.successLight" : "theme.yellowLight"
+    const panelBorder = revisionsSent ? "semantic.success" : "border.light"
 
     const selectedTabStyles = {
       borderLeft: "1px Solid",
@@ -292,15 +270,17 @@ export const RevisionSideBar = observer(
       borderColor: "border.dark",
       borderLeftColor: "border.dark",
       borderTopColor: "theme.blueAlt",
-      borderBottomColor: "theme.yellowLight",
+      borderBottomColor: panelBg,
       borderRadius: 0,
     }
 
-    const sortedPastRevisionRequests = useMemo(() => {
+    const pastRevisionRequests = useMemo(() => {
       return Array.from((selectedSubmissionVersion?.revisionRequests as IRevisionRequest[]) ?? []).sort((a, b) => {
         return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
       })
     }, [selectedSubmissionVersion?.revisionRequests])
+    const pastFieldRevisions = pastRevisionRequests.filter((request) => !isSupportingDocumentRequest(request))
+    const pastSupportingInformation = pastRevisionRequests.filter((request) => isSupportingDocumentRequest(request))
 
     return (
       <>
@@ -310,15 +290,15 @@ export const RevisionSideBar = observer(
             direction="column"
             boxShadow="md"
             borderRight="1px solid"
-            borderRightColor="border.light"
-            width={"sidebar.width"}
+            borderRightColor={panelBorder}
+            width={"sidebar.revisionWidth"}
             position="sticky"
             {...stickyBelowNavBar(`${topHeight ?? 0}px`)}
             bottom="0"
             height={`calc(100vh - ${topHeight ?? 0}px - var(--app-navbar-offset))`}
             float="left"
             id="permit-revision-sidebar"
-            bg="theme.yellowLight"
+            bg={panelBg}
             index={tabIndex}
             // @ts-ignore
             onChange={(index: number) => handleSetTabIndex(index)}
@@ -340,16 +320,18 @@ export const RevisionSideBar = observer(
                       setSupportingInformationRequest(item)
                       onSupportingInfoOpen()
                     }}
-                    onViewAdditionalPermit={(item) => {
-                      setAdditionalPermitRequest(item)
-                      onAdditionalPermitOpen()
-                    }}
                   />
                 ) : (
                   <Box flex={1} pb={8}>
                     <RequestSection
                       title={t("permitApplication.show.revision.revisionsSection")}
+                      borderColor={panelBorder}
                       hint={t("permitApplication.show.clickQuestion")}
+                      emptyText={
+                        visibleRevisionFields.length === 0
+                          ? t("permitApplication.show.revision.revisionsEmpty")
+                          : undefined
+                      }
                     >
                       <OrderedList ml={0}>
                         {visibleRevisionFields.map((field) => (
@@ -359,6 +341,7 @@ export const RevisionSideBar = observer(
                     </RequestSection>
                     <RequestSection
                       title={t("permitApplication.show.revision.supportingInformationSection")}
+                      borderColor={panelBorder}
                       onAdd={
                         permitApplication.isRevisionsRequested
                           ? undefined
@@ -380,38 +363,8 @@ export const RevisionSideBar = observer(
                             title={field.title}
                             comment={field.comment}
                             onView={() => {
-                              setSupportingInformationRequest(field as ISupportingInformationRequest)
+                              setSupportingInformationRequest(field as IRevisionRequest)
                               onSupportingInfoOpen()
-                            }}
-                          />
-                        ))}
-                      </OrderedList>
-                    </RequestSection>
-                    <RequestSection
-                      title={t("permitApplication.show.revision.permitApplicationSection")}
-                      onAdd={
-                        permitApplication.isRevisionsRequested
-                          ? undefined
-                          : () => {
-                              setAdditionalPermitRequest(undefined)
-                              onAdditionalPermitOpen()
-                            }
-                      }
-                      emptyText={
-                        visibleAdditionalPermitFields.length === 0
-                          ? t("permitApplication.show.revision.permitApplicationEmpty")
-                          : undefined
-                      }
-                    >
-                      <OrderedList ml={0}>
-                        {visibleAdditionalPermitFields.map((field) => (
-                          <GenericRequestListItem
-                            key={field.fieldId}
-                            title={field.nameSnapshot}
-                            comment={field.comment}
-                            onView={() => {
-                              setAdditionalPermitRequest(field as IAdditionalPermitRequest)
-                              onAdditionalPermitOpen()
                             }}
                           />
                         ))}
@@ -421,17 +374,59 @@ export const RevisionSideBar = observer(
                 )}
               </TabPanel>
               <TabPanel>
-                {/* UX DISCUSSION ASSUMPTION: #9 Past Requests mixed types — field-revision compare only. */}
-                <SubmissionVersionSelect
-                  options={permitApplication.pastSubmissionVersionOptions}
-                  onChange={handleSelectPastVersionChange}
-                  value={selectedSubmissionVersion}
-                />
-                <OrderedList mt={4} ml={0}>
-                  {sortedPastRevisionRequests.map((rr) => (
-                    <RevisionRequestListItem revisionRequest={rr} key={rr.id} />
-                  ))}
-                </OrderedList>
+                {permitApplication.pastSubmissionVersionOptions.length === 0 ? (
+                  <Text px={4} fontSize="sm" color="text.secondary">
+                    {t("permitApplication.show.revision.pastSubmissionsEmpty")}
+                  </Text>
+                ) : (
+                  <Box flex={1} pb={8}>
+                    <Box px={4} pt={4}>
+                      <SubmissionVersionSelect
+                        options={permitApplication.pastSubmissionVersionOptions}
+                        onChange={handleSelectPastVersionChange}
+                        value={selectedSubmissionVersion}
+                      />
+                    </Box>
+                    <RequestSection
+                      title={t("permitApplication.show.revision.revisionsSection")}
+                      borderColor={panelBorder}
+                      emptyText={
+                        pastFieldRevisions.length === 0
+                          ? t("permitApplication.show.revision.revisionsEmpty")
+                          : undefined
+                      }
+                    >
+                      <OrderedList ml={0}>
+                        {pastFieldRevisions.map((request) => (
+                          <RevisionRequestListItem revisionRequest={request} key={request.id} />
+                        ))}
+                      </OrderedList>
+                    </RequestSection>
+                    <RequestSection
+                      title={t("permitApplication.show.revision.supportingInformationSection")}
+                      borderColor={panelBorder}
+                      emptyText={
+                        pastSupportingInformation.length === 0
+                          ? t("permitApplication.show.revision.supportingInformationEmpty")
+                          : undefined
+                      }
+                    >
+                      <OrderedList ml={0}>
+                        {pastSupportingInformation.map((request) => (
+                          <GenericRequestListItem
+                            key={request.id}
+                            title={request.title}
+                            comment={request.comment}
+                            onView={() => {
+                              setSupportingInformationRequest(request)
+                              onSupportingInfoOpen()
+                            }}
+                          />
+                        ))}
+                      </OrderedList>
+                    </RequestSection>
+                  </Box>
+                )}
               </TabPanel>
             </TabPanels>
             {inNewRequest && (
@@ -440,14 +435,14 @@ export const RevisionSideBar = observer(
                 border="1px solid"
                 borderColor="border.light"
                 p={8}
-                width={"sidebar.width"}
+                width={"sidebar.revisionWidth"}
                 gap={4}
                 justify="center"
                 position="sticky"
                 bottom={0}
                 left={0}
                 maxH={145}
-                bg="theme.yellowLight"
+                bg={panelBg}
                 flex={1}
               >
                 <Box>
@@ -487,24 +482,11 @@ export const RevisionSideBar = observer(
               onSupportingInfoClose()
             }}
             supportingInformationRequest={supportingInformationRequest}
-            useFieldArrayMethods={supportingInfoFieldArrayMethods}
+            useFieldArrayMethods={useFieldArrayMethods}
             onSave={handleSubmit(onSaveRevision)}
             disableInput={forSubmitter || isViewingPastRequests || permitApplication.isRevisionsRequested}
-          />
-        )}
-        {isAdditionalPermitOpen && (
-          <AdditionalPermitRequestModal
-            isOpen={isAdditionalPermitOpen}
-            onClose={() => {
-              setAdditionalPermitRequest(undefined)
-              onAdditionalPermitClose()
-            }}
+            allowFulfillmentUpload={forSubmitter && !isViewingPastRequests}
             permitApplication={permitApplication}
-            additionalPermitRequest={additionalPermitRequest}
-            requestedTemplateIds={requestedTemplateIds}
-            useFieldArrayMethods={additionalPermitFieldArrayMethods}
-            onSave={handleSubmit(onSaveRevision)}
-            disableInput={forSubmitter || isViewingPastRequests || permitApplication.isRevisionsRequested}
           />
         )}
         <DesignatedReviewerModal
@@ -523,7 +505,7 @@ export const RevisionSideBar = observer(
                   {t("ui.selected")}
                 </Text>
               </Box>
-              {renderButtons()}
+              {renderButtons(revisionsSent)}
             </Flex>
           </Portal>
         )}
@@ -532,49 +514,40 @@ export const RevisionSideBar = observer(
   }
 )
 
-const isAddressed = (item?: { addressedAt?: number | string | null }) => !!item?.addressedAt
-
 const SubmitterRequestsPanel = observer(
   ({
     permitApplication,
     onViewSupportingInfo,
-    onViewAdditionalPermit,
   }: {
     permitApplication: IPermitApplication
-    onViewSupportingInfo: (item: ISupportingInformationRequest) => void
-    onViewAdditionalPermit: (item: IAdditionalPermitRequest) => void
+    onViewSupportingInfo: (item: IRevisionRequest) => void
   }) => {
     const { t } = useTranslation()
-    const revisionRequests = permitApplication.latestRevisionRequests
-    const supportingInfoRequests = permitApplication.latestSupportingInformationRequests
-    const additionalPermitRequests = permitApplication.latestAdditionalPermitRequests
-    const totalCount = permitApplication.latestRequestPackageCount
-    const addressedCount =
-      revisionRequests.filter(isAddressed).length +
-      supportingInfoRequests.filter(isAddressed).length +
-      additionalPermitRequests.filter(isAddressed).length
+    const revisionRequests = permitApplication.latestFieldRevisionRequests
+    const supportingInfoRequests = permitApplication.latestSupportingDocumentRevisionRequests
+    const changedFieldKeys = new Set(
+      permitApplication.submissionData
+        ? compareSubmissionData(
+            permitApplication.latestSubmissionVersion?.submissionData,
+            permitApplication.submissionData
+          )
+        : []
+    )
 
     return (
       <Box flex={1} pb={8}>
-        <InventedReviewerCommentsBlock
-          documents={supportingInfoRequests.flatMap((item) => item.projectDocuments || [])}
-        />
-        <Text px={4} pt={4} fontWeight="bold">
-          {t("permitApplication.show.revision.progressAddressed", {
-            addressed: addressedCount,
-            total: totalCount,
-          })}
-        </Text>
-        <RequestSection title={t("permitApplication.show.revision.revisionsSection")}>
-          <OrderedList ml={0}>
+        <ApplicantNoteBlock note={permitApplication.latestSubmissionVersion?.applicantNote} />
+        <RequestSection
+          title={t("permitApplication.show.revision.revisionsSection")}
+          emptyText={revisionRequests.length === 0 ? t("permitApplication.show.revision.revisionsEmpty") : undefined}
+        >
+          <OrderedList m={0} p={0} listStyleType="none">
             {revisionRequests.map((field) => (
               <RevisionRequestListItem
                 revisionRequest={field}
                 key={field.id}
-                showAddressedCheckbox
-                onToggleAddressed={(addressed) =>
-                  permitApplication.toggleRequestItemAddressed("revision_request", field.id, addressed)
-                }
+                forSubmitter
+                fieldChanged={changedFieldKeys.has(field.requirementJson?.key)}
               />
             ))}
           </OrderedList>
@@ -587,43 +560,14 @@ const SubmitterRequestsPanel = observer(
               : undefined
           }
         >
-          <OrderedList ml={0}>
+          <OrderedList m={0} p={0} listStyleType="none">
             {supportingInfoRequests.map((field) => (
               <GenericRequestListItem
                 key={field.id}
                 title={field.title}
                 comment={field.comment}
+                fulfilled={field.supportingDocuments?.length > 0}
                 onView={() => onViewSupportingInfo(field)}
-                showAddressedCheckbox
-                addressed={isAddressed(field)}
-                onToggleAddressed={(addressed) =>
-                  permitApplication.toggleRequestItemAddressed("supporting_information_request", field.id, addressed)
-                }
-              />
-            ))}
-          </OrderedList>
-        </RequestSection>
-        <RequestSection
-          title={t("permitApplication.show.revision.permitApplicationSection")}
-          emptyText={
-            additionalPermitRequests.length === 0
-              ? t("permitApplication.show.revision.permitApplicationEmpty")
-              : undefined
-          }
-        >
-          <OrderedList ml={0}>
-            {additionalPermitRequests.map((field) => (
-              <GenericRequestListItem
-                key={field.id}
-                title={field.nameSnapshot}
-                comment={field.comment}
-                onView={() => onViewAdditionalPermit(field)}
-                showAddressedCheckbox
-                addressed={isAddressed(field)}
-                onToggleAddressed={(addressed) =>
-                  permitApplication.toggleRequestItemAddressed("additional_permit_request", field.id, addressed)
-                }
-                statusChip={<AdditionalPermitStatusChip status={field.siblingStatus} />}
               />
             ))}
           </OrderedList>
@@ -633,65 +577,27 @@ const SubmitterRequestsPanel = observer(
   }
 )
 
-// UX DISCUSSION ASSUMPTION: #5 package-level reviewer message.
-// Guess: submitter shell only (empty copy + union of supporting-info reference files as “Download all”).
-// Lapse: reviewer assemble still has no compose field; this is not a zip; talking point 5 is unresolved.
-const InventedReviewerCommentsBlock = ({ documents }: { documents: IProjectDocument[] }) => {
+const ApplicantNoteBlock = ({ note }: { note?: string | null }) => {
   const { t } = useTranslation()
-  const downloadable = documents.filter((doc) => doc.kind !== "fulfillment" && doc.fileUrl)
-
-  const downloadAll = () => {
-    downloadable.forEach((doc) => {
-      const anchor = window.document.createElement("a")
-      anchor.href = doc.fileUrl as string
-      anchor.target = "_blank"
-      anchor.rel = "noopener"
-      anchor.click()
-    })
-  }
+  if (!note) return null
 
   return (
     <Box px={4} pt={4} pb={2} borderBottom="1px solid" borderColor="border.light">
       <Heading as="h3" fontSize="md" mb={2}>
-        {t("permitApplication.show.revision.reviewerComments")}
+        {t("permitApplication.show.revision.noteToApplicant")}
       </Heading>
-      <Text fontSize="sm" color="text.secondary" fontStyle="italic">
-        {t("permitApplication.show.revision.reviewerCommentsEmpty")}
-      </Text>
-      {downloadable.length > 0 && (
-        <Button variant="link" mt={2} onClick={downloadAll}>
-          {t("permitApplication.show.revision.downloadAllAttachments")}
-        </Button>
-      )}
+      <Text fontSize="sm">{note}</Text>
     </Box>
-  )
-}
-
-// UX DISCUSSION ASSUMPTION: #4 request-only (no auto-create); #7 allow already-on-project duplicates.
-// Guess: chip = latest sibling of that template, else Not started.
-// Lapse: chip can stay Not started forever; multiple matches are a guess.
-const AdditionalPermitStatusChip = ({ status }: { status?: EPermitApplicationStatus | null }) => {
-  const { t } = useTranslation()
-  if (status) return <PermitApplicationStatusTag status={status} />
-
-  return (
-    <Tag size="sm" bg="greys.grey04" color="text.primary" border="1px solid" borderColor="border.light">
-      {t("permitApplication.show.revision.notStarted")}
-    </Tag>
   )
 }
 
 interface IRevisionRequestListItemProps {
   revisionRequest: Partial<IRevisionRequest>
-  showAddressedCheckbox?: boolean
-  onToggleAddressed?: (addressed: boolean) => void
+  forSubmitter?: boolean
+  fieldChanged?: boolean
 }
 
-const RevisionRequestListItem = ({
-  revisionRequest,
-  showAddressedCheckbox,
-  onToggleAddressed,
-}: IRevisionRequestListItemProps) => {
+const RevisionRequestListItem = ({ revisionRequest, forSubmitter, fieldChanged }: IRevisionRequestListItemProps) => {
   const { t } = useTranslation()
 
   const { requirementJson, reasonCode, comment, user } = revisionRequest
@@ -704,32 +610,56 @@ const RevisionRequestListItem = ({
 
   return (
     <ListItem mb={4} w="full">
-      {requirementKey ? (
-        <ScrollLink to={`formio-component-${requirementKey}`}>{requirementJson?.label}</ScrollLink>
-      ) : (
-        <Text fontWeight="medium">{t("permitApplication.show.revision.revisionRequest")}</Text>
-      )}
-      <Flex fontStyle="italic">
-        {t("permitApplication.show.revision.reasonCode")}: {reasonCode}
-      </Flex>
-      <Flex gap={2} fontStyle="italic" alignItems="center" flexWrap="nowrap" w="full">
-        <Box width={6} height={6}>
-          <ChatDots size={24} />
-        </Box>
-        <Text noOfLines={1}>{comment}</Text>
-        <Spacer />
-        <Button variant="link" onClick={clickHandleView} isDisabled={!requirementKey}>
-          {t("ui.view")}
-        </Button>
-      </Flex>
-      {user && (
-        <Text fontStyle={"italic"}>
-          {t("ui.modifiedBy")}: {user.firstName} {user.lastName}
+      <Flex direction="column" gap={1} align="flex-start">
+        <Flex align="center" gap={1}>
+          {requirementKey && !forSubmitter ? (
+            <ScrollLink to={`formio-component-${requirementKey}`}>{requirementJson?.label}</ScrollLink>
+          ) : (
+            <Text fontSize="sm" fontWeight="bold" color="text.secondary" lineHeight="shorter">
+              {requirementJson?.label || t("permitApplication.show.revision.revisionRequest")}
+            </Text>
+          )}
+          {forSubmitter && fieldChanged && (
+            <Box flexShrink={0} lineHeight={0}>
+              <CheckCircle
+                color="var(--chakra-colors-text-secondary)"
+                size={16}
+                aria-label={t("permitApplication.show.revision.fieldChanged")}
+              />
+            </Box>
+          )}
+        </Flex>
+        <Text fontSize="xs" color="text.secondary" lineHeight="shorter">
+          {t("permitApplication.show.revision.reasonCode")}: {reasonCode}
         </Text>
-      )}
-      {showAddressedCheckbox && (
-        <AddressedCheckbox addressed={!!revisionRequest.addressedAt} onToggle={onToggleAddressed} />
-      )}
+        <Text fontSize="xs" color="text.secondary" lineHeight="shorter" noOfLines={1}>
+          {comment}
+        </Text>
+        {user && (
+          <Text fontSize="xs" color="text.secondary" lineHeight="shorter">
+            {t("ui.modifiedBy")}: {user.firstName} {user.lastName}
+          </Text>
+        )}
+        <Flex gap={1} align="center">
+          {forSubmitter && requirementKey && (
+            <ScrollLink to={`formio-component-${requirementKey}`} fontSize="xs" lineHeight="shorter">
+              {t("permitApplication.show.revision.goToField")}
+            </ScrollLink>
+          )}
+          <Link
+            as="button"
+            type="button"
+            fontSize="xs"
+            lineHeight="shorter"
+            color="text.link"
+            textDecoration="underline"
+            onClick={clickHandleView}
+            isDisabled={!requirementKey}
+          >
+            {t("permitApplication.show.revision.viewRequest")}
+          </Link>
+        </Flex>
+      </Flex>
     </ListItem>
   )
 }
@@ -737,66 +667,51 @@ const RevisionRequestListItem = ({
 const GenericRequestListItem = ({
   title,
   comment,
+  fulfilled,
   onView,
-  showAddressedCheckbox,
-  addressed,
-  onToggleAddressed,
-  statusChip,
 }: {
   title?: string
   comment?: string
+  fulfilled?: boolean
   onView: () => void
-  showAddressedCheckbox?: boolean
-  addressed?: boolean
-  onToggleAddressed?: (addressed: boolean) => void
-  statusChip?: React.ReactNode
 }) => {
   const { t } = useTranslation()
 
   return (
     <ListItem mb={4} w="full">
-      <Flex align="center" gap={2}>
-        <Text fontWeight="medium">{title}</Text>
-        {statusChip}
+      <Flex direction="column" gap={1} align="flex-start">
+        <Flex align="center" gap={1}>
+          <Text fontSize="sm" fontWeight="bold" color="text.secondary" lineHeight="shorter">
+            {title}
+          </Text>
+          {fulfilled && (
+            <Box flexShrink={0} lineHeight={0}>
+              <CheckCircle
+                color="var(--chakra-colors-text-secondary)"
+                size={16}
+                aria-label={t("permitApplication.show.revision.filesUploaded")}
+              />
+            </Box>
+          )}
+        </Flex>
+        {comment && (
+          <Text fontSize="xs" color="text.secondary" lineHeight="shorter" noOfLines={1}>
+            {comment}
+          </Text>
+        )}
+        <Link
+          as="button"
+          type="button"
+          fontSize="xs"
+          lineHeight="shorter"
+          color="text.link"
+          textDecoration="underline"
+          onClick={onView}
+        >
+          {t("permitApplication.show.revision.viewRequest")}
+        </Link>
       </Flex>
-      {comment && (
-        <Flex gap={2} fontStyle="italic" alignItems="center" flexWrap="nowrap" w="full">
-          <Box width={6} height={6}>
-            <ChatDots size={24} />
-          </Box>
-          <Text noOfLines={1}>{comment}</Text>
-          <Spacer />
-          <Button variant="link" onClick={onView}>
-            {t("ui.view")}
-          </Button>
-        </Flex>
-      )}
-      {!comment && (
-        <Flex justify="flex-end">
-          <Button variant="link" onClick={onView}>
-            {t("ui.view")}
-          </Button>
-        </Flex>
-      )}
-      {showAddressedCheckbox && <AddressedCheckbox addressed={!!addressed} onToggle={onToggleAddressed} />}
     </ListItem>
-  )
-}
-
-// UX DISCUSSION ASSUMPTION: #8 honor-system ticks; does not verify artifacts or gate Submit.
-const AddressedCheckbox = ({
-  addressed,
-  onToggle,
-}: {
-  addressed: boolean
-  onToggle?: (addressed: boolean) => void
-}) => {
-  const { t } = useTranslation()
-
-  return (
-    <Checkbox mt={2} isChecked={addressed} onChange={(e) => onToggle?.(e.target.checked)}>
-      {t("permitApplication.show.revision.iveAddressed")}
-    </Checkbox>
   )
 }
 
@@ -805,15 +720,17 @@ const RequestSection = ({
   hint,
   onAdd,
   emptyText,
+  borderColor = "border.light",
   children,
 }: {
   title: string
   hint?: string
   onAdd?: () => void
   emptyText?: string
+  borderColor?: string
   children: React.ReactNode
 }) => (
-  <Box borderBottom="1px solid" borderColor="border.light" pb={4} mb={4}>
+  <Box borderBottom="1px solid" borderColor={borderColor} pb={4} mb={4}>
     <Flex align="center" px={4} pt={4} pb={2}>
       <Heading as="h3" fontSize="md">
         {title}

@@ -340,17 +340,11 @@ RSpec.describe PermitApplication, type: :model do
       expect(permit_application.can_finalize_requests?).to be_falsey
     end
 
-    it "is true with only a supporting information request" do
+    it "is true with only a supporting document revision request" do
       create(
-        :supporting_information_request,
+        :supporting_document_revision_request,
         submission_version: submission_version
       )
-
-      expect(permit_application.can_finalize_requests?).to be true
-    end
-
-    it "is true with only an additional permit request" do
-      create(:additional_permit_request, submission_version: submission_version)
 
       expect(permit_application.can_finalize_requests?).to be true
     end

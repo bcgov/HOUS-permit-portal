@@ -1,6 +1,5 @@
 import {
   Button,
-  Divider,
   Flex,
   FormControl,
   FormHelperText,
@@ -10,11 +9,12 @@ import {
   ModalBody,
   ModalCloseButton,
   ModalContent,
-  ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Select,
-  Spacer,
+  Radio,
+  RadioGroup,
+  Stack,
+  Text,
   Textarea,
   useDisclosure,
 } from "@chakra-ui/react"
@@ -23,6 +23,7 @@ import React, { useState } from "react"
 import { UseFieldArrayReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
+import { ERevisionRequestType } from "../../../types/enums"
 import { IFormIORequirement, IRevisionRequest } from "../../../types/types"
 import { singleRequirementFormJson } from "../../../utils/formio-helpers"
 import { IRevisionRequestForm } from "../../domains/permit-application/revision-sidebar"
@@ -84,6 +85,7 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
     const newItem = {
       id: revisionRequest?.id,
       userId: currentUser.id,
+      type: revisionRequest?.type || ERevisionRequestType.FieldRevisionRequest,
       reasonCode,
       requirementJson,
       submissionData,
@@ -121,96 +123,97 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
     revisionRequestDefault?.submissionData ?? revisionRequest?.submissionData ?? submissionData
 
   const selectedLabel = revisionReasonOptions.find((opt) => opt.value === reasonCode)?.label
+  const fieldLabel = requirementJson?.label || t("permitApplication.show.revision.revisionRequest")
+  const readOnly = disableInput || isRevisionsRequested
+  const previousValue = (
+    <SingleRequirementForm requirementJson={requirementForm} submissionData={requirementSubmission} />
+  )
 
   return (
-    <Modal onClose={handleClose} isOpen={isOpen} size="2xl">
+    <Modal onClose={handleClose} isOpen={isOpen} size="lg">
       <ModalOverlay />
 
       <ModalContent mt={48}>
-        <ModalHeader textAlign="center">
+        <ModalHeader textAlign="left" px={10} pt={10} pb={4}>
           <ModalCloseButton fontSize="11px" />
-          <Heading as="h3" fontSize="xl">
-            {t("permitApplication.show.revision.revisionRequest")}
+          <Heading as="h3" fontSize="2xl" textAlign="left">
+            {disableInput ? t("permitApplication.show.revision.submitterRevisionTitle") : fieldLabel}
           </Heading>
+          {!readOnly && (
+            <Text fontWeight="normal" fontSize="md" mt={2}>
+              {t("permitApplication.show.revision.requestRevisionIntro")}
+            </Text>
+          )}
         </ModalHeader>
-        <ModalBody>
-          <Flex direction="column" gap={4}>
-            <FormControl>
-              <FormLabel>{t("permitApplication.show.revision.reasonFor")}</FormLabel>
-              {isRevisionsRequested ? (
-                <Textarea disabled={true}>{selectedLabel}</Textarea>
-              ) : (
-                <Select
-                  placeholder={t("ui.pleaseSelect")}
-                  value={reasonCode}
-                  onChange={(e) => setReasonCode(e.target.value)}
-                  isDisabled={disableInput}
-                >
-                  {revisionReasonOptions.map((opt) => (
-                    <option value={opt.value} key={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </Select>
-              )}
-            </FormControl>
-            <FormControl>
-              <FormLabel>{t("permitApplication.show.revision.comment")}</FormLabel>
-              <Textarea
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                placeholder={t("permitApplication.show.revision.comment")}
-                maxLength={350}
-                isDisabled={disableInput || isRevisionsRequested}
-                sx={{
-                  _disabled: {
-                    color: "text.primary",
-                    cursor: "not-allowed",
-                  },
-                }}
-              />
-              {!disableInput && !isRevisionsRequested && (
-                <FormHelperText>{t("permitApplication.show.revision.maxCharacters")}</FormHelperText>
-              )}
-            </FormControl>
-
-            <Divider />
-
-            <SingleRequirementForm requirementJson={requirementForm} submissionData={requirementSubmission} />
-          </Flex>
-          <ModalFooter>
-            <Flex width="full" justify="center" gap={4}>
-              {disableInput ? (
-                <>
+        <ModalBody px={10} pt={0} pb={10}>
+          <Flex direction="column" gap={4} align="stretch">
+            {disableInput && (
+              <Flex direction="column" gap={1}>
+                <Text fontWeight="bold">{t("permitApplication.show.revision.fieldLabel")}</Text>
+                <Text>{fieldLabel}</Text>
+              </Flex>
+            )}
+            <Flex direction="column" gap={2}>
+              <Text fontWeight="bold">{t("permitApplication.show.revision.responseProvided")}</Text>
+              {previousValue}
+            </Flex>
+            {readOnly ? (
+              <>
+                <Flex direction="column" gap={1}>
+                  <Text fontWeight="bold">{t("permitApplication.show.revision.whyRevisionNeeded")}</Text>
+                  <Text>{selectedLabel || t("permitApplication.show.revision.notProvided")}</Text>
+                </Flex>
+                <Flex direction="column" gap={1}>
+                  <Text fontWeight="bold">{t("permitApplication.show.revision.explanationFromAuthority")}</Text>
+                  <Text>{comment || t("permitApplication.show.revision.notProvided")}</Text>
+                </Flex>
+                <Flex justify="flex-start">
                   <Button variant="secondary" onClick={onClose}>
-                    {t("ui.ok")}
+                    {t("ui.close")}
                   </Button>
-                </>
-              ) : (
-                <>
-                  <Button onClick={handleUpsert} variant="primary" isDisabled={!reasonCode || isRevisionsRequested}>
-                    {t("permitApplication.show.revision.useButton")}
+                </Flex>
+              </>
+            ) : (
+              <>
+                <FormControl>
+                  <FormLabel>{t("permitApplication.show.revision.whyRevisionNeeded")}</FormLabel>
+                  <RadioGroup value={reasonCode} onChange={setReasonCode}>
+                    <Stack spacing={4}>
+                      {revisionReasonOptions.map((opt) => (
+                        <Radio key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </Radio>
+                      ))}
+                    </Stack>
+                  </RadioGroup>
+                </FormControl>
+                <FormControl>
+                  <FormLabel>{t("permitApplication.show.revision.explanationToApplicant")}</FormLabel>
+                  <Textarea value={comment} onChange={(e) => setComment(e.target.value)} maxLength={350} />
+                  <FormHelperText>{t("permitApplication.show.revision.explanationToApplicantHelper")}</FormHelperText>
+                </FormControl>
+                <Flex justify="flex-start" gap={4}>
+                  <Button onClick={handleUpsert} variant="primary" isDisabled={!reasonCode}>
+                    {revisionRequest ? t("ui.change") : t("ui.add")}
                   </Button>
-
                   <Button variant="secondary" onClick={onClose}>
                     {t("ui.cancel")}
                   </Button>
-                  <Spacer />
-                  {revisionRequest && (
-                    <Button
-                      color="semantic.error"
-                      leftIcon={<Trash />}
-                      variant="link"
-                      onClick={handleDelete}
-                      isDisabled={isRevisionsRequested}
-                    >
-                      {t("ui.delete")}
-                    </Button>
-                  )}
-                </>
-              )}
-            </Flex>
-          </ModalFooter>
+                </Flex>
+                {revisionRequest && (
+                  <Button
+                    leftIcon={<Trash />}
+                    variant="link"
+                    color="text.primary"
+                    onClick={handleDelete}
+                    w="fit-content"
+                  >
+                    {t("ui.delete")}
+                  </Button>
+                )}
+              </>
+            )}
+          </Flex>
         </ModalBody>
       </ModalContent>
     </Modal>

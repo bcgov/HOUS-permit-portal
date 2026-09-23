@@ -7,18 +7,9 @@ class SubmissionVersion < ApplicationRecord
 
   belongs_to :permit_application
   has_many :revision_requests, dependent: :destroy
-  has_many :supporting_information_requests,
-           dependent: :destroy,
-           inverse_of: :submission_version
-  has_many :additional_permit_requests,
-           dependent: :destroy,
-           inverse_of: :submission_version
   has_many :supporting_documents, dependent: :destroy
 
   accepts_nested_attributes_for :revision_requests, allow_destroy: true
-  accepts_nested_attributes_for :supporting_information_requests,
-                                allow_destroy: true
-  accepts_nested_attributes_for :additional_permit_requests, allow_destroy: true
 
   def zipfile_size
     zipfile_data&.dig("metadata", "size")
@@ -149,8 +140,7 @@ class SubmissionVersion < ApplicationRecord
   end
 
   def has_request_package_items?
-    revision_requests.exists? || supporting_information_requests.exists? ||
-      additional_permit_requests.exists?
+    revision_requests.exists?
   end
 
   def request_package_visible_to_submitter?
@@ -172,7 +162,10 @@ class SubmissionVersion < ApplicationRecord
     return [] if permissions.blank?
 
     revision_requests.select do |r|
-      return false if r.requirement_json["key"].blank?
+      next true if r.is_a?(SupportingDocumentRevisionRequest)
+      if r.requirement_json.blank? || r.requirement_json["key"].blank?
+        return false
+      end
 
       rb_id = r.requirement_json["key"][/RB([a-zA-Z0-9\-]+)/, 1]
       permissions.include?(rb_id)

@@ -1,72 +1,89 @@
+<%
+  requests = @permit_application.revision_requests
+  field_revisions = requests.select { |request| request.is_a?(FieldRevisionRequest) }
+  supporting_information = requests.select { |request| request.is_a?(SupportingDocumentRevisionRequest) }
+  reviewer_message = @permit_application.latest_submission_version&.applicant_note
+  project_title = @permit_application.permit_project&.title
+  permit_name = @permit_application.nickname.presence || @permit_application.template_nickname
+%>
 <!-- START MAIN CONTENT AREA -->
 <tr>
   <td class="wrapper" style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top; box-sizing: border-box; padding: 56px 32px;" valign="top">
     <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; width: 100%;" width="100%">
       <tr>
-      <!-- START CONTENT ROW -->
         <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top;" valign="top">
-          <h1 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; text-align: left; font-size: 28px; margin-top: 0; margin-bottom: 48px;">Revisions Requested</h1>
-          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">Dear <%= @user.name %>,</p>
-          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
-              Your permit application status has changed: 
+          <h1 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; text-align: left; font-size: 28px; margin-top: 0; margin-bottom: 32px;">Changes requested for your permit application</h1>
+
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 12px;">Hello <%= @user.first_name.presence || @user.name %>,</p>
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 12px;">
+            <%= @permit_application.jurisdiction.qualified_name %> has requested changes or additional information for your permit application:
+          </p>
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 16px;">
+            <% if project_title.present? %>
+              <strong>Project:</strong> <%= project_title %><br>
+            <% end %>
+            <% if permit_name.present? %>
+              <strong>Permit application:</strong> <%= permit_name %><br>
+            <% end %>
+            <strong>HUB#:</strong> <%= @permit_application.number %>
           </p>
 
-          <h2 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 24px; margin-bottom: 16px; text-align: left; font-size: 22px;">Application details:</h2>
-            <table class="basic-table" role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; width: 100%; background: #f2f2f2; border: 1px solid #d9d9d9; margin-bottom: 32px;" width="100%">
+          <hr style="border: 0; border-top: 1px solid #d9d9d9; margin: 16px 0;">
+
+          <h2 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 16px; margin-bottom: 12px; text-align: left; font-size: 22px;">Requests</h2>
+
+          <% if field_revisions.any? %>
+            <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0;">Revisions:</p>
+            <ul style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0 0 12px; padding-left: 24px;">
+              <% field_revisions.each do |request| %>
+                <li style="margin-left: 5px;"><%= request.requirement_json&.dig("label").presence || "Revision request" %></li>
+              <% end %>
+            </ul>
+          <% end %>
+
+          <% if supporting_information.any? %>
+            <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0;">Supporting information:</p>
+            <ul style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0 0 12px; padding-left: 24px;">
+              <% supporting_information.each do |request| %>
+                <li style="margin-left: 5px;"><%= request.title.presence || "Supporting information" %></li>
+              <% end %>
+            </ul>
+          <% end %>
+
+          <% if reviewer_message.present? %>
+            <h2 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 16px; margin-bottom: 12px; text-align: left; font-size: 22px;">Message from the reviewer</h2>
+            <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0 0 16px;"><%= reviewer_message %></p>
+          <% end %>
+
+          <hr style="border: 0; border-top: 1px solid #d9d9d9; margin: 16px 0;">
+
+          <h2 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 16px; margin-bottom: 12px; text-align: left; font-size: 22px;">Next steps</h2>
+          <ul style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0 0 16px; padding-left: 24px;">
+            <li style="margin-left: 5px;">Log in to Building Permit Hub to review each request, update your application, and provide any supporting information as requested.</li>
+          </ul>
+
+          <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin: 8px 0 16px;">
             <tr>
-              <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top;" valign="top">
-                <dl class="table-like" style="margin: 0;">
-                  
-                  <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px; text-align: left;">Jurisdiction</dt>
-                  <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 1px solid #d9d9d9;"><%= @permit_application.jurisdiction.qualified_name %></dd>
-
-                  <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px; text-align: left;">Application #</dt>
-                  <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 1px solid #d9d9d9;"><a href="<%= @permit_application.submitter_frontend_url %>" style="color: #1a5a96; text-decoration: underline;"><%= @permit_application.number %></a></dd>
-
-                  <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px; text-align: left;">Current status</dt>
-                  <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 1px solid #d9d9d9;"><%= @permit_application.status.titleize %></dd>
-                  
-
-                  <% if @permit_application.viewed_at.present? %>
-                    <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px; text-align: left;">Revisions requested on</dt>
-                    <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 1px solid #d9d9d9;"><%= @permit_application.formatted_revisions_requested_at %></dd>
-                  <% end %>
-
-                  <% if @permit_application.reference_number.present? %>
-                    <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px; text-align: left;">Local reference #</dt>
-                    <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 0;"><%= @permit_application.reference_number %></dd>
-                  <% end %>
-
-                </dl>
+              <td style="background: #003366; border-radius: 4px;">
+                <a href="<%= @permit_application.submitter_frontend_url %>" style="display: inline-block; padding: 8px 12px; font-family: 'Open Sans', sans-serif; font-size: 16px; color: #ffffff; text-decoration: none;">Log in to Building Permit Hub</a>
               </td>
             </tr>
           </table>
-          
-          <h2 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 24px; margin-bottom: 16px; text-align: left; font-size: 22px;">Next steps:</h2>
 
-          <ul style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px; padding-left: 24px;">
-            <li style="list-style-position: initial; margin-left: 5px;">Please update your application with the requested changes.</li>
-            <li style="list-style-position: initial; margin-left: 5px;">Please resubmit your application with the requested revisions.</li>
-          </ul>
+          <hr style="border: 0; border-top: 1px solid #d9d9d9; margin: 16px 0;">
 
-
-          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
-              If you have any questions or difficulties during your application status, please contact the local jurisdiction you applied to.
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0 0 12px;">
+            If you have any questions or need technical assistance, reach out to us at <a href="mailto:digital.codes.permits@gov.bc.ca" style="color: #1a5a96; text-decoration: underline;">digital.codes.permits@gov.bc.ca</a>
           </p>
-
-
-          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
-              Thank you,<br><br>
-              The Building Permit Hub Team
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0 0 24px;">
+            For questions about your permit application, reach out to your local building authority.
           </p>
-          
-
-          
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0;">
+            The Building Permit Hub Team
+          </p>
         </td>
-        <!-- END OF CONTENT ROW -->
       </tr>
     </table>
   </td>
 </tr>
-
 <!-- END MAIN CONTENT AREA -->

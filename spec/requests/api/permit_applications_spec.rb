@@ -292,6 +292,59 @@ RSpec.describe "Api::PermitApplications", type: :request do
       expect(response).to have_http_status(:ok)
       expect(json_response.dig("data", "requires_project_meeting")).to be(true)
     end
+
+    it "keeps the submitter note on the version that had the requests" do
+      revision_application =
+        create(
+          :permit_application,
+          :revisions_requested,
+          submitter: submitter,
+          template_version: template_version,
+          jurisdiction: jurisdiction,
+          submission_data: {
+            "data" => {
+              "section-completion-key" => {
+                "signed" => true
+              }
+            }
+          }
+        )
+      requested_version = revision_application.latest_submission_version
+
+      patch "/api/permit_applications/#{revision_application.id}/submitter_note",
+            params: {
+              permit_application: {
+                submitter_note:
+                  "I will submit the demolition application next week."
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(requested_version.reload.submitter_note).to eq(
+        "I will submit the demolition application next week."
+      )
+
+      post "/api/permit_applications/#{revision_application.id}/submit",
+           params: {
+             permit_application: {
+               submitter_note: "Updated before submit.",
+               submission_data: revision_application.submission_data
+             }
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(revision_application.reload).to be_resubmitted
+      expect(requested_version.reload.submitter_note).to eq(
+        "Updated before submit."
+      )
+      expect(
+        revision_application.latest_submission_version.submitter_note
+      ).to be_nil
+    end
   end
 
   describe "POST /api/permit_applications/:id/mark_as_viewed" do
@@ -345,19 +398,21 @@ RSpec.describe "Api::PermitApplications", type: :request do
       expect(json_response.dig("data", "id")).to eq(submitted_application.id)
     end
 
-    it "persists supporting information requests with a reference file" do
+    it "persists a document request whose reference files stay out of the submission" do
       sign_in reviewer
 
       patch "/api/permit_applications/#{submitted_application.id}/revision_requests",
             params: {
               submission_version: {
-                supporting_information_requests_attributes: [
+                revision_requests_attributes: [
                   {
+                    type: "SupportingDocumentRevisionRequest",
                     user_id: reviewer.id,
                     title: "Site plan",
                     comment: "Please provide a current site plan.",
-                    project_documents_attributes: [
-                      { file: cached_file_data, kind: "reference" }
+                    revision_reference_documents_attributes: [
+                      { file: cached_file_data },
+                      { file: cached_file_data }
                     ]
                   }
                 ]
@@ -371,25 +426,33 @@ RSpec.describe "Api::PermitApplications", type: :request do
         submitted_application
           .reload
           .latest_submission_version
-          .supporting_information_requests
+          .revision_requests
           .last
-      expect(request.title).to eq("Site plan")
-      expect(request.project_documents.count).to eq(1)
-      expect(request.project_documents.first).to be_reference
-      expect(request.project_documents.first.permit_project_id).to eq(
-        submitted_application.permit_project_id
-      )
+      expect(request).to be_a(SupportingDocumentRevisionRequest)
+      expect(request.revision_reference_documents.count).to eq(2)
+      expect(
+        submitted_application.all_submission_version_completed_supporting_documents
+      ).to be_empty
+      completed_ids =
+        json_response
+          .dig("data", "all_submission_version_completed_supporting_documents")
+          &.map { |doc| doc["id"] }
+      expect(completed_ids).to eq([])
+      expect(
+        json_response
+          .dig("data", "supporting_documents")
+          &.map { |doc| doc["id"] }
+      ).to eq([])
     end
 
-    it "hides draft package items from the submitter until finalize" do
-      create(
-        :supporting_information_request,
-        submission_version: submitted_application.latest_submission_version
-      )
-      create(
-        :additional_permit_request,
-        submission_version: submitted_application.latest_submission_version
-      )
+    it "hides a document request from the submitter until finalize" do
+      document_request =
+        create(
+          :supporting_document_revision_request,
+          submission_version: submitted_application.latest_submission_version
+        )
+      create(:revision_reference_document, revision_request: document_request)
+      create(:revision_reference_document, revision_request: document_request)
 
       sign_in submitter
       get "/api/permit_applications/#{submitted_application.id}",
@@ -402,11 +465,14 @@ RSpec.describe "Api::PermitApplications", type: :request do
           &.find do |sv|
             sv["id"] == submitted_application.latest_submission_version.id
           end
-      expect(version.fetch("supporting_information_requests", [])).to eq([])
-      expect(version.fetch("additional_permit_requests", [])).to eq([])
+      expect(version.fetch("revision_requests", [])).to eq([])
+      expect(version["applicant_note"]).to be_nil
 
       allow(NotificationService).to receive(
         :publish_application_revisions_request_event
+      )
+      submitted_application.latest_submission_version.update!(
+        applicant_note: "Please see the attached examples."
       )
       submitted_application.finalize_revision_requests!
 
@@ -419,18 +485,23 @@ RSpec.describe "Api::PermitApplications", type: :request do
           &.find do |sv|
             sv["id"] == submitted_application.latest_submission_version.id
           end
-      expect(version["supporting_information_requests"].length).to eq(1)
-      expect(version["additional_permit_requests"].length).to eq(1)
+      payload = version["revision_requests"].first
+      expect(version["revision_requests"].length).to eq(1)
+      expect(payload["title"]).to eq("Site photos")
+      expect(payload["revision_reference_documents"].length).to eq(2)
+      expect(version["applicant_note"]).to eq(
+        "Please see the attached examples."
+      )
       expect(
-        version["supporting_information_requests"].first["addressed_at"]
-      ).to be_nil
-      expect(
-        version["additional_permit_requests"].first["sibling_status"]
-      ).to be_nil
+        json_response.dig(
+          "data",
+          "all_submission_version_completed_supporting_documents"
+        )
+      ).to eq([])
     end
   end
 
-  describe "PATCH /api/permit_applications/:id/request_item_addressed" do
+  describe "PATCH /api/permit_applications/:id/upload_supporting_document fulfillment" do
     let(:revision_application) do
       create(
         :permit_application,
@@ -440,22 +511,52 @@ RSpec.describe "Api::PermitApplications", type: :request do
         jurisdiction: jurisdiction
       )
     end
-    let(:revision_item) do
-      revision_application.latest_submission_version.revision_requests.first
+    let(:document_request) do
+      create(
+        :supporting_document_revision_request,
+        submission_version: revision_application.latest_submission_version
+      )
     end
 
-    it "lets the submitter toggle addressed_at" do
-      patch "/api/permit_applications/#{revision_application.id}/request_item_addressed",
+    before do
+      allow(PromoteJob).to receive(:perform_async)
+      allow(VirusScanService).to receive(:new).and_return(
+        instance_double(VirusScanService, scan!: true)
+      )
+      create(:revision_reference_document, revision_request: document_request)
+    end
+
+    def upload_fulfillment(revision_request_id, files: [cached_file_data])
+      patch "/api/permit_applications/#{revision_application.id}/upload_supporting_document",
             params: {
-              request_type: "revision_request",
-              request_item_id: revision_item.id,
-              addressed: true
+              permit_application: {
+                supporting_documents_attributes:
+                  files.map { |file| { revision_request_id:, file: } }
+              }
             },
             headers: headers,
             as: :json
+    end
+
+    it "saves fulfillment files on the request and includes them in the package" do
+      upload_fulfillment(
+        document_request.id,
+        files: [cached_file_data, cached_file_data]
+      )
 
       expect(response).to have_http_status(:ok)
-      expect(revision_item.reload.addressed_at).to be_present
+      documents = document_request.supporting_documents.reload
+      expect(documents.size).to eq(2)
+      expect(documents.map(&:submission_version_id)).to all(be_nil)
+      expect(documents.map(&:data_key)).to all(
+        start_with("revision_fulfillment_#{document_request.id}_")
+      )
+      expect(documents.map(&:data_key).uniq.size).to eq(2)
+      expect(
+        revision_application.all_submission_version_completed_supporting_documents.map(
+          &:id
+        )
+      ).to match_array(documents.map(&:id))
 
       version =
         json_response
@@ -463,77 +564,92 @@ RSpec.describe "Api::PermitApplications", type: :request do
           &.find do |sv|
             sv["id"] == revision_application.latest_submission_version.id
           end
-      expect(version["revision_requests"].first["addressed_at"]).to be_present
+      payload =
+        version["revision_requests"].find do |item|
+          item["id"] == document_request.id
+        end
+      expect(payload["supporting_documents"].length).to eq(2)
+      expect(payload["revision_reference_documents"].length).to eq(1)
     end
 
-    it "does not change the reviewer comment" do
-      original_comment = revision_item.comment
+    it "rejects a destroy for a file that is not on the request" do
+      other_document =
+        create(:supporting_document, permit_application: revision_application)
 
-      patch "/api/permit_applications/#{revision_application.id}/request_item_addressed",
+      patch "/api/permit_applications/#{revision_application.id}/upload_supporting_document",
             params: {
-              request_type: "revision_request",
-              request_item_id: revision_item.id,
-              addressed: true,
-              comment: "tampered"
+              permit_application: {
+                supporting_documents_attributes: [
+                  {
+                    id: other_document.id,
+                    _destroy: true,
+                    revision_request_id: document_request.id
+                  }
+                ]
+              }
             },
             headers: headers,
             as: :json
 
-      expect(revision_item.reload.comment).to eq(original_comment)
+      expect(response).to have_http_status(:bad_request)
+      expect(other_document.reload).to be_persisted
     end
 
     it "forbids an unrelated submitter" do
       sign_in other_user
 
-      patch "/api/permit_applications/#{revision_application.id}/request_item_addressed",
+      upload_fulfillment(document_request.id)
+
+      expect(response).to have_http_status(:forbidden)
+      expect(document_request.supporting_documents).to be_empty
+    end
+
+    it "rejects a field revision id" do
+      field_request =
+        revision_application
+          .latest_submission_version
+          .revision_requests
+          .find_by!(type: "FieldRevisionRequest")
+
+      upload_fulfillment(field_request.id)
+
+      expect(response).to have_http_status(:bad_request)
+      expect(
+        SupportingDocument.where(revision_request_id: field_request.id)
+      ).to be_empty
+    end
+
+    it "forbids a reviewer" do
+      sign_in create(:user, :reviewer, jurisdiction: jurisdiction)
+
+      upload_fulfillment(document_request.id)
+
+      expect(response).to have_http_status(:forbidden)
+      expect(document_request.supporting_documents).to be_empty
+    end
+
+    it "stays draft-only when no revision request id is sent" do
+      submitted_application =
+        create(
+          :permit_application,
+          :newly_submitted,
+          submitter: submitter,
+          template_version: template_version,
+          jurisdiction: jurisdiction
+        )
+
+      patch "/api/permit_applications/#{submitted_application.id}/upload_supporting_document",
             params: {
-              request_type: "revision_request",
-              request_item_id: revision_item.id,
-              addressed: true
+              permit_application: {
+                supporting_documents_attributes: [
+                  { data_key: "RB123", file: cached_file_data }
+                ]
+              }
             },
             headers: headers,
             as: :json
 
       expect(response).to have_http_status(:forbidden)
-      expect(revision_item.reload.addressed_at).to be_nil
-    end
-
-    it "forbids review staff from using the submitter toggle" do
-      reviewer = create(:user, :reviewer, jurisdiction: jurisdiction)
-      sign_in reviewer
-
-      patch "/api/permit_applications/#{revision_application.id}/request_item_addressed",
-            params: {
-              request_type: "revision_request",
-              request_item_id: revision_item.id,
-              addressed: true
-            },
-            headers: headers,
-            as: :json
-
-      expect(response).to have_http_status(:forbidden)
-    end
-
-    it "does not gate can_submit? on addressed_at" do
-      revision_application.update!(
-        submission_data: {
-          "data" => {
-            "section-completion-key" => {
-              "signed" => true
-            }
-          }
-        }
-      )
-      allow(revision_application).to receive(:inbox_enabled?).and_return(true)
-      allow(revision_application).to receive(
-        :template_version_disabled_by_jurisdiction?
-      ).and_return(false)
-      allow(revision_application).to receive(
-        :using_current_template_version
-      ).and_return(true)
-
-      expect(revision_item.addressed_at).to be_nil
-      expect(revision_application.can_submit?).to be(true)
     end
   end
 
@@ -581,6 +697,23 @@ RSpec.describe "Api::PermitApplications", type: :request do
            headers: headers
 
       expect(response).to have_http_status(:unprocessable_content)
+    end
+
+    it "finalizes a package that only has a document request" do
+      sign_in reviewer
+      create(
+        :supporting_document_revision_request,
+        submission_version: submitted_application.latest_submission_version
+      )
+      allow(NotificationService).to receive(
+        :publish_application_revisions_request_event
+      )
+
+      post "/api/permit_applications/#{submitted_application.id}/revision_requests/finalize",
+           headers: headers
+
+      expect(response).to have_http_status(:ok)
+      expect(submitted_application.reload).to be_revisions_requested
     end
   end
 

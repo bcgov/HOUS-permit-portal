@@ -169,14 +169,6 @@ en:
           attributes:
             user:
               incorrect_role: "User must be review staff"
-        supporting_information_request:
-          attributes:
-            user:
-              incorrect_role: "User must be review staff"
-        additional_permit_request:
-          attributes:
-            user:
-              incorrect_role: "User must be review staff"
         permit_collaboration:
           attributes:
             base:
@@ -209,7 +201,7 @@ en:
       notify_reviewer_application_received: "New application received: %{permit_application_number}"
       notify_block_status_ready: "Requirement block status ready"
       notify_review_started: "Your application is now under review: %{permit_application_number}"
-      notify_application_revisions_requested: "Revisions requested on application %{permit_application_number}"
+      notify_application_revisions_requested: "Changes requested for your permit application %{permit_application_number}"
       remind_reviewer: "Your report on outstanding permit applications"
       remind_resource_update: "Reminder: Review your jurisdiction resources"
       submission_contact_confirm: "Confirm submission inbox email"

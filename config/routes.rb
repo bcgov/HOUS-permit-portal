@@ -244,9 +244,9 @@ Rails.application.routes.draw do
       patch "revision_requests",
             on: :member,
             to: "permit_applications#update_revision_requests"
-      patch "request_item_addressed",
+      patch "submitter_note",
             on: :member,
-            to: "permit_applications#request_item_addressed"
+            to: "permit_applications#update_submitter_note"
       post "revision_requests/finalize",
            on: :member,
            to: "permit_applications#finalize_revision_requests"

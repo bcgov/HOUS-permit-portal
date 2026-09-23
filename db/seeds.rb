@@ -461,10 +461,13 @@ seed_pa_status =
         updated_at: base_time
       )
 
+    requirement_json = { "id" => "requirement", "key" => "field" }
+
     case target
     when :revisions_requested
       sv1.revision_requests.create!(
         reason_code: reason_codes.sample || "other",
+        requirement_json: requirement_json,
         comment: "Please address the highlighted items.",
         user: reviewer_user
       )
@@ -475,6 +478,7 @@ seed_pa_status =
     when :resubmitted
       sv1.revision_requests.create!(
         reason_code: reason_codes.sample || "other",
+        requirement_json: requirement_json,
         comment: "Initial review comment.",
         user: reviewer_user
       )

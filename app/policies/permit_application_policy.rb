@@ -73,9 +73,14 @@ class PermitApplicationPolicy < ApplicationPolicy
     record.submitted? && user.review_staff?
   end
 
-  # UX DISCUSSION ASSUMPTION: #8 honor-system ticks; same audience as Save draft.
-  # Lapse: meeting should confirm submitter vs collaborator can tick boxes.
-  def request_item_addressed?
+  def update_submitter_note?
+    record.revisions_requested? &&
+      record.submission_requirement_block_edit_permissions(
+        user_id: user.id
+      ).present?
+  end
+
+  def upload_revision_fulfillment?
     record.revisions_requested? &&
       record.submission_requirement_block_edit_permissions(
         user_id: user.id

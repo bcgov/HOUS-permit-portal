@@ -111,6 +111,7 @@ module ExternalApi
       end
 
       {
+        type: "FieldRevisionRequest",
         reason_code: reason_code,
         comment: comment,
         requirement_json: form_json,
