@@ -539,13 +539,12 @@ class PermitApplication < ApplicationRecord
   end
 
   def mark_submission_packages_ready!
-    return [] unless zipfile_data.present?
-
     newly_ready = []
     submission_versions
       .order(:created_at)
       .each do |submission_version|
         next if submission_version.package_ready_at.present?
+        next if submission_version.zipfile_data.blank?
         next if submission_version.missing_pdfs?
 
         submission_version.update!(package_ready_at: Time.current)

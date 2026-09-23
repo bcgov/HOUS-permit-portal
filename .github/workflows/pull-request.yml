@@ -36,7 +36,7 @@ jobs:
       - name: Build Frontend
         run: npm run build
       - name: Build PDF Renderer
-        run: npm run build:ssr
+        run: npm run build:print
 
   test:
     runs-on: ubuntu-latest

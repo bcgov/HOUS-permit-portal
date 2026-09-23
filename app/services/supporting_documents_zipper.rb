@@ -1,13 +1,22 @@
 require "open-uri"
 require "zip"
 require "fileutils"
+require "tmpdir"
 
 class SupportingDocumentsZipper
   attr_reader :permit_application, :temp_files, :file_path, :document_ids
 
-  def initialize(permit_application_id, document_ids: nil)
+  def initialize(
+    permit_application_id,
+    document_ids: nil,
+    submission_version: nil,
+    version_ids: nil
+  )
     @permit_application = PermitApplication.find(permit_application_id)
     @document_ids = Array(document_ids).presence
+    @submission_version =
+      submission_version || @permit_application.latest_submission_version
+    @version_ids = version_ids
     @temp_files = []
     # Ensure tmp/zipfiles directory exists
     zipfiles_directory = Rails.root.join("tmp", "zipfiles")
@@ -18,7 +27,17 @@ class SupportingDocumentsZipper
       PermitApplicationGeneratedFileNamer.new(
         @permit_application
       ).supporting_documents_zip
-    @file_path = zipfiles_directory.join(zip_filename)
+    @directory = Dir.mktmpdir("package-", zipfiles_directory.to_s)
+    @file_path = Pathname.new(@directory).join(zip_filename)
+    @documents = select_documents.to_a
+    if @document_ids && (@document_ids - @documents.map(&:id)).any?
+      raise "Requested ZIP documents are unavailable"
+    end
+  rescue StandardError
+    if @directory && File.directory?(@directory)
+      FileUtils.remove_entry(@directory)
+    end
+    raise
   end
 
   def perform
@@ -44,8 +63,9 @@ class SupportingDocumentsZipper
     used_entry_names = Hash.new(0)
 
     Zip::File.open(file_path, Zip::File::CREATE) do |zipfile|
-      documents_to_zip.each do |document|
+      @documents.each do |document|
         file_path = download_file(document)
+        raise "Required ZIP member could not be downloaded" unless file_path
         if file_path
           zipfile.add(
             unique_zip_entry_name(document, used_entry_names),
@@ -56,9 +76,29 @@ class SupportingDocumentsZipper
     end
   end
 
-  def documents_to_zip
+  def select_documents
     docs =
       permit_application.all_submission_version_completed_supporting_documents
+    if @version_ids
+      versions = permit_application.submission_versions.where(id: @version_ids)
+      upload_ids =
+        versions.flat_map do |version|
+          collect_upload_ids(version.submission_data)
+        end
+      if (upload_ids.uniq - docs.map(&:id)).any?
+        raise "Required supporting documents are unavailable"
+      end
+      docs =
+        docs.select do |doc|
+          upload_ids.include?(doc.id) ||
+            (
+              @version_ids.include?(doc.submission_version_id) &&
+                SupportingDocument::STATIC_DOCUMENT_DATA_KEYS.include?(
+                  doc.data_key
+                )
+            )
+        end
+    end
     return docs if document_ids.blank?
 
     docs.select { |document| document_ids.include?(document.id) }
@@ -82,25 +122,34 @@ class SupportingDocumentsZipper
   end
 
   def upload_zip_file
-    submission_version = permit_application.latest_submission_version
+    submission_version = @submission_version
     unless submission_version
-      Rails.logger.error "Failed to upload zip file: no submission version"
-      return
+      raise "Failed to upload zip file: no submission version"
     end
 
     File.open(file_path.to_s, "rb") do |file|
       uploader = ZipfileUploader.new(:store)
       temp_files << file.path
       uploaded_file = uploader.upload(file)
+      if @version_ids && !uploaded_file.exists?
+        raise "Uploaded ZIP is unavailable"
+      end
       submission_version.zipfile_data = uploaded_file.data
 
-      unless submission_version.save
-        Rails.logger.error "Failed to upload zip file: #{submission_version.errors.full_messages.join(", ")}"
-      end
+      raise "Failed to save ZIP attachment" unless submission_version.save
     end
   end
 
   def download_file(document)
+    if @version_ids
+      PrintReports::Generation.new.promote!(document)
+      downloaded = document.file.download
+      temp_files << downloaded
+      if document.file_size && downloaded.size != document.file_size
+        raise "ZIP member size mismatch"
+      end
+      return downloaded.path
+    end
     document.save unless document.id.present?
     temp_file = Tempfile.new(["download", File.extname(document.id)])
     temp_file.binmode
@@ -108,10 +157,15 @@ class SupportingDocumentsZipper
     Net::HTTP.start(
       url.host,
       url.port,
-      use_ssl: url.scheme == "https"
+      use_ssl: url.scheme == "https",
+      open_timeout: 5,
+      read_timeout: 60
     ) do |http|
       request = Net::HTTP::Get.new(url)
       http.request(request) do |response|
+        unless response.is_a?(Net::HTTPSuccess)
+          raise "ZIP member download failed (HTTP #{response.code})"
+        end
         response.read_body { |chunk| temp_file.write(chunk) }
       end
     end
@@ -120,11 +174,11 @@ class SupportingDocumentsZipper
     temp_file.path
   rescue => e
     Rails.logger.error(
-      "Failed to download file: #{document.file_url} with error: #{e.message}"
+      "Failed to download ZIP member #{document.id}: #{e.class}"
     )
     temp_file&.close
     temp_file&.unlink
-    nil
+    raise
   end
 
   def cleanup_temp_files
@@ -137,5 +191,20 @@ class SupportingDocumentsZipper
       end
     end
     FileUtils.rm_f(file_path)
+    if @directory && File.directory?(@directory)
+      FileUtils.remove_entry(@directory)
+    end
+  end
+
+  def collect_upload_ids(value)
+    case value
+    when Hash
+      [value["model_id"], value["modelId"]].compact +
+        value.values.flat_map { |v| collect_upload_ids(v) }
+    when Array
+      value.flat_map { |v| collect_upload_ids(v) }
+    else
+      []
+    end
   end
 end
