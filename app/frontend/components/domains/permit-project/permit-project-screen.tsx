@@ -36,7 +36,12 @@ export const PermitProjectScreen = observer(() => {
     return [
       { label: t("permitProject.details.overview"), icon: SquaresFour, to: `${projectBasePath}/overview`, tabIndex: 0 },
       { label: t("permitProject.details.activity"), icon: TrendUp, to: `${projectBasePath}/activity`, tabIndex: 1 },
-      { label: t("permitProject.details.permits"), icon: ClipboardText, to: `${projectBasePath}/permits`, tabIndex: 2 },
+      {
+        label: t("permitProject.details.permits"),
+        icon: ClipboardText,
+        to: `${projectBasePath}/applications`,
+        tabIndex: 2,
+      },
       ...(projectMeetingsEnabled
         ? [
             {

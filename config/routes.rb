@@ -213,7 +213,7 @@ Rails.application.routes.draw do
       end
     end
 
-    resources :permit_applications, only: %i[create update show destroy] do
+    resources :permit_applications, only: %i[update show destroy] do
       collection { patch :reorder }
       post "restore", on: :member
       post "generate_missing_pdfs",

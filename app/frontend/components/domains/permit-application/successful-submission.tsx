@@ -23,7 +23,7 @@ export const SuccessfulSubmissionScreen = observer(() => {
   const { jurisdiction, number, projectId } = currentPermitApplication
   const { qualifiedName, primaryContact } = jurisdiction
   const returnProjectId = projectId || permitProjectStore.currentPermitProject?.id
-  const returnTo = returnProjectId ? `/projects/${returnProjectId}/permits` : "/"
+  const returnTo = returnProjectId ? `/projects/${returnProjectId}/applications` : "/"
   return (
     <Container maxW="container.lg">
       <Flex direction="column" align="center" my={24} gap={8}>

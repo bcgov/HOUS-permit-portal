@@ -432,7 +432,10 @@ RSpec.describe Api::RequirementTemplatesController,
           }
 
       expect(response).to have_http_status(:success)
-      expect(option_labels).to contain_exactly("Plumbing permit")
+      expect(option_labels).to contain_exactly(
+        "Plumbing permit",
+        "Draft only permit"
+      )
     end
 
     it "returns category grouping fields ordered by category" do

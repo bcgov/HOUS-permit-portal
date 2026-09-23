@@ -34,6 +34,17 @@ class PermitApplicationBlueprint < Blueprinter::Base
                 view: :base
     association :submitter, blueprint: UserBlueprint, view: :minimal
 
+    field :created_by do |pa, _options|
+      creator = pa.created_by
+      next unless creator
+
+      if creator.is_a?(User)
+        { id: creator.id, type: "User", name: creator.name, role: creator.role }
+      else
+        { id: creator.id, type: "Jurisdiction", name: creator.qualified_name }
+      end
+    end
+
     field :using_current_template_version do |pa, _options|
       pa.using_current_template_version
     end

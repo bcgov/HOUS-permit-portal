@@ -22,24 +22,30 @@ export const PermitApplicationGridHeaders = observer(
     return (
       <>
         {columns.map((column) => (
-          <GridHeader key={column}>
-            <Flex
-              w={"full"}
-              as={"button"}
-              justifyContent={"space-between"}
-              cursor="pointer"
-              onClick={() => toggleSort(column)}
-              px={4}
-            >
-              <Text textAlign="left">{getProjectPermitApplicationSortColumnHeader(column)}</Text>
-              <SortIcon<EProjectPermitApplicationSortFields>
-                field={column}
-                currentSort={sort as ISort<EProjectPermitApplicationSortFields>}
-              />
-            </Flex>
-          </GridHeader>
+          <React.Fragment key={column}>
+            {column === EProjectPermitApplicationSortFields.status && (
+              <GridHeader role={"columnheader"}>
+                <Text px={4}>{t("permitProject.overview.createdBy")}</Text>
+              </GridHeader>
+            )}
+            <GridHeader>
+              <Flex
+                w={"full"}
+                as={"button"}
+                justifyContent={"space-between"}
+                cursor="pointer"
+                onClick={() => toggleSort(column)}
+                px={4}
+              >
+                <Text textAlign="left">{getProjectPermitApplicationSortColumnHeader(column)}</Text>
+                <SortIcon<EProjectPermitApplicationSortFields>
+                  field={column}
+                  currentSort={sort as ISort<EProjectPermitApplicationSortFields>}
+                />
+              </Flex>
+            </GridHeader>
+          </React.Fragment>
         ))}
-
         {includeActionColumn && <GridHeader role={"columnheader"} />}
       </>
     )

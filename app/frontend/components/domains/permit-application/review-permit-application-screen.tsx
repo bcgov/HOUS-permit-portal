@@ -140,12 +140,8 @@ export const ReviewPermitApplicationScreen = observer(() => {
   // @ts-ignore
   const permitHeaderHeight = permitHeaderRef?.current?.offsetHeight ?? 0
 
-  // Meeting drafts are policy-visible for review staff; open them read-only so
-  // RMs can inspect form contents during an active project meeting.
-  const isMeetingDraft =
-    currentPermitApplication.status === EPermitApplicationStatus.newDraft &&
-    currentPermitApplication.hasActiveProjectMeeting
-  if (currentPermitApplication.status === EPermitApplicationStatus.newDraft && !isMeetingDraft) {
+  const isMeetingDraft = currentPermitApplication.isNewDraft && currentPermitApplication.hasActiveProjectMeeting
+  if (currentPermitApplication.isNewDraft && !isMeetingDraft) {
     return <NotFoundScreen />
   }
 

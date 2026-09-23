@@ -63,7 +63,7 @@ class PermitProjectPolicy < ApplicationPolicy
   end
 
   def search_permit_applications?
-    same_sandbox? && user_is_owner_or_collaborator?
+    show?
   end
 
   def mark_as_viewed?
@@ -80,7 +80,7 @@ class PermitProjectPolicy < ApplicationPolicy
 
   # Allow bulk creation of permit applications under a project
   def create_permit_applications?
-    same_sandbox? && user_is_owner?
+    show? && (user_is_owner? || user&.review_staff?)
   end
 
   def submission_collaborator_options?

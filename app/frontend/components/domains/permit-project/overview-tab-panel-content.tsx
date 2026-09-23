@@ -245,7 +245,7 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
         ) : (
           <>
             <SearchGrid
-              templateColumns="2.25fr 1.75fr 1fr 1.4fr 1.1fr 1fr 0.5fr"
+              templateColumns="2.25fr 1.75fr 1fr 1.4fr 1fr 1.1fr 0.5fr"
               gridRowClassName="permit-application-grid-row"
             >
               <PermitApplicationGridHeaders
@@ -269,7 +269,7 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
                 variant="tertiary"
                 fontWeight="bold"
                 rightIcon={<CaretRight />}
-                to={`/projects/${permitProject.id}/permits`}
+                to={`/projects/${permitProject.id}/applications`}
               >
                 {t("permitProject.overview.allPermits")}
               </RouterLinkButton>

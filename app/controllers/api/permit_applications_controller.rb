@@ -331,36 +331,6 @@ class Api::PermitApplicationsController < Api::ApplicationController
     render_error "permit_application.submit_state_error", message_opts: {}
   end
 
-  def create
-    @permit_application =
-      PermitApplication.build(
-        permit_application_params.to_h.merge(submitter: current_user)
-      )
-    authorize @permit_application
-    if @permit_application.save
-      if !Rails.env.development? || ENV["RUN_COMPLIANCE_ON_SAVE"] == "true"
-        AutomatedCompliance::AutopopulateJob.perform_async(
-          @permit_application.id
-        )
-      end
-      render_success @permit_application,
-                     "permit_application.create_success",
-                     {
-                       blueprint: PermitApplicationBlueprint,
-                       blueprint_opts: {
-                         view: :extended,
-                         current_user: current_user
-                       }
-                     }
-    else
-      render_error "permit_application.create_error",
-                   message_opts: {
-                     error_message:
-                       @permit_application.errors.full_messages.join(", ")
-                   }
-    end
-  end
-
   def create_permit_collaboration
     begin
       @permit_collaboration =
