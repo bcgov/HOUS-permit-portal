@@ -3,6 +3,54 @@ require "rails_helper"
 RSpec.describe PrintReports::Data do
   let(:user) { create(:user, :submitter) }
 
+  it "restores current cover metadata for saved application and checklist reports" do
+    application = create(:permit_application, submitter: user)
+    version =
+      create(
+        :submission_version,
+        permit_application: application,
+        form_json: {
+          "components" => []
+        },
+        submission_data: {
+          "data" => {
+            "answer" => "Saved answer"
+          }
+        },
+        step_code_checklist_json: {
+          "step_code_type" => "Part3StepCode"
+        }
+      )
+    application.permit_project.update!(full_address: "42 Current Avenue")
+    user.update!(first_name: "Alex", last_name: "Applicant")
+    application.template_version.requirement_template.update!(
+      nickname: "Housing permit"
+    )
+    application.requirement_template.update!(tag_list: %w[Residential Addition])
+    snapshot = version.reload.attributes
+
+    data = described_class.for_generation
+    reports = [
+      data.application(application, version.id),
+      data.application_step_code(application, version.id)
+    ]
+    reports.each do |report|
+      expect(report[:identity]).to include(
+        address: "42 Current Avenue",
+        jurisdiction: application.jurisdiction.name,
+        applicant: "Alex Applicant",
+        tags: %w[Residential Addition],
+        template_nickname: "Housing permit",
+        submission_version_id: version.id,
+        submitted_at: version.created_at
+      )
+    end
+    expect(reports.first[:submission_data].dig("data", "answer")).to eq(
+      "Saved answer"
+    )
+    expect(version.reload.attributes).to eq(snapshot)
+  end
+
   it "renders saved submissions and applies enabled elective semantics without writes" do
     application = create(:permit_application, :newly_submitted, submitter: user)
     schema = {
