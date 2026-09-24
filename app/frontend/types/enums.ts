@@ -137,7 +137,6 @@ export enum ERequirementLibrarySortFields {
   associations = "associations",
   requirementLabels = "requirement_labels",
   updatedAt = "updated_at",
-  configurations = "configurations",
 }
 
 export enum EQuestionBankSortFields {

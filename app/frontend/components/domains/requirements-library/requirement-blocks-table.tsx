@@ -29,13 +29,9 @@ import { IRequirementBlockStoreModel } from "../../../stores/requirement-block-s
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
-import { ElectiveTag } from "../../shared/elective-tag"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { SearchGridItem } from "../../shared/grid/search-grid-item"
 import { SearchGridRow } from "../../shared/grid/search-grid-row"
-import { HasAutomatedComplianceTag } from "../../shared/has-automated-compliance-tag"
-import { HasConditionalTag } from "../../shared/has-conditional-tag"
-import { HasDataValidationTag } from "../../shared/has-data-validation-tag"
 import { GridHeaders } from "./grid-header"
 import { RequirementsBlockModal } from "./requirements-block-modal"
 
@@ -77,20 +73,12 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
   useSearch(searchModel as ISearch, isNested ? [] : [showArchived], { nested: isNested })
 
   return (
-    <VStack
-      as={"article"}
-      spacing={5}
-      minH={isNested ? 0 : undefined}
-      overflow={isNested ? "hidden" : undefined}
-      {...containerProps}
-    >
+    <VStack as={"article"} spacing={5} {...containerProps}>
       <SearchGrid
-        templateColumns="minmax(12rem, 3fr) minmax(13rem, 1fr) max-content max-content minmax(220px, 1.5fr) 88px"
+        templateColumns="minmax(12rem, 3fr) minmax(140px, 1fr) 180px 170px 88px"
         pos={"relative"}
         searchModel={searchModel as ISearch}
         searchLabel={t("requirementsLibrary.index.searchLabel")}
-        flex={isNested ? 1 : undefined}
-        minH={isNested ? 0 : undefined}
         sx={{
           "[role='row']:not(:last-child) > [role='cell']": { borderBottom: "none" },
         }}
@@ -98,7 +86,7 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
         <GridHeaders searchModel={searchModel} />
 
         {isSearching ? (
-          <Flex py={50} gridColumn={"span 6"}>
+          <Flex py={50} gridColumn={"span 5"}>
             <SharedSpinner />
           </Flex>
         ) : (
@@ -127,16 +115,8 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
                 <SearchGridItem justifyContent="center">
                   <FormFieldsCountCell requirementBlock={requirementBlock} />
                 </SearchGridItem>
-                <SearchGridItem fontSize={"sm"} whiteSpace="nowrap">
+                <SearchGridItem fontSize={"sm"}>
                   {format(requirementBlock.updatedAt, datefnsTableDateFormat)}
-                </SearchGridItem>
-                <SearchGridItem minW={0}>
-                  <HStack wrap={"wrap"} spacing={1}>
-                    {requirementBlock.hasAnyElective && <ElectiveTag hasElective />}
-                    {requirementBlock.hasAnyConditional && <HasConditionalTag />}
-                    {requirementBlock.hasAnyDataValidation && <HasDataValidationTag />}
-                    {requirementBlock.hasAutomatedCompliance && <HasAutomatedComplianceTag />}
-                  </HStack>
                 </SearchGridItem>
                 <SearchGridItem justifyContent={"center"}>
                   {renderActionButton ? (
@@ -150,7 +130,7 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
           })
         )}
       </SearchGrid>
-      <Flex w={"full"} justifyContent={"space-between"} flexShrink={0}>
+      <Flex w={"full"} justifyContent={"space-between"}>
         <PerPageSelect
           handleCountPerPageChange={handleCountPerPageChange}
           countPerPage={countPerPage}

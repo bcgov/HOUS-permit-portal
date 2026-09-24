@@ -27,65 +27,40 @@ export const GridHeaders = observer(function GridHeaders({
   return (
     <Box display={"contents"} role={"rowgroup"} position="fixed">
       <Box display={"contents"} role={"row"}>
-        {Object.values(ERequirementLibrarySortFields).map((field) => {
-          const fitHeader =
-            field === ERequirementLibrarySortFields.requirementLabels ||
-            field === ERequirementLibrarySortFields.updatedAt
-          return (
-            <GridHeader
-              key={field}
-              role={"columnheader"}
-              overflow={fitHeader ? "visible" : "hidden"}
-              minW={fitHeader ? "max-content" : 0}
+        {Object.values(ERequirementLibrarySortFields).map((field) => (
+          <GridHeader key={field} role={"columnheader"}>
+            <Flex
+              w={"full"}
+              as={"button"}
+              justifyContent={"space-between"}
+              cursor="pointer"
+              onClick={() => toggleSort(field)}
+              borderRight={"1px solid"}
+              borderColor={"border.light"}
+              px={4}
             >
-              <Flex
-                w={"full"}
-                minW={fitHeader ? "max-content" : 0}
-                as={"button"}
-                justifyContent={"space-between"}
-                alignItems="center"
-                gap={2}
-                cursor="pointer"
-                onClick={() => toggleSort(field)}
-                borderRight={"1px solid"}
-                borderColor={"border.light"}
-                px={4}
-              >
-                <Text
-                  as="span"
-                  whiteSpace="nowrap"
-                  minW={fitHeader ? "max-content" : 0}
-                  overflow="hidden"
-                  textOverflow="ellipsis"
-                >
-                  {getSortColumnHeader(field)}
-                </Text>
-                {field === ERequirementLibrarySortFields.associations ? (
-                  <HStack flexShrink={0} spacing={3}>
-                    <SortIcon<ERequirementLibrarySortFields>
-                      field={field}
-                      currentSort={sort}
-                      aria-label={`Sort ${getSortColumnHeader(field)} Icon`}
-                    />
-                    <Tooltip
-                      label={t("requirementsLibrary.associationsInfo")}
-                      placement="bottom-end"
-                      shouldWrapChildren
-                    >
-                      <Info aria-label={"Info Icon"} />
-                    </Tooltip>
-                  </HStack>
-                ) : (
+              <Text whiteSpace="nowrap">{getSortColumnHeader(field)}</Text>
+              {field === ERequirementLibrarySortFields.associations ? (
+                <HStack w={"fit-content"} spacing={3}>
                   <SortIcon<ERequirementLibrarySortFields>
                     field={field}
                     currentSort={sort}
-                    aria-label={`Sort ${getSortColumnHeader(field)}`}
+                    aria-label={`Sort ${getSortColumnHeader(field)} Icon`}
                   />
-                )}
-              </Flex>
-            </GridHeader>
-          )
-        })}
+                  <Tooltip label={t("requirementsLibrary.associationsInfo")}>
+                    <Info aria-label={"Info Icon"} />
+                  </Tooltip>
+                </HStack>
+              ) : (
+                <SortIcon<ERequirementLibrarySortFields>
+                  field={field}
+                  currentSort={sort}
+                  aria-label={`Sort ${getSortColumnHeader(field)}`}
+                />
+              )}
+            </Flex>
+          </GridHeader>
+        ))}
         <GridHeader role={"columnheader"} />
       </Box>
     </Box>
