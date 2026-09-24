@@ -11,6 +11,7 @@ import {
 import {
   IHelpLinkItems,
   IOption,
+  IRevisionReferenceDocument,
   IRevisionRequest,
   ISimplifiedRequirementsMap,
   TComputedCompliance,
@@ -123,6 +124,7 @@ export interface IRequirementTemplateSectionAttributes {
 export interface IRevisionRequestsAttributes extends Partial<IRevisionRequest> {
   _destroy?: true
   userId?: string
+  revisionReferenceDocumentsAttributes?: Array<Partial<IRevisionReferenceDocument> & { _destroy?: boolean }>
 }
 
 export interface IRevisionReasonsAttributes {

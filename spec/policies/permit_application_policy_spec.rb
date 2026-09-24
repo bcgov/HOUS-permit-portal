@@ -52,6 +52,39 @@ RSpec.describe PermitApplicationPolicy do
       expect(subject.create?).to be true
     end
 
+    it "denies create for a submitter who does not own the project" do
+      other = create(:user, :submitter)
+      policy =
+        described_class.new(
+          UserContext.new(other, sandbox),
+          draft_permit_application
+        )
+
+      expect(policy.create?).to be false
+    end
+
+    it "permits create for review staff who can view the project" do
+      reviewer = create(:user, :reviewer, jurisdiction: jurisdiction)
+      policy =
+        described_class.new(
+          UserContext.new(reviewer, sandbox),
+          draft_permit_application
+        )
+
+      expect(policy.create?).to be true
+    end
+
+    it "denies create for review staff from another jurisdiction" do
+      reviewer = create(:user, :reviewer)
+      policy =
+        described_class.new(
+          UserContext.new(reviewer, sandbox),
+          draft_permit_application
+        )
+
+      expect(policy.create?).to be false
+    end
+
     it "permits update" do
       expect(subject.update?).to be true
     end
@@ -125,7 +158,7 @@ RSpec.describe PermitApplicationPolicy do
       expect(policy2.show?).to be false
     end
 
-    it "show? permits review staff for draft records with active project meetings" do
+    it "show? permits review staff for new drafts when the project has an active meeting" do
       reviewer = create(:user, :review_manager, jurisdiction:)
       create(
         :project_meeting,
@@ -249,6 +282,34 @@ RSpec.describe PermitApplicationPolicy do
 
       policy2 = described_class.new(UserContext.new(submitter, sandbox), record)
       expect(policy2.update_revision_requests?).to be false
+    end
+
+    it "update_submitter_note? permits submitters who can edit during revisions" do
+      record = double("PermitApplication", revisions_requested?: true)
+      allow(record).to receive(
+        :submission_requirement_block_edit_permissions
+      ).with(user_id: submitter.id).and_return(:all)
+      policy = described_class.new(UserContext.new(submitter, sandbox), record)
+      expect(policy.update_submitter_note?).to be true
+
+      allow(record).to receive(
+        :submission_requirement_block_edit_permissions
+      ).and_return(nil)
+      expect(policy.update_submitter_note?).to be false
+    end
+
+    it "upload_revision_fulfillment? permits submitters who can edit during revisions" do
+      record = double("PermitApplication", revisions_requested?: true)
+      allow(record).to receive(
+        :submission_requirement_block_edit_permissions
+      ).with(user_id: submitter.id).and_return(:all)
+      policy = described_class.new(UserContext.new(submitter, sandbox), record)
+      expect(policy.upload_revision_fulfillment?).to be true
+
+      allow(record).to receive(
+        :submission_requirement_block_edit_permissions
+      ).and_return(nil)
+      expect(policy.upload_revision_fulfillment?).to be false
     end
 
     it "upload_supporting_document? matches draft edit permissions" do
@@ -703,10 +764,10 @@ RSpec.describe PermitApplicationPolicy do
         ).resolve
 
       expect(resolved).to include(submitted)
-      expect(resolved).not_to include(draft)
+      expect(resolved).to include(draft)
     end
 
-    it "includes draft applications with active project meetings for review staff" do
+    it "includes new drafts for review staff whether or not the project has a meeting" do
       reviewer = create(:user, :review_manager, jurisdiction:)
       draft_with_active_meeting =
         create(
@@ -739,7 +800,7 @@ RSpec.describe PermitApplicationPolicy do
         ).resolve
 
       expect(resolved).to include(draft_with_active_meeting)
-      expect(resolved).not_to include(draft_with_withdrawn_meeting)
+      expect(resolved).to include(draft_with_withdrawn_meeting)
     end
   end
 end

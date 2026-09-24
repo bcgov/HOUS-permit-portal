@@ -68,6 +68,18 @@ export enum EMeetingRequestDocumentType {
 
 export enum ENoteableType {
   ProjectMeeting = "ProjectMeeting",
+  SubmissionVersion = "SubmissionVersion",
+}
+
+export enum ENoteKind {
+  meeting = "meeting",
+  applicantMessage = "applicant_message",
+  submitterMessage = "submitter_message",
+}
+
+export enum ERevisionRequestType {
+  FieldRevisionRequest = "FieldRevisionRequest",
+  SupportingDocumentRevisionRequest = "SupportingDocumentRevisionRequest",
 }
 
 export enum ESubmissionContactClass {
@@ -223,7 +235,6 @@ export enum EPermitApplicationSortFields {
 }
 
 export enum EProjectPermitApplicationSortFields {
-  applicationNickname = "nickname",
   permit = "template_nickname",
   assignedTo = "review_delegatee_name",
   permitApplicationNumber = "number",

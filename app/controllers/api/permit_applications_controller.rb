@@ -11,6 +11,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
                   generate_missing_pdfs
                   download_supporting_documents_zip
                   update_revision_requests
+                  update_submitter_note
                   create_permit_collaboration
                   invite_new_collaborator
                   remove_collaborator_collaborations
@@ -164,10 +165,9 @@ class Api::PermitApplicationsController < Api::ApplicationController
 
   def update_revision_requests
     authorize @permit_application
-    if @permit_application.submitted? &&
-         @permit_application.latest_submission_version&.update(
-           revision_request_params
-         )
+    version = @permit_application.latest_submission_version
+    if @permit_application.submitted? && version &&
+         persist_revision_package(version)
       render_success @permit_application,
                      ("permit_application.save_success"),
                      {
@@ -210,10 +210,32 @@ class Api::PermitApplicationsController < Api::ApplicationController
   end
 
   def upload_supporting_document
-    authorize @permit_application
+    if fulfillment_upload?
+      authorize @permit_application, :upload_revision_fulfillment?
+      unless fulfillment_documents_scoped_to_request?
+        return(
+          render_error "permit_application.update_error",
+                       message_opts: {
+                         error_message: ""
+                       }
+        )
+      end
+    else
+      authorize @permit_application
+    end
     begin
       success = @permit_application.update(supporting_document_params)
-      if success
+      if success && fulfillment_upload?
+        render_success @permit_application,
+                       nil,
+                       {
+                         blueprint: PermitApplicationBlueprint,
+                         blueprint_opts: {
+                           view: :extended,
+                           current_user: current_user
+                         }
+                       }
+      elsif success
         regex_pattern =
           "(#{supporting_document_params["supporting_documents_attributes"].map { |spd| spd.dig("file", "id") }.compact.join("|")})$"
         render_success @permit_application.supporting_documents.file_ids_with_regex(
@@ -238,10 +260,39 @@ class Api::PermitApplicationsController < Api::ApplicationController
     end
   end
 
+  def update_submitter_note
+    authorize @permit_application
+    if persist_submitter_note
+      render_success @permit_application,
+                     nil,
+                     {
+                       blueprint: PermitApplicationBlueprint,
+                       blueprint_opts: {
+                         view: :extended,
+                         current_user: current_user
+                       }
+                     }
+    else
+      render_error "permit_application.update_error",
+                   message_opts: {
+                     error_message: ""
+                   }
+    end
+  end
+
   def submit
     authorize @permit_application
     # for submissions, we do not run the automated compliance as that should have already been complete
     #
+    unless persist_submitter_note
+      return(
+        render_error "permit_application.update_error",
+                     message_opts: {
+                       error_message: ""
+                     }
+      )
+    end
+
     if !@permit_application.using_current_template_version
       render_error "permit_application.outdated_error", message_opts: {} and
         return
@@ -277,36 +328,6 @@ class Api::PermitApplicationsController < Api::ApplicationController
     end
   rescue AASM::InvalidTransition
     render_error "permit_application.submit_state_error", message_opts: {}
-  end
-
-  def create
-    @permit_application =
-      PermitApplication.build(
-        permit_application_params.to_h.merge(submitter: current_user)
-      )
-    authorize @permit_application
-    if @permit_application.save
-      if !Rails.env.development? || ENV["RUN_COMPLIANCE_ON_SAVE"] == "true"
-        AutomatedCompliance::AutopopulateJob.perform_async(
-          @permit_application.id
-        )
-      end
-      render_success @permit_application,
-                     "permit_application.create_success",
-                     {
-                       blueprint: PermitApplicationBlueprint,
-                       blueprint_opts: {
-                         view: :extended,
-                         current_user: current_user
-                       }
-                     }
-    else
-      render_error "permit_application.create_error",
-                   message_opts: {
-                     error_message:
-                       @permit_application.errors.full_messages.join(", ")
-                   }
-    end
   end
 
   def create_permit_collaboration
@@ -417,6 +438,9 @@ class Api::PermitApplicationsController < Api::ApplicationController
     else
       render_error "permit_application.revision_request_finalize_error"
     end
+  rescue AASM::InvalidTransition
+    render_error "permit_application.revision_request_finalize_error",
+                 { status: 422 }
   end
 
   def remove_collaborator_collaborations
@@ -605,10 +629,48 @@ class Api::PermitApplicationsController < Api::ApplicationController
     )
   end
 
+  def persist_submitter_note
+    unless params[:permit_application].respond_to?(:key?) &&
+             params[:permit_application].key?(:submitter_note)
+      return true
+    end
+    return false unless @permit_application.revisions_requested?
+
+    version = @permit_application.latest_submission_version
+    return false unless version
+
+    Note.upsert_revision_message!(
+      submission_version: version,
+      kind: :submitter_message,
+      body: params.dig(:permit_application, :submitter_note),
+      user: current_user
+    )
+    true
+  end
+
+  def persist_revision_package(version)
+    attrs = revision_request_params
+    has_applicant_note = attrs.key?(:applicant_note)
+    applicant_note = attrs.delete(:applicant_note)
+    return unless version.update(attrs)
+
+    if has_applicant_note
+      Note.upsert_revision_message!(
+        submission_version: version,
+        kind: :applicant_message,
+        body: applicant_note,
+        user: current_user
+      )
+    end
+    version
+  end
+
   def supporting_document_params
+    permitted =
+      (fulfillment_upload? ? %i[id _destroy revision_request_id] : %i[data_key])
     params.require(:permit_application).permit(
       supporting_documents_attributes: [
-        :data_key,
+        *permitted,
         file: [
           :id,
           :storage,
@@ -618,22 +680,74 @@ class Api::PermitApplicationsController < Api::ApplicationController
     )
   end
 
+  def fulfillment_upload?
+    fulfillment_document_attributes.any? do |attrs|
+      attrs[:revision_request_id].present? ||
+        attrs["revision_request_id"].present?
+    end
+  end
+
+  def fulfillment_documents_scoped_to_request?
+    request = fulfillment_revision_request
+    return false unless request.is_a?(SupportingDocumentRevisionRequest)
+    unless request.submission_version_id ==
+             @permit_application.latest_submission_version&.id
+      return false
+    end
+
+    fulfillment_document_attributes.all? do |attrs|
+      request_id = attrs[:revision_request_id] || attrs["revision_request_id"]
+      document_id = attrs[:id] || attrs["id"]
+      request_id.to_s == request.id.to_s &&
+        (
+          document_id.blank? ||
+            request.supporting_documents.exists?(id: document_id)
+        )
+    end
+  end
+
+  def fulfillment_revision_request
+    request_id =
+      fulfillment_document_attributes
+        .filter_map do |attrs|
+          attrs[:revision_request_id] || attrs["revision_request_id"]
+        end
+        .first
+    return if request_id.blank?
+
+    @permit_application.latest_submission_version&.revision_requests&.find_by(
+      id: request_id
+    )
+  end
+
+  def fulfillment_document_attributes
+    Array(params.dig(:permit_application, :supporting_documents_attributes))
+  end
+
   def submitted_permit_application_params # params for submitters
     params.require(:permit_application).permit(:reference_number)
   end
 
   def revision_request_params # params for submitters
     params.require(:submission_version).permit(
+      :applicant_note,
       revision_requests_attributes: [
         :id,
         :user_id,
         :_destroy,
+        :type,
+        :title,
         :reason_code,
         :comment,
         requirement_json: {
         },
         submission_data: {
-        }
+        },
+        revision_reference_documents_attributes: [
+          :id,
+          :_destroy,
+          file: [:id, :storage, metadata: %i[size filename mime_type]]
+        ]
       ]
     )
   end

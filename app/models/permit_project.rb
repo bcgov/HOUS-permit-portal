@@ -246,16 +246,6 @@ class PermitProject < ApplicationRecord
     full_address.split(",").first
   end
 
-  # Reviewer inbox preview: newest visible-to-reviewer applications (not owner-scoped).
-  def recent_inbox_permit_applications(limit: 3)
-    permit_applications
-      .kept
-      .includes(:submitter, :template_version, requirement_template: :taggings)
-      .select(&:submitted_at_least_once?)
-      .sort_by(&:updated_at)
-      .last(limit)
-  end
-
   def recent_permit_applications(user = nil)
     return PermitApplication.none if user.nil?
 
@@ -266,23 +256,15 @@ class PermitProject < ApplicationRecord
           :submission_versions,
           :permit_collaborations,
           :submitter,
+          :created_by,
           :template_version,
           requirement_template: :taggings
         )
         .order(updated_at: :desc)
-    return scope.limit(3) if owner_id == user.id
 
-    scope
-      .joins(permit_collaborations: :collaborator)
-      .where(
-        collaborators: {
-          user_id: user.id
-        },
-        permit_collaborations: {
-          discarded_at: nil
-        }
-      )
-      .distinct
+    PermitApplicationPolicy::Scope
+      .new(UserContext.new(user, sandbox), scope)
+      .resolve
       .limit(3)
   end
 

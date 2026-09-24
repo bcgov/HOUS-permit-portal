@@ -46,23 +46,17 @@ export const InboxProjectDetailScreen = observer(() => {
         to: `${inboxProjectBasePath}/permits`,
         tabIndex: 1,
       },
-      // Currently, notes are specific to projject meetings and thus will only be shown if project meetings are enabled
-      // Change this when notes are made independent of project meetings
-      ...(projectMeetingsEnabled
-        ? [
-            {
-              label: t("submissionInbox.projectDetail.notes"),
-              icon: Chat,
-              to: `${inboxProjectBasePath}/notes`,
-              tabIndex: 2,
-            },
-          ]
-        : []),
+      {
+        label: t("submissionInbox.projectDetail.notes"),
+        icon: Chat,
+        to: `${inboxProjectBasePath}/notes`,
+        tabIndex: 2,
+      },
       {
         label: t("submissionInbox.projectDetail.activity"),
         icon: TrendUp,
         to: `${inboxProjectBasePath}/activity`,
-        tabIndex: projectMeetingsEnabled ? 3 : 2,
+        tabIndex: 3,
       },
       ...(projectMeetingsEnabled
         ? [
@@ -133,11 +127,9 @@ export const InboxProjectDetailScreen = observer(() => {
           <TabPanel flex={1} minH={0} minW={0} display="flex" flexDirection="column" overflow="hidden">
             {isPending ? <LoadingScreen /> : <InboxPermitsTab permitProject={currentPermitProject} />}
           </TabPanel>
-          {projectMeetingsEnabled && (
-            <TabPanel flex={1} minH={0} minW={0} display="flex" flexDirection="column" overflow="hidden">
-              {isPending ? <LoadingScreen /> : <InboxNotesTab permitProject={currentPermitProject} />}
-            </TabPanel>
-          )}
+          <TabPanel flex={1} minH={0} minW={0} display="flex" flexDirection="column" overflow="hidden">
+            {isPending ? <LoadingScreen /> : <InboxNotesTab permitProject={currentPermitProject} />}
+          </TabPanel>
           <TabPanel flex={1} minH={0} minW={0} display="flex" flexDirection="column" overflow="hidden">
             {isPending ? <LoadingScreen /> : <ActivityTabPanelContent permitProject={currentPermitProject} fromInbox />}
           </TabPanel>

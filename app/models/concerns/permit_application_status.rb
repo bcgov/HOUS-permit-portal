@@ -217,7 +217,7 @@ module PermitApplicationStatus
     end
 
     def can_finalize_requests?
-      latest_submission_version.revision_requests.any?
+      latest_submission_version&.has_request_package_items?
     end
 
     def stamp_issued_at
@@ -230,10 +230,13 @@ module PermitApplicationStatus
 
     def handle_finalize_revision_requests
       update(revisions_requested_at: Time.current)
+      publish_revision_message(:applicant_message)
       NotificationService.publish_application_revisions_request_event(self)
     end
 
     def handle_submission
+      publish_revision_message(:submitter_message)
+
       update(signed_off_at: Time.current)
 
       checklist = step_code_checklist
@@ -257,6 +260,13 @@ module PermitApplicationStatus
       )
 
       send_submit_notifications
+    end
+
+    def publish_revision_message(kind)
+      version = latest_submission_version
+      return unless version
+
+      version.notes.public_send(kind).find_each(&:publish!)
     end
 
     def update_queue_clock

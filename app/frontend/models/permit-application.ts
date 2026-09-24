@@ -1,5 +1,5 @@
 import { t } from "i18next"
-import { cast, flow, Instance, toGenerator, types } from "mobx-state-tree"
+import { cast, flow, getSnapshot, Instance, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
@@ -10,6 +10,7 @@ import {
   EPermitBlockStatus,
   ERequirementChangeAction,
   ERequirementType,
+  ERevisionRequestType,
   EStepCodeChecklistStage,
 } from "../types/enums"
 import {
@@ -59,6 +60,9 @@ export const PermitApplicationModel = types.snapshotProcessor(
       tags: types.optional(types.array(types.string), []),
       status: types.enumeration(Object.values(EPermitApplicationStatus)),
       submitter: types.maybeNull(types.maybe(types.reference(types.late(() => UserModel)))),
+      createdBy: types.maybeNull(
+        types.frozen<{ id: string; type: "User" | "Jurisdiction"; name: string; role?: string | null }>()
+      ),
       jurisdiction: types.maybeNull(types.maybe(types.reference(types.late(() => JurisdictionModel)))),
       templateVersion: types.maybeNull(types.reference(types.late(() => TemplateVersionModel))),
       sandbox: types.maybeNull(types.reference(types.late(() => SandboxModel))),
@@ -126,12 +130,19 @@ export const PermitApplicationModel = types.snapshotProcessor(
       get isStepCodeComplete() {
         return !!self.stepCode?.isStageComplete(self.stepCodeStage || EStepCodeChecklistStage.preConstruction)
       },
-      get isPart3() {
-        // TODO
-        return false
-      },
       get isNewDraft() {
         return self.status === EPermitApplicationStatus.newDraft
+      },
+      // Review staff cannot open a new draft unless the project has an active meeting.
+      get isLockedForReviewStaff() {
+        const user = self.rootStore.userStore.currentUser
+        if (!user?.isReviewStaff || !this.isNewDraft) return false
+        if (self.submitter?.id === user.id) return false
+        if (self.hasActiveProjectMeeting) return false
+
+        const project = self.rootStore.permitProjectStore.currentPermitProject
+        if (project?.id === self.projectId && (project.isOwner || project.hasActiveProjectMeeting)) return false
+        return true
       },
       get isDraft() {
         return (
@@ -215,6 +226,19 @@ export const PermitApplicationModel = types.snapshotProcessor(
       get latestRevisionRequests() {
         return (self.latestSubmissionVersion?.revisionRequests || []).slice().sort((a, b) => a.createdAt - b.createdAt)
       },
+      get latestFieldRevisionRequests() {
+        return self.latestRevisionRequests.filter(
+          (request) => request.type !== ERevisionRequestType.SupportingDocumentRevisionRequest
+        )
+      },
+      get latestSupportingDocumentRevisionRequests() {
+        return self.latestRevisionRequests.filter(
+          (request) => request.type === ERevisionRequestType.SupportingDocumentRevisionRequest
+        )
+      },
+      get latestRequestPackageCount() {
+        return (self.latestSubmissionVersion?.revisionRequests || []).length
+      },
       get inboxEnabled() {
         return self.jurisdiction?.inboxEnabled && self.rootStore.siteConfigurationStore.inboxEnabled
       },
@@ -257,9 +281,11 @@ export const PermitApplicationModel = types.snapshotProcessor(
 
         // Disable certain fields if this is an ephemeral preview
         const ephemeralProcessedFormJson = self.isEphemeral ? processFieldsForEphemeral(clonedFormJson) : clonedFormJson
+        const revisionRequestsForAnnotations =
+          self.revisionMode || self.isRevisionsRequested ? self.latestRevisionRequests : []
         const revisionAnnotatedFormJson = combineRevisionAnnotations(
           ephemeralProcessedFormJson,
-          self.latestRevisionRequests
+          revisionRequestsForAnnotations
         )
         //merge the formattedComliance data.  This should trigger a form redraw when it is updated
         const complianceHintedFormJson = combineCustomizations(
@@ -813,6 +839,27 @@ export const PermitApplicationModel = types.snapshotProcessor(
         self.isLoading = false
         return response
       }),
+      uploadRevisionFulfillment: flow(function* (supportingDocumentsAttributes) {
+        const response = yield self.environment.api.uploadRevisionFulfillment(self.id, supportingDocumentsAttributes)
+        if (response.ok) {
+          const { data: permitApplication } = response.data
+          const snapshot = getSnapshot(self)
+          const fulfillmentUpdate = {
+            ...permitApplication,
+            formJson: snapshot.formJson,
+            submissionData: snapshot.submissionData,
+            selectedSubmissionVersion: snapshot.selectedSubmissionVersion,
+            isViewingPastRequests: snapshot.isViewingPastRequests,
+            revisionMode: snapshot.revisionMode,
+            isDirty: snapshot.isDirty,
+            selectedTabIndex: snapshot.selectedTabIndex,
+            diff: snapshot.diff,
+            showingCompareAfter: snapshot.showingCompareAfter,
+          }
+          self.rootStore.permitApplicationStore.mergeUpdate(fulfillmentUpdate, "permitApplicationMap")
+        }
+        return response
+      }),
       fetchDiff: flow(function* () {
         const diffData = yield self.publishedTemplateVersion.fetchTemplateVersionCompare(self.templateVersion.id)
         self.diff = diffData.data
@@ -845,6 +892,14 @@ export const PermitApplicationModel = types.snapshotProcessor(
           }
         }
         return response.ok
+      }),
+      updateSubmitterNote: flow(function* (submitterNote: string) {
+        const response = yield self.environment.api.updateSubmitterNote(self.id, submitterNote)
+        if (response.ok) {
+          const { data: permitApplication } = response.data
+          self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
+        }
+        return response
       }),
       submit: flow(function* (params) {
         const response = yield self.environment.api.submitPermitApplication(self.id, params)

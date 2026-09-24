@@ -451,15 +451,14 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitApplications,
       context "when the scoped permit project has no active meeting" do
         let(:target_project) { draft_permit_applications.first.permit_project }
 
-        it "excludes draft applications for that permit project" do
+        it "includes draft applications for that permit project" do
           controller.perform_jurisdiction_permit_application_search
           results =
             controller.instance_variable_get(
               :@jurisdiction_permit_application_search
             ).results
 
-          expect(results).to be_empty
-          expect(results).not_to include(*draft_permit_applications)
+          expect(results).to match_array(draft_permit_applications)
         end
       end
     end

@@ -6,15 +6,22 @@ class SubmissionVersionBlueprint < Blueprinter::Base
 
   view :extended do
     include_view :base
-    fields :form_json
+    fields :form_json, :submitter_note
     field :submission_data do |submission_version, options|
       submission_version.formatted_submission_data(
         current_user: options[:current_user]
       )
     end
+    field :applicant_note do |submission_version, _options|
+      next nil unless submission_version.request_package_visible_to_submitter?
+
+      submission_version.applicant_note
+    end
     association :revision_requests,
                 blueprint: RevisionRequestBlueprint,
                 view: :base do |submission_version, options|
+      next [] unless submission_version.request_package_visible_to_submitter?
+
       submission_version.revision_requests_for_submitter_based_on_user_permissions(
         user: options[:current_user]
       )
@@ -23,6 +30,7 @@ class SubmissionVersionBlueprint < Blueprinter::Base
 
   view :review_extended do
     include_view :extended
+    field :applicant_note
     association :revision_requests,
                 blueprint: RevisionRequestBlueprint,
                 view: :extended

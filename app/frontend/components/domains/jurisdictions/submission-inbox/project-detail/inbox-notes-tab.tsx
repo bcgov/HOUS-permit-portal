@@ -5,7 +5,7 @@ import React from "react"
 import { useTranslation } from "react-i18next"
 import { useParams } from "react-router-dom"
 import { IPermitProject } from "../../../../../models/permit-project"
-import { ProjectMeetingNotesList } from "../../../../shared/project-meetings/project-meeting-notes-list"
+import { ProjectNotesList } from "../../../../shared/notes/project-notes-list"
 
 interface IProps {
   permitProject: IPermitProject
@@ -47,12 +47,13 @@ export const InboxNotesTab = observer(({ permitProject }: IProps) => {
           {t("submissionInbox.projectDetail.projectMeetingNotes")}
         </Heading>
 
-        <ProjectMeetingNotesList
+        <ProjectNotesList
           notes={permitProject.notes}
           emptyDescription={t("submissionInbox.projectDetail.notesEmptyDescription")}
           getMeetingPath={(note) =>
             `/jurisdictions/${jurisdictionId}/submission-inbox/projects/${permitProject.id}/meetings/${note.projectMeetingId}`
           }
+          getApplicationPath={(note) => `/permit-applications/${note.permitApplicationId}`}
         />
       </Box>
     </FlexColumn>

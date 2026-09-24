@@ -31,6 +31,7 @@ import {
   EReleaseNoteNotificationAudience,
   EReleaseNoteType,
   ERequirementType,
+  ERevisionRequestType,
   ESocketDomainTypes,
   ESocketEventTypes,
   ESortDirection,
@@ -383,7 +384,13 @@ export interface IResource {
 }
 
 export interface IProjectDocument extends IBaseFileAttachment {
-  permitProjectId: string // Foreign key to link to PermitProject
+  permitProjectId: string
+}
+
+export interface IRevisionReferenceDocument extends IBaseFileAttachment {
+  revisionRequestId: string
+  scanStatus?: EFileScanStatus
+  fileUrl?: string
 }
 
 export interface IMeetingRequestDocument extends IBaseFileAttachment {
@@ -421,6 +428,8 @@ export interface IDownloadableFile {
   fileName: string
   fileSize: number
   createdAt: Date
+  submissionVersionId?: string | null
+  revisionRequestId?: string | null
 }
 
 export interface IEULA {
@@ -735,12 +744,16 @@ export interface ILinkData {
 
 export interface IRevisionRequest {
   id: string
+  type?: ERevisionRequestType
+  title?: string
   reasonCode: string
   requirementJson: IFormIORequirement
   submissionData: any
   comment: string
   user?: IMinimalFrozenUser
   createdAt: number
+  revisionReferenceDocuments?: IRevisionReferenceDocument[]
+  supportingDocuments?: Array<{ id: string; fileName?: string; fileUrl?: string }>
 }
 
 export interface IMinimalFrozenUser {
@@ -760,6 +773,8 @@ export interface ISubmissionVersion {
   formJson: IFormJson
   submissionData: ISubmissionData
   revisionRequests: IRevisionRequest[]
+  applicantNote?: string | null
+  submitterNote?: string | null
   viewedAt?: Date
   createdAt: number
 }
@@ -793,15 +808,6 @@ export type TCreateRequirementTemplateFormData = {
   templateCategoryId?: string | null
   type: string
   nickname?: string
-}
-
-export type TCreatePermitApplicationFormData = {
-  pid?: string
-  pin?: string
-  templateVersionId: string
-  jurisdictionId?: string
-  site?: IOption
-  sandboxId?: string
 }
 
 export type TReleaseNoteFormData = {

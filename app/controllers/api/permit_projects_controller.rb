@@ -287,11 +287,11 @@ class Api::PermitProjectsController < Api::ApplicationController
     permit_applications_params.each do |pa_params|
       permit_application =
         PermitApplication.new(
-          submitter: current_user,
           permit_project: @permit_project,
           template_version_id: pa_params[:template_version_id],
           jurisdiction_id: pa_params[:jurisdiction_id]
         )
+      permit_application.assign_creation_actors(current_user)
 
       authorize permit_application, :create?
 

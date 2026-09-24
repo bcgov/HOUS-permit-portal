@@ -23,7 +23,7 @@ import { useTranslation } from "react-i18next"
 import { datefnsAppDateFormat } from "../../../constants"
 import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
-import { IDownloadableFile, IFormIOSection } from "../../../types/types"
+import { IDownloadableFile, IFormIOSection, ISubmissionVersion } from "../../../types/types"
 import { formatBytes } from "../../../utils/utility-functions"
 import { CalloutBanner } from "../../shared/base/callout-banner"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
@@ -55,6 +55,38 @@ function formSectionKeyFromDataKey(dataKey?: string) {
 function isGeneratedDocumentKey(key?: string) {
   if (!key) return false
   return key.startsWith("permit_application_pdf") || key.startsWith("step_code_checklist_pdf")
+}
+
+function collectFileModelIds(data: unknown, ids: Set<string>) {
+  if (!data || typeof data !== "object") return
+  if (Array.isArray(data)) {
+    data.forEach((item) => collectFileModelIds(item, ids))
+    return
+  }
+
+  const record = data as Record<string, unknown>
+  if (typeof record.modelId === "string") ids.add(record.modelId)
+  Object.values(record).forEach((value) => collectFileModelIds(value, ids))
+}
+
+function documentsForSubmissionVersion(
+  documents: IDownloadableFile[],
+  version: ISubmissionVersion | null,
+  latestVersionId?: string
+) {
+  if (!version) return documents
+
+  const fileIds = new Set<string>()
+  collectFileModelIds(version.submissionData, fileIds)
+  const revisionIds = new Set((version.revisionRequests ?? []).map((request) => request.id))
+
+  return documents.filter((doc) => {
+    if (fileIds.has(doc.id)) return true
+    if (doc.revisionRequestId && revisionIds.has(doc.revisionRequestId)) return true
+    if (!isGeneratedDocumentKey(doc.dataKey)) return false
+    if (doc.submissionVersionId) return doc.submissionVersionId === version.id
+    return version.id === latestVersionId
+  })
 }
 
 function groupDownloadItemsBySection({
@@ -131,9 +163,34 @@ export const SubmissionDownloadModal = observer(
     const applicationJsonUrl = `/api/permit_applications/${permitApplication.id}/download_application_json`
     const applicationJsonName = `permit-application-${permitApplication.id}.json`
 
-    const documents = allSubmissionVersionCompletedSupportingDocuments || []
+    const viewingPastVersion = permitApplication.isViewingPastRequests && !!permitApplication.selectedSubmissionVersion
+    const displayedVersion = viewingPastVersion
+      ? permitApplication.selectedSubmissionVersion
+      : permitApplication.latestSubmissionVersion
+    const isLatestVersion = !displayedVersion || displayedVersion.id === permitApplication.latestSubmissionVersion?.id
+    const displayedVersionDate = displayedVersion?.createdAt
+      ? format(new Date(displayedVersion.createdAt), "MMMM d, yyyy 'at' h:mma")
+      : null
+
+    const documents = useMemo(
+      () =>
+        documentsForSubmissionVersion(
+          allSubmissionVersionCompletedSupportingDocuments || [],
+          displayedVersion,
+          permitApplication.latestSubmissionVersion?.id
+        ),
+      [
+        allSubmissionVersionCompletedSupportingDocuments,
+        displayedVersion,
+        permitApplication.latestSubmissionVersion?.id,
+      ]
+    )
     const documentKeys = useMemo(() => documents.map((doc) => doc.fileUrl), [documents])
-    const missingPdfs = permitApplication.missingPdfs || []
+    const missingPdfs = useMemo(() => {
+      const keys = permitApplication.missingPdfs || []
+      if (!displayedVersion) return keys
+      return keys.filter((key) => key.endsWith(`_${displayedVersion.id}`))
+    }, [permitApplication.missingPdfs, displayedVersion])
     const hasMissingPdfs = missingPdfs.length > 0
     const allKeys = useMemo(() => [...documentKeys, ...missingPdfs], [documentKeys, missingPdfs])
 
@@ -142,11 +199,11 @@ export const SubmissionDownloadModal = observer(
         groupDownloadItemsBySection({
           documents,
           missingPdfs,
-          formSections: permitApplication.formJson?.components || [],
+          formSections: displayedVersion?.formJson?.components || permitApplication.formJson?.components || [],
           generatedTitle: t("permitApplication.show.downloadSectionGenerated"),
           otherTitle: t("permitApplication.show.downloadSectionOther"),
         }),
-      [documents, missingPdfs, permitApplication.formJson, t]
+      [documents, missingPdfs, displayedVersion?.formJson, permitApplication.formJson, t]
     )
 
     const { isOpen, onOpen, onClose: disclosureOnClose } = useDisclosure()
@@ -262,7 +319,7 @@ export const SubmissionDownloadModal = observer(
         return true
       }
 
-      if (wasAllSelected && zipfileUrl) {
+      if (wasAllSelected && zipfileUrl && !displayedVersion) {
         const a = document.createElement("a")
         a.href = zipfileUrl
         a.download = zipfileName || `permit-application-${permitApplication.number}.zip`
@@ -411,6 +468,33 @@ export const SubmissionDownloadModal = observer(
                   <Text fontSize="lg" fontWeight="normal" color="text.primary" lineHeight="1.68">
                     {t("permitApplication.show.downloadApplicationNumber", { number: permitApplication.number })}
                   </Text>
+                  {displayedVersionDate && (
+                    <CalloutBanner
+                      type="info"
+                      my={0}
+                      title={t("permitApplication.show.downloadVersionNotice", { date: displayedVersionDate })}
+                      body={
+                        isLatestVersion ? undefined : (
+                          <Link
+                            as="button"
+                            type="button"
+                            color="text.link"
+                            textDecoration="underline"
+                            onClick={() => {
+                              permitApplication.setIsViewingPastRequests(false)
+                              if (permitApplication.latestSubmissionVersion) {
+                                permitApplication.setSelectedSubmissionVersion(
+                                  permitApplication.latestSubmissionVersion
+                                )
+                              }
+                            }}
+                          >
+                            {t("permitApplication.show.downloadViewLatest")}
+                          </Link>
+                        )
+                      }
+                    />
+                  )}
                 </VStack>
 
                 <ModalBody px={10} py={6} flex={1} minH={0} overflow="hidden" display="flex" flexDirection="column">

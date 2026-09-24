@@ -333,6 +333,71 @@ RSpec.describe "Api::PermitProjects", type: :request, search: true do
       expect(response).to have_http_status(:ok)
       expect(json_response).to include("data", "meta")
       expect(json_response["data"].size).to eq(1)
+      application = PermitApplication.find(json_response["data"].first["id"])
+      expect(application.created_by).to eq(owner)
+      expect(application.submitter).to eq(owner)
+      expect(application.nickname).to be_nil
+      expect(json_response["data"].first["created_by"]).to include(
+        "type" => "User",
+        "id" => owner.id,
+        "name" => owner.name
+      )
+      expect(json_response["data"].first["created_by"]).not_to have_key("email")
+    end
+
+    it "attributes a reviewer's draft to the jurisdiction and lets that jurisdiction's staff see it" do
+      reviewer = create(:user, :reviewer, jurisdiction:)
+      colleague = create(:user, :reviewer, jurisdiction:)
+      outsider = create(:user, :reviewer)
+      sign_in reviewer
+
+      post "/api/permit_projects/#{permit_project.id}/permit_applications",
+           params: {
+             permit_applications: [
+               {
+                 template_version_id: template_version.id,
+                 jurisdiction_id: permit_project.jurisdiction_id
+               }
+             ]
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      application = PermitApplication.find(json_response["data"].first["id"])
+      expect(application.created_by).to eq(jurisdiction)
+      expect(application.submitter).to eq(owner)
+      expect(application.nickname).to be_nil
+      expect(json_response["data"].first["created_by"]).to eq(
+        "id" => jurisdiction.id,
+        "type" => "Jurisdiction",
+        "name" => jurisdiction.qualified_name
+      )
+      expect(response.body).not_to include(reviewer.email)
+      expect(permit_project.recent_permit_applications(colleague)).to include(
+        application
+      )
+      expect(
+        permit_project.recent_permit_applications(outsider)
+      ).not_to include(application)
+
+      PermitApplication.reindex
+      sign_in colleague
+      post "/api/permit_projects/#{permit_project.id}/permit_applications/search",
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response["data"].map { |row| row["id"] }).to include(
+        application.id
+      )
+
+      sign_in outsider
+      post "/api/permit_projects/#{permit_project.id}/permit_applications/search",
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:forbidden)
     end
 
     it "returns errors when any payload is invalid" do

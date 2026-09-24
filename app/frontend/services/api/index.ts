@@ -92,7 +92,6 @@ import {
   IProjectMeetingInboxSearchFilters,
   ITemplateVersionDiff,
   TAutoComplianceModuleConfigurations,
-  TCreatePermitApplicationFormData,
   TCreateRequirementTemplateFormData,
   TReleaseNoteFormData,
   TReleaseNoteViewerContext,
@@ -612,10 +611,6 @@ export class Api {
     )
   }
 
-  async createPermitApplication(params: TCreatePermitApplicationFormData) {
-    return this.client.post<ApiResponse<IPermitApplication>>("/permit_applications", { permitApplication: params })
-  }
-
   async createProjectPermitApplications(
     permitProjectId: string,
     params: Array<{ templateVersionId: string; jurisdictionId?: string }>
@@ -700,6 +695,20 @@ export class Api {
   async updateRevisionRequests(id, params: IRevisionRequestForm) {
     return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/revision_requests`, {
       submissionVersion: params,
+    })
+  }
+
+  async uploadRevisionFulfillment(
+    id: string,
+    supportingDocumentsAttributes: Array<{
+      id?: string
+      revisionRequestId: string
+      _destroy?: boolean
+      file?: { id: string; storage: string; metadata: { size: number; filename: string; mimeType: string } }
+    }>
+  ) {
+    return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/upload_supporting_document`, {
+      permitApplication: { supportingDocumentsAttributes },
     })
   }
 
@@ -814,6 +823,12 @@ export class Api {
       `/permit_applications/${id}/download_supporting_documents_zip`,
       { supportingDocumentIds }
     )
+  }
+
+  async updateSubmitterNote(id: string, submitterNote: string) {
+    return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/submitter_note`, {
+      permitApplication: { submitterNote },
+    })
   }
 
   async submitPermitApplication(id, params) {

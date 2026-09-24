@@ -25,7 +25,9 @@ RSpec.describe "Api::Notes", type: :request do
 
       expect(response).to have_http_status(:ok)
       expect(json_response.dig("data", 0, "id")).to eq(note.id)
-      expect(json_response.dig("data", 0, "author_name")).to eq(reviewer.name)
+      expect(json_response.dig("data", 0, "author_name")).to eq(
+        jurisdiction.qualified_name
+      )
       expect(json_response.dig("data", 0)).not_to have_key("author_email")
       expect(json_response.dig("data", 0)).not_to have_key("project_meeting_id")
       expect(json_response.dig("data", 0, "noteable_type")).to eq(
@@ -43,6 +45,7 @@ RSpec.describe "Api::Notes", type: :request do
 
       expect(response).to have_http_status(:ok)
       expect(json_response.dig("data", 0, "id")).to eq(note.id)
+      expect(json_response.dig("data", 0, "author_name")).to eq(reviewer.name)
     end
   end
 
@@ -169,6 +172,8 @@ RSpec.describe "Api::Notes", type: :request do
       expect(response).to have_http_status(:ok)
       expect(response.media_type).to eq("text/csv")
       expect(response.body).to include("CSV body")
+      expect(response.body).to include(jurisdiction.qualified_name)
+      expect(response.body).not_to include(reviewer.name)
       expect(response.body).not_to include("<p>")
       expect(CSV.parse(response.body).first).to eq(
         [
@@ -247,6 +252,40 @@ RSpec.describe "Api::Notes", type: :request do
 
       note_ids = json_response.fetch("data").map { |note| note.fetch("id") }
       expect(note_ids).to include(draft_note.id, withdrawn_note.id)
+    end
+
+    it "includes a published revision message and omits a draft" do
+      application =
+        create(
+          :permit_application,
+          :newly_submitted,
+          permit_project: permit_project
+        )
+      version = application.latest_submission_version
+      published =
+        create(
+          :note,
+          noteable: version,
+          kind: :applicant_message,
+          user: reviewer,
+          body: "<p>Sent to the applicant.</p>",
+          published_at: Time.current
+        )
+      create(
+        :note,
+        noteable: version,
+        kind: :submitter_message,
+        user: owner,
+        body: "<p>Still a draft.</p>",
+        published_at: nil
+      )
+      sign_in reviewer
+
+      get "/api/permit_projects/#{permit_project.id}/notes", headers: headers
+
+      note_ids = json_response.fetch("data").map { |note| note.fetch("id") }
+      expect(note_ids).to include(published.id)
+      expect(note_ids).not_to include(version.notes.submitter_message.pick(:id))
     end
   end
 

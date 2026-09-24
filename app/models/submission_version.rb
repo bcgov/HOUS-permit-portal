@@ -8,6 +8,7 @@ class SubmissionVersion < ApplicationRecord
   belongs_to :permit_application
   has_many :revision_requests, dependent: :destroy
   has_many :supporting_documents, dependent: :destroy
+  has_many :notes, as: :noteable, dependent: :destroy
 
   accepts_nested_attributes_for :revision_requests, allow_destroy: true
 
@@ -40,7 +41,15 @@ class SubmissionVersion < ApplicationRecord
     update!(viewed_at: nil)
   end
 
-  delegate :sandbox, to: :permit_application
+  delegate :permit_project, :sandbox, to: :permit_application
+
+  def applicant_note
+    notes.applicant_message.pick(:body)
+  end
+
+  def submitter_note
+    notes.submitter_message.pick(:body)
+  end
 
   scope :sandboxed,
         -> do
@@ -139,6 +148,16 @@ class SubmissionVersion < ApplicationRecord
       .index(id) + 1
   end
 
+  def has_request_package_items?
+    revision_requests.exists?
+  end
+
+  def request_package_visible_to_submitter?
+    return true if permit_application.revisions_requested?
+
+    permit_application.latest_submission_version&.id != id
+  end
+
   def revision_requests_for_submitter_based_on_user_permissions(user: nil)
     return revision_requests if user.blank?
 
@@ -152,7 +171,10 @@ class SubmissionVersion < ApplicationRecord
     return [] if permissions.blank?
 
     revision_requests.select do |r|
-      return false if r.requirement_json["key"].blank?
+      next true if r.is_a?(SupportingDocumentRevisionRequest)
+      if r.requirement_json.blank? || r.requirement_json["key"].blank?
+        return false
+      end
 
       rb_id = r.requirement_json["key"][/RB([a-zA-Z0-9\-]+)/, 1]
       permissions.include?(rb_id)

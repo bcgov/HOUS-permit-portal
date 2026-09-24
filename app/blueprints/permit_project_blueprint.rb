@@ -138,8 +138,8 @@ class PermitProjectBlueprint < Blueprinter::Base
     end
     association :recent_permit_applications,
                 blueprint: PermitApplicationBlueprint,
-                view: :jurisdiction_review_inbox do |permit_project, _options|
-      permit_project.recent_inbox_permit_applications
+                view: :jurisdiction_review_inbox do |permit_project, options|
+      permit_project.recent_permit_applications(options[:current_user])
     end
     association :project_documents,
                 blueprint:
@@ -167,8 +167,9 @@ class PermitProjectBlueprint < Blueprinter::Base
     scope = options[:notes_scope] || Note.all
 
     scope
+      .visible_on_project
       .where(permit_project: permit_project)
-      .preload(:user, :permit_project, :note_attachment_documents)
+      .preload(:user, :permit_project, :noteable, :note_attachment_documents)
       .order(created_at: :desc)
   end
 end

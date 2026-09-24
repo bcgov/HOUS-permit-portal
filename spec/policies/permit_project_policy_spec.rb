@@ -136,6 +136,8 @@ RSpec.describe PermitProjectPolicy, type: :policy do
       expect(p.mark_as_unviewed?).to be true
       expect(p.assign_project_review_collaborator?).to be true
       expect(p.download_notes_csv?).to be true
+      expect(p.search_permit_applications?).to be true
+      expect(p.create_permit_applications?).to be true
     end
 
     it "denies show and inbox actions when the project is in another sandbox" do

@@ -49,4 +49,46 @@ RSpec.describe SubmissionVersion, type: :model do
       end
     end
   end
+
+  describe "#has_request_package_items?" do
+    let(:submission_version) { create(:submission_version) }
+
+    it "is false when the package is empty" do
+      expect(submission_version.has_request_package_items?).to be false
+    end
+
+    it "is true when a supporting document revision request is present" do
+      create(
+        :supporting_document_revision_request,
+        submission_version: submission_version
+      )
+      expect(submission_version.has_request_package_items?).to be true
+    end
+  end
+
+  describe "#request_package_visible_to_submitter?" do
+    let(:permit_application) { create(:permit_application, :newly_submitted) }
+    let(:submission_version) { permit_application.latest_submission_version }
+
+    it "is false for draft items on the latest version" do
+      expect(submission_version.request_package_visible_to_submitter?).to be(
+        false
+      )
+    end
+
+    it "is true after revisions are requested" do
+      create(
+        :supporting_document_revision_request,
+        submission_version: submission_version
+      )
+      allow(NotificationService).to receive(
+        :publish_application_revisions_request_event
+      )
+      permit_application.finalize_revision_requests!
+
+      expect(
+        submission_version.request_package_visible_to_submitter?
+      ).to be true
+    end
+  end
 end
