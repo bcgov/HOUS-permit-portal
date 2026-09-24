@@ -104,10 +104,10 @@ export const UserModel = types
     },
     get omniauthProviderLabel() {
       const keys = {
-        idir: "idir",
-        bceidbasic: "bceidbasic",
-        bceidbusiness: "bceidbusiness",
-        "digital-building-permit-5120": "bcsc",
+        [OMNIAUTH_PROVIDERS.idir]: OMNIAUTH_PROVIDERS.idir,
+        [OMNIAUTH_PROVIDERS.basicBceid]: OMNIAUTH_PROVIDERS.basicBceid,
+        [OMNIAUTH_PROVIDERS.businessBceid]: OMNIAUTH_PROVIDERS.businessBceid,
+        [OMNIAUTH_PROVIDERS.bcsc]: "bcsc",
       }
       // @ts-ignore
       return t(`user.omniauthProviders.${keys[self.omniauthProvider]}`)
