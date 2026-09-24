@@ -49,68 +49,6 @@ RSpec.describe "Api::PermitApplications", type: :request do
     file&.close
   end
 
-  describe "POST /api/permit_applications" do
-    let(:valid_params) do
-      {
-        permit_application: {
-          template_version_id: template_version.id,
-          jurisdiction_id: permit_project.jurisdiction_id,
-          permit_project_id: permit_project.id,
-          full_address: "123 Main St"
-        }
-      }
-    end
-
-    it "creates a permit application for the current submitter" do
-      post "/api/permit_applications",
-           params: valid_params,
-           headers: headers,
-           as: :json
-
-      expect(response).to have_http_status(:ok)
-      expect(json_response).to include("data", "meta")
-      expect(json_response.dig("data", "submitter", "id")).to eq(submitter.id)
-    end
-
-    it "ignores submitter_id injection" do
-      params =
-        valid_params.deep_merge(
-          permit_application: {
-            submitter_id: other_user.id
-          }
-        )
-
-      post "/api/permit_applications",
-           params: params,
-           headers: headers,
-           as: :json
-
-      expect(response).to have_http_status(:ok)
-      expect(PermitApplication.last.submitter_id).to eq(submitter.id)
-    end
-
-    it "returns validation errors for invalid payloads" do
-      allow_any_instance_of(PermitApplication).to receive(:save) do |record|
-        record.errors.add(:base, "invalid")
-        false
-      end
-
-      post "/api/permit_applications",
-           params: {
-             permit_application: {
-               template_version_id: template_version.id,
-               jurisdiction_id: permit_project.jurisdiction_id,
-               permit_project_id: permit_project.id
-             }
-           },
-           headers: headers,
-           as: :json
-
-      expect(response).to have_http_status(:bad_request)
-      expect(json_response.dig("meta", "message", "message")).to be_present
-    end
-  end
-
   describe "GET /api/permit_applications/:id" do
     it "returns the permit application for the submitter" do
       get "/api/permit_applications/#{permit_application.id}", headers: headers
@@ -126,6 +64,24 @@ RSpec.describe "Api::PermitApplications", type: :request do
 
       expect(response).to have_http_status(:forbidden)
       expect(json_response.dig("meta", "message", "message")).to be_present
+    end
+
+    it "forbids review staff from opening a new draft" do
+      sign_in create(:user, :reviewer, jurisdiction: jurisdiction)
+
+      get "/api/permit_applications/#{permit_application.id}", headers: headers
+
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it "lets review staff open a new draft when the project has an active meeting" do
+      sign_in create(:user, :reviewer, jurisdiction: jurisdiction)
+      create(:project_meeting, :open, permit_project: permit_project)
+
+      get "/api/permit_applications/#{permit_application.id}", headers: headers
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("data", "id")).to eq(permit_application.id)
     end
 
     it "returns active project meeting metadata for the submitter" do

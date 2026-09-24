@@ -7,6 +7,8 @@ import {
   FormLabel,
   Heading,
   ListItem,
+  Radio,
+  RadioGroup,
   Text,
   Textarea,
   UnorderedList,
@@ -25,13 +27,14 @@ interface IReviewAndSendRequestsScreenProps {
   onExitRevisionMode: () => void
 }
 
-// TODO: adding a permit is prompted from this confirm step later, and does not
-// touch permit-application status or revision gating. No checkbox here saves anything.
+// The yes/no answer is not saved. It only chooses where to go after send, and
+// does not touch permit-application status or revision gating.
 export const ReviewAndSendRequestsScreen = observer(
   ({ permitApplication, onBack, onExitRevisionMode }: IReviewAndSendRequestsScreenProps) => {
     const { t } = useTranslation()
     const navigate = useNavigate()
     const [applicantNote, setApplicantNote] = useState(permitApplication.latestSubmissionVersion?.applicantNote ?? "")
+    const [addApplications, setAddApplications] = useState("")
 
     useEffect(() => {
       handleScrollToTop()
@@ -64,7 +67,12 @@ export const ReviewAndSendRequestsScreen = observer(
       }
       const sent = await permitApplication.finalizeRevisionRequests()
       setIsSaving(false)
-      if (sent) navigate(`/jurisdictions/${permitApplication.jurisdiction.slug}/submission-inbox`)
+      if (!sent) return
+      if (addApplications === "yes" && permitApplication.projectId) {
+        navigate(`/projects/${permitApplication.projectId}/add-permits`)
+      } else {
+        navigate(`/jurisdictions/${permitApplication.jurisdiction.slug}/submission-inbox`)
+      }
     }
 
     return (
@@ -114,6 +122,17 @@ export const ReviewAndSendRequestsScreen = observer(
           />
         )}
 
+        <FormControl mt={8}>
+          <FormLabel>{t("permitApplication.show.revision.needsOtherApplications")}</FormLabel>
+          <FormHelperText mb={3}>{t("permitApplication.show.revision.needsOtherApplicationsHelper")}</FormHelperText>
+          <RadioGroup value={addApplications} onChange={setAddApplications}>
+            <Flex gap={4}>
+              <YesNoRadio value="yes" label={t("ui.yes")} />
+              <YesNoRadio value="no" label={t("ui.no")} />
+            </Flex>
+          </RadioGroup>
+        </FormControl>
+
         <Flex gap={4} mt={8}>
           <Button variant="primary" onClick={handleSend} isLoading={isSaving}>
             <Flex as="span" align="center" gap={2}>
@@ -141,6 +160,21 @@ export const ReviewAndSendRequestsScreen = observer(
       </Box>
     )
   }
+)
+
+const YesNoRadio = ({ value, label }: { value: string; label: string }) => (
+  <Radio
+    value={value}
+    px={4}
+    py={3}
+    bg="white"
+    borderWidth="1px"
+    borderColor="border.light"
+    borderRadius="md"
+    cursor="pointer"
+  >
+    {label}
+  </Radio>
 )
 
 const SectionMarker = ({ spaced }: { spaced?: boolean }) => (

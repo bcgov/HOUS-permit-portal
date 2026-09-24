@@ -314,12 +314,6 @@ module Api::Concerns::Search::JurisdictionPermitApplications
 
     permit_project_id =
       jurisdiction_permit_application_search_params[:permit_project_id]
-    # Project Permits tab may include new_draft when the project has an active
-    # meeting (matches PermitApplicationPolicy::Scope). Jurisdiction Applications
-    # list never does — drafts there ghost-page after scope_results.
-    active_meeting_request =
-      permit_project_id.present? &&
-        PermitProject.find_by(id: permit_project_id)&.has_active_project_meeting
 
     statuses = search_filters.delete(:status)
 
@@ -327,7 +321,9 @@ module Api::Concerns::Search::JurisdictionPermitApplications
       and_conditions << { status: status_filter }
     elsif statuses.present?
       and_conditions << { status: statuses }
-    elsif !active_meeting_request
+    elsif permit_project_id.blank?
+      # Jurisdiction applications list stays a submitted queue. A project
+      # search includes new drafts so review staff can see they exist.
       and_conditions << { status: { not: "new_draft" } }
     end
 

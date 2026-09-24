@@ -808,15 +808,6 @@ export type TCreateRequirementTemplateFormData = {
   nickname?: string
 }
 
-export type TCreatePermitApplicationFormData = {
-  pid?: string
-  pin?: string
-  templateVersionId: string
-  jurisdictionId?: string
-  site?: IOption
-  sandboxId?: string
-}
-
 export type TReleaseNoteFormData = {
   releaseType: EReleaseNoteType
   notificationAudience: EReleaseNoteNotificationAudience

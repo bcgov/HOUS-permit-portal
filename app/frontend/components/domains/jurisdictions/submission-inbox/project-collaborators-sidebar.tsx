@@ -11,6 +11,7 @@ import {
   Select,
   Stack,
   Text,
+  Tooltip,
 } from "@chakra-ui/react"
 import { ArrowSquareOut, Users } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
@@ -121,19 +122,27 @@ export const ProjectCollaboratorsSidebar = observer(function ProjectCollaborator
                       {t("permitCollaboration.projectSidebar.goToApplication")}
                     </Text>
 
-                    <ChakraLink
-                      as={Link}
-                      to={`/permit-applications/${selectedPa.id}`}
-                      color="text.link"
-                      fontSize="sm"
-                      fontWeight={600}
-                      display="inline-flex"
-                      alignItems="center"
-                      gap={1}
-                    >
-                      {selectedPa.nickname || selectedPa.number}
-                      <ArrowSquareOut size={14} />
-                    </ChakraLink>
+                    {selectedPa.isLockedForReviewStaff ? (
+                      <Tooltip label={t("permitProject.activity.unsubmittedPermitApplication")} hasArrow>
+                        <Text fontSize="sm" color="text.secondary" cursor="not-allowed">
+                          {selectedPa.nickname || selectedPa.number}
+                        </Text>
+                      </Tooltip>
+                    ) : (
+                      <ChakraLink
+                        as={Link}
+                        to={`/permit-applications/${selectedPa.id}`}
+                        color="text.link"
+                        fontSize="sm"
+                        fontWeight={600}
+                        display="inline-flex"
+                        alignItems="center"
+                        gap={1}
+                      >
+                        {selectedPa.nickname || selectedPa.number}
+                        <ArrowSquareOut size={14} />
+                      </ChakraLink>
+                    )}
                   </Stack>
                 )}
               </>

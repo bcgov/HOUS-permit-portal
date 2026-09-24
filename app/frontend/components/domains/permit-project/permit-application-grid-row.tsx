@@ -1,16 +1,4 @@
-import {
-  Avatar,
-  Button,
-  Icon,
-  IconButton,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  Text,
-  Tooltip,
-  VStack,
-} from "@chakra-ui/react"
+import { Button, Icon, IconButton, Menu, MenuButton, MenuItem, MenuList, Text, Tooltip, VStack } from "@chakra-ui/react"
 import { Archive, ClockClockwise, DotsThreeVertical } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
@@ -27,6 +15,7 @@ import { SearchGridItem } from "../../shared/grid/search-grid-item"
 import { SearchGridRow } from "../../shared/grid/search-grid-row"
 import { OutdatedFormWarning } from "../../shared/outdated-form-warning"
 import { PermitApplicationStatusTag } from "../../shared/permit-applications/permit-application-status-tag"
+import { SharedAvatar } from "../../shared/user/shared-avatar"
 import { ApplicationReviewAssigneesCell } from "../jurisdictions/submission-inbox/application-review-assignees-cell"
 
 interface IPermitApplicationGridRowProps {
@@ -39,11 +28,15 @@ export const PermitApplicationGridRow = observer(
   ({ permitApplication, searchModel, fromInbox = false }: IPermitApplicationGridRowProps) => {
     const { t } = useTranslation()
     const navigate = useNavigate()
-    const { id, updatedAt, designatedSubmitter, usingCurrentTemplateVersion } = permitApplication
+    const { id, updatedAt, designatedSubmitter, usingCurrentTemplateVersion, createdBy, nickname, templateNickname } =
+      permitApplication
+    const assignee = designatedSubmitter?.collaborator?.user
     const { sandboxStore, userStore } = useMst()
     const { currentSandbox } = sandboxStore
     const { currentUser } = userStore
-    const isDisabledRow = currentSandbox?.id !== permitApplication.sandbox?.id && !currentUser?.isSuperAdmin
+    const isSandboxMismatch = currentSandbox?.id !== permitApplication.sandbox?.id && !currentUser?.isSuperAdmin
+    const isLockedDraft = permitApplication.isLockedForReviewStaff
+    const isDisabledRow = isSandboxMismatch || isLockedDraft
     const shouldMarkRow = currentSandbox?.id !== permitApplication.sandbox?.id
     const isSubmitter = currentUser?.id === permitApplication.submitter?.id
     const permitApplicationPath = fromInbox ? `/permit-applications/${id}` : `/permit-applications/${id}/edit`
@@ -51,13 +44,18 @@ export const PermitApplicationGridRow = observer(
     return (
       <Tooltip
         isDisabled={!isDisabledRow}
-        label={t("sandbox.disabledRow", "Disabled due to sandbox mismatch")}
+        label={
+          isLockedDraft
+            ? t("permitProject.activity.unsubmittedPermitApplication")
+            : t("sandbox.disabledRow", "Disabled due to sandbox mismatch")
+        }
         hasArrow
         placement="top"
         openDelay={200}
       >
         <SearchGridRow
           aria-disabled={isDisabledRow}
+          opacity={isLockedDraft ? 0.55 : undefined}
           bgImage={
             shouldMarkRow
               ? `repeating-linear-gradient(45deg,${colors.background.sandboxStripe} 5px,${colors.background.sandboxStripe} 10px,rgba(0, 0, 0, 0) 10px,rgba(0, 0, 0, 0) 20px)`
@@ -78,21 +76,36 @@ export const PermitApplicationGridRow = observer(
           }
         >
           {!usingCurrentTemplateVersion && <OutdatedFormWarning colSpan={7} mx={4} mt={2} />}
-          <SearchGridItem>{permitApplication.nickname || "—"}</SearchGridItem>
           <SearchGridItem>
             <VStack align="start" spacing={0}>
-              <Text variant="secondary">{permitApplication.templateNickname}</Text>
+              <Text fontWeight="bold">{templateNickname}</Text>
+              {nickname && (
+                <Text fontSize="sm" color="text.secondary">
+                  {nickname}
+                </Text>
+              )}
             </VStack>
           </SearchGridItem>
           <SearchGridItem>
             {fromInbox ? (
               <ApplicationReviewAssigneesCell application={permitApplication} />
             ) : (
-              <Avatar name={designatedSubmitter?.collaborator?.user?.name} size="sm" />
+              assignee?.name && (
+                <Tooltip label={assignee.name} hasArrow placement="top" openDelay={200}>
+                  <SharedAvatar name={assignee.name} role={assignee.role} size="sm" />
+                </Tooltip>
+              )
             )}
           </SearchGridItem>
           <SearchGridItem>{permitApplication.number}</SearchGridItem>
           <SearchGridItem>{format(updatedAt, datefnsTableDateFormat)}</SearchGridItem>
+          <SearchGridItem>
+            {createdBy?.name && (
+              <Tooltip label={createdBy.name} hasArrow placement="top" openDelay={200}>
+                <SharedAvatar name={createdBy.name} role={createdBy.role} size="sm" />
+              </Tooltip>
+            )}
+          </SearchGridItem>
           <SearchGridItem>
             <PermitApplicationStatusTag status={permitApplication.status} />
           </SearchGridItem>
@@ -108,6 +121,7 @@ export const PermitApplicationGridRow = observer(
               />
               <MenuList>
                 <MenuItem
+                  isDisabled={isDisabledRow}
                   onClick={(e) => {
                     e.stopPropagation()
                     if (isDisabledRow) return

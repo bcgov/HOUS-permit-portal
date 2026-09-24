@@ -9,7 +9,6 @@ class PermitApplicationPolicy < ApplicationPolicy
     elsif user.review_staff?
       return false unless user.member_of?(record.jurisdiction.id)
       return false unless record.sandbox == sandbox
-
       return true unless record.new_draft?
 
       record.permit_project&.project_meetings&.active&.exists? == true
@@ -17,9 +16,11 @@ class PermitApplicationPolicy < ApplicationPolicy
   end
 
   def create?
-    # Only allow creating a permit application if it is under a permit project
-    # owned by the current user
-    record.permit_project.present? && record.permit_project.owner_id == user.id
+    project = record.permit_project
+    return false unless project
+
+    PermitProjectPolicy.new(user_context, project).show? &&
+      (project.owner_id == user.id || user.review_staff?)
   end
 
   def mark_as_viewed?
@@ -258,51 +259,22 @@ class PermitApplicationPolicy < ApplicationPolicy
       values = { uid: user.id, submission_type: submission_type }
 
       if user.review_staff?
-        # Access rule 3 (review staff only):
-        # user can see applications for their jurisdictions once they have
-        # reached a submitted status, or while still new draft if the parent
-        # project has an active meeting. In sandbox mode, the sandbox filter
-        # lives on the parent project now.
+        # Access rule 3 (review staff only): applications on projects in their
+        # jurisdictions, including new drafts. Opening a new draft is denied
+        # by show?. In sandbox mode, the sandbox filter lives on the project.
         pp_clauses = [
           "pp.id = permit_applications.permit_project_id",
           "pp.jurisdiction_id IN (:jur_ids)"
         ]
         pp_clauses << "pp.sandbox_id = :sandbox_id" if sandbox.present?
 
-        review_exists_sql = <<-SQL.squish
+        clauses << <<-SQL.squish
           EXISTS (
             SELECT 1 FROM permit_projects pp
             WHERE #{pp_clauses.join(" AND ")}
           )
         SQL
-
-        active_meeting_exists_sql = <<-SQL.squish
-          EXISTS (
-            SELECT 1 FROM project_meetings pm
-            WHERE pm.permit_project_id = permit_applications.permit_project_id
-              AND pm.status IN (:active_meeting_statuses)
-          )
-        SQL
-
-        visible_status_sql = <<-SQL.squish
-          permit_applications.status IN (:visible_statuses)
-          OR (
-            permit_applications.status = :new_draft_status
-            AND #{active_meeting_exists_sql}
-          )
-        SQL
-
-        clauses << "#{review_exists_sql} AND (#{visible_status_sql})"
         values[:jur_ids] = user.jurisdictions.pluck(:id)
-        values[:visible_statuses] = PermitApplication
-          .kanban_statuses
-          .map { |name| PermitApplication.statuses.fetch(name) }
-        values[:new_draft_status] = PermitApplication.statuses.fetch(
-          "new_draft"
-        )
-        values[:active_meeting_statuses] = ProjectMeeting.statuses.values_at(
-          *ProjectMeeting.active_statuses
-        )
         values[:sandbox_id] = sandbox.id if sandbox.present?
       end
 

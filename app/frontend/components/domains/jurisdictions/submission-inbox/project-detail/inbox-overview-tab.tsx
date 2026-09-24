@@ -12,6 +12,7 @@ import { SearchGrid } from "../../../../shared/grid/search-grid"
 import { FullscreenMapModal } from "../../../../shared/module-wrappers/fullscreen-map-modal"
 import { ProjectMap } from "../../../../shared/module-wrappers/project-map"
 import { RouterLinkButton } from "../../../../shared/navigation/router-link-button"
+import { AddPermitsButton } from "../../../../shared/permit-projects/add-permits-button"
 import { ProjectStateTag } from "../../../../shared/permit-projects/project-state-tag"
 import ProjectInfoRow from "../../../../shared/project/project-info-row"
 import { PermitApplicationGridHeaders } from "../../../permit-project/permit-application-grid-headers"
@@ -118,13 +119,14 @@ export const InboxOverviewTab = observer(({ permitProject }: IProps) => {
           <Heading as="h3" size="md" mb={0}>
             {t("submissionInbox.projectDetail.recentPermitApplications")}
           </Heading>
+          <AddPermitsButton permitProject={permitProject} />
         </Flex>
         {!(permitProject.recentPermitApplications ?? []).filter((pa) => !pa.isDiscarded).length ? (
           <Text color="text.secondary">{t("submissionInbox.projectDetail.noRecentPermitApplications")}</Text>
         ) : (
           <>
             <SearchGrid
-              templateColumns="2.25fr 1.75fr 1fr 1.4fr 1.1fr 1fr 0.5fr"
+              templateColumns="2.25fr 1.75fr 1fr 1.4fr 1fr 1.1fr 0.5fr"
               gridRowClassName="permit-application-grid-row"
             >
               <PermitApplicationGridHeaders

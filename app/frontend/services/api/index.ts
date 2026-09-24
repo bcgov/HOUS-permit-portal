@@ -92,7 +92,6 @@ import {
   IProjectMeetingInboxSearchFilters,
   ITemplateVersionDiff,
   TAutoComplianceModuleConfigurations,
-  TCreatePermitApplicationFormData,
   TCreateRequirementTemplateFormData,
   TReleaseNoteFormData,
   TReleaseNoteViewerContext,
@@ -610,10 +609,6 @@ export class Api {
       `/jurisdictions/${jurisdictionId}/permit_projects/search`,
       params
     )
-  }
-
-  async createPermitApplication(params: TCreatePermitApplicationFormData) {
-    return this.client.post<ApiResponse<IPermitApplication>>("/permit_applications", { permitApplication: params })
   }
 
   async createProjectPermitApplications(

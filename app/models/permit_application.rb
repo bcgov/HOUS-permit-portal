@@ -25,10 +25,12 @@ class PermitApplication < ApplicationRecord
     :submission_versions,
     :step_code,
     :submitter,
+    :created_by,
     { permit_collaborations: :collaborator }
   ]
 
   belongs_to :submitter, class_name: "User", optional: true
+  belongs_to :created_by, polymorphic: true, optional: true
   public_recordable user_association: :submitter
   belongs_to :template_version
   belongs_to :permit_project, optional: true, touch: true
@@ -88,7 +90,6 @@ class PermitApplication < ApplicationRecord
 
   before_validation :assign_unique_number, on: :create
   before_validation :set_template_version, on: :create
-  before_validation :assign_default_nickname, on: :create
   before_validation :populate_base_form_data, on: :create
   before_save :take_form_customizations_snapshot_if_submitted
 
@@ -849,14 +850,23 @@ class PermitApplication < ApplicationRecord
     )
   end
 
+  def assign_creation_actors(user)
+    project = permit_project
+    return unless project && user
+
+    if project.owner_id == user.id
+      self.created_by = user
+      self.submitter = user
+    else
+      self.created_by = project.jurisdiction
+      self.submitter = project.owner
+    end
+  end
+
   private
 
   def update_collaboration_assignments
     # TODO: Implement this method to remove collaborations for missing requirement block when a new template is published
-  end
-
-  def assign_default_nickname
-    self.nickname = requirement_template.nickname if nickname.blank?
   end
 
   def assign_unique_number

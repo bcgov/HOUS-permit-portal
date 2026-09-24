@@ -10,6 +10,7 @@ import { IPermitProject } from "../../../../../models/permit-project"
 import { useMst } from "../../../../../setup/root"
 import { EInboxDisplayMode, EPermitApplicationStatus } from "../../../../../types/enums"
 import { IOption } from "../../../../../types/types"
+import { AddPermitsButton } from "../../../../shared/permit-projects/add-permits-button"
 import { ApplicationInboxTable } from "../application-inbox-table"
 import { ApplicationKanbanBoard } from "../application-kanban-board"
 import {
@@ -45,12 +46,15 @@ export const InboxPermitsTab = observer(function InboxPermitsTab({ permitProject
   return (
     <Flex direction="column" flex={1} minH={0} minW={0} bg="greys.white" p={4} overflow="hidden">
       <Box as="section" mb={6} flexShrink={0}>
-        <HStack align="center" spacing={4} mb={4}>
-          <ClipboardText size={32} />
-          <Heading as="h2" size="lg" mb={0}>
-            {t("submissionInbox.projectDetail.permits")}
-          </Heading>
-        </HStack>
+        <Flex justify="space-between" align="center" mb={4}>
+          <HStack align="center" spacing={4}>
+            <ClipboardText size={32} />
+            <Heading as="h2" size="lg" mb={0}>
+              {t("submissionInbox.projectDetail.permits")}
+            </Heading>
+          </HStack>
+          <AddPermitsButton permitProject={permitProject} />
+        </Flex>
 
         <VStack align="stretch" spacing={4}>
           <InboxSearchInput placeholder={t("permitProject.searchPlaceholder")} searchModel={permitProject} />

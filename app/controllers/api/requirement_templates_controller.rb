@@ -424,6 +424,12 @@ class Api::RequirementTemplatesController < Api::ApplicationController
       apps = apps.where(permit_project_id: project.id)
     end
 
+    # The jurisdiction queue stays submitted-only. A project search includes
+    # new drafts, matching the inbox search where-clause.
+    if current_user.review_staff? && params[:permit_project_id].blank?
+      apps = apps.where.not(status: :new_draft)
+    end
+
     RequirementTemplate
       .preload(:template_category)
       .where(id: apps.select("requirement_templates.id"))

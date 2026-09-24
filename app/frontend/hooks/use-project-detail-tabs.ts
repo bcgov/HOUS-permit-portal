@@ -27,6 +27,12 @@ export const useProjectDetailTabs = ({
   const projectMatchesRoute = Boolean(routeProjectId && currentProjectId === routeProjectId)
 
   useEffect(() => {
+    const permitsAlias = location.pathname.match(/^\/projects\/([^/]+)\/permits\/?$/)
+    if (permitsAlias) {
+      navigate(`/projects/${permitsAlias[1]}/applications${location.search}`, { replace: true })
+      return
+    }
+
     if (!basePath) return
 
     // Bare project path → overview for the URL project only (never store current).
@@ -41,7 +47,7 @@ export const useProjectDetailTabs = ({
     if (!tabs.some((tab) => location.pathname === tab.to || location.pathname.startsWith(`${tab.to}/`))) {
       navigate(`${basePath}/overview`, { replace: true })
     }
-  }, [tabs, projectMatchesRoute, basePath, location.pathname, navigate])
+  }, [tabs, projectMatchesRoute, basePath, location.pathname, location.search, navigate])
 
   const matchedTabIndex = tabs.findIndex(
     (tab) => location.pathname === tab.to || location.pathname.startsWith(`${tab.to}/`)

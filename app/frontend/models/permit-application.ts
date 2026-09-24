@@ -60,6 +60,9 @@ export const PermitApplicationModel = types.snapshotProcessor(
       tags: types.optional(types.array(types.string), []),
       status: types.enumeration(Object.values(EPermitApplicationStatus)),
       submitter: types.maybeNull(types.maybe(types.reference(types.late(() => UserModel)))),
+      createdBy: types.maybeNull(
+        types.frozen<{ id: string; type: "User" | "Jurisdiction"; name: string; role?: string | null }>()
+      ),
       jurisdiction: types.maybeNull(types.maybe(types.reference(types.late(() => JurisdictionModel)))),
       templateVersion: types.maybeNull(types.reference(types.late(() => TemplateVersionModel))),
       sandbox: types.maybeNull(types.reference(types.late(() => SandboxModel))),
@@ -127,12 +130,19 @@ export const PermitApplicationModel = types.snapshotProcessor(
       get isStepCodeComplete() {
         return !!self.stepCode?.isStageComplete(self.stepCodeStage || EStepCodeChecklistStage.preConstruction)
       },
-      get isPart3() {
-        // TODO
-        return false
-      },
       get isNewDraft() {
         return self.status === EPermitApplicationStatus.newDraft
+      },
+      // Review staff cannot open a new draft unless the project has an active meeting.
+      get isLockedForReviewStaff() {
+        const user = self.rootStore.userStore.currentUser
+        if (!user?.isReviewStaff || !this.isNewDraft) return false
+        if (self.submitter?.id === user.id) return false
+        if (self.hasActiveProjectMeeting) return false
+
+        const project = self.rootStore.permitProjectStore.currentPermitProject
+        if (project?.id === self.projectId && (project.isOwner || project.hasActiveProjectMeeting)) return false
+        return true
       },
       get isDraft() {
         return (
