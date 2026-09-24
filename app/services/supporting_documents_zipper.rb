@@ -4,6 +4,8 @@ require "fileutils"
 require "tmpdir"
 
 class SupportingDocumentsZipper
+  include TraverseDataJson
+
   attr_reader :permit_application, :temp_files, :file_path, :document_ids
 
   def initialize(
@@ -197,14 +199,12 @@ class SupportingDocumentsZipper
   end
 
   def collect_upload_ids(value)
-    case value
-    when Hash
-      [value["model_id"], value["modelId"]].compact +
-        value.values.flat_map { |v| collect_upload_ids(v) }
-    when Array
-      value.flat_map { |v| collect_upload_ids(v) }
-    else
-      []
+    ids = []
+    find_file_fields_and_transform!(value, ids) do |_key, files|
+      next [] unless files.is_a?(Array)
+
+      files.filter_map { |file| file["model_id"] || file["modelId"] }
     end
+    ids
   end
 end
