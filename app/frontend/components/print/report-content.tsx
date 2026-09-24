@@ -11,6 +11,10 @@ export function ReportContent({ report }: { report: ReportData }) {
   const title =
     report.kind === "application" ? "Permit application" : `Part ${report.kind === "part3" ? 3 : 9} step-code report`
   const checklist = report.checklist ? camelizeResponse(report.checklist) : null
+  // Rails persists this field as dwh_heating_consumption. Keep the existing
+  // presentation name, while accepting older payloads using the DHW spelling.
+  if (report.kind === "part9" && checklist)
+    checklist.dhwHeatingConsumption = checklist.dwhHeatingConsumption ?? checklist.dhwHeatingConsumption
   const project = report.step_code ? camelizeResponse(report.step_code) : {}
   return (
     <>

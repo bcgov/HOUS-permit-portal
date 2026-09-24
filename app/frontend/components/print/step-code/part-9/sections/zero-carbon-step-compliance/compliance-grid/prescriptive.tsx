@@ -40,7 +40,7 @@ export function Prescriptive({ report }: IProps) {
             />
           </ReportCell>
           <ReportCell colSpan={1} rowSpan={3}>
-            <ReportResult success={report.co2Passed} />
+            <ReportResult success={report.prescriptivePassed} />
           </ReportCell>
         </ReportRow>
         <ReportRow>

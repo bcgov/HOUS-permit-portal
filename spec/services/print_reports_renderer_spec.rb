@@ -364,6 +364,66 @@ RSpec.describe PrintReports::Renderer do
         end
     end
 
+    %w[ach nla nlr].each do |target|
+      it "prints serialized Part 9 values and independent results for #{target}" do
+        fixture =
+          JSON.parse(
+            Rails
+              .root
+              .join(
+                "app/frontend/components/print/__tests__/fixtures/part9-populated.json"
+              )
+              .read,
+            symbolize_names: true
+          )
+        checklist = fixture[:checklist]
+        checklist[:epc_calculation_testing_target_type] = target
+        checklist[:dwh_heating_consumption] = 0
+        checklist[:building_characteristics_summary][:ventilation_lines] = [
+          {
+            details: "AUDIT-VENTILATION",
+            percent_eff: "88.76",
+            liters_per_sec: "54.32"
+          }
+        ]
+        checklist[:selected_report][:energy].merge!(
+          ach: "1.23",
+          nla: "9.87",
+          nlr: "6.54",
+          meui_passed: true,
+          tedi_passed: true,
+          airtightness_passed: false
+        )
+        checklist[:selected_report][:zero_carbon].merge!(
+          co2_passed: true,
+          ghg_passed: true,
+          prescriptive_passed: false
+        )
+        original = Marshal.dump(fixture)
+        described_class
+          .new
+          .render(fixture) do |path|
+            text = PDF::Reader.new(path).pages.map(&:text).join(" ")
+            expect(text).to include("88.76", "54.32")
+            # Each failed criterion and its overall table result must show Fail,
+            # even though the unrelated MEUI and CO2 checks passed.
+            expect(
+              text.gsub(/Pass\s+or\s+Fail/i, "").scan(/\bFail\b/).length
+            ).to eq(4)
+            target_value = {
+              "ach" => "1.23",
+              "nla" => "9.87",
+              "nlr" => "6.54"
+            }.fetch(target)
+            expect(text).to match(
+              /OR Testing Target\s+#{Regexp.escape(target_value)}/i
+            )
+            expect(text).to include("123.25") # HVAC + a saved zero hot-water value.
+          end
+        expect(Marshal.dump(fixture)).to eq(original)
+      end
+    end
+
     %w[
       part3-standard
       part3-baseline
