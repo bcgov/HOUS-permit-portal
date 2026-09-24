@@ -32,6 +32,7 @@ import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { BrowserSearchPrompt } from "../../shared/permit-applications/browser-search-prompt"
 import { PermitApplicationStatusTag } from "../../shared/permit-applications/permit-application-status-tag"
 import { RequirementForm } from "../../shared/permit-applications/requirement-form"
+import { ReviewAndSendRequestsScreen } from "../../shared/revisions/review-and-send-requests-screen"
 import { ChecklistSideBar } from "./checklist-sidebar"
 import { BlockCollaboratorAssignmentManagement } from "./collaborator-management/block-collaborator-assignment-management"
 import { CollaboratorsSidebar } from "./collaborator-management/collaborators-sidebar"
@@ -68,6 +69,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
   const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
 
   const [hideRevisionList, setHideRevisionList] = useState(false)
+  const [isReviewingSend, setIsReviewingSend] = useState(false)
   const [isRetriggeringWebhook, setIsRetriggeringWebhook] = useState(false)
   const [isStartingReview, setIsStartingReview] = useState(false)
 
@@ -265,23 +267,26 @@ export const ReviewPermitApplicationScreen = observer(() => {
             )}
           </Flex>
         </Flex>
-        {canManageRevisions && revisionMode && (
+        {canManageRevisions && revisionMode && !isReviewingSend && (
           <Flex
             position="sticky"
             zIndex={11}
             w="full"
             px={4}
             py={2}
-            bg="theme.yellow"
+            bg={currentPermitApplication.isRevisionsRequested ? "semantic.success" : "theme.yellow"}
+            color={currentPermitApplication.isRevisionsRequested ? "white" : undefined}
             justify="flex-start"
             align="center"
             gap={4}
             top={permitHeaderHeight}
           >
-            <Flex width={"sidebar.width"} align="center" gap={2}>
+            <Flex width={"sidebar.revisionWidth"} align="center" gap={2}>
               <NotePencil size={24} />
-              <Heading fontSize="lg" mt={2}>
-                {t("permitApplication.show.requestingRevisions")}
+              <Heading fontSize="lg" mt={2} color="inherit">
+                {currentPermitApplication.isRevisionsRequested
+                  ? t("permitApplication.show.requestingRevisions")
+                  : t("permitApplication.show.addingRequests")}
               </Heading>
               <Spacer />
               <Button
@@ -289,83 +294,115 @@ export const ReviewPermitApplicationScreen = observer(() => {
                 h={8}
                 p={1}
                 variant="secondary"
+                color={currentPermitApplication.isRevisionsRequested ? "white" : undefined}
+                borderColor={currentPermitApplication.isRevisionsRequested ? "white" : undefined}
+                _hover={
+                  currentPermitApplication.isRevisionsRequested ? { bg: "whiteAlpha.200", color: "white" } : undefined
+                }
                 rightIcon={hideRevisionList ? <CaretDown /> : <CaretUp />}
                 onClick={() => setHideRevisionList((cur) => !cur)}
               >
                 {hideRevisionList ? t("permitApplication.show.showList") : t("permitApplication.show.hideList")}
               </Button>
-              <Divider orientation="vertical" height="24px" mx={4} borderColor="greys.grey01" />
+              <Divider
+                orientation="vertical"
+                height="24px"
+                mx={4}
+                borderColor={currentPermitApplication.isRevisionsRequested ? "white" : "greys.grey01"}
+              />
             </Flex>
             <Flex align="center" gap={2} flex={1} justify="flex-end" ref={sendRevisionContainerRef}></Flex>
           </Flex>
         )}
       </Flex>
       <Box id="sidebar-and-form-container" sx={{ "&:after": { content: `""`, display: "block", clear: "both" } }}>
-        {canManageRevisions && revisionMode && !hideRevisionList ? (
-          <RevisionSideBar
+        {isReviewingSend ? (
+          <ReviewAndSendRequestsScreen
             permitApplication={currentPermitApplication}
-            onCancel={() => setRevisionMode(false)}
-            sendRevisionContainerRef={sendRevisionContainerRef}
+            onBack={() => setIsReviewingSend(false)}
+            onExitRevisionMode={() => {
+              setIsReviewingSend(false)
+              setRevisionMode(false)
+            }}
           />
         ) : (
-          <ChecklistSideBar permitApplication={currentPermitApplication} completedBlocks={completedBlocks} />
-        )}
-        {formattedFormJson && (
-          <Flex flex={1} direction="column" pt={8} position={"relative"} id="permitApplicationFieldsContainer" gap={8}>
-            <RequirementForm
-              formRef={formRef}
-              permitApplication={currentPermitApplication}
-              onCompletedBlocksChange={setCompletedBlocks}
-              showHelpButton
-              readOnly={isReadOnly}
-              renderTopButtons={() => {
-                const collaboratorsButton = (
-                  <CollaboratorsSidebar
-                    permitApplication={currentPermitApplication}
-                    collaborationType={ECollaborationType.review}
-                    triggerButtonProps={{
-                      variant: "secondary",
-                    }}
-                  />
-                )
+          <>
+            {canManageRevisions && revisionMode && !hideRevisionList ? (
+              <RevisionSideBar
+                permitApplication={currentPermitApplication}
+                onCancel={() => setRevisionMode(false)}
+                onReviewSend={() => setIsReviewingSend(true)}
+                sendRevisionContainerRef={sendRevisionContainerRef}
+              />
+            ) : (
+              <ChecklistSideBar permitApplication={currentPermitApplication} completedBlocks={completedBlocks} />
+            )}
+            {formattedFormJson && (
+              <Flex
+                flex={1}
+                direction="column"
+                pt={8}
+                position={"relative"}
+                id="permitApplicationFieldsContainer"
+                gap={8}
+              >
+                <RequirementForm
+                  formRef={formRef}
+                  permitApplication={currentPermitApplication}
+                  onCompletedBlocksChange={setCompletedBlocks}
+                  showHelpButton
+                  readOnly={isReadOnly}
+                  renderTopButtons={() => {
+                    const collaboratorsButton = (
+                      <CollaboratorsSidebar
+                        permitApplication={currentPermitApplication}
+                        collaborationType={ECollaborationType.review}
+                        triggerButtonProps={{
+                          variant: "secondary",
+                        }}
+                      />
+                    )
 
-                if (canManageRevisions) {
-                  return (
-                    <HStack spacing={6}>
-                      {!revisionMode && (
-                        <Button variant="callout" leftIcon={<NotePencil />} onClick={() => setRevisionMode(true)}>
-                          {currentPermitApplication.isRevisionsRequested
-                            ? t("permitApplication.show.viewRevisionRequests")
-                            : t("permitApplication.show.requestRevisions")}{" "}
-                          {currentPermitApplication?.latestRevisionRequests?.length > 0 &&
-                            `(${currentPermitApplication.latestRevisionRequests.length})`}
-                        </Button>
-                      )}
-                      {collaboratorsButton}
-                    </HStack>
-                  )
-                }
+                    if (canManageRevisions) {
+                      return (
+                        <HStack spacing={6}>
+                          {!revisionMode && (
+                            <Button variant="callout" leftIcon={<NotePencil />} onClick={() => setRevisionMode(true)}>
+                              {currentPermitApplication.isRevisionsRequested
+                                ? t("permitApplication.show.viewRevisionRequests")
+                                : t("permitApplication.show.requestRevisions")}{" "}
+                              {currentPermitApplication?.latestRequestPackageCount > 0 &&
+                                `(${currentPermitApplication.latestRequestPackageCount})`}
+                            </Button>
+                          )}
+                          {collaboratorsButton}
+                        </HStack>
+                      )
+                    }
 
-                return (
-                  <HStack spacing={6}>
-                    {canStartReview && (
-                      <Button
-                        variant="callout"
-                        leftIcon={<Swap />}
-                        onClick={handleStartReview}
-                        isLoading={isStartingReview}
-                        loadingText={t("permitApplication.show.startingReview")}
-                      >
-                        {t("permitApplication.show.readyForReview")}
-                      </Button>
-                    )}
-                    {collaboratorsButton}
-                  </HStack>
-                )
-              }}
-              updateCollaborationAssignmentNodes={updateRequirementBlockAssignmentNode}
-            />
-          </Flex>
+                    return (
+                      <HStack spacing={6}>
+                        {canStartReview && (
+                          <Button
+                            variant="callout"
+                            leftIcon={<Swap />}
+                            onClick={handleStartReview}
+                            isLoading={isStartingReview}
+                            loadingText={t("permitApplication.show.startingReview")}
+                          >
+                            {t("permitApplication.show.readyForReview")}
+                          </Button>
+                        )}
+                        {collaboratorsButton}
+                      </HStack>
+                    )
+                  }}
+                  updateCollaborationAssignmentNodes={updateRequirementBlockAssignmentNode}
+                  showResubmissionSummary
+                />
+              </Flex>
+            )}
+          </>
         )}
       </Box>
       {isContactsOpen && (

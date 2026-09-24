@@ -251,6 +251,34 @@ RSpec.describe PermitApplicationPolicy do
       expect(policy2.update_revision_requests?).to be false
     end
 
+    it "update_submitter_note? permits submitters who can edit during revisions" do
+      record = double("PermitApplication", revisions_requested?: true)
+      allow(record).to receive(
+        :submission_requirement_block_edit_permissions
+      ).with(user_id: submitter.id).and_return(:all)
+      policy = described_class.new(UserContext.new(submitter, sandbox), record)
+      expect(policy.update_submitter_note?).to be true
+
+      allow(record).to receive(
+        :submission_requirement_block_edit_permissions
+      ).and_return(nil)
+      expect(policy.update_submitter_note?).to be false
+    end
+
+    it "upload_revision_fulfillment? permits submitters who can edit during revisions" do
+      record = double("PermitApplication", revisions_requested?: true)
+      allow(record).to receive(
+        :submission_requirement_block_edit_permissions
+      ).with(user_id: submitter.id).and_return(:all)
+      policy = described_class.new(UserContext.new(submitter, sandbox), record)
+      expect(policy.upload_revision_fulfillment?).to be true
+
+      allow(record).to receive(
+        :submission_requirement_block_edit_permissions
+      ).and_return(nil)
+      expect(policy.upload_revision_fulfillment?).to be false
+    end
+
     it "upload_supporting_document? matches draft edit permissions" do
       record = double("PermitApplication", draft?: true)
       allow(record).to receive(

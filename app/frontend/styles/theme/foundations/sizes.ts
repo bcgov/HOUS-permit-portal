@@ -5,5 +5,6 @@ export const sizes = {
   },
   sidebar: {
     width: "368px",
+    revisionWidth: "412px",
   },
 }

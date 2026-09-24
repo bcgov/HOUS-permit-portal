@@ -6,7 +6,12 @@ class RevisionRequestBlueprint < Blueprinter::Base
            :reason_code,
            :requirement_json,
            :submission_data,
-           :created_at
+           :created_at,
+           :type,
+           :title
+    association :revision_reference_documents,
+                blueprint: RevisionReferenceDocumentBlueprint
+    association :supporting_documents, blueprint: SupportingDocumentBlueprint
   end
 
   view :extended do

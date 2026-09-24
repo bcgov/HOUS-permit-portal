@@ -75,5 +75,5 @@ export const useNoteAttachments = ({ maxNumberOfFiles = DEFAULT_MAX_FILES }: Use
     setAttachments([])
   }, [uppy])
 
-  return { attachments, isUploading, addFiles, removeAttachment, clearAttachments }
+  return { attachments, isUploading, addFiles, removeAttachment, clearAttachments, uppy }
 }

@@ -70,6 +70,11 @@ export enum ENoteableType {
   ProjectMeeting = "ProjectMeeting",
 }
 
+export enum ERevisionRequestType {
+  FieldRevisionRequest = "FieldRevisionRequest",
+  SupportingDocumentRevisionRequest = "SupportingDocumentRevisionRequest",
+}
+
 export enum ESubmissionContactClass {
   application = "ApplicationSubmissionContact",
   meeting = "MeetingSubmissionContact",

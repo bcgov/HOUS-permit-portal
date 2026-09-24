@@ -73,6 +73,20 @@ class PermitApplicationPolicy < ApplicationPolicy
     record.submitted? && user.review_staff?
   end
 
+  def update_submitter_note?
+    record.revisions_requested? &&
+      record.submission_requirement_block_edit_permissions(
+        user_id: user.id
+      ).present?
+  end
+
+  def upload_revision_fulfillment?
+    record.revisions_requested? &&
+      record.submission_requirement_block_edit_permissions(
+        user_id: user.id
+      ).present?
+  end
+
   def upload_supporting_document?
     record.draft? &&
       record.submission_requirement_block_edit_permissions(

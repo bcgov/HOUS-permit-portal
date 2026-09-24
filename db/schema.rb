@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_09_14_180000) do
+ActiveRecord::Schema[7.2].define(version: 2026_09_21_160000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -996,11 +996,21 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_14_180000) do
     t.index ["site_configuration_id"], name: "index_revision_reasons_on_site_configuration_id"
   end
 
+  create_table "revision_reference_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "revision_request_id", null: false
+    t.jsonb "file_data"
+    t.string "scan_status", default: "pending", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["revision_request_id"], name: "index_revision_reference_documents_on_revision_request_id"
+    t.index ["scan_status"], name: "index_revision_reference_documents_on_scan_status"
+  end
+
   create_table "revision_requests", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "reason_code", limit: 64
     t.jsonb "requirement_json"
     t.jsonb "submission_data"
-    t.string "comment", limit: 350
+    t.text "comment"
     t.uuid "submission_version_id", null: false
     t.uuid "user_id"
     t.datetime "created_at", null: false
@@ -1009,6 +1019,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_14_180000) do
     t.string "first_name_snapshot"
     t.string "last_name_snapshot"
     t.datetime "orphaned_at"
+    t.string "type", default: "FieldRevisionRequest", null: false
+    t.string "title"
     t.index ["submission_version_id"], name: "index_revision_requests_on_submission_version_id"
     t.index ["user_id"], name: "index_revision_requests_on_user_id"
   end
@@ -1162,6 +1174,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_14_180000) do
     t.jsonb "step_code_checklist_json", default: {}
     t.datetime "package_ready_at"
     t.jsonb "zipfile_data"
+    t.text "applicant_note"
+    t.text "submitter_note"
     t.index ["permit_application_id"], name: "index_submission_versions_on_permit_application_id"
   end
 
@@ -1174,7 +1188,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_14_180000) do
     t.string "data_key"
     t.uuid "submission_version_id"
     t.string "scan_status", default: "pending", null: false
+    t.uuid "revision_request_id"
     t.index ["permit_application_id"], name: "index_supporting_documents_on_permit_application_id"
+    t.index ["revision_request_id"], name: "index_supporting_documents_on_revision_request_id"
     t.index ["scan_status"], name: "index_supporting_documents_on_scan_status"
     t.index ["submission_version_id"], name: "index_supporting_documents_on_submission_version_id"
   end
@@ -1428,6 +1444,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_14_180000) do
   add_foreign_key "resource_documents", "resources"
   add_foreign_key "resources", "jurisdictions"
   add_foreign_key "revision_reasons", "site_configurations"
+  add_foreign_key "revision_reference_documents", "revision_requests"
   add_foreign_key "revision_requests", "submission_versions"
   add_foreign_key "revision_requests", "users"
   add_foreign_key "sandboxes", "jurisdictions"
@@ -1440,6 +1457,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_14_180000) do
   add_foreign_key "submission_contacts", "jurisdictions"
   add_foreign_key "submission_versions", "permit_applications"
   add_foreign_key "supporting_documents", "permit_applications"
+  add_foreign_key "supporting_documents", "revision_requests"
   add_foreign_key "supporting_documents", "submission_versions"
   add_foreign_key "taggings", "tags"
   add_foreign_key "template_section_blocks", "requirement_blocks"

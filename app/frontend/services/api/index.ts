@@ -703,6 +703,20 @@ export class Api {
     })
   }
 
+  async uploadRevisionFulfillment(
+    id: string,
+    supportingDocumentsAttributes: Array<{
+      id?: string
+      revisionRequestId: string
+      _destroy?: boolean
+      file?: { id: string; storage: string; metadata: { size: number; filename: string; mimeType: string } }
+    }>
+  ) {
+    return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/upload_supporting_document`, {
+      permitApplication: { supportingDocumentsAttributes },
+    })
+  }
+
   async updatePermitApplicationVersion(id) {
     return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/update_version`)
   }
@@ -814,6 +828,12 @@ export class Api {
       `/permit_applications/${id}/download_supporting_documents_zip`,
       { supportingDocumentIds }
     )
+  }
+
+  async updateSubmitterNote(id: string, submitterNote: string) {
+    return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/submitter_note`, {
+      permitApplication: { submitterNote },
+    })
   }
 
   async submitPermitApplication(id, params) {

@@ -9,6 +9,15 @@ class RevisionRequest < ApplicationRecord
              primary_key: :reason_code,
              optional: true
 
+  has_many :revision_reference_documents,
+           dependent: :destroy,
+           inverse_of: :revision_request
+  has_many :supporting_documents,
+           dependent: :destroy,
+           inverse_of: :revision_request
+  accepts_nested_attributes_for :revision_reference_documents,
+                                allow_destroy: true
+
   validate :user_must_be_review_staff
 
   def public_record?

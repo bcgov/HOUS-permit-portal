@@ -57,6 +57,14 @@ RSpec.describe ExternalApi::ApplyRevisionRequests do
     described_class.new(permit_application, items).call
   end
 
+  it "stores field revision requests" do
+    apply([item])
+
+    request =
+      permit_application.latest_submission_version.revision_requests.last
+    expect(request).to be_a(FieldRevisionRequest)
+  end
+
   it "rejects the synthetic energy step code block" do
     expect {
       apply([item.merge("requirement_block_code" => "energy_step_code_tool")])
