@@ -8,6 +8,7 @@ class SubmissionVersion < ApplicationRecord
   belongs_to :permit_application
   has_many :revision_requests, dependent: :destroy
   has_many :supporting_documents, dependent: :destroy
+  has_many :notes, as: :noteable, dependent: :destroy
 
   accepts_nested_attributes_for :revision_requests, allow_destroy: true
 
@@ -40,7 +41,15 @@ class SubmissionVersion < ApplicationRecord
     update!(viewed_at: nil)
   end
 
-  delegate :sandbox, to: :permit_application
+  delegate :permit_project, :sandbox, to: :permit_application
+
+  def applicant_note
+    notes.applicant_message.pick(:body)
+  end
+
+  def submitter_note
+    notes.submitter_message.pick(:body)
+  end
 
   scope :sandboxed,
         -> do

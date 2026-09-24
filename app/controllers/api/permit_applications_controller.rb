@@ -165,10 +165,9 @@ class Api::PermitApplicationsController < Api::ApplicationController
 
   def update_revision_requests
     authorize @permit_application
-    if @permit_application.submitted? &&
-         @permit_application.latest_submission_version&.update(
-           revision_request_params
-         )
+    version = @permit_application.latest_submission_version
+    if @permit_application.submitted? && version &&
+         persist_revision_package(version)
       render_success @permit_application,
                      ("permit_application.save_success"),
                      {
@@ -637,9 +636,33 @@ class Api::PermitApplicationsController < Api::ApplicationController
     end
     return false unless @permit_application.revisions_requested?
 
-    @permit_application.latest_submission_version&.update(
-      submitter_note: params.dig(:permit_application, :submitter_note)
-    ) || false
+    version = @permit_application.latest_submission_version
+    return false unless version
+
+    Note.upsert_revision_message!(
+      submission_version: version,
+      kind: :submitter_message,
+      body: params.dig(:permit_application, :submitter_note),
+      user: current_user
+    )
+    true
+  end
+
+  def persist_revision_package(version)
+    attrs = revision_request_params
+    has_applicant_note = attrs.key?(:applicant_note)
+    applicant_note = attrs.delete(:applicant_note)
+    return unless version.update(attrs)
+
+    if has_applicant_note
+      Note.upsert_revision_message!(
+        submission_version: version,
+        kind: :applicant_message,
+        body: applicant_note,
+        user: current_user
+      )
+    end
+    version
   end
 
   def supporting_document_params

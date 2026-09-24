@@ -9,8 +9,9 @@ class NotesExportService
     "Attachments"
   ].freeze
 
-  def initialize(notes)
+  def initialize(notes, viewer: nil)
     @notes = notes
+    @viewer = viewer
   end
 
   def to_csv
@@ -22,11 +23,11 @@ class NotesExportService
 
   private
 
-  attr_reader :notes
+  attr_reader :notes, :viewer
 
   def row_for(note)
     [
-      note.user&.name,
+      note.author_name_for(viewer),
       note.created_at&.iso8601,
       related_item_type(note),
       note.noteable_id,

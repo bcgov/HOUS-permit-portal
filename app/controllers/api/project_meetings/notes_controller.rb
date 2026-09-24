@@ -10,7 +10,14 @@ class Api::ProjectMeetings::NotesController < Api::ApplicationController
         .preload(:user, :permit_project, :note_attachment_documents)
         .order(created_at: :desc)
 
-    render_success notes, nil, { blueprint: NoteBlueprint }
+    render_success notes,
+                   nil,
+                   {
+                     blueprint: NoteBlueprint,
+                     blueprint_opts: {
+                       current_user: current_user
+                     }
+                   }
   end
 
   def create
@@ -21,7 +28,13 @@ class Api::ProjectMeetings::NotesController < Api::ApplicationController
     if note.save
       render_success note,
                      "note.create_success",
-                     { blueprint: NoteBlueprint, status: :created }
+                     {
+                       blueprint: NoteBlueprint,
+                       status: :created,
+                       blueprint_opts: {
+                         current_user: current_user
+                       }
+                     }
     else
       render_error(
         "note.create_error",
@@ -45,7 +58,7 @@ class Api::ProjectMeetings::NotesController < Api::ApplicationController
         .preload(:user, :permit_project, :note_attachment_documents)
         .order(created_at: :asc)
 
-    send_data NotesExportService.new(notes).to_csv,
+    send_data NotesExportService.new(notes, viewer: current_user).to_csv,
               filename: "project-meeting-notes-#{@project_meeting.id}.csv",
               type: "text/csv",
               disposition: "attachment"

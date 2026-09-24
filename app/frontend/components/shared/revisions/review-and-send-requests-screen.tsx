@@ -10,7 +10,6 @@ import {
   Radio,
   RadioGroup,
   Text,
-  Textarea,
   UnorderedList,
 } from "@chakra-ui/react"
 import { CaretLeft } from "@phosphor-icons/react"
@@ -20,6 +19,7 @@ import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { IPermitApplication } from "../../../models/permit-application"
 import { handleScrollToTop } from "../../../utils/utility-functions"
+import { Editor } from "../editor/editor"
 
 interface IReviewAndSendRequestsScreenProps {
   permitApplication: IPermitApplication
@@ -91,11 +91,10 @@ export const ReviewAndSendRequestsScreen = observer(
         </Heading>
         <FormControl mb={10}>
           <FormLabel>{t("permitApplication.show.revision.messageOptional")}</FormLabel>
-          <Textarea
-            value={applicantNote}
-            onChange={(event) => setApplicantNote(event.target.value)}
-            bg="white"
-            minH="120px"
+          <Editor
+            htmlValue={applicantNote}
+            onChange={setApplicantNote}
+            shouldContainRichTextToolbarItem={(item) => item !== "image"}
           />
           <FormHelperText>{t("permitApplication.show.revision.messageHelper")}</FormHelperText>
         </FormControl>

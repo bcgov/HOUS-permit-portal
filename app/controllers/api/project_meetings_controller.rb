@@ -59,7 +59,8 @@ class Api::ProjectMeetingsController < Api::ApplicationController
                    {
                      blueprint: ProjectMeetingBlueprint,
                      blueprint_opts: {
-                       view: :extended
+                       view: :extended,
+                       current_user: current_user
                      }
                    }
   end

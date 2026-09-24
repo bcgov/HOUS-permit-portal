@@ -8,6 +8,7 @@ import { IPermitApplication } from "../../../models/permit-application"
 import { EFlashMessageStatus, ERevisionRequestType } from "../../../types/enums"
 import { additionalChangeFields } from "../../../utils/submission-change-summary"
 import { CustomMessageBox } from "../base/custom-message-box"
+import { SafeTipTapDisplay } from "../editor/safe-tiptap-display"
 import { ScrollLink } from "../permit-applications/scroll-link"
 
 const dateFormat = "MMM d, yyyy 'at' h:mm a"
@@ -102,9 +103,7 @@ export const ResubmissionSummaryBox = observer(function ResubmissionSummaryBox({
               <Heading as="h4" fontSize="md" mb={2}>
                 {t("permitApplication.show.revision.messageFromSubmitter")}
               </Heading>
-              <Text fontSize="sm" color="text.secondary">
-                {previous.submitterNote}
-              </Text>
+              <SafeTipTapDisplay htmlContent={previous.submitterNote} fontSize="sm" color="text.secondary" />
             </Box>
           )}
           {fieldRevisions.length > 0 && (

@@ -34,6 +34,7 @@ import { getRequirementByKey } from "../../../utils/formio-component-traversal"
 import { compareSubmissionData } from "../../../utils/formio-helpers"
 import { getSinglePreviousSubmissionData } from "../../../utils/formio-submission-traversal"
 import { handleScrollToBottom } from "../../../utils/utility-functions"
+import { SafeTipTapDisplay } from "../../shared/editor/safe-tiptap-display"
 import { ScrollLink } from "../../shared/permit-applications/scroll-link"
 import { RevisionModal } from "../../shared/revisions/revision-modal"
 import { SupportingInformationModal } from "../../shared/revisions/supporting-information-modal"
@@ -590,7 +591,7 @@ const ApplicantNoteBlock = ({ note }: { note?: string | null }) => {
       <Heading as="h3" fontSize="md" mb={2}>
         {t("permitApplication.show.revision.noteToApplicant")}
       </Heading>
-      <Text fontSize="sm">{note}</Text>
+      <SafeTipTapDisplay htmlContent={note} fontSize="sm" />
     </Box>
   )
 }

@@ -6,14 +6,22 @@ class Api::PermitProjects::NotesController < Api::ApplicationController
 
     notes = notes_scope.order(created_at: :desc)
 
-    render_success notes, nil, { blueprint: NoteBlueprint }
+    render_success notes,
+                   nil,
+                   {
+                     blueprint: NoteBlueprint,
+                     blueprint_opts: {
+                       current_user: current_user
+                     }
+                   }
   end
 
   def download_csv
     authorize @permit_project, :download_notes_csv?
 
     send_data NotesExportService.new(
-                notes_scope.order(created_at: :asc)
+                notes_scope.order(created_at: :asc),
+                viewer: current_user
               ).to_csv,
               filename: "project-notes-#{@permit_project.id}.csv",
               type: "text/csv",
@@ -29,10 +37,9 @@ class Api::PermitProjects::NotesController < Api::ApplicationController
   end
 
   def notes_scope
-    policy_scope(Note).where(permit_project: @permit_project).preload(
-      :user,
-      :permit_project,
-      :note_attachment_documents
-    )
+    policy_scope(Note)
+      .visible_on_project
+      .where(permit_project: @permit_project)
+      .preload(:user, :permit_project, :noteable, :note_attachment_documents)
   end
 end
