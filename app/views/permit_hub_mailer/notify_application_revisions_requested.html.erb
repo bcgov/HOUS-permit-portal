@@ -2,7 +2,7 @@
   requests = @permit_application.revision_requests
   field_revisions = requests.select { |request| request.is_a?(FieldRevisionRequest) }
   supporting_information = requests.select { |request| request.is_a?(SupportingDocumentRevisionRequest) }
-  reviewer_message = @permit_application.latest_submission_version&.applicant_note
+  reviewer_message = Note.plain_body(@permit_application.latest_submission_version&.applicant_note)
   project = @permit_application.permit_project
   project_title = project&.title
   project_url = project && FrontendUrlHelper.frontend_url("/projects/#{project.id}/overview")

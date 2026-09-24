@@ -30,8 +30,8 @@ class NoteBlueprint < Blueprinter::Base
     end
   end
 
-  field :author_name do |note, _options|
-    note.user&.name
+  field :author_name do |note, options|
+    note.author_name_for(options[:current_user])
   end
 
   field :project_number do |note, _options|

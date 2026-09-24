@@ -279,7 +279,7 @@ RSpec.describe "Api::PermitApplications", type: :request do
 
       expect(response).to have_http_status(:ok)
       expect(requested_version.reload.submitter_note).to eq(
-        "I will submit the demolition application next week."
+        "<p>I will submit the demolition application next week.</p>"
       )
       expect(
         requested_version.notes.submitter_message.first.published_at
@@ -298,7 +298,7 @@ RSpec.describe "Api::PermitApplications", type: :request do
       expect(response).to have_http_status(:ok)
       expect(revision_application.reload).to be_resubmitted
       expect(requested_version.reload.submitter_note).to eq(
-        "Updated before submit."
+        "<p>Updated before submit.</p>"
       )
       expect(
         requested_version.notes.submitter_message.first.published_at
@@ -456,7 +456,7 @@ RSpec.describe "Api::PermitApplications", type: :request do
       expect(payload["title"]).to eq("Site photos")
       expect(payload["revision_reference_documents"].length).to eq(2)
       expect(version["applicant_note"]).to eq(
-        "Please see the attached examples."
+        "<p>Please see the attached examples.</p>"
       )
       expect(
         submitted_application

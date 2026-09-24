@@ -62,4 +62,21 @@ RSpec.describe Note, type: :model do
     expect(note).not_to be_valid
     expect(note.errors[:permit_project]).to be_present
   end
+
+  it "shows a staff author's name only to jurisdiction staff" do
+    jurisdiction = create(:sub_district)
+    reviewer = create(:user, :reviewer, jurisdiction: jurisdiction)
+    owner = create(:user, :submitter)
+    project = create(:permit_project, owner: owner, jurisdiction: jurisdiction)
+    note =
+      create(
+        :note,
+        user: reviewer,
+        noteable: create(:project_meeting, :open, permit_project: project)
+      )
+
+    expect(note.author_name_for(owner)).to eq(jurisdiction.qualified_name)
+    expect(note.author_name_for(reviewer)).to eq(reviewer.name)
+    expect(note.author_name_for(nil)).to eq(jurisdiction.qualified_name)
+  end
 end

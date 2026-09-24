@@ -44,11 +44,11 @@ class SubmissionVersion < ApplicationRecord
   delegate :permit_project, :sandbox, to: :permit_application
 
   def applicant_note
-    Note.plain_body(notes.applicant_message.pick(:body))
+    notes.applicant_message.pick(:body)
   end
 
   def submitter_note
-    Note.plain_body(notes.submitter_message.pick(:body))
+    notes.submitter_message.pick(:body)
   end
 
   scope :sandboxed,

@@ -1,4 +1,4 @@
-import { Box, Button, Flex, FormControl, FormHelperText, FormLabel, Heading, Text, Textarea } from "@chakra-ui/react"
+import { Box, Button, Flex, FormControl, FormHelperText, FormLabel, Heading, Text } from "@chakra-ui/react"
 import { CaretLeft } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { MutableRefObject, useEffect, useState } from "react"
@@ -11,6 +11,7 @@ import { compareSubmissionData } from "../../../utils/formio-helpers"
 import { additionalChangeFields } from "../../../utils/submission-change-summary"
 import { handleScrollToTop } from "../../../utils/utility-functions"
 import { CustomMessageBox } from "../base/custom-message-box"
+import { Editor } from "../editor/editor"
 import { ProjectMeetingAdvisory } from "../permit-applications/permit-application-submit-modal"
 
 export interface IReviewSubmitActions {
@@ -107,11 +108,10 @@ export const ReviewAndSubmitRevisedApplicationScreen = observer(
         </Heading>
         <FormControl mb={10}>
           <FormLabel>{t("permitApplication.show.revision.messageOptional")}</FormLabel>
-          <Textarea
-            value={submitterNote}
-            onChange={(event) => setSubmitterNote(event.target.value)}
-            bg="white"
-            minH="120px"
+          <Editor
+            htmlValue={submitterNote}
+            onChange={setSubmitterNote}
+            shouldContainRichTextToolbarItem={(item) => item !== "image"}
           />
           <FormHelperText>{t("permitApplication.show.revision.resubmitMessageHelper")}</FormHelperText>
         </FormControl>
