@@ -68,6 +68,13 @@ export enum EMeetingRequestDocumentType {
 
 export enum ENoteableType {
   ProjectMeeting = "ProjectMeeting",
+  SubmissionVersion = "SubmissionVersion",
+}
+
+export enum ENoteKind {
+  meeting = "meeting",
+  applicantMessage = "applicant_message",
+  submitterMessage = "submitter_message",
 }
 
 export enum ERevisionRequestType {

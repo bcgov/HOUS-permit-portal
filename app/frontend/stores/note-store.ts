@@ -25,6 +25,7 @@ export const NoteStoreModel = types
         ...note,
         createdAt: nullableDate(note.createdAt),
         updatedAt: nullableDate(note.updatedAt),
+        publishedAt: nullableDate(note.publishedAt),
       }
     },
   }))

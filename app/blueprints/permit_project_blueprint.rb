@@ -167,8 +167,9 @@ class PermitProjectBlueprint < Blueprinter::Base
     scope = options[:notes_scope] || Note.all
 
     scope
+      .visible_on_project
       .where(permit_project: permit_project)
-      .preload(:user, :permit_project, :note_attachment_documents)
+      .preload(:user, :permit_project, :noteable, :note_attachment_documents)
       .order(created_at: :desc)
   end
 end

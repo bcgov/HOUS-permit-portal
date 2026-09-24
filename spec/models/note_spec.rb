@@ -16,6 +16,20 @@ RSpec.describe Note, type: :model do
       expect(note).to be_valid
     end
 
+    it "allows a submission version as a noteable record" do
+      application = create(:permit_application, :newly_submitted)
+      note =
+        build(
+          :note,
+          noteable: application.latest_submission_version,
+          kind: :applicant_message,
+          user: application.submitter
+        )
+
+      expect(note).to be_valid
+      expect(note.permit_project).to eq(application.permit_project)
+    end
+
     it "blocks unsupported noteable types" do
       note = build(:note, noteable: build(:permit_project))
 

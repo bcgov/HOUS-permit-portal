@@ -50,14 +50,19 @@ export const PermitProjectScreen = observer(() => {
               to: `${projectBasePath}/meetings`,
               tabIndex: 3,
             },
-            { label: t("permitProject.details.notes"), icon: Chat, to: `${projectBasePath}/notes`, tabIndex: 4 },
           ]
         : []),
+      {
+        label: t("permitProject.details.notes"),
+        icon: Chat,
+        to: `${projectBasePath}/notes`,
+        tabIndex: projectMeetingsEnabled ? 4 : 3,
+      },
       {
         label: t("permitProject.details.localResources"),
         icon: Folder,
         to: `${projectBasePath}/local-resources`,
-        tabIndex: projectMeetingsEnabled ? 5 : 3,
+        tabIndex: projectMeetingsEnabled ? 5 : 4,
       },
     ]
   }, [projectBasePath, projectMeetingsEnabled, t])
@@ -152,11 +157,9 @@ export const PermitProjectScreen = observer(() => {
               {isPending ? <LoadingScreen /> : <MeetingsTabPanelContent permitProject={currentPermitProject} />}
             </TabPanel>
           )}
-          {projectMeetingsEnabled && (
-            <TabPanel p={0}>
-              {isPending ? <LoadingScreen /> : <ProjectNotesTabPanelContent permitProject={currentPermitProject} />}
-            </TabPanel>
-          )}
+          <TabPanel p={0}>
+            {isPending ? <LoadingScreen /> : <ProjectNotesTabPanelContent permitProject={currentPermitProject} />}
+          </TabPanel>
           <TabPanel>
             {isPending ? <LoadingScreen /> : <LocalResourcesTabPanelContent permitProject={currentPermitProject} />}
           </TabPanel>

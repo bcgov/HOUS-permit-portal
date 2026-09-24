@@ -29,10 +29,9 @@ class Api::PermitProjects::NotesController < Api::ApplicationController
   end
 
   def notes_scope
-    policy_scope(Note).where(permit_project: @permit_project).preload(
-      :user,
-      :permit_project,
-      :note_attachment_documents
-    )
+    policy_scope(Note)
+      .visible_on_project
+      .where(permit_project: @permit_project)
+      .preload(:user, :permit_project, :noteable, :note_attachment_documents)
   end
 end

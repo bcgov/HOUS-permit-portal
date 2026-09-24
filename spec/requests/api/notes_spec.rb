@@ -248,6 +248,40 @@ RSpec.describe "Api::Notes", type: :request do
       note_ids = json_response.fetch("data").map { |note| note.fetch("id") }
       expect(note_ids).to include(draft_note.id, withdrawn_note.id)
     end
+
+    it "includes a published revision message and omits a draft" do
+      application =
+        create(
+          :permit_application,
+          :newly_submitted,
+          permit_project: permit_project
+        )
+      version = application.latest_submission_version
+      published =
+        create(
+          :note,
+          noteable: version,
+          kind: :applicant_message,
+          user: reviewer,
+          body: "<p>Sent to the applicant.</p>",
+          published_at: Time.current
+        )
+      create(
+        :note,
+        noteable: version,
+        kind: :submitter_message,
+        user: owner,
+        body: "<p>Still a draft.</p>",
+        published_at: nil
+      )
+      sign_in reviewer
+
+      get "/api/permit_projects/#{permit_project.id}/notes", headers: headers
+
+      note_ids = json_response.fetch("data").map { |note| note.fetch("id") }
+      expect(note_ids).to include(published.id)
+      expect(note_ids).not_to include(version.notes.submitter_message.pick(:id))
+    end
   end
 
   describe "GET /api/permit_projects/:permit_project_id/notes/download_csv" do

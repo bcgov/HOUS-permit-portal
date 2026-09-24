@@ -281,6 +281,9 @@ RSpec.describe "Api::PermitApplications", type: :request do
       expect(requested_version.reload.submitter_note).to eq(
         "I will submit the demolition application next week."
       )
+      expect(
+        requested_version.notes.submitter_message.first.published_at
+      ).to be_nil
 
       post "/api/permit_applications/#{revision_application.id}/submit",
            params: {
@@ -297,6 +300,9 @@ RSpec.describe "Api::PermitApplications", type: :request do
       expect(requested_version.reload.submitter_note).to eq(
         "Updated before submit."
       )
+      expect(
+        requested_version.notes.submitter_message.first.published_at
+      ).to be_present
       expect(
         revision_application.latest_submission_version.submitter_note
       ).to be_nil
@@ -427,8 +433,12 @@ RSpec.describe "Api::PermitApplications", type: :request do
       allow(NotificationService).to receive(
         :publish_application_revisions_request_event
       )
-      submitted_application.latest_submission_version.update!(
-        applicant_note: "Please see the attached examples."
+      create(
+        :note,
+        noteable: submitted_application.latest_submission_version,
+        kind: :applicant_message,
+        body: "<p>Please see the attached examples.</p>",
+        user: reviewer
       )
       submitted_application.finalize_revision_requests!
 
@@ -448,6 +458,14 @@ RSpec.describe "Api::PermitApplications", type: :request do
       expect(version["applicant_note"]).to eq(
         "Please see the attached examples."
       )
+      expect(
+        submitted_application
+          .latest_submission_version
+          .notes
+          .applicant_message
+          .first
+          .published_at
+      ).to be_present
       expect(
         json_response.dig(
           "data",
