@@ -22,7 +22,7 @@ export function Ventilation({ checklist }: IProps) {
             <ReportMetric value={line.details} />
           </ReportCell>
           <ReportCell colSpan={1}>
-            <ReportMetric value={line.percent_eff} hint={index == lines.length - 1 && t(`${i18nPrefix}.percent_eff`)} />
+            <ReportMetric value={line.percentEff} hint={index == lines.length - 1 && t(`${i18nPrefix}.percent_eff`)} />
           </ReportCell>
           <ReportCell colSpan={1}>
             <ReportMetric
