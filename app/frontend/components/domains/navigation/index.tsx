@@ -10,6 +10,7 @@ import { isSafeAppPath } from "../../../utils/utility-functions"
 import { FlashMessage } from "../../shared/base/flash-message"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EULAScreen } from "../onboarding/eula"
+import { MatomoAuthFunnel } from "./matomo-auth-funnel"
 import { MatomoSpaPageviews } from "./matomo-spa-pageviews"
 import { NavBar } from "./nav-bar"
 import { ProtectedRoute } from "./protected-route"
@@ -516,6 +517,7 @@ export const Navigation = observer(() => {
   return (
     <BrowserRouter>
       <MatomoSpaPageviews />
+      <MatomoAuthFunnel />
       <Box pos="relative" w="full">
         <Box pos="absolute" top={0} zIndex="toast" w="full">
           <FlashMessage />
