@@ -52,7 +52,7 @@ export const GridHeaders = observer(function GridHeaders({
             {t(isPicker ? "questionBank.fields.question" : "questionBank.fields.description")}
           </Text>
         </GridHeader>
-        <GridHeader role={"columnheader"}>
+        <GridHeader role={"columnheader"} minW={0} overflow="hidden">
           <Flex
             w={"full"}
             as={"button"}
@@ -62,15 +62,20 @@ export const GridHeaders = observer(function GridHeaders({
             borderRight={"1px solid"}
             borderColor={"border.light"}
             px={4}
+            minW={0}
+            overflow="hidden"
+            gap={2}
           >
-            <Text>{getSortColumnHeader(EQuestionBankSortFields.associations)}</Text>
-            <HStack w={"fit-content"} spacing={3}>
+            <Text isTruncated minW={0}>
+              {getSortColumnHeader(EQuestionBankSortFields.associations)}
+            </Text>
+            <HStack flexShrink={0} spacing={3}>
               <SortIcon<EQuestionBankSortFields>
                 field={EQuestionBankSortFields.associations}
                 currentSort={sort}
                 aria-label={`Sort ${getSortColumnHeader(EQuestionBankSortFields.associations)}`}
               />
-              <Tooltip label={t("questionBank.associationsInfo")}>
+              <Tooltip label={t("questionBank.associationsInfo")} placement="bottom-end">
                 <Info aria-label={"Info Icon"} />
               </Tooltip>
             </HStack>

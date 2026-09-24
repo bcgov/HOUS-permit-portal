@@ -9,14 +9,15 @@ const FALLBACK_NAVBAR_HEIGHT_PX = 58
  * A scroller counts as page-level if it is roughly viewport-sized. This keeps narrow
  * sidebars, dropdown lists and other small overflow areas from driving the nav bar.
  *
- * ponytail: a size heuristic rather than a registry of scroll containers, so pages get
- * the behaviour without opting in. If a page ever needs a viewport-sized inner scroller
- * that should *not* move the bar, swap this for an explicit `data-*` opt-out.
+ * Overlay dialogs/drawers are never page scroll even when they fill the viewport —
+ * peeking the bar would shift --app-navbar-offset and jump the overlay. Non-dialog
+ * inner panes that should also be ignored can set data-scroll-peek-ignore.
  */
 function isPageLevelScroller(target: EventTarget | null): boolean {
   if (!target) return false
   if (target === document || target === window || target === document.documentElement) return true
   if (!(target instanceof HTMLElement)) return false
+  if (target.closest("[data-scroll-peek-ignore], [role='dialog'], [role='alertdialog']")) return false
 
   return target.clientWidth >= window.innerWidth * 0.5 && target.clientHeight >= window.innerHeight * 0.5
 }

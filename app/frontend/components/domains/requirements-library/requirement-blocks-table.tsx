@@ -75,7 +75,7 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
   return (
     <VStack as={"article"} spacing={5} {...containerProps}>
       <SearchGrid
-        templateColumns="minmax(12rem, 3fr) minmax(140px, 1fr) 180px 170px 88px"
+        templateColumns="minmax(12rem, 3fr) minmax(13rem, 1fr) 180px 170px 88px"
         pos={"relative"}
         searchModel={searchModel as ISearch}
         searchLabel={t("requirementsLibrary.index.searchLabel")}
