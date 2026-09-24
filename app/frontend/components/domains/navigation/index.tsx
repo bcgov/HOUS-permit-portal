@@ -1,16 +1,16 @@
 import { Box, Center } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
-import React, { Suspense, lazy, useEffect } from "react"
+import React, { lazy, Suspense, useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { BrowserRouter, Route, Routes, useLocation, useNavigate } from "react-router-dom"
 import useSyncPathWithStore from "../../../hooks/use-sync-path-with-root-store"
 import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus } from "../../../types/enums"
-import { shouldTrackMatomoSpaPageview, trackMatomoSpaPageview } from "../../../utils/matomo"
 import { isSafeAppPath } from "../../../utils/utility-functions"
 import { FlashMessage } from "../../shared/base/flash-message"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EULAScreen } from "../onboarding/eula"
+import { MatomoSpaPageviews } from "./matomo-spa-pageviews"
 import { NavBar } from "./nav-bar"
 import { ProtectedRoute } from "./protected-route"
 import { QaToolsPopout } from "./qa-tools-popout"
@@ -540,18 +540,6 @@ export const Navigation = observer(() => {
       )}
     </BrowserRouter>
   )
-})
-
-const MatomoSpaPageviews = observer(function MatomoSpaPageviews() {
-  const { pathname } = useLocation()
-  const { isValidating, loggedIn } = useMst().sessionStore
-
-  useEffect(() => {
-    if (!shouldTrackMatomoSpaPageview(pathname, { isValidating, loggedIn })) return
-    trackMatomoSpaPageview(pathname)
-  }, [pathname, isValidating, loggedIn])
-
-  return null
 })
 
 const AppRoutes = observer(() => {

@@ -2,6 +2,7 @@ const UUID_SEGMENT = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{
 const AUTH_CALLBACK = /^\/api\/auth\/[^/]+\/callback\/?$/i
 
 export const MATOMO_SPA_PAGE_READY_EVENT = "spaPageReady"
+export const MATOMO_ANONYMOUS_ROLE = "anonymous"
 
 function matomoEnabled() {
   return Boolean(import.meta.env.VITE_MATOMO_URL)
@@ -26,6 +27,11 @@ export function matomoVirtualUrl(pathname: string, origin: string): string {
   return `${origin}${scrubMatomoVirtualPath(pathname)}`
 }
 
+export function matomoUserRole(loggedIn: boolean, role: string | null | undefined): string {
+  if (!loggedIn || !role) return MATOMO_ANONYMOUS_ROLE
+  return role
+}
+
 /** Skip anonymous `/` — RedirectScreen replaces it with `/about`, and `/` is Submitter home. */
 export function shouldTrackMatomoSpaPageview(
   pathname: string,
@@ -38,6 +44,7 @@ export function shouldTrackMatomoSpaPageview(
 
 export function trackMatomoSpaPageview(
   pathname: string,
+  dimensions: { userRole: string; jurisdiction: string | null },
   title = typeof document === "undefined" ? "" : document.title
 ) {
   if (!matomoEnabled()) return
@@ -45,5 +52,8 @@ export function trackMatomoSpaPageview(
     event: MATOMO_SPA_PAGE_READY_EVENT,
     pageUrl: matomoVirtualUrl(pathname, window.location.origin),
     pageTitle: title,
+    userRole: dimensions.userRole,
+    // Empty string overwrites a previous slug in the data layer so MTM leaves the dimension unset.
+    jurisdiction: dimensions.jurisdiction ?? "",
   })
 }
