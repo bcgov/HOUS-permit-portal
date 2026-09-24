@@ -1,6 +1,9 @@
 class SupportingDocument < FileUploadAttachment
   belongs_to :permit_application
   belongs_to :submission_version, optional: true
+  belongs_to :revision_request,
+             optional: true,
+             inverse_of: :supporting_documents
 
   include FileUploader.Attachment(:file)
   prepend FilenamePreservingFileUrl
@@ -10,6 +13,11 @@ class SupportingDocument < FileUploadAttachment
   end
 
   validate :validate_submission_version_data_key
+  validate :revision_request_on_same_application,
+           if: -> { revision_request_id.present? }
+
+  before_validation :assign_revision_fulfillment_data_key,
+                    if: -> { revision_request_id.present? && !persisted? }
 
   scope :file_ids_with_regex,
         ->(regex_pattern) { where("file_data ->> 'id' ~ ?", regex_pattern) }
@@ -154,6 +162,21 @@ class SupportingDocument < FileUploadAttachment
   end
 
   private
+
+  def assign_revision_fulfillment_data_key
+    self.data_key =
+      "revision_fulfillment_#{revision_request_id}_#{SecureRandom.hex(4)}"
+  end
+
+  def revision_request_on_same_application
+    same_application =
+      revision_request.is_a?(SupportingDocumentRevisionRequest) &&
+        revision_request.submission_version&.permit_application_id ==
+          permit_application_id
+    return if same_application
+
+    errors.add(:revision_request, :invalid)
+  end
 
   def generated_document_filename
     return unless STATIC_DOCUMENT_DATA_KEYS.include?(data_key)

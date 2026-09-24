@@ -153,34 +153,6 @@ class PermitApplication < ApplicationRecord
     inbox_enabled?
   end
 
-  # UX DISCUSSION ASSUMPTION: #8 assumed A (no resubmit gate) + honor-system checkboxes
-  # (looks like B, does not verify artifacts).
-  # Lapse: meeting still picks A/B/C; if C, addressed_at is the wrong source of truth.
-  REQUEST_ITEM_ASSOCIATIONS = {
-    "revision_request" => :revision_requests,
-    "supporting_information_request" => :supporting_information_requests,
-    "additional_permit_request" => :additional_permit_requests
-  }.freeze
-
-  def latest_request_item(request_type, request_item_id)
-    association_name = REQUEST_ITEM_ASSOCIATIONS[request_type]
-    return if association_name.blank? || latest_submission_version.blank?
-
-    latest_submission_version.public_send(association_name).find_by(
-      id: request_item_id
-    )
-  end
-
-  def set_request_item_addressed(request_type:, request_item_id:, addressed:)
-    item = latest_request_item(request_type, request_item_id)
-    return false unless item
-
-    item.update(
-      addressed_at:
-        ActiveModel::Type::Boolean.new.cast(addressed) ? Time.current : nil
-    )
-  end
-
   def supporting_documents_for_submitter_based_on_user_permissions(
     supporting_documents,
     user: nil

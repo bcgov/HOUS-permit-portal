@@ -301,15 +301,14 @@ class PermitProject < ApplicationRecord
   end
 
   def project_documents(user = nil)
+    # Limit project documents to owner for now
     base = association(:project_documents).reader
     return ProjectDocument.none if user.nil?
 
-    return base if user.review_staff_of?(jurisdiction_id)
+    return base if owner_id == user.id
 
-    return ProjectDocument.none unless owner_id == user.id
-
-    visible = base.reject(&:hidden_from_submitter?)
-    base.loaded? ? visible : ProjectDocument.where(id: visible.map(&:id))
+    # Not the owner: return an empty result, preferring in-memory if already loaded
+    base.loaded? ? [] : ProjectDocument.none
   end
 
   def recent_audits(user = nil)

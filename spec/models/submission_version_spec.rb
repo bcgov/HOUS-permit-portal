@@ -57,9 +57,9 @@ RSpec.describe SubmissionVersion, type: :model do
       expect(submission_version.has_request_package_items?).to be false
     end
 
-    it "is true when a supporting information request is present" do
+    it "is true when a supporting document revision request is present" do
       create(
-        :supporting_information_request,
+        :supporting_document_revision_request,
         submission_version: submission_version
       )
       expect(submission_version.has_request_package_items?).to be true
@@ -78,7 +78,7 @@ RSpec.describe SubmissionVersion, type: :model do
 
     it "is true after revisions are requested" do
       create(
-        :supporting_information_request,
+        :supporting_document_revision_request,
         submission_version: submission_version
       )
       allow(NotificationService).to receive(

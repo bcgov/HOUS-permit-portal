@@ -31,6 +31,7 @@ import {
   EReleaseNoteNotificationAudience,
   EReleaseNoteType,
   ERequirementType,
+  ERevisionRequestType,
   ESocketDomainTypes,
   ESocketEventTypes,
   ESortDirection,
@@ -384,9 +385,11 @@ export interface IResource {
 
 export interface IProjectDocument extends IBaseFileAttachment {
   permitProjectId: string
-  supportingInformationRequestId?: string
-  uploadedById?: string
-  kind?: "reference" | "fulfillment"
+}
+
+export interface IRevisionReferenceDocument extends IBaseFileAttachment {
+  revisionRequestId: string
+  scanStatus?: EFileScanStatus
   fileUrl?: string
 }
 
@@ -739,34 +742,16 @@ export interface ILinkData {
 
 export interface IRevisionRequest {
   id: string
+  type?: ERevisionRequestType
+  title?: string
   reasonCode: string
   requirementJson: IFormIORequirement
   submissionData: any
   comment: string
   user?: IMinimalFrozenUser
   createdAt: number
-  addressedAt?: number | string | null
-}
-
-export interface ISupportingInformationRequest {
-  id: string
-  title: string
-  comment?: string
-  projectDocuments?: IProjectDocument[]
-  user?: IMinimalFrozenUser
-  createdAt: number
-  addressedAt?: number | string | null
-}
-
-export interface IAdditionalPermitRequest {
-  id: string
-  requirementTemplateId: string
-  nameSnapshot: string
-  comment?: string
-  user?: IMinimalFrozenUser
-  createdAt: number
-  addressedAt?: number | string | null
-  siblingStatus?: EPermitApplicationStatus | null
+  revisionReferenceDocuments?: IRevisionReferenceDocument[]
+  supportingDocuments?: Array<{ id: string; fileName?: string; fileUrl?: string }>
 }
 
 export interface IMinimalFrozenUser {
@@ -786,8 +771,8 @@ export interface ISubmissionVersion {
   formJson: IFormJson
   submissionData: ISubmissionData
   revisionRequests: IRevisionRequest[]
-  supportingInformationRequests?: ISupportingInformationRequest[]
-  additionalPermitRequests?: IAdditionalPermitRequest[]
+  applicantNote?: string | null
+  submitterNote?: string | null
   viewedAt?: Date
   createdAt: number
 }

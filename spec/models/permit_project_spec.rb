@@ -338,38 +338,6 @@ RSpec.describe PermitProject, type: :model do
 
         expect(project.project_documents(other)).to be_empty
       end
-
-      it "hides draft reference attachments from the owner until send" do
-        owner = create(:user, :submitter)
-        jurisdiction = create(:sub_district)
-        project =
-          create(:permit_project, owner: owner, jurisdiction: jurisdiction)
-        application =
-          create(
-            :permit_application,
-            :newly_submitted,
-            submitter: owner,
-            jurisdiction: jurisdiction,
-            permit_project: project
-          )
-        request =
-          create(
-            :supporting_information_request,
-            submission_version: application.latest_submission_version
-          )
-        draft_doc =
-          create(
-            :project_document,
-            permit_project: project,
-            supporting_information_request: request,
-            kind: :reference
-          )
-        visible_doc = create(:project_document, permit_project: project)
-
-        docs = project.project_documents(owner)
-        expect(docs).to include(visible_doc)
-        expect(docs).not_to include(draft_doc)
-      end
     end
   end
 end

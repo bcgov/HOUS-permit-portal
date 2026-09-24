@@ -2,6 +2,7 @@ import {
   Button,
   Flex,
   FormControl,
+  FormHelperText,
   FormLabel,
   Heading,
   Input,
@@ -9,10 +10,8 @@ import {
   ModalBody,
   ModalCloseButton,
   ModalContent,
-  ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Spacer,
   Text,
   Textarea,
 } from "@chakra-ui/react"
@@ -21,20 +20,23 @@ import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { UseFieldArrayReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
-import { ISupportingInformationRequest } from "../../../types/types"
+import { ERevisionRequestType } from "../../../types/enums"
+import { IRevisionRequest } from "../../../types/types"
 import { IRevisionRequestForm } from "../../domains/permit-application/revision-sidebar"
-import { NoteAttachmentChips } from "../notes/note-attachment-chips"
 import { useNoteAttachments } from "../notes/use-note-attachments"
-import { UppyDashboard } from "../uppy-dashboard"
+import { IRevisionFileGridItem, RevisionFileGrid } from "./revision-file-grid"
 
 interface ISupportingInformationModalProps {
   isOpen: boolean
   onClose: () => void
-  supportingInformationRequest?: ISupportingInformationRequest
-  useFieldArrayMethods: UseFieldArrayReturn<IRevisionRequestForm, "supportingInformationRequestsAttributes", "fieldId">
+  supportingInformationRequest?: IRevisionRequest
+  useFieldArrayMethods: UseFieldArrayReturn<IRevisionRequestForm, "revisionRequestsAttributes", "fieldId">
   onSave: () => Promise<void>
   disableInput?: boolean
+  allowFulfillmentUpload?: boolean
+  permitApplication?: IPermitApplication
 }
 
 export const SupportingInformationModal = observer(
@@ -45,21 +47,27 @@ export const SupportingInformationModal = observer(
     useFieldArrayMethods,
     onSave,
     disableInput,
+    allowFulfillmentUpload,
+    permitApplication,
   }: ISupportingInformationModalProps) => {
     const { t } = useTranslation()
     const { userStore } = useMst()
     const { currentUser } = userStore
     const { update, append, fields } = useFieldArrayMethods
-    const { attachments, isUploading, removeAttachment, clearAttachments, uppy } = useNoteAttachments({
+    const { attachments, isUploading, addFiles, removeAttachment, clearAttachments } = useNoteAttachments({
       maxNumberOfFiles: 10,
     })
 
     const [title, setTitle] = useState(supportingInformationRequest?.title ?? "")
     const [comment, setComment] = useState(supportingInformationRequest?.comment ?? "")
     const [destroyedDocumentIds, setDestroyedDocumentIds] = useState<string[]>([])
+    const [destroyedFulfillmentIds, setDestroyedFulfillmentIds] = useState<string[]>([])
 
-    const existingDocuments = (supportingInformationRequest?.projectDocuments || []).filter(
+    const existingDocuments = (supportingInformationRequest?.revisionReferenceDocuments || []).filter(
       (doc) => !destroyedDocumentIds.includes(doc.id)
+    )
+    const fulfillmentDocuments = (supportingInformationRequest?.supportingDocuments || []).filter(
+      (doc) => !destroyedFulfillmentIds.includes(doc.id)
     )
 
     useEffect(() => {
@@ -67,6 +75,7 @@ export const SupportingInformationModal = observer(
       setTitle(supportingInformationRequest?.title ?? "")
       setComment(supportingInformationRequest?.comment ?? "")
       setDestroyedDocumentIds([])
+      setDestroyedFulfillmentIds([])
       clearAttachments()
     }, [isOpen, supportingInformationRequest?.id])
 
@@ -80,21 +89,20 @@ export const SupportingInformationModal = observer(
     const handleUpsert = () => {
       if (!title.trim()) return
 
-      const projectDocumentsAttributes = [
-        ...destroyedDocumentIds.map((id) => ({ id, _destroy: true })),
+      const revisionReferenceDocumentsAttributes = [
+        ...destroyedDocumentIds.map((id) => ({ id, _destroy: true as const })),
         ...attachments.map((attachment) => ({
           file: attachment.file,
-          kind: "reference" as const,
-          uploadedById: currentUser.id,
         })),
       ]
 
       const newItem = {
         id: supportingInformationRequest?.id,
         userId: currentUser.id,
+        type: ERevisionRequestType.SupportingDocumentRevisionRequest,
         title: title.trim(),
         comment,
-        projectDocumentsAttributes,
+        revisionReferenceDocumentsAttributes,
       }
 
       if (supportingInformationRequest && index >= 0) {
@@ -112,84 +120,187 @@ export const SupportingInformationModal = observer(
       onSave().then(handleClose)
     }
 
-    return (
-      <Modal onClose={handleClose} isOpen={isOpen} size="2xl">
-        <ModalOverlay />
-        <ModalContent mt={48}>
-          <ModalHeader textAlign="center">
-            <ModalCloseButton fontSize="11px" />
-            <Heading as="h3" fontSize="xl">
-              {t("permitApplication.show.revision.addSupportingInformation")}
-            </Heading>
-          </ModalHeader>
-          <ModalBody>
-            <Flex direction="column" gap={4}>
-              <FormControl isRequired>
-                <FormLabel>{t("permitApplication.show.revision.supportingInformationTitle")}</FormLabel>
-                <Input value={title} onChange={(e) => setTitle(e.target.value)} isDisabled={disableInput} bg="white" />
-              </FormControl>
-              <FormControl>
-                <FormLabel>{t("permitApplication.show.revision.supportingInformationDescription")}</FormLabel>
-                <Textarea value={comment} onChange={(e) => setComment(e.target.value)} isDisabled={disableInput} />
-              </FormControl>
-              {!disableInput && (
-                <FormControl>
-                  <FormLabel>{t("permitApplication.show.revision.supportingInformationFiles")}</FormLabel>
-                  <UppyDashboard uppy={uppy} width="100%" height={220} />
-                  <NoteAttachmentChips attachments={attachments} onRemove={removeAttachment} />
-                </FormControl>
+    const handleSaveFulfillment = () => {
+      if (!supportingInformationRequest?.id || !permitApplication) return
+
+      const supportingDocumentsAttributes = [
+        ...destroyedFulfillmentIds.map((id) => ({
+          id,
+          _destroy: true,
+          revisionRequestId: supportingInformationRequest.id,
+        })),
+        ...attachments.map((attachment) => ({
+          revisionRequestId: supportingInformationRequest.id,
+          file: attachment.file,
+        })),
+      ]
+
+      if (supportingDocumentsAttributes.length === 0) {
+        handleClose()
+        return
+      }
+
+      permitApplication.uploadRevisionFulfillment(supportingDocumentsAttributes).then((response) => {
+        if (response?.ok) handleClose()
+      })
+    }
+
+    const stagedFiles: IRevisionFileGridItem[] = attachments.map((attachment) => ({
+      id: attachment.uppyFileId,
+      name: attachment.file.metadata.filename,
+      size: attachment.file.metadata.size,
+      onRemove: () => removeAttachment(attachment.uppyFileId),
+    }))
+    const referenceFiles: IRevisionFileGridItem[] = existingDocuments.map((doc) => ({
+      id: doc.id,
+      name: doc.file?.metadata?.filename || "",
+      size: doc.file?.metadata?.size,
+      href: doc.fileUrl,
+      onRemove: disableInput ? undefined : () => setDestroyedDocumentIds((ids) => [...ids, doc.id]),
+    }))
+    const uploadedFulfillmentFiles: IRevisionFileGridItem[] = fulfillmentDocuments.map((doc) => ({
+      id: doc.id,
+      name: doc.fileName,
+      href: doc.fileUrl,
+      onRemove: allowFulfillmentUpload ? () => setDestroyedFulfillmentIds((ids) => [...ids, doc.id]) : undefined,
+    }))
+
+    const referenceFileList =
+      referenceFiles.length === 0 ? null : (
+        <Flex direction="column" gap={1}>
+          {referenceFiles.map((file) => (
+            <Flex key={file.id} justify="space-between" align="center">
+              {file.href ? (
+                <Button
+                  as="a"
+                  href={file.href}
+                  target="_blank"
+                  rel="noopener"
+                  variant="link"
+                  justifyContent="flex-start"
+                >
+                  {file.name}
+                </Button>
+              ) : (
+                <Text>{file.name}</Text>
               )}
-              {existingDocuments.length > 0 && (
-                <Flex direction="column" gap={1}>
-                  {/* UX DISCUSSION ASSUMPTION: supporting-info View is reference-only.
-                      Lapse: no fulfillment upload; ticking addressed does not attach the asked-for file. */}
-                  {existingDocuments.map((doc) => (
-                    <Flex key={doc.id} justify="space-between" align="center">
-                      {doc.fileUrl ? (
-                        <Button as="a" href={doc.fileUrl} target="_blank" rel="noopener" variant="link" fontSize="sm">
-                          {doc.file?.metadata?.filename}
-                        </Button>
-                      ) : (
-                        <Text fontSize="sm">{doc.file?.metadata?.filename}</Text>
-                      )}
-                      {!disableInput && (
-                        <Button
-                          variant="link"
-                          color="semantic.error"
-                          onClick={() => setDestroyedDocumentIds((ids) => [...ids, doc.id])}
-                        >
-                          {t("ui.delete")}
-                        </Button>
-                      )}
-                    </Flex>
-                  ))}
-                </Flex>
+              {file.onRemove && (
+                <Button variant="link" onClick={file.onRemove}>
+                  {t("ui.delete")}
+                </Button>
               )}
             </Flex>
-            <ModalFooter>
-              <Flex width="full" justify="center" gap={4}>
-                {disableInput ? (
-                  <Button variant="secondary" onClick={onClose}>
-                    {t("ui.ok")}
-                  </Button>
-                ) : (
-                  <>
-                    <Button onClick={handleUpsert} variant="primary" isDisabled={!title.trim() || isUploading}>
-                      {t("permitApplication.show.revision.addItem")}
+          ))}
+        </Flex>
+      )
+
+    const actionButtons = (primaryLabel: string, onPrimary: () => void, primaryDisabled: boolean) => (
+      <Flex justify="flex-start" gap={4}>
+        <Button onClick={onPrimary} variant="primary" isDisabled={primaryDisabled}>
+          {primaryLabel}
+        </Button>
+        <Button variant="secondary" onClick={handleClose}>
+          {t("ui.cancel")}
+        </Button>
+      </Flex>
+    )
+
+    return (
+      <Modal onClose={handleClose} isOpen={isOpen} size="xl">
+        <ModalOverlay />
+        <ModalContent mt={48}>
+          <ModalHeader textAlign="left" px={10} pt={10} pb={4}>
+            <ModalCloseButton fontSize="11px" />
+            <Heading as="h3" fontSize="2xl" textAlign="left">
+              {allowFulfillmentUpload
+                ? t("permitApplication.show.revision.submitterInformationTitle")
+                : t("permitApplication.show.revision.addSupportingInformation")}
+            </Heading>
+          </ModalHeader>
+          <ModalBody px={10} pt={0} pb={10}>
+            <Flex direction="column" gap={4} align="stretch">
+              {allowFulfillmentUpload ? (
+                <>
+                  <Flex direction="column" gap={1}>
+                    <Text fontWeight="bold">{t("permitApplication.show.revision.informationRequested")}</Text>
+                    <Text>{title}</Text>
+                  </Flex>
+                  <Flex direction="column" gap={1}>
+                    <Text fontWeight="bold">{t("permitApplication.show.revision.whyThisIsNeeded")}</Text>
+                    <Text>{comment || t("permitApplication.show.revision.notProvided")}</Text>
+                  </Flex>
+                  {referenceFileList}
+                  <Flex direction="column" gap={2}>
+                    <Text fontWeight="bold">{t("permitApplication.show.revision.uploadAFile")}</Text>
+                    <RevisionFileGrid
+                      files={[...uploadedFulfillmentFiles, ...stagedFiles]}
+                      onAddFiles={addFiles}
+                      showDropzone
+                    />
+                  </Flex>
+                  {actionButtons(
+                    t("permitApplication.show.revision.save"),
+                    handleSaveFulfillment,
+                    isUploading || (attachments.length === 0 && destroyedFulfillmentIds.length === 0)
+                  )}
+                </>
+              ) : disableInput ? (
+                <>
+                  <Flex direction="column" gap={1}>
+                    <Text fontWeight="bold">{t("permitApplication.show.revision.informationRequested")}</Text>
+                    <Text>{title}</Text>
+                  </Flex>
+                  <Flex direction="column" gap={1}>
+                    <Text fontWeight="bold">{t("permitApplication.show.revision.whyThisIsNeeded")}</Text>
+                    <Text>{comment || t("permitApplication.show.revision.notProvided")}</Text>
+                  </Flex>
+                  {referenceFileList}
+                  <Flex justify="flex-start">
+                    <Button variant="secondary" onClick={onClose}>
+                      {t("ui.close")}
                     </Button>
-                    <Button variant="secondary" onClick={handleClose}>
-                      {t("ui.cancel")}
+                  </Flex>
+                </>
+              ) : (
+                <>
+                  <FormControl isRequired>
+                    <FormLabel>{t("permitApplication.show.revision.nameRequestedInformation")}</FormLabel>
+                    <Input value={title} onChange={(e) => setTitle(e.target.value)} bg="white" />
+                    <FormHelperText>
+                      {t("permitApplication.show.revision.nameRequestedInformationHelper")}
+                    </FormHelperText>
+                  </FormControl>
+                  <Flex direction="column" gap={2}>
+                    <Text fontWeight="bold">{t("permitApplication.show.revision.uploadReferenceDocument")}</Text>
+                    {referenceFileList}
+                    <RevisionFileGrid files={stagedFiles} onAddFiles={addFiles} showDropzone />
+                  </Flex>
+                  <FormControl>
+                    <FormLabel>{t("permitApplication.show.revision.explanationToApplicant")}</FormLabel>
+                    <Textarea value={comment} onChange={(e) => setComment(e.target.value)} />
+                    <FormHelperText>
+                      {t("permitApplication.show.revision.explanationForInformationHelper")}
+                    </FormHelperText>
+                  </FormControl>
+                  {actionButtons(
+                    supportingInformationRequest ? t("ui.change") : t("ui.add"),
+                    handleUpsert,
+                    !title.trim() || isUploading
+                  )}
+                  {supportingInformationRequest && (
+                    <Button
+                      leftIcon={<Trash />}
+                      variant="link"
+                      color="text.primary"
+                      onClick={handleDelete}
+                      w="fit-content"
+                    >
+                      {t("ui.delete")}
                     </Button>
-                    <Spacer />
-                    {supportingInformationRequest && (
-                      <Button color="semantic.error" leftIcon={<Trash />} variant="link" onClick={handleDelete}>
-                        {t("ui.delete")}
-                      </Button>
-                    )}
-                  </>
-                )}
-              </Flex>
-            </ModalFooter>
+                  )}
+                </>
+              )}
+            </Flex>
           </ModalBody>
         </ModalContent>
       </Modal>
