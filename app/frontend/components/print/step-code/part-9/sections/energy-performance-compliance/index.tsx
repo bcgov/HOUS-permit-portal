@@ -17,6 +17,8 @@ export const EnergyPerformanceCompliance = function StepCodeChecklistPDFEnergyPe
   checklist,
 }: IProps) {
   const report = checklist.selectedReport?.energy
+  const targetType = checklist.epcCalculationTestingTargetType
+  const testingTarget = targetType && ["ach", "nla", "nlr"].includes(targetType) ? report?.[targetType] : undefined
   return (
     <ReportPanel heading={t(`${i18nPrefix}.heading`)}>
       <ReportText className="report-strong">{t(`${i18nPrefix}.proposedHouseEnergyConsumption`)}</ReportText>
@@ -56,7 +58,7 @@ export const EnergyPerformanceCompliance = function StepCodeChecklistPDFEnergyPe
         />
       </ReportRow>
       <ReportRow>
-        <ReportMetric label={t(`${i18nPrefix}.calculationTestingTarget`)} value={report?.ach} />
+        <ReportMetric label={t(`${i18nPrefix}.calculationTestingTarget`)} value={testingTarget} />
         <ReportMetric
           value={t(`${i18nPrefix}.epcTestingTargetType.options.${checklist.epcCalculationTestingTargetType}`)}
         />

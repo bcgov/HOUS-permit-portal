@@ -48,7 +48,7 @@ export function Airtightness({ report }: IProps) {
             />
           </ReportCell>
           <ReportCell colSpan={1} rowSpan={3}>
-            <ReportResult success={report.meuiPassed} />
+            <ReportResult success={report.airtightnessPassed} />
           </ReportCell>
         </ReportRow>
         <ReportRow>

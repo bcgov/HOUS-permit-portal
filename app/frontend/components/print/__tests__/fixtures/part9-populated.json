@@ -49,7 +49,7 @@
     "compliance_status": null,
     "data_entries": [],
     "dwelling_units_count": 0,
-    "dwh_heating_consumption": null,
+    "dwh_heating_consumption": "45.50",
     "energy_advisor_id": null,
     "epc_calculation_airtightness": null,
     "epc_calculation_compliance": null,
@@ -125,8 +125,7 @@
     "testing_result_type": null,
     "title": null,
     "updated_at": 1790101502000,
-    "compliance_reports": [],
-    "dhw_heating_consumption": "45.50"
+    "compliance_reports": []
   },
   "step_code": {
     "title": "Synthetic test building",
