@@ -28,7 +28,7 @@ export const GridHeaders = observer(function GridHeaders({
     <Box display={"contents"} role={"rowgroup"} position="fixed">
       <Box display={"contents"} role={"row"}>
         {Object.values(ERequirementLibrarySortFields).map((field) => (
-          <GridHeader key={field} role={"columnheader"}>
+          <GridHeader key={field} role={"columnheader"} minW={0} overflow="hidden">
             <Flex
               w={"full"}
               as={"button"}
@@ -38,16 +38,21 @@ export const GridHeaders = observer(function GridHeaders({
               borderRight={"1px solid"}
               borderColor={"border.light"}
               px={4}
+              minW={0}
+              overflow="hidden"
+              gap={2}
             >
-              <Text whiteSpace="nowrap">{getSortColumnHeader(field)}</Text>
+              <Text isTruncated minW={0}>
+                {getSortColumnHeader(field)}
+              </Text>
               {field === ERequirementLibrarySortFields.associations ? (
-                <HStack w={"fit-content"} spacing={3}>
+                <HStack flexShrink={0} spacing={3}>
                   <SortIcon<ERequirementLibrarySortFields>
                     field={field}
                     currentSort={sort}
                     aria-label={`Sort ${getSortColumnHeader(field)} Icon`}
                   />
-                  <Tooltip label={t("requirementsLibrary.associationsInfo")}>
+                  <Tooltip label={t("requirementsLibrary.associationsInfo")} placement="bottom-end">
                     <Info aria-label={"Info Icon"} />
                   </Tooltip>
                 </HStack>
