@@ -56,7 +56,7 @@ export const NewPermitProjectScreen = observer(() => {
 
   const onSubmit = async (values: TCreatePermitProjectFormData) => {
     const params = {
-      title: values.title,
+      title: values.title?.trim(),
       fullAddress: values.site?.label,
       pid: values.pid,
       jurisdictionId: values.jurisdictionId,
@@ -91,7 +91,11 @@ export const NewPermitProjectScreen = observer(() => {
                 {t("permitProject.new.nameHeading")}
               </Heading>
               <Text>{t("permitProject.new.nameDescription")}</Text>
-              <TextFormControl fieldName="title" label={t("permitProject.new.nameLabel")} required />
+              <TextFormControl
+                fieldName="title"
+                label={t("permitProject.new.nameLabel")}
+                hint={t("permitProject.new.nameHint")}
+              />
             </Flex>
 
             <Flex direction="column" gap={2}>

@@ -6,6 +6,7 @@ import { BrowserRouter, Route, Routes, useLocation, useNavigate } from "react-ro
 import useSyncPathWithStore from "../../../hooks/use-sync-path-with-root-store"
 import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus } from "../../../types/enums"
+import { shouldTrackMatomoSpaPageview, trackMatomoSpaPageview } from "../../../utils/matomo"
 import { isSafeAppPath } from "../../../utils/utility-functions"
 import { FlashMessage } from "../../shared/base/flash-message"
 import { LoadingScreen } from "../../shared/base/loading-screen"
@@ -331,6 +332,9 @@ const ExportTemplatesScreen = lazy(() =>
 const RequirementsLibraryScreen = lazy(() =>
   import("../requirements-library").then((module) => ({ default: module.RequirementsLibraryScreen }))
 )
+const QuestionBankScreen = lazy(() =>
+  import("../question-bank").then((module) => ({ default: module.QuestionBankScreen }))
+)
 const Part9StepCodeForm = lazy(() =>
   import("../step-code/part-9").then((module) => ({ default: module.Part9StepCodeForm }))
 )
@@ -511,6 +515,7 @@ export const Navigation = observer(() => {
 
   return (
     <BrowserRouter>
+      <MatomoSpaPageviews />
       <Box pos="relative" w="full">
         <Box pos="absolute" top={0} zIndex="toast" w="full">
           <FlashMessage />
@@ -535,6 +540,18 @@ export const Navigation = observer(() => {
       )}
     </BrowserRouter>
   )
+})
+
+const MatomoSpaPageviews = observer(function MatomoSpaPageviews() {
+  const { pathname } = useLocation()
+  const { isValidating, loggedIn } = useMst().sessionStore
+
+  useEffect(() => {
+    if (!shouldTrackMatomoSpaPageview(pathname, { isValidating, loggedIn })) return
+    trackMatomoSpaPageview(pathname)
+  }, [pathname, isValidating, loggedIn])
+
+  return null
 })
 
 const AppRoutes = observer(() => {
@@ -587,6 +604,7 @@ const AppRoutes = observer(() => {
     <>
       <Route path="/jurisdictions/new" element={<NewJurisdictionScreen />} />
       <Route path="/requirements-library" element={<RequirementsLibraryScreen />} />
+      <Route path="/question-bank" element={<QuestionBankScreen />} />
       <Route path="/requirement-templates" element={<RequirementTemplatesScreen />} />
       <Route path="/requirement-templates/new" element={<NewRequirementTemplateScreen />} />
       <Route path="/requirement-templates/:requirementTemplateId/edit" element={<EditRequirementTemplateScreen />} />
@@ -824,7 +842,7 @@ const AppRoutes = observer(() => {
           </>
         )}
         {loggedIn && !isUnconfirmed && <Route path="/" element={<HomeScreen />} />}
-        {!loggedIn && <Route path="/" element={<RedirectScreen path="/welcome" />} />}
+        {!loggedIn && <Route path="/" element={<RedirectScreen path="/about" />} />}
         <Route
           element={
             <ProtectedRoute
@@ -926,10 +944,9 @@ const AppRoutes = observer(() => {
               element={<SuccessfulSubmissionScreen />}
             />
             <Route
-              path="/project-readiness-tools/check-step-code-requirements/select"
+              path="/project-readiness-tools/create-a-step-codes-compliance-report/building-categories"
               element={<SelectStepCodeRequirementsScreen />}
             />
-            <Route path="/project-readiness-tools/pre-check" element={<PreCheckInfoScreen />} />
           </Route>
         </Route>
 
@@ -1020,11 +1037,11 @@ const AppRoutes = observer(() => {
           element={<LettersOfAssuranceScreen />}
         />
         <Route
-          path="/project-readiness-tools/check-step-code-requirements"
+          path="/project-readiness-tools/create-a-step-codes-compliance-report"
           element={<CheckStepCodeRequirementsScreen />}
         />
         <Route
-          path="/project-readiness-tools/look-up-step-codes-requirements-for-your-project"
+          path="/project-readiness-tools/look-up-step-codes-requirements"
           element={<LookUpStepCodesRequirementsForYourProjectScreen />}
         />
         <Route path="/project-readiness-tools/pre-check" element={<PreCheckInfoScreen />} />
@@ -1033,7 +1050,7 @@ const AppRoutes = observer(() => {
           element={<OnboardingChecklistPageForLgAdoptingScreen />}
         />
         <Route path="/confirmed" element={<EmailConfirmedScreen />} />
-        <Route path="/welcome" element={<LandingScreen />} />
+        <Route path="/about" element={<LandingScreen />} />
         <Route
           path="/jurisdictions"
           element={

@@ -7,6 +7,7 @@ import { Link as RouterLink, useParams } from "react-router-dom"
 import { usePermitProject } from "../../../../../hooks/resources/use-permit-project"
 import { useProjectDetailTabs } from "../../../../../hooks/use-project-detail-tabs"
 import { useMst } from "../../../../../setup/root"
+import { belowNavBarInFlow } from "../../../../../styles/nav-bar-offset"
 import { ErrorScreen } from "../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
 import { ActivityTabPanelContent } from "../../../permit-project/activity-tab-panel-content"
@@ -95,7 +96,7 @@ export const InboxProjectDetailScreen = observer(() => {
   if (!currentPermitProject) return <Text>{t("permitProject.details.notFound")}</Text>
 
   return (
-    <Flex direction="column" h="calc(100vh - var(--app-navbar-height, 0px))" minH={0} minW={0} overflow="hidden">
+    <Flex direction="column" {...belowNavBarInFlow} minH={0} minW={0} overflow="hidden">
       <Flex flexShrink={0} justify="space-between" align="center" py={6} borderBottom="1px" borderColor="border.light">
         <Container maxW="container.lg">
           <Flex align="center" h={24}>

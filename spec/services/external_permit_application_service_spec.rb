@@ -172,6 +172,42 @@ RSpec.describe ExternalPermitApplicationService do
           ]
         )
       end
+
+      it "formats a submission version snapshot instead of live permit data" do
+        version_data = {
+          "data" => {
+            "s1" => {
+              "prefix|RBblock-1|field1" => "from-version"
+            }
+          }
+        }
+        live_data = {
+          "data" => {
+            "s1" => {
+              "prefix|RBblock-1|field1" => "from-live"
+            }
+          }
+        }
+        allow(permit_application).to receive(:submission_data).and_return(
+          live_data
+        )
+        version =
+          instance_double(
+            "SubmissionVersion",
+            submission_data: version_data,
+            supporting_documents: double(find_by: nil)
+          )
+
+        result =
+          described_class.new(
+            permit_application,
+            submission_version: version
+          ).formatted_submission_data_for_external_use
+
+        expect(result["rb_sku"][:requirements].first[:value]).to eq(
+          "from-version"
+        )
+      end
     end
   end
 

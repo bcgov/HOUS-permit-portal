@@ -82,14 +82,20 @@ class SupportingDocumentsZipper
   end
 
   def upload_zip_file
+    submission_version = permit_application.latest_submission_version
+    unless submission_version
+      Rails.logger.error "Failed to upload zip file: no submission version"
+      return
+    end
+
     File.open(file_path.to_s, "rb") do |file|
       uploader = ZipfileUploader.new(:store)
       temp_files << file.path
       uploaded_file = uploader.upload(file)
-      permit_application.zipfile_data = uploaded_file.data
+      submission_version.zipfile_data = uploaded_file.data
 
-      unless permit_application.save
-        Rails.logger.error "Failed to upload zip file: #{permit_application.errors.full_messages.join(", ")}"
+      unless submission_version.save
+        Rails.logger.error "Failed to upload zip file: #{submission_version.errors.full_messages.join(", ")}"
       end
     end
   end

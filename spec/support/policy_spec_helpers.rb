@@ -10,4 +10,12 @@ module PolicySpecHelpers
   def external_api_policy_for(policy_class, external_api_key:, record:)
     policy_class.new(external_api_key, record)
   end
+
+  def external_api_scope_for(
+    policy_class,
+    external_api_key:,
+    scope: PermitApplication.all
+  )
+    policy_class::Scope.new(external_api_key, scope).resolve
+  end
 end

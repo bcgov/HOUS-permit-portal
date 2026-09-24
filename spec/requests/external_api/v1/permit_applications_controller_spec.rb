@@ -16,12 +16,39 @@ RSpec.describe "External API v1 permit applications", type: :request do
       expect(response).to have_http_status(:unauthorized)
     end
 
+    def stub_permit_application_search(*records)
+      allow(PermitApplication).to receive(:search) do |_query, **kwargs|
+        relation = PermitApplication.where(id: records.map(&:id))
+        scoped = kwargs.fetch(:scope_results).call(relation)
+        results = scoped.to_a
+
+        double(
+          "PermitApplicationSearch",
+          results: results,
+          total_pages: 1,
+          total_count: results.size,
+          current_page: 1,
+          limit_value: 10
+        )
+      end
+    end
+
+    def search_ids
+      JSON.parse(response.body).fetch("data").map { |row| row["id"] }
+    end
+
     it "returns results scoped by policy (jurisdiction + submitted + sandbox)" do
       allowed =
         create(
           :permit_application,
           :newly_submitted,
           jurisdiction: external_api_key.jurisdiction
+        )
+      allowed_in_review =
+        create(
+          :permit_application,
+          jurisdiction: external_api_key.jurisdiction,
+          status: :in_review
         )
       disallowed_other_jurisdiction =
         create(
@@ -31,18 +58,27 @@ RSpec.describe "External API v1 permit applications", type: :request do
         )
       disallowed_draft =
         create(:permit_application, jurisdiction: external_api_key.jurisdiction)
-
-      # Avoid depending on Searchkick/Elasticsearch in this spec: the controller
-      # filters results via Pundit policy in `apply_search_authorization`.
-      allow(PermitApplication).to receive(:search).and_return(
-        double(
-          "PermitApplicationSearch",
-          results: [allowed, disallowed_other_jurisdiction, disallowed_draft],
-          total_pages: 1,
-          total_count: 3,
-          current_page: 1,
-          limit_value: 10
+      disallowed_revisions =
+        create(
+          :permit_application,
+          :revisions_requested,
+          jurisdiction: external_api_key.jurisdiction
         )
+      disallowed_sandbox =
+        create(
+          :permit_application,
+          :newly_submitted,
+          jurisdiction: external_api_key.jurisdiction,
+          sandbox: external_api_key.jurisdiction.sandboxes.published.first
+        )
+
+      stub_permit_application_search(
+        allowed,
+        allowed_in_review,
+        disallowed_other_jurisdiction,
+        disallowed_draft,
+        disallowed_revisions,
+        disallowed_sandbox
       )
 
       post "/external_api/v1/permit_applications/search",
@@ -50,12 +86,46 @@ RSpec.describe "External API v1 permit applications", type: :request do
            headers: auth_headers
 
       expect(response).to have_http_status(:ok)
-      json = JSON.parse(response.body)
-      ids = (json["data"] || []).map { |row| row["id"] }
+      expect(search_ids).to contain_exactly(allowed.id, allowed_in_review.id)
+    end
 
-      expect(ids).to include(allowed.id)
-      expect(ids).not_to include(disallowed_other_jurisdiction.id)
-      expect(ids).not_to include(disallowed_draft.id)
+    it "returns only the sandbox key's submitted applications" do
+      sandbox = external_api_key.jurisdiction.sandboxes.published.first
+      sandbox_key =
+        create(
+          :external_api_key,
+          jurisdiction: external_api_key.jurisdiction,
+          sandbox:
+        )
+      allowed =
+        create(
+          :permit_application,
+          :newly_submitted,
+          jurisdiction: sandbox_key.jurisdiction,
+          sandbox:
+        )
+      live =
+        create(
+          :permit_application,
+          :newly_submitted,
+          jurisdiction: sandbox_key.jurisdiction
+        )
+      other_sandbox =
+        create(
+          :permit_application,
+          :newly_submitted,
+          jurisdiction: sandbox_key.jurisdiction,
+          sandbox: sandbox_key.jurisdiction.sandboxes.scheduled.first
+        )
+
+      stub_permit_application_search(allowed, live, other_sandbox)
+
+      post "/external_api/v1/permit_applications/search",
+           params: {}.to_json,
+           headers: auth_headers(token: sandbox_key.token)
+
+      expect(response).to have_http_status(:ok)
+      expect(search_ids).to contain_exactly(allowed.id)
     end
 
     it "returns 429 when rate limited (external_api/ip)" do
@@ -102,7 +172,7 @@ RSpec.describe "External API v1 permit applications", type: :request do
       expect(response).to have_http_status(:forbidden)
     end
 
-    it "returns 200 for an allowed record" do
+    it "returns 200 for an allowed record with live submission_data" do
       pa =
         create(
           :permit_application,
@@ -111,6 +181,21 @@ RSpec.describe "External API v1 permit applications", type: :request do
         )
       get "/external_api/v1/permit_applications/#{pa.id}", headers: auth_headers
       expect(response).to have_http_status(:ok)
+      json = JSON.parse(response.body).fetch("data")
+      expect(json).to have_key("submission_data")
+      expect(json).not_to have_key("submission_versions")
+      expect(json).not_to have_key("zipfile_url")
+      expect(json).not_to have_key("latest_zipfile_url")
+    end
+  end
+
+  describe "PATCH /external_api/v1/permit_applications/:id/status" do
+    it "does not expose status write-back in V1" do
+      patch "/external_api/v1/permit_applications/#{SecureRandom.uuid}/status",
+            params: { status: "in_review" }.to_json,
+            headers: auth_headers
+
+      expect(response).to have_http_status(:not_found)
     end
   end
 end

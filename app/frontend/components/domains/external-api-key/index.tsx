@@ -17,7 +17,7 @@ import { SearchGrid } from "../../shared/grid/search-grid"
 import { SearchGridItem } from "../../shared/grid/search-grid-item"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { ExternalApiKeyStatusTag } from "./external-api-key-status-tag"
-import { GridHeaders } from "./grid-header"
+import { ApiKeysTableToolbar, GridHeaders } from "./grid-header"
 
 interface IProps extends Partial<StackProps> {}
 
@@ -109,11 +109,15 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
           />
         )}
 
-        <SearchGrid templateColumns="1fr 1fr 1fr 1.2fr 1fr 1fr 1fr 85px" pos={"relative"}>
+        <SearchGrid
+          templateColumns="1fr 1fr 0.7fr 1fr 1.2fr 1fr 1fr 1fr 85px"
+          pos={"relative"}
+          toolbar={<ApiKeysTableToolbar />}
+        >
           <GridHeaders />
 
           {isFetching ? (
-            <Flex py={50} gridColumn={"span 8"}>
+            <Flex py={50} gridColumn={"span 9"}>
               <SharedSpinner />
             </Flex>
           ) : (
@@ -122,6 +126,7 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
                 <Box key={externalApiKey.id} role={"row"} display={"contents"}>
                   <SearchGridItem fontWeight={700}>{externalApiKey.name}</SearchGridItem>
                   <SearchGridItem>{externalApiKey.connectingApplication}</SearchGridItem>
+                  <SearchGridItem>{externalApiKey.apiVersion.toUpperCase()}</SearchGridItem>
                   <SearchGridItem>
                     <ExternalApiKeyStatusTag status={externalApiKey.status} />
                   </SearchGridItem>

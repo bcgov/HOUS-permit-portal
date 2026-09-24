@@ -27,7 +27,7 @@ jobs:
 
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
 
     - name: Check if user is authorized
       run: |
@@ -50,7 +50,7 @@ jobs:
         oc version
 
     - name: Install Helm
-      uses: azure/setup-helm@v3
+      uses: azure/setup-helm@v5
       with:
         version: 'v3.14.0'
 

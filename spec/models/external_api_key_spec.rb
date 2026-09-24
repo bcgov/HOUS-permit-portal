@@ -165,6 +165,24 @@ RSpec.describe ExternalApiKey, type: :model do
         )
       end
     end
+
+    context "api_version" do
+      it "defaults to V1 and accepts only supported versions" do
+        expect(ExternalApiKey.new.api_version).to eq("v1")
+        expect(build(:external_api_key, api_version: "v2")).to be_valid
+        expect(build(:external_api_key, api_version: "v3")).not_to be_valid
+      end
+
+      it "cannot be changed after the key is created" do
+        external_api_key = create(:external_api_key, api_version: "v1")
+
+        expect(external_api_key.update(api_version: "v2")).to be(false)
+        expect(external_api_key.errors[:api_version]).to include(
+          "cannot be changed after the key is created"
+        )
+        expect(external_api_key.reload.api_version).to eq("v1")
+      end
+    end
   end
 
   describe "methods" do

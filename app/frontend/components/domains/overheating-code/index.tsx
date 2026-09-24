@@ -5,6 +5,7 @@ import { RemoveScroll } from "react-remove-scroll"
 import { useNavigate, useParams } from "react-router-dom"
 import { useOverheatingCode } from "../../../hooks/resources/use-overheating-code"
 import { useMst } from "../../../setup/root"
+import { belowNavBarFixed } from "../../../styles/nav-bar-offset"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { FormSection } from "./form-section"
@@ -16,11 +17,8 @@ export const OverheatingCodeForm = observer(function OverheatingCodeForm() {
   const {
     overheatingCodeStore: { createOverheatingCode },
     siteConfigurationStore,
-    sandboxStore,
-    userStore,
   } = useMst()
   const { displaySitewideMessage } = siteConfigurationStore
-  const hasSandboxBanner = userStore.currentUser?.isReviewStaff && sandboxStore.isSandboxActive
   const { currentOverheatingCode } = useOverheatingCode()
 
   // Create overheating code if this is /new route
@@ -54,12 +52,9 @@ export const OverheatingCodeForm = observer(function OverheatingCodeForm() {
     <RemoveScroll>
       <Flex
         direction="column"
-        h={
-          hasSandboxBanner ? "calc(100vh - var(--app-navbar-height) - 24px)" : "calc(100vh - var(--app-navbar-height))"
-        }
+        {...belowNavBarFixed()}
         w="100vw"
         pos="fixed"
-        top={hasSandboxBanner ? "calc(var(--app-navbar-height) + 24px)" : "var(--app-navbar-height)"}
         left="0"
         right="0"
         bottom="0"

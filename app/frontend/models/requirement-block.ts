@@ -68,10 +68,16 @@ export const RequirementBlockModel = types
     get requirementFormDefaults(): IRequirementAttributes[] {
       return self.requirements.map((requirement) => {
         const { inputOptions, conditional, ...baseAttributes } = requirement
+        const formAttributes = {
+          ...baseAttributes,
+          // Linked placements store overrides separately; local fields use hint/instructions directly.
+          hint: requirement.requirementQuestionId ? requirement.hintOverride : requirement.hint,
+          instructions: requirement.requirementQuestionId ? requirement.instructionsOverride : requirement.instructions,
+        }
 
         if (!conditional) {
           return {
-            ...baseAttributes,
+            ...formAttributes,
             inputOptions,
           } as IRequirementAttributes
         }
@@ -86,7 +92,7 @@ export const RequirementBlockModel = types
         )
 
         return {
-          ...baseAttributes,
+          ...formAttributes,
           inputOptions: {
             ...inputOptions,
             conditional: isEnergyStepCodeDependency

@@ -5,6 +5,7 @@ import { IPermitApplication } from "../models/permit-application"
 import { IPreCheck } from "../models/pre-check"
 import { IProjectMeeting } from "../models/project-meeting"
 import { IRequirementBlock } from "../models/requirement-block"
+import { IRequirementQuestion } from "../models/requirement-question"
 import { IRequirementTemplate } from "../models/requirement-template"
 import { IUser } from "../models/user"
 import { INotification, IOption, ITemplateVersionDiff } from "./types"
@@ -23,6 +24,8 @@ export interface IPageMeta {
 export interface IUserResponse extends IApiResponse<IUser, {}> {}
 
 export interface IRequirementBlockResponse extends IApiResponse<IRequirementBlock[], IPageMeta> {}
+
+export interface IRequirementQuestionResponse extends IApiResponse<IRequirementQuestion[], IPageMeta> {}
 
 export interface IRequirementTemplateResponse extends IApiResponse<IRequirementTemplate[], IPageMeta> {}
 

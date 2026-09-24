@@ -49,7 +49,11 @@ module PermitApplicationStatus
       %w[newly_submitted resubmitted in_review]
     end
 
-    aasm column: "status", enum: true, timestamps: true do
+    scope :submitted_at_least_once, -> { where.not(status: :new_draft) }
+
+    aasm column: "status", enum: true, timestamp: true do
+      before_all_events :reject_if_discarded
+
       state :new_draft, initial: true
       state :newly_submitted
       state :in_review
@@ -93,7 +97,7 @@ module PermitApplicationStatus
       end
 
       event :issue_permit do
-        transitions from: :approved, to: :issued
+        transitions from: :approved, to: :issued, after: :stamp_issued_at
       end
 
       event :withdraw do
@@ -150,7 +154,15 @@ module PermitApplicationStatus
     end
 
     def allowed_manual_transitions
+      return [] if discarded? || permit_project&.discarded?
+
       MANUAL_TRANSITIONS[status.to_sym] || []
+    end
+
+    def reject_if_discarded
+      return unless discarded? || permit_project&.discarded?
+
+      raise AASM::InvalidTransition.new(self, aasm.current_event, :default)
     end
 
     def pertinence_score
@@ -208,6 +220,10 @@ module PermitApplicationStatus
       latest_submission_version.revision_requests.any?
     end
 
+    def stamp_issued_at
+      self.issued_at ||= Time.current
+    end
+
     def handle_review_started
       NotificationService.publish_review_started_event(self)
     end
@@ -239,8 +255,6 @@ module PermitApplicationStatus
             end
           )
       )
-
-      zip_and_upload_supporting_documents
 
       send_submit_notifications
     end
