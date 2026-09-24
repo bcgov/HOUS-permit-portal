@@ -205,6 +205,13 @@ class PermitProject < ApplicationRecord
           .includes(:requirement_template)
           .filter_map { |pa| pa.requirement_template&.id }
           .uniq,
+      inbox_requirement_template_ids:
+        permit_applications
+          .kept
+          .submitted_at_least_once
+          .includes(:requirement_template)
+          .filter_map { |pa| pa.requirement_template&.id }
+          .uniq,
       total_permits_count: permit_applications.kept.count,
       new_draft_count: permit_applications.kept.where(status: :new_draft).count,
       newly_submitted_count:

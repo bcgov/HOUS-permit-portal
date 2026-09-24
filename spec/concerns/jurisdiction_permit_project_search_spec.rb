@@ -275,6 +275,38 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitProjects,
         expect(ids).to include(project_a.id, project_c.id)
         expect(ids).not_to include(project_b.id)
       end
+
+      context "when a project only has a draft of the filtered template" do
+        let(:search_params) do
+          {
+            query: "",
+            page: 1,
+            per_page: 50,
+            filters: {
+              requirement_template_ids: [template_b.id]
+            }
+          }
+        end
+
+        before do
+          create(
+            :permit_application,
+            status: :new_draft,
+            submitter: submitter,
+            permit_project: project_a,
+            template_version: template_version_b
+          )
+          PermitProject.reindex
+        end
+
+        it "does not return that project" do
+          perform_search
+          ids = search_result_ids
+
+          expect(ids).to include(project_b.id)
+          expect(ids).not_to include(project_a.id)
+        end
+      end
     end
 
     context "with state filter" do

@@ -415,7 +415,12 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     if params[:jurisdiction_id].present?
       jurisdiction = Jurisdiction.friendly.find(params[:jurisdiction_id])
       authorize jurisdiction, :search_permit_applications?
-      apps = apps.where(permit_projects: { jurisdiction_id: jurisdiction.id })
+      apps =
+        apps.where(
+          permit_projects: {
+            jurisdiction_id: jurisdiction.id
+          }
+        ).submitted_at_least_once
     end
 
     if params[:permit_project_id].present?
