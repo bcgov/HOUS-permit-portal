@@ -508,10 +508,10 @@ export function numberToFormattedString(
 
 /**
  * Rounds a numeric value (number or string) to a fixed number of decimal places.
- * Returns "-" for null, undefined, or NaN values.
+ * Returns "-" for missing or invalid values; preserves numeric zero.
  */
 export function roundMetric(value: string | number | null | undefined, decimals: number = 5): string {
-  if (!value) return "-"
+  if (value === null || value === undefined || value === "") return "-"
   const num = typeof value === "string" ? parseFloat(value) : value
   return isNaN(num) ? "-" : num.toFixed(decimals)
 }
