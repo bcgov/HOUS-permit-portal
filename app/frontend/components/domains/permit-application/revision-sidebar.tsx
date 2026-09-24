@@ -110,6 +110,10 @@ export const RevisionSideBar = observer(
       setSelectedSubmissionVersion(latestSubmissionVersion)
     }, [latestSubmissionVersion, setSelectedSubmissionVersion])
 
+    useEffect(() => {
+      if (!isViewingPastRequests) setTabIndex(0)
+    }, [isViewingPastRequests])
+
     const onSaveRevision = (formData: IRevisionRequestForm) => {
       setTabIndex(0)
       permitApplication.updateRevisionRequests(formData)

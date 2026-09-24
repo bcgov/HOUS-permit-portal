@@ -3,8 +3,11 @@
   field_revisions = requests.select { |request| request.is_a?(FieldRevisionRequest) }
   supporting_information = requests.select { |request| request.is_a?(SupportingDocumentRevisionRequest) }
   reviewer_message = @permit_application.latest_submission_version&.applicant_note
-  project_title = @permit_application.permit_project&.title
-  permit_name = @permit_application.nickname.presence || @permit_application.template_nickname
+  project = @permit_application.permit_project
+  project_title = project&.title
+  project_url = project && FrontendUrlHelper.frontend_url("/projects/#{project.id}/overview")
+  template_name = @permit_application.template_nickname
+  link_style = "color: #1a5a96; text-decoration: underline;"
 %>
 <!-- START MAIN CONTENT AREA -->
 <tr>
@@ -20,12 +23,15 @@
           </p>
           <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 16px;">
             <% if project_title.present? %>
-              <strong>Project:</strong> <%= project_title %><br>
+              <strong>Project:</strong> <a href="<%= project_url %>" style="<%= link_style %>"><%= project_title %></a><br>
             <% end %>
-            <% if permit_name.present? %>
-              <strong>Permit application:</strong> <%= permit_name %><br>
+            <% if template_name.present? %>
+              <strong>Template:</strong> <%= template_name %><br>
             <% end %>
-            <strong>HUB#:</strong> <%= @permit_application.number %>
+            <% if @permit_application.nickname.present? %>
+              <strong>Permit application:</strong> <%= @permit_application.nickname %><br>
+            <% end %>
+            <strong>HUB#:</strong> <a href="<%= @permit_application.submitter_frontend_url %>" style="<%= link_style %>"><%= @permit_application.number %></a>
           </p>
 
           <hr style="border: 0; border-top: 1px solid #d9d9d9; margin: 16px 0;">
