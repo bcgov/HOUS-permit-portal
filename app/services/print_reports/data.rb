@@ -110,10 +110,14 @@ module PrintReports
     def application_identity(record, version)
       {
         number: record.number,
-        # Address/title are current application metadata; historical answers below
-        # always come from the selected snapshot and are never substituted.
+        # Cover metadata reflects the application at export time. It is not
+        # independently snapshotted with each submission version.
         title: "Submitted application",
-        address: nil,
+        address: record.full_address,
+        jurisdiction: record.jurisdiction&.name,
+        applicant: record.submitter&.name,
+        tags: record.template_tag_list.to_a,
+        template_nickname: record.template_nickname,
         status: "Submitted",
         version_number: version&.version_number,
         submission_version_id: version&.id,

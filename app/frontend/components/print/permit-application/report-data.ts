@@ -2,6 +2,10 @@ export interface ReportIdentity {
   number?: string
   title?: string
   address?: string
+  jurisdiction?: string
+  applicant?: string
+  tags?: string[]
+  template_nickname?: string
   status?: string
   version_number?: number
   submission_version_id?: string
