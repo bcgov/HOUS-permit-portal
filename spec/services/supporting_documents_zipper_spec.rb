@@ -136,6 +136,121 @@ RSpec.describe SupportingDocumentsZipper do
       expect(FileUtils).to have_received(:rm_f).at_least(:once)
     end
 
+    context "with selected submission versions" do
+      let(:versions) { double("Submission versions") }
+      let(:answers) do
+        {
+          "data" => {
+            "equipment" => {
+              "modelId" => "equipment-1"
+            },
+            "rows" => [
+              {
+                "equipment" => {
+                  "model_id" => "equipment-2"
+                },
+                "drawings_file" => [
+                  { "modelId" => document1.id },
+                  { "model_id" => document2.id }
+                ]
+              }
+            ]
+          }
+        }
+      end
+
+      before do
+        allow(permit_application).to receive(:submission_versions).and_return(
+          versions
+        )
+        allow(versions).to receive(:where).with(id: ["version-1"]).and_return(
+          [submission_version]
+        )
+        allow(submission_version).to receive(:submission_data).and_return(
+          answers
+        )
+      end
+
+      it "includes nested file references in either casing and ignores non-file model ids" do
+        zipper =
+          described_class.new(permit_application.id, version_ids: ["version-1"])
+        allow(zipper).to receive(:download_file).with(document1).and_return(
+          "/tmp/f1.pdf"
+        )
+        allow(zipper).to receive(:download_file).with(document2).and_return(
+          "/tmp/f2.pdf"
+        )
+
+        zipper.with_zip { |_path| }
+
+        expect(zip_entry_zipfile).to have_received(:add).with(
+          "Original File.pdf",
+          "/tmp/f1.pdf"
+        )
+        expect(zip_entry_zipfile).to have_received(:add).with(
+          "Other Original.pdf",
+          "/tmp/f2.pdf"
+        )
+      end
+
+      it "still rejects a missing attachment referenced by a file field" do
+        answers["data"]["rows"][0]["drawings_file"] << {
+          "modelId" => "missing-document"
+        }
+
+        expect do
+          described_class.new(permit_application.id, version_ids: ["version-1"])
+        end.to raise_error("Required supporting documents are unavailable")
+        expect(zipfile_uploader).not_to have_received(:upload)
+      end
+
+      it "excludes later-version uploads and PDFs while keeping the selected version PDF" do
+        selected_pdf =
+          instance_double(
+            "SupportingDocument",
+            id: "pdf-1",
+            submission_version_id: "version-1",
+            data_key: SupportingDocument::APPLICATION_PDF_DATA_KEY,
+            download_filename: "Application.pdf"
+          )
+        later_pdf =
+          instance_double(
+            "SupportingDocument",
+            id: "pdf-2",
+            submission_version_id: "version-2"
+          )
+        allow(document2).to receive(:submission_version_id).and_return(
+          "version-2"
+        )
+        answers["data"]["rows"][0]["drawings_file"] = [
+          { "modelId" => document1.id }
+        ]
+        allow(permit_application).to receive(
+          :all_submission_version_completed_supporting_documents
+        ).and_return([document1, document2, selected_pdf, later_pdf])
+        zipper =
+          described_class.new(permit_application.id, version_ids: ["version-1"])
+        allow(zipper).to receive(:download_file).with(document1).and_return(
+          "/tmp/f1.pdf"
+        )
+        allow(zipper).to receive(:download_file).with(selected_pdf).and_return(
+          "/tmp/application.pdf"
+        )
+
+        zipper.with_zip { |_path| }
+
+        expect(zip_entry_zipfile).to have_received(:add).exactly(2).times
+        expect(zip_entry_zipfile).to have_received(:add).with(
+          "Original File.pdf",
+          "/tmp/f1.pdf"
+        )
+        expect(zip_entry_zipfile).to have_received(:add).with(
+          "Application.pdf",
+          "/tmp/application.pdf"
+        )
+      end
+    end
+
     it "fails without uploading an incomplete ZIP" do
       zipper = described_class.new(permit_application.id)
       allow(zipper).to receive(:download_file).with(document1).and_return(nil)
