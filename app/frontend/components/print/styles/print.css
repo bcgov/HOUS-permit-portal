@@ -79,7 +79,7 @@ p + p {
   border-top: 3pt solid var(--report-brand-gold);
 }
 .report-cover .report-field {
-  padding: 10pt 0;
+  padding: 7pt 0;
   border-bottom: 0.5pt solid var(--report-line);
 }
 .report-cover .report-note {

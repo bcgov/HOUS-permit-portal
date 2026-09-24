@@ -20,6 +20,9 @@ IDs. Application reports use saved schema and answers. Elective visibility uses
 application customization snapshots, matching the previous pipeline; older
 submissions do not have historically exact per-version elective settings.
 Historical step-code reports use the saved checklist snapshot, not the current one.
+Submission covers show the current application address, jurisdiction, applicant
+and template tags (or template nickname when there are no tags). These fields
+are not independently snapshotted per submission; the cover labels this distinction.
 
 ## Build and readiness
 
