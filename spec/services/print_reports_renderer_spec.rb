@@ -128,6 +128,41 @@ RSpec.describe PrintReports::Renderer do
 
   context "real local conversion", if: ENV["RUN_GOTENBERG_SPECS"] == "true" do
     around { |example| VCR.turned_off { example.run } }
+    it "prints cover metadata and falls back to the template when there are no tags" do
+      report[:identity].merge!(
+        address: "42 Current Avenue",
+        jurisdiction: "Example Municipality",
+        applicant: "Alex Applicant",
+        number: "APP-042",
+        version_number: 2,
+        submitted_at: "2026-09-22T19:00:00Z",
+        template_nickname: "Housing permit",
+        stage: "as_built",
+        checklist_id: "12345678-1234-1234-1234-123456789012"
+      )
+      [%w[Residential Addition], []].each do |tags|
+        report[:identity][:tags] = tags
+        described_class
+          .new
+          .render(report) do |path|
+            pages = PDF::Reader.new(path).pages
+            cover = pages.first.text.gsub(/\s+/, " ")
+            expect(cover).to include(
+              "42 Current Avenue",
+              "Example Municipality",
+              "Alex Applicant",
+              "APP-042",
+              "Submission version 2",
+              "Submission date",
+              "Export date",
+              "current application information at export",
+              tags.any? ? "Residential | Addition" : "Housing permit"
+            )
+            expect(pages[1].text).to include("Saved answer")
+          end
+      end
+    end
+
     it "renders saved application values" do
       described_class
         .new
