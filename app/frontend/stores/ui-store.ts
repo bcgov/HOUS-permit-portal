@@ -3,6 +3,7 @@ import queryString from "query-string"
 import { v4 as uuidv4 } from "uuid"
 import { withRootStore } from "../lib/with-root-store"
 import { FlashMessageModel } from "../models/flash-message"
+import { captureMatomoLoginFailReason } from "../utils/matomo"
 
 export const UIStoreModel = types
   .model("UIStoreModel")
@@ -16,21 +17,25 @@ export const UIStoreModel = types
   .views((self) => ({}))
   .actions((self) => ({
     showQueryParamFlash() {
-      // check if there are any messages to show in the URL params
       const query = queryString.parse(location.search)
+      let dirty = false
+
+      if ("loginReason" in query) {
+        captureMatomoLoginFailReason(query.loginReason)
+        delete query.loginReason
+        dirty = true
+      }
 
       if (query.flash) {
         const { type, title, message } = JSON.parse(query.flash as any)
         self.flashMessage.show(type, title, message, 5000) // show flash messages from the query param for longer
-        // Remove the "flash" parameter
         delete query.flash
+        dirty = true
+      }
 
-        // Reconstruct the query string without the "flash" parameter
+      if (dirty) {
         const newQueryString = queryString.stringify(query)
-
-        // Update the URL
-        const newUrl = `${location.pathname}${newQueryString ? "?" + newQueryString : ""}`
-        window.history.replaceState({}, "", newUrl)
+        window.history.replaceState({}, "", `${location.pathname}${newQueryString ? "?" + newQueryString : ""}`)
       }
     },
   }))

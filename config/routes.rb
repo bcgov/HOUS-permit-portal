@@ -45,6 +45,7 @@ Rails.application.routes.draw do
       delete "/invitation/remove" => "invitations#remove"
       get "/invitations/:invitation_token" => "invitations#show"
       get "/logout" => "sessions#destroy"
+      get "/auth/failure" => "omniauth_callbacks#failure"
     end
 
     get "/submission_contacts/confirm",
