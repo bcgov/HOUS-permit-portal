@@ -113,7 +113,7 @@ RSpec.describe "external_api/v2/permit_applications",
 
   path "/permit_applications/{id}/status" do
     patch(
-      "Updates a submitted permit application's status using a canonical Building Permit Hub code. For `revisions_requested`, include field-level `revision_requests` copied from the submission version payload (`requirement_block_code` + `requirement_code`)."
+      "Updates a submitted permit application's status using a canonical Building Permit Hub code. For `revisions_requested`, include field-level `revision_requests` copied from the submission version payload (`requirement_block_code` + `requirement_code`). An optional `applicant_note` plain-text message is stored with those requests."
     ) do
       tags "Permit applications"
       consumes "application/json"
@@ -140,6 +140,12 @@ RSpec.describe "external_api/v2/permit_applications",
                       },
                       description:
                         "Required and non-empty when status is `revisions_requested`. Must be omitted for every other status."
+                    },
+                    applicant_note: {
+                      type: :string,
+                      nullable: true,
+                      description:
+                        "Optional plain-text message for the submitter. Accepted only when status is `revisions_requested`. Blank or omitted stores no note."
                     }
                   }
                 }

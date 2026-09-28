@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_09_24_181500) do
+ActiveRecord::Schema[7.2].define(version: 2026_09_28_105100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -402,7 +402,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_24_181500) do
   end
 
   create_table "notes", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.uuid "user_id", null: false
+    t.uuid "user_id"
     t.uuid "permit_project_id", null: false
     t.string "noteable_type", null: false
     t.uuid "noteable_id", null: false
@@ -412,7 +412,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_24_181500) do
     t.string "kind", default: "meeting", null: false
     t.datetime "published_at"
     t.index ["noteable_type", "noteable_id", "created_at"], name: "index_notes_on_noteable_type_and_noteable_id_and_created_at"
-    t.index ["noteable_type", "noteable_id", "kind"], name: "index_notes_on_revision_message_kind", unique: true, where: "((kind)::text <> 'meeting'::text)"
+    t.index ["noteable_type", "noteable_id", "kind"], name: "index_notes_on_revision_message_kind", unique: true, where: "((kind)::text = ANY ((ARRAY['applicant_message'::character varying, 'submitter_message'::character varying])::text[]))"
     t.index ["noteable_type", "noteable_id"], name: "index_notes_on_noteable"
     t.index ["permit_project_id", "created_at"], name: "index_notes_on_permit_project_id_and_created_at"
     t.index ["user_id"], name: "index_notes_on_user_id"

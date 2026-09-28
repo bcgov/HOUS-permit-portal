@@ -9,8 +9,8 @@ class Note < ApplicationRecord
   enum :kind,
        {
          meeting: "meeting",
-         applicant_message: "applicant_message",
-         submitter_message: "submitter_message"
+         applicant_message: "applicant_message", # is a message TO the applicant
+         submitter_message: "submitter_message" # is a message TO the reviewer
        },
        default: "meeting"
 

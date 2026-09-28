@@ -13,9 +13,10 @@ module ExternalApi
     FINALIZABLE_STATUSES = %w[newly_submitted resubmitted in_review].freeze
     MAX_COMMENT_LENGTH = 350
 
-    def initialize(permit_application, items)
+    def initialize(permit_application, items, applicant_note: nil)
       @permit_application = permit_application
       @items = items
+      @applicant_note = applicant_note
     end
 
     def call
@@ -31,12 +32,25 @@ module ExternalApi
       end
 
       snapshots = normalize_items!.map { |item| resolve_item(item) }
+      validate_applicant_note!
 
       version.revision_requests.destroy_all
       snapshots.each { |attrs| version.revision_requests.create!(attrs) }
+      Note.upsert_revision_message!(
+        submission_version: version,
+        kind: :applicant_message,
+        body: @applicant_note,
+        user: nil
+      )
     end
 
     private
+
+    def validate_applicant_note!
+      return if @applicant_note.nil? || @applicant_note.is_a?(String)
+
+      raise Error, "applicant_note must be a string."
+    end
 
     def normalize_items!
       unless @items.is_a?(Array) && @items.any?
