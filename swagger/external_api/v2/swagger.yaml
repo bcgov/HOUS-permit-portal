@@ -3,7 +3,7 @@ openapi: 3.1.0
 info:
   title: Integration API V2
   version: v2
-  description: "### API documentation overview\nThis document provides detailed information
+  description: "**Last updated:** 2026-09-28\n\n### API documentation overview\nThis document provides detailed information
     about the APIs available for external integrators to query and retrieve submitted
     and resubmitted permit applications.\nIt also includes specifications on webhook
     events that notify your systems in real-time.\n\n### Data scope:\nThe permit applications

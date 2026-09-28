@@ -34,6 +34,8 @@ RSpec.configure do |config|
         title: "Integration API V1",
         version: "v1",
         description: <<-DESC
+**Last updated:** 2026-09-28
+
 ### API documentation overview
 This document provides detailed information about the APIs available for external integrators to query and retrieve submitted and resubmitted permit applications.
 It also includes specifications on webhook events that notify your systems in real-time.
@@ -936,6 +938,8 @@ in this document.
   v2_spec = v1_spec.deep_dup
 
   v1_spec[:info][:description] = <<~DESC
+    **Last updated:** 2026-09-28
+
     ### API documentation overview
     Integration API V1 provides jurisdiction- and sandbox-scoped read access to submitted permit applications and integration mappings.
 

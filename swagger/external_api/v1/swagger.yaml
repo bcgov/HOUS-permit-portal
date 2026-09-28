@@ -4,6 +4,8 @@ info:
   title: Integration API V1
   version: v1.1
   description: |-
+    **Last updated:** 2026-09-28
+
     ### API documentation overview
     Integration API V1 provides jurisdiction- and sandbox-scoped read access to submitted permit applications and integration mappings.
 
