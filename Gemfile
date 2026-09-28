@@ -5,6 +5,10 @@ ruby "3.2.5"
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
 gem "rails", "7.2.3.2"
 
+# json 3 removed quirks_mode; Rails 7.2 ActiveSupport still passes it.
+# Drop this pin when upgrading to Rails >= 8.1.
+gem "json", "~> 2.21"
+
 # Use postgresql as the database for Active Record
 gem "pg", "~> 1.1"
 gem "activerecord-nulldb-adapter", "~> 1.1.0" # for Dockerfile asset build

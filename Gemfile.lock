@@ -290,7 +290,7 @@ GEM
       reline (>= 0.4.2)
     jaro_winkler (1.7.0)
     jmespath (1.6.2)
-    json (3.0.2)
+    json (2.21.2)
     json-jwt (1.16.7)
       activesupport (>= 4.2)
       aes_key_wrap
@@ -742,6 +742,7 @@ DEPENDENCIES
   friendly_id (~> 5.5.1)
   hexapdf
   image_processing (~> 1.12.2)
+  json (~> 2.21)
   json-jwt (>= 1.16.6)
   kaminari (~> 1.2.2)
   letter_opener (~> 1.10)
