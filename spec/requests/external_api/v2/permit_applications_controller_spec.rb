@@ -371,6 +371,46 @@ RSpec.describe "External API v2 permit applications", type: :request do
       expect(request.submission_data).to eq(
         { "data" => { form_key => "123 Main St" } }
       )
+      expect(
+        permit_application.latest_submission_version.notes.applicant_message
+      ).to be_empty
+    end
+
+    it "stores and publishes an applicant note" do
+      update_status(
+        "revisions_requested",
+        revision_requests: [revision_item],
+        applicant_note: "Please update the address."
+      )
+
+      expect(response).to have_http_status(:ok)
+      note =
+        permit_application
+          .reload
+          .latest_submission_version
+          .notes
+          .applicant_message
+          .first
+      expect(note.body).to eq("<p>Please update the address.</p>")
+      expect(note.user_id).to be_nil
+      expect(note.published_at).to be_present
+    end
+
+    it "does not store a blank applicant note" do
+      update_status(
+        "revisions_requested",
+        revision_requests: [revision_item],
+        applicant_note: "  "
+      )
+
+      expect(response).to have_http_status(:ok)
+      expect(
+        permit_application
+          .reload
+          .latest_submission_version
+          .notes
+          .applicant_message
+      ).to be_empty
     end
 
     it "treats a repeated write of revisions_requested as an idempotent success" do
@@ -411,6 +451,16 @@ RSpec.describe "External API v2 permit applications", type: :request do
       expect(response).to have_http_status(:unprocessable_content)
       expect(JSON.parse(response.body).dig("meta", "message")).to include(
         "revision_requests is only accepted when status is 'revisions_requested'"
+      )
+      expect(permit_application.reload).to be_newly_submitted
+    end
+
+    it "rejects applicant_note on a non-revision status write" do
+      update_status("in_review", applicant_note: "Please update the address.")
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(JSON.parse(response.body).dig("meta", "message")).to include(
+        "applicant_note is only accepted when status is 'revisions_requested'"
       )
       expect(permit_application.reload).to be_newly_submitted
     end

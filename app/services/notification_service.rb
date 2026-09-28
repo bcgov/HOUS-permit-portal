@@ -453,11 +453,17 @@ class NotificationService
     user_ids << creator_id if creator_id.present?
 
     notification_user_hash =
-      user_ids
-        .compact
-        .uniq
-        .each_with_object({}) do |uid, hash|
-          hash[uid] = report_document.report_generated_event_notification_data
+      User
+        .where(id: user_ids)
+        .includes(:preference)
+        .each_with_object({}) do |user, hash|
+          unless user.preference&.enable_in_app_step_code_report_notification
+            next
+          end
+
+          hash[
+            user.id
+          ] = report_document.report_generated_event_notification_data
         end
 
     unless notification_user_hash.empty?
@@ -468,27 +474,41 @@ class NotificationService
   def self.publish_pre_check_submitted_event(pre_check)
     return if pre_check.blank? || pre_check.creator_id.blank?
 
-    notification_user_hash = {
-      pre_check.creator_id => pre_check.submission_event_notification_data
-    }
+    preference = pre_check.creator&.preference
+    notification_user_hash = {}
+    if preference&.enable_in_app_pre_check_submitted_notification
+      notification_user_hash[
+        pre_check.creator_id
+      ] = pre_check.submission_event_notification_data
+    end
 
-    NotificationPushJob.perform_async(notification_user_hash)
+    unless notification_user_hash.empty?
+      NotificationPushJob.perform_async(notification_user_hash)
+    end
 
-    # Send email notification
-    PermitHubMailer.notify_pre_check_submitted(pre_check).deliver_later
+    if preference&.enable_email_pre_check_submitted_notification
+      PermitHubMailer.notify_pre_check_submitted(pre_check).deliver_later
+    end
   end
 
   def self.publish_pre_check_completed_event(pre_check)
     return if pre_check.blank? || pre_check.creator_id.blank?
 
-    notification_user_hash = {
-      pre_check.creator_id => pre_check.completed_event_notification_data
-    }
+    preference = pre_check.creator&.preference
+    notification_user_hash = {}
+    if preference&.enable_in_app_pre_check_completed_notification
+      notification_user_hash[
+        pre_check.creator_id
+      ] = pre_check.completed_event_notification_data
+    end
 
-    NotificationPushJob.perform_async(notification_user_hash)
+    unless notification_user_hash.empty?
+      NotificationPushJob.perform_async(notification_user_hash)
+    end
 
-    # Send email notification
-    PermitHubMailer.notify_pre_check_completed(pre_check).deliver_later
+    if preference&.enable_email_pre_check_completed_notification
+      PermitHubMailer.notify_pre_check_completed(pre_check).deliver_later
+    end
   end
 
   def self.publish_application_submission_event(permit_application)
@@ -621,7 +641,8 @@ class NotificationService
     notification_user_hash = {}
     users_to_notify.each do |user|
       next if user.blank?
-      # Ensure user.id is a string
+      next unless user.preference&.enable_in_app_file_upload_failed_notification
+
       notification_user_hash[
         user.id
       ] = file_attachment.upload_failed_notification_data(file_name)
@@ -748,9 +769,14 @@ class NotificationService
   end
 
   def self.publish_project_meeting_scheduled_event(project_meeting)
-    PermitHubMailer.notify_project_meeting_scheduled(
-      project_meeting
-    ).deliver_later
+    user = project_meeting.requested_by
+    preference = user&.preference
+
+    if preference&.enable_email_project_meeting_scheduled_notification
+      PermitHubMailer.notify_project_meeting_scheduled(
+        project_meeting
+      ).deliver_later
+    end
 
     project_meeting
       .jurisdiction
@@ -762,8 +788,9 @@ class NotificationService
       ).deliver_later
     end
 
-    user = project_meeting.requested_by
-    return if user.blank?
+    unless preference&.enable_in_app_project_meeting_scheduled_notification
+      return
+    end
 
     NotificationPushJob.perform_async(
       user.id => project_meeting.scheduled_event_notification_data
@@ -771,9 +798,14 @@ class NotificationService
   end
 
   def self.publish_project_meeting_rescheduled_event(project_meeting)
-    PermitHubMailer.notify_project_meeting_rescheduled(
-      project_meeting
-    ).deliver_later
+    user = project_meeting.requested_by
+    preference = user&.preference
+
+    if preference&.enable_email_project_meeting_rescheduled_notification
+      PermitHubMailer.notify_project_meeting_rescheduled(
+        project_meeting
+      ).deliver_later
+    end
 
     project_meeting
       .jurisdiction
@@ -785,8 +817,9 @@ class NotificationService
       ).deliver_later
     end
 
-    user = project_meeting.requested_by
-    return if user.blank?
+    unless preference&.enable_in_app_project_meeting_rescheduled_notification
+      return
+    end
 
     NotificationPushJob.perform_async(
       user.id => project_meeting.rescheduled_event_notification_data

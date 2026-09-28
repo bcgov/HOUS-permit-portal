@@ -152,9 +152,14 @@ RSpec.describe NotificationService do
 
   describe ".publish_file_upload_failed_event" do
     it "pushes notification payloads for each determined owner" do
+      preference =
+        instance_double(
+          "Preference",
+          enable_in_app_file_upload_failed_notification: true
+        )
       owners = [
-        instance_double("User", id: "u1"),
-        instance_double("User", id: "u2")
+        instance_double("User", id: "u1", preference: preference),
+        instance_double("User", id: "u2", preference: preference)
       ]
       file_attachment = double("FileAttachment")
       allow(file_attachment).to receive(
@@ -256,9 +261,15 @@ RSpec.describe NotificationService do
     end
 
     it "notifies submitter (if permit application) and creator (if present)" do
-      pa = instance_double("PermitApplication", submitter_id: "u1")
+      submitter = create(:user, :submitter)
+      creator = create(:user, :submitter)
+      pa = instance_double("PermitApplication", submitter_id: submitter.id)
       step_code =
-        instance_double("StepCode", permit_application: pa, creator_id: "u2")
+        instance_double(
+          "StepCode",
+          permit_application: pa,
+          creator_id: creator.id
+        )
       report_document =
         instance_double(
           "ReportDocument",
@@ -272,7 +283,7 @@ RSpec.describe NotificationService do
       described_class.publish_step_code_report_generated_event(report_document)
 
       expect(NotificationPushJob).to have_received(:perform_async) do |hash|
-        expect(hash.keys).to match_array(%w[u1 u2])
+        expect(hash.keys).to match_array([submitter.id, creator.id])
       end
     end
 
@@ -290,9 +301,19 @@ RSpec.describe NotificationService do
 
   describe ".publish_pre_check_submitted_event / .publish_pre_check_completed_event" do
     it "pushes in-app and emails for submitted and completed events" do
+      preference =
+        instance_double(
+          "Preference",
+          enable_in_app_pre_check_submitted_notification: true,
+          enable_email_pre_check_submitted_notification: true,
+          enable_in_app_pre_check_completed_notification: true,
+          enable_email_pre_check_completed_notification: true
+        )
+      creator = instance_double("User", preference: preference)
       pre_check =
         instance_double(
           "PreCheck",
+          creator: creator,
           creator_id: "u1",
           submission_event_notification_data: {
             a: 1

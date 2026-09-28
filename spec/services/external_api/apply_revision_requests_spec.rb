@@ -65,6 +65,31 @@ RSpec.describe ExternalApi::ApplyRevisionRequests do
     expect(request).to be_a(FieldRevisionRequest)
   end
 
+  it "stores an applicant note without a user" do
+    described_class.new(
+      permit_application,
+      [item],
+      applicant_note: "Please fix the address"
+    ).call
+
+    note =
+      permit_application.latest_submission_version.notes.applicant_message.first
+    expect(note.body).to eq("<p>Please fix the address</p>")
+    expect(note.user).to be_nil
+  end
+
+  it "rejects a non-string applicant note" do
+    expect {
+      described_class.new(
+        permit_application,
+        [item],
+        applicant_note: {
+          text: "nope"
+        }
+      ).call
+    }.to raise_error(described_class::Error, "applicant_note must be a string.")
+  end
+
   it "rejects the synthetic energy step code block" do
     expect {
       apply([item.merge("requirement_block_code" => "energy_step_code_tool")])

@@ -3,7 +3,7 @@ openapi: 3.1.0
 info:
   title: Integration API V2
   version: v2
-  description: "### API documentation overview\nThis document provides detailed information
+  description: "**Last updated:** 2026-09-28\n\n### API documentation overview\nThis document provides detailed information
     about the APIs available for external integrators to query and retrieve submitted
     and resubmitted permit applications.\nIt also includes specifications on webhook
     events that notify your systems in real-time.\n\n### Data scope:\nThe permit applications
@@ -552,6 +552,7 @@ paths:
       summary: Updates a submitted permit application's status using a canonical Building
         Permit Hub code. For `revisions_requested`, include field-level `revision_requests`
         copied from the submission version payload (`requirement_block_code` + `requirement_code`).
+        An optional `applicant_note` plain-text message is stored with those requests.
       tags:
       - Permit applications
       parameters:
@@ -579,6 +580,12 @@ paths:
                     "$ref": "#/components/schemas/RevisionRequestItem"
                   description: Required and non-empty when status is `revisions_requested`.
                     Must be omitted for every other status.
+                applicant_note:
+                  type: string
+                  nullable: true
+                  description: Optional plain-text message for the submitter. Accepted
+                    only when status is `revisions_requested`. Blank or omitted stores
+                    no note.
       responses:
         '200':
           description: Status updated
