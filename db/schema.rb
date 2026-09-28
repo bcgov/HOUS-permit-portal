@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_09_28_105100) do
+ActiveRecord::Schema[7.2].define(version: 2026_09_28_114600) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -790,6 +790,16 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_28_105100) do
     t.boolean "enable_in_app_release_note_publish_notification", default: true
     t.boolean "enable_in_app_project_meeting_submitted_notification", default: true
     t.boolean "enable_email_project_meeting_submitted_notification", default: true
+    t.boolean "enable_email_project_meeting_scheduled_notification", default: true
+    t.boolean "enable_in_app_project_meeting_scheduled_notification", default: true
+    t.boolean "enable_email_project_meeting_rescheduled_notification", default: true
+    t.boolean "enable_in_app_project_meeting_rescheduled_notification", default: true
+    t.boolean "enable_email_pre_check_submitted_notification", default: true
+    t.boolean "enable_in_app_pre_check_submitted_notification", default: true
+    t.boolean "enable_email_pre_check_completed_notification", default: true
+    t.boolean "enable_in_app_pre_check_completed_notification", default: true
+    t.boolean "enable_in_app_step_code_report_notification", default: true
+    t.boolean "enable_in_app_file_upload_failed_notification", default: true
     t.index ["user_id"], name: "index_preferences_on_user_id"
   end
 
