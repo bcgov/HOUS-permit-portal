@@ -48,14 +48,14 @@ gem "redis", "~> 5.0.8"
 gem "image_processing", "~> 1.12.2"
 gem "acts_as_list", "~> 1.1.0"
 gem "searchkick", "~> 5.3.1"
-gem "elasticsearch", "~> 8.11.0"
+gem "elasticsearch", "~> 8.11.2"
 gem "kaminari", "~> 1.2.2"
 gem "acts-as-taggable-on", "~> 12.0"
 # Assuming BC Common Object Management Service (COMS) is compatible with S3 formats:
 gem "aws-sdk-s3", "~> 1.208.0"
 gem "pundit", "~> 2.3.1"
 gem "phonelib", "~> 0.8.5"
-gem "roo", "~> 2.10"
+gem "roo", "~> 3.0"
 gem "discard", "~> 1.2"
 gem "faraday", "~> 2.14.3"
 gem "factory_bot", "~> 6.4"
@@ -63,8 +63,8 @@ gem "factory_bot", "~> 6.4"
 gem "timecop", "~> 0.9.8"
 gem "sidekiq-cron", "~> 2.4"
 gem "sidekiq-unique-jobs", "~> 8.0"
-gem "rubyzip", "~> 2.3.2"
-gem "anycable-rails", "~> 1.6.0"
+gem "rubyzip", "~> 3.7.0"
+gem "anycable-rails", "~> 1.6.2"
 gem "addressable", "~> 2.9"
 gem "friendly_id", "~> 5.5.1"
 gem "exception_notification", "~> 4.5.0"
@@ -92,7 +92,7 @@ group :development, :test do
   gem "debug", platforms: %i[mri windows]
   gem "pry-byebug", "~> 3.10.1"
   gem "rspec-rails", "~> 6.1.0"
-  gem "rswag-specs", "~> 2.13"
+  gem "rswag-specs", "~> 2.17"
   gem "factory_bot_rails", "~> 6.4.2"
   gem "faker", "~> 3.2.2"
   gem "shoulda-matchers", "~> 5.3.0"
@@ -119,9 +119,9 @@ group :development do
   gem "syntax_tree", "~> 6.2"
   gem "syntax_tree-haml", "~> 4.0"
   gem "syntax_tree-rbs", "~> 1.0"
-  gem "letter_opener", "~> 1.8"
+  gem "letter_opener", "~> 1.10"
   gem "rails-erd", "~> 1.5"
-  gem "rubocop", "~> 1.67", require: false
+  gem "rubocop", "~> 1.91", require: false
   gem "rubocop-rails", "~> 2.26", require: false
   gem "solargraph", "~> 0.58.0", require: false
 end
