@@ -45,6 +45,14 @@ class ExternalApi::PermitApplicationsController < ExternalApi::ApplicationContro
       )
     end
 
+    if target_status != "revisions_requested" && params.key?(:applicant_note)
+      return(
+        render_status_error(
+          "applicant_note is only accepted when status is 'revisions_requested'."
+        )
+      )
+    end
+
     @permit_application.with_lock do
       if @permit_application.status == target_status
         return render_permit_application
@@ -57,7 +65,8 @@ class ExternalApi::PermitApplicationsController < ExternalApi::ApplicationContro
           if target_status == "revisions_requested"
             ExternalApi::ApplyRevisionRequests.new(
               @permit_application,
-              params[:revision_requests]
+              params[:revision_requests],
+              applicant_note: params[:applicant_note]
             ).call
             @permit_application.finalize_revision_requests!
           else
