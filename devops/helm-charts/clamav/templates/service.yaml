@@ -17,7 +17,12 @@ spec:
   selector:
     app: "{{ $.Values.clamav.name }}"
     deployment: "{{ $.Values.clamav.name }}"
-  sessionAffinity: None
+  sessionAffinity: {{ .Values.service.sessionAffinity }}
+  {{- if eq .Values.service.sessionAffinity "ClientIP" }}
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: {{ .Values.service.sessionAffinityTimeout }}
+  {{- end }}
   type: ClusterIP
 status:
   loadBalancer: {}
