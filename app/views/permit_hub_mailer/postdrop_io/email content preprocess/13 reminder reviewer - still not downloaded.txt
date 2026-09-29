@@ -106,7 +106,7 @@
                                     <thead>
                                         <tr>
                                             <th>
-                                                Application ID 
+                                                Application number 
                                             </th>
                                             <th>
                                                 Submission date

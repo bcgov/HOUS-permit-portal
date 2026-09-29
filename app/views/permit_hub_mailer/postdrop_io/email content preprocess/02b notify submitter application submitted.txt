@@ -50,7 +50,7 @@
                             <td>
                               <dl class="table-like">
                                 
-                                <dt>Application ID</dt>
+                                <dt>Application number</dt>
                                 <dd><a href="#TODO">123456789@TODO</a></dd>
 
                                 <dt>Submission Date</dt>

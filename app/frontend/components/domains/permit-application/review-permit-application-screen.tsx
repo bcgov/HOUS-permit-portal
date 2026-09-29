@@ -183,23 +183,28 @@ export const ReviewPermitApplicationScreen = observer(() => {
         zIndex={12}
         ref={permitHeaderRef}
       >
-        <Flex w="full" px={6} py={3} bg="theme.blue" justify="space-between" color="greys.white">
-          <HStack gap={4} flex={1}>
+        <Flex
+          w="full"
+          px={6}
+          py={3}
+          bg="theme.blue"
+          justify="space-between"
+          color="greys.white"
+          flexWrap="wrap"
+          rowGap={3}
+          align="flex-start"
+        >
+          <HStack gap={4} flex={1} minW={0} align="flex-start">
             <PermitApplicationStatusTag status={currentPermitApplication.status} />
-            <Flex direction="column" w="full">
+            <Flex direction="column" w="full" minW={0}>
               <Heading fontSize="xl" as="h3">
                 {currentPermitApplication.nickname}
               </Heading>
               <Text noOfLines={1}>{tagsOrNickname}</Text>
-              <HStack>
-                <CopyableValue
-                  textTransform={"uppercase"}
-                  value={number}
-                  label={t("permitApplication.fields.number")}
-                />
+              <HStack flexWrap="wrap" rowGap={1} columnGap={4} align="center">
+                <CopyableValue value={number} label={t("permitApplication.fields.number")} />
                 <HStack mt={2} sx={{ svg: { fill: "theme.yellow" } }}>
-                  <Text textTransform={"uppercase"} whiteSpace="nowrap" flexShrink={0}>
-                    {" "}
+                  <Text whiteSpace="nowrap" flexShrink={0}>
                     {t("permitApplication.referenceNumber")}:
                   </Text>
                   <EditableInputWithControls

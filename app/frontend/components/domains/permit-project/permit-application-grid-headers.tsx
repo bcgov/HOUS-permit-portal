@@ -37,7 +37,9 @@ export const PermitApplicationGridHeaders = observer(
                 onClick={() => toggleSort(column)}
                 px={4}
               >
-                <Text textAlign="left">{getProjectPermitApplicationSortColumnHeader(column)}</Text>
+                <Text textAlign="left" flex="1" minW={0}>
+                  {getProjectPermitApplicationSortColumnHeader(column)}
+                </Text>
                 <SortIcon<EProjectPermitApplicationSortFields>
                   field={column}
                   currentSort={sort as ISort<EProjectPermitApplicationSortFields>}
