@@ -117,7 +117,7 @@ RSpec.describe StepCodeExportService do
       csv = service.part_3_metrics_csv
 
       expect(csv).to include(
-        "Application ID,Jurisdiction,Address,Building Height"
+        "Reference number,Jurisdiction,Address,Building Height"
       )
       expect(csv).to include("APP-1,Jur A,123 St,10,2024,3000,4")
     end
@@ -169,7 +169,7 @@ RSpec.describe StepCodeExportService do
       csv = service.part_9_metrics_csv
 
       expect(csv).to include(
-        "Application ID,Jurisdiction,Address,Building Type"
+        "Reference number,Jurisdiction,Address,Building Type"
       )
       expect(csv).to include("APP-9,Jur 9,9 St,House,step_code_ers,4,2")
     end
