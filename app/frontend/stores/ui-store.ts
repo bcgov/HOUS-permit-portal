@@ -3,7 +3,6 @@ import queryString from "query-string"
 import { v4 as uuidv4 } from "uuid"
 import { withRootStore } from "../lib/with-root-store"
 import { FlashMessageModel } from "../models/flash-message"
-import { captureMatomoLoginFailReason } from "../utils/matomo"
 
 export const UIStoreModel = types
   .model("UIStoreModel")
@@ -18,22 +17,17 @@ export const UIStoreModel = types
   .actions((self) => ({
     showQueryParamFlash() {
       const query = queryString.parse(location.search)
-      let dirty = false
+      const strippedLoginReason = self.rootStore.sessionStore.consumeLoginReason(query)
 
-      if ("loginReason" in query) {
-        captureMatomoLoginFailReason(query.loginReason)
-        delete query.loginReason
-        dirty = true
-      }
-
+      let strippedFlash = false
       if (query.flash) {
         const { type, title, message } = JSON.parse(query.flash as any)
         self.flashMessage.show(type, title, message, 5000) // show flash messages from the query param for longer
         delete query.flash
-        dirty = true
+        strippedFlash = true
       }
 
-      if (dirty) {
+      if (strippedLoginReason || strippedFlash) {
         const newQueryString = queryString.stringify(query)
         window.history.replaceState({}, "", `${location.pathname}${newQueryString ? "?" + newQueryString : ""}`)
       }
@@ -48,9 +42,6 @@ export const UIStoreModel = types
     },
     updateRmJurisdictionSelectKey() {
       self.rmJurisdictionSelectKey = uuidv4()
-    },
-    afterCreate() {
-      self.showQueryParamFlash()
     },
   }))
 
