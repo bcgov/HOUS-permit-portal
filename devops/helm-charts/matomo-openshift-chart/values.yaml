@@ -227,9 +227,9 @@ matomo:
     hostname: my.host
     tls: false
     firstuser:
-      username: admin
-      password: admin123
-      email: foo@example.com
+      username: <REDACTED>
+      password: <REDACTED>
+      email: <REDACTED>
     nginx:
       nginxWorkerProcesses: 5
       image: ''
