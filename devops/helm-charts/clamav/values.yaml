@@ -1,58 +1,55 @@
-OPENSHIFT_NAMESPACE: bb18ab
-STAGE: dev
+# Global ClamAV Helm Chart Values
+# Override environment-specific values in values-{STAGE}.yaml
 
 clamav:
   name: clamav
-  image: "bb18ab-dev/clamav-scanner"
+  image: "clamav-scanner"
   tag: "latest"
-  registry: image-registry.apps.silver.devops.gov.bc.ca
+  registry: ""  # Set in environment-specific values
   replicaCount: 1
   resources:
     requests:
       cpu: "100m"         # CPU request
       memory: "128Mi"     # Memory request
 
+  persistentVolume:
+    enabled: true
+    size: "500Mi"  # Persistent storage for virus signatures (keeps 3-4 versions)
+    storageClassName: "netapp-file-standard"
+
   freshclam:
-    # clamav.freshclam.mirrors -- A list of clamav mirrors to be used by the clamav service. By default, use the ClamAV Mirror provided in OCP4 Silver cluster
-    mirrors:
-    - https://clamav-mirror.apps.silver.devops.gov.bc.ca
+    mirrors: []  # Set in environment-specific values
 
   limits:
-    # clamav.limits.fileSize -- The largest file size scanable by clamav, in MB
-    fileSize: 30
-    # clamav.limits.scanSize -- The largest scan size permitted in clamav, in MB
-    scanSize: 150
-    # clamav.limits.connectionQueueLength -- Maximum length the queue of pending connections may grow to
+    fileSize: 30           # The largest file size scanable by clamav, in MB
+    scanSize: 150          # The largest scan size permitted in clamav, in MB
     connectionQueueLength: 100
-    # clamav.limits.maxThreads --Maximum number of threads running at the same time.
     maxThreads: 4
-    # clamav.sendBufTimeout -- This option specifies how long to wait (in milliseconds) if the send buffer is full, keep low to avoid clamd hanging
-    sendBufTimeout: 500
+    sendBufTimeout: 500    # milliseconds
 
 nameOverride: ""
 fullnameOverride: "clamav-scanner"
 
 service:
-  # The name of the service. Defaults to the release name.
   name: clamav-service
-  # The port that the service should expose.
   port: 3310
   type: ClusterIP
+  sessionAffinity: ClientIP  # Sticky sessions: same client goes to same pod
+  sessionAffinityTimeout: 3600  # Session timeout in seconds (1 hour)
 
 pdb:
   create: false
-  minAvailable: 1   # Ensure at least one pod is available during disruption
-  maxUnavailable: 1 # Allow one pod to be disrupted at a time
+  minAvailable: 1
+  maxUnavailable: 1
 
 cronJob:
   enabled: true
   name: clamav-freshclam
-  schedule: "0 0,18 * * *" # Run at midnight every day "0 0 * * *" 
+  schedule: "0 0,18 * * *"
   image:
-    repository: "image-registry.apps.silver.devops.gov.bc.ca/bb18ab-dev/clamav-scanner"
+    repository: ""  # Set in environment-specific values
     tag: "latest"
   imagePullPolicy: IfNotPresent
-  command: ["freshclam"]
   resources: {}
   restartPolicy: OnFailure
   successfulJobsHistoryLimit: 3
