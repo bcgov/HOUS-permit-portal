@@ -319,6 +319,9 @@ figure img {
 #print-ready {
   display: none;
 }
+.report-footer-preload {
+  display: none;
+}
 .report-error {
   border: 1pt solid #a92323;
   padding: 16pt;
@@ -326,16 +329,19 @@ figure img {
 @media print {
   @page permit-report {
     size: letter portrait;
-    margin: 0.5in 0.5in 0.75in;
+    margin: 0.5in 0.5in var(--report-bottom-margin, 0.75in);
     @bottom-left {
       content: var(--report-footer, "");
       font:
         9pt "BC Sans",
         sans-serif;
       color: #526176;
-      vertical-align: middle;
-      width: 75%;
-      white-space: normal;
+      line-height: 1.35;
+      border-top: 0.5pt solid var(--report-line, #d5dce5);
+      padding-top: 9pt;
+      vertical-align: top;
+      width: 80%;
+      white-space: pre-line;
       overflow-wrap: anywhere;
     }
     @bottom-right {
@@ -344,16 +350,22 @@ figure img {
         9pt "BC Sans",
         sans-serif;
       color: #526176;
-      vertical-align: middle;
-      width: 25%;
+      line-height: 1.35;
+      border-top: 0.5pt solid var(--report-line, #d5dce5);
+      padding-top: 9pt;
+      vertical-align: top;
+      text-align: right;
+      width: 20%;
     }
   }
   @page permit-report:first {
     @bottom-left {
       content: none;
+      border-top: none;
     }
     @bottom-right {
       content: none;
+      border-top: none;
     }
   }
   html,
@@ -396,7 +408,7 @@ figure img {
 
 .report-page-measure {
   position: absolute;
-  height: 9.75in;
+  height: calc(10.5in - var(--report-bottom-margin, 0.75in));
   width: 0;
   visibility: hidden;
 }
