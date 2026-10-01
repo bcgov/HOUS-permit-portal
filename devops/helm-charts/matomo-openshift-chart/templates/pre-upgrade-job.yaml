@@ -43,7 +43,10 @@ spec:
         - name: MATOMO_FIRST_USER_EMAIL
           value: {{.Values.matomo.dashboard.firstuser.email}}
         - name: MATOMO_FIRST_USER_PASSWORD
-          value: {{.Values.matomo.dashboard.firstuser.password}}
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.matomo.dashboard.firstuser.secretKeyRef.name }}
+              key: {{ .Values.matomo.dashboard.firstuser.secretKeyRef.key }}
         - name: MATOMO_DB_HOST
           value: {{.Values.db.hostname}}
         - name: MATOMO_DB_NAME

@@ -45,8 +45,11 @@ A Helm chart for Matomo
 | matomo.cronJobs.scheduledTasks.php | string | `nil` |  |
 | matomo.cronJobs.scheduledTasks.schedule | string | `"*/60 * * * *"` |  |
 | matomo.dashboard.enabled | bool | `true` |  |
+| matomo.dashboard.firstuser.createSecret | bool | `true` | If true, chart generates/manages the admin password Secret. |
 | matomo.dashboard.firstuser.email | string | `"foo@example.com"` |  |
-| matomo.dashboard.firstuser.password | string | `"admin123"` |  |
+| matomo.dashboard.firstuser.password | string | `""` | Leave blank to auto-generate; never commit a real password here. |
+| matomo.dashboard.firstuser.secretKeyRef.key | string | `"password"` |  |
+| matomo.dashboard.firstuser.secretKeyRef.name | string | `"matomo-admin"` |  |
 | matomo.dashboard.firstuser.username | string | `"admin"` |  |
 | matomo.dashboard.hostname | string | `"my.host"` |  |
 | matomo.dashboard.ingress.annotations."digitalist.cloud/instance" | string | `"matomo"` |  |
