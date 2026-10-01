@@ -51,9 +51,14 @@ See the root README for local setup and the job/attachment/ZIP workflow.
 ## Report design
 
 Letter portrait uses half-inch top/side margins and a three-quarter-inch footer
-margin. The dedicated cover is counted but has no footer. Content pages show the
-saved reference and version/stage, with Page X of Y in CSS page-margin boxes.
-Dynamic footer text is hex-escaped before insertion into CSS.
+margin. The dedicated cover is counted but has no footer. Submission content pages
+show the application ID, saved submission date and current applicant in spaced
+columns with labels above bold values,
+with Page X of Y aligned right and a horizontal divider above. Standalone step-code
+reports retain their reference and stage. Footers use CSS page-margin boxes;
+dynamic text is escaped before insertion into CSS and the footer SVG. The SVG
+embeds BC Sans and is decoded before readiness; long values wrap, reserving more
+footer space when needed rather than clipping or shrinking them.
 
 Application layout wrappers retain their visibility/data scopes but do not add
 visual nesting. A repeated enclosing heading is suppressed, never an answer.

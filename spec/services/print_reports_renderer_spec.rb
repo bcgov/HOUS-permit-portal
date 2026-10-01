@@ -429,20 +429,45 @@ RSpec.describe PrintReports::Renderer do
     it "prints literal identifiers and accurate footers, omitting the cover footer" do
       report[:identity].merge!(
         number: 'QA-"quoted"-\\-<style>literal</style>',
-        version_number: 2
+        version_number: 2,
+        submitted_at: "2026-09-23T01:00:00Z",
+        applicant:
+          'Alex "Applicant" \\ <style>literal</style> with a long applicant name for wrapping'
       )
       described_class
         .new
         .render(report) do |path|
           reader = PDF::Reader.new(path)
-          expect(reader.pages.first.text).not_to include("Page 1 of")
+          expect(
+            reader.pages.first.text(
+              rect: PDF::Reader::Rectangle.new(0, 0, 612, 90)
+            )
+          ).to be_blank
           reader
             .pages
             .drop(1)
             .each_with_index do |page, index|
-              expect(page.text).to include(
-                report[:identity][:number],
-                "Version 2",
+              application_id =
+                page.text(rect: PDF::Reader::Rectangle.new(0, 0, 175, 90))
+              submission_date =
+                page.text(rect: PDF::Reader::Rectangle.new(175, 0, 290, 90))
+              applicant =
+                page.text(rect: PDF::Reader::Rectangle.new(290, 0, 490, 90))
+              page_number =
+                page.text(rect: PDF::Reader::Rectangle.new(490, 0, 612, 90))
+              expect(application_id).to include("APPLICATION ID")
+              expect(application_id.gsub(/\s+/, "")).to include(
+                report[:identity][:number].gsub(/\s+/, "")
+              )
+              expect(submission_date).to include(
+                "SUBMISSION DATE",
+                "2026-09-22"
+              )
+              expect(applicant.gsub(/\s+/, " ")).to include(
+                "APPLICANT",
+                report[:identity][:applicant]
+              )
+              expect(page_number).to include(
                 "Page #{index + 2} of #{reader.page_count}"
               )
             end
