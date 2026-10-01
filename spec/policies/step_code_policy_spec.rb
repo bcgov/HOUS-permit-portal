@@ -280,14 +280,27 @@ RSpec.describe StepCodePolicy, type: :policy do
   end
 
   describe "Scope" do
-    it "includes standalone Step Codes created by the user" do
+    it "includes standalone Step Codes created by the user in the same sandbox" do
       visible =
-        create(:part_9_step_code, permit_application: nil, creator: submitter)
+        create(
+          :part_9_step_code,
+          permit_application: nil,
+          creator: submitter,
+          sandbox: sandbox
+        )
       hidden =
         create(
           :part_9_step_code,
           permit_application: nil,
-          creator: create(:user, :submitter)
+          creator: create(:user, :submitter),
+          sandbox: sandbox
+        )
+      other_sandbox =
+        create(
+          :part_9_step_code,
+          permit_application: nil,
+          creator: submitter,
+          sandbox: (jurisdiction.sandboxes.to_a - [sandbox]).first
         )
 
       resolved =
@@ -298,6 +311,7 @@ RSpec.describe StepCodePolicy, type: :policy do
 
       expect(resolved).to include(visible)
       expect(resolved).not_to include(hidden)
+      expect(resolved).not_to include(other_sandbox)
     end
 
     it "scopes attached Step Codes through the permit application policy scope" do

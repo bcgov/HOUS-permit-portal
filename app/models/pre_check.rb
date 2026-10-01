@@ -1,8 +1,6 @@
 class PreCheck < ApplicationRecord
-  include ProjectItem
   include AASM
   include PublicRecordable
-  has_parent :permit_application
 
   searchkick word_middle: %i[full_address external_id]
 
@@ -42,14 +40,18 @@ class PreCheck < ApplicationRecord
              foreign_key: "creator_id",
              optional: true
   public_recordable user_association: :creator
-  belongs_to :permit_application, optional: true
-  has_one :permit_project, through: :permit_application
+  belongs_to :jurisdiction, optional: true
+  belongs_to :sandbox, optional: true
   has_many :design_documents, dependent: :destroy, inverse_of: :pre_check
+
+  delegate :qualified_name,
+           :name,
+           to: :jurisdiction,
+           prefix: :jurisdiction,
+           allow_nil: true
 
   accepts_nested_attributes_for :design_documents, allow_destroy: true
 
-  validate :permit_application_belongs_to_creator,
-           if: -> { permit_application_id.present? }
   validate :agreements_accepted_before_design_documents
   validate :agreements_cannot_be_unaccepted
   validate :cannot_change_after_submission
@@ -62,10 +64,11 @@ class PreCheck < ApplicationRecord
 
   scope :completed_and_unviewed, -> { where(status: :complete, viewed_at: nil) }
 
-  delegate :permit_project_title, to: :permit_application, allow_nil: true
+  def self.unviewed_count_for_user(user_id, sandbox_id: :unscoped)
+    relation = completed_and_unviewed.where(creator_id: user_id)
+    return relation.count if sandbox_id == :unscoped
 
-  def self.unviewed_count_for_user(user_id)
-    completed_and_unviewed.where(creator_id: user_id).count
+    relation.where(sandbox_id: sandbox_id).count
   end
 
   # Helper to check if all required agreements have been accepted
@@ -148,14 +151,12 @@ class PreCheck < ApplicationRecord
       full_address: full_address,
       pid: pid,
       status: status,
-      title: title,
       service_partner: service_partner,
       creator_id: creator_id,
       created_at: created_at,
       updated_at: updated_at,
-      permit_project_id: permit_project&.id,
-      jurisdiction_id: jurisdiction&.id,
-      permit_application_id: permit_application_id
+      jurisdiction_id: jurisdiction_id,
+      sandbox_id: sandbox_id
     }
   end
 
@@ -212,15 +213,6 @@ class PreCheck < ApplicationRecord
   end
 
   private
-
-  def permit_application_belongs_to_creator
-    return if creator_id.blank?
-
-    submitter_id = permit_application&.submitter_id
-    return if submitter_id.nil? || submitter_id == creator_id
-
-    errors.add(:permit_application, :invalid)
-  end
 
   def agreements_accepted_before_design_documents
     return unless design_documents.any?

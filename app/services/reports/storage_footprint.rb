@@ -280,12 +280,13 @@ module Reports
         {
           key: "design_documents",
           created: "design_documents.created_at",
-          jurisdiction: "permit_projects.jurisdiction_id",
+          jurisdiction: "pre_checks.jurisdiction_id",
           scope: -> do
-            DesignDocument
-              .joins(pre_check: { permit_application: :permit_project })
-              .merge(PermitApplication.kept)
-              .merge(PermitProject.kept.live)
+            DesignDocument.joins(:pre_check).where(
+              pre_checks: {
+                sandbox_id: nil
+              }
+            )
           end
         },
         {

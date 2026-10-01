@@ -577,7 +577,6 @@ const options = {
           columns: {
             created_at: "Created",
             updated_at: "Last Updated",
-            title: "Project",
             external_id: "External ID",
             status: "Status",
             full_address: "Address",

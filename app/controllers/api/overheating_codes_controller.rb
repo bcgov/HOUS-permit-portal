@@ -25,7 +25,12 @@ class Api::OverheatingCodesController < Api::ApplicationController
 
   def create
     overheating_code =
-      OverheatingCode.new(overheating_code_params.merge(creator: current_user))
+      OverheatingCode.new(
+        overheating_code_params.merge(
+          creator: current_user,
+          sandbox: current_sandbox
+        )
+      )
 
     authorize overheating_code
     if overheating_code.save
