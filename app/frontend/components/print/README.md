@@ -61,6 +61,14 @@ Short scalar fields are paired inside their logical group (labels <=60 and value
 <=80 characters); multiline, compound, address and long fields stay full width.
 Wide/complex repeating grids become labelled records. Empty answers remain explicit.
 
+Standalone answers use a 1.5pt gray left rule, 8pt left padding and 4pt spacing
+below the bold question, without background shading. Cover metadata and table
+cells retain their existing layouts. Checkbox groups and multi-select fields show
+only selected labels, in saved schema order, as checked lines with hanging indents;
+unknown saved options follow with their saved values. Single-choice answers have
+no checkmark. Empty selections show "Not provided". Long answers can split across
+pages while their question stays with the start of the answer.
+
 Step-code sections use semantic report blocks and explicit table spans, without
 React-PDF style conversion or imports of the interactive application's theme.
 Use typed table layout/keepTogether options and report classes rather than inline

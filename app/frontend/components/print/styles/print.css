@@ -108,7 +108,7 @@ p + p {
 .report-field {
   min-width: 0;
   padding: 5pt 0 7pt;
-  break-inside: avoid;
+  break-inside: auto;
 }
 .report-field dt,
 .report-label {
@@ -122,6 +122,38 @@ p + p {
   margin: 3pt 0 0;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+}
+.report-field > .report-answer {
+  margin-top: 4pt;
+  border-left: 1.5pt solid #aeb5be;
+  padding-left: 8pt;
+  color: var(--report-ink);
+  font-weight: 400;
+}
+.report-cover .report-answer,
+.report-table .report-answer,
+.report-field > .report-answer:has(> dl) {
+  margin-top: 3pt;
+  border-left: 0;
+  padding-left: 0;
+}
+.report-choice-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  white-space: normal;
+}
+.report-choice-list li {
+  display: grid;
+  grid-template-columns: 11pt minmax(0, 1fr);
+  column-gap: 4pt;
+  break-inside: avoid;
+}
+.report-choice-list li + li {
+  margin-top: 3pt;
+}
+.report-choice-marker {
+  font-family: var(--report-font-family);
 }
 .report-field-pair,
 .report-columns {

@@ -128,6 +128,124 @@ RSpec.describe PrintReports::Renderer do
 
   context "real local conversion", if: ENV["RUN_GOTENBERG_SPECS"] == "true" do
     around { |example| VCR.turned_off { example.run } }
+    it "prints only selected choice labels in schema order, including aliases and unknown saved values" do
+      options = [
+        {
+          label:
+            "Fireplace built into a prefabricated structure with a long description that wraps onto another line",
+          value: "fireplace"
+        },
+        { label: "Pellet stove", value: "pellet" },
+        { label: "UNSELECTED WOOD STOVE", value: "wood" }
+      ]
+      report[:form_json][:components] = [
+        {
+          type: "simplecheckboxes",
+          key: "appliances",
+          label: "Appliances",
+          values: options
+        },
+        {
+          type: "simpleselectadvanced",
+          multiple: true,
+          key: "multi",
+          label: "Multiple selections",
+          data: {
+            values: options
+          }
+        },
+        {
+          type: "selectboxes",
+          key: "empty",
+          label: "Empty selection",
+          values: options
+        },
+        {
+          type: "select",
+          key: "single",
+          label: "Chimney",
+          data: {
+            values: [{ label: "Factory-built chimney", value: "factory" }]
+          }
+        },
+        {
+          type: "simpleradios",
+          key: "radio",
+          label: "Radio selection",
+          values: [{ label: "Zero option", value: 0 }]
+        },
+        { type: "checkbox", key: "boolean", label: "Boolean answer" },
+        { type: "number", key: "zero", label: "Numeric answer" },
+        {
+          type: "select",
+          key: "missing",
+          label: "Missing selection",
+          input: true,
+          values: options
+        }
+      ]
+      report[:submission_data][:data] = {
+        appliances: {
+          :pellet => true,
+          :wood => false,
+          :fireplace => true,
+          "LEGACY-CHOICE" => true
+        },
+        multi: %w[pellet fireplace],
+        empty: {
+          fireplace: false,
+          pellet: false,
+          wood: false
+        },
+        single: "factory",
+        radio: 0,
+        boolean: false,
+        zero: 0
+      }
+      original = Marshal.dump(report)
+      described_class
+        .new
+        .render(report) do |path|
+          text =
+            PDF::Reader.new(path).pages.map(&:text).join(" ").gsub(/\s+/, " ")
+          expect(text).to include(
+            options.first[:label],
+            "Pellet stove",
+            "LEGACY-CHOICE",
+            "Factory-built chimney",
+            "Zero option"
+          )
+          expect(text).not_to include("UNSELECTED WOOD STOVE")
+          expect(text).to match(
+            /Appliances.*Fireplace.*Pellet stove.*LEGACY-CHOICE/
+          )
+          expect(text).to match(/Multiple selections.*Fireplace.*Pellet stove/)
+          expect(text).to match(/Empty selection\s+Not provided/)
+          expect(text).to match(/Missing selection\s+Not provided/)
+          expect(text).to match(/Boolean answer\s+Numeric answer\s+No\s+0/)
+          expect(text.scan("✓").length).to eq(5)
+        end
+      expect(Marshal.dump(report)).to eq(original)
+    end
+
+    it "preserves the beginning and end of a multi-page answer with its question" do
+      report[:form_json][:components] = [
+        { type: "textarea", key: "answer", label: "Long answer question" }
+      ]
+      report[:submission_data][:data][:answer] = "BEGIN-ANSWER " +
+        ("Long saved narrative. " * 1200) + " END-ANSWER"
+      described_class
+        .new
+        .render(report) do |path|
+          pages = PDF::Reader.new(path).pages
+          expect(pages.length).to be > 3
+          first_answer_page =
+            pages.find { |page| page.text.include?("BEGIN-ANSWER") }
+          expect(first_answer_page.text).to include("Long answer question")
+          expect(pages.map(&:text).join(" ")).to include("END-ANSWER")
+        end
+    end
+
     it "prints cover metadata and falls back to the template when there are no tags" do
       report[:identity].merge!(
         address: "42 Current Avenue",
@@ -359,7 +477,7 @@ RSpec.describe PrintReports::Renderer do
         .new
         .render(report) do |path|
           reader = PDF::Reader.new(path)
-          text = reader.pages.map(&:text).join(" ")
+          text = reader.pages.map(&:text).join(" ").gsub(/-\s+/, "-")
           expect(reader.page_count).to be > 3
           expect(text).to include(
             "FIRST-RECORD",
