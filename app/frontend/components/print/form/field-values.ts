@@ -24,16 +24,31 @@ export function optionLabel(component: FormComponent, value: any): string {
   const selected = options.find((option: any) => String(option.value) === String(value))
   return selected?.label ?? displayValue(value)
 }
+/** Selected labels in saved schema order, followed by values no longer in the schema. */
+export function selectedOptionLabels(component: FormComponent, value: any): string[] {
+  if (isMissing(value)) return []
+  const selected =
+    component.type === "selectboxes"
+      ? Object.keys(value).filter((key) => value[key])
+      : Array.isArray(value)
+        ? value
+        : [value]
+  const remaining = new Map(selected.map((entry) => [String(entry), entry]))
+  const labels: string[] = []
+  for (const option of component.values || component.data?.values || []) {
+    const key = String(option.value)
+    if (remaining.has(key)) {
+      labels.push(optionLabel(component, remaining.get(key)))
+      remaining.delete(key)
+    }
+  }
+  return labels.concat(Array.from(remaining.values(), (entry) => optionLabel(component, entry)))
+}
 export function fieldValue(component: FormComponent, value: any): string {
   if (isMissing(value)) return NOT_PROVIDED
-  if (component.type === "selectboxes") {
-    const selected = Object.keys(value)
-      .filter((key) => value[key])
-      .map((key) => optionLabel(component, key))
-    return selected.length ? selected.join("; ") : NOT_PROVIDED
-  }
+  if (component.type === "selectboxes") return selectedOptionLabels(component, value).join("; ") || NOT_PROVIDED
   if (["select", "radio"].includes(component.type))
-    return Array.isArray(value) ? value.map((v) => optionLabel(component, v)).join("; ") : optionLabel(component, value)
+    return selectedOptionLabels(component, value).join("; ") || NOT_PROVIDED
   if (["datetime", "date", "day"].includes(component.type) && typeof value === "string") {
     // Preserve date-only values without a timezone shift.
     if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value
