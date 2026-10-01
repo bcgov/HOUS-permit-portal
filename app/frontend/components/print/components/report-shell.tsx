@@ -46,6 +46,8 @@ export function ReportShell({
         }
       }
       await document.fonts.ready
+      // Let footer preparation finish with the loaded font before decoding its image.
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
       await Promise.all(Array.from(documentRef.current?.querySelectorAll("img") || []).map((img) => img.decode()))
       await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
       // Measure at the actual Letter content width after fonts/images settle. Oversized
