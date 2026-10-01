@@ -90,6 +90,7 @@ import {
   IPermitProjectSearchFilters,
   IProjectAuditSearchFilters,
   IProjectMeetingInboxSearchFilters,
+  ISubmissionContact,
   ITemplateVersionDiff,
   TAutoComplianceModuleConfigurations,
   TCreateRequirementTemplateFormData,
@@ -1355,6 +1356,18 @@ export class Api {
 
   async createContact(params: TContactFormData) {
     return this.client.post<ApiResponse<IContact>>("/contacts", { contact: params })
+  }
+
+  async createSubmissionContact(params: { jurisdictionId: string; email: string; type: string }) {
+    return this.client.post<ApiResponse<ISubmissionContact>>("/submission_contacts", { submissionContact: params })
+  }
+
+  async destroySubmissionContact(id: string) {
+    return this.client.delete<ApiResponse<ISubmissionContact>>(`/submission_contacts/${id}`)
+  }
+
+  async resendSubmissionContactConfirmation(id: string) {
+    return this.client.post<ApiResponse<ISubmissionContact>>(`/submission_contacts/${id}/resend_confirmation`)
   }
 
   async updateContact(id: string, params: TContactFormData) {

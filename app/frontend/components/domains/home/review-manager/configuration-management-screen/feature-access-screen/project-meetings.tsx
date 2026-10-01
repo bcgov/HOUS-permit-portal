@@ -96,14 +96,10 @@ export const ProjectMeetingsJurisdictionFeatureAccessScreen = observer(() => {
             </Link>
           </Flex>
 
-          <SubmissionContactForm
-            jurisdiction={currentJurisdiction}
-            heading={recipientHeading(t(`${i18nPrefix}.projectMeetings`))}
-            contactClass={ESubmissionContactClass.meeting}
-            emailLabel={t(`${i18nPrefix}.projectMeetingsEmailLabel`)}
-            addEmailLabel={t(`${i18nPrefix}.projectMeetingsAddEmail`)}
-            confirmationRequiredLabel={t(`${i18nPrefix}.projectMeetingsConfirmationRequired`)}
-          />
+          <Flex direction="column" w="full" gap={4}>
+            {recipientHeading(t(`${i18nPrefix}.projectMeetings`))}
+            <SubmissionContactForm jurisdiction={currentJurisdiction} contactClass={ESubmissionContactClass.meeting} />
+          </Flex>
 
           {projectMeetingsEnabled && (
             <>
@@ -123,14 +119,13 @@ export const ProjectMeetingsJurisdictionFeatureAccessScreen = observer(() => {
                 />
               </Flex>
 
-              <SubmissionContactForm
-                jurisdiction={currentJurisdiction}
-                heading={recipientHeading(t(`${i18nPrefix}.propertyInformation`))}
-                contactClass={ESubmissionContactClass.propertyInformation}
-                emailLabel={t(`${i18nPrefix}.propertyInformationEmailLabel`)}
-                addEmailLabel={t(`${i18nPrefix}.propertyInformationAddEmail`)}
-                confirmationRequiredLabel={t(`${i18nPrefix}.propertyInformationConfirmationRequired`)}
-              />
+              <Flex direction="column" w="full" gap={4}>
+                {recipientHeading(t(`${i18nPrefix}.propertyInformation`))}
+                <SubmissionContactForm
+                  jurisdiction={currentJurisdiction}
+                  contactClass={ESubmissionContactClass.propertyInformation}
+                />
+              </Flex>
             </>
           )}
         </Flex>

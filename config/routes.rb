@@ -193,7 +193,9 @@ Rails.application.routes.draw do
       get "contact_options", on: :collection
     end
 
-    resources :submission_contacts, only: %i[index create update destroy]
+    resources :submission_contacts, only: %i[index create update destroy] do
+      post :resend_confirmation, on: :member
+    end
 
     resources :geocoder, only: %i[] do
       get "site_options", on: :collection

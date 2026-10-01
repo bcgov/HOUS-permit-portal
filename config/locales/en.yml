@@ -837,6 +837,19 @@ en:
       autofill_part_9_step_code_error:
         title: Error
         message: "%{error_message}"
+    submission_contact:
+      create_error:
+        title: Error
+        message: "%{error_message}"
+      destroy_error:
+        title: Error
+        message: "%{error_message}"
+      destroy_failed:
+        title: Error
+        message: "Could not remove email address"
+      resend_error:
+        title: Error
+        message: "This email address is already verified"
     permit_collaboration:
       destroy_success:
         title: ""
