@@ -12,7 +12,7 @@ export function ReportField({
   return (
     <div className={`report-field report-field--${width}`}>
       <dt>{label}</dt>
-      <dd>{children}</dd>
+      <dd className="report-answer">{children}</dd>
     </div>
   )
 }

@@ -1,7 +1,7 @@
 import DOMPurify from "dompurify"
 import React from "react"
 import { ReportAttachments } from "../components/report-attachments"
-import { displayValue, fieldValue, FormComponent } from "./field-values"
+import { displayValue, fieldValue, FormComponent, NOT_PROVIDED, selectedOptionLabels } from "./field-values"
 export function RichText({ html }: { html: string }) {
   return (
     <span
@@ -46,6 +46,24 @@ export const fieldRenderers: Record<string, React.ComponentType<Props>> = Object
   ].map((type) => [type, Plain])
 )
 fieldRenderers.textarea = Rich
+const Choices = ({ component, value }: Props) => {
+  const labels = selectedOptionLabels(component, value)
+  if (!labels.length) return <>{NOT_PROVIDED}</>
+  if (component.type !== "selectboxes" && !component.multiple && !Array.isArray(value)) return <>{labels[0]}</>
+  return (
+    <ul className="report-choice-list">
+      {labels.map((label, index) => (
+        <li key={index}>
+          <span className="report-choice-marker" aria-hidden="true">
+            ✓
+          </span>
+          <span>{label}</span>
+        </li>
+      ))}
+    </ul>
+  )
+}
+fieldRenderers.selectboxes = fieldRenderers.select = Choices
 fieldRenderers.file = fieldRenderers.simplefile = ({ value }) => <ReportAttachments value={value} />
 export function FieldValue({ component, value }: Props) {
   const Renderer = fieldRenderers[component.type]
@@ -111,7 +129,7 @@ fieldRenderers.survey = ({ component, value }) => (
         <dt>
           <RichText html={question.label || question.value} />
         </dt>
-        <dd>{fieldValue({ ...component, type: "radio" }, value?.[question.value])}</dd>
+        <dd className="report-answer">{fieldValue({ ...component, type: "radio" }, value?.[question.value])}</dd>
       </div>
     ))}
   </dl>
