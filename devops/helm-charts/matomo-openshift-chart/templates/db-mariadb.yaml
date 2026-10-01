@@ -43,6 +43,13 @@ spec:
         - name: mariadb
           image: {{ include "matomo.image" (dict "registry" (.Values.db.imageRegistry | default .Values.global.imageRegistry) "image" .Values.db.image) }}
           imagePullPolicy: IfNotPresent
+          {{- if .Values.db.extraArgs }}
+          args:
+            - mariadbd
+            {{- range .Values.db.extraArgs }}
+            - {{ . | quote }}
+            {{- end }}
+          {{- end }}
           startupProbe:
             exec:
               command:

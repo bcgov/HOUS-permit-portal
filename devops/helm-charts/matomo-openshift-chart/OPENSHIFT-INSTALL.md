@@ -37,8 +37,13 @@ Before installing, update:
 
 - `matomo.dashboard.hostname`
 - `matomo.tracker.hostname`
-- `matomo.dashboard.firstuser.password`
 - `global.imageRegistry`
+
+`matomo.dashboard.firstuser.password` is deliberately **not** something you
+set here — leave it blank and the chart auto-generates a random password into
+a Secret (`matomo-admin`) on first install. After `helm install`, retrieve it
+with the command `helm status matomo` / the install output prints (or run it
+directly): `oc get secret matomo-admin -n <namespace> -o jsonpath='{.data.password}' | base64 -d; echo`
 
 ## First-time database setup (required after every fresh DB)
 
@@ -72,7 +77,10 @@ once per database, using these steps:
      Password = the value in the `db.password.secretKeyRef.name` /
      `.key` Secret, Database Name = `db.name`, Table Prefix = `db.prefix`,
      Database Engine = MariaDB (if using the bundled StatefulSet).
-   - **Superuser**: use `matomo.dashboard.firstuser.username` / `.password` / `.email`.
+   - **Superuser**: Username = `matomo.dashboard.firstuser.username`, Email =
+     `.email`, Password = retrieve it first with
+     `oc get secret matomo-admin -n <namespace> -o jsonpath='{.data.password}' | base64 -d; echo`
+     (auto-generated on first `helm install` — see §0 above).
    - **Set up a Website**: use `matomo.site.name` / `matomo.site.url` and your timezone.
    - Skip the JavaScript tracking code step (already handled by the tracker deployment)
      and click through to **Congratulations**.
