@@ -82,6 +82,7 @@ securityContext:
 [General]
 proxy_client_headers[] = "HTTP_X_FORWARDED_FOR"
 assume_secure_protocol = 1
+force_ssl = 1
 browser_archiving_disabled_enforce = 1
 enable_browser_archiving_triggering = 0
 archiving_range_force_on_browser_request = 0
@@ -272,12 +273,13 @@ initContainers:
     {{- include "matomo.securityContext" (dict "runAsUser" .Values.matomo.runAsUser) | nindent 4 }}
     imagePullPolicy: Always
     env:
-    - name: MATOMO_FIRST_USER_NAME
-      value: {{ .Values.matomo.dashboard.firstuser.username | quote }}
-    - name: MATOMO_FIRST_USER_EMAIL
-      value: {{ .Values.matomo.dashboard.firstuser.email | quote }}
-    - name: MATOMO_FIRST_USER_PASSWORD
-      value: {{ .Values.matomo.dashboard.firstuser.password | quote }}
+    {{- /*
+      MATOMO_FIRST_USER_* deliberately not set here: this initContainer's
+      script (below) never reads them, so they'd just be plaintext exposure
+      on every pod (dashboard/tracker/cron/cli) for no functional benefit.
+      Only post-install-job.yaml / pre-upgrade-job.yaml actually consume
+      them, sourced from the matomo-admin Secret (see matomo-admin-secret.yaml).
+    */}}
     - name: MATOMO_DB_HOST
       value: {{ .Values.db.hostname | quote }}
     - name: MATOMO_DB_NAME
@@ -308,6 +310,8 @@ initContainers:
         password = "${MATOMO_DB_PASSWORD}"
         dbname = "{{ .Values.db.name }}"
         tables_prefix = "{{ .Values.db.prefix }}"
+        charset = "{{ .Values.db.charset | default "utf8mb4" }}"
+        collation = "{{ .Values.db.collation | default "utf8mb4_general_ci" }}"
 
         [General]
         proxy_client_headers[] = "HTTP_X_FORWARDED_FOR"
@@ -320,6 +324,24 @@ initContainers:
         if [ -f /tmp/matomo/common.config.ini.php ]; then
           cp /tmp/matomo/common.config.ini.php /var/www/html/config/common.config.ini.php
         fi
+        {{- if .Values.matomo.geoip.enabled }}
+        # Every pod has its own ephemeral /var/www/html, so the GeoIp2 plugin's
+        # own AutoUpdater task (which only ever runs inside a short-lived
+        # scheduled-tasks cron pod) never leaves a database file any other pod
+        # can see. Fetch it here instead so dashboard/tracker/cli/cronjobs all
+        # have a consistent, working DBIP-City.mmdb from the moment they start.
+        # Non-fatal on failure: Matomo just falls back to no geolocation.
+        if [ ! -f /var/www/html/misc/DBIP-City.mmdb ]; then
+          DBIP_URL=$(printf '{{ .Values.matomo.geoip.downloadUrlPattern }}' "$(date -u +%Y-%m)")
+          echo "Downloading GeoIP city database from ${DBIP_URL} ..."
+          if curl -fsSL --connect-timeout 10 --max-time 120 "${DBIP_URL}" -o /tmp/dbip-city.mmdb.gz; then
+            gunzip -c /tmp/dbip-city.mmdb.gz > /var/www/html/misc/DBIP-City.mmdb && rm -f /tmp/dbip-city.mmdb.gz
+            echo "GeoIP database installed."
+          else
+            echo "WARNING: could not download GeoIP database ${DBIP_URL}; continuing without accurate geolocation."
+          fi
+        fi
+        {{- end }}
     {{- if $initResources }}
     resources:
 {{ toYaml $initResources | indent 6 }}

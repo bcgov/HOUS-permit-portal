@@ -57,6 +57,20 @@ data:
           try_files $uri $uri/ /index.php$is_args$args;
         }
 
+        {{- /*
+          Liveness/readiness probes must NOT hit /index.php: every hit runs a
+          full PHP bootstrap, and since Matomo stores sessions in the database
+          (session_save_handler = dbtable), a probe request with no session
+          cookie inserts a brand-new row that's never reused — every 5-10s,
+          forever, regardless of real traffic. Answered entirely by nginx so
+          probes never reach PHP-FPM or touch the session table at all.
+        */}}
+        location = /healthz {
+          access_log off;
+          add_header Content-Type text/plain;
+          return 200 "OK";
+        }
+
         location ~ js/container_.*_preview\.js$ {
             expires off;
             add_header Cache-Control 'private, no-cache, no-store';
@@ -120,15 +134,6 @@ data:
           include fastcgi_params;
         }
 
-        ## Allow access to static media files.
-        location ~ \.(gif|ico|jpg|png|svg|js|css|htm|html|mp3|mp4|wav|ogg|avi|ttf|eot|woff|woff2|json)$ {
-            allow all;
-            ## Cache images,CSS,JS and webfonts for an hour
-            ## Increasing the duration may improve the load-time, but may cause old files to show after an Matomo upgrade
-            expires 1h;
-            add_header Pragma public;
-            add_header Cache-Control "public";
-        }
         # location ~ ^/(status)$ {
         #   access_log off;
 
@@ -149,8 +154,20 @@ data:
           return 403;
         }
 
+        {{- /*
+          This must come BEFORE the "allow all static media files" location
+          below. Nginx picks the first matching regex location in file order
+          (not the most specific one), so a rule allowing *.json/*.js/etc.
+          placed earlier would otherwise win over this deny-list for anything
+          under /lang/, /config/, /tmp/, /core/ that happens to end in one of
+          those extensions (e.g. /lang/en.json) — exactly the "should not be
+          publicly accessible" System Check warning this fixes. Unlike
+          libs/vendor/plugins below, these four directories never contain
+          anything the dashboard legitimately needs to serve, so it's safe to
+          deny them unconditionally ahead of the static-asset rule.
+        */}}
         ## Deny access to key matomo folders and files that dashboard should not serve.
-        location ~ /(config|tmp|core|lang|libs|vendor|plugins|misc/user|piwik.js|piwik.php|matomo.js|matomo.php) {
+        location ~ /(config|tmp|core|lang|misc/user|piwik.js|piwik.php|matomo.js|matomo.php) {
           deny all;
           return 403;
         }
@@ -175,6 +192,29 @@ data:
         location ~ ^/[^.]*\.lock$ {
             deny  all;
             return 403;
+        }
+
+        ## Allow access to static media files.
+        location ~ \.(gif|ico|jpg|png|svg|js|css|htm|html|mp3|mp4|wav|ogg|avi|ttf|eot|woff|woff2|json)$ {
+            allow all;
+            ## Cache images,CSS,JS and webfonts for an hour
+            ## Increasing the duration may improve the load-time, but may cause old files to show after an Matomo upgrade
+            expires 1h;
+            add_header Pragma public;
+            add_header Cache-Control "public";
+        }
+
+        {{- /*
+          Deliberately placed AFTER the static-asset rule above, matching
+          Matomo's own upstream nginx reference config: plugins/libs/vendor
+          legitimately serve public theme assets (e.g. plugins/Morpheus's
+          logo/fonts/CSS), so those requests need to be served by the rule
+          above first. This rule then catches anything else under these
+          directories (PHP is already denied earlier regardless).
+        */}}
+        location ~ ^/(libs|vendor|plugins) {
+          deny all;
+          return 403;
         }
       }
     }
