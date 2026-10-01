@@ -62,6 +62,23 @@ matomo:
   # in OPENSHIFT-INSTALL.md for exact steps and how to recover if you see
   # "Matomo is already installed" with a missing-table error).
   installCommand: ""
+  #
+  # Geolocation (DB-IP City Lite database)
+  # ---------------------------------------
+  # Every pod (dashboard/tracker/cli/cronjobs) has its own ephemeral webroot,
+  # so GeoIp2's built-in AutoUpdater task — which only ever runs inside a
+  # short-lived scheduled-tasks cron pod — never leaves a database file any
+  # OTHER pod can see. The tracker pod in particular needs this file locally
+  # to record accurate visitor city/region/country at tracking time. The init
+  # container fetches it fresh on every pod start instead; disable if your
+  # cluster has no egress to db-ip.com, or if you'd rather manage this via a
+  # shared persistent volume.
+  geoip:
+    enabled: true
+    # -- URL pattern for the free DB-IP City Lite database. The single %s is
+    # replaced with the current UTC year-month (e.g. 2026-08) at pod start,
+    # matching DB-IP's monthly release naming.
+    downloadUrlPattern: "https://download.db-ip.com/free/dbip-city-lite-%s.mmdb.gz"
   # -- Default site created at install time (used in install.json).
   site:
     name: Localhost
@@ -227,9 +244,26 @@ matomo:
     hostname: my.host
     tls: false
     firstuser:
-      username: <REDACTED>
-      password: <REDACTED>
-      email: <REDACTED>
+      username: admin
+      email: foo@example.com
+      # -- Leave blank to auto-generate a random password on first install --
+      # avoids ever putting a real admin password in a values file. Retrieve
+      # it after deploy with the command `helm status` prints (NOTES.txt), or:
+      #   oc get secret <firstuser.secretKeyRef.name> -n <namespace> -o jsonpath='{.data.password}' | base64 -d
+      # Only used when createSecret: true. Setting this to a real password is
+      # still supported (e.g. to match an existing manually-set admin login)
+      # but then treat this values file as sensitive -- see BACKUP-AND-RESTORE-GUIDE.md
+      # §0 for the same rule applied to other credentials in this chart.
+      password: ""
+      # -- If true (default), the chart creates/manages the Secret below: a
+      # random password is generated once on first install and the SAME
+      # Secret is reused (not regenerated) on every later `helm upgrade`, so
+      # it never silently rotates out from under you. If false, secretKeyRef
+      # must point at a Secret that already exists in this namespace.
+      createSecret: true
+      secretKeyRef:
+        name: "matomo-admin"
+        key: "password"
     nginx:
       nginxWorkerProcesses: 5
       image: ''
@@ -336,6 +370,18 @@ fpmExporter:
 db:
   # -- Deploy the bundled MariaDB StatefulSet. Set false to use an external DB.
   enabled: false
+  # -- Extra mariadbd startup flags. Defaults clear three Matomo System Check
+  # warnings: max_allowed_packet (Matomo recommends >=64MB, MariaDB defaults to 16MB)
+  # and utf8mb4 as the server-wide default charset/collation for new databases.
+  extraArgs:
+    - "--max_allowed_packet=64M"
+    - "--character-set-server=utf8mb4"
+    - "--collation-server=utf8mb4_general_ci"
+  # -- Matomo's [database] connection charset/collation (config/config.ini.php).
+  # Existing tables created before this was set still need a one-time
+  # `console core:convert-to-utf8mb4` to actually convert their charset.
+  charset: "utf8mb4"
+  collation: "utf8mb4_general_ci"
   imageRegistry: ""
   image: mariadb:11.4
   imagePullSecrets: []
@@ -377,6 +423,160 @@ db:
   name: matomo
   username: root
   prefix: matomo_
+
+# Database backup to an S3-compatible object store (e.g. an on-premise bucket)
+# ------------------------------------------------------------------------------
+# Uses mariadb-dump for a full logical backup on every run. MariaDB has no
+# simple logical-incremental equivalent to tools like pgBackRest, so retention
+# is handled by trimming older objects from the bucket after each successful
+# upload rather than by incremental backups. See BACKUP-AND-RESTORE-GUIDE.md
+# for full setup and restore instructions.
+backup:
+  enabled: false
+  # -- Standard cron schedule for the backup CronJob.
+  schedule: "0 2 * * *"
+  # -- How many backups to keep under s3.path; older ones are deleted by the
+  # same job immediately after a successful upload. Backup filenames embed a
+  # sortable UTC timestamp (matomo-YYYYMMDD-HHMMSS.sql.gz), so "oldest" is
+  # just a plain lexicographic sort of filenames -- no listing-API/JSON
+  # parsing needed, works identically on any S3-compatible store.
+  #
+  # SAFETY: retention only ever deletes files whose name matches exactly
+  # matomo-YYYYMMDD-HHMMSS.sql.gz (what this job itself creates). Any other
+  # object in the same folder is never listed for deletion, so pre-existing
+  # data is left alone. Must be >= 1.
+  retentionCount: 14
+  # -- Set false to disable ALL deletion (upload-only). Useful for a first dev
+  # test, or when the bucket's own lifecycle rules do the cleanup.
+  pruneEnabled: true
+  concurrencyPolicy: Forbid
+  activeDeadlineSeconds: 3600
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  resources: {}
+  # -- Image for the mariadb-dump step. Defaults to db.image (same registry)
+  # so the dump tool version always matches the running server.
+  dbImage: ""
+  # -- Image for the S3 upload/retention step: rclone -- a vendor-neutral
+  # cloud-storage sync tool (S3-compatible is one of dozens of backends it
+  # supports via a plain endpoint URL; nothing AWS-specific about it). Pin an
+  # exact tag you've verified exists in your registry before importing it --
+  # this chart already got burned once by trusting a mistagged image blindly.
+  #
+  # Local ImageStream tag name only (no "rclone/" org prefix) -- combined
+  # with global.imageRegistry via the same matomo.image helper every other
+  # image in this chart uses. Import with:
+  #   oc tag rclone/rclone:1.68.2 --source=docker rclone:1.68.2 -n <namespace>
+  # (source keeps the Docker Hub org path; destination is just the local tag
+  # name -- a destination containing "/" gets parsed as <namespace>/<name>
+  # by `oc tag` and silently targets the wrong namespace).
+  s3ClientImage: "rclone:1.68.2"
+  s3:
+    # -- Master switch: the backup CronJob is only created when both
+    # backup.enabled and backup.s3.enabled are true.
+    enabled: false
+    # -- If true, the chart creates the Secret below from accessKey/secretKey
+    # (convenient for dev). If false, secretName must already exist in this
+    # namespace with keys "access-key" / "secret-key" -- the recommended
+    # setup for anything beyond local testing, so credentials never live in
+    # a values file.
+    createSecret: true
+    secretName: "matomo-s3-backup"
+    accessKey: ""
+    secretKey: ""
+    # -- S3-compatible endpoint, e.g. https://objectstore.example.gov.bc.ca
+    # -- an on-premise bucket, same as the reference CrunchyDB/pgBackRest
+    # setup this was modelled on. Not AWS.
+    endpoint: ""
+    bucket: ""
+    # -- Folder/prefix within the bucket. Leading slash optional. Use a
+    # DEDICATED, new folder (e.g. /matomo-backups-dev) -- never a folder that
+    # already holds other data. Empty (bucket root) is rejected by the job.
+    path: "/matomo-backups"
+    # -- Object-count ceiling of the bucket (0 = don't check). If your store
+    # caps the whole bucket (e.g. 500 objects), set it here: before each
+    # upload the job counts ALL objects in the bucket (not just ours) and
+    # refuses to upload if that would exceed this, after first trying to make
+    # room by pruning only its own oldest backups. It never deletes anything
+    # that isn't a matomo-*.sql.gz backup. Each backup is exactly one object.
+    maxObjects: 0
+    # -- Set true only if your on-premise endpoint serves a self-signed/
+    # internal-CA certificate rclone wouldn't otherwise trust.
+    insecure: false
+  # -- A SECOND, independent backup destination: a PersistentVolumeClaim in
+  # this namespace. Fully separate from s3 above -- enable either one alone,
+  # or both together (every run then writes to both, each with its own
+  # retention). Restoring later picks whichever source you point it at
+  # (restore.source), so if one destination is unavailable the other still
+  # has you covered.
+  pvc:
+    enabled: false
+    # -- If true, the chart creates the PVC below. If false, set
+    # existingClaim to a PVC that already exists in this namespace.
+    createClaim: true
+    existingClaim: ""
+    size: "2Gi"
+    storageClass: ""
+    # -- ReadWriteOnce is the safe default. If your StorageClass supports
+    # ReadWriteMany (e.g. an NFS-backed class such as this cluster's
+    # netapp-file-standard), that removes the small chance of a restore Job
+    # being unable to mount the PVC while a backup happens to be running.
+    accessMode: ReadWriteOnce
+    mountPath: /pvc-backups
+    # -- How many backups to keep on the PVC. Independent of s3.* retention
+    # above -- size this against backup.pvc.size, not against s3 capacity.
+    retentionCount: 7
+    # -- Set false to disable deletion on the PVC specifically (copy-only).
+    pruneEnabled: true
+    # -- Image for the copy/retention step. Empty reuses the same image as
+    # the dump step (backup.dbImage | default db.image) -- avoids importing
+    # a separate image into the ImageStream just for this.
+    image: ""
+
+# On-demand, DESTRUCTIVE restore of the database from either backup source.
+# ------------------------------------------------------------------------------
+# Deliberately not a CronJob -- never run this against a live, traffic-serving
+# database without a fresh backup already taken. Gated behind both `enabled`
+# and `confirm` so a stray `helm upgrade` with a stale values file can never
+# trigger it by accident. Do NOT set these in a persisted values file --
+# invoke restore via a one-off `--set` override per BACKUP-AND-RESTORE-GUIDE.md.
+restore:
+  enabled: false
+  # -- Must be set to the exact literal string "yes-overwrite-database" for
+  # the restore Job to render at all.
+  confirm: ""
+  # -- Which backup destination to restore FROM: "s3" or "pvc". Only one at a
+  # time -- pick whichever one is actually available/intact. Defaults to s3
+  # for backward compatibility with restores set up before pvc existed.
+  source: "s3"
+  # -- Filename to restore (matomo-YYYYMMDD-HHMMSS.sql.gz), or "latest" for
+  # the most recent one on the chosen source. Same naming on both sources.
+  backupFile: "latest"
+  # -- Change this to a fresh value (e.g. a timestamp) on every restore
+  # attempt -- Jobs are immutable once created, so re-running with the same
+  # suffix will fail rather than silently doing nothing.
+  jobSuffix: "manual"
+  activeDeadlineSeconds: 3600
+  resources: {}
+  dbImage: ""
+  # -- Same local-ImageStream-name convention as backup.s3ClientImage above.
+  s3ClientImage: "rclone:1.68.2"
+  # -- Used only when restore.source: "s3". Each defaults to the matching
+  # backup.s3.* value above; override only to restore from a DIFFERENT
+  # bucket/endpoint than backups currently go to (e.g. promoting a prod
+  # snapshot into a dev environment).
+  s3:
+    secretName: ""
+    endpoint: ""
+    bucket: ""
+    path: ""
+    insecure: false
+  # -- Used only when restore.source: "pvc". Each defaults to the matching
+  # backup.pvc.* value above; override only to restore from a DIFFERENT PVC
+  # than the one backups currently go to.
+  pvc:
+    claimName: ""
+    mountPath: ""
 
 openshift:
   route:

@@ -1,16 +1,3 @@
-# Example OpenShift install overrides.
-# Mirror/import these images into the project first, or change the image names to match your ImageStreams.
-#
-# Sizing notes
-# ------------
-# This file is a medium/small profile. For larger OpenShift memory quotas, raise:
-#   - matomo.php.memory_limit / matomo.phpfpm.memory_limit
-#   - matomo.resources / matomo.tracker.resources / matomo.cronJobs.*.resources
-#   - matomo.cronJobs.scheduledTasks.php.memory_limit (purge can be heavy)
-#   - db.storage.size and db.resources
-# and optionally keep more history via matomo.privacy.*.
-#
-# Privacy purge depends on matomo.cronJobs.scheduledTasks.enabled = true.
 
 global:
   imageRegistry: image-registry.openshift-image-registry.svc:5000/matomo
@@ -56,12 +43,6 @@ matomo:
       keepRangeReports: false
       keepSegmentReports: false
 
-  # PHP / FPM — raise for high-traffic or large OpenShift memory.
-  # Example large profile:
-  #   php.memory_limit: "4G"
-  #   phpfpm.memory_limit: "4096M"
-  #   phpfpm.max_children: 50
-  #   resources.limits.memory: 6Gi
   php:
     memory_limit: "2G"
     opcache_memory_consumption: "512"
@@ -92,10 +73,16 @@ matomo:
     hostname: matomo-dashboard.apps.example.com
     tls: true
     nginx:
+      # /healthz is answered by nginx directly (see configmap-nginx-matomo-dashboard.yaml)
+      # and never reaches PHP-FPM. Do NOT point these at /index.php: every probe hit runs
+      # a full PHP bootstrap and, since Matomo stores sessions in the database, inserts a
+      # brand-new row in matomo_session on every single hit (no cookie to reuse) — at these
+      # intervals that's roughly one new row every 3-4 seconds, forever, unrelated to real
+      # traffic. This is what silently filled a large share of the DB PVC in bb18ab-tools.
       livenessProbe:
         exec: null # unset the base chart's exec probe so only httpGet remains (k8s forbids both)
         httpGet:
-          path: /index.php
+          path: /healthz
           port: 8080
         initialDelaySeconds: 15
         periodSeconds: 10
@@ -103,7 +90,7 @@ matomo:
         failureThreshold: 6
       readinessProbe:
         httpGet:
-          path: /index.php
+          path: /healthz
           port: 8080
         initialDelaySeconds: 5
         periodSeconds: 5
@@ -111,8 +98,9 @@ matomo:
         failureThreshold: 6
     firstuser:
       username: admin
-      password: <REDACTED>
       email: admin@example.com
+      # No password here -- auto-generated into a Secret on first install,
+      # see values.yaml matomo.dashboard.firstuser for the retrieval command.
   tracker:
     enabled: true
     replicas: 1

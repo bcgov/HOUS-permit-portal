@@ -35,6 +35,12 @@ spec:
         - podSelector:
             matchLabels:
               app: matomo-jobs-scheduled-tasks
+        - podSelector:
+            matchLabels:
+              app: matomo-db-backup
+        - podSelector:
+            matchLabels:
+              app: matomo-db-restore
       ports:
         - protocol: TCP
           port: 3306

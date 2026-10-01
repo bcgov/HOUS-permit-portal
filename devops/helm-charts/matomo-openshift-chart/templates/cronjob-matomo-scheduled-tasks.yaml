@@ -25,7 +25,28 @@ spec:
             image: {{ include "matomo.image" (dict "registry" (.Values.matomo.imageRegistry | default .Values.global.imageRegistry) "image" .Values.matomo.image) }}
             imagePullPolicy: Always
             {{- include "matomo.securityContext" (dict "runAsUser" .Values.matomo.runAsUser) | nindent 12 }}
-            command: [ 'sh' , '-c' , {{quote .Values.matomo.cronJobs.scheduledTasks.command}} ]
+            {{- /*
+              Also purges expired rows from the session table. Matomo stores
+              PHP sessions in the database (session_save_handler = dbtable)
+              but has no built-in cleanup task for it, so without this the
+              table grows unbounded — see matomo.dashboard.nginx.*Probe
+              comments in values-openshift.yaml for how it gets filled in the
+              first place. Only deletes rows already past their own lifetime,
+              matching PHP's own session-expiry semantics; never touches a
+              live session.
+            */}}
+            command:
+              - sh
+              - -c
+              - |
+                {{ .Values.matomo.cronJobs.scheduledTasks.command }}
+                php -r '
+                $mysqli = @new mysqli("{{ .Values.db.hostname }}", "{{ .Values.db.username }}", getenv("MARIADB_MATOMO_PASSWORD"), "{{ .Values.db.name }}");
+                if (!$mysqli->connect_errno) {
+                    $mysqli->query("DELETE FROM {{ .Values.db.prefix }}session WHERE modified + lifetime < UNIX_TIMESTAMP()");
+                    fwrite(STDOUT, "Purged " . $mysqli->affected_rows . " expired sessions." . PHP_EOL);
+                }
+                '
             env:
             - name: MARIADB_MATOMO_PASSWORD
               valueFrom:

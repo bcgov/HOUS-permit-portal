@@ -1,9 +1,6 @@
-# Example OpenShift install overrides.
-# Mirror/import these images into the project first, or change the image names to match your ImageStreams.
-# Namespace is taken from `helm -n <namespace>` / --namespace, not from a values key.
 
 global:
-  imageRegistry: image-registry.openshift-image-registry.svc:5000/d6af69-tools
+  imageRegistry: image-registry.openshift-image-registry.svc:5000/bb18ab-dev
   imagePullSecrets: []
   storageClass: ""
 
@@ -15,26 +12,39 @@ defaultResources:
     memory: 25Mi
 
 matomo:
-  image: matomo:5.7.1
+  image: matomo:5.12.0-fpm
   runAsUser: null
+  resources:
+    requests:
+      cpu: 20m
+      memory: 512Mi
+    limits:
+      memory: 2Gi
   site:
     name: Matomo
-    url: https://dev.buildingcode.gov.bc.ca
+    url: <REDACTED>
   ingress:
     enabled: false
   dashboard:
     replicas: 1
-    hostname: matomo-<REDACTED>-tools.apps.<REDACTED>
+    hostname: <REDACTED>
     tls: true
     firstuser:
       username: admin
-      password:  <REDACTED> #change-me-admin-password
-      email: <REDACTED>
+      email: BPH.Dev@gov.bc.ca
   tracker:
     enabled: true
     replicas: 1
-    hostname: matomo-tracker-<REDACTED>-tools.apps.<REDACTED>
+    hostname: <REDACTED>
     tls: true
+    phpFpmCommand: /usr/local/sbin/php-fpm
+    # -- Main "matomo" (php-fpm) container in the tracker pod.
+    resources:
+      requests:
+        cpu: 10m
+        memory: 256Mi
+      limits:
+        memory: 1Gi
   cli:
     enabled: false
     replicas: 0
@@ -46,8 +56,20 @@ matomo:
   cronJobs:
     coreArchive:
       enabled: true
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          memory: 1Gi
     scheduledTasks:
       enabled: true
+      resources:
+        requests:
+          cpu: 50m
+          memory: 256Mi
+        limits:
+          memory: 1Gi
 
 nginx:
   image: nginx:1.21.6
@@ -59,13 +81,27 @@ fpmExporter:
 db:
   enabled: true
   image: mariadb:11.4
+  collation: "utf8mb4_uca1400_ai_ci"
   storage:
     size: 1Gi
     storageClass: ""
     mountPath: /var/lib/mysql
+  temp:
+    enabled: true
+    mountPath: /tmp
+    sizeLimit: 256Mi
   auth:
     createSecret: true
     rootPassword: ""
+  # -- "mariadb" container.
+  resources:
+    requests:
+      cpu: 20m
+      memory: 256Mi
+    limits:
+      memory: 1Gi
+backup:
+  enabled: false
 
 openshift:
   route:

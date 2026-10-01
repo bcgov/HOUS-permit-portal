@@ -20,6 +20,19 @@ site, this could fail a couple of times, but should succeed in the end.
 After installation is complete, you can access your website by this url:
 {{ .Values.matomo.dashboard.hostname }}
 
+{{- if .Values.matomo.dashboard.firstuser.createSecret }}
+
+Matomo admin login:
+  Username: {{ .Values.matomo.dashboard.firstuser.username }}
+  Password: retrieve it with:
+    oc get secret {{ .Values.matomo.dashboard.firstuser.secretKeyRef.name }} -n {{ .Release.Namespace }} -o jsonpath='{.data.{{ .Values.matomo.dashboard.firstuser.secretKeyRef.key }}}' | base64 -d; echo
+{{- else }}
+
+Matomo admin login:
+  Username: {{ .Values.matomo.dashboard.firstuser.username }}
+  Password: in Secret "{{ .Values.matomo.dashboard.firstuser.secretKeyRef.name }}" (key "{{ .Values.matomo.dashboard.firstuser.secretKeyRef.key }}"), managed outside this chart.
+{{- end }}
+
 To learn more about the release, try:
 
   $ helm status {{ .Release.Name }}

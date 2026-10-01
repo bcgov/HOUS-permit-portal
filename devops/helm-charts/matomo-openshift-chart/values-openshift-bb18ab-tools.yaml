@@ -1,7 +1,3 @@
-# Example OpenShift install overrides.
-# Mirror/import these images into the project first, or change the image names to match your ImageStreams.
-# Namespace is taken from `helm -n <namespace>` / --namespace, not from a values key.
-
 global:
   imageRegistry: image-registry.openshift-image-registry.svc:5000/bb18ab-tools
   imagePullSecrets: []
@@ -15,30 +11,31 @@ defaultResources:
     memory: 25Mi
 
 matomo:
-  # image: matomo:5.7.1
-  # matomo:5.11.2-fpm on Docker Hub is mistagged: the code inside it is
-  # actually core 5.12.0 (confirmed via core/Version.php), which made Matomo's
-  # own front controller refuse to run ("codebase running old version 5.11.2
-  # ... database already upgraded to 5.12.0"). Use the correctly-labeled tag.
   image: matomo:5.12.0-fpm
   runAsUser: null
   site:
     name: Matomo
-    url: https://dev.buildingpermit.gov.bc.ca
+    url: <REDACTED>
   ingress:
     enabled: false
   dashboard:
     replicas: 1
-    hostname: matomo-<REDACTED>-tools.apps.<REDACTED>
+    hostname: <REDACTED>
     tls: true
     firstuser:
       username: admin
-      password:  <REDACTED> #change-me-admin-password
-      email: <REDACTED>
+      email: BPH.Dev@gov.bc.ca
+      # No password here -- the chart auto-generates one into a Secret on
+      # first install (see values.yaml matomo.dashboard.firstuser). This is
+      # cosmetic/unused in practice here since postInstallCommand/
+      # preUpgradeCommand are both empty -- the real, actual login is whatever
+      # was set through the manual web installer. Retrieve the generated
+      # Secret's value with:
+      #   oc get secret matomo-admin -n bb18ab-tools -o jsonpath='{.data.password}' | base64 -d
   tracker:
     enabled: true
     replicas: 1
-    hostname: matomo-tracker-<REDACTED>-tools.apps.<REDACTED>
+    hostname: <REDACTED>
     tls: true
     phpFpmCommand: /usr/local/sbin/php-fpm
   cli:
@@ -50,13 +47,6 @@ matomo:
     enabled: false
     replicas: 0
   cronJobs:
-    # values-openshift.yaml's 512Mi requests.memory per job don't fit here:
-    # compute-long-running-quota caps this namespace at 2Gi requests.memory
-    # total, and the always-on dashboard/tracker/db/clamav pods already
-    # commit ~1.25-1.8Gi of that, so a 512Mi cron pod often can't be
-    # scheduled at all (BackoffLimitExceeded). Scale requests down to fit
-    # the remaining headroom; limits can stay generous since only requests
-    # count against the quota.
     coreArchive:
       enabled: true
       resources:
@@ -84,6 +74,7 @@ fpmExporter:
 db:
   enabled: true
   image: mariadb:11.4
+  collation: "utf8mb4_uca1400_ai_ci"
   storage:
     size: 1Gi
     storageClass: ""
@@ -95,6 +86,22 @@ db:
   auth:
     createSecret: true
     rootPassword: ""
+backup:
+  enabled: true
+  schedule: "0 2 * * *"
+  retentionCount: 3            # low count while testing
+  pruneEnabled: true
+  s3:
+    enabled: true
+    createSecret: false
+    secretName: "matomo-s3-backup"
+    endpoint: "<REDACTED>"
+    bucket: "<REDACTED>"
+    path: "/matomo-backups-dev"
+    maxObjects: 0
+    insecure: false
+  pvc:
+    enabled: false            
 
 openshift:
   route:
