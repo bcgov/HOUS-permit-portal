@@ -1,0 +1,2 @@
+# One replica is intentional; existing background-job retries cover interruptions.
+replicaCount: 1

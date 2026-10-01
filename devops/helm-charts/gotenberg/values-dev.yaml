@@ -1,0 +1,2 @@
+# Resource and conversion settings inherit the initial defaults from values.yaml.
+replicaCount: 1
