@@ -418,6 +418,9 @@ RSpec.describe PrintReports::Renderer do
             FUTURE-ANSWER
           ].each { |value| expect(text).to include(value) }
           expect(text).to include("0", "No", "Not provided")
+          expect(text).to match(
+            %r{Application / reference number\s+Not provided}
+          )
           expect(text).not_to include("HIDDEN-ANSWER", "LOGIC-HIDDEN-ANSWER")
         end
       expect(Marshal.dump(report)).to eq(original)
@@ -517,7 +520,134 @@ RSpec.describe PrintReports::Renderer do
         end
     end
 
+    it "wraps Part 9 assembly descriptions and notes inside the Details column" do
+      fixture =
+        JSON.parse(
+          Rails
+            .root
+            .join(
+              "app/frontend/components/print/__tests__/fixtures/part9-populated.json"
+            )
+            .read,
+          symbolize_names: true
+        )
+      summary = fixture[:checklist][:building_characteristics_summary]
+      summary[:windows_glazed_doors][:lines] = [
+        {
+          details: (["WRAPASSEMBLY"] * 36).join(" "),
+          performance_value: "1.50",
+          shgc: "0.25"
+        }
+      ]
+      summary[:other_lines] = [{ details: (["WRAPOTHER"] * 32).join(" ") }]
+      summary[:fossil_fuels] = {
+        presence: "yes",
+        details: (["WRAPFUEL"] * 45).join(" ")
+      }
+      described_class
+        .new
+        .render(fixture) do |path|
+          reader = PDF::Reader.new(path)
+          text = reader.pages.map(&:text).join(" ")
+          {
+            "WRAPASSEMBLY" => 36,
+            "WRAPOTHER" => 32,
+            "WRAPFUEL" => 45
+          }.each do |marker, count|
+            expect(text.scan(marker).length).to eq(count)
+            runs =
+              reader
+                .pages
+                .flat_map(&:runs)
+                .select { |run| run.text.include?(marker) }
+            expect(runs.map(&:y).uniq.length).to be > 1
+            reader.pages.each do |page|
+              details = page.runs.select { |run| run.text.include?(marker) }
+              next if details.empty?
+              header =
+                page.runs.find { |run| run.text.include?("Performance values") }
+              expect(header).to be_present
+              # The second header starts after its 8pt left padding. Every detail
+              # line must end inside the first column, rather than span both.
+              details.each { |run| expect(run.endx).to be < header.x - 8 }
+            end
+          end
+          expect(text).to include("1.50", "0.25")
+        end
+    end
+
+    [
+      ["as_built", "2.0", nil, "2.0", "-"],
+      ["pre_construction", "0", false, "0", "No"],
+      ["mid_construction", nil, true, "-", "Yes"]
+    ].each do |stage, ach, compliance, expected_target, expected_compliance|
+      it "retains the untyped Part 9 ACH value and compliance state for #{stage}" do
+        fixture =
+          JSON.parse(
+            Rails
+              .root
+              .join(
+                "app/frontend/components/print/__tests__/fixtures/part9-populated.json"
+              )
+              .read,
+            symbolize_names: true
+          )
+        checklist = fixture[:checklist]
+        checklist[:stage] = stage
+        fixture[:identity][:stage] = stage
+        fixture[:identity][:number] = nil
+        checklist[:epc_calculation_airtightness] = "three_point_two"
+        checklist[:epc_calculation_testing_target_type] = nil
+        checklist[:epc_calculation_compliance] = compliance
+        checklist[:selected_report][:energy][:ach] = ach
+        original = Marshal.dump(fixture)
+        described_class
+          .new
+          .render(fixture) do |path|
+            text = PDF::Reader.new(path).pages.map(&:text).join(" ")
+            expect(text).not_to include("Not provided")
+            expect(text).to include("3.2 ACH", stage.tr("_", " "))
+            expect(text).to match(
+              /OR Testing Target\s+#{Regexp.escape(expected_target)}\s+-/
+            )
+            expect(text).to match(
+              /#{Regexp.escape(expected_compliance)}\s+—\s+The above calculation was performed/
+            )
+            expect(text).to match(%r{Application / reference number\s+-})
+          end
+        expect(Marshal.dump(fixture)).to eq(original)
+      end
+    end
+
     %w[ach nla nlr].each do |target|
+      it "does not substitute another value for a missing selected #{target} target" do
+        fixture =
+          JSON.parse(
+            Rails
+              .root
+              .join(
+                "app/frontend/components/print/__tests__/fixtures/part9-populated.json"
+              )
+              .read,
+            symbolize_names: true
+          )
+        checklist = fixture[:checklist]
+        checklist[:epc_calculation_testing_target_type] = target
+        checklist[:selected_report][:energy].merge!(
+          ach: "1.23",
+          nla: "9.87",
+          nlr: "6.54"
+        )
+        checklist[:selected_report][:energy][target.to_sym] = nil
+        described_class
+          .new
+          .render(fixture) do |path|
+            text = PDF::Reader.new(path).pages.map(&:text).join(" ")
+            expect(text).to match(/OR Testing Target\s+-\s+#{target.upcase}/)
+            expect(text).not_to include("Not provided")
+          end
+      end
+
       it "prints serialized Part 9 values and independent results for #{target}" do
         fixture =
           JSON.parse(
@@ -558,6 +688,7 @@ RSpec.describe PrintReports::Renderer do
           .render(fixture) do |path|
             text = PDF::Reader.new(path).pages.map(&:text).join(" ")
             expect(text).to include("88.76", "54.32")
+            expect(text).not_to include("Not provided")
             # Each failed criterion and its overall table result must show Fail,
             # even though the unrelated MEUI and CO2 checks passed.
             expect(
@@ -625,6 +756,9 @@ RSpec.describe PrintReports::Renderer do
                 "45.50",
                 "7.25"
               )
+            end
+            if name.start_with?("part3")
+              expect(text).not_to include("Not provided")
             end
           end
       end

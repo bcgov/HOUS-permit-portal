@@ -12,20 +12,23 @@ export function FossilFuels({ checklist }: IProps) {
   return (
     <>
       <ReportRow>
-        <ReportCell colSpan={4}>
+        <ReportCell colSpan={2}>
           <ReportText>{t(`${i18nPrefix}.fossilFuels.label`)}</ReportText>
         </ReportCell>
+        <ReportCell colSpan={2} />
       </ReportRow>
 
       <ReportRow>
-        <ReportCell colSpan={4}>
+        <ReportCell colSpan={2}>
           <ReportMetric value={t(`${i18nPrefix}.fossilFuels.${fossilFuels.presence as EFossilFuelsPresence}`)} />
         </ReportCell>
+        <ReportCell colSpan={2} />
       </ReportRow>
       <ReportRow>
-        <ReportCell colSpan={4}>
+        <ReportCell colSpan={2}>
           <ReportMetric value={fossilFuels.details} />
         </ReportCell>
+        <ReportCell colSpan={2} />
       </ReportRow>
     </>
   )

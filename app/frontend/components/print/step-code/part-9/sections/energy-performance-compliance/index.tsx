@@ -10,6 +10,7 @@ import {
   ReportRow,
   ReportText,
 } from "../../../../components/step-code-layout"
+import { isMissing } from "../../../../form/field-values"
 interface IProps {
   checklist: IPart9StepCodeChecklist
 }
@@ -18,7 +19,12 @@ export const EnergyPerformanceCompliance = function StepCodeChecklistPDFEnergyPe
 }: IProps) {
   const report = checklist.selectedReport?.energy
   const targetType = checklist.epcCalculationTestingTargetType
-  const testingTarget = targetType && ["ach", "nla", "nlr"].includes(targetType) ? report?.[targetType] : undefined
+  // Older checklists and the existing form show saved ACH even without a target type.
+  const testingTarget = isMissing(targetType)
+    ? report?.ach
+    : targetType && ["ach", "nla", "nlr"].includes(targetType)
+      ? report?.[targetType]
+      : undefined
   return (
     <ReportPanel heading={t(`${i18nPrefix}.heading`)}>
       <ReportText className="report-strong">{t(`${i18nPrefix}.proposedHouseEnergyConsumption`)}</ReportText>
@@ -57,16 +63,17 @@ export const EnergyPerformanceCompliance = function StepCodeChecklistPDFEnergyPe
           value={t(`${i18nPrefix}.airtightnessValue.options.${checklist.epcCalculationAirtightness}`)}
         />
       </ReportRow>
-      <ReportRow>
-        <ReportMetric label={t(`${i18nPrefix}.calculationTestingTarget`)} value={testingTarget} />
-        <ReportMetric
-          value={t(`${i18nPrefix}.epcTestingTargetType.options.${checklist.epcCalculationTestingTargetType}`)}
-        />
-      </ReportRow>
-      <ReportRow>
+      <ReportMetric
+        className="report-testing-target"
+        label={t(`${i18nPrefix}.calculationTestingTarget`)}
+        value={testingTarget}
+        rightElement={t(`${i18nPrefix}.epcTestingTargetType.options.${targetType}`)}
+      />
+      <ReportText>
         <ReportBoolean isChecked={checklist.epcCalculationCompliance} />
-        <ReportText>{t(`${i18nPrefix}.compliance`)}</ReportText>
-      </ReportRow>
+        {" — "}
+        {t(`${i18nPrefix}.compliance`)}
+      </ReportText>
     </ReportPanel>
   )
 }

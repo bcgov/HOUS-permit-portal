@@ -5,16 +5,16 @@ export function isMissing(value: unknown): boolean {
     value == null || (typeof value === "string" && value.trim() === "") || (Array.isArray(value) && value.length === 0)
   )
 }
-export function displayValue(value: any): string {
-  if (isMissing(value)) return NOT_PROVIDED
+export function displayValue(value: any, missingValue = NOT_PROVIDED): string {
+  if (isMissing(value)) return missingValue
   if (typeof value === "boolean") return value ? "Yes" : "No"
-  if (Array.isArray(value)) return value.map(displayValue).join("; ")
+  if (Array.isArray(value)) return value.map((entry) => displayValue(entry, missingValue)).join("; ")
   if (typeof value === "object") {
     const address = value.properties?.fullAddress || value.display_name || value.displayName || value.formatted_address
     if (address) return address
-    if (Object.keys(value).length === 0) return NOT_PROVIDED
+    if (Object.keys(value).length === 0) return missingValue
     return Object.entries(value)
-      .map(([key, entry]) => `${key}: ${displayValue(entry)}`)
+      .map(([key, entry]) => `${key}: ${displayValue(entry, missingValue)}`)
       .join("\n")
   }
   return String(value)

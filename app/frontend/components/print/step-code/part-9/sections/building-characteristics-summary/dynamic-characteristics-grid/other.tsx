@@ -17,9 +17,10 @@ export function Other({ checklist }: IProps) {
       </ReportRow>
       {checklist.buildingCharacteristicsSummary.otherLines.map((line, index) => (
         <ReportRow key={generateUUID()}>
-          <ReportCell colSpan={4}>
+          <ReportCell colSpan={2}>
             <ReportMetric value={line.details} />
           </ReportCell>
+          <ReportCell colSpan={2} />
         </ReportRow>
       ))}
     </>
