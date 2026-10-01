@@ -1,10 +1,19 @@
 import React from "react"
-import { displayValue } from "../form/field-values"
+import { displayValue as formatValue, NOT_PROVIDED } from "../form/field-values"
 import { ReportIdentity } from "../permit-application/report-data"
 import { ReportField } from "./report-field"
-const date = (value?: string) =>
-  value ? new Date(value).toLocaleDateString("en-CA", { timeZone: "America/Vancouver" }) : "Not provided"
-export function ReportCover({ identity, title }: { identity: ReportIdentity; title: string }) {
+export function ReportCover({
+  identity,
+  title,
+  missingValue = NOT_PROVIDED,
+}: {
+  identity: ReportIdentity
+  title: string
+  missingValue?: string
+}) {
+  const displayValue = (value: unknown) => formatValue(value, missingValue)
+  const date = (value?: string) =>
+    value ? new Date(value).toLocaleDateString("en-CA", { timeZone: "America/Vancouver" }) : missingValue
   return (
     <header className="report-cover">
       <img src="logo.png" alt="Government of British Columbia" />

@@ -24,7 +24,7 @@ export const StepCodePerformanceSummary = function StepCodePart3ChecklistPDFStep
           label={t(`${i18nPrefix}.compliancePath`)}
           value={t(`stepCode.part3.projectDetails.buildingCodeVersions.${checklist.buildingCodeVersion}`)}
         />
-        <p>Not provided — no occupancy data is saved for this checklist.</p>
+        <p>No occupancy data is saved for this checklist.</p>
       </ReportPanel>
     )
   const isMixedUse = stepCodeOccs.length + baselineOccs.length > 1

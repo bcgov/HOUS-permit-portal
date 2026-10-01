@@ -12,7 +12,7 @@ export function ReportBlock({ children, className = "" }: BlockProps) {
 export function ReportText({ children, className = "" }: BlockProps) {
   return (
     <div className={`report-text ${className}`}>
-      {isMissing(children) || children === "undefined" || children === "null" ? "Not provided" : children}
+      {isMissing(children) || children === "undefined" || children === "null" ? "-" : children}
     </div>
   )
 }
@@ -31,7 +31,7 @@ export function ReportMetric({
 }) {
   const content = (
     <>
-      {displayValue(value)}
+      {displayValue(value, "-")}
       {rightElement && <div className="report-unit">{rightElement}</div>}
       {hint && <div className="report-note">{hint}</div>}
     </>
@@ -55,7 +55,7 @@ export function ReportValue({
 }) {
   return (
     <div className={`report-value ${className}`}>
-      {displayValue(value)}
+      {displayValue(value, "-")}
       {rightElement}
     </div>
   )
@@ -119,15 +119,15 @@ export function ReportDivider() {
   return <hr className="report-rule" />
 }
 export function ReportBoolean({ isChecked }: { isChecked?: boolean }) {
-  return <span>{isChecked == null ? "Not provided" : isChecked ? "Yes" : "No"}</span>
+  return <span>{isChecked == null ? "-" : isChecked ? "Yes" : "No"}</span>
 }
 export function ReportResult({ success }: { success?: boolean }) {
-  return <strong className="report-result">{success == null ? "Not provided" : success ? "Pass" : "Fail"}</strong>
+  return <strong className="report-result">{success == null ? "-" : success ? "Pass" : "Fail"}</strong>
 }
 export function ReportCheckbox({ checked, text }: { checked?: boolean; text?: React.ReactNode }) {
   return (
     <span>
-      {checked ? "Yes" : "No"}
+      <ReportBoolean isChecked={checked} />
       {text && <> — {text}</>}
     </span>
   )

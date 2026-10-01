@@ -46,10 +46,11 @@ export const CompletedBy = function StepCodeChecklistPDFCompletedBy({ checklist 
         <ReportValue value={checklist.completedAt ? format(checklist.completedAt, datefnsAppDateFormat) : ""} />
       </ReportStack>
 
-      <ReportRow>
+      <ReportText>
         <ReportBoolean isChecked={checklist.codeco} />
-        <ReportText>{t(`${i18nPrefix}.codeco`)}</ReportText>
-      </ReportRow>
+        {" — "}
+        {t(`${i18nPrefix}.codeco`)}
+      </ReportText>
 
       <ReportMetric label={t(`${i18nPrefix}.pFile`)} value={checklist.pFileNo} />
     </ReportPanel>

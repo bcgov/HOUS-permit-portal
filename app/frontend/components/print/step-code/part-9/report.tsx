@@ -27,7 +27,7 @@ export function Part9Report({ checklist }: IProps) {
         ) : (
           <section>
             <h2>Energy step-code compliance</h2>
-            <p>Not provided — no saved compliance report is available.</p>
+            <p>No saved compliance report is available.</p>
           </section>
         )}
         {checklist.selectedReport?.zeroCarbon ? (
@@ -35,7 +35,7 @@ export function Part9Report({ checklist }: IProps) {
         ) : (
           <section>
             <h2>Zero-carbon step-code compliance</h2>
-            <p>Not provided — no saved compliance report is available.</p>
+            <p>No saved compliance report is available.</p>
           </section>
         )}
       </div>
