@@ -57,8 +57,6 @@ const resolveComponentDisplay = (component: any, value: any): string => {
       ;(component.values || []).forEach((opt: any) => labelMap.set(opt.value, opt.label))
       return selected.map((v) => labelMap.get(v) || v).join("; ")
     }
-    case ERequirementType.signature:
-      return value ? "(signed)" : ""
     case ERequirementType.text:
     case ERequirementType.number:
     case ERequirementType.date:

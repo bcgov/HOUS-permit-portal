@@ -34,7 +34,6 @@ import simpleradios from "./SimpleRadios/Component"
 import simpleselect from "./SimpleSelect/Component"
 import simpleselectadvanced from "./SimpleSelectAdvanced/Component"
 import simpleselectboxesadvanced from "./SimpleSelectBoxesAdvanced/Component"
-import simplesignatureadvanced from "./SimpleSignatureAdvanced/Component"
 import simplesurveyadvanced from "./SimpleSurveyAdvanced/Component"
 import simpletabs from "./SimpleTabs/Component"
 import simpletagsadvanced from "./SimpleTagsAdvanced/Component"
@@ -89,7 +88,6 @@ declare const _default: {
   simplecurrencyadvanced: typeof simplecurrencyadvanced
   simpleradioadvanced: typeof simpleradioadvanced
   simplesurveyadvanced: typeof simplesurveyadvanced
-  simplesignatureadvanced: typeof simplesignatureadvanced
   simplebuttonadvanced: typeof simplebuttonadvanced
   bcaddress: typeof bcaddress
   simplebcaddress: typeof simplebcaddress
