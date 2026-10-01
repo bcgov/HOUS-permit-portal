@@ -1,0 +1,56 @@
+appName: gotenberg
+replicaCount: 1
+
+image:
+  repository: gotenberg/gotenberg
+  tag: "8.32.0"
+  pullPolicy: IfNotPresent
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: "1"
+    memory: 2Gi
+
+# Preserve the upstream tini entrypoint; these replace only its command arguments.
+# Keep conversion limits and resource-fetch restrictions aligned with compose.yml.
+args:
+  - gotenberg
+  - --chromium-auto-start=true
+  - --chromium-max-concurrency=1
+  - --chromium-max-queue-size=5
+  - --api-timeout=60s
+  - --api-body-limit=50MB
+  - --chromium-deny-list=^https?://,^file:(?!///tmp/).*
+  - --libreoffice-disable-routes=true
+  - --api-disable-download-from=true
+  - --webhook-disable=true
+  - --gotenberg-graceful-shutdown-duration=60s
+
+terminationGracePeriodSeconds: 90
+
+startupProbe:
+  httpGet:
+    path: /health
+    port: http
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 12
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+# In 8.32.0 a busy browser can fail /health; do not restart it on that alone.
+livenessProbe:
+  tcpSocket:
+    port: http
+  periodSeconds: 30
+  timeoutSeconds: 5
+  failureThreshold: 3

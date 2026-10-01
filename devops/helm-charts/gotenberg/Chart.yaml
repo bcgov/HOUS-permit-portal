@@ -1,0 +1,6 @@
+apiVersion: v2
+name: gotenberg
+description: Internal HTML-to-PDF conversion for Building Permit Hub
+type: application
+version: 0.1.0
+appVersion: "8.32.0"
