@@ -19,7 +19,11 @@ export function ReportContent({ report }: { report: ReportData }) {
   return (
     <>
       <ReportFooter identity={report.identity} />
-      <ReportCover identity={report.identity} title={title} />
+      <ReportCover
+        identity={report.identity}
+        title={title}
+        missingValue={report.kind === "application" ? undefined : "-"}
+      />
       {report.kind === "application" ? (
         <PermitApplicationReport report={report} />
       ) : report.kind === "part3" ? (

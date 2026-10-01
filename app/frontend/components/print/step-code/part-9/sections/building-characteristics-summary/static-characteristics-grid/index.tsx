@@ -14,8 +14,8 @@ export function StaticCharacteristicsGrid({ checklist }: { checklist: IPart9Step
         const lines = checklist.buildingCharacteristicsSummary?.[`${key}Lines`]
         return (lines?.length ? lines : [{}]).map((line) => [
           t(`${i18nPrefix}.${key}`),
-          displayValue(line.details),
-          displayValue(line.rsi),
+          displayValue(line.details, "-"),
+          displayValue(line.rsi, "-"),
         ])
       })}
     />

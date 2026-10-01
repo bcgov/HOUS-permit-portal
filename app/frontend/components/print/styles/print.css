@@ -294,6 +294,10 @@ p + p {
 .report-metric-value {
   overflow-wrap: anywhere;
 }
+.report-testing-target .report-unit {
+  display: inline;
+  margin-left: 10pt;
+}
 .report-rule {
   border: 0;
   border-top: 0.5pt solid var(--report-line);
