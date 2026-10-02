@@ -34,6 +34,7 @@ import {
   combineRevisionButtons,
   processFieldsForEphemeral,
 } from "../utils/formio-component-traversal"
+import { injectOptionalElectivesButtons } from "../utils/view-optional-electives"
 
 import { format } from "date-fns"
 import { StepCodeModel } from "../stores/step-code-store"
@@ -324,6 +325,10 @@ export const PermitApplicationModel = types.snapshotProcessor(
         const revisionModeFormJson = showRevisionButtons
           ? combineRevisionButtons(changedMarkedFormJson, self.isSubmitted, revisionRequestsToUse)
           : changedMarkedFormJson
+
+        if (self.isEphemeral) {
+          return injectOptionalElectivesButtons(revisionModeFormJson, t("templateVersionPreview.viewOptionalElectives"))
+        }
 
         return revisionModeFormJson
       },
