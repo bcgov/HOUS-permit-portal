@@ -177,7 +177,9 @@ RSpec.describe FileUploadAttachment, type: :model do
         scan_status: "clean",
         file_data: { "id" => SecureRandom.uuid, "metadata" => {} }.to_json
       )
-      allow(document).to receive(:file_url).and_return("https://example.com/file")
+      allow(document).to receive(:file_url).and_return(
+        "https://example.com/file"
+      )
 
       expect(document.file_url_safe(disposition: "inline")).to eq(
         "https://example.com/file"
@@ -187,7 +189,7 @@ RSpec.describe FileUploadAttachment, type: :model do
   end
 
   describe "#upload_failed_notification_data" do
-    it "includes permit_application_id when attached_to responds to permit_application" do
+    it "does not include permit_application_id for a pre-check design document" do
       data = document.upload_failed_notification_data
 
       expect(data).to include("id", "action_type", "action_text", "object_data")
@@ -195,9 +197,8 @@ RSpec.describe FileUploadAttachment, type: :model do
         "record_type" => "DesignDocument",
         "record_id" => document.id
       )
-      expect(data["object_data"]["permit_application_id"]).to eq(
-        document.attached_to.permit_application_id
-      )
+      expect(data["object_data"]).not_to have_key("permit_application_id")
+      expect(data["object_data"]["pre_check_id"]).to eq(document.pre_check_id)
     end
   end
 end

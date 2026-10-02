@@ -80,6 +80,7 @@ class StepCodeExportService
       Part3StepCode
         .includes(:permit_application, :checklists)
         .where(permit_applications: { status: %i[newly_submitted resubmitted] })
+        .where(permit_application_id: PermitApplication.live.select(:id))
         .find_each do |step_code|
           checklist = step_code.current_checklist
           next unless checklist
@@ -169,6 +170,7 @@ class StepCodeExportService
       Part9StepCode
         .includes(:permit_application, :checklists)
         .where(permit_applications: { status: %i[newly_submitted resubmitted] })
+        .where(permit_application_id: PermitApplication.live.select(:id))
         .find_each do |step_code|
           checklist = step_code.current_checklist
           next unless checklist

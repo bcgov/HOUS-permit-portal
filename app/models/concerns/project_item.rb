@@ -1,6 +1,24 @@
 module ProjectItem
   extend ActiveSupport::Concern
 
+  # Parent project wins when one is present, including a live (nil) sandbox.
+  # Standalone rows fall back to their own sandbox_id column.
+  module SandboxResolution
+    def sandbox
+      return parent.sandbox if parent.present?
+      return super if has_attribute?(:sandbox_id)
+
+      nil
+    end
+
+    def sandbox_id
+      return parent.sandbox_id if parent.present?
+      return super if has_attribute?(:sandbox_id)
+
+      nil
+    end
+  end
+
   class_methods do
     def has_parent(parent_association)
       define_method(:parent) do
@@ -28,7 +46,10 @@ module ProjectItem
     belongs_to :jurisdiction, optional: true
     has_one :owner, through: :permit_project
 
+    prepend SandboxResolution
+
     after_commit :reindex_permit_project
+    before_save :keep_standalone_sandbox
 
     delegate :permit_date, to: :permit_project, allow_nil: true
     delegate :title, to: :permit_project, prefix: true, allow_nil: true
@@ -78,16 +99,6 @@ module ProjectItem
       rows.first.heating_degree_days
     end
 
-    # Sandbox lives on the parent project. Project items no longer carry
-    # their own sandbox_id column; always defer to the parent.
-    def sandbox
-      parent&.sandbox
-    end
-
-    def sandbox_id
-      parent&.sandbox_id
-    end
-
     def permit_date
       parent&.permit_date || self[:permit_date]
     end
@@ -113,6 +124,22 @@ module ProjectItem
 
       permit_project.reload
       permit_project.reindex
+    end
+
+    # Attached rows take sandbox from the parent. Detach copies that sandbox
+    # onto the row so the standalone record stays in the same training sandbox.
+    def keep_standalone_sandbox
+      return unless has_attribute?(:sandbox_id)
+      return unless has_attribute?(:permit_application_id)
+      return unless will_save_change_to_permit_application_id?
+
+      if permit_application_id.present?
+        self.sandbox_id = nil
+      else
+        previous =
+          PermitApplication.find_by(id: permit_application_id_in_database)
+        self.sandbox_id = previous&.sandbox_id
+      end
     end
   end
 end

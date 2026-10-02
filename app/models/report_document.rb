@@ -28,6 +28,7 @@ class ReportDocument < FileUploadAttachment
       "object_data" => {
         "step_code_id" => step_code_id,
         "step_code_type" => step_code.type,
+        "sandbox_id" => step_code.sandbox_id,
         "report_document_id" => id,
         "checklist_id" => checklist_id,
         "filename" => file&.metadata&.dig("filename"),

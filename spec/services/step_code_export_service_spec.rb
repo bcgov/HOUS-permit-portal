@@ -221,4 +221,26 @@ RSpec.describe StepCodeExportService do
       expect(csv).to include("APP-10,Jur 10,10 St,House,step_code_ers,3,1")
     end
   end
+
+  it "limits both metrics exports to live applications" do
+    live_only =
+      satisfy do |relation|
+        relation.to_sql.include?('"permit_projects"."sandbox_id" IS NULL')
+      end
+
+    {
+      Part3StepCode => :part_3_metrics_csv,
+      Part9StepCode => :part_9_metrics_csv
+    }.each do |klass, method|
+      relation = double("ARRelation", find_each: nil)
+      allow(klass).to receive(:includes).and_return(relation)
+      allow(relation).to receive(:where).and_return(relation)
+
+      service.public_send(method)
+
+      expect(relation).to have_received(:where).with(
+        permit_application_id: live_only
+      )
+    end
+  end
 end

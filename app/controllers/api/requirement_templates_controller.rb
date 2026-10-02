@@ -419,7 +419,8 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     end
 
     if params[:permit_project_id].present?
-      project = PermitProject.find(params[:permit_project_id])
+      project =
+        ensure_in_sandbox!(PermitProject.find(params[:permit_project_id]))
       authorize project, :show?
       apps = apps.where(permit_project_id: project.id)
     end

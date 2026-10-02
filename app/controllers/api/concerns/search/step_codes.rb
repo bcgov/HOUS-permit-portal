@@ -70,6 +70,9 @@ module Api::Concerns::Search::StepCodes
     final_where = { _and: [{ _or: base_conditions }] }
 
     final_where[:_and] << { discarded: show_archived }
+    unless current_user.super_admin?
+      final_where[:_and] << { sandbox_id: current_sandbox&.id }
+    end
 
     # OR within a filter (arrays), AND across different filters
     if search_filters[:type].present?
