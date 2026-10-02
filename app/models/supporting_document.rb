@@ -138,6 +138,8 @@ class SupportingDocument < FileUploadAttachment
   ].freeze
 
   def validate_submission_version_data_key
+    return if revision_request_id.present?
+
     unless submission_version.present? &&
              !STATIC_DOCUMENT_DATA_KEYS.include?(data_key)
       return

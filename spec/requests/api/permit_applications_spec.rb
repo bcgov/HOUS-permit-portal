@@ -307,6 +307,55 @@ RSpec.describe "Api::PermitApplications", type: :request do
         revision_application.latest_submission_version.submitter_note
       ).to be_nil
     end
+
+    it "associates revision fulfillment files with the resubmitted version" do
+      revision_application =
+        create(
+          :permit_application,
+          :revisions_requested,
+          submitter: submitter,
+          template_version: template_version,
+          jurisdiction: jurisdiction,
+          submission_data: {
+            "data" => {
+              "section-completion-key" => {
+                "signed" => true
+              }
+            }
+          }
+        )
+      requested_version = revision_application.latest_submission_version
+      document_request =
+        create(
+          :supporting_document_revision_request,
+          submission_version: requested_version
+        )
+      fulfillment =
+        create(
+          :supporting_document,
+          permit_application: revision_application,
+          revision_request: document_request
+        )
+
+      post "/api/permit_applications/#{revision_application.id}/submit",
+           params: {
+             permit_application: {
+               submission_data: revision_application.submission_data
+             }
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      response_version = revision_application.reload.latest_submission_version
+      expect(response_version.id).not_to eq(requested_version.id)
+      expect(fulfillment.reload.submission_version_id).to eq(
+        response_version.id
+      )
+      expect(document_request.reload.submission_version_id).to eq(
+        requested_version.id
+      )
+    end
   end
 
   describe "POST /api/permit_applications/:id/mark_as_viewed" do
