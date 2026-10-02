@@ -276,6 +276,29 @@ RSpec.describe ProjectMeetingPolicy, type: :policy do
       expect(resolved).to include(sandboxed_meeting)
     end
 
+    it "limits the owner's own meetings to the active sandbox" do
+      published = jurisdiction.sandboxes.published.first
+      sandboxed_meeting =
+        create(
+          :project_meeting,
+          permit_project:
+            create(
+              :permit_project,
+              owner: owner,
+              jurisdiction: jurisdiction,
+              sandbox: published
+            )
+        )
+      resolved_in_sandbox =
+        described_class::Scope.new(
+          UserContext.new(owner, published),
+          ProjectMeeting.all
+        ).resolve
+
+      expect(resolved_scope_for(owner)).not_to include(sandboxed_meeting)
+      expect(resolved_in_sandbox).to include(sandboxed_meeting)
+    end
+
     it "excludes draft project meetings for jurisdiction review staff" do
       meeting
 

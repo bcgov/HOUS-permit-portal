@@ -138,7 +138,7 @@ class Api::PreChecksController < Api::ApplicationController
   private
 
   def set_pre_check
-    @pre_check = PreCheck.find(params[:id])
+    @pre_check = ensure_in_sandbox!(PreCheck.find(params[:id]))
   end
 
   def pre_check_params

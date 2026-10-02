@@ -110,7 +110,7 @@ class Api::OverheatingCodesController < Api::ApplicationController
   private
 
   def set_overheating_code
-    @overheating_code = OverheatingCode.find(params[:id])
+    @overheating_code = ensure_in_sandbox!(OverheatingCode.find(params[:id]))
   end
 
   def overheating_code_params
