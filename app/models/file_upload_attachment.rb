@@ -149,6 +149,8 @@ class FileUploadAttachment < ApplicationRecord
       data["object_data"][
         "permit_application_id"
       ] = attached_to.permit_application.id
+    elsif attached_to.is_a?(PreCheck)
+      data["object_data"]["pre_check_id"] = attached_to.id
     end
 
     data

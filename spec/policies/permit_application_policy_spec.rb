@@ -802,5 +802,53 @@ RSpec.describe PermitApplicationPolicy do
       expect(resolved).to include(draft_with_active_meeting)
       expect(resolved).to include(draft_with_withdrawn_meeting)
     end
+
+    it "limits the submitter's own applications to the active sandbox" do
+      live_application =
+        create(
+          :permit_application,
+          submitter: submitter,
+          jurisdiction: jurisdiction
+        )
+      resolve_for = ->(context_sandbox) do
+        described_class.new(
+          UserContext.new(submitter, context_sandbox),
+          PermitApplication.all
+        ).resolve
+      end
+
+      expect(resolve_for.call(nil)).to include(live_application)
+      expect(resolve_for.call(nil)).not_to include(draft_permit_application)
+      expect(resolve_for.call(sandbox)).to include(draft_permit_application)
+      expect(resolve_for.call(sandbox)).not_to include(live_application)
+    end
+
+    it "limits review staff to the active sandbox" do
+      reviewer = create(:user, :review_manager, jurisdiction:)
+      sandboxed =
+        create(
+          :permit_application,
+          :newly_submitted,
+          jurisdiction: jurisdiction,
+          sandbox: sandbox
+        )
+      live =
+        create(
+          :permit_application,
+          :newly_submitted,
+          jurisdiction: jurisdiction
+        )
+      resolve_for = ->(context_sandbox) do
+        described_class.new(
+          UserContext.new(reviewer, context_sandbox),
+          PermitApplication.all
+        ).resolve
+      end
+
+      expect(resolve_for.call(nil)).to include(live)
+      expect(resolve_for.call(nil)).not_to include(sandboxed)
+      expect(resolve_for.call(sandbox)).to include(sandboxed)
+      expect(resolve_for.call(sandbox)).not_to include(live)
+    end
   end
 end

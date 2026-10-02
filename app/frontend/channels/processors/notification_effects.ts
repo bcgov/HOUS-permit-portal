@@ -4,6 +4,9 @@ import { IUserPushPayload } from "../../types/types"
 
 export function applyNotificationSideEffects(payload: IUserPushPayload, rootStore: IRootStore) {
   const data: any = payload?.data
+  const sandboxId = data?.objectData?.sandboxId
+  if (sandboxId !== undefined && (sandboxId ?? null) !== (rootStore.sandboxStore.currentSandboxId ?? null)) return
+
   switch (data?.actionType) {
     case ENotificationActionType.stepCodeReportGenerated: {
       const stepCodeId = data?.objectData?.stepCodeId

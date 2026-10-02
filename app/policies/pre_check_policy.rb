@@ -4,7 +4,7 @@ class PreCheckPolicy < ApplicationPolicy
   end
 
   def show?
-    record.creator_id == user.id || permit_application_submitter?
+    same_sandbox? && record.creator_id == user.id
   end
 
   def create?
@@ -12,7 +12,7 @@ class PreCheckPolicy < ApplicationPolicy
   end
 
   def update?
-    record.creator_id == user.id
+    same_sandbox? && record.creator_id == user.id
   end
 
   def submit?
@@ -33,13 +33,18 @@ class PreCheckPolicy < ApplicationPolicy
 
   class Scope < Scope
     def resolve
-      scope.where(creator_id: user.id)
+      relation = scope.where(creator_id: user.id)
+      return relation if user.super_admin?
+
+      relation.where(sandbox_id: sandbox&.id)
     end
   end
 
   private
 
-  def permit_application_submitter?
-    record.permit_application&.submitter_id == user.id
+  def same_sandbox?
+    return true if user&.super_admin?
+
+    record.sandbox_id == sandbox&.id
   end
 end

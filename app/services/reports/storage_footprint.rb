@@ -10,9 +10,9 @@ module Reports
     def headline_figures
       [
         figure("total_bytes", total_bytes),
+        figure("accounted_bytes", accounted_bytes),
         figure("average_bytes_per_application", average_bytes),
-        figure("projected_next_12_months", projected_bytes),
-        figure("excluded_zipfile_bytes", zipfile_bytes)
+        figure("projected_next_12_months", projected_bytes)
       ]
     end
 
@@ -38,6 +38,11 @@ module Reports
 
     def tables
       [
+        table(
+          "excluded",
+          [column("category"), column("bytes"), column("why")],
+          excluded_rows
+        ),
         table("by_type", [column("document_type"), column("bytes")], type_rows),
         table(
           "by_jurisdiction",
@@ -55,17 +60,15 @@ module Reports
 
     def notes
       [
-        note("zipfiles", "definition"),
-        note("discarded", "definition"),
+        note("accounted", "definition"),
         note("billed", "definition"),
-        note("sandbox", "definition"),
         note("projection", "definition"),
         note("unattributed", "definition")
       ]
     end
 
     def empty?
-      total_bytes.zero? && zipfile_bytes.zero?
+      accounted_bytes.zero?
     end
 
     private
@@ -91,14 +94,48 @@ module Reports
       (added.sum.to_f / months.length * 12).round
     end
 
+    # Every file row this report knows how to size. Live and sandbox totals are
+    # subsets; the remainder is discarded or no longer attached to a parent.
+    TRACKED = [
+      SupportingDocument,
+      ProjectDocument,
+      ReportDocument,
+      DesignDocument,
+      MeetingRequestDocument,
+      NoteAttachmentDocument,
+      RequirementDocument,
+      ResourceDocument
+    ].freeze
+
+    def accounted_bytes
+      tracked_bytes + zipfile_bytes
+    end
+
+    def tracked_bytes
+      @tracked_bytes ||= TRACKED.sum { |klass| sum_size(klass.all) }
+    end
+
+    def discarded_bytes
+      tracked_bytes - total_bytes - sandbox_bytes
+    end
+
     def zipfile_bytes
-      @zipfile_bytes ||=
-        SubmissionVersion
-          .joins(permit_application: :permit_project)
-          .merge(PermitApplication.kept)
-          .merge(PermitProject.kept.live)
-          .sum(Arel.sql(ZIP_SIZE_SQL))
-          .to_i
+      @zipfile_bytes ||= SubmissionVersion.sum(Arel.sql(ZIP_SIZE_SQL)).to_i
+    end
+
+    def excluded_rows
+      {
+        sandbox: sandbox_bytes,
+        discarded: discarded_bytes,
+        zipfiles: zipfile_bytes
+      }.map do |key, bytes|
+        {
+          "category" =>
+            I18n.t("reports.storage_footprint.excluded.#{key}.category"),
+          "bytes" => bytes,
+          "why" => I18n.t("reports.storage_footprint.excluded.#{key}.why")
+        }
+      end
     end
 
     def type_rows
@@ -229,8 +266,17 @@ module Reports
       months
     end
 
-    def sources
-      [
+    def sandbox_bytes
+      @sandbox_bytes ||=
+        sources(sandboxed: true).sum { |source| sum_size(source[:scope].call) }
+    end
+
+    def sources(sandboxed: false)
+      projects =
+        sandboxed ? PermitProject.kept.sandboxed : PermitProject.kept.live
+      sandbox_check = sandboxed ? "IS NOT NULL" : "IS NULL"
+
+      list = [
         {
           key: "supporting_documents",
           created: "supporting_documents.created_at",
@@ -239,18 +285,14 @@ module Reports
             SupportingDocument
               .joins(permit_application: :permit_project)
               .merge(PermitApplication.kept)
-              .merge(PermitProject.kept.live)
+              .merge(projects)
           end
         },
         {
           key: "project_documents",
           created: "project_documents.created_at",
           jurisdiction: "permit_projects.jurisdiction_id",
-          scope: -> do
-            ProjectDocument.joins(:permit_project).merge(
-              PermitProject.kept.live
-            )
-          end
+          scope: -> { ProjectDocument.joins(:permit_project).merge(projects) }
         },
         {
           key: "report_documents",
@@ -268,11 +310,15 @@ module Reports
                   ON permit_projects.id = permit_applications.permit_project_id
               SQL
               .where(<<~SQL.squish)
-                permit_applications.id IS NULL
+                (
+                  permit_applications.id IS NULL
+                  AND step_codes.sandbox_id #{sandbox_check}
+                )
                 OR (
-                  permit_applications.discarded_at IS NULL
+                  permit_applications.id IS NOT NULL
+                  AND permit_applications.discarded_at IS NULL
                   AND permit_projects.discarded_at IS NULL
-                  AND permit_projects.sandbox_id IS NULL
+                  AND permit_projects.sandbox_id #{sandbox_check}
                 )
               SQL
           end
@@ -280,12 +326,11 @@ module Reports
         {
           key: "design_documents",
           created: "design_documents.created_at",
-          jurisdiction: "permit_projects.jurisdiction_id",
+          jurisdiction: "pre_checks.jurisdiction_id",
           scope: -> do
-            DesignDocument
-              .joins(pre_check: { permit_application: :permit_project })
-              .merge(PermitApplication.kept)
-              .merge(PermitProject.kept.live)
+            DesignDocument.joins(:pre_check).where(
+              "pre_checks.sandbox_id #{sandbox_check}"
+            )
           end
         },
         {
@@ -295,7 +340,7 @@ module Reports
           scope: -> do
             MeetingRequestDocument.joins(
               project_meeting: :permit_project
-            ).merge(PermitProject.kept.live)
+            ).merge(projects)
           end
         },
         {
@@ -303,28 +348,31 @@ module Reports
           created: "note_attachment_documents.created_at",
           jurisdiction: "permit_projects.jurisdiction_id",
           scope: -> do
-            NoteAttachmentDocument.joins(note: :permit_project).merge(
-              PermitProject.kept.live
-            )
+            NoteAttachmentDocument.joins(note: :permit_project).merge(projects)
           end
-        },
-        {
-          key: "requirement_documents",
-          created: "requirement_documents.created_at",
-          jurisdiction: nil,
-          scope: -> do
-            RequirementDocument.joins(:requirement_block).merge(
-              RequirementBlock.kept
-            )
-          end
-        },
-        {
-          key: "resource_documents",
-          created: "resource_documents.created_at",
-          jurisdiction: "resources.jurisdiction_id",
-          scope: -> { ResourceDocument.joins(:resource) }
         }
       ]
+      return list if sandboxed
+
+      list +
+        [
+          {
+            key: "requirement_documents",
+            created: "requirement_documents.created_at",
+            jurisdiction: nil,
+            scope: -> do
+              RequirementDocument.joins(:requirement_block).merge(
+                RequirementBlock.kept
+              )
+            end
+          },
+          {
+            key: "resource_documents",
+            created: "resource_documents.created_at",
+            jurisdiction: "resources.jurisdiction_id",
+            scope: -> { ResourceDocument.joins(:resource) }
+          }
+        ]
     end
   end
 end

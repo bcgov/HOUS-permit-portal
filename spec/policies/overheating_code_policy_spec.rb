@@ -95,6 +95,27 @@ RSpec.describe OverheatingCodePolicy do
       expect(scope).to contain_exactly(mine)
     end
 
+    it "excludes codes from another sandbox" do
+      jurisdiction = create(:sub_district)
+      sandbox = jurisdiction.sandboxes.published.first
+      visible = create(:overheating_code, creator: creator, sandbox: sandbox)
+      hidden =
+        create(
+          :overheating_code,
+          creator: creator,
+          sandbox: jurisdiction.sandboxes.scheduled.first
+        )
+
+      scope =
+        described_class.new(
+          UserContext.new(creator, sandbox),
+          OverheatingCode.all
+        ).resolve
+
+      expect(scope).to include(visible)
+      expect(scope).not_to include(hidden)
+    end
+
     it "returns no records when the overheating tool is disabled" do
       SiteConfiguration.instance.update!(overheating_tool_enabled: false)
       create(:overheating_code, creator: creator)

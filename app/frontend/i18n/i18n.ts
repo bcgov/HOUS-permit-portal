@@ -577,7 +577,6 @@ const options = {
           columns: {
             created_at: "Created",
             updated_at: "Last Updated",
-            title: "Project",
             external_id: "External ID",
             status: "Status",
             full_address: "Address",
@@ -5693,6 +5692,7 @@ Thank you,
               submitter_mix: "Submitter mix",
               document_profile: "Document profile",
               by_type: "By document type",
+              excluded: "Stored, but not in the live total",
               stale_drafts: "Stale drafts",
             },
             charts: {

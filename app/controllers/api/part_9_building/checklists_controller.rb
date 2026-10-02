@@ -109,11 +109,12 @@ class Api::Part9Building::ChecklistsController < Api::ApplicationController
 
   def set_and_authorize_checklist
     @step_code_checklist = Part9StepCode::Checklist.find(params[:id])
+    ensure_in_sandbox!(@step_code_checklist.step_code)
     authorize @step_code_checklist
   end
 
   def set_and_authorize_step_code
-    @step_code = Part9StepCode.find(params[:step_code_id])
+    @step_code = ensure_in_sandbox!(Part9StepCode.find(params[:step_code_id]))
     authorize @step_code, :update?
   end
 end

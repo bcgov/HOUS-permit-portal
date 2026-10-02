@@ -212,7 +212,6 @@ export enum EReleaseNoteNotificationAudience {
 
 export enum EPreCheckSortFields {
   fullAddress = "full_address",
-  title = "title",
   updatedAt = "updated_at",
   status = "status",
 }

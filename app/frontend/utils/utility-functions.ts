@@ -427,6 +427,7 @@ export async function downloadFileFromStorage(options: {
     const response = await fetch(`/api/s3/params/download?model=${model}&modelId=${modelId}`, {
       method: "GET",
       headers: {
+        "X-Sandbox-ID": getCurrentSandboxId(),
         "Content-Type": "application/json",
         Accept: "application/json",
       },
