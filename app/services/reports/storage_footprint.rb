@@ -190,7 +190,7 @@ module Reports
         sources.each_with_object(Hash.new(0)) do |source, totals|
           source[:scope]
             .call
-            .group(Arel.sql("date_trunc('month', #{source[:created]})"))
+            .group(Arel.sql(local_month_sql(source[:created])))
             .sum(Arel.sql(SIZE_SQL))
             .each do |timestamp, bytes|
               next if timestamp.blank?
