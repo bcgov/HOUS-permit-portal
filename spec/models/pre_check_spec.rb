@@ -101,7 +101,7 @@ RSpec.describe PreCheck, type: :model do
   describe "#completed_event_notification_data" do
     it "tags the sandbox and counts unviewed pre-checks in that sandbox only" do
       user = create(:user)
-      sandbox = create(:sub_district).sandboxes.published.first
+      sandbox = published_sandbox
       create(:pre_check, :complete, creator: user, viewed_at: nil)
       sandboxed =
         create(

@@ -73,11 +73,7 @@ RSpec.describe StepCodeChecklistDumpService do
   it "excludes sandboxed step codes" do
     live = create(:part_9_step_code)
     fill_roof_lines(live.pre_construction_checklist, [{ details: "live" }])
-    sandboxed =
-      create(
-        :part_9_step_code,
-        sandbox: create(:sub_district).sandboxes.published.first
-      )
+    sandboxed = create(:part_9_step_code, sandbox: published_sandbox)
     fill_roof_lines(
       sandboxed.pre_construction_checklist,
       [{ details: "training" }]

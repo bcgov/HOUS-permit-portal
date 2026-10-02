@@ -49,7 +49,7 @@ RSpec.describe PreCheckExportService do
         create(
           :pre_check,
           jurisdiction: jurisdiction,
-          sandbox: jurisdiction.sandboxes.published.first
+          sandbox: published_sandbox(jurisdiction)
         )
 
       csv = service.user_consent_csv

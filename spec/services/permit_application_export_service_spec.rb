@@ -39,7 +39,7 @@ RSpec.describe PermitApplicationExportService do
       create(
         :permit_application,
         jurisdiction: sandbox_jurisdiction,
-        sandbox: sandbox_jurisdiction.sandboxes.published.first
+        sandbox: published_sandbox(sandbox_jurisdiction)
       )
 
       stats = PermitApplication.stats_by_template_jurisdiction_and_status

@@ -57,18 +57,14 @@ RSpec.describe Reports::StorageFootprint do
     create(:report_document, step_code: create(:part_9_step_code))
     create(
       :report_document,
-      step_code:
-        create(
-          :part_9_step_code,
-          sandbox: create(:sub_district).sandboxes.published.first
-        )
+      step_code: create(:part_9_step_code, sandbox: published_sandbox)
     )
     jurisdiction = create(:sub_district)
     sandboxed_application =
       create(
         :permit_application,
         jurisdiction: jurisdiction,
-        sandbox: jurisdiction.sandboxes.published.first
+        sandbox: published_sandbox(jurisdiction)
       )
     document_with_size(sandboxed_application, 1000)
 

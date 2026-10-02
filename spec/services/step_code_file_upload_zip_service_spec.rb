@@ -103,7 +103,7 @@ RSpec.describe StepCodeFileUploadZipService do
       create(
         :permit_application,
         jurisdiction: jurisdiction,
-        sandbox: jurisdiction.sandboxes.published.first
+        sandbox: published_sandbox(jurisdiction)
       )
     sandboxed = create_file_doc(sandboxed_application, data_key: data_key)
     attach_current_files(sandboxed_application, sandboxed)
