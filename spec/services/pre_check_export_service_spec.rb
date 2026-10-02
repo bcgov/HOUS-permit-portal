@@ -24,7 +24,10 @@ RSpec.describe PreCheckExportService do
       pre_check_without_creator = instance_double("PreCheck", creator: nil)
 
       relation = double("ARRelation")
-      allow(PreCheck).to receive(:includes).and_return(relation)
+      allow(PreCheck).to receive(:where).with(sandbox_id: nil).and_return(
+        relation
+      )
+      allow(relation).to receive(:includes).and_return(relation)
       allow(relation).to receive(:order).and_return(relation)
       allow(relation).to receive(:limit).and_return(relation)
       allow(relation).to receive(:find_each).and_yield(
@@ -37,6 +40,22 @@ RSpec.describe PreCheckExportService do
       expect(csv).to include("a@example.com,A User,2026-02-01 10:00:00,Jur A")
       # only one row beyond header
       expect(csv.lines.count).to eq(2)
+    end
+
+    it "excludes sandboxed pre-checks" do
+      jurisdiction = create(:sub_district)
+      live = create(:pre_check, jurisdiction: jurisdiction)
+      sandboxed =
+        create(
+          :pre_check,
+          jurisdiction: jurisdiction,
+          sandbox: jurisdiction.sandboxes.published.first
+        )
+
+      csv = service.user_consent_csv
+
+      expect(csv).to include(live.creator.email)
+      expect(csv).not_to include(sandboxed.creator.email)
     end
   end
 end

@@ -31,5 +31,22 @@ RSpec.describe PermitApplicationExportService do
         "J1,My Template,\"part9, residential\",2,1,1.0,2.0"
       )
     end
+
+    it "counts only live applications" do
+      live_jurisdiction = create(:sub_district)
+      create(:permit_application, jurisdiction: live_jurisdiction)
+      sandbox_jurisdiction = create(:sub_district)
+      create(
+        :permit_application,
+        jurisdiction: sandbox_jurisdiction,
+        sandbox: sandbox_jurisdiction.sandboxes.published.first
+      )
+
+      stats = PermitApplication.stats_by_template_jurisdiction_and_status
+
+      expect(stats.map { |row| row[:jurisdiction_name] }).to eq(
+        [live_jurisdiction.qualified_name]
+      )
+    end
   end
 end

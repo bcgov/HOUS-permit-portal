@@ -191,7 +191,9 @@ class PreCheck < ApplicationRecord
         "external_id" => external_id,
         "assessment_result" => assessment_result,
         "full_address" => full_address,
-        "unviewed_count" => PreCheck.unviewed_count_for_user(creator_id)
+        "sandbox_id" => sandbox_id,
+        "unviewed_count" =>
+          PreCheck.unviewed_count_for_user(creator_id, sandbox_id: sandbox_id)
       }
     }
   end
@@ -299,6 +301,6 @@ class PreCheck < ApplicationRecord
   end
 
   def public_record?
-    false # Pre-checks are not public records until they are attached to a permit application - revist this after merging HUB-4112
+    false
   end
 end

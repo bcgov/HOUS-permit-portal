@@ -37,6 +37,7 @@ class StepCodeFileUploadZipService
       SupportingDocument
         .with_file
         .includes(:permit_application)
+        .where(permit_application_id: PermitApplication.live.select(:id))
         .where(
           FILE_REQUIREMENT_CODES.map { "data_key LIKE ?" }.join(" OR "),
           *FILE_REQUIREMENT_CODES.map { |code| "%#{code}" }

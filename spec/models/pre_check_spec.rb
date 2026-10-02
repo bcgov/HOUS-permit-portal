@@ -98,6 +98,27 @@ RSpec.describe PreCheck, type: :model do
     end
   end
 
+  describe "#completed_event_notification_data" do
+    it "tags the sandbox and counts unviewed pre-checks in that sandbox only" do
+      user = create(:user)
+      sandbox = create(:sub_district).sandboxes.published.first
+      create(:pre_check, :complete, creator: user, viewed_at: nil)
+      sandboxed =
+        create(
+          :pre_check,
+          :complete,
+          creator: user,
+          viewed_at: nil,
+          sandbox: sandbox
+        )
+
+      object_data = sandboxed.completed_event_notification_data["object_data"]
+
+      expect(object_data["sandbox_id"]).to eq(sandbox.id)
+      expect(object_data["unviewed_count"]).to eq(1)
+    end
+  end
+
   describe "#can_submit?" do
     let(:pre_check) { create(:pre_check, service_partner: :archistar) }
     let(:jurisdiction) { pre_check.jurisdiction }

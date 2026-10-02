@@ -762,6 +762,7 @@ class PermitApplication < ApplicationRecord
           "LEFT JOIN (#{sv_max.to_sql}) sv_max ON sv_max.permit_application_id = permit_applications.id"
         )
         .where(users: { role: "submitter" })
+        .where(permit_projects: { sandbox_id: nil })
         .group(
           "jurisdictions.id",
           "requirement_templates.id",

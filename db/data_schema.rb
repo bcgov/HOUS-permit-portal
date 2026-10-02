@@ -1,1 +1,1 @@
-DataMigrate::Data.define(version: 20_261_001_140_100)
+DataMigrate::Data.define(version: 20_260_709_150_001)

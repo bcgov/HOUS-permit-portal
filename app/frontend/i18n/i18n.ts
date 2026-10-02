@@ -5692,6 +5692,7 @@ Thank you,
               submitter_mix: "Submitter mix",
               document_profile: "Document profile",
               by_type: "By document type",
+              excluded: "Stored, but not in the live total",
               stale_drafts: "Stale drafts",
             },
             charts: {

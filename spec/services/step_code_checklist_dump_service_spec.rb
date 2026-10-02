@@ -69,4 +69,22 @@ RSpec.describe StepCodeChecklistDumpService do
     expect(rows.headers).to include("Roof ceiling details 6")
     expect(rows.headers).not_to include("Roof ceiling details 7")
   end
+
+  it "excludes sandboxed step codes" do
+    live = create(:part_9_step_code)
+    fill_roof_lines(live.pre_construction_checklist, [{ details: "live" }])
+    sandboxed =
+      create(
+        :part_9_step_code,
+        sandbox: create(:sub_district).sandboxes.published.first
+      )
+    fill_roof_lines(
+      sandboxed.pre_construction_checklist,
+      [{ details: "training" }]
+    )
+
+    rows = rows_for("all_time")
+
+    expect(rows.map { |row| row["Roof ceiling details 1"] }).to eq(["live"])
+  end
 end
