@@ -1589,6 +1589,13 @@ Thank you,
             infoDescription:
               "Meeting notes and messages sent with a revision are visible to the applicant and the review team.",
             emptyDescription: "Meeting notes and sent revision messages will appear here.",
+            filters: {
+              type: "Type",
+              author: "Author",
+              projectMeeting: "Meeting",
+              submissionVersion: "Revision",
+              noMatches: "No notes match these filters.",
+            },
           },
           localResources: {
             title: "Local Resources",
