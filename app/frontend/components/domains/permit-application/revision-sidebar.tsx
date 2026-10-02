@@ -546,7 +546,7 @@ const SubmitterRequestsPanel = observer(
           title={t("permitApplication.show.revision.revisionsSection")}
           emptyText={revisionRequests.length === 0 ? t("permitApplication.show.revision.revisionsEmpty") : undefined}
         >
-          <OrderedList m={0} p={0} listStyleType="none">
+          <OrderedList ml={0}>
             {revisionRequests.map((field) => (
               <RevisionRequestListItem
                 revisionRequest={field}
@@ -617,7 +617,7 @@ const RevisionRequestListItem = ({ revisionRequest, forSubmitter, fieldChanged }
     <ListItem mb={4} w="full">
       <Flex direction="column" gap={1} align="flex-start">
         <Flex align="center" gap={1}>
-          {requirementKey && !forSubmitter ? (
+          {requirementKey ? (
             <ScrollLink to={`formio-component-${requirementKey}`}>{requirementJson?.label}</ScrollLink>
           ) : (
             <Text fontSize="sm" fontWeight="bold" color="text.secondary" lineHeight="shorter">
@@ -646,11 +646,6 @@ const RevisionRequestListItem = ({ revisionRequest, forSubmitter, fieldChanged }
           </Text>
         )}
         <Flex gap={1} align="center">
-          {forSubmitter && requirementKey && (
-            <ScrollLink to={`formio-component-${requirementKey}`} fontSize="xs" lineHeight="shorter">
-              {t("permitApplication.show.revision.goToField")}
-            </ScrollLink>
-          )}
           <Link
             as="button"
             type="button"
