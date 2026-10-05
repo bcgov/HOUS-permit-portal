@@ -30,6 +30,7 @@ class StepCode < ApplicationRecord
 
   # Associations
   belongs_to :permit_application, optional: true
+  belongs_to :sandbox, optional: true
   has_one :permit_project, through: :permit_application
   has_many :report_documents, dependent: :destroy, inverse_of: :step_code
 
@@ -45,6 +46,19 @@ class StepCode < ApplicationRecord
             },
             allow_nil: true
   validates :current_stage, inclusion: { in: STAGES }
+
+  scope :for_effective_sandbox,
+        ->(sandbox_id) do
+          left_joins(permit_application: :permit_project).where(
+            <<~SQL.squish,
+              CASE
+                WHEN step_codes.permit_application_id IS NULL THEN step_codes.sandbox_id
+                ELSE permit_projects.sandbox_id
+              END IS NOT DISTINCT FROM ?
+            SQL
+            sandbox_id
+          )
+        end
 
   def permit_date
     return permit_application.permit_date if permit_application
@@ -113,7 +127,7 @@ class StepCode < ApplicationRecord
       submitter_id: permit_application&.submitter_id,
       permit_project_id: permit_project&.id,
       jurisdiction_id: jurisdiction&.id,
-      sandbox_id: permit_application&.sandbox_id,
+      sandbox_id: sandbox_id,
       discarded: discarded_at.present?
     }
   end

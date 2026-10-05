@@ -17,6 +17,7 @@ class Note < ApplicationRecord
   belongs_to :user, optional: true
   belongs_to :permit_project
   belongs_to :noteable, polymorphic: true
+  delegate :sandbox_id, to: :permit_project
   has_many :note_attachment_documents, dependent: :destroy, inverse_of: :note
 
   accepts_nested_attributes_for :note_attachment_documents

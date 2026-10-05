@@ -44,7 +44,6 @@ declare const _default: {
     simplecurrencyadvanced: typeof import("./components/SimpleCurrencyAdvanced/Component").default
     simpleradioadvanced: typeof import("./components/SimpleRadioAdvanced/Component").default
     simplesurveyadvanced: typeof import("./components/SimpleSurveyAdvanced/Component").default
-    simplesignatureadvanced: typeof import("./components/SimpleSignatureAdvanced/Component").default
     simplebuttonadvanced: typeof import("./components/SimpleButtonAdvanced/Component").default
     bcaddress: typeof import("./components/BCAddress/Component").default
     simplebcaddress: typeof import("./components/SimpleBCAddress/Component").default

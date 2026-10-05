@@ -180,9 +180,6 @@ class RequirementFormJsonService
         # precisionPoints: 100
       }
     },
-    signature: {
-      type: "simplesignatureadvanced"
-    },
     number: {
       delimiter: true,
       applyMaskOn: "change",

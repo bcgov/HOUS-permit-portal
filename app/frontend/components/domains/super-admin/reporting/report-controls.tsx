@@ -1,9 +1,11 @@
 import { Button, Flex, FormControl, FormLabel, HStack, Select, Spinner, Text, Wrap, WrapItem } from "@chakra-ui/react"
 import { ArrowsClockwise, DownloadSimple } from "@phosphor-icons/react"
 import { format } from "date-fns"
+import { utcToZonedTime } from "date-fns-tz"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
+import { vancouverTimeZone } from "../../../../constants"
 import { useMst } from "../../../../setup/root"
 import { TReportRangePreset } from "../../../../types/report"
 
@@ -72,5 +74,5 @@ export const ReportControls = observer(({ reportKey }: IProps) => {
 function formatTimestamp(value: string) {
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return value
-  return format(date, "d MMM yyyy, HH:mm")
+  return format(utcToZonedTime(date, vancouverTimeZone), "d MMM yyyy, HH:mm")
 }

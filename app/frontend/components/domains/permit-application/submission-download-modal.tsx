@@ -82,9 +82,9 @@ function documentsForSubmissionVersion(
 
   return documents.filter((doc) => {
     if (fileIds.has(doc.id)) return true
+    if (doc.submissionVersionId) return doc.submissionVersionId === version.id
     if (doc.revisionRequestId && revisionIds.has(doc.revisionRequestId)) return true
     if (!isGeneratedDocumentKey(doc.dataKey)) return false
-    if (doc.submissionVersionId) return doc.submissionVersionId === version.id
     return version.id === latestVersionId
   })
 }

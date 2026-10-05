@@ -212,7 +212,6 @@ export enum EReleaseNoteNotificationAudience {
 
 export enum EPreCheckSortFields {
   fullAddress = "full_address",
-  title = "title",
   updatedAt = "updated_at",
   status = "status",
 }
@@ -286,7 +285,6 @@ export enum ERequirementType {
   radio = "radio",
   address = "address",
   bcaddress = "bcaddress",
-  signature = "signature",
   textArea = "textarea",
   energyStepCodePart9 = "energy_step_code",
   energyStepCodePart3 = "energy_step_code_part_3",

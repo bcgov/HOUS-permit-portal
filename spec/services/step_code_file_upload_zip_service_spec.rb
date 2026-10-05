@@ -91,4 +91,28 @@ RSpec.describe StepCodeFileUploadZipService do
     expect(names).to eq([current.standardized_filename])
     expect(names).not_to include(removed.standardized_filename)
   end
+
+  it "excludes files on sandboxed applications" do
+    data_key = "formSubmissionDataRSTsection1|RB1|energy_step_code_report_file"
+    live_application = create(:permit_application)
+    live = create_file_doc(live_application, data_key: data_key)
+    attach_current_files(live_application, live)
+
+    jurisdiction = create(:sub_district)
+    sandboxed_application =
+      create(
+        :permit_application,
+        jurisdiction: jurisdiction,
+        sandbox: published_sandbox(jurisdiction)
+      )
+    sandboxed = create_file_doc(sandboxed_application, data_key: data_key)
+    attach_current_files(sandboxed_application, sandboxed)
+
+    names =
+      zip_names(
+        described_class.new(range: Reports::Range.parse("all_time")).zip
+      )
+
+    expect(names).to eq([live.standardized_filename])
+  end
 end

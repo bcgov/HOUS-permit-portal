@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_09_28_114600) do
+ActiveRecord::Schema[7.2].define(version: 2026_10_01_140200) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -475,9 +475,11 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_28_114600) do
     t.datetime "discarded_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "sandbox_id"
     t.index ["creator_id"], name: "index_overheating_codes_on_creator_id"
     t.index ["discarded_at"], name: "index_overheating_codes_on_discarded_at"
     t.index ["jurisdiction_id"], name: "index_overheating_codes_on_jurisdiction_id"
+    t.index ["sandbox_id"], name: "index_overheating_codes_on_sandbox_id"
   end
 
   create_table "part3_occupancy_required_steps", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -732,7 +734,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_28_114600) do
   end
 
   create_table "pre_checks", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.uuid "permit_application_id"
     t.uuid "creator_id"
     t.uuid "jurisdiction_id"
     t.string "external_id"
@@ -757,12 +758,13 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_28_114600) do
     t.string "first_name_snapshot"
     t.string "last_name_snapshot"
     t.datetime "orphaned_at"
+    t.uuid "sandbox_id"
     t.index ["assessment_result"], name: "index_pre_checks_on_assessment_result"
     t.index ["completed_at"], name: "index_pre_checks_on_completed_at"
     t.index ["creator_id"], name: "index_pre_checks_on_creator_id"
     t.index ["external_id"], name: "index_pre_checks_on_external_id", unique: true
     t.index ["jurisdiction_id"], name: "index_pre_checks_on_jurisdiction_id"
-    t.index ["permit_application_id"], name: "index_pre_checks_on_permit_application_id", unique: true
+    t.index ["sandbox_id"], name: "index_pre_checks_on_sandbox_id"
     t.index ["service_partner"], name: "index_pre_checks_on_service_partner"
     t.index ["viewed_at"], name: "index_pre_checks_on_viewed_at"
   end
@@ -1158,12 +1160,14 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_28_114600) do
     t.string "last_name_snapshot"
     t.datetime "orphaned_at"
     t.string "current_stage", default: "pre_construction", null: false
+    t.uuid "sandbox_id"
     t.index ["creator_id"], name: "index_step_codes_on_creator_id"
     t.index ["current_stage"], name: "index_step_codes_on_current_stage"
     t.index ["discarded_at"], name: "index_step_codes_on_discarded_at"
     t.index ["jurisdiction_id"], name: "index_step_codes_on_jurisdiction_id"
     t.index ["permit_application_id"], name: "index_step_codes_on_permit_application_id"
     t.index ["permit_project_id"], name: "index_step_codes_on_permit_project_id"
+    t.index ["sandbox_id"], name: "index_step_codes_on_sandbox_id"
   end
 
   create_table "submission_contacts", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1422,6 +1426,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_28_114600) do
   add_foreign_key "notes", "users"
   add_foreign_key "occupancy_classifications", "part_3_step_code_checklists", column: "checklist_id", on_delete: :cascade
   add_foreign_key "overheating_codes", "jurisdictions"
+  add_foreign_key "overheating_codes", "sandboxes"
   add_foreign_key "overheating_codes", "users", column: "creator_id"
   add_foreign_key "part3_occupancy_required_steps", "jurisdictions", on_delete: :cascade
   add_foreign_key "part_3_step_code_checklists", "step_codes", on_delete: :cascade
@@ -1442,7 +1447,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_28_114600) do
   add_foreign_key "pinned_projects", "permit_projects"
   add_foreign_key "pinned_projects", "users"
   add_foreign_key "pre_checks", "jurisdictions"
-  add_foreign_key "pre_checks", "permit_applications"
+  add_foreign_key "pre_checks", "sandboxes"
   add_foreign_key "pre_checks", "users", column: "creator_id"
   add_foreign_key "preferences", "users"
   add_foreign_key "project_documents", "permit_projects"
@@ -1467,6 +1472,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_28_114600) do
   add_foreign_key "step_codes", "jurisdictions"
   add_foreign_key "step_codes", "permit_applications"
   add_foreign_key "step_codes", "permit_projects"
+  add_foreign_key "step_codes", "sandboxes"
   add_foreign_key "step_codes", "users", column: "creator_id"
   add_foreign_key "submission_contacts", "jurisdictions"
   add_foreign_key "submission_versions", "permit_applications"

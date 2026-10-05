@@ -27,7 +27,7 @@ class StepCodeExportService
     CSV.generate(headers: true) do |csv|
       # Headers for Part 3 metrics
       csv << [
-        "Application ID",
+        "Reference number",
         "Jurisdiction",
         "Address",
         "Building Height",
@@ -80,6 +80,7 @@ class StepCodeExportService
       Part3StepCode
         .includes(:permit_application, :checklists)
         .where(permit_applications: { status: %i[newly_submitted resubmitted] })
+        .where(permit_application_id: PermitApplication.live.select(:id))
         .find_each do |step_code|
           checklist = step_code.current_checklist
           next unless checklist
@@ -141,7 +142,7 @@ class StepCodeExportService
     CSV.generate(headers: true) do |csv|
       # Headers for Part 9 metrics
       csv << [
-        "Application ID",
+        "Reference number",
         "Jurisdiction",
         "Address",
         "Building Type",
@@ -169,6 +170,7 @@ class StepCodeExportService
       Part9StepCode
         .includes(:permit_application, :checklists)
         .where(permit_applications: { status: %i[newly_submitted resubmitted] })
+        .where(permit_application_id: PermitApplication.live.select(:id))
         .find_each do |step_code|
           checklist = step_code.current_checklist
           next unless checklist

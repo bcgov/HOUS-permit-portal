@@ -2,7 +2,6 @@ FactoryBot.define do
   factory :pre_check do
     association :creator, factory: :user
     association :jurisdiction, factory: :sub_district
-    permit_application { association :permit_application, submitter: creator }
     full_address { "123 Test St" }
     external_id { "EXT-#{SecureRandom.hex(4)}" }
     status { "draft" }

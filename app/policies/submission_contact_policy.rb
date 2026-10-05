@@ -16,6 +16,10 @@ class SubmissionContactPolicy < ApplicationPolicy
     create?
   end
 
+  def resend_confirmation?
+    update?
+  end
+
   private
 
   def privileged?

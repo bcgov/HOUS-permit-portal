@@ -31,7 +31,7 @@
             <% if @permit_application.nickname.present? %>
               <strong>Permit application:</strong> <%= @permit_application.nickname %><br>
             <% end %>
-            <strong>HUB#:</strong> <a href="<%= @permit_application.submitter_frontend_url %>" style="<%= link_style %>"><%= @permit_application.number %></a>
+            <strong>Application number:</strong> <a href="<%= @permit_application.submitter_frontend_url %>" style="<%= link_style %>"><%= @permit_application.number %></a>
           </p>
 
           <hr style="border: 0; border-top: 1px solid #d9d9d9; margin: 16px 0;">

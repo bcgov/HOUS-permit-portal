@@ -16,12 +16,13 @@ import {
   singleRequirementFormJson,
   singleRequirementSubmissionData,
 } from "../../../../utils/formio-helpers"
+import { getOptionalElectivesByPanelId, TOptionalElectivesPanel } from "../../../../utils/view-optional-electives"
 import { CompareRequirementsBox } from "../../../domains/permit-application/compare-requirements-box"
 import { ErrorsBox } from "../../../domains/permit-application/errors-box"
 import { BuilderBottomFloatingButtons } from "../../../domains/requirement-template/builder-bottom-floating-buttons"
 import { CustomMessageBox } from "../../base/custom-message-box"
 import { SharedSpinner } from "../../base/shared-spinner"
-import { Form, defaultOptions } from "../../chefs"
+import { defaultOptions, Form } from "../../chefs"
 import { ContactModal } from "../../contact/contact-modal"
 import { PreviousSubmissionModal } from "../../revisions/previous-submission-modal"
 import { ResubmissionSummaryBox, resubmissionSummaryIsVisible } from "../../revisions/resubmission-summary-box"
@@ -30,6 +31,7 @@ import { StepCodeSelectModal } from "../step-code-select-modal"
 import { useBlockScrollSpy } from "./hooks/use-block-scroll-spy"
 import { useChecklistVisibility } from "./hooks/use-checklist-visibility"
 import { useRequirementFormEvents } from "./hooks/use-requirement-form-events"
+import { OptionalElectivesModal } from "./optional-electives-modal"
 
 interface IRequirementFormProps {
   permitApplication?: IPermitApplication
@@ -119,6 +121,33 @@ export const RequirementForm = observer(
     const [firstComponentKey, setFirstComponentKey] = useState(null)
     const [isCollapsedAll, setIsCollapsedAllState] = useState(false)
     const stepCodeToolErrorRef = useRef<IErrorsBoxData[] | null>(null)
+    const {
+      isOpen: isOptionalElectivesOpen,
+      onOpen: onOptionalElectivesOpen,
+      onClose: onOptionalElectivesClose,
+    } = useDisclosure()
+    const [optionalElectivesModalData, setOptionalElectivesModalData] = useState<TOptionalElectivesPanel | null>(null)
+    const isEphemeral = permitApplication?.isEphemeral
+
+    const optionalElectivesByPanelId = useMemo(() => {
+      if (!isEphemeral) return new Map<string, TOptionalElectivesPanel>()
+      return getOptionalElectivesByPanelId(formattedFormJson)
+    }, [formattedFormJson, isEphemeral])
+
+    useEffect(() => {
+      if (!isEphemeral) return
+
+      const handleOpenOptionalElectives = (event: Event) => {
+        const panelId = (event as CustomEvent<{ panelId?: string }>).detail?.panelId
+        if (!panelId) return
+
+        setOptionalElectivesModalData(optionalElectivesByPanelId.get(panelId) || { labels: [], electives: [] })
+        onOptionalElectivesOpen()
+      }
+
+      document.addEventListener("openOptionalElectives", handleOpenOptionalElectives)
+      return () => document.removeEventListener("openOptionalElectives", handleOpenOptionalElectives)
+    }, [isEphemeral, onOptionalElectivesOpen, optionalElectivesByPanelId])
 
     const currentSubmissionData = useMemo(() => {
       return R.clone(submissionData)
@@ -489,6 +518,11 @@ export const RequirementForm = observer(
           isCollapsedAll={isCollapsedAll}
           setIsCollapsedAll={setIsCollapsedAll}
           renderSaveButton={renderSaveButton}
+        />
+        <OptionalElectivesModal
+          isOpen={isOptionalElectivesOpen}
+          onClose={onOptionalElectivesClose}
+          data={optionalElectivesModalData}
         />
         {isOpen && (
           <PermitApplicationSubmitModal

@@ -40,8 +40,8 @@ class Api::StepCodesController < Api::ApplicationController
       # disallow updating Step Code if it's tied to a permit application and the user is not the submitter (for now)
       if step_code_params[:permit_application_id].present?
         target_pa =
-          PermitApplication.find_by(
-            id: step_code_params[:permit_application_id]
+          ensure_in_sandbox!(
+            PermitApplication.find(step_code_params[:permit_application_id])
           )
         unless StepCodePolicy.new(pundit_user, @step_code).reassign_to?(
                  target_pa
@@ -178,7 +178,7 @@ class Api::StepCodesController < Api::ApplicationController
   private
 
   def set_step_code
-    @step_code = StepCode.find(params[:id])
+    @step_code = ensure_in_sandbox!(StepCode.find(params[:id]))
   end
 
   def step_code_metrics_params
