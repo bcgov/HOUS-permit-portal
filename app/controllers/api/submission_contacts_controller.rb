@@ -3,7 +3,8 @@ class Api::SubmissionContactsController < Api::ApplicationController
   skip_before_action :require_confirmation, only: %i[confirm]
   skip_after_action :verify_authorized, only: %i[confirm]
 
-  before_action :set_submission_contact, only: %i[update destroy]
+  before_action :set_submission_contact,
+                only: %i[update destroy resend_confirmation]
 
   def index
     contacts =
@@ -37,10 +38,18 @@ class Api::SubmissionContactsController < Api::ApplicationController
       render_success contact, nil, { blueprint: SubmissionContactBlueprint }
     else
       render_error "submission_contact.create_error",
-                   { errors: contact.errors.full_messages }
+                   message_opts: {
+                     error_message: contact.errors.full_messages.to_sentence
+                   }
     end
   rescue StandardError => e
-    render_error "submission_contact.create_error", {}, e
+    render_error "submission_contact.create_error",
+                 {
+                   message_opts: {
+                     error_message: "Could not add email address"
+                   }
+                 },
+                 e
   end
 
   def update
@@ -59,15 +68,33 @@ class Api::SubmissionContactsController < Api::ApplicationController
   end
 
   def destroy
-    authorize :submission_contact, :destroy?
+    authorize @submission_contact
     @submission_contact.destroy!
     render_success @submission_contact,
                    nil,
                    { blueprint: SubmissionContactBlueprint }
+  rescue ActiveRecord::RecordNotDestroyed => e
+    render_error "submission_contact.destroy_error",
+                 message_opts: {
+                   error_message: e.record.errors.full_messages.to_sentence
+                 }
   rescue ActiveRecord::InvalidForeignKey => e
     render_error("submission_contact.in_use_error", { status: 400 }, e)
   rescue StandardError => e
-    render_error "submission_contact.destroy_error", {}, e
+    render_error "submission_contact.destroy_failed", {}, e
+  end
+
+  def resend_confirmation
+    authorize @submission_contact
+    if @submission_contact.confirmed?
+      render_error "submission_contact.resend_error"
+      return
+    end
+
+    @submission_contact.send_confirmation
+    render_success @submission_contact,
+                   nil,
+                   { blueprint: SubmissionContactBlueprint }
   end
 
   private

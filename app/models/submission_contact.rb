@@ -1,4 +1,8 @@
 class SubmissionContact < ApplicationRecord
+  def self.policy_class
+    SubmissionContactPolicy
+  end
+
   belongs_to :jurisdiction
 
   before_destroy :ensure_enabled_feature_remains_configured
