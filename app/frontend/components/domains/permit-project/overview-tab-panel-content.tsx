@@ -7,8 +7,9 @@ import { useTranslation } from "react-i18next"
 import { useSearchParams } from "react-router-dom"
 import { IPermitProject } from "../../../models/permit-project"
 import { useMst } from "../../../setup/root"
+import { IPermitProjectUpdateParams } from "../../../types/api-request"
 import { EProjectPermitApplicationSortFields } from "../../../types/enums"
-import { IOption } from "../../../types/types"
+import { ISiteOption } from "../../../types/types"
 import { EmptyResultsBox } from "../../shared/grid/empty-results-box"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { FullscreenMapModal } from "../../shared/module-wrappers/fullscreen-map-modal"
@@ -26,7 +27,7 @@ interface IProps {
 }
 
 interface IProjectInfoForm {
-  site: IOption | null
+  site: ISiteOption | null
   pid: string | null
   jurisdictionId: string | null
 }
@@ -76,7 +77,7 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
   const onSubmit = async (data: IProjectInfoForm) => {
     setIsSubmitting(true)
     try {
-      const updateParams: { fullAddress?: string; pid?: string; jurisdictionId?: string } = {}
+      const updateParams: IPermitProjectUpdateParams = {}
 
       // Get address from site option, or keep the current address if not changed
       if (data.site?.label) {
@@ -92,6 +93,12 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
 
       if (data.jurisdictionId) {
         updateParams.jurisdictionId = data.jurisdictionId
+      }
+
+      const siteCoordinates = data.site?.coordinates
+      if (!data.pid && siteCoordinates?.length >= 2) {
+        updateParams.longitude = siteCoordinates[0]
+        updateParams.latitude = siteCoordinates[1]
       }
 
       await permitProjectStore.updatePermitProject(permitProject.id, updateParams)
