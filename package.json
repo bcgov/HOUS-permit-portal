@@ -106,7 +106,7 @@
       "rollup": "npm:@rollup/wasm-node"
     },
     "brace-expansion@1": "1.1.21",
-    "brace-expansion@2": "2.1.2",
+    "brace-expansion@2": "2.1.7",
     "dompurify": "$dompurify",
     "lodash": "4.18.1",
     "nanoid@3": "3.3.18",
