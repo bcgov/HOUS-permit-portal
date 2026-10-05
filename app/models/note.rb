@@ -89,7 +89,7 @@ class Note < ApplicationRecord
     return user.name unless user.jurisdiction_staff?
     return user.name if viewer&.jurisdiction_staff?
 
-    jurisdiction_name
+    permit_project&.jurisdiction&.qualified_name
   end
 
   private

@@ -92,26 +92,39 @@ RSpec.describe "Api::OmniauthCallbacks", type: :request do
 
       expect(response).to have_http_status(:found)
       expect(response.headers["Location"]).to include(login_path)
+      expect(login_reason_from(response.headers["Location"])).to eq("denied")
     end
   end
 
   describe "GET /api/auth/failure" do
-    before do
-      allow_any_instance_of(ActionView::Base).to receive(
-        :vite_client_tag
-      ).and_return("")
-      allow_any_instance_of(ActionView::Base).to receive(
-        :vite_react_refresh_tag
-      ).and_return("")
-      allow_any_instance_of(ActionView::Base).to receive(
-        :vite_typescript_tag
-      ).and_return("")
+    it "redirects to login with cancelled when the IdP denies access" do
+      get "/api/auth/failure", params: { message: "access_denied" }
+
+      expect(response).to have_http_status(:found)
+      expect(response.headers["Location"]).to include(login_path)
+      expect(login_reason_from(response.headers["Location"])).to eq("cancelled")
     end
 
-    it "redirects to login with error flash" do
-      get "/api/auth/failure"
+    it "redirects to login with error when the login service is unavailable" do
+      get "/api/auth/failure", params: { message: "service_unavailable" }
 
-      expect(response).to have_http_status(:ok)
+      expect(response).to have_http_status(:found)
+      expect(login_reason_from(response.headers["Location"])).to eq("error")
     end
+
+    it "uses unknown for unrecognized messages and does not copy raw IdP text into loginReason" do
+      raw = "invalid_client: secret leaked from keycloak"
+      get "/api/auth/failure", params: { message: raw }
+
+      expect(response).to have_http_status(:found)
+      expect(login_reason_from(response.headers["Location"])).to eq("unknown")
+      expect(Rack::Utils.unescape(response.headers["Location"])).not_to include(
+        "secret leaked"
+      )
+    end
+  end
+
+  def login_reason_from(location)
+    Rack::Utils.parse_query(URI(location).query)["loginReason"]
   end
 end
