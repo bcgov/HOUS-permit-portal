@@ -6,14 +6,13 @@ module PrintReports
         versions = application.submission_versions.order(:created_at, :id).to_a
         index = versions.index { |entry| entry.id == version.id }
         results = Generation.new.submission(version, recover: true)
-        replaced = results.any? { |result| result[:status] == "restored" }
         cumulative = versions.take(index)
         versions
           .drop(index)
           .each do |target|
             cumulative << target
-            needs_zip = (replaced || !StoredFile.valid_zip?(target.zipfile))
-            next unless needs_zip
+            # Always rebuild on manual recovery: a previous attempt may have
+            # repaired the PDF but failed before publishing all affected ZIPs.
             blockers =
               cumulative.flat_map do |entry|
                 expected = [SupportingDocument::APPLICATION_PDF_DATA_KEY]

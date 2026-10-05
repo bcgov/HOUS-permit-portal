@@ -41,9 +41,66 @@ RSpec.describe PrintReports::Recovery do
     expect(results).to include(include(kind: "application", status: "restored"))
     expect(version.supporting_documents.count).to eq(1)
     expect(version.supporting_documents.first.id).not_to eq(old.id)
-    expect(described_class.call(version)).to eq(
-      [{ kind: "application", status: "reused" }]
+    expect(described_class.call(version)).to contain_exactly(
+      { kind: "application", status: "reused" },
+      { kind: "zip", submission_version_id: version.id, status: "restored" }
     )
+  end
+
+  it "rebuilds the selected and later ZIPs on retry after PDF repair and partial ZIP publication" do
+    earlier =
+      create(
+        :submission_version,
+        :with_report_snapshot,
+        permit_application: application
+      )
+    described_class.call(earlier)
+    described_class.call(version)
+    later =
+      create(
+        :submission_version,
+        :with_report_snapshot,
+        permit_application: application
+      )
+    described_class.call(later)
+    versions = [earlier, version, later]
+    old_zips = versions.map { |entry| entry.reload.zipfile_data }
+    doc = version.supporting_documents.first
+    doc.file.delete
+
+    allow(SupportingDocumentsZipper).to receive(
+      :new
+    ).and_wrap_original do |original, *args, **kwargs|
+      if kwargs[:submission_version].id == later.id
+        raise IOError, "Interrupted ZIP rebuild"
+      end
+      original.call(*args, **kwargs)
+    end
+    expect { described_class.call(version) }.to raise_error(
+      IOError,
+      "Interrupted ZIP rebuild"
+    )
+    expect(PrintReports::StoredFile.valid_pdf?(doc.reload.file)).to be true
+    expect(version.reload.zipfile_data).not_to eq(old_zips[1])
+    expect(later.reload.zipfile_data).to eq(old_zips[2])
+    expect(PrintReports::StoredFile.valid_zip?(later.zipfile)).to be true
+    repaired_file = doc.file_data
+    first_rebuilt_zip = version.zipfile_data
+
+    allow(SupportingDocumentsZipper).to receive(:new).and_call_original
+    result = described_class.call(version)
+    expect(result).to contain_exactly(
+      { kind: "application", status: "reused" },
+      { kind: "zip", submission_version_id: version.id, status: "restored" },
+      { kind: "zip", submission_version_id: later.id, status: "restored" }
+    )
+    expect(earlier.reload.zipfile_data).to eq(old_zips[0])
+    expect(version.reload.zipfile_data).not_to eq(first_rebuilt_zip)
+    expect(later.reload.zipfile_data).not_to eq(old_zips[2])
+    expect(doc.reload.file_data).to eq(repaired_file)
+    later.zipfile.download do |file|
+      Zip::File.open(file.path) { |zip| expect(zip.entries.length).to eq(3) }
+    end
   end
 
   it "repairs object-only loss and rebuilds later cumulative packages without new readiness webhooks" do
