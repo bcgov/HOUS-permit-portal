@@ -237,35 +237,53 @@ module PermitApplicationStatus
     def handle_submission
       publish_revision_message(:submitter_message)
 
-      update(signed_off_at: Time.current)
+      self.class.transaction do
+        # Lock without reloading the in-flight AASM transition.
+        self.class.where(id: id).lock.pick(:id)
+        update!(signed_off_at: Time.current)
+        requested_version = latest_submission_version
+        customizations = PrintReports::Snapshot.customizations(self)
 
-      requested_version = latest_submission_version
-      checklist = step_code_checklist
-      # Only snapshot / generate digital checklist PDF when the selected method is the tool
-      snapshot_checklist =
-        checklist.present? && using_digital_energy_step_code_tool?
-      response_version =
-        submission_versions.create!(
-          form_json: self.form_json,
-          submission_data: self.submission_data,
-          step_code_checklist_json:
-            (
-              if snapshot_checklist
-                step_code.checklist_blueprint.render_as_hash(
-                  checklist,
-                  view: :extended
-                )
-              else
-                nil
-              end
-            )
+        checklist = step_code_checklist
+        # Only snapshot / generate digital checklist PDF when the selected method is the tool
+        snapshot_checklist =
+          checklist.present? && using_digital_energy_step_code_tool?
+        version =
+          submission_versions.build(
+            form_json:
+              PermitApplication::FormJsonService
+                .new(permit_application: self, customizations: customizations)
+                .call
+                .form_json,
+            submission_data: self.submission_data,
+            step_code_checklist_json:
+              (
+                if snapshot_checklist
+                  step_code.checklist_blueprint.render_as_hash(
+                    checklist,
+                    view: :extended
+                  )
+                else
+                  nil
+                end
+              )
+          )
+
+        version.id ||= SecureRandom.uuid
+        version.created_at = Time.current
+        version.report_snapshot =
+          PrintReports::Snapshot.capture(
+            version,
+            customizations: customizations
+          )
+        version.save!
+        assign_revision_fulfillments_to_response_version(
+          requested_version,
+          version
         )
-      assign_revision_fulfillments_to_response_version(
-        requested_version,
-        response_version
-      )
 
-      send_submit_notifications
+        send_submit_notifications
+      end
     end
 
     def assign_revision_fulfillments_to_response_version(

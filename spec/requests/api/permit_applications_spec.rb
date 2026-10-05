@@ -931,13 +931,25 @@ RSpec.describe "Api::PermitApplications", type: :request do
   end
 
   describe "POST /api/permit_applications/:id/generate_missing_pdfs" do
-    it "enqueues zipfile generation" do
+    it "enqueues generation and identifies historical reports that cannot be recreated" do
+      version =
+        create(:submission_version, permit_application: permit_application)
       allow(ZipfileJob).to receive(:perform_async)
 
       post "/api/permit_applications/#{permit_application.id}/generate_missing_pdfs",
            headers: headers
 
       expect(response).to have_http_status(:ok)
+      expect(
+        JSON.parse(response.body).dig("data", "report_generation_issues")
+      ).to contain_exactly(
+        include(
+          "submission_version_id" => version.id,
+          "key" => "permit_application_pdf_#{version.id}",
+          "reason" => PrintReports::Snapshot::UNAVAILABLE
+        )
+      )
+      expect(response.body).not_to include("report_snapshot")
       expect(ZipfileJob).to have_received(:perform_async).with(
         permit_application.id
       )

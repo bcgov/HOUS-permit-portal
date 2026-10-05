@@ -42,7 +42,7 @@ export function ReportCover({
       </dl>
       <p className="report-note">
         {identity.submission_version_id
-          ? "This report presents the saved submission. Cover address, jurisdiction, applicant and tags/template reflect current application information at export."
+          ? "This report presents the answers and application information saved at submission. Later edits are not included."
           : "This report presents saved data. Unsaved changes are not included."}
       </p>
     </header>

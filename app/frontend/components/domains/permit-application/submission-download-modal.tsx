@@ -186,11 +186,12 @@ export const SubmissionDownloadModal = observer(
       ]
     )
     const documentKeys = useMemo(() => documents.map((doc) => doc.fileUrl), [documents])
-    const missingPdfs = useMemo(() => {
-      const keys = permitApplication.missingPdfs || []
-      if (!displayedVersion) return keys
-      return keys.filter((key) => key.endsWith(`_${displayedVersion.id}`))
-    }, [permitApplication.missingPdfs, displayedVersion])
+    const issues = permitApplication.reportGenerationIssues
+    const unavailableKeys = new Set(issues.map((issue) => issue.key))
+    const missingPdfs = (permitApplication.missingPdfs || []).filter(
+      (key) => !unavailableKeys.has(key) && (!displayedVersion || key.endsWith(`_${displayedVersion.id}`))
+    )
+    const packageBlocked = issues.length > 0
     const hasMissingPdfs = missingPdfs.length > 0
     const allKeys = useMemo(() => [...documentKeys, ...missingPdfs], [documentKeys, missingPdfs])
 
@@ -265,7 +266,9 @@ export const SubmissionDownloadModal = observer(
 
       // Kick off generation when system PDFs are missing and/or the package zip isn't ready yet
       const needsGeneration =
-        permitApplication.isSubmitted && !zipGenerationTriggeredRef.current && (hasMissingPdfs || !zipfileUrl)
+        permitApplication.isSubmitted &&
+        !zipGenerationTriggeredRef.current &&
+        (hasMissingPdfs || (!zipfileUrl && !packageBlocked))
 
       if (!needsGeneration) {
         return
@@ -284,6 +287,7 @@ export const SubmissionDownloadModal = observer(
       isOpen,
       zipfileUrl,
       generationFailed,
+      packageBlocked,
     ])
 
     // Keep selections that still exist as either a ready file or a missing PDF placeholder
@@ -319,7 +323,7 @@ export const SubmissionDownloadModal = observer(
         return true
       }
 
-      if (wasAllSelected && zipfileUrl && !displayedVersion) {
+      if (wasAllSelected && zipfileUrl && !packageBlocked && !displayedVersion) {
         const a = document.createElement("a")
         a.href = zipfileUrl
         a.download = zipfileName || `permit-application-${permitApplication.number}.zip`
@@ -353,11 +357,15 @@ export const SubmissionDownloadModal = observer(
 
     // After missing PDFs finish, continue the download that was waiting
     useEffect(() => {
-      if (!isOpen || !awaitingGeneration || hasMissingPdfs || !pendingDownloadRef.current) return
-
-      if (generationFailed) return
+      if (!isOpen || !awaitingGeneration || !pendingDownloadRef.current) return
 
       const pending = pendingDownloadRef.current
+      if (pending.missingKeys.some((key) => unavailableKeys.has(key))) {
+        pendingDownloadRef.current = null
+        setAwaitingGeneration(false)
+        return
+      }
+      if (hasMissingPdfs || generationFailed) return
       pendingDownloadRef.current = null
       setAwaitingGeneration(false)
       ;(async () => {
@@ -369,7 +377,7 @@ export const SubmissionDownloadModal = observer(
         )
         if (result === false) setSelectiveZipFailed(true)
       })()
-    }, [awaitingGeneration, hasMissingPdfs, generationFailed, isOpen, documents, zipfileUrl])
+    }, [awaitingGeneration, hasMissingPdfs, generationFailed, isOpen, documents, zipfileUrl, issues])
 
     // Selective zip ready via websocket — auto-download when requestId matches
     useEffect(() => {
@@ -437,7 +445,7 @@ export const SubmissionDownloadModal = observer(
 
       const result = await performDownload(
         selectedReady.map((doc) => doc.fileUrl),
-        allSelected
+        allSelected && !packageBlocked
       )
       if (result === false) setSelectiveZipFailed(true)
     }
@@ -523,6 +531,27 @@ export const SubmissionDownloadModal = observer(
                     minH={0}
                     overflowY="auto"
                   >
+                    {issues.map((issue) => (
+                      <Text key={issue.key} role="status" fontSize="sm" color="text.secondary">
+                        {t("permitApplication.show.reportUnavailable", {
+                          version: issue.versionNumber,
+                          report: t(
+                            issue.key.startsWith("permit_application_pdf")
+                              ? "permitApplication.show.missingPdfLabels.permitApplication"
+                              : "permitApplication.show.missingPdfLabels.stepCode"
+                          ),
+                          reason: issue.reason,
+                        })}
+                      </Text>
+                    ))}
+                    {packageBlocked && (
+                      <Text fontSize="sm">{t("permitApplication.show.incompleteHistoricalPackage")}</Text>
+                    )}
+                    {packageBlocked && zipfileUrl && (
+                      <Link href={zipfileUrl} download={zipfileName || undefined} color="text.link">
+                        {t("permitApplication.show.downloadExistingPackage")}
+                      </Link>
+                    )}
                     <Checkbox
                       isChecked={allSelected}
                       isIndeterminate={someSelected}
