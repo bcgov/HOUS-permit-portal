@@ -3,6 +3,7 @@ import { observer } from "mobx-react-lite"
 import React, { lazy, Suspense, useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { BrowserRouter, Route, Routes, useLocation, useNavigate } from "react-router-dom"
+import { useMatomoAuthFunnel } from "../../../hooks/use-matomo-auth-funnel"
 import useSyncPathWithStore from "../../../hooks/use-sync-path-with-root-store"
 import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus } from "../../../types/enums"
@@ -506,6 +507,8 @@ export const Navigation = observer(() => {
   const { displaySitewideMessage, sitewideMessage } = siteConfigurationStore
   const { validateToken, isValidating } = sessionStore
   const { t } = useTranslation()
+
+  useMatomoAuthFunnel()
 
   useEffect(() => {
     validateToken()

@@ -103,14 +103,10 @@ export const UserModel = types
       )
     },
     get omniauthProviderLabel() {
-      const keys = {
-        idir: "idir",
-        bceidbasic: "bceidbasic",
-        bceidbusiness: "bceidbusiness",
-        "digital-building-permit-5120": "bcsc",
-      }
-      // @ts-ignore
-      return t(`user.omniauthProviders.${keys[self.omniauthProvider]}`)
+      if (!self.omniauthProvider) return
+      // Stored BCSC id is digital-building-permit-5120; the copy key is bcsc.
+      const labelKey = self.omniauthProvider === OMNIAUTH_PROVIDERS.bcsc ? "bcsc" : self.omniauthProvider
+      return t(`user.omniauthProviders.${labelKey}`)
     },
   }))
   .actions((self) => ({

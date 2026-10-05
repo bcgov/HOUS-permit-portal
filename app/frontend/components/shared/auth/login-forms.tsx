@@ -3,6 +3,14 @@ import React, { FormEvent, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { OMNIAUTH_PROVIDERS } from "../../../models/user"
 import { useServerAPI } from "../../../setup/root"
+import { beginMatomoLogin, MatomoAuthProvider } from "../../../utils/matomo"
+
+function onProviderLogin(provider: MatomoAuthProvider) {
+  return (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    beginMatomoLogin(provider, e.currentTarget)
+  }
+}
 
 export const IdirLoginForm: React.FC = () => {
   // @ts-ignore
@@ -10,7 +18,7 @@ export const IdirLoginForm: React.FC = () => {
   const { t } = useTranslation()
 
   return (
-    <form action="/api/auth/keycloak" method="post">
+    <form action="/api/auth/keycloak" method="post" onSubmit={onProviderLogin("idir")}>
       <input type="hidden" name="kc_idp_hint" value={OMNIAUTH_PROVIDERS.idir} />
       <input type="hidden" name="authenticity_token" value={csrfToken} />
       <Button variant="primary" w="full" type="submit">
@@ -25,7 +33,7 @@ export const BcscLoginForm: React.FC = () => {
   const { t } = useTranslation()
 
   return (
-    <form action="/api/auth/keycloak" method="post">
+    <form action="/api/auth/keycloak" method="post" onSubmit={onProviderLogin("bcsc")}>
       <input type="hidden" name="kc_idp_hint" value={OMNIAUTH_PROVIDERS.bcsc} />
       <input type="hidden" name="authenticity_token" value={csrfToken} />
       <Button variant="primary" w="full" type="submit">
@@ -40,7 +48,7 @@ export const BceidLoginForm: React.FC = () => {
   const { t } = useTranslation()
 
   return (
-    <form action="/api/auth/keycloak" method="post">
+    <form action="/api/auth/keycloak" method="post" onSubmit={onProviderLogin("bceid")}>
       <input type="hidden" name="kc_idp_hint" value={OMNIAUTH_PROVIDERS.bceid} />
       <input type="hidden" name="authenticity_token" value={csrfToken} />
       <Button variant="primary" w="full" type="submit">
