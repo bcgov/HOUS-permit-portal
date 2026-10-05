@@ -90,6 +90,7 @@ import {
   IPermitProjectSearchFilters,
   IProjectAuditSearchFilters,
   IProjectMeetingInboxSearchFilters,
+  IReportGenerationIssue,
   ISubmissionContact,
   ITemplateVersionDiff,
   TAutoComplianceModuleConfigurations,
@@ -816,7 +817,9 @@ export class Api {
   }
 
   async generatePermitApplicationMissingPdfs(id: string) {
-    return this.client.post<never>(`/permit_applications/${id}/generate_missing_pdfs`)
+    return this.client.post<IApiResponse<{ reportGenerationIssues: IReportGenerationIssue[] }, {}>>(
+      `/permit_applications/${id}/generate_missing_pdfs`
+    )
   }
 
   async downloadSupportingDocumentsZip(id: string, supportingDocumentIds: string[]) {

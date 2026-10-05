@@ -405,7 +405,12 @@ class Api::PermitApplicationsController < Api::ApplicationController
 
     ZipfileJob.perform_async(@permit_application.id)
 
-    head :ok
+    render json: {
+             data: {
+               report_generation_issues:
+                 @permit_application.report_generation_issues
+             }
+           }
   end
 
   def download_supporting_documents_zip

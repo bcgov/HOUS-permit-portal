@@ -21,6 +21,7 @@ import {
   IFormJson,
   IPermitApplicationSelectiveZipReady,
   IPermitApplicationSupportingDocumentsUpdate,
+  IReportGenerationIssue,
   ISubmissionData,
   ISubmissionVersion,
   ITemplateCustomization,
@@ -91,6 +92,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       selectiveZipResult: types.maybeNull(types.frozen<IPermitApplicationSelectiveZipReady>()),
       referenceNumber: types.maybeNull(types.string),
       missingPdfs: types.maybeNull(types.array(types.string)),
+      reportGenerationIssues: types.optional(types.frozen<IReportGenerationIssue[]>(), []),
       isFullyLoaded: types.optional(types.boolean, false),
       isDirty: types.optional(types.boolean, false),
       isLoading: types.optional(types.boolean, false),
@@ -971,6 +973,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
     .actions((self) => ({
       handleSocketSupportingDocsUpdate: (data: IPermitApplicationSupportingDocumentsUpdate) => {
         self.missingPdfs = cast(data.missingPdfs)
+        self.reportGenerationIssues = data.reportGenerationIssues || []
         self.supportingDocuments = data.supportingDocuments
         self.allSubmissionVersionCompletedSupportingDocuments = data.allSubmissionVersionCompletedSupportingDocuments
         self.zipfileSize = data.zipfileSize
@@ -985,6 +988,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       },
       generateMissingPdfs: flow(function* () {
         const response = yield self.environment.api.generatePermitApplicationMissingPdfs(self.id)
+        if (response.ok) self.reportGenerationIssues = response.data?.data?.reportGenerationIssues || []
         return response.ok
       }),
 

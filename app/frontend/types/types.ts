@@ -521,10 +521,18 @@ export interface IReportDocumentNotificationObjectData {
   downloadUrl?: string
 }
 
+export interface IReportGenerationIssue {
+  key: string
+  submissionVersionId: string
+  versionNumber: number
+  reason: string
+}
+
 export interface IPermitApplicationSupportingDocumentsUpdate {
   id: string
   supportingDocuments: IPermitApplication["supportingDocuments"]
   missingPdfs: string[]
+  reportGenerationIssues?: IReportGenerationIssue[]
   zipfileSize: null | number
   zipfileName: null | string
   zipfileUrl: null | string

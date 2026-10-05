@@ -581,6 +581,10 @@ class PermitApplication < ApplicationRecord
       end
   end
 
+  def report_generation_issues
+    submission_versions.flat_map(&:report_generation_issues)
+  end
+
   def missing_pdfs
     return [] unless submitted?
 

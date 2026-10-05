@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_10_01_140200) do
+ActiveRecord::Schema[7.2].define(version: 2026_10_02_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -1194,6 +1194,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_01_140200) do
     t.jsonb "step_code_checklist_json", default: {}
     t.datetime "package_ready_at"
     t.jsonb "zipfile_data"
+    t.jsonb "report_snapshot"
     t.index ["permit_application_id"], name: "index_submission_versions_on_permit_application_id"
   end
 

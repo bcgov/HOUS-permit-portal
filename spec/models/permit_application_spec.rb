@@ -211,8 +211,10 @@ RSpec.describe PermitApplication, type: :model do
           :zip_and_upload_supporting_documents
         )
         allow(permit_application).to receive(:send_submit_notifications)
-        allow(permit_application).to receive(:form_json).and_return(
-          { "components" => [] }
+        permit_application.template_version.update!(
+          form_json: {
+            "components" => []
+          }
         )
 
         permit_application.send(:handle_submission)
@@ -234,8 +236,10 @@ RSpec.describe PermitApplication, type: :model do
           :zip_and_upload_supporting_documents
         )
         allow(permit_application).to receive(:send_submit_notifications)
-        allow(permit_application).to receive(:form_json).and_return(
-          { "components" => [] }
+        permit_application.template_version.update!(
+          form_json: {
+            "components" => []
+          }
         )
 
         permit_application.send(:handle_submission)

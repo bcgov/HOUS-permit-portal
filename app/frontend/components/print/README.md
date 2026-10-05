@@ -16,13 +16,10 @@ toolbars, or browser fixture screens.
 - `__tests__/fixtures/` contains synthetic data used by automated PDF tests.
 
 Rails `PrintReports::Data.for_generation` requires explicit submission/checklist
-IDs. Application reports use saved schema and answers. Elective visibility uses
-application customization snapshots, matching the previous pipeline; older
-submissions do not have historically exact per-version elective settings.
-Historical step-code reports use the saved checklist snapshot, not the current one.
-Submission covers show the current application address, jurisdiction, applicant
-and template tags (or template nickname when there are no tags). These fields
-are not independently snapshotted per submission; the cover labels this distinction.
+IDs. Submission reports use immutable report snapshots, including their original
+cover identity and elective settings. Historical versions without these snapshots
+can reuse stored PDFs but cannot reconstruct missing ones. Standalone Step Code
+reports continue to render the explicitly selected saved checklist.
 
 ## Build and readiness
 
@@ -83,3 +80,51 @@ readability and preserving every answer take priority over minimizing page count
 The live renderer specs cover historical source handling, nesting/conditions,
 long records, repeated headers, footer escaping/page counts, populated Part 9
 (including distinct TEDI/MEUI values), and Part 3 standard/baseline/mixed-use cases.
+
+## Submission snapshots and recovery
+
+New submissions atomically save an immutable, versioned `SubmissionVersion.report_snapshot`
+with their report inputs: schema, answers, elective settings, cover identity, stable
+filenames and (when present) the selected Part 3/9 checklist and project metadata.
+Initial generation and recovery both read this snapshot. Current application,
+jurisdiction or checklist changes must not be substituted into it. Format 1 must
+remain readable when the renderer changes; preserve its field and visibility
+semantics with regression fixtures. Layout and export date may change. Exact bytes,
+original pagination and archived renderer binaries are not promised.
+
+Historical submissions without a snapshot are deliberately not backfilled from
+current data. Their existing PDFs remain usable; missing reports cannot be recreated.
+The download dialog identifies these reports and keeps available files downloadable.
+An incomplete historical version blocks cumulative ZIP reconstruction, not generation
+of later versions' PDFs. External API v1/v2 contracts and standalone Step Code report
+generation are unchanged.
+
+To repair a submission, including missing/corrupt object-store files whose attachment
+rows still exist:
+
+```sh
+bin/rails print_reports:recover SUBMISSION_VERSION_ID=<uuid>
+```
+
+The command reuses valid PDFs, restores missing or invalid ones, recreates deleted
+PDF attachment rows, and rebuilds missing/invalid or affected cumulative ZIPs from
+that version onward. It prints identifiers and restored/reused/blocked outcomes,
+returns failure when any package is blocked, and never logs answers. Storage access
+errors propagate; they are not interpreted as missing objects. A shared application
+advisory lock coordinates normal generation and recovery. Existing package-ready
+milestones and webhooks are not replayed during repair.
+
+Generated submission PDF rows/files and ZIP attachments are disposable **only for
+submissions with a complete, supported snapshot**. Keep submission versions and
+snapshots permanently for as long as regeneration is required. Original uploads
+are also required for complete ZIPs; snapshots contain their references, not their
+binary content. Exclude snapshot-less historical submissions from routine cleanup.
+Use Shrine/ActiveRecord attachment lifecycle methods, not `delete_all` or raw SQL,
+when removing generated outputs. This change does not introduce scheduled cleanup.
+
+Deploy the nullable column first, then coordinate web/worker deployment so that
+old workers cannot process new snapshot-backed submissions using live metadata.
+Verify capture and recovery before enabling any retention cleanup. Database and
+original-upload backups remain necessary; losing the submission snapshot removes
+its recovery source. Do not modify or backfill snapshots to work around a recovery
+failure.
