@@ -1,10 +1,9 @@
-import { observer } from "mobx-react-lite"
 import { useEffect } from "react"
-import { useMst } from "../../../setup/root"
-import { resolveAndTrackMatomoLoginAttempt } from "../../../utils/matomo"
+import { useMst } from "../setup/root"
+import { resolveAndTrackMatomoLoginAttempt } from "../utils/matomo"
 
 /** After Keycloak, fire login_success or login_fail once. Unknown outcome (no session, no loginReason) is not an event. */
-export const MatomoAuthFunnel = observer(function MatomoAuthFunnel() {
+export function useMatomoAuthFunnel() {
   const { sessionStore, userStore } = useMst()
   const { isValidating, loggedIn } = sessionStore
 
@@ -15,6 +14,4 @@ export const MatomoAuthFunnel = observer(function MatomoAuthFunnel() {
       omniauthProvider: userStore.currentUser?.omniauthProvider,
     })
   }, [isValidating, loggedIn])
-
-  return null
-})
+}

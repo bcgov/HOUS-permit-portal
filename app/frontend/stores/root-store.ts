@@ -125,6 +125,8 @@ export const RootStoreModel = types
       })
     },
     afterCreate() {
+      // UI store is created before session store, so this cannot run from uiStore.afterCreate.
+      self.uiStore.showQueryParamFlash()
       self.loadLocalPersistedData()
     },
   }))

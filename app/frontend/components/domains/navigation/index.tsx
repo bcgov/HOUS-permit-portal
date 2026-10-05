@@ -3,6 +3,7 @@ import { observer } from "mobx-react-lite"
 import React, { lazy, Suspense, useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { BrowserRouter, Route, Routes, useLocation, useNavigate } from "react-router-dom"
+import { useMatomoAuthFunnel } from "../../../hooks/use-matomo-auth-funnel"
 import useSyncPathWithStore from "../../../hooks/use-sync-path-with-root-store"
 import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus } from "../../../types/enums"
@@ -10,7 +11,6 @@ import { isSafeAppPath } from "../../../utils/utility-functions"
 import { FlashMessage } from "../../shared/base/flash-message"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EULAScreen } from "../onboarding/eula"
-import { MatomoAuthFunnel } from "./matomo-auth-funnel"
 import { MatomoSpaPageviews } from "./matomo-spa-pageviews"
 import { NavBar } from "./nav-bar"
 import { ProtectedRoute } from "./protected-route"
@@ -508,6 +508,8 @@ export const Navigation = observer(() => {
   const { validateToken, isValidating } = sessionStore
   const { t } = useTranslation()
 
+  useMatomoAuthFunnel()
+
   useEffect(() => {
     validateToken()
   }, [])
@@ -517,7 +519,6 @@ export const Navigation = observer(() => {
   return (
     <BrowserRouter>
       <MatomoSpaPageviews />
-      <MatomoAuthFunnel />
       <Box pos="relative" w="full">
         <Box pos="absolute" top={0} zIndex="toast" w="full">
           <FlashMessage />
