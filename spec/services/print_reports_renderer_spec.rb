@@ -273,7 +273,7 @@ RSpec.describe PrintReports::Renderer do
               "Submission version 2",
               "Submission date",
               "Export date",
-              "current application information at export",
+              "application information saved at submission",
               tags.any? ? "Residential | Addition" : "Housing permit"
             )
             expect(pages[1].text).to include("Saved answer")

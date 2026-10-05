@@ -2,7 +2,12 @@ require "rails_helper"
 require "sidekiq/testing"
 
 RSpec.describe ZipfileJob, type: :job do
-  before { Sidekiq::Testing.fake! }
+  before do
+    Sidekiq::Testing.fake!
+    allow_any_instance_of(SubmissionVersion).to receive(
+      :report_generation_issues
+    ).and_return([])
+  end
 
   it "locks by permit_application_id" do
     expect(described_class.lock_args(%w[pa1 x])).to eq(["pa1"])

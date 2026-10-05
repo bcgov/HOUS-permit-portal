@@ -4,6 +4,8 @@ require "fileutils"
 require "tmpdir"
 
 class SupportingDocumentsZipper
+  class Unavailable < StandardError
+  end
   include TraverseDataJson
 
   attr_reader :permit_application, :temp_files, :file_path, :document_ids
@@ -85,10 +87,10 @@ class SupportingDocumentsZipper
       versions = permit_application.submission_versions.where(id: @version_ids)
       upload_ids =
         versions.flat_map do |version|
-          collect_upload_ids(version.submission_data)
+          collect_upload_ids(version.report_submission_data)
         end
       if (upload_ids.uniq - docs.map(&:id)).any?
-        raise "Required supporting documents are unavailable"
+        raise Unavailable, "Required supporting documents are unavailable"
       end
       docs =
         docs.select do |doc|
@@ -144,6 +146,9 @@ class SupportingDocumentsZipper
 
   def download_file(document)
     if @version_ids
+      unless document.file && document.file.exists?
+        raise Unavailable, "Required ZIP member is unavailable: #{document.id}"
+      end
       PrintReports::Generation.new.promote!(document)
       downloaded = document.file.download
       temp_files << downloaded

@@ -5,49 +5,77 @@ module PrintReports
       @renderer = Renderer.new
     end
 
-    def submission(version)
+    def submission(version, recover: false)
+      ApplicationLock.synchronize(version.permit_application_id) do
+        generate_submission(version.reload, recover: recover)
+      end
+    end
+
+    def generate_submission(version, recover:)
       application = version.permit_application
-      namer =
-        PermitApplicationGeneratedFileNamer.new(
-          application,
-          date: version.created_at
-        )
+      results = []
       [
         [
           SupportingDocument::APPLICATION_PDF_DATA_KEY,
           :application,
-          namer.permit_application_pdf(version_number: version.version_number)
+          "application"
         ],
         [
           SupportingDocument::CHECKLIST_PDF_DATA_KEY,
           :application_step_code,
-          namer.step_code_checklist_pdf(version_number: version.version_number)
+          "checklist"
         ]
-      ].each do |key, method, filename|
-        if method == :application_step_code && !version.has_step_code_checklist?
-          next
-        end
-        existing = version.supporting_documents.find_by(data_key: key)
-        if existing&.file.present?
-          promote!(existing)
-          next
-        end
-        report = @data.public_send(method, application, version.id)
-        @renderer.render(report, filename: filename) do |path|
-          version.with_lock do
-            doc =
-              version.supporting_documents.find_or_initialize_by(
-                data_key: key,
-                permit_application_id: application.id
-              )
-            if doc.file.blank?
-              File.open(path, "rb") { |file| doc.update!(file: file) }
-            end
-            promote!(doc)
+      ].each do |key, method, kind|
+        next if kind == "checklist" && !version.has_step_code_checklist?
+        begin
+          existing = version.supporting_documents.find_by(data_key: key)
+          if existing&.file.present? &&
+               (!recover || StoredFile.valid_pdf?(existing.file))
+            promote!(existing)
+            results << { kind: kind, status: "reused" }
+            next
           end
+          report = @data.public_send(method, application, version.id)
+          filename = Snapshot.filename(version, kind)
+          @renderer.render(report, filename: filename) do |path|
+            version.with_lock do
+              doc =
+                version.supporting_documents.find_or_initialize_by(
+                  data_key: key,
+                  permit_application_id: application.id
+                )
+              replace =
+                doc.file.blank? || (recover && !StoredFile.valid_pdf?(doc.file))
+              if replace
+                # Upload and validate permanent storage before replacing the row.
+                # A unique storage key prevents delayed old-file cleanup removing
+                # the replacement. Failed publication leaves the old row intact.
+                uploaded =
+                  File.open(path, "rb") do |file|
+                    FileUploader.new(:store).upload(
+                      file,
+                      metadata: {
+                        "filename" => filename
+                      }
+                    )
+                  end
+                unless StoredFile.valid_pdf?(uploaded)
+                  raise Renderer::Error, "Replacement PDF is unavailable"
+                end
+                doc.file = uploaded
+                doc.save!
+              end
+              promote!(doc)
+              results << { kind: kind, status: replace ? "restored" : "reused" }
+            end
+          end
+        rescue Data::Unavailable => e
+          results << { kind: kind, status: "blocked", reason: e.message }
         end
       end
+      results
     end
+    private :generate_submission
 
     def step_code(step_code, checklist, filename:)
       report = @data.step_code(step_code, checklist.id)

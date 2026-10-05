@@ -320,6 +320,7 @@ export const PermitApplicationStoreModel = types
         selectiveZipResult: overrides.selectiveZipResult || null,
         referenceNumber: overrides.referenceNumber || null,
         missingPdfs: overrides.missingPdfs || null,
+        reportGenerationIssues: overrides.reportGenerationIssues || [],
         isFullyLoaded: overrides.isFullyLoaded ?? false,
         isDirty: overrides.isDirty ?? false,
         isLoading: overrides.isLoading ?? false,

@@ -6,6 +6,7 @@ RSpec.describe PrintReports::Generation do
   let(:version) do
     create(
       :submission_version,
+      :with_report_snapshot,
       permit_application: application,
       form_json: {
         "components" => [
@@ -88,9 +89,21 @@ RSpec.describe PrintReports::Generation do
           "step_code_type" =>
             kind == "part3" ? "Part3StepCode" : "Part9StepCode"
         )
-      version.update!(step_code_checklist_json: checklist)
-      described_class.new.submission(version)
-      expect(version.supporting_documents.pluck(:data_key)).to contain_exactly(
+      step = create(kind == "part3" ? :part_3_step_code : :part_9_step_code)
+      step.update_column(:permit_application_id, application.id)
+      application.reload
+      saved =
+        create(
+          :submission_version,
+          :with_report_snapshot,
+          permit_application: application,
+          step_code_checklist_json: checklist
+        )
+      application.step_code.update_column(:permit_application_id, nil)
+      application.reload
+      expect(application.step_code).to be_nil
+      described_class.new.submission(saved)
+      expect(saved.supporting_documents.pluck(:data_key)).to contain_exactly(
         SupportingDocument::APPLICATION_PDF_DATA_KEY,
         SupportingDocument::CHECKLIST_PDF_DATA_KEY
       )

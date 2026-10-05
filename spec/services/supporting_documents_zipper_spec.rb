@@ -166,9 +166,9 @@ RSpec.describe SupportingDocumentsZipper do
         allow(versions).to receive(:where).with(id: ["version-1"]).and_return(
           [submission_version]
         )
-        allow(submission_version).to receive(:submission_data).and_return(
-          answers
-        )
+        allow(submission_version).to receive(
+          :report_submission_data
+        ).and_return(answers)
       end
 
       it "includes nested file references in either casing and ignores non-file model ids" do
