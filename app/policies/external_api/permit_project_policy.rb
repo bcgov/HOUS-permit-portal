@@ -3,6 +3,10 @@ class ExternalApi::PermitProjectPolicy < ExternalApi::ApplicationPolicy
     same_jurisdiction_and_sandbox? && visible_children?
   end
 
+  def update_state?
+    show?
+  end
+
   private
 
   def visible_children?

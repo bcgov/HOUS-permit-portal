@@ -266,6 +266,10 @@ class PermitApplicationBlueprint < Blueprinter::Base
       pa.template_tag_list
     end
 
+    field :available_statuses do |pa, _options|
+      Constants::ExternalApi.available_statuses_for(pa)
+    end
+
     association :template_version,
                 blueprint: TemplateVersionBlueprint,
                 view: :external_api,

@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "d76764f2-5509-4e1f-bcb6-8bf8821ebf57",
     "name": "Integration API V2",
-    "description": "Option B bidirectional contract. A V2 API key selected at key creation is required. The partner owns durable permit-package storage; BPH provides one-hour signed URLs and supports re-GET for refreshed URLs. Ingest on `permit_application_package_ready`, not on `permit_application_status_changed`. Meeting requests remain in BPH and are outside External API V2. Partners write canonical application statuses and are authoritative; project-state write-back and manual-status conflict UX are deferred.",
+    "description": "Option B bidirectional contract. A V2 API key selected at key creation is required. The partner owns durable permit-package storage; BPH provides one-hour signed URLs and supports re-GET for refreshed URLs. Ingest on `permit_application_package_ready`, not on `permit_application_status_changed`. Meeting requests remain in BPH and are outside External API V2. Partners write canonical application statuses and project state and are authoritative; manual-status conflict UX is deferred.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
