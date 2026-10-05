@@ -104,7 +104,7 @@
                 "status"
               ]
             },
-            "description": "Uses canonical BPH status codes. Lifecycle transitions are enforced and repeated writes of the current status are idempotent. For `revisions_requested`, send a non-empty `revision_requests` array of field-level items (`requirement_block_code`, `requirement_code`, `reason_code`, `comment`) copied from the submission version payload. `revision_requests` must be omitted for every other status. Invalid, reserved, or unavailable transitions return 422 with the allowed write set."
+            "description": "Uses canonical BPH status codes. Lifecycle transitions are enforced and repeated writes of the current status are idempotent. For `revisions_requested`, send a non-empty `revision_requests` array of field-level items (`requirement_block_code`, `requirement_code`, `reason_code`, `comment`) copied from the submission version payload. `revision_requests` must be omitted for every other status. Invalid, reserved, or unavailable transitions return 422 naming the statuses available from the current status."
           },
           "response": []
         },
@@ -167,7 +167,7 @@
     },
     {
       "name": "Permit projects",
-      "description": "Project GET follows `permit_project_id` from application reads and webhooks. Child summaries omit drafts and include `revisions_requested`. Meetings, collaborators, notes, and documents stay in BPH.",
+      "description": "Project GET follows `permit_project_id` from application reads and webhooks. Child summaries omit drafts and include `revisions_requested`. PATCH state accepts only `available_states` from the current state. Meetings, collaborators, notes, and documents stay in BPH.",
       "item": [
         {
           "name": "Get Permit Project by ID",
@@ -179,7 +179,42 @@
               "host": ["{{base_url}}"],
               "path": ["external_api", "v2", "permit_projects", "{{permit_project_id}}"]
             },
-            "description": "Project identity, state, address, and sibling application summaries (id, number, status, status_label, tags)."
+            "description": "Project identity, state, available_states, address, and sibling application summaries (id, number, status, status_label, tags)."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Permit Project State",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"state\": \"in_progress\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/external_api/v2/permit_projects/{{permit_project_id}}/state",
+              "host": ["{{base_url}}"],
+              "path": [
+                "external_api",
+                "v2",
+                "permit_projects",
+                "{{permit_project_id}}",
+                "state"
+              ]
+            },
+            "description": "Sets project state to a code in `available_states` for the current state. `draft` is not a partner write. Writing the current state returns 200 and does not emit another `permit_project_state_changed`. Illegal or unknown codes return 422 and name the available states."
           },
           "response": []
         }
