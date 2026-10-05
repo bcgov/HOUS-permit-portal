@@ -190,7 +190,9 @@ class StepCodeChecklistDumpService
   end
 
   def loaded_checklists
-    Part9StepCode::Checklist.includes(
+    Part9StepCode::Checklist.where(
+      step_code_id: StepCode.for_effective_sandbox(nil).select(:id)
+    ).includes(
       :building_characteristics_summary,
       :data_entries,
       step_code: %i[jurisdiction permit_application]

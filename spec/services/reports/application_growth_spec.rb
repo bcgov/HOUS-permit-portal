@@ -1,6 +1,8 @@
 require "rails_helper"
 
 RSpec.describe Reports::ApplicationGrowth do
+  include ActiveSupport::Testing::TimeHelpers
+
   let(:range) { Reports::Range.parse("12_months") }
   let(:payload) { described_class.new(range: range).call }
 
@@ -12,6 +14,22 @@ RSpec.describe Reports::ApplicationGrowth do
     expect(payload[:empty]).to eq(true)
     expect(figure("total_created")[:value]).to eq(0)
     expect(payload[:charts].first[:suppressed]).to eq(true)
+  end
+
+  it "buckets a late-evening Vancouver timestamp in the Vancouver month" do
+    travel_to(Time.zone.parse("2026-10-02 12:00")) do
+      create(
+        :permit_application,
+        created_at: Time.zone.parse("2026-09-30 20:00")
+      )
+
+      by_month = payload[:tables].find { |tbl| tbl[:key] == "by_month" }[:rows]
+      september = by_month.find { |row| row["period"] == "2026-09" }
+      october = by_month.find { |row| row["period"] == "2026-10" }
+
+      expect(september["created"]).to eq(1)
+      expect(october["created"]).to eq(0)
+    end
   end
 
   it "counts live applications created and submitted in the range" do

@@ -129,14 +129,22 @@ const linkGenerators: Partial<Record<ENotificationActionType, LinkGenerator>> = 
   },
 
   [ENotificationActionType.fileUploadFailed]: (notification) => {
-    const permitApplicationId = (notification.objectData as any)?.permitApplicationId
-    if (!permitApplicationId) return []
-    return [
-      {
-        text: t("permitApplication.goToApplication"),
-        href: `/permit-applications/${permitApplicationId}/edit`,
-      },
-    ]
+    const objectData = notification.objectData as {
+      permitApplicationId?: string
+      preCheckId?: string
+    }
+    if (objectData?.permitApplicationId) {
+      return [
+        {
+          text: t("permitApplication.goToApplication"),
+          href: `/permit-applications/${objectData.permitApplicationId}/edit`,
+        },
+      ]
+    }
+    if (objectData?.preCheckId) {
+      return showLink(`/pre-checks/${objectData.preCheckId}/edit/upload-drawings`)
+    }
+    return []
   },
 
   [ENotificationActionType.resourceReminder]: (notification) => {

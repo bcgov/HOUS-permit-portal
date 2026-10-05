@@ -7,6 +7,7 @@ class Api::ApplicationController < ActionController::API
   before_action :store_currents
   before_action :require_confirmation
 
+  rescue_from ActiveRecord::RecordNotFound, with: :record_not_found
   rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
 
   after_action :verify_authorized, except: %i[index], unless: :skip_pundit?
@@ -42,6 +43,18 @@ class Api::ApplicationController < ActionController::API
 
   def skip_pundit?
     devise_controller?
+  end
+
+  # Records in another sandbox (or live vs training) are reported as not found.
+  def ensure_in_sandbox!(record)
+    return record if current_user&.super_admin?
+    return record if record.sandbox_id == current_sandbox&.id
+
+    raise ActiveRecord::RecordNotFound
+  end
+
+  def record_not_found(exception)
+    render_error "misc.not_found_error", { status: :not_found }, exception
   end
 
   def user_not_authorized(exception)

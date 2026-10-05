@@ -8,6 +8,12 @@ RSpec.describe Reports::StorageFootprint do
     payload[:headline_figures].find { |row| row[:key] == key }
   end
 
+  def excluded(category)
+    payload[:tables].find { |tbl| tbl[:key] == "excluded" }[:rows].find do |row|
+      row["category"] == category
+    end
+  end
+
   def document_with_size(application, size)
     document = create(:supporting_document, permit_application: application)
     data = document.file_data.deep_dup
@@ -31,7 +37,8 @@ RSpec.describe Reports::StorageFootprint do
     )
 
     expect(figure("total_bytes")[:value]).to eq(2048)
-    expect(figure("excluded_zipfile_bytes")[:value]).to eq(99_999)
+    expect(excluded("Submission zipfiles")["bytes"]).to eq(99_999)
+    expect(figure("accounted_bytes")[:value]).to eq(2048 + 99_999)
     expect(figure("average_bytes_per_application")[:value]).to eq(2048)
   end
 
@@ -43,6 +50,27 @@ RSpec.describe Reports::StorageFootprint do
     discarded.discard!
 
     expect(figure("total_bytes")[:value]).to eq(1000)
+    expect(excluded("Discarded")["bytes"]).to eq(5000)
+  end
+
+  it "reports sandboxed documents separately from the live total" do
+    create(:report_document, step_code: create(:part_9_step_code))
+    create(
+      :report_document,
+      step_code: create(:part_9_step_code, sandbox: published_sandbox)
+    )
+    jurisdiction = create(:sub_district)
+    sandboxed_application =
+      create(
+        :permit_application,
+        jurisdiction: jurisdiction,
+        sandbox: published_sandbox(jurisdiction)
+      )
+    document_with_size(sandboxed_application, 1000)
+
+    expect(figure("total_bytes")[:value]).to eq(456)
+    expect(excluded("Sandbox (training)")["bytes"]).to eq(1456)
+    expect(figure("accounted_bytes")[:value]).to eq(456 + 1456)
   end
 
   it "breaks down current storage by document type and jurisdiction" do
@@ -78,7 +106,7 @@ RSpec.describe Reports::StorageFootprint do
   it "states zipfile, discarded, billing, and projection treatment" do
     texts = payload[:notes].map { |note| note[:text] }.join(" ")
 
-    expect(texts).to include("zipfiles")
+    expect(texts).to include("zipfile")
     expect(texts).to include("discarded")
     expect(texts).to include("bills")
     expect(texts).to include("multiplied by 12")

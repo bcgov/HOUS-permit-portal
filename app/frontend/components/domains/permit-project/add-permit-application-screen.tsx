@@ -53,8 +53,10 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
   const selectedTemplatesRequireProjectMeeting = selectedTemplateVersions.some(
     (templateVersion) => templateVersion.requiresProjectMeeting
   )
+  // Meeting requests are owner-only. Review staff adding permits they do not own skip this step.
   const shouldOfferProjectMeetingAfterAdd =
     selectedTemplatesRequireProjectMeeting &&
+    !!currentPermitProject?.isOwner &&
     !currentPermitProject?.activeProjectMeeting &&
     siteConfigurationStore.projectMeetingsEnabled &&
     (currentPermitProject?.jurisdiction?.projectMeetingsEnabled ?? false)

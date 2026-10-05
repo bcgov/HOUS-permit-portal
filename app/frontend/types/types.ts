@@ -296,6 +296,12 @@ export interface IErrorsBoxData {
   class: string
 }
 
+export interface IOptionalElectiveFieldInfo {
+  label: string
+  tooltip?: string
+  description?: string
+}
+
 interface IStepCodeBuildingCharacteristicSummarySelectOptions {
   performanceTypes: {
     windowsGlazedDoors: EWindowsGlazedDoorsPerformanceType[]

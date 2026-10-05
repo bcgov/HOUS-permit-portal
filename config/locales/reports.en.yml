@@ -390,24 +390,34 @@ en:
         jurisdiction: "Jurisdiction"
         bytes: "Bytes"
         period: "Month"
+        category: "Category"
+        why: "Why it is not in the total"
+      excluded:
+        sandbox:
+          category: "Sandbox (training)"
+          why: "Documents on training projects, applications, standalone Step Codes, and pre-checks. Discarded training records are in the discarded row."
+        discarded:
+          category: "Discarded"
+          why: "Documents on a discarded application, project, Step Code, or requirement block, including discarded training records."
+        zipfiles:
+          category: "Submission zipfiles"
+          why: "Zipfiles built when an application is submitted, including sandbox and discarded applications. A live application's documents are already in the total; the zipfile is a second copy."
       figures:
         total_bytes:
-          label: "Current total storage (bytes)"
-          help: "Sum of Shrine uploaded sizes on kept, live records. Submission zipfiles are excluded. This snapshot ignores the selected range."
+          label: "Live storage (bytes)"
+          help: "Shrine sizes on kept, live records only. Sandbox, discarded, and submission zipfiles are in the table below. This snapshot ignores the selected range."
+        accounted_bytes:
+          label: "All stored bytes this report can see"
+          help: "Live storage plus the sandbox, discarded, and submission-zipfile rows. This is every byte the report can size. The storage bill can still be higher."
         average_bytes_per_application:
           label: "Average storage per application (bytes)"
-          help: "Current total storage divided by live applications. Ignores the selected range."
+          help: "Live storage divided by live applications. Ignores the selected range."
         projected_next_12_months:
           label: "Projected storage added, next 12 months (bytes)"
           help: "Average monthly storage added over the last three calendar months (including the current partial month), times 12. This does not follow the selected range."
-        excluded_zipfile_bytes:
-          label: "Excluded zipfile bytes"
-          help: "Shrine size of permit application submission zipfiles. Excluded from the total because those zipfiles bundle supporting documents already counted."
       notes:
-        zipfiles: "Submission zipfiles (submission_versions.zipfile_data) are excluded from the total. They bundle supporting documents at submit, so including them would count those bytes twice. Their combined Shrine size is the excluded-zipfile figure."
-        discarded: "Documents attached to discarded permit applications, discarded projects, or discarded Step Codes are excluded. Requirement-block documents on discarded requirement blocks are excluded."
+        accounted: "Live storage plus the sandbox, discarded, and submission zipfile rows is every file this report can size. Add those rows to the live total and it matches the all-stored figure."
         billed: "Sizes come from Shrine file_data metadata size (uploaded bytes). That is not what the storage backend bills: orphans, packing, and provider overhead are excluded."
-        sandbox: "Sandbox (non-live) projects are excluded."
         projection: "The forward projection is last-three-calendar-month average bytes added, including the current incomplete month, multiplied by 12. It assumes recent additions continue at that average. It is not a capacity booking."
         unattributed: "Requirement-block documents have no jurisdiction. They appear as Unattributed on the jurisdiction table and are included in the total."
   arbitrary_message_construct:

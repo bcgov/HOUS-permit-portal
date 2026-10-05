@@ -68,7 +68,11 @@ class Api::ProjectMeetings::NotesController < Api::ApplicationController
 
   def set_project_meeting
     @project_meeting =
-      ProjectMeeting.preload(:permit_project).find(params[:project_meeting_id])
+      ensure_in_sandbox!(
+        ProjectMeeting.preload(:permit_project).find(
+          params[:project_meeting_id]
+        )
+      )
   end
 
   def note_params

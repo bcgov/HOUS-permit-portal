@@ -261,25 +261,23 @@ class PermitApplicationPolicy < ApplicationPolicy
       if user.review_staff?
         # Access rule 3 (review staff only): applications on projects in their
         # jurisdictions, including new drafts. Opening a new draft is denied
-        # by show?. In sandbox mode, the sandbox filter lives on the project.
-        pp_clauses = [
-          "pp.id = permit_applications.permit_project_id",
-          "pp.jurisdiction_id IN (:jur_ids)"
-        ]
-        pp_clauses << "pp.sandbox_id = :sandbox_id" if sandbox.present?
-
+        # by show?.
         clauses << <<-SQL.squish
           EXISTS (
             SELECT 1 FROM permit_projects pp
-            WHERE #{pp_clauses.join(" AND ")}
+            WHERE pp.id = permit_applications.permit_project_id
+              AND pp.jurisdiction_id IN (:jur_ids)
           )
         SQL
         values[:jur_ids] = user.jurisdictions.pluck(:id)
-        values[:sandbox_id] = sandbox.id if sandbox.present?
       end
 
-      # Combine all access rules with OR and de-duplicate results.
-      scope.where(clauses.map { |c| "(#{c})" }.join(" OR "), values).distinct
+      # Combine all access rules with OR and de-duplicate results. Every rule
+      # is limited to the current sandbox (live when nil).
+      scope
+        .for_sandbox(sandbox)
+        .where(clauses.map { |c| "(#{c})" }.join(" OR "), values)
+        .distinct
     end
   end
 end

@@ -167,8 +167,7 @@ module Reports
     end
 
     def counts_by_month(scope, timestamp_sql)
-      grouped =
-        scope.group(Arel.sql("date_trunc('month', #{timestamp_sql})")).count
+      grouped = scope.group(Arel.sql(local_month_sql(timestamp_sql))).count
       grouped_by_month =
         grouped.each_with_object({}) do |(key, count), memo|
           next if key.blank?
@@ -255,6 +254,13 @@ module Reports
     end
 
     private
+
+    # Timestamps are stored as UTC without a zone. Truncate in the app zone
+    # and return a date so ActiveRecord does not read the bucket back as UTC.
+    def local_month_sql(timestamp_sql)
+      zone = ActiveRecord::Base.connection.quote(Time.zone.tzinfo.name)
+      "date_trunc('month', (#{timestamp_sql}) AT TIME ZONE 'UTC' AT TIME ZONE #{zone})::date"
+    end
 
     def numeric_presence?(value)
       case value
