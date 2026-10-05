@@ -13,7 +13,7 @@ export const Footer = observer(() => {
     "/accept-invitation",
     "/login",
     "/forgot-password",
-    "/welcome",
+    "/about",
     "/contact",
     "/videos",
     "/videos/:videoId",

@@ -267,6 +267,19 @@ RSpec.describe PermitApplication, type: :model do
       end
     end
 
+    describe "discarded records" do
+      it "blocks status transitions including submit" do
+        permit_application = create(:permit_application)
+        permit_application.discard!
+
+        expect(permit_application.allowed_manual_transitions).to eq([])
+        expect { permit_application.submit! }.to raise_error(
+          AASM::InvalidTransition
+        )
+        expect(permit_application.reload).to be_new_draft
+      end
+    end
+
     describe "#can_submit?" do
       it "is false when digital tool method is selected but step code is incomplete" do
         permit_application = create(:permit_application)

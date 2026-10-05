@@ -55,7 +55,7 @@ export const PreCheckInfoScreen = () => {
   return (
     <Container maxW="container.lg" pb="36" px="8">
       <Heading as="h1" mt="16">
-        {t("preCheck.infoPage.title", "Pre-check your drawings for compliance with BC Building Code")}
+        {t("preCheck.infoPage.title")}
       </Heading>
       <Text pt="4" fontSize="lg">
         {t(

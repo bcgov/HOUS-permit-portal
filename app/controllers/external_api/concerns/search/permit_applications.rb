@@ -26,7 +26,8 @@ module ExternalApi::Concerns::Search::PermitApplications
             nil
           end
         ),
-      includes: PermitApplication::SEARCH_INCLUDES
+      includes: PermitApplication::SEARCH_INCLUDES,
+      scope_results: ->(relation) { policy_scope([:external_api, relation]) }
     }
 
     @permit_application_search =

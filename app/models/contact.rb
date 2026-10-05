@@ -25,12 +25,16 @@ class Contact < ApplicationRecord
             allow_blank: true
   validates :phone, phone: true, allow_blank: true
   validates :cell, phone: true, allow_blank: true
-  before_validation :normalize_phone
+  before_validation :normalize_phone, :clear_extension_without_phone
 
   belongs_to :contactable, polymorphic: true
 
   def normalize_phone
     self.phone = Phonelib.parse(phone).e164
+  end
+
+  def clear_extension_without_phone
+    self.extension = nil if phone.blank?
   end
 
   def name

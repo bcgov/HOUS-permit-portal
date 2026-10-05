@@ -1,0 +1,2 @@
+class RequirementTemplateStructureRestoreError < StandardError
+end

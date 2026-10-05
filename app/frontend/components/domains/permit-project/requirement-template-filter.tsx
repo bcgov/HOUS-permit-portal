@@ -1,6 +1,7 @@
 import { observer } from "mobx-react-lite"
-import React, { useEffect } from "react"
+import React, { useEffect, useRef } from "react"
 import { useTranslation } from "react-i18next"
+import { useParams } from "react-router-dom"
 import { ISearch } from "../../../lib/create-search-model"
 import { useMst } from "../../../setup/root"
 import { CheckboxFilter } from "../../shared/filters/checkbox-filter"
@@ -13,12 +14,24 @@ export const RequirementTemplateFilter = observer(function RequirementTemplateId
   searchModel,
 }: IProps<TSearchModel>) {
   const { t } = useTranslation()
+  const { permitProjectId } = useParams<{ permitProjectId?: string }>()
   const { requirementTemplateStore } = useMst()
-  const { requirementTemplateIdFilter, setRequirementTemplateIdFilter, search } = searchModel as any
+  const { requirementTemplateIdFilter, setRequirementTemplateIdFilter, search, isSearching } = searchModel as any
+  const wasSearching = useRef(false)
+
+  const fetchOptions = () =>
+    requirementTemplateStore.fetchFilterOptions(permitProjectId ? { permitProjectId } : undefined)
 
   useEffect(() => {
-    requirementTemplateStore.fetchFilterOptions()
-  }, [])
+    fetchOptions()
+  }, [permitProjectId])
+
+  useEffect(() => {
+    const searchJustFinished = wasSearching.current && !isSearching
+    wasSearching.current = isSearching
+    if (!searchJustFinished) return
+    fetchOptions()
+  }, [isSearching, permitProjectId])
 
   const handleChange = (nextValue: string[]) => {
     setRequirementTemplateIdFilter(nextValue)

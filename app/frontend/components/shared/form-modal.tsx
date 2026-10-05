@@ -84,6 +84,8 @@ export const FormModal = observer(function FormModal<T extends FieldValues>({
           isOpen: isConfirmationModalOpen,
           onClose: onConfirmationModalClose,
         }}
+        // Dialog is opened programmatically on dirty close; suppress ConfirmationModal's default trigger.
+        renderTriggerButton={() => null}
         title={confirmCloseTitle || t("ui.confirmation.unsavedChangesTitle")}
         body={confirmCloseBody || t("ui.confirmation.unsavedChangesBody")}
         onConfirm={handleConfirmClose}

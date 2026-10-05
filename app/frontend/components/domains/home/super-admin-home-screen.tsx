@@ -28,6 +28,12 @@ export const SuperAdminHomeScreen = ({ ...rest }: IHomeScreenProps) => {
             href="/requirement-templates"
           />
           <HomeScreenBox
+            title={t("home.questionBankTitle")}
+            description={t("home.questionBankDescription")}
+            icon={<BookOpen size={24} />}
+            href="/question-bank"
+          />
+          <HomeScreenBox
             title={t("home.requirementsLibraryTitle")}
             description={t("home.requirementsLibraryDescription")}
             icon={<BookOpen size={24} />}

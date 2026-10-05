@@ -141,6 +141,27 @@ export function isContactRequirement(requirementType: ERequirementType): boolean
   return contactRequirementFields.includes(requirementType)
 }
 
+/** Bank definitions own these; placements own conditional / compliance / validation. */
+export function toBankDefinitionInputOptions<T extends Record<string, unknown>>(inputOptions?: T | null) {
+  if (!inputOptions) return {} as Omit<T, "conditional" | "computedCompliance" | "dataValidation">
+  const { conditional: _c, computedCompliance: _cc, dataValidation: _dv, ...definitionOptions } = inputOptions
+  return definitionOptions
+}
+
+export function pickPlacementInputOptions<T extends Record<string, unknown>>(inputOptions?: T | null) {
+  if (!inputOptions) return {}
+  const { conditional, computedCompliance, dataValidation } = inputOptions as T & {
+    conditional?: unknown
+    computedCompliance?: unknown
+    dataValidation?: unknown
+  }
+  return {
+    ...(conditional !== undefined ? { conditional } : {}),
+    ...(computedCompliance !== undefined ? { computedCompliance } : {}),
+    ...(dataValidation !== undefined ? { dataValidation } : {}),
+  }
+}
+
 /**
  * Checks if editor HTML content is empty (only whitespace/empty tags).
  */
@@ -343,6 +364,11 @@ export function getCurrentSandboxId() {
     console.error("Failed to parse SandboxStore from localStorage:", error)
     return null
   }
+}
+
+export function syncMatomoSandboxFlag(isSandbox: boolean) {
+  const _mtm = ((window as any)._mtm = (window as any)._mtm || [])
+  _mtm.push({ isSandbox })
 }
 
 export function convertToDate(property: any) {

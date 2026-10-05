@@ -179,12 +179,8 @@ export const DatePickerFormControl = ({
                 *
               </Text>
             )}
+            {!required && showOptional && ` ${t("ui.optional")}`}
           </FormLabel>
-          {!required && showOptional && (
-            <Text ml={-2} mb={2}>
-              {t("ui.optional")}
-            </Text>
-          )}
           {LabelInfo && <LabelInfo />}
         </HStack>
       )}
@@ -276,12 +272,8 @@ export const InputFormControl = ({
                 *
               </Text>
             )}
+            {!required && showOptional && ` ${t("ui.optional")}`}
           </FormLabel>
-          {!required && showOptional && (
-            <Text ml={-2} mb={2}>
-              {t("ui.optional")}
-            </Text>
-          )}
           {LabelInfo && <LabelInfo />}
         </HStack>
       )}
@@ -332,12 +324,8 @@ export const SelectFormControl = ({
                 *
               </Text>
             )}
+            {!required && showOptional && ` ${t("ui.optional")}`}
           </FormLabel>
-          {!required && showOptional && (
-            <Text ml={-2} mb={2}>
-              {t("ui.optional")}
-            </Text>
-          )}
         </HStack>
       )}
       <Select bg="greys.white" {...registerProps} {...inputProps}>

@@ -349,6 +349,7 @@ class Api::PermitProjectsController < Api::ApplicationController
     authorize PermitProject, :reorder?
 
     scope = PermitProject.where(jurisdiction_id: current_user.jurisdiction_ids)
+    scope = scope.for_sandbox(current_sandbox) unless current_user.super_admin?
 
     items = params.require(:items)
     items.each do |item|

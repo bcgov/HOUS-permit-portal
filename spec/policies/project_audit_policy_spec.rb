@@ -297,7 +297,7 @@ RSpec.describe ProjectAuditPolicy do
           create(:permit_block_status, permit_application: pa)
 
           scope = ApplicationAudit.for_permit_project(other_project.id)
-          user_context = UserContext.new(other_role_user, nil)
+          user_context = UserContext.new(other_role_user, project_sandbox)
           result = described_class::Scope.new(user_context, scope).resolve
 
           audit_types = result.map(&:auditable_type).uniq

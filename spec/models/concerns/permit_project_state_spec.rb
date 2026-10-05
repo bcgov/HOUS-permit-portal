@@ -369,6 +369,19 @@ RSpec.describe PermitProjectState, type: :model do
       end
     end
 
+    describe "discarded projects" do
+      it "blocks state transitions and inbox moves" do
+        project.update_column(:state, PermitProject.states[:queued])
+        project.discard!
+
+        expect(project.allowed_manual_transitions).to eq([])
+        expect { project.begin_progress! }.to raise_error(
+          AASM::InvalidTransition
+        )
+        expect(project.reload).to be_queued
+      end
+    end
+
     describe "#no_post_draft_permits?" do
       it "returns true with no permits" do
         expect(project.no_post_draft_permits?).to be true

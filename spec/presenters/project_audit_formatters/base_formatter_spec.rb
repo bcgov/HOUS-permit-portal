@@ -99,6 +99,14 @@ RSpec.describe ProjectAuditFormatters::BaseFormatter do
       end
     end
 
+    context "when audit user is a partner/system actor string" do
+      let(:audit) { build_audit_double(user: "Partner system") }
+
+      it "uses the actor string" do
+        expect(formatter.description).to eq("Partner system made a change")
+      end
+    end
+
     context "when viewer is a submitter viewing a staff user's action" do
       let(:jurisdiction) do
         instance_double(

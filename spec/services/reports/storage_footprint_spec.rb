@@ -19,7 +19,7 @@ RSpec.describe Reports::StorageFootprint do
   it "sums shrine sizes and excludes submission zipfiles" do
     application = create(:permit_application)
     document_with_size(application, 2048)
-    application.update_column(
+    create(:submission_version, permit_application: application).update_column(
       :zipfile_data,
       {
         "id" => SecureRandom.uuid,

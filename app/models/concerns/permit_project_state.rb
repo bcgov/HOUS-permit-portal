@@ -45,6 +45,8 @@ module PermitProjectState
          default: 0
 
     aasm column: "state", enum: true do
+      before_all_events :reject_if_discarded
+
       state :draft, initial: true
       state :queued
       state :waiting
@@ -144,7 +146,15 @@ module PermitProjectState
     end
 
     def allowed_manual_transitions
+      return [] if discarded?
+
       MANUAL_TRANSITIONS[state.to_sym] || []
+    end
+
+    def reject_if_discarded
+      return unless discarded?
+
+      raise AASM::InvalidTransition.new(self, aasm.current_event, :default)
     end
 
     def sorted_application_statuses

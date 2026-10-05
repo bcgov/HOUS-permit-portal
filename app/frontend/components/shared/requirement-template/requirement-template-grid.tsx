@@ -1,4 +1,4 @@
-import { Box, Flex, GridItem, HStack, Tag, Text, VStack } from "@chakra-ui/react"
+import { Box, Flex, HStack, Tag, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -7,7 +7,6 @@ import { useMst } from "../../../setup/root"
 import { ERequirementTemplateSortFields } from "../../../types/enums"
 import { Paginator } from "../base/inputs/paginator"
 import { PerPageSelect } from "../base/inputs/per-page-select"
-import { ModelSearchInput } from "../base/model-search-input"
 import { SharedSpinner } from "../base/shared-spinner"
 import { GridHeader } from "../grid/grid-header"
 import { SearchGrid } from "../grid/search-grid"
@@ -37,7 +36,11 @@ export const RequirementTemplateGrid: React.FC<RequirementTemplateGridProps> = o
 
   return (
     <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
-      <SearchGrid templateColumns="1.5fr 1fr 2.5fr 1.5fr 1fr 7.9rem">
+      <SearchGrid
+        templateColumns="1.5fr 1fr 2.5fr 1.5fr 1fr 7.9rem"
+        searchModel={requirementTemplateStore}
+        searchLabel={t("requirementTemplate.index.searchLabel")}
+      >
         <GridHeaders />
 
         {isSearching ? (
@@ -95,26 +98,9 @@ export const RequirementTemplateGrid: React.FC<RequirementTemplateGridProps> = o
 const GridHeaders = observer(function GridHeaders() {
   const { requirementTemplateStore } = useMst()
   const { sort, toggleSort, getSortColumnHeader } = requirementTemplateStore
-  const { t } = useTranslation()
 
   return (
     <Box display={"contents"} role={"rowgroup"}>
-      <Box display={"contents"} role={"row"}>
-        <GridItem
-          as={Flex}
-          gridColumn={"1 / -1"}
-          p={6}
-          bg={"greys.grey10"}
-          justifyContent={"space-between"}
-          align="center"
-          gap={6}
-        >
-          <Text role={"heading"} flexShrink={0}>
-            {t("requirementTemplate.index.tableHeading")}
-          </Text>
-          <ModelSearchInput searchModel={requirementTemplateStore} />
-        </GridItem>
-      </Box>
       <Box display={"contents"} role={"row"}>
         {Object.values(ERequirementTemplateSortFields).map((field) => (
           <React.Fragment key={field}>

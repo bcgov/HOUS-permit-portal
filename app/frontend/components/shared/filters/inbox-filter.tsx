@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   Checkbox,
   Divider,
@@ -18,6 +19,12 @@ import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { IOption } from "../../../types/types"
+import {
+  filterGroupSelectionState,
+  groupFilterOptions,
+  shouldShowFilterGroupLabels,
+  toggleFilterGroupValues,
+} from "../../../utils/group-filter-options"
 import { UnreadBadge } from "../base/unread-badge"
 
 interface IInboxFilterProps {
@@ -109,6 +116,14 @@ export const InboxFilter = observer(function InboxFilter({
     }
   }
 
+  const handleSelectGroup = (groupValues: string[]) => {
+    const current = Array.isArray(localValue) ? localValue : []
+    setLocalValue(toggleFilterGroupValues(current, groupValues))
+  }
+
+  const groupedOptions = groupFilterOptions(options, t("siteConfiguration.templateCategories.uncategorized"))
+  const showGroupLabels = shouldShowFilterGroupLabels(groupedOptions)
+
   return (
     <Popover
       isOpen={!isDisabled && isOpen}
@@ -140,60 +155,104 @@ export const InboxFilter = observer(function InboxFilter({
           </HStack>
         </Button>
       </PopoverTrigger>
-      <PopoverContent w="auto" minW="200px" p={4} zIndex="dropdown">
-        <PopoverBody p={0}>
-          <VStack align="start" spacing={3}>
-            {isMulti ? (
-              <>
-                <Checkbox
-                  isChecked={Array.isArray(localValue) && localValue.length === options.length && options.length > 0}
-                  isIndeterminate={
-                    Array.isArray(localValue) && localValue.length > 0 && localValue.length < options.length
-                  }
-                  onChange={handleSelectAll}
-                >
-                  {t("ui.selectAll")}
-                </Checkbox>
-                {options.map((option) => (
-                  <Checkbox
-                    key={option.value}
-                    isChecked={Array.isArray(localValue) && localValue.includes(option.value)}
-                    onChange={() => handleCheckboxToggle(option.value)}
-                  >
-                    {option.label}
-                  </Checkbox>
-                ))}
-                <Divider />
-                <HStack w="full" justifyContent="space-between">
-                  <Button variant="link" size="sm" onClick={handleClear}>
-                    {t("ui.clear")}
-                  </Button>
-                  <Button variant="primary" size="sm" onClick={handleApply}>
-                    {t("ui.apply")}
-                  </Button>
-                </HStack>
-              </>
-            ) : (
-              <>
+      <PopoverContent
+        w="auto"
+        minW="200px"
+        p={4}
+        zIndex="dropdown"
+        maxH="min(420px, calc(100vh - 96px))"
+        display="flex"
+        flexDirection="column"
+        overflow="hidden"
+      >
+        <PopoverBody p={0} display="flex" flexDirection="column" minH={0} overflow="hidden">
+          {isMulti ? (
+            <VStack align="stretch" spacing={3} flex={1} minH={0} overflow="hidden">
+              <Checkbox
+                isChecked={Array.isArray(localValue) && localValue.length === options.length && options.length > 0}
+                isIndeterminate={
+                  Array.isArray(localValue) && localValue.length > 0 && localValue.length < options.length
+                }
+                onChange={handleSelectAll}
+              >
+                {t("ui.selectAll")}
+              </Checkbox>
+              <Box overflowY="auto" minH={0} flex={1}>
+                <VStack align="stretch" spacing={4}>
+                  {groupedOptions.map((group) => {
+                    const groupValues = group.options.map((option) => option.value)
+                    const current = Array.isArray(localValue) ? localValue : []
+                    const { isChecked, isIndeterminate } = filterGroupSelectionState(current, groupValues)
+
+                    return (
+                      <VStack key={group.id} align="start" spacing={3}>
+                        {showGroupLabels && (
+                          <Checkbox
+                            isChecked={isChecked}
+                            isIndeterminate={isIndeterminate}
+                            onChange={() => handleSelectGroup(groupValues)}
+                          >
+                            <Text fontSize="sm" fontWeight="bold" color="text.secondary">
+                              {group.label}
+                            </Text>
+                          </Checkbox>
+                        )}
+                        {group.options.map((option) => (
+                          <Checkbox
+                            key={option.value}
+                            pl={showGroupLabels ? 6 : 0}
+                            isChecked={current.includes(option.value)}
+                            onChange={() => handleCheckboxToggle(option.value)}
+                          >
+                            {option.label}
+                          </Checkbox>
+                        ))}
+                      </VStack>
+                    )
+                  })}
+                </VStack>
+              </Box>
+              <Divider />
+              <HStack w="full" justifyContent="space-between">
+                <Button variant="link" size="sm" onClick={handleClear}>
+                  {t("ui.clear")}
+                </Button>
+                <Button variant="primary" size="sm" onClick={handleApply}>
+                  {t("ui.apply")}
+                </Button>
+              </HStack>
+            </VStack>
+          ) : (
+            <VStack align="stretch" spacing={3} flex={1} minH={0} overflow="hidden">
+              <Box overflowY="auto" minH={0} flex={1}>
                 <RadioGroup
                   value={typeof localValue === "string" ? localValue : ""}
                   onChange={(val) => setLocalValue(val)}
                 >
-                  <VStack align="start" spacing={3}>
-                    {options.map((option) => (
-                      <Radio key={option.value} value={option.value}>
-                        {option.label}
-                      </Radio>
+                  <VStack align="stretch" spacing={4}>
+                    {groupedOptions.map((group) => (
+                      <VStack key={group.id} align="start" spacing={3}>
+                        {showGroupLabels && (
+                          <Text fontSize="sm" fontWeight="bold" color="text.secondary">
+                            {group.label}
+                          </Text>
+                        )}
+                        {group.options.map((option) => (
+                          <Radio key={option.value} value={option.value}>
+                            {option.label}
+                          </Radio>
+                        ))}
+                      </VStack>
                     ))}
                   </VStack>
                 </RadioGroup>
-                <Divider />
-                <Button variant="primary" size="sm" w="full" onClick={handleApply}>
-                  {t("ui.apply")}
-                </Button>
-              </>
-            )}
-          </VStack>
+              </Box>
+              <Divider />
+              <Button variant="primary" size="sm" w="full" onClick={handleApply}>
+                {t("ui.apply")}
+              </Button>
+            </VStack>
+          )}
         </PopoverBody>
       </PopoverContent>
     </Popover>

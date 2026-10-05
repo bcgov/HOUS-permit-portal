@@ -33,15 +33,30 @@ inputs:
 runs:
   using: composite
   steps:
+    # Preserve workflow scripts before checkout switches to the application branch.
+    - name: Prepare deployment scripts
+      id: prepare-deployment-scripts
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+      run: |
+        scripts_path=$(mktemp -d "${RUNNER_TEMP}/deployment-scripts.XXXXXX")
+        cp -R "${ACTION_PATH}/scripts/." "$scripts_path/"
+        echo "path=$scripts_path" >> "$GITHUB_OUTPUT"
+
     - name: Start GitHub deployment
       id: deployment-start
-      uses: bobheadxi/deployments@v1
+      uses: actions/github-script@v8
+      env:
+        DEPLOY_SCRIPTS_PATH: ${{ steps.prepare-deployment-scripts.outputs.path }}
+        DEPLOY_BRANCH: ${{ inputs.branch }}
+        DEPLOY_ENVIRONMENT: ${{ inputs.deployment_environment }}
+        DEPLOY_DESCRIPTION: OpenShift deployment to ${{ inputs.environment_label }} for ${{ inputs.branch }}
+        DEPLOY_LOG_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
       with:
-        step: start
-        token: ${{ inputs.github_token }}
-        env: ${{ inputs.deployment_environment }}
-        ref: ${{ inputs.branch }}
-        desc: OpenShift deployment to ${{ inputs.environment_label }} for ${{ inputs.branch }}
+        github-token: ${{ inputs.github_token }}
+        script: |
+          await require(`${process.env.DEPLOY_SCRIPTS_PATH}/start.cjs`)({ github, context, core, env: process.env });
 
     - name: Install Git LFS
       id: install-git-lfs
@@ -53,7 +68,7 @@ runs:
 
     - name: Checkout Code
       id: checkout-code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
       with:
         ref: ${{ inputs.branch }}
         lfs: true
@@ -93,7 +108,7 @@ runs:
 
     - name: Build Docker Image
       id: build-image
-      uses: redhat-actions/buildah-build@v2
+      uses: redhat-actions/buildah-build@v3
       with:
         image: ${{ inputs.image_name }}
         tags: latest ${{ env.GITHUB_SHA }}
@@ -105,7 +120,7 @@ runs:
 
     - name: Push to Openshift Registry using Service Account
       id: push-image
-      uses: redhat-actions/push-to-registry@v2.7
+      uses: redhat-actions/push-to-registry@v3
       with:
         image: ${{ inputs.image_name }}
         registry: ${{ inputs.registry_url }}
@@ -113,14 +128,17 @@ runs:
         password: ${{ inputs.builder_token }}
 
     - name: Finish GitHub deployment
-      if: always()
-      uses: bobheadxi/deployments@v1
+      if: ${{ always() && steps.deployment-start.outputs.deployment_id != '' }}
+      uses: actions/github-script@v8
+      env:
+        DEPLOY_SCRIPTS_PATH: ${{ steps.prepare-deployment-scripts.outputs.path }}
+        DEPLOYMENT_ID: ${{ steps.deployment-start.outputs.deployment_id }}
+        DEPLOY_ENVIRONMENT: ${{ steps.deployment-start.outputs.env }}
+        DEPLOY_STATUS: ${{ steps.push-image.outcome == 'success' && 'success' || 'failure' }}
+        DEPLOY_LOG_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        DEPLOY_ENV_URL: ${{ github.server_url }}/${{ github.repository }}/tree/${{ inputs.branch }}
+        DEPLOY_DESCRIPTION: OpenShift deployment to ${{ inputs.environment_label }} finished for ${{ inputs.branch }}
       with:
-        step: finish
-        token: ${{ inputs.github_token }}
-        deployment_id: ${{ steps.deployment-start.outputs.deployment_id }}
-        env: ${{ steps.deployment-start.outputs.env }}
-        status: ${{ steps.push-image.outcome == 'success' && 'success' || 'failure' }}
-        logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        env_url: ${{ github.server_url }}/${{ github.repository }}/tree/${{ inputs.branch }}
-        desc: OpenShift deployment to ${{ inputs.environment_label }} finished for ${{ inputs.branch }}
+        github-token: ${{ inputs.github_token }}
+        script: |
+          await require(`${process.env.DEPLOY_SCRIPTS_PATH}/finish.cjs`)({ github, context, core, env: process.env });

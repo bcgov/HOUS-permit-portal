@@ -139,6 +139,24 @@ RSpec.describe TemplateVersionPolicy, type: :policy do
       expect(draft_policy(admin, published_record).promote_draft?).to be false
     end
 
+    it "permits restore_layout for super admins on any version with a kept template" do
+      kept_template =
+        double("RequirementTemplate", discarded?: false, present?: true)
+      discarded_template =
+        double("RequirementTemplate", discarded?: true, present?: true)
+      version = double("TemplateVersion", requirement_template: kept_template)
+      discarded_version =
+        double("TemplateVersion", requirement_template: discarded_template)
+
+      expect(draft_policy(admin, version).restore_layout?).to be true
+      expect(draft_policy(non_admin, version).restore_layout?).to be false
+      expect(draft_policy(admin, discarded_version).restore_layout?).to be false
+      expect(draft_policy(admin, version).restore_requirement_block?).to be true
+      expect(
+        draft_policy(non_admin, version).restore_requirement_block?
+      ).to be false
+    end
+
     it "permits force publishing draft versions only when enabled" do
       allow(ENV).to receive(:[]).and_call_original
       allow(ENV).to receive(:[]).with(

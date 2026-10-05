@@ -23,6 +23,7 @@ import { requirementTypeToFormioType } from "../../../constants"
 import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
 import { useInterval } from "../../../hooks/use-interval"
 import { useMst } from "../../../setup/root"
+import { stickyBelowNavBar } from "../../../styles/nav-bar-offset"
 import { ICustomEventMap } from "../../../types/dom"
 import { ECollaborationType, ECustomEvents, ERequirementType } from "../../../types/enums"
 import { findPidComponentKey } from "../../../utils/formio-component-traversal"
@@ -284,7 +285,14 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   return (
     <Box as="main" id="submitter-view-permit">
       {!isStepCode && (
-        <Flex id="permitHeader" direction="column" position="sticky" top={0} zIndex={12} ref={permitHeaderRef}>
+        <Flex
+          id="permitHeader"
+          direction="column"
+          position="sticky"
+          {...stickyBelowNavBar()}
+          zIndex={12}
+          ref={permitHeaderRef}
+        >
           <Flex
             w="full"
             px={6}
@@ -475,7 +483,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
               renderSaveButton={() => (
                 <SaveButton
                   handleSave={handleSave}
-                  isViewingPastRequests={currentPermitApplication?.isViewingPastRequests}
+                  isDisabled={isSubmitted || currentPermitApplication.isViewingPastRequests}
                 />
               )}
               updateCollaborationAssignmentNodes={updateRequirementBlockAssignmentNode}
@@ -505,7 +513,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   )
 })
 
-function SaveButton({ handleSave, isViewingPastRequests }) {
+function SaveButton({ handleSave, isDisabled }) {
   const { handleSubmit, formState } = useForm()
   const { isSubmitting } = formState
 
@@ -519,7 +527,7 @@ function SaveButton({ handleSave, isViewingPastRequests }) {
         leftIcon={<FloppyDiskBack />}
         type="submit"
         isLoading={isSubmitting}
-        isDisabled={isSubmitting || isViewingPastRequests}
+        isDisabled={isSubmitting || isDisabled}
       >
         {t("ui.onlySave")}
       </Button>

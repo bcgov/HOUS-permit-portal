@@ -225,6 +225,51 @@ class PermitApplicationBlueprint < Blueprinter::Base
                 name: :account_holder
   end
 
+  view :external_api_summary do
+    identifier :id
+    fields :number, :status
+
+    field :status_label do |pa, _options|
+      Constants::ExternalApi::APPLICATION_STATUS_LABELS.fetch(pa.status)
+    end
+
+    field :tags do |pa, _options|
+      pa.template_tag_list
+    end
+  end
+
+  view :external_api_v2 do
+    identifier :id
+    fields :status,
+           :number,
+           :full_address,
+           :pid,
+           :pin,
+           :reference_number,
+           :submitted_at,
+           :resubmitted_at,
+           :issued_at,
+           :permit_project_id
+
+    field :tags do |pa, _options|
+      pa.template_tag_list
+    end
+
+    association :template_version,
+                blueprint: TemplateVersionBlueprint,
+                view: :external_api,
+                name: :permit_version
+    association :submitter,
+                blueprint: UserBlueprint,
+                view: :external_api,
+                name: :account_holder
+    association :submission_versions,
+                blueprint: SubmissionVersionBlueprint,
+                view: :external_api_index do |pa, _options|
+      pa.submission_versions.order(:created_at)
+    end
+  end
+
   view :supporting_docs_update do
     identifier :id
 

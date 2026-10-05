@@ -121,6 +121,35 @@ RSpec.describe Api::RequirementBlocksController,
           "Successfully created requirement block!"
         )
       end
+
+      it "links a bank requirement question by id without duplicating the definition" do
+        bank_question = create(:requirement_question)
+
+        attrs =
+          valid_attributes.merge(
+            requirements_attributes: [
+              {
+                requirement_question_id: bank_question.id,
+                requirement_code: bank_question.requirement_code,
+                input_type: bank_question.input_type,
+                label: bank_question.label,
+                required: true,
+                elective: false,
+                position: 0
+              }
+            ]
+          )
+
+        expect { post :create, params: { requirement_block: attrs } }.to change(
+          RequirementBlock,
+          :count
+        ).by(1).and change(RequirementQuestion, :count).by(0)
+
+        created = RequirementBlock.order(:created_at).last
+        requirement = created.requirements.first
+        expect(requirement.requirement_question_id).to eq(bank_question.id)
+        expect(requirement.requirement_question).to eq(bank_question)
+      end
     end
 
     context "with invalid parameters" do

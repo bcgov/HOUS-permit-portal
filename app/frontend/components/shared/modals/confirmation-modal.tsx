@@ -18,6 +18,7 @@ interface IConfirmationModalProps {
   promptMessage?: string | ReactNode
   promptHeader?: string
   confirmText?: string
+  confirmButtonBg?: string
   renderTrigger: (onOpen: () => void) => ReactNode
 }
 
@@ -26,6 +27,7 @@ export const ConfirmationModal = ({
   promptMessage,
   promptHeader,
   confirmText,
+  confirmButtonBg,
   renderTrigger,
 }: IConfirmationModalProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -51,7 +53,12 @@ export const ConfirmationModal = ({
           <ModalBody>{promptMessage ?? t("ui.confirm")}</ModalBody>
           <ModalFooter>
             <Flex justify="flex-start" w="full" gap={4}>
-              <Button variant="primary" onClick={handleConfirm}>
+              <Button
+                variant="primary"
+                bg={confirmButtonBg}
+                _hover={confirmButtonBg ? { bg: confirmButtonBg, opacity: 0.9 } : undefined}
+                onClick={handleConfirm}
+              >
                 {confirmText ?? t("ui.confirm")}
               </Button>
               <Button variant="secondary" onClick={handleCancel}>

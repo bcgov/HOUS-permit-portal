@@ -3,7 +3,7 @@ module Reports
     SIZE_SQL =
       "COALESCE((file_data::jsonb -> 'metadata' ->> 'size')::bigint, 0)"
     ZIP_SIZE_SQL =
-      "COALESCE((zipfile_data -> 'metadata' ->> 'size')::bigint, 0)"
+      "COALESCE((submission_versions.zipfile_data -> 'metadata' ->> 'size')::bigint, 0)"
     PROJECTION_MONTHS = 3
     UNATTRIBUTED = "unattributed"
 
@@ -92,7 +92,13 @@ module Reports
     end
 
     def zipfile_bytes
-      @zipfile_bytes ||= live_applications.sum(Arel.sql(ZIP_SIZE_SQL)).to_i
+      @zipfile_bytes ||=
+        SubmissionVersion
+          .joins(permit_application: :permit_project)
+          .merge(PermitApplication.kept)
+          .merge(PermitProject.kept.live)
+          .sum(Arel.sql(ZIP_SIZE_SQL))
+          .to_i
     end
 
     def type_rows

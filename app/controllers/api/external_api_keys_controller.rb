@@ -134,7 +134,8 @@ class Api::ExternalApiKeysController < Api::ApplicationController
       :notification_email,
       :jurisdiction_id,
       :webhook_url,
-      :sandbox_id
+      :sandbox_id,
+      :api_version
     )
   end
 

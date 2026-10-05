@@ -3,58 +3,14 @@ openapi: 3.1.0
 info:
   title: Integration API V1
   version: v1.1
-  description: "### API documentation overview\nThis document provides detailed information
-    about the APIs available for external integrators to query and retrieve submitted
-    and resubmitted permit applications.\nIt also includes specifications on webhook
-    events that notify your systems in real-time.\n\n### Data scope:\nThe permit applications
-    returned by these APIs are limited to those within the jurisdiction associated
-    with the API key used for the request. This\nensures that each integrator has
-    access solely to relevant data.\n\n### Integration steps:\nTo integrate with our
-    APIs, please contact the Building Permit Hub team to enable your API access. Your
-    local jurisdiction can then obtain the API key\nand register your webhook URL
-    in their configuration settings on the building permit hub. You can reach us directly
-    at <digital.codes.permits@gov.bc.ca>\nfor further assistance.\n\n### Authentication
-    and authorization:\nAccess to these APIs is controlled via an API key, which must
-    be included in the Authorization header as a Bearer token like so:\n```\nAuthorization:
-    Bearer {Your_API_Key_Here}\n```\nPlease note that a unique API key is required
-    for each jurisdiction you wish to access, enhancing security and data integrity.\n\n###
-    Webhook signatures:\nEach webhook delivery is an HTTP POST with `Content-Type:
-    application/json` and an `X-Webhook-Signature` header. The header value is the
-    lowercase hexadecimal HMAC-SHA256 digest of the **raw request body** bytes, using
-    your API key token (the same value you send as the Bearer token for API requests)
-    as the HMAC secret.\nTo verify a request:\n1. Read the raw request body before
-    parsing JSON.\n2. Compute HMAC-SHA256 with your API key token as the key and
-    the raw body as the message; encode the digest as lowercase hex.\n3. Compare that
-    value to `X-Webhook-Signature` using a constant-time comparison to avoid timing
-    attacks.\n\nExample (Node.js):\n```javascript\nconst crypto = require(\"crypto\");\n\nfunction
-    verifyPermitWebhook(rawBody, signatureHeader, apiKeyToken) {\n  const expected
-    = crypto.createHmac(\"sha256\", apiKeyToken)\n    .update(rawBody, \"utf8\")\n
-    \   .digest(\"hex\");\n  return crypto.timingSafeEqual(\n    Buffer.from(signatureHeader.trim(),
-    \"utf8\"),\n    Buffer.from(expected, \"utf8\")\n  );\n}\n```\n\n###
-    Rate limits:\nTo ensure fair usage, the API is rate-limited to 100 requests per
-    minute per API key and 300 requests per IP in a 3 minute interval. Exceeding these\nlimits
-    will result in a 429 response. If this occurs, we recommend spacing out your requests.
-    Continued exceeding of rate limits\nmay necessitate further contact with the building
-    permit hub team.\n\n### Api base path:\nThe base path for all API endpoints is
-    `/external_api/v1`.\n\n### Server information for testing:\nBy default the requests
-    from the documentation will be sent to the current environment servers. For testing
-    purposes, you can specify a different server using the {serverUrl} variable.\nDuring
-    your integration testing phase, you have the flexibility to use custom URLs by
-    configuring the serverUrl variable. This allows you to\ntailor the API environment
-    to better suit your development needs. Ensure that your custom URLs are configured
-    correctly to avoid any connectivity or data access issues.\n\n### Special considerations:\nA
-    returned permit application will have a status of either `newly_submitted` for
-    permit applications submitted for the first time, or `resubmitted` for\npermit
-    applications that have been resubmitted due to revision requests. The `resubmitted_at`
-    field will indicate the timestamp of the latest resubmission.\nWhile there may
-    be multiple resubmissions, the submission data payload returned will reflect the
-    most recent submission data. \n\nFor security purposes, any API response that
-    includes a file URL will have a signed URL. These files will be available for
-    download for a limited time (1 hour).\nWe recommend downloading the file immediately
-    upon receiving the URL to avoid any issues. If necessary, you can always call
-    the API again to retrieve a\nnew file URL.\n\n### Visual aids and examples:\nFor
-    a better understanding of how our APIs work, including webhook setups and request
-    handling, please refer to the code examples included later\nin this document.\n"
+  description: |-
+    ### API documentation overview
+    Integration API V1 provides jurisdiction- and sandbox-scoped read access to submitted permit applications and integration mappings.
+
+    V1 webhook keys receive the legacy `permit_submitted` and `permit_resubmitted` events. V1 does not support status write-back,
+    application status-change events, or project state-change events.
+
+    File URLs are signed for one hour. Re-fetch an application to refresh expired URLs.
 x-example-permit-application-all-types: &example_permit_application_all_types
   id: "00000000-0000-4000-8000-000000000001"
   account_holder:
@@ -443,11 +399,17 @@ paths:
                 status:
                   type: string
                   enum:
+                  - new_draft
                   - newly_submitted
+                  - in_review
+                  - revisions_requested
                   - resubmitted
-                  description: 'Filters by submitted status. Newly submitted: permit
-                    applications submitted for the first time. Resubmitted: permit
-                    applications resubmitted after a revision request.'
+                  - approved
+                  - issued
+                  - withdrawn
+                  description: Filters by canonical application status. Without a
+                    status filter, search remains limited to newly submitted and resubmitted
+                    applications.
                 submitted_at:
                   type: object
                   description: Filters by submitted date. This is the date the permit
@@ -611,11 +573,74 @@ components:
         using the integrator API key token as the secret (same value as the Bearer
         token for Integration API requests). See **Webhook signatures** in the overview.'
   schemas:
+    ApplicationStatus:
+      type: string
+      enum:
+      - new_draft
+      - newly_submitted
+      - in_review
+      - revisions_requested
+      - resubmitted
+      - approved
+      - issued
+      - withdrawn
+      x-enum-labels:
+      - Draft
+      - Submitted
+      - In review
+      - Revisions requested
+      - Resubmitted
+      - Approved
+      - Issued
+      - Withdrawn
+      description: |-
+        `new_draft` — Draft
+        `newly_submitted` — Submitted
+        `in_review` — In review
+        `revisions_requested` — Revisions requested
+        `resubmitted` — Resubmitted
+        `approved` — Approved
+        `issued` — Issued
+        `withdrawn` — Withdrawn
+    ProjectState:
+      type: string
+      enum:
+      - draft
+      - queued
+      - waiting
+      - in_progress
+      - ready
+      - permit_issued
+      - active
+      - complete
+      - closed
+      x-enum-labels:
+      - Draft
+      - Queued
+      - Waiting
+      - In progress
+      - Ready
+      - Permit issued
+      - Active
+      - Completed
+      - Closed
+      description: |-
+        `draft` — Draft
+        `queued` — Queued
+        `waiting` — Waiting
+        `in_progress` — In progress
+        `ready` — Ready
+        `permit_issued` — Permit issued
+        `active` — Active
+        `complete` — Completed
+        `closed` — Closed
     PermitApplication:
       type: object
       properties:
         id:
           type: string
+        status:
+          "$ref": "#/components/schemas/ApplicationStatus"
         full_address:
           type: string
           description: The full address of the permit application.

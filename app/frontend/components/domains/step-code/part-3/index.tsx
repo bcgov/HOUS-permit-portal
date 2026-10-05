@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom"
 import { usePart3StepCode } from "../../../../hooks/resources/use-part-3-step-code"
 import { usePermitApplication } from "../../../../hooks/resources/use-permit-application"
 import { useMst } from "../../../../setup/root"
+import { belowNavBarInFlow } from "../../../../styles/nav-bar-offset"
 import { NotFoundScreen } from "../../../shared/base/not-found-screen"
 import { SharedSpinner } from "../../../shared/base/shared-spinner"
 import { FloatingHelpDrawer } from "../../../shared/floating-help-drawer"
@@ -55,7 +56,7 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
   if (currentStepCode?.isDiscarded) return <NotFoundScreen />
 
   return (
-    <Flex direction="column" h="calc(100vh - var(--app-navbar-height))" w="full" bg="white">
+    <Flex direction="column" {...belowNavBarInFlow} w="full" bg="white">
       {section && (
         <StepCodeSubNavBar infoPagePath={infoPagePath} isPermitLinked={isPermitLinked} exitLinkPath={exitLinkPath} />
       )}

@@ -21,6 +21,7 @@ import { useController, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
+import { stickyBelowNavBar } from "../../../styles/nav-bar-offset"
 import { ECollaborationType, EPermitApplicationStatus } from "../../../types/enums"
 import { CopyableValue } from "../../shared/base/copyable-value"
 import { ErrorScreen } from "../../shared/base/error-screen"
@@ -176,7 +177,14 @@ export const ReviewPermitApplicationScreen = observer(() => {
 
   return (
     <Box as="main" id="reviewing-permit-application">
-      <Flex id="permitHeader" direction="column" position="sticky" top={0} zIndex={12} ref={permitHeaderRef}>
+      <Flex
+        id="permitHeader"
+        direction="column"
+        position="sticky"
+        {...stickyBelowNavBar()}
+        zIndex={12}
+        ref={permitHeaderRef}
+      >
         <Flex w="full" px={6} py={3} bg="theme.blue" justify="space-between" color="greys.white">
           <HStack gap={4} flex={1}>
             <PermitApplicationStatusTag status={currentPermitApplication.status} />

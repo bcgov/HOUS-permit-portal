@@ -4,6 +4,7 @@ import React from "react"
 import { useTranslation } from "react-i18next"
 import { RemoveScroll } from "react-remove-scroll"
 import { usePreCheck } from "../../../hooks/resources/use-pre-check"
+import { belowNavBarFixed } from "../../../styles/nav-bar-offset"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { FloatingHelpDrawer } from "../../shared/floating-help-drawer"
 
@@ -36,10 +37,9 @@ export const PreCheckViewer = observer(function PreCheckViewer() {
       <RemoveScroll>
         <Flex
           direction="column"
-          h="calc(100vh - var(--app-navbar-height))"
+          {...belowNavBarFixed()}
           w="100vw"
           pos="fixed"
-          top="var(--app-navbar-height)"
           left="0"
           right="0"
           bottom="0"
@@ -61,10 +61,9 @@ export const PreCheckViewer = observer(function PreCheckViewer() {
     <RemoveScroll>
       <Flex
         direction="column"
-        h="calc(100vh - var(--app-navbar-height))"
+        {...belowNavBarFixed()}
         w="100vw"
         pos="fixed"
-        top="var(--app-navbar-height)"
         left="0"
         right="0"
         bottom="0"

@@ -7,5 +7,6 @@ FactoryBot.define do
     connecting_application { Faker::Lorem.words(number: 2).join(" ") }
     expired_at { Time.now + 1.day }
     revoked_at { nil }
+    api_version { "v1" }
   end
 end

@@ -69,7 +69,6 @@ RSpec.describe PermitWebhookService do
       allow(PermitApplication).to receive(:find).with(
         permit_application.id
       ).and_return(permit_application)
-      allow(permit_application).to receive(:newly_submitted?).and_return(true)
 
       expect(service.client).to receive(:post) do |url, body, headers|
         expect(url).to eq(external_api_key.webhook_url)
@@ -114,10 +113,26 @@ RSpec.describe PermitWebhookService do
       expect(service.send_submitted_event(resubmitted_pa.id)).to be_truthy
     end
 
+    it "keeps the original submission event after the application enters review" do
+      service = described_class.new(external_api_key)
+      permit_application.update_column(
+        :status,
+        PermitApplication.statuses[:in_review]
+      )
+
+      expect(service.client).to receive(:post) do |_url, body, _headers|
+        expect(JSON.parse(body)["event"]).to eq(
+          Constants::Webhooks::Events::PermitApplication::PERMIT_SUBMITTED
+        )
+        instance_double(Faraday::Response, success?: true)
+      end
+
+      expect(service.send_submitted_event(permit_application.id)).to be_truthy
+    end
+
     it "raises PermitWebhookError when Faraday raises" do
       service = described_class.new(external_api_key)
       allow(PermitApplication).to receive(:find).and_return(permit_application)
-      allow(permit_application).to receive(:newly_submitted?).and_return(true)
 
       # Simulate Faraday client raising an error on post
       allow(service.client).to receive(:post).and_raise(
@@ -127,6 +142,39 @@ RSpec.describe PermitWebhookService do
       expect do
         service.send_submitted_event(permit_application.id)
       end.to raise_error(PermitWebhookError, /Failed to send/)
+    end
+  end
+
+  describe "#send_event" do
+    it "sends the captured event payload with the existing HMAC contract" do
+      service = described_class.new(external_api_key)
+      event_payload = {
+        permit_application_id: SecureRandom.uuid,
+        status: "in_review",
+        status_label: "In review",
+        occurred_at: 1_725_000_000_000
+      }
+
+      expect(service.client).to receive(:post) do |url, body, headers|
+        expect(url).to eq(external_api_key.webhook_url)
+        expect(JSON.parse(body)).to eq(
+          {
+            "event" => "permit_application_status_changed",
+            "payload" => event_payload.stringify_keys
+          }
+        )
+        expect(headers[Constants::Webhooks::WEBHOOK_SIGNATURE_HEADER]).to eq(
+          described_class.webhook_signature_hex(external_api_key.token, body)
+        )
+        instance_double(Faraday::Response, success?: true)
+      end
+
+      expect(
+        service.send_event(
+          Constants::Webhooks::Events::PermitApplication::STATUS_CHANGED,
+          event_payload
+        )
+      ).to be_truthy
     end
   end
 end

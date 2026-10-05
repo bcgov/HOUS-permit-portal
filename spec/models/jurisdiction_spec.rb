@@ -327,6 +327,33 @@ RSpec.describe Jurisdiction, type: :model do
     end
   end
 
+  describe ".fuzzy_find_by_ltsa_feature_attributes" do
+    it "matches when LTSA includes The/City but the stored matcher is reverse_qualified_name" do
+      jurisdiction =
+        create(
+          :sub_district,
+          name: "North Vancouver",
+          locality_type: "corporation of the city",
+          ltsa_matcher: "North Vancouver, Corporation of the city of"
+        )
+      create(
+        :sub_district,
+        name: "North Vancouver",
+        locality_type: "corporation of the district",
+        ltsa_matcher: "North Vancouver, Corporation of the district of"
+      )
+      allow(SubDistrict).to receive(:search).and_return([])
+
+      result =
+        described_class.fuzzy_find_by_ltsa_feature_attributes(
+          "MUNICIPALITY" => "North Vancouver, The Corporation of the City of",
+          "REGIONAL_DISTRICT" => "Metro Vancouver Regional District"
+        )
+
+      expect(result).to eq(jurisdiction)
+    end
+  end
+
   describe "callbacks" do
     let(:super_admin) { create(:user, :super_admin) }
     let(:manager) { create(:user, :review_manager) }
@@ -462,5 +489,22 @@ RSpec.describe Jurisdiction, type: :model do
     expect { jurisdiction.update!(inbox_enabled: false) }.to change {
       jurisdiction.audits.where("audited_changes ? 'inbox_enabled'").count
     }.by(1)
+  end
+
+  describe "resources nested attributes" do
+    it "updates show_on_about and about_position" do
+      jurisdiction = create(:sub_district)
+      resource = create(:resource, jurisdiction: jurisdiction)
+
+      jurisdiction.update!(
+        resources_attributes: [
+          { id: resource.id, show_on_about: false, about_position: 4 }
+        ]
+      )
+
+      resource.reload
+      expect(resource.show_on_about).to be(false)
+      expect(resource.about_position).to eq(4)
+    end
   end
 end

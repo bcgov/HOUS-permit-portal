@@ -1,15 +1,20 @@
-import { Box, Text } from "@chakra-ui/react"
+import { Box, Tag, Text } from "@chakra-ui/react"
 import { ErrorMessage } from "@hookform/error-message"
-import React from "react"
+import React, { useState } from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { IRequirementQuestion } from "../../../../models/requirement-question"
+import { useMst } from "../../../../setup/root"
 import { IFormConditional, IRequirementAttributes } from "../../../../types/api-request"
-import { EEnergyStepCodeDependencyRequirementCode, ENumberUnit, ERequirementType } from "../../../../types/enums"
+import { EEnergyStepCodeDependencyRequirementCode, ERequirementType } from "../../../../types/enums"
 import {
   isArchitecturalDrawingRequirement,
   isContactRequirement,
   isMultiOptionRequirement,
+  pickPlacementInputOptions,
+  toBankDefinitionInputOptions,
 } from "../../../../utils/utility-functions"
+import { QuestionBankModal } from "../../question-bank/question-bank-modal"
 import { RequirementFieldDisplay } from "../requirement-field-display"
 import { RequirementFieldEdit } from "../requirement-field-edit"
 import { FieldControlsHeader } from "./field-controls-header"
@@ -21,6 +26,13 @@ interface RequirementFieldRowProps {
   isEditing: boolean
   toggleEdit: () => void
   onRemove: () => void
+  hideConditional?: boolean
+  /** Bank questions: required/elective live on placement, not the catalogue row. */
+  hidePlacementOptions?: boolean
+  /** Bank questions do not own conditionals, compliance, or validation. */
+  hidePlacementConfiguration?: boolean
+  /** Disable removing a field when removal would enable an unsafe type swap. */
+  disableRemove?: boolean
 }
 
 const fieldContainerSharedProps = {
@@ -58,10 +70,22 @@ const getRequirementFieldState = (requirementCode: string | undefined, inputType
   return { disabledMenuOptions, showEditControls }
 }
 
-export const RequirementFieldRow = ({ index, field, isEditing, toggleEdit, onRemove }: RequirementFieldRowProps) => {
+export const RequirementFieldRow = ({
+  index,
+  field,
+  isEditing,
+  toggleEdit,
+  onRemove,
+  hideConditional = false,
+  hidePlacementOptions = false,
+  hidePlacementConfiguration = false,
+  disableRemove = false,
+}: RequirementFieldRowProps) => {
   const { t } = useTranslation()
+  const { requirementQuestionStore } = useMst()
   const {
     setValue,
+    getValues,
     control,
     watch,
     formState: { errors },
@@ -69,14 +93,65 @@ export const RequirementFieldRow = ({ index, field, isEditing, toggleEdit, onRem
 
   const watchedHint = watch(`requirementsAttributes.${index}.hint`)
   const watchedRequired = watch(`requirementsAttributes.${index}.required`)
-  const requirementType = field.inputType
+  const requirementType = watch(`requirementsAttributes.${index}.inputType`) ?? field.inputType
   const watchedElective = watch(`requirementsAttributes.${index}.elective`)
   const watchedConditional = watch(`requirementsAttributes.${index}.inputOptions.conditional`)
   const watchedRequirementCode = watch(`requirementsAttributes.${index}.requirementCode`)
   const watchedComputedCompliance = watch(`requirementsAttributes.${index}.inputOptions.computedCompliance`)
   const watchedDataValidation = watch(`requirementsAttributes.${index}.inputOptions.dataValidation`)
+  const requirementQuestionId = watch(`requirementsAttributes.${index}.requirementQuestionId`)
+  // Linked vs local is just the FK — no separate "shared" flag on the form.
+  const usesBankQuestion = !!requirementQuestionId
+  const defaultHint = watch(`requirementsAttributes.${index}.defaultHint`)
+  const defaultInstructions = watch(`requirementsAttributes.${index}.defaultInstructions`)
+  const displayedHint = usesBankQuestion && watchedHint == null ? defaultHint : watchedHint
+
+  const [questionViewer, setQuestionViewer] = useState<{ id: string; key: number } | null>(null)
+  // Editable inputs use defaultValue / useFieldArray local state — remount after bank sync.
+  const [editMountKey, setEditMountKey] = useState(0)
+  const viewingQuestion = questionViewer
+    ? requirementQuestionStore.getRequirementQuestionById(questionViewer.id)
+    : undefined
 
   const { disabledMenuOptions, showEditControls } = getRequirementFieldState(watchedRequirementCode, requirementType)
+  if (disableRemove && !disabledMenuOptions.includes("remove")) {
+    disabledMenuOptions.push("remove")
+  }
+
+  const handleDetachBankQuestion = () => {
+    // Copy bank defaults onto the placement, then drop the FK (local-only field).
+    if (watchedHint == null) {
+      setValue(`requirementsAttributes.${index}.hint`, defaultHint ?? "")
+    }
+    if (watch(`requirementsAttributes.${index}.instructions`) == null) {
+      setValue(`requirementsAttributes.${index}.instructions`, defaultInstructions ?? "")
+    }
+    setValue(`requirementsAttributes.${index}.requirementQuestionId`, null)
+    setValue(`requirementsAttributes.${index}.defaultHint`, null)
+    setValue(`requirementsAttributes.${index}.defaultInstructions`, null)
+  }
+
+  const handleOpenBankQuestion = async () => {
+    if (!requirementQuestionId) return
+    const question = await requirementQuestionStore.fetchRequirementQuestion(requirementQuestionId)
+    if (question) {
+      setQuestionViewer({ id: requirementQuestionId, key: Date.now() })
+    }
+  }
+
+  const handleBankQuestionSaved = (question: IRequirementQuestion) => {
+    const currentOptions = getValues(`requirementsAttributes.${index}.inputOptions`) ?? {}
+    setValue(`requirementsAttributes.${index}.label`, question.label)
+    setValue(`requirementsAttributes.${index}.inputType`, question.inputType)
+    setValue(`requirementsAttributes.${index}.inputOptions`, {
+      ...toBankDefinitionInputOptions(question.inputOptions as Record<string, unknown> | undefined),
+      ...pickPlacementInputOptions(currentOptions as Record<string, unknown>),
+    } as IRequirementAttributes["inputOptions"])
+    setValue(`requirementsAttributes.${index}.defaultHint`, question.hint ?? null)
+    setValue(`requirementsAttributes.${index}.defaultInstructions`, question.instructions ?? null)
+    setEditMountKey((key) => key + 1)
+    setQuestionViewer(null)
+  }
 
   return (
     <Box
@@ -106,6 +181,11 @@ export const RequirementFieldRow = ({ index, field, isEditing, toggleEdit, onRem
       pos={"relative"}
       bg={isEditing ? "greys.grey04" : "transparent"}
     >
+      {usesBankQuestion && (
+        <Tag size="sm" bg="semantic.infoLight" color="text.primary" mb={2}>
+          {t("requirementsLibrary.bankQuestions.bankLinked")}
+        </Tag>
+      )}
       <ErrorMessage
         errors={errors}
         name={`requirementsAttributes.${index}.label`}
@@ -115,103 +195,121 @@ export const RequirementFieldRow = ({ index, field, isEditing, toggleEdit, onRem
           </Text>
         )}
       />
-      <Box {...fieldContainerSharedProps} display={isEditing ? "block" : "none"}>
-        <RequirementFieldEdit<IRequirementBlockForm>
-          requirementType={requirementType}
-          label={watch(`requirementsAttributes.${index}.label`)}
-          editableLabelProps={{
-            controlProps: {
-              control,
-              name: `requirementsAttributes.${index}.label`,
-              rules: {
-                required: `${t("requirementsLibrary.modals.fieldLabel")} ${t("ui.required" as any)}`.toLowerCase(),
+      {/* Mount only while editing so Editable/defaultValue and useFieldArray pick up latest form values */}
+      {isEditing && (
+        <Box {...fieldContainerSharedProps}>
+          <RequirementFieldEdit<IRequirementBlockForm>
+            key={editMountKey}
+            requirementType={requirementType}
+            label={watch(`requirementsAttributes.${index}.label`)}
+            editableLabelProps={{
+              controlProps: {
+                control,
+                name: `requirementsAttributes.${index}.label`,
+                rules: {
+                  required: `${t("requirementsLibrary.modals.fieldLabel")} ${t("ui.required" as any)}`.toLowerCase(),
+                },
               },
-            },
-            color: "text.link",
-            // @ts-ignore
-            "aria-label": t("requirementsLibrary.modals.fieldLabel"),
-          }}
-          editableHelperTextProps={{
-            controlProps: { control, name: `requirementsAttributes.${index}.hint` },
-          }}
-          editableInstructionsTextProps={{
-            controlProps: { control, name: `requirementsAttributes.${index}.instructions` },
-          }}
-          isOptionalCheckboxProps={{
-            controlProps: {
-              control,
-              name: `requirementsAttributes.${index}.required`,
-              defaultValue: true,
-            },
-          }}
-          isElectiveCheckboxProps={{
-            controlProps: {
-              control,
-              name: `requirementsAttributes.${index}.elective`,
-            },
-          }}
-          unitSelectProps={
-            requirementType === ERequirementType.number
-              ? {
-                  controlProps: {
-                    control: control,
+              color: "text.link",
+              // @ts-ignore
+              "aria-label": t("requirementsLibrary.modals.fieldLabel"),
+            }}
+            editableHelperTextProps={{
+              controlProps: { control, name: `requirementsAttributes.${index}.hint` },
+              defaultValue: defaultHint,
+              usesBankQuestion,
+              isQuestionBankDefault: hidePlacementConfiguration,
+            }}
+            editableInstructionsTextProps={{
+              controlProps: { control, name: `requirementsAttributes.${index}.instructions` },
+              defaultValue: defaultInstructions,
+              usesBankQuestion,
+              isQuestionBankDefault: hidePlacementConfiguration,
+            }}
+            isOptionalCheckboxProps={
+              hidePlacementOptions
+                ? undefined
+                : {
+                    controlProps: {
+                      control,
+                      name: `requirementsAttributes.${index}.required`,
+                      defaultValue: true,
+                    },
+                  }
+            }
+            isElectiveCheckboxProps={
+              hidePlacementOptions
+                ? undefined
+                : {
+                    controlProps: {
+                      control,
+                      name: `requirementsAttributes.${index}.elective`,
+                    },
+                  }
+            }
+            unitSelectProps={
+              requirementType === ERequirementType.number
+                ? {
+                    controlProps: {
+                      control: control,
 
-                    name: `requirementsAttributes.${index}.inputOptions.numberUnit`,
-                    // @ts-ignore
-                    defaultValue: ENumberUnit.noUnit,
-                  },
-                }
-              : undefined
-          }
-          multiOptionProps={
-            isMultiOptionRequirement(requirementType)
-              ? {
-                  useFieldArrayProps: {
-                    control,
-                    name: `requirementsAttributes.${index}.inputOptions.valueOptions`,
-                  },
-                  onOptionValueChange: (optionNIndex, optionValue) => {
-                    setValue(
-                      `requirementsAttributes.${index}.inputOptions.valueOptions.${optionNIndex}.value`,
-                      optionValue
-                    )
-                    setValue(
-                      `requirementsAttributes.${index}.inputOptions.valueOptions.${optionNIndex}.label`,
-                      optionValue
-                    )
-                  },
-                  getOptionValue: (idx) => watch(`requirementsAttributes.${index}.inputOptions.valueOptions.${idx}`),
-                }
-              : undefined
-          }
-          canAddMultipleContactProps={
-            isContactRequirement(requirementType)
-              ? {
-                  controlProps: {
-                    control: control,
-                    name: `requirementsAttributes.${index}.inputOptions.canAddMultipleContacts`,
-                  },
-                }
-              : undefined
-          }
-          isMultipleFilesCheckboxProps={
-            requirementType === ERequirementType.file
-              ? {
-                  controlProps: {
-                    control: control,
-                    name: `requirementsAttributes.${index}.inputOptions.multiple` as any,
-                  },
-                }
-              : undefined
-          }
-          requirementCode={watchedRequirementCode}
-        />
-      </Box>
+                      name: `requirementsAttributes.${index}.inputOptions.numberUnit`,
+                      defaultValue: undefined,
+                    },
+                  }
+                : undefined
+            }
+            multiOptionProps={
+              isMultiOptionRequirement(requirementType)
+                ? {
+                    useFieldArrayProps: {
+                      control,
+                      name: `requirementsAttributes.${index}.inputOptions.valueOptions`,
+                    },
+                    onOptionValueChange: (optionNIndex, optionValue) => {
+                      setValue(
+                        `requirementsAttributes.${index}.inputOptions.valueOptions.${optionNIndex}.value`,
+                        optionValue
+                      )
+                      setValue(
+                        `requirementsAttributes.${index}.inputOptions.valueOptions.${optionNIndex}.label`,
+                        optionValue
+                      )
+                    },
+                    getOptionValue: (idx) => watch(`requirementsAttributes.${index}.inputOptions.valueOptions.${idx}`),
+                  }
+                : undefined
+            }
+            canAddMultipleContactProps={
+              isContactRequirement(requirementType)
+                ? {
+                    controlProps: {
+                      control: control,
+                      name: `requirementsAttributes.${index}.inputOptions.canAddMultipleContacts`,
+                    },
+                  }
+                : undefined
+            }
+            isMultipleFilesCheckboxProps={
+              requirementType === ERequirementType.file
+                ? {
+                    controlProps: {
+                      control: control,
+                      name: `requirementsAttributes.${index}.inputOptions.multiple` as any,
+                    },
+                  }
+                : undefined
+            }
+            requirementCode={watchedRequirementCode}
+            lockDefinition={usesBankQuestion}
+          />
+        </Box>
+      )}
       <Box className={"requirement-display"} display={isEditing ? "none" : "block"} {...fieldContainerSharedProps}>
         <RequirementFieldDisplay
           requirementType={requirementType}
           label={watch(`requirementsAttributes.${index}.label`)}
-          helperText={watchedHint}
+          helperText={displayedHint}
           inputOptions={watch(`requirementsAttributes.${index}.inputOptions`)}
           unit={
             requirementType === ERequirementType.number
@@ -238,14 +336,28 @@ export const RequirementFieldRow = ({ index, field, isEditing, toggleEdit, onRem
         isRequirementInEditMode={isEditing}
         toggleRequirementToEdit={showEditControls ? toggleEdit : undefined}
         onRemove={onRemove}
+        onDetachBankQuestion={handleDetachBankQuestion}
+        onOpenBankQuestion={handleOpenBankQuestion}
+        isBankLinked={usesBankQuestion}
         elective={watchedElective}
-        conditional={watchedConditional as IFormConditional}
-        computedCompliance={watchedComputedCompliance}
-        dataValidation={watchedDataValidation}
+        conditional={hideConditional ? undefined : (watchedConditional as IFormConditional)}
+        computedCompliance={hidePlacementConfiguration ? undefined : watchedComputedCompliance}
+        dataValidation={hidePlacementConfiguration ? undefined : watchedDataValidation}
         requirementType={requirementType}
         index={index}
         disabledMenuOptions={disabledMenuOptions}
+        hideConditional={hideConditional}
+        hidePlacementConfiguration={hidePlacementConfiguration}
       />
+      {questionViewer && viewingQuestion && (
+        <QuestionBankModal
+          key={questionViewer.key}
+          requirementQuestion={viewingQuestion}
+          autoOpen
+          triggerButtonProps={{ display: "none" }}
+          onSaved={handleBankQuestionSaved}
+        />
+      )}
     </Box>
   )
 }

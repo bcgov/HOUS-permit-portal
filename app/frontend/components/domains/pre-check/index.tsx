@@ -5,6 +5,7 @@ import { RemoveScroll } from "react-remove-scroll"
 import { useNavigate, useParams } from "react-router-dom"
 import { usePreCheck } from "../../../hooks/resources/use-pre-check"
 import { useMst } from "../../../setup/root"
+import { belowNavBarFixed } from "../../../styles/nav-bar-offset"
 import { EPreCheckServicePartner, EPreCheckStatus } from "../../../types/enums"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
@@ -59,10 +60,9 @@ export const PreCheckForm = observer(function PreCheckForm() {
     <RemoveScroll>
       <Flex
         direction="column"
-        h="calc(100vh - var(--app-navbar-height))"
+        {...belowNavBarFixed()}
         w="100vw"
         pos="fixed"
-        top="var(--app-navbar-height)"
         left="0"
         right="0"
         bottom="0"

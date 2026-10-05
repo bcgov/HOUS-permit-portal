@@ -10,6 +10,7 @@ import { JurisdictionsMenuItem } from "./menu-items/jurisdictions-menu-item"
 import { MyProfileMenuItem } from "./menu-items/my-profile-menu-item"
 import { MyProjectsMenuItem } from "./menu-items/my-projects-menu-item"
 import { PermitTemplateCatalogueMenuItem } from "./menu-items/permit-template-catalogue-menu-item"
+import { QuestionBankMenuItem } from "./menu-items/question-bank-menu-item"
 import { ReportingMenuItem } from "./menu-items/reporting-menu-item"
 import { RequirementsLibraryMenuItem } from "./menu-items/requirements-library-menu-item"
 import { SuperAdminConfigurationMenuItem } from "./menu-items/super-admin-configuration-menu-item"
@@ -39,6 +40,7 @@ export const SuperAdminMenuContent = observer(() => {
       {/* Permits section */}
       <MenuSection title={t("site.navMenu.sections.permits")}>
         <PermitTemplateCatalogueMenuItem />
+        <QuestionBankMenuItem />
         <RequirementsLibraryMenuItem />
         <ReportingMenuItem />
       </MenuSection>

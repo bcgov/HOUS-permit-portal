@@ -244,6 +244,65 @@ RSpec.describe Api::TemplateVersionsController,
         expect(response).to have_http_status(:forbidden)
       end
 
+      it "returns structured configuration errors without a flash message" do
+        config_errors = [
+          {
+            category: "block_conditional",
+            block_id: "block-id",
+            block_name: "Details",
+            message: "conditional references a block not in this template"
+          }
+        ]
+        allow(TemplateVersioningService).to receive(
+          :promote_draft_to_scheduled!
+        ).and_raise(TemplateVersionConfigError.new(config_errors))
+
+        post :promote_draft,
+             params: {
+               id: draft_version.id,
+               version_date: Date.tomorrow.to_s
+             }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(json_response.dig("meta", "config_errors")).to eq(
+          config_errors.map(&:deep_stringify_keys)
+        )
+        expect(json_response.dig("meta", "message")).to be_nil
+      end
+
+      describe "POST #validate_config" do
+        it "returns an empty config_errors list when valid" do
+          allow(TemplateVersioningService).to receive(:validate_config!)
+
+          post :validate_config, params: { id: draft_version.id }
+
+          expect(response).to have_http_status(:success)
+          expect(json_response.dig("meta", "config_errors")).to eq([])
+        end
+
+        it "returns structured configuration errors without a flash message" do
+          config_errors = [
+            {
+              category: "block_conditional",
+              block_id: "block-id",
+              block_name: "Details",
+              message: "conditional references a block not in this template"
+            }
+          ]
+          allow(TemplateVersioningService).to receive(
+            :validate_config!
+          ).and_raise(TemplateVersionConfigError.new(config_errors))
+
+          post :validate_config, params: { id: draft_version.id }
+
+          expect(response).to have_http_status(:bad_request)
+          expect(json_response.dig("meta", "config_errors")).to eq(
+            config_errors.map(&:deep_stringify_keys)
+          )
+          expect(json_response.dig("meta", "message")).to be_nil
+        end
+      end
+
       context "with skip_date_check: true" do
         around do |example|
           original = ENV["ENABLE_TEMPLATE_FORCE_PUBLISH"]
@@ -310,6 +369,138 @@ RSpec.describe Api::TemplateVersionsController,
              params: {
                id: draft_version.id,
                version_date: Date.tomorrow.to_s
+             }
+
+        expect(response).to have_http_status(:forbidden)
+      end
+    end
+  end
+
+  describe "POST #restore_layout" do
+    let!(:requirement_template) do
+      create(:full_requirement_template, sections_count: 1)
+    end
+    let!(:template_version) do
+      create(
+        :template_version,
+        requirement_template: requirement_template,
+        status: :published,
+        denormalized_template_json:
+          RequirementTemplateBlueprint.render_as_hash(
+            requirement_template,
+            view: :template_snapshot
+          )
+      )
+    end
+
+    context "as a super admin" do
+      let!(:super_admin) { create(:user, :super_admin) }
+
+      before { sign_in super_admin }
+
+      it "restores the template layout from the version snapshot" do
+        original_names =
+          requirement_template
+            .requirement_template_sections
+            .order(:position)
+            .pluck(:name)
+        requirement_template.requirement_template_sections.destroy_all
+        requirement_template.requirement_template_sections.create!(
+          name: "Changed",
+          position: 0
+        )
+
+        post :restore_layout, params: { id: template_version.id }
+
+        expect(response).to have_http_status(:success)
+        expect(
+          requirement_template
+            .reload
+            .requirement_template_sections
+            .order(:position)
+            .pluck(:name)
+        ).to eq(original_names)
+      end
+
+      it "returns an error when blocks are missing" do
+        snapshot = template_version.denormalized_template_json.deep_dup
+        snapshot["requirement_template_sections"].first[
+          "template_section_blocks"
+        ].first[
+          "requirement_block"
+        ][
+          "id"
+        ] = SecureRandom.uuid
+        template_version.update!(denormalized_template_json: snapshot)
+
+        post :restore_layout, params: { id: template_version.id }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(json_response.dig("meta", "message", "message")).to match(
+          /missing or archived/i
+        )
+      end
+    end
+
+    context "as a non-admin user" do
+      it "denies access" do
+        post :restore_layout, params: { id: template_version.id }
+
+        expect(response).to have_http_status(:forbidden)
+      end
+    end
+  end
+
+  describe "POST #restore_requirement_block" do
+    let!(:requirement_template) do
+      create(:full_requirement_template, sections_count: 1)
+    end
+    let!(:block) do
+      requirement_template
+        .requirement_template_sections
+        .first
+        .requirement_blocks
+        .first
+    end
+    let!(:template_version) do
+      blocks_json = {
+        block.id =>
+          RequirementBlockBlueprint.render_as_hash(block, parent_key: "section")
+      }
+      create(
+        :template_version,
+        requirement_template: requirement_template,
+        status: :published,
+        requirement_blocks_json: blocks_json
+      )
+    end
+
+    context "as a super admin" do
+      let!(:super_admin) { create(:user, :super_admin) }
+
+      before { sign_in super_admin }
+
+      it "restores the shared requirement block from the version snapshot" do
+        original_name = block.name
+        block.update!(name: "Changed")
+
+        post :restore_requirement_block,
+             params: {
+               id: template_version.id,
+               requirement_block_id: block.id
+             }
+
+        expect(response).to have_http_status(:success)
+        expect(block.reload.name).to eq(original_name)
+      end
+    end
+
+    context "as a non-admin user" do
+      it "denies access" do
+        post :restore_requirement_block,
+             params: {
+               id: template_version.id,
+               requirement_block_id: block.id
              }
 
         expect(response).to have_http_status(:forbidden)

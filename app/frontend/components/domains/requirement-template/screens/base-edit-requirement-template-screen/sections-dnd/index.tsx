@@ -23,6 +23,7 @@ import { SortableContext, arrayMove, verticalListSortingStrategy } from "@dnd-ki
 import * as R from "ramda"
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { stickyBelowNavBar } from "../../../../../../styles/nav-bar-offset"
 import {
   IRequirementTemplateSectionAttributes,
   ITemplateSectionBlockAttributes,
@@ -164,13 +165,13 @@ export function SectionsDnd({ sections, onDone, onCancel }: IProps) {
       id="sections-sidebar-reordering"
       as={"section"}
       w={"sidebar.width"}
-      h="calc(100vh) "
+      h="calc(100vh - var(--app-navbar-offset))"
       bg="greys.white"
       borderRight={"1px solid"}
       borderColor={"border.light"}
       boxShadow={"elevations.elevation01"}
       position="sticky"
-      top="0"
+      {...stickyBelowNavBar()}
       zIndex="1"
       float="left"
     >

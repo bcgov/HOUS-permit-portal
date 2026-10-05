@@ -19,13 +19,17 @@ class PermitProjectPolicy < ApplicationPolicy
         values[:jur_ids] = user.jurisdictions.pluck(:id)
       end
 
-      scope.where(clauses.map { |c| "(#{c})" }.join(" OR "), values).distinct
+      relation =
+        scope.where(clauses.map { |c| "(#{c})" }.join(" OR "), values).distinct
+      return relation if user.super_admin?
+
+      relation.where(sandbox_id: sandbox&.id)
     end
   end
 
   # Check if the user can index/list projects (relies on the Scope above for actual filtering)
   def index?
-    user_is_owner_or_collaborator?
+    same_sandbox? && user_is_owner_or_collaborator?
   end
 
   def pinned?
@@ -34,7 +38,8 @@ class PermitProjectPolicy < ApplicationPolicy
 
   # This is for authorizing a specific project instance (e.g., in a show action).
   def show?
-    user_is_owner_or_collaborator? || user_is_review_staff_for_jurisdiction?
+    same_sandbox? &&
+      (user_is_owner_or_collaborator? || user_is_review_staff_for_jurisdiction?)
   end
 
   def create?
@@ -42,52 +47,52 @@ class PermitProjectPolicy < ApplicationPolicy
   end
 
   def update?
-    user_is_owner?
+    same_sandbox? && user_is_owner?
   end
 
   def destroy?
-    user_is_owner?
+    same_sandbox? && user_is_owner?
   end
 
   def pin?
-    user_is_owner_or_collaborator?
+    same_sandbox? && user_is_owner_or_collaborator?
   end
 
   def unpin?
-    user_is_owner_or_collaborator?
+    same_sandbox? && user_is_owner_or_collaborator?
   end
 
   def search_permit_applications?
-    user_is_owner_or_collaborator?
+    same_sandbox? && user_is_owner_or_collaborator?
   end
 
   def mark_as_viewed?
-    user_is_review_staff_for_jurisdiction?
+    same_sandbox? && user_is_review_staff_for_jurisdiction?
   end
 
   def mark_as_unviewed?
-    user_is_review_staff_for_jurisdiction?
+    same_sandbox? && user_is_review_staff_for_jurisdiction?
   end
 
   def transition_state?
-    user_is_review_staff_for_jurisdiction? && !record.draft?
+    same_sandbox? && user_is_review_staff_for_jurisdiction? && !record.draft?
   end
 
   # Allow bulk creation of permit applications under a project
   def create_permit_applications?
-    user_is_owner?
+    same_sandbox? && user_is_owner?
   end
 
   def submission_collaborator_options?
-    user_is_owner?
+    same_sandbox? && user_is_owner?
   end
 
   def assign_project_review_collaborator?
-    user_is_review_staff_for_jurisdiction?
+    same_sandbox? && user_is_review_staff_for_jurisdiction?
   end
 
   def unassign_project_review_collaborator?
-    user_is_review_staff_for_jurisdiction?
+    same_sandbox? && user_is_review_staff_for_jurisdiction?
   end
 
   def reorder?
@@ -104,6 +109,13 @@ class PermitProjectPolicy < ApplicationPolicy
   end
 
   private
+
+  def same_sandbox?
+    return true if user&.super_admin?
+    return true unless record.respond_to?(:sandbox)
+
+    record.sandbox == sandbox
+  end
 
   def user_is_owner?
     return false unless user && record # Ensure user and record exist

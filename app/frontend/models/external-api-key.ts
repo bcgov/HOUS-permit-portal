@@ -1,6 +1,6 @@
 import { isFuture } from "date-fns"
 import { getParent, Instance, types } from "mobx-state-tree"
-import { ETemplateVersionStatus, ExternalApiKeyStatus } from "../types/enums"
+import { EExternalApiVersion, ETemplateVersionStatus, ExternalApiKeyStatus } from "../types/enums"
 
 export const ExternalApiKeyModel = types
   .model("ExternalApiKeyModel")
@@ -8,6 +8,7 @@ export const ExternalApiKeyModel = types
     id: types.identifier,
     name: types.string,
     connectingApplication: types.string,
+    apiVersion: types.optional(types.enumeration(Object.values(EExternalApiVersion)), EExternalApiVersion.v1),
     webhookUrl: types.maybeNull(types.string),
     notificationEmail: types.maybeNull(types.string),
     sandboxId: types.maybeNull(types.string),

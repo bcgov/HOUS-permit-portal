@@ -399,4 +399,58 @@ RSpec.describe Api::JurisdictionsController, type: :controller do
       expect(response).to have_http_status(:forbidden)
     end
   end
+
+  describe "PATCH #update resources about page display" do
+    it "persists show_on_about and about_position" do
+      manager = create(:user, :review_manager, jurisdiction: jurisdiction)
+      resource = create(:resource, jurisdiction: jurisdiction)
+      sign_in manager
+
+      patch :update,
+            params: {
+              id: jurisdiction.id,
+              jurisdiction: {
+                resources_attributes: [
+                  { id: resource.id, show_on_about: false, about_position: 3 }
+                ]
+              }
+            },
+            format: :json
+
+      expect(response).to have_http_status(:ok)
+      resource.reload
+      expect(resource.show_on_about).to be(false)
+      expect(resource.about_position).to eq(3)
+    end
+  end
+
+  describe "PATCH #update contacts" do
+    it "persists contact extension" do
+      manager = create(:user, :review_manager, jurisdiction: jurisdiction)
+      sign_in manager
+
+      patch :update,
+            params: {
+              id: jurisdiction.id,
+              jurisdiction: {
+                contacts_attributes: [
+                  {
+                    first_name: "Ada",
+                    last_name: "Lovelace",
+                    title: "Director",
+                    department: "Planning",
+                    email: "ada@example.com",
+                    phone: "604-555-0100",
+                    extension: "123"
+                  }
+                ]
+              }
+            },
+            format: :json
+
+      expect(response).to have_http_status(:ok)
+      contact = jurisdiction.reload.contacts.first
+      expect(contact.extension).to eq("123")
+    end
+  end
 end

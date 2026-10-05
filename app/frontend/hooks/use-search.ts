@@ -5,7 +5,16 @@ import { useMst } from "../setup/root"
 import { ESortDirection } from "../types/enums"
 import { parseBoolean } from "../utils/utility-functions"
 
-export const useSearch = (searchModel: ISearch, dependencyArray: any[] = []) => {
+interface IUseSearchOptions {
+  /** Skip URL hydration; reset + fetch for nested drawers/modals. */
+  nested?: boolean
+}
+
+export const useSearch = (
+  searchModel: ISearch,
+  dependencyArray: any[] = [],
+  { nested = false }: IUseSearchOptions = {}
+) => {
   // Reset currents
   const { jurisdictionId } = useParams()
   const { permitApplicationId } = useParams()
@@ -22,6 +31,14 @@ export const useSearch = (searchModel: ISearch, dependencyArray: any[] = []) => 
   useEffect(() => {
     // This is necessary for preventing failed calls, IE when the currentJursidiction for user search is undefined
     if (dependencyArray.some((dep) => dep == null)) return
+
+    if (nested) {
+      searchModel.resetAll()
+      searchModel.fetchData({ reset: true })
+      return () => {
+        searchModel.resetAll()
+      }
+    }
 
     const queryParams = new URLSearchParams(location.search)
     const query = queryParams.get("query")
@@ -52,5 +69,5 @@ export const useSearch = (searchModel: ISearch, dependencyArray: any[] = []) => 
       page: searchModel.currentPage,
       countPerPage: searchModel.countPerPage,
     })
-  }, [...dependencyArray])
+  }, [...dependencyArray, nested])
 }

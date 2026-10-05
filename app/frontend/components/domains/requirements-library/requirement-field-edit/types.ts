@@ -16,4 +16,11 @@ export type TIsElectiveCheckboxProps<TFieldValues extends FieldValues> = IContro
 export type TIsMultipleFilesCheckboxProps<TFieldValues extends FieldValues> = IControlProps<TFieldValues> &
   Partial<CheckboxProps>
 
-export type TEditableInstructionsTextProps<TFieldValues extends FieldValues> = IControlProps<TFieldValues>
+export type TEditableRichTextProps<TFieldValues extends FieldValues> = IControlProps<TFieldValues> & {
+  defaultValue?: string | null
+  // Placement is linked to a bank question (derive from requirementQuestionId in callers).
+  usesBankQuestion?: boolean
+  isQuestionBankDefault?: boolean
+}
+
+export type TEditableInstructionsTextProps<TFieldValues extends FieldValues> = TEditableRichTextProps<TFieldValues>

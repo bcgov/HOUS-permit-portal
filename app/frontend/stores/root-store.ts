@@ -5,7 +5,7 @@ import { withEnvironment } from "../lib/with-environment"
 import { CollaboratorStoreModel, ICollaboratorStore } from "./collaborator-store"
 import { ContactStoreModel, IContactStore } from "./contact-store"
 import { GeocoderStoreModel, IGeocoderStore } from "./geocoder-store"
-import { IHelpVideoStore, HelpVideoStoreModel } from "./help-video-store"
+import { HelpVideoStoreModel, IHelpVideoStore } from "./help-video-store"
 import { IInfoDocumentStore, InfoDocumentStoreModel } from "./info-document-store"
 import { IJurisdictionStore, JurisdictionStoreModel } from "./jurisdiction-store"
 import { INoteStore, NoteStoreModel } from "./note-store"
@@ -20,6 +20,7 @@ import { IProjectMeetingStore, ProjectMeetingStoreModel } from "./project-meetin
 import { IReleaseNoteStore, ReleaseNoteStoreModel } from "./release-note-store"
 import { IReportStore, ReportStoreModel } from "./report-store"
 import { IRequirementBlockStoreModel, RequirementBlockStoreModel } from "./requirement-block-store"
+import { IRequirementQuestionStoreModel, RequirementQuestionStoreModel } from "./requirement-question-store"
 import { IRequirementTemplateStoreModel, RequirementTemplateStoreModel } from "./requirement-template-store"
 import { ISandboxStore, SandboxStoreModel } from "./sandbox-store"
 import { ISessionStore, SessionStoreModel } from "./session-store"
@@ -48,6 +49,7 @@ export const RootStoreModel = types
     overheatingCodeStore: types.optional(OverheatingCodeStoreModel, {}),
     jurisdictionStore: types.optional(JurisdictionStoreModel, {}),
     requirementBlockStore: types.optional(RequirementBlockStoreModel, {}),
+    requirementQuestionStore: types.optional(RequirementQuestionStoreModel, {}),
     requirementTemplateStore: types.optional(RequirementTemplateStoreModel, {}),
     templateVersionPreviewStore: types.optional(TemplateVersionPreviewStoreModel, {}),
     collaboratorStore: types.optional(CollaboratorStoreModel, {}),
@@ -141,6 +143,7 @@ export interface IRootStore extends IStateTreeNode {
   jurisdictionStore: IJurisdictionStore
   userStore: IUserStore
   requirementBlockStore: IRequirementBlockStoreModel
+  requirementQuestionStore: IRequirementQuestionStoreModel
   requirementTemplateStore: IRequirementTemplateStoreModel
   templateVersionPreviewStore: ITemplateVersionPreviewStoreModel
   templateVersionStore: ITemplateVersionStoreModel

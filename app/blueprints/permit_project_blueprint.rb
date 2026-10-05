@@ -1,6 +1,22 @@
 class PermitProjectBlueprint < Blueprinter::Base
   identifier :id
 
+  view :external_api do
+    fields :number, :title, :state, :full_address, :pid, :pin
+
+    field :state_label do |permit_project, _options|
+      Constants::ExternalApi::PROJECT_STATE_LABELS.fetch(permit_project.state)
+    end
+
+    association :permit_applications,
+                blueprint: PermitApplicationBlueprint,
+                view: :external_api_summary do |permit_project, _options|
+      permit_project.permit_applications.kept.submitted_at_least_once.order(
+        :created_at
+      )
+    end
+  end
+
   view :base do
     fields :full_address,
            :title,

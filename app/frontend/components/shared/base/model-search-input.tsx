@@ -10,6 +10,7 @@ interface IProps<TSearchModel extends ISearch> {
   inputGroupProps?: Partial<InputGroupProps>
   inputProps?: Partial<InputProps>
   debounceTimeInMilliseconds?: number
+  label?: string
 }
 
 export const ModelSearchInput = observer(function ModelSearchInput<TSearchModel extends ISearch>({
@@ -17,6 +18,7 @@ export const ModelSearchInput = observer(function ModelSearchInput<TSearchModel 
   inputGroupProps,
   inputProps,
   debounceTimeInMilliseconds = 500,
+  label,
 }: IProps<TSearchModel>) {
   const { setQuery, query, search } = searchModel
   const debouncedSearch = useCallback(debounce(search, debounceTimeInMilliseconds), [search])
@@ -27,6 +29,12 @@ export const ModelSearchInput = observer(function ModelSearchInput<TSearchModel 
   }
 
   return (
-    <SearchInput query={query} onQueryChange={onSearch} inputGroupProps={inputGroupProps} inputProps={inputProps} />
+    <SearchInput
+      query={query}
+      onQueryChange={onSearch}
+      inputGroupProps={inputGroupProps}
+      inputProps={inputProps}
+      label={label}
+    />
   )
 })

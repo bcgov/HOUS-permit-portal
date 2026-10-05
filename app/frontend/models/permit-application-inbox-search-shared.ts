@@ -122,12 +122,17 @@ export function applyPermitApplicationInboxFiltersFromQueryParams(
   queryParams: URLSearchParams
 ) {
   const requirementTemplateIds = queryParams.get("requirementTemplateIds")?.split(",")
-  const statusRaw = queryParams.get("status")?.split(",") as EPermitApplicationStatus[]
+  const statusRaw = queryParams
+    .get("status")
+    ?.split(",")
+    .filter((value): value is EPermitApplicationStatus =>
+      (Object.values(EPermitApplicationStatus) as string[]).includes(value)
+    )
   const unread = queryParams.get("unread") as ERadioFilterValue
   const daysInQueueOp = queryParams.get("daysInQueueOp")
   const daysInQueueDays = queryParams.get("daysInQueueDays")
   if (requirementTemplateIds) self.setRequirementTemplateIdFilter(requirementTemplateIds)
-  if (statusRaw) self.setStatusFilter(statusRaw)
+  if (statusRaw?.length) self.setStatusFilter(statusRaw)
   if (unread) self.setUnreadFilter(unread)
   if (daysInQueueOp && daysInQueueDays) {
     self.setDaysInQueueFilter({ operator: daysInQueueOp, days: parseInt(daysInQueueDays, 10) })

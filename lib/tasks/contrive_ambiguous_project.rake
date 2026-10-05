@@ -60,8 +60,7 @@ namespace :sandbox do
       Seed or create one (through the UI) and re-run.
     MSG
 
-    # Bypass validations/callbacks (notably searchkick reindex and the
-    # owner_cannot_be_jurisdiction_staff_without_sandbox validation) so we can
+    # Bypass validations/callbacks (notably searchkick reindex) so we can
     # leave the project in the intentionally-broken pre-migration shape.
     # Note: permit_projects.sandbox_id does not exist yet pre-migration, so we
     # only touch owner_id here — the migration is what adds the column.

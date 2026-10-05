@@ -118,6 +118,11 @@ export enum ExternalApiKeyStatus {
   notActive = "notActive",
 }
 
+export enum EExternalApiVersion {
+  v1 = "v1",
+  v2 = "v2",
+}
+
 export enum EUserRoles {
   submitter = "submitter",
   regionalReviewManager = "regional_review_manager",
@@ -131,6 +136,12 @@ export enum ERequirementLibrarySortFields {
   name = "name",
   associations = "associations",
   requirementLabels = "requirement_labels",
+  updatedAt = "updated_at",
+}
+
+export enum EQuestionBankSortFields {
+  name = "name",
+  associations = "associations",
   updatedAt = "updated_at",
 }
 
@@ -250,6 +261,7 @@ export enum ETagType {
   requirementTemplate = "RequirementTemplate",
   requirementBlock = "RequirementBlock",
   infoDocument = "InfoDocument",
+  requirementQuestion = "RequirementQuestion",
 }
 
 export enum ERequirementType {

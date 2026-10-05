@@ -3,6 +3,7 @@ import {
   EConditionalOperator,
   EConditionalThen,
   EDataValidationOperation,
+  EExternalApiVersion,
   ENumberUnit,
   ERequirementType,
   ETagType,
@@ -44,8 +45,11 @@ export interface IRequirementAttributes {
   id?: string
   label?: string
   inputType?: ERequirementType
-  hint?: string
-  instructions?: string
+  hint?: string | null
+  instructions?: string | null
+  requirementQuestionId?: string | null
+  defaultHint?: string | null
+  defaultInstructions?: string | null
   required?: boolean
   requirementCode: string
   elective?: boolean
@@ -76,6 +80,18 @@ export interface IRequirementBlockParams {
     _destroy?: boolean
     file: IUppyAttachmentFile
   }>
+}
+
+export interface IRequirementQuestionParams {
+  id: string
+  name: string
+  description?: string
+  associationList?: string[]
+  label: string
+  inputType: ERequirementType
+  hint?: string
+  instructions?: string
+  inputOptions?: IRequirementAttributes["inputOptions"]
 }
 
 export interface IBlockConditional {
@@ -150,6 +166,7 @@ export interface ITagSearchParams {
 export interface IExternalApiKeyParams {
   name?: string
   connectingApplication?: string
+  apiVersion?: EExternalApiVersion
   webhookUrl?: string
   expiredAt?: Date
   jurisdictionId?: string
