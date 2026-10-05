@@ -5334,6 +5334,10 @@ Thank you,
             categoryDescription:
               "Use <permitCategoriesLink>permit categories</permitCategoriesLink> to control how permit applications appear to the public, including which permit applications appear in each category and the order they appear in.",
             createButton: "Create new template",
+            archiveConfirmationModal: {
+              title: "Archive this template?",
+              body: "Archiving hides this template from jurisdictions and applicants. You can restore it from See archived.",
+            },
           },
           new: {
             title: "Create new template",
