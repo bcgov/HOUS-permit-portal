@@ -7,7 +7,9 @@ module PrintReports
     # authentication/network exceptions must propagate without deleting anything.
     def self.valid_pdf?(file)
       return false unless file && file.exists?
-      file.open do |download|
+      # S3 opens a stream without a path; download supplies a Tempfile and
+      # removes it when the block exits, including on validation failure.
+      file.download do |download|
         return false unless File.binread(download.path, 5) == "%PDF-"
         reader = PDF::Reader.new(download.path)
         return false if reader.page_count.zero?
@@ -20,7 +22,7 @@ module PrintReports
 
     def self.valid_zip?(file)
       return false unless file && file.exists?
-      file.open do |download|
+      file.download do |download|
         Zip::File.open(download.path) do |zip|
           return false if zip.entries.empty?
           zip.each do |entry|

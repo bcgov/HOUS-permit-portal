@@ -107,8 +107,11 @@ bin/rails print_reports:recover SUBMISSION_VERSION_ID=<uuid>
 ```
 
 The command reuses valid PDFs, restores missing or invalid ones, recreates deleted
-PDF attachment rows, and rebuilds missing/invalid or affected cumulative ZIPs from
-that version onward. It prints identifiers and restored/reused/blocked outcomes,
+PDF attachment rows, and always rebuilds cumulative ZIPs from that version onward,
+even when existing ZIPs are valid. Rerunning the command therefore completes ZIP
+rebuilding after a partial failure; existing ZIPs remain available until replaced.
+Validation downloads use temporary files that are cleaned up when validation finishes.
+It prints identifiers and restored/reused/blocked outcomes,
 returns failure when any package is blocked, and never logs answers. Storage access
 errors propagate; they are not interpreted as missing objects. A shared application
 advisory lock coordinates normal generation and recovery. Existing package-ready
