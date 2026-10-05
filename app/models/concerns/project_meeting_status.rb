@@ -27,6 +27,9 @@ module ProjectMeetingStatus
     validate :validate_schedule_requirements, if: :scheduled?
     validate :only_one_active_meeting_request, if: :active?
 
+    # draft → open is only submit_request. Queue after that save commits.
+    after_commit :send_requested_webhook, if: :submitted_for_external_api?
+
     scope :active, -> { where(status: statuses.values_at(*active_statuses)) }
 
     def self.active_statuses
@@ -145,6 +148,32 @@ module ProjectMeetingStatus
       if active_meetings.exists?
         errors.add(:permit_project, :active_project_meeting_exists)
       end
+    end
+
+    def submitted_for_external_api?
+      saved_change_to_status? && open? && status_before_last_save == "draft"
+    end
+
+    def send_requested_webhook
+      payload = {
+        "project_meeting_id" => id,
+        "permit_project_id" => permit_project_id,
+        "status" => status,
+        "occurred_at" => submitted_at.to_i * 1000
+      }
+
+      jurisdiction
+        .active_external_api_keys
+        .where(sandbox_id: sandbox_id)
+        .where(api_version: "v2")
+        .where.not(webhook_url: [nil, ""])
+        .each do |external_api_key|
+          PermitWebhookJob.perform_async(
+            external_api_key.id,
+            Constants::Webhooks::Events::ProjectMeeting::REQUESTED,
+            payload
+          )
+        end
     end
   end
 end

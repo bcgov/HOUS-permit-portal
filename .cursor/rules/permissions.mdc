@@ -1,5 +1,12 @@
 ---
+description: Hand bundle, install, and database commands to the user; stay inside this repo
 alwaysApply: true
 ---
 
-You may notice that in several cases, especially around installing modules and database operations, you may run into permission issues. Please do not attempt to get around these issues, as this is intentional. Please simply give the user the command you want to run, and the user will gladly perform the operation for you.
+# Environment limits
+
+`bundle` commands that need this app's gems fail in this environment. Paste the command and leave the run to the user.
+
+Stay inside this repo. Do not search other apps or the home directory for gem source or data.
+
+Installing modules and database operations can also hit permission errors. That is intentional. Do not work around them. Give the user the command to run.

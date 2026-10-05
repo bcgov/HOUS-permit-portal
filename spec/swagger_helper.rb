@@ -112,7 +112,7 @@ application or submission version to refresh expired URLs. Ingest on `permit_app
 `permit_application_status_changed`. The status event only means the application status changed; generated PDFs and the
 application zip may still be incomplete.
 
-Meeting requests remain in Building Permit Hub and are outside the Option B v2 External API contract.
+Submitting a meeting request emits `project_meeting_requested`. Fetch it with `GET /project_meetings/{id}` and accept an open request with `PATCH /project_meetings/{id}`. Document URLs on that GET expire after one hour; call GET again for a new URL.
 
 ### Status authority:
 Partners write canonical Building Permit Hub application status codes. An accepted partner write becomes the current status shown in Building Permit Hub.
@@ -230,6 +230,32 @@ in this document.
                   schema: {
                     "$ref" =>
                       "#/components/schemas/PermitProjectStateChangedWebhook"
+                  }
+                }
+              }
+            },
+            responses: {
+              "200" => {
+                description:
+                  "The external integrator should return 200 to acknowledge receipt."
+              }
+            }
+          }
+        },
+        project_meeting_requested: {
+          tags: ["Webhooks"],
+          post: {
+            parameters: [
+              { "$ref" => "#/components/parameters/WebhookSignature" }
+            ],
+            requestBody: {
+              description:
+                "Emitted when a project meeting request is submitted (draft to open), including when the project has no submitted permit application. Payload is identifiers only; fetch the request and signed document URLs from GET /project_meetings/{id}. Not emitted for draft saves, schedule, reschedule, complete, or withdraw.",
+              content: {
+                "application/json" => {
+                  schema: {
+                    "$ref" =>
+                      "#/components/schemas/ProjectMeetingRequestedWebhook"
                   }
                 }
               }
@@ -795,6 +821,45 @@ in this document.
               }
             }
           },
+          ProjectMeetingRequestedWebhook: {
+            type: :object,
+            required: %w[event payload],
+            properties: {
+              event: {
+                type: :string,
+                enum: %w[project_meeting_requested]
+              },
+              payload: {
+                type: :object,
+                required: %w[
+                  project_meeting_id
+                  permit_project_id
+                  status
+                  occurred_at
+                ],
+                properties: {
+                  project_meeting_id: {
+                    type: :string,
+                    format: :uuid
+                  },
+                  permit_project_id: {
+                    type: :string,
+                    format: :uuid
+                  },
+                  status: {
+                    type: :string,
+                    enum: %w[open]
+                  },
+                  occurred_at: {
+                    type: :integer,
+                    format: :int64,
+                    description:
+                      "Event timestamp in milliseconds since the Unix epoch."
+                  }
+                }
+              }
+            }
+          },
           PermitApplicationPackageReadyWebhook: {
             type: :object,
             required: %w[event payload],
@@ -955,6 +1020,7 @@ in this document.
     :PartnerWritableApplicationStatus,
     :PermitApplicationStatusChangedWebhook,
     :PermitProjectStateChangedWebhook,
+    :ProjectMeetingRequestedWebhook,
     :PermitApplicationPackageReadyWebhook,
     :SubmissionVersionIndex,
     :SubmissionVersion
@@ -969,6 +1035,7 @@ in this document.
     %i[
       permit_application_status_changed
       permit_project_state_changed
+      project_meeting_requested
       permit_application_package_ready
     ].include?(event)
   end
@@ -1114,6 +1181,123 @@ in this document.
           maxLength: 350
         }
       }
+    },
+    ProjectMeeting: {
+      type: :object,
+      required: %w[id status permit_project_id meeting_request_documents],
+      properties: {
+        id: {
+          type: :string,
+          format: :uuid
+        },
+        status: {
+          type: :string,
+          enum: %w[open scheduled completed withdrawn]
+        },
+        requester_relationship: {
+          type: :string,
+          nullable: true,
+          enum: %w[
+            owner_or_landholder
+            leaseholder_or_tenant
+            owners_representative
+            other
+          ]
+        },
+        contact_name: {
+          type: :string,
+          nullable: true
+        },
+        contact_email: {
+          type: :string,
+          nullable: true
+        },
+        contact_phone_number: {
+          type: :string,
+          nullable: true
+        },
+        project_description: {
+          type: :string,
+          nullable: true
+        },
+        request_property_information: {
+          type: :boolean,
+          nullable: true
+        },
+        permit_project_id: {
+          type: :string,
+          format: :uuid
+        },
+        project_number: {
+          type: :string,
+          nullable: true
+        },
+        project_address: {
+          type: :string,
+          nullable: true
+        },
+        project_pid: {
+          type: :string,
+          nullable: true
+        },
+        contact_method: {
+          type: :string,
+          nullable: true,
+          description:
+            "phone, in_person, or videoconference. Null until scheduled."
+        },
+        confirmed_date: {
+          type: :integer,
+          format: :int64,
+          nullable: true,
+          description: "Datetime in milliseconds since the epoch (Unix time)."
+        },
+        meeting_url: {
+          type: :string,
+          nullable: true
+        },
+        scheduled_at: {
+          type: :integer,
+          format: :int64,
+          nullable: true,
+          description: "Datetime in milliseconds since the epoch (Unix time)."
+        },
+        meeting_request_documents: {
+          type: :array,
+          items: {
+            type: :object,
+            required: %w[id document_type],
+            properties: {
+              id: {
+                type: :string,
+                format: :uuid
+              },
+              document_type: {
+                type: :string,
+                enum: %w[supporting authorization]
+              },
+              name: {
+                type: :string,
+                nullable: true
+              },
+              type: {
+                type: :string,
+                nullable: true
+              },
+              size: {
+                type: :integer,
+                nullable: true
+              },
+              url: {
+                type: :string,
+                nullable: true,
+                description:
+                  "Signed download URL. Expires after 1 hour. A later GET returns a new URL."
+              }
+            }
+          }
+        }
+      }
     }
   )
   v2_spec[:tags] << {
@@ -1125,6 +1309,11 @@ in this document.
     name: "Revision reasons",
     description:
       "Site-configured revision reason codes accepted on partner revision requests. The list is dynamic."
+  }
+  v2_spec[:tags] << {
+    name: "Project meetings",
+    description:
+      "Submitted project meeting requests in the API key's jurisdiction and sandbox. Drafts are not readable. PATCH accepts an open request by scheduling it."
   }
   v2_spec[:components][:schemas].except!(:WebhookPayload)
 

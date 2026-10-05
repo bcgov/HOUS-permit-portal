@@ -46,7 +46,8 @@ RSpec.describe PermitWebhookJob, type: :job do
       Constants::Webhooks::Events::PermitApplication::PERMIT_SUBMITTED,
       Constants::Webhooks::Events::PermitApplication::STATUS_CHANGED,
       Constants::Webhooks::Events::PermitApplication::PACKAGE_READY,
-      Constants::Webhooks::Events::PermitProject::STATE_CHANGED
+      Constants::Webhooks::Events::PermitProject::STATE_CHANGED,
+      Constants::Webhooks::Events::ProjectMeeting::REQUESTED
     ]
 
     events.each do |event_type|

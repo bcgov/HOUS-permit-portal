@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "d76764f2-5509-4e1f-bcb6-8bf8821ebf57",
     "name": "Integration API V2",
-    "description": "Option B bidirectional contract. A V2 API key selected at key creation is required. The partner owns durable permit-package storage; BPH provides one-hour signed URLs and supports re-GET for refreshed URLs. Ingest on `permit_application_package_ready`, not on `permit_application_status_changed`. Meeting requests remain in BPH and are outside External API V2. Partners write canonical application statuses and project state and are authoritative; manual-status conflict UX is deferred.",
+    "description": "Option B bidirectional contract. A V2 API key selected at key creation is required. The partner owns durable permit-package storage; BPH provides one-hour signed URLs and supports re-GET for refreshed URLs. Ingest on `permit_application_package_ready`, not on `permit_application_status_changed`. Submitting a meeting request emits `project_meeting_requested`. Fetch it at `GET /external_api/v2/project_meetings/{id}` and accept an open request with `PATCH /external_api/v2/project_meetings/{id}`. Partners write canonical application statuses and project state and are authoritative; manual-status conflict UX is deferred.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -167,7 +167,7 @@
     },
     {
       "name": "Permit projects",
-      "description": "Project GET follows `permit_project_id` from application reads and webhooks. Child summaries omit drafts and include `revisions_requested`. PATCH state accepts only `available_states` from the current state. Meetings, collaborators, notes, and documents stay in BPH.",
+      "description": "Project GET follows `permit_project_id` from application reads and webhooks. Child summaries omit drafts and include `revisions_requested`. PATCH state accepts only `available_states` from the current state. Collaborators, notes, and project documents stay in BPH. Fetch and accept meeting requests from the Project meetings folder.",
       "item": [
         {
           "name": "Get Permit Project by ID",
@@ -241,6 +241,55 @@
       ]
     },
     {
+      "name": "Project meetings",
+      "description": "GET a submitted meeting request, including one-hour signed document URLs. PATCH accepts an open request by scheduling it. Drafts are not readable.",
+      "item": [
+        {
+          "name": "Get Project Meeting by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/external_api/v2/project_meetings/{{project_meeting_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["external_api", "v2", "project_meetings", "{{project_meeting_id}}"]
+            },
+            "description": "Contact, description, property-information flag, project identity, and meeting_request_documents with signed download URLs. A later GET returns new URLs."
+          },
+          "response": []
+        },
+        {
+          "name": "Accept Project Meeting",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"confirmed_date\": \"2026-10-12T15:00:00Z\",\n  \"contact_method\": \"phone\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/external_api/v2/project_meetings/{{project_meeting_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["external_api", "v2", "project_meetings", "{{project_meeting_id}}"]
+            },
+            "description": "Schedules an open meeting. contact_method is phone, in_person, or videoconference. meeting_url is required for videoconference and must be an http(s) URL when present. Success returns status scheduled and sends the existing scheduled notifications. A meeting that is not open returns 422."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "Webhook events",
       "item": [
         {
@@ -260,7 +309,7 @@
           "response": []
         }
       ],
-      "description": "V2 emits `permit_application_status_changed` for each externally visible application status transition, including submission and resubmission. Payload: `{ permit_application_id, permit_project_id, submission_version_id, status, status_label, occurred_at }`. Durable ingest waits for `permit_application_package_ready` (`{ permit_application_id, permit_project_id, submission_version_id, number, reference_number, occurred_at }`), which fires once per submission version after generated PDFs exist and the application zip is rebuilt. V2 also emits `permit_project_state_changed` with `{ permit_project_id, state, state_label, occurred_at }`. Project states: `draft` (Draft), `queued` (Queued), `waiting` (Waiting), `in_progress` (In progress), `ready` (Ready), `permit_issued` (Permit issued), `active` (Active), `complete` (Completed), `closed` (Closed). Timestamps are Unix epoch milliseconds. All bodies use the `{ event, payload }` envelope and `X-Webhook-Signature` HMAC-SHA256 header. File URLs are not included in webhooks; fetch them after package_ready. In development, set the key webhook URL to `{{webhook_url}}`."
+      "description": "V2 emits `permit_application_status_changed` for each externally visible application status transition, including submission and resubmission. Payload: `{ permit_application_id, permit_project_id, submission_version_id, status, status_label, occurred_at }`. Durable ingest waits for `permit_application_package_ready` (`{ permit_application_id, permit_project_id, submission_version_id, number, reference_number, occurred_at }`), which fires once per submission version after generated PDFs exist and the application zip is rebuilt. V2 also emits `permit_project_state_changed` with `{ permit_project_id, state, state_label, occurred_at }`. Project states: `draft` (Draft), `queued` (Queued), `waiting` (Waiting), `in_progress` (In progress), `ready` (Ready), `permit_issued` (Permit issued), `active` (Active), `complete` (Completed), `closed` (Closed). Submitting a meeting request emits `project_meeting_requested` with `{ project_meeting_id, permit_project_id, status, occurred_at }` and no file URL, even when the project has no submitted permit application. Timestamps are Unix epoch milliseconds. All bodies use the `{ event, payload }` envelope and `X-Webhook-Signature` HMAC-SHA256 header. File URLs are not included in webhooks; fetch them after package_ready, or from GET project meeting for meeting documents. In development, set the key webhook URL to `{{webhook_url}}`."
     }
   ],
   "auth": {
@@ -296,6 +345,10 @@
     },
     {
       "key": "permit_project_id",
+      "value": ""
+    },
+    {
+      "key": "project_meeting_id",
       "value": ""
     },
     {
