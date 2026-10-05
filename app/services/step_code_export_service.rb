@@ -27,7 +27,7 @@ class StepCodeExportService
     CSV.generate(headers: true) do |csv|
       # Headers for Part 3 metrics
       csv << [
-        "Application ID",
+        "Reference number",
         "Jurisdiction",
         "Address",
         "Building Height",
@@ -142,7 +142,7 @@ class StepCodeExportService
     CSV.generate(headers: true) do |csv|
       # Headers for Part 9 metrics
       csv << [
-        "Application ID",
+        "Reference number",
         "Jurisdiction",
         "Address",
         "Building Type",

@@ -312,9 +312,9 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
             zIndex={12}
             flexDirection={{ base: "column", md: "row" }}
           >
-            <HStack gap={4} flex={1}>
+            <HStack gap={4} flex={1} minW={0} align="flex-start">
               <PermitApplicationStatusTag status={currentPermitApplication.status} />
-              <Flex direction="column" w="full">
+              <Flex direction="column" w="full" minW={0}>
                 <form>
                   <Tooltip
                     label={t("permitApplication.edit.clickToWriteNickname")}
@@ -364,7 +364,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                 </form>
 
                 <Text noOfLines={1}>{tagsOrNickname}</Text>
-                <HStack>
+                <HStack flexWrap="wrap" rowGap={1} columnGap={4} align="center">
                   <CopyableValue value={number} label={t("permitApplication.fields.number")} />
                   {currentPermitApplication.referenceNumber && (
                     <CopyableValue
