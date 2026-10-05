@@ -14,6 +14,10 @@ module Constants
       module PermitProject
         STATE_CHANGED = "permit_project_state_changed"
       end
+
+      module ProjectMeeting
+        REQUESTED = "project_meeting_requested"
+      end
     end
   end
 end
