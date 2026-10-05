@@ -2,7 +2,7 @@ require "rails_helper"
 
 RSpec.describe Note, type: :model do
   describe "associations" do
-    it { is_expected.to belong_to(:user) }
+    it { is_expected.to belong_to(:user).without_validating_presence }
     it { is_expected.to belong_to(:permit_project) }
     it { is_expected.to belong_to(:noteable) }
   end
@@ -14,6 +14,29 @@ RSpec.describe Note, type: :model do
       note = build(:note, noteable: build(:project_meeting, :open))
 
       expect(note).to be_valid
+    end
+
+    it "requires a user on meeting notes" do
+      note = build(:note, user: nil)
+
+      expect(note).not_to be_valid
+      expect(note.errors[:user]).to be_present
+    end
+
+    it "allows a revision message without a user" do
+      application = create(:permit_application, :newly_submitted)
+      note =
+        build(
+          :note,
+          noteable: application.latest_submission_version,
+          kind: :applicant_message,
+          user: nil
+        )
+
+      expect(note).to be_valid
+      expect(note.author_name_for(nil)).to eq(
+        application.permit_project.jurisdiction.qualified_name
+      )
     end
 
     it "allows a submission version as a noteable record" do

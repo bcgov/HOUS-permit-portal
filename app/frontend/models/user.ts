@@ -210,4 +210,16 @@ export interface IPreference {
 
   enableInAppProjectMeetingSubmittedNotification: boolean
   enableEmailProjectMeetingSubmittedNotification: boolean
+
+  enableInAppProjectMeetingScheduledNotification: boolean
+  enableEmailProjectMeetingScheduledNotification: boolean
+  enableInAppProjectMeetingRescheduledNotification: boolean
+  enableEmailProjectMeetingRescheduledNotification: boolean
+  enableInAppPreCheckSubmittedNotification: boolean
+  enableEmailPreCheckSubmittedNotification: boolean
+  enableInAppPreCheckCompletedNotification: boolean
+  enableEmailPreCheckCompletedNotification: boolean
+  enableInAppStepCodeReportNotification: boolean
+  enableInAppFileUploadFailedNotification: boolean
+  enableInAppReleaseNotePublishNotification: boolean
 }

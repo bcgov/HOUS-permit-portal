@@ -9,12 +9,12 @@ class Note < ApplicationRecord
   enum :kind,
        {
          meeting: "meeting",
-         applicant_message: "applicant_message",
-         submitter_message: "submitter_message"
+         applicant_message: "applicant_message", # is a message TO the applicant
+         submitter_message: "submitter_message" # is a message TO the reviewer
        },
        default: "meeting"
 
-  belongs_to :user
+  belongs_to :user, optional: true
   belongs_to :permit_project
   belongs_to :noteable, polymorphic: true
   delegate :sandbox_id, to: :permit_project
@@ -25,6 +25,7 @@ class Note < ApplicationRecord
   before_validation :assign_permit_project
 
   validates :body, presence: true
+  validates :user, presence: true, if: :meeting?
   validates :noteable_type, inclusion: { in: NOTEABLE_TYPES }
   validate :permit_project_matches_noteable
 
@@ -85,7 +86,8 @@ class Note < ApplicationRecord
   end
 
   def author_name_for(viewer)
-    return user&.name unless user&.jurisdiction_staff?
+    return jurisdiction_name if user.blank?
+    return user.name unless user.jurisdiction_staff?
     return user.name if viewer&.jurisdiction_staff?
 
     permit_project&.jurisdiction&.qualified_name
@@ -103,6 +105,10 @@ class Note < ApplicationRecord
     return if permit_project == noteable_project
 
     errors.add(:permit_project, :invalid)
+  end
+
+  def jurisdiction_name
+    permit_project&.jurisdiction&.qualified_name
   end
 
   def noteable_permit_project
