@@ -43,7 +43,7 @@ class SupportingDocumentsZipper
     FileUtils.rm_f(file_path)
     used_entry_names = Hash.new(0)
 
-    Zip::File.open(file_path, Zip::File::CREATE) do |zipfile|
+    Zip::File.open(file_path, create: true) do |zipfile|
       documents_to_zip.each do |document|
         file_path = download_file(document)
         if file_path
