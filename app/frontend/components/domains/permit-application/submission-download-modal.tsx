@@ -27,6 +27,7 @@ import { IDownloadableFile, IFormIOSection, ISubmissionVersion } from "../../../
 import { formatBytes } from "../../../utils/utility-functions"
 import { CalloutBanner } from "../../shared/base/callout-banner"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
+import { InfoTooltip } from "../../shared/info-tooltip"
 
 export interface ISubmissionDownloadModalProps {
   permitApplication: IPermitApplication
@@ -532,17 +533,24 @@ export const SubmissionDownloadModal = observer(
                     overflowY="auto"
                   >
                     {issues.map((issue) => (
-                      <Text key={issue.key} role="status" fontSize="sm" color="text.secondary">
-                        {t("permitApplication.show.reportUnavailable", {
-                          version: issue.versionNumber,
-                          report: t(
-                            issue.key.startsWith("permit_application_pdf")
-                              ? "permitApplication.show.missingPdfLabels.permitApplication"
-                              : "permitApplication.show.missingPdfLabels.stepCode"
-                          ),
-                          reason: issue.reason,
-                        })}
-                      </Text>
+                      <HStack key={issue.key} spacing={2} fontSize="sm" color="text.secondary">
+                        <Text role="status">
+                          {t("permitApplication.show.reportUnavailable", {
+                            version: issue.versionNumber,
+                            report: t(
+                              issue.key.startsWith("permit_application_pdf")
+                                ? "permitApplication.show.unavailableReportLabels.permitApplication"
+                                : "permitApplication.show.unavailableReportLabels.stepCode"
+                            ),
+                          })}
+                        </Text>
+                        <InfoTooltip
+                          label={t("permitApplication.show.reportUnavailableHelp")}
+                          ariaLabel={t("permitApplication.show.reportUnavailableHelp")}
+                          hasArrow
+                          shouldWrapChildren
+                        />
+                      </HStack>
                     ))}
                     {packageBlocked && (
                       <Text fontSize="sm">{t("permitApplication.show.incompleteHistoricalPackage")}</Text>
