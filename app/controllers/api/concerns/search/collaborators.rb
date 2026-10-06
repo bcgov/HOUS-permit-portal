@@ -6,18 +6,10 @@ module Api::Concerns::Search::Collaborators
       order: collaborator_order,
       match: :word_start,
       where: collaborator_where_clause,
-      page: collaborator_search_params[:page],
+      page: collaborator_search_params[:page].presence || 1,
       per_page:
-        (
-          if collaborator_search_params[:page]
-            (
-              collaborator_search_params[:per_page] ||
-                Kaminari.config.default_per_page
-            )
-          else
-            nil
-          end
-        )
+        collaborator_search_params[:per_page].presence ||
+          Kaminari.config.default_per_page
     }
 
     @collaborator_search =

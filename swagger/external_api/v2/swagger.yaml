@@ -526,6 +526,12 @@ paths:
                       format: date-time
                       description: 'Less than or equal to: resubmitted date is less
                         than or equal to this date'
+                page:
+                  type: integer
+                  description: Page number. Defaults to 1.
+                per_page:
+                  type: integer
+                  description: Page size. Defaults to 25.
   "/permit_applications/{id}":
     get:
       summary: This endpoint retrieves detailed information about a specific permit
@@ -755,10 +761,10 @@ paths:
                         and results stay limited to non-draft projects.
                 page:
                   type: integer
-                  description: Page number. Results are unpaginated when omitted.
+                  description: Page number. Defaults to 1.
                 per_page:
                   type: integer
-                  description: Page size. Used only when `page` is present.
+                  description: Page size. Defaults to 25.
       responses:
         '200':
           description: Successful

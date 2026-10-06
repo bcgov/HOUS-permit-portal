@@ -110,6 +110,10 @@ RSpec.describe "External API v2 permit projects", type: :request do
           not: "draft"
         }
       )
+      expect(@permit_project_search_kwargs[:page]).to eq(1)
+      expect(@permit_project_search_kwargs[:per_page]).to eq(
+        Kaminari.config.default_per_page
+      )
       expect(@permit_project_search_kwargs[:order]).to eq(
         created_at: {
           order: :desc,
