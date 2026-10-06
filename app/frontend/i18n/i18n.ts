@@ -2135,7 +2135,12 @@ Thank you,
             selectOrDeselectAll: "Select or deselect all",
             downloadSelectedFiles: "Download selected files",
             downloadExistingPackage: "Download the previously generated package",
-            reportUnavailable: "Submission {{version}} — {{report}} unavailable. {{reason}}",
+            reportUnavailable: "Submission {{version}} — {{report}} unavailable",
+            reportUnavailableHelp: "We can’t recreate this PDF from the saved submission. Contact support for help.",
+            unavailableReportLabels: {
+              permitApplication: "PDF",
+              stepCode: "Step Code PDF",
+            },
             incompleteHistoricalPackage:
               "The complete package cannot be rebuilt because a historical report is unavailable. Available files can still be downloaded.",
             downloadSectionGenerated: "Application documents",
