@@ -851,4 +851,94 @@ RSpec.describe TemplateVersioningService, type: :service, search: true do
       expect(valid_version.reload).to be_published
     end
   end
+
+  describe "archive!" do
+    let(:admin) { create(:user, :super_admin) }
+
+    it "does nothing when a published version exists" do
+      template = create(:requirement_template)
+      published =
+        create(
+          :template_version,
+          requirement_template: template,
+          status: :published
+        )
+      scheduled =
+        create(
+          :template_version,
+          requirement_template: template,
+          status: :scheduled,
+          version_date: Date.tomorrow
+        )
+      draft =
+        create(
+          :template_version,
+          requirement_template: template,
+          status: :draft,
+          publicly_previewable: true
+        )
+
+      expect { described_class.archive!(template, admin) }.to raise_error(
+        TemplateVersionArchiveError
+      )
+
+      expect(template.reload).not_to be_discarded
+      expect(published.reload).to be_published
+      expect(scheduled.reload).to be_scheduled
+      expect(draft.reload).to be_draft
+      expect(draft.publicly_previewable).to be true
+    end
+
+    it "unschedules scheduled versions, retires drafts, and discards the template" do
+      template = create(:requirement_template)
+      scheduled =
+        create(
+          :template_version,
+          requirement_template: template,
+          status: :scheduled,
+          version_date: Date.tomorrow
+        )
+      draft =
+        create(
+          :template_version,
+          requirement_template: template,
+          status: :draft,
+          publicly_previewable: true
+        )
+
+      described_class.archive!(template, admin)
+
+      expect(template.reload).to be_discarded
+      expect(scheduled.reload).to be_deprecated
+      expect(scheduled.deprecation_reason).to eq("unscheduled")
+      expect(scheduled.deprecated_by).to eq(admin)
+      expect(draft.reload).to be_deprecated
+      expect(draft.publicly_previewable).to be false
+    end
+
+    it "does not return a scheduled version on a discarded template" do
+      kept = create(:requirement_template)
+      discarded_template = create(:requirement_template)
+      due =
+        create(
+          :template_version,
+          requirement_template: kept,
+          status: :scheduled,
+          version_date: Date.current
+        )
+      hidden =
+        create(
+          :template_version,
+          requirement_template: discarded_template,
+          status: :scheduled,
+          version_date: Date.current
+        )
+      discarded_template.discard
+
+      ids = described_class.get_versions_publishable_now.map(&:id)
+
+      expect(ids).to include(due.id)
+      expect(ids).not_to include(hidden.id)
+    end
+  end
 end

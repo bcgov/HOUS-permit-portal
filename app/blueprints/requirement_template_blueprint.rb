@@ -22,7 +22,7 @@ class RequirementTemplateBlueprint < Blueprinter::Base
     if rt.available_globally
       I18n.t("activerecord.attributes.requirement_template.available_in_all")
     else
-      rt.jurisdiction_requirement_templates.count
+      rt.jurisdiction_requirement_templates.size
     end
   end
 

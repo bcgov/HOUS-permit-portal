@@ -1,10 +1,13 @@
 class RequirementTemplate < ApplicationRecord
-  SEARCH_INCLUDES = %i[
-    published_template_version
-    draft_template_versions
-    last_three_deprecated_template_versions
-    scheduled_template_versions
-    template_category
+  SEARCH_INCLUDES = [
+    :published_template_version,
+    :draft_template_versions,
+    :last_three_deprecated_template_versions,
+    :scheduled_template_versions,
+    :template_category,
+    :jurisdiction_requirement_templates,
+    :enabled_jurisdictions,
+    { taggings: :tag }
   ]
 
   searchkick searchable: %i[description current_version nickname tags],
@@ -140,7 +143,7 @@ class RequirementTemplate < ApplicationRecord
       Jurisdiction.count - disabled_count
     else
       # Jurisdictions with access (via JurisdictionRequirementTemplate) minus disabled
-      access_count = jurisdiction_requirement_templates.count
+      access_count = jurisdiction_requirement_templates.size
       # Only count disabled ones that actually have access
       disabled_with_access_count =
         published_template_version
@@ -290,7 +293,7 @@ class RequirementTemplate < ApplicationRecord
           if available_globally
             Jurisdiction.count
           else
-            jurisdiction_requirement_templates.count
+            jurisdiction_requirement_templates.size
           end
         ),
       template_category_id: template_category_id,

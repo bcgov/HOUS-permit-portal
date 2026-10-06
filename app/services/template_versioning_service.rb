@@ -9,6 +9,7 @@ class TemplateVersioningService
     TemplateVersion
       .select("DISTINCT ON (requirement_templates.id) template_versions.*")
       .joins(:requirement_template)
+      .where(requirement_templates: { discarded_at: nil })
       .where(
         "template_versions.status = #{TemplateVersion.statuses[:scheduled]} AND template_versions.version_date <= ?",
         Date.current
@@ -290,10 +291,37 @@ class TemplateVersioningService
     draft_version.update!(
       status: "deprecated",
       deprecation_reason: "unscheduled",
-      deprecated_by: deprecated_by
+      deprecated_by: deprecated_by,
+      publicly_previewable: false
     )
 
     draft_version
+  end
+
+  # Refuses when a published version exists. Otherwise unschedules every
+  # scheduled version, retires every early-access draft, then discards the
+  # template. A published version aborts before any row changes.
+  def self.archive!(requirement_template, deprecated_by)
+    if requirement_template.template_versions.published.exists?
+      raise TemplateVersionArchiveError,
+            I18n.t(
+              "arbitrary_message_construct.requirement_template.archive_blocked_published.message"
+            )
+    end
+
+    ActiveRecord::Base.transaction do
+      requirement_template.template_versions.scheduled.each do |version|
+        unschedule!(version, deprecated_by)
+      end
+
+      requirement_template.template_versions.draft.each do |version|
+        discard_draft!(version, deprecated_by)
+      end
+
+      requirement_template.discard!
+    end
+
+    requirement_template
   end
 
   # ── End draft workflow methods ──────────────────────────────────────────
