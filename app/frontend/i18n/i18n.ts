@@ -5338,6 +5338,7 @@ Thank you,
               title: "Archive this template?",
               body: "Archiving cancels scheduled publishes and early-access previews. You can restore the template from See archived.",
             },
+            archiveDisabledPublished: "This template has a published version and cannot be archived",
           },
           new: {
             title: "Create new template",

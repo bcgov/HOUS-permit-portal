@@ -1,4 +1,4 @@
-import { Button, Menu, MenuButton, MenuItem, MenuList, useDisclosure } from "@chakra-ui/react"
+import { Button, Menu, MenuButton, MenuItem, MenuList, Tooltip, useDisclosure } from "@chakra-ui/react"
 import { Archive, ClockClockwise, ClockCounterClockwise, Globe } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -60,27 +60,36 @@ export const RequirementTemplateActions = observer(function RequirementTemplateA
                 </Button>
               )}
             />
+          ) : requirementTemplate.publishedTemplateVersion ? (
+            <Tooltip
+              label={t("requirementTemplate.index.archiveDisabledPublished")}
+              shouldWrapChildren
+              hasArrow
+              placement="left"
+            >
+              <MenuItem isDisabled icon={<Archive size={20} />} color="semantic.error">
+                {t("ui.archive")}
+              </MenuItem>
+            </Tooltip>
           ) : (
-            !requirementTemplate.publishedTemplateVersion && (
-              <ConfirmationModal
-                title={t("requirementTemplate.index.archiveConfirmationModal.title")}
-                body={t("requirementTemplate.index.archiveConfirmationModal.body")}
-                onConfirm={(closeModal) => {
-                  handleArchive()
-                  closeModal()
-                }}
-                renderTriggerButton={({ onClick }) => (
-                  <MenuItem icon={<Archive size={20} />} onClick={onClick} color="semantic.error">
-                    {t("ui.archive")}
-                  </MenuItem>
-                )}
-                renderConfirmationButton={(props) => (
-                  <Button {...props} colorScheme="red">
-                    {t("ui.archive")}
-                  </Button>
-                )}
-              />
-            )
+            <ConfirmationModal
+              title={t("requirementTemplate.index.archiveConfirmationModal.title")}
+              body={t("requirementTemplate.index.archiveConfirmationModal.body")}
+              onConfirm={(closeModal) => {
+                handleArchive()
+                closeModal()
+              }}
+              renderTriggerButton={({ onClick }) => (
+                <MenuItem icon={<Archive size={20} />} onClick={onClick} color="semantic.error">
+                  {t("ui.archive")}
+                </MenuItem>
+              )}
+              renderConfirmationButton={(props) => (
+                <Button {...props} colorScheme="red">
+                  {t("ui.archive")}
+                </Button>
+              )}
+            />
           )}
         </MenuList>
       </Menu>

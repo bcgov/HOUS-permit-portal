@@ -133,7 +133,7 @@ class RequirementQuestion < ApplicationRecord
   end
 
   def usage_count
-    requirements.count
+    requirements.loaded? ? requirements.size : requirements.count
   end
 
   def search_data
