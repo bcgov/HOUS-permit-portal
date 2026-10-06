@@ -7,18 +7,10 @@ module Api::Concerns::Search::JurisdictionProjectMeetings
       match: :word_middle,
       fields: jurisdiction_project_meeting_search_fields,
       where: jurisdiction_project_meeting_where_clause,
-      page: jurisdiction_project_meeting_search_params[:page],
+      page: jurisdiction_project_meeting_search_params[:page].presence || 1,
       per_page:
-        (
-          if jurisdiction_project_meeting_search_params[:page]
-            (
-              jurisdiction_project_meeting_search_params[:per_page] ||
-                Kaminari.config.default_per_page
-            )
-          else
-            nil
-          end
-        ),
+        jurisdiction_project_meeting_search_params[:per_page].presence ||
+          Kaminari.config.default_per_page,
       includes: ProjectMeeting::SEARCH_INCLUDES,
       scope_results: ->(relation) { policy_scope(relation) }
     }

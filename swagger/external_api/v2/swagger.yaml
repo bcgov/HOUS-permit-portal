@@ -526,6 +526,12 @@ paths:
                       format: date-time
                       description: 'Less than or equal to: resubmitted date is less
                         than or equal to this date'
+                page:
+                  type: integer
+                  description: Page number. Defaults to 1.
+                per_page:
+                  type: integer
+                  description: Page size. Defaults to 25.
   "/permit_applications/{id}":
     get:
       summary: This endpoint retrieves detailed information about a specific permit
@@ -724,6 +730,73 @@ paths:
                       "$ref": "#/components/schemas/RevisionReason"
                 required:
                 - data
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ResponseError"
+  "/permit_projects/search":
+    post:
+      summary: Searches non-draft permit projects in the key's jurisdiction and sandbox.
+        An empty body matches the jurisdiction inbox with no filters. `draft` is never
+        returned.
+      tags:
+      - Permit projects
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                constraints:
+                  type: object
+                  description: Optional filters. Without a state, search returns every
+                    non-draft project in the key's jurisdiction and sandbox.
+                  properties:
+                    state:
+                      "$ref": "#/components/schemas/ProjectState"
+                      description: Narrows results to this state. `draft` is ignored
+                        and results stay limited to non-draft projects.
+                page:
+                  type: integer
+                  description: Page number. Defaults to 1.
+                per_page:
+                  type: integer
+                  description: Page size. Defaults to 25.
+      responses:
+        '200':
+          description: Successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: Non-draft permit projects
+                    items:
+                      "$ref": "#/components/schemas/PermitProject"
+                  meta:
+                    type: object
+                    properties:
+                      total_pages:
+                        type: integer
+                        description: Total number of pages
+                      total_count:
+                        type: integer
+                        description: Total number of permit projects
+                      current_page:
+                        type: integer
+                        description: Current page number
+                    required:
+                    - total_pages
+                    - total_count
+                    - current_page
+                required:
+                - data
+                - meta
         '429':
           description: Rate limit exceeded
           content:

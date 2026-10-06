@@ -8,15 +8,9 @@ module Api::Concerns::Search::RequirementQuestions
       where: {
         discarded: discarded
       },
-      page: search_params[:page],
+      page: search_params[:page].presence || 1,
       per_page:
-        (
-          if search_params[:page]
-            (search_params[:per_page] || Kaminari.config.default_per_page)
-          else
-            nil
-          end
-        ),
+        search_params[:per_page].presence || Kaminari.config.default_per_page,
       # Index only needs block id/name (:extended). Templates load on show (:with_usage).
       includes: %i[taggings requirement_blocks],
       scope_results: ->(relation) { policy_scope(relation) }

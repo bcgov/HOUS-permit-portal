@@ -1,5 +1,21 @@
 class ExternalApi::V2::PermitProjectsController < ExternalApi::ApplicationController
+  include ExternalApi::Concerns::Search::PermitProjects
+
   before_action :set_permit_project, only: %i[show update_state]
+
+  def index
+    perform_permit_project_search
+
+    render_success @permit_project_search.results,
+                   nil,
+                   {
+                     meta: page_meta(@permit_project_search),
+                     blueprint: PermitProjectBlueprint,
+                     blueprint_opts: {
+                       view: :external_api
+                     }
+                   }
+  end
 
   def show
     authorize [:external_api, @permit_project]

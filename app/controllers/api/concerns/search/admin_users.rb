@@ -18,18 +18,10 @@ module Api::Concerns::Search::AdminUsers
         },
         order: user_order,
         match: :word_start,
-        page: user_search_params[:page],
+        page: user_search_params[:page].presence || 1,
         per_page:
-          (
-            if user_search_params[:page]
-              (
-                user_search_params[:per_page] ||
-                  Kaminari.config.default_per_page
-              )
-            else
-              nil
-            end
-          )
+          user_search_params[:per_page].presence ||
+            Kaminari.config.default_per_page
       )
   end
 

@@ -10,11 +10,11 @@ interface IProps extends Partial<StackProps> {
 
 const iconProps = {
   size: 16,
-  flexShrink: 0,
   style: {
     marginTop: "var(--chakra-space-1)",
     minWidth: "16px",
-    minH: "16px",
+    minHeight: "16px",
+    flexShrink: 0,
   },
 }
 

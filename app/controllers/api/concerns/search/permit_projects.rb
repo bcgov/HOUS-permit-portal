@@ -7,18 +7,10 @@ module Api::Concerns::Search::PermitProjects
       order: permit_project_order,
       match: :word_middle, # Default match type, can be customized
       where: permit_project_where_clause,
-      page: permit_project_search_params[:page],
+      page: permit_project_search_params[:page].presence || 1,
       per_page:
-        (
-          if permit_project_search_params[:page]
-            (
-              permit_project_search_params[:per_page] ||
-                Kaminari.config.default_per_page
-            )
-          else
-            nil # No pagination if no page is specified
-          end
-        ),
+        permit_project_search_params[:per_page].presence ||
+          Kaminari.config.default_per_page,
       includes: [
         :owner,
         :jurisdiction,

@@ -170,6 +170,35 @@
       "description": "Project GET follows `permit_project_id` from application reads and webhooks. Child summaries omit drafts and include `revisions_requested`. PATCH state accepts only `available_states` from the current state. Collaborators, notes, and project documents stay in BPH. Fetch and accept meeting requests from the Project meetings folder.",
       "item": [
         {
+          "name": "Search Permit Projects",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/external_api/v2/permit_projects/search",
+              "host": ["{{base_url}}"],
+              "path": ["external_api", "v2", "permit_projects", "search"]
+            },
+            "description": "Non-draft projects in the key's jurisdiction and sandbox, the same set as the jurisdiction inbox with no filters. Optional constraints.state narrows to one non-draft state. draft is ignored."
+          },
+          "response": []
+        },
+        {
           "name": "Get Permit Project by ID",
           "request": {
             "method": "GET",
