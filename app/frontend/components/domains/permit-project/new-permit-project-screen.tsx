@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus } from "../../../types/enums"
 import { IOption } from "../../../types/types"
+import { trackMatomoEvent } from "../../../utils/matomo"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { BackButton } from "../../shared/buttons/back-button"
 import { TextFormControl } from "../../shared/form/input-form-control"
@@ -49,6 +50,10 @@ export const NewPermitProjectScreen = observer(() => {
     isSandboxActive && !!jurisdictionId && !!currentUserJurisdictionId && jurisdictionId !== currentUserJurisdictionId
 
   useEffect(() => {
+    trackMatomoEvent("project", "create_start")
+  }, [])
+
+  useEffect(() => {
     if (jurisdictionId) {
       jurisdictionStore.fetchJurisdiction(jurisdictionId)
     }
@@ -63,6 +68,7 @@ export const NewPermitProjectScreen = observer(() => {
     }
     const result = await permitProjectStore.createPermitProject(params)
     if (result.ok && result.data) {
+      trackMatomoEvent("project", "create_complete")
       navigate(`/projects/${result.data.id}`)
     }
   }

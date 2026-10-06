@@ -34,6 +34,7 @@ import {
   combineRevisionButtons,
   processFieldsForEphemeral,
 } from "../utils/formio-component-traversal"
+import { matomoTemplateNameKeyFrom, trackMatomoEvent } from "../utils/matomo"
 import { injectOptionalElectivesButtons } from "../utils/view-optional-electives"
 
 import { format } from "date-fns"
@@ -907,10 +908,12 @@ export const PermitApplicationModel = types.snapshotProcessor(
         return response
       }),
       submit: flow(function* (params) {
+        const templateKey = matomoTemplateNameKeyFrom(self)
         const response = yield self.environment.api.submitPermitApplication(self.id, params)
         if (response.ok) {
           const { data: permitApplication } = response.data
           self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
+          trackMatomoEvent("permit", "submit_success", templateKey)
         }
         return response.ok
       }),

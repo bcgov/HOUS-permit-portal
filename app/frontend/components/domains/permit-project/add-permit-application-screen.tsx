@@ -14,13 +14,14 @@ import {
 } from "@chakra-ui/react"
 import { CaretLeft, MagnifyingGlass } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useMemo, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { usePermitProject } from "../../../hooks/resources/use-permit-project"
 import { useTemplateVersions } from "../../../hooks/resources/use-template-versions"
 import { ITemplateVersion } from "../../../models/template-version"
 import { useMst } from "../../../setup/root"
+import { matomoTemplateNameKeyFrom, trackMatomoEvent } from "../../../utils/matomo"
 import { groupTemplateVersionsByCategory } from "../../../utils/template-version-grouping"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
@@ -61,6 +62,11 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
     siteConfigurationStore.projectMeetingsEnabled &&
     (currentPermitProject?.jurisdiction?.projectMeetingsEnabled ?? false)
 
+  useEffect(() => {
+    if (!currentPermitProject?.id) return
+    trackMatomoEvent("permit", "catalogue_view")
+  }, [currentPermitProject?.id])
+
   const toggleSelection = (templateVersionId: string) => {
     setSelectedTemplateVersionIds((prev) =>
       prev.includes(templateVersionId) ? prev.filter((id) => id !== templateVersionId) : [...prev, templateVersionId]
@@ -78,6 +84,9 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
       }))
       const response = await (currentPermitProject as any).bulkCreatePermitApplications(params)
       if (response?.ok) {
+        selectedTemplateVersions.forEach((tv) => {
+          trackMatomoEvent("permit", "template_select", matomoTemplateNameKeyFrom(tv))
+        })
         currentPermitProject.resetIsFullyLoaded()
         if (shouldOfferProjectMeetingAfterAdd) {
           const params = new URLSearchParams({
