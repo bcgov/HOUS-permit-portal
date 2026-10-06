@@ -91,6 +91,18 @@ export function trackMatomoEvent(category: string, action: string, name?: string
   })
 }
 
+/** Application uses templateNickname. Catalogue version uses the denormalized nickname. */
+export function matomoTemplateNameKeyFrom(source: {
+  templateNickname?: string | null
+  denormalizedTemplateJson?: { nickname?: string | null } | null
+}): string {
+  return (source.templateNickname ?? source.denormalizedTemplateJson?.nickname ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+}
+
 export function isMatomoAuthProvider(value: unknown): value is MatomoAuthProvider {
   return (MATOMO_AUTH_PROVIDERS as readonly string[]).includes(value as string)
 }
