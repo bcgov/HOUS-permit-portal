@@ -1,5 +1,3 @@
-import { OMNIAUTH_PROVIDERS } from "../models/user"
-
 const UUID_SEGMENT = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const AUTH_CALLBACK = /^\/api\/auth\/[^/]+\/callback\/?$/i
 const MATOMO_LOGIN_ATTEMPT_KEY = "matomo.loginAttempt"
@@ -16,12 +14,13 @@ export type MatomoAuthProvider = (typeof MATOMO_AUTH_PROVIDERS)[number]
 export type MatomoLoginFailReason = (typeof MATOMO_LOGIN_FAIL_REASONS)[number]
 export type MatomoLoginOutcome = "success" | "fail" | null
 
+// ponytail: literals, not OMNIAUTH_PROVIDERS — models/user imports this file via jurisdiction → permit-application. Keep in sync with models/user.ts.
 const OMNIAUTH_TO_MATOMO: Record<string, MatomoAuthProvider> = {
-  [OMNIAUTH_PROVIDERS.bceid]: "bceid",
-  [OMNIAUTH_PROVIDERS.basicBceid]: "bceid",
-  [OMNIAUTH_PROVIDERS.businessBceid]: "bceid",
-  [OMNIAUTH_PROVIDERS.bcsc]: "bcsc",
-  [OMNIAUTH_PROVIDERS.idir]: "idir",
+  bceidboth: "bceid",
+  bceidbasic: "bceid",
+  bceidbusiness: "bceid",
+  "digital-building-permit-5120": "bcsc",
+  idir: "idir",
 }
 
 let capturedLoginFailReason: MatomoLoginFailReason | null = null
