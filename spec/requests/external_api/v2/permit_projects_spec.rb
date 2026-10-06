@@ -2,6 +2,7 @@ require "swagger_helper"
 
 RSpec.describe "external_api/v2/permit_projects",
                type: :request,
+               search: true,
                openapi_spec: "external_api/v2/swagger.yaml" do
   let!(:external_api_key) { create(:external_api_key, api_version: "v2") }
   let!(:Authorization) { "Bearer #{external_api_key.token}" }
@@ -11,6 +12,68 @@ RSpec.describe "external_api/v2/permit_projects",
       :newly_submitted,
       jurisdiction: external_api_key.jurisdiction
     )
+  end
+
+  before do
+    permit_application.permit_project.update_column(
+      :state,
+      PermitProject.states[:queued]
+    )
+    PermitProject.reindex
+  end
+
+  path "/permit_projects/search" do
+    post "Searches non-draft permit projects in the key's jurisdiction and sandbox." do
+      tags "Permit projects"
+      consumes "application/json"
+      produces "application/json"
+      parameter name: :constraints,
+                in: :body,
+                schema: {
+                  type: :object,
+                  properties: {
+                    constraints: {
+                      type: :object,
+                      properties: {
+                        state: {
+                          "$ref" => "#/components/schemas/ProjectState"
+                        }
+                      }
+                    }
+                  }
+                }
+      let(:constraints) { {} }
+
+      response(200, "Successful") do
+        schema type: :object,
+               properties: {
+                 data: {
+                   type: :array,
+                   items: {
+                     "$ref" => "#/components/schemas/PermitProject"
+                   }
+                 },
+                 meta: {
+                   type: :object,
+                   properties: {
+                     total_pages: {
+                       type: :integer
+                     },
+                     total_count: {
+                       type: :integer
+                     },
+                     current_page: {
+                       type: :integer
+                     }
+                   },
+                   required: %w[total_pages total_count current_page]
+                 }
+               },
+               required: %w[data meta]
+
+        run_test!
+      end
+    end
   end
 
   path "/permit_projects/{id}" do

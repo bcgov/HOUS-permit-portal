@@ -34,6 +34,24 @@ RSpec.describe "External API v2 permit projects", type: :request do
     project.reload
   end
 
+  def stub_permit_project_search(*records)
+    allow(PermitProject).to receive(:search) do |_query, **kwargs|
+      @permit_project_search_kwargs = kwargs
+      relation = PermitProject.where(id: records.map(&:id))
+      scoped = kwargs.fetch(:scope_results).call(relation)
+      results = scoped.to_a
+
+      double(
+        "PermitProjectSearch",
+        results: results,
+        total_pages: 1,
+        total_count: results.size,
+        current_page: 1,
+        limit_value: 10
+      )
+    end
+  end
+
   it "returns 401 without an API key" do
     get_project(headers: { "Content-Type" => "application/json" })
 
@@ -50,6 +68,89 @@ RSpec.describe "External API v2 permit projects", type: :request do
 
     get_project(headers: auth_headers(v1_key))
     expect(response).to have_http_status(:forbidden)
+  end
+
+  describe "POST /external_api/v2/permit_projects/search" do
+    it "returns the key's non-draft projects and drops drafts, other jurisdictions, and the wrong sandbox" do
+      allowed = queue_project
+      draft_only =
+        create(
+          :permit_application,
+          jurisdiction: external_api_key.jurisdiction
+        ).permit_project
+      other_jurisdiction =
+        create(:permit_application, :newly_submitted).permit_project
+      other_jurisdiction.update_column(:state, PermitProject.states[:queued])
+      sandbox_project =
+        create(
+          :permit_application,
+          :newly_submitted,
+          jurisdiction: external_api_key.jurisdiction,
+          sandbox: external_api_key.jurisdiction.sandboxes.first
+        ).permit_project
+      sandbox_project.update_column(:state, PermitProject.states[:queued])
+
+      stub_permit_project_search(
+        allowed,
+        draft_only,
+        other_jurisdiction,
+        sandbox_project
+      )
+
+      post "/external_api/v2/permit_projects/search",
+           params: {}.to_json,
+           headers: auth_headers
+
+      expect(response).to have_http_status(:ok)
+      expect(@permit_project_search_kwargs[:where]).to eq(
+        jurisdiction_id: external_api_key.jurisdiction_id,
+        sandbox_id: external_api_key.sandbox_id,
+        discarded: false,
+        state: {
+          not: "draft"
+        }
+      )
+      expect(@permit_project_search_kwargs[:order]).to eq(
+        created_at: {
+          order: :desc,
+          unmapped_type: "long"
+        }
+      )
+
+      data = JSON.parse(response.body).fetch("data")
+      expect(data.map { |row| row["id"] }).to contain_exactly(allowed.id)
+      expect(data.first).to include(
+        "state" => "queued",
+        "state_label" => "Queued"
+      )
+      expect(
+        data.first.fetch("permit_applications").map { |row| row["id"] }
+      ).to contain_exactly(permit_application.id)
+      expect(JSON.parse(response.body).fetch("meta")).to include(
+        "total_count" => 1,
+        "current_page" => 1
+      )
+    end
+
+    it "narrows the jurisdiction inbox to constraints.state unless that state is draft" do
+      queue_project
+      stub_permit_project_search(permit_project)
+
+      post "/external_api/v2/permit_projects/search",
+           params: { constraints: { state: "in_progress" } }.to_json,
+           headers: auth_headers
+
+      expect(response).to have_http_status(:ok)
+      expect(@permit_project_search_kwargs[:where][:state]).to eq("in_progress")
+
+      post "/external_api/v2/permit_projects/search",
+           params: { constraints: { state: "draft" } }.to_json,
+           headers: auth_headers
+
+      expect(@permit_project_search_kwargs[:where][:state]).to eq(
+        { not: "draft" }
+      )
+    end
   end
 
   describe "GET /external_api/v2/permit_projects/:id" do
@@ -171,9 +272,14 @@ RSpec.describe "External API v2 permit projects", type: :request do
 
       audit =
         ApplicationAudit
-          .where(auditable_type: "PermitProject", auditable_id: project.id)
+          .where(
+            auditable_type: "PermitProject",
+            auditable_id: project.id,
+            action: "update"
+          )
           .where("audited_changes ? 'state'")
-          .last
+          .order(version: :desc)
+          .first
       expect(audit.username).to eq(Constants::ExternalApi::PARTNER_SYSTEM_ACTOR)
 
       expect(PermitWebhookJob.jobs.length).to eq(1)
