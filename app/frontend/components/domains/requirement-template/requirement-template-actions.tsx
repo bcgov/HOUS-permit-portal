@@ -61,24 +61,26 @@ export const RequirementTemplateActions = observer(function RequirementTemplateA
               )}
             />
           ) : (
-            <ConfirmationModal
-              title={t("requirementTemplate.index.archiveConfirmationModal.title")}
-              body={t("requirementTemplate.index.archiveConfirmationModal.body")}
-              onConfirm={(closeModal) => {
-                handleArchive()
-                closeModal()
-              }}
-              renderTriggerButton={({ onClick }) => (
-                <MenuItem icon={<Archive size={20} />} onClick={onClick} color="semantic.error">
-                  {t("ui.archive")}
-                </MenuItem>
-              )}
-              renderConfirmationButton={(props) => (
-                <Button {...props} colorScheme="red">
-                  {t("ui.archive")}
-                </Button>
-              )}
-            />
+            !requirementTemplate.publishedTemplateVersion && (
+              <ConfirmationModal
+                title={t("requirementTemplate.index.archiveConfirmationModal.title")}
+                body={t("requirementTemplate.index.archiveConfirmationModal.body")}
+                onConfirm={(closeModal) => {
+                  handleArchive()
+                  closeModal()
+                }}
+                renderTriggerButton={({ onClick }) => (
+                  <MenuItem icon={<Archive size={20} />} onClick={onClick} color="semantic.error">
+                    {t("ui.archive")}
+                  </MenuItem>
+                )}
+                renderConfirmationButton={(props) => (
+                  <Button {...props} colorScheme="red">
+                    {t("ui.archive")}
+                  </Button>
+                )}
+              />
+            )
           )}
         </MenuList>
       </Menu>

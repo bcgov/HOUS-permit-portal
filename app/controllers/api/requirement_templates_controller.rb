@@ -262,14 +262,22 @@ class Api::RequirementTemplatesController < Api::ApplicationController
 
   def destroy
     authorize @requirement_template
-    if @requirement_template.discard
-      render_success(
-        @requirement_template,
-        "requirement_template.destroy_success"
-      )
-    else
-      render_error "requirement_template.destroy_error"
-    end
+
+    TemplateVersioningService.archive!(@requirement_template, current_user)
+    render_success(
+      @requirement_template,
+      "requirement_template.destroy_success"
+    )
+  rescue TemplateVersionArchiveError => e
+    render_error "requirement_template.archive_blocked_published",
+                 log_args: {
+                   errors: e.message
+                 }
+  rescue StandardError => e
+    render_error "requirement_template.destroy_error",
+                 log_args: {
+                   errors: e.message
+                 }
   end
 
   def restore

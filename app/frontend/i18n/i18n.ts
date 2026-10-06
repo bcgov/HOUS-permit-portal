@@ -5336,7 +5336,7 @@ Thank you,
             createButton: "Create new template",
             archiveConfirmationModal: {
               title: "Archive this template?",
-              body: "Archiving hides this template from jurisdictions and applicants. You can restore it from See archived.",
+              body: "Archiving cancels scheduled publishes and early-access previews. You can restore the template from See archived.",
             },
           },
           new: {
