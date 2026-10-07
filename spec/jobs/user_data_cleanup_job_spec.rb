@@ -42,7 +42,7 @@ RSpec.describe UserDataCleanupJob, type: :job do
         "USER_DELETE_AFTER_DAYS",
         anything
       ).and_return(delete_after.to_s)
-      allow(ENV).to receive(:[])
+      allow(ENV).to receive(:[]).and_call_original
       allow(ENV).to receive(:[]).with("USER_ARCHIVE_WARNING_DAYS").and_return(
         archive_warn_days.join(",")
       )

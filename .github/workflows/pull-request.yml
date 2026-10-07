@@ -20,15 +20,14 @@ jobs:
           sudo apt-get install -y libproj-dev libgeos-dev proj-bin
       - name: Checkout Code
         uses: actions/checkout@v7
-      - name: Set up Ruby 3.2.5
+      - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.2.5"
           bundler-cache: true
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: "20.19.0"
+          node-version-file: ".nvmrc"
           cache: "npm"
       - name: Install Dependencies
         run: |
@@ -36,6 +35,8 @@ jobs:
           npm ci
       - name: Build Frontend
         run: npm run build
+      - name: Build PDF Renderer
+        run: npm run build:ssr
 
   test:
     runs-on: ubuntu-latest
@@ -109,10 +110,8 @@ jobs:
         uses: actions/checkout@v7
         with:
           lfs: true
-      - name: Set up Ruby 3.2.5
+      - name: Set up Ruby
         uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: "3.2.5"
       - name: Install Dependencies
         run: |
           bundle install

@@ -1,221 +1,162 @@
 # Overview
 
-Welcome to the codebase for BC's Housing Permit Portal
+Welcome to the codebase for BC's Housing Permit Portal. Rails serves the backend and React/MST frontend.
 
-## Getting Started
+## Local development
 
-The codebase uses Rails on the back-end, and React/MST stack on the front-end.
+Ruby and Node run on your host using rbenv and nvm. Docker runs PostgreSQL, Redis, Elasticsearch, SeaweedFS, and AnyCable-Go. There is no local application image to build.
 
-Ensure you have the following:
+### Prerequisites
 
-- Ruby 3.2.2
-- Postgres 13+
-- Redis
-- Node 20.19+
+- Git LFS (`git lfs install` before cloning; run `git lfs pull` for an existing clone).
+- Docker Desktop, or Docker Engine with Compose v2 supporting `up --wait` (2.20+), and `curl`.
+- rbenv initialized in your shell, with Ruby from `.ruby-version` (currently 4.0.6).
+- nvm initialized in your shell, with Node from `.nvmrc` (currently v24.21.0).
+- Native build dependencies: compiler tools, PostgreSQL client libraries, GEOS, PROJ, and libvips. These are loaded by host Ruby; no host PostgreSQL or Redis daemon is needed.
 
-(Alternatively run this locally with `docker compose` see section further down)
-
-**Please enable git LFS in order to properly clone the repo.**
-
-## Running the application locally with Docker Compose
-
-To make things easier to develop on various platforms locally, there is a `docker compose` script for the app that can be run. This will setup all critical dependencies locally and bring the app up mounted to your filesystem for live development. There are a few caveats to this to note which will are mentioned at the end of this section
-
-**Prerequisites**
-
-- Download and install Docker Desktop for your system
-- Make sure that you can run both `docker` and `docker compose` in your terminal and this is working correctly
-- Since some prefer to run this locally without Docker (see section below) this setup is aimed to preserve the ability to run this application both ways. As such, this uses a separate `Dockerfile.dev` and ENV file `.env.docker_compose` that we will use for the purposes of running locally only
-- Ensure that you have a local copy of `.env.docker_compose` - an example is provided in `.env_example.docker_compose` which provides the minimal ENV configuration to start the app without some services (see first point in Caveats section for more info)
-- Production login is Keycloak-only. For local development you can optionally enable email/password login (see **Local password authentication** below). Keycloak still works if you have valid development secrets (see `.env_example.docker_compose` and [What is Keycloak at BC Government](https://developer.gov.bc.ca/docs/default/component/css-docs/What-is-Keycloak-at-BC-Government/))
-
-**Instructions**
-
-1. Clone this repo with git to your local machine
-2. Run: `docker compose up` (this will start up all related services including Vite for HMR)
-3. (If this is the first run of the application, create the database) `docker compose exec app bundle exec rails db:create`
-4. (If this is the first run of the application OR if there are new migrations to run) Run migrations: `docker compose exec app bundle exec rails db:migrate`
-5. (If this is the first run of the app or seeds have changed, you can rerun the seeder). Generate seed data: `docker compose exec app bundle exec rails db:seed`
-6. Things should now be running. You can isolate / look at logs for various containers using `docker compose logs -f app` for example for the app logs (or any other service)
-7. The app should reflect changes live if you edit the files in the folder (both Ruby and JS) since its mounted live on the filesystem
-8. If you want to run a `binding.pry` or `debugger` you can do so in the code, and then run `docker compose attach app` to interact with the debugging interface.
-
-**NOTES / Caveats**
-
-- A minimal set of ENV vars that reference various services (eg. Redis, Postgres, etc.) are defaulted in the `docker-compose.yml` for dev purposes, the app also loads other ENV vars from `.env.docker_compose` so ensure that you have those setup if you are trying to use functionality related to that (eg. CHES keys for email sending, BCEID / keycloak stuff, etc.)
-- Local development (see above) uses `letter_opener` / `launchy` to view emails locally. These do not work within the dockerized environment, and we haven't yet put in a workaround for this
-- This local dockerized version does not contain a service for `Consigno Verifio Notarius Server` which is proprietary licensed software that helps with validating PDFs. Therefore all functionality around this will not work. You can either run the service manually outside Docker and refer to it using the ENV vars, or find a private repository that has the image that you can then run in `docker-compose`
-- The local dockerized version does not setup Minio (which can be used to locally to mock Object Storage as it is S3 compatible - see instructions for local setup below). You can set this up manually outside the docker setup or add your own docker compose service for it. Just hook it up via the ENV vars (see `.env.example`) or simply switch the app to use actual `BCGOV_OBJECT_STORAGE` if you have a bucket allocation already.
-
-## Supporting services only (hybrid local)
-
-If you run Rails / Sidekiq / Vite / AnyCable RPC on the host but want Docker for the supporting daemons, use `docker-compose.services.yml`. This starts Elasticsearch (`:9200`), Minio (API `:9001`, console `:9002`), and `anycable-go` (`:8080`). It does **not** start Redis, Postgres, Rails, Sidekiq, Vite, or AnyCable RPC.
+On macOS, install Xcode command-line tools and the libraries:
 
 ```bash
-docker compose -f docker-compose.services.yml up -d
+xcode-select --install # if not already installed
+brew install rbenv ruby-build libpq geos proj vips
+export PATH="$(brew --prefix libpq)/bin:$PATH"
 ```
 
-Then on the host (with Redis already running):
+On Debian/Ubuntu, install the equivalent native dependencies:
 
 ```bash
-bundle exec anycable          # RPC on :50051 — required by the anycable-go container
-npm run dev
-bundle exec sidekiq ...
-bundle exec rails s
+sudo apt-get install build-essential libpq-dev libgeos-dev libproj-dev proj-bin libvips-dev pkg-config
 ```
 
-Notes:
+Ensure the project's Ruby is active (`ruby -v`), not the system Ruby. `bin/setup` validates Ruby and Node versions and installs the Bundler version from `Gemfile.lock`.
 
-- `anycable-go` reaches host Redis at `host.docker.internal:6379` (db `1`) and host AnyCable RPC at `host.docker.internal:50051`. Keep Redis on `:6379` and start `bundle exec anycable` before relying on websockets.
-- Point host `.env` at these services, e.g. `ELASTICSEARCH_URL=http://localhost:9200` and Minio via `BCGOV_OBJECT_STORAGE_ENDPOINT=http://127.0.0.1:9001` with access key / secret matching the compose defaults (`minioadmin` / `minioadmin`). Create a bucket once in the Minio console at `http://127.0.0.1:9002` if needed.
-- Stop infra with `docker compose -f docker-compose.services.yml down` (add `-v` only if you want to wipe Elasticsearch / Minio data volumes).
+### First-time setup
 
-## Running the application locally (non-dockerized)
+From the repository root, after installing prerequisites:
 
-- Install Dependencies: `bundle install` and `npm install`
-- Ensure you have a `.env` file with required variables (reference `.env.example`)
-- Set up Database credentials following [the official Rails guide](https://guides.rubyonrails.org/v2.3/getting_started.html#configuring-a-database). One of the ways is to have an environment variable called `DATABASE_URL`
-- (_Only first time_) Create a database: `rails db:create`
-- (_Only first time or if there are changes_) Run migrations: `rails db:migrate`
-- (_Only first time or if there are changes_) Generate seed data: `rails db:seed`
-- Start the server: `rails s`
-- Start the front-end dev server for hot-reloading: `npm run dev`
-
-### Local password authentication
-
-For local development (and browser agents) without Keycloak, set both:
-
-```
-ENABLE_LOCAL_PASSWORD_AUTH=true
-VITE_ENABLE_LOCAL_PASSWORD_AUTH=true
+```bash
+rbenv install -s "$(cat .ruby-version)"
+nvm install && nvm use
+cp .env_example .env
+cp .env_example.compose .env.compose
+./bin/local-infra-up
+./bin/setup
+./bin/dev
 ```
 
-This is never honored when `RAILS_ENV=production`, even if the flags are set. When enabled, `/login` and `/admin` show a "Local development login" form that posts to `POST /api/login`.
+The two example files are tracked; the copied files are ignored. Copy them only when setting up a new environment; the scripts never overwrite an existing environment file.
 
-Seeded users (password for all: `P@ssword1`):
+`bin/local-infra-up` waits for infrastructure health and creates the private `hous-local` SeaweedFS bucket automatically. `bin/setup` installs gems and npm packages, copies `config/database.yml.local` to `config/database.yml` if missing, verifies development/test database names differ, prepares the development and test databases, loads initial development seeds through Rails’ standard `db:prepare` task, and builds the PDF renderer. Repeated setup preserves data; Rails only seeds when initializing the development database.
 
-| Role                    | Email                                 |
-| ----------------------- | ------------------------------------- |
-| submitter               | `submitter@example.com`               |
-| review_manager          | `review_manager@example.com`          |
-| reviewer                | `reviewer@example.com`                |
-| super_admin             | `super_admin@example.com`             |
-| regional_review_manager | `regional_review_manager@example.com` |
-| technical_support       | `technical_support@example.com`       |
+`bin/dev` starts Rails, Vite, Sidekiq, and Ruby AnyCable RPC. It uses Overmind if installed, then Hivemind, otherwise Foreman (installed automatically if absent). All processes inherit your selected Ruby/Node runtimes.
 
-### Workers (Sidekiq)
+### Daily use
 
-The app uses the [Sidekiq](https://github.com/sidekiq/sidekiq) library for background job processing. To run this locally:
+With the project’s Ruby and Node selected in your shell (`nvm use` in a new terminal):
 
-- Ensure you have `Redis` installed locally
-- Set ENV var `SIDEKIQ_DEV_REDIS_URL=localhost:6379/0`
-- Run `bundle exec sidekiq` (add a `-q queue_name`) to start that particular queue, you can see which queues are currently in the app in `config/initializers/sidekiq.rb` under `config.queues`
-
-* Note that the Openshift deployed versions make use of HA-Redis via Sentinels so the environment variables required for that are different
-
-### Websockets (Anycable)
-
-The app uses [Anycable](https://anycable.io/) to serve websockets in a scalable way. To run the websocket server locally:
-
-- Ensure to `bundle install`
-- Either run `anycable-go` via [Supporting services only (hybrid local)](#supporting-services-only-hybrid-local), or [install it on OSX with `brew install anycable-go`](https://docs.anycable.io/anycable-go/getting_started)
-- Host AnyCable Redis should use db `1` (see `ANYCABLE_DEV_REDIS_URL` in `.env_example`), a different Redis db than Sidekiq
-
-After installation run the RPC server (and `anycable-go` if you are not using the services compose):
-
-- RPC Server: `bundle exec anycable`
-- Anycable-Go Sockets: `anycable-go --port=8080` (or the `anycable-go` service in `docker-compose.services.yml`)
-
-### Notorius - Digital Seal Validation
-
-- For local development, ensure you have the right test endpoint. The dev / test / production environments are set up with a licensed version running in its own container.
-
-### Local - File storage setup
-
-- For the local environment, if you want to test the full file upload process, you would want to run a local version of minio to simulate the object storage environment.
-- Easiest: start Minio via [Supporting services only (hybrid local)](#supporting-services-only-hybrid-local) (`docker-compose.services.yml`), then use the console at `http://127.0.0.1:9002` (defaults `minioadmin` / `minioadmin`).
-- Or install and run Minio on the host:
-
-```
-brew install minio
-
-minio server --address 127.0.0.1:9001 ~/Documents/whatever-your-folder-for-storage-is
+```bash
+./bin/local-infra-up
+./bin/dev
 ```
 
-- Log into minio with the admin/password provided and set up the environment.
-- Set up a bucket (in our example we call it `hous-local`)
-  <img width="1466" alt="minio-create-bucket" src="https://github.com/bcgov/HOUS-permit-portal/assets/607956/81c315a5-1bc9-46c7-ac32-202269691276">
-- Set up a user (in our example, we call it `hous-formio-user`)
-  <img width="1458" alt="minio-create-user" src="https://github.com/bcgov/HOUS-permit-portal/assets/607956/0bc1864e-f461-4ad7-bfe0-4a76babb311e">
-- Set up a policy (in our example, we call it `formioupload`)
-  <img width="1462" alt="minio-create-policy" src="https://github.com/bcgov/HOUS-permit-portal/assets/607956/01890f09-633e-4dff-8e00-24d9fbb4494c">
+Open the app at <http://localhost:3000>. Ctrl-C stops Rails, Vite, Sidekiq, and Ruby AnyCable RPC. The Docker infrastructure keeps running until you stop it separately.
 
-```
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "ListBucket",
-            "Effect": "Allow",
-            "Action": [
-                "s3:ListBucket"
-            ],
-            "Resource": [
-                "arn:aws:s3:::hous-local"
-            ]
-        },
-        {
-            "Sid": "UploadFile",
-            "Effect": "Allow",
-            "Action": [
-                "s3:GetObject",
-                "s3:ListMultipartUploadParts",
-                "s3:PutObject",
-                "s3:AbortMultipartUpload",
-                "s3:DeleteObject"
-            ],
-            "Resource": [
-                "arn:aws:s3:::hous-local/*"
-            ]
-        },
-        {
-            "Sid": "crossdomainAccess",
-            "Effect": "Allow",
-            "Action": [
-                "s3:GetObject"
-            ],
-            "Resource": [
-                "arn:aws:s3:::hous-local/crossdomain.xml"
-            ]
-        }
-    ]
-}
+### Infrastructure scripts
+
+| Command                     | What it does                                                                                                                              |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `./bin/local-infra-up`      | Starts infrastructure, waits for readiness, and ensures the SeaweedFS bucket exists. Safe to run again when services are already running. |
+| `./bin/local-infra-down`    | Stops and removes infrastructure containers, preserving all volume data.                                                                  |
+| `./bin/local-infra-down -v` | Stops infrastructure and deletes its volumes, including development/test databases, Redis data, search indexes, and SeaweedFS uploads.    |
+
+These scripts operate on the dedicated `hous-permit-portal-local` Compose project. `local-infra-down` forwards additional options to `docker compose down`; `-v` and `--volumes` are equivalent.
+
+To reset all infrastructure data, first stop `bin/dev` with Ctrl-C, then run:
+
+```bash
+./bin/local-infra-down -v
+./bin/local-infra-up
+./bin/setup
+./bin/dev
 ```
 
-- note that "s3:PutObjectAcl" is ignored at the moment since we are at the root bucket, but we may need it later
+**Deleting volumes permanently removes this stack's local data.** Setup recreates the databases and demo seeds; environment files and host-installed dependencies are retained.
 
-- Assign the policy to the user
-  <img width="1464" alt="minio-assign-policy" src="https://github.com/bcgov/HOUS-permit-portal/assets/607956/86f6b0c3-8c7f-43f7-afd7-fe2c4dce6dc4">
-- You will need to add the following to your .env files:
+Inspect service status or follow logs from the repository root:
 
-```
-BCGOV_OBJECT_STORAGE_ENDPOINT=http://127.0.0.1:9001(or_whatever_you want)
-BCGOV_OBJECT_STORAGE_BUCKET=your-local-bucket-name
-BCGOV_OBJECT_STORAGE_ACCESS_KEY_ID=your-local-user-access-key
-BCGOV_OBJECT_STORAGE_SECRET_ACCESS_KEY=your-local-user-secret-access
-BCGOV_OBJECT_STORAGE_REGION=us-east-1
+```bash
+docker compose -p hous-permit-portal-local -f compose.yml --env-file .env.compose ps
+docker compose -p hous-permit-portal-local -f compose.yml --env-file .env.compose logs -f
+# Follow one service, for example:
+docker compose -p hous-permit-portal-local -f compose.yml --env-file .env.compose logs -f postgres
 ```
 
-Our folder structure for our bucket is designed as follows:
+### Configuration and endpoints
 
-- :bucket_name/permit-applications/:id/\*
+`.env_example.compose` is the infrastructure template. Copy it to `.env.compose`, which `bin/local-infra-up/down` explicitly pass to Compose. Compose does not use the application's `.env` file. All images are pinned directly in `compose.yml`, which also supplies default ports, users, passwords, and bucket settings. The template contains only commented port overrides; uncomment a setting when a port conflicts with another local app. An otherwise empty `.env.compose` uses all defaults. Shell-exported variables still take precedence for configurable settings according to Compose's normal rules.
 
-The overall process of a file upload is as follow:
+`.env_example` is the host Rails/Node template. Copy it to `.env`; its defaults match `compose.yml`. When overriding an infrastructure port in `.env.compose`, update its matching application setting below.
 
-- The front-end form allows you to upload files
-- Upon selecting files, it calls the backend to get a presigned url for upload
-- The files are directly uploaded into the /cache/ folder
-- Upon saving the file, it persists gainst the application as a 'supporting_document'
+| Service            | Default host endpoint       | Settings to keep aligned                                                                         |
+| ------------------ | --------------------------- | ------------------------------------------------------------------------------------------------ |
+| Rails              | <http://localhost:3000>     | Explicit port in `Procfile.dev`                                                                  |
+| Vite               | <http://127.0.0.1:3036>     | Explicit port in `Procfile.dev`                                                                  |
+| PostgreSQL         | `127.0.0.1:15432`           | Compose `POSTGRES_HOST_PORT` → app `POSTGRES_PORT`; matching `POSTGRES_USER`/`POSTGRES_PASSWORD` |
+| Redis              | `127.0.0.1:16379`           | Compose `REDIS_HOST_PORT` → every app `*_DEV_REDIS_URL`                                          |
+| Elasticsearch      | <http://127.0.0.1:19200>    | Compose `ELASTICSEARCH_HOST_PORT` → app `ELASTICSEARCH_URL`                                      |
+| SeaweedFS API      | <http://127.0.0.1:19001>    | Compose `SEAWEEDFS_HOST_PORT` → app `BCGOV_OBJECT_STORAGE_ENDPOINT`                              |
+| SeaweedFS Admin UI | <http://127.0.0.1:19002>    | Compose `SEAWEEDFS_ADMIN_HOST_PORT`                                                              |
+| WebSockets         | `ws://localhost:8080/cable` | Compose `ANYCABLE_HOST_PORT` → app `ANYCABLE_URL`                                                |
+| Ruby RPC           | `0.0.0.0:50051`             | `Procfile.dev` RPC command → Compose `ANYCABLE_RPC_PORT`                                         |
+
+Redis logical databases are Sidekiq **0**, AnyCable **1**, rate limiting **2**, Simple Feed **3**, and cache **4**.
+
+Default PostgreSQL credentials are `hous` / `hous-local-password`. Credentials normally need no configuration. If you customize them, Compose `POSTGRES_USER`/`POSTGRES_PASSWORD` must match `.env`. SeaweedFS uses access key `hous-local`, secret `hous-local-password`, and bucket `hous-local`, matching the application's `BCGOV_OBJECT_STORAGE_*` defaults. Admin UI login is `hous-local` / `hous-local-password`. These credentials and the example JWT/encryption keys are for local development only.
+
+SeaweedFS provides local S3-compatible storage with an automatically created private bucket; no manual provisioning, account registration, or license file is needed. Its `-s3.allowedOrigins` setting in `compose.yml` permits browser requests from localhost/127.0.0.1 port 3000 and exposes upload ETags. Uploads use browser-reachable presigned URLs; do not point the host application at Docker's internal `seaweedfs` hostname.
+
+If your existing `.env.compose` customized `MINIO_HOST_PORT` or `MINIO_CONSOLE_HOST_PORT`, transfer those values to `SEAWEEDFS_HOST_PORT` or `SEAWEEDFS_ADMIN_HOST_PORT`. Existing environment files are not rewritten. SeaweedFS starts with its own empty storage volume; previous MinIO volumes are neither reused nor deleted. Existing database records referring to old uploads will not have replacement files. Other infrastructure data is retained.
+
+AnyCable-Go connects to Docker Redis internally and to the host RPC server through `host.docker.internal`. The Compose file supplies Linux host-gateway support. RPC binds to `0.0.0.0` so containers can reach it; published infrastructure ports bind to loopback.
+
+The database template uses `hous_permit_portal_development` and `hous_permit_portal_test`. Leave `DATABASE_URL` unset for local use: Rails would otherwise use it in preference to the separate database names. If an existing database config is present, setup preserves it; ensure its host, port, and user match `.env`. Update it using the tracked local template if they differ. Do not set `IS_DOCKER_BUILD` locally, even to `false`: several application checks use its presence.
+
+### Local login and optional integrations
+
+Local email/password login is enabled by both `ENABLE_LOCAL_PASSWORD_AUTH=true` and `VITE_ENABLE_LOCAL_PASSWORD_AUTH=true`. These flags are never honored in production. Use `/login` or `/admin`.
+
+Seeded accounts all use password `P@ssword1`:
+
+| Role                    | Email                               |
+| ----------------------- | ----------------------------------- |
+| submitter               | submitter@example.com               |
+| review_manager          | review_manager@example.com          |
+| reviewer                | reviewer@example.com                |
+| super_admin             | super_admin@example.com             |
+| regional_review_manager | regional_review_manager@example.com |
+| technical_support       | technical_support@example.com       |
+
+Local email previews use `letter_opener` on the host. ClamAV is not included: leave `CLAM_AV_HOSTNAME` blank and uploads use the existing scanning bypass. Compliance checks are disabled by default.
+
+Keycloak, licensed Consigno digital-seal validation, CHES, Archistar, and government geospatial APIs remain optional external integrations. The example `*_stub` URLs support the existing VCR test recordings and are not running services. Configure real endpoints and credentials when working on those features; the default local stack does not provision or emulate them. Production deployment configuration is separate and unchanged.
+
+### Debugging and troubleshooting
+
+Run these in separate terminals instead of `bin/dev` when you need direct debugger access:
+
+```bash
+bundle exec rails server -b 127.0.0.1 -p 3000
+VITE_RUBY_HOST=127.0.0.1 VITE_RUBY_PORT=3036 bin/vite dev
+bundle exec sidekiq
+ANYCABLE_RPC_HOST=0.0.0.0:50051 bundle exec anycable
+```
+
+- If Docker is unavailable, start Docker Desktop or the daemon.
+- If a published port is occupied, stop the conflicting service or change the port and its matching application setting in the table above. Restart affected processes after configuration changes.
+- If readiness times out, inspect logs and Docker memory/disk availability. Elasticsearch keeps the Apple Silicon JVM workaround and uses a 512 MB heap.
+- The gateway can start before Ruby RPC, but authenticated WebSockets need the RPC process running.
+- After changing PDF renderer code, run `npm run build:ssr` again.
+- If initial seeding fails, fix the reported error and run `bin/rails db:seed`, then rerun `./bin/setup` to finish preparation. You can also run seeds explicitly when needed; they are not part of daily startup. Keep infrastructure running while seeding.
 
 ## DevOps
 
@@ -232,7 +173,7 @@ bundle exec rspec
 Some other notes
 
 - For digital seal tests, the we have not uploaded documents with the real document to the repo, but captured the request responses
-- If you are running in the dockerized version, you may need to reset your database or you may want to create a second instance of the dockerized postgre service to run tests.
+- The local database template uses `hous_permit_portal_test`, separate from development. Leave `DATABASE_URL` unset when running local tests.
 
 ## ERD generation
 
