@@ -78,6 +78,37 @@ RSpec.describe "Api::OmniauthCallbacks", type: :request do
       expect(response.headers["Location"]).to eq(root_url)
     end
 
+    it "issues both prefixed cookies when another environment's cookies are present" do
+      with_auth_cookie_prefix("hub_test_") do
+        OmniAuth.config.mock_auth[:keycloak] = mock_auth_hash(idp_hint: "bceid")
+        stub_resolver_for(invitation_token: nil, result_user: user)
+
+        get "/api/auth/keycloak/callback",
+            headers: {
+              "Cookie" =>
+                "access_token=production-token; id_token=production-id-token"
+            },
+            env: {
+              "HTTPS" => "on",
+              "omniauth.auth" => OmniAuth.config.mock_auth[:keycloak],
+              "omniauth.origin" => set_origin
+            }
+
+        expect(response).to have_http_status(:found)
+        set_cookie = Array(response.headers["Set-Cookie"])
+        expect(set_cookie).to include(
+          a_string_starting_with("hub_test_access_token=")
+        )
+        expect(set_cookie).to include(
+          a_string_starting_with("hub_test_id_token=id-token-bceid;")
+        )
+        expect(set_cookie).not_to include(
+          a_string_starting_with("access_token=")
+        )
+        expect(set_cookie).not_to include(a_string_starting_with("id_token="))
+      end
+    end
+
     it "redirects to login on failure from resolver" do
       OmniAuth.config.mock_auth[:keycloak] = mock_auth_hash(idp_hint: "bceid")
       invalid_user = User.new(email: nil)
