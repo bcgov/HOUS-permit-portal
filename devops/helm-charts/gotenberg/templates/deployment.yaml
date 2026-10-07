@@ -35,6 +35,15 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
             {{- toYaml .Values.args | nindent 12 }}
+          # OpenShift's assigned UID may have no passwd entry. Give Chromium and
+          # Crashpad explicit writable home, configuration, and cache locations.
+          env:
+            - name: HOME
+              value: /tmp
+            - name: XDG_CONFIG_HOME
+              value: /tmp/.config
+            - name: XDG_CACHE_HOME
+              value: /tmp/.cache
           ports:
             - name: http
               containerPort: 3000
