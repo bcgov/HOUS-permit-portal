@@ -5,6 +5,7 @@ import {
   VALUE_EXTRACTION_AUTO_COMPLIANCE_TYPES,
   vancouverTimeZone,
 } from "../constants"
+import { requestAppNavBarReveal } from "../hooks/use-scroll-aware-nav-bar"
 import {
   EEnergyStepCodeDependencyRequirementCode,
   EEnergyStepCodePart3DependencyRequirementCode,
@@ -182,6 +183,9 @@ export function handleScrollToTop() {
     behavior: "instant",
   })
   document.body.scrollTop = 0 // For Safari
+  // A tucked bar keeps its layout slot. On a short page that slot is a blank
+  // gap and no further scroll can bring the bar back.
+  requestAppNavBarReveal()
 }
 
 export function handleScrollToBottom() {
