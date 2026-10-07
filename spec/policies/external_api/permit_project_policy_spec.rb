@@ -170,4 +170,14 @@ RSpec.describe ExternalApi::PermitProjectPolicy, type: :policy do
       expect(policy(draft_only).update_state?).to be false
     end
   end
+
+  describe "#create_permit_applications?" do
+    it "matches project read visibility" do
+      visible = create_application(status: :newly_submitted).permit_project
+      draft_only = create_application(status: :new_draft).permit_project
+
+      expect(policy(visible).create_permit_applications?).to be true
+      expect(policy(draft_only).create_permit_applications?).to be false
+    end
+  end
 end

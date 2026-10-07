@@ -100,7 +100,7 @@ tailor the API environment to better suit your development needs. Ensure that yo
 Application GET returns identity and a submission version index. Frozen form data, generated PDFs, and the version zip live on
 `GET /permit_applications/{id}/submission_versions/{submission_version_id}`. `raw_h2k_files` are current step-code tool
 state, not snapshotted per version. `GET /permit_projects/{id}` returns project state, address, and sibling application
-summaries (drafts omitted). Follow `permit_project_id` from application reads and webhooks.
+summaries (drafts omitted). `POST /permit_projects/{id}/permit_applications` adds draft permits from requirement template ids. Each id resolves to that template's published version. The project must already be readable by the key. Those drafts stay off project GET until one is submitted. Follow `permit_project_id` from application reads and webhooks.
 
 For security purposes, any API response that includes a file URL will have a signed URL. These files will be available for download for a limited time (1 hour).
 Download files when you receive `permit_application_package_ready`. If a URL expires, call the API again to retrieve a
@@ -1106,6 +1106,99 @@ in this document.
             "Tags associated with the permit application's requirement template."
         }
       }
+    },
+    CreatedPermitApplication: {
+      type: :object,
+      properties: {
+        id: {
+          type: :string,
+          format: :uuid
+        },
+        number: {
+          type: :string
+        },
+        status: {
+          "$ref" => "#/components/schemas/ApplicationStatus"
+        },
+        permit_project_id: {
+          type: :string,
+          format: :uuid
+        },
+        permit_version: {
+          type: :object,
+          description:
+            "The published template version this draft was created from.",
+          properties: {
+            id: {
+              type: :string,
+              format: :uuid
+            },
+            status: {
+              type: :string
+            },
+            version_date: {
+              type: :integer,
+              format: :int64,
+              description:
+                "The version date in milliseconds since the epoch (UNIX time). This is meant to be parsed as PST."
+            },
+            requirement_template_id: {
+              type: :string,
+              format: :uuid
+            },
+            feedbacks_count: {
+              type: :integer
+            },
+            has_unresolved_feedbacks: {
+              type: :boolean
+            },
+            template_category_id: {
+              type: :string,
+              format: :uuid,
+              nullable: true
+            },
+            template_sort_order: {
+              type: :integer
+            },
+            template_category: {
+              type: :object,
+              nullable: true,
+              properties: {
+                id: {
+                  type: :string,
+                  format: :uuid
+                },
+                label: {
+                  type: :string
+                },
+                sort_order: {
+                  type: :integer
+                },
+                created_at: {
+                  type: :integer,
+                  format: :int64
+                },
+                updated_at: {
+                  type: :integer,
+                  format: :int64
+                }
+              }
+            }
+          },
+          required: %w[
+            id
+            status
+            version_date
+            requirement_template_id
+            feedbacks_count
+            has_unresolved_feedbacks
+            template_category_id
+            template_sort_order
+            template_category
+          ]
+        }
+      },
+      required: %w[id number status permit_project_id permit_version]
     },
     PermitProject: {
       type: :object,

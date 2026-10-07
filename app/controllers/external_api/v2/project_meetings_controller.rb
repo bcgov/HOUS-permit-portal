@@ -27,11 +27,7 @@ class ExternalApi::V2::ProjectMeetingsController < ExternalApi::ApplicationContr
         end
 
         @project_meeting.assign_attributes(schedule_params)
-        Audited
-          .audit_class
-          .as_user(Constants::ExternalApi::PARTNER_SYSTEM_ACTOR) do
-            @project_meeting.schedule!
-          end
+        @project_meeting.schedule!
       end
 
     if scheduled
