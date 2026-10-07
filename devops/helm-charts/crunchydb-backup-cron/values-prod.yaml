@@ -6,4 +6,4 @@ cronjob:
   bucket: "<REDACTED>"
   basePath: "habackup_new"
   endpoint: "<REDACTED>"
-  retenretentionSeconds: 63072000 #730days
+  retentionSeconds: 63072000 #730days
