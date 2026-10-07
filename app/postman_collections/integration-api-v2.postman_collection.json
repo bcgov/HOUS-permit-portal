@@ -305,6 +305,41 @@
             "description": "Sets project state to a code in `available_states` for the current state. `draft` is not a partner write. Writing the current state returns 200 and does not emit another `permit_project_state_changed`. Illegal or unknown codes return 422 and name the available states."
           },
           "response": []
+        },
+        {
+          "name": "Add Draft Permit Applications",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"permit_applications\": [\n    { \"requirement_template_id\": \"{{requirement_template_id}}\" }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/external_api/v2/permit_projects/{{permit_project_id}}/permit_applications",
+              "host": ["{{base_url}}"],
+              "path": [
+                "external_api",
+                "v2",
+                "permit_projects",
+                "{{permit_project_id}}",
+                "permit_applications"
+              ]
+            },
+            "description": "Adds draft permits to a project the key can already read. Each requirement_template_id resolves to that template's published version. The project owner is the submitter. Sandbox, jurisdiction, and template_version_id on the body are ignored. An empty list, or any unknown, unpublished, or discarded id, returns 422 and creates nothing. The new drafts stay off project GET until one is submitted, and project state does not change."
+          },
+          "response": []
         }
       ]
     },
@@ -441,6 +476,10 @@
     },
     {
       "key": "template_version_id",
+      "value": ""
+    },
+    {
+      "key": "requirement_template_id",
       "value": ""
     },
     {
