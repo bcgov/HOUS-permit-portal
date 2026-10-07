@@ -496,6 +496,7 @@ Rails.application.routes.draw do
       end
       resources :files, only: %i[create]
       resources :revision_reasons, only: %i[index]
+      resources :requirement_templates, only: %i[index]
       resources :permit_applications, only: %i[show] do
         post "search", on: :collection, to: "permit_applications#index"
         patch "status", on: :member, to: "permit_applications#update_status"

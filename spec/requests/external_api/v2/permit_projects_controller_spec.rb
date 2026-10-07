@@ -413,7 +413,7 @@ RSpec.describe "External API v2 permit projects", type: :request do
           "permit_project_id" => permit_project.id
         )
         expect(row).not_to have_key("tags")
-        expect(row["permit_version"]).to include(
+        expect(row["template_version"]).to include(
           "id" => application.template_version_id,
           "status" => "published",
           "requirement_template_id" =>

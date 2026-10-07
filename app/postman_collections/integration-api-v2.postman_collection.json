@@ -344,6 +344,26 @@
       ]
     },
     {
+      "name": "Requirement templates",
+      "description": "Kept templates with a published version in this key's sandbox. Use id as requirement_template_id when adding a draft.",
+      "item": [
+        {
+          "name": "List Requirement Templates",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/external_api/v2/requirement_templates",
+              "host": ["{{base_url}}"],
+              "path": ["external_api", "v2", "requirement_templates"]
+            },
+            "description": "Returns id, nickname, description, sort_order, template_category, and published_template_version. Draft-only and discarded templates are omitted. A scheduled sandbox key gets an empty list, matching draft create."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "Revision reasons",
       "description": "Site-configured revision reason codes. The list is dynamic; do not hard-code a static enum.",
       "item": [

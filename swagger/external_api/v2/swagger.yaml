@@ -49,7 +49,7 @@ info:
     form data, generated PDFs, and the version zip live on GET /permit_applications/{id}/submission_versions/{submission_version_id}.
     raw_h2k_files are current step-code tool state, not snapshotted per version.
     GET /permit_projects/{id} returns project state, address, and sibling application
-    summaries (drafts omitted). POST /permit_projects/{id}/permit_applications adds draft permits for published template versions on a project the key can already read. Those drafts stay off project GET until one is submitted. Follow permit_project_id from application reads and webhooks.\n\nFor
+    summaries (drafts omitted). POST /permit_projects/{id}/permit_applications adds draft permits from requirement template ids. Each id resolves to that template's published version. The project must already be readable by the key. Those drafts stay off project GET until one is submitted. GET /requirement_templates lists those ids: kept templates with a published version in the key's sandbox. Follow permit_project_id from application reads and webhooks.\n\nFor
     security purposes, any API response that
     includes a file URL will have a signed URL. These files will be available for
     download for a limited time (1 hour).\nDownload files when you receive `permit_application_package_ready`.
@@ -752,6 +752,32 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/ResponseError"
+  "/requirement_templates":
+    get:
+      summary: Lists requirement templates whose published version can be added as
+        a draft. Each id is the requirement_template_id for POST /permit_projects/{id}/permit_applications.
+      tags:
+      - Requirement templates
+      responses:
+        '200':
+          description: Successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      "$ref": "#/components/schemas/RequirementTemplate"
+                required:
+                - data
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ResponseError"
   "/revision_reasons":
     get:
       summary: Lists the current site-configured revision reason codes.
@@ -1116,6 +1142,9 @@ tags:
 - name: Files
   description: Reference file uploads cited by a document revision request. The upload
     does not change an application.
+- name: Requirement templates
+  description: Kept requirement templates with a published version in the API key's
+    sandbox. Pass id as requirement_template_id when adding a draft permit.
 - name: Revision reasons
   description: Site-configured revision reason codes accepted on partner revision
     requests. The list is dynamic.
@@ -1245,7 +1274,7 @@ components:
       - number
       - status
       - permit_project_id
-      - permit_version
+      - template_version
       properties:
         id:
           type: string
@@ -1257,7 +1286,7 @@ components:
         permit_project_id:
           type: string
           format: uuid
-        permit_version:
+        template_version:
           type: object
           description: The published template version this draft was created from.
           required:
@@ -1944,6 +1973,90 @@ components:
           items:
             "$ref": "#/components/schemas/File"
           nullable: true
+    RequirementTemplate:
+      type: object
+      required:
+      - id
+      - nickname
+      - description
+      - sort_order
+      - template_category
+      - published_template_version
+      properties:
+        id:
+          type: string
+          format: uuid
+        nickname:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        sort_order:
+          type: integer
+        template_category:
+          type: object
+          nullable: true
+          properties:
+            id:
+              type: string
+              format: uuid
+            label:
+              type: string
+            sort_order:
+              type: integer
+            created_at:
+              type: integer
+              format: int64
+            updated_at:
+              type: integer
+              format: int64
+        published_template_version:
+          type: object
+          nullable: true
+          description: The published version create copies onto a new draft. Null when
+            the template has none.
+          properties:
+            id:
+              type: string
+              format: uuid
+            status:
+              type: string
+            version_date:
+              type: integer
+              format: int64
+              description: The version date in milliseconds since the epoch (UNIX time).
+                This is meant to be parsed as PST.
+            requirement_template_id:
+              type: string
+              format: uuid
+            feedbacks_count:
+              type: integer
+            has_unresolved_feedbacks:
+              type: boolean
+            template_category_id:
+              type: string
+              format: uuid
+              nullable: true
+            template_sort_order:
+              type: integer
+            template_category:
+              type: object
+              nullable: true
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                label:
+                  type: string
+                sort_order:
+                  type: integer
+                created_at:
+                  type: integer
+                  format: int64
+                updated_at:
+                  type: integer
+                  format: int64
     RevisionReason:
       type: object
       properties:

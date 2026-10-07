@@ -243,7 +243,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
     association :template_version,
                 blueprint: TemplateVersionBlueprint,
                 view: :external_api,
-                name: :permit_version
+                name: :template_version
   end
 
   view :external_api_summary do

@@ -100,7 +100,7 @@ tailor the API environment to better suit your development needs. Ensure that yo
 Application GET returns identity and a submission version index. Frozen form data, generated PDFs, and the version zip live on
 `GET /permit_applications/{id}/submission_versions/{submission_version_id}`. `raw_h2k_files` are current step-code tool
 state, not snapshotted per version. `GET /permit_projects/{id}` returns project state, address, and sibling application
-summaries (drafts omitted). `POST /permit_projects/{id}/permit_applications` adds draft permits from requirement template ids. Each id resolves to that template's published version. The project must already be readable by the key. Those drafts stay off project GET until one is submitted. Follow `permit_project_id` from application reads and webhooks.
+summaries (drafts omitted). `POST /permit_projects/{id}/permit_applications` adds draft permits from requirement template ids. Each id resolves to that template's published version. The project must already be readable by the key. Those drafts stay off project GET until one is submitted. `GET /requirement_templates` lists those ids: kept templates with a published version in the key's sandbox. Follow `permit_project_id` from application reads and webhooks.
 
 For security purposes, any API response that includes a file URL will have a signed URL. These files will be available for download for a limited time (1 hour).
 Download files when you receive `permit_application_package_ready`. If a URL expires, call the API again to retrieve a
@@ -1124,7 +1124,7 @@ in this document.
           type: :string,
           format: :uuid
         },
-        permit_version: {
+        template_version: {
           type: :object,
           description:
             "The published template version this draft was created from.",
@@ -1198,7 +1198,7 @@ in this document.
           ]
         }
       },
-      required: %w[id number status permit_project_id permit_version]
+      required: %w[id number status permit_project_id template_version]
     },
     PermitProject: {
       type: :object,
@@ -1249,6 +1249,121 @@ in this document.
             "Sibling applications that have been submitted at least once. Drafts are omitted; revisions_requested is included."
         }
       }
+    },
+    RequirementTemplate: {
+      type: :object,
+      properties: {
+        id: {
+          type: :string,
+          format: :uuid
+        },
+        nickname: {
+          type: :string,
+          nullable: true
+        },
+        description: {
+          type: :string,
+          nullable: true
+        },
+        sort_order: {
+          type: :integer
+        },
+        template_category: {
+          type: :object,
+          nullable: true,
+          properties: {
+            id: {
+              type: :string,
+              format: :uuid
+            },
+            label: {
+              type: :string
+            },
+            sort_order: {
+              type: :integer
+            },
+            created_at: {
+              type: :integer,
+              format: :int64
+            },
+            updated_at: {
+              type: :integer,
+              format: :int64
+            }
+          }
+        },
+        published_template_version: {
+          type: :object,
+          nullable: true,
+          description:
+            "The published version create copies onto a new draft. Null when the template has none.",
+          properties: {
+            id: {
+              type: :string,
+              format: :uuid
+            },
+            status: {
+              type: :string
+            },
+            version_date: {
+              type: :integer,
+              format: :int64,
+              description:
+                "The version date in milliseconds since the epoch (UNIX time). This is meant to be parsed as PST."
+            },
+            requirement_template_id: {
+              type: :string,
+              format: :uuid
+            },
+            feedbacks_count: {
+              type: :integer
+            },
+            has_unresolved_feedbacks: {
+              type: :boolean
+            },
+            template_category_id: {
+              type: :string,
+              format: :uuid,
+              nullable: true
+            },
+            template_sort_order: {
+              type: :integer
+            },
+            template_category: {
+              type: :object,
+              nullable: true,
+              properties: {
+                id: {
+                  type: :string,
+                  format: :uuid
+                },
+                label: {
+                  type: :string
+                },
+                sort_order: {
+                  type: :integer
+                },
+                created_at: {
+                  type: :integer,
+                  format: :int64
+                },
+                updated_at: {
+                  type: :integer,
+                  format: :int64
+                }
+              }
+            }
+          }
+        }
+      },
+      required: %w[
+        id
+        nickname
+        description
+        sort_order
+        template_category
+        published_template_version
+      ]
     },
     RevisionReason: {
       type: :object,
@@ -1498,6 +1613,11 @@ in this document.
     name: "Files",
     description:
       "Reference file uploads cited by a document revision request. The upload does not change an application."
+  }
+  v2_spec[:tags] << {
+    name: "Requirement templates",
+    description:
+      "Kept requirement templates with a published version in the API key's sandbox. Pass id as requirement_template_id when adding a draft permit."
   }
   v2_spec[:tags] << {
     name: "Revision reasons",
