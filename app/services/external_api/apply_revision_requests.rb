@@ -4,14 +4,23 @@ module ExternalApi
     end
 
     SYNTHETIC_BLOCK_CODE = "energy_step_code_tool"
+    FIELD_ITEM_KEYS = %w[requirement_block_code requirement_code].freeze
     REQUIRED_ITEM_KEYS = %w[
       requirement_block_code
       requirement_code
       reason_code
       comment
     ].freeze
+    REQUIRED_DOCUMENT_KEYS = %w[
+      name
+      reason_code
+      comment
+      reference_document_ids
+    ].freeze
     FINALIZABLE_STATUSES = %w[newly_submitted resubmitted in_review].freeze
     MAX_COMMENT_LENGTH = 350
+    CACHE_ID_FORMAT =
+      /\A[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/[^\/]+\z/i
 
     def initialize(permit_application, items, applicant_note: nil)
       @permit_application = permit_application
@@ -31,7 +40,10 @@ module ExternalApi
               "Cannot request revisions because this application has no submission version."
       end
 
-      snapshots = normalize_items!.map { |item| resolve_item(item) }
+      snapshots =
+        normalize_items!.each_with_index.map do |item, index|
+          resolve_item(item, index)
+        end
       validate_applicant_note!
 
       version.revision_requests.destroy_all
@@ -60,10 +72,17 @@ module ExternalApi
 
       normalized = @items.map { |item| stringify_item(item) }
 
+      mixed =
+        normalized.each_with_index.filter_map do |item, index|
+          next unless document_request?(item) && field_revision?(item)
+
+          "revision_requests[#{index}] cannot include both field and document request fields"
+        end
+      raise Error, mixed.join("; ") if mixed.any?
+
       missing =
         normalized.each_with_index.filter_map do |item, index|
-          blank_keys =
-            REQUIRED_ITEM_KEYS.select { |key| item[key].to_s.strip.blank? }
+          blank_keys = missing_keys(item)
           next if blank_keys.empty?
 
           "revision_requests[#{index}] is missing #{blank_keys.join(", ")}"
@@ -72,6 +91,7 @@ module ExternalApi
 
       too_long =
         normalized.each_with_index.filter_map do |item, index|
+          next if document_request?(item)
           next if item["comment"].to_s.length <= MAX_COMMENT_LENGTH
 
           "revision_requests[#{index}] comment exceeds #{MAX_COMMENT_LENGTH} characters"
@@ -79,7 +99,9 @@ module ExternalApi
       raise Error, too_long.join("; ") if too_long.any?
 
       pairs =
-        normalized.map do |item|
+        normalized.filter_map do |item|
+          next if document_request?(item)
+
           [item["requirement_block_code"], item["requirement_code"]]
         end
       if pairs.uniq.length != pairs.length
@@ -103,7 +125,101 @@ module ExternalApi
       hash.stringify_keys
     end
 
-    def resolve_item(item)
+    def document_request?(item)
+      item["name"].to_s.strip.present? || item.key?("reference_document_ids")
+    end
+
+    def field_revision?(item)
+      FIELD_ITEM_KEYS.any? { |key| item[key].to_s.strip.present? }
+    end
+
+    def missing_keys(item)
+      if document_request?(item)
+        REQUIRED_DOCUMENT_KEYS.select { |key| blank_document_value?(item, key) }
+      else
+        REQUIRED_ITEM_KEYS.select { |key| item[key].to_s.strip.blank? }
+      end
+    end
+
+    def blank_document_value?(item, key)
+      if key == "reference_document_ids"
+        ids = item[key]
+        return true unless ids.is_a?(Array)
+
+        ids.empty? || ids.any? { |id| id.to_s.strip.blank? }
+      else
+        item[key].to_s.strip.blank?
+      end
+    end
+
+    def resolve_item(item, index)
+      return resolve_document_request(item, index) if document_request?(item)
+
+      resolve_field_revision(item)
+    end
+
+    def resolve_document_request(item, index)
+      reason_code = item["reason_code"].to_s
+      unless RevisionReason.kept.exists?(reason_code: reason_code)
+        raise Error, "Unknown reason_code '#{reason_code}'."
+      end
+
+      ids = item["reference_document_ids"].map(&:to_s).uniq
+      files = ids.map { |cache_id| cached_file_data(cache_id, index) }
+
+      {
+        type: "SupportingDocumentRevisionRequest",
+        title: item["name"].to_s.strip,
+        reason_code: reason_code,
+        comment: item["comment"].to_s,
+        revision_reference_documents_attributes:
+          files.map { |file| { file: file } }
+      }
+    end
+
+    # ponytail: cache ids are unguessable but not bound to the API key.
+    # Upgrade: a table with external_api_key_id if a key must not attach another key's upload.
+    def cached_file_data(cache_id, index)
+      filename = File.basename(cache_id)
+      unless cache_id.match?(CACHE_ID_FORMAT) && !filename.start_with?(".") &&
+               !FileUploader::BLOCKED_EXTENSIONS.include?(
+                 File.extname(filename).delete_prefix(".").downcase
+               )
+        raise Error, missing_reference_message(index)
+      end
+
+      storage = Shrine.storages[:cache]
+      unless storage.exists?(cache_id)
+        raise Error, missing_reference_message(index)
+      end
+
+      io = storage.open(cache_id)
+      size = io.respond_to?(:size) ? io.size : io.read.bytesize
+      io.rewind if io.respond_to?(:rewind)
+      mime = FileUploader.determine_mime_type(io)
+
+      {
+        "id" => cache_id,
+        "storage" => "cache",
+        "metadata" => {
+          "filename" => filename,
+          "size" => size,
+          "mime_type" => mime
+        }
+      }
+    rescue Error
+      raise
+    rescue StandardError
+      raise Error, missing_reference_message(index)
+    ensure
+      io&.close
+    end
+
+    def missing_reference_message(index)
+      "revision_requests[#{index}] is missing reference_document_ids"
+    end
+
+    def resolve_field_revision(item)
       block_code = item["requirement_block_code"].to_s
       requirement_code = item["requirement_code"].to_s
       reason_code = item["reason_code"].to_s

@@ -973,6 +973,22 @@ in this document.
                   "$ref" => "#/components/schemas/File"
                 }
               },
+              document_requests: {
+                type: :array,
+                description:
+                  "Document revision requests stored on this version. Reference file URLs expire after 1 hour; a later GET returns a new URL.",
+                items: {
+                  "$ref" => "#/components/schemas/DocumentRequest"
+                }
+              },
+              fulfillment_documents: {
+                type: :array,
+                description:
+                  "Files the applicant uploaded to fulfill a document request, assigned to this version on resubmission. Empty when none were uploaded. Signed URLs expire after 1 hour.",
+                items: {
+                  "$ref" => "#/components/schemas/File"
+                }
+              },
               zipfile: {
                 anyOf: [
                   { "$ref" => "#/components/schemas/File" },
@@ -1158,6 +1174,12 @@ in this document.
       required: %w[id reason_code description]
     },
     RevisionRequestItem: {
+      oneOf: [
+        { "$ref" => "#/components/schemas/FieldRevisionRequestItem" },
+        { "$ref" => "#/components/schemas/DocumentRevisionRequestItem" }
+      ]
+    },
+    FieldRevisionRequestItem: {
       type: :object,
       required: %w[requirement_block_code requirement_code reason_code comment],
       properties: {
@@ -1179,6 +1201,80 @@ in this document.
         comment: {
           type: :string,
           maxLength: 350
+        }
+      }
+    },
+    DocumentRevisionRequestItem: {
+      type: :object,
+      required: %w[name reason_code comment reference_document_ids],
+      properties: {
+        name: {
+          type: :string,
+          description: "Name of the document the applicant must provide."
+        },
+        reason_code: {
+          type: :string,
+          description:
+            "A currently active code from GET /revision_reasons. The list is site-configured and not a fixed enum."
+        },
+        comment: {
+          type: :string
+        },
+        reference_document_ids: {
+          type: :array,
+          minItems: 1,
+          description:
+            "Ids returned by POST /files. At least one. The files are stored on the revision request when the status write succeeds.",
+          items: {
+            type: :string
+          }
+        }
+      }
+    },
+    DocumentRequest: {
+      type: :object,
+      required: %w[id name reason_code comment reference_documents],
+      properties: {
+        id: {
+          type: :string,
+          format: :uuid
+        },
+        name: {
+          type: :string
+        },
+        reason_code: {
+          type: :string
+        },
+        comment: {
+          type: :string
+        },
+        reference_documents: {
+          type: :array,
+          items: {
+            "$ref" => "#/components/schemas/File"
+          }
+        }
+      }
+    },
+    CachedFile: {
+      type: :object,
+      required: %w[id name type size],
+      properties: {
+        id: {
+          type: :string,
+          description:
+            "Cache id to send as reference_document_ids on the revisions status write. Not a download URL."
+        },
+        name: {
+          type: :string
+        },
+        type: {
+          type: :string,
+          description: "MIME type, for example application/pdf."
+        },
+        size: {
+          type: :integer,
+          description: "Size in bytes."
         }
       }
     },
@@ -1304,6 +1400,11 @@ in this document.
     name: "Permit projects",
     description:
       "Permit projects in the API key's jurisdiction and sandbox. Draft-only projects are not readable."
+  }
+  v2_spec[:tags] << {
+    name: "Files",
+    description:
+      "Reference file uploads cited by a document revision request. The upload does not change an application."
   }
   v2_spec[:tags] << {
     name: "Revision reasons",

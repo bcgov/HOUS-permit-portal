@@ -491,6 +491,7 @@ Rails.application.routes.draw do
         post "search", on: :collection, to: "permit_projects#index"
         patch "state", on: :member, to: "permit_projects#update_state"
       end
+      resources :files, only: %i[create]
       resources :revision_reasons, only: %i[index]
       resources :permit_applications, only: %i[show] do
         post "search", on: :collection, to: "permit_applications#index"
