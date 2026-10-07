@@ -65,7 +65,7 @@ module ProjectAuditFormatters
       when "in_review"
         "#{user_display} marked the application as in review"
       when "revisions_requested"
-        "Revisions requested — sent to submitter"
+        "#{user_display} requested revisions — sent to submitter"
       when "resubmitted"
         submitter_name = audit.auditable&.submitter&.name || user_display
         "#{submitter_name} resubmitted the application"

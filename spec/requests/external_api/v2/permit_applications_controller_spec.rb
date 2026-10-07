@@ -226,7 +226,9 @@ RSpec.describe "External API v2 permit applications", type: :request do
         audit,
         permit_application.submitter
       ).format_description
-    ).to eq("Partner system marked the application as in review")
+    ).to eq(
+      "#{permit_application.jurisdiction.qualified_name} marked the application as in review"
+    )
   end
 
   it "treats a repeated write of the current status as an idempotent success" do
@@ -560,10 +562,10 @@ RSpec.describe "External API v2 permit applications", type: :request do
         expect(request.title).to eq("Site plan")
         expect(request.revision_reference_documents.count).to eq(1)
 
-        urls = %w[https://files.example/one https://files.example/two]
+        urls = %w[https://files.example/one https://files.example/two].each
         allow_any_instance_of(
           FileUploadAttachment::FilenamePreservingFileUrl
-        ).to receive(:file_url).and_return(*urls)
+        ).to receive(:file_url) { urls.next }
 
         first = version_payload(version)
         document = first.fetch("document_requests").sole
@@ -573,13 +575,13 @@ RSpec.describe "External API v2 permit applications", type: :request do
           request.revision_reference_documents.sole.id
         )
         expect(reference["name"]).to eq("site-plan.pdf")
-        expect(reference["url"]).to eq(urls.first)
+        expect(reference["url"]).to eq("https://files.example/one")
         expect(first["fulfillment_documents"]).to eq([])
 
         second = version_payload(version)
         expect(
           second.dig("document_requests", 0, "reference_documents", 0, "url")
-        ).to eq(urls.last)
+        ).to eq("https://files.example/two")
       end
 
       it "stores a field revision and a document request from one payload" do
