@@ -1,7 +1,7 @@
 FROM registry.access.redhat.com/ubi9/ubi
 ARG VERSION=1.0.5
 
-LABEL name="ubi8-clamav" \
+LABEL name="ubi9-clamav" \
       vendor="Red Hat" \
       version="${VERSION}" \
       release="1" \
@@ -9,33 +9,42 @@ LABEL name="ubi8-clamav" \
       description="ClamAV for UBI 9" \
       maintainer="EPIC"
 
-RUN yum -y update
-RUN yum -y install https://www.clamav.net/downloads/production/clamav-${VERSION}.linux.x86_64.rpm
-RUN yum -y install nc wget
+RUN yum -y update && \
+    yum -y install \
+      https://www.clamav.net/downloads/production/clamav-${VERSION}.linux.x86_64.rpm \
+      nc \
+      wget && \
+    yum clean all && \
+    rm -rf /var/cache/yum
 
-# copy our configs to where clamav expects
+# Create all required directories and files in a single layer
+RUN mkdir -p /opt/app-root/src \
+             /var/log/clamav \
+             /var/run/clamav && \
+    touch /var/log/clamav/clamav.log \
+          /var/log/clamav/freshclam.log && \
+    chgrp -R 0 /opt/app-root/src \
+               /var/log/clamav \
+               /var/run/clamav \
+               /opt/app-root && \
+    chmod -R g+rwx /opt/app-root/src \
+                   /var/log/clamav \
+                   /var/run/clamav \
+                   /opt/app-root
+
+# Copy configs — must be LF line endings, not CRLF
 COPY config/clamd.conf /usr/local/etc/clamd.conf
 COPY config/freshclam.conf /usr/local/etc/freshclam.conf
 
-RUN mkdir -p /opt/app-root/src
-RUN chown -R 1001:0 /opt/app-root/src
-RUN chmod -R ug+rwx /opt/app-root/src
+# Copy scripts
+COPY scripts/clamdcheck.sh /opt/app-root/clamdcheck.sh
+COPY scripts/entrypoint.sh /opt/app-root/entrypoint.sh
 
-# copy health check script to app-root 
-COPY clamdcheck.sh /opt/app-root
-RUN chmod ug+rwx /opt/app-root/clamdcheck.sh
-
-# # To fix check permissions error for clamAV
-RUN mkdir /var/log/clamav
-RUN touch /var/log/clamav/clamav.log
-RUN touch /var/log/clamav/freshclam.log
-RUN chown -R 1001:0 /var/log/clamav
-RUN chmod -R ug+rwx /var/log/clamav
-
-RUN chown -R 1001:0 /opt/app-root/src
+RUN chmod ug+rx /opt/app-root/clamdcheck.sh \
+                /opt/app-root/entrypoint.sh
 
 USER 1001
 
 EXPOSE 3310
 
-CMD freshclam && clamd
+CMD ["/opt/app-root/entrypoint.sh"]

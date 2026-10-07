@@ -1,0 +1,80 @@
+{{- if .Values.matomo.postInstallCommand }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: matomo-post-install
+  namespace: {{.Release.Namespace}}
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    partOf: matomo
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  template:
+    metadata:
+      name: "{{ .Release.Name }}"
+      labels:
+        app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+        app.kubernetes.io/instance: {{ .Release.Name | quote }}
+        helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    spec:
+      restartPolicy: Never
+{{ include "matomo.images.pullSecrets" ( dict "images" (list .Values.matomo) "global" .Values.global) | nindent 6 }}
+      containers:
+      - name: post-install-matomo
+        image: {{.Values.matomo.image}}
+        lifecycle:
+          postStart:
+            exec:
+              command: [ 'sh' , '-c' , '{{.Values.matomo.installCommand}}' ]
+        # To do anything with Matomo, we first need to bootstrap it (curl).
+        command:  [ 'bash' , '-c' , 'sleep {{.Values.matomo.postInstallSleepTime}}; curl -Il https://{{.Values.matomo.dashboard.hostname}}; {{.Values.matomo.postInstallCommand}}' ]
+        env:
+        - name: MATOMO_FIRST_USER_NAME
+          value: {{.Values.matomo.dashboard.firstuser.username}}
+        - name: MATOMO_FIRST_USER_EMAIL
+          value: {{.Values.matomo.dashboard.firstuser.email}}
+        - name: MATOMO_FIRST_USER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.matomo.dashboard.firstuser.secretKeyRef.name }}
+              key: {{ .Values.matomo.dashboard.firstuser.secretKeyRef.key }}
+        - name: MATOMO_DB_HOST
+          value: {{.Values.db.hostname}}
+        - name: MATOMO_DB_NAME
+          value: {{.Values.db.name}}
+        {{ if .Values.db.prefix }}
+        - name: MATOMO_DB_PREFIX
+          value: {{.Values.db.prefix}}
+        {{ end }}
+        - name: MATOMO_DB_USERNAME
+          value: {{.Values.db.username}}
+        - name: MATOMO_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.db.password.secretKeyRef.name }}
+              key: {{ .Values.db.password.secretKeyRef.key }}
+{{ include "matomo.license" . | nindent 8 }}
+        volumeMounts:
+        - name: matomo-startup-config
+          mountPath: /var/www/html/config/config.ini.php
+          subPath: config.ini.php
+{{- if .Values.extraVolumeMounts }}
+{{ toYaml .Values.extraVolumeMounts | indent 8 }}
+{{- end }}
+      volumes:
+        - name: matomo-startup-config
+          configMap:
+            name: matomo-startup-config
+            optional: true
+{{- if .Values.extraVolumes }}
+{{ toYaml .Values.extraVolumes | indent 8 }}
+{{- end }}
+{{- end -}}
+
+
