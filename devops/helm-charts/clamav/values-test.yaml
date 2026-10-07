@@ -9,6 +9,10 @@ clamav:
   registry: image-registry.apps.silver.devops.gov.bc.ca
   replicaCount: 1  # Can be scaled up to 2-3 for load distribution (pod anti-affinity prevents same node)
 
+  resources:
+    requests:
+      cpu: "10m"
+
   persistentVolume:
     size: "500Mi"  # Dev environment PVC size (shared by all replicas)
 

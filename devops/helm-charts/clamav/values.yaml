@@ -9,7 +9,7 @@ clamav:
   replicaCount: 1
   resources:
     requests:
-      cpu: "100m"         # CPU request
+      cpu: "10m"         # CPU request
       memory: "128Mi"     # Memory request
 
   persistentVolume:
