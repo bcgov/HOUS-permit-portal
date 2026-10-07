@@ -1,0 +1,245 @@
+
+global:
+  imageRegistry: image-registry.openshift-image-registry.svc:5000/matomo
+  imagePullSecrets: []
+  storageClass: ""
+
+# Fallback resources when a component does not set its own.
+# Keep requests modest for constrained namespaces; raise limits on larger clusters.
+defaultResources:
+  requests:
+    cpu: 25m
+    memory: 128Mi
+  limits:
+    memory: 512Mi
+
+matomo:
+  image: matomo:5.11.2-fpm
+  # OpenShift restricted SCC assigns the UID; omit runAsUser.
+  runAsUser: null
+  installCommand: ""
+  site:
+    name: Matomo
+    url: https://matomo-dashboard.apps.example.com
+
+  # Automatic DB retention / purge (PrivacyManager).
+  # Raw logs older than olderThanDays are deleted; reports older than olderThanMonths too.
+  privacy:
+    deleteLogs:
+      enable: true
+      scheduleLowestInterval: 1
+      olderThanDays: 180
+      maxRowsPerQuery: 100000
+      enableAutoDatabaseSizeEstimate: true
+      enableDatabaseSizeEstimate: true
+    deleteReports:
+      enable: true
+      olderThanMonths: 12
+      keepBasicMetrics: true
+      keepDayReports: false
+      keepWeekReports: false
+      keepMonthReports: true
+      keepYearReports: true
+      keepRangeReports: false
+      keepSegmentReports: false
+
+  php:
+    memory_limit: "2G"
+    opcache_memory_consumption: "512"
+    max_execution_time: "300"
+  phpfpm:
+    type: ondemand
+    max_children: 50
+    memory_limit: "2048M"
+    process_idle_timeout: "480s"
+    max_requests: 500
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      memory: 2Gi
+  initResources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 512Mi
+
+  ingress:
+    enabled: false
+  dashboard:
+    replicas: 1
+    hostname: matomo-dashboard.apps.example.com
+    tls: true
+    nginx:
+      # /healthz is answered by nginx directly (see configmap-nginx-matomo-dashboard.yaml)
+      # and never reaches PHP-FPM. Do NOT point these at /index.php: every probe hit runs
+      # a full PHP bootstrap and, since Matomo stores sessions in the database, inserts a
+      # brand-new row in matomo_session on every single hit (no cookie to reuse) — at these
+      # intervals that's roughly one new row every 3-4 seconds, forever, unrelated to real
+      # traffic. This is what silently filled a large share of the DB PVC in bb18ab-tools.
+      livenessProbe:
+        exec: null # unset the base chart's exec probe so only httpGet remains (k8s forbids both)
+        httpGet:
+          path: /healthz
+          port: 8080
+        initialDelaySeconds: 15
+        periodSeconds: 10
+        timeoutSeconds: 2
+        failureThreshold: 6
+      readinessProbe:
+        httpGet:
+          path: /healthz
+          port: 8080
+        initialDelaySeconds: 5
+        periodSeconds: 5
+        timeoutSeconds: 2
+        failureThreshold: 6
+    firstuser:
+      username: admin
+      email: admin@example.com
+      # No password here -- auto-generated into a Secret on first install,
+      # see values.yaml matomo.dashboard.firstuser for the retrieval command.
+  tracker:
+    enabled: true
+    replicas: 1
+    hostname: matomo-tracker.apps.example.com
+    tls: true
+    phpFpmCommand: /usr/local/sbin/php-fpm
+    resources:
+      requests:
+        cpu: 50m
+        memory: 256Mi
+      limits:
+        memory: 1Gi
+    phpfpm:
+      type: ondemand
+      max_children: 40
+      memory_limit: "1024M"
+      process_idle_timeout: 600s
+      max_requests: 500
+    nginx:
+      livenessProbe:
+        exec: null # unset the base chart's exec probe so only httpGet remains (k8s forbids both)
+        httpGet:
+          path: /matomo.js
+          port: 8080
+        initialDelaySeconds: 15
+        periodSeconds: 10
+        timeoutSeconds: 2
+        failureThreshold: 6
+      readinessProbe:
+        httpGet:
+          path: /matomo.js
+          port: 8080
+        initialDelaySeconds: 5
+        periodSeconds: 5
+        timeoutSeconds: 2
+        failureThreshold: 6
+  cli:
+    enabled: false
+    replicas: 0
+  queuedTrackingMonitor:
+    enabled: false
+  queuedTrackingProcess:
+    enabled: false
+    replicas: 0
+
+  # Required for automatic purge + report archiving.
+  cronJobs:
+    coreArchive:
+      enabled: true
+      schedule: "15 * * * *"
+      concurrencyPolicy: Forbid
+      resources:
+        requests:
+          cpu: 100m
+          memory: 512Mi
+        limits:
+          memory: 2Gi
+    scheduledTasks:
+      enabled: true
+      # Hourly is enough; PrivacyManager also respects scheduleLowestInterval.
+      schedule: "30 * * * *"
+      resources:
+        requests:
+          cpu: 50m
+          memory: 512Mi
+        limits:
+          memory: 2Gi
+      php:
+        memory_limit: "2G"
+
+nginx:
+  image: nginx:1.21.6
+  runAsUser: null
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      memory: 128Mi
+
+fpmExporter:
+  image: php-fpm_exporter:2.2.0
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      memory: 128Mi
+
+db:
+  enabled: true
+  image: mariadb:11.4
+  temp:
+    enabled: true
+    mountPath: /tmp
+    sizeLimit: 256Mi
+  probes:
+    startup:
+      initialDelaySeconds: 60
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 180
+    liveness:
+      initialDelaySeconds: 600
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 6
+    readiness:
+      initialDelaySeconds: 60
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 6
+  # Size for ~180 days raw logs + 12 months reports with headroom.
+  # Increase for longer retention or higher traffic.
+  storage:
+    size: 10Gi
+    storageClass: ""
+    mountPath: /var/lib/mysql
+  resources:
+    requests:
+      cpu: 50m
+      memory: 256Mi
+    limits:
+      memory: 1Gi
+  auth:
+    createSecret: true
+    rootPassword: ""
+
+openshift:
+  route:
+    enabled: true
+    tls:
+      enabled: true
+      termination: edge
+      insecureEdgeTerminationPolicy: Redirect
+
+networkPolicy:
+  enabled: true
+  allowOpenShiftIngress: true
+  ingressNamespaceSelector:
+    matchLabels:
+      network.openshift.io/policy-group: ingress

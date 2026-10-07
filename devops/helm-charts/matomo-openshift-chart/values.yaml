@@ -1,0 +1,657 @@
+## @section Global parameters
+## Global Docker image parameters
+## Please, note that this will override the image parameters, configured to use the global value
+## Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass
+
+## @param global.imageRegistry Global Docker image registry
+## @param global.imagePullSecrets Global Docker registry secret names as an array
+##
+ # -- Globals settings
+global:
+  ## As:
+  ## imageRegistry: "docker.io"
+  # -- Global image registry
+  imageRegistry: ""
+  ## As:
+  ## imagePullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  # -- Global image pull secrets
+  imagePullSecrets: []
+  # -- Global storage class for persistent volumes
+  storageClass: ""
+
+# -- Default container resources used when a component does not set its own resources (e.g. DB).
+# Raise these (and matomo.resources / matomo.php.memory_limit) for larger OpenShift quotas.
+defaultResources:
+  requests:
+    cpu: 50m
+    memory: 256Mi
+
+matomo:
+  # -- Image registry to use.
+  imageRegistry: ""
+  ## As:
+  ## imagePullSecrets:
+  ##   - myRegistryKeySecretName
+  # -- Image pull secrets for Matomo.
+  imagePullSecrets: []
+  # -- Which image to use for Matomo deployment.
+  image: digitalist/matomo:5.7.1
+  # -- run container as user id. Set null/omit on OpenShift restricted SCC.
+  runAsUser: 82
+  # -- Resources for the matomo-init container (copy source + seed config).
+  initResources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  # -- Resources for the dashboard Matomo/PHP-FPM container.
+  # Scale with cluster memory, e.g. requests 1Gi / limits 3Gi on larger OpenShift nodes.
+  resources: {}
+  # -- Not used automatically (see matomo.postInstallCommand for the hook that runs it).
+  # WARNING: the ExtraTools-based command this used to default to
+  # ("./console plugin:activate ExtraTools && ./console matomo:install ...")
+  # only works on the old digitalist/matomo image, which bundled that plugin.
+  # It fails with "Cannot find plugin files for ExtraTools." on the vanilla
+  # matomo:*-fpm image used by values-openshift*.yaml. There is no automated
+  # schema installer for that image — after a fresh install/DB, complete
+  # Matomo's own web Installation wizard once (see "First-time database setup"
+  # in OPENSHIFT-INSTALL.md for exact steps and how to recover if you see
+  # "Matomo is already installed" with a missing-table error).
+  installCommand: ""
+  #
+  # Geolocation (DB-IP City Lite database)
+  # ---------------------------------------
+  # Every pod (dashboard/tracker/cli/cronjobs) has its own ephemeral webroot,
+  # so GeoIp2's built-in AutoUpdater task — which only ever runs inside a
+  # short-lived scheduled-tasks cron pod — never leaves a database file any
+  # OTHER pod can see. The tracker pod in particular needs this file locally
+  # to record accurate visitor city/region/country at tracking time. The init
+  # container fetches it fresh on every pod start instead; disable if your
+  # cluster has no egress to db-ip.com, or if you'd rather manage this via a
+  # shared persistent volume.
+  geoip:
+    enabled: true
+    # -- URL pattern for the free DB-IP City Lite database. The single %s is
+    # replaced with the current UTC year-month (e.g. 2026-08) at pod start,
+    # matching DB-IP's monthly release naming.
+    downloadUrlPattern: "https://download.db-ip.com/free/dbip-city-lite-%s.mmdb.gz"
+  # -- Default site created at install time (used in install.json).
+  site:
+    name: Localhost
+    url: https://localhost
+  #
+  # Privacy Manager / automatic data retention
+  # ------------------------------------------
+  # Keeps the database from growing without bound by deleting old raw logs and
+  # old aggregated reports on a schedule. Purge is executed by the
+  # matomo-jobs-scheduled-tasks CronJob (must stay enabled).
+  #
+  # Typical profiles:
+  #   small / dev:   deleteLogs.olderThanDays=90,  deleteReports.olderThanMonths=6,  db.storage.size=5-10Gi
+  #   medium:        deleteLogs.olderThanDays=180, deleteReports.olderThanMonths=12, db.storage.size=20-50Gi
+  #   large:         deleteLogs.olderThanDays=365, deleteReports.olderThanMonths=24, db.storage.size=100Gi+
+  #
+  privacy:
+    deleteLogs:
+      # -- Enable automatic raw visitor-log purge (PrivacyManager [Deletelogs]).
+      enable: true
+      # -- Minimum days between purge runs (1 = daily).
+      scheduleLowestInterval: 1
+      # -- Delete raw logs older than this many days.
+      olderThanDays: 180
+      # -- Max rows deleted per SQL batch (protects DB under load).
+      maxRowsPerQuery: 100000
+      # -- Let Matomo estimate DB size for diagnostics / UI.
+      enableAutoDatabaseSizeEstimate: true
+      enableDatabaseSizeEstimate: true
+    deleteReports:
+      # -- Enable automatic old-report purge (PrivacyManager [Deletereports]).
+      enable: true
+      # -- Delete aggregated reports older than this many months.
+      olderThanMonths: 12
+      # -- Keep lightweight basic metrics even when reports are purged.
+      keepBasicMetrics: true
+      keepDayReports: false
+      keepWeekReports: false
+      keepMonthReports: true
+      keepYearReports: true
+      keepRangeReports: false
+      keepSegmentReports: false
+  #
+  # PHP runtime tuning (dashboard + archive cron). Raise memory_limit when the
+  # OpenShift project has larger memory quotas / high-traffic sites.
+  #
+  php:
+    expose_php: "Off"
+    memory_limit: "2G"
+    opcache_memory_consumption: "512"
+    opcache_interned_strings_buffer: "16"
+    opcache_save_comments: "1"
+    opcache_jit_buffer_size: "256M"
+    opcache_jit: "1235"
+    opcache_max_file_upload: "300"
+    max_execution_time: "300"
+    post_max_size: "1500M"
+    upload_max_filesize: "32M"
+    max_input_time: "3600"
+    display_errors: "Off"
+    error_reporting: "22527"
+    mysqli_reconnect: "On"
+    mysqli_allow_local_infile: "On"
+    default_socket_timeout: "20"
+    max_input_vars: "2000"
+  # -- PHP-FPM pool for the dashboard (process count scales with CPU/memory).
+  phpfpm:
+    type: ondemand
+    max_children: 100
+    start_servers: 5
+    min_spare_servers: 5
+    max_spare_servers: 75
+    max_requests: 500
+    process_idle_timeout: "480s"
+    memory_limit: "2048M"
+    status_path: "/status"
+  # Post install for helm chart. Starts a post-install-job.
+  postInstallSleepTime: 5
+  postInstallCommand: ""
+  preUpgradeSleepTime: 5
+  preUpgradeCommand: ""
+  extralabels: {}
+  readinessProbe: {}
+  livenessProbe: {}
+  ## matomo:
+  ##   env:
+  ##     - name: BAR
+  ##       value: foo
+  ##     - name: FOO
+  ##       valueFromSecret:
+  ##         secretName: foo
+  ##         key: bar
+  # -- Env variables to inject, if any.
+  env: []
+  ## If you have a premium license for plugins, set it here.
+  ## you need to create the secret before referring it.
+  ## As:
+  ## license:
+  ##   secretKeyRef:
+  ##     name: matomo-license
+  ##     key: matomo-license
+  license:
+  ingress:
+    enabled: true
+    extralabels: {}
+    annotations: {}
+  cli:
+    replicas: 1
+    enabled: true
+    resources: {}
+  cronJobs:
+    # Archiving must run regularly so reports stay fresh without browser archiving.
+    coreArchive:
+      enabled: true
+      labels:
+        name: matomo-jobs-corearchive
+        instance: matomo
+        component: cronjob
+        partOf: matomo
+        managedBy: helm
+      schedule: "*/60 * * * *"
+      concurrencyPolicy: Forbid
+      activeDeadlineSeconds: 43200
+      command: ./console core:archive --disable-scheduled-tasks
+      resources: {}
+    # scheduled-tasks runs PrivacyManager purge (and other maintenance).
+    # Keep enabled whenever matomo.privacy.deleteLogs/deleteReports are enabled.
+    scheduledTasks:
+      enabled: true
+      labels:
+        name: matomo-jobs-scheduled-tasks
+        instance: matomo
+        component: cronjob
+        partOf: matomo
+        managedBy: helm
+      schedule: "0 * * * *"
+      activeDeadlineSeconds: 43200
+      command: ./console scheduled-tasks:run
+      resources: {}
+      # PHP overrides for the scheduled-tasks job (purge can be memory-heavy).
+      php:
+        memory_limit: "4G"
+        max_execution_time: "0"
+        max_input_time: "3600"
+        max_input_vars: "2000"
+  dashboard:
+    sidecars: []
+    ## added like this:
+    # sidecars:
+    # - name: fpm-metrics
+    #   image: hipages/php-fpm_exporter:2.2.0
+    #   imagePullPolicy: IfNotPresent
+    #   resources:
+    #     limits:
+    #       cpu: 500m
+    #       memory: 256Mi
+    #     requests:
+    #       cpu: 40m
+    #       memory: 32Mi
+    enabled: true
+    replicas: 1
+    loadbalancer: false
+    hostname: my.host
+    tls: false
+    firstuser:
+      username: admin
+      email: foo@example.com
+      # -- Leave blank to auto-generate a random password on first install --
+      # avoids ever putting a real admin password in a values file. Retrieve
+      # it after deploy with the command `helm status` prints (NOTES.txt), or:
+      #   oc get secret <firstuser.secretKeyRef.name> -n <namespace> -o jsonpath='{.data.password}' | base64 -d
+      # Only used when createSecret: true. Setting this to a real password is
+      # still supported (e.g. to match an existing manually-set admin login)
+      # but then treat this values file as sensitive -- see BACKUP-AND-RESTORE-GUIDE.md
+      # §0 for the same rule applied to other credentials in this chart.
+      password: ""
+      # -- If true (default), the chart creates/manages the Secret below: a
+      # random password is generated once on first install and the SAME
+      # Secret is reused (not regenerated) on every later `helm upgrade`, so
+      # it never silently rotates out from under you. If false, secretKeyRef
+      # must point at a Secret that already exists in this namespace.
+      createSecret: true
+      secretKeyRef:
+        name: "matomo-admin"
+        key: "password"
+    nginx:
+      nginxWorkerProcesses: 5
+      image: ''
+      # conf:
+      #   nginx.conf: |
+      #     worker_processes 5;
+      #     load_module modules/ngx_http_geoip2_module.so;
+      #     ...
+      #   fastcgi_params: |
+      #     fastcgi_param   COUNTRY_CODE            $geoip2_data_country_code;
+      #     fastcgi_param   QUERY_STRING            $query_string;
+      #     fastcgi_param   REQUEST_METHOD          $request_method;
+      #     ...
+      #   mime.types: |
+      #     types {
+      #       text/html                                        html htm shtml;
+      #       text/css                                         css;
+      #       text/xml                                         xml;
+      #       ...
+      conf: ''
+      livenessProbe:
+        exec:
+          command:
+          - /bin/sh
+          - -c
+          - "[ -f /tmp/nginx.pid ] && ps -A | grep nginx"
+        initialDelaySeconds: 10
+        periodSeconds: 5
+      readinessProbe:
+        httpGet:
+          scheme: HTTP
+          path: /index.php
+          port: 8080
+        initialDelaySeconds: 10
+        periodSeconds: 5
+    ingressClassName: ""
+    ingress:
+      annotations:
+        digitalist.cloud/instance: "matomo"
+  queuedTrackingMonitor:
+    enabled: true
+  queuedTrackingProcess:
+    enabled: true
+    replicas: 1
+  tracker:
+    enabled: true
+    replicas: 1
+    hostname: my.host
+    tls: false
+    loadbalancer: false
+    phpFpmCommand: /usr/local/sbin/php-fpm
+    # -- Resources for the tracker Matomo/PHP-FPM container.
+    resources: {}
+    nginx:
+      resources: {}
+      nginxWorkerProcesses: 5
+      livenessProbe:
+        exec:
+          command:
+          - /bin/sh
+          - -c
+          - "[ -f /tmp/nginx.pid ] && ps -A | grep nginx"
+        initialDelaySeconds: 10
+        periodSeconds: 5
+      readinessProbe:
+        httpGet:
+          scheme: HTTP
+          path: /matomo.js
+          port: 8080
+        initialDelaySeconds: 10
+        periodSeconds: 5
+    phpfpm:
+      type: ondemand
+      max_children: 75
+      process_idle_timeout: 600s
+      max_requests: 500
+      start_servers: 5
+      min_spare_servers: 5
+      max_spare_servers: 75
+      memory_limit: "2048M"
+      status_path: "/status"
+    ingressClassName: ""
+    ingress:
+      annotations:
+        digitalist.cloud/instance: "matomo"
+
+nginx:
+  imageRegistry: ""
+  image: digitalist/nginx:1.21.6
+  imagePullSecrets: []
+  runAsUser: 100
+  resources: {}
+
+fpmExporter:
+  imageRegistry: ""
+  image: hipages/php-fpm_exporter:2.2.0
+  resources:
+    requests:
+      cpu: 15m
+      memory: 32Mi
+    limits:
+      memory: 128Mi
+
+db:
+  # -- Deploy the bundled MariaDB StatefulSet. Set false to use an external DB.
+  enabled: false
+  # -- Extra mariadbd startup flags. Defaults clear three Matomo System Check
+  # warnings: max_allowed_packet (Matomo recommends >=64MB, MariaDB defaults to 16MB)
+  # and utf8mb4 as the server-wide default charset/collation for new databases.
+  extraArgs:
+    - "--max_allowed_packet=64M"
+    - "--character-set-server=utf8mb4"
+    - "--collation-server=utf8mb4_general_ci"
+  # -- Matomo's [database] connection charset/collation (config/config.ini.php).
+  # Existing tables created before this was set still need a one-time
+  # `console core:convert-to-utf8mb4` to actually convert their charset.
+  charset: "utf8mb4"
+  collation: "utf8mb4_general_ci"
+  imageRegistry: ""
+  image: mariadb:11.4
+  imagePullSecrets: []
+  temp:
+    enabled: true
+    mountPath: /tmp
+    sizeLimit: 256Mi
+  probes:
+    startup:
+      initialDelaySeconds: 60
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 180
+    liveness:
+      initialDelaySeconds: 600
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 6
+    readiness:
+      initialDelaySeconds: 60
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 6
+  # -- PVC size for bundled MariaDB. Size for retention + growth headroom.
+  # Rule of thumb: raw logs dominate size; shorter deleteLogs.olderThanDays => smaller DB.
+  storage:
+    size: 8Gi
+    storageClass: ""
+    mountPath: /var/lib/mysql
+  resources: {}
+  auth:
+    createSecret: true
+    rootPassword: ""
+  hostname: matomo-db-mysql
+  password:
+    secretKeyRef:
+      name: matomo-db-mysql
+      key: mysql-root-password
+  name: matomo
+  username: root
+  prefix: matomo_
+
+# Database backup to an S3-compatible object store (e.g. an on-premise bucket)
+# ------------------------------------------------------------------------------
+# Uses mariadb-dump for a full logical backup on every run. MariaDB has no
+# simple logical-incremental equivalent to tools like pgBackRest, so retention
+# is handled by trimming older objects from the bucket after each successful
+# upload rather than by incremental backups. See BACKUP-AND-RESTORE-GUIDE.md
+# for full setup and restore instructions.
+backup:
+  enabled: false
+  # -- Standard cron schedule for the backup CronJob.
+  schedule: "0 2 * * *"
+  # -- How many backups to keep under s3.path; older ones are deleted by the
+  # same job immediately after a successful upload. Backup filenames embed a
+  # sortable UTC timestamp (matomo-YYYYMMDD-HHMMSS.sql.gz), so "oldest" is
+  # just a plain lexicographic sort of filenames -- no listing-API/JSON
+  # parsing needed, works identically on any S3-compatible store.
+  #
+  # SAFETY: retention only ever deletes files whose name matches exactly
+  # matomo-YYYYMMDD-HHMMSS.sql.gz (what this job itself creates). Any other
+  # object in the same folder is never listed for deletion, so pre-existing
+  # data is left alone. Must be >= 1.
+  retentionCount: 14
+  # -- Set false to disable ALL deletion (upload-only). Useful for a first dev
+  # test, or when the bucket's own lifecycle rules do the cleanup.
+  pruneEnabled: true
+  concurrencyPolicy: Forbid
+  activeDeadlineSeconds: 3600
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  resources: {}
+  # -- Image for the mariadb-dump step. Defaults to db.image (same registry)
+  # so the dump tool version always matches the running server.
+  dbImage: ""
+  # -- Image for the S3 upload/retention step: rclone -- a vendor-neutral
+  # cloud-storage sync tool (S3-compatible is one of dozens of backends it
+  # supports via a plain endpoint URL; nothing AWS-specific about it). Pin an
+  # exact tag you've verified exists in your registry before importing it --
+  # this chart already got burned once by trusting a mistagged image blindly.
+  #
+  # Local ImageStream tag name only (no "rclone/" org prefix) -- combined
+  # with global.imageRegistry via the same matomo.image helper every other
+  # image in this chart uses. Import with:
+  #   oc tag rclone/rclone:1.68.2 --source=docker rclone:1.68.2 -n <namespace>
+  # (source keeps the Docker Hub org path; destination is just the local tag
+  # name -- a destination containing "/" gets parsed as <namespace>/<name>
+  # by `oc tag` and silently targets the wrong namespace).
+  s3ClientImage: "rclone:1.68.2"
+  s3:
+    # -- Master switch: the backup CronJob is only created when both
+    # backup.enabled and backup.s3.enabled are true.
+    enabled: false
+    # -- If true, the chart creates the Secret below from accessKey/secretKey
+    # (convenient for dev). If false, secretName must already exist in this
+    # namespace with keys "access-key" / "secret-key" -- the recommended
+    # setup for anything beyond local testing, so credentials never live in
+    # a values file.
+    createSecret: true
+    secretName: "matomo-s3-backup"
+    accessKey: ""
+    secretKey: ""
+    # -- S3-compatible endpoint, e.g. https://objectstore.example.gov.bc.ca
+    # -- an on-premise bucket, same as the reference CrunchyDB/pgBackRest
+    # setup this was modelled on. Not AWS.
+    endpoint: ""
+    bucket: ""
+    # -- Folder/prefix within the bucket. Leading slash optional. Use a
+    # DEDICATED, new folder (e.g. /matomo-backups-dev) -- never a folder that
+    # already holds other data. Empty (bucket root) is rejected by the job.
+    path: "/matomo-backups"
+    # -- Object-count ceiling of the bucket (0 = don't check). If your store
+    # caps the whole bucket (e.g. 500 objects), set it here: before each
+    # upload the job counts ALL objects in the bucket (not just ours) and
+    # refuses to upload if that would exceed this, after first trying to make
+    # room by pruning only its own oldest backups. It never deletes anything
+    # that isn't a matomo-*.sql.gz backup. Each backup is exactly one object.
+    maxObjects: 0
+    # -- Set true only if your on-premise endpoint serves a self-signed/
+    # internal-CA certificate rclone wouldn't otherwise trust.
+    insecure: false
+  # -- A SECOND, independent backup destination: a PersistentVolumeClaim in
+  # this namespace. Fully separate from s3 above -- enable either one alone,
+  # or both together (every run then writes to both, each with its own
+  # retention). Restoring later picks whichever source you point it at
+  # (restore.source), so if one destination is unavailable the other still
+  # has you covered.
+  pvc:
+    enabled: false
+    # -- If true, the chart creates the PVC below. If false, set
+    # existingClaim to a PVC that already exists in this namespace.
+    createClaim: true
+    existingClaim: ""
+    size: "2Gi"
+    storageClass: ""
+    # -- ReadWriteOnce is the safe default. If your StorageClass supports
+    # ReadWriteMany (e.g. an NFS-backed class such as this cluster's
+    # netapp-file-standard), that removes the small chance of a restore Job
+    # being unable to mount the PVC while a backup happens to be running.
+    accessMode: ReadWriteOnce
+    mountPath: /pvc-backups
+    # -- How many backups to keep on the PVC. Independent of s3.* retention
+    # above -- size this against backup.pvc.size, not against s3 capacity.
+    retentionCount: 7
+    # -- Set false to disable deletion on the PVC specifically (copy-only).
+    pruneEnabled: true
+    # -- Image for the copy/retention step. Empty reuses the same image as
+    # the dump step (backup.dbImage | default db.image) -- avoids importing
+    # a separate image into the ImageStream just for this.
+    image: ""
+
+# On-demand, DESTRUCTIVE restore of the database from either backup source.
+# ------------------------------------------------------------------------------
+# Deliberately not a CronJob -- never run this against a live, traffic-serving
+# database without a fresh backup already taken. Gated behind both `enabled`
+# and `confirm` so a stray `helm upgrade` with a stale values file can never
+# trigger it by accident. Do NOT set these in a persisted values file --
+# invoke restore via a one-off `--set` override per BACKUP-AND-RESTORE-GUIDE.md.
+restore:
+  enabled: false
+  # -- Must be set to the exact literal string "yes-overwrite-database" for
+  # the restore Job to render at all.
+  confirm: ""
+  # -- Which backup destination to restore FROM: "s3" or "pvc". Only one at a
+  # time -- pick whichever one is actually available/intact. Defaults to s3
+  # for backward compatibility with restores set up before pvc existed.
+  source: "s3"
+  # -- Filename to restore (matomo-YYYYMMDD-HHMMSS.sql.gz), or "latest" for
+  # the most recent one on the chosen source. Same naming on both sources.
+  backupFile: "latest"
+  # -- Change this to a fresh value (e.g. a timestamp) on every restore
+  # attempt -- Jobs are immutable once created, so re-running with the same
+  # suffix will fail rather than silently doing nothing.
+  jobSuffix: "manual"
+  activeDeadlineSeconds: 3600
+  resources: {}
+  dbImage: ""
+  # -- Same local-ImageStream-name convention as backup.s3ClientImage above.
+  s3ClientImage: "rclone:1.68.2"
+  # -- Used only when restore.source: "s3". Each defaults to the matching
+  # backup.s3.* value above; override only to restore from a DIFFERENT
+  # bucket/endpoint than backups currently go to (e.g. promoting a prod
+  # snapshot into a dev environment).
+  s3:
+    secretName: ""
+    endpoint: ""
+    bucket: ""
+    path: ""
+    insecure: false
+  # -- Used only when restore.source: "pvc". Each defaults to the matching
+  # backup.pvc.* value above; override only to restore from a DIFFERENT PVC
+  # than the one backups currently go to.
+  pvc:
+    claimName: ""
+    mountPath: ""
+
+openshift:
+  route:
+    enabled: false
+    annotations: {}
+    tls:
+      enabled: true
+      termination: edge
+      insecureEdgeTerminationPolicy: Redirect
+
+networkPolicy:
+  enabled: false
+  allowOpenShiftIngress: true
+  ingressNamespaceSelector:
+    matchLabels:
+      network.openshift.io/policy-group: ingress
+
+# -- Extra secrets
+extraSecrets:
+  create: false
+  data: {}
+# * secrets need to base64 encoded.
+#  data:
+#    name: Zm9vCg==
+#    bar: YmFyCg==
+# -- Extra services
+extraServices: {}
+#  - name: foo
+    ## Service port type
+#    type: ClusterIP
+    ## Service protocol
+#    protocol: TCP
+    ## The container target port
+#    containerPort: 12001
+    ## The service port
+#    port: 12001
+#    selector:
+#      app: matomo-dashboard
+    ## The node port (only relevant for type LoadBalancer or NodePort)
+#    nodePort:
+    ## The cluster ip address (only relevant for type LoadBalancer or NodePort)
+#    clusterIP:
+    ## The loadbalancer ip address (only relevant for type LoadBalancer)
+#    loadBalancerIP:
+# -- Extra configMaps
+extraConfigMaps:
+  create: false
+  data: {}
+# data:
+#   my.ini: |
+#     extension=foo.so
+#     foo.socket=tcp://bar:9309
+# -- Extra volumes
+extraVolumes: []
+# extraVolumes:
+# - name: mySecretVolume
+#   secret:
+#     secretName: matomo-extra-secrets
+# - name: my.ini
+#   configMap:
+#     name: matomo-additional-config-maps
+#     items:
+#     - key: "my.ini"
+#       path: "my.ini"
+# -- Extra volumes to mount
+extraVolumeMounts: []
+# extraVolumeMounts:
+# - name: mySecretVolume
+#   mountPath: /foo/secrets/mySecretVolume/
+# - name: my.ini
+#   mountPath: /usr/local/etc/php/conf.d/my.ini
+#   subPath: my.ini
+
+# -- Node labels for pod assignment.
+nodeSelector: {}
+
+# -- Tolerations for pod assignment
+tolerations: []

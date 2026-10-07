@@ -19,6 +19,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
            :revisions_requested_at,
            :issued_at,
            :missing_pdfs,
+           :report_generation_issues,
            :template_nickname,
            :discarded_at,
            :days_in_queue,
@@ -284,7 +285,11 @@ class PermitApplicationBlueprint < Blueprinter::Base
   view :supporting_docs_update do
     identifier :id
 
-    fields :missing_pdfs, :zipfile_size, :zipfile_name, :zipfile_url
+    fields :missing_pdfs,
+           :report_generation_issues,
+           :zipfile_size,
+           :zipfile_name,
+           :zipfile_url
 
     association :supporting_documents,
                 blueprint: SupportingDocumentBlueprint do |pa, options|

@@ -34,12 +34,6 @@ const NotFoundScreen = lazy(() =>
   import("../../shared/base/not-found-screen").then((module) => ({ default: module.NotFoundScreen }))
 )
 
-const PermitApplicationPDFViewer = lazy(() =>
-  import("../../shared/permit-applications/pdf-content/viewer").then((module) => ({
-    default: module.PermitApplicationPDFViewer,
-  }))
-)
-
 const EmailConfirmedScreen = lazy(() =>
   import("../authentication/email-confirmed-screen").then((module) => ({ default: module.EmailConfirmedScreen }))
 )
@@ -355,11 +349,6 @@ const OverheatingCodeUnavailableScreen = lazy(() =>
   }))
 )
 
-const StepCodeChecklistPDFViewer = lazy(() =>
-  import("../step-code/checklist/pdf-content/viewer").then((module) => ({
-    default: module.StepCodeChecklistPDFViewer,
-  }))
-)
 const SiteConfigurationManagementScreen = lazy(() =>
   import("../super-admin/site-configuration-management").then((module) => ({
     default: module.SiteConfigurationManagementScreen,
@@ -739,26 +728,6 @@ const AppRoutes = observer(() => {
         element={<ClimateZonesScreen />}
       />
       <Route path="/permit-applications/:permitApplicationId" element={<ReviewPermitApplicationScreen />} />
-      {import.meta.env.DEV && (
-        <>
-          <Route
-            path="/permit-applications/:permitApplicationId/pdf-content"
-            element={<PermitApplicationPDFViewer mode={"pdf"} />}
-          />
-          <Route
-            path="/permit-applications/:permitApplicationId/pdf-html"
-            element={<PermitApplicationPDFViewer mode={"html"} />}
-          />
-          <Route
-            path="/permit-applications/:permitApplicationId/step-code-pdf-content"
-            element={<StepCodeChecklistPDFViewer mode={"pdf"} />}
-          />
-          <Route
-            path="/permit-applications/:permitApplicationId/step-code-pdf-html"
-            element={<StepCodeChecklistPDFViewer mode={"html"} />}
-          />
-        </>
-      )}
     </>
   )
 

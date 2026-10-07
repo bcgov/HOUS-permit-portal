@@ -1,0 +1,24 @@
+{{- /*
+  Second, independent backup destination -- a PVC in this namespace. Only
+  rendered when backup.pvc.enabled and backup.pvc.createClaim are both true;
+  set createClaim: false and backup.pvc.existingClaim to reuse a PVC that
+  already exists instead.
+*/}}
+{{- if and .Values.backup.enabled .Values.backup.pvc.enabled .Values.backup.pvc.createClaim }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: matomo-db-backup
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: matomo-db-backup
+spec:
+  accessModes:
+    - {{ .Values.backup.pvc.accessMode | default "ReadWriteOnce" }}
+  resources:
+    requests:
+      storage: {{ .Values.backup.pvc.size | default "2Gi" | quote }}
+  {{- if .Values.backup.pvc.storageClass }}
+  storageClassName: {{ .Values.backup.pvc.storageClass }}
+  {{- end }}
+{{- end }}

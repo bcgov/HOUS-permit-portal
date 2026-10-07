@@ -12,6 +12,47 @@ class SubmissionVersion < ApplicationRecord
 
   accepts_nested_attributes_for :revision_requests, allow_destroy: true
 
+  attr_readonly :report_snapshot
+  validate :report_snapshot_is_valid, on: :create
+  validate :report_snapshot_is_immutable, on: :update
+
+  def report_snapshot_is_valid
+    return if report_snapshot.nil?
+    PrintReports::Snapshot.validate!(report_snapshot, self)
+  rescue PrintReports::Data::Unavailable => e
+    errors.add(:report_snapshot, e.message)
+  end
+
+  def report_snapshot_is_immutable
+    if will_save_change_to_report_snapshot?
+      errors.add(:report_snapshot, "cannot be changed")
+    end
+  end
+
+  # ZIP membership follows the same saved answers as the report, even if a
+  # maintenance operation subsequently changes the legacy submission_data field.
+  def report_submission_data
+    reports = report_snapshot["reports"] if report_snapshot.is_a?(Hash)
+    report = reports["application"] if reports.is_a?(Hash)
+    saved = report["submission_data"] if report.is_a?(Hash)
+    saved.is_a?(Hash) ? saved.deep_dup : submission_data
+  end
+
+  def report_generation_issues
+    return [] if missing_pdfs.empty?
+    PrintReports::Snapshot.validate!(report_snapshot, self)
+    []
+  rescue PrintReports::Data::Unavailable => e
+    missing_pdfs.map do |key|
+      {
+        key: key,
+        submission_version_id: id,
+        version_number: version_number,
+        reason: e.message
+      }
+    end
+  end
+
   def zipfile_size
     zipfile_data&.dig("metadata", "size")
   end
@@ -124,6 +165,9 @@ class SubmissionVersion < ApplicationRecord
   end
 
   def has_step_code_checklist?
+    if report_snapshot.is_a?(Hash) && report_snapshot["reports"].is_a?(Hash)
+      return report_snapshot["reports"].key?("checklist")
+    end
     step_code_checklist_json.present? && !step_code_checklist_json.empty?
   end
 

@@ -27,6 +27,7 @@ import { IDownloadableFile, IFormIOSection, ISubmissionVersion } from "../../../
 import { formatBytes } from "../../../utils/utility-functions"
 import { CalloutBanner } from "../../shared/base/callout-banner"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
+import { InfoTooltip } from "../../shared/info-tooltip"
 
 export interface ISubmissionDownloadModalProps {
   permitApplication: IPermitApplication
@@ -186,11 +187,12 @@ export const SubmissionDownloadModal = observer(
       ]
     )
     const documentKeys = useMemo(() => documents.map((doc) => doc.fileUrl), [documents])
-    const missingPdfs = useMemo(() => {
-      const keys = permitApplication.missingPdfs || []
-      if (!displayedVersion) return keys
-      return keys.filter((key) => key.endsWith(`_${displayedVersion.id}`))
-    }, [permitApplication.missingPdfs, displayedVersion])
+    const issues = permitApplication.reportGenerationIssues
+    const unavailableKeys = new Set(issues.map((issue) => issue.key))
+    const missingPdfs = (permitApplication.missingPdfs || []).filter(
+      (key) => !unavailableKeys.has(key) && (!displayedVersion || key.endsWith(`_${displayedVersion.id}`))
+    )
+    const packageBlocked = issues.length > 0
     const hasMissingPdfs = missingPdfs.length > 0
     const allKeys = useMemo(() => [...documentKeys, ...missingPdfs], [documentKeys, missingPdfs])
 
@@ -265,7 +267,9 @@ export const SubmissionDownloadModal = observer(
 
       // Kick off generation when system PDFs are missing and/or the package zip isn't ready yet
       const needsGeneration =
-        permitApplication.isSubmitted && !zipGenerationTriggeredRef.current && (hasMissingPdfs || !zipfileUrl)
+        permitApplication.isSubmitted &&
+        !zipGenerationTriggeredRef.current &&
+        (hasMissingPdfs || (!zipfileUrl && !packageBlocked))
 
       if (!needsGeneration) {
         return
@@ -284,6 +288,7 @@ export const SubmissionDownloadModal = observer(
       isOpen,
       zipfileUrl,
       generationFailed,
+      packageBlocked,
     ])
 
     // Keep selections that still exist as either a ready file or a missing PDF placeholder
@@ -319,7 +324,7 @@ export const SubmissionDownloadModal = observer(
         return true
       }
 
-      if (wasAllSelected && zipfileUrl && !displayedVersion) {
+      if (wasAllSelected && zipfileUrl && !packageBlocked && !displayedVersion) {
         const a = document.createElement("a")
         a.href = zipfileUrl
         a.download = zipfileName || `permit-application-${permitApplication.number}.zip`
@@ -335,13 +340,33 @@ export const SubmissionDownloadModal = observer(
       return "pending"
     }
 
+    // A lost websocket or exhausted job must not leave the modal spinning forever.
+    useEffect(() => {
+      if (!isOpen || (!awaitingGeneration && !awaitingSelectiveZip)) return
+      const timeout = window.setTimeout(() => {
+        if (awaitingGeneration) setGenerationFailed(true)
+        if (awaitingSelectiveZip) setSelectiveZipFailed(true)
+      }, 180000)
+      const poll = window.setInterval(() => {
+        permitApplicationStore.fetchPermitApplication(permitApplication.id, review)
+      }, 10000)
+      return () => {
+        window.clearTimeout(timeout)
+        window.clearInterval(poll)
+      }
+    }, [isOpen, awaitingGeneration, awaitingSelectiveZip])
+
     // After missing PDFs finish, continue the download that was waiting
     useEffect(() => {
-      if (!isOpen || !awaitingGeneration || hasMissingPdfs || !pendingDownloadRef.current) return
-
-      if (generationFailed) return
+      if (!isOpen || !awaitingGeneration || !pendingDownloadRef.current) return
 
       const pending = pendingDownloadRef.current
+      if (pending.missingKeys.some((key) => unavailableKeys.has(key))) {
+        pendingDownloadRef.current = null
+        setAwaitingGeneration(false)
+        return
+      }
+      if (hasMissingPdfs || generationFailed) return
       pendingDownloadRef.current = null
       setAwaitingGeneration(false)
       ;(async () => {
@@ -353,7 +378,7 @@ export const SubmissionDownloadModal = observer(
         )
         if (result === false) setSelectiveZipFailed(true)
       })()
-    }, [awaitingGeneration, hasMissingPdfs, generationFailed, isOpen, documents, zipfileUrl])
+    }, [awaitingGeneration, hasMissingPdfs, generationFailed, isOpen, documents, zipfileUrl, issues])
 
     // Selective zip ready via websocket — auto-download when requestId matches
     useEffect(() => {
@@ -421,7 +446,7 @@ export const SubmissionDownloadModal = observer(
 
       const result = await performDownload(
         selectedReady.map((doc) => doc.fileUrl),
-        allSelected
+        allSelected && !packageBlocked
       )
       if (result === false) setSelectiveZipFailed(true)
     }
@@ -507,6 +532,34 @@ export const SubmissionDownloadModal = observer(
                     minH={0}
                     overflowY="auto"
                   >
+                    {issues.map((issue) => (
+                      <HStack key={issue.key} spacing={2} fontSize="sm" color="text.secondary">
+                        <Text role="status">
+                          {t("permitApplication.show.reportUnavailable", {
+                            version: issue.versionNumber,
+                            report: t(
+                              issue.key.startsWith("permit_application_pdf")
+                                ? "permitApplication.show.unavailableReportLabels.permitApplication"
+                                : "permitApplication.show.unavailableReportLabels.stepCode"
+                            ),
+                          })}
+                        </Text>
+                        <InfoTooltip
+                          label={t("permitApplication.show.reportUnavailableHelp")}
+                          ariaLabel={t("permitApplication.show.reportUnavailableHelp")}
+                          hasArrow
+                          shouldWrapChildren
+                        />
+                      </HStack>
+                    ))}
+                    {packageBlocked && (
+                      <Text fontSize="sm">{t("permitApplication.show.incompleteHistoricalPackage")}</Text>
+                    )}
+                    {packageBlocked && zipfileUrl && (
+                      <Link href={zipfileUrl} download={zipfileName || undefined} color="text.link">
+                        {t("permitApplication.show.downloadExistingPackage")}
+                      </Link>
+                    )}
                     <Checkbox
                       isChecked={allSelected}
                       isIndeterminate={someSelected}
@@ -711,7 +764,6 @@ function FileSelectRow({
 
   return (
     <HStack
-      as="label"
       w="full"
       align="flex-start"
       spacing={2}
@@ -722,23 +774,24 @@ function FileSelectRow({
       borderStyle="solid"
       borderColor="transparent"
       borderRadius="sm"
-      cursor="pointer"
       _hover={{ borderColor: "border.base" }}
     >
-      <Checkbox isChecked={isSelected} onChange={onToggle} spacing={2} mt="2px" />
-      <VStack flex={1} align="start" spacing={0} minW={0}>
-        <Text fontSize="md" lineHeight="normal" noOfLines={1} w="full">
-          {doc.fileName}
-        </Text>
-        <Text fontSize="xs" color="text.secondary" lineHeight="normal">
-          {[
-            formatBytes(doc.fileSize),
-            submittedDate && t("permitApplication.show.downloadSubmitted", { date: submittedDate }),
-          ]
-            .filter(Boolean)
-            .join(" · ")}
-        </Text>
-      </VStack>
+      <HStack as="label" flex={1} minW={0} align="flex-start" cursor="pointer">
+        <Checkbox isChecked={isSelected} onChange={onToggle} spacing={2} mt="2px" />
+        <VStack flex={1} align="start" spacing={0} minW={0}>
+          <Text fontSize="md" lineHeight="normal" overflowWrap="anywhere" w="full">
+            {doc.fileName}
+          </Text>
+          <Text fontSize="xs" color="text.secondary" lineHeight="normal">
+            {[
+              formatBytes(doc.fileSize),
+              submittedDate && t("permitApplication.show.downloadSubmitted", { date: submittedDate }),
+            ]
+              .filter(Boolean)
+              .join(" · ")}
+          </Text>
+        </VStack>
+      </HStack>
     </HStack>
   )
 }

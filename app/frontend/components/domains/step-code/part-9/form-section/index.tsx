@@ -349,7 +349,12 @@ const ReviewSection = observer(function ReviewSection() {
   }
 
   if (!checklist) return <SharedSpinner />
-  if (!checklist.selectedReport) return <MissingReportSection />
+  if (!checklist.selectedReport)
+    return (
+      <>
+        <MissingReportSection />
+      </>
+    )
   if (!checklist.canAccessReview) {
     const target = checklist.currentNavLink?.location ?? "start"
     return <Navigate to={pathname.replace(/\/review$/, `/${target}`)} replace />
@@ -438,7 +443,12 @@ const ReportSection = observer(function ReportSection() {
   }
 
   if (!checklist) return <SharedSpinner />
-  if (!checklist.selectedReport) return <MissingReportSection />
+  if (!checklist.selectedReport)
+    return (
+      <>
+        <MissingReportSection />
+      </>
+    )
   if (!checklist.canAccessReport) {
     const target = checklist.currentNavLink?.location ?? "start"
     return <Navigate to={pathname.replace(/\/report$/, `/${target}`)} replace />

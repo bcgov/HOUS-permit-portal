@@ -375,7 +375,6 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                 </HStack>
               </Flex>
             </HStack>
-
             {isSubmitted ? (
               <Stack direction={{ base: "column", lg: "row" }} align={{ base: "flex-end", lg: "center" }}>
                 <BrowserSearchPrompt />

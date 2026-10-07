@@ -183,6 +183,17 @@ class SupportingDocument < FileUploadAttachment
   def generated_document_filename
     return unless STATIC_DOCUMENT_DATA_KEYS.include?(data_key)
 
+    kind = data_key == APPLICATION_PDF_DATA_KEY ? "application" : "checklist"
+    if submission_version&.report_snapshot.is_a?(Hash)
+      # Stored legacy/unsupported reports remain downloadable independently of
+      # whether their source snapshot can currently be rendered.
+      filenames = submission_version.report_snapshot["filenames"]
+      saved_name = filenames[kind] if filenames.is_a?(Hash)
+      if saved_name.is_a?(String) && saved_name.present?
+        return File.basename(saved_name)
+      end
+    end
+
     file_namer =
       PermitApplicationGeneratedFileNamer.new(
         permit_application,

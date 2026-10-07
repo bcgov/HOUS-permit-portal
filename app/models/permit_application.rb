@@ -540,13 +540,12 @@ class PermitApplication < ApplicationRecord
   end
 
   def mark_submission_packages_ready!
-    return [] unless zipfile_data.present?
-
     newly_ready = []
     submission_versions
       .order(:created_at)
       .each do |submission_version|
         next if submission_version.package_ready_at.present?
+        next if submission_version.zipfile_data.blank?
         next if submission_version.missing_pdfs?
 
         submission_version.update!(package_ready_at: Time.current)
@@ -580,6 +579,10 @@ class PermitApplication < ApplicationRecord
           enqueue_v2_status_webhook(external_api_key)
         end
       end
+  end
+
+  def report_generation_issues
+    submission_versions.flat_map(&:report_generation_issues)
   end
 
   def missing_pdfs
