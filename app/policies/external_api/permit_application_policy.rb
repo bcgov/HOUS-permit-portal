@@ -8,7 +8,7 @@ class ExternalApi::PermitApplicationPolicy < ExternalApi::ApplicationPolicy
   end
 
   def show_submission_version?
-    show?
+    update_status?
   end
 
   def update_status?

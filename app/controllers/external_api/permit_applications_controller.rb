@@ -67,21 +67,17 @@ class ExternalApi::PermitApplicationsController < ExternalApi::ApplicationContro
       end
 
       @permit_application.inbox_sort_order = nil
-      Audited
-        .audit_class
-        .as_user(Constants::ExternalApi::PARTNER_SYSTEM_ACTOR) do
-          if target_status == "revisions_requested"
-            ExternalApi::ApplyRevisionRequests.new(
-              @permit_application,
-              params[:revision_requests],
-              applicant_note: params[:applicant_note]
-            ).call
-            @permit_application.finalize_revision_requests!
-          else
-            event = PermitApplicationStatus::STATUS_EVENT_MAP[target_status]
-            @permit_application.public_send(:"#{event}!")
-          end
-        end
+      if target_status == "revisions_requested"
+        ExternalApi::ApplyRevisionRequests.new(
+          @permit_application,
+          params[:revision_requests],
+          applicant_note: params[:applicant_note]
+        ).call
+        @permit_application.finalize_revision_requests!
+      else
+        event = PermitApplicationStatus::STATUS_EVENT_MAP[target_status]
+        @permit_application.public_send(:"#{event}!")
+      end
     end
 
     render_permit_application

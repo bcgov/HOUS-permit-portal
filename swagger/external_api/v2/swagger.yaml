@@ -49,7 +49,7 @@ info:
     form data, generated PDFs, and the version zip live on GET /permit_applications/{id}/submission_versions/{submission_version_id}.
     raw_h2k_files are current step-code tool state, not snapshotted per version.
     GET /permit_projects/{id} returns project state, address, and sibling application
-    summaries (drafts omitted). Follow permit_project_id from application reads and webhooks.\n\nFor
+    summaries (drafts omitted). POST /permit_projects/{id}/permit_applications adds draft permits from requirement template ids. Each id resolves to that template's published version. The project must already be readable by the key. Those drafts stay off project GET until one is submitted. GET /requirement_templates lists those ids: kept templates with a published version in the key's sandbox. Follow permit_project_id from application reads and webhooks.\n\nFor
     security purposes, any API response that
     includes a file URL will have a signed URL. These files will be available for
     download for a limited time (1 hour).\nDownload files when you receive `permit_application_package_ready`.
@@ -577,9 +577,12 @@ paths:
   "/permit_applications/{id}/status":
     patch:
       summary: Updates a submitted permit application's status using a canonical Building
-        Permit Hub code. For `revisions_requested`, include field-level `revision_requests`
-        copied from the submission version payload (`requirement_block_code` + `requirement_code`).
-        An optional `applicant_note` plain-text message is stored with those requests.
+        Permit Hub code. For `revisions_requested`, include `revision_requests`. A
+        field revision copies `requirement_block_code` and `requirement_code` from
+        the submission version payload. A document request sends `name`, `reason_code`,
+        `comment`, and `reference_document_ids` from POST /files, and does not send
+        requirement codes. One array may mix both. An optional `applicant_note` plain-text
+        message is stored with those requests.
       tags:
       - Permit applications
       parameters:
@@ -634,7 +637,8 @@ paths:
   "/permit_applications/{id}/submission_versions/{submission_version_id}":
     get:
       summary: Retrieves a frozen submission version, including form data, generated
-        PDFs, and signed file URLs for that version.
+        PDFs, document requests, fulfillment files, and signed file URLs for that
+        version.
       tags:
       - Permit applications
       parameters:
@@ -707,6 +711,69 @@ paths:
         '429':
           description: 'Rate limit exceeded. Note: The rate limit is 100 requests
             per minute per API key and 300 requests per IP in a 3 minute interval'
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ResponseError"
+  "/files":
+    post:
+      summary: Uploads one reference file for a later document revision request.
+        Returns a cache id to send as `reference_document_ids` on PATCH /permit_applications/{id}/status.
+        Does not change an application and does not return a download URL.
+      tags:
+      - Files
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+              - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: File stored
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    "$ref": "#/components/schemas/CachedFile"
+                required:
+                - data
+        '422':
+          description: Missing file, blocked extension, or file too large
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ResponseError"
+  "/requirement_templates":
+    get:
+      summary: Lists requirement templates whose published version can be added as
+        a draft. Each id is the requirement_template_id for POST /permit_projects/{id}/permit_applications.
+      tags:
+      - Requirement templates
+      responses:
+        '200':
+          description: Successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      "$ref": "#/components/schemas/RequirementTemplate"
+                required:
+                - data
+        '429':
+          description: Rate limit exceeded
           content:
             application/json:
               schema:
@@ -891,6 +958,74 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/ResponseError"
+  "/permit_projects/{id}/permit_applications":
+    post:
+      summary: Adds one or more draft permit applications to a project the key can
+        already read. Each item is a requirement template id, resolved to that
+        template's published version. The batch is all or nothing. Sandbox and
+        jurisdiction come from the project. Project GET still omits the new drafts
+        until one is submitted, and project state does not change.
+      tags:
+      - Permit projects
+      parameters:
+      - name: id
+        in: path
+        description: Permit project ID
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - permit_applications
+              properties:
+                permit_applications:
+                  type: array
+                  minItems: 1
+                  items:
+                    type: object
+                    required:
+                    - requirement_template_id
+                    properties:
+                      requirement_template_id:
+                        type: string
+                        format: uuid
+                        description: Requirement template whose published version is
+                          copied onto the new draft. Unknown, unpublished, and discarded
+                          templates are rejected. A template_version_id on the item is
+                          ignored.
+      responses:
+        '200':
+          description: Drafts created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      "$ref": "#/components/schemas/CreatedPermitApplication"
+                required:
+                - data
+        '403':
+          description: Accessing a permit project for an unauthorized jurisdiction
+            or a draft-only project
+        '404':
+          description: Accessing a permit project which does not exist in this key's
+            sandbox
+        '422':
+          description: Empty list, or an unknown, unpublished, or discarded requirement_template_id.
+            Nothing is created. The error names each bad requirement_template_id.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ResponseError"
   "/project_meetings/{id}":
     get:
       summary: Retrieves a submitted project meeting request.
@@ -1004,6 +1139,12 @@ tags:
 - name: Permit projects
   description: Permit projects in the API key's jurisdiction and sandbox. Draft-only
     projects are not readable.
+- name: Files
+  description: Reference file uploads cited by a document revision request. The upload
+    does not change an application.
+- name: Requirement templates
+  description: Kept requirement templates with a published version in the API key's
+    sandbox. Pass id as requirement_template_id when adding a draft permit.
 - name: Revision reasons
   description: Site-configured revision reason codes accepted on partner revision
     requests. The list is dynamic.
@@ -1126,6 +1267,79 @@ components:
           items:
             type: string
           description: Tags associated with the permit application's requirement template.
+    CreatedPermitApplication:
+      type: object
+      required:
+      - id
+      - number
+      - status
+      - permit_project_id
+      - template_version
+      properties:
+        id:
+          type: string
+          format: uuid
+        number:
+          type: string
+        status:
+          "$ref": "#/components/schemas/ApplicationStatus"
+        permit_project_id:
+          type: string
+          format: uuid
+        template_version:
+          type: object
+          description: The published template version this draft was created from.
+          required:
+          - id
+          - status
+          - version_date
+          - requirement_template_id
+          - feedbacks_count
+          - has_unresolved_feedbacks
+          - template_category_id
+          - template_sort_order
+          - template_category
+          properties:
+            id:
+              type: string
+              format: uuid
+            status:
+              type: string
+            version_date:
+              type: integer
+              format: int64
+              description: The version date in milliseconds since the epoch (UNIX time).
+                This is meant to be parsed as PST.
+            requirement_template_id:
+              type: string
+              format: uuid
+            feedbacks_count:
+              type: integer
+            has_unresolved_feedbacks:
+              type: boolean
+            template_category_id:
+              type: string
+              format: uuid
+              nullable: true
+            template_sort_order:
+              type: integer
+            template_category:
+              type: object
+              nullable: true
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                label:
+                  type: string
+                sort_order:
+                  type: integer
+                created_at:
+                  type: integer
+                  format: int64
+                updated_at:
+                  type: integer
+                  format: int64
     PermitProject:
       type: object
       properties:
@@ -1732,6 +1946,19 @@ components:
           type: array
           items:
             "$ref": "#/components/schemas/File"
+        document_requests:
+          type: array
+          description: Document revision requests stored on this version. Reference
+            file URLs expire after 1 hour; a later GET returns a new URL.
+          items:
+            "$ref": "#/components/schemas/DocumentRequest"
+        fulfillment_documents:
+          type: array
+          description: Files the applicant uploaded to fulfill a document request,
+            assigned to this version on resubmission. Empty when none were uploaded.
+            Signed URLs expire after 1 hour.
+          items:
+            "$ref": "#/components/schemas/File"
         zipfile:
           anyOf:
           - "$ref": "#/components/schemas/File"
@@ -1746,6 +1973,90 @@ components:
           items:
             "$ref": "#/components/schemas/File"
           nullable: true
+    RequirementTemplate:
+      type: object
+      required:
+      - id
+      - nickname
+      - description
+      - sort_order
+      - template_category
+      - published_template_version
+      properties:
+        id:
+          type: string
+          format: uuid
+        nickname:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        sort_order:
+          type: integer
+        template_category:
+          type: object
+          nullable: true
+          properties:
+            id:
+              type: string
+              format: uuid
+            label:
+              type: string
+            sort_order:
+              type: integer
+            created_at:
+              type: integer
+              format: int64
+            updated_at:
+              type: integer
+              format: int64
+        published_template_version:
+          type: object
+          nullable: true
+          description: The published version create copies onto a new draft. Null when
+            the template has none.
+          properties:
+            id:
+              type: string
+              format: uuid
+            status:
+              type: string
+            version_date:
+              type: integer
+              format: int64
+              description: The version date in milliseconds since the epoch (UNIX time).
+                This is meant to be parsed as PST.
+            requirement_template_id:
+              type: string
+              format: uuid
+            feedbacks_count:
+              type: integer
+            has_unresolved_feedbacks:
+              type: boolean
+            template_category_id:
+              type: string
+              format: uuid
+              nullable: true
+            template_sort_order:
+              type: integer
+            template_category:
+              type: object
+              nullable: true
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                label:
+                  type: string
+                sort_order:
+                  type: integer
+                created_at:
+                  type: integer
+                  format: int64
+                updated_at:
+                  type: integer
+                  format: int64
     RevisionReason:
       type: object
       properties:
@@ -1761,6 +2072,10 @@ components:
       - reason_code
       - description
     RevisionRequestItem:
+      oneOf:
+      - "$ref": "#/components/schemas/FieldRevisionRequestItem"
+      - "$ref": "#/components/schemas/DocumentRevisionRequestItem"
+    FieldRevisionRequestItem:
       type: object
       required:
       - requirement_block_code
@@ -1783,6 +2098,72 @@ components:
         comment:
           type: string
           maxLength: 350
+    DocumentRevisionRequestItem:
+      type: object
+      required:
+      - name
+      - reason_code
+      - comment
+      - reference_document_ids
+      properties:
+        name:
+          type: string
+          description: Name of the document the applicant must provide.
+        reason_code:
+          type: string
+          description: A currently active code from GET /revision_reasons. The list
+            is site-configured and not a fixed enum.
+        comment:
+          type: string
+        reference_document_ids:
+          type: array
+          minItems: 1
+          description: Ids returned by POST /files. At least one. The files are stored
+            on the revision request when the status write succeeds.
+          items:
+            type: string
+    DocumentRequest:
+      type: object
+      required:
+      - id
+      - name
+      - reason_code
+      - comment
+      - reference_documents
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        reason_code:
+          type: string
+        comment:
+          type: string
+        reference_documents:
+          type: array
+          items:
+            "$ref": "#/components/schemas/File"
+    CachedFile:
+      type: object
+      required:
+      - id
+      - name
+      - type
+      - size
+      properties:
+        id:
+          type: string
+          description: Cache id to send as reference_document_ids on the revisions
+            status write. Not a download URL.
+        name:
+          type: string
+        type:
+          type: string
+          description: MIME type, for example application/pdf.
+        size:
+          type: integer
+          description: Size in bytes.
     ProjectMeeting:
       type: object
       required:

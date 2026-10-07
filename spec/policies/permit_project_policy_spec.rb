@@ -152,6 +152,29 @@ RSpec.describe PermitProjectPolicy, type: :policy do
       expect(p.download_notes_csv?).to be false
     end
 
+    it "denies create_permit_applications when review staff can see a project only as a collaborator outside their jurisdiction" do
+      other_jurisdiction = create(:sub_district)
+      application =
+        create(:permit_application, jurisdiction: other_jurisdiction)
+      # Review staff fail submission-collaborator eligibility, and a review
+      # collaborator must belong to the application's jurisdiction. Persist
+      # the row anyway so the policy sees collaboration without membership.
+      collaborator =
+        Collaborator.new(user: reviewer, collaboratorable: other_jurisdiction)
+      collaborator.save!(validate: false)
+      PermitCollaboration.new(
+        collaborator: collaborator,
+        permit_application: application,
+        collaboration_type: :review,
+        collaborator_type: :delegatee
+      ).save!(validate: false)
+
+      p = policy(reviewer, application.permit_project)
+
+      expect(p.show?).to be true
+      expect(p.create_permit_applications?).to be false
+    end
+
     it "permits show for a sandboxed project when the request uses that sandbox" do
       record =
         create(:permit_project, jurisdiction:, sandbox: published_sandbox)

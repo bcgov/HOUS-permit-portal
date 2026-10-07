@@ -29,6 +29,16 @@ RSpec.describe "External API v2 permit projects", type: :request do
           headers: headers
   end
 
+  def post_drafts(
+    permit_applications,
+    project: permit_project,
+    headers: auth_headers
+  )
+    post "/external_api/v2/permit_projects/#{project.id}/permit_applications",
+         params: { permit_applications: permit_applications }.to_json,
+         headers: headers
+  end
+
   def queue_project(project = permit_project)
     project.update_column(:state, PermitProject.states[:queued])
     project.reload
@@ -344,6 +354,244 @@ RSpec.describe "External API v2 permit projects", type: :request do
 
       expect(response).to have_http_status(:not_found)
       expect(sandbox_project.reload).to be_queued
+    end
+  end
+
+  describe "POST /external_api/v2/permit_projects/:id/permit_applications" do
+    # The submitted application is a lazy let. Load it before change matchers,
+    # or the first reference inside post_drafts looks like a created draft.
+    before { permit_project }
+
+    def published_template_version
+      create(
+        :template_version,
+        status: :published,
+        requirement_template: create(:requirement_template)
+      )
+    end
+
+    it "creates new_draft applications for the project owner and enqueues autopopulate" do
+      low_residential = published_template_version
+      laneway = published_template_version
+      other_jurisdiction = create(:sub_district)
+      state_before = permit_project.state
+      external_api_key.update!(
+        webhook_url: "https://partner.example.com/webhook"
+      )
+      PermitWebhookJob.clear
+      AutomatedCompliance::AutopopulateJob.clear
+
+      expect do
+        post_drafts(
+          [
+            {
+              requirement_template_id: low_residential.requirement_template_id,
+              template_version_id: SecureRandom.uuid,
+              jurisdiction_id: other_jurisdiction.id,
+              sandbox_id: SecureRandom.uuid
+            },
+            { requirement_template_id: laneway.requirement_template_id }
+          ]
+        )
+      end.to change(PermitApplication, :count).by(2)
+
+      expect(response).to have_http_status(:ok)
+      created =
+        permit_project.permit_applications.where.not(id: permit_application.id)
+      rows = JSON.parse(response.body).fetch("data")
+      expect(rows.map { |row| row["id"] }).to match_array(created.map(&:id))
+      published_version_ids = {
+        low_residential.requirement_template_id => low_residential.id,
+        laneway.requirement_template_id => laneway.id
+      }
+
+      rows.each do |row|
+        application = created.find(row["id"])
+        expect(row).to include(
+          "number" => application.number,
+          "status" => "new_draft",
+          "permit_project_id" => permit_project.id
+        )
+        expect(row).not_to have_key("tags")
+        expect(row["template_version"]).to include(
+          "id" => application.template_version_id,
+          "status" => "published",
+          "requirement_template_id" =>
+            application.template_version.requirement_template_id,
+          "feedbacks_count" => 0,
+          "has_unresolved_feedbacks" => false,
+          "template_sort_order" =>
+            application.template_version.requirement_template.sort_order,
+          "template_category_id" => nil,
+          "template_category" => nil
+        )
+        expect(application).to be_new_draft
+        expect(application.submitter_id).to eq(permit_project.owner_id)
+        expect(application.sandbox_id).to eq(permit_project.sandbox_id)
+        expect(application.jurisdiction_id).to eq(
+          permit_project.jurisdiction_id
+        )
+        expect(application.created_by).to eq(permit_project.jurisdiction)
+        expect(application.template_version_id).to eq(
+          published_version_ids[
+            application.template_version.requirement_template_id
+          ]
+        )
+      end
+
+      audits =
+        ApplicationAudit.where(
+          auditable_type: "PermitApplication",
+          auditable_id: created.map(&:id),
+          action: "create"
+        )
+      expect(audits.size).to eq(2)
+      expect(audits.map(&:username).uniq).to eq(
+        [Constants::ExternalApi::PARTNER_SYSTEM_ACTOR]
+      )
+      expect(
+        AutomatedCompliance::AutopopulateJob.jobs.map do |job|
+          job["args"].first
+        end
+      ).to match_array(created.map(&:id))
+
+      expect(permit_project.reload.state).to eq(state_before)
+      state_events =
+        PermitWebhookJob.jobs.select do |job|
+          job["args"][1] ==
+            Constants::Webhooks::Events::PermitProject::STATE_CHANGED
+        end
+      expect(state_events).to be_empty
+
+      get_project
+
+      expect(response).to have_http_status(:ok)
+      child_ids =
+        JSON
+          .parse(response.body)
+          .dig("data", "permit_applications")
+          .map { |row| row["id"] }
+      expect(child_ids).to include(permit_application.id)
+      expect(child_ids & created.map(&:id)).to be_empty
+    end
+
+    it "returns 422 and creates nothing when one requirement template is unknown" do
+      valid = published_template_version
+      unknown_id = SecureRandom.uuid
+
+      expect do
+        post_drafts(
+          [
+            { requirement_template_id: valid.requirement_template_id },
+            { requirement_template_id: unknown_id }
+          ]
+        )
+      end.not_to change(PermitApplication, :count)
+
+      expect(response).to have_http_status(:unprocessable_content)
+      message = JSON.parse(response.body).dig("meta", "message")
+      expect(message).to include(unknown_id)
+      expect(message).not_to include(valid.requirement_template_id)
+    end
+
+    it "returns 422 and creates nothing when the template has no published version" do
+      draft_version =
+        create(
+          :template_version,
+          status: :draft,
+          requirement_template: create(:requirement_template)
+        )
+
+      expect do
+        post_drafts(
+          [{ requirement_template_id: draft_version.requirement_template_id }]
+        )
+      end.not_to change(PermitApplication, :count)
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(JSON.parse(response.body).dig("meta", "message")).to include(
+        draft_version.requirement_template_id
+      )
+    end
+
+    it "returns 422 and creates nothing when the requirement template is discarded" do
+      template = create(:requirement_template)
+      create(
+        :template_version,
+        status: :published,
+        requirement_template: template
+      )
+      template.update_column(:discarded_at, Time.current)
+
+      expect do
+        post_drafts([{ requirement_template_id: template.id }])
+      end.not_to change(PermitApplication, :count)
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(JSON.parse(response.body).dig("meta", "message")).to include(
+        template.id
+      )
+    end
+
+    it "returns 422 for an empty permit_applications array" do
+      expect { post_drafts([]) }.not_to change(PermitApplication, :count)
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(JSON.parse(response.body).dig("meta", "message")).to include(
+        "empty"
+      )
+    end
+
+    it "returns 403 for a project in another jurisdiction" do
+      other = create(:permit_application, :newly_submitted).permit_project
+      version = published_template_version
+
+      expect do
+        post_drafts(
+          [{ requirement_template_id: version.requirement_template_id }],
+          project: other
+        )
+      end.not_to change(PermitApplication, :count)
+
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it "returns 404 for a sandbox project when the key is live" do
+      sandbox_project =
+        create(
+          :permit_application,
+          :newly_submitted,
+          jurisdiction: external_api_key.jurisdiction,
+          sandbox: external_api_key.jurisdiction.sandboxes.first
+        ).permit_project
+      version = published_template_version
+
+      expect do
+        post_drafts(
+          [{ requirement_template_id: version.requirement_template_id }],
+          project: sandbox_project
+        )
+      end.not_to change(PermitApplication, :count)
+
+      expect(response).to have_http_status(:not_found)
+    end
+
+    it "returns 403 for a draft-only project" do
+      draft_project =
+        create(
+          :permit_application,
+          jurisdiction: external_api_key.jurisdiction
+        ).permit_project
+      version = published_template_version
+
+      expect do
+        post_drafts(
+          [{ requirement_template_id: version.requirement_template_id }],
+          project: draft_project
+        )
+      end.not_to change(PermitApplication, :count)
+
+      expect(response).to have_http_status(:forbidden)
     end
   end
 end

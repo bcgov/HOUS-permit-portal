@@ -107,6 +107,32 @@ RSpec.describe ProjectAuditFormatters::BaseFormatter do
       end
     end
 
+    context "when a submitter views a partner actor" do
+      let(:jurisdiction) do
+        instance_double(
+          Jurisdiction,
+          qualified_name: "City Hall",
+          id: 1,
+          present?: true
+        )
+      end
+      let(:auditable) do
+        instance_double(PermitProject, jurisdiction: jurisdiction)
+      end
+      let(:audit) do
+        build_audit_double(
+          user: "Partner system",
+          auditable: auditable,
+          auditable_type: "PermitProject"
+        )
+      end
+      let(:viewer) { instance_double(User, submitter?: true, present?: true) }
+
+      it "uses the jurisdiction name" do
+        expect(formatter.description).to eq("City Hall made a change")
+      end
+    end
+
     context "when viewer is a submitter viewing a staff user's action" do
       let(:jurisdiction) do
         instance_double(
