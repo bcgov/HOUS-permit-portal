@@ -44,7 +44,8 @@ class StepCode < ApplicationRecord
             uniqueness: {
               conditions: -> { kept }
             },
-            allow_nil: true
+            allow_nil: true,
+            if: :will_save_change_to_permit_application_id?
   validates :current_stage, inclusion: { in: STAGES }
 
   scope :for_effective_sandbox,
