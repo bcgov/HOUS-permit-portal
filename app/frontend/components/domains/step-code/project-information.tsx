@@ -419,7 +419,7 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
             <Table variant="simple" size="sm">
               <Thead>
                 <Tr borderTop="none">
-                  <Th colSpan={2} pl={0} {...stageTableHeaderProps}>
+                  <Th colSpan={2} pl={3} {...stageTableHeaderProps}>
                     {permitApplicationId
                       ? t("stepCode.projectInformation.permitStage")
                       : t("stepCode.projectInformation.stage")}
@@ -458,7 +458,7 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
                         handleStageSelect(stage)
                       }}
                     >
-                      <Td pl={0} width="1px">
+                      <Td pl={3} width="1px">
                         <Radio
                           isChecked={isSelected}
                           onChange={() => handleStageSelect(stage)}
