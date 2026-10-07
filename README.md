@@ -121,6 +121,19 @@ AnyCable-Go connects to Docker Redis internally and to the host RPC server throu
 
 The database template uses `hous_permit_portal_development` and `hous_permit_portal_test`. Leave `DATABASE_URL` unset for local use: Rails would otherwise use it in preference to the separate database names. If an existing database config is present, setup preserves it; ensure its host, port, and user match `.env`. Update it using the tracked local template if they differ. Do not set `IS_DOCKER_BUILD` locally, even to `false`: several application checks use its presence.
 
+### Authentication cookie names
+
+Authentication cookie names use `AUTH_COOKIE_PREFIX` for both the application JWT
+and the Keycloak logout token. Set `AUTH_COOKIE_PREFIX=hub_dev_` in dev's Vault
+entry and `AUTH_COOKIE_PREFIX=hub_test_` in test's. Leave it unset or empty in
+production to keep the existing `access_token` / `id_token` names. Rails web and
+AnyCable RPC must use the same prefix; both already load their environment's
+Vault secrets. Restart the affected processes after changing the setting.
+Cookie domains and websocket URLs stay the same.
+
+Deploying the new names requires dev / test users to log in again. Old cookies can
+expire naturally; dev / test do not delete production's parent-domain cookies.
+
 ### Local login and optional integrations
 
 Local email/password login is enabled by both `ENABLE_LOCAL_PASSWORD_AUTH=true` and `VITE_ENABLE_LOCAL_PASSWORD_AUTH=true`. These flags are never honored in production. Use `/login` or `/admin`.
