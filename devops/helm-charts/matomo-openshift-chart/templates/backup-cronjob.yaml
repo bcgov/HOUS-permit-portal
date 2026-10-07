@@ -91,7 +91,7 @@ spec:
                 - name: RETENTION_COUNT
                   value: {{ .Values.backup.retentionCount | quote }}
                 - name: PRUNE_ENABLED
-                  value: {{ .Values.backup.pruneEnabled | default true | quote }}
+                  value: {{ dig "pruneEnabled" true .Values.backup | quote }}
                 - name: MAX_OBJECTS
                   value: {{ .Values.backup.s3.maxObjects | default 0 | quote }}
                 {{- /*
@@ -212,7 +212,7 @@ spec:
                 - name: RETENTION_COUNT
                   value: {{ .Values.backup.pvc.retentionCount | default 7 | quote }}
                 - name: PRUNE_ENABLED
-                  value: {{ .Values.backup.pvc.pruneEnabled | default true | quote }}
+                  value: {{ dig "pruneEnabled" true .Values.backup.pvc | quote }}
                 - name: PVC_MOUNT_PATH
                   value: {{ .Values.backup.pvc.mountPath | default "/pvc-backups" | quote }}
               command:

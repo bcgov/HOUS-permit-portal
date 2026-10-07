@@ -246,21 +246,21 @@ PluginsInstalled[] = "BotTracking"
 PluginsInstalled[] = "TagManager"
 
 [Deletelogs]
-delete_logs_enable = {{ include "matomo.bool01" ($deleteLogs.enable | default true) }}
+delete_logs_enable = {{ include "matomo.bool01" (dig "enable" true $deleteLogs) }}
 delete_logs_schedule_lowest_interval = {{ $deleteLogs.scheduleLowestInterval | default 1 }}
 delete_logs_older_than = {{ $deleteLogs.olderThanDays | default 180 }}
 delete_logs_max_rows_per_query = {{ $deleteLogs.maxRowsPerQuery | default 100000 }}
-enable_auto_database_size_estimate = {{ include "matomo.bool01" ($deleteLogs.enableAutoDatabaseSizeEstimate | default true) }}
-enable_database_size_estimate = {{ include "matomo.bool01" ($deleteLogs.enableDatabaseSizeEstimate | default true) }}
+enable_auto_database_size_estimate = {{ include "matomo.bool01" (dig "enableAutoDatabaseSizeEstimate" true $deleteLogs) }}
+enable_database_size_estimate = {{ include "matomo.bool01" (dig "enableDatabaseSizeEstimate" true $deleteLogs) }}
 
 [Deletereports]
-delete_reports_enable = {{ include "matomo.bool01" ($deleteReports.enable | default true) }}
+delete_reports_enable = {{ include "matomo.bool01" (dig "enable" true $deleteReports) }}
 delete_reports_older_than = {{ $deleteReports.olderThanMonths | default 12 }}
-delete_reports_keep_basic_metrics = {{ include "matomo.bool01" ($deleteReports.keepBasicMetrics | default true) }}
+delete_reports_keep_basic_metrics = {{ include "matomo.bool01" (dig "keepBasicMetrics" true $deleteReports) }}
 delete_reports_keep_day_reports = {{ include "matomo.bool01" ($deleteReports.keepDayReports | default false) }}
 delete_reports_keep_week_reports = {{ include "matomo.bool01" ($deleteReports.keepWeekReports | default false) }}
-delete_reports_keep_month_reports = {{ include "matomo.bool01" ($deleteReports.keepMonthReports | default true) }}
-delete_reports_keep_year_reports = {{ include "matomo.bool01" ($deleteReports.keepYearReports | default true) }}
+delete_reports_keep_month_reports = {{ include "matomo.bool01" (dig "keepMonthReports" true $deleteReports) }}
+delete_reports_keep_year_reports = {{ include "matomo.bool01" (dig "keepYearReports" true $deleteReports) }}
 delete_reports_keep_range_reports = {{ include "matomo.bool01" ($deleteReports.keepRangeReports | default false) }}
 delete_reports_keep_segment_reports = {{ include "matomo.bool01" ($deleteReports.keepSegmentReports | default false) }}
 {{- end -}}

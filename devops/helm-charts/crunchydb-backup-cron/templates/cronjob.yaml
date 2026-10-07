@@ -43,7 +43,7 @@ spec:
                   BUCKET="{{ .Values.cronjob.bucket }}"
                   BASE_PATH="{{ .Values.cronjob.basePath | trimSuffix "/" }}"
                   ENDPOINT="{{ .Values.cronjob.endpoint }}"
-                  RETENTION_SECONDS={{ .Values.cronjob.retentionSeconds }}   # e.g., 57600 for 16 hours
+                  RETENTION_SECONDS={{ printf "%.0f" (float64 .Values.cronjob.retentionSeconds) }}   # e.g., 57600 for 16 hours
 
                   # Validate BASE_PATH
                   if [ -z "$BASE_PATH" ]; then

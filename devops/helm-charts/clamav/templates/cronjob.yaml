@@ -16,12 +16,13 @@ spec:
                 - /bin/sh
                 - -c
                 - |
-                  freshclam && \
-                  echo "Cleaning up old database files..." && \
+                  set -e
+                  freshclam
+                  echo "Cleaning up old database files..."
                   find /opt/app-root/src -type f \( -name "*.cvd" -o -name "*.cld" \) | \
                   sort | \
                   head -n -3 | \
-                  xargs rm -f 2>/dev/null || true && \
+                  xargs rm -f 2>/dev/null || true
                   echo "Cleanup complete"
               resources:
                 {{- toYaml .Values.cronJob.resources | nindent 16 }}
