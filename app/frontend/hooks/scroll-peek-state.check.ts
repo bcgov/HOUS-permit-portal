@@ -71,6 +71,20 @@ assert.equal(
   "clamp that eats leftover overflow is not a return to the top"
 )
 
+assert.equal(
+  nextScrollPeekState(
+    { hiddenPx: CHROME },
+    {
+      delta: -2000,
+      scrollTop: 0,
+      maxScroll: 0,
+      barHeight: CHROME,
+    }
+  ).hiddenPx,
+  0,
+  "a content collapse bigger than the bar shows it, banner height included"
+)
+
 assert.equal(replay([0, 400, 390], { hiddenPx: 0 }, 400).hiddenPx, 48, "a real scroll up from the bottom still reveals")
 
 assert.equal(
