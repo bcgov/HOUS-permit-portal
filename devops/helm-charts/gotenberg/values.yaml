@@ -8,11 +8,8 @@ image:
 
 resources:
   requests:
-    cpu: 250m
+    cpu: 50m
     memory: 512Mi
-  limits:
-    cpu: "1"
-    memory: 2Gi
 
 # Preserve the upstream tini entrypoint; these replace only its command arguments.
 # Keep conversion limits and resource-fetch restrictions aligned with compose.yml.
