@@ -390,4 +390,188 @@ RSpec.describe JurisdictionTemplateVersionCustomization,
       end
     end
   end
+
+  describe "elective publish notifications" do
+    let(:jurisdiction) { create(:sub_district) }
+    let(:template_version) { create(:template_version) }
+    let(:field_id) { SecureRandom.uuid }
+    let!(:draft) do
+      create(
+        :permit_application,
+        jurisdiction: jurisdiction,
+        template_version: template_version
+      )
+    end
+
+    let(:notification_payloads) { [] }
+
+    before do
+      allow(NotificationPushJob).to receive(:perform_async) do |payload|
+        notification_payloads << payload
+      end
+    end
+
+    def elective_customizations(optional_ids: [])
+      {
+        "requirement_block_changes" => {
+          field_id => {
+            "enabled_elective_field_ids" => [field_id],
+            "optional_elective_field_ids" => optional_ids,
+            "enabled_elective_field_reasons" => {
+              field_id => "bylaw"
+            }
+          }
+        }
+      }
+    end
+
+    def expect_one_notice(action_type, component_key: nil, component_ids: nil)
+      expect(notification_payloads.size).to eq(1)
+      notice = notification_payloads.last[draft.submitter_id]
+      expect(notice["action_type"]).to eq(action_type)
+      return if component_key.nil?
+
+      ids =
+        Array(notice.dig("object_data", component_key)).map do |component|
+          component["id"]
+        end
+      expect(ids).to match_array(component_ids)
+    end
+
+    it "notifies when a live elective is enabled and does not also send customization_update" do
+      customization =
+        create(
+          :jurisdiction_template_version_customization,
+          jurisdiction: jurisdiction,
+          template_version: template_version
+        )
+
+      customization.update!(customizations: elective_customizations)
+
+      expect_one_notice(
+        Constants::NotificationActionTypes::ELECTIVE_PUBLISHED,
+        component_key: "enabled_components",
+        component_ids: [field_id]
+      )
+      expect(CustomizationChange.count).to eq(1)
+    end
+
+    it "notifies when an enabled elective becomes optional" do
+      customization =
+        create(
+          :jurisdiction_template_version_customization,
+          jurisdiction: jurisdiction,
+          template_version: template_version
+        )
+      customization.update!(customizations: elective_customizations)
+      notification_payloads.clear
+
+      customization.update!(
+        customizations: elective_customizations(optional_ids: [field_id])
+      )
+
+      expect_one_notice(
+        Constants::NotificationActionTypes::ELECTIVE_PUBLISHED,
+        component_key: "optional_components",
+        component_ids: [field_id]
+      )
+    end
+
+    it "notifies when a sandbox customization is promoted onto a new live row" do
+      sandbox = jurisdiction.sandboxes.published.first
+      customization =
+        create(
+          :jurisdiction_template_version_customization,
+          jurisdiction: jurisdiction,
+          template_version: template_version,
+          sandbox: sandbox,
+          customizations: elective_customizations
+        )
+
+      customization.promote
+
+      expect_one_notice(
+        Constants::NotificationActionTypes::ELECTIVE_PUBLISHED,
+        component_key: "enabled_components",
+        component_ids: [field_id]
+      )
+    end
+
+    it "names the field from the template form json" do
+      template_version.update_column(
+        :form_json,
+        {
+          "components" => [
+            {
+              "components" => [
+                {
+                  "components" => [
+                    {
+                      "id" => field_id,
+                      "key" => "site_plan",
+                      "label" => "Site plan"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      )
+      create(
+        :jurisdiction_template_version_customization,
+        jurisdiction: jurisdiction,
+        template_version: template_version,
+        customizations: elective_customizations
+      )
+
+      notice = notification_payloads.last[draft.submitter_id]
+      expect(notice["action_text"]).to include("Site plan")
+      expect(CustomizationChange.last.enabled_components.first["key"]).to eq(
+        "site_plan"
+      )
+    end
+
+    it "sends customization_update for a tip-only live save" do
+      customization =
+        create(
+          :jurisdiction_template_version_customization,
+          jurisdiction: jurisdiction,
+          template_version: template_version
+        )
+
+      customization.update!(
+        customizations: {
+          "requirement_block_changes" => {
+            "block-1" => {
+              "tip" => "Bring the site plan"
+            }
+          }
+        }
+      )
+
+      expect_one_notice(
+        Constants::NotificationActionTypes::CUSTOMIZATION_UPDATE
+      )
+      expect(CustomizationChange.count).to eq(0)
+    end
+
+    it "does not send elective_published for a sandbox elective save" do
+      sandbox = jurisdiction.sandboxes.published.first
+      customization =
+        create(
+          :jurisdiction_template_version_customization,
+          jurisdiction: jurisdiction,
+          template_version: template_version,
+          sandbox: sandbox
+        )
+
+      customization.update!(customizations: elective_customizations)
+
+      expect_one_notice(
+        Constants::NotificationActionTypes::CUSTOMIZATION_UPDATE
+      )
+      expect(CustomizationChange.count).to eq(0)
+    end
+  end
 end
