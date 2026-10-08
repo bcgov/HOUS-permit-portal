@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { IPermitApplication } from "../../../../../models/permit-application"
+import { useMst } from "../../../../../setup/root"
 import { EFileUploadAttachmentType, EStepCodeType } from "../../../../../types/enums"
 import { downloadFileFromStorage } from "../../../../../utils/utility-functions"
 
@@ -18,6 +19,7 @@ export function useRequirementFormEvents({
   onPreviousSubmissionOpen,
 }: IUseRequirementFormEventsParams) {
   const navigate = useNavigate()
+  const { stepCodeStore } = useMst()
   const [autofillContactKey, setAutofillContactKey] = useState(null)
   const [previousSubmissionKey, setPreviousSubmissionKey] = useState(null)
   const [isStepCodeSelectOpen, setIsStepCodeSelectOpen] = useState(false)
@@ -34,11 +36,13 @@ export function useRequirementFormEvents({
   useEffect(() => {
     const handleOpenStepCodePart3 = async (_event) => {
       await triggerSave?.()
+      stepCodeStore.setIndexExitPath(null)
       navigate("part-3-step-code")
     }
 
     const handleOpenStepCodePart9 = async (_event) => {
       await triggerSave?.()
+      stepCodeStore.setIndexExitPath(null)
       navigate("part-9-step-code")
     }
 
