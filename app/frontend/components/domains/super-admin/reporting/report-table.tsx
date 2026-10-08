@@ -19,7 +19,10 @@ import { ESortDirection } from "../../../../types/enums"
 import { IReportSort, IReportTable } from "../../../../types/report"
 import { ISort } from "../../../../types/types"
 import { toCamelCase } from "../../../../utils/utility-functions"
+import { Paginator } from "../../../shared/base/inputs/paginator"
 import { SortIcon } from "../../../shared/sort-icon"
+
+const MONTH_PAGE_SIZE = 12
 
 interface IProps {
   table: IReportTable
@@ -28,12 +31,15 @@ interface IProps {
 export function ReportTable({ table }: IProps) {
   const { t } = useTranslation()
   const [sort, setSort] = useState<IReportSort | null>(table.defaultSort ?? null)
+  const [page, setPage] = useState(1)
   const mixColumn = table.columns.find((column) => isMixColumn(column.key))
   const columns = table.columns.filter((column) => !isMixColumn(column.key))
+  const monthTable = columns.some((column) => column.key === "period")
 
   useEffect(() => {
     setSort(table.defaultSort ?? null)
-  }, [table.key, table.defaultSort?.key, table.defaultSort?.direction])
+    setPage(1)
+  }, [table.key, table.rows.length, table.defaultSort?.key, table.defaultSort?.direction])
 
   const rows = useMemo(() => {
     if (!sort) return table.rows
@@ -41,8 +47,15 @@ export function ReportTable({ table }: IProps) {
     return [...table.rows].sort((a, b) => compareValues(rowValue(a, sort.key), rowValue(b, sort.key)) * direction)
   }, [table.rows, sort])
 
+  const pagedRows = useMemo(
+    () => pageRows(rows, page, monthTable && rows.length > MONTH_PAGE_SIZE, sort == null),
+    [rows, page, monthTable, sort]
+  )
+  const totalPages = Math.ceil(rows.length / MONTH_PAGE_SIZE)
+
   const onSort = (key: string) => {
     if (!table.sortable) return
+    setPage(1)
     setSort((previous) => {
       if (previous?.key === key) {
         return { key, direction: previous.direction === "asc" ? "desc" : "asc" }
@@ -95,14 +108,14 @@ export function ReportTable({ table }: IProps) {
             </Tr>
           </Thead>
           <Tbody>
-            {rows.length === 0 ? (
+            {pagedRows.length === 0 ? (
               <Tr>
                 <Td colSpan={Math.max(columns.length, 1)}>
                   <Text color="text.secondary">{t("reporting.shell.emptyTable")}</Text>
                 </Td>
               </Tr>
             ) : (
-              rows.map((row, index) => (
+              pagedRows.map((row, index) => (
                 <Tr key={index}>
                   {columns.map((column) => (
                     <Td
@@ -135,8 +148,33 @@ export function ReportTable({ table }: IProps) {
           </Tbody>
         </Table>
       </TableContainer>
+      {monthTable && rows.length > MONTH_PAGE_SIZE ? (
+        <Box mt={4}>
+          <Paginator
+            current={page}
+            total={rows.length}
+            totalPages={totalPages}
+            pageSize={MONTH_PAGE_SIZE}
+            handlePageChange={(nextPage) => {
+              if (nextPage < 1 || nextPage > totalPages) return
+              setPage(nextPage)
+            }}
+            showLessItems
+          />
+        </Box>
+      ) : null}
     </Box>
   )
+}
+
+function pageRows<T>(rows: T[], page: number, paginate: boolean, fromEnd: boolean) {
+  if (!paginate) return rows
+  if (fromEnd) {
+    const end = rows.length - (page - 1) * MONTH_PAGE_SIZE
+    return rows.slice(Math.max(0, end - MONTH_PAGE_SIZE), end)
+  }
+  const start = (page - 1) * MONTH_PAGE_SIZE
+  return rows.slice(start, start + MONTH_PAGE_SIZE)
 }
 
 function isMixColumn(key: string) {
