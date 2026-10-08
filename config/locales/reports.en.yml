@@ -373,7 +373,7 @@ en:
           help: "Live applications currently newly submitted, resubmitted, or in review, as of %{as_of}. This snapshot ignores the selected range."
         revision_request_rate:
           label: "Revision request rate"
-          help: "Share of resolved applications first submitted in %{range} that had more than one submission version. In-flight applications are excluded."
+          help: "Share of resolved applications first submitted in %{range} that had more than one submission version. In-flight applications (still newly submitted, resubmitted, or in review) are excluded."
         mean_revision_rounds:
           label: "Mean revision rounds"
           help: "Mean extra submission versions after the first, among resolved applications first submitted in %{range}."
@@ -385,19 +385,19 @@ en:
           help: "Share of resolved applications first submitted in %{range} that were withdrawn."
         median_days_to_first_review:
           label: "Median days to first review"
-          help: "Median days from first submission to the earliest submission version viewed_at, for applications with that timestamp."
+          help: "Median days from first submission to the first time a reviewer viewed the submission, for applications that have been viewed."
         median_days_to_resolution:
           label: "Median days to resolution"
           help: "Median days from first submission to the first audit that records approved, issued, or withdrawn."
         excluded_timing:
           label: "Excluded from timings"
-          help: "Applications missing viewed_at or a resolution audit. Timing data starts on %{start_date}."
+          help: "Applications a reviewer has not viewed, or that have no resolution audit. Timing data starts on %{start_date}."
       notes:
         aggregate_only: "Revision, resubmission, and withdrawal figures are aggregates. Reviewer names and reviewer-level attribution are not included."
         in_flight_excluded: "Applications still newly submitted, resubmitted, or in review are omitted from outcome rates."
         queue_independent: "The queue snapshot is the current in-review count and does not follow the selected time range. Its as-of time is on the headline."
-        timing_start: "Time to resolution uses PermitApplication status audits. The start of that series is shown on the excluded-timing figure. Time to first review uses submission_versions.viewed_at."
-        timing_exclusions: "Applications without viewed_at or without a resolution audit are excluded from the corresponding median. The excluded count is shown."
+        timing_start: "Time to resolution uses PermitApplication status audits. The start of that series is shown on the excluded-timing figure. Time to first review is the first time a reviewer viewed the submission."
+        timing_exclusions: "Applications a reviewer has not viewed, or that have no resolution audit, are excluded from the corresponding median. The excluded count is shown."
     platform_health:
       title: "Platform health"
       description: "Collaboration, uploaded documents, and stated gaps in error capture"
