@@ -27,6 +27,7 @@ import { stickyBelowNavBar } from "../../../styles/nav-bar-offset"
 import { ICustomEventMap } from "../../../types/dom"
 import { ECollaborationType, ECustomEvents, ERequirementType } from "../../../types/enums"
 import { findPidComponentKey } from "../../../utils/formio-component-traversal"
+import { matomoTemplateNameKeyFrom, trackMatomoEvent } from "../../../utils/matomo"
 import { handleScrollToBottom, handleScrollToTop } from "../../../utils/utility-functions"
 import { CopyableValue } from "../../shared/base/copyable-value"
 import { ErrorScreen } from "../../shared/base/error-screen"
@@ -77,6 +78,11 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
       }, 100)
     }
   }, [scrollToSelector])
+
+  useEffect(() => {
+    if (!currentPermitApplication?.isFullyLoaded) return
+    trackMatomoEvent("permit", "edit_open", matomoTemplateNameKeyFrom(currentPermitApplication))
+  }, [currentPermitApplication?.id, currentPermitApplication?.isFullyLoaded])
 
   const getDefaultPermitApplicationMetadataValues = () => ({ nickname: currentPermitApplication?.nickname })
 
