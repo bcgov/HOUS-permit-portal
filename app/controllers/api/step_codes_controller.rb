@@ -162,6 +162,19 @@ class Api::StepCodesController < Api::ApplicationController
               disposition: "attachment"
   end
 
+  def download_part_3_step_code_checklists_csv
+    authorize :step_code, :download_part_3_step_code_checklists_csv?
+
+    service =
+      StepCodeChecklistDumpService.new(
+        range: Reports::Range.parse(params[:range])
+      )
+    send_data service.part_3_csv,
+              type: "text/csv",
+              filename: service.part_3_csv_filename,
+              disposition: "attachment"
+  end
+
   def download_step_code_file_uploads_zip
     authorize :step_code, :download_step_code_file_uploads_zip?
 

@@ -4,15 +4,15 @@ module Reports
 
     module_function
 
-    def fetch(key, range, force: false)
-      cache_key = key_for(key, range)
+    def fetch(key, range, force: false, subject: nil)
+      cache_key = key_for(key, range, subject)
       unless force
         cached = Rails.cache.read(cache_key)
         return cached if cached.present?
       end
 
       previous = Rails.cache.read(cache_key)
-      payload = Registry.build(key, range).call
+      payload = Registry.build(key, range, subject: subject).call
       Rails.cache.write(cache_key, payload, expires_in: TTL)
       payload
     rescue StandardError => e
@@ -27,8 +27,9 @@ module Reports
       )
     end
 
-    def key_for(key, range)
-      "reports/#{key}/#{range.preset}"
+    def key_for(key, range, subject = nil)
+      suffix = subject.present? ? "/#{subject}" : ""
+      "reports/#{key}/#{range.preset}#{suffix}"
     end
   end
 end

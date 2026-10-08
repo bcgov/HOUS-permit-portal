@@ -17,10 +17,7 @@ module Reports
           "bar",
           x_key: "period",
           series: [
-            {
-              key: "count",
-              label: I18n.t("reports.step_code_part_9.series.submissions")
-            }
+            { key: "count", label: I18n.t("#{i18n_base}.series.submissions") }
           ],
           data: by_month,
           record_count: count
@@ -30,10 +27,7 @@ module Reports
           "bar",
           x_key: "label",
           series: [
-            {
-              key: "count",
-              label: I18n.t("reports.step_code_part_9.series.submissions")
-            }
+            { key: "count", label: I18n.t("#{i18n_base}.series.submissions") }
           ],
           data: outcome_rows,
           record_count: count
@@ -43,10 +37,7 @@ module Reports
           "bar",
           x_key: "label",
           series: [
-            {
-              key: "count",
-              label: I18n.t("reports.step_code_part_9.series.submissions")
-            }
+            { key: "count", label: I18n.t("#{i18n_base}.series.submissions") }
           ],
           data: energy_step_rows,
           record_count: count
@@ -56,10 +47,7 @@ module Reports
           "bar",
           x_key: "label",
           series: [
-            {
-              key: "count",
-              label: I18n.t("reports.step_code_part_9.series.submissions")
-            }
+            { key: "count", label: I18n.t("#{i18n_base}.series.submissions") }
           ],
           data: zero_carbon_step_rows,
           record_count: count
@@ -73,7 +61,7 @@ module Reports
           "by_month",
           [
             column("period"),
-            column("count", "reports.step_code_part_9.columns.submissions")
+            column("count", "#{i18n_base}.columns.submissions")
           ],
           by_month
         ),
@@ -84,16 +72,13 @@ module Reports
         ),
         table(
           "outcomes",
-          [
-            column("label", "reports.step_code_part_9.columns.outcome"),
-            column("count")
-          ],
+          [column("label", "#{i18n_base}.columns.outcome"), column("count")],
           outcome_rows
         ),
         table(
           "energy_step",
           [
-            column("label", "reports.step_code_part_9.columns.energy_step"),
+            column("label", "#{i18n_base}.columns.energy_step"),
             column("count")
           ],
           energy_step_rows
@@ -101,10 +86,7 @@ module Reports
         table(
           "zero_carbon_step",
           [
-            column(
-              "label",
-              "reports.step_code_part_9.columns.zero_carbon_step"
-            ),
+            column("label", "#{i18n_base}.columns.zero_carbon_step"),
             column("count")
           ],
           zero_carbon_step_rows
@@ -285,7 +267,7 @@ module Reports
       submitted_scope
         .includes(
           :jurisdiction,
-          checklists: :data_entries,
+          checklist_includes,
           permit_application: {
             permit_project: :jurisdiction
           }
@@ -300,7 +282,7 @@ module Reports
             "jurisdiction_id" => step_code.jurisdiction&.id,
             "jurisdiction_name" =>
               step_code.jurisdiction&.name ||
-                I18n.t("reports.step_code_part_9.unknown_jurisdiction"),
+                I18n.t("#{i18n_base}.unknown_jurisdiction"),
             "submitted_at" => submitted_at,
             "period" =>
               submitted_at.to_date.beginning_of_month.strftime("%Y-%m"),
@@ -313,7 +295,7 @@ module Reports
 
     def submitted_scope
       scope =
-        Part9StepCode
+        step_code_class
           .kept
           .joins(permit_application: :permit_project)
           .merge(PermitApplication.kept)
@@ -371,21 +353,18 @@ module Reports
     def outcome_rows
       %w[pass fail incomplete].map do |key|
         {
-          "label" => I18n.t("reports.step_code_part_9.outcomes.#{key}"),
+          "label" => I18n.t("#{i18n_base}.outcomes.#{key}"),
           "count" => outcome_counts[key].to_i
         }
       end
     end
 
     def energy_step_rows
-      step_distribution("energy_step", "reports.step_code_part_9.energy_step")
+      step_distribution("energy_step", "#{i18n_base}.energy_step")
     end
 
     def zero_carbon_step_rows
-      step_distribution(
-        "zero_carbon_step",
-        "reports.step_code_part_9.zero_carbon_step"
-      )
+      step_distribution("zero_carbon_step", "#{i18n_base}.zero_carbon_step")
     end
 
     def step_distribution(field, i18n_prefix)
@@ -401,7 +380,7 @@ module Reports
         end
       if incomplete.positive?
         rows_out << {
-          "label" => I18n.t("reports.step_code_part_9.outcomes.incomplete"),
+          "label" => I18n.t("#{i18n_base}.outcomes.incomplete"),
           "count" => incomplete
         }
       end
@@ -413,32 +392,35 @@ module Reports
         rows
           .group_by { |row| row["jurisdiction_id"] }
           .transform_values(&:length)
-      enabled_ids = JurisdictionStepRequirement.distinct.pluck(:jurisdiction_id)
+      enabled_ids = enabled_jurisdiction_ids
 
-      Jurisdiction
-        .order(:name)
-        .map do |jurisdiction|
-          {
-            "jurisdiction" => jurisdiction.name,
-            "submissions" => submission_counts[jurisdiction.id].to_i,
-            "enablement" =>
-              I18n.t(
-                "reports.step_code_part_9.enablement.#{enabled_ids.include?(jurisdiction.id) ? "enabled" : "not_enabled"}"
-              )
-          }
-        end
-        .tap do |list|
-          unknown = submission_counts[nil].to_i
-          if unknown.positive?
-            list << {
-              "jurisdiction" =>
-                I18n.t("reports.step_code_part_9.unknown_jurisdiction"),
-              "submissions" => unknown,
+      list =
+        Jurisdiction
+          .order(:name)
+          .filter_map do |jurisdiction|
+            count = submission_counts[jurisdiction.id].to_i
+            next if count.zero?
+
+            {
+              "jurisdiction" => jurisdiction.name,
+              "jurisdiction_slug" => jurisdiction.slug,
+              "submissions" => count,
               "enablement" =>
-                I18n.t("reports.step_code_part_9.enablement.enabled")
+                I18n.t(
+                  "#{i18n_base}.enablement.#{enabled_ids.include?(jurisdiction.id) ? "enabled" : "not_enabled"}"
+                )
             }
           end
-        end
+
+      unknown = submission_counts[nil].to_i
+      if unknown.positive?
+        list << {
+          "jurisdiction" => I18n.t("#{i18n_base}.unknown_jurisdiction"),
+          "submissions" => unknown,
+          "enablement" => I18n.t("#{i18n_base}.enablement.enabled")
+        }
+      end
+      list
     end
 
     def each_export_context
@@ -451,7 +433,7 @@ module Reports
           .group(:permit_application_id)
           .minimum(:created_at)
 
-      Part9StepCode
+      step_code_class
         .where(id: submitted_scope.select("step_codes.id"))
         .includes(
           :jurisdiction,
@@ -474,7 +456,7 @@ module Reports
               submitted_at: submitted_at,
               jurisdiction_name:
                 step_code.jurisdiction&.name ||
-                  I18n.t("reports.step_code_part_9.unknown_jurisdiction"),
+                  I18n.t("#{i18n_base}.unknown_jurisdiction"),
               outcome: outcome,
               energy_step: energy_step,
               zero_carbon_step: zero_carbon_step
@@ -491,11 +473,24 @@ module Reports
       ctx[:checklist]&.building_characteristics_summary&.fossil_fuels&.presence
     end
 
+    def step_code_class
+      Part9StepCode
+    end
+
+    def checklist_includes
+      { checklists: :data_entries }
+    end
+
+    def enabled_jurisdiction_ids
+      JurisdictionStepRequirement.distinct.pluck(:jurisdiction_id)
+    end
+
+    def i18n_base
+      "reports.#{self.class.key}"
+    end
+
     def column(key, i18n_key = nil)
-      {
-        key: key,
-        label: I18n.t(i18n_key || "reports.step_code_part_9.columns.#{key}")
-      }
+      { key: key, label: I18n.t(i18n_key || "#{i18n_base}.columns.#{key}") }
     end
   end
 end

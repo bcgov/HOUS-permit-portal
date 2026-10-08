@@ -9,11 +9,11 @@ import { ReportShell } from "./report-shell"
 export const ReportScreen = observer(() => {
   const { reportKey } = useParams()
   const { reportStore } = useMst()
-  const { fetchReport, currentPayload, isLoading, rangePreset } = reportStore
+  const { fetchReport, currentPayload, isLoading, rangePreset, subject } = reportStore
 
   useEffect(() => {
     if (reportKey) fetchReport(reportKey)
-  }, [reportKey, rangePreset])
+  }, [reportKey, rangePreset, subject])
 
   return (
     <Container maxW="container.lg" p={{ base: 4, md: 8 }} as="main">

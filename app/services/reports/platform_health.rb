@@ -138,11 +138,11 @@ module Reports
     def average_total_size
       return nil if application_count.zero?
 
-      (sizes_by_application.values.sum.to_f / application_count).round
+      megabytes(sizes_by_application.values.sum.to_f / application_count)
     end
 
     def maximum_total_size
-      sizes_by_application.values.max
+      megabytes(sizes_by_application.values.max)
     end
   end
 end

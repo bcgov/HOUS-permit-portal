@@ -45,19 +45,31 @@ RSpec.describe Reports::StepCodePart9 do
     expect(failed[:value]).to eq(0)
   end
 
-  it "distinguishes jurisdictions with no submissions from those not enabled" do
-    enabled = create(:sub_district)
-    not_enabled = create(:sub_district)
-    not_enabled.jurisdiction_step_requirements.delete_all
+  it "omits jurisdictions with no submissions and links those that have some" do
+    with_submissions = create(:sub_district)
+    quiet = create(:sub_district)
+    application =
+      create(
+        :permit_application,
+        :newly_submitted,
+        with_fake_plan_document: true,
+        jurisdiction: with_submissions
+      )
+    create(:part_9_step_code, permit_application: application)
 
     table = payload[:tables].find { |tbl| tbl[:key] == "by_jurisdiction" }
-    enabled_row =
-      table[:rows].find { |row| row["jurisdiction"] == enabled.name }
-    not_enabled_row =
-      table[:rows].find { |row| row["jurisdiction"] == not_enabled.name }
+    names = table[:rows].map { |row| row["jurisdiction"] }
+    row =
+      table[:rows].find do |entry|
+        entry["jurisdiction"] == with_submissions.name
+      end
 
-    expect(enabled_row["enablement"]).to eq("Enabled")
-    expect(not_enabled_row["enablement"]).to eq("Not enabled")
+    expect(names).not_to include(quiet.name)
+    expect(table[:rows]).to all(
+      satisfy { |entry| entry["submissions"].to_i.positive? }
+    )
+    expect(row["enablement"]).to eq("Enabled")
+    expect(row["jurisdiction_slug"]).to eq(with_submissions.slug)
   end
 
   it "suppresses charts when volume is below the small-N threshold" do

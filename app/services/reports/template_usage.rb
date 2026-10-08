@@ -20,7 +20,7 @@ module Reports
               label: I18n.t("reports.template_usage.series.applications")
             }
           ],
-          data: combined_rows,
+          data: combined_rows.reject { |row| row["count"].to_i.zero? },
           record_count: created_in_range.count
         )
       ]
@@ -30,7 +30,12 @@ module Reports
       [
         table(
           "combined",
-          [column("template"), column("category"), column("count")],
+          [
+            column("template"),
+            column("category"),
+            column("created"),
+            column("submitted")
+          ],
           combined_rows
         ),
         table(
@@ -54,6 +59,7 @@ module Reports
     def notes
       [
         note("permit_type_proxy", "definition"),
+        note("created_and_submitted", "definition"),
         note("never_used", "definition")
       ]
     end
@@ -68,27 +74,34 @@ module Reports
       { key: key, label: I18n.t("reports.template_usage.columns.#{key}") }
     end
 
-    def grouped_counts
-      @grouped_counts ||=
-        created_in_range
-          .joins(:template_version)
-          .joins(
-            "INNER JOIN requirement_templates ON requirement_templates.id = template_versions.requirement_template_id"
-          )
-          .joins(
-            "LEFT JOIN template_categories ON template_categories.id = requirement_templates.template_category_id"
-          )
-          .group(
-            "permit_projects.jurisdiction_id",
-            "requirement_templates.nickname",
-            "template_categories.label"
-          )
-          .count
+    def created_grouped_counts
+      @created_grouped_counts ||= grouped_counts(created_in_range)
+    end
+
+    def submitted_grouped_counts
+      @submitted_grouped_counts ||= grouped_counts(submitted_in_range)
+    end
+
+    def grouped_counts(scope)
+      scope
+        .joins(:template_version)
+        .joins(
+          "INNER JOIN requirement_templates ON requirement_templates.id = template_versions.requirement_template_id"
+        )
+        .joins(
+          "LEFT JOIN template_categories ON template_categories.id = requirement_templates.template_category_id"
+        )
+        .group(
+          "permit_projects.jurisdiction_id",
+          "requirement_templates.nickname",
+          "template_categories.label"
+        )
+        .count
     end
 
     def jurisdiction_rows
       @jurisdiction_rows ||=
-        grouped_counts
+        created_grouped_counts
           .map do |(jurisdiction_id, nickname, category), count|
             {
               "jurisdiction" => jurisdiction_name(jurisdiction_id),
@@ -102,16 +115,33 @@ module Reports
 
     def combined_rows
       @combined_rows ||=
-        jurisdiction_rows
-          .group_by { |row| [row["template"], row["category"]] }
-          .map do |(nickname, category), rows|
-            {
-              "template" => nickname,
-              "category" => category,
-              "count" => rows.sum { |row| row["count"] }
-            }
-          end
-          .sort_by { |row| -row["count"] }
+        begin
+          created = rollup(created_grouped_counts)
+          submitted = rollup(submitted_grouped_counts)
+          (created.keys + submitted.keys)
+            .uniq
+            .map do |nickname, category|
+              created_count = created[[nickname, category]].to_i
+              {
+                "template" => nickname,
+                "category" => category,
+                "created" => created_count,
+                "submitted" => submitted[[nickname, category]].to_i,
+                "count" => created_count
+              }
+            end
+            .sort_by do |row|
+              [-row["created"], -row["submitted"], row["template"]]
+            end
+        end
+    end
+
+    def rollup(grouped)
+      grouped.each_with_object(
+        Hash.new(0)
+      ) do |((_id, nickname, category), count), memo|
+        memo[[nickname.to_s, category.to_s]] += count.to_i
+      end
     end
 
     def used_labels
@@ -152,7 +182,7 @@ module Reports
     def jurisdiction_names
       @jurisdiction_names ||=
         Jurisdiction
-          .where(id: grouped_counts.keys.map(&:first))
+          .where(id: created_grouped_counts.keys.map(&:first))
           .each_with_object({}) do |jurisdiction, memo|
             memo[jurisdiction.id] = jurisdiction.qualified_name.presence ||
               jurisdiction.name

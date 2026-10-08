@@ -17,6 +17,7 @@ export const ReportStoreModel = types
   .model("ReportStoreModel")
   .props({
     rangePreset: types.optional(types.string, storedRange),
+    subject: types.optional(types.string, "applications"),
     isLoading: types.optional(types.boolean, false),
     isRefreshing: types.optional(types.boolean, false),
   })
@@ -37,6 +38,9 @@ export const ReportStoreModel = types
         sessionStorage.setItem(RANGE_STORAGE_KEY, preset)
       }
     },
+    setSubject(subject: "applications" | "projects") {
+      self.subject = subject
+    },
     setPayload(payload: IReportPayload | null) {
       self.currentPayload = payload
     },
@@ -55,7 +59,9 @@ export const ReportStoreModel = types
       self.isLoading = true
       self.setPayload(null)
       try {
-        const response = yield* toGenerator(self.environment.api.fetchReport(key, self.rangePreset))
+        const response = yield* toGenerator(
+          self.environment.api.fetchReport(key, self.rangePreset, reportSubject(key, self.subject))
+        )
         if (response.ok) {
           self.setPayload(response.data?.data ?? null)
         } else {
@@ -68,7 +74,9 @@ export const ReportStoreModel = types
     refreshReport: flow(function* (key: string) {
       self.isRefreshing = true
       try {
-        const response = yield* toGenerator(self.environment.api.refreshReport(key, self.rangePreset))
+        const response = yield* toGenerator(
+          self.environment.api.refreshReport(key, self.rangePreset, reportSubject(key, self.subject))
+        )
         if (response.ok && response.data?.data) {
           self.setPayload(response.data.data)
         }
@@ -77,11 +85,19 @@ export const ReportStoreModel = types
       }
     }),
     downloadExport: flow(function* (key: string) {
-      const response = yield* toGenerator(self.environment.api.downloadReportExport(key, self.rangePreset))
+      const response = yield* toGenerator(
+        self.environment.api.downloadReportExport(key, self.rangePreset, reportSubject(key, self.subject))
+      )
       if (!response.ok) return
       const fileName = `${key}_${self.rangePreset}_${new Date().toISOString().slice(0, 10)}.csv`
       startBlobDownload(response.data, "text/csv", fileName)
     }),
   }))
+
+const SUBJECT_REPORTS = ["submitter_adoption", "draft_completion"]
+
+function reportSubject(key: string, subject: string) {
+  return SUBJECT_REPORTS.includes(key) ? subject : undefined
+}
 
 export interface IReportStore extends Instance<typeof ReportStoreModel> {}

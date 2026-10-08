@@ -83,4 +83,22 @@ RSpec.describe StepCodeChecklistDumpService do
 
     expect(rows.map { |row| row["Roof ceiling details 1"] }).to eq(["live"])
   end
+
+  it "exports part 3 checklists created in range" do
+    create(:part_3_step_code)
+
+    rows =
+      CSV.parse(
+        described_class.new(range: Reports::Range.parse("all_time")).part_3_csv,
+        headers: true
+      )
+
+    expect(rows.headers).to include(
+      "Reference number",
+      "Building Height",
+      "Climate Zone"
+    )
+    expect(rows.length).to eq(1)
+    expect(rows.first["Stage"]).to eq("pre_construction")
+  end
 end

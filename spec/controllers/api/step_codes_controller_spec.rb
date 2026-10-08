@@ -302,6 +302,29 @@ RSpec.describe Api::StepCodesController, type: :controller do
     end
   end
 
+  describe "GET #download_part_3_step_code_checklists_csv" do
+    it "returns csv data for super admins" do
+      sign_in create(:user, :super_admin)
+      service =
+        instance_double(
+          StepCodeChecklistDumpService,
+          part_3_csv: "csv-data",
+          part_3_csv_filename:
+            "part_3_step_code_checklists_12_months_2026-08-31.csv"
+        )
+      allow(StepCodeChecklistDumpService).to receive(:new).and_return(service)
+
+      get :download_part_3_step_code_checklists_csv,
+          params: {
+            range: "12_months"
+          }
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to eq("csv-data")
+      expect(response.media_type).to eq("text/csv")
+    end
+  end
+
   describe "GET #download_step_code_file_uploads_zip" do
     it "returns a zip for super admins" do
       sign_in create(:user, :super_admin)
