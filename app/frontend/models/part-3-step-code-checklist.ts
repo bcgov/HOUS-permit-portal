@@ -227,10 +227,18 @@ export const Part3StepCodeChecklistModel = types
       return hasComplianceReport && baselineIsComplete && stepCodeIsComplete //&& self.isComplete("modelledOutputs")
     },
   }))
+  // Not in the API snapshot, so a websocket checklist reload does not clear it.
+  .volatile(() => ({
+    reportGenerationPending: false,
+  }))
   .actions((self) => ({
     markReportDocumentStale() {
       if (!self.reportDocument || self.reportDocument.stale) return
       self.reportDocument = { ...self.reportDocument, stale: true }
+      self.reportGenerationPending = false
+    },
+    clearReportGenerationPending() {
+      self.reportGenerationPending = false
     },
     load: flow(function* () {
       const response = yield self.environment.api.fetchPart3Checklist(self.id)
@@ -262,6 +270,9 @@ export const Part3StepCodeChecklistModel = types
         if (key !== "report") {
           self.markReportDocumentStale()
         }
+        if (requestOptions?.reportGenerationRequested) {
+          self.reportGenerationPending = true
+        }
         return true
       }
       return false
@@ -274,6 +285,7 @@ export const Part3StepCodeChecklistModel = types
       )
       if (response.ok) {
         self.markReportDocumentStale()
+        self.reportGenerationPending = true
         return true
       }
       return false
