@@ -13,11 +13,13 @@ import {
   Wrap,
   WrapItem,
 } from "@chakra-ui/react"
-import { CaretDown, CaretUp } from "@phosphor-icons/react"
 import React, { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { ESortDirection } from "../../../../types/enums"
 import { IReportSort, IReportTable } from "../../../../types/report"
+import { ISort } from "../../../../types/types"
 import { toCamelCase } from "../../../../utils/utility-functions"
+import { SortIcon } from "../../../shared/sort-icon"
 
 interface IProps {
   table: IReportTable
@@ -86,13 +88,7 @@ export function ReportTable({ table }: IProps) {
                     <Text as="span" lineHeight="short">
                       {column.label}
                     </Text>
-                    {table.sortable && sort?.key === column.key ? (
-                      sort.direction === "asc" ? (
-                        <CaretUp size={12} />
-                      ) : (
-                        <CaretDown size={12} />
-                      )
-                    ) : null}
+                    {table.sortable ? <SortIcon field={column.key} currentSort={columnSort(sort, column.key)} /> : null}
                   </HStack>
                 </Th>
               ))}
@@ -182,6 +178,14 @@ function rowValue(row: Record<string, string | number | null>, key: string) {
 function compareValues(a: string | number | null | undefined, b: string | number | null | undefined) {
   if (typeof a === "number" && typeof b === "number") return a - b
   return String(a ?? "").localeCompare(String(b ?? ""), undefined, { numeric: true, sensitivity: "base" })
+}
+
+function columnSort(sort: IReportSort | null, key: string): ISort<string> {
+  if (sort?.key !== key) return { field: "", direction: ESortDirection.descending }
+  return {
+    field: key,
+    direction: sort.direction === "asc" ? ESortDirection.ascending : ESortDirection.descending,
+  }
 }
 
 function ariaSort(sort: IReportSort | null, key: string) {
