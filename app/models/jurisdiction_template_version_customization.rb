@@ -18,13 +18,16 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
 
   belongs_to :template_version
 
+  has_many :customization_changes, dependent: :destroy
+
   before_save :sanitize_tip
   # Ensure that there is no two customizations with the same sandbox, jurisdiction, and template_version
 
   validate :unique_combination_of_jurisdiction_sandbox_and_template_version
 
   after_commit :reindex_jurisdiction_templates_used_size
-  after_commit :publish_customization_event, on: %i[update]
+  after_save :record_published_elective_change
+  after_commit :publish_customization_event, on: %i[create update]
 
   validate :ensure_reason_set_for_enabled_elective_fields
   validate :sandbox_belongs_to_jurisdiction
@@ -36,6 +39,42 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
   scope :requiring_project_meeting, -> { where(requires_project_meeting: true) }
 
   ACCEPTED_ENABLED_ELECTIVE_FIELD_REASONS = %w[bylaw policy zoning].freeze
+
+  def self.elective_field_sets(customizations)
+    blocks = customizations&.dig("requirement_block_changes") || {}
+    enabled = []
+    optional = []
+    blocks.each_value do |value|
+      next unless value.is_a?(Hash)
+
+      enabled.concat(Array(value["enabled_elective_field_ids"]))
+      optional.concat(Array(value["optional_elective_field_ids"]))
+    end
+    [
+      enabled.compact.map(&:to_s).uniq.sort,
+      optional.compact.map(&:to_s).uniq.sort
+    ]
+  end
+
+  def self.elective_sets_changed?(before_json, after_json)
+    elective_field_sets(before_json) != elective_field_sets(after_json)
+  end
+
+  # enabled: newly turned on. disabled: turned off. optional: still on, required/optional flipped.
+  def self.elective_field_change(before_json, after_json)
+    before_enabled, before_optional = elective_field_sets(before_json)
+    after_enabled, after_optional = elective_field_sets(after_json)
+    still_enabled = after_enabled & before_enabled
+    flipped =
+      still_enabled.select do |id|
+        before_optional.include?(id) != after_optional.include?(id)
+      end
+    {
+      enabled: after_enabled - before_enabled,
+      disabled: before_enabled - after_enabled,
+      optional: flipped
+    }
+  end
 
   def elective_enabled?(requirement_block_id, requirement_id)
     if customizations.blank? ||
@@ -60,6 +99,34 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
         "template_version_id" => template_version.id,
         "requirement_template_id" => template_version.requirement_template_id,
         "customizations" => customizations
+      }
+    }
+  end
+
+  def elective_published_notification_data(change)
+    labels = change.field_labels
+    i18n_key =
+      if labels.present?
+        "notification.template_version.elective_published_notification"
+      else
+        "notification.template_version.elective_published_notification_unnamed"
+      end
+    i18n_opts = {
+      jurisdiction_name: jurisdiction.qualified_name,
+      template_label: template_version.label
+    }
+    i18n_opts[:field_labels] = labels.to_sentence if labels.present?
+    {
+      "id" => SecureRandom.uuid,
+      "action_type" => Constants::NotificationActionTypes::ELECTIVE_PUBLISHED,
+      "action_text" => I18n.t(i18n_key, **i18n_opts),
+      "object_data" => {
+        "template_version_id" => template_version.id,
+        "requirement_template_id" => template_version.requirement_template_id,
+        "customization_change_id" => change.id,
+        "enabled_components" => change.enabled_components,
+        "disabled_components" => change.disabled_components,
+        "optional_components" => change.optional_components
       }
     }
   end
@@ -134,6 +201,60 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
 
   private
 
+  def record_published_elective_change
+    @elective_publish_notices ||= []
+    @elective_publish_notices << elective_change_for_this_save
+  end
+
+  def elective_change_for_this_save
+    return unless sandbox_id.nil?
+    return unless published_electives_changed?
+
+    before_json, after_json =
+      saved_change_to_customizations || [nil, customizations]
+    change = self.class.elective_field_change(before_json, after_json)
+    return if change.values.all?(&:empty?)
+
+    customization_changes.create!(
+      enabled_components: components_for(change[:enabled]),
+      disabled_components: components_for(change[:disabled]),
+      optional_components: components_for(change[:optional])
+    )
+  end
+
+  def components_for(ids)
+    ids.map do |id|
+      component = form_component_index[id.to_s] || {}
+      {
+        "id" => id.to_s,
+        "label" => component["label"],
+        "key" => component["key"]
+      }
+    end
+  end
+
+  def form_component_index
+    @form_component_index ||=
+      begin
+        index = {}
+        root = template_version&.form_json
+        components = root.is_a?(Hash) ? root["components"] : nil
+        index_form_components(components, index)
+        index
+      end
+  end
+
+  def index_form_components(components, index)
+    Array(components).each do |component|
+      next unless component.is_a?(Hash)
+
+      index[component["id"].to_s] = component if component["id"].present?
+      if component["components"]
+        index_form_components(component["components"], index)
+      end
+    end
+  end
+
   def update_template_version_unique_customizations_count
     return unless template_version
 
@@ -203,7 +324,22 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
   end
 
   def publish_customization_event
-    NotificationService.publish_customization_update_event(self)
+    # One entry per save. Promote creates an empty live row and then updates it
+    # inside one lock, so both after_commits see the same object.
+    change = @elective_publish_notices&.shift
+    if change
+      NotificationService.publish_elective_published_event(self, change)
+    elsif !previously_new_record?
+      NotificationService.publish_customization_update_event(self)
+    end
+  end
+
+  def published_electives_changed?
+    return false unless saved_change_to_customizations || previously_new_record?
+
+    before_json, after_json =
+      saved_change_to_customizations || [nil, customizations]
+    self.class.elective_sets_changed?(before_json, after_json)
   end
 
   def unique_combination_of_jurisdiction_sandbox_and_template_version

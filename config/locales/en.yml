@@ -1297,6 +1297,8 @@ en:
     template_version:
       new_version_notification: 'Please update the Energy Step Code and Zero Carbon Step Code requirements in your Configuration Management for  "%{template_label}"'
       new_customization_notification: "%{jurisdiction_name} has made a modification to the requirements for %{template_label}"
+      elective_published_notification: "%{jurisdiction_name} published or updated elective fields on %{template_label}: %{field_labels}. Open your application to review it."
+      elective_published_notification_unnamed: "%{jurisdiction_name} published or updated an elective field on %{template_label}. Open your application to review it."
     permit_application:
       submission_notification: "Your application %{number} has been received by %{jurisdiction_name} and is pending review."
       resubmission_notification: "Your revised application %{number} has been received by %{jurisdiction_name} and is pending review."

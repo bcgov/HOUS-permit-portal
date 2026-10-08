@@ -59,6 +59,151 @@ RSpec.describe PermitApplication, type: :model do
     end
   end
 
+  describe "published electives" do
+    let(:jurisdiction) { create(:sub_district) }
+    let(:template_version) { create(:template_version) }
+    let(:field_id) { SecureRandom.uuid }
+
+    def elective_customizations(enabled_ids: [field_id], optional_ids: [])
+      {
+        "requirement_block_changes" => {
+          "block-1" => {
+            "enabled_elective_field_ids" => enabled_ids,
+            "optional_elective_field_ids" => optional_ids,
+            "enabled_elective_field_reasons" =>
+              enabled_ids.index_with { "bylaw" }
+          }
+        }
+      }
+    end
+
+    it "highlights a newly enabled elective until it is acknowledged" do
+      application =
+        create(
+          :permit_application,
+          jurisdiction: jurisdiction,
+          template_version: template_version
+        )
+      create(
+        :jurisdiction_template_version_customization,
+        jurisdiction: jurisdiction,
+        template_version: template_version,
+        customizations: elective_customizations
+      )
+
+      expect(application.unseen_elective_field_ids).to eq([field_id])
+
+      application.acknowledge_published_electives!
+      application.reload
+      expect(application.unseen_elective_field_ids).to eq([])
+    end
+
+    it "highlights an elective whose optional flag flipped" do
+      customization =
+        create(
+          :jurisdiction_template_version_customization,
+          jurisdiction: jurisdiction,
+          template_version: template_version,
+          customizations: elective_customizations
+        )
+      application =
+        create(
+          :permit_application,
+          jurisdiction: jurisdiction,
+          template_version: template_version
+        )
+
+      expect(application.unseen_elective_field_ids).to eq([])
+
+      customization.update!(
+        customizations: elective_customizations(optional_ids: [field_id])
+      )
+
+      expect(application.reload.unseen_elective_field_ids).to eq([field_id])
+    end
+
+    it "keeps every publish since the draft was created until the latest is acknowledged" do
+      second_id = SecureRandom.uuid
+      application =
+        create(
+          :permit_application,
+          jurisdiction: jurisdiction,
+          template_version: template_version
+        )
+      customization =
+        create(
+          :jurisdiction_template_version_customization,
+          jurisdiction: jurisdiction,
+          template_version: template_version,
+          customizations: elective_customizations
+        )
+
+      expect(application.unseen_elective_field_ids).to eq([field_id])
+
+      customization.update!(
+        customizations:
+          elective_customizations(enabled_ids: [field_id, second_id])
+      )
+
+      expect(application.reload.unseen_elective_field_ids).to match_array(
+        [field_id, second_id]
+      )
+
+      application.acknowledge_published_electives!
+      expect(application.reload.unseen_elective_field_ids).to eq([])
+    end
+
+    it "does not highlight electives that were already published when the draft was created" do
+      create(
+        :jurisdiction_template_version_customization,
+        jurisdiction: jurisdiction,
+        template_version: template_version,
+        customizations: elective_customizations
+      )
+      application =
+        create(
+          :permit_application,
+          jurisdiction: jurisdiction,
+          template_version: template_version
+        )
+
+      expect(application.unseen_elective_field_ids).to eq([])
+    end
+
+    it "does not highlight an elective that was turned off" do
+      application =
+        create(
+          :permit_application,
+          jurisdiction: jurisdiction,
+          template_version: template_version
+        )
+      customization =
+        create(
+          :jurisdiction_template_version_customization,
+          jurisdiction: jurisdiction,
+          template_version: template_version,
+          customizations: elective_customizations
+        )
+      customization.update!(
+        customizations: {
+          "requirement_block_changes" => {
+            "block-1" => {
+              "enabled_elective_field_ids" => [],
+              "optional_elective_field_ids" => []
+            }
+          }
+        }
+      )
+
+      expect(application.reload.unseen_elective_field_ids).to eq([])
+      removed_ids =
+        CustomizationChange.all.flat_map do |change|
+          change.disabled_components.map { |component| component["id"] }
+        end
+      expect(removed_ids).to eq([field_id])
+    end
+  end
+
   describe "Scopes" do
     # Create sandboxed and non-sandboxed permit applications
     let!(:jurisdiction) { create(:sub_district) }

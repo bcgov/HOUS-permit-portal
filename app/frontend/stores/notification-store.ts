@@ -50,6 +50,13 @@ const linkGenerators: Partial<Record<ENotificationActionType, LinkGenerator>> = 
     },
   ],
 
+  [ENotificationActionType.electivePublished]: () => [
+    {
+      text: t("permitApplication.reviewCustomizedSubmissionLink"),
+      href: `/projects`,
+    },
+  ],
+
   [ENotificationActionType.submissionCollaborationAssignment]: (notification) => {
     const { permitApplicationId } = notification.objectData as IPermitCollaborationNotificationObjectData
     return showLink(`/permit-applications/${permitApplicationId}/edit`)

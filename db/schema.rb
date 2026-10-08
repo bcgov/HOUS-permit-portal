@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_10_01_140200) do
+ActiveRecord::Schema[7.2].define(version: 2026_10_08_161500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -98,6 +98,19 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_01_140200) do
     t.uuid "contactable_id"
     t.string "contact_type"
     t.index ["contactable_type", "contactable_id"], name: "index_contacts_on_contactable"
+  end
+
+  create_table "customization_changes", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "jurisdiction_template_version_customization_id", null: false
+    t.jsonb "enabled_components", default: [], null: false
+    t.jsonb "disabled_components", default: [], null: false
+    t.jsonb "optional_components", default: [], null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["jurisdiction_template_version_customization_id"], name: "index_customization_changes_on_jtvc_id"
+  end
+
+  create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
   end
 
   create_table "design_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -412,7 +425,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_01_140200) do
     t.string "kind", default: "meeting", null: false
     t.datetime "published_at"
     t.index ["noteable_type", "noteable_id", "created_at"], name: "index_notes_on_noteable_type_and_noteable_id_and_created_at"
-    t.index ["noteable_type", "noteable_id", "kind"], name: "index_notes_on_revision_message_kind", unique: true, where: "((kind)::text = ANY ((ARRAY['applicant_message'::character varying, 'submitter_message'::character varying])::text[]))"
+    t.index ["noteable_type", "noteable_id", "kind"], name: "index_notes_on_revision_message_kind", unique: true, where: "((kind)::text <> 'meeting'::text)"
     t.index ["noteable_type", "noteable_id"], name: "index_notes_on_noteable"
     t.index ["permit_project_id", "created_at"], name: "index_notes_on_permit_project_id_and_created_at"
     t.index ["user_id"], name: "index_notes_on_user_id"
@@ -639,6 +652,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_01_140200) do
     t.datetime "issued_at"
     t.string "created_by_type"
     t.uuid "created_by_id"
+    t.uuid "acknowledged_customization_change_id"
+    t.index ["acknowledged_customization_change_id"], name: "index_permit_applications_on_acked_change_id"
     t.index ["created_by_type", "created_by_id"], name: "index_permit_applications_on_created_by"
     t.index ["discarded_at"], name: "index_permit_applications_on_discarded_at"
     t.index ["jurisdiction_id"], name: "index_permit_applications_on_jurisdiction_id"
@@ -1396,6 +1411,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_01_140200) do
   add_foreign_key "allowlisted_jwts", "users", on_delete: :cascade
   add_foreign_key "api_key_expiration_notifications", "external_api_keys"
   add_foreign_key "collaborators", "users"
+  add_foreign_key "customization_changes", "jurisdiction_template_version_customizations"
   add_foreign_key "design_documents", "pre_checks"
   add_foreign_key "document_references", "part_3_step_code_checklists", column: "checklist_id", on_delete: :cascade
   add_foreign_key "energy_outputs", "part_3_step_code_checklists", column: "checklist_id", on_delete: :cascade
@@ -1432,6 +1448,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_01_140200) do
   add_foreign_key "part_3_step_code_checklists", "step_codes", on_delete: :cascade
   add_foreign_key "part_9_step_code_checklists", "jurisdiction_step_requirements", column: "step_requirement_id"
   add_foreign_key "part_9_step_code_checklists", "step_codes", on_delete: :cascade
+  add_foreign_key "permit_applications", "customization_changes", column: "acknowledged_customization_change_id", on_delete: :nullify
   add_foreign_key "permit_applications", "jurisdictions"
   add_foreign_key "permit_applications", "permit_projects"
   add_foreign_key "permit_applications", "template_versions"

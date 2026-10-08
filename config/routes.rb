@@ -239,6 +239,7 @@ Rails.application.routes.draw do
            to: "permit_applications#invite_new_collaborator"
       post "submit", on: :member
       post "mark_as_viewed", on: :member
+      post "acknowledge_published_electives", on: :member
       post "mark_as_unviewed", on: :member
       post "transition_status", on: :member
       post "retrigger_submission_webhook", on: :member

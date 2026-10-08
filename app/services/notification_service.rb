@@ -333,40 +333,58 @@ class NotificationService
 
     return unless throttle_acquired
 
-    template_version = customization.template_version
-    jurisdiction_id = customization.jurisdiction_id
-    relevant_submitter_ids =
-      PermitApplication
-        .kept
-        .joins(:template_version)
-        .joins(submitter: :preference)
-        .left_joins(:permit_project)
-        .where(
-          template_versions: {
-            requirement_template_id: template_version.requirement_template_id
-          },
-          status: PermitApplication.draft_statuses,
-          users: {
-            preferences: {
-              enable_in_app_customization_update_notification: true
-            }
-          }
-        )
-        .where(
-          Arel.sql(
-            "COALESCE(permit_projects.jurisdiction_id, permit_applications.jurisdiction_id) = ?"
-          ),
-          jurisdiction_id
-        )
-        .pluck(:submitter_id)
-        .uniq
-
     notification_user_hash =
-      relevant_submitter_ids.each_with_object({}) do |submitter_id, hash|
+      customization_draft_submitter_ids(customization).each_with_object(
+        {}
+      ) do |submitter_id, hash|
         hash[submitter_id] = customization.update_event_notification_data
       end
 
     NotificationPushJob.perform_async(notification_user_hash)
+  end
+
+  def self.publish_elective_published_event(customization, change)
+    notification_user_hash =
+      customization_draft_submitter_ids(customization).each_with_object(
+        {}
+      ) do |submitter_id, hash|
+        hash[submitter_id] = customization.elective_published_notification_data(
+          change
+        )
+      end
+
+    return if notification_user_hash.empty?
+
+    NotificationPushJob.perform_async(notification_user_hash)
+  end
+
+  def self.customization_draft_submitter_ids(customization)
+    template_version = customization.template_version
+    jurisdiction_id = customization.jurisdiction_id
+    PermitApplication
+      .kept
+      .joins(:template_version)
+      .joins(submitter: :preference)
+      .left_joins(:permit_project)
+      .where(
+        template_versions: {
+          requirement_template_id: template_version.requirement_template_id
+        },
+        status: PermitApplication.draft_statuses,
+        users: {
+          preferences: {
+            enable_in_app_customization_update_notification: true
+          }
+        }
+      )
+      .where(
+        Arel.sql(
+          "COALESCE(permit_projects.jurisdiction_id, permit_applications.jurisdiction_id) = ?"
+        ),
+        jurisdiction_id
+      )
+      .pluck(:submitter_id)
+      .uniq
   end
 
   def self.publish_permit_collaboration_assignment_event(permit_collaboration)
