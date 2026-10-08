@@ -33,6 +33,9 @@ class PermitApplication < ApplicationRecord
   belongs_to :created_by, polymorphic: true, optional: true
   public_recordable user_association: :submitter
   belongs_to :template_version
+  belongs_to :acknowledged_customization_change,
+             class_name: "CustomizationChange",
+             optional: true
   belongs_to :permit_project, optional: true, touch: true
 
   has_one :requirement_template, through: :template_version
@@ -91,6 +94,7 @@ class PermitApplication < ApplicationRecord
   before_validation :assign_unique_number, on: :create
   before_validation :set_template_version, on: :create
   before_validation :populate_base_form_data, on: :create
+  before_create :acknowledge_current_customization_change
   before_save :take_form_customizations_snapshot_if_submitted
 
   after_commit :reindex_jurisdiction_permit_application_size
@@ -403,6 +407,24 @@ class PermitApplication < ApplicationRecord
         &.find_by(template_version: template_version, sandbox_id: sandbox_id)
         &.customizations
     end
+  end
+
+  def unseen_elective_field_ids
+    return [] unless draft?
+
+    current_enabled, = current_elective_field_sets
+    ids =
+      unacknowledged_customization_changes.flat_map(
+        &:highlight_component_ids
+      ).uniq
+    ids & current_enabled
+  end
+
+  def acknowledge_published_electives!
+    latest = latest_customization_change
+    return unless latest
+
+    update_column(:acknowledged_customization_change_id, latest.id)
   end
 
   def update_viewed_at
@@ -914,6 +936,44 @@ class PermitApplication < ApplicationRecord
 
     self.number = new_number if self.number.blank?
     return new_number
+  end
+
+  def acknowledge_current_customization_change
+    self.acknowledged_customization_change = latest_customization_change
+  end
+
+  def latest_customization_change
+    customization_changes_for_application.order(created_at: :desc).first
+  end
+
+  def unacknowledged_customization_changes
+    scope = customization_changes_for_application
+    acknowledged = acknowledged_customization_change
+    return scope unless acknowledged
+
+    scope.where("customization_changes.created_at > ?", acknowledged.created_at)
+  end
+
+  def customization_changes_for_application
+    if jurisdiction.blank? || template_version_id.blank?
+      return CustomizationChange.none
+    end
+
+    CustomizationChange.joins(
+      :jurisdiction_template_version_customization
+    ).where(
+      jurisdiction_template_version_customizations: {
+        jurisdiction_id: jurisdiction.id,
+        template_version_id: template_version_id,
+        sandbox_id: sandbox_id
+      }
+    )
+  end
+
+  def current_elective_field_sets
+    JurisdictionTemplateVersionCustomization.elective_field_sets(
+      form_customizations
+    )
   end
 
   def take_form_customizations_snapshot_if_submitted

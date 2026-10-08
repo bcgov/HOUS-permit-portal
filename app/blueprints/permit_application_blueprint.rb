@@ -91,7 +91,8 @@ class PermitApplicationBlueprint < Blueprinter::Base
     include_view :base
     fields :formatted_compliance_data,
            :front_end_form_update,
-           :form_customizations
+           :form_customizations,
+           :unseen_elective_field_ids
 
     association :submitter, blueprint: UserBlueprint, view: :minimal
 

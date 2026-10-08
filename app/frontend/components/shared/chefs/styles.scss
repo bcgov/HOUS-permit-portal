@@ -1250,7 +1250,8 @@
 
 .added-in-diff,
 .changed-in-diff,
-.removed-in-diff {
+.removed-in-diff,
+.recently-published-elective {
   @include diff-styles;
 }
 

@@ -2,6 +2,7 @@ module Constants
   module NotificationActionTypes
     NEW_TEMPLATE_VERSION_PUBLISH = "new_template_version_publish"
     CUSTOMIZATION_UPDATE = "customization_update"
+    ELECTIVE_PUBLISHED = "elective_published"
     SUBMISSION_COLLABORATION_ASSIGNMENT = "submission_collaboration_assignment"
     SUBMISSION_COLLABORATION_UNASSIGNMENT =
       "submission_collaboration_unassignment"
