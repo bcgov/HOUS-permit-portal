@@ -177,6 +177,7 @@ en:
       description: "Permits received per jurisdiction, and how much of that volume sits with the largest few"
       columns:
         jurisdiction: "Jurisdiction"
+        created: "Created"
         drafts: "Drafts"
         submitted: "Submitted"
         revisions: "Revisions"
@@ -189,11 +190,12 @@ en:
           label: "Concentration (top five jurisdictions)"
           help: "Share of first submissions in %{range} that came from the five jurisdictions with the most submissions. This is a concentration measure: a high figure means volume depends on a few sources."
       notes:
+        created: "Created counts every live application created in the selected range, including those later submitted. It is not included in the total."
         drafts: "Drafts are live applications created in the selected range that have never been submitted."
         submitted: "Submitted counts the first submission in the selected range. Later versions of the same application are revisions, not additional submissions."
         revisions: "Revisions are submission versions created in the selected range after the first submission. A revision can fall in range even when the first submission did not."
         concentration: "Concentration is the top-five share of first submissions, not of drafts or revisions."
-        zeros: "Jurisdictions with no activity in range remain in the table so the quietest sources are as visible as the busiest. Sort any volume column to find either end."
+        zeros: "Jurisdictions with no created applications, submissions, or revisions in the selected range are omitted."
     template_usage:
       title: "Template usage"
       description: "How published permit templates are used, by jurisdiction and combined"

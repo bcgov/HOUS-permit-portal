@@ -22,6 +22,7 @@ module Reports
           "jurisdictions",
           [
             column("jurisdiction"),
+            column("created"),
             column("drafts"),
             column("submitted"),
             column("revisions"),
@@ -39,6 +40,7 @@ module Reports
 
     def notes
       [
+        note("created", "definition"),
         note("drafts", "definition"),
         note("submitted", "definition"),
         note("revisions", "definition"),
@@ -61,22 +63,31 @@ module Reports
       @jurisdiction_rows ||=
         Jurisdiction
           .order(:name)
-          .map { |jurisdiction| row_for(jurisdiction) }
+          .filter_map do |jurisdiction|
+            row = row_for(jurisdiction)
+            row unless row["total"].to_i.zero?
+          end
           .sort_by { |row| -row["submitted"].to_i }
     end
 
     def row_for(jurisdiction)
+      created = created_by_jurisdiction[jurisdiction.id].to_i
       drafts = drafts_by_jurisdiction[jurisdiction.id].to_i
       submitted = submitted_by_jurisdiction[jurisdiction.id].to_i
       revisions = revisions_by_jurisdiction[jurisdiction.id].to_i
       {
         "jurisdiction" =>
           jurisdiction.qualified_name.presence || jurisdiction.name,
-        "drafts" => drafts,
-        "submitted" => submitted,
-        "revisions" => revisions,
+        "created" => count_or_blank(created),
+        "drafts" => count_or_blank(drafts),
+        "submitted" => count_or_blank(submitted),
+        "revisions" => count_or_blank(revisions),
         "total" => drafts + submitted + revisions
       }
+    end
+
+    def count_or_blank(count)
+      count.zero? ? nil : count
     end
 
     def total_submitted
@@ -85,6 +96,14 @@ module Reports
 
     def top_n_submitted
       submitted_by_jurisdiction.values.max(TOP_N).sum
+    end
+
+    def created_by_jurisdiction
+      @created_by_jurisdiction ||=
+        range
+          .apply(live_applications, "permit_applications.created_at")
+          .group("permit_projects.jurisdiction_id")
+          .count
     end
 
     def drafts_by_jurisdiction

@@ -25,18 +25,20 @@ RSpec.describe Reports::JurisdictionVolume do
     create(:permit_application, :newly_submitted, jurisdiction: quiet)
 
     busy_row = row_for(busy)
+    expect(busy_row["created"]).to eq(3)
     expect(busy_row["drafts"]).to eq(1)
     expect(busy_row["submitted"]).to eq(2)
     expect(busy_row["revisions"]).to eq(1)
     expect(busy_row["total"]).to eq(4)
 
     quiet_row = row_for(quiet)
-    expect(quiet_row["drafts"]).to eq(0)
+    expect(quiet_row["created"]).to eq(1)
+    expect(quiet_row["drafts"]).to be_nil
     expect(quiet_row["submitted"]).to eq(1)
-    expect(quiet_row["revisions"]).to eq(0)
+    expect(quiet_row["revisions"]).to be_nil
   end
 
-  it "keeps zero-activity jurisdictions in the table" do
+  it "omits jurisdictions with no activity in range" do
     silent = create(:sub_district)
     create(
       :permit_application,
@@ -44,9 +46,8 @@ RSpec.describe Reports::JurisdictionVolume do
       jurisdiction: create(:sub_district)
     )
 
-    silent_row = row_for(silent)
-    expect(silent_row["submitted"]).to eq(0)
-    expect(silent_row["total"]).to eq(0)
+    expect(row_for(silent)).to be_nil
+    expect(table_rows).to all(satisfy { |row| row["total"].to_i.positive? })
   end
 
   it "reports top-five concentration as a labelled share of submissions" do
@@ -73,5 +74,11 @@ RSpec.describe Reports::JurisdictionVolume do
 
     expect(table[:sortable]).to eq(true)
     expect(table[:default_sort]).to eq(key: "submitted", direction: "desc")
+    expect(
+      table[:columns].find { |column| column[:key] == "created" }[:label]
+    ).to eq("Created")
+    expect(
+      table[:columns].find { |column| column[:key] == "drafts" }[:label]
+    ).to eq("Drafts")
   end
 end
