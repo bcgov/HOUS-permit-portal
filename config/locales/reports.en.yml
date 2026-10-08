@@ -171,7 +171,7 @@ en:
         active_definition: "Active means the inbox is currently enabled and the jurisdiction has at least one live submission in the selected range."
         approximate: "Dates and cumulative days are marked approximate when any contributing event was seeded from the programme dataset or inferred from the earliest membership date."
         enabled_time: "Days to first submission counts only time the inbox was enabled. Gaps while the inbox was off are excluded. An open enabled interval is closed at now."
-        churned_kept: "Jurisdictions that turned the inbox off stay in the table as previously enabled."
+        churned_kept: "The table lists jurisdictions with at least one submission in the selected range. Headline counts still include jurisdictions with none. A jurisdiction that turned the inbox off stays previously enabled."
     jurisdiction_volume:
       title: "Permit volume and concentration"
       description: "Permits received per jurisdiction, and how much of that volume sits with the largest few"

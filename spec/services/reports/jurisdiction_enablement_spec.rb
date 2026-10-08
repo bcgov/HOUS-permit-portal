@@ -35,15 +35,20 @@ RSpec.describe Reports::JurisdictionEnablement do
 
     never_enabled = create(:sub_district)
     never_enabled.update_column(:inbox_enabled, false)
+    create(:permit_application, :newly_submitted, jurisdiction: churned)
 
     expect(figure("currently_enabled")[:value]).to eq(1)
     expect(figure("previously_enabled")[:value]).to eq(1)
     expect(figure("never_enabled")[:value]).to eq(1)
 
+    names = table_rows.map { |row| row["jurisdiction"] }
+    expect(names).not_to include(a_string_including(never_enabled.name))
+    expect(names).not_to include(a_string_including(enabled.name))
     churned_row =
       table_rows.find { |row| row["jurisdiction"].include?(churned.name) }
     expect(churned_row["status"]).to include("Previously")
     expect(churned_row["currently_enabled"]).to eq("No")
+    expect(churned_row["submissions_in_range"]).to be > 0
   end
 
   it "marks seeded or inferred history as approximate" do
@@ -54,6 +59,7 @@ RSpec.describe Reports::JurisdictionEnablement do
       at: 3.months.ago,
       comment: "inferred"
     )
+    create(:permit_application, :newly_submitted, jurisdiction: jurisdiction)
 
     row = table_rows.find { |r| r["jurisdiction"].include?(jurisdiction.name) }
     expect(row["approximate"]).to eq("Yes")
@@ -67,5 +73,17 @@ RSpec.describe Reports::JurisdictionEnablement do
 
     expect(figure("active")[:value]).to eq(1)
     expect(figure("enabled_never_submitted")[:value]).to eq(0)
+  end
+
+  it "draws the first-enabled-by-quarter chart for a single jurisdiction" do
+    jurisdiction = create(:sub_district)
+    record_inbox_change(jurisdiction, enabled: true, at: 2.months.ago)
+
+    chart =
+      payload[:charts].find { |entry| entry[:key] == "enabled_by_quarter" }
+
+    expect(chart[:suppressed]).to eq(false)
+    expect(chart[:data].sum { |row| row["count"] }).to eq(1)
+    expect(chart[:data]).to all(satisfy { |row| row["count"].positive? })
   end
 end
