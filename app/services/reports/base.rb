@@ -247,6 +247,17 @@ module Reports
       (bytes.to_f / 1.megabyte).round(1)
     end
 
+    def storage_size(bytes)
+      return nil if bytes.nil?
+
+      amount = bytes.to_f
+      if amount.abs >= 1.gigabyte
+        format("%.2f GB", amount / 1.gigabyte)
+      else
+        format("%.1f MB", amount / 1.megabyte)
+      end
+    end
+
     def round_days(seconds)
       return nil if seconds.nil?
 

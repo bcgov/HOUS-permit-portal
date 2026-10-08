@@ -8,6 +8,10 @@ RSpec.describe Reports::StorageFootprint do
     payload[:headline_figures].find { |row| row[:key] == key }
   end
 
+  def forecast(key)
+    payload[:forecast_figures].find { |row| row[:key] == key }
+  end
+
   def excluded(category)
     payload[:tables].find { |tbl| tbl[:key] == "excluded" }[:rows].find do |row|
       row["category"] == category
@@ -17,7 +21,7 @@ RSpec.describe Reports::StorageFootprint do
   def resize(document, size)
     data = document.file_data.deep_dup
     data["metadata"] ||= {}
-    data["metadata"]["size"] = size
+    data["metadata"]["size"] = size.to_i
     document.update_column(:file_data, data)
   end
 
@@ -25,13 +29,13 @@ RSpec.describe Reports::StorageFootprint do
     document = create(:supporting_document, permit_application: application)
     data = document.file_data.deep_dup
     data["metadata"] ||= {}
-    data["metadata"]["size"] = size
+    data["metadata"]["size"] = size.to_i
     document.update_column(:file_data, data)
   end
 
   it "sums shrine sizes and excludes submission zipfiles" do
     application = create(:permit_application)
-    document_with_size(application, 2.megabytes)
+    document_with_size(application, 1.5.gigabytes)
     create(:submission_version, permit_application: application).update_column(
       :zipfile_data,
       {
@@ -43,11 +47,10 @@ RSpec.describe Reports::StorageFootprint do
       }
     )
 
-    expect(figure("total_bytes")[:value]).to eq(2.0)
-    expect(figure("total_bytes")[:label]).to include("MB")
-    expect(excluded("Submission zipfiles")["bytes"]).to eq(1.0)
-    expect(figure("accounted_bytes")[:value]).to eq(3.0)
-    expect(figure("average_bytes_per_application")[:value]).to eq(2.0)
+    expect(figure("total_bytes")[:value]).to eq("1.50 GB")
+    expect(excluded("Submission zipfiles")["bytes"]).to eq("1.0 MB")
+    expect(figure("accounted_bytes")[:value]).to eq("1.50 GB")
+    expect(figure("average_bytes_per_application")[:value]).to eq("1.50 GB")
   end
 
   it "excludes documents on discarded applications" do
@@ -57,8 +60,8 @@ RSpec.describe Reports::StorageFootprint do
     document_with_size(discarded, 2.megabytes)
     discarded.discard!
 
-    expect(figure("total_bytes")[:value]).to eq(1.0)
-    expect(excluded("Discarded")["bytes"]).to eq(2.0)
+    expect(figure("total_bytes")[:value]).to eq("1.0 MB")
+    expect(excluded("Discarded")["bytes"]).to eq("2.0 MB")
   end
 
   it "reports sandboxed documents separately from the live total" do
@@ -79,9 +82,9 @@ RSpec.describe Reports::StorageFootprint do
       )
     document_with_size(sandboxed_application, 1.megabyte)
 
-    expect(figure("total_bytes")[:value]).to eq(1.0)
-    expect(excluded("Sandbox (training)")["bytes"]).to eq(3.0)
-    expect(figure("accounted_bytes")[:value]).to eq(4.0)
+    expect(figure("total_bytes")[:value]).to eq("1.0 MB")
+    expect(excluded("Sandbox (training)")["bytes"]).to eq("3.0 MB")
+    expect(figure("accounted_bytes")[:value]).to eq("4.0 MB")
   end
 
   it "breaks down current storage by document type and jurisdiction" do
@@ -92,7 +95,7 @@ RSpec.describe Reports::StorageFootprint do
     by_type = payload[:tables].find { |tbl| tbl[:key] == "by_type" }[:rows]
     supporting =
       by_type.find { |row| row["document_type"].include?("Supporting") }
-    expect(supporting["bytes"]).to eq(2.0)
+    expect(supporting["bytes"]).to eq("2.0 MB")
 
     by_jurisdiction =
       payload[:tables].find { |tbl| tbl[:key] == "by_jurisdiction" }[:rows]
@@ -100,15 +103,16 @@ RSpec.describe Reports::StorageFootprint do
       by_jurisdiction.find do |entry|
         entry["jurisdiction"].include?(jurisdiction.name)
       end
-    expect(row["bytes"]).to eq(2.0)
+    expect(row["bytes"]).to eq("2.0 MB")
   end
 
   it "projects the next year from the last three calendar months" do
     application = create(:permit_application)
     document_with_size(application, 3.megabytes)
 
-    expect(figure("projected_next_12_months")[:value]).to eq(12.0)
-    expect(figure("projected_next_12_months")[:help_text]).to include(
+    expect(figure("projected_next_12_months")).to be_nil
+    expect(forecast("projected_next_12_months")[:value]).to eq("12.0 MB")
+    expect(forecast("projected_next_12_months")[:help_text]).to include(
       "three calendar months"
     )
   end
