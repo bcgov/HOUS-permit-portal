@@ -9,10 +9,10 @@ module Reports
 
     def headline_figures
       [
-        figure("total_bytes", total_bytes),
-        figure("accounted_bytes", accounted_bytes),
-        figure("average_bytes_per_application", average_bytes),
-        figure("projected_next_12_months", projected_bytes)
+        figure("total_bytes", megabytes(total_bytes)),
+        figure("accounted_bytes", megabytes(accounted_bytes)),
+        figure("average_bytes_per_application", megabytes(average_bytes)),
+        figure("projected_next_12_months", megabytes(projected_bytes))
       ]
     end
 
@@ -132,7 +132,7 @@ module Reports
         {
           "category" =>
             I18n.t("reports.storage_footprint.excluded.#{key}.category"),
-          "bytes" => bytes,
+          "bytes" => megabytes(bytes),
           "why" => I18n.t("reports.storage_footprint.excluded.#{key}.why")
         }
       end
@@ -144,7 +144,7 @@ module Reports
         .map do |key, bytes|
           {
             "document_type" => I18n.t("reports.storage_footprint.types.#{key}"),
-            "bytes" => bytes
+            "bytes" => megabytes(bytes)
           }
         end
     end
@@ -157,7 +157,7 @@ module Reports
         .map do |id, bytes|
           {
             "jurisdiction" => names[id] || unattributed_label,
-            "bytes" => bytes
+            "bytes" => megabytes(bytes)
           }
         end
     end
@@ -166,7 +166,7 @@ module Reports
       months_for_trend.map do |month|
         {
           "period" => month.strftime("%Y-%m"),
-          "bytes" => all_monthly_totals[month].to_i
+          "bytes" => megabytes(all_monthly_totals[month].to_i)
         }
       end
     end

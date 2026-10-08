@@ -407,8 +407,8 @@ en:
       metrics:
         documents: "Documents"
         average_documents: "Average documents per application"
-        average_size: "Average total size per application (bytes)"
-        maximum_size: "Maximum total size on one application (bytes)"
+        average_size: "Average total size per application (MB)"
+        maximum_size: "Maximum total size on one application (MB)"
       figures:
         collaborated_applications:
           label: "Applications with collaboration"
@@ -426,14 +426,14 @@ en:
           label: "Average documents per application"
           help: "Supporting documents on live applications created in %{range}, including applications with none."
         average_total_size_bytes:
-          label: "Average total size (bytes)"
-          help: "Average per-application sum of Shrine file_data metadata size, for applications created in %{range}."
+          label: "Average total size (MB)"
+          help: "Average per-application sum of uploaded document size, for applications created in %{range}."
         maximum_total_size_bytes:
-          label: "Maximum total size (bytes)"
-          help: "Largest per-application sum of Shrine file_data metadata size, for applications created in %{range}."
+          label: "Maximum total size (MB)"
+          help: "Largest per-application sum of uploaded document size, for applications created in %{range}."
       notes:
         collaboration_scope: "Collaboration includes kept permit_collaborations and permit_project_collaborations. Discarded assignments are excluded."
-        shrine_sizes: "Document sizes come from Shrine file_data metadata size. This app does not use Active Storage."
+        shrine_sizes: "Document sizes are the file sizes recorded when each document was uploaded."
         failed_submissions: "Failed submission counts are not measured. There is no failed-submission log table, so a zero would mean no capture rather than no failures."
         errors: "Error counts are not measured. There is no application error log table, so a zero would mean no capture rather than no errors."
     storage_footprint:
@@ -441,7 +441,7 @@ en:
       description: "Current uploaded footprint, where it sits, and a stated projection of what comes next"
       unattributed: "Unattributed"
       series:
-        bytes_added: "Storage added (bytes)"
+        bytes_added: "Storage added (MB)"
       types:
         supporting_documents: "Supporting documents"
         project_documents: "Project documents"
@@ -454,7 +454,7 @@ en:
       columns:
         document_type: "Document type"
         jurisdiction: "Jurisdiction"
-        bytes: "Bytes"
+        bytes: "MB"
         period: "Month"
         category: "Category"
         why: "Why it is not in the total"
@@ -470,21 +470,21 @@ en:
           why: "Zipfiles built when an application is submitted, including sandbox and discarded applications. A live application's documents are already in the total; the zipfile is a second copy."
       figures:
         total_bytes:
-          label: "Live storage (bytes)"
-          help: "Shrine sizes on kept, live records only. Sandbox, discarded, and submission zipfiles are in the table below. This snapshot ignores the selected range."
+          label: "Live storage (MB)"
+          help: "Uploaded file sizes on kept, live records only. Sandbox, discarded, and submission zipfiles are in the table below. This snapshot ignores the selected range."
         accounted_bytes:
-          label: "All stored bytes this report can see"
-          help: "Live storage plus the sandbox, discarded, and submission-zipfile rows. This is every byte the report can size. The storage bill can still be higher."
+          label: "All stored size this report can see (MB)"
+          help: "Live storage plus the sandbox, discarded, and submission-zipfile rows. This is every file the report can size. The storage bill can still be higher."
         average_bytes_per_application:
-          label: "Average storage per application (bytes)"
+          label: "Average storage per application (MB)"
           help: "Live storage divided by live applications. Ignores the selected range."
         projected_next_12_months:
-          label: "Projected storage added, next 12 months (bytes)"
+          label: "Projected storage added, next 12 months (MB)"
           help: "Average monthly storage added over the last three calendar months (including the current partial month), times 12. This does not follow the selected range."
       notes:
         accounted: "Live storage plus the sandbox, discarded, and submission zipfile rows is every file this report can size. Add those rows to the live total and it matches the all-stored figure."
-        billed: "Sizes come from Shrine file_data metadata size (uploaded bytes). That is not what the storage backend bills: orphans, packing, and provider overhead are excluded."
-        projection: "The forward projection is last-three-calendar-month average bytes added, including the current incomplete month, multiplied by 12. It assumes recent additions continue at that average. It is not a capacity booking."
+        billed: "Sizes are the file sizes recorded when each document was uploaded. That is not what the storage backend bills: orphans, packing, and provider overhead are excluded."
+        projection: "The forward projection is last-three-calendar-month average storage added, including the current incomplete month, multiplied by 12. It assumes recent additions continue at that average. It is not a capacity booking."
         unattributed: "Requirement-block documents have no jurisdiction. They appear as Unattributed on the jurisdiction table and are included in the total."
   arbitrary_message_construct:
     report:

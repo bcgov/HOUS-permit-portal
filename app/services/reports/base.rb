@@ -241,6 +241,12 @@ module Reports
       sorted.length.odd? ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2.0
     end
 
+    def megabytes(bytes)
+      return nil if bytes.nil?
+
+      (bytes.to_f / 1.megabyte).round(1)
+    end
+
     def round_days(seconds)
       return nil if seconds.nil?
 
