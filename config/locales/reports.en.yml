@@ -276,9 +276,16 @@ en:
         active_users: "Daily, weekly, and monthly active users are not measured. The application does not keep a login history beyond the current and last sign-in timestamps, so active users cannot be computed for a past range."
     submitter_adoption:
       title: "Submitter adoption"
-      description: "First-time and returning submitters, and accounts that never started an application"
+      description: "First-time and returning submitters, counted by applications or by projects"
       series:
         submitters: "Submitters"
+      subjects:
+        applications:
+          record: "application"
+          records: "applications"
+        projects:
+          record: "project"
+          records: "projects"
       columns:
         group: "Group"
         count: "Count"
@@ -289,26 +296,27 @@ en:
       figures:
         first_time:
           label: "First-time submitters"
-          help: "Submitters who created a live application in %{range} and have exactly one live application since launch."
+          help: "Submitters who created a live %{record} in %{range} and have exactly one live %{record} since launch."
         returning:
           label: "Returning submitters"
-          help: "Submitters who created a live application in %{range} and have two or more live applications since launch."
+          help: "Submitters who created a live %{record} in %{range} and have two or more live %{records} since launch."
         first_time_share:
           label: "First-time share"
-          help: "Share of submitters in %{range} who have exactly one live application."
+          help: "Share of submitters who created a live %{record} in %{range} and have exactly one live %{record} since launch."
         returning_share:
           label: "Returning share"
-          help: "Share of submitters in %{range} who have two or more live applications."
+          help: "Share of submitters who created a live %{record} in %{range} and have two or more live %{records} since launch."
         never_started:
           label: "Never started"
-          help: "Registered submitter accounts with no applications."
+          help: "Registered submitter accounts with no %{records}."
         mean_applications:
-          label: "Mean applications per active submitter"
-          help: "Live applications divided by submitters who have at least one live application."
+          label: "Mean %{records} per active submitter"
+          help: "Live %{records} since launch, divided by submitters who have at least one. This ignores the selected range."
       notes:
-        returning_definition: "Returning means two or more live applications since launch, among submitters who created an application in the selected range."
-        never_started: "Never started counts registered submitter accounts with no permit applications at all."
-        active_submitter: "An active submitter is a submitter with at least one live (non-sandbox) application."
+        terms: "Live means kept and not in a sandbox. Created means the %{record} was created inside the selected range. Active means the submitter has at least one live %{record} since launch."
+        returning_definition: "First-time and returning look at submitters who created a live %{record} in the selected range, then count how many live %{records} they have since launch."
+        never_started: "Never started counts registered submitter accounts with no %{records} at all, including discarded and sandbox records."
+        active_submitter: "The mean uses every live %{record} since launch, not only those created in the selected range."
     draft_completion:
       title: "Draft completion"
       description: "How drafts become submissions, how long that takes, and which drafts go stale"

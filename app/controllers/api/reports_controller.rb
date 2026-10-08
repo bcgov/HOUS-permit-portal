@@ -10,14 +10,24 @@ class Api::ReportsController < Api::ApplicationController
     authorize :report, :show?
     return render_unknown_report unless registered?
 
-    render_success Reports::Cache.fetch(params[:key], report_range)
+    render_success Reports::Cache.fetch(
+                     params[:key],
+                     report_range,
+                     subject: report_subject
+                   )
   end
 
   def refresh
     authorize :report, :refresh?
     return render_unknown_report unless registered?
 
-    payload = Reports::Cache.fetch(params[:key], report_range, force: true)
+    payload =
+      Reports::Cache.fetch(
+        params[:key],
+        report_range,
+        force: true,
+        subject: report_subject
+      )
     if payload.with_indifferent_access[:refresh_failed]
       render_error "report.refresh_error"
     else
@@ -29,8 +39,14 @@ class Api::ReportsController < Api::ApplicationController
     authorize :report, :export?
     return render_unknown_report unless registered?
 
-    report = Reports::Registry.build(params[:key], report_range)
-    payload = Reports::Cache.fetch(params[:key], report_range)
+    report =
+      Reports::Registry.build(
+        params[:key],
+        report_range,
+        subject: report_subject
+      )
+    payload =
+      Reports::Cache.fetch(params[:key], report_range, subject: report_subject)
     send_data report.csv_from_payload(payload),
               type: "text/csv",
               filename: report.export_filename
@@ -44,6 +60,10 @@ class Api::ReportsController < Api::ApplicationController
 
   def report_range
     Reports::Range.parse(params[:range])
+  end
+
+  def report_subject
+    params[:subject].presence
   end
 
   def render_unknown_report

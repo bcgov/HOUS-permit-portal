@@ -5738,6 +5738,11 @@ Thank you,
           },
           controls: {
             range: "Time range",
+            count: "Count",
+            subjects: {
+              applications: "Applications",
+              projects: "Projects",
+            },
             dataAsOf: "Data as of",
             pacificTime: "PCT",
             refresh: "Refresh",

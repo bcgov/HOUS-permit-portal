@@ -16,8 +16,17 @@ interface IProps {
 export const ReportControls = observer(({ reportKey }: IProps) => {
   const { t } = useTranslation()
   const { reportStore } = useMst()
-  const { rangePreset, setRangePreset, rangePresets, isRefreshing, currentPayload, refreshReport, downloadExport } =
-    reportStore
+  const {
+    rangePreset,
+    setRangePreset,
+    rangePresets,
+    subject,
+    setSubject,
+    isRefreshing,
+    currentPayload,
+    refreshReport,
+    downloadExport,
+  } = reportStore
 
   return (
     <Flex
@@ -28,21 +37,37 @@ export const ReportControls = observer(({ reportKey }: IProps) => {
       w="full"
       wrap="wrap"
     >
-      <FormControl maxW={{ base: "full", md: "240px" }}>
-        <FormLabel htmlFor="report-range">{t("reporting.controls.range")}</FormLabel>
-        <Select
-          id="report-range"
-          value={rangePreset}
-          onChange={(e) => setRangePreset(e.target.value as TReportRangePreset)}
-          bg="white"
-        >
-          {rangePresets.map((preset) => (
-            <option key={preset} value={preset}>
-              {t(`reporting.controls.ranges.${preset}`)}
-            </option>
-          ))}
-        </Select>
-      </FormControl>
+      <Flex gap={4} direction={{ base: "column", md: "row" }}>
+        <FormControl maxW={{ base: "full", md: "240px" }}>
+          <FormLabel htmlFor="report-range">{t("reporting.controls.range")}</FormLabel>
+          <Select
+            id="report-range"
+            value={rangePreset}
+            onChange={(e) => setRangePreset(e.target.value as TReportRangePreset)}
+            bg="white"
+          >
+            {rangePresets.map((preset) => (
+              <option key={preset} value={preset}>
+                {t(`reporting.controls.ranges.${preset}`)}
+              </option>
+            ))}
+          </Select>
+        </FormControl>
+        {reportKey === "submitter_adoption" ? (
+          <FormControl maxW={{ base: "full", md: "240px" }}>
+            <FormLabel htmlFor="report-subject">{t("reporting.controls.count")}</FormLabel>
+            <Select
+              id="report-subject"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value as "applications" | "projects")}
+              bg="white"
+            >
+              <option value="applications">{t("reporting.controls.subjects.applications")}</option>
+              <option value="projects">{t("reporting.controls.subjects.projects")}</option>
+            </Select>
+          </FormControl>
+        ) : null}
+      </Flex>
       <Wrap spacing={3} align="center">
         <WrapItem>
           <Text fontSize="sm" color="text.secondary">

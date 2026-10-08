@@ -25,8 +25,9 @@ module Reports
       I18n.t("reports.#{key}.description")
     end
 
-    def initialize(range:)
+    def initialize(range:, subject: nil)
       @range = range
+      @subject = subject
     end
 
     def call
@@ -115,7 +116,11 @@ module Reports
     def figure(key, value, approximate: false, help_overrides: {})
       {
         key: key,
-        label: I18n.t("reports.#{self.class.key}.figures.#{key}.label"),
+        label:
+          I18n.t(
+            "reports.#{self.class.key}.figures.#{key}.label",
+            **{ range: range.label }.merge(help_overrides)
+          ),
         value: value,
         help_text:
           I18n.t(

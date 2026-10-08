@@ -28,8 +28,8 @@ module Reports
       class_name.constantize
     end
 
-    def build(key, range)
-      fetch!(key).new(range: range)
+    def build(key, range, subject: nil)
+      fetch!(key).new(range: range, subject: subject)
     end
 
     def summaries
