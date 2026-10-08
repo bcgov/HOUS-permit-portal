@@ -1,5 +1,7 @@
 module Reports
   class SubmitterAdoption < Base
+    SUBJECTS = %w[applications projects].freeze
+
     def headline_figures
       [
         figure("first_time", first_time_count),
@@ -47,10 +49,15 @@ module Reports
 
     def notes
       [
+        note("terms", "definition"),
         note("returning_definition", "definition"),
         note("never_started", "definition"),
         note("active_submitter", "definition")
       ]
+    end
+
+    def export_filename
+      "#{self.class.key}_#{subject}_#{range.slug}_#{Date.current.iso8601}.csv"
     end
 
     def empty?
@@ -61,6 +68,39 @@ module Reports
 
     def column(key)
       { key: key, label: I18n.t("reports.submitter_adoption.columns.#{key}") }
+    end
+
+    def subject
+      SUBJECTS.include?(@subject) ? @subject : "applications"
+    end
+
+    def term_interpolations
+      {
+        record: I18n.t("reports.submitter_adoption.subjects.#{subject}.record"),
+        records:
+          I18n.t("reports.submitter_adoption.subjects.#{subject}.records")
+      }
+    end
+
+    def figure(key, value, approximate: false, help_overrides: {})
+      super(
+        key,
+        value,
+        approximate: approximate,
+        help_overrides: term_interpolations.merge(help_overrides)
+      )
+    end
+
+    def note(key, kind)
+      {
+        key: key,
+        kind: kind,
+        text:
+          I18n.t(
+            "reports.submitter_adoption.notes.#{key}",
+            **term_interpolations
+          )
+      }
     end
 
     def mix_rows
@@ -88,7 +128,7 @@ module Reports
 
     def never_started_count
       @never_started_count ||=
-        User.kept.submitter.where.missing(:permit_applications).count
+        User.kept.submitter.where.missing(missing_association).count
     end
 
     def mean_applications
@@ -98,11 +138,37 @@ module Reports
     end
 
     def submitters_in_range
-      @submitters_in_range ||= created_in_range.distinct.pluck(:submitter_id)
+      @submitters_in_range ||=
+        created_records.distinct.pluck(owner_column).compact
     end
 
     def lifetime_counts
-      @lifetime_counts ||= live_applications.group(:submitter_id).count
+      @lifetime_counts ||=
+        records.where.not(owner_column => nil).group(owner_column).count
+    end
+
+    def records
+      subject == "projects" ? live_projects : live_applications
+    end
+
+    def created_records
+      range.apply(records, created_column)
+    end
+
+    def owner_column
+      subject == "projects" ? :owner_id : :submitter_id
+    end
+
+    def created_column
+      if subject == "projects"
+        "permit_projects.created_at"
+      else
+        "permit_applications.created_at"
+      end
+    end
+
+    def missing_association
+      subject == "projects" ? :permit_projects : :permit_applications
     end
   end
 end

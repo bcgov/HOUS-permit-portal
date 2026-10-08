@@ -1493,15 +1493,19 @@ export class Api {
     return this.client.get<IApiResponse<IReportSummary[], {}>>(`/reports`)
   }
 
-  async fetchReport(key: string, range: string) {
-    return this.client.get<IApiResponse<IReportPayload, {}>>(`/reports/${key}`, { range })
+  async fetchReport(key: string, range: string, subject?: string) {
+    return this.client.get<IApiResponse<IReportPayload, {}>>(`/reports/${key}`, reportParams(range, subject))
   }
 
-  async refreshReport(key: string, range: string) {
-    return this.client.post<IApiResponse<IReportPayload, {}>>(`/reports/${key}/refresh`, { range })
+  async refreshReport(key: string, range: string, subject?: string) {
+    return this.client.post<IApiResponse<IReportPayload, {}>>(`/reports/${key}/refresh`, reportParams(range, subject))
   }
 
-  async downloadReportExport(key: string, range: string) {
-    return this.client.get<BlobPart>(`/reports/${key}/export`, { range })
+  async downloadReportExport(key: string, range: string, subject?: string) {
+    return this.client.get<BlobPart>(`/reports/${key}/export`, reportParams(range, subject))
   }
+}
+
+function reportParams(range: string, subject?: string) {
+  return subject ? { range, subject } : { range }
 }
