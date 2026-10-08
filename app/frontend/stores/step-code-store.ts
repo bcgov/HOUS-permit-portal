@@ -238,6 +238,23 @@ export const StepCodeStoreModel = types
         throw error
       }
     }),
+    downloadPart3StepCodeChecklistsCsv: flow(function* () {
+      try {
+        const range = self.rootStore.reportStore.rangePreset
+        const fileName = `${t("reporting.stepCodeDataPart3.filename")}_${range}_${new Date().toISOString().slice(0, 10)}.csv`
+        yield* toGenerator(
+          downloadFromApi(
+            `/api/step_codes/download_part_3_step_code_checklists_csv?range=${encodeURIComponent(range)}`,
+            fileName
+          )
+        )
+      } catch (error) {
+        if (import.meta.env.DEV) {
+          console.error(`Failed to download Part 3 Step Code checklists:`, error)
+        }
+        throw error
+      }
+    }),
     downloadPart9StepCodeChecklistsCsv: flow(function* () {
       try {
         const range = self.rootStore.reportStore.rangePreset

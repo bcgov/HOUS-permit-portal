@@ -15,6 +15,10 @@ class StepCodePolicy < ApplicationPolicy
     user.super_admin?
   end
 
+  def download_part_3_step_code_checklists_csv?
+    user.super_admin?
+  end
+
   def download_step_code_file_uploads_zip?
     user.super_admin?
   end

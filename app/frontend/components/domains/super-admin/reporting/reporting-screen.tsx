@@ -38,7 +38,14 @@ const REPORT_GROUPS: { key: TReportGroup; ids: string[] }[] = [
   },
   {
     key: "stepCodes",
-    ids: ["step_code_part_9", "step-code-data", "step-code-summary", "step-code-metrics"],
+    ids: [
+      "step_code_part_9",
+      "step_code_part_3",
+      "step-code-data",
+      "step-code-data-part-3",
+      "step-code-summary",
+      "step-code-metrics",
+    ],
   },
   { key: "jurisdictions", ids: ["jurisdiction_enablement"] },
   { key: "users", ids: ["accounts", "submitter_adoption", "pre-check-user-consent"] },
@@ -77,6 +84,12 @@ export const ReportingScreen = observer(() => {
       name: t("reporting.stepCodeData.name"),
       description: t("reporting.stepCodeData.description"),
       href: "step-code-data",
+    },
+    {
+      id: "step-code-data-part-3",
+      name: t("reporting.stepCodeDataPart3.name"),
+      description: t("reporting.stepCodeDataPart3.description"),
+      href: "step-code-data?part=part3",
     },
     {
       id: "step-code-summary",
