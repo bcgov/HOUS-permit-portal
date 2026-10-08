@@ -14,6 +14,13 @@ RSpec.describe Reports::StorageFootprint do
     end
   end
 
+  def resize(document, size)
+    data = document.file_data.deep_dup
+    data["metadata"] ||= {}
+    data["metadata"]["size"] = size
+    document.update_column(:file_data, data)
+  end
+
   def document_with_size(application, size)
     document = create(:supporting_document, permit_application: application)
     data = document.file_data.deep_dup
@@ -24,41 +31,45 @@ RSpec.describe Reports::StorageFootprint do
 
   it "sums shrine sizes and excludes submission zipfiles" do
     application = create(:permit_application)
-    document_with_size(application, 2048)
+    document_with_size(application, 2.megabytes)
     create(:submission_version, permit_application: application).update_column(
       :zipfile_data,
       {
         "id" => SecureRandom.uuid,
         "storage" => "store",
         "metadata" => {
-          "size" => 99_999
+          "size" => 1.megabyte
         }
       }
     )
 
-    expect(figure("total_bytes")[:value]).to eq(2048)
-    expect(excluded("Submission zipfiles")["bytes"]).to eq(99_999)
-    expect(figure("accounted_bytes")[:value]).to eq(2048 + 99_999)
-    expect(figure("average_bytes_per_application")[:value]).to eq(2048)
+    expect(figure("total_bytes")[:value]).to eq(2.0)
+    expect(figure("total_bytes")[:label]).to include("MB")
+    expect(excluded("Submission zipfiles")["bytes"]).to eq(1.0)
+    expect(figure("accounted_bytes")[:value]).to eq(3.0)
+    expect(figure("average_bytes_per_application")[:value]).to eq(2.0)
   end
 
   it "excludes documents on discarded applications" do
     kept = create(:permit_application)
     discarded = create(:permit_application)
-    document_with_size(kept, 1000)
-    document_with_size(discarded, 5000)
+    document_with_size(kept, 1.megabyte)
+    document_with_size(discarded, 2.megabytes)
     discarded.discard!
 
-    expect(figure("total_bytes")[:value]).to eq(1000)
-    expect(excluded("Discarded")["bytes"]).to eq(5000)
+    expect(figure("total_bytes")[:value]).to eq(1.0)
+    expect(excluded("Discarded")["bytes"]).to eq(2.0)
   end
 
   it "reports sandboxed documents separately from the live total" do
-    create(:report_document, step_code: create(:part_9_step_code))
-    create(
-      :report_document,
-      step_code: create(:part_9_step_code, sandbox: published_sandbox)
-    )
+    live = create(:report_document, step_code: create(:part_9_step_code))
+    resize(live, 1.megabyte)
+    sandboxed =
+      create(
+        :report_document,
+        step_code: create(:part_9_step_code, sandbox: published_sandbox)
+      )
+    resize(sandboxed, 2.megabytes)
     jurisdiction = create(:sub_district)
     sandboxed_application =
       create(
@@ -66,22 +77,22 @@ RSpec.describe Reports::StorageFootprint do
         jurisdiction: jurisdiction,
         sandbox: published_sandbox(jurisdiction)
       )
-    document_with_size(sandboxed_application, 1000)
+    document_with_size(sandboxed_application, 1.megabyte)
 
-    expect(figure("total_bytes")[:value]).to eq(456)
-    expect(excluded("Sandbox (training)")["bytes"]).to eq(1456)
-    expect(figure("accounted_bytes")[:value]).to eq(456 + 1456)
+    expect(figure("total_bytes")[:value]).to eq(1.0)
+    expect(excluded("Sandbox (training)")["bytes"]).to eq(3.0)
+    expect(figure("accounted_bytes")[:value]).to eq(4.0)
   end
 
   it "breaks down current storage by document type and jurisdiction" do
     jurisdiction = create(:sub_district)
     application = create(:permit_application, jurisdiction: jurisdiction)
-    document_with_size(application, 4096)
+    document_with_size(application, 2.megabytes)
 
     by_type = payload[:tables].find { |tbl| tbl[:key] == "by_type" }[:rows]
     supporting =
       by_type.find { |row| row["document_type"].include?("Supporting") }
-    expect(supporting["bytes"]).to eq(4096)
+    expect(supporting["bytes"]).to eq(2.0)
 
     by_jurisdiction =
       payload[:tables].find { |tbl| tbl[:key] == "by_jurisdiction" }[:rows]
@@ -89,15 +100,14 @@ RSpec.describe Reports::StorageFootprint do
       by_jurisdiction.find do |entry|
         entry["jurisdiction"].include?(jurisdiction.name)
       end
-    expect(row["bytes"]).to eq(4096)
+    expect(row["bytes"]).to eq(2.0)
   end
 
   it "projects the next year from the last three calendar months" do
     application = create(:permit_application)
-    document_with_size(application, 3000)
+    document_with_size(application, 3.megabytes)
 
-    expected = (3000.0 / 3 * 12).round
-    expect(figure("projected_next_12_months")[:value]).to eq(expected)
+    expect(figure("projected_next_12_months")[:value]).to eq(12.0)
     expect(figure("projected_next_12_months")[:help_text]).to include(
       "three calendar months"
     )
