@@ -454,7 +454,7 @@ en:
       columns:
         document_type: "Document type"
         jurisdiction: "Jurisdiction"
-        bytes: "MB"
+        bytes: "Size"
         period: "Month"
         category: "Category"
         why: "Why it is not in the total"
@@ -470,16 +470,16 @@ en:
           why: "Zipfiles built when an application is submitted, including sandbox and discarded applications. A live application's documents are already in the total; the zipfile is a second copy."
       figures:
         total_bytes:
-          label: "Live storage (MB)"
+          label: "Live storage"
           help: "Uploaded file sizes on kept, live records only. Sandbox, discarded, and submission zipfiles are in the table below. This snapshot ignores the selected range."
         accounted_bytes:
-          label: "All stored size this report can see (MB)"
+          label: "All stored size this report can see"
           help: "Live storage plus the sandbox, discarded, and submission-zipfile rows. This is every file the report can size. The storage bill can still be higher."
         average_bytes_per_application:
-          label: "Average storage per application (MB)"
+          label: "Average storage per application"
           help: "Live storage divided by live applications. Ignores the selected range."
         projected_next_12_months:
-          label: "Projected storage added, next 12 months (MB)"
+          label: "Projected storage added, next 12 months"
           help: "Average monthly storage added over the last three calendar months (including the current partial month), times 12. This does not follow the selected range."
       notes:
         accounted: "Live storage plus the sandbox, discarded, and submission zipfile rows is every file this report can size. Add those rows to the live total and it matches the all-stored figure."
