@@ -53,7 +53,7 @@ export const ReportControls = observer(({ reportKey }: IProps) => {
             ))}
           </Select>
         </FormControl>
-        {reportKey === "submitter_adoption" ? (
+        {reportKey === "submitter_adoption" || reportKey === "draft_completion" ? (
           <FormControl maxW={{ base: "full", md: "240px" }}>
             <FormLabel htmlFor="report-subject">{t("reporting.controls.count")}</FormLabel>
             <Select

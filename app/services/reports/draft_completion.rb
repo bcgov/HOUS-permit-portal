@@ -1,5 +1,6 @@
 module Reports
   class DraftCompletion < Base
+    SUBJECTS = %w[applications projects].freeze
     STALE_BUCKETS = [
       ["stale_30", 30.days, 60.days],
       ["stale_60", 60.days, 90.days],
@@ -48,10 +49,15 @@ module Reports
 
     def notes
       [
+        note("first_submitted", "definition"),
         note("completion_definition", "definition"),
         note("range_boundary", "definition"),
         note("abandonment_definition", "definition")
       ]
+    end
+
+    def export_filename
+      "#{self.class.key}_#{subject}_#{range.slug}_#{Date.current.iso8601}.csv"
     end
 
     def empty?
@@ -64,6 +70,43 @@ module Reports
       { key: key, label: I18n.t("reports.draft_completion.columns.#{key}") }
     end
 
+    def subject
+      SUBJECTS.include?(@subject) ? @subject : "applications"
+    end
+
+    def projects?
+      subject == "projects"
+    end
+
+    def term_interpolations
+      {
+        record: I18n.t("reports.draft_completion.subjects.#{subject}.record"),
+        records: I18n.t("reports.draft_completion.subjects.#{subject}.records"),
+        records_title:
+          I18n.t("reports.draft_completion.subjects.#{subject}.records_title"),
+        first_submitted:
+          I18n.t("reports.draft_completion.subjects.#{subject}.first_submitted")
+      }
+    end
+
+    def figure(key, value, approximate: false, help_overrides: {})
+      super(
+        key,
+        value,
+        approximate: approximate,
+        help_overrides: term_interpolations.merge(help_overrides)
+      )
+    end
+
+    def note(key, kind)
+      {
+        key: key,
+        kind: kind,
+        text:
+          I18n.t("reports.draft_completion.notes.#{key}", **term_interpolations)
+      }
+    end
+
     def created_count
       @created_count ||= created_in_range.count
     end
@@ -71,8 +114,8 @@ module Reports
     def submitted_created_in_range
       @submitted_created_in_range ||=
         range.apply(
-          created_in_range.where("#{FIRST_SUBMITTED_AT_SQL} IS NOT NULL"),
-          FIRST_SUBMITTED_AT_SQL
+          created_in_range.where("#{submitted_at_sql} IS NOT NULL"),
+          submitted_at_sql
         ).count
     end
 
@@ -82,15 +125,14 @@ module Reports
           0
         else
           submitted_in_range.where(
-            "permit_applications.created_at < ?",
+            "#{created_column} < ?",
             range.start_date
           ).count
         end
     end
 
     def median_draft_to_submit_days
-      pairs =
-        submitted_in_range.pluck(:created_at, Arel.sql(FIRST_SUBMITTED_AT_SQL))
+      pairs = submitted_in_range.pluck(:created_at, Arel.sql(submitted_at_sql))
       seconds =
         pairs.filter_map do |created_at, submitted_at|
           next if created_at.blank? || submitted_at.blank?
@@ -103,29 +145,63 @@ module Reports
     def abandoned_count
       @abandoned_count ||=
         created_in_range
-          .where(status: :new_draft)
-          .where("permit_applications.updated_at <= ?", 90.days.ago)
+          .where(draft_condition)
+          .where("#{updated_column} <= ?", 90.days.ago)
           .count
     end
 
     def open_drafts
-      @open_drafts ||= live_applications.where(status: :new_draft)
+      @open_drafts ||= records.where(draft_condition)
     end
 
     def stale_rows
       STALE_BUCKETS.map do |key, min_age, max_age|
-        scope =
-          open_drafts.where("permit_applications.updated_at <= ?", min_age.ago)
-        scope =
-          scope.where(
-            "permit_applications.updated_at > ?",
-            max_age.ago
-          ) if max_age
+        scope = open_drafts.where("#{updated_column} <= ?", min_age.ago)
+        scope = scope.where("#{updated_column} > ?", max_age.ago) if max_age
         {
           "bucket" => I18n.t("reports.draft_completion.buckets.#{key}"),
           "count" => scope.count
         }
       end
+    end
+
+    def records
+      projects? ? live_projects : live_applications
+    end
+
+    def created_in_range
+      range.apply(records, created_column)
+    end
+
+    def submitted_in_range
+      range.apply(
+        records.where("#{submitted_at_sql} IS NOT NULL"),
+        submitted_at_sql
+      )
+    end
+
+    def created_column
+      if projects?
+        "permit_projects.created_at"
+      else
+        "permit_applications.created_at"
+      end
+    end
+
+    def updated_column
+      if projects?
+        "permit_projects.updated_at"
+      else
+        "permit_applications.updated_at"
+      end
+    end
+
+    def submitted_at_sql
+      projects? ? "permit_projects.enqueued_at" : FIRST_SUBMITTED_AT_SQL
+    end
+
+    def draft_condition
+      projects? ? { state: :draft } : { status: :new_draft }
     end
   end
 end
