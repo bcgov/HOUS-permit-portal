@@ -9,6 +9,7 @@ import {
   Text,
   Th,
   Thead,
+  Tooltip,
   Tr,
   Wrap,
   WrapItem,
@@ -20,6 +21,7 @@ import { IReportSort, IReportTable } from "../../../../types/report"
 import { ISort } from "../../../../types/types"
 import { toCamelCase } from "../../../../utils/utility-functions"
 import { Paginator } from "../../../shared/base/inputs/paginator"
+import { RouterLink } from "../../../shared/navigation/router-link"
 import { SortIcon } from "../../../shared/sort-icon"
 
 const MONTH_PAGE_SIZE = 12
@@ -126,7 +128,9 @@ export function ReportTable({ table }: IProps) {
                       py={3}
                       textAlign={isNumericColumn(column.key) ? "end" : "start"}
                     >
-                      {isEnablementColumn(column.key) ? (
+                      {column.key === "jurisdiction" ? (
+                        <JurisdictionName row={row} />
+                      ) : isEnablementColumn(column.key) ? (
                         <EnablementTag value={rowValue(row, column.key)} />
                       ) : (
                         <>
@@ -175,6 +179,25 @@ function pageRows<T>(rows: T[], page: number, paginate: boolean, fromEnd: boolea
   }
   const start = (page - 1) * MONTH_PAGE_SIZE
   return rows.slice(start, start + MONTH_PAGE_SIZE)
+}
+
+function JurisdictionName({ row }: { row: Record<string, string | number | null> }) {
+  const name = formatCell(rowValue(row, "jurisdiction"))
+  const slug = rowValue(row, "jurisdiction_slug")
+  const enablement = rowValue(row, "enablement")
+  const content = slug ? (
+    <RouterLink to={`/jurisdictions/${slug}/step-code-requirements`}>{name}</RouterLink>
+  ) : (
+    <Text as="span">{name}</Text>
+  )
+
+  if (enablement === null || enablement === undefined || enablement === "") return content
+
+  return (
+    <Tooltip label={String(enablement)} hasArrow placement="top" openDelay={200}>
+      {content}
+    </Tooltip>
+  )
 }
 
 function isMixColumn(key: string) {
