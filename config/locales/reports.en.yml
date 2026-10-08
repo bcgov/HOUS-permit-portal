@@ -233,16 +233,16 @@ en:
         status_mix: "Status mix"
         withdrawal_rate: "Withdrawn"
         abandoned_rate: "Abandoned"
-        median_our_court_days: "Median days (our court)"
-        stuck_our_court: "Stuck our court"
+        median_our_court_days: "Median days with jurisdiction"
+        stuck_our_court: "Stuck with jurisdiction"
         stuck_revisions: "Stuck revisions"
       figures:
         applications:
           label: "Applications in range"
           help: "Live applications created in %{range}."
         stuck_our_court:
-          label: "Stuck in our court"
-          help: "In our court 30 days or more. Current snapshot, not the selected range."
+          label: "Stuck with the jurisdiction"
+          help: "Newly submitted, resubmitted, or in review for 30 days or more. Current snapshot, not the selected range."
         stuck_revisions:
           label: "Stuck in revisions"
           help: "Revisions requested 30 days or more. Current snapshot, not the selected range."
@@ -250,8 +250,8 @@ en:
           label: "Withdrawal rate"
           help: "Share of live applications created in %{range} that are withdrawn."
       notes:
-        queue_clock: "Our-court time only runs while an application is newly submitted, resubmitted, or in review. Draft and revisions-requested time is the applicant's court and is not included."
-        stuck_thresholds: "Stuck in our court means 30 or more days of our-court time right now. Stuck in revisions means revisions have been requested for 30 or more days. Abandoned drafts are new drafts in the selected range with no update for 90 days, the same rule as draft completion. Stuck counts ignore the selected range."
+        queue_clock: "Time with the jurisdiction only runs while an application is newly submitted, resubmitted, or in review. Draft and revisions-requested time is with the applicant and is not included."
+        stuck_thresholds: "Stuck with the jurisdiction means 30 or more days of that time right now. Stuck in revisions means revisions have been requested for 30 or more days. Abandoned drafts are new drafts in the selected range with no update for 90 days, the same rule as draft completion. Stuck counts ignore the selected range."
         no_cancelled: "There is no cancelled status. Withdrawal is the withdrawn status."
         small_n: "Rates on templates with few applications are easy to overread. Small counts are still listed."
         failed_submissions: "Failed submissions are not captured. There is no failed-submission log, so this report ranks stall, abandonment, and withdrawal from kept live applications only."
