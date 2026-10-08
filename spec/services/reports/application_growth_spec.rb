@@ -79,4 +79,10 @@ RSpec.describe Reports::ApplicationGrowth do
       ]
     ).to eq(1)
   end
+
+  it "marks the monthly table sortable" do
+    by_month = payload[:tables].find { |tbl| tbl[:key] == "by_month" }
+
+    expect(by_month[:sortable]).to eq(true)
+  end
 end

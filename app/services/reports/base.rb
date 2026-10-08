@@ -141,7 +141,7 @@ module Reports
       }
     end
 
-    def table(key, columns, rows, sortable: false, default_sort: nil)
+    def table(key, columns, rows, sortable: true, default_sort: nil)
       payload = {
         key: key,
         columns:
