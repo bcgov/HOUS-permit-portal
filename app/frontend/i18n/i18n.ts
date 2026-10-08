@@ -5624,6 +5624,13 @@ Thank you,
         reporting: {
           title: "Reporting",
           searchLabel: "Search for available reports",
+          groups: {
+            platform: "Platform",
+            permits: "Permits & applications",
+            stepCodes: "Energy step codes",
+            jurisdictions: "Jurisdictions",
+            users: "Users",
+          },
           stepCodeSummaryName: "Energy Step Code configuration by jurisdiction",
           stepCodeSummaryDescription: "Energy Step Code configuration by jurisdiction",
           templateSummary: {
