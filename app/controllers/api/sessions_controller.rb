@@ -7,10 +7,9 @@ class Api::SessionsController < Devise::SessionsController
   before_action :ensure_local_password_auth!, only: :create
 
   def destroy
-    id_token = cookies[:id_token]
-    # Delete the frontend-accessible id_token cookie
+    id_token = cookies[AuthCookies.id_token_name]
     cookies.delete(
-      :id_token,
+      AuthCookies.id_token_name,
       path: "/",
       domain: Rails.env.production? ? ".#{ENV["APP_DOMAIN"]}" : nil
     )

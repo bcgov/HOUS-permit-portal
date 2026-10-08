@@ -14,7 +14,7 @@ class Api::OmniauthCallbacksController < Devise::OmniauthCallbacksController
     auth = request.env["omniauth.auth"]
     id_token = auth.extra.id_token
 
-    cookies[:id_token] = {
+    cookies[AuthCookies.id_token_name] = {
       value: id_token,
       expires: 6.hours.from_now,
       httponly: true, # No JavaScript access
