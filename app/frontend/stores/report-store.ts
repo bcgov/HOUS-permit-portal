@@ -94,8 +94,10 @@ export const ReportStoreModel = types
     }),
   }))
 
+const SUBJECT_REPORTS = ["submitter_adoption", "draft_completion"]
+
 function reportSubject(key: string, subject: string) {
-  return key === "submitter_adoption" ? subject : undefined
+  return SUBJECT_REPORTS.includes(key) ? subject : undefined
 }
 
 export interface IReportStore extends Instance<typeof ReportStoreModel> {}

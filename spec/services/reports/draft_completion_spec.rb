@@ -37,4 +37,30 @@ RSpec.describe Reports::DraftCompletion do
       "range_boundary"
     )
   end
+
+  it "describes creation in words" do
+    help = figure("median_draft_to_submit_days")[:help_text]
+
+    expect(help).to include("when the application was created")
+    expect(help).not_to include("created_at")
+  end
+
+  it "counts projects that left draft" do
+    submitted = create(:permit_project, created_at: 2.years.ago)
+    submitted.update_columns(
+      state: PermitProject.states[:queued],
+      enqueued_at: 1.day.ago
+    )
+    project_payload =
+      described_class.new(range: range, subject: "projects").call
+    value = ->(key) do
+      project_payload[:headline_figures].find { |row| row[:key] == key }[:value]
+    end
+
+    expect(value.call("created_before_submitted_in_range")).to eq(1)
+    expect(value.call("completion_rate")).to be_nil
+    help = project_payload[:headline_figures].first[:help_text]
+    expect(help).to include("project")
+    expect(help).not_to include("application")
+  end
 end
