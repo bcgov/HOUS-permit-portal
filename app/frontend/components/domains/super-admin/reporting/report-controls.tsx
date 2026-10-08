@@ -47,7 +47,9 @@ export const ReportControls = observer(({ reportKey }: IProps) => {
         <WrapItem>
           <Text fontSize="sm" color="text.secondary">
             {t("reporting.controls.dataAsOf")}{" "}
-            {currentPayload?.computedAt ? formatTimestamp(currentPayload.computedAt) : "—"}
+            {currentPayload?.computedAt
+              ? `${formatTimestamp(currentPayload.computedAt)} ${t("reporting.controls.pacificTime")}`
+              : "—"}
           </Text>
         </WrapItem>
         <WrapItem>
