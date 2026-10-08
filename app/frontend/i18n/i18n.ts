@@ -5725,6 +5725,7 @@ Thank you,
           controls: {
             range: "Time range",
             dataAsOf: "Data as of",
+            pacificTime: "PCT",
             refresh: "Refresh",
             refreshing: "Refreshing...",
             exportCsv: "Download CSV",
