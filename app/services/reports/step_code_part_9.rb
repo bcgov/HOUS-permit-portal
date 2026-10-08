@@ -394,28 +394,33 @@ module Reports
           .transform_values(&:length)
       enabled_ids = enabled_jurisdiction_ids
 
-      Jurisdiction
-        .order(:name)
-        .map do |jurisdiction|
-          {
-            "jurisdiction" => jurisdiction.name,
-            "submissions" => submission_counts[jurisdiction.id].to_i,
-            "enablement" =>
-              I18n.t(
-                "#{i18n_base}.enablement.#{enabled_ids.include?(jurisdiction.id) ? "enabled" : "not_enabled"}"
-              )
-          }
-        end
-        .tap do |list|
-          unknown = submission_counts[nil].to_i
-          if unknown.positive?
-            list << {
-              "jurisdiction" => I18n.t("#{i18n_base}.unknown_jurisdiction"),
-              "submissions" => unknown,
-              "enablement" => I18n.t("#{i18n_base}.enablement.enabled")
+      list =
+        Jurisdiction
+          .order(:name)
+          .filter_map do |jurisdiction|
+            count = submission_counts[jurisdiction.id].to_i
+            next if count.zero?
+
+            {
+              "jurisdiction" => jurisdiction.name,
+              "jurisdiction_slug" => jurisdiction.slug,
+              "submissions" => count,
+              "enablement" =>
+                I18n.t(
+                  "#{i18n_base}.enablement.#{enabled_ids.include?(jurisdiction.id) ? "enabled" : "not_enabled"}"
+                )
             }
           end
-        end
+
+      unknown = submission_counts[nil].to_i
+      if unknown.positive?
+        list << {
+          "jurisdiction" => I18n.t("#{i18n_base}.unknown_jurisdiction"),
+          "submissions" => unknown,
+          "enablement" => I18n.t("#{i18n_base}.enablement.enabled")
+        }
+      end
+      list
     end
 
     def each_export_context
