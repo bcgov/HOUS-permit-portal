@@ -3,6 +3,7 @@ module Reports
     REPORTS = {
       "application_growth" => "Reports::ApplicationGrowth",
       "step_code_part_9" => "Reports::StepCodePart9",
+      "step_code_part_3" => "Reports::StepCodePart3",
       "jurisdiction_enablement" => "Reports::JurisdictionEnablement",
       "jurisdiction_volume" => "Reports::JurisdictionVolume",
       "template_usage" => "Reports::TemplateUsage",

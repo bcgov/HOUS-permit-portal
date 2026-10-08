@@ -3,6 +3,7 @@ import { FileCsv, FileZip } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
+import { useSearchParams } from "react-router-dom"
 import { useMst } from "../../../../setup/root"
 import { EFlashMessageStatus } from "../../../../types/enums"
 import { TReportRangePreset } from "../../../../types/report"
@@ -10,6 +11,9 @@ import { CustomMessageBox } from "../../../shared/base/custom-message-box"
 
 export const StepCodeDataScreen = observer(function StepCodeDataScreen() {
   const { t } = useTranslation()
+  const [params] = useSearchParams()
+  const part3 = params.get("part") === "part3"
+  const copyKey = part3 ? "reporting.stepCodeDataPart3" : "reporting.stepCodeData"
   const { reportStore, stepCodeStore } = useMst()
   const { rangePreset, setRangePreset, rangePresets } = reportStore
   const [downloadingCsv, setDownloadingCsv] = useState(false)
@@ -18,7 +22,11 @@ export const StepCodeDataScreen = observer(function StepCodeDataScreen() {
   const handleDownloadCsv = async () => {
     setDownloadingCsv(true)
     try {
-      await stepCodeStore.downloadPart9StepCodeChecklistsCsv()
+      if (part3) {
+        await stepCodeStore.downloadPart3StepCodeChecklistsCsv()
+      } else {
+        await stepCodeStore.downloadPart9StepCodeChecklistsCsv()
+      }
     } finally {
       setDownloadingCsv(false)
     }
@@ -38,10 +46,10 @@ export const StepCodeDataScreen = observer(function StepCodeDataScreen() {
       <VStack align="stretch" spacing={6} w="full">
         <Box>
           <Heading as="h1" size="lg">
-            {t("reporting.stepCodeData.title")}
+            {t(`${copyKey}.title`)}
           </Heading>
           <Text color="text.secondary" mt={1}>
-            {t("reporting.stepCodeData.description")}
+            {t(`${copyKey}.description`)}
           </Text>
         </Box>
 
@@ -61,7 +69,7 @@ export const StepCodeDataScreen = observer(function StepCodeDataScreen() {
           </Select>
         </FormControl>
 
-        <CustomMessageBox status={EFlashMessageStatus.info} description={t("reporting.stepCodeData.rangeHelp")} />
+        <CustomMessageBox status={EFlashMessageStatus.info} description={t(`${copyKey}.rangeHelp`)} />
 
         <HStack spacing={3} flexWrap="wrap">
           <Button
@@ -73,15 +81,17 @@ export const StepCodeDataScreen = observer(function StepCodeDataScreen() {
           >
             {t("reporting.controls.exportCsv")}
           </Button>
-          <Button
-            variant="primary"
-            leftIcon={<FileZip />}
-            onClick={handleDownloadZip}
-            isLoading={downloadingZip}
-            loadingText={t("reporting.stepCodeData.downloadFileUploads")}
-          >
-            {t("reporting.stepCodeData.downloadFileUploads")}
-          </Button>
+          {part3 ? null : (
+            <Button
+              variant="primary"
+              leftIcon={<FileZip />}
+              onClick={handleDownloadZip}
+              isLoading={downloadingZip}
+              loadingText={t("reporting.stepCodeData.downloadFileUploads")}
+            >
+              {t("reporting.stepCodeData.downloadFileUploads")}
+            </Button>
+          )}
         </HStack>
       </VStack>
     </Container>

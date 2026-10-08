@@ -87,6 +87,47 @@ en:
         incomplete_not_fail: "Submissions with incomplete compliance data are counted on their own. They are not folded into failures."
         enablement: "Enablement is whether the jurisdiction has Step Codes requirements configured. Submission counts are in their own column."
         small_n: "When fewer than 10 submissions are in range, the tables lead and charts are omitted so a small count is not read as a trend."
+    step_code_part_3:
+      title: "Energy Step Code Part 3"
+      description: "Part 3 submission volumes and compliance outcomes"
+      unknown_jurisdiction: "Unknown jurisdiction"
+      series:
+        submissions: "Submissions"
+      columns:
+        period: "Month"
+        count: "Count"
+        submissions: "Submissions"
+        jurisdiction: "Jurisdiction"
+        enablement: "Step Code enablement"
+        outcome: "Compliance outcome"
+        energy_step: "Energy step achieved"
+        zero_carbon_step: "Zero carbon step achieved"
+      outcomes:
+        pass: "Pass"
+        fail: "Fail"
+        incomplete: "Incomplete compliance data"
+      energy_step: "Energy step %{step}"
+      zero_carbon_step: "Zero carbon step %{step}"
+      enablement:
+        enabled: "Enabled"
+        not_enabled: "Not enabled"
+      figures:
+        total_submissions:
+          label: "Part 3 submissions"
+          help: "Part 3 Step Code submissions first submitted in %{range}. Live (non-sandbox) records only."
+        pass_count:
+          label: "Passed"
+          help: "Submissions in %{range} where the Part 3 compliance report achieved the required energy and zero carbon steps, or the baseline performance requirement."
+        fail_count:
+          label: "Failed"
+          help: "Submissions in %{range} with enough checklist data to evaluate that did not achieve the required steps. Incomplete records are counted separately."
+        incomplete_count:
+          label: "Incomplete compliance data"
+          help: "Submissions in %{range} without enough checklist data to evaluate pass or fail. These are not counted as failures."
+      notes:
+        incomplete_not_fail: "Submissions with incomplete compliance data are counted on their own. They are not folded into failures."
+        enablement: "Enablement is whether the jurisdiction has Part 3 occupancy step requirements configured. Submission counts are in their own column."
+        small_n: "When fewer than 10 submissions are in range, the tables lead and charts are omitted so a small count is not read as a trend."
     jurisdiction_enablement:
       title: "Never-activated, live, and churned jurisdictions"
       description: "Inbox enablement history so never-activated, live, and churned jurisdictions are distinct"
