@@ -206,6 +206,8 @@ en:
         template: "Template"
         category: "Category"
         count: "Applications"
+        created: "Created"
+        submitted: "Submitted"
         version_date: "Published version date"
       figures:
         applications:
@@ -219,6 +221,7 @@ en:
           help: "Published template versions on kept templates with no live applications since launch."
       notes:
         permit_type_proxy: "There is no separate permit-type model. Template nickname and category are the permit-type stand-in on this report."
+        created_and_submitted: "Created counts live applications created in the selected range, including those later submitted. Submitted counts the first submission in the selected range."
         never_used: "Published template versions with zero live applications are listed explicitly. They are not shown as zero on the usage chart."
     template_stall:
       title: "Template stall and withdrawal"

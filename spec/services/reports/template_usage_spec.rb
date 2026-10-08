@@ -28,15 +28,27 @@ RSpec.describe Reports::TemplateUsage do
       jurisdiction: jurisdiction,
       template_version: version
     )
+    create(
+      :permit_application,
+      :newly_submitted,
+      jurisdiction: jurisdiction,
+      template_version: version
+    )
 
     combined = payload[:tables].find { |tbl| tbl[:key] == "combined" }[:rows]
     by_jurisdiction =
       payload[:tables].find { |tbl| tbl[:key] == "by_jurisdiction" }[:rows]
+    columns =
+      payload[:tables].find { |tbl| tbl[:key] == "combined" }[
+        :columns
+      ].map { |column| column[:key] }
 
-    expect(figure("applications")[:value]).to eq(1)
+    expect(figure("applications")[:value]).to eq(2)
+    expect(columns).to eq(%w[template category created submitted])
     expect(combined.first["template"]).to eq("Part 9 house")
     expect(combined.first["category"]).to eq("New housing")
-    expect(combined.first["count"]).to eq(1)
+    expect(combined.first["created"]).to eq(2)
+    expect(combined.first["submitted"]).to eq(1)
     expect(by_jurisdiction.first["jurisdiction"]).to include(jurisdiction.name)
   end
 
