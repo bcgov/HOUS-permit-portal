@@ -157,6 +157,18 @@ RSpec.describe Reports::TemplateStall do
       key: "stuck_our_court",
       direction: "desc"
     )
+    expect(
+      templates[:columns].find do |column|
+        column[:key] == "median_our_court_days"
+      end[
+        :label
+      ]
+    ).to eq("Median days with jurisdiction")
+    expect(
+      templates[:columns].find { |column| column[:key] == "stuck_our_court" }[
+        :label
+      ]
+    ).to eq("Stuck with jurisdiction")
   end
 
   it "defines the queue clock and states that failed submissions are not captured" do
