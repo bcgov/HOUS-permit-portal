@@ -12,9 +12,17 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
+import { toCamelCase } from "../../../../utils/utility-functions"
 import { IReportChart } from "../../../types/report"
 
-const SERIES_COLORS = ["theme.blue", "theme.blueAlt", "theme.yellow", "success", "semantic.info"]
+const SERIES_COLORS = [
+  "theme.blue",
+  "theme.yellow",
+  "semantic.success",
+  "semantic.special",
+  "theme.blueActive",
+  "semantic.warningDark",
+]
 
 interface IProps {
   chart: IReportChart
@@ -24,6 +32,7 @@ export function ReportChart({ chart }: IProps) {
   const colors = useToken("colors", SERIES_COLORS)
   const ChartComponent = chart.type === "line" ? LineChart : BarChart
   const stacked = chart.type === "stacked_bar"
+  const xKey = toCamelCase(chart.xKey)
 
   return (
     <Box w="full" minH="280px" overflow="hidden">
@@ -33,7 +42,7 @@ export function ReportChart({ chart }: IProps) {
       <ResponsiveContainer width="100%" height={280}>
         <ChartComponent data={chart.data} margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey={chart.xKey} tick={{ fontSize: 12 }} />
+          <XAxis dataKey={xKey} tick={{ fontSize: 12 }} />
           <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
           <Tooltip />
           <Legend />
@@ -42,7 +51,7 @@ export function ReportChart({ chart }: IProps) {
               <Line
                 key={series.key}
                 type="monotone"
-                dataKey={series.key}
+                dataKey={toCamelCase(series.key)}
                 name={series.label}
                 stroke={colors[index % colors.length]}
                 strokeWidth={2}
@@ -51,7 +60,7 @@ export function ReportChart({ chart }: IProps) {
             ) : (
               <Bar
                 key={series.key}
-                dataKey={series.key}
+                dataKey={toCamelCase(series.key)}
                 name={series.label}
                 fill={colors[index % colors.length]}
                 stackId={stacked ? "stack" : undefined}
