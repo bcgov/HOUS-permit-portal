@@ -21,6 +21,7 @@ Devise.setup do |config|
   end
 
   config.jwt_cookie do |jwt_cookie|
+    jwt_cookie.name = AuthCookies.access_token_name
     if Rails.env.production?
       jwt_cookie.domain = ".#{ENV["APP_DOMAIN"]}" # set this to .<DOMAIN>.com so that cookies can be read on the subdomain
     end
