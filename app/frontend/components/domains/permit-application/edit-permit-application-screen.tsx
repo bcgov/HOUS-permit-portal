@@ -66,6 +66,11 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const formRef = useRef(null)
   const navigate = useNavigate()
 
+  // HUB-2310 REVIEW: acknowledged_customization_change_id is on the application, and this
+  // effect POSTs for every non-review user as soon as the form loads. The first collaborator
+  // or project owner to open the draft clears the highlight for the submitter. Only the
+  // submitter should call this. Send the change id from the loaded payload, not a bare POST
+  // that lets the server stamp whatever is latest now.
   const acknowledgedElectivesKey = useRef("")
   useEffect(() => {
     if (!currentUser || currentUser.isReviewStaff || !currentPermitApplication?.isFullyLoaded) return

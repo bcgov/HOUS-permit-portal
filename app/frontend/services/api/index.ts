@@ -306,6 +306,9 @@ export class Api {
     return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/mark_as_viewed`)
   }
 
+  // HUB-2310 REVIEW: Response type stays ApiResponse<null> (render_success nil). Send the
+  // customization change id the show payload rendered, so the server does not acknowledge a
+  // newer publish the user has not seen.
   async acknowledgePublishedElectives(id: string) {
     return this.client.post<ApiResponse<null>>(`/permit_applications/${id}/acknowledge_published_electives`)
   }

@@ -59,6 +59,8 @@ RSpec.describe PermitApplication, type: :model do
     end
   end
 
+  # HUB-2310 REVIEW: Add coverage for two changes with the same created_at (acknowledging one
+  # must not hide the other) and for acknowledging the loaded change id rather than a newer row.
   describe "published electives" do
     let(:jurisdiction) { create(:sub_district) }
     let(:template_version) { create(:template_version) }

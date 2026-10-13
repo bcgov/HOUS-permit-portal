@@ -343,6 +343,11 @@ class NotificationService
     NotificationPushJob.perform_async(notification_user_hash)
   end
 
+  # HUB-2310 REVIEW: Delete this. Fold the field-label sentence into
+  # publish_customization_update_event so the 2-hour throttle applies. There is no separate
+  # profile setting for elective publishes and there should not be one: keep gating on
+  # preferences.enable_in_app_customization_update_notification. This path is in-app only;
+  # enable_email_customization_update_notification is not consulted. Do not add a preference column.
   def self.publish_elective_published_event(customization, change)
     notification_user_hash =
       customization_draft_submitter_ids(customization).each_with_object(
@@ -358,6 +363,12 @@ class NotificationService
     NotificationPushJob.perform_async(notification_user_hash)
   end
 
+  # HUB-2310 REVIEW: This matches every new_draft and revisions_requested application on any
+  # version of the requirement template, in any sandbox. Elective highlights only exist for the
+  # live customization of this exact template_version_id and sandbox_id. An elective notice must
+  # be limited to drafts on that version and sandbox, or those submitters get "open your
+  # application to review it" and no highlight. Leave the generic customization_update audience
+  # as it was for non-elective saves.
   def self.customization_draft_submitter_ids(customization)
     template_version = customization.template_version
     jurisdiction_id = customization.jurisdiction_id

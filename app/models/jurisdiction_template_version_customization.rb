@@ -103,6 +103,11 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
     }
   end
 
+  # HUB-2310 REVIEW: Do not add a second action type. The highlight does not read this payload;
+  # it reads CustomizationChange via unseen_elective_field_ids. Recipients, preference flag, and
+  # link are already customization_update. Keep these sentences as the customization_update
+  # action_text when this save recorded a CustomizationChange. Drop ELECTIVE_PUBLISHED,
+  # elective_published_notification_data, and publish_elective_published_event.
   def elective_published_notification_data(change)
     labels = change.field_labels
     i18n_key =
@@ -326,6 +331,11 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
   def publish_customization_event
     # One entry per save. Promote creates an empty live row and then updates it
     # inside one lock, so both after_commits see the same object.
+    # HUB-2310 REVIEW: These do not need to be two events. One save should still send one
+    # notice. When `change` is present, call publish_customization_update_event with the
+    # field-label sentence as action_text. When it is not, keep the generic sentence.
+    # That also picks up the existing 2-hour throttle. publish_elective_published_event
+    # bypasses it, so each elective toggle currently sends its own notice.
     change = @elective_publish_notices&.shift
     if change
       NotificationService.publish_elective_published_event(self, change)

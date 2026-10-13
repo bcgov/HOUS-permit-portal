@@ -50,6 +50,8 @@ const linkGenerators: Partial<Record<ENotificationActionType, LinkGenerator>> = 
     },
   ],
 
+  // HUB-2310 REVIEW: Remove. This is a copy of customizationUpdate. After the action type is
+  // collapsed, the existing customizationUpdate link covers it.
   [ENotificationActionType.electivePublished]: () => [
     {
       text: t("permitApplication.reviewCustomizedSubmissionLink"),

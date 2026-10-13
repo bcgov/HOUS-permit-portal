@@ -391,6 +391,9 @@ RSpec.describe JurisdictionTemplateVersionCustomization,
     end
   end
 
+  # HUB-2310 REVIEW: Expect customization_update, with the field-label sentence when a
+  # CustomizationChange was recorded, and still exactly one notice (no second event). Cover the
+  # 2-hour throttle and that a draft on another template version or another sandbox is not notified.
   describe "elective publish notifications" do
     let(:jurisdiction) { create(:sub_district) }
     let(:template_version) { create(:template_version) }

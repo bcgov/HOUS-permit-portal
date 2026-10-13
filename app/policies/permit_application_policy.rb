@@ -88,6 +88,9 @@ class PermitApplicationPolicy < ApplicationPolicy
       ).present?
   end
 
+  # HUB-2310 REVIEW: Add acknowledge_published_electives? here. draft? plus
+  # submission_requirement_block_edit_permissions for this user. Do not reuse update?:
+  # update? allows review staff on non-drafts, which is why the controller then returns 403.
   def upload_supporting_document?
     record.draft? &&
       record.submission_requirement_block_edit_permissions(

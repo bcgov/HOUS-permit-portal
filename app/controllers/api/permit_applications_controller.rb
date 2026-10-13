@@ -26,6 +26,13 @@ class Api::PermitApplicationsController < Api::ApplicationController
                 ]
   skip_after_action :verify_policy_scoped, only: [:index]
 
+  # HUB-2310 REVIEW: Move the draft check into PermitApplicationPolicy#acknowledge_published_electives?
+  # (same shape as upload_supporting_document?: draft? and submission edit permission). Call
+  # `authorize @permit_application` with no second argument so that method runs. Pundit already
+  # render_errors a 403, so delete `head :forbidden`. On success call `render_success nil`.
+  # Do not render the permit application: the client ignores the body (ApiResponse<null>) and
+  # applying it would clear unseenElectiveFieldIds on the same visit that should show the highlight.
+  # Add a policy spec and a request spec (allowed submitter, 403 when not draft / no edit permission).
   def acknowledge_published_electives
     authorize @permit_application, :update?
     return head :forbidden unless @permit_application.draft?

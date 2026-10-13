@@ -420,6 +420,11 @@ class PermitApplication < ApplicationRecord
     ids & current_enabled
   end
 
+  # HUB-2310 REVIEW: This stamps whatever is latest at POST time. A publish that lands between
+  # page load and this request is marked seen without being shown. Acknowledge the change id
+  # the client loaded (put that id on the extended blueprint), not latest_customization_change.
+  # acknowledged_customization_change_id is per application, so this one write clears the
+  # highlight for every collaborator. Only the submitter should be allowed to call it.
   def acknowledge_published_electives!
     latest = latest_customization_change
     return unless latest
@@ -942,6 +947,10 @@ class PermitApplication < ApplicationRecord
     self.acknowledged_customization_change = latest_customization_change
   end
 
+  # HUB-2310 REVIEW: created_at alone is not a unique cursor. Two CustomizationChange rows with
+  # the same timestamp (one transaction, or frozen time) collapse: order(created_at: :desc).first
+  # is arbitrary, and `created_at >` hides the other row. Acknowledging one row must not hide
+  # a different row with the same created_at. Tie-break on id.
   def latest_customization_change
     customization_changes_for_application.order(created_at: :desc).first
   end

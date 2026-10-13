@@ -2,6 +2,8 @@ module Constants
   module NotificationActionTypes
     NEW_TEMPLATE_VERSION_PUBLISH = "new_template_version_publish"
     CUSTOMIZATION_UPDATE = "customization_update"
+    # HUB-2310 REVIEW: Remove. Use CUSTOMIZATION_UPDATE. The frontend treats electivePublished
+    # the same as customizationUpdate (both link to /projects).
     ELECTIVE_PUBLISHED = "elective_published"
     SUBMISSION_COLLABORATION_ASSIGNMENT = "submission_collaboration_assignment"
     SUBMISSION_COLLABORATION_UNASSIGNMENT =
