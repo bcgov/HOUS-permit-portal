@@ -74,6 +74,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       formattedComplianceData: types.maybeNull(types.frozen()),
       formCustomizations: types.maybeNull(types.frozen<ITemplateCustomization>()),
       unseenElectiveFieldIds: types.optional(types.array(types.string), []),
+      unseenCustomizationChangeId: types.maybeNull(types.string),
       submittedAt: types.maybeNull(types.Date),
       resubmittedAt: types.maybeNull(types.Date),
       revisionsRequestedAt: types.maybeNull(types.Date),
@@ -931,7 +932,9 @@ export const PermitApplicationModel = types.snapshotProcessor(
         return response.ok
       }),
       acknowledgePublishedElectives: flow(function* () {
-        yield self.environment.api.acknowledgePublishedElectives(self.id)
+        const customizationChangeId = self.unseenCustomizationChangeId
+        if (!customizationChangeId) return
+        yield self.environment.api.acknowledgePublishedElectives(self.id, customizationChangeId)
       }),
       markAsViewed: flow(function* () {
         const wasUnread = !self.isViewed

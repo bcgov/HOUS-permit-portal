@@ -1937,17 +1937,12 @@ Thank you,
           statusFilter: "Status",
           submissionCollaboratorFilter: "Collaborator",
           updateToNewVersion: "Update my application",
-          // HUB-2310 REVIEW: This used to say "View draft applications". The change also relabels
-          // new-template-version and customization-update links, not just this feature. Revert
-          // unless product wants every existing notification relabeled. Use a new key if this
-          // feature needs different link text.
-          reviewOutdatedSubmissionLink: "View applications",
+          reviewOutdatedSubmissionLink: "View draft applications",
           configureStepCodePageLink: "Configure Step Code(s)",
           reviewUpdatedEditLink: "View template",
           reviewOutdatedTitle: "Filters applied to show applications that are outdated",
           reviewOutdatedMessage: "Filters have been applied. Please review and acknowledge the actions required below.",
-          // HUB-2310 REVIEW: Same as reviewOutdatedSubmissionLink above. Revert to "View draft applications".
-          reviewCustomizedSubmissionLink: "View applications",
+          reviewCustomizedSubmissionLink: "View draft applications",
           reviewCustomizedTitle: "Filters applied to show applications that have new customizations added",
           reviewCustomizedMessage: "Filters have been applied. Please review the draft applications below.",
           newVersionPublished: "New version of template has been published - please review changes",

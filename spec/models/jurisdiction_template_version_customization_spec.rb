@@ -391,9 +391,6 @@ RSpec.describe JurisdictionTemplateVersionCustomization,
     end
   end
 
-  # HUB-2310 REVIEW: Expect customization_update, with the field-label sentence when a
-  # CustomizationChange was recorded, and still exactly one notice (no second event). Cover the
-  # 2-hour throttle and that a draft on another template version or another sandbox is not notified.
   describe "elective publish notifications" do
     let(:jurisdiction) { create(:sub_district) }
     let(:template_version) { create(:template_version) }
@@ -428,20 +425,41 @@ RSpec.describe JurisdictionTemplateVersionCustomization,
       }
     end
 
-    def expect_one_notice(action_type, component_key: nil, component_ids: nil)
-      expect(notification_payloads.size).to eq(1)
-      notice = notification_payloads.last[draft.submitter_id]
-      expect(notice["action_type"]).to eq(action_type)
-      return if component_key.nil?
-
-      ids =
-        Array(notice.dig("object_data", component_key)).map do |component|
-          component["id"]
-        end
-      expect(ids).to match_array(component_ids)
+    def customization_update_text(field_labels: nil)
+      if field_labels.present?
+        I18n.t(
+          "notification.template_version.elective_published_notification",
+          jurisdiction_name: jurisdiction.qualified_name,
+          template_label: template_version.label,
+          field_labels: field_labels
+        )
+      else
+        I18n.t(
+          "notification.template_version.elective_published_notification_unnamed",
+          jurisdiction_name: jurisdiction.qualified_name,
+          template_label: template_version.label
+        )
+      end
     end
 
-    it "notifies when a live elective is enabled and does not also send customization_update" do
+    def generic_customization_text
+      I18n.t(
+        "notification.template_version.new_customization_notification",
+        jurisdiction_name: jurisdiction.qualified_name,
+        template_label: template_version.label
+      )
+    end
+
+    def expect_one_notice(action_text)
+      expect(notification_payloads.size).to eq(1)
+      notice = notification_payloads.last[draft.submitter_id]
+      expect(notice["action_type"]).to eq(
+        Constants::NotificationActionTypes::CUSTOMIZATION_UPDATE
+      )
+      expect(notice["action_text"]).to eq(action_text)
+    end
+
+    it "notifies with the field-label sentence when a live elective is enabled" do
       customization =
         create(
           :jurisdiction_template_version_customization,
@@ -451,11 +469,7 @@ RSpec.describe JurisdictionTemplateVersionCustomization,
 
       customization.update!(customizations: elective_customizations)
 
-      expect_one_notice(
-        Constants::NotificationActionTypes::ELECTIVE_PUBLISHED,
-        component_key: "enabled_components",
-        component_ids: [field_id]
-      )
+      expect_one_notice(customization_update_text)
       expect(CustomizationChange.count).to eq(1)
     end
 
@@ -473,11 +487,8 @@ RSpec.describe JurisdictionTemplateVersionCustomization,
         customizations: elective_customizations(optional_ids: [field_id])
       )
 
-      expect_one_notice(
-        Constants::NotificationActionTypes::ELECTIVE_PUBLISHED,
-        component_key: "optional_components",
-        component_ids: [field_id]
-      )
+      expect_one_notice(customization_update_text)
+      expect(CustomizationChange.count).to eq(2)
     end
 
     it "notifies when a sandbox customization is promoted onto a new live row" do
@@ -493,11 +504,8 @@ RSpec.describe JurisdictionTemplateVersionCustomization,
 
       customization.promote
 
-      expect_one_notice(
-        Constants::NotificationActionTypes::ELECTIVE_PUBLISHED,
-        component_key: "enabled_components",
-        component_ids: [field_id]
-      )
+      expect_one_notice(customization_update_text)
+      expect(CustomizationChange.count).to eq(1)
     end
 
     it "names the field from the template form json" do
@@ -528,8 +536,7 @@ RSpec.describe JurisdictionTemplateVersionCustomization,
         customizations: elective_customizations
       )
 
-      notice = notification_payloads.last[draft.submitter_id]
-      expect(notice["action_text"]).to include("Site plan")
+      expect_one_notice(customization_update_text(field_labels: "Site plan"))
       expect(CustomizationChange.last.enabled_components.first["key"]).to eq(
         "site_plan"
       )
@@ -553,13 +560,11 @@ RSpec.describe JurisdictionTemplateVersionCustomization,
         }
       )
 
-      expect_one_notice(
-        Constants::NotificationActionTypes::CUSTOMIZATION_UPDATE
-      )
+      expect_one_notice(generic_customization_text)
       expect(CustomizationChange.count).to eq(0)
     end
 
-    it "does not send elective_published for a sandbox elective save" do
+    it "sends the generic sentence for a sandbox elective save" do
       sandbox = jurisdiction.sandboxes.published.first
       customization =
         create(
@@ -571,10 +576,118 @@ RSpec.describe JurisdictionTemplateVersionCustomization,
 
       customization.update!(customizations: elective_customizations)
 
-      expect_one_notice(
-        Constants::NotificationActionTypes::CUSTOMIZATION_UPDATE
-      )
+      expect_one_notice(generic_customization_text)
       expect(CustomizationChange.count).to eq(0)
+    end
+
+    it "throttles a second elective publish for two hours" do
+      memory_cache = ActiveSupport::Cache::MemoryStore.new
+      allow(Rails).to receive(:cache).and_return(memory_cache)
+      customization =
+        create(
+          :jurisdiction_template_version_customization,
+          jurisdiction: jurisdiction,
+          template_version: template_version
+        )
+
+      customization.update!(customizations: elective_customizations)
+      customization.update!(
+        customizations: elective_customizations(optional_ids: [field_id])
+      )
+
+      expect_one_notice(customization_update_text)
+      expect(CustomizationChange.count).to eq(2)
+    end
+
+    it "does not notify a draft on another template version or sandbox" do
+      other_version =
+        create(
+          :template_version,
+          requirement_template: template_version.requirement_template,
+          version_date: "2024-03-01"
+        )
+      other_draft =
+        create(
+          :permit_application,
+          jurisdiction: jurisdiction,
+          template_version: other_version
+        )
+      sandbox = jurisdiction.sandboxes.published.first
+      sandbox_draft =
+        create(
+          :permit_application,
+          jurisdiction: jurisdiction,
+          template_version: template_version,
+          sandbox: sandbox
+        )
+      customization =
+        create(
+          :jurisdiction_template_version_customization,
+          jurisdiction: jurisdiction,
+          template_version: template_version
+        )
+
+      customization.update!(customizations: elective_customizations)
+
+      expect_one_notice(customization_update_text)
+      notified_ids = notification_payloads.last.keys
+      expect(notified_ids).not_to include(other_draft.submitter_id)
+      expect(notified_ids).not_to include(sandbox_draft.submitter_id)
+    end
+
+    it "still notifies other template versions for a non-elective save" do
+      other_version =
+        create(
+          :template_version,
+          requirement_template: template_version.requirement_template,
+          version_date: "2024-04-01"
+        )
+      other_draft =
+        create(
+          :permit_application,
+          jurisdiction: jurisdiction,
+          template_version: other_version
+        )
+      customization =
+        create(
+          :jurisdiction_template_version_customization,
+          jurisdiction: jurisdiction,
+          template_version: template_version
+        )
+
+      customization.update!(
+        customizations: {
+          "requirement_block_changes" => {
+            "block-1" => {
+              "tip" => "Bring the site plan"
+            }
+          }
+        }
+      )
+
+      expect_one_notice(generic_customization_text)
+      expect(notification_payloads.last.keys).to include(
+        draft.submitter_id,
+        other_draft.submitter_id
+      )
+    end
+
+    it "does not notify a submitter who disabled customization update notices" do
+      draft.submitter.preference.update!(
+        enable_in_app_customization_update_notification: false
+      )
+      customization =
+        create(
+          :jurisdiction_template_version_customization,
+          jurisdiction: jurisdiction,
+          template_version: template_version
+        )
+
+      customization.update!(customizations: elective_customizations)
+
+      expect(notification_payloads.flat_map(&:keys)).not_to include(
+        draft.submitter_id
+      )
     end
   end
 end

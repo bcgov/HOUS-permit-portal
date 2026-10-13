@@ -89,49 +89,15 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
     )&.include?(requirement_id)
   end
 
-  def update_event_notification_data
+  def update_event_notification_data(change = nil)
     {
       "id" => SecureRandom.uuid,
       "action_type" => Constants::NotificationActionTypes::CUSTOMIZATION_UPDATE,
-      "action_text" =>
-        "#{I18n.t("notification.template_version.new_customization_notification", jurisdiction_name: jurisdiction.qualified_name, template_label: template_version.label)}",
+      "action_text" => customization_update_action_text(change),
       "object_data" => {
         "template_version_id" => template_version.id,
         "requirement_template_id" => template_version.requirement_template_id,
         "customizations" => customizations
-      }
-    }
-  end
-
-  # HUB-2310 REVIEW: Do not add a second action type. The highlight does not read this payload;
-  # it reads CustomizationChange via unseen_elective_field_ids. Recipients, preference flag, and
-  # link are already customization_update. Keep these sentences as the customization_update
-  # action_text when this save recorded a CustomizationChange. Drop ELECTIVE_PUBLISHED,
-  # elective_published_notification_data, and publish_elective_published_event.
-  def elective_published_notification_data(change)
-    labels = change.field_labels
-    i18n_key =
-      if labels.present?
-        "notification.template_version.elective_published_notification"
-      else
-        "notification.template_version.elective_published_notification_unnamed"
-      end
-    i18n_opts = {
-      jurisdiction_name: jurisdiction.qualified_name,
-      template_label: template_version.label
-    }
-    i18n_opts[:field_labels] = labels.to_sentence if labels.present?
-    {
-      "id" => SecureRandom.uuid,
-      "action_type" => Constants::NotificationActionTypes::ELECTIVE_PUBLISHED,
-      "action_text" => I18n.t(i18n_key, **i18n_opts),
-      "object_data" => {
-        "template_version_id" => template_version.id,
-        "requirement_template_id" => template_version.requirement_template_id,
-        "customization_change_id" => change.id,
-        "enabled_components" => change.enabled_components,
-        "disabled_components" => change.disabled_components,
-        "optional_components" => change.optional_components
       }
     }
   end
@@ -331,17 +297,41 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
   def publish_customization_event
     # One entry per save. Promote creates an empty live row and then updates it
     # inside one lock, so both after_commits see the same object.
-    # HUB-2310 REVIEW: These do not need to be two events. One save should still send one
-    # notice. When `change` is present, call publish_customization_update_event with the
-    # field-label sentence as action_text. When it is not, keep the generic sentence.
-    # That also picks up the existing 2-hour throttle. publish_elective_published_event
-    # bypasses it, so each elective toggle currently sends its own notice.
     change = @elective_publish_notices&.shift
     if change
-      NotificationService.publish_elective_published_event(self, change)
+      NotificationService.publish_customization_update_event(
+        self,
+        change: change
+      )
     elsif !previously_new_record?
       NotificationService.publish_customization_update_event(self)
     end
+  end
+
+  def customization_update_action_text(change)
+    unless change
+      return(
+        I18n.t(
+          "notification.template_version.new_customization_notification",
+          jurisdiction_name: jurisdiction.qualified_name,
+          template_label: template_version.label
+        )
+      )
+    end
+
+    labels = change.field_labels
+    i18n_key =
+      if labels.present?
+        "notification.template_version.elective_published_notification"
+      else
+        "notification.template_version.elective_published_notification_unnamed"
+      end
+    i18n_opts = {
+      jurisdiction_name: jurisdiction.qualified_name,
+      template_label: template_version.label
+    }
+    i18n_opts[:field_labels] = labels.to_sentence if labels.present?
+    I18n.t(i18n_key, **i18n_opts)
   end
 
   def published_electives_changed?

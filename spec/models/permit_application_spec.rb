@@ -59,8 +59,6 @@ RSpec.describe PermitApplication, type: :model do
     end
   end
 
-  # HUB-2310 REVIEW: Add coverage for two changes with the same created_at (acknowledging one
-  # must not hide the other) and for acknowledging the loaded change id rather than a newer row.
   describe "published electives" do
     let(:jurisdiction) { create(:sub_district) }
     let(:template_version) { create(:template_version) }
@@ -95,7 +93,9 @@ RSpec.describe PermitApplication, type: :model do
 
       expect(application.unseen_elective_field_ids).to eq([field_id])
 
-      application.acknowledge_published_electives!
+      application.acknowledge_published_electives!(
+        application.unseen_customization_change_id
+      )
       application.reload
       expect(application.unseen_elective_field_ids).to eq([])
     end
@@ -151,8 +151,86 @@ RSpec.describe PermitApplication, type: :model do
         [field_id, second_id]
       )
 
-      application.acknowledge_published_electives!
+      application.acknowledge_published_electives!(
+        application.unseen_customization_change_id
+      )
       expect(application.reload.unseen_elective_field_ids).to eq([])
+    end
+
+    it "does not hide a same-timestamp change when another one is acknowledged" do
+      lower_field_id = SecureRandom.uuid
+      higher_field_id = SecureRandom.uuid
+      published_at = Time.zone.parse("2026-01-15 12:00:00")
+      application =
+        create(
+          :permit_application,
+          jurisdiction: jurisdiction,
+          template_version: template_version
+        )
+      customization =
+        create(
+          :jurisdiction_template_version_customization,
+          jurisdiction: jurisdiction,
+          template_version: template_version
+        )
+      customization.update_column(
+        :customizations,
+        elective_customizations(enabled_ids: [lower_field_id, higher_field_id])
+      )
+      customization.customization_changes.create!(
+        id: "11111111-1111-4111-8111-111111111111",
+        created_at: published_at,
+        updated_at: published_at,
+        enabled_components: [{ "id" => lower_field_id }],
+        disabled_components: [],
+        optional_components: []
+      )
+      customization.customization_changes.create!(
+        id: "22222222-2222-4222-8222-222222222222",
+        created_at: published_at,
+        updated_at: published_at,
+        enabled_components: [{ "id" => higher_field_id }],
+        disabled_components: [],
+        optional_components: []
+      )
+
+      application.acknowledge_published_electives!(
+        "11111111-1111-4111-8111-111111111111"
+      )
+
+      expect(application.reload.unseen_elective_field_ids).to eq(
+        [higher_field_id]
+      )
+    end
+
+    it "acknowledges the loaded change id and leaves a newer publish unseen" do
+      second_id = SecureRandom.uuid
+      application =
+        create(
+          :permit_application,
+          jurisdiction: jurisdiction,
+          template_version: template_version
+        )
+      customization =
+        create(
+          :jurisdiction_template_version_customization,
+          jurisdiction: jurisdiction,
+          template_version: template_version
+        )
+      customization.update!(customizations: elective_customizations)
+      loaded_id = application.reload.unseen_customization_change_id
+
+      customization.update!(
+        customizations:
+          elective_customizations(enabled_ids: [field_id, second_id])
+      )
+
+      application.acknowledge_published_electives!(loaded_id)
+
+      expect(application.reload.acknowledged_customization_change_id).to eq(
+        loaded_id
+      )
+      expect(application.unseen_elective_field_ids).to eq([second_id])
     end
 
     it "does not highlight electives that were already published when the draft was created" do

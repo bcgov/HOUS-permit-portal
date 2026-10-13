@@ -420,16 +420,23 @@ class PermitApplication < ApplicationRecord
     ids & current_enabled
   end
 
-  # HUB-2310 REVIEW: This stamps whatever is latest at POST time. A publish that lands between
-  # page load and this request is marked seen without being shown. Acknowledge the change id
-  # the client loaded (put that id on the extended blueprint), not latest_customization_change.
-  # acknowledged_customization_change_id is per application, so this one write clears the
-  # highlight for every collaborator. Only the submitter should be allowed to call it.
-  def acknowledge_published_electives!
-    latest = latest_customization_change
-    return unless latest
+  def unseen_customization_change_id
+    return if unseen_elective_field_ids.empty?
 
-    update_column(:acknowledged_customization_change_id, latest.id)
+    unacknowledged_customization_changes.order(
+      created_at: :desc,
+      id: :desc
+    ).pick(:id)
+  end
+
+  def acknowledge_published_electives!(change_id)
+    change = customization_changes_for_application.find_by(id: change_id)
+    return unless change
+
+    acknowledged = acknowledged_customization_change
+    return if acknowledged && !customization_change_after?(change, acknowledged)
+
+    update_column(:acknowledged_customization_change_id, change.id)
   end
 
   def update_viewed_at
@@ -947,12 +954,11 @@ class PermitApplication < ApplicationRecord
     self.acknowledged_customization_change = latest_customization_change
   end
 
-  # HUB-2310 REVIEW: created_at alone is not a unique cursor. Two CustomizationChange rows with
-  # the same timestamp (one transaction, or frozen time) collapse: order(created_at: :desc).first
-  # is arbitrary, and `created_at >` hides the other row. Acknowledging one row must not hide
-  # a different row with the same created_at. Tie-break on id.
   def latest_customization_change
-    customization_changes_for_application.order(created_at: :desc).first
+    customization_changes_for_application.order(
+      created_at: :desc,
+      id: :desc
+    ).first
   end
 
   def unacknowledged_customization_changes
@@ -960,7 +966,20 @@ class PermitApplication < ApplicationRecord
     acknowledged = acknowledged_customization_change
     return scope unless acknowledged
 
-    scope.where("customization_changes.created_at > ?", acknowledged.created_at)
+    scope.where(
+      "customization_changes.created_at > :created_at OR " \
+        "(customization_changes.created_at = :created_at AND customization_changes.id > :id)",
+      created_at: acknowledged.created_at,
+      id: acknowledged.id
+    )
+  end
+
+  def customization_change_after?(change, earlier)
+    change.created_at > earlier.created_at ||
+      (
+        change.created_at == earlier.created_at &&
+          change.id.to_s > earlier.id.to_s
+      )
   end
 
   def customization_changes_for_application

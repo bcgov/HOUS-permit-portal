@@ -92,10 +92,8 @@ class PermitApplicationBlueprint < Blueprinter::Base
     fields :formatted_compliance_data,
            :front_end_form_update,
            :form_customizations,
-           :unseen_elective_field_ids
-    # HUB-2310 REVIEW: Also expose the customization change id these unseen fields came
-    # from. The acknowledge POST must send that id back. Do not let the server acknowledge
-    # a newer CustomizationChange than the one in this payload.
+           :unseen_elective_field_ids,
+           :unseen_customization_change_id
 
     association :submitter, blueprint: UserBlueprint, view: :minimal
 

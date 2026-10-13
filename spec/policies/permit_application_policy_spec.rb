@@ -312,6 +312,46 @@ RSpec.describe PermitApplicationPolicy do
       expect(policy.upload_revision_fulfillment?).to be false
     end
 
+    it "acknowledge_published_electives? permits a draft submitter with edit permission" do
+      record =
+        double("PermitApplication", draft?: true, submitter_id: submitter.id)
+      allow(record).to receive(
+        :submission_requirement_block_edit_permissions
+      ).with(user_id: submitter.id).and_return(:all)
+      policy = described_class.new(UserContext.new(submitter, sandbox), record)
+      expect(policy.acknowledge_published_electives?).to be true
+
+      allow(record).to receive(
+        :submission_requirement_block_edit_permissions
+      ).and_return(nil)
+      expect(policy.acknowledge_published_electives?).to be false
+
+      not_draft =
+        double("PermitApplication", draft?: false, submitter_id: submitter.id)
+      allow(not_draft).to receive(
+        :submission_requirement_block_edit_permissions
+      ).and_return(:all)
+      expect(
+        described_class.new(
+          UserContext.new(submitter, sandbox),
+          not_draft
+        ).acknowledge_published_electives?
+      ).to be false
+
+      other = create(:user, :submitter)
+      collaborator_record =
+        double("PermitApplication", draft?: true, submitter_id: submitter.id)
+      allow(collaborator_record).to receive(
+        :submission_requirement_block_edit_permissions
+      ).with(user_id: other.id).and_return(:all)
+      expect(
+        described_class.new(
+          UserContext.new(other, sandbox),
+          collaborator_record
+        ).acknowledge_published_electives?
+      ).to be false
+    end
+
     it "upload_supporting_document? matches draft edit permissions" do
       record = double("PermitApplication", draft?: true)
       allow(record).to receive(

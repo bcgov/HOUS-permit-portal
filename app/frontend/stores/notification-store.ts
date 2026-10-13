@@ -50,15 +50,6 @@ const linkGenerators: Partial<Record<ENotificationActionType, LinkGenerator>> = 
     },
   ],
 
-  // HUB-2310 REVIEW: Remove. This is a copy of customizationUpdate. After the action type is
-  // collapsed, the existing customizationUpdate link covers it.
-  [ENotificationActionType.electivePublished]: () => [
-    {
-      text: t("permitApplication.reviewCustomizedSubmissionLink"),
-      href: `/projects`,
-    },
-  ],
-
   [ENotificationActionType.submissionCollaborationAssignment]: (notification) => {
     const { permitApplicationId } = notification.objectData as IPermitCollaborationNotificationObjectData
     return showLink(`/permit-applications/${permitApplicationId}/edit`)
