@@ -486,6 +486,7 @@ Rails.application.routes.draw do
       end
     end
     namespace :v2 do
+      resources :project_meetings, only: %i[show update]
       resources :permit_projects, only: %i[show] do
         patch "state", on: :member, to: "permit_projects#update_state"
       end
