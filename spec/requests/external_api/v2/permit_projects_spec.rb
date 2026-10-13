@@ -37,4 +37,56 @@ RSpec.describe "external_api/v2/permit_projects",
       end
     end
   end
+
+  path "/permit_projects/{id}/state" do
+    patch "Sets a permit project's state to a code legal from its current state." do
+      tags "Permit projects"
+      consumes "application/json"
+      produces "application/json"
+      parameter name: "id",
+                in: :path,
+                type: :string,
+                format: :uuid,
+                description: "Permit project ID"
+      parameter name: :state_update,
+                in: :body,
+                schema: {
+                  type: :object,
+                  required: %w[state],
+                  properties: {
+                    state: {
+                      "$ref" => "#/components/schemas/ProjectState"
+                    }
+                  }
+                }
+      let(:id) { permit_application.permit_project_id }
+      let(:state_update) { { state: "in_progress" } }
+
+      before do
+        permit_application.permit_project.update_column(
+          :state,
+          PermitProject.states[:queued]
+        )
+      end
+
+      response(200, "State updated") do
+        schema type: :object,
+               properties: {
+                 data: {
+                   "$ref" => "#/components/schemas/PermitProject"
+                 }
+               },
+               required: %w[data]
+
+        run_test!
+      end
+
+      response(422, "Illegal or unknown state") do
+        schema "$ref" => "#/components/schemas/ResponseError"
+        let(:state_update) { { state: "draft" } }
+
+        run_test!
+      end
+    end
+  end
 end

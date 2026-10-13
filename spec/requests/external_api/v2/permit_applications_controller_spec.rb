@@ -65,8 +65,12 @@ RSpec.describe "External API v2 permit applications", type: :request do
            headers: auth_headers
 
       expect(response).to have_http_status(:ok)
-      ids = JSON.parse(response.body).fetch("data").map { |row| row["id"] }
+      data = JSON.parse(response.body).fetch("data")
+      ids = data.map { |row| row["id"] }
       expect(ids).to contain_exactly(allowed.id)
+      expect(data.first["available_statuses"]).to eq(
+        %w[in_review withdrawn revisions_requested]
+      )
     end
   end
 
@@ -111,7 +115,8 @@ RSpec.describe "External API v2 permit applications", type: :request do
       expect(json).to include(
         "id" => permit_application.id,
         "permit_project_id" => permit_application.permit_project_id,
-        "number" => permit_application.number
+        "number" => permit_application.number,
+        "available_statuses" => %w[in_review withdrawn revisions_requested]
       )
       expect(json).not_to have_key("zipfile_url")
       expect(json).not_to have_key("latest_zipfile_url")
@@ -122,6 +127,21 @@ RSpec.describe "External API v2 permit applications", type: :request do
         "version_number" => 1
       )
       expect(versions.first).to have_key("package_ready_at")
+    end
+
+    it "returns issued and withdrawn from approved, without revisions_requested" do
+      permit_application.update_column(
+        :status,
+        PermitApplication.statuses[:approved]
+      )
+
+      get "/external_api/v2/permit_applications/#{permit_application.id}",
+          headers: auth_headers
+
+      expect(response).to have_http_status(:ok)
+      expect(JSON.parse(response.body).dig("data", "available_statuses")).to eq(
+        %w[issued withdrawn]
+      )
     end
   end
 
@@ -242,25 +262,16 @@ RSpec.describe "External API v2 permit applications", type: :request do
     expect(job["args"][2]["status"]).to eq("in_review")
   end
 
-  it "rejects BPH-owned and unknown statuses with the frozen write set" do
-    %w[newly_submitted not_a_status].each do |status|
+  it "rejects codes outside the statuses available from the current status" do
+    %w[newly_submitted not_a_status approved].each do |status|
       update_status(status)
 
       expect(response).to have_http_status(:unprocessable_content)
       expect(JSON.parse(response.body).dig("meta", "message")).to include(
-        "in_review, approved, issued, withdrawn, revisions_requested"
+        "Available statuses: in_review, withdrawn, revisions_requested"
       )
     end
     expect(permit_application.reload).to be_newly_submitted
-  end
-
-  it "rejects a canonical status that is not a valid lifecycle transition" do
-    update_status("approved")
-
-    expect(response).to have_http_status(:unprocessable_content)
-    expect(JSON.parse(response.body).dig("meta", "message")).to include(
-      "Cannot transition status from 'newly_submitted' to 'approved'"
-    )
   end
 
   it "does not allow a key to update another jurisdiction" do

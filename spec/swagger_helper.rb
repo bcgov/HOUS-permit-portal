@@ -34,7 +34,7 @@ RSpec.configure do |config|
         title: "Integration API V1",
         version: "v1",
         description: <<-DESC
-**Last updated:** 2026-09-28
+**Last updated:** 2026-10-05
 
 ### API documentation overview
 This document provides detailed information about the APIs available for external integrators to query and retrieve submitted and resubmitted permit applications.
@@ -117,8 +117,8 @@ Meeting requests remain in Building Permit Hub and are outside the Option B v2 E
 ### Status authority:
 Partners write canonical Building Permit Hub application status codes. An accepted partner write becomes the current status shown in Building Permit Hub.
 During the pilot, manual Building Permit Hub status controls remain available; the partner should re-send its authoritative state during reconciliation.
-Product will decide whether to warn or disable manual status changes in the Phase 3 conflict-UX story. Project state write-back is deferred from the pilot,
-but project state changes are emitted as webhooks.
+Product will decide whether to warn or disable manual status changes in the Phase 3 conflict-UX story. Partners write project state with `PATCH /permit_projects/{id}/state`.
+Reads include `available_states` and `available_statuses`, the codes that write may set from the current value. Project state changes are also emitted as webhooks.
 
 ### Visual aids and examples:
 For a better understanding of how our APIs work, including webhook setups and request handling, please refer to the code examples included later
@@ -224,7 +224,7 @@ in this document.
             ],
             requestBody: {
               description:
-                "Emitted when the state of a project containing a submitted permit application changes. Project state write-back is not available in the pilot.",
+                "Emitted when the state of a project containing a submitted permit application changes, including changes made through PATCH /permit_projects/{id}/state. Writing the project's current state does not emit another event.",
               content: {
                 "application/json" => {
                   schema: {
@@ -986,6 +986,14 @@ in this document.
       items: {
         "$ref" => "#/components/schemas/SubmissionVersionIndex"
       }
+    },
+    available_statuses: {
+      type: :array,
+      items: {
+        "$ref" => "#/components/schemas/PartnerWritableApplicationStatus"
+      },
+      description:
+        "Partner-writable statuses the lifecycle can reach from the current status. `revisions_requested` is included when that transition is legal, even before revision requests exist. Writing it still requires `revision_requests`."
     }
   )
   v2_spec[:components][:schemas].merge!(
@@ -1035,6 +1043,14 @@ in this document.
         },
         state_label: {
           type: :string
+        },
+        available_states: {
+          type: :array,
+          items: {
+            "$ref" => "#/components/schemas/ProjectState"
+          },
+          description:
+            "States a partner may write from the current state. `draft` is never included."
         },
         full_address: {
           type: :string,

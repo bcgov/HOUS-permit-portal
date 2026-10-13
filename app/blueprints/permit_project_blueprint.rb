@@ -8,6 +8,10 @@ class PermitProjectBlueprint < Blueprinter::Base
       Constants::ExternalApi::PROJECT_STATE_LABELS.fetch(permit_project.state)
     end
 
+    field :available_states do |permit_project, _options|
+      permit_project.allowed_manual_transitions.map(&:to_s)
+    end
+
     association :permit_applications,
                 blueprint: PermitApplicationBlueprint,
                 view: :external_api_summary do |permit_project, _options|

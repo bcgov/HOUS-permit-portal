@@ -22,7 +22,7 @@ module ExternalApi
     def call
       unless FINALIZABLE_STATUSES.include?(@permit_application.status)
         raise Error,
-              "Cannot transition status from '#{@permit_application.status}' to 'revisions_requested'. Allowed partner status codes: #{partner_writable_statuses}."
+              "Cannot transition status from '#{@permit_application.status}' to 'revisions_requested'. Available statuses: #{available_status_list}."
       end
 
       version = @permit_application.latest_submission_version
@@ -187,8 +187,10 @@ module ExternalApi
       {}
     end
 
-    def partner_writable_statuses
-      Constants::ExternalApi::PARTNER_WRITABLE_APPLICATION_STATUSES.join(", ")
+    def available_status_list
+      Constants::ExternalApi.available_statuses_for(@permit_application).join(
+        ", "
+      )
     end
   end
 end

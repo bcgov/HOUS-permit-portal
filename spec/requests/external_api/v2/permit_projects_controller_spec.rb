@@ -1,4 +1,5 @@
 require "rails_helper"
+require "sidekiq/testing"
 
 RSpec.describe "External API v2 permit projects", type: :request do
   let(:external_api_key) { create(:external_api_key, api_version: "v2") }
@@ -20,6 +21,17 @@ RSpec.describe "External API v2 permit projects", type: :request do
 
   def get_project(project = permit_project, headers: auth_headers)
     get "/external_api/v2/permit_projects/#{project.id}", headers: headers
+  end
+
+  def update_state(state, project: permit_project, headers: auth_headers)
+    patch "/external_api/v2/permit_projects/#{project.id}/state",
+          params: { state: state }.to_json,
+          headers: headers
+  end
+
+  def queue_project(project = permit_project)
+    project.update_column(:state, PermitProject.states[:queued])
+    project.reload
   end
 
   it "returns 401 without an API key" do
@@ -84,6 +96,7 @@ RSpec.describe "External API v2 permit projects", type: :request do
         "status_label" => "Submitted"
       )
       expect(submitted_row).to have_key("tags")
+      expect(submitted_row).not_to have_key("available_statuses")
 
       revisions_row = children.find { |row| row["id"] == revisions.id }
       expect(revisions_row).to include(
@@ -114,6 +127,17 @@ RSpec.describe "External API v2 permit projects", type: :request do
       expect(response).to have_http_status(:not_found)
     end
 
+    it "returns the inbox states a partner may write from queued" do
+      queue_project
+
+      get_project
+
+      expect(response).to have_http_status(:ok)
+      expect(JSON.parse(response.body).dig("data", "available_states")).to eq(
+        %w[waiting in_progress ready permit_issued active closed]
+      )
+    end
+
     it "returns 403 for a draft-only project" do
       draft_project =
         create(
@@ -124,6 +148,92 @@ RSpec.describe "External API v2 permit projects", type: :request do
       get_project(draft_project)
 
       expect(response).to have_http_status(:forbidden)
+    end
+  end
+
+  describe "PATCH /external_api/v2/permit_projects/:id/state" do
+    it "writes an allowed state, clears inbox order, audits the partner, and emits one webhook" do
+      project = queue_project
+      project.update!(inbox_sort_order: 4)
+      external_api_key.update!(
+        webhook_url: "https://partner.example.com/webhook"
+      )
+      PermitWebhookJob.clear
+
+      update_state("in_progress")
+
+      expect(response).to have_http_status(:ok)
+      json = JSON.parse(response.body).fetch("data")
+      expect(json["state"]).to eq("in_progress")
+      expect(json["available_states"]).to eq(%w[queued waiting ready closed])
+      expect(project.reload).to be_in_progress
+      expect(project.inbox_sort_order).to be_nil
+
+      audit =
+        ApplicationAudit
+          .where(auditable_type: "PermitProject", auditable_id: project.id)
+          .where("audited_changes ? 'state'")
+          .last
+      expect(audit.username).to eq(Constants::ExternalApi::PARTNER_SYSTEM_ACTOR)
+
+      expect(PermitWebhookJob.jobs.length).to eq(1)
+      expect(PermitWebhookJob.jobs.first["args"][1]).to eq(
+        Constants::Webhooks::Events::PermitProject::STATE_CHANGED
+      )
+    end
+
+    it "rejects draft and does not change state" do
+      project = queue_project
+
+      update_state("draft")
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(JSON.parse(response.body).dig("meta", "message")).to include(
+        "waiting, in_progress, ready, permit_issued, active, closed"
+      )
+      expect(project.reload).to be_queued
+    end
+
+    it "accepts the current state without another webhook" do
+      project = queue_project
+      project.update!(inbox_sort_order: 4)
+      external_api_key.update!(
+        webhook_url: "https://partner.example.com/webhook"
+      )
+      PermitWebhookJob.clear
+
+      update_state("queued")
+
+      expect(response).to have_http_status(:ok)
+      expect(project.reload).to be_queued
+      expect(project.inbox_sort_order).to eq(4)
+      expect(PermitWebhookJob.jobs).to be_empty
+    end
+
+    it "returns 403 for a project in another jurisdiction" do
+      other = create(:permit_application, :newly_submitted).permit_project
+      other.update_column(:state, PermitProject.states[:queued])
+
+      update_state("in_progress", project: other)
+
+      expect(response).to have_http_status(:forbidden)
+      expect(other.reload).to be_queued
+    end
+
+    it "returns 404 for a sandbox project when the key is live" do
+      sandbox_project =
+        create(
+          :permit_application,
+          :newly_submitted,
+          jurisdiction: external_api_key.jurisdiction,
+          sandbox: external_api_key.jurisdiction.sandboxes.first
+        ).permit_project
+      sandbox_project.update_column(:state, PermitProject.states[:queued])
+
+      update_state("in_progress", project: sandbox_project)
+
+      expect(response).to have_http_status(:not_found)
+      expect(sandbox_project.reload).to be_queued
     end
   end
 end

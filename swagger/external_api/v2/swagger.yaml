@@ -3,7 +3,7 @@ openapi: 3.1.0
 info:
   title: Integration API V2
   version: v2
-  description: "**Last updated:** 2026-09-28\n\n### API documentation overview\nThis document provides detailed information
+  description: "**Last updated:** 2026-10-05\n\n### API documentation overview\nThis document provides detailed information
     about the APIs available for external integrators to query and retrieve submitted
     and resubmitted permit applications.\nIt also includes specifications on webhook
     events that notify your systems in real-time.\n\n### Data scope:\nThe permit applications
@@ -66,8 +66,8 @@ info:
     Hub. During the pilot, manual Building Permit Hub status controls remain available;
     the partner should re-send its authoritative state during reconciliation. Product
     will decide whether to warn or disable manual status changes in the Phase 3 conflict-UX
-    story. Project state write-back is deferred from the pilot, but project state changes
-    are emitted as webhooks.\n\n### Visual aids and examples:\nFor
+    story. Partners write project state with `PATCH /permit_projects/{id}/state`.
+    Reads include `available_states` and `available_statuses`, the codes that write may set from the current value. Project state changes are also emitted as webhooks.\n\n### Visual aids and examples:\nFor
     a better understanding of how our APIs work, including webhook setups and request
     handling, please refer to the code examples included later\nin this document.\n"
 x-example-permit-application-all-types: &example_permit_application_all_types
@@ -347,7 +347,8 @@ webhooks:
       - "$ref": "#/components/parameters/WebhookSignature"
       requestBody:
         description: Emitted when the state of a project containing a submitted permit
-          application changes. Project state write-back is not available in the pilot.
+          application changes, including changes made through PATCH /permit_projects/{id}/state.
+          Writing the project's current state does not emit another event.
         content:
           application/json:
             schema:
@@ -746,6 +747,57 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/ResponseError"
+  "/permit_projects/{id}/state":
+    patch:
+      summary: Sets a permit project's state. Accepts only the codes in available_states
+        for the current state. `draft` is not a partner write. Writing the current
+        state returns the project and does not emit another permit_project_state_changed
+        webhook.
+      tags:
+      - Permit projects
+      parameters:
+      - name: id
+        in: path
+        description: Permit project ID
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - state
+              properties:
+                state:
+                  "$ref": "#/components/schemas/ProjectState"
+      responses:
+        '200':
+          description: State updated, or the project was already in that state
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    "$ref": "#/components/schemas/PermitProject"
+                required:
+                - data
+        '403':
+          description: Accessing a permit project for an unauthorized jurisdiction
+            or a draft-only project
+        '404':
+          description: Accessing a permit project which does not exist in this key's
+            sandbox
+        '422':
+          description: Illegal or unknown state
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ResponseError"
 servers:
 - url: "/external_api/v2"
   description: Current environment server
@@ -893,6 +945,12 @@ components:
           "$ref": "#/components/schemas/ProjectState"
         state_label:
           type: string
+        available_states:
+          type: array
+          items:
+            "$ref": "#/components/schemas/ProjectState"
+          description: States a partner may write from the current state. `draft`
+            is never included.
         full_address:
           type: string
           nullable: true
@@ -915,6 +973,13 @@ components:
           type: string
         status:
           "$ref": "#/components/schemas/ApplicationStatus"
+        available_statuses:
+          type: array
+          items:
+            "$ref": "#/components/schemas/PartnerWritableApplicationStatus"
+          description: Partner-writable statuses the lifecycle can reach from the current
+            status. `revisions_requested` is included when that transition is legal,
+            even before revision requests exist. Writing it still requires `revision_requests`.
         full_address:
           type: string
           description: The full address of the permit application.
