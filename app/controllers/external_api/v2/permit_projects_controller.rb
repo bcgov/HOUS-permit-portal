@@ -89,10 +89,6 @@ class ExternalApi::V2::PermitProjectsController < ExternalApi::ApplicationContro
         end
       end
 
-    created.each do |permit_application|
-      enqueue_autopopulate(permit_application)
-    end
-
     render_success created,
                    nil,
                    {
@@ -138,14 +134,6 @@ class ExternalApi::V2::PermitProjectsController < ExternalApi::ApplicationContro
       .for_sandbox(@permit_project.sandbox)
       .where(requirement_template_id: query_ids)
       .index_by { |version| version.requirement_template_id.to_s }
-  end
-
-  def enqueue_autopopulate(permit_application)
-    unless !Rails.env.development? || ENV["RUN_COMPLIANCE_ON_SAVE"] == "true"
-      return
-    end
-
-    AutomatedCompliance::AutopopulateJob.perform_async(permit_application.id)
   end
 
   def render_draft_error(message)

@@ -370,7 +370,7 @@ RSpec.describe "External API v2 permit projects", type: :request do
       )
     end
 
-    it "creates new_draft applications for the project owner and enqueues autopopulate" do
+    it "creates new_draft applications for the project owner" do
       low_residential = published_template_version
       laneway = published_template_version
       other_jurisdiction = create(:sub_district)
@@ -379,7 +379,6 @@ RSpec.describe "External API v2 permit projects", type: :request do
         webhook_url: "https://partner.example.com/webhook"
       )
       PermitWebhookJob.clear
-      AutomatedCompliance::AutopopulateJob.clear
 
       expect do
         post_drafts(
@@ -449,11 +448,6 @@ RSpec.describe "External API v2 permit projects", type: :request do
       expect(audits.map(&:username).uniq).to eq(
         [Constants::ExternalApi::PARTNER_SYSTEM_ACTOR]
       )
-      expect(
-        AutomatedCompliance::AutopopulateJob.jobs.map do |job|
-          job["args"].first
-        end
-      ).to match_array(created.map(&:id))
 
       expect(permit_project.reload.state).to eq(state_before)
       state_events =

@@ -5,7 +5,12 @@ class ExternalApi::V2::RequirementTemplatesController < ExternalApi::Application
 
     render_success catalog,
                    nil,
-                   { blueprint: ExternalApi::RequirementTemplateBlueprint }
+                   {
+                     blueprint: RequirementTemplateBlueprint,
+                     blueprint_opts: {
+                       view: :external_api
+                     }
+                   }
   end
 
   private
