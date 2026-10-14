@@ -80,6 +80,87 @@ RSpec.describe ExternalApi::PermitProjectPolicy, type: :policy do
     end
   end
 
+  describe "Scope" do
+    def resolve
+      external_api_scope_for(
+        described_class,
+        external_api_key:,
+        scope: PermitProject.all
+      )
+    end
+
+    def queue(project)
+      project.update_column(:state, PermitProject.states[:queued])
+      project
+    end
+
+    it "includes a non-draft project with a submitted application in the key's jurisdiction and sandbox" do
+      project =
+        queue(create_application(status: :newly_submitted).permit_project)
+
+      expect(resolve).to contain_exactly(project)
+    end
+
+    it "excludes drafts, draft-only non-draft rows, other jurisdictions, the wrong sandbox, and discarded projects" do
+      draft_only = create_application(status: :new_draft).permit_project
+      queued_without_submission =
+        queue(create_application(status: :new_draft).permit_project)
+      other_project =
+        queue(
+          create_application(
+            status: :newly_submitted,
+            jurisdiction: other_jurisdiction
+          ).permit_project
+        )
+      wrong_sandbox =
+        queue(
+          create_application(
+            status: :newly_submitted,
+            sandbox: published_sandbox
+          ).permit_project
+        )
+      discarded =
+        queue(create_application(status: :newly_submitted).permit_project)
+      discarded.discard!
+
+      expect(resolve).not_to include(
+        draft_only,
+        queued_without_submission,
+        other_project,
+        wrong_sandbox,
+        discarded
+      )
+    end
+
+    it "includes a sandbox project only for a key in that sandbox" do
+      live = queue(create_application(status: :newly_submitted).permit_project)
+      sandbox_project =
+        queue(
+          create_application(
+            status: :newly_submitted,
+            sandbox: published_sandbox
+          ).permit_project
+        )
+      sandbox_key =
+        create(
+          :external_api_key,
+          jurisdiction:,
+          sandbox: published_sandbox,
+          api_version: "v2"
+        )
+
+      scoped =
+        external_api_scope_for(
+          described_class,
+          external_api_key: sandbox_key,
+          scope: PermitProject.all
+        )
+
+      expect(scoped).to contain_exactly(sandbox_project)
+      expect(scoped).not_to include(live)
+    end
+  end
+
   describe "#update_state?" do
     it "matches project read visibility" do
       visible = create_application(status: :newly_submitted).permit_project

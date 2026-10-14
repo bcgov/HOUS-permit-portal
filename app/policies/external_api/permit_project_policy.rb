@@ -7,6 +7,24 @@ class ExternalApi::PermitProjectPolicy < ExternalApi::ApplicationPolicy
     show?
   end
 
+  class Scope < Scope
+    def resolve
+      scope
+        .kept
+        .where(
+          jurisdiction_id: external_api_key.jurisdiction_id,
+          sandbox_id: external_api_key.sandbox_id
+        )
+        .where.not(state: :draft)
+        .where(
+          id:
+            PermitApplication.kept.submitted_at_least_once.select(
+              :permit_project_id
+            )
+        )
+    end
+  end
+
   private
 
   def visible_children?

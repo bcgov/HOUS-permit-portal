@@ -20,6 +20,7 @@ RSpec.describe "External API v2 permit applications", type: :request do
 
   def stub_permit_application_search(*records)
     allow(PermitApplication).to receive(:search) do |_query, **kwargs|
+      @permit_application_search_kwargs = kwargs
       relation = PermitApplication.where(id: records.map(&:id))
       scoped = kwargs.fetch(:scope_results).call(relation)
       results = scoped.to_a
@@ -65,6 +66,10 @@ RSpec.describe "External API v2 permit applications", type: :request do
            headers: auth_headers
 
       expect(response).to have_http_status(:ok)
+      expect(@permit_application_search_kwargs[:page]).to eq(1)
+      expect(@permit_application_search_kwargs[:per_page]).to eq(
+        Kaminari.config.default_per_page
+      )
       data = JSON.parse(response.body).fetch("data")
       ids = data.map { |row| row["id"] }
       expect(ids).to contain_exactly(allowed.id)

@@ -29,6 +29,9 @@ module ProjectMeetingStatus
 
     # draft → open is only submit_request. Queue after that save commits.
     after_commit :send_requested_webhook, if: :submitted_for_external_api?
+    # The AASM schedule callback runs before the save. Notify only after
+    # status scheduled is committed, so a failed save does not send email.
+    after_commit :publish_scheduled_notification, if: :became_scheduled?
 
     scope :active, -> { where(status: statuses.values_at(*active_statuses)) }
 
@@ -51,10 +54,7 @@ module ProjectMeetingStatus
       end
 
       event :schedule, before: :stamp_scheduled_at do
-        transitions from: :open,
-                    to: :scheduled,
-                    guard: :can_schedule?,
-                    after: :handle_scheduled
+        transitions from: :open, to: :scheduled, guard: :can_schedule?
       end
 
       event :complete, before: :stamp_completed_at do
@@ -120,7 +120,11 @@ module ProjectMeetingStatus
       )
     end
 
-    def handle_scheduled
+    def became_scheduled?
+      saved_change_to_status? && scheduled?
+    end
+
+    def publish_scheduled_notification
       NotificationService.publish_project_meeting_scheduled_event(self)
     end
 

@@ -488,6 +488,7 @@ Rails.application.routes.draw do
     namespace :v2 do
       resources :project_meetings, only: %i[show update]
       resources :permit_projects, only: %i[show] do
+        post "search", on: :collection, to: "permit_projects#index"
         patch "state", on: :member, to: "permit_projects#update_state"
       end
       resources :revision_reasons, only: %i[index]
