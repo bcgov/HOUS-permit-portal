@@ -66,6 +66,20 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const formRef = useRef(null)
   const navigate = useNavigate()
 
+  const acknowledgedElectivesKey = useRef("")
+  useEffect(() => {
+    if (!currentUser || !currentPermitApplication?.isFullyLoaded) return
+    if (currentUser.id !== currentPermitApplication.submitter?.id) return
+
+    const changeId = currentPermitApplication.unseenCustomizationChangeId
+    if (!changeId || !currentPermitApplication.unseenElectiveFieldIds.length) return
+
+    const key = `${currentPermitApplication.id}:${changeId}`
+    if (acknowledgedElectivesKey.current === key) return
+    acknowledgedElectivesKey.current = key
+    void currentPermitApplication.acknowledgePublishedElectives()
+  }, [currentPermitApplication, currentPermitApplication?.isFullyLoaded, currentUser])
+
   useEffect(() => {
     if (scrollToSelector) {
       setTimeout(() => {

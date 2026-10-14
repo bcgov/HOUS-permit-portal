@@ -32,6 +32,7 @@ import {
   combineDiff,
   combineRevisionAnnotations,
   combineRevisionButtons,
+  highlightPublishedElectives,
   processFieldsForEphemeral,
 } from "../utils/formio-component-traversal"
 import { injectOptionalElectivesButtons } from "../utils/view-optional-electives"
@@ -72,6 +73,8 @@ export const PermitApplicationModel = types.snapshotProcessor(
       submissionData: types.maybeNull(types.frozen<ISubmissionData>()),
       formattedComplianceData: types.maybeNull(types.frozen()),
       formCustomizations: types.maybeNull(types.frozen<ITemplateCustomization>()),
+      unseenElectiveFieldIds: types.optional(types.array(types.string), []),
+      unseenCustomizationChangeId: types.maybeNull(types.string),
       submittedAt: types.maybeNull(types.Date),
       resubmittedAt: types.maybeNull(types.Date),
       revisionsRequestedAt: types.maybeNull(types.Date),
@@ -295,7 +298,10 @@ export const PermitApplicationModel = types.snapshotProcessor(
           self.formattedComplianceData,
           self.jurisdiction?.resources
         )
-        const diffColoredFormJson = combineDiff(complianceHintedFormJson, self.diff)
+        const withPublishedElectives = self.rootStore.userStore.currentUser?.isReviewStaff
+          ? complianceHintedFormJson
+          : highlightPublishedElectives(complianceHintedFormJson, self.unseenElectiveFieldIds.slice())
+        const diffColoredFormJson = combineDiff(withPublishedElectives, self.diff)
         const revisionRequestsToUse = self.isViewingPastRequests
           ? self.selectedSubmissionVersion?.revisionRequests
           : self.latestRevisionRequests
@@ -924,6 +930,11 @@ export const PermitApplicationModel = types.snapshotProcessor(
           )
         }
         return response.ok
+      }),
+      acknowledgePublishedElectives: flow(function* () {
+        const customizationChangeId = self.unseenCustomizationChangeId
+        if (!customizationChangeId) return
+        yield self.environment.api.acknowledgePublishedElectives(self.id, customizationChangeId)
       }),
       markAsViewed: flow(function* () {
         const wasUnread = !self.isViewed

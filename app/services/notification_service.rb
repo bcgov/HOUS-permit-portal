@@ -318,7 +318,7 @@ class NotificationService
     end
   end
 
-  def self.publish_customization_update_event(customization)
+  def self.publish_customization_update_event(customization, change: nil)
     throttle_key =
       "customization_update_notification:" \
         "#{customization.jurisdiction_id}:#{customization.template_version_id}"
@@ -333,18 +333,31 @@ class NotificationService
 
     return unless throttle_acquired
 
+    notification_user_hash =
+      customization_draft_submitter_ids(
+        customization,
+        for_elective_change: change.present?
+      ).each_with_object({}) do |submitter_id, hash|
+        hash[submitter_id] = customization.update_event_notification_data(
+          change
+        )
+      end
+
+    NotificationPushJob.perform_async(notification_user_hash)
+  end
+
+  def self.customization_draft_submitter_ids(
+    customization,
+    for_elective_change: false
+  )
     template_version = customization.template_version
     jurisdiction_id = customization.jurisdiction_id
-    relevant_submitter_ids =
+    scope =
       PermitApplication
         .kept
-        .joins(:template_version)
         .joins(submitter: :preference)
         .left_joins(:permit_project)
         .where(
-          template_versions: {
-            requirement_template_id: template_version.requirement_template_id
-          },
           status: PermitApplication.draft_statuses,
           users: {
             preferences: {
@@ -358,15 +371,24 @@ class NotificationService
           ),
           jurisdiction_id
         )
-        .pluck(:submitter_id)
-        .uniq
 
-    notification_user_hash =
-      relevant_submitter_ids.each_with_object({}) do |submitter_id, hash|
-        hash[submitter_id] = customization.update_event_notification_data
+    scope =
+      if for_elective_change
+        scope.where(
+          template_version_id: customization.template_version_id,
+          permit_projects: {
+            sandbox_id: customization.sandbox_id
+          }
+        )
+      else
+        scope.joins(:template_version).where(
+          template_versions: {
+            requirement_template_id: template_version.requirement_template_id
+          }
+        )
       end
 
-    NotificationPushJob.perform_async(notification_user_hash)
+    scope.pluck(:submitter_id).uniq
   end
 
   def self.publish_permit_collaboration_assignment_event(permit_collaboration)

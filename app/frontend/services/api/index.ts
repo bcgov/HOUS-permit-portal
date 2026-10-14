@@ -306,6 +306,12 @@ export class Api {
     return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/mark_as_viewed`)
   }
 
+  async acknowledgePublishedElectives(id: string, customizationChangeId: string) {
+    return this.client.post<ApiResponse<null>>(`/permit_applications/${id}/acknowledge_published_electives`, {
+      customizationChangeId,
+    })
+  }
+
   async unviewPermitApplication(id: string) {
     return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/mark_as_unviewed`)
   }

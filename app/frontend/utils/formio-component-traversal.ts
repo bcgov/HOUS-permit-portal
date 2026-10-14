@@ -352,6 +352,11 @@ export const combineRevisionAnnotations = (formJson: IFormJson, revisionRequests
   return updateFormJsonClasses(formJson, { "revision-requested": revisionIds })
 }
 
+export const highlightPublishedElectives = (formJson: IFormJson, unseenIds: string[]): IFormJson => {
+  if (!unseenIds?.length) return formJson
+  return updateFormJsonClasses(formJson, { "recently-published-elective": unseenIds })
+}
+
 export const combineDiff = (formJson: IFormJson, diff: ITemplateVersionDiff) => {
   const removedIds = diff?.removed?.map((req) => req.id) || []
   const addedIds = diff?.added?.map((req) => req.id) || []

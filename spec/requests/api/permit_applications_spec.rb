@@ -381,6 +381,132 @@ RSpec.describe "Api::PermitApplications", type: :request do
     end
   end
 
+  describe "POST /api/permit_applications/:id/acknowledge_published_electives" do
+    let(:field_id) { SecureRandom.uuid }
+    let(:newer_field_id) { SecureRandom.uuid }
+    let(:customization) do
+      create(
+        :jurisdiction_template_version_customization,
+        jurisdiction: jurisdiction,
+        template_version: template_version
+      )
+    end
+
+    it "acknowledges the loaded change and leaves a newer publish unseen" do
+      permit_application
+      loaded =
+        customization.customization_changes.create!(
+          enabled_components: [{ "id" => field_id, "label" => "Site plan" }],
+          disabled_components: [],
+          optional_components: [],
+          created_at: 2.hours.ago
+        )
+      customization.customization_changes.create!(
+        enabled_components: [
+          { "id" => newer_field_id, "label" => "Elevation" }
+        ],
+        disabled_components: [],
+        optional_components: [],
+        created_at: 1.hour.ago
+      )
+      customization.update_column(
+        :customizations,
+        {
+          "requirement_block_changes" => {
+            "block-1" => {
+              "enabled_elective_field_ids" => [field_id, newer_field_id],
+              "optional_elective_field_ids" => [],
+              "enabled_elective_field_reasons" => {
+                field_id => "bylaw",
+                newer_field_id => "bylaw"
+              }
+            }
+          }
+        }
+      )
+
+      post "/api/permit_applications/#{permit_application.id}/acknowledge_published_electives",
+           params: {
+             customization_change_id: loaded.id
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response["data"]).to be_nil
+      permit_application.reload
+      expect(permit_application.acknowledged_customization_change_id).to eq(
+        loaded.id
+      )
+      expect(permit_application.unseen_elective_field_ids).to eq(
+        [newer_field_id]
+      )
+    end
+
+    it "forbids a submitter when the application is not a draft" do
+      submitted =
+        create(
+          :permit_application,
+          :newly_submitted,
+          submitter: submitter,
+          template_version: template_version,
+          jurisdiction: jurisdiction
+        )
+
+      post "/api/permit_applications/#{submitted.id}/acknowledge_published_electives",
+           params: {
+             customization_change_id: SecureRandom.uuid
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(json_response.dig("meta", "message", "message")).to be_present
+      expect(submitted.reload.acknowledged_customization_change_id).to be_nil
+    end
+
+    it "forbids a user without submission edit permission" do
+      sign_in other_user
+
+      post "/api/permit_applications/#{permit_application.id}/acknowledge_published_electives",
+           params: {
+             customization_change_id: SecureRandom.uuid
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(json_response.dig("meta", "message", "message")).to be_present
+      expect(
+        permit_application.reload.acknowledged_customization_change_id
+      ).to be_nil
+    end
+
+    it "forbids a submission collaborator who is not the submitter" do
+      collaborator_user = create(:user, :submitter)
+      create(
+        :permit_collaboration,
+        permit_application: permit_application,
+        collaborator: create(:collaborator, user: collaborator_user),
+        collaboration_type: :submission,
+        collaborator_type: :delegatee
+      )
+      sign_in collaborator_user
+
+      post "/api/permit_applications/#{permit_application.id}/acknowledge_published_electives",
+           params: {
+             customization_change_id: SecureRandom.uuid
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(
+        permit_application.reload.acknowledged_customization_change_id
+      ).to be_nil
+    end
+  end
+
   describe "PATCH /api/permit_applications/:id/revision_requests" do
     let(:reviewer) { create(:user, :reviewer, jurisdiction: jurisdiction) }
     let(:submitted_application) do

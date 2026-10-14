@@ -7,6 +7,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
                   upload_supporting_document
                   finalize_revision_requests
                   mark_as_viewed
+                  acknowledge_published_electives
                   update_version
                   generate_missing_pdfs
                   download_supporting_documents_zip
@@ -24,6 +25,15 @@ class Api::PermitApplicationsController < Api::ApplicationController
                   mark_as_unviewed
                 ]
   skip_after_action :verify_policy_scoped, only: [:index]
+
+  def acknowledge_published_electives
+    authorize @permit_application
+
+    @permit_application.acknowledge_published_electives!(
+      params[:customization_change_id]
+    )
+    render_success nil
+  end
 
   def mark_as_viewed
     authorize @permit_application

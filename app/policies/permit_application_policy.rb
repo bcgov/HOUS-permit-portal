@@ -88,6 +88,13 @@ class PermitApplicationPolicy < ApplicationPolicy
       ).present?
   end
 
+  def acknowledge_published_electives?
+    record.draft? && record.submitter_id == user.id &&
+      record.submission_requirement_block_edit_permissions(
+        user_id: user.id
+      ).present?
+  end
+
   def upload_supporting_document?
     record.draft? &&
       record.submission_requirement_block_edit_permissions(
