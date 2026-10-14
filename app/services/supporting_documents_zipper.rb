@@ -35,7 +35,7 @@ class SupportingDocumentsZipper
     @file_path = Pathname.new(@directory).join(zip_filename)
     @documents = select_documents.to_a
     if @document_ids && (@document_ids - @documents.map(&:id)).any?
-      raise "Requested ZIP documents are unavailable"
+      raise RuntimeError, "Requested ZIP documents are unavailable"
     end
   rescue StandardError
     if @directory && File.directory?(@directory)
@@ -69,7 +69,9 @@ class SupportingDocumentsZipper
     Zip::File.open(file_path, create: true) do |zipfile|
       @documents.each do |document|
         file_path = download_file(document)
-        raise "Required ZIP member could not be downloaded" unless file_path
+        unless file_path
+          raise RuntimeError, "Required ZIP member could not be downloaded"
+        end
         if file_path
           zipfile.add(
             unique_zip_entry_name(document, used_entry_names),
@@ -128,7 +130,7 @@ class SupportingDocumentsZipper
   def upload_zip_file
     submission_version = @submission_version
     unless submission_version
-      raise "Failed to upload zip file: no submission version"
+      raise RuntimeError, "Failed to upload zip file: no submission version"
     end
 
     File.open(file_path.to_s, "rb") do |file|
@@ -136,11 +138,13 @@ class SupportingDocumentsZipper
       temp_files << file.path
       uploaded_file = uploader.upload(file)
       if @version_ids && !uploaded_file.exists?
-        raise "Uploaded ZIP is unavailable"
+        raise RuntimeError, "Uploaded ZIP is unavailable"
       end
       submission_version.zipfile_data = uploaded_file.data
 
-      raise "Failed to save ZIP attachment" unless submission_version.save
+      unless submission_version.save
+        raise RuntimeError, "Failed to save ZIP attachment"
+      end
     end
   end
 
@@ -153,7 +157,7 @@ class SupportingDocumentsZipper
       downloaded = document.file.download
       temp_files << downloaded
       if document.file_size && downloaded.size != document.file_size
-        raise "ZIP member size mismatch"
+        raise RuntimeError, "ZIP member size mismatch"
       end
       return downloaded.path
     end
@@ -171,7 +175,8 @@ class SupportingDocumentsZipper
       request = Net::HTTP::Get.new(url)
       http.request(request) do |response|
         unless response.is_a?(Net::HTTPSuccess)
-          raise "ZIP member download failed (HTTP #{response.code})"
+          raise RuntimeError,
+                "ZIP member download failed (HTTP #{response.code})"
         end
         response.read_body { |chunk| temp_file.write(chunk) }
       end

@@ -1,2 +1,6 @@
-# Resource and conversion settings inherit the initial defaults from values.yaml.
+# Resource requests and conversion settings inherit from values.yaml.
 replicaCount: 1
+
+resources:
+  limits:
+    memory: 2Gi

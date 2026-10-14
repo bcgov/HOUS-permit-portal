@@ -5,12 +5,12 @@ export function ReportTable({
   rows,
   layout = "records",
   keepTogether = true,
-}: {
+}: Readonly<{
   headers: React.ReactNode[]
   rows: React.ReactNode[][]
   layout?: TableLayout
   keepTogether?: boolean
-}) {
+}>) {
   return (
     <table className={`report-table report-table--${layout} ${keepTogether ? "report-keep" : "report-split"}`}>
       <colgroup>

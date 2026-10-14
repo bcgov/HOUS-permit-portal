@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: nginx-matomo-dashboard
-  namespace: {{.Release.Namespace}}
+  namespace: {{ .Release.Namespace }}
 data:
 {{- if .Values.matomo.dashboard.nginx.conf }}
 {{ toYaml .Values.matomo.dashboard.nginx.conf | indent 2 }}

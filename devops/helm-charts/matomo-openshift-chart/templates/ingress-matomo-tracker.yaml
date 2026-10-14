@@ -8,7 +8,7 @@ metadata:
 {{ toYaml .Values.matomo.ingress.extralabels | indent 4 }}
 {{- end }}
   name: matomo-tracker
-  namespace: {{.Release.Namespace}}
+  namespace: {{ .Release.Namespace }}
   annotations:
     nginx.ingress.kubernetes.io/use-regex: "true"
     {{- if .Values.matomo.ingress.annotations }}
@@ -23,10 +23,10 @@ metadata:
     {{- end }}
 spec:
   {{- if .Values.matomo.tracker.ingressClassName }}
-  ingressClassName: {{.Values.matomo.tracker.ingressClassName}}
+  ingressClassName: {{ .Values.matomo.tracker.ingressClassName }}
   {{- end }}
   rules:
-  - host: {{.Values.matomo.tracker.hostname}}
+  - host: {{ .Values.matomo.tracker.hostname }}
     http:
       paths:
       - path: /index.php
@@ -178,9 +178,9 @@ spec:
   {{- if .Values.matomo.tracker.tls }}
   tls:
   - hosts:
-    - {{.Values.matomo.tracker.hostname}}
+    - {{ .Values.matomo.tracker.hostname }}
     {{- if .Values.matomo.tracker.secretName }}
-    secretName: {{.Values.matomo.tracker.secretName}}
+    secretName: {{ .Values.matomo.tracker.secretName }}
     {{- end -}}
   {{- end -}}
 {{- end -}}

@@ -3,7 +3,7 @@ import { IPart3StepCodeChecklist } from "../../../../../../models/part-3-step-co
 import { ReportTable } from "../../../../components/report-table"
 import { reportTranslation as t } from "../../../../components/report-translation"
 const prefix = "stepCode.part3.stepCodeSummary.mixedUse.occupancies"
-export const StepCodeOccupanciesPdf = ({ checklist }: { checklist: IPart3StepCodeChecklist }) => (
+export const StepCodeOccupanciesPdf = ({ checklist }: Readonly<{ checklist: IPart3StepCodeChecklist }>) => (
   <ReportTable
     layout="metrics"
     headers={[t(`${prefix}.occupancy`), t(`${prefix}.energy`), t(`${prefix}.ghgi`)]}

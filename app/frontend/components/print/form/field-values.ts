@@ -27,12 +27,8 @@ export function optionLabel(component: FormComponent, value: any): string {
 /** Selected labels in saved schema order, followed by values no longer in the schema. */
 export function selectedOptionLabels(component: FormComponent, value: any): string[] {
   if (isMissing(value)) return []
-  const selected =
-    component.type === "selectboxes"
-      ? Object.keys(value).filter((key) => value[key])
-      : Array.isArray(value)
-        ? value
-        : [value]
+  const entries = Array.isArray(value) ? value : [value]
+  const selected = component.type === "selectboxes" ? Object.keys(value).filter((key) => value[key]) : entries
   const remaining = new Map(selected.map((entry) => [String(entry), entry]))
   const labels: string[] = []
   for (const option of component.values || component.data?.values || []) {

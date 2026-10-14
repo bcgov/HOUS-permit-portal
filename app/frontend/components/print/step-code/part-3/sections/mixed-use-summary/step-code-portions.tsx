@@ -8,11 +8,11 @@ export const StepCodePortionsPdf = ({
   requirements,
   adjustedResults,
   compliance,
-}: {
+}: Readonly<{
   requirements: Performance["requirements"]
   adjustedResults: Performance["adjustedResults"]
   compliance: Performance["complianceSummary"]
-}) => {
+}>) => {
   const prefix = "stepCode.part3.stepCodeSummary.mixedUse.stepCode"
   return (
     <ReportTable

@@ -4,14 +4,14 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: matomo-tracker
-  namespace: {{.Release.Namespace}}
+  namespace: {{ .Release.Namespace }}
   labels:
     app: matomo-tracker
 {{- if .Values.matomo.extralabels }}
 {{ toYaml .Values.matomo.extralabels | indent 4 }}
 {{- end }}
 spec:
-  replicas: {{.Values.matomo.tracker.replicas}}
+  replicas: {{ .Values.matomo.tracker.replicas }}
   # Recreate avoids needing surge capacity on every deploy; with replicas=1
   # RollingUpdate provides no HA benefit anyway. Reconsider if replicas > 1.
   strategy:

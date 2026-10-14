@@ -3,11 +3,11 @@ export function ReportContact({
   title,
   children,
   record = false,
-}: {
+}: Readonly<{
   title?: React.ReactNode
   children: React.ReactNode
   record?: boolean
-}) {
+}>) {
   return (
     <section className={record ? "report-record" : "report-group"}>
       {title && <h3>{title}</h3>}

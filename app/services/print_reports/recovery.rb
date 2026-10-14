@@ -58,7 +58,7 @@ module PrintReports
         # Preserve the original readiness event: recovery never sends a second
         # package-ready webhook. Normal generation handles first publication.
         WebsocketBroadcaster.push_update_to_relevant_users(
-          application.notifiable_users.pluck(:id),
+          application.notifiable_users.map(&:id),
           Constants::Websockets::Events::PermitApplication::DOMAIN,
           Constants::Websockets::Events::PermitApplication::TYPES[
             :update_supporting_documents

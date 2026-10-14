@@ -12,7 +12,7 @@ import { ZeroCarbonStepCompliance } from "./sections/zero-carbon-step-compliance
 interface IProps {
   checklist: IPart9StepCodeChecklist
 }
-export function Part9Report({ checklist }: IProps) {
+export function Part9Report({ checklist }: Readonly<IProps>) {
   return (
     <div>
       <div>

@@ -6,11 +6,11 @@ export function ReportCover({
   identity,
   title,
   missingValue = NOT_PROVIDED,
-}: {
+}: Readonly<{
   identity: ReportIdentity
   title: string
   missingValue?: string
-}) {
+}>) {
   const displayValue = (value: unknown) => formatValue(value, missingValue)
   const date = (value?: string) =>
     value ? new Date(value).toLocaleDateString("en-CA", { timeZone: "America/Vancouver" }) : missingValue
@@ -40,11 +40,9 @@ export function ReportCover({
         {identity.updated_at && <ReportField label="Last saved">{date(identity.updated_at)}</ReportField>}
         <ReportField label="Export date">{date(identity.exported_at)}</ReportField>
       </dl>
-      <p className="report-note">
-        {identity.submission_version_id
-          ? "This report presents the answers and application information saved at submission. Later edits are not included."
-          : "This report presents saved data. Unsaved changes are not included."}
-      </p>
+      {!identity.submission_version_id && (
+        <p className="report-note">This report presents saved data. Unsaved changes are not included.</p>
+      )}
     </header>
   )
 }

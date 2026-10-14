@@ -8,11 +8,11 @@ export const BaselineWholeBuildingPdf = ({
   requirements,
   compliance,
   adjustedResults,
-}: {
+}: Readonly<{
   requirements: Performance["requirements"]
   compliance: Performance["complianceSummary"]
   adjustedResults: Performance["adjustedResults"]
-}) => {
+}>) => {
   const prefix = "stepCode.part3.stepCodeSummary.mixedUse.wholeBuilding"
   return (
     <ReportTable

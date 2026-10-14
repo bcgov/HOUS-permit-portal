@@ -173,7 +173,7 @@ RSpec.describe PrintReports::Recovery do
     described_class.call(version)
     snapshot = version.reload.report_snapshot
     doc = version.supporting_documents.first
-    doc.file.open do |file|
+    doc.file.open do |_file|
       # Overwrite the storage object while preserving its database reference.
       doc.file.storage.upload(StringIO.new("broken PDF"), doc.file.id)
     end

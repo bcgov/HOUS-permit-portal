@@ -4,14 +4,14 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: matomo-queuedtracking-process
-  namespace: {{.Release.Namespace}}
+  namespace: {{ .Release.Namespace }}
   labels:
     app: matomo-queuedtracking-process
 {{- if .Values.matomo.extralabels }}
 {{ toYaml .Values.matomo.extralabels | indent 4 }}
 {{- end }}
 spec:
-  replicas: {{.Values.matomo.queuedTrackingProcess.replicas}}
+  replicas: {{ .Values.matomo.queuedTrackingProcess.replicas }}
   selector:
     matchLabels:
       app: matomo-queuedtracking-process
@@ -28,7 +28,7 @@ spec:
 {{ include "matomo.init" . | nindent 6 }}
       containers:
       - name: matomo
-        image: {{.Values.matomo.image}}
+        image: {{ .Values.matomo.image }}
         resources:
           requests:
             memory: "128Mi"
@@ -37,7 +37,7 @@ spec:
             memory: "220Mi"
             cpu: "1"
         securityContext:
-          runAsUser: {{.Values.matomo.runAsUser}}
+          runAsUser: {{ .Values.matomo.runAsUser }}
           privileged: false
           allowPrivilegeEscalation: false
         imagePullPolicy: Always

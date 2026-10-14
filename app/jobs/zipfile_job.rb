@@ -79,7 +79,9 @@ class ZipfileJob
            .any? { |v| v.reload.report_generation_issues.any? }
         next
       end
-      raise "Required PDFs are missing" if version.reload.missing_pdfs?
+      if version.reload.missing_pdfs?
+        raise RuntimeError, "Required PDFs are missing"
+      end
       SupportingDocumentsZipper.new(
         application.id,
         submission_version: version,

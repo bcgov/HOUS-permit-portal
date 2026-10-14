@@ -2,7 +2,7 @@ import DOMPurify from "dompurify"
 import React from "react"
 import { ReportAttachments } from "../components/report-attachments"
 import { displayValue, fieldValue, FormComponent, NOT_PROVIDED, selectedOptionLabels } from "./field-values"
-export function RichText({ html }: { html: string }) {
+export function RichText({ html }: Readonly<{ html: string }>) {
   return (
     <span
       dangerouslySetInnerHTML={{
@@ -16,8 +16,8 @@ export function RichText({ html }: { html: string }) {
   )
 }
 type Props = { component: FormComponent; value: any }
-const Plain = ({ component, value }: Props) => <>{fieldValue(component, value)}</>
-const Rich = ({ component, value }: Props) =>
+const Plain = ({ component, value }: Readonly<Props>) => <>{fieldValue(component, value)}</>
+const Rich = ({ component, value }: Readonly<Props>) =>
   component.wysiwyg && value ? <RichText html={value} /> : <Plain component={component} value={value} />
 /** Add a new field type here; form templates never need report-specific copies. */
 export const fieldRenderers: Record<string, React.ComponentType<Props>> = Object.fromEntries(
@@ -46,7 +46,7 @@ export const fieldRenderers: Record<string, React.ComponentType<Props>> = Object
   ].map((type) => [type, Plain])
 )
 fieldRenderers.textarea = Rich
-const Choices = ({ component, value }: Props) => {
+const Choices = ({ component, value }: Readonly<Props>) => {
   const labels = selectedOptionLabels(component, value)
   if (!labels.length) return <>{NOT_PROVIDED}</>
   if (component.type !== "selectboxes" && !component.multiple && !Array.isArray(value)) return <>{labels[0]}</>
@@ -65,7 +65,7 @@ const Choices = ({ component, value }: Props) => {
 }
 fieldRenderers.selectboxes = fieldRenderers.select = Choices
 fieldRenderers.file = fieldRenderers.simplefile = ({ value }) => <ReportAttachments value={value} />
-export function FieldValue({ component, value }: Props) {
+export function FieldValue({ component, value }: Readonly<Props>) {
   const Renderer = fieldRenderers[component.type]
   if (Renderer) return <Renderer component={component} value={value} />
   if (import.meta.env.DEV) console.warn("Print report: unsupported field type", component.type, component.key)

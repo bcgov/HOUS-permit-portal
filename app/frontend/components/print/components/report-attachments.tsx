@@ -1,7 +1,8 @@
 import React from "react"
 import { NOT_PROVIDED } from "../form/field-values"
-export function ReportAttachments({ value }: { value: any }) {
-  const files = Array.isArray(value) ? value : value ? [value] : []
+export function ReportAttachments({ value }: Readonly<{ value: any }>) {
+  const singleFile = value ? [value] : []
+  const files = Array.isArray(value) ? value : singleFile
   return files.length ? (
     <ul>
       {files.map((file, i) => (

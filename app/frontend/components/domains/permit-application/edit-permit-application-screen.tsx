@@ -302,6 +302,22 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const parentProjectPath = currentPermitApplication.projectId
     ? `/projects/${currentPermitApplication.projectId}/applications`
     : "/projects"
+  const submitClickHandler = currentPermitApplication.canUserSubmit(currentUser)
+    ? handleScrollToBottom
+    : onSubmitBlockedModalOpen
+  let sidebar = <ChecklistSideBar permitApplication={currentPermitApplication} completedBlocks={completedBlocks} />
+  if (isReviewingSubmit && imminentSubmission) {
+    sidebar = (
+      <ReviewAndSubmitRevisedApplicationScreen
+        permitApplication={currentPermitApplication}
+        submission={imminentSubmission}
+        onBack={() => setIsReviewingSubmit(false)}
+        actionsRef={reviewSubmitActionsRef}
+      />
+    )
+  } else if (isRevisionsRequested && !hideRevisionList) {
+    sidebar = <RevisionSideBar permitApplication={currentPermitApplication} forSubmitter />
+  }
 
   return (
     <Box as="main" id="submitter-view-permit">
@@ -435,13 +451,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                 </Button>
                 <Button
                   rightIcon={<CaretRight />}
-                  onClick={
-                    isReviewingSubmit
-                      ? () => reviewSubmitActionsRef.current?.submit()
-                      : currentPermitApplication.canUserSubmit(currentUser)
-                        ? handleScrollToBottom
-                        : onSubmitBlockedModalOpen
-                  }
+                  onClick={isReviewingSubmit ? () => reviewSubmitActionsRef.current?.submit() : submitClickHandler}
                 >
                   {isReviewingSubmit
                     ? t("permitApplication.new.submitApplication")
@@ -494,18 +504,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
         </Flex>
       )}
       <Box id="sidebar-and-form-container" sx={{ "&:after": { content: `""`, display: "block", clear: "both" } }}>
-        {isReviewingSubmit && imminentSubmission ? (
-          <ReviewAndSubmitRevisedApplicationScreen
-            permitApplication={currentPermitApplication}
-            submission={imminentSubmission}
-            onBack={() => setIsReviewingSubmit(false)}
-            actionsRef={reviewSubmitActionsRef}
-          />
-        ) : isRevisionsRequested && !hideRevisionList ? (
-          <RevisionSideBar permitApplication={currentPermitApplication} forSubmitter />
-        ) : (
-          <ChecklistSideBar permitApplication={currentPermitApplication} completedBlocks={completedBlocks} />
-        )}
+        {sidebar}
         {formJson && (
           <Flex
             flex={1}

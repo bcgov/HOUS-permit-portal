@@ -191,22 +191,24 @@ module PrintReports
       changes = customizations.fetch("requirement_block_changes", {})
       visit =
         lambda do |component, block_id = nil|
-          block_id = component["id"] if changes.key?(component["id"])
+          current_block_id =
+            changes.key?(component["id"]) ? component["id"] : block_id
           conditional = component["customConditional"].to_s
           if component["elective"] && conditional.end_with?(";show = false")
-            enabled = changes.dig(block_id, "enabled_elective_field_ids") || []
+            enabled =
+              changes.dig(current_block_id, "enabled_elective_field_ids") || []
             component["customConditional"] = conditional.delete_suffix(
               ";show = false"
             ) if enabled.include?(component["id"])
           end
           Array(component["components"]).each do |child|
-            visit.call(child, block_id)
+            visit.call(child, current_block_id)
           end
           Array(component["columns"]).each do |column|
-            visit.call(column, block_id)
+            visit.call(column, current_block_id)
           end
           Array(component["rows"]).flatten.each do |cell|
-            visit.call(cell, block_id)
+            visit.call(cell, current_block_id)
           end
         end
       visit.call(schema)

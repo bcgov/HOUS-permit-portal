@@ -8,7 +8,8 @@ function sourceDigest() {
     readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
       const path = `${dir}/${entry.name}`
       if (entry.name === "__tests__") return []
-      return entry.isDirectory() ? walk(path) : /\.(tsx?|css)$/.test(path) ? [path] : []
+      if (entry.isDirectory()) return walk(path)
+      return /\.(tsx?|css)$/.test(path) ? [path] : []
     })
   const hash = createHash("sha256")
   for (const path of [

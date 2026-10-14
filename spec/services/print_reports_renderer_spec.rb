@@ -96,7 +96,9 @@ RSpec.describe PrintReports::Renderer do
         response(200, "<html>Error</html>")
       )
       expect {
-        described_class.new.render(report) { raise "must not publish" }
+        described_class
+          .new
+          .render(report) { raise RuntimeError, "must not publish" }
       }.to raise_error(described_class::Error, /invalid PDF/)
     end
 
@@ -128,6 +130,53 @@ RSpec.describe PrintReports::Renderer do
 
   context "real local conversion", if: ENV["RUN_GOTENBERG_SPECS"] == "true" do
     around { |example| VCR.turned_off { example.run } }
+
+    it "shows a blocking render error without an unhandled rejection when footer preparation fails" do
+      renderer = described_class.new
+      allow(renderer).to receive(:html).and_wrap_original do |original, *args|
+        original.call(*args).sub("</head>", <<~HTML)
+            <script>
+              window.addEventListener("unhandledrejection", () => {
+                document.documentElement.dataset.unhandledRejection = "true";
+              });
+              const loadFont = document.fonts.load.bind(document.fonts);
+              document.fonts.load = (font, ...args) =>
+                font === '700 9pt "BC Sans"'
+                  ? Promise.reject(new Error("Footer font failed"))
+                  : loadFont(font, ...args);
+            </script></head>
+          HTML
+      end
+      connection = renderer.send(:connection)
+      allow(renderer).to receive(:connection).and_return(connection)
+      allow(connection).to receive(
+        :post
+      ).and_wrap_original do |original, url, params|
+        # Only this test converts the error view so its contents can be inspected.
+        # Production continues to require the ready state and #print-ready.
+        original.call(
+          url,
+          params.merge(
+            waitForExpression: <<~JS.squish,
+              document.documentElement.dataset.reportState === 'error' &&
+              !document.querySelector('#print-ready') &&
+              !document.documentElement.dataset.unhandledRejection
+            JS
+            failOnConsoleExceptions: "false"
+          )
+        )
+      end
+
+      renderer.render(report) do |path|
+        text =
+          PDF::Reader.new(path).pages.map(&:text).join(" ").gsub(/\s+/, " ")
+        expect(text).to include(
+          "This report could not be rendered. No printable record was produced."
+        )
+        expect(text).not_to include("Saved answer")
+      end
+    end
+
     it "prints only selected choice labels in schema order, including aliases and unknown saved values" do
       options = [
         {

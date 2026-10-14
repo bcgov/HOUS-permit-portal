@@ -4,11 +4,11 @@ export function ReportField({
   label,
   children,
   width = "full",
-}: {
+}: Readonly<{
   label: React.ReactNode
   children: React.ReactNode
   width?: FieldWidth
-}) {
+}>) {
   return (
     <div className={`report-field report-field--${width}`}>
       <dt>{label}</dt>

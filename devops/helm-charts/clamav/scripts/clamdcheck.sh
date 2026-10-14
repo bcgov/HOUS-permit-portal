@@ -4,7 +4,7 @@ set -eu
 
 if [ "${CLAMAV_NO_CLAMD:-}" != "false" ]; then
 	if [ "$(echo "PING" | nc localhost 3310)" != "PONG" ]; then
-		echo "ERROR: Unable to contact server"
+		echo "ERROR: Unable to contact server" >&2
 		exit 1
 	fi
 

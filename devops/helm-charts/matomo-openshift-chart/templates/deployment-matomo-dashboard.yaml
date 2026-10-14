@@ -4,14 +4,14 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: matomo-dashboard
-  namespace: {{.Release.Namespace}}
+  namespace: {{ .Release.Namespace }}
   labels:
     app: matomo-dashboard
 {{- if .Values.matomo.extralabels }}
 {{ toYaml .Values.matomo.extralabels | indent 4 }}
 {{- end }}
 spec:
-  replicas: {{.Values.matomo.dashboard.replicas}}
+  replicas: {{ .Values.matomo.dashboard.replicas }}
   # Recreate avoids needing surge capacity on every deploy; with replicas=1
   # RollingUpdate provides no HA benefit anyway. Reconsider if replicas > 1.
   strategy:
@@ -44,7 +44,7 @@ spec:
         {{- include "matomo.resources" (dict "resources" .Values.fpmExporter.resources "defaultResources" .Values.defaultResources) | nindent 8 }}
       - name: nginx
         {{- if .Values.matomo.dashboard.nginx.image }}
-        image: {{.Values.matomo.dashboard.nginx.image}}
+        image: {{ .Values.matomo.dashboard.nginx.image }}
         {{ else }}
         image: {{ include "matomo.image" (dict "registry" (.Values.nginx.imageRegistry | default .Values.global.imageRegistry) "image" .Values.nginx.image) }}
         {{- end }}
@@ -175,7 +175,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: matomo-dashboard
-  namespace: {{.Release.Namespace}}
+  namespace: {{ .Release.Namespace }}
   labels:
     app: matomo-dashboard
 {{- if .Values.matomo.extralabels }}

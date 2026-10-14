@@ -74,7 +74,7 @@ function fieldLayout(nodes: React.ReactNode[]): React.ReactNode[] {
   }
   return result
 }
-export function FormReport({ schema, submissionData }: { schema: FormComponent; submissionData: any }) {
+export function FormReport({ schema, submissionData }: Readonly<{ schema: FormComponent; submissionData: any }>) {
   // FormIO conditional utilities can decorate schemas; never give them caller-owned objects.
   const form = structuredClone(schema)
   const data = structuredClone(submissionData?.data || {})
@@ -156,10 +156,10 @@ export function FormReport({ schema, submissionData }: { schema: FormComponent; 
             {simple ? (
               <ReportTable
                 headers={children.map((child) => (
-                  <RichText html={child.label || child.key} />
+                  <RichText key={child.key} html={child.label || child.key} />
                 ))}
                 rows={value.map((entry) =>
-                  children.map((child) => <FieldValue component={child} value={entry[child.key]} />)
+                  children.map((child) => <FieldValue key={child.key} component={child} value={entry[child.key]} />)
                 )}
               />
             ) : (

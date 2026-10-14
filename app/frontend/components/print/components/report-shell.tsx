@@ -24,11 +24,11 @@ export function ReportShell({
   children,
   error,
   loading = false,
-}: {
+}: Readonly<{
   children?: React.ReactNode
   error?: string
   loading?: boolean
-}) {
+}>) {
   const [ready, setReady] = useState(false)
   const [assetError, setAssetError] = useState<string>()
   const documentRef = useRef<HTMLDivElement>(null)
@@ -39,11 +39,13 @@ export function ReportShell({
     if (loading || error || !children) return
     const wait = async () => {
       if (document.documentElement.dataset.reportAssets === "packaged") {
-        for (const weight of [400, 700]) {
-          const faces = await document.fonts.load(`${weight} 11pt "BC Sans"`)
-          if (!faces.length || faces.some((face) => face.status !== "loaded"))
-            throw new Error("Required font unavailable")
-        }
+        await Promise.all(
+          [400, 700].map(async (weight) => {
+            const faces = await document.fonts.load(`${weight} 11pt "BC Sans"`)
+            if (!faces.length || faces.some((face) => face.status !== "loaded"))
+              throw new Error("Required font unavailable")
+          })
+        )
       }
       await document.fonts.ready
       // Let footer preparation finish with the loaded font before decoding its image.
@@ -91,23 +93,26 @@ export function ReportShell({
   const failure = error || assetError
   useEffect(() => {
     if (document.documentElement.dataset.reportAssets !== "packaged") return
-    document.documentElement.dataset.reportState = failure ? "error" : ready ? "ready" : "loading"
+    const state = ready ? "ready" : "loading"
+    document.documentElement.dataset.reportState = failure ? "error" : state
     return () => {
       delete document.documentElement.dataset.reportState
     }
   }, [ready, failure])
+  let content = children
+  if (failure) {
+    content = (
+      <div role="alert" className="report-error">
+        {failure}
+      </div>
+    )
+  } else if (loading) {
+    content = <p role="status">Loading report…</p>
+  }
   return (
     <main className="print-report">
       <div className="report-document" ref={documentRef}>
-        {failure ? (
-          <div role="alert" className="report-error">
-            {failure}
-          </div>
-        ) : loading ? (
-          <p role="status">Loading report…</p>
-        ) : (
-          children
-        )}
+        {content}
         {ready && !failure && <span id="print-ready" aria-hidden="true" />}
       </div>
     </main>

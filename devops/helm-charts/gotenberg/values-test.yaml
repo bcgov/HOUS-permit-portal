@@ -1,2 +1,6 @@
 # Promote changes here after validation in dev.
 replicaCount: 1
+
+resources:
+  limits:
+    memory: 2Gi

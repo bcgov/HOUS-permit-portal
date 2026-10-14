@@ -4,16 +4,16 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: matomo-jobs-scheduled-tasks
-  namespace: {{.Release.Namespace}}
+  namespace: {{ .Release.Namespace }}
   {{- template "matomo.labels" .Values.matomo.cronJobs.scheduledTasks.labels }}
 spec:
-  schedule: {{quote .Values.matomo.cronJobs.scheduledTasks.schedule}}
+  schedule: {{ quote .Values.matomo.cronJobs.scheduledTasks.schedule }}
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
   jobTemplate:
     spec:
-      activeDeadlineSeconds: {{.Values.matomo.cronJobs.scheduledTasks.activeDeadlineSeconds}}
+      activeDeadlineSeconds: {{ .Values.matomo.cronJobs.scheduledTasks.activeDeadlineSeconds }}
       template:
         metadata:
           labels:

@@ -8,7 +8,7 @@ metadata:
 {{ toYaml .Values.matomo.ingress.extralabels | indent 4 }}
 {{- end }}
   name: matomo-dashboard
-  namespace: {{.Release.Namespace}}
+  namespace: {{ .Release.Namespace }}
   annotations:
     nginx.ingress.kubernetes.io/use-regex: "true"
     nginx.ingress.kubernetes.io/enable-cors: "true"
@@ -25,15 +25,15 @@ metadata:
       {{- end }}
     {{- end }}
     {{- if .Values.matomo.dashboard.whitelist }}
-    nginx.ingress.kubernetes.io/whitelist-source-range: {{.Values.matomo.dashboard.whitelist | toPrettyJson}}
+    nginx.ingress.kubernetes.io/whitelist-source-range: {{ .Values.matomo.dashboard.whitelist | toPrettyJson }}
     {{ else }}
   {{- end }}
 spec:
   {{- if .Values.matomo.dashboard.ingressClassName }}
-  ingressClassName: {{.Values.matomo.dashboard.ingressClassName}}
+  ingressClassName: {{ .Values.matomo.dashboard.ingressClassName }}
   {{- end }}
   rules:
-  - host: {{.Values.matomo.dashboard.hostname}}
+  - host: {{ .Values.matomo.dashboard.hostname }}
     http:
       paths:
       - path: /
@@ -53,9 +53,9 @@ spec:
   {{- if .Values.matomo.dashboard.tls }}
   tls:
   - hosts:
-    - {{.Values.matomo.dashboard.hostname}}
+    - {{ .Values.matomo.dashboard.hostname }}
     {{- if .Values.matomo.dashboard.secretName }}
-    secretName: {{.Values.matomo.dashboard.secretName}}
+    secretName: {{ .Values.matomo.dashboard.secretName }}
     {{- end -}}
   {{- end -}}
 {{- end -}}

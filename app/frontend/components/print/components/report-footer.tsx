@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import boldFont from "../../../../../public/fonts/2023_01_01_BCSans-Bold_2f.ttf?inline"
 import regularFont from "../../../../../public/fonts/2023_01_01_BCSans-Regular_2f.ttf?inline"
 import { displayValue } from "../form/field-values"
@@ -13,9 +13,10 @@ export function cssString(value: string): string {
     '"'
   )
 }
-export function ReportFooter({ identity }: { identity: ReportIdentity }) {
+export function ReportFooter({ identity }: Readonly<{ identity: ReportIdentity }>) {
   const imageRef = useRef<HTMLImageElement>(null)
   const metadataStyleRef = useRef<HTMLStyleElement>(null)
+  const [preparationError, setPreparationError] = useState<Error>()
   const version =
     identity.version_number != null ? `Version ${identity.version_number}` : identity.stage?.replace(/_/g, " ")
   const identifier = identity.number || identity.checklist_id || identity.submission_version_id || "Building Permit Hub"
@@ -63,9 +64,17 @@ export function ReportFooter({ identity }: { identity: ReportIdentity }) {
       // The left margin box is 80% of Letter's 7.5-inch content width (432pt).
       // SVG keeps labels/values independently styled and text selectable in Chromium.
       const height = 14 + Math.max(...fields.map((field) => field.lines.length)) * 12
+      const fieldMarkup = fields
+        .map((field) => {
+          const values = field.lines
+            .map((line, index) => `<text class="value" x="${field.x}" y="${23 + index * 12}">${escape(line)}</text>`)
+            .join("")
+          return `<text x="${field.x}" y="9">${field.label}</text>${values}`
+        })
+        .join("")
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="432pt" height="${height}pt" viewBox="0 0 432 ${height}">
         <style>@font-face{font-family:BC;src:url(${regularFont});font-weight:400}@font-face{font-family:BC;src:url(${boldFont});font-weight:700}text{font:9px BC;fill:#526176}.value{font-weight:700;fill:#253247}</style>
-        ${fields.map((field) => `<text x="${field.x}" y="9">${field.label}</text>${field.lines.map((line, index) => `<text class="value" x="${field.x}" y="${23 + index * 12}">${escape(line)}</text>`).join("")}`).join("")}
+        ${fieldMarkup}
       </svg>`
       const source = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
       imageRef.current.src = source
@@ -76,12 +85,16 @@ export function ReportFooter({ identity }: { identity: ReportIdentity }) {
       }`
       document.documentElement.style.setProperty("--report-bottom-margin", `${Math.max(54, height + 21)}pt`)
     }
-    prepare()
+    prepare().catch(() => {
+      if (!cancelled) setPreparationError(new Error("The report footer could not be prepared."))
+    })
     return () => {
       cancelled = true
       document.documentElement.style.removeProperty("--report-bottom-margin")
     }
   }, [identity])
+  // React error boundaries handle errors thrown during rendering, not async effects.
+  if (preparationError) throw preparationError
   // @page margin boxes read inherited custom properties from the document root.
   return (
     <>

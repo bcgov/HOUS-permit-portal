@@ -16,7 +16,7 @@ export const Part3Report = function Part3PrintReport({ checklist, stepCode }: IP
   const isBaseline = isBaselineChecklist(checklist as any)
   // Snapshot project details may be unavailable; never substitute current data.
   const reportProject = {
-    ...(stepCode ?? {}),
+    ...stepCode,
     currentStage: checklist.stage,
     updatedAt: checklist.updatedAt ?? stepCode?.updatedAt,
   }

@@ -4,7 +4,7 @@ import { i18nPrefix } from "../../../../../../domains/step-code/part-9/checklist
 import { ReportTable } from "../../../../../components/report-table"
 import { reportTranslation as t } from "../../../../../components/report-translation"
 import { displayValue } from "../../../../../form/field-values"
-export function StaticCharacteristicsGrid({ checklist }: { checklist: IPart9StepCodeChecklist }) {
+export function StaticCharacteristicsGrid({ checklist }: Readonly<{ checklist: IPart9StepCodeChecklist }>) {
   const groups = ["roofCeilings", "aboveGradeWalls", "framings", "unheatedFloors", "belowGradeWalls", "slabs"]
   return (
     <ReportTable

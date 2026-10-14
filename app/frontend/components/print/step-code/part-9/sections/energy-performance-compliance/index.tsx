@@ -20,11 +20,10 @@ export const EnergyPerformanceCompliance = function StepCodeChecklistPDFEnergyPe
   const report = checklist.selectedReport?.energy
   const targetType = checklist.epcCalculationTestingTargetType
   // Older checklists and the existing form show saved ACH even without a target type.
-  const testingTarget = isMissing(targetType)
-    ? report?.ach
-    : targetType && ["ach", "nla", "nlr"].includes(targetType)
-      ? report?.[targetType]
-      : undefined
+  let testingTarget = report?.ach
+  if (!isMissing(targetType)) {
+    testingTarget = targetType && ["ach", "nla", "nlr"].includes(targetType) ? report?.[targetType] : undefined
+  }
   return (
     <ReportPanel heading={t(`${i18nPrefix}.heading`)}>
       <ReportText className="report-strong">{t(`${i18nPrefix}.proposedHouseEnergyConsumption`)}</ReportText>

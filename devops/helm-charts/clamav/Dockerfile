@@ -11,7 +11,7 @@ LABEL name="ubi9-clamav" \
 
 RUN yum -y update && \
     yum -y install \
-      https://www.clamav.net/downloads/production/clamav-${VERSION}.linux.x86_64.rpm \
+      "https://www.clamav.net/downloads/production/clamav-${VERSION}.linux.x86_64.rpm" \
       nc \
       wget && \
     yum clean all && \
