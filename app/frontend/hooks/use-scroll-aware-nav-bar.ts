@@ -5,6 +5,13 @@ import { IScrollPeekState, nextBarHeightState, nextScrollPeekState } from "./scr
 export const APP_NAV_CHROME_ID = "appNavChrome"
 const FALLBACK_NAVBAR_HEIGHT_PX = 58
 
+let revealAppNavBar = () => {}
+
+/** Show the bar. Scroll-to-top on a page that no longer overflows never emits a scroll. */
+export function requestAppNavBarReveal() {
+  revealAppNavBar()
+}
+
 /**
  * A scroller counts as page-level if it is roughly viewport-sized. This keeps narrow
  * sidebars, dropdown lists and other small overflow areas from driving the nav bar.
@@ -77,6 +84,7 @@ export function useScrollAwareNavBar() {
       apply()
     }
     revealRef.current = reveal
+    revealAppNavBar = reveal
 
     const sample = () => {
       frame = 0
@@ -118,6 +126,7 @@ export function useScrollAwareNavBar() {
     document.addEventListener("focusin", onFocusIn)
 
     return () => {
+      if (revealAppNavBar === reveal) revealAppNavBar = () => {}
       document.removeEventListener("scroll", onScroll, true)
       document.removeEventListener("focusin", onFocusIn)
       resizeObserver?.disconnect()
