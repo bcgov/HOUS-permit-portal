@@ -18,11 +18,12 @@ class ZipfileJob
     permit_application = PermitApplication.find_by_id(permit_application_id)
     return if permit_application.blank?
 
+    version_ids_at_start = permit_application.submission_versions.pluck(:id)
+    # PDF rendering happens in build_packages and must not run under the
+    # application lock. The lock below covers readiness only.
+    build_packages(permit_application, version_ids_at_start)
+
     PrintReports::ApplicationLock.synchronize(permit_application.id) do
-      version_ids_at_start = permit_application.submission_versions.pluck(:id)
-
-      build_packages(permit_application, version_ids_at_start)
-
       permit_application.reload
       newly_ready = permit_application.mark_submission_packages_ready!
       newly_ready.each do |submission_version|
@@ -68,23 +69,31 @@ class ZipfileJob
     first_missing = versions.index(&:missing_pdfs?)
     rebuild_ids |= versions.drop(first_missing).map(&:id) if first_missing
     PdfGenerationJob.new.perform(application.id, version_ids)
+    versions.each(&:reload)
     cumulative_ids = []
     versions.each do |version|
       cumulative_ids << version.id
       next unless rebuild_ids.include?(version.id)
-      # A missing historical report must not prevent newer PDFs being rendered,
-      # but cumulative packages must never silently omit it.
-      if versions
-           .take(cumulative_ids.length)
-           .any? { |v| v.reload.report_generation_issues.any? }
-        next
+      current = version.reload
+      prefix = versions.take(cumulative_ids.length)
+      # This version's snapshot cannot produce the missing PDF. Skip its ZIP.
+      # Later versions still publish; the download dialog lists this gap via
+      # report_generation_issues instead of withholding every newer package.
+      next if current.unrecoverable_report?
+      # A prefix file we can still render must be in the archive. Raising
+      # retries the job. An unrecoverable earlier file is not this case.
+      if prefix.any? { |entry|
+           entry.missing_pdfs? && !entry.unrecoverable_report?
+         }
+        raise "Required PDFs are missing"
       end
-      raise "Required PDFs are missing" if version.reload.missing_pdfs?
-      SupportingDocumentsZipper.new(
-        application.id,
-        submission_version: version,
-        version_ids: cumulative_ids.dup
-      ).perform
+      PrintReports::ApplicationLock.synchronize(application.id) do
+        SupportingDocumentsZipper.new(
+          application.id,
+          submission_version: current,
+          version_ids: cumulative_ids.dup
+        ).perform
+      end
     end
   end
 

@@ -17,11 +17,12 @@ class PdfGenerationJob
     permit_application = PermitApplication.find(permit_application_id)
     return if permit_application.blank?
 
-    PrintReports::ApplicationLock.synchronize(permit_application.id) do
-      versions = permit_application.submission_versions.order(:created_at, :id)
-      versions = versions.where(id: version_ids) if version_ids
-      generator = PrintReports::Generation.new
-      versions.each { |version| generator.submission(version) }
-    end
+    # No application lock here. Generation holds it only while saving the file,
+    # after Gotenberg has returned. Wrapping this loop would pin a pooled
+    # connection for every version's render.
+    versions = permit_application.submission_versions.order(:created_at, :id)
+    versions = versions.where(id: version_ids) if version_ids
+    generator = PrintReports::Generation.new
+    versions.each { |version| generator.submission(version) }
   end
 end

@@ -9,11 +9,16 @@ module PrintReports
 
     def application(record, version_id = nil)
       version = selected_version(record, version_id)
+      # Freeze a pre-snapshot row before rendering. A failed backfill leaves the
+      # column null and Snapshot.report raises Unavailable, which generation
+      # records instead of substituting today's live form.
+      Snapshot.materialize!(version)
       Snapshot.report(version, "application")
     end
 
     def application_step_code(record, version_id = nil)
       version = selected_version(record, version_id)
+      Snapshot.materialize!(version)
       Snapshot.report(version, "checklist")
     end
 

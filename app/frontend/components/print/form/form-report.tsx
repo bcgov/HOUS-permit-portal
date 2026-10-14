@@ -119,6 +119,10 @@ export function FormReport({ schema, submissionData }: { schema: FormComponent; 
       )
         return null
       const context = structuredClone(row)
+      // FormIO runs customConditional in this Chromium process. Jurisdiction
+      // template logic is the same trust boundary as the form editor. Gotenberg
+      // denies outbound http(s) and file: URLs, so that logic cannot fetch the
+      // cluster network while the PDF is built.
       if (!Utils.checkCondition(c as any, context, structuredClone(data), form as any, undefined)) return null
       const children = childComponents(c)
       const value = row?.[c.key]

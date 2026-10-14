@@ -1,0 +1,29 @@
+{{- if .Values.networkPolicy.enabled }}
+# Default deny for this pod, then allow only the app processes that call
+# /forms/chromium/convert/html. Kubelet probes are not subject to this policy.
+# Chromium's own deny-list (see values args) blocks outbound fetches from HTML
+# that those callers submit, including FormIO customConditional.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Values.appName }}-ingress
+  labels:
+    app: {{ .Values.appName | quote }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.appName | quote }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values:
+                  {{- toYaml .Values.networkPolicy.ingressFromApps | nindent 18 }}
+      ports:
+        - protocol: TCP
+          port: http
+{{- end }}

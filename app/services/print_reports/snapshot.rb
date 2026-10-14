@@ -17,11 +17,39 @@ module PrintReports
         &.customizations || {}
     end
 
+    # One-time fill for rows created before snapshots existed. Answers and schema
+    # come from the version row. Cover fields were never stored, so those use the
+    # application as it is now — the only source left. A captured snapshot is then
+    # immutable, including this backfill. attr_readonly rejects update and
+    # update_columns; update_all is the write that can still fill a null column.
+    def self.materialize!(version)
+      return version if version.report_snapshot.present?
+
+      snapshot =
+        capture(version, version_number: version.version_number, legacy: true)
+      version
+        .class
+        .where(id: version.id, report_snapshot: nil)
+        .update_all(report_snapshot: snapshot)
+      version.reload
+    rescue Data::Unavailable
+      # Stored form JSON cannot build a format-1 snapshot. Leave the column
+      # null so a later retry can try again, and so generation reports the
+      # report as unrecoverable instead of freezing a bad payload.
+      version
+    end
+
     def self.capture(
       version,
-      customizations: self.customizations(version.permit_application)
+      customizations: self.customizations(version.permit_application),
+      version_number: nil,
+      legacy: false
     )
       application = version.permit_application
+      # Submit captures before the row exists, so the next number is count + 1.
+      # A persisted legacy row is already included in that count; use its place
+      # in created_at order instead of inventing a new version.
+      number = version_number || (application.submission_versions.count + 1)
       identity = {
         number: application.number,
         title: "Submitted application",
@@ -31,7 +59,7 @@ module PrintReports
         tags: application.template_tag_list.to_a,
         template_nickname: application.template_nickname,
         status: "Submitted",
-        version_number: application.submission_versions.count + 1,
+        version_number: number,
         submission_version_id: version.id,
         submitted_at: version.created_at.iso8601(6)
       }
@@ -65,10 +93,33 @@ module PrintReports
           raise Data::Unavailable, "Unknown saved checklist type"
         end
         step = application.step_code
-        unless step
-          raise Data::Unavailable,
-                "Checklist project information is unavailable"
-        end
+        # Live project fields when the step code still exists. Legacy checklist
+        # JSON already contains the blueprint's project fields; use those when
+        # the step code row is gone so a missing live record does not make the
+        # saved checklist unprintable.
+        project =
+          if step
+            {
+              title: step.title,
+              full_address: step.full_address,
+              reference_number: step.reference_number,
+              jurisdiction_name: step.jurisdiction_name,
+              pid: step.pid,
+              permit_date: step.permit_date
+            }
+          elsif legacy
+            checklist.slice(
+              "title",
+              "full_address",
+              "reference_number",
+              "jurisdiction_name",
+              "pid",
+              "permit_date"
+            )
+          else
+            raise Data::Unavailable,
+                  "Checklist project information is unavailable"
+          end
         reports["checklist"] = {
           kind: kind == "Part3StepCode" ? "part3" : "part9",
           identity:
@@ -77,14 +128,7 @@ module PrintReports
               checklist_id: checklist["id"]
             ),
           checklist: checklist.except("report_document"),
-          step_code: {
-            title: step.title,
-            full_address: step.full_address,
-            reference_number: step.reference_number,
-            jurisdiction_name: step.jurisdiction_name,
-            pid: step.pid,
-            permit_date: step.permit_date
-          }
+          step_code: project
         }
         filenames["checklist"] = namer.step_code_checklist_pdf(
           version_number: identity[:version_number]

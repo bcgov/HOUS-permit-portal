@@ -125,6 +125,69 @@ RSpec.describe PrintReports::Snapshot do
     ).to eq("show = true")
   end
 
+  it "backfills a legacy row once from its stored submission" do
+    application.permit_project.update!(full_address: "Original street")
+    version =
+      create(
+        :submission_version,
+        permit_application: application,
+        form_json: {
+          "components" => []
+        },
+        submission_data: {
+          "data" => {
+            "answer" => "Stored"
+          }
+        }
+      )
+    expect(version.report_snapshot).to be_nil
+    described_class.materialize!(version)
+    expect(
+      version.report_snapshot.dig(
+        "reports",
+        "application",
+        "submission_data",
+        "data",
+        "answer"
+      )
+    ).to eq("Stored")
+    expect(
+      version.report_snapshot.dig(
+        "reports",
+        "application",
+        "identity",
+        "address"
+      )
+    ).to eq("Original street")
+    expect(
+      version.report_snapshot.dig(
+        "reports",
+        "application",
+        "identity",
+        "version_number"
+      )
+    ).to eq(1)
+    application.permit_project.update!(full_address: "Changed street")
+    described_class.materialize!(version)
+    expect(
+      version.reload.report_snapshot.dig(
+        "reports",
+        "application",
+        "identity",
+        "address"
+      )
+    ).to eq("Original street")
+    expect { version.update!(report_snapshot: {}) }.to raise_error(
+      ActiveRecord::ActiveRecordError
+    )
+  end
+
+  it "leaves a legacy row null when its stored schema cannot be snapshotted" do
+    version = create(:submission_version, permit_application: application)
+    described_class.materialize!(version)
+    expect(version.reload.report_snapshot).to be_nil
+  end
+
   it "rejects application writes to a captured snapshot" do
     version =
       create(

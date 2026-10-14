@@ -17,9 +17,12 @@ toolbars, or browser fixture screens.
 
 Rails `PrintReports::Data.for_generation` requires explicit submission/checklist
 IDs. Submission reports use immutable report snapshots, including their original
-cover identity and elective settings. Historical versions without these snapshots
-can reuse stored PDFs but cannot reconstruct missing ones. Standalone Step Code
-reports continue to render the explicitly selected saved checklist.
+cover identity and elective settings. A historical version with stored schema and
+answers is snapshotted once on first render; cover fields use the application as
+it is at that moment, because they were never saved on the row. A row whose schema
+cannot be snapshotted can still reuse an existing PDF, and a missing one stays
+unrecoverable. Standalone Step Code reports continue to render the explicitly
+selected saved checklist.
 
 ## Build and readiness
 
@@ -92,11 +95,14 @@ remain readable when the renderer changes; preserve its field and visibility
 semantics with regression fixtures. Layout and export date may change. Exact bytes,
 original pagination and archived renderer binaries are not promised.
 
-Historical submissions without a snapshot are deliberately not backfilled from
-current data. Their existing PDFs remain usable; missing reports cannot be recreated.
-The download dialog identifies these reports and keeps available files downloadable.
-An incomplete historical version blocks cumulative ZIP reconstruction, not generation
-of later versions' PDFs. External API v1/v2 contracts and standalone Step Code report
+Historical submissions are snapshotted once, from the schema and answers stored on
+the version, the first time a missing PDF is rendered. Cover identity uses the
+application at that moment. The column then stays immutable. Existing PDFs are
+reused and are not rewritten. A row that cannot produce a valid snapshot stays
+null; its missing report cannot be recreated, the download dialog says so, and
+later packages are still published without that file. A missing PDF that can
+still be rendered blocks a cumulative ZIP until it exists, so a recoverable file
+is not dropped. External API v1/v2 contracts and standalone Step Code report
 generation are unchanged.
 
 To repair a submission, including missing/corrupt object-store files whose attachment
@@ -114,8 +120,9 @@ Validation downloads use temporary files that are cleaned up when validation fin
 It prints identifiers and restored/reused/blocked outcomes,
 returns failure when any package is blocked, and never logs answers. Storage access
 errors propagate; they are not interpreted as missing objects. A shared application
-advisory lock coordinates normal generation and recovery. Existing package-ready
-milestones and webhooks are not replayed during repair.
+advisory lock coordinates publication. It is not held across the Gotenberg render,
+which would keep a pooled database connection checked out for the whole conversion.
+Existing package-ready milestones and webhooks are not replayed during repair.
 
 Generated submission PDF rows/files and ZIP attachments are disposable **only for
 submissions with a complete, supported snapshot**. Keep submission versions and
@@ -129,5 +136,5 @@ Deploy the nullable column first, then coordinate web/worker deployment so that
 old workers cannot process new snapshot-backed submissions using live metadata.
 Verify capture and recovery before enabling any retention cleanup. Database and
 original-upload backups remain necessary; losing the submission snapshot removes
-its recovery source. Do not modify or backfill snapshots to work around a recovery
-failure.
+its recovery source. Do not edit a snapshot that has already been captured. The
+one-time legacy fill runs only while the column is null.

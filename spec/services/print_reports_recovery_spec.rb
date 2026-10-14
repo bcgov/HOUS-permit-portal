@@ -131,18 +131,30 @@ RSpec.describe PrintReports::Recovery do
     end
   end
 
-  it "continues newer PDF generation when missing historical reports block cumulative ZIPs" do
+  it "publishes later packages when a historical report cannot be rebuilt" do
     historical = create(:submission_version, permit_application: application)
     result = described_class.call(version)
     expect(version.supporting_documents.count).to eq(1)
-    expect(version.reload.zipfile_data).to be_blank
+    expect(version.reload.zipfile_data).to be_present
     expect(result).to include(
-      include(kind: "zip", status: "blocked", reason: include(historical.id))
+      include(
+        kind: "zip",
+        submission_version_id: version.id,
+        status: "restored"
+      )
     )
     expect(described_class.call(historical)).to include(
-      include(kind: "application", status: "blocked")
+      include(kind: "application", status: "blocked"),
+      include(
+        kind: "zip",
+        submission_version_id: historical.id,
+        status: "blocked"
+      )
     )
     expect(historical.supporting_documents).to be_empty
+    expect(application.report_generation_issues).to include(
+      include(submission_version_id: historical.id)
+    )
   end
 
   it "does not interpret storage errors as permission to replace reports" do
@@ -260,7 +272,7 @@ RSpec.describe PrintReports::Recovery do
     )
     expect { ZipfileJob.new.perform(application.id) }.not_to raise_error
     expect(version.supporting_documents.count).to eq(1)
-    expect(version.reload.zipfile_data).to be_blank
+    expect(version.reload.zipfile_data).to be_present
     expect(application.report_generation_issues).to include(
       include(submission_version_id: historical.id)
     )

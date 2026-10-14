@@ -40,6 +40,9 @@ class SubmissionVersion < ApplicationRecord
 
   def report_generation_issues
     return [] if missing_pdfs.empty?
+    # A valid snapshot with a missing file is not an issue: generation can still
+    # render it. Only a snapshot we cannot read is reported, and that is what
+    # makes the gap unrecoverable.
     PrintReports::Snapshot.validate!(report_snapshot, self)
     []
   rescue PrintReports::Data::Unavailable => e
@@ -169,6 +172,14 @@ class SubmissionVersion < ApplicationRecord
       return report_snapshot["reports"].key?("checklist")
     end
     step_code_checklist_json.present? && !step_code_checklist_json.empty?
+  end
+
+  # Missing output whose snapshot cannot be rendered. Later packages must still
+  # be published; this file is omitted and stays listed for the download dialog.
+  # A missing file with a valid snapshot is not unrecoverable — generation or
+  # recovery can still produce it, so cumulative ZIPs wait for that file.
+  def unrecoverable_report?
+    missing_pdfs? && report_generation_issues.any?
   end
 
   def missing_pdfs?

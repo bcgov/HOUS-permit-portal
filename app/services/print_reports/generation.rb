@@ -6,9 +6,9 @@ module PrintReports
     end
 
     def submission(version, recover: false)
-      ApplicationLock.synchronize(version.permit_application_id) do
-        generate_submission(version.reload, recover: recover)
-      end
+      # Rendering stays outside ApplicationLock. The lock is taken only when a
+      # finished file is promoted or saved. See ApplicationLock.
+      generate_submission(version.reload, recover: recover)
     end
 
     def generate_submission(version, recover:)
@@ -29,44 +29,54 @@ module PrintReports
         next if kind == "checklist" && !version.has_step_code_checklist?
         begin
           existing = version.supporting_documents.find_by(data_key: key)
-          if existing&.file.present? &&
-               (!recover || StoredFile.valid_pdf?(existing.file))
-            promote!(existing)
+          # Validity reads the object store. Do that before taking the lock so a
+          # large or slow download does not pin a database connection.
+          reusable =
+            existing&.file.present? &&
+              (!recover || StoredFile.valid_pdf?(existing.file))
+          if reusable
+            ApplicationLock.synchronize(application.id) { promote!(existing) }
             results << { kind: kind, status: "reused" }
             next
           end
           report = @data.public_send(method, application, version.id)
           filename = Snapshot.filename(version, kind)
           @renderer.render(report, filename: filename) do |path|
-            version.with_lock do
-              doc =
-                version.supporting_documents.find_or_initialize_by(
-                  data_key: key,
-                  permit_application_id: application.id
-                )
-              replace =
-                doc.file.blank? || (recover && !StoredFile.valid_pdf?(doc.file))
-              if replace
-                # Upload and validate permanent storage before replacing the row.
-                # A unique storage key prevents delayed old-file cleanup removing
-                # the replacement. Failed publication leaves the old row intact.
-                uploaded =
-                  File.open(path, "rb") do |file|
-                    FileUploader.new(:store).upload(
-                      file,
-                      metadata: {
-                        "filename" => filename
-                      }
-                    )
+            ApplicationLock.synchronize(application.id) do
+              version.with_lock do
+                doc =
+                  version.supporting_documents.find_or_initialize_by(
+                    data_key: key,
+                    permit_application_id: application.id
+                  )
+                replace =
+                  doc.file.blank? ||
+                    (recover && !StoredFile.valid_pdf?(doc.file))
+                if replace
+                  # Upload and validate permanent storage before replacing the row.
+                  # A unique storage key prevents delayed old-file cleanup removing
+                  # the replacement. Failed publication leaves the old row intact.
+                  uploaded =
+                    File.open(path, "rb") do |file|
+                      FileUploader.new(:store).upload(
+                        file,
+                        metadata: {
+                          "filename" => filename
+                        }
+                      )
+                    end
+                  unless StoredFile.valid_pdf?(uploaded)
+                    raise Renderer::Error, "Replacement PDF is unavailable"
                   end
-                unless StoredFile.valid_pdf?(uploaded)
-                  raise Renderer::Error, "Replacement PDF is unavailable"
+                  doc.file = uploaded
+                  doc.save!
                 end
-                doc.file = uploaded
-                doc.save!
+                promote!(doc)
+                results << {
+                  kind: kind,
+                  status: replace ? "restored" : "reused"
+                }
               end
-              promote!(doc)
-              results << { kind: kind, status: replace ? "restored" : "reused" }
             end
           end
         rescue Data::Unavailable => e

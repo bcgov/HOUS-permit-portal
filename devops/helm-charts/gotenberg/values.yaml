@@ -1,6 +1,15 @@
 appName: gotenberg
 replicaCount: 1
 
+# Ingress is limited to the app pods that render PDFs. The app chart's
+# namespace-wide allow policies exclude this app label; without that exclusion
+# those policies would select this pod too and the union would allow every peer.
+networkPolicy:
+  enabled: true
+  ingressFromApps:
+    - hous-permit-portal-web
+    - hous-permit-portal-worker
+
 image:
   repository: gotenberg/gotenberg
   tag: "8.32.0"
