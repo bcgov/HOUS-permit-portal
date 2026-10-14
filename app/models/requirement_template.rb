@@ -142,8 +142,9 @@ class RequirementTemplate < ApplicationRecord
       # All jurisdictions minus those explicitly disabled
       Jurisdiction.count - disabled_count
     else
-      # Jurisdictions with access (via JurisdictionRequirementTemplate) minus disabled
-      access_count = jurisdiction_requirement_templates.size
+      # Jurisdictions with access (via JurisdictionRequirementTemplate) minus disabled.
+      # count, not size: size caches an empty collection, so later inserts are missed.
+      access_count = jurisdiction_requirement_templates.count
       # Only count disabled ones that actually have access
       disabled_with_access_count =
         published_template_version
