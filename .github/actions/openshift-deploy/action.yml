@@ -20,6 +20,10 @@ inputs:
   build_args:
     description: Docker build args
     required: true
+  release_version_prefix:
+    description: Optional frontend release prefix; the checked-out commit SHA is appended after checkout
+    required: false
+    default: ""
   registry_url:
     description: OpenShift registry URL
     required: true
@@ -92,31 +96,34 @@ runs:
         end
         RUBY
 
-    - name: Update GITHUB_SHA with checked-out commit SHA
+    - name: Capture checked-out commit SHA
       id: capture-git-sha
       shell: bash
-      run: echo "GITHUB_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+      run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
     - name: Confirm branch and SHA to deploy
       id: confirm-deploy-target
       shell: bash
       env:
         DEPLOY_BRANCH: ${{ inputs.branch }}
+        DEPLOY_SHA: ${{ steps.capture-git-sha.outputs.sha }}
         ENVIRONMENT_LABEL: ${{ inputs.environment_label }}
       run: |
-        echo "Deploying branch: ${DEPLOY_BRANCH} @ ${GITHUB_SHA} to ${ENVIRONMENT_LABEL}"
+        echo "Deploying branch: ${DEPLOY_BRANCH} @ ${DEPLOY_SHA} to ${ENVIRONMENT_LABEL}"
 
     - name: Build Docker Image
       id: build-image
       uses: redhat-actions/buildah-build@v3
       with:
         image: ${{ inputs.image_name }}
-        tags: latest ${{ env.GITHUB_SHA }}
+        tags: latest ${{ steps.capture-git-sha.outputs.sha }}
         labels: |
           app=${{ inputs.image_name }}
-          git-sha=${{ env.GITHUB_SHA }}
+          git-sha=${{ steps.capture-git-sha.outputs.sha }}
         containerfiles: ./devops/docker/app/Dockerfile
-        build-args: ${{ inputs.build_args }}
+        build-args: |
+          ${{ inputs.build_args }}
+          ${{ inputs.release_version_prefix && format('VITE_RELEASE_VERSION={0}-{1}', inputs.release_version_prefix, steps.capture-git-sha.outputs.sha) || '' }}
 
     - name: Push to Openshift Registry using Service Account
       id: push-image
