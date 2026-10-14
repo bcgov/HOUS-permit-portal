@@ -87,6 +87,8 @@ export function FormReport({ schema, submissionData }: Readonly<{ schema: FormCo
   ): React.ReactNode[] =>
     components.map((original, i) => {
       const c = structuredClone(original)
+      // Step Code widgets contain tool controls and attachment prompts, not saved answers.
+      if (["energy_step_code", "energy_step_code_part_3"].includes(c.requirementInputType)) return null
       // Only visibility property actions apply to a report. Value actions never run.
       for (const logic of c.logic || []) {
         if (

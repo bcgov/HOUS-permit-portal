@@ -5,9 +5,24 @@ export function isMissing(value: unknown): boolean {
     value == null || (typeof value === "string" && value.trim() === "") || (Array.isArray(value) && value.length === 0)
   )
 }
+function decimalNumber(value: number): string {
+  const text = String(value)
+  if (!Number.isFinite(value) || !text.includes("e")) return text
+  // Expand the saved number's shortest representation without rounding its
+  // significant digits or imposing a fixed number of decimal places.
+  const [coefficient, exponent] = text.split("e")
+  const sign = coefficient.startsWith("-") ? "-" : ""
+  const [integer, fraction = ""] = coefficient.replace(/^-/, "").split(".")
+  const digits = integer + fraction
+  const decimalPosition = integer.length + Number(exponent)
+  if (decimalPosition <= 0) return `${sign}0.${"0".repeat(-decimalPosition)}${digits}`
+  if (decimalPosition >= digits.length) return sign + digits + "0".repeat(decimalPosition - digits.length)
+  return `${sign}${digits.slice(0, decimalPosition)}.${digits.slice(decimalPosition)}`
+}
 export function displayValue(value: any, missingValue = NOT_PROVIDED): string {
   if (isMissing(value)) return missingValue
   if (typeof value === "boolean") return value ? "Yes" : "No"
+  if (typeof value === "number") return decimalNumber(value)
   if (Array.isArray(value)) return value.map((entry) => displayValue(entry, missingValue)).join("; ")
   if (typeof value === "object") {
     const address = value.properties?.fullAddress || value.display_name || value.displayName || value.formatted_address

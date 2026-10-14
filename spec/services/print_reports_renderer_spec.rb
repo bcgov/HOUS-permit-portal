@@ -131,6 +131,173 @@ RSpec.describe PrintReports::Renderer do
   context "real local conversion", if: ENV["RUN_GOTENBERG_SPECS"] == "true" do
     around { |example| VCR.turned_off { example.run } }
 
+    {
+      "energy_step_code" => "Part9StepCode",
+      "energy_step_code_part_3" => "Part3StepCode"
+    }.each do |input_type, step_code_type|
+      it "omits #{step_code_type} tool prompts while preserving application content and saved answers" do
+        widget =
+          RequirementFormJsonService::STEP_CODE_ACTIONS_CONTAINER.call(
+            "openStepCode",
+            step_code_type
+          )
+        report[:form_json][:components] = [
+          {
+            type: "content",
+            html: "<p>Keep these application instructions.</p>"
+          },
+          {
+            type: "radio",
+            key: "method",
+            label: "Step Code method",
+            values: [
+              { value: "tool", label: "Utilizing the digital Step Code tool" }
+            ]
+          },
+          widget.merge(
+            key: "step_code_tool",
+            label: "Interactive Step Code controls",
+            requirementInputType: input_type
+          ),
+          {
+            type: "simplefile",
+            key: "drawing",
+            label: "Design drawing package",
+            input: true
+          },
+          { type: "textfield", key: "answer", label: "Original question" }
+        ]
+        report[:submission_data][:data].merge!(
+          method: "tool",
+          drawing: [{ originalName: "synthetic-design.pdf" }]
+        )
+        original = Marshal.dump(report)
+        described_class
+          .new
+          .render(report) do |path|
+            text = PDF::Reader.new(path).pages.map(&:text).join(" ")
+            expect(text).to include(
+              "Keep these application instructions.",
+              "Utilizing the digital Step Code tool",
+              "Design drawing package",
+              "synthetic-design.pdf",
+              "Original question",
+              "Saved answer"
+            )
+            expect(text).not_to include(
+              I18n.t(
+                "formio.requirement_template.started_report_outside"
+              ).strip,
+              I18n.t("formio.requirement_template.energy_step_code"),
+              I18n.t("formio.requirement_template.select_energy_step_code"),
+              "Interactive Step Code controls"
+            )
+          end
+        expect(Marshal.dump(report)).to eq(original)
+      end
+    end
+
+    it "prints saved numbers in decimal notation without rounding or changing text answers" do
+      report[:form_json][:components] = [
+        {
+          type: "datagrid",
+          key: "grid",
+          label: "Numeric grid",
+          components: [
+            { type: "textfield", key: "name", label: "Name", input: true },
+            { type: "number", key: "a", label: "A", input: true },
+            {
+              type: "simplenumberadvanced",
+              key: "quantity",
+              label: "Quantity",
+              input: true
+            },
+            { type: "number", key: "load", label: "A x B", input: true }
+          ]
+        },
+        { type: "number", key: "total", label: "Total quantity" },
+        { type: "number", key: "precise", label: "Precise decimal" },
+        { type: "number", key: "extreme", label: "Very long number" },
+        {
+          type: "simplecurrencyadvanced",
+          key: "currency",
+          label: "Currency",
+          prefix: "$",
+          suffix: "CAD"
+        },
+        { type: "textfield", key: "text", label: "Literal scientific text" },
+        { type: "textfield", key: "identifier", label: "Literal identifier" }
+      ]
+      report[:submission_data][:data] = {
+        grid: [
+          { name: "LARGE", a: 0, quantity: 1e41, load: 0 },
+          {
+            name: "SMALL",
+            a: -1.2345678901234568e25,
+            quantity: 1.234e-7,
+            load: -1.234e-7
+          }
+        ],
+        total: 1e41,
+        precise: 1.2345678901234567,
+        extreme: 1e100,
+        currency: 1e21,
+        text: "1e+41",
+        identifier: "001234.5000"
+      }
+      original = Marshal.dump(report)
+      described_class
+        .new
+        .render(report) do |path|
+          reader = PDF::Reader.new(path)
+          text = reader.pages.map(&:text).join(" ")
+          # Wrapping may split a long number across lines; every digit must survive.
+          expect(text.gsub(/\s+/, "").scan("1" + "0" * 41).length).to eq(2)
+          expect(text.gsub(/\s+/, "")).to include("1" + "0" * 100)
+          expect(text).to include(
+            "0.0000001234",
+            "-0.0000001234",
+            "1.2345678901234567",
+            "$ 1000000000000000000000 CAD",
+            "001234.5000"
+          )
+          expect(text.scan("1e+41").length).to eq(1) # Only the literal text answer.
+          expect(text).not_to include(
+            "1e+100",
+            "1e+21",
+            "1.234e-7",
+            "1.2345678901234568e+25"
+          )
+          grid_page =
+            reader.pages.find { |page| page.text.include?("Numeric grid") }
+          a_header = grid_page.runs.find { |run| run.text == "A" }
+          quantity_header = grid_page.runs.find { |run| run.text == "Quantity" }
+          a_column =
+            grid_page.text(
+              rect:
+                PDF::Reader::Rectangle.new(
+                  a_header.x - 8,
+                  0,
+                  quantity_header.x - 8,
+                  a_header.y
+                )
+            )
+          expect(a_column.gsub(/\s+/, "")).to include(
+            "-12345678901234568000000000"
+          )
+          reader
+            .pages
+            .drop(1)
+            .each do |page|
+              page.runs.each do |run|
+                expect(run.x).to be >= 0
+                expect(run.endx).to be <= 612
+              end
+            end
+        end
+      expect(Marshal.dump(report)).to eq(original)
+    end
+
     it "shows a blocking render error without an unhandled rejection when footer preparation fails" do
       renderer = described_class.new
       allow(renderer).to receive(:html).and_wrap_original do |original, *args|
