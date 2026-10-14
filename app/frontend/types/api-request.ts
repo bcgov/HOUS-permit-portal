@@ -194,6 +194,8 @@ export interface IPermitProjectUpdateParams {
   fullAddress?: string
   pid?: string
   jurisdictionId?: string
+  latitude?: number
+  longitude?: number
   // other PermitProject fields that can be updated
   projectDocumentsAttributes?: IProjectDocumentAttribute[]
 }
