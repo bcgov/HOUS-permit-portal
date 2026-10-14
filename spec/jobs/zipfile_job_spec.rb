@@ -46,6 +46,50 @@ RSpec.describe ZipfileJob, type: :job do
     )
   end
 
+  it "rebuilds later packages when the earliest version is missing a PDF" do
+    pdf_job = instance_double("PdfGenerationJob")
+    generated = false
+    allow(PdfGenerationJob).to receive(:new).and_return(pdf_job)
+    allow(pdf_job).to receive(:perform) { generated = true }
+
+    zipper = instance_double("SupportingDocumentsZipper", perform: true)
+    allow(SupportingDocumentsZipper).to receive(:new).and_return(zipper)
+    allow(PermitApplicationBlueprint).to receive(:render_as_hash).and_return({})
+    allow(WebsocketBroadcaster).to receive(:push_update_to_relevant_users)
+
+    permit_application = create(:permit_application, :newly_submitted)
+    earliest = permit_application.latest_submission_version
+    later =
+      create(
+        :submission_version,
+        permit_application: permit_application,
+        created_at: earliest.created_at + 1.minute
+      )
+    later.update_columns(
+      zipfile_data: {
+        "id" => "zip",
+        "storage" => "store"
+      },
+      package_ready_at: Time.current
+    )
+    allow_any_instance_of(SubmissionVersion).to receive(
+      :missing_pdfs?
+    ) { |version| version.id == earliest.id && !generated }
+
+    described_class.new.perform(permit_application.id)
+
+    expect(SupportingDocumentsZipper).to have_received(:new).with(
+      permit_application.id,
+      submission_version: earliest,
+      version_ids: [earliest.id]
+    )
+    expect(SupportingDocumentsZipper).to have_received(:new).with(
+      permit_application.id,
+      submission_version: later,
+      version_ids: [earliest.id, later.id]
+    )
+  end
+
   it "does not broadcast when permit application is missing" do
     allow(PdfGenerationJob).to receive_message_chain(:new, :perform)
     allow(SupportingDocumentsZipper).to receive_message_chain(:new, :perform)
