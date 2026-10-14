@@ -88,6 +88,68 @@ RSpec.describe TemplateVersionPolicy, type: :policy do
         ).show?
       ).to be false
     end
+
+    it "permits an anonymous public preview of a draft on a kept template" do
+      kept = double("RequirementTemplate", discarded?: false, present?: true)
+      preview =
+        double(
+          "TemplateVersion",
+          draft?: true,
+          publicly_previewable?: true,
+          requirement_template: kept
+        )
+
+      expect(
+        policy_for(
+          described_class,
+          user: nil,
+          record: preview,
+          sandbox: nil
+        ).show?
+      ).to be true
+    end
+
+    it "denies an anonymous public preview when the template is discarded" do
+      discarded =
+        double("RequirementTemplate", discarded?: true, present?: true)
+      preview =
+        double(
+          "TemplateVersion",
+          draft?: true,
+          publicly_previewable?: true,
+          requirement_template: discarded
+        )
+
+      expect(
+        policy_for(
+          described_class,
+          user: nil,
+          record: preview,
+          sandbox: nil
+        ).show?
+      ).to be false
+    end
+
+    it "denies an anonymous public preview of a deprecated draft" do
+      kept = double("RequirementTemplate", discarded?: false, present?: true)
+      preview =
+        double(
+          "TemplateVersion",
+          draft?: false,
+          publicly_previewable?: true,
+          requirement_template: kept,
+          scheduled?: false
+        )
+
+      expect(
+        policy_for(
+          described_class,
+          user: nil,
+          record: preview,
+          sandbox: nil
+        ).show?
+      ).to be false
+    end
   end
 
   it "permits show_jurisdiction_template_version_customization? only when sandbox matches" do

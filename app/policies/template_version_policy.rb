@@ -8,7 +8,7 @@ class TemplateVersionPolicy < ApplicationPolicy
     # Anonymous visitors (and any signed-in user) can view a draft template
     # version that has been explicitly marked as publicly previewable. This
     # powers the public /standardization-preview landing flow.
-    return true if record&.draft? && record&.publicly_previewable?
+    return true if public_preview?
 
     return false if user.nil?
 
@@ -105,6 +105,12 @@ class TemplateVersionPolicy < ApplicationPolicy
       .where(previewer_id: user.id)
       .where("expires_at > ?", Time.current)
       .exists?
+  end
+
+  def public_preview?
+    record&.draft? && record&.publicly_previewable? &&
+      record.requirement_template.present? &&
+      !record.requirement_template.discarded?
   end
 
   class Scope < Scope

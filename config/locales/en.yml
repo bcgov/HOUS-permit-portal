@@ -605,6 +605,9 @@ en:
       destroy_error:
         title: Error
         message: "Something went wrong archiving the template"
+      archive_blocked_published:
+        title: Error
+        message: "This template has a published version and cannot be archived"
       update_error:
         title: Error
         message: "%{error_message}"

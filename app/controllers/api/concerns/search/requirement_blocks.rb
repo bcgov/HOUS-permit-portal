@@ -17,7 +17,11 @@ module Api::Concerns::Search::RequirementBlocks
             nil
           end
         ),
-      includes: %i[taggings requirements],
+      includes: [
+        :taggings,
+        :requirement_documents,
+        { requirements: { requirement_question: %i[taggings requirements] } }
+      ],
       scope_results: ->(relation) { policy_scope(relation) }
     }
 
