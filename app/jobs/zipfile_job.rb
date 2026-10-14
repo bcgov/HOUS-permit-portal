@@ -65,8 +65,11 @@ class ZipfileJob
           v.missing_pdfs? || v.zipfile_data.blank? || v.package_ready_at.blank?
         end
         .map(&:id)
+    # 0 is the earliest version, so this cannot be a truthiness check.
     first_missing = versions.index(&:missing_pdfs?)
-    rebuild_ids |= versions.drop(first_missing).map(&:id) if first_missing
+    unless first_missing.nil?
+      rebuild_ids |= versions.drop(first_missing).map(&:id)
+    end
     PdfGenerationJob.new.perform(application.id, version_ids)
     cumulative_ids = []
     versions.each do |version|
