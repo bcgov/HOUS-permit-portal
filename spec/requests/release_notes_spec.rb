@@ -607,7 +607,6 @@ RSpec.describe "ReleaseNotes", type: :request do
         create(
           :release_note,
           status: :published,
-          version: "9.9.9",
           release_date: release_date,
           created_at: release_date
         )
