@@ -138,13 +138,13 @@ export const SitesSelect = observer(function ({
 
   const handleChange = (option: ISiteOption) => {
     setPidOptions([])
-    setManualMode(false)
     onChange(option)
-    // Keep a PID after the address is cleared, including when that PID has an address.
+    // Keep the PID and jurisdiction after the address is cleared, including when that PID has an address.
     if (!option?.value) {
       lookupAddressFromPidRef.current = false
       return
     }
+    setManualMode(false)
     setValue(pidName, null)
     fetchPids(option.value).then((pids: string[]) => {
       if (pids) {
@@ -185,13 +185,8 @@ export const SitesSelect = observer(function ({
       return
     }
     const siteValue: string | undefined = siteWatch?.value
-    if (R.isNil(siteValue) || siteValue === "") {
-      // Don't clear jurisdiction if we have an initialJurisdiction and haven't selected a site yet
-      if (!initialJurisdiction || jurisdiction !== initialJurisdiction) {
-        setJurisdiction(null)
-      }
-      return
-    }
+    // An empty address is not a new match. Keep whatever jurisdiction is already selected.
+    if (R.isNil(siteValue) || siteValue === "") return
 
     let isActive = true
     ;(async () => {
@@ -341,7 +336,9 @@ export const SitesSelect = observer(function ({
 
       {showNoPidMap && (
         <Flex direction="column" gap={2} w="full" flexShrink={0}>
-          <Text fontSize="sm">{t("permitApplication.noPidConfirmSiteLocation")}</Text>
+          <Text fontSize="sm" color="semantic.error">
+            {t("permitApplication.noPidConfirmSiteLocation")}
+          </Text>
           <Box h="240px" minH="240px" maxH="240px" w="full" overflow="hidden" borderRadius="md" position="relative">
             <ProjectMap coordinates={siteCoordinates} />
           </Box>
@@ -363,6 +360,11 @@ export const SitesSelect = observer(function ({
       {manualMode && showJurisdiction && (
         <Flex bg="greys.grey03" px={6} py={2} gap={4} w="full" direction="column">
           <FormControl w="full" zIndex={1} isInvalid={!!jurisdictionErrorMessage}>
+            {showNoPidMap && (
+              <Text fontSize="sm" color="semantic.error" mb={2}>
+                {t("permitApplication.noPidCheckJurisdiction")}
+              </Text>
+            )}
             <FormLabel>{t("permitProject.new.jurisdictionTitle")}</FormLabel>
             <InputGroup w="full">
               <JurisdictionSelect
