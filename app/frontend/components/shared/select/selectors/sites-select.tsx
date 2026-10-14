@@ -79,6 +79,7 @@ export const SitesSelect = observer(function ({
   } = geocoderStore
   const { addJurisdiction, getJurisdictionById } = jurisdictionStore
   const pidSelectRef = useRef(null)
+  const lookupAddressFromPidRef = useRef(false)
 
   const { setValue, control, watch, formState } = useFormContext()
   const { field: jurisdictionField } = useController({
@@ -139,35 +140,44 @@ export const SitesSelect = observer(function ({
     setPidOptions([])
     setManualMode(false)
     onChange(option)
-    setValue(pidName, null)
-    if (option && option.value) {
-      fetchPids(option.value).then((pids: string[]) => {
-        if (pids) {
-          setPidOptions(pids.map((pid) => ({ value: pid, label: formatPidLabel(pid) })))
-          if (pids.length === 1) {
-            setValue(pidName, formatPidValue(pids[0]), { shouldValidate: true })
-            return
-          }
-          const selectControl = pidSelectRef?.current?.controlRef
-          if (selectControl && !R.isEmpty(pids)) {
-            selectControl.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }))
-          }
-        }
-      })
+    // Keep a PID after the address is cleared, including when that PID has an address.
+    if (!option?.value) {
+      lookupAddressFromPidRef.current = false
+      return
     }
+    setValue(pidName, null)
+    fetchPids(option.value).then((pids: string[]) => {
+      if (pids) {
+        setPidOptions(pids.map((pid) => ({ value: pid, label: formatPidLabel(pid) })))
+        if (pids.length === 1) {
+          setValue(pidName, formatPidValue(pids[0]), { shouldValidate: true })
+          return
+        }
+        const selectControl = pidSelectRef?.current?.controlRef
+        if (selectControl && !R.isEmpty(pids)) {
+          selectControl.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }))
+        }
+      }
+    })
   }
 
   useEffect(() => {
+    if (!lookupAddressFromPidRef.current) return
+    const requestedPid = pidWatch
+    let active = true
     ;(async () => {
-      if (R.isNil(siteWatch?.value) && pidWatch) {
+      if (R.isNil(siteWatch?.value) && requestedPid) {
         //the pid is valid, lets try to fill in the address based on the PID
-        const siteDetails = await fetchSiteDetailsFromPid(pidWatch)
-        if (siteDetails) {
-          setValue(siteName, siteDetails)
-        }
+        const siteDetails = await fetchSiteDetailsFromPid(requestedPid)
+        if (!active || !lookupAddressFromPidRef.current) return
+        if (siteDetails) setValue(siteName, siteDetails)
       }
+      lookupAddressFromPidRef.current = false
     })()
-  }, [siteWatch?.value, pidWatch])
+    return () => {
+      active = false
+    }
+  }, [pidWatch])
 
   // Jurisdiction matching logic - integrated from useJurisdictionFromSite hook
   useEffect(() => {
@@ -298,10 +308,12 @@ export const SitesSelect = observer(function ({
                         value: formatPidValue(value),
                       }}
                       onChange={(option) => {
+                        if (option?.value) lookupAddressFromPidRef.current = true
                         onChange(formatPidValue(option?.value))
                       }}
                       onCreateOption={(inputValue: string) => {
                         const newValue = { label: formatPidLabel(inputValue), value: formatPidValue(inputValue) }
+                        lookupAddressFromPidRef.current = true
                         onChange(newValue.value)
                       }}
                       formatCreateLabel={(inputValue: string) =>
