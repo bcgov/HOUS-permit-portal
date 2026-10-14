@@ -152,4 +152,71 @@ RSpec.describe "external_api/v2/permit_projects",
       end
     end
   end
+
+  path "/permit_projects/{id}/permit_applications" do
+    post "Adds draft permit applications from requirement template ids. Each id resolves to that template's published version. The batch is all or nothing. Project GET still omits the drafts until one is submitted." do
+      tags "Permit projects"
+      consumes "application/json"
+      produces "application/json"
+      parameter name: "id",
+                in: :path,
+                type: :string,
+                format: :uuid,
+                description: "Permit project ID"
+      parameter name: :drafts,
+                in: :body,
+                schema: {
+                  type: :object,
+                  required: %w[permit_applications],
+                  properties: {
+                    permit_applications: {
+                      type: :array,
+                      items: {
+                        type: :object,
+                        required: %w[requirement_template_id],
+                        properties: {
+                          requirement_template_id: {
+                            type: :string,
+                            format: :uuid
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+      let(:id) { permit_application.permit_project_id }
+      let(:template_version) { create(:template_version, status: :published) }
+      let(:drafts) do
+        {
+          permit_applications: [
+            {
+              requirement_template_id: template_version.requirement_template_id
+            }
+          ]
+        }
+      end
+
+      response(200, "Drafts created") do
+        schema type: :object,
+               properties: {
+                 data: {
+                   type: :array,
+                   items: {
+                     "$ref" => "#/components/schemas/CreatedPermitApplication"
+                   }
+                 }
+               },
+               required: %w[data]
+
+        run_test!
+      end
+
+      response(422, "Empty list or invalid requirement template") do
+        schema "$ref" => "#/components/schemas/ResponseError"
+        let(:drafts) { { permit_applications: [] } }
+
+        run_test!
+      end
+    end
+  end
 end

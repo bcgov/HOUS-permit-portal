@@ -7,6 +7,10 @@ class ExternalApi::PermitProjectPolicy < ExternalApi::ApplicationPolicy
     show?
   end
 
+  def create_permit_applications?
+    show?
+  end
+
   class Scope < Scope
     def resolve
       scope

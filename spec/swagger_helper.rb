@@ -100,7 +100,7 @@ tailor the API environment to better suit your development needs. Ensure that yo
 Application GET returns identity and a submission version index. Frozen form data, generated PDFs, and the version zip live on
 `GET /permit_applications/{id}/submission_versions/{submission_version_id}`. `raw_h2k_files` are current step-code tool
 state, not snapshotted per version. `GET /permit_projects/{id}` returns project state, address, and sibling application
-summaries (drafts omitted). Follow `permit_project_id` from application reads and webhooks.
+summaries (drafts omitted). `POST /permit_projects/{id}/permit_applications` adds draft permits from requirement template ids. Each id resolves to that template's published version. The project must already be readable by the key. Those drafts stay off project GET until one is submitted. `GET /requirement_templates` lists those ids: kept templates with a published version in the key's sandbox. Follow `permit_project_id` from application reads and webhooks.
 
 For security purposes, any API response that includes a file URL will have a signed URL. These files will be available for download for a limited time (1 hour).
 Download files when you receive `permit_application_package_ready`. If a URL expires, call the API again to retrieve a
@@ -973,6 +973,22 @@ in this document.
                   "$ref" => "#/components/schemas/File"
                 }
               },
+              document_requests: {
+                type: :array,
+                description:
+                  "Document revision requests stored on this version. Reference file URLs expire after 1 hour; a later GET returns a new URL.",
+                items: {
+                  "$ref" => "#/components/schemas/DocumentRequest"
+                }
+              },
+              fulfillment_documents: {
+                type: :array,
+                description:
+                  "Files the applicant uploaded to fulfill a document request, assigned to this version on resubmission. Empty when none were uploaded. Signed URLs expire after 1 hour.",
+                items: {
+                  "$ref" => "#/components/schemas/File"
+                }
+              },
               zipfile: {
                 anyOf: [
                   { "$ref" => "#/components/schemas/File" },
@@ -1091,6 +1107,99 @@ in this document.
         }
       }
     },
+    CreatedPermitApplication: {
+      type: :object,
+      properties: {
+        id: {
+          type: :string,
+          format: :uuid
+        },
+        number: {
+          type: :string
+        },
+        status: {
+          "$ref" => "#/components/schemas/ApplicationStatus"
+        },
+        permit_project_id: {
+          type: :string,
+          format: :uuid
+        },
+        template_version: {
+          type: :object,
+          description:
+            "The published template version this draft was created from.",
+          properties: {
+            id: {
+              type: :string,
+              format: :uuid
+            },
+            status: {
+              type: :string
+            },
+            version_date: {
+              type: :integer,
+              format: :int64,
+              description:
+                "The version date in milliseconds since the epoch (UNIX time). This is meant to be parsed as PST."
+            },
+            requirement_template_id: {
+              type: :string,
+              format: :uuid
+            },
+            feedbacks_count: {
+              type: :integer
+            },
+            has_unresolved_feedbacks: {
+              type: :boolean
+            },
+            template_category_id: {
+              type: :string,
+              format: :uuid,
+              nullable: true
+            },
+            template_sort_order: {
+              type: :integer
+            },
+            template_category: {
+              type: :object,
+              nullable: true,
+              properties: {
+                id: {
+                  type: :string,
+                  format: :uuid
+                },
+                label: {
+                  type: :string
+                },
+                sort_order: {
+                  type: :integer
+                },
+                created_at: {
+                  type: :integer,
+                  format: :int64
+                },
+                updated_at: {
+                  type: :integer,
+                  format: :int64
+                }
+              }
+            }
+          },
+          required: %w[
+            id
+            status
+            version_date
+            requirement_template_id
+            feedbacks_count
+            has_unresolved_feedbacks
+            template_category_id
+            template_sort_order
+            template_category
+          ]
+        }
+      },
+      required: %w[id number status permit_project_id template_version]
+    },
     PermitProject: {
       type: :object,
       properties: {
@@ -1141,6 +1250,121 @@ in this document.
         }
       }
     },
+    RequirementTemplate: {
+      type: :object,
+      properties: {
+        id: {
+          type: :string,
+          format: :uuid
+        },
+        nickname: {
+          type: :string,
+          nullable: true
+        },
+        description: {
+          type: :string,
+          nullable: true
+        },
+        sort_order: {
+          type: :integer
+        },
+        template_category: {
+          type: :object,
+          nullable: true,
+          properties: {
+            id: {
+              type: :string,
+              format: :uuid
+            },
+            label: {
+              type: :string
+            },
+            sort_order: {
+              type: :integer
+            },
+            created_at: {
+              type: :integer,
+              format: :int64
+            },
+            updated_at: {
+              type: :integer,
+              format: :int64
+            }
+          }
+        },
+        published_template_version: {
+          type: :object,
+          nullable: true,
+          description:
+            "The published version create copies onto a new draft. Null when the template has none.",
+          properties: {
+            id: {
+              type: :string,
+              format: :uuid
+            },
+            status: {
+              type: :string
+            },
+            version_date: {
+              type: :integer,
+              format: :int64,
+              description:
+                "The version date in milliseconds since the epoch (UNIX time). This is meant to be parsed as PST."
+            },
+            requirement_template_id: {
+              type: :string,
+              format: :uuid
+            },
+            feedbacks_count: {
+              type: :integer
+            },
+            has_unresolved_feedbacks: {
+              type: :boolean
+            },
+            template_category_id: {
+              type: :string,
+              format: :uuid,
+              nullable: true
+            },
+            template_sort_order: {
+              type: :integer
+            },
+            template_category: {
+              type: :object,
+              nullable: true,
+              properties: {
+                id: {
+                  type: :string,
+                  format: :uuid
+                },
+                label: {
+                  type: :string
+                },
+                sort_order: {
+                  type: :integer
+                },
+                created_at: {
+                  type: :integer,
+                  format: :int64
+                },
+                updated_at: {
+                  type: :integer,
+                  format: :int64
+                }
+              }
+            }
+          }
+        }
+      },
+      required: %w[
+        id
+        nickname
+        description
+        sort_order
+        template_category
+        published_template_version
+      ]
+    },
     RevisionReason: {
       type: :object,
       properties: {
@@ -1158,6 +1382,12 @@ in this document.
       required: %w[id reason_code description]
     },
     RevisionRequestItem: {
+      oneOf: [
+        { "$ref" => "#/components/schemas/FieldRevisionRequestItem" },
+        { "$ref" => "#/components/schemas/DocumentRevisionRequestItem" }
+      ]
+    },
+    FieldRevisionRequestItem: {
       type: :object,
       required: %w[requirement_block_code requirement_code reason_code comment],
       properties: {
@@ -1179,6 +1409,80 @@ in this document.
         comment: {
           type: :string,
           maxLength: 350
+        }
+      }
+    },
+    DocumentRevisionRequestItem: {
+      type: :object,
+      required: %w[name reason_code comment reference_document_ids],
+      properties: {
+        name: {
+          type: :string,
+          description: "Name of the document the applicant must provide."
+        },
+        reason_code: {
+          type: :string,
+          description:
+            "A currently active code from GET /revision_reasons. The list is site-configured and not a fixed enum."
+        },
+        comment: {
+          type: :string
+        },
+        reference_document_ids: {
+          type: :array,
+          minItems: 1,
+          description:
+            "Ids returned by POST /files. At least one. The files are stored on the revision request when the status write succeeds.",
+          items: {
+            type: :string
+          }
+        }
+      }
+    },
+    DocumentRequest: {
+      type: :object,
+      required: %w[id name reason_code comment reference_documents],
+      properties: {
+        id: {
+          type: :string,
+          format: :uuid
+        },
+        name: {
+          type: :string
+        },
+        reason_code: {
+          type: :string
+        },
+        comment: {
+          type: :string
+        },
+        reference_documents: {
+          type: :array,
+          items: {
+            "$ref" => "#/components/schemas/File"
+          }
+        }
+      }
+    },
+    CachedFile: {
+      type: :object,
+      required: %w[id name type size],
+      properties: {
+        id: {
+          type: :string,
+          description:
+            "Cache id to send as reference_document_ids on the revisions status write. Not a download URL."
+        },
+        name: {
+          type: :string
+        },
+        type: {
+          type: :string,
+          description: "MIME type, for example application/pdf."
+        },
+        size: {
+          type: :integer,
+          description: "Size in bytes."
         }
       }
     },
@@ -1304,6 +1608,16 @@ in this document.
     name: "Permit projects",
     description:
       "Permit projects in the API key's jurisdiction and sandbox. Draft-only projects are not readable."
+  }
+  v2_spec[:tags] << {
+    name: "Files",
+    description:
+      "Reference file uploads cited by a document revision request. The upload does not change an application."
+  }
+  v2_spec[:tags] << {
+    name: "Requirement templates",
+    description:
+      "Kept requirement templates with a published version in the API key's sandbox. Pass id as requirement_template_id when adding a draft permit."
   }
   v2_spec[:tags] << {
     name: "Revision reasons",

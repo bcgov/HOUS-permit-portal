@@ -6,6 +6,7 @@ class ExternalApi::ApplicationController < ActionController::API
   before_action :authenticate_with_token
   before_action :authorize_api_version
   before_action :store_currents
+  around_action :audit_as_partner_system
 
   attr_reader :current_external_api_key
 
@@ -28,6 +29,14 @@ class ExternalApi::ApplicationController < ActionController::API
 
   def store_currents
     Current.external_api_key = current_external_api_key
+  end
+
+  # Audited's sweeper looks for current_user, which these requests do not have.
+  # audited_user wins over that lookup, so every partner write is attributed once.
+  def audit_as_partner_system
+    Audited
+      .audit_class
+      .as_user(Constants::ExternalApi::PARTNER_SYSTEM_ACTOR) { yield }
   end
 
   def external_api_key_not_authorized(exception)

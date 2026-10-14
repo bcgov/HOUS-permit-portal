@@ -69,7 +69,7 @@
                 "{{submission_version_id}}"
               ]
             },
-            "description": "Frozen submission snapshot for one version, including form data, generated PDFs, zipfile (File object, null if that version never received a zip), and signed file URLs. Ingest after permit_application_package_ready. URLs expire in one hour; re-GET to refresh."
+            "description": "Frozen submission snapshot for one version, including form data, generated PDFs, document_requests (with reference file URLs), fulfillment_documents from the resubmission, zipfile (File object, null if that version never received a zip), and signed file URLs. Ingest after permit_application_package_ready. URLs expire in one hour; re-GET to refresh."
           },
           "response": []
         },
@@ -104,7 +104,31 @@
                 "status"
               ]
             },
-            "description": "Uses canonical BPH status codes. Lifecycle transitions are enforced and repeated writes of the current status are idempotent. For `revisions_requested`, send a non-empty `revision_requests` array of field-level items (`requirement_block_code`, `requirement_code`, `reason_code`, `comment`) copied from the submission version payload. `revision_requests` must be omitted for every other status. Invalid, reserved, or unavailable transitions return 422 naming the statuses available from the current status."
+            "description": "Uses canonical BPH status codes. Lifecycle transitions are enforced and repeated writes of the current status are idempotent. For `revisions_requested`, send a non-empty `revision_requests` array. Field items use `requirement_block_code`, `requirement_code`, `reason_code`, and `comment`. Document items use `name`, `reason_code`, `comment`, and `reference_document_ids` from Upload reference file, and omit requirement codes. One array may mix both. `revision_requests` must be omitted for every other status. Invalid, reserved, or unavailable transitions return 422 naming the statuses available from the current status."
+          },
+          "response": []
+        },
+        {
+          "name": "Upload reference file",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/external_api/v2/files",
+              "host": ["{{base_url}}"],
+              "path": ["external_api", "v2", "files"]
+            },
+            "description": "Stores one reference file and returns `{ id, name, type, size }`. Send `id` in `reference_document_ids` on Request document revision. No download URL. A missing file or blocked extension returns 422. The upload does not change an application."
           },
           "response": []
         },
@@ -139,7 +163,42 @@
                 "status"
               ]
             },
-            "description": "One-call revision request: creates field-level revision requests on the latest submission version and moves the application to `revisions_requested`, notifying the submitter. Target fields with `requirement_block_code` + `requirement_code` from GET submission version. Reason codes come from GET /revision_reasons."
+            "description": "One-call field revision: creates field-level revision requests on the latest submission version and moves the application to `revisions_requested`, notifying the submitter. Target fields with `requirement_block_code` + `requirement_code` from GET submission version. Reason codes come from GET /revision_reasons."
+          },
+          "response": []
+        },
+        {
+          "name": "Request document revision",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"revisions_requested\",\n  \"revision_requests\": [\n    {\n      \"name\": \"Site plan\",\n      \"reason_code\": \"inaccurate_documentation\",\n      \"comment\": \"Please provide a current site plan.\",\n      \"reference_document_ids\": [\"{{reference_document_id}}\"]\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/external_api/v2/permit_applications/{{permit_application_id}}/status",
+              "host": ["{{base_url}}"],
+              "path": [
+                "external_api",
+                "v2",
+                "permit_applications",
+                "{{permit_application_id}}",
+                "status"
+              ]
+            },
+            "description": "Document revision on the same status write. Upload the reference PDF first and put its id in `reference_document_ids`. Omit `requirement_block_code` and `requirement_code`. A missing name, reason, comment, or cache id returns 422 and does not change status. GET the submission version for a one-hour download URL; a later GET returns a new URL."
           },
           "response": []
         },
@@ -244,6 +303,61 @@
               ]
             },
             "description": "Sets project state to a code in `available_states` for the current state. `draft` is not a partner write. Writing the current state returns 200 and does not emit another `permit_project_state_changed`. Illegal or unknown codes return 422 and name the available states."
+          },
+          "response": []
+        },
+        {
+          "name": "Add Draft Permit Applications",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"permit_applications\": [\n    { \"requirement_template_id\": \"{{requirement_template_id}}\" }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/external_api/v2/permit_projects/{{permit_project_id}}/permit_applications",
+              "host": ["{{base_url}}"],
+              "path": [
+                "external_api",
+                "v2",
+                "permit_projects",
+                "{{permit_project_id}}",
+                "permit_applications"
+              ]
+            },
+            "description": "Adds draft permits to a project the key can already read. Each requirement_template_id resolves to that template's published version. The project owner is the submitter. Sandbox, jurisdiction, and template_version_id on the body are ignored. An empty list, or any unknown, unpublished, or discarded id, returns 422 and creates nothing. The new drafts stay off project GET until one is submitted, and project state does not change."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Requirement templates",
+      "description": "Kept templates with a published version in this key's sandbox. Use id as requirement_template_id when adding a draft.",
+      "item": [
+        {
+          "name": "List Requirement Templates",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/external_api/v2/requirement_templates",
+              "host": ["{{base_url}}"],
+              "path": ["external_api", "v2", "requirement_templates"]
+            },
+            "description": "Returns id, nickname, description, sort_order, template_category, and published_template_version. Draft-only and discarded templates are omitted. A scheduled sandbox key gets an empty list, matching draft create."
           },
           "response": []
         }
@@ -382,6 +496,14 @@
     },
     {
       "key": "template_version_id",
+      "value": ""
+    },
+    {
+      "key": "requirement_template_id",
+      "value": ""
+    },
+    {
+      "key": "reference_document_id",
       "value": ""
     }
   ]
