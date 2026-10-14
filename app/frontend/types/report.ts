@@ -62,6 +62,7 @@ export interface IReportPayload {
   range: IReportRange
   computedAt: string
   headlineFigures: IReportHeadlineFigure[]
+  forecastFigures?: IReportHeadlineFigure[]
   charts: IReportChart[]
   tables: IReportTable[]
   notes: IReportNote[]

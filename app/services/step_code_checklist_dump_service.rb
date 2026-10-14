@@ -183,10 +183,66 @@ class StepCodeChecklistDumpService
     "part_9_step_code_checklists_#{@range.slug}_#{Date.current.iso8601}.csv"
   end
 
+  PART_3_COLUMNS = [
+    ["Reference number", ->(c) { c.step_code&.reference_number }],
+    ["Jurisdiction", ->(c) { c.step_code&.jurisdiction_name }],
+    ["Address", ->(c) { c.step_code&.full_address }],
+    ["Stage", ->(c) { c.stage }],
+    ["Status", ->(c) { c.status }],
+    ["Created at", ->(c) { c.created_at }],
+    ["Building Height", ->(c) { c.building_height }],
+    ["Building Code Version", ->(c) { c.building_code_version }],
+    ["Heating Degree Days", ->(c) { c.heating_degree_days }],
+    ["Climate Zone", ->(c) { c.climate_zone }],
+    [
+      "Reference Annual Thermal Energy Demand",
+      ->(c) { c.ref_annual_thermal_energy_demand }
+    ],
+    [
+      "Total Annual Thermal Energy Demand",
+      ->(c) { c.total_annual_thermal_energy_demand }
+    ],
+    [
+      "Total Annual Cooling Energy Demand",
+      ->(c) { c.total_annual_cooling_energy_demand }
+    ],
+    [
+      "Step Code Annual Thermal Energy Demand",
+      ->(c) { c.step_code_annual_thermal_energy_demand }
+    ],
+    ["Generated Electricity", ->(c) { c.generated_electricity }],
+    ["Overheating Hours", ->(c) { c.overheating_hours }],
+    ["Software", ->(c) { c.software }],
+    ["Software Name", ->(c) { c.software_name }],
+    ["Simulation Weather File", ->(c) { c.simulation_weather_file }]
+  ].freeze
+
+  def part_3_csv
+    CSV.generate(headers: true) do |csv|
+      csv << PART_3_COLUMNS.map(&:first)
+      part_3_scope.find_each do |checklist|
+        csv << PART_3_COLUMNS.map { |(_, value)| cell(value.call(checklist)) }
+      end
+    end
+  end
+
+  def part_3_csv_filename
+    "part_3_step_code_checklists_#{@range.slug}_#{Date.current.iso8601}.csv"
+  end
+
   private
 
   def scope
     @range.apply(loaded_checklists, "part_9_step_code_checklists.created_at")
+  end
+
+  def part_3_scope
+    @range.apply(
+      Part3StepCode::Checklist.where(
+        step_code_id: StepCode.for_effective_sandbox(nil).select(:id)
+      ).includes(step_code: %i[jurisdiction permit_application]),
+      "part_3_step_code_checklists.created_at"
+    )
   end
 
   def loaded_checklists

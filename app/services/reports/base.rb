@@ -25,8 +25,9 @@ module Reports
       I18n.t("reports.#{key}.description")
     end
 
-    def initialize(range:)
+    def initialize(range:, subject: nil)
       @range = range
+      @subject = subject
     end
 
     def call
@@ -115,7 +116,11 @@ module Reports
     def figure(key, value, approximate: false, help_overrides: {})
       {
         key: key,
-        label: I18n.t("reports.#{self.class.key}.figures.#{key}.label"),
+        label:
+          I18n.t(
+            "reports.#{self.class.key}.figures.#{key}.label",
+            **{ range: range.label }.merge(help_overrides)
+          ),
         value: value,
         help_text:
           I18n.t(
@@ -141,7 +146,7 @@ module Reports
       }
     end
 
-    def table(key, columns, rows, sortable: false, default_sort: nil)
+    def table(key, columns, rows, sortable: true, default_sort: nil)
       payload = {
         key: key,
         columns:
@@ -234,6 +239,23 @@ module Reports
       sorted = numbers.sort
       mid = sorted.length / 2
       sorted.length.odd? ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2.0
+    end
+
+    def megabytes(bytes)
+      return nil if bytes.nil?
+
+      (bytes.to_f / 1.megabyte).round(1)
+    end
+
+    def storage_size(bytes)
+      return nil if bytes.nil?
+
+      amount = bytes.to_f
+      if amount.abs >= 1.gigabyte
+        format("%.2f GB", amount / 1.gigabyte)
+      else
+        format("%.1f MB", amount / 1.megabyte)
+      end
     end
 
     def round_days(seconds)

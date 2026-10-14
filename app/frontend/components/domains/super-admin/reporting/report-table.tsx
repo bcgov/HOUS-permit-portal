@@ -9,15 +9,22 @@ import {
   Text,
   Th,
   Thead,
+  Tooltip,
   Tr,
   Wrap,
   WrapItem,
 } from "@chakra-ui/react"
-import { CaretDown, CaretUp } from "@phosphor-icons/react"
 import React, { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { ESortDirection } from "../../../../types/enums"
 import { IReportSort, IReportTable } from "../../../../types/report"
+import { ISort } from "../../../../types/types"
 import { toCamelCase } from "../../../../utils/utility-functions"
+import { Paginator } from "../../../shared/base/inputs/paginator"
+import { RouterLink } from "../../../shared/navigation/router-link"
+import { SortIcon } from "../../../shared/sort-icon"
+
+const MONTH_PAGE_SIZE = 12
 
 interface IProps {
   table: IReportTable
@@ -26,12 +33,15 @@ interface IProps {
 export function ReportTable({ table }: IProps) {
   const { t } = useTranslation()
   const [sort, setSort] = useState<IReportSort | null>(table.defaultSort ?? null)
+  const [page, setPage] = useState(1)
   const mixColumn = table.columns.find((column) => isMixColumn(column.key))
   const columns = table.columns.filter((column) => !isMixColumn(column.key))
+  const monthTable = columns.some((column) => column.key === "period")
 
   useEffect(() => {
     setSort(table.defaultSort ?? null)
-  }, [table.key, table.defaultSort?.key, table.defaultSort?.direction])
+    setPage(1)
+  }, [table.key, table.rows.length, table.defaultSort?.key, table.defaultSort?.direction])
 
   const rows = useMemo(() => {
     if (!sort) return table.rows
@@ -39,8 +49,15 @@ export function ReportTable({ table }: IProps) {
     return [...table.rows].sort((a, b) => compareValues(rowValue(a, sort.key), rowValue(b, sort.key)) * direction)
   }, [table.rows, sort])
 
+  const pagedRows = useMemo(
+    () => pageRows(rows, page, monthTable && rows.length > MONTH_PAGE_SIZE, sort == null),
+    [rows, page, monthTable, sort]
+  )
+  const totalPages = Math.ceil(rows.length / MONTH_PAGE_SIZE)
+
   const onSort = (key: string) => {
     if (!table.sortable) return
+    setPage(1)
     setSort((previous) => {
       if (previous?.key === key) {
         return { key, direction: previous.direction === "asc" ? "desc" : "asc" }
@@ -86,27 +103,21 @@ export function ReportTable({ table }: IProps) {
                     <Text as="span" lineHeight="short">
                       {column.label}
                     </Text>
-                    {table.sortable && sort?.key === column.key ? (
-                      sort.direction === "asc" ? (
-                        <CaretUp size={12} />
-                      ) : (
-                        <CaretDown size={12} />
-                      )
-                    ) : null}
+                    {table.sortable ? <SortIcon field={column.key} currentSort={columnSort(sort, column.key)} /> : null}
                   </HStack>
                 </Th>
               ))}
             </Tr>
           </Thead>
           <Tbody>
-            {rows.length === 0 ? (
+            {pagedRows.length === 0 ? (
               <Tr>
                 <Td colSpan={Math.max(columns.length, 1)}>
                   <Text color="text.secondary">{t("reporting.shell.emptyTable")}</Text>
                 </Td>
               </Tr>
             ) : (
-              rows.map((row, index) => (
+              pagedRows.map((row, index) => (
                 <Tr key={index}>
                   {columns.map((column) => (
                     <Td
@@ -117,7 +128,9 @@ export function ReportTable({ table }: IProps) {
                       py={3}
                       textAlign={isNumericColumn(column.key) ? "end" : "start"}
                     >
-                      {isEnablementColumn(column.key) ? (
+                      {column.key === "jurisdiction" ? (
+                        <JurisdictionName row={row} />
+                      ) : isEnablementColumn(column.key) ? (
                         <EnablementTag value={rowValue(row, column.key)} />
                       ) : (
                         <>
@@ -139,7 +152,51 @@ export function ReportTable({ table }: IProps) {
           </Tbody>
         </Table>
       </TableContainer>
+      {monthTable && rows.length > MONTH_PAGE_SIZE ? (
+        <Box mt={4}>
+          <Paginator
+            current={page}
+            total={rows.length}
+            totalPages={totalPages}
+            pageSize={MONTH_PAGE_SIZE}
+            handlePageChange={(nextPage) => {
+              if (nextPage < 1 || nextPage > totalPages) return
+              setPage(nextPage)
+            }}
+            showLessItems
+          />
+        </Box>
+      ) : null}
     </Box>
+  )
+}
+
+function pageRows<T>(rows: T[], page: number, paginate: boolean, fromEnd: boolean) {
+  if (!paginate) return rows
+  if (fromEnd) {
+    const end = rows.length - (page - 1) * MONTH_PAGE_SIZE
+    return rows.slice(Math.max(0, end - MONTH_PAGE_SIZE), end)
+  }
+  const start = (page - 1) * MONTH_PAGE_SIZE
+  return rows.slice(start, start + MONTH_PAGE_SIZE)
+}
+
+function JurisdictionName({ row }: { row: Record<string, string | number | null> }) {
+  const name = formatCell(rowValue(row, "jurisdiction"))
+  const slug = rowValue(row, "jurisdiction_slug")
+  const enablement = rowValue(row, "enablement")
+  const content = slug ? (
+    <RouterLink to={`/jurisdictions/${slug}/step-code-requirements`}>{name}</RouterLink>
+  ) : (
+    <Text as="span">{name}</Text>
+  )
+
+  if (enablement === null || enablement === undefined || enablement === "") return content
+
+  return (
+    <Tooltip label={String(enablement)} hasArrow placement="top" openDelay={200}>
+      {content}
+    </Tooltip>
   )
 }
 
@@ -182,6 +239,14 @@ function rowValue(row: Record<string, string | number | null>, key: string) {
 function compareValues(a: string | number | null | undefined, b: string | number | null | undefined) {
   if (typeof a === "number" && typeof b === "number") return a - b
   return String(a ?? "").localeCompare(String(b ?? ""), undefined, { numeric: true, sensitivity: "base" })
+}
+
+function columnSort(sort: IReportSort | null, key: string): ISort<string> {
+  if (sort?.key !== key) return { field: "", direction: ESortDirection.descending }
+  return {
+    field: key,
+    direction: sort.direction === "asc" ? ESortDirection.ascending : ESortDirection.descending,
+  }
 }
 
 function ariaSort(sort: IReportSort | null, key: string) {
