@@ -101,6 +101,12 @@ export const RootStoreModel = types
         properties: ["viewMode", "displayMode", "collapsedColumns"],
         storage: localStorage,
       })
+      yield makePersistable(self.stepCodeStore, {
+        name: "StepCodeStore",
+        properties: ["indexExitPath"],
+        storage: sessionStorage,
+      })
+      self.stepCodeStore.setIndexExitPath(self.stepCodeStore.indexExitPath)
       protect(self)
     }),
     subscribeToUserChannel() {

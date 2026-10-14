@@ -13,6 +13,7 @@ import { SharedSpinner } from "../../../shared/base/shared-spinner"
 import { FloatingHelpDrawer } from "../../../shared/floating-help-drawer"
 import { ProjectInformation } from "../project-information"
 import { StepCodeSubNavBar } from "../step-code-sub-nav-bar"
+import { useRedirectAttachedStepCode } from "../use-redirect-attached-step-code"
 import { DrawingsWarning } from "./drawings-warning"
 import { FormSection } from "./form-section"
 import { Info } from "./info"
@@ -27,6 +28,7 @@ export const Part9StepCodeForm = observer(function Part9StepCodeForm() {
     stepCodeStore: { createPart9StepCode, isOptionsLoaded, fetchPart9SelectOptions },
   } = useMst()
   const { currentStepCode } = usePart9StepCode()
+  const redirectingToPermit = useRedirectAttachedStepCode("part-9-step-code", currentStepCode)
   const { infoPagePath, isPermitLinked, exitLinkPath } = usePart9Navigation()
   const { currentPermitApplication } = usePermitApplication()
   const { permitApplicationId, section, stepCodeId } = useParams()
@@ -42,6 +44,7 @@ export const Part9StepCodeForm = observer(function Part9StepCodeForm() {
     if (stepCodeId) return
     if (!!currentStepCode) return
     if (!isStandaloneStepCode && !currentPermitApplication?.isFullyLoaded) return
+    if (!isStandaloneStepCode && currentPermitApplication?.stepCode) return
     ;(async () => {
       const result = await createPart9StepCode({
         permitApplicationId,
@@ -59,6 +62,14 @@ export const Part9StepCodeForm = observer(function Part9StepCodeForm() {
       scroller.scrollTo({ top: 0, left: 0, behavior: "auto" })
     }
   }, [section])
+
+  if (redirectingToPermit) {
+    return (
+      <Center p={50}>
+        <SharedSpinner />
+      </Center>
+    )
+  }
 
   // Prevent viewing/editing archived Step Codes
   if (currentStepCode?.isDiscarded) return <NotFoundScreen />

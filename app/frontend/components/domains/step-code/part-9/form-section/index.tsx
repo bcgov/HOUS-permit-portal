@@ -14,19 +14,18 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react"
-import { LightningA, PaperPlaneRight } from "@phosphor-icons/react"
+import { LightningA } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { ReactNode, useEffect, useState } from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
 import { Navigate, useLocation, useNavigate, useParams } from "react-router-dom"
 import { usePart9StepCode } from "../../../../../hooks/resources/use-part-9-step-code"
-import { EFileUploadAttachmentType, EFlashMessageStatus } from "../../../../../types/enums"
+import { EFlashMessageStatus } from "../../../../../types/enums"
 import { TPart9NavLinkKey } from "../../../../../types/types"
-import { FileDownloadButton } from "../../../../shared/base/file-download-button"
 import { SharedSpinner } from "../../../../shared/base/shared-spinner"
-import { ConfirmationModal } from "../../../../shared/confirmation-modal"
 import { TextFormControl } from "../../../../shared/form/input-form-control"
+import { ReportDocumentActions } from "../../report-document-actions"
 import { BuildingCharacteristicsSummary } from "../checklist/building-characteristics-summary"
 import { CompletedBy } from "../checklist/completed-by"
 import { ComplianceSummary } from "../checklist/compliance-summary"
@@ -399,12 +398,14 @@ const ReportSection = observer(function ReportSection() {
   const formMethods = useForm({ mode: "onChange" })
   const { handleSubmit, formState } = formMethods
   const [isRegenerating, setIsRegenerating] = useState(false)
-  const [isSharing, setIsSharing] = useState(false)
-  const freshReport = checklist?.freshReportDocument
+  const freshReport = checklist?.freshReportDocument ?? null
+  const awaitingReport = !!checklist?.reportGenerationPending && !freshReport
 
   useEffect(() => {
-    if (freshReport) setIsRegenerating(false)
-  }, [freshReport])
+    if (!freshReport) return
+    setIsRegenerating(false)
+    checklist?.clearReportGenerationPending()
+  }, [freshReport, checklist])
 
   const onSubmit = async () => {
     const updated = await checklist.completeSection("report")
@@ -426,17 +427,6 @@ const ReportSection = observer(function ReportSection() {
     }
   }
 
-  const handleShare = async () => {
-    const reportId = checklist?.freshReportDocument?.id
-    if (!reportId) return
-    setIsSharing(true)
-    try {
-      await currentStepCode?.shareReportWithJurisdiction(reportId)
-    } finally {
-      setIsSharing(false)
-    }
-  }
-
   if (!checklist) return <SharedSpinner />
   if (!checklist.selectedReport) return <MissingReportSection />
   if (!checklist.canAccessReport) {
@@ -445,7 +435,6 @@ const ReportSection = observer(function ReportSection() {
   }
 
   const isStale = !!checklist.reportDocument?.stale && !freshReport
-  const canShare = !!freshReport && !!currentStepCode?.jurisdiction
   const reportStatusKey = freshReport ? "ready" : isStale ? "stale" : "missing"
 
   return (
@@ -453,10 +442,10 @@ const ReportSection = observer(function ReportSection() {
       <form onSubmit={handleSubmit(onSubmit)}>
         <VStack align="start" spacing={6}>
           <Heading as="h2" fontSize="2xl">
-            {t("stepCode.part9.sidebar.report")}
+            {t("stepCode.part9.report.heading")}
           </Heading>
-          {!freshReport && <Text>{t("stepCode.part9.report.description")}</Text>}
-          {!isRegenerating && (
+          <Text>{t("stepCode.part9.report.description")}</Text>
+          {!isRegenerating && !awaitingReport && (
             <Text>
               {reportStatusKey === "ready"
                 ? t("stepCode.part9.report.ready", { address: checklist.fullAddress })
@@ -465,42 +454,14 @@ const ReportSection = observer(function ReportSection() {
           )}
           <VStack align="start" spacing={3}>
             <Flex gap={3} align="center" wrap="wrap">
-              {freshReport && (
-                <FileDownloadButton
-                  variant="secondary"
-                  size="md"
-                  modelType={EFileUploadAttachmentType.ReportDocument}
-                  document={freshReport as any}
-                  simpleLabel
-                />
-              )}
-              {canShare && (
-                <ConfirmationModal
-                  title={t("stepCode.shareReport.confirmTitle")}
-                  body={t("stepCode.shareReport.confirmBody")}
-                  onConfirm={async (closeModal) => {
-                    await handleShare()
-                    closeModal()
-                  }}
-                  renderTriggerButton={(props) => (
-                    <Button
-                      {...props}
-                      type="button"
-                      variant="secondary"
-                      size="md"
-                      leftIcon={<PaperPlaneRight size={16} />}
-                      isLoading={isSharing}
-                    >
-                      {t("stepCode.shareReport.action")}
-                    </Button>
-                  )}
-                  renderConfirmationButton={(props) => (
-                    <Button {...props} variant="primary" isLoading={isSharing}>
-                      {t("stepCode.shareReport.confirm")}
-                    </Button>
-                  )}
-                />
-              )}
+              <ReportDocumentActions
+                freshReport={freshReport}
+                awaitingReport={awaitingReport}
+                canEmail={!!currentStepCode?.jurisdiction}
+                onShare={async (reportId) => {
+                  await currentStepCode?.shareReportWithJurisdiction(reportId)
+                }}
+              />
               <Button
                 type="button"
                 variant="primary"
