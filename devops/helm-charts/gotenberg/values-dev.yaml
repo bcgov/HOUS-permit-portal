@@ -1,0 +1,6 @@
+# Resource requests and conversion settings inherit from values.yaml.
+replicaCount: 1
+
+resources:
+  limits:
+    memory: 2Gi

@@ -11,6 +11,7 @@ RSpec.describe SupportingDocument, type: :model do
       instance_double(
         "SubmissionVersion",
         version_number: 1,
+        report_snapshot: nil,
         created_at: Time.zone.local(2026, 4, 29)
       )
     end

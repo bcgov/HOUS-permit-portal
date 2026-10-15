@@ -12,6 +12,7 @@ There are helm charts available for each major service / application. Right now 
 - ha-postgres-crunchydb (HA Postgres, makes use of https://github.com/bcgov/crunchy-postgres)
 - ha-elasticsearch (HA Elasticsearch based off bitnami/elasticsearch)
 - ha-redis (HA Redis with Sentinels based off bitnami/redis)
+- gotenberg (internal HTML-to-PDF conversion for application and step-code reports)
 
 Run each helm chart by going into the respective folder and issuing helm commands, here are some examples:
 

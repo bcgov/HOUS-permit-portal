@@ -1,0 +1,119 @@
+global:
+  imageRegistry: image-registry.openshift-image-registry.svc:5000/bb18ab-tools
+  imagePullSecrets: []
+  storageClass: ""
+
+defaultResources:
+  limits:
+    memory: 200Mi
+  requests:
+    cpu: 10m
+    memory: 25Mi
+
+matomo:
+  image: matomo:5.12.0-fpm
+  runAsUser: null
+  site:
+    name: Matomo
+    url: <REDACTED>
+  ingress:
+    enabled: false
+  dashboard:
+    replicas: 1
+    hostname: <REDACTED>
+    tls: true
+    firstuser:
+      username: admin
+      email: BPH.Dev@gov.bc.ca
+      # No password here -- the chart auto-generates one into a Secret on
+      # first install (see values.yaml matomo.dashboard.firstuser). This is
+      # cosmetic/unused in practice here since postInstallCommand/
+      # preUpgradeCommand are both empty -- the real, actual login is whatever
+      # was set through the manual web installer. Retrieve the generated
+      # Secret's value with:
+      #   oc get secret matomo-admin -n bb18ab-tools -o jsonpath='{.data.password}' | base64 -d
+  tracker:
+    enabled: true
+    replicas: 1
+    hostname: <REDACTED>
+    tls: true
+    phpFpmCommand: /usr/local/sbin/php-fpm
+  cli:
+    enabled: false
+    replicas: 0
+  queuedTrackingMonitor:
+    enabled: false
+  queuedTrackingProcess:
+    enabled: false
+    replicas: 0
+  cronJobs:
+    coreArchive:
+      enabled: true
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          memory: 1Gi
+    scheduledTasks:
+      enabled: true
+      resources:
+        requests:
+          cpu: 50m
+          memory: 256Mi
+        limits:
+          memory: 1Gi
+
+nginx:
+  image: nginx:1.21.6
+  runAsUser: null
+
+fpmExporter:
+  image: php-fpm_exporter:2.2.0
+
+db:
+  enabled: true
+  image: mariadb:11.4
+  collation: "utf8mb4_uca1400_ai_ci"
+  storage:
+    size: 1Gi
+    storageClass: ""
+    mountPath: /var/lib/mysql
+  temp:
+    enabled: true
+    mountPath: /tmp
+    sizeLimit: 256Mi
+  auth:
+    createSecret: true
+    rootPassword: ""
+backup:
+  enabled: true
+  schedule: "0 2 * * *"
+  retentionCount: 3            # low count while testing
+  pruneEnabled: true
+  s3:
+    enabled: true
+    createSecret: false
+    secretName: "matomo-s3-backup"
+    endpoint: "<REDACTED>"
+    bucket: "<REDACTED>"
+    path: "/matomo-backups-dev"
+    maxObjects: 0
+    insecure: false
+  pvc:
+    enabled: false            
+
+openshift:
+  route:
+    enabled: true
+    tls:
+      enabled: true
+      termination: edge
+      insecureEdgeTerminationPolicy: Redirect
+
+networkPolicy:
+  enabled: true
+  allowOpenShiftIngress: true
+  ingressNamespaceSelector:
+    matchLabels:
+      network.openshift.io/policy-group: ingress

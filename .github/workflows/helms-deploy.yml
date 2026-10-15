@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       component:
-        description: 'Component to deploy (app, ha-redis, cruha-postgres-crunchydb, ha-elasticsearch, consigno-verifio-notarius-server, anycable-go, clamav)'
+        description: 'Component to deploy (app, ha-redis, cruha-postgres-crunchydb, ha-elasticsearch, consigno-verifio-notarius-server, anycable-go, clamav, gotenberg)'
         required: true
       environment:
         description: 'Environment to deploy (dev, test, prod)'
@@ -96,6 +96,7 @@ jobs:
           consigno-verifio-notarius-server)         DEFAULT_RELEASE_NAME="consigno-server-automation" ;;
           anycable-go)         DEFAULT_RELEASE_NAME="anycable-go" ;;
           clamav)           DEFAULT_RELEASE_NAME="clamav" ;;
+          gotenberg)        DEFAULT_RELEASE_NAME="gotenberg" ;;
           *)
             echo "Invalid component: $COMPONENT"
             exit 1
@@ -137,7 +138,12 @@ jobs:
         fi
 
         echo "Deploying $RELEASE_NAME to namespace $NAMESPACE"
+        DEPLOY_ARGS=()
+        if [ "$COMPONENT" = "gotenberg" ]; then
+          DEPLOY_ARGS+=(--wait --atomic --timeout 5m)
+        fi
         helm upgrade --install "$RELEASE_NAME" "$CHART_DIR" \
           --namespace "$NAMESPACE" \
           -f "$CHART_DIR/values.yaml" \
-          -f "$CHART_DIR/$VALUES_FILE"
+          -f "$CHART_DIR/$VALUES_FILE" \
+          "${DEPLOY_ARGS[@]}"

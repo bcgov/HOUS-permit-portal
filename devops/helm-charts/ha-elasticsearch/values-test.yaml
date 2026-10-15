@@ -1,4 +1,8 @@
 elasticsearch:
+  image:
+    registry: image-registry.openshift-image-registry.svc:5000
+    repository: bb18ab-test/elasticsearch
+    tag: 8.12.2-debian-12-r0
   master:
     replicaCount: 1
     heapSize: "512m"
