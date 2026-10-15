@@ -233,22 +233,23 @@ class StepCodeChecklistDumpService
   private
 
   def scope
-    @range.apply(loaded_checklists, "part_9_step_code_checklists.created_at")
+    @range.apply(
+      loaded_checklists,
+      "part_9_step_code_checklists.stage_completed_at"
+    )
   end
 
   def part_3_scope
     @range.apply(
-      Part3StepCode::Checklist.where(
-        step_code_id: StepCode.for_effective_sandbox(nil).select(:id)
-      ).includes(step_code: %i[jurisdiction permit_application]),
-      "part_3_step_code_checklists.created_at"
+      Part3StepCode::Checklist.completed_live.includes(
+        step_code: %i[jurisdiction permit_application]
+      ),
+      "part_3_step_code_checklists.stage_completed_at"
     )
   end
 
   def loaded_checklists
-    Part9StepCode::Checklist.where(
-      step_code_id: StepCode.for_effective_sandbox(nil).select(:id)
-    ).includes(
+    Part9StepCode::Checklist.completed_live.includes(
       :building_characteristics_summary,
       :data_entries,
       step_code: %i[jurisdiction permit_application]

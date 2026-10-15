@@ -41,6 +41,8 @@ const REPORT_GROUPS: { key: TReportGroup; ids: string[] }[] = [
     ids: [
       "step_code_part_9",
       "step_code_part_3",
+      "step_code_part_9_submissions",
+      "step_code_part_3_submissions",
       "step-code-data",
       "step-code-data-part-3",
       "step-code-summary",
