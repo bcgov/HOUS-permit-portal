@@ -48,6 +48,8 @@ RSpec.describe ExternalApi::PermitApplicationPolicy, type: :policy do
       record = create_application(status: :revisions_requested)
 
       expect(policy(record).update_status?).to be true
+      expect(policy(record).show_submission_version?).to be true
+      expect(policy(record).show?).to be false
     end
 
     it "denies update_status? on drafts" do

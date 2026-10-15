@@ -239,6 +239,16 @@ class PermitApplicationBlueprint < Blueprinter::Base
                 name: :account_holder
   end
 
+  view :external_api_created_draft do
+    identifier :id
+    fields :number, :status, :permit_project_id
+
+    association :template_version,
+                blueprint: TemplateVersionBlueprint,
+                view: :external_api,
+                name: :template_version
+  end
+
   view :external_api_summary do
     identifier :id
     fields :number, :status
@@ -267,6 +277,10 @@ class PermitApplicationBlueprint < Blueprinter::Base
 
     field :tags do |pa, _options|
       pa.template_tag_list
+    end
+
+    field :available_statuses do |pa, _options|
+      Constants::ExternalApi.available_statuses_for(pa)
     end
 
     association :template_version,

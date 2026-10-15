@@ -10,6 +10,19 @@ RSpec.describe Constants::ExternalApi do
     )
   end
 
+  it "lists partner statuses the machine can reach from the current status" do
+    newly_submitted =
+      instance_double(PermitApplication, status: "newly_submitted")
+    approved = instance_double(PermitApplication, status: "approved")
+
+    expect(described_class.available_statuses_for(newly_submitted)).to eq(
+      %w[in_review withdrawn revisions_requested]
+    )
+    expect(described_class.available_statuses_for(approved)).to eq(
+      %w[issued withdrawn]
+    )
+  end
+
   it "limits partner writes to statuses backed by lifecycle events" do
     expect(
       described_class::PARTNER_WRITABLE_APPLICATION_STATUSES

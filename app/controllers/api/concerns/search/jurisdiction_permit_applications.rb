@@ -15,18 +15,10 @@ module Api::Concerns::Search::JurisdictionPermitApplications
       match: :word_start,
       fields: jurisdiction_permit_application_search_fields,
       where: jurisdiction_permit_application_where_clause,
-      page: jurisdiction_permit_application_search_params[:page],
+      page: jurisdiction_permit_application_search_params[:page].presence || 1,
       per_page:
-        (
-          if jurisdiction_permit_application_search_params[:page]
-            (
-              jurisdiction_permit_application_search_params[:per_page] ||
-                Kaminari.config.default_per_page
-            )
-          else
-            nil
-          end
-        ),
+        jurisdiction_permit_application_search_params[:per_page].presence ||
+          Kaminari.config.default_per_page,
       includes: PermitApplication::SEARCH_INCLUDES,
       scope_results: ->(relation) { policy_scope(relation) }
     }

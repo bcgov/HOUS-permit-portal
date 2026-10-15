@@ -160,4 +160,84 @@ RSpec.describe "External API webhook delivery", type: :model do
       }
     )
   end
+
+  it "emits project_meeting_requested to the matching V2 key when a request is submitted" do
+    create(
+      :external_api_key,
+      jurisdiction: jurisdiction,
+      api_version: "v2",
+      webhook_url: nil
+    )
+    project = create(:permit_project, jurisdiction: jurisdiction)
+    meeting = create(:project_meeting, permit_project: project)
+    expect(project.permit_applications).to be_empty
+    PermitWebhookJob.clear
+
+    meeting.submit_request!
+
+    expect(PermitWebhookJob.jobs.length).to eq(1)
+    key_id, event_type, payload = PermitWebhookJob.jobs.first["args"]
+    expect(key_id).to eq(v2_live_key.id)
+    expect(event_type).to eq(
+      Constants::Webhooks::Events::ProjectMeeting::REQUESTED
+    )
+    expect(payload).to eq(
+      {
+        "project_meeting_id" => meeting.id,
+        "permit_project_id" => project.id,
+        "status" => "open",
+        "occurred_at" => meeting.submitted_at.to_i * 1000
+      }
+    )
+    expect(payload.to_json).not_to include("http")
+  end
+
+  it "emits a sandbox meeting request only to the matching sandbox key" do
+    project =
+      create(
+        :permit_project,
+        jurisdiction: jurisdiction,
+        sandbox: v2_sandbox_key.sandbox
+      )
+    meeting = create(:project_meeting, permit_project: project)
+    PermitWebhookJob.clear
+
+    meeting.submit_request!
+
+    expect(PermitWebhookJob.jobs.map { |job| job["args"][0] }).to eq(
+      [v2_sandbox_key.id]
+    )
+  end
+
+  it "does not emit project_meeting_requested for draft saves or later meeting transitions" do
+    project = create(:permit_project, jurisdiction: jurisdiction)
+    meeting = create(:project_meeting, permit_project: project)
+    PermitWebhookJob.clear
+
+    meeting.update!(project_description: "Still a draft")
+    expect(PermitWebhookJob.jobs).to be_empty
+
+    meeting.submit_request!
+    PermitWebhookJob.clear
+
+    meeting.update!(contact_method: :phone, confirmed_date: 1.week.from_now)
+    meeting.schedule!
+    expect(PermitWebhookJob.jobs).to be_empty
+
+    meeting.update!(confirmed_date: 2.weeks.from_now)
+    expect(PermitWebhookJob.jobs).to be_empty
+
+    meeting.complete!
+    expect(PermitWebhookJob.jobs).to be_empty
+
+    open_meeting =
+      create(
+        :project_meeting,
+        :open,
+        permit_project: create(:permit_project, jurisdiction: jurisdiction)
+      )
+    PermitWebhookJob.clear
+    open_meeting.withdraw!
+    expect(PermitWebhookJob.jobs).to be_empty
+  end
 end

@@ -57,6 +57,19 @@ RSpec.describe ExternalApi::ApplyRevisionRequests do
     described_class.new(permit_application, items).call
   end
 
+  def cache_reference_file(filename)
+    file = File.open("spec/support/signed_converted.pdf", binmode: true)
+    uploaded =
+      FileUploader.upload(
+        file,
+        :cache,
+        location: "#{SecureRandom.uuid}/#{filename}"
+      )
+    uploaded.id
+  ensure
+    file&.close
+  end
+
   it "stores field revision requests" do
     apply([item])
 
@@ -103,6 +116,62 @@ RSpec.describe ExternalApi::ApplyRevisionRequests do
     expect { apply([item, item]) }.to raise_error(
       described_class::Error,
       /duplicate requirement_block_code and requirement_code/
+    )
+  end
+
+  it "stores a document request from a cached reference file" do
+    allow(PromoteJob).to receive(:perform_async)
+    cache_id = cache_reference_file("site-plan.pdf")
+
+    apply(
+      [
+        {
+          "name" => "Site plan",
+          "reason_code" => revision_reason.reason_code,
+          "comment" => "a" * 400,
+          "reference_document_ids" => [cache_id]
+        }
+      ]
+    )
+
+    request =
+      permit_application.latest_submission_version.revision_requests.last
+    expect(request).to be_a(SupportingDocumentRevisionRequest)
+    expect(request.title).to eq("Site plan")
+    expect(request.comment.length).to eq(400)
+    expect(request.revision_reference_documents.count).to eq(1)
+    expect(request.revision_reference_documents.first.file_name).to eq(
+      "site-plan.pdf"
+    )
+  end
+
+  it "rejects a document request whose reference file is not in the cache" do
+    expect {
+      apply(
+        [
+          {
+            "name" => "Site plan",
+            "reason_code" => revision_reason.reason_code,
+            "comment" => "Please provide a current site plan.",
+            "reference_document_ids" => [
+              "00000000-0000-4000-8000-000000000000/missing.pdf"
+            ]
+          }
+        ]
+      )
+    }.to raise_error(
+      described_class::Error,
+      "revision_requests[0] is missing reference_document_ids"
+    )
+    expect(
+      permit_application.latest_submission_version.revision_requests
+    ).to be_empty
+  end
+
+  it "still rejects a field comment over 350 characters" do
+    expect { apply([item.merge("comment" => "a" * 351)]) }.to raise_error(
+      described_class::Error,
+      /comment exceeds 350 characters/
     )
   end
 

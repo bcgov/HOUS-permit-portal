@@ -32,7 +32,7 @@ class ExternalApi::PermitApplicationsController < ExternalApi::ApplicationContro
            )
       return(
         render_status_error(
-          "Invalid status '#{target_status}'. Allowed status codes: #{partner_writable_statuses}."
+          "Cannot transition status from '#{@permit_application.status}' to '#{target_status}'. Available statuses: #{available_status_list}."
         )
       )
     end
@@ -58,30 +58,26 @@ class ExternalApi::PermitApplicationsController < ExternalApi::ApplicationContro
         return render_permit_application
       end
 
-      @permit_application.inbox_sort_order = nil
-      Audited
-        .audit_class
-        .as_user(Constants::ExternalApi::PARTNER_SYSTEM_ACTOR) do
-          if target_status == "revisions_requested"
-            ExternalApi::ApplyRevisionRequests.new(
-              @permit_application,
-              params[:revision_requests],
-              applicant_note: params[:applicant_note]
-            ).call
-            @permit_application.finalize_revision_requests!
-          else
-            event = PermitApplicationStatus::STATUS_EVENT_MAP[target_status]
-            unless event && @permit_application.aasm.may_fire_event?(event)
-              return(
-                render_status_error(
-                  "Cannot transition status from '#{@permit_application.status}' to '#{target_status}'. Allowed partner status codes: #{partner_writable_statuses}."
-                )
-              )
-            end
+      unless available_statuses.include?(target_status)
+        return(
+          render_status_error(
+            "Cannot transition status from '#{@permit_application.status}' to '#{target_status}'. Available statuses: #{available_status_list}."
+          )
+        )
+      end
 
-            @permit_application.public_send(:"#{event}!")
-          end
-        end
+      @permit_application.inbox_sort_order = nil
+      if target_status == "revisions_requested"
+        ExternalApi::ApplyRevisionRequests.new(
+          @permit_application,
+          params[:revision_requests],
+          applicant_note: params[:applicant_note]
+        ).call
+        @permit_application.finalize_revision_requests!
+      else
+        event = PermitApplicationStatus::STATUS_EVENT_MAP[target_status]
+        @permit_application.public_send(:"#{event}!")
+      end
     end
 
     render_permit_application
@@ -89,7 +85,7 @@ class ExternalApi::PermitApplicationsController < ExternalApi::ApplicationContro
     render_status_error(e.message)
   rescue AASM::InvalidTransition, ActiveRecord::RecordInvalid
     render_status_error(
-      "Cannot transition status to '#{target_status}'. Allowed partner status codes: #{partner_writable_statuses}."
+      "Cannot transition status from '#{@permit_application.status}' to '#{target_status}'. Available statuses: #{available_status_list}."
     )
   end
 
@@ -144,8 +140,12 @@ class ExternalApi::PermitApplicationsController < ExternalApi::ApplicationContro
                  }
   end
 
-  def partner_writable_statuses
-    Constants::ExternalApi::PARTNER_WRITABLE_APPLICATION_STATUSES.join(", ")
+  def available_statuses
+    Constants::ExternalApi.available_statuses_for(@permit_application)
+  end
+
+  def available_status_list
+    available_statuses.join(", ")
   end
 
   def set_permit_application

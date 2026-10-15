@@ -490,8 +490,17 @@ Rails.application.routes.draw do
       end
     end
     namespace :v2 do
-      resources :permit_projects, only: %i[show]
+      resources :project_meetings, only: %i[show update]
+      resources :permit_projects, only: %i[show] do
+        post "search", on: :collection, to: "permit_projects#index"
+        patch "state", on: :member, to: "permit_projects#update_state"
+        post "permit_applications",
+             on: :member,
+             to: "permit_projects#create_permit_applications"
+      end
+      resources :files, only: %i[create]
       resources :revision_reasons, only: %i[index]
+      resources :requirement_templates, only: %i[index]
       resources :permit_applications, only: %i[show] do
         post "search", on: :collection, to: "permit_applications#index"
         patch "status", on: :member, to: "permit_applications#update_status"
