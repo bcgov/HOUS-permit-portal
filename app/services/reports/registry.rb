@@ -13,6 +13,7 @@ module Reports
       "accounts" => "Reports::Accounts",
       "submitter_adoption" => "Reports::SubmitterAdoption",
       "draft_completion" => "Reports::DraftCompletion",
+      "submitter_journey" => "Reports::SubmitterJourney",
       "review_process" => "Reports::ReviewProcess",
       "platform_health" => "Reports::PlatformHealth",
       "storage_footprint" => "Reports::StorageFootprint"

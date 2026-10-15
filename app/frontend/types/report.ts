@@ -22,7 +22,7 @@ export interface IReportChartSeries {
 
 export interface IReportChart {
   key: string
-  type: "bar" | "line" | "stacked_bar"
+  type: "bar" | "line" | "stacked_bar" | "funnel"
   xKey: string
   series: IReportChartSeries[]
   data: Record<string, string | number>[]

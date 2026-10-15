@@ -29,6 +29,7 @@ const REPORT_GROUPS: { key: TReportGroup; ids: string[] }[] = [
     ids: [
       "jurisdiction_volume",
       "draft_completion",
+      "submitter_journey",
       "review_process",
       "template_usage",
       "template_stall",

@@ -456,6 +456,43 @@ en:
         completion_definition: "Completion rate is first submissions in the selected range among %{records} created in the selected range."
         range_boundary: "Drafts created before the selected range and first submitted inside it are counted in the median and in the created-before headline. They are not in the completion-rate denominator, which is %{records} created in the range."
         abandonment_definition: "Abandonment is a draft created in the selected range that has never been submitted and has not been updated in 90 days or more, divided by %{records} created in the range."
+    submitter_journey:
+      title: "Submitter journey"
+      description: "How many projects created in the selected range reached each step"
+      series:
+        projects: "Projects"
+      steps:
+        created: "Project created"
+        started: "Application started"
+        submitted: "Application submitted"
+        issued: "Permit issued"
+      columns:
+        step: "Step"
+        count: "Projects"
+        share: "Share of projects created"
+        dropped: "Did not reach this step"
+      drops:
+        did_not_start: "%{dropped} did not start an application · %{share} continued"
+        did_not_submit: "%{dropped} did not submit · %{share} continued"
+        not_issued: "%{dropped} not issued · %{share} continued"
+      figures:
+        created:
+          label: "Projects created"
+          help: "Live projects created in %{range}."
+        started_share:
+          label: "Started an application"
+          help: "Share of those projects with at least one application. An application created after %{range} still counts."
+        submitted_share:
+          label: "Application submitted"
+          help: "Share of those projects where an application has been submitted. A submission after %{range} still counts."
+        issued_share:
+          label: "Permit issued"
+          help: "Share of those projects where an application has been issued. Review staff may approve an application and never mark it issued."
+      notes:
+        projects_not_applications: "Each step counts projects, not applications. Segment width is proportional to the number of projects."
+        any_application: "A project counts once any of its applications reaches the step. Submitting one application counts the project as submitted. Issuing one application counts it as issued."
+        milestones_after_range: "Starting, submitting, or issuing an application still counts when it happens after the selected range. The cohort is projects created in the range."
+        issued_is_not_abandonment: "Permit issued is the application issue event. Review staff may stop at approved, so the last drop is not submitter abandonment. It is not the optional project state for a permit being issued."
     review_process:
       title: "Review process"
       description: "Queue snapshot, revision and withdrawal rates, and review timings"

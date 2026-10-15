@@ -12,8 +12,9 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
+import { IReportChart } from "../../../../types/report"
 import { toCamelCase } from "../../../../utils/utility-functions"
-import { IReportChart } from "../../../types/report"
+import { ReportFunnel } from "./report-funnel"
 
 const SERIES_COLORS = [
   "theme.blue",
@@ -30,6 +31,7 @@ interface IProps {
 
 export function ReportChart({ chart }: IProps) {
   const colors = useToken("colors", SERIES_COLORS)
+  if (chart.type === "funnel") return <ReportFunnel chart={chart} />
   const ChartComponent = chart.type === "line" ? LineChart : BarChart
   const stacked = chart.type === "stacked_bar"
   const xKey = toCamelCase(chart.xKey)
