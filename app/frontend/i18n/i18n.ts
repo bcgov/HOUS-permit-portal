@@ -2074,6 +2074,10 @@ Thank you,
             confirmation:
               "By submitting this application, you confirm that the information you provided was completed to the best of your knowledge and ability.",
             submitApplication: "Submit application",
+            digitalSealChecksPending:
+              "Digital seal checks are still running. You can keep editing and saving while you wait.",
+            digitalSealChecksFailed:
+              "We couldn’t verify the digital seal on one or more files. You can still submit your application. The application PDF will indicate that verification could not be completed.",
             projectMeetingAdvisory: {
               title: "This type of permit application may need a project meeting",
               prefix: "If you haven't completed a project meeting,",
@@ -2576,15 +2580,15 @@ Thank you,
               energyStepCodeMethod: {
                 tool: "Utilizing the digital Step Code tool",
                 file: "By file upload",
-                label: "Which method do you want to do use for the Energy Step Code",
+                label: "Which method do you want to use for the Energy Step Code?",
               },
               energyStepCodeToolPart9: {
                 label:
-                  "Please use this tool to do your fill in your Step Code details and it will populate onto the application.",
+                  "Please use this tool to fill in your Step Code details, which will then populate the application.",
               },
               energyStepCodeToolPart3: {
                 label:
-                  "Please use this tool to do your fill in your Step Code details and it will populate onto the application.",
+                  "Please use this tool to fill in your Step Code details, which will then populate the application.",
               },
               energyStepCodeReportFile: {
                 label: "BC Energy Step Code Compliance Report",

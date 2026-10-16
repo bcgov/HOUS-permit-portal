@@ -742,6 +742,9 @@ en:
       submit_state_error:
         title: Error
         message: "This application cannot be submitted or re-submitted"
+      digital_seal_checks_pending:
+        title: "Digital seal checks are still running"
+        message: "Your draft has been saved. Wait for the digital seal checks to finish before submitting."
       outdated_error:
         title: Error
         message: "Please refresh the page. A new template version is available."

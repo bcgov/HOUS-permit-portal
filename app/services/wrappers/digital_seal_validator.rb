@@ -13,6 +13,8 @@ class Wrappers::DigitalSealValidator < Wrappers::Base
         f.request :multipart
         f.request :url_encoded
         f.response :json, content_type: /\bjson$/
+        f.options.open_timeout = 5
+        f.options.timeout = 60
         f.adapter Faraday.default_adapter
       end
   end

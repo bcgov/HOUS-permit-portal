@@ -1,9 +1,11 @@
 import { Utils } from "@formio/js"
 import React from "react"
+import { DigitalSealResultsContext } from "../components/report-attachments"
 import { ReportContact } from "../components/report-contact"
 import { ReportField } from "../components/report-field"
 import { ReportSection } from "../components/report-section"
 import { ReportTable } from "../components/report-table"
+import type { DigitalSealResults } from "../permit-application/report-data"
 import { fieldRenderers, FieldValue, RichText } from "./field-renderers"
 import { fieldValue, FormComponent, NOT_PROVIDED } from "./field-values"
 
@@ -74,7 +76,11 @@ function fieldLayout(nodes: React.ReactNode[]): React.ReactNode[] {
   }
   return result
 }
-export function FormReport({ schema, submissionData }: Readonly<{ schema: FormComponent; submissionData: any }>) {
+export function FormReport({
+  schema,
+  submissionData,
+  digitalSealResults,
+}: Readonly<{ schema: FormComponent; submissionData: any; digitalSealResults?: DigitalSealResults }>) {
   // FormIO conditional utilities can decorate schemas; never give them caller-owned objects.
   const form = structuredClone(schema)
   const data = structuredClone(submissionData?.data || {})
@@ -87,8 +93,6 @@ export function FormReport({ schema, submissionData }: Readonly<{ schema: FormCo
   ): React.ReactNode[] =>
     components.map((original, i) => {
       const c = structuredClone(original)
-      // Step Code widgets contain tool controls and attachment prompts, not saved answers.
-      if (["energy_step_code", "energy_step_code_part_3"].includes(c.requirementInputType)) return null
       // Only visibility property actions apply to a report. Value actions never run.
       for (const logic of c.logic || []) {
         if (
@@ -122,6 +126,13 @@ export function FormReport({ schema, submissionData }: Readonly<{ schema: FormCo
         return null
       const context = structuredClone(row)
       if (!Utils.checkCondition(c as any, context, structuredClone(data), form as any, undefined)) return null
+      // Replace visible tool controls with a reference to the separate report.
+      if (["energy_step_code", "energy_step_code_part_3"].includes(c.requirementInputType))
+        return (
+          <p key={key} className="report-note report-step-code-note">
+            For Step Code details and status, please refer to the Step Code PDF report.
+          </p>
+        )
       const children = childComponents(c)
       const value = row?.[c.key]
       const title = layoutTypes.has(c.type) ? undefined : c.title || c.label
@@ -224,5 +235,9 @@ export function FormReport({ schema, submissionData }: Readonly<{ schema: FormCo
         )
       return null
     })
-  return <div className="report-form">{fieldLayout(render(form.components || [], data, "data"))}</div>
+  return (
+    <DigitalSealResultsContext.Provider value={digitalSealResults || {}}>
+      <div className="report-form">{fieldLayout(render(form.components || [], data, "data"))}</div>
+    </DigitalSealResultsContext.Provider>
+  )
 }

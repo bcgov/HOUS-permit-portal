@@ -46,7 +46,12 @@ module PrintReports
           identity: identity,
           form_json:
             presentation_schema(version.form_json.deep_dup, customizations),
-          submission_data: version.submission_data.deep_dup
+          submission_data: version.submission_data.deep_dup,
+          digital_seal_results:
+            DigitalSealChecks.new(
+              application,
+              submission_data: version.submission_data
+            ).snapshot
         }
       }
       filenames = {

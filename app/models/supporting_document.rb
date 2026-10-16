@@ -36,7 +36,7 @@ class SupportingDocument < FileUploadAttachment
     if compliance_data["result"] &&
          signer =
            compliance_data["result"]
-             .sort_by { |signer| signer.dig("signatureTimestamp", "date") }
+             .sort_by { |signer| signer.dig("signatureTimestamp", "date").to_s }
              &.last
       parse_signature(signer)
     else
@@ -51,9 +51,9 @@ class SupportingDocument < FileUploadAttachment
           .map { |signer| parse_signature(signer) }
           .group_by { |signer| signer[:subjectName] }
           .map do |subjectName, signaturesArray|
-            signaturesArray.sort_by { |signer| signer[:date] }&.last
+            signaturesArray.sort_by { |signer| signer[:date].to_s }&.last
           end
-          .sort_by { |signer| signer[:date] }
+          .sort_by { |signer| signer[:date].to_s }
           .reverse
 
       {
@@ -97,12 +97,18 @@ class SupportingDocument < FileUploadAttachment
           &.filter { |i| i.starts_with?("OU=") }
           &.map { |i| i[3..-1] }
           &.join(","),
-      date:
-        Time
-          .parse(signer.dig("signatureTimestamp", "date"))
-          .in_time_zone(Rails.application.config.time_zone)
-          .strftime("%Y-%m-%d %H:%M:%S %Z")
+      date: formatted_signature_date(signer.dig("signatureTimestamp", "date"))
     }
+  end
+
+  def formatted_signature_date(value)
+    return if value.blank?
+    Time
+      .parse(value)
+      .in_time_zone(Rails.application.config.time_zone)
+      .strftime("%Y-%m-%d %H:%M:%S %Z")
+  rescue ArgumentError, TypeError
+    nil
   end
 
   def standardized_filename
