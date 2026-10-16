@@ -35,7 +35,8 @@ class PermitApplicationBlueprint < Blueprinter::Base
     association :submitter, blueprint: UserBlueprint, view: :minimal
 
     field :created_by do |pa, _options|
-      creator = pa.created_by
+      # ponytail: applications created before created_by was stored only have a submitter
+      creator = pa.created_by || pa.submitter
       next unless creator
 
       if creator.is_a?(User)
