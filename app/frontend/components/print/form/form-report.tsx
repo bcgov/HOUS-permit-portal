@@ -93,8 +93,6 @@ export function FormReport({
   ): React.ReactNode[] =>
     components.map((original, i) => {
       const c = structuredClone(original)
-      // Step Code widgets contain tool controls and attachment prompts, not saved answers.
-      if (["energy_step_code", "energy_step_code_part_3"].includes(c.requirementInputType)) return null
       // Only visibility property actions apply to a report. Value actions never run.
       for (const logic of c.logic || []) {
         if (
@@ -128,6 +126,13 @@ export function FormReport({
         return null
       const context = structuredClone(row)
       if (!Utils.checkCondition(c as any, context, structuredClone(data), form as any, undefined)) return null
+      // Replace visible tool controls with a reference to the separate report.
+      if (["energy_step_code", "energy_step_code_part_3"].includes(c.requirementInputType))
+        return (
+          <p key={key} className="report-note report-step-code-note">
+            For Step Code details and status, please refer to the Step Code PDF report.
+          </p>
+        )
       const children = childComponents(c)
       const value = row?.[c.key]
       const title = layoutTypes.has(c.type) ? undefined : c.title || c.label

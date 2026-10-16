@@ -175,6 +175,9 @@ p + p {
   color: var(--report-muted);
   font-size: 10pt;
 }
+.report-step-code-note {
+  margin-top: 6pt;
+}
 .report-unit {
   line-height: 1.2;
 }

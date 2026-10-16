@@ -2580,15 +2580,15 @@ Thank you,
               energyStepCodeMethod: {
                 tool: "Utilizing the digital Step Code tool",
                 file: "By file upload",
-                label: "Which method do you want to do use for the Energy Step Code",
+                label: "Which method do you want to use for the Energy Step Code?",
               },
               energyStepCodeToolPart9: {
                 label:
-                  "Please use this tool to do your fill in your Step Code details and it will populate onto the application.",
+                  "Please use this tool to fill in your Step Code details, which will then populate the application.",
               },
               energyStepCodeToolPart3: {
                 label:
-                  "Please use this tool to do your fill in your Step Code details and it will populate onto the application.",
+                  "Please use this tool to fill in your Step Code details, which will then populate the application.",
               },
               energyStepCodeReportFile: {
                 label: "BC Energy Step Code Compliance Report",

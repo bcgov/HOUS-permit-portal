@@ -210,65 +210,144 @@ RSpec.describe PrintReports::Renderer do
       "energy_step_code" => "Part9StepCode",
       "energy_step_code_part_3" => "Part3StepCode"
     }.each do |input_type, step_code_type|
-      it "omits #{step_code_type} tool prompts while preserving application content and saved answers" do
-        widget =
-          RequirementFormJsonService::STEP_CODE_ACTIONS_CONTAINER.call(
-            "openStepCode",
-            step_code_type
+      %w[tool file hidden logic_hidden].each do |scenario|
+        it "renders the #{step_code_type} PDF reference for #{scenario} while preserving saved labels and answers" do
+          method = scenario == "file" ? "file" : "tool"
+          method_label =
+            (
+              if scenario == "file"
+                "How will you provide your Step Code report?"
+              else
+                "Which method do you want to do use for the Energy Step Code"
+              end
+            )
+          widget =
+            RequirementFormJsonService::STEP_CODE_ACTIONS_CONTAINER.call(
+              "openStepCode",
+              step_code_type
+            )
+          report[:form_json][:components] = [
+            {
+              type: "content",
+              html: "<p>Keep these application instructions.</p>"
+            },
+            {
+              type: "radio",
+              key: "method",
+              label: method_label,
+              values: [
+                {
+                  value: "tool",
+                  label: "Utilizing the digital Step Code tool"
+                },
+                { value: "file", label: "By file upload" }
+              ]
+            },
+            widget.merge(
+              key: "step_code_tool",
+              label: "Interactive Step Code controls",
+              requirementInputType: input_type,
+              conditional: {
+                show: true,
+                when: "method",
+                eq: "tool"
+              },
+              hidden: scenario == "hidden",
+              logic:
+                (
+                  if scenario == "logic_hidden"
+                    [
+                      {
+                        trigger: {
+                          type: "javascript",
+                          javascript: "result = true"
+                        },
+                        actions: [
+                          {
+                            type: "property",
+                            property: {
+                              type: "boolean",
+                              value: "hidden"
+                            },
+                            state: true
+                          }
+                        ]
+                      }
+                    ]
+                  else
+                    []
+                  end
+                )
+            ),
+            {
+              type: "simplefile",
+              key: "drawing",
+              label: "Design drawing package",
+              input: true
+            },
+            {
+              type: "simplefile",
+              key: "report_file",
+              label: "BC Energy Step Code Compliance Report",
+              input: true,
+              conditional: {
+                show: true,
+                when: "method",
+                eq: "file"
+              }
+            },
+            { type: "textfield", key: "answer", label: "Original question" }
+          ]
+          report[:submission_data][:data].merge!(
+            method: method,
+            drawing: [{ originalName: "synthetic-design.pdf" }],
+            report_file: [{ originalName: "synthetic-step-code.pdf" }]
           )
-        report[:form_json][:components] = [
-          {
-            type: "content",
-            html: "<p>Keep these application instructions.</p>"
-          },
-          {
-            type: "radio",
-            key: "method",
-            label: "Step Code method",
-            values: [
-              { value: "tool", label: "Utilizing the digital Step Code tool" }
-            ]
-          },
-          widget.merge(
-            key: "step_code_tool",
-            label: "Interactive Step Code controls",
-            requirementInputType: input_type
-          ),
-          {
-            type: "simplefile",
-            key: "drawing",
-            label: "Design drawing package",
-            input: true
-          },
-          { type: "textfield", key: "answer", label: "Original question" }
-        ]
-        report[:submission_data][:data].merge!(
-          method: "tool",
-          drawing: [{ originalName: "synthetic-design.pdf" }]
-        )
-        original = Marshal.dump(report)
-        described_class
-          .new
-          .render(report) do |path|
-            text = PDF::Reader.new(path).pages.map(&:text).join(" ")
-            expect(text).to include(
-              "Keep these application instructions.",
-              "Utilizing the digital Step Code tool",
-              "Design drawing package",
-              "synthetic-design.pdf",
-              "Original question",
-              "Saved answer"
-            )
-            expect(text).not_to include(
-              I18n.t(
-                "formio.requirement_template.started_report_outside"
-              ).strip,
-              I18n.t("formio.requirement_template.energy_step_code"),
-              I18n.t("formio.requirement_template.select_energy_step_code"),
-              "Interactive Step Code controls"
-            )
-          end
-        expect(Marshal.dump(report)).to eq(original)
+          original = Marshal.dump(report)
+          described_class
+            .new
+            .render(report) do |path|
+              text =
+                PDF::Reader
+                  .new(path)
+                  .pages
+                  .map(&:text)
+                  .join(" ")
+                  .gsub(/\s+/, " ")
+              expect(text).to include(
+                "Keep these application instructions.",
+                method_label,
+                (
+                  if method == "tool"
+                    "Utilizing the digital Step Code tool"
+                  else
+                    "By file upload"
+                  end
+                ),
+                "Design drawing package",
+                "synthetic-design.pdf",
+                "Original question",
+                "Saved answer"
+              )
+              note =
+                "For Step Code details and status, please refer to the Step Code PDF report."
+              expect(text.scan(note).length).to eq(scenario == "tool" ? 1 : 0)
+              if method == "file"
+                expect(text).to include("synthetic-step-code.pdf")
+              else
+                expect(text).not_to include("synthetic-step-code.pdf")
+              end
+              expect(text).not_to include(
+                I18n.t(
+                  "formio.requirement_template.started_report_outside"
+                ).strip,
+                I18n.t("formio.requirement_template.energy_step_code"),
+                I18n.t("formio.requirement_template.select_energy_step_code"),
+                "Interactive Step Code controls"
+              )
+            end
+          expect(Marshal.dump(report)).to eq(original)
+        end
       end
     end
 
