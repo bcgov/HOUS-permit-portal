@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "d76764f2-5509-4e1f-bcb6-8bf8821ebf57",
     "name": "Integration API V2",
-    "description": "Option B bidirectional contract. A V2 API key selected at key creation is required. The partner owns durable permit-package storage; BPH provides one-hour signed URLs and supports re-GET for refreshed URLs. Ingest on `permit_application_package_ready`, not on `permit_application_status_changed`. Meeting requests remain in BPH and are outside External API V2. Partners write canonical application statuses and are authoritative; project-state write-back and manual-status conflict UX are deferred.",
+    "description": "Option B bidirectional contract. A V2 API key selected at key creation is required. The partner owns durable permit-package storage; BPH provides one-hour signed URLs and supports re-GET for refreshed URLs. Ingest on `permit_application_package_ready`, not on `permit_application_status_changed`. Submitting a meeting request emits `project_meeting_requested`. Fetch it at `GET /external_api/v2/project_meetings/{id}` and accept an open request with `PATCH /external_api/v2/project_meetings/{id}`. Partners write canonical application statuses and project state and are authoritative; manual-status conflict UX is deferred.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -69,7 +69,7 @@
                 "{{submission_version_id}}"
               ]
             },
-            "description": "Frozen submission snapshot for one version, including form data, generated PDFs, zipfile (File object, null if that version never received a zip), and signed file URLs. Ingest after permit_application_package_ready. URLs expire in one hour; re-GET to refresh."
+            "description": "Frozen submission snapshot for one version, including form data, generated PDFs, document_requests (with reference file URLs), fulfillment_documents from the resubmission, zipfile (File object, null if that version never received a zip), and signed file URLs. Ingest after permit_application_package_ready. URLs expire in one hour; re-GET to refresh."
           },
           "response": []
         },
@@ -104,7 +104,31 @@
                 "status"
               ]
             },
-            "description": "Uses canonical BPH status codes. Lifecycle transitions are enforced and repeated writes of the current status are idempotent. For `revisions_requested`, send a non-empty `revision_requests` array of field-level items (`requirement_block_code`, `requirement_code`, `reason_code`, `comment`) copied from the submission version payload. `revision_requests` must be omitted for every other status. Invalid, reserved, or unavailable transitions return 422 with the allowed write set."
+            "description": "Uses canonical BPH status codes. Lifecycle transitions are enforced and repeated writes of the current status are idempotent. For `revisions_requested`, send a non-empty `revision_requests` array. Field items use `requirement_block_code`, `requirement_code`, `reason_code`, and `comment`. Document items use `name`, `reason_code`, `comment`, and `reference_document_ids` from Upload reference file, and omit requirement codes. One array may mix both. `revision_requests` must be omitted for every other status. Invalid, reserved, or unavailable transitions return 422 naming the statuses available from the current status."
+          },
+          "response": []
+        },
+        {
+          "name": "Upload reference file",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/external_api/v2/files",
+              "host": ["{{base_url}}"],
+              "path": ["external_api", "v2", "files"]
+            },
+            "description": "Stores one reference file and returns `{ id, name, type, size }`. Send `id` in `reference_document_ids` on Request document revision. No download URL. A missing file or blocked extension returns 422. The upload does not change an application."
           },
           "response": []
         },
@@ -139,7 +163,42 @@
                 "status"
               ]
             },
-            "description": "One-call revision request: creates field-level revision requests on the latest submission version and moves the application to `revisions_requested`, notifying the submitter. Target fields with `requirement_block_code` + `requirement_code` from GET submission version. Reason codes come from GET /revision_reasons."
+            "description": "One-call field revision: creates field-level revision requests on the latest submission version and moves the application to `revisions_requested`, notifying the submitter. Target fields with `requirement_block_code` + `requirement_code` from GET submission version. Reason codes come from GET /revision_reasons."
+          },
+          "response": []
+        },
+        {
+          "name": "Request document revision",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"revisions_requested\",\n  \"revision_requests\": [\n    {\n      \"name\": \"Site plan\",\n      \"reason_code\": \"inaccurate_documentation\",\n      \"comment\": \"Please provide a current site plan.\",\n      \"reference_document_ids\": [\"{{reference_document_id}}\"]\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/external_api/v2/permit_applications/{{permit_application_id}}/status",
+              "host": ["{{base_url}}"],
+              "path": [
+                "external_api",
+                "v2",
+                "permit_applications",
+                "{{permit_application_id}}",
+                "status"
+              ]
+            },
+            "description": "Document revision on the same status write. Upload the reference PDF first and put its id in `reference_document_ids`. Omit `requirement_block_code` and `requirement_code`. A missing name, reason, comment, or cache id returns 422 and does not change status. GET the submission version for a one-hour download URL; a later GET returns a new URL."
           },
           "response": []
         },
@@ -167,8 +226,37 @@
     },
     {
       "name": "Permit projects",
-      "description": "Project GET follows `permit_project_id` from application reads and webhooks. Child summaries omit drafts and include `revisions_requested`. Meetings, collaborators, notes, and documents stay in BPH.",
+      "description": "Project GET follows `permit_project_id` from application reads and webhooks. Child summaries omit drafts and include `revisions_requested`. PATCH state accepts only `available_states` from the current state. Collaborators, notes, and project documents stay in BPH. Fetch and accept meeting requests from the Project meetings folder.",
       "item": [
+        {
+          "name": "Search Permit Projects",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/external_api/v2/permit_projects/search",
+              "host": ["{{base_url}}"],
+              "path": ["external_api", "v2", "permit_projects", "search"]
+            },
+            "description": "Non-draft projects in the key's jurisdiction and sandbox, the same set as the jurisdiction inbox with no filters. Optional constraints.state narrows to one non-draft state. draft is ignored."
+          },
+          "response": []
+        },
         {
           "name": "Get Permit Project by ID",
           "request": {
@@ -179,7 +267,97 @@
               "host": ["{{base_url}}"],
               "path": ["external_api", "v2", "permit_projects", "{{permit_project_id}}"]
             },
-            "description": "Project identity, state, address, and sibling application summaries (id, number, status, status_label, tags)."
+            "description": "Project identity, state, available_states, address, and sibling application summaries (id, number, status, status_label, tags)."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Permit Project State",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"state\": \"in_progress\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/external_api/v2/permit_projects/{{permit_project_id}}/state",
+              "host": ["{{base_url}}"],
+              "path": [
+                "external_api",
+                "v2",
+                "permit_projects",
+                "{{permit_project_id}}",
+                "state"
+              ]
+            },
+            "description": "Sets project state to a code in `available_states` for the current state. `draft` is not a partner write. Writing the current state returns 200 and does not emit another `permit_project_state_changed`. Illegal or unknown codes return 422 and name the available states."
+          },
+          "response": []
+        },
+        {
+          "name": "Add Draft Permit Applications",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"permit_applications\": [\n    { \"requirement_template_id\": \"{{requirement_template_id}}\" }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/external_api/v2/permit_projects/{{permit_project_id}}/permit_applications",
+              "host": ["{{base_url}}"],
+              "path": [
+                "external_api",
+                "v2",
+                "permit_projects",
+                "{{permit_project_id}}",
+                "permit_applications"
+              ]
+            },
+            "description": "Adds draft permits to a project the key can already read. Each requirement_template_id resolves to that template's published version. The project owner is the submitter. Sandbox, jurisdiction, and template_version_id on the body are ignored. An empty list, or any unknown, unpublished, or discarded id, returns 422 and creates nothing. The new drafts stay off project GET until one is submitted, and project state does not change."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Requirement templates",
+      "description": "Kept templates with a published version in this key's sandbox. Use id as requirement_template_id when adding a draft.",
+      "item": [
+        {
+          "name": "List Requirement Templates",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/external_api/v2/requirement_templates",
+              "host": ["{{base_url}}"],
+              "path": ["external_api", "v2", "requirement_templates"]
+            },
+            "description": "Returns id, nickname, description, sort_order, template_category, and published_template_version. Draft-only and discarded templates are omitted. A scheduled sandbox key gets an empty list, matching draft create."
           },
           "response": []
         }
@@ -206,6 +384,55 @@
       ]
     },
     {
+      "name": "Project meetings",
+      "description": "GET a submitted meeting request, including one-hour signed document URLs. PATCH accepts an open request by scheduling it. Drafts are not readable.",
+      "item": [
+        {
+          "name": "Get Project Meeting by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/external_api/v2/project_meetings/{{project_meeting_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["external_api", "v2", "project_meetings", "{{project_meeting_id}}"]
+            },
+            "description": "Contact, description, property-information flag, project identity, and meeting_request_documents with signed download URLs. A later GET returns new URLs."
+          },
+          "response": []
+        },
+        {
+          "name": "Accept Project Meeting",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"confirmed_date\": \"2026-10-12T15:00:00Z\",\n  \"contact_method\": \"phone\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/external_api/v2/project_meetings/{{project_meeting_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["external_api", "v2", "project_meetings", "{{project_meeting_id}}"]
+            },
+            "description": "Schedules an open meeting. contact_method is phone, in_person, or videoconference. meeting_url is required for videoconference and must be an http(s) URL when present. Success returns status scheduled and sends the existing scheduled notifications. A meeting that is not open returns 422."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "Webhook events",
       "item": [
         {
@@ -225,7 +452,7 @@
           "response": []
         }
       ],
-      "description": "V2 emits `permit_application_status_changed` for each externally visible application status transition, including submission and resubmission. Payload: `{ permit_application_id, permit_project_id, submission_version_id, status, status_label, occurred_at }`. Durable ingest waits for `permit_application_package_ready` (`{ permit_application_id, permit_project_id, submission_version_id, number, reference_number, occurred_at }`), which fires once per submission version after generated PDFs exist and the application zip is rebuilt. V2 also emits `permit_project_state_changed` with `{ permit_project_id, state, state_label, occurred_at }`. Project states: `draft` (Draft), `queued` (Queued), `waiting` (Waiting), `in_progress` (In progress), `ready` (Ready), `permit_issued` (Permit issued), `active` (Active), `complete` (Completed), `closed` (Closed). Timestamps are Unix epoch milliseconds. All bodies use the `{ event, payload }` envelope and `X-Webhook-Signature` HMAC-SHA256 header. File URLs are not included in webhooks; fetch them after package_ready. In development, set the key webhook URL to `{{webhook_url}}`."
+      "description": "V2 emits `permit_application_status_changed` for each externally visible application status transition, including submission and resubmission. Payload: `{ permit_application_id, permit_project_id, submission_version_id, status, status_label, occurred_at }`. Durable ingest waits for `permit_application_package_ready` (`{ permit_application_id, permit_project_id, submission_version_id, number, reference_number, occurred_at }`), which fires once per submission version after generated PDFs exist and the application zip is rebuilt. V2 also emits `permit_project_state_changed` with `{ permit_project_id, state, state_label, occurred_at }`. Project states: `draft` (Draft), `queued` (Queued), `waiting` (Waiting), `in_progress` (In progress), `ready` (Ready), `permit_issued` (Permit issued), `active` (Active), `complete` (Completed), `closed` (Closed). Submitting a meeting request emits `project_meeting_requested` with `{ project_meeting_id, permit_project_id, status, occurred_at }` and no file URL, even when the project has no submitted permit application. Timestamps are Unix epoch milliseconds. All bodies use the `{ event, payload }` envelope and `X-Webhook-Signature` HMAC-SHA256 header. File URLs are not included in webhooks; fetch them after package_ready, or from GET project meeting for meeting documents. In development, set the key webhook URL to `{{webhook_url}}`."
     }
   ],
   "auth": {
@@ -264,7 +491,19 @@
       "value": ""
     },
     {
+      "key": "project_meeting_id",
+      "value": ""
+    },
+    {
       "key": "template_version_id",
+      "value": ""
+    },
+    {
+      "key": "requirement_template_id",
+      "value": ""
+    },
+    {
+      "key": "reference_document_id",
       "value": ""
     }
   ]

@@ -79,7 +79,7 @@ RSpec.describe "external_api/v2/permit_applications",
   end
 
   path "/permit_applications/{id}/submission_versions/{submission_version_id}" do
-    get "Retrieves a frozen submission version, including form data and files for that version." do
+    get "Retrieves a frozen submission version, including form data, generated PDFs, document requests, fulfillment files, and signed file URLs for that version." do
       tags "Permit applications"
       produces "application/json"
       parameter name: "id",
@@ -113,7 +113,7 @@ RSpec.describe "external_api/v2/permit_applications",
 
   path "/permit_applications/{id}/status" do
     patch(
-      "Updates a submitted permit application's status using a canonical Building Permit Hub code. For `revisions_requested`, include field-level `revision_requests` copied from the submission version payload (`requirement_block_code` + `requirement_code`). An optional `applicant_note` plain-text message is stored with those requests."
+      "Updates a submitted permit application's status using a canonical Building Permit Hub code. For `revisions_requested`, include `revision_requests`. A field revision copies `requirement_block_code` and `requirement_code` from the submission version payload. A document request sends `name`, `reason_code`, `comment`, and `reference_document_ids` from POST /files, and does not send requirement codes. One array may mix both. An optional `applicant_note` plain-text message is stored with those requests."
     ) do
       tags "Permit applications"
       consumes "application/json"
