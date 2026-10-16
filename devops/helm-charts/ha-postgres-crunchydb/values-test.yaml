@@ -25,7 +25,7 @@ instances:
   requests:
     cpu: 100m
     memory: 256Mi
-  limits: # wanted to just leave limits blank here, but the underlying chart speciffies it, so instead just specify a large number
+  limits: # just specify a large number or leave blank
     cpu: 1
     memory: 4Gi
   replicaCertCopy:
