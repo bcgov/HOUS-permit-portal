@@ -452,6 +452,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                 <Button
                   rightIcon={<CaretRight />}
                   onClick={isReviewingSubmit ? () => reviewSubmitActionsRef.current?.submit() : submitClickHandler}
+                  isDisabled={isReviewingSubmit && currentPermitApplication.digitalSealChecks.pendingCount > 0}
                 >
                   {isReviewingSubmit
                     ? t("permitApplication.new.submitApplication")

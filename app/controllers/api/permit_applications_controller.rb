@@ -293,8 +293,6 @@ class Api::PermitApplicationsController < Api::ApplicationController
 
   def submit
     authorize @permit_application
-    # for submissions, we do not run the automated compliance as that should have already been complete
-    #
     unless persist_submitter_note
       return(
         render_error "permit_application.update_error",
@@ -312,15 +310,47 @@ class Api::PermitApplicationsController < Api::ApplicationController
     is_current_user_submitter =
       current_user.id == @permit_application.submitter_id
 
-    if @permit_application.update(
-         (
-           if is_current_user_submitter
-             permit_application_params
-           else
-             submission_collaborator_permit_application_params
-           end
-         )
-       ) && @permit_application.submit!
+    pending_checks = nil
+    submitted =
+      @permit_application.with_lock do
+        saved =
+          @permit_application.update(
+            (
+              if is_current_user_submitter
+                permit_application_params
+              else
+                submission_collaborator_permit_application_params
+              end
+            )
+          )
+        if saved
+          checks = @permit_application.digital_seal_checks
+          if checks[:pending_count].positive?
+            # Commit the saved draft, but do not create a version or send notifications.
+            pending_checks = checks
+            false
+          else
+            @permit_application.submit!
+          end
+        end
+      end
+
+    if pending_checks
+      AutomatedCompliance::DigitalSealValidatorJob.perform_async(
+        @permit_application.id
+      )
+      return(
+        render_error(
+          "permit_application.digital_seal_checks_pending",
+          status: 422,
+          meta: {
+            digital_seal_checks: pending_checks
+          }
+        )
+      )
+    end
+
+    if submitted
       render_success @permit_application,
                      nil,
                      {

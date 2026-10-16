@@ -131,6 +131,81 @@ RSpec.describe PrintReports::Renderer do
   context "real local conversion", if: ENV["RUN_GOTENBERG_SPECS"] == "true" do
     around { |example| VCR.turned_off { example.run } }
 
+    it "prints per-file digital seal text, complete signer details and historical fallbacks without icons" do
+      fixture =
+        JSON.parse(
+          Rails
+            .root
+            .join(
+              "app/frontend/components/print/__tests__/fixtures/application-digital-seals.json"
+            )
+            .read
+        )
+      described_class
+        .new
+        .render(fixture.deep_symbolize_keys) do |path|
+          reader = PDF::Reader.new(path)
+          text = reader.pages.map(&:text).join(" ").gsub(/\s+/, " ")
+          %w[
+            drawing-one.pdf
+            drawing-two.pdf
+            unsigned-drawing.pdf
+            failed-drawing.pdf
+            historical-drawing.pdf
+            ordinary-document.pdf
+          ].each { |name| expect(text.scan(name).length).to eq(1) }
+          expect(text).to include(
+            "Digital seal found",
+            "Digital seal checks",
+            "Alex Example (INSTITUTE - AIBC,MEMBER)",
+            "Taylor Example (EGBC)",
+            "Signed at 2024-09-06 11:26:19 PDT",
+            "Signed at 2024-09-08 13:14:15 PDT",
+            "No approved digital seal found.",
+            "We couldn’t verify the digital seal.",
+            "Digital seal information was not recorded for this submission.",
+            "Organization text preserved exactly, including membership details, punctuation and long descriptions that wrap onto another line"
+          )
+          expect(text).not_to match(/[✓⚡]/)
+          expect(text.scan("was not recorded").length).to eq(1)
+          reader
+            .pages
+            .drop(1)
+            .flat_map(&:runs)
+            .each do |run|
+              expect(run.x).to be >= 0
+              expect(run.endx).to be <= 612
+            end
+        end
+    end
+
+    it "does not reuse digital seal results for an upload with a different identity" do
+      fixture =
+        JSON.parse(
+          Rails
+            .root
+            .join(
+              "app/frontend/components/print/__tests__/fixtures/application-digital-seals.json"
+            )
+            .read
+        )
+      fixture["submission_data"]["data"]["section|RBblock|design_file"].first[
+        "id"
+      ] = "replacement"
+      described_class
+        .new
+        .render(fixture.deep_symbolize_keys) do |path|
+          text =
+            PDF::Reader.new(path).pages.map(&:text).join(" ").gsub(/\s+/, " ")
+          expect(text).not_to include(
+            "Alex Example",
+            "Taylor Example",
+            "2024-09-06 11:26:19 PDT"
+          )
+          expect(text).to include("drawing-one.pdf", "was not recorded")
+        end
+    end
+
     {
       "energy_step_code" => "Part9StepCode",
       "energy_step_code_part_3" => "Part3StepCode"

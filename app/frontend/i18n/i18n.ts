@@ -2074,6 +2074,10 @@ Thank you,
             confirmation:
               "By submitting this application, you confirm that the information you provided was completed to the best of your knowledge and ability.",
             submitApplication: "Submit application",
+            digitalSealChecksPending:
+              "Digital seal checks are still running. You can keep editing and saving while you wait.",
+            digitalSealChecksFailed:
+              "We couldn’t verify the digital seal on one or more files. You can still submit your application. The application PDF will indicate that verification could not be completed.",
             projectMeetingAdvisory: {
               title: "This type of permit application may need a project meeting",
               prefix: "If you haven't completed a project meeting,",

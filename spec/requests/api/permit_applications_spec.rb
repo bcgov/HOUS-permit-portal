@@ -202,6 +202,154 @@ RSpec.describe "Api::PermitApplications", type: :request do
   end
 
   describe "POST /api/permit_applications/:id/submit" do
+    context "digital seal checks" do
+      let(:field_key) { "section|RBblock|design_file" }
+      let(:document) do
+        create(
+          :supporting_document,
+          permit_application: permit_application,
+          data_key: field_key
+        )
+      end
+      let(:answers) do
+        {
+          "data" => {
+            "section" => {
+              field_key => [
+                {
+                  "id" => document.file_id,
+                  "modelId" => document.id,
+                  "originalName" => "drawing.pdf"
+                }
+              ]
+            },
+            "section-completion-key" => {
+              "signed" => true
+            }
+          }
+        }
+      end
+
+      before do
+        allow_any_instance_of(TemplateVersion).to receive(
+          :lookup_props
+        ).and_return(
+          field_key => {
+            "computedCompliance" => {
+              "module" => "DigitalSealValidator"
+            }
+          }
+        )
+      end
+
+      it "saves final-request uploads but blocks pending checks without creating a version or package" do
+        expect(ZipfileJob).not_to receive(:perform_async)
+        expect(AutomatedCompliance::DigitalSealValidatorJob).to receive(
+          :perform_async
+        ).with(permit_application.id)
+        post "/api/permit_applications/#{permit_application.id}/submit",
+             params: {
+               permit_application: {
+                 submission_data: answers
+               }
+             },
+             headers: headers,
+             as: :json
+        expect(response).to have_http_status(422)
+        expect(
+          json_response.dig("meta", "digital_seal_checks", "pending_count")
+        ).to eq(1)
+        expect(json_response.dig("meta", "message", "message")).to include(
+          "draft has been saved"
+        )
+        expect(permit_application.reload.submission_data).to eq(answers)
+        expect(permit_application).to be_new_draft
+        expect(permit_application.submission_versions).to be_empty
+      end
+
+      it "enforces the guard for direct model submissions too" do
+        permit_application.update!(submission_data: answers)
+        expect { permit_application.submit! }.to raise_error(
+          AASM::InvalidTransition
+        )
+        expect(permit_application.reload.submission_versions).to be_empty
+      end
+
+      it "allows an unsigned result and snapshots it at submission" do
+        document.update!(compliance_data: { status: "success", result: [] })
+        post "/api/permit_applications/#{permit_application.id}/submit",
+             params: {
+               permit_application: {
+                 submission_data: answers
+               }
+             },
+             headers: headers,
+             as: :json
+        expect(response).to have_http_status(:ok)
+        result =
+          permit_application
+            .reload
+            .latest_submission_version
+            .report_snapshot
+            .dig("reports", "application", "digital_seal_results", field_key, 0)
+        expect(result["status"]).to eq("not_found")
+      end
+
+      it "allows a recorded service failure and reports it without the raw error" do
+        document.update!(
+          compliance_data: {
+            status: "failed",
+            error: "PRIVATE VALIDATOR DETAIL"
+          }
+        )
+        post "/api/permit_applications/#{permit_application.id}/submit",
+             params: {
+               permit_application: {
+                 submission_data: answers
+               }
+             },
+             headers: headers,
+             as: :json
+        expect(response).to have_http_status(:ok)
+        expect(
+          json_response.dig("data", "digital_seal_checks", "failed_count")
+        ).to eq(1)
+        snapshot =
+          permit_application.reload.latest_submission_version.report_snapshot
+        expect(
+          snapshot.dig(
+            "reports",
+            "application",
+            "digital_seal_results",
+            field_key,
+            0,
+            "status"
+          )
+        ).to eq("failed")
+        expect(snapshot.to_json).not_to include("PRIVATE VALIDATOR DETAIL")
+      end
+
+      it "blocks resubmission while preserving the previous version" do
+        old =
+          create(:submission_version, permit_application: permit_application)
+        create(:revision_request, submission_version: old)
+        permit_application.update!(status: :revisions_requested)
+        post "/api/permit_applications/#{permit_application.id}/submit",
+             params: {
+               permit_application: {
+                 submission_data: answers
+               }
+             },
+             headers: headers,
+             as: :json
+        expect(response).to have_http_status(422)
+        expect(permit_application.reload).to be_revisions_requested
+        expect(permit_application.submission_versions.pluck(:id)).to eq(
+          [old.id]
+        )
+      end
+    end
+
     it "submits the permit application" do
       post "/api/permit_applications/#{permit_application.id}/submit",
            params: {

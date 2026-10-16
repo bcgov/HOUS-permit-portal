@@ -13,7 +13,7 @@ module AutomatedComplianceUtils
 
   def automated_compliance_requirements
     #check which fields in requirement have custom compliance components
-    requirements_lookups.select do |field_id, req|
+    (requirements_lookups || {}).to_h.select do |field_id, req|
       req["computedCompliance"].present?
     end
   end
@@ -26,16 +26,10 @@ module AutomatedComplianceUtils
 
   def submission_field_is_empty?(field_id, requirement)
     if requirement.dig("computedCompliance", "module") == "DigitalSealValidator"
-      #if there is no related supporting document, consider this okay and not run the autopopulate again
-      #if there is a supporting document, check if the compliance has a result, if not, let it know as unfilled
-      doc = active_supporting_documents.find_by(data_key: field_id)
-      doc.present? ? doc.compliance_data.empty? : false
-
-      #ALTERNATIVELY search submssion data itself, identify fields with values and loop through
-      # supporting_documents
-      #   .find_by_id(submission_data.dig("data", field_id, "id"))
-      #   &.compliance_data
-      #   .blank?
+      DigitalSealChecks
+        .new(self)
+        .pending_entries
+        .any? { |entry| entry.field_key == field_id }
     else
       compliance_data.dig(field_id).blank?
     end
@@ -52,5 +46,9 @@ module AutomatedComplianceUtils
     automated_compliance_requirements.select do |field_id, req|
       req.dig("computedCompliance", "module") == compliance_module_name
     end
+  end
+
+  def digital_seal_checks
+    DigitalSealChecks.new(self).summary
   end
 end

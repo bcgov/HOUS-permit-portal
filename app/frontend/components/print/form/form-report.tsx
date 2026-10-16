@@ -1,9 +1,11 @@
 import { Utils } from "@formio/js"
 import React from "react"
+import { DigitalSealResultsContext } from "../components/report-attachments"
 import { ReportContact } from "../components/report-contact"
 import { ReportField } from "../components/report-field"
 import { ReportSection } from "../components/report-section"
 import { ReportTable } from "../components/report-table"
+import type { DigitalSealResults } from "../permit-application/report-data"
 import { fieldRenderers, FieldValue, RichText } from "./field-renderers"
 import { fieldValue, FormComponent, NOT_PROVIDED } from "./field-values"
 
@@ -74,7 +76,11 @@ function fieldLayout(nodes: React.ReactNode[]): React.ReactNode[] {
   }
   return result
 }
-export function FormReport({ schema, submissionData }: Readonly<{ schema: FormComponent; submissionData: any }>) {
+export function FormReport({
+  schema,
+  submissionData,
+  digitalSealResults,
+}: Readonly<{ schema: FormComponent; submissionData: any; digitalSealResults?: DigitalSealResults }>) {
   // FormIO conditional utilities can decorate schemas; never give them caller-owned objects.
   const form = structuredClone(schema)
   const data = structuredClone(submissionData?.data || {})
@@ -224,5 +230,9 @@ export function FormReport({ schema, submissionData }: Readonly<{ schema: FormCo
         )
       return null
     })
-  return <div className="report-form">{fieldLayout(render(form.components || [], data, "data"))}</div>
+  return (
+    <DigitalSealResultsContext.Provider value={digitalSealResults || {}}>
+      <div className="report-form">{fieldLayout(render(form.components || [], data, "data"))}</div>
+    </DigitalSealResultsContext.Provider>
+  )
 }

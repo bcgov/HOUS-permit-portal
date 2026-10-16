@@ -192,6 +192,15 @@ p + p {
 .report-strong {
   font-weight: 700;
 }
+.report-attachment-file {
+  margin-top: 8pt;
+  overflow-wrap: anywhere;
+}
+.report-seal-signer {
+  margin-top: 3pt;
+  padding-left: 12pt;
+  break-inside: avoid;
+}
 .report-table {
   width: 100%;
   border-collapse: collapse;

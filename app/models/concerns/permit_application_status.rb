@@ -197,6 +197,7 @@ module PermitApplicationStatus
 
     def can_submit?
       return false unless inbox_enabled? || sandbox.present?
+      return false if DigitalSealChecks.new(self).pending_entries.any?
       return false if template_version_disabled_by_jurisdiction?
       if using_digital_energy_step_code_tool? && !step_code_complete?
         return false
