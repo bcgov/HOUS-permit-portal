@@ -4,6 +4,10 @@ RSpec.describe Reports::StepCodePart3 do
   let(:range) { Reports::Range.parse("12_months") }
   let(:payload) { described_class.new(range: range).call }
 
+  def headline(key)
+    payload[:headline_figures].find { |figure| figure[:key] == key }
+  end
+
   def mark_complete(checklist, completed_at: Time.current)
     checklist.update!(
       status: :complete,
@@ -28,17 +32,11 @@ RSpec.describe Reports::StepCodePart3 do
     sandboxed = create(:part_3_step_code, sandbox: published_sandbox)
     mark_complete(sandboxed.pre_construction_checklist)
 
-    total =
-      payload[:headline_figures].find do |figure|
-        figure[:key] == "total_completions"
-      end
-    incomplete =
-      payload[:headline_figures].find do |figure|
-        figure[:key] == "incomplete_count"
-      end
-
-    expect(total[:value]).to eq("2 checklists among 1 step code")
-    expect(incomplete[:value]).to eq("2 checklists among 1 step code")
+    expect(headline("pre_construction_total_completions")[:value]).to eq(1)
+    expect(headline("as_built_total_completions")[:value]).to eq(1)
+    expect(headline("pre_construction_incomplete_count")[:value]).to eq(1)
+    expect(headline("as_built_incomplete_count")[:value]).to eq(1)
+    expect(headline("mid_construction_total_completions")[:value]).to eq(0)
     expect(payload[:tables]).to be_present
   end
 end

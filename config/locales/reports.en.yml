@@ -8,6 +8,10 @@ en:
     small_n: "Too few records (%{count}) for a meaningful chart. The table below is the source of truth."
     growth:
       suppressed: "Percentage omitted; previous period too small to be meaningful."
+    stages:
+      pre_construction: "Pre-construction"
+      mid_construction: "Mid-construction"
+      as_built: "As-built"
     application_growth:
       title: "Platform growth"
       description: "Application volumes, cumulative totals, and growth rates"
@@ -50,13 +54,6 @@ en:
       title: "Energy Step Code Part 9"
       description: "Part 9 completion volumes and compliance outcomes"
       unknown_jurisdiction: "Unknown jurisdiction"
-      completion_count: "%{checklists} among %{step_codes}"
-      checklist:
-        one: "%{count} checklist"
-        other: "%{count} checklists"
-      step_code_record:
-        one: "%{count} step code"
-        other: "%{count} step codes"
       series:
         checklists: "Checklists"
       columns:
@@ -81,16 +78,16 @@ en:
       figures:
         total_completions:
           label: "Part 9 completions"
-          help: "Completed Part 9 checklists in %{range}, including standalone reports. Each completed stage counts on its own. Live (non-sandbox) records only. Shown as checklists among step codes."
+          help: "Completed Part 9 %{stage} checklists in %{range}, including standalone reports. Live (non-sandbox) records only."
         pass_count:
           label: "Passed"
-          help: "Completed checklists in %{range} where both energy and zero carbon proposed steps were achieved. Shown as checklists among step codes. A step code with more than one completed stage can appear in more than one outcome."
+          help: "Completed %{stage} checklists in %{range} where both energy and zero carbon proposed steps were achieved."
         fail_count:
           label: "Failed"
-          help: "Completed checklists in %{range} with enough data to evaluate that did not achieve both required tracks. Incomplete records are counted separately. Shown as checklists among step codes."
+          help: "Completed %{stage} checklists in %{range} with enough data to evaluate that did not achieve both required tracks. Incomplete records are counted separately."
         incomplete_count:
           label: "Incomplete compliance data"
-          help: "Completed checklists in %{range} without enough data to evaluate pass or fail. These are not drafts, and they are not counted as failures. Shown as checklists among step codes."
+          help: "Completed %{stage} checklists in %{range} without enough data to evaluate pass or fail. These are not drafts, and they are not counted as failures."
       notes:
         incomplete_not_fail: "Completed checklists with incomplete compliance data are counted on their own. They are not folded into failures."
         enablement: "Enablement is whether the jurisdiction has Step Codes requirements configured. Checklist and step code counts are in their own columns."
@@ -99,13 +96,6 @@ en:
       title: "Energy Step Code Part 3"
       description: "Part 3 completion volumes and compliance outcomes"
       unknown_jurisdiction: "Unknown jurisdiction"
-      completion_count: "%{checklists} among %{step_codes}"
-      checklist:
-        one: "%{count} checklist"
-        other: "%{count} checklists"
-      step_code_record:
-        one: "%{count} step code"
-        other: "%{count} step codes"
       series:
         checklists: "Checklists"
       columns:
@@ -130,16 +120,16 @@ en:
       figures:
         total_completions:
           label: "Part 3 completions"
-          help: "Completed Part 3 checklists in %{range}, including standalone reports. Each completed stage counts on its own. Live (non-sandbox) records only. Shown as checklists among step codes."
+          help: "Completed Part 3 %{stage} checklists in %{range}, including standalone reports. Live (non-sandbox) records only."
         pass_count:
           label: "Passed"
-          help: "Completed checklists in %{range} where the Part 3 compliance report achieved the required energy and zero carbon steps, or the baseline performance requirement. Shown as checklists among step codes. A step code with more than one completed stage can appear in more than one outcome."
+          help: "Completed %{stage} checklists in %{range} where the Part 3 compliance report achieved the required energy and zero carbon steps, or the baseline performance requirement."
         fail_count:
           label: "Failed"
-          help: "Completed checklists in %{range} with enough data to evaluate that did not achieve the required steps. Incomplete records are counted separately. Shown as checklists among step codes."
+          help: "Completed %{stage} checklists in %{range} with enough data to evaluate that did not achieve the required steps. Incomplete records are counted separately."
         incomplete_count:
           label: "Incomplete compliance data"
-          help: "Completed checklists in %{range} without enough data to evaluate pass or fail. These are not drafts, and they are not counted as failures. Shown as checklists among step codes."
+          help: "Completed %{stage} checklists in %{range} without enough data to evaluate pass or fail. These are not drafts, and they are not counted as failures."
       notes:
         incomplete_not_fail: "Completed checklists with incomplete compliance data are counted on their own. They are not folded into failures."
         enablement: "Enablement is whether the jurisdiction has Part 3 occupancy step requirements configured. Checklist and step code counts are in their own columns."

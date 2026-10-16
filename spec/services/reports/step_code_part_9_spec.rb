@@ -4,6 +4,10 @@ RSpec.describe Reports::StepCodePart9 do
   let(:range) { Reports::Range.parse("12_months") }
   let(:payload) { described_class.new(range: range).call }
 
+  def headline(key)
+    payload[:headline_figures].find { |figure| figure[:key] == key }
+  end
+
   def mark_complete(checklist, completed_at: Time.current)
     checklist.update!(
       status: :complete,
@@ -28,13 +32,16 @@ RSpec.describe Reports::StepCodePart9 do
     sandboxed = create(:part_9_step_code, sandbox: published_sandbox)
     mark_complete(sandboxed.pre_construction_checklist)
 
-    total =
-      payload[:headline_figures].find do |figure|
-        figure[:key] == "total_completions"
-      end
+    sections = payload[:headline_figures].map { |figure| figure[:section] }.uniq
+    pre_construction = headline("pre_construction_total_completions")
+    as_built = headline("as_built_total_completions")
 
-    expect(total[:value]).to eq("2 checklists among 1 step code")
-    expect(total[:help_text]).to be_present
+    expect(sections).to eq(%w[Pre-construction Mid-construction As-built])
+    expect(pre_construction[:value]).to eq(1)
+    expect(as_built[:value]).to eq(1)
+    expect(headline("mid_construction_total_completions")[:value]).to eq(0)
+    expect(pre_construction[:help_text]).to include("pre-construction")
+    expect(pre_construction[:help_text]).not_to include("among")
     expect(payload[:empty]).to eq(false)
   end
 
@@ -42,15 +49,10 @@ RSpec.describe Reports::StepCodePart9 do
     step_code = create(:part_9_step_code)
     mark_complete(step_code.pre_construction_checklist)
 
-    incomplete =
-      payload[:headline_figures].find do |figure|
-        figure[:key] == "incomplete_count"
-      end
-    failed =
-      payload[:headline_figures].find { |figure| figure[:key] == "fail_count" }
-
-    expect(incomplete[:value]).to eq("1 checklist among 1 step code")
-    expect(failed[:value]).to eq("0 checklists among 0 step codes")
+    expect(headline("pre_construction_incomplete_count")[:value]).to eq(1)
+    expect(headline("pre_construction_fail_count")[:value]).to eq(0)
+    expect(headline("mid_construction_incomplete_count")[:value]).to eq(0)
+    expect(headline("as_built_incomplete_count")[:value]).to eq(0)
   end
 
   it "omits jurisdictions with no completions and links those that have some" do

@@ -11,6 +11,7 @@ export interface IReportHeadlineFigure {
   label: string
   value: string | number | null
   helpText: string
+  section?: string
   approximate?: boolean
   direction?: "up" | "down" | "flat" | "suppressed"
 }

@@ -1,15 +1,9 @@
 module Reports
   class StepCodePart9 < Base
+    STAGES = %w[pre_construction mid_construction as_built].freeze
+
     def headline_figures
-      [
-        figure("total_completions", completion_phrase(rows)),
-        figure("pass_count", completion_phrase(rows_with_outcome("pass"))),
-        figure("fail_count", completion_phrase(rows_with_outcome("fail"))),
-        figure(
-          "incomplete_count",
-          completion_phrase(rows_with_outcome("incomplete"))
-        )
-      ]
+      STAGES.flat_map { |stage| stage_headline_figures(stage) }
     end
 
     def charts
@@ -293,6 +287,7 @@ module Reports
             "completed_at" => completed_at,
             "period" =>
               completed_at.to_date.beginning_of_month.strftime("%Y-%m"),
+            "stage" => checklist.stage,
             "outcome" => outcome,
             "energy_step" => energy_step,
             "zero_carbon_step" => zero_carbon_step
@@ -498,12 +493,45 @@ module Reports
       group.map { |row| row["step_code_id"] }.uniq.length
     end
 
-    def completion_phrase(group)
-      I18n.t(
-        "#{i18n_base}.completion_count",
-        checklists: I18n.t("#{i18n_base}.checklist", count: group.length),
-        step_codes:
-          I18n.t("#{i18n_base}.step_code_record", count: step_code_count(group))
+    def stage_headline_figures(stage)
+      group = rows.select { |row| row["stage"] == stage }
+      section = I18n.t("reports.stages.#{stage}")
+      overrides = { stage: section.downcase }
+      [
+        staged_figure(
+          stage,
+          "total_completions",
+          group.length,
+          section,
+          overrides
+        ),
+        staged_figure(
+          stage,
+          "pass_count",
+          group.count { |row| row["outcome"] == "pass" },
+          section,
+          overrides
+        ),
+        staged_figure(
+          stage,
+          "fail_count",
+          group.count { |row| row["outcome"] == "fail" },
+          section,
+          overrides
+        ),
+        staged_figure(
+          stage,
+          "incomplete_count",
+          group.count { |row| row["outcome"] == "incomplete" },
+          section,
+          overrides
+        )
+      ]
+    end
+
+    def staged_figure(stage, key, value, section, overrides)
+      figure(key, value, help_overrides: overrides, section: section).merge(
+        key: "#{stage}_#{key}"
       )
     end
 
