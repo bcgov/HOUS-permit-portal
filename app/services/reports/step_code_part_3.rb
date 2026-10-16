@@ -3,7 +3,8 @@ module Reports
     CSV_HEADERS = [
       "Application number",
       "Jurisdiction",
-      "Submission date",
+      "Completed at",
+      "Stage",
       "Address",
       "Compliance outcome",
       "Energy step achieved",
@@ -11,30 +12,19 @@ module Reports
     ].freeze
 
     def csv_from_payload(_payload)
-      submitted_at_by_application = first_submitted_at
       CSV.generate do |csv|
         csv << CSV_HEADERS
-        step_code_class
-          .where(id: submitted_scope.select("step_codes.id"))
-          .includes(
-            :jurisdiction,
-            checklist_includes,
-            permit_application: {
-              permit_project: :jurisdiction
-            }
-          )
-          .find_each do |step_code|
-            submitted_at =
-              submitted_at_by_application[step_code.permit_application_id]
-            next unless submitted_at
-
-            outcome, energy_step, zero_carbon_step =
-              classify(step_code.current_checklist)
+        completed_scope
+          .includes(checklist_row_includes)
+          .find_each do |checklist|
+            step_code = checklist.step_code
+            outcome, energy_step, zero_carbon_step = classify(checklist)
             csv << [
               step_code.permit_application_number,
               step_code.jurisdiction&.name ||
                 I18n.t("#{i18n_base}.unknown_jurisdiction"),
-              submitted_at.to_date.iso8601,
+              checklist.stage_completed_at&.to_date&.iso8601,
+              checklist.stage,
               step_code.full_address,
               outcome,
               energy_step,
@@ -44,12 +34,20 @@ module Reports
       end
     end
 
-    def step_code_class
-      Part3StepCode
+    def checklist_class
+      Part3StepCode::Checklist
     end
 
-    def checklist_includes
-      { checklists: :occupancy_classifications }
+    def checklist_row_includes
+      [
+        :occupancy_classifications,
+        {
+          step_code: [
+            :jurisdiction,
+            { permit_application: { permit_project: :jurisdiction } }
+          ]
+        }
+      ]
     end
 
     def enabled_jurisdiction_ids
@@ -79,16 +77,6 @@ module Reports
       end
     rescue StandardError
       ["incomplete", nil, nil]
-    end
-
-    def first_submitted_at
-      SubmissionVersion
-        .where(
-          permit_application_id:
-            submitted_scope.select("permit_applications.id")
-        )
-        .group(:permit_application_id)
-        .minimum(:created_at)
     end
   end
 end

@@ -113,8 +113,8 @@ module Reports
       range.apply(submitted_applications, FIRST_SUBMITTED_AT_SQL)
     end
 
-    def figure(key, value, approximate: false, help_overrides: {})
-      {
+    def figure(key, value, approximate: false, help_overrides: {}, section: nil)
+      payload = {
         key: key,
         label:
           I18n.t(
@@ -129,6 +129,8 @@ module Reports
           ),
         approximate: approximate
       }
+      payload[:section] = section if section
+      payload
     end
 
     def chart(key, type, x_key:, series:, data:, record_count:, suppressed: nil)

@@ -94,6 +94,7 @@ class PermitApplication < ApplicationRecord
   before_validation :assign_unique_number, on: :create
   before_validation :set_template_version, on: :create
   before_validation :populate_base_form_data, on: :create
+  before_validation :assign_created_by_from_submitter, on: :create
   before_create :acknowledge_current_customization_change
   before_save :take_form_customizations_snapshot_if_submitted
 
@@ -902,6 +903,12 @@ class PermitApplication < ApplicationRecord
   end
 
   private
+
+  # ponytail: assign_creation_actors sets a jurisdiction when a reviewer creates
+  # the draft. Anything else is created by the submitter.
+  def assign_created_by_from_submitter
+    self.created_by ||= submitter
+  end
 
   def update_collaboration_assignments
     # TODO: Implement this method to remove collaborations for missing requirement block when a new template is published
