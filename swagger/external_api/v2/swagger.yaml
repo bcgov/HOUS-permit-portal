@@ -101,7 +101,7 @@ x-example-permit-application-all-types: &example_permit_application_all_types
     image_url: /images/permit_classifications/low_residential.png
     name: Example permit type
     type: PermitType
-  permit_version:
+  template_version:
     id: "00000000-0000-4000-8000-000000000005"
     first_nations: false
     public: false
@@ -1435,7 +1435,7 @@ components:
           "$ref": "#/components/schemas/PermitClassification"
         account_holder:
           "$ref": "#/components/schemas/AccountHolder"
-        permit_version:
+        template_version:
           "$ref": "#/components/schemas/PermitVersion"
         permit_project_id:
           type:

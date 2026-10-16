@@ -125,6 +125,10 @@ RSpec.describe "External API v2 permit applications", type: :request do
       )
       expect(json).not_to have_key("zipfile_url")
       expect(json).not_to have_key("latest_zipfile_url")
+      expect(json).not_to have_key("permit_version")
+      expect(json["template_version"]).to include(
+        "id" => permit_application.template_version_id
+      )
       versions = json.fetch("submission_versions")
       expect(versions.length).to eq(1)
       expect(versions.first).to include(

@@ -1059,7 +1059,12 @@ in this document.
     :submission_data,
     :raw_h2k_files
   )
-  v2_spec[:components][:schemas][:PermitApplication][:properties].merge!(
+  v2_application_properties =
+    v2_spec[:components][:schemas][:PermitApplication][:properties]
+  v2_application_properties[
+    :template_version
+  ] = v2_application_properties.delete(:permit_version)
+  v2_application_properties.merge!(
     permit_project_id: {
       type: %i[string null],
       format: :uuid

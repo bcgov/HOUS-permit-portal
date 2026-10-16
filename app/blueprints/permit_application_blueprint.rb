@@ -285,8 +285,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
 
     association :template_version,
                 blueprint: TemplateVersionBlueprint,
-                view: :external_api,
-                name: :permit_version
+                view: :external_api
     association :submitter,
                 blueprint: UserBlueprint,
                 view: :external_api,
