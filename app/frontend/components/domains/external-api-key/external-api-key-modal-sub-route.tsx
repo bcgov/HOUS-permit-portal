@@ -169,7 +169,7 @@ export const ExternalApiKeyModalSubRoute = observer(function ExternalApiKeyModal
                   required
                 />
               </GridItem>
-              <GridItem>
+              <GridItem colSpan={2}>
                 <SelectFormControl
                   label={t("externalApiKey.fieldLabels.apiVersion")}
                   fieldName={"apiVersion"}
