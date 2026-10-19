@@ -48,6 +48,7 @@ class PermitApplication < ApplicationRecord
   attr_accessor :front_end_form_update
 
   has_many :submission_versions, dependent: :destroy
+  has_many :notes, as: :noteable, dependent: :destroy
   has_many :permit_collaborations,
            -> { where(discarded_at: nil) },
            dependent: :destroy

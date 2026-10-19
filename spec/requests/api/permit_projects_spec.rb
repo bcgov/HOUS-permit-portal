@@ -419,6 +419,85 @@ RSpec.describe "Api::PermitProjects", type: :request, search: true do
       expect(response).to have_http_status(:forbidden)
     end
 
+    it "publishes one creation message per application when a reviewer adds them" do
+      reviewer = create(:user, :reviewer, jurisdiction:)
+      sign_in reviewer
+
+      post "/api/permit_projects/#{permit_project.id}/permit_applications",
+           params: {
+             note: "Please complete these applications.",
+             permit_applications: [
+               {
+                 template_version_id: template_version.id,
+                 jurisdiction_id: permit_project.jurisdiction_id
+               },
+               {
+                 template_version_id: template_version.id,
+                 jurisdiction_id: permit_project.jurisdiction_id
+               }
+             ]
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      applications = PermitApplication.where(permit_project: permit_project)
+      notes =
+        Note.where(
+          noteable_type: "PermitApplication",
+          noteable_id: applications.select(:id)
+        )
+      expect(notes.size).to eq(2)
+      expect(notes).to all(
+        have_attributes(kind: "creation_message", user: reviewer)
+      )
+      expect(notes.map(&:published_at)).to all(be_present)
+      expect(notes.map { |note| Note.plain_body(note.body) }).to all(
+        eq("Please complete these applications.")
+      )
+    end
+
+    it "does not create a note for a blank message" do
+      reviewer = create(:user, :reviewer, jurisdiction:)
+      sign_in reviewer
+
+      expect do
+        post "/api/permit_projects/#{permit_project.id}/permit_applications",
+             params: {
+               note: "<p></p>",
+               permit_applications: [
+                 {
+                   template_version_id: template_version.id,
+                   jurisdiction_id: permit_project.jurisdiction_id
+                 }
+               ]
+             },
+             headers: headers,
+             as: :json
+      end.not_to change(Note, :count)
+
+      expect(response).to have_http_status(:ok)
+    end
+
+    it "does not create a note when the owner adds applications" do
+      expect do
+        post "/api/permit_projects/#{permit_project.id}/permit_applications",
+             params: {
+               note: "Please complete these applications.",
+               permit_applications: [
+                 {
+                   template_version_id: template_version.id,
+                   jurisdiction_id: permit_project.jurisdiction_id
+                 }
+               ]
+             },
+             headers: headers,
+             as: :json
+      end.not_to change(Note, :count)
+
+      expect(response).to have_http_status(:ok)
+    end
+
     it "returns errors when any payload is invalid" do
       errors_double =
         instance_double(
