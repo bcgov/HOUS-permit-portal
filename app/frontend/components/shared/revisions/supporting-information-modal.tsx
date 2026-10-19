@@ -53,7 +53,7 @@ export const SupportingInformationModal = observer(
     const { t } = useTranslation()
     const { userStore } = useMst()
     const { currentUser } = userStore
-    const { update, append, fields } = useFieldArrayMethods
+    const { update, append, remove, fields } = useFieldArrayMethods
     const { attachments, isUploading, addFiles, removeAttachment, clearAttachments } = useNoteAttachments({
       maxNumberOfFiles: 10,
     })
@@ -79,7 +79,10 @@ export const SupportingInformationModal = observer(
       clearAttachments()
     }, [isOpen, supportingInformationRequest?.id])
 
-    const index = fields.findIndex((field) => field.id === supportingInformationRequest?.id)
+    const requestFieldId = (supportingInformationRequest as { fieldId?: string } | undefined)?.fieldId
+    const index = fields.findIndex((field) =>
+      supportingInformationRequest?.id ? field.id === supportingInformationRequest.id : field.fieldId === requestFieldId
+    )
 
     const handleClose = () => {
       clearAttachments()
@@ -115,9 +118,9 @@ export const SupportingInformationModal = observer(
     }
 
     const handleDelete = () => {
-      if (!supportingInformationRequest?.id) return
-      update(index, { _destroy: true, id: supportingInformationRequest.id })
-      onSave().then(handleClose)
+      if (index < 0) return
+      remove(index)
+      handleClose()
     }
 
     const handleSaveFulfillment = () => {
@@ -282,22 +285,18 @@ export const SupportingInformationModal = observer(
                       {t("permitApplication.show.revision.explanationForInformationHelper")}
                     </FormHelperText>
                   </FormControl>
-                  {actionButtons(
-                    supportingInformationRequest ? t("ui.change") : t("ui.add"),
-                    handleUpsert,
-                    !title.trim() || isUploading
-                  )}
-                  {supportingInformationRequest && (
-                    <Button
-                      leftIcon={<Trash />}
-                      variant="link"
-                      color="text.primary"
-                      onClick={handleDelete}
-                      w="fit-content"
-                    >
-                      {t("ui.delete")}
-                    </Button>
-                  )}
+                  <Flex w="full" justify="space-between" align="center">
+                    {actionButtons(
+                      supportingInformationRequest ? t("ui.change") : t("ui.add"),
+                      handleUpsert,
+                      !title.trim() || isUploading
+                    )}
+                    {supportingInformationRequest && (
+                      <Button color="semantic.error" onClick={handleDelete} leftIcon={<Trash />} variant="link" px={2}>
+                        {t("ui.delete")}
+                      </Button>
+                    )}
+                  </Flex>
                 </>
               )}
             </Flex>

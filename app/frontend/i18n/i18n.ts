@@ -2194,7 +2194,7 @@ Thank you,
               whyRevisionNeeded: "Why this revision is needed",
               explanationToApplicant: "Explanation to applicant (optional)",
               explanationToApplicantHelper: "Explain to the applicant why you're requesting this revision.",
-              explanationForInformationHelper: "Explain to the applicant why you're requesting this information.",
+              explanationForInformationHelper: "Explain to the applicant why you are requesting this information.",
               nameRequestedInformation: "Name the requested information",
               nameRequestedInformationHelper:
                 "Use a clear name, like 'Site plan' or 'Letter of assurance.' Request only one piece of information at a time.",
