@@ -48,7 +48,7 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
   const [query, setQuery] = useState("")
   const [note, setNote] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const showSubmitterMessage = !!currentPermitProject && !currentPermitProject.isOwner
+  const showCreationMessage = !!currentPermitProject && !currentPermitProject.isOwner
 
   const filteredTemplates = templateVersions.filter((tv) => tv.matchesSearchQuery(query))
   const groupedTemplates = groupTemplateVersionsByCategory(filteredTemplates)
@@ -84,7 +84,7 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
       }))
       const response = await (currentPermitProject as any).bulkCreatePermitApplications(
         params,
-        showSubmitterMessage ? note : undefined
+        showCreationMessage ? note : undefined
       )
       if (response?.ok) {
         currentPermitProject.resetIsFullyLoaded()
@@ -180,7 +180,7 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
           </Flex>
         </Box>
 
-        {showSubmitterMessage && (
+        {showCreationMessage && (
           <Box w={{ base: "full", md: "50%" }}>
             <Heading as="h2" variant="yellowline">
               {t("permitProject.addPermits.messageForSubmitter.heading")}

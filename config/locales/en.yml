@@ -202,6 +202,7 @@ en:
       notify_block_status_ready: "Requirement block status ready"
       notify_review_started: "Your application is now under review: %{permit_application_number}"
       notify_application_revisions_requested: "Changes requested for your permit application %{permit_application_number}"
+      notify_applications_added: "%{jurisdiction_name} added permit applications to your project"
       remind_reviewer: "Your report on outstanding permit applications"
       remind_resource_update: "Reminder: Review your jurisdiction resources"
       submission_contact_confirm: "Confirm submission inbox email"
@@ -1306,6 +1307,10 @@ en:
       submission_notification: "Your application %{number} has been received by %{jurisdiction_name} and is pending review."
       resubmission_notification: "Your revised application %{number} has been received by %{jurisdiction_name} and is pending review."
       revisions_request_notification: "%{jurisdiction_name} has reviewed your application %{number} and has requested revisions. Please review and re-submit."
+      applications_added_notification:
+        one: "%{jurisdiction_name} added a permit application to your project: %{applications}."
+        other: "%{jurisdiction_name} added %{count} permit applications to your project: %{applications}."
+      applications_added_message: "Message: %{note}"
       review_started_notification: "%{jurisdiction_name} has started reviewing your application %{number}."
     permit_collaboration:
       submission_delegatee_collaboration_notification: "Collaboration request from %{author_name}. You have been assigned as a designated submitter for permit application %{number}."

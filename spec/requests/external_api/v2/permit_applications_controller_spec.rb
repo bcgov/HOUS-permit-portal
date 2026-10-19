@@ -675,7 +675,7 @@ RSpec.describe "External API v2 permit applications", type: :request do
         expect(
           SupportingDocumentsZipper
             .new(permit_application.id)
-            .send(:documents_to_zip)
+            .send(:select_documents)
             .map(&:id)
         ).to include(fulfillment.id)
       end

@@ -546,6 +546,7 @@ export enum ENotificationActionType {
   permitBlockStatusReady = "permit_block_status_ready",
   applicationSubmission = "application_submission",
   applicationRevisionsRequest = "application_revisions_request",
+  applicationsAdded = "applications_added",
   reviewStarted = "review_started",
   stepCodeReportGenerated = "step_code_report_generated",
   preCheckSubmitted = "pre_check_submitted",

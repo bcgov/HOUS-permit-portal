@@ -1,8 +1,4 @@
-# frozen_string_literal: true
-
-class RenameApplicantMessageNotesToJurisdictionMessage < ActiveRecord::Migration[
-  7.2
-]
+class RenameApplicantMessage < ActiveRecord::Migration[7.2]
   def up
     execute <<~SQL.squish
       UPDATE notes

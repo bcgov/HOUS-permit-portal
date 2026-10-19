@@ -311,6 +311,14 @@ class Api::PermitProjectsController < Api::ApplicationController
     end
 
     if errors.empty?
+      if created.first&.created_by_type == "Jurisdiction"
+        NotificationService.publish_applications_added_event(
+          @permit_project,
+          created,
+          note_body
+        )
+      end
+
       render_success created,
                      "permit_application.bulk_create_success",
                      {

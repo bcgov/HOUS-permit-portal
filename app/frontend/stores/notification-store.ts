@@ -106,6 +106,12 @@ const linkGenerators: Partial<Record<ENotificationActionType, LinkGenerator>> = 
       `/permit-applications/${(notification.objectData as IPermitNotificationObjectData).permitApplicationId}/edit`
     ),
 
+  [ENotificationActionType.applicationsAdded]: (notification) => {
+    const projectId = (notification.objectData as { permitProjectId?: string })?.permitProjectId
+    if (!projectId) return []
+    return showLink(`/projects/${projectId}`)
+  },
+
   [ENotificationActionType.reviewStarted]: (notification) =>
     showLink(
       `/permit-applications/${(notification.objectData as IPermitNotificationObjectData).permitApplicationId}/edit`

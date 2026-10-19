@@ -30,6 +30,7 @@ class Note < ApplicationRecord
   validates :noteable_type, inclusion: { in: NOTEABLE_TYPES }
   validate :permit_project_matches_noteable
   validate :kind_matches_noteable
+  validate :creation_message_from_jurisdiction
 
   after_create :increment_meeting_notes_count
   after_destroy :decrement_meeting_notes_count
@@ -134,6 +135,18 @@ class Note < ApplicationRecord
     return if expected.blank? || noteable_type == expected
 
     errors.add(:noteable_type, :invalid)
+  end
+
+  def creation_message_from_jurisdiction
+    return unless creation_message?
+    return unless noteable.is_a?(PermitApplication)
+
+    jurisdiction_id = noteable.jurisdiction_id
+    if jurisdiction_id.present? && user&.review_staff_of?(jurisdiction_id)
+      return
+    end
+
+    errors.add(:user, :invalid)
   end
 
   def jurisdiction_name

@@ -94,6 +94,30 @@ RSpec.describe Note, type: :model do
       expect(application.notes).to be_empty
     end
 
+    it "rejects a creation message unless the author is that jurisdiction's review staff" do
+      application = create(:permit_application)
+      outsider = create(:user, :reviewer)
+      submitter_note =
+        build(
+          :note,
+          noteable: application,
+          kind: :creation_message,
+          user: application.submitter
+        )
+      outsider_note =
+        build(
+          :note,
+          noteable: application,
+          kind: :creation_message,
+          user: outsider
+        )
+
+      expect(submitter_note).not_to be_valid
+      expect(submitter_note.errors[:user]).to be_present
+      expect(outsider_note).not_to be_valid
+      expect(outsider_note.errors[:user]).to be_present
+    end
+
     it "rejects a creation message on a meeting or submission version" do
       meeting_note =
         build(
