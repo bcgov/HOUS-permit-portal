@@ -22,10 +22,10 @@ module ExternalApi
     CACHE_ID_FORMAT =
       /\A[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/[^\/]+\z/i
 
-    def initialize(permit_application, items, applicant_note: nil)
+    def initialize(permit_application, items, jurisdiction_note: nil)
       @permit_application = permit_application
       @items = items
-      @applicant_note = applicant_note
+      @jurisdiction_note = jurisdiction_note
     end
 
     def call
@@ -44,24 +44,24 @@ module ExternalApi
         normalize_items!.each_with_index.map do |item, index|
           resolve_item(item, index)
         end
-      validate_applicant_note!
+      validate_jurisdiction_note!
 
       version.revision_requests.destroy_all
       snapshots.each { |attrs| version.revision_requests.create!(attrs) }
       Note.upsert_revision_message!(
         submission_version: version,
-        kind: :applicant_message,
-        body: @applicant_note,
+        kind: :jurisdiction_message,
+        body: @jurisdiction_note,
         user: nil
       )
     end
 
     private
 
-    def validate_applicant_note!
-      return if @applicant_note.nil? || @applicant_note.is_a?(String)
+    def validate_jurisdiction_note!
+      return if @jurisdiction_note.nil? || @jurisdiction_note.is_a?(String)
 
-      raise Error, "applicant_note must be a string."
+      raise Error, "jurisdiction_note must be a string."
     end
 
     def normalize_items!

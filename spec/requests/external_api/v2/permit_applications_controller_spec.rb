@@ -396,7 +396,7 @@ RSpec.describe "External API v2 permit applications", type: :request do
         { "data" => { form_key => "123 Main St" } }
       )
       expect(
-        permit_application.latest_submission_version.notes.applicant_message
+        permit_application.latest_submission_version.notes.jurisdiction_message
       ).to be_empty
     end
 
@@ -404,7 +404,7 @@ RSpec.describe "External API v2 permit applications", type: :request do
       update_status(
         "revisions_requested",
         revision_requests: [revision_item],
-        applicant_note: "Please update the address."
+        jurisdiction_note: "Please update the address."
       )
 
       expect(response).to have_http_status(:ok)
@@ -413,7 +413,7 @@ RSpec.describe "External API v2 permit applications", type: :request do
           .reload
           .latest_submission_version
           .notes
-          .applicant_message
+          .jurisdiction_message
           .first
       expect(note.body).to eq("<p>Please update the address.</p>")
       expect(note.user_id).to be_nil
@@ -424,7 +424,7 @@ RSpec.describe "External API v2 permit applications", type: :request do
       update_status(
         "revisions_requested",
         revision_requests: [revision_item],
-        applicant_note: "  "
+        jurisdiction_note: "  "
       )
 
       expect(response).to have_http_status(:ok)
@@ -433,7 +433,7 @@ RSpec.describe "External API v2 permit applications", type: :request do
           .reload
           .latest_submission_version
           .notes
-          .applicant_message
+          .jurisdiction_message
       ).to be_empty
     end
 
@@ -479,12 +479,15 @@ RSpec.describe "External API v2 permit applications", type: :request do
       expect(permit_application.reload).to be_newly_submitted
     end
 
-    it "rejects applicant_note on a non-revision status write" do
-      update_status("in_review", applicant_note: "Please update the address.")
+    it "rejects jurisdiction_note on a non-revision status write" do
+      update_status(
+        "in_review",
+        jurisdiction_note: "Please update the address."
+      )
 
       expect(response).to have_http_status(:unprocessable_content)
       expect(JSON.parse(response.body).dig("meta", "message")).to include(
-        "applicant_note is only accepted when status is 'revisions_requested'"
+        "jurisdiction_note is only accepted when status is 'revisions_requested'"
       )
       expect(permit_application.reload).to be_newly_submitted
     end

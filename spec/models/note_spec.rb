@@ -29,7 +29,7 @@ RSpec.describe Note, type: :model do
         build(
           :note,
           noteable: application.latest_submission_version,
-          kind: :applicant_message,
+          kind: :jurisdiction_message,
           user: nil
         )
 
@@ -45,7 +45,7 @@ RSpec.describe Note, type: :model do
         build(
           :note,
           noteable: application.latest_submission_version,
-          kind: :applicant_message,
+          kind: :jurisdiction_message,
           user: application.submitter
         )
 

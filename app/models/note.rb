@@ -4,13 +4,13 @@ class Note < ApplicationRecord
   sanitizable :body
 
   NOTEABLE_TYPES = %w[ProjectMeeting SubmissionVersion PermitApplication].freeze
-  REVISION_KINDS = %w[applicant_message submitter_message].freeze
+  REVISION_KINDS = %w[jurisdiction_message submitter_message].freeze
 
   enum :kind,
        {
          meeting: "meeting",
-         applicant_message: "applicant_message", # is a message TO the applicant
-         submitter_message: "submitter_message", # is a message TO the reviewer
+         jurisdiction_message: "jurisdiction_message", # written by the jurisdiction
+         submitter_message: "submitter_message", # written by the submitter
          creation_message: "creation_message" # is a message TO the submitter about an added application
        },
        default: "meeting"

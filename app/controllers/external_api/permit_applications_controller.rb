@@ -45,10 +45,10 @@ class ExternalApi::PermitApplicationsController < ExternalApi::ApplicationContro
       )
     end
 
-    if target_status != "revisions_requested" && params.key?(:applicant_note)
+    if target_status != "revisions_requested" && params.key?(:jurisdiction_note)
       return(
         render_status_error(
-          "applicant_note is only accepted when status is 'revisions_requested'."
+          "jurisdiction_note is only accepted when status is 'revisions_requested'."
         )
       )
     end
@@ -71,7 +71,7 @@ class ExternalApi::PermitApplicationsController < ExternalApi::ApplicationContro
         ExternalApi::ApplyRevisionRequests.new(
           @permit_application,
           params[:revision_requests],
-          applicant_note: params[:applicant_note]
+          jurisdiction_note: params[:jurisdiction_note]
         ).call
         @permit_application.finalize_revision_requests!
       else

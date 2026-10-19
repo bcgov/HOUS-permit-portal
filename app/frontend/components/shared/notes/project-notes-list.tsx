@@ -79,7 +79,7 @@ export const ProjectNotesList = observer(
             const meetingPath = note.projectMeetingId ? getMeetingPath(note) : undefined
             const applicationPath = note.permitApplicationId ? getApplicationPath?.(note) : undefined
             const kindLabel =
-              note.kind === ENoteKind.applicantMessage
+              note.kind === ENoteKind.jurisdictionMessage
                 ? t("submissionInbox.projectDetail.noteToApplicant")
                 : note.kind === ENoteKind.submitterMessage
                   ? t("submissionInbox.projectDetail.messageFromSubmitter")

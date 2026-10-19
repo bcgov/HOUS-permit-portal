@@ -51,7 +51,7 @@ interface IRevisionSideBarProps {
 
 export interface IRevisionRequestForm {
   revisionRequestsAttributes: IRevisionRequestsAttributes[]
-  applicantNote?: string
+  jurisdictionNote?: string
 }
 
 export const RevisionSideBar = observer(
@@ -552,7 +552,7 @@ const SubmitterRequestsPanel = observer(
 
     return (
       <Box flex={1} pb={8}>
-        <ApplicantNoteBlock note={permitApplication.latestSubmissionVersion?.applicantNote} />
+        <ApplicantNoteBlock note={permitApplication.latestSubmissionVersion?.jurisdictionNote} />
         <RequestSection
           title={t("permitApplication.show.revision.revisionsSection")}
           emptyText={revisionRequests.length === 0 ? t("permitApplication.show.revision.revisionsEmpty") : undefined}

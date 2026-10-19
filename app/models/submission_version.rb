@@ -84,8 +84,8 @@ class SubmissionVersion < ApplicationRecord
 
   delegate :permit_project, :sandbox, to: :permit_application
 
-  def applicant_note
-    notes.applicant_message.pick(:body)
+  def jurisdiction_note
+    notes.jurisdiction_message.pick(:body)
   end
 
   def submitter_note

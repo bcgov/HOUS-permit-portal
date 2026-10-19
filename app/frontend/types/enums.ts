@@ -74,7 +74,7 @@ export enum ENoteableType {
 
 export enum ENoteKind {
   meeting = "meeting",
-  applicantMessage = "applicant_message",
+  jurisdictionMessage = "jurisdiction_message",
   submitterMessage = "submitter_message",
   creationMessage = "creation_message",
 }
