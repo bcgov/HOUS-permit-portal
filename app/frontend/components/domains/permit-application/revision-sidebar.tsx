@@ -194,15 +194,16 @@ export const RevisionSideBar = observer(
     const revisionsSent = !forSubmitter && permitApplication.isRevisionsRequested
     const sentButtonProps = revisionsSent
       ? {
-          color: "white",
+          bg: "white",
+          color: "text.primary",
           borderColor: "white",
-          bg: "transparent",
-          _hover: { bg: "whiteAlpha.200", color: "white" },
+          fontWeight: "bold",
+          _hover: { bg: "white", color: "text.primary" },
           _disabled: {
+            bg: "whiteAlpha.400",
             color: "white",
-            borderColor: "white",
-            bg: "transparent",
-            opacity: 0.7,
+            borderColor: "whiteAlpha.500",
+            opacity: 1,
             cursor: "not-allowed",
           },
         }
@@ -244,13 +245,14 @@ export const RevisionSideBar = observer(
                 as="span"
                 align="center"
                 justify="center"
-                bg="white"
-                color="text.primary"
+                bg={onDark ? "semantic.success" : "white"}
+                color={onDark ? "white" : "text.primary"}
                 borderRadius="full"
                 minW={6}
                 h={6}
                 px={1}
                 fontSize="sm"
+                fontWeight="bold"
               >
                 {packageItemCount}
               </Flex>
