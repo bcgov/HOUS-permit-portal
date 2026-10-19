@@ -962,7 +962,8 @@ paths:
     post:
       summary: Adds one or more draft permit applications to a project the key can
         already read. Each item is a requirement template id, resolved to that
-        template's published version. The batch is all or nothing. Sandbox and
+        template's published version. An optional note is copied onto each draft
+        as a message the submitter can see. The batch is all or nothing. Sandbox and
         jurisdiction come from the project. Project GET still omits the new drafts
         until one is submitted, and project state does not change.
       tags:
@@ -984,6 +985,10 @@ paths:
               required:
               - permit_applications
               properties:
+                note:
+                  type: string
+                  description: Optional message copied onto each new draft for the
+                    submitter. Blank messages are ignored.
                 permit_applications:
                   type: array
                   minItems: 1

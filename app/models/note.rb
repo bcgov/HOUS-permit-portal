@@ -142,11 +142,19 @@ class Note < ApplicationRecord
     return unless noteable.is_a?(PermitApplication)
 
     jurisdiction_id = noteable.jurisdiction_id
-    if jurisdiction_id.present? && user&.review_staff_of?(jurisdiction_id)
-      return
-    end
+    return if jurisdiction_authored?(jurisdiction_id)
 
     errors.add(:user, :invalid)
+  end
+
+  # A signed-in reviewer, or the jurisdiction itself when it created the draft
+  # through the external API (no user on the request).
+  def jurisdiction_authored?(jurisdiction_id)
+    return false if jurisdiction_id.blank?
+    return true if user&.review_staff_of?(jurisdiction_id)
+
+    user.blank? && noteable.created_by_type == "Jurisdiction" &&
+      noteable.created_by_id == jurisdiction_id
   end
 
   def jurisdiction_name

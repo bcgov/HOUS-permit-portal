@@ -94,6 +94,32 @@ RSpec.describe Note, type: :model do
       expect(application.notes).to be_empty
     end
 
+    it "allows a creation message with no user when the jurisdiction created the application" do
+      application = create(:permit_application)
+      application.update!(created_by: application.jurisdiction)
+      note =
+        Note.create_creation_message!(
+          permit_application: application,
+          body: "Please complete this application.",
+          user: nil
+        )
+
+      expect(note).to be_persisted
+      expect(note.user).to be_nil
+      expect(note.author_name_for(application.submitter)).to eq(
+        application.jurisdiction.qualified_name
+      )
+    end
+
+    it "rejects a creation message with no user when the jurisdiction did not create the application" do
+      application = create(:permit_application)
+      note =
+        build(:note, noteable: application, kind: :creation_message, user: nil)
+
+      expect(note).not_to be_valid
+      expect(note.errors[:user]).to be_present
+    end
+
     it "rejects a creation message unless the author is that jurisdiction's review staff" do
       application = create(:permit_application)
       outsider = create(:user, :reviewer)

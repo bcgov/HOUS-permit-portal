@@ -154,7 +154,7 @@ RSpec.describe "external_api/v2/permit_projects",
   end
 
   path "/permit_projects/{id}/permit_applications" do
-    post "Adds draft permit applications from requirement template ids. Each id resolves to that template's published version. The batch is all or nothing. Project GET still omits the drafts until one is submitted." do
+    post "Adds draft permit applications from requirement template ids. Each id resolves to that template's published version. An optional note is copied onto each draft as a message the submitter can see. The batch is all or nothing. Project GET still omits the drafts until one is submitted." do
       tags "Permit projects"
       consumes "application/json"
       produces "application/json"
@@ -169,6 +169,11 @@ RSpec.describe "external_api/v2/permit_projects",
                   type: :object,
                   required: %w[permit_applications],
                   properties: {
+                    note: {
+                      type: :string,
+                      description:
+                        "Optional message copied onto each new draft for the submitter."
+                    },
                     permit_applications: {
                       type: :array,
                       items: {

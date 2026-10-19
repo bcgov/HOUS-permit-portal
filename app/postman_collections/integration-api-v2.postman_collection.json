@@ -319,7 +319,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"permit_applications\": [\n    { \"requirement_template_id\": \"{{requirement_template_id}}\" }\n  ]\n}",
+              "raw": "{\n  \"note\": \"Please complete these applications.\",\n  \"permit_applications\": [\n    { \"requirement_template_id\": \"{{requirement_template_id}}\" }\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -337,7 +337,7 @@
                 "permit_applications"
               ]
             },
-            "description": "Adds draft permits to a project the key can already read. Each requirement_template_id resolves to that template's published version. The project owner is the submitter. Sandbox, jurisdiction, and template_version_id on the body are ignored. An empty list, or any unknown, unpublished, or discarded id, returns 422 and creates nothing. The new drafts stay off project GET until one is submitted, and project state does not change."
+            "description": "Adds draft permits to a project the key can already read. Each requirement_template_id resolves to that template's published version. The project owner is the submitter. Optional note is copied onto each new draft as a message the submitter can see; a blank note is ignored. Sandbox, jurisdiction, and template_version_id on the body are ignored. An empty list, or any unknown, unpublished, or discarded id, returns 422 and creates nothing. The new drafts stay off project GET until one is submitted, and project state does not change."
           },
           "response": []
         }

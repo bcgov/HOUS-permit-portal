@@ -32,10 +32,13 @@ RSpec.describe "External API v2 permit projects", type: :request do
   def post_drafts(
     permit_applications,
     project: permit_project,
-    headers: auth_headers
+    headers: auth_headers,
+    note: nil
   )
+    body = { permit_applications: permit_applications }
+    body[:note] = note unless note.nil?
     post "/external_api/v2/permit_projects/#{project.id}/permit_applications",
-         params: { permit_applications: permit_applications }.to_json,
+         params: body.to_json,
          headers: headers
   end
 
@@ -467,6 +470,52 @@ RSpec.describe "External API v2 permit projects", type: :request do
           .map { |row| row["id"] }
       expect(child_ids).to include(permit_application.id)
       expect(child_ids & created.map(&:id)).to be_empty
+    end
+
+    it "publishes the note on each draft and notifies the owner once" do
+      version = published_template_version
+      allow(NotificationPushJob).to receive(:perform_async)
+      allow(PermitHubMailer).to receive(:notify_applications_added).and_return(
+        instance_double("MailerMessage", deliver_later: true)
+      )
+
+      post_drafts(
+        [
+          { requirement_template_id: version.requirement_template_id },
+          { requirement_template_id: version.requirement_template_id }
+        ],
+        note: "Please complete these applications."
+      )
+
+      expect(response).to have_http_status(:ok)
+      created =
+        permit_project.permit_applications.where.not(id: permit_application.id)
+      notes =
+        Note.creation_message.where(
+          noteable_type: "PermitApplication",
+          noteable_id: created.select(:id)
+        )
+      expect(notes.size).to eq(2)
+      expect(notes.map(&:user)).to all(be_nil)
+      expect(notes.map(&:published_at)).to all(be_present)
+      expect(notes.map { |note| Note.plain_body(note.body) }).to all(
+        eq("Please complete these applications.")
+      )
+      expect(NotificationPushJob).to have_received(:perform_async).once
+      expect(PermitHubMailer).to have_received(:notify_applications_added).once
+    end
+
+    it "does not publish a blank note" do
+      version = published_template_version
+
+      expect do
+        post_drafts(
+          [{ requirement_template_id: version.requirement_template_id }],
+          note: "<p></p>"
+        )
+      end.not_to change(Note, :count)
+
+      expect(response).to have_http_status(:ok)
     end
 
     it "returns 422 and creates nothing when one requirement template is unknown" do
