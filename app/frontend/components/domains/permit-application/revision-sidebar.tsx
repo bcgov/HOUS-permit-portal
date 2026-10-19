@@ -232,32 +232,33 @@ export const RevisionSideBar = observer(
 
       return (
         <Flex gap={4}>
-          <Button
-            variant={onDark ? "secondary" : "primary"}
-            border={onDark ? undefined : 0}
-            onClick={handleSendClick}
-            isDisabled={permitApplication.isRevisionsRequested}
-            {...(onDark ? sentButtonProps : {})}
-          >
-            <Flex as="span" align="center" gap={2}>
-              {t("permitApplication.show.revision.send")}
-              <Flex
-                as="span"
-                align="center"
-                justify="center"
-                bg={onDark ? "semantic.success" : "white"}
-                color={onDark ? "white" : "text.primary"}
-                borderRadius="full"
-                minW={6}
-                h={6}
-                px={1}
-                fontSize="sm"
-                fontWeight="bold"
-              >
-                {packageItemCount}
+          {!revisionsSent && (
+            <Button
+              variant={onDark ? "secondary" : "primary"}
+              border={onDark ? undefined : 0}
+              onClick={handleSendClick}
+              {...(onDark ? sentButtonProps : {})}
+            >
+              <Flex as="span" align="center" gap={2}>
+                {t("permitApplication.show.revision.send")}
+                <Flex
+                  as="span"
+                  align="center"
+                  justify="center"
+                  bg={onDark ? "semantic.success" : "white"}
+                  color={onDark ? "white" : "text.primary"}
+                  borderRadius="full"
+                  minW={6}
+                  h={6}
+                  px={1}
+                  fontSize="sm"
+                  fontWeight="bold"
+                >
+                  {packageItemCount}
+                </Flex>
               </Flex>
-            </Flex>
-          </Button>
+            </Button>
+          )}
           {onCancel && (
             <Button variant="secondary" onClick={onCancel} {...(onDark ? sentButtonProps : {})}>
               {t("permitApplication.show.revision.saveAndExit")}
