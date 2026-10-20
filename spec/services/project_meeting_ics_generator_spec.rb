@@ -53,6 +53,12 @@ RSpec.describe ProjectMeetingIcsGenerator do
       expect(ics).to include("DTEND;TZID=America/Vancouver:20260120T103000")
     end
 
+    it "keeps winter meetings at UTC minus seven after the final clock change" do
+      project_meeting.confirmed_date = Time.iso8601("2027-01-15T20:00:00Z")
+      expect(ics).to include("DTSTART;TZID=America/Vancouver:20270115T130000")
+      expect(ics).to include("DTEND;TZID=America/Vancouver:20270115T140000")
+    end
+
     it "uses a stable UID for the meeting" do
       expect(ics).to include(
         "UID:project-meeting-#{project_meeting.id}@example.test"

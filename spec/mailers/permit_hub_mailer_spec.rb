@@ -203,6 +203,23 @@ RSpec.describe PermitHubMailer, type: :mailer do
     )
   end
 
+  %w[user_archive_warning user_delete_warning].each do |template|
+    it "renders #{template} on the Vancouver day after the last clock change" do
+      mailer.instance_variable_set(:@user, User.new(first_name: "Example"))
+      mailer.instance_variable_set(
+        :@scheduled_date,
+        Time.iso8601("2027-02-01T07:30:00Z")
+      )
+      html =
+        mailer.render_to_string(
+          template: "permit_hub_mailer/#{template}",
+          layout: false
+        )
+      expect(html).to include("February 1, 2027 at 12:30 AM Pacific Time")
+      expect(html).not_to include("January 31")
+    end
+  end
+
   it "sends onboarding and new jurisdiction membership emails" do
     jurisdiction = instance_double("Jurisdiction")
     allow(Jurisdiction).to receive(:find).with("j-1").and_return(jurisdiction)
@@ -416,7 +433,7 @@ RSpec.describe PermitHubMailer, type: :mailer do
         contact_email: "jane@example.com",
         contact_name: "Jane Smith",
         contact_method: "videoconference",
-        confirmed_date: Time.zone.parse("2026-01-20 09:30"),
+        confirmed_date: Time.iso8601("2027-01-15T20:00:00Z"),
         meeting_url: "https://example.com/meeting",
         permit_project: permit_project,
         updated_at: Time.zone.parse("2026-01-20 08:00")
@@ -426,13 +443,20 @@ RSpec.describe PermitHubMailer, type: :mailer do
 
     mailer.notify_project_meeting_scheduled(project_meeting)
 
+    expect(mailer.instance_variable_get(:@meeting_datetime)).to eq(
+      "Jan 15, 2027 at 1:00 pm PT"
+    )
+
     expect(attachments_hash.keys.first).to end_with(".ics")
     expect(attachments_hash.values.first[:mime_type]).to include(
       "text/calendar"
     ).and include("method=REQUEST")
     expect(attachments_hash.values.first[:content]).to include(
       "BEGIN:VCALENDAR"
-    ).and include("METHOD:REQUEST")
+    ).and include(
+            "METHOD:REQUEST",
+            "DTSTART;TZID=America/Vancouver:20270115T130000"
+          )
     expect(mailer).to have_received(:send_mail).with(
       email: "jane@example.com",
       template_key: "notify_project_meeting_scheduled"
