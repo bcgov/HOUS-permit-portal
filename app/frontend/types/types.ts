@@ -455,10 +455,16 @@ export interface ILicenseAgreement {
   acceptedAt: Date
 }
 
+export interface IDigitalSealChecks {
+  pendingCount: number
+  failedCount: number
+}
+
 export interface IPermitApplicationComplianceUpdate {
   id: string
   frontEndFormUpdate: Object
   formattedComplianceData: Object
+  digitalSealChecks?: IDigitalSealChecks
 }
 
 export interface IPermitNotificationObjectData {

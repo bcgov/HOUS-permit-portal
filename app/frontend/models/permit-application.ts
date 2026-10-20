@@ -16,6 +16,7 @@ import {
 import {
   ICompareRequirementsBoxData,
   ICompareRequirementsBoxDiff,
+  IDigitalSealChecks,
   IDownloadableFile,
   IFormIOBlock,
   IFormJson,
@@ -73,6 +74,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       formJson: types.maybeNull(types.frozen<IFormJson>()),
       submissionData: types.maybeNull(types.frozen<ISubmissionData>()),
       formattedComplianceData: types.maybeNull(types.frozen()),
+      digitalSealChecks: types.optional(types.frozen<IDigitalSealChecks>(), { pendingCount: 0, failedCount: 0 }),
       formCustomizations: types.maybeNull(types.frozen<ITemplateCustomization>()),
       unseenElectiveFieldIds: types.optional(types.array(types.string), []),
       unseenCustomizationChangeId: types.maybeNull(types.string),
@@ -826,6 +828,9 @@ export const PermitApplicationModel = types.snapshotProcessor(
       setFormattedComplianceData(data: Record<string, any>) {
         self.formattedComplianceData = data
       },
+      setDigitalSealChecks(data: IDigitalSealChecks) {
+        if (data) self.digitalSealChecks = data
+      },
       update: flow(function* ({ autosave, review, ...params }) {
         self.isLoading = true
         const response = yield self.environment.api.updatePermitApplication(self.id, params, review)
@@ -834,6 +839,8 @@ export const PermitApplicationModel = types.snapshotProcessor(
           if (!autosave) {
             self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
           }
+          // Keep readiness current without replacing an in-progress autosaved form.
+          if (permitApplication.digitalSealChecks) self.digitalSealChecks = permitApplication.digitalSealChecks
         }
         self.isLoading = false
         return response
@@ -916,6 +923,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       }),
       submit: flow(function* (params) {
         const response = yield self.environment.api.submitPermitApplication(self.id, params)
+        if (response.data?.meta?.digitalSealChecks) self.digitalSealChecks = response.data.meta.digitalSealChecks
         if (response.ok) {
           const { data: permitApplication } = response.data
           self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")

@@ -31,6 +31,22 @@ interface IProps {
   onSubmit?: () => void
 }
 
+export const DigitalSealChecksNotice = observer(function DigitalSealChecksNotice({
+  permitApplication,
+}: {
+  permitApplication: IPermitApplication
+}) {
+  const { t } = useTranslation()
+  const { pendingCount, failedCount } = permitApplication.digitalSealChecks
+  if (!pendingCount && !failedCount) return null
+  return (
+    <Box role="status" aria-live="polite">
+      {pendingCount > 0 && <Text>{t("permitApplication.new.digitalSealChecksPending")}</Text>}
+      {failedCount > 0 && <Text fontStyle="italic">{t("permitApplication.new.digitalSealChecksFailed")}</Text>}
+    </Box>
+  )
+})
+
 export const ProjectMeetingAdvisory = observer(function ProjectMeetingAdvisory({
   permitApplication,
 }: {
@@ -123,8 +139,13 @@ export const PermitApplicationSubmitModal = observer(function PermitApplicationS
               <Heading as="h3">{t("permitApplication.new.ready")}</Heading>
               <Text fontSize="lg">{t("permitApplication.new.confirmation")}</Text>
               <ProjectMeetingAdvisory permitApplication={permitApplication} />
+              <DigitalSealChecksNotice permitApplication={permitApplication} />
               <Flex justify="center" gap={6}>
-                <Button onClick={onSubmit} variant="primary">
+                <Button
+                  onClick={onSubmit}
+                  variant="primary"
+                  isDisabled={permitApplication.digitalSealChecks.pendingCount > 0}
+                >
                   {t("permitApplication.new.submitApplication")}
                 </Button>
                 <Button onClick={onClose} variant="secondary">

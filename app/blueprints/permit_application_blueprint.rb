@@ -91,6 +91,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
   view :extended do
     include_view :base
     fields :formatted_compliance_data,
+           :digital_seal_checks,
            :front_end_form_update,
            :form_customizations,
            :unseen_elective_field_ids,
@@ -202,7 +203,9 @@ class PermitApplicationBlueprint < Blueprinter::Base
 
   view :compliance_update do
     identifier :id
-    fields :formatted_compliance_data, :front_end_form_update
+    fields :formatted_compliance_data,
+           :front_end_form_update,
+           :digital_seal_checks
   end
 
   view :external_api do

@@ -411,6 +411,7 @@ export const PermitApplicationStoreModel = types
           self.permitApplicationMap
             .get(payloadData?.id)
             ?.setFormattedComplianceData(payloadData?.formattedComplianceData)
+          self.permitApplicationMap.get(payloadData?.id)?.setDigitalSealChecks(payloadData?.digitalSealChecks)
           document.dispatchEvent(event)
           break
         case EPermitApplicationSocketEventTypes.updateSupportingDocuments:

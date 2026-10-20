@@ -86,6 +86,63 @@ RSpec.describe PrintReports::Snapshot do
     ).to end_with(";show = false")
   end
 
+  it "freezes per-file seal results independently of later checks and application edits" do
+    key = "section|RBblock|design_file"
+    allow(application).to receive(:requirements_lookups).and_return(
+      key => {
+        "computedCompliance" => {
+          "module" => "DigitalSealValidator"
+        }
+      }
+    )
+    document =
+      create(
+        :supporting_document,
+        permit_application: application,
+        data_key: key,
+        compliance_data: {
+          status: "success",
+          result: []
+        }
+      )
+    answers = {
+      "data" => {
+        "section" => {
+          key => [{ "id" => document.file_id, "modelId" => document.id }]
+        }
+      }
+    }
+    version =
+      create(
+        :submission_version,
+        :with_report_snapshot,
+        permit_application: application,
+        form_json: schema,
+        submission_data: answers
+      )
+    original =
+      described_class.report(version, "application")[:digital_seal_results]
+    document.update!(
+      compliance_data: {
+        status: "failed",
+        error: "later failure"
+      }
+    )
+    application.update!(
+      status: :newly_submitted,
+      submission_data: {
+        "data" => {
+        }
+      }
+    )
+    expect(
+      described_class.report(version.reload, "application")[
+        :digital_seal_results
+      ]
+    ).to eq(original)
+    expect(original.dig(key, 0, "status")).to eq("not_found")
+  end
+
   it "uses the sandbox's explicit settings even when the application accessor differs" do
     sandbox =
       application.jurisdiction.sandboxes.find_by!(
