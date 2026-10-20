@@ -903,8 +903,9 @@ class PermitApplication < ApplicationRecord
 
   # ponytail: assign_creation_actors sets a jurisdiction when a reviewer creates
   # the draft. Anything else is created by the submitter.
+  # association reader skips PublicRecordable's unsaved readonly snapshot user.
   def assign_created_by_from_submitter
-    self.created_by ||= submitter
+    self.created_by ||= association(:submitter).reader
   end
 
   def update_collaboration_assignments
