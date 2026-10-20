@@ -798,7 +798,7 @@ export interface ISubmissionVersion {
   formJson: IFormJson
   submissionData: ISubmissionData
   revisionRequests: IRevisionRequest[]
-  applicantNote?: string | null
+  jurisdictionNote?: string | null
   submitterNote?: string | null
   viewedAt?: Date
   createdAt: number

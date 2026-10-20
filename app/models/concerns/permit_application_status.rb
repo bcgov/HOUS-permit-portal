@@ -231,7 +231,7 @@ module PermitApplicationStatus
 
     def handle_finalize_revision_requests
       update(revisions_requested_at: Time.current)
-      publish_revision_message(:applicant_message)
+      publish_revision_message(:jurisdiction_message)
       NotificationService.publish_application_revisions_request_event(self)
     end
 

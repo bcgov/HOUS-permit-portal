@@ -29,7 +29,7 @@ RSpec.describe Note, type: :model do
         build(
           :note,
           noteable: application.latest_submission_version,
-          kind: :applicant_message,
+          kind: :jurisdiction_message,
           user: nil
         )
 
@@ -45,7 +45,7 @@ RSpec.describe Note, type: :model do
         build(
           :note,
           noteable: application.latest_submission_version,
-          kind: :applicant_message,
+          kind: :jurisdiction_message,
           user: application.submitter
         )
 
@@ -58,6 +58,111 @@ RSpec.describe Note, type: :model do
 
       expect(note).not_to be_valid
       expect(note.errors[:noteable_type]).to be_present
+    end
+
+    it "allows a creation message on a permit application and copies the project" do
+      application = create(:permit_application)
+      reviewer =
+        create(:user, :reviewer, jurisdiction: application.jurisdiction)
+      note =
+        Note.create_creation_message!(
+          permit_application: application,
+          body: "Please complete this application.",
+          user: reviewer
+        )
+
+      expect(note).to be_persisted
+      expect(note.kind).to eq("creation_message")
+      expect(note.permit_project).to eq(application.permit_project)
+      expect(note.published_at).to be_present
+      expect(Note.visible_on_project).to include(note)
+      expect(note.author_name_for(application.submitter)).to eq(
+        application.permit_project.jurisdiction.qualified_name
+      )
+    end
+
+    it "skips a blank creation message" do
+      application = create(:permit_application)
+
+      expect(
+        Note.create_creation_message!(
+          permit_application: application,
+          body: "<p></p>",
+          user: application.submitter
+        )
+      ).to be_nil
+      expect(application.notes).to be_empty
+    end
+
+    it "allows a creation message with no user when the jurisdiction created the application" do
+      application = create(:permit_application)
+      application.update!(created_by: application.jurisdiction)
+      note =
+        Note.create_creation_message!(
+          permit_application: application,
+          body: "Please complete this application.",
+          user: nil
+        )
+
+      expect(note).to be_persisted
+      expect(note.user).to be_nil
+      expect(note.author_name_for(application.submitter)).to eq(
+        application.jurisdiction.qualified_name
+      )
+    end
+
+    it "rejects a creation message with no user when the jurisdiction did not create the application" do
+      application = create(:permit_application)
+      note =
+        build(:note, noteable: application, kind: :creation_message, user: nil)
+
+      expect(note).not_to be_valid
+      expect(note.errors[:user]).to be_present
+    end
+
+    it "rejects a creation message unless the author is that jurisdiction's review staff" do
+      application = create(:permit_application)
+      outsider = create(:user, :reviewer)
+      submitter_note =
+        build(
+          :note,
+          noteable: application,
+          kind: :creation_message,
+          user: application.submitter
+        )
+      outsider_note =
+        build(
+          :note,
+          noteable: application,
+          kind: :creation_message,
+          user: outsider
+        )
+
+      expect(submitter_note).not_to be_valid
+      expect(submitter_note.errors[:user]).to be_present
+      expect(outsider_note).not_to be_valid
+      expect(outsider_note.errors[:user]).to be_present
+    end
+
+    it "rejects a creation message on a meeting or submission version" do
+      meeting_note =
+        build(
+          :note,
+          noteable: build(:project_meeting, :open),
+          kind: :creation_message
+        )
+      application = create(:permit_application, :newly_submitted)
+      version_note =
+        build(
+          :note,
+          noteable: application.latest_submission_version,
+          kind: :creation_message
+        )
+
+      expect(meeting_note).not_to be_valid
+      expect(meeting_note.errors[:noteable_type]).to be_present
+      expect(version_note).not_to be_valid
+      expect(version_note.errors[:noteable_type]).to be_present
     end
   end
 

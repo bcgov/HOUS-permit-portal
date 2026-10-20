@@ -12,10 +12,10 @@ class SubmissionVersionBlueprint < Blueprinter::Base
         current_user: options[:current_user]
       )
     end
-    field :applicant_note do |submission_version, _options|
+    field :jurisdiction_note do |submission_version, _options|
       next nil unless submission_version.request_package_visible_to_submitter?
 
-      submission_version.applicant_note
+      submission_version.jurisdiction_note
     end
     association :revision_requests,
                 blueprint: RevisionRequestBlueprint,
@@ -30,7 +30,7 @@ class SubmissionVersionBlueprint < Blueprinter::Base
 
   view :review_extended do
     include_view :extended
-    field :applicant_note
+    field :jurisdiction_note
     association :revision_requests,
                 blueprint: RevisionRequestBlueprint,
                 view: :extended

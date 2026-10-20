@@ -636,6 +636,104 @@ class NotificationService
     end
   end
 
+  def self.publish_applications_added_event(
+    permit_project,
+    applications,
+    note_body
+  )
+    return if applications.blank?
+    created_by_jurisdiction =
+      applications.all? do |application|
+        application.created_by_type == "Jurisdiction"
+      end
+    return unless created_by_jurisdiction
+
+    owner = permit_project.owner
+    return if owner.blank?
+
+    preference = owner.preference
+    notification_user_hash = {}
+
+    if preference&.enable_in_app_applications_added_notification
+      notification_user_hash[owner.id] = applications_added_notification_data(
+        permit_project,
+        applications,
+        note_body
+      )
+    end
+
+    if preference&.enable_email_applications_added_notification
+      PermitHubMailer.notify_applications_added(
+        permit_project,
+        applications,
+        note_body,
+        owner
+      )&.deliver_later
+    end
+
+    return if notification_user_hash.empty?
+
+    NotificationPushJob.perform_async(notification_user_hash)
+  end
+
+  def self.applications_added_notification_data(
+    permit_project,
+    applications,
+    note_body
+  )
+    note = Note.plain_body(note_body)
+    jurisdiction_name =
+      applications.map(&:jurisdiction_name).compact.uniq.join(", ")
+    action_text =
+      I18n.t(
+        "notification.permit_application.applications_added_notification",
+        jurisdiction_name: jurisdiction_name,
+        count: applications.size,
+        applications:
+          applications
+            .map { |application| application_added_label(application) }
+            .join(", ")
+      )
+    if note.present?
+      action_text = [
+        action_text,
+        I18n.t(
+          "notification.permit_application.applications_added_message",
+          note: note
+        )
+      ].join(" ")
+    end
+
+    object_data = {
+      "permit_project_id" => permit_project.id,
+      "applications" =>
+        applications.map do |application|
+          {
+            "id" => application.id,
+            "number" => application.number,
+            "nickname" => application.nickname
+          }
+        end
+    }
+    object_data["note"] = note if note.present?
+
+    {
+      "id" => SecureRandom.uuid,
+      "action_type" => Constants::NotificationActionTypes::APPLICATIONS_ADDED,
+      "action_text" => action_text,
+      "object_data" => object_data
+    }
+  end
+
+  def self.application_added_label(application)
+    number = application.number.presence || application.id
+    nickname = application.nickname.presence
+    nickname ? "#{number} (#{nickname})" : number.to_s
+  end
+
+  private_class_method :applications_added_notification_data,
+                       :application_added_label
+
   def self.publish_review_started_event(permit_application)
     notification_user_hash = {}
     notification_user_hash[

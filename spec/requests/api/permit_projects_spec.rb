@@ -419,6 +419,141 @@ RSpec.describe "Api::PermitProjects", type: :request, search: true do
       expect(response).to have_http_status(:forbidden)
     end
 
+    it "publishes one creation message per application when a reviewer adds them" do
+      reviewer = create(:user, :reviewer, jurisdiction:)
+      sign_in reviewer
+
+      post "/api/permit_projects/#{permit_project.id}/permit_applications",
+           params: {
+             note: "Please complete these applications.",
+             permit_applications: [
+               {
+                 template_version_id: template_version.id,
+                 jurisdiction_id: permit_project.jurisdiction_id
+               },
+               {
+                 template_version_id: template_version.id,
+                 jurisdiction_id: permit_project.jurisdiction_id
+               }
+             ]
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      applications = PermitApplication.where(permit_project: permit_project)
+      notes =
+        Note.where(
+          noteable_type: "PermitApplication",
+          noteable_id: applications.select(:id)
+        )
+      expect(notes.size).to eq(2)
+      expect(notes).to all(
+        have_attributes(kind: "creation_message", user: reviewer)
+      )
+      expect(notes.map(&:published_at)).to all(be_present)
+      expect(notes.map { |note| Note.plain_body(note.body) }).to all(
+        eq("Please complete these applications.")
+      )
+    end
+
+    it "notifies the project owner once when a reviewer adds applications" do
+      reviewer = create(:user, :reviewer, jurisdiction:)
+      sign_in reviewer
+      allow(NotificationPushJob).to receive(:perform_async)
+      allow(PermitHubMailer).to receive(:notify_applications_added).and_return(
+        instance_double("MailerMessage", deliver_later: true)
+      )
+
+      post "/api/permit_projects/#{permit_project.id}/permit_applications",
+           params: {
+             note: "Please complete these applications.",
+             permit_applications: [
+               {
+                 template_version_id: template_version.id,
+                 jurisdiction_id: permit_project.jurisdiction_id
+               },
+               {
+                 template_version_id: template_version.id,
+                 jurisdiction_id: permit_project.jurisdiction_id
+               }
+             ]
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      created_ids = json_response["data"].map { |row| row["id"] }
+      expect(created_ids.size).to eq(2)
+
+      expect(NotificationPushJob).to have_received(:perform_async).once
+      expect(NotificationPushJob).to have_received(:perform_async) do |hash|
+        payload = hash[owner.id]
+        expect(payload["action_type"]).to eq("applications_added")
+        expect(
+          payload.dig("object_data", "applications").map { |app| app["id"] }
+        ).to match_array(created_ids)
+        expect(payload.dig("object_data", "note")).to eq(
+          "Please complete these applications."
+        )
+      end
+      expect(PermitHubMailer).to have_received(:notify_applications_added).once
+      expect(PermitHubMailer).to have_received(
+        :notify_applications_added
+      ) do |project, applications, note, user|
+        expect(project).to eq(permit_project)
+        expect(applications.map(&:id)).to match_array(created_ids)
+        expect(note).to eq("Please complete these applications.")
+        expect(user).to eq(owner)
+      end
+    end
+
+    it "does not create a note for a blank message" do
+      reviewer = create(:user, :reviewer, jurisdiction:)
+      sign_in reviewer
+
+      expect do
+        post "/api/permit_projects/#{permit_project.id}/permit_applications",
+             params: {
+               note: "<p></p>",
+               permit_applications: [
+                 {
+                   template_version_id: template_version.id,
+                   jurisdiction_id: permit_project.jurisdiction_id
+                 }
+               ]
+             },
+             headers: headers,
+             as: :json
+      end.not_to change(Note, :count)
+
+      expect(response).to have_http_status(:ok)
+    end
+
+    it "does not create a note when the owner adds applications" do
+      allow(NotificationService).to receive(:publish_applications_added_event)
+
+      expect do
+        post "/api/permit_projects/#{permit_project.id}/permit_applications",
+             params: {
+               note: "Please complete these applications.",
+               permit_applications: [
+                 {
+                   template_version_id: template_version.id,
+                   jurisdiction_id: permit_project.jurisdiction_id
+                 }
+               ]
+             },
+             headers: headers,
+             as: :json
+      end.not_to change(Note, :count)
+
+      expect(response).to have_http_status(:ok)
+      expect(NotificationService).not_to have_received(
+        :publish_applications_added_event
+      )
+    end
+
     it "returns errors when any payload is invalid" do
       errors_double =
         instance_double(

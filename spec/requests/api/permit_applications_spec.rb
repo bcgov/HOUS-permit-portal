@@ -751,7 +751,7 @@ RSpec.describe "Api::PermitApplications", type: :request do
             sv["id"] == submitted_application.latest_submission_version.id
           end
       expect(version.fetch("revision_requests", [])).to eq([])
-      expect(version["applicant_note"]).to be_nil
+      expect(version["jurisdiction_note"]).to be_nil
 
       allow(NotificationService).to receive(
         :publish_application_revisions_request_event
@@ -759,7 +759,7 @@ RSpec.describe "Api::PermitApplications", type: :request do
       create(
         :note,
         noteable: submitted_application.latest_submission_version,
-        kind: :applicant_message,
+        kind: :jurisdiction_message,
         body: "<p>Please see the attached examples.</p>",
         user: reviewer
       )
@@ -778,14 +778,14 @@ RSpec.describe "Api::PermitApplications", type: :request do
       expect(version["revision_requests"].length).to eq(1)
       expect(payload["title"]).to eq("Site photos")
       expect(payload["revision_reference_documents"].length).to eq(2)
-      expect(version["applicant_note"]).to eq(
+      expect(version["jurisdiction_note"]).to eq(
         "<p>Please see the attached examples.</p>"
       )
       expect(
         submitted_application
           .latest_submission_version
           .notes
-          .applicant_message
+          .jurisdiction_message
           .first
           .published_at
       ).to be_present

@@ -82,11 +82,15 @@ RSpec.describe ExternalApi::ApplyRevisionRequests do
     described_class.new(
       permit_application,
       [item],
-      applicant_note: "Please fix the address"
+      jurisdiction_note: "Please fix the address"
     ).call
 
     note =
-      permit_application.latest_submission_version.notes.applicant_message.first
+      permit_application
+        .latest_submission_version
+        .notes
+        .jurisdiction_message
+        .first
     expect(note.body).to eq("<p>Please fix the address</p>")
     expect(note.user).to be_nil
   end
@@ -96,11 +100,14 @@ RSpec.describe ExternalApi::ApplyRevisionRequests do
       described_class.new(
         permit_application,
         [item],
-        applicant_note: {
+        jurisdiction_note: {
           text: "nope"
         }
       ).call
-    }.to raise_error(described_class::Error, "applicant_note must be a string.")
+    }.to raise_error(
+      described_class::Error,
+      "jurisdiction_note must be a string."
+    )
   end
 
   it "rejects the synthetic energy step code block" do

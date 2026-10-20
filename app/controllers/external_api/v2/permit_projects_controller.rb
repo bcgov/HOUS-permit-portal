@@ -73,6 +73,8 @@ class ExternalApi::V2::PermitProjectsController < ExternalApi::ApplicationContro
       )
     end
 
+    note_body = params.permit(:note)[:note]
+
     created =
       PermitApplication.transaction do
         template_ids.map do |template_id|
@@ -85,9 +87,20 @@ class ExternalApi::V2::PermitProjectsController < ExternalApi::ApplicationContro
               created_by: @permit_project.jurisdiction
             )
           permit_application.save!
+          Note.create_creation_message!(
+            permit_application: permit_application,
+            body: note_body,
+            user: nil
+          )
           permit_application
         end
       end
+
+    NotificationService.publish_applications_added_event(
+      @permit_project,
+      created,
+      note_body
+    )
 
     render_success created,
                    nil,

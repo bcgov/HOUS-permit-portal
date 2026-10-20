@@ -273,46 +273,81 @@ export const ReviewPermitApplicationScreen = observer(() => {
             position="sticky"
             zIndex={11}
             w="full"
-            px={4}
+            pl={currentPermitApplication.isRevisionsRequested ? 0 : 4}
+            pr={currentPermitApplication.isRevisionsRequested ? 6 : 4}
             py={2}
             bg={currentPermitApplication.isRevisionsRequested ? "semantic.success" : "theme.yellow"}
             color={currentPermitApplication.isRevisionsRequested ? "white" : undefined}
             justify="flex-start"
             align="center"
-            gap={4}
+            gap={currentPermitApplication.isRevisionsRequested ? 0 : 4}
             top={permitHeaderHeight}
           >
-            <Flex width={"sidebar.revisionWidth"} align="center" gap={2}>
-              <NotePencil size={24} />
-              <Heading fontSize="lg" mt={2} color="inherit">
-                {currentPermitApplication.isRevisionsRequested
-                  ? t("permitApplication.show.requestingRevisions")
-                  : t("permitApplication.show.addingRequests")}
-              </Heading>
-              <Spacer />
-              <Button
-                fontSize="sm"
-                h={8}
-                p={1}
-                variant="secondary"
-                color={currentPermitApplication.isRevisionsRequested ? "white" : undefined}
-                borderColor={currentPermitApplication.isRevisionsRequested ? "white" : undefined}
-                _hover={
-                  currentPermitApplication.isRevisionsRequested ? { bg: "whiteAlpha.200", color: "white" } : undefined
-                }
-                rightIcon={hideRevisionList ? <CaretDown /> : <CaretUp />}
-                onClick={() => setHideRevisionList((cur) => !cur)}
-              >
-                {hideRevisionList ? t("permitApplication.show.showList") : t("permitApplication.show.hideList")}
-              </Button>
-              <Divider
-                orientation="vertical"
-                height="24px"
-                mx={4}
-                borderColor={currentPermitApplication.isRevisionsRequested ? "white" : "greys.grey01"}
-              />
-            </Flex>
-            <Flex align="center" gap={2} flex={1} justify="flex-end" ref={sendRevisionContainerRef}></Flex>
+            {currentPermitApplication.isRevisionsRequested ? (
+              <>
+                <Flex width="sidebar.revisionWidth" align="center" pl={8} pr={3} flexShrink={0} alignSelf="stretch">
+                  <Text fontSize="md" fontWeight="bold" lineHeight="short">
+                    {t("permitApplication.show.requestsSent")}
+                  </Text>
+                  <Spacer />
+                  <Button
+                    fontSize="sm"
+                    h={8}
+                    px={3}
+                    variant="secondary"
+                    color="white"
+                    borderColor="white"
+                    bg="transparent"
+                    fontWeight="normal"
+                    _hover={{ bg: "whiteAlpha.200", color: "white" }}
+                    rightIcon={hideRevisionList ? <CaretDown /> : <CaretUp />}
+                    onClick={() => setHideRevisionList((cur) => !cur)}
+                  >
+                    {hideRevisionList
+                      ? t("permitApplication.show.showRequests")
+                      : t("permitApplication.show.hideRequests")}
+                  </Button>
+                </Flex>
+                <Text flex={1} fontSize="md" lineHeight="short" pl={4}>
+                  {t("permitApplication.show.requestsSentLocked")}
+                </Text>
+                <Button
+                  variant="secondary"
+                  bg="white"
+                  color="text.primary"
+                  borderColor="white"
+                  fontWeight="bold"
+                  flexShrink={0}
+                  ml={4}
+                  _hover={{ bg: "white", color: "text.primary" }}
+                  onClick={() => setRevisionMode(false)}
+                >
+                  {t("permitApplication.show.revision.saveAndExit")}
+                </Button>
+              </>
+            ) : (
+              <>
+                <Flex width={"sidebar.revisionWidth"} align="center" gap={2}>
+                  <NotePencil size={24} />
+                  <Heading fontSize="lg" mt={2} color="inherit">
+                    {t("permitApplication.show.addingRequests")}
+                  </Heading>
+                  <Spacer />
+                  <Button
+                    fontSize="sm"
+                    h={8}
+                    p={1}
+                    variant="secondary"
+                    rightIcon={hideRevisionList ? <CaretDown /> : <CaretUp />}
+                    onClick={() => setHideRevisionList((cur) => !cur)}
+                  >
+                    {hideRevisionList ? t("permitApplication.show.showList") : t("permitApplication.show.hideList")}
+                  </Button>
+                  <Divider orientation="vertical" height="24px" mx={4} borderColor="greys.grey01" />
+                </Flex>
+                <Flex align="center" gap={2} flex={1} justify="flex-end" ref={sendRevisionContainerRef}></Flex>
+              </>
+            )}
           </Flex>
         )}
       </Flex>

@@ -222,6 +222,23 @@ class PermitHubMailer < ApplicationMailer
     )
   end
 
+  def notify_applications_added(permit_project, applications, note_body, user)
+    @user = user
+    @permit_project = permit_project
+    @applications = applications
+    @note = Note.plain_body(note_body)
+    @jurisdiction_name =
+      applications.map(&:jurisdiction_name).compact.uniq.join(", ")
+
+    send_user_mail(
+      email: @user.email,
+      template_key: "notify_applications_added",
+      subject_i18n_params: {
+        jurisdiction_name: @jurisdiction_name
+      }
+    )
+  end
+
   def notify_pre_check_submitted(pre_check)
     @pre_check = pre_check
     @user = pre_check.creator

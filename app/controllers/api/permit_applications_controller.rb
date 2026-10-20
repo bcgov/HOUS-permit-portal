@@ -696,15 +696,15 @@ class Api::PermitApplicationsController < Api::ApplicationController
 
   def persist_revision_package(version)
     attrs = revision_request_params
-    has_applicant_note = attrs.key?(:applicant_note)
-    applicant_note = attrs.delete(:applicant_note)
+    has_jurisdiction_note = attrs.key?(:jurisdiction_note)
+    jurisdiction_note = attrs.delete(:jurisdiction_note)
     return unless version.update(attrs)
 
-    if has_applicant_note
+    if has_jurisdiction_note
       Note.upsert_revision_message!(
         submission_version: version,
-        kind: :applicant_message,
-        body: applicant_note,
+        kind: :jurisdiction_message,
+        body: jurisdiction_note,
         user: current_user
       )
     end
@@ -776,7 +776,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
 
   def revision_request_params # params for submitters
     params.require(:submission_version).permit(
-      :applicant_note,
+      :jurisdiction_note,
       revision_requests_attributes: [
         :id,
         :user_id,

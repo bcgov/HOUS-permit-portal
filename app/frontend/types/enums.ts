@@ -69,12 +69,14 @@ export enum EMeetingRequestDocumentType {
 export enum ENoteableType {
   ProjectMeeting = "ProjectMeeting",
   SubmissionVersion = "SubmissionVersion",
+  PermitApplication = "PermitApplication",
 }
 
 export enum ENoteKind {
   meeting = "meeting",
-  applicantMessage = "applicant_message",
+  jurisdictionMessage = "jurisdiction_message",
   submitterMessage = "submitter_message",
+  creationMessage = "creation_message",
 }
 
 export enum ERevisionRequestType {
@@ -544,6 +546,7 @@ export enum ENotificationActionType {
   permitBlockStatusReady = "permit_block_status_ready",
   applicationSubmission = "application_submission",
   applicationRevisionsRequest = "application_revisions_request",
+  applicationsAdded = "applications_added",
   reviewStarted = "review_started",
   stepCodeReportGenerated = "step_code_report_generated",
   preCheckSubmitted = "pre_check_submitted",

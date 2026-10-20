@@ -131,6 +131,11 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
       emailControl: "preferenceAttributes.enableEmailApplicationRevisionsRequestNotification",
     },
     {
+      event: t("user.notifications.applicationsAdded"),
+      inAppControl: "preferenceAttributes.enableInAppApplicationsAddedNotification",
+      emailControl: "preferenceAttributes.enableEmailApplicationsAddedNotification",
+    },
+    {
       event: t("user.notifications.collaboration"),
       inAppControl: "preferenceAttributes.enableInAppCollaborationNotification",
       emailControl: "preferenceAttributes.enableEmailCollaborationNotification",

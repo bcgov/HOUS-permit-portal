@@ -3,14 +3,15 @@ class Note < ApplicationRecord
 
   sanitizable :body
 
-  NOTEABLE_TYPES = %w[ProjectMeeting SubmissionVersion].freeze
-  REVISION_KINDS = %w[applicant_message submitter_message].freeze
+  NOTEABLE_TYPES = %w[ProjectMeeting SubmissionVersion PermitApplication].freeze
+  REVISION_KINDS = %w[jurisdiction_message submitter_message].freeze
 
   enum :kind,
        {
          meeting: "meeting",
-         applicant_message: "applicant_message", # is a message TO the applicant
-         submitter_message: "submitter_message" # is a message TO the reviewer
+         jurisdiction_message: "jurisdiction_message", # written by the jurisdiction
+         submitter_message: "submitter_message", # written by the submitter
+         creation_message: "creation_message" # is a message TO the submitter about an added application
        },
        default: "meeting"
 
@@ -28,6 +29,8 @@ class Note < ApplicationRecord
   validates :user, presence: true, if: :meeting?
   validates :noteable_type, inclusion: { in: NOTEABLE_TYPES }
   validate :permit_project_matches_noteable
+  validate :kind_matches_noteable
+  validate :creation_message_from_jurisdiction
 
   after_create :increment_meeting_notes_count
   after_destroy :decrement_meeting_notes_count
@@ -53,6 +56,18 @@ class Note < ApplicationRecord
     note.body = html
     note.save!
     note
+  end
+
+  def self.create_creation_message!(permit_application:, body:, user:)
+    html = tip_tap_body(body)
+    return if html.blank?
+
+    permit_application.notes.create!(
+      kind: :creation_message,
+      body: html,
+      user: user,
+      published_at: Time.current
+    )
   end
 
   def self.tip_tap_body(text)
@@ -105,6 +120,41 @@ class Note < ApplicationRecord
     return if permit_project == noteable_project
 
     errors.add(:permit_project, :invalid)
+  end
+
+  def kind_matches_noteable
+    expected =
+      case kind
+      when "meeting"
+        "ProjectMeeting"
+      when "creation_message"
+        "PermitApplication"
+      when *REVISION_KINDS
+        "SubmissionVersion"
+      end
+    return if expected.blank? || noteable_type == expected
+
+    errors.add(:noteable_type, :invalid)
+  end
+
+  def creation_message_from_jurisdiction
+    return unless creation_message?
+    return unless noteable.is_a?(PermitApplication)
+
+    jurisdiction_id = noteable.jurisdiction_id
+    return if jurisdiction_authored?(jurisdiction_id)
+
+    errors.add(:user, :invalid)
+  end
+
+  # A signed-in reviewer, or the jurisdiction itself when it created the draft
+  # through the external API (no user on the request).
+  def jurisdiction_authored?(jurisdiction_id)
+    return false if jurisdiction_id.blank?
+    return true if user&.review_staff_of?(jurisdiction_id)
+
+    user.blank? && noteable.created_by_type == "Jurisdiction" &&
+      noteable.created_by_id == jurisdiction_id
   end
 
   def jurisdiction_name

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_10_08_161500) do
+ActiveRecord::Schema[7.2].define(version: 2026_10_19_201500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -108,9 +108,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_08_161500) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["jurisdiction_template_version_customization_id"], name: "index_customization_changes_on_jtvc_id"
-  end
-
-  create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
   end
 
   create_table "design_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -425,7 +422,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_08_161500) do
     t.string "kind", default: "meeting", null: false
     t.datetime "published_at"
     t.index ["noteable_type", "noteable_id", "created_at"], name: "index_notes_on_noteable_type_and_noteable_id_and_created_at"
-    t.index ["noteable_type", "noteable_id", "kind"], name: "index_notes_on_revision_message_kind", unique: true, where: "((kind)::text <> 'meeting'::text)"
+    t.index ["noteable_type", "noteable_id", "kind"], name: "index_notes_on_revision_message_kind", unique: true, where: "((kind)::text = ANY (ARRAY[('applicant_message'::character varying)::text, ('submitter_message'::character varying)::text]))"
     t.index ["noteable_type", "noteable_id"], name: "index_notes_on_noteable"
     t.index ["permit_project_id", "created_at"], name: "index_notes_on_permit_project_id_and_created_at"
     t.index ["user_id"], name: "index_notes_on_user_id"
@@ -817,6 +814,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_08_161500) do
     t.boolean "enable_in_app_pre_check_completed_notification", default: true
     t.boolean "enable_in_app_step_code_report_notification", default: true
     t.boolean "enable_in_app_file_upload_failed_notification", default: true
+    t.boolean "enable_in_app_applications_added_notification", default: true
+    t.boolean "enable_email_applications_added_notification", default: true
     t.index ["user_id"], name: "index_preferences_on_user_id"
   end
 
