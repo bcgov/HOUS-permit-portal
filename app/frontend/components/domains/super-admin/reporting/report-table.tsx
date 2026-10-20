@@ -216,6 +216,7 @@ function isNumericColumn(key: string) {
     key !== "status" &&
     key !== "metric" &&
     key !== "outcome" &&
+    key !== "step" &&
     key !== "bucket" &&
     key !== "group" &&
     key !== "role" &&

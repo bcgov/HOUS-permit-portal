@@ -29,6 +29,7 @@ const REPORT_GROUPS: { key: TReportGroup; ids: string[] }[] = [
     ids: [
       "jurisdiction_volume",
       "draft_completion",
+      "submitter_journey",
       "review_process",
       "template_usage",
       "template_stall",
@@ -41,6 +42,8 @@ const REPORT_GROUPS: { key: TReportGroup; ids: string[] }[] = [
     ids: [
       "step_code_part_9",
       "step_code_part_3",
+      "step_code_part_9_submissions",
+      "step_code_part_3_submissions",
       "step-code-data",
       "step-code-data-part-3",
       "step-code-summary",

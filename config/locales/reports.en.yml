@@ -8,6 +8,10 @@ en:
     small_n: "Too few records (%{count}) for a meaningful chart. The table below is the source of truth."
     growth:
       suppressed: "Percentage omitted; previous period too small to be meaningful."
+    stages:
+      pre_construction: "Pre-construction"
+      mid_construction: "Mid-construction"
+      as_built: "As-built"
     application_growth:
       title: "Platform growth"
       description: "Application volumes, cumulative totals, and growth rates"
@@ -48,14 +52,15 @@ en:
         growth_small_base: "Where the previous period has fewer than 10 records, the percentage is omitted and raw counts are shown."
     step_code_part_9:
       title: "Energy Step Code Part 9"
-      description: "Part 9 submission volumes and compliance outcomes"
+      description: "Part 9 completion volumes and compliance outcomes"
       unknown_jurisdiction: "Unknown jurisdiction"
       series:
-        submissions: "Submissions"
+        checklists: "Checklists"
       columns:
         period: "Month"
-        count: "Count"
-        submissions: "Submissions"
+        count: "Checklists"
+        checklists: "Checklists"
+        step_codes: "Step codes"
         jurisdiction: "Jurisdiction"
         enablement: "Step Code enablement"
         outcome: "Compliance outcome"
@@ -71,32 +76,74 @@ en:
         enabled: "Enabled"
         not_enabled: "Not enabled"
       figures:
-        total_submissions:
-          label: "Part 9 submissions"
-          help: "Part 9 Step Code submissions first submitted in %{range}. Live (non-sandbox) records only."
+        total_completions:
+          label: "Part 9 completions"
+          help: "Completed Part 9 %{stage} checklists in %{range}, including standalone reports. Live (non-sandbox) records only."
         pass_count:
           label: "Passed"
-          help: "Submissions in %{range} where both energy and zero carbon proposed steps were achieved."
+          help: "Completed %{stage} checklists in %{range} where both energy and zero carbon proposed steps were achieved."
         fail_count:
           label: "Failed"
-          help: "Submissions in %{range} with enough data to evaluate that did not achieve both required tracks. Incomplete records are counted separately."
+          help: "Completed %{stage} checklists in %{range} with enough data to evaluate that did not achieve both required tracks. Incomplete records are counted separately."
         incomplete_count:
           label: "Incomplete compliance data"
-          help: "Submissions in %{range} without enough checklist data to evaluate pass or fail. These are not counted as failures."
+          help: "Completed %{stage} checklists in %{range} without enough data to evaluate pass or fail. These are not drafts, and they are not counted as failures."
       notes:
-        incomplete_not_fail: "Submissions with incomplete compliance data are counted on their own. They are not folded into failures."
-        enablement: "Enablement is whether the jurisdiction has Step Codes requirements configured. Submission counts are in their own column."
-        small_n: "When fewer than 10 submissions are in range, the tables lead and charts are omitted so a small count is not read as a trend."
+        incomplete_not_fail: "Completed checklists with incomplete compliance data are counted on their own. They are not folded into failures."
+        enablement: "Enablement is whether the jurisdiction has Step Codes requirements configured. Checklist and step code counts are in their own columns."
+        small_n: "When fewer than 10 completed checklists are in range, the tables lead and charts are omitted so a small count is not read as a trend."
     step_code_part_3:
       title: "Energy Step Code Part 3"
-      description: "Part 3 submission volumes and compliance outcomes"
+      description: "Part 3 completion volumes and compliance outcomes"
       unknown_jurisdiction: "Unknown jurisdiction"
       series:
-        submissions: "Submissions"
+        checklists: "Checklists"
       columns:
         period: "Month"
-        count: "Count"
-        submissions: "Submissions"
+        count: "Checklists"
+        checklists: "Checklists"
+        step_codes: "Step codes"
+        jurisdiction: "Jurisdiction"
+        enablement: "Step Code enablement"
+        outcome: "Compliance outcome"
+        energy_step: "Energy step achieved"
+        zero_carbon_step: "Zero carbon step achieved"
+      outcomes:
+        pass: "Pass"
+        fail: "Fail"
+        incomplete: "Incomplete compliance data"
+      energy_step: "Energy step %{step}"
+      zero_carbon_step: "Zero carbon step %{step}"
+      enablement:
+        enabled: "Enabled"
+        not_enabled: "Not enabled"
+      figures:
+        total_completions:
+          label: "Part 3 completions"
+          help: "Completed Part 3 %{stage} checklists in %{range}, including standalone reports. Live (non-sandbox) records only."
+        pass_count:
+          label: "Passed"
+          help: "Completed %{stage} checklists in %{range} where the Part 3 compliance report achieved the required energy and zero carbon steps, or the baseline performance requirement."
+        fail_count:
+          label: "Failed"
+          help: "Completed %{stage} checklists in %{range} with enough data to evaluate that did not achieve the required steps. Incomplete records are counted separately."
+        incomplete_count:
+          label: "Incomplete compliance data"
+          help: "Completed %{stage} checklists in %{range} without enough data to evaluate pass or fail. These are not drafts, and they are not counted as failures."
+      notes:
+        incomplete_not_fail: "Completed checklists with incomplete compliance data are counted on their own. They are not folded into failures."
+        enablement: "Enablement is whether the jurisdiction has Part 3 occupancy step requirements configured. Checklist and step code counts are in their own columns."
+        small_n: "When fewer than 10 completed checklists are in range, the tables lead and charts are omitted so a small count is not read as a trend."
+    step_code_part_9_submissions:
+      title: "Part 9 step codes on submitted permits"
+      description: "Part 9 step codes attached to a permit application, counted on the date that application was first submitted. Standalone step code reports are not included. One count per attached step code, using its current checklist."
+      unknown_jurisdiction: "Unknown jurisdiction"
+      series:
+        submissions: "Attached submissions"
+      columns:
+        period: "Month"
+        count: "Attached submissions"
+        submissions: "Attached submissions"
         jurisdiction: "Jurisdiction"
         enablement: "Step Code enablement"
         outcome: "Compliance outcome"
@@ -113,21 +160,62 @@ en:
         not_enabled: "Not enabled"
       figures:
         total_submissions:
-          label: "Part 3 submissions"
-          help: "Part 3 Step Code submissions first submitted in %{range}. Live (non-sandbox) records only."
+          label: "Attached Part 9 submissions"
+          help: "Part 9 step codes attached to a permit application whose first submission is in %{range}. Standalone step code reports are not included. The date is the permit application's first submission, not when the checklist was completed. One count per step code, using its current checklist. Live (non-sandbox) applications only."
         pass_count:
           label: "Passed"
-          help: "Submissions in %{range} where the Part 3 compliance report achieved the required energy and zero carbon steps, or the baseline performance requirement."
+          help: "Attached Part 9 step codes, on permit applications first submitted in %{range}, where the current checklist achieved both the energy step and the zero carbon step. Standalone step code reports are not included."
         fail_count:
           label: "Failed"
-          help: "Submissions in %{range} with enough checklist data to evaluate that did not achieve the required steps. Incomplete records are counted separately."
+          help: "Attached Part 9 step codes, on permit applications first submitted in %{range}, whose current checklist had enough data to evaluate and did not achieve both required tracks. Incomplete checklists are counted separately. Standalone step code reports are not included."
         incomplete_count:
           label: "Incomplete compliance data"
-          help: "Submissions in %{range} without enough checklist data to evaluate pass or fail. These are not counted as failures."
+          help: "Attached Part 9 step codes, on permit applications first submitted in %{range}, whose current checklist does not have enough data to evaluate pass or fail. These are not counted as failures. Standalone step code reports are not included."
       notes:
-        incomplete_not_fail: "Submissions with incomplete compliance data are counted on their own. They are not folded into failures."
-        enablement: "Enablement is whether the jurisdiction has Part 3 occupancy step requirements configured. Submission counts are in their own column."
-        small_n: "When fewer than 10 submissions are in range, the tables lead and charts are omitted so a small count is not read as a trend."
+        incomplete_not_fail: "Attached step codes whose current checklist cannot be scored are counted on their own. They are not folded into failures."
+        enablement: "Enablement is whether the jurisdiction has Step Codes requirements configured. This column is separate from the count of attached step codes on submitted permits."
+        small_n: "When fewer than 10 attached step codes on submitted permits are in range, the tables lead and charts are omitted so a small count is not read as a trend. Standalone step code reports are not part of this count."
+    step_code_part_3_submissions:
+      title: "Part 3 step codes on submitted permits"
+      description: "Part 3 step codes attached to a permit application, counted on the date that application was first submitted. Standalone step code reports are not included. One count per attached step code, using its current checklist."
+      unknown_jurisdiction: "Unknown jurisdiction"
+      series:
+        submissions: "Attached submissions"
+      columns:
+        period: "Month"
+        count: "Attached submissions"
+        submissions: "Attached submissions"
+        jurisdiction: "Jurisdiction"
+        enablement: "Step Code enablement"
+        outcome: "Compliance outcome"
+        energy_step: "Energy step achieved"
+        zero_carbon_step: "Zero carbon step achieved"
+      outcomes:
+        pass: "Pass"
+        fail: "Fail"
+        incomplete: "Incomplete compliance data"
+      energy_step: "Energy step %{step}"
+      zero_carbon_step: "Zero carbon step %{step}"
+      enablement:
+        enabled: "Enabled"
+        not_enabled: "Not enabled"
+      figures:
+        total_submissions:
+          label: "Attached Part 3 submissions"
+          help: "Part 3 step codes attached to a permit application whose first submission is in %{range}. Standalone step code reports are not included. The date is the permit application's first submission, not when the checklist was completed. One count per step code, using its current checklist. Live (non-sandbox) applications only."
+        pass_count:
+          label: "Passed"
+          help: "Attached Part 3 step codes, on permit applications first submitted in %{range}, where the current checklist achieved the required energy and zero carbon steps, or the baseline performance requirement. Standalone step code reports are not included."
+        fail_count:
+          label: "Failed"
+          help: "Attached Part 3 step codes, on permit applications first submitted in %{range}, whose current checklist had enough data to evaluate and did not achieve the required steps. Incomplete checklists are counted separately. Standalone step code reports are not included."
+        incomplete_count:
+          label: "Incomplete compliance data"
+          help: "Attached Part 3 step codes, on permit applications first submitted in %{range}, whose current checklist does not have enough data to evaluate pass or fail. These are not counted as failures. Standalone step code reports are not included."
+      notes:
+        incomplete_not_fail: "Attached step codes whose current checklist cannot be scored are counted on their own. They are not folded into failures."
+        enablement: "Enablement is whether the jurisdiction has Part 3 occupancy step requirements configured. This column is separate from the count of attached step codes on submitted permits."
+        small_n: "When fewer than 10 attached step codes on submitted permits are in range, the tables lead and charts are omitted so a small count is not read as a trend. Standalone step code reports are not part of this count."
     jurisdiction_enablement:
       title: "Never-activated, live, and churned jurisdictions"
       description: "Inbox enablement history so never-activated, live, and churned jurisdictions are distinct"
@@ -358,6 +446,43 @@ en:
         completion_definition: "Completion rate is first submissions in the selected range among %{records} created in the selected range."
         range_boundary: "Drafts created before the selected range and first submitted inside it are counted in the median and in the created-before headline. They are not in the completion-rate denominator, which is %{records} created in the range."
         abandonment_definition: "Abandonment is a draft created in the selected range that has never been submitted and has not been updated in 90 days or more, divided by %{records} created in the range."
+    submitter_journey:
+      title: "Submitter journey"
+      description: "How many projects created in the selected range reached each step"
+      series:
+        projects: "Projects"
+      steps:
+        created: "Project created"
+        started: "Application started"
+        submitted: "Application submitted"
+        issued: "Permit issued"
+      columns:
+        step: "Step"
+        count: "Projects"
+        share: "Share of projects created"
+        dropped: "Did not reach this step"
+      drops:
+        did_not_start: "%{dropped} did not start an application · %{share} continued"
+        did_not_submit: "%{dropped} did not submit · %{share} continued"
+        not_issued: "%{dropped} not issued · %{share} continued"
+      figures:
+        created:
+          label: "Projects created"
+          help: "Live projects created in %{range}."
+        started_share:
+          label: "Started an application"
+          help: "Share of those projects with at least one application. An application created after %{range} still counts."
+        submitted_share:
+          label: "Application submitted"
+          help: "Share of those projects where an application has been submitted. A submission after %{range} still counts."
+        issued_share:
+          label: "Permit issued"
+          help: "Share of those projects where an application has been issued. Review staff may approve an application and never mark it issued."
+      notes:
+        projects_not_applications: "Each step counts projects, not applications. Segment width is proportional to the number of projects."
+        any_application: "A project counts once any of its applications reaches the step. Submitting one application counts the project as submitted. Issuing one application counts it as issued."
+        milestones_after_range: "Starting, submitting, or issuing an application still counts when it happens after the selected range. The cohort is projects created in the range."
+        issued_is_not_abandonment: "Permit issued is the application issue event. Review staff may stop at approved, so the last drop is not submitter abandonment. It is not the optional project state for a permit being issued."
     review_process:
       title: "Review process"
       description: "Queue snapshot, revision and withdrawal rates, and review timings"
