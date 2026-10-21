@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_10_08_161500) do
+ActiveRecord::Schema[7.2].define(version: 2026_10_16_140000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -156,6 +156,39 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_08_161500) do
     t.index ["checklist_id"], name: "index_energy_outputs_on_checklist_id"
     t.index ["fuel_type_id"], name: "index_energy_outputs_on_fuel_type_id"
     t.index ["use_type"], name: "index_energy_outputs_on_use_type"
+  end
+
+  create_table "explainer_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "explainer_id", null: false
+    t.jsonb "file_data"
+    t.string "scan_status", default: "pending", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["explainer_id"], name: "index_explainer_documents_on_explainer_id"
+    t.index ["scan_status"], name: "index_explainer_documents_on_scan_status"
+  end
+
+  create_table "explainer_related_templates", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "explainer_id", null: false
+    t.uuid "requirement_template_id", null: false
+    t.integer "position", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["explainer_id", "requirement_template_id"], name: "idx_on_explainer_and_related_template", unique: true
+    t.index ["explainer_id"], name: "index_explainer_related_templates_on_explainer_id"
+    t.index ["requirement_template_id"], name: "index_explainer_related_templates_on_requirement_template_id"
+  end
+
+  create_table "explainers", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "requirement_template_id", null: false
+    t.text "introduction_html", default: "", null: false
+    t.text "before_you_apply_html", default: "", null: false
+    t.jsonb "steps", default: [], null: false
+    t.jsonb "links", default: [], null: false
+    t.datetime "published_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["requirement_template_id"], name: "index_explainers_on_requirement_template_id", unique: true
   end
 
   create_table "external_api_keys", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1416,6 +1449,10 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_08_161500) do
   add_foreign_key "design_documents", "pre_checks"
   add_foreign_key "document_references", "part_3_step_code_checklists", column: "checklist_id", on_delete: :cascade
   add_foreign_key "energy_outputs", "part_3_step_code_checklists", column: "checklist_id", on_delete: :cascade
+  add_foreign_key "explainer_documents", "explainers"
+  add_foreign_key "explainer_related_templates", "explainers"
+  add_foreign_key "explainer_related_templates", "requirement_templates"
+  add_foreign_key "explainers", "requirement_templates"
   add_foreign_key "external_api_keys", "jurisdictions"
   add_foreign_key "external_api_keys", "sandboxes"
   add_foreign_key "fuel_types", "part_3_step_code_checklists", column: "checklist_id", on_delete: :cascade
