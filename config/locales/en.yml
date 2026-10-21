@@ -1005,6 +1005,10 @@ en:
       reorder_success:
         title: ""
         message: "Documents reordered successfully."
+    explainer:
+      update_success:
+        title: ""
+        message: "Permit information saved."
     help_video:
       create_success:
         title: ""
