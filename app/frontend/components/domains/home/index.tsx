@@ -2,6 +2,7 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
+import { FeedbackTab } from "../../shared/sentry/feedback-tab"
 import { ProjectDashboardScreen } from "../permit-project"
 import { ReviewManagerHomeScreen } from "./review-manager"
 import { ReviewerHomeScreen } from "./reviewer-home-screen"
@@ -25,5 +26,11 @@ export const HomeScreen = observer(({ ...props }: IHomeScreenProps) => {
   const { userStore } = useMst()
   const { currentUser } = userStore
 
-  return roleSpecificScreens(currentUser?.role, props)
+  if (!currentUser?.isJurisdictionStaff) return roleSpecificScreens(currentUser?.role, props)
+  return (
+    <>
+      {roleSpecificScreens(currentUser.role, props)}
+      <FeedbackTab />
+    </>
+  )
 })

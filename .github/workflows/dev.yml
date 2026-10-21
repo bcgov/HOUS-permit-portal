@@ -31,6 +31,8 @@ jobs:
         with:
           branch: ${{ github.event.inputs.branch }}
           github_token: ${{ github.token }}
+          sentry_auth_token: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          sentry_upload_sourcemaps: ${{ vars.SENTRY_UPLOAD_SOURCEMAPS || 'false' }}
           deployment_environment: dev
           environment_label: Dev
           image_name: dev-hous-permit-portal

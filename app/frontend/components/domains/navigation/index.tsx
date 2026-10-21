@@ -2,7 +2,7 @@ import { Box, Center } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { lazy, Suspense, useEffect } from "react"
 import { useTranslation } from "react-i18next"
-import { BrowserRouter, Route, Routes, useLocation, useNavigate } from "react-router-dom"
+import { BrowserRouter, Route, useLocation, useNavigate } from "react-router-dom"
 import { useMatomoAuthFunnel } from "../../../hooks/use-matomo-auth-funnel"
 import useSyncPathWithStore from "../../../hooks/use-sync-path-with-root-store"
 import { useMst } from "../../../setup/root"
@@ -10,6 +10,7 @@ import { EFlashMessageStatus } from "../../../types/enums"
 import { isSafeAppPath } from "../../../utils/utility-functions"
 import { FlashMessage } from "../../shared/base/flash-message"
 import { LoadingScreen } from "../../shared/base/loading-screen"
+import { ObservedRoutes } from "../../shared/sentry/observed-routes"
 import { EULAScreen } from "../onboarding/eula"
 import { MatomoSpaPageviews } from "./matomo-spa-pageviews"
 import { NavBar } from "./nav-bar"
@@ -787,7 +788,7 @@ const AppRoutes = observer(() => {
 
   return (
     <>
-      <Routes location={background || location}>
+      <ObservedRoutes location={background || location}>
         {mustAcceptEula && (
           // Onboarding step 1: EULA
           <Route path="/" element={<EULAScreen />} />
@@ -1040,7 +1041,7 @@ const AppRoutes = observer(() => {
         <Route path="/part-9-step-code/:stepCodeId/stages/:stage/:section" element={<Part9StepCodeForm />} />
         <Route path="/part-9-step-code/:section" element={<Part9StepCodeForm />} />
         <Route path="*" element={<NotFoundScreen />} />
-      </Routes>
+      </ObservedRoutes>
     </>
   )
 })
