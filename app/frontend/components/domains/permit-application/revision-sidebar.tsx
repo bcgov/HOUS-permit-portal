@@ -4,12 +4,10 @@ import {
   Flex,
   Heading,
   Hide,
-  IconButton,
   Link,
   ListItem,
   OrderedList,
   Portal,
-  Spacer,
   Tab,
   TabList,
   TabPanel,
@@ -358,8 +356,11 @@ export const RevisionSideBar = observer(
                     <RequestSection
                       title={t("permitApplication.show.revision.supportingInformationSection")}
                       borderColor={panelBorder}
+                      description={
+                        revisionsSent ? undefined : t("permitApplication.show.revision.supportingInformationPrompt")
+                      }
                       onAdd={
-                        permitApplication.isRevisionsRequested
+                        revisionsSent
                           ? undefined
                           : () => {
                               setSupportingInformationRequest(undefined)
@@ -729,6 +730,7 @@ const GenericRequestListItem = ({
 const RequestSection = ({
   title,
   hint,
+  description,
   onAdd,
   emptyText,
   borderColor = "border.light",
@@ -736,23 +738,44 @@ const RequestSection = ({
 }: {
   title: string
   hint?: string
+  description?: string
   onAdd?: () => void
   emptyText?: string
   borderColor?: string
   children: React.ReactNode
 }) => (
   <Box borderBottom="1px solid" borderColor={borderColor} pb={4} mb={4}>
-    <Flex align="center" px={4} pt={4} pb={2}>
-      <Heading as="h3" fontSize="md">
-        {title}
-      </Heading>
-      <Spacer />
-      {onAdd && <IconButton aria-label={title} icon={<Plus />} size="sm" variant="ghost" onClick={onAdd} />}
-    </Flex>
+    <Heading as="h3" fontSize="md" px={4} pt={4} pb={2}>
+      {title}
+    </Heading>
     {hint && (
       <Text px={4} fontStyle="italic" fontSize="sm" color="text.secondary" mb={2}>
         {hint}
       </Text>
+    )}
+    {description && (
+      <Text px={4} fontSize="sm" mb={3}>
+        {description}
+      </Text>
+    )}
+    {onAdd && (
+      <Box px={4} mb={3}>
+        <Button
+          size="xs"
+          variant="secondary"
+          bg="transparent"
+          leftIcon={<Plus size={14} />}
+          iconSpacing={1}
+          h="7"
+          minH="7"
+          px={2}
+          fontSize="sm"
+          lineHeight="shorter"
+          onClick={onAdd}
+        >
+          {title}
+        </Button>
+      </Box>
     )}
     {emptyText && (
       <Text px={4} fontSize="sm" color="text.secondary" mb={2}>
