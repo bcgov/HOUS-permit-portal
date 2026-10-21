@@ -467,7 +467,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                 )}
               </HStack>
             )}
-            <FloatingHelpDrawer top="250px" />
+            <FloatingHelpDrawer top={{ base: "auto", md: "250px" }} bottom={{ base: 18, md: "auto" }} />
           </Flex>
           {currentPermitApplication.isRevisionsRequested && !isReviewingSubmit && (
             <Flex
