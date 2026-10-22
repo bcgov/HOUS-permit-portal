@@ -98,6 +98,8 @@ Rails.application.routes.draw do
       post "jurisdiction_availabilities",
            on: :member,
            to: "requirement_templates#update_jurisdiction_availabilities"
+
+      resource :explainer, only: %i[show update]
     end
 
     # Draft version-specific endpoints (feedback and previews)

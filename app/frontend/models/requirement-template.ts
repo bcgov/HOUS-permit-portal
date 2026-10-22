@@ -4,7 +4,9 @@ import { Instance, flow, toGenerator, types } from "mobx-state-tree"
 import { vancouverTimeZone } from "../constants"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import { IJurisdictionStub, IRequirementTemplateFormJson } from "../types/types"
+import { IExplainerParams } from "../types/api-request"
+import { IJurisdictionStub, IOption, IRequirementTemplateFormJson } from "../types/types"
+import { ExplainerModel } from "./explainer"
 import { RequirementTemplateSectionModel } from "./requirement-template-section"
 import { TemplateVersionModel } from "./template-version"
 import { UserModel } from "./user"
@@ -78,6 +80,7 @@ export const RequirementTemplateModel = types.snapshotProcessor(
       sortOrder: types.optional(types.number, 0),
       enabledJurisdictions: types.maybe(types.array(types.frozen<IJurisdictionStub>())),
       explicitlyDisabledJurisdictions: types.optional(types.array(types.frozen<IJurisdictionStub>()), []),
+      explainer: types.optional(types.maybeNull(ExplainerModel), null),
     })
     .extend(withRootStore())
     .extend(withEnvironment())
@@ -144,6 +147,10 @@ export const RequirementTemplateModel = types.snapshotProcessor(
         }
         self.scheduledTemplateVersions.remove(templateVersion)
       },
+      setExplainer(explainer) {
+        self.explainer = null
+        if (explainer) self.explainer = ExplainerModel.create(explainer)
+      },
     }))
     .actions((self) => ({
       unscheduleTemplateVersion: flow(function* (templateVersionId: string) {
@@ -190,6 +197,18 @@ export const RequirementTemplateModel = types.snapshotProcessor(
           self.rootStore.requirementTemplateStore.mergeUpdate(templateData, "requirementTemplateMap")
           return self
         }
+      }),
+      fetchExplainer: flow(function* () {
+        const { ok, data: response } = yield* toGenerator(self.environment.api.fetchExplainer(self.id))
+        if (!ok || !response) return null
+
+        self.setExplainer(response.data ?? null)
+        return (response.meta?.relatedTemplateOptions ?? []) as IOption[]
+      }),
+      saveExplainer: flow(function* (explainer: IExplainerParams) {
+        const { ok, data: response } = yield* toGenerator(self.environment.api.saveExplainer(self.id, explainer))
+        if (ok && response) self.setExplainer(response.data ?? null)
+        return ok
       }),
     })),
   {

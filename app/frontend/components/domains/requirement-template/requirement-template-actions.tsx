@@ -1,11 +1,12 @@
 import { Button, Menu, MenuButton, MenuItem, MenuList, Tooltip, useDisclosure } from "@chakra-ui/react"
-import { Archive, ClockClockwise, ClockCounterClockwise, Globe } from "@phosphor-icons/react"
+import { Archive, ClockClockwise, ClockCounterClockwise, Globe, NotePencil } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { IRequirementTemplate } from "../../../models/requirement-template"
 import { useMst } from "../../../setup/root"
 import { ConfirmationModal } from "../../shared/confirmation-modal"
+import { ExplainerModal } from "./explainer-modal"
 import { TemplateAccessSidebar } from "./template-access-sidebar"
 import { TemplateVersionsSidebar } from "./template-versions-sidebar"
 
@@ -20,6 +21,7 @@ export const RequirementTemplateActions = observer(function RequirementTemplateA
   const { requirementTemplateStore } = useMst()
   const { isOpen: isVersionsOpen, onOpen: onVersionsOpen, onClose: onVersionsClose } = useDisclosure()
   const { isOpen: isAccessOpen, onOpen: onAccessOpen, onClose: onAccessClose } = useDisclosure()
+  const { isOpen: isInfoOpen, onOpen: onInfoOpen, onClose: onInfoClose } = useDisclosure()
 
   const handleArchive = async () => {
     if (await requirementTemplate.destroy()) await requirementTemplateStore.search()
@@ -41,6 +43,9 @@ export const RequirementTemplateActions = observer(function RequirementTemplateA
           </MenuItem>
           <MenuItem icon={<Globe size={20} />} onClick={onAccessOpen}>
             {t("requirementTemplate.access.title", "Access")}
+          </MenuItem>
+          <MenuItem icon={<NotePencil size={20} />} onClick={onInfoOpen}>
+            {t("requirementTemplate.explainer.configure")}
           </MenuItem>
           {requirementTemplate.isDiscarded ? (
             <ConfirmationModal
@@ -101,6 +106,7 @@ export const RequirementTemplateActions = observer(function RequirementTemplateA
       />
 
       <TemplateAccessSidebar requirementTemplate={requirementTemplate} isOpen={isAccessOpen} onClose={onAccessClose} />
+      <ExplainerModal requirementTemplate={requirementTemplate} isOpen={isInfoOpen} onClose={onInfoClose} />
     </>
   )
 })

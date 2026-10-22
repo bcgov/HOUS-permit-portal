@@ -2,6 +2,7 @@ import { ApiResponse, ApisauceInstance, create, Monitor } from "apisauce"
 import { IRevisionRequestForm } from "../../components/domains/permit-application/revision-sidebar"
 import { IJurisdictionTemplateVersionCustomizationForm } from "../../components/domains/requirement-template/screens/jurisdiction-edit-digital-permit-screen"
 import { TContactFormData } from "../../components/shared/contact/create-edit-contact-modal"
+import { IExplainer } from "../../models/explainer"
 import { IExternalApiKey } from "../../models/external-api-key"
 import { IHelpVideo } from "../../models/help-video"
 import { IHelpVideoSection } from "../../models/help-video-section"
@@ -32,6 +33,7 @@ import { IUser } from "../../models/user"
 import { ISiteConfigurationStore } from "../../stores/site-configuration-store"
 import { IStepCode } from "../../stores/step-code-store"
 import {
+  IExplainerParams,
   IExternalApiKeyParams,
   IIntegrationMappingUpdateParams,
   IPermitProjectUpdateParams,
@@ -84,6 +86,7 @@ import {
   IJurisdictionFilters,
   IJurisdictionSearchFilters,
   INoteAttachmentDraft,
+  IOption,
   IPart9ChecklistSelectOptions,
   IPermitApplicationInboxSearchFilters,
   IPermitApplicationSearchFilters,
@@ -111,6 +114,10 @@ interface ITemplateVersionFeedback {
   updatedAt: Date
   user?: IUser
   resolvedBy?: IUser | null
+}
+
+type TExplainerMeta = {
+  relatedTemplateOptions?: IOption[]
 }
 
 export class Api {
@@ -867,6 +874,19 @@ export class Api {
 
   async fetchRequirementTemplate(id: string) {
     return this.client.get<IApiResponse<IRequirementTemplate, {}>>(`/requirement_templates/${id}`)
+  }
+
+  async fetchExplainer(requirementTemplateId: string) {
+    return this.client.get<IApiResponse<IExplainer | null, TExplainerMeta>>(
+      `/requirement_templates/${requirementTemplateId}/explainer`
+    )
+  }
+
+  async saveExplainer(requirementTemplateId: string, explainer: IExplainerParams) {
+    return this.client.patch<IApiResponse<IExplainer | null, TExplainerMeta>>(
+      `/requirement_templates/${requirementTemplateId}/explainer`,
+      { explainer }
+    )
   }
 
   async createRequirementTemplate(params: TCreateRequirementTemplateFormData) {

@@ -27,7 +27,8 @@ class Api::StorageController < Api::ApplicationController
     "HelpVideoVideoDocument" => HelpVideoVideoDocument,
     "HelpVideoCaptionDocument" => HelpVideoCaptionDocument,
     "HelpVideoTranscriptDocument" => HelpVideoTranscriptDocument,
-    "InfoDocument" => InfoDocument
+    "InfoDocument" => InfoDocument,
+    "ExplainerDocument" => ExplainerDocument
   }.freeze
 
   def download
