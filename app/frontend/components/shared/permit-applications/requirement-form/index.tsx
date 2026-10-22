@@ -38,6 +38,7 @@ interface IRequirementFormProps {
   showHelpButton?: boolean
   renderSaveButton?: () => JSX.Element
   isEditing?: boolean
+  forSubmitterEdit?: boolean
   readOnly?: boolean
   renderTopButtons?: () => React.ReactNode
   updateCollaborationAssignmentNodes?: () => void
@@ -52,6 +53,7 @@ export const RequirementForm = observer(
     renderTopButtons,
     renderSaveButton,
     isEditing = false,
+    forSubmitterEdit = false,
     readOnly: readOnlyProp = false,
     updateCollaborationAssignmentNodes,
   }: IRequirementFormProps) => {
@@ -62,7 +64,8 @@ export const RequirementForm = observer(
       selectedTabIndex,
       formJson,
       blockClasses,
-      formattedFormJson,
+      reviewFormattedFormJson,
+      editFormattedFormJson,
       isDraft,
       previousSubmissionVersion,
       selectedSubmissionVersion,
@@ -72,6 +75,7 @@ export const RequirementForm = observer(
       sandbox,
       isStepCodeComplete,
     } = permitApplication
+    const formattedFormJson = forSubmitterEdit ? editFormattedFormJson : reviewFormattedFormJson
 
     const {
       visibilityVersion,

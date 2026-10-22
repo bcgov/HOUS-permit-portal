@@ -252,7 +252,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
           }, [] as IFormIOBlock[])
           .filter((outNull) => outNull)
       },
-      get formattedFormJson() {
+      buildFormattedFormJson(forSubmitterEdit: boolean) {
         const clonedFormJson = R.clone(self.formJson)
 
         // Disable certain fields if this is an ephemeral preview
@@ -284,10 +284,9 @@ export const PermitApplicationModel = types.snapshotProcessor(
             self.latestSubmissionVersion.submissionData
           )
         }
-        // Submitter can edit any draft status. Past-request snapshots stay locked.
-        // Everyone else keeps the review-screen lock on revisions_requested.
         const currentUser = self.rootStore.userStore.currentUser
-        const submitterCanEditDraft = self.isDraft && !!currentUser?.id && currentUser.id === self.submitter?.id
+        const submitterCanEditDraft =
+          forSubmitterEdit && self.isDraft && !!currentUser?.id && currentUser.id === self.submitter?.id
         const disableRequirementFields = submitterCanEditDraft
           ? self.isViewingPastRequests
           : self.isSubmitted ||
@@ -303,6 +302,12 @@ export const PermitApplicationModel = types.snapshotProcessor(
           : changedMarkedFormJson
 
         return revisionModeFormJson
+      },
+      get reviewFormattedFormJson() {
+        return this.buildFormattedFormJson(false)
+      },
+      get editFormattedFormJson() {
+        return this.buildFormattedFormJson(true)
       },
       sectionKey(sectionId) {
         return `section${sectionId}`

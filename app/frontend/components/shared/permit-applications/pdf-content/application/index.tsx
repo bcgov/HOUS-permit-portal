@@ -39,7 +39,7 @@ export const ApplicationFields = function ApplicationFields({
   return (
     <Page size="LETTER" style={page}>
       <View style={{ overflow: "hidden" }}>
-        {permitApplication.formattedFormJson.components.map((c) => (
+        {permitApplication.reviewFormattedFormJson.components.map((c) => (
           <FormComponent key={c.id} component={c} permitApplication={permitApplication} />
         ))}
       </View>
