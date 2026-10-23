@@ -1,6 +1,6 @@
 source "https://rubygems.org"
 
-ruby "4.0.6"
+ruby "4.0.9"
 
 # Explicit standard-library dependencies for Ruby 4.
 gem "csv", "~> 3.3"

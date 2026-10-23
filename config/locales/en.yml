@@ -1346,7 +1346,7 @@ en:
       publish_notification: "Building Permit Hub has been updated. Read about changes and improvements in the release notes."
     integration_mapping:
       published_template_missing_requirements_mapping: "Missing API mapping: A new version of “%{template_label}” has been published on %{version_date}"
-      scheduled_template_missing_requirements_mapping: "Missing API Mapping: A new version of “%{template_label}” has been scheduled for %{version_date}, 01:00hrs Pacific Time."
+      scheduled_template_missing_requirements_mapping: "Missing API Mapping: A new version of “%{template_label}” has been scheduled for %{version_date}, 00:01hrs Pacific Time."
     file_upload_failed: "File upload failed: %{file_name} was removed during a routine scan."
   export:
     template_version_csv_headers: "Requirement Block,Requirement block tip,Question,Requirement code,Input type,Optional,Is elective,Elective enabled,Elective reason"

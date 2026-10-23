@@ -4,7 +4,7 @@
   "license": "Apache-2.0",
   "private": true,
   "engines": {
-    "node": "^24.21.0"
+    "node": "^24.22.1"
   },
   "devDependencies": {
     "@chakra-ui/cli": "^2.4.1",

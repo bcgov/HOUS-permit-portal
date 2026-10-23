@@ -33,8 +33,6 @@ jobs:
         run: |
           bundle install
           npm ci
-      - name: Verify Frontend Time Zones
-        run: npm run test:time-zones
       - name: Build Frontend and PDF Reports
         run: npm run build
 

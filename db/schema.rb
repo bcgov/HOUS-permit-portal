@@ -422,7 +422,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_19_201500) do
     t.string "kind", default: "meeting", null: false
     t.datetime "published_at"
     t.index ["noteable_type", "noteable_id", "created_at"], name: "index_notes_on_noteable_type_and_noteable_id_and_created_at"
-    t.index ["noteable_type", "noteable_id", "kind"], name: "index_notes_on_revision_message_kind", unique: true, where: "((kind)::text = ANY (ARRAY[('applicant_message'::character varying)::text, ('submitter_message'::character varying)::text]))"
+    t.index ["noteable_type", "noteable_id", "kind"], name: "index_notes_on_revision_message_kind", unique: true, where: "((kind)::text <> 'meeting'::text)"
     t.index ["noteable_type", "noteable_id"], name: "index_notes_on_noteable"
     t.index ["permit_project_id", "created_at"], name: "index_notes_on_permit_project_id_and_created_at"
     t.index ["user_id"], name: "index_notes_on_user_id"
