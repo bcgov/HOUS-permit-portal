@@ -9,6 +9,7 @@ import { IHelpVideoSection } from "../../models/help-video-section"
 import { IInfoDocument } from "../../models/info-document"
 import { IIntegrationMapping } from "../../models/integration-mapping"
 import { IJurisdiction } from "../../models/jurisdiction"
+import { IJurisdictionExplainer } from "../../models/jurisdiction-explainer"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
 import { INote } from "../../models/note"
 import { IOverheatingCode } from "../../models/overheating-code"
@@ -118,6 +119,7 @@ interface ITemplateVersionFeedback {
 
 type TExplainerMeta = {
   relatedTemplateOptions?: IOption[]
+  jurisdictionExplainers?: IJurisdictionExplainer[]
 }
 
 export class Api {
@@ -886,6 +888,23 @@ export class Api {
     return this.client.patch<IApiResponse<IExplainer | null, TExplainerMeta>>(
       `/requirement_templates/${requirementTemplateId}/explainer`,
       { explainer }
+    )
+  }
+
+  async fetchJurisdictionExplainer(requirementTemplateId: string, jurisdictionId: string) {
+    return this.client.get<IApiResponse<IJurisdictionExplainer | null, {}>>(
+      `/requirement_templates/${requirementTemplateId}/jurisdiction_explainers/${jurisdictionId}`
+    )
+  }
+
+  async saveJurisdictionExplainer(
+    requirementTemplateId: string,
+    jurisdictionId: string,
+    jurisdictionExplainer: { localContextHtml: string }
+  ) {
+    return this.client.patch<IApiResponse<IJurisdictionExplainer | null, {}>>(
+      `/requirement_templates/${requirementTemplateId}/jurisdiction_explainers/${jurisdictionId}`,
+      { jurisdictionExplainer }
     )
   }
 
