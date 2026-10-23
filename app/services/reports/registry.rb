@@ -3,6 +3,9 @@ module Reports
     REPORTS = {
       "application_growth" => "Reports::ApplicationGrowth",
       "step_code_part_9" => "Reports::StepCodePart9",
+      "step_code_part_3" => "Reports::StepCodePart3",
+      "step_code_part_9_submissions" => "Reports::StepCodePart9Submissions",
+      "step_code_part_3_submissions" => "Reports::StepCodePart3Submissions",
       "jurisdiction_enablement" => "Reports::JurisdictionEnablement",
       "jurisdiction_volume" => "Reports::JurisdictionVolume",
       "template_usage" => "Reports::TemplateUsage",
@@ -10,6 +13,7 @@ module Reports
       "accounts" => "Reports::Accounts",
       "submitter_adoption" => "Reports::SubmitterAdoption",
       "draft_completion" => "Reports::DraftCompletion",
+      "submitter_journey" => "Reports::SubmitterJourney",
       "review_process" => "Reports::ReviewProcess",
       "platform_health" => "Reports::PlatformHealth",
       "storage_footprint" => "Reports::StorageFootprint"
@@ -27,8 +31,8 @@ module Reports
       class_name.constantize
     end
 
-    def build(key, range)
-      fetch!(key).new(range: range)
+    def build(key, range, subject: nil)
+      fetch!(key).new(range: range, subject: subject)
     end
 
     def summaries

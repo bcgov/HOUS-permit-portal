@@ -6,15 +6,22 @@ class SubmissionVersionBlueprint < Blueprinter::Base
 
   view :extended do
     include_view :base
-    fields :form_json
+    fields :form_json, :submitter_note
     field :submission_data do |submission_version, options|
       submission_version.formatted_submission_data(
         current_user: options[:current_user]
       )
     end
+    field :jurisdiction_note do |submission_version, _options|
+      next nil unless submission_version.request_package_visible_to_submitter?
+
+      submission_version.jurisdiction_note
+    end
     association :revision_requests,
                 blueprint: RevisionRequestBlueprint,
                 view: :base do |submission_version, options|
+      next [] unless submission_version.request_package_visible_to_submitter?
+
       submission_version.revision_requests_for_submitter_based_on_user_permissions(
         user: options[:current_user]
       )
@@ -23,6 +30,7 @@ class SubmissionVersionBlueprint < Blueprinter::Base
 
   view :review_extended do
     include_view :extended
+    field :jurisdiction_note
     association :revision_requests,
                 blueprint: RevisionRequestBlueprint,
                 view: :extended
@@ -59,15 +67,34 @@ class SubmissionVersionBlueprint < Blueprinter::Base
             doc.data_key
           ) && doc.file.present?
         end
-        .map do |doc|
+        .map { |doc| external_api_file(doc) }
+    end
+    field :document_requests do |submission_version, _options|
+      submission_version
+        .revision_requests
+        .where(type: "SupportingDocumentRevisionRequest")
+        .includes(:revision_reference_documents)
+        .map do |request|
           {
-            id: doc.id,
-            name: doc.file_name,
-            type: doc.file_type,
-            size: doc.file_size,
-            url: doc.file_url
+            id: request.id,
+            name: request.title,
+            reason_code: request.reason_code,
+            comment: request.comment,
+            reference_documents:
+              request
+                .revision_reference_documents
+                .select(&:file_available?)
+                .map { |doc| external_api_file(doc) }
           }
         end
+    end
+    field :fulfillment_documents do |submission_version, _options|
+      submission_version
+        .supporting_documents
+        .select do |doc|
+          doc.revision_request_id.present? && doc.file_available?
+        end
+        .map { |doc| external_api_file(doc) }
     end
     field :zipfile do |submission_version, _options|
       next nil unless submission_version.zipfile_data.present?
@@ -82,5 +109,15 @@ class SubmissionVersionBlueprint < Blueprinter::Base
         url: submission_version.zipfile_url
       }
     end
+  end
+
+  def self.external_api_file(record)
+    {
+      id: record.id,
+      name: record.file_name,
+      type: record.file_type,
+      size: record.file_size,
+      url: record.file_url
+    }
   end
 end

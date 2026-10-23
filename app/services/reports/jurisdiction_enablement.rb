@@ -26,7 +26,8 @@ module Reports
             }
           ],
           data: enabled_by_quarter,
-          record_count: jurisdiction_rows.length
+          record_count: enabled_by_quarter.sum { |row| row["count"] },
+          suppressed: false
         ),
         chart(
           "submission_cohorts",
@@ -42,8 +43,8 @@ module Reports
             }
           ],
           data: submission_cohorts,
-          record_count:
-            jurisdiction_rows.count { |row| row["first_submitted_on"].present? }
+          record_count: submission_cohorts.sum { |row| row["count"] },
+          suppressed: false
         )
       ]
     end
@@ -63,7 +64,9 @@ module Reports
             column("days_to_first_submission"),
             column("approximate")
           ],
-          jurisdiction_rows.map do |row|
+          jurisdiction_rows.filter_map do |row|
+            next if row["submissions_in_range"].to_i.zero?
+
             row.except(
               "first_submitted_on",
               "churned",
@@ -144,19 +147,12 @@ module Reports
     end
 
     def quarter_rows(counts)
-      return [] if counts.empty?
-
-      current = counts.keys.min
-      last = [counts.keys.max, range.end_date.to_date.beginning_of_quarter].max
-      rows = []
-      while current <= last
-        rows << {
-          "period" => "#{current.year}-Q#{(current.month / 3.0).ceil}",
-          "count" => counts[current].to_i
+      counts.keys.sort.map do |quarter|
+        {
+          "period" => "#{quarter.year}-Q#{(quarter.month / 3.0).ceil}",
+          "count" => counts[quarter].to_i
         }
-        current = current.next_quarter
       end
-      rows
     end
 
     def jurisdiction_rows

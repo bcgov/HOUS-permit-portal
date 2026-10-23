@@ -40,4 +40,13 @@ RSpec.describe Reports::ReviewProcess do
       "aggregate_only"
     )
   end
+
+  it "defines in-flight and does not name the viewed_at column" do
+    expect(figure("revision_request_rate")[:help_text]).to include(
+      "newly submitted, resubmitted, or in review"
+    )
+    %w[median_days_to_first_review excluded_timing].each do |key|
+      expect(figure(key)[:help_text]).not_to include("viewed_at")
+    end
+  end
 end

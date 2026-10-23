@@ -46,10 +46,19 @@ RSpec.describe StepCodeExportService do
   end
 
   describe "#part_3_metrics_csv" do
-    it "outputs a row for each submitted Step Code with a checklist" do
+    it "outputs a row for each completed checklist" do
+      step_code =
+        instance_double(
+          "Part3StepCode",
+          reference_number: "APP-1",
+          jurisdiction_name: "Jur A",
+          full_address: "123 St"
+        )
       checklist =
         instance_double(
           "Part3StepCode::Checklist",
+          step_code: step_code,
+          stage: "pre_construction",
           building_height: 10,
           building_code_version: "2024",
           heating_degree_days: 3000,
@@ -96,30 +105,21 @@ RSpec.describe StepCodeExportService do
           is_suite_sub_metered: false
         )
 
-      step_code =
-        instance_double(
-          "Part3StepCode",
-          reference_number: "APP-1",
-          jurisdiction_name: "Jur A",
-          full_address: "123 St",
-          current_checklist: checklist
-        )
-      step_code_without_checklist =
-        instance_double("Part3StepCode", current_checklist: nil)
-
       relation = double("ARRelation")
-      allow(Part3StepCode).to receive(:includes).and_return(relation)
-      allow(relation).to receive(:where).and_return(relation)
-      allow(relation).to receive(:find_each).and_yield(step_code).and_yield(
-        step_code_without_checklist
+      allow(Part3StepCode::Checklist).to receive(:completed_live).and_return(
+        relation
       )
+      allow(relation).to receive(:includes).and_return(relation)
+      allow(relation).to receive(:find_each).and_yield(checklist)
 
       csv = service.part_3_metrics_csv
 
       expect(csv).to include(
-        "Application ID,Jurisdiction,Address,Building Height"
+        "Reference number,Jurisdiction,Address,Stage,Building Height"
       )
-      expect(csv).to include("APP-1,Jur A,123 St,10,2024,3000,4")
+      expect(csv).to include(
+        "APP-1,Jur A,123 St,pre_construction,10,2024,3000,4"
+      )
     end
   end
 
@@ -129,9 +129,18 @@ RSpec.describe StepCodeExportService do
         energy: OpenStruct.new(step: 4),
         zero_carbon: OpenStruct.new(step: 2)
       }
+      step_code =
+        instance_double(
+          "Part9StepCode",
+          reference_number: "APP-9",
+          jurisdiction_name: "Jur 9",
+          full_address: "9 St"
+        )
       checklist =
         instance_double(
           "Part9StepCode::Checklist",
+          step_code: step_code,
+          stage: "pre_construction",
           building_type: "House",
           compliance_path: "step_code_ers",
           status: "draft",
@@ -152,26 +161,22 @@ RSpec.describe StepCodeExportService do
           selected_report: compliance_report,
           passing_compliance_reports: []
         )
-      step_code =
-        instance_double(
-          "Part9StepCode",
-          reference_number: "APP-9",
-          jurisdiction_name: "Jur 9",
-          full_address: "9 St",
-          current_checklist: checklist
-        )
 
       relation = double("ARRelation")
-      allow(Part9StepCode).to receive(:includes).and_return(relation)
-      allow(relation).to receive(:where).and_return(relation)
-      allow(relation).to receive(:find_each).and_yield(step_code)
+      allow(Part9StepCode::Checklist).to receive(:completed_live).and_return(
+        relation
+      )
+      allow(relation).to receive(:includes).and_return(relation)
+      allow(relation).to receive(:find_each).and_yield(checklist)
 
       csv = service.part_9_metrics_csv
 
       expect(csv).to include(
-        "Application ID,Jurisdiction,Address,Building Type"
+        "Reference number,Jurisdiction,Address,Stage,Building Type"
       )
-      expect(csv).to include("APP-9,Jur 9,9 St,House,step_code_ers,4,2")
+      expect(csv).to include(
+        "APP-9,Jur 9,9 St,pre_construction,House,step_code_ers,4,2"
+      )
     end
 
     it "falls back to passing_compliance_reports.first when selected_report is nil" do
@@ -179,9 +184,18 @@ RSpec.describe StepCodeExportService do
         energy: OpenStruct.new(step: 3),
         zero_carbon: OpenStruct.new(step: 1)
       }
+      step_code =
+        instance_double(
+          "Part9StepCode",
+          reference_number: "APP-10",
+          jurisdiction_name: "Jur 10",
+          full_address: "10 St"
+        )
       checklist =
         instance_double(
           "Part9StepCode::Checklist",
+          step_code: step_code,
+          stage: "as_built",
           building_type: "House",
           compliance_path: "step_code_ers",
           status: "draft",
@@ -202,23 +216,42 @@ RSpec.describe StepCodeExportService do
           selected_report: nil,
           passing_compliance_reports: [fallback_report]
         )
-      step_code =
-        instance_double(
-          "Part9StepCode",
-          reference_number: "APP-10",
-          jurisdiction_name: "Jur 10",
-          full_address: "10 St",
-          current_checklist: checklist
-        )
 
       relation = double("ARRelation")
-      allow(Part9StepCode).to receive(:includes).and_return(relation)
-      allow(relation).to receive(:where).and_return(relation)
-      allow(relation).to receive(:find_each).and_yield(step_code)
+      allow(Part9StepCode::Checklist).to receive(:completed_live).and_return(
+        relation
+      )
+      allow(relation).to receive(:includes).and_return(relation)
+      allow(relation).to receive(:find_each).and_yield(checklist)
 
       csv = service.part_9_metrics_csv
 
-      expect(csv).to include("APP-10,Jur 10,10 St,House,step_code_ers,3,1")
+      expect(csv).to include(
+        "APP-10,Jur 10,10 St,as_built,House,step_code_ers,3,1"
+      )
     end
+  end
+
+  it "exports one row per completed checklist and skips drafts" do
+    step_code = create(:part_3_step_code)
+    mark_complete(step_code.pre_construction_checklist)
+    mark_complete(step_code.find_or_create_checklist_for!(stage: "as_built"))
+    create(:part_3_step_code)
+
+    rows = CSV.parse(service.part_3_metrics_csv, headers: true)
+
+    expect(rows.map { |row| row["Stage"] }).to contain_exactly(
+      "pre_construction",
+      "as_built"
+    )
+  end
+
+  def mark_complete(checklist)
+    checklist.update!(
+      status: :complete,
+      section_completion_status:
+        checklist.class.fully_complete_section_completion_status,
+      stage_completed_at: Time.current
+    )
   end
 end

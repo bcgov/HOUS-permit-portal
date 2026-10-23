@@ -16,19 +16,22 @@ import {
   singleRequirementFormJson,
   singleRequirementSubmissionData,
 } from "../../../../utils/formio-helpers"
+import { getOptionalElectivesByPanelId, TOptionalElectivesPanel } from "../../../../utils/view-optional-electives"
 import { CompareRequirementsBox } from "../../../domains/permit-application/compare-requirements-box"
 import { ErrorsBox } from "../../../domains/permit-application/errors-box"
 import { BuilderBottomFloatingButtons } from "../../../domains/requirement-template/builder-bottom-floating-buttons"
 import { CustomMessageBox } from "../../base/custom-message-box"
 import { SharedSpinner } from "../../base/shared-spinner"
-import { Form, defaultOptions } from "../../chefs"
+import { defaultOptions, Form } from "../../chefs"
 import { ContactModal } from "../../contact/contact-modal"
 import { PreviousSubmissionModal } from "../../revisions/previous-submission-modal"
+import { ResubmissionSummaryBox, resubmissionSummaryIsVisible } from "../../revisions/resubmission-summary-box"
 import { PermitApplicationSubmitModal } from "../permit-application-submit-modal"
 import { StepCodeSelectModal } from "../step-code-select-modal"
 import { useBlockScrollSpy } from "./hooks/use-block-scroll-spy"
 import { useChecklistVisibility } from "./hooks/use-checklist-visibility"
 import { useRequirementFormEvents } from "./hooks/use-requirement-form-events"
+import { OptionalElectivesModal } from "./optional-electives-modal"
 
 interface IRequirementFormProps {
   permitApplication?: IPermitApplication
@@ -42,6 +45,8 @@ interface IRequirementFormProps {
   readOnly?: boolean
   renderTopButtons?: () => React.ReactNode
   updateCollaborationAssignmentNodes?: () => void
+  onReviewSubmit?: (submission: any) => void
+  showResubmissionSummary?: boolean
 }
 
 export const RequirementForm = observer(
@@ -56,6 +61,8 @@ export const RequirementForm = observer(
     forSubmitterEdit = false,
     readOnly: readOnlyProp = false,
     updateCollaborationAssignmentNodes,
+    onReviewSubmit,
+    showResubmissionSummary,
   }: IRequirementFormProps) => {
     const {
       jurisdiction,
@@ -118,6 +125,33 @@ export const RequirementForm = observer(
     const [firstComponentKey, setFirstComponentKey] = useState(null)
     const [isCollapsedAll, setIsCollapsedAllState] = useState(false)
     const stepCodeToolErrorRef = useRef<IErrorsBoxData[] | null>(null)
+    const {
+      isOpen: isOptionalElectivesOpen,
+      onOpen: onOptionalElectivesOpen,
+      onClose: onOptionalElectivesClose,
+    } = useDisclosure()
+    const [optionalElectivesModalData, setOptionalElectivesModalData] = useState<TOptionalElectivesPanel | null>(null)
+    const isEphemeral = permitApplication?.isEphemeral
+
+    const optionalElectivesByPanelId = useMemo(() => {
+      if (!isEphemeral) return new Map<string, TOptionalElectivesPanel>()
+      return getOptionalElectivesByPanelId(formattedFormJson)
+    }, [formattedFormJson, isEphemeral])
+
+    useEffect(() => {
+      if (!isEphemeral) return
+
+      const handleOpenOptionalElectives = (event: Event) => {
+        const panelId = (event as CustomEvent<{ panelId?: string }>).detail?.panelId
+        if (!panelId) return
+
+        setOptionalElectivesModalData(optionalElectivesByPanelId.get(panelId) || { labels: [], electives: [] })
+        onOptionalElectivesOpen()
+      }
+
+      document.addEventListener("openOptionalElectives", handleOpenOptionalElectives)
+      return () => document.removeEventListener("openOptionalElectives", handleOpenOptionalElectives)
+    }, [isEphemeral, onOptionalElectivesOpen, optionalElectivesByPanelId])
 
     const currentSubmissionData = useMemo(() => {
       return R.clone(submissionData)
@@ -141,6 +175,8 @@ export const RequirementForm = observer(
     }, [selectedSubmissionVersion, isViewingPastRequests, currentSubmissionData])
 
     const [unsavedSubmissionData, setUnsavedSubmissionData] = useState(() => R.clone(submissionData))
+    const stableFormJsonRef = useRef(formattedFormJson)
+    const pinnedSubmissionRef = useRef(null)
 
     const handleSetUnsavedSubmissionData = (data) => {
       permitApplication.setIsDirty(true)
@@ -177,6 +213,9 @@ export const RequirementForm = observer(
     }, [])
 
     useEffect(() => {
+      const formIsDirty =
+        !!formRef?.current && formRef.current.pristine === false && !permitApplication.isViewingPastRequests
+      if (formIsDirty) return
       setUnsavedSubmissionData(displayedSubmissionData)
       // We don't want to trigger a re-render if the permitApplication itself changes, only if the derived data changes
     }, [displayedSubmissionData])
@@ -229,6 +268,10 @@ export const RequirementForm = observer(
       stepCodeToolErrorRef.current = null
       setHasErrors(null)
       setImminentSubmission(submission)
+      if (permitApplication.isRevisionsRequested && onReviewSubmit) {
+        onReviewSubmit(submission)
+        return
+      }
       onOpen()
     }
 
@@ -320,6 +363,15 @@ export const RequirementForm = observer(
       isPreviousSubmissionOpen && previousSubmissionKey && pastVersion?.formJson
         ? getRequirementByKey(pastVersion.formJson, previousSubmissionKey)
         : null
+    const formSchemaChanged =
+      stableFormJsonRef.current !== formattedFormJson && !R.equals(stableFormJsonRef.current, formattedFormJson)
+    if (formSchemaChanged) stableFormJsonRef.current = formattedFormJson
+    const formIsDirty = !!formRef?.current && formRef.current.pristine === false && !isViewingPastRequests
+    if (formSchemaChanged && formIsDirty) {
+      pinnedSubmissionRef.current = { data: R.clone(formRef.current.data) }
+    }
+    if (!formIsDirty) pinnedSubmissionRef.current = null
+    const submissionForForm = pinnedSubmissionRef.current ?? unsavedSubmissionData
     return (
       <>
         <Flex
@@ -399,7 +451,8 @@ export const RequirementForm = observer(
               status={EFlashMessageStatus.error}
             />
           )}
-          {permitApplication?.isSubmitted ? (
+          {showResubmissionSummary &&
+          resubmissionSummaryIsVisible(permitApplication) ? null : permitApplication?.isSubmitted ? (
             <CustomMessageBox
               description={t("permitApplication.show.wasSubmitted", {
                 date: format(permitApplication.submittedAt, "MMM d, yyyy h:mm a"),
@@ -442,6 +495,7 @@ export const RequirementForm = observer(
               status={EFlashMessageStatus.info}
             />
           ) : null}
+          {showResubmissionSummary && <ResubmissionSummaryBox permitApplication={permitApplication} />}
           <Box bg="greys.grey03" p={3} borderRadius="sm">
             <Text fontStyle="italic">
               {t("site.foippaWarning")}
@@ -452,10 +506,10 @@ export const RequirementForm = observer(
           </Box>
           <Form
             key={permitApplication.formFormatKey}
-            form={formattedFormJson}
+            form={stableFormJsonRef.current}
             formReady={formReady}
             /* Needs cloned submissionData otherwise it's not possible to use data grid as mst props can't be mutated*/
-            submission={unsavedSubmissionData}
+            submission={submissionForForm}
             onSubmit={onFormSubmit}
             options={permitAppOptions}
             onBlur={onBlur}
@@ -468,6 +522,11 @@ export const RequirementForm = observer(
           isCollapsedAll={isCollapsedAll}
           setIsCollapsedAll={setIsCollapsedAll}
           renderSaveButton={renderSaveButton}
+        />
+        <OptionalElectivesModal
+          isOpen={isOptionalElectivesOpen}
+          onClose={onOptionalElectivesClose}
+          data={optionalElectivesModalData}
         />
         {isOpen && (
           <PermitApplicationSubmitModal

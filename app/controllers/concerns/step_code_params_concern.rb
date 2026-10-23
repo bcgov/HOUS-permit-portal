@@ -29,6 +29,8 @@ module StepCodeParamsConcern
   end
 
   def step_code_params_for_create
-    step_code_params.merge(creator: current_user)
+    attrs = step_code_params.merge(creator: current_user)
+    attrs[:sandbox] = current_sandbox if attrs[:permit_application_id].blank?
+    attrs
   end
 end

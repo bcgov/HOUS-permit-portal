@@ -22,7 +22,7 @@ class RequirementTemplateBlueprint < Blueprinter::Base
     if rt.available_globally
       I18n.t("activerecord.attributes.requirement_template.available_in_all")
     else
-      rt.jurisdiction_requirement_templates.count
+      rt.jurisdiction_requirement_templates.size
     end
   end
 
@@ -86,6 +86,28 @@ class RequirementTemplateBlueprint < Blueprinter::Base
   view :template_snapshot do
     association :requirement_template_sections,
                 blueprint: RequirementTemplateSectionBlueprint
+  end
+
+  view :external_api do
+    excludes :discarded_at,
+             :fetched_at,
+             :created_at,
+             :updated_at,
+             :available_globally,
+             :template_category_id,
+             :used_by,
+             :tags,
+             :available_in,
+             :explicitly_disabled_jurisdictions,
+             :deprecated_template_versions,
+             :scheduled_template_versions,
+             :assignee,
+             :draft_template_versions,
+             :enabled_jurisdictions
+
+    association :published_template_version,
+                blueprint: TemplateVersionBlueprint,
+                view: :external_api
   end
 end
 

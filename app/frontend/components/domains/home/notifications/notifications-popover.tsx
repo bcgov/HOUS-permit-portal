@@ -94,7 +94,7 @@ export const NotificationsPopover: React.FC<INotificationsPopoverProps> = observ
   }
 
   return (
-    <Popover isOpen={isOpen} onOpen={handleOpen} onClose={handleClose}>
+    <Popover isLazy isOpen={isOpen} onOpen={handleOpen} onClose={handleClose}>
       <PopoverTrigger>
         <Box position="relative">
           <IconButton
@@ -120,7 +120,7 @@ export const NotificationsPopover: React.FC<INotificationsPopoverProps> = observ
         </Box>
       </PopoverTrigger>
       <Portal>
-        <PopoverContent color="black" w={500} mt={3}>
+        <PopoverContent color="black" w={{ base: "calc(100vw - 2rem)", md: "500px" }} maxW="calc(100vw - 2rem)" mt={3}>
           <PopoverArrow />
           <PopoverCloseButton mt={1} />
           <PopoverHeader>

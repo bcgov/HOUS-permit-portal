@@ -240,6 +240,8 @@ class Api::UsersController < Api::ApplicationController
         enable_in_app_application_view_notification
         enable_email_application_revisions_request_notification
         enable_in_app_application_revisions_request_notification
+        enable_in_app_applications_added_notification
+        enable_email_applications_added_notification
         enable_in_app_collaboration_notification
         enable_email_collaboration_notification
         enable_in_app_unmapped_api_notification
@@ -248,6 +250,16 @@ class Api::UsersController < Api::ApplicationController
         enable_email_resource_reminder_notification
         enable_in_app_project_meeting_submitted_notification
         enable_email_project_meeting_submitted_notification
+        enable_in_app_project_meeting_scheduled_notification
+        enable_email_project_meeting_scheduled_notification
+        enable_in_app_project_meeting_rescheduled_notification
+        enable_email_project_meeting_rescheduled_notification
+        enable_in_app_pre_check_submitted_notification
+        enable_email_pre_check_submitted_notification
+        enable_in_app_pre_check_completed_notification
+        enable_email_pre_check_completed_notification
+        enable_in_app_step_code_report_notification
+        enable_in_app_file_upload_failed_notification
         enable_in_app_release_note_publish_notification
       ]
     )

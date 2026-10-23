@@ -103,14 +103,10 @@ export const UserModel = types
       )
     },
     get omniauthProviderLabel() {
-      const keys = {
-        idir: "idir",
-        bceidbasic: "bceidbasic",
-        bceidbusiness: "bceidbusiness",
-        "digital-building-permit-5120": "bcsc",
-      }
-      // @ts-ignore
-      return t(`user.omniauthProviders.${keys[self.omniauthProvider]}`)
+      if (!self.omniauthProvider) return
+      // Stored BCSC id is digital-building-permit-5120; the copy key is bcsc.
+      const labelKey = self.omniauthProvider === OMNIAUTH_PROVIDERS.bcsc ? "bcsc" : self.omniauthProvider
+      return t(`user.omniauthProviders.${labelKey}`)
     },
   }))
   .actions((self) => ({
@@ -202,6 +198,8 @@ export interface IPreference {
   enableEmailApplicationViewNotification: boolean
   enableInAppApplicationRevisionsRequestNotification: boolean
   enableEmailApplicationRevisionsRequestNotification: boolean
+  enableInAppApplicationsAddedNotification: boolean
+  enableEmailApplicationsAddedNotification: boolean
 
   enableInAppCollaborationNotification: boolean
   enableEmailCollaborationNotification: boolean
@@ -214,4 +212,16 @@ export interface IPreference {
 
   enableInAppProjectMeetingSubmittedNotification: boolean
   enableEmailProjectMeetingSubmittedNotification: boolean
+
+  enableInAppProjectMeetingScheduledNotification: boolean
+  enableEmailProjectMeetingScheduledNotification: boolean
+  enableInAppProjectMeetingRescheduledNotification: boolean
+  enableEmailProjectMeetingRescheduledNotification: boolean
+  enableInAppPreCheckSubmittedNotification: boolean
+  enableEmailPreCheckSubmittedNotification: boolean
+  enableInAppPreCheckCompletedNotification: boolean
+  enableEmailPreCheckCompletedNotification: boolean
+  enableInAppStepCodeReportNotification: boolean
+  enableInAppFileUploadFailedNotification: boolean
+  enableInAppReleaseNotePublishNotification: boolean
 }

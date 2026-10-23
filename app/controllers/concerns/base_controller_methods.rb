@@ -6,6 +6,7 @@ module BaseControllerMethods
     include ActionController::RequestForgeryProtection
 
     protect_from_forgery with: :exception
+    before_action :set_sentry_request_context
     after_action :set_csrf_cookie
   end
 
@@ -62,6 +63,10 @@ module BaseControllerMethods
 
   # error_key maps to a translation key in en.yml
   def render_error(error_key = nil, opts = {}, exception = nil)
+    if exception.present? &&
+         Rack::Utils.status_code(opts[:status] || 400) >= 500
+      BphSentry.capture_exception(exception)
+    end
     if exception.present?
       Rails.logger.error "#{exception.message}\n#{exception.backtrace}"
     elsif opts[:log_args].present?
@@ -102,6 +107,20 @@ module BaseControllerMethods
   end
 
   private
+
+  def set_sentry_request_context
+    unless BphSentry::Configuration.new.backend_enabled? && Sentry.initialized?
+      return
+    end
+
+    user = respond_to?(:current_user, true) ? current_user : nil
+    Sentry.set_user(BphSentry::Privacy.user_context(user))
+    Sentry.set_tags(
+      component: "web",
+      route: "#{controller_path}##{action_name}",
+      role: BphSentry::Privacy::ROLES.include?(user&.role) ? user.role : nil
+    )
+  end
 
   def set_csrf_cookie
     cookies["CSRF-TOKEN"] = {

@@ -31,14 +31,28 @@ interface IProps {
   onSubmit?: () => void
 }
 
-export const PermitApplicationSubmitModal = observer(function PermitApplicationSubmitModal({
+export const DigitalSealChecksNotice = observer(function DigitalSealChecksNotice({
   permitApplication,
-  isOpen,
-  onSubmit,
-  onClose,
-}: IProps) {
-  const { siteConfigurationStore, userStore } = useMst()
-  const currentUser = userStore.currentUser
+}: {
+  permitApplication: IPermitApplication
+}) {
+  const { t } = useTranslation()
+  const { pendingCount, failedCount } = permitApplication.digitalSealChecks
+  if (!pendingCount && !failedCount) return null
+  return (
+    <Box role="status" aria-live="polite">
+      {pendingCount > 0 && <Text>{t("permitApplication.new.digitalSealChecksPending")}</Text>}
+      {failedCount > 0 && <Text fontStyle="italic">{t("permitApplication.new.digitalSealChecksFailed")}</Text>}
+    </Box>
+  )
+})
+
+export const ProjectMeetingAdvisory = observer(function ProjectMeetingAdvisory({
+  permitApplication,
+}: {
+  permitApplication: IPermitApplication
+}) {
+  const { siteConfigurationStore } = useMst()
   const { t } = useTranslation()
   const projectId = permitApplication.projectId
   const activeProjectMeetingId = permitApplication.activeProjectMeetingId
@@ -50,6 +64,56 @@ export const PermitApplicationSubmitModal = observer(function PermitApplicationS
   const projectMeetingLink = hasActiveProjectMeeting
     ? `/projects/${projectId}/meetings/${activeProjectMeetingId}`
     : `/projects/${projectId}/meetings/new`
+
+  if (!shouldShowProjectMeetingAdvisory) return null
+
+  return (
+    <CustomMessageBox status={EFlashMessageStatus.info} title={t("permitApplication.new.projectMeetingAdvisory.title")}>
+      <Text fontSize="sm">
+        {hasActiveProjectMeeting ? (
+          <>
+            {t("permitApplication.new.projectMeetingAdvisory.activeBody")}{" "}
+            <Text
+              as={RouterLink}
+              to={projectMeetingLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              display="inline"
+              textDecoration="underline"
+            >
+              {t("permitApplication.new.projectMeetingAdvisory.activeLink")}
+            </Text>
+          </>
+        ) : (
+          <>
+            {t("permitApplication.new.projectMeetingAdvisory.prefix")}{" "}
+            <Text
+              as={RouterLink}
+              to={projectMeetingLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              display="inline"
+              textDecoration="underline"
+            >
+              {t("permitApplication.new.projectMeetingAdvisory.link")}
+            </Text>
+            {t("permitApplication.new.projectMeetingAdvisory.suffix")}
+          </>
+        )}
+      </Text>
+    </CustomMessageBox>
+  )
+})
+
+export const PermitApplicationSubmitModal = observer(function PermitApplicationSubmitModal({
+  permitApplication,
+  isOpen,
+  onSubmit,
+  onClose,
+}: IProps) {
+  const { userStore } = useMst()
+  const currentUser = userStore.currentUser
+  const { t } = useTranslation()
 
   return (
     <Modal onClose={onClose} isOpen={isOpen} size="2xl">
@@ -74,47 +138,14 @@ export const PermitApplicationSubmitModal = observer(function PermitApplicationS
             <Flex direction="column" gap={8}>
               <Heading as="h3">{t("permitApplication.new.ready")}</Heading>
               <Text fontSize="lg">{t("permitApplication.new.confirmation")}</Text>
-              {shouldShowProjectMeetingAdvisory && (
-                <CustomMessageBox
-                  status={EFlashMessageStatus.info}
-                  title={t("permitApplication.new.projectMeetingAdvisory.title")}
-                >
-                  <Text fontSize="sm">
-                    {hasActiveProjectMeeting ? (
-                      <>
-                        {t("permitApplication.new.projectMeetingAdvisory.activeBody")}{" "}
-                        <Text
-                          as={RouterLink}
-                          to={projectMeetingLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          display="inline"
-                          textDecoration="underline"
-                        >
-                          {t("permitApplication.new.projectMeetingAdvisory.activeLink")}
-                        </Text>
-                      </>
-                    ) : (
-                      <>
-                        {t("permitApplication.new.projectMeetingAdvisory.prefix")}{" "}
-                        <Text
-                          as={RouterLink}
-                          to={projectMeetingLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          display="inline"
-                          textDecoration="underline"
-                        >
-                          {t("permitApplication.new.projectMeetingAdvisory.link")}
-                        </Text>
-                        {t("permitApplication.new.projectMeetingAdvisory.suffix")}
-                      </>
-                    )}
-                  </Text>
-                </CustomMessageBox>
-              )}
+              <ProjectMeetingAdvisory permitApplication={permitApplication} />
+              <DigitalSealChecksNotice permitApplication={permitApplication} />
               <Flex justify="center" gap={6}>
-                <Button onClick={onSubmit} variant="primary">
+                <Button
+                  onClick={onSubmit}
+                  variant="primary"
+                  isDisabled={permitApplication.digitalSealChecks.pendingCount > 0}
+                >
                   {t("permitApplication.new.submitApplication")}
                 </Button>
                 <Button onClick={onClose} variant="secondary">

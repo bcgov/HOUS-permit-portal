@@ -29,15 +29,23 @@ RSpec.describe Reports::PlatformHealth do
     expect(figure("project_collaborations")[:value]).to eq(1)
   end
 
-  it "profiles document counts and shrine metadata sizes" do
+  it "profiles document counts and sizes in megabytes" do
     application = create(:permit_application)
-    document_with_size(application, 2048)
-    document_with_size(application, 1024)
+    document_with_size(application, 2.megabytes)
+    document_with_size(application, 1.megabyte)
     create(:permit_application)
 
     expect(figure("average_documents")[:value]).to eq(1.0)
-    expect(figure("average_total_size_bytes")[:value]).to eq(1536)
-    expect(figure("maximum_total_size_bytes")[:value]).to eq(3072)
+    expect(figure("average_total_size_bytes")[:value]).to eq(1.5)
+    expect(figure("average_total_size_bytes")[:label]).to include("MB")
+    expect(figure("maximum_total_size_bytes")[:value]).to eq(3.0)
+    help = [
+      figure("average_total_size_bytes")[:help_text],
+      figure("maximum_total_size_bytes")[:help_text],
+      payload[:notes].map { |note| note[:text] }.join
+    ].join
+    expect(help).not_to include("Shrine")
+    expect(help).not_to include("file_data")
   end
 
   it "states that failed submissions and errors are not measured" do

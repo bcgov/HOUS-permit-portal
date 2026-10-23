@@ -5,7 +5,13 @@ import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IExternalApiKeyParams } from "../types/api-request"
-import { EEnergyStep, EJurisdictionExternalApiState, EPreCheckServicePartner, EZeroCarbonStep } from "../types/enums"
+import {
+  EEnergyStep,
+  EJurisdictionExternalApiState,
+  EPreCheckServicePartner,
+  ESubmissionContactClass,
+  EZeroCarbonStep,
+} from "../types/enums"
 import {
   IContact,
   IJurisdictionHeatingDegreeDay,
@@ -248,6 +254,33 @@ export const JurisdictionModel = types
     }),
   }))
   .actions((self) => ({
+    createSubmissionContact: flow(function* (email: string, type: ESubmissionContactClass) {
+      const response = yield* toGenerator(
+        self.environment.api.createSubmissionContact({ jurisdictionId: self.id, email, type })
+      )
+      if (response.ok && response.data?.data) {
+        self.submissionContacts.push(response.data.data)
+        return true
+      }
+      return false
+    }),
+    destroySubmissionContact: flow(function* (id: string) {
+      const response = yield* toGenerator(self.environment.api.destroySubmissionContact(id))
+      if (response.ok) {
+        const index = self.submissionContacts.findIndex((contact) => contact.id === id)
+        if (index >= 0) self.submissionContacts.splice(index, 1)
+      }
+      return response.ok
+    }),
+    resendSubmissionContactConfirmation: flow(function* (id: string) {
+      const response = yield* toGenerator(self.environment.api.resendSubmissionContactConfirmation(id))
+      if (response.ok && response.data?.data) {
+        const index = self.submissionContacts.findIndex((contact) => contact.id === id)
+        if (index >= 0) self.submissionContacts.splice(index, 1, response.data.data)
+        return true
+      }
+      return false
+    }),
     toggleExternalApiEnabled: flow(function* () {
       const response = yield* toGenerator(
         self.environment.api.updateJurisdictionExternalApiEnabled(self.id, !self.externalApiEnabled)

@@ -1,6 +1,9 @@
 class SupportingDocument < FileUploadAttachment
   belongs_to :permit_application
   belongs_to :submission_version, optional: true
+  belongs_to :revision_request,
+             optional: true,
+             inverse_of: :supporting_documents
 
   include FileUploader.Attachment(:file)
   prepend FilenamePreservingFileUrl
@@ -10,6 +13,11 @@ class SupportingDocument < FileUploadAttachment
   end
 
   validate :validate_submission_version_data_key
+  validate :revision_request_on_same_application,
+           if: -> { revision_request_id.present? }
+
+  before_validation :assign_revision_fulfillment_data_key,
+                    if: -> { revision_request_id.present? && !persisted? }
 
   scope :file_ids_with_regex,
         ->(regex_pattern) { where("file_data ->> 'id' ~ ?", regex_pattern) }
@@ -28,7 +36,7 @@ class SupportingDocument < FileUploadAttachment
     if compliance_data["result"] &&
          signer =
            compliance_data["result"]
-             .sort_by { |signer| signer.dig("signatureTimestamp", "date") }
+             .sort_by { |signer| signer.dig("signatureTimestamp", "date").to_s }
              &.last
       parse_signature(signer)
     else
@@ -43,9 +51,9 @@ class SupportingDocument < FileUploadAttachment
           .map { |signer| parse_signature(signer) }
           .group_by { |signer| signer[:subjectName] }
           .map do |subjectName, signaturesArray|
-            signaturesArray.sort_by { |signer| signer[:date] }&.last
+            signaturesArray.sort_by { |signer| signer[:date].to_s }&.last
           end
-          .sort_by { |signer| signer[:date] }
+          .sort_by { |signer| signer[:date].to_s }
           .reverse
 
       {
@@ -89,12 +97,18 @@ class SupportingDocument < FileUploadAttachment
           &.filter { |i| i.starts_with?("OU=") }
           &.map { |i| i[3..-1] }
           &.join(","),
-      date:
-        Time
-          .parse(signer.dig("signatureTimestamp", "date"))
-          .in_time_zone(Rails.application.config.time_zone)
-          .strftime("%Y-%m-%d %H:%M:%S %Z")
+      date: formatted_signature_date(signer.dig("signatureTimestamp", "date"))
     }
+  end
+
+  def formatted_signature_date(value)
+    return if value.blank?
+    Time
+      .parse(value)
+      .in_time_zone(Rails.application.config.time_zone)
+      .strftime("%Y-%m-%d %H:%M:%S Pacific Time")
+  rescue ArgumentError, TypeError
+    nil
   end
 
   def standardized_filename
@@ -130,6 +144,8 @@ class SupportingDocument < FileUploadAttachment
   ].freeze
 
   def validate_submission_version_data_key
+    return if revision_request_id.present?
+
     unless submission_version.present? &&
              !STATIC_DOCUMENT_DATA_KEYS.include?(data_key)
       return
@@ -155,8 +171,34 @@ class SupportingDocument < FileUploadAttachment
 
   private
 
+  def assign_revision_fulfillment_data_key
+    self.data_key =
+      "revision_fulfillment_#{revision_request_id}_#{SecureRandom.hex(4)}"
+  end
+
+  def revision_request_on_same_application
+    same_application =
+      revision_request.is_a?(SupportingDocumentRevisionRequest) &&
+        revision_request.submission_version&.permit_application_id ==
+          permit_application_id
+    return if same_application
+
+    errors.add(:revision_request, :invalid)
+  end
+
   def generated_document_filename
     return unless STATIC_DOCUMENT_DATA_KEYS.include?(data_key)
+
+    kind = data_key == APPLICATION_PDF_DATA_KEY ? "application" : "checklist"
+    if submission_version&.report_snapshot.is_a?(Hash)
+      # Stored legacy/unsupported reports remain downloadable independently of
+      # whether their source snapshot can currently be rendered.
+      filenames = submission_version.report_snapshot["filenames"]
+      saved_name = filenames[kind] if filenames.is_a?(Hash)
+      if saved_name.is_a?(String) && saved_name.present?
+        return File.basename(saved_name)
+      end
+    end
 
     file_namer =
       PermitApplicationGeneratedFileNamer.new(

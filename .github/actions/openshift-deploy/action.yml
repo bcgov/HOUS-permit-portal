@@ -20,6 +20,10 @@ inputs:
   build_args:
     description: Docker build args
     required: true
+  release_version_prefix:
+    description: Optional frontend release prefix; the checked-out commit SHA is appended after checkout
+    required: false
+    default: ""
   registry_url:
     description: OpenShift registry URL
     required: true
@@ -29,6 +33,13 @@ inputs:
   builder_token:
     description: Registry service account token
     required: true
+  sentry_auth_token:
+    description: Sentry organization CI token; mounted as a build secret only
+    required: false
+  sentry_upload_sourcemaps:
+    description: Explicitly enable source-map uploads (requires token)
+    required: false
+    default: "false"
 
 runs:
   using: composite
@@ -92,31 +103,54 @@ runs:
         end
         RUBY
 
-    - name: Update GITHUB_SHA with checked-out commit SHA
+    - name: Capture checked-out commit SHA
       id: capture-git-sha
       shell: bash
-      run: echo "GITHUB_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+      run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
     - name: Confirm branch and SHA to deploy
       id: confirm-deploy-target
       shell: bash
       env:
         DEPLOY_BRANCH: ${{ inputs.branch }}
+        DEPLOY_SHA: ${{ steps.capture-git-sha.outputs.sha }}
         ENVIRONMENT_LABEL: ${{ inputs.environment_label }}
       run: |
-        echo "Deploying branch: ${DEPLOY_BRANCH} @ ${GITHUB_SHA} to ${ENVIRONMENT_LABEL}"
+        echo "Deploying branch: ${DEPLOY_BRANCH} @ ${DEPLOY_SHA} to ${ENVIRONMENT_LABEL}"
+
+    - name: Prepare Sentry build secret
+      if: inputs.sentry_upload_sourcemaps == 'true'
+      shell: bash
+      env:
+        SENTRY_BUILD_TOKEN: ${{ inputs.sentry_auth_token }}
+      run: |
+        set -euo pipefail
+        test -n "$SENTRY_BUILD_TOKEN" || { echo 'Missing Sentry CI token'; exit 1; }
+        umask 077
+        printf '%s' "$SENTRY_BUILD_TOKEN" > "$RUNNER_TEMP/bph-sentry-build-token"
 
     - name: Build Docker Image
       id: build-image
       uses: redhat-actions/buildah-build@v3
       with:
         image: ${{ inputs.image_name }}
-        tags: latest ${{ env.GITHUB_SHA }}
+        tags: latest ${{ steps.capture-git-sha.outputs.sha }}
         labels: |
           app=${{ inputs.image_name }}
-          git-sha=${{ env.GITHUB_SHA }}
+          git-sha=${{ steps.capture-git-sha.outputs.sha }}
         containerfiles: ./devops/docker/app/Dockerfile
-        build-args: ${{ inputs.build_args }}
+        build-args: |
+          ${{ inputs.build_args }}
+          SENTRY_RELEASE=hous-permit-portal@${{ steps.capture-git-sha.outputs.sha }}
+          SENTRY_UPLOAD_SOURCEMAPS=${{ inputs.sentry_upload_sourcemaps }}
+          ${{ inputs.release_version_prefix && format('VITE_RELEASE_VERSION={0}-{1}', inputs.release_version_prefix, steps.capture-git-sha.outputs.sha) || '' }}
+        extra-args: |
+          ${{ inputs.sentry_upload_sourcemaps == 'true' && format('--secret=id=sentry_auth_token,src={0}/bph-sentry-build-token', runner.temp) || '' }}
+
+    - name: Remove Sentry build secret
+      if: always()
+      shell: bash
+      run: rm -f "$RUNNER_TEMP/bph-sentry-build-token"
 
     - name: Push to Openshift Registry using Service Account
       id: push-image

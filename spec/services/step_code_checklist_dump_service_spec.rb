@@ -7,6 +7,15 @@ RSpec.describe StepCodeChecklistDumpService do
     )
   end
 
+  def mark_complete(checklist, completed_at: Time.current)
+    checklist.update!(
+      status: :complete,
+      section_completion_status:
+        checklist.class.fully_complete_section_completion_status,
+      stage_completed_at: completed_at
+    )
+  end
+
   def rows_for(range)
     csv = described_class.new(range: Reports::Range.parse(range)).part_9_csv
     CSV.parse(csv, headers: true)
@@ -23,6 +32,8 @@ RSpec.describe StepCodeChecklistDumpService do
       narrow.pre_construction_checklist,
       [{ details: "single", rsi: "4" }]
     )
+    mark_complete(wide.pre_construction_checklist)
+    mark_complete(narrow.pre_construction_checklist)
 
     rows = rows_for("all_time")
 
@@ -46,11 +57,17 @@ RSpec.describe StepCodeChecklistDumpService do
     expect(wide_row["Roof ceiling details 4"]).to be_blank
   end
 
-  it "includes only checklists created in the selected range, with all-time column widths" do
+  it "includes only checklists completed in the selected range, with all-time column widths" do
     in_range = create(:part_9_step_code)
     fill_roof_lines(
       in_range.pre_construction_checklist,
       [{ details: "recent", rsi: "1" }]
+    )
+    mark_complete(in_range.pre_construction_checklist)
+    draft = create(:part_9_step_code)
+    fill_roof_lines(
+      draft.pre_construction_checklist,
+      [{ details: "draft", rsi: "9" }]
     )
     old = create(:part_9_step_code)
     fill_roof_lines(
@@ -61,12 +78,48 @@ RSpec.describe StepCodeChecklistDumpService do
         { details: "oldest", rsi: "4" }
       ]
     )
-    old.pre_construction_checklist.update_column(:created_at, 2.years.ago)
+    mark_complete(old.pre_construction_checklist, completed_at: 2.years.ago)
 
     rows = rows_for("12_months")
 
     expect(rows.map { |row| row["Roof ceiling details 1"] }).to eq(["recent"])
     expect(rows.headers).to include("Roof ceiling details 6")
     expect(rows.headers).not_to include("Roof ceiling details 7")
+  end
+
+  it "excludes sandboxed step codes" do
+    live = create(:part_9_step_code)
+    fill_roof_lines(live.pre_construction_checklist, [{ details: "live" }])
+    mark_complete(live.pre_construction_checklist)
+    sandboxed = create(:part_9_step_code, sandbox: published_sandbox)
+    fill_roof_lines(
+      sandboxed.pre_construction_checklist,
+      [{ details: "training" }]
+    )
+    mark_complete(sandboxed.pre_construction_checklist)
+
+    rows = rows_for("all_time")
+
+    expect(rows.map { |row| row["Roof ceiling details 1"] }).to eq(["live"])
+  end
+
+  it "exports part 3 checklists completed in range" do
+    create(:part_3_step_code)
+    completed = create(:part_3_step_code)
+    mark_complete(completed.pre_construction_checklist)
+
+    rows =
+      CSV.parse(
+        described_class.new(range: Reports::Range.parse("all_time")).part_3_csv,
+        headers: true
+      )
+
+    expect(rows.headers).to include(
+      "Reference number",
+      "Building Height",
+      "Climate Zone"
+    )
+    expect(rows.length).to eq(1)
+    expect(rows.first["Stage"]).to eq("pre_construction")
   end
 end

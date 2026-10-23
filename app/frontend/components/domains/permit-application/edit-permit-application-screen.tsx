@@ -38,6 +38,10 @@ import { BrowserSearchPrompt } from "../../shared/permit-applications/browser-se
 import { PermitApplicationStatusTag } from "../../shared/permit-applications/permit-application-status-tag"
 import { PermitApplicationSubmitModal } from "../../shared/permit-applications/permit-application-submit-modal"
 import { RequirementForm } from "../../shared/permit-applications/requirement-form"
+import {
+  IReviewSubmitActions,
+  ReviewAndSubmitRevisedApplicationScreen,
+} from "../../shared/revisions/review-and-submit-revised-application-screen"
 import { ChecklistSideBar } from "./checklist-sidebar"
 import { BlockCollaboratorAssignmentManagement } from "./collaborator-management/block-collaborator-assignment-management"
 import { CollaboratorsSidebar } from "./collaborator-management/collaborators-sidebar"
@@ -62,6 +66,20 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
 
   const formRef = useRef(null)
   const navigate = useNavigate()
+
+  const acknowledgedElectivesKey = useRef("")
+  useEffect(() => {
+    if (!currentUser || !currentPermitApplication?.isFullyLoaded) return
+    if (currentUser.id !== currentPermitApplication.submitter?.id) return
+
+    const changeId = currentPermitApplication.unseenCustomizationChangeId
+    if (!changeId || !currentPermitApplication.unseenElectiveFieldIds.length) return
+
+    const key = `${currentPermitApplication.id}:${changeId}`
+    if (acknowledgedElectivesKey.current === key) return
+    acknowledgedElectivesKey.current = key
+    void currentPermitApplication.acknowledgePublishedElectives()
+  }, [currentPermitApplication, currentPermitApplication?.isFullyLoaded, currentUser])
 
   useEffect(() => {
     if (scrollToSelector) {
@@ -95,6 +113,9 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
     onOpen: onSubmitBlockedModalOpen,
     onClose: onSubmitBlockedModalClose,
   } = useDisclosure()
+  const [isReviewingSubmit, setIsReviewingSubmit] = useState(false)
+  const [imminentSubmission, setImminentSubmission] = useState(null)
+  const reviewSubmitActionsRef = useRef<IReviewSubmitActions | null>(null)
 
   const handlePermitApplicationUpdate = (_event: ICustomEventMap[ECustomEvents.handlePermitApplicationUpdate]) => {
     if (formRef.current) {
@@ -280,8 +301,24 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
     !currentPermitApplication.isViewingPastRequests
 
   const parentProjectPath = currentPermitApplication.projectId
-    ? `/projects/${currentPermitApplication.projectId}/permits`
+    ? `/projects/${currentPermitApplication.projectId}/applications`
     : "/projects"
+  const submitClickHandler = currentPermitApplication.canUserSubmit(currentUser)
+    ? handleScrollToBottom
+    : onSubmitBlockedModalOpen
+  let sidebar = <ChecklistSideBar permitApplication={currentPermitApplication} completedBlocks={completedBlocks} />
+  if (isReviewingSubmit && imminentSubmission) {
+    sidebar = (
+      <ReviewAndSubmitRevisedApplicationScreen
+        permitApplication={currentPermitApplication}
+        submission={imminentSubmission}
+        onBack={() => setIsReviewingSubmit(false)}
+        actionsRef={reviewSubmitActionsRef}
+      />
+    )
+  } else if (isRevisionsRequested && !hideRevisionList) {
+    sidebar = <RevisionSideBar permitApplication={currentPermitApplication} forSubmitter />
+  }
 
   return (
     <Box as="main" id="submitter-view-permit">
@@ -306,9 +343,9 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
             zIndex={12}
             flexDirection={{ base: "column", md: "row" }}
           >
-            <HStack gap={4} flex={1}>
+            <HStack gap={4} flex={1} minW={0} align="flex-start">
               <PermitApplicationStatusTag status={currentPermitApplication.status} />
-              <Flex direction="column" w="full">
+              <Flex direction="column" w="full" minW={0}>
                 <form>
                   <Tooltip
                     label={t("permitApplication.edit.clickToWriteNickname")}
@@ -358,7 +395,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                 </form>
 
                 <Text noOfLines={1}>{tagsOrNickname}</Text>
-                <HStack>
+                <HStack flexWrap="wrap" rowGap={1} columnGap={4} align="center">
                   <CopyableValue value={number} label={t("permitApplication.fields.number")} />
                   {currentPermitApplication.referenceNumber && (
                     <CopyableValue
@@ -369,7 +406,6 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                 </HStack>
               </Flex>
             </HStack>
-
             {isSubmitted ? (
               <Stack direction={{ base: "column", lg: "row" }} align={{ base: "flex-end", lg: "center" }}>
                 <BrowserSearchPrompt />
@@ -405,20 +441,23 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                 />
                 <Button
                   variant="primary"
-                  onClick={handleClickFinishLater}
-                  isDisabled={currentPermitApplication.isViewingPastRequests}
+                  onClick={
+                    isReviewingSubmit ? () => reviewSubmitActionsRef.current?.saveAndExit() : handleClickFinishLater
+                  }
+                  isDisabled={!isReviewingSubmit && currentPermitApplication.isViewingPastRequests}
                 >
-                  {t("permitApplication.edit.saveDraft")}
+                  {isReviewingSubmit
+                    ? t("permitApplication.show.revision.saveAndExit")
+                    : t("permitApplication.edit.saveDraft")}
                 </Button>
                 <Button
                   rightIcon={<CaretRight />}
-                  onClick={
-                    currentPermitApplication.canUserSubmit(currentUser)
-                      ? handleScrollToBottom
-                      : onSubmitBlockedModalOpen
-                  }
+                  onClick={isReviewingSubmit ? () => reviewSubmitActionsRef.current?.submit() : submitClickHandler}
+                  isDisabled={isReviewingSubmit && currentPermitApplication.digitalSealChecks.pendingCount > 0}
                 >
-                  {t("permitApplication.edit.submit")}
+                  {isReviewingSubmit
+                    ? t("permitApplication.new.submitApplication")
+                    : t("permitApplication.edit.submit")}
                 </Button>
                 {!currentPermitApplication.canUserSubmit(currentUser) && isSubmitBlockedModalOpen && (
                   <PermitApplicationSubmitModal
@@ -429,9 +468,9 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                 )}
               </HStack>
             )}
-            <FloatingHelpDrawer top="250px" />
+            <FloatingHelpDrawer top={{ base: "auto", md: "250px" }} bottom={{ base: 18, md: "auto" }} />
           </Flex>
-          {currentPermitApplication.isRevisionsRequested && (
+          {currentPermitApplication.isRevisionsRequested && !isReviewingSubmit && (
             <Flex
               position="sticky"
               zIndex={11}
@@ -444,7 +483,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
               gap={4}
               top={permitHeaderHeight}
             >
-              <Flex width={"sidebar.width"} align="center" gap={2}>
+              <Flex width={"sidebar.revisionWidth"} align="center" gap={2}>
                 <NotePencil size={24} />
                 <Heading fontSize="lg" mt={2}>
                   {t("permitApplication.show.requestedRevisions")}
@@ -467,13 +506,16 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
         </Flex>
       )}
       <Box id="sidebar-and-form-container" sx={{ "&:after": { content: `""`, display: "block", clear: "both" } }}>
-        {isRevisionsRequested && !hideRevisionList ? (
-          <RevisionSideBar permitApplication={currentPermitApplication} forSubmitter />
-        ) : (
-          <ChecklistSideBar permitApplication={currentPermitApplication} completedBlocks={completedBlocks} />
-        )}
+        {sidebar}
         {formJson && (
-          <Flex flex={1} direction="column" pt={8} position={"relative"} id="permitApplicationFieldsContainer">
+          <Flex
+            flex={1}
+            direction="column"
+            pt={8}
+            position={"relative"}
+            id="permitApplicationFieldsContainer"
+            display={isReviewingSubmit ? "none" : "flex"}
+          >
             <RequirementForm
               formRef={formRef}
               permitApplication={currentPermitApplication}
@@ -489,6 +531,14 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                 />
               )}
               updateCollaborationAssignmentNodes={updateRequirementBlockAssignmentNode}
+              onReviewSubmit={
+                currentPermitApplication.canUserSubmit(currentUser)
+                  ? (submission) => {
+                      setImminentSubmission(submission)
+                      setIsReviewingSubmit(true)
+                    }
+                  : undefined
+              }
             />
           </Flex>
         )}

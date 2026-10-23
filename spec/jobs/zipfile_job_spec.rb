@@ -2,13 +2,11 @@ require "rails_helper"
 require "sidekiq/testing"
 
 RSpec.describe ZipfileJob, type: :job do
-  before { Sidekiq::Testing.fake! }
-
-  def stub_package_pipeline(pa)
-    versions = double("Versions")
-    allow(pa).to receive(:submission_versions).and_return(versions)
-    allow(versions).to receive(:pluck).with(:id).and_return([])
-    allow(pa).to receive(:mark_submission_packages_ready!).and_return([])
+  before do
+    Sidekiq::Testing.fake!
+    allow_any_instance_of(SubmissionVersion).to receive(
+      :report_generation_issues
+    ).and_return([])
   end
 
   it "locks by permit_application_id" do
@@ -24,27 +22,71 @@ RSpec.describe ZipfileJob, type: :job do
       zipper
     )
 
-    pa =
-      instance_double(
-        "PermitApplication",
-        notifiable_users: double("UsersRel", pluck: ["u1"]),
-        reload: true,
-        mark_submission_packages_ready!: [],
-        enqueue_package_ready_webhooks: true
-      )
-    stub_package_pipeline(pa)
-    allow(PermitApplication).to receive(:find_by_id).with("pa1").and_return(pa)
+    pa = create(:permit_application, :newly_submitted)
+    version = pa.latest_submission_version
+    allow_any_instance_of(SubmissionVersion).to receive(
+      :missing_pdfs?
+    ).and_return(false)
+    allow(SupportingDocumentsZipper).to receive(:new).with(
+      pa.id,
+      submission_version: version,
+      version_ids: [version.id]
+    ).and_return(zipper)
     allow(PermitApplicationBlueprint).to receive(:render_as_hash).and_return(
       { "p" => 1 }
     )
     allow(WebsocketBroadcaster).to receive(:push_update_to_relevant_users)
 
-    described_class.new.perform("pa1")
+    described_class.new.perform(pa.id)
 
-    expect(pdf_job).to have_received(:perform).with("pa1")
+    expect(pdf_job).to have_received(:perform).with(pa.id, [version.id])
     expect(zipper).to have_received(:perform)
     expect(WebsocketBroadcaster).to have_received(
       :push_update_to_relevant_users
+    )
+  end
+
+  it "rebuilds later packages when the earliest version is missing a PDF" do
+    pdf_job = instance_double("PdfGenerationJob")
+    generated = false
+    allow(PdfGenerationJob).to receive(:new).and_return(pdf_job)
+    allow(pdf_job).to receive(:perform) { generated = true }
+
+    zipper = instance_double("SupportingDocumentsZipper", perform: true)
+    allow(SupportingDocumentsZipper).to receive(:new).and_return(zipper)
+    allow(PermitApplicationBlueprint).to receive(:render_as_hash).and_return({})
+    allow(WebsocketBroadcaster).to receive(:push_update_to_relevant_users)
+
+    permit_application = create(:permit_application, :newly_submitted)
+    earliest = permit_application.latest_submission_version
+    later =
+      create(
+        :submission_version,
+        permit_application: permit_application,
+        created_at: earliest.created_at + 1.minute
+      )
+    later.update_columns(
+      zipfile_data: {
+        "id" => "zip",
+        "storage" => "store"
+      },
+      package_ready_at: Time.current
+    )
+    allow_any_instance_of(SubmissionVersion).to receive(
+      :missing_pdfs?
+    ) { |version| version.id == earliest.id && !generated }
+
+    described_class.new.perform(permit_application.id)
+
+    expect(SupportingDocumentsZipper).to have_received(:new).with(
+      permit_application.id,
+      submission_version: earliest,
+      version_ids: [earliest.id]
+    )
+    expect(SupportingDocumentsZipper).to have_received(:new).with(
+      permit_application.id,
+      submission_version: later,
+      version_ids: [earliest.id, later.id]
     )
   end
 

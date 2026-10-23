@@ -34,7 +34,6 @@ import simpleradios from "./SimpleRadios/Component.js"
 import simpleselect from "./SimpleSelect/Component.js"
 import simpleselectadvanced from "./SimpleSelectAdvanced/Component.js"
 import simpleselectboxesadvanced from "./SimpleSelectBoxesAdvanced/Component.js"
-import simplesignatureadvanced from "./SimpleSignatureAdvanced/Component.js"
 import simplesurveyadvanced from "./SimpleSurveyAdvanced/Component.js"
 import simpletabs from "./SimpleTabs/Component.js"
 import simpletagsadvanced from "./SimpleTagsAdvanced/Component.js"
@@ -89,7 +88,6 @@ export default {
   simplecurrencyadvanced,
   simpleradioadvanced,
   simplesurveyadvanced,
-  simplesignatureadvanced,
   simplebuttonadvanced,
   bcaddress,
   simplebcaddress,

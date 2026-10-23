@@ -16,16 +16,16 @@ export const SuperAdminHomeScreen = ({ ...rest }: IHomeScreenProps) => {
         </Heading>
         <Flex direction="column" align="center" w="full" gap={6}>
           <HomeScreenBox
-            title={t("home.jurisdictionsTitle")}
-            description={t("home.jurisdictionsDescription")}
-            icon={<Buildings size={24} />}
-            href="/jurisdictions"
-          />
-          <HomeScreenBox
             title={t("home.permitTemplateCatalogueTitle")}
             description={t("home.permitTemplateCatalogueDescription")}
             icon={<FileText size={24} />}
             href="/requirement-templates"
+          />
+          <HomeScreenBox
+            title={t("home.requirementsLibraryTitle")}
+            description={t("home.requirementsLibraryDescription")}
+            icon={<BookOpen size={24} />}
+            href="/requirements-library"
           />
           <HomeScreenBox
             title={t("home.questionBankTitle")}
@@ -34,10 +34,10 @@ export const SuperAdminHomeScreen = ({ ...rest }: IHomeScreenProps) => {
             href="/question-bank"
           />
           <HomeScreenBox
-            title={t("home.requirementsLibraryTitle")}
-            description={t("home.requirementsLibraryDescription")}
-            icon={<BookOpen size={24} />}
-            href="/requirements-library"
+            title={t("home.jurisdictionsTitle")}
+            description={t("home.jurisdictionsDescription")}
+            icon={<Buildings size={24} />}
+            href="/jurisdictions"
           />
           <HomeScreenBox
             title={t("home.reportingTitle")}

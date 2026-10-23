@@ -59,6 +59,231 @@ RSpec.describe PermitApplication, type: :model do
     end
   end
 
+  describe "published electives" do
+    let(:jurisdiction) { create(:sub_district) }
+    let(:template_version) { create(:template_version) }
+    let(:field_id) { SecureRandom.uuid }
+
+    def elective_customizations(enabled_ids: [field_id], optional_ids: [])
+      {
+        "requirement_block_changes" => {
+          "block-1" => {
+            "enabled_elective_field_ids" => enabled_ids,
+            "optional_elective_field_ids" => optional_ids,
+            "enabled_elective_field_reasons" =>
+              enabled_ids.index_with { "bylaw" }
+          }
+        }
+      }
+    end
+
+    it "highlights a newly enabled elective until it is acknowledged" do
+      application =
+        create(
+          :permit_application,
+          jurisdiction: jurisdiction,
+          template_version: template_version
+        )
+      create(
+        :jurisdiction_template_version_customization,
+        jurisdiction: jurisdiction,
+        template_version: template_version,
+        customizations: elective_customizations
+      )
+
+      expect(application.unseen_elective_field_ids).to eq([field_id])
+
+      application.acknowledge_published_electives!(
+        application.unseen_customization_change_id
+      )
+      application.reload
+      expect(application.unseen_elective_field_ids).to eq([])
+    end
+
+    it "highlights an elective whose optional flag flipped" do
+      customization =
+        create(
+          :jurisdiction_template_version_customization,
+          jurisdiction: jurisdiction,
+          template_version: template_version,
+          customizations: elective_customizations
+        )
+      application =
+        create(
+          :permit_application,
+          jurisdiction: jurisdiction,
+          template_version: template_version
+        )
+
+      expect(application.unseen_elective_field_ids).to eq([])
+
+      customization.update!(
+        customizations: elective_customizations(optional_ids: [field_id])
+      )
+
+      expect(application.reload.unseen_elective_field_ids).to eq([field_id])
+    end
+
+    it "keeps every publish since the draft was created until the latest is acknowledged" do
+      second_id = SecureRandom.uuid
+      application =
+        create(
+          :permit_application,
+          jurisdiction: jurisdiction,
+          template_version: template_version
+        )
+      customization =
+        create(
+          :jurisdiction_template_version_customization,
+          jurisdiction: jurisdiction,
+          template_version: template_version,
+          customizations: elective_customizations
+        )
+
+      expect(application.unseen_elective_field_ids).to eq([field_id])
+
+      customization.update!(
+        customizations:
+          elective_customizations(enabled_ids: [field_id, second_id])
+      )
+
+      expect(application.reload.unseen_elective_field_ids).to match_array(
+        [field_id, second_id]
+      )
+
+      application.acknowledge_published_electives!(
+        application.unseen_customization_change_id
+      )
+      expect(application.reload.unseen_elective_field_ids).to eq([])
+    end
+
+    it "does not hide a same-timestamp change when another one is acknowledged" do
+      lower_field_id = SecureRandom.uuid
+      higher_field_id = SecureRandom.uuid
+      published_at = Time.zone.parse("2026-01-15 12:00:00")
+      application =
+        create(
+          :permit_application,
+          jurisdiction: jurisdiction,
+          template_version: template_version
+        )
+      customization =
+        create(
+          :jurisdiction_template_version_customization,
+          jurisdiction: jurisdiction,
+          template_version: template_version
+        )
+      customization.update_column(
+        :customizations,
+        elective_customizations(enabled_ids: [lower_field_id, higher_field_id])
+      )
+      customization.customization_changes.create!(
+        id: "11111111-1111-4111-8111-111111111111",
+        created_at: published_at,
+        updated_at: published_at,
+        enabled_components: [{ "id" => lower_field_id }],
+        disabled_components: [],
+        optional_components: []
+      )
+      customization.customization_changes.create!(
+        id: "22222222-2222-4222-8222-222222222222",
+        created_at: published_at,
+        updated_at: published_at,
+        enabled_components: [{ "id" => higher_field_id }],
+        disabled_components: [],
+        optional_components: []
+      )
+
+      application.acknowledge_published_electives!(
+        "11111111-1111-4111-8111-111111111111"
+      )
+
+      expect(application.reload.unseen_elective_field_ids).to eq(
+        [higher_field_id]
+      )
+    end
+
+    it "acknowledges the loaded change id and leaves a newer publish unseen" do
+      second_id = SecureRandom.uuid
+      application =
+        create(
+          :permit_application,
+          jurisdiction: jurisdiction,
+          template_version: template_version
+        )
+      customization =
+        create(
+          :jurisdiction_template_version_customization,
+          jurisdiction: jurisdiction,
+          template_version: template_version
+        )
+      customization.update!(customizations: elective_customizations)
+      loaded_id = application.reload.unseen_customization_change_id
+
+      customization.update!(
+        customizations:
+          elective_customizations(enabled_ids: [field_id, second_id])
+      )
+
+      application.acknowledge_published_electives!(loaded_id)
+
+      expect(application.reload.acknowledged_customization_change_id).to eq(
+        loaded_id
+      )
+      expect(application.unseen_elective_field_ids).to eq([second_id])
+    end
+
+    it "does not highlight electives that were already published when the draft was created" do
+      create(
+        :jurisdiction_template_version_customization,
+        jurisdiction: jurisdiction,
+        template_version: template_version,
+        customizations: elective_customizations
+      )
+      application =
+        create(
+          :permit_application,
+          jurisdiction: jurisdiction,
+          template_version: template_version
+        )
+
+      expect(application.unseen_elective_field_ids).to eq([])
+    end
+
+    it "does not highlight an elective that was turned off" do
+      application =
+        create(
+          :permit_application,
+          jurisdiction: jurisdiction,
+          template_version: template_version
+        )
+      customization =
+        create(
+          :jurisdiction_template_version_customization,
+          jurisdiction: jurisdiction,
+          template_version: template_version,
+          customizations: elective_customizations
+        )
+      customization.update!(
+        customizations: {
+          "requirement_block_changes" => {
+            "block-1" => {
+              "enabled_elective_field_ids" => [],
+              "optional_elective_field_ids" => []
+            }
+          }
+        }
+      )
+
+      expect(application.reload.unseen_elective_field_ids).to eq([])
+      removed_ids =
+        CustomizationChange.all.flat_map do |change|
+          change.disabled_components.map { |component| component["id"] }
+        end
+      expect(removed_ids).to eq([field_id])
+    end
+  end
+
   describe "Scopes" do
     # Create sandboxed and non-sandboxed permit applications
     let!(:jurisdiction) { create(:sub_district) }
@@ -211,8 +436,10 @@ RSpec.describe PermitApplication, type: :model do
           :zip_and_upload_supporting_documents
         )
         allow(permit_application).to receive(:send_submit_notifications)
-        allow(permit_application).to receive(:form_json).and_return(
-          { "components" => [] }
+        permit_application.template_version.update!(
+          form_json: {
+            "components" => []
+          }
         )
 
         permit_application.send(:handle_submission)
@@ -234,8 +461,10 @@ RSpec.describe PermitApplication, type: :model do
           :zip_and_upload_supporting_documents
         )
         allow(permit_application).to receive(:send_submit_notifications)
-        allow(permit_application).to receive(:form_json).and_return(
-          { "components" => [] }
+        permit_application.template_version.update!(
+          form_json: {
+            "components" => []
+          }
         )
 
         permit_application.send(:handle_submission)
@@ -329,6 +558,24 @@ RSpec.describe PermitApplication, type: :model do
         )
         expect(permit_application.permit_date).to eq(Time.current.to_date)
       end
+    end
+  end
+
+  describe "#can_finalize_requests?" do
+    let(:permit_application) { create(:permit_application, :newly_submitted) }
+    let(:submission_version) { permit_application.latest_submission_version }
+
+    it "is false with an empty package" do
+      expect(permit_application.can_finalize_requests?).to be_falsey
+    end
+
+    it "is true with only a supporting document revision request" do
+      create(
+        :supporting_document_revision_request,
+        submission_version: submission_version
+      )
+
+      expect(permit_application.can_finalize_requests?).to be true
     end
   end
 end

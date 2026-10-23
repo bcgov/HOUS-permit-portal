@@ -16,10 +16,11 @@ import {
 } from "@chakra-ui/react"
 import { List, X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LinkProps, useLocation } from "react-router-dom"
 import { APP_NAV_CHROME_ID } from "../../../hooks/use-scroll-aware-nav-bar"
+import { feedbackController } from "../../../services/observability"
 import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
 import { RouterLink } from "../../shared/navigation/router-link"
@@ -74,6 +75,27 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
   const { currentUser } = userStore
   const { loggedIn } = sessionStore
   const { isOpen, onOpen, onClose, onToggle } = useDisclosure()
+  const afterMenuClose = useRef<() => void>()
+  const drawerPresent = useRef(false)
+  useEffect(() => {
+    if (isOpen) drawerPresent.current = true
+  }, [isOpen])
+  useEffect(() => {
+    const beforeOpen = () =>
+      new Promise<void>((resolve) => {
+        if (!drawerPresent.current) resolve()
+        else {
+          afterMenuClose.current = resolve
+          onClose()
+        }
+      })
+    feedbackController.beforeOpen = beforeOpen
+    return () => {
+      if (feedbackController.beforeOpen === beforeOpen) feedbackController.beforeOpen = undefined
+      afterMenuClose.current?.()
+      afterMenuClose.current = undefined
+    }
+  }, [onClose])
   const [menuOffset, setMenuOffset] = useState<string>("var(--app-navbar-height)")
 
   const handleToggle = () => {
@@ -235,7 +257,17 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
         </Button>
       </Show>
 
-      <Drawer isOpen={isOpen} placement="top" onClose={onClose} size="full">
+      <Drawer
+        isOpen={isOpen}
+        placement="top"
+        onClose={onClose}
+        size="full"
+        onCloseComplete={() => {
+          drawerPresent.current = false
+          afterMenuClose.current?.()
+          afterMenuClose.current = undefined
+        }}
+      >
         <DrawerOverlay mt={menuOffset} zIndex={1400} />
         <DrawerContent
           mt={menuOffset}

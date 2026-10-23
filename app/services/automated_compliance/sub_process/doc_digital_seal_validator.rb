@@ -1,44 +1,43 @@
 class AutomatedCompliance::SubProcess::DocDigitalSealValidator < AutomatedCompliance::Base
-  #responsible for taking a supporting document, assumes document has a compliance_data json field and a file uploader from shrine
   def call(supporting_document)
-    raise ArgumentError.new("Invalid document") if supporting_document.blank?
-    #stream down the supporting document
+    raise ArgumentError, "Invalid document" if supporting_document.blank?
+
     uploaded_file = supporting_document.file
-    uploaded_file.open do
-      response =
-        Wrappers::DigitalSealValidator.new.call(
-          uploaded_file.download,
-          uploaded_file.mime_type
-        )
-      # Match standalone tool: UNSIGNED / no approved seals => empty success result (not found),
-      # not a system failure. Filter to AIBC/EGBC the same way as the standalone API.
-      if response.success || response.error.to_s == "UNSIGNED"
-        return(
-          supporting_document.update(
-            compliance_data: {
-              status: "success",
-              result: DigitalSealSignatureFilter.call(response.signatures)
-            }
-          )
-        )
-      else
-        return(
-          supporting_document.update(
-            compliance_data: {
-              status: "failed",
-              error:
-                "Unable to run digital seal validator integration - #{response.error}"
-            }
-          )
-        )
+    validated_file_id = uploaded_file&.id
+    data =
+      begin
+        response =
+          uploaded_file.open do
+            Wrappers::DigitalSealValidator.new.call(
+              uploaded_file.download,
+              uploaded_file.mime_type
+            )
+          end
+        if response.success || response.error.to_s == "UNSIGNED"
+          {
+            status: "success",
+            result: DigitalSealSignatureFilter.call(response.signatures)
+          }
+        else
+          { status: "failed", error: "Unable to run digital seal validation" }
+        end
+      rescue StandardError
+        # Storage/validator failures are recorded outcomes. Database writes below
+        # must still raise so an unpersisted outcome cannot unlock submission.
+        { status: "failed", error: "Unable to run digital seal validation" }
       end
+
+    supporting_document.with_lock do
+      # Promotion changes the path but preserves the original upload ID.
+      unless DigitalSealChecks.same_file?(
+               validated_file_id,
+               supporting_document.file_id
+             )
+        return false
+      end
+      supporting_document.update!(
+        compliance_data: data.merge(file_id: validated_file_id)
+      )
     end
-    supporting_document.update(
-      compliance_data: {
-        status: "failed",
-        error: "Unable to run digital seal validator integration"
-      }
-    )
-    #special case
   end
 end

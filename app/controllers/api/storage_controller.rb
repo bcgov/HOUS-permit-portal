@@ -184,6 +184,11 @@ class Api::StorageController < Api::ApplicationController
 
     record_class = AUTHORIZED_S3_MODELS[params[:model]]
     @record = record_class.find(params[:modelId])
+    # ponytail: opt-in by respond_to?, so a new attachment parent without
+    # sandbox_id is silently unchecked. Add sandbox_id to the parent to cover it.
+    if @record.attached_to.respond_to?(:sandbox_id)
+      ensure_in_sandbox!(@record.attached_to)
+    end
   rescue ActiveRecord::RecordNotFound => e
     render_error "misc.not_found_error", { status: :not_found }, e
   end

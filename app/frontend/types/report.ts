@@ -11,6 +11,7 @@ export interface IReportHeadlineFigure {
   label: string
   value: string | number | null
   helpText: string
+  section?: string
   approximate?: boolean
   direction?: "up" | "down" | "flat" | "suppressed"
 }
@@ -22,7 +23,7 @@ export interface IReportChartSeries {
 
 export interface IReportChart {
   key: string
-  type: "bar" | "line" | "stacked_bar"
+  type: "bar" | "line" | "stacked_bar" | "funnel"
   xKey: string
   series: IReportChartSeries[]
   data: Record<string, string | number>[]
@@ -62,6 +63,7 @@ export interface IReportPayload {
   range: IReportRange
   computedAt: string
   headlineFigures: IReportHeadlineFigure[]
+  forecastFigures?: IReportHeadlineFigure[]
   charts: IReportChart[]
   tables: IReportTable[]
   notes: IReportNote[]

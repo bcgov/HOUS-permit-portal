@@ -23,6 +23,7 @@ export const StepCodeBaseFields = types
       EStepCodeChecklistStage.preConstruction
     ),
     permitProjectTitle: types.maybeNull(types.string),
+    permitApplicationId: types.maybeNull(types.string),
     // API snapshot for list/index rows without checklists loaded. Detail UIs
     // should prefer stageStatus()/isStageComplete() which derive from checklists.
     stageCompletions: types.optional(

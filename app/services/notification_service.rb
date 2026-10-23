@@ -318,7 +318,7 @@ class NotificationService
     end
   end
 
-  def self.publish_customization_update_event(customization)
+  def self.publish_customization_update_event(customization, change: nil)
     throttle_key =
       "customization_update_notification:" \
         "#{customization.jurisdiction_id}:#{customization.template_version_id}"
@@ -333,18 +333,31 @@ class NotificationService
 
     return unless throttle_acquired
 
+    notification_user_hash =
+      customization_draft_submitter_ids(
+        customization,
+        for_elective_change: change.present?
+      ).each_with_object({}) do |submitter_id, hash|
+        hash[submitter_id] = customization.update_event_notification_data(
+          change
+        )
+      end
+
+    NotificationPushJob.perform_async(notification_user_hash)
+  end
+
+  def self.customization_draft_submitter_ids(
+    customization,
+    for_elective_change: false
+  )
     template_version = customization.template_version
     jurisdiction_id = customization.jurisdiction_id
-    relevant_submitter_ids =
+    scope =
       PermitApplication
         .kept
-        .joins(:template_version)
         .joins(submitter: :preference)
         .left_joins(:permit_project)
         .where(
-          template_versions: {
-            requirement_template_id: template_version.requirement_template_id
-          },
           status: PermitApplication.draft_statuses,
           users: {
             preferences: {
@@ -358,15 +371,24 @@ class NotificationService
           ),
           jurisdiction_id
         )
-        .pluck(:submitter_id)
-        .uniq
 
-    notification_user_hash =
-      relevant_submitter_ids.each_with_object({}) do |submitter_id, hash|
-        hash[submitter_id] = customization.update_event_notification_data
+    scope =
+      if for_elective_change
+        scope.where(
+          template_version_id: customization.template_version_id,
+          permit_projects: {
+            sandbox_id: customization.sandbox_id
+          }
+        )
+      else
+        scope.joins(:template_version).where(
+          template_versions: {
+            requirement_template_id: template_version.requirement_template_id
+          }
+        )
       end
 
-    NotificationPushJob.perform_async(notification_user_hash)
+    scope.pluck(:submitter_id).uniq
   end
 
   def self.publish_permit_collaboration_assignment_event(permit_collaboration)
@@ -453,11 +475,17 @@ class NotificationService
     user_ids << creator_id if creator_id.present?
 
     notification_user_hash =
-      user_ids
-        .compact
-        .uniq
-        .each_with_object({}) do |uid, hash|
-          hash[uid] = report_document.report_generated_event_notification_data
+      User
+        .where(id: user_ids)
+        .includes(:preference)
+        .each_with_object({}) do |user, hash|
+          unless user.preference&.enable_in_app_step_code_report_notification
+            next
+          end
+
+          hash[
+            user.id
+          ] = report_document.report_generated_event_notification_data
         end
 
     unless notification_user_hash.empty?
@@ -468,27 +496,41 @@ class NotificationService
   def self.publish_pre_check_submitted_event(pre_check)
     return if pre_check.blank? || pre_check.creator_id.blank?
 
-    notification_user_hash = {
-      pre_check.creator_id => pre_check.submission_event_notification_data
-    }
+    preference = pre_check.creator&.preference
+    notification_user_hash = {}
+    if preference&.enable_in_app_pre_check_submitted_notification
+      notification_user_hash[
+        pre_check.creator_id
+      ] = pre_check.submission_event_notification_data
+    end
 
-    NotificationPushJob.perform_async(notification_user_hash)
+    unless notification_user_hash.empty?
+      NotificationPushJob.perform_async(notification_user_hash)
+    end
 
-    # Send email notification
-    PermitHubMailer.notify_pre_check_submitted(pre_check).deliver_later
+    if preference&.enable_email_pre_check_submitted_notification
+      PermitHubMailer.notify_pre_check_submitted(pre_check).deliver_later
+    end
   end
 
   def self.publish_pre_check_completed_event(pre_check)
     return if pre_check.blank? || pre_check.creator_id.blank?
 
-    notification_user_hash = {
-      pre_check.creator_id => pre_check.completed_event_notification_data
-    }
+    preference = pre_check.creator&.preference
+    notification_user_hash = {}
+    if preference&.enable_in_app_pre_check_completed_notification
+      notification_user_hash[
+        pre_check.creator_id
+      ] = pre_check.completed_event_notification_data
+    end
 
-    NotificationPushJob.perform_async(notification_user_hash)
+    unless notification_user_hash.empty?
+      NotificationPushJob.perform_async(notification_user_hash)
+    end
 
-    # Send email notification
-    PermitHubMailer.notify_pre_check_completed(pre_check).deliver_later
+    if preference&.enable_email_pre_check_completed_notification
+      PermitHubMailer.notify_pre_check_completed(pre_check).deliver_later
+    end
   end
 
   def self.publish_application_submission_event(permit_application)
@@ -594,6 +636,104 @@ class NotificationService
     end
   end
 
+  def self.publish_applications_added_event(
+    permit_project,
+    applications,
+    note_body
+  )
+    return if applications.blank?
+    created_by_jurisdiction =
+      applications.all? do |application|
+        application.created_by_type == "Jurisdiction"
+      end
+    return unless created_by_jurisdiction
+
+    owner = permit_project.owner
+    return if owner.blank?
+
+    preference = owner.preference
+    notification_user_hash = {}
+
+    if preference&.enable_in_app_applications_added_notification
+      notification_user_hash[owner.id] = applications_added_notification_data(
+        permit_project,
+        applications,
+        note_body
+      )
+    end
+
+    if preference&.enable_email_applications_added_notification
+      PermitHubMailer.notify_applications_added(
+        permit_project,
+        applications,
+        note_body,
+        owner
+      )&.deliver_later
+    end
+
+    return if notification_user_hash.empty?
+
+    NotificationPushJob.perform_async(notification_user_hash)
+  end
+
+  def self.applications_added_notification_data(
+    permit_project,
+    applications,
+    note_body
+  )
+    note = Note.plain_body(note_body)
+    jurisdiction_name =
+      applications.map(&:jurisdiction_name).compact.uniq.join(", ")
+    action_text =
+      I18n.t(
+        "notification.permit_application.applications_added_notification",
+        jurisdiction_name: jurisdiction_name,
+        count: applications.size,
+        applications:
+          applications
+            .map { |application| application_added_label(application) }
+            .join(", ")
+      )
+    if note.present?
+      action_text = [
+        action_text,
+        I18n.t(
+          "notification.permit_application.applications_added_message",
+          note: note
+        )
+      ].join(" ")
+    end
+
+    object_data = {
+      "permit_project_id" => permit_project.id,
+      "applications" =>
+        applications.map do |application|
+          {
+            "id" => application.id,
+            "number" => application.number,
+            "nickname" => application.nickname
+          }
+        end
+    }
+    object_data["note"] = note if note.present?
+
+    {
+      "id" => SecureRandom.uuid,
+      "action_type" => Constants::NotificationActionTypes::APPLICATIONS_ADDED,
+      "action_text" => action_text,
+      "object_data" => object_data
+    }
+  end
+
+  def self.application_added_label(application)
+    number = application.number.presence || application.id
+    nickname = application.nickname.presence
+    nickname ? "#{number} (#{nickname})" : number.to_s
+  end
+
+  private_class_method :applications_added_notification_data,
+                       :application_added_label
+
   def self.publish_review_started_event(permit_application)
     notification_user_hash = {}
     notification_user_hash[
@@ -621,7 +761,8 @@ class NotificationService
     notification_user_hash = {}
     users_to_notify.each do |user|
       next if user.blank?
-      # Ensure user.id is a string
+      next unless user.preference&.enable_in_app_file_upload_failed_notification
+
       notification_user_hash[
         user.id
       ] = file_attachment.upload_failed_notification_data(file_name)
@@ -748,9 +889,14 @@ class NotificationService
   end
 
   def self.publish_project_meeting_scheduled_event(project_meeting)
-    PermitHubMailer.notify_project_meeting_scheduled(
-      project_meeting
-    ).deliver_later
+    user = project_meeting.requested_by
+    preference = user&.preference
+
+    if preference&.enable_email_project_meeting_scheduled_notification
+      PermitHubMailer.notify_project_meeting_scheduled(
+        project_meeting
+      ).deliver_later
+    end
 
     project_meeting
       .jurisdiction
@@ -762,8 +908,9 @@ class NotificationService
       ).deliver_later
     end
 
-    user = project_meeting.requested_by
-    return if user.blank?
+    unless preference&.enable_in_app_project_meeting_scheduled_notification
+      return
+    end
 
     NotificationPushJob.perform_async(
       user.id => project_meeting.scheduled_event_notification_data
@@ -771,9 +918,14 @@ class NotificationService
   end
 
   def self.publish_project_meeting_rescheduled_event(project_meeting)
-    PermitHubMailer.notify_project_meeting_rescheduled(
-      project_meeting
-    ).deliver_later
+    user = project_meeting.requested_by
+    preference = user&.preference
+
+    if preference&.enable_email_project_meeting_rescheduled_notification
+      PermitHubMailer.notify_project_meeting_rescheduled(
+        project_meeting
+      ).deliver_later
+    end
 
     project_meeting
       .jurisdiction
@@ -785,8 +937,9 @@ class NotificationService
       ).deliver_later
     end
 
-    user = project_meeting.requested_by
-    return if user.blank?
+    unless preference&.enable_in_app_project_meeting_rescheduled_notification
+      return
+    end
 
     NotificationPushJob.perform_async(
       user.id => project_meeting.rescheduled_event_notification_data

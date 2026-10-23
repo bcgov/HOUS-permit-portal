@@ -5,18 +5,10 @@ module Api::Concerns::Search::OverheatingCodes
     search_conditions = {
       order: overheating_code_order,
       where: overheating_code_where_clause,
-      page: overheating_code_search_params[:page],
+      page: overheating_code_search_params[:page].presence || 1,
       per_page:
-        (
-          if overheating_code_search_params[:page]
-            (
-              overheating_code_search_params[:per_page] ||
-                Kaminari.config.default_per_page
-            )
-          else
-            nil
-          end
-        ),
+        overheating_code_search_params[:per_page].presence ||
+          Kaminari.config.default_per_page,
       scope_results: ->(relation) { policy_scope(relation) }
     }
     @overheating_code_search =
@@ -56,6 +48,8 @@ module Api::Concerns::Search::OverheatingCodes
       ActiveModel::Type::Boolean.new.cast(
         overheating_code_search_params[:show_archived] || false
       )
-    { creator_id: current_user.id, discarded: show_archived }
+    where = { creator_id: current_user.id, discarded: show_archived }
+    where[:sandbox_id] = current_sandbox&.id unless current_user.super_admin?
+    where
   end
 end

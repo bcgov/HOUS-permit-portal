@@ -15,7 +15,7 @@ import { ArrowFatLinesRight } from "@phosphor-icons/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { EFlashMessageStatus } from "../../../../types/enums"
-import { IReportNote, IReportPayload } from "../../../../types/report"
+import { IReportHeadlineFigure, IReportNote, IReportPayload } from "../../../../types/report"
 import { CustomMessageBox } from "../../../shared/base/custom-message-box"
 import { ReportChart } from "./report-chart"
 import { ReportTable } from "./report-table"
@@ -61,17 +61,7 @@ export function ReportShell({ payload, isLoading, controls }: IProps) {
         </Text>
       </Box>
       {controls}
-      <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={4}>
-        {payload.headlineFigures.map((figure) => (
-          <Stat key={figure.key} borderWidth="1px" borderColor="border.light" borderRadius="md" p={4} bg="greys.white">
-            <StatLabel>{figure.label}</StatLabel>
-            <StatNumber>
-              {formatHeadline(figure.value, figure.approximate ? t("reporting.shell.approximate") : null)}
-            </StatNumber>
-            <StatHelpText>{figure.helpText}</StatHelpText>
-          </Stat>
-        ))}
-      </SimpleGrid>
+      <FigureSections figures={payload.headlineFigures} />
 
       {payload.empty ? (
         <CustomMessageBox
@@ -93,6 +83,15 @@ export function ReportShell({ payload, isLoading, controls }: IProps) {
                 <ReportTable table={table} />
               </Box>
             ))}
+
+          {payload.forecastFigures?.length ? (
+            <Box>
+              <Heading as="h2" size="md" mb={3}>
+                {t("reporting.shell.forecast")}
+              </Heading>
+              <FigureGrid figures={payload.forecastFigures} />
+            </Box>
+          ) : null}
 
           {payload.charts.map((chart) =>
             chart.suppressed ? (
@@ -129,6 +128,54 @@ export function ReportShell({ payload, isLoading, controls }: IProps) {
 
       <ReportNotes notes={payload.notes} />
     </VStack>
+  )
+}
+
+function FigureSections({ figures }: { figures: IReportHeadlineFigure[] }) {
+  const groups = groupHeadlineFigures(figures)
+
+  return (
+    <VStack align="stretch" spacing={6}>
+      {groups.map((group) => (
+        <Box key={group.section ?? "figures"}>
+          {group.section ? (
+            <Heading as="h2" size="md" mb={3}>
+              {group.section}
+            </Heading>
+          ) : null}
+          <FigureGrid figures={group.figures} />
+        </Box>
+      ))}
+    </VStack>
+  )
+}
+
+function groupHeadlineFigures(figures: IReportHeadlineFigure[]) {
+  const groups: { section: string | null; figures: IReportHeadlineFigure[] }[] = []
+  figures.forEach((figure) => {
+    const section = figure.section || null
+    const current = groups[groups.length - 1]
+    if (current && current.section === section) current.figures.push(figure)
+    else groups.push({ section, figures: [figure] })
+  })
+  return groups
+}
+
+function FigureGrid({ figures }: { figures: IReportHeadlineFigure[] }) {
+  const { t } = useTranslation()
+
+  return (
+    <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={4}>
+      {figures.map((figure) => (
+        <Stat key={figure.key} borderWidth="1px" borderColor="border.light" borderRadius="md" p={4} bg="greys.white">
+          <StatLabel>{figure.label}</StatLabel>
+          <StatNumber>
+            {formatHeadline(figure.value, figure.approximate ? t("reporting.shell.approximate") : null)}
+          </StatNumber>
+          <StatHelpText>{figure.helpText}</StatHelpText>
+        </Stat>
+      ))}
+    </SimpleGrid>
   )
 }
 

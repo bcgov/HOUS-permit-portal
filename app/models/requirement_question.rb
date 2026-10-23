@@ -46,7 +46,6 @@ class RequirementQuestion < ApplicationRecord
          radio: 12,
          address: 13,
          bcaddress: 14,
-         signature: 15,
          energy_step_code: 16,
          general_contact: 17,
          professional_contact: 18,
@@ -134,7 +133,7 @@ class RequirementQuestion < ApplicationRecord
   end
 
   def usage_count
-    requirements.count
+    requirements.loaded? ? requirements.size : requirements.count
   end
 
   def search_data

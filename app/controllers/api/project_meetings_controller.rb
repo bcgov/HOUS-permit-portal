@@ -21,7 +21,10 @@ class Api::ProjectMeetingsController < Api::ApplicationController
                    nil,
                    {
                      meta: page_meta(@project_meeting_search),
-                     blueprint: ProjectMeetingBlueprint
+                     blueprint: ProjectMeetingBlueprint,
+                     blueprint_opts: {
+                       view: :base
+                     }
                    }
   end
 
@@ -38,7 +41,13 @@ class Api::ProjectMeetingsController < Api::ApplicationController
     if @project_meeting.save
       render_success @project_meeting,
                      "project_meeting.create_success",
-                     { blueprint: ProjectMeetingBlueprint, status: :created }
+                     {
+                       blueprint: ProjectMeetingBlueprint,
+                       blueprint_opts: {
+                         view: :base
+                       },
+                       status: :created
+                     }
     else
       render_error(
         "project_meeting.create_error",
@@ -59,7 +68,8 @@ class Api::ProjectMeetingsController < Api::ApplicationController
                    {
                      blueprint: ProjectMeetingBlueprint,
                      blueprint_opts: {
-                       view: :extended
+                       view: :extended,
+                       current_user: current_user
                      }
                    }
   end
@@ -121,7 +131,12 @@ class Api::ProjectMeetingsController < Api::ApplicationController
     @project_meeting.submit_request!
     render_success @project_meeting,
                    "project_meeting.submit_success",
-                   { blueprint: ProjectMeetingBlueprint }
+                   {
+                     blueprint: ProjectMeetingBlueprint,
+                     blueprint_opts: {
+                       view: :base
+                     }
+                   }
   rescue AASM::InvalidTransition, ActiveRecord::RecordInvalid
     render_error(
       "project_meeting.submit_error",
@@ -144,7 +159,12 @@ class Api::ProjectMeetingsController < Api::ApplicationController
     @project_meeting.withdraw!
     render_success @project_meeting,
                    "project_meeting.withdraw_success",
-                   { blueprint: ProjectMeetingBlueprint }
+                   {
+                     blueprint: ProjectMeetingBlueprint,
+                     blueprint_opts: {
+                       view: :base
+                     }
+                   }
   rescue AASM::InvalidTransition, ActiveRecord::RecordInvalid
     render_error(
       "project_meeting.withdraw_error",
@@ -202,7 +222,12 @@ class Api::ProjectMeetingsController < Api::ApplicationController
     @project_meeting.send(:"#{event}!")
     render_success @project_meeting,
                    "project_meeting.transition_success",
-                   { blueprint: ProjectMeetingBlueprint }
+                   {
+                     blueprint: ProjectMeetingBlueprint,
+                     blueprint_opts: {
+                       view: :base
+                     }
+                   }
   rescue AASM::InvalidTransition, ActiveRecord::RecordInvalid
     render_error(
       "project_meeting.invalid_transition",
@@ -218,13 +243,27 @@ class Api::ProjectMeetingsController < Api::ApplicationController
   def mark_as_viewed
     authorize @project_meeting
     @project_meeting.update_viewed_at
-    render_success @project_meeting, nil, { blueprint: ProjectMeetingBlueprint }
+    render_success @project_meeting,
+                   nil,
+                   {
+                     blueprint: ProjectMeetingBlueprint,
+                     blueprint_opts: {
+                       view: :base
+                     }
+                   }
   end
 
   def mark_as_unviewed
     authorize @project_meeting
     @project_meeting.mark_as_unviewed
-    render_success @project_meeting, nil, { blueprint: ProjectMeetingBlueprint }
+    render_success @project_meeting,
+                   nil,
+                   {
+                     blueprint: ProjectMeetingBlueprint,
+                     blueprint_opts: {
+                       view: :base
+                     }
+                   }
   end
 
   private

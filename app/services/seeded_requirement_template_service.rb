@@ -437,8 +437,7 @@ class SeededRequirementTemplateService
       "Communication",
       [
         req("Primary Phone", "#{prefix}_primary_phone", "phone"),
-        req("Primary Email", "#{prefix}_primary_email", "email"),
-        req("Applicant Signature", "#{prefix}_applicant_signature", "signature")
+        req("Primary Email", "#{prefix}_primary_email", "email")
       ]
     )
   end

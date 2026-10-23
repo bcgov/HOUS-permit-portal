@@ -1,0 +1,10 @@
+apiVersion: postgres-operator.crunchydata.com/v1beta1
+kind: PostgresCluster
+metadata:
+  annotations:
+    meta.helm.sh/release-name: ha-postgres-crunchydb
+    meta.helm.sh/release-namespace: bb18ab-prod
+    postgres-operator.crunchydata.com/allow-upgrade: prod-crunchy-upgrade
+  name: ha-postgres-crunchydb
+spec:
+    shutdown: true

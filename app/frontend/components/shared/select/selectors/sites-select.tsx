@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   Input as ChakraInput,
   Flex,
@@ -20,15 +21,16 @@ import { ControlProps, InputProps, OptionProps, components } from "react-select"
 import CreatableSelect from "react-select/creatable"
 import { IJurisdiction } from "../../../../models/jurisdiction"
 import { useMst } from "../../../../setup/root"
-import { IOption } from "../../../../types/types"
+import { IOption, ISiteOption } from "../../../../types/types"
 import { formatPidLabel, formatPidValue } from "../../../../utils/utility-functions"
 import { fieldArrayCompatibleErrorMessage } from "../../form/form-helpers"
+import { ProjectMap } from "../../module-wrappers/project-map"
 import { AsyncSelect, TAsyncSelectProps } from "../async-select"
 import { JurisdictionSelect } from "./jurisdiction-select"
 
 export type TSitesSelectProps = {
-  onChange: (option: IOption) => void
-  selectedOption: IOption
+  onChange: (option: ISiteOption) => void
+  selectedOption: ISiteOption
   pidName?: string
   siteName?: string
   pidRequired?: boolean
@@ -40,7 +42,7 @@ export type TSitesSelectProps = {
   initialJurisdiction?: IJurisdiction | null
   isDisabled?: boolean
   jurisdictionRequired?: boolean
-} & Partial<TAsyncSelectProps>
+} & Partial<TAsyncSelectProps<ISiteOption>>
 
 // Please be advised that this is expected to be used within a form context!
 // This component now includes integrated jurisdiction matching and manual mode functionality
@@ -72,9 +74,12 @@ export const SitesSelect = observer(function ({
     fetchPids,
     fetchSiteDetailsFromPid,
     fetchGeocodedJurisdiction,
+    fetchingPids,
+    fetchingJurisdiction,
   } = geocoderStore
   const { addJurisdiction, getJurisdictionById } = jurisdictionStore
   const pidSelectRef = useRef(null)
+  const lookupAddressFromPidRef = useRef(false)
 
   const { setValue, control, watch, formState } = useFormContext()
   const { field: jurisdictionField } = useController({
@@ -91,6 +96,25 @@ export const SitesSelect = observer(function ({
 
   const pidWatch = watch(pidName)
   const siteWatch = watch(siteName)
+  const siteCoordinates = selectedOption?.coordinates
+  const showNoPidMap =
+    Boolean(selectedOption) &&
+    !fetchingPids &&
+    !fetchingJurisdiction &&
+    !pidWatch &&
+    pidOptions.length === 0 &&
+    Array.isArray(siteCoordinates) &&
+    siteCoordinates.length >= 2
+  const addressParts =
+    selectedOption?.label
+      ?.split(",")
+      .map((part) => part.trim())
+      .filter(Boolean) ?? []
+  const jurisdictionSearchPrefill = addressParts.length >= 2 ? addressParts[addressParts.length - 2] : ""
+
+  useEffect(() => {
+    if (showNoPidMap) setManualMode(true)
+  }, [showNoPidMap])
 
   const preserveExistingJurisdiction = () => {
     const existingJurisdiction =
@@ -104,7 +128,7 @@ export const SitesSelect = observer(function ({
 
   const fetchSiteOptions = (address: string, callback: (options) => void) => {
     if (address.length > 3) {
-      fetchOptions(address).then((options: IOption[]) => {
+      fetchOptions(address).then((options: ISiteOption[]) => {
         setValue(pidName, null)
         setValue(siteName, null)
         callback(options)
@@ -112,38 +136,48 @@ export const SitesSelect = observer(function ({
     } else callback([])
   }
 
-  const handleChange = (option: IOption) => {
+  const handleChange = (option: ISiteOption) => {
     setPidOptions([])
     onChange(option)
-    setValue(pidName, null)
-    if (option && option.value) {
-      fetchPids(option.value).then((pids: string[]) => {
-        if (pids) {
-          setPidOptions(pids.map((pid) => ({ value: pid, label: formatPidLabel(pid) })))
-          if (pids.length === 1) {
-            setValue(pidName, formatPidValue(pids[0]), { shouldValidate: true })
-            return
-          }
-          const selectControl = pidSelectRef?.current?.controlRef
-          if (selectControl && !R.isEmpty(pids)) {
-            selectControl.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }))
-          }
-        }
-      })
+    // Keep the PID and jurisdiction after the address is cleared, including when that PID has an address.
+    if (!option?.value) {
+      lookupAddressFromPidRef.current = false
+      return
     }
+    setManualMode(false)
+    setValue(pidName, null)
+    fetchPids(option.value).then((pids: string[]) => {
+      if (pids) {
+        setPidOptions(pids.map((pid) => ({ value: pid, label: formatPidLabel(pid) })))
+        if (pids.length === 1) {
+          setValue(pidName, formatPidValue(pids[0]), { shouldValidate: true })
+          return
+        }
+        const selectControl = pidSelectRef?.current?.controlRef
+        if (selectControl && !R.isEmpty(pids)) {
+          selectControl.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }))
+        }
+      }
+    })
   }
 
   useEffect(() => {
+    if (!lookupAddressFromPidRef.current) return
+    const requestedPid = pidWatch
+    let active = true
     ;(async () => {
-      if (R.isNil(siteWatch?.value) && pidWatch) {
+      if (R.isNil(siteWatch?.value) && requestedPid) {
         //the pid is valid, lets try to fill in the address based on the PID
-        const siteDetails = await fetchSiteDetailsFromPid(pidWatch)
-        if (siteDetails) {
-          setValue(siteName, siteDetails)
-        }
+        const siteDetails = await fetchSiteDetailsFromPid(requestedPid)
+        if (!active || !lookupAddressFromPidRef.current) return
+        if (siteDetails) setValue(siteName, siteDetails)
       }
+      lookupAddressFromPidRef.current = false
     })()
-  }, [siteWatch?.value, pidWatch])
+    return () => {
+      active = false
+    }
+  }, [pidWatch])
 
   // Jurisdiction matching logic - integrated from useJurisdictionFromSite hook
   useEffect(() => {
@@ -151,18 +185,13 @@ export const SitesSelect = observer(function ({
       return
     }
     const siteValue: string | undefined = siteWatch?.value
-    if (R.isNil(siteValue) || siteValue === "") {
-      // Don't clear jurisdiction if we have an initialJurisdiction and haven't selected a site yet
-      if (!initialJurisdiction || jurisdiction !== initialJurisdiction) {
-        setJurisdiction(null)
-      }
-      return
-    }
+    // An empty address is not a new match. Keep whatever jurisdiction is already selected.
+    if (R.isNil(siteValue) || siteValue === "") return
 
     let isActive = true
     ;(async () => {
       try {
-        const response = await fetchGeocodedJurisdiction(siteValue, undefined, Boolean(onLtsaMatcherFound))
+        const response = await fetchGeocodedJurisdiction(siteValue, pidWatch || undefined, Boolean(onLtsaMatcherFound))
         const matchedJurisdiction = response?.jurisdiction
         const foundLtsaMatcher = response?.ltsaMatcher ?? null
         if (onLtsaMatcherFound) {
@@ -195,7 +224,7 @@ export const SitesSelect = observer(function ({
     return () => {
       isActive = false
     }
-  }, [siteWatch?.value, manualMode])
+  }, [siteWatch?.value, pidWatch, manualMode])
 
   const debouncedFetchOptions = useCallback(debounce(fetchSiteOptions, 1000), [])
 
@@ -206,7 +235,7 @@ export const SitesSelect = observer(function ({
         <FormControl>
           <FormLabel>{t("permitApplication.addressLabel")}</FormLabel>
           <InputGroup>
-            <AsyncSelect<IOption, boolean>
+            <AsyncSelect<ISiteOption, boolean>
               isClearable={true}
               onChange={handleChange}
               placeholder="Search Addresses"
@@ -274,10 +303,12 @@ export const SitesSelect = observer(function ({
                         value: formatPidValue(value),
                       }}
                       onChange={(option) => {
+                        if (option?.value) lookupAddressFromPidRef.current = true
                         onChange(formatPidValue(option?.value))
                       }}
                       onCreateOption={(inputValue: string) => {
                         const newValue = { label: formatPidLabel(inputValue), value: formatPidValue(inputValue) }
+                        lookupAddressFromPidRef.current = true
                         onChange(newValue.value)
                       }}
                       formatCreateLabel={(inputValue: string) =>
@@ -303,6 +334,17 @@ export const SitesSelect = observer(function ({
         </FormControl>
       </Flex>
 
+      {showNoPidMap && (
+        <Flex direction="column" gap={2} w="full" flexShrink={0}>
+          <Text fontSize="sm" color="semantic.error">
+            {t("permitApplication.noPidConfirmSiteLocation")}
+          </Text>
+          <Box h="240px" minH="240px" maxH="240px" w="full" overflow="hidden" borderRadius="md" position="relative">
+            <ProjectMap coordinates={siteCoordinates} />
+          </Box>
+        </Flex>
+      )}
+
       {/* Auto-matched Jurisdiction Display - Only in automatic mode */}
       {!manualMode && showJurisdiction && (
         <Flex bg="greys.grey03" px={6} py={2} gap={2} w="full" direction="column">
@@ -318,9 +360,16 @@ export const SitesSelect = observer(function ({
       {manualMode && showJurisdiction && (
         <Flex bg="greys.grey03" px={6} py={2} gap={4} w="full" direction="column">
           <FormControl w="full" zIndex={1} isInvalid={!!jurisdictionErrorMessage}>
+            {showNoPidMap && (
+              <Text fontSize="sm" color="semantic.error" mb={2}>
+                {t("permitApplication.noPidCheckJurisdiction")}
+              </Text>
+            )}
             <FormLabel>{t("permitProject.new.jurisdictionTitle")}</FormLabel>
             <InputGroup w="full">
               <JurisdictionSelect
+                key={jurisdictionSearchPrefill || "manual"}
+                initialInputValue={jurisdictionSearchPrefill || undefined}
                 onChange={(selectValue) => {
                   if (selectValue) addJurisdiction(selectValue)
                   jurisdictionField.onChange(selectValue?.id)
@@ -344,7 +393,7 @@ export const SitesSelect = observer(function ({
       )}
 
       {/* Manual Mode Toggle */}
-      {showManualModeToggle && showJurisdiction && (
+      {showManualModeToggle && showJurisdiction && !showNoPidMap && (
         <Button isDisabled={isDisabled} variant="link" size="sm" onClick={() => setManualMode((prev) => !prev)}>
           {manualMode ? t("ui.switchToAutomaticMode") : t("ui.switchToManualMode")}
         </Button>
@@ -353,7 +402,7 @@ export const SitesSelect = observer(function ({
   )
 })
 
-const Option = (props: OptionProps<IOption>) => {
+const Option = (props: OptionProps<ISiteOption>) => {
   return (
     <components.Option {...props}>
       <HStack color={"text.secondary"} fontSize={"xs"}>
@@ -364,7 +413,7 @@ const Option = (props: OptionProps<IOption>) => {
   )
 }
 
-const Control = ({ children, ...props }: ControlProps<IOption>) => {
+const Control = ({ children, ...props }: ControlProps<ISiteOption>) => {
   return (
     <components.Control {...props}>
       <MapPin size={"16.7px"} />

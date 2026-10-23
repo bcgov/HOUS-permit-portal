@@ -19,6 +19,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
            :revisions_requested_at,
            :issued_at,
            :missing_pdfs,
+           :report_generation_issues,
            :template_nickname,
            :discarded_at,
            :days_in_queue,
@@ -33,6 +34,18 @@ class PermitApplicationBlueprint < Blueprinter::Base
                 blueprint: SubmissionVersionBlueprint,
                 view: :base
     association :submitter, blueprint: UserBlueprint, view: :minimal
+
+    field :created_by do |pa, _options|
+      # ponytail: applications created before created_by was stored only have a submitter
+      creator = pa.created_by || pa.submitter
+      next unless creator
+
+      if creator.is_a?(User)
+        { id: creator.id, type: "User", name: creator.name, role: creator.role }
+      else
+        { id: creator.id, type: "Jurisdiction", name: creator.qualified_name }
+      end
+    end
 
     field :using_current_template_version do |pa, _options|
       pa.using_current_template_version
@@ -79,8 +92,11 @@ class PermitApplicationBlueprint < Blueprinter::Base
   view :extended do
     include_view :base
     fields :formatted_compliance_data,
+           :digital_seal_checks,
            :front_end_form_update,
-           :form_customizations
+           :form_customizations,
+           :unseen_elective_field_ids,
+           :unseen_customization_change_id
 
     association :submitter, blueprint: UserBlueprint, view: :minimal
 
@@ -188,7 +204,9 @@ class PermitApplicationBlueprint < Blueprinter::Base
 
   view :compliance_update do
     identifier :id
-    fields :formatted_compliance_data, :front_end_form_update
+    fields :formatted_compliance_data,
+           :front_end_form_update,
+           :digital_seal_checks
   end
 
   view :external_api do
@@ -225,6 +243,16 @@ class PermitApplicationBlueprint < Blueprinter::Base
                 name: :account_holder
   end
 
+  view :external_api_created_draft do
+    identifier :id
+    fields :number, :status, :permit_project_id
+
+    association :template_version,
+                blueprint: TemplateVersionBlueprint,
+                view: :external_api,
+                name: :template_version
+  end
+
   view :external_api_summary do
     identifier :id
     fields :number, :status
@@ -255,10 +283,13 @@ class PermitApplicationBlueprint < Blueprinter::Base
       pa.template_tag_list
     end
 
+    field :available_statuses do |pa, _options|
+      Constants::ExternalApi.available_statuses_for(pa)
+    end
+
     association :template_version,
                 blueprint: TemplateVersionBlueprint,
-                view: :external_api,
-                name: :permit_version
+                view: :external_api
     association :submitter,
                 blueprint: UserBlueprint,
                 view: :external_api,
@@ -273,7 +304,11 @@ class PermitApplicationBlueprint < Blueprinter::Base
   view :supporting_docs_update do
     identifier :id
 
-    fields :missing_pdfs, :zipfile_size, :zipfile_name, :zipfile_url
+    fields :missing_pdfs,
+           :report_generation_issues,
+           :zipfile_size,
+           :zipfile_name,
+           :zipfile_url
 
     association :supporting_documents,
                 blueprint: SupportingDocumentBlueprint do |pa, options|

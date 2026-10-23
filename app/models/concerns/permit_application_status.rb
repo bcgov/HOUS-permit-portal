@@ -197,6 +197,7 @@ module PermitApplicationStatus
 
     def can_submit?
       return false unless inbox_enabled? || sandbox.present?
+      return false if DigitalSealChecks.new(self).pending_entries.any?
       return false if template_version_disabled_by_jurisdiction?
       if using_digital_energy_step_code_tool? && !step_code_complete?
         return false
@@ -217,7 +218,7 @@ module PermitApplicationStatus
     end
 
     def can_finalize_requests?
-      latest_submission_version.revision_requests.any?
+      latest_submission_version&.has_request_package_items?
     end
 
     def stamp_issued_at
@@ -230,33 +231,78 @@ module PermitApplicationStatus
 
     def handle_finalize_revision_requests
       update(revisions_requested_at: Time.current)
+      publish_revision_message(:jurisdiction_message)
       NotificationService.publish_application_revisions_request_event(self)
     end
 
     def handle_submission
-      update(signed_off_at: Time.current)
+      publish_revision_message(:submitter_message)
 
-      checklist = step_code_checklist
-      # Only snapshot / generate digital checklist PDF when the selected method is the tool
-      snapshot_checklist =
-        checklist.present? && using_digital_energy_step_code_tool?
-      submission_versions.create!(
-        form_json: self.form_json,
-        submission_data: self.submission_data,
-        step_code_checklist_json:
-          (
-            if snapshot_checklist
-              step_code.checklist_blueprint.render_as_hash(
-                checklist,
-                view: :extended
+      self.class.transaction do
+        # Lock without reloading the in-flight AASM transition.
+        self.class.where(id: id).lock.pick(:id)
+        update!(signed_off_at: Time.current)
+        requested_version = latest_submission_version
+        customizations = PrintReports::Snapshot.customizations(self)
+
+        checklist = step_code_checklist
+        # Only snapshot / generate digital checklist PDF when the selected method is the tool
+        snapshot_checklist =
+          checklist.present? && using_digital_energy_step_code_tool?
+        version =
+          submission_versions.build(
+            form_json:
+              PermitApplication::FormJsonService
+                .new(permit_application: self, customizations: customizations)
+                .call
+                .form_json,
+            submission_data: self.submission_data,
+            step_code_checklist_json:
+              (
+                if snapshot_checklist
+                  step_code.checklist_blueprint.render_as_hash(
+                    checklist,
+                    view: :extended
+                  )
+                else
+                  nil
+                end
               )
-            else
-              nil
-            end
           )
-      )
 
-      send_submit_notifications
+        version.id ||= SecureRandom.uuid
+        version.created_at = Time.current
+        version.report_snapshot =
+          PrintReports::Snapshot.capture(
+            version,
+            customizations: customizations
+          )
+        version.save!
+        assign_revision_fulfillments_to_response_version(
+          requested_version,
+          version
+        )
+
+        send_submit_notifications
+      end
+    end
+
+    def assign_revision_fulfillments_to_response_version(
+      requested_version,
+      response_version
+    )
+      return if requested_version.blank?
+
+      SupportingDocument.where(
+        revision_request_id: requested_version.revision_requests.select(:id)
+      ).update_all(submission_version_id: response_version.id)
+    end
+
+    def publish_revision_message(kind)
+      version = latest_submission_version
+      return unless version
+
+      version.notes.public_send(kind).find_each(&:publish!)
     end
 
     def update_queue_clock

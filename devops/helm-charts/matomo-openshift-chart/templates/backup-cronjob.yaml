@@ -1,0 +1,268 @@
+{{- /*
+  Renders when backup.enabled and at least one destination (s3 and/or pvc) is
+  enabled. Each destination is fully independent -- enable one, the other, or
+  both; each gets its own container below so a failure/misconfiguration in
+  one destination doesn't block the other from completing.
+*/}}
+{{- if and .Values.backup.enabled (or .Values.backup.s3.enabled .Values.backup.pvc.enabled) }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: matomo-db-backup
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: matomo-db-backup
+spec:
+  schedule: {{ .Values.backup.schedule | quote }}
+  concurrencyPolicy: {{ .Values.backup.concurrencyPolicy | default "Forbid" }}
+  successfulJobsHistoryLimit: {{ .Values.backup.successfulJobsHistoryLimit | default 3 }}
+  failedJobsHistoryLimit: {{ .Values.backup.failedJobsHistoryLimit | default 3 }}
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: {{ .Values.backup.activeDeadlineSeconds | default 3600 }}
+      template:
+        metadata:
+          labels:
+            app: matomo-db-backup
+        spec:
+          restartPolicy: Never
+          {{- /*
+            The dump step runs to completion (initContainer) before the upload
+            step starts, guaranteeing a complete file is on the shared volume
+            before anything tries to read it.
+          */}}
+          initContainers:
+            - name: dump
+              image: {{ include "matomo.image" (dict "registry" (.Values.db.imageRegistry | default .Values.global.imageRegistry) "image" (.Values.backup.dbImage | default .Values.db.image)) }}
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: DB_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.db.password.secretKeyRef.name }}
+                      key: {{ .Values.db.password.secretKeyRef.key }}
+              command:
+                - sh
+                - -ec
+                - |
+                  mkdir -p /backup
+                  {{- /*
+                    Deliberately NOT piped straight into gzip: under plain
+                    `sh -e` (no pipefail in dash/ash), a failed mariadb-dump
+                    mid-pipeline does not abort the script -- gzip happily
+                    compresses whatever little/nothing came through and exits
+                    0, producing a "successful" near-empty backup. Dumping to
+                    a file first means `set -e` catches mariadb-dump's own
+                    exit code directly, before gzip ever runs.
+                  */}}
+                  mariadb-dump -h "{{ .Values.db.hostname }}" -u "{{ .Values.db.username }}" -p"${DB_PASSWORD}" \
+                    --single-transaction --routines --triggers --add-drop-table \
+                    "{{ .Values.db.name }}" > /backup/dump.sql
+                  gzip -f /backup/dump.sql
+                  echo "Dump complete: $(du -h /backup/dump.sql.gz | cut -f1)"
+              volumeMounts:
+                - name: backup-data
+                  mountPath: /backup
+              {{- include "matomo.resources" (dict "resources" .Values.backup.resources "defaultResources" .Values.defaultResources) | nindent 14 }}
+          containers:
+          {{- if .Values.backup.s3.enabled }}
+            - name: upload
+              image: {{ include "matomo.image" (dict "registry" (.Values.global.imageRegistry) "image" .Values.backup.s3ClientImage) }}
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: S3_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.backup.s3.secretName }}
+                      key: access-key
+                - name: S3_SECRET_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.backup.s3.secretName }}
+                      key: secret-key
+                - name: S3_ENDPOINT
+                  value: {{ .Values.backup.s3.endpoint | quote }}
+                - name: S3_BUCKET
+                  value: {{ .Values.backup.s3.bucket | quote }}
+                - name: S3_PATH
+                  value: {{ .Values.backup.s3.path | quote }}
+                - name: S3_INSECURE
+                  value: {{ .Values.backup.s3.insecure | default false | quote }}
+                - name: RETENTION_COUNT
+                  value: {{ .Values.backup.retentionCount | quote }}
+                - name: PRUNE_ENABLED
+                  value: {{ dig "pruneEnabled" true .Values.backup | quote }}
+                - name: MAX_OBJECTS
+                  value: {{ .Values.backup.s3.maxObjects | default 0 | quote }}
+                {{- /*
+                  rclone reads its remote config entirely from RCLONE_CONFIG_<REMOTE>_*
+                  env vars -- no config file, no vendor-specific CLI. "Other" is
+                  rclone's provider value for any generic/on-premise S3-compatible
+                  endpoint (not AWS).
+                */}}
+                - name: RCLONE_CONFIG_S3REMOTE_TYPE
+                  value: "s3"
+                - name: RCLONE_CONFIG_S3REMOTE_PROVIDER
+                  value: "Other"
+                - name: RCLONE_CONFIG_S3REMOTE_ENV_AUTH
+                  value: "false"
+                - name: RCLONE_CONFIG_S3REMOTE_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.backup.s3.secretName }}
+                      key: access-key
+                - name: RCLONE_CONFIG_S3REMOTE_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.backup.s3.secretName }}
+                      key: secret-key
+                - name: RCLONE_CONFIG_S3REMOTE_ENDPOINT
+                  value: {{ .Values.backup.s3.endpoint | quote }}
+                - name: RCLONE_CONFIG_S3REMOTE_FORCE_PATH_STYLE
+                  value: "true"
+              command:
+                - sh
+                - -ec
+                - |
+                  {{- /*
+                    --s3-no-check-bucket: rclone's default behaviour tries to
+                    verify/create the destination bucket before writing,
+                    which needs a CreateBucket permission a properly
+                    least-privilege service account won't have (and doesn't
+                    need -- the bucket already exists). Without this flag,
+                    every write fails with AccessDenied even though the
+                    actual object-level permissions are fine.
+                  */}}
+                  RCLONE_FLAGS="--s3-no-check-bucket"
+                  [ "${S3_INSECURE}" = "true" ] && RCLONE_FLAGS="${RCLONE_FLAGS} --no-check-certificate"
+
+                  PREFIX="${S3_PATH#/}"
+                  if [ -z "${PREFIX}" ]; then
+                    echo "ERROR: backup.s3.path must be a dedicated folder, not the bucket root -- refusing to run."
+                    exit 1
+                  fi
+                  REMOTE_DIR="s3remote:${S3_BUCKET}/${PREFIX}/"
+                  # Only ever look at, count, or delete files matching the exact
+                  # pattern this job itself produces. Anything else already sitting
+                  # in this folder (or elsewhere in the bucket) is never touched.
+                  PATTERN='^matomo-[0-9]{8}-[0-9]{6}\.sql\.gz$'
+                  list_our_backups() {
+                    rclone ${RCLONE_FLAGS} lsf "${REMOTE_DIR}" 2>/dev/null | grep -E "${PATTERN}" | sort
+                  }
+
+                  if [ "${MAX_OBJECTS}" -gt 0 ] 2>/dev/null; then
+                    echo "Checking bucket-wide object count against maxObjects=${MAX_OBJECTS} ..."
+                    BUCKET_TOTAL=$(rclone ${RCLONE_FLAGS} lsf --recursive "s3remote:${S3_BUCKET}/" | grep -c . || true)
+                    echo "Bucket currently has ${BUCKET_TOTAL} object(s) in total (all folders, not just ours)."
+                    if [ "$((BUCKET_TOTAL + 1))" -gt "${MAX_OBJECTS}" ]; then
+                      if [ "${PRUNE_ENABLED}" = "true" ]; then
+                        OUR_BACKUPS=$(list_our_backups)
+                        OUR_COUNT=$(printf '%s\n' "${OUR_BACKUPS}" | grep -c . || true)
+                        NEED_TO_FREE=$((BUCKET_TOTAL + 1 - MAX_OBJECTS))
+                        if [ "${NEED_TO_FREE}" -gt "${OUR_COUNT}" ]; then
+                          echo "ERROR: bucket would still exceed maxObjects=${MAX_OBJECTS} even after deleting all ${OUR_COUNT} of our own backups under ${PREFIX}/. Other data in this bucket is consuming the quota. Aborting WITHOUT uploading or deleting anything."
+                          exit 1
+                        fi
+                        echo "Pruning ${NEED_TO_FREE} of our own oldest backup(s) to stay under maxObjects before uploading ..."
+                        printf '%s\n' "${OUR_BACKUPS}" | head -n "${NEED_TO_FREE}" | while read -r F; do
+                          [ -n "${F}" ] || continue
+                          echo "Deleting old backup: ${F}"
+                          rclone ${RCLONE_FLAGS} deletefile "${REMOTE_DIR}${F}"
+                        done
+                      else
+                        echo "ERROR: bucket would exceed maxObjects=${MAX_OBJECTS} and pruneEnabled=false. Refusing to upload rather than risk hitting the bucket's object limit."
+                        exit 1
+                      fi
+                    fi
+                  fi
+
+                  BASENAME="matomo-$(date -u +%Y%m%d-%H%M%S).sql.gz"
+                  DEST="${REMOTE_DIR}${BASENAME}"
+                  echo "Uploading to ${DEST} ..."
+                  rclone ${RCLONE_FLAGS} copyto /backup/dump.sql.gz "${DEST}"
+                  echo "Upload complete."
+
+                  if [ "${PRUNE_ENABLED}" = "true" ]; then
+                    echo "Applying retention (keep newest ${RETENTION_COUNT} of our own backups under ${PREFIX}/) ..."
+                    FILES=$(list_our_backups)
+                    TOTAL=$(printf '%s\n' "${FILES}" | grep -c . || true)
+                    if [ "${TOTAL}" -gt "${RETENTION_COUNT}" ]; then
+                      TO_DELETE=$((TOTAL - RETENTION_COUNT))
+                      printf '%s\n' "${FILES}" | head -n "${TO_DELETE}" | while read -r F; do
+                        [ -n "${F}" ] || continue
+                        echo "Deleting old backup: ${F}"
+                        rclone ${RCLONE_FLAGS} deletefile "${REMOTE_DIR}${F}"
+                      done
+                    else
+                      echo "Nothing to prune (${TOTAL} of our backups, retaining ${RETENTION_COUNT})."
+                    fi
+                  else
+                    echo "pruneEnabled=false -- skipping retention deletion (upload-only)."
+                  fi
+              volumeMounts:
+                - name: backup-data
+                  mountPath: /backup
+              {{- include "matomo.resources" (dict "resources" .Values.backup.resources "defaultResources" .Values.defaultResources) | nindent 14 }}
+          {{- end }}
+          {{- if .Values.backup.pvc.enabled }}
+            - name: pvc-backup
+              image: {{ include "matomo.image" (dict "registry" (.Values.db.imageRegistry | default .Values.global.imageRegistry) "image" (.Values.backup.pvc.image | default .Values.backup.dbImage | default .Values.db.image)) }}
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: RETENTION_COUNT
+                  value: {{ .Values.backup.pvc.retentionCount | default 7 | quote }}
+                - name: PRUNE_ENABLED
+                  value: {{ dig "pruneEnabled" true .Values.backup.pvc | quote }}
+                - name: PVC_MOUNT_PATH
+                  value: {{ .Values.backup.pvc.mountPath | default "/pvc-backups" | quote }}
+              command:
+                - sh
+                - -ec
+                - |
+                  mkdir -p "${PVC_MOUNT_PATH}"
+                  # Same naming/safety pattern as the s3 destination: only
+                  # ever list/count/delete files matching exactly what this
+                  # job itself creates. Anything else already on the PVC is
+                  # never touched.
+                  PATTERN='^matomo-[0-9]{8}-[0-9]{6}\.sql\.gz$'
+                  BASENAME="matomo-$(date -u +%Y%m%d-%H%M%S).sql.gz"
+                  DEST="${PVC_MOUNT_PATH}/${BASENAME}"
+                  echo "Copying backup to PVC: ${DEST} ..."
+                  cp /backup/dump.sql.gz "${DEST}"
+                  echo "Copy complete: $(du -h "${DEST}" | cut -f1)"
+
+                  if [ "${PRUNE_ENABLED}" = "true" ]; then
+                    echo "Applying PVC retention (keep newest ${RETENTION_COUNT}) ..."
+                    FILES=$(ls -1 "${PVC_MOUNT_PATH}" 2>/dev/null | grep -E "${PATTERN}" | sort)
+                    TOTAL=$(printf '%s\n' "${FILES}" | grep -c . || true)
+                    if [ "${TOTAL}" -gt "${RETENTION_COUNT}" ]; then
+                      TO_DELETE=$((TOTAL - RETENTION_COUNT))
+                      printf '%s\n' "${FILES}" | head -n "${TO_DELETE}" | while read -r F; do
+                        [ -n "${F}" ] || continue
+                        echo "Deleting old PVC backup: ${F}"
+                        rm -f "${PVC_MOUNT_PATH}/${F}"
+                      done
+                    else
+                      echo "Nothing to prune on PVC (${TOTAL} backups, retaining ${RETENTION_COUNT})."
+                    fi
+                  else
+                    echo "pruneEnabled=false for PVC -- skipping retention deletion (copy-only)."
+                  fi
+              volumeMounts:
+                - name: backup-data
+                  mountPath: /backup
+                  readOnly: true
+                - name: pvc-backup-store
+                  mountPath: {{ .Values.backup.pvc.mountPath | default "/pvc-backups" | quote }}
+              {{- include "matomo.resources" (dict "resources" .Values.backup.resources "defaultResources" .Values.defaultResources) | nindent 14 }}
+          {{- end }}
+{{ include "matomo.images.pullSecrets" ( dict "images" (list .Values.db) "global" .Values.global) | nindent 10 }}
+          volumes:
+            - name: backup-data
+              emptyDir: {}
+          {{- if .Values.backup.pvc.enabled }}
+            - name: pvc-backup-store
+              persistentVolumeClaim:
+                claimName: {{ .Values.backup.pvc.existingClaim | default "matomo-db-backup" }}
+          {{- end }}
+{{- end }}

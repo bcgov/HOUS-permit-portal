@@ -90,9 +90,10 @@ import {
   IPermitProjectSearchFilters,
   IProjectAuditSearchFilters,
   IProjectMeetingInboxSearchFilters,
+  IReportGenerationIssue,
+  ISubmissionContact,
   ITemplateVersionDiff,
   TAutoComplianceModuleConfigurations,
-  TCreatePermitApplicationFormData,
   TCreateRequirementTemplateFormData,
   TReleaseNoteFormData,
   TReleaseNoteViewerContext,
@@ -306,6 +307,12 @@ export class Api {
     return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/mark_as_viewed`)
   }
 
+  async acknowledgePublishedElectives(id: string, customizationChangeId: string) {
+    return this.client.post<ApiResponse<null>>(`/permit_applications/${id}/acknowledge_published_electives`, {
+      customizationChangeId,
+    })
+  }
+
   async unviewPermitApplication(id: string) {
     return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/mark_as_unviewed`)
   }
@@ -419,6 +426,8 @@ export class Api {
     pid?: string
     jurisdictionId?: string
     pin?: string
+    latitude?: number
+    longitude?: number
   }) {
     return this.client.post<ApiResponse<IPermitProject>>("/permit_projects", { permitProject: projectData })
   }
@@ -612,17 +621,14 @@ export class Api {
     )
   }
 
-  async createPermitApplication(params: TCreatePermitApplicationFormData) {
-    return this.client.post<ApiResponse<IPermitApplication>>("/permit_applications", { permitApplication: params })
-  }
-
   async createProjectPermitApplications(
     permitProjectId: string,
-    params: Array<{ templateVersionId: string; jurisdictionId?: string }>
+    params: Array<{ templateVersionId: string; jurisdictionId?: string }>,
+    note?: string
   ) {
     return this.client.post<ApiResponse<IPermitApplication[]>>(
       `/permit_projects/${permitProjectId}/permit_applications`,
-      { permitApplications: params }
+      { permitApplications: params, ...(note ? { note } : {}) }
     )
   }
 
@@ -700,6 +706,20 @@ export class Api {
   async updateRevisionRequests(id, params: IRevisionRequestForm) {
     return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/revision_requests`, {
       submissionVersion: params,
+    })
+  }
+
+  async uploadRevisionFulfillment(
+    id: string,
+    supportingDocumentsAttributes: Array<{
+      id?: string
+      revisionRequestId: string
+      _destroy?: boolean
+      file?: { id: string; storage: string; metadata: { size: number; filename: string; mimeType: string } }
+    }>
+  ) {
+    return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/upload_supporting_document`, {
+      permitApplication: { supportingDocumentsAttributes },
     })
   }
 
@@ -806,7 +826,9 @@ export class Api {
   }
 
   async generatePermitApplicationMissingPdfs(id: string) {
-    return this.client.post<never>(`/permit_applications/${id}/generate_missing_pdfs`)
+    return this.client.post<IApiResponse<{ reportGenerationIssues: IReportGenerationIssue[] }, {}>>(
+      `/permit_applications/${id}/generate_missing_pdfs`
+    )
   }
 
   async downloadSupportingDocumentsZip(id: string, supportingDocumentIds: string[]) {
@@ -814,6 +836,12 @@ export class Api {
       `/permit_applications/${id}/download_supporting_documents_zip`,
       { supportingDocumentIds }
     )
+  }
+
+  async updateSubmitterNote(id: string, submitterNote: string) {
+    return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/submitter_note`, {
+      permitApplication: { submitterNote },
+    })
   }
 
   async submitPermitApplication(id, params) {
@@ -1342,6 +1370,18 @@ export class Api {
     return this.client.post<ApiResponse<IContact>>("/contacts", { contact: params })
   }
 
+  async createSubmissionContact(params: { jurisdictionId: string; email: string; type: string }) {
+    return this.client.post<ApiResponse<ISubmissionContact>>("/submission_contacts", { submissionContact: params })
+  }
+
+  async destroySubmissionContact(id: string) {
+    return this.client.delete<ApiResponse<ISubmissionContact>>(`/submission_contacts/${id}`)
+  }
+
+  async resendSubmissionContactConfirmation(id: string) {
+    return this.client.post<ApiResponse<ISubmissionContact>>(`/submission_contacts/${id}/resend_confirmation`)
+  }
+
   async updateContact(id: string, params: TContactFormData) {
     return this.client.put<ApiResponse<IContact>>(`/contacts/${id}`, { contact: params })
   }
@@ -1465,15 +1505,19 @@ export class Api {
     return this.client.get<IApiResponse<IReportSummary[], {}>>(`/reports`)
   }
 
-  async fetchReport(key: string, range: string) {
-    return this.client.get<IApiResponse<IReportPayload, {}>>(`/reports/${key}`, { range })
+  async fetchReport(key: string, range: string, subject?: string) {
+    return this.client.get<IApiResponse<IReportPayload, {}>>(`/reports/${key}`, reportParams(range, subject))
   }
 
-  async refreshReport(key: string, range: string) {
-    return this.client.post<IApiResponse<IReportPayload, {}>>(`/reports/${key}/refresh`, { range })
+  async refreshReport(key: string, range: string, subject?: string) {
+    return this.client.post<IApiResponse<IReportPayload, {}>>(`/reports/${key}/refresh`, reportParams(range, subject))
   }
 
-  async downloadReportExport(key: string, range: string) {
-    return this.client.get<BlobPart>(`/reports/${key}/export`, { range })
+  async downloadReportExport(key: string, range: string, subject?: string) {
+    return this.client.get<BlobPart>(`/reports/${key}/export`, reportParams(range, subject))
   }
+}
+
+function reportParams(range: string, subject?: string) {
+  return subject ? { range, subject } : { range }
 }

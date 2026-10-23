@@ -26,4 +26,42 @@ RSpec.describe Reports::SubmitterAdoption do
 
     expect(figure("never_started")[:value]).to eq(1)
   end
+
+  it "defines live, created, and active" do
+    terms = payload[:notes].find { |item| item[:key] == "terms" }
+
+    expect(terms[:text]).to include("not in a sandbox")
+    expect(terms[:text]).to include("selected range")
+    expect(terms[:text]).to include("since launch")
+    expect(figure("mean_applications")[:help_text]).to include(
+      "ignores the selected range"
+    )
+    expect(figure("first_time")[:help_text]).to include("application")
+  end
+
+  it "counts projects when the subject is projects" do
+    first_time = create(:user, :submitter)
+    returning = create(:user, :submitter)
+    create(:permit_project, owner: first_time)
+    create(:permit_project, owner: returning)
+    create(:permit_project, owner: returning)
+
+    project_payload =
+      described_class.new(range: range, subject: "projects").call
+    value = ->(key) do
+      project_payload[:headline_figures].find { |row| row[:key] == key }[:value]
+    end
+
+    expect(value.call("first_time")).to eq(1)
+    expect(value.call("returning")).to eq(1)
+    expect(value.call("mean_applications")).to eq(1.5)
+    help =
+      project_payload[:headline_figures].find do |row|
+        row[:key] == "first_time"
+      end[
+        :help_text
+      ]
+    expect(help).to include("project")
+    expect(help).not_to include("application")
+  end
 end

@@ -19,7 +19,12 @@ export function nextScrollPeekState(state: IScrollPeekState, input: IScrollPeekI
 
   // Real top of a page that still overflows. A clamp that ate the leftover
   // overflow also lands on scrollTop 0, but that is the new bottom — leave it.
-  if (scrollTop <= 0 && !(atBottom && state.hiddenPx > 0)) return { hiddenPx: 0 }
+  // The reclaim can only shrink the page by the bar itself. A bigger jump is the
+  // page content collapsing (revision confirm is shorter than the form); show
+  // the bar or its empty slot sits above the page. Worst when the bar is tall
+  // (action-required banner) and the short page no longer scrolls.
+  const reclaimedAtNewBottom = atBottom && state.hiddenPx > 0 && delta >= -barHeight
+  if (scrollTop <= 0 && !reclaimedAtNewBottom) return { hiddenPx: 0 }
 
   // Browser clamped scrollTop because the scroller got taller (the in-flow
   // region reclaimed the bar). Still at the bottom, so this is not a user scroll-up.

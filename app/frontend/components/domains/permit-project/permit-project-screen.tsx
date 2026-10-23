@@ -4,7 +4,7 @@ import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { Link as RouterLink, useParams } from "react-router-dom"
+import { Link as RouterLink, useLocation, useNavigate, useParams } from "react-router-dom"
 import { usePermitProject } from "../../../hooks/resources/use-permit-project"
 import { useProjectDetailTabs } from "../../../hooks/use-project-detail-tabs"
 import { useMst } from "../../../setup/root"
@@ -23,20 +23,33 @@ import { ITabItem, ProjectSidebarTabList } from "./project-sidebar-tab-list"
 export const PermitProjectScreen = observer(() => {
   const { currentPermitProject, error } = usePermitProject()
   const { permitProjectId } = useParams<{ permitProjectId: string }>()
-  const { permitProjectStore, siteConfigurationStore } = useMst()
+  const { permitProjectStore, siteConfigurationStore, userStore } = useMst()
   const { t } = useTranslation()
+  const location = useLocation()
+  const navigate = useNavigate()
   const projectMeetingsEnabled = Boolean(
     siteConfigurationStore.projectMeetingsEnabled && currentPermitProject?.jurisdiction?.projectMeetingsEnabled
   )
+  // Review staff who do not own the project belong on the submission-inbox project view.
+  // Null the submitter base path so tab canonicalization does not race this redirect.
+  const inboxSlug =
+    userStore.currentUser?.isReviewStaff && currentPermitProject && !currentPermitProject.isOwner
+      ? currentPermitProject.jurisdiction?.slug
+      : null
   // Derive from the URL, not store current — store lags during project switches and was redirecting to the wrong project.
-  const projectBasePath = permitProjectId ? `/projects/${permitProjectId}` : null
+  const projectBasePath = permitProjectId && !inboxSlug ? `/projects/${permitProjectId}` : null
 
   const TABS_DATA: ITabItem[] = useMemo(() => {
     if (!projectBasePath) return []
     return [
       { label: t("permitProject.details.overview"), icon: SquaresFour, to: `${projectBasePath}/overview`, tabIndex: 0 },
       { label: t("permitProject.details.activity"), icon: TrendUp, to: `${projectBasePath}/activity`, tabIndex: 1 },
-      { label: t("permitProject.details.permits"), icon: ClipboardText, to: `${projectBasePath}/permits`, tabIndex: 2 },
+      {
+        label: t("permitProject.details.permits"),
+        icon: ClipboardText,
+        to: `${projectBasePath}/applications`,
+        tabIndex: 2,
+      },
       ...(projectMeetingsEnabled
         ? [
             {
@@ -45,14 +58,19 @@ export const PermitProjectScreen = observer(() => {
               to: `${projectBasePath}/meetings`,
               tabIndex: 3,
             },
-            { label: t("permitProject.details.notes"), icon: Chat, to: `${projectBasePath}/notes`, tabIndex: 4 },
           ]
         : []),
+      {
+        label: t("permitProject.details.notes"),
+        icon: Chat,
+        to: `${projectBasePath}/notes`,
+        tabIndex: projectMeetingsEnabled ? 4 : 3,
+      },
       {
         label: t("permitProject.details.localResources"),
         icon: Folder,
         to: `${projectBasePath}/local-resources`,
-        tabIndex: projectMeetingsEnabled ? 5 : 3,
+        tabIndex: projectMeetingsEnabled ? 5 : 4,
       },
     ]
   }, [projectBasePath, projectMeetingsEnabled, t])
@@ -80,12 +98,28 @@ export const PermitProjectScreen = observer(() => {
     reset(getDefaultValues())
   }, [currentPermitProject, reset]) // Recalculate if title changes, as it might affect height
 
+  useEffect(() => {
+    if (!inboxSlug || !permitProjectId || currentPermitProject?.id !== permitProjectId) return
+    const raw = location.pathname.slice(`/projects/${permitProjectId}`.length)
+    const inboxSubpath =
+      raw === "" || raw === "/" || raw.startsWith("/local-resources")
+        ? "/overview"
+        : raw === "/applications" || raw.startsWith("/applications/")
+          ? `/permits${raw.slice("/applications".length)}`
+          : raw
+    navigate(
+      `/jurisdictions/${inboxSlug}/submission-inbox/projects/${permitProjectId}${inboxSubpath}${location.search}`,
+      { replace: true }
+    )
+  }, [inboxSlug, permitProjectId, currentPermitProject?.id, location.pathname, location.search, navigate])
+
   const onSubmit = async (data: { title: string }) => {
     if (!currentPermitProject) return
     await updatePermitProject(currentPermitProject.id, { title: data.title })
   }
 
   if (error) return <ErrorScreen error={error} />
+  if (inboxSlug) return <LoadingScreen />
   if (!projectMatchesRoute && !error) return <LoadingScreen />
   if (!currentPermitProject) return <Text>{t("permitProject.details.notFound")}</Text>
 
@@ -147,11 +181,9 @@ export const PermitProjectScreen = observer(() => {
               {isPending ? <LoadingScreen /> : <MeetingsTabPanelContent permitProject={currentPermitProject} />}
             </TabPanel>
           )}
-          {projectMeetingsEnabled && (
-            <TabPanel p={0}>
-              {isPending ? <LoadingScreen /> : <ProjectNotesTabPanelContent permitProject={currentPermitProject} />}
-            </TabPanel>
-          )}
+          <TabPanel p={0}>
+            {isPending ? <LoadingScreen /> : <ProjectNotesTabPanelContent permitProject={currentPermitProject} />}
+          </TabPanel>
           <TabPanel>
             {isPending ? <LoadingScreen /> : <LocalResourcesTabPanelContent permitProject={currentPermitProject} />}
           </TabPanel>

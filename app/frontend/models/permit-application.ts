@@ -1,5 +1,5 @@
 import { t } from "i18next"
-import { cast, flow, Instance, toGenerator, types } from "mobx-state-tree"
+import { cast, flow, getSnapshot, Instance, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
@@ -10,16 +10,19 @@ import {
   EPermitBlockStatus,
   ERequirementChangeAction,
   ERequirementType,
+  ERevisionRequestType,
   EStepCodeChecklistStage,
 } from "../types/enums"
 import {
   ICompareRequirementsBoxData,
   ICompareRequirementsBoxDiff,
+  IDigitalSealChecks,
   IDownloadableFile,
   IFormIOBlock,
   IFormJson,
   IPermitApplicationSelectiveZipReady,
   IPermitApplicationSupportingDocumentsUpdate,
+  IReportGenerationIssue,
   ISubmissionData,
   ISubmissionVersion,
   ITemplateCustomization,
@@ -31,8 +34,10 @@ import {
   combineDiff,
   combineRevisionAnnotations,
   combineRevisionButtons,
+  highlightPublishedElectives,
   processFieldsForEphemeral,
 } from "../utils/formio-component-traversal"
+import { injectOptionalElectivesButtons } from "../utils/view-optional-electives"
 
 import { format } from "date-fns"
 import { StepCodeModel } from "../stores/step-code-store"
@@ -59,6 +64,9 @@ export const PermitApplicationModel = types.snapshotProcessor(
       tags: types.optional(types.array(types.string), []),
       status: types.enumeration(Object.values(EPermitApplicationStatus)),
       submitter: types.maybeNull(types.maybe(types.reference(types.late(() => UserModel)))),
+      createdBy: types.maybeNull(
+        types.frozen<{ id: string; type: "User" | "Jurisdiction"; name: string; role?: string | null }>()
+      ),
       jurisdiction: types.maybeNull(types.maybe(types.reference(types.late(() => JurisdictionModel)))),
       templateVersion: types.maybeNull(types.reference(types.late(() => TemplateVersionModel))),
       sandbox: types.maybeNull(types.reference(types.late(() => SandboxModel))),
@@ -66,7 +74,10 @@ export const PermitApplicationModel = types.snapshotProcessor(
       formJson: types.maybeNull(types.frozen<IFormJson>()),
       submissionData: types.maybeNull(types.frozen<ISubmissionData>()),
       formattedComplianceData: types.maybeNull(types.frozen()),
+      digitalSealChecks: types.optional(types.frozen<IDigitalSealChecks>(), { pendingCount: 0, failedCount: 0 }),
       formCustomizations: types.maybeNull(types.frozen<ITemplateCustomization>()),
+      unseenElectiveFieldIds: types.optional(types.array(types.string), []),
+      unseenCustomizationChangeId: types.maybeNull(types.string),
       submittedAt: types.maybeNull(types.Date),
       resubmittedAt: types.maybeNull(types.Date),
       revisionsRequestedAt: types.maybeNull(types.Date),
@@ -86,6 +97,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       selectiveZipResult: types.maybeNull(types.frozen<IPermitApplicationSelectiveZipReady>()),
       referenceNumber: types.maybeNull(types.string),
       missingPdfs: types.maybeNull(types.array(types.string)),
+      reportGenerationIssues: types.optional(types.frozen<IReportGenerationIssue[]>(), []),
       isFullyLoaded: types.optional(types.boolean, false),
       isDirty: types.optional(types.boolean, false),
       isLoading: types.optional(types.boolean, false),
@@ -126,12 +138,19 @@ export const PermitApplicationModel = types.snapshotProcessor(
       get isStepCodeComplete() {
         return !!self.stepCode?.isStageComplete(self.stepCodeStage || EStepCodeChecklistStage.preConstruction)
       },
-      get isPart3() {
-        // TODO
-        return false
-      },
       get isNewDraft() {
         return self.status === EPermitApplicationStatus.newDraft
+      },
+      // Review staff cannot open a new draft unless the project has an active meeting.
+      get isLockedForReviewStaff() {
+        const user = self.rootStore.userStore.currentUser
+        if (!user?.isReviewStaff || !this.isNewDraft) return false
+        if (self.submitter?.id === user.id) return false
+        if (self.hasActiveProjectMeeting) return false
+
+        const project = self.rootStore.permitProjectStore.currentPermitProject
+        if (project?.id === self.projectId && (project.isOwner || project.hasActiveProjectMeeting)) return false
+        return true
       },
       get isDraft() {
         return (
@@ -215,6 +234,19 @@ export const PermitApplicationModel = types.snapshotProcessor(
       get latestRevisionRequests() {
         return (self.latestSubmissionVersion?.revisionRequests || []).slice().sort((a, b) => a.createdAt - b.createdAt)
       },
+      get latestFieldRevisionRequests() {
+        return self.latestRevisionRequests.filter(
+          (request) => request.type !== ERevisionRequestType.SupportingDocumentRevisionRequest
+        )
+      },
+      get latestSupportingDocumentRevisionRequests() {
+        return self.latestRevisionRequests.filter(
+          (request) => request.type === ERevisionRequestType.SupportingDocumentRevisionRequest
+        )
+      },
+      get latestRequestPackageCount() {
+        return (self.latestSubmissionVersion?.revisionRequests || []).length
+      },
       get inboxEnabled() {
         return self.jurisdiction?.inboxEnabled && self.rootStore.siteConfigurationStore.inboxEnabled
       },
@@ -257,9 +289,11 @@ export const PermitApplicationModel = types.snapshotProcessor(
 
         // Disable certain fields if this is an ephemeral preview
         const ephemeralProcessedFormJson = self.isEphemeral ? processFieldsForEphemeral(clonedFormJson) : clonedFormJson
+        const revisionRequestsForAnnotations =
+          self.revisionMode || self.isRevisionsRequested ? self.latestRevisionRequests : []
         const revisionAnnotatedFormJson = combineRevisionAnnotations(
           ephemeralProcessedFormJson,
-          self.latestRevisionRequests
+          revisionRequestsForAnnotations
         )
         //merge the formattedComliance data.  This should trigger a form redraw when it is updated
         const complianceHintedFormJson = combineCustomizations(
@@ -268,7 +302,10 @@ export const PermitApplicationModel = types.snapshotProcessor(
           self.formattedComplianceData,
           self.jurisdiction?.resources
         )
-        const diffColoredFormJson = combineDiff(complianceHintedFormJson, self.diff)
+        const withPublishedElectives = self.rootStore.userStore.currentUser?.isReviewStaff
+          ? complianceHintedFormJson
+          : highlightPublishedElectives(complianceHintedFormJson, self.unseenElectiveFieldIds.slice())
+        const diffColoredFormJson = combineDiff(withPublishedElectives, self.diff)
         const revisionRequestsToUse = self.isViewingPastRequests
           ? self.selectedSubmissionVersion?.revisionRequests
           : self.latestRevisionRequests
@@ -300,6 +337,10 @@ export const PermitApplicationModel = types.snapshotProcessor(
         const revisionModeFormJson = showRevisionButtons
           ? combineRevisionButtons(changedMarkedFormJson, self.isSubmitted, revisionRequestsToUse)
           : changedMarkedFormJson
+
+        if (self.isEphemeral) {
+          return injectOptionalElectivesButtons(revisionModeFormJson, t("templateVersionPreview.viewOptionalElectives"))
+        }
 
         return revisionModeFormJson
       },
@@ -795,6 +836,9 @@ export const PermitApplicationModel = types.snapshotProcessor(
       setFormattedComplianceData(data: Record<string, any>) {
         self.formattedComplianceData = data
       },
+      setDigitalSealChecks(data: IDigitalSealChecks) {
+        if (data) self.digitalSealChecks = data
+      },
       update: flow(function* ({ autosave, review, ...params }) {
         self.isLoading = true
         const response = yield self.environment.api.updatePermitApplication(self.id, params, review)
@@ -803,6 +847,8 @@ export const PermitApplicationModel = types.snapshotProcessor(
           if (!autosave) {
             self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
           }
+          // Keep readiness current without replacing an in-progress autosaved form.
+          if (permitApplication.digitalSealChecks) self.digitalSealChecks = permitApplication.digitalSealChecks
         }
         self.isLoading = false
         return response
@@ -819,6 +865,27 @@ export const PermitApplicationModel = types.snapshotProcessor(
           )
         }
         self.isLoading = false
+        return response
+      }),
+      uploadRevisionFulfillment: flow(function* (supportingDocumentsAttributes) {
+        const response = yield self.environment.api.uploadRevisionFulfillment(self.id, supportingDocumentsAttributes)
+        if (response.ok) {
+          const { data: permitApplication } = response.data
+          const snapshot = getSnapshot(self)
+          const fulfillmentUpdate = {
+            ...permitApplication,
+            formJson: snapshot.formJson,
+            submissionData: snapshot.submissionData,
+            selectedSubmissionVersion: snapshot.selectedSubmissionVersion,
+            isViewingPastRequests: snapshot.isViewingPastRequests,
+            revisionMode: snapshot.revisionMode,
+            isDirty: snapshot.isDirty,
+            selectedTabIndex: snapshot.selectedTabIndex,
+            diff: snapshot.diff,
+            showingCompareAfter: snapshot.showingCompareAfter,
+          }
+          self.rootStore.permitApplicationStore.mergeUpdate(fulfillmentUpdate, "permitApplicationMap")
+        }
         return response
       }),
       fetchDiff: flow(function* () {
@@ -854,8 +921,17 @@ export const PermitApplicationModel = types.snapshotProcessor(
         }
         return response.ok
       }),
+      updateSubmitterNote: flow(function* (submitterNote: string) {
+        const response = yield self.environment.api.updateSubmitterNote(self.id, submitterNote)
+        if (response.ok) {
+          const { data: permitApplication } = response.data
+          self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
+        }
+        return response
+      }),
       submit: flow(function* (params) {
         const response = yield self.environment.api.submitPermitApplication(self.id, params)
+        if (response.data?.meta?.digitalSealChecks) self.digitalSealChecks = response.data.meta.digitalSealChecks
         if (response.ok) {
           const { data: permitApplication } = response.data
           self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
@@ -872,6 +948,11 @@ export const PermitApplicationModel = types.snapshotProcessor(
           )
         }
         return response.ok
+      }),
+      acknowledgePublishedElectives: flow(function* () {
+        const customizationChangeId = self.unseenCustomizationChangeId
+        if (!customizationChangeId) return
+        yield self.environment.api.acknowledgePublishedElectives(self.id, customizationChangeId)
       }),
       markAsViewed: flow(function* () {
         const wasUnread = !self.isViewed
@@ -919,6 +1000,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
     .actions((self) => ({
       handleSocketSupportingDocsUpdate: (data: IPermitApplicationSupportingDocumentsUpdate) => {
         self.missingPdfs = cast(data.missingPdfs)
+        self.reportGenerationIssues = data.reportGenerationIssues || []
         self.supportingDocuments = data.supportingDocuments
         self.allSubmissionVersionCompletedSupportingDocuments = data.allSubmissionVersionCompletedSupportingDocuments
         self.zipfileSize = data.zipfileSize
@@ -933,6 +1015,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       },
       generateMissingPdfs: flow(function* () {
         const response = yield self.environment.api.generatePermitApplicationMissingPdfs(self.id)
+        if (response.ok) self.reportGenerationIssues = response.data?.data?.reportGenerationIssues || []
         return response.ok
       }),
 

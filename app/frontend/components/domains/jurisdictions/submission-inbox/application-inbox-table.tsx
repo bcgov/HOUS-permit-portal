@@ -228,28 +228,42 @@ const ApplicationInboxRow = observer(function ApplicationInboxRow({
 }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const isLockedDraft = application.isLockedForReviewStaff
 
   return (
     <SearchGridRow
       key={application.id}
       className="application-inbox-grid-row"
-      onClick={() => navigate(`/permit-applications/${application.id}`)}
-      _hover={{ bg: "gray.50", cursor: "pointer" }}
-      _active={{ bg: "background.blueLight" }}
+      aria-disabled={isLockedDraft}
+      opacity={isLockedDraft ? 0.55 : undefined}
+      onClick={() => {
+        if (isLockedDraft) return
+        navigate(`/permit-applications/${application.id}`)
+      }}
+      _hover={isLockedDraft ? { cursor: "not-allowed" } : { bg: "gray.50", cursor: "pointer" }}
+      _active={isLockedDraft ? undefined : { bg: "background.blueLight" }}
     >
       <SearchGridItem justifyContent="center" px={2}>
         <UnreadIndicatorDot isUnread={!application.isViewed} />
       </SearchGridItem>
 
       <SearchGridItem>
-        <VStack align="start" spacing={0}>
-          <Text fontWeight={700} fontSize="sm" noOfLines={1}>
-            {application.templateNickname || "—"}
-          </Text>
-          <Text fontSize="xs" color="text.secondary" noOfLines={1}>
-            {application.number}
-          </Text>
-        </VStack>
+        <Tooltip
+          isDisabled={!isLockedDraft}
+          label={t("permitProject.activity.unsubmittedPermitApplication")}
+          hasArrow
+          placement="top"
+          openDelay={200}
+        >
+          <VStack align="start" spacing={0}>
+            <Text fontWeight={700} fontSize="sm" noOfLines={1}>
+              {application.templateNickname || "—"}
+            </Text>
+            <Text fontSize="xs" color="text.secondary" noOfLines={1}>
+              {application.number}
+            </Text>
+          </VStack>
+        </Tooltip>
       </SearchGridItem>
 
       <SearchGridItem>

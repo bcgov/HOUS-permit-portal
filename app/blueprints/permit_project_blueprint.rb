@@ -8,6 +8,10 @@ class PermitProjectBlueprint < Blueprinter::Base
       Constants::ExternalApi::PROJECT_STATE_LABELS.fetch(permit_project.state)
     end
 
+    field :available_states do |permit_project, _options|
+      permit_project.allowed_manual_transitions.map(&:to_s)
+    end
+
     association :permit_applications,
                 blueprint: PermitApplicationBlueprint,
                 view: :external_api_summary do |permit_project, _options|
@@ -115,7 +119,9 @@ class PermitProjectBlueprint < Blueprinter::Base
                 blueprint: ProjectDocumentBlueprint do |permit_project, options|
       permit_project.project_documents(options[:current_user])
     end
-    association :active_project_meeting, blueprint: ProjectMeetingBlueprint
+    association :active_project_meeting,
+                blueprint: ProjectMeetingBlueprint,
+                view: :base
     association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
     association :notes, blueprint: NoteBlueprint do |permit_project, options|
       PermitProjectBlueprint.notes_for(permit_project, options)
@@ -138,8 +144,8 @@ class PermitProjectBlueprint < Blueprinter::Base
     end
     association :recent_permit_applications,
                 blueprint: PermitApplicationBlueprint,
-                view: :jurisdiction_review_inbox do |permit_project, _options|
-      permit_project.recent_inbox_permit_applications
+                view: :jurisdiction_review_inbox do |permit_project, options|
+      permit_project.recent_permit_applications(options[:current_user])
     end
     association :project_documents,
                 blueprint:
@@ -167,8 +173,9 @@ class PermitProjectBlueprint < Blueprinter::Base
     scope = options[:notes_scope] || Note.all
 
     scope
+      .visible_on_project
       .where(permit_project: permit_project)
-      .preload(:user, :permit_project, :note_attachment_documents)
+      .preload(:user, :permit_project, :noteable, :note_attachment_documents)
       .order(created_at: :desc)
   end
 end

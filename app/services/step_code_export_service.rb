@@ -27,9 +27,10 @@ class StepCodeExportService
     CSV.generate(headers: true) do |csv|
       # Headers for Part 3 metrics
       csv << [
-        "Application ID",
+        "Reference number",
         "Jurisdiction",
         "Address",
+        "Stage",
         "Building Height",
         "Building Code Version",
         "Heating Degree Days",
@@ -76,18 +77,17 @@ class StepCodeExportService
         "Is Suite Sub Metered"
       ]
 
-      # Get all submitted Part 3 Step Codes with their current checklist
-      Part3StepCode
-        .includes(:permit_application, :checklists)
-        .where(permit_applications: { status: %i[newly_submitted resubmitted] })
-        .find_each do |step_code|
-          checklist = step_code.current_checklist
-          next unless checklist
+      Part3StepCode::Checklist
+        .completed_live
+        .includes(step_code: :jurisdiction)
+        .find_each do |checklist|
+          step_code = checklist.step_code
 
           csv << [
             step_code.reference_number,
             step_code.jurisdiction_name,
             step_code.full_address,
+            checklist.stage,
             checklist.building_height,
             checklist.building_code_version,
             checklist.heating_degree_days,
@@ -141,9 +141,10 @@ class StepCodeExportService
     CSV.generate(headers: true) do |csv|
       # Headers for Part 9 metrics
       csv << [
-        "Application ID",
+        "Reference number",
         "Jurisdiction",
         "Address",
+        "Stage",
         "Building Type",
         "Compliance Path",
         "Energy Step",
@@ -165,15 +166,12 @@ class StepCodeExportService
         "Notes"
       ]
 
-      # Get all submitted Part 9 Step Codes with their checklists
-      Part9StepCode
-        .includes(:permit_application, :checklists)
-        .where(permit_applications: { status: %i[newly_submitted resubmitted] })
-        .find_each do |step_code|
-          checklist = step_code.current_checklist
-          next unless checklist
+      Part9StepCode::Checklist
+        .completed_live
+        .includes(step_code: :jurisdiction)
+        .find_each do |checklist|
+          step_code = checklist.step_code
 
-          # Get compliance reports to extract energy and Zero Carbon steps
           compliance_report =
             checklist.selected_report ||
               checklist.passing_compliance_reports.first
@@ -184,6 +182,7 @@ class StepCodeExportService
             step_code.reference_number,
             step_code.jurisdiction_name,
             step_code.full_address,
+            checklist.stage,
             checklist.building_type,
             checklist.compliance_path,
             energy_step,

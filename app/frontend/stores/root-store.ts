@@ -101,6 +101,12 @@ export const RootStoreModel = types
         properties: ["viewMode", "displayMode", "collapsedColumns"],
         storage: localStorage,
       })
+      yield makePersistable(self.stepCodeStore, {
+        name: "StepCodeStore",
+        properties: ["indexExitPath"],
+        storage: sessionStorage,
+      })
+      self.stepCodeStore.setIndexExitPath(self.stepCodeStore.indexExitPath)
       protect(self)
     }),
     subscribeToUserChannel() {
@@ -125,6 +131,8 @@ export const RootStoreModel = types
       })
     },
     afterCreate() {
+      // UI store is created before session store, so this cannot run from uiStore.afterCreate.
+      self.uiStore.showQueryParamFlash()
       self.loadLocalPersistedData()
     },
   }))

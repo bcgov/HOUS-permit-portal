@@ -15,18 +15,10 @@ module Api::Concerns::Search::JurisdictionPermitApplications
       match: :word_start,
       fields: jurisdiction_permit_application_search_fields,
       where: jurisdiction_permit_application_where_clause,
-      page: jurisdiction_permit_application_search_params[:page],
+      page: jurisdiction_permit_application_search_params[:page].presence || 1,
       per_page:
-        (
-          if jurisdiction_permit_application_search_params[:page]
-            (
-              jurisdiction_permit_application_search_params[:per_page] ||
-                Kaminari.config.default_per_page
-            )
-          else
-            nil
-          end
-        ),
+        jurisdiction_permit_application_search_params[:per_page].presence ||
+          Kaminari.config.default_per_page,
       includes: PermitApplication::SEARCH_INCLUDES,
       scope_results: ->(relation) { policy_scope(relation) }
     }
@@ -314,12 +306,6 @@ module Api::Concerns::Search::JurisdictionPermitApplications
 
     permit_project_id =
       jurisdiction_permit_application_search_params[:permit_project_id]
-    # Project Permits tab may include new_draft when the project has an active
-    # meeting (matches PermitApplicationPolicy::Scope). Jurisdiction Applications
-    # list never does — drafts there ghost-page after scope_results.
-    active_meeting_request =
-      permit_project_id.present? &&
-        PermitProject.find_by(id: permit_project_id)&.has_active_project_meeting
 
     statuses = search_filters.delete(:status)
 
@@ -327,7 +313,9 @@ module Api::Concerns::Search::JurisdictionPermitApplications
       and_conditions << { status: status_filter }
     elsif statuses.present?
       and_conditions << { status: statuses }
-    elsif !active_meeting_request
+    elsif permit_project_id.blank?
+      # Jurisdiction applications list stays a submitted queue. A project
+      # search includes new drafts so review staff can see they exist.
       and_conditions << { status: { not: "new_draft" } }
     end
 

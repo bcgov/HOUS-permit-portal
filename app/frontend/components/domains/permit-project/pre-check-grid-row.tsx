@@ -41,7 +41,6 @@ export const PreCheckGridRow = observer(({ preCheck }: IPreCheckGridRowProps) =>
   return (
     <SearchGridRow onClick={() => navigate(`/pre-checks/${preCheck.id}/edit`)}>
       <SearchGridItem>{preCheck.fullAddress || "—"}</SearchGridItem>
-      <SearchGridItem>{preCheck.title || "—"}</SearchGridItem>
       <SearchGridItem>{preCheck.updatedAt && format(preCheck.updatedAt, datefnsTableDateTimeFormat)}</SearchGridItem>
       <SearchGridItem textTransform="capitalize">{preCheck.status || "—"}</SearchGridItem>
       <SearchGridItem justifyContent="flex-end">

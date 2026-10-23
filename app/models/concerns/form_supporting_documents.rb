@@ -38,9 +38,10 @@ module FormSupportingDocuments
                where(
                  id:
                    permit_application.supporting_doc_ids_from_all_versions_submission_data
-               ).or(where(data_key: STATIC_DOCUMENT_DATA_KEYS)).order(
-                 created_at: :desc
                )
+                 .or(where(data_key: STATIC_DOCUMENT_DATA_KEYS))
+                 .or(where.not(revision_request_id: nil))
+                 .order(created_at: :desc)
              end,
              class_name: "SupportingDocument"
     accepts_nested_attributes_for :supporting_documents, allow_destroy: true
@@ -63,10 +64,11 @@ module FormSupportingDocuments
     submission_versions.map do |sv|
       version_doc_ids =
         find_file_fields_and_transform!(
-          sv.formatted_submission_data,
+          sv.report_submission_data,
           []
         ) do |_file_field_key, file_array|
-          file_array.map { |fa| fa["modelId"] }
+          next [] unless file_array.is_a?(Array)
+          file_array.filter_map { |fa| fa["model_id"] || fa["modelId"] }
         end
 
       doc_ids += version_doc_ids if version_doc_ids.is_a?(Array)

@@ -23,10 +23,11 @@ import { useTranslation } from "react-i18next"
 import { datefnsAppDateFormat } from "../../../constants"
 import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
-import { IDownloadableFile, IFormIOSection } from "../../../types/types"
+import { IDownloadableFile, IFormIOSection, ISubmissionVersion } from "../../../types/types"
 import { formatBytes } from "../../../utils/utility-functions"
 import { CalloutBanner } from "../../shared/base/callout-banner"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
+import { InfoTooltip } from "../../shared/info-tooltip"
 
 export interface ISubmissionDownloadModalProps {
   permitApplication: IPermitApplication
@@ -55,6 +56,38 @@ function formSectionKeyFromDataKey(dataKey?: string) {
 function isGeneratedDocumentKey(key?: string) {
   if (!key) return false
   return key.startsWith("permit_application_pdf") || key.startsWith("step_code_checklist_pdf")
+}
+
+function collectFileModelIds(data: unknown, ids: Set<string>) {
+  if (!data || typeof data !== "object") return
+  if (Array.isArray(data)) {
+    data.forEach((item) => collectFileModelIds(item, ids))
+    return
+  }
+
+  const record = data as Record<string, unknown>
+  if (typeof record.modelId === "string") ids.add(record.modelId)
+  Object.values(record).forEach((value) => collectFileModelIds(value, ids))
+}
+
+function documentsForSubmissionVersion(
+  documents: IDownloadableFile[],
+  version: ISubmissionVersion | null,
+  latestVersionId?: string
+) {
+  if (!version) return documents
+
+  const fileIds = new Set<string>()
+  collectFileModelIds(version.submissionData, fileIds)
+  const revisionIds = new Set((version.revisionRequests ?? []).map((request) => request.id))
+
+  return documents.filter((doc) => {
+    if (fileIds.has(doc.id)) return true
+    if (doc.submissionVersionId) return doc.submissionVersionId === version.id
+    if (doc.revisionRequestId && revisionIds.has(doc.revisionRequestId)) return true
+    if (!isGeneratedDocumentKey(doc.dataKey)) return false
+    return version.id === latestVersionId
+  })
 }
 
 function groupDownloadItemsBySection({
@@ -131,9 +164,35 @@ export const SubmissionDownloadModal = observer(
     const applicationJsonUrl = `/api/permit_applications/${permitApplication.id}/download_application_json`
     const applicationJsonName = `permit-application-${permitApplication.id}.json`
 
-    const documents = allSubmissionVersionCompletedSupportingDocuments || []
+    const viewingPastVersion = permitApplication.isViewingPastRequests && !!permitApplication.selectedSubmissionVersion
+    const displayedVersion = viewingPastVersion
+      ? permitApplication.selectedSubmissionVersion
+      : permitApplication.latestSubmissionVersion
+    const isLatestVersion = !displayedVersion || displayedVersion.id === permitApplication.latestSubmissionVersion?.id
+    const displayedVersionDate = displayedVersion?.createdAt
+      ? format(new Date(displayedVersion.createdAt), "MMMM d, yyyy 'at' h:mma")
+      : null
+
+    const documents = useMemo(
+      () =>
+        documentsForSubmissionVersion(
+          allSubmissionVersionCompletedSupportingDocuments || [],
+          displayedVersion,
+          permitApplication.latestSubmissionVersion?.id
+        ),
+      [
+        allSubmissionVersionCompletedSupportingDocuments,
+        displayedVersion,
+        permitApplication.latestSubmissionVersion?.id,
+      ]
+    )
     const documentKeys = useMemo(() => documents.map((doc) => doc.fileUrl), [documents])
-    const missingPdfs = permitApplication.missingPdfs || []
+    const issues = permitApplication.reportGenerationIssues
+    const unavailableKeys = new Set(issues.map((issue) => issue.key))
+    const missingPdfs = (permitApplication.missingPdfs || []).filter(
+      (key) => !unavailableKeys.has(key) && (!displayedVersion || key.endsWith(`_${displayedVersion.id}`))
+    )
+    const packageBlocked = issues.length > 0
     const hasMissingPdfs = missingPdfs.length > 0
     const allKeys = useMemo(() => [...documentKeys, ...missingPdfs], [documentKeys, missingPdfs])
 
@@ -142,11 +201,11 @@ export const SubmissionDownloadModal = observer(
         groupDownloadItemsBySection({
           documents,
           missingPdfs,
-          formSections: permitApplication.formJson?.components || [],
+          formSections: displayedVersion?.formJson?.components || permitApplication.formJson?.components || [],
           generatedTitle: t("permitApplication.show.downloadSectionGenerated"),
           otherTitle: t("permitApplication.show.downloadSectionOther"),
         }),
-      [documents, missingPdfs, permitApplication.formJson, t]
+      [documents, missingPdfs, displayedVersion?.formJson, permitApplication.formJson, t]
     )
 
     const { isOpen, onOpen, onClose: disclosureOnClose } = useDisclosure()
@@ -188,20 +247,6 @@ export const SubmissionDownloadModal = observer(
       }
     }, [isOpen])
 
-    // ponytail: window capture runs before the navbar's document-capture listener, so this
-    // list can fill the modal without the size heuristic hiding the bar. Upgrade: data-*
-    // opt-out in isPageLevelScroller.
-    useEffect(() => {
-      if (!isOpen) return
-
-      const onScroll = (event: Event) => {
-        if (event.target === listScrollRef.current) event.stopPropagation()
-      }
-
-      window.addEventListener("scroll", onScroll, true)
-      return () => window.removeEventListener("scroll", onScroll, true)
-    }, [isOpen])
-
     useEffect(() => {
       if (!isOpen) return
 
@@ -222,7 +267,9 @@ export const SubmissionDownloadModal = observer(
 
       // Kick off generation when system PDFs are missing and/or the package zip isn't ready yet
       const needsGeneration =
-        permitApplication.isSubmitted && !zipGenerationTriggeredRef.current && (hasMissingPdfs || !zipfileUrl)
+        permitApplication.isSubmitted &&
+        !zipGenerationTriggeredRef.current &&
+        (hasMissingPdfs || (!zipfileUrl && !packageBlocked))
 
       if (!needsGeneration) {
         return
@@ -241,6 +288,7 @@ export const SubmissionDownloadModal = observer(
       isOpen,
       zipfileUrl,
       generationFailed,
+      packageBlocked,
     ])
 
     // Keep selections that still exist as either a ready file or a missing PDF placeholder
@@ -276,7 +324,7 @@ export const SubmissionDownloadModal = observer(
         return true
       }
 
-      if (wasAllSelected && zipfileUrl) {
+      if (wasAllSelected && zipfileUrl && !packageBlocked && !displayedVersion) {
         const a = document.createElement("a")
         a.href = zipfileUrl
         a.download = zipfileName || `permit-application-${permitApplication.number}.zip`
@@ -292,13 +340,33 @@ export const SubmissionDownloadModal = observer(
       return "pending"
     }
 
+    // A lost websocket or exhausted job must not leave the modal spinning forever.
+    useEffect(() => {
+      if (!isOpen || (!awaitingGeneration && !awaitingSelectiveZip)) return
+      const timeout = window.setTimeout(() => {
+        if (awaitingGeneration) setGenerationFailed(true)
+        if (awaitingSelectiveZip) setSelectiveZipFailed(true)
+      }, 180000)
+      const poll = window.setInterval(() => {
+        permitApplicationStore.fetchPermitApplication(permitApplication.id, review)
+      }, 10000)
+      return () => {
+        window.clearTimeout(timeout)
+        window.clearInterval(poll)
+      }
+    }, [isOpen, awaitingGeneration, awaitingSelectiveZip])
+
     // After missing PDFs finish, continue the download that was waiting
     useEffect(() => {
-      if (!isOpen || !awaitingGeneration || hasMissingPdfs || !pendingDownloadRef.current) return
-
-      if (generationFailed) return
+      if (!isOpen || !awaitingGeneration || !pendingDownloadRef.current) return
 
       const pending = pendingDownloadRef.current
+      if (pending.missingKeys.some((key) => unavailableKeys.has(key))) {
+        pendingDownloadRef.current = null
+        setAwaitingGeneration(false)
+        return
+      }
+      if (hasMissingPdfs || generationFailed) return
       pendingDownloadRef.current = null
       setAwaitingGeneration(false)
       ;(async () => {
@@ -310,7 +378,7 @@ export const SubmissionDownloadModal = observer(
         )
         if (result === false) setSelectiveZipFailed(true)
       })()
-    }, [awaitingGeneration, hasMissingPdfs, generationFailed, isOpen, documents, zipfileUrl])
+    }, [awaitingGeneration, hasMissingPdfs, generationFailed, isOpen, documents, zipfileUrl, issues])
 
     // Selective zip ready via websocket — auto-download when requestId matches
     useEffect(() => {
@@ -378,7 +446,7 @@ export const SubmissionDownloadModal = observer(
 
       const result = await performDownload(
         selectedReady.map((doc) => doc.fileUrl),
-        allSelected
+        allSelected && !packageBlocked
       )
       if (result === false) setSelectiveZipFailed(true)
     }
@@ -425,6 +493,33 @@ export const SubmissionDownloadModal = observer(
                   <Text fontSize="lg" fontWeight="normal" color="text.primary" lineHeight="1.68">
                     {t("permitApplication.show.downloadApplicationNumber", { number: permitApplication.number })}
                   </Text>
+                  {displayedVersionDate && (
+                    <CalloutBanner
+                      type="info"
+                      my={0}
+                      title={t("permitApplication.show.downloadVersionNotice", { date: displayedVersionDate })}
+                      body={
+                        isLatestVersion ? undefined : (
+                          <Link
+                            as="button"
+                            type="button"
+                            color="text.link"
+                            textDecoration="underline"
+                            onClick={() => {
+                              permitApplication.setIsViewingPastRequests(false)
+                              if (permitApplication.latestSubmissionVersion) {
+                                permitApplication.setSelectedSubmissionVersion(
+                                  permitApplication.latestSubmissionVersion
+                                )
+                              }
+                            }}
+                          >
+                            {t("permitApplication.show.downloadViewLatest")}
+                          </Link>
+                        )
+                      }
+                    />
+                  )}
                 </VStack>
 
                 <ModalBody px={10} py={6} flex={1} minH={0} overflow="hidden" display="flex" flexDirection="column">
@@ -437,6 +532,34 @@ export const SubmissionDownloadModal = observer(
                     minH={0}
                     overflowY="auto"
                   >
+                    {issues.map((issue) => (
+                      <HStack key={issue.key} spacing={2} fontSize="sm" color="text.secondary">
+                        <Text role="status">
+                          {t("permitApplication.show.reportUnavailable", {
+                            version: issue.versionNumber,
+                            report: t(
+                              issue.key.startsWith("permit_application_pdf")
+                                ? "permitApplication.show.unavailableReportLabels.permitApplication"
+                                : "permitApplication.show.unavailableReportLabels.stepCode"
+                            ),
+                          })}
+                        </Text>
+                        <InfoTooltip
+                          label={t("permitApplication.show.reportUnavailableHelp")}
+                          ariaLabel={t("permitApplication.show.reportUnavailableHelp")}
+                          hasArrow
+                          shouldWrapChildren
+                        />
+                      </HStack>
+                    ))}
+                    {packageBlocked && (
+                      <Text fontSize="sm">{t("permitApplication.show.incompleteHistoricalPackage")}</Text>
+                    )}
+                    {packageBlocked && zipfileUrl && (
+                      <Link href={zipfileUrl} download={zipfileName || undefined} color="text.link">
+                        {t("permitApplication.show.downloadExistingPackage")}
+                      </Link>
+                    )}
                     <Checkbox
                       isChecked={allSelected}
                       isIndeterminate={someSelected}
@@ -641,7 +764,6 @@ function FileSelectRow({
 
   return (
     <HStack
-      as="label"
       w="full"
       align="flex-start"
       spacing={2}
@@ -652,23 +774,24 @@ function FileSelectRow({
       borderStyle="solid"
       borderColor="transparent"
       borderRadius="sm"
-      cursor="pointer"
       _hover={{ borderColor: "border.base" }}
     >
-      <Checkbox isChecked={isSelected} onChange={onToggle} spacing={2} mt="2px" />
-      <VStack flex={1} align="start" spacing={0} minW={0}>
-        <Text fontSize="md" lineHeight="normal" noOfLines={1} w="full">
-          {doc.fileName}
-        </Text>
-        <Text fontSize="xs" color="text.secondary" lineHeight="normal">
-          {[
-            formatBytes(doc.fileSize),
-            submittedDate && t("permitApplication.show.downloadSubmitted", { date: submittedDate }),
-          ]
-            .filter(Boolean)
-            .join(" · ")}
-        </Text>
-      </VStack>
+      <HStack as="label" flex={1} minW={0} align="flex-start" cursor="pointer">
+        <Checkbox isChecked={isSelected} onChange={onToggle} spacing={2} mt="2px" />
+        <VStack flex={1} align="start" spacing={0} minW={0}>
+          <Text fontSize="md" lineHeight="normal" overflowWrap="anywhere" w="full">
+            {doc.fileName}
+          </Text>
+          <Text fontSize="xs" color="text.secondary" lineHeight="normal">
+            {[
+              formatBytes(doc.fileSize),
+              submittedDate && t("permitApplication.show.downloadSubmitted", { date: submittedDate }),
+            ]
+              .filter(Boolean)
+              .join(" · ")}
+          </Text>
+        </VStack>
+      </HStack>
     </HStack>
   )
 }

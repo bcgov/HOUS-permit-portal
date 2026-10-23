@@ -277,25 +277,28 @@ class Api::PermitProjectsController < Api::ApplicationController
   # Sandbox comes from the parent project, not the request, so all PAs in a
   # project stay in the same sandbox.
   # Expected params:
+  #   note?: string
   #   permit_applications: [{ template_version_id, jurisdiction_id?, sandbox_id? }]
   def create_permit_applications
     authorize @permit_project
 
     created = []
     errors = []
+    note_body = params.permit(:note)[:note]
 
     permit_applications_params.each do |pa_params|
       permit_application =
         PermitApplication.new(
-          submitter: current_user,
           permit_project: @permit_project,
           template_version_id: pa_params[:template_version_id],
           jurisdiction_id: pa_params[:jurisdiction_id]
         )
+      permit_application.assign_creation_actors(current_user)
 
       authorize permit_application, :create?
 
       if permit_application.save
+        attach_creation_note(permit_application, note_body)
         if !Rails.env.development? || ENV["RUN_COMPLIANCE_ON_SAVE"] == "true"
           AutomatedCompliance::AutopopulateJob.perform_async(
             permit_application.id
@@ -308,6 +311,14 @@ class Api::PermitProjectsController < Api::ApplicationController
     end
 
     if errors.empty?
+      if created.first&.created_by_type == "Jurisdiction"
+        NotificationService.publish_applications_added_event(
+          @permit_project,
+          created,
+          note_body
+        )
+      end
+
       render_success created,
                      "permit_application.bulk_create_success",
                      {
@@ -429,6 +440,16 @@ class Api::PermitProjectsController < Api::ApplicationController
     compute_active_project_meeting_ids_by_project_id([@permit_project])
   end
 
+  def attach_creation_note(permit_application, note_body)
+    return unless permit_application.created_by_type == "Jurisdiction"
+
+    Note.create_creation_message!(
+      permit_application: permit_application,
+      body: note_body,
+      user: current_user
+    )
+  end
+
   def permit_applications_params
     params
       .require(:permit_applications)
@@ -453,6 +474,8 @@ class Api::PermitProjectsController < Api::ApplicationController
       :full_address,
       :pid,
       :pin,
+      :latitude,
+      :longitude,
       :jurisdiction_id,
       project_documents_attributes: [
         :id,

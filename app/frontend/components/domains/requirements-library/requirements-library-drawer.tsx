@@ -57,6 +57,7 @@ export const RequirementsLibraryDrawer = observer(function RequirementsLibraryDr
           flexDir={"column"}
           maxW={"container.lg"}
           h={"full"}
+          overflow="hidden"
           p={8}
           pt="calc(var(--app-navbar-offset) + var(--chakra-space-8))"
         >
@@ -64,8 +65,9 @@ export const RequirementsLibraryDrawer = observer(function RequirementsLibraryDr
           {isOpen && (
             <RequirementBlocksTable
               searchModel={pickerSearch}
-              h={"calc(100% - 120px)"}
               flex={1}
+              minH={0}
+              overflow="hidden"
               p={0}
               renderActionButton={({ requirementBlock }) => {
                 const isDisabled = disabledUseForBlockIds.has(requirementBlock.id)

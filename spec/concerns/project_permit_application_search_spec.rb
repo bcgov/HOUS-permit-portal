@@ -110,7 +110,7 @@ RSpec.describe Api::Concerns::Search::ProjectPermitApplications,
     expect(ids).to be_empty
   end
 
-  it "as reviewer does not see draft apps under project list (only submitted within jurisdiction)" do
+  it "as reviewer sees drafts and submitted apps on a project in their jurisdiction" do
     allow(controller).to receive(:current_user).and_return(reviewer)
     controller.perform_permit_application_search
     ids =
@@ -118,8 +118,7 @@ RSpec.describe Api::Concerns::Search::ProjectPermitApplications,
         .instance_variable_get(:@permit_application_search)
         .results
         .map(&:id)
-    expect(ids).to match_array([p2_sub.id, p3_resub.id])
-    expect(ids).not_to include(p1_draft.id)
+    expect(ids).to match_array([p1_draft.id, p2_sub.id, p3_resub.id])
   end
 
   it "as unrelated non-review user sees only their own submissions (none here)" do

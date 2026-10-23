@@ -10,6 +10,7 @@
 # Ignore all logfiles and tempfiles.
 /log/*
 /tmp/*
+/docs/
 !/log/.keep
 !/tmp/.keep
 
@@ -63,7 +64,17 @@ deleteme.*
 /allure-results/
 /cypress/downloads/
 /cypress/screenshots/
+/.playwright-mcp/
 
 .npm/
 
 .cursor/
+
+# Host database configuration template
+!/config/database.yml.local
+.claude/
+
+devops/helm-charts/**/outputs/
+outputs/
+devops/helm-charts/**/work/
+work/

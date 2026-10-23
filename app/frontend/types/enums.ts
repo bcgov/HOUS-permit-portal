@@ -68,6 +68,20 @@ export enum EMeetingRequestDocumentType {
 
 export enum ENoteableType {
   ProjectMeeting = "ProjectMeeting",
+  SubmissionVersion = "SubmissionVersion",
+  PermitApplication = "PermitApplication",
+}
+
+export enum ENoteKind {
+  meeting = "meeting",
+  jurisdictionMessage = "jurisdiction_message",
+  submitterMessage = "submitter_message",
+  creationMessage = "creation_message",
+}
+
+export enum ERevisionRequestType {
+  FieldRevisionRequest = "FieldRevisionRequest",
+  SupportingDocumentRevisionRequest = "SupportingDocumentRevisionRequest",
 }
 
 export enum ESubmissionContactClass {
@@ -200,7 +214,6 @@ export enum EReleaseNoteNotificationAudience {
 
 export enum EPreCheckSortFields {
   fullAddress = "full_address",
-  title = "title",
   updatedAt = "updated_at",
   status = "status",
 }
@@ -223,7 +236,6 @@ export enum EPermitApplicationSortFields {
 }
 
 export enum EProjectPermitApplicationSortFields {
-  applicationNickname = "nickname",
   permit = "template_nickname",
   assignedTo = "review_delegatee_name",
   permitApplicationNumber = "number",
@@ -275,7 +287,6 @@ export enum ERequirementType {
   radio = "radio",
   address = "address",
   bcaddress = "bcaddress",
-  signature = "signature",
   textArea = "textarea",
   energyStepCodePart9 = "energy_step_code",
   energyStepCodePart3 = "energy_step_code_part_3",
@@ -535,6 +546,7 @@ export enum ENotificationActionType {
   permitBlockStatusReady = "permit_block_status_ready",
   applicationSubmission = "application_submission",
   applicationRevisionsRequest = "application_revisions_request",
+  applicationsAdded = "applications_added",
   reviewStarted = "review_started",
   stepCodeReportGenerated = "step_code_report_generated",
   preCheckSubmitted = "pre_check_submitted",
