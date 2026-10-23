@@ -6,6 +6,7 @@
 
   <%= csrf_meta_tags %>
   <%= csp_meta_tag %>
+  <%= tag.meta name: "sentry-config", content: BphSentry::Configuration.new.frontend_config.to_json %>
 
   <%= vite_client_tag %>
   <%= vite_react_refresh_tag %>

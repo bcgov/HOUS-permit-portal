@@ -16,6 +16,18 @@ const options = {
     /* English translations */
     en: {
       translation: {
+        sentry: {
+          tab: "Feedback",
+          feedbackTitle: "Give feedback",
+          descriptionLabel:
+            "Describe what happened. Do not include personal information, passwords, or permit details.",
+          send: "Send feedback",
+          cancel: "Cancel",
+          errorTitle: "Something went wrong",
+          errorBody: "You can reload this page or contact support for help.",
+          reload: "Reload page",
+          support: "Contact support",
+        },
         auth: {
           login: "Log in",
           loginTitle: "Log in to Building Permit Hub",

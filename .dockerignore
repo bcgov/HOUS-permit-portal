@@ -1,10 +1,14 @@
 # .dockerignore
 
 .env
+.env.*
 
 node_modules
 /node_modules
 .npm
+
+# Always build application assets inside the image; exclude stale local maps.
+/public/vite*
 
 .git
 .gitignore
