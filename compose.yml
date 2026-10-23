@@ -23,7 +23,7 @@ services:
       retries: 12
       start_period: 10s
   postgres:
-    image: postgres:15.19-alpine
+    image: postgres:17.7-alpine
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-hous}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hous-local-password}

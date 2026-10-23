@@ -153,7 +153,7 @@ RSpec.describe DigitalSealChecks do
     expect(results.first["signers"].first).to include(
       "name" => "Test Signer",
       "organization" => "INSTITUTE - AIBC",
-      "date" => "2024-09-06 11:26:19 PDT"
+      "date" => "2024-09-06 11:26:19 Pacific Time"
     )
     expect(results.to_json).not_to include("PRIVATE INTEGRATION ERROR")
   end
