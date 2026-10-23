@@ -1,10 +1,12 @@
 import { Box, Heading, Stack, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { useEffect } from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step-code"
 import { IPart3StepCodeChecklist } from "../../../../../models/part-3-step-code-checklist"
+import { IUser } from "../../../../../models/user"
+import { useMst } from "../../../../../setup/root"
 import { TextFormControl } from "../../../../shared/form/input-form-control"
 import { Part3FormFooter } from "./shared/form-footer"
 
@@ -16,12 +18,16 @@ interface IStepcodeContactForm {
   completedByPhoneNumber?: string | null
 }
 
-function initializeFormValues(checklist?: IPart3StepCodeChecklist): IStepcodeContactForm {
+function profileName(user?: IUser) {
+  return [user?.firstName, user?.lastName].filter(Boolean).join(" ") || null
+}
+
+function contactFormValues(checklist?: IPart3StepCodeChecklist, user?: IUser): IStepcodeContactForm {
   return {
-    completedByName: checklist?.completedByName || null,
+    completedByName: checklist?.completedByName || profileName(user),
     completedByTitle: checklist?.completedByTitle || null,
-    completedByEmail: checklist?.completedByEmail || null,
-    completedByOrganizationName: checklist?.completedByOrganizationName || null,
+    completedByEmail: checklist?.completedByEmail || user?.email || null,
+    completedByOrganizationName: checklist?.completedByOrganizationName || user?.organization || null,
     completedByPhoneNumber: checklist?.completedByPhoneNumber || null,
   }
 }
@@ -31,14 +37,23 @@ const i18nPrefix = "stepCode.part3.completedByContact"
 export const Contact = observer(() => {
   const { t } = useTranslation()
   const { checklist } = usePart3StepCode()
+  const {
+    userStore: { currentUser },
+  } = useMst()
   const formMethods = useForm<IStepcodeContactForm>({
     mode: "onSubmit",
-    defaultValues: initializeFormValues(checklist),
+    defaultValues: contactFormValues(checklist, currentUser),
   })
   const {
     handleSubmit,
+    reset,
     formState: { isSubmitting },
   } = formMethods
+
+  useEffect(() => {
+    if (!checklist) return
+    reset(contactFormValues(checklist, currentUser))
+  }, [checklist?.id, currentUser?.id])
 
   const onSubmit = async (values) => {
     if (!checklist) return

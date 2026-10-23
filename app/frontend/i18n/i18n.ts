@@ -2289,6 +2289,8 @@ Thank you,
               revisionsSection: "Revisions",
               revisionsEmpty: "No revisions requested.",
               supportingInformationSection: "Supporting information",
+              supportingInformationPrompt:
+                "Ask the applicant to provide documents, drawings, photos, or other supporting material.",
               permitApplicationSection: "Permit application",
               addSupportingInformation: "Request supporting information",
               addPermitApplication: "Add a permit application",
