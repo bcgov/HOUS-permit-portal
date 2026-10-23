@@ -7,7 +7,9 @@ import { withRootStore } from "../lib/with-root-store"
 import { EDeprecationReason, EExportFormat, ETemplateVersionStatus } from "../types/enums"
 import { IDenormalizedRequirementBlock, IDenormalizedTemplate, IFormJson, ITemplateVersionUpdate } from "../types/types"
 import { startBlobDownload } from "../utils/utility-functions"
+import { ExplainerModel } from "./explainer"
 import { IIntegrationMapping, IntegrationMappingModel } from "./integration-mapping"
+import { IExplainerLoadResult, IJurisdictionExplainerLoadResult } from "./jurisdiction-explainer"
 import { JurisdictionTemplateVersionCustomizationModel } from "./jurisdiction-template-version-customization"
 
 interface ITemplateCategorySummary {
@@ -42,6 +44,7 @@ export const TemplateVersionModel = types
     publiclyPreviewable: types.optional(types.boolean, false),
     requiresProjectMeeting: types.optional(types.boolean, false),
     disabledByJurisdiction: types.optional(types.boolean, false),
+    explainerPublished: types.optional(types.boolean, false),
     hasUnresolvedFeedbacks: types.optional(types.boolean, false),
     feedbacksCount: types.optional(types.number, 0),
     templateCategoryId: types.maybeNull(types.string),
@@ -340,6 +343,37 @@ export const TemplateVersionModel = types
         return { failedEmails: meta?.failedEmails ?? [] }
       }
       return null
+    }),
+    fetchExplainer: flow(function* (): Generator<any, IExplainerLoadResult | null, any> {
+      const { ok, data: response } = yield* toGenerator(self.environment.api.fetchExplainer(self.requirementTemplateId))
+      if (!ok || !response) return null
+
+      return {
+        explainer: response.data ? ExplainerModel.create(response.data) : null,
+        relatedTemplateOptions: response.meta?.relatedTemplateOptions ?? [],
+        jurisdictionExplainers: response.meta?.jurisdictionExplainers ?? [],
+      }
+    }),
+    fetchJurisdictionExplainer: flow(function* (
+      jurisdictionId: string
+    ): Generator<any, IJurisdictionExplainerLoadResult | null, any> {
+      const { ok, data: response } = yield* toGenerator(
+        self.environment.api.fetchJurisdictionExplainer(self.requirementTemplateId, jurisdictionId)
+      )
+      if (!ok || !response) return null
+
+      return {
+        localContextHtml: response.data?.localContextHtml ?? "",
+        updatedAt: response.data?.updatedAt ?? null,
+      }
+    }),
+    saveJurisdictionExplainer: flow(function* (jurisdictionId: string, localContextHtml: string) {
+      const { ok } = yield* toGenerator(
+        self.environment.api.saveJurisdictionExplainer(self.requirementTemplateId, jurisdictionId, {
+          localContextHtml,
+        })
+      )
+      return ok
     }),
   }))
   .actions((self) => ({
