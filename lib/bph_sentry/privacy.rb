@@ -50,6 +50,7 @@ module BphSentry
       id = user[:id] || user["id"]
       clean_user = component == "web" && UUID.match?(id.to_s) ? { id: id } : {}
       {
+        type: "event",
         event_id: data[:event_id],
         timestamp: data[:timestamp],
         platform: :ruby,
