@@ -19,6 +19,57 @@ RSpec.describe Api::ExplainersController, type: :controller do
       expect(response).to have_http_status(:forbidden)
     end
 
+    it "allows review managers to read a published explainer" do
+      explainer = create(:explainer, :published, requirement_template: template)
+      sign_in create(:user, :review_manager)
+
+      get :show, params: { requirement_template_id: template.id }, format: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("data", "id")).to eq(explainer.id)
+      expect(json_response.dig("meta", "jurisdiction_explainers")).to be_nil
+    end
+
+    it "hides a draft explainer from review managers" do
+      create(
+        :explainer,
+        requirement_template: template,
+        introduction_html: "<p>Draft only</p>"
+      )
+      sign_in create(:user, :review_manager)
+
+      get :show, params: { requirement_template_id: template.id }, format: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response["data"]).to be_nil
+      expect(response.body).not_to include("Draft only")
+      expect(json_response.dig("meta", "related_template_options")).to be_nil
+    end
+
+    it "includes filled jurisdiction explainers for super admins" do
+      filled_jurisdiction = create(:sub_district, name: "Alpha")
+      create(
+        :jurisdiction_explainer,
+        :filled,
+        requirement_template: template,
+        jurisdiction: filled_jurisdiction
+      )
+      create(
+        :jurisdiction_explainer,
+        requirement_template: template,
+        jurisdiction: create(:sub_district)
+      )
+      sign_in super_admin
+
+      get :show, params: { requirement_template_id: template.id }, format: :json
+
+      expect(
+        json_response.dig("meta", "jurisdiction_explainers").pluck(
+          "jurisdiction_id"
+        )
+      ).to eq([filled_jurisdiction.id])
+    end
+
     it "returns null data when the explainer has not been created" do
       sign_in super_admin
 
@@ -46,6 +97,22 @@ RSpec.describe Api::ExplainersController, type: :controller do
   end
 
   describe "PATCH #update" do
+    it "prevents review managers from saving" do
+      sign_in create(:user, :review_manager)
+
+      patch :update,
+            params: {
+              requirement_template_id: template.id,
+              explainer: {
+                introduction_html: "<p>When you need this permit</p>"
+              }
+            },
+            format: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(template.reload.explainer).to be_nil
+    end
+
     it "prevents non-super admins from saving" do
       sign_in create(:user)
 
