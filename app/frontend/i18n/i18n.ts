@@ -5433,6 +5433,22 @@ Thank you,
             searchPermits: "Search permit types",
             statusDraft: "Draft",
             statusPublished: "Published",
+            localCommunity: "Local community information",
+            localContextHint:
+              "Add local information applicants need before they start a building permit application. This information will appear on your permit application information page.",
+            localContextNote:
+              "Do not repeat the provincial content or contradict it - applicants read both. Keep this concise, current to what is specific to your local community.",
+            localContextReadOnly: "Read only - you cannot edit this",
+            localContextReadOnlyHint:
+              "Each local community writes and maintains its own section for its own jurisdiction. It appears on the public page after the sections above. Shown here so you can see what applicants read alongside your content.",
+            localContextJurisdiction: "Jurisdiction",
+            localContextSelectPlaceholder: "Select a jurisdiction",
+            localContextEmpty: "No local jurisdictions have added community information for this permit yet.",
+            localContextUnselected: "Select a jurisdiction to preview what applicants will see.",
+            fromYourLocalJurisdiction: "From your local jurisdiction",
+            lastUpdated: "Last updated {{date}}",
+            addedBy:
+              "Added by {{name}} · This section is written and maintained by the local jurisdiction, not by the Province.",
           },
         },
         apiMappingsSetup: {
@@ -5531,6 +5547,29 @@ Thank you,
               disabledDescription:
                 "Project meetings must be enabled for this jurisdiction before this setting can be changed.",
             },
+          },
+          applicationInfo: {
+            title: "Permit application information page",
+            description:
+              "Add local information applicants need before they start a building permit application. This information will appear on your permit application information page.",
+            supportingNote:
+              "Applicants will see this alongside general guidance. Help them by sharing what's different about this building permit in your community. There's no need to repeat what's already covered.",
+            addLocalContextTitle: "Add local context",
+            addLocalContextIntro:
+              "Help applicants understand your local requirements and prepare a complete application. You may want to include:",
+            items: {
+              bylaws: "Local bylaws, policies, and zoning requirements",
+              documents: "Documents and information applicants should have ready",
+              links: "Links to municipal resources and contacts",
+              fees: "Your fees and how they are calculated",
+              steps: "Any steps applicants should complete before applying",
+            },
+            writeOwn:
+              "You can write your own content or start with a suggested outline and customize it for your community.",
+            addButton: "Add local context",
+            editButton: "Edit local context",
+            cardButton: "Permit information",
+            unpublishedNote: "This page is not available until the permit application information has been published.",
           },
         },
         siteConfiguration: {

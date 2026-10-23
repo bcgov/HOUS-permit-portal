@@ -58,6 +58,10 @@ class TemplateVersionBlueprint < Blueprinter::Base
       )
     end
 
+    field :explainer_published do |template_version|
+      template_version.requirement_template&.explainer&.published? || false
+    end
+
     field :latest_version_id do |template_version|
       template_version.latest_version&.id
     end

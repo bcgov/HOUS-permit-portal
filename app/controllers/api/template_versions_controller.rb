@@ -26,7 +26,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
       policy_scope(TemplateVersion)
         .joins(:requirement_template)
         .left_joins(requirement_template: :template_category)
-        .includes(requirement_template: :template_category)
+        .includes(requirement_template: %i[template_category explainer])
         .where(status:)
         .then do |scope|
           if template_version_params.key?(:publicly_previewable)
