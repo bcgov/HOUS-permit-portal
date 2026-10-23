@@ -59,6 +59,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const currentUser = userStore.currentUser
   const { currentPermitApplication, error } = usePermitApplication()
   const { t } = useTranslation()
+
   const formRef = useRef(null)
   const navigate = useNavigate()
 
@@ -479,6 +480,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
               onCompletedBlocksChange={setCompletedBlocks}
               triggerSave={handleSave}
               showHelpButton
+              forSubmitterEdit
               isEditing={currentPermitApplication?.isDraft}
               renderSaveButton={() => (
                 <SaveButton

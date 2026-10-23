@@ -252,7 +252,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
           }, [] as IFormIOBlock[])
           .filter((outNull) => outNull)
       },
-      get formattedFormJson() {
+      buildFormattedFormJson(forSubmitterEdit: boolean) {
         const clonedFormJson = R.clone(self.formJson)
 
         // Disable certain fields if this is an ephemeral preview
@@ -284,22 +284,30 @@ export const PermitApplicationModel = types.snapshotProcessor(
             self.latestSubmissionVersion.submissionData
           )
         }
-        // Review staff on revisions_requested: lock fields the same way in_review does via
-        // isSubmitted. Submitters must still edit on the edit screen.
-        const disableRequirementFields =
-          self.isSubmitted ||
-          self.isViewingPastRequests ||
-          (self.isRevisionsRequested && !!self.rootStore.userStore.currentUser?.isReviewStaff)
+        const currentUser = self.rootStore.userStore.currentUser
+        const submitterCanEditDraft =
+          forSubmitterEdit && self.isDraft && !!currentUser?.id && currentUser.id === self.submitter?.id
+        const disableRequirementFields = submitterCanEditDraft
+          ? self.isViewingPastRequests
+          : self.isSubmitted ||
+            self.isViewingPastRequests ||
+            (self.isRevisionsRequested && !!currentUser?.isReviewStaff)
         const changedMarkedFormJson = combineChangeMarkers(diffColoredFormJson, disableRequirementFields, changedKeys)
         // Review staff: buttons only after "View revision requests" (revisionMode).
-        // Submitters: always show while revisions are outstanding (sidebar is always open).
+        // The submitter always sees them while revisions are outstanding.
         const showRevisionButtons =
-          self.revisionMode || (self.isRevisionsRequested && !self.rootStore.userStore.currentUser?.isReviewStaff)
+          self.revisionMode || (self.isRevisionsRequested && (!currentUser?.isReviewStaff || submitterCanEditDraft))
         const revisionModeFormJson = showRevisionButtons
           ? combineRevisionButtons(changedMarkedFormJson, self.isSubmitted, revisionRequestsToUse)
           : changedMarkedFormJson
 
         return revisionModeFormJson
+      },
+      get reviewFormattedFormJson() {
+        return this.buildFormattedFormJson(false)
+      },
+      get editFormattedFormJson() {
+        return this.buildFormattedFormJson(true)
       },
       sectionKey(sectionId) {
         return `section${sectionId}`

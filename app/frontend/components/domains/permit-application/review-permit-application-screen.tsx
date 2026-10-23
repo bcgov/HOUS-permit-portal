@@ -99,7 +99,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
   if (error) return <ErrorScreen error={error} />
   if (!currentPermitApplication?.isFullyLoaded) return <LoadingScreen />
 
-  const { tagsOrNickname, formattedFormJson, number, revisionMode, setRevisionMode } = currentPermitApplication
+  const { tagsOrNickname, reviewFormattedFormJson, number, revisionMode, setRevisionMode } = currentPermitApplication
 
   const onSaveReferenceNumber = handleSubmit(async ({ referenceNumber: referenceNumberToSave }) => {
     if (referenceNumber === referenceNumberSnapshot) {
@@ -310,7 +310,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
         ) : (
           <ChecklistSideBar permitApplication={currentPermitApplication} completedBlocks={completedBlocks} />
         )}
-        {formattedFormJson && (
+        {reviewFormattedFormJson && (
           <Flex flex={1} direction="column" pt={8} position={"relative"} id="permitApplicationFieldsContainer" gap={8}>
             <RequirementForm
               formRef={formRef}

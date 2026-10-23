@@ -37,7 +37,7 @@ const main = async () => {
     }
 
     if (pdfData.permitApplication) {
-      pdfData.permitApplication.formattedFormJson = combineCustomizations(
+      pdfData.permitApplication.reviewFormattedFormJson = combineCustomizations(
         pdfData.permitApplication?.formJson ?? {},
         pdfData.permitApplication?.formCustomizations ?? {},
         pdfData.permitApplication?.formattedComplianceData ?? {},
