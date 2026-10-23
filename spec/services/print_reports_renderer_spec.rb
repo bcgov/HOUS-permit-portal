@@ -24,7 +24,7 @@ RSpec.describe PrintReports::Renderer do
   before do
     allow(ENV).to receive(:fetch).and_call_original
     allow(ENV).to receive(:fetch).with("GOTENBERG_URL", anything).and_return(
-      "http://127.0.0.1:13000"
+      ENV.fetch("GOTENBERG_TEST_URL", "http://127.0.0.1:13000")
     )
   end
 
@@ -130,6 +130,30 @@ RSpec.describe PrintReports::Renderer do
 
   context "real local conversion", if: ENV["RUN_GOTENBERG_SPECS"] == "true" do
     around { |example| VCR.turned_off { example.run } }
+
+    it "uses the Vancouver day for winter submission dates and preserves date-only answers" do
+      report[:identity][:submitted_at] = "2027-02-01T07:30:00Z"
+      report[:form_json][:components] = [
+        { type: "datetime", key: "instant", label: "Winter instant" },
+        { type: "datetime", key: "date_only", label: "Saved calendar date" }
+      ]
+      report[:submission_data][:data] = {
+        instant: "2027-02-01T07:30:00Z",
+        date_only: "2027-02-01"
+      }
+      described_class
+        .new
+        .render(report) do |path|
+          text =
+            PDF::Reader.new(path).pages.map(&:text).join(" ").gsub(/\s+/, " ")
+          expect(text).to include(
+            "Winter instant",
+            "Saved calendar date",
+            "2027-02-01"
+          )
+          expect(text).not_to include("2027-01-31")
+        end
+    end
 
     it "prints per-file digital seal text, complete signer details and historical fallbacks without icons" do
       fixture =

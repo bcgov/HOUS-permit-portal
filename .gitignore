@@ -64,6 +64,7 @@ deleteme.*
 /allure-results/
 /cypress/downloads/
 /cypress/screenshots/
+/.playwright-mcp/
 
 .npm/
 

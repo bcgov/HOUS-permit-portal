@@ -106,7 +106,7 @@ class SupportingDocument < FileUploadAttachment
     Time
       .parse(value)
       .in_time_zone(Rails.application.config.time_zone)
-      .strftime("%Y-%m-%d %H:%M:%S %Z")
+      .strftime("%Y-%m-%d %H:%M:%S Pacific Time")
   rescue ArgumentError, TypeError
     nil
   end

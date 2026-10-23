@@ -2,7 +2,7 @@
 name: hous-permit-portal-local
 services:
   gotenberg:
-    image: gotenberg/gotenberg:8.32.0
+    image: gotenberg/gotenberg:8.38.1
     ports:
       - "127.0.0.1:${GOTENBERG_HOST_PORT:-13000}:3000"
     command:
@@ -23,7 +23,7 @@ services:
       retries: 12
       start_period: 10s
   postgres:
-    image: postgres:15.10-alpine
+    image: postgres:17.7-alpine
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-hous}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hous-local-password}

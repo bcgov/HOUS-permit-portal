@@ -116,6 +116,8 @@ module PrintReports
         %w[
           app/frontend/i18n/i18n.ts
           app/frontend/styles/brand.ts
+          app/frontend/utils/formio-time-zones.ts
+          package-lock.json
           vite.print.config.mjs
         ].map { |p| Rails.root.join(p).to_s }
       hash = Digest::SHA256.new

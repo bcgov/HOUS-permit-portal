@@ -1,5 +1,5 @@
 # Make sure RUBY_VERSION matches the Ruby version in .ruby-version and Gemfile
-ARG RUBY_VERSION=4.0.6-trixie
+ARG RUBY_VERSION=4.0.9-trixie
 FROM docker.io/library/ruby:$RUBY_VERSION
 
 # Rails app lives here
@@ -15,7 +15,7 @@ ENV RAILS_ENV="production" \
 
 # Install packages needed for both building and running the application
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential curl git libpq-dev libvips node-gyp pkg-config python3 libjemalloc2 postgresql-client libproj-dev libgeos-dev proj-bin netcat-openbsd && \
+    apt-get install --no-install-recommends -y build-essential curl git libpq-dev libvips node-gyp pkg-config python3 libjemalloc2 postgresql-client libproj-dev libgeos-dev proj-bin netcat-openbsd tzdata && \
     rm -rf /var/lib/apt/lists/*
 
 # Use jemalloc to improve memory management
@@ -24,7 +24,7 @@ ENV LD_PRELOAD="libjemalloc.so.2" \
     RUBY_YJIT_ENABLE="1"
 
 # Install Node.js
-ARG NODE_VERSION=24.21.0
+ARG NODE_VERSION=24.22.1
 RUN curl -sL https://github.com/nodenv/node-build/archive/master.tar.gz | tar xz -C /tmp/ && \
     cd /tmp/node-build-master && ./install.sh && \
     /tmp/node-build-master/bin/node-build "${NODE_VERSION}" /usr/local/node && \

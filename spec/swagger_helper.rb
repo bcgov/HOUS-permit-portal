@@ -527,7 +527,7 @@ in this document.
                 type: :integer,
                 format: :int64,
                 description:
-                  "The version date in milliseconds since the epoch (UNIX time). This is meant to be parsed as PST."
+                  "The version date in milliseconds since the epoch (UNIX time). This is meant to be parsed in America/Vancouver."
               },
               status: {
                 type: :string,
@@ -1145,7 +1145,7 @@ in this document.
               type: :integer,
               format: :int64,
               description:
-                "The version date in milliseconds since the epoch (UNIX time). This is meant to be parsed as PST."
+                "The version date in milliseconds since the epoch (UNIX time). This is meant to be parsed in America/Vancouver."
             },
             requirement_template_id: {
               type: :string,
@@ -1314,7 +1314,7 @@ in this document.
               type: :integer,
               format: :int64,
               description:
-                "The version date in milliseconds since the epoch (UNIX time). This is meant to be parsed as PST."
+                "The version date in milliseconds since the epoch (UNIX time). This is meant to be parsed in America/Vancouver."
             },
             requirement_template_id: {
               type: :string,

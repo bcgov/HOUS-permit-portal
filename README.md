@@ -10,8 +10,8 @@ Ruby and Node run on your host using rbenv and nvm. Docker runs PostgreSQL, Redi
 
 - Git LFS (`git lfs install` before cloning; run `git lfs pull` for an existing clone).
 - Docker Desktop, or Docker Engine with Compose v2 supporting `up --wait` (2.20+), and `curl`.
-- rbenv initialized in your shell, with Ruby from `.ruby-version` (currently 4.0.6).
-- nvm initialized in your shell, with Node from `.nvmrc` (currently v24.21.0).
+- rbenv initialized in your shell, with Ruby from `.ruby-version` (currently 4.0.9).
+- nvm initialized in your shell, with Node from `.nvmrc` (currently v24.22.1).
 - Native build dependencies: compiler tools, PostgreSQL client libraries, GEOS, PROJ, and libvips. These are loaded by host Ruby; no host PostgreSQL or Redis daemon is needed.
 
 On macOS, install Xcode command-line tools and the libraries:
