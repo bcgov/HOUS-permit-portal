@@ -5,6 +5,12 @@ class Api::ExplainersController < Api::ApplicationController
     explainer = find_or_build
     authorize explainer
 
+    # Managers only need to know that a draft exists. The read-only modal
+    # loads the page after it is published.
+    unless current_user.super_admin? || explainer.published?
+      return render_success nil
+    end
+
     render_success explainer.persisted? ? explainer : nil,
                    nil,
                    explainer_render_opts
@@ -45,15 +51,20 @@ class Api::ExplainersController < Api::ApplicationController
   end
 
   def explainer_render_opts
-    {
-      blueprint: ExplainerBlueprint,
-      meta: {
-        related_template_options:
-          RequirementTemplateOptionBlueprint.render_as_hash(
-            related_template_options
-          )
-      }
+    meta = {
+      related_template_options:
+        RequirementTemplateOptionBlueprint.render_as_hash(
+          related_template_options
+        )
     }
+    if current_user.super_admin?
+      meta[
+        :jurisdiction_explainers
+      ] = JurisdictionExplainerBlueprint.render_as_hash(
+        JurisdictionExplainer.previews_for(@requirement_template)
+      )
+    end
+    { blueprint: ExplainerBlueprint, meta: }
   end
 
   def related_template_options

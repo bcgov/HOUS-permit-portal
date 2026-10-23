@@ -100,6 +100,9 @@ Rails.application.routes.draw do
            to: "requirement_templates#update_jurisdiction_availabilities"
 
       resource :explainer, only: %i[show update]
+      resources :jurisdiction_explainers,
+                only: %i[show update],
+                param: :jurisdiction_id
     end
 
     # Draft version-specific endpoints (feedback and previews)
