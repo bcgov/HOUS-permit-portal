@@ -57,7 +57,6 @@ export const TemplateVersionModel = types
     // may have null description/category.
     nickname: types.maybeNull(types.string),
     description: types.maybeNull(types.string),
-    isAvailableForAdoption: types.maybeNull(types.boolean),
   })
   .extend(withEnvironment())
   .extend(withRootStore())

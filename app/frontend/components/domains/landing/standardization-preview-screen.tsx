@@ -25,17 +25,18 @@ import { RouterLink } from "../../shared/navigation/router-link"
 export const StandardizationPreviewScreen = observer(function StandardizationPreviewScreen() {
   const { t } = useTranslation()
   const { templateVersionStore } = useMst()
-  const { publiclyPreviewableTemplateVersions } = templateVersionStore
+  const { standardizationPreviewPublishedTemplateVersions, standardizationPreviewPubliclyPreviewableTemplateVersions } =
+    templateVersionStore
 
   useEffect(() => {
-    templateVersionStore.fetchPubliclyPreviewableTemplateVersions()
+    templateVersionStore.fetchStandardizationPreviewTemplateVersions()
   }, [templateVersionStore])
 
   // safeReference returns undefined entries if the target was removed; filter them out.
-  const templateVersions = publiclyPreviewableTemplateVersions.filter(Boolean) as ITemplateVersion[]
-
-  const availableForAdoption = templateVersions.filter((tv) => tv.isAvailableForAdoption)
-  const underDevelopment = templateVersions.filter((tv) => !tv.isAvailableForAdoption)
+  const availableForAdoption = standardizationPreviewPublishedTemplateVersions.filter(Boolean) as ITemplateVersion[]
+  const underDevelopment = standardizationPreviewPubliclyPreviewableTemplateVersions.filter(
+    Boolean
+  ) as ITemplateVersion[]
 
   const renderTemplateGrid = (templates: ITemplateVersion[]) => {
     const groupedTemplates = groupTemplateVersionsByCategory(templates)
