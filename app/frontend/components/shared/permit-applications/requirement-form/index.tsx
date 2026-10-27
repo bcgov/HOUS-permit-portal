@@ -430,14 +430,14 @@ export const RequirementForm = observer(
               status={EFlashMessageStatus.warning}
             />
           )}
-          {permitApplication?.isEphemeral && (
+          {permitApplication?.isEphemeral && permitApplication.templateVersion?.isDraft && (
             <CustomMessageBox
               title={t("templateVersionPreview.earlyAccessTitle")}
               description={t("templateVersionPreview.earlyAccessDescription")}
               status={EFlashMessageStatus.warning}
             />
           )}
-          {!inboxEnabled && !sandbox && (
+          {!permitApplication?.isEphemeral && !inboxEnabled && !sandbox && (
             <CustomMessageBox
               title={t("permitApplication.show.inboxDisabledTitle")}
               description={t("permitApplication.show.inboxDisabled")}
