@@ -105,7 +105,7 @@ class VirusScanService
     end
   rescue Errno::ECONNREFUSED, Errno::ETIMEDOUT, Errno::EHOSTUNREACH => e
     raise ScanError, "Cannot connect to ClamAV daemon: #{e.message}"
-  rescue IOError, SocketError => e
+  rescue IOError, SocketError, Errno::EPIPE, Errno::ECONNRESET => e
     raise ScanError, "Communication error with ClamAV: #{e.message}"
   end
 
@@ -125,48 +125,35 @@ class VirusScanService
     raise ScanError, "Failed to download file for scanning: #{e.message}"
   end
 
+  # One-shot INSTREAM. ClamAV::Client opens an IDSESSION and never closes it,
+  # and its reader does `buffer << socket.getc`, which raises TypeError when
+  # clamd closes the socket before a newline.
   def scan_with_clamav(temp_file)
-    client = build_clamav_client
+    socket = open_clamav_socket
+    begin
+      socket.write("nINSTREAM\n")
+      while (chunk = temp_file.read(16 * 1024))
+        socket.write([chunk.bytesize].pack("N"))
+        socket.write(chunk)
+      end
+      socket.write("\x00\x00\x00\x00")
 
-    # Use INSTREAM command to stream file content to ClamAV
-    # This avoids needing the file to be on the ClamAV server's filesystem
-    response = client.execute(ClamAV::Commands::InstreamCommand.new(temp_file))
+      response = socket.gets
+      if response.nil?
+        raise ScanError, "ClamAV closed the connection before sending a result"
+      end
 
-    parse_scan_response(response)
-  end
-
-  def build_clamav_client
-    # Create TCP socket connection to ClamAV daemon
-    socket = TCPSocket.new(::CLAMAV_CONFIG[:host], ::CLAMAV_CONFIG[:port])
-
-    # Build connection with the TCP socket
-    connection =
-      ClamAV::Connection.new(
-        socket: socket,
-        wrapper: ClamAV::Wrappers::NewLineWrapper.new
-      )
-
-    # Create client with the TCP connection
-    ClamAV::Client.new(connection)
-  end
-
-  def parse_scan_response(response)
-    # clamav-client gem returns response objects:
-    # - ClamAV::SuccessResponse for clean files
-    # - ClamAV::VirusResponse for infected files
-    # - ClamAV::ErrorResponse for errors
-
-    case response
-    when ClamAV::SuccessResponse
-      { infected: false, virus_name: nil }
-    when ClamAV::VirusResponse
-      { infected: true, virus_name: response.virus_name }
-    when ClamAV::ErrorResponse
-      raise ScanError, "ClamAV error: #{response.error_str}"
-    else
-      # Fallback to string parsing for unexpected response types
-      parse_string_response(response.to_s)
+      parse_string_response(response)
+    ensure
+      socket.close
     end
+  end
+
+  def open_clamav_socket
+    socket = TCPSocket.new(::CLAMAV_CONFIG[:host], ::CLAMAV_CONFIG[:port])
+    socket.binmode
+    socket.timeout = ::CLAMAV_CONFIG[:timeout] if ::CLAMAV_CONFIG[:timeout]
+    socket
   end
 
   def parse_string_response(response_text)

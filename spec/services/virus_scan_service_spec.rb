@@ -1,4 +1,5 @@
 require "rails_helper"
+require "socket"
 
 RSpec.describe VirusScanService do
   let(:shrine_file) do
@@ -11,35 +12,24 @@ RSpec.describe VirusScanService do
     allow(Rails.logger).to receive(:info)
     allow(Rails.logger).to receive(:warn)
     allow(Rails.logger).to receive(:error)
-
-    # If clamav-client is not loaded in this test environment, define minimal constants.
-    unless defined?(ClamAV::SuccessResponse)
-      module ::ClamAV
-        module Commands
-          class InstreamCommand
-            def initialize(_io)
-            end
-          end
-        end
-        class SuccessResponse
-        end
-        class VirusResponse
-          def initialize(name = "Eicar-Test-Signature")
-            @name = name
-          end
-          def virus_name = @name
-        end
-        class ErrorResponse
-          def initialize(error_str = "bad")
-            @error_str = error_str
-          end
-          def error_str = @error_str
-        end
-      end
-    end
+    allow(shrine_file).to receive(:open).and_yield(StringIO.new("data"))
   end
 
   subject(:service) { described_class.new(shrine_file) }
+
+  def with_clamav
+    server = TCPServer.new("127.0.0.1", 0)
+    stub_const("CLAMAV_CONFIG", { host: "127.0.0.1", port: server.addr[1] })
+    yield server
+  ensure
+    server&.close
+  end
+
+  def read_instream(client)
+    buf = +""
+    buf << client.readpartial(4096) until buf.include?("\x00\x00\x00\x00")
+    buf
+  end
 
   describe "#scan!" do
     it "raises NotEnabledError when clamav is disabled" do
@@ -48,31 +38,47 @@ RSpec.describe VirusScanService do
     end
 
     it "returns true for clean file" do
-      allow(shrine_file).to receive(:open).and_yield(StringIO.new("data"))
-      client = instance_double("ClamAVClient")
-      ok_resp = ClamAV::SuccessResponse.allocate
-      allow(client).to receive(:execute).and_return(ok_resp)
-      allow(service).to receive(:build_clamav_client).and_return(client)
+      with_clamav do |server|
+        Thread.new do
+          client = server.accept
+          read_instream(client)
+          client.write("stream: OK\n")
+          client.close
+        end
 
-      expect(service.scan!).to eq(true)
+        expect(service.scan!).to eq(true)
+      end
       expect(Rails.logger).to have_received(:info).with(/File clean/)
     end
 
     it "raises InfectedFileError for infected file with virus name and file id" do
-      allow(shrine_file).to receive(:open).and_yield(StringIO.new("data"))
-      client = instance_double("ClamAVClient")
-      virus_resp = ClamAV::VirusResponse.allocate
-      allow(virus_resp).to receive(:virus_name).and_return("BadVirus")
-      allow(client).to receive(:execute).and_return(virus_resp)
-      allow(service).to receive(:build_clamav_client).and_return(client)
+      with_clamav do |server|
+        Thread.new do
+          client = server.accept
+          read_instream(client)
+          client.write("stream: BadVirus FOUND\n")
+          client.close
+        end
 
-      expect { service.scan! }.to raise_error(
-        VirusScanService::InfectedFileError
-      ) { |e|
-        expect(e.virus_name).to eq("BadVirus")
-        expect(e.file_id).to eq("file.pdf")
-      }
+        expect { service.scan! }.to raise_error(
+          VirusScanService::InfectedFileError
+        ) { |e|
+          expect(e.virus_name).to eq("BadVirus")
+          expect(e.file_id).to eq("file.pdf")
+        }
+      end
       expect(Rails.logger).to have_received(:warn).with(/Virus detected/)
+    end
+
+    it "raises ScanError when ClamAV closes the connection" do
+      with_clamav do |server|
+        Thread.new do
+          client = server.accept
+          client.close
+        end
+
+        expect { service.scan! }.to raise_error(VirusScanService::ScanError)
+      end
     end
   end
 

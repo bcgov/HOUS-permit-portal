@@ -2,7 +2,7 @@
 
 # ClamAV virus scanning configuration
 #
-# ClamAV is accessed via TCP socket using the clamav-client gem.
+# ClamAV is accessed via a one-shot INSTREAM TCP command.
 # The daemon should be running and accessible at the configured host/port.
 #
 # Environment variables:
