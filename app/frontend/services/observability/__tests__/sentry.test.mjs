@@ -28,6 +28,7 @@ const result = await build({
 const output = (Array.isArray(result) ? result[0] : result).output.find((item) => item.type === "chunk")
 const {
   sanitizeEvent,
+  redactDescription,
   feedbackArea,
   eligibleCrash,
   FeedbackController,
@@ -43,7 +44,7 @@ const exception = {
   values: [
     {
       type: "TypeError",
-      value: "private-payload",
+      value: "Cannot load form: password=private-payload",
       mechanism: { handled: false },
       stacktrace: {
         frames: [
@@ -168,7 +169,7 @@ test("SDK scopes and per-event feedback tags retain only approved outgoing data"
     "person@example.com",
     "Authorization",
     "context_line",
-    "signed.invalid",
+
     "192.0.2.1",
     "555 0100",
     "feedback_route",
@@ -239,6 +240,117 @@ test("the final filter never preserves raw identifiers or unsafe route metadata"
     const event = sanitizeEvent({ event_id: "a".repeat(32), tags: { route }, exception }, origin)
     assert.equal(event.transaction, "/[unknown]")
   }
+})
+
+test("messages preserve diagnostics with targeted personal data redaction", () => {
+  for (const message of [
+    "Cannot read properties of undefined (reading 'permitApplication')",
+    "Cannot set properties of null (setting 'value')",
+    "store.fetch is not a function",
+    "permitApplication is not defined",
+    "Failed to fetch",
+    "Maximum call stack size exceeded",
+  ])
+    assert.equal(redactDescription(message), message)
+  assert.equal(
+    redactDescription("Unexpected token < in JSON: person@example.com"),
+    "Unexpected token < in JSON: [Filtered email]"
+  )
+  assert.equal(
+    redactDescription("Cannot render unsupported permit version"),
+    "Cannot render unsupported permit version"
+  )
+  assert.equal(
+    redactDescription('name="Derek Example" person@example.com password=secret https://signed.invalid/?token=secret'),
+    "name=[Filtered] [Filtered email] password=[Filtered] https://signed.invalid/"
+  )
+})
+
+test("native diagnostics survive while known names and private containers are scrubbed", () => {
+  const event = {
+    event_id: "a".repeat(32),
+    release: "hous-permit-portal@123456789abcdef",
+    sdk: { name: "sentry.javascript.react", version: "11.8.0" },
+    user: { id, name: "Quinn Redwood", email: "person@example.com" },
+    tags: { role: "reviewer" },
+    contexts: { privacy: { names: ["Quinn", "Redwood"] }, browser: { name: "Chrome", version: "142" } },
+    extra: { formAnswers: "private-payload" },
+    request: { headers: { Authorization: "private-payload" } },
+    exception: {
+      values: [
+        {
+          type: "TypeError",
+          value: "Cannot deliver reminder to Quinn Redwood person@example.com",
+          mechanism: { type: "auto.browser.global_handlers.onerror", handled: false },
+          stacktrace: {
+            frames: [
+              {
+                filename: origin + "/vite/assets/application-1234567890.js?token=secret",
+                function: "Object.send (async)",
+                lineno: 38,
+                vars: { name: "Quinn Redwood" },
+              },
+            ],
+          },
+        },
+      ],
+    },
+    debug_meta: {
+      images: [{ type: "sourcemap", debug_id: id, code_file: origin + "/vite/assets/application-1234567890.js" }],
+    },
+  }
+  const clean = sanitizeEvent(event, origin)
+  assert.equal(clean.sdk.name, event.sdk.name)
+  assert.equal(clean.contexts.browser.name, "Chrome")
+  assert.equal(clean.exception.values[0].mechanism.handled, false)
+  assert.equal(
+    clean.exception.values[0].stacktrace.frames[0].filename,
+    origin + "/vite/assets/application-1234567890.js"
+  )
+  assert.deepEqual(clean.debug_meta, event.debug_meta)
+  assert.equal(clean.release, event.release)
+  assert.equal(
+    clean.exception.values[0].value,
+    "Cannot deliver reminder to [Filtered name] [Filtered name] [Filtered email]"
+  )
+  for (const forbidden of ["Quinn", "Redwood", "person@example.com", "private-payload", "token=secret", '"privacy"'])
+    assert.equal(JSON.stringify(clean).includes(forbidden), false, forbidden)
+  assert.equal(event.exception.values[0].value.includes("Quinn"), true)
+  assert.equal(redactDescription("Mayfly failed for May", ["May"]), "Mayfly failed for [Filtered name]")
+  assert.equal(redactDescription("Failed for Quinn (Redwood)", ["Quinn (Redwood)"]), "Failed for [Filtered name]")
+})
+
+test("error envelopes retain safe diagnostics, generated functions and omit missing stacks", () => {
+  const event = sanitizeEvent(
+    {
+      event_id: "a".repeat(32),
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: "store.fetch is not a function",
+            stacktrace: {
+              frames: [
+                {
+                  filename: origin + "/vite/assets/application-abc.js?token=secret",
+                  function: "Object.fetch (async)",
+                  lineno: 12,
+                  vars: { private: "private-payload" },
+                },
+              ],
+            },
+          },
+          { type: "Error", value: "person@example.com" },
+        ],
+      },
+    },
+    origin
+  )
+  assert.equal(event.exception.values[0].value, "store.fetch is not a function")
+  assert.equal(event.exception.values[0].stacktrace.frames[0].function, "Object.fetch (async)")
+  assert.equal("stacktrace" in event.exception.values[1], false)
+  for (const forbidden of ["person@example.com", "secret", "private-payload"])
+    assert.equal(JSON.stringify(event).includes(forbidden), false)
 })
 
 test("native scopes retain capture-time identity, route and debug IDs across delayed processors", async (t) => {

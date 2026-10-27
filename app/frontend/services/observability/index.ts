@@ -52,9 +52,10 @@ export function initializeSentry() {
   })
 }
 
-export function setSentryUser(user?: { id: string; role: string }) {
+export function setSentryUser(user?: { id: string; role: string; firstName?: string; lastName?: string }) {
   if (Sentry.getIsolationScope().getUser().id !== user?.id) feedbackController.close()
   Sentry.setUser(user ? { id: user.id } : null)
+  Sentry.setContext("privacy", user ? { names: [user.firstName, user.lastName].filter(Boolean) } : null)
   Sentry.setTag("role", user?.role)
 }
 
@@ -64,12 +65,15 @@ export function observeSentryUser(rootStore: any) {
       const session = rootStore.sessionStore
       const user =
         session.loggedIn && !session.tokenExpired && !session.isLoggingOut ? rootStore.userStore.currentUser : undefined
-      return { id: user?.id, role: user?.role }
+      return { id: user?.id, role: user?.role, firstName: user?.firstName, lastName: user?.lastName }
     },
-    ({ id, role }) => {
-      const user = uuid.test(id ?? "") && roles.includes(role) ? { id, role } : undefined
+    ({ id, role, firstName, lastName }) => {
+      const user = uuid.test(id ?? "") && roles.includes(role) ? { id, role, firstName, lastName } : undefined
       if (Sentry.isInitialized()) setSentryUser(user)
     },
-    { fireImmediately: true, equals: (a, b) => a.id === b.id && a.role === b.role }
+    {
+      fireImmediately: true,
+      equals: (a, b) => a.id === b.id && a.role === b.role && a.firstName === b.firstName && a.lastName === b.lastName,
+    }
   )
 }

@@ -21,91 +21,141 @@ module BphSentry
       { id: user.id.to_s }
     end
 
-    # A new payload is constructed rather than recursively scrubbing arbitrary application data.
-    def payload(event)
-      data = event.to_h
-      values = data.dig(:exception, :values)
-      unless event.is_a?(Sentry::ErrorEvent) && values.is_a?(Array) &&
-               values.any?
-        return nil
+    # Use the native SDK event so stack traces, mechanisms and grouping stay intact.
+    def scrub(event)
+      unless event.is_a?(Sentry::ErrorEvent) && event.exception&.values&.any?
+        return
       end
 
-      tags = data[:tags] || {}
-      clean_tags = {}
-      sidekiq = data.dig(:contexts, :sidekiq)
-      component = sidekiq ? "worker" : (tags[:component] || tags["component"])
-      clean_tags[:component] = component if COMPONENTS.include?(component)
-      role = component == "web" ? (tags[:role] || tags["role"]) : nil
-      clean_tags[:role] = role if ROLES.include?(role)
-      route = component == "web" ? (tags[:route] || tags["route"]) : nil
-      clean_tags[:route] = route if route.to_s.match?(%r{\A[a-z_/]+#[a-z_]+\z})
-      job_class =
-        sidekiq&.dig(:job, "class") || sidekiq&.dig("class") ||
-          tags[:job_class] || tags["job_class"]
-      clean_tags[:job_class] = job_class if job_class.to_s.match?(
-        /\A[A-Z][A-Za-z0-9_:]*Job\z/
-      )
-
-      user = data[:user] || {}
-      id = user[:id] || user["id"]
-      clean_user = component == "web" && UUID.match?(id.to_s) ? { id: id } : {}
-      {
-        type: "event",
-        event_id: data[:event_id],
-        timestamp: data[:timestamp],
-        platform: :ruby,
-        level: :error,
-        environment: data[:environment],
-        release: data[:release],
-        sdk: {
-          name: "sentry.ruby",
-          version: Sentry::VERSION,
-          settings: {
-            infer_ip: "never"
-          }
-        },
-        tags: clean_tags,
-        user: clean_user,
-        exception: {
-          values:
-            values.map do |value|
-              {
-                type: identifier(value[:type]),
-                value: "[Filtered]",
-                stacktrace: {
-                  frames:
-                    Array(value.dig(:stacktrace, :frames)).map do |frame|
-                      clean_frame(frame)
-                    end
-                }
-              }
-            end
-        }
-      }
+      privacy =
+        event.contexts.delete(:privacy) || event.contexts.delete("privacy") ||
+          {}
+      names = Array(privacy[:names] || privacy["names"])
+      sidekiq =
+        event.contexts.delete(:sidekiq) || event.contexts.delete("sidekiq")
+      if sidekiq
+        event.tags[:component] = "worker"
+        event.tags[:job_class] = sidekiq.dig(:job, "class") ||
+          sidekiq["class"] || sidekiq[:class]
+      end
+      if event.tags[:component] != "web"
+        event.user = {}
+        event.tags.delete(:role)
+        event.tags.delete(:route)
+      else
+        event.user = event.user.slice(:id)
+      end
+      event.extra = {}
+      event.breadcrumbs = nil
+      event.attachments = []
+      event.dynamic_sampling_context = nil
+      if event.request
+        event.transaction =
+          event.tags[:route] ||
+            (event.transaction unless event.transaction.to_s.start_with?("/"))
+        %i[data cookies headers env query_string url].each do |key|
+          event.request.public_send("#{key}=", nil)
+        end
+      end
+      event.tags = scrub_value(event.tags, names)
+      event.contexts = scrub_value(event.contexts, names)
+      event.message = scrub_text(event.message, names)
+      event.exception.values.each do |exception|
+        exception.value = scrub_text(exception.value, names)
+        exception.stacktrace&.frames&.each do |frame|
+          frame.vars = nil
+          frame.pre_context = frame.post_context = frame.context_line = nil
+          frame.filename = scrub_text(frame.filename, names, identifier: true)
+          frame.abs_path = scrub_text(frame.abs_path, names, identifier: true)
+          frame.function = scrub_text(frame.function, names, identifier: true)
+        end
+      end
+      event.sdk = event.sdk.merge(settings: { infer_ip: "never" })
+      event
     rescue StandardError
       nil
     end
 
-    def identifier(value)
-      if value.to_s.match?(/\A[A-Za-z_$][A-Za-z0-9_$:.!?<>=# -]{0,200}\z/)
-        value.to_s
+    def scrub_value(value, names = [], context = nil)
+      case value
+      when Hash
+        value.each_with_object({}) do |(key, item), clean|
+          if !(
+               key.to_s == "name" &&
+                 %w[browser os runtime device].include?(context.to_s)
+             ) &&
+               key.to_s.match?(
+                 /\A(?:password|secret|token|authorization|api[_-]?key|email|name|first[_-]?name|last[_-]?name|full[_-]?name|ip_address|ip|args|arguments|params|parameters|binds|body|data|cookies|headers|vars|answers|snapshot)\z/i
+               )
+            next
+          end
+          clean[key] = if key.to_s.match?(
+               /\A(?:id|event_id|trace_id|span_id|parent_span_id|release|version)\z/
+             )
+            item
+          else
+            scrub_value(item, names, key)
+          end
+        end
+      when Array
+        value.map { |item| scrub_value(item, names) }
+      when String
+        scrub_text(value, names)
       else
-        "Error"
+        value
       end
     end
 
-    def clean_frame(frame)
-      filename = frame[:filename].to_s.split(/[?#]/).first.to_s
-      filename = filename.sub(%r{\A.*?/(app|lib|config)/}, '\1/')
-      filename = "[external]" unless filename.match?(
-        %r{\A(?:app|lib|config)/[A-Za-z0-9_./-]+\.rb\z}
-      )
-      {
-        filename: filename,
-        function: identifier(frame[:function]),
-        lineno: frame[:lineno].is_a?(Integer) ? frame[:lineno] : nil,
-        in_app: frame[:in_app] == true
-      }.compact
+    def scrub_text(value, names = [], identifier: false)
+      return value unless value.is_a?(String)
+      sql =
+        value.match?(/\b(?:SELECT|INSERT|UPDATE|DELETE)\b|(?:ERROR|DETAIL):/i)
+      text =
+        value
+          .gsub(%r{https?://[^\s"'<>]+}i) do |url|
+            url.sub(%r{(://)[^/@]+@}, '\\1[Filtered]@').split(/[?#]/).first
+          end
+          .gsub(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i, "[Filtered email]")
+          .gsub(
+            /\b(?:Bearer\s+\S+|sntrys_\S+|eyJ[A-Za-z0-9_.+-]+)\b/i,
+            "[Filtered credential]"
+          )
+          .gsub(
+            /\b(password|secret|token|api[_ -]?key|first[_-]?name|last[_-]?name|full[_-]?name|name)["']?\s*[:=]\s*(?:"[^"]*"|'[^']*'|[^\s,;]+)/i
+          ) do |match|
+            if sql && match.match?(/[:=]\s*(?:\$\d+|\?|:\w+)\z/)
+              match
+            else
+              "#{Regexp.last_match(1)}=[Filtered]"
+            end
+          end
+      unless identifier
+        text =
+          text.gsub(/\b\d{1,3}(?:\.\d{1,3}){3}\b/, "[Filtered IP]").gsub(
+            /(?:\+?\d[\d ().-]{7,}\d)/,
+            "[Filtered number]"
+          )
+      end
+      names
+        .compact
+        .uniq
+        .sort_by { |name| -name.length }
+        .each do |name|
+          text =
+            text.gsub(
+              /(?<![[:alnum:]])#{Regexp.escape(name)}(?![[:alnum:]])/i,
+              "[Filtered name]"
+            ) unless name.empty?
+        end
+      # SQL identifiers and placeholders stay useful; literal values and row details do not.
+      if sql
+        text =
+          text.gsub(/'(?:[^']|'')*'/, "'[Filtered]'").gsub(
+            /^(\s*DETAIL:).*$/i,
+            '\\1 [Filtered]'
+          )
+      end
+      text
     end
   end
 end
