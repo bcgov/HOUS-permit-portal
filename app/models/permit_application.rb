@@ -115,7 +115,7 @@ class PermitApplication < ApplicationRecord
   scope :unviewed,
         -> do
           where(status: submitted_statuses, viewed_at: nil).order(
-            submitted_at: :asc
+            created_at: :asc
           )
         end
 

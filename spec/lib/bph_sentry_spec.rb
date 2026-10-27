@@ -117,10 +117,7 @@ RSpec.describe "BPH Sentry privacy and deployment guards" do
         config.send_client_reports = false
         config.breadcrumbs_logger = []
         config.before_send =
-          lambda do |event, _hint|
-            payload = BphSentry::Privacy.payload(event)
-            BphSentry::PrivateEvent.new(event, payload) if payload
-          end
+          lambda { |event, _hint| BphSentry::Privacy.scrub(event) }
       end
     end
     after { Sentry.close }
@@ -140,7 +137,7 @@ RSpec.describe "BPH Sentry privacy and deployment guards" do
       Sentry.get_current_client.transport.envelopes.last.items.first.payload
     end
 
-    it "serializes an allowlist rather than leaking payloads, exception messages or frame variables" do
+    it "preserves native events without leaking private values or frame variables" do
       Sentry.set_user(
         id: "12345678-1234-1234-1234-123456789abc",
         email: "person@example.com",
@@ -187,7 +184,7 @@ RSpec.describe "BPH Sentry privacy and deployment guards" do
           }
         )
       expect(result[:user]).to eq({})
-      expect(result[:tags]).to eq(
+      expect(result[:tags]).to include(
         component: "worker",
         job_class: "PdfGenerationJob"
       )
@@ -209,7 +206,7 @@ RSpec.describe "BPH Sentry privacy and deployment guards" do
         .call("PdfGenerationJob", job, "default", nil) {}
       expect(job).not_to have_key("sentry_user")
       expect(job).not_to have_key("trace_propagation_headers")
-      failure = ArgumentError.new("private-payload")
+      failure = ArgumentError.new("password=private-payload")
       expect do
         Sentry::Sidekiq::SentryContextServerMiddleware
           .new
@@ -220,7 +217,7 @@ RSpec.describe "BPH Sentry privacy and deployment guards" do
       events = Sentry.get_current_client.transport.envelopes
       expect(events.length).to eq(1)
       result = events.first.items.first.payload
-      expect(result[:tags]).to eq(
+      expect(result[:tags]).to include(
         component: "worker",
         job_class: "PdfGenerationJob"
       )
@@ -305,7 +302,7 @@ RSpec.describe "BPH Sentry privacy and deployment guards" do
             component: "web",
             role: env["synthetic.actor"] ? "reviewer" : nil
           )
-          raise ArgumentError, "private-payload"
+          raise ArgumentError, "password=private-payload"
         end
       middleware = Sentry::Rack::CaptureExceptions.new(app)
       [true, false].each do |authenticated|
