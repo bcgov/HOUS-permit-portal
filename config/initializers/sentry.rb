@@ -32,8 +32,7 @@ if settings.backend_enabled?
     config.before_send =
       lambda do |event, _hint|
         event.tags[:component] = component
-        payload = BphSentry::Privacy.payload(event)
-        BphSentry::PrivateEvent.new(event, payload) if payload
+        BphSentry::Privacy.scrub(event)
       end
   end
 end

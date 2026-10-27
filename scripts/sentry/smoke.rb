@@ -24,11 +24,7 @@ Sentry.init do |config|
   config.data_collection.user_info = false
   config.data_collection.stack_frame_variables = false
   config.data_collection.frame_context_lines = 0
-  config.before_send =
-    lambda do |event, _hint|
-      payload = BphSentry::Privacy.payload(event)
-      BphSentry::PrivateEvent.new(event, payload) if payload
-    end
+  config.before_send = lambda { |event, _hint| BphSentry::Privacy.scrub(event) }
 end
 Sentry.set_tags(component: "smoke")
 begin

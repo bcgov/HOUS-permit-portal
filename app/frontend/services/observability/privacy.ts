@@ -1,5 +1,5 @@
 // Only telemetry copies pass through this module. Never transform saved form data.
-import { SDK_VERSION, type Transport } from "@sentry/core"
+import { type Transport } from "@sentry/core"
 
 export const roles = [
   "submitter",
@@ -40,103 +40,88 @@ function routeTemplate(value: unknown): string {
     : "/[unknown]"
 }
 
-const identifier = (value: unknown) =>
-  typeof value === "string" && /^[A-Za-z_$][A-Za-z0-9_$:.!?<>=# -]{0,200}$/.test(value) ? value : "Error"
-
-export function redactDescription(value: string): string {
-  return value
-    .replace(/https?:\/\/\S+/gi, "[Filtered URL]")
+export function redactDescription(value: string, names: string[] = [], identifier = false): string {
+  const sql = /\b(?:SELECT|INSERT|UPDATE|DELETE)\b|(?:ERROR|DETAIL):/i.test(value)
+  let text = value
+    .replace(/https?:\/\/[^\s"'<>]+/gi, (url) => url.replace(/(:\/\/)[^/@]+@/, "$1[Filtered]@").split(/[?#]/)[0])
     .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, "[Filtered email]")
     .replace(/\b(?:Bearer\s+\S+|sntrys_\S+|eyJ[A-Za-z0-9_.+-]+)\b/gi, "[Filtered credential]")
-    .replace(/\b(password|secret|token|api[_ -]?key)\s*[:=]\s*[^\s,;]+/gi, "$1=[Filtered]")
-    .replace(/(?:\+?\d[\d ().-]{7,}\d)/g, "[Filtered number]")
+    .replace(
+      /\b(password|secret|token|api[_ -]?key|first[_-]?name|last[_-]?name|full[_-]?name|name)["']?\s*[:=]\s*(?:"[^"]*"|'[^']*'|[^\s,;]+)/gi,
+      (match, field) => (sql && /[:=]\s*(?:\$\d+|\?|:\w+)$/.test(match) ? match : `${field}=[Filtered]`)
+    )
+  if (!identifier)
+    text = text
+      .replace(/\b\d{1,3}(?:\.\d{1,3}){3}\b/g, "[Filtered IP]")
+      .replace(/(?:\+?\d[\d ().-]{7,}\d)/g, "[Filtered number]")
+  for (const name of [...new Set(names)].filter(Boolean).sort((a, b) => b.length - a.length)) {
+    const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+    text = text.replace(new RegExp(`(?<![\\p{L}\\p{N}])${escaped}(?![\\p{L}\\p{N}])`, "giu"), "[Filtered name]")
+  }
+  if (sql) {
+    text = text.replace(/'(?:[^']|'')*'/g, "'[Filtered]'").replace(/^(\s*DETAIL:).*$/gim, "$1 [Filtered]")
+  }
+  return text
 }
 
-function frame(value: any) {
-  const filename = String(value.filename ?? "").split(/[?#]/)[0]
-  // Keep emitted asset paths for debug-ID matching; never preserve arbitrary document URLs.
-  const asset = filename.match(/(?:^|\/)(?:vite\/)?assets\/[A-Za-z0-9_./-]+\.m?js$/)?.[0]
-  const source = filename.match(/(?:^|\/)(?:app\/frontend|src)\/[A-Za-z0-9_./-]+\.[cm]?[jt]sx?$/)?.[0]
-  const clean: Record<string, unknown> = {
-    filename: asset || source || "[external]",
-    function: identifier(value.function),
-    in_app: value.in_app === true,
+const privateFields =
+  /^(password|secret|token|authorization|api[_-]?key|email|name|first[_-]?name|last[_-]?name|full[_-]?name|ip_address|ip|args|arguments|params|parameters|binds|body|data|cookies|headers|vars|pre_context|post_context|context_line|answers|snapshot)$/i
+const protocolFields = /^(id|event_id|associated_event_id|debug_id|trace_id|span_id|parent_span_id|release|version)$/
+
+function scrubValue(value: any, names: string[], key = ""): any {
+  if (typeof value === "string") {
+    if (protocolFields.test(key)) return value
+    return redactDescription(value, names, /^(filename|abs_path|code_file|function)$/.test(key))
   }
-  for (const key of ["lineno", "colno"]) if (Number.isInteger(value[key])) clean[key] = value[key]
-  if (typeof value.debug_id === "string" && uuid.test(value.debug_id)) clean.debug_id = value.debug_id
-  return clean
+  if (Array.isArray(value)) return value.map((item) => scrubValue(item, names))
+  if (value && typeof value === "object") {
+    if (key === "sdk") return value
+    return Object.fromEntries(
+      Object.entries(value)
+        .filter(
+          ([field]) =>
+            (field === "name" && ["browser", "os", "runtime", "device"].includes(key)) || !privateFields.test(field)
+        )
+        .filter(([field, item]: any) => field !== "stacktrace" || item?.frames?.length)
+        .map(([field, item]) => [field, scrubValue(item, names, field)])
+    )
+  }
+  return value
 }
 
 export function sanitizeEvent(event: any, origin: string): any | null {
   try {
     if (event.type !== undefined && event.type !== "feedback") return null
     if (event.exception?.values?.some((value: any) => value.mechanism?.type === "internal")) return null
-    if (!/^[a-f0-9]{32}$/.test(event.event_id ?? "")) return null
-    const tags = event.tags ?? {}
-    const clean: any = {
-      event_id: event.event_id,
-      timestamp: event.timestamp,
-      platform: "javascript",
-      level: event.type === "feedback" ? "info" : "error",
-      environment: event.environment,
-      release: event.release,
-      tags: { component: "web" },
-      sdk: { name: "sentry.javascript.react", version: SDK_VERSION, settings: { infer_ip: "never" } },
-    }
-    if (uuid.test(event.user?.id ?? "") && roles.includes(tags.role)) {
-      clean.user = { id: event.user.id }
-      clean.tags.role = tags.role
-    }
-    clean.transaction = routeTemplate(tags.route)
+    const names = event.contexts?.privacy?.names ?? []
+    const clean = structuredClone(event)
+    delete clean.extra
+    delete clean.request
+    delete clean.breadcrumbs
+    delete clean.contexts?.privacy
+    clean.tags = { ...clean.tags, component: "web" }
+    clean.user = uuid.test(event.user?.id ?? "") && roles.includes(event.tags?.role) ? { id: event.user.id } : undefined
+    clean.transaction = routeTemplate(event.tags?.route)
+    clean.sdk = { ...clean.sdk, settings: { ...clean.sdk?.settings, infer_ip: "never" } }
     if (event.type === "feedback") {
       const message = event.contexts?.feedback?.message
-      if (
-        !["drawer", "side_tab", "crash_prompt"].includes(tags.feedback_entrypoint) ||
-        !["template_preview", "jurisdiction_home", "general"].includes(tags.feedback_area) ||
-        typeof message !== "string" ||
-        !message.trim()
-      )
-        return null
-      const route = routeTemplate(tags.feedback_route)
+      if (!message?.trim()) return null
+      const route = routeTemplate(event.tags?.feedback_route)
       clean.transaction = route
-      clean.type = "feedback"
-      clean.tags.feedback_entrypoint = tags.feedback_entrypoint
-      clean.tags.feedback_area = tags.feedback_area
-      clean.contexts = {
-        feedback: {
-          message: redactDescription(message),
-          url: origin + route,
-        },
-      }
-      // createForm supports per-form tags but not associatedEventId. The private
-      // tag carries its immutable link; only the standard feedback field is sent.
-      const eventId = tags.feedback_error_id ?? event.contexts?.feedback?.associated_event_id
-      if (tags.feedback_entrypoint === "crash_prompt" && /^[a-f0-9]{32}$/.test(eventId ?? "")) {
+      clean.contexts.feedback = { message, url: origin + route }
+      const eventId = event.tags?.feedback_error_id ?? event.contexts?.feedback?.associated_event_id
+      if (event.tags?.feedback_entrypoint === "crash_prompt" && /^[a-f0-9]{32}$/.test(eventId ?? "")) {
         clean.contexts.feedback.associated_event_id = eventId
       }
     } else {
-      if (!Array.isArray(event.exception?.values) || !event.exception.values.length) return null
-      clean.exception = {
-        values: event.exception.values.map((value: any) => ({
-          type: identifier(value.type),
-          value: "[Filtered]",
-          stacktrace: { frames: (value.stacktrace?.frames ?? []).map(frame) },
-        })),
-      }
-      // Symbolication uses the debug ID, not the browser's original URL.
-      if (Array.isArray(event.debug_meta?.images)) {
-        clean.debug_meta = {
-          images: event.debug_meta.images
-            .filter((image: any) => image.type === "sourcemap" && uuid.test(image.debug_id))
-            .map((image: any) => ({
-              type: "sourcemap",
-              debug_id: image.debug_id,
-              code_file: frame({ filename: image.code_file }).filename,
-            })),
-        }
+      if (!event.exception?.values?.length) return null
+      for (const value of event.exception.values) {
+        if (value.stacktrace?.frames && !Array.isArray(value.stacktrace.frames)) return null
       }
     }
-    return clean
+    delete clean.tags.feedback_route
+    delete clean.tags.feedback_error_id
+    return scrubValue(clean, names)
   } catch {
     return null
   }

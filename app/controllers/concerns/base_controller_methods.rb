@@ -115,6 +115,10 @@ module BaseControllerMethods
 
     user = respond_to?(:current_user, true) ? current_user : nil
     Sentry.set_user(BphSentry::Privacy.user_context(user))
+    Sentry.set_context(
+      "privacy",
+      { names: [user&.first_name, user&.last_name, user&.name].compact }
+    )
     Sentry.set_tags(
       component: "web",
       route: "#{controller_path}##{action_name}",
