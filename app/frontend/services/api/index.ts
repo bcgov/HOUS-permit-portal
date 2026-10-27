@@ -1127,8 +1127,13 @@ export class Api {
     )
   }
 
-  async fetchPubliclyPreviewableTemplateVersions() {
-    return this.client.get<ApiResponse<ITemplateVersion[]>>(`/template_versions/publicly_previewable`)
+  async fetchStandardizationPreviewTemplateVersions() {
+    return this.client.get<
+      ApiResponse<{
+        publishedTemplateVersions: ITemplateVersion[]
+        publiclyPreviewableTemplateVersions: ITemplateVersion[]
+      }>
+    >(`/template_versions/standardization_preview`)
   }
 
   // ── Draft feedback API methods ──────────────────────────────────────

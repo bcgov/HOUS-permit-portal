@@ -1,14 +1,16 @@
 class Api::TemplateVersionsController < Api::ApplicationController
-  # Anonymous access is permitted for the public preview endpoints; the
-  # TemplateVersionPolicy#show? check still enforces that only publicly
-  # previewable drafts are actually visible without a signed-in user.
-  skip_before_action :authenticate_user!, only: %i[publicly_previewable show]
-  # `publicly_previewable` is a collection action that intentionally returns a
-  # hard-coded, non-sensitive filter (draft TVs flagged publicly previewable),
-  # so we bypass Pundit's verify_authorized / verify_policy_scoped hooks.
-  skip_after_action :verify_authorized, only: :publicly_previewable
-  skip_after_action :verify_policy_scoped, only: :publicly_previewable
-  before_action :set_template_version, except: %i[index publicly_previewable]
+  # Anonymous access is permitted for the public catalog and for show.
+  # TemplateVersionPolicy#show? still limits guests to a publicly previewable
+  # draft or a published version on a kept template.
+  skip_before_action :authenticate_user!, only: %i[standardization_preview show]
+
+  # `standardization_preview` is a collection action with a fixed, non-sensitive
+  # filter (published versions on kept templates, plus flagged drafts), so we
+  # bypass Pundit's verify_authorized / verify_policy_scoped hooks.
+  skip_after_action :verify_authorized, only: :standardization_preview
+
+  skip_after_action :verify_policy_scoped, only: :standardization_preview
+  before_action :set_template_version, except: %i[index standardization_preview]
 
   before_action :set_jurisdiction_template_version_customization,
                 only: %i[
@@ -23,10 +25,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
   def index
     status = template_version_params[:status] || "published"
     @template_versions =
-      policy_scope(TemplateVersion)
-        .joins(:requirement_template)
-        .left_joins(requirement_template: :template_category)
-        .includes(requirement_template: :template_category)
+      catalog_scope(policy_scope(TemplateVersion))
         .where(status:)
         .then do |scope|
           if template_version_params.key?(:publicly_previewable)
@@ -56,26 +55,20 @@ class Api::TemplateVersionsController < Api::ApplicationController
                    }
   end
 
-  # Public landing-page endpoint: returns the set of draft TemplateVersions
-  # marked as publicly previewable, for the /standardization-preview page.
-  def publicly_previewable
-    @template_versions =
-      TemplateVersion
-        .where(publicly_previewable: true, status: :draft)
-        .joins(:requirement_template)
-        .left_joins(requirement_template: :template_category)
-        .includes(requirement_template: :template_category)
-        .where(requirement_templates: { discarded_at: nil })
-        .order(template_category_order_sql)
-
-    render_success @template_versions,
-                   nil,
-                   {
-                     blueprint: TemplateVersionBlueprint,
-                     blueprint_opts: {
-                       view: :standardization_preview
-                     }
-                   }
+  # Public landing-page endpoint for /standardization-preview. The two keys
+  # are the two sections: live published versions, and drafts flagged for
+  # public preview.
+  def standardization_preview
+    render_success(
+      {
+        published_template_versions:
+          standardization_preview_json(TemplateVersion.published),
+        publicly_previewable_template_versions:
+          standardization_preview_json(
+            TemplateVersion.draft.where(publicly_previewable: true)
+          )
+      }
+    )
   end
 
   def show
@@ -502,6 +495,23 @@ class Api::TemplateVersionsController < Api::ApplicationController
     ActiveModel::Type::Boolean.new.cast(
       template_version_params[:publicly_previewable]
     )
+  end
+
+  def standardization_preview_json(scope)
+    TemplateVersionBlueprint.render_as_hash(
+      catalog_scope(scope).order(template_category_order_sql),
+      view: :standardization_preview
+    )
+  end
+
+  # Joins the owning template and category, and drops discarded templates.
+  # Index passes a policy scope; the public catalog passes a status scope.
+  def catalog_scope(scope)
+    scope
+      .joins(:requirement_template)
+      .left_joins(requirement_template: :template_category)
+      .includes(requirement_template: :template_category)
+      .where(requirement_templates: { discarded_at: nil })
   end
 
   def template_category_order_sql

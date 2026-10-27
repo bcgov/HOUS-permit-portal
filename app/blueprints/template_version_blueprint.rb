@@ -95,8 +95,5 @@ class TemplateVersionBlueprint < Blueprinter::Base
   view :standardization_preview do
     field(:nickname) { |tv| tv.requirement_template&.nickname }
     field(:description) { |tv| tv.requirement_template&.description }
-    field(:is_available_for_adoption) do |tv|
-      tv.requirement_template&.published_template_version.present?
-    end
   end
 end

@@ -135,8 +135,8 @@ Rails.application.routes.draw do
     end
 
     resources :template_versions, only: %i[index show] do
-      get "publicly_previewable",
-          to: "template_versions#publicly_previewable",
+      get "standardization_preview",
+          to: "template_versions#standardization_preview",
           on: :collection
       get "compare_requirements",
           to: "template_versions#compare_requirements",
