@@ -64,7 +64,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
         .where(publicly_previewable: true, status: :draft)
         .joins(:requirement_template)
         .left_joins(requirement_template: :template_category)
-        .includes(requirement_template: :template_category)
+        .includes(requirement_template: %i[template_category explainer])
         .where(requirement_templates: { discarded_at: nil })
         .order(template_category_order_sql)
 
