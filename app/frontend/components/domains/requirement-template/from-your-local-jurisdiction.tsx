@@ -6,6 +6,8 @@ import { useTranslation } from "react-i18next"
 import { isTipTapEmpty } from "../../../utils/utility-functions"
 import { SafeTipTapDisplay } from "../../shared/editor/safe-tiptap-display"
 
+export const LOCAL_COMMUNITY_SECTION_ID = "local-community"
+
 export function FromYourLocalJurisdiction({
   html,
   updatedAt,
@@ -23,9 +25,11 @@ export function FromYourLocalJurisdiction({
   return (
     <Box
       as="section"
+      id={LOCAL_COMMUNITY_SECTION_ID}
       w="full"
       py={4}
       px={6}
+      scrollMarginTop="var(--app-navbar-height)"
       bg="theme.blueLight"
       borderLeft="4px solid"
       borderColor="theme.blue"
