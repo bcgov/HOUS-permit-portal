@@ -60,6 +60,11 @@ const StandardizationPreviewScreen = lazy(() =>
     default: module.StandardizationPreviewScreen,
   }))
 )
+const PermitApplicationInfoScreen = lazy(() =>
+  import("../requirement-template/screens/permit-application-info-screen").then((module) => ({
+    default: module.PermitApplicationInfoScreen,
+  }))
+)
 
 const ConfigurationManagementScreen = lazy(() =>
   import("../home/review-manager/configuration-management-screen").then((module) => ({
@@ -998,6 +1003,7 @@ const AppRoutes = observer(() => {
         <Route path="/videos/:videoId" element={<HelpVideoScreen />} />
         <Route path="/info-documents" element={<InfoDocumentsIndexScreen />} />
         <Route path="/standardization-preview" element={<StandardizationPreviewScreen />} />
+        <Route path="/permit-application-info/:requirementTemplateId" element={<PermitApplicationInfoScreen />} />
         <Route path="/template-versions/:templateVersionId/preview" element={<TemplateVersionPreviewScreen />} />
         <Route path="/project-readiness-tools" element={<ProjectReadinessToolsIndexScreen />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyScreen />} />
