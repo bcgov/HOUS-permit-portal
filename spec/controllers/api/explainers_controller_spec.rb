@@ -5,10 +5,84 @@ RSpec.describe Api::ExplainersController, type: :controller do
   let(:super_admin) { create(:user, :super_admin) }
 
   describe "GET #show" do
-    it "prevents anonymous users from reading the explainer" do
+    it "prevents anonymous users from reading a missing explainer" do
       get :show, params: { requirement_template_id: template.id }, format: :json
 
-      expect(response).to have_http_status(:unauthorized)
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it "prevents anonymous users from reading a draft explainer" do
+      create(
+        :explainer,
+        requirement_template: template,
+        introduction_html: "<p>Draft only</p>"
+      )
+
+      get :show, params: { requirement_template_id: template.id }, format: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(response.body).not_to include("Draft only")
+    end
+
+    it "allows anonymous users to read a published explainer" do
+      explainer = create(:explainer, :published, requirement_template: template)
+
+      get :show, params: { requirement_template_id: template.id }, format: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("data", "id")).to eq(explainer.id)
+      expect(json_response.dig("meta", "permit", "id")).to eq(template.id)
+      expect(json_response.dig("meta", "permit", "nickname")).to eq(
+        template.nickname
+      )
+      expect(json_response.dig("meta", "related_template_options")).to be_nil
+      expect(json_response.dig("meta", "jurisdiction_explainers")).to be_nil
+    end
+
+    it "includes download urls for published explainer documents" do
+      explainer = create(:explainer, :published, requirement_template: template)
+      explainer.documents.create!(file: TestData.cached_file_data)
+      allow_any_instance_of(ExplainerDocument).to receive(:file_url_safe).with(
+        disposition: "inline"
+      ).and_return("https://example.com/open.pdf")
+      allow_any_instance_of(ExplainerDocument).to receive(:file_url_safe).with(
+        disposition: "attachment"
+      ).and_return("https://example.com/download.pdf")
+
+      get :show, params: { requirement_template_id: template.id }, format: :json
+
+      document = json_response.dig("data", "documents").first
+      expect(document["file_url"]).to eq("https://example.com/open.pdf")
+      expect(document["download_url"]).to eq("https://example.com/download.pdf")
+    end
+
+    it "includes related permits that have a published explainer" do
+      related = create(:requirement_template, nickname: "Plumbing permit")
+      create(
+        :template_version,
+        requirement_template: related,
+        status: :published
+      )
+      create(:explainer, :published, requirement_template: related)
+      unpublished_related =
+        create(:requirement_template, nickname: "Gas permit")
+      create(
+        :template_version,
+        requirement_template: unpublished_related,
+        status: :published
+      )
+      explainer = create(:explainer, :published, requirement_template: template)
+      explainer.related_template_ids = [related.id, unpublished_related.id]
+      explainer.save!
+
+      get :show, params: { requirement_template_id: template.id }, format: :json
+
+      expect(json_response.dig("meta", "related_permits").pluck("id")).to eq(
+        [related.id]
+      )
+      expect(
+        json_response.dig("meta", "related_permits").first["nickname"]
+      ).to eq("Plumbing permit")
     end
 
     it "prevents non-super admins from reading the explainer" do

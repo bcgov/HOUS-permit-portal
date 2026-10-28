@@ -54,8 +54,15 @@ RSpec.describe Api::JurisdictionExplainersController, type: :controller do
       expect(response).to have_http_status(:forbidden)
     end
 
-    it "prevents a review manager from reading another jurisdiction" do
+    it "allows a review manager to read another jurisdiction once the page is published" do
       publish_explainer!
+      explainer =
+        create(
+          :jurisdiction_explainer,
+          :filled,
+          requirement_template: template,
+          jurisdiction: other_jurisdiction
+        )
       sign_in review_manager
 
       get :show,
@@ -64,6 +71,29 @@ RSpec.describe Api::JurisdictionExplainersController, type: :controller do
             jurisdiction_id: other_jurisdiction.id
           },
           format: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("data", "id")).to eq(explainer.id)
+    end
+
+    it "allows anonymous users to read published local context" do
+      publish_explainer!
+      explainer =
+        create(
+          :jurisdiction_explainer,
+          :filled,
+          requirement_template: template,
+          jurisdiction: jurisdiction
+        )
+
+      get :show, params: show_params, format: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("data", "id")).to eq(explainer.id)
+    end
+
+    it "prevents anonymous users from reading local context before the page is published" do
+      get :show, params: show_params, format: :json
 
       expect(response).to have_http_status(:forbidden)
     end
