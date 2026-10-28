@@ -7,6 +7,8 @@ import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
+import { ExplainerModel } from "../models/explainer"
+import { IExplainerLoadResult, IJurisdictionExplainerLoadResult } from "../models/jurisdiction-explainer"
 import { IRequirementTemplate, RequirementTemplateModel } from "../models/requirement-template"
 import { IRequirementTemplateUpdateParams } from "../types/api-request"
 import { ERequirementTemplateSortFields, ETagType } from "../types/enums"
@@ -127,6 +129,31 @@ export const RequirementTemplateStoreModel = types
       }
 
       return response.ok
+    }),
+
+    fetchExplainer: flow(function* (id: string) {
+      const { ok, data: response } = yield* toGenerator(self.environment.api.fetchExplainer(id))
+      if (!ok || !response?.data) return null
+
+      return {
+        explainer: ExplainerModel.create(response.data),
+        relatedTemplateOptions: response.meta?.relatedTemplateOptions ?? [],
+        jurisdictionExplainers: response.meta?.jurisdictionExplainers ?? [],
+        permit: response.meta?.permit ?? null,
+        relatedPermits: response.meta?.relatedPermits ?? [],
+      } as IExplainerLoadResult
+    }),
+
+    fetchJurisdictionExplainer: flow(function* (requirementTemplateId: string, jurisdictionId: string) {
+      const { ok, data: response } = yield* toGenerator(
+        self.environment.api.fetchJurisdictionExplainer(requirementTemplateId, jurisdictionId)
+      )
+      if (!ok || !response) return null
+
+      return {
+        localContextHtml: response.data?.localContextHtml ?? "",
+        updatedAt: response.data?.updatedAt ?? null,
+      } as IJurisdictionExplainerLoadResult
     }),
 
     createRequirementTemplate: flow(function* (formData: TCreateRequirementTemplateFormData) {

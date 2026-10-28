@@ -352,6 +352,8 @@ export const TemplateVersionModel = types
         explainer: response.data ? ExplainerModel.create(response.data) : null,
         relatedTemplateOptions: response.meta?.relatedTemplateOptions ?? [],
         jurisdictionExplainers: response.meta?.jurisdictionExplainers ?? [],
+        permit: response.meta?.permit ?? null,
+        relatedPermits: response.meta?.relatedPermits ?? [],
       }
     }),
     fetchJurisdictionExplainer: flow(function* (

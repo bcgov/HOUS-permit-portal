@@ -117,9 +117,17 @@ interface ITemplateVersionFeedback {
   resolvedBy?: IUser | null
 }
 
+export type TRelatedPermit = {
+  id: string
+  nickname: string | null
+  description: string | null
+}
+
 type TExplainerMeta = {
   relatedTemplateOptions?: IOption[]
   jurisdictionExplainers?: IJurisdictionExplainer[]
+  relatedPermits?: TRelatedPermit[]
+  permit?: { id: string; nickname: string | null; description: string | null }
 }
 
 export class Api {
