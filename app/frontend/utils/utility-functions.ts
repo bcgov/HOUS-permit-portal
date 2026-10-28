@@ -295,7 +295,8 @@ export function convertPhoneNumberToFormioFormat(phoneNumber: string): string {
   return `(${areaCode}) ${firstThree}-${lastFour}`
 }
 
-export function telHref(phone: string): string {
+export function telHref(phone?: string | null): string {
+  if (!phone) return ""
   const digits = phone.replace(/[^\d+]/g, "")
   return digits ? `tel:${digits}` : `tel:${phone}`
 }
@@ -307,7 +308,8 @@ export function isValidPhoneNumber(value?: string | null): boolean {
   return digits.length >= 7 && digits.length <= 15
 }
 
-export function mailtoHref(email: string): string {
+export function mailtoHref(email?: string | null): string {
+  if (!email) return ""
   return `mailto:${email.trim()}`
 }
 
