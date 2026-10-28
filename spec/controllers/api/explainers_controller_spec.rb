@@ -102,6 +102,7 @@ RSpec.describe Api::ExplainersController, type: :controller do
       expect(response).to have_http_status(:ok)
       expect(json_response.dig("data", "id")).to eq(explainer.id)
       expect(json_response.dig("meta", "jurisdiction_explainers")).to be_nil
+      expect(json_response.dig("meta", "related_template_options")).to be_nil
     end
 
     it "hides a draft explainer from review managers" do

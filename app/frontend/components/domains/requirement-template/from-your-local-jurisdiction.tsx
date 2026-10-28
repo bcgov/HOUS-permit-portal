@@ -12,13 +12,15 @@ export function FromYourLocalJurisdiction({
   html,
   updatedAt,
   jurisdictionName,
+  children,
 }: {
   html: string
   updatedAt?: string | Date | null
   jurisdictionName: string
+  children?: React.ReactNode
 }) {
   const { t } = useTranslation()
-  if (isTipTapEmpty(html)) return null
+  if (!children && isTipTapEmpty(html)) return null
 
   const dateLabel = updatedAt ? format(new Date(updatedAt), "d MMMM yyyy") : null
 
@@ -52,7 +54,7 @@ export function FromYourLocalJurisdiction({
       <Text fontSize="sm" color="text.secondary" mb={3}>
         {t("requirementTemplate.explainer.addedBy", { name: jurisdictionName })}
       </Text>
-      <SafeTipTapDisplay htmlContent={html} />
+      {children ?? <SafeTipTapDisplay htmlContent={html} />}
     </Box>
   )
 }

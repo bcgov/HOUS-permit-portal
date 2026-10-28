@@ -3,6 +3,7 @@ import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
+  Button,
   Container,
   Flex,
   Grid,
@@ -10,39 +11,57 @@ import {
   Link,
   Text,
 } from "@chakra-ui/react"
-import { ArrowSquareOut, CaretRight, Download, WarningCircle } from "@phosphor-icons/react"
+import { ArrowSquareOut, CaretLeft, CaretRight, Download, WarningCircle } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useParams, useSearchParams } from "react-router-dom"
+import { Navigate, useParams, useSearchParams } from "react-router-dom"
+import { useTemplateVersion } from "../../../../../hooks/resources/use-template-version"
 import { IExplainer } from "../../../../../models/explainer"
 import { IJurisdiction } from "../../../../../models/jurisdiction"
 import { IExplainerPermit } from "../../../../../models/jurisdiction-explainer"
 import { useMst } from "../../../../../setup/root"
 import { permitApplicationInfoPath } from "../../../../../utils/permit-application-info-path"
 import { isTipTapEmpty, isUUID } from "../../../../../utils/utility-functions"
+import { ErrorScreen } from "../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
 import { NotFoundScreen } from "../../../../shared/base/not-found-screen"
 import { SafeTipTapDisplay } from "../../../../shared/editor/safe-tiptap-display"
 import { RouterLink } from "../../../../shared/navigation/router-link"
+import { RouterLinkButton } from "../../../../shared/navigation/router-link-button"
 import { FindLocalRequirements } from "../../find-local-requirements"
-import { FromYourLocalJurisdiction } from "../../from-your-local-jurisdiction"
+import { FromYourLocalJurisdiction, LOCAL_COMMUNITY_SECTION_ID } from "../../from-your-local-jurisdiction"
+import { LocalContextEditor } from "../../local-context-editor"
 
-export const PermitApplicationInfoScreen = observer(function PermitApplicationInfoScreen() {
+export const PermitApplicationInfoScreen = observer(function PermitApplicationInfoScreen({
+  requirementTemplateId: requirementTemplateIdProp,
+  lockedJurisdiction,
+  editLocalContext = false,
+  backTo,
+}: {
+  requirementTemplateId?: string
+  lockedJurisdiction?: IJurisdiction
+  editLocalContext?: boolean
+  backTo?: string
+} = {}) {
   const { t } = useTranslation()
-  const { requirementTemplateId } = useParams()
+  const { requirementTemplateId: requirementTemplateIdParam } = useParams()
+  const requirementTemplateId = requirementTemplateIdProp ?? requirementTemplateIdParam
   const [searchParams, setSearchParams] = useSearchParams()
   const { jurisdictionStore, requirementTemplateStore } = useMst()
-  const jurisdictionIdParam = searchParams.get("jurisdictionId")
+  const jurisdictionIdParam = lockedJurisdiction?.id ?? searchParams.get("jurisdictionId")
 
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
   const [explainer, setExplainer] = useState<IExplainer | null>(null)
   const [permitName, setPermitName] = useState("")
   const [relatedPermits, setRelatedPermits] = useState<IExplainerPermit[]>([])
-  const [jurisdiction, setJurisdiction] = useState<IJurisdiction | null>(null)
+  const [selectedJurisdiction, setSelectedJurisdiction] = useState<IJurisdiction | null>(null)
+  const jurisdiction = lockedJurisdiction ?? selectedJurisdiction
   const [localContextHtml, setLocalContextHtml] = useState("")
   const [localUpdatedAt, setLocalUpdatedAt] = useState<string | null>(null)
+  const [draftHtml, setDraftHtml] = useState("")
+  const [savingLocalContext, setSavingLocalContext] = useState(false)
 
   useEffect(() => {
     if (!requirementTemplateId || !isUUID(requirementTemplateId)) {
@@ -81,31 +100,36 @@ export const PermitApplicationInfoScreen = observer(function PermitApplicationIn
   }, [requirementTemplateId])
 
   useEffect(() => {
+    if (lockedJurisdiction) return
     if (!jurisdictionIdParam || !isUUID(jurisdictionIdParam)) {
-      setJurisdiction(null)
+      setSelectedJurisdiction(null)
       return
     }
     let cancelled = false
     jurisdictionStore.fetchJurisdiction(jurisdictionIdParam).then(() => {
-      if (!cancelled) setJurisdiction(jurisdictionStore.getJurisdictionById(jurisdictionIdParam) ?? null)
+      if (!cancelled) setSelectedJurisdiction(jurisdictionStore.getJurisdictionById(jurisdictionIdParam) ?? null)
     })
     return () => {
       cancelled = true
     }
-  }, [jurisdictionIdParam])
+  }, [jurisdictionIdParam, lockedJurisdiction])
 
   useEffect(() => {
     if (!requirementTemplateId || !jurisdiction?.id) {
       setLocalContextHtml("")
+      setDraftHtml("")
       setLocalUpdatedAt(null)
       return
     }
     let cancelled = false
     setLocalContextHtml("")
+    setDraftHtml("")
     setLocalUpdatedAt(null)
     requirementTemplateStore.fetchJurisdictionExplainer(requirementTemplateId, jurisdiction.id).then((result) => {
       if (cancelled) return
-      setLocalContextHtml(result?.localContextHtml ?? "")
+      const html = result?.localContextHtml ?? ""
+      setLocalContextHtml(html)
+      setDraftHtml(html)
       setLocalUpdatedAt(result?.updatedAt ?? null)
     })
     return () => {
@@ -114,7 +138,7 @@ export const PermitApplicationInfoScreen = observer(function PermitApplicationIn
   }, [requirementTemplateId, jurisdiction?.id])
 
   const handleJurisdictionChange = (next: IJurisdiction | null) => {
-    setJurisdiction(next)
+    setSelectedJurisdiction(next)
     setSearchParams(
       (current) => {
         const params = new URLSearchParams(current)
@@ -124,6 +148,29 @@ export const PermitApplicationInfoScreen = observer(function PermitApplicationIn
       },
       { replace: true }
     )
+  }
+
+  useEffect(() => {
+    if (!editLocalContext || loading || !explainer || !jurisdiction) return
+    document.getElementById(LOCAL_COMMUNITY_SECTION_ID)?.scrollIntoView({ behavior: "smooth", block: "start" })
+  }, [editLocalContext, loading, explainer, jurisdiction?.id])
+
+  const saveLocalContext = async () => {
+    if (!requirementTemplateId || !jurisdiction?.id) return
+    setSavingLocalContext(true)
+    try {
+      const result = await requirementTemplateStore.saveJurisdictionExplainer(
+        requirementTemplateId,
+        jurisdiction.id,
+        draftHtml
+      )
+      if (!result) return
+      setLocalContextHtml(result.localContextHtml)
+      setDraftHtml(result.localContextHtml)
+      setLocalUpdatedAt(result.updatedAt)
+    } finally {
+      setSavingLocalContext(false)
+    }
   }
 
   if (loading) return <LoadingScreen />
@@ -142,16 +189,22 @@ export const PermitApplicationInfoScreen = observer(function PermitApplicationIn
   return (
     <Box as="main" bg="greys.white" minH="calc(100vh - 200px)">
       <Container maxW="container.lg" px={{ base: 6, md: 8 }} pt={6} pb={4}>
-        <Breadcrumb separator="/" spacing={2} mb={4}>
-          <BreadcrumbItem>
-            <BreadcrumbLink as={RouterLink} to="/" color="text.link">
-              {t("site.home")}
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbItem isCurrentPage>
-            <Text fontWeight="bold">{title}</Text>
-          </BreadcrumbItem>
-        </Breadcrumb>
+        {backTo ? (
+          <RouterLinkButton variant="link" to={backTo} leftIcon={<CaretLeft size={20} />} mb={4}>
+            {t("ui.back")}
+          </RouterLinkButton>
+        ) : (
+          <Breadcrumb separator="/" spacing={2} mb={4}>
+            <BreadcrumbItem>
+              <BreadcrumbLink as={RouterLink} to="/" color="text.link">
+                {t("site.home")}
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbItem isCurrentPage>
+              <Text fontWeight="bold">{title}</Text>
+            </BreadcrumbItem>
+          </Breadcrumb>
+        )}
         <Heading as="h1" fontSize="4xl" mb={4}>
           {title}
         </Heading>
@@ -160,11 +213,13 @@ export const PermitApplicationInfoScreen = observer(function PermitApplicationIn
         </Text>
       </Container>
 
-      <FindLocalRequirements
-        jurisdiction={jurisdiction}
-        hasLocalContext={!isTipTapEmpty(localContextHtml)}
-        onJurisdictionChange={handleJurisdictionChange}
-      />
+      {!editLocalContext && (
+        <FindLocalRequirements
+          jurisdiction={jurisdiction}
+          hasLocalContext={!isTipTapEmpty(localContextHtml)}
+          onJurisdictionChange={handleJurisdictionChange}
+        />
+      )}
 
       <Container maxW="container.lg" px={{ base: 6, md: 8 }} py={8}>
         <Flex direction="column" gap={9}>
@@ -315,13 +370,53 @@ export const PermitApplicationInfoScreen = observer(function PermitApplicationIn
             </Box>
           )}
 
-          <FromYourLocalJurisdiction
-            html={localContextHtml}
-            updatedAt={localUpdatedAt}
-            jurisdictionName={jurisdiction?.name || ""}
-          />
+          {editLocalContext && jurisdiction ? (
+            <FromYourLocalJurisdiction
+              html={localContextHtml}
+              updatedAt={localUpdatedAt}
+              jurisdictionName={jurisdiction.name}
+            >
+              <LocalContextEditor htmlValue={draftHtml} onChange={setDraftHtml} />
+              <Button mt={4} variant="primary" onClick={saveLocalContext} isLoading={savingLocalContext}>
+                {t("ui.onlySave")}
+              </Button>
+            </FromYourLocalJurisdiction>
+          ) : (
+            <FromYourLocalJurisdiction
+              html={localContextHtml}
+              updatedAt={localUpdatedAt}
+              jurisdictionName={jurisdiction?.name || ""}
+            />
+          )}
         </Flex>
       </Container>
     </Box>
   )
 })
+
+export const JurisdictionPermitApplicationInfoEditScreen = observer(
+  function JurisdictionPermitApplicationInfoEditScreen() {
+    const { t } = useTranslation()
+    const { userStore } = useMst()
+    const jurisdiction = userStore.currentUser?.jurisdiction
+    const { templateVersion, error: templateVersionError } = useTemplateVersion({
+      customErrorMessage: t("errors.fetchBuildingPermit"),
+    })
+
+    if (!jurisdiction) return <ErrorScreen error={new Error(t("errors.fetchJurisdiction"))} />
+    if (templateVersionError) return <ErrorScreen error={templateVersionError} />
+    if (!templateVersion) return <LoadingScreen />
+    if (!templateVersion.explainerPublished) {
+      return <Navigate to={`/digital-building-permits/${templateVersion.id}/application-info`} replace />
+    }
+
+    return (
+      <PermitApplicationInfoScreen
+        requirementTemplateId={templateVersion.requirementTemplateId}
+        lockedJurisdiction={jurisdiction}
+        editLocalContext
+        backTo={`/digital-building-permits/${templateVersion.id}/application-info`}
+      />
+    )
+  }
+)

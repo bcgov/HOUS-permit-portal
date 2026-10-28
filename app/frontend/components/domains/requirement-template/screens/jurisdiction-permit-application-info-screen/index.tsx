@@ -1,56 +1,47 @@
-import { Box, Button, Container, Flex, Heading, List, ListItem, Text, useDisclosure } from "@chakra-ui/react"
+import { Box, Container, Flex, Heading, HStack, List, ListItem, Text } from "@chakra-ui/react"
 import { CaretLeft } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useTemplateVersion } from "../../../../../hooks/resources/use-template-version"
 import { useMst } from "../../../../../setup/root"
+import { permitApplicationInfoPath } from "../../../../../utils/permit-application-info-path"
 import { isTipTapEmpty } from "../../../../../utils/utility-functions"
 import { CalloutBanner } from "../../../../shared/base/callout-banner"
 import { ErrorScreen } from "../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
 import { RouterLinkButton } from "../../../../shared/navigation/router-link-button"
-import { ExplainerModal } from "../../explainer-modal"
 
 const LOCAL_CONTEXT_ITEM_KEYS = ["bylaws", "documents", "links", "fees", "steps"] as const
 
 export const JurisdictionPermitApplicationInfoScreen = observer(function JurisdictionPermitApplicationInfoScreen() {
   const { t } = useTranslation()
-  const { userStore } = useMst()
+  const { userStore, requirementTemplateStore } = useMst()
   const jurisdiction = userStore.currentUser?.jurisdiction
   const { templateVersion, error: templateVersionError } = useTemplateVersion({
     customErrorMessage: t("errors.fetchBuildingPermit"),
   })
-  const modal = useDisclosure()
   const [localContextHtml, setLocalContextHtml] = useState("")
-  const [explainerPublished, setExplainerPublished] = useState(false)
   const [loadingLocalContext, setLoadingLocalContext] = useState(true)
 
   useEffect(() => {
     if (!templateVersion || !jurisdiction) return
+    if (!templateVersion.explainerPublished) {
+      setLocalContextHtml("")
+      setLoadingLocalContext(false)
+      return
+    }
     let cancelled = false
     setLoadingLocalContext(true)
-    templateVersion
-      .fetchExplainer()
-      .then(async (result) => {
-        if (cancelled) return
-        const published = Boolean(result?.explainer?.publishedAt)
-        setExplainerPublished(published)
-        if (!published) {
-          setLocalContextHtml("")
-          setLoadingLocalContext(false)
-          return
-        }
-        const saved = await templateVersion.fetchJurisdictionExplainer(jurisdiction.id)
+    requirementTemplateStore
+      .fetchJurisdictionExplainer(templateVersion.requirementTemplateId, jurisdiction.id)
+      .then((saved) => {
         if (cancelled) return
         setLocalContextHtml(saved?.localContextHtml ?? "")
         setLoadingLocalContext(false)
       })
       .catch(() => {
-        if (!cancelled) {
-          setExplainerPublished(false)
-          setLoadingLocalContext(false)
-        }
+        if (!cancelled) setLoadingLocalContext(false)
       })
     return () => {
       cancelled = true
@@ -62,6 +53,8 @@ export const JurisdictionPermitApplicationInfoScreen = observer(function Jurisdi
   if (!templateVersion) return <LoadingScreen />
 
   const hasLocalContext = !isTipTapEmpty(localContextHtml)
+  const editPath = `/digital-building-permits/${templateVersion.id}/application-info/edit`
+  const publicPath = permitApplicationInfoPath(templateVersion.requirementTemplateId, jurisdiction.id)
 
   return (
     <Container maxW="container.lg" p={8} as="main">
@@ -78,7 +71,7 @@ export const JurisdictionPermitApplicationInfoScreen = observer(function Jurisdi
 
         {loadingLocalContext ? (
           <LoadingScreen />
-        ) : explainerPublished ? (
+        ) : templateVersion.explainerPublished ? (
           <>
             <CalloutBanner type="info" title={t("digitalBuildingPermits.applicationInfo.supportingNote")} my={0} />
 
@@ -92,29 +85,22 @@ export const JurisdictionPermitApplicationInfoScreen = observer(function Jurisdi
                   <ListItem key={key}>{t(`digitalBuildingPermits.applicationInfo.items.${key}`)}</ListItem>
                 ))}
               </List>
-              <Text mb={6}>{t("digitalBuildingPermits.applicationInfo.writeOwn")}</Text>
-              <Button variant="primary" onClick={modal.onOpen}>
-                {hasLocalContext
-                  ? t("digitalBuildingPermits.applicationInfo.editButton")
-                  : t("digitalBuildingPermits.applicationInfo.addButton")}
-              </Button>
+              <HStack spacing={3}>
+                <RouterLinkButton variant="primary" to={editPath}>
+                  {hasLocalContext
+                    ? t("digitalBuildingPermits.applicationInfo.editButton")
+                    : t("digitalBuildingPermits.applicationInfo.addButton")}
+                </RouterLinkButton>
+                <RouterLinkButton variant="secondary" to={publicPath} target="_blank" rel="noopener noreferrer">
+                  {t("digitalBuildingPermits.applicationInfo.viewPublicPage")}
+                </RouterLinkButton>
+              </HStack>
             </Box>
           </>
         ) : (
           <CalloutBanner type="info" title={t("digitalBuildingPermits.applicationInfo.unpublishedNote")} my={0} />
         )}
       </Flex>
-
-      {explainerPublished && (
-        <ExplainerModal
-          templateVersion={templateVersion}
-          jurisdictionId={jurisdiction.id}
-          mode="reviewManager"
-          isOpen={modal.isOpen}
-          onClose={modal.onClose}
-          onLocalContextSaved={setLocalContextHtml}
-        />
-      )}
     </Container>
   )
 })

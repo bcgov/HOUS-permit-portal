@@ -9,7 +9,7 @@ import { IHelpVideoSection } from "../../models/help-video-section"
 import { IInfoDocument } from "../../models/info-document"
 import { IIntegrationMapping } from "../../models/integration-mapping"
 import { IJurisdiction } from "../../models/jurisdiction"
-import { IJurisdictionExplainer } from "../../models/jurisdiction-explainer"
+import { IExplainerPermit, IJurisdictionExplainer } from "../../models/jurisdiction-explainer"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
 import { INote } from "../../models/note"
 import { IOverheatingCode } from "../../models/overheating-code"
@@ -117,17 +117,11 @@ interface ITemplateVersionFeedback {
   resolvedBy?: IUser | null
 }
 
-export type TRelatedPermit = {
-  id: string
-  nickname: string | null
-  description: string | null
-}
-
 type TExplainerMeta = {
   relatedTemplateOptions?: IOption[]
   jurisdictionExplainers?: IJurisdictionExplainer[]
-  relatedPermits?: TRelatedPermit[]
-  permit?: { id: string; nickname: string | null; description: string | null }
+  relatedPermits?: IExplainerPermit[]
+  permit?: IExplainerPermit | null
 }
 
 export class Api {

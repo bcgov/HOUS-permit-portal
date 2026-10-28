@@ -6,8 +6,7 @@ class Api::ExplainersController < Api::ApplicationController
     explainer = find_or_build
     authorize explainer
 
-    # Managers only need to know that a draft exists. The public page and the
-    # read-only modal load the content after it is published.
+    # Managers only need to know that a draft exists. Content loads after it is published.
     unless current_user&.super_admin? || explainer.published?
       return render_success nil
     end
@@ -60,7 +59,7 @@ class Api::ExplainersController < Api::ApplicationController
       related_permits:
         RequirementTemplatePermitBlueprint.render_as_hash(related_permits)
     }
-    if current_user&.super_admin? || current_user&.manager?
+    if current_user&.super_admin?
       meta[
         :related_template_options
       ] = RequirementTemplateOptionBlueprint.render_as_hash(

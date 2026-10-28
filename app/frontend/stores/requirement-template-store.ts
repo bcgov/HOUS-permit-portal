@@ -156,6 +156,22 @@ export const RequirementTemplateStoreModel = types
       } as IJurisdictionExplainerLoadResult
     }),
 
+    saveJurisdictionExplainer: flow(function* (
+      requirementTemplateId: string,
+      jurisdictionId: string,
+      localContextHtml: string
+    ) {
+      const { ok, data: response } = yield* toGenerator(
+        self.environment.api.saveJurisdictionExplainer(requirementTemplateId, jurisdictionId, { localContextHtml })
+      )
+      if (!ok || !response) return null
+
+      return {
+        localContextHtml: response.data?.localContextHtml ?? "",
+        updatedAt: response.data?.updatedAt ?? null,
+      } as IJurisdictionExplainerLoadResult
+    }),
+
     createRequirementTemplate: flow(function* (formData: TCreateRequirementTemplateFormData) {
       const { ok, data: response } = yield* toGenerator(self.environment.api.createRequirementTemplate(formData))
 

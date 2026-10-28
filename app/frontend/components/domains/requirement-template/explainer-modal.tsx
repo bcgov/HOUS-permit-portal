@@ -49,7 +49,6 @@ import useUppyS3 from "../../../hooks/use-uppy-s3"
 import { IExplainer } from "../../../models/explainer"
 import { IJurisdictionExplainer } from "../../../models/jurisdiction-explainer"
 import { IRequirementTemplate } from "../../../models/requirement-template"
-import { ITemplateVersion } from "../../../models/template-version"
 import { IExplainerParams, IUppyAttachmentFile } from "../../../types/api-request"
 import { EFileUploadAttachmentType } from "../../../types/enums"
 import { IOption } from "../../../types/types"
@@ -64,7 +63,6 @@ import { TextAreaFormControl, TextFormControl, UrlFormControl } from "../../shar
 import { SortableItem } from "../../shared/sortable-item"
 import { UppyDashboard } from "../../shared/uppy-dashboard"
 import { FromYourLocalJurisdiction } from "./from-your-local-jurisdiction"
-import { LocalContextEditor } from "./local-context-editor"
 
 interface IDocumentFormValue {
   id?: string
@@ -82,7 +80,6 @@ interface IFormValues {
   documentsAttributes: IDocumentFormValue[]
   relatedTemplateIds: string[]
   isPublished: boolean
-  localContextHtml: string
 }
 
 // Same as note attachments: last path segment of the cache URL is the Shrine file id.
@@ -117,7 +114,6 @@ const emptyForm: IFormValues = {
   documentsAttributes: [],
   relatedTemplateIds: [],
   isPublished: false,
-  localContextHtml: "",
 }
 
 function scrollWithinModalBody(el: HTMLElement | null) {
@@ -131,36 +127,24 @@ function scrollWithinModalBody(el: HTMLElement | null) {
 
 export const ExplainerModal = observer(function ExplainerModal({
   requirementTemplate,
-  templateVersion,
-  jurisdictionId,
-  mode = "superAdmin",
   isOpen,
   onClose,
-  onLocalContextSaved,
 }: {
-  requirementTemplate?: IRequirementTemplate
-  templateVersion?: ITemplateVersion
-  jurisdictionId?: string
-  mode?: "superAdmin" | "reviewManager"
+  requirementTemplate: IRequirementTemplate
   isOpen: boolean
   onClose: () => void
-  onLocalContextSaved?: (html: string) => void
 }) {
   const { t } = useTranslation()
   const closeConfirm = useDisclosure()
-  const localSectionRef = useRef<HTMLDivElement>(null)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
   const [options, setOptions] = useState<IOption[]>([])
   const [activeStepId, setActiveStepId] = useState<string | null>(null)
   const [savedExplainer, setSavedExplainer] = useState<IExplainer | null>(null)
   const [jurisdictionExplainers, setJurisdictionExplainers] = useState<IJurisdictionExplainer[]>([])
-  const [localUpdatedAt, setLocalUpdatedAt] = useState<string | null>(null)
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
-  const isReviewManager = mode === "reviewManager"
-  const explainer = requirementTemplate?.explainer ?? savedExplainer
-  const nickname =
-    requirementTemplate?.nickname || templateVersion?.denormalizedTemplateJson?.nickname || templateVersion?.label
+  const explainer = requirementTemplate.explainer ?? savedExplainer
+  const nickname = requirementTemplate.nickname
 
   const methods = useForm<IFormValues>({ defaultValues: emptyForm })
   const {
@@ -171,7 +155,7 @@ export const ExplainerModal = observer(function ExplainerModal({
     setValue,
     formState: { isDirty, isSubmitting },
   } = methods
-  const applyExplainer = (saved: IExplainer | null, relatedOptions?: IOption[], localContextHtml = "") => {
+  const applyExplainer = (saved: IExplainer | null, relatedOptions?: IOption[]) => {
     if (relatedOptions) setOptions(relatedOptions)
     reset({
       introductionHtml: saved?.introductionHtml ?? "",
@@ -185,7 +169,6 @@ export const ExplainerModal = observer(function ExplainerModal({
       })),
       relatedTemplateIds: [...(saved?.relatedTemplateIds ?? [])],
       isPublished: Boolean(saved?.publishedAt),
-      localContextHtml,
     })
   }
   const steps = useFieldArray({ control, name: "steps" })
@@ -238,37 +221,18 @@ export const ExplainerModal = observer(function ExplainerModal({
     let cancelled = false
     setLoading(true)
     setLoadError(false)
-    const fetchExplainer = requirementTemplate?.fetchExplainer ?? templateVersion?.fetchExplainer
-    if (!fetchExplainer) {
-      setLoadError(true)
-      setLoading(false)
-      return
-    }
-    fetchExplainer()
-      .then(async (result) => {
+    requirementTemplate
+      .fetchExplainer()
+      .then((result) => {
         if (cancelled) return
         if (!result) {
           setLoadError(true)
           setLoading(false)
           return
         }
-        let localHtml = ""
-        let localAt: string | null = null
-        if (isReviewManager && jurisdictionId && templateVersion) {
-          const savedLocal = await templateVersion.fetchJurisdictionExplainer(jurisdictionId)
-          if (cancelled) return
-          if (!savedLocal) {
-            setLoadError(true)
-            setLoading(false)
-            return
-          }
-          localHtml = savedLocal.localContextHtml
-          localAt = savedLocal.updatedAt
-        }
-        applyExplainer(result.explainer, result.relatedTemplateOptions, localHtml)
+        applyExplainer(result.explainer, result.relatedTemplateOptions)
         setSavedExplainer(result.explainer)
         setJurisdictionExplainers(result.jurisdictionExplainers)
-        setLocalUpdatedAt(localAt)
         setLoading(false)
       })
       .catch(() => {
@@ -280,21 +244,10 @@ export const ExplainerModal = observer(function ExplainerModal({
     return () => {
       cancelled = true
     }
-  }, [isOpen, requirementTemplate, templateVersion, jurisdictionId, isReviewManager])
-
-  const explainerPublished = Boolean(explainer?.publishedAt)
-
-  useEffect(() => {
-    if (loading || !isReviewManager || !explainerPublished || !localSectionRef.current) return
-    scrollWithinModalBody(localSectionRef.current)
-  }, [loading, isReviewManager, explainerPublished])
+  }, [isOpen, requirementTemplate])
 
   const persist = async (values: IFormValues) => {
-    if (isReviewManager) {
-      if (!templateVersion || !jurisdictionId || !explainerPublished) return false
-      return await templateVersion.saveJurisdictionExplainer(jurisdictionId, values.localContextHtml)
-    }
-    if (isUploading || !requirementTemplate) return false
+    if (isUploading) return false
     const ok = await requirementTemplate.saveExplainer({
       introductionHtml: values.introductionHtml,
       beforeYouApplyHtml: values.beforeYouApplyHtml,
@@ -326,7 +279,6 @@ export const ExplainerModal = observer(function ExplainerModal({
 
   const onSave = handleSubmit(async (values) => {
     if (!(await persist(values))) return
-    if (isReviewManager) onLocalContextSaved?.(values.localContextHtml)
     onClose()
   })
 
@@ -340,7 +292,7 @@ export const ExplainerModal = observer(function ExplainerModal({
   const selectedOptions = options.filter((option) => relatedTemplateIds.includes(option.value))
   const groupedOptions = groupFilterOptions(options, t("siteConfiguration.templateCategories.uncategorized"))
   const selectOptions = shouldShowFilterGroupLabels(groupedOptions) ? groupedOptions : options
-  const lastSavedAt = isReviewManager ? localUpdatedAt : explainer?.updatedAt
+  const lastSavedAt = explainer?.updatedAt
 
   const renderActions = () => (
     <HStack spacing={3}>
@@ -401,30 +353,27 @@ export const ExplainerModal = observer(function ExplainerModal({
                       <CalloutBanner type="warning" title={t("requirementTemplate.explainer.draftBanner")} />
                     )}
 
-                    {!isReviewManager && (
-                      <FormControl>
-                        <Checkbox {...methods.register("isPublished")}>
-                          {t("requirementTemplate.explainer.published")}
-                        </Checkbox>
-                      </FormControl>
-                    )}
+                    <FormControl>
+                      <Checkbox {...methods.register("isPublished")}>
+                        {t("requirementTemplate.explainer.published")}
+                      </Checkbox>
+                    </FormControl>
 
                     <Controller
                       name="introductionHtml"
                       control={control}
                       rules={{
                         validate: (value) =>
-                          isReviewManager ||
                           !isPublished ||
                           !isTipTapEmpty(value ?? "") ||
                           t("ui.isRequired", { field: t("requirementTemplate.explainer.introduction") }),
                       }}
                       render={({ field, fieldState }) => (
                         <FormControl isInvalid={!!fieldState.error}>
-                          <FieldLabel required={!isReviewManager && isPublished}>
+                          <FieldLabel required={isPublished}>
                             {t("requirementTemplate.explainer.introduction")}
                           </FieldLabel>
-                          <Editor htmlValue={field.value} onChange={field.onChange} readonly={isReviewManager} />
+                          <Editor htmlValue={field.value} onChange={field.onChange} />
                           <FormHelperText>{t("requirementTemplate.explainer.introductionRequired")}</FormHelperText>
                           <FormErrorMessage>{fieldState.error?.message}</FormErrorMessage>
                         </FormControl>
@@ -436,85 +385,55 @@ export const ExplainerModal = observer(function ExplainerModal({
                       <Controller
                         name="beforeYouApplyHtml"
                         control={control}
-                        render={({ field }) => (
-                          <Editor htmlValue={field.value} onChange={field.onChange} readonly={isReviewManager} />
-                        )}
+                        render={({ field }) => <Editor htmlValue={field.value} onChange={field.onChange} />}
                       />
                     </FormControl>
 
                     <FormControl>
                       <FieldLabel>{t("requirementTemplate.explainer.howToApply")}</FieldLabel>
                       <FormHelperText mb={3}>{t("requirementTemplate.explainer.howToApplyHint")}</FormHelperText>
-                      {isReviewManager ? (
-                        <VStack align="stretch" spacing={3}>
-                          {steps.fields.map((step, index) => (
-                            <Flex key={step.id} bg="greys.grey03" p={4} borderRadius="md" gap={3} align="flex-start">
-                              <Text fontWeight="semibold" w={6} mt={8}>
-                                {index + 1}.
-                              </Text>
-                              <VStack flex="1" align="stretch" spacing={2}>
-                                <TextFormControl
-                                  fieldName={`steps.${index}.title`}
-                                  label={t("requirementTemplate.explainer.stepTitle")}
-                                  showOptional={false}
-                                  isDisabled
-                                />
-                                <TextAreaFormControl
-                                  fieldName={`steps.${index}.description`}
-                                  label={t("requirementTemplate.explainer.stepDescription")}
-                                  showOptional={false}
-                                  isDisabled
-                                />
-                              </VStack>
-                            </Flex>
-                          ))}
-                        </VStack>
-                      ) : (
-                        <>
-                          <DndContext
-                            sensors={sensors}
-                            collisionDetection={closestCenter}
-                            modifiers={stepDragModifiers}
-                            onDragStart={startStepDrag}
-                            onDragCancel={() => setActiveStepId(null)}
-                            onDragEnd={reorderSteps}
-                          >
-                            <SortableContext
-                              items={steps.fields.map((step) => step.id)}
-                              strategy={verticalListSortingStrategy}
-                            >
-                              <VStack align="stretch" spacing={3}>
-                                {steps.fields.map((step, index) => (
-                                  <SortableItem
-                                    key={step.id}
-                                    sortableArguments={{ id: step.id }}
-                                    Component={HowToApplyStep}
-                                    componentProps={{ index, onRemove: () => steps.remove(index) }}
-                                  />
-                                ))}
-                              </VStack>
-                            </SortableContext>
-                            <DragOverlay dropAnimation={stepDropAnimation} modifiers={stepDragModifiers} zIndex={1600}>
-                              {activeStep ? (
-                                <StepDragPreview
-                                  index={activeStepIndex}
-                                  title={activeStep.title}
-                                  description={activeStep.description}
-                                />
-                              ) : null}
-                            </DragOverlay>
-                          </DndContext>
-                          <Button
-                            type="button"
-                            mt={3}
-                            variant="tertiary"
-                            leftIcon={<Plus size={16} />}
-                            onClick={() => steps.append({ title: "", description: "" })}
-                          >
-                            {t("requirementTemplate.explainer.addStep")}
-                          </Button>
-                        </>
-                      )}
+                      <DndContext
+                        sensors={sensors}
+                        collisionDetection={closestCenter}
+                        modifiers={stepDragModifiers}
+                        onDragStart={startStepDrag}
+                        onDragCancel={() => setActiveStepId(null)}
+                        onDragEnd={reorderSteps}
+                      >
+                        <SortableContext
+                          items={steps.fields.map((step) => step.id)}
+                          strategy={verticalListSortingStrategy}
+                        >
+                          <VStack align="stretch" spacing={3}>
+                            {steps.fields.map((step, index) => (
+                              <SortableItem
+                                key={step.id}
+                                sortableArguments={{ id: step.id }}
+                                Component={HowToApplyStep}
+                                componentProps={{ index, onRemove: () => steps.remove(index) }}
+                              />
+                            ))}
+                          </VStack>
+                        </SortableContext>
+                        <DragOverlay dropAnimation={stepDropAnimation} modifiers={stepDragModifiers} zIndex={1600}>
+                          {activeStep ? (
+                            <StepDragPreview
+                              index={activeStepIndex}
+                              title={activeStep.title}
+                              description={activeStep.description}
+                            />
+                          ) : null}
+                        </DragOverlay>
+                      </DndContext>
+                      <Button
+                        type="button"
+                        mt={3}
+                        variant="tertiary"
+                        leftIcon={<Plus size={16} />}
+                        onClick={() => steps.append({ title: "", description: "" })}
+                      >
+                        {t("requirementTemplate.explainer.addStep")}
+                      </Button>
                     </FormControl>
 
                     <Box>
@@ -524,7 +443,7 @@ export const ExplainerModal = observer(function ExplainerModal({
                       <VStack align="stretch" spacing={5}>
                         <FormControl>
                           <FieldLabel>{t("requirementTemplate.explainer.documents")}</FieldLabel>
-                          {!isReviewManager && <UppyDashboard uppy={uppy} height={180} width="100%" />}
+                          <UppyDashboard uppy={uppy} height={180} width="100%" />
                           {savedDocuments.length > 0 && (
                             <VStack align="stretch" mt={3} spacing={2}>
                               {savedDocuments.map((document) => (
@@ -541,25 +460,23 @@ export const ExplainerModal = observer(function ExplainerModal({
                                   ) : (
                                     <Text fontSize="sm">{document.fileName}</Text>
                                   )}
-                                  {!isReviewManager && (
-                                    <Button
-                                      type="button"
-                                      variant="tertiary"
-                                      size="sm"
-                                      leftIcon={<X size={16} />}
-                                      onClick={() =>
-                                        setValue(
-                                          "documentsAttributes",
-                                          documentsAttributes.map((item) =>
-                                            item.id === document.id ? { ...item, _destroy: true } : item
-                                          ),
-                                          { shouldDirty: true }
-                                        )
-                                      }
-                                    >
-                                      {t("ui.remove")}
-                                    </Button>
-                                  )}
+                                  <Button
+                                    type="button"
+                                    variant="tertiary"
+                                    size="sm"
+                                    leftIcon={<X size={16} />}
+                                    onClick={() =>
+                                      setValue(
+                                        "documentsAttributes",
+                                        documentsAttributes.map((item) =>
+                                          item.id === document.id ? { ...item, _destroy: true } : item
+                                        ),
+                                        { shouldDirty: true }
+                                      )
+                                    }
+                                  >
+                                    {t("ui.remove")}
+                                  </Button>
                                 </Flex>
                               ))}
                             </VStack>
@@ -576,7 +493,6 @@ export const ExplainerModal = observer(function ExplainerModal({
                                     fieldName={`links.${index}.title`}
                                     label={t("requirementTemplate.explainer.linkTitle")}
                                     showOptional={false}
-                                    isDisabled={isReviewManager}
                                   />
                                 </Box>
                                 <Box flex="1">
@@ -584,33 +500,28 @@ export const ExplainerModal = observer(function ExplainerModal({
                                     fieldName={`links.${index}.url`}
                                     label={t("requirementTemplate.explainer.linkUrl")}
                                     showOptional={false}
-                                    isDisabled={isReviewManager}
                                   />
                                 </Box>
-                                {!isReviewManager && (
-                                  <Button
-                                    type="button"
-                                    variant="tertiary"
-                                    leftIcon={<X size={16} />}
-                                    onClick={() => links.remove(index)}
-                                  >
-                                    {t("ui.remove")}
-                                  </Button>
-                                )}
+                                <Button
+                                  type="button"
+                                  variant="tertiary"
+                                  leftIcon={<X size={16} />}
+                                  onClick={() => links.remove(index)}
+                                >
+                                  {t("ui.remove")}
+                                </Button>
                               </Flex>
                             ))}
                           </VStack>
-                          {!isReviewManager && (
-                            <Button
-                              type="button"
-                              mt={3}
-                              variant="tertiary"
-                              leftIcon={<Plus size={16} />}
-                              onClick={() => links.append({ title: "", url: "" })}
-                            >
-                              {t("requirementTemplate.explainer.addLink")}
-                            </Button>
-                          )}
+                          <Button
+                            type="button"
+                            mt={3}
+                            variant="tertiary"
+                            leftIcon={<Plus size={16} />}
+                            onClick={() => links.append({ title: "", url: "" })}
+                          >
+                            {t("requirementTemplate.explainer.addLink")}
+                          </Button>
                         </FormControl>
                       </VStack>
                     </Box>
@@ -620,7 +531,6 @@ export const ExplainerModal = observer(function ExplainerModal({
                       <FormHelperText mb={3}>{t("requirementTemplate.explainer.relatedPermitsHint")}</FormHelperText>
                       <Select<IOption, true, GroupBase<IOption>>
                         isMulti
-                        isDisabled={isReviewManager}
                         isClearable={false}
                         options={selectOptions}
                         value={selectedOptions}
@@ -674,21 +584,7 @@ export const ExplainerModal = observer(function ExplainerModal({
                       />
                     </FormControl>
 
-                    <Box ref={localSectionRef}>
-                      {isReviewManager ? (
-                        explainerPublished && (
-                          <Controller
-                            name="localContextHtml"
-                            control={control}
-                            render={({ field }) => (
-                              <LocalContextEditor htmlValue={field.value} onChange={field.onChange} />
-                            )}
-                          />
-                        )
-                      ) : (
-                        <SuperAdminLocalContextPreview explainers={jurisdictionExplainers} />
-                      )}
-                    </Box>
+                    <SuperAdminLocalContextPreview explainers={jurisdictionExplainers} />
                   </VStack>
                 )
               )}
