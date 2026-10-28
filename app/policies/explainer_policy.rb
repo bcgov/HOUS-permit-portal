@@ -4,7 +4,7 @@ class ExplainerPolicy < ApplicationPolicy
     return false if record.requirement_template&.discarded?
     return true if record.published?
 
-    user&.manager?
+    !!user&.manager?
   end
 
   def update?
