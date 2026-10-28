@@ -41,6 +41,7 @@ interface IRequirementFormProps {
   showHelpButton?: boolean
   renderSaveButton?: () => JSX.Element
   isEditing?: boolean
+  forSubmitterEdit?: boolean
   readOnly?: boolean
   renderTopButtons?: () => React.ReactNode
   updateCollaborationAssignmentNodes?: () => void
@@ -57,6 +58,7 @@ export const RequirementForm = observer(
     renderTopButtons,
     renderSaveButton,
     isEditing = false,
+    forSubmitterEdit = false,
     readOnly: readOnlyProp = false,
     updateCollaborationAssignmentNodes,
     onReviewSubmit,
@@ -69,7 +71,8 @@ export const RequirementForm = observer(
       selectedTabIndex,
       formJson,
       blockClasses,
-      formattedFormJson,
+      reviewFormattedFormJson,
+      editFormattedFormJson,
       isDraft,
       previousSubmissionVersion,
       selectedSubmissionVersion,
@@ -79,6 +82,7 @@ export const RequirementForm = observer(
       sandbox,
       isStepCodeComplete,
     } = permitApplication
+    const formattedFormJson = forSubmitterEdit ? editFormattedFormJson : reviewFormattedFormJson
 
     const {
       visibilityVersion,
@@ -426,14 +430,14 @@ export const RequirementForm = observer(
               status={EFlashMessageStatus.warning}
             />
           )}
-          {permitApplication?.isEphemeral && (
+          {permitApplication?.isEphemeral && permitApplication.templateVersion?.isDraft && (
             <CustomMessageBox
               title={t("templateVersionPreview.earlyAccessTitle")}
               description={t("templateVersionPreview.earlyAccessDescription")}
               status={EFlashMessageStatus.warning}
             />
           )}
-          {!inboxEnabled && !sandbox && (
+          {!permitApplication?.isEphemeral && !inboxEnabled && !sandbox && (
             <CustomMessageBox
               title={t("permitApplication.show.inboxDisabledTitle")}
               description={t("permitApplication.show.inboxDisabled")}
