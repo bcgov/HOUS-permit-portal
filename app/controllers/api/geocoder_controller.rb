@@ -9,9 +9,9 @@ class Api::GeocoderController < Api::ApplicationController
       if geocoder_params[:address].present?
         wrapper = Wrappers::Geocoder.new
         options = wrapper.site_options(geocoder_params[:address])
-        render_success options, nil, { blueprint: OptionBlueprint }
+        render_success options, nil, { blueprint: SiteOptionBlueprint }
       else
-        render_success [], nil, { blueprint: OptionBlueprint }
+        render_success [], nil, { blueprint: SiteOptionBlueprint }
       end
     rescue StandardError => e
       render_error "geocoder.site_options_error", {}, e and return
@@ -32,7 +32,7 @@ class Api::GeocoderController < Api::ApplicationController
         options = wrapper.site_options(nil, coordinates)
         options.each do |option|
           if wrapper.pids(option[:value]).include?(geocoder_params[:pid])
-            render_success option, nil, { blueprint: OptionBlueprint }
+            render_success option, nil, { blueprint: SiteOptionBlueprint }
             return
           end
         end
@@ -40,7 +40,7 @@ class Api::GeocoderController < Api::ApplicationController
       #for options that come back, check if there are pids against that site
       #if the pid matches, get the addsress string and return, else nothing
 
-      render_success nil, nil, { blueprint: OptionBlueprint }
+      render_success nil, nil, { blueprint: SiteOptionBlueprint }
     rescue StandardError => e
       render_error "geocoder.site_options_error", {}, e and return
     end
@@ -61,11 +61,9 @@ class Api::GeocoderController < Api::ApplicationController
     authorize :geocoder, :jurisdiction?
     begin
       wrapper = Wrappers::Geocoder.new
-      if geocoder_params[:site_id].present?
-        pids = wrapper.pids(geocoder_params[:site_id])
-        pid = pids.first
-      elsif geocoder_params[:pid].present?
-        pid = geocoder_params[:pid]
+      pid = geocoder_params[:pid].presence
+      if pid.blank? && geocoder_params[:site_id].present?
+        pid = wrapper.pids(geocoder_params[:site_id]).first
       end
       raise StandardError unless pid.present?
 

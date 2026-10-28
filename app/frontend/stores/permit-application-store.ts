@@ -25,7 +25,6 @@ import {
   IPermitApplicationSelectiveZipReady,
   IPermitApplicationSupportingDocumentsUpdate,
   IUserPushPayload,
-  TCreatePermitApplicationFormData,
   TSearchParams,
 } from "../types/types"
 import { convertResourceArrayToRecord, setQueryParam, startBlobDownload } from "../utils/utility-functions"
@@ -69,7 +68,6 @@ export const PermitApplicationStoreModel = types
     getProjectPermitApplicationSortColumnHeader(field: EProjectPermitApplicationSortFields) {
       const map = {
         [EProjectPermitApplicationSortFields.permit]: t("permitProject.overview.permit"),
-        [EProjectPermitApplicationSortFields.applicationNickname]: t("permitProject.overview.applicationNickname"),
         [EProjectPermitApplicationSortFields.assignedTo]: t("permitProject.overview.assignedTo"),
         [EProjectPermitApplicationSortFields.permitApplicationNumber]: t(
           "permitProject.overview.permitApplicationNumber"
@@ -322,6 +320,7 @@ export const PermitApplicationStoreModel = types
         selectiveZipResult: overrides.selectiveZipResult || null,
         referenceNumber: overrides.referenceNumber || null,
         missingPdfs: overrides.missingPdfs || null,
+        reportGenerationIssues: overrides.reportGenerationIssues || [],
         isFullyLoaded: overrides.isFullyLoaded ?? false,
         isDirty: overrides.isDirty ?? false,
         isLoading: overrides.isLoading ?? false,
@@ -350,14 +349,6 @@ export const PermitApplicationStoreModel = types
     },
   }))
   .actions((self) => ({
-    createPermitApplication: flow(function* (formData: TCreatePermitApplicationFormData) {
-      const { ok, data: response } = yield self.environment.api.createPermitApplication(formData)
-      if (ok && response.data) {
-        self.mergeUpdate(response.data, "permitApplicationMap")
-        return response.data
-      }
-      return false
-    }),
     // Action to remove a PermitApplication
     removePermitApplication(id: string) {
       self.permitApplicationMap.delete(id)
@@ -420,6 +411,7 @@ export const PermitApplicationStoreModel = types
           self.permitApplicationMap
             .get(payloadData?.id)
             ?.setFormattedComplianceData(payloadData?.formattedComplianceData)
+          self.permitApplicationMap.get(payloadData?.id)?.setDigitalSealChecks(payloadData?.digitalSealChecks)
           document.dispatchEvent(event)
           break
         case EPermitApplicationSocketEventTypes.updateSupportingDocuments:

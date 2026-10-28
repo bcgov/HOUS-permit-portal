@@ -2,6 +2,7 @@ require "swagger_helper"
 
 RSpec.describe "external_api/v2/permit_projects",
                type: :request,
+               search: true,
                openapi_spec: "external_api/v2/swagger.yaml" do
   let!(:external_api_key) { create(:external_api_key, api_version: "v2") }
   let!(:Authorization) { "Bearer #{external_api_key.token}" }
@@ -11,6 +12,68 @@ RSpec.describe "external_api/v2/permit_projects",
       :newly_submitted,
       jurisdiction: external_api_key.jurisdiction
     )
+  end
+
+  before do
+    permit_application.permit_project.update_column(
+      :state,
+      PermitProject.states[:queued]
+    )
+    PermitProject.reindex
+  end
+
+  path "/permit_projects/search" do
+    post "Searches non-draft permit projects in the key's jurisdiction and sandbox." do
+      tags "Permit projects"
+      consumes "application/json"
+      produces "application/json"
+      parameter name: :constraints,
+                in: :body,
+                schema: {
+                  type: :object,
+                  properties: {
+                    constraints: {
+                      type: :object,
+                      properties: {
+                        state: {
+                          "$ref" => "#/components/schemas/ProjectState"
+                        }
+                      }
+                    }
+                  }
+                }
+      let(:constraints) { {} }
+
+      response(200, "Successful") do
+        schema type: :object,
+               properties: {
+                 data: {
+                   type: :array,
+                   items: {
+                     "$ref" => "#/components/schemas/PermitProject"
+                   }
+                 },
+                 meta: {
+                   type: :object,
+                   properties: {
+                     total_pages: {
+                       type: :integer
+                     },
+                     total_count: {
+                       type: :integer
+                     },
+                     current_page: {
+                       type: :integer
+                     }
+                   },
+                   required: %w[total_pages total_count current_page]
+                 }
+               },
+               required: %w[data meta]
+
+        run_test!
+      end
+    end
   end
 
   path "/permit_projects/{id}" do
@@ -32,6 +95,130 @@ RSpec.describe "external_api/v2/permit_projects",
                  }
                },
                required: %w[data]
+
+        run_test!
+      end
+    end
+  end
+
+  path "/permit_projects/{id}/state" do
+    patch "Sets a permit project's state to a code legal from its current state." do
+      tags "Permit projects"
+      consumes "application/json"
+      produces "application/json"
+      parameter name: "id",
+                in: :path,
+                type: :string,
+                format: :uuid,
+                description: "Permit project ID"
+      parameter name: :state_update,
+                in: :body,
+                schema: {
+                  type: :object,
+                  required: %w[state],
+                  properties: {
+                    state: {
+                      "$ref" => "#/components/schemas/ProjectState"
+                    }
+                  }
+                }
+      let(:id) { permit_application.permit_project_id }
+      let(:state_update) { { state: "in_progress" } }
+
+      before do
+        permit_application.permit_project.update_column(
+          :state,
+          PermitProject.states[:queued]
+        )
+      end
+
+      response(200, "State updated") do
+        schema type: :object,
+               properties: {
+                 data: {
+                   "$ref" => "#/components/schemas/PermitProject"
+                 }
+               },
+               required: %w[data]
+
+        run_test!
+      end
+
+      response(422, "Illegal or unknown state") do
+        schema "$ref" => "#/components/schemas/ResponseError"
+        let(:state_update) { { state: "draft" } }
+
+        run_test!
+      end
+    end
+  end
+
+  path "/permit_projects/{id}/permit_applications" do
+    post "Adds draft permit applications from requirement template ids. Each id resolves to that template's published version. An optional note is copied onto each draft as a message the submitter can see. The batch is all or nothing. Project GET still omits the drafts until one is submitted." do
+      tags "Permit projects"
+      consumes "application/json"
+      produces "application/json"
+      parameter name: "id",
+                in: :path,
+                type: :string,
+                format: :uuid,
+                description: "Permit project ID"
+      parameter name: :drafts,
+                in: :body,
+                schema: {
+                  type: :object,
+                  required: %w[permit_applications],
+                  properties: {
+                    note: {
+                      type: :string,
+                      description:
+                        "Optional message copied onto each new draft for the submitter."
+                    },
+                    permit_applications: {
+                      type: :array,
+                      items: {
+                        type: :object,
+                        required: %w[requirement_template_id],
+                        properties: {
+                          requirement_template_id: {
+                            type: :string,
+                            format: :uuid
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+      let(:id) { permit_application.permit_project_id }
+      let(:template_version) { create(:template_version, status: :published) }
+      let(:drafts) do
+        {
+          permit_applications: [
+            {
+              requirement_template_id: template_version.requirement_template_id
+            }
+          ]
+        }
+      end
+
+      response(200, "Drafts created") do
+        schema type: :object,
+               properties: {
+                 data: {
+                   type: :array,
+                   items: {
+                     "$ref" => "#/components/schemas/CreatedPermitApplication"
+                   }
+                 }
+               },
+               required: %w[data]
+
+        run_test!
+      end
+
+      response(422, "Empty list or invalid requirement template") do
+        schema "$ref" => "#/components/schemas/ResponseError"
+        let(:drafts) { { permit_applications: [] } }
 
         run_test!
       end

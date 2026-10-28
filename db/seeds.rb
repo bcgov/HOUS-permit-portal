@@ -434,7 +434,7 @@ reason_codes = RevisionReason.pluck(:reason_code)
 #   new_draft           → 0 submission versions
 #   newly_submitted     → 1 submission version
 #   revisions_requested → 1+ submission versions, latest has revision request(s)
-#   resubmitted         → 2+ submission versions, earlier one has revision request(s)
+#   resubmitted         → 2+ submission versions
 #   in_review / approved / issued / withdrawn → 1 submission version (progressed from submitted)
 seed_pa_status =
   lambda do |pa, target_status|
@@ -461,10 +461,13 @@ seed_pa_status =
         updated_at: base_time
       )
 
+    requirement_json = { "id" => "requirement", "key" => "field" }
+
     case target
     when :revisions_requested
       sv1.revision_requests.create!(
         reason_code: reason_codes.sample || "other",
+        requirement_json: requirement_json,
         comment: "Please address the highlighted items.",
         user: reviewer_user
       )
@@ -473,11 +476,6 @@ seed_pa_status =
         revisions_requested_at: [base_time + 1.day, Time.current].min
       )
     when :resubmitted
-      sv1.revision_requests.create!(
-        reason_code: reason_codes.sample || "other",
-        comment: "Initial review comment.",
-        user: reviewer_user
-      )
       resub_time = base_time + rand(72..240).hours
       resub_time = [resub_time, Time.current].min
       if resub_time <= base_time

@@ -5,27 +5,13 @@ RSpec.describe PreCheckPolicy do
 
   let(:creator) { create(:user) }
   let(:other_user) { create(:user) }
-  let(:permit_application) { create(:permit_application, submitter: creator) }
-  let(:pre_check) do
-    create(:pre_check, creator: creator, permit_application: permit_application)
-  end
+  let(:pre_check) { create(:pre_check, creator: creator) }
   let(:creator_context) { UserContext.new(creator, nil) }
   let(:other_user_context) { UserContext.new(other_user, nil) }
 
   permissions :show? do
     it "allows the creator" do
       expect(policy).to permit(creator_context, pre_check)
-    end
-
-    it "allows the permit application submitter" do
-      expect(policy).to permit(
-        creator_context,
-        create(
-          :pre_check,
-          creator: creator,
-          permit_application: permit_application
-        )
-      )
     end
 
     it "denies other users" do
@@ -55,13 +41,7 @@ RSpec.describe PreCheckPolicy do
   permissions :index? do
     it "allows authenticated users" do
       user = create(:user)
-      permit_application = create(:permit_application, submitter: user)
-      pre_check =
-        create(
-          :pre_check,
-          creator: user,
-          permit_application: permit_application
-        )
+      pre_check = create(:pre_check, creator: user)
 
       expect(policy).to permit(UserContext.new(user, nil), pre_check)
     end
@@ -75,6 +55,35 @@ RSpec.describe PreCheckPolicy do
       scope = described_class.new(creator_context, PreCheck.all).resolve
 
       expect(scope).to contain_exactly(mine)
+    end
+
+    it "excludes standalone pre-checks from another sandbox" do
+      jurisdiction = create(:sub_district)
+      sandbox = jurisdiction.sandboxes.published.first
+      other = jurisdiction.sandboxes.scheduled.first
+      visible =
+        create(
+          :pre_check,
+          creator: creator,
+          jurisdiction: jurisdiction,
+          sandbox: sandbox
+        )
+      hidden =
+        create(
+          :pre_check,
+          creator: creator,
+          jurisdiction: jurisdiction,
+          sandbox: other
+        )
+
+      scope =
+        described_class.new(
+          UserContext.new(creator, sandbox),
+          PreCheck.all
+        ).resolve
+
+      expect(scope).to include(visible)
+      expect(scope).not_to include(hidden)
     end
   end
 end

@@ -262,14 +262,22 @@ class Api::RequirementTemplatesController < Api::ApplicationController
 
   def destroy
     authorize @requirement_template
-    if @requirement_template.discard
-      render_success(
-        @requirement_template,
-        "requirement_template.destroy_success"
-      )
-    else
-      render_error "requirement_template.destroy_error"
-    end
+
+    TemplateVersioningService.archive!(@requirement_template, current_user)
+    render_success(
+      @requirement_template,
+      "requirement_template.destroy_success"
+    )
+  rescue TemplateVersionArchiveError => e
+    render_error "requirement_template.archive_blocked_published",
+                 log_args: {
+                   errors: e.message
+                 }
+  rescue StandardError => e
+    render_error "requirement_template.destroy_error",
+                 log_args: {
+                   errors: e.message
+                 }
   end
 
   def restore
@@ -415,18 +423,21 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     if params[:jurisdiction_id].present?
       jurisdiction = Jurisdiction.friendly.find(params[:jurisdiction_id])
       authorize jurisdiction, :search_permit_applications?
-      apps =
-        apps.where(
-          permit_projects: {
-            jurisdiction_id: jurisdiction.id
-          }
-        ).submitted_at_least_once
+      apps = apps.where(permit_projects: { jurisdiction_id: jurisdiction.id })
+      apps = apps.submitted_at_least_once if params[:permit_project_id].blank?
     end
 
     if params[:permit_project_id].present?
-      project = PermitProject.find(params[:permit_project_id])
+      project =
+        ensure_in_sandbox!(PermitProject.find(params[:permit_project_id]))
       authorize project, :show?
       apps = apps.where(permit_project_id: project.id)
+    end
+
+    # The jurisdiction queue stays submitted-only. A project search includes
+    # new drafts, matching the inbox search where-clause.
+    if current_user.review_staff? && params[:permit_project_id].blank?
+      apps = apps.where.not(status: :new_draft)
     end
 
     RequirementTemplate

@@ -241,6 +241,9 @@ class Api::JurisdictionsController < Api::ApplicationController
                    nil,
                    {
                      blueprint: ProjectMeetingBlueprint,
+                     blueprint_opts: {
+                       view: :base
+                     },
                      meta: @jurisdiction_project_meeting_meta
                    }
   end

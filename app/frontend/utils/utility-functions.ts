@@ -5,6 +5,7 @@ import {
   VALUE_EXTRACTION_AUTO_COMPLIANCE_TYPES,
   vancouverTimeZone,
 } from "../constants"
+import { requestAppNavBarReveal } from "../hooks/use-scroll-aware-nav-bar"
 import {
   EEnergyStepCodeDependencyRequirementCode,
   EEnergyStepCodePart3DependencyRequirementCode,
@@ -182,6 +183,9 @@ export function handleScrollToTop() {
     behavior: "instant",
   })
   document.body.scrollTop = 0 // For Safari
+  // A tucked bar keeps its layout slot. On a short page that slot is a blank
+  // gap and no further scroll can bring the bar back.
+  requestAppNavBarReveal()
 }
 
 export function handleScrollToBottom() {
@@ -427,6 +431,7 @@ export async function downloadFileFromStorage(options: {
     const response = await fetch(`/api/s3/params/download?model=${model}&modelId=${modelId}`, {
       method: "GET",
       headers: {
+        "X-Sandbox-ID": getCurrentSandboxId(),
         "Content-Type": "application/json",
         Accept: "application/json",
       },
@@ -508,10 +513,10 @@ export function numberToFormattedString(
 
 /**
  * Rounds a numeric value (number or string) to a fixed number of decimal places.
- * Returns "-" for null, undefined, or NaN values.
+ * Returns "-" for missing or invalid values; preserves numeric zero.
  */
 export function roundMetric(value: string | number | null | undefined, decimals: number = 5): string {
-  if (!value) return "-"
+  if (value === null || value === undefined || value === "") return "-"
   const num = typeof value === "string" ? parseFloat(value) : value
   return isNaN(num) ? "-" : num.toFixed(decimals)
 }

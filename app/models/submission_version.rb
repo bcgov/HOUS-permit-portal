@@ -8,8 +8,50 @@ class SubmissionVersion < ApplicationRecord
   belongs_to :permit_application
   has_many :revision_requests, dependent: :destroy
   has_many :supporting_documents, dependent: :destroy
+  has_many :notes, as: :noteable, dependent: :destroy
 
   accepts_nested_attributes_for :revision_requests, allow_destroy: true
+
+  attr_readonly :report_snapshot
+  validate :report_snapshot_is_valid, on: :create
+  validate :report_snapshot_is_immutable, on: :update
+
+  def report_snapshot_is_valid
+    return if report_snapshot.nil?
+    PrintReports::Snapshot.validate!(report_snapshot, self)
+  rescue PrintReports::Data::Unavailable => e
+    errors.add(:report_snapshot, e.message)
+  end
+
+  def report_snapshot_is_immutable
+    if will_save_change_to_report_snapshot?
+      errors.add(:report_snapshot, "cannot be changed")
+    end
+  end
+
+  # ZIP membership follows the same saved answers as the report, even if a
+  # maintenance operation subsequently changes the legacy submission_data field.
+  def report_submission_data
+    reports = report_snapshot["reports"] if report_snapshot.is_a?(Hash)
+    report = reports["application"] if reports.is_a?(Hash)
+    saved = report["submission_data"] if report.is_a?(Hash)
+    saved.is_a?(Hash) ? saved.deep_dup : submission_data
+  end
+
+  def report_generation_issues
+    return [] if missing_pdfs.empty?
+    PrintReports::Snapshot.validate!(report_snapshot, self)
+    []
+  rescue PrintReports::Data::Unavailable => e
+    missing_pdfs.map do |key|
+      {
+        key: key,
+        submission_version_id: id,
+        version_number: version_number,
+        reason: e.message
+      }
+    end
+  end
 
   def zipfile_size
     zipfile_data&.dig("metadata", "size")
@@ -40,7 +82,15 @@ class SubmissionVersion < ApplicationRecord
     update!(viewed_at: nil)
   end
 
-  delegate :sandbox, to: :permit_application
+  delegate :permit_project, :sandbox, to: :permit_application
+
+  def jurisdiction_note
+    notes.jurisdiction_message.pick(:body)
+  end
+
+  def submitter_note
+    notes.submitter_message.pick(:body)
+  end
 
   scope :sandboxed,
         -> do
@@ -115,6 +165,9 @@ class SubmissionVersion < ApplicationRecord
   end
 
   def has_step_code_checklist?
+    if report_snapshot.is_a?(Hash) && report_snapshot["reports"].is_a?(Hash)
+      return report_snapshot["reports"].key?("checklist")
+    end
     step_code_checklist_json.present? && !step_code_checklist_json.empty?
   end
 
@@ -139,6 +192,16 @@ class SubmissionVersion < ApplicationRecord
       .index(id) + 1
   end
 
+  def has_request_package_items?
+    revision_requests.exists?
+  end
+
+  def request_package_visible_to_submitter?
+    return true if permit_application.revisions_requested?
+
+    permit_application.latest_submission_version&.id != id
+  end
+
   def revision_requests_for_submitter_based_on_user_permissions(user: nil)
     return revision_requests if user.blank?
 
@@ -152,7 +215,10 @@ class SubmissionVersion < ApplicationRecord
     return [] if permissions.blank?
 
     revision_requests.select do |r|
-      return false if r.requirement_json["key"].blank?
+      next true if r.is_a?(SupportingDocumentRevisionRequest)
+      if r.requirement_json.blank? || r.requirement_json["key"].blank?
+        return false
+      end
 
       rb_id = r.requirement_json["key"][/RB([a-zA-Z0-9\-]+)/, 1]
       permissions.include?(rb_id)

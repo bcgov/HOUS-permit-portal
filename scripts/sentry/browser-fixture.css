@@ -1,0 +1,190 @@
+html {
+  /* Keep the page width steady when Sentry locks body scrolling. */
+  scrollbar-gutter: stable;
+}
+body {
+  margin: 0;
+  background: #f3f5f7;
+  color: #253447;
+  font-family: "BC Sans", sans-serif;
+}
+.fixture {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 40px 72px 56px 24px;
+}
+.fixture h1 {
+  color: #003366;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 8px 0 16px;
+}
+.fixture h2 {
+  color: #003366;
+  font-size: 21px;
+  font-weight: 700;
+  margin: 0 0 12px;
+}
+.fixture p {
+  line-height: 1.6;
+  margin: 0 0 16px;
+}
+.fixture .eyebrow {
+  color: #526373;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.fixture .notice {
+  padding: 16px 20px;
+  background: #e8eff7;
+  border-left: 4px solid #003366;
+  border-radius: 4px;
+  margin: 24px 0;
+}
+.fixture .notice p {
+  margin: 0;
+}
+.fixture .controls {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  margin-bottom: 24px;
+}
+.fixture .card {
+  background: white;
+  border: 1px solid #d8dfe5;
+  border-radius: 8px;
+  padding: 24px;
+}
+.fixture .controls .card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.fixture .controls .card p {
+  flex: 1;
+}
+.fixture button {
+  background: #003366;
+  border: 2px solid #003366;
+  border-radius: 4px;
+  padding: 10px 16px;
+  color: white;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  line-height: 1.4;
+}
+.fixture button:hover {
+  background: #174b7d;
+}
+.fixture button:focus-visible,
+.fixture a:focus-visible,
+.fixture input:focus-visible {
+  outline: 3px solid #fcba19;
+  outline-offset: 3px;
+}
+.fixture button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.fixture button.secondary {
+  background: white;
+  color: #003366;
+}
+.fixture button.secondary:hover {
+  background: #e8eff7;
+}
+.fixture a {
+  color: #003366;
+  text-decoration: underline;
+}
+.fixture .options {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+}
+.fixture input[type="checkbox"] {
+  appearance: auto;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  margin-top: 3px;
+  accent-color: #003366;
+}
+.fixture .helper {
+  font-size: 14px;
+  color: #526373;
+  margin: 8px 0 0 32px;
+}
+.fixture .status {
+  display: inline-block;
+  background: #e6f2ea;
+  color: #225339;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+.fixture .section {
+  margin-bottom: 24px;
+}
+.fixture .section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.fixture .preview {
+  border: 1px dashed #b7c4d0;
+  border-radius: 4px;
+  padding: 20px;
+  background: #fafbfd;
+}
+.fixture .preview p:last-child {
+  margin-bottom: 0;
+}
+.fixture .preview [role="alert"] {
+  padding: 0 !important;
+}
+.fixture .preview [role="alert"] h1 {
+  font-size: 22px;
+  margin-top: 0;
+}
+.fixture .preview [role="alert"] p {
+  margin-top: 12px;
+}
+.fixture pre {
+  background: #172b3e;
+  color: #e9f0f7;
+  padding: 20px;
+  border-radius: 4px;
+  font:
+    13px/1.6 ui-monospace,
+    monospace;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 480px;
+  overflow: auto;
+}
+@media (max-width: 850px) {
+  .fixture .controls {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 480px) {
+  .fixture {
+    padding: 24px 60px 32px 16px;
+  }
+  .fixture h1 {
+    font-size: 25px;
+  }
+  .fixture .card {
+    padding: 16px;
+  }
+}

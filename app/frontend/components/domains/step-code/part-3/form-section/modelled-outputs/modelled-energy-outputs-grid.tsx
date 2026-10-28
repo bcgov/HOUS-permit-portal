@@ -1,4 +1,16 @@
-import { Box, Button, Flex, Grid, GridProps, IconButton, Input, InputProps, Stack, Text } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  Flex,
+  Grid,
+  GridProps,
+  HStack,
+  IconButton,
+  Input,
+  InputProps,
+  Stack,
+  Text,
+} from "@chakra-ui/react"
 import { Plus, X } from "@phosphor-icons/react"
 import { computed } from "mobx"
 import { observer } from "mobx-react-lite"
@@ -14,7 +26,6 @@ import { formattedStringToNumber, numberToFormattedString } from "../../../../..
 import { TextFormControl } from "../../../../../shared/form/input-form-control"
 import { InfoTooltip } from "../../../../../shared/info-tooltip"
 import FuelTypeSelect from "../../../../../shared/select/selectors/fuel-type-select"
-import { HStack } from "../../../part-9/checklist/pdf-content/shared/h-stack"
 import { GridColumnHeader } from "../../../part-9/checklist/shared/grid/column-header"
 import { GridData } from "../../../part-9/checklist/shared/grid/data"
 import { GridRowHeader } from "../../../part-9/checklist/shared/grid/row-header"

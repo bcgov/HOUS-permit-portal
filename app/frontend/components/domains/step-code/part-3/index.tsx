@@ -11,6 +11,7 @@ import { SharedSpinner } from "../../../shared/base/shared-spinner"
 import { FloatingHelpDrawer } from "../../../shared/floating-help-drawer"
 import { ProjectInformation } from "../project-information"
 import { StepCodeSubNavBar } from "../step-code-sub-nav-bar"
+import { useRedirectAttachedStepCode } from "../use-redirect-attached-step-code"
 import { FormSection } from "./form-section"
 import { Sidebar } from "./sidebar"
 import { defaultSectionCompletionStatus } from "./sidebar/nav-sections"
@@ -23,6 +24,7 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
     stepCodeStore: { createPart3StepCode },
   } = useMst()
   const { currentStepCode } = usePart3StepCode()
+  const redirectingToPermit = useRedirectAttachedStepCode("part-3-step-code", currentStepCode)
   const { infoPagePath, isPermitLinked, exitLinkPath } = usePart3Navigation()
   const isStandaloneStepCode = !permitApplicationId
 
@@ -32,6 +34,7 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
     if (stepCodeId) return // Step Code was already created in the previous screen
     if (!!currentStepCode) return // Step Code already exists
     if (!isStandaloneStepCode && !currentPermitApplication?.isFullyLoaded) return // wait for permit application to load
+    if (!isStandaloneStepCode && currentPermitApplication?.stepCode) return
 
     if (!currentStepCode) {
       // HUB-5145: Permit-linked Part 3 entry auto-creates the StepCode report
@@ -51,6 +54,14 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
       scroller.scrollTo({ top: 0, left: 0, behavior: "auto" })
     }
   }, [section])
+
+  if (redirectingToPermit) {
+    return (
+      <Center p={50}>
+        <SharedSpinner />
+      </Center>
+    )
+  }
 
   // Prevent viewing/editing archived Step Codes
   if (currentStepCode?.isDiscarded) return <NotFoundScreen />

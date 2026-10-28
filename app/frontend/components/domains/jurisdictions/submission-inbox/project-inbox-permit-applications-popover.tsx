@@ -7,6 +7,7 @@ import {
   PopoverTrigger,
   Portal,
   Text,
+  Tooltip,
   VStack,
 } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
@@ -61,15 +62,25 @@ export const ProjectInboxPermitApplicationsPopover = observer(function ProjectIn
           return (
             <HStack key={idx} spacing={2} justify="space-between">
               {linkDisabled ? (
-                <Text
-                  fontSize="xs"
-                  color="text.secondary"
-                  noOfLines={1}
-                  cursor="default"
-                  onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                <Tooltip
+                  label={
+                    entry.status === EPermitApplicationStatus.newDraft
+                      ? t("permitProject.activity.unsubmittedPermitApplication")
+                      : undefined
+                  }
+                  isDisabled={entry.status !== EPermitApplicationStatus.newDraft}
+                  hasArrow
                 >
-                  {label}
-                </Text>
+                  <Text
+                    fontSize="xs"
+                    color="text.secondary"
+                    noOfLines={1}
+                    cursor="not-allowed"
+                    onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                  >
+                    {label}
+                  </Text>
+                </Tooltip>
               ) : (
                 <Text
                   as={Link}

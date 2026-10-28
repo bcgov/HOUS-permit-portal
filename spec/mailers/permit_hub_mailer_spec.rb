@@ -1,6 +1,7 @@
 require "rails_helper"
 
 RSpec.describe PermitHubMailer, type: :mailer do
+  include ActiveSupport::Testing::TimeHelpers
   let(:mailer) { described_class.new }
 
   let(:confirmed_user) do
@@ -201,6 +202,23 @@ RSpec.describe PermitHubMailer, type: :mailer do
         days: 2
       }
     )
+  end
+
+  %w[user_archive_warning user_delete_warning].each do |template|
+    it "renders #{template} on the Vancouver day after the last clock change" do
+      mailer.instance_variable_set(:@user, User.new(first_name: "Example"))
+      mailer.instance_variable_set(
+        :@scheduled_date,
+        Time.iso8601("2027-02-01T07:30:00Z")
+      )
+      html =
+        mailer.render_to_string(
+          template: "permit_hub_mailer/#{template}",
+          layout: false
+        )
+      expect(html).to include("February 1, 2027 at 12:30 AM Pacific Time")
+      expect(html).not_to include("January 31")
+    end
   end
 
   it "sends onboarding and new jurisdiction membership emails" do
@@ -416,7 +434,7 @@ RSpec.describe PermitHubMailer, type: :mailer do
         contact_email: "jane@example.com",
         contact_name: "Jane Smith",
         contact_method: "videoconference",
-        confirmed_date: Time.zone.parse("2026-01-20 09:30"),
+        confirmed_date: Time.iso8601("2027-01-15T20:00:00Z"),
         meeting_url: "https://example.com/meeting",
         permit_project: permit_project,
         updated_at: Time.zone.parse("2026-01-20 08:00")
@@ -426,13 +444,17 @@ RSpec.describe PermitHubMailer, type: :mailer do
 
     mailer.notify_project_meeting_scheduled(project_meeting)
 
+    expect(mailer.instance_variable_get(:@meeting_datetime)).to eq(
+      "Jan 15, 2027 at 1:00 pm PT"
+    )
+
     expect(attachments_hash.keys.first).to end_with(".ics")
     expect(attachments_hash.values.first[:mime_type]).to include(
       "text/calendar"
     ).and include("method=REQUEST")
     expect(attachments_hash.values.first[:content]).to include(
       "BEGIN:VCALENDAR"
-    ).and include("METHOD:REQUEST")
+    ).and include("METHOD:REQUEST", "DTSTART:20270115T200000Z")
     expect(mailer).to have_received(:send_mail).with(
       email: "jane@example.com",
       template_key: "notify_project_meeting_scheduled"
@@ -651,6 +673,27 @@ RSpec.describe PermitHubMailer, type: :mailer do
     )
   end
 
+  it "labels winter API key revocations as Pacific Time rather than MST" do
+    mailer.instance_variable_set(:@status, :revoked)
+    mailer.instance_variable_set(:@jurisdiction_name, "Example jurisdiction")
+    mailer.instance_variable_set(
+      :@external_api_key,
+      ExternalApiKey.new(
+        name: "Example key",
+        connecting_application: "Example application",
+        revoked_at: Time.iso8601("2027-01-15T20:00:00Z")
+      )
+    )
+
+    html =
+      mailer.render_to_string(
+        template: "permit_hub_mailer/notify_api_key_status_change",
+        layout: false
+      )
+    expect(html).to include("January 15, 2027 01:00 PM Pacific Time")
+    expect(html).not_to include("MST")
+  end
+
   it "uses STI class specific subject for submission contact confirmations" do
     submission_contact =
       instance_double(
@@ -711,6 +754,42 @@ RSpec.describe PermitHubMailer, type: :mailer do
   end
 
   describe "#send_step_code_report_to_jurisdiction" do
+    it "labels the winter shared date as Pacific Time rather than MST" do
+      travel_to(Time.iso8601("2027-01-15T20:00:00Z")) do
+        mailer.instance_variable_set(
+          :@step_code,
+          instance_double("StepCode", full_address: nil, reference_number: nil)
+        )
+        mailer.instance_variable_set(
+          :@jurisdiction,
+          instance_double(
+            "Jurisdiction",
+            qualified_name: "Example jurisdiction"
+          )
+        )
+        mailer.instance_variable_set(
+          :@sender_user,
+          User.new(
+            first_name: "Example",
+            last_name: "User",
+            email: "example@example.test"
+          )
+        )
+        mailer.instance_variable_set(
+          :@report_document,
+          instance_double("ReportDocument", file_name: "report.pdf")
+        )
+
+        html =
+          mailer.render_to_string(
+            template: "permit_hub_mailer/send_step_code_report_to_jurisdiction",
+            layout: false
+          )
+        expect(html).to include("January 15, 2027 at 01:00 PM Pacific Time")
+        expect(html).not_to include("MST")
+      end
+    end
+
     it "raises when report document has no file attached" do
       report_document = instance_double("ReportDocument", id: "rd-1", file: nil)
 

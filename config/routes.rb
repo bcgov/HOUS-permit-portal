@@ -45,6 +45,7 @@ Rails.application.routes.draw do
       delete "/invitation/remove" => "invitations#remove"
       get "/invitations/:invitation_token" => "invitations#show"
       get "/logout" => "sessions#destroy"
+      get "/auth/failure" => "omniauth_callbacks#failure"
     end
 
     get "/submission_contacts/confirm",
@@ -134,8 +135,8 @@ Rails.application.routes.draw do
     end
 
     resources :template_versions, only: %i[index show] do
-      get "publicly_previewable",
-          to: "template_versions#publicly_previewable",
+      get "standardization_preview",
+          to: "template_versions#standardization_preview",
           on: :collection
       get "compare_requirements",
           to: "template_versions#compare_requirements",
@@ -193,7 +194,9 @@ Rails.application.routes.draw do
       get "contact_options", on: :collection
     end
 
-    resources :submission_contacts, only: %i[index create update destroy]
+    resources :submission_contacts, only: %i[index create update destroy] do
+      post :resend_confirmation, on: :member
+    end
 
     resources :geocoder, only: %i[] do
       get "site_options", on: :collection
@@ -213,7 +216,7 @@ Rails.application.routes.draw do
       end
     end
 
-    resources :permit_applications, only: %i[create update show destroy] do
+    resources :permit_applications, only: %i[update show destroy] do
       collection { patch :reorder }
       post "restore", on: :member
       post "generate_missing_pdfs",
@@ -236,6 +239,7 @@ Rails.application.routes.draw do
            to: "permit_applications#invite_new_collaborator"
       post "submit", on: :member
       post "mark_as_viewed", on: :member
+      post "acknowledge_published_electives", on: :member
       post "mark_as_unviewed", on: :member
       post "transition_status", on: :member
       post "retrigger_submission_webhook", on: :member
@@ -244,6 +248,9 @@ Rails.application.routes.draw do
       patch "revision_requests",
             on: :member,
             to: "permit_applications#update_revision_requests"
+      patch "submitter_note",
+            on: :member,
+            to: "permit_applications#update_submitter_note"
       post "revision_requests/finalize",
            on: :member,
            to: "permit_applications#finalize_revision_requests"
@@ -351,6 +358,9 @@ Rails.application.routes.draw do
       get "download_part_9_step_code_checklists_csv",
           on: :collection,
           to: "step_codes#download_part_9_step_code_checklists_csv"
+      get "download_part_3_step_code_checklists_csv",
+          on: :collection,
+          to: "step_codes#download_part_3_step_code_checklists_csv"
       get "download_step_code_file_uploads_zip",
           on: :collection,
           to: "step_codes#download_step_code_file_uploads_zip"
@@ -480,8 +490,17 @@ Rails.application.routes.draw do
       end
     end
     namespace :v2 do
-      resources :permit_projects, only: %i[show]
+      resources :project_meetings, only: %i[show update]
+      resources :permit_projects, only: %i[show] do
+        post "search", on: :collection, to: "permit_projects#index"
+        patch "state", on: :member, to: "permit_projects#update_state"
+        post "permit_applications",
+             on: :member,
+             to: "permit_projects#create_permit_applications"
+      end
+      resources :files, only: %i[create]
       resources :revision_reasons, only: %i[index]
+      resources :requirement_templates, only: %i[index]
       resources :permit_applications, only: %i[show] do
         post "search", on: :collection, to: "permit_applications#index"
         patch "status", on: :member, to: "permit_applications#update_status"

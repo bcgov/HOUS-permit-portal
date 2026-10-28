@@ -1,0 +1,8 @@
+.print-report {
+  --report-ink: #253247;
+  --report-muted: #526176;
+  --report-line: #d5dce5;
+  --report-tint: #f2f5f8;
+  --report-body-size: 11pt;
+  --report-font-family: var(--report-brand-font), Arial, sans-serif;
+}

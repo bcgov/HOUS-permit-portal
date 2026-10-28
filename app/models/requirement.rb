@@ -24,7 +24,6 @@ class Requirement < ApplicationRecord
          radio: 12,
          address: 13,
          bcaddress: 14,
-         signature: 15,
          energy_step_code: 16, #NOTE: THIS IS ASSUMED TO BE PART_9
          general_contact: 17,
          professional_contact: 18,

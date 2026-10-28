@@ -183,10 +183,18 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
         return self.reportDocument
       },
     }))
+    // Not in the API snapshot, so a websocket checklist reload does not clear it.
+    .volatile(() => ({
+      reportGenerationPending: false,
+    }))
     .actions((self) => ({
       markReportDocumentStale() {
         if (!self.reportDocument || self.reportDocument.stale) return
         self.reportDocument = { ...self.reportDocument, stale: true }
+        self.reportGenerationPending = false
+      },
+      clearReportGenerationPending() {
+        self.reportGenerationPending = false
       },
       load: flow(function* () {
         const response = yield self.environment.api.fetchPart9Checklist(self.id)
@@ -220,6 +228,9 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
           if (key !== "report") {
             self.markReportDocumentStale()
           }
+          if (requestOptions?.reportGenerationRequested) {
+            self.reportGenerationPending = true
+          }
           return true
         }
         return false
@@ -234,6 +245,7 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
           const snapshotData = { ...preProcessor(response.data.data), isLoaded: true }
           applySnapshot(self, snapshotData)
           self.markReportDocumentStale()
+          self.reportGenerationPending = true
           return true
         }
         return false

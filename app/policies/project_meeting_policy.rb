@@ -8,22 +8,17 @@ class ProjectMeetingPolicy < ApplicationPolicy
 
       if user.review_staff?
         # NOTE: This will have to be updated if review staff can ever create meeting requests
-        review_clauses = [
+        clauses << [
           "permit_projects.jurisdiction_id IN (:jur_ids)",
           "project_meetings.status != :draft_status"
-        ]
-        if sandbox.present?
-          review_clauses << "permit_projects.sandbox_id = :sandbox_id"
-        end
-
-        clauses << review_clauses.join(" AND ")
+        ].join(" AND ")
         values[:jur_ids] = user.jurisdictions.pluck(:id)
         values[:draft_status] = ProjectMeeting.statuses[:draft]
-        values[:sandbox_id] = sandbox.id if sandbox.present?
       end
 
       scope
         .joins(:permit_project)
+        .where(permit_projects: { sandbox_id: sandbox&.id })
         .where(clauses.map { |clause| "(#{clause})" }.join(" OR "), values)
         .distinct
     end

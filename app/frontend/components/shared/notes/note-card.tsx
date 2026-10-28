@@ -9,20 +9,26 @@ import { NoteAttachmentList } from "./note-attachment-list"
 
 interface NoteCardProps {
   note: INote
+  label?: string | null
   footer?: ReactNode
 }
 
 // Single rendering of a note wherever it is displayed, so attachments show up
 // consistently for reviewers and submitters alike.
-export const NoteCard = observer(({ note, footer }: NoteCardProps) => {
+export const NoteCard = observer(({ note, label, footer }: NoteCardProps) => {
   const createdAt = note.createdAt ? format(note.createdAt, datefnsTableDateTimeFormat) : null
   const attachments = note.noteAttachmentDocuments ?? []
 
   return (
     <Box border="1px" borderColor="border.light" borderRadius="md" p={4}>
       <VStack align="stretch" spacing={2}>
-        <HStack spacing={4} align="baseline">
+        <HStack spacing={3} align="baseline">
           <Text fontWeight="bold">{note.authorName}</Text>
+          {label && (
+            <Text color="text.secondary" fontSize="sm">
+              {label}
+            </Text>
+          )}
           {createdAt && (
             <Text color="text.secondary" fontSize="sm">
               {createdAt}

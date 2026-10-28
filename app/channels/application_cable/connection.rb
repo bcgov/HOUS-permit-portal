@@ -11,7 +11,8 @@ module ApplicationCable
     def find_verified_user
       # decode using JWT strategy
       decoder = Warden::JWTAuth::UserDecoder.new
-      verified_user = decoder.call(cookies["access_token"], :user, nil)
+      verified_user =
+        decoder.call(cookies[Devise::JWT::Cookie.config.name], :user, nil)
       verified_user.blank? ? reject_unauthorized_connection : verified_user
     end
   end

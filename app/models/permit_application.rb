@@ -25,12 +25,17 @@ class PermitApplication < ApplicationRecord
     :submission_versions,
     :step_code,
     :submitter,
+    :created_by,
     { permit_collaborations: :collaborator }
   ]
 
   belongs_to :submitter, class_name: "User", optional: true
+  belongs_to :created_by, polymorphic: true, optional: true
   public_recordable user_association: :submitter
   belongs_to :template_version
+  belongs_to :acknowledged_customization_change,
+             class_name: "CustomizationChange",
+             optional: true
   belongs_to :permit_project, optional: true, touch: true
 
   has_one :requirement_template, through: :template_version
@@ -43,6 +48,7 @@ class PermitApplication < ApplicationRecord
   attr_accessor :front_end_form_update
 
   has_many :submission_versions, dependent: :destroy
+  has_many :notes, as: :noteable, dependent: :destroy
   has_many :permit_collaborations,
            -> { where(discarded_at: nil) },
            dependent: :destroy
@@ -88,8 +94,9 @@ class PermitApplication < ApplicationRecord
 
   before_validation :assign_unique_number, on: :create
   before_validation :set_template_version, on: :create
-  before_validation :assign_default_nickname, on: :create
   before_validation :populate_base_form_data, on: :create
+  before_validation :assign_created_by_from_submitter, on: :create
+  before_create :acknowledge_current_customization_change
   before_save :take_form_customizations_snapshot_if_submitted
 
   after_commit :reindex_jurisdiction_permit_application_size
@@ -108,7 +115,7 @@ class PermitApplication < ApplicationRecord
   scope :unviewed,
         -> do
           where(status: submitted_statuses, viewed_at: nil).order(
-            submitted_at: :asc
+            created_at: :asc
           )
         end
 
@@ -404,6 +411,36 @@ class PermitApplication < ApplicationRecord
     end
   end
 
+  def unseen_elective_field_ids
+    return [] unless draft?
+
+    current_enabled, = current_elective_field_sets
+    ids =
+      unacknowledged_customization_changes.flat_map(
+        &:highlight_component_ids
+      ).uniq
+    ids & current_enabled
+  end
+
+  def unseen_customization_change_id
+    return if unseen_elective_field_ids.empty?
+
+    unacknowledged_customization_changes.order(
+      created_at: :desc,
+      id: :desc
+    ).pick(:id)
+  end
+
+  def acknowledge_published_electives!(change_id)
+    change = customization_changes_for_application.find_by(id: change_id)
+    return unless change
+
+    acknowledged = acknowledged_customization_change
+    return if acknowledged && !customization_change_after?(change, acknowledged)
+
+    update_column(:acknowledged_customization_change_id, change.id)
+  end
+
   def update_viewed_at
     version = latest_submission_version
     return unless version.present?
@@ -539,13 +576,12 @@ class PermitApplication < ApplicationRecord
   end
 
   def mark_submission_packages_ready!
-    return [] unless zipfile_data.present?
-
     newly_ready = []
     submission_versions
       .order(:created_at)
       .each do |submission_version|
         next if submission_version.package_ready_at.present?
+        next if submission_version.zipfile_data.blank?
         next if submission_version.missing_pdfs?
 
         submission_version.update!(package_ready_at: Time.current)
@@ -579,6 +615,10 @@ class PermitApplication < ApplicationRecord
           enqueue_v2_status_webhook(external_api_key)
         end
       end
+  end
+
+  def report_generation_issues
+    submission_versions.flat_map(&:report_generation_issues)
   end
 
   def missing_pdfs
@@ -761,6 +801,7 @@ class PermitApplication < ApplicationRecord
           "LEFT JOIN (#{sv_max.to_sql}) sv_max ON sv_max.permit_application_id = permit_applications.id"
         )
         .where(users: { role: "submitter" })
+        .where(permit_projects: { sandbox_id: nil })
         .group(
           "jurisdictions.id",
           "requirement_templates.id",
@@ -849,14 +890,30 @@ class PermitApplication < ApplicationRecord
     )
   end
 
+  def assign_creation_actors(user)
+    project = permit_project
+    return unless project && user
+
+    if project.owner_id == user.id
+      self.created_by = user
+      self.submitter = user
+    else
+      self.created_by = project.jurisdiction
+      self.submitter = project.owner
+    end
+  end
+
   private
+
+  # ponytail: assign_creation_actors sets a jurisdiction when a reviewer creates
+  # the draft. Anything else is created by the submitter.
+  # association reader skips PublicRecordable's unsaved readonly snapshot user.
+  def assign_created_by_from_submitter
+    self.created_by ||= association(:submitter).reader
+  end
 
   def update_collaboration_assignments
     # TODO: Implement this method to remove collaborations for missing requirement block when a new template is published
-  end
-
-  def assign_default_nickname
-    self.nickname = requirement_template.nickname if nickname.blank?
   end
 
   def assign_unique_number
@@ -903,6 +960,60 @@ class PermitApplication < ApplicationRecord
 
     self.number = new_number if self.number.blank?
     return new_number
+  end
+
+  def acknowledge_current_customization_change
+    self.acknowledged_customization_change = latest_customization_change
+  end
+
+  def latest_customization_change
+    customization_changes_for_application.order(
+      created_at: :desc,
+      id: :desc
+    ).first
+  end
+
+  def unacknowledged_customization_changes
+    scope = customization_changes_for_application
+    acknowledged = acknowledged_customization_change
+    return scope unless acknowledged
+
+    scope.where(
+      "customization_changes.created_at > :created_at OR " \
+        "(customization_changes.created_at = :created_at AND customization_changes.id > :id)",
+      created_at: acknowledged.created_at,
+      id: acknowledged.id
+    )
+  end
+
+  def customization_change_after?(change, earlier)
+    change.created_at > earlier.created_at ||
+      (
+        change.created_at == earlier.created_at &&
+          change.id.to_s > earlier.id.to_s
+      )
+  end
+
+  def customization_changes_for_application
+    if jurisdiction.blank? || template_version_id.blank?
+      return CustomizationChange.none
+    end
+
+    CustomizationChange.joins(
+      :jurisdiction_template_version_customization
+    ).where(
+      jurisdiction_template_version_customizations: {
+        jurisdiction_id: jurisdiction.id,
+        template_version_id: template_version_id,
+        sandbox_id: sandbox_id
+      }
+    )
+  end
+
+  def current_elective_field_sets
+    JurisdictionTemplateVersionCustomization.elective_field_sets(
+      form_customizations
+    )
   end
 
   def take_form_customizations_snapshot_if_submitted
@@ -1059,10 +1170,10 @@ class PermitApplication < ApplicationRecord
           :base,
           "Revisions-requested applications must have at least one submission version"
         )
-      elsif latest_submission_version.revision_requests.empty?
+      elsif !latest_submission_version.has_request_package_items?
         errors.add(
           :base,
-          "Revisions-requested applications must have at least one revision request"
+          "Revisions-requested applications must have at least one request"
         )
       end
     elsif resubmitted? && sv_count < 2

@@ -25,8 +25,9 @@ module Reports
       I18n.t("reports.#{key}.description")
     end
 
-    def initialize(range:)
+    def initialize(range:, subject: nil)
       @range = range
+      @subject = subject
     end
 
     def call
@@ -112,10 +113,14 @@ module Reports
       range.apply(submitted_applications, FIRST_SUBMITTED_AT_SQL)
     end
 
-    def figure(key, value, approximate: false, help_overrides: {})
-      {
+    def figure(key, value, approximate: false, help_overrides: {}, section: nil)
+      payload = {
         key: key,
-        label: I18n.t("reports.#{self.class.key}.figures.#{key}.label"),
+        label:
+          I18n.t(
+            "reports.#{self.class.key}.figures.#{key}.label",
+            **{ range: range.label }.merge(help_overrides)
+          ),
         value: value,
         help_text:
           I18n.t(
@@ -124,6 +129,8 @@ module Reports
           ),
         approximate: approximate
       }
+      payload[:section] = section if section
+      payload
     end
 
     def chart(key, type, x_key:, series:, data:, record_count:, suppressed: nil)
@@ -141,7 +148,7 @@ module Reports
       }
     end
 
-    def table(key, columns, rows, sortable: false, default_sort: nil)
+    def table(key, columns, rows, sortable: true, default_sort: nil)
       payload = {
         key: key,
         columns:
@@ -167,8 +174,7 @@ module Reports
     end
 
     def counts_by_month(scope, timestamp_sql)
-      grouped =
-        scope.group(Arel.sql("date_trunc('month', #{timestamp_sql})")).count
+      grouped = scope.group(Arel.sql(local_month_sql(timestamp_sql))).count
       grouped_by_month =
         grouped.each_with_object({}) do |(key, count), memo|
           next if key.blank?
@@ -237,6 +243,23 @@ module Reports
       sorted.length.odd? ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2.0
     end
 
+    def megabytes(bytes)
+      return nil if bytes.nil?
+
+      (bytes.to_f / 1.megabyte).round(1)
+    end
+
+    def storage_size(bytes)
+      return nil if bytes.nil?
+
+      amount = bytes.to_f
+      if amount.abs >= 1.gigabyte
+        format("%.2f GB", amount / 1.gigabyte)
+      else
+        format("%.1f MB", amount / 1.megabyte)
+      end
+    end
+
     def round_days(seconds)
       return nil if seconds.nil?
 
@@ -255,6 +278,13 @@ module Reports
     end
 
     private
+
+    # Timestamps are stored as UTC without a zone. Truncate in the app zone
+    # and return a date so ActiveRecord does not read the bucket back as UTC.
+    def local_month_sql(timestamp_sql)
+      zone = ActiveRecord::Base.connection.quote(Time.zone.tzinfo.name)
+      "date_trunc('month', (#{timestamp_sql}) AT TIME ZONE 'UTC' AT TIME ZONE #{zone})::date"
+    end
 
     def numeric_presence?(value)
       case value

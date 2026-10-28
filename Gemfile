@@ -1,6 +1,10 @@
 source "https://rubygems.org"
 
-ruby "3.2.5"
+ruby "4.0.9"
+
+# Explicit standard-library dependencies for Ruby 4.
+gem "csv", "~> 3.3"
+gem "ostruct", "~> 0.6"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
 gem "rails", "7.2.3.2"
@@ -47,6 +51,9 @@ gem "blueprinter", "~> 1.0.2"
 
 gem "awesome_print", "~> 1.9"
 gem "sidekiq", "~> 7.2.4"
+gem "sentry-ruby", "~> 7.1.0"
+gem "sentry-rails", "~> 7.1.0"
+gem "sentry-sidekiq", "~> 7.1.0"
 gem "shrine", "~> 3.5.0"
 gem "redis", "~> 5.0.8"
 gem "image_processing", "~> 1.12.2"
@@ -82,10 +89,10 @@ gem "rswag-api", "~> 2.13"
 gem "rswag-ui", "~> 2.13"
 
 # brew install geos
-# bundle config build.rgeo --with-geos-dir=/usr/local/opt/geos
-gem "rgeo", "~> 3.0.1"
+# bundle config build.rgeo --with-geos-dir="$(brew --prefix geos)"
+gem "rgeo", "~> 3.1.0"
 # brew install proj
-gem "rgeo-proj4", "~> 4.0.0"
+gem "rgeo-proj4", "~> 5.0.0"
 gem "aasm", "~> 5.5.0"
 
 # Virus scanning via ClamAV daemon
@@ -93,8 +100,10 @@ gem "clamav-client", "~> 3.2", require: "clamav/client"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
-  gem "debug", platforms: %i[mri windows]
+  gem "debug", "~> 1.11.1", platforms: %i[mri windows]
   gem "pry-byebug", "~> 3.10.1"
+  # Byebug still requires the readline compatibility library.
+  gem "readline", "~> 0.0.4"
   gem "rspec-rails", "~> 6.1.0"
   gem "rswag-specs", "~> 2.17"
   gem "factory_bot_rails", "~> 6.4.2"
@@ -103,6 +112,9 @@ group :development, :test do
   gem "database_cleaner-active_record"
   gem "vcr", "~> 6.2"
   gem "bullet", "~> 8.0"
+
+  # FactoryBot requires observer, which is no longer a default Ruby gem.
+  gem "observer", "~> 0.1"
 end
 
 group :test do
@@ -124,6 +136,7 @@ group :development do
   gem "syntax_tree-haml", "~> 4.0"
   gem "syntax_tree-rbs", "~> 1.0"
   gem "letter_opener", "~> 1.10"
+  gem "nkf", "~> 0.2" # letter_opener requires kconv, extracted from Ruby stdlib.
   gem "rails-erd", "~> 1.5"
   gem "rubocop", "~> 1.91", require: false
   gem "rubocop-rails", "~> 2.26", require: false
@@ -137,3 +150,5 @@ gem "hexapdf"
 gem "data_migrate", "~> 11.3"
 
 gem "audited", "~> 5.4"
+
+gem "pdf-reader", "~> 2.15"

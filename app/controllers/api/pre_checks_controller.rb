@@ -7,13 +7,18 @@ class Api::PreChecksController < Api::ApplicationController
 
   def index
     perform_pre_check_search
+    unviewed_sandbox_id =
+      current_user.super_admin? ? :unscoped : current_sandbox&.id
     render_success @pre_check_search.results,
                    nil,
                    {
                      meta:
                        page_meta(@pre_check_search).merge(
                          unviewed_count:
-                           PreCheck.unviewed_count_for_user(current_user.id)
+                           PreCheck.unviewed_count_for_user(
+                             current_user.id,
+                             sandbox_id: unviewed_sandbox_id
+                           )
                        ),
                      blueprint: PreCheckBlueprint
                    }
@@ -25,7 +30,10 @@ class Api::PreChecksController < Api::ApplicationController
   end
 
   def create
-    pre_check = PreCheck.new(pre_check_params.merge(creator: current_user))
+    pre_check =
+      PreCheck.new(
+        pre_check_params.merge(creator: current_user, sandbox: current_sandbox)
+      )
 
     authorize pre_check
     if pre_check.save
@@ -130,7 +138,7 @@ class Api::PreChecksController < Api::ApplicationController
   private
 
   def set_pre_check
-    @pre_check = PreCheck.find(params[:id])
+    @pre_check = ensure_in_sandbox!(PreCheck.find(params[:id]))
   end
 
   def pre_check_params
@@ -138,7 +146,6 @@ class Api::PreChecksController < Api::ApplicationController
       :status,
       :full_address,
       :pid,
-      :permit_application_id,
       :jurisdiction_id,
       :service_partner,
       :eula_accepted,

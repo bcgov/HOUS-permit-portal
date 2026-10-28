@@ -7,6 +7,7 @@ RSpec.describe TemplateVersionPolicy, type: :policy do
       "TemplateVersion",
       scheduled?: false,
       draft?: false,
+      published?: false,
       publicly_previewable?: false,
       sandbox: :s1,
       jurisdiction_id: "j1"
@@ -29,6 +30,7 @@ RSpec.describe TemplateVersionPolicy, type: :policy do
           "TemplateVersion",
           scheduled?: true,
           draft?: false,
+          published?: false,
           publicly_previewable?: false,
           sandbox: :s1,
           jurisdiction_id: "j1"
@@ -57,6 +59,7 @@ RSpec.describe TemplateVersionPolicy, type: :policy do
           "TemplateVersion",
           scheduled?: true,
           draft?: false,
+          published?: false,
           publicly_previewable?: false,
           sandbox: scheduled_sandbox,
           jurisdiction_id: "j1"
@@ -66,6 +69,7 @@ RSpec.describe TemplateVersionPolicy, type: :policy do
           "TemplateVersion",
           scheduled?: false,
           draft?: false,
+          published?: false,
           publicly_previewable?: false,
           sandbox: scheduled_sandbox,
           jurisdiction_id: "j1"
@@ -85,6 +89,113 @@ RSpec.describe TemplateVersionPolicy, type: :policy do
           user:,
           record: unscheduled_record,
           sandbox: scheduled_sandbox
+        ).show?
+      ).to be false
+    end
+
+    it "permits an anonymous public preview of a draft on a kept template" do
+      kept = double("RequirementTemplate", discarded?: false, present?: true)
+      preview =
+        double(
+          "TemplateVersion",
+          draft?: true,
+          publicly_previewable?: true,
+          requirement_template: kept
+        )
+
+      expect(
+        policy_for(
+          described_class,
+          user: nil,
+          record: preview,
+          sandbox: nil
+        ).show?
+      ).to be true
+    end
+
+    it "denies an anonymous public preview when the template is discarded" do
+      discarded =
+        double("RequirementTemplate", discarded?: true, present?: true)
+      preview =
+        double(
+          "TemplateVersion",
+          draft?: true,
+          published?: false,
+          publicly_previewable?: true,
+          requirement_template: discarded
+        )
+
+      expect(
+        policy_for(
+          described_class,
+          user: nil,
+          record: preview,
+          sandbox: nil
+        ).show?
+      ).to be false
+    end
+
+    it "denies an anonymous public preview of a deprecated draft" do
+      kept = double("RequirementTemplate", discarded?: false, present?: true)
+      preview =
+        double(
+          "TemplateVersion",
+          draft?: false,
+          published?: false,
+          publicly_previewable?: true,
+          requirement_template: kept,
+          scheduled?: false
+        )
+
+      expect(
+        policy_for(
+          described_class,
+          user: nil,
+          record: preview,
+          sandbox: nil
+        ).show?
+      ).to be false
+    end
+
+    it "permits an anonymous preview of a published version on a kept template" do
+      kept = double("RequirementTemplate", discarded?: false, present?: true)
+      published =
+        double(
+          "TemplateVersion",
+          draft?: false,
+          published?: true,
+          publicly_previewable?: false,
+          requirement_template: kept
+        )
+
+      expect(
+        policy_for(
+          described_class,
+          user: nil,
+          record: published,
+          sandbox: nil
+        ).show?
+      ).to be true
+    end
+
+    it "denies an anonymous preview of a published version on a discarded template" do
+      discarded =
+        double("RequirementTemplate", discarded?: true, present?: true)
+      published =
+        double(
+          "TemplateVersion",
+          draft?: false,
+          published?: true,
+          publicly_previewable?: false,
+          requirement_template: discarded
+        )
+
+      expect(
+        policy_for(
+          described_class,
+          user: nil,
+          record: published,
+          sandbox: nil
         ).show?
       ).to be false
     end

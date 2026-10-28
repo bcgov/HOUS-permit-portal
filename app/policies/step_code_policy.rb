@@ -15,6 +15,10 @@ class StepCodePolicy < ApplicationPolicy
     user.super_admin?
   end
 
+  def download_part_3_step_code_checklists_csv?
+    user.super_admin?
+  end
+
   def download_step_code_file_uploads_zip?
     user.super_admin?
   end
@@ -30,15 +34,16 @@ class StepCodePolicy < ApplicationPolicy
   end
 
   def destroy?
-    record.creator == user || record.submitter == user
+    same_sandbox? && (record.creator == user || record.submitter == user)
   end
 
   def restore?
-    record.creator == user || record.submitter == user
+    same_sandbox? && (record.creator == user || record.submitter == user)
   end
 
   def show?
     return false unless user
+    return false unless same_sandbox?
 
     return true if user == record.creator
 
@@ -56,6 +61,7 @@ class StepCodePolicy < ApplicationPolicy
 
   def update?
     return false unless user
+    return false unless same_sandbox?
 
     (user == record.creator) ||
       (record.permit_application&.submitter == user) ||
@@ -81,6 +87,12 @@ class StepCodePolicy < ApplicationPolicy
     pa&.user_can_edit_step_code_block?(user_id: user.id) || false
   end
 
+  def same_sandbox?
+    return true if user&.super_admin?
+
+    record.sandbox_id == sandbox&.id
+  end
+
   class Scope < Scope
     # NOTE: Be explicit about which records you allow access to!
     def resolve
@@ -99,7 +111,10 @@ class StepCodePolicy < ApplicationPolicy
           permit_application_id: permitted_permit_applications.select(:id)
         )
 
-      standalone_step_codes.or(attached_step_codes)
+      visible = standalone_step_codes.or(attached_step_codes)
+      return visible if user.super_admin?
+
+      scope.where(id: visible.select(:id)).for_effective_sandbox(sandbox&.id)
     end
   end
 end

@@ -1018,13 +1018,7 @@
 
     &:disabled,
     &[disabled="disabled"] {
-      cursor: not-allowed;
-
-      &::before {
-        background: var(--chakra-colors-greys-grey03) !important;
-        color: var(--chakra-colors-greys-grey01);
-        text-decoration: none;
-      }
+      opacity: 1;
     }
 
     &::before {
@@ -1250,7 +1244,8 @@
 
 .added-in-diff,
 .changed-in-diff,
-.removed-in-diff {
+.removed-in-diff,
+.recently-published-elective {
   @include diff-styles;
 }
 

@@ -1,16 +1,18 @@
 import { Box, Center } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
-import React, { Suspense, lazy, useEffect } from "react"
+import React, { lazy, Suspense, useEffect } from "react"
 import { useTranslation } from "react-i18next"
-import { BrowserRouter, Route, Routes, useLocation, useNavigate } from "react-router-dom"
+import { BrowserRouter, Route, useLocation, useNavigate } from "react-router-dom"
+import { useMatomoAuthFunnel } from "../../../hooks/use-matomo-auth-funnel"
 import useSyncPathWithStore from "../../../hooks/use-sync-path-with-root-store"
 import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus } from "../../../types/enums"
-import { shouldTrackMatomoSpaPageview, trackMatomoSpaPageview } from "../../../utils/matomo"
 import { isSafeAppPath } from "../../../utils/utility-functions"
 import { FlashMessage } from "../../shared/base/flash-message"
 import { LoadingScreen } from "../../shared/base/loading-screen"
+import { ObservedRoutes } from "../../shared/sentry/observed-routes"
 import { EULAScreen } from "../onboarding/eula"
+import { MatomoSpaPageviews } from "./matomo-spa-pageviews"
 import { NavBar } from "./nav-bar"
 import { ProtectedRoute } from "./protected-route"
 import { QaToolsPopout } from "./qa-tools-popout"
@@ -31,12 +33,6 @@ const ExternalApiKeyModalSubRoute = lazy(() =>
 
 const NotFoundScreen = lazy(() =>
   import("../../shared/base/not-found-screen").then((module) => ({ default: module.NotFoundScreen }))
-)
-
-const PermitApplicationPDFViewer = lazy(() =>
-  import("../../shared/permit-applications/pdf-content/viewer").then((module) => ({
-    default: module.PermitApplicationPDFViewer,
-  }))
 )
 
 const EmailConfirmedScreen = lazy(() =>
@@ -354,11 +350,6 @@ const OverheatingCodeUnavailableScreen = lazy(() =>
   }))
 )
 
-const StepCodeChecklistPDFViewer = lazy(() =>
-  import("../step-code/checklist/pdf-content/viewer").then((module) => ({
-    default: module.StepCodeChecklistPDFViewer,
-  }))
-)
 const SiteConfigurationManagementScreen = lazy(() =>
   import("../super-admin/site-configuration-management").then((module) => ({
     default: module.SiteConfigurationManagementScreen,
@@ -507,6 +498,8 @@ export const Navigation = observer(() => {
   const { validateToken, isValidating } = sessionStore
   const { t } = useTranslation()
 
+  useMatomoAuthFunnel()
+
   useEffect(() => {
     validateToken()
   }, [])
@@ -540,18 +533,6 @@ export const Navigation = observer(() => {
       )}
     </BrowserRouter>
   )
-})
-
-const MatomoSpaPageviews = observer(function MatomoSpaPageviews() {
-  const { pathname } = useLocation()
-  const { isValidating, loggedIn } = useMst().sessionStore
-
-  useEffect(() => {
-    if (!shouldTrackMatomoSpaPageview(pathname, { isValidating, loggedIn })) return
-    trackMatomoSpaPageview(pathname)
-  }, [pathname, isValidating, loggedIn])
-
-  return null
 })
 
 const AppRoutes = observer(() => {
@@ -748,26 +729,6 @@ const AppRoutes = observer(() => {
         element={<ClimateZonesScreen />}
       />
       <Route path="/permit-applications/:permitApplicationId" element={<ReviewPermitApplicationScreen />} />
-      {import.meta.env.DEV && (
-        <>
-          <Route
-            path="/permit-applications/:permitApplicationId/pdf-content"
-            element={<PermitApplicationPDFViewer mode={"pdf"} />}
-          />
-          <Route
-            path="/permit-applications/:permitApplicationId/pdf-html"
-            element={<PermitApplicationPDFViewer mode={"html"} />}
-          />
-          <Route
-            path="/permit-applications/:permitApplicationId/step-code-pdf-content"
-            element={<StepCodeChecklistPDFViewer mode={"pdf"} />}
-          />
-          <Route
-            path="/permit-applications/:permitApplicationId/step-code-pdf-html"
-            element={<StepCodeChecklistPDFViewer mode={"html"} />}
-          />
-        </>
-      )}
     </>
   )
 
@@ -827,7 +788,7 @@ const AppRoutes = observer(() => {
 
   return (
     <>
-      <Routes location={background || location}>
+      <ObservedRoutes location={background || location}>
         {mustAcceptEula && (
           // Onboarding step 1: EULA
           <Route path="/" element={<EULAScreen />} />
@@ -1080,7 +1041,7 @@ const AppRoutes = observer(() => {
         <Route path="/part-9-step-code/:stepCodeId/stages/:stage/:section" element={<Part9StepCodeForm />} />
         <Route path="/part-9-step-code/:section" element={<Part9StepCodeForm />} />
         <Route path="*" element={<NotFoundScreen />} />
-      </Routes>
+      </ObservedRoutes>
     </>
   )
 })

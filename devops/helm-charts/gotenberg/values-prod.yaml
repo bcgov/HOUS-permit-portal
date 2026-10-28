@@ -1,0 +1,6 @@
+# Two replicas provide redundancy for production PDF generation.
+replicaCount: 2
+
+resources:
+  limits:
+    memory: 2Gi

@@ -1,0 +1,169 @@
+{{- /*
+  DESTRUCTIVE, on-demand only. Deliberately requires BOTH restore.enabled=true
+  AND restore.confirm to be the exact literal string below -- never set both
+  of these in a persisted values file. Invoke via a one-off `--set` override
+  per BACKUP-AND-RESTORE-GUIDE.md so a routine `helm upgrade` on the main
+  release can never accidentally trigger this.
+
+  restore.source picks which of the two independent backup destinations to
+  restore FROM ("s3" or "pvc") -- whichever one is actually available/intact
+  right now. Only one is used per restore attempt.
+*/}}
+{{- if and .Values.restore.enabled (eq .Values.restore.confirm "yes-overwrite-database") }}
+{{- $source := .Values.restore.source | default "s3" }}
+{{- $secretName := .Values.restore.s3.secretName | default .Values.backup.s3.secretName }}
+{{- $endpoint := .Values.restore.s3.endpoint | default .Values.backup.s3.endpoint }}
+{{- $bucket := .Values.restore.s3.bucket | default .Values.backup.s3.bucket }}
+{{- $path := .Values.restore.s3.path | default .Values.backup.s3.path }}
+{{- $insecure := .Values.restore.s3.insecure | default .Values.backup.s3.insecure | default false }}
+{{- $pvcClaimName := .Values.restore.pvc.claimName | default .Values.backup.pvc.existingClaim | default "matomo-db-backup" }}
+{{- $pvcMountPath := .Values.restore.pvc.mountPath | default .Values.backup.pvc.mountPath | default "/pvc-backups" }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: matomo-db-restore-{{ .Values.restore.jobSuffix }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: matomo-db-restore
+spec:
+  activeDeadlineSeconds: {{ .Values.restore.activeDeadlineSeconds | default 3600 }}
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app: matomo-db-restore
+    spec:
+      restartPolicy: Never
+      {{- /*
+        The select/download step completes (initContainer) before the restore
+        container starts, guaranteeing the file is fully present before
+        mariadb tries to read it. Both branches leave the chosen backup at
+        the same path (/backup/restore.sql.gz) so the restore container below
+        doesn't need to know which source it came from.
+      */}}
+      initContainers:
+      {{- if eq $source "pvc" }}
+        - name: select
+          image: {{ include "matomo.image" (dict "registry" (.Values.db.imageRegistry | default .Values.global.imageRegistry) "image" (.Values.restore.dbImage | default .Values.db.image)) }}
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: BACKUP_FILE
+              value: {{ .Values.restore.backupFile | quote }}
+            - name: PVC_MOUNT_PATH
+              value: {{ $pvcMountPath | quote }}
+          command:
+            - sh
+            - -ec
+            - |
+              PATTERN='^matomo-[0-9]{8}-[0-9]{6}\.sql\.gz$'
+              if [ "${BACKUP_FILE}" = "latest" ]; then
+                BACKUP_FILE=$(ls -1 "${PVC_MOUNT_PATH}" 2>/dev/null | grep -E "${PATTERN}" | sort | tail -n1)
+              fi
+              if [ -z "${BACKUP_FILE}" ] || [ ! -f "${PVC_MOUNT_PATH}/${BACKUP_FILE}" ]; then
+                echo "ERROR: no backup found on PVC at ${PVC_MOUNT_PATH}/ (looked for: ${BACKUP_FILE:-<none>})"
+                exit 1
+              fi
+              mkdir -p /backup
+              cp "${PVC_MOUNT_PATH}/${BACKUP_FILE}" /backup/restore.sql.gz
+              echo "Selected from PVC: ${BACKUP_FILE} ($(du -h /backup/restore.sql.gz | cut -f1))"
+          volumeMounts:
+            - name: pvc-backup-store
+              mountPath: {{ $pvcMountPath | quote }}
+              readOnly: true
+            - name: backup-data
+              mountPath: /backup
+          {{- include "matomo.resources" (dict "resources" .Values.restore.resources "defaultResources" .Values.defaultResources) | nindent 10 }}
+      {{- else }}
+        - name: download
+          image: {{ include "matomo.image" (dict "registry" (.Values.global.imageRegistry) "image" .Values.restore.s3ClientImage) }}
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: S3_PATH
+              value: {{ $path | quote }}
+            - name: S3_INSECURE
+              value: {{ $insecure | quote }}
+            - name: BACKUP_FILE
+              value: {{ .Values.restore.backupFile | quote }}
+            - name: RCLONE_CONFIG_S3REMOTE_TYPE
+              value: "s3"
+            - name: RCLONE_CONFIG_S3REMOTE_PROVIDER
+              value: "Other"
+            - name: RCLONE_CONFIG_S3REMOTE_ENV_AUTH
+              value: "false"
+            - name: RCLONE_CONFIG_S3REMOTE_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $secretName }}
+                  key: access-key
+            - name: RCLONE_CONFIG_S3REMOTE_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $secretName }}
+                  key: secret-key
+            - name: RCLONE_CONFIG_S3REMOTE_ENDPOINT
+              value: {{ $endpoint | quote }}
+            - name: RCLONE_CONFIG_S3REMOTE_FORCE_PATH_STYLE
+              value: "true"
+          command:
+            - sh
+            - -ec
+            - |
+              RCLONE_FLAGS="--s3-no-check-bucket"
+              [ "${S3_INSECURE}" = "true" ] && RCLONE_FLAGS="${RCLONE_FLAGS} --no-check-certificate"
+
+              PREFIX="${S3_PATH#/}"
+              if [ "${BACKUP_FILE}" = "latest" ]; then
+                BACKUP_FILE=$(rclone ${RCLONE_FLAGS} lsf "s3remote:{{ $bucket }}/${PREFIX}/" | sort | tail -n1)
+              fi
+              if [ -z "${BACKUP_FILE}" ]; then
+                echo "ERROR: no backup found under ${PREFIX}/"
+                exit 1
+              fi
+              echo "Downloading s3remote:{{ $bucket }}/${PREFIX}/${BACKUP_FILE} ..."
+              mkdir -p /backup
+              rclone ${RCLONE_FLAGS} copyto "s3remote:{{ $bucket }}/${PREFIX}/${BACKUP_FILE}" /backup/restore.sql.gz
+              echo "Download complete: $(du -h /backup/restore.sql.gz | cut -f1)"
+          volumeMounts:
+            - name: backup-data
+              mountPath: /backup
+          {{- include "matomo.resources" (dict "resources" .Values.restore.resources "defaultResources" .Values.defaultResources) | nindent 10 }}
+      {{- end }}
+      containers:
+        - name: restore
+          image: {{ include "matomo.image" (dict "registry" (.Values.db.imageRegistry | default .Values.global.imageRegistry) "image" (.Values.restore.dbImage | default .Values.db.image)) }}
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.db.password.secretKeyRef.name }}
+                  key: {{ .Values.db.password.secretKeyRef.key }}
+          command:
+            - sh
+            - -ec
+            - |
+              echo "Restoring into {{ .Values.db.name }} on {{ .Values.db.hostname }} -- this OVERWRITES current data."
+              {{- /*
+                Same reasoning as the dump side: decompress to a file first
+                so `set -e` catches a corrupt/truncated archive via gunzip's
+                own exit code, rather than mariadb silently seeing an empty
+                or partial stream through a pipe and reporting success.
+              */}}
+              gunzip -f /backup/restore.sql.gz
+              mariadb -h "{{ .Values.db.hostname }}" -u "{{ .Values.db.username }}" -p"${DB_PASSWORD}" "{{ .Values.db.name }}" < /backup/restore.sql
+              echo "Restore complete."
+          volumeMounts:
+            - name: backup-data
+              mountPath: /backup
+          {{- include "matomo.resources" (dict "resources" .Values.restore.resources "defaultResources" .Values.defaultResources) | nindent 10 }}
+{{ include "matomo.images.pullSecrets" ( dict "images" (list .Values.db) "global" .Values.global) | nindent 8 }}
+      volumes:
+        - name: backup-data
+          emptyDir: {}
+      {{- if eq $source "pvc" }}
+        - name: pvc-backup-store
+          persistentVolumeClaim:
+            claimName: {{ $pvcClaimName }}
+            readOnly: true
+      {{- end }}
+{{- end }}

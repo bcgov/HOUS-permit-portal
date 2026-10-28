@@ -110,10 +110,7 @@ module Reports
 
     def monthly_role_rows(scope)
       grouped =
-        scope.group(
-          Arel.sql("date_trunc('month', users.created_at)"),
-          :role
-        ).count
+        scope.group(Arel.sql(local_month_sql("users.created_at")), :role).count
       by_month = Hash.new { |hash, key| hash[key] = Hash.new(0) }
       grouped.each do |(timestamp, role), count|
         next if timestamp.blank?

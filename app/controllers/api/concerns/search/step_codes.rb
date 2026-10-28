@@ -5,18 +5,10 @@ module Api::Concerns::Search::StepCodes
     search_conditions = {
       order: step_code_order,
       where: step_code_where_clause,
-      page: step_code_search_params[:page],
+      page: step_code_search_params[:page].presence || 1,
       per_page:
-        (
-          if step_code_search_params[:page]
-            (
-              step_code_search_params[:per_page] ||
-                Kaminari.config.default_per_page
-            )
-          else
-            nil
-          end
-        ),
+        step_code_search_params[:per_page].presence ||
+          Kaminari.config.default_per_page,
       load: {
         includes: %i[creator permit_application jurisdiction permit_project]
       },
@@ -70,6 +62,9 @@ module Api::Concerns::Search::StepCodes
     final_where = { _and: [{ _or: base_conditions }] }
 
     final_where[:_and] << { discarded: show_archived }
+    unless current_user.super_admin?
+      final_where[:_and] << { sandbox_id: current_sandbox&.id }
+    end
 
     # OR within a filter (arrays), AND across different filters
     if search_filters[:type].present?

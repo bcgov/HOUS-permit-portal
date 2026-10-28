@@ -1,0 +1,124 @@
+{
+  "kind": "application",
+  "identity": { "number": "QA-STRESS", "version_number": 1, "exported_at": "2026-09-23", "submitted_at": "2026-09-22" },
+  "form_json": {
+    "components": [
+      {
+        "type": "panel",
+        "title": "Applicant information",
+        "components": [
+          {
+            "type": "columns",
+            "columns": [
+              { "components": [{ "type": "textfield", "key": "First name", "label": "First name", "input": true }] },
+              { "components": [{ "type": "textfield", "key": "Last name", "label": "Last name", "input": true }] }
+            ]
+          },
+          { "type": "textfield", "key": "Zero", "label": "Zero", "input": true },
+          { "type": "checkbox", "key": "No", "label": "Confirmed", "input": true },
+          { "type": "textarea", "key": "notes", "label": "Narrative", "input": true },
+          {
+            "type": "datagrid",
+            "key": "rows",
+            "label": "Repeated entries",
+            "components": [
+              { "type": "textfield", "key": "Name", "label": "Name", "input": true },
+              { "type": "textfield", "key": "Value", "label": "Value", "input": true }
+            ]
+          },
+          {
+            "type": "datagrid",
+            "key": "wide",
+            "label": "Detailed contacts",
+            "components": [
+              { "type": "textfield", "key": "First", "label": "First", "input": true },
+              { "type": "textfield", "key": "Last", "label": "Last", "input": true },
+              { "type": "textfield", "key": "Email", "label": "Email", "input": true },
+              { "type": "textfield", "key": "Role", "label": "Role", "input": true },
+              { "type": "textfield", "key": "Address", "label": "Address", "input": true }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "submission_data": {
+    "data": {
+      "First name": "Sample",
+      "Last name": "Applicant",
+      "Zero": 0,
+      "No": false,
+      "notes": "Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. Paragraph of saved narrative, which must remain readable and complete. END-NARRATIVE",
+      "rows": [
+        { "Name": "ROW-0", "Value": 0 },
+        { "Name": "ROW-1", "Value": 1 },
+        { "Name": "ROW-2", "Value": 2 },
+        { "Name": "ROW-3", "Value": 3 },
+        { "Name": "ROW-4", "Value": 4 },
+        { "Name": "ROW-5", "Value": 5 },
+        { "Name": "ROW-6", "Value": 6 },
+        { "Name": "ROW-7", "Value": 7 },
+        { "Name": "ROW-8", "Value": 8 },
+        { "Name": "ROW-9", "Value": 9 },
+        { "Name": "ROW-10", "Value": 10 },
+        { "Name": "ROW-11", "Value": 11 },
+        { "Name": "ROW-12", "Value": 12 },
+        { "Name": "ROW-13", "Value": 13 },
+        { "Name": "ROW-14", "Value": 14 },
+        { "Name": "ROW-15", "Value": 15 },
+        { "Name": "ROW-16", "Value": 16 },
+        { "Name": "ROW-17", "Value": 17 },
+        { "Name": "ROW-18", "Value": 18 },
+        { "Name": "ROW-19", "Value": 19 },
+        { "Name": "ROW-20", "Value": 20 },
+        { "Name": "ROW-21", "Value": 21 },
+        { "Name": "ROW-22", "Value": 22 },
+        { "Name": "ROW-23", "Value": 23 },
+        { "Name": "ROW-24", "Value": 24 },
+        { "Name": "ROW-25", "Value": 25 },
+        { "Name": "ROW-26", "Value": 26 },
+        { "Name": "ROW-27", "Value": 27 },
+        { "Name": "ROW-28", "Value": 28 },
+        { "Name": "ROW-29", "Value": 29 },
+        { "Name": "ROW-30", "Value": 30 },
+        { "Name": "ROW-31", "Value": 31 },
+        { "Name": "ROW-32", "Value": 32 },
+        { "Name": "ROW-33", "Value": 33 },
+        { "Name": "ROW-34", "Value": 34 },
+        { "Name": "ROW-35", "Value": 35 },
+        { "Name": "ROW-36", "Value": 36 },
+        { "Name": "ROW-37", "Value": 37 },
+        { "Name": "ROW-38", "Value": 38 },
+        { "Name": "ROW-39", "Value": 39 },
+        { "Name": "ROW-40", "Value": 40 },
+        { "Name": "ROW-41", "Value": 41 },
+        { "Name": "ROW-42", "Value": 42 },
+        { "Name": "ROW-43", "Value": 43 },
+        { "Name": "ROW-44", "Value": 44 }
+      ],
+      "wide": [
+        {
+          "First": "Contact",
+          "Last": "0",
+          "Email": "person@example.test",
+          "Role": "Owner",
+          "Address": "A long address abcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijk"
+        },
+        {
+          "First": "Contact",
+          "Last": "1",
+          "Email": "person@example.test",
+          "Role": "Owner",
+          "Address": "A long address abcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijk"
+        },
+        {
+          "First": "Contact",
+          "Last": "2",
+          "Email": "person@example.test",
+          "Role": "Owner",
+          "Address": "A long address abcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijkabcdefghijk"
+        }
+      ]
+    }
+  }
+}

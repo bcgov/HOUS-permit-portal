@@ -39,6 +39,55 @@ RSpec.describe StepCode, type: :model do
     end
   end
 
+  describe "sandbox" do
+    let(:jurisdiction) { create(:sub_district) }
+    let(:project_sandbox) { jurisdiction.sandboxes.published.first }
+    let(:permit_project) do
+      create(
+        :permit_project,
+        jurisdiction: jurisdiction,
+        sandbox: project_sandbox
+      )
+    end
+    let(:permit_application) do
+      create(
+        :permit_application,
+        permit_project: permit_project,
+        jurisdiction: jurisdiction
+      )
+    end
+
+    it "uses the parent project sandbox when attached, even if the column differs" do
+      step_code =
+        Part3StepCode.create!(
+          permit_application: permit_application,
+          creator: create(:user, :submitter)
+        )
+      step_code.update_column(
+        :sandbox_id,
+        jurisdiction.sandboxes.scheduled.first.id
+      )
+
+      expect(step_code.reload.sandbox_id).to eq(project_sandbox.id)
+      expect(step_code.search_data[:sandbox_id]).to eq(project_sandbox.id)
+    end
+
+    it "copies the parent sandbox onto the row when detached" do
+      step_code =
+        Part3StepCode.create!(
+          permit_application: permit_application,
+          creator: create(:user, :submitter)
+        )
+
+      step_code.update!(permit_application_id: nil)
+
+      expect(step_code.reload.read_attribute(:sandbox_id)).to eq(
+        project_sandbox.id
+      )
+      expect(step_code.sandbox_id).to eq(project_sandbox.id)
+    end
+  end
+
   describe "#permit_date" do
     it "uses the attached permit application's issued_at, not the step code column" do
       permit_application =

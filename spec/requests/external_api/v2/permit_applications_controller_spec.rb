@@ -20,6 +20,7 @@ RSpec.describe "External API v2 permit applications", type: :request do
 
   def stub_permit_application_search(*records)
     allow(PermitApplication).to receive(:search) do |_query, **kwargs|
+      @permit_application_search_kwargs = kwargs
       relation = PermitApplication.where(id: records.map(&:id))
       scoped = kwargs.fetch(:scope_results).call(relation)
       results = scoped.to_a
@@ -65,8 +66,16 @@ RSpec.describe "External API v2 permit applications", type: :request do
            headers: auth_headers
 
       expect(response).to have_http_status(:ok)
-      ids = JSON.parse(response.body).fetch("data").map { |row| row["id"] }
+      expect(@permit_application_search_kwargs[:page]).to eq(1)
+      expect(@permit_application_search_kwargs[:per_page]).to eq(
+        Kaminari.config.default_per_page
+      )
+      data = JSON.parse(response.body).fetch("data")
+      ids = data.map { |row| row["id"] }
       expect(ids).to contain_exactly(allowed.id)
+      expect(data.first["available_statuses"]).to eq(
+        %w[in_review withdrawn revisions_requested]
+      )
     end
   end
 
@@ -111,10 +120,15 @@ RSpec.describe "External API v2 permit applications", type: :request do
       expect(json).to include(
         "id" => permit_application.id,
         "permit_project_id" => permit_application.permit_project_id,
-        "number" => permit_application.number
+        "number" => permit_application.number,
+        "available_statuses" => %w[in_review withdrawn revisions_requested]
       )
       expect(json).not_to have_key("zipfile_url")
       expect(json).not_to have_key("latest_zipfile_url")
+      expect(json).not_to have_key("permit_version")
+      expect(json["template_version"]).to include(
+        "id" => permit_application.template_version_id
+      )
       versions = json.fetch("submission_versions")
       expect(versions.length).to eq(1)
       expect(versions.first).to include(
@@ -122,6 +136,21 @@ RSpec.describe "External API v2 permit applications", type: :request do
         "version_number" => 1
       )
       expect(versions.first).to have_key("package_ready_at")
+    end
+
+    it "returns issued and withdrawn from approved, without revisions_requested" do
+      permit_application.update_column(
+        :status,
+        PermitApplication.statuses[:approved]
+      )
+
+      get "/external_api/v2/permit_applications/#{permit_application.id}",
+          headers: auth_headers
+
+      expect(response).to have_http_status(:ok)
+      expect(JSON.parse(response.body).dig("data", "available_statuses")).to eq(
+        %w[issued withdrawn]
+      )
     end
   end
 
@@ -156,6 +185,8 @@ RSpec.describe "External API v2 permit applications", type: :request do
       expect(json["permit_application_id"]).to eq(permit_application.id)
       expect(json).to have_key("submission_data")
       expect(json).to have_key("generated_documents")
+      expect(json["document_requests"]).to eq([])
+      expect(json["fulfillment_documents"]).to eq([])
       expect(json).to have_key("zipfile")
       expect(json).not_to have_key("zipfile_url")
       expect(json).to have_key("raw_h2k_files")
@@ -199,7 +230,9 @@ RSpec.describe "External API v2 permit applications", type: :request do
         audit,
         permit_application.submitter
       ).format_description
-    ).to eq("Partner system marked the application as in review")
+    ).to eq(
+      "#{permit_application.jurisdiction.qualified_name} marked the application as in review"
+    )
   end
 
   it "treats a repeated write of the current status as an idempotent success" do
@@ -242,25 +275,16 @@ RSpec.describe "External API v2 permit applications", type: :request do
     expect(job["args"][2]["status"]).to eq("in_review")
   end
 
-  it "rejects BPH-owned and unknown statuses with the frozen write set" do
-    %w[newly_submitted not_a_status].each do |status|
+  it "rejects codes outside the statuses available from the current status" do
+    %w[newly_submitted not_a_status approved].each do |status|
       update_status(status)
 
       expect(response).to have_http_status(:unprocessable_content)
       expect(JSON.parse(response.body).dig("meta", "message")).to include(
-        "in_review, approved, issued, withdrawn, revisions_requested"
+        "Available statuses: in_review, withdrawn, revisions_requested"
       )
     end
     expect(permit_application.reload).to be_newly_submitted
-  end
-
-  it "rejects a canonical status that is not a valid lifecycle transition" do
-    update_status("approved")
-
-    expect(response).to have_http_status(:unprocessable_content)
-    expect(JSON.parse(response.body).dig("meta", "message")).to include(
-      "Cannot transition status from 'newly_submitted' to 'approved'"
-    )
   end
 
   it "does not allow a key to update another jurisdiction" do
@@ -371,6 +395,46 @@ RSpec.describe "External API v2 permit applications", type: :request do
       expect(request.submission_data).to eq(
         { "data" => { form_key => "123 Main St" } }
       )
+      expect(
+        permit_application.latest_submission_version.notes.jurisdiction_message
+      ).to be_empty
+    end
+
+    it "stores and publishes an applicant note" do
+      update_status(
+        "revisions_requested",
+        revision_requests: [revision_item],
+        jurisdiction_note: "Please update the address."
+      )
+
+      expect(response).to have_http_status(:ok)
+      note =
+        permit_application
+          .reload
+          .latest_submission_version
+          .notes
+          .jurisdiction_message
+          .first
+      expect(note.body).to eq("<p>Please update the address.</p>")
+      expect(note.user_id).to be_nil
+      expect(note.published_at).to be_present
+    end
+
+    it "does not store a blank applicant note" do
+      update_status(
+        "revisions_requested",
+        revision_requests: [revision_item],
+        jurisdiction_note: "  "
+      )
+
+      expect(response).to have_http_status(:ok)
+      expect(
+        permit_application
+          .reload
+          .latest_submission_version
+          .notes
+          .jurisdiction_message
+      ).to be_empty
     end
 
     it "treats a repeated write of revisions_requested as an idempotent success" do
@@ -415,6 +479,19 @@ RSpec.describe "External API v2 permit applications", type: :request do
       expect(permit_application.reload).to be_newly_submitted
     end
 
+    it "rejects jurisdiction_note on a non-revision status write" do
+      update_status(
+        "in_review",
+        jurisdiction_note: "Please update the address."
+      )
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(JSON.parse(response.body).dig("meta", "message")).to include(
+        "jurisdiction_note is only accepted when status is 'revisions_requested'"
+      )
+      expect(permit_application.reload).to be_newly_submitted
+    end
+
     it "rejects an unknown requirement code" do
       update_status(
         "revisions_requested",
@@ -441,6 +518,193 @@ RSpec.describe "External API v2 permit applications", type: :request do
         "Cannot transition status from 'approved' to 'revisions_requested'"
       )
       expect(permit_application.reload).to be_approved
+    end
+
+    describe "document requests" do
+      before { allow(PromoteJob).to receive(:perform_async) }
+
+      def upload_reference_file(filename = "site-plan.pdf")
+        post "/external_api/v2/files",
+             params: {
+               file:
+                 Rack::Test::UploadedFile.new(
+                   Rails.root.join("spec/support/signed_converted.pdf"),
+                   "application/pdf",
+                   true,
+                   original_filename: filename
+                 )
+             },
+             headers: {
+               "Authorization" => "Bearer #{external_api_key.token}"
+             }
+        JSON.parse(response.body).fetch("data").fetch("id")
+      end
+
+      def document_item(cache_id)
+        {
+          name: "Site plan",
+          reason_code: revision_reason.reason_code,
+          comment: "Please provide a current site plan.",
+          reference_document_ids: [cache_id]
+        }
+      end
+
+      def version_payload(version)
+        get "/external_api/v2/permit_applications/#{permit_application.id}/submission_versions/#{version.id}",
+            headers: auth_headers
+        JSON.parse(response.body).fetch("data")
+      end
+
+      it "stores the request and reference file and returns a new download URL on each GET" do
+        cache_id = upload_reference_file
+        update_status(
+          "revisions_requested",
+          revision_requests: [document_item(cache_id)]
+        )
+
+        expect(response).to have_http_status(:ok)
+        version = permit_application.reload.latest_submission_version
+        request = version.revision_requests.sole
+        expect(request).to be_a(SupportingDocumentRevisionRequest)
+        expect(request.title).to eq("Site plan")
+        expect(request.revision_reference_documents.count).to eq(1)
+
+        urls = %w[https://files.example/one https://files.example/two].each
+        allow_any_instance_of(
+          FileUploadAttachment::FilenamePreservingFileUrl
+        ).to receive(:file_url) { urls.next }
+
+        first = version_payload(version)
+        document = first.fetch("document_requests").sole
+        reference = document.fetch("reference_documents").sole
+        expect(document["name"]).to eq("Site plan")
+        expect(reference["id"]).to eq(
+          request.revision_reference_documents.sole.id
+        )
+        expect(reference["name"]).to eq("site-plan.pdf")
+        expect(reference["url"]).to eq("https://files.example/one")
+        expect(first["fulfillment_documents"]).to eq([])
+
+        second = version_payload(version)
+        expect(
+          second.dig("document_requests", 0, "reference_documents", 0, "url")
+        ).to eq("https://files.example/two")
+      end
+
+      it "stores a field revision and a document request from one payload" do
+        cache_id = upload_reference_file
+        update_status(
+          "revisions_requested",
+          revision_requests: [revision_item, document_item(cache_id)]
+        )
+
+        expect(response).to have_http_status(:ok)
+        requests =
+          permit_application.reload.latest_submission_version.revision_requests
+        expect(requests.map(&:class)).to contain_exactly(
+          FieldRevisionRequest,
+          SupportingDocumentRevisionRequest
+        )
+      end
+
+      it "rejects a document request with no resolvable reference file and leaves status unchanged" do
+        update_status(
+          "revisions_requested",
+          revision_requests: [
+            document_item("00000000-0000-4000-8000-000000000000/missing.pdf")
+          ]
+        )
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(JSON.parse(response.body).dig("meta", "message")).to include(
+          "revision_requests[0] is missing reference_document_ids"
+        )
+        expect(permit_application.reload).to be_newly_submitted
+        expect(
+          permit_application.latest_submission_version.revision_requests
+        ).to be_empty
+      end
+
+      it "lists a fulfillment file on the resubmission version and includes it in the zip set" do
+        cache_id = upload_reference_file
+        update_status(
+          "revisions_requested",
+          revision_requests: [document_item(cache_id)]
+        )
+        requested_version = permit_application.reload.latest_submission_version
+        document_request = requested_version.revision_requests.sole
+        generated =
+          create(
+            :supporting_document,
+            permit_application: permit_application,
+            submission_version: requested_version,
+            data_key: SupportingDocument::APPLICATION_PDF_DATA_KEY
+          )
+        fulfillment =
+          create(
+            :supporting_document,
+            permit_application: permit_application,
+            revision_request: document_request
+          )
+        allow_any_instance_of(PermitApplication).to receive(
+          :can_submit?
+        ).and_return(true)
+        allow(ZipfileJob).to receive(:perform_async)
+        allow(NotificationService).to receive(
+          :publish_application_submission_event
+        )
+        permit_application.template_version.update!(
+          form_json: {
+            "components" => []
+          }
+        )
+
+        permit_application.submit!
+
+        response_version = permit_application.reload.latest_submission_version
+        expect(response_version.id).not_to eq(requested_version.id)
+        payload = version_payload(response_version)
+        expect(
+          payload["fulfillment_documents"].map { |file| file["id"] }
+        ).to eq([fulfillment.id])
+        expect(payload["generated_documents"]).to eq([])
+        expect(payload["document_requests"]).to eq([])
+        expect(
+          version_payload(requested_version).dig("generated_documents", 0, "id")
+        ).to eq(generated.id)
+        expect(
+          SupportingDocumentsZipper
+            .new(permit_application.id)
+            .send(:select_documents)
+            .map(&:id)
+        ).to include(fulfillment.id)
+      end
+
+      it "lists no fulfillment file when the applicant did not upload one" do
+        cache_id = upload_reference_file
+        update_status(
+          "revisions_requested",
+          revision_requests: [document_item(cache_id)]
+        )
+        allow_any_instance_of(PermitApplication).to receive(
+          :can_submit?
+        ).and_return(true)
+        allow(ZipfileJob).to receive(:perform_async)
+        allow(NotificationService).to receive(
+          :publish_application_submission_event
+        )
+        permit_application.template_version.update!(
+          form_json: {
+            "components" => []
+          }
+        )
+
+        permit_application.reload.submit!
+
+        payload =
+          version_payload(permit_application.reload.latest_submission_version)
+        expect(payload["fulfillment_documents"]).to eq([])
+      end
     end
   end
 end

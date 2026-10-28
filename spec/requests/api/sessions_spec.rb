@@ -131,6 +131,41 @@ RSpec.describe "Api::Sessions", type: :request do
 
       expect(response).to have_http_status(:unauthorized)
     end
+
+    context "with an environment cookie prefix" do
+      around { |example| with_auth_cookie_prefix("hub_test_") { example.run } }
+
+      it "authenticates the current environment despite a foreign cookie appearing first" do
+        token, payload = Warden::JWTAuth::UserEncoder.new.call(user, :user, nil)
+        user.on_jwt_dispatch(token, payload)
+
+        get "/api/validate_token",
+            headers: {
+              "Cookie" =>
+                "access_token=foreign-environment-token; hub_test_access_token=#{token}"
+            }
+
+        expect(response).to have_http_status(:ok)
+        expect(json_response.dig("data", "id")).to eq(user.id)
+      end
+
+      it "clears only the current environment's cookie when validation fails" do
+        get "/api/validate_token",
+            headers: {
+              "Cookie" =>
+                "access_token=foreign-environment-token; hub_test_access_token=invalid-token"
+            }
+
+        expect(response).to have_http_status(:unauthorized)
+        set_cookie = Array(response.headers["Set-Cookie"])
+        expect(set_cookie).to include(
+          a_string_starting_with("hub_test_access_token=;")
+        )
+        expect(set_cookie).not_to include(
+          a_string_starting_with("access_token=")
+        )
+      end
+    end
   end
 
   describe "GET /api/logout" do
@@ -163,6 +198,48 @@ RSpec.describe "Api::Sessions", type: :request do
 
       expect(response).to have_http_status(:ok)
       expect(json_response.dig("logout_url")).to eq("https://app.example.com")
+    end
+
+    it "revokes and clears the current environment's tokens without touching production cookies" do
+      with_auth_cookie_prefix("hub_test_") do
+        token, payload = Warden::JWTAuth::UserEncoder.new.call(user, :user, nil)
+        user.on_jwt_dispatch(token, payload)
+
+        delete "/api/logout",
+               headers: {
+                 "Cookie" =>
+                   "access_token=production-token; id_token=production-id-token; hub_test_access_token=#{token}; hub_test_id_token=test-id-token"
+               }
+
+        expect(response).to have_http_status(:ok)
+        logout_query =
+          Rack::Utils.parse_query(URI(json_response["logout_url"]).query)
+        expect(logout_query["id_token_hint"]).to eq("test-id-token")
+        expect(user.allowlisted_jwts.exists?(jti: payload["jti"])).to be(false)
+        set_cookie = Array(response.headers["Set-Cookie"])
+        expect(set_cookie).to include(
+          a_string_starting_with("hub_test_access_token=;")
+        )
+        expect(set_cookie).to include(
+          a_string_starting_with("hub_test_id_token=;")
+        )
+        expect(set_cookie).not_to include(
+          a_string_starting_with("access_token=")
+        )
+        expect(set_cookie).not_to include(a_string_starting_with("id_token="))
+      end
+    end
+
+    it "does not use another environment's ID token when the current token is absent" do
+      with_auth_cookie_prefix("hub_test_") do
+        get "/api/logout",
+            headers: {
+              "Cookie" => "id_token=production-id-token"
+            }
+
+        expect(response).to have_http_status(:ok)
+        expect(json_response["logout_url"]).to eq("https://app.example.com")
+      end
     end
   end
 end

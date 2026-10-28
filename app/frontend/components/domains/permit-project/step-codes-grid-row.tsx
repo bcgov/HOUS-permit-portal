@@ -4,7 +4,7 @@ import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { Link as ReactRouterLink, useNavigate } from "react-router-dom"
+import { Link as ReactRouterLink, useLocation, useNavigate } from "react-router-dom"
 import { datefnsTableDateTimeFormat } from "../../../constants"
 import { useMst } from "../../../setup/root"
 import { IStepCode } from "../../../stores/step-code-store"
@@ -16,6 +16,7 @@ import { StepCodeStageIndicators } from "./step-code-stage-indicators"
 
 export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode }) => {
   const navigate = useNavigate()
+  const location = useLocation()
   const { t } = useTranslation()
   const { stepCodeStore } = useMst()
   const { type, permitProjectTitle, fullAddress, updatedAt, targetPath, isDiscarded } = stepCode as any
@@ -38,8 +39,19 @@ export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode })
 
   const isNavigable = !isDiscarded && !!targetPath
 
+  const rememberIndexExit = () => {
+    stepCodeStore.setIndexExitPath(`${location.pathname}${location.search}`)
+  }
+
   return (
-    <SearchGridRow isClickable={isNavigable} onClick={() => isNavigable && navigate(targetPath)}>
+    <SearchGridRow
+      isClickable={isNavigable}
+      onClick={() => {
+        if (!isNavigable) return
+        rememberIndexExit()
+        navigate(targetPath)
+      }}
+    >
       {/* HUB-5145: The index shows only Part 3/Part 9 type today. As staged
       checklists become user-selectable, include the StepCode currentStage
       and stage-aware target paths. Report download/share live on the project
@@ -92,7 +104,10 @@ export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode })
                   to={targetPath || "#"}
                   isDisabled={!targetPath}
                   icon={<ArrowSquareOut size={16} />}
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    if (targetPath) rememberIndexExit()
+                  }}
                 >
                   {t("ui.open")}
                 </MenuItem>

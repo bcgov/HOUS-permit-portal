@@ -12,32 +12,8 @@ RSpec.describe Api::PreChecksController, type: :controller, search: true do
 
   describe "POST #index" do
     it "returns the current user's pre-checks" do
-      permit_project_mine = create(:permit_project, title: "Mine", owner: user)
-      permit_application_mine =
-        create(
-          :permit_application,
-          permit_project: permit_project_mine,
-          submitter: user
-        )
-      mine =
-        create(
-          :pre_check,
-          creator: user,
-          permit_application: permit_application_mine
-        )
-
-      permit_project_theirs = create(:permit_project, title: "Theirs")
-      permit_application_theirs =
-        create(
-          :permit_application,
-          permit_project: permit_project_theirs,
-          submitter: create(:user)
-        )
-      create(
-        :pre_check,
-        creator: permit_application_theirs.submitter,
-        permit_application: permit_application_theirs
-      )
+      mine = create(:pre_check, creator: user, full_address: "Mine Street")
+      create(:pre_check, creator: create(:user), full_address: "Theirs Street")
 
       PreCheck.reindex
       PreCheck.search_index.refresh

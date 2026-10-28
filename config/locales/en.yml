@@ -201,7 +201,8 @@ en:
       notify_reviewer_application_received: "New application received: %{permit_application_number}"
       notify_block_status_ready: "Requirement block status ready"
       notify_review_started: "Your application is now under review: %{permit_application_number}"
-      notify_application_revisions_requested: "Revisions requested on application %{permit_application_number}"
+      notify_application_revisions_requested: "Changes requested for your permit application %{permit_application_number}"
+      notify_applications_added: "%{jurisdiction_name} added permit applications to your project"
       remind_reviewer: "Your report on outstanding permit applications"
       remind_resource_update: "Reminder: Review your jurisdiction resources"
       submission_contact_confirm: "Confirm submission inbox email"
@@ -605,6 +606,9 @@ en:
       destroy_error:
         title: Error
         message: "Something went wrong archiving the template"
+      archive_blocked_published:
+        title: Error
+        message: "This template has a published version and cannot be archived"
       update_error:
         title: Error
         message: "%{error_message}"
@@ -694,12 +698,6 @@ en:
       retrigger_webhook_error:
         title: Error
         message: "There was an error re-triggering the submitted webhook"
-      create_error:
-        title: Error
-        message: "%{error_message}"
-      create_success:
-        title: ""
-        message: "New permit application started!"
       bulk_create_success:
         title: ""
         message: "Permit applications created successfully!"
@@ -745,6 +743,9 @@ en:
       submit_state_error:
         title: Error
         message: "This application cannot be submitted or re-submitted"
+      digital_seal_checks_pending:
+        title: "Digital seal checks are still running"
+        message: "Your draft has been saved. Wait for the digital seal checks to finish before submitting."
       outdated_error:
         title: Error
         message: "Please refresh the page. A new template version is available."
@@ -843,6 +844,19 @@ en:
       autofill_part_9_step_code_error:
         title: Error
         message: "%{error_message}"
+    submission_contact:
+      create_error:
+        title: Error
+        message: "%{error_message}"
+      destroy_error:
+        title: Error
+        message: "%{error_message}"
+      destroy_failed:
+        title: Error
+        message: "Could not remove email address"
+      resend_error:
+        title: Error
+        message: "This email address is already verified"
     permit_collaboration:
       destroy_success:
         title: ""
@@ -1290,10 +1304,16 @@ en:
     template_version:
       new_version_notification: 'Please update the Energy Step Code and Zero Carbon Step Code requirements in your Configuration Management for  "%{template_label}"'
       new_customization_notification: "%{jurisdiction_name} has made a modification to the requirements for %{template_label}"
+      elective_published_notification: "%{jurisdiction_name} published or updated elective fields on %{template_label}: %{field_labels}. Open your application to review it."
+      elective_published_notification_unnamed: "%{jurisdiction_name} published or updated an elective field on %{template_label}. Open your application to review it."
     permit_application:
       submission_notification: "Your application %{number} has been received by %{jurisdiction_name} and is pending review."
       resubmission_notification: "Your revised application %{number} has been received by %{jurisdiction_name} and is pending review."
       revisions_request_notification: "%{jurisdiction_name} has reviewed your application %{number} and has requested revisions. Please review and re-submit."
+      applications_added_notification:
+        one: "%{jurisdiction_name} added a permit application to your project: %{applications}."
+        other: "%{jurisdiction_name} added %{count} permit applications to your project: %{applications}."
+      applications_added_message: "Message: %{note}"
       review_started_notification: "%{jurisdiction_name} has started reviewing your application %{number}."
     permit_collaboration:
       submission_delegatee_collaboration_notification: "Collaboration request from %{author_name}. You have been assigned as a designated submitter for permit application %{number}."
@@ -1326,7 +1346,7 @@ en:
       publish_notification: "Building Permit Hub has been updated. Read about changes and improvements in the release notes."
     integration_mapping:
       published_template_missing_requirements_mapping: "Missing API mapping: A new version of “%{template_label}” has been published on %{version_date}"
-      scheduled_template_missing_requirements_mapping: "Missing API Mapping: A new version of “%{template_label}” has been scheduled for %{version_date}, 01:00hrs PST."
+      scheduled_template_missing_requirements_mapping: "Missing API Mapping: A new version of “%{template_label}” has been scheduled for %{version_date}, 00:01hrs Pacific Time."
     file_upload_failed: "File upload failed: %{file_name} was removed during a routine scan."
   export:
     template_version_csv_headers: "Requirement Block,Requirement block tip,Question,Requirement code,Input type,Optional,Is elective,Elective enabled,Elective reason"

@@ -25,7 +25,6 @@ export const Part9StepCodeModel = types.snapshotProcessor(
         checklistsMap: types.map(Part9StepCodeChecklistModel),
         zeroCarbonSteps: types.array(types.enumeration(Object.values(EZeroCarbonStep))),
         energySteps: types.array(types.enumeration(Object.values(EEnergyStep))),
-        permitApplicationId: types.maybeNull(types.string),
         isFullyLoaded: types.optional(types.boolean, false),
       })
     )

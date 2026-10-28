@@ -31,6 +31,7 @@ import {
   EReleaseNoteNotificationAudience,
   EReleaseNoteType,
   ERequirementType,
+  ERevisionRequestType,
   ESocketDomainTypes,
   ESocketEventTypes,
   ESortDirection,
@@ -130,6 +131,10 @@ export interface IOption<TValue = string> {
   groupId?: string | null
   groupLabel?: string | null
   groupSortOrder?: number | null
+}
+
+export interface ISiteOption extends IOption {
+  coordinates?: TLatLngTuple
 }
 
 export type TDebouncedFunction<T extends (...args: any[]) => any> = (...args: Parameters<T>) => void
@@ -295,6 +300,12 @@ export interface IErrorsBoxData {
   class: string
 }
 
+export interface IOptionalElectiveFieldInfo {
+  label: string
+  tooltip?: string
+  description?: string
+}
+
 interface IStepCodeBuildingCharacteristicSummarySelectOptions {
   performanceTypes: {
     windowsGlazedDoors: EWindowsGlazedDoorsPerformanceType[]
@@ -383,7 +394,13 @@ export interface IResource {
 }
 
 export interface IProjectDocument extends IBaseFileAttachment {
-  permitProjectId: string // Foreign key to link to PermitProject
+  permitProjectId: string
+}
+
+export interface IRevisionReferenceDocument extends IBaseFileAttachment {
+  revisionRequestId: string
+  scanStatus?: EFileScanStatus
+  fileUrl?: string
 }
 
 export interface IMeetingRequestDocument extends IBaseFileAttachment {
@@ -416,11 +433,14 @@ export interface ITemplateCustomization {
 
 export interface IDownloadableFile {
   id: string
+  submissionVersionId?: string
   dataKey?: string
   fileUrl: string
   fileName: string
   fileSize: number
   createdAt: Date
+  submissionVersionId?: string | null
+  revisionRequestId?: string | null
 }
 
 export interface IEULA {
@@ -435,10 +455,16 @@ export interface ILicenseAgreement {
   acceptedAt: Date
 }
 
+export interface IDigitalSealChecks {
+  pendingCount: number
+  failedCount: number
+}
+
 export interface IPermitApplicationComplianceUpdate {
   id: string
   frontEndFormUpdate: Object
   formattedComplianceData: Object
+  digitalSealChecks?: IDigitalSealChecks
 }
 
 export interface IPermitNotificationObjectData {
@@ -505,10 +531,18 @@ export interface IReportDocumentNotificationObjectData {
   downloadUrl?: string
 }
 
+export interface IReportGenerationIssue {
+  key: string
+  submissionVersionId: string
+  versionNumber: number
+  reason: string
+}
+
 export interface IPermitApplicationSupportingDocumentsUpdate {
   id: string
   supportingDocuments: IPermitApplication["supportingDocuments"]
   missingPdfs: string[]
+  reportGenerationIssues?: IReportGenerationIssue[]
   zipfileSize: null | number
   zipfileName: null | string
   zipfileUrl: null | string
@@ -735,12 +769,16 @@ export interface ILinkData {
 
 export interface IRevisionRequest {
   id: string
+  type?: ERevisionRequestType
+  title?: string
   reasonCode: string
   requirementJson: IFormIORequirement
   submissionData: any
   comment: string
   user?: IMinimalFrozenUser
   createdAt: number
+  revisionReferenceDocuments?: IRevisionReferenceDocument[]
+  supportingDocuments?: Array<{ id: string; fileName?: string; fileUrl?: string }>
 }
 
 export interface IMinimalFrozenUser {
@@ -760,6 +798,8 @@ export interface ISubmissionVersion {
   formJson: IFormJson
   submissionData: ISubmissionData
   revisionRequests: IRevisionRequest[]
+  jurisdictionNote?: string | null
+  submitterNote?: string | null
   viewedAt?: Date
   createdAt: number
 }
@@ -793,15 +833,6 @@ export type TCreateRequirementTemplateFormData = {
   templateCategoryId?: string | null
   type: string
   nickname?: string
-}
-
-export type TCreatePermitApplicationFormData = {
-  pid?: string
-  pin?: string
-  templateVersionId: string
-  jurisdictionId?: string
-  site?: IOption
-  sandboxId?: string
 }
 
 export type TReleaseNoteFormData = {

@@ -18,6 +18,7 @@ class OverheatingCode < ApplicationRecord
 
   belongs_to :creator, class_name: "User", foreign_key: "creator_id"
   belongs_to :jurisdiction, optional: true
+  belongs_to :sandbox, optional: true
 
   validates :creator, presence: true
   validates :postal_code,
@@ -36,6 +37,7 @@ class OverheatingCode < ApplicationRecord
       building_model: building_model,
       full_address: full_address,
       creator_id: creator_id,
+      sandbox_id: sandbox_id,
       discarded: discarded_at.present?,
       created_at: created_at,
       updated_at: updated_at

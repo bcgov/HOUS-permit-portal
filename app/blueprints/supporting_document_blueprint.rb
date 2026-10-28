@@ -1,5 +1,12 @@
 class SupportingDocumentBlueprint < Blueprinter::Base
-  fields :id, :data_key, :file_name, :file_url, :file_size, :created_at
+  fields :id,
+         :data_key,
+         :file_name,
+         :file_url,
+         :file_size,
+         :created_at,
+         :submission_version_id,
+         :revision_request_id
 
   view :form_io_details do
     field :file_id, name: :id

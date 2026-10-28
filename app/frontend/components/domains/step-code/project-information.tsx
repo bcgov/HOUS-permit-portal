@@ -24,13 +24,21 @@ import {
   Thead,
   Tr,
 } from "@chakra-ui/react"
-import { ArrowRight, CaretLeft, DotsThreeVertical, Download, MapPin, PaperPlaneRight } from "@phosphor-icons/react"
+import {
+  ArrowRight,
+  CaretLeft,
+  CaretRight,
+  DotsThreeVertical,
+  Download,
+  MapPin,
+  PaperPlaneRight,
+} from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo, useState } from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
-import { useNavigate, useParams } from "react-router-dom"
+import { Link as ReactRouterLink, useNavigate, useParams } from "react-router-dom"
 import { datefnsAppDateFormat } from "../../../constants"
 import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
@@ -139,7 +147,7 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
 }: IProjectInformationProps) {
   const { permitApplicationId } = useParams()
   const navigate = useNavigate()
-  const { permitApplicationStore } = useMst()
+  const { permitApplicationStore, stepCodeStore } = useMst()
   const permitApplication = permitApplicationId ? permitApplicationStore.currentPermitApplication : null
   const pinnedStage =
     permitApplication?.stepCodeStage || currentStepCode?.currentStage || EStepCodeChecklistStage.preConstruction
@@ -310,6 +318,28 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
     <FormProvider {...formMethods}>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Flex direction="column" gap={6} pb={4}>
+          <Flex justify="space-between" align="center" gap={4}>
+            <Button
+              as={ReactRouterLink}
+              to={stepCodeStore.indexExitPath ?? stepCodesPath}
+              variant="link"
+              leftIcon={<CaretLeft size={20} />}
+              textDecoration="none"
+            >
+              {t("stepCode.goToStepCodes")}
+            </Button>
+            {permitApplicationId && (
+              <Button
+                as={ReactRouterLink}
+                to={`/permit-applications/${permitApplicationId}/edit`}
+                variant="link"
+                rightIcon={<CaretRight size={20} />}
+                textDecoration="none"
+              >
+                {t("stepCode.goToPermitApplication")}
+              </Button>
+            )}
+          </Flex>
           <Flex direction="column" gap={2}>
             <Flex justify="space-between" align="flex-end" gap={4} w="full">
               <HStack align="flex-end" spacing={3}>
@@ -419,7 +449,7 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
             <Table variant="simple" size="sm">
               <Thead>
                 <Tr borderTop="none">
-                  <Th colSpan={2} pl={0} {...stageTableHeaderProps}>
+                  <Th colSpan={2} pl={3} {...stageTableHeaderProps}>
                     {permitApplicationId
                       ? t("stepCode.projectInformation.permitStage")
                       : t("stepCode.projectInformation.stage")}
@@ -458,7 +488,7 @@ export const ProjectInformation = observer(function StepCodeProjectInformation({
                         handleStageSelect(stage)
                       }}
                     >
-                      <Td pl={0} width="1px">
+                      <Td pl={3} width="1px">
                         <Radio
                           isChecked={isSelected}
                           onChange={() => handleStageSelect(stage)}

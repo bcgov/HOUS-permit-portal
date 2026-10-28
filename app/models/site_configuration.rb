@@ -6,10 +6,10 @@ class SiteConfiguration < ApplicationRecord
   validate :validate_help_link_items
   has_many :revision_reasons
 
-  # NOTE: The standardization page is now powered by
-  # TemplateVersion.publicly_previewable drafts, served via a dedicated
-  # `GET /api/template_versions/publicly_previewable` endpoint. The
-  # previous SiteConfiguration-backed association has been removed.
+  # NOTE: The standardization page is powered by
+  # `GET /api/template_versions/standardization_preview`, which returns
+  # published template versions plus drafts flagged publicly_previewable.
+  # The previous SiteConfiguration-backed association has been removed.
 
   accepts_nested_attributes_for :revision_reasons, allow_destroy: true
   validate :max_undiscarded_revision_reasons

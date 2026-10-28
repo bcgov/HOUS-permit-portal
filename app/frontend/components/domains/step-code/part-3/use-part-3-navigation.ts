@@ -1,6 +1,7 @@
 import * as R from "ramda"
 import { useLocation, useNavigate, useParams } from "react-router-dom"
 import { usePart3StepCode } from "../../../../hooks/resources/use-part-3-step-code"
+import { useMst } from "../../../../setup/root"
 import { IPart3NavLink } from "../../../../types/types"
 import { navLinks } from "./sidebar/nav-sections"
 
@@ -15,6 +16,7 @@ export const usePart3Navigation = () => {
   const { pathname } = useLocation()
   const { permitApplicationId, stepCodeId } = useParams()
   const { checklist, currentStepCode } = usePart3StepCode()
+  const { stepCodeStore } = useMst()
 
   // Computed lazily so callers always see the latest relevance state
   // (sections like baseline-occupancies update relevance flags mid-save)
@@ -67,9 +69,10 @@ export const usePart3Navigation = () => {
     }
   }
 
-  const isPermitLinked = !!permitApplicationId
+  const indexExitPath = stepCodeStore.indexExitPath
+  const isPermitLinked = !!permitApplicationId && !indexExitPath
   const goBackPath = isPermitLinked ? `/permit-applications/${permitApplicationId}/edit` : "/step-codes"
-  const exitLinkPath = isPermitLinked ? goBackPath : "/step-codes?currentPage=1"
+  const exitLinkPath = indexExitPath ?? (isPermitLinked ? goBackPath : "/step-codes?currentPage=1")
 
   return {
     navigateToNext,

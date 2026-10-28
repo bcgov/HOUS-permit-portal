@@ -319,6 +319,29 @@ RSpec.describe PermitProject, type: :model do
         )
         expect(project.recent_permit_applications(owner)).not_to include(older)
       end
+
+      it "shows new drafts to review staff of that jurisdiction" do
+        jurisdiction = create(:sub_district)
+        owner = create(:user, :submitter)
+        project = create(:permit_project, owner:, jurisdiction:, sandbox: nil)
+        reviewer = create(:user, :reviewer, jurisdiction:)
+        colleague = create(:user, :reviewer, jurisdiction:)
+        outsider = create(:user, :reviewer)
+        draft =
+          create(
+            :permit_application,
+            permit_project: project,
+            submitter: owner,
+            jurisdiction:,
+            sandbox: nil
+          )
+
+        expect(project.recent_permit_applications(reviewer)).to include(draft)
+        expect(project.recent_permit_applications(colleague)).to include(draft)
+        expect(project.recent_permit_applications(outsider)).not_to include(
+          draft
+        )
+      end
     end
 
     describe "#submission_collaborators" do
