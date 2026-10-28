@@ -5,6 +5,8 @@ RSpec.describe RequirementTemplate, type: :model do
     it { should have_many(:requirement_template_sections) }
     it { should have_many(:template_versions) }
     it { should have_one(:published_template_version) }
+    it { should have_one(:explainer).dependent(:destroy) }
+    it { should have_many(:jurisdiction_explainers).dependent(:destroy) }
     it { should have_many(:explainer_related_templates).dependent(:destroy) }
   end
 

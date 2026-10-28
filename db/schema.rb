@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_10_16_140000) do
+ActiveRecord::Schema[7.2].define(version: 2026_10_22_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -291,6 +291,17 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_16_140000) do
     t.datetime "updated_at", null: false
     t.index ["jurisdiction_id"], name: "index_integration_mappings_on_jurisdiction_id"
     t.index ["template_version_id"], name: "index_integration_mappings_on_template_version_id"
+  end
+
+  create_table "jurisdiction_explainers", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "jurisdiction_id", null: false
+    t.uuid "requirement_template_id", null: false
+    t.text "local_context_html", default: "", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["jurisdiction_id", "requirement_template_id"], name: "idx_jurisdiction_explainers_on_jurisdiction_and_template", unique: true
+    t.index ["jurisdiction_id"], name: "index_jurisdiction_explainers_on_jurisdiction_id"
+    t.index ["requirement_template_id"], name: "index_jurisdiction_explainers_on_requirement_template_id"
   end
 
   create_table "jurisdiction_heating_degree_days", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1461,6 +1472,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_16_140000) do
   add_foreign_key "integration_mapping_notifications", "template_versions"
   add_foreign_key "integration_mappings", "jurisdictions"
   add_foreign_key "integration_mappings", "template_versions"
+  add_foreign_key "jurisdiction_explainers", "jurisdictions"
+  add_foreign_key "jurisdiction_explainers", "requirement_templates"
   add_foreign_key "jurisdiction_heating_degree_days", "jurisdictions", on_delete: :cascade
   add_foreign_key "jurisdiction_memberships", "jurisdictions"
   add_foreign_key "jurisdiction_memberships", "users"

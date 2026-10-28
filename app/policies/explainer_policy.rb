@@ -1,9 +1,11 @@
 class ExplainerPolicy < ApplicationPolicy
   def show?
-    user&.super_admin?
+    return true if user&.super_admin?
+
+    user&.manager?
   end
 
   def update?
-    show?
+    user&.super_admin?
   end
 end

@@ -25,7 +25,7 @@ function isTemplateEditPath(path: string): boolean {
 }
 
 function isDigitalPermitEditPath(path: string): boolean {
-  const regex = /^\/digital-building-permits\/([a-f\d-]+)\/(edit|settings)$/
+  const regex = /^\/digital-building-permits\/([a-f\d-]+)\/(edit|settings|application-info)$/
 
   return regex.test(path)
 }

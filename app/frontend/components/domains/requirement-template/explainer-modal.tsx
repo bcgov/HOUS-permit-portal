@@ -36,18 +36,20 @@ import {
 } from "@dnd-kit/core"
 import { restrictToParentElement, restrictToVerticalAxis } from "@dnd-kit/modifiers"
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable"
-import { DotsSixVertical, Plus, X } from "@phosphor-icons/react"
+import { DotsSixVertical, Info, Plus, X } from "@phosphor-icons/react"
 import { UppyFile } from "@uppy/core"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
-import React, { CSSProperties, useEffect, useState } from "react"
+import React, { CSSProperties, useEffect, useRef, useState } from "react"
 import { Controller, FormProvider, useFieldArray, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import Select, { GroupBase } from "react-select"
 import { datefnsTableDateTimeFormat } from "../../../constants"
 import useUppyS3 from "../../../hooks/use-uppy-s3"
 import { IExplainer } from "../../../models/explainer"
+import { IJurisdictionExplainer } from "../../../models/jurisdiction-explainer"
 import { IRequirementTemplate } from "../../../models/requirement-template"
+import { ITemplateVersion } from "../../../models/template-version"
 import { IExplainerParams, IUppyAttachmentFile } from "../../../types/api-request"
 import { EFileUploadAttachmentType } from "../../../types/enums"
 import { IOption } from "../../../types/types"
@@ -61,6 +63,8 @@ import { Editor } from "../../shared/editor/editor"
 import { TextAreaFormControl, TextFormControl, UrlFormControl } from "../../shared/form/input-form-control"
 import { SortableItem } from "../../shared/sortable-item"
 import { UppyDashboard } from "../../shared/uppy-dashboard"
+import { FromYourLocalJurisdiction } from "./from-your-local-jurisdiction"
+import { LocalContextEditor } from "./local-context-editor"
 
 interface IDocumentFormValue {
   id?: string
@@ -78,6 +82,7 @@ interface IFormValues {
   documentsAttributes: IDocumentFormValue[]
   relatedTemplateIds: string[]
   isPublished: boolean
+  localContextHtml: string
 }
 
 // Same as note attachments: last path segment of the cache URL is the Shrine file id.
@@ -112,25 +117,50 @@ const emptyForm: IFormValues = {
   documentsAttributes: [],
   relatedTemplateIds: [],
   isPublished: false,
+  localContextHtml: "",
+}
+
+function scrollWithinModalBody(el: HTMLElement | null) {
+  if (!el) return
+  const body = el.closest(".chakra-modal__body") as HTMLElement | null
+  if (!body) return
+  const paddingTop = Number.parseFloat(getComputedStyle(body).paddingTop) || 0
+  const top = el.getBoundingClientRect().top - body.getBoundingClientRect().top + body.scrollTop - paddingTop
+  body.scrollTo({ top: Math.max(0, top), behavior: "smooth" })
 }
 
 export const ExplainerModal = observer(function ExplainerModal({
   requirementTemplate,
+  templateVersion,
+  jurisdictionId,
+  mode = "superAdmin",
   isOpen,
   onClose,
+  onLocalContextSaved,
 }: {
-  requirementTemplate: IRequirementTemplate
+  requirementTemplate?: IRequirementTemplate
+  templateVersion?: ITemplateVersion
+  jurisdictionId?: string
+  mode?: "superAdmin" | "reviewManager"
   isOpen: boolean
   onClose: () => void
+  onLocalContextSaved?: (html: string) => void
 }) {
   const { t } = useTranslation()
   const closeConfirm = useDisclosure()
+  const localSectionRef = useRef<HTMLDivElement>(null)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
   const [options, setOptions] = useState<IOption[]>([])
   const [activeStepId, setActiveStepId] = useState<string | null>(null)
+  const [savedExplainer, setSavedExplainer] = useState<IExplainer | null>(null)
+  const [jurisdictionExplainers, setJurisdictionExplainers] = useState<IJurisdictionExplainer[]>([])
+  const [localUpdatedAt, setLocalUpdatedAt] = useState<string | null>(null)
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
-  const explainer = requirementTemplate.explainer
+  const isReviewManager = mode === "reviewManager"
+  const explainer = requirementTemplate?.explainer ?? savedExplainer
+  const nickname =
+    requirementTemplate?.nickname || templateVersion?.denormalizedTemplateJson?.nickname || templateVersion?.label
 
   const methods = useForm<IFormValues>({ defaultValues: emptyForm })
   const {
@@ -141,7 +171,7 @@ export const ExplainerModal = observer(function ExplainerModal({
     setValue,
     formState: { isDirty, isSubmitting },
   } = methods
-  const applyExplainer = (saved: IExplainer | null, relatedOptions?: IOption[]) => {
+  const applyExplainer = (saved: IExplainer | null, relatedOptions?: IOption[], localContextHtml = "") => {
     if (relatedOptions) setOptions(relatedOptions)
     reset({
       introductionHtml: saved?.introductionHtml ?? "",
@@ -155,6 +185,7 @@ export const ExplainerModal = observer(function ExplainerModal({
       })),
       relatedTemplateIds: [...(saved?.relatedTemplateIds ?? [])],
       isPublished: Boolean(saved?.publishedAt),
+      localContextHtml,
     })
   }
   const steps = useFieldArray({ control, name: "steps" })
@@ -207,22 +238,63 @@ export const ExplainerModal = observer(function ExplainerModal({
     let cancelled = false
     setLoading(true)
     setLoadError(false)
-    requirementTemplate.fetchExplainer().then((relatedOptions) => {
-      if (cancelled) return
-      if (relatedOptions) {
-        applyExplainer(requirementTemplate.explainer, relatedOptions)
-      } else {
-        setLoadError(true)
-      }
+    const fetchExplainer = requirementTemplate?.fetchExplainer ?? templateVersion?.fetchExplainer
+    if (!fetchExplainer) {
+      setLoadError(true)
       setLoading(false)
-    })
+      return
+    }
+    fetchExplainer()
+      .then(async (result) => {
+        if (cancelled) return
+        if (!result) {
+          setLoadError(true)
+          setLoading(false)
+          return
+        }
+        let localHtml = ""
+        let localAt: string | null = null
+        if (isReviewManager && jurisdictionId && templateVersion) {
+          const savedLocal = await templateVersion.fetchJurisdictionExplainer(jurisdictionId)
+          if (cancelled) return
+          if (!savedLocal) {
+            setLoadError(true)
+            setLoading(false)
+            return
+          }
+          localHtml = savedLocal.localContextHtml
+          localAt = savedLocal.updatedAt
+        }
+        applyExplainer(result.explainer, result.relatedTemplateOptions, localHtml)
+        setSavedExplainer(result.explainer)
+        setJurisdictionExplainers(result.jurisdictionExplainers)
+        setLocalUpdatedAt(localAt)
+        setLoading(false)
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setLoadError(true)
+          setLoading(false)
+        }
+      })
     return () => {
       cancelled = true
     }
-  }, [isOpen, requirementTemplate])
+  }, [isOpen, requirementTemplate, templateVersion, jurisdictionId, isReviewManager])
+
+  const explainerPublished = Boolean(explainer?.publishedAt)
+
+  useEffect(() => {
+    if (loading || !isReviewManager || !explainerPublished || !localSectionRef.current) return
+    scrollWithinModalBody(localSectionRef.current)
+  }, [loading, isReviewManager, explainerPublished])
 
   const persist = async (values: IFormValues) => {
-    if (isUploading) return false
+    if (isReviewManager) {
+      if (!templateVersion || !jurisdictionId || !explainerPublished) return false
+      return await templateVersion.saveJurisdictionExplainer(jurisdictionId, values.localContextHtml)
+    }
+    if (isUploading || !requirementTemplate) return false
     const ok = await requirementTemplate.saveExplainer({
       introductionHtml: values.introductionHtml,
       beforeYouApplyHtml: values.beforeYouApplyHtml,
@@ -233,6 +305,7 @@ export const ExplainerModal = observer(function ExplainerModal({
       publish: values.isPublished,
     })
     if (!ok) return false
+    setSavedExplainer(requirementTemplate.explainer)
     uppy.cancelAll()
     return true
   }
@@ -252,7 +325,9 @@ export const ExplainerModal = observer(function ExplainerModal({
   }
 
   const onSave = handleSubmit(async (values) => {
-    if (await persist(values)) onClose()
+    if (!(await persist(values))) return
+    if (isReviewManager) onLocalContextSaved?.(values.localContextHtml)
+    onClose()
   })
 
   const requestClose = () => {
@@ -265,6 +340,7 @@ export const ExplainerModal = observer(function ExplainerModal({
   const selectedOptions = options.filter((option) => relatedTemplateIds.includes(option.value))
   const groupedOptions = groupFilterOptions(options, t("siteConfiguration.templateCategories.uncategorized"))
   const selectOptions = shouldShowFilterGroupLabels(groupedOptions) ? groupedOptions : options
+  const lastSavedAt = isReviewManager ? localUpdatedAt : explainer?.updatedAt
 
   const renderActions = () => (
     <HStack spacing={3}>
@@ -295,17 +371,17 @@ export const ExplainerModal = observer(function ExplainerModal({
               <Flex justify="space-between" align="flex-start" gap={6}>
                 <Box>
                   <Heading size="lg">{t("requirementTemplate.explainer.title")}</Heading>
-                  {requirementTemplate.nickname && (
+                  {nickname && (
                     <Text mt={1} color="text.secondary" fontWeight="normal" fontSize="md">
-                      {requirementTemplate.nickname}
+                      {nickname}
                     </Text>
                   )}
                   <HStack mt={3} spacing={3}>
                     <StatusTag explainer={explainer} />
-                    {explainer?.updatedAt && (
+                    {lastSavedAt && (
                       <Text fontSize="sm" fontWeight="normal" color="text.secondary">
                         {t("requirementTemplate.explainer.lastSaved", {
-                          time: format(new Date(explainer.updatedAt), datefnsTableDateTimeFormat),
+                          time: format(new Date(lastSavedAt), datefnsTableDateTimeFormat),
                         })}
                       </Text>
                     )}
@@ -325,27 +401,30 @@ export const ExplainerModal = observer(function ExplainerModal({
                       <CalloutBanner type="warning" title={t("requirementTemplate.explainer.draftBanner")} />
                     )}
 
-                    <FormControl>
-                      <Checkbox {...methods.register("isPublished")}>
-                        {t("requirementTemplate.explainer.published")}
-                      </Checkbox>
-                    </FormControl>
+                    {!isReviewManager && (
+                      <FormControl>
+                        <Checkbox {...methods.register("isPublished")}>
+                          {t("requirementTemplate.explainer.published")}
+                        </Checkbox>
+                      </FormControl>
+                    )}
 
                     <Controller
                       name="introductionHtml"
                       control={control}
                       rules={{
                         validate: (value) =>
+                          isReviewManager ||
                           !isPublished ||
                           !isTipTapEmpty(value ?? "") ||
                           t("ui.isRequired", { field: t("requirementTemplate.explainer.introduction") }),
                       }}
                       render={({ field, fieldState }) => (
                         <FormControl isInvalid={!!fieldState.error}>
-                          <FieldLabel required={isPublished}>
+                          <FieldLabel required={!isReviewManager && isPublished}>
                             {t("requirementTemplate.explainer.introduction")}
                           </FieldLabel>
-                          <Editor htmlValue={field.value} onChange={field.onChange} />
+                          <Editor htmlValue={field.value} onChange={field.onChange} readonly={isReviewManager} />
                           <FormHelperText>{t("requirementTemplate.explainer.introductionRequired")}</FormHelperText>
                           <FormErrorMessage>{fieldState.error?.message}</FormErrorMessage>
                         </FormControl>
@@ -357,55 +436,85 @@ export const ExplainerModal = observer(function ExplainerModal({
                       <Controller
                         name="beforeYouApplyHtml"
                         control={control}
-                        render={({ field }) => <Editor htmlValue={field.value} onChange={field.onChange} />}
+                        render={({ field }) => (
+                          <Editor htmlValue={field.value} onChange={field.onChange} readonly={isReviewManager} />
+                        )}
                       />
                     </FormControl>
 
                     <FormControl>
                       <FieldLabel>{t("requirementTemplate.explainer.howToApply")}</FieldLabel>
                       <FormHelperText mb={3}>{t("requirementTemplate.explainer.howToApplyHint")}</FormHelperText>
-                      <DndContext
-                        sensors={sensors}
-                        collisionDetection={closestCenter}
-                        modifiers={stepDragModifiers}
-                        onDragStart={startStepDrag}
-                        onDragCancel={() => setActiveStepId(null)}
-                        onDragEnd={reorderSteps}
-                      >
-                        <SortableContext
-                          items={steps.fields.map((step) => step.id)}
-                          strategy={verticalListSortingStrategy}
-                        >
-                          <VStack align="stretch" spacing={3}>
-                            {steps.fields.map((step, index) => (
-                              <SortableItem
-                                key={step.id}
-                                sortableArguments={{ id: step.id }}
-                                Component={HowToApplyStep}
-                                componentProps={{ index, onRemove: () => steps.remove(index) }}
-                              />
-                            ))}
-                          </VStack>
-                        </SortableContext>
-                        <DragOverlay dropAnimation={stepDropAnimation} modifiers={stepDragModifiers} zIndex={1600}>
-                          {activeStep ? (
-                            <StepDragPreview
-                              index={activeStepIndex}
-                              title={activeStep.title}
-                              description={activeStep.description}
-                            />
-                          ) : null}
-                        </DragOverlay>
-                      </DndContext>
-                      <Button
-                        type="button"
-                        mt={3}
-                        variant="tertiary"
-                        leftIcon={<Plus size={16} />}
-                        onClick={() => steps.append({ title: "", description: "" })}
-                      >
-                        {t("requirementTemplate.explainer.addStep")}
-                      </Button>
+                      {isReviewManager ? (
+                        <VStack align="stretch" spacing={3}>
+                          {steps.fields.map((step, index) => (
+                            <Flex key={step.id} bg="greys.grey03" p={4} borderRadius="md" gap={3} align="flex-start">
+                              <Text fontWeight="semibold" w={6} mt={8}>
+                                {index + 1}.
+                              </Text>
+                              <VStack flex="1" align="stretch" spacing={2}>
+                                <TextFormControl
+                                  fieldName={`steps.${index}.title`}
+                                  label={t("requirementTemplate.explainer.stepTitle")}
+                                  showOptional={false}
+                                  isDisabled
+                                />
+                                <TextAreaFormControl
+                                  fieldName={`steps.${index}.description`}
+                                  label={t("requirementTemplate.explainer.stepDescription")}
+                                  showOptional={false}
+                                  isDisabled
+                                />
+                              </VStack>
+                            </Flex>
+                          ))}
+                        </VStack>
+                      ) : (
+                        <>
+                          <DndContext
+                            sensors={sensors}
+                            collisionDetection={closestCenter}
+                            modifiers={stepDragModifiers}
+                            onDragStart={startStepDrag}
+                            onDragCancel={() => setActiveStepId(null)}
+                            onDragEnd={reorderSteps}
+                          >
+                            <SortableContext
+                              items={steps.fields.map((step) => step.id)}
+                              strategy={verticalListSortingStrategy}
+                            >
+                              <VStack align="stretch" spacing={3}>
+                                {steps.fields.map((step, index) => (
+                                  <SortableItem
+                                    key={step.id}
+                                    sortableArguments={{ id: step.id }}
+                                    Component={HowToApplyStep}
+                                    componentProps={{ index, onRemove: () => steps.remove(index) }}
+                                  />
+                                ))}
+                              </VStack>
+                            </SortableContext>
+                            <DragOverlay dropAnimation={stepDropAnimation} modifiers={stepDragModifiers} zIndex={1600}>
+                              {activeStep ? (
+                                <StepDragPreview
+                                  index={activeStepIndex}
+                                  title={activeStep.title}
+                                  description={activeStep.description}
+                                />
+                              ) : null}
+                            </DragOverlay>
+                          </DndContext>
+                          <Button
+                            type="button"
+                            mt={3}
+                            variant="tertiary"
+                            leftIcon={<Plus size={16} />}
+                            onClick={() => steps.append({ title: "", description: "" })}
+                          >
+                            {t("requirementTemplate.explainer.addStep")}
+                          </Button>
+                        </>
+                      )}
                     </FormControl>
 
                     <Box>
@@ -415,7 +524,7 @@ export const ExplainerModal = observer(function ExplainerModal({
                       <VStack align="stretch" spacing={5}>
                         <FormControl>
                           <FieldLabel>{t("requirementTemplate.explainer.documents")}</FieldLabel>
-                          <UppyDashboard uppy={uppy} height={180} width="100%" />
+                          {!isReviewManager && <UppyDashboard uppy={uppy} height={180} width="100%" />}
                           {savedDocuments.length > 0 && (
                             <VStack align="stretch" mt={3} spacing={2}>
                               {savedDocuments.map((document) => (
@@ -432,23 +541,25 @@ export const ExplainerModal = observer(function ExplainerModal({
                                   ) : (
                                     <Text fontSize="sm">{document.fileName}</Text>
                                   )}
-                                  <Button
-                                    type="button"
-                                    variant="tertiary"
-                                    size="sm"
-                                    leftIcon={<X size={16} />}
-                                    onClick={() =>
-                                      setValue(
-                                        "documentsAttributes",
-                                        documentsAttributes.map((item) =>
-                                          item.id === document.id ? { ...item, _destroy: true } : item
-                                        ),
-                                        { shouldDirty: true }
-                                      )
-                                    }
-                                  >
-                                    {t("ui.remove")}
-                                  </Button>
+                                  {!isReviewManager && (
+                                    <Button
+                                      type="button"
+                                      variant="tertiary"
+                                      size="sm"
+                                      leftIcon={<X size={16} />}
+                                      onClick={() =>
+                                        setValue(
+                                          "documentsAttributes",
+                                          documentsAttributes.map((item) =>
+                                            item.id === document.id ? { ...item, _destroy: true } : item
+                                          ),
+                                          { shouldDirty: true }
+                                        )
+                                      }
+                                    >
+                                      {t("ui.remove")}
+                                    </Button>
+                                  )}
                                 </Flex>
                               ))}
                             </VStack>
@@ -465,6 +576,7 @@ export const ExplainerModal = observer(function ExplainerModal({
                                     fieldName={`links.${index}.title`}
                                     label={t("requirementTemplate.explainer.linkTitle")}
                                     showOptional={false}
+                                    isDisabled={isReviewManager}
                                   />
                                 </Box>
                                 <Box flex="1">
@@ -472,28 +584,33 @@ export const ExplainerModal = observer(function ExplainerModal({
                                     fieldName={`links.${index}.url`}
                                     label={t("requirementTemplate.explainer.linkUrl")}
                                     showOptional={false}
+                                    isDisabled={isReviewManager}
                                   />
                                 </Box>
-                                <Button
-                                  type="button"
-                                  variant="tertiary"
-                                  leftIcon={<X size={16} />}
-                                  onClick={() => links.remove(index)}
-                                >
-                                  {t("ui.remove")}
-                                </Button>
+                                {!isReviewManager && (
+                                  <Button
+                                    type="button"
+                                    variant="tertiary"
+                                    leftIcon={<X size={16} />}
+                                    onClick={() => links.remove(index)}
+                                  >
+                                    {t("ui.remove")}
+                                  </Button>
+                                )}
                               </Flex>
                             ))}
                           </VStack>
-                          <Button
-                            type="button"
-                            mt={3}
-                            variant="tertiary"
-                            leftIcon={<Plus size={16} />}
-                            onClick={() => links.append({ title: "", url: "" })}
-                          >
-                            {t("requirementTemplate.explainer.addLink")}
-                          </Button>
+                          {!isReviewManager && (
+                            <Button
+                              type="button"
+                              mt={3}
+                              variant="tertiary"
+                              leftIcon={<Plus size={16} />}
+                              onClick={() => links.append({ title: "", url: "" })}
+                            >
+                              {t("requirementTemplate.explainer.addLink")}
+                            </Button>
+                          )}
                         </FormControl>
                       </VStack>
                     </Box>
@@ -503,6 +620,7 @@ export const ExplainerModal = observer(function ExplainerModal({
                       <FormHelperText mb={3}>{t("requirementTemplate.explainer.relatedPermitsHint")}</FormHelperText>
                       <Select<IOption, true, GroupBase<IOption>>
                         isMulti
+                        isDisabled={isReviewManager}
                         isClearable={false}
                         options={selectOptions}
                         value={selectedOptions}
@@ -555,6 +673,22 @@ export const ExplainerModal = observer(function ExplainerModal({
                         }}
                       />
                     </FormControl>
+
+                    <Box ref={localSectionRef}>
+                      {isReviewManager ? (
+                        explainerPublished && (
+                          <Controller
+                            name="localContextHtml"
+                            control={control}
+                            render={({ field }) => (
+                              <LocalContextEditor htmlValue={field.value} onChange={field.onChange} />
+                            )}
+                          />
+                        )
+                      ) : (
+                        <SuperAdminLocalContextPreview explainers={jurisdictionExplainers} />
+                      )}
+                    </Box>
                   </VStack>
                 )
               )}
@@ -580,6 +714,99 @@ export const ExplainerModal = observer(function ExplainerModal({
     </>
   )
 })
+
+function SuperAdminLocalContextPreview({ explainers }: { explainers: IJurisdictionExplainer[] }) {
+  const { t } = useTranslation()
+  const sectionRef = useRef<HTMLDivElement>(null)
+  const options: IOption[] = explainers.map((item) => ({
+    label: item.qualifiedName || item.name,
+    value: item.id,
+  }))
+  const [selectedId, setSelectedId] = useState("")
+
+  useEffect(() => {
+    if (selectedId && !options.some((option) => option.value === selectedId)) {
+      setSelectedId("")
+    }
+  }, [explainers, selectedId])
+
+  useEffect(() => {
+    if (!selectedId) return
+    scrollWithinModalBody(sectionRef.current)
+  }, [selectedId])
+
+  const selected = explainers.find((item) => item.id === selectedId)
+  const selectedOption = options.find((option) => option.value === selectedId) ?? null
+
+  return (
+    <Box ref={sectionRef}>
+      <FieldLabel optional={false}>{t("requirementTemplate.explainer.localCommunity")}</FieldLabel>
+      <Flex gap={2} align="flex-start" mb={2}>
+        <Box flexShrink={0} mt="2px">
+          <Info size={16} />
+        </Box>
+        <Text fontSize="sm">{t("requirementTemplate.explainer.localContextReadOnly")}</Text>
+      </Flex>
+      <Text fontSize="sm" mb={4}>
+        {t("requirementTemplate.explainer.localContextReadOnlyHint")}
+      </Text>
+      {explainers.length === 0 ? (
+        <Text color="text.secondary">{t("requirementTemplate.explainer.localContextEmpty")}</Text>
+      ) : (
+        <FormControl mb={selected ? 4 : 0}>
+          <FormLabel htmlFor="explainer-local-jurisdiction-select">
+            {t("requirementTemplate.explainer.localContextJurisdiction")}
+          </FormLabel>
+          <Select<IOption>
+            inputId="explainer-local-jurisdiction-select"
+            isClearable
+            options={options}
+            value={selectedOption}
+            onChange={(option) => setSelectedId(option?.value ?? "")}
+            placeholder={t("requirementTemplate.explainer.localContextSelectPlaceholder")}
+            menuPortalTarget={document.body}
+            menuPosition="fixed"
+            styles={{
+              control: (css, state) => ({
+                ...css,
+                borderColor: state.isFocused ? "var(--chakra-colors-focus)" : "var(--chakra-colors-border-light)",
+                borderRadius: "6px",
+                minHeight: "var(--chakra-sizes-10)",
+                boxShadow: "none",
+                fontSize: "var(--chakra-fontSizes-sm)",
+                ":hover": {
+                  borderColor: "var(--chakra-colors-border-base)",
+                },
+              }),
+              menu: (css) => ({
+                ...css,
+                zIndex: 1600,
+              }),
+              menuPortal: (base) => ({ ...base, zIndex: 1600 }),
+              option: (css, state) => ({
+                ...css,
+                cursor: "pointer",
+                color: "var(--chakra-colors-text-primary)",
+                backgroundColor: state.isFocused ? "var(--chakra-colors-semantic-infoLight)" : undefined,
+                ":hover": {
+                  backgroundColor: "var(--chakra-colors-gray-100)",
+                },
+              }),
+            }}
+          />
+          {!selected && <FormHelperText>{t("requirementTemplate.explainer.localContextUnselected")}</FormHelperText>}
+        </FormControl>
+      )}
+      {selected && (
+        <FromYourLocalJurisdiction
+          html={selected.localContextHtml}
+          updatedAt={selected.updatedAt}
+          jurisdictionName={selected.qualifiedName || selected.name}
+        />
+      )}
+    </Box>
+  )
+}
 
 function StepDragPreview({ index, title, description }: { index: number; title: string; description: string }) {
   const { t } = useTranslation()
@@ -608,7 +835,15 @@ function StepDragPreview({ index, title, description }: { index: number; title: 
   )
 }
 
-function FieldLabel({ required, children }: { required?: boolean; children: React.ReactNode }) {
+function FieldLabel({
+  required,
+  optional = true,
+  children,
+}: {
+  required?: boolean
+  optional?: boolean
+  children: React.ReactNode
+}) {
   const { t } = useTranslation()
   return (
     <FormLabel>
@@ -618,7 +853,7 @@ function FieldLabel({ required, children }: { required?: boolean; children: Reac
           *
         </Text>
       ) : (
-        ` ${t("ui.optional")}`
+        optional && ` ${t("ui.optional")}`
       )}
     </FormLabel>
   )

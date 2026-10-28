@@ -5,8 +5,9 @@ import { vancouverTimeZone } from "../constants"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { IExplainerParams } from "../types/api-request"
-import { IJurisdictionStub, IOption, IRequirementTemplateFormJson } from "../types/types"
+import { IJurisdictionStub, IRequirementTemplateFormJson } from "../types/types"
 import { ExplainerModel } from "./explainer"
+import { IExplainerLoadResult } from "./jurisdiction-explainer"
 import { RequirementTemplateSectionModel } from "./requirement-template-section"
 import { TemplateVersionModel } from "./template-version"
 import { UserModel } from "./user"
@@ -198,12 +199,16 @@ export const RequirementTemplateModel = types.snapshotProcessor(
           return self
         }
       }),
-      fetchExplainer: flow(function* () {
+      fetchExplainer: flow(function* (): Generator<any, IExplainerLoadResult | null, any> {
         const { ok, data: response } = yield* toGenerator(self.environment.api.fetchExplainer(self.id))
         if (!ok || !response) return null
 
         self.setExplainer(response.data ?? null)
-        return (response.meta?.relatedTemplateOptions ?? []) as IOption[]
+        return {
+          explainer: self.explainer,
+          relatedTemplateOptions: response.meta?.relatedTemplateOptions ?? [],
+          jurisdictionExplainers: response.meta?.jurisdictionExplainers ?? [],
+        }
       }),
       saveExplainer: flow(function* (explainer: IExplainerParams) {
         const { ok, data: response } = yield* toGenerator(self.environment.api.saveExplainer(self.id, explainer))

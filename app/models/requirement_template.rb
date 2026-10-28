@@ -23,6 +23,7 @@ class RequirementTemplate < ApplicationRecord
   has_many :requirement_blocks, through: :requirement_template_sections
   has_many :requirements, through: :requirement_blocks
   has_one :explainer, dependent: :destroy
+  has_many :jurisdiction_explainers, dependent: :destroy
   has_many :template_versions,
            -> { order(version_date: :desc) },
            dependent: :destroy

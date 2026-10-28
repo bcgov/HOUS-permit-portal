@@ -68,79 +68,95 @@ export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermi
           {group.templateVersions.map((templateVersion) => {
             return (
               <SectionBox key={templateVersion.id} w="full" enableCardClick={!!renderButton}>
-                <Flex w="full" as="section">
-                  <Stack spacing={3} flex={1}>
-                    <Text as="h3" color={"text.link"} fontWeight={700} fontSize="xl">
-                      {templateVersion.denormalizedTemplateJson.nickname}
-                    </Text>
-                    <Text fontSize={"sm"} color={"text.secondary"}>
-                      {templateVersion.denormalizedTemplateJson?.description}
-                    </Text>
-                    <Text fontSize={"sm"} color={"text.secondary"}>
-                      <Text as="span" fontWeight={700}>
-                        {t("digitalBuildingPermits.index.lastUpdated")}:{" "}
+                <Flex direction="column" w="full" as="section" gap={3}>
+                  <Flex w="full">
+                    <Stack spacing={3} flex={1}>
+                      <Text as="h3" color={"text.link"} fontWeight={700} fontSize="xl">
+                        {templateVersion.denormalizedTemplateJson.nickname}
                       </Text>
-                      {format(templateVersion.updatedAt, datefnsTableDateFormat)}
-                    </Text>
-                    <HStack gap={4} align="center">
-                      <VersionTag versionDate={templateVersion.versionDate} w="fit-content" />
-                      {(templateVersion.denormalizedTemplateJson?.tags ?? []).length > 0 && (
-                        <Text fontSize="sm" color="text.secondary">
-                          {(templateVersion.denormalizedTemplateJson?.tags ?? []).join(", ")}
+                      <Text fontSize={"sm"} color={"text.secondary"}>
+                        {templateVersion.denormalizedTemplateJson?.description}
+                      </Text>
+                      <Text fontSize={"sm"} color={"text.secondary"}>
+                        <Text as="span" fontWeight={700}>
+                          {t("digitalBuildingPermits.index.lastUpdated")}:{" "}
                         </Text>
-                      )}
-                      {showStatusTag && (
-                        <TemplateStatusTag
-                          status={templateVersion.status}
-                          scheduledFor={
-                            showVersionDate &&
-                            templateVersion.status === ETemplateVersionStatus.scheduled &&
-                            templateVersion.versionDate
-                              ? templateVersion.versionDate
-                              : undefined
-                          }
-                        />
-                      )}
-                    </HStack>
-                    {jurisdictionId && (
-                      <HStack gap={2}>
-                        <Box
-                          as="span"
-                          w={2.5}
-                          h={2.5}
-                          borderRadius="full"
-                          bg={templateVersion.disabledByJurisdiction ? "transparent" : "semantic.success"}
-                          border="1px solid"
-                          borderColor={templateVersion.disabledByJurisdiction ? "border.light" : "semantic.success"}
-                        />
-                        <Text fontSize="sm" color="text.secondary">
-                          {templateVersion.disabledByJurisdiction
-                            ? t("digitalBuildingPermits.index.notAvailableToApplicants")
-                            : t("digitalBuildingPermits.index.availableToApplicants")}
-                        </Text>
+                        {format(templateVersion.updatedAt, datefnsTableDateFormat)}
+                      </Text>
+                      <HStack gap={4} align="center">
+                        <VersionTag versionDate={templateVersion.versionDate} w="fit-content" />
+                        {(templateVersion.denormalizedTemplateJson?.tags ?? []).length > 0 && (
+                          <Text fontSize="sm" color="text.secondary">
+                            {(templateVersion.denormalizedTemplateJson?.tags ?? []).join(", ")}
+                          </Text>
+                        )}
+                        {showStatusTag && (
+                          <TemplateStatusTag
+                            status={templateVersion.status}
+                            scheduledFor={
+                              showVersionDate &&
+                              templateVersion.status === ETemplateVersionStatus.scheduled &&
+                              templateVersion.versionDate
+                                ? templateVersion.versionDate
+                                : undefined
+                            }
+                          />
+                        )}
+                      </HStack>
+                    </Stack>
+
+                    {renderButton ? (
+                      renderButton(templateVersion)
+                    ) : (
+                      <HStack ml={4} alignSelf="center">
+                        <Button
+                          to={`/digital-building-permits/${templateVersion.id}/settings`}
+                          as={RouterLink}
+                          variant="secondary"
+                        >
+                          {t("ui.settings")}
+                        </Button>
+                        <Button
+                          to={`/digital-building-permits/${templateVersion.id}/edit`}
+                          as={RouterLink}
+                          variant="primary"
+                        >
+                          {t("ui.open")}
+                        </Button>
                       </HStack>
                     )}
-                  </Stack>
-
-                  {renderButton ? (
-                    renderButton(templateVersion)
-                  ) : (
-                    <HStack ml={4} alignSelf="center">
-                      <Button
-                        to={`/digital-building-permits/${templateVersion.id}/settings`}
-                        as={RouterLink}
-                        variant="secondary"
-                      >
-                        {t("ui.settings")}
-                      </Button>
-                      <Button
-                        to={`/digital-building-permits/${templateVersion.id}/edit`}
-                        as={RouterLink}
-                        variant="primary"
-                      >
-                        {t("ui.open")}
-                      </Button>
-                    </HStack>
+                  </Flex>
+                  {(jurisdictionId || (!renderButton && templateVersion.explainerPublished)) && (
+                    <Flex align="center" justify="space-between" gap={4}>
+                      {jurisdictionId ? (
+                        <HStack gap={2}>
+                          <Box
+                            as="span"
+                            w={2.5}
+                            h={2.5}
+                            borderRadius="full"
+                            bg={templateVersion.disabledByJurisdiction ? "transparent" : "semantic.success"}
+                            border="1px solid"
+                            borderColor={templateVersion.disabledByJurisdiction ? "border.light" : "semantic.success"}
+                          />
+                          <Text fontSize="sm" color="text.secondary">
+                            {templateVersion.disabledByJurisdiction
+                              ? t("digitalBuildingPermits.index.notAvailableToApplicants")
+                              : t("digitalBuildingPermits.index.availableToApplicants")}
+                          </Text>
+                        </HStack>
+                      ) : (
+                        <Box />
+                      )}
+                      {!renderButton && templateVersion.explainerPublished && (
+                        <RouterLink
+                          to={`/digital-building-permits/${templateVersion.id}/application-info`}
+                          fontSize="sm"
+                        >
+                          {t("digitalBuildingPermits.applicationInfo.cardButton")}
+                        </RouterLink>
+                      )}
+                    </Flex>
                   )}
                 </Flex>
               </SectionBox>
