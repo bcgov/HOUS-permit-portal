@@ -9,7 +9,7 @@ export function LocalContextEditor({ htmlValue, onChange }: { htmlValue: string;
 
   return (
     <FormControl>
-      <FormLabel>{t("requirementTemplate.explainer.localCommunity")}</FormLabel>
+      <FormLabel>{t("requirementTemplate.explainer.localJurisdiction")}</FormLabel>
       <FormHelperText mb={3}>{t("requirementTemplate.explainer.localContextHint")}</FormHelperText>
       <CalloutBanner type="info" title={t("requirementTemplate.explainer.localContextNote")} my={0} mb={3} />
       <Editor htmlValue={htmlValue} onChange={onChange} />

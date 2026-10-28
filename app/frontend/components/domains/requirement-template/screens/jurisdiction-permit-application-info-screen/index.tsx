@@ -73,7 +73,7 @@ export const JurisdictionPermitApplicationInfoScreen = observer(function Jurisdi
           <Heading as="h1" size="2xl" mb={2}>
             {t("digitalBuildingPermits.applicationInfo.title")}
           </Heading>
-          <Text>{t("digitalBuildingPermits.applicationInfo.description")}</Text>
+          <Text>{t("requirementTemplate.explainer.localContextHint")}</Text>
         </Box>
 
         {loadingLocalContext ? (

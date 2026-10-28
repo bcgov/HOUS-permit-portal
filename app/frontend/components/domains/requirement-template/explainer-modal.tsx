@@ -740,7 +740,7 @@ function SuperAdminLocalContextPreview({ explainers }: { explainers: IJurisdicti
 
   return (
     <Box ref={sectionRef}>
-      <FieldLabel optional={false}>{t("requirementTemplate.explainer.localCommunity")}</FieldLabel>
+      <FieldLabel optional={false}>{t("requirementTemplate.explainer.localJurisdiction")}</FieldLabel>
       <Flex gap={2} align="flex-start" mb={2}>
         <Box flexShrink={0} mt="2px">
           <Info size={16} />
