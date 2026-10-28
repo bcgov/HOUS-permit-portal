@@ -5448,7 +5448,28 @@ Thank you,
             fromYourLocalJurisdiction: "From your local jurisdiction",
             lastUpdated: "Last updated {{date}}",
             addedBy:
-              "Added by {{name}} · This section is written and maintained by the local jurisdiction, not by the Province.",
+              "Added by {{name}} · This section is written and maintained by the local jurisdiction, not by the Building Permit Hub.",
+            publicPage: {
+              fallbackTitle: "Permit application information",
+              intro:
+                "Apply for a {{name}} online through the Building Permit Hub. Before you begin, learn what this permit is for, what you'll need and what happens after you submit.",
+              findLocalRequirements: "Find local requirements",
+              findLocalRequirementsBody:
+                "Requirements, fees and processing times are set by your local community. Find your local community below as your application will be sent to the local community where the property is located.",
+              whereAreYouBuilding: "Where are you building?",
+              whereAreYouBuildingBody:
+                "Enter an address to check service availability and local requirements for this permit",
+              dontKnowAddress: "Don't know your address?",
+              browseJurisdictions: "Browse list of jurisdictions",
+              aboutThisPermit: "About this permit",
+              beforeYouBegin: "Before you begin",
+              whatToExpect: "What to expect after you submit",
+              resources: "Resources for applicants",
+              resourcesIntro: "Additional resources and reference materials to help you with your application:",
+              relatedPermits: "Related permits",
+              viewInformation: "View information",
+              viewPermitInformation: "View permit information",
+            },
           },
         },
         apiMappingsSetup: {
