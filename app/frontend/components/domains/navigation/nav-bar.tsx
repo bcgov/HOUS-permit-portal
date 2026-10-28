@@ -25,7 +25,7 @@ function isTemplateEditPath(path: string): boolean {
 }
 
 function isDigitalPermitEditPath(path: string): boolean {
-  const regex = /^\/digital-building-permits\/([a-f\d-]+)\/(edit|settings|application-info)$/
+  const regex = /^\/digital-building-permits\/([a-f\d-]+)\/(edit|settings|application-info(?:\/edit)?)$/
 
   return regex.test(path)
 }
@@ -111,6 +111,11 @@ function isAboutPath(path: string): boolean {
   return regex.test(path)
 }
 
+function isPermitApplicationInfoPath(path: string): boolean {
+  const regex = /^\/permit-application-info\/[a-f\d-]+/
+  return regex.test(path)
+}
+
 function isSubmissionInboxPath(path: string): boolean {
   const regex = /^\/jurisdictions\/[a-z\d-]+\/submission-inbox/
   return regex.test(path)
@@ -141,6 +146,7 @@ function shouldHideSubNavbarForPath(path: string): boolean {
     isPreCheckPath,
     isOverheatingCodePath,
     isAboutPath,
+    isPermitApplicationInfoPath,
     isSubmissionInboxPath,
     isMeetingPath,
   ]

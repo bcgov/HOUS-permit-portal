@@ -9,7 +9,7 @@ import { IHelpVideoSection } from "../../models/help-video-section"
 import { IInfoDocument } from "../../models/info-document"
 import { IIntegrationMapping } from "../../models/integration-mapping"
 import { IJurisdiction } from "../../models/jurisdiction"
-import { IJurisdictionExplainer } from "../../models/jurisdiction-explainer"
+import { IExplainerPermit, IJurisdictionExplainer } from "../../models/jurisdiction-explainer"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
 import { INote } from "../../models/note"
 import { IOverheatingCode } from "../../models/overheating-code"
@@ -120,6 +120,8 @@ interface ITemplateVersionFeedback {
 type TExplainerMeta = {
   relatedTemplateOptions?: IOption[]
   jurisdictionExplainers?: IJurisdictionExplainer[]
+  relatedPermits?: IExplainerPermit[]
+  permit?: IExplainerPermit | null
 }
 
 export class Api {

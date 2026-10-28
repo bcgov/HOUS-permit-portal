@@ -102,5 +102,8 @@ class TemplateVersionBlueprint < Blueprinter::Base
     field(:is_available_for_adoption) do |tv|
       tv.requirement_template&.published_template_version.present?
     end
+    field(:explainer_published) do |tv|
+      tv.requirement_template&.explainer&.published? || false
+    end
   end
 end

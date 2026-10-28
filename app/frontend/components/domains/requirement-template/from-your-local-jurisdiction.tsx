@@ -6,26 +6,32 @@ import { useTranslation } from "react-i18next"
 import { isTipTapEmpty } from "../../../utils/utility-functions"
 import { SafeTipTapDisplay } from "../../shared/editor/safe-tiptap-display"
 
+export const LOCAL_COMMUNITY_SECTION_ID = "local-community"
+
 export function FromYourLocalJurisdiction({
   html,
   updatedAt,
   jurisdictionName,
+  children,
 }: {
   html: string
   updatedAt?: string | Date | null
   jurisdictionName: string
+  children?: React.ReactNode
 }) {
   const { t } = useTranslation()
-  if (isTipTapEmpty(html)) return null
+  if (!children && isTipTapEmpty(html)) return null
 
   const dateLabel = updatedAt ? format(new Date(updatedAt), "d MMMM yyyy") : null
 
   return (
     <Box
       as="section"
+      id={LOCAL_COMMUNITY_SECTION_ID}
       w="full"
       py={4}
       px={6}
+      scrollMarginTop="var(--app-navbar-height)"
       bg="theme.blueLight"
       borderLeft="4px solid"
       borderColor="theme.blue"
@@ -48,7 +54,7 @@ export function FromYourLocalJurisdiction({
       <Text fontSize="sm" color="text.secondary" mb={3}>
         {t("requirementTemplate.explainer.addedBy", { name: jurisdictionName })}
       </Text>
-      <SafeTipTapDisplay htmlContent={html} />
+      {children ?? <SafeTipTapDisplay htmlContent={html} />}
     </Box>
   )
 }

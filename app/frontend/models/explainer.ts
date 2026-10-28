@@ -5,6 +5,8 @@ const ExplainerDocumentModel = types.model("ExplainerDocumentModel", {
   id: types.identifier,
   scanStatus: types.maybeNull(types.string),
   file: types.maybeNull(types.frozen<IFileData>()),
+  fileUrl: types.maybeNull(types.string),
+  downloadUrl: types.maybeNull(types.string),
 })
 
 export const ExplainerModel = types.model("ExplainerModel", {
