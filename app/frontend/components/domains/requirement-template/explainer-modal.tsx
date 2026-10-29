@@ -512,13 +512,20 @@ export const ExplainerModal = observer(function ExplainerModal({
                                   <TextFormControl
                                     fieldName={`links.${index}.title`}
                                     label={t("requirementTemplate.explainer.linkTitle")}
+                                    required
                                     showOptional={false}
+                                    validate={{
+                                      present: (value) =>
+                                        String(value ?? "").trim() !== "" ||
+                                        t("ui.isRequired", { field: t("requirementTemplate.explainer.linkTitle") }),
+                                    }}
                                   />
                                 </Box>
                                 <Box flex="1">
                                   <UrlFormControl
                                     fieldName={`links.${index}.url`}
                                     label={t("requirementTemplate.explainer.linkUrl")}
+                                    required
                                     showOptional={false}
                                   />
                                 </Box>
