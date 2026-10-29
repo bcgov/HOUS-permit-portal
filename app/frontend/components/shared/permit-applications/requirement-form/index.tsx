@@ -1,4 +1,4 @@
-import { Box, Button, Center, Flex, Link, Text, useDisclosure } from "@chakra-ui/react"
+import { Box, Button, Center, Flex, Heading, Link, Text, useDisclosure } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 
 import { ArrowSquareOut } from "@phosphor-icons/react"
@@ -24,6 +24,7 @@ import { CustomMessageBox } from "../../base/custom-message-box"
 import { SharedSpinner } from "../../base/shared-spinner"
 import { defaultOptions, Form } from "../../chefs"
 import { ContactModal } from "../../contact/contact-modal"
+import { SafeTipTapDisplay } from "../../editor/safe-tiptap-display"
 import { PreviousSubmissionModal } from "../../revisions/previous-submission-modal"
 import { ResubmissionSummaryBox, resubmissionSummaryIsVisible } from "../../revisions/resubmission-summary-box"
 import { PermitApplicationSubmitModal } from "../permit-application-submit-modal"
@@ -418,7 +419,19 @@ export const RequirementForm = observer(
                 date: format(permitApplication.revisionsRequestedAt, "MMM d, yyyy h:mm a"),
               })}
               status={EFlashMessageStatus.warning}
-            />
+            >
+              {permitApplication.latestSubmissionVersion?.jurisdictionNote && (
+                <Box>
+                  <Heading as="h4" fontSize="md" mb={2}>
+                    {t("permitApplication.show.revision.messageToSubmitter")}
+                  </Heading>
+                  <SafeTipTapDisplay
+                    htmlContent={permitApplication.latestSubmissionVersion.jurisdictionNote}
+                    fontSize="sm"
+                  />
+                </Box>
+              )}
+            </CustomMessageBox>
           )}
           {showVersionDiffContactWarning && (
             <CustomMessageBox
