@@ -1,16 +1,40 @@
 import { Box, Container, Flex, Heading, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { useEffect } from "react"
 import { Trans, useTranslation } from "react-i18next"
+import { useSearchParams } from "react-router-dom"
 import { useMst } from "../../../../setup/root"
+import { configurePermitInformationParam } from "../../../../utils/permit-application-info-path"
 import { ToggleArchivedButton } from "../../../shared/buttons/toggle-archived-button"
 import { RouterLink } from "../../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
 import { RequirementTemplateGrid } from "../../../shared/requirement-template/requirement-template-grid"
+import { ExplainerModal } from "../explainer-modal"
 import { RequirementTemplateActions } from "../requirement-template-actions"
 
 export const RequirementTemplatesScreen = observer(function RequirementTemplate() {
   const { requirementTemplateStore } = useMst()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const configureTemplateId = searchParams.get(configurePermitInformationParam)
+  const configureTemplate = configureTemplateId
+    ? requirementTemplateStore.getRequirementTemplateById(configureTemplateId)
+    : undefined
+
+  useEffect(() => {
+    if (!configureTemplateId || requirementTemplateStore.getRequirementTemplateById(configureTemplateId)) return
+    requirementTemplateStore.fetchRequirementTemplate(configureTemplateId)
+  }, [configureTemplateId, requirementTemplateStore])
+
+  const closeConfigure = () => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev)
+        next.delete(configurePermitInformationParam)
+        return next
+      },
+      { replace: true }
+    )
+  }
 
   const { t } = useTranslation()
 
@@ -46,6 +70,10 @@ export const RequirementTemplatesScreen = observer(function RequirementTemplate(
         </Flex>
 
         <RequirementTemplateGrid renderActions={(rt) => <RequirementTemplateActions requirementTemplate={rt} />} />
+
+        {configureTemplate && (
+          <ExplainerModal requirementTemplate={configureTemplate} isOpen onClose={closeConfigure} />
+        )}
 
         <ToggleArchivedButton searchModel={requirementTemplateStore} mt={3} />
       </VStack>

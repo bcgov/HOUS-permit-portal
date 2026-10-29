@@ -5296,6 +5296,7 @@ Thank you,
               "This will save your current template changes and create a new, immutable early access version. Existing early access versions and their preview links will remain unchanged.",
             versionNote: "Version note",
             versionNoteHint: "Add a note to distinguish this version from others",
+            publishInfoReminder: "Update the permit information page",
             forcePublishNow: "Force publish!",
             pleaseReview: "Please review the following:",
             errorsBox: {
