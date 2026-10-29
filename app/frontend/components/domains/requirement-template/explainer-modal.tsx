@@ -136,6 +136,9 @@ export const ExplainerModal = observer(function ExplainerModal({
 }) {
   const { t } = useTranslation()
   const closeConfirm = useDisclosure()
+  const publishConfirm = useDisclosure()
+  const [isSaving, setIsSaving] = useState(false)
+  const isSavingRef = useRef(false)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
   const [options, setOptions] = useState<IOption[]>([])
@@ -247,20 +250,27 @@ export const ExplainerModal = observer(function ExplainerModal({
   }, [isOpen, requirementTemplate])
 
   const persist = async (values: IFormValues) => {
-    if (isUploading) return false
-    const ok = await requirementTemplate.saveExplainer({
-      introductionHtml: values.introductionHtml,
-      beforeYouApplyHtml: values.beforeYouApplyHtml,
-      steps: values.steps,
-      links: values.links,
-      documentsAttributes: documentsAttributesForSave(values.documentsAttributes),
-      relatedTemplateIds: values.relatedTemplateIds,
-      publish: values.isPublished,
-    })
-    if (!ok) return false
-    setSavedExplainer(requirementTemplate.explainer)
-    uppy.cancelAll()
-    return true
+    if (isUploading || isSavingRef.current) return false
+    isSavingRef.current = true
+    setIsSaving(true)
+    try {
+      const ok = await requirementTemplate.saveExplainer({
+        introductionHtml: values.introductionHtml,
+        beforeYouApplyHtml: values.beforeYouApplyHtml,
+        steps: values.steps,
+        links: values.links,
+        documentsAttributes: documentsAttributesForSave(values.documentsAttributes),
+        relatedTemplateIds: values.relatedTemplateIds,
+        publish: values.isPublished,
+      })
+      if (!ok) return false
+      setSavedExplainer(requirementTemplate.explainer)
+      uppy.cancelAll()
+      return true
+    } finally {
+      isSavingRef.current = false
+      setIsSaving(false)
+    }
   }
 
   const reorderSteps = (event: DragEndEvent) => {
@@ -278,9 +288,19 @@ export const ExplainerModal = observer(function ExplainerModal({
   }
 
   const onSave = handleSubmit(async (values) => {
+    if (values.isPublished) {
+      publishConfirm.onOpen()
+      return
+    }
     if (!(await persist(values))) return
     onClose()
   })
+
+  const confirmPublishedSave = async (closeModal: () => void) => {
+    if (!(await persist(getValues()))) return
+    closeModal()
+    onClose()
+  }
 
   const requestClose = () => {
     if (isDirty) closeConfirm.onOpen()
@@ -606,6 +626,18 @@ export const ExplainerModal = observer(function ExplainerModal({
           closeModal()
           onClose()
         }}
+      />
+      <ConfirmationModal
+        title={t("requirementTemplate.explainer.savePublishTitle")}
+        body={t("requirementTemplate.explainer.savePublishBody")}
+        renderTriggerButton={() => null}
+        confirmButtonProps={{ isLoading: isSaving }}
+        modalControlProps={{
+          isOpen: publishConfirm.isOpen,
+          onOpen: publishConfirm.onOpen,
+          onClose: publishConfirm.onClose,
+        }}
+        onConfirm={confirmPublishedSave}
       />
     </>
   )
