@@ -2247,6 +2247,7 @@ Thank you,
               emptySend: "Add at least one request before sending.",
               confirmRevisionTitle: "Confirm revision request",
               noteToApplicant: "Note to applicant",
+              messageToSubmitter: "Message to submitter",
               backToPermitApplication: "Back to permit application",
               reviewAndSendTitle: "Review and send requests",
               reviewAndSendIntro:
