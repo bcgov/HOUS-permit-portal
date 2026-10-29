@@ -109,6 +109,33 @@ RSpec.describe Explainer, type: :model do
     expect(explainer.related_template_ids).to eq([other.id])
   end
 
+  it "rejects a step that is missing a title or a description and keeps the saved steps" do
+    explainer =
+      explainer_with(
+        steps: [{ title: "Apply", description: "Submit the form" }]
+      )
+
+    expect(
+      explainer.update(steps: [{ title: "Apply", description: " " }])
+    ).to be false
+    expect(explainer.errors.full_messages.join).to include(
+      "title and a description"
+    )
+
+    explainer.reload
+    expect(explainer.steps).to eq(
+      [{ "title" => "Apply", "description" => "Submit the form" }]
+    )
+
+    expect(
+      explainer.update(steps: [{ title: "", description: "Submit the form" }])
+    ).to be false
+    explainer.reload
+    expect(explainer.steps).to eq(
+      [{ "title" => "Apply", "description" => "Submit the form" }]
+    )
+  end
+
   it "drops related-permit pointers when the pointed-at template is deleted" do
     other = create(:requirement_template, nickname: "Plumbing permit")
     create(:template_version, requirement_template: other, status: :published)

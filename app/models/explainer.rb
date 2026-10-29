@@ -22,6 +22,7 @@ class Explainer < ApplicationRecord
   after_save :sync_related_templates
 
   validate :introduction_present_when_published
+  validate :steps_have_title_and_description
 
   def published?
     published_at.present?
@@ -58,6 +59,17 @@ class Explainer < ApplicationRecord
       :base,
       "Page title and introduction is required before this can be published"
     )
+  end
+
+  def steps_have_title_and_description
+    incomplete =
+      Array(steps).any? do |step|
+        step = step.to_h.with_indifferent_access
+        step[:title].to_s.strip.blank? || step[:description].to_s.strip.blank?
+      end
+    return unless incomplete
+
+    errors.add(:base, "Each step needs a title and a description")
   end
 
   def clean_content

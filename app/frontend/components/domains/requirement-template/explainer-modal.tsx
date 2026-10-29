@@ -828,12 +828,24 @@ function HowToApplyStep({
         <TextFormControl
           fieldName={`steps.${index}.title`}
           label={t("requirementTemplate.explainer.stepTitle")}
+          required
           showOptional={false}
+          validate={{
+            present: (value) =>
+              String(value ?? "").trim() !== "" ||
+              t("ui.isRequired", { field: t("requirementTemplate.explainer.stepTitle") }),
+          }}
         />
         <TextAreaFormControl
           fieldName={`steps.${index}.description`}
           label={t("requirementTemplate.explainer.stepDescription")}
+          required
           showOptional={false}
+          validate={{
+            present: (value) =>
+              String(value ?? "").trim() !== "" ||
+              t("ui.isRequired", { field: t("requirementTemplate.explainer.stepDescription") }),
+          }}
         />
       </VStack>
       <Button type="button" mt={8} variant="tertiary" leftIcon={<X size={16} />} onClick={onRemove}>
