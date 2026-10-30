@@ -1,5 +1,5 @@
 import { Box, Container, Flex, Heading, Link, Text } from "@chakra-ui/react"
-import { CaretLeft } from "@phosphor-icons/react"
+import { CaretLeft, CaretRight } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
@@ -37,7 +37,8 @@ function formDefaults(
 
 export const JurisdictionDigitalPermitSettingsScreen = observer(function JurisdictionDigitalPermitSettingsScreen() {
   const { t } = useTranslation()
-  const { siteConfigurationStore, uiStore, userStore } = useMst()
+  const { siteConfigurationStore, uiStore, userStore, sandboxStore } = useMst()
+  const { isSandboxActive } = sandboxStore
   const { currentUser } = userStore
   const jurisdiction = currentUser?.jurisdiction
   const { templateVersion, error: templateVersionError } = useTemplateVersion({
@@ -134,6 +135,35 @@ export const JurisdictionDigitalPermitSettingsScreen = observer(function Jurisdi
             }
             onChange={handleRequiresProjectMeetingChange}
           />
+          <Flex
+            align="center"
+            justify="space-between"
+            gap={8}
+            py={5}
+            borderBottom="1px solid"
+            borderColor="border.light"
+            opacity={isSandboxActive ? 0.75 : 1}
+          >
+            <Box>
+              <Heading as="h2" fontSize="lg" mb={2}>
+                {t("digitalBuildingPermits.applicationInfo.title")}
+              </Heading>
+              <Text>{t("requirementTemplate.explainer.localContextHint")}</Text>
+            </Box>
+            {isSandboxActive ? (
+              <Text fontWeight="bold" color="greys.grey01" maxW={100}>
+                {t("sandbox.disabledFor")}
+              </Text>
+            ) : (
+              <RouterLinkButton
+                to={`/digital-building-permits/${templateVersion.id}/application-info`}
+                variant="link"
+                rightIcon={<CaretRight size={16} />}
+              >
+                {t("digitalBuildingPermits.applicationInfo.cardButton")}
+              </RouterLinkButton>
+            )}
+          </Flex>
         </Flex>
       </Flex>
     </Container>

@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next"
 import { datefnsTableDateFormat } from "../../../constants"
 import { useTemplateVersions } from "../../../hooks/resources/use-template-versions"
 import { ITemplateVersion } from "../../../models/template-version"
-import { useMst } from "../../../setup/root"
 import { ETemplateVersionStatus } from "../../../types/enums"
 import { groupTemplateVersionsByCategory } from "../../../utils/template-version-grouping"
 import { ErrorScreen } from "../../shared/base/error-screen"
@@ -36,8 +35,6 @@ export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermi
   jurisdictionId,
 }: IProps) {
   const { t } = useTranslation()
-  const { sandboxStore } = useMst()
-  const { isSandboxActive } = sandboxStore
   const { error, templateVersions, isLoading } = useTemplateVersions({
     customErrorMessage: t("errors.fetchBuildingPermits"),
     status,
@@ -129,42 +126,24 @@ export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermi
                       </HStack>
                     )}
                   </Flex>
-                  {(jurisdictionId || (!renderButton && templateVersion.explainerPublished)) && (
+                  {jurisdictionId && (
                     <Flex align="center" justify="space-between" gap={4}>
-                      {jurisdictionId ? (
-                        <HStack gap={2}>
-                          <Box
-                            as="span"
-                            w={2.5}
-                            h={2.5}
-                            borderRadius="full"
-                            bg={templateVersion.disabledByJurisdiction ? "transparent" : "semantic.success"}
-                            border="1px solid"
-                            borderColor={templateVersion.disabledByJurisdiction ? "border.light" : "semantic.success"}
-                          />
-                          <Text fontSize="sm" color="text.secondary">
-                            {templateVersion.disabledByJurisdiction
-                              ? t("digitalBuildingPermits.index.notAvailableToApplicants")
-                              : t("digitalBuildingPermits.index.availableToApplicants")}
-                          </Text>
-                        </HStack>
-                      ) : (
-                        <Box />
-                      )}
-                      {!renderButton &&
-                        templateVersion.explainerPublished &&
-                        (isSandboxActive ? (
-                          <Text fontSize="sm" fontWeight="bold" color="greys.grey01">
-                            {t("sandbox.disabledFor")}
-                          </Text>
-                        ) : (
-                          <RouterLink
-                            to={`/digital-building-permits/${templateVersion.id}/application-info`}
-                            fontSize="sm"
-                          >
-                            {t("digitalBuildingPermits.applicationInfo.cardButton")}
-                          </RouterLink>
-                        ))}
+                      <HStack gap={2}>
+                        <Box
+                          as="span"
+                          w={2.5}
+                          h={2.5}
+                          borderRadius="full"
+                          bg={templateVersion.disabledByJurisdiction ? "transparent" : "semantic.success"}
+                          border="1px solid"
+                          borderColor={templateVersion.disabledByJurisdiction ? "border.light" : "semantic.success"}
+                        />
+                        <Text fontSize="sm" color="text.secondary">
+                          {templateVersion.disabledByJurisdiction
+                            ? t("digitalBuildingPermits.index.notAvailableToApplicants")
+                            : t("digitalBuildingPermits.index.availableToApplicants")}
+                        </Text>
+                      </HStack>
                     </Flex>
                   )}
                 </Flex>
