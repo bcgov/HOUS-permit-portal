@@ -6,7 +6,7 @@ class JurisdictionExplainerPolicy < ApplicationPolicy
   end
 
   def update?
-    can_manage_settings? && explainer_published?
+    sandbox.nil? && can_manage_settings? && explainer_published?
   end
 
   private

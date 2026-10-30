@@ -75,7 +75,7 @@ RSpec.describe Explainer, type: :model do
     expect(explainer.introduction_html).to include("When you need this permit")
   end
 
-  it "keeps only published templates other than this one, and drops empty steps and unsafe links" do
+  it "keeps only published templates other than this one, and drops empty steps and links" do
     other = create(:requirement_template, nickname: "Plumbing permit")
     create(:template_version, requirement_template: other, status: :published)
     unpublished = create(:requirement_template, nickname: "Hidden")
@@ -88,7 +88,7 @@ RSpec.describe Explainer, type: :model do
           { title: "Completeness check", description: "Staff confirm the file" }
         ],
         links: [
-          { title: "Bad", url: "javascript:alert(1)" },
+          { title: " ", url: "" },
           { title: "BC Building Code", url: "https://www.bccodes.ca" }
         ],
         related_template_ids: [other.id, unpublished.id, template.id]
@@ -107,6 +107,59 @@ RSpec.describe Explainer, type: :model do
       [{ "title" => "BC Building Code", "url" => "https://www.bccodes.ca" }]
     )
     expect(explainer.related_template_ids).to eq([other.id])
+  end
+
+  it "rejects a link that is missing a title or a URL and keeps the saved links" do
+    explainer =
+      explainer_with(
+        links: [{ title: "BC Building Code", url: "https://www.bccodes.ca" }]
+      )
+
+    expect(explainer.update(links: [{ title: "Code", url: " " }])).to be false
+    expect(explainer.errors.full_messages.join).to include("title and a URL")
+
+    explainer.reload
+    expect(explainer.links).to eq(
+      [{ "title" => "BC Building Code", "url" => "https://www.bccodes.ca" }]
+    )
+
+    expect(
+      explainer.update(links: [{ title: "", url: "https://www.bccodes.ca" }])
+    ).to be false
+    expect(
+      explainer.update(links: [{ title: "Bad", url: "javascript:alert(1)" }])
+    ).to be false
+    explainer.reload
+    expect(explainer.links).to eq(
+      [{ "title" => "BC Building Code", "url" => "https://www.bccodes.ca" }]
+    )
+  end
+
+  it "rejects a step that is missing a title or a description and keeps the saved steps" do
+    explainer =
+      explainer_with(
+        steps: [{ title: "Apply", description: "Submit the form" }]
+      )
+
+    expect(
+      explainer.update(steps: [{ title: "Apply", description: " " }])
+    ).to be false
+    expect(explainer.errors.full_messages.join).to include(
+      "title and a description"
+    )
+
+    explainer.reload
+    expect(explainer.steps).to eq(
+      [{ "title" => "Apply", "description" => "Submit the form" }]
+    )
+
+    expect(
+      explainer.update(steps: [{ title: "", description: "Submit the form" }])
+    ).to be false
+    explainer.reload
+    expect(explainer.steps).to eq(
+      [{ "title" => "Apply", "description" => "Submit the form" }]
+    )
   end
 
   it "drops related-permit pointers when the pointed-at template is deleted" do

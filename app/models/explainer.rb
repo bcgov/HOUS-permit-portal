@@ -22,6 +22,8 @@ class Explainer < ApplicationRecord
   after_save :sync_related_templates
 
   validate :introduction_present_when_published
+  validate :steps_have_title_and_description
+  validate :links_have_title_and_url
 
   def published?
     published_at.present?
@@ -60,6 +62,30 @@ class Explainer < ApplicationRecord
     )
   end
 
+  def steps_have_title_and_description
+    incomplete =
+      Array(steps).any? do |step|
+        step = step.to_h.with_indifferent_access
+        step[:title].to_s.strip.blank? || step[:description].to_s.strip.blank?
+      end
+    return unless incomplete
+
+    errors.add(:base, "Each step needs a title and a description")
+  end
+
+  def links_have_title_and_url
+    incomplete =
+      Array(links).any? do |link|
+        link = link.to_h.with_indifferent_access
+        title = link[:title].to_s.strip
+        url = link[:url].to_s.strip
+        title.blank? || !url.match?(%r{\Ahttps?://\S+\z}i)
+      end
+    return unless incomplete
+
+    errors.add(:base, "Each link needs a title and a URL")
+  end
+
   def clean_content
     self.introduction_html = collapse_blank_html(introduction_html)
     self.before_you_apply_html = collapse_blank_html(before_you_apply_html)
@@ -85,11 +111,11 @@ class Explainer < ApplicationRecord
   def clean_links(links)
     Array(links).filter_map do |link|
       link = link.to_h.with_indifferent_access
-      url = link[:url].to_s.strip
-      next unless url.match?(%r{\Ahttps?://\S+\z}i)
-
       title = link[:title].to_s.strip
-      { "title" => title.presence || url, "url" => url }
+      url = link[:url].to_s.strip
+      next if title.blank? && url.blank?
+
+      { "title" => title, "url" => url }
     end
   end
 

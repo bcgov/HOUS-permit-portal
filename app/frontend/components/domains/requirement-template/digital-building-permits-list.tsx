@@ -126,37 +126,23 @@ export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermi
                       </HStack>
                     )}
                   </Flex>
-                  {(jurisdictionId || (!renderButton && templateVersion.explainerPublished)) && (
-                    <Flex align="center" justify="space-between" gap={4}>
-                      {jurisdictionId ? (
-                        <HStack gap={2}>
-                          <Box
-                            as="span"
-                            w={2.5}
-                            h={2.5}
-                            borderRadius="full"
-                            bg={templateVersion.disabledByJurisdiction ? "transparent" : "semantic.success"}
-                            border="1px solid"
-                            borderColor={templateVersion.disabledByJurisdiction ? "border.light" : "semantic.success"}
-                          />
-                          <Text fontSize="sm" color="text.secondary">
-                            {templateVersion.disabledByJurisdiction
-                              ? t("digitalBuildingPermits.index.notAvailableToApplicants")
-                              : t("digitalBuildingPermits.index.availableToApplicants")}
-                          </Text>
-                        </HStack>
-                      ) : (
-                        <Box />
-                      )}
-                      {!renderButton && templateVersion.explainerPublished && (
-                        <RouterLink
-                          to={`/digital-building-permits/${templateVersion.id}/application-info`}
-                          fontSize="sm"
-                        >
-                          {t("digitalBuildingPermits.applicationInfo.cardButton")}
-                        </RouterLink>
-                      )}
-                    </Flex>
+                  {jurisdictionId && (
+                    <HStack gap={2}>
+                      <Box
+                        as="span"
+                        w={2.5}
+                        h={2.5}
+                        borderRadius="full"
+                        bg={templateVersion.disabledByJurisdiction ? "transparent" : "semantic.success"}
+                        border="1px solid"
+                        borderColor={templateVersion.disabledByJurisdiction ? "border.light" : "semantic.success"}
+                      />
+                      <Text fontSize="sm" color="text.secondary">
+                        {templateVersion.disabledByJurisdiction
+                          ? t("digitalBuildingPermits.index.notAvailableToApplicants")
+                          : t("digitalBuildingPermits.index.availableToApplicants")}
+                      </Text>
+                    </HStack>
                   )}
                 </Flex>
               </SectionBox>
