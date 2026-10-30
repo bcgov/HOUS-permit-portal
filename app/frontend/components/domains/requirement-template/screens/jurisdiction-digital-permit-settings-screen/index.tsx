@@ -1,5 +1,5 @@
-import { Box, Container, Flex, Heading, Link, Text } from "@chakra-ui/react"
-import { CaretLeft, CaretRight } from "@phosphor-icons/react"
+import { Box, Container, Flex, Heading, HStack, Link, List, ListItem, Text } from "@chakra-ui/react"
+import { CaretLeft } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
@@ -11,10 +11,16 @@ import { IJurisdictionTemplateVersionCustomization } from "../../../../../models
 import { useMst } from "../../../../../setup/root"
 import { EFlashMessageStatus } from "../../../../../types/enums"
 import { ITemplateCustomization } from "../../../../../types/types"
+import { permitApplicationInfoPath } from "../../../../../utils/permit-application-info-path"
+import { isTipTapEmpty } from "../../../../../utils/utility-functions"
+import { CalloutBanner } from "../../../../shared/base/callout-banner"
 import { ErrorScreen } from "../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
+import { SharedSpinner } from "../../../../shared/base/shared-spinner"
 import { SwitchButton } from "../../../../shared/buttons/switch-button"
 import { RouterLinkButton } from "../../../../shared/navigation/router-link-button"
+
+const LOCAL_CONTEXT_ITEM_KEYS = ["bylaws", "documents", "links", "fees", "steps"] as const
 
 interface IJurisdictionDigitalPermitSettingsForm {
   customizations: ITemplateCustomization
@@ -37,7 +43,7 @@ function formDefaults(
 
 export const JurisdictionDigitalPermitSettingsScreen = observer(function JurisdictionDigitalPermitSettingsScreen() {
   const { t } = useTranslation()
-  const { siteConfigurationStore, uiStore, userStore, sandboxStore } = useMst()
+  const { siteConfigurationStore, uiStore, userStore, sandboxStore, requirementTemplateStore } = useMst()
   const { isSandboxActive } = sandboxStore
   const { currentUser } = userStore
   const jurisdiction = currentUser?.jurisdiction
@@ -56,6 +62,8 @@ export const JurisdictionDigitalPermitSettingsScreen = observer(function Jurisdi
   })
   const { getValues, reset, setValue, watch } = formMethods
   const [isSaving, setIsSaving] = useState(false)
+  const [localContextHtml, setLocalContextHtml] = useState("")
+  const [loadingLocalContext, setLoadingLocalContext] = useState(false)
   const disabled = watch("disabled")
   const requiresProjectMeeting = watch("requiresProjectMeeting")
   const projectMeetingsAvailable =
@@ -65,12 +73,39 @@ export const JurisdictionDigitalPermitSettingsScreen = observer(function Jurisdi
     reset(formDefaults(jurisdictionTemplateVersionCustomization))
   }, [jurisdictionTemplateVersionCustomization, reset])
 
+  useEffect(() => {
+    if (!templateVersion || !jurisdiction) return
+    if (!templateVersion.explainerPublished || isSandboxActive) {
+      setLocalContextHtml("")
+      setLoadingLocalContext(false)
+      return
+    }
+    let cancelled = false
+    setLoadingLocalContext(true)
+    requirementTemplateStore
+      .fetchJurisdictionExplainer(templateVersion.requirementTemplateId, jurisdiction.id)
+      .then((saved) => {
+        if (cancelled) return
+        setLocalContextHtml(saved?.localContextHtml ?? "")
+        setLoadingLocalContext(false)
+      })
+      .catch(() => {
+        if (!cancelled) setLoadingLocalContext(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [templateVersion, jurisdiction?.id, isSandboxActive])
+
   if (!jurisdiction) return <ErrorScreen error={new Error(t("errors.fetchJurisdiction"))} />
   if (templateVersionError || customizationError)
     return <ErrorScreen error={templateVersionError || customizationError} />
   if (!templateVersion || !jurisdictionTemplateVersionCustomization) return <LoadingScreen />
 
   const denormalizedTemplate = templateVersion.denormalizedTemplateJson
+  const hasLocalContext = !isTipTapEmpty(localContextHtml)
+  const editPath = `/digital-building-permits/${templateVersion.id}/application-info/edit`
+  const publicPath = permitApplicationInfoPath(templateVersion.requirementTemplateId, jurisdiction.id)
 
   const saveSettings = async (patch: Partial<IJurisdictionDigitalPermitSettingsForm>) => {
     const data = { ...getValues(), ...patch }
@@ -135,35 +170,47 @@ export const JurisdictionDigitalPermitSettingsScreen = observer(function Jurisdi
             }
             onChange={handleRequiresProjectMeetingChange}
           />
-          <Flex
-            align="center"
-            justify="space-between"
-            gap={8}
-            py={5}
-            borderBottom="1px solid"
-            borderColor="border.light"
-            opacity={isSandboxActive ? 0.75 : 1}
-          >
-            <Box>
-              <Heading as="h2" fontSize="lg" mb={2}>
-                {t("digitalBuildingPermits.applicationInfo.title")}
-              </Heading>
-              <Text>{t("requirementTemplate.explainer.localContextHint")}</Text>
-            </Box>
-            {isSandboxActive ? (
-              <Text fontWeight="bold" color="greys.grey01" maxW={100}>
-                {t("sandbox.disabledFor")}
-              </Text>
+          <Box py={5} borderBottom="1px solid" borderColor="border.light">
+            <Heading as="h2" fontSize="lg" mb={2}>
+              {t("digitalBuildingPermits.applicationInfo.title")}
+            </Heading>
+            <Text mb={4}>{t("requirementTemplate.explainer.localContextHint")}</Text>
+            {loadingLocalContext ? (
+              <SharedSpinner />
+            ) : isSandboxActive ? (
+              <CalloutBanner type="info" title={t("sandbox.disabledFor")} my={0} />
+            ) : templateVersion.explainerPublished ? (
+              <>
+                <CalloutBanner
+                  type="info"
+                  title={t("digitalBuildingPermits.applicationInfo.supportingNote")}
+                  my={0}
+                  mb={6}
+                />
+                <Heading as="h3" fontSize="md" mb={3}>
+                  {t("digitalBuildingPermits.applicationInfo.addLocalContextTitle")}
+                </Heading>
+                <Text mb={4}>{t("digitalBuildingPermits.applicationInfo.addLocalContextIntro")}</Text>
+                <List spacing={2} mb={4} styleType="disc" pl={6}>
+                  {LOCAL_CONTEXT_ITEM_KEYS.map((key) => (
+                    <ListItem key={key}>{t(`digitalBuildingPermits.applicationInfo.items.${key}`)}</ListItem>
+                  ))}
+                </List>
+                <HStack spacing={3}>
+                  <RouterLinkButton variant="primary" to={editPath}>
+                    {hasLocalContext
+                      ? t("digitalBuildingPermits.applicationInfo.editButton")
+                      : t("digitalBuildingPermits.applicationInfo.addButton")}
+                  </RouterLinkButton>
+                  <RouterLinkButton variant="secondary" to={publicPath} target="_blank" rel="noopener noreferrer">
+                    {t("digitalBuildingPermits.applicationInfo.viewPublicPage")}
+                  </RouterLinkButton>
+                </HStack>
+              </>
             ) : (
-              <RouterLinkButton
-                to={`/digital-building-permits/${templateVersion.id}/application-info`}
-                variant="link"
-                rightIcon={<CaretRight size={16} />}
-              >
-                {t("digitalBuildingPermits.applicationInfo.cardButton")}
-              </RouterLinkButton>
+              <CalloutBanner type="info" title={t("digitalBuildingPermits.applicationInfo.unpublishedNote")} my={0} />
             )}
-          </Flex>
+          </Box>
         </Flex>
       </Flex>
     </Container>

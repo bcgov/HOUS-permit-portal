@@ -408,7 +408,7 @@ export const JurisdictionPermitApplicationInfoEditScreen = observer(
     if (templateVersionError) return <ErrorScreen error={templateVersionError} />
     if (!templateVersion) return <LoadingScreen />
     if (!templateVersion.explainerPublished || isSandboxActive) {
-      return <Navigate to={`/digital-building-permits/${templateVersion.id}/application-info`} replace />
+      return <Navigate to={`/digital-building-permits/${templateVersion.id}/settings`} replace />
     }
 
     return (
@@ -416,7 +416,7 @@ export const JurisdictionPermitApplicationInfoEditScreen = observer(
         requirementTemplateId={templateVersion.requirementTemplateId}
         lockedJurisdiction={jurisdiction}
         editLocalContext
-        backTo={`/digital-building-permits/${templateVersion.id}/application-info`}
+        backTo={`/digital-building-permits/${templateVersion.id}/settings`}
       />
     )
   }
