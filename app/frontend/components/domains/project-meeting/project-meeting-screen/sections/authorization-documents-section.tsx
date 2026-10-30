@@ -91,7 +91,10 @@ export const AuthorizationDocumentsSection = observer(({ meeting }: Authorizatio
 
   const handleUndoRemoveFile = (documentId: string) => {
     const index = documents.findIndex((doc) => (doc.id || doc.file?.id) === documentId)
-    if (index !== -1) update(index, { ...documents[index], _destroy: false })
+    if (index !== -1) {
+      update(index, { ...documents[index], _destroy: false })
+      clearErrors("meetingRequestDocumentsAttributes")
+    }
   }
 
   const onSubmit = async (data) => {
