@@ -35,6 +35,12 @@ interface IProps {
 
 const toIsoDate = (date: Date) => format(date, "yyyy-MM-dd")
 
+const matchesNextDays = (from: string | null, to: string | null, days: number) => {
+  if (!from || !to) return false
+  const start = startOfDay(new Date())
+  return from === toIsoDate(start) && to === toIsoDate(startOfDay(addDays(start, days - 1)))
+}
+
 const parseOptionalIsoDate = (value: string | null | undefined): Date | null => {
   if (!value) return null
   try {
@@ -43,6 +49,11 @@ const parseOptionalIsoDate = (value: string | null | undefined): Date | null => 
   } catch {
     return null
   }
+}
+
+const formatChipDate = (value: string) => {
+  const date = parseOptionalIsoDate(value)
+  return date ? format(date, datefnsAppDateFormat) : value
 }
 
 export const MeetingDateFilter = observer(function MeetingDateFilter({ value, onChange, onApply, onClear }: IProps) {
@@ -58,6 +69,21 @@ export const MeetingDateFilter = observer(function MeetingDateFilter({ value, on
   }, [value.from, value.to, isOpen])
 
   const hasSelection = !!(value.from || value.to)
+
+  const chipLabel = () => {
+    if (!value.from && !value.to) return t("submissionInbox.filters.meetingDate")
+    if (matchesNextDays(value.from, value.to, 7)) return t("submissionInbox.filters.next7Days")
+    if (matchesNextDays(value.from, value.to, 30)) return t("submissionInbox.filters.next30Days")
+    if (value.from && value.to) {
+      return t("submissionInbox.filters.meetingDateRange", {
+        from: formatChipDate(value.from),
+        to: formatChipDate(value.to),
+      })
+    }
+    if (value.from) return t("submissionInbox.filters.meetingDateFromActive", { date: formatChipDate(value.from) })
+    if (value.to) return t("submissionInbox.filters.meetingDateToActive", { date: formatChipDate(value.to) })
+    return t("submissionInbox.filters.meetingDate")
+  }
 
   const commitRange = (from: Date | null, to: Date | null) => {
     setLocalFrom(from)
@@ -93,7 +119,7 @@ export const MeetingDateFilter = observer(function MeetingDateFilter({ value, on
           size="sm"
           fontWeight="normal"
         >
-          <Text>{t("submissionInbox.filters.meetingDate")}</Text>
+          <Text>{chipLabel()}</Text>
         </Button>
       </PopoverTrigger>
       <Portal>
@@ -147,7 +173,7 @@ export const MeetingDateFilter = observer(function MeetingDateFilter({ value, on
                   {t("ui.clear")}
                 </Button>
                 <Button variant="primary" size="sm" onClick={onClose}>
-                  {t("ui.apply")}
+                  {t("ui.close")}
                 </Button>
               </HStack>
             </VStack>

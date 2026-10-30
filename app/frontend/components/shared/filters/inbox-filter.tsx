@@ -134,12 +134,7 @@ export const InboxFilter = observer(function InboxFilter({
         >
           <HStack spacing={2}>
             {leftIcon}
-            <Text>{title}</Text>
-            {showSelectionParens && (
-              <Text as="span" fontSize="sm">
-                ({selectedValues.length})
-              </Text>
-            )}
+            <Text>{showSelectionParens ? `${title} (${selectedValues.length})` : title}</Text>
             {showResultsBadge && <UnreadBadge count={badgeCount} />}
           </HStack>
         </Button>
@@ -205,7 +200,7 @@ export const InboxFilter = observer(function InboxFilter({
                     {t("ui.clear")}
                   </Button>
                   <Button variant="primary" size="sm" onClick={onClose}>
-                    {t("ui.apply")}
+                    {t("ui.close")}
                   </Button>
                 </HStack>
               </VStack>
@@ -239,7 +234,7 @@ export const InboxFilter = observer(function InboxFilter({
                 </Box>
                 <Divider />
                 <Button variant="primary" size="sm" w="full" onClick={onClose}>
-                  {t("ui.apply")}
+                  {t("ui.close")}
                 </Button>
               </VStack>
             )}

@@ -82,8 +82,13 @@ export const DaysInQueueFilter = observer(function DaysInQueueFilter({ value, on
           size="sm"
           fontWeight="normal"
         >
-          {/* @ts-ignore */}
-          <Text>{t("submissionInbox.filters.daysInQueue")}</Text>
+          <Text>
+            {value == null
+              ? t("submissionInbox.filters.daysInQueue")
+              : value.operator === "lt"
+                ? t("submissionInbox.filters.daysInQueueLtActive", { count: value.days })
+                : t("submissionInbox.filters.daysInQueueGteActive", { count: value.days })}
+          </Text>
         </Button>
       </PopoverTrigger>
       <Portal>
@@ -130,7 +135,7 @@ export const DaysInQueueFilter = observer(function DaysInQueueFilter({ value, on
                   {t("ui.clear")}
                 </Button>
                 <Button variant="primary" size="sm" onClick={onClose}>
-                  {t("ui.apply")}
+                  {t("ui.close")}
                 </Button>
               </HStack>
             </VStack>
