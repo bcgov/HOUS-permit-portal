@@ -95,7 +95,7 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
             <Flex direction="column" gap={6}>
               <Flex direction="column" gap={4}>
                 {fields.map((field, index) => (
-                  <UserInput key={field.id} index={index} remove={remove} />
+                  <UserInput key={field.id} index={index} remove={fields.length > 1 ? remove : undefined} />
                 ))}
                 <Button
                   type="button"
