@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next"
 import { datefnsTableDateFormat } from "../../../constants"
 import { useTemplateVersions } from "../../../hooks/resources/use-template-versions"
 import { ITemplateVersion } from "../../../models/template-version"
+import { useMst } from "../../../setup/root"
 import { ETemplateVersionStatus } from "../../../types/enums"
 import { groupTemplateVersionsByCategory } from "../../../utils/template-version-grouping"
 import { ErrorScreen } from "../../shared/base/error-screen"
@@ -35,6 +36,8 @@ export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermi
   jurisdictionId,
 }: IProps) {
   const { t } = useTranslation()
+  const { sandboxStore } = useMst()
+  const { isSandboxActive } = sandboxStore
   const { error, templateVersions, isLoading } = useTemplateVersions({
     customErrorMessage: t("errors.fetchBuildingPermits"),
     status,
@@ -148,14 +151,20 @@ export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermi
                       ) : (
                         <Box />
                       )}
-                      {!renderButton && templateVersion.explainerPublished && (
-                        <RouterLink
-                          to={`/digital-building-permits/${templateVersion.id}/application-info`}
-                          fontSize="sm"
-                        >
-                          {t("digitalBuildingPermits.applicationInfo.cardButton")}
-                        </RouterLink>
-                      )}
+                      {!renderButton &&
+                        templateVersion.explainerPublished &&
+                        (isSandboxActive ? (
+                          <Text fontSize="sm" fontWeight="bold" color="greys.grey01">
+                            {t("sandbox.disabledFor")}
+                          </Text>
+                        ) : (
+                          <RouterLink
+                            to={`/digital-building-permits/${templateVersion.id}/application-info`}
+                            fontSize="sm"
+                          >
+                            {t("digitalBuildingPermits.applicationInfo.cardButton")}
+                          </RouterLink>
+                        ))}
                     </Flex>
                   )}
                 </Flex>

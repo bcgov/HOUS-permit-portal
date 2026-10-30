@@ -16,8 +16,9 @@ const LOCAL_CONTEXT_ITEM_KEYS = ["bylaws", "documents", "links", "fees", "steps"
 
 export const JurisdictionPermitApplicationInfoScreen = observer(function JurisdictionPermitApplicationInfoScreen() {
   const { t } = useTranslation()
-  const { userStore, requirementTemplateStore } = useMst()
+  const { userStore, requirementTemplateStore, sandboxStore } = useMst()
   const jurisdiction = userStore.currentUser?.jurisdiction
+  const { isSandboxActive } = sandboxStore
   const { templateVersion, error: templateVersionError } = useTemplateVersion({
     customErrorMessage: t("errors.fetchBuildingPermit"),
   })
@@ -26,7 +27,7 @@ export const JurisdictionPermitApplicationInfoScreen = observer(function Jurisdi
 
   useEffect(() => {
     if (!templateVersion || !jurisdiction) return
-    if (!templateVersion.explainerPublished) {
+    if (!templateVersion.explainerPublished || isSandboxActive) {
       setLocalContextHtml("")
       setLoadingLocalContext(false)
       return
@@ -46,7 +47,7 @@ export const JurisdictionPermitApplicationInfoScreen = observer(function Jurisdi
     return () => {
       cancelled = true
     }
-  }, [templateVersion, jurisdiction?.id])
+  }, [templateVersion, jurisdiction?.id, isSandboxActive])
 
   if (!jurisdiction) return <ErrorScreen error={new Error(t("errors.fetchJurisdiction"))} />
   if (templateVersionError) return <ErrorScreen error={templateVersionError} />
@@ -71,6 +72,8 @@ export const JurisdictionPermitApplicationInfoScreen = observer(function Jurisdi
 
         {loadingLocalContext ? (
           <LoadingScreen />
+        ) : isSandboxActive ? (
+          <CalloutBanner type="info" title={t("sandbox.disabledFor")} my={0} />
         ) : templateVersion.explainerPublished ? (
           <>
             <CalloutBanner type="info" title={t("digitalBuildingPermits.applicationInfo.supportingNote")} my={0} />

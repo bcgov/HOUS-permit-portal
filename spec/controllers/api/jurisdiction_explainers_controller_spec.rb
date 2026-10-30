@@ -145,6 +145,22 @@ RSpec.describe Api::JurisdictionExplainersController, type: :controller do
       expect(response).to have_http_status(:forbidden)
     end
 
+    it "prevents a review manager from updating local context in a sandbox" do
+      publish_explainer!
+      sign_in review_manager
+      request.headers["X-Sandbox-ID"] = published_sandbox(jurisdiction).id
+
+      patch :update, params: update_params, format: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(
+        JurisdictionExplainer.where(
+          requirement_template: template,
+          jurisdiction: jurisdiction
+        )
+      ).to be_empty
+    end
+
     it "prevents a review manager from updating local context before the page is published" do
       sign_in review_manager
 
