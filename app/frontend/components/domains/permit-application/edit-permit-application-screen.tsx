@@ -302,8 +302,16 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const parentProjectPath = currentPermitApplication.projectId
     ? `/projects/${currentPermitApplication.projectId}/applications`
     : "/projects"
+  const handleSubmitClick = () => {
+    const formio = formRef.current
+    if (formio?.submit) {
+      formio.submit().catch(() => {})
+      return
+    }
+    handleScrollToBottom()
+  }
   const submitClickHandler = currentPermitApplication.canUserSubmit(currentUser)
-    ? handleScrollToBottom
+    ? handleSubmitClick
     : onSubmitBlockedModalOpen
   let sidebar = <ChecklistSideBar permitApplication={currentPermitApplication} completedBlocks={completedBlocks} />
   if (isReviewingSubmit && imminentSubmission) {
@@ -467,7 +475,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                 )}
               </HStack>
             )}
-            <FloatingHelpDrawer top={{ base: "auto", md: "250px" }} bottom={{ base: 18, md: "auto" }} />
+            <FloatingHelpDrawer top="auto" right={6} bottom={20} />
           </Flex>
           {currentPermitApplication.isRevisionsRequested && !isReviewingSubmit && (
             <Flex

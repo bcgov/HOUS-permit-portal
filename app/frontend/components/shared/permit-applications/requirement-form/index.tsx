@@ -258,6 +258,7 @@ export const RequirementForm = observer(
         // Keep this error across the Form.io `change` that follows a successful submit.
         stepCodeToolErrorRef.current = customError
         setHasErrors(true)
+        setFloatErrorBox(true)
         setErrorBoxData(customError)
         return
       }
@@ -331,6 +332,7 @@ export const RequirementForm = observer(
       rootComponent.on("submitError", (_error) => {
         // when the form attempts to submit but has validation errors, we set a flag to show ErrorBox
         setHasErrors(true)
+        setFloatErrorBox(true)
         setErrorBoxData(mapErrorBoxData(formRef.current.errors))
       })
 
