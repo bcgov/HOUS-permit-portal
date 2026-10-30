@@ -11,6 +11,7 @@ import {
   PopoverBody,
   PopoverContent,
   PopoverTrigger,
+  Portal,
   Select,
   Text,
   useDisclosure,
@@ -85,55 +86,57 @@ export const DaysInQueueFilter = observer(function DaysInQueueFilter({ value, on
           <Text>{t("submissionInbox.filters.daysInQueue")}</Text>
         </Button>
       </PopoverTrigger>
-      <PopoverContent w="auto" minW="240px" p={4} zIndex="dropdown">
-        <PopoverBody p={0}>
-          <VStack align="start" spacing={3}>
-            <Select
-              size="sm"
-              value={localOperator}
-              onChange={(e) => {
-                const operator = e.target.value
-                setLocalOperator(operator)
-                commit(operator, localDays, Number(localDays))
-              }}
-            >
-              {/* @ts-ignore */}
-              <option value="gte">{t("submissionInbox.filters.daysInQueueGte")}</option>
-              {/* @ts-ignore */}
-              <option value="lt">{t("submissionInbox.filters.daysInQueueLt")}</option>
-            </Select>
-            <HStack spacing={2}>
-              <NumberInput
+      <Portal>
+        <PopoverContent w="auto" minW="240px" p={4} zIndex="dropdown">
+          <PopoverBody p={0}>
+            <VStack align="start" spacing={3}>
+              <Select
                 size="sm"
-                min={0}
-                value={localDays}
-                onChange={(valueAsString, valueAsNumber) => {
-                  setLocalDays(valueAsString)
-                  commit(localOperator, valueAsString, valueAsNumber)
+                value={localOperator}
+                onChange={(e) => {
+                  const operator = e.target.value
+                  setLocalOperator(operator)
+                  commit(operator, localDays, Number(localDays))
                 }}
-                maxW="100px"
               >
-                <NumberInputField />
-                <NumberInputStepper>
-                  <NumberIncrementStepper />
-                  <NumberDecrementStepper />
-                </NumberInputStepper>
-              </NumberInput>
-              {/* @ts-ignore */}
-              <Text fontSize="sm">{t("submissionInbox.filters.daysInQueueDays")}</Text>
-            </HStack>
-            <Divider />
-            <HStack w="full" justifyContent="space-between">
-              <Button variant="link" size="sm" onClick={handleClear}>
-                {t("ui.clear")}
-              </Button>
-              <Button variant="primary" size="sm" onClick={onClose}>
-                {t("ui.apply")}
-              </Button>
-            </HStack>
-          </VStack>
-        </PopoverBody>
-      </PopoverContent>
+                {/* @ts-ignore */}
+                <option value="gte">{t("submissionInbox.filters.daysInQueueGte")}</option>
+                {/* @ts-ignore */}
+                <option value="lt">{t("submissionInbox.filters.daysInQueueLt")}</option>
+              </Select>
+              <HStack spacing={2}>
+                <NumberInput
+                  size="sm"
+                  min={0}
+                  value={localDays}
+                  onChange={(valueAsString, valueAsNumber) => {
+                    setLocalDays(valueAsString)
+                    commit(localOperator, valueAsString, valueAsNumber)
+                  }}
+                  maxW="100px"
+                >
+                  <NumberInputField />
+                  <NumberInputStepper>
+                    <NumberIncrementStepper />
+                    <NumberDecrementStepper />
+                  </NumberInputStepper>
+                </NumberInput>
+                {/* @ts-ignore */}
+                <Text fontSize="sm">{t("submissionInbox.filters.daysInQueueDays")}</Text>
+              </HStack>
+              <Divider />
+              <HStack w="full" justifyContent="space-between">
+                <Button variant="link" size="sm" onClick={handleClear}>
+                  {t("ui.clear")}
+                </Button>
+                <Button variant="primary" size="sm" onClick={onClose}>
+                  {t("ui.apply")}
+                </Button>
+              </HStack>
+            </VStack>
+          </PopoverBody>
+        </PopoverContent>
+      </Portal>
     </Popover>
   )
 })

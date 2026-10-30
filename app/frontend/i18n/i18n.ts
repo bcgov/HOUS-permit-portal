@@ -355,6 +355,7 @@ const options = {
           selectAll: "Select all",
           okay: "Okay",
           filter: "Filter",
+          filters: "Filters",
           until: "til",
           start: "Start",
           reorder: "Reorder",

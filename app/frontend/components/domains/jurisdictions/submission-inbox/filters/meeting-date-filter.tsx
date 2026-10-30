@@ -8,6 +8,7 @@ import {
   PopoverBody,
   PopoverContent,
   PopoverTrigger,
+  Portal,
   Text,
   useDisclosure,
   VStack,
@@ -95,62 +96,64 @@ export const MeetingDateFilter = observer(function MeetingDateFilter({ value, on
           <Text>{t("submissionInbox.filters.meetingDate")}</Text>
         </Button>
       </PopoverTrigger>
-      <PopoverContent w="auto" minW="280px" p={4} zIndex="dropdown">
-        <PopoverBody p={0}>
-          <VStack align="stretch" spacing={3}>
-            <Text fontSize="sm" fontWeight="medium">
-              {t("submissionInbox.filters.meetingDatesBetween")}
-            </Text>
-            <FormControl>
-              <FormLabel fontSize="sm" mb={1}>
-                {t("submissionInbox.filters.meetingDateFrom")}
-              </FormLabel>
-              <DatePicker
-                selected={localFrom}
-                onChange={(date: Date | null) => commitRange(date, localTo)}
-                selectsStart
-                startDate={localFrom}
-                endDate={localTo}
-                dateFormat={datefnsAppDateFormat}
-                isClearable
-              />
-            </FormControl>
-            <FormControl>
-              <FormLabel fontSize="sm" mb={1}>
-                {t("submissionInbox.filters.meetingDateTo")}
-              </FormLabel>
-              <DatePicker
-                selected={localTo}
-                onChange={(date: Date | null) => commitRange(localFrom, date)}
-                selectsEnd
-                startDate={localFrom}
-                endDate={localTo}
-                minDate={localFrom ?? undefined}
-                dateFormat={datefnsAppDateFormat}
-                isClearable
-              />
-            </FormControl>
-            <hr />
-            <HStack spacing={2}>
-              <Button variant="secondary" size="sm" onClick={() => handleNextDays(7)}>
-                {t("submissionInbox.filters.next7Days")}
-              </Button>
-              <Button variant="secondary" size="sm" onClick={() => handleNextDays(30)}>
-                {t("submissionInbox.filters.next30Days")}
-              </Button>
-            </HStack>
-            <Divider />
-            <HStack w="full" justifyContent="space-between">
-              <Button variant="link" size="sm" onClick={handleClear}>
-                {t("ui.clear")}
-              </Button>
-              <Button variant="primary" size="sm" onClick={onClose}>
-                {t("ui.apply")}
-              </Button>
-            </HStack>
-          </VStack>
-        </PopoverBody>
-      </PopoverContent>
+      <Portal>
+        <PopoverContent w="auto" minW="280px" p={4} zIndex="dropdown">
+          <PopoverBody p={0}>
+            <VStack align="stretch" spacing={3}>
+              <Text fontSize="sm" fontWeight="medium">
+                {t("submissionInbox.filters.meetingDatesBetween")}
+              </Text>
+              <FormControl>
+                <FormLabel fontSize="sm" mb={1}>
+                  {t("submissionInbox.filters.meetingDateFrom")}
+                </FormLabel>
+                <DatePicker
+                  selected={localFrom}
+                  onChange={(date: Date | null) => commitRange(date, localTo)}
+                  selectsStart
+                  startDate={localFrom}
+                  endDate={localTo}
+                  dateFormat={datefnsAppDateFormat}
+                  isClearable
+                />
+              </FormControl>
+              <FormControl>
+                <FormLabel fontSize="sm" mb={1}>
+                  {t("submissionInbox.filters.meetingDateTo")}
+                </FormLabel>
+                <DatePicker
+                  selected={localTo}
+                  onChange={(date: Date | null) => commitRange(localFrom, date)}
+                  selectsEnd
+                  startDate={localFrom}
+                  endDate={localTo}
+                  minDate={localFrom ?? undefined}
+                  dateFormat={datefnsAppDateFormat}
+                  isClearable
+                />
+              </FormControl>
+              <hr />
+              <HStack spacing={2}>
+                <Button variant="secondary" size="sm" onClick={() => handleNextDays(7)}>
+                  {t("submissionInbox.filters.next7Days")}
+                </Button>
+                <Button variant="secondary" size="sm" onClick={() => handleNextDays(30)}>
+                  {t("submissionInbox.filters.next30Days")}
+                </Button>
+              </HStack>
+              <Divider />
+              <HStack w="full" justifyContent="space-between">
+                <Button variant="link" size="sm" onClick={handleClear}>
+                  {t("ui.clear")}
+                </Button>
+                <Button variant="primary" size="sm" onClick={onClose}>
+                  {t("ui.apply")}
+                </Button>
+              </HStack>
+            </VStack>
+          </PopoverBody>
+        </PopoverContent>
+      </Portal>
     </Popover>
   )
 })
