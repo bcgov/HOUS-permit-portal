@@ -33,30 +33,39 @@ interface IProps {
   onClear: () => void
 }
 
+const parseDays = (rawDays: string, valueAsNumber: number) => {
+  if (rawDays.trim() === "") return null
+  return Number.isFinite(valueAsNumber) ? valueAsNumber : null
+}
+
 export const DaysInQueueFilter = observer(function DaysInQueueFilter({ value, onChange, onApply, onClear }: IProps) {
   const { t } = useTranslation()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [localOperator, setLocalOperator] = useState<string>(value?.operator ?? "gte")
-  const [localDays, setLocalDays] = useState<number>(value?.days ?? 0)
+  const [localDays, setLocalDays] = useState<string>(value?.days != null ? String(value.days) : "")
 
   useEffect(() => {
+    if (isOpen) return
     setLocalOperator(value?.operator ?? "gte")
-    setLocalDays(value?.days ?? 0)
-  }, [value?.operator, value?.days])
+    setLocalDays(value?.days != null ? String(value.days) : "")
+  }, [value?.operator, value?.days, isOpen])
 
   const hasSelection = value != null
 
-  const handleApply = () => {
-    if (localDays > 0) {
-      onChange({ operator: localOperator, days: localDays })
-      onApply()
+  const commit = (operator: string, rawDays: string, valueAsNumber: number) => {
+    const days = parseDays(rawDays, valueAsNumber)
+    if (days == null || days <= 0) {
+      if (value != null) onClear()
+      return
     }
-    onClose()
+    if (value?.operator === operator && value.days === days) return
+    onChange({ operator, days })
+    onApply()
   }
 
   const handleClear = () => {
     setLocalOperator("gte")
-    setLocalDays(0)
+    setLocalDays("")
     onClear()
     onClose()
   }
@@ -79,7 +88,15 @@ export const DaysInQueueFilter = observer(function DaysInQueueFilter({ value, on
       <PopoverContent w="auto" minW="240px" p={4} zIndex="dropdown">
         <PopoverBody p={0}>
           <VStack align="start" spacing={3}>
-            <Select size="sm" value={localOperator} onChange={(e) => setLocalOperator(e.target.value)}>
+            <Select
+              size="sm"
+              value={localOperator}
+              onChange={(e) => {
+                const operator = e.target.value
+                setLocalOperator(operator)
+                commit(operator, localDays, Number(localDays))
+              }}
+            >
               {/* @ts-ignore */}
               <option value="gte">{t("submissionInbox.filters.daysInQueueGte")}</option>
               {/* @ts-ignore */}
@@ -90,7 +107,10 @@ export const DaysInQueueFilter = observer(function DaysInQueueFilter({ value, on
                 size="sm"
                 min={0}
                 value={localDays}
-                onChange={(_, val) => setLocalDays(isNaN(val) ? 0 : val)}
+                onChange={(valueAsString, valueAsNumber) => {
+                  setLocalDays(valueAsString)
+                  commit(localOperator, valueAsString, valueAsNumber)
+                }}
                 maxW="100px"
               >
                 <NumberInputField />
@@ -107,7 +127,7 @@ export const DaysInQueueFilter = observer(function DaysInQueueFilter({ value, on
               <Button variant="link" size="sm" onClick={handleClear}>
                 {t("ui.clear")}
               </Button>
-              <Button variant="primary" size="sm" onClick={handleApply}>
+              <Button variant="primary" size="sm" onClick={onClose}>
                 {t("ui.apply")}
               </Button>
             </HStack>

@@ -61,11 +61,7 @@ export const InboxFilter = observer(function InboxFilter({
   const { t } = useTranslation()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [options, setOptions] = useState<IOption[]>(staticOptions || [])
-  const [localValue, setLocalValue] = useState<string | string[]>(value)
-
-  useEffect(() => {
-    setLocalValue(value)
-  }, [JSON.stringify(value)])
+  const selectedValues = Array.isArray(value) ? value : []
 
   useEffect(() => {
     if (staticOptions) {
@@ -80,45 +76,37 @@ export const InboxFilter = observer(function InboxFilter({
   }, [isOpen])
 
   const hasSelection = isMulti
-    ? Array.isArray(localValue) && localValue.length > 0
-    : !!localValue && localValue !== options?.[0]?.value
+    ? selectedValues.length > 0
+    : typeof value === "string" && !!value && value !== options?.[0]?.value
 
-  const selectedCheckboxCount = isMulti && Array.isArray(localValue) ? localValue.length : 0
-  const showSelectionParens = isMulti && selectedCheckboxCount >= 1
+  const showSelectionParens = isMulti && selectedValues.length >= 1
 
-  const handleApply = () => {
-    onChange(localValue)
+  const commit = (next: string | string[]) => {
+    onChange(next)
     onApply()
-    onClose()
   }
 
   const handleClear = () => {
     const cleared = isMulti ? [] : options?.[0]?.value || ""
-    setLocalValue(cleared)
     onChange(cleared)
     onClear?.()
     onClose()
   }
 
   const handleCheckboxToggle = (optionValue: string) => {
-    const current = Array.isArray(localValue) ? localValue : []
-    const next = current.includes(optionValue) ? current.filter((v) => v !== optionValue) : [...current, optionValue]
-    setLocalValue(next)
+    const next = selectedValues.includes(optionValue)
+      ? selectedValues.filter((v) => v !== optionValue)
+      : [...selectedValues, optionValue]
+    commit(next)
   }
 
   const handleSelectAll = () => {
     const allValues = options.map((o) => o.value)
-    const current = Array.isArray(localValue) ? localValue : []
-    if (current.length === options.length) {
-      setLocalValue([])
-    } else {
-      setLocalValue(allValues)
-    }
+    commit(selectedValues.length === options.length ? [] : allValues)
   }
 
   const handleSelectGroup = (groupValues: string[]) => {
-    const current = Array.isArray(localValue) ? localValue : []
-    setLocalValue(toggleFilterGroupValues(current, groupValues))
+    commit(toggleFilterGroupValues(selectedValues, groupValues))
   }
 
   const groupedOptions = groupFilterOptions(options, t("siteConfiguration.templateCategories.uncategorized"))
@@ -148,7 +136,7 @@ export const InboxFilter = observer(function InboxFilter({
             <Text>{title}</Text>
             {showSelectionParens && (
               <Text as="span" fontSize="sm">
-                ({selectedCheckboxCount})
+                ({selectedValues.length})
               </Text>
             )}
             {showResultsBadge && <UnreadBadge count={badgeCount} />}
@@ -169,10 +157,8 @@ export const InboxFilter = observer(function InboxFilter({
           {isMulti ? (
             <VStack align="stretch" spacing={3} flex={1} minH={0} overflow="hidden">
               <Checkbox
-                isChecked={Array.isArray(localValue) && localValue.length === options.length && options.length > 0}
-                isIndeterminate={
-                  Array.isArray(localValue) && localValue.length > 0 && localValue.length < options.length
-                }
+                isChecked={selectedValues.length === options.length && options.length > 0}
+                isIndeterminate={selectedValues.length > 0 && selectedValues.length < options.length}
                 onChange={handleSelectAll}
               >
                 {t("ui.selectAll")}
@@ -181,8 +167,7 @@ export const InboxFilter = observer(function InboxFilter({
                 <VStack align="stretch" spacing={4}>
                   {groupedOptions.map((group) => {
                     const groupValues = group.options.map((option) => option.value)
-                    const current = Array.isArray(localValue) ? localValue : []
-                    const { isChecked, isIndeterminate } = filterGroupSelectionState(current, groupValues)
+                    const { isChecked, isIndeterminate } = filterGroupSelectionState(selectedValues, groupValues)
 
                     return (
                       <VStack key={group.id} align="start" spacing={3}>
@@ -201,7 +186,7 @@ export const InboxFilter = observer(function InboxFilter({
                           <Checkbox
                             key={option.value}
                             pl={showGroupLabels ? 6 : 0}
-                            isChecked={current.includes(option.value)}
+                            isChecked={selectedValues.includes(option.value)}
                             onChange={() => handleCheckboxToggle(option.value)}
                           >
                             {option.label}
@@ -217,7 +202,7 @@ export const InboxFilter = observer(function InboxFilter({
                 <Button variant="link" size="sm" onClick={handleClear}>
                   {t("ui.clear")}
                 </Button>
-                <Button variant="primary" size="sm" onClick={handleApply}>
+                <Button variant="primary" size="sm" onClick={onClose}>
                   {t("ui.apply")}
                 </Button>
               </HStack>
@@ -226,8 +211,11 @@ export const InboxFilter = observer(function InboxFilter({
             <VStack align="stretch" spacing={3} flex={1} minH={0} overflow="hidden">
               <Box overflowY="auto" minH={0} flex={1}>
                 <RadioGroup
-                  value={typeof localValue === "string" ? localValue : ""}
-                  onChange={(val) => setLocalValue(val)}
+                  value={typeof value === "string" ? value : ""}
+                  onChange={(val) => {
+                    commit(val)
+                    onClose()
+                  }}
                 >
                   <VStack align="stretch" spacing={4}>
                     {groupedOptions.map((group) => (
@@ -248,7 +236,7 @@ export const InboxFilter = observer(function InboxFilter({
                 </RadioGroup>
               </Box>
               <Divider />
-              <Button variant="primary" size="sm" w="full" onClick={handleApply}>
+              <Button variant="primary" size="sm" w="full" onClick={onClose}>
                 {t("ui.apply")}
               </Button>
             </VStack>

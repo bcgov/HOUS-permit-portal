@@ -51,22 +51,22 @@ export const MeetingDateFilter = observer(function MeetingDateFilter({ value, on
   const [localTo, setLocalTo] = useState<Date | null>(() => parseOptionalIsoDate(value.to))
 
   useEffect(() => {
+    if (isOpen) return
     setLocalFrom(parseOptionalIsoDate(value.from))
     setLocalTo(parseOptionalIsoDate(value.to))
-  }, [value.from, value.to])
+  }, [value.from, value.to, isOpen])
 
   const hasSelection = !!(value.from || value.to)
 
-  const applyRange = (from: Date | null, to: Date | null) => {
-    onChange({
-      from: from ? toIsoDate(from) : null,
-      to: to ? toIsoDate(to) : null,
-    })
+  const commitRange = (from: Date | null, to: Date | null) => {
+    setLocalFrom(from)
+    setLocalTo(to)
+    const nextFrom = from ? toIsoDate(from) : null
+    const nextTo = to ? toIsoDate(to) : null
+    if ((value.from || null) === nextFrom && (value.to || null) === nextTo) return
+    onChange({ from: nextFrom, to: nextTo })
     onApply()
-    onClose()
   }
-
-  const handleApply = () => applyRange(localFrom, localTo)
 
   const handleClear = () => {
     setLocalFrom(null)
@@ -78,9 +78,7 @@ export const MeetingDateFilter = observer(function MeetingDateFilter({ value, on
   const handleNextDays = (days: number) => {
     const from = startOfDay(new Date())
     const to = startOfDay(addDays(from, days - 1))
-    setLocalFrom(from)
-    setLocalTo(to)
-    applyRange(from, to)
+    commitRange(from, to)
   }
 
   return (
@@ -109,7 +107,7 @@ export const MeetingDateFilter = observer(function MeetingDateFilter({ value, on
               </FormLabel>
               <DatePicker
                 selected={localFrom}
-                onChange={(date: Date | null) => setLocalFrom(date)}
+                onChange={(date: Date | null) => commitRange(date, localTo)}
                 selectsStart
                 startDate={localFrom}
                 endDate={localTo}
@@ -123,7 +121,7 @@ export const MeetingDateFilter = observer(function MeetingDateFilter({ value, on
               </FormLabel>
               <DatePicker
                 selected={localTo}
-                onChange={(date: Date | null) => setLocalTo(date)}
+                onChange={(date: Date | null) => commitRange(localFrom, date)}
                 selectsEnd
                 startDate={localFrom}
                 endDate={localTo}
@@ -146,7 +144,7 @@ export const MeetingDateFilter = observer(function MeetingDateFilter({ value, on
               <Button variant="link" size="sm" onClick={handleClear}>
                 {t("ui.clear")}
               </Button>
-              <Button variant="primary" size="sm" onClick={handleApply}>
+              <Button variant="primary" size="sm" onClick={onClose}>
                 {t("ui.apply")}
               </Button>
             </HStack>
