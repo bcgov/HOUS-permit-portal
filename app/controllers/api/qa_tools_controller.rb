@@ -99,6 +99,10 @@ class Api::QaToolsController < Api::ApplicationController
       current_user: current_user
     ).call
 
+    if !Rails.env.development? || ENV["RUN_COMPLIANCE_ON_SAVE"] == "true"
+      AutomatedCompliance::AutopopulateJob.perform_async(@permit_application.id)
+    end
+
     render_success @permit_application,
                    "qa_tools.autofill_permit_application_success",
                    {
