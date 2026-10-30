@@ -10,6 +10,7 @@ import {
   Heading,
   HStack,
   IconButton,
+  Input,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -19,6 +20,7 @@ import {
   ModalOverlay,
   Tag,
   Text,
+  Textarea,
   useDisclosure,
   VStack,
 } from "@chakra-ui/react"
@@ -41,7 +43,7 @@ import { UppyFile } from "@uppy/core"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { CSSProperties, useEffect, useRef, useState } from "react"
-import { Controller, FormProvider, useFieldArray, useForm, useWatch } from "react-hook-form"
+import { Controller, FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import Select, { GroupBase } from "react-select"
 import { datefnsTableDateTimeFormat } from "../../../constants"
@@ -59,7 +61,7 @@ import { FileDownloadButton } from "../../shared/base/file-download-button"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { ConfirmationModal } from "../../shared/confirmation-modal"
 import { Editor } from "../../shared/editor/editor"
-import { TextAreaFormControl, TextFormControl, UrlFormControl } from "../../shared/form/input-form-control"
+import { UrlFormControl } from "../../shared/form/input-form-control"
 import { SortableItem } from "../../shared/sortable-item"
 import { UppyDashboard } from "../../shared/uppy-dashboard"
 import { FromYourLocalJurisdiction } from "./from-your-local-jurisdiction"
@@ -104,6 +106,14 @@ const stepDropAnimation: DropAnimation = {
   sideEffects: defaultDropAnimationSideEffects({
     styles: { active: { opacity: "0.35" } },
   }),
+}
+
+const hasText = (value: unknown) => String(value ?? "").trim() !== ""
+
+const withHttp = (value: string) => {
+  const url = value.trim()
+  if (!url) return url
+  return /^(https?):\/\//i.test(url) ? url : `https://${url}`
 }
 
 const emptyForm: IFormValues = {
@@ -258,7 +268,7 @@ export const ExplainerModal = observer(function ExplainerModal({
         introductionHtml: values.introductionHtml,
         beforeYouApplyHtml: values.beforeYouApplyHtml,
         steps: values.steps,
-        links: values.links,
+        links: values.links.map((link) => ({ ...link, url: withHttp(String(link.url ?? "")) })),
         documentsAttributes: documentsAttributesForSave(values.documentsAttributes),
         relatedTemplateIds: values.relatedTemplateIds,
         publish: values.isPublished,
@@ -287,6 +297,12 @@ export const ExplainerModal = observer(function ExplainerModal({
     setActiveStepId(String(event.active.id))
   }
 
+  const onInvalid = () => {
+    requestAnimationFrame(() => {
+      scrollWithinModalBody(document.querySelector(".chakra-modal__body [aria-invalid='true']") as HTMLElement | null)
+    })
+  }
+
   const onSave = handleSubmit(async (values) => {
     if (values.isPublished) {
       publishConfirm.onOpen()
@@ -294,12 +310,14 @@ export const ExplainerModal = observer(function ExplainerModal({
     }
     if (!(await persist(values))) return
     onClose()
-  })
+  }, onInvalid)
 
   const confirmPublishedSave = async (closeModal: () => void) => {
-    if (!(await persist(getValues()))) return
     closeModal()
-    onClose()
+    await handleSubmit(async (values) => {
+      if (!(await persist(values))) return
+      onClose()
+    }, onInvalid)()
   }
 
   const requestClose = () => {
@@ -509,16 +527,9 @@ export const ExplainerModal = observer(function ExplainerModal({
                             {links.fields.map((link, index) => (
                               <Flex key={link.id} bg="greys.grey03" p={4} borderRadius="md" gap={3} align="flex-end">
                                 <Box flex="1">
-                                  <TextFormControl
-                                    fieldName={`links.${index}.title`}
+                                  <RequiredExplainerField
+                                    name={`links.${index}.title`}
                                     label={t("requirementTemplate.explainer.linkTitle")}
-                                    required
-                                    showOptional={false}
-                                    validate={{
-                                      present: (value) =>
-                                        String(value ?? "").trim() !== "" ||
-                                        t("ui.isRequired", { field: t("requirementTemplate.explainer.linkTitle") }),
-                                    }}
                                   />
                                 </Box>
                                 <Box flex="1">
@@ -770,6 +781,38 @@ function StepDragPreview({ index, title, description }: { index: number; title: 
   )
 }
 
+function RequiredExplainerField({
+  name,
+  label,
+  multiline,
+}: {
+  name: `steps.${number}.title` | `steps.${number}.description` | `links.${number}.title`
+  label: string
+  multiline?: boolean
+}) {
+  const { t } = useTranslation()
+  const { control } = useFormContext<IFormValues>()
+  const As = multiline ? Textarea : Input
+  return (
+    <Controller
+      name={name}
+      control={control}
+      rules={{
+        validate: (value) => hasText(value) || t("ui.isRequired", { field: label }),
+      }}
+      render={({ field, fieldState }) => (
+        <FormControl isInvalid={!!fieldState.error}>
+          <FieldLabel required optional={false}>
+            {label}
+          </FieldLabel>
+          <As bg="greys.white" {...field} value={field.value ?? ""} />
+          <FormErrorMessage>{fieldState.error?.message}</FormErrorMessage>
+        </FormControl>
+      )}
+    />
+  )
+}
+
 function FieldLabel({
   required,
   optional = true,
@@ -832,27 +875,11 @@ function HowToApplyStep({
         </Text>
       </HStack>
       <VStack flex="1" align="stretch" spacing={2}>
-        <TextFormControl
-          fieldName={`steps.${index}.title`}
-          label={t("requirementTemplate.explainer.stepTitle")}
-          required
-          showOptional={false}
-          validate={{
-            present: (value) =>
-              String(value ?? "").trim() !== "" ||
-              t("ui.isRequired", { field: t("requirementTemplate.explainer.stepTitle") }),
-          }}
-        />
-        <TextAreaFormControl
-          fieldName={`steps.${index}.description`}
+        <RequiredExplainerField name={`steps.${index}.title`} label={t("requirementTemplate.explainer.stepTitle")} />
+        <RequiredExplainerField
+          name={`steps.${index}.description`}
           label={t("requirementTemplate.explainer.stepDescription")}
-          required
-          showOptional={false}
-          validate={{
-            present: (value) =>
-              String(value ?? "").trim() !== "" ||
-              t("ui.isRequired", { field: t("requirementTemplate.explainer.stepDescription") }),
-          }}
+          multiline
         />
       </VStack>
       <Button type="button" mt={8} variant="tertiary" leftIcon={<X size={16} />} onClick={onRemove}>
