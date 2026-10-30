@@ -8,6 +8,7 @@ import {
   PopoverBody,
   PopoverContent,
   PopoverTrigger,
+  Portal,
   Text,
   useDisclosure,
   VStack,
@@ -34,6 +35,12 @@ interface IProps {
 
 const toIsoDate = (date: Date) => format(date, "yyyy-MM-dd")
 
+const matchesNextDays = (from: string | null, to: string | null, days: number) => {
+  if (!from || !to) return false
+  const start = startOfDay(new Date())
+  return from === toIsoDate(start) && to === toIsoDate(startOfDay(addDays(start, days - 1)))
+}
+
 const parseOptionalIsoDate = (value: string | null | undefined): Date | null => {
   if (!value) return null
   try {
@@ -44,6 +51,11 @@ const parseOptionalIsoDate = (value: string | null | undefined): Date | null => 
   }
 }
 
+const formatChipDate = (value: string) => {
+  const date = parseOptionalIsoDate(value)
+  return date ? format(date, datefnsAppDateFormat) : value
+}
+
 export const MeetingDateFilter = observer(function MeetingDateFilter({ value, onChange, onApply, onClear }: IProps) {
   const { t } = useTranslation()
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -51,22 +63,37 @@ export const MeetingDateFilter = observer(function MeetingDateFilter({ value, on
   const [localTo, setLocalTo] = useState<Date | null>(() => parseOptionalIsoDate(value.to))
 
   useEffect(() => {
+    if (isOpen) return
     setLocalFrom(parseOptionalIsoDate(value.from))
     setLocalTo(parseOptionalIsoDate(value.to))
-  }, [value.from, value.to])
+  }, [value.from, value.to, isOpen])
 
   const hasSelection = !!(value.from || value.to)
 
-  const applyRange = (from: Date | null, to: Date | null) => {
-    onChange({
-      from: from ? toIsoDate(from) : null,
-      to: to ? toIsoDate(to) : null,
-    })
-    onApply()
-    onClose()
+  const chipLabel = () => {
+    if (!value.from && !value.to) return t("submissionInbox.filters.meetingDate")
+    if (matchesNextDays(value.from, value.to, 7)) return t("submissionInbox.filters.next7Days")
+    if (matchesNextDays(value.from, value.to, 30)) return t("submissionInbox.filters.next30Days")
+    if (value.from && value.to) {
+      return t("submissionInbox.filters.meetingDateRange", {
+        from: formatChipDate(value.from),
+        to: formatChipDate(value.to),
+      })
+    }
+    if (value.from) return t("submissionInbox.filters.meetingDateFromActive", { date: formatChipDate(value.from) })
+    if (value.to) return t("submissionInbox.filters.meetingDateToActive", { date: formatChipDate(value.to) })
+    return t("submissionInbox.filters.meetingDate")
   }
 
-  const handleApply = () => applyRange(localFrom, localTo)
+  const commitRange = (from: Date | null, to: Date | null) => {
+    setLocalFrom(from)
+    setLocalTo(to)
+    const nextFrom = from ? toIsoDate(from) : null
+    const nextTo = to ? toIsoDate(to) : null
+    if ((value.from || null) === nextFrom && (value.to || null) === nextTo) return
+    onChange({ from: nextFrom, to: nextTo })
+    onApply()
+  }
 
   const handleClear = () => {
     setLocalFrom(null)
@@ -78,9 +105,7 @@ export const MeetingDateFilter = observer(function MeetingDateFilter({ value, on
   const handleNextDays = (days: number) => {
     const from = startOfDay(new Date())
     const to = startOfDay(addDays(from, days - 1))
-    setLocalFrom(from)
-    setLocalTo(to)
-    applyRange(from, to)
+    commitRange(from, to)
   }
 
   return (
@@ -94,65 +119,67 @@ export const MeetingDateFilter = observer(function MeetingDateFilter({ value, on
           size="sm"
           fontWeight="normal"
         >
-          <Text>{t("submissionInbox.filters.meetingDate")}</Text>
+          <Text>{chipLabel()}</Text>
         </Button>
       </PopoverTrigger>
-      <PopoverContent w="auto" minW="280px" p={4} zIndex="dropdown">
-        <PopoverBody p={0}>
-          <VStack align="stretch" spacing={3}>
-            <Text fontSize="sm" fontWeight="medium">
-              {t("submissionInbox.filters.meetingDatesBetween")}
-            </Text>
-            <FormControl>
-              <FormLabel fontSize="sm" mb={1}>
-                {t("submissionInbox.filters.meetingDateFrom")}
-              </FormLabel>
-              <DatePicker
-                selected={localFrom}
-                onChange={(date: Date | null) => setLocalFrom(date)}
-                selectsStart
-                startDate={localFrom}
-                endDate={localTo}
-                dateFormat={datefnsAppDateFormat}
-                isClearable
-              />
-            </FormControl>
-            <FormControl>
-              <FormLabel fontSize="sm" mb={1}>
-                {t("submissionInbox.filters.meetingDateTo")}
-              </FormLabel>
-              <DatePicker
-                selected={localTo}
-                onChange={(date: Date | null) => setLocalTo(date)}
-                selectsEnd
-                startDate={localFrom}
-                endDate={localTo}
-                minDate={localFrom ?? undefined}
-                dateFormat={datefnsAppDateFormat}
-                isClearable
-              />
-            </FormControl>
-            <hr />
-            <HStack spacing={2}>
-              <Button variant="secondary" size="sm" onClick={() => handleNextDays(7)}>
-                {t("submissionInbox.filters.next7Days")}
-              </Button>
-              <Button variant="secondary" size="sm" onClick={() => handleNextDays(30)}>
-                {t("submissionInbox.filters.next30Days")}
-              </Button>
-            </HStack>
-            <Divider />
-            <HStack w="full" justifyContent="space-between">
-              <Button variant="link" size="sm" onClick={handleClear}>
-                {t("ui.clear")}
-              </Button>
-              <Button variant="primary" size="sm" onClick={handleApply}>
-                {t("ui.apply")}
-              </Button>
-            </HStack>
-          </VStack>
-        </PopoverBody>
-      </PopoverContent>
+      <Portal>
+        <PopoverContent w="auto" minW="280px" p={4} zIndex="dropdown">
+          <PopoverBody p={0}>
+            <VStack align="stretch" spacing={3}>
+              <Text fontSize="sm" fontWeight="medium">
+                {t("submissionInbox.filters.meetingDatesBetween")}
+              </Text>
+              <FormControl>
+                <FormLabel fontSize="sm" mb={1}>
+                  {t("submissionInbox.filters.meetingDateFrom")}
+                </FormLabel>
+                <DatePicker
+                  selected={localFrom}
+                  onChange={(date: Date | null) => commitRange(date, localTo)}
+                  selectsStart
+                  startDate={localFrom}
+                  endDate={localTo}
+                  dateFormat={datefnsAppDateFormat}
+                  isClearable
+                />
+              </FormControl>
+              <FormControl>
+                <FormLabel fontSize="sm" mb={1}>
+                  {t("submissionInbox.filters.meetingDateTo")}
+                </FormLabel>
+                <DatePicker
+                  selected={localTo}
+                  onChange={(date: Date | null) => commitRange(localFrom, date)}
+                  selectsEnd
+                  startDate={localFrom}
+                  endDate={localTo}
+                  minDate={localFrom ?? undefined}
+                  dateFormat={datefnsAppDateFormat}
+                  isClearable
+                />
+              </FormControl>
+              <hr />
+              <HStack spacing={2}>
+                <Button variant="secondary" size="sm" onClick={() => handleNextDays(7)}>
+                  {t("submissionInbox.filters.next7Days")}
+                </Button>
+                <Button variant="secondary" size="sm" onClick={() => handleNextDays(30)}>
+                  {t("submissionInbox.filters.next30Days")}
+                </Button>
+              </HStack>
+              <Divider />
+              <HStack w="full" justifyContent="space-between">
+                <Button variant="link" size="sm" onClick={handleClear}>
+                  {t("ui.clear")}
+                </Button>
+                <Button variant="primary" size="sm" onClick={onClose}>
+                  {t("ui.close")}
+                </Button>
+              </HStack>
+            </VStack>
+          </PopoverBody>
+        </PopoverContent>
+      </Portal>
     </Popover>
   )
 })

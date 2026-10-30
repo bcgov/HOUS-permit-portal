@@ -182,9 +182,9 @@ export const LocationDetails = observer(function Part3StepCodeFormLocationDetail
       </Flex>
       <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
         <FormControl>
-          <FormLabel>{t("stepCode.part3.locationDetails.aboveGradeStories.label")}</FormLabel>
+          <FormLabel>{t("stepCode.part3.locationDetails.aboveGradeStoreys.label")}</FormLabel>
           <FormHelperText mb={1} mt={0}>
-            {t("stepCode.part3.locationDetails.aboveGradeStories.hint")}
+            {t("stepCode.part3.locationDetails.aboveGradeStoreys.hint")}
           </FormHelperText>
           <FormHelperText mb={1} mt={0} color="semantic.error">
             <ErrorMessage errors={errors} name="buildingHeight" />
@@ -194,7 +194,7 @@ export const LocationDetails = observer(function Part3StepCodeFormLocationDetail
             type="number"
             step={0.1}
             textAlign="left"
-            {...register("buildingHeight", { required: t("stepCode.part3.locationDetails.aboveGradeStories.error") })}
+            {...register("buildingHeight", { required: t("stepCode.part3.locationDetails.aboveGradeStoreys.error") })}
           />
         </FormControl>
         <FormControl>

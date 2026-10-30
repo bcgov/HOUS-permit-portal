@@ -118,7 +118,10 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
             pr={3}
             display={"flex"}
             justifyContent={"space-between"}
-            onClick={onToggle}
+            onClick={(e) => {
+              if (!(e.currentTarget as HTMLElement).contains(e.target as Node)) return
+              onToggle()
+            }}
           >
             <HStack spacing={4}>
               <Box fontWeight={700} fontSize={"base"}>
