@@ -2895,10 +2895,10 @@ Thank you,
               heading: "Building and location details",
               errorDescription: "",
               instructions: "Set key parameters for your project.",
-              aboveGradeStories: {
-                label: "Number of above grade stories",
+              aboveGradeStoreys: {
+                label: "Number of above grade storeys",
                 hint: "Include half-storeys and relevant below-grade storeys",
-                error: "Enter the number of above grade stories for this project.",
+                error: "Enter the number of above grade storeys for this project.",
               },
               hdd: {
                 label: "Heating degree days below 18°C",
