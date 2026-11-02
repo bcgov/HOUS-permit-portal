@@ -12,6 +12,12 @@ import { RequirementTemplateGrid } from "../../../shared/requirement-template/re
 import { ExplainerModal } from "../explainer-modal"
 import { RequirementTemplateActions } from "../requirement-template-actions"
 
+function withoutConfigureParam(prev: URLSearchParams) {
+  const next = new URLSearchParams(prev)
+  next.delete(configurePermitInformationParam)
+  return next
+}
+
 export const RequirementTemplatesScreen = observer(function RequirementTemplate() {
   const { requirementTemplateStore } = useMst()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -22,19 +28,22 @@ export const RequirementTemplatesScreen = observer(function RequirementTemplate(
 
   useEffect(() => {
     if (!configureTemplateId || requirementTemplateStore.getRequirementTemplateById(configureTemplateId)) return
-    requirementTemplateStore.fetchRequirementTemplate(configureTemplateId)
-  }, [configureTemplateId, requirementTemplateStore])
-
-  const closeConfigure = () => {
-    setSearchParams(
-      (prev) => {
-        const next = new URLSearchParams(prev)
-        next.delete(configurePermitInformationParam)
-        return next
+    let cancelled = false
+    requirementTemplateStore.fetchRequirementTemplate(configureTemplateId).then(
+      (template) => {
+        if (cancelled || template) return
+        setSearchParams(withoutConfigureParam, { replace: true })
       },
-      { replace: true }
+      () => {
+        if (!cancelled) setSearchParams(withoutConfigureParam, { replace: true })
+      }
     )
-  }
+    return () => {
+      cancelled = true
+    }
+  }, [configureTemplateId, requirementTemplateStore, setSearchParams])
+
+  const closeConfigure = () => setSearchParams(withoutConfigureParam, { replace: true })
 
   const { t } = useTranslation()
 

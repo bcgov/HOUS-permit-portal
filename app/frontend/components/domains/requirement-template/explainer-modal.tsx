@@ -116,6 +116,13 @@ const withHttp = (value: string) => {
   return /^(https?):\/\//i.test(url) ? url : `https://${url}`
 }
 
+type SaveConfirm = "publish" | "update" | "unpublish"
+
+function saveConfirmKind(publishing: boolean, wasPublished: boolean): SaveConfirm | null {
+  if (publishing) return wasPublished ? "update" : "publish"
+  return wasPublished ? "unpublish" : null
+}
+
 const emptyForm: IFormValues = {
   introductionHtml: "",
   beforeYouApplyHtml: "",
@@ -146,7 +153,7 @@ export const ExplainerModal = observer(function ExplainerModal({
 }) {
   const { t } = useTranslation()
   const closeConfirm = useDisclosure()
-  const publishConfirm = useDisclosure()
+  const [saveConfirm, setSaveConfirm] = useState<SaveConfirm | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const isSavingRef = useRef(false)
   const [loading, setLoading] = useState(true)
@@ -303,21 +310,44 @@ export const ExplainerModal = observer(function ExplainerModal({
     })
   }
 
+  const wasPublished = Boolean(explainer?.publishedAt)
+  const saveConfirmCopy = {
+    publish: {
+      title: t("requirementTemplate.explainer.savePublishTitle"),
+      body: t("requirementTemplate.explainer.savePublishBody"),
+    },
+    update: {
+      title: t("requirementTemplate.explainer.saveLiveTitle"),
+      body: t("requirementTemplate.explainer.saveLiveBody"),
+    },
+    unpublish: {
+      title: t("requirementTemplate.explainer.unpublishTitle"),
+      body: t("requirementTemplate.explainer.unpublishBody"),
+    },
+  } as const
+
   const onSave = handleSubmit(async (values) => {
-    if (values.isPublished) {
-      publishConfirm.onOpen()
+    const kind = saveConfirmKind(values.isPublished, wasPublished)
+    if (kind) {
+      setSaveConfirm(kind)
       return
     }
     if (!(await persist(values))) return
     onClose()
   }, onInvalid)
 
-  const confirmPublishedSave = async (closeModal: () => void) => {
-    closeModal()
-    await handleSubmit(async (values) => {
-      if (!(await persist(values))) return
-      onClose()
-    }, onInvalid)()
+  const confirmSave = async (closeModal: () => void) => {
+    await handleSubmit(
+      async (values) => {
+        if (!(await persist(values))) return
+        closeModal()
+        onClose()
+      },
+      () => {
+        closeModal()
+        onInvalid()
+      }
+    )()
   }
 
   const requestClose = () => {
@@ -387,7 +417,7 @@ export const ExplainerModal = observer(function ExplainerModal({
               ) : (
                 !loadError && (
                   <VStack align="stretch" spacing={6}>
-                    {explainer && !explainer.publishedAt && (
+                    {!explainer?.publishedAt && (
                       <CalloutBanner type="warning" title={t("requirementTemplate.explainer.draftBanner")} />
                     )}
 
@@ -646,16 +676,15 @@ export const ExplainerModal = observer(function ExplainerModal({
         }}
       />
       <ConfirmationModal
-        title={t("requirementTemplate.explainer.savePublishTitle")}
-        body={t("requirementTemplate.explainer.savePublishBody")}
+        title={saveConfirm ? saveConfirmCopy[saveConfirm].title : undefined}
+        body={saveConfirm ? saveConfirmCopy[saveConfirm].body : undefined}
         renderTriggerButton={() => null}
         confirmButtonProps={{ isLoading: isSaving }}
         modalControlProps={{
-          isOpen: publishConfirm.isOpen,
-          onOpen: publishConfirm.onOpen,
-          onClose: publishConfirm.onClose,
+          isOpen: saveConfirm != null,
+          onClose: () => setSaveConfirm(null),
         }}
-        onConfirm={confirmPublishedSave}
+        onConfirm={confirmSave}
       />
     </>
   )

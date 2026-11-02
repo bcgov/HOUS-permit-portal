@@ -2,7 +2,6 @@ import {
   Button,
   ButtonProps,
   Center,
-  Link,
   Modal,
   ModalBody,
   ModalContent,
@@ -14,13 +13,12 @@ import {
   Text,
   useDisclosure,
 } from "@chakra-ui/react"
-import { ArrowSquareOut } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { IRequirementTemplateConfigError } from "../../../types/types"
-import { configurePermitInformationPath } from "../../../utils/permit-application-info-path"
 import { ConfigErrorsList } from "./config-errors-list"
+import { PermitInformationReminderLink } from "./permit-information-reminder-link"
 import { VersionNoteField, normalizedVersionNote } from "./version-note-field"
 
 interface ICreateEarlyAccessVersionModalProps {
@@ -111,18 +109,7 @@ export const CreateEarlyAccessVersionModal = observer(function CreateEarlyAccess
             ) : (
               <Stack spacing={6}>
                 <Text>{t("requirementTemplate.edit.earlyAccessModalBody")}</Text>
-                {requirementTemplateId && (
-                  <Link
-                    href={configurePermitInformationPath(requirementTemplateId)}
-                    isExternal
-                    display="inline-flex"
-                    alignItems="center"
-                    w="fit-content"
-                  >
-                    {t("requirementTemplate.edit.publishInfoReminder")}
-                    <ArrowSquareOut size={16} />
-                  </Link>
-                )}
+                <PermitInformationReminderLink requirementTemplateId={requirementTemplateId} />
                 <VersionNoteField value={versionNote} onChange={setVersionNote} />
                 {requirementTemplateId && (
                   <ConfigErrorsList

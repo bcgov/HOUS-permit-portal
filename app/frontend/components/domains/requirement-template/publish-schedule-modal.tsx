@@ -11,7 +11,6 @@ import {
   Button,
   ButtonProps,
   Center,
-  Link,
   Modal,
   ModalBody,
   ModalContent,
@@ -23,7 +22,7 @@ import {
   Text,
   useDisclosure,
 } from "@chakra-ui/react"
-import { ArrowSquareOut, CaretRight } from "@phosphor-icons/react"
+import { CaretRight } from "@phosphor-icons/react"
 import { format, isAfter, isSameDay } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo, useRef } from "react"
@@ -32,9 +31,9 @@ import { IRequirementTemplate } from "../../../models/requirement-template"
 import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus } from "../../../types/enums"
 import { IRequirementTemplateConfigError } from "../../../types/types"
-import { configurePermitInformationPath } from "../../../utils/permit-application-info-path"
 import { DatePicker } from "../../shared/date-picker"
 import { ConfigErrorsList } from "./config-errors-list"
+import { PermitInformationReminderLink } from "./permit-information-reminder-link"
 import { TemplateAccessSidebar } from "./template-access-sidebar"
 import { VersionNoteField, normalizedVersionNote } from "./version-note-field"
 
@@ -209,19 +208,7 @@ export const PublishScheduleModal = observer(function PublishScheduleModal({
                     }}
                   />
                 </Text>
-                {requirementTemplate && (
-                  <Link
-                    href={configurePermitInformationPath(requirementTemplate.id)}
-                    isExternal
-                    mt={4}
-                    display="inline-flex"
-                    alignItems="center"
-                    w="fit-content"
-                  >
-                    {t("requirementTemplate.edit.publishInfoReminder")}
-                    <ArrowSquareOut size={16} />
-                  </Link>
-                )}
+                <PermitInformationReminderLink requirementTemplateId={requirementTemplate?.id} mt={4} />
                 <Stack spacing={1} mt={6}>
                   <Text>
                     <Trans
