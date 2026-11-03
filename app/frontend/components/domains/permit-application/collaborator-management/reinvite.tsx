@@ -12,25 +12,23 @@ interface IProps {
 
 export const Reinvite = observer(function Reinvite({ permitCollaboration, onReinvite }: IProps) {
   const { t } = useTranslation()
-  const isConfirmedUser =
-    !permitCollaboration.collaborator.user?.isDiscarded && !permitCollaboration.collaborator.user?.isUnconfirmed
-  const isEligibleForReinvite = permitCollaboration.collaborator.user?.isSubmitter
-  return isConfirmedUser ? null : (
+  const user = permitCollaboration.collaborator.user
+  const isConfirmedUser = !user?.isDiscarded && !user?.isUnconfirmed
+
+  // Resends the collaboration email. Account reinvite for an unconfirmed or
+  // discarded reviewer is not supported here yet.
+  if (isConfirmedUser) return null
+
+  return (
     <Text fontSize={"xs"} color={"text.secondary"} ml={2}>
-      {isEligibleForReinvite ? (
-        <>
-          {t("permitCollaboration.popover.collaborations.unconfirmed")}
-          <RequestLoadingButton
-            onClick={onReinvite ? () => onReinvite(permitCollaboration.id) : undefined}
-            variant={"link"}
-            fontStyle={"italic"}
-          >
-            {t("permitCollaboration.popover.collaborations.resendInvite")}
-          </RequestLoadingButton>
-        </>
-      ) : (
-        t("permitCollaboration.popover.collaborations.inEligibleForReInvite")
-      )}
+      {t("permitCollaboration.popover.collaborations.unconfirmed")}
+      <RequestLoadingButton
+        onClick={onReinvite ? () => onReinvite(permitCollaboration.id) : undefined}
+        variant={"link"}
+        fontStyle={"italic"}
+      >
+        {t("permitCollaboration.popover.collaborations.resendInvite")}
+      </RequestLoadingButton>
     </Text>
   )
 })

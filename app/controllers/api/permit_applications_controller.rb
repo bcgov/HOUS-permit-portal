@@ -14,7 +14,6 @@ class Api::PermitApplicationsController < Api::ApplicationController
                   update_revision_requests
                   update_submitter_note
                   create_permit_collaboration
-                  invite_new_collaborator
                   remove_collaborator_collaborations
                   create_or_update_permit_block_status
                   retrigger_submission_webhook
@@ -125,19 +124,9 @@ class Api::PermitApplicationsController < Api::ApplicationController
       )
     submission_section&.each { |key, value| submission_section[key] = nil }
 
-    is_current_user_submitter =
-      current_user.id == @permit_application.submitter_id
-
     if @permit_application.draft? &&
          @permit_application.update_with_submission_data_merge(
-           permit_application_params:
-             (
-               if is_current_user_submitter
-                 permit_application_params
-               else
-                 submission_collaborator_permit_application_params
-               end
-             ),
+           permit_application_params: permit_application_params,
            current_user: current_user
          )
       if !Rails.env.development? || ENV["RUN_COMPLIANCE_ON_SAVE"] == "true"
@@ -307,22 +296,10 @@ class Api::PermitApplicationsController < Api::ApplicationController
         return
     end
 
-    is_current_user_submitter =
-      current_user.id == @permit_application.submitter_id
-
     pending_checks = nil
     submitted =
       @permit_application.with_lock do
-        saved =
-          @permit_application.update(
-            (
-              if is_current_user_submitter
-                permit_application_params
-              else
-                submission_collaborator_permit_application_params
-              end
-            )
-          )
+        saved = @permit_application.update(permit_application_params)
         if saved
           checks = @permit_application.digital_seal_checks
           if checks[:pending_count].positive?
@@ -403,43 +380,6 @@ class Api::PermitApplicationsController < Api::ApplicationController
     end
   end
 
-  def invite_new_collaborator
-    begin
-      @permit_collaboration =
-        PermitCollaboration::CollaborationManagementService.new(
-          @permit_application
-        ).invite_new_submission_collaborator!(
-          authorize_collaboration: ->(permit_collaboration) do
-            authorize permit_collaboration,
-                      policy_class: PermitApplicationPolicy
-          end,
-          user_params: collaborator_invite_params[:user],
-          inviter: current_user,
-          collaborator_type: collaborator_invite_params[:collaborator_type],
-          assigned_requirement_block_id:
-            collaborator_invite_params[:assigned_requirement_block_id]
-        )
-
-      render_success @permit_collaboration,
-                     "permit_application.assign_collaborator_success",
-                     {
-                       blueprint: PermitCollaborationBlueprint,
-                       blueprint_opts: {
-                         view: :base
-                       }
-                     }
-    rescue PermitCollaborationError => e
-      # The skip_authorization is necessary here as if there are any errors
-      # in the invite_new_submission_collaborator! method, before the permit_collaboration
-      # is created, the policy will not be able to authorize the permit_collaboration
-      skip_authorization
-      render_error "permit_application.assign_collaborator_error",
-                   message_opts: {
-                     error_message: e.message
-                   }
-    end
-  end
-
   def generate_missing_pdfs
     authorize @permit_application
 
@@ -495,8 +435,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
     collaborations_to_remove =
       @permit_application.permit_collaborations.where(
         collaborator_id: params.require(:collaborator_id),
-        collaborator_type: params.require(:collaborator_type),
-        collaboration_type: params.require(:collaboration_type)
+        collaborator_type: params.require(:collaborator_type)
       )
 
     if collaborations_to_remove.discard_all
@@ -516,8 +455,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
   def create_or_update_permit_block_status
     @permit_block_status =
       @permit_application.permit_block_statuses.find_or_initialize_by(
-        requirement_block_id: params.require(:requirement_block_id),
-        collaboration_type: params.require(:collaboration_type)
+        requirement_block_id: params.require(:requirement_block_id)
       )
 
     authorize @permit_block_status, policy_class: PermitApplicationPolicy
@@ -646,32 +584,11 @@ class Api::PermitApplicationsController < Api::ApplicationController
     )
   end
 
-  def submission_collaborator_permit_application_params # permit application params collaborators can update if they are a collaborator during submission
-    designated_submitter =
-      @permit_application.users_by_collaboration_options(
-        collaboration_type: :submission,
-        collaborator_type: :delegatee
-      ).first
-    if designated_submitter&.id == current_user.id
-      params.require(:permit_application).permit(:nickname, submission_data: {})
-    else
-      params.require(:permit_application).permit(submission_data: {})
-    end
-  end
-
   def permit_collaboration_params
     params.require(:permit_collaboration).permit(
       :collaborator_id,
       :collaborator_type,
       :assigned_requirement_block_id
-    )
-  end
-
-  def collaborator_invite_params
-    params.require(:collaborator_invite).permit(
-      :collaborator_type,
-      :assigned_requirement_block_id,
-      user: %i[email first_name last_name]
     )
   end
 

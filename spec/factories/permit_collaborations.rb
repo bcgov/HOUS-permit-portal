@@ -1,18 +1,13 @@
 FactoryBot.define do
   factory :permit_collaboration do
-    association :collaborator
-    association :permit_application
+    collaborator
+    permit_application do
+      association :permit_application,
+                  :newly_submitted,
+                  jurisdiction: collaborator.jurisdiction
+    end
 
-    collaboration_type { :submission }
     collaborator_type { :delegatee }
-
-    trait :submission do
-      collaboration_type { :submission }
-    end
-
-    trait :review do
-      collaboration_type { :review }
-    end
 
     trait :delegatee do
       collaborator_type { :delegatee }
@@ -20,6 +15,7 @@ FactoryBot.define do
 
     trait :assignee do
       collaborator_type { :assignee }
+      assigned_requirement_block_id { SecureRandom.uuid }
     end
   end
 end

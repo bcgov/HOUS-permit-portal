@@ -84,10 +84,6 @@ class PermitProjectPolicy < ApplicationPolicy
     show? && (user_is_owner? || user_is_review_staff_for_jurisdiction?)
   end
 
-  def submission_collaborator_options?
-    same_sandbox? && user_is_owner?
-  end
-
   def assign_project_review_collaborator?
     same_sandbox? && user_is_review_staff_for_jurisdiction?
   end

@@ -268,27 +268,6 @@ class PermitProject < ApplicationRecord
       .limit(3)
   end
 
-  def submission_collaborators(user = nil)
-    return Collaborator.none if user.nil?
-
-    if owner_id == user.id
-      return(
-        Collaborator
-          .joins(:permit_collaborations)
-          .where(
-            permit_collaborations: {
-              permit_application_id: permit_applications.kept.select(:id),
-              collaboration_type: :submission,
-              discarded_at: nil
-            }
-          )
-          .distinct
-      )
-    end
-
-    Collaborator.none
-  end
-
   def project_documents(user = nil)
     # Limit project documents to owner for now
     base = association(:project_documents).reader
@@ -439,7 +418,7 @@ class PermitProject < ApplicationRecord
       PermitCollaboration
         .joins(:collaborator)
         .where(permit_application_id: permit_applications.kept.select(:id))
-        .where(collaboration_type: :review, discarded_at: nil)
+        .where(discarded_at: nil)
         .pluck("collaborators.user_id")
 
     project_user_ids =

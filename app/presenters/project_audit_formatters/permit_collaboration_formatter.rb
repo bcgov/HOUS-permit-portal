@@ -43,41 +43,29 @@ module ProjectAuditFormatters
 
     private
 
-    def format_create_description(collab, collaborator_name, block_name)
-      if collab.submission?
-        if collab.delegatee?
-          "#{collaborator_name} set as designated submitter"
-        else
-          "#{collaborator_name} assigned to #{block_name}"
-        end
-      elsif collab.review? && collab.delegatee?
+    def format_create_description(collab, collaborator_name, _block_name)
+      if collab.delegatee?
         I18n.t(
           "project_audit.actions.assigned_application_reviewer",
           user: user_display,
           reviewer: collaborator_name
         )
-      elsif collab.review?
+      elsif collab.assignee?
         "#{collaborator_name} assigned to application"
       else
         I18n.t("project_audit.fallback.collaborator_change", user: user_display)
       end
     end
 
-    def format_update_description(collab, collaborator_name, block_name)
+    def format_update_description(collab, collaborator_name, _block_name)
       if discard?
-        if collab.submission?
-          if collab.delegatee?
-            "#{collaborator_name} unset as designated submitter"
-          else
-            "#{collaborator_name} unassigned from #{block_name}"
-          end
-        elsif collab.review? && collab.delegatee?
+        if collab.delegatee?
           I18n.t(
             "project_audit.actions.removed_application_reviewer",
             user: user_display,
             reviewer: collaborator_name
           )
-        elsif collab.review?
+        elsif collab.assignee?
           "#{collaborator_name} unassigned from application"
         else
           I18n.t(

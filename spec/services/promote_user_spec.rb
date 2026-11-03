@@ -103,7 +103,7 @@ RSpec.describe PromoteUser do
     invited_user_collab =
       instance_double(
         "Collaborator",
-        collaboratorable: "x",
+        jurisdiction_id: "j1",
         permit_collaborations: [],
         update: true
       )
@@ -111,7 +111,7 @@ RSpec.describe PromoteUser do
       [invited_user_collab]
     )
     allow(existing_collabs).to receive(:find_by).with(
-      collaboratorable: "x"
+      jurisdiction_id: "j1"
     ).and_return(nil)
 
     described_class.new(

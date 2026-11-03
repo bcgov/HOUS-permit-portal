@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_10_19_201500) do
+ActiveRecord::Schema[7.2].define(version: 2026_11_02_180000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -67,12 +67,11 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_19_201500) do
 
   create_table "collaborators", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "user_id", null: false
-    t.string "collaboratorable_type", null: false
-    t.uuid "collaboratorable_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["collaboratorable_type", "collaboratorable_id"], name: "idx_on_collaboratorable_type_collaboratorable_id_aa1cca136d"
-    t.index ["collaboratorable_type", "collaboratorable_id"], name: "index_collaborators_on_collaboratorable"
+    t.uuid "jurisdiction_id", null: false
+    t.index ["jurisdiction_id"], name: "index_collaborators_on_jurisdiction_id"
+    t.index ["user_id", "jurisdiction_id"], name: "index_collaborators_on_user_id_and_jurisdiction_id", unique: true
     t.index ["user_id"], name: "index_collaborators_on_user_id"
   end
 
@@ -664,27 +663,24 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_19_201500) do
     t.uuid "permit_application_id", null: false
     t.string "requirement_block_id", null: false
     t.integer "status", default: 0, null: false
-    t.integer "collaboration_type", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["permit_application_id", "requirement_block_id", "collaboration_type"], name: "index_block_statuses_on_app_id_and_block_id_and_collab_type", unique: true
+    t.index ["permit_application_id", "requirement_block_id"], name: "index_block_statuses_on_app_id_and_block_id", unique: true
     t.index ["permit_application_id"], name: "index_permit_block_statuses_on_permit_application_id"
   end
 
   create_table "permit_collaborations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "collaborator_id", null: false
     t.uuid "permit_application_id", null: false
-    t.integer "collaboration_type", default: 0
     t.integer "collaborator_type", default: 0
     t.string "assigned_requirement_block_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.datetime "discarded_at"
-    t.index ["collaboration_type"], name: "index_permit_collaborations_on_collaboration_type"
     t.index ["collaborator_id"], name: "index_permit_collaborations_on_collaborator_id"
     t.index ["collaborator_type"], name: "index_permit_collaborations_on_collaborator_type"
     t.index ["discarded_at"], name: "index_permit_collaborations_on_discarded_at"
-    t.index ["permit_application_id", "collaborator_id", "collaboration_type", "collaborator_type", "assigned_requirement_block_id"], name: "index_permit_collaborations_on_unique_columns", unique: true, where: "(discarded_at IS NULL)"
+    t.index ["permit_application_id", "collaborator_id", "collaborator_type", "assigned_requirement_block_id"], name: "index_permit_collaborations_on_unique_columns", unique: true, where: "(discarded_at IS NULL)"
     t.index ["permit_application_id"], name: "index_permit_collaborations_on_permit_application_id"
   end
 
@@ -1410,6 +1406,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_19_201500) do
 
   add_foreign_key "allowlisted_jwts", "users", on_delete: :cascade
   add_foreign_key "api_key_expiration_notifications", "external_api_keys"
+  add_foreign_key "collaborators", "jurisdictions"
   add_foreign_key "collaborators", "users"
   add_foreign_key "customization_changes", "jurisdiction_template_version_customizations"
   add_foreign_key "design_documents", "pre_checks"

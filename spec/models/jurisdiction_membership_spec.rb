@@ -12,7 +12,7 @@ RSpec.describe JurisdictionMembership, type: :model do
     it "creates a jurisdiction collaborator for review_staff users (idempotent)" do
       user = create(:user, :review_manager, jurisdictions_count: 0)
       described_class.create!(jurisdiction: jurisdiction, user: user)
-      Collaborator.where(user: user, collaboratorable: jurisdiction).delete_all
+      Collaborator.where(user: user, jurisdiction: jurisdiction).delete_all
 
       membership = described_class.new(jurisdiction: jurisdiction, user: user)
 
@@ -38,8 +38,8 @@ RSpec.describe JurisdictionMembership, type: :model do
     it "destroys an existing jurisdiction collaborator on destroy hook" do
       user = create(:user, :review_manager, jurisdictions_count: 0)
       described_class.create!(jurisdiction: jurisdiction, user: user)
-      Collaborator.where(user: user, collaboratorable: jurisdiction).delete_all
-      Collaborator.create!(user: user, collaboratorable: jurisdiction)
+      Collaborator.where(user: user, jurisdiction: jurisdiction).delete_all
+      Collaborator.create!(user: user, jurisdiction: jurisdiction)
 
       membership = described_class.new(jurisdiction: jurisdiction, user: user)
       expect { membership.send(:destroy_jurisdiction_collaborator) }.to change(

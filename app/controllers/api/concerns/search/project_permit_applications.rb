@@ -42,8 +42,7 @@ module Api::Concerns::Search::ProjectPermitApplications
         :requirement_template_id,
         :template_version_id,
         { status: [] },
-        :has_collaborator,
-        { submission_delegatee_id: [] }
+        :has_collaborator
       ],
       sort: %i[field direction]
     )
@@ -84,8 +83,6 @@ module Api::Concerns::Search::ProjectPermitApplications
         and_conditions << { requirement_template_id: value.split(",") }
       when :status
         and_conditions << { status: value }
-      when :submission_delegatee_id
-        and_conditions << { submission_delegatee_id: value }
       else
         and_conditions << { key => value }
       end

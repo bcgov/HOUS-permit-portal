@@ -25,7 +25,7 @@ import { useInterval } from "../../../hooks/use-interval"
 import { useMst } from "../../../setup/root"
 import { stickyBelowNavBar } from "../../../styles/nav-bar-offset"
 import { ICustomEventMap } from "../../../types/dom"
-import { ECollaborationType, ECustomEvents, ERequirementType } from "../../../types/enums"
+import { ECustomEvents, ERequirementType } from "../../../types/enums"
 import { findPidComponentKey } from "../../../utils/formio-component-traversal"
 import { handleScrollToBottom, handleScrollToTop } from "../../../utils/utility-functions"
 import { CopyableValue } from "../../shared/base/copyable-value"
@@ -43,9 +43,6 @@ import {
   ReviewAndSubmitRevisedApplicationScreen,
 } from "../../shared/revisions/review-and-submit-revised-application-screen"
 import { ChecklistSideBar } from "./checklist-sidebar"
-import { BlockCollaboratorAssignmentManagement } from "./collaborator-management/block-collaborator-assignment-management"
-import { CollaboratorsSidebar } from "./collaborator-management/collaborators-sidebar"
-import { useCollaborationAssignmentNodes } from "./collaborator-management/hooks/use-collaboration-assignment-nodes"
 import { ContactSummaryModal } from "./contact-summary-modal"
 import { setupEnergyStepCodeReportLink } from "./energy-step-code-report-link"
 import { RevisionSideBar } from "./revision-sidebar"
@@ -105,9 +102,6 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
 
   const [processEventOnLoad, setProcessEventOnLoad] = useState<CustomEvent | null>(null)
-  const { requirementBlockAssignmentNodes, updateRequirementBlockAssignmentNode } = useCollaborationAssignmentNodes({
-    formRef,
-  })
   const {
     isOpen: isSubmitBlockedModalOpen,
     onOpen: onSubmitBlockedModalOpen,
@@ -292,9 +286,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const { tagsOrNickname, formJson, number, isSubmitted, isDirty, setIsDirty, isRevisionsRequested } =
     currentPermitApplication
 
-  const doesUserHaveSubmissionPermission =
-    currentUser?.id === currentPermitApplication.submitter?.id ||
-    currentUser?.id === currentPermitApplication?.designatedSubmitter?.collaborator?.user?.id
+  const doesUserHaveSubmissionPermission = currentUser?.id === currentPermitApplication.submitter?.id
   const canEditPermitApplication =
     currentPermitApplication.isDraft &&
     doesUserHaveSubmissionPermission &&
@@ -412,10 +404,6 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                 <Button variant="ghost" leftIcon={<Info size={20} />} color="white" onClick={onContactsOpen}>
                   {t("permitApplication.show.contactsSummary")}
                 </Button>{" "}
-                <CollaboratorsSidebar
-                  permitApplication={currentPermitApplication}
-                  collaborationType={ECollaborationType.submission}
-                />
                 {doesUserHaveSubmissionPermission && (
                   <SubmissionDownloadModal permitApplication={currentPermitApplication} />
                 )}
@@ -435,10 +423,6 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                 gap={4}
               >
                 <BrowserSearchPrompt />
-                <CollaboratorsSidebar
-                  permitApplication={currentPermitApplication}
-                  collaborationType={ECollaborationType.submission}
-                />
                 <Button
                   variant="primary"
                   onClick={
@@ -530,7 +514,6 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                   isDisabled={isSubmitted || currentPermitApplication.isViewingPastRequests}
                 />
               )}
-              updateCollaborationAssignmentNodes={updateRequirementBlockAssignmentNode}
               onReviewSubmit={
                 currentPermitApplication.canUserSubmit(currentUser)
                   ? (submission) => {
@@ -551,16 +534,6 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
           permitApplication={currentPermitApplication}
         />
       )}
-      {requirementBlockAssignmentNodes.map((requirementBlockAssignmentNode) => {
-        return (
-          <BlockCollaboratorAssignmentManagement
-            key={requirementBlockAssignmentNode.requirementBlockId}
-            requirementBlockAssignmentNode={requirementBlockAssignmentNode}
-            permitApplication={currentPermitApplication}
-            collaborationType={ECollaborationType.submission}
-          />
-        )
-      })}
     </Box>
   )
 })

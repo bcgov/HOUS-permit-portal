@@ -12,7 +12,6 @@ RSpec.describe Api::Concerns::Search::ProjectPermitApplications,
 
   let!(:owner) { create(:user, :submitter) }
   let!(:submitter) { create(:user, :submitter) }
-  let!(:collaborator_user) { create(:user, :submitter) }
   let!(:reviewer) { create(:user, :reviewer, jurisdiction:) }
   let!(:unrelated_nonreview_user) { create(:user, :submitter) }
 
@@ -70,32 +69,6 @@ RSpec.describe Api::Concerns::Search::ProjectPermitApplications,
         .results
         .map(&:id)
     expect(ids).to match_array([p1_draft.id, p2_sub.id, p3_resub.id])
-  end
-
-  it "as submission collaborator returns only collaborated apps" do
-    # add collaborator_user as submission collaborator on p2_sub
-    collaborator =
-      create(
-        :collaborator,
-        user: collaborator_user,
-        collaboratorable: submitter
-      )
-    create(
-      :permit_collaboration,
-      :submission,
-      :delegatee,
-      collaborator:,
-      permit_application: p1_draft
-    )
-
-    allow(controller).to receive(:current_user).and_return(collaborator_user)
-    controller.perform_permit_application_search
-    ids =
-      controller
-        .instance_variable_get(:@permit_application_search)
-        .results
-        .map(&:id)
-    expect(ids).to match_array([p1_draft.id])
   end
 
   it "as unrelated submitter sees nothing under someone else's project" do

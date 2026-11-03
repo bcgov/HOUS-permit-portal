@@ -9,7 +9,6 @@ class Api::PermitProjectsController < Api::ApplicationController
                   pin
                   unpin
                   search_permit_applications
-                  submission_collaborator_options
                   create_permit_applications
                   mark_as_viewed
                   mark_as_unviewed
@@ -257,18 +256,6 @@ class Api::PermitProjectsController < Api::ApplicationController
                      blueprint_opts: {
                        view: :project_base,
                        current_user: current_user
-                     }
-                   }
-  end
-
-  def submission_collaborator_options
-    authorize @permit_project
-    render_success @permit_project.submission_collaborators(current_user),
-                   nil,
-                   {
-                     blueprint: CollaboratorOptionBlueprint,
-                     blueprint_opts: {
-                       view: :base
                      }
                    }
   end

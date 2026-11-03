@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { createPortal } from "react-dom"
 import { IPermitApplication } from "../../../../models/permit-application"
-import { ECollaborationType, EPermitBlockStatus } from "../../../../types/enums"
+import { EPermitBlockStatus } from "../../../../types/enums"
 import { BlockStatusSelect } from "../../../shared/select/selectors/block-status-select"
 import { CollaboratorAssignmentModal } from "./collaborator-assignment-modal"
 
@@ -16,33 +16,20 @@ export interface IRequirementBlockAssignmentNode {
 interface IProps {
   requirementBlockAssignmentNode: IRequirementBlockAssignmentNode
   permitApplication: IPermitApplication
-  collaborationType: ECollaborationType
 }
 
 export const BlockCollaboratorAssignmentManagement = observer(function BlockCollaboratorAssignmentManagement({
   requirementBlockAssignmentNode,
   permitApplication,
-  collaborationType,
 }: IProps) {
   const { requirementBlockId, attachmentNode } = requirementBlockAssignmentNode
-  const existingAssignments = permitApplication.getCollaborationAssigneesByBlockId(
-    collaborationType,
-    requirementBlockId
-  )
+  const existingAssignments = permitApplication.getCollaborationAssigneesByBlockId(requirementBlockId)
   return (
     <>
       {createPortal(
         <HStack mr={6} spacing={6} onClick={(e) => e.stopPropagation()}>
-          <StatusSelect
-            permitApplication={permitApplication}
-            collaborationType={collaborationType}
-            requirementBlockId={requirementBlockId}
-          />
-          <CollaboratorAssignmentModal
-            permitApplication={permitApplication}
-            collaborationType={collaborationType}
-            requirementBlockId={requirementBlockId}
-          />
+          <StatusSelect permitApplication={permitApplication} requirementBlockId={requirementBlockId} />
+          <CollaboratorAssignmentModal permitApplication={permitApplication} requirementBlockId={requirementBlockId} />
         </HStack>,
         attachmentNode
       )}
@@ -75,14 +62,12 @@ export const BlockCollaboratorAssignmentManagement = observer(function BlockColl
 
 const StatusSelect = observer(function StatusSelect({
   permitApplication,
-  collaborationType,
   requirementBlockId,
 }: {
   permitApplication: IPermitApplication
-  collaborationType: ECollaborationType
   requirementBlockId: string
 }) {
-  const permitBlockStatus = permitApplication.getPermitBlockStatus(collaborationType, requirementBlockId)
+  const permitBlockStatus = permitApplication.getPermitBlockStatus(requirementBlockId)
 
   const [status, setStatus] = useState<EPermitBlockStatus>(permitBlockStatus?.status || EPermitBlockStatus.draft)
 
@@ -95,11 +80,7 @@ const StatusSelect = observer(function StatusSelect({
     try {
       setStatus(newStatus)
 
-      const response = await permitApplication.createOrUpdatePermitBlockStatus(
-        requirementBlockId,
-        newStatus,
-        collaborationType
-      )
+      const response = await permitApplication.createOrUpdatePermitBlockStatus(requirementBlockId, newStatus)
 
       if (!response) {
         setStatus(originalStatus)
@@ -109,8 +90,7 @@ const StatusSelect = observer(function StatusSelect({
     }
   }
 
-  const isDisabled =
-    collaborationType === ECollaborationType.review ? !permitApplication.isSubmitted : !permitApplication.isDraft
+  const isDisabled = !permitApplication.isSubmitted
 
   return (
     <BlockStatusSelect

@@ -139,42 +139,6 @@ RSpec.describe PermitHubMailer, type: :mailer do
     expect(mailer).not_to have_received(:send_mail)
   end
 
-  it "notify_new_or_unconfirmed_permit_collaboration invites submitter users" do
-    collaboratorable = instance_double("Collaboratorable")
-    collaborator =
-      instance_double("Collaborator", collaboratorable: collaboratorable)
-    permit_collaboration =
-      instance_double(
-        "PermitCollaboration",
-        collaborator: collaborator,
-        permit_application: instance_double("PermitApplication")
-      )
-
-    user =
-      instance_double(
-        "User",
-        email: "inv@example.com",
-        discarded?: false,
-        confirmed?: true,
-        submitter?: true
-      )
-    allow(user).to receive(:skip_confirmation_notification!)
-    allow(user).to receive(:skip_invitation=)
-    allow(user).to receive(:invite!).with(collaboratorable)
-    allow(user).to receive(:invitation_sent_at=)
-    allow(user).to receive(:save!)
-
-    mailer.notify_new_or_unconfirmed_permit_collaboration(
-      permit_collaboration: permit_collaboration,
-      user: user
-    )
-
-    expect(mailer).to have_received(:send_mail).with(
-      email: user.email,
-      template_key: :notify_new_or_unconfirmed_permit_collaboration
-    )
-  end
-
   it "notifies user archive warning and handles invalid retention days env" do
     allow(ENV).to receive(:fetch).and_call_original
     allow(ENV).to receive(:fetch).with(

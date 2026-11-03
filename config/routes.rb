@@ -234,9 +234,6 @@ Rails.application.routes.draw do
       delete "permit_collaborations/remove_collaborator_collaborations",
              on: :member,
              to: "permit_applications#remove_collaborator_collaborations"
-      post "permit_collaborations/invite",
-           on: :member,
-           to: "permit_applications#invite_new_collaborator"
       post "submit", on: :member
       post "mark_as_viewed", on: :member
       post "acknowledge_published_electives", on: :member
@@ -300,7 +297,6 @@ Rails.application.routes.draw do
       member do
         post :pin
         delete :unpin
-        get :submission_collaborator_options
         post :activities, to: "project_audits#index"
         post :mark_as_viewed
         post :mark_as_unviewed
@@ -461,9 +457,8 @@ Rails.application.routes.draw do
 
     resources :collaborators, only: %i[] do
       collection do
-        resources :collaboratorable, only: %i[] do
-          post "search", to: "collaborators#collaborator_search"
-        end
+        post "jurisdictions/:jurisdiction_id/search",
+             to: "collaborators#collaborator_search"
       end
     end
 
