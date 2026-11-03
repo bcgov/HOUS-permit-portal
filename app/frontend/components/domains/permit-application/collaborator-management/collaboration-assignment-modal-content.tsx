@@ -5,9 +5,7 @@ import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { ISearch } from "../../../../lib/create-search-model"
 import { useMst } from "../../../../setup/root"
-import { ECollaborationType } from "../../../../types/enums"
 import { ModelSearchInput } from "../../../shared/base/model-search-input"
-import { ConfirmationModal } from "../../../shared/confirmation-modal"
 import { RequestLoadingButton } from "../../../shared/request-loading-button"
 import { SharedAvatar } from "../../../shared/user/shared-avatar"
 
@@ -30,10 +28,8 @@ export const CollaborationAssignmentModalContent = observer(function Collaborato
   onUnselect,
   takenCollaboratorIds = new Set<string>(),
   onClose,
-  getConfirmationModalDisclosureProps,
   transitionToInvite,
   takenCollaboratorStrategy = "exclude",
-  collaborationType,
   selectedCollaborations = [],
   selectedTitle,
   selectedEmptyText,
@@ -52,7 +48,6 @@ export const CollaborationAssignmentModalContent = observer(function Collaborato
     collaboratorId: string
   ) => Partial<Omit<ReturnType<typeof useDisclosure>, "onToggle">>
   transitionToInvite?: () => void
-  collaborationType: ECollaborationType
   selectedCollaborations?: ICollaborationDisplayItem[]
   selectedTitle?: string
   selectedEmptyText?: string
@@ -68,12 +63,6 @@ export const CollaborationAssignmentModalContent = observer(function Collaborato
       ? collaboratorStore.getFilteredCollaborationSearchList(takenCollaboratorIds)
       : collaboratorStore.collaboratorSearchList
   const { t } = useTranslation()
-
-  useEffect(() => {
-    collaboratorStore.setSearchContext(collaborationType)
-
-    return () => collaboratorStore.setSearchContext(null)
-  }, [])
 
   useEffect(() => {
     collaboratorStore.search()
@@ -184,37 +173,6 @@ export const CollaborationAssignmentModalContent = observer(function Collaborato
                       >
                         {t("permitCollaboration.popover.collaborations.unassignButton")}
                       </Button>
-                    ) : collaborationType === ECollaborationType.submission ? (
-                      <ConfirmationModal
-                        title={t("permitCollaboration.popover.assignment.inviteWarning.title")}
-                        body={t("permitCollaboration.popover.assignment.inviteWarning.body")}
-                        triggerText={t("ui.proceed")}
-                        renderTriggerButton={({ onClick, ...rest }) => (
-                          <Button
-                            variant={"ghost"}
-                            color={"text.link"}
-                            size={"sm"}
-                            ml={3}
-                            flexShrink={0}
-                            fontWeight={"semibold"}
-                            fontSize={"sm"}
-                            onClick={onClick}
-                            {...rest}
-                          >
-                            {t("ui.select")}
-                          </Button>
-                        )}
-                        renderConfirmationButton={({ onClick }) => (
-                          <RequestLoadingButton variant={"primary"} onClick={onClick as () => Promise<any>}>
-                            {t("ui.confirm")}
-                          </RequestLoadingButton>
-                        )}
-                        onConfirm={onSelectCreator(collaborator.id)}
-                        modalControlProps={getConfirmationModalDisclosureProps(collaborator.id)}
-                        modalContentProps={{
-                          maxW: "700px",
-                        }}
-                      />
                     ) : (
                       <RequestLoadingButton
                         variant={"ghost"}

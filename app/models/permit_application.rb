@@ -189,14 +189,12 @@ class PermitApplication < ApplicationRecord
   end
 
   def users_by_collaboration_options(
-    collaboration_type:,
     collaborator_type: nil,
     assigned_requirement_block_id: nil
   )
     base_where_clause = {
       collaborations: {
         permit_collaborations: {
-          collaboration_type: collaboration_type,
           permit_application_id: id,
           discarded_at: nil
         }
@@ -311,15 +309,9 @@ class PermitApplication < ApplicationRecord
       requirement_template_id: template_version.requirement_template.id,
       created_at: created_at,
       updated_at: updated_at,
-      user_ids_with_submission_edit_permissions:
-        [submitter.id] +
-          users_by_collaboration_options(collaboration_type: :submission).pluck(
-            :id
-          ),
       review_delegatee_name: review_delegatee_name,
       review_collaborator_user_ids:
         permit_collaborations
-          .review
           .joins(:collaborator)
           .pluck("collaborators.user_id")
           .uniq,
@@ -327,27 +319,10 @@ class PermitApplication < ApplicationRecord
       sandbox_id: sandbox_id,
       permit_project_id: permit_project_id,
       project_number: permit_project&.number,
-      submission_delegatee_id: submission_delegatee&.id,
       discarded: discarded?,
       queue_time_seconds: queue_time_seconds,
       queue_clock_started_at: queue_clock_started_at&.to_i
     }
-  end
-
-  def submission_delegatee
-    collaborators.where(
-      permit_collaborations: {
-        collaboration_type: :submission,
-        collaborator_type: :delegatee
-      }
-    ).first
-  end
-
-  def collaborator?(user_id:, collaboration_type:, collaborator_type: nil)
-    users_by_collaboration_options(
-      collaboration_type:,
-      collaborator_type:
-    ).exists?(id: user_id)
   end
 
   def has_collaborator?
@@ -355,25 +330,9 @@ class PermitApplication < ApplicationRecord
   end
 
   def submission_requirement_block_edit_permissions(user_id:)
-    if submitter_id != user_id &&
-         !collaborator?(user_id:, collaboration_type: :submission)
-      return nil
-    end
+    return :all if submitter_id == user_id
 
-    if submitter_id == user_id ||
-         collaborator?(
-           user_id:,
-           collaboration_type: :submission,
-           collaborator_type: :delegatee
-         )
-      return :all
-    end
-
-    permit_collaborations
-      .joins(:collaborator)
-      .where(collaboration_type: :submission, collaborators: { user_id: })
-      .map(&:assigned_requirement_block_id)
-      .compact
+    nil
   end
 
   def user_can_edit_block?(user_id:, requirement_block_id:)
@@ -463,15 +422,6 @@ class PermitApplication < ApplicationRecord
 
   def notifiable_users
     relevant_collaborators = [submitter]
-    designated_submitter =
-      users_by_collaboration_options(
-        collaboration_type: :submission,
-        collaborator_type: :delegatee
-      ).first
-
-    if designated_submitter.present?
-      relevant_collaborators << designated_submitter
-    end
 
     if submitted?
       relevant_collaborators =
@@ -850,10 +800,7 @@ class PermitApplication < ApplicationRecord
   end
 
   def review_delegatee_name
-    users_by_collaboration_options(
-      collaboration_type: :review,
-      collaborator_type: :delegatee
-    ).first&.name
+    users_by_collaboration_options(collaborator_type: :delegatee).first&.name
   end
 
   def jurisdiction_name

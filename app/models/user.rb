@@ -86,7 +86,6 @@ class User < ApplicationRecord
            class_name: "UserLicenseAgreement",
            dependent: :destroy
   has_many :contacts, as: :contactable, dependent: :destroy
-  has_many :collaborators, as: :collaboratorable, dependent: :destroy
   has_many :collaborations,
            foreign_key: "user_id",
            class_name: "Collaborator",
@@ -145,7 +144,6 @@ class User < ApplicationRecord
 
   # Stub this for now since we do not want to use IP Tracking at the moment - Jan 30, 2024
   attr_accessor :current_sign_in_ip, :last_sign_in_ip
-  attr_accessor :collaboration_invitation # this is needed to signal that a registration invitation is for collaboration when sending the email
 
   after_discard { destroy_jurisdiction_collaborator }
   after_save :create_jurisdiction_collaborator,
@@ -249,12 +247,6 @@ class User < ApplicationRecord
 
   def blueprint
     UserBlueprint
-  end
-
-  def set_collaboration_invitation(permit_collaboration)
-    self.collaboration_invitation = {
-      permit_collaboration: permit_collaboration
-    }
   end
 
   def create_jurisdiction_collaborator

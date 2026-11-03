@@ -74,11 +74,11 @@ class PermitProjectCollaboration < ApplicationRecord
   end
 
   def validate_collaborator_is_review_type
-    return if collaborator.blank?
+    return if collaborator.blank? || permit_project.blank?
 
-    unless collaborator.collaboratorable_type == "Jurisdiction"
-      errors.add(:collaborator, :must_be_review_collaborator)
-    end
+    return if collaborator.jurisdiction_id == permit_project.jurisdiction_id
+
+    errors.add(:collaborator, :must_be_review_collaborator)
   end
 
   def validate_only_one_kept_per_project

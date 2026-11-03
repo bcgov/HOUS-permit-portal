@@ -5,8 +5,6 @@ import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { CollaboratorModel, ICollaborator } from "../models/collaborator"
-import { IJurisdiction } from "../models/jurisdiction"
-import { ECollaborationType, ECollaboratorableType } from "../types/enums"
 import { IOption, TSearchParams } from "../types/types"
 
 export const CollaboratorStoreModel = types
@@ -14,7 +12,6 @@ export const CollaboratorStoreModel = types
     types.model("CollaboratorStore", {
       collaboratorMap: types.map(CollaboratorModel),
       collaboratorSearchList: types.array(types.reference(CollaboratorModel)),
-      searchContext: types.maybeNull(types.enumeration(Object.values(ECollaborationType))),
     }),
     createSearchModel<never>("searchCollaborators", undefined)
   )
@@ -32,40 +29,15 @@ export const CollaboratorStoreModel = types
   .actions((self) => ({
     __beforeMergeUpdate(collaboratorData) {
       if (!collaboratorData.skipAssociationMerges) {
-        collaboratorData.collaboratorableType === ECollaboratorableType.User &&
-          self.rootStore.userStore.mergeUpdate(collaboratorData.collaboratorable, "usersMap")
-        collaboratorData.collaboratorableType === ECollaboratorableType.Jurisdiction &&
-          self.rootStore.jurisdictionStore.mergeUpdate(collaboratorData.collaboratorable, "jurisdictionMap")
-
         collaboratorData.user && self.rootStore.userStore.mergeUpdate(collaboratorData.user, "usersMap")
       }
 
       return collaboratorData
     },
     __beforeMergeUpdateAll(collaboratorsData) {
-      //find all unique jurisdictions
-      const jurisdictionsUniq = R.uniqBy(
-        (j: IJurisdiction) => j.id,
-        collaboratorsData
-          .filter((c) => c.collaboratorableType === ECollaboratorableType.Jurisdiction)
-          .map((c) => c.collaboratorable)
-      )
-      self.rootStore.jurisdictionStore.mergeUpdateAll(jurisdictionsUniq, "jurisdictionMap")
-
-      //find all unique submitters
-      const users = R.uniqBy(
-        (u: { id: string }) => u.id,
-        collaboratorsData
-          .filter((c) => c.collaboratorableType === ECollaboratorableType.User)
-          .map((c) => c.collaboratorable)
-          .concat(collaboratorsData.map((c) => c.user))
-      )
+      const users = R.uniqBy((u: { id: string }) => u.id, collaboratorsData.map((c) => c.user).filter(Boolean))
 
       self.rootStore.userStore.mergeUpdateAll(users, "usersMap")
-
-      // Already merged associations here.
-      // Since beforeMergeUpdateAll internally uses beforeMergeUpdate, we need to skip the association merges
-      // to reduce duplication of work
 
       collaboratorsData.skipAssociationMerges = true
 
@@ -79,13 +51,10 @@ export const CollaboratorStoreModel = types
     addCollaborator(collaborator: ICollaborator) {
       self.collaboratorMap.put(collaborator)
     },
-    setSearchContext(context: ECollaborationType | null) {
-      self.searchContext = context
-    },
   }))
   .actions((self) => ({
     fetchCollaboratorOptionsForJurisdiction: flow(function* (jurisdictionId: string): Generator<any, IOption[], any> {
-      const response = yield self.environment.api.fetchCollaboratorsByCollaboratorable(jurisdictionId)
+      const response = yield self.environment.api.fetchCollaboratorsByJurisdiction(jurisdictionId)
       if (response.ok && response.data?.data) {
         return response.data.data.map((collab: any) => ({
           value: collab.user.id,
@@ -111,8 +80,8 @@ export const CollaboratorStoreModel = types
         perPage: opts?.countPerPage ?? self.countPerPage,
       } as TSearchParams<never, never>
 
-      const response = yield self.environment.api.fetchCollaboratorsByCollaboratorable(
-        self.searchContext === ECollaborationType.review ? currentUser.jurisdiction?.id : currentUser.id,
+      const response = yield self.environment.api.fetchCollaboratorsByJurisdiction(
+        currentUser.jurisdiction?.id,
         searchParams
       )
 

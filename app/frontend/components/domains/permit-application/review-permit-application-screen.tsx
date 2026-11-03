@@ -22,7 +22,7 @@ import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
 import { stickyBelowNavBar } from "../../../styles/nav-bar-offset"
-import { ECollaborationType, EPermitApplicationStatus } from "../../../types/enums"
+import { EPermitApplicationStatus } from "../../../types/enums"
 import { CopyableValue } from "../../shared/base/copyable-value"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
@@ -392,7 +392,6 @@ export const ReviewPermitApplicationScreen = observer(() => {
                     const collaboratorsButton = (
                       <CollaboratorsSidebar
                         permitApplication={currentPermitApplication}
-                        collaborationType={ECollaborationType.review}
                         triggerButtonProps={{
                           variant: "secondary",
                         }}
@@ -455,7 +454,6 @@ export const ReviewPermitApplicationScreen = observer(() => {
             key={requirementBlockAssignmentNode.requirementBlockId}
             requirementBlockAssignmentNode={requirementBlockAssignmentNode}
             permitApplication={currentPermitApplication}
-            collaborationType={ECollaborationType.review}
           />
         )
       })}
