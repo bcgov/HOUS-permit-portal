@@ -412,6 +412,8 @@ class Api::PermitProjectsController < Api::ApplicationController
       current_user: current_user,
       viewer: current_user,
       pinned_project_ids: current_user.pinned_permit_project_ids,
+      member_project_ids:
+        current_user.project_memberships.pluck(:permit_project_id),
       project_ids_with_outdated_drafts: @project_ids_with_outdated_drafts,
       active_project_meeting_ids_by_project_id:
         @active_project_meeting_ids_by_project_id,

@@ -92,6 +92,40 @@ RSpec.describe "Api::PermitProjects", type: :request, search: true do
       expect(returned_ids).to include(inactive_project.id)
       expect(returned_ids).not_to include(permit_project.id)
     end
+
+    it "labels an owned project as owner" do
+      post "/api/permit_projects/search", headers: headers, as: :json
+
+      row =
+        json_response["data"].find { |proj| proj["id"] == permit_project.id }
+      expect(row["viewer_relationship"]).to eq("owner")
+    end
+
+    it "includes a membership project for the member and not for a stranger" do
+      member = create(:user, :submitter)
+      stranger = create(:user, :submitter)
+      create(
+        :project_membership,
+        user: member,
+        permit_project: permit_project,
+        access: :expanded
+      )
+      PermitProject.reindex
+
+      sign_in member
+      post "/api/permit_projects/search", headers: headers, as: :json
+
+      expect(response).to have_http_status(:ok)
+      row =
+        json_response["data"].find { |proj| proj["id"] == permit_project.id }
+      expect(row["viewer_relationship"]).to eq("member")
+
+      sign_in stranger
+      post "/api/permit_projects/search", headers: headers, as: :json
+
+      returned_ids = json_response["data"].map { |proj| proj["id"] }
+      expect(returned_ids).not_to include(permit_project.id)
+    end
   end
 
   describe "POST /api/permit_projects" do

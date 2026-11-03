@@ -52,6 +52,7 @@ import {
   IOptionResponse,
   IPageMeta,
   IProjectMeetingResponse,
+  IProjectMembershipsResponse,
   IRequirementBlockResponse,
   IRequirementQuestionResponse,
   IRequirementTemplateResponse,
@@ -484,6 +485,16 @@ export class Api {
 
   async fetchPermitProjectNotes(permitProjectId: string) {
     return this.client.get<INoteResponse>(`/permit_projects/${permitProjectId}/notes`)
+  }
+
+  async fetchPermitProjectMemberships(
+    permitProjectId: string,
+    params?: TSearchParams<never, { access?: string[]; roleTags?: string[] }>
+  ) {
+    return this.client.post<IProjectMembershipsResponse>(
+      `/permit_projects/${permitProjectId}/memberships/search`,
+      params
+    )
   }
 
   async downloadPermitProjectNotesCsv(permitProjectId: string) {

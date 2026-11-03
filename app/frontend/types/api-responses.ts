@@ -39,6 +39,22 @@ export interface IProjectMeetingResponse extends IApiResponse<IProjectMeeting[],
 
 export interface INoteResponse extends IApiResponse<INote[], IPageMeta> {}
 
+export interface IProjectPerson {
+  id: string
+  kind: "owner" | "member"
+  name: string
+  email: string
+  roleTags: string[]
+  access: "standard" | "expanded" | "full" | null
+  contactDesignation: "none" | "primary" | "alternate"
+}
+
+export interface IProjectPeopleMeta extends IPageMeta {
+  roleTags?: string[]
+}
+
+export interface IProjectMembershipsResponse extends IApiResponse<IProjectPerson[], IProjectPeopleMeta> {}
+
 export interface IJurisdictionProjectMeetingMeta extends IPageMeta {
   statusCounts?: Record<string, number>
   unreadCount?: number

@@ -58,6 +58,7 @@ const PermitProjectCoreModel = types.model("PermitProjectCore", {
   isFullyLoaded: types.optional(types.boolean, false),
   ownerName: types.maybeNull(types.string),
   ownerId: types.maybeNull(types.string),
+  viewerRelationship: types.maybeNull(types.string),
   latitude: types.maybeNull(types.string), // From decimal in backend
   longitude: types.maybeNull(types.string), // From decimal in backend
   viewedAt: types.maybeNull(types.Date),

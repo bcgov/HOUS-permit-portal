@@ -31,7 +31,21 @@ export const ProjectGridRow = observer(({ project }: IProjectGridRowProps) => {
           <ActiveProjectMeetingIndicator to={`/projects/${project.id}/meetings/${project.activeProjectMeetingId}`} />
         )}
       </SearchGridItem>
-      <SearchGridItem>{project.title}</SearchGridItem>
+      <SearchGridItem>
+        <Flex direction="column" align="flex-start">
+          <Text>{project.title}</Text>
+          {project.viewerRelationship === "owner" && (
+            <Text fontSize="sm" color="text.secondary">
+              {t("permitProject.viewerRelationship.owner")}
+            </Text>
+          )}
+          {project.viewerRelationship === "member" && (
+            <Text fontSize="sm" color="text.secondary">
+              {t("permitProject.viewerRelationship.member")}
+            </Text>
+          )}
+        </Flex>
+      </SearchGridItem>
       <SearchGridItem>
         <Flex direction="column">
           <Text fontWeight="bold">{project.jurisdictionDisambiguatedName}</Text>

@@ -26,6 +26,7 @@ class PermitProject < ApplicationRecord
   has_many :collaborators, through: :permit_applications
   has_many :pinned_projects, dependent: :destroy
   has_many :pinning_users, through: :pinned_projects, source: :user
+  has_many :project_memberships, dependent: :destroy
   accepts_nested_attributes_for :project_documents, allow_destroy: true
 
   validates :title, presence: true
@@ -188,6 +189,7 @@ class PermitProject < ApplicationRecord
       jurisdiction_id: jurisdiction_id,
       sandbox_id: sandbox_id,
       collaborator_ids: collaborators.pluck(:user_id).uniq,
+      member_ids: project_memberships.pluck(:user_id),
       review_collaborator_user_ids: compute_review_collaborator_user_ids,
       created_at: created_at,
       updated_at: updated_at,

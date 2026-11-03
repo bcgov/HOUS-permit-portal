@@ -274,6 +274,12 @@ Rails.application.routes.draw do
         get :download_csv, on: :collection
       end
 
+      resources :memberships,
+                only: %i[index],
+                controller: "permit_projects/memberships" do
+        post "search", on: :collection, to: "permit_projects/memberships#index"
+      end
+
       resources :project_meetings, path: "meetings", only: %i[create update] do
         post "search", on: :collection, to: "project_meetings#index"
         post :submit, on: :member

@@ -79,6 +79,15 @@ class PermitProjectBlueprint < Blueprinter::Base
     field :active_project_meeting_id do |permit_project, options|
       options[:active_project_meeting_ids_by_project_id]&.[](permit_project.id)
     end
+
+    field :viewer_relationship do |permit_project, options|
+      viewer = options[:current_user]
+      if viewer && permit_project.owner_id == viewer.id
+        "owner"
+      elsif options[:member_project_ids]&.include?(permit_project.id)
+        "member"
+      end
+    end
   end
 
   view :jurisdiction_review_inbox do
