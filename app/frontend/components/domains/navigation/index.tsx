@@ -295,11 +295,6 @@ const JurisdictionDigitalPermitSettingsScreen = lazy(() =>
     default: module.JurisdictionDigitalPermitSettingsScreen,
   }))
 )
-const JurisdictionPermitApplicationInfoScreen = lazy(() =>
-  import("../requirement-template/screens/jurisdiction-permit-application-info-screen").then((module) => ({
-    default: module.JurisdictionPermitApplicationInfoScreen,
-  }))
-)
 const JurisdictionPermitApplicationInfoEditScreen = lazy(() =>
   import("../requirement-template/screens/permit-application-info-screen").then((module) => ({
     default: module.JurisdictionPermitApplicationInfoEditScreen,
@@ -751,10 +746,6 @@ const AppRoutes = observer(() => {
       <Route
         path="/digital-building-permits/:templateVersionId/edit"
         element={<JurisdictionEditDigitalPermitScreen />}
-      />
-      <Route
-        path="/digital-building-permits/:templateVersionId/application-info"
-        element={<JurisdictionPermitApplicationInfoScreen />}
       />
       <Route
         path="/digital-building-permits/:templateVersionId/application-info/edit"

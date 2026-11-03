@@ -13,7 +13,7 @@ import {
   Text,
   UnorderedList,
 } from "@chakra-ui/react"
-import { CaretLeft, MagnifyingGlass } from "@phosphor-icons/react"
+import { ArrowSquareOut, CaretLeft, MagnifyingGlass } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -247,8 +247,11 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
                                   fontSize="sm"
                                   color="text.link"
                                   textDecoration="underline"
+                                  display="inline-flex"
+                                  alignItems="center"
                                 >
                                   {t("requirementTemplate.explainer.publicPage.viewPermitInformation")}
+                                  <ArrowSquareOut size={16} />
                                 </Link>
                               ) : (
                                 <Box />

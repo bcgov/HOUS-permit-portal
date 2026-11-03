@@ -397,8 +397,9 @@ export const PermitApplicationInfoScreen = observer(function PermitApplicationIn
 export const JurisdictionPermitApplicationInfoEditScreen = observer(
   function JurisdictionPermitApplicationInfoEditScreen() {
     const { t } = useTranslation()
-    const { userStore } = useMst()
+    const { userStore, sandboxStore } = useMst()
     const jurisdiction = userStore.currentUser?.jurisdiction
+    const { isSandboxActive } = sandboxStore
     const { templateVersion, error: templateVersionError } = useTemplateVersion({
       customErrorMessage: t("errors.fetchBuildingPermit"),
     })
@@ -406,8 +407,8 @@ export const JurisdictionPermitApplicationInfoEditScreen = observer(
     if (!jurisdiction) return <ErrorScreen error={new Error(t("errors.fetchJurisdiction"))} />
     if (templateVersionError) return <ErrorScreen error={templateVersionError} />
     if (!templateVersion) return <LoadingScreen />
-    if (!templateVersion.explainerPublished) {
-      return <Navigate to={`/digital-building-permits/${templateVersion.id}/application-info`} replace />
+    if (!templateVersion.explainerPublished || isSandboxActive) {
+      return <Navigate to={`/digital-building-permits/${templateVersion.id}/settings`} replace />
     }
 
     return (
@@ -415,7 +416,7 @@ export const JurisdictionPermitApplicationInfoEditScreen = observer(
         requirementTemplateId={templateVersion.requirementTemplateId}
         lockedJurisdiction={jurisdiction}
         editLocalContext
-        backTo={`/digital-building-permits/${templateVersion.id}/application-info`}
+        backTo={`/digital-building-permits/${templateVersion.id}/settings`}
       />
     )
   }

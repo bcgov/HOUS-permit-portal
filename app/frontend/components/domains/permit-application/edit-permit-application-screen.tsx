@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Link as ChakraLink,
   Divider,
   Flex,
   Heading,
@@ -11,7 +12,7 @@ import {
   Tooltip,
   useDisclosure,
 } from "@chakra-ui/react"
-import { CaretDown, CaretRight, CaretUp, FloppyDiskBack, Info, NotePencil } from "@phosphor-icons/react"
+import { ArrowSquareOut, CaretDown, CaretRight, CaretUp, FloppyDiskBack, Info, NotePencil } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
@@ -27,6 +28,7 @@ import { stickyBelowNavBar } from "../../../styles/nav-bar-offset"
 import { ICustomEventMap } from "../../../types/dom"
 import { ECollaborationType, ECustomEvents, ERequirementType } from "../../../types/enums"
 import { findPidComponentKey } from "../../../utils/formio-component-traversal"
+import { permitApplicationInfoPath } from "../../../utils/permit-application-info-path"
 import { handleScrollToBottom, handleScrollToTop } from "../../../utils/utility-functions"
 import { CopyableValue } from "../../shared/base/copyable-value"
 import { ErrorScreen } from "../../shared/base/error-screen"
@@ -290,6 +292,11 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
 
   const { tagsOrNickname, formJson, number, isSubmitted, isDirty, setIsDirty, isRevisionsRequested } =
     currentPermitApplication
+  const requirementTemplateId = currentPermitApplication.templateVersion?.requirementTemplateId
+  const explainerPath =
+    currentPermitApplication.explainerPublished && requirementTemplateId
+      ? permitApplicationInfoPath(requirementTemplateId, currentPermitApplication.jurisdiction?.id)
+      : null
 
   const doesUserHaveSubmissionPermission =
     currentUser?.id === currentPermitApplication.submitter?.id ||
@@ -393,7 +400,23 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                   </Tooltip>
                 </form>
 
-                <Text noOfLines={1}>{tagsOrNickname}</Text>
+                <Text noOfLines={1}>
+                  {explainerPath ? (
+                    <ChakraLink
+                      href={explainerPath}
+                      isExternal
+                      color="greys.white"
+                      display="inline-flex"
+                      alignItems="center"
+                      _hover={{ color: "greys.white" }}
+                    >
+                      {tagsOrNickname}
+                      <ArrowSquareOut size={16} />
+                    </ChakraLink>
+                  ) : (
+                    tagsOrNickname
+                  )}
+                </Text>
                 <HStack flexWrap="wrap" rowGap={1} columnGap={4} align="center">
                   <CopyableValue value={number} label={t("permitApplication.fields.number")} />
                   {currentPermitApplication.referenceNumber && (
