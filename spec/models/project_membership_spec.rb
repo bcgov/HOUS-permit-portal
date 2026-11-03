@@ -14,21 +14,21 @@ RSpec.describe ProjectMembership, type: :model do
     expect(duplicate.errors[:user_id]).to be_present
   end
 
-  it "rejects the project owner" do
+  it "gives the creator a full primary membership" do
     project = create(:permit_project)
-    membership =
-      build(:project_membership, user: project.owner, permit_project: project)
+    membership = project.project_memberships.find_by!(user: project.creator)
 
-    expect(membership).not_to be_valid
-    expect(membership.errors[:user]).to include("is the project owner")
+    expect(membership.access).to eq("full")
+    expect(membership.contact_designation).to eq("primary")
+    expect(project.creator_id).to eq(project.owner_id)
   end
 
-  it "allows one primary and one alternate, and no second of either" do
+  it "allows several alternates and only one primary" do
     project = create(:permit_project)
     create(
       :project_membership,
       permit_project: project,
-      contact_designation: :primary
+      contact_designation: :alternate
     )
     create(
       :project_membership,
@@ -42,9 +42,6 @@ RSpec.describe ProjectMembership, type: :model do
         permit_project: project,
         contact_designation: :primary
       )
-    expect(extra_primary).not_to be_valid
-
-    extra_primary.contact_designation = :alternate
     expect(extra_primary).not_to be_valid
   end
 

@@ -7,6 +7,7 @@ class Api::PermitProjects::MembershipsController < Api::ApplicationController
   skip_after_action :verify_policy_scoped, only: :index
 
   def index
+    # MEMBERSHIP COMMENT - currently this shows all project memebers to everyone - confirm this later
     authorize @permit_project, :show?
     perform_project_membership_search
 
@@ -16,6 +17,7 @@ class Api::PermitProjects::MembershipsController < Api::ApplicationController
   private
 
   def set_permit_project
+    # MEMBERSHIP COMMENT - currently depends on owner
     scope = PermitProject.includes(:owner)
     scope = scope.for_sandbox(current_sandbox) unless current_user.super_admin?
     @permit_project = scope.find(params[:permit_project_id])

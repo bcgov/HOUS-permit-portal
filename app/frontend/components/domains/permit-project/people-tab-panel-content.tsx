@@ -46,7 +46,8 @@ const PeopleNewStub = () => {
 
 const PeopleList = observer(({ permitProject }: IProps) => {
   const { t } = useTranslation()
-  const { projectPeopleStore } = useMst()
+  const { projectPeopleStore, userStore } = useMst()
+  const currentUser = userStore.currentUser
   const {
     tablePeople,
     isSearching,
@@ -159,7 +160,10 @@ const PeopleList = observer(({ permitProject }: IProps) => {
               <SearchGridRow key={person.id}>
                 <SearchGridItem>
                   <Flex direction="column" align="flex-start">
-                    <Text>{person.name}</Text>
+                    <Text>
+                      {person.name}
+                      {person.userId === currentUser?.id ? ` ${t("permitProject.people.you")}` : ""}
+                    </Text>
                     {person.contactDesignation === "primary" && (
                       <Text fontSize="xs" color="text.secondary">
                         {t("permitProject.people.primaryContact")}

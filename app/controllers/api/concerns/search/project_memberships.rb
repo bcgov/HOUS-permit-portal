@@ -2,12 +2,6 @@ module Api::Concerns::Search::ProjectMemberships
   extend ActiveSupport::Concern
 
   def perform_project_membership_search
-    @include_project_owner = owner_matches_search?
-    window = membership_window
-
-    # Page 1 keeps a row for the owner, who is not a membership document.
-    # A full page of only the owner still runs the membership query so the hit count stays correct.
-    @drop_membership_results = window[:drop_results]
     @project_membership_search =
       ProjectMembership.search(
         people_query,
@@ -20,35 +14,17 @@ module Api::Concerns::Search::ProjectMemberships
             unmapped_type: "long"
           }
         },
-        limit: [window[:limit], 1].max,
-        offset: window[:offset],
+        page: people_page,
+        per_page: people_per_page,
         includes: [:user]
       )
   end
 
-  def include_project_owner?
-    @include_project_owner
-  end
-
   def project_people_rows
-    rows = []
-    if @include_project_owner && people_page == 1 &&
-         (owner = @permit_project.owner)
-      rows << {
-        id: "owner-#{owner.id}",
-        kind: "owner",
-        name: owner.name,
-        email: owner.email,
-        role_tags: [],
-        access: nil,
-        contact_designation: "none"
-      }
-    end
-    return rows if @drop_membership_results
-
-    @project_membership_search.results.each do |membership|
-      rows << {
+    @project_membership_search.results.map do |membership|
+      {
         id: membership.id,
+        user_id: membership.user_id,
         kind: "member",
         name: membership.user.name,
         email: membership.user.email,
@@ -57,18 +33,14 @@ module Api::Concerns::Search::ProjectMemberships
         contact_designation: membership.contact_designation
       }
     end
-    rows
   end
 
   def project_people_meta
-    per_page = people_per_page
-    total = @project_membership_search.total_count
-    total += 1 if @include_project_owner
     {
-      total_pages: per_page.positive? ? (total.to_f / per_page).ceil : 0,
-      total_count: total,
-      current_page: people_page,
-      per_page: per_page,
+      total_pages: @project_membership_search.total_pages,
+      total_count: @project_membership_search.total_count,
+      current_page: @project_membership_search.current_page,
+      per_page: @project_membership_search.limit_value,
       role_tags: project_role_tags
     }
   end
@@ -117,47 +89,6 @@ module Api::Concerns::Search::ProjectMemberships
     where[:access] = filters[:access] if filters[:access].present?
     where[:role_tags] = filters[:role_tags] if filters[:role_tags].present?
     where
-  end
-
-  def membership_window
-    page = people_page
-    per_page = people_per_page
-    unless @include_project_owner
-      return(
-        { limit: per_page, offset: (page - 1) * per_page, drop_results: false }
-      )
-    end
-
-    if page == 1
-      limit = per_page - 1
-      { limit: limit, offset: 0, drop_results: limit <= 0 }
-    else
-      {
-        limit: per_page,
-        offset: (page - 1) * per_page - 1,
-        drop_results: false
-      }
-    end
-  end
-
-  def owner_matches_search?
-    return false if @permit_project.owner_id.blank?
-    filters = membership_filters
-    return false if filters[:access].present? || filters[:role_tags].present?
-
-    User
-      .search(
-        people_query,
-        where: {
-          id: @permit_project.owner_id
-        },
-        fields: %i[first_name last_name],
-        match: :word_start,
-        limit: 1,
-        load: false
-      )
-      .total_count
-      .positive?
   end
 
   def project_role_tags

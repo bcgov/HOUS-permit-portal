@@ -11,19 +11,9 @@ class PermitProjectPolicy < ApplicationPolicy
         )
       SQL
 
-      membership_exists_sql = <<-SQL.squish
-        EXISTS (
-          SELECT 1 FROM project_memberships pm
-          WHERE pm.permit_project_id = permit_projects.id
-            AND pm.user_id = :uid
-        )
-      SQL
-
-      clauses = [
-        "permit_projects.owner_id = :uid",
-        collaborator_exists_sql,
-        membership_exists_sql
-      ]
+      # MEMBERSHIP COMMENT: later, authorize from membership.
+      # owner_id only identifies the creator.
+      clauses = ["permit_projects.owner_id = :uid", collaborator_exists_sql]
       values = { uid: user.id }
 
       if user.review_staff?
@@ -41,7 +31,7 @@ class PermitProjectPolicy < ApplicationPolicy
 
   # Check if the user can index/list projects (relies on the Scope above for actual filtering)
   def index?
-    same_sandbox? && user_can_view_as_participant?
+    same_sandbox? && user_is_owner_or_collaborator?
   end
 
   def pinned?
@@ -51,7 +41,7 @@ class PermitProjectPolicy < ApplicationPolicy
   # This is for authorizing a specific project instance (e.g., in a show action).
   def show?
     same_sandbox? &&
-      (user_can_view_as_participant? || user_is_review_staff_for_jurisdiction?)
+      (user_is_owner_or_collaborator? || user_is_review_staff_for_jurisdiction?)
   end
 
   def create?
@@ -67,11 +57,11 @@ class PermitProjectPolicy < ApplicationPolicy
   end
 
   def pin?
-    same_sandbox? && user_can_view_as_participant?
+    same_sandbox? && user_is_owner_or_collaborator?
   end
 
   def unpin?
-    same_sandbox? && user_can_view_as_participant?
+    same_sandbox? && user_is_owner_or_collaborator?
   end
 
   def search_permit_applications?
@@ -126,6 +116,8 @@ class PermitProjectPolicy < ApplicationPolicy
     record.sandbox == sandbox
   end
 
+  # MEMBERSHIP COMMENT: later, authorize from membership.
+  # owner_id only identifies the creator.
   def user_is_owner?
     return false unless user && record # Ensure user and record exist
 
@@ -138,17 +130,6 @@ class PermitProjectPolicy < ApplicationPolicy
     record.permit_applications.any? do |app|
       app.collaborators.any? { |collaborator| collaborator.user_id == user.id }
     end
-  end
-
-  def user_can_view_as_participant?
-    user_is_owner_or_collaborator? || user_is_project_member?
-  end
-
-  # instance_double records in policy specs are not PermitProject instances.
-  def user_is_project_member?
-    return false unless user && record.is_a?(PermitProject)
-
-    record.project_memberships.exists?(user_id: user.id)
   end
 
   def user_is_review_staff_for_jurisdiction?

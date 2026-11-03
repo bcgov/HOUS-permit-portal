@@ -82,34 +82,6 @@ RSpec.describe PermitProjectPolicy, type: :policy do
     end
   end
 
-  describe "project member access" do
-    let(:member) { create(:user, :submitter) }
-    let(:record) { create(:permit_project, owner: owner) }
-
-    it "permits show and pin but denies update and creating applications for every access level" do
-      membership =
-        create(
-          :project_membership,
-          user: member,
-          permit_project: record,
-          access: :standard
-        )
-
-      %i[standard expanded full].each do |access|
-        membership.update!(access: access)
-        p = policy(member, record)
-
-        expect(p.index?).to be true
-        expect(p.show?).to be true
-        expect(p.pin?).to be true
-        expect(p.unpin?).to be true
-        expect(p.update?).to be false
-        expect(p.destroy?).to be false
-        expect(p.create_permit_applications?).to be false
-      end
-    end
-  end
-
   describe "non-collaborator access" do
     it "denies index/show when not owner and no collaborator match" do
       app =
@@ -246,7 +218,6 @@ RSpec.describe PermitProjectPolicy, type: :policy do
         expect(sql).to include("permit_projects.owner_id = :uid")
         expect(sql).to include("EXISTS")
         expect(sql).to include("permit_collaborations")
-        expect(sql).to include("project_memberships")
         expect(binds).to eq(uid: owner.id)
         where_rel
       end

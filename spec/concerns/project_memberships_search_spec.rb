@@ -16,6 +16,9 @@ RSpec.describe Api::Concerns::Search::ProjectMemberships, type: :controller do
   end
   let(:project) { create(:permit_project, owner: owner) }
   let(:other_project) { create(:permit_project, owner: owner) }
+  let(:creator_membership) do
+    project.project_memberships.find_by!(user_id: owner.id)
+  end
   let!(:architect_membership) do
     membership =
       create(
@@ -61,13 +64,16 @@ RSpec.describe Api::Concerns::Search::ProjectMemberships, type: :controller do
     context "when the query is blank" do
       let(:search_params) { { query: "", page: 1, per_page: 10 } }
 
-      it "returns this project's memberships and matches the owner" do
+      it "returns this project's memberships, including the creator" do
         controller.perform_project_membership_search
 
-        expect(controller.include_project_owner?).to be true
         expect(
           controller.instance_variable_get(:@project_membership_search).results
-        ).to contain_exactly(architect_membership, builder_membership)
+        ).to contain_exactly(
+          creator_membership,
+          architect_membership,
+          builder_membership
+        )
         expect(
           controller.instance_variable_get(:@project_membership_search).results
         ).not_to include(other_membership)
@@ -77,10 +83,9 @@ RSpec.describe Api::Concerns::Search::ProjectMemberships, type: :controller do
     context "when the query matches a member name" do
       let(:search_params) { { query: "Mina", page: 1, per_page: 10 } }
 
-      it "returns that member and not the owner" do
+      it "returns that member" do
         controller.perform_project_membership_search
 
-        expect(controller.include_project_owner?).to be false
         expect(
           controller.instance_variable_get(:@project_membership_search).results
         ).to contain_exactly(architect_membership)
@@ -90,13 +95,12 @@ RSpec.describe Api::Concerns::Search::ProjectMemberships, type: :controller do
     context "when the query matches the owner name" do
       let(:search_params) { { query: "Olivia", page: 1, per_page: 10 } }
 
-      it "matches the owner and no memberships" do
+      it "returns the creator membership" do
         controller.perform_project_membership_search
 
-        expect(controller.include_project_owner?).to be true
         expect(
           controller.instance_variable_get(:@project_membership_search).results
-        ).to be_empty
+        ).to contain_exactly(creator_membership)
       end
     end
 
@@ -105,13 +109,12 @@ RSpec.describe Api::Concerns::Search::ProjectMemberships, type: :controller do
         { query: "", page: 1, per_page: 10, filters: { access: ["full"] } }
       end
 
-      it "returns members with that access and skips the owner" do
+      it "returns members with that access" do
         controller.perform_project_membership_search
 
-        expect(controller.include_project_owner?).to be false
         expect(
           controller.instance_variable_get(:@project_membership_search).results
-        ).to contain_exactly(architect_membership)
+        ).to contain_exactly(creator_membership, architect_membership)
       end
     end
 
@@ -130,7 +133,6 @@ RSpec.describe Api::Concerns::Search::ProjectMemberships, type: :controller do
       it "returns members tagged with that role" do
         controller.perform_project_membership_search
 
-        expect(controller.include_project_owner?).to be false
         expect(
           controller.instance_variable_get(:@project_membership_search).results
         ).to contain_exactly(builder_membership)

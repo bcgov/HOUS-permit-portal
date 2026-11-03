@@ -22,11 +22,5 @@ class CreateProjectMemberships < ActiveRecord::Migration[7.2]
               unique: true,
               where: "contact_designation = 1",
               name: "index_project_memberships_one_primary_per_project"
-
-    add_index :project_memberships,
-              :permit_project_id,
-              unique: true,
-              where: "contact_designation = 2",
-              name: "index_project_memberships_one_alternate_per_project"
   end
 end

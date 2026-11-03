@@ -875,7 +875,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_03_183000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["permit_project_id"], name: "index_project_memberships_on_permit_project_id"
-    t.index ["permit_project_id"], name: "index_project_memberships_one_alternate_per_project", unique: true, where: "(contact_designation = 2)"
     t.index ["permit_project_id"], name: "index_project_memberships_one_primary_per_project", unique: true, where: "(contact_designation = 1)"
     t.index ["user_id", "permit_project_id"], name: "index_project_memberships_on_user_and_project", unique: true
     t.index ["user_id"], name: "index_project_memberships_on_user_id"

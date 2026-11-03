@@ -26,7 +26,7 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
         user: member,
         permit_project: project,
         access: :full,
-        contact_designation: :primary
+        contact_designation: :none
       )
     membership.role_list = ["Architect"]
     membership.save!
@@ -41,21 +41,26 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
   end
 
   describe "GET /api/permit_projects/:id/memberships" do
-    it "returns this project's owner and members" do
-      sign_in member
+    it "returns the creator membership and the other members" do
+      sign_in owner
 
       get "/api/permit_projects/#{project.id}/memberships", headers: headers
 
       expect(response).to have_http_status(:ok)
       rows = json_response["data"]
-      expect(rows.map { |row| row["kind"] }).to eq(%w[owner member])
+      expect(rows.map { |row| row["kind"] }).to eq(%w[member member])
       expect(rows.map { |row| row["name"] }).to eq(
         ["Olivia Owner", "Mina Member"]
       )
-      expect(rows.first["access"]).to be_nil
-      expect(rows.second).to include(
+      expect(rows.first).to include(
+        "user_id" => owner.id,
         "access" => "full",
         "contact_designation" => "primary",
+        "role_tags" => []
+      )
+      expect(rows.second).to include(
+        "access" => "full",
+        "contact_designation" => "none",
         "role_tags" => ["Architect"]
       )
       expect(rows.map { |row| row["name"] }).not_to include("Other Project")
@@ -71,7 +76,7 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
   end
 
   describe "POST /api/permit_projects/:id/memberships/search" do
-    it "matches a member name and leaves the owner out" do
+    it "matches a member name" do
       sign_in owner
 
       post "/api/permit_projects/#{project.id}/memberships/search",
@@ -88,7 +93,7 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
       expect(json_response["meta"]["role_tags"]).to eq(["Architect"])
     end
 
-    it "matches the owner by name" do
+    it "matches the creator by name" do
       sign_in owner
 
       post "/api/permit_projects/#{project.id}/memberships/search",
@@ -99,10 +104,17 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
            as: :json
 
       expect(response).to have_http_status(:ok)
-      expect(json_response["data"].map { |row| row["kind"] }).to eq(["owner"])
+      expect(json_response["data"].map { |row| row["name"] }).to eq(
+        ["Olivia Owner"]
+      )
+      expect(json_response["data"].first).to include(
+        "kind" => "member",
+        "access" => "full",
+        "contact_designation" => "primary"
+      )
     end
 
-    it "filters by access and skips the owner" do
+    it "filters by access" do
       sign_in owner
 
       post "/api/permit_projects/#{project.id}/memberships/search",
@@ -116,7 +128,7 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
 
       expect(response).to have_http_status(:ok)
       expect(json_response["data"].map { |row| row["name"] }).to eq(
-        ["Mina Member"]
+        ["Olivia Owner", "Mina Member"]
       )
     end
   end

@@ -43,6 +43,7 @@ class PermitProject < ApplicationRecord
 
   delegate :name, to: :owner, prefix: true
 
+  after_create :ensure_creator_membership!
   after_commit :reindex
   after_commit :send_state_changed_webhook, if: :state_changed_for_external_api?
   after_commit :broadcast_jurisdiction_projects_count_update,
@@ -343,6 +344,33 @@ class PermitProject < ApplicationRecord
     collaboration =
       permit_project_collaborations.find_by!(collaborator_id: collaborator_id)
     collaboration.discard!
+  end
+
+  # owner_id is the user who created the project. The column name stays so
+  # other branches keep reading owner_id.
+  def creator
+    owner
+  end
+
+  def creator_id
+    owner_id
+  end
+
+  def ensure_creator_membership!
+    return if owner_id.blank?
+
+    project_memberships
+      .where(contact_designation: :primary)
+      .where.not(user_id: owner_id)
+      .update_all(
+        contact_designation:
+          ProjectMembership.contact_designations.fetch("none")
+      )
+
+    membership = project_memberships.find_or_initialize_by(user_id: owner_id)
+    membership.access = :full
+    membership.contact_designation = :primary
+    membership.save!
   end
 
   private

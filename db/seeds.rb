@@ -805,7 +805,7 @@ else
     )
 
   [
-    [member_users[0], :full, :primary, ["Architect"]],
+    [member_users[0], :full, :none, ["Architect"]],
     [
       member_users[1],
       :expanded,

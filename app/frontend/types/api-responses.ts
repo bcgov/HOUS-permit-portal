@@ -41,6 +41,7 @@ export interface INoteResponse extends IApiResponse<INote[], IPageMeta> {}
 
 export interface IProjectPerson {
   id: string
+  userId: string
   kind: "owner" | "member"
   name: string
   email: string
