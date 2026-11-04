@@ -2797,6 +2797,7 @@ Thank you,
           attached: "Attached",
           columns: {
             project: "Project",
+            noProject: "None",
             type: "Type",
             fullAddress: "Address",
             updatedAt: "Last modified",

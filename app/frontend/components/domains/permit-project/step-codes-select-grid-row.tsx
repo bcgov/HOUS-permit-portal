@@ -27,7 +27,7 @@ export const StepCodesSelectGridRow = observer(
     return (
       <SearchGridRow bg={isAttached ? "theme.blueLight" : undefined} aria-current={isAttached ? "true" : undefined}>
         <SearchGridItem>{t(`stepCode.types.${type as EStepCodeType}`)}</SearchGridItem>
-        <SearchGridItem>{permitProjectTitle}</SearchGridItem>
+        <SearchGridItem>{permitProjectTitle?.trim() || t("stepCode.columns.noProject")}</SearchGridItem>
         <SearchGridItem>{fullAddress}</SearchGridItem>
         <SearchGridItem>{updatedAt ? format(updatedAt, datefnsTableDateTimeFormat) : ""}</SearchGridItem>
         <SearchGridItem>
