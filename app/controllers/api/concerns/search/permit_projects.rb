@@ -98,7 +98,8 @@ module Api::Concerns::Search::PermitProjects
 
     or_conditions = [
       { owner_id: current_user.id },
-      { collaborator_ids: current_user.id }
+      { collaborator_ids: current_user.id },
+      { member_ids: current_user.id }
     ]
 
     final_where = { _and: [{ _or: or_conditions }] }

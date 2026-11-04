@@ -11,6 +11,8 @@ class PermitProjectPolicy < ApplicationPolicy
         )
       SQL
 
+      # MEMBERSHIP COMMENT: later, authorize from membership.
+      # owner_id only identifies the creator.
       clauses = ["permit_projects.owner_id = :uid", collaborator_exists_sql]
       values = { uid: user.id }
 
@@ -114,6 +116,8 @@ class PermitProjectPolicy < ApplicationPolicy
     record.sandbox == sandbox
   end
 
+  # MEMBERSHIP COMMENT: later, authorize from membership.
+  # owner_id only identifies the creator.
   def user_is_owner?
     return false unless user && record # Ensure user and record exist
 

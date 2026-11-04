@@ -72,6 +72,7 @@ class User < ApplicationRecord
   has_many :pinned_permit_projects,
            through: :pinned_projects,
            source: :permit_project
+  has_many :project_memberships, dependent: :destroy
 
   # New intermediate association for jurisdictions applied for via permit applications
   has_many :application_projects,
@@ -136,6 +137,7 @@ class User < ApplicationRecord
   validate :single_jurisdiction, unless: :regional_review_manager?
 
   after_commit :refresh_search_index, if: :saved_change_to_discarded_at
+  after_commit :reindex_project_memberships, if: :reindex_project_memberships?
   after_commit :revoke_jwt_allowlist, if: :should_revoke_jwt_allowlist?
   after_commit :reindex_jurisdiction_user_size,
                :reindex_jurisdiction_review_manager_email
@@ -358,6 +360,15 @@ class User < ApplicationRecord
 
   def refresh_search_index
     User.search_index.refresh
+  end
+
+  def reindex_project_memberships?
+    Searchkick.callbacks? &&
+      (saved_change_to_first_name? || saved_change_to_last_name?)
+  end
+
+  def reindex_project_memberships
+    project_memberships.reindex
   end
 
   def normalize_phone_number

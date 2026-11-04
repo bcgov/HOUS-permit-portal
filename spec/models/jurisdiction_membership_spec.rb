@@ -21,6 +21,11 @@ RSpec.describe JurisdictionMembership, type: :model do
         :count
       ).by(1)
 
+      collaborator =
+        Collaborator.find_by!(user: user, jurisdiction: jurisdiction)
+      expect(collaborator.collaboratorable_type).to eq("Jurisdiction")
+      expect(collaborator.collaboratorable_id).to eq(jurisdiction.id)
+
       expect {
         membership.send(:create_jurisdiction_collaborator)
       }.not_to change(Collaborator, :count)

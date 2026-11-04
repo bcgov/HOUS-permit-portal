@@ -598,28 +598,35 @@ class NotificationService
       end
     return unless created_by_jurisdiction
 
-    owner = permit_project.owner
-    return if owner.blank?
-
-    preference = owner.preference
     notification_user_hash = {}
+    permit_project
+      .project_memberships
+      .where(contact_designation: %i[primary alternate])
+      .includes(:user)
+      .each do |membership|
+        user = membership.user
+        next if user.blank?
 
-    if preference&.enable_in_app_applications_added_notification
-      notification_user_hash[owner.id] = applications_added_notification_data(
-        permit_project,
-        applications,
-        note_body
-      )
-    end
+        preference = user.preference
+        if preference&.enable_in_app_applications_added_notification
+          notification_user_hash[
+            user.id
+          ] = applications_added_notification_data(
+            permit_project,
+            applications,
+            note_body
+          )
+        end
 
-    if preference&.enable_email_applications_added_notification
-      PermitHubMailer.notify_applications_added(
-        permit_project,
-        applications,
-        note_body,
-        owner
-      )&.deliver_later
-    end
+        if preference&.enable_email_applications_added_notification
+          PermitHubMailer.notify_applications_added(
+            permit_project,
+            applications,
+            note_body,
+            user
+          )&.deliver_later
+        end
+      end
 
     return if notification_user_hash.empty?
 

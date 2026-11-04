@@ -1,5 +1,7 @@
 class PermitApplicationPolicy < ApplicationPolicy
   def show?
+    # MEMBERSHIP COMMENT: later, authorize from membership.
+    # owner_id only identifies the creator.
     if record.submitter == user || record.permit_project&.owner_id == user.id
       true
     elsif user.review_staff?
@@ -17,6 +19,8 @@ class PermitApplicationPolicy < ApplicationPolicy
     project = record.permit_project
     return false unless project
 
+    # MEMBERSHIP COMMENT: later, authorize from membership.
+    # owner_id only identifies the creator.
     PermitProjectPolicy.new(user_context, project).show? &&
       (project.owner_id == user.id || user.review_staff?)
   end
@@ -175,6 +179,8 @@ class PermitApplicationPolicy < ApplicationPolicy
 
   class Scope < Scope
     def resolve
+      # MEMBERSHIP COMMENT: later, authorize from membership.
+      # owner_id only identifies the creator.
       # Access rule: user owns the parent permit project.
       owner_exists_sql = <<-SQL.squish
         EXISTS (

@@ -3,6 +3,8 @@ class ProjectMeetingPolicy < ApplicationPolicy
     def resolve
       return scope.none unless user
 
+      # MEMBERSHIP COMMENT: later, authorize from membership.
+      # owner_id only identifies the creator.
       clauses = ["permit_projects.owner_id = :uid"]
       values = { uid: user.id }
 
@@ -81,6 +83,8 @@ class ProjectMeetingPolicy < ApplicationPolicy
 
   private
 
+  # MEMBERSHIP COMMENT: later, authorize from membership.
+  # owner_id only identifies the creator. record.owner is the project creator.
   def user_is_owner?
     user.present? && record.owner&.id == user.id
   end
