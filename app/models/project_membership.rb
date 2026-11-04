@@ -5,13 +5,19 @@ class ProjectMembership < ApplicationRecord
   belongs_to :permit_project
 
   acts_as_taggable_on :roles
+  # The API calls these role_tags. Tagging stores them on role_list.
+  alias_method :role_tags=, :role_list=
 
-  enum :access, { standard: 0, expanded: 1, full: 2 }, default: :standard
+  enum :access,
+       { standard: 0, expanded: 1, full: 2 },
+       default: :standard,
+       validate: true
   # scopes: false — the value `none` would override ActiveRecord::Relation.none
   enum :contact_designation,
        { none: 0, primary: 1, alternate: 2 },
        default: :none,
-       scopes: false
+       scopes: false,
+       validate: true
 
   validates :user_id, uniqueness: { scope: :permit_project_id }
   validate :one_primary_contact
@@ -31,6 +37,32 @@ class ProjectMembership < ApplicationRecord
     }
   end
 
+  def save(**)
+    with_primary_transfer { super }
+  end
+
+  def save!(**)
+    with_primary_transfer { super }
+  end
+
+  private
+
+  # Demote the previous primary inside this save's transaction, before
+  # validation. A failed save rolls the demotion back. before_validation
+  # would also run from valid? and change rows that are never saved.
+  def with_primary_transfer
+    self.class.transaction do
+      release_other_primary_contact if claiming_primary_contact?
+      result = yield
+      raise ActiveRecord::Rollback unless result
+      result
+    end
+  end
+
+  def claiming_primary_contact?
+    will_save_change_to_contact_designation? && primary?
+  end
+
   def release_other_primary_contact
     self
       .class
@@ -43,8 +75,6 @@ class ProjectMembership < ApplicationRecord
         contact_designation: self.class.contact_designations.fetch("none")
       )
   end
-
-  private
 
   def primary_contact_stays
     return unless will_save_change_to_contact_designation?
