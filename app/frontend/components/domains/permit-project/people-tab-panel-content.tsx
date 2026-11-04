@@ -1,5 +1,21 @@
-import { Box, Button, Flex, FormControl, Heading, HStack, Icon, Text, VStack } from "@chakra-ui/react"
-import { Plus, Users } from "@phosphor-icons/react"
+import {
+  Avatar,
+  Box,
+  Button,
+  Flex,
+  FormControl,
+  Heading,
+  HStack,
+  Icon,
+  IconButton,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
+import { DotsThreeVertical, Info, Plus, Users } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -17,8 +33,9 @@ import { SearchGrid } from "../../shared/grid/search-grid"
 import { SearchGridItem } from "../../shared/grid/search-grid-item"
 import { SearchGridRow } from "../../shared/grid/search-grid-row"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
+import { ProjectAccessTag } from "../../shared/permit-projects/project-access-tag"
 
-const PEOPLE_GRID_TEMPLATE_COLUMNS = "2fr 1.5fr 1fr 1fr"
+const PEOPLE_GRID_TEMPLATE_COLUMNS = "2fr 1.5fr 1fr 1fr 60px"
 const ACCESS_LEVELS = ["standard", "expanded", "full"] as const
 
 interface IProps {
@@ -150,6 +167,7 @@ const PeopleList = observer(({ permitProject }: IProps) => {
                 <Text px={4}>{t(`permitProject.people.columns.${column}`)}</Text>
               </GridHeader>
             ))}
+            <GridHeader role="columnheader" />
           </Box>
           {isSearching ? (
             <Flex gridColumn="1 / -1" justify="center" align="center" minH="200px">
@@ -159,23 +177,46 @@ const PeopleList = observer(({ permitProject }: IProps) => {
             tablePeople.map((person) => (
               <SearchGridRow key={person.id}>
                 <SearchGridItem>
-                  <Flex direction="column" align="flex-start">
-                    <Text>
-                      {person.name}
-                      {person.userId === currentUser?.id ? ` ${t("permitProject.people.you")}` : ""}
-                    </Text>
-                    {person.contactDesignation === "primary" && (
-                      <Text fontSize="xs" color="text.secondary">
-                        {t("permitProject.people.primaryContact")}
+                  <Flex align="center" gap={2.5}>
+                    <Avatar
+                      name={person.name}
+                      size="sm"
+                      bg="semantic.warningLight"
+                      color="text.primary"
+                      fontSize="sm"
+                    />
+                    <Flex direction="column" align="flex-start">
+                      <Text>
+                        {person.name}
+                        {person.userId === currentUser?.id ? ` ${t("permitProject.people.you")}` : ""}
                       </Text>
-                    )}
+                      {person.contactDesignation === "primary" && (
+                        <Text fontSize="xs" color="text.secondary">
+                          {t("permitProject.people.primaryContact")}
+                        </Text>
+                      )}
+                    </Flex>
                   </Flex>
                 </SearchGridItem>
                 <SearchGridItem>{person.roleTags.join(", ")}</SearchGridItem>
-                <SearchGridItem>
-                  {person.access ? t(`permitProject.people.access.${person.access}`) : ""}
-                </SearchGridItem>
+                <SearchGridItem>{person.access && <ProjectAccessTag access={person.access} />}</SearchGridItem>
                 <SearchGridItem>{t("permitProject.people.statusActive")}</SearchGridItem>
+                <SearchGridItem justifyContent="flex-end" px={2}>
+                  <Menu>
+                    <MenuButton
+                      as={IconButton}
+                      aria-label={t("ui.options")}
+                      icon={<DotsThreeVertical size={20} />}
+                      variant="ghost"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    <MenuList boxShadow="elevations.elevation04" borderColor="border.base" minW="220px">
+                      <MenuItem icon={<Info size={16} />} fontSize="sm">
+                        {t("permitProject.people.details")}
+                      </MenuItem>
+                    </MenuList>
+                  </Menu>
+                </SearchGridItem>
               </SearchGridRow>
             ))
           )}

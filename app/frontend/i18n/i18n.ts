@@ -1614,6 +1614,7 @@ Thank you,
             accessFilter: "Access",
             roleFilter: "Role",
             statusActive: "Active",
+            details: "Details",
             columns: {
               name: "Name",
               role: "Role",
