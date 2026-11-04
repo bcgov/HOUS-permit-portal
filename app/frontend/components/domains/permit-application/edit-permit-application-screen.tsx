@@ -65,6 +65,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const currentUser = userStore.currentUser
   const { currentPermitApplication, error } = usePermitApplication()
   const { t } = useTranslation()
+
   const formRef = useRef(null)
   const navigate = useNavigate()
 
@@ -475,6 +476,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                 <Button
                   rightIcon={<CaretRight />}
                   onClick={isReviewingSubmit ? () => reviewSubmitActionsRef.current?.submit() : submitClickHandler}
+                  isDisabled={isReviewingSubmit && currentPermitApplication.digitalSealChecks.pendingCount > 0}
                 >
                   {isReviewingSubmit
                     ? t("permitApplication.new.submitApplication")
@@ -489,7 +491,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                 )}
               </HStack>
             )}
-            <FloatingHelpDrawer top="250px" />
+            <FloatingHelpDrawer top={{ base: "auto", md: "250px" }} bottom={{ base: 18, md: "auto" }} />
           </Flex>
           {currentPermitApplication.isRevisionsRequested && !isReviewingSubmit && (
             <Flex
@@ -543,6 +545,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
               onCompletedBlocksChange={setCompletedBlocks}
               triggerSave={handleSave}
               showHelpButton
+              forSubmitterEdit
               isEditing={currentPermitApplication?.isDraft}
               renderSaveButton={() => (
                 <SaveButton

@@ -16,10 +16,25 @@ class StepCodeFileUploadZipService
     used_names = Hash.new(0)
     buffer =
       Zip::OutputStream.write_buffer do |zio|
-        documents.find_each do |document|
+        application_documents.find_each do |document|
           next unless current_on_application?(document)
 
-          write_entry(zio, document, used_names)
+          write_uploaded(
+            zio,
+            document.file,
+            document.standardized_filename,
+            used_names
+          )
+        end
+        h2k_entries.find_each do |data_entry|
+          next unless data_entry.h2k_file_attacher&.attached?
+
+          write_uploaded(
+            zio,
+            data_entry.h2k_file,
+            data_entry.h2k_file_name,
+            used_names
+          )
         end
       end
     buffer.rewind
@@ -32,17 +47,35 @@ class StepCodeFileUploadZipService
 
   private
 
-  def documents
-    rel =
-      SupportingDocument
-        .with_file
-        .includes(:permit_application)
-        .where(permit_application_id: PermitApplication.live.select(:id))
-        .where(
-          FILE_REQUIREMENT_CODES.map { "data_key LIKE ?" }.join(" OR "),
-          *FILE_REQUIREMENT_CODES.map { |code| "%#{code}" }
-        )
-    @range.apply(rel, "supporting_documents.created_at")
+  def completed_checklists
+    @range.apply(
+      Part9StepCode::Checklist.completed_live,
+      "part_9_step_code_checklists.stage_completed_at"
+    )
+  end
+
+  def application_documents
+    application_ids =
+      completed_checklists
+        .joins(:step_code)
+        .where.not(step_codes: { permit_application_id: nil })
+        .distinct
+        .pluck("step_codes.permit_application_id")
+
+    SupportingDocument
+      .with_file
+      .includes(:permit_application)
+      .where(permit_application_id: application_ids)
+      .where(
+        FILE_REQUIREMENT_CODES.map { "data_key LIKE ?" }.join(" OR "),
+        *FILE_REQUIREMENT_CODES.map { |code| "%#{code}" }
+      )
+  end
+
+  def h2k_entries
+    Part9StepCode::DataEntry
+      .where(checklist_id: completed_checklists.select(:id))
+      .where.not(h2k_file_data: nil)
   end
 
   def current_on_application?(document)
@@ -59,21 +92,19 @@ class StepCodeFileUploadZipService
     ).compact.map(&:to_s).to_set
   end
 
-  def write_entry(zio, document, used_names)
-    uploaded = document.file
+  def write_uploaded(zio, uploaded, filename, used_names)
     return if uploaded.blank?
 
-    zio.put_next_entry(unique_entry_name(document, used_names))
+    zio.put_next_entry(unique_entry_name(filename, used_names))
     uploaded.open { |io| IO.copy_stream(io, zio) }
   rescue StandardError => e
     Rails.logger.error(
-      "StepCodeFileUploadZipService skipped #{document.id}: #{e.message}"
+      "StepCodeFileUploadZipService skipped #{filename}: #{e.message}"
     )
   end
 
-  def unique_entry_name(document, used_names)
-    filename =
-      File.basename(document.standardized_filename.presence || "download")
+  def unique_entry_name(filename, used_names)
+    filename = File.basename(filename.presence || "download")
     basename = File.basename(filename, ".*")
     extension = File.extname(filename)
     candidate = filename

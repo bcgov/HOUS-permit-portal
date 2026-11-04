@@ -30,6 +30,7 @@ class SupportingDocumentsZipDownloadJob
       zipfile_name: zipfile_name
     )
   rescue StandardError => e
+    BphSentry.capture_exception(e)
     Rails.logger.error(
       "SupportingDocumentsZipDownloadJob failed for #{permit_application_id}: #{e.message}"
     )

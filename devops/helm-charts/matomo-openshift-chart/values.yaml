@@ -385,6 +385,12 @@ db:
   imageRegistry: ""
   image: mariadb:11.4
   imagePullSecrets: []
+  # -- Share one PID namespace across the pod so the `pause` process (PID 1)
+  # reaps orphaned processes. Without this, mariadbd is PID 1 and never reaps
+  # the occasional orphaned healthcheck.sh / mariadb client left behind when an
+  # exec probe is killed, so <defunct> zombies slowly accumulate (harmless to
+  # CPU/memory, but each holds a PID slot until the pod restarts).
+  shareProcessNamespace: true
   temp:
     enabled: true
     mountPath: /tmp

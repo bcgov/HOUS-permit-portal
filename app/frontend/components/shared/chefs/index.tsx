@@ -1,5 +1,6 @@
 // The custom components in this directory are from the CHEFS codebase https://github.com/bcgov/common-hosted-form-service/tree/master/components
 import { Form, Formio, Templates } from "@formio/react"
+import "../../../utils/formio-time-zones"
 import "./styles.scss"
 
 import { t } from "i18next"

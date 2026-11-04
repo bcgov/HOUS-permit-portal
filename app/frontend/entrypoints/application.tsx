@@ -5,16 +5,19 @@ import React from "react"
 import { createRoot } from "react-dom/client"
 import { Helmet } from "react-helmet"
 import { Navigation } from "../components/domains/navigation"
+import { AppErrorBoundary } from "../components/shared/sentry/error-boundary"
 import "../i18n/i18n"
 import { useLanguageChange } from "../i18n/use-language-change"
+import { initializeSentry, observeSentryUser } from "../services/observability"
 import { isReactotronEnabled, setupReactotron } from "../setup/reactotron"
 import { Provider, setupRootStore } from "../setup/root"
 import { GlobalStyles } from "../styles"
 import { theme } from "../styles/theme"
 
 import { useTranslation } from "react-i18next"
-import "../i18n/i18n"
 import { getCurrentSandboxId, syncMatomoSandboxFlag } from "../utils/utility-functions"
+
+initializeSentry()
 
 const renderApp = (rootStore) => {
   const container = document.getElementById("app")
@@ -61,11 +64,16 @@ const renderApp = (rootStore) => {
       </ChakraProvider>
     )
   }
-  root.render(<RootComponent />)
+  root.render(
+    <AppErrorBoundary>
+      <RootComponent />
+    </AppErrorBoundary>
+  )
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   const rootStore = setupRootStore()
+  observeSentryUser(rootStore)
   if (import.meta.env.PROD || !isReactotronEnabled()) {
     renderApp(rootStore)
   } else {

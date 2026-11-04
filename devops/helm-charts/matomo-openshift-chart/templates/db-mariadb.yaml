@@ -33,6 +33,17 @@ spec:
       labels:
         app: matomo-db
     spec:
+      {{- if .Values.db.shareProcessNamespace }}
+      {{- /*
+        mariadbd is PID 1 in its container, and it never reaps children it
+        didn't spawn itself. The exec probes below fork sh -> healthcheck.sh ->
+        mariadb every few seconds; whenever one is killed mid-run (probe
+        timeout, node stall) its child is orphaned, re-parented to PID 1, and
+        left as a <defunct> zombie forever. A shared PID namespace makes the
+        pod's `pause` process PID 1 instead -- it reaps orphans for us.
+      */}}
+      shareProcessNamespace: true
+      {{- end }}
       {{- if .Values.db.temp.enabled }}
       volumes:
         - name: mariadb-tmp

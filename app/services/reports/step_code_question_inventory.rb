@@ -28,7 +28,7 @@ module Reports
           [
             "",
             "Checklist enums: building type, compliance path, and stage are stored as integers with the names above.",
-            "Characteristics not captured for a submission are exported as empty cells, never as zero."
+            "Characteristics not captured for a completion are exported as empty cells, never as zero."
           ]
       ).join("\n") + "\n"
     end

@@ -240,6 +240,8 @@ class Api::UsersController < Api::ApplicationController
         enable_in_app_application_view_notification
         enable_email_application_revisions_request_notification
         enable_in_app_application_revisions_request_notification
+        enable_in_app_applications_added_notification
+        enable_email_applications_added_notification
         enable_in_app_collaboration_notification
         enable_email_collaboration_notification
         enable_in_app_unmapped_api_notification

@@ -30,6 +30,32 @@ RSpec.describe AutomatedCompliance::SubProcess::DocDigitalSealValidator do
     end
 
     context "the integration call has an error" do
+      it "records upload read errors without preventing the remaining documents from being checked" do
+        allow(supporting_document.file).to receive(:open).and_raise(
+          IOError,
+          "upload unavailable"
+        )
+        described_class.new.call(supporting_document)
+        expect(supporting_document.reload.compliance_data).to include(
+          "status" => "failed",
+          "file_id" => supporting_document.file_id
+        )
+      end
+
+      it "propagates persistence errors instead of treating them as a completed check" do
+        allow_any_instance_of(Wrappers::DigitalSealValidator).to receive(
+          :call
+        ).and_return(OpenStruct.new(success: false, error: "timeout"))
+        allow(supporting_document).to receive(:update!).and_raise(
+          ActiveRecord::StatementInvalid,
+          "write failed"
+        )
+        expect { described_class.new.call(supporting_document) }.to raise_error(
+          ActiveRecord::StatementInvalid
+        )
+        expect(supporting_document.reload.compliance_data).to eq({})
+      end
+
       it "updates the status of the supporting document with failure" do
         allow_any_instance_of(Wrappers::DigitalSealValidator).to receive(
           :call

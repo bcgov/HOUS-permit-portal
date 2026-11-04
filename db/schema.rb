@@ -110,9 +110,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_22_120000) do
     t.index ["jurisdiction_template_version_customization_id"], name: "index_customization_changes_on_jtvc_id"
   end
 
-  create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
-  end
-
   create_table "design_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "pre_check_id", null: false
     t.text "file_data"
@@ -861,6 +858,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_22_120000) do
     t.boolean "enable_in_app_pre_check_completed_notification", default: true
     t.boolean "enable_in_app_step_code_report_notification", default: true
     t.boolean "enable_in_app_file_upload_failed_notification", default: true
+    t.boolean "enable_in_app_applications_added_notification", default: true
+    t.boolean "enable_email_applications_added_notification", default: true
     t.index ["user_id"], name: "index_preferences_on_user_id"
   end
 

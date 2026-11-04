@@ -266,7 +266,7 @@ RSpec.describe "Api::Notes", type: :request do
         create(
           :note,
           noteable: version,
-          kind: :applicant_message,
+          kind: :jurisdiction_message,
           user: reviewer,
           body: "<p>Sent to the applicant.</p>",
           published_at: Time.current

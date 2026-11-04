@@ -197,6 +197,7 @@ module PermitApplicationStatus
 
     def can_submit?
       return false unless inbox_enabled? || sandbox.present?
+      return false if DigitalSealChecks.new(self).pending_entries.any?
       return false if template_version_disabled_by_jurisdiction?
       if using_digital_energy_step_code_tool? && !step_code_complete?
         return false
@@ -230,7 +231,7 @@ module PermitApplicationStatus
 
     def handle_finalize_revision_requests
       update(revisions_requested_at: Time.current)
-      publish_revision_message(:applicant_message)
+      publish_revision_message(:jurisdiction_message)
       NotificationService.publish_application_revisions_request_event(self)
     end
 

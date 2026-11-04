@@ -13,6 +13,12 @@ defaultResources:
 matomo:
   image: matomo:5.12.0-fpm
   runAsUser: null
+  resources:
+    requests:
+      cpu: 20m
+      memory: 512Mi
+    limits:
+      memory: 2Gi
   site:
     name: Matomo
     url: <REDACTED>
@@ -38,6 +44,12 @@ matomo:
     hostname: <REDACTED>
     tls: true
     phpFpmCommand: /usr/local/sbin/php-fpm
+    resources:
+      requests:
+        cpu: 10m
+        memory: 256Mi
+      limits:
+        memory: 1Gi
   cli:
     enabled: false
     replicas: 0
@@ -86,6 +98,12 @@ db:
   auth:
     createSecret: true
     rootPassword: ""
+  resources:
+    requests:
+      cpu: 20m
+      memory: 256Mi
+    limits:
+      memory: 1Gi
 backup:
   enabled: true
   schedule: "0 2 * * *"

@@ -26,6 +26,23 @@ RSpec.describe PermitApplication, type: :model do
     end
   end
 
+  describe ".unviewed" do
+    it "returns unviewed submitted applications, oldest first" do
+      older = create(:permit_application, :newly_submitted)
+      older.update_column(:created_at, 10.days.ago)
+
+      newer = create(:permit_application, :newly_submitted)
+      newer.update_column(:created_at, 2.days.ago)
+
+      viewed = create(:permit_application, :newly_submitted)
+      viewed.update_column(:viewed_at, Time.current)
+
+      create(:permit_application)
+
+      expect(PermitApplication.unviewed.pluck(:id)).to eq([older.id, newer.id])
+    end
+  end
+
   describe "#requires_project_meeting?" do
     let(:jurisdiction) { create(:sub_district) }
     let(:template_version) { create(:template_version) }

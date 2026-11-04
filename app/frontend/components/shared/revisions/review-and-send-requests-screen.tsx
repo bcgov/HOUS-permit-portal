@@ -33,7 +33,9 @@ export const ReviewAndSendRequestsScreen = observer(
   ({ permitApplication, onBack, onExitRevisionMode }: IReviewAndSendRequestsScreenProps) => {
     const { t } = useTranslation()
     const navigate = useNavigate()
-    const [applicantNote, setApplicantNote] = useState(permitApplication.latestSubmissionVersion?.applicantNote ?? "")
+    const [jurisdictionNote, setJurisdictionNote] = useState(
+      permitApplication.latestSubmissionVersion?.jurisdictionNote ?? ""
+    )
     const [addApplications, setAddApplications] = useState("")
 
     useEffect(() => {
@@ -46,7 +48,7 @@ export const ReviewAndSendRequestsScreen = observer(
     const requestCount = fieldRevisions.length + supportingInformation.length
 
     const saveNote = async () => {
-      const response = await permitApplication.updateRevisionRequests({ applicantNote })
+      const response = await permitApplication.updateRevisionRequests({ jurisdictionNote })
       return response?.ok
     }
 
@@ -92,8 +94,8 @@ export const ReviewAndSendRequestsScreen = observer(
         <FormControl mb={10}>
           <FormLabel>{t("permitApplication.show.revision.messageOptional")}</FormLabel>
           <Editor
-            htmlValue={applicantNote}
-            onChange={setApplicantNote}
+            htmlValue={jurisdictionNote}
+            onChange={setJurisdictionNote}
             shouldContainRichTextToolbarItem={(item) => item !== "image"}
           />
           <FormHelperText>{t("permitApplication.show.revision.messageHelper")}</FormHelperText>

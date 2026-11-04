@@ -41,7 +41,10 @@ module ProjectAuditFormatters
     def user_display
       actor = audit.user.presence || audit.try(:username)
       return "System" if actor.blank?
-      # Audited stores partner/system actors as a username string, not a User.
+      # Audited stores a non-User actor on username. audit.user returns that string.
+      if actor.to_s == Constants::ExternalApi::PARTNER_SYSTEM_ACTOR
+        return partner_display
+      end
       return actor.to_s unless actor.respond_to?(:name)
 
       if viewer&.submitter? && actor.try(:jurisdiction_staff?)
@@ -52,6 +55,15 @@ module ProjectAuditFormatters
       end
 
       actor.name
+    end
+
+    def partner_display
+      if viewer&.submitter?
+        resolve_jurisdiction&.qualified_name.presence ||
+          Constants::ExternalApi::PARTNER_SYSTEM_ACTOR
+      else
+        Constants::ExternalApi::PARTNER_SYSTEM_ACTOR
+      end
     end
 
     def resolve_jurisdiction_via_associated

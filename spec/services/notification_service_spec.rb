@@ -623,6 +623,101 @@ RSpec.describe NotificationService do
     end
   end
 
+  describe ".publish_applications_added_event" do
+    let(:owner_preference) do
+      instance_double(
+        "Preference",
+        enable_in_app_applications_added_notification: true,
+        enable_email_applications_added_notification: true
+      )
+    end
+    let(:owner) do
+      instance_double("User", id: "owner-1", preference: owner_preference)
+    end
+    let(:permit_project) do
+      instance_double("PermitProject", id: "project-1", owner: owner)
+    end
+
+    def added_application(id, created_by_type: "Jurisdiction")
+      instance_double(
+        "PermitApplication",
+        id: id,
+        number: "APP-#{id}",
+        nickname: "Nick #{id}",
+        jurisdiction_name: "North Vancouver",
+        created_by_type: created_by_type
+      )
+    end
+
+    before do
+      allow(NotificationPushJob).to receive(:perform_async)
+      allow(PermitHubMailer).to receive(:notify_applications_added).and_return(
+        instance_double("MailerMessage", deliver_later: true)
+      )
+    end
+
+    it "sends one in-app notification and one email for every application in the add" do
+      applications = [added_application("a1"), added_application("a2")]
+
+      described_class.publish_applications_added_event(
+        permit_project,
+        applications,
+        "<p>Please finish</p>"
+      )
+
+      expect(NotificationPushJob).to have_received(:perform_async).once
+      expect(NotificationPushJob).to have_received(:perform_async) do |hash|
+        expect(hash.keys).to eq(["owner-1"])
+        payload = hash["owner-1"]
+        expect(payload["action_type"]).to eq("applications_added")
+        expect(payload["action_text"]).to include(
+          "North Vancouver",
+          "APP-a1 (Nick a1)",
+          "APP-a2 (Nick a2)",
+          "Please finish"
+        )
+        expect(payload["object_data"]["permit_project_id"]).to eq("project-1")
+        expect(payload["object_data"]["note"]).to eq("Please finish")
+        expect(payload["object_data"]["applications"]).to contain_exactly(
+          { "id" => "a1", "number" => "APP-a1", "nickname" => "Nick a1" },
+          { "id" => "a2", "number" => "APP-a2", "nickname" => "Nick a2" }
+        )
+      end
+      expect(PermitHubMailer).to have_received(
+        :notify_applications_added
+      ).once.with(permit_project, applications, "<p>Please finish</p>", owner)
+    end
+
+    it "does not email when that preference is off" do
+      allow(owner_preference).to receive(
+        :enable_email_applications_added_notification
+      ).and_return(false)
+
+      described_class.publish_applications_added_event(
+        permit_project,
+        [added_application("a1")],
+        nil
+      )
+
+      expect(PermitHubMailer).not_to have_received(:notify_applications_added)
+      expect(NotificationPushJob).to have_received(:perform_async).once
+      expect(NotificationPushJob).to have_received(:perform_async) do |hash|
+        expect(hash["owner-1"]["object_data"]).not_to have_key("note")
+      end
+    end
+
+    it "does not notify when the applications were added by the owner" do
+      described_class.publish_applications_added_event(
+        permit_project,
+        [added_application("a1", created_by_type: "User")],
+        "Please finish"
+      )
+
+      expect(NotificationPushJob).not_to have_received(:perform_async)
+      expect(PermitHubMailer).not_to have_received(:notify_applications_added)
+    end
+  end
+
   describe "private email notifications for external api keys" do
     it "sends template update emails to active external api keys for eligible jurisdictions" do
       template_version = instance_double("TemplateVersion")

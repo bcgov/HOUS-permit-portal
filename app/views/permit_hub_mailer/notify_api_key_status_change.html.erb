@@ -8,7 +8,7 @@
           <% if @status == :revoked %>
             <h1 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; text-align: left; font-size: 28px; margin-top: 0; margin-bottom: 48px;">API Key Revoked</h1>
             <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
-              The API key named "<%= @external_api_key.name %>" for the jurisdiction <strong><%= @jurisdiction_name %></strong> has been revoked as of <%= @external_api_key.revoked_at.strftime('%B %d, %Y %I:%M %p %Z') %>.
+              The API key named "<%= @external_api_key.name %>" for the jurisdiction <strong><%= @jurisdiction_name %></strong> has been revoked as of <%= @external_api_key.revoked_at.strftime('%B %d, %Y %I:%M %p Pacific Time') %>.
             </p>
             <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
               This key will no longer be able to access the API. If this was unexpected, please contact the jurisdiction review manager.

@@ -15,6 +15,34 @@ module StepCodeChecklistStageCompletion
   included do
     before_save :sync_stage_completed_at
     validate :all_relevant_sections_complete_when_marking_complete
+
+    # Live completions: status complete, kept step code, and not a sandbox.
+    # A standalone uses step_codes.sandbox_id. An attached one uses the
+    # project's sandbox, and a discarded application or project drops out.
+    # for_effective_sandbox is a StepCode scope, so it stays a subquery.
+    # Merging its joins onto a checklist would look up permit_application
+    # on the checklist model.
+    scope :completed_live,
+          -> do
+            where(status: :complete).where(
+              step_code_id:
+                StepCode
+                  .kept
+                  .for_effective_sandbox(nil)
+                  .where(<<~SQL.squish)
+                    step_codes.permit_application_id IS NULL
+                    OR step_codes.permit_application_id IN (
+                      SELECT permit_applications.id
+                      FROM permit_applications
+                      INNER JOIN permit_projects
+                        ON permit_projects.id = permit_applications.permit_project_id
+                      WHERE permit_applications.discarded_at IS NULL
+                        AND permit_projects.discarded_at IS NULL
+                    )
+                  SQL
+                  .select(:id)
+            )
+          end
   end
 
   class_methods do

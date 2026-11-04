@@ -16,6 +16,7 @@ import {
 import {
   ICompareRequirementsBoxData,
   ICompareRequirementsBoxDiff,
+  IDigitalSealChecks,
   IDownloadableFile,
   IFormIOBlock,
   IFormJson,
@@ -73,6 +74,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       formJson: types.maybeNull(types.frozen<IFormJson>()),
       submissionData: types.maybeNull(types.frozen<ISubmissionData>()),
       formattedComplianceData: types.maybeNull(types.frozen()),
+      digitalSealChecks: types.optional(types.frozen<IDigitalSealChecks>(), { pendingCount: 0, failedCount: 0 }),
       formCustomizations: types.maybeNull(types.frozen<ITemplateCustomization>()),
       unseenElectiveFieldIds: types.optional(types.array(types.string), []),
       unseenCustomizationChangeId: types.maybeNull(types.string),
@@ -283,7 +285,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
           }, [] as IFormIOBlock[])
           .filter((outNull) => outNull)
       },
-      get formattedFormJson() {
+      buildFormattedFormJson(forSubmitterEdit: boolean) {
         const clonedFormJson = R.clone(self.formJson)
 
         // Disable certain fields if this is an ephemeral preview
@@ -320,17 +322,19 @@ export const PermitApplicationModel = types.snapshotProcessor(
             self.latestSubmissionVersion.submissionData
           )
         }
-        // Review staff on revisions_requested: lock fields the same way in_review does via
-        // isSubmitted. Submitters must still edit on the edit screen.
-        const disableRequirementFields =
-          self.isSubmitted ||
-          self.isViewingPastRequests ||
-          (self.isRevisionsRequested && !!self.rootStore.userStore.currentUser?.isReviewStaff)
+        const currentUser = self.rootStore.userStore.currentUser
+        const submitterCanEditDraft =
+          forSubmitterEdit && self.isDraft && !!currentUser?.id && currentUser.id === self.submitter?.id
+        const disableRequirementFields = submitterCanEditDraft
+          ? self.isViewingPastRequests
+          : self.isSubmitted ||
+            self.isViewingPastRequests ||
+            (self.isRevisionsRequested && !!currentUser?.isReviewStaff)
         const changedMarkedFormJson = combineChangeMarkers(diffColoredFormJson, disableRequirementFields, changedKeys)
         // Review staff: buttons only after "View revision requests" (revisionMode).
-        // Submitters: always show while revisions are outstanding (sidebar is always open).
+        // The submitter always sees them while revisions are outstanding.
         const showRevisionButtons =
-          self.revisionMode || (self.isRevisionsRequested && !self.rootStore.userStore.currentUser?.isReviewStaff)
+          self.revisionMode || (self.isRevisionsRequested && (!currentUser?.isReviewStaff || submitterCanEditDraft))
         const revisionModeFormJson = showRevisionButtons
           ? combineRevisionButtons(changedMarkedFormJson, self.isSubmitted, revisionRequestsToUse)
           : changedMarkedFormJson
@@ -340,6 +344,12 @@ export const PermitApplicationModel = types.snapshotProcessor(
         }
 
         return revisionModeFormJson
+      },
+      get reviewFormattedFormJson() {
+        return this.buildFormattedFormJson(false)
+      },
+      get editFormattedFormJson() {
+        return this.buildFormattedFormJson(true)
       },
       sectionKey(sectionId) {
         return `section${sectionId}`
@@ -827,6 +837,9 @@ export const PermitApplicationModel = types.snapshotProcessor(
       setFormattedComplianceData(data: Record<string, any>) {
         self.formattedComplianceData = data
       },
+      setDigitalSealChecks(data: IDigitalSealChecks) {
+        if (data) self.digitalSealChecks = data
+      },
       update: flow(function* ({ autosave, review, ...params }) {
         self.isLoading = true
         const response = yield self.environment.api.updatePermitApplication(self.id, params, review)
@@ -835,6 +848,8 @@ export const PermitApplicationModel = types.snapshotProcessor(
           if (!autosave) {
             self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
           }
+          // Keep readiness current without replacing an in-progress autosaved form.
+          if (permitApplication.digitalSealChecks) self.digitalSealChecks = permitApplication.digitalSealChecks
         }
         self.isLoading = false
         return response
@@ -917,6 +932,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       }),
       submit: flow(function* (params) {
         const response = yield self.environment.api.submitPermitApplication(self.id, params)
+        if (response.data?.meta?.digitalSealChecks) self.digitalSealChecks = response.data.meta.digitalSealChecks
         if (response.ok) {
           const { data: permitApplication } = response.data
           self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")

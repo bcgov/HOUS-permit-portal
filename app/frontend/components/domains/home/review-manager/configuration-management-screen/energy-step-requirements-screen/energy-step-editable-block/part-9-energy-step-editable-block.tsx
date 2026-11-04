@@ -169,7 +169,6 @@ export const Part9EnergyStepEditableBlock = observer(function Part9EnergyStepEdi
                           onChange={onChange}
                           value={value}
                           isDisabled={!isEditing || isCustomizing}
-                          portal
                         />
                       )
                     }}
@@ -253,7 +252,6 @@ export const Part9EnergyStepEditableBlock = observer(function Part9EnergyStepEdi
                                     value={value}
                                     isDisabled={!isEditing}
                                     allowNull
-                                    portal
                                   />
                                 )
                               }}

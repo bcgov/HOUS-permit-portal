@@ -4,12 +4,10 @@ import {
   Flex,
   Heading,
   Hide,
-  IconButton,
   Link,
   ListItem,
   OrderedList,
   Portal,
-  Spacer,
   Tab,
   TabList,
   TabPanel,
@@ -51,7 +49,7 @@ interface IRevisionSideBarProps {
 
 export interface IRevisionRequestForm {
   revisionRequestsAttributes: IRevisionRequestsAttributes[]
-  applicantNote?: string
+  jurisdictionNote?: string
 }
 
 export const RevisionSideBar = observer(
@@ -194,15 +192,16 @@ export const RevisionSideBar = observer(
     const revisionsSent = !forSubmitter && permitApplication.isRevisionsRequested
     const sentButtonProps = revisionsSent
       ? {
-          color: "white",
+          bg: "white",
+          color: "text.primary",
           borderColor: "white",
-          bg: "transparent",
-          _hover: { bg: "whiteAlpha.200", color: "white" },
+          fontWeight: "bold",
+          _hover: { bg: "white", color: "text.primary" },
           _disabled: {
+            bg: "whiteAlpha.400",
             color: "white",
-            borderColor: "white",
-            bg: "transparent",
-            opacity: 0.7,
+            borderColor: "whiteAlpha.500",
+            opacity: 1,
             cursor: "not-allowed",
           },
         }
@@ -231,31 +230,33 @@ export const RevisionSideBar = observer(
 
       return (
         <Flex gap={4}>
-          <Button
-            variant={onDark ? "secondary" : "primary"}
-            border={onDark ? undefined : 0}
-            onClick={handleSendClick}
-            isDisabled={permitApplication.isRevisionsRequested}
-            {...(onDark ? sentButtonProps : {})}
-          >
-            <Flex as="span" align="center" gap={2}>
-              {t("permitApplication.show.revision.send")}
-              <Flex
-                as="span"
-                align="center"
-                justify="center"
-                bg="white"
-                color="text.primary"
-                borderRadius="full"
-                minW={6}
-                h={6}
-                px={1}
-                fontSize="sm"
-              >
-                {packageItemCount}
+          {!revisionsSent && (
+            <Button
+              variant={onDark ? "secondary" : "primary"}
+              border={onDark ? undefined : 0}
+              onClick={handleSendClick}
+              {...(onDark ? sentButtonProps : {})}
+            >
+              <Flex as="span" align="center" gap={2}>
+                {t("permitApplication.show.revision.send")}
+                <Flex
+                  as="span"
+                  align="center"
+                  justify="center"
+                  bg={onDark ? "semantic.success" : "white"}
+                  color={onDark ? "white" : "text.primary"}
+                  borderRadius="full"
+                  minW={6}
+                  h={6}
+                  px={1}
+                  fontSize="sm"
+                  fontWeight="bold"
+                >
+                  {packageItemCount}
+                </Flex>
               </Flex>
-            </Flex>
-          </Button>
+            </Button>
+          )}
           {onCancel && (
             <Button variant="secondary" onClick={onCancel} {...(onDark ? sentButtonProps : {})}>
               {t("permitApplication.show.revision.saveAndExit")}
@@ -355,8 +356,11 @@ export const RevisionSideBar = observer(
                     <RequestSection
                       title={t("permitApplication.show.revision.supportingInformationSection")}
                       borderColor={panelBorder}
+                      description={
+                        revisionsSent ? undefined : t("permitApplication.show.revision.supportingInformationPrompt")
+                      }
                       onAdd={
-                        permitApplication.isRevisionsRequested
+                        revisionsSent
                           ? undefined
                           : () => {
                               setSupportingInformationRequest(undefined)
@@ -549,7 +553,7 @@ const SubmitterRequestsPanel = observer(
 
     return (
       <Box flex={1} pb={8}>
-        <ApplicantNoteBlock note={permitApplication.latestSubmissionVersion?.applicantNote} />
+        <ApplicantNoteBlock note={permitApplication.latestSubmissionVersion?.jurisdictionNote} />
         <RequestSection
           title={t("permitApplication.show.revision.revisionsSection")}
           emptyText={revisionRequests.length === 0 ? t("permitApplication.show.revision.revisionsEmpty") : undefined}
@@ -726,6 +730,7 @@ const GenericRequestListItem = ({
 const RequestSection = ({
   title,
   hint,
+  description,
   onAdd,
   emptyText,
   borderColor = "border.light",
@@ -733,23 +738,44 @@ const RequestSection = ({
 }: {
   title: string
   hint?: string
+  description?: string
   onAdd?: () => void
   emptyText?: string
   borderColor?: string
   children: React.ReactNode
 }) => (
   <Box borderBottom="1px solid" borderColor={borderColor} pb={4} mb={4}>
-    <Flex align="center" px={4} pt={4} pb={2}>
-      <Heading as="h3" fontSize="md">
-        {title}
-      </Heading>
-      <Spacer />
-      {onAdd && <IconButton aria-label={title} icon={<Plus />} size="sm" variant="ghost" onClick={onAdd} />}
-    </Flex>
+    <Heading as="h3" fontSize="md" px={4} pt={4} pb={2}>
+      {title}
+    </Heading>
     {hint && (
       <Text px={4} fontStyle="italic" fontSize="sm" color="text.secondary" mb={2}>
         {hint}
       </Text>
+    )}
+    {description && (
+      <Text px={4} fontSize="sm" mb={3}>
+        {description}
+      </Text>
+    )}
+    {onAdd && (
+      <Box px={4} mb={3}>
+        <Button
+          size="xs"
+          variant="secondary"
+          bg="transparent"
+          leftIcon={<Plus size={14} />}
+          iconSpacing={1}
+          h="7"
+          minH="7"
+          px={2}
+          fontSize="sm"
+          lineHeight="shorter"
+          onClick={onAdd}
+        >
+          {title}
+        </Button>
+      </Box>
     )}
     {emptyText && (
       <Text px={4} fontSize="sm" color="text.secondary" mb={2}>

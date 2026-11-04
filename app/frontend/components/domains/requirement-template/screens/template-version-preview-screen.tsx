@@ -10,6 +10,7 @@ import { BackButton } from "../../../shared/buttons/back-button"
 import { FloatingHelpDrawer } from "../../../shared/floating-help-drawer"
 import { PermitApplicationStatusTag } from "../../../shared/permit-applications/permit-application-status-tag"
 import { RequirementForm } from "../../../shared/permit-applications/requirement-form"
+import { FeedbackTab } from "../../../shared/sentry/feedback-tab"
 import { ChecklistSideBar } from "../../permit-application/checklist-sidebar"
 
 export const TemplateVersionPreviewScreen = observer(() => {
@@ -29,6 +30,7 @@ export const TemplateVersionPreviewScreen = observer(() => {
 
   return (
     <Box as="main" id="submitter-view-permit">
+      <FeedbackTab />
       <Flex
         id="permitHeader"
         direction="column"

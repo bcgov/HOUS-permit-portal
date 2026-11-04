@@ -11,18 +11,20 @@ class NoteBlueprint < Blueprinter::Base
          :updated_at
 
   field :permit_application_id do |note, _options|
-    if note.noteable_type == "SubmissionVersion"
+    case note.noteable_type
+    when "SubmissionVersion"
       note.noteable&.permit_application_id
+    when "PermitApplication"
+      note.noteable_id
     end
   end
 
   field :noteable_label do |note, _options|
     case note.noteable
     when SubmissionVersion
-      application = note.noteable.permit_application
-      [application&.number, application&.nickname].compact_blank
-        .join(" — ")
-        .presence
+      NoteBlueprint.application_label(note.noteable.permit_application)
+    when PermitApplication
+      NoteBlueprint.application_label(note.noteable)
     when ProjectMeeting
       (note.noteable.confirmed_date || note.noteable.submitted_at)&.strftime(
         "%b %-d, %Y"
@@ -44,4 +46,10 @@ class NoteBlueprint < Blueprinter::Base
 
   association :note_attachment_documents,
               blueprint: NoteAttachmentDocumentBlueprint
+
+  def self.application_label(application)
+    [application&.number, application&.nickname].compact_blank
+      .join(" — ")
+      .presence
+  end
 end

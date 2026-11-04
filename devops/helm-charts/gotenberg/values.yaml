@@ -3,7 +3,7 @@ replicaCount: 1
 
 image:
   repository: gotenberg/gotenberg
-  tag: "8.32.0"
+  tag: "8.38.1"
   pullPolicy: IfNotPresent
 
 resources:

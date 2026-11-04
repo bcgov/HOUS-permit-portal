@@ -4,7 +4,7 @@ import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { INote } from "../../../models/note"
-import { ENoteableType } from "../../../types/enums"
+import { ENoteKind, ENoteableType } from "../../../types/enums"
 import { IOption } from "../../../types/types"
 import { InboxFilter } from "../filters/inbox-filter"
 import { EmptyResultsBox } from "../grid/empty-results-box"
@@ -37,6 +37,7 @@ export const ProjectNotesList = observer(
     const typeOptions: IOption[] = [
       { value: ENoteableType.ProjectMeeting, label: t("permitProject.notes.filters.projectMeeting") },
       { value: ENoteableType.SubmissionVersion, label: t("permitProject.notes.filters.submissionVersion") },
+      { value: ENoteableType.PermitApplication, label: t("permitProject.notes.filters.permitApplication") },
     ]
     const authorOptions: IOption[] = [...new Set(notes.flatMap((note) => (note.authorName ? [note.authorName] : [])))]
       .sort((a, b) => a.localeCompare(b))
@@ -78,11 +79,13 @@ export const ProjectNotesList = observer(
             const meetingPath = note.projectMeetingId ? getMeetingPath(note) : undefined
             const applicationPath = note.permitApplicationId ? getApplicationPath?.(note) : undefined
             const kindLabel =
-              note.kind === "applicant_message"
+              note.kind === ENoteKind.jurisdictionMessage
                 ? t("submissionInbox.projectDetail.noteToApplicant")
-                : note.kind === "submitter_message"
+                : note.kind === ENoteKind.submitterMessage
                   ? t("submissionInbox.projectDetail.messageFromSubmitter")
-                  : t("submissionInbox.projectDetail.meetingNote")
+                  : note.kind === ENoteKind.creationMessage
+                    ? t("submissionInbox.projectDetail.creationMessage")
+                    : t("submissionInbox.projectDetail.meetingNote")
             const subjectPath = meetingPath || applicationPath
             const subjectLabel =
               note.noteableLabel || (meetingPath ? t("submissionInbox.projectDetail.viewProjectMeeting") : null)

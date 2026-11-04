@@ -12,7 +12,7 @@ import { additionalChangeFields } from "../../../utils/submission-change-summary
 import { handleScrollToTop } from "../../../utils/utility-functions"
 import { CustomMessageBox } from "../base/custom-message-box"
 import { Editor } from "../editor/editor"
-import { ProjectMeetingAdvisory } from "../permit-applications/permit-application-submit-modal"
+import { DigitalSealChecksNotice, ProjectMeetingAdvisory } from "../permit-applications/permit-application-submit-modal"
 
 export interface IReviewSubmitActions {
   submit: () => void
@@ -76,6 +76,7 @@ export const ReviewAndSubmitRevisedApplicationScreen = observer(
     }
 
     const handleSubmit = async () => {
+      if (permitApplication.digitalSealChecks.pendingCount > 0) return
       setIsSaving(true)
       const ok = await saveNote()
       if (!ok) {
@@ -175,8 +176,14 @@ export const ReviewAndSubmitRevisedApplicationScreen = observer(
           </Box>
         )}
 
+        <DigitalSealChecksNotice permitApplication={permitApplication} />
         <Flex gap={4}>
-          <Button variant="primary" onClick={handleSubmit} isLoading={isSaving}>
+          <Button
+            variant="primary"
+            onClick={handleSubmit}
+            isLoading={isSaving}
+            isDisabled={permitApplication.digitalSealChecks.pendingCount > 0}
+          >
             {t("permitApplication.new.submitApplication")}
           </Button>
           <Button variant="secondary" onClick={handleSaveAndExit} isDisabled={isSaving}>

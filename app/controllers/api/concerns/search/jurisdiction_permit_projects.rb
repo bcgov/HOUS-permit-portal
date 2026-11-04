@@ -14,18 +14,10 @@ module Api::Concerns::Search::JurisdictionPermitProjects
       order: jurisdiction_permit_project_order,
       match: :word_middle,
       where: jurisdiction_permit_project_where_clause,
-      page: jurisdiction_permit_project_search_params[:page],
+      page: jurisdiction_permit_project_search_params[:page].presence || 1,
       per_page:
-        (
-          if jurisdiction_permit_project_search_params[:page]
-            (
-              jurisdiction_permit_project_search_params[:per_page] ||
-                Kaminari.config.default_per_page
-            )
-          else
-            nil
-          end
-        ),
+        jurisdiction_permit_project_search_params[:per_page].presence ||
+          Kaminari.config.default_per_page,
       includes: [
         :owner,
         :jurisdiction,

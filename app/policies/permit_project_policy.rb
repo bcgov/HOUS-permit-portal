@@ -78,9 +78,10 @@ class PermitProjectPolicy < ApplicationPolicy
     same_sandbox? && user_is_review_staff_for_jurisdiction? && !record.draft?
   end
 
-  # Allow bulk creation of permit applications under a project
+  # Allow bulk creation of permit applications under a project.
+  # Review staff may add only on a project they can see in their jurisdiction.
   def create_permit_applications?
-    show? && (user_is_owner? || user&.review_staff?)
+    show? && (user_is_owner? || user_is_review_staff_for_jurisdiction?)
   end
 
   def submission_collaborator_options?

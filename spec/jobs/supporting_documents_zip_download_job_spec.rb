@@ -67,6 +67,7 @@ RSpec.describe SupportingDocumentsZipDownloadJob, type: :job do
   end
 
   it "broadcasts an error payload when zipping fails" do
+    allow(BphSentry).to receive(:capture_exception)
     allow(SupportingDocumentsZipper).to receive(:new).and_raise(
       StandardError,
       "boom"
@@ -86,5 +87,8 @@ RSpec.describe SupportingDocumentsZipDownloadJob, type: :job do
       zipfile_name: nil,
       error: true
     )
+    expect(BphSentry).to have_received(:capture_exception).with(
+      an_instance_of(StandardError)
+    ).once
   end
 end

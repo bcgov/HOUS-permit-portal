@@ -102,6 +102,20 @@ db:
       memory: 1Gi
 backup:
   enabled: false
+  schedule: "0 2 * * *"
+  retentionCount: 3            # low count while testing
+  pruneEnabled: true
+  s3:
+    enabled: true
+    createSecret: false
+    secretName: "matomo-s3-backup"
+    endpoint: "<REDACTED>"
+    bucket: "<REDACTED>"
+    path: "/matomo-backups-dev"
+    maxObjects: 0
+    insecure: false
+  pvc:
+    enabled: false  
 
 openshift:
   route:

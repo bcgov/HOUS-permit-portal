@@ -12,7 +12,8 @@ export const TemplateVersionStoreModel = types
   .props({
     templateVersionMap: types.map(TemplateVersionModel),
     templateVersionsList: types.array(types.reference(TemplateVersionModel)),
-    publiclyPreviewableTemplateVersions: types.array(types.safeReference(TemplateVersionModel)),
+    standardizationPreviewPublishedTemplateVersions: types.array(types.safeReference(TemplateVersionModel)),
+    standardizationPreviewPubliclyPreviewableTemplateVersions: types.array(types.safeReference(TemplateVersionModel)),
     isLoading: types.optional(types.boolean, false),
   })
   .extend(withEnvironment())
@@ -89,15 +90,21 @@ export const TemplateVersionStoreModel = types
       return response.ok
     }),
 
-    fetchPubliclyPreviewableTemplateVersions: flow(function* () {
+    fetchStandardizationPreviewTemplateVersions: flow(function* () {
       self.isLoading = true
-      const response = yield* toGenerator(self.environment.api.fetchPubliclyPreviewableTemplateVersions())
+      const response = yield* toGenerator(self.environment.api.fetchStandardizationPreviewTemplateVersions())
 
       if (response.ok) {
-        const templateVersions = response.data.data
-        self.mergeUpdateAll(templateVersions, "templateVersionMap")
+        const { publishedTemplateVersions, publiclyPreviewableTemplateVersions } = response.data.data
+        self.mergeUpdateAll(
+          [...publishedTemplateVersions, ...publiclyPreviewableTemplateVersions],
+          "templateVersionMap"
+        )
         // safeReference resolves these ids into live TemplateVersion instances.
-        self.publiclyPreviewableTemplateVersions = cast(templateVersions.map((tv) => tv.id))
+        self.standardizationPreviewPublishedTemplateVersions = cast(publishedTemplateVersions.map((tv) => tv.id))
+        self.standardizationPreviewPubliclyPreviewableTemplateVersions = cast(
+          publiclyPreviewableTemplateVersions.map((tv) => tv.id)
+        )
       }
       self.isLoading = false
       return response.ok
@@ -112,12 +119,13 @@ export const TemplateVersionStoreModel = types
 
         // Keep the landing-page list in sync without needing a refetch: drop
         // the id when it's being hidden, and add it if it was just enabled.
-        const existingIndex = self.publiclyPreviewableTemplateVersions.findIndex((tv) => tv?.id === id)
+        const previewList = self.standardizationPreviewPubliclyPreviewableTemplateVersions
+        const existingIndex = previewList.findIndex((tv) => tv?.id === id)
         if (!publiclyPreviewable && existingIndex !== -1) {
-          self.publiclyPreviewableTemplateVersions.splice(existingIndex, 1)
+          previewList.splice(existingIndex, 1)
         } else if (publiclyPreviewable && existingIndex === -1) {
           // cast each element so MST resolves the id back to a reference.
-          self.publiclyPreviewableTemplateVersions.push(id as any)
+          previewList.push(id as any)
         }
       }
       return response.ok

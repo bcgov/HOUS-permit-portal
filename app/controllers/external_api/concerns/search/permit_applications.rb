@@ -14,18 +14,10 @@ module ExternalApi::Concerns::Search::PermitApplications
       order: permit_application_order,
       match: :word_start,
       where: permit_application_where_clause,
-      page: permit_application_search_params[:page],
+      page: permit_application_search_params[:page].presence || 1,
       per_page:
-        (
-          if permit_application_search_params[:page]
-            (
-              permit_application_search_params[:per_page] ||
-                Kaminari.config.default_per_page
-            )
-          else
-            nil
-          end
-        ),
+        permit_application_search_params[:per_page].presence ||
+          Kaminari.config.default_per_page,
       includes: PermitApplication::SEARCH_INCLUDES,
       scope_results: ->(relation) { policy_scope([:external_api, relation]) }
     }

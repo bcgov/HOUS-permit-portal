@@ -87,6 +87,28 @@ class RequirementTemplateBlueprint < Blueprinter::Base
     association :requirement_template_sections,
                 blueprint: RequirementTemplateSectionBlueprint
   end
+
+  view :external_api do
+    excludes :discarded_at,
+             :fetched_at,
+             :created_at,
+             :updated_at,
+             :available_globally,
+             :template_category_id,
+             :used_by,
+             :tags,
+             :available_in,
+             :explicitly_disabled_jurisdictions,
+             :deprecated_template_versions,
+             :scheduled_template_versions,
+             :assignee,
+             :draft_template_versions,
+             :enabled_jurisdictions
+
+    association :published_template_version,
+                blueprint: TemplateVersionBlueprint,
+                view: :external_api
+  end
 end
 
 def defaulted_template_version(rt, options)

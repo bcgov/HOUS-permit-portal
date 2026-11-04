@@ -23,7 +23,7 @@ instances:
   dataVolumeClaimSpec:
     storage: 1Gi
   requests:
-    cpu: 200m
+    cpu: 100m
     memory: 256Mi
   limits: # wanted to just leave limits blank here, but the underlying chart speciffies it, so instead just specify a large number
     cpu: 1

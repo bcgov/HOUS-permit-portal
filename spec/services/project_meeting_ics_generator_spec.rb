@@ -46,11 +46,18 @@ RSpec.describe ProjectMeetingIcsGenerator do
       expect(ics).to include("BEGIN:VEVENT")
       expect(ics).to include("END:VEVENT")
       expect(ics).to include("END:VCALENDAR")
+      expect(ics).not_to include("TZID=")
     end
 
-    it "includes the meeting time in Vancouver time" do
-      expect(ics).to include("DTSTART;TZID=America/Vancouver:20260120T093000")
-      expect(ics).to include("DTEND;TZID=America/Vancouver:20260120T103000")
+    it "represents a historical winter Vancouver meeting as UTC" do
+      expect(ics).to include("DTSTART:20260120T173000Z")
+      expect(ics).to include("DTEND:20260120T183000Z")
+    end
+
+    it "preserves the meeting instant after the final clock change" do
+      project_meeting.confirmed_date = Time.iso8601("2027-01-15T20:00:00Z")
+      expect(ics).to include("DTSTART:20270115T200000Z")
+      expect(ics).to include("DTEND:20270115T210000Z")
     end
 
     it "uses a stable UID for the meeting" do

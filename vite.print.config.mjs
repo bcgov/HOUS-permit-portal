@@ -16,6 +16,8 @@ function sourceDigest() {
     ...walk("app/frontend/components/print"),
     "app/frontend/i18n/i18n.ts",
     "app/frontend/styles/brand.ts",
+    "app/frontend/utils/formio-time-zones.ts",
+    "package-lock.json",
     "vite.print.config.mjs",
   ].sort()) {
     hash

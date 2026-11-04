@@ -1,6 +1,6 @@
 source "https://rubygems.org"
 
-ruby "4.0.6"
+ruby "4.0.9"
 
 # Explicit standard-library dependencies for Ruby 4.
 gem "csv", "~> 3.3"
@@ -51,6 +51,9 @@ gem "blueprinter", "~> 1.0.2"
 
 gem "awesome_print", "~> 1.9"
 gem "sidekiq", "~> 7.2.4"
+gem "sentry-ruby", "~> 7.1.0"
+gem "sentry-rails", "~> 7.1.0"
+gem "sentry-sidekiq", "~> 7.1.0"
 gem "shrine", "~> 3.5.0"
 gem "redis", "~> 5.0.8"
 gem "image_processing", "~> 1.12.2"

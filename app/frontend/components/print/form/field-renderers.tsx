@@ -64,7 +64,9 @@ const Choices = ({ component, value }: Readonly<Props>) => {
   )
 }
 fieldRenderers.selectboxes = fieldRenderers.select = Choices
-fieldRenderers.file = fieldRenderers.simplefile = ({ value }) => <ReportAttachments value={value} />
+fieldRenderers.file = fieldRenderers.simplefile = ({ component, value }) => (
+  <ReportAttachments component={component} value={value} />
+)
 export function FieldValue({ component, value }: Readonly<Props>) {
   const Renderer = fieldRenderers[component.type]
   if (Renderer) return <Renderer component={component} value={value} />

@@ -10,6 +10,7 @@ module Constants
     PERMIT_BLOCK_STATUS_READY = "permit_block_status_ready"
     APPLICATION_SUBMISSION = "application_submission"
     APPLICATION_REVISIONS_REQUEST = "application_revisions_request"
+    APPLICATIONS_ADDED = "applications_added"
     REVIEW_STARTED = "review_started"
     PUBLISHED_TEMPLATE_MISSING_REQUIREMENTS_MAPPING =
       "published_template_missing_requirements_mapping"

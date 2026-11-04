@@ -87,7 +87,7 @@ class TemplateVersion < ApplicationRecord
   end
 
   def version_date_in_province_time
-    version_date.in_time_zone("Pacific Time (US & Canada)").to_time
+    version_date.in_time_zone.to_time
   end
 
   def label

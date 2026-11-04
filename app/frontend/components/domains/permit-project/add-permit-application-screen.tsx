@@ -4,6 +4,9 @@ import {
   Checkbox,
   Container,
   Flex,
+  FormControl,
+  FormHelperText,
+  FormLabel,
   Heading,
   Input,
   InputGroup,
@@ -25,6 +28,7 @@ import { useMst } from "../../../setup/root"
 import { permitApplicationInfoPath } from "../../../utils/permit-application-info-path"
 import { groupTemplateVersionsByCategory } from "../../../utils/template-version-grouping"
 import { ErrorScreen } from "../../shared/base/error-screen"
+import { Editor } from "../../shared/editor/editor"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import ProjectInfoRow from "../../shared/project/project-info-row"
 
@@ -44,7 +48,9 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
 
   const [selectedTemplateVersionIds, setSelectedTemplateVersionIds] = useState<string[]>([])
   const [query, setQuery] = useState("")
+  const [note, setNote] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const showCreationMessage = !!currentPermitProject && !currentPermitProject.isOwner
 
   const filteredTemplates = templateVersions.filter((tv) => tv.matchesSearchQuery(query))
   const groupedTemplates = groupTemplateVersionsByCategory(filteredTemplates)
@@ -78,7 +84,10 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
         templateVersionId,
         jurisdictionId: currentPermitProject.jurisdiction?.id,
       }))
-      const response = await (currentPermitProject as any).bulkCreatePermitApplications(params)
+      const response = await (currentPermitProject as any).bulkCreatePermitApplications(
+        params,
+        showCreationMessage ? note : undefined
+      )
       if (response?.ok) {
         currentPermitProject.resetIsFullyLoaded()
         if (shouldOfferProjectMeetingAfterAdd) {
@@ -172,6 +181,23 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
             />
           </Flex>
         </Box>
+
+        {showCreationMessage && (
+          <Box w={{ base: "full", md: "50%" }}>
+            <Heading as="h2" variant="yellowline">
+              {t("permitProject.addPermits.messageForSubmitter.heading")}
+            </Heading>
+            <FormControl>
+              <FormLabel>{t("permitProject.addPermits.messageForSubmitter.label")}</FormLabel>
+              <Editor
+                htmlValue={note}
+                onChange={setNote}
+                shouldContainRichTextToolbarItem={(item) => item !== "image"}
+              />
+              <FormHelperText>{t("permitProject.addPermits.messageForSubmitter.helper")}</FormHelperText>
+            </FormControl>
+          </Box>
+        )}
 
         <Box>
           <Heading as="h2" variant="yellowline">

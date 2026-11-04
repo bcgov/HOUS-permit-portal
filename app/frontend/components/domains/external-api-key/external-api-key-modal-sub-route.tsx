@@ -18,7 +18,7 @@ import {
   ModalHeader,
   ModalOverlay,
 } from "@chakra-ui/react"
-import { Info, Key, Prohibit } from "@phosphor-icons/react"
+import { ArrowSquareOut, Info, Key, Prohibit } from "@phosphor-icons/react"
 import { addYears } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
@@ -169,7 +169,7 @@ export const ExternalApiKeyModalSubRoute = observer(function ExternalApiKeyModal
                   required
                 />
               </GridItem>
-              <GridItem>
+              <GridItem colSpan={2}>
                 <SelectFormControl
                   label={t("externalApiKey.fieldLabels.apiVersion")}
                   fieldName={"apiVersion"}
@@ -184,6 +184,18 @@ export const ExternalApiKeyModalSubRoute = observer(function ExternalApiKeyModal
                   }))}
                   hint={t("externalApiKey.apiVersionHint")}
                 />
+                <Link
+                  href={"/integrations/api_docs"}
+                  target={"_blank"}
+                  rel={"noopener noreferrer"}
+                  fontSize={"sm"}
+                  display={"inline-flex"}
+                  alignItems={"center"}
+                  gap={1}
+                  mt={2}
+                >
+                  {t("externalApiKey.index.accessDocs")} <ArrowSquareOut />
+                </Link>
               </GridItem>
 
               <GridItem>

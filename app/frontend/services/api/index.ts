@@ -634,11 +634,12 @@ export class Api {
 
   async createProjectPermitApplications(
     permitProjectId: string,
-    params: Array<{ templateVersionId: string; jurisdictionId?: string }>
+    params: Array<{ templateVersionId: string; jurisdictionId?: string }>,
+    note?: string
   ) {
     return this.client.post<ApiResponse<IPermitApplication[]>>(
       `/permit_projects/${permitProjectId}/permit_applications`,
-      { permitApplications: params }
+      { permitApplications: params, ...(note ? { note } : {}) }
     )
   }
 
@@ -1167,8 +1168,13 @@ export class Api {
     )
   }
 
-  async fetchPubliclyPreviewableTemplateVersions() {
-    return this.client.get<ApiResponse<ITemplateVersion[]>>(`/template_versions/publicly_previewable`)
+  async fetchStandardizationPreviewTemplateVersions() {
+    return this.client.get<
+      ApiResponse<{
+        publishedTemplateVersions: ITemplateVersion[]
+        publiclyPreviewableTemplateVersions: ITemplateVersion[]
+      }>
+    >(`/template_versions/standardization_preview`)
   }
 
   // ── Draft feedback API methods ──────────────────────────────────────

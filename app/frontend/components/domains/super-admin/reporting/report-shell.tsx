@@ -61,7 +61,7 @@ export function ReportShell({ payload, isLoading, controls }: IProps) {
         </Text>
       </Box>
       {controls}
-      <FigureGrid figures={payload.headlineFigures} />
+      <FigureSections figures={payload.headlineFigures} />
 
       {payload.empty ? (
         <CustomMessageBox
@@ -129,6 +129,36 @@ export function ReportShell({ payload, isLoading, controls }: IProps) {
       <ReportNotes notes={payload.notes} />
     </VStack>
   )
+}
+
+function FigureSections({ figures }: { figures: IReportHeadlineFigure[] }) {
+  const groups = groupHeadlineFigures(figures)
+
+  return (
+    <VStack align="stretch" spacing={6}>
+      {groups.map((group) => (
+        <Box key={group.section ?? "figures"}>
+          {group.section ? (
+            <Heading as="h2" size="md" mb={3}>
+              {group.section}
+            </Heading>
+          ) : null}
+          <FigureGrid figures={group.figures} />
+        </Box>
+      ))}
+    </VStack>
+  )
+}
+
+function groupHeadlineFigures(figures: IReportHeadlineFigure[]) {
+  const groups: { section: string | null; figures: IReportHeadlineFigure[] }[] = []
+  figures.forEach((figure) => {
+    const section = figure.section || null
+    const current = groups[groups.length - 1]
+    if (current && current.section === section) current.figures.push(figure)
+    else groups.push({ section, figures: [figure] })
+  })
+  return groups
 }
 
 function FigureGrid({ figures }: { figures: IReportHeadlineFigure[] }) {
