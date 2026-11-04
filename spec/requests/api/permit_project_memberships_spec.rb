@@ -206,7 +206,7 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
             headers: headers,
             as: :json
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       expect(membership.reload.access).to eq("full")
     end
 
@@ -260,7 +260,7 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
             headers: headers,
             as: :json
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       expect(creator_membership.reload.contact_designation).to eq("primary")
     end
 

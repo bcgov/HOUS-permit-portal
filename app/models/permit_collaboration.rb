@@ -8,6 +8,8 @@ class PermitCollaboration < ApplicationRecord
   belongs_to :permit_application, touch: true
 
   enum :collaborator_type, { delegatee: 0, assignee: 1 }, default: 0
+  # 0 is a leftover submission row until HUB-5783. New rows are review.
+  enum :collaboration_type, { submission: 0, review: 1 }, default: :review
 
   after_save :reindex_permit_application
   after_commit :reindex_permit_project

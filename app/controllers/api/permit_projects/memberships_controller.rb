@@ -23,7 +23,7 @@ class Api::PermitProjects::MembershipsController < Api::ApplicationController
         render_error(
           "project_membership.update_error",
           {
-            status: :unprocessable_entity,
+            status: :unprocessable_content,
             log_args: {
               errors: @membership.errors.full_messages,
               params: membership_params.to_h

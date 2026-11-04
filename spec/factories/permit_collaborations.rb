@@ -7,6 +7,7 @@ FactoryBot.define do
                   jurisdiction: collaborator.jurisdiction
     end
 
+    collaboration_type { :review }
     collaborator_type { :delegatee }
 
     trait :delegatee do
