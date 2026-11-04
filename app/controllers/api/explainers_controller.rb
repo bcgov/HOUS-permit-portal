@@ -1,13 +1,13 @@
 class Api::ExplainersController < Api::ApplicationController
+  skip_before_action :authenticate_user!, only: :show
   before_action :set_requirement_template
 
   def show
     explainer = find_or_build
     authorize explainer
 
-    # Managers only need to know that a draft exists. The read-only modal
-    # loads the page after it is published.
-    unless current_user.super_admin? || explainer.published?
+    # Managers only need to know that a draft exists. Content loads after it is published.
+    unless current_user&.super_admin? || explainer.published?
       return render_success nil
     end
 
@@ -52,12 +52,21 @@ class Api::ExplainersController < Api::ApplicationController
 
   def explainer_render_opts
     meta = {
-      related_template_options:
-        RequirementTemplateOptionBlueprint.render_as_hash(
-          related_template_options
-        )
+      permit:
+        RequirementTemplatePermitBlueprint.render_as_hash(
+          @requirement_template
+        ),
+      related_permits:
+        RequirementTemplatePermitBlueprint.render_as_hash(related_permits)
     }
-    if current_user.super_admin?
+    if current_user&.super_admin?
+      meta[
+        :related_template_options
+      ] = RequirementTemplateOptionBlueprint.render_as_hash(
+        related_template_options
+      )
+    end
+    if current_user&.super_admin?
       meta[
         :jurisdiction_explainers
       ] = JurisdictionExplainerBlueprint.render_as_hash(
@@ -65,6 +74,17 @@ class Api::ExplainersController < Api::ApplicationController
       )
     end
     { blueprint: ExplainerBlueprint, meta: }
+  end
+
+  def related_permits
+    explainer = @requirement_template.explainer
+    return RequirementTemplate.none unless explainer&.persisted?
+
+    explainer
+      .related_templates
+      .kept
+      .includes(:explainer)
+      .select { |template| template.explainer&.published? }
   end
 
   def related_template_options

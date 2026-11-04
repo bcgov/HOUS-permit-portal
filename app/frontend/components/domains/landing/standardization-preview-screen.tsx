@@ -1,6 +1,7 @@
 import {
   Box,
   Container,
+  Flex,
   Grid,
   Heading,
   Link,
@@ -18,6 +19,7 @@ import { useTranslation } from "react-i18next"
 import { ITemplateVersion } from "../../../models/template-version"
 import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus } from "../../../types/enums"
+import { permitApplicationInfoPath } from "../../../utils/permit-application-info-path"
 import { groupTemplateVersionsByCategory } from "../../../utils/template-version-grouping"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { RouterLink } from "../../shared/navigation/router-link"
@@ -70,21 +72,35 @@ export const StandardizationPreviewScreen = observer(function StandardizationPre
                         {template.description}
                       </Text>
                     </Box>
-                    <LinkOverlay
-                      as={RouterLink}
-                      to={`/template-versions/${template.id}/preview`}
-                      color="text.link"
-                      fontWeight="bold"
-                      display="flex"
-                      alignItems="center"
-                      gap={2}
-                      _hover={{ textDecoration: "underline" }}
-                      alignSelf="flex-end"
-                      width="full"
-                      justifyContent="flex-end"
-                    >
-                      {t("standardizationPreview.previewDraftForm")} <CaretRight />
-                    </LinkOverlay>
+                    <Flex w="full" align="center" justify="space-between" gap={4}>
+                      {template.explainerPublished ? (
+                        <RouterLink
+                          to={permitApplicationInfoPath(template.requirementTemplateId)}
+                          fontSize="sm"
+                          color="text.link"
+                          textDecoration="underline"
+                          position="relative"
+                          zIndex={1}
+                        >
+                          {t("requirementTemplate.explainer.publicPage.viewPermitInformation")}
+                        </RouterLink>
+                      ) : (
+                        <Box />
+                      )}
+                      <LinkOverlay
+                        as={RouterLink}
+                        to={`/template-versions/${template.id}/preview`}
+                        color="text.link"
+                        fontWeight="bold"
+                        display="inline-flex"
+                        alignItems="center"
+                        gap={2}
+                        _hover={{ textDecoration: "underline" }}
+                        flexShrink={0}
+                      >
+                        {t("standardizationPreview.previewDraftForm")} <CaretRight />
+                      </LinkOverlay>
+                    </Flex>
                   </VStack>
                 </LinkBox>
               ))}

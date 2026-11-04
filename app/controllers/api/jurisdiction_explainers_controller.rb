@@ -1,4 +1,5 @@
 class Api::JurisdictionExplainersController < Api::ApplicationController
+  skip_before_action :authenticate_user!, only: :show
   before_action :set_requirement_template
   before_action :set_jurisdiction_explainer
 
@@ -6,11 +7,7 @@ class Api::JurisdictionExplainersController < Api::ApplicationController
     authorize @jurisdiction_explainer
 
     render_success(
-      if @jurisdiction_explainer.persisted?
-        @jurisdiction_explainer
-      else
-        nil
-      end
+      (@jurisdiction_explainer.persisted? ? @jurisdiction_explainer : nil)
     )
   end
 

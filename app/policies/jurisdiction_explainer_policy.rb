@@ -2,11 +2,11 @@ class JurisdictionExplainerPolicy < ApplicationPolicy
   def show?
     return true if user&.super_admin?
 
-    can_manage_settings? && explainer_published?
+    explainer_published?
   end
 
   def update?
-    can_manage_settings? && explainer_published?
+    sandbox.nil? && can_manage_settings? && explainer_published?
   end
 
   private

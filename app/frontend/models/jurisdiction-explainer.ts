@@ -10,10 +10,18 @@ export interface IJurisdictionExplainer {
   qualifiedName: string
 }
 
+export interface IExplainerPermit {
+  id: string
+  nickname: string | null
+  description: string | null
+}
+
 export interface IExplainerLoadResult {
   explainer: IExplainer | null
   relatedTemplateOptions: IOption[]
   jurisdictionExplainers: IJurisdictionExplainer[]
+  permit?: IExplainerPermit | null
+  relatedPermits?: IExplainerPermit[]
 }
 
 export interface IJurisdictionExplainerLoadResult {

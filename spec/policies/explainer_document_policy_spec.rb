@@ -19,5 +19,6 @@ RSpec.describe ExplainerDocumentPolicy, type: :policy do
     document = published.documents.create!(file: TestData.cached_file_data)
 
     expect(policy(create(:user), document).download?).to be true
+    expect(policy(nil, document).download?).to be true
   end
 end

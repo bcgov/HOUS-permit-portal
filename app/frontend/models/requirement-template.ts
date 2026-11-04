@@ -208,6 +208,8 @@ export const RequirementTemplateModel = types.snapshotProcessor(
           explainer: self.explainer,
           relatedTemplateOptions: response.meta?.relatedTemplateOptions ?? [],
           jurisdictionExplainers: response.meta?.jurisdictionExplainers ?? [],
+          permit: response.meta?.permit ?? null,
+          relatedPermits: response.meta?.relatedPermits ?? [],
         }
       }),
       saveExplainer: flow(function* (explainer: IExplainerParams) {

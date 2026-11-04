@@ -113,6 +113,10 @@ class PermitApplicationBlueprint < Blueprinter::Base
     association :template_version, blueprint: TemplateVersionBlueprint
     association :published_template_version, blueprint: TemplateVersionBlueprint
 
+    field :explainer_published do |pa, _options|
+      pa.requirement_template&.explainer&.published? || false
+    end
+
     field :template_version_disabled_by_jurisdiction do |pa, _options|
       pa.template_version_disabled_by_jurisdiction?
     end
