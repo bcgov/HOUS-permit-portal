@@ -535,65 +535,28 @@ class NotificationService
 
   def self.publish_application_submission_event(permit_application)
     notification_user_hash = {}
+    user = permit_application.submitter
 
-    users_that_can_submit = [permit_application.submitter]
-
-    designated_submitter_user =
-      permit_application.users_by_collaboration_options(
-        collaboration_type: :submission,
-        collaborator_type: :delegatee
-      ).first
-    assignee_users =
-      permit_application.users_by_collaboration_options(
-        collaboration_type: :submission,
-        collaborator_type: :assignee
-      )
-
-    if designated_submitter_user.present?
-      users_that_can_submit << designated_submitter_user
+    if user.preference&.enable_in_app_application_submission_notification
+      notification_user_hash[
+        user.id
+      ] = permit_application.submit_event_notification_data
     end
 
-    users_that_can_submit.each do |user|
-      if user.preference&.enable_in_app_application_submission_notification
-        notification_user_hash[
-          user.id
-        ] = permit_application.submit_event_notification_data
-      end
-
-      if user.preference&.enable_email_application_submission_notification
-        PermitHubMailer.notify_submitter_application_submitted(
-          permit_application,
-          user
-        )&.deliver_later
-      end
-
-      permit_application
-        .confirmed_submission_contacts
-        .each do |submission_contact|
-        PermitHubMailer.notify_reviewer_application_received(
-          submission_contact,
-          permit_application
-        ).deliver_later
-      end
+    if user.preference&.enable_email_application_submission_notification
+      PermitHubMailer.notify_submitter_application_submitted(
+        permit_application,
+        user
+      )&.deliver_later
     end
 
-    # assignees to be notified
-    assignee_users.each do |user|
-      # skip the designated submitter as they have already been added and use a different preference settings
-      next if user.id == designated_submitter_user&.id
-
-      if user.preference&.enable_in_app_collaboration_notification
-        notification_user_hash[
-          user.id
-        ] = permit_application.submit_event_notification_data
-      end
-
-      if user.preference&.enable_email_collaboration_notification
-        PermitHubMailer.notify_submitter_application_submitted(
-          permit_application,
-          user
-        )&.deliver_later
-      end
+    permit_application
+      .confirmed_submission_contacts
+      .each do |submission_contact|
+      PermitHubMailer.notify_reviewer_application_received(
+        submission_contact,
+        permit_application
+      ).deliver_later
     end
 
     unless notification_user_hash.empty?
@@ -603,32 +566,19 @@ class NotificationService
 
   def self.publish_application_revisions_request_event(permit_application)
     notification_user_hash = {}
+    user = permit_application.submitter
 
-    users_that_can_submit = [permit_application.submitter]
-
-    designated_submitter_user =
-      permit_application.users_by_collaboration_options(
-        collaboration_type: :submission,
-        collaborator_type: :delegatee
-      ).first
-
-    if designated_submitter_user.present?
-      users_that_can_submit << designated_submitter_user
+    if user.preference&.enable_in_app_application_revisions_request_notification
+      notification_user_hash[
+        user.id
+      ] = permit_application.revisions_request_event_notification_data
     end
 
-    users_that_can_submit.each do |user|
-      if user.preference&.enable_in_app_application_revisions_request_notification
-        notification_user_hash[
-          user.id
-        ] = permit_application.revisions_request_event_notification_data
-      end
-
-      if user.preference&.enable_email_application_revisions_request_notification
-        PermitHubMailer.notify_application_revisions_requested(
-          permit_application,
-          user
-        )&.deliver_later
-      end
+    if user.preference&.enable_email_application_revisions_request_notification
+      PermitHubMailer.notify_application_revisions_requested(
+        permit_application,
+        user
+      )&.deliver_later
     end
 
     unless notification_user_hash.empty?
@@ -648,28 +598,35 @@ class NotificationService
       end
     return unless created_by_jurisdiction
 
-    owner = permit_project.owner
-    return if owner.blank?
-
-    preference = owner.preference
     notification_user_hash = {}
+    permit_project
+      .project_memberships
+      .where(contact_designation: %i[primary alternate])
+      .includes(:user)
+      .each do |membership|
+        user = membership.user
+        next if user.blank?
 
-    if preference&.enable_in_app_applications_added_notification
-      notification_user_hash[owner.id] = applications_added_notification_data(
-        permit_project,
-        applications,
-        note_body
-      )
-    end
+        preference = user.preference
+        if preference&.enable_in_app_applications_added_notification
+          notification_user_hash[
+            user.id
+          ] = applications_added_notification_data(
+            permit_project,
+            applications,
+            note_body
+          )
+        end
 
-    if preference&.enable_email_applications_added_notification
-      PermitHubMailer.notify_applications_added(
-        permit_project,
-        applications,
-        note_body,
-        owner
-      )&.deliver_later
-    end
+        if preference&.enable_email_applications_added_notification
+          PermitHubMailer.notify_applications_added(
+            permit_project,
+            applications,
+            note_body,
+            user
+          )&.deliver_later
+        end
+      end
 
     return if notification_user_hash.empty?
 

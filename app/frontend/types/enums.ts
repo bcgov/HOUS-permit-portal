@@ -561,16 +561,6 @@ export enum ENotificationActionType {
   releaseNotePublish = "release_note_publish",
 }
 
-export enum ECollaboratorableType {
-  Jurisdiction = "Jurisdiction",
-  User = "User",
-}
-
-export enum ECollaborationType {
-  submission = "submission",
-  review = "review",
-}
-
 export enum ECollaboratorType {
   delegatee = "delegatee",
   assignee = "assignee",

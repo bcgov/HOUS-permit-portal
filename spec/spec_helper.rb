@@ -114,6 +114,7 @@ RSpec.configure do |config|
     PreCheck.reindex
     OverheatingCode.reindex
     ProjectMeeting.reindex
+    ProjectMembership.reindex
     ReleaseNote.reindex
 
     # and disable callbacks

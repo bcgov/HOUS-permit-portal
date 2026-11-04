@@ -1,10 +1,8 @@
 class PermitApplicationPolicy < ApplicationPolicy
   def show?
-    if record.submitter == user ||
-         record.collaborator?(
-           user_id: user.id,
-           collaboration_type: :submission
-         ) || record.permit_project&.owner_id == user.id
+    # MEMBERSHIP COMMENT: later, authorize from membership.
+    # owner_id only identifies the creator.
+    if record.submitter == user || record.permit_project&.owner_id == user.id
       true
     elsif user.review_staff?
       return false unless user.member_of?(record.jurisdiction.id)
@@ -12,6 +10,8 @@ class PermitApplicationPolicy < ApplicationPolicy
       return true unless record.new_draft?
 
       record.permit_project&.project_meetings&.active&.exists? == true
+    else
+      false
     end
   end
 
@@ -19,6 +19,8 @@ class PermitApplicationPolicy < ApplicationPolicy
     project = record.permit_project
     return false unless project
 
+    # MEMBERSHIP COMMENT: later, authorize from membership.
+    # owner_id only identifies the creator.
     PermitProjectPolicy.new(user_context, project).show? &&
       (project.owner_id == user.id || user.review_staff?)
   end
@@ -60,14 +62,7 @@ class PermitApplicationPolicy < ApplicationPolicy
   end
 
   def update_version?
-    permit_application = record
-    designated_submitter =
-      permit_application.users_by_collaboration_options(
-        collaboration_type: :submission,
-        collaborator_type: :delegatee
-      ).first
-
-    record.draft? && (record.submitter == user || designated_submitter == user)
+    record.draft? && record.submitter == user
   end
 
   def update_revision_requests?
@@ -103,13 +98,7 @@ class PermitApplicationPolicy < ApplicationPolicy
   end
 
   def submit?
-    record.draft? ? record.submitter == user : user.review_staff?
-    if record.draft?
-      record.submission_requirement_block_edit_permissions(user_id: user.id) ==
-        :all
-    else
-      user.review_staff? && user.member_of?(record.jurisdiction_id)
-    end
+    record.draft? && record.submitter == user
   end
 
   def transition_status?
@@ -140,7 +129,7 @@ class PermitApplicationPolicy < ApplicationPolicy
 
     return true unless feature_enabled
 
-    designated_reviewer = record.permit_collaborations.review.delegatee.first
+    designated_reviewer = record.permit_collaborations.delegatee.first
     return true if designated_reviewer.nil?
 
     designated_reviewer.collaborator.user_id == user.id
@@ -149,65 +138,29 @@ class PermitApplicationPolicy < ApplicationPolicy
   def create_permit_collaboration?
     permit_collaboration = record
 
-    if permit_collaboration.submission?
-      permit_collaboration.permit_application.submitter == user &&
-        permit_collaboration.permit_application.draft?
-    elsif permit_collaboration.review?
-      (user.review_staff?) &&
-        user
-          .jurisdictions
-          .find_by(id: permit_collaboration.permit_application.jurisdiction_id)
-          .present? &&
-        permit_collaboration.permit_application.submitted_at_least_once?
-    else
-      false
-    end
+    user.review_staff? &&
+      user
+        .jurisdictions
+        .find_by(id: permit_collaboration.permit_application.jurisdiction_id)
+        .present? &&
+      permit_collaboration.permit_application.submitted_at_least_once?
   end
 
   def remove_collaborator_collaborations?
     permit_application = record
 
-    if permit_application.draft?
-      permit_application.submitter_id == user.id
-    else
-      user.review_staff? && user.member_of?(permit_application.jurisdiction_id)
-    end
-  end
-
-  def invite_new_collaborator?
-    permit_collaboration = record
-
-    # New collaborators (i.e new user in the system) can only be invited for submission collaborations
-    return false if permit_collaboration.review?
-
-    permit_collaboration.permit_application.submitter == user &&
-      permit_collaboration.permit_application.draft?
+    user.review_staff? && user.member_of?(permit_application.jurisdiction_id) &&
+      permit_application.submitted_at_least_once?
   end
 
   def create_or_update_permit_block_status?
     permit_block_status = record
 
-    if permit_block_status.submission?
-      block_permissions =
-        permit_block_status.permit_application.submission_requirement_block_edit_permissions(
-          user_id: user.id
-        )
-
-      permit_block_status.permit_application.draft? &&
-        block_permissions.present? &&
-        (
-          block_permissions == :all ||
-            block_permissions.include?(permit_block_status.requirement_block_id)
-        )
-    elsif permit_block_status.review?
-      (user.review_staff?) &&
-        user
-          .jurisdictions
-          .find_by(id: permit_block_status.permit_application.jurisdiction_id)
-          .present? && permit_block_status.permit_application.submitted?
-    else
-      false
-    end
+    user.review_staff? &&
+      user
+        .jurisdictions
+        .find_by(id: permit_block_status.permit_application.jurisdiction_id)
+        .present? && permit_block_status.permit_application.submitted?
   end
 
   def download_application_metrics_csv?
@@ -226,24 +179,9 @@ class PermitApplicationPolicy < ApplicationPolicy
 
   class Scope < Scope
     def resolve
-      # Identify the collaboration type used for "submission" access checks.
-      submission_type =
-        PermitCollaboration.collaboration_types.fetch(:submission)
-
-      # Access rule 1: user is a submission collaborator on the permit application.
-      # Uses EXISTS to avoid JOINs that could duplicate rows.
-      exists_sql = <<-SQL.squish
-        EXISTS (
-          SELECT 1 FROM permit_collaborations pc
-          JOIN collaborators c ON c.id = pc.collaborator_id
-          WHERE pc.permit_application_id = permit_applications.id
-            AND pc.collaboration_type = :submission_type
-            AND pc.discarded_at IS NULL
-            AND c.user_id = :uid
-        )
-      SQL
-
-      # Access rule 2: user owns the parent permit project.
+      # MEMBERSHIP COMMENT: later, authorize from membership.
+      # owner_id only identifies the creator.
+      # Access rule: user owns the parent permit project.
       owner_exists_sql = <<-SQL.squish
         EXISTS (
           SELECT 1 FROM permit_projects pp
@@ -254,16 +192,10 @@ class PermitApplicationPolicy < ApplicationPolicy
 
       # Base access rules (ORed together later):
       # - submitter of the application
-      # - submission collaborator
       # - owner of the parent permit project
-      clauses = [
-        "permit_applications.submitter_id = :uid",
-        exists_sql,
-        owner_exists_sql
-      ]
+      clauses = ["permit_applications.submitter_id = :uid", owner_exists_sql]
 
-      # Values for parameterized SQL.
-      values = { uid: user.id, submission_type: submission_type }
+      values = { uid: user.id }
 
       if user.review_staff?
         # Access rule 3 (review staff only): applications on projects in their

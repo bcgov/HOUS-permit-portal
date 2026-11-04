@@ -17,6 +17,7 @@ import { IPreCheckStore, PreCheckStoreModel } from "./pre-check-store"
 import { IProjectAuditStore, ProjectAuditStoreModel } from "./project-audit-store"
 import { IProjectMeetingInboxStore, ProjectMeetingInboxStoreModel } from "./project-meeting-inbox-store"
 import { IProjectMeetingStore, ProjectMeetingStoreModel } from "./project-meeting-store"
+import { IProjectPeopleStore, ProjectPeopleStoreModel } from "./project-people-store"
 import { IReleaseNoteStore, ReleaseNoteStoreModel } from "./release-note-store"
 import { IReportStore, ReportStoreModel } from "./report-store"
 import { IRequirementBlockStoreModel, RequirementBlockStoreModel } from "./requirement-block-store"
@@ -45,6 +46,7 @@ export const RootStoreModel = types
     projectAuditStore: types.optional(ProjectAuditStoreModel, {}),
     preCheckStore: types.optional(PreCheckStoreModel, {}),
     projectMeetingStore: types.optional(ProjectMeetingStoreModel, {}),
+    projectPeopleStore: types.optional(ProjectPeopleStoreModel, {}),
     projectMeetingInboxStore: types.optional(ProjectMeetingInboxStoreModel, {}),
     overheatingCodeStore: types.optional(OverheatingCodeStoreModel, {}),
     jurisdictionStore: types.optional(JurisdictionStoreModel, {}),
@@ -146,6 +148,7 @@ export interface IRootStore extends IStateTreeNode {
   projectAuditStore: IProjectAuditStore
   preCheckStore: IPreCheckStore
   projectMeetingStore: IProjectMeetingStore
+  projectPeopleStore: IProjectPeopleStore
   projectMeetingInboxStore: IProjectMeetingInboxStore
   overheatingCodeStore: IOverheatingCodeStore
   jurisdictionStore: IJurisdictionStore

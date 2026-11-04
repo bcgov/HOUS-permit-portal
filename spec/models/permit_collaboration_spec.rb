@@ -9,14 +9,7 @@ RSpec.describe PermitCollaboration, type: :model do
   end
 
   describe "enums" do
-    subject { build_stubbed(:permit_collaboration) }
-
-    it do
-      should define_enum_for(:collaboration_type).with_values(
-               submission: 0,
-               review: 1
-             )
-    end
+    subject { described_class.new }
 
     it do
       should define_enum_for(:collaborator_type).with_values(
@@ -34,17 +27,20 @@ RSpec.describe PermitCollaboration, type: :model do
   describe "validations" do
     let(:jurisdiction) { create(:sub_district) }
 
+    def review_collaborator
+      reviewer = create(:user, :reviewer, jurisdiction: jurisdiction)
+      jurisdiction.collaborators.find_by!(user_id: reviewer.id)
+    end
+
     describe "uniqueness" do
       it "prevents duplicate collaborations for the same scope" do
         permit_application =
-          create(:permit_application, jurisdiction: jurisdiction)
-        collaborator =
           create(
-            :collaborator,
-            user: create(:user),
-            collaboratorable: create(:user)
+            :permit_application,
+            :newly_submitted,
+            jurisdiction: jurisdiction
           )
-
+        collaborator = review_collaborator
         assigned_requirement_block_id = SecureRandom.uuid
         permit_application.template_version.update!(
           requirement_blocks_json: {
@@ -58,7 +54,6 @@ RSpec.describe PermitCollaboration, type: :model do
           :permit_collaboration,
           permit_application: permit_application,
           collaborator: collaborator,
-          collaboration_type: :submission,
           collaborator_type: :assignee,
           assigned_requirement_block_id: assigned_requirement_block_id
         )
@@ -68,7 +63,6 @@ RSpec.describe PermitCollaboration, type: :model do
             :permit_collaboration,
             permit_application: permit_application,
             collaborator: collaborator,
-            collaboration_type: :submission,
             collaborator_type: :assignee,
             assigned_requirement_block_id: assigned_requirement_block_id
           )
@@ -83,20 +77,17 @@ RSpec.describe PermitCollaboration, type: :model do
     describe "assigned_requirement_block_id" do
       it "requires assigned_requirement_block_id when collaborator_type is assignee" do
         permit_application =
-          create(:permit_application, jurisdiction: jurisdiction)
-        collaborator =
           create(
-            :collaborator,
-            user: create(:user),
-            collaboratorable: create(:user)
+            :permit_application,
+            :newly_submitted,
+            jurisdiction: jurisdiction
           )
 
         collaboration =
           build(
             :permit_collaboration,
             permit_application: permit_application,
-            collaborator: collaborator,
-            collaboration_type: :submission,
+            collaborator: review_collaborator,
             collaborator_type: :assignee,
             assigned_requirement_block_id: nil
           )
@@ -109,20 +100,17 @@ RSpec.describe PermitCollaboration, type: :model do
 
       it "validates assigned_requirement_block_id exists in template_version.requirement_blocks_json for assignees (on create)" do
         permit_application =
-          create(:permit_application, jurisdiction: jurisdiction)
-        collaborator =
           create(
-            :collaborator,
-            user: create(:user),
-            collaboratorable: create(:user)
+            :permit_application,
+            :newly_submitted,
+            jurisdiction: jurisdiction
           )
 
         collaboration =
           build(
             :permit_collaboration,
             permit_application: permit_application,
-            collaborator: collaborator,
-            collaboration_type: :submission,
+            collaborator: review_collaborator,
             collaborator_type: :assignee,
             assigned_requirement_block_id: SecureRandom.uuid
           )
@@ -140,19 +128,17 @@ RSpec.describe PermitCollaboration, type: :model do
     describe "delegatee uniqueness per collaborator" do
       it "prevents creating multiple delegatee collaborations for the same collaborator on a permit application" do
         permit_application =
-          create(:permit_application, jurisdiction: jurisdiction)
-        collaborator =
           create(
-            :collaborator,
-            user: create(:user),
-            collaboratorable: create(:user)
+            :permit_application,
+            :newly_submitted,
+            jurisdiction: jurisdiction
           )
+        collaborator = review_collaborator
 
         create(
           :permit_collaboration,
           permit_application: permit_application,
           collaborator: collaborator,
-          collaboration_type: :submission,
           collaborator_type: :delegatee
         )
 
@@ -161,7 +147,6 @@ RSpec.describe PermitCollaboration, type: :model do
             :permit_collaboration,
             permit_application: permit_application,
             collaborator: collaborator,
-            collaboration_type: :submission,
             collaborator_type: :delegatee
           )
 
@@ -172,74 +157,16 @@ RSpec.describe PermitCollaboration, type: :model do
       end
     end
 
-    describe "author cannot be a submission collaborator" do
-      it "adds an error when collaborator.user is the permit_application submitter (submission)" do
+    describe "must be submitted for review" do
+      it "requires the permit application to have been submitted" do
         permit_application =
           create(:permit_application, jurisdiction: jurisdiction)
-        collaborator =
-          create(
-            :collaborator,
-            user: permit_application.submitter,
-            collaboratorable: create(:user)
-          )
 
         collaboration =
           build(
             :permit_collaboration,
             permit_application: permit_application,
-            collaborator: collaborator,
-            collaboration_type: :submission,
-            collaborator_type: :delegatee
-          )
-
-        expect(collaboration).not_to be_valid
-        expect(
-          collaboration.errors.of_kind?(:collaborator, :cannot_be_author)
-        ).to be(true)
-      end
-    end
-
-    describe "collaboration_type must match permit application state" do
-      it "requires permit application to be draft for submission collaborations" do
-        permit_application =
-          create(
-            :permit_application,
-            :newly_submitted,
-            jurisdiction: jurisdiction
-          )
-        collaborator =
-          create(
-            :collaborator,
-            user: create(:user),
-            collaboratorable: create(:user)
-          )
-
-        collaboration =
-          build(
-            :permit_collaboration,
-            permit_application: permit_application,
-            collaborator: collaborator,
-            collaboration_type: :submission
-          )
-
-        expect(collaboration).not_to be_valid
-        expect(
-          collaboration.errors.of_kind?(:base, :must_be_draft_for_submission)
-        ).to be(true)
-      end
-
-      it "requires permit application to be submitted for review collaborations" do
-        permit_application =
-          create(:permit_application, jurisdiction: jurisdiction) # draft
-        reviewer = create(:user, :reviewer, jurisdiction: jurisdiction)
-        collaborator = jurisdiction.collaborators.find_by!(user_id: reviewer.id)
-
-        collaboration =
-          build(
-            :permit_collaboration,
-            permit_application: permit_application,
-            collaborator: collaborator,
-            collaboration_type: :review
+            collaborator: review_collaborator
           )
 
         expect(collaboration).not_to be_valid
@@ -259,8 +186,6 @@ RSpec.describe PermitCollaboration, type: :model do
           )
         other_jurisdiction = create(:sub_district)
         reviewer = create(:user, :reviewer, jurisdiction: other_jurisdiction)
-
-        # reviewer is a collaborator for other_jurisdiction, but not for permit_application.jurisdiction
         collaborator =
           other_jurisdiction.collaborators.find_by!(user_id: reviewer.id)
 
@@ -268,8 +193,7 @@ RSpec.describe PermitCollaboration, type: :model do
           build(
             :permit_collaboration,
             permit_application: permit_application,
-            collaborator: collaborator,
-            collaboration_type: :review
+            collaborator: collaborator
           )
 
         expect(collaboration).not_to be_valid
@@ -283,76 +207,48 @@ RSpec.describe PermitCollaboration, type: :model do
     end
   end
 
-  describe "callbacks" do
-    it "defaults collaboration_type to submission when collaboratorable is a User" do
-      permit_application = create(:permit_application)
-      collaborator =
-        create(
-          :collaborator,
-          user: create(:user),
-          collaboratorable: create(:user)
-        )
-
-      collaboration =
-        described_class.new(
-          permit_application: permit_application,
-          collaborator: collaborator
-        )
-      expect(collaboration.collaboration_type).to eq("submission")
-    end
-
-    it "defaults collaboration_type to review when collaboratorable is a Jurisdiction" do
-      jurisdiction = create(:sub_district)
-      permit_application =
-        create(
-          :permit_application,
-          :newly_submitted,
-          jurisdiction: jurisdiction
-        )
-      reviewer = create(:user, :reviewer, jurisdiction: jurisdiction)
-      collaborator = jurisdiction.collaborators.find_by!(user_id: reviewer.id)
-
-      collaboration =
-        described_class.new(
-          permit_application: permit_application,
-          collaborator: collaborator
-        )
-      expect(collaboration.collaboration_type).to eq("review")
-    end
-  end
-
   describe "instance methods" do
+    let(:jurisdiction) { create(:sub_district) }
+
+    def review_collaborator(user: nil)
+      reviewer = user || create(:user, :reviewer, jurisdiction: jurisdiction)
+      jurisdiction.collaborators.find_by!(user_id: reviewer.id)
+    end
+
     describe "#collaborator_name" do
       it "returns the collaborator user's name" do
-        collaborator_user = create(:user, first_name: "Taylor", last_name: "Ng")
-        collaborator =
+        collaborator_user =
           create(
-            :collaborator,
-            user: collaborator_user,
-            collaboratorable: create(:user)
+            :user,
+            :reviewer,
+            first_name: "Taylor",
+            last_name: "Ng",
+            jurisdiction: jurisdiction
           )
         collaboration =
-          create(:permit_collaboration, collaborator: collaborator)
+          create(
+            :permit_collaboration,
+            collaborator: review_collaborator(user: collaborator_user),
+            permit_application:
+              create(
+                :permit_application,
+                :newly_submitted,
+                jurisdiction: jurisdiction
+              )
+          )
 
         expect(collaboration.collaborator_name).to eq("Taylor Ng")
       end
     end
 
-    describe "#inviter_name" do
-      it "returns the collaboratorable name (inviter)" do
-        inviter = create(:user, first_name: "Avery", last_name: "Smith")
-        collaborator =
-          create(:collaborator, user: create(:user), collaboratorable: inviter)
-        collaboration =
-          create(:permit_collaboration, collaborator: collaborator)
-
-        expect(collaboration.inviter_name).to eq("Avery Smith")
-      end
-    end
-
     describe "#assigned_requirement_block_name and #assigned_block_exists?" do
       it "returns the assigned block name and whether it exists" do
-        permit_application = create(:permit_application)
+        permit_application =
+          create(
+            :permit_application,
+            :newly_submitted,
+            jurisdiction: jurisdiction
+          )
         block_id = SecureRandom.uuid
         permit_application.template_version.update!(
           requirement_blocks_json: {
@@ -362,18 +258,11 @@ RSpec.describe PermitCollaboration, type: :model do
           }
         )
 
-        collaborator =
-          create(
-            :collaborator,
-            user: create(:user),
-            collaboratorable: create(:user)
-          )
         collaboration =
           create(
             :permit_collaboration,
             permit_application: permit_application,
-            collaborator: collaborator,
-            collaboration_type: :submission,
+            collaborator: review_collaborator,
             collaborator_type: :assignee,
             assigned_requirement_block_id: block_id
           )
@@ -387,25 +276,23 @@ RSpec.describe PermitCollaboration, type: :model do
 
     describe "#collaboration_assignment_notification_data" do
       it "sets action_type and object_data keys" do
-        permit_application = create(:permit_application)
-        collaborator =
+        permit_application =
           create(
-            :collaborator,
-            user: create(:user),
-            collaboratorable: create(:user)
+            :permit_application,
+            :newly_submitted,
+            jurisdiction: jurisdiction
           )
         collaboration =
           create(
             :permit_collaboration,
             permit_application: permit_application,
-            collaborator: collaborator,
-            collaboration_type: :submission,
+            collaborator: review_collaborator,
             collaborator_type: :delegatee
           )
 
         data = collaboration.collaboration_assignment_notification_data
         expect(data["action_type"]).to eq(
-          Constants::NotificationActionTypes::SUBMISSION_COLLABORATION_ASSIGNMENT
+          Constants::NotificationActionTypes::REVIEW_COLLABORATION_ASSIGNMENT
         )
         expect(data["object_data"]["permit_application_id"]).to eq(
           permit_application.id
@@ -419,24 +306,20 @@ RSpec.describe PermitCollaboration, type: :model do
 
     describe "destroy callbacks" do
       it "publishes unassignment notification when enabled in collaborator preferences" do
-        permit_application = create(:permit_application)
-        collaborator_user = create(:user)
-        Preference.create!(
-          user: collaborator_user,
+        collaborator_user = create(:user, :reviewer, jurisdiction: jurisdiction)
+        collaborator_user.preference.update!(
           enable_in_app_collaboration_notification: true
         )
-
-        collaborator =
-          create(
-            :collaborator,
-            user: collaborator_user,
-            collaboratorable: create(:user)
-          )
         collaboration =
           create(
             :permit_collaboration,
-            permit_application: permit_application,
-            collaborator: collaborator
+            collaborator: review_collaborator(user: collaborator_user),
+            permit_application:
+              create(
+                :permit_application,
+                :newly_submitted,
+                jurisdiction: jurisdiction
+              )
           )
 
         allow(NotificationService).to receive(
@@ -450,24 +333,20 @@ RSpec.describe PermitCollaboration, type: :model do
       end
 
       it "does not publish unassignment notification when disabled in collaborator preferences" do
-        permit_application = create(:permit_application)
-        collaborator_user = create(:user)
-        Preference.create!(
-          user: collaborator_user,
+        collaborator_user = create(:user, :reviewer, jurisdiction: jurisdiction)
+        collaborator_user.preference.update!(
           enable_in_app_collaboration_notification: false
         )
-
-        collaborator =
-          create(
-            :collaborator,
-            user: collaborator_user,
-            collaboratorable: create(:user)
-          )
         collaboration =
           create(
             :permit_collaboration,
-            permit_application: permit_application,
-            collaborator: collaborator
+            collaborator: review_collaborator(user: collaborator_user),
+            permit_application:
+              create(
+                :permit_application,
+                :newly_submitted,
+                jurisdiction: jurisdiction
+              )
           )
 
         allow(NotificationService).to receive(

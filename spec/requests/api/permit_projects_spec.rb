@@ -277,20 +277,6 @@ RSpec.describe "Api::PermitProjects", type: :request, search: true do
     end
   end
 
-  describe "GET /api/permit_projects/:id/submission_collaborator_options" do
-    it "returns submission collaborator options" do
-      allow_any_instance_of(PermitProject).to receive(
-        :submission_collaborators
-      ).and_return([])
-
-      get "/api/permit_projects/#{permit_project.id}/submission_collaborator_options",
-          headers: headers
-
-      expect(response).to have_http_status(:ok)
-      expect(json_response["data"]).to eq([])
-    end
-  end
-
   describe "GET /api/permit_projects/jurisdiction_options" do
     it "returns jurisdiction options" do
       get "/api/permit_projects/jurisdiction_options", headers: headers

@@ -4,7 +4,6 @@ import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import {
-  ECollaborationType,
   ECollaboratorType,
   EPermitApplicationStatus,
   EPermitBlockStatus,
@@ -191,12 +190,9 @@ export const PermitApplicationModel = types.snapshotProcessor(
       },
     }))
     .views((self) => ({
-      getRequirementBlockIdToStatusMap(collaborationType: ECollaborationType) {
+      getRequirementBlockIdToStatusMap() {
         return self.permitBlockStatuses.reduce((acc, permitBlockStatus) => {
-          if (permitBlockStatus.collaborationType === collaborationType) {
-            acc[permitBlockStatus.requirementBlockId] = permitBlockStatus
-          }
-
+          acc[permitBlockStatus.requirementBlockId] = permitBlockStatus
           return acc
         }, {})
       },
@@ -209,8 +205,8 @@ export const PermitApplicationModel = types.snapshotProcessor(
       },
     }))
     .views((self) => ({
-      getPermitBlockStatus(collaborationType: ECollaborationType, requirementBlockId: string) {
-        return self.getRequirementBlockIdToStatusMap(collaborationType)[requirementBlockId]
+      getPermitBlockStatus(requirementBlockId: string) {
+        return self.getRequirementBlockIdToStatusMap()[requirementBlockId]
       },
       get previousSubmissionVersion() {
         if (self.submissionVersions.length <= 1) {
@@ -520,99 +516,77 @@ export const PermitApplicationModel = types.snapshotProcessor(
       },
     }))
     .views((self) => ({
-      getCollaborationsByType(collaborationType: ECollaborationType) {
+      getCollaborations() {
         const collaborations = Array.from(self.permitCollaborationMap.values())
-        const filtered = collaborations.filter((c) => c.collaborationType === collaborationType)
-        return mutableSortPermitCollaborations(filtered)
+        return mutableSortPermitCollaborations(collaborations)
       },
     }))
     .views((self) => ({
-      getCollaborationAssignees(collaborationType: ECollaborationType) {
+      getCollaborationAssignees() {
         return self
-          .getCollaborationsByType(collaborationType)
+          .getCollaborations()
           .filter((permitCollaboration) => permitCollaboration.collaboratorType === ECollaboratorType.assignee)
       },
-      getCollaborationDelegatee(collaborationType: ECollaborationType) {
+      getCollaborationDelegatee() {
         return (
           self
-            .getCollaborationsByType(collaborationType)
+            .getCollaborations()
             .find((permitCollaboration) => permitCollaboration.collaboratorType === ECollaboratorType.delegatee) ?? null
         )
       },
     }))
     .views((self) => ({
       get designatedReviewer() {
-        return self.getCollaborationDelegatee(ECollaborationType.review)
-      },
-      get designatedSubmitter() {
-        return self.getCollaborationDelegatee(ECollaborationType.submission)
+        return self.getCollaborationDelegatee()
       },
     }))
     .views((self) => ({
       get currentUserShouldSeeApplicationDiff() {
         const currentUser = self.rootStore.userStore.currentUser
-        return (
-          currentUser?.id === self.submitter?.id ||
-          currentUser?.id === self?.designatedSubmitter?.collaborator?.user?.id
-        )
+        return currentUser?.id === self.submitter?.id
       },
-      getCollaborationAssigneesByBlockIdMap(collaborationType: ECollaborationType) {
-        return self
-          .getCollaborationAssignees(collaborationType)
-          .reduce<Record<string, IPermitCollaboration[]>>((acc, collaboration) => {
-            const blockId = collaboration.assignedRequirementBlockId
+      getCollaborationAssigneesByBlockIdMap() {
+        return self.getCollaborationAssignees().reduce<Record<string, IPermitCollaboration[]>>((acc, collaboration) => {
+          const blockId = collaboration.assignedRequirementBlockId
 
-            if (!blockId) {
-              return acc
-            }
-
-            if (!acc[blockId]) {
-              acc[blockId] = []
-            }
-
-            acc[blockId].push(collaboration)
-
+          if (!blockId) {
             return acc
-          }, {})
+          }
+
+          if (!acc[blockId]) {
+            acc[blockId] = []
+          }
+
+          acc[blockId].push(collaboration)
+
+          return acc
+        }, {})
       },
     }))
     .views((self) => ({
-      getCollaborationAssigneesByBlockId(collaborationType: ECollaborationType, requirementBlockId: string) {
-        return self.getCollaborationAssigneesByBlockIdMap(collaborationType)[requirementBlockId] ?? []
+      getCollaborationAssigneesByBlockId(requirementBlockId: string) {
+        return self.getCollaborationAssigneesByBlockIdMap()[requirementBlockId] ?? []
       },
       canUserSubmit(user: IUser) {
         if (!user) return false
 
-        if (self.submitter?.id === user.id) {
-          return true
-        }
-
-        const delegateePermitCollaboration = self.designatedSubmitter
-
-        return delegateePermitCollaboration?.collaborator?.user?.id == user.id
+        return self.submitter?.id === user.id
       },
-      canUserManageCollaborators(user: IUser, collaborationType: ECollaborationType) {
+      canUserManageCollaborators(user: IUser) {
         if (!user) return false
 
-        if (collaborationType === ECollaborationType.review) {
-          return !self.isNewDraft && user.isReviewStaff
-        }
-
-        return self.isDraft && user?.id === self.submitter?.id
+        return !self.isNewDraft && user.isReviewStaff
       },
-      delegateeUser(collaborationType: ECollaborationType) {
-        return self.getCollaborationDelegatee(collaborationType)?.collaborator?.user
+      delegateeUser() {
+        return self.getCollaborationDelegatee()?.collaborator?.user
       },
-      getCollaborationUniqueUserCount(collaborationType: ECollaborationType) {
-        return R.uniqBy(
-          (collaboration) => collaboration.collaborator.user.id,
-          self.getCollaborationsByType(collaborationType)
-        ).length
+      getCollaborationUniqueUserCount() {
+        return R.uniqBy((collaboration) => collaboration.collaborator.user.id, self.getCollaborations()).length
       },
     }))
     .views((self) => ({
-      getSidebarAssigneesList(collaborationType: ECollaborationType) {
-        const assignees = self.getCollaborationAssignees(collaborationType)
+      getSidebarAssigneesList() {
+        const assignees = self.getCollaborationAssignees()
 
         return Object.values(
           assignees.reduce<
@@ -704,80 +678,26 @@ export const PermitApplicationModel = types.snapshotProcessor(
         const { data: permitCollaboration } = response.data
 
         if (permitCollaboration.collaboratorType === ECollaboratorType.delegatee) {
-          if (permitCollaboration.collaborationType === ECollaborationType.submission) {
-            const existingDelegatee = self.designatedSubmitter
-            existingDelegatee && self.permitCollaborationMap.delete(existingDelegatee.id)
-          } else {
-            const existingDelegatee = self.designatedReviewer
-            existingDelegatee && self.permitCollaborationMap.delete(existingDelegatee.id)
-          }
+          const existingDelegatee = self.designatedReviewer
+          existingDelegatee && self.permitCollaborationMap.delete(existingDelegatee.id)
         }
         self.updatePermitCollaboration(permitCollaboration)
 
         return self.getPermitCollaboration(permitCollaboration.id)
       }),
-      removeCollaboratorCollaborations: flow(function* (
-        collaboratorId: string,
-        collaboratorType: ECollaboratorType,
-        collaborationType: ECollaborationType
-      ) {
+      removeCollaboratorCollaborations: flow(function* (collaboratorId: string, collaboratorType: ECollaboratorType) {
         const response = yield self.environment.api.removeCollaboratorCollaborationsFromPermitApplication(self.id, {
           collaboratorId,
           collaboratorType,
-          collaborationType,
         })
 
         if (response.ok) {
-          self.getCollaborationAssignees(collaborationType).forEach((collaboration) => {
+          self.getCollaborationAssignees().forEach((collaboration) => {
             collaboration.collaborator.id === collaboratorId && self.permitCollaborationMap.delete(collaboration.id)
           })
         }
 
         return response.ok
-      }),
-      createOrUpdatePermitBlockStatus: flow(function* (
-        requirementBlockId: string,
-        status: EPermitBlockStatus,
-        collaborationType: ECollaborationType
-      ) {
-        const response = yield self.environment.api.createOrUpdatePermitBlockStatus(self.id, {
-          requirementBlockId,
-          status,
-          collaborationType,
-        })
-
-        if (!response.ok) {
-          return false
-        }
-
-        const { data: permitBlockStatus } = response.data
-
-        self.updatePermitBlockStatus(permitBlockStatus)
-
-        return self.permitBlockStatusMap.get(permitBlockStatus.id)
-      }),
-      inviteNewCollaborator: flow(function* (
-        collaboratorType: ECollaboratorType,
-        user: {
-          email: string
-          firstName: string
-          lastName: string
-        },
-        assignedRequirementBlockId?: string
-      ) {
-        const response = yield self.environment.api.inviteNewCollaboratorToPermitApplication(self.id, {
-          collaboratorType,
-          assignedRequirementBlockId,
-          user,
-        })
-
-        if (response.ok) {
-          const { data: permitCollaboration } = response.data
-          self.updatePermitCollaboration(permitCollaboration)
-          return self.getPermitCollaboration(permitCollaboration.id)
-        }
-
-        return false
       }),
       reinvitePermitCollaboration: flow(function* (permitCollaborationId: string) {
         const response = yield self.environment.api.reinvitePermitCollaboration(permitCollaborationId)
@@ -789,6 +709,22 @@ export const PermitApplicationModel = types.snapshotProcessor(
         }
 
         return false
+      }),
+      createOrUpdatePermitBlockStatus: flow(function* (requirementBlockId: string, status: EPermitBlockStatus) {
+        const response = yield self.environment.api.createOrUpdatePermitBlockStatus(self.id, {
+          requirementBlockId,
+          status,
+        })
+
+        if (!response.ok) {
+          return false
+        }
+
+        const { data: permitBlockStatus } = response.data
+
+        self.updatePermitBlockStatus(permitBlockStatus)
+
+        return self.permitBlockStatusMap.get(permitBlockStatus.id)
       }),
     }))
     .actions((self) => ({
