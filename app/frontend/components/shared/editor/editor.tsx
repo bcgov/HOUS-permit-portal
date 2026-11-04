@@ -1,7 +1,7 @@
 import { Link, ListBullets, ListNumbers, TextB, TextItalic, TextUnderline } from "@phosphor-icons/react"
 import Placeholder from "@tiptap/extension-placeholder"
 import Underline from "@tiptap/extension-underline"
-import { EditorContent, useEditor } from "@tiptap/react"
+import { EditorContent, useEditor, useEditorState } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
 import debounce from "lodash/debounce"
 import { observer } from "mobx-react-lite"
@@ -98,6 +98,18 @@ export const Editor = observer(
       },
     })
 
+    const activeMarks = useEditorState({
+      editor,
+      selector: ({ editor: currentEditor }) => ({
+        bold: currentEditor?.isActive("bold") ?? false,
+        italic: currentEditor?.isActive("italic") ?? false,
+        underline: currentEditor?.isActive("underline") ?? false,
+        bulletList: currentEditor?.isActive("bulletList") ?? false,
+        orderedList: currentEditor?.isActive("orderedList") ?? false,
+        link: currentEditor?.isActive("link") ?? false,
+      }),
+    })
+
     // Update content when htmlValue prop changes externally
     useEffect(() => {
       if (editor && htmlValue !== editor.getHTML()) {
@@ -169,43 +181,36 @@ export const Editor = observer(
       const availableItems: Array<{
         name: TToolbarItemName | string
         action: () => void
-        isActive?: () => boolean
         icon?: React.ReactNode
       }> = [
         {
           name: "bold",
           action: () => editor.chain().focus().toggleBold().run(),
-          isActive: () => editor.isActive("bold"),
           icon: <TextB size={16} weight="bold" />,
         },
         {
           name: "italic",
           action: () => editor.chain().focus().toggleItalic().run(),
-          isActive: () => editor.isActive("italic"),
           icon: <TextItalic size={16} />,
         },
         {
           name: "underline",
           action: () => editor.chain().focus().toggleUnderline().run(),
-          isActive: () => editor.isActive("underline"),
           icon: <TextUnderline size={16} />,
         },
         {
           name: { list: "bullet" },
           action: () => editor.chain().focus().toggleBulletList().run(),
-          isActive: () => editor.isActive("bulletList"),
           icon: <ListBullets size={16} />,
         },
         {
           name: { list: "ordered" },
           action: () => editor.chain().focus().toggleOrderedList().run(),
-          isActive: () => editor.isActive("orderedList"),
           icon: <ListNumbers size={16} />,
         },
         {
           name: "link",
           action: handleLinkClick,
-          isActive: () => editor.isActive("link"),
           icon: <Link size={16} />,
         },
       ]
@@ -221,7 +226,7 @@ export const Editor = observer(
           toolbarItems.push({
             name: itemName,
             action: item.action,
-            isActive: item.isActive?.(),
+            isActive: activeMarks?.[itemName as keyof typeof activeMarks] ?? false,
             icon: item.icon,
           })
         }
