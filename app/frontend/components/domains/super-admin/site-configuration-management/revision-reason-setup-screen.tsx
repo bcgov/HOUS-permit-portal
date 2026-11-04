@@ -58,6 +58,9 @@ export const RevisionReasonSetupScreen = observer(function RevisionReasonSetupSc
     await updateSiteConfiguration(formData)
   }
 
+  const rejectBlank = (label: string) => (value: string) =>
+    (typeof value === "string" && value.trim().length > 0) || t("ui.isRequired", { field: label })
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Container maxW="container.lg" py={8} px={{ base: 8, xl: 0 }} flexGrow={1} as="main">
@@ -87,6 +90,11 @@ export const RevisionReasonSetupScreen = observer(function RevisionReasonSetupSc
                             label={t("siteConfiguration.revisionReasonsAttributesSetup.fields.reasonCode")}
                             fieldName={`revisionReasonsAttributes.${index}.reasonCode`}
                             required
+                            validate={{
+                              notBlank: rejectBlank(
+                                t("siteConfiguration.revisionReasonsAttributesSetup.fields.reasonCode")
+                              ),
+                            }}
                             isDisabled={field._discard}
                           />
                         </Flex>
@@ -101,6 +109,11 @@ export const RevisionReasonSetupScreen = observer(function RevisionReasonSetupSc
                               height: "40px",
                             }}
                             required
+                            validate={{
+                              notBlank: rejectBlank(
+                                t("siteConfiguration.revisionReasonsAttributesSetup.fields.reasonDescription")
+                              ),
+                            }}
                             isDisabled={field._discard}
                           />
                         </Flex>
