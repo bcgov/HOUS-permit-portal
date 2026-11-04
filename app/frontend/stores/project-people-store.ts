@@ -2,12 +2,15 @@ import { cast, flow, Instance, types } from "mobx-state-tree"
 import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import { IProjectPerson } from "../types/api-responses"
-import { TSearchParams } from "../types/types"
+import { EProjectAccess, EProjectContactDesignation } from "../types/enums"
+import { IProjectPerson, TSearchParams } from "../types/types"
 import { setQueryParam } from "../utils/utility-functions"
 
+const isProjectAccess = (value: string): value is EProjectAccess =>
+  (Object.values(EProjectAccess) as string[]).includes(value)
+
 interface IProjectPeopleFilters {
-  access?: string[]
+  access?: EProjectAccess[]
   roleTags?: string[]
 }
 
@@ -18,6 +21,7 @@ export const ProjectPeopleStoreModel = types
       accessFilter: types.optional(types.array(types.string), []),
       roleFilter: types.optional(types.array(types.string), []),
       roleTags: types.optional(types.array(types.string), []),
+      primaryContactName: types.maybeNull(types.string),
     }),
     createSearchModel<never>("searchProjectPeople", "setProjectPeopleFilters")
   )
@@ -25,8 +29,9 @@ export const ProjectPeopleStoreModel = types
   .extend(withRootStore())
   .actions((self) => ({
     setAccessFilter(access: string[]) {
-      setQueryParam("access", access)
-      self.accessFilter = cast(access)
+      const values = access.filter(isProjectAccess)
+      setQueryParam("access", values)
+      self.accessFilter = cast(values)
     },
     setRoleFilter(role: string[]) {
       setQueryParam("role", role)
@@ -35,7 +40,7 @@ export const ProjectPeopleStoreModel = types
     setProjectPeopleFilters(queryParams: URLSearchParams) {
       const access = queryParams.get("access")
       const role = queryParams.get("role")
-      self.accessFilter = cast(access ? access.split(",").filter(Boolean) : [])
+      self.accessFilter = cast(access ? access.split(",").filter(isProjectAccess) : [])
       self.roleFilter = cast(role ? role.split(",").filter(Boolean) : [])
     },
   }))
@@ -62,9 +67,42 @@ export const ProjectPeopleStoreModel = types
       if (response.ok) {
         self.tablePeople = cast(response.data?.data ?? [])
         self.roleTags = cast(response.data?.meta?.roleTags ?? [])
+        self.primaryContactName = response.data?.meta?.primaryContactName ?? null
         self.setPageFields(response.data.meta, opts)
       }
       return response.ok
+    }),
+    updateProjectPerson: flow(function* (
+      membershipId: string,
+      params: {
+        roleTags?: string[]
+        contactDesignation?: EProjectContactDesignation
+        access?: EProjectAccess
+      }
+    ) {
+      const permitProjectId = self.rootStore.permitProjectStore.currentPermitProject?.id
+      if (!permitProjectId) return null
+
+      const response = yield self.environment.api.updatePermitProjectMembership(permitProjectId, membershipId, params)
+      if (!response.ok || !response.data?.data) return null
+
+      const updated: IProjectPerson = response.data.data
+      yield self.search()
+      if (!self.tablePeople.some((person) => person.id === updated.id)) return null
+
+      self.tablePeople = cast(self.tablePeople.map((person) => (person.id === updated.id ? updated : person)))
+      return updated
+    }),
+    destroyProjectPerson: flow(function* (membershipId: string) {
+      const permitProjectId = self.rootStore.permitProjectStore.currentPermitProject?.id
+      if (!permitProjectId) return false
+
+      const response = yield self.environment.api.destroyPermitProjectMembership(permitProjectId, membershipId)
+      if (!response.ok) return false
+
+      yield self.search()
+      self.tablePeople = cast(self.tablePeople.filter((person) => person.id !== membershipId))
+      return true
     }),
     resetFilters() {
       self.setQuery("")

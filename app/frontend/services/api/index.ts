@@ -66,7 +66,9 @@ import {
   EPermitBlockStatus,
   EPermitProjectSortFields,
   EPreCheckSortFields,
+  EProjectAccess,
   EProjectAuditSortFields,
+  EProjectContactDesignation,
   EProjectMeetingSortFields,
   EQuestionBankSortFields,
   EReleaseNoteSortFields,
@@ -90,6 +92,7 @@ import {
   IPermitProjectSearchFilters,
   IProjectAuditSearchFilters,
   IProjectMeetingInboxSearchFilters,
+  IProjectPerson,
   IReportGenerationIssue,
   ISubmissionContact,
   ITemplateVersionDiff,
@@ -489,11 +492,32 @@ export class Api {
 
   async fetchPermitProjectMemberships(
     permitProjectId: string,
-    params?: TSearchParams<never, { access?: string[]; roleTags?: string[] }>
+    params?: TSearchParams<never, { access?: EProjectAccess[]; roleTags?: string[] }>
   ) {
     return this.client.post<IProjectMembershipsResponse>(
       `/permit_projects/${permitProjectId}/memberships/search`,
       params
+    )
+  }
+
+  async updatePermitProjectMembership(
+    permitProjectId: string,
+    membershipId: string,
+    membership: {
+      roleTags?: string[]
+      contactDesignation?: EProjectContactDesignation
+      access?: EProjectAccess
+    }
+  ) {
+    return this.client.patch<IApiResponse<IProjectPerson, Record<string, never>>>(
+      `/permit_projects/${permitProjectId}/memberships/${membershipId}`,
+      { membership }
+    )
+  }
+
+  async destroyPermitProjectMembership(permitProjectId: string, membershipId: string) {
+    return this.client.delete<IApiResponse<null, Record<string, never>>>(
+      `/permit_projects/${permitProjectId}/memberships/${membershipId}`
     )
   }
 

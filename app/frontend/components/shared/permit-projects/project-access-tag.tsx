@@ -1,23 +1,22 @@
 import { Tag, TagProps } from "@chakra-ui/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
+import { EProjectAccess } from "../../../types/enums"
 
-export type TProjectAccessLevel = "standard" | "expanded" | "full"
-
-const accessBgMap: Record<TProjectAccessLevel, string> = {
-  standard: "semantic.infoLight",
-  expanded: "theme.green.100",
-  full: "semantic.warningLight",
+const accessBgMap: Record<EProjectAccess, string> = {
+  [EProjectAccess.standard]: "semantic.infoLight",
+  [EProjectAccess.expanded]: "theme.green.100",
+  [EProjectAccess.full]: "semantic.warningLight",
 }
 
-const accessBorderColorMap: Record<TProjectAccessLevel, string> = {
-  standard: "focus",
-  expanded: "semantic.success",
-  full: "semantic.warning",
+const accessBorderColorMap: Record<EProjectAccess, string> = {
+  [EProjectAccess.standard]: "focus",
+  [EProjectAccess.expanded]: "semantic.success",
+  [EProjectAccess.full]: "semantic.warning",
 }
 
 interface IProjectAccessTagProps extends TagProps {
-  access: TProjectAccessLevel
+  access: EProjectAccess
 }
 
 export const ProjectAccessTag = React.forwardRef<HTMLSpanElement, IProjectAccessTagProps>(
@@ -33,7 +32,8 @@ export const ProjectAccessTag = React.forwardRef<HTMLSpanElement, IProjectAccess
         fontWeight="medium"
         border="1px solid"
         borderColor={accessBorderColorMap[access]}
-        minW="fit-content"
+        w="fit-content"
+        maxW="fit-content"
         textAlign="center"
         {...rest}
       >

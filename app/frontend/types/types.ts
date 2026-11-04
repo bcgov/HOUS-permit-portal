@@ -25,6 +25,8 @@ import {
   ENumberUnit,
   EPermitApplicationSocketEventTypes,
   EPermitApplicationStatus,
+  EProjectAccess,
+  EProjectContactDesignation,
   EProjectMeetingStatus,
   EProjectState,
   EReleaseNoteNotificationAudience,
@@ -686,6 +688,16 @@ export interface IPermitApplicationSearchFilters {
   hasCollaborator?: boolean
   permitProjectId?: string
   query?: string
+}
+
+export interface IProjectPerson {
+  id: string
+  userId: string
+  name: string
+  email: string
+  roleTags: string[]
+  access: EProjectAccess | null
+  contactDesignation: EProjectContactDesignation
 }
 
 export interface IPermitProjectSearchFilters {

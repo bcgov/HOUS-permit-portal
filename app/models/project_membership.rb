@@ -15,6 +15,7 @@ class ProjectMembership < ApplicationRecord
 
   validates :user_id, uniqueness: { scope: :permit_project_id }
   validate :one_primary_contact
+  validate :primary_contact_stays
 
   after_commit :reindex_permit_project
 
@@ -30,7 +31,34 @@ class ProjectMembership < ApplicationRecord
     }
   end
 
+  def release_other_primary_contact
+    self
+      .class
+      .where(
+        permit_project_id: permit_project_id,
+        contact_designation: :primary
+      )
+      .where.not(id: id)
+      .update_all(
+        contact_designation: self.class.contact_designations.fetch("none")
+      )
+  end
+
   private
+
+  def primary_contact_stays
+    return unless will_save_change_to_contact_designation?
+    return unless was_primary?
+    return if primary?
+
+    errors.add(:contact_designation, :primary_locked)
+  end
+
+  def was_primary?
+    previous = contact_designation_was
+    previous == "primary" ||
+      previous == self.class.contact_designations.fetch("primary")
+  end
 
   def one_primary_contact
     return unless primary?

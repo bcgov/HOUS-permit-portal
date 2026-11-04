@@ -8,7 +8,7 @@ import { IRequirementBlock } from "../models/requirement-block"
 import { IRequirementQuestion } from "../models/requirement-question"
 import { IRequirementTemplate } from "../models/requirement-template"
 import { IUser } from "../models/user"
-import { INotification, IOption, ITemplateVersionDiff } from "./types"
+import { INotification, IOption, IProjectPerson, ITemplateVersionDiff } from "./types"
 
 export interface IApiResponse<TData, TMeta> {
   data: TData
@@ -39,19 +39,9 @@ export interface IProjectMeetingResponse extends IApiResponse<IProjectMeeting[],
 
 export interface INoteResponse extends IApiResponse<INote[], IPageMeta> {}
 
-export interface IProjectPerson {
-  id: string
-  userId: string
-  kind: "owner" | "member"
-  name: string
-  email: string
-  roleTags: string[]
-  access: "standard" | "expanded" | "full" | null
-  contactDesignation: "none" | "primary" | "alternate"
-}
-
 export interface IProjectPeopleMeta extends IPageMeta {
   roleTags?: string[]
+  primaryContactName?: string | null
 }
 
 export interface IProjectMembershipsResponse extends IApiResponse<IProjectPerson[], IProjectPeopleMeta> {}

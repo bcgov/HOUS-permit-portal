@@ -275,7 +275,7 @@ Rails.application.routes.draw do
       end
 
       resources :memberships,
-                only: %i[index],
+                only: %i[index update destroy],
                 controller: "permit_projects/memberships" do
         post "search", on: :collection, to: "permit_projects/memberships#index"
       end
