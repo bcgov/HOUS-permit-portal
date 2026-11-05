@@ -7,15 +7,7 @@ redis_config =
     {
       name: ENV["REDIS_SENTINEL_MASTER_SET_NAME"],
       driver: :ruby,
-      sentinels:
-        Resolv
-          .getaddresses(ENV["REDIS_SENTINEL_HEADLESS"])
-          .map do |address|
-            {
-              host: address,
-              port: (ENV["REDIS_SENTINEL_PORT"]&.to_i || 26_379)
-            }
-          end,
+      sentinels: RedisSentinelConfiguration.sentinels,
       db: ENV["SIDEKIQ_REDIS_DB"]&.to_i || 0,
       role: :master
     }
