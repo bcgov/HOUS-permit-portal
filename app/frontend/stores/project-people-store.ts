@@ -22,6 +22,7 @@ export const ProjectPeopleStoreModel = types
       roleFilter: types.optional(types.array(types.string), []),
       roleTags: types.optional(types.array(types.string), []),
       primaryContactName: types.maybeNull(types.string),
+      alternateContactNames: types.optional(types.array(types.string), []),
     }),
     createSearchModel<never>("searchProjectPeople", "setProjectPeopleFilters")
   )
@@ -68,6 +69,7 @@ export const ProjectPeopleStoreModel = types
         self.tablePeople = cast(response.data?.data ?? [])
         self.roleTags = cast(response.data?.meta?.roleTags ?? [])
         self.primaryContactName = response.data?.meta?.primaryContactName ?? null
+        self.alternateContactNames = cast(response.data?.meta?.alternateContactNames ?? [])
         self.setPageFields(response.data.meta, opts)
       }
       return response.ok

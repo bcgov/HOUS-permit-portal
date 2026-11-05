@@ -86,6 +86,7 @@ const PeopleList = observer(({ permitProject }: IProps) => {
     updateProjectPerson,
     destroyProjectPerson,
     primaryContactName,
+    alternateContactNames,
   } = projectPeopleStore
   const [selectedPerson, setSelectedPerson] = useState<IProjectPerson | null>(null)
   const [isSaving, setIsSaving] = useState(false)
@@ -298,6 +299,7 @@ const PeopleList = observer(({ permitProject }: IProps) => {
           canEdit={permitProject.isOwner}
           canRemove={permitProject.isOwner && selectedPerson.userId !== permitProject.ownerId}
           primaryContactName={primaryContactName}
+          alternateContactNames={alternateContactNames.slice()}
           isSaving={isSaving}
           onClose={() => setSelectedPerson(null)}
           onSave={handleSave}

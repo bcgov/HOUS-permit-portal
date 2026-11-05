@@ -42,6 +42,7 @@ export interface INoteResponse extends IApiResponse<INote[], IPageMeta> {}
 export interface IProjectPeopleMeta extends IPageMeta {
   roleTags?: string[]
   primaryContactName?: string | null
+  alternateContactNames?: string[]
 }
 
 export interface IProjectMembershipsResponse extends IApiResponse<IProjectPerson[], IProjectPeopleMeta> {}
