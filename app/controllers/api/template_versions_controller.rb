@@ -510,7 +510,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
     scope
       .joins(:requirement_template)
       .left_joins(requirement_template: :template_category)
-      .includes(requirement_template: :template_category)
+      .includes(requirement_template: %i[template_category explainer])
       .where(requirement_templates: { discarded_at: nil })
   end
 

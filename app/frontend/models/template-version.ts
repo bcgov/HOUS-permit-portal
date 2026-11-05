@@ -42,6 +42,7 @@ export const TemplateVersionModel = types
     publiclyPreviewable: types.optional(types.boolean, false),
     requiresProjectMeeting: types.optional(types.boolean, false),
     disabledByJurisdiction: types.optional(types.boolean, false),
+    explainerPublished: types.optional(types.boolean, false),
     hasUnresolvedFeedbacks: types.optional(types.boolean, false),
     feedbacksCount: types.optional(types.number, 0),
     templateCategoryId: types.maybeNull(types.string),

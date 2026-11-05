@@ -11,11 +11,12 @@ import {
   Input,
   InputGroup,
   InputLeftElement,
+  Link,
   ListItem,
   Text,
   UnorderedList,
 } from "@chakra-ui/react"
-import { CaretLeft, MagnifyingGlass } from "@phosphor-icons/react"
+import { ArrowSquareOut, CaretLeft, MagnifyingGlass } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -24,6 +25,7 @@ import { usePermitProject } from "../../../hooks/resources/use-permit-project"
 import { useTemplateVersions } from "../../../hooks/resources/use-template-versions"
 import { ITemplateVersion } from "../../../models/template-version"
 import { useMst } from "../../../setup/root"
+import { permitApplicationInfoPath } from "../../../utils/permit-application-info-path"
 import { groupTemplateVersionsByCategory } from "../../../utils/template-version-grouping"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { Editor } from "../../shared/editor/editor"
@@ -248,8 +250,9 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
                           transition="all 0.2s ease-in-out"
                           _hover={{ bg: "hover.blue" }}
                           cursor="pointer"
+                          display="flex"
                         >
-                          <Flex direction="column" justify="space-between" align="start" gap={4}>
+                          <Flex direction="column" justify="space-between" align="start" gap={4} w="full">
                             <Box>
                               <Heading as="h4" fontSize="lg" mb={2}>
                                 {tv.denormalizedTemplateJson?.nickname || tv.label}
@@ -258,23 +261,45 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
                                 {tv.denormalizedTemplateJson?.description}
                               </Text>
                             </Box>
-                            <Flex
-                              align="center"
-                              gap={2}
-                              border="1px solid"
-                              borderColor={checked ? "theme.blueAlt" : "border.light"}
-                              bg="white"
-                              px={4}
-                              py={2}
-                              borderRadius="md"
-                              alignSelf="flex-end"
-                            >
-                              <Checkbox
-                                isChecked={checked}
-                                onChange={() => toggleSelection(tv.id)}
-                                pointerEvents="none"
-                              />
-                              <Text fontWeight="medium">{t("permitProject.addPermits.addToProject")}</Text>
+                            <Flex w="full" align="flex-end" justify="space-between" gap={4}>
+                              {tv.explainerPublished ? (
+                                <Link
+                                  href={permitApplicationInfoPath(
+                                    tv.requirementTemplateId,
+                                    currentPermitProject?.jurisdiction?.id
+                                  )}
+                                  isExternal
+                                  onClick={(event) => event.stopPropagation()}
+                                  fontSize="sm"
+                                  color="text.link"
+                                  textDecoration="underline"
+                                  display="inline-flex"
+                                  alignItems="center"
+                                >
+                                  {t("requirementTemplate.explainer.publicPage.viewPermitInformation")}
+                                  <ArrowSquareOut size={16} />
+                                </Link>
+                              ) : (
+                                <Box />
+                              )}
+                              <Flex
+                                align="center"
+                                gap={2}
+                                border="1px solid"
+                                borderColor={checked ? "theme.blueAlt" : "border.light"}
+                                bg="white"
+                                px={4}
+                                py={2}
+                                borderRadius="md"
+                                flexShrink={0}
+                              >
+                                <Checkbox
+                                  isChecked={checked}
+                                  onChange={() => toggleSelection(tv.id)}
+                                  pointerEvents="none"
+                                />
+                                <Text fontWeight="medium">{t("permitProject.addPermits.addToProject")}</Text>
+                              </Flex>
                             </Flex>
                           </Flex>
                         </Box>

@@ -90,6 +90,24 @@ RSpec.describe Api::TemplateVersionsController,
 
       expect(template_payload["disabled_by_jurisdiction"]).to be(true)
       expect(template_payload["requires_project_meeting"]).to be(true)
+      expect(template_payload["explainer_published"]).to be(false)
+    end
+
+    it "marks template versions with a published explainer" do
+      create(:explainer, :published, requirement_template: source_template)
+
+      get :index,
+          params: {
+            status: "published",
+            jurisdiction_id: jurisdiction.id
+          }
+
+      template_payload =
+        json_response["data"].find do |payload|
+          payload["id"] == source_version.id
+        end
+
+      expect(template_payload["explainer_published"]).to be(true)
     end
   end
 
