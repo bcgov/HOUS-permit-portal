@@ -70,6 +70,7 @@ gem "roo", "~> 3.0"
 gem "discard", "~> 1.2"
 gem "faraday", "~> 2.14.3"
 gem "factory_bot", "~> 6.4"
+gem "observer", "~> 0.1"
 # The timcop gem mocks Time, it is only used in specs and for seeding a published template version to get around time based validations
 gem "timecop", "~> 0.9.8"
 gem "sidekiq-cron", "~> 2.4"
@@ -112,9 +113,6 @@ group :development, :test do
   gem "database_cleaner-active_record"
   gem "vcr", "~> 6.2"
   gem "bullet", "~> 8.0"
-
-  # FactoryBot requires observer, which is no longer a default Ruby gem.
-  gem "observer", "~> 0.1"
 end
 
 group :test do
