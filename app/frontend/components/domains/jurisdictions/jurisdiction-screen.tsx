@@ -38,6 +38,7 @@ import { SafeTipTapDisplay } from "../../shared/editor/safe-tiptap-display"
 import { JurisdictionResourcesGridSection } from "../../shared/jurisdiction/jurisdiction-resources-grid-section"
 import { JurisdictionMap } from "../../shared/module-wrappers/jurisdiction-map"
 import { RouterLink } from "../../shared/navigation/router-link"
+import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { StepCodeRequirementsTable } from "../../shared/step-code-requirements-table"
 import { Can, can } from "../../shared/user/can"
 import { ContactGrid } from "./contacts/contact-grid"
@@ -94,7 +95,7 @@ const JurisdictionScreenBody = observer(
 
     const { control, reset } = formMethods
 
-    const { qualifiedName, update, showAboutPage } = currentJurisdiction
+    const { qualifiedName, update, showAboutPage, inboxEnabled } = currentJurisdiction
     const onSubmit = async (formData) => {
       await update(formData)
       reset(getDefaultJurisdictionValuesForJurisdiction(currentJurisdiction))
@@ -425,6 +426,20 @@ const JurisdictionScreenBody = observer(
               </Container>
             </form>
           </FormProvider>
+        ) : inboxEnabled ? (
+          <Container maxW="container.lg" py={{ base: 6, md: 16 }} px={8}>
+            <Box>
+              <Heading as="h2" fontSize="2xl" fontWeight="bold" mb={6}>
+                {t("jurisdiction.permittingInfoUnpublished.title")}
+              </Heading>
+              <Text fontSize="lg" mb={8}>
+                {t("jurisdiction.permittingInfoUnpublished.description", { jurisdictionName: qualifiedName })}
+              </Text>
+              <RouterLinkButton to="/projects" variant="primary" size="lg">
+                {t("jurisdiction.cta.apply.button")}
+              </RouterLinkButton>
+            </Box>
+          </Container>
         ) : (
           <Container maxW="container.lg" py={{ base: 6, md: 16 }} px={8}>
             <Box>

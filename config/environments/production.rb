@@ -74,15 +74,7 @@ Rails.application.configure do
       {
         url:
           "redis://#{ENV["REDIS_SENTINEL_MASTER_SET_NAME"]}/#{ENV["CACHE_REDIS_DB"]&.to_i || 4}",
-        sentinels:
-          Resolv
-            .getaddresses(ENV["REDIS_SENTINEL_HEADLESS"])
-            .map do |address|
-              {
-                host: address,
-                port: (ENV["REDIS_SENTINEL_PORT"]&.to_i || 26_379)
-              }
-            end,
+        sentinels: RedisSentinelConfiguration.sentinels,
         role: :master,
         namespace: "cache"
       }
