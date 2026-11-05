@@ -157,6 +157,9 @@ RSpec.describe PermitProjectPolicy, type: :policy do
       # Review staff fail submission-collaborator eligibility, and a review
       # collaborator must belong to the application's jurisdiction. Persist
       # the row anyway so the policy sees collaboration without membership.
+      # save!(validate: false) skips validations, so Collaborator mirrors
+      # jurisdiction_id onto collaboratorable in before_create. HUB-5783
+      # drops those columns and this dependency.
       collaborator =
         Collaborator.new(user: reviewer, jurisdiction: other_jurisdiction)
       collaborator.save!(validate: false)
