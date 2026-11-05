@@ -113,7 +113,7 @@ export const PersonDetailsPanel = ({
   const [openField, setOpenField] = useState<TEditableField | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const [isResendingView, setIsResendingView] = useState(false)
-  const [resendEmail, setResendEmail] = useState(person.email)
+  const [resendEmail, setResendEmail] = useState("")
   const [resentToEmail, setResentToEmail] = useState<string | null>(null)
   const fieldsDisabled = !canEdit || isSaving
 
@@ -140,7 +140,7 @@ export const PersonDetailsPanel = ({
   }
 
   const openResendView = () => {
-    setResendEmail(person.email)
+    setResendEmail("")
     setIsResendingView(true)
   }
 
@@ -293,9 +293,7 @@ export const PersonDetailsPanel = ({
           {!isActive && (
             <CustomMessageBox status={isExpired ? EFlashMessageStatus.error : EFlashMessageStatus.info}>
               <Text as="div" fontSize="md">
-                {t(isExpired ? "permitProject.people.invitationExpired" : "permitProject.people.invitationSent", {
-                  email: person.email,
-                })}{" "}
+                {t(isExpired ? "permitProject.people.invitationExpired" : "permitProject.people.invitationSent")}{" "}
                 {canEdit && onReinvite && (
                   <Button
                     variant="link"
@@ -324,7 +322,6 @@ export const PersonDetailsPanel = ({
                   {(
                     [
                       { label: t("permitProject.people.personalDetailsFields.name"), value: person.name },
-                      { label: t("permitProject.people.personalDetailsFields.email"), value: person.email },
                       { label: t("permitProject.people.personalDetailsFields.phone"), value: person.phone },
                       {
                         label: t("permitProject.people.personalDetailsFields.organization"),

@@ -696,7 +696,6 @@ export interface IProjectPerson {
   userId: string | null
   name: string
   firstName?: string | null
-  email: string
   phone?: string | null
   organization?: string | null
   roleTags: string[]

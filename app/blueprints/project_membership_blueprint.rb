@@ -11,10 +11,6 @@ class ProjectMembershipBlueprint < Blueprinter::Base
     membership.user&.first_name || membership.invited_first_name
   end
 
-  field :email do |membership|
-    membership.display_email
-  end
-
   field :phone do |membership|
     membership.user&.phone_number
   end

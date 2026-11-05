@@ -356,12 +356,13 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
       expect(json_response["data"]).to include(
         "user_id" => nil,
         "name" => "Wanda Walls",
-        "email" => "wanda@example.com",
         "access" => "expanded",
         "contact_designation" => "primary",
         "status" => "pending",
         "role_tags" => ["Architect"]
       )
+      expect(json_response["data"]).not_to have_key("email")
+      expect(json_response["data"]).not_to have_key("invited_email")
 
       creator_membership = project.project_memberships.find_by!(user: owner)
       expect(creator_membership.reload.contact_designation).to eq("primary")
@@ -388,7 +389,9 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
            as: :json
 
       expect(response).to have_http_status(:ok)
-      expect(json_response["data"]["email"]).to eq("wanda.updated@example.com")
+      expect(json_response["data"]).not_to have_key("email")
+      expect(json_response["data"]).not_to have_key("invited_email")
+      expect(pending.reload.invited_email).to eq("wanda.updated@example.com")
       raw_token = enqueued_invitation_raw_token
       expect(pending.reload.invitation_token).not_to eq(old_digest)
       expect(pending.invitation_token).to eq(

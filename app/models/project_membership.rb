@@ -67,10 +67,6 @@ class ProjectMembership < ApplicationRecord
     user&.name.presence || "#{invited_first_name} #{invited_last_name}".strip
   end
 
-  def display_email
-    user&.email.presence || invited_email
-  end
-
   def search_data
     {
       name: display_name,
