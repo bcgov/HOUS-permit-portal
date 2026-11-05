@@ -20,24 +20,6 @@ module Api::Concerns::Search::ProjectMemberships
       )
   end
 
-  def project_people_rows
-    @project_membership_search.results.map do |membership|
-      membership_row(membership)
-    end
-  end
-
-  def membership_row(membership)
-    {
-      id: membership.id,
-      user_id: membership.user_id,
-      name: membership.user.name,
-      email: membership.user.email,
-      role_tags: membership.role_list.to_a,
-      access: membership.access,
-      contact_designation: membership.contact_designation
-    }
-  end
-
   def project_people_meta
     {
       total_pages: @project_membership_search.total_pages,
@@ -45,7 +27,8 @@ module Api::Concerns::Search::ProjectMemberships
       current_page: @project_membership_search.current_page,
       per_page: @project_membership_search.limit_value,
       role_tags: project_role_tags,
-      primary_contact_name: primary_contact_name
+      primary_contact_name: primary_contact_name,
+      alternate_contact_name: alternate_contact_name
     }
   end
 
@@ -98,9 +81,22 @@ module Api::Concerns::Search::ProjectMemberships
   def primary_contact_name
     ProjectMembership
       .includes(:user)
+      .where.not(user_id: nil)
       .find_by(
         permit_project_id: @permit_project.id,
         contact_designation: :primary
+      )
+      &.user
+      &.name
+  end
+
+  def alternate_contact_name
+    ProjectMembership
+      .includes(:user)
+      .where.not(user_id: nil)
+      .find_by(
+        permit_project_id: @permit_project.id,
+        contact_designation: :alternate
       )
       &.user
       &.name

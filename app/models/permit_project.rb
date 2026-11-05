@@ -190,7 +190,7 @@ class PermitProject < ApplicationRecord
       jurisdiction_id: jurisdiction_id,
       sandbox_id: sandbox_id,
       collaborator_ids: collaborators.pluck(:user_id).uniq,
-      member_ids: project_memberships.pluck(:user_id),
+      member_ids: project_memberships.where.not(user_id: nil).pluck(:user_id),
       review_collaborator_user_ids: compute_review_collaborator_user_ids,
       created_at: created_at,
       updated_at: updated_at,

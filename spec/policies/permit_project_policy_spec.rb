@@ -66,6 +66,8 @@ RSpec.describe PermitProjectPolicy, type: :policy do
           "PermitProject",
           owner_id: owner.id,
           permit_applications: [app],
+          project_memberships:
+            instance_double(ActiveRecord::Relation, exists?: false),
           sandbox: nil
         )
 
@@ -96,6 +98,8 @@ RSpec.describe PermitProjectPolicy, type: :policy do
           "PermitProject",
           owner_id: owner.id,
           permit_applications: [app],
+          project_memberships:
+            instance_double(ActiveRecord::Relation, exists?: false),
           sandbox: nil
         )
 

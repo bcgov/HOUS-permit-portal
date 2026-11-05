@@ -77,10 +77,13 @@ export const RootStoreModel = types
   .actions((self) => ({
     loadLocalPersistedData: flow(function* () {
       unprotect(self)
+      // The path can hold an invite token. sessionStorage dies with the tab;
+      // the old localStorage copy must not outlive that.
+      localStorage.removeItem("SessionStore")
       yield makePersistable(self.sessionStore, {
         name: `SessionStore`,
         properties: ["afterLoginPath"],
-        storage: localStorage,
+        storage: sessionStorage,
       })
       // Persist hydrates props directly; re-run setter so unsafe paths are dropped
       self.sessionStore.setAfterLoginPath(self.sessionStore.afterLoginPath)

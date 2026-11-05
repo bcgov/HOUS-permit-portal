@@ -28,6 +28,7 @@ import {
   EProjectAccess,
   EProjectContactDesignation,
   EProjectMeetingStatus,
+  EProjectMembershipStatus,
   EProjectState,
   EReleaseNoteNotificationAudience,
   EReleaseNoteType,
@@ -692,12 +693,23 @@ export interface IPermitApplicationSearchFilters {
 
 export interface IProjectPerson {
   id: string
-  userId: string
+  userId: string | null
   name: string
+  firstName?: string | null
   email: string
+  phone?: string | null
+  organization?: string | null
   roleTags: string[]
   access: EProjectAccess | null
   contactDesignation: EProjectContactDesignation
+  status: EProjectMembershipStatus
+}
+
+export interface IProjectInvitation {
+  projectId: string
+  projectTitle: string
+  invitedByName?: string | null
+  status: EProjectMembershipStatus
 }
 
 export interface IPermitProjectSearchFilters {

@@ -111,6 +111,11 @@ function isAboutPath(path: string): boolean {
   return regex.test(path)
 }
 
+function isProjectInvitationPath(path: string): boolean {
+  const regex = /^\/project-invitations/
+  return regex.test(path)
+}
+
 function isSubmissionInboxPath(path: string): boolean {
   const regex = /^\/jurisdictions\/[a-z\d-]+\/submission-inbox/
   return regex.test(path)
@@ -141,6 +146,7 @@ function shouldHideSubNavbarForPath(path: string): boolean {
     isPreCheckPath,
     isOverheatingCodePath,
     isAboutPath,
+    isProjectInvitationPath,
     isSubmissionInboxPath,
     isMeetingPath,
   ]

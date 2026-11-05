@@ -328,4 +328,164 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
       expect(ProjectMembership.exists?(membership.id)).to be(true)
     end
   end
+
+  describe "POST /api/permit_projects/:id/memberships and /api/project_invitations/:token" do
+    it "creates a pending membership without creating a User, resends it, and lets a signed-in user accept or decline" do
+      sign_in owner
+
+      expect do
+        post "/api/permit_projects/#{project.id}/memberships",
+             params: {
+               membership: {
+                 first_name: "Wanda",
+                 last_name: "Walls",
+                 email: "wanda@example.com",
+                 role_tags: ["Architect"],
+                 contact_designation: "primary",
+                 access: "expanded"
+               }
+             },
+             headers: headers,
+             as: :json
+      end.to change(ProjectMembership, :count).by(1).and change(
+              User,
+              :count
+            ).by(0)
+
+      expect(response).to have_http_status(:created)
+      expect(json_response["data"]).to include(
+        "user_id" => nil,
+        "name" => "Wanda Walls",
+        "email" => "wanda@example.com",
+        "access" => "expanded",
+        "contact_designation" => "primary",
+        "status" => "pending",
+        "role_tags" => ["Architect"]
+      )
+
+      creator_membership = project.project_memberships.find_by!(user: owner)
+      expect(creator_membership.reload.contact_designation).to eq("primary")
+
+      pending = ProjectMembership.find(json_response["data"]["id"])
+      raw_token = enqueued_invitation_raw_token
+      expect(pending.invitation_token).to eq(
+        Devise.token_generator.digest(
+          ProjectMembership,
+          :invitation_token,
+          raw_token
+        )
+      )
+      expect(pending.invitation_token).not_to eq(raw_token)
+      old_digest = pending.invitation_token
+
+      post "/api/permit_projects/#{project.id}/memberships/#{pending.id}/reinvite",
+           params: {
+             membership: {
+               email: "wanda.updated@example.com"
+             }
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response["data"]["email"]).to eq("wanda.updated@example.com")
+      raw_token = enqueued_invitation_raw_token
+      expect(pending.reload.invitation_token).not_to eq(old_digest)
+      expect(pending.invitation_token).to eq(
+        Devise.token_generator.digest(
+          ProjectMembership,
+          :invitation_token,
+          raw_token
+        )
+      )
+
+      invitee =
+        create(
+          :user,
+          :submitter,
+          first_name: "Wanda",
+          last_name: "Different",
+          email: "different-account@example.com"
+        )
+      sign_in invitee
+
+      get "/api/project_invitations/#{raw_token}", headers: headers
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response["data"]).to include(
+        "project_id" => project.id,
+        "project_title" => project.title,
+        "invited_by_name" => "Olivia Owner",
+        "status" => "pending"
+      )
+      expect(json_response["data"]).not_to have_key("invited_email")
+
+      post "/api/project_invitations/#{raw_token}/accept",
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response["data"]).to include(
+        "permit_project_id" => project.id,
+        "project_title" => project.title
+      )
+
+      pending.reload
+      expect(pending.user_id).to eq(invitee.id)
+      expect(pending.invitation_token).to be_nil
+      expect(pending.contact_designation).to eq("primary")
+      expect(creator_membership.reload.contact_designation).to eq("none")
+    end
+
+    it "rejects accepting an expired invitation and destroys a declined invitation" do
+      expired_raw = SecureRandom.urlsafe_base64(32)
+      expired =
+        create(
+          :project_membership,
+          :pending_invitation,
+          permit_project: project,
+          invitation_sent_at: 4.days.ago,
+          raw_invitation_token: expired_raw
+        )
+      declinable_raw = SecureRandom.urlsafe_base64(32)
+      declinable =
+        create(
+          :project_membership,
+          :pending_invitation,
+          permit_project: project,
+          raw_invitation_token: declinable_raw
+        )
+      expect(expired.invitation_token).to eq(
+        Devise.token_generator.digest(
+          ProjectMembership,
+          :invitation_token,
+          expired_raw
+        )
+      )
+
+      invitee = create(:user, :submitter)
+      sign_in invitee
+
+      post "/api/project_invitations/#{expired_raw}/accept",
+           headers: headers,
+           as: :json
+      expect(response).to have_http_status(:unprocessable_content)
+
+      post "/api/project_invitations/#{declinable_raw}/decline",
+           headers: headers,
+           as: :json
+      expect(response).to have_http_status(:ok)
+      expect(ProjectMembership.exists?(declinable.id)).to be(false)
+    end
+  end
+
+  def enqueued_invitation_raw_token
+    job =
+      ActiveJob::Base.queue_adapter.enqueued_jobs.reverse.find do |enqueued|
+        enqueued[:args][0] == "PermitHubMailer" &&
+          enqueued[:args][1] == "notify_project_membership_invitation"
+      end
+    delivery_args = job[:args][3]
+    (delivery_args["args"] || delivery_args[:args]).last
+  end
 end

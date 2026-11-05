@@ -89,4 +89,41 @@ RSpec.describe ProjectMembership, type: :model do
       "Builder"
     )
   end
+
+  it "tracks pending and expired invitation status after 3 days" do
+    pending_invite = create(:project_membership, :pending_invitation)
+    expect(pending_invite).to be_pending
+    expect(pending_invite.status).to eq("pending")
+
+    pending_invite.update!(invitation_sent_at: 4.days.ago)
+    expect(pending_invite).to be_expired
+    expect(pending_invite.status).to eq("expired")
+  end
+
+  it "keeps the current primary contact until a pending primary invitation is accepted" do
+    project = create(:permit_project)
+    creator_membership =
+      project.project_memberships.find_by!(user: project.creator)
+    invitee = create(:user, :submitter)
+
+    pending_primary =
+      create(
+        :project_membership,
+        :pending_invitation,
+        permit_project: project,
+        contact_designation: :primary
+      )
+
+    expect(creator_membership.reload.contact_designation).to eq("primary")
+    expect(pending_primary.reload.contact_designation).to eq("primary")
+
+    pending_primary.update!(
+      user: invitee,
+      invitation_accepted_at: Time.current,
+      invitation_token: nil
+    )
+
+    expect(pending_primary.reload.contact_designation).to eq("primary")
+    expect(creator_membership.reload.contact_designation).to eq("none")
+  end
 end
