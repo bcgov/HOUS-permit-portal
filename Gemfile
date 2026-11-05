@@ -107,6 +107,7 @@ group :development, :test do
   # Byebug still requires the readline compatibility library.
   gem "readline", "~> 0.0.4"
   gem "rspec-rails", "~> 6.1.0"
+  gem "parallel_tests", "~> 5.9"
   gem "rswag-specs", "~> 2.17"
   gem "factory_bot_rails", "~> 6.4.2"
   gem "faker", "~> 3.2.2"

@@ -1,8 +1,6 @@
 require "rails_helper"
 
-RSpec.describe SubmissionDataKeyConverterService,
-               type: :service,
-               search: true do
+RSpec.describe SubmissionDataKeyConverterService, type: :service do
   describe ".call" do
     # Ensure necessary base data for factories if they rely on `first` records
     let!(:jurisdiction) { FactoryBot.create(:sub_district) }
@@ -91,15 +89,6 @@ RSpec.describe SubmissionDataKeyConverterService,
           }
         }
       }.deep_stringify_keys
-    end
-
-    # Clean database before running full suite of tests in this describe block
-    before(:all) do
-      # Consider DatabaseCleaner or similar for more robust test DB management
-      PermitApplication.destroy_all
-      # Ensure base records for factories if they are not created by let!
-      FactoryBot.create(:sub_district) unless SubDistrict.exists?
-      FactoryBot.create(:template_version) unless TemplateVersion.exists?
     end
 
     # Recreate records for each test to ensure isolation

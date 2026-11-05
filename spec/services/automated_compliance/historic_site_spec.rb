@@ -1,8 +1,6 @@
 require "rails_helper"
 
-RSpec.describe AutomatedCompliance::HistoricSite,
-               type: :service,
-               search: true do
+RSpec.describe AutomatedCompliance::HistoricSite, type: :service do
   let(:vcr_options) { { match_requests_on: %i[method path query] } }
 
   before do

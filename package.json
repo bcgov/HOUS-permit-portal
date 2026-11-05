@@ -129,6 +129,7 @@
     "gen:theme-typings": "chakra-cli tokens app/frontend/styles/theme/index.ts",
     "postinstall": "npm run gen:theme-typings",
     "build:print": "NODE_ENV=production vite build --config vite.print.config.mjs",
+    "test": "node --test 'app/frontend/**/*.test.mjs'",
     "test:time-zones": "node --test app/frontend/utils/__tests__/formio-time-zones.test.mjs",
     "dev:print": "npm run build:print -- --watch"
   },

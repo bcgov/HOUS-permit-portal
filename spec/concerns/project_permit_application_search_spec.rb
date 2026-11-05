@@ -57,8 +57,8 @@ RSpec.describe Api::Concerns::Search::ProjectPermitApplications,
     )
     controller.instance_variable_set(:@permit_project, project)
 
-    User.reindex
-    PermitApplication.reindex
+    reindex_search(User)
+    reindex_search(PermitApplication)
   end
 
   it "as project owner returns all project applications" do

@@ -41,6 +41,46 @@ RSpec.describe RequirementFormJsonService do
   end
 
   describe "#to_form_json" do
+    it "does not carry date constraints or compliance tooltips into later requirements" do
+      constrained_date =
+        build_requirement(
+          input_type: "date",
+          input_options: {
+            "data_validation" => {
+              "operation" => "after",
+              "value" => "2026-01-01"
+            }
+          }
+        )
+      compliant_select =
+        build_requirement(
+          input_type: "select",
+          computed_compliance?: true,
+          input_options: {
+            "computed_compliance" => {
+              "op" => "eq",
+              "value" => 1
+            }
+          }
+        )
+      defaults = described_class::DEFAULT_FORMIO_TYPE_TO_OPTIONS.deep_dup
+      described_class.new(constrained_date).to_form_json("block_key")
+      described_class.new(compliant_select).to_form_json("block_key")
+
+      date_json =
+        described_class.new(build_requirement(input_type: "date")).to_form_json(
+          "block_key"
+        )
+      select_json =
+        described_class.new(
+          build_requirement(input_type: "select")
+        ).to_form_json("block_key")
+      expect(date_json.dig(:widget, :minDate)).to be_nil
+      expect(date_json[:datePicker]).not_to have_key(:minDate)
+      expect(select_json).not_to have_key(:tooltip)
+      expect(described_class::DEFAULT_FORMIO_TYPE_TO_OPTIONS).to eq(defaults)
+    end
+
     it "returns nil when requirement has no input_type" do
       requirement = build_requirement(input_type: nil)
       service = described_class.new(requirement)

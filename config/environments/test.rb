@@ -1,4 +1,14 @@
 require "active_support/core_ext/integer/time"
+require "uri"
+
+# Reserve Redis databases 8..15 for up to eight test workers (development uses 0..4).
+# Preserve the configured server/credentials, assigning each worker its own DB.
+test_worker = [ENV.fetch("TEST_ENV_NUMBER", "1").to_i, 1].max
+%w[SIDEKIQ_DEV_REDIS_URL SIMPLE_FEED_DEV_REDIS_URL].each do |key|
+  url = URI(ENV.fetch(key, "redis://localhost:6379"))
+  url.path = "/#{7 + test_worker}"
+  ENV[key] = url.to_s
+end
 
 # The test environment is used exclusively to run your application's
 # test suite. You never need to work with it otherwise. Remember that

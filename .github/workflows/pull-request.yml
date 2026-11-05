@@ -9,6 +9,10 @@ on:
     branches: ["main", "stable", "develop"]
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   frontend-build:
     runs-on: ubuntu-latest
@@ -29,10 +33,10 @@ jobs:
         with:
           node-version-file: ".nvmrc"
           cache: "npm"
-      - name: Install Dependencies
-        run: |
-          bundle install
-          npm ci
+      - name: Install Node Dependencies
+        run: npm ci
+      - name: Run Frontend Tests
+        run: npm test
       - name: Build Frontend and PDF Reports
         run: npm run build
 
@@ -42,7 +46,10 @@ jobs:
     # environment: "CI-test"
     env:
       RAILS_ENV: test
-      DATABASE_URL: postgres://user:password@localhost:5432/test_db
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: "5432"
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
       ELASTICSEARCH_URL: http://localhost:9200
       SIDEKIQ_DEV_REDIS_URL: redis://localhost:6379/0
       RATE_LIMIT_DEV_REDIS_URL: redis://localhost:6379/1
@@ -110,14 +117,17 @@ jobs:
           lfs: true
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
-      - name: Install Dependencies
-        run: |
-          bundle install
+        with:
+          bundler-cache: true
       - name: Setup Test Database
         run: |
-          bundle exec rails db:create
-          bundle exec rails db:schema:load
-          bundle exec rails db:migrate
+          cp config/database.yml.local config/database.yml
+          bundle exec rake "parallel:create[4]" "parallel:load_schema[4]"
+      - name: Restore RSpec Timings
+        uses: actions/cache@v6
+        with:
+          path: tmp/parallel_runtime_rspec.log
+          key: rspec-timings-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: rspec-timings-${{ runner.os }}-
       - name: Run RSpec
-        run: |
-          bundle exec rspec
+        run: bundle exec parallel_rspec -n 4 --serialize-stdout spec

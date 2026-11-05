@@ -2,7 +2,8 @@ require "rails_helper"
 
 RSpec.describe Api::Concerns::Search::JurisdictionPermitApplications,
                type: :controller,
-               search: true do
+               search: true,
+               search_callbacks: false do
   controller(Api::ApplicationController) do
     include Api::Concerns::Search::JurisdictionPermitApplications
   end
@@ -134,8 +135,8 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitApplications,
     allow(controller).to receive(:params).and_return(
       jurisdiction_permit_application_search_params
     )
-    User.reindex
-    PermitApplication.reindex
+    reindex_search(User)
+    reindex_search(PermitApplication)
   end
 
   describe "perform_jurisdiction_permit_application_search" do
@@ -224,7 +225,7 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitApplications,
           )
         end
 
-        PermitApplication.reindex
+        reindex_search(PermitApplication)
       end
 
       let(:cur_user) { reviewer }

@@ -1,8 +1,6 @@
 require "rails_helper"
 
-RSpec.describe AutomatedCompliance::ParcelInfoExtractor,
-               type: :service,
-               search: true do
+RSpec.describe AutomatedCompliance::ParcelInfoExtractor, type: :service do
   let(:vcr_options) { { match_requests_on: %i[method path query] } }
 
   before do

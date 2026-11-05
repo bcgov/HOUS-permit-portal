@@ -2,9 +2,7 @@
 
 require "rails_helper"
 
-RSpec.describe Api::RequirementQuestionsController,
-               type: :controller,
-               search: true do
+RSpec.describe Api::RequirementQuestionsController, type: :controller do
   let(:super_admin) { create(:user, :super_admin) }
   let(:submitter) { create(:user, :submitter) }
   let(:question_id) { SecureRandom.uuid }
@@ -78,16 +76,13 @@ RSpec.describe Api::RequirementQuestionsController,
     end
   end
 
-  describe "POST #index (search)" do
+  describe "POST #index (search)", search: true do
     let!(:bank_question) { create(:requirement_question) }
     let!(:archived_question) do
       create(:requirement_question, discarded_at: Time.current)
     end
 
-    before do
-      RequirementQuestion.reindex
-      RequirementQuestion.search_index.refresh
-    end
+    before { reindex_search(RequirementQuestion) }
 
     it "returns only non-archived questions" do
       post :index, params: { query: "", page: 1, per_page: 20 }, format: :json

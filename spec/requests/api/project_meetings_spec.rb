@@ -190,7 +190,7 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
       )
     end
 
-    before { ProjectMeeting.reindex }
+    before { reindex_search(ProjectMeeting) }
 
     it "returns scoped meeting requests for the project owner" do
       post "/api/permit_projects/#{permit_project.id}/meetings/search",
@@ -321,7 +321,7 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
 
     before do
       sign_in reviewer
-      ProjectMeeting.reindex
+      reindex_search(ProjectMeeting)
     end
 
     it "returns jurisdiction-scoped submitted meeting requests with metadata" do
@@ -414,8 +414,7 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
             ),
           confirmed_date: 20.days.from_now
         )
-      ProjectMeeting.reindex
-
+      reindex_search(ProjectMeeting)
       post "/api/jurisdictions/#{jurisdiction.id}/project_meetings/search",
            params: {
              query: "*",
