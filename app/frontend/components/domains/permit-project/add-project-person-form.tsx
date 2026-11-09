@@ -53,7 +53,7 @@ export const AddProjectPersonForm = observer(({ permitProject }: IAddProjectPers
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { projectPeopleStore } = useMst()
-  const { primaryContactName, alternateContactName, createProjectPerson, search } = projectPeopleStore
+  const { primaryContactName, alternateContactNames, createProjectPerson, search } = projectPeopleStore
 
   useEffect(() => {
     if (!primaryContactName) {
@@ -105,7 +105,8 @@ export const AddProjectPersonForm = observer(({ permitProject }: IAddProjectPers
   ].filter(Boolean) as { id: string; message?: string }[]
 
   const resolvedPrimaryName = primaryContactName || permitProject.ownerName || t("permitProject.people.notAssigned")
-  const resolvedAlternateName = alternateContactName || t("permitProject.people.notAssigned")
+  const resolvedAlternateNames =
+    alternateContactNames.length > 0 ? alternateContactNames.join(", ") : t("permitProject.people.notAssigned")
 
   return (
     <Flex direction="column" flex={1} minW={0} h="full" minH={0} overflowY="auto" bg="greys.white" p={10}>
@@ -245,7 +246,7 @@ export const AddProjectPersonForm = observer(({ permitProject }: IAddProjectPers
                 <Text fontWeight="bold" fontSize="sm">
                   {t("permitProject.people.alternateContact")}
                 </Text>
-                <Text fontSize="sm">{resolvedAlternateName}</Text>
+                <Text fontSize="sm">{resolvedAlternateNames}</Text>
               </Flex>
             </VStack>
 

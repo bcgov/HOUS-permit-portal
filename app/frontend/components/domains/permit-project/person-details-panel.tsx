@@ -5,32 +5,28 @@ import {
   Flex,
   FormControl,
   FormLabel,
-  HStack,
   IconButton,
   Input,
+  Radio,
+  RadioGroup,
   Text,
   VStack,
 } from "@chakra-ui/react"
 import { CaretLeft, X } from "@phosphor-icons/react"
-import React, { useEffect, useMemo, useRef, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import Select, { components, OptionProps, SingleValueProps, StylesConfig } from "react-select"
 import {
   EFlashMessageStatus,
   EProjectAccess,
   EProjectContactDesignation,
   EProjectMembershipStatus,
 } from "../../../types/enums"
-import { IOption, IProjectPerson } from "../../../types/types"
+import { IProjectPerson } from "../../../types/types"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { ConfirmationModal } from "../../shared/modals/confirmation-modal"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { ProjectAccessTag } from "../../shared/permit-projects/project-access-tag"
 import { ProjectRoleSelect } from "../../shared/select/selectors/project-role-select"
-
-interface IContactOption extends IOption<EProjectContactDesignation> {
-  isDisabled?: boolean
-}
 
 interface IPersonDetailsPanelProps {
   person: IProjectPerson
@@ -38,6 +34,7 @@ interface IPersonDetailsPanelProps {
   canEdit: boolean
   canRemove: boolean
   primaryContactName?: string | null
+  alternateContactNames?: string[]
   isSaving: boolean
   onClose: () => void
   onSave: (changes: {
@@ -49,43 +46,7 @@ interface IPersonDetailsPanelProps {
   onRemove: () => void
 }
 
-type TEditableField = "role" | "contact" | "access"
-
-const AccessOption = (props: OptionProps<IOption<EProjectAccess>, false>) => (
-  <components.Option {...props}>
-    <ProjectAccessTag access={props.data.value} />
-  </components.Option>
-)
-
-const AccessValue = (props: SingleValueProps<IOption<EProjectAccess>, false>) => (
-  <components.SingleValue {...props}>
-    <ProjectAccessTag access={props.data.value} />
-  </components.SingleValue>
-)
-
-const contactSelectStyles: StylesConfig<IContactOption, false> = {
-  control: (css, state) => ({
-    ...css,
-    borderColor: state.isFocused ? "var(--chakra-colors-focus)" : "var(--chakra-colors-border-light)",
-    borderRadius: "6px",
-    minHeight: "var(--chakra-sizes-10)",
-    boxShadow: "none",
-    fontSize: "var(--chakra-fontSizes-sm)",
-    ":hover": {
-      borderColor: "var(--chakra-colors-border-base)",
-    },
-  }),
-  menuPortal: (css) => ({
-    ...css,
-    zIndex: 10,
-  }),
-  option: (css, state) => ({
-    ...css,
-    cursor: state.isDisabled ? "not-allowed" : "pointer",
-    color: "var(--chakra-colors-text-primary)",
-    backgroundColor: state.isFocused ? "var(--chakra-colors-semantic-infoLight)" : undefined,
-  }),
-}
+type TPanelView = "summary" | "role" | "contact" | "access" | "resend"
 
 const SectionDivider = () => (
   <Box as="hr" w="full" flexShrink={0} my={0} border="0" borderTop="1px solid" borderColor="border.light" />
@@ -93,12 +54,258 @@ const SectionDivider = () => (
 
 const sectionTitleProps = { fontWeight: "bold", fontSize: "lg", lineHeight: "short" } as const
 
+const sameTags = (left: string[], right: string[]) => {
+  if (left.length !== right.length) return false
+  const rightTags = new Set(right)
+  return left.every((tag) => rightTags.has(tag))
+}
+
+const BackLink = ({ onClick }: { onClick: () => void }) => {
+  const { t } = useTranslation()
+
+  return (
+    <Button
+      variant="link"
+      leftIcon={<CaretLeft size={20} />}
+      onClick={onClick}
+      alignSelf="flex-start"
+      fontWeight="normal"
+      fontSize="md"
+      color="text.link"
+      textDecoration="none"
+      h="auto"
+      minH={0}
+      px={0}
+      mb={3}
+      iconSpacing={0.5}
+    >
+      {t("ui.back")}
+    </Button>
+  )
+}
+
+const EditorFooter = ({
+  onCancel,
+  onSave,
+  isSaving,
+}: {
+  onCancel: () => void
+  onSave: () => void
+  isSaving: boolean
+}) => {
+  const { t } = useTranslation()
+
+  return (
+    <Flex
+      flexShrink={0}
+      align="center"
+      gap={4}
+      px={6}
+      py={4}
+      borderTop="1px solid"
+      borderColor="border.light"
+      bg="greys.white"
+    >
+      <Button variant="secondary" onClick={onCancel} isDisabled={isSaving}>
+        {t("ui.cancel")}
+      </Button>
+      <Button variant="primary" onClick={onSave} isDisabled={isSaving}>
+        {t("ui.onlySave")}
+      </Button>
+    </Flex>
+  )
+}
+
+const RoleEditor = ({
+  draftRoles,
+  isSaving,
+  onBack,
+  onDraftRolesChange,
+}: {
+  draftRoles: string[]
+  isSaving: boolean
+  onBack: () => void
+  onDraftRolesChange: (roleTags: string[]) => void
+}) => {
+  const { t } = useTranslation()
+
+  return (
+    <VStack align="stretch" spacing={0}>
+      <BackLink onClick={onBack} />
+      <Text {...sectionTitleProps} mb={2}>
+        {t("permitProject.people.projectRole")}
+      </Text>
+      <Text fontSize="lg" mb={4}>
+        {t("permitProject.people.selectAllThatApply")}
+      </Text>
+      <ProjectRoleSelect roleTags={draftRoles} isDisabled={isSaving} onChange={onDraftRolesChange} />
+    </VStack>
+  )
+}
+
+const ContactEditor = ({
+  personName,
+  currentDesignation,
+  draftContact,
+  primaryContactName,
+  alternateContactNames = [],
+  isSaving,
+  onBack,
+  onDraftContactChange,
+}: {
+  personName: string
+  currentDesignation: EProjectContactDesignation
+  draftContact: EProjectContactDesignation
+  primaryContactName?: string | null
+  alternateContactNames?: string[]
+  isSaving: boolean
+  onBack: () => void
+  onDraftContactChange: (designation: EProjectContactDesignation) => void
+}) => {
+  const { t } = useTranslation()
+  const replacingPrimary =
+    draftContact === EProjectContactDesignation.primary &&
+    currentDesignation !== EProjectContactDesignation.primary &&
+    !!primaryContactName
+  const contactName = (name?: string | null) => name || t("permitProject.people.notAssigned")
+
+  return (
+    <VStack align="stretch" spacing={0}>
+      <BackLink onClick={onBack} />
+      <Text {...sectionTitleProps} mb={2}>
+        {t("permitProject.people.projectContacts")}
+      </Text>
+      <Text fontSize="md" lineHeight="1.68">
+        {t("permitProject.people.projectContactsDescription")}
+      </Text>
+      <VStack align="stretch" spacing={2} pt={4}>
+        <Box>
+          <Text fontWeight="bold" fontSize="md">
+            {t("permitProject.people.primaryContact")}
+          </Text>
+          <Text fontSize="md">{contactName(primaryContactName)}</Text>
+        </Box>
+        <Box>
+          <Text fontWeight="bold" fontSize="md">
+            {t("permitProject.people.alternateContact")}
+          </Text>
+          {alternateContactNames.length > 0 ? (
+            alternateContactNames.map((name, index) => (
+              <Text key={`${name}-${index}`} fontSize="md">
+                {name}
+              </Text>
+            ))
+          ) : (
+            <Text fontSize="md">{t("permitProject.people.notAssigned")}</Text>
+          )}
+        </Box>
+      </VStack>
+      <RadioGroup
+        value={draftContact}
+        isDisabled={isSaving}
+        onChange={(value) => onDraftContactChange(value as EProjectContactDesignation)}
+      >
+        <VStack align="stretch" spacing={2.5} pt={4}>
+          <Text fontWeight="bold" fontSize="lg">
+            {t("permitProject.people.contactQuestion")}
+          </Text>
+          <Radio value={EProjectContactDesignation.primary} size="lg">
+            <Text fontSize="lg">{t("permitProject.people.contactYesPrimary")}</Text>
+          </Radio>
+          <Radio value={EProjectContactDesignation.alternate} size="lg">
+            <Text fontSize="lg">{t("permitProject.people.contactYesAlternate")}</Text>
+          </Radio>
+          <Radio value={EProjectContactDesignation.none} size="lg">
+            <Text fontSize="lg">{t("ui.no")}</Text>
+          </Radio>
+        </VStack>
+      </RadioGroup>
+      {replacingPrimary && (
+        <CustomMessageBox status={EFlashMessageStatus.warning} mt={4}>
+          <Text fontSize="md">
+            {t("permitProject.people.replacePrimaryContact", {
+              name: personName,
+              existing: primaryContactName,
+            })}
+          </Text>
+        </CustomMessageBox>
+      )}
+    </VStack>
+  )
+}
+
+const AccessEditor = ({
+  draftAccess,
+  isSaving,
+  onBack,
+  onDraftAccessChange,
+}: {
+  draftAccess: EProjectAccess | null
+  isSaving: boolean
+  onBack: () => void
+  onDraftAccessChange: (access: EProjectAccess) => void
+}) => {
+  const { t } = useTranslation()
+
+  return (
+    <VStack align="stretch" spacing={0}>
+      <BackLink onClick={onBack} />
+      <Text {...sectionTitleProps} mb={2}>
+        {t("permitProject.people.projectAccess")}
+      </Text>
+      <Text fontSize="md" lineHeight="1.68">
+        {t("permitProject.people.accessIntro")}{" "}
+        <RouterLink to="/compare-access-levels" color="text.link">
+          {t("permitProject.people.compareAccessLevels")}
+        </RouterLink>
+      </Text>
+      <RadioGroup
+        value={draftAccess ?? ""}
+        isDisabled={isSaving}
+        onChange={(value) => onDraftAccessChange(value as EProjectAccess)}
+      >
+        <VStack align="stretch" spacing={2} pt={4}>
+          {Object.values(EProjectAccess).map((access) => {
+            const selected = draftAccess === access
+            return (
+              <Box
+                key={access}
+                border="1px solid"
+                borderColor={selected ? "semantic.info" : "border.light"}
+                bg={selected ? "semantic.infoLight" : "greys.white"}
+                borderRadius="sm"
+                p={4}
+                cursor="pointer"
+                onClick={() => {
+                  if (!isSaving) onDraftAccessChange(access)
+                }}
+              >
+                <Radio value={access} alignItems="flex-start" spacing={4} w="full">
+                  <Box>
+                    <Text fontWeight="bold" fontSize="md">
+                      {t(`permitProject.people.access.${access}`)}
+                    </Text>
+                    <Text fontSize="sm" mt={2}>
+                      {t(`permitProject.people.accessChoiceDescription.${access}`)}
+                    </Text>
+                  </Box>
+                </Radio>
+              </Box>
+            )
+          })}
+        </VStack>
+      </RadioGroup>
+    </VStack>
+  )
+}
+
 export const PersonDetailsPanel = ({
   person,
   isSelf = false,
   canEdit,
   canRemove,
   primaryContactName,
+  alternateContactNames,
   isSaving,
   onClose,
   onSave,
@@ -106,42 +313,36 @@ export const PersonDetailsPanel = ({
   onRemove,
 }: IPersonDetailsPanelProps) => {
   const { t } = useTranslation()
-  const openPrimaryConfirm = useRef<(() => void) | null>(null)
   const isActive = person.status === EProjectMembershipStatus.active
   const isExpired = person.status === EProjectMembershipStatus.expired
-  const isPrimaryContact = isActive && person.contactDesignation === EProjectContactDesignation.primary
-  const [openField, setOpenField] = useState<TEditableField | null>(null)
-  const [menuOpen, setMenuOpen] = useState(false)
-  const [isResendingView, setIsResendingView] = useState(false)
+  const [view, setView] = useState<TPanelView>("summary")
+  const [draftRoles, setDraftRoles] = useState<string[]>([])
+  const [draftContact, setDraftContact] = useState<EProjectContactDesignation>(person.contactDesignation)
+  const [draftAccess, setDraftAccess] = useState<EProjectAccess | null>(person.access)
   const [resendEmail, setResendEmail] = useState("")
   const [resentToEmail, setResentToEmail] = useState<string | null>(null)
-  const fieldsDisabled = !canEdit || isSaving
 
   useEffect(() => {
-    setOpenField(null)
-    setMenuOpen(false)
-    setIsResendingView(false)
+    setView("summary")
     setResentToEmail(null)
   }, [person.id])
 
-  useEffect(() => {
-    if (!openField) {
-      setMenuOpen(false)
-      return
-    }
+  const contactLabel = (designation: EProjectContactDesignation) => {
+    if (designation === EProjectContactDesignation.primary) return t("permitProject.people.primaryContact")
+    if (designation === EProjectContactDesignation.alternate) return t("permitProject.people.alternateContact")
+    return t("permitProject.people.notAProjectContact")
+  }
 
-    const timeoutId = window.setTimeout(() => setMenuOpen(true), 0)
-    return () => window.clearTimeout(timeoutId)
-  }, [openField])
-
-  const closeEditor = () => {
-    setMenuOpen(false)
-    setOpenField(null)
+  const openView = (next: Exclude<TPanelView, "summary" | "resend">) => {
+    if (next === "role") setDraftRoles([...person.roleTags])
+    if (next === "contact") setDraftContact(person.contactDesignation)
+    if (next === "access") setDraftAccess(person.access)
+    setView(next)
   }
 
   const openResendView = () => {
     setResendEmail("")
-    setIsResendingView(true)
+    setView("resend")
   }
 
   const handleSendReinvite = async () => {
@@ -151,31 +352,26 @@ export const PersonDetailsPanel = ({
     const ok = await onReinvite(trimmed)
     if (ok) {
       setResentToEmail(trimmed)
-      setIsResendingView(false)
+      setView("summary")
     }
   }
 
-  const contactOptions = useMemo<IContactOption[]>(
-    () => [
-      { value: EProjectContactDesignation.none, label: t("permitProject.people.notAProjectContact") },
-      { value: EProjectContactDesignation.alternate, label: t("permitProject.people.alternateContact") },
-      { value: EProjectContactDesignation.primary, label: t("permitProject.people.primaryContact") },
-    ],
-    [t]
-  )
-  const contactValue = contactOptions.find((option) => option.value === person.contactDesignation) ?? null
-  const accessOptions = useMemo<IOption<EProjectAccess>[]>(
-    () =>
-      Object.values(EProjectAccess).map((access) => ({
-        value: access,
-        label: t(`permitProject.people.access.${access}`),
-      })),
-    [t]
-  )
-  const accessValue = accessOptions.find((option) => option.value === person.access) ?? null
-  const menuIsOpen = (field: TEditableField) => openField === field && menuOpen
+  const backToSummary = () => setView("summary")
 
-  const changeButton = (field: TEditableField) =>
+  const save = async () => {
+    if (view === "role" && !sameTags(draftRoles, person.roleTags)) {
+      await Promise.resolve(onSave({ roleTags: draftRoles }))
+    }
+    if (view === "contact" && draftContact !== person.contactDesignation) {
+      await Promise.resolve(onSave({ contactDesignation: draftContact }))
+    }
+    if (view === "access" && draftAccess && draftAccess !== person.access) {
+      await Promise.resolve(onSave({ access: draftAccess }))
+    }
+    setView("summary")
+  }
+
+  const changeButton = (next: Exclude<TPanelView, "summary" | "resend">) =>
     canEdit ? (
       <Button
         variant="link"
@@ -186,7 +382,7 @@ export const PersonDetailsPanel = ({
         alignSelf="flex-start"
         textDecoration="none"
         isDisabled={isSaving}
-        onClick={() => setOpenField(field)}
+        onClick={() => openView(next)}
       >
         {t("ui.change")}
       </Button>
@@ -224,28 +420,214 @@ export const PersonDetailsPanel = ({
         <IconButton aria-label={t("ui.close")} icon={<X />} variant="ghost" onClick={onClose} />
       </Flex>
 
-      {isResendingView ? (
-        <>
-          <VStack align="stretch" spacing={5} flex={1} minH={0} overflowY="auto" px={6} py={6}>
-            <Button
-              variant="link"
-              size="sm"
-              leftIcon={<CaretLeft size={16} />}
-              alignSelf="flex-start"
-              px={0}
-              onClick={() => setIsResendingView(false)}
-            >
-              {t("ui.back")}
-            </Button>
+      <Box flex={1} minH={0} overflowY="auto" px={6} py={6}>
+        {view === "summary" && (
+          <VStack align="stretch" spacing={6}>
+            {resentToEmail && (
+              <CustomMessageBox
+                status={EFlashMessageStatus.success}
+                title={t("permitProject.people.inviteResentTitle")}
+                description={t("permitProject.people.inviteResentDescription", { email: resentToEmail })}
+              />
+            )}
 
+            {!isActive && (
+              <CustomMessageBox status={isExpired ? EFlashMessageStatus.error : EFlashMessageStatus.info}>
+                <Text as="div" fontSize="md">
+                  {t(isExpired ? "permitProject.people.invitationExpired" : "permitProject.people.invitationSent")}{" "}
+                  {canEdit && onReinvite && (
+                    <Button
+                      variant="link"
+                      size="sm"
+                      h="auto"
+                      minH={0}
+                      px={0}
+                      fontWeight="normal"
+                      textDecoration="underline"
+                      onClick={openResendView}
+                    >
+                      {t(isExpired ? "permitProject.people.sendNewInvite" : "permitProject.people.resendInvite")}
+                    </Button>
+                  )}
+                </Text>
+              </CustomMessageBox>
+            )}
+
+            <Box>
+              <Text {...sectionTitleProps} mb={3}>
+                {t("permitProject.people.personalDetails")}
+              </Text>
+              {isActive ? (
+                <VStack align="stretch" spacing={3}>
+                  <Box as="dl">
+                    {(
+                      [
+                        { label: t("permitProject.people.personalDetailsFields.name"), value: person.name },
+                        { label: t("permitProject.people.personalDetailsFields.phone"), value: person.phone },
+                        {
+                          label: t("permitProject.people.personalDetailsFields.organization"),
+                          value: person.organization,
+                        },
+                      ] as const
+                    ).map((item) => (
+                      <Box key={item.label} mb={2}>
+                        <Text as="dt" fontSize="xs" fontWeight="bold" color="text.secondary">
+                          {item.label}
+                        </Text>
+                        <Text as="dd" fontSize="md">
+                          {item.value || t("ui.notProvided")}
+                        </Text>
+                      </Box>
+                    ))}
+                  </Box>
+                  <Text fontSize="sm" color="text.secondary">
+                    {isSelf ? (
+                      <>
+                        {t("permitProject.people.personalDetailsSelfPrefix")}
+                        <RouterLink to="/profile" color="text.link">
+                          {t("permitProject.people.personalDetailsSelfLink")}
+                        </RouterLink>
+                        .
+                      </>
+                    ) : (
+                      t("permitProject.people.personalDetailsOtherNote")
+                    )}
+                  </Text>
+                </VStack>
+              ) : (
+                <Text fontSize="md">{t("permitProject.people.personalDetailsPlaceholder")}</Text>
+              )}
+            </Box>
+
+            <Box>
+              <Text fontWeight="bold" fontSize="md" mb={3}>
+                {t("permitProject.people.status")}
+              </Text>
+              <VStack align="stretch" spacing={3}>
+                <Text fontSize="md">
+                  {isActive
+                    ? t("permitProject.people.statusActive")
+                    : isExpired
+                      ? t("permitProject.people.statusExpired")
+                      : t("permitProject.people.statusPending")}
+                </Text>
+                {!isActive && canEdit && onReinvite && (
+                  <Button
+                    variant="link"
+                    size="sm"
+                    h="auto"
+                    minH={0}
+                    px={0}
+                    alignSelf="flex-start"
+                    textDecoration="none"
+                    onClick={openResendView}
+                  >
+                    {t("permitProject.people.resendInvite")}
+                  </Button>
+                )}
+              </VStack>
+            </Box>
+
+            <SectionDivider />
+
+            <Box>
+              <Text {...sectionTitleProps} mb={3}>
+                {t("permitProject.people.projectRole")}
+              </Text>
+              <VStack align="stretch" spacing={3}>
+                <Text fontSize="md">{person.roleTags.join(", ") || t("ui.notProvided")}</Text>
+                {changeButton("role")}
+              </VStack>
+            </Box>
+
+            <SectionDivider />
+
+            <Box>
+              <Text {...sectionTitleProps} mb={3}>
+                {t("permitProject.people.projectContact")}
+              </Text>
+              <VStack align="stretch" spacing={3}>
+                <Text fontSize="md">{contactLabel(person.contactDesignation)}</Text>
+                {changeButton("contact")}
+              </VStack>
+            </Box>
+
+            <SectionDivider />
+
+            <Box>
+              <Text {...sectionTitleProps} mb={3}>
+                {t("permitProject.people.projectAccess")}
+              </Text>
+              <VStack align="stretch" spacing={3}>
+                {person.access && <ProjectAccessTag access={person.access} alignSelf="flex-start" />}
+                {person.access && (
+                  <Text fontSize="md">{t(`permitProject.people.accessDescription.${person.access}`)}</Text>
+                )}
+                {person.access && (
+                  <RouterLink to="/compare-access-levels" color="text.link" fontSize="md" alignSelf="flex-start">
+                    {t("permitProject.people.compareAccessLevels")}
+                  </RouterLink>
+                )}
+                {changeButton("access")}
+              </VStack>
+            </Box>
+
+            <Box>
+              <Text fontWeight="bold" fontSize="md">
+                {t("permitProject.people.additionalAccess")}
+              </Text>
+              <Text fontSize="sm" color="text.secondary" mt={2.5}>
+                {t("permitProject.people.additionalAccessPlaceholder")}
+              </Text>
+            </Box>
+
+            {canRemove && (
+              <>
+                <SectionDivider />
+                <Box>
+                  <Text {...sectionTitleProps} mb={3}>
+                    {t("permitProject.people.removePerson")}
+                  </Text>
+                  <VStack align="stretch" spacing={3}>
+                    <Text fontSize="md">{t("permitProject.people.removePersonDescription")}</Text>
+                    <ConfirmationModal
+                      promptHeader={t("permitProject.people.removeConfirmTitle")}
+                      promptMessage={t("permitProject.people.removeConfirmBody")}
+                      confirmText={t("permitProject.people.removeFromProject")}
+                      confirmButtonBg="semantic.error"
+                      onConfirm={onRemove}
+                      renderTrigger={(onOpen) => (
+                        <Button
+                          variant="link"
+                          size="sm"
+                          h="auto"
+                          minH={0}
+                          px={0}
+                          alignSelf="flex-start"
+                          textDecoration="none"
+                          onClick={onOpen}
+                          isDisabled={isSaving}
+                        >
+                          {t("permitProject.people.removeFromProject")}
+                        </Button>
+                      )}
+                    />
+                  </VStack>
+                </Box>
+              </>
+            )}
+          </VStack>
+        )}
+
+        {view === "resend" && (
+          <VStack align="stretch" spacing={5}>
+            <BackLink onClick={backToSummary} />
             <Text {...sectionTitleProps}>{t("permitProject.people.resendPanel.title")}</Text>
-
             <Text fontSize="md">
               {t("permitProject.people.resendPanel.description", {
                 firstName: person.firstName || person.name,
               })}
             </Text>
-
             <FormControl>
               <FormLabel htmlFor="resend-invite-email">{t("permitProject.people.email")}</FormLabel>
               <Input
@@ -257,311 +639,59 @@ export const PersonDetailsPanel = ({
               />
             </FormControl>
           </VStack>
+        )}
 
-          <HStack
-            justify="flex-start"
-            spacing={3}
-            px={6}
-            py={4}
-            flexShrink={0}
-            borderTop="1px solid"
-            borderColor="border.light"
-          >
-            <Button variant="secondary" onClick={() => setIsResendingView(false)} isDisabled={isSaving}>
-              {t("ui.cancel")}
-            </Button>
-            <Button
-              variant="primary"
-              onClick={handleSendReinvite}
-              isLoading={isSaving}
-              isDisabled={!resendEmail.trim()}
-            >
-              {t("permitProject.people.resendPanel.send")}
-            </Button>
-          </HStack>
-        </>
-      ) : (
-        <VStack align="stretch" spacing={6} flex={1} minH={0} overflowY="auto" px={6} py={6}>
-          {resentToEmail && (
-            <CustomMessageBox
-              status={EFlashMessageStatus.success}
-              title={t("permitProject.people.inviteResentTitle")}
-              description={t("permitProject.people.inviteResentDescription", { email: resentToEmail })}
-            />
-          )}
+        {view === "role" && (
+          <RoleEditor
+            draftRoles={draftRoles}
+            isSaving={isSaving}
+            onBack={backToSummary}
+            onDraftRolesChange={setDraftRoles}
+          />
+        )}
+        {view === "contact" && (
+          <ContactEditor
+            personName={person.name}
+            currentDesignation={person.contactDesignation}
+            draftContact={draftContact}
+            primaryContactName={primaryContactName}
+            alternateContactNames={alternateContactNames}
+            isSaving={isSaving}
+            onBack={backToSummary}
+            onDraftContactChange={setDraftContact}
+          />
+        )}
+        {view === "access" && (
+          <AccessEditor
+            draftAccess={draftAccess}
+            isSaving={isSaving}
+            onBack={backToSummary}
+            onDraftAccessChange={setDraftAccess}
+          />
+        )}
+      </Box>
 
-          {!isActive && (
-            <CustomMessageBox status={isExpired ? EFlashMessageStatus.error : EFlashMessageStatus.info}>
-              <Text as="div" fontSize="md">
-                {t(isExpired ? "permitProject.people.invitationExpired" : "permitProject.people.invitationSent")}{" "}
-                {canEdit && onReinvite && (
-                  <Button
-                    variant="link"
-                    size="sm"
-                    h="auto"
-                    minH={0}
-                    px={0}
-                    fontWeight="normal"
-                    textDecoration="underline"
-                    onClick={openResendView}
-                  >
-                    {t(isExpired ? "permitProject.people.sendNewInvite" : "permitProject.people.resendInvite")}
-                  </Button>
-                )}
-              </Text>
-            </CustomMessageBox>
-          )}
-
-          <Box>
-            <Text {...sectionTitleProps} mb={3}>
-              {t("permitProject.people.personalDetails")}
-            </Text>
-            {isActive ? (
-              <VStack align="stretch" spacing={3}>
-                <Box as="dl">
-                  {(
-                    [
-                      { label: t("permitProject.people.personalDetailsFields.name"), value: person.name },
-                      { label: t("permitProject.people.personalDetailsFields.phone"), value: person.phone },
-                      {
-                        label: t("permitProject.people.personalDetailsFields.organization"),
-                        value: person.organization,
-                      },
-                    ] as const
-                  ).map((item) => (
-                    <Box key={item.label} mb={2}>
-                      <Text as="dt" fontSize="xs" fontWeight="bold" color="text.secondary">
-                        {item.label}
-                      </Text>
-                      <Text as="dd" fontSize="md">
-                        {item.value || t("ui.notProvided")}
-                      </Text>
-                    </Box>
-                  ))}
-                </Box>
-                <Text fontSize="sm" color="text.secondary">
-                  {isSelf ? (
-                    <>
-                      {t("permitProject.people.personalDetailsSelfPrefix")}
-                      <RouterLink to="/profile" color="text.link">
-                        {t("permitProject.people.personalDetailsSelfLink")}
-                      </RouterLink>
-                      .
-                    </>
-                  ) : (
-                    t("permitProject.people.personalDetailsOtherNote")
-                  )}
-                </Text>
-              </VStack>
-            ) : (
-              <Text fontSize="md">{t("permitProject.people.personalDetailsPlaceholder")}</Text>
-            )}
-          </Box>
-
-          <Box>
-            <Text fontWeight="bold" fontSize="md" mb={3}>
-              {t("permitProject.people.status")}
-            </Text>
-            <VStack align="stretch" spacing={3}>
-              <Text fontSize="md">
-                {isActive
-                  ? t("permitProject.people.statusActive")
-                  : isExpired
-                    ? t("permitProject.people.statusExpired")
-                    : t("permitProject.people.statusPending")}
-              </Text>
-              {!isActive && canEdit && onReinvite && (
-                <Button
-                  variant="link"
-                  size="sm"
-                  h="auto"
-                  minH={0}
-                  px={0}
-                  alignSelf="flex-start"
-                  textDecoration="none"
-                  onClick={openResendView}
-                >
-                  {t("permitProject.people.resendInvite")}
-                </Button>
-              )}
-            </VStack>
-          </Box>
-
-          <SectionDivider />
-
-          <Box>
-            <Text {...sectionTitleProps} mb={3}>
-              {t("permitProject.people.projectRole")}
-            </Text>
-            {openField === "role" ? (
-              <ProjectRoleSelect
-                roleTags={person.roleTags}
-                isDisabled={fieldsDisabled}
-                menuIsOpen={menuIsOpen("role")}
-                onMenuClose={() => {
-                  if (menuOpen) closeEditor()
-                }}
-                onChange={(roleTags) => onSave({ roleTags })}
-              />
-            ) : (
-              <VStack align="stretch" spacing={3}>
-                <Text fontSize="md">{person.roleTags.join(", ") || t("ui.notProvided")}</Text>
-                {changeButton("role")}
-              </VStack>
-            )}
-          </Box>
-
-          <SectionDivider />
-
-          <Box>
-            <Text {...sectionTitleProps} mb={3}>
-              {t("permitProject.people.projectContact")}
-            </Text>
-            {openField === "contact" && !isPrimaryContact ? (
-              <Select<IContactOption, false>
-                autoFocus
-                options={contactOptions}
-                value={contactValue}
-                isDisabled={fieldsDisabled}
-                menuIsOpen={menuIsOpen("contact")}
-                menuPortalTarget={typeof document === "undefined" ? undefined : document.body}
-                menuPosition="fixed"
-                styles={contactSelectStyles}
-                onMenuClose={() => {
-                  if (menuOpen) closeEditor()
-                }}
-                onChange={(option) => {
-                  if (!option || option.value === person.contactDesignation) return
-                  if (isActive && option.value === EProjectContactDesignation.primary) {
-                    closeEditor()
-                    openPrimaryConfirm.current?.()
-                    return
-                  }
-                  onSave({ contactDesignation: option.value })
-                  closeEditor()
-                }}
-              />
-            ) : (
-              <VStack align="stretch" spacing={3}>
-                <Text fontSize="md">{contactValue?.label}</Text>
-                {canEdit && isPrimaryContact ? (
-                  <Button
-                    variant="link"
-                    size="sm"
-                    h="auto"
-                    minH={0}
-                    px={0}
-                    alignSelf="flex-start"
-                    textDecoration="none"
-                    isDisabled
-                  >
-                    {t("ui.change")}
-                  </Button>
-                ) : (
-                  changeButton("contact")
-                )}
-              </VStack>
-            )}
-            <ConfirmationModal
-              promptHeader={t("permitProject.people.transferPrimaryTitle")}
-              promptMessage={t("permitProject.people.transferPrimaryBody", { name: primaryContactName })}
-              confirmText={t("permitProject.people.transferPrimaryConfirm")}
-              onConfirm={() => onSave({ contactDesignation: EProjectContactDesignation.primary })}
-              renderTrigger={(onOpen) => {
-                openPrimaryConfirm.current = onOpen
-                return null
-              }}
-            />
-          </Box>
-
-          <SectionDivider />
-
-          <Box>
-            <Text {...sectionTitleProps} mb={3}>
-              {t("permitProject.people.projectAccess")}
-            </Text>
-            <VStack align="stretch" spacing={3}>
-              {person.access && <ProjectAccessTag access={person.access} alignSelf="flex-start" />}
-              {person.access && (
-                <Text fontSize="md">{t(`permitProject.people.accessDescription.${person.access}`)}</Text>
-              )}
-              {person.access && (
-                <RouterLink to="/compare-access-levels" color="text.link" fontSize="md" alignSelf="flex-start">
-                  {t("permitProject.people.compareAccessLevels")}
-                </RouterLink>
-              )}
-              {openField === "access" ? (
-                <Select<IOption<EProjectAccess>, false>
-                  autoFocus
-                  options={accessOptions}
-                  value={accessValue}
-                  isDisabled={fieldsDisabled}
-                  menuIsOpen={menuIsOpen("access")}
-                  menuPortalTarget={typeof document === "undefined" ? undefined : document.body}
-                  menuPosition="fixed"
-                  components={{ Option: AccessOption, SingleValue: AccessValue }}
-                  styles={contactSelectStyles as StylesConfig<IOption<EProjectAccess>, false>}
-                  onMenuClose={() => {
-                    if (menuOpen) closeEditor()
-                  }}
-                  onChange={(option) => {
-                    if (!option || option.value === person.access) return
-                    onSave({ access: option.value })
-                    closeEditor()
-                  }}
-                />
-              ) : (
-                changeButton("access")
-              )}
-            </VStack>
-          </Box>
-
-          <Box>
-            <Text fontWeight="bold" fontSize="md">
-              {t("permitProject.people.additionalAccess")}
-            </Text>
-            <Text fontSize="sm" color="text.secondary" mt={2.5}>
-              {t("permitProject.people.additionalAccessPlaceholder")}
-            </Text>
-          </Box>
-
-          {canRemove && (
-            <>
-              <SectionDivider />
-              <Box>
-                <Text {...sectionTitleProps} mb={3}>
-                  {t("permitProject.people.removePerson")}
-                </Text>
-                <VStack align="stretch" spacing={3}>
-                  <Text fontSize="md">{t("permitProject.people.removePersonDescription")}</Text>
-                  <ConfirmationModal
-                    promptHeader={t("permitProject.people.removeConfirmTitle")}
-                    promptMessage={t("permitProject.people.removeConfirmBody")}
-                    confirmText={t("permitProject.people.removeFromProject")}
-                    confirmButtonBg="semantic.error"
-                    onConfirm={onRemove}
-                    renderTrigger={(onOpen) => (
-                      <Button
-                        variant="link"
-                        size="sm"
-                        h="auto"
-                        minH={0}
-                        px={0}
-                        alignSelf="flex-start"
-                        textDecoration="none"
-                        onClick={onOpen}
-                        isDisabled={isSaving}
-                      >
-                        {t("permitProject.people.removeFromProject")}
-                      </Button>
-                    )}
-                  />
-                </VStack>
-              </Box>
-            </>
-          )}
-        </VStack>
+      {view === "resend" && (
+        <Flex
+          flexShrink={0}
+          align="center"
+          gap={4}
+          px={6}
+          py={4}
+          borderTop="1px solid"
+          borderColor="border.light"
+          bg="greys.white"
+        >
+          <Button variant="secondary" onClick={backToSummary} isDisabled={isSaving}>
+            {t("ui.cancel")}
+          </Button>
+          <Button variant="primary" onClick={handleSendReinvite} isLoading={isSaving} isDisabled={!resendEmail.trim()}>
+            {t("permitProject.people.resendPanel.send")}
+          </Button>
+        </Flex>
       )}
+
+      {view !== "summary" && view !== "resend" && <EditorFooter onCancel={onClose} onSave={save} isSaving={isSaving} />}
     </Flex>
   )
 }

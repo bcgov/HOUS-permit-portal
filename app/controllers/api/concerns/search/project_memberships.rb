@@ -28,7 +28,7 @@ module Api::Concerns::Search::ProjectMemberships
       per_page: @project_membership_search.limit_value,
       role_tags: project_role_tags,
       primary_contact_name: primary_contact_name,
-      alternate_contact_name: alternate_contact_name
+      alternate_contact_names: alternate_contact_names
     }
   end
 
@@ -90,16 +90,16 @@ module Api::Concerns::Search::ProjectMemberships
       &.name
   end
 
-  def alternate_contact_name
+  def alternate_contact_names
     ProjectMembership
       .includes(:user)
       .where.not(user_id: nil)
-      .find_by(
+      .where(
         permit_project_id: @permit_project.id,
         contact_designation: :alternate
       )
-      &.user
-      &.name
+      .order(:created_at)
+      .map { |membership| membership.user.name }
   end
 
   def project_role_tags
