@@ -67,7 +67,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const acknowledgedElectivesKey = useRef("")
   useEffect(() => {
     if (!currentUser || !currentPermitApplication?.isFullyLoaded) return
-    if (currentUser.id !== currentPermitApplication.submitter?.id) return
+    if (!currentPermitApplication.currentUserAccess?.editApplication) return
 
     const changeId = currentPermitApplication.unseenCustomizationChangeId
     if (!changeId || !currentPermitApplication.unseenElectiveFieldIds.length) return
@@ -286,7 +286,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const { tagsOrNickname, formJson, number, isSubmitted, isDirty, setIsDirty, isRevisionsRequested } =
     currentPermitApplication
 
-  const doesUserHaveSubmissionPermission = currentUser?.id === currentPermitApplication.submitter?.id
+  const doesUserHaveSubmissionPermission = !!currentPermitApplication.currentUserAccess?.editApplication
   const canEditPermitApplication =
     currentPermitApplication.isDraft &&
     doesUserHaveSubmissionPermission &&
@@ -404,7 +404,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                 <Button variant="ghost" leftIcon={<Info size={20} />} color="white" onClick={onContactsOpen}>
                   {t("permitApplication.show.contactsSummary")}
                 </Button>{" "}
-                {doesUserHaveSubmissionPermission && (
+                {currentPermitApplication.currentUserAccess?.viewApplication && (
                   <SubmissionDownloadModal permitApplication={currentPermitApplication} />
                 )}
                 <RouterLinkButton to={parentProjectPath} variant="default" rightIcon={<CaretRight />}>

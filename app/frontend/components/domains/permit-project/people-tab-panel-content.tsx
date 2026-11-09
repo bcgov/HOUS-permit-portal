@@ -110,10 +110,10 @@ const PeopleList = observer(({ permitProject }: IProps) => {
     setSelectedPerson(updated)
   }
 
-  const handleReinvite = async (email?: string) => {
+  const handleReinvite = async () => {
     if (!selectedPerson) return false
     setIsSaving(true)
-    const updated = await reinviteProjectPerson(selectedPerson.id, email)
+    const updated = await reinviteProjectPerson(selectedPerson.id)
     setIsSaving(false)
     if (updated) {
       setSelectedPerson(updated)
@@ -129,6 +129,13 @@ const PeopleList = observer(({ permitProject }: IProps) => {
     setIsSaving(false)
     if (removed) setSelectedPerson(null)
   }
+
+  const projectAccess = permitProject.currentUserAccess
+  const selectedIsActive = selectedPerson?.status === EProjectMembershipStatus.active
+  // The API also refuses the last Full member.
+  const canRemoveSelected = selectedIsActive
+    ? !!projectAccess?.manageMemberStanding && selectedPerson?.contactDesignation !== EProjectContactDesignation.primary
+    : !!projectAccess?.invitePeople
 
   const accessOptions = Object.values(EProjectAccess).map((access) => ({
     value: access,
@@ -147,13 +154,15 @@ const PeopleList = observer(({ permitProject }: IProps) => {
                 {t("permitProject.details.people")}
               </Heading>
             </Flex>
-            <RouterLinkButton
-              variant="primary"
-              leftIcon={<Icon as={Plus} />}
-              to={`/projects/${permitProject.id}/people/new`}
-            >
-              {t("permitProject.people.addPerson")}
-            </RouterLinkButton>
+            {projectAccess?.invitePeople && (
+              <RouterLinkButton
+                variant="primary"
+                leftIcon={<Icon as={Plus} />}
+                to={`/projects/${permitProject.id}/people/new`}
+              >
+                {t("permitProject.people.addPerson")}
+              </RouterLinkButton>
+            )}
           </Flex>
 
           <Flex direction="column" gap={4} w="full">
@@ -305,13 +314,13 @@ const PeopleList = observer(({ permitProject }: IProps) => {
         </VStack>
       </Flex>
       {selectedPerson && (
-        // MEMBERSHIP COMMENT: canEdit and canRemove currently depend on permitProject.isOwner;
-        // revisit when full-access members can manage project people.
         <PersonDetailsPanel
           person={selectedPerson}
           isSelf={Boolean(selectedPerson.userId && selectedPerson.userId === currentUser?.id)}
-          canEdit={permitProject.isOwner}
-          canRemove={permitProject.isOwner && selectedPerson.userId !== permitProject.ownerId}
+          canEditRoleTags={selectedPerson.canEditRoleTags}
+          canManageStanding={!!projectAccess?.manageMemberStanding}
+          canResend={!!projectAccess?.invitePeople}
+          canRemove={canRemoveSelected}
           primaryContactName={primaryContactName}
           alternateContactNames={alternateContactNames.slice()}
           isSaving={isSaving}

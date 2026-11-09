@@ -1,7 +1,7 @@
 class SupportingDocumentPolicy < ApplicationPolicy
   def download?
-    return true if record.permit_application.submitter_id == user.id
-    return false unless user.review_staff?
+    return true if project_access.view_application?
+    return false unless user&.review_staff?
 
     user
       .jurisdictions
@@ -10,10 +10,16 @@ class SupportingDocumentPolicy < ApplicationPolicy
   end
 
   def destroy?
-    record.permit_application.submitter_id == user.id
+    project_access.edit_application?
   end
 
   def upload?
-    true
+    project_access.edit_application?
+  end
+
+  private
+
+  def project_access
+    @project_access ||= access.on(record.permit_application&.permit_project)
   end
 end

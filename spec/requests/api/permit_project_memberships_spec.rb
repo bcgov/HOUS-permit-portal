@@ -194,6 +194,31 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
       expect(membership.reload.access).to eq("standard")
     end
 
+    it "does not change role tags when the same update changes access and the member cannot change standing" do
+      expanded = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: project,
+        user: expanded,
+        access: :expanded
+      )
+      sign_in expanded
+
+      patch "/api/permit_projects/#{project.id}/memberships/#{membership.id}",
+            params: {
+              membership: {
+                access: "standard",
+                role_tags: ["Builder"]
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(membership.reload.access).to eq("full")
+      expect(membership.role_list).to contain_exactly("Architect")
+    end
+
     it "rejects an unknown access level" do
       sign_in owner
 
@@ -304,14 +329,14 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
       expect(names).not_to include("Mina Member")
     end
 
-    it "forbids removing the creator membership" do
+    it "rejects removing the primary contact" do
       creator_membership = project.project_memberships.find_by!(user: owner)
       sign_in owner
 
       delete "/api/permit_projects/#{project.id}/memberships/#{creator_membership.id}",
              headers: headers
 
-      expect(response).to have_http_status(:forbidden)
+      expect(response).to have_http_status(:unprocessable_content)
       expect(ProjectMembership.exists?(creator_membership.id)).to be(true)
     end
 
@@ -391,7 +416,7 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
       expect(response).to have_http_status(:ok)
       expect(json_response["data"]).not_to have_key("email")
       expect(json_response["data"]).not_to have_key("invited_email")
-      expect(pending.reload.invited_email).to eq("wanda.updated@example.com")
+      expect(pending.reload.invited_email).to eq("wanda@example.com")
       raw_token = enqueued_invitation_raw_token
       expect(pending.reload.invitation_token).not_to eq(old_digest)
       expect(pending.invitation_token).to eq(

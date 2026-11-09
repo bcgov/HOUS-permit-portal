@@ -75,7 +75,19 @@ module Api::Concerns::Search::ProjectMemberships
     filters = membership_filters
     where[:access] = filters[:access] if filters[:access].present?
     where[:role_tags] = filters[:role_tags] if filters[:role_tags].present?
+    unless project_access.view_invitations?
+      where[:id] = @permit_project
+        .project_memberships
+        .where.not(user_id: nil)
+        .ids
+    end
     where
+  end
+
+  # Standard members do not see pending invites. The memberships controller
+  # uses this same method for the people payload.
+  def project_access
+    @project_access ||= pundit_user.access.on(@permit_project)
   end
 
   def primary_contact_name

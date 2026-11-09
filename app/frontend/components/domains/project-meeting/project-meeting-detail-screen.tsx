@@ -51,10 +51,10 @@ export const SubmitterProjectMeetingDetailContent = observer(
 
     const documents = currentProjectMeeting.meetingRequestDocuments.filter((document) => !document._destroy)
     const canWithdrawMeeting =
-      permitProject.isOwner &&
+      !!permitProject.currentUserAccess?.manageMeetings &&
       [EProjectMeetingStatus.open, EProjectMeetingStatus.scheduled].includes(currentProjectMeeting.status)
     const requesterEditPath =
-      permitProject.isOwner && currentProjectMeeting.isActive
+      !!permitProject.currentUserAccess?.manageMeetings && currentProjectMeeting.isActive
         ? `/projects/${permitProjectId}/meetings/${currentProjectMeeting.id}/edit/relationship`
         : null
 

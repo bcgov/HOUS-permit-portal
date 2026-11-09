@@ -1,4 +1,6 @@
 class ReportDocumentPolicy < ApplicationPolicy
+  # Only the Step Code creator (step_codes.creator_id), not everyone who can
+  # view or edit the Step Code.
   def download?
     return false unless user
 
@@ -6,7 +8,6 @@ class ReportDocumentPolicy < ApplicationPolicy
   end
 
   def share?
-    # Only the creator of the Step Code can share the report
     return false unless user
 
     record.step_code.creator == user

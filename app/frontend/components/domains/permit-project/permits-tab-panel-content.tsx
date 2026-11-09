@@ -41,7 +41,7 @@ export const PermitsTabPanelContent = observer(({ permitProject }: IProps) => {
               {t("permitProject.permits.title")}
             </Heading>
           </HStack>
-          <AddPermitsButton permitProject={permitProject} />
+          {permitProject.currentUserAccess?.addApplication && <AddPermitsButton permitProject={permitProject} />}
         </Flex>
         {permitProject.totalPermitsCount === 0 ? (
           <EmptyResultsBox description={t("permitProject.index.empty")} icon={<ClipboardText size={18} />} mt={2} />

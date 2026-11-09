@@ -3,9 +3,7 @@ class ProjectMeetingPolicy < ApplicationPolicy
     def resolve
       return scope.none unless user
 
-      # MEMBERSHIP COMMENT: later, authorize from membership.
-      # owner_id only identifies the creator.
-      clauses = ["permit_projects.owner_id = :uid"]
+      clauses = [ProjectAccess.member_sql(:manage_meetings?)]
       values = { uid: user.id }
 
       if user.review_staff?
@@ -28,23 +26,23 @@ class ProjectMeetingPolicy < ApplicationPolicy
 
   def show?
     # TODO: confirm if collaborators can see all meeting details including documents
-    user_is_owner? || user_is_review_staff_for_jurisdiction?
+    manages_meetings? || user_is_review_staff_for_jurisdiction?
   end
 
   def create?
-    user_is_owner? && feature_enabled?
+    manages_meetings? && feature_enabled?
   end
 
   def update?
-    user_is_owner? && feature_enabled? && (record.draft? || record.active?)
+    manages_meetings? && feature_enabled? && (record.draft? || record.active?)
   end
 
   def submit?
-    user_is_owner? && record.draft? && feature_enabled?
+    manages_meetings? && record.draft? && feature_enabled?
   end
 
   def withdraw?
-    user_is_owner? && feature_enabled?
+    manages_meetings? && feature_enabled?
   end
 
   def reschedule?
@@ -65,12 +63,14 @@ class ProjectMeetingPolicy < ApplicationPolicy
     mark_as_viewed?
   end
 
+  # Review staff only. Submitters do not add meeting notes.
   def create_note?
     user_is_review_staff_for_jurisdiction? && feature_enabled?
   end
 
   def view_notes?
-    user_is_owner? || user_is_review_staff_for_jurisdiction_in_active_sandbox?
+    manages_meetings? ||
+      user_is_review_staff_for_jurisdiction_in_active_sandbox?
   end
 
   def download_notes_csv?
@@ -83,10 +83,8 @@ class ProjectMeetingPolicy < ApplicationPolicy
 
   private
 
-  # MEMBERSHIP COMMENT: later, authorize from membership.
-  # owner_id only identifies the creator. record.owner is the project creator.
-  def user_is_owner?
-    user.present? && record.owner&.id == user.id
+  def manages_meetings?
+    access.on(record.permit_project).manage_meetings?
   end
 
   def user_is_review_staff_for_jurisdiction?

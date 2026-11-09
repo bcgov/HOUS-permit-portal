@@ -55,18 +55,16 @@ class Api::PermitProjectsController < Api::ApplicationController
   # and view variants. Worth doing as a dedicated refactor rather than piecemeal.
   def show
     authorize @permit_project
-    # MEMBERSHIP COMMENT: temporary check so accepted members receive the
-    # submitter extended view when opening the project; revisit with membership permissions.
-    # This runs before the review-staff :inbox_extended branch. If reviewers can
-    # accept later, a reviewer who accepted would lose the inbox view of that project.
-    is_owner_or_collaborator =
-      @permit_project.owner_id == current_user.id ||
-        @permit_project.project_memberships.exists?(user_id: current_user.id) ||
+    # MEMBERSHIP COMMENT: members get the submitter view before the
+    # review-staff :inbox_extended branch. If reviewers can accept later, a
+    # reviewer who accepted would lose the inbox view of that project.
+    is_member_or_collaborator =
+      project_access.view_project? ||
         @permit_project.permit_applications.any? do |app|
           app.collaborators.any? { |c| c.user_id == current_user.id }
         end
     view =
-      if is_owner_or_collaborator
+      if is_member_or_collaborator
         :extended
       elsif current_user.review_staff?
         :inbox_extended
@@ -259,8 +257,13 @@ class Api::PermitProjectsController < Api::ApplicationController
                      meta: page_meta(@permit_application_search),
                      blueprint: PermitApplicationBlueprint,
                      blueprint_opts: {
-                       view: :project_base,
-                       current_user: current_user
+                       view:
+                         PermitProjectBlueprint.application_row_view(
+                           project_access: project_access,
+                           current_user: current_user
+                         ),
+                       current_user: current_user,
+                       project_access: project_access
                      }
                    }
   end
@@ -316,7 +319,8 @@ class Api::PermitProjectsController < Api::ApplicationController
                      {
                        blueprint: PermitApplicationBlueprint,
                        blueprint_opts: {
-                         view: :project_base
+                         view: :project_base,
+                         project_access: project_access
                        }
                      }
     else
@@ -420,8 +424,13 @@ class Api::PermitProjectsController < Api::ApplicationController
       project_ids_with_outdated_drafts: @project_ids_with_outdated_drafts,
       active_project_meeting_ids_by_project_id:
         @active_project_meeting_ids_by_project_id,
-      notes_scope: policy_scope(Note)
+      notes_scope: policy_scope(Note),
+      project_access: @permit_project&.persisted? ? project_access : nil
     }
+  end
+
+  def project_access
+    @project_access ||= pundit_user.access.on(@permit_project)
   end
 
   def set_permit_project

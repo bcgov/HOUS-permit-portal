@@ -191,4 +191,49 @@ RSpec.describe StepCodePolicy, type: :policy do
       expect(resolved).not_to include(hidden)
     end
   end
+
+  context "for a Standard member of the project" do
+    let(:standard) { create(:user, :submitter) }
+    let(:step_code) do
+      create(
+        :part_9_step_code,
+        permit_application: permit_application,
+        creator: submitter
+      )
+    end
+
+    before do
+      create(
+        :project_membership,
+        permit_project: permit_application.permit_project,
+        user: standard,
+        access: :standard
+      )
+    end
+
+    it "denies show, update, and destroy" do
+      expect(policy_for(standard, step_code).show?).to be false
+      expect(policy_for(standard, step_code).update?).to be false
+      expect(policy_for(standard, step_code).destroy?).to be false
+    end
+  end
+
+  it "lets a Full member who did not create the step code delete it" do
+    member = create(:user, :submitter)
+    create(
+      :project_membership,
+      permit_project: permit_application.permit_project,
+      user: member,
+      access: :full
+    )
+    step_code =
+      create(
+        :part_9_step_code,
+        permit_application: permit_application,
+        creator: submitter
+      )
+
+    expect(policy_for(member, step_code).show?).to be true
+    expect(policy_for(member, step_code).destroy?).to be true
+  end
 end

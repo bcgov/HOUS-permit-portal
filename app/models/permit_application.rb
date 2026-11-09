@@ -127,6 +127,16 @@ class PermitApplication < ApplicationRecord
 
   COMPLETION_SECTION_KEY = "section-completion-key"
 
+  # created_by is who created this application (a User or a Jurisdiction).
+  # submitter is a different field and is not an access check.
+  def creator
+    created_by
+  end
+
+  def creator_id
+    created_by_id
+  end
+
   def public_record?
     !new_draft?
   end
@@ -224,7 +234,7 @@ class PermitApplication < ApplicationRecord
   def permit_collaborations(user = nil)
     base = association(:permit_collaborations).reader
 
-    return base if user.nil? || submitter_id == user.id
+    return base if user.nil? || project_access_for(user).view_application?
 
     if base.loaded?
       base.select { |pc| pc.collaborator&.user_id == user.id }
@@ -339,8 +349,11 @@ class PermitApplication < ApplicationRecord
   # collaborators. A delegatee could edit every block; an assignee could edit
   # assigned_requirement_block_id. How that becomes grants is still open.
   # Check git history before changing it.
+  # :all is project edit access (Full or Expanded). A list of block ids
+  # would be a grant.
   def submission_requirement_block_edit_permissions(user_id:)
-    return :all if submitter_id == user_id
+    user = User.find_by(id: user_id)
+    return :all if project_access_for(user).edit_application?
 
     nil
   end
@@ -847,11 +860,13 @@ class PermitApplication < ApplicationRecord
     )
   end
 
+  # A member who adds a draft is its creator. Review staff who are not
+  # members add it as the jurisdiction, with the project creator as submitter.
   def assign_creation_actors(user)
     project = permit_project
     return unless project && user
 
-    if project.owner_id == user.id
+    if project_access_for(user).add_application?
       self.created_by = user
       self.submitter = user
     else
@@ -861,6 +876,11 @@ class PermitApplication < ApplicationRecord
   end
 
   private
+
+  # The project's own sandbox, so a model check never depends on the request.
+  def project_access_for(user)
+    ProjectAccess.new(user, permit_project&.sandbox, permit_project)
+  end
 
   # TODO: HUB-5783 The association scopes above ignore submission rows. Delete
   # them with the application so the foreign keys still allow destroy.

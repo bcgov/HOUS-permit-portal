@@ -39,10 +39,11 @@ class Api::ProjectInvitationsController < Api::ApplicationController
         )
 
       if existing
-        # MEMBERSHIP COMMENT - preserves creator's full access when merging a
-        # duplicate invite into an existing membership; revisit with full access rules.
-        existing.access = @membership.access unless existing.user_id ==
-          @membership.permit_project.owner_id
+        # A second invite never lowers access.
+        existing.access =
+          [existing.access, @membership.access].max_by do |level|
+            ProjectMembership.accesses[level]
+          end
         existing.role_tags = (existing.role_list + @membership.role_list).uniq
         if !existing.primary? && @membership.contact_designation != "none"
           existing.contact_designation = @membership.contact_designation

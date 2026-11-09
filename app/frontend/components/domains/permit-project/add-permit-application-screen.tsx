@@ -48,7 +48,8 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
   const [query, setQuery] = useState("")
   const [note, setNote] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const showCreationMessage = !!currentPermitProject && !currentPermitProject.isOwner
+  // A non-member (review staff) adds as the jurisdiction, with a note.
+  const showCreationMessage = !!currentPermitProject && !currentPermitProject.currentUserAccess?.addApplication
 
   const filteredTemplates = templateVersions.filter((tv) => tv.matchesSearchQuery(query))
   const groupedTemplates = groupTemplateVersionsByCategory(filteredTemplates)
@@ -59,10 +60,10 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
   const selectedTemplatesRequireProjectMeeting = selectedTemplateVersions.some(
     (templateVersion) => templateVersion.requiresProjectMeeting
   )
-  // Meeting requests are owner-only. Review staff adding permits they do not own skip this step.
+  // Review staff adding permits as the jurisdiction skip this step.
   const shouldOfferProjectMeetingAfterAdd =
     selectedTemplatesRequireProjectMeeting &&
-    !!currentPermitProject?.isOwner &&
+    !!currentPermitProject?.currentUserAccess?.manageMeetings &&
     !currentPermitProject?.activeProjectMeeting &&
     siteConfigurationStore.projectMeetingsEnabled &&
     (currentPermitProject?.jurisdiction?.projectMeetingsEnabled ?? false)

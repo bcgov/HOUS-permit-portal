@@ -263,7 +263,13 @@ RSpec.describe NotificationService do
     it "notifies submitter (if permit application) and creator (if present)" do
       submitter = create(:user, :submitter)
       creator = create(:user, :submitter)
-      pa = instance_double("PermitApplication", submitter_id: submitter.id)
+      pa =
+        instance_double(
+          "PermitApplication",
+          permit_project: nil,
+          submitter: submitter,
+          submitter_id: submitter.id
+        )
       step_code =
         instance_double(
           "StepCode",
@@ -571,6 +577,7 @@ RSpec.describe NotificationService do
       permit_application =
         instance_double(
           "PermitApplication",
+          permit_project: nil,
           submitter: submitter,
           submitter_id: "u_submit",
           submit_event_notification_data: {

@@ -21,6 +21,7 @@ import {
   IFormJson,
   IPermitApplicationSelectiveZipReady,
   IPermitApplicationSupportingDocumentsUpdate,
+  IProjectAccess,
   IReportGenerationIssue,
   ISubmissionData,
   ISubmissionVersion,
@@ -120,6 +121,10 @@ export const PermitApplicationModel = types.snapshotProcessor(
       inboxSortOrder: types.maybeNull(types.number),
       allowedManualTransitions: types.optional(types.array(types.string), []),
       daysInQueue: types.maybeNull(types.number),
+      // Project list rows only. Full: any draft. Expanded: drafts they created.
+      canArchiveDraft: types.optional(types.boolean, false),
+      // The caller's project access, on the full application payload.
+      currentUserAccess: types.maybeNull(types.frozen<IProjectAccess>()),
     })
     .extend(withEnvironment())
     .extend(withRootStore())
@@ -144,11 +149,17 @@ export const PermitApplicationModel = types.snapshotProcessor(
       get isLockedForReviewStaff() {
         const user = self.rootStore.userStore.currentUser
         if (!user?.isReviewStaff || !this.isNewDraft) return false
-        if (self.submitter?.id === user.id) return false
+        if (self.currentUserAccess?.viewApplication) return false
         if (self.hasActiveProjectMeeting) return false
 
+        // MEMBERSHIP COMMENT: a member who is also review staff opens drafts as
+        // a member. Reviewers accepting invitations is out of scope.
         const project = self.rootStore.permitProjectStore.currentPermitProject
-        if (project?.id === self.projectId && (project.isOwner || project.hasActiveProjectMeeting)) return false
+        if (
+          project?.id === self.projectId &&
+          (project.currentUserAccess?.viewApplication || project.hasActiveProjectMeeting)
+        )
+          return false
         return true
       },
       get isDraft() {
@@ -318,8 +329,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
           )
         }
         const currentUser = self.rootStore.userStore.currentUser
-        const submitterCanEditDraft =
-          forSubmitterEdit && self.isDraft && !!currentUser?.id && currentUser.id === self.submitter?.id
+        const submitterCanEditDraft = forSubmitterEdit && self.isDraft && !!self.currentUserAccess?.editApplication
         const disableRequirementFields = submitterCanEditDraft
           ? self.isViewingPastRequests
           : self.isSubmitted ||
@@ -542,8 +552,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
     }))
     .views((self) => ({
       get currentUserShouldSeeApplicationDiff() {
-        const currentUser = self.rootStore.userStore.currentUser
-        return currentUser?.id === self.submitter?.id
+        return !!self.currentUserAccess?.editApplication
       },
       getCollaborationAssigneesByBlockIdMap() {
         return self.getCollaborationAssignees().reduce<Record<string, IPermitCollaboration[]>>((acc, collaboration) => {
@@ -570,7 +579,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       canUserSubmit(user: IUser) {
         if (!user) return false
 
-        return self.submitter?.id === user.id
+        return !!self.currentUserAccess?.submitApplication
       },
       canUserManageCollaborators(user: IUser) {
         if (!user) return false

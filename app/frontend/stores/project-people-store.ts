@@ -92,11 +92,11 @@ export const ProjectPeopleStoreModel = types
       yield self.search()
       return created
     }),
-    reinviteProjectPerson: flow(function* (membershipId: string, email?: string) {
+    reinviteProjectPerson: flow(function* (membershipId: string) {
       const permitProjectId = self.rootStore.permitProjectStore.currentPermitProject?.id
       if (!permitProjectId) return null
 
-      const response = yield self.environment.api.reinvitePermitProjectMembership(permitProjectId, membershipId, email)
+      const response = yield self.environment.api.reinvitePermitProjectMembership(permitProjectId, membershipId)
       if (!response.ok || !response.data?.data) return null
 
       const updated: IProjectPerson = response.data.data

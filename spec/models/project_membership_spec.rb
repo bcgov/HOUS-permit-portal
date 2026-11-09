@@ -126,4 +126,33 @@ RSpec.describe ProjectMembership, type: :model do
     expect(pending_primary.reload.contact_designation).to eq("primary")
     expect(creator_membership.reload.contact_designation).to eq("none")
   end
+
+  it "refuses to demote or remove the last full member" do
+    project = create(:permit_project)
+    membership = project.project_memberships.find_by!(user: project.creator)
+
+    expect(membership.update(access: :standard)).to be false
+    expect(membership.errors[:access]).to be_present
+    expect(membership.destroy).to be false
+    expect(ProjectMembership.exists?(membership.id)).to be true
+  end
+
+  it "refuses to remove the primary contact while another full member remains" do
+    project = create(:permit_project)
+    create(:project_membership, permit_project: project, access: :full)
+    membership = project.project_memberships.find_by!(user: project.creator)
+
+    expect(membership.destroy).to be false
+    expect(membership.errors[:base]).to be_present
+    expect(ProjectMembership.exists?(membership.id)).to be true
+  end
+
+  it "removes a pending invite" do
+    project = create(:permit_project)
+    pending =
+      create(:project_membership, :pending_invitation, permit_project: project)
+
+    expect(pending.destroy).to be_truthy
+    expect(ProjectMembership.exists?(pending.id)).to be false
+  end
 end

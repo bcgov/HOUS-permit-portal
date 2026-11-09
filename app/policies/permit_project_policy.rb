@@ -1,6 +1,7 @@
 class PermitProjectPolicy < ApplicationPolicy
   class Scope < Scope
     def resolve
+      # TODO: HUB-5783 legacy submission collaborators still see the project.
       collaborator_exists_sql = <<-SQL.squish
         EXISTS (
           SELECT 1 FROM collaborators c
@@ -11,24 +12,10 @@ class PermitProjectPolicy < ApplicationPolicy
         )
       SQL
 
-      # MEMBERSHIP COMMENT: temporary project visibility for accepted members so
-      # invitees can open /projects/:id/overview after accepting; revisit with
-      # full membership access levels. If reviewers can accept later, this
-      # visibility plus the show action's membership check selects the submitter
-      # :extended view before the review inbox view.
-      member_exists_sql = <<-SQL.squish
-        EXISTS (
-          SELECT 1 FROM project_memberships pm
-          WHERE pm.permit_project_id = permit_projects.id
-            AND pm.user_id = :uid
-        )
-      SQL
-
-      # MEMBERSHIP COMMENT: later, authorize from membership.
-      # owner_id only identifies the creator.
+      # owner_id only identifies the project creator. The creator has a Full
+      # membership like any other member.
       clauses = [
-        "permit_projects.owner_id = :uid",
-        member_exists_sql,
+        ProjectAccess.member_sql(:view_project?),
         collaborator_exists_sql
       ]
       values = { uid: user.id }
@@ -48,7 +35,7 @@ class PermitProjectPolicy < ApplicationPolicy
 
   # Check if the user can index/list projects (relies on the Scope above for actual filtering)
   def index?
-    same_sandbox? && user_is_owner_or_collaborator?
+    same_sandbox? && user_is_member_or_collaborator?
   end
 
   def pinned?
@@ -58,7 +45,10 @@ class PermitProjectPolicy < ApplicationPolicy
   # This is for authorizing a specific project instance (e.g., in a show action).
   def show?
     same_sandbox? &&
-      (user_is_owner_or_collaborator? || user_is_review_staff_for_jurisdiction?)
+      (
+        user_is_member_or_collaborator? ||
+          user_is_review_staff_for_jurisdiction?
+      )
   end
 
   def create?
@@ -66,21 +56,25 @@ class PermitProjectPolicy < ApplicationPolicy
   end
 
   def update?
-    same_sandbox? && user_is_owner?
+    same_sandbox? && project_access.edit_project?
   end
 
+  # The route and UI are not wired.
   def destroy?
-    same_sandbox? && user_is_owner?
+    same_sandbox? && project_access.archive_project?
   end
 
+  # Not in the public grid.
   def pin?
-    same_sandbox? && user_is_owner_or_collaborator?
+    same_sandbox? && user_is_member_or_collaborator?
   end
 
   def unpin?
-    same_sandbox? && user_is_owner_or_collaborator?
+    pin?
   end
 
+  # Every member, including Standard. The list is name and status; opening
+  # an application is PermitApplicationPolicy#show?.
   def search_permit_applications?
     show?
   end
@@ -100,7 +94,11 @@ class PermitProjectPolicy < ApplicationPolicy
   # Allow bulk creation of permit applications under a project.
   # Review staff may add only on a project they can see in their jurisdiction.
   def create_permit_applications?
-    show? && (user_is_owner? || user_is_review_staff_for_jurisdiction?)
+    show? &&
+      (
+        project_access.add_application? ||
+          user_is_review_staff_for_jurisdiction?
+      )
   end
 
   def assign_project_review_collaborator?
@@ -121,7 +119,11 @@ class PermitProjectPolicy < ApplicationPolicy
   end
 
   def download_notes_csv?
-    show?
+    same_sandbox? &&
+      (
+        project_access.view_project_notes? ||
+          user_is_review_staff_for_jurisdiction?
+      )
   end
 
   private
@@ -133,21 +135,15 @@ class PermitProjectPolicy < ApplicationPolicy
     record.sandbox == sandbox
   end
 
-  # MEMBERSHIP COMMENT: later, authorize from membership.
-  # owner_id only identifies the creator.
-  def user_is_owner?
-    return false unless user && record # Ensure user and record exist
-
-    record.owner_id == user.id
+  def project_access
+    @project_access ||= access.on(record)
   end
 
-  # MEMBERSHIP COMMENT: temporary project visibility for accepted members;
-  # revisit when access levels (standard / expanded / full) are enforced.
-  # If reviewers can accept later, this check selects the submitter view
-  # ahead of the review inbox view. See PermitProjectsController#show.
-  def user_is_owner_or_collaborator?
-    return true if user_is_owner?
-    return true if user && record.project_memberships.exists?(user_id: user.id)
+  # pin_project? and view_project? are the same members. Legacy submission
+  # collaborators (HUB-5783) are not members and keep project visibility.
+  def user_is_member_or_collaborator?
+    return false unless user && record
+    return true if project_access.view_project?
 
     record.permit_applications.any? do |app|
       app.collaborators.any? { |collaborator| collaborator.user_id == user.id }
@@ -156,10 +152,5 @@ class PermitProjectPolicy < ApplicationPolicy
 
   def user_is_review_staff_for_jurisdiction?
     user&.review_staff? && user.member_of?(record.jurisdiction_id)
-  end
-
-  # user_context is still useful if you need to check policies of associated items for more granular permissions.
-  def user_context
-    @user_context ||= UserContext.new(user, sandbox)
   end
 end

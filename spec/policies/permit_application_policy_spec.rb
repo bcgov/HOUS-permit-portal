@@ -36,12 +36,17 @@ RSpec.describe PermitApplicationPolicy do
       expect(subject.show?).to be true
     end
 
-    it "permits show for the project owner who is not the submitter" do
-      owner = create(:user, :submitter)
-      draft_permit_application.permit_project.update!(owner: owner)
+    it "permits show for a Full member who is not the submitter" do
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: draft_permit_application.permit_project,
+        user: member,
+        access: :full
+      )
       policy =
         described_class.new(
-          UserContext.new(owner, sandbox),
+          UserContext.new(member, sandbox),
           draft_permit_application
         )
 
@@ -52,7 +57,7 @@ RSpec.describe PermitApplicationPolicy do
       expect(subject.create?).to be true
     end
 
-    it "denies create for a submitter who does not own the project" do
+    it "denies create for a submitter who is not a member" do
       other = create(:user, :submitter)
       policy =
         described_class.new(
@@ -61,6 +66,23 @@ RSpec.describe PermitApplicationPolicy do
         )
 
       expect(policy.create?).to be false
+    end
+
+    it "permits create for an Expanded member who is not the creator" do
+      expanded = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: draft_permit_application.permit_project,
+        user: expanded,
+        access: :expanded
+      )
+      policy =
+        described_class.new(
+          UserContext.new(expanded, sandbox),
+          draft_permit_application
+        )
+
+      expect(policy.create?).to be true
     end
 
     it "permits create for review staff who can view the project" do
@@ -181,20 +203,27 @@ RSpec.describe PermitApplicationPolicy do
       expect(policy.update?).to be false
     end
 
-    it "update? permits draft when edit permissions present" do
-      record =
-        double(
-          "PermitApplication",
-          discarded?: false,
-          draft?: true,
-          submission_requirement_block_edit_permissions: [:all]
-        )
-      allow(record).to receive(
-        :submission_requirement_block_edit_permissions
-      ).with(user_id: user.id).and_return([SecureRandom.uuid])
+    it "update? permits a draft for a member who can edit it" do
+      expect(
+        described_class.new(
+          UserContext.new(submitter, sandbox),
+          draft_permit_application
+        ).update?
+      ).to be true
 
-      policy = described_class.new(UserContext.new(user, sandbox), record)
-      expect(policy.update?).to be true
+      standard = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: draft_permit_application.permit_project,
+        user: standard,
+        access: :standard
+      )
+      expect(
+        described_class.new(
+          UserContext.new(standard, sandbox),
+          draft_permit_application
+        ).update?
+      ).to be false
     end
 
     it "update? permits submitted for review staff members" do
@@ -210,19 +239,18 @@ RSpec.describe PermitApplicationPolicy do
       expect(policy.update?).to be true
     end
 
-    it "retrigger_submission_webhook? requires submitted? and update?" do
+    it "retrigger_submission_webhook? requires a submitted application the user can update" do
+      reviewer = create(:user, :review_manager, jurisdiction:)
       record =
         double(
           "PermitApplication",
           submitted?: true,
           discarded?: false,
-          draft?: true
+          draft?: false,
+          jurisdiction_id: jurisdiction.id
         )
-      allow(record).to receive(
-        :submission_requirement_block_edit_permissions
-      ).and_return([1])
 
-      policy = described_class.new(UserContext.new(user, sandbox), record)
+      policy = described_class.new(UserContext.new(reviewer, sandbox), record)
       expect(policy.retrigger_submission_webhook?).to be true
 
       allow(record).to receive(:submitted?).and_return(false)
@@ -247,19 +275,17 @@ RSpec.describe PermitApplicationPolicy do
       expect(submitter_policy.download_application_json?).to be false
     end
 
-    it "update_version? permits the draft submitter" do
-      record = double("PermitApplication", draft?: true, submitter: submitter)
-
+    it "update_version? permits a member who can edit the draft" do
       expect(
         described_class.new(
           UserContext.new(submitter, sandbox),
-          record
+          draft_permit_application
         ).update_version?
       ).to be true
       expect(
         described_class.new(
           UserContext.new(create(:user, :submitter), sandbox),
-          record
+          draft_permit_application
         ).update_version?
       ).to be false
     end
@@ -274,53 +300,51 @@ RSpec.describe PermitApplicationPolicy do
       expect(policy2.update_revision_requests?).to be false
     end
 
-    it "update_submitter_note? permits submitters who can edit during revisions" do
-      record = double("PermitApplication", revisions_requested?: true)
-      allow(record).to receive(
-        :submission_requirement_block_edit_permissions
-      ).with(user_id: submitter.id).and_return(:all)
+    it "update_submitter_note? permits a member who can edit during revisions" do
+      record =
+        double(
+          "PermitApplication",
+          revisions_requested?: true,
+          permit_project: draft_permit_application.permit_project
+        )
       policy = described_class.new(UserContext.new(submitter, sandbox), record)
       expect(policy.update_submitter_note?).to be true
 
-      allow(record).to receive(
-        :submission_requirement_block_edit_permissions
-      ).and_return(nil)
-      expect(policy.update_submitter_note?).to be false
+      expect(
+        described_class.new(
+          UserContext.new(create(:user, :submitter), sandbox),
+          record
+        ).update_submitter_note?
+      ).to be false
     end
 
-    it "upload_revision_fulfillment? permits submitters who can edit during revisions" do
-      record = double("PermitApplication", revisions_requested?: true)
-      allow(record).to receive(
-        :submission_requirement_block_edit_permissions
-      ).with(user_id: submitter.id).and_return(:all)
+    it "upload_revision_fulfillment? permits a member who can edit during revisions" do
+      record =
+        double(
+          "PermitApplication",
+          revisions_requested?: true,
+          permit_project: draft_permit_application.permit_project
+        )
       policy = described_class.new(UserContext.new(submitter, sandbox), record)
       expect(policy.upload_revision_fulfillment?).to be true
 
-      allow(record).to receive(
-        :submission_requirement_block_edit_permissions
-      ).and_return(nil)
-      expect(policy.upload_revision_fulfillment?).to be false
+      expect(
+        described_class.new(
+          UserContext.new(create(:user, :submitter), sandbox),
+          record
+        ).upload_revision_fulfillment?
+      ).to be false
     end
 
-    it "acknowledge_published_electives? permits a draft submitter with edit permission" do
-      record =
-        double("PermitApplication", draft?: true, submitter_id: submitter.id)
-      allow(record).to receive(
-        :submission_requirement_block_edit_permissions
-      ).with(user_id: submitter.id).and_return(:all)
-      policy = described_class.new(UserContext.new(submitter, sandbox), record)
-      expect(policy.acknowledge_published_electives?).to be true
+    it "acknowledge_published_electives? permits a member who can edit the draft" do
+      expect(
+        described_class.new(
+          UserContext.new(submitter, sandbox),
+          draft_permit_application
+        ).acknowledge_published_electives?
+      ).to be true
 
-      allow(record).to receive(
-        :submission_requirement_block_edit_permissions
-      ).and_return(nil)
-      expect(policy.acknowledge_published_electives?).to be false
-
-      not_draft =
-        double("PermitApplication", draft?: false, submitter_id: submitter.id)
-      allow(not_draft).to receive(
-        :submission_requirement_block_edit_permissions
-      ).and_return(:all)
+      not_draft = double("PermitApplication", draft?: false)
       expect(
         described_class.new(
           UserContext.new(submitter, sandbox),
@@ -328,53 +352,52 @@ RSpec.describe PermitApplicationPolicy do
         ).acknowledge_published_electives?
       ).to be false
 
-      other = create(:user, :submitter)
-      collaborator_record =
-        double("PermitApplication", draft?: true, submitter_id: submitter.id)
-      allow(collaborator_record).to receive(
-        :submission_requirement_block_edit_permissions
-      ).with(user_id: other.id).and_return(:all)
       expect(
         described_class.new(
-          UserContext.new(other, sandbox),
-          collaborator_record
+          UserContext.new(create(:user, :submitter), sandbox),
+          draft_permit_application
         ).acknowledge_published_electives?
       ).to be false
     end
 
-    it "upload_supporting_document? matches draft edit permissions" do
-      record = double("PermitApplication", draft?: true)
-      allow(record).to receive(
-        :submission_requirement_block_edit_permissions
-      ).and_return([1])
-      policy = described_class.new(UserContext.new(submitter, sandbox), record)
-      expect(policy.upload_supporting_document?).to be true
-
-      allow(record).to receive(
-        :submission_requirement_block_edit_permissions
-      ).and_return(nil)
-      expect(policy.upload_supporting_document?).to be false
-    end
-
-    it "submit? permits only the draft submitter" do
-      record = double("PermitApplication", draft?: true, submitter: submitter)
+    it "upload_supporting_document? permits a member who can edit the draft" do
       expect(
-        described_class.new(UserContext.new(submitter, sandbox), record).submit?
+        described_class.new(
+          UserContext.new(submitter, sandbox),
+          draft_permit_application
+        ).upload_supporting_document?
       ).to be true
       expect(
         described_class.new(
           UserContext.new(create(:user, :submitter), sandbox),
-          record
+          draft_permit_application
+        ).upload_supporting_document?
+      ).to be false
+    end
+
+    it "submit? permits a Full or Expanded member on a draft" do
+      expect(
+        described_class.new(
+          UserContext.new(submitter, sandbox),
+          draft_permit_application
+        ).submit?
+      ).to be true
+      expect(
+        described_class.new(
+          UserContext.new(create(:user, :submitter), sandbox),
+          draft_permit_application
         ).submit?
       ).to be false
 
       reviewer = create(:user, :review_manager, jurisdiction:)
       expect(
-        described_class.new(UserContext.new(reviewer, sandbox), record).submit?
+        described_class.new(
+          UserContext.new(reviewer, sandbox),
+          draft_permit_application
+        ).submit?
       ).to be false
 
-      not_draft =
-        double("PermitApplication", draft?: false, submitter: submitter)
+      not_draft = double("PermitApplication", draft?: false)
       expect(
         described_class.new(
           UserContext.new(submitter, sandbox),
@@ -383,23 +406,17 @@ RSpec.describe PermitApplicationPolicy do
       ).to be false
     end
 
-    it "generate_missing_pdfs? permits admin, submitter, or review staff member" do
-      record =
-        double(
-          "PermitApplication",
-          submitter: submitter,
-          jurisdiction_id: jurisdiction.id
-        )
+    it "generate_missing_pdfs? permits a member who can view, an admin, or review staff" do
       expect(
         described_class.new(
           UserContext.new(submitter, sandbox),
-          record
+          draft_permit_application
         ).generate_missing_pdfs?
       ).to be true
       expect(
         described_class.new(
           UserContext.new(create(:user, :super_admin), sandbox),
-          record
+          draft_permit_application
         ).generate_missing_pdfs?
       ).to be true
 
@@ -407,32 +424,32 @@ RSpec.describe PermitApplicationPolicy do
       expect(
         described_class.new(
           UserContext.new(reviewer, sandbox),
-          record
+          draft_permit_application
         ).generate_missing_pdfs?
       ).to be true
-      stranger = create(:user)
       expect(
         described_class.new(
-          UserContext.new(stranger, sandbox),
-          record
+          UserContext.new(create(:user), sandbox),
+          draft_permit_application
         ).generate_missing_pdfs?
       ).to be false
     end
 
     it "download_supporting_documents_zip? mirrors generate_missing_pdfs?" do
-      record =
-        double(
-          "PermitApplication",
-          submitter: submitter,
-          jurisdiction_id: jurisdiction.id
+      policy =
+        described_class.new(
+          UserContext.new(submitter, sandbox),
+          draft_permit_application
         )
-      policy = described_class.new(UserContext.new(submitter, sandbox), record)
       expect(policy.download_supporting_documents_zip?).to eq(
         policy.generate_missing_pdfs?
       )
 
       stranger_policy =
-        described_class.new(UserContext.new(create(:user), sandbox), record)
+        described_class.new(
+          UserContext.new(create(:user), sandbox),
+          draft_permit_application
+        )
       expect(stranger_policy.download_supporting_documents_zip?).to eq(
         stranger_policy.generate_missing_pdfs?
       )
@@ -598,19 +615,60 @@ RSpec.describe PermitApplicationPolicy do
       ).to be true
     end
 
-    it "destroy? permits only submitter for drafts; restore? permits submitter" do
-      record = double("PermitApplication", draft?: true, submitter: submitter)
-      policy = described_class.new(UserContext.new(submitter, sandbox), record)
+    it "destroy? and restore? follow archive access, not the submitter column" do
+      policy =
+        described_class.new(
+          UserContext.new(submitter, sandbox),
+          draft_permit_application
+        )
       expect(policy.destroy?).to be true
       expect(policy.restore?).to be true
 
       other = create(:user, :submitter)
       expect(
-        described_class.new(UserContext.new(other, sandbox), record).destroy?
+        described_class.new(
+          UserContext.new(other, sandbox),
+          draft_permit_application
+        ).destroy?
       ).to be false
       expect(
-        described_class.new(UserContext.new(other, sandbox), record).restore?
+        described_class.new(
+          UserContext.new(other, sandbox),
+          draft_permit_application
+        ).restore?
       ).to be false
+    end
+
+    it "lets Expanded archive only a draft they created" do
+      expanded = create(:user, :submitter)
+      project = draft_permit_application.permit_project
+      create(
+        :project_membership,
+        permit_project: project,
+        user: expanded,
+        access: :expanded
+      )
+      own =
+        create(
+          :permit_application,
+          submitter: expanded,
+          permit_project: project,
+          jurisdiction: jurisdiction,
+          sandbox: sandbox
+        )
+
+      expect(
+        described_class.new(
+          UserContext.new(expanded, sandbox),
+          draft_permit_application
+        ).destroy?
+      ).to be false
+      expect(
+        described_class.new(UserContext.new(expanded, sandbox), own).destroy?
+      ).to be true
+      expect(
+        described_class.new(UserContext.new(expanded, sandbox), own).restore?
+      ).to be true
     end
   end
 
@@ -797,6 +855,27 @@ RSpec.describe PermitApplicationPolicy do
       expect(resolve_for.call(nil)).not_to include(sandboxed)
       expect(resolve_for.call(sandbox)).to include(sandboxed)
       expect(resolve_for.call(sandbox)).not_to include(live)
+    end
+
+    it "keeps a Standard member in the project list and out of applications they can open" do
+      standard = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: draft_permit_application.permit_project,
+        user: standard,
+        access: :standard
+      )
+      context = UserContext.new(standard, sandbox)
+
+      expect(
+        described_class.new(context, PermitApplication.all).resolve
+      ).to include(draft_permit_application)
+      expect(
+        described_class.new(context, PermitApplication.all).resolve_viewable
+      ).not_to include(draft_permit_application)
+      expect(
+        PermitApplicationPolicy.new(context, draft_permit_application).show?
+      ).to be false
     end
   end
 end

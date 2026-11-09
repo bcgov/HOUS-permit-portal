@@ -21,20 +21,87 @@ RSpec.describe ProjectMembershipPolicy, type: :policy do
     )
   end
 
-  it "lets the project owner create, reinvite, update, and remove another member" do
+  it "lets a Full member create, reinvite, change standing, and remove another member" do
     expect(policy(membership).create?).to be true
     expect(policy(membership).reinvite?).to be true
-    expect(policy(membership).update?).to be true
+    expect(policy(membership).update_standing?).to be true
+    expect(policy(membership).update_role_tags?).to be true
     expect(policy(membership).destroy?).to be true
   end
 
-  it "forbids a member who does not own the project" do
+  it "lets a Full member who is not the creator do the same" do
+    member = create(:user, :submitter)
+    create(
+      :project_membership,
+      permit_project: project,
+      user: member,
+      access: :full
+    )
+
+    expect(policy(membership, acting_user: member).create?).to be true
+    expect(policy(membership, acting_user: member).update_standing?).to be true
+    expect(policy(membership, acting_user: member).destroy?).to be true
+  end
+
+  it "forbids a user with no membership" do
     member = create(:user, :submitter)
 
     expect(policy(membership, acting_user: member).create?).to be false
     expect(policy(membership, acting_user: member).reinvite?).to be false
-    expect(policy(membership, acting_user: member).update?).to be false
+    expect(policy(membership, acting_user: member).update_standing?).to be false
+    expect(
+      policy(membership, acting_user: member).update_role_tags?
+    ).to be false
     expect(policy(membership, acting_user: member).destroy?).to be false
+  end
+
+  it "cancels a pending invite with invite access and removes an active member with standing access" do
+    pending =
+      create(:project_membership, :pending_invitation, permit_project: project)
+    expanded = create(:user, :submitter)
+    create(
+      :project_membership,
+      permit_project: project,
+      user: expanded,
+      access: :expanded
+    )
+
+    expect(policy(pending).destroy?).to be true
+    expect(policy(membership).destroy?).to be true
+    expect(policy(pending, acting_user: expanded).destroy?).to be false
+    expect(policy(membership, acting_user: expanded).destroy?).to be false
+  end
+
+  it "lets Expanded edit role tags on themself and a Standard member, not access" do
+    expanded_user = create(:user, :submitter)
+    expanded =
+      create(
+        :project_membership,
+        permit_project: project,
+        user: expanded_user,
+        access: :expanded
+      )
+
+    expect(
+      policy(expanded, acting_user: expanded_user).update_role_tags?
+    ).to be true
+    expect(
+      policy(membership, acting_user: expanded_user).update_role_tags?
+    ).to be true
+    expect(
+      policy(expanded, acting_user: expanded_user).update_standing?
+    ).to be false
+
+    full_member =
+      create(
+        :project_membership,
+        permit_project: project,
+        user: create(:user, :submitter),
+        access: :full
+      )
+    expect(
+      policy(full_member, acting_user: expanded_user).update_role_tags?
+    ).to be false
   end
 
   it "lets a submitter view, accept, or decline a pending invitation" do

@@ -1,5 +1,5 @@
 class NoteAttachmentDocumentPolicy < ApplicationPolicy
-  # An attachment is downloadable by exactly the people who can see its note.
+  # Exactly the people who can see its note.
   def download?
     return false unless user && record.note_id
 

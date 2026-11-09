@@ -56,7 +56,9 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
 
   const { handleSubmit, watch, setValue, reset } = formMethods
   const siteWatch = watch("site")
-  const canRequestProjectMeeting = permitProject.isOwner && projectMeetingsEnabled && !hasActiveProjectMeeting
+  const canRequestProjectMeeting =
+    !!permitProject.currentUserAccess?.manageMeetings && projectMeetingsEnabled && !hasActiveProjectMeeting
+  const canEditProject = !!permitProject.currentUserAccess?.editProject
 
   const handleEditClick = () => {
     // Reset form to current values when entering edit mode
@@ -123,14 +125,14 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
               <Heading as="h3" size="md" mb={0}>
                 {t("permitProject.overview.projectInformation")}
               </Heading>
-              {!isEditing && (
+              {!isEditing && canEditProject && (
                 <Button variant="link" leftIcon={<Pencil size={16} />} onClick={handleEditClick} color="text.link">
                   {t("permitProject.overview.editProjectInfo")}
                 </Button>
               )}
             </Flex>
 
-            {isEditing ? (
+            {isEditing && canEditProject ? (
               <FormProvider {...formMethods}>
                 <form onSubmit={handleSubmit(onSubmit)}>
                   <VStack spacing={4} align="stretch">
@@ -200,7 +202,7 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
                 >
                   {t("permitProject.overview.lookupStepCode")}
                 </RouterLinkButton>
-                {permitProject.isOwner && projectMeetingsEnabled && (
+                {!!permitProject.currentUserAccess?.manageMeetings && projectMeetingsEnabled && (
                   <RouterLinkButton
                     variant="link"
                     to={`/projects/${permitProject.id}/meetings/new`}
@@ -235,7 +237,7 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
             {t("permitProject.overview.recentPermits")}
           </Heading>
           <HStack spacing={3}>
-            {permitProject.isOwner && projectMeetingsEnabled && (
+            {!!permitProject.currentUserAccess?.manageMeetings && projectMeetingsEnabled && (
               <RouterLinkButton
                 variant="secondary"
                 to={`/projects/${permitProject.id}/meetings/new`}
@@ -244,7 +246,7 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
                 {t("permitProject.meetings.requestButton")}
               </RouterLinkButton>
             )}
-            <AddPermitsButton permitProject={permitProject} />
+            {permitProject.currentUserAccess?.addApplication && <AddPermitsButton permitProject={permitProject} />}
           </HStack>
         </Flex>
         {permitProject.totalPermitsCount === 0 ? (

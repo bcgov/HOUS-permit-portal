@@ -16,7 +16,10 @@ class Api::StepCodesController < Api::ApplicationController
                    nil,
                    {
                      meta: page_meta(@step_code_search),
-                     blueprint: StepCodeBlueprint
+                     blueprint: StepCodeBlueprint,
+                     blueprint_opts: {
+                       pundit_user:
+                     }
                    }
   end
 

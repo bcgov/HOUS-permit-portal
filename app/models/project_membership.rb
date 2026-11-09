@@ -38,6 +38,9 @@ class ProjectMembership < ApplicationRecord
   validate :unique_pending_or_active_invited_email, if: -> { user_id.nil? }
   validate :one_primary_contact
   validate :primary_contact_stays
+  validate :keeps_a_full_member, on: :update
+
+  before_destroy :keep_full_member_and_primary_contact
 
   after_commit :reindex_permit_project
 
@@ -124,12 +127,13 @@ class ProjectMembership < ApplicationRecord
   # validation. A failed save rolls the demotion back. before_validation
   # would also run from valid? and change rows that are never saved.
   def with_primary_transfer
+    result = nil
     self.class.transaction do
       release_other_primary_contact if claiming_primary_contact?
       result = yield
       raise ActiveRecord::Rollback unless result
-      result
     end
+    result
   end
 
   def claiming_primary_contact?
@@ -166,6 +170,33 @@ class ProjectMembership < ApplicationRecord
     previous = contact_designation_was
     previous == "primary" ||
       previous == self.class.contact_designations.fetch("primary")
+  end
+
+  def keeps_a_full_member
+    return unless active? && will_save_change_to_access?
+    return unless access_was == "full"
+    return if other_active_full_members.exists?
+
+    errors.add(:access, :last_full_member)
+  end
+
+  # Removing the project removes every row.
+  def keep_full_member_and_primary_contact
+    return if destroyed_by_association || !active?
+
+    if full? && !other_active_full_members.exists?
+      errors.add(:base, :last_full_member)
+    end
+    errors.add(:base, :primary_contact) if primary?
+    throw :abort if errors.any?
+  end
+
+  def other_active_full_members
+    self
+      .class
+      .where(permit_project_id: permit_project_id, access: :full)
+      .where.not(user_id: nil)
+      .where.not(id: id)
   end
 
   def one_primary_contact
