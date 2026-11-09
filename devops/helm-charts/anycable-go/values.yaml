@@ -13,12 +13,13 @@ anycable-go:
   replicas: 1
   image:
     repository: anycable/anycable-go
-    tag: 1.4.8
+    tag: 1.6.20
     pullPolicy: IfNotPresent
   env:
     # Assuming that Ruby RPC is available in K8s in the same namespace as anycable-rpc service (see next chapter)
     anycableRpcHost: hous-permit-portal-anycable-rpc:50051
-    anycableRedisUrl: "redis://redisMasterSet:6379/1"
+    # Sentinel mode expects the master-set name without a data-node port.
+    anycableRedisUrl: "redis://redisMasterSet/1"
     anycableRedisSentinels: "redis-ha-headless:26379"
   ingress:
     enable: true
