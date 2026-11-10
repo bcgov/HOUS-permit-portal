@@ -114,7 +114,11 @@
     "moment-timezone": "$moment-timezone",
     "nanoid@3": "3.3.18",
     "nanoid@5": "5.1.16",
-    "uuid": "$uuid"
+    "uuid": "$uuid",
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "11.0.5"
+    },
+    "glob": "14.0.4"
   },
   "scripts": {
     "dev": "bin/vite dev",
