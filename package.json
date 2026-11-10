@@ -73,7 +73,7 @@
     "date-fns": "^2.30.0",
     "date-fns-tz": "^2.0.1",
     "dompurify": "^3.4.17",
-    "follow-redirects": ">=1.16.1",
+    "follow-redirects": ">=1.16.2",
     "formiojs": "^4.17.4",
     "framer-motion": "^10.16.5",
     "fuse.js": "^7.0.0",
@@ -114,7 +114,11 @@
     "moment-timezone": "$moment-timezone",
     "nanoid@3": "3.3.18",
     "nanoid@5": "5.1.16",
-    "uuid": "$uuid"
+    "uuid": "$uuid",
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "11.0.5"
+    },
+    "glob": "14.0.4"
   },
   "scripts": {
     "dev": "bin/vite dev",
