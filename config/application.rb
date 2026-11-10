@@ -24,6 +24,7 @@ Bundler.require(*Rails.groups)
 # initializer runs. See lib/devise/jwt/cookie.rb for full documentation.
 require_relative "../lib/devise/jwt/cookie"
 require_relative "../lib/auth_cookies"
+require_relative "../lib/redis_sentinel_configuration"
 
 module HousPermitPortal
   class Application < Rails::Application
@@ -34,7 +35,15 @@ module HousPermitPortal
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
     # Common ones are `templates`, `generators`, or `middleware`, for example.
 
-    config.autoload_lib(ignore: %w[assets tasks devise auth_cookies.rb])
+    config.autoload_lib(
+      ignore: %w[
+        assets
+        tasks
+        devise
+        auth_cookies.rb
+        redis_sentinel_configuration.rb
+      ]
+    )
 
     # Configuration for the application, engines, and railties goes here.
     #

@@ -1165,6 +1165,11 @@ const options = {
           templatesUsed: "Templates used",
           search: "Search jurisdictions",
           view: "View Jurisdiction",
+          permittingInfoUnpublished: {
+            title: "This community hasn't published permitting information here yet",
+            description:
+              "{{jurisdictionName}} is accepting permit applications through Building Permit Hub. Local requirements and contacts will appear here once the community publishes them.",
+          },
           notUsingBPH: {
             title: "This community isn't using Building Permit Hub yet",
             description:
@@ -2792,6 +2797,7 @@ Thank you,
           attached: "Attached",
           columns: {
             project: "Project",
+            noProject: "None",
             type: "Type",
             fullAddress: "Address",
             updatedAt: "Last modified",
