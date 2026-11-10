@@ -189,6 +189,9 @@ RSpec.describe "Api::QaTools", type: :request do
     it "autofills a draft permit application" do
       allow(ENV).to receive(:[]).and_call_original
       allow(ENV).to receive(:[]).with("VITE_QA_MODE").and_return("true")
+      expect(AutomatedCompliance::AutopopulateJob).to receive(
+        :perform_async
+      ).with(permit_application.id)
       sign_in submitter
 
       post "/api/qa_tools/permit_applications/#{permit_application.id}/autofill",

@@ -98,13 +98,15 @@ export const ProjectInboxTable = observer(function ProjectInboxTable({ searchSto
       >
         <SearchGridItem>
           <HStack spacing={3}>
-            <HStack spacing={1}>
+            <HStack spacing={1} flexShrink={0}>
               <UnreadIndicatorDot isUnread={!project.viewedAt} />
-              {project.hasActiveProjectMeeting && jurisdictionId && project.activeProjectMeetingId && (
-                <ActiveProjectMeetingIndicator
-                  to={`/jurisdictions/${jurisdictionId}/meetings/${project.activeProjectMeetingId}`}
-                />
-              )}
+              <Box boxSize={5} flexShrink={0}>
+                {project.hasActiveProjectMeeting && jurisdictionId && project.activeProjectMeetingId && (
+                  <ActiveProjectMeetingIndicator
+                    to={`/jurisdictions/${jurisdictionId}/meetings/${project.activeProjectMeetingId}`}
+                  />
+                )}
+              </Box>
             </HStack>
 
             <Text fontWeight={700} fontSize="sm">
