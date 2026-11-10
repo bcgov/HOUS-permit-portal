@@ -97,6 +97,7 @@ RSpec.describe Api::RequirementQuestionsController, type: :controller do
       before { sign_in submitter }
 
       it "returns an empty result set scoped by policy" do
+        silence_policy_filtered_search_warning(bank_question)
         post :index, params: { query: "", page: 1, per_page: 20 }, format: :json
 
         expect(response).to have_http_status(:success)

@@ -52,6 +52,7 @@ RSpec.describe Api::RequirementBlocksController, type: :controller do
       before { sign_in submitter }
 
       it "returns an empty result set scoped by policy" do
+        silence_policy_filtered_search_warning(visible_requirement_block)
         get :index, params: { query: "", page: 1, per_page: 20 }, format: :json
 
         expect(response).to have_http_status(:success)
@@ -59,6 +60,7 @@ RSpec.describe Api::RequirementBlocksController, type: :controller do
       end
 
       it "does not load RequirementBlock records when show_archived is true" do
+        silence_policy_filtered_search_warning(discarded_requirement_block)
         expect(RequirementBlock).not_to receive(:find)
 
         get :index,

@@ -46,7 +46,7 @@ cp .env_example.compose .env.compose
 
 The two example files are tracked; the copied files are ignored. Copy them only when setting up a new environment; the scripts never overwrite an existing environment file.
 
-`bin/local-infra-up` waits for infrastructure health and creates the private `hous-local` SeaweedFS bucket automatically. `bin/setup` installs gems and npm packages, copies `config/database.yml.local` to `config/database.yml` if missing, verifies development/test database names differ, prepares the development and test databases, loads initial development seeds through Rails’ standard `db:prepare` task, and builds the PDF renderer. Repeated setup preserves data; Rails only seeds when initializing the development database.
+`bin/local-infra-up` waits for infrastructure health and creates the private `hous-local` SeaweedFS bucket automatically. `bin/setup` installs gems and npm packages, copies `config/database.yml.local` to `config/database.yml` if missing, prepares the development database and four isolated test databases on the same PostgreSQL server, and builds the PDF renderer. Repeated setup applies pending migrations. Demo seeds are loaded only when initializing the development database.
 
 `bin/dev` starts Rails, Vite, the PDF report bundle watcher, Sidekiq, and Ruby AnyCable RPC. It uses Overmind if installed, then Hivemind, otherwise Foreman (installed automatically if absent). All processes inherit your selected Ruby/Node runtimes.
 
@@ -178,21 +178,21 @@ See the `/devops` folder for Dockerfiles and Helm-Charts
 
 ## Testing
 
-With the local PostgreSQL, Redis and Elasticsearch services running, prepare four
-test databases once (and repeat after schema changes):
-
-```sh
-bundle exec rake "parallel:create[4]" "parallel:load_schema[4]"
-```
-
-Run the suite using the `parallel_tests` gem directly:
+With local PostgreSQL, Redis and Elasticsearch running, `./bin/setup` prepares
+the four default test databases. Run the suite using the `parallel_tests` gem:
 
 ```sh
 bundle exec parallel_rspec -n 4 --serialize-stdout spec
 ```
 
 Four workers are the recommended balance of speed and resource use. Use `-n 2`
-for a lighter run, or prepare eight databases and use `-n 8` for more concurrency.
+for a lighter run. To prepare eight disposable test databases and run eight workers:
+
+```sh
+bundle exec rake "parallel:create[8]" "parallel:load_schema[8]"
+bundle exec parallel_rspec -n 8 --serialize-stdout spec
+```
+
 The gem records file timings in `tmp/parallel_runtime_rspec.log` and uses them to
 balance subsequent runs. CI uses the same four-worker command and caches timings.
 `--serialize-stdout` buffers worker output and prints each worker's output together.

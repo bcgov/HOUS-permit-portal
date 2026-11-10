@@ -9,6 +9,8 @@ module SearchSpecSupport
     end
 
     def clear(index)
+      # Delete by query only sees documents that have already been refreshed.
+      index.refresh
       Searchkick.client.delete_by_query(
         index: index.name,
         body: {
@@ -57,6 +59,23 @@ module SearchSpecSupport
     end
   ensure
     SearchSpecSupport.explicit_indexing = previous
+  end
+
+  # Searchkick reports policy-filtered hits as missing rows.
+  def silence_policy_filtered_search_warning(*records)
+    prefix = "Records in search index do not exist in database: "
+    expected_hits =
+      records.map { |record| "#{record.class.model_name} #{record.id}" }.sort
+
+    allow(Searchkick).to receive(:warn).and_wrap_original do |warn, message|
+      if message.start_with?(prefix) &&
+           message.delete_prefix(prefix).split(", ").sort == expected_hits &&
+           records.all? { |record| record.class.unscoped.exists?(record.id) }
+        next
+      end
+
+      warn.call(message)
+    end
   end
 end
 

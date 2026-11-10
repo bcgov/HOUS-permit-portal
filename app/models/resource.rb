@@ -2,7 +2,8 @@ class Resource < ApplicationRecord
   belongs_to :jurisdiction, inverse_of: :resources
   has_one :resource_document, dependent: :destroy
 
-  enum category: {
+  enum :category,
+       {
          planning_zoning: "planning_zoning",
          bylaws_requirements: "bylaws_requirements",
          gis_mapping: "gis_mapping",
@@ -10,7 +11,7 @@ class Resource < ApplicationRecord
          project_meeting_authorization: "project_meeting_authorization"
        }
 
-  enum resource_type: { file: "file", link: "link" }
+  enum :resource_type, { file: "file", link: "link" }
 
   attribute :show_on_about, :boolean, default: true
 

@@ -30,5 +30,26 @@ RSpec.describe "Search test isolation" do
       RequirementBlock.search_index.refresh
       expect(RequirementBlock.search("*").map(&:id)).to eq([block.id])
     end
+
+    it "clears documents that have not been refreshed yet" do
+      index = RequirementBlock.search_index
+      refresh_interval = index.refresh_interval
+      index.update_settings(index: { refresh_interval: "-1" })
+      Searchkick.client.index(
+        index: index.name,
+        id: SecureRandom.uuid,
+        body: {
+          name: "Unrefreshed document"
+        },
+        refresh: false
+      )
+
+      SearchSpecSupport.clear(index)
+      index.refresh
+
+      expect(RequirementBlock.search("*", load: false).to_a).to be_empty
+    ensure
+      index.update_settings(index: { refresh_interval: refresh_interval })
+    end
   end
 end

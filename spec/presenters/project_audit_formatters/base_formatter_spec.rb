@@ -75,10 +75,6 @@ RSpec.describe ProjectAuditFormatters::BaseFormatter do
       end
 
       it "returns the jurisdiction from the associated record" do
-        allow(audit).to receive_message_chain(
-          :auditable,
-          :jurisdiction
-        ).and_return(nil)
         expect(formatter.resolve_jurisdiction).to eq(jurisdiction)
       end
     end
