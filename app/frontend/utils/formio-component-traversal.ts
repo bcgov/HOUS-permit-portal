@@ -9,6 +9,7 @@ import {
   IRevisionRequest,
   ITemplateVersionDiff,
 } from "../types/types"
+import { applyEnabledElectiveRequirements } from "./elective-block-requirements"
 import { formatFileSize, getFileExtension } from "./file-utils"
 import {
   ENERGY_STEP_CODE_METHOD_REQUIREMENT_CODE,
@@ -248,21 +249,11 @@ export const combineCustomizations = (
       const optionalElectiveIds = blocksLookups[panelComponent.id]?.["optionalElectiveFieldIds"]
 
       if (enabledElectiveIds) {
-        panelComponent.components.forEach((subComp) => {
-          if (
-            enabledElectiveIds?.includes(subComp?.id) &&
-            subComp.elective &&
-            subComp.customConditional.endsWith(";show =" + " false")
-          ) {
-            //remove the ;show = false at the end of the conditional
-            subComp.customConditional = subComp.customConditional.slice(0, -13)
-
-            // Handle optional/required status
-            if (subComp.validate) {
-              subComp.validate.required = !optionalElectiveIds?.includes(subComp.id)
-            }
-          }
-        })
+        panelComponent.components = applyEnabledElectiveRequirements(
+          panelComponent.components,
+          enabledElectiveIds,
+          optionalElectiveIds
+        )
       }
 
       // Inject resource components if resourceIds are present

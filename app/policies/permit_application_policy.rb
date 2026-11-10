@@ -1,6 +1,7 @@
 class PermitApplicationPolicy < ApplicationPolicy
   # submitter_id and the project creator (owner_id) are not checks. Project
   # access is membership; the application creator is created_by.
+  # GRANTS TODO: Standard with a grant on the application. Members follow view_application?.
   def show?
     return true if project_access.view_application?
     return false unless user.review_staff?
@@ -26,6 +27,7 @@ class PermitApplicationPolicy < ApplicationPolicy
     user.review_staff? && user.member_of?(record.jurisdiction_id)
   end
 
+  # GRANTS TODO: Standard with a block grant. Draft edits follow edit_application?.
   def update?
     return false if record.discarded?
 
@@ -52,6 +54,7 @@ class PermitApplicationPolicy < ApplicationPolicy
       !record.new_draft?
   end
 
+  # GRANTS TODO: Standard with a block grant. Follows edit_application?.
   def update_version?
     record.draft? && project_access.edit_application?
   end
@@ -69,10 +72,12 @@ class PermitApplicationPolicy < ApplicationPolicy
     record.revisions_requested? && project_access.edit_application?
   end
 
+  # GRANTS TODO: Standard with a block grant. Follows edit_application?.
   def acknowledge_published_electives?
     record.draft? && project_access.edit_application?
   end
 
+  # GRANTS TODO: Standard with a block grant. Follows edit_application?.
   def upload_supporting_document?
     record.draft? && project_access.edit_application?
   end
@@ -92,11 +97,13 @@ class PermitApplicationPolicy < ApplicationPolicy
     user&.review_staff?
   end
 
+  # GRANTS TODO: Standard with a grant on the application. Members follow view_application?.
   def generate_missing_pdfs?
     user.super_admin? || project_access.view_application? ||
       ((user.review_staff?) && user.member_of?(record.jurisdiction_id))
   end
 
+  # GRANTS TODO: Standard with a grant on the application. Same check as generate_missing_pdfs?.
   def download_supporting_documents_zip?
     generate_missing_pdfs?
   end

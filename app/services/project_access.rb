@@ -73,6 +73,7 @@ class ProjectAccess
   end
 
   # Change access or contact designation, and remove an active member.
+  # Hard Full block, not a grant. The grants pass must leave this Full-only.
   def manage_member_standing?
     full?
   end

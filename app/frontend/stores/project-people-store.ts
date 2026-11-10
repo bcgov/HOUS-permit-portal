@@ -131,6 +131,13 @@ export const ProjectPeopleStoreModel = types
       const response = yield self.environment.api.destroyPermitProjectMembership(permitProjectId, membershipId)
       if (!response.ok) return false
 
+      const currentUserId = self.rootStore.userStore.currentUser?.id
+      const leftProject = self.tablePeople.some(
+        (person) => person.id === membershipId && person.userId && person.userId === currentUserId
+      )
+      // The people list is project show?, which this user no longer passes.
+      if (leftProject) return true
+
       yield self.search()
       self.tablePeople = cast(self.tablePeople.filter((person) => person.id !== membershipId))
       return true

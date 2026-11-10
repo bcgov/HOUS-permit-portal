@@ -72,6 +72,30 @@ RSpec.describe ProjectMembershipPolicy, type: :policy do
     expect(policy(membership, acting_user: expanded).destroy?).to be false
   end
 
+  it "lets Expanded and Standard leave by removing their own membership" do
+    expanded_user = create(:user, :submitter)
+    expanded =
+      create(
+        :project_membership,
+        permit_project: project,
+        user: expanded_user,
+        access: :expanded
+      )
+    standard_user = create(:user, :submitter)
+    standard =
+      create(
+        :project_membership,
+        permit_project: project,
+        user: standard_user,
+        access: :standard
+      )
+
+    expect(policy(expanded, acting_user: expanded_user).destroy?).to be true
+    expect(policy(standard, acting_user: standard_user).destroy?).to be true
+    expect(policy(membership, acting_user: expanded_user).destroy?).to be false
+    expect(policy(membership, acting_user: standard_user).destroy?).to be false
+  end
+
   it "lets Expanded edit role tags on themself and a Standard member, not access" do
     expanded_user = create(:user, :submitter)
     expanded =

@@ -477,10 +477,7 @@ class SeededRequirementTemplateService
           "#{prefix}_optional_notes",
           "text",
           required: false,
-          elective: true,
-          input_options: {
-            "customConditional" => "show = data.enableOptionalNotes === true"
-          }
+          elective: true
         ),
         req(
           "Optional Review Types",

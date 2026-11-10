@@ -79,12 +79,19 @@ const EditorFooter = ({
   onCancel,
   onSave,
   isSaving,
+  confirm,
 }: {
   onCancel: () => void
   onSave: () => void
   isSaving: boolean
+  confirm?: { header: string; message: string }
 }) => {
   const { t } = useTranslation()
+  const saveButton = (onClick: () => void) => (
+    <Button variant="primary" onClick={onClick} isDisabled={isSaving}>
+      {t("ui.onlySave")}
+    </Button>
+  )
 
   return (
     <Flex
@@ -100,9 +107,17 @@ const EditorFooter = ({
       <Button variant="secondary" onClick={onCancel} isDisabled={isSaving}>
         {t("ui.cancel")}
       </Button>
-      <Button variant="primary" onClick={onSave} isDisabled={isSaving}>
-        {t("ui.onlySave")}
-      </Button>
+      {confirm ? (
+        <ConfirmationModal
+          promptHeader={confirm.header}
+          promptMessage={confirm.message}
+          confirmText={t("ui.onlySave")}
+          onConfirm={onSave}
+          renderTrigger={(onOpen) => saveButton(onOpen)}
+        />
+      ) : (
+        saveButton(onSave)
+      )}
     </Flex>
   )
 }
@@ -358,6 +373,8 @@ export const PersonDetailsPanel = ({
     setView("summary")
   }
 
+  const changingOwnAccess = isSelf && view === "access" && !!draftAccess && draftAccess !== person.access
+
   const changeButton = (next: Exclude<TPanelView, "summary" | "resend">, canChange: boolean) =>
     canChange ? (
       <Button
@@ -572,14 +589,26 @@ export const PersonDetailsPanel = ({
                 <SectionDivider />
                 <Box>
                   <Text {...sectionTitleProps} mb={3}>
-                    {t("permitProject.people.removePerson")}
+                    {t(isSelf ? "permitProject.people.leaveProject" : "permitProject.people.removePerson")}
                   </Text>
                   <VStack align="stretch" spacing={3}>
-                    <Text fontSize="md">{t("permitProject.people.removePersonDescription")}</Text>
+                    <Text fontSize="md">
+                      {t(
+                        isSelf
+                          ? "permitProject.people.leaveProjectDescription"
+                          : "permitProject.people.removePersonDescription"
+                      )}
+                    </Text>
                     <ConfirmationModal
-                      promptHeader={t("permitProject.people.removeConfirmTitle")}
-                      promptMessage={t("permitProject.people.removeConfirmBody")}
-                      confirmText={t("permitProject.people.removeFromProject")}
+                      promptHeader={t(
+                        isSelf ? "permitProject.people.leaveConfirmTitle" : "permitProject.people.removeConfirmTitle"
+                      )}
+                      promptMessage={t(
+                        isSelf ? "permitProject.people.leaveConfirmBody" : "permitProject.people.removeConfirmBody"
+                      )}
+                      confirmText={t(
+                        isSelf ? "permitProject.people.leaveProject" : "permitProject.people.removeFromProject"
+                      )}
                       confirmButtonBg="semantic.error"
                       onConfirm={onRemove}
                       renderTrigger={(onOpen) => (
@@ -594,7 +623,7 @@ export const PersonDetailsPanel = ({
                           onClick={onOpen}
                           isDisabled={isSaving}
                         >
-                          {t("permitProject.people.removeFromProject")}
+                          {t(isSelf ? "permitProject.people.leaveProject" : "permitProject.people.removeFromProject")}
                         </Button>
                       )}
                     />
@@ -667,7 +696,21 @@ export const PersonDetailsPanel = ({
         </Flex>
       )}
 
-      {view !== "summary" && view !== "resend" && <EditorFooter onCancel={onClose} onSave={save} isSaving={isSaving} />}
+      {view !== "summary" && view !== "resend" && (
+        <EditorFooter
+          onCancel={backToSummary}
+          onSave={save}
+          isSaving={isSaving}
+          confirm={
+            changingOwnAccess
+              ? {
+                  header: t("permitProject.people.changeOwnAccessTitle"),
+                  message: t("permitProject.people.changeOwnAccessBody"),
+                }
+              : undefined
+          }
+        />
+      )}
     </Flex>
   )
 }

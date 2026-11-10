@@ -12,8 +12,8 @@ class ProjectMembershipPolicy < ApplicationPolicy
     project_access.invite_people?
   end
 
-  # Access and contact designation. The last Full member and the primary
-  # contact are model validations.
+  # Access and contact designation. Hard Full block, not a grant.
+  # The last Full member and the primary contact are model validations.
   def update_standing?
     project_access.manage_member_standing?
   end
@@ -22,10 +22,12 @@ class ProjectMembershipPolicy < ApplicationPolicy
     project_access.edit_role_tags?(record)
   end
 
-  # Canceling an invite matches invite. Removing an active member is
-  # standing; ProjectMembership refuses the last Full member and the primary.
+  # Canceling an invite matches invite. Removing someone else is standing.
+  # Leaving is removing your own active membership, at any access level.
+  # ProjectMembership still refuses the last Full member and the primary.
   def destroy?
     return project_access.invite_people? unless record.active?
+    return true if own_membership?
 
     project_access.manage_member_standing?
   end
@@ -53,5 +55,10 @@ class ProjectMembershipPolicy < ApplicationPolicy
 
   def project_access
     @project_access ||= access.on(record.permit_project)
+  end
+
+  def own_membership?
+    record.user_id.present? && record.user_id == user&.id &&
+      project_access.view_project?
   end
 end

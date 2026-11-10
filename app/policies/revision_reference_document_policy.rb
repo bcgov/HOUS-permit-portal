@@ -1,4 +1,5 @@
 class RevisionReferenceDocumentPolicy < ApplicationPolicy
+  # GRANTS TODO: Standard with a grant on the application. Follows view_application?.
   def download?
     return false unless user && record.revision_request
 

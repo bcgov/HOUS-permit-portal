@@ -19,7 +19,7 @@ import { DotsThreeVertical, Info, Plus, Users } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useMatch } from "react-router-dom"
+import { useMatch, useNavigate } from "react-router-dom"
 import { useSearch } from "../../../hooks/use-search"
 import { IPermitProject } from "../../../models/permit-project"
 import { useMst } from "../../../setup/root"
@@ -54,7 +54,8 @@ export const PeopleTabPanelContent = observer(({ permitProject }: IProps) => {
 
 const PeopleList = observer(({ permitProject }: IProps) => {
   const { t } = useTranslation()
-  const { projectPeopleStore, userStore } = useMst()
+  const navigate = useNavigate()
+  const { projectPeopleStore, permitProjectStore, userStore } = useMst()
   const currentUser = userStore.currentUser
   const {
     tablePeople,
@@ -104,8 +105,12 @@ const PeopleList = observer(({ permitProject }: IProps) => {
     access?: EProjectAccess
   }) => {
     if (!selectedPerson) return
+    const changingOwnAccess = Boolean(changes.access && selectedPerson.userId === currentUser?.id)
     setIsSaving(true)
     const updated = await updateProjectPerson(selectedPerson.id, changes)
+    if (changingOwnAccess && updated) {
+      await permitProjectStore.fetchPermitProject(permitProject.id)
+    }
     setIsSaving(false)
     setSelectedPerson(updated)
   }
@@ -124,18 +129,29 @@ const PeopleList = observer(({ permitProject }: IProps) => {
 
   const handleRemove = async () => {
     if (!selectedPerson) return
+    const leavingSelf =
+      selectedPerson.status === EProjectMembershipStatus.active && selectedPerson.userId === currentUser?.id
     setIsSaving(true)
     const removed = await destroyProjectPerson(selectedPerson.id)
     setIsSaving(false)
-    if (removed) setSelectedPerson(null)
+    if (!removed) return
+    if (leavingSelf) {
+      navigate("/projects")
+      return
+    }
+    setSelectedPerson(null)
   }
 
   const projectAccess = permitProject.currentUserAccess
   const selectedIsActive = selectedPerson?.status === EProjectMembershipStatus.active
-  // The API also refuses the last Full member.
-  const canRemoveSelected = selectedIsActive
-    ? !!projectAccess?.manageMemberStanding && selectedPerson?.contactDesignation !== EProjectContactDesignation.primary
-    : !!projectAccess?.invitePeople
+  const leavingSelf = selectedIsActive && Boolean(selectedPerson?.userId && selectedPerson.userId === currentUser?.id)
+  // The API also refuses the last Full member and the primary contact.
+  const canRemoveSelected =
+    leavingSelf ||
+    (selectedIsActive
+      ? !!projectAccess?.manageMemberStanding &&
+        selectedPerson?.contactDesignation !== EProjectContactDesignation.primary
+      : !!projectAccess?.invitePeople)
 
   const accessOptions = Object.values(EProjectAccess).map((access) => ({
     value: access,

@@ -25,6 +25,7 @@ class StepCodePolicy < ApplicationPolicy
 
   # A Step Code on an application follows that application's project access.
   # A standalone Step Code (no application) belongs to its creator.
+  # GRANTS TODO: Standard with a block grant. An attached Step Code follows edit_application?.
   def create?
     return false unless user
     return true if record.permit_application.nil?
@@ -44,6 +45,7 @@ class StepCodePolicy < ApplicationPolicy
     destroy?
   end
 
+  # GRANTS TODO: Standard with a grant on the application. An attached Step Code follows view_application?.
   def show?
     return false unless user && same_sandbox?
     application = record.permit_application
@@ -53,6 +55,7 @@ class StepCodePolicy < ApplicationPolicy
       (user.review_staff? && user.member_of?(application.jurisdiction))
   end
 
+  # GRANTS TODO: Standard with a block grant. An attached Step Code follows edit_application?.
   def update?
     return false unless user && same_sandbox?
     return standalone_creator? if record.permit_application.nil?
