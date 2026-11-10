@@ -28,9 +28,7 @@ export const PermitApplicationGridRow = observer(
   ({ permitApplication, searchModel, fromInbox = false }: IPermitApplicationGridRowProps) => {
     const { t } = useTranslation()
     const navigate = useNavigate()
-    const { id, updatedAt, designatedSubmitter, usingCurrentTemplateVersion, createdBy, nickname, templateNickname } =
-      permitApplication
-    const assignee = designatedSubmitter?.collaborator?.user
+    const { id, updatedAt, usingCurrentTemplateVersion, createdBy, nickname, templateNickname } = permitApplication
     const { sandboxStore, userStore } = useMst()
     const { currentSandbox } = sandboxStore
     const { currentUser } = userStore
@@ -87,15 +85,7 @@ export const PermitApplicationGridRow = observer(
             </VStack>
           </SearchGridItem>
           <SearchGridItem>
-            {fromInbox ? (
-              <ApplicationReviewAssigneesCell application={permitApplication} />
-            ) : (
-              assignee?.name && (
-                <Tooltip label={assignee.name} hasArrow placement="top" openDelay={200}>
-                  <SharedAvatar name={assignee.name} role={assignee.role} size="sm" />
-                </Tooltip>
-              )
-            )}
+            {fromInbox && <ApplicationReviewAssigneesCell application={permitApplication} />}
           </SearchGridItem>
           <SearchGridItem>{permitApplication.number}</SearchGridItem>
           <SearchGridItem>{format(updatedAt, datefnsTableDateFormat)}</SearchGridItem>

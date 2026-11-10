@@ -6,14 +6,12 @@ import { useTranslation } from "react-i18next"
 import { IPermitApplication } from "../../../../models/permit-application"
 import { IPermitCollaboration } from "../../../../models/permit-collaboration"
 import { useMst } from "../../../../setup/root"
-import { ECollaborationType, ECollaboratorType } from "../../../../types/enums"
+import { ECollaboratorType } from "../../../../types/enums"
 import { CollaborationAssignmentModalContent } from "./collaboration-assignment-modal-content"
-import { CollaboratorInviteModalContent } from "./collaborator-invite-modal-content"
 import { EAssignmentModalScreen } from "./types"
 
 interface IProps {
   permitApplication: IPermitApplication
-  collaborationType: ECollaborationType
   avatarTrigger?: boolean
   additionalCollaborations?: IPermitCollaboration[]
   renderTrigger?: (props: {
@@ -27,13 +25,10 @@ interface IProps {
 
 const INITIAL_SCREEN = EAssignmentModalScreen.collaborationAssignment
 
-type TDesignatedSubmitterAssignmentModalScreen =
-  | EAssignmentModalScreen.collaborationAssignment
-  | EAssignmentModalScreen.collaboratorInvite
+type TDesignatedReviewerAssignmentModalScreen = EAssignmentModalScreen.collaborationAssignment
 
 export const DesignatedCollaboratorAssignmentModal = observer(function DesignatedSubmitterAssignmentModal({
   permitApplication,
-  collaborationType,
   avatarTrigger,
   additionalCollaborations = [],
   renderTrigger,
@@ -42,24 +37,21 @@ export const DesignatedCollaboratorAssignmentModal = observer(function Designate
   const { userStore } = useMst()
   const currentUser = (userStore as any).currentUser
   const { t } = useTranslation()
-  const existingDelegateeCollaboration =
-    collaborationType === ECollaborationType.submission
-      ? permitApplication.designatedSubmitter
-      : permitApplication.designatedReviewer
+  const existingDelegateeCollaboration = permitApplication.designatedReviewer
   const existingCollaboratorIds = new Set<string>(
     existingDelegateeCollaboration ? [existingDelegateeCollaboration.collaborator?.id] : []
   )
   const { isOpen, onOpen, onClose } = useDisclosure()
   const createConfirmationModalDisclosureProps = useDisclosure()
   const [isBeforeOpenLoading, setIsBeforeOpenLoading] = useState(false)
-  const [currentScreen, setCurrentScreen] = React.useState<TDesignatedSubmitterAssignmentModalScreen>(INITIAL_SCREEN)
+  const [currentScreen, setCurrentScreen] = React.useState<TDesignatedReviewerAssignmentModalScreen>(INITIAL_SCREEN)
   const [openAssignmentConfirmationModals, setOpenAssignmentConfirmationModals] = React.useState<Set<string>>(new Set())
   const contentRef = React.useRef<HTMLDivElement>(null)
 
-  const canManage = permitApplication.canUserManageCollaborators(currentUser, collaborationType)
+  const canManage = permitApplication.canUserManageCollaborators(currentUser)
 
-  const changeScreen = (screen: TDesignatedSubmitterAssignmentModalScreen) => {
-    if (!canManage || (!isSubmissionCollaboration && screen === EAssignmentModalScreen.collaboratorInvite)) {
+  const changeScreen = (screen: TDesignatedReviewerAssignmentModalScreen) => {
+    if (!canManage) {
       return
     }
 
@@ -102,13 +94,7 @@ export const DesignatedCollaboratorAssignmentModal = observer(function Designate
     onClose: () => closeAssignmentConfirmationModal(collaboratorId),
   })
 
-  const onInviteCollaborator = (user: { email: string; firstName: string; lastName: string }) =>
-    permitApplication.inviteNewCollaborator(ECollaboratorType.delegatee, user)
-
-  const isSubmissionCollaboration = collaborationType === ECollaborationType.submission
-  const selectedTitle = isSubmissionCollaboration
-    ? t("permitCollaboration.sidebar.designatedSubmitters")
-    : t("permitCollaboration.sidebar.designatedReviewers")
+  const selectedTitle = t("permitCollaboration.sidebar.designatedReviewers")
 
   const handleOpen = async () => {
     if (onBeforeOpen) {
@@ -188,9 +174,6 @@ export const DesignatedCollaboratorAssignmentModal = observer(function Designate
               onClose={onClose}
               takenCollaboratorIds={existingCollaboratorIds}
               getConfirmationModalDisclosureProps={createAssignmentConfirmationModalDisclosureProps}
-              transitionToInvite={
-                isSubmissionCollaboration ? () => changeScreen(EAssignmentModalScreen.collaboratorInvite) : undefined
-              }
               selectedCollaborations={existingDelegateeCollaboration ? [existingDelegateeCollaboration] : []}
               selectedTitle={selectedTitle}
               selectedEmptyText={t("permitCollaboration.popover.assignment.noneAssigned")}
@@ -201,15 +184,6 @@ export const DesignatedCollaboratorAssignmentModal = observer(function Designate
                 response && onClose()
               }}
               additionalCollaborations={additionalCollaborations}
-              collaborationType={collaborationType}
-            />
-          )}
-          {canManage && currentScreen === EAssignmentModalScreen.collaboratorInvite && isSubmissionCollaboration && (
-            <CollaboratorInviteModalContent
-              onClose={() => changeScreen(INITIAL_SCREEN)}
-              onInviteSuccess={onClose}
-              onInvite={onInviteCollaborator}
-              confirmationModalDisclosureProps={createConfirmationModalDisclosureProps}
             />
           )}
         </ModalContent>

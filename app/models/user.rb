@@ -72,6 +72,7 @@ class User < ApplicationRecord
   has_many :pinned_permit_projects,
            through: :pinned_projects,
            source: :permit_project
+  has_many :project_memberships, dependent: :destroy
 
   # New intermediate association for jurisdictions applied for via permit applications
   has_many :application_projects,
@@ -86,7 +87,6 @@ class User < ApplicationRecord
            class_name: "UserLicenseAgreement",
            dependent: :destroy
   has_many :contacts, as: :contactable, dependent: :destroy
-  has_many :collaborators, as: :collaboratorable, dependent: :destroy
   has_many :collaborations,
            foreign_key: "user_id",
            class_name: "Collaborator",
@@ -137,6 +137,7 @@ class User < ApplicationRecord
   validate :single_jurisdiction, unless: :regional_review_manager?
 
   after_commit :refresh_search_index, if: :saved_change_to_discarded_at
+  after_commit :reindex_project_memberships, if: :reindex_project_memberships?
   after_commit :revoke_jwt_allowlist, if: :should_revoke_jwt_allowlist?
   after_commit :reindex_jurisdiction_user_size,
                :reindex_jurisdiction_review_manager_email
@@ -145,7 +146,6 @@ class User < ApplicationRecord
 
   # Stub this for now since we do not want to use IP Tracking at the moment - Jan 30, 2024
   attr_accessor :current_sign_in_ip, :last_sign_in_ip
-  attr_accessor :collaboration_invitation # this is needed to signal that a registration invitation is for collaboration when sending the email
 
   after_discard { destroy_jurisdiction_collaborator }
   after_save :create_jurisdiction_collaborator,
@@ -249,12 +249,6 @@ class User < ApplicationRecord
 
   def blueprint
     UserBlueprint
-  end
-
-  def set_collaboration_invitation(permit_collaboration)
-    self.collaboration_invitation = {
-      permit_collaboration: permit_collaboration
-    }
   end
 
   def create_jurisdiction_collaborator
@@ -366,6 +360,15 @@ class User < ApplicationRecord
 
   def refresh_search_index
     User.search_index.refresh
+  end
+
+  def reindex_project_memberships?
+    Searchkick.callbacks? &&
+      (saved_change_to_first_name? || saved_change_to_last_name?)
+  end
+
+  def reindex_project_memberships
+    project_memberships.reindex
   end
 
   def normalize_phone_number

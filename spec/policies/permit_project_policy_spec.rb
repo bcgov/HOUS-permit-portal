@@ -29,7 +29,6 @@ RSpec.describe PermitProjectPolicy, type: :policy do
       expect(p.unpin?).to be true
       expect(p.search_permit_applications?).to be true
       expect(p.create_permit_applications?).to be true
-      expect(p.submission_collaborator_options?).to be true
       expect(p.download_notes_csv?).to be true
     end
 
@@ -80,7 +79,6 @@ RSpec.describe PermitProjectPolicy, type: :policy do
       expect(p.update?).to be false
       expect(p.destroy?).to be false
       expect(p.create_permit_applications?).to be false
-      expect(p.submission_collaborator_options?).to be false
     end
   end
 
@@ -160,12 +158,11 @@ RSpec.describe PermitProjectPolicy, type: :policy do
       # collaborator must belong to the application's jurisdiction. Persist
       # the row anyway so the policy sees collaboration without membership.
       collaborator =
-        Collaborator.new(user: reviewer, collaboratorable: other_jurisdiction)
+        Collaborator.new(user: reviewer, jurisdiction: other_jurisdiction)
       collaborator.save!(validate: false)
       PermitCollaboration.new(
         collaborator: collaborator,
         permit_application: application,
-        collaboration_type: :review,
         collaborator_type: :delegatee
       ).save!(validate: false)
 

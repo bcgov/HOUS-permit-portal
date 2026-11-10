@@ -26,6 +26,7 @@ class PermitProject < ApplicationRecord
   has_many :collaborators, through: :permit_applications
   has_many :pinned_projects, dependent: :destroy
   has_many :pinning_users, through: :pinned_projects, source: :user
+  has_many :project_memberships, dependent: :destroy
   accepts_nested_attributes_for :project_documents, allow_destroy: true
 
   validates :title, presence: true
@@ -42,6 +43,7 @@ class PermitProject < ApplicationRecord
 
   delegate :name, to: :owner, prefix: true
 
+  after_create :ensure_creator_membership!
   after_commit :reindex
   after_commit :send_state_changed_webhook, if: :state_changed_for_external_api?
   after_commit :broadcast_jurisdiction_projects_count_update,
@@ -188,6 +190,7 @@ class PermitProject < ApplicationRecord
       jurisdiction_id: jurisdiction_id,
       sandbox_id: sandbox_id,
       collaborator_ids: collaborators.pluck(:user_id).uniq,
+      member_ids: project_memberships.pluck(:user_id),
       review_collaborator_user_ids: compute_review_collaborator_user_ids,
       created_at: created_at,
       updated_at: updated_at,
@@ -268,27 +271,6 @@ class PermitProject < ApplicationRecord
       .limit(3)
   end
 
-  def submission_collaborators(user = nil)
-    return Collaborator.none if user.nil?
-
-    if owner_id == user.id
-      return(
-        Collaborator
-          .joins(:permit_collaborations)
-          .where(
-            permit_collaborations: {
-              permit_application_id: permit_applications.kept.select(:id),
-              collaboration_type: :submission,
-              discarded_at: nil
-            }
-          )
-          .distinct
-      )
-    end
-
-    Collaborator.none
-  end
-
   def project_documents(user = nil)
     # Limit project documents to owner for now
     base = association(:project_documents).reader
@@ -362,6 +344,33 @@ class PermitProject < ApplicationRecord
     collaboration =
       permit_project_collaborations.find_by!(collaborator_id: collaborator_id)
     collaboration.discard!
+  end
+
+  # owner_id is the user who created the project. The column name stays so
+  # other branches keep reading owner_id.
+  def creator
+    owner
+  end
+
+  def creator_id
+    owner_id
+  end
+
+  def ensure_creator_membership!
+    return if owner_id.blank?
+
+    project_memberships
+      .where(contact_designation: :primary)
+      .where.not(user_id: owner_id)
+      .update_all(
+        contact_designation:
+          ProjectMembership.contact_designations.fetch("none")
+      )
+
+    membership = project_memberships.find_or_initialize_by(user_id: owner_id)
+    membership.access = :full
+    membership.contact_designation = :primary
+    membership.save!
   end
 
   private
@@ -439,7 +448,7 @@ class PermitProject < ApplicationRecord
       PermitCollaboration
         .joins(:collaborator)
         .where(permit_application_id: permit_applications.kept.select(:id))
-        .where(collaboration_type: :review, discarded_at: nil)
+        .where(discarded_at: nil)
         .pluck("collaborators.user_id")
 
     project_user_ids =

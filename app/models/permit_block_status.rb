@@ -3,14 +3,9 @@ class PermitBlockStatus < ApplicationRecord
   belongs_to :permit_application
 
   enum :status, { draft: 0, in_progress: 1, ready: 2 }, default: 0
-  enum :collaboration_type, { submission: 0, review: 1 }, default: 0
 
   validates :requirement_block_id, presence: true
-  validates :collaboration_type, presence: true
-  validates :permit_application_id,
-            uniqueness: {
-              scope: %i[requirement_block_id collaboration_type]
-            }
+  validates :permit_application_id, uniqueness: { scope: :requirement_block_id }
 
   after_commit :send_status_change_websocket
   after_commit :send_status_ready_email
@@ -49,7 +44,6 @@ class PermitBlockStatus < ApplicationRecord
         ),
       "object_data" => {
         "permit_application_id" => permit_application.id,
-        "collaboration_type" => collaboration_type,
         "requirement_block_name" => requirement_block_name
       }
     }
@@ -58,20 +52,13 @@ class PermitBlockStatus < ApplicationRecord
   def users_to_notify_status_ready
     users_to_notify = []
 
-    users_to_notify << permit_application.submitter if submission?
-
-    # add delegatee
     users_to_notify +=
       permit_application.users_by_collaboration_options(
-        collaboration_type: collaboration_type,
         collaborator_type: :delegatee
       )
 
-    # add only assignees who are assigned to same requirement block.
-
     users_to_notify +=
       permit_application.users_by_collaboration_options(
-        collaboration_type: collaboration_type,
         collaborator_type: :assignee,
         assigned_requirement_block_id: requirement_block_id
       )
@@ -93,16 +80,14 @@ class PermitBlockStatus < ApplicationRecord
 
     user_ids_to_send = users_to_notify_status_ready.pluck(:id)
 
-    if review?
-      # as all review staff have access to status we send the status update websocket regardless if they are a collaborator
-      user_ids_to_send +=
-        permit_application
-          .jurisdiction
-          .users
-          .kept
-          .where(role: %i[review_manager reviewer regional_review_manager])
-          .pluck(:id)
-    end
+    # as all review staff have access to status we send the status update websocket regardless if they are a collaborator
+    user_ids_to_send +=
+      permit_application
+        .jurisdiction
+        .users
+        .kept
+        .where(role: %i[review_manager reviewer regional_review_manager])
+        .pluck(:id)
 
     WebsocketBroadcaster.push_update_to_relevant_users(
       user_ids_to_send.uniq,
@@ -124,7 +109,7 @@ class PermitBlockStatus < ApplicationRecord
         (Rails.env.development? ? 10.seconds : 5.minutes).to_i
       lock_key =
         "permit_block_status_ready_summary:" \
-          "#{permit_application_id}:#{collaboration_type}:#{user.id}"
+          "#{permit_application_id}:#{user.id}"
       Rails.logger.info(
         "[PermitBlockStatus] Scheduling debounced email job with lock_key: #{lock_key}"
       )
@@ -135,7 +120,6 @@ class PermitBlockStatus < ApplicationRecord
         "NotificationAggregators::PermitBlockReadySummary",
         {
           "permit_application_id" => permit_application_id,
-          "collaboration_type" => collaboration_type,
           "user_id" => user.id
         },
         "PermitHubMailer",

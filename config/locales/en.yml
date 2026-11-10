@@ -127,6 +127,8 @@ en:
               authorization_required: "must include authorization documents when the requester is not the owner"
         permit_project_collaboration:
           attributes:
+            collaborator:
+              must_be_same_jurisdiction: "must be of the same jurisdiction as the project"
             permit_project:
               only_one_review_collaborator_allowed: "can only have one review collaborator assigned at a time"
         requirement_template:

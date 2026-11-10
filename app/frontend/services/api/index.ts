@@ -52,13 +52,13 @@ import {
   IOptionResponse,
   IPageMeta,
   IProjectMeetingResponse,
+  IProjectMembershipsResponse,
   IRequirementBlockResponse,
   IRequirementQuestionResponse,
   IRequirementTemplateResponse,
   IUsersResponse,
 } from "../../types/api-responses"
 import {
-  ECollaborationType,
   ECollaboratorType,
   EJurisdictionSortFields,
   EPermitApplicationInboxSortFields,
@@ -487,6 +487,16 @@ export class Api {
     return this.client.get<INoteResponse>(`/permit_projects/${permitProjectId}/notes`)
   }
 
+  async fetchPermitProjectMemberships(
+    permitProjectId: string,
+    params?: TSearchParams<never, { access?: string[]; roleTags?: string[] }>
+  ) {
+    return this.client.post<IProjectMembershipsResponse>(
+      `/permit_projects/${permitProjectId}/memberships/search`,
+      params
+    )
+  }
+
   async downloadPermitProjectNotesCsv(permitProjectId: string) {
     return this.client.get<BlobPart>(`/permit_projects/${permitProjectId}/notes/download_csv`)
   }
@@ -593,13 +603,9 @@ export class Api {
     return this.client.patch("/permit_applications/reorder", { items })
   }
 
-  async fetchSubmissionCollaboratorOptions(id: string) {
-    return this.client.get<IOptionResponse>(`/permit_projects/${id}/submission_collaborator_options`)
-  }
-
-  async fetchCollaboratorsByCollaboratorable(collaboratorableId: string, params?: TSearchParams<never, never>) {
+  async fetchCollaboratorsByJurisdiction(jurisdictionId: string, params?: TSearchParams<never, never>) {
     return this.client.post<ICollaboratorSearchResponse>(
-      `/collaborators/collaboratorable/${collaboratorableId}/search`,
+      `/collaborators/jurisdictions/${jurisdictionId}/search`,
       params
     )
   }
@@ -756,11 +762,9 @@ export class Api {
     {
       collaboratorId,
       collaboratorType,
-      collaborationType,
     }: {
       collaboratorId: string
       collaboratorType: ECollaboratorType
-      collaborationType: ECollaborationType
     }
   ) {
     return this.client.delete<ApiResponse<IPermitCollaboration>>(
@@ -768,7 +772,6 @@ export class Api {
       {
         collaboratorId,
         collaboratorType,
-        collaborationType,
       }
     )
   }
@@ -777,11 +780,9 @@ export class Api {
     permitApplicationId: string,
     {
       requirementBlockId,
-      collaborationType,
       status,
     }: {
       requirementBlockId: string
-      collaborationType: ECollaborationType
       status: EPermitBlockStatus
     }
   ) {
@@ -790,27 +791,6 @@ export class Api {
       {
         requirementBlockId,
         status,
-        collaborationType,
-      }
-    )
-  }
-
-  async inviteNewCollaboratorToPermitApplication(
-    permitApplicationId: string,
-    params: {
-      user: {
-        email: string
-        firstName: string
-        lastName: string
-      }
-      collaboratorType: ECollaboratorType
-      assignedRequirementBlockId?: string
-    }
-  ) {
-    return this.client.post<ApiResponse<IPermitCollaboration>>(
-      `/permit_applications/${permitApplicationId}/permit_collaborations/invite`,
-      {
-        collaboratorInvite: params,
       }
     )
   }

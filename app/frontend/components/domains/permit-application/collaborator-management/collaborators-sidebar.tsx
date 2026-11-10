@@ -35,7 +35,7 @@ import { ICollaborator } from "../../../../models/collaborator"
 import { IPermitApplication } from "../../../../models/permit-application"
 import { IPermitCollaboration } from "../../../../models/permit-collaboration"
 import { useMst } from "../../../../setup/root"
-import { ECollaborationType, ECollaboratorType } from "../../../../types/enums"
+import { ECollaboratorType } from "../../../../types/enums"
 import { getRequirementBlockAccordionNodes } from "../../../../utils/formio-helpers"
 import { RemoveConfirmationModal } from "../../../shared/modals/remove-confirmation-modal"
 import { RequestLoadingButton } from "../../../shared/request-loading-button"
@@ -44,27 +44,24 @@ import { Reinvite } from "./reinvite"
 
 interface IProps {
   permitApplication: IPermitApplication
-  collaborationType: ECollaborationType
   triggerButtonProps?: Partial<ButtonProps>
 }
 
 interface IDrawerProps {
   permitApplication: IPermitApplication
-  collaborationType: ECollaborationType
   isOpen: boolean
   onClose: () => void
 }
 
 export const CollaboratorsSidebarDrawer = observer(function CollaboratorsSidebarDrawer({
   permitApplication,
-  collaborationType,
   isOpen,
   onClose,
 }: IDrawerProps) {
   const { t } = useTranslation()
   const { userStore } = useMst()
   const currentUser = userStore.currentUser
-  const canManage = permitApplication.canUserManageCollaborators(currentUser, collaborationType)
+  const canManage = permitApplication.canUserManageCollaborators(currentUser)
 
   return (
     <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
@@ -80,7 +77,7 @@ export const CollaboratorsSidebarDrawer = observer(function CollaboratorsSidebar
 
         <DrawerBody as={Stack} spacing={8}>
           <Text color={"text.secondary"} mt={6}>
-            {t(`permitCollaboration.sidebar.description.${collaborationType}`)}
+            {t("permitCollaboration.sidebar.description.review")}
           </Text>
           <Stack borderLeft={"4px solid"} borderColor={"theme.blueAlt"} px={6} py={3} bg={"theme.blueLight"}>
             <Text fontSize={"lg"} fontWeight={700} color={"theme.blueAlt"}>
@@ -90,7 +87,7 @@ export const CollaboratorsSidebarDrawer = observer(function CollaboratorsSidebar
             <Text fontSize={"sm"}>
               {
                 <Trans
-                  i18nKey={`permitCollaboration.sidebar.howItWorksDescription.${collaborationType}`}
+                  i18nKey="permitCollaboration.sidebar.howItWorksDescription.review"
                   t={t}
                   components={{
                     1: <br />,
@@ -99,16 +96,8 @@ export const CollaboratorsSidebarDrawer = observer(function CollaboratorsSidebar
               }
             </Text>
           </Stack>
-          <DesignatedCollaborators
-            permitApplication={permitApplication}
-            collaborationType={collaborationType}
-            canManage={canManage}
-          />
-          <Assignees
-            permitApplication={permitApplication}
-            collaborationType={collaborationType}
-            canManage={canManage}
-          />
+          <DesignatedCollaborators permitApplication={permitApplication} canManage={canManage} />
+          <Assignees permitApplication={permitApplication} canManage={canManage} />
         </DrawerBody>
       </DrawerContent>
     </Drawer>
@@ -116,7 +105,6 @@ export const CollaboratorsSidebarDrawer = observer(function CollaboratorsSidebar
 })
 
 export const CollaboratorsSidebar = observer(function CollaboratorsSidebar({
-  collaborationType,
   permitApplication,
   triggerButtonProps,
 }: IProps) {
@@ -127,82 +115,45 @@ export const CollaboratorsSidebar = observer(function CollaboratorsSidebar({
     <>
       <Button leftIcon={<Users />} variant={"primary"} onClick={onOpen} {...triggerButtonProps}>
         {t("permitCollaboration.sidebar.triggerButton", {
-          count: permitApplication.getCollaborationUniqueUserCount(collaborationType),
+          count: permitApplication.getCollaborationUniqueUserCount(),
         })}
       </Button>
-      <CollaboratorsSidebarDrawer
-        permitApplication={permitApplication}
-        collaborationType={collaborationType}
-        isOpen={isOpen}
-        onClose={onClose}
-      />
+      <CollaboratorsSidebarDrawer permitApplication={permitApplication} isOpen={isOpen} onClose={onClose} />
     </>
   )
 })
 
 const DesignatedCollaborators = observer(function DesignatedCollaborators({
   permitApplication,
-  collaborationType,
   canManage,
 }: IProps & {
   canManage: boolean
 }) {
   const { t } = useTranslation()
-  const delegateeCollaboration = permitApplication.getCollaborationDelegatee(collaborationType)
+  const delegateeCollaboration = permitApplication.getCollaborationDelegatee()
 
-  let name = delegateeCollaboration?.collaborator?.user?.name
-  let organization = delegateeCollaboration?.collaborator?.user?.organization
-  const isSubmissionCollaboration = collaborationType === ECollaborationType.submission
-  if (collaborationType === ECollaborationType.review && !permitApplication.isDesignatedReviewerEnabled) {
+  if (!permitApplication.isDesignatedReviewerEnabled) {
     return <></>
   }
   return (
     <Stack spacing={2}>
       <Text as={"h3"} fontSize={"md"} fontWeight={700}>
-        {t(`permitCollaboration.sidebar.designated${isSubmissionCollaboration ? "Submitters" : "Reviewers"}`)}
+        {t("permitCollaboration.sidebar.designatedReviewers")}
       </Text>
       <CollaborationCard
         rightElement={
-          canManage ? (
-            <DesignatedCollaboratorAssignmentModal
-              permitApplication={permitApplication}
-              collaborationType={collaborationType}
-            />
-          ) : undefined
+          canManage ? <DesignatedCollaboratorAssignmentModal permitApplication={permitApplication} /> : undefined
         }
         onReinvite={canManage ? permitApplication.reinvitePermitCollaboration : undefined}
         permitCollaboration={delegateeCollaboration}
       />
-      {isSubmissionCollaboration && (
-        <Text fontSize={"sm"} color={"text.secondary"}>
-          <Trans
-            t={t}
-            i18nKey={
-              organization
-                ? "permitCollaboration.sidebar.authorCanSubmitWithOrganization"
-                : "permitCollaboration.sidebar.authorCanSubmit"
-            }
-            components={{
-              1: <Text as={"span"} fontWeight={700} />,
-            }}
-            values={{
-              author: name,
-              organization: organization,
-            }}
-          />
-        </Text>
-      )}
     </Stack>
   )
 })
 
-const Assignees = observer(function Assignees({
-  permitApplication,
-  collaborationType,
-  canManage,
-}: IProps & { canManage: boolean }) {
+const Assignees = observer(function Assignees({ permitApplication, canManage }: IProps & { canManage: boolean }) {
   const { t } = useTranslation()
-  const sidebarAssigneeList = permitApplication.getSidebarAssigneesList(collaborationType)
+  const sidebarAssigneeList = permitApplication.getSidebarAssigneesList()
 
   return (
     <Stack spacing={2}>
@@ -220,7 +171,6 @@ const Assignees = observer(function Assignees({
               permitApplication={permitApplication}
               collaborator={collaborator}
               permitCollaborations={permitCollaborations}
-              collaborationType={collaborationType}
               canManage={canManage}
             />
           )
@@ -232,7 +182,6 @@ const Assignees = observer(function Assignees({
 
 const AssigneeAccordion = observer(function AssigneeAccordion({
   collaborator,
-  collaborationType,
   permitCollaborations,
   permitApplication,
   canManage,
@@ -240,7 +189,6 @@ const AssigneeAccordion = observer(function AssigneeAccordion({
   permitApplication: IPermitApplication
   collaborator: ICollaborator
   permitCollaborations: IPermitCollaboration[]
-  collaborationType: ECollaborationType
   canManage: boolean
 }) {
   const { t } = useTranslation()
@@ -363,11 +311,7 @@ const AssigneeAccordion = observer(function AssigneeAccordion({
           </Box>
           <RemoveConfirmationModal
             onRemove={() =>
-              permitApplication.removeCollaboratorCollaborations(
-                collaborator.id,
-                ECollaboratorType.assignee,
-                collaborationType
-              )
+              permitApplication.removeCollaboratorCollaborations(collaborator.id, ECollaboratorType.assignee)
             }
             triggerButtonProps={{
               mt: 2,

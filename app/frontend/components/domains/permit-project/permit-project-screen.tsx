@@ -1,5 +1,14 @@
 import { Box, Container, Flex, IconButton, TabPanel, TabPanels, Tabs, Text } from "@chakra-ui/react"
-import { CalendarBlank, CaretLeft, Chat, ClipboardText, Folder, SquaresFour, TrendUp } from "@phosphor-icons/react"
+import {
+  CalendarBlank,
+  CaretLeft,
+  Chat,
+  ClipboardText,
+  Folder,
+  SquaresFour,
+  TrendUp,
+  Users,
+} from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo } from "react"
 import { useForm } from "react-hook-form"
@@ -16,6 +25,7 @@ import { ActivityTabPanelContent } from "./activity-tab-panel-content"
 import { LocalResourcesTabPanelContent } from "./local-resources-tab-panel-content"
 import { MeetingsTabPanelContent } from "./meetings-tab-panel-content"
 import { OverviewTabPanelContent } from "./overview-tab-panel-content"
+import { PeopleTabPanelContent } from "./people-tab-panel-content"
 import { PermitsTabPanelContent } from "./permits-tab-panel-content"
 import { ProjectNotesTabPanelContent } from "./project-notes-tab-panel-content"
 import { ITabItem, ProjectSidebarTabList } from "./project-sidebar-tab-list"
@@ -50,13 +60,19 @@ export const PermitProjectScreen = observer(() => {
         to: `${projectBasePath}/applications`,
         tabIndex: 2,
       },
+      {
+        label: t("permitProject.details.people"),
+        icon: Users,
+        to: `${projectBasePath}/people`,
+        tabIndex: 3,
+      },
       ...(projectMeetingsEnabled
         ? [
             {
               label: t("permitProject.details.meetings"),
               icon: CalendarBlank,
               to: `${projectBasePath}/meetings`,
-              tabIndex: 3,
+              tabIndex: 4,
             },
           ]
         : []),
@@ -64,13 +80,13 @@ export const PermitProjectScreen = observer(() => {
         label: t("permitProject.details.notes"),
         icon: Chat,
         to: `${projectBasePath}/notes`,
-        tabIndex: projectMeetingsEnabled ? 4 : 3,
+        tabIndex: projectMeetingsEnabled ? 5 : 4,
       },
       {
         label: t("permitProject.details.localResources"),
         icon: Folder,
         to: `${projectBasePath}/local-resources`,
-        tabIndex: projectMeetingsEnabled ? 5 : 4,
+        tabIndex: projectMeetingsEnabled ? 6 : 5,
       },
     ]
   }, [projectBasePath, projectMeetingsEnabled, t])
@@ -175,6 +191,9 @@ export const PermitProjectScreen = observer(() => {
           </TabPanel>
           <TabPanel>
             {isPending ? <LoadingScreen /> : <PermitsTabPanelContent permitProject={currentPermitProject} />}
+          </TabPanel>
+          <TabPanel>
+            {isPending ? <LoadingScreen /> : <PeopleTabPanelContent permitProject={currentPermitProject} />}
           </TabPanel>
           {projectMeetingsEnabled && (
             <TabPanel p={0}>

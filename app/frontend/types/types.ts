@@ -7,7 +7,6 @@ import {
   EAutoComplianceType,
   EBaselineOccupancyKey,
   EBaselinePerformanceRequirement,
-  ECollaborationType,
   ECollaboratorType,
   EDocumentReferenceDocumentType,
   EDoorsPerformanceType,
@@ -433,7 +432,6 @@ export interface ITemplateCustomization {
 
 export interface IDownloadableFile {
   id: string
-  submissionVersionId?: string
   dataKey?: string
   fileUrl: string
   fileName: string
@@ -492,7 +490,6 @@ export interface IPermitCollaborationNotificationObjectData {
 
 export interface IPermitBlockStatusReadyNotificationObjectData {
   permitApplicationId?: string
-  collaborationType: ECollaborationType
   requirementBlockName?: string
 }
 

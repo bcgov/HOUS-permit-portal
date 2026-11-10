@@ -17,7 +17,6 @@ import { PermitApplicationGridHeaders } from "./permit-application-grid-headers"
 import { PermitApplicationGridRow } from "./permit-application-grid-row"
 import { RequirementTemplateFilter } from "./requirement-template-filter"
 import { StatusFilter } from "./status-filter"
-import { SubmissionDelegateeFilter } from "./submission-delegatee-filter"
 
 interface IProps {
   permitProject: IPermitProject
@@ -51,9 +50,6 @@ export const PermitsTabPanelContent = observer(({ permitProject }: IProps) => {
             <Flex gap={2} mb={2}>
               <RequirementTemplateFilter searchModel={permitApplicationStore} />
               <StatusFilter searchModel={permitApplicationStore} />
-              {permitProject.isOwner && (
-                <SubmissionDelegateeFilter searchModel={permitApplicationStore} permitProject={permitProject} />
-              )}
             </Flex>
             <SearchGrid
               templateColumns="2.25fr 1.75fr 1fr 1.4fr 1fr 1.1fr 0.5fr"

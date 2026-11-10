@@ -81,7 +81,7 @@ class Jurisdiction < ApplicationRecord
   has_many :jurisdiction_step_requirements, dependent: :destroy
   has_many :part3_occupancy_required_steps, dependent: :destroy
   has_many :jurisdiction_heating_degree_days, dependent: :destroy
-  has_many :collaborators, as: :collaboratorable, dependent: :destroy
+  has_many :collaborators, dependent: :destroy
   has_many :sandboxes, dependent: :destroy
   has_many :property_plan_local_jurisdictions, dependent: :destroy
   has_many :resources, dependent: :destroy
