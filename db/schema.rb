@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_10_19_201500) do
+ActiveRecord::Schema[7.2].define(version: 2026_11_04_180000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -71,8 +71,11 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_19_201500) do
     t.uuid "collaboratorable_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "jurisdiction_id"
     t.index ["collaboratorable_type", "collaboratorable_id"], name: "idx_on_collaboratorable_type_collaboratorable_id_aa1cca136d"
     t.index ["collaboratorable_type", "collaboratorable_id"], name: "index_collaborators_on_collaboratorable"
+    t.index ["jurisdiction_id"], name: "index_collaborators_on_jurisdiction_id"
+    t.index ["user_id", "jurisdiction_id"], name: "index_collaborators_on_user_id_and_jurisdiction_id", unique: true
     t.index ["user_id"], name: "index_collaborators_on_user_id"
   end
 
@@ -864,6 +867,30 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_19_201500) do
     t.index ["withdrawn_at"], name: "index_project_meetings_on_withdrawn_at"
   end
 
+  create_table "project_memberships", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "user_id"
+    t.uuid "permit_project_id", null: false
+    t.integer "access", default: 0, null: false
+    t.integer "contact_designation", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "invited_email"
+    t.string "invited_first_name"
+    t.string "invited_last_name"
+    t.uuid "invited_by_id"
+    t.string "invitation_token"
+    t.datetime "invitation_sent_at"
+    t.datetime "invitation_accepted_at"
+    t.datetime "invitation_declined_at"
+    t.index "permit_project_id, lower((invited_email)::text)", name: "index_project_memberships_unique_pending_email_per_project", unique: true, where: "((user_id IS NULL) AND (invitation_declined_at IS NULL))"
+    t.index ["invitation_token"], name: "index_project_memberships_on_invitation_token", unique: true, where: "(invitation_token IS NOT NULL)"
+    t.index ["invited_by_id"], name: "index_project_memberships_on_invited_by_id"
+    t.index ["permit_project_id"], name: "index_project_memberships_on_permit_project_id"
+    t.index ["permit_project_id"], name: "index_project_memberships_one_primary_per_project", unique: true, where: "((contact_designation = 1) AND (user_id IS NOT NULL))"
+    t.index ["user_id", "permit_project_id"], name: "index_project_memberships_on_user_and_project", unique: true
+    t.index ["user_id"], name: "index_project_memberships_on_user_id"
+  end
+
   create_table "release_notes", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "version"
     t.datetime "release_date"
@@ -1410,6 +1437,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_19_201500) do
 
   add_foreign_key "allowlisted_jwts", "users", on_delete: :cascade
   add_foreign_key "api_key_expiration_notifications", "external_api_keys"
+  add_foreign_key "collaborators", "jurisdictions"
   add_foreign_key "collaborators", "users"
   add_foreign_key "customization_changes", "jurisdiction_template_version_customizations"
   add_foreign_key "design_documents", "pre_checks"
@@ -1470,6 +1498,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_19_201500) do
   add_foreign_key "project_documents", "permit_projects"
   add_foreign_key "project_meetings", "permit_projects"
   add_foreign_key "project_meetings", "users", column: "requested_by_id"
+  add_foreign_key "project_memberships", "permit_projects"
+  add_foreign_key "project_memberships", "users"
+  add_foreign_key "project_memberships", "users", column: "invited_by_id"
   add_foreign_key "requirement_documents", "requirement_blocks"
   add_foreign_key "requirement_template_sections", "requirement_template_sections", column: "copied_from_id"
   add_foreign_key "requirement_template_sections", "requirement_templates"

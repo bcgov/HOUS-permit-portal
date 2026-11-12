@@ -177,13 +177,6 @@ export const PermitProjectModel = types
     setTablePermitApplications(permitApplications: IPermitApplication[]) {
       self.tablePermitApplications = permitApplications.map((p) => p.id) as any
     },
-    fetchSubmissionCollaboratorOptions: flow(function* () {
-      const response = yield* toGenerator(self.environment.api.fetchSubmissionCollaboratorOptions(self.id))
-      if (response.ok) {
-        return response.data.data
-      }
-      return []
-    }),
     markAsViewed: flow(function* () {
       const wasUnread = !self.viewedAt
       const state = self.state

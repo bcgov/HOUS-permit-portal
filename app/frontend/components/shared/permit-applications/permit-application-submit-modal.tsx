@@ -172,7 +172,6 @@ const CollaboratorSubmitBlockModalContent = observer(function CollaboratorSubmit
   const { t } = useTranslation()
 
   const submitter = permitApplication.submitter
-  const delegatee = permitApplication.delegatee
 
   return (
     <VStack spacing={8} textAlign={"center"}>
@@ -182,12 +181,6 @@ const CollaboratorSubmitBlockModalContent = observer(function CollaboratorSubmit
       <Text textAlign={"center"}> {t("permitApplication.submissionBlockModal.description")}</Text>
 
       <HStack justifyContent={"center"} w={"full"} spacing={6} alignItems={"stretch"}>
-        <CollaboratorSubmitBlockModalCard
-          title={t("permitApplication.submissionBlockModal.designatedSubmitter")}
-          name={delegatee?.name}
-          organization={delegatee?.organization}
-        />
-
         <CollaboratorSubmitBlockModalCard
           title={t("permitApplication.submissionBlockModal.author")}
           name={submitter?.name}

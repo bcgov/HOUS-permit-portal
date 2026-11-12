@@ -4,10 +4,11 @@ RSpec.describe "Api::Collaborators", type: :request, search: true do
   include Devise::Test::IntegrationHelpers
 
   let(:headers) { { "ACCEPT" => "application/json" } }
-  let(:collaboratorable) { create(:user, :submitter) }
-  let(:owner) { collaboratorable }
+  let(:jurisdiction) { create(:sub_district) }
+  let(:owner) { create(:user, :reviewer, jurisdiction: jurisdiction) }
   let!(:collaborators) do
-    create_list(:collaborator, 3, collaboratorable: collaboratorable)
+    create_list(:user, 2, :reviewer, jurisdiction: jurisdiction)
+    jurisdiction.collaborators.to_a
   end
 
   before do
@@ -15,9 +16,9 @@ RSpec.describe "Api::Collaborators", type: :request, search: true do
     Collaborator.reindex
   end
 
-  describe "POST /api/collaborators/collaboratorable/:collaboratorable_id/search" do
+  describe "POST /api/collaborators/jurisdictions/:jurisdiction_id/search" do
     it "returns paginated collaborator results" do
-      post "/api/collaborators/collaboratorable/#{collaboratorable.id}/search",
+      post "/api/collaborators/jurisdictions/#{jurisdiction.id}/search",
            params: {
              page: 1,
              per_page: 2
@@ -33,7 +34,7 @@ RSpec.describe "Api::Collaborators", type: :request, search: true do
     it "filters out results for unauthorized users" do
       sign_in create(:user, :submitter)
 
-      post "/api/collaborators/collaboratorable/#{collaboratorable.id}/search",
+      post "/api/collaborators/jurisdictions/#{jurisdiction.id}/search",
            headers: headers,
            as: :json
 

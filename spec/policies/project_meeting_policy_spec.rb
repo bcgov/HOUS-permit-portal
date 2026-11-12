@@ -46,21 +46,12 @@ RSpec.describe ProjectMeetingPolicy, type: :policy do
     expect(policy(other_user).update?).to be false
   end
 
-  it "blocks submitter collaborators during the submitter phase" do
-    permit_application =
-      create(
-        :permit_application,
-        permit_project: permit_project,
-        submitter: owner,
-        jurisdiction: jurisdiction
-      )
-    collaborator =
-      create(:collaborator, user: collaborator_user, collaboratorable: owner)
+  it "blocks unrelated submitters from a project application" do
     create(
-      :permit_collaboration,
-      permit_application: permit_application,
-      collaborator: collaborator,
-      collaboration_type: :submission
+      :permit_application,
+      permit_project: permit_project,
+      submitter: owner,
+      jurisdiction: jurisdiction
     )
 
     expect(policy(collaborator_user).show?).to be false

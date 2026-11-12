@@ -171,6 +171,9 @@ const NewJurisdictionScreen = lazy(() =>
 const PrivacyPolicyScreen = lazy(() =>
   import("../misc/privacy-policy-screen").then((module) => ({ default: module.PrivacyPolicyScreen }))
 )
+const CompareAccessLevelsScreen = lazy(() =>
+  import("../misc/compare-access-levels-screen").then((module) => ({ default: module.CompareAccessLevelsScreen }))
+)
 const ReviewerWorkspaceScreen = lazy(() =>
   import("../jurisdictions/submission-inbox/reviewer-workspace-screen").then((module) => ({
     default: module.ReviewerWorkspaceScreen,
@@ -247,6 +250,11 @@ const PermitProjectScreen = lazy(() =>
 const AddPermitApplicationToProjectScreen = lazy(() =>
   import("../permit-project/add-permit-application-screen").then((module) => ({
     default: module.AddPermitApplicationToProjectScreen,
+  }))
+)
+const AcceptProjectInvitationScreen = lazy(() =>
+  import("../permit-project/accept-project-invitation-screen").then((module) => ({
+    default: module.AcceptProjectInvitationScreen,
   }))
 )
 const EditPermitApplicationScreen = lazy(() =>
@@ -552,13 +560,24 @@ const AppRoutes = observer(() => {
     return <LoadingScreen />
   }
 
+  // Step 2: Safely derive booleans from currentUser. These default to false if currentUser is null.
+  const isReviewStaff = currentUser ? currentUser.isReviewStaff : false
+  const isReviewManager = currentUser ? currentUser.isReviewManager : false
+  const isRegionalReviewManager = currentUser ? currentUser.isRegionalReviewManager : false
+  const isTechnicalSupport = currentUser ? currentUser.isTechnicalSupport : false
+  const eulaAccepted = currentUser ? currentUser.eulaAccepted : false
+  const isSuperAdmin = currentUser ? currentUser.isSuperAdmin : false
+  const isUnconfirmed = currentUser ? currentUser.isUnconfirmed : false
+  const mustAcceptEula = loggedIn && !currentUser.eulaAccepted && !currentUser.isSuperAdmin
+  const qaModeEnabled = import.meta.env.VITE_QA_MODE === "true"
+
   useEffect(() => {
-    if (loggedIn && afterLoginPath) {
+    if (loggedIn && !mustAcceptEula && !isUnconfirmed && afterLoginPath) {
       // Defense in depth for after-login redirects
       if (isSafeAppPath(afterLoginPath)) navigate(afterLoginPath)
       setAfterLoginPath(null)
     }
-  }, [loggedIn, afterLoginPath])
+  }, [loggedIn, mustAcceptEula, isUnconfirmed, afterLoginPath])
 
   useEffect(() => {
     if (tokenExpired) {
@@ -570,16 +589,6 @@ const AppRoutes = observer(() => {
   }, [tokenExpired])
 
   useSyncPathWithStore()
-
-  // Step 2: Safely derive booleans from currentUser. These default to false if currentUser is null.
-  const isReviewStaff = currentUser ? currentUser.isReviewStaff : false
-  const isReviewManager = currentUser ? currentUser.isReviewManager : false
-  const isRegionalReviewManager = currentUser ? currentUser.isRegionalReviewManager : false
-  const isTechnicalSupport = currentUser ? currentUser.isTechnicalSupport : false
-  const eulaAccepted = currentUser ? currentUser.eulaAccepted : false
-  const isSuperAdmin = currentUser ? currentUser.isSuperAdmin : false
-  const isUnconfirmed = currentUser ? currentUser.isUnconfirmed : false
-  const qaModeEnabled = import.meta.env.VITE_QA_MODE === "true"
 
   const superAdminOnlyRoutes = (
     <>
@@ -775,8 +784,6 @@ const AppRoutes = observer(() => {
     </>
   )
 
-  const mustAcceptEula = loggedIn && !currentUser.eulaAccepted && !currentUser.isSuperAdmin
-
   // Step 4: Calculate isAllowed props using safe booleans
   const isAllowedForAdminOrManager =
     loggedIn && !mustAcceptEula && (isReviewManager || isRegionalReviewManager || isSuperAdmin || isTechnicalSupport)
@@ -854,6 +861,12 @@ const AppRoutes = observer(() => {
             <Route path="/documents" element={<ProjectDashboardScreen />} />
             {/* Already handled above with path-based tabs */}
             <Route path="/projects" element={<ProjectDashboardScreen />} />
+            {/* MEMBERSHIP COMMENT: this screen renders for any confirmed signed-in user.
+                The API limits show, accept, and decline to submitters. If reviewers can
+                accept later, the project show view must stay the inbox view for review
+                staff, and accept must check sandbox so they are not sent to an overview
+                they cannot open. */}
+            <Route path="/project-invitations/:invitationToken" element={<AcceptProjectInvitationScreen />} />
             <Route path="/projects/new" element={<NewPermitProjectScreen />} />
             <Route path="/projects/:permitProjectId">
               <Route index element={<PermitProjectScreen />} />
@@ -993,6 +1006,7 @@ const AppRoutes = observer(() => {
         <Route path="/template-versions/:templateVersionId/preview" element={<TemplateVersionPreviewScreen />} />
         <Route path="/project-readiness-tools" element={<ProjectReadinessToolsIndexScreen />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyScreen />} />
+        <Route path="/compare-access-levels" element={<CompareAccessLevelsScreen />} />
         <Route
           path="/project-readiness-tools/create-your-letters-of-assurance"
           element={<LettersOfAssuranceScreen />}

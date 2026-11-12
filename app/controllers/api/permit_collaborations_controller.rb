@@ -19,10 +19,13 @@ class Api::PermitCollaborationsController < Api::ApplicationController
 
   def reinvite
     authorize @permit_collaboration
+
+    # Resends the review collaboration email. Registration reinvite for an
+    # unconfirmed or discarded reviewer is not supported here yet.
     begin
       PermitCollaboration::CollaborationManagementService.new(
-        @permit_application
-      ).send_submission_collaboration_email!(@permit_collaboration)
+        @permit_collaboration.permit_application
+      ).reinvite!(@permit_collaboration)
 
       render_success @permit_collaboration,
                      "permit_collaboration.re_invite_success",

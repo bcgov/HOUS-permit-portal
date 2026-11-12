@@ -42,7 +42,6 @@ export const PermitApplicationStoreModel = types
       templateVersionIdFilter: types.maybeNull(types.string),
       requirementTemplateIdFilter: types.optional(types.array(types.string), []),
       hasCollaboratorFilter: types.maybeNull(types.boolean),
-      submissionDelagateeIdFilter: types.optional(types.array(types.string), []),
     }),
     createSearchModel<EProjectPermitApplicationSortFields | EPermitApplicationSortFields>(
       "searchPermitApplications",
@@ -230,12 +229,6 @@ export const PermitApplicationStoreModel = types
       // @ts-ignore
       self.requirementTemplateIdFilter = requirementTemplateIds
     },
-    setSubmissionCollaboratorIdFilter(submissionDelegateeId: string[] | undefined) {
-      if (!submissionDelegateeId) return
-      setQueryParam("submissionDelagateeId", submissionDelegateeId)
-      // @ts-ignore
-      self.submissionDelagateeIdFilter = submissionDelegateeId
-    },
     searchPermitApplications: flow(function* (opts?: { reset?: boolean; page?: number; countPerPage?: number }) {
       if (opts?.reset) {
         self.resetPages()
@@ -253,7 +246,6 @@ export const PermitApplicationStoreModel = types
           templateVersionId: self.templateVersionIdFilter,
           requirementTemplateId,
           hasCollaborator: self.hasCollaboratorFilter,
-          submissionDelegateeId: self.submissionDelagateeIdFilter,
         },
       } as TSearchParams<EPermitApplicationSortFields, IPermitApplicationSearchFilters>
 
@@ -391,11 +383,9 @@ export const PermitApplicationStoreModel = types
       const templateVersionIdFilter = queryParams.get("templateVersionId")
       const requirementTemplateIdFilter = queryParams.get("requirementTemplateId")?.split(",")
       const hasCollaboratorFilter = queryParams.get("hasCollaborator") === "true"
-      const submissionDelagateeIdFilter = queryParams.get("submissionDelagateeId")?.split(",")
 
       self.setStatusFilter(statusFilter)
       self.setRequirementTemplateIdFilter(requirementTemplateIdFilter)
-      self.setSubmissionCollaboratorIdFilter(submissionDelagateeIdFilter)
       self.templateVersionIdFilter = templateVersionIdFilter
       self.hasCollaboratorFilter = hasCollaboratorFilter
     },
@@ -438,10 +428,9 @@ export const PermitApplicationStoreModel = types
       self.hasCollaboratorFilter = null
       self.templateVersionIdFilter = null
       self.requirementTemplateIdFilter = [] as any
-      self.submissionDelagateeIdFilter = [] as any
       if (typeof window !== "undefined") {
         const url = new URL(window.location.href)
-        const staticParams = ["templateVersionId", "requirementTemplateId", "hasCollaborator", "submissionDelagateeId"]
+        const staticParams = ["templateVersionId", "requirementTemplateId", "hasCollaborator"]
         staticParams.forEach((param) => {
           url.searchParams.delete(param)
         })

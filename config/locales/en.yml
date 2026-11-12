@@ -90,6 +90,13 @@ en:
           enabled_project_meetings_requires_setup: "can only be toggled on once at least one project meeting contact is confirmed."
           enabled_project_meetings_requires_authorization_resource: "can only be toggled on once at least one Project meeting authorization resource has been added."
           enabled_property_information_requests_requires_setup: "can only be toggled on once at least one property information contact is confirmed."
+        project_membership:
+          attributes:
+            contact_designation:
+              primary_locked: "cannot be removed from the primary contact. Transfer it to someone else."
+            invited_email:
+              already_member: "is already a member of this project."
+              already_invited: "already has a pending invitation for this project."
         submission_contact:
           last_confirmed_contact: "cannot be deleted while %{feature} is enabled. Turn the setting off before deleting the last confirmed contact."
         part3_occupancy_required_step:
@@ -127,6 +134,8 @@ en:
               authorization_required: "must include authorization documents when the requester is not the owner"
         permit_project_collaboration:
           attributes:
+            collaborator:
+              must_be_same_jurisdiction: "must be of the same jurisdiction as the project"
             permit_project:
               only_one_review_collaborator_allowed: "can only have one review collaborator assigned at a time"
         requirement_template:
@@ -211,6 +220,7 @@ en:
       new_jurisdiction_membership: "New jurisdiction membership"
       notify_permit_collaboration: "Welcome you have been invited to Collaborate in the Building Permit Hub"
       notify_project_review_collaboration: "You have been assigned as a review collaborator on a project"
+      notify_project_membership_invitation: "You've been invited to join a project"
       notify_new_or_unconfirmed_permit_collaboration: "You’re Invited to Collaborate on a Building Permit Application"
       notify_new_or_unconfirmed_preview: "You’re Invited to Preview a Building Permit Template"
       notify_preview: "You're Invited to Preview a Building Permit Template"
@@ -816,6 +826,26 @@ en:
       feature_not_enabled:
         title: Error
         message: "Designated reviewer is not enabled for this project"
+    project_membership:
+      create_error:
+        title: Error
+        message: "%{error_message}"
+      reinvite_error:
+        title: Error
+        message: "%{error_message}"
+      reinvite_active_error:
+        title: Error
+        message: "Active members cannot be re-invited"
+      update_error:
+        title: Error
+        message: "Person could not be updated"
+      destroy_creator_error:
+        title: Error
+        message: "The project creator cannot be removed"
+    project_invitation:
+      expired_error:
+        title: Error
+        message: "This invitation has expired"
     qa_tools:
       full_permit_project_success:
         title: ""
@@ -1327,6 +1357,8 @@ en:
     permit_project_collaboration:
       assignment_notification: "You have been assigned as a review collaborator on project %{project_number}."
       unassignment_notification: "You have been removed as a review collaborator on project %{project_number}."
+    project_membership:
+      invitation_notification: "You've been invited by %{inviter_name} to join project %{project_title}. Check your email to accept."
     step_code:
       report_generated: "Your Step Code report is ready to download"
     pre_check:

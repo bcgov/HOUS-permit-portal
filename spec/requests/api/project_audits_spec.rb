@@ -50,23 +50,22 @@ RSpec.describe "Api::ProjectAudits (project activities)", type: :request do
       )
     end
 
-    it "returns success for project collaborator" do
+    it "returns success for a review collaborator" do
+      reviewer = create(:user, :reviewer, jurisdiction: jurisdiction)
       permit_application =
         create(
           :permit_application,
+          :newly_submitted,
           permit_project: permit_project,
           submitter: owner,
           jurisdiction: jurisdiction
         )
-      collaborator =
-        create(:collaborator, user: other_user, collaboratorable: owner)
       create(
         :permit_collaboration,
         permit_application: permit_application,
-        collaborator: collaborator,
-        collaboration_type: :submission
+        collaborator: jurisdiction.collaborators.find_by!(user: reviewer)
       )
-      sign_in other_user
+      sign_in reviewer
 
       post "/api/permit_projects/#{permit_project.id}/activities",
            params: {

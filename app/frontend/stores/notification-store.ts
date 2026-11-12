@@ -3,7 +3,7 @@ import { flow, Instance, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import { ECollaborationType, EFlashMessageStatus, ENotificationActionType } from "../types/enums"
+import { EFlashMessageStatus, ENotificationActionType } from "../types/enums"
 import {
   ILinkData,
   INotification,
@@ -73,13 +73,17 @@ const linkGenerators: Partial<Record<ENotificationActionType, LinkGenerator>> = 
 
   [ENotificationActionType.projectReviewCollaborationUnassignment]: () => [],
 
+  [ENotificationActionType.projectMembershipInvitation]: (notification) => {
+    const token = (notification.objectData as { invitationToken?: string })?.invitationToken
+    if (!token) return []
+    return showLink(`/project-invitations/${token}`)
+  },
+
   [ENotificationActionType.permitBlockStatusReady]: (notification) => {
     const data = notification.objectData as IPermitBlockStatusReadyNotificationObjectData
-    const href =
-      data?.collaborationType === ECollaborationType.review
-        ? `/permit-applications/${data.permitApplicationId}`
-        : `/permit-applications/${data.permitApplicationId}/edit`
-    return showLink(href)
+    if (!data?.permitApplicationId) return []
+
+    return showLink(`/permit-applications/${data.permitApplicationId}`)
   },
 
   [ENotificationActionType.publishedTemplateMissingRequirementsMapping]: (notification) => [

@@ -9,7 +9,6 @@ class Api::PermitProjectsController < Api::ApplicationController
                   pin
                   unpin
                   search_permit_applications
-                  submission_collaborator_options
                   create_permit_applications
                   mark_as_viewed
                   mark_as_unviewed
@@ -56,8 +55,13 @@ class Api::PermitProjectsController < Api::ApplicationController
   # and view variants. Worth doing as a dedicated refactor rather than piecemeal.
   def show
     authorize @permit_project
+    # MEMBERSHIP COMMENT: temporary check so accepted members receive the
+    # submitter extended view when opening the project; revisit with membership permissions.
+    # This runs before the review-staff :inbox_extended branch. If reviewers can
+    # accept later, a reviewer who accepted would lose the inbox view of that project.
     is_owner_or_collaborator =
       @permit_project.owner_id == current_user.id ||
+        @permit_project.project_memberships.exists?(user_id: current_user.id) ||
         @permit_project.permit_applications.any? do |app|
           app.collaborators.any? { |c| c.user_id == current_user.id }
         end
@@ -257,18 +261,6 @@ class Api::PermitProjectsController < Api::ApplicationController
                      blueprint_opts: {
                        view: :project_base,
                        current_user: current_user
-                     }
-                   }
-  end
-
-  def submission_collaborator_options
-    authorize @permit_project
-    render_success @permit_project.submission_collaborators(current_user),
-                   nil,
-                   {
-                     blueprint: CollaboratorOptionBlueprint,
-                     blueprint_opts: {
-                       view: :base
                      }
                    }
   end

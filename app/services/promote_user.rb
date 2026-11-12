@@ -60,7 +60,7 @@ class PromoteUser
     invited_user.collaborations.each do |invited_user_collaborator|
       existing_user_collaborator =
         existing_user.collaborations.find_by(
-          collaboratorable: invited_user_collaborator.collaboratorable
+          jurisdiction_id: invited_user_collaborator.jurisdiction_id
         )
 
       # if the existing_user is not already a collaborator on the same record
@@ -80,8 +80,6 @@ class PromoteUser
           existing_user_collaborator.permit_collaborations.kept.find_by(
             permit_application:
               invited_user_permit_collaboration.permit_application,
-            collaboration_type:
-              invited_user_permit_collaboration.collaboration_type,
             collaborator_type:
               invited_user_permit_collaboration.collaborator_type,
             assigned_requirement_block_id:

@@ -344,44 +344,6 @@ RSpec.describe PermitProject, type: :model do
       end
     end
 
-    describe "#submission_collaborators" do
-      it "returns none when user is nil" do
-        project = create(:permit_project)
-        expect(project.submission_collaborators(nil)).to be_empty
-      end
-
-      it "returns collaborators for owner (submission collaborations only)" do
-        owner = create(:user)
-        project = create(:permit_project, owner: owner)
-        permit_application =
-          create(:permit_application, permit_project: project)
-
-        submitter = create(:user)
-        collaborator =
-          create(
-            :collaborator,
-            user: submitter,
-            collaboratorable: permit_application.submitter
-          )
-        create(
-          :permit_collaboration,
-          permit_application: permit_application,
-          collaborator: collaborator,
-          collaboration_type: :submission
-        )
-
-        expect(project.submission_collaborators(owner)).to include(collaborator)
-      end
-
-      it "returns none for non-owner" do
-        owner = create(:user)
-        other = create(:user)
-        project = create(:permit_project, owner: owner)
-
-        expect(project.submission_collaborators(other)).to be_empty
-      end
-    end
-
     describe "#project_documents(user)" do
       it "returns none when user is nil" do
         project = create(:permit_project)

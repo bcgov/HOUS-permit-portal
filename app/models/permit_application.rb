@@ -49,11 +49,17 @@ class PermitApplication < ApplicationRecord
 
   has_many :submission_versions, dependent: :destroy
   has_many :notes, as: :noteable, dependent: :destroy
+  before_destroy :delete_legacy_submission_collaboration_rows
+  # TODO: HUB-5783 Submission rows (collaboration_type 0) stay in these tables
+  # until they are converted to project memberships and grants. Ignore them
+  # here so they are not treated as review assignments.
   has_many :permit_collaborations,
-           -> { where(discarded_at: nil) },
+           -> { where(discarded_at: nil).where.not(collaboration_type: 0) },
            dependent: :destroy
   has_many :collaborators, through: :permit_collaborations
-  has_many :permit_block_statuses, dependent: :destroy
+  has_many :permit_block_statuses,
+           -> { where.not(collaboration_type: 0) },
+           dependent: :destroy
 
   # HUB-5145: Keep one StepCode per permit as the report family. Pre-Construction
   # and As-Built should become staged child checklists selected by the StepCode's
@@ -189,14 +195,12 @@ class PermitApplication < ApplicationRecord
   end
 
   def users_by_collaboration_options(
-    collaboration_type:,
     collaborator_type: nil,
     assigned_requirement_block_id: nil
   )
     base_where_clause = {
       collaborations: {
         permit_collaborations: {
-          collaboration_type: collaboration_type,
           permit_application_id: id,
           discarded_at: nil
         }
@@ -311,15 +315,9 @@ class PermitApplication < ApplicationRecord
       requirement_template_id: template_version.requirement_template.id,
       created_at: created_at,
       updated_at: updated_at,
-      user_ids_with_submission_edit_permissions:
-        [submitter.id] +
-          users_by_collaboration_options(collaboration_type: :submission).pluck(
-            :id
-          ),
       review_delegatee_name: review_delegatee_name,
       review_collaborator_user_ids:
         permit_collaborations
-          .review
           .joins(:collaborator)
           .pluck("collaborators.user_id")
           .uniq,
@@ -327,53 +325,24 @@ class PermitApplication < ApplicationRecord
       sandbox_id: sandbox_id,
       permit_project_id: permit_project_id,
       project_number: permit_project&.number,
-      submission_delegatee_id: submission_delegatee&.id,
       discarded: discarded?,
       queue_time_seconds: queue_time_seconds,
       queue_clock_started_at: queue_clock_started_at&.to_i
     }
   end
 
-  def submission_delegatee
-    collaborators.where(
-      permit_collaborations: {
-        collaboration_type: :submission,
-        collaborator_type: :delegatee
-      }
-    ).first
-  end
-
-  def collaborator?(user_id:, collaboration_type:, collaborator_type: nil)
-    users_by_collaboration_options(
-      collaboration_type:,
-      collaborator_type:
-    ).exists?(id: user_id)
-  end
-
   def has_collaborator?
     collaborators.any?
   end
 
+  # TODO: HUB-5783 This used to grant block-level edit access to submitter
+  # collaborators. A delegatee could edit every block; an assignee could edit
+  # assigned_requirement_block_id. How that becomes grants is still open.
+  # Check git history before changing it.
   def submission_requirement_block_edit_permissions(user_id:)
-    if submitter_id != user_id &&
-         !collaborator?(user_id:, collaboration_type: :submission)
-      return nil
-    end
+    return :all if submitter_id == user_id
 
-    if submitter_id == user_id ||
-         collaborator?(
-           user_id:,
-           collaboration_type: :submission,
-           collaborator_type: :delegatee
-         )
-      return :all
-    end
-
-    permit_collaborations
-      .joins(:collaborator)
-      .where(collaboration_type: :submission, collaborators: { user_id: })
-      .map(&:assigned_requirement_block_id)
-      .compact
+    nil
   end
 
   def user_can_edit_block?(user_id:, requirement_block_id:)
@@ -463,15 +432,6 @@ class PermitApplication < ApplicationRecord
 
   def notifiable_users
     relevant_collaborators = [submitter]
-    designated_submitter =
-      users_by_collaboration_options(
-        collaboration_type: :submission,
-        collaborator_type: :delegatee
-      ).first
-
-    if designated_submitter.present?
-      relevant_collaborators << designated_submitter
-    end
 
     if submitted?
       relevant_collaborators =
@@ -850,10 +810,7 @@ class PermitApplication < ApplicationRecord
   end
 
   def review_delegatee_name
-    users_by_collaboration_options(
-      collaboration_type: :review,
-      collaborator_type: :delegatee
-    ).first&.name
+    users_by_collaboration_options(collaborator_type: :delegatee).first&.name
   end
 
   def jurisdiction_name
@@ -904,6 +861,20 @@ class PermitApplication < ApplicationRecord
   end
 
   private
+
+  # TODO: HUB-5783 The association scopes above ignore submission rows. Delete
+  # them with the application so the foreign keys still allow destroy.
+  # Remove this once those rows are backfilled and collaboration_type is gone.
+  def delete_legacy_submission_collaboration_rows
+    PermitCollaboration.where(
+      permit_application_id: id,
+      collaboration_type: 0
+    ).delete_all
+    PermitBlockStatus.where(
+      permit_application_id: id,
+      collaboration_type: 0
+    ).delete_all
+  end
 
   # ponytail: assign_creation_actors sets a jurisdiction when a reviewer creates
   # the draft. Anything else is created by the submitter.

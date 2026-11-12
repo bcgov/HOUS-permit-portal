@@ -7,7 +7,7 @@ import { Link, useNavigate } from "react-router-dom"
 import { IPermitApplication } from "../../../../models/permit-application"
 import { useMst } from "../../../../setup/root"
 import { colors } from "../../../../styles/theme/foundations/colors"
-import { ECollaborationType, EPermitApplicationStatus } from "../../../../types/enums"
+import { EPermitApplicationStatus } from "../../../../types/enums"
 import { DesignatedCollaboratorAssignmentModal } from "../../permit-application/collaborator-management/designated-collaborator-assignment-modal"
 import { EReorderDirection, IKanbanColumn, IReorderEvent, KanbanBoard } from "./kanban-board"
 import { KanbanCard } from "./kanban-card"
@@ -125,7 +125,7 @@ const ApplicationKanbanCard = observer(function ApplicationKanbanCard({
   const isLockedDraft = application.isLockedForReviewStaff
 
   const primaryAssignee = application.designatedReviewer?.collaborator?.user ?? null
-  const additionalCollaborations = application.getCollaborationAssignees(ECollaborationType.review)
+  const additionalCollaborations = application.getCollaborationAssignees()
 
   return (
     <KanbanCard
@@ -140,7 +140,6 @@ const ApplicationKanbanCard = observer(function ApplicationKanbanCard({
         <ReviewAssigneesRow primaryAssignee={primaryAssignee}>
           <DesignatedCollaboratorAssignmentModal
             permitApplication={application}
-            collaborationType={ECollaborationType.review}
             additionalCollaborations={additionalCollaborations}
             onBeforeOpen={async () => {
               await permitApplicationStore.fetchPermitApplication(application.id, true)

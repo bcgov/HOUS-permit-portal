@@ -11,7 +11,26 @@ class PermitProjectPolicy < ApplicationPolicy
         )
       SQL
 
-      clauses = ["permit_projects.owner_id = :uid", collaborator_exists_sql]
+      # MEMBERSHIP COMMENT: temporary project visibility for accepted members so
+      # invitees can open /projects/:id/overview after accepting; revisit with
+      # full membership access levels. If reviewers can accept later, this
+      # visibility plus the show action's membership check selects the submitter
+      # :extended view before the review inbox view.
+      member_exists_sql = <<-SQL.squish
+        EXISTS (
+          SELECT 1 FROM project_memberships pm
+          WHERE pm.permit_project_id = permit_projects.id
+            AND pm.user_id = :uid
+        )
+      SQL
+
+      # MEMBERSHIP COMMENT: later, authorize from membership.
+      # owner_id only identifies the creator.
+      clauses = [
+        "permit_projects.owner_id = :uid",
+        member_exists_sql,
+        collaborator_exists_sql
+      ]
       values = { uid: user.id }
 
       if user.review_staff?
@@ -84,10 +103,6 @@ class PermitProjectPolicy < ApplicationPolicy
     show? && (user_is_owner? || user_is_review_staff_for_jurisdiction?)
   end
 
-  def submission_collaborator_options?
-    same_sandbox? && user_is_owner?
-  end
-
   def assign_project_review_collaborator?
     same_sandbox? && user_is_review_staff_for_jurisdiction?
   end
@@ -118,14 +133,21 @@ class PermitProjectPolicy < ApplicationPolicy
     record.sandbox == sandbox
   end
 
+  # MEMBERSHIP COMMENT: later, authorize from membership.
+  # owner_id only identifies the creator.
   def user_is_owner?
     return false unless user && record # Ensure user and record exist
 
     record.owner_id == user.id
   end
 
+  # MEMBERSHIP COMMENT: temporary project visibility for accepted members;
+  # revisit when access levels (standard / expanded / full) are enforced.
+  # If reviewers can accept later, this check selects the submitter view
+  # ahead of the review inbox view. See PermitProjectsController#show.
   def user_is_owner_or_collaborator?
     return true if user_is_owner?
+    return true if user && record.project_memberships.exists?(user_id: user.id)
 
     record.permit_applications.any? do |app|
       app.collaborators.any? { |collaborator| collaborator.user_id == user.id }

@@ -95,6 +95,29 @@ class PermitHubMailer < ApplicationMailer
     )
   end
 
+  def notify_project_membership_invitation(
+    project_membership,
+    raw_invitation_token
+  )
+    @project_membership = project_membership
+    @permit_project = project_membership.permit_project
+    @inviter = project_membership.invited_by
+    @expires_at =
+      (project_membership.invitation_sent_at || Time.current) +
+        ProjectMembership::INVITATION_EXPIRY
+    @accept_url =
+      FrontendUrlHelper.frontend_url(
+        "/project-invitations/#{raw_invitation_token}"
+      )
+
+    return if project_membership.invited_email.blank?
+
+    send_mail(
+      email: project_membership.invited_email,
+      template_key: :notify_project_membership_invitation
+    )
+  end
+
   def notify_template_version_preview(template_version_preview:)
     @template_version_preview = template_version_preview
     @user = template_version_preview.previewer
@@ -145,42 +168,16 @@ class PermitHubMailer < ApplicationMailer
   def notify_block_status_ready_summary(
     permit_application:,
     user:,
-    collaboration_type:,
     requirement_block_names:
   )
     @permit_application = permit_application
     @user = user
-    @collaboration_type = collaboration_type
     @requirement_block_names = requirement_block_names
     @requirement_block_count = requirement_block_names.size
 
     send_user_mail(
       email: @user.email,
       template_key: :notify_block_status_ready_summary
-    )
-  end
-
-  def notify_new_or_unconfirmed_permit_collaboration(
-    permit_collaboration:,
-    user:
-  )
-    @permit_collaboration = permit_collaboration
-    @user = user
-
-    return unless @permit_collaboration.permit_application
-
-    if !@user.discarded? && @user.submitter?
-      @user.skip_confirmation_notification!
-      @user.skip_invitation = true
-      @user.invite!(@permit_collaboration.collaborator.collaboratorable)
-      @user.invitation_sent_at = Time.now
-
-      @user.save!
-    end
-
-    send_mail(
-      email: @user.email,
-      template_key: :notify_new_or_unconfirmed_permit_collaboration
     )
   end
 

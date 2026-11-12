@@ -629,30 +629,6 @@ RSpec.describe "Api::PermitApplications", type: :request do
         permit_application.reload.acknowledged_customization_change_id
       ).to be_nil
     end
-
-    it "forbids a submission collaborator who is not the submitter" do
-      collaborator_user = create(:user, :submitter)
-      create(
-        :permit_collaboration,
-        permit_application: permit_application,
-        collaborator: create(:collaborator, user: collaborator_user),
-        collaboration_type: :submission,
-        collaborator_type: :delegatee
-      )
-      sign_in collaborator_user
-
-      post "/api/permit_applications/#{permit_application.id}/acknowledge_published_electives",
-           params: {
-             customization_change_id: SecureRandom.uuid
-           },
-           headers: headers,
-           as: :json
-
-      expect(response).to have_http_status(:forbidden)
-      expect(
-        permit_application.reload.acknowledged_customization_change_id
-      ).to be_nil
-    end
   end
 
   describe "PATCH /api/permit_applications/:id/revision_requests" do
@@ -1015,16 +991,25 @@ RSpec.describe "Api::PermitApplications", type: :request do
   end
 
   describe "POST /api/permit_applications/:id/permit_block_status" do
-    it "creates or updates permit block status" do
+    it "creates or updates permit block status for review staff" do
+      reviewer = create(:user, :reviewer, jurisdiction: jurisdiction)
+      submitted_application =
+        create(
+          :permit_application,
+          :newly_submitted,
+          submitter: submitter,
+          template_version: template_version,
+          jurisdiction: jurisdiction
+        )
+      sign_in reviewer
       allow(WebsocketBroadcaster).to receive(:push_update_to_relevant_users)
       allow(NotificationService).to receive(
         :publish_permit_block_status_ready_event
       )
 
-      post "/api/permit_applications/#{permit_application.id}/permit_block_status",
+      post "/api/permit_applications/#{submitted_application.id}/permit_block_status",
            params: {
              requirement_block_id: TestConstants::REQUIREMENT_BLOCK_IDS.first,
-             collaboration_type: "submission",
              status: "ready"
            },
            headers: headers,
@@ -1080,13 +1065,22 @@ RSpec.describe "Api::PermitApplications", type: :request do
     end
   end
 
-  describe "POST /api/permit_applications/:id/permit_collaborations/invite" do
-    it "invites a new collaborator" do
-      collaborator = create(:collaborator, collaboratorable: submitter)
+  describe "POST /api/permit_applications/:id/permit_collaborations" do
+    it "creates a permit collaboration via the service" do
+      reviewer = create(:user, :reviewer, jurisdiction: jurisdiction)
+      submitted_application =
+        create(
+          :permit_application,
+          :newly_submitted,
+          submitter: submitter,
+          template_version: template_version,
+          jurisdiction: jurisdiction
+        )
+      collaborator = jurisdiction.collaborators.find_by!(user: reviewer)
       permit_collaboration =
         create(
           :permit_collaboration,
-          permit_application: permit_application,
+          permit_application: submitted_application,
           collaborator: collaborator
         )
       service =
@@ -1095,22 +1089,17 @@ RSpec.describe "Api::PermitApplications", type: :request do
       allow(PermitCollaboration::CollaborationManagementService).to receive(
         :new
       ).and_return(service)
-      allow(service).to receive(
-        :invite_new_submission_collaborator!
-      ) do |**kwargs|
+      allow(service).to receive(:assign_collaborator!) do |**kwargs|
         kwargs[:authorize_collaboration]&.call(permit_collaboration)
         permit_collaboration
       end
+      sign_in reviewer
 
-      post "/api/permit_applications/#{permit_application.id}/permit_collaborations/invite",
+      post "/api/permit_applications/#{submitted_application.id}/permit_collaborations",
            params: {
-             collaborator_invite: {
-               collaborator_type: "delegatee",
-               user: {
-                 email: "invitee@example.com",
-                 first_name: "New",
-                 last_name: "User"
-               }
+             permit_collaboration: {
+               collaborator_id: collaborator.id,
+               collaborator_type: "delegatee"
              }
            },
            headers: headers,
@@ -1121,6 +1110,38 @@ RSpec.describe "Api::PermitApplications", type: :request do
     end
   end
 
+  describe "DELETE /api/permit_applications/:id/permit_collaborations/remove_collaborator_collaborations" do
+    it "removes collaborator collaborations" do
+      reviewer = create(:user, :reviewer, jurisdiction: jurisdiction)
+      submitted_application =
+        create(
+          :permit_application,
+          :newly_submitted,
+          submitter: submitter,
+          template_version: template_version,
+          jurisdiction: jurisdiction
+        )
+      collaborator = jurisdiction.collaborators.find_by!(user: reviewer)
+      permit_collaboration =
+        create(
+          :permit_collaboration,
+          permit_application: submitted_application,
+          collaborator: collaborator
+        )
+      sign_in reviewer
+
+      delete "/api/permit_applications/#{submitted_application.id}/permit_collaborations/remove_collaborator_collaborations",
+             params: {
+               collaborator_id: collaborator.id,
+               collaborator_type: permit_collaboration.collaborator_type
+             },
+             headers: headers,
+             as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(permit_collaboration.reload.discarded?).to be(true)
+    end
+  end
   describe "PATCH /api/permit_applications/:id/upload_supporting_document" do
     it "uploads supporting documents and enqueues promotion" do
       allow(PromoteJob).to receive(:perform_async)
@@ -1142,65 +1163,6 @@ RSpec.describe "Api::PermitApplications", type: :request do
       expect(response).to have_http_status(:ok)
       expect(json_response["data"]).to be_an(Array)
       expect(PromoteJob).to have_received(:perform_async)
-    end
-  end
-
-  describe "POST /api/permit_applications/:id/permit_collaborations" do
-    it "creates a permit collaboration via the service" do
-      collaborator = create(:collaborator, collaboratorable: submitter)
-      permit_collaboration =
-        create(
-          :permit_collaboration,
-          permit_application: permit_application,
-          collaborator: collaborator
-        )
-      service =
-        instance_double(PermitCollaboration::CollaborationManagementService)
-
-      allow(PermitCollaboration::CollaborationManagementService).to receive(
-        :new
-      ).and_return(service)
-      allow(service).to receive(:assign_collaborator!) do |**kwargs|
-        kwargs[:authorize_collaboration]&.call(permit_collaboration)
-        permit_collaboration
-      end
-
-      post "/api/permit_applications/#{permit_application.id}/permit_collaborations",
-           params: {
-             permit_collaboration: {
-               collaborator_id: collaborator.id,
-               collaborator_type: "delegatee"
-             }
-           },
-           headers: headers,
-           as: :json
-
-      expect(response).to have_http_status(:ok)
-      expect(json_response.dig("data", "id")).to eq(permit_collaboration.id)
-    end
-  end
-
-  describe "DELETE /api/permit_applications/:id/permit_collaborations/remove_collaborator_collaborations" do
-    it "removes collaborator collaborations" do
-      collaborator = create(:collaborator, collaboratorable: submitter)
-      permit_collaboration =
-        create(
-          :permit_collaboration,
-          permit_application: permit_application,
-          collaborator: collaborator
-        )
-
-      delete "/api/permit_applications/#{permit_application.id}/permit_collaborations/remove_collaborator_collaborations",
-             params: {
-               collaborator_id: collaborator.id,
-               collaborator_type: permit_collaboration.collaborator_type,
-               collaboration_type: permit_collaboration.collaboration_type
-             },
-             headers: headers,
-             as: :json
-
-      expect(response).to have_http_status(:ok)
-      expect(permit_collaboration.reload.discarded?).to be(true)
     end
   end
 

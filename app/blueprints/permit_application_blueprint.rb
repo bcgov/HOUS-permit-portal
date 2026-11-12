@@ -68,11 +68,10 @@ class PermitApplicationBlueprint < Blueprinter::Base
     association :permit_collaborations,
                 blueprint: PermitCollaborationBlueprint,
                 view: :base do |pa, options|
-      collabs = pa.permit_collaborations(options[:current_user])
       if options[:current_user]&.review_staff?
-        collabs
+        pa.permit_collaborations(options[:current_user])
       else
-        collabs.select(&:submission?)
+        []
       end
     end
   end
@@ -84,7 +83,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
     association :permit_collaborations,
                 blueprint: PermitCollaborationBlueprint,
                 view: :base do |pa, _options|
-      pa.permit_collaborations.where(collaboration_type: :review)
+      pa.permit_collaborations
     end
     association :submitter, blueprint: UserBlueprint, view: :minimal
   end
@@ -150,11 +149,10 @@ class PermitApplicationBlueprint < Blueprinter::Base
     association :permit_collaborations,
                 blueprint: PermitCollaborationBlueprint,
                 view: :base do |pa, options|
-      collabs = pa.permit_collaborations(options[:current_user])
       if options[:current_user]&.review_staff?
-        collabs
+        pa.permit_collaborations(options[:current_user])
       else
-        collabs.select(&:submission?)
+        []
       end
     end
     association :permit_block_statuses, blueprint: PermitBlockStatusBlueprint

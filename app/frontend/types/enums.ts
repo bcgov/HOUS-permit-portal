@@ -558,17 +558,8 @@ export enum ENotificationActionType {
   projectMeetingRescheduled = "project_meeting_rescheduled",
   projectReviewCollaborationAssignment = "project_review_collaboration_assignment",
   projectReviewCollaborationUnassignment = "project_review_collaboration_unassignment",
+  projectMembershipInvitation = "project_membership_invitation",
   releaseNotePublish = "release_note_publish",
-}
-
-export enum ECollaboratorableType {
-  Jurisdiction = "Jurisdiction",
-  User = "User",
-}
-
-export enum ECollaborationType {
-  submission = "submission",
-  review = "review",
 }
 
 export enum ECollaboratorType {
@@ -782,6 +773,24 @@ export enum EPermitProjectRollupStatus {
   approved = "approved",
   issued = "issued",
   withdrawn = "withdrawn",
+}
+
+export enum EProjectAccess {
+  standard = "standard",
+  expanded = "expanded",
+  full = "full",
+}
+
+export enum EProjectContactDesignation {
+  none = "none",
+  primary = "primary",
+  alternate = "alternate",
+}
+
+export enum EProjectMembershipStatus {
+  active = "active",
+  pending = "pending",
+  expired = "expired",
 }
 
 export enum EProjectState {
