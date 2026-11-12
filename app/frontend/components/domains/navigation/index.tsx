@@ -171,6 +171,9 @@ const NewJurisdictionScreen = lazy(() =>
 const PrivacyPolicyScreen = lazy(() =>
   import("../misc/privacy-policy-screen").then((module) => ({ default: module.PrivacyPolicyScreen }))
 )
+const CompareAccessLevelsScreen = lazy(() =>
+  import("../misc/compare-access-levels-screen").then((module) => ({ default: module.CompareAccessLevelsScreen }))
+)
 const ReviewerWorkspaceScreen = lazy(() =>
   import("../jurisdictions/submission-inbox/reviewer-workspace-screen").then((module) => ({
     default: module.ReviewerWorkspaceScreen,
@@ -993,6 +996,7 @@ const AppRoutes = observer(() => {
         <Route path="/template-versions/:templateVersionId/preview" element={<TemplateVersionPreviewScreen />} />
         <Route path="/project-readiness-tools" element={<ProjectReadinessToolsIndexScreen />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyScreen />} />
+        <Route path="/compare-access-levels" element={<CompareAccessLevelsScreen />} />
         <Route
           path="/project-readiness-tools/create-your-letters-of-assurance"
           element={<LettersOfAssuranceScreen />}

@@ -774,6 +774,18 @@ export enum EPermitProjectRollupStatus {
   withdrawn = "withdrawn",
 }
 
+export enum EProjectAccess {
+  standard = "standard",
+  expanded = "expanded",
+  full = "full",
+}
+
+export enum EProjectContactDesignation {
+  none = "none",
+  primary = "primary",
+  alternate = "alternate",
+}
+
 export enum EProjectState {
   draft = "draft",
   queued = "queued",

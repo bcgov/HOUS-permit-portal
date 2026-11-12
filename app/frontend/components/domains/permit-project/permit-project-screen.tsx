@@ -1,4 +1,4 @@
-import { Box, Container, Flex, IconButton, TabPanel, TabPanels, Tabs, Text } from "@chakra-ui/react"
+import { Container, Flex, IconButton, TabPanel, TabPanels, Tabs, Text } from "@chakra-ui/react"
 import {
   CalendarBlank,
   CaretLeft,
@@ -140,8 +140,8 @@ export const PermitProjectScreen = observer(() => {
   if (!currentPermitProject) return <Text>{t("permitProject.details.notFound")}</Text>
 
   return (
-    <Box>
-      <Flex justify="space-between" align="center" py={6} borderBottom="1px" borderColor="border.light">
+    <Flex direction="column" h="calc(100vh - var(--app-navbar-offset))" overflow="hidden">
+      <Flex flexShrink={0} justify="space-between" align="center" py={6} borderBottom="1px" borderColor="border.light">
         <Container maxW="container.lg">
           <Flex align="center" h={24}>
             <IconButton
@@ -180,34 +180,44 @@ export const PermitProjectScreen = observer(() => {
           </Flex>
         </Container>
       </Flex>
-      <Tabs w="full" flexGrow={1} index={tabIndex} onChange={handleTabChange} display="flex" isLazy variant="sidebar">
-        <ProjectSidebarTabList p={0} tabsData={TABS_DATA} />
-        <TabPanels>
-          <TabPanel>
+      <Tabs
+        w="full"
+        flex="1"
+        minH={0}
+        overflow="hidden"
+        index={tabIndex}
+        onChange={handleTabChange}
+        display="flex"
+        isLazy
+        variant="sidebar"
+      >
+        <ProjectSidebarTabList h="full" overflowY="auto" pb={0} p={0} tabsData={TABS_DATA} />
+        <TabPanels flex="1" minW={0} minH={0} h="full" overflow="hidden">
+          <TabPanel h="full" overflowY="auto">
             {isPending ? <LoadingScreen /> : <OverviewTabPanelContent permitProject={currentPermitProject} />}
           </TabPanel>
-          <TabPanel>
+          <TabPanel h="full" overflowY="auto">
             {isPending ? <LoadingScreen /> : <ActivityTabPanelContent permitProject={currentPermitProject} />}
           </TabPanel>
-          <TabPanel>
+          <TabPanel h="full" overflowY="auto">
             {isPending ? <LoadingScreen /> : <PermitsTabPanelContent permitProject={currentPermitProject} />}
           </TabPanel>
-          <TabPanel>
+          <TabPanel p={0} h="full" overflow="hidden">
             {isPending ? <LoadingScreen /> : <PeopleTabPanelContent permitProject={currentPermitProject} />}
           </TabPanel>
           {projectMeetingsEnabled && (
-            <TabPanel p={0}>
+            <TabPanel p={0} h="full" overflowY="auto">
               {isPending ? <LoadingScreen /> : <MeetingsTabPanelContent permitProject={currentPermitProject} />}
             </TabPanel>
           )}
-          <TabPanel p={0}>
+          <TabPanel p={0} h="full" overflowY="auto">
             {isPending ? <LoadingScreen /> : <ProjectNotesTabPanelContent permitProject={currentPermitProject} />}
           </TabPanel>
-          <TabPanel>
+          <TabPanel h="full" overflowY="auto">
             {isPending ? <LoadingScreen /> : <LocalResourcesTabPanelContent permitProject={currentPermitProject} />}
           </TabPanel>
         </TabPanels>
       </Tabs>
-    </Box>
+    </Flex>
   )
 })

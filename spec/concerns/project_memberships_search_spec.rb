@@ -64,6 +64,19 @@ RSpec.describe Api::Concerns::Search::ProjectMemberships, type: :controller do
     context "when the query is blank" do
       let(:search_params) { { query: "", page: 1, per_page: 10 } }
 
+      it "names the primary contact and every alternate" do
+        architect_membership.update!(contact_designation: :alternate)
+        builder_membership.update!(contact_designation: :alternate)
+        controller.perform_project_membership_search
+
+        meta = controller.project_people_meta
+        expect(meta[:primary_contact_name]).to eq("Olivia Owner")
+        expect(meta[:alternate_contact_names]).to contain_exactly(
+          "Mina Member",
+          "Bo Builder"
+        )
+      end
+
       it "returns this project's memberships, including the creator" do
         controller.perform_project_membership_search
 

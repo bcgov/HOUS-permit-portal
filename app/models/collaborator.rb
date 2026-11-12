@@ -12,10 +12,10 @@ class Collaborator < ApplicationRecord
 
   validate :validate_user, on: :create
 
-  # ponytail: collaboratorable stays NOT NULL until HUB-5772 drops it.
+  # ponytail: collaboratorable stays NOT NULL until HUB-5783 drops it.
   # New roster rows only know jurisdiction_id; mirror it so inserts succeed.
   # Remove this callback when those columns go.
-  before_validation :mirror_jurisdiction_collaboratorable, on: :create
+  before_create :mirror_jurisdiction_collaboratorable
 
   after_save :reindex_permit_applications
 

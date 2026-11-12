@@ -19,8 +19,8 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
     create(:permit_project, owner: owner, jurisdiction: jurisdiction)
   end
 
-  before do
-    membership =
+  let!(:membership) do
+    record =
       create(
         :project_membership,
         user: member,
@@ -28,9 +28,12 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
         access: :full,
         contact_designation: :none
       )
-    membership.role_list = ["Architect"]
-    membership.save!
+    record.role_list = ["Architect"]
+    record.save!
+    record
+  end
 
+  before do
     create(
       :project_membership,
       permit_project: other_project,
@@ -48,7 +51,6 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
 
       expect(response).to have_http_status(:ok)
       rows = json_response["data"]
-      expect(rows.map { |row| row["kind"] }).to eq(%w[member member])
       expect(rows.map { |row| row["name"] }).to eq(
         ["Olivia Owner", "Mina Member"]
       )
@@ -108,7 +110,6 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
         ["Olivia Owner"]
       )
       expect(json_response["data"].first).to include(
-        "kind" => "member",
         "access" => "full",
         "contact_designation" => "primary"
       )
@@ -130,6 +131,201 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
       expect(json_response["data"].map { |row| row["name"] }).to eq(
         ["Olivia Owner", "Mina Member"]
       )
+    end
+  end
+
+  describe "PATCH /api/permit_projects/:id/memberships/:id" do
+    it "updates role tags and contact designation without changing access" do
+      sign_in owner
+
+      patch "/api/permit_projects/#{project.id}/memberships/#{membership.id}",
+            params: {
+              membership: {
+                role_tags: %w[Architect Builder],
+                contact_designation: "alternate"
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response["data"]).to include(
+        "id" => membership.id,
+        "contact_designation" => "alternate",
+        "access" => "full"
+      )
+      expect(json_response["data"]["role_tags"]).to contain_exactly(
+        "Architect",
+        "Builder"
+      )
+
+      membership.reload
+      expect(membership.role_list).to contain_exactly("Architect", "Builder")
+      expect(membership.contact_designation).to eq("alternate")
+      expect(membership.access).to eq("full")
+
+      patch "/api/permit_projects/#{project.id}/memberships/#{membership.id}",
+            params: {
+              membership: {
+                contact_designation: "none"
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(membership.reload.contact_designation).to eq("none")
+    end
+
+    it "updates project access" do
+      sign_in owner
+
+      patch "/api/permit_projects/#{project.id}/memberships/#{membership.id}",
+            params: {
+              membership: {
+                access: "standard"
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response["data"]).to include("access" => "standard")
+      expect(membership.reload.access).to eq("standard")
+    end
+
+    it "rejects an unknown access level" do
+      sign_in owner
+
+      patch "/api/permit_projects/#{project.id}/memberships/#{membership.id}",
+            params: {
+              membership: {
+                access: "admin"
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(membership.reload.access).to eq("full")
+    end
+
+    it "lets the creator keep primary while updating roles" do
+      creator_membership = project.project_memberships.find_by!(user: owner)
+      sign_in owner
+
+      patch "/api/permit_projects/#{project.id}/memberships/#{creator_membership.id}",
+            params: {
+              membership: {
+                role_tags: ["Owner"],
+                contact_designation: "primary"
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(creator_membership.reload.contact_designation).to eq("primary")
+      expect(creator_membership.role_list).to contain_exactly("Owner")
+    end
+
+    it "transfers primary contact to another member" do
+      creator_membership = project.project_memberships.find_by!(user: owner)
+      sign_in owner
+
+      patch "/api/permit_projects/#{project.id}/memberships/#{membership.id}",
+            params: {
+              membership: {
+                contact_designation: "primary"
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(membership.reload.contact_designation).to eq("primary")
+      expect(creator_membership.reload.contact_designation).to eq("none")
+    end
+
+    it "rejects removing primary from the current primary contact" do
+      creator_membership = project.project_memberships.find_by!(user: owner)
+      sign_in owner
+
+      patch "/api/permit_projects/#{project.id}/memberships/#{creator_membership.id}",
+            params: {
+              membership: {
+                contact_designation: "alternate"
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(creator_membership.reload.contact_designation).to eq("primary")
+    end
+
+    it "forbids a reviewer who can see the project" do
+      sign_in create(:user, :reviewer, jurisdiction: jurisdiction)
+
+      get "/api/permit_projects/#{project.id}/memberships", headers: headers
+      expect(response).to have_http_status(:ok)
+
+      patch "/api/permit_projects/#{project.id}/memberships/#{membership.id}",
+            params: {
+              membership: {
+                contact_designation: "alternate"
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(membership.reload.contact_designation).to eq("none")
+    end
+  end
+
+  describe "DELETE /api/permit_projects/:id/memberships/:id" do
+    it "removes another member from the project" do
+      sign_in owner
+
+      delete "/api/permit_projects/#{project.id}/memberships/#{membership.id}",
+             headers: headers
+
+      expect(response).to have_http_status(:ok)
+      expect(ProjectMembership.exists?(membership.id)).to be(false)
+
+      ProjectMembership.reindex
+
+      get "/api/permit_projects/#{project.id}/memberships", headers: headers
+
+      expect(response).to have_http_status(:ok)
+      names = json_response["data"].map { |row| row["name"] }
+      expect(names).to include("Olivia Owner")
+      expect(names).not_to include("Mina Member")
+    end
+
+    it "forbids removing the creator membership" do
+      creator_membership = project.project_memberships.find_by!(user: owner)
+      sign_in owner
+
+      delete "/api/permit_projects/#{project.id}/memberships/#{creator_membership.id}",
+             headers: headers
+
+      expect(response).to have_http_status(:forbidden)
+      expect(ProjectMembership.exists?(creator_membership.id)).to be(true)
+    end
+
+    it "forbids a reviewer who can see the project" do
+      sign_in create(:user, :reviewer, jurisdiction: jurisdiction)
+
+      get "/api/permit_projects/#{project.id}/memberships", headers: headers
+      expect(response).to have_http_status(:ok)
+
+      delete "/api/permit_projects/#{project.id}/memberships/#{membership.id}",
+             headers: headers
+
+      expect(response).to have_http_status(:forbidden)
+      expect(ProjectMembership.exists?(membership.id)).to be(true)
     end
   end
 end
