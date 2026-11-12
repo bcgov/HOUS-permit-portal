@@ -16,6 +16,22 @@ RSpec.describe "Api::ProjectAudits (project activities)", type: :request do
 
   before { sign_in owner }
 
+  def full_member_of_another_project
+    outsider = create(:user, :submitter)
+    other_application =
+      create(
+        :permit_application,
+        submitter: outsider,
+        jurisdiction: jurisdiction
+      )
+    expect(
+      other_application.permit_project.project_memberships.find_by!(
+        user: outsider
+      )
+    ).to be_full
+    outsider
+  end
+
   def stub_project_meeting_notifications
     allow(NotificationService).to receive(
       :publish_project_meeting_submitted_event
@@ -32,6 +48,43 @@ RSpec.describe "Api::ProjectAudits (project activities)", type: :request do
   end
 
   describe "POST /api/permit_projects/:id/activities" do
+    it "returns activity to Expanded and hides it from Standard" do
+      expanded = create(:user, :submitter)
+      standard = create(:user, :submitter)
+      create(
+        :project_membership,
+        user: expanded,
+        permit_project: permit_project,
+        access: :expanded
+      )
+      create(
+        :project_membership,
+        user: standard,
+        permit_project: permit_project,
+        access: :standard
+      )
+
+      sign_in expanded
+      post "/api/permit_projects/#{permit_project.id}/activities",
+           params: {
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response["data"]).not_to be_empty
+
+      sign_in standard
+      post "/api/permit_projects/#{permit_project.id}/activities",
+           params: {
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response["data"]).to be_empty
+    end
+
     it "returns success for project owner" do
       post "/api/permit_projects/#{permit_project.id}/activities",
            params: {
@@ -79,6 +132,18 @@ RSpec.describe "Api::ProjectAudits (project activities)", type: :request do
 
     it "returns forbidden for user with no access to the project" do
       sign_in other_user
+
+      post "/api/permit_projects/#{permit_project.id}/activities",
+           params: {
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it "returns forbidden for a Full member of a different project" do
+      sign_in full_member_of_another_project
 
       post "/api/permit_projects/#{permit_project.id}/activities",
            params: {

@@ -22,7 +22,7 @@ class ProjectMembershipPolicy < ApplicationPolicy
     project_access.edit_role_tags?(record)
   end
 
-  # Canceling an invite matches invite. Removing someone else is standing.
+  # Canceling a pending or expired invite matches invite. Removing someone else is standing.
   # Leaving is removing your own active membership, at any access level.
   # ProjectMembership still refuses the last Full member and the primary.
   def destroy?

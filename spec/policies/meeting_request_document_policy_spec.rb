@@ -18,6 +18,26 @@ RSpec.describe MeetingRequestDocumentPolicy, type: :policy do
     policy_for(described_class, user:, record:, sandbox:)
   end
 
+  it "lets Expanded download a meeting document and denies Standard" do
+    expanded = create(:user, :submitter)
+    standard = create(:user, :submitter)
+    create(
+      :project_membership,
+      permit_project: permit_project,
+      user: expanded,
+      access: :expanded
+    )
+    create(
+      :project_membership,
+      permit_project: permit_project,
+      user: standard,
+      access: :standard
+    )
+
+    expect(policy(expanded).download?).to be true
+    expect(policy(standard).download?).to be false
+  end
+
   it "permits download for the project owner" do
     expect(policy(owner).download?).to be true
   end
@@ -50,5 +70,32 @@ RSpec.describe MeetingRequestDocumentPolicy, type: :policy do
     record = instance_double("MeetingRequestDocument", project_meeting: nil)
 
     expect(policy(owner, record).download?).to be false
+  end
+
+  it "download? denies a Full member of a different project" do
+    outsider = create(:user, :submitter)
+    other_application =
+      create(
+        :permit_application,
+        submitter: outsider,
+        jurisdiction: jurisdiction
+      )
+    expect(
+      other_application.permit_project.project_memberships.find_by!(
+        user: outsider
+      )
+    ).to be_full
+    theirs =
+      create(
+        :meeting_request_document,
+        project_meeting:
+          create(
+            :project_meeting,
+            permit_project: other_application.permit_project
+          )
+      )
+
+    expect(policy(outsider, theirs).download?).to be true
+    expect(policy(outsider).download?).to be false
   end
 end

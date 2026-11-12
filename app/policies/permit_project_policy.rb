@@ -35,7 +35,7 @@ class PermitProjectPolicy < ApplicationPolicy
 
   # Check if the user can index/list projects (relies on the Scope above for actual filtering)
   def index?
-    same_sandbox? && user_is_member_or_collaborator?
+    same_sandbox? && user_is_member?
   end
 
   def pinned?
@@ -44,11 +44,7 @@ class PermitProjectPolicy < ApplicationPolicy
 
   # This is for authorizing a specific project instance (e.g., in a show action).
   def show?
-    same_sandbox? &&
-      (
-        user_is_member_or_collaborator? ||
-          user_is_review_staff_for_jurisdiction?
-      )
+    same_sandbox? && (user_is_member? || user_is_review_staff_for_jurisdiction?)
   end
 
   def create?
@@ -66,14 +62,14 @@ class PermitProjectPolicy < ApplicationPolicy
 
   # Not in the public grid.
   def pin?
-    same_sandbox? && user_is_member_or_collaborator?
+    same_sandbox? && user_is_member?
   end
 
   def unpin?
     pin?
   end
 
-  # Every member, including Standard. The list is name and status; opening
+  # Every member, including Standard. The row is the summary view; opening
   # an application is PermitApplicationPolicy#show?.
   def search_permit_applications?
     show?
@@ -139,15 +135,12 @@ class PermitProjectPolicy < ApplicationPolicy
     @project_access ||= access.on(record)
   end
 
-  # pin_project? and view_project? are the same members. Legacy submission
-  # collaborators (HUB-5783) are not members and keep project visibility.
-  def user_is_member_or_collaborator?
+  # Review assignment is not membership. A review collaborator is review
+  # staff of this jurisdiction, so show? already allows them.
+  def user_is_member?
     return false unless user && record
-    return true if project_access.view_project?
 
-    record.permit_applications.any? do |app|
-      app.collaborators.any? { |collaborator| collaborator.user_id == user.id }
-    end
+    project_access.view_project?
   end
 
   def user_is_review_staff_for_jurisdiction?

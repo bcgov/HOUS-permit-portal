@@ -37,9 +37,11 @@ export const PermitApplicationGridRow = observer(
     // A Standard member sees the row (name and status) but cannot open it.
     const isViewRestricted =
       !fromInbox && permitProjectStore.currentPermitProject?.currentUserAccess?.viewApplication === false
-    const isDisabledRow = isSandboxMismatch || isLockedDraft || isViewRestricted
-    const shouldMarkRow = currentSandbox?.id !== permitApplication.sandbox?.id
     const { canArchiveDraft } = permitApplication
+    const isDisabledRow = isSandboxMismatch || isLockedDraft || isViewRestricted
+    // A Standard creator cannot open the row, and can still archive that draft.
+    const menuDisabled = isSandboxMismatch || isLockedDraft || (isViewRestricted && !canArchiveDraft)
+    const shouldMarkRow = currentSandbox?.id !== permitApplication.sandbox?.id
     const permitApplicationPath = fromInbox ? `/permit-applications/${id}` : `/permit-applications/${id}/edit`
 
     return (
@@ -110,7 +112,7 @@ export const PermitApplicationGridRow = observer(
                 as={IconButton}
                 icon={<Icon as={DotsThreeVertical} />}
                 variant="ghost"
-                isDisabled={isDisabledRow}
+                isDisabled={menuDisabled}
                 onClick={(e) => e.stopPropagation()}
                 aria-label={t("ui.options")}
               />

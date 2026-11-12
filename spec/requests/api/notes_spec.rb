@@ -16,6 +16,22 @@ RSpec.describe "Api::Notes", type: :request do
 
   before { SiteConfiguration.instance.update!(project_meetings_enabled: true) }
 
+  def full_member_of_another_project
+    outsider = create(:user, :submitter)
+    other_application =
+      create(
+        :permit_application,
+        submitter: outsider,
+        jurisdiction: jurisdiction
+      )
+    expect(
+      other_application.permit_project.project_memberships.find_by!(
+        user: outsider
+      )
+    ).to be_full
+    [outsider, other_application]
+  end
+
   describe "GET /api/project_meetings/:project_meeting_id/notes" do
     it "returns notes for a visible meeting" do
       note = create(:note, noteable: meeting, user: reviewer)
@@ -46,6 +62,16 @@ RSpec.describe "Api::Notes", type: :request do
       expect(response).to have_http_status(:ok)
       expect(json_response.dig("data", 0, "id")).to eq(note.id)
       expect(json_response.dig("data", 0, "author_name")).to eq(reviewer.name)
+    end
+
+    it "denies a Full member of a different project" do
+      create(:note, noteable: meeting, user: reviewer)
+      outsider, _other_application = full_member_of_another_project
+      sign_in outsider
+
+      get "/api/project_meetings/#{meeting.id}/notes", headers: headers
+
+      expect(response).to have_http_status(:forbidden)
     end
   end
 
@@ -189,6 +215,17 @@ RSpec.describe "Api::Notes", type: :request do
       expect(CSV.parse(response.body).last.length).to eq(7)
     end
 
+    it "denies a Full member of a different project" do
+      create(:note, noteable: meeting, user: reviewer, body: "<p>CSV body</p>")
+      outsider, _other_application = full_member_of_another_project
+      sign_in outsider
+
+      get "/api/project_meetings/#{meeting.id}/notes/download_csv",
+          headers: headers
+
+      expect(response).to have_http_status(:forbidden)
+    end
+
     it "lists attachment filenames in the CSV" do
       note = create(:note, noteable: meeting, user: reviewer)
       create(:note_attachment_document, note: note)
@@ -202,6 +239,16 @@ RSpec.describe "Api::Notes", type: :request do
   end
 
   describe "GET /api/permit_projects/:permit_project_id/notes" do
+    it "denies a Full member of a different project" do
+      create(:note, noteable: meeting, user: reviewer)
+      outsider, _other_application = full_member_of_another_project
+      sign_in outsider
+
+      get "/api/permit_projects/#{permit_project.id}/notes", headers: headers
+
+      expect(response).to have_http_status(:forbidden)
+    end
+
     it "returns project meeting notes for a project" do
       project_note = create(:note, noteable: meeting, user: reviewer)
       create(:note)
@@ -290,6 +337,71 @@ RSpec.describe "Api::Notes", type: :request do
   end
 
   describe "GET /api/permit_projects/:permit_project_id/notes/download_csv" do
+    it "returns notes and a CSV to Expanded and denies Standard" do
+      create(
+        :note,
+        noteable: meeting,
+        user: reviewer,
+        body: "<p>Shared note</p>"
+      )
+      expanded = create(:user, :submitter)
+      standard = create(:user, :submitter)
+      create(
+        :project_membership,
+        user: expanded,
+        permit_project: permit_project,
+        access: :expanded
+      )
+      create(
+        :project_membership,
+        user: standard,
+        permit_project: permit_project,
+        access: :standard
+      )
+
+      sign_in expanded
+      get "/api/permit_projects/#{permit_project.id}/notes", headers: headers
+
+      expect(response).to have_http_status(:ok)
+      expect(
+        json_response.fetch("data").map { |note| note.fetch("body") }
+      ).to include("<p>Shared note</p>")
+
+      get "/api/permit_projects/#{permit_project.id}/notes/download_csv",
+          headers: headers
+
+      expect(response).to have_http_status(:ok)
+      expect(response.media_type).to eq("text/csv")
+      expect(response.body).to include("Shared note")
+
+      sign_in standard
+      get "/api/permit_projects/#{permit_project.id}/notes", headers: headers
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.fetch("data")).to be_empty
+
+      get "/api/permit_projects/#{permit_project.id}/notes/download_csv",
+          headers: headers
+
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it "denies a Full member of a different project" do
+      create(
+        :note,
+        noteable: meeting,
+        user: reviewer,
+        body: "<p>Project CSV</p>"
+      )
+      outsider, _other_application = full_member_of_another_project
+      sign_in outsider
+
+      get "/api/permit_projects/#{permit_project.id}/notes/download_csv",
+          headers: headers
+
+      expect(response).to have_http_status(:forbidden)
+    end
+
     it "downloads all meeting notes for the project as CSV" do
       create(
         :note,

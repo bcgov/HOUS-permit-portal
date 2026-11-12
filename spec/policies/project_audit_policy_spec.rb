@@ -204,5 +204,53 @@ RSpec.describe ProjectAuditPolicy do
         end
       end
     end
+
+    it "includes activity for an Expanded member and excludes it for Standard" do
+      project_audit =
+        ApplicationAudit.find_by!(
+          auditable_type: "PermitProject",
+          auditable_id: project.id
+        )
+      expanded = create(:user, :submitter)
+      standard = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: project,
+        user: expanded,
+        access: :expanded
+      )
+      create(
+        :project_membership,
+        permit_project: project,
+        user: standard,
+        access: :standard
+      )
+
+      expect(resolved_scope_for(expanded)).to include(project_audit)
+      expect(resolved_scope_for(standard)).not_to include(project_audit)
+    end
+
+    it "excludes a Full member of a different project" do
+      outsider = create(:user, :submitter)
+      other_application =
+        create(
+          :permit_application,
+          submitter: outsider,
+          jurisdiction: jurisdiction
+        )
+      expect(
+        other_application.permit_project.project_memberships.find_by!(
+          user: outsider
+        )
+      ).to be_full
+      project_audit =
+        ApplicationAudit.find_by!(
+          auditable_type: "PermitProject",
+          auditable_id: project.id
+        )
+
+      expect(resolved_scope_for(outsider)).not_to include(project_audit)
+      expect(resolved_scope_for(owner)).to include(project_audit)
+    end
   end
 end

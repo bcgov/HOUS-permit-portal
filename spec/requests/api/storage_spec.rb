@@ -74,6 +74,150 @@ RSpec.describe "Api::Storage", type: :request do
       expect(response).to have_http_status(:forbidden)
     end
 
+    it "denies a Full member of a different project" do
+      project = permit_application.permit_project
+      outsider = create(:user, :submitter)
+      other_application =
+        create(
+          :permit_application,
+          submitter: outsider,
+          jurisdiction: project.jurisdiction,
+          sandbox: project.sandbox
+        )
+      expect(
+        other_application.permit_project.project_memberships.find_by!(
+          user: outsider
+        )
+      ).to be_full
+      own_document =
+        create(
+          :supporting_document,
+          permit_application: other_application,
+          data_key: "RB123|own_file"
+        )
+      sign_in outsider
+
+      get "/api/s3/params/download",
+          params: {
+            model: "SupportingDocument",
+            modelId: supporting_document.id
+          },
+          headers: headers,
+          as: :json
+
+      expect(response).to have_http_status(:forbidden)
+
+      get "/api/s3/params/download",
+          params: {
+            model: "SupportingDocument",
+            modelId: own_document.id
+          },
+          headers: headers,
+          as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response["url"]).to be_present
+    end
+
+    it "lets Expanded download a meeting document and denies Standard" do
+      project = create(:permit_project, owner: user)
+      document =
+        create(
+          :meeting_request_document,
+          project_meeting: create(:project_meeting, permit_project: project)
+        )
+      expanded = create(:user, :submitter)
+      standard = create(:user, :submitter)
+      create(
+        :project_membership,
+        user: expanded,
+        permit_project: project,
+        access: :expanded
+      )
+      create(
+        :project_membership,
+        user: standard,
+        permit_project: project,
+        access: :standard
+      )
+
+      sign_in expanded
+      get "/api/s3/params/download",
+          params: {
+            model: "MeetingRequestDocument",
+            modelId: document.id
+          },
+          headers: headers,
+          as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response["url"]).to be_present
+
+      sign_in standard
+      get "/api/s3/params/download",
+          params: {
+            model: "MeetingRequestDocument",
+            modelId: document.id
+          },
+          headers: headers,
+          as: :json
+
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it "denies a Full member of a different project from downloading a meeting document" do
+      project = permit_application.permit_project
+      outsider = create(:user, :submitter)
+      other_application =
+        create(
+          :permit_application,
+          submitter: outsider,
+          jurisdiction: project.jurisdiction,
+          sandbox: project.sandbox
+        )
+      expect(
+        other_application.permit_project.project_memberships.find_by!(
+          user: outsider
+        )
+      ).to be_full
+      document =
+        create(
+          :meeting_request_document,
+          project_meeting: create(:project_meeting, permit_project: project)
+        )
+      own_document =
+        create(
+          :meeting_request_document,
+          project_meeting:
+            create(
+              :project_meeting,
+              permit_project: other_application.permit_project
+            )
+        )
+      sign_in outsider
+
+      get "/api/s3/params/download",
+          params: {
+            model: "MeetingRequestDocument",
+            modelId: document.id
+          },
+          headers: headers,
+          as: :json
+
+      expect(response).to have_http_status(:forbidden)
+
+      get "/api/s3/params/download",
+          params: {
+            model: "MeetingRequestDocument",
+            modelId: own_document.id
+          },
+          headers: headers,
+          as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response["url"]).to be_present
+    end
+
     context "with a note attachment" do
       let(:note) do
         create(

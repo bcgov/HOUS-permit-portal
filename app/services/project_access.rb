@@ -66,8 +66,9 @@ class ProjectAccess
     full?
   end
 
-  # Invite, choose access, re-send, and cancel a pending invite.
+  # Invite, choose access, re-send, and cancel a pending or expired invite.
   # GRANTS TODO: Expanded with an invite grant. They must not offer Full.
+  # Standard stays denied. This is not a future grant.
   def invite_people?
     full?
   end
@@ -78,13 +79,13 @@ class ProjectAccess
     full?
   end
 
-  def edit_role_tags?(target)
-    return true if full?
-    return false unless expanded?
-
-    target.user_id == @user&.id || target.standard?
+  # Anyone on this project. Standard stays denied, including their own.
+  # This is not a future grant.
+  def edit_role_tags?(_target)
+    full_or_expanded?
   end
 
+  # Pending and expired invitations. Standard stays denied. This is not a future grant.
   def view_invitations?
     full_or_expanded?
   end
@@ -107,6 +108,8 @@ class ProjectAccess
     full_or_expanded?
   end
 
+  # Standard stays denied. This is not a future grant.
+  # Assigning submit to someone else is assign_submit?.
   def submit_application?
     full_or_expanded?
   end
@@ -121,29 +124,35 @@ class ProjectAccess
     false
   end
 
-  # Archive or restore a draft.
+  # Full archives any draft. Any member archives a draft they created.
   def archive_draft?(application)
     return true if full?
-    return false unless expanded? && @user
+    return false unless member? && @user
 
     application.created_by_type == "User" &&
       application.created_by_id == @user.id
   end
 
+  # Standard stays denied. This is not a future grant.
   def delete_step_code?
     full_or_expanded?
   end
 
   # List, detail, documents, request, edit, calendar, withdraw, and notes
   # from the local government.
+  # Standard stays denied. This is not a future grant.
   def manage_meetings?
     full_or_expanded?
   end
 
+  # The notes tab and the project notes CSV.
+  # Standard stays denied. This is not a future grant.
   def view_project_notes?
     full_or_expanded?
   end
 
+  # The activity tab.
+  # Standard stays denied. This is not a future grant.
   def view_activity?
     full_or_expanded?
   end

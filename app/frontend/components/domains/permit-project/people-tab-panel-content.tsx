@@ -19,7 +19,7 @@ import { DotsThreeVertical, Info, Plus, Users } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useMatch, useNavigate } from "react-router-dom"
+import { Navigate, useMatch, useNavigate } from "react-router-dom"
 import { useSearch } from "../../../hooks/use-search"
 import { IPermitProject } from "../../../models/permit-project"
 import { useMst } from "../../../setup/root"
@@ -47,6 +47,9 @@ interface IProps {
 
 export const PeopleTabPanelContent = observer(({ permitProject }: IProps) => {
   const isNew = Boolean(useMatch("/projects/:permitProjectId/people/new"))
+  if (isNew && !permitProject.currentUserAccess?.invitePeople) {
+    return <Navigate to={`/projects/${permitProject.id}/people`} replace />
+  }
   if (isNew) return <AddProjectPersonForm permitProject={permitProject} />
 
   return <PeopleList permitProject={permitProject} />

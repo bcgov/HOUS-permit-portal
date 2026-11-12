@@ -31,8 +31,25 @@ RSpec.describe RevisionReferenceDocumentPolicy, type: :policy do
     policy_for(described_class, user:, record:, sandbox:)
   end
 
-  it "hides reference files from the submitter until the package is sent" do
+  it "hides reference files from members until the package is sent" do
+    expanded = create(:user, :submitter)
+    standard = create(:user, :submitter)
+    create(
+      :project_membership,
+      permit_project: permit_project,
+      user: expanded,
+      access: :expanded
+    )
+    create(
+      :project_membership,
+      permit_project: permit_project,
+      user: standard,
+      access: :standard
+    )
+
     expect(policy(owner).download?).to be false
+    expect(policy(expanded).download?).to be false
+    expect(policy(standard).download?).to be false
     expect(policy(reviewer).download?).to be true
 
     allow(NotificationService).to receive(
@@ -41,5 +58,33 @@ RSpec.describe RevisionReferenceDocumentPolicy, type: :policy do
     application.finalize_revision_requests!
 
     expect(policy(owner).download?).to be true
+    expect(policy(expanded).download?).to be true
+    expect(policy(standard).download?).to be false
+    expect(policy(create(:user, :submitter)).download?).to be false
+  end
+
+  it "download? denies a Full member of a different project" do
+    outsider = create(:user, :submitter)
+    other_application =
+      create(
+        :permit_application,
+        submitter: outsider,
+        jurisdiction: jurisdiction,
+        sandbox: permit_project.sandbox
+      )
+    expect(
+      other_application.permit_project.project_memberships.find_by!(
+        user: outsider
+      )
+    ).to be_full
+
+    record
+    allow(NotificationService).to receive(
+      :publish_application_revisions_request_event
+    )
+    application.finalize_revision_requests!
+
+    expect(policy(owner).download?).to be true
+    expect(policy(outsider).download?).to be false
   end
 end

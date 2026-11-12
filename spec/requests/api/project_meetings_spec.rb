@@ -16,6 +16,22 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
     sign_in owner
   end
 
+  def full_member_of_another_project
+    outsider = create(:user, :submitter)
+    other_application =
+      create(
+        :permit_application,
+        submitter: outsider,
+        jurisdiction: jurisdiction
+      )
+    expect(
+      other_application.permit_project.project_memberships.find_by!(
+        user: outsider
+      )
+    ).to be_full
+    [outsider, other_application]
+  end
+
   describe "POST /api/permit_projects/:permit_project_id/meetings" do
     it "creates a draft meeting request with contact defaults" do
       post "/api/permit_projects/#{permit_project.id}/meetings",
@@ -28,6 +44,39 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
       expect(json_response.dig("data", "contact_phone_number")).to eq(
         owner.reload.phone_number
       )
+    end
+
+    it "lets Expanded request a meeting and denies Standard" do
+      expanded = create(:user, :submitter)
+      standard = create(:user, :submitter)
+      create(
+        :project_membership,
+        user: expanded,
+        permit_project: permit_project,
+        access: :expanded
+      )
+      create(
+        :project_membership,
+        user: standard,
+        permit_project: permit_project,
+        access: :standard
+      )
+
+      sign_in expanded
+      post "/api/permit_projects/#{permit_project.id}/meetings",
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:created)
+
+      sign_in standard
+      expect {
+        post "/api/permit_projects/#{permit_project.id}/meetings",
+             headers: headers,
+             as: :json
+      }.not_to change(ProjectMeeting, :count)
+
+      expect(response).to have_http_status(:forbidden)
     end
 
     it "blocks non-owners" do
@@ -58,6 +107,25 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
            as: :json
 
       expect(response).to have_http_status(:forbidden)
+    end
+
+    it "denies a Full member of a different project" do
+      outsider, other_application = full_member_of_another_project
+      sign_in outsider
+
+      expect {
+        post "/api/permit_projects/#{permit_project.id}/meetings",
+             headers: headers,
+             as: :json
+      }.not_to change(ProjectMeeting, :count)
+
+      expect(response).to have_http_status(:forbidden)
+
+      post "/api/permit_projects/#{other_application.permit_project.id}/meetings",
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:created)
     end
 
     it "allows creating a draft meeting request when an active request exists" do
@@ -97,6 +165,35 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
       )
     end
 
+    it "returns a meeting to Expanded and hides it from Standard" do
+      meeting = create(:project_meeting, permit_project: permit_project)
+      expanded = create(:user, :submitter)
+      standard = create(:user, :submitter)
+      create(
+        :project_membership,
+        user: expanded,
+        permit_project: permit_project,
+        access: :expanded
+      )
+      create(
+        :project_membership,
+        user: standard,
+        permit_project: permit_project,
+        access: :standard
+      )
+
+      sign_in expanded
+      get "/api/project_meetings/#{meeting.id}", headers: headers
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("data", "id")).to eq(meeting.id)
+
+      sign_in standard
+      get "/api/project_meetings/#{meeting.id}", headers: headers
+
+      expect(response).to have_http_status(:not_found)
+    end
+
     it "returns a submitted meeting request for jurisdiction review staff" do
       reviewer = create(:user, :reviewer, jurisdiction: jurisdiction)
       meeting = create(:project_meeting, :open, permit_project: permit_project)
@@ -118,9 +215,56 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
 
       expect(response).to have_http_status(:not_found)
     end
+
+    it "hides the meeting from a Full member of a different project" do
+      meeting = create(:project_meeting, permit_project: permit_project)
+      outsider, _other_application = full_member_of_another_project
+      sign_in outsider
+
+      get "/api/project_meetings/#{meeting.id}", headers: headers
+
+      expect(response).to have_http_status(:not_found)
+    end
   end
 
   describe "GET /api/project_meetings/:id/download_calendar" do
+    it "lets Expanded download a calendar invite and hides it from Standard" do
+      meeting =
+        create(
+          :project_meeting,
+          :scheduled,
+          permit_project: permit_project,
+          confirmed_date: Time.zone.parse("2026-01-20 09:30")
+        )
+      expanded = create(:user, :submitter)
+      standard = create(:user, :submitter)
+      create(
+        :project_membership,
+        user: expanded,
+        permit_project: permit_project,
+        access: :expanded
+      )
+      create(
+        :project_membership,
+        user: standard,
+        permit_project: permit_project,
+        access: :standard
+      )
+
+      sign_in expanded
+      get "/api/project_meetings/#{meeting.id}/download_calendar",
+          headers: headers
+
+      expect(response).to have_http_status(:ok)
+      expect(response.headers["Content-Type"]).to include("text/calendar")
+
+      sign_in standard
+      get "/api/project_meetings/#{meeting.id}/download_calendar",
+          headers: headers
+
+      expect(response).to have_http_status(:not_found)
+    end
+
     it "downloads an ICS invite for a scheduled meeting" do
       meeting =
         create(
@@ -168,6 +312,23 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
 
       expect(response).to have_http_status(:forbidden)
     end
+
+    it "hides the calendar from a Full member of a different project" do
+      meeting =
+        create(
+          :project_meeting,
+          :scheduled,
+          permit_project: permit_project,
+          confirmed_date: Time.zone.parse("2026-01-20 09:30")
+        )
+      outsider, _other_application = full_member_of_another_project
+      sign_in outsider
+
+      get "/api/project_meetings/#{meeting.id}/download_calendar",
+          headers: headers
+
+      expect(response).to have_http_status(:not_found)
+    end
   end
 
   describe "POST /api/permit_projects/:permit_project_id/meetings/search",
@@ -207,8 +368,71 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
       expect(json_response["data"].pluck("id")).not_to include(other_meeting.id)
     end
 
+    it "returns meetings to Expanded and hides them from Standard" do
+      expanded = create(:user, :submitter)
+      standard = create(:user, :submitter)
+      create(
+        :project_membership,
+        user: expanded,
+        permit_project: permit_project,
+        access: :expanded
+      )
+      create(
+        :project_membership,
+        user: standard,
+        permit_project: permit_project,
+        access: :standard
+      )
+
+      sign_in expanded
+      post "/api/permit_projects/#{permit_project.id}/meetings/search",
+           params: {
+             query: "*",
+             page: 1,
+             per_page: 10
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response["data"].pluck("id")).to include(
+        meeting.id,
+        draft_meeting.id
+      )
+
+      sign_in standard
+      post "/api/permit_projects/#{permit_project.id}/meetings/search",
+           params: {
+             query: "*",
+             page: 1,
+             per_page: 10
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response["data"]).to be_empty
+    end
+
     it "does not return meetings to unrelated users" do
       sign_in other_user
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/search",
+           params: {
+             query: "*",
+             page: 1,
+             per_page: 10
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response["data"]).to be_empty
+    end
+
+    it "does not return meetings to a Full member of a different project" do
+      outsider, _other_application = full_member_of_another_project
+      sign_in outsider
 
       post "/api/permit_projects/#{permit_project.id}/meetings/search",
            params: {
@@ -450,6 +674,63 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
   end
 
   describe "PATCH /api/permit_projects/:permit_project_id/meetings/:id" do
+    it "lets Expanded edit a draft and an active meeting and denies Standard" do
+      draft = create(:project_meeting, permit_project: permit_project)
+      active = create(:project_meeting, :open, permit_project: permit_project)
+      expanded = create(:user, :submitter)
+      standard = create(:user, :submitter)
+      create(
+        :project_membership,
+        user: expanded,
+        permit_project: permit_project,
+        access: :expanded
+      )
+      create(
+        :project_membership,
+        user: standard,
+        permit_project: permit_project,
+        access: :standard
+      )
+
+      sign_in expanded
+      patch "/api/permit_projects/#{permit_project.id}/meetings/#{draft.id}",
+            params: {
+              project_meeting: {
+                project_description: "Expanded draft edit"
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(draft.reload.project_description).to eq("Expanded draft edit")
+
+      patch "/api/permit_projects/#{permit_project.id}/meetings/#{active.id}",
+            params: {
+              project_meeting: {
+                project_description: "Expanded active edit"
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(active.reload.project_description).to eq("Expanded active edit")
+
+      sign_in standard
+      patch "/api/permit_projects/#{permit_project.id}/meetings/#{draft.id}",
+            params: {
+              project_meeting: {
+                project_description: "Standard edit"
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(draft.reload.project_description).to eq("Expanded draft edit")
+    end
+
     it "updates meeting request step data and documents" do
       meeting = create(:project_meeting, permit_project: permit_project)
 
@@ -546,6 +827,24 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
 
       expect(response).to have_http_status(:forbidden)
     end
+
+    it "denies a Full member of a different project" do
+      meeting = create(:project_meeting, permit_project: permit_project)
+      outsider, _other_application = full_member_of_another_project
+      sign_in outsider
+
+      patch "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}",
+            params: {
+              project_meeting: {
+                contact_name: "Nope"
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(meeting.reload.contact_name).not_to eq("Nope")
+    end
   end
 
   describe "POST /api/permit_projects/:permit_project_id/meetings/:id/submit" do
@@ -637,9 +936,56 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
       expect(response).to have_http_status(:ok)
       expect(json_response.dig("data", "status")).to eq("open")
     end
+
+    it "denies a Full member of a different project" do
+      meeting = create(:project_meeting, permit_project: permit_project)
+      outsider, _other_application = full_member_of_another_project
+      sign_in outsider
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/submit",
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(meeting.reload).to be_draft
+    end
   end
 
   describe "POST /api/permit_projects/:permit_project_id/meetings/:id/withdraw" do
+    it "lets Expanded withdraw a meeting request and denies Standard" do
+      meeting = create(:project_meeting, :open, permit_project: permit_project)
+      expanded = create(:user, :submitter)
+      standard = create(:user, :submitter)
+      create(
+        :project_membership,
+        user: expanded,
+        permit_project: permit_project,
+        access: :expanded
+      )
+      create(
+        :project_membership,
+        user: standard,
+        permit_project: permit_project,
+        access: :standard
+      )
+
+      sign_in standard
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/withdraw",
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(meeting.reload).to be_open
+
+      sign_in expanded
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/withdraw",
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(meeting.reload).to be_withdrawn
+    end
+
     it "allows the project owner to withdraw an open meeting request" do
       meeting = create(:project_meeting, :open, permit_project: permit_project)
 
@@ -685,6 +1031,19 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
 
       expect(response).to have_http_status(:unprocessable_content)
       expect(meeting.reload).to be_completed
+    end
+
+    it "denies a Full member of a different project" do
+      meeting = create(:project_meeting, :open, permit_project: permit_project)
+      outsider, _other_application = full_member_of_another_project
+      sign_in outsider
+
+      post "/api/permit_projects/#{permit_project.id}/meetings/#{meeting.id}/withdraw",
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(meeting.reload).to be_open
     end
   end
 

@@ -107,12 +107,8 @@ module Api::Concerns::Search::PermitProjects
 
     search_filters[:discarded] = show_archived
 
-    or_conditions = [
-      { collaborator_ids: current_user.id },
-      { member_ids: current_user.id }
-    ]
-
-    final_where = { _and: [{ _or: or_conditions }] }
+    # Review assignment is the inbox search. This list is membership.
+    final_where = { _and: [{ member_ids: current_user.id }] }
 
     search_filters.each { |key, value| final_where[:_and] << { key => value } }
     final_where[:_and] << active_meeting_condition if active_meeting_condition

@@ -40,6 +40,79 @@ RSpec.describe ProjectMeetingPolicy, type: :policy do
     expect(policy(owner, completed_meeting).submit?).to be false
   end
 
+  it "lets Expanded request, edit, withdraw, and download a calendar, and denies Standard" do
+    expanded = create(:user, :submitter)
+    standard = create(:user, :submitter)
+    create(
+      :project_membership,
+      permit_project: permit_project,
+      user: expanded,
+      access: :expanded
+    )
+    create(
+      :project_membership,
+      permit_project: permit_project,
+      user: standard,
+      access: :standard
+    )
+    open_meeting =
+      create(:project_meeting, :open, permit_project: permit_project)
+    calendar_project = create(:permit_project, jurisdiction: jurisdiction)
+    create(
+      :project_membership,
+      permit_project: calendar_project,
+      user: expanded,
+      access: :expanded
+    )
+    create(
+      :project_membership,
+      permit_project: calendar_project,
+      user: standard,
+      access: :standard
+    )
+    scheduled_meeting =
+      create(:project_meeting, :scheduled, permit_project: calendar_project)
+    completed_meeting =
+      create(:project_meeting, :completed, permit_project: permit_project)
+
+    expect(policy(expanded).create?).to be true
+    expect(policy(expanded).update?).to be true
+    expect(policy(expanded, open_meeting).update?).to be true
+    expect(policy(expanded, completed_meeting).update?).to be false
+    expect(policy(expanded, open_meeting).withdraw?).to be true
+    expect(policy(expanded, scheduled_meeting).download_calendar?).to be true
+
+    expect(policy(standard).create?).to be false
+    expect(policy(standard).update?).to be false
+    expect(policy(standard, open_meeting).update?).to be false
+    expect(policy(standard, open_meeting).withdraw?).to be false
+    expect(policy(standard, scheduled_meeting).download_calendar?).to be false
+  end
+
+  it "lets Expanded view a meeting and denies Standard" do
+    expanded = create(:user, :submitter)
+    standard = create(:user, :submitter)
+    create(
+      :project_membership,
+      permit_project: permit_project,
+      user: expanded,
+      access: :expanded
+    )
+    create(
+      :project_membership,
+      permit_project: permit_project,
+      user: standard,
+      access: :standard
+    )
+    open_meeting =
+      create(:project_meeting, :open, permit_project: permit_project)
+
+    expect(policy(expanded).show?).to be true
+    expect(policy(expanded, open_meeting).show?).to be true
+    expect(policy(standard).show?).to be false
+    expect(policy(standard, open_meeting).show?).to be false
+  end
+
   it "blocks unrelated submitters" do
     expect(policy(other_user).show?).to be false
     expect(policy(other_user).create?).to be false
@@ -220,12 +293,118 @@ RSpec.describe ProjectMeetingPolicy, type: :policy do
     expect(policy(owner).create?).to be false
   end
 
+  context "for a Full member of a different project" do
+    let(:outsider) { create(:user, :submitter) }
+    let(:other_application) do
+      create(
+        :permit_application,
+        submitter: outsider,
+        jurisdiction: jurisdiction
+      )
+    end
+    let(:other_project) { other_application.permit_project }
+
+    def expect_outsider_is_full
+      expect(
+        other_project.project_memberships.find_by!(user: outsider)
+      ).to be_full
+    end
+
+    it "show? denies a Full member of a different project" do
+      expect_outsider_is_full
+      theirs = create(:project_meeting, permit_project: other_project)
+
+      expect(policy(outsider, theirs).show?).to be true
+      expect(policy(outsider).show?).to be false
+    end
+
+    it "create? denies a Full member of a different project" do
+      expect_outsider_is_full
+      theirs = create(:project_meeting, permit_project: other_project)
+
+      expect(policy(outsider, theirs).create?).to be true
+      expect(policy(outsider).create?).to be false
+    end
+
+    it "update? denies a Full member of a different project" do
+      expect_outsider_is_full
+      theirs = create(:project_meeting, permit_project: other_project)
+
+      expect(policy(outsider, theirs).update?).to be true
+      expect(policy(outsider).update?).to be false
+    end
+
+    it "submit? denies a Full member of a different project" do
+      expect_outsider_is_full
+      theirs = create(:project_meeting, permit_project: other_project)
+
+      expect(policy(outsider, theirs).submit?).to be true
+      expect(policy(outsider).submit?).to be false
+    end
+
+    it "withdraw? denies a Full member of a different project" do
+      expect_outsider_is_full
+      theirs = create(:project_meeting, permit_project: other_project)
+
+      expect(policy(outsider, theirs).withdraw?).to be true
+      expect(policy(outsider).withdraw?).to be false
+    end
+
+    it "view_notes? denies a Full member of a different project" do
+      expect_outsider_is_full
+      theirs = create(:project_meeting, permit_project: other_project)
+
+      expect(policy(outsider, theirs).view_notes?).to be true
+      expect(policy(outsider).view_notes?).to be false
+    end
+
+    it "download_notes_csv? denies a Full member of a different project" do
+      expect_outsider_is_full
+      theirs = create(:project_meeting, permit_project: other_project)
+
+      expect(policy(outsider, theirs).download_notes_csv?).to be true
+      expect(policy(outsider).download_notes_csv?).to be false
+    end
+
+    it "download_calendar? denies a Full member of a different project" do
+      expect_outsider_is_full
+      theirs =
+        create(:project_meeting, :scheduled, permit_project: other_project)
+      scheduled =
+        create(:project_meeting, :scheduled, permit_project: permit_project)
+
+      expect(policy(outsider, theirs).download_calendar?).to be true
+      expect(policy(outsider, scheduled).download_calendar?).to be false
+    end
+  end
+
   describe "Scope" do
     def resolved_scope_for(user)
       described_class::Scope.new(
         UserContext.new(user, sandbox),
         ProjectMeeting.all
       ).resolve
+    end
+
+    it "includes meetings for an Expanded member and excludes them for Standard" do
+      meeting
+      expanded = create(:user, :submitter)
+      standard = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: permit_project,
+        user: expanded,
+        access: :expanded
+      )
+      create(
+        :project_membership,
+        permit_project: permit_project,
+        user: standard,
+        access: :standard
+      )
+
+      expect(resolved_scope_for(expanded)).to include(meeting)
+      expect(resolved_scope_for(standard)).to be_empty
     end
 
     it "includes project meetings for the project owner" do
