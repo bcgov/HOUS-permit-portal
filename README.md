@@ -186,12 +186,7 @@ bundle exec parallel_rspec -n 4 --serialize-stdout spec
 ```
 
 Four workers are the recommended balance of speed and resource use. Use `-n 2`
-for a lighter run. To prepare eight disposable test databases and run eight workers:
-
-```sh
-bundle exec rake "parallel:create[8]" "parallel:load_schema[8]"
-bundle exec parallel_rspec -n 8 --serialize-stdout spec
-```
+for a lighter run.
 
 The gem records file timings in `tmp/parallel_runtime_rspec.log` and uses them to
 balance subsequent runs. CI uses the same four-worker command and caches timings.
