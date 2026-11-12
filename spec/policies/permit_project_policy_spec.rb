@@ -264,7 +264,7 @@ RSpec.describe PermitProjectPolicy, type: :policy do
   end
 
   describe "Scope" do
-    it "builds a where/distinct query for a member or collaborator and applies sandbox" do
+    it "builds a where/distinct query for a member and applies sandbox" do
       relation = instance_double("ActiveRecord::Relation")
       where_rel = instance_double("ActiveRecord::Relation")
       distinct_rel = instance_double("ActiveRecord::Relation")
@@ -274,7 +274,7 @@ RSpec.describe PermitProjectPolicy, type: :policy do
         expect(sql).to include("project_memberships")
         expect(sql).to include("pm.user_id = :uid")
         expect(sql).not_to include("permit_projects.owner_id")
-        expect(sql).to include("permit_collaborations")
+        expect(sql).not_to include("permit_collaborations")
         expect(binds).to eq(uid: owner.id)
         where_rel
       end

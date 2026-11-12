@@ -1,23 +1,10 @@
 class PermitProjectPolicy < ApplicationPolicy
   class Scope < Scope
     def resolve
-      # TODO: HUB-5783 legacy submission collaborators still see the project.
-      collaborator_exists_sql = <<-SQL.squish
-        EXISTS (
-          SELECT 1 FROM collaborators c
-          JOIN permit_collaborations pc ON pc.collaborator_id = c.id
-          JOIN permit_applications pa ON pa.id = pc.permit_application_id
-          WHERE pa.permit_project_id = permit_projects.id
-            AND c.user_id = :uid
-        )
-      SQL
-
       # owner_id only identifies the project creator. The creator has a Full
-      # membership like any other member.
-      clauses = [
-        ProjectAccess.member_sql(:view_project?),
-        collaborator_exists_sql
-      ]
+      # membership like any other member. Review staff see a project through
+      # their jurisdiction, not through a collaborator row.
+      clauses = [ProjectAccess.member_sql(:view_project?)]
       values = { uid: user.id }
 
       if user.review_staff?

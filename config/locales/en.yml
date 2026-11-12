@@ -850,6 +850,9 @@ en:
       expired_error:
         title: Error
         message: "This invitation has expired"
+      already_member:
+        title: Error
+        message: "You are already a member of this project"
     qa_tools:
       full_permit_project_success:
         title: ""

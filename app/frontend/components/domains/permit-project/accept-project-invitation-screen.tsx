@@ -58,6 +58,7 @@ export const AcceptProjectInvitationScreen = observer(() => {
   if (!invitation) return null
 
   const isExpired = invitation.status === EProjectMembershipStatus.expired
+  const alreadyMember = !!invitation.alreadyMember
 
   const handleAccept = async () => {
     if (!invitationToken) return
@@ -121,6 +122,13 @@ export const AcceptProjectInvitationScreen = observer(() => {
           />
         )}
 
+        {alreadyMember && !isExpired && (
+          <CustomMessageBox
+            status={EFlashMessageStatus.info}
+            description={t("permitProject.people.invitationScreen.alreadyMember")}
+          />
+        )}
+
         <VStack align="stretch" spacing={3}>
           <Heading as="h2" size="md" mb={0}>
             {t("permitProject.people.invitationScreen.projectInformation")}
@@ -172,6 +180,15 @@ export const AcceptProjectInvitationScreen = observer(() => {
               {t("permitProject.people.invitationScreen.goToProjects")}
             </RouterLinkButton>
           </Box>
+        ) : alreadyMember ? (
+          <HStack spacing={4} pt={2}>
+            <RouterLinkButton to={`/projects/${invitation.projectId}/overview`} variant="primary">
+              {t("permitProject.people.invitationScreen.goToProject")}
+            </RouterLinkButton>
+            <Button variant="link" onClick={handleDecline} isDisabled={isSubmitting}>
+              {t("permitProject.people.invitationScreen.declineInvite")}
+            </Button>
+          </HStack>
         ) : (
           <HStack spacing={4} pt={2}>
             <Button variant="primary" onClick={handleAccept} isLoading={isSubmitting}>

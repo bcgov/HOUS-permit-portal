@@ -726,6 +726,7 @@ export interface IProjectInvitation {
   projectTitle: string
   invitedByName?: string | null
   status: EProjectMembershipStatus
+  alreadyMember?: boolean
 }
 
 export interface IPermitProjectSearchFilters {

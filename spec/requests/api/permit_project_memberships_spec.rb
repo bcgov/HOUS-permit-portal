@@ -729,6 +729,39 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
       expect(creator_membership.reload.contact_designation).to eq("none")
     end
 
+    it "rejects accepting an invitation when the person is already a member" do
+      raw = SecureRandom.urlsafe_base64(32)
+      invite =
+        create(
+          :project_membership,
+          :pending_invitation,
+          permit_project: project,
+          raw_invitation_token: raw
+        )
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: project,
+        user: member,
+        access: :standard
+      )
+      sign_in member
+
+      get "/api/project_invitations/#{raw}", headers: headers
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("data", "already_member")).to be true
+
+      expect {
+        post "/api/project_invitations/#{raw}/accept",
+             headers: headers,
+             as: :json
+      }.not_to change(ProjectMembership, :count)
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(invite.reload.user_id).to be_nil
+    end
+
     it "rejects accepting an expired invitation and destroys a declined invitation" do
       expired_raw = SecureRandom.urlsafe_base64(32)
       expired =

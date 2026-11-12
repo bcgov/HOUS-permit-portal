@@ -12,7 +12,8 @@ class Api::ProjectInvitationsController < Api::ApplicationController
         project_id: @membership.permit_project_id,
         project_title: @membership.permit_project.title,
         invited_by_name: @membership.invited_by&.name,
-        status: @membership.status
+        status: @membership.status,
+        already_member: already_a_member?
       }
     )
   end
@@ -29,34 +30,23 @@ class Api::ProjectInvitationsController < Api::ApplicationController
       )
     end
 
+    if already_a_member?
+      return(
+        render_error(
+          "project_invitation.already_member",
+          { status: :unprocessable_content }
+        )
+      )
+    end
+
     project_id = @membership.permit_project_id
     project_title = @membership.permit_project.title
 
-    ProjectMembership.transaction do
-      existing =
-        @membership.permit_project.project_memberships.find_by(
-          user_id: current_user.id
-        )
-
-      if existing
-        # A second invite never lowers access.
-        existing.access =
-          [existing.access, @membership.access].max_by do |level|
-            ProjectMembership.accesses[level]
-          end
-        existing.role_tags = (existing.role_list + @membership.role_list).uniq
-        if !existing.primary? && @membership.contact_designation != "none"
-          existing.contact_designation = @membership.contact_designation
-        end
-        @membership.destroy!
-        existing.save!
-      else
-        @membership.user = current_user
-        @membership.invitation_accepted_at = Time.current
-        @membership.invitation_token = nil
-        @membership.save!
-      end
-    end
+    @membership.update!(
+      user: current_user,
+      invitation_accepted_at: Time.current,
+      invitation_token: nil
+    )
 
     render_success(
       { permit_project_id: project_id, project_title: project_title }
@@ -82,6 +72,14 @@ class Api::ProjectInvitationsController < Api::ApplicationController
   end
 
   private
+
+  def already_a_member?
+    @membership
+      .permit_project
+      .project_memberships
+      .where.not(id: @membership.id)
+      .exists?(user_id: current_user.id)
+  end
 
   def set_membership
     digest =
