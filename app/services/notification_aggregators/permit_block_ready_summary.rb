@@ -1,11 +1,6 @@
 module NotificationAggregators
   class PermitBlockReadySummary
-    def self.call(
-      permit_application_id:,
-      collaboration_type:,
-      user_id:,
-      debounce_window_seconds:
-    )
+    def self.call(permit_application_id:, user_id:, debounce_window_seconds:)
       permit_application = PermitApplication.find_by(id: permit_application_id)
       user = User.find_by(id: user_id)
 
@@ -18,11 +13,7 @@ module NotificationAggregators
       window_start = Time.current - lookback_duration
       statuses =
         PermitBlockStatus
-          .where(
-            permit_application_id: permit_application_id,
-            collaboration_type: collaboration_type,
-            status: :ready
-          )
+          .where(permit_application_id: permit_application_id, status: :ready)
           .where("updated_at >= ?", window_start)
           .select(&:block_exists?)
 
@@ -37,7 +28,6 @@ module NotificationAggregators
       {
         permit_application: permit_application,
         user: user,
-        collaboration_type: collaboration_type,
         requirement_block_names: requirement_block_names
       }
     end

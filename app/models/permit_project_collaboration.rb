@@ -20,7 +20,7 @@ class PermitProjectCollaboration < ApplicationRecord
             }
 
   validate :validate_review_staff_for_jurisdiction
-  validate :validate_collaborator_is_review_type
+  validate :validate_collaborator_jurisdiction
   validate :validate_only_one_kept_per_project
 
   def collaboration_assignment_notification_data
@@ -73,12 +73,12 @@ class PermitProjectCollaboration < ApplicationRecord
     end
   end
 
-  def validate_collaborator_is_review_type
+  def validate_collaborator_jurisdiction
     return if collaborator.blank? || permit_project.blank?
 
     return if collaborator.jurisdiction_id == permit_project.jurisdiction_id
 
-    errors.add(:collaborator, :must_be_review_collaborator)
+    errors.add(:collaborator, :must_be_same_jurisdiction)
   end
 
   def validate_only_one_kept_per_project

@@ -120,11 +120,11 @@ RSpec.describe PermitApplicationPolicy do
       expect(policy.mark_as_viewed?).to be true
     end
 
-    it "show? permits submission collaborator" do
+    it "show? denies a user who is not the submitter or project owner" do
       record = draft_permit_application
-      allow(record).to receive(:collaborator?).and_return(true)
-      policy = described_class.new(UserContext.new(user, sandbox), record)
-      expect(policy.show?).to be true
+      stranger = create(:user, :submitter)
+      policy = described_class.new(UserContext.new(stranger, sandbox), record)
+      expect(policy.show?).to be false
     end
 
     it "show? permits review staff only for non-draft records in same sandbox" do
@@ -247,12 +247,8 @@ RSpec.describe PermitApplicationPolicy do
       expect(submitter_policy.download_application_json?).to be false
     end
 
-    it "update_version? permits draft submitter or designated submitter" do
-      designated = create(:user, :submitter)
+    it "update_version? permits the draft submitter" do
       record = double("PermitApplication", draft?: true, submitter: submitter)
-      allow(record).to receive(:users_by_collaboration_options).and_return(
-        [designated]
-      )
 
       expect(
         described_class.new(
@@ -262,13 +258,7 @@ RSpec.describe PermitApplicationPolicy do
       ).to be true
       expect(
         described_class.new(
-          UserContext.new(designated, sandbox),
-          record
-        ).update_version?
-      ).to be true
-      expect(
-        described_class.new(
-          UserContext.new(create(:user), sandbox),
+          UserContext.new(create(:user, :submitter), sandbox),
           record
         ).update_version?
       ).to be false
@@ -366,31 +356,31 @@ RSpec.describe PermitApplicationPolicy do
       expect(policy.upload_supporting_document?).to be false
     end
 
-    it "submit? requires :all for drafts" do
+    it "submit? permits only the draft submitter" do
       record = double("PermitApplication", draft?: true, submitter: submitter)
-      allow(record).to receive(
-        :submission_requirement_block_edit_permissions
-      ).with(user_id: submitter.id).and_return(:all)
-      policy = described_class.new(UserContext.new(submitter, sandbox), record)
-      expect(policy.submit?).to be true
+      expect(
+        described_class.new(UserContext.new(submitter, sandbox), record).submit?
+      ).to be true
+      expect(
+        described_class.new(
+          UserContext.new(create(:user, :submitter), sandbox),
+          record
+        ).submit?
+      ).to be false
 
-      allow(record).to receive(
-        :submission_requirement_block_edit_permissions
-      ).and_return([1])
-      expect(policy.submit?).to be false
-    end
-
-    it "submit? permits review staff for non-drafts when member of jurisdiction" do
       reviewer = create(:user, :review_manager, jurisdiction:)
-      record =
-        double(
-          "PermitApplication",
-          draft?: false,
-          jurisdiction_id: jurisdiction.id
-        )
       expect(
         described_class.new(UserContext.new(reviewer, sandbox), record).submit?
-      ).to be true
+      ).to be false
+
+      not_draft =
+        double("PermitApplication", draft?: false, submitter: submitter)
+      expect(
+        described_class.new(
+          UserContext.new(submitter, sandbox),
+          not_draft
+        ).submit?
+      ).to be false
     end
 
     it "generate_missing_pdfs? permits admin, submitter, or review staff member" do
@@ -451,14 +441,13 @@ RSpec.describe PermitApplicationPolicy do
     it "finalize_revision_requests? respects designated reviewer feature" do
       reviewer = create(:user, :review_manager, jurisdiction:)
       delegatee_rel = double("DelegateeRel", first: nil)
-      review_rel = double("ReviewRel", delegatee: delegatee_rel)
       record =
         double(
           "PermitApplication",
           submitted?: true,
           jurisdiction: double("Jurisdiction", allow_designated_reviewer: true),
           permit_collaborations:
-            double("PermitCollaborations", review: review_rel)
+            double("PermitCollaborations", delegatee: delegatee_rel)
         )
 
       allow(SiteConfiguration).to receive(
@@ -483,33 +472,15 @@ RSpec.describe PermitApplicationPolicy do
       ).to be false
     end
 
-    it "create_permit_collaboration? supports submission/review branches" do
-      submission_record =
-        double(
-          "PermitCollaboration",
-          submission?: true,
-          review?: false,
-          permit_application:
-            double("PermitApplication", submitter: submitter, draft?: true)
-        )
-      expect(
-        described_class.new(
-          UserContext.new(submitter, sandbox),
-          submission_record
-        ).create_permit_collaboration?
-      ).to be true
-
+    it "create_permit_collaboration? permits review staff on a submitted application" do
       reviewer = create(:user, :review_manager, jurisdiction:)
       review_record =
         double(
           "PermitCollaboration",
-          submission?: false,
-          review?: true,
           permit_application:
             double(
               "PermitApplication",
               jurisdiction_id: jurisdiction.id,
-              submitted?: true,
               submitted_at_least_once?: true
             )
         )
@@ -520,37 +491,37 @@ RSpec.describe PermitApplicationPolicy do
         ).create_permit_collaboration?
       ).to be true
 
-      other_record =
+      draft_record =
         double(
           "PermitCollaboration",
-          submission?: false,
-          review?: false,
-          permit_application: double("PermitApplication")
+          permit_application:
+            double(
+              "PermitApplication",
+              jurisdiction_id: jurisdiction.id,
+              submitted_at_least_once?: false
+            )
         )
       expect(
         described_class.new(
           UserContext.new(reviewer, sandbox),
-          other_record
+          draft_record
+        ).create_permit_collaboration?
+      ).to be false
+      expect(
+        described_class.new(
+          UserContext.new(submitter, sandbox),
+          review_record
         ).create_permit_collaboration?
       ).to be false
     end
 
-    it "remove_collaborator_collaborations? supports draft and non-draft branches" do
-      draft_record =
-        double("PermitApplication", draft?: true, submitter_id: submitter.id)
-      expect(
-        described_class.new(
-          UserContext.new(submitter, sandbox),
-          draft_record
-        ).remove_collaborator_collaborations?
-      ).to be true
-
+    it "remove_collaborator_collaborations? permits review staff on a submitted application" do
       reviewer = create(:user, :review_manager, jurisdiction:)
       submitted_record =
         double(
           "PermitApplication",
-          draft?: false,
-          jurisdiction_id: jurisdiction.id
+          jurisdiction_id: jurisdiction.id,
+          submitted_at_least_once?: true
         )
       expect(
         described_class.new(
@@ -558,126 +529,63 @@ RSpec.describe PermitApplicationPolicy do
           submitted_record
         ).remove_collaborator_collaborations?
       ).to be true
-    end
 
-    it "invite_new_collaborator? denies review collaborations and permits submitter on drafts" do
-      reviewer = create(:user, :review_manager, jurisdiction:)
-      review_collab =
+      draft_record =
         double(
-          "PermitCollaboration",
-          review?: true,
-          permit_application:
-            double("PermitApplication", submitter: submitter, draft?: true)
+          "PermitApplication",
+          jurisdiction_id: jurisdiction.id,
+          submitted_at_least_once?: false
         )
       expect(
         described_class.new(
           UserContext.new(reviewer, sandbox),
-          review_collab
-        ).invite_new_collaborator?
+          draft_record
+        ).remove_collaborator_collaborations?
       ).to be false
-
-      submission_collab =
-        double(
-          "PermitCollaboration",
-          review?: false,
-          permit_application:
-            double("PermitApplication", submitter: submitter, draft?: true)
-        )
       expect(
         described_class.new(
           UserContext.new(submitter, sandbox),
-          submission_collab
-        ).invite_new_collaborator?
-      ).to be true
-    end
-
-    it "create_or_update_permit_block_status? supports requirement_block_id allow-listing" do
-      reviewer = create(:user, :review_manager, jurisdiction:)
-      pa =
-        double(
-          "PermitApplication",
-          draft?: true,
-          submitted?: false,
-          jurisdiction_id: jurisdiction.id
-        )
-      allow(pa).to receive(
-        :submission_requirement_block_edit_permissions
-      ).and_return(["rb-1"])
-      pbs =
-        double(
-          "PermitBlockStatus",
-          submission?: true,
-          review?: false,
-          permit_application: pa,
-          requirement_block_id: "rb-1"
-        )
-      pbs2 =
-        double(
-          "PermitBlockStatus",
-          submission?: true,
-          review?: false,
-          permit_application: pa,
-          requirement_block_id: "rb-2"
-        )
-
-      expect(
-        described_class.new(
-          UserContext.new(reviewer, sandbox),
-          pbs
-        ).create_or_update_permit_block_status?
-      ).to be true
-      expect(
-        described_class.new(
-          UserContext.new(reviewer, sandbox),
-          pbs2
-        ).create_or_update_permit_block_status?
+          submitted_record
+        ).remove_collaborator_collaborations?
       ).to be false
     end
 
-    it "create_or_update_permit_block_status? supports submission and review branches" do
-      pa =
-        double(
-          "PermitApplication",
-          draft?: true,
-          submitted?: false,
-          jurisdiction_id: jurisdiction.id
-        )
-      allow(pa).to receive(
-        :submission_requirement_block_edit_permissions
-      ).and_return(:all)
-      pbs =
-        double(
-          "PermitBlockStatus",
-          submission?: true,
-          review?: false,
-          permit_application: pa,
-          requirement_block_id: "rb1"
-        )
-
+    it "create_or_update_permit_block_status? permits review staff on a submitted application" do
       reviewer = create(:user, :review_manager, jurisdiction:)
-      policy = described_class.new(UserContext.new(reviewer, sandbox), pbs)
-      expect(policy.create_or_update_permit_block_status?).to be true
-
-      pa2 =
+      submitted =
         double(
           "PermitApplication",
-          draft?: false,
           submitted?: true,
           jurisdiction_id: jurisdiction.id
         )
-      pbs2 =
+      draft =
         double(
-          "PermitBlockStatus",
-          submission?: false,
-          review?: true,
-          permit_application: pa2
+          "PermitApplication",
+          submitted?: false,
+          jurisdiction_id: jurisdiction.id
         )
+      submitted_status =
+        double("PermitBlockStatus", permit_application: submitted)
+      draft_status = double("PermitBlockStatus", permit_application: draft)
+
       expect(
         described_class.new(
           UserContext.new(reviewer, sandbox),
-          pbs2
+          submitted_status
         ).create_or_update_permit_block_status?
       ).to be true
+      expect(
+        described_class.new(
+          UserContext.new(reviewer, sandbox),
+          draft_status
+        ).create_or_update_permit_block_status?
+      ).to be false
+      expect(
+        described_class.new(
+          UserContext.new(submitter, sandbox),
+          submitted_status
+        ).create_or_update_permit_block_status?
+      ).to be false
     end
 
     it "download_application_metrics_csv? permits only super_admin" do

@@ -624,19 +624,31 @@ RSpec.describe NotificationService do
   end
 
   describe ".publish_applications_added_event" do
-    let(:owner_preference) do
+    let(:primary_preference) do
       instance_double(
         "Preference",
         enable_in_app_applications_added_notification: true,
         enable_email_applications_added_notification: true
       )
     end
-    let(:owner) do
-      instance_double("User", id: "owner-1", preference: owner_preference)
+    let(:alternate_preference) do
+      instance_double(
+        "Preference",
+        enable_in_app_applications_added_notification: true,
+        enable_email_applications_added_notification: true
+      )
     end
-    let(:permit_project) do
-      instance_double("PermitProject", id: "project-1", owner: owner)
+    let(:primary_user) do
+      instance_double("User", id: "primary-1", preference: primary_preference)
     end
+    let(:alternate_user) do
+      instance_double(
+        "User",
+        id: "alternate-1",
+        preference: alternate_preference
+      )
+    end
+    let(:permit_project) { instance_double("PermitProject", id: "project-1") }
 
     def added_application(id, created_by_type: "Jurisdiction")
       instance_double(
@@ -650,13 +662,27 @@ RSpec.describe NotificationService do
     end
 
     before do
+      contacts = [
+        instance_double("ProjectMembership", user: primary_user),
+        instance_double("ProjectMembership", user: alternate_user)
+      ]
+      memberships = double("memberships")
+      filtered = double("filtered memberships")
+      allow(permit_project).to receive(:project_memberships).and_return(
+        memberships
+      )
+      allow(memberships).to receive(:where).with(
+        contact_designation: %i[primary alternate]
+      ).and_return(filtered)
+      allow(filtered).to receive(:includes).with(:user).and_return(contacts)
+
       allow(NotificationPushJob).to receive(:perform_async)
       allow(PermitHubMailer).to receive(:notify_applications_added).and_return(
         instance_double("MailerMessage", deliver_later: true)
       )
     end
 
-    it "sends one in-app notification and one email for every application in the add" do
+    it "notifies the primary and alternate contacts for every application in the add" do
       applications = [added_application("a1"), added_application("a2")]
 
       described_class.publish_applications_added_event(
@@ -667,8 +693,8 @@ RSpec.describe NotificationService do
 
       expect(NotificationPushJob).to have_received(:perform_async).once
       expect(NotificationPushJob).to have_received(:perform_async) do |hash|
-        expect(hash.keys).to eq(["owner-1"])
-        payload = hash["owner-1"]
+        expect(hash.keys).to contain_exactly("primary-1", "alternate-1")
+        payload = hash["primary-1"]
         expect(payload["action_type"]).to eq("applications_added")
         expect(payload["action_text"]).to include(
           "North Vancouver",
@@ -683,13 +709,25 @@ RSpec.describe NotificationService do
           { "id" => "a2", "number" => "APP-a2", "nickname" => "Nick a2" }
         )
       end
-      expect(PermitHubMailer).to have_received(
-        :notify_applications_added
-      ).once.with(permit_project, applications, "<p>Please finish</p>", owner)
+      expect(PermitHubMailer).to have_received(:notify_applications_added).with(
+        permit_project,
+        applications,
+        "<p>Please finish</p>",
+        primary_user
+      )
+      expect(PermitHubMailer).to have_received(:notify_applications_added).with(
+        permit_project,
+        applications,
+        "<p>Please finish</p>",
+        alternate_user
+      )
     end
 
     it "does not email when that preference is off" do
-      allow(owner_preference).to receive(
+      allow(primary_preference).to receive(
+        :enable_email_applications_added_notification
+      ).and_return(false)
+      allow(alternate_preference).to receive(
         :enable_email_applications_added_notification
       ).and_return(false)
 
@@ -702,7 +740,8 @@ RSpec.describe NotificationService do
       expect(PermitHubMailer).not_to have_received(:notify_applications_added)
       expect(NotificationPushJob).to have_received(:perform_async).once
       expect(NotificationPushJob).to have_received(:perform_async) do |hash|
-        expect(hash["owner-1"]["object_data"]).not_to have_key("note")
+        expect(hash["primary-1"]["object_data"]).not_to have_key("note")
+        expect(hash["alternate-1"]["object_data"]).not_to have_key("note")
       end
     end
 

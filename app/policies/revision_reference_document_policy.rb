@@ -8,6 +8,8 @@ class RevisionReferenceDocumentPolicy < ApplicationPolicy
 
     return true if user.review_staff_of?(application.jurisdiction_id)
 
+    # MEMBERSHIP COMMENT: later, authorize from membership.
+    # owner_id only identifies the creator.
     submitter =
       application.submitter_id == user.id ||
         application.permit_project&.owner_id == user.id

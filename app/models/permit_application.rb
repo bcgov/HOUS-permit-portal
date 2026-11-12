@@ -49,11 +49,17 @@ class PermitApplication < ApplicationRecord
 
   has_many :submission_versions, dependent: :destroy
   has_many :notes, as: :noteable, dependent: :destroy
+  before_destroy :delete_legacy_submission_collaboration_rows
+  # TODO: HUB-5772 Submission rows (collaboration_type 0) stay in these tables
+  # until they are converted to project memberships. Ignore them here so they
+  # are not treated as review assignments.
   has_many :permit_collaborations,
-           -> { where(discarded_at: nil) },
+           -> { where(discarded_at: nil).where.not(collaboration_type: 0) },
            dependent: :destroy
   has_many :collaborators, through: :permit_collaborations
-  has_many :permit_block_statuses, dependent: :destroy
+  has_many :permit_block_statuses,
+           -> { where.not(collaboration_type: 0) },
+           dependent: :destroy
 
   # HUB-5145: Keep one StepCode per permit as the report family. Pre-Construction
   # and As-Built should become staged child checklists selected by the StepCode's
@@ -329,6 +335,9 @@ class PermitApplication < ApplicationRecord
     collaborators.any?
   end
 
+  # TODO: Revisit when working on permit application grants. This used to
+  # grant block-level edit access to submitter collaborators. Check git history
+  # before changing it.
   def submission_requirement_block_edit_permissions(user_id:)
     return :all if submitter_id == user_id
 
@@ -851,6 +860,19 @@ class PermitApplication < ApplicationRecord
   end
 
   private
+
+  # TODO: HUB-5772 The association scopes above ignore submission rows. Delete
+  # them with the application so the foreign keys still allow destroy.
+  def delete_legacy_submission_collaboration_rows
+    PermitCollaboration.where(
+      permit_application_id: id,
+      collaboration_type: 0
+    ).delete_all
+    PermitBlockStatus.where(
+      permit_application_id: id,
+      collaboration_type: 0
+    ).delete_all
+  end
 
   # ponytail: assign_creation_actors sets a jurisdiction when a reviewer creates
   # the draft. Anything else is created by the submitter.

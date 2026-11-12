@@ -15,6 +15,8 @@ class MeetingRequestDocumentPolicy < ApplicationPolicy
     record.project_meeting
   end
 
+  # MEMBERSHIP COMMENT: later, authorize from membership.
+  # owner_id only identifies the creator.
   def user_is_owner?
     permit_project.owner_id == user.id
   end
