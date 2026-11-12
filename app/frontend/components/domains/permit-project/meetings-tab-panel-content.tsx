@@ -75,7 +75,8 @@ const MeetingsListContent = observer(({ permitProject, projectMeetingsEnabled }:
     totalPages,
   } = projectMeetingStore
   const hasActiveProjectMeeting = !!permitProject.activeProjectMeeting
-  const canRequestProjectMeeting = permitProject.isOwner && projectMeetingsEnabled && !hasActiveProjectMeeting
+  const canRequestProjectMeeting =
+    !!permitProject.currentUserAccess?.manageMeetings && projectMeetingsEnabled && !hasActiveProjectMeeting
   const isEmpty = !isSearching && tableProjectMeetings.length === 0
 
   useSearch(projectMeetingStore, [permitProject.id])

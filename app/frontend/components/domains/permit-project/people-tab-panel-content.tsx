@@ -19,7 +19,7 @@ import { DotsThreeVertical, Info, Plus, Users } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useMatch } from "react-router-dom"
+import { Navigate, useMatch, useNavigate } from "react-router-dom"
 import { useSearch } from "../../../hooks/use-search"
 import { IPermitProject } from "../../../models/permit-project"
 import { useMst } from "../../../setup/root"
@@ -47,6 +47,9 @@ interface IProps {
 
 export const PeopleTabPanelContent = observer(({ permitProject }: IProps) => {
   const isNew = Boolean(useMatch("/projects/:permitProjectId/people/new"))
+  if (isNew && !permitProject.currentUserAccess?.invitePeople) {
+    return <Navigate to={`/projects/${permitProject.id}/people`} replace />
+  }
   if (isNew) return <AddProjectPersonForm permitProject={permitProject} />
 
   return <PeopleList permitProject={permitProject} />
@@ -54,7 +57,8 @@ export const PeopleTabPanelContent = observer(({ permitProject }: IProps) => {
 
 const PeopleList = observer(({ permitProject }: IProps) => {
   const { t } = useTranslation()
-  const { projectPeopleStore, userStore } = useMst()
+  const navigate = useNavigate()
+  const { projectPeopleStore, permitProjectStore, userStore } = useMst()
   const currentUser = userStore.currentUser
   const {
     tablePeople,
@@ -104,16 +108,20 @@ const PeopleList = observer(({ permitProject }: IProps) => {
     access?: EProjectAccess
   }) => {
     if (!selectedPerson) return
+    const changingOwnAccess = Boolean(changes.access && selectedPerson.userId === currentUser?.id)
     setIsSaving(true)
     const updated = await updateProjectPerson(selectedPerson.id, changes)
+    if (changingOwnAccess && updated) {
+      await permitProjectStore.fetchPermitProject(permitProject.id)
+    }
     setIsSaving(false)
     setSelectedPerson(updated)
   }
 
-  const handleReinvite = async (email?: string) => {
+  const handleReinvite = async () => {
     if (!selectedPerson) return false
     setIsSaving(true)
-    const updated = await reinviteProjectPerson(selectedPerson.id, email)
+    const updated = await reinviteProjectPerson(selectedPerson.id)
     setIsSaving(false)
     if (updated) {
       setSelectedPerson(updated)
@@ -124,11 +132,29 @@ const PeopleList = observer(({ permitProject }: IProps) => {
 
   const handleRemove = async () => {
     if (!selectedPerson) return
+    const leavingSelf =
+      selectedPerson.status === EProjectMembershipStatus.active && selectedPerson.userId === currentUser?.id
     setIsSaving(true)
     const removed = await destroyProjectPerson(selectedPerson.id)
     setIsSaving(false)
-    if (removed) setSelectedPerson(null)
+    if (!removed) return
+    if (leavingSelf) {
+      navigate("/projects")
+      return
+    }
+    setSelectedPerson(null)
   }
+
+  const projectAccess = permitProject.currentUserAccess
+  const selectedIsActive = selectedPerson?.status === EProjectMembershipStatus.active
+  const leavingSelf = selectedIsActive && Boolean(selectedPerson?.userId && selectedPerson.userId === currentUser?.id)
+  // The API also refuses the last Full member and the primary contact.
+  const canRemoveSelected =
+    leavingSelf ||
+    (selectedIsActive
+      ? !!projectAccess?.manageMemberStanding &&
+        selectedPerson?.contactDesignation !== EProjectContactDesignation.primary
+      : !!projectAccess?.invitePeople)
 
   const accessOptions = Object.values(EProjectAccess).map((access) => ({
     value: access,
@@ -147,13 +173,15 @@ const PeopleList = observer(({ permitProject }: IProps) => {
                 {t("permitProject.details.people")}
               </Heading>
             </Flex>
-            <RouterLinkButton
-              variant="primary"
-              leftIcon={<Icon as={Plus} />}
-              to={`/projects/${permitProject.id}/people/new`}
-            >
-              {t("permitProject.people.addPerson")}
-            </RouterLinkButton>
+            {projectAccess?.invitePeople && (
+              <RouterLinkButton
+                variant="primary"
+                leftIcon={<Icon as={Plus} />}
+                to={`/projects/${permitProject.id}/people/new`}
+              >
+                {t("permitProject.people.addPerson")}
+              </RouterLinkButton>
+            )}
           </Flex>
 
           <Flex direction="column" gap={4} w="full">
@@ -305,13 +333,13 @@ const PeopleList = observer(({ permitProject }: IProps) => {
         </VStack>
       </Flex>
       {selectedPerson && (
-        // MEMBERSHIP COMMENT: canEdit and canRemove currently depend on permitProject.isOwner;
-        // revisit when full-access members can manage project people.
         <PersonDetailsPanel
           person={selectedPerson}
           isSelf={Boolean(selectedPerson.userId && selectedPerson.userId === currentUser?.id)}
-          canEdit={permitProject.isOwner}
-          canRemove={permitProject.isOwner && selectedPerson.userId !== permitProject.ownerId}
+          canEditRoleTags={selectedPerson.canEditRoleTags}
+          canManageStanding={!!projectAccess?.manageMemberStanding}
+          canResend={!!projectAccess?.invitePeople}
+          canRemove={canRemoveSelected}
           primaryContactName={primaryContactName}
           alternateContactNames={alternateContactNames.slice()}
           isSaving={isSaving}

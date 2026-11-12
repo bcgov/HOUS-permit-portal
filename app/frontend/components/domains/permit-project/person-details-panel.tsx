@@ -1,17 +1,4 @@
-import {
-  Avatar,
-  Box,
-  Button,
-  Flex,
-  FormControl,
-  FormLabel,
-  IconButton,
-  Input,
-  Radio,
-  RadioGroup,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { Avatar, Box, Button, Flex, IconButton, Radio, RadioGroup, Text, VStack } from "@chakra-ui/react"
 import { CaretLeft, X } from "@phosphor-icons/react"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -31,7 +18,11 @@ import { ProjectRoleSelect } from "../../shared/select/selectors/project-role-se
 interface IPersonDetailsPanelProps {
   person: IProjectPerson
   isSelf?: boolean
-  canEdit: boolean
+  // Three levels: role tags (Expanded on self and Standard), access and
+  // contact designation (Full), and re-send (same as invite).
+  canEditRoleTags: boolean
+  canManageStanding: boolean
+  canResend: boolean
   canRemove: boolean
   primaryContactName?: string | null
   alternateContactNames?: string[]
@@ -42,7 +33,7 @@ interface IPersonDetailsPanelProps {
     contactDesignation?: EProjectContactDesignation
     access?: EProjectAccess
   }) => void
-  onReinvite?: (email?: string) => Promise<boolean>
+  onReinvite?: () => Promise<boolean>
   onRemove: () => void
 }
 
@@ -88,12 +79,19 @@ const EditorFooter = ({
   onCancel,
   onSave,
   isSaving,
+  confirm,
 }: {
   onCancel: () => void
   onSave: () => void
   isSaving: boolean
+  confirm?: { header: string; message: string }
 }) => {
   const { t } = useTranslation()
+  const saveButton = (onClick: () => void) => (
+    <Button variant="primary" onClick={onClick} isDisabled={isSaving}>
+      {t("ui.onlySave")}
+    </Button>
+  )
 
   return (
     <Flex
@@ -109,9 +107,17 @@ const EditorFooter = ({
       <Button variant="secondary" onClick={onCancel} isDisabled={isSaving}>
         {t("ui.cancel")}
       </Button>
-      <Button variant="primary" onClick={onSave} isDisabled={isSaving}>
-        {t("ui.onlySave")}
-      </Button>
+      {confirm ? (
+        <ConfirmationModal
+          promptHeader={confirm.header}
+          promptMessage={confirm.message}
+          confirmText={t("ui.onlySave")}
+          onConfirm={onSave}
+          renderTrigger={(onOpen) => saveButton(onOpen)}
+        />
+      ) : (
+        saveButton(onSave)
+      )}
     </Flex>
   )
 }
@@ -302,7 +308,9 @@ const AccessEditor = ({
 export const PersonDetailsPanel = ({
   person,
   isSelf = false,
-  canEdit,
+  canEditRoleTags,
+  canManageStanding,
+  canResend,
   canRemove,
   primaryContactName,
   alternateContactNames,
@@ -319,12 +327,11 @@ export const PersonDetailsPanel = ({
   const [draftRoles, setDraftRoles] = useState<string[]>([])
   const [draftContact, setDraftContact] = useState<EProjectContactDesignation>(person.contactDesignation)
   const [draftAccess, setDraftAccess] = useState<EProjectAccess | null>(person.access)
-  const [resendEmail, setResendEmail] = useState("")
-  const [resentToEmail, setResentToEmail] = useState<string | null>(null)
+  const [resent, setResent] = useState(false)
 
   useEffect(() => {
     setView("summary")
-    setResentToEmail(null)
+    setResent(false)
   }, [person.id])
 
   const contactLabel = (designation: EProjectContactDesignation) => {
@@ -340,18 +347,13 @@ export const PersonDetailsPanel = ({
     setView(next)
   }
 
-  const openResendView = () => {
-    setResendEmail("")
-    setView("resend")
-  }
+  const openResendView = () => setView("resend")
 
   const handleSendReinvite = async () => {
     if (!onReinvite) return
-    const trimmed = resendEmail.trim()
-    if (!trimmed) return
-    const ok = await onReinvite(trimmed)
+    const ok = await onReinvite()
     if (ok) {
-      setResentToEmail(trimmed)
+      setResent(true)
       setView("summary")
     }
   }
@@ -371,8 +373,10 @@ export const PersonDetailsPanel = ({
     setView("summary")
   }
 
-  const changeButton = (next: Exclude<TPanelView, "summary" | "resend">) =>
-    canEdit ? (
+  const changingOwnAccess = isSelf && view === "access" && !!draftAccess && draftAccess !== person.access
+
+  const changeButton = (next: Exclude<TPanelView, "summary" | "resend">, canChange: boolean) =>
+    canChange ? (
       <Button
         variant="link"
         size="sm"
@@ -423,11 +427,11 @@ export const PersonDetailsPanel = ({
       <Box flex={1} minH={0} overflowY="auto" px={6} py={6}>
         {view === "summary" && (
           <VStack align="stretch" spacing={6}>
-            {resentToEmail && (
+            {resent && (
               <CustomMessageBox
                 status={EFlashMessageStatus.success}
                 title={t("permitProject.people.inviteResentTitle")}
-                description={t("permitProject.people.inviteResentDescription", { email: resentToEmail })}
+                description={t("permitProject.people.inviteResentDescription", { name: person.name })}
               />
             )}
 
@@ -435,7 +439,7 @@ export const PersonDetailsPanel = ({
               <CustomMessageBox status={isExpired ? EFlashMessageStatus.error : EFlashMessageStatus.info}>
                 <Text as="div" fontSize="md">
                   {t(isExpired ? "permitProject.people.invitationExpired" : "permitProject.people.invitationSent")}{" "}
-                  {canEdit && onReinvite && (
+                  {canResend && onReinvite && (
                     <Button
                       variant="link"
                       size="sm"
@@ -463,7 +467,6 @@ export const PersonDetailsPanel = ({
                     {(
                       [
                         { label: t("permitProject.people.personalDetailsFields.name"), value: person.name },
-                        { label: t("permitProject.people.personalDetailsFields.phone"), value: person.phone },
                         {
                           label: t("permitProject.people.personalDetailsFields.organization"),
                           value: person.organization,
@@ -511,7 +514,7 @@ export const PersonDetailsPanel = ({
                       ? t("permitProject.people.statusExpired")
                       : t("permitProject.people.statusPending")}
                 </Text>
-                {!isActive && canEdit && onReinvite && (
+                {!isActive && canResend && onReinvite && (
                   <Button
                     variant="link"
                     size="sm"
@@ -536,7 +539,7 @@ export const PersonDetailsPanel = ({
               </Text>
               <VStack align="stretch" spacing={3}>
                 <Text fontSize="md">{person.roleTags.join(", ") || t("ui.notProvided")}</Text>
-                {changeButton("role")}
+                {changeButton("role", canEditRoleTags)}
               </VStack>
             </Box>
 
@@ -548,7 +551,7 @@ export const PersonDetailsPanel = ({
               </Text>
               <VStack align="stretch" spacing={3}>
                 <Text fontSize="md">{contactLabel(person.contactDesignation)}</Text>
-                {changeButton("contact")}
+                {changeButton("contact", canManageStanding)}
               </VStack>
             </Box>
 
@@ -568,7 +571,7 @@ export const PersonDetailsPanel = ({
                     {t("permitProject.people.compareAccessLevels")}
                   </RouterLink>
                 )}
-                {changeButton("access")}
+                {changeButton("access", canManageStanding)}
               </VStack>
             </Box>
 
@@ -586,14 +589,26 @@ export const PersonDetailsPanel = ({
                 <SectionDivider />
                 <Box>
                   <Text {...sectionTitleProps} mb={3}>
-                    {t("permitProject.people.removePerson")}
+                    {t(isSelf ? "permitProject.people.leaveProject" : "permitProject.people.removePerson")}
                   </Text>
                   <VStack align="stretch" spacing={3}>
-                    <Text fontSize="md">{t("permitProject.people.removePersonDescription")}</Text>
+                    <Text fontSize="md">
+                      {t(
+                        isSelf
+                          ? "permitProject.people.leaveProjectDescription"
+                          : "permitProject.people.removePersonDescription"
+                      )}
+                    </Text>
                     <ConfirmationModal
-                      promptHeader={t("permitProject.people.removeConfirmTitle")}
-                      promptMessage={t("permitProject.people.removeConfirmBody")}
-                      confirmText={t("permitProject.people.removeFromProject")}
+                      promptHeader={t(
+                        isSelf ? "permitProject.people.leaveConfirmTitle" : "permitProject.people.removeConfirmTitle"
+                      )}
+                      promptMessage={t(
+                        isSelf ? "permitProject.people.leaveConfirmBody" : "permitProject.people.removeConfirmBody"
+                      )}
+                      confirmText={t(
+                        isSelf ? "permitProject.people.leaveProject" : "permitProject.people.removeFromProject"
+                      )}
                       confirmButtonBg="semantic.error"
                       onConfirm={onRemove}
                       renderTrigger={(onOpen) => (
@@ -608,7 +623,7 @@ export const PersonDetailsPanel = ({
                           onClick={onOpen}
                           isDisabled={isSaving}
                         >
-                          {t("permitProject.people.removeFromProject")}
+                          {t(isSelf ? "permitProject.people.leaveProject" : "permitProject.people.removeFromProject")}
                         </Button>
                       )}
                     />
@@ -628,16 +643,6 @@ export const PersonDetailsPanel = ({
                 firstName: person.firstName || person.name,
               })}
             </Text>
-            <FormControl>
-              <FormLabel htmlFor="resend-invite-email">{t("permitProject.people.email")}</FormLabel>
-              <Input
-                id="resend-invite-email"
-                type="email"
-                value={resendEmail}
-                onChange={(event) => setResendEmail(event.target.value)}
-                isDisabled={isSaving}
-              />
-            </FormControl>
           </VStack>
         )}
 
@@ -685,13 +690,27 @@ export const PersonDetailsPanel = ({
           <Button variant="secondary" onClick={backToSummary} isDisabled={isSaving}>
             {t("ui.cancel")}
           </Button>
-          <Button variant="primary" onClick={handleSendReinvite} isLoading={isSaving} isDisabled={!resendEmail.trim()}>
+          <Button variant="primary" onClick={handleSendReinvite} isLoading={isSaving}>
             {t("permitProject.people.resendPanel.send")}
           </Button>
         </Flex>
       )}
 
-      {view !== "summary" && view !== "resend" && <EditorFooter onCancel={onClose} onSave={save} isSaving={isSaving} />}
+      {view !== "summary" && view !== "resend" && (
+        <EditorFooter
+          onCancel={backToSummary}
+          onSave={save}
+          isSaving={isSaving}
+          confirm={
+            changingOwnAccess
+              ? {
+                  header: t("permitProject.people.changeOwnAccessTitle"),
+                  message: t("permitProject.people.changeOwnAccessBody"),
+                }
+              : undefined
+          }
+        />
+      )}
     </Flex>
   )
 }

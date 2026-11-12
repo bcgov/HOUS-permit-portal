@@ -561,12 +561,16 @@ class Api::PermitApplicationsController < Api::ApplicationController
   end
 
   def set_permit_application
-    @permit_application =
+    relation =
       if current_user.super_admin?
-        PermitApplication.find(params[:id])
+        PermitApplication.all
       else
-        PermitApplication.for_sandbox(current_sandbox).find(params[:id])
+        PermitApplication.for_sandbox(current_sandbox)
       end
+    # Discard hides archived drafts from the default scope. Restore still
+    # needs to find the one the member just archived.
+    relation = relation.with_discarded if action_name == "restore"
+    @permit_application = relation.find(params[:id])
   end
 
   def permit_application_params # params for submitters

@@ -29,23 +29,30 @@ export const PermitApplicationGridRow = observer(
     const { t } = useTranslation()
     const navigate = useNavigate()
     const { id, updatedAt, usingCurrentTemplateVersion, createdBy, nickname, templateNickname } = permitApplication
-    const { sandboxStore, userStore } = useMst()
+    const { sandboxStore, userStore, permitProjectStore } = useMst()
     const { currentSandbox } = sandboxStore
     const { currentUser } = userStore
     const isSandboxMismatch = currentSandbox?.id !== permitApplication.sandbox?.id && !currentUser?.isSuperAdmin
     const isLockedDraft = permitApplication.isLockedForReviewStaff
-    const isDisabledRow = isSandboxMismatch || isLockedDraft
+    // A Standard member sees the row (name and status) but cannot open it.
+    const isViewRestricted =
+      !fromInbox && permitProjectStore.currentPermitProject?.currentUserAccess?.viewApplication === false
+    const { canArchiveDraft } = permitApplication
+    const isDisabledRow = isSandboxMismatch || isLockedDraft || isViewRestricted
+    // A Standard creator cannot open the row, and can still archive that draft.
+    const menuDisabled = isSandboxMismatch || isLockedDraft || (isViewRestricted && !canArchiveDraft)
     const shouldMarkRow = currentSandbox?.id !== permitApplication.sandbox?.id
-    const isSubmitter = currentUser?.id === permitApplication.submitter?.id
     const permitApplicationPath = fromInbox ? `/permit-applications/${id}` : `/permit-applications/${id}/edit`
 
     return (
       <Tooltip
         isDisabled={!isDisabledRow}
         label={
-          isLockedDraft
-            ? t("permitProject.activity.unsubmittedPermitApplication")
-            : t("sandbox.disabledRow", "Disabled due to sandbox mismatch")
+          isViewRestricted
+            ? t("permitProject.applicationViewRestricted")
+            : isLockedDraft
+              ? t("permitProject.activity.unsubmittedPermitApplication")
+              : t("sandbox.disabledRow", "Disabled due to sandbox mismatch")
         }
         hasArrow
         placement="top"
@@ -105,7 +112,7 @@ export const PermitApplicationGridRow = observer(
                 as={IconButton}
                 icon={<Icon as={DotsThreeVertical} />}
                 variant="ghost"
-                isDisabled={isDisabledRow}
+                isDisabled={menuDisabled}
                 onClick={(e) => e.stopPropagation()}
                 aria-label={t("ui.options")}
               />
@@ -120,7 +127,7 @@ export const PermitApplicationGridRow = observer(
                 >
                   {t("ui.view")}
                 </MenuItem>
-                {!permitApplication.isDiscarded && permitApplication.isDraft && isSubmitter && (
+                {!permitApplication.isDiscarded && permitApplication.isDraft && canArchiveDraft && (
                   <ConfirmationModal
                     title={t("ui.confirmArchive")}
                     body={t("ui.archiveRetentionNotice" as any)}
@@ -149,7 +156,7 @@ export const PermitApplicationGridRow = observer(
                     )}
                   />
                 )}
-                {permitApplication.isDiscarded && isSubmitter && (
+                {permitApplication.isDiscarded && canArchiveDraft && (
                   <ConfirmationModal
                     title={t("ui.confirmRestore")}
                     onConfirm={async (closeModal) => {

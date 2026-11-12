@@ -40,9 +40,10 @@ RSpec.describe PrintReports::StoredFile do
     context "#{kind} validation" do
       let(:bytes) do
         if kind == "pdf"
-          File.binread(
-            Rails.root.join("spec/support/Test Document Seal - unsigned.pdf")
-          )
+          # The support PDF is a Git LFS pointer in this checkout. Any valid PDF exercises the check.
+          io = StringIO.new
+          HexaPDF::Document.new.tap { |document| document.pages.add }.write(io)
+          io.string
         else
           Zip::OutputStream
             .write_buffer do |zip|

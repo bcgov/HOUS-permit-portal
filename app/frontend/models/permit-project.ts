@@ -5,7 +5,7 @@ import { datefnsTableDateFormat } from "../constants"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { EInboxDisplayMode, EPermitProjectRollupStatus, EProjectState } from "../types/enums"
-import { IParcelGeometry, IProjectAuditSummary, IProjectDocument } from "../types/types"
+import { IParcelGeometry, IProjectAccess, IProjectAuditSummary, IProjectDocument } from "../types/types"
 import { startBlobDownload } from "../utils/utility-functions"
 import { CollaboratorModel } from "./collaborator"
 import { JurisdictionModel } from "./jurisdiction"
@@ -71,6 +71,7 @@ const PermitProjectCoreModel = types.model("PermitProjectCore", {
   permitProjectCollaborations: types.optional(types.array(PermitProjectCollaborationModel), []),
   activeProjectMeeting: types.maybeNull(types.frozen<IProjectMeeting>()),
   displayMode: types.optional(types.enumeration(Object.values(EInboxDisplayMode)), EInboxDisplayMode.list),
+  currentUserAccess: types.maybeNull(types.frozen<IProjectAccess>()),
 })
 
 export const PermitProjectModel = types
@@ -114,8 +115,12 @@ export const PermitProjectModel = types
         total,
       })
     },
+    // The project creator, for display. Not a permission; use currentUserAccess.
     get isOwner() {
       return self.ownerId === self.rootStore.userStore.currentUser?.id
+    },
+    get isMember() {
+      return !!self.currentUserAccess?.level
     },
     get jurisdictionDifferentFromSandbox() {
       if (!self.rootStore.sandboxStore.currentSandbox) return false

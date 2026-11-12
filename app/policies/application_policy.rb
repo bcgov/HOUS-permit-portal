@@ -38,6 +38,13 @@ class ApplicationPolicy
     false
   end
 
+  # Staff policies still read user.review_staff? and user.member_of?
+  # directly. New checks should use access.account and
+  # access.in(record.jurisdiction). Project membership is access.on(project).
+  def access
+    user_context.access
+  end
+
   class Scope
     attr_accessor :user, :sandbox, :scope
 

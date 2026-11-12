@@ -272,7 +272,8 @@ class PermitProject < ApplicationRecord
   end
 
   def project_documents(user = nil)
-    # Limit project documents to owner for now
+    # Project documents are disabled. The creator check is a closed door;
+    # if the feature returns, use project access.
     base = association(:project_documents).reader
     return ProjectDocument.none if user.nil?
 
@@ -347,13 +348,24 @@ class PermitProject < ApplicationRecord
   end
 
   # owner_id is the user who created the project. The column name stays so
-  # other branches keep reading owner_id.
+  # other branches keep reading owner_id. It is metadata; authorization is
+  # ProjectAccess.
   def creator
     owner
   end
 
   def creator_id
     owner_id
+  end
+
+  # Accepted members whose access passes a ProjectAccess check.
+  def members_who(check)
+    User.joins(:project_memberships).where(
+      project_memberships: {
+        permit_project_id: id,
+        access: ProjectAccess.levels(check)
+      }
+    )
   end
 
   def ensure_creator_membership!

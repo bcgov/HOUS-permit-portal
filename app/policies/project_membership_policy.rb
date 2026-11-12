@@ -1,24 +1,35 @@
 # frozen_string_literal: true
 
 class ProjectMembershipPolicy < ApplicationPolicy
-  # MEMBERSHIP COMMENT - currently depends on owner
+  # Invite and choose access.
   def create?
-    owner_of_project?
+    project_access.invite_people?
   end
 
-  # MEMBERSHIP COMMENT - currently depends on owner
+  # Re-send keeps invited_email. MembershipsController#reinvite refuses an
+  # active member.
   def reinvite?
-    owner_of_project?
+    project_access.invite_people?
   end
 
-  # MEMBERSHIP COMMENT - currently depends on owner
-  def update?
-    owner_of_project?
+  # Access and contact designation. Hard Full block, not a grant.
+  # The last Full member and the primary contact are model validations.
+  def update_standing?
+    project_access.manage_member_standing?
   end
 
-  # MEMBERSHIP COMMENT - currently depends on owner
+  def update_role_tags?
+    project_access.edit_role_tags?(record)
+  end
+
+  # Canceling a pending or expired invite matches invite. Removing someone else is standing.
+  # Leaving is removing your own active membership, at any access level.
+  # ProjectMembership still refuses the last Full member and the primary.
   def destroy?
-    owner_of_project?
+    return project_access.invite_people? unless record.active?
+    return true if own_membership?
+
+    project_access.manage_member_standing?
   end
 
   # MEMBERSHIP COMMENT - submitters only. If reviewers can accept later:
@@ -42,12 +53,12 @@ class ProjectMembershipPolicy < ApplicationPolicy
 
   private
 
-  # MEMBERSHIP COMMENT - currently depends on owner (PermitProjectPolicy#update?);
-  # later, full-access members should also be able to manage people.
-  def owner_of_project?
-    project = record.permit_project
-    return false unless user && project
+  def project_access
+    @project_access ||= access.on(record.permit_project)
+  end
 
-    PermitProjectPolicy.new(user_context, project).update?
+  def own_membership?
+    record.user_id.present? && record.user_id == user&.id &&
+      project_access.view_project?
   end
 end

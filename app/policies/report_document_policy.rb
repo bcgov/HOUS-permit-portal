@@ -1,14 +1,19 @@
 class ReportDocumentPolicy < ApplicationPolicy
+  # Opening the Step Code. A standalone code is its creator. An attached
+  # code follows the application's view check, including review staff.
   def download?
-    return false unless user
-
-    record.step_code.creator == user
+    step_code_policy.show?
   end
 
+  # Editing the Step Code. Review staff can open an attached code and
+  # cannot share it.
   def share?
-    # Only the creator of the Step Code can share the report
-    return false unless user
+    step_code_policy.update?
+  end
 
-    record.step_code.creator == user
+  private
+
+  def step_code_policy
+    StepCodePolicy.new(user_context, record.step_code)
   end
 end

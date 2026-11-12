@@ -504,12 +504,15 @@ class NotificationService
     step_code = report_document.step_code
     return if step_code.blank?
 
-    # Determine recipient users:
-    # If the Step Code belongs to a permit application, notify the submitter; otherwise notify the creator
+    # Members who can open the application, plus the Step Code creator.
     user_ids = []
     if step_code.permit_application.present?
-      submitter_id = step_code.permit_application.submitter_id
-      user_ids << submitter_id if submitter_id.present?
+      user_ids.concat(
+        application_recipients(
+          step_code.permit_application,
+          :view_application?
+        ).map(&:id)
+      )
     end
 
     creator_id = step_code.creator_id
@@ -576,19 +579,23 @@ class NotificationService
 
   def self.publish_application_submission_event(permit_application)
     notification_user_hash = {}
-    user = permit_application.submitter
 
-    if user.preference&.enable_in_app_application_submission_notification
-      notification_user_hash[
-        user.id
-      ] = permit_application.submit_event_notification_data
-    end
+    application_recipients(
+      permit_application,
+      :submit_application?
+    ).each do |user|
+      if user.preference&.enable_in_app_application_submission_notification
+        notification_user_hash[
+          user.id
+        ] = permit_application.submit_event_notification_data
+      end
 
-    if user.preference&.enable_email_application_submission_notification
-      PermitHubMailer.notify_submitter_application_submitted(
-        permit_application,
-        user
-      )&.deliver_later
+      if user.preference&.enable_email_application_submission_notification
+        PermitHubMailer.notify_submitter_application_submitted(
+          permit_application,
+          user
+        )&.deliver_later
+      end
     end
 
     permit_application
@@ -607,24 +614,36 @@ class NotificationService
 
   def self.publish_application_revisions_request_event(permit_application)
     notification_user_hash = {}
-    user = permit_application.submitter
 
-    if user.preference&.enable_in_app_application_revisions_request_notification
-      notification_user_hash[
-        user.id
-      ] = permit_application.revisions_request_event_notification_data
-    end
+    application_recipients(
+      permit_application,
+      :edit_application?
+    ).each do |user|
+      if user.preference&.enable_in_app_application_revisions_request_notification
+        notification_user_hash[
+          user.id
+        ] = permit_application.revisions_request_event_notification_data
+      end
 
-    if user.preference&.enable_email_application_revisions_request_notification
-      PermitHubMailer.notify_application_revisions_requested(
-        permit_application,
-        user
-      )&.deliver_later
+      if user.preference&.enable_email_application_revisions_request_notification
+        PermitHubMailer.notify_application_revisions_requested(
+          permit_application,
+          user
+        )&.deliver_later
+      end
     end
 
     unless notification_user_hash.empty?
       NotificationPushJob.perform_async(notification_user_hash)
     end
+  end
+
+  # Project members who pass the check. Without a project, the submitter.
+  def self.application_recipients(permit_application, check)
+    project = permit_application.permit_project
+    return [permit_application.submitter].compact unless project
+
+    project.members_who(check).includes(:preference).to_a
   end
 
   def self.publish_applications_added_event(
@@ -777,7 +796,7 @@ class NotificationService
 
     case attached_to
     when PermitApplication
-      [attached_to.submitter]
+      application_recipients(attached_to, :edit_application?)
     when RequirementBlock
       # For requirement blocks, notify all super admins
       User.where(role: :super_admin).to_a

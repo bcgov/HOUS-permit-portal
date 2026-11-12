@@ -1,28 +1,22 @@
 class PermitApplicationPolicy < ApplicationPolicy
+  # submitter_id and the project creator (owner_id) are not checks. Project
+  # access is membership; the application creator is created_by.
+  # GRANTS TODO: Standard with a grant on the application. Members follow view_application?.
   def show?
-    # MEMBERSHIP COMMENT: later, authorize from membership.
-    # owner_id only identifies the creator.
-    if record.submitter == user || record.permit_project&.owner_id == user.id
-      true
-    elsif user.review_staff?
-      return false unless user.member_of?(record.jurisdiction.id)
-      return false unless record.sandbox == sandbox
-      return true unless record.new_draft?
+    return true if project_access.view_application?
+    return false unless user.review_staff?
+    return false unless user.member_of?(record.jurisdiction.id)
+    return false unless record.sandbox == sandbox
+    return true unless record.new_draft?
 
-      record.permit_project&.project_meetings&.active&.exists? == true
-    else
-      false
-    end
+    record.permit_project&.project_meetings&.active&.exists? == true
   end
 
   def create?
     project = record.permit_project
     return false unless project
 
-    # MEMBERSHIP COMMENT: later, authorize from membership.
-    # owner_id only identifies the creator.
-    PermitProjectPolicy.new(user_context, project).show? &&
-      (project.owner_id == user.id || user.review_staff?)
+    PermitProjectPolicy.new(user_context, project).create_permit_applications?
   end
 
   def mark_as_viewed?
@@ -33,13 +27,13 @@ class PermitApplicationPolicy < ApplicationPolicy
     user.review_staff? && user.member_of?(record.jurisdiction_id)
   end
 
+  # GRANTS TODO: Standard with a block grant. Draft edits follow edit_application?.
+  # A field-revision response is this check while revisions_requested.
   def update?
     return false if record.discarded?
 
     if record.draft?
-      record.submission_requirement_block_edit_permissions(
-        user_id: user.id
-      ).present?
+      project_access.edit_application?
     else
       user.review_staff? && user.member_of?(record.jurisdiction_id)
     end
@@ -61,44 +55,43 @@ class PermitApplicationPolicy < ApplicationPolicy
       !record.new_draft?
   end
 
+  # GRANTS TODO: Standard with a block grant. Follows edit_application?.
   def update_version?
-    record.draft? && record.submitter == user
+    record.draft? && project_access.edit_application?
   end
 
   def update_revision_requests?
     record.submitted? && user.review_staff?
   end
 
+  # The note sent with a response.
+  # GRANTS TODO: Standard with a block grant. Follows edit_application?.
   def update_submitter_note?
-    record.revisions_requested? &&
-      record.submission_requirement_block_edit_permissions(
-        user_id: user.id
-      ).present?
+    record.revisions_requested? && project_access.edit_application?
   end
 
+  # Additional information requested as a supporting-document revision.
+  # GRANTS TODO: Standard with a block grant. Follows edit_application?.
   def upload_revision_fulfillment?
-    record.revisions_requested? &&
-      record.submission_requirement_block_edit_permissions(
-        user_id: user.id
-      ).present?
+    record.revisions_requested? && project_access.edit_application?
   end
 
+  # GRANTS TODO: Standard with a block grant. Follows edit_application?.
   def acknowledge_published_electives?
-    record.draft? && record.submitter_id == user.id &&
-      record.submission_requirement_block_edit_permissions(
-        user_id: user.id
-      ).present?
+    record.draft? && project_access.edit_application?
   end
 
+  # GRANTS TODO: Standard with a block grant. Follows edit_application?.
   def upload_supporting_document?
-    record.draft? &&
-      record.submission_requirement_block_edit_permissions(
-        user_id: user.id
-      ).present?
+    record.draft? && project_access.edit_application?
   end
 
+  # Assigning submit to someone else is a grant (assign_submit?).
+  # Re-submit is this same check: revisions_requested is still a draft.
   def submit?
-    record.draft? && record.submitter == user
+    return false if record.discarded?
+
+    record.draft? && project_access.submit_application?
   end
 
   def transition_status?
@@ -111,11 +104,13 @@ class PermitApplicationPolicy < ApplicationPolicy
     user&.review_staff?
   end
 
+  # GRANTS TODO: Standard with a grant on the application. Members follow view_application?.
   def generate_missing_pdfs?
-    user.super_admin? || record.submitter == user ||
+    user.super_admin? || project_access.view_application? ||
       ((user.review_staff?) && user.member_of?(record.jurisdiction_id))
   end
 
+  # GRANTS TODO: Standard with a grant on the application. Same check as generate_missing_pdfs?.
   def download_supporting_documents_zip?
     generate_missing_pdfs?
   end
@@ -167,40 +162,44 @@ class PermitApplicationPolicy < ApplicationPolicy
     user.super_admin?
   end
 
+  # Full: any draft. A member who created the draft can archive that one.
+  # revisions_requested is still a draft. A submitted application is not.
   def destroy?
-    record.draft? && record.submitter == user
+    record.draft? && project_access.archive_draft?(record)
   end
 
   def restore?
-    record.submitter == user
+    record.draft? && project_access.archive_draft?(record)
   end
 
   # we may want to separate an admin update to a secondary policy
 
   class Scope < Scope
+    # The project's application list. Every member, including Standard, is
+    # in it; opening one is show?.
     def resolve
-      # MEMBERSHIP COMMENT: later, authorize from membership.
-      # owner_id only identifies the creator.
-      # Access rule: user owns the parent permit project.
-      owner_exists_sql = <<-SQL.squish
-        EXISTS (
-          SELECT 1 FROM permit_projects pp
-          WHERE pp.id = permit_applications.permit_project_id
-            AND pp.owner_id = :uid
+      resolve_for(:view_project?)
+    end
+
+    # Applications the user can open. Step Code follows this, not the list.
+    def resolve_viewable
+      resolve_for(:view_application?)
+    end
+
+    private
+
+    def resolve_for(project_check)
+      clauses = [
+        ProjectAccess.member_sql(
+          project_check,
+          "permit_applications.permit_project_id"
         )
-      SQL
-
-      # Base access rules (ORed together later):
-      # - submitter of the application
-      # - owner of the parent permit project
-      clauses = ["permit_applications.submitter_id = :uid", owner_exists_sql]
-
+      ]
       values = { uid: user.id }
 
       if user.review_staff?
-        # Access rule 3 (review staff only): applications on projects in their
-        # jurisdictions, including new drafts. Opening a new draft is denied
-        # by show?.
+        # Applications on projects in their jurisdictions, including new
+        # drafts. Opening a new draft is denied by show?.
         clauses << <<-SQL.squish
           EXISTS (
             SELECT 1 FROM permit_projects pp
@@ -211,12 +210,17 @@ class PermitApplicationPolicy < ApplicationPolicy
         values[:jur_ids] = user.jurisdictions.pluck(:id)
       end
 
-      # Combine all access rules with OR and de-duplicate results. Every rule
-      # is limited to the current sandbox (live when nil).
+      # Every rule is limited to the current sandbox (live when nil).
       scope
         .for_sandbox(sandbox)
         .where(clauses.map { |c| "(#{c})" }.join(" OR "), values)
         .distinct
     end
+  end
+
+  private
+
+  def project_access
+    @project_access ||= access.on(record.permit_project)
   end
 end

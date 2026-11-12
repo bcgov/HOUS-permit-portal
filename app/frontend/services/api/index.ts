@@ -518,10 +518,9 @@ export class Api {
     )
   }
 
-  async reinvitePermitProjectMembership(permitProjectId: string, membershipId: string, email?: string) {
+  async reinvitePermitProjectMembership(permitProjectId: string, membershipId: string) {
     return this.client.post<IApiResponse<IProjectPerson, Record<string, never>>>(
-      `/permit_projects/${permitProjectId}/memberships/${membershipId}/reinvite`,
-      { membership: email ? { email } : {} }
+      `/permit_projects/${permitProjectId}/memberships/${membershipId}/reinvite`
     )
   }
 

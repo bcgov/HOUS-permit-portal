@@ -1,5 +1,7 @@
 class PermitApplicationBlueprint < Blueprinter::Base
-  view :base do
+  # A project member who cannot open the application (Standard) still sees it
+  # in the project list. No files, PDFs, or submission versions.
+  view :summary do
     identifier :id
     fields :nickname,
            :status,
@@ -10,16 +12,11 @@ class PermitApplicationBlueprint < Blueprinter::Base
            :full_address,
            :pid,
            :pin,
-           :zipfile_size,
-           :zipfile_name,
-           :zipfile_url,
            :reference_number,
            :submitted_at,
            :resubmitted_at,
            :revisions_requested_at,
            :issued_at,
-           :missing_pdfs,
-           :report_generation_issues,
            :template_nickname,
            :discarded_at,
            :days_in_queue,
@@ -30,10 +27,11 @@ class PermitApplicationBlueprint < Blueprinter::Base
     field :tags do |pa, _options|
       pa.template_tag_list
     end
-    association :submission_versions,
-                blueprint: SubmissionVersionBlueprint,
-                view: :base
     association :submitter, blueprint: UserBlueprint, view: :minimal
+
+    field :can_archive_draft do |pa, options|
+      options[:project_access]&.archive_draft?(pa) || false
+    end
 
     field :created_by do |pa, _options|
       # ponytail: applications created before created_by was stored only have a submitter
@@ -63,8 +61,26 @@ class PermitApplicationBlueprint < Blueprinter::Base
     field :allowed_manual_transitions, default: []
   end
 
+  view :base do
+    include_view :summary
+    fields :zipfile_size,
+           :zipfile_name,
+           :zipfile_url,
+           :missing_pdfs,
+           :report_generation_issues
+
+    association :submission_versions,
+                blueprint: SubmissionVersionBlueprint,
+                view: :base
+  end
+
   view :project_base do
     include_view :base
+
+    field :can_archive_draft do |pa, options|
+      options[:project_access]&.archive_draft?(pa) || false
+    end
+
     association :permit_collaborations,
                 blueprint: PermitCollaborationBlueprint,
                 view: :base do |pa, options|
@@ -101,6 +117,15 @@ class PermitApplicationBlueprint < Blueprinter::Base
 
     field :is_fully_loaded do |_pa, _options|
       true
+    end
+
+    # The caller's project access. The UI hides what the API refuses.
+    field :current_user_access do |pa, options|
+      ProjectAccess.new(
+        options[:current_user],
+        pa.permit_project&.sandbox,
+        pa.permit_project
+      ).to_h
     end
 
     field :form_json do |pa, options|

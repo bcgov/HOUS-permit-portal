@@ -26,6 +26,23 @@ RSpec.describe Api::Part9Building::StepCodesController, type: :controller do
     request.headers["ACCEPT"] = "application/json"
   end
 
+  def full_member_of_another_project
+    outsider = create(:user, :submitter)
+    other_application =
+      create(
+        :permit_application,
+        submitter: outsider,
+        jurisdiction: jurisdiction,
+        with_fake_plan_document: true
+      )
+    expect(
+      other_application.permit_project.project_memberships.find_by!(
+        user: outsider
+      )
+    ).to be_full
+    [outsider, other_application]
+  end
+
   describe "POST #create" do
     context "when permit_application_id provided (find or create)" do
       it "finds an existing Part9StepCode" do
@@ -49,6 +66,84 @@ RSpec.describe Api::Part9Building::StepCodesController, type: :controller do
              as: :json
         expect(response).to have_http_status(:success)
         expect(JSON.parse(response.body).dig("data", "id")).to eq(existing.id)
+      end
+
+      it "finds an existing Part9StepCode for an Expanded member" do
+        existing =
+          Part9StepCode.create!(
+            creator: submitter,
+            permit_application: permit_application_with_fake_plan_document
+          )
+        member = create(:user, :submitter)
+        create(
+          :project_membership,
+          permit_project:
+            permit_application_with_fake_plan_document.permit_project,
+          user: member,
+          access: :expanded
+        )
+        sign_in member
+
+        post :create,
+             params: {
+               step_code: {
+                 permit_application_id:
+                   permit_application_with_fake_plan_document.id
+               }
+             },
+             as: :json
+
+        expect(response).to have_http_status(:success)
+        expect(JSON.parse(response.body).dig("data", "id")).to eq(existing.id)
+      end
+
+      it "forbids a Standard member from creating a Step Code on the application" do
+        member = create(:user, :submitter)
+        create(
+          :project_membership,
+          permit_project:
+            permit_application_with_fake_plan_document.permit_project,
+          user: member,
+          access: :standard
+        )
+        sign_in member
+
+        post :create,
+             params: {
+               step_code: {
+                 permit_application_id:
+                   permit_application_with_fake_plan_document.id
+               }
+             },
+             as: :json
+
+        expect(response).to have_http_status(:forbidden)
+        expect(
+          Part9StepCode.where(
+            permit_application_id: permit_application_with_fake_plan_document.id
+          )
+        ).to be_empty
+      end
+
+      it "denies a Full member of a different project" do
+        outsider, _other_application = full_member_of_another_project
+        sign_in outsider
+
+        post :create,
+             params: {
+               step_code: {
+                 permit_application_id:
+                   permit_application_with_fake_plan_document.id
+               }
+             },
+             as: :json
+
+        expect(response).to have_http_status(:forbidden)
+        expect(
+          Part9StepCode.where(
+            permit_application_id: permit_application_with_fake_plan_document.id
+          )
+        ).to be_empty
       end
 
       it "creates a new Part9StepCode when none exists" do
@@ -172,6 +267,61 @@ RSpec.describe Api::Part9Building::StepCodesController, type: :controller do
       get :show, params: { id: step_code.id }
 
       expect(response).to have_http_status(:forbidden)
+    end
+
+    it "returns the Step Code for an Expanded member" do
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project:
+          permit_application_with_fake_plan_document.permit_project,
+        user: member,
+        access: :expanded
+      )
+      sign_in member
+
+      get :show, params: { id: step_code.id }
+
+      expect(response).to have_http_status(:success)
+      expect(JSON.parse(response.body).dig("data", "id")).to eq(step_code.id)
+    end
+
+    it "returns forbidden for a Standard member" do
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project:
+          permit_application_with_fake_plan_document.permit_project,
+        user: member,
+        access: :standard
+      )
+      sign_in member
+
+      get :show, params: { id: step_code.id }
+
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it "denies a Full member of a different project" do
+      outsider, other_application = full_member_of_another_project
+      own_step_code =
+        create(
+          :part_9_step_code,
+          permit_application: other_application,
+          creator: outsider
+        )
+      sign_in outsider
+
+      get :show, params: { id: step_code.id }
+
+      expect(response).to have_http_status(:forbidden)
+
+      get :show, params: { id: own_step_code.id }
+
+      expect(response).to have_http_status(:success)
+      expect(JSON.parse(response.body).dig("data", "id")).to eq(
+        own_step_code.id
+      )
     end
   end
 

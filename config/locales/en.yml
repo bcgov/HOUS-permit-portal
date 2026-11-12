@@ -91,7 +91,11 @@ en:
           enabled_project_meetings_requires_authorization_resource: "can only be toggled on once at least one Project meeting authorization resource has been added."
           enabled_property_information_requests_requires_setup: "can only be toggled on once at least one property information contact is confirmed."
         project_membership:
+          last_full_member: "The project needs at least one member with Full access. Give someone else Full access first."
+          primary_contact: "The primary contact cannot be removed. Transfer primary contact to someone else first."
           attributes:
+            access:
+              last_full_member: "cannot be changed. The project needs at least one member with Full access."
             contact_designation:
               primary_locked: "cannot be removed from the primary contact. Transfer it to someone else."
             invited_email:
@@ -838,14 +842,17 @@ en:
         message: "Active members cannot be re-invited"
       update_error:
         title: Error
-        message: "Person could not be updated"
-      destroy_creator_error:
+        message: "Person could not be updated. %{error_message}"
+      destroy_error:
         title: Error
-        message: "The project creator cannot be removed"
+        message: "%{error_message}"
     project_invitation:
       expired_error:
         title: Error
         message: "This invitation has expired"
+      already_member:
+        title: Error
+        message: "You are already a member of this project"
     qa_tools:
       full_permit_project_success:
         title: ""

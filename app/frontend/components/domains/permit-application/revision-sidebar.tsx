@@ -502,7 +502,9 @@ export const RevisionSideBar = observer(
             useFieldArrayMethods={useFieldArrayMethods}
             onSave={handleSubmit(onSaveRevision)}
             disableInput={forSubmitter || isViewingPastRequests || permitApplication.isRevisionsRequested}
-            allowFulfillmentUpload={forSubmitter && !isViewingPastRequests}
+            allowFulfillmentUpload={
+              forSubmitter && !isViewingPastRequests && !!permitApplication.currentUserAccess?.editApplication
+            }
             permitApplication={permitApplication}
           />
         )}

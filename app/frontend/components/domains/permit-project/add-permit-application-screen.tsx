@@ -17,7 +17,7 @@ import {
 } from "@chakra-ui/react"
 import { CaretLeft, MagnifyingGlass } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useMemo, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { usePermitProject } from "../../../hooks/resources/use-permit-project"
@@ -26,6 +26,7 @@ import { ITemplateVersion } from "../../../models/template-version"
 import { useMst } from "../../../setup/root"
 import { groupTemplateVersionsByCategory } from "../../../utils/template-version-grouping"
 import { ErrorScreen } from "../../shared/base/error-screen"
+import { LoadingScreen } from "../../shared/base/loading-screen"
 import { Editor } from "../../shared/editor/editor"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import ProjectInfoRow from "../../shared/project/project-info-row"
@@ -48,7 +49,17 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
   const [query, setQuery] = useState("")
   const [note, setNote] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const showCreationMessage = !!currentPermitProject && !currentPermitProject.isOwner
+  // A member without add access is sent back. Review staff who are not members
+  // have no currentUserAccess and still add here, with a note for the submitter.
+  const projectLoaded = !!currentPermitProject?.isFullyLoaded
+  const loadedAccess = projectLoaded ? currentPermitProject?.currentUserAccess : null
+  const memberCannotAdd = !!loadedAccess && !loadedAccess.addApplication
+  const showCreationMessage = !!currentPermitProject && !currentPermitProject.currentUserAccess?.addApplication
+
+  useEffect(() => {
+    if (!memberCannotAdd || !currentPermitProject) return
+    navigate(`/projects/${currentPermitProject.id}`, { replace: true })
+  }, [memberCannotAdd, currentPermitProject, navigate])
 
   const filteredTemplates = templateVersions.filter((tv) => tv.matchesSearchQuery(query))
   const groupedTemplates = groupTemplateVersionsByCategory(filteredTemplates)
@@ -59,10 +70,10 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
   const selectedTemplatesRequireProjectMeeting = selectedTemplateVersions.some(
     (templateVersion) => templateVersion.requiresProjectMeeting
   )
-  // Meeting requests are owner-only. Review staff adding permits they do not own skip this step.
+  // Review staff adding permits as the jurisdiction skip this step.
   const shouldOfferProjectMeetingAfterAdd =
     selectedTemplatesRequireProjectMeeting &&
-    !!currentPermitProject?.isOwner &&
+    !!currentPermitProject?.currentUserAccess?.manageMeetings &&
     !currentPermitProject?.activeProjectMeeting &&
     siteConfigurationStore.projectMeetingsEnabled &&
     (currentPermitProject?.jurisdiction?.projectMeetingsEnabled ?? false)
@@ -110,6 +121,8 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
 
   if (error) return <ErrorScreen error={error} />
   if (templateError) return <ErrorScreen error={templateError} />
+  if (!projectLoaded) return <LoadingScreen />
+  if (memberCannotAdd) return null
 
   return (
     <Container maxW="container.lg" py={10}>

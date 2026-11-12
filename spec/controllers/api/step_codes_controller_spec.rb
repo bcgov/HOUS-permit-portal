@@ -26,6 +26,22 @@ RSpec.describe Api::StepCodesController, type: :controller do
     allow(StepCode.search_index).to receive(:refresh)
   end
 
+  def full_member_of_another_project
+    outsider = create(:user, :submitter)
+    other_application =
+      create(
+        :permit_application,
+        submitter: outsider,
+        jurisdiction: jurisdiction
+      )
+    expect(
+      other_application.permit_project.project_memberships.find_by!(
+        user: outsider
+      )
+    ).to be_full
+    [outsider, other_application]
+  end
+
   describe "PATCH #update" do
     it "updates the Step Code for the creator" do
       standalone_step_code =
@@ -47,6 +63,88 @@ RSpec.describe Api::StepCodesController, type: :controller do
 
       expect(response).to have_http_status(:success)
       expect(json_response.dig("data", "title")).to eq("Updated Title")
+    end
+
+    it "updates an attached Step Code for an Expanded member" do
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: permit_application.permit_project,
+        user: member,
+        access: :expanded
+      )
+      sign_in member
+
+      patch :update,
+            params: {
+              id: step_code.id,
+              step_code: {
+                title: "Expanded edit"
+              }
+            },
+            as: :json
+
+      expect(response).to have_http_status(:success)
+      # Attached title is the project title. The column is what the update writes.
+      expect(step_code.reload.read_attribute(:title)).to eq("Expanded edit")
+    end
+
+    it "forbids a Standard member from editing an attached Step Code" do
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: permit_application.permit_project,
+        user: member,
+        access: :standard
+      )
+      sign_in member
+
+      patch :update,
+            params: {
+              id: step_code.id,
+              step_code: {
+                title: "Nope"
+              }
+            },
+            as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(step_code.reload.title).not_to eq("Nope")
+    end
+
+    it "denies a Full member of a different project" do
+      outsider, other_application = full_member_of_another_project
+      own_step_code =
+        create(
+          :part_3_step_code,
+          permit_application: other_application,
+          creator: outsider
+        )
+      sign_in outsider
+
+      patch :update,
+            params: {
+              id: step_code.id,
+              step_code: {
+                title: "Nope"
+              }
+            },
+            as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(step_code.reload.read_attribute(:title)).not_to eq("Nope")
+
+      patch :update,
+            params: {
+              id: own_step_code.id,
+              step_code: {
+                title: "Mine"
+              }
+            },
+            as: :json
+
+      expect(response).to have_http_status(:success)
+      expect(own_step_code.reload.read_attribute(:title)).to eq("Mine")
     end
 
     it "rejects updates to archived Step Codes" do
@@ -88,6 +186,112 @@ RSpec.describe Api::StepCodesController, type: :controller do
       expect(response).to have_http_status(:forbidden)
     end
 
+    it "lets an Expanded member attach a Step Code they created" do
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: permit_application.permit_project,
+        user: member,
+        access: :expanded
+      )
+      standalone =
+        create(:part_3_step_code, permit_application: nil, creator: member)
+      sign_in member
+
+      patch :update,
+            params: {
+              id: standalone.id,
+              step_code: {
+                permit_application_id: permit_application.id
+              }
+            },
+            as: :json
+
+      expect(response).to have_http_status(:success)
+      expect(standalone.reload.permit_application_id).to eq(
+        permit_application.id
+      )
+    end
+
+    it "forbids a Standard member from attaching a Step Code they created" do
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: permit_application.permit_project,
+        user: member,
+        access: :standard
+      )
+      standalone =
+        create(:part_3_step_code, permit_application: nil, creator: member)
+      sign_in member
+
+      patch :update,
+            params: {
+              id: standalone.id,
+              step_code: {
+                permit_application_id: permit_application.id
+              }
+            },
+            as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(standalone.reload.permit_application_id).to be_nil
+    end
+
+    it "denies reassigning onto a project where the user is Full only elsewhere" do
+      outsider, other_application = full_member_of_another_project
+      standalone =
+        create(:part_3_step_code, permit_application: nil, creator: outsider)
+      sign_in outsider
+
+      patch :update,
+            params: {
+              id: standalone.id,
+              step_code: {
+                permit_application_id: permit_application.id
+              }
+            },
+            as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(standalone.reload.permit_application_id).to be_nil
+
+      patch :update,
+            params: {
+              id: standalone.id,
+              step_code: {
+                permit_application_id: other_application.id
+              }
+            },
+            as: :json
+
+      expect(response).to have_http_status(:success)
+      expect(standalone.reload.permit_application_id).to eq(
+        other_application.id
+      )
+    end
+
+    it "forbids attaching a standalone Step Code created by someone else" do
+      standalone =
+        create(
+          :part_3_step_code,
+          permit_application: nil,
+          creator: create(:user, :submitter)
+        )
+
+      patch :update,
+            params: {
+              id: standalone.id,
+              step_code: {
+                permit_application_id: permit_application.id
+              }
+            },
+            as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(standalone.reload.permit_application_id).to be_nil
+    end
+
     it "returns error for invalid input" do
       allow(StepCode).to receive(:find).and_return(step_code)
       allow(step_code).to receive(:update!).and_raise(
@@ -127,6 +331,59 @@ RSpec.describe Api::StepCodesController, type: :controller do
 
       expect(response).to have_http_status(:forbidden)
     end
+
+    it "discards an attached Step Code for an Expanded member" do
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: permit_application.permit_project,
+        user: member,
+        access: :expanded
+      )
+      sign_in member
+
+      delete :destroy, params: { id: step_code.id }
+
+      expect(response).to have_http_status(:success)
+      expect(step_code.reload).to be_discarded
+    end
+
+    it "forbids a Standard member from discarding an attached Step Code" do
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: permit_application.permit_project,
+        user: member,
+        access: :standard
+      )
+      sign_in member
+
+      delete :destroy, params: { id: step_code.id }
+
+      expect(response).to have_http_status(:forbidden)
+      expect(step_code.reload).not_to be_discarded
+    end
+
+    it "denies a Full member of a different project" do
+      outsider, other_application = full_member_of_another_project
+      own_step_code =
+        create(
+          :part_3_step_code,
+          permit_application: other_application,
+          creator: outsider
+        )
+      sign_in outsider
+
+      delete :destroy, params: { id: step_code.id }
+
+      expect(response).to have_http_status(:forbidden)
+      expect(step_code.reload).not_to be_discarded
+
+      delete :destroy, params: { id: own_step_code.id }
+
+      expect(response).to have_http_status(:success)
+      expect(own_step_code.reload).to be_discarded
+    end
   end
 
   describe "PATCH #restore" do
@@ -137,6 +394,63 @@ RSpec.describe Api::StepCodesController, type: :controller do
 
       expect(response).to have_http_status(:success)
       expect(json_response.dig("data", "id")).to eq(step_code.id)
+    end
+
+    it "restores an attached Step Code for an Expanded member" do
+      step_code.update!(discarded_at: Time.current)
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: permit_application.permit_project,
+        user: member,
+        access: :expanded
+      )
+      sign_in member
+
+      patch :restore, params: { id: step_code.id }
+
+      expect(response).to have_http_status(:success)
+      expect(step_code.reload).not_to be_discarded
+    end
+
+    it "forbids a Standard member from restoring an attached Step Code" do
+      step_code.update!(discarded_at: Time.current)
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: permit_application.permit_project,
+        user: member,
+        access: :standard
+      )
+      sign_in member
+
+      patch :restore, params: { id: step_code.id }
+
+      expect(response).to have_http_status(:forbidden)
+      expect(step_code.reload).to be_discarded
+    end
+
+    it "denies a Full member of a different project" do
+      step_code.update!(discarded_at: Time.current)
+      outsider, other_application = full_member_of_another_project
+      own_step_code =
+        create(
+          :part_3_step_code,
+          permit_application: other_application,
+          creator: outsider,
+          discarded_at: Time.current
+        )
+      sign_in outsider
+
+      patch :restore, params: { id: step_code.id }
+
+      expect(response).to have_http_status(:forbidden)
+      expect(step_code.reload).to be_discarded
+
+      patch :restore, params: { id: own_step_code.id }
+
+      expect(response).to have_http_status(:success)
+      expect(own_step_code.reload).not_to be_discarded
     end
   end
 

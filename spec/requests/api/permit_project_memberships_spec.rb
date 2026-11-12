@@ -43,6 +43,23 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
     ProjectMembership.reindex
   end
 
+  def full_member_of_another_project
+    outsider = create(:user, :submitter)
+    other_application =
+      create(
+        :permit_application,
+        submitter: outsider,
+        jurisdiction: jurisdiction,
+        sandbox: project.sandbox
+      )
+    expect(
+      other_application.permit_project.project_memberships.find_by!(
+        user: outsider
+      )
+    ).to be_full
+    [outsider, other_application]
+  end
+
   describe "GET /api/permit_projects/:id/memberships" do
     it "returns the creator membership and the other members" do
       sign_in owner
@@ -74,6 +91,92 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
       get "/api/permit_projects/#{project.id}/memberships", headers: headers
 
       expect(response).to have_http_status(:forbidden)
+    end
+
+    it "denies a Full member of a different project" do
+      outsider, _other_application = full_member_of_another_project
+      sign_in outsider
+
+      get "/api/permit_projects/#{project.id}/memberships", headers: headers
+
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it "shows every member their access and hides invitations from Standard" do
+      standard =
+        create(:user, :submitter, first_name: "Sam", last_name: "Standard")
+      expanded =
+        create(:user, :submitter, first_name: "Eve", last_name: "Expanded")
+      create(
+        :project_membership,
+        user: standard,
+        permit_project: project,
+        access: :standard
+      )
+      create(
+        :project_membership,
+        user: expanded,
+        permit_project: project,
+        access: :expanded
+      )
+      create(
+        :project_membership,
+        :pending_invitation,
+        permit_project: project,
+        invited_first_name: "Penny",
+        invited_last_name: "Pending",
+        access: :expanded
+      )
+      create(
+        :project_membership,
+        :pending_invitation,
+        permit_project: project,
+        invited_first_name: "Eddie",
+        invited_last_name: "Expired",
+        invitation_sent_at: 4.days.ago,
+        access: :standard
+      )
+      ProjectMembership.reindex
+
+      sign_in standard
+      get "/api/permit_projects/#{project.id}/memberships", headers: headers
+
+      expect(response).to have_http_status(:ok)
+      rows = json_response["data"]
+      names = rows.map { |row| row["name"] }
+      expect(names).to include(
+        "Sam Standard",
+        "Eve Expanded",
+        "Olivia Owner",
+        "Mina Member"
+      )
+      expect(names).not_to include("Penny Pending", "Eddie Expired")
+      expanded_row = rows.find { |row| row["name"] == "Eve Expanded" }
+      expect(expanded_row).to include(
+        "access" => "expanded",
+        "status" => "active"
+      )
+      expect(expanded_row).not_to have_key("invited_email")
+      expect(expanded_row).not_to have_key("email")
+
+      sign_in expanded
+      get "/api/permit_projects/#{project.id}/memberships", headers: headers
+
+      expect(response).to have_http_status(:ok)
+      invitation_rows = json_response["data"]
+      expect(invitation_rows.map { |row| row["name"] }).to include(
+        "Penny Pending",
+        "Eddie Expired"
+      )
+      expect(
+        invitation_rows.find { |row| row["name"] == "Penny Pending" }
+      ).to include("status" => "pending", "access" => "expanded")
+      expect(
+        invitation_rows.find { |row| row["name"] == "Eddie Expired" }
+      ).to include("status" => "expired", "access" => "standard")
+      expect(invitation_rows).to all(
+        satisfy { |row| !row.key?("invited_email") }
+      )
     end
   end
 
@@ -194,6 +297,144 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
       expect(membership.reload.access).to eq("standard")
     end
 
+    it "does not change role tags when the same update changes access and the member cannot change standing" do
+      expanded = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: project,
+        user: expanded,
+        access: :expanded
+      )
+      sign_in expanded
+
+      patch "/api/permit_projects/#{project.id}/memberships/#{membership.id}",
+            params: {
+              membership: {
+                access: "standard",
+                role_tags: ["Builder"]
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(membership.reload.access).to eq("full")
+      expect(membership.role_list).to contain_exactly("Architect")
+    end
+
+    it "lets Expanded change anyone's role and denies Standard" do
+      expanded_user = create(:user, :submitter)
+      standard_user = create(:user, :submitter)
+      expanded_membership =
+        create(
+          :project_membership,
+          permit_project: project,
+          user: expanded_user,
+          access: :expanded
+        )
+      standard_membership =
+        create(
+          :project_membership,
+          permit_project: project,
+          user: standard_user,
+          access: :standard
+        )
+      sign_in expanded_user
+
+      patch "/api/permit_projects/#{project.id}/memberships/#{standard_membership.id}",
+            params: {
+              membership: {
+                role_tags: ["Designer"]
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(standard_membership.reload.role_list).to contain_exactly(
+        "Designer"
+      )
+
+      patch "/api/permit_projects/#{project.id}/memberships/#{expanded_membership.id}",
+            params: {
+              membership: {
+                role_tags: ["Architect"]
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(expanded_membership.reload.role_list).to contain_exactly(
+        "Architect"
+      )
+
+      patch "/api/permit_projects/#{project.id}/memberships/#{membership.id}",
+            params: {
+              membership: {
+                role_tags: ["Designer"]
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(membership.reload.role_list).to contain_exactly("Designer")
+
+      sign_in standard_user
+
+      patch "/api/permit_projects/#{project.id}/memberships/#{standard_membership.id}",
+            params: {
+              membership: {
+                role_tags: ["Builder"]
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(standard_membership.reload.role_list).to contain_exactly(
+        "Designer"
+      )
+    end
+
+    it "denies Expanded and Standard from changing access or contact designation" do
+      %i[expanded standard].each do |level|
+        person = create(:user, :submitter)
+        create(
+          :project_membership,
+          permit_project: project,
+          user: person,
+          access: level
+        )
+        sign_in person
+
+        patch "/api/permit_projects/#{project.id}/memberships/#{membership.id}",
+              params: {
+                membership: {
+                  contact_designation: "alternate"
+                }
+              },
+              headers: headers,
+              as: :json
+
+        expect(response).to have_http_status(:forbidden)
+        expect(membership.reload.contact_designation).to eq("none")
+
+        patch "/api/permit_projects/#{project.id}/memberships/#{membership.id}",
+              params: {
+                membership: {
+                  access: "standard"
+                }
+              },
+              headers: headers,
+              as: :json
+
+        expect(response).to have_http_status(:forbidden)
+        expect(membership.reload.access).to eq("full")
+      end
+    end
+
     it "rejects an unknown access level" do
       sign_in owner
 
@@ -282,6 +523,24 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
       expect(response).to have_http_status(:forbidden)
       expect(membership.reload.contact_designation).to eq("none")
     end
+
+    it "denies a Full member of a different project" do
+      outsider, _other_application = full_member_of_another_project
+      sign_in outsider
+
+      patch "/api/permit_projects/#{project.id}/memberships/#{membership.id}",
+            params: {
+              membership: {
+                access: "standard"
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(membership.reload.access).to eq("full")
+      expect(membership.contact_designation).to eq("none")
+    end
   end
 
   describe "DELETE /api/permit_projects/:id/memberships/:id" do
@@ -304,14 +563,33 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
       expect(names).not_to include("Mina Member")
     end
 
-    it "forbids removing the creator membership" do
+    it "denies Expanded and Standard from removing another member" do
+      %i[expanded standard].each do |level|
+        person = create(:user, :submitter)
+        create(
+          :project_membership,
+          permit_project: project,
+          user: person,
+          access: level
+        )
+        sign_in person
+
+        delete "/api/permit_projects/#{project.id}/memberships/#{membership.id}",
+               headers: headers
+
+        expect(response).to have_http_status(:forbidden)
+        expect(ProjectMembership.exists?(membership.id)).to be(true)
+      end
+    end
+
+    it "rejects removing the primary contact" do
       creator_membership = project.project_memberships.find_by!(user: owner)
       sign_in owner
 
       delete "/api/permit_projects/#{project.id}/memberships/#{creator_membership.id}",
              headers: headers
 
-      expect(response).to have_http_status(:forbidden)
+      expect(response).to have_http_status(:unprocessable_content)
       expect(ProjectMembership.exists?(creator_membership.id)).to be(true)
     end
 
@@ -320,6 +598,17 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
 
       get "/api/permit_projects/#{project.id}/memberships", headers: headers
       expect(response).to have_http_status(:ok)
+
+      delete "/api/permit_projects/#{project.id}/memberships/#{membership.id}",
+             headers: headers
+
+      expect(response).to have_http_status(:forbidden)
+      expect(ProjectMembership.exists?(membership.id)).to be(true)
+    end
+
+    it "denies a Full member of a different project" do
+      outsider, _other_application = full_member_of_another_project
+      sign_in outsider
 
       delete "/api/permit_projects/#{project.id}/memberships/#{membership.id}",
              headers: headers
@@ -391,7 +680,7 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
       expect(response).to have_http_status(:ok)
       expect(json_response["data"]).not_to have_key("email")
       expect(json_response["data"]).not_to have_key("invited_email")
-      expect(pending.reload.invited_email).to eq("wanda.updated@example.com")
+      expect(pending.reload.invited_email).to eq("wanda@example.com")
       raw_token = enqueued_invitation_raw_token
       expect(pending.reload.invitation_token).not_to eq(old_digest)
       expect(pending.invitation_token).to eq(
@@ -440,6 +729,39 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
       expect(creator_membership.reload.contact_designation).to eq("none")
     end
 
+    it "rejects accepting an invitation when the person is already a member" do
+      raw = SecureRandom.urlsafe_base64(32)
+      invite =
+        create(
+          :project_membership,
+          :pending_invitation,
+          permit_project: project,
+          raw_invitation_token: raw
+        )
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: project,
+        user: member,
+        access: :standard
+      )
+      sign_in member
+
+      get "/api/project_invitations/#{raw}", headers: headers
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("data", "already_member")).to be true
+
+      expect {
+        post "/api/project_invitations/#{raw}/accept",
+             headers: headers,
+             as: :json
+      }.not_to change(ProjectMembership, :count)
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(invite.reload.user_id).to be_nil
+    end
+
     it "rejects accepting an expired invitation and destroys a declined invitation" do
       expired_raw = SecureRandom.urlsafe_base64(32)
       expired =
@@ -479,6 +801,106 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
            as: :json
       expect(response).to have_http_status(:ok)
       expect(ProjectMembership.exists?(declinable.id)).to be(false)
+    end
+
+    it "denies Expanded and Standard from inviting with an access level" do
+      %i[expanded standard].each do |level|
+        person = create(:user, :submitter)
+        create(
+          :project_membership,
+          permit_project: project,
+          user: person,
+          access: level
+        )
+        sign_in person
+
+        expect {
+          post "/api/permit_projects/#{project.id}/memberships",
+               params: {
+                 membership: {
+                   first_name: "Wanda",
+                   last_name: "Walls",
+                   email: "wanda-#{level}@example.com",
+                   access: "full"
+                 }
+               },
+               headers: headers,
+               as: :json
+        }.not_to change(ProjectMembership, :count)
+
+        expect(response).to have_http_status(:forbidden)
+      end
+    end
+
+    it "denies a Full member of a different project from inviting" do
+      outsider, _other_application = full_member_of_another_project
+      sign_in outsider
+
+      expect {
+        post "/api/permit_projects/#{project.id}/memberships",
+             params: {
+               membership: {
+                 first_name: "Wanda",
+                 last_name: "Walls",
+                 email: "wanda-outsider@example.com",
+                 access: "expanded"
+               }
+             },
+             headers: headers,
+             as: :json
+      }.not_to change(ProjectMembership, :count)
+
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it "denies Expanded and Standard from resending or canceling an invitation" do
+      %i[expanded standard].each do |level|
+        person = create(:user, :submitter)
+        create(
+          :project_membership,
+          permit_project: project,
+          user: person,
+          access: level
+        )
+        pending =
+          create(
+            :project_membership,
+            :pending_invitation,
+            permit_project: project
+          )
+        sign_in person
+
+        post "/api/permit_projects/#{project.id}/memberships/#{pending.id}/reinvite",
+             headers: headers,
+             as: :json
+
+        expect(response).to have_http_status(:forbidden)
+        expect(pending.reload).to be_pending
+
+        delete "/api/permit_projects/#{project.id}/memberships/#{pending.id}",
+               headers: headers
+
+        expect(response).to have_http_status(:forbidden)
+        expect(ProjectMembership.exists?(pending.id)).to be(true)
+      end
+    end
+
+    it "denies a Full member of a different project from reinviting" do
+      pending =
+        create(
+          :project_membership,
+          :pending_invitation,
+          permit_project: project
+        )
+      outsider, _other_application = full_member_of_another_project
+      sign_in outsider
+
+      post "/api/permit_projects/#{project.id}/memberships/#{pending.id}/reinvite",
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(pending.reload).to be_pending
     end
   end
 

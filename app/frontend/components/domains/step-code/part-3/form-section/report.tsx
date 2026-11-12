@@ -71,7 +71,7 @@ export const Report = observer(function Report() {
             isLoading={isSubmitting}
             isDisabled={!checklist?.canMarkComplete}
           >
-            {t("stepCode.saveAndExit")}
+            {t("stepCode.markAsComplete")}
           </Button>
         </Flex>
         <Button type="button" variant="link" onClick={handleRegenerateReport} isLoading={isRegenerating}>

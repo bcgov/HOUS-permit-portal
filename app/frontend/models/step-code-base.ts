@@ -24,6 +24,8 @@ export const StepCodeBaseFields = types
     ),
     permitProjectTitle: types.maybeNull(types.string),
     permitApplicationId: types.maybeNull(types.string),
+    // Index payload only. Omitted responses leave the previous value.
+    canArchive: types.optional(types.boolean, false),
     // API snapshot for list/index rows without checklists loaded. Detail UIs
     // should prefer stageStatus()/isStageComplete() which derive from checklists.
     stageCompletions: types.optional(

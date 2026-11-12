@@ -83,10 +83,21 @@ module Api::Concerns::Search::PermitProjects
     end
 
     active_meeting = search_filters.delete(:active_meeting)
-    if active_meeting == "only_show"
-      search_filters[:has_active_project_meeting] = true
-    elsif active_meeting == "hide"
-      search_filters[:has_active_project_meeting] = false
+    if active_meeting.in?(%w[only_show hide])
+      # The flag counts only where the caller can see meetings.
+      meeting_project_ids =
+        PermitProject.where(
+          ProjectAccess.member_sql(:manage_meetings?),
+          uid: current_user.id
+        ).ids
+      with_meeting = {
+        _and: [
+          { has_active_project_meeting: true },
+          { id: meeting_project_ids }
+        ]
+      }
+      active_meeting_condition =
+        active_meeting == "only_show" ? with_meeting : { _not: with_meeting }
     end
 
     jurisdiction_ids = search_filters.delete(:jurisdiction_id)
@@ -96,15 +107,11 @@ module Api::Concerns::Search::PermitProjects
 
     search_filters[:discarded] = show_archived
 
-    or_conditions = [
-      { owner_id: current_user.id },
-      { collaborator_ids: current_user.id },
-      { member_ids: current_user.id }
-    ]
-
-    final_where = { _and: [{ _or: or_conditions }] }
+    # Review assignment is the inbox search. This list is membership.
+    final_where = { _and: [{ member_ids: current_user.id }] }
 
     search_filters.each { |key, value| final_where[:_and] << { key => value } }
+    final_where[:_and] << active_meeting_condition if active_meeting_condition
 
     unless current_user.super_admin?
       final_where[:_and] << { sandbox_id: current_sandbox&.id }

@@ -5,4 +5,8 @@ class UserContext
     @user = user
     @sandbox = sandbox
   end
+
+  def access
+    @access ||= Access.new(self)
+  end
 end

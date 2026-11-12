@@ -301,6 +301,7 @@ export const AddProjectPersonForm = observer(({ permitProject }: IAddProjectPers
                 <FormControl as="fieldset" isInvalid={Boolean(errors.access)}>
                   <RadioGroup value={field.value} onChange={field.onChange}>
                     <VStack align="stretch" spacing={3}>
+                      {/* GRANTS TODO: an Expanded inviter must not be offered Full. */}
                       {Object.values(EProjectAccess).map((access, idx) => {
                         const isSelected = field.value === access
                         return (
