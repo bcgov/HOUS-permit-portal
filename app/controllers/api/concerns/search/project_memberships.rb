@@ -84,8 +84,8 @@ module Api::Concerns::Search::ProjectMemberships
     where
   end
 
-  # Standard members do not see pending invites. The memberships controller
-  # uses this same method for the people payload.
+  # Standard members do not see pending or expired invites. The memberships
+  # controller uses this same method for the people payload.
   def project_access
     @project_access ||= pundit_user.access.on(@permit_project)
   end

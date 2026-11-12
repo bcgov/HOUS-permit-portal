@@ -55,16 +55,11 @@ class Api::PermitProjectsController < Api::ApplicationController
   # and view variants. Worth doing as a dedicated refactor rather than piecemeal.
   def show
     authorize @permit_project
-    # MEMBERSHIP COMMENT: members get the submitter view before the
-    # review-staff :inbox_extended branch. If reviewers can accept later, a
-    # reviewer who accepted would lose the inbox view of that project.
-    is_member_or_collaborator =
-      project_access.view_project? ||
-        @permit_project.permit_applications.any? do |app|
-          app.collaborators.any? { |c| c.user_id == current_user.id }
-        end
+    # Members get the submitter view before the review-staff inbox view.
+    # A review assignment is not membership, so an assigned reviewer keeps
+    # the inbox view. A reviewer who later accepts a membership would not.
     view =
-      if is_member_or_collaborator
+      if project_access.view_project?
         :extended
       elsif current_user.review_staff?
         :inbox_extended

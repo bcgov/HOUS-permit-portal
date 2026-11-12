@@ -28,6 +28,7 @@ class PermitApplicationPolicy < ApplicationPolicy
   end
 
   # GRANTS TODO: Standard with a block grant. Draft edits follow edit_application?.
+  # A field-revision response is this check while revisions_requested.
   def update?
     return false if record.discarded?
 
@@ -63,11 +64,14 @@ class PermitApplicationPolicy < ApplicationPolicy
     record.submitted? && user.review_staff?
   end
 
-  # Responding to a revision request.
+  # The note sent with a response.
+  # GRANTS TODO: Standard with a block grant. Follows edit_application?.
   def update_submitter_note?
     record.revisions_requested? && project_access.edit_application?
   end
 
+  # Additional information requested as a supporting-document revision.
+  # GRANTS TODO: Standard with a block grant. Follows edit_application?.
   def upload_revision_fulfillment?
     record.revisions_requested? && project_access.edit_application?
   end
@@ -83,7 +87,10 @@ class PermitApplicationPolicy < ApplicationPolicy
   end
 
   # Assigning submit to someone else is a grant (assign_submit?).
+  # Re-submit is this same check: revisions_requested is still a draft.
   def submit?
+    return false if record.discarded?
+
     record.draft? && project_access.submit_application?
   end
 
@@ -155,13 +162,14 @@ class PermitApplicationPolicy < ApplicationPolicy
     user.super_admin?
   end
 
-  # Full: any draft. Expanded: only a draft they created (created_by).
+  # Full: any draft. A member who created the draft can archive that one.
+  # revisions_requested is still a draft. A submitted application is not.
   def destroy?
     record.draft? && project_access.archive_draft?(record)
   end
 
   def restore?
-    project_access.archive_draft?(record)
+    record.draft? && project_access.archive_draft?(record)
   end
 
   # we may want to separate an admin update to a secondary policy

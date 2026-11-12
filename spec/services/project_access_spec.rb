@@ -59,22 +59,23 @@ RSpec.describe ProjectAccess do
       expect(access.submit_application?).to be true
       expect(access.delete_step_code?).to be true
       expect(access.manage_meetings?).to be true
+      expect(access.view_project_notes?).to be true
+      expect(access.view_activity?).to be true
       expect(access.assign_block?).to be false
       expect(access.assign_submit?).to be false
     end
 
-    it "edits role tags on themself and a Standard member" do
-      standard = ProjectMembership.new(access: :standard)
-      full =
-        ProjectMembership.new(access: :full, user: create(:user, :submitter))
-
-      expect(
-        access.edit_role_tags?(
-          ProjectMembership.new(access: :expanded, user: user)
-        )
-      ).to be true
-      expect(access.edit_role_tags?(standard)).to be true
-      expect(access.edit_role_tags?(full)).to be false
+    it "edits anyone's role tags" do
+      %i[standard expanded full].each do |level|
+        expect(
+          access.edit_role_tags?(
+            ProjectMembership.new(
+              access: level,
+              user: create(:user, :submitter)
+            )
+          )
+        ).to be true
+      end
     end
 
     it "archives only a draft they created" do
@@ -90,6 +91,18 @@ RSpec.describe ProjectAccess do
   describe "a Standard member" do
     subject(:access) { access_for(create(:user, :submitter), :standard) }
 
+    it "archives only a draft they created" do
+      user = create(:user, :submitter)
+      access = access_for(user, :standard)
+
+      expect(
+        access.archive_draft?(PermitApplication.new(created_by: user))
+      ).to be true
+      expect(
+        access.archive_draft?(PermitApplication.new(created_by: owner))
+      ).to be false
+    end
+
     it "can see the project and not its applications, invites, meetings, notes, or activity" do
       expect(access.view_project?).to be true
       expect(access.pin_project?).to be true
@@ -103,6 +116,12 @@ RSpec.describe ProjectAccess do
       expect(access.view_project_notes?).to be false
       expect(access.view_activity?).to be false
       expect(access.delete_step_code?).to be false
+    end
+
+    it "cannot change role tags" do
+      expect(
+        access.edit_role_tags?(ProjectMembership.new(access: :standard))
+      ).to be false
     end
   end
 

@@ -29,6 +29,10 @@ class PermitApplicationBlueprint < Blueprinter::Base
     end
     association :submitter, blueprint: UserBlueprint, view: :minimal
 
+    field :can_archive_draft do |pa, options|
+      options[:project_access]&.archive_draft?(pa) || false
+    end
+
     field :created_by do |pa, _options|
       # ponytail: applications created before created_by was stored only have a submitter
       creator = pa.created_by || pa.submitter

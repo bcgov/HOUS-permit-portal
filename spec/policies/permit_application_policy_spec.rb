@@ -53,6 +53,40 @@ RSpec.describe PermitApplicationPolicy do
       expect(policy.show?).to be true
     end
 
+    it "permits show for an Expanded member who is not the creator" do
+      expanded = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: draft_permit_application.permit_project,
+        user: expanded,
+        access: :expanded
+      )
+      policy =
+        described_class.new(
+          UserContext.new(expanded, sandbox),
+          draft_permit_application
+        )
+
+      expect(policy.show?).to be true
+    end
+
+    it "denies show for a Standard member" do
+      standard = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: draft_permit_application.permit_project,
+        user: standard,
+        access: :standard
+      )
+      policy =
+        described_class.new(
+          UserContext.new(standard, sandbox),
+          draft_permit_application
+        )
+
+      expect(policy.show?).to be false
+    end
+
     it "permits create when under a project owned by the submitter" do
       expect(subject.create?).to be true
     end
@@ -83,6 +117,23 @@ RSpec.describe PermitApplicationPolicy do
         )
 
       expect(policy.create?).to be true
+    end
+
+    it "denies create for a Standard member" do
+      standard = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: draft_permit_application.permit_project,
+        user: standard,
+        access: :standard
+      )
+      policy =
+        described_class.new(
+          UserContext.new(standard, sandbox),
+          draft_permit_application
+        )
+
+      expect(policy.create?).to be false
     end
 
     it "permits create for review staff who can view the project" do
@@ -211,6 +262,20 @@ RSpec.describe PermitApplicationPolicy do
         ).update?
       ).to be true
 
+      expanded = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: draft_permit_application.permit_project,
+        user: expanded,
+        access: :expanded
+      )
+      expect(
+        described_class.new(
+          UserContext.new(expanded, sandbox),
+          draft_permit_application
+        ).update?
+      ).to be true
+
       standard = create(:user, :submitter)
       create(
         :project_membership,
@@ -282,10 +347,53 @@ RSpec.describe PermitApplicationPolicy do
           draft_permit_application
         ).update_version?
       ).to be true
+
+      expanded = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: draft_permit_application.permit_project,
+        user: expanded,
+        access: :expanded
+      )
+      expect(
+        described_class.new(
+          UserContext.new(expanded, sandbox),
+          draft_permit_application
+        ).update_version?
+      ).to be true
+
+      standard = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: draft_permit_application.permit_project,
+        user: standard,
+        access: :standard
+      )
+      expect(
+        described_class.new(
+          UserContext.new(standard, sandbox),
+          draft_permit_application
+        ).update_version?
+      ).to be false
       expect(
         described_class.new(
           UserContext.new(create(:user, :submitter), sandbox),
           draft_permit_application
+        ).update_version?
+      ).to be false
+
+      submitted =
+        create(
+          :permit_application,
+          :newly_submitted,
+          submitter: submitter,
+          jurisdiction: jurisdiction,
+          sandbox: sandbox
+        )
+      expect(
+        described_class.new(
+          UserContext.new(submitter, sandbox),
+          submitted
         ).update_version?
       ).to be false
     end
@@ -336,10 +444,74 @@ RSpec.describe PermitApplicationPolicy do
       ).to be false
     end
 
+    it "lets Full and Expanded respond during revisions and denies Standard" do
+      revision =
+        create(
+          :permit_application,
+          :revisions_requested,
+          submitter: submitter,
+          jurisdiction: jurisdiction,
+          sandbox: sandbox
+        )
+      expanded = create(:user, :submitter)
+      standard = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: revision.permit_project,
+        user: expanded,
+        access: :expanded
+      )
+      create(
+        :project_membership,
+        permit_project: revision.permit_project,
+        user: standard,
+        access: :standard
+      )
+
+      %i[
+        update?
+        update_submitter_note?
+        upload_revision_fulfillment?
+      ].each do |check|
+        expect(
+          described_class.new(
+            UserContext.new(submitter, sandbox),
+            revision
+          ).public_send(check)
+        ).to be true
+        expect(
+          described_class.new(
+            UserContext.new(expanded, sandbox),
+            revision
+          ).public_send(check)
+        ).to be true
+        expect(
+          described_class.new(
+            UserContext.new(standard, sandbox),
+            revision
+          ).public_send(check)
+        ).to be false
+      end
+    end
+
     it "acknowledge_published_electives? permits a member who can edit the draft" do
       expect(
         described_class.new(
           UserContext.new(submitter, sandbox),
+          draft_permit_application
+        ).acknowledge_published_electives?
+      ).to be true
+
+      expanded = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: draft_permit_application.permit_project,
+        user: expanded,
+        access: :expanded
+      )
+      expect(
+        described_class.new(
+          UserContext.new(expanded, sandbox),
           draft_permit_application
         ).acknowledge_published_electives?
       ).to be true
@@ -352,6 +524,19 @@ RSpec.describe PermitApplicationPolicy do
         ).acknowledge_published_electives?
       ).to be false
 
+      standard = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: draft_permit_application.permit_project,
+        user: standard,
+        access: :standard
+      )
+      expect(
+        described_class.new(
+          UserContext.new(standard, sandbox),
+          draft_permit_application
+        ).acknowledge_published_electives?
+      ).to be false
       expect(
         described_class.new(
           UserContext.new(create(:user, :submitter), sandbox),
@@ -367,10 +552,53 @@ RSpec.describe PermitApplicationPolicy do
           draft_permit_application
         ).upload_supporting_document?
       ).to be true
+
+      expanded = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: draft_permit_application.permit_project,
+        user: expanded,
+        access: :expanded
+      )
+      expect(
+        described_class.new(
+          UserContext.new(expanded, sandbox),
+          draft_permit_application
+        ).upload_supporting_document?
+      ).to be true
+
+      standard = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: draft_permit_application.permit_project,
+        user: standard,
+        access: :standard
+      )
+      expect(
+        described_class.new(
+          UserContext.new(standard, sandbox),
+          draft_permit_application
+        ).upload_supporting_document?
+      ).to be false
       expect(
         described_class.new(
           UserContext.new(create(:user, :submitter), sandbox),
           draft_permit_application
+        ).upload_supporting_document?
+      ).to be false
+
+      submitted =
+        create(
+          :permit_application,
+          :newly_submitted,
+          submitter: submitter,
+          jurisdiction: jurisdiction,
+          sandbox: sandbox
+        )
+      expect(
+        described_class.new(
+          UserContext.new(submitter, sandbox),
+          submitted
         ).upload_supporting_document?
       ).to be false
     end
@@ -397,11 +625,98 @@ RSpec.describe PermitApplicationPolicy do
         ).submit?
       ).to be false
 
-      not_draft = double("PermitApplication", draft?: false)
+      not_draft = double("PermitApplication", draft?: false, discarded?: false)
       expect(
         described_class.new(
           UserContext.new(submitter, sandbox),
           not_draft
+        ).submit?
+      ).to be false
+    end
+
+    it "submit? denies a Full member of a different project" do
+      outsider = create(:user, :submitter)
+      other_application =
+        create(
+          :permit_application,
+          submitter: outsider,
+          jurisdiction: jurisdiction,
+          sandbox: sandbox
+        )
+      expect(
+        other_application.permit_project.project_memberships.find_by!(
+          user: outsider
+        )
+      ).to be_full
+      expect(
+        described_class.new(
+          UserContext.new(outsider, sandbox),
+          other_application
+        ).submit?
+      ).to be true
+      expect(
+        described_class.new(
+          UserContext.new(outsider, sandbox),
+          draft_permit_application
+        ).submit?
+      ).to be false
+    end
+
+    it "submit? permits Full and Expanded on a draft or a revision request and denies Standard" do
+      expanded = create(:user, :submitter)
+      standard = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: draft_permit_application.permit_project,
+        user: expanded,
+        access: :expanded
+      )
+      create(
+        :project_membership,
+        permit_project: draft_permit_application.permit_project,
+        user: standard,
+        access: :standard
+      )
+
+      expect(
+        described_class.new(
+          UserContext.new(expanded, sandbox),
+          draft_permit_application
+        ).submit?
+      ).to be true
+      expect(
+        described_class.new(
+          UserContext.new(standard, sandbox),
+          draft_permit_application
+        ).submit?
+      ).to be false
+
+      draft_permit_application.update!(status: :revisions_requested)
+
+      expect(
+        described_class.new(
+          UserContext.new(submitter, sandbox),
+          draft_permit_application
+        ).submit?
+      ).to be true
+      expect(
+        described_class.new(
+          UserContext.new(expanded, sandbox),
+          draft_permit_application
+        ).submit?
+      ).to be true
+      expect(
+        described_class.new(
+          UserContext.new(standard, sandbox),
+          draft_permit_application
+        ).submit?
+      ).to be false
+
+      draft_permit_application.discard
+      expect(
+        described_class.new(
+          UserContext.new(submitter, sandbox),
+          draft_permit_application
         ).submit?
       ).to be false
     end
@@ -433,6 +748,36 @@ RSpec.describe PermitApplicationPolicy do
           draft_permit_application
         ).generate_missing_pdfs?
       ).to be false
+
+      expanded = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: draft_permit_application.permit_project,
+        user: expanded,
+        access: :expanded
+      )
+      expanded_policy =
+        described_class.new(
+          UserContext.new(expanded, sandbox),
+          draft_permit_application
+        )
+      expect(expanded_policy.generate_missing_pdfs?).to be true
+      expect(expanded_policy.download_supporting_documents_zip?).to be true
+
+      standard = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: draft_permit_application.permit_project,
+        user: standard,
+        access: :standard
+      )
+      standard_policy =
+        described_class.new(
+          UserContext.new(standard, sandbox),
+          draft_permit_application
+        )
+      expect(standard_policy.generate_missing_pdfs?).to be false
+      expect(standard_policy.download_supporting_documents_zip?).to be false
     end
 
     it "download_supporting_documents_zip? mirrors generate_missing_pdfs?" do
@@ -669,6 +1014,230 @@ RSpec.describe PermitApplicationPolicy do
       expect(
         described_class.new(UserContext.new(expanded, sandbox), own).restore?
       ).to be true
+    end
+
+    it "lets a Standard member archive only a draft they created" do
+      standard = create(:user, :submitter)
+      project = draft_permit_application.permit_project
+      create(
+        :project_membership,
+        permit_project: project,
+        user: standard,
+        access: :standard
+      )
+      own =
+        create(
+          :permit_application,
+          submitter: standard,
+          permit_project: project,
+          jurisdiction: jurisdiction,
+          sandbox: sandbox
+        )
+      submitted =
+        create(
+          :permit_application,
+          :newly_submitted,
+          submitter: standard,
+          permit_project: project,
+          jurisdiction: jurisdiction,
+          sandbox: sandbox
+        )
+
+      expect(
+        described_class.new(
+          UserContext.new(standard, sandbox),
+          draft_permit_application
+        ).destroy?
+      ).to be false
+      expect(
+        described_class.new(UserContext.new(standard, sandbox), own).destroy?
+      ).to be true
+      expect(
+        described_class.new(UserContext.new(standard, sandbox), own).restore?
+      ).to be true
+      expect(
+        described_class.new(
+          UserContext.new(standard, sandbox),
+          submitted
+        ).destroy?
+      ).to be false
+    end
+  end
+
+  context "for a Full member of a different project" do
+    let(:outsider) { create(:user, :submitter) }
+    let(:other_application) do
+      create(
+        :permit_application,
+        submitter: outsider,
+        jurisdiction: jurisdiction,
+        sandbox: sandbox
+      )
+    end
+
+    def application_policy(user, record)
+      described_class.new(UserContext.new(user, sandbox), record)
+    end
+
+    def expect_outsider_is_full
+      expect(
+        other_application.permit_project.project_memberships.find_by!(
+          user: outsider
+        )
+      ).to be_full
+    end
+
+    it "show? denies a Full member of a different project" do
+      expect_outsider_is_full
+
+      expect(application_policy(outsider, other_application).show?).to be true
+      expect(
+        application_policy(outsider, draft_permit_application).show?
+      ).to be false
+    end
+
+    it "create? denies a Full member of a different project" do
+      expect_outsider_is_full
+
+      expect(application_policy(outsider, other_application).create?).to be true
+      expect(
+        application_policy(outsider, draft_permit_application).create?
+      ).to be false
+    end
+
+    it "update? denies a Full member of a different project" do
+      expect_outsider_is_full
+
+      expect(application_policy(outsider, other_application).update?).to be true
+      expect(
+        application_policy(outsider, draft_permit_application).update?
+      ).to be false
+    end
+
+    it "update_version? denies a Full member of a different project" do
+      expect_outsider_is_full
+
+      expect(
+        application_policy(outsider, other_application).update_version?
+      ).to be true
+      expect(
+        application_policy(outsider, draft_permit_application).update_version?
+      ).to be false
+    end
+
+    it "update_submitter_note? denies a Full member of a different project" do
+      expect_outsider_is_full
+      record =
+        double(
+          "PermitApplication",
+          revisions_requested?: true,
+          permit_project: draft_permit_application.permit_project
+        )
+
+      expect(
+        application_policy(outsider, record).update_submitter_note?
+      ).to be false
+    end
+
+    it "upload_revision_fulfillment? denies a Full member of a different project" do
+      expect_outsider_is_full
+      record =
+        double(
+          "PermitApplication",
+          revisions_requested?: true,
+          permit_project: draft_permit_application.permit_project
+        )
+
+      expect(
+        application_policy(outsider, record).upload_revision_fulfillment?
+      ).to be false
+    end
+
+    it "acknowledge_published_electives? denies a Full member of a different project" do
+      expect_outsider_is_full
+
+      expect(
+        application_policy(
+          outsider,
+          other_application
+        ).acknowledge_published_electives?
+      ).to be true
+      expect(
+        application_policy(
+          outsider,
+          draft_permit_application
+        ).acknowledge_published_electives?
+      ).to be false
+    end
+
+    it "upload_supporting_document? denies a Full member of a different project" do
+      expect_outsider_is_full
+
+      expect(
+        application_policy(
+          outsider,
+          other_application
+        ).upload_supporting_document?
+      ).to be true
+      expect(
+        application_policy(
+          outsider,
+          draft_permit_application
+        ).upload_supporting_document?
+      ).to be false
+    end
+
+    it "generate_missing_pdfs? denies a Full member of a different project" do
+      expect_outsider_is_full
+
+      expect(
+        application_policy(outsider, other_application).generate_missing_pdfs?
+      ).to be true
+      expect(
+        application_policy(
+          outsider,
+          draft_permit_application
+        ).generate_missing_pdfs?
+      ).to be false
+    end
+
+    it "download_supporting_documents_zip? denies a Full member of a different project" do
+      expect_outsider_is_full
+
+      expect(
+        application_policy(
+          outsider,
+          other_application
+        ).download_supporting_documents_zip?
+      ).to be true
+      expect(
+        application_policy(
+          outsider,
+          draft_permit_application
+        ).download_supporting_documents_zip?
+      ).to be false
+    end
+
+    it "destroy? denies a Full member of a different project" do
+      expect_outsider_is_full
+
+      expect(
+        application_policy(outsider, other_application).destroy?
+      ).to be true
+      expect(
+        application_policy(outsider, draft_permit_application).destroy?
+      ).to be false
+    end
+
+    it "restore? denies a Full member of a different project" do
+      expect_outsider_is_full
+
+      expect(
+        application_policy(outsider, other_application).restore?
+      ).to be true
+      expect(
+        application_policy(outsider, draft_permit_application).restore?
+      ).to be false
     end
   end
 
