@@ -23,7 +23,7 @@ import { useMatch } from "react-router-dom"
 import { useSearch } from "../../../hooks/use-search"
 import { IPermitProject } from "../../../models/permit-project"
 import { useMst } from "../../../setup/root"
-import { EProjectAccess, EProjectContactDesignation } from "../../../types/enums"
+import { EProjectAccess, EProjectContactDesignation, EProjectMembershipStatus } from "../../../types/enums"
 import { IProjectPerson } from "../../../types/types"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
@@ -36,6 +36,7 @@ import { SearchGridItem } from "../../shared/grid/search-grid-item"
 import { SearchGridRow } from "../../shared/grid/search-grid-row"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { ProjectAccessTag } from "../../shared/permit-projects/project-access-tag"
+import { AddProjectPersonForm } from "./add-project-person-form"
 import { PersonDetailsPanel } from "./person-details-panel"
 
 const PEOPLE_GRID_TEMPLATE_COLUMNS = "2fr 1.5fr 1fr 1fr 60px"
@@ -46,22 +47,10 @@ interface IProps {
 
 export const PeopleTabPanelContent = observer(({ permitProject }: IProps) => {
   const isNew = Boolean(useMatch("/projects/:permitProjectId/people/new"))
-  if (isNew) return <PeopleNewStub />
+  if (isNew) return <AddProjectPersonForm permitProject={permitProject} />
 
   return <PeopleList permitProject={permitProject} />
 })
-
-const PeopleNewStub = () => {
-  const { t } = useTranslation()
-
-  return (
-    <Box p={10}>
-      <Heading as="h2" size="lg">
-        {t("permitProject.people.addPerson")}
-      </Heading>
-    </Box>
-  )
-}
 
 const PeopleList = observer(({ permitProject }: IProps) => {
   const { t } = useTranslation()
@@ -84,6 +73,7 @@ const PeopleList = observer(({ permitProject }: IProps) => {
     handleCountPerPageChange,
     handlePageChange,
     updateProjectPerson,
+    reinviteProjectPerson,
     destroyProjectPerson,
     primaryContactName,
     alternateContactNames,
@@ -118,6 +108,18 @@ const PeopleList = observer(({ permitProject }: IProps) => {
     const updated = await updateProjectPerson(selectedPerson.id, changes)
     setIsSaving(false)
     setSelectedPerson(updated)
+  }
+
+  const handleReinvite = async (email?: string) => {
+    if (!selectedPerson) return false
+    setIsSaving(true)
+    const updated = await reinviteProjectPerson(selectedPerson.id, email)
+    setIsSaving(false)
+    if (updated) {
+      setSelectedPerson(updated)
+      return true
+    }
+    return false
   }
 
   const handleRemove = async () => {
@@ -236,19 +238,28 @@ const PeopleList = observer(({ permitProject }: IProps) => {
                       <Flex direction="column" align="flex-start">
                         <Text>
                           {person.name}
-                          {person.userId === currentUser?.id ? ` ${t("permitProject.people.you")}` : ""}
+                          {person.userId && person.userId === currentUser?.id
+                            ? ` ${t("permitProject.people.you")}`
+                            : ""}
                         </Text>
-                        {person.contactDesignation === EProjectContactDesignation.primary && (
-                          <Text fontSize="xs" color="text.secondary">
-                            {t("permitProject.people.primaryContact")}
-                          </Text>
-                        )}
+                        {person.status === EProjectMembershipStatus.active &&
+                          person.contactDesignation === EProjectContactDesignation.primary && (
+                            <Text fontSize="xs" color="text.secondary">
+                              {t("permitProject.people.primaryContact")}
+                            </Text>
+                          )}
                       </Flex>
                     </Flex>
                   </SearchGridItem>
                   <SearchGridItem>{person.roleTags.join(", ")}</SearchGridItem>
                   <SearchGridItem>{person.access && <ProjectAccessTag access={person.access} />}</SearchGridItem>
-                  <SearchGridItem>{t("permitProject.people.statusActive")}</SearchGridItem>
+                  <SearchGridItem>
+                    {person.status === EProjectMembershipStatus.expired
+                      ? t("permitProject.people.statusExpired")
+                      : person.status === EProjectMembershipStatus.pending
+                        ? t("permitProject.people.statusPending")
+                        : t("permitProject.people.statusActive")}
+                  </SearchGridItem>
                   <SearchGridItem justifyContent="flex-end" px={2}>
                     <Menu>
                       <MenuButton
@@ -294,8 +305,11 @@ const PeopleList = observer(({ permitProject }: IProps) => {
         </VStack>
       </Flex>
       {selectedPerson && (
+        // MEMBERSHIP COMMENT: canEdit and canRemove currently depend on permitProject.isOwner;
+        // revisit when full-access members can manage project people.
         <PersonDetailsPanel
           person={selectedPerson}
+          isSelf={Boolean(selectedPerson.userId && selectedPerson.userId === currentUser?.id)}
           canEdit={permitProject.isOwner}
           canRemove={permitProject.isOwner && selectedPerson.userId !== permitProject.ownerId}
           primaryContactName={primaryContactName}
@@ -303,6 +317,7 @@ const PeopleList = observer(({ permitProject }: IProps) => {
           isSaving={isSaving}
           onClose={() => setSelectedPerson(null)}
           onSave={handleSave}
+          onReinvite={handleReinvite}
           onRemove={handleRemove}
         />
       )}

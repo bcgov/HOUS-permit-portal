@@ -91,6 +91,7 @@ import {
   IPermitApplicationSearchFilters,
   IPermitProjectSearchFilters,
   IProjectAuditSearchFilters,
+  IProjectInvitation,
   IProjectMeetingInboxSearchFilters,
   IProjectPerson,
   IReportGenerationIssue,
@@ -500,6 +501,30 @@ export class Api {
     )
   }
 
+  async createPermitProjectMembership(
+    permitProjectId: string,
+    membership: {
+      firstName: string
+      lastName: string
+      email: string
+      roleTags?: string[]
+      contactDesignation?: EProjectContactDesignation
+      access?: EProjectAccess
+    }
+  ) {
+    return this.client.post<IApiResponse<IProjectPerson, Record<string, never>>>(
+      `/permit_projects/${permitProjectId}/memberships`,
+      { membership }
+    )
+  }
+
+  async reinvitePermitProjectMembership(permitProjectId: string, membershipId: string, email?: string) {
+    return this.client.post<IApiResponse<IProjectPerson, Record<string, never>>>(
+      `/permit_projects/${permitProjectId}/memberships/${membershipId}/reinvite`,
+      { membership: email ? { email } : {} }
+    )
+  }
+
   async updatePermitProjectMembership(
     permitProjectId: string,
     membershipId: string,
@@ -518,6 +543,22 @@ export class Api {
   async destroyPermitProjectMembership(permitProjectId: string, membershipId: string) {
     return this.client.delete<IApiResponse<null, Record<string, never>>>(
       `/permit_projects/${permitProjectId}/memberships/${membershipId}`
+    )
+  }
+
+  async fetchProjectInvitation(token: string) {
+    return this.client.get<IApiResponse<IProjectInvitation, Record<string, never>>>(`/project_invitations/${token}`)
+  }
+
+  async acceptProjectInvitation(token: string) {
+    return this.client.post<IApiResponse<{ permitProjectId: string; projectTitle: string }, Record<string, never>>>(
+      `/project_invitations/${token}/accept`
+    )
+  }
+
+  async declineProjectInvitation(token: string) {
+    return this.client.post<IApiResponse<{ projectTitle: string }, Record<string, never>>>(
+      `/project_invitations/${token}/decline`
     )
   }
 

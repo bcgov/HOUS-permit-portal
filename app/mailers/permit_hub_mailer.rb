@@ -95,6 +95,29 @@ class PermitHubMailer < ApplicationMailer
     )
   end
 
+  def notify_project_membership_invitation(
+    project_membership,
+    raw_invitation_token
+  )
+    @project_membership = project_membership
+    @permit_project = project_membership.permit_project
+    @inviter = project_membership.invited_by
+    @expires_at =
+      (project_membership.invitation_sent_at || Time.current) +
+        ProjectMembership::INVITATION_EXPIRY
+    @accept_url =
+      FrontendUrlHelper.frontend_url(
+        "/project-invitations/#{raw_invitation_token}"
+      )
+
+    return if project_membership.invited_email.blank?
+
+    send_mail(
+      email: project_membership.invited_email,
+      template_key: :notify_project_membership_invitation
+    )
+  end
+
   def notify_template_version_preview(template_version_preview:)
     @template_version_preview = template_version_preview
     @user = template_version_preview.previewer

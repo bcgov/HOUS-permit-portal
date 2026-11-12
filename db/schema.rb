@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_11_03_183000) do
+ActiveRecord::Schema[7.2].define(version: 2026_11_04_180000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -868,14 +868,25 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_03_183000) do
   end
 
   create_table "project_memberships", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.uuid "user_id", null: false
+    t.uuid "user_id"
     t.uuid "permit_project_id", null: false
     t.integer "access", default: 0, null: false
     t.integer "contact_designation", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "invited_email"
+    t.string "invited_first_name"
+    t.string "invited_last_name"
+    t.uuid "invited_by_id"
+    t.string "invitation_token"
+    t.datetime "invitation_sent_at"
+    t.datetime "invitation_accepted_at"
+    t.datetime "invitation_declined_at"
+    t.index "permit_project_id, lower((invited_email)::text)", name: "index_project_memberships_unique_pending_email_per_project", unique: true, where: "((user_id IS NULL) AND (invitation_declined_at IS NULL))"
+    t.index ["invitation_token"], name: "index_project_memberships_on_invitation_token", unique: true, where: "(invitation_token IS NOT NULL)"
+    t.index ["invited_by_id"], name: "index_project_memberships_on_invited_by_id"
     t.index ["permit_project_id"], name: "index_project_memberships_on_permit_project_id"
-    t.index ["permit_project_id"], name: "index_project_memberships_one_primary_per_project", unique: true, where: "(contact_designation = 1)"
+    t.index ["permit_project_id"], name: "index_project_memberships_one_primary_per_project", unique: true, where: "((contact_designation = 1) AND (user_id IS NOT NULL))"
     t.index ["user_id", "permit_project_id"], name: "index_project_memberships_on_user_and_project", unique: true
     t.index ["user_id"], name: "index_project_memberships_on_user_id"
   end
@@ -1489,6 +1500,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_03_183000) do
   add_foreign_key "project_meetings", "users", column: "requested_by_id"
   add_foreign_key "project_memberships", "permit_projects"
   add_foreign_key "project_memberships", "users"
+  add_foreign_key "project_memberships", "users", column: "invited_by_id"
   add_foreign_key "requirement_documents", "requirement_blocks"
   add_foreign_key "requirement_template_sections", "requirement_template_sections", column: "copied_from_id"
   add_foreign_key "requirement_template_sections", "requirement_templates"

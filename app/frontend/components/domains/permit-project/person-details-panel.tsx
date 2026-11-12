@@ -1,8 +1,26 @@
-import { Avatar, Box, Button, Flex, IconButton, Radio, RadioGroup, Text, VStack } from "@chakra-ui/react"
+import {
+  Avatar,
+  Box,
+  Button,
+  Flex,
+  FormControl,
+  FormLabel,
+  IconButton,
+  Input,
+  Radio,
+  RadioGroup,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { CaretLeft, X } from "@phosphor-icons/react"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { EFlashMessageStatus, EProjectAccess, EProjectContactDesignation } from "../../../types/enums"
+import {
+  EFlashMessageStatus,
+  EProjectAccess,
+  EProjectContactDesignation,
+  EProjectMembershipStatus,
+} from "../../../types/enums"
 import { IProjectPerson } from "../../../types/types"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { ConfirmationModal } from "../../shared/modals/confirmation-modal"
@@ -12,6 +30,7 @@ import { ProjectRoleSelect } from "../../shared/select/selectors/project-role-se
 
 interface IPersonDetailsPanelProps {
   person: IProjectPerson
+  isSelf?: boolean
   canEdit: boolean
   canRemove: boolean
   primaryContactName?: string | null
@@ -23,10 +42,11 @@ interface IPersonDetailsPanelProps {
     contactDesignation?: EProjectContactDesignation
     access?: EProjectAccess
   }) => void
+  onReinvite?: (email?: string) => Promise<boolean>
   onRemove: () => void
 }
 
-type TPanelView = "summary" | "role" | "contact" | "access"
+type TPanelView = "summary" | "role" | "contact" | "access" | "resend"
 
 const SectionDivider = () => (
   <Box as="hr" w="full" flexShrink={0} my={0} border="0" borderTop="1px solid" borderColor="border.light" />
@@ -281,6 +301,7 @@ const AccessEditor = ({
 
 export const PersonDetailsPanel = ({
   person,
+  isSelf = false,
   canEdit,
   canRemove,
   primaryContactName,
@@ -288,16 +309,22 @@ export const PersonDetailsPanel = ({
   isSaving,
   onClose,
   onSave,
+  onReinvite,
   onRemove,
 }: IPersonDetailsPanelProps) => {
   const { t } = useTranslation()
+  const isActive = person.status === EProjectMembershipStatus.active
+  const isExpired = person.status === EProjectMembershipStatus.expired
   const [view, setView] = useState<TPanelView>("summary")
   const [draftRoles, setDraftRoles] = useState<string[]>([])
   const [draftContact, setDraftContact] = useState<EProjectContactDesignation>(person.contactDesignation)
   const [draftAccess, setDraftAccess] = useState<EProjectAccess | null>(person.access)
+  const [resendEmail, setResendEmail] = useState("")
+  const [resentToEmail, setResentToEmail] = useState<string | null>(null)
 
   useEffect(() => {
     setView("summary")
+    setResentToEmail(null)
   }, [person.id])
 
   const contactLabel = (designation: EProjectContactDesignation) => {
@@ -306,11 +333,27 @@ export const PersonDetailsPanel = ({
     return t("permitProject.people.notAProjectContact")
   }
 
-  const openView = (next: Exclude<TPanelView, "summary">) => {
+  const openView = (next: Exclude<TPanelView, "summary" | "resend">) => {
     if (next === "role") setDraftRoles([...person.roleTags])
     if (next === "contact") setDraftContact(person.contactDesignation)
     if (next === "access") setDraftAccess(person.access)
     setView(next)
+  }
+
+  const openResendView = () => {
+    setResendEmail("")
+    setView("resend")
+  }
+
+  const handleSendReinvite = async () => {
+    if (!onReinvite) return
+    const trimmed = resendEmail.trim()
+    if (!trimmed) return
+    const ok = await onReinvite(trimmed)
+    if (ok) {
+      setResentToEmail(trimmed)
+      setView("summary")
+    }
   }
 
   const backToSummary = () => setView("summary")
@@ -328,7 +371,7 @@ export const PersonDetailsPanel = ({
     setView("summary")
   }
 
-  const changeButton = (next: Exclude<TPanelView, "summary">) =>
+  const changeButton = (next: Exclude<TPanelView, "summary" | "resend">) =>
     canEdit ? (
       <Button
         variant="link"
@@ -380,22 +423,109 @@ export const PersonDetailsPanel = ({
       <Box flex={1} minH={0} overflowY="auto" px={6} py={6}>
         {view === "summary" && (
           <VStack align="stretch" spacing={6}>
-            {/* TODO HUB 5774 invitation alert and resend */}
+            {resentToEmail && (
+              <CustomMessageBox
+                status={EFlashMessageStatus.success}
+                title={t("permitProject.people.inviteResentTitle")}
+                description={t("permitProject.people.inviteResentDescription", { email: resentToEmail })}
+              />
+            )}
+
+            {!isActive && (
+              <CustomMessageBox status={isExpired ? EFlashMessageStatus.error : EFlashMessageStatus.info}>
+                <Text as="div" fontSize="md">
+                  {t(isExpired ? "permitProject.people.invitationExpired" : "permitProject.people.invitationSent")}{" "}
+                  {canEdit && onReinvite && (
+                    <Button
+                      variant="link"
+                      size="sm"
+                      h="auto"
+                      minH={0}
+                      px={0}
+                      fontWeight="normal"
+                      textDecoration="underline"
+                      onClick={openResendView}
+                    >
+                      {t(isExpired ? "permitProject.people.sendNewInvite" : "permitProject.people.resendInvite")}
+                    </Button>
+                  )}
+                </Text>
+              </CustomMessageBox>
+            )}
 
             <Box>
               <Text {...sectionTitleProps} mb={3}>
                 {t("permitProject.people.personalDetails")}
               </Text>
-              {/* TODO HUB 5774 personal details after the invitation is accepted */}
-              <Text fontSize="md">{t("permitProject.people.personalDetailsPlaceholder")}</Text>
+              {isActive ? (
+                <VStack align="stretch" spacing={3}>
+                  <Box as="dl">
+                    {(
+                      [
+                        { label: t("permitProject.people.personalDetailsFields.name"), value: person.name },
+                        { label: t("permitProject.people.personalDetailsFields.phone"), value: person.phone },
+                        {
+                          label: t("permitProject.people.personalDetailsFields.organization"),
+                          value: person.organization,
+                        },
+                      ] as const
+                    ).map((item) => (
+                      <Box key={item.label} mb={2}>
+                        <Text as="dt" fontSize="xs" fontWeight="bold" color="text.secondary">
+                          {item.label}
+                        </Text>
+                        <Text as="dd" fontSize="md">
+                          {item.value || t("ui.notProvided")}
+                        </Text>
+                      </Box>
+                    ))}
+                  </Box>
+                  <Text fontSize="sm" color="text.secondary">
+                    {isSelf ? (
+                      <>
+                        {t("permitProject.people.personalDetailsSelfPrefix")}
+                        <RouterLink to="/profile" color="text.link">
+                          {t("permitProject.people.personalDetailsSelfLink")}
+                        </RouterLink>
+                        .
+                      </>
+                    ) : (
+                      t("permitProject.people.personalDetailsOtherNote")
+                    )}
+                  </Text>
+                </VStack>
+              ) : (
+                <Text fontSize="md">{t("permitProject.people.personalDetailsPlaceholder")}</Text>
+              )}
             </Box>
 
             <Box>
               <Text fontWeight="bold" fontSize="md" mb={3}>
                 {t("permitProject.people.status")}
               </Text>
-              {/* TODO HUB 5774 pending invitation status and resend */}
-              <Text fontSize="md">{t("permitProject.people.statusActive")}</Text>
+              <VStack align="stretch" spacing={3}>
+                <Text fontSize="md">
+                  {isActive
+                    ? t("permitProject.people.statusActive")
+                    : isExpired
+                      ? t("permitProject.people.statusExpired")
+                      : t("permitProject.people.statusPending")}
+                </Text>
+                {!isActive && canEdit && onReinvite && (
+                  <Button
+                    variant="link"
+                    size="sm"
+                    h="auto"
+                    minH={0}
+                    px={0}
+                    alignSelf="flex-start"
+                    textDecoration="none"
+                    onClick={openResendView}
+                  >
+                    {t("permitProject.people.resendInvite")}
+                  </Button>
+                )}
+              </VStack>
             </Box>
 
             <SectionDivider />
@@ -489,6 +619,28 @@ export const PersonDetailsPanel = ({
           </VStack>
         )}
 
+        {view === "resend" && (
+          <VStack align="stretch" spacing={5}>
+            <BackLink onClick={backToSummary} />
+            <Text {...sectionTitleProps}>{t("permitProject.people.resendPanel.title")}</Text>
+            <Text fontSize="md">
+              {t("permitProject.people.resendPanel.description", {
+                firstName: person.firstName || person.name,
+              })}
+            </Text>
+            <FormControl>
+              <FormLabel htmlFor="resend-invite-email">{t("permitProject.people.email")}</FormLabel>
+              <Input
+                id="resend-invite-email"
+                type="email"
+                value={resendEmail}
+                onChange={(event) => setResendEmail(event.target.value)}
+                isDisabled={isSaving}
+              />
+            </FormControl>
+          </VStack>
+        )}
+
         {view === "role" && (
           <RoleEditor
             draftRoles={draftRoles}
@@ -519,7 +671,27 @@ export const PersonDetailsPanel = ({
         )}
       </Box>
 
-      {view !== "summary" && <EditorFooter onCancel={onClose} onSave={save} isSaving={isSaving} />}
+      {view === "resend" && (
+        <Flex
+          flexShrink={0}
+          align="center"
+          gap={4}
+          px={6}
+          py={4}
+          borderTop="1px solid"
+          borderColor="border.light"
+          bg="greys.white"
+        >
+          <Button variant="secondary" onClick={backToSummary} isDisabled={isSaving}>
+            {t("ui.cancel")}
+          </Button>
+          <Button variant="primary" onClick={handleSendReinvite} isLoading={isSaving} isDisabled={!resendEmail.trim()}>
+            {t("permitProject.people.resendPanel.send")}
+          </Button>
+        </Flex>
+      )}
+
+      {view !== "summary" && view !== "resend" && <EditorFooter onCancel={onClose} onSave={save} isSaving={isSaving} />}
     </Flex>
   )
 }
