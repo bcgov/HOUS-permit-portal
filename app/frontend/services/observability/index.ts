@@ -1,5 +1,6 @@
 import * as Sentry from "@sentry/react"
 import { reaction } from "mobx"
+import { frontendUpdateCheck } from "../frontend-update"
 import { feedbackOptions } from "./feedback-appearance"
 import { feedbackController } from "./feedback-controller"
 import { privateTransport, roles, uuid } from "./privacy"
@@ -49,6 +50,10 @@ export function initializeSentry() {
       ...(config.feedbackEnabled ? [feedback] : []),
     ],
     beforeBreadcrumb: () => null,
+    beforeSend: (event, hint) => {
+      const updateCheck = frontendUpdateCheck(hint.originalException)
+      return updateCheck ? updateCheck.then((updated) => (updated ? null : event)) : event
+    },
   })
 }
 
