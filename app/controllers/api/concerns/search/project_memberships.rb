@@ -20,28 +20,15 @@ module Api::Concerns::Search::ProjectMemberships
       )
   end
 
-  def project_people_rows
-    @project_membership_search.results.map do |membership|
-      {
-        id: membership.id,
-        user_id: membership.user_id,
-        kind: "member",
-        name: membership.user.name,
-        email: membership.user.email,
-        role_tags: membership.role_list.to_a,
-        access: membership.access,
-        contact_designation: membership.contact_designation
-      }
-    end
-  end
-
   def project_people_meta
     {
       total_pages: @project_membership_search.total_pages,
       total_count: @project_membership_search.total_count,
       current_page: @project_membership_search.current_page,
       per_page: @project_membership_search.limit_value,
-      role_tags: project_role_tags
+      role_tags: project_role_tags,
+      primary_contact_name: primary_contact_name,
+      alternate_contact_names: alternate_contact_names
     }
   end
 
@@ -89,6 +76,30 @@ module Api::Concerns::Search::ProjectMemberships
     where[:access] = filters[:access] if filters[:access].present?
     where[:role_tags] = filters[:role_tags] if filters[:role_tags].present?
     where
+  end
+
+  def primary_contact_name
+    ProjectMembership
+      .includes(:user)
+      .where.not(user_id: nil)
+      .find_by(
+        permit_project_id: @permit_project.id,
+        contact_designation: :primary
+      )
+      &.user
+      &.name
+  end
+
+  def alternate_contact_names
+    ProjectMembership
+      .includes(:user)
+      .where.not(user_id: nil)
+      .where(
+        permit_project_id: @permit_project.id,
+        contact_designation: :alternate
+      )
+      .order(:created_at)
+      .map { |membership| membership.user.name }
   end
 
   def project_role_tags

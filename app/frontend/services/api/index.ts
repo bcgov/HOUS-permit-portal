@@ -66,7 +66,9 @@ import {
   EPermitBlockStatus,
   EPermitProjectSortFields,
   EPreCheckSortFields,
+  EProjectAccess,
   EProjectAuditSortFields,
+  EProjectContactDesignation,
   EProjectMeetingSortFields,
   EQuestionBankSortFields,
   EReleaseNoteSortFields,
@@ -89,7 +91,9 @@ import {
   IPermitApplicationSearchFilters,
   IPermitProjectSearchFilters,
   IProjectAuditSearchFilters,
+  IProjectInvitation,
   IProjectMeetingInboxSearchFilters,
+  IProjectPerson,
   IReportGenerationIssue,
   ISubmissionContact,
   ITemplateVersionDiff,
@@ -489,11 +493,72 @@ export class Api {
 
   async fetchPermitProjectMemberships(
     permitProjectId: string,
-    params?: TSearchParams<never, { access?: string[]; roleTags?: string[] }>
+    params?: TSearchParams<never, { access?: EProjectAccess[]; roleTags?: string[] }>
   ) {
     return this.client.post<IProjectMembershipsResponse>(
       `/permit_projects/${permitProjectId}/memberships/search`,
       params
+    )
+  }
+
+  async createPermitProjectMembership(
+    permitProjectId: string,
+    membership: {
+      firstName: string
+      lastName: string
+      email: string
+      roleTags?: string[]
+      contactDesignation?: EProjectContactDesignation
+      access?: EProjectAccess
+    }
+  ) {
+    return this.client.post<IApiResponse<IProjectPerson, Record<string, never>>>(
+      `/permit_projects/${permitProjectId}/memberships`,
+      { membership }
+    )
+  }
+
+  async reinvitePermitProjectMembership(permitProjectId: string, membershipId: string, email?: string) {
+    return this.client.post<IApiResponse<IProjectPerson, Record<string, never>>>(
+      `/permit_projects/${permitProjectId}/memberships/${membershipId}/reinvite`,
+      { membership: email ? { email } : {} }
+    )
+  }
+
+  async updatePermitProjectMembership(
+    permitProjectId: string,
+    membershipId: string,
+    membership: {
+      roleTags?: string[]
+      contactDesignation?: EProjectContactDesignation
+      access?: EProjectAccess
+    }
+  ) {
+    return this.client.patch<IApiResponse<IProjectPerson, Record<string, never>>>(
+      `/permit_projects/${permitProjectId}/memberships/${membershipId}`,
+      { membership }
+    )
+  }
+
+  async destroyPermitProjectMembership(permitProjectId: string, membershipId: string) {
+    return this.client.delete<IApiResponse<null, Record<string, never>>>(
+      `/permit_projects/${permitProjectId}/memberships/${membershipId}`
+    )
+  }
+
+  async fetchProjectInvitation(token: string) {
+    return this.client.get<IApiResponse<IProjectInvitation, Record<string, never>>>(`/project_invitations/${token}`)
+  }
+
+  async acceptProjectInvitation(token: string) {
+    return this.client.post<IApiResponse<{ permitProjectId: string; projectTitle: string }, Record<string, never>>>(
+      `/project_invitations/${token}/accept`
+    )
+  }
+
+  async declineProjectInvitation(token: string) {
+    return this.client.post<IApiResponse<{ projectTitle: string }, Record<string, never>>>(
+      `/project_invitations/${token}/decline`
     )
   }
 

@@ -73,6 +73,12 @@ const linkGenerators: Partial<Record<ENotificationActionType, LinkGenerator>> = 
 
   [ENotificationActionType.projectReviewCollaborationUnassignment]: () => [],
 
+  [ENotificationActionType.projectMembershipInvitation]: (notification) => {
+    const token = (notification.objectData as { invitationToken?: string })?.invitationToken
+    if (!token) return []
+    return showLink(`/project-invitations/${token}`)
+  },
+
   [ENotificationActionType.permitBlockStatusReady]: (notification) => {
     const data = notification.objectData as IPermitBlockStatusReadyNotificationObjectData
     if (!data?.permitApplicationId) return []

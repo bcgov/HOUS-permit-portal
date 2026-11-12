@@ -50,9 +50,9 @@ class PermitApplication < ApplicationRecord
   has_many :submission_versions, dependent: :destroy
   has_many :notes, as: :noteable, dependent: :destroy
   before_destroy :delete_legacy_submission_collaboration_rows
-  # TODO: HUB-5772 Submission rows (collaboration_type 0) stay in these tables
-  # until they are converted to project memberships. Ignore them here so they
-  # are not treated as review assignments.
+  # TODO: HUB-5783 Submission rows (collaboration_type 0) stay in these tables
+  # until they are converted to project memberships and grants. Ignore them
+  # here so they are not treated as review assignments.
   has_many :permit_collaborations,
            -> { where(discarded_at: nil).where.not(collaboration_type: 0) },
            dependent: :destroy
@@ -335,9 +335,10 @@ class PermitApplication < ApplicationRecord
     collaborators.any?
   end
 
-  # TODO: Revisit when working on permit application grants. This used to
-  # grant block-level edit access to submitter collaborators. Check git history
-  # before changing it.
+  # TODO: HUB-5783 This used to grant block-level edit access to submitter
+  # collaborators. A delegatee could edit every block; an assignee could edit
+  # assigned_requirement_block_id. How that becomes grants is still open.
+  # Check git history before changing it.
   def submission_requirement_block_edit_permissions(user_id:)
     return :all if submitter_id == user_id
 
@@ -861,8 +862,9 @@ class PermitApplication < ApplicationRecord
 
   private
 
-  # TODO: HUB-5772 The association scopes above ignore submission rows. Delete
+  # TODO: HUB-5783 The association scopes above ignore submission rows. Delete
   # them with the application so the foreign keys still allow destroy.
+  # Remove this once those rows are backfilled and collaboration_type is gone.
   def delete_legacy_submission_collaboration_rows
     PermitCollaboration.where(
       permit_application_id: id,

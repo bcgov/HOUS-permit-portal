@@ -1,8 +1,9 @@
 class ReviewOnlyCollaborators < ActiveRecord::Migration[7.2]
   def up
-    # TODO: HUB-5772 Convert existing submitter collaborations into project
-    # memberships instead of deleting them.
-    # https://hous-bssb.atlassian.net/browse/HUB-5772
+    # TODO: HUB-5783 Convert existing submitter collaborations into project
+    # memberships and grants instead of deleting them. This migration already
+    # ran; do the conversion and the drops below in a new migration.
+    # https://hous-bssb.atlassian.net/browse/HUB-5783
     # These deletes are commented out so the submission delegatees, submission
     # assignees, and the user-owned collaborator rows behind them survive until
     # that conversion exists. collaboratorable and collaboration_type stay too,
@@ -49,7 +50,7 @@ class ReviewOnlyCollaborators < ActiveRecord::Migration[7.2]
       SET jurisdiction_id = collaboratorable_id
       WHERE collaboratorable_type = 'Jurisdiction'
     SQL
-    # TODO: HUB-5772 change_column_null :collaborators, :jurisdiction_id, false
+    # TODO: HUB-5783 change_column_null :collaborators, :jurisdiction_id, false
     add_index :collaborators,
               %i[user_id jurisdiction_id],
               unique: true,
@@ -57,7 +58,7 @@ class ReviewOnlyCollaborators < ActiveRecord::Migration[7.2]
     add_index :collaborators, :jurisdiction_id
     add_foreign_key :collaborators, :jurisdictions
 
-    # TODO: HUB-5772 Drop collaboratorable_type, collaboratorable_id, and
+    # TODO: HUB-5783 Drop collaboratorable_type, collaboratorable_id, and
     # collaboration_type once submitter rows have been converted. Dropping them
     # now would erase the submission/review distinction, and the replacement
     # unique indexes would collide while both kinds of block status exist.

@@ -269,15 +269,23 @@ Rails.application.routes.draw do
            to: "part9_building/step_codes#create"
     end
 
+    resources :project_invitations, param: :token, only: %i[show] do
+      member do
+        post :accept
+        post :decline
+      end
+    end
+
     resources :permit_projects, only: %i[show index update create] do
       resources :notes, only: %i[index], controller: "permit_projects/notes" do
         get :download_csv, on: :collection
       end
 
       resources :memberships,
-                only: %i[index],
+                only: %i[index create update destroy],
                 controller: "permit_projects/memberships" do
         post "search", on: :collection, to: "permit_projects/memberships#index"
+        post :reinvite, on: :member
       end
 
       resources :project_meetings, path: "meetings", only: %i[create update] do

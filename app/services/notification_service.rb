@@ -441,6 +441,47 @@ class NotificationService
     NotificationPushJob.perform_async(notification_user_hash)
   end
 
+  def self.publish_project_membership_invitation_event(project_membership)
+    return if project_membership.invited_email.blank?
+
+    users =
+      User
+        .kept
+        .submitter
+        .where.not(confirmed_at: nil)
+        .includes(:preference)
+        .where("LOWER(email) = ?", project_membership.invited_email.downcase)
+
+    notification_data = {
+      "id" => SecureRandom.uuid,
+      "action_type" =>
+        Constants::NotificationActionTypes::PROJECT_MEMBERSHIP_INVITATION,
+      "action_text" =>
+        I18n.t(
+          "notification.project_membership.invitation_notification",
+          inviter_name: project_membership.invited_by&.name,
+          project_title: project_membership.permit_project.title
+        ),
+      "object_data" => {
+        "permit_project_id" => project_membership.permit_project_id
+      }
+    }
+
+    notification_user_hash =
+      users.each_with_object({}) do |user, hash|
+        if user.preference &&
+             !user.preference.enable_in_app_collaboration_notification
+          next
+        end
+
+        hash[user.id] = notification_data
+      end
+
+    return if notification_user_hash.empty?
+
+    NotificationPushJob.perform_async(notification_user_hash)
+  end
+
   def self.publish_permit_block_status_ready_event(permit_block_status)
     unless permit_block_status.ready? && permit_block_status.block_exists?
       return

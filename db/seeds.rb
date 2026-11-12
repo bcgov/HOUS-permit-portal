@@ -794,36 +794,45 @@ member_users =
 if submitter_owner.blank? || north_van.blank?
   puts "  (skipped project memberships: need submitter@example.com and North Vancouver)"
 else
-  invited_project =
-    PermitProject.where(owner: submitter_owner).order(:created_at).first
-  invited_project ||=
-    PermitProject.create!(
-      owner: submitter_owner,
-      jurisdiction: north_van,
-      title: "Submitter house",
-      full_address: "200 West 1st Street, North Vancouver, BC"
-    )
-
-  [
-    [member_users[0], :full, :none, ["Architect"]],
-    [
-      member_users[1],
-      :expanded,
-      :alternate,
-      ["Coordinating registered professional"]
-    ],
-    [member_users[2], :standard, :none, ["Builder"]],
-    [member_users[3], :standard, :none, []]
-  ].each do |user, access, designation, roles|
-    membership =
-      ProjectMembership.find_or_initialize_by(
-        user: user,
-        permit_project: invited_project
+  owner_projects =
+    PermitProject.where(owner: submitter_owner).order(:created_at, :id).to_a
+  if owner_projects.empty?
+    owner_projects = [
+      PermitProject.create!(
+        owner: submitter_owner,
+        jurisdiction: north_van,
+        title: "Submitter house",
+        full_address: "200 West 1st Street, North Vancouver, BC"
       )
-    membership.access = access
-    membership.contact_designation = designation
-    membership.role_list = roles
-    membership.save!
+    ]
+  end
+
+  half_projects = owner_projects.last((owner_projects.size / 2.0).ceil)
+  half_members = member_users.first((member_users.size / 2.0).ceil)
+  ProjectMembership.where(
+    permit_project: owner_projects - half_projects,
+    user: half_members
+  ).destroy_all
+  member_profiles = [
+    [:full, :none, ["Architect"]],
+    [:expanded, :alternate, ["Coordinating registered professional"]],
+    [:standard, :none, ["Builder"]],
+    [:standard, :none, []]
+  ]
+
+  half_projects.each do |project|
+    half_members.each_with_index do |user, index|
+      access, designation, roles = member_profiles[index]
+      membership =
+        ProjectMembership.find_or_initialize_by(
+          user: user,
+          permit_project: project
+        )
+      membership.access = access
+      membership.contact_designation = designation
+      membership.role_list = roles
+      membership.save!
+    end
   end
 
   submitter_1 = member_users[0]

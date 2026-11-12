@@ -20,6 +20,7 @@ export const SessionStoreModel = types
     resetAuth: flow(function* () {
       self.loggedIn = false
       self.tokenExpired = false
+      self.setAfterLoginPath(null)
       self.rootStore.sandboxStore.clearSandboxId()
       self.rootStore.userStore.unsetCurrentUser()
       self.rootStore.disconnectUserChannel()
