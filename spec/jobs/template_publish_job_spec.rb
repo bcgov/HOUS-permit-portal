@@ -4,7 +4,7 @@ require "rails_helper"
 require "sidekiq/testing"
 require "sidekiq/cron"
 
-RSpec.describe TemplatePublishJob, type: :job, search: true do
+RSpec.describe TemplatePublishJob, type: :job do
   before { Sidekiq::Testing.fake! }
 
   it "has no unique lock so retries are not suppressed" do

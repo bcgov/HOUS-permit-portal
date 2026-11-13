@@ -1,9 +1,7 @@
 # spec/controllers/api/requirement_blocks_controller_spec.rb
 require "rails_helper"
 
-RSpec.describe Api::RequirementBlocksController,
-               type: :controller,
-               search: true do
+RSpec.describe Api::RequirementBlocksController, type: :controller do
   # Define users with different roles
   let(:super_admin) { create(:user, :super_admin) }
   let(:submitter) { create(:user, :submitter) }
@@ -42,21 +40,19 @@ RSpec.describe Api::RequirementBlocksController,
     sign_in super_admin
   end
 
-  describe "GET #index" do
+  describe "GET #index", search: true do
     let!(:visible_requirement_block) { create(:requirement_block) }
     let!(:discarded_requirement_block) do
       create(:requirement_block, discarded_at: Time.current)
     end
 
-    before do
-      RequirementBlock.reindex
-      RequirementBlock.search_index.refresh
-    end
+    before { reindex_search(RequirementBlock) }
 
     context "when the user is unauthorized" do
       before { sign_in submitter }
 
       it "returns an empty result set scoped by policy" do
+        silence_policy_filtered_search_warning(visible_requirement_block)
         get :index, params: { query: "", page: 1, per_page: 20 }, format: :json
 
         expect(response).to have_http_status(:success)
@@ -64,6 +60,7 @@ RSpec.describe Api::RequirementBlocksController,
       end
 
       it "does not load RequirementBlock records when show_archived is true" do
+        silence_policy_filtered_search_warning(discarded_requirement_block)
         expect(RequirementBlock).not_to receive(:find)
 
         get :index,

@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe Api::ContactsController, type: :controller do
+RSpec.describe Api::ContactsController, type: :controller, search: true do
   let(:jurisdiction) { create(:sub_district) }
   let(:super_admin) { create(:user, :super_admin) }
   let!(:review_managers) do
@@ -25,7 +25,7 @@ RSpec.describe Api::ContactsController, type: :controller do
 
   before do
     sign_in submitter
-    Contact.reindex
+    reindex_search(Contact)
   end
 
   describe "GET #contact_options" do
@@ -56,7 +56,7 @@ RSpec.describe Api::ContactsController, type: :controller do
         expect(json_response).to include("meta", "data")
         expect(json_response["data"]["first_name"]).to eq("searchme")
 
-        Contact.reindex
+        reindex_search(Contact)
         sign_in other_submitter
         get :contact_options, params: { query: "searchme" }
         expect(

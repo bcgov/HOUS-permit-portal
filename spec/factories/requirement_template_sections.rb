@@ -10,13 +10,17 @@ FactoryBot.define do
     end
 
     factory :requirement_template_section_with_template_section_blocks do
-      transient { template_section_blocks_count { 5 } }
+      transient do
+        template_section_blocks_count { 5 }
+        requirements_count { 5 }
+      end
 
       after(:create) do |requirement_template_section, evaluator|
         requirement_template_section.template_section_blocks << create_list(
           :template_section_block,
           evaluator.template_section_blocks_count,
-          requirement_template_section: requirement_template_section
+          requirement_template_section: requirement_template_section,
+          requirements_count: evaluator.requirements_count
         )
 
         # You may need to reload the record here, depending on your application

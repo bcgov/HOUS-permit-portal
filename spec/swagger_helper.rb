@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 require "rails_helper"
+require "json-schema"
+
+JSON::Validator.use_multi_json = false
 
 RSpec.configure do |config|
   # Specify a root folder where Swagger JSON files are generated

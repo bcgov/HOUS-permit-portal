@@ -46,7 +46,7 @@ cp .env_example.compose .env.compose
 
 The two example files are tracked; the copied files are ignored. Copy them only when setting up a new environment; the scripts never overwrite an existing environment file.
 
-`bin/local-infra-up` waits for infrastructure health and creates the private `hous-local` SeaweedFS bucket automatically. `bin/setup` installs gems and npm packages, copies `config/database.yml.local` to `config/database.yml` if missing, verifies development/test database names differ, prepares the development and test databases, loads initial development seeds through Rails’ standard `db:prepare` task, and builds the PDF renderer. Repeated setup preserves data; Rails only seeds when initializing the development database.
+`bin/local-infra-up` waits for infrastructure health and creates the private `hous-local` SeaweedFS bucket automatically. `bin/setup` installs gems and npm packages, copies `config/database.yml.local` to `config/database.yml` if missing, prepares the development database and four isolated test databases on the same PostgreSQL server, and builds the PDF renderer. Repeated setup applies pending migrations. Demo seeds are loaded only when initializing the development database.
 
 `bin/dev` starts Rails, Vite, the PDF report bundle watcher, Sidekiq, and Ruby AnyCable RPC. It uses Overmind if installed, then Hivemind, otherwise Foreman (installed automatically if absent). All processes inherit your selected Ruby/Node runtimes.
 
@@ -178,11 +178,35 @@ See the `/devops` folder for Dockerfiles and Helm-Charts
 
 ## Testing
 
-All unit tests should be run like the following:
+With local PostgreSQL, Redis and Elasticsearch running, `./bin/setup` prepares
+the four default test databases. Run the suite using the `parallel_tests` gem:
 
+```sh
+bundle exec parallel_rspec -n 4 --serialize-stdout spec
 ```
-bundle exec rspec
-```
+
+Four workers are the recommended balance of speed and resource use. Use `-n 2`
+for a lighter run.
+
+The gem records file timings in `tmp/parallel_runtime_rspec.log` and uses them to
+balance subsequent runs. CI uses the same four-worker command and caches timings.
+`--serialize-stdout` buffers worker output and prints each worker's output together.
+
+The test database name in `config/database.yml` must include the gem's suffix:
+`database: hous_permit_portal_test<%= ENV["TEST_ENV_NUMBER"] %>`. New setups get this
+from `config/database.yml.local`; existing setups need this one-line change. Leave
+`DATABASE_URL` unset so it cannot override the worker database names. Tests reserve
+Redis databases 8–15 on the configured server, separate from development's 0–4.
+
+`bundle exec rspec spec` still works for a serial run; pass a file or directory for
+focused runs. Add `--profile 10` to report the slowest examples. Run the frontend
+tests with `npm test`.
+
+Database-only specs use transaction rollback and skip Elasticsearch indexing.
+Use `search: true` for real search/indexing tests. Query-only fixtures can use
+`search_callbacks: false` with `reindex_search(Model)` after creating or changing
+records; this bulk-imports into the existing index. Keep callbacks enabled when
+testing automatic index updates.
 
 Some other notes
 

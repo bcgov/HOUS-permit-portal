@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe TemplateVersion, type: :model, search: true do
+RSpec.describe TemplateVersion, type: :model do
   describe "#requires_project_meeting_for_jurisdiction?" do
     let(:jurisdiction) { create(:sub_district) }
     let(:other_jurisdiction) { create(:sub_district) }

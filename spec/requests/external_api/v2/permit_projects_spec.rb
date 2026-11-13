@@ -19,7 +19,7 @@ RSpec.describe "external_api/v2/permit_projects",
       :state,
       PermitProject.states[:queued]
     )
-    PermitProject.reindex
+    reindex_search(PermitProject)
   end
 
   path "/permit_projects/search" do

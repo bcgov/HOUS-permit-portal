@@ -70,19 +70,21 @@ gem "roo", "~> 3.0"
 gem "discard", "~> 1.2"
 gem "faraday", "~> 2.14.3"
 gem "factory_bot", "~> 6.4"
+gem "observer", "~> 0.1"
 # The timcop gem mocks Time, it is only used in specs and for seeding a published template version to get around time based validations
 gem "timecop", "~> 0.9.8"
 gem "sidekiq-cron", "~> 2.4"
 gem "sidekiq-unique-jobs", "~> 8.0"
 gem "rubyzip", "~> 3.7.0"
 gem "anycable-rails", "~> 1.6.2"
-gem "addressable", "~> 2.9"
+gem "addressable", "~> 2.9.2"
 gem "friendly_id", "~> 5.5.1"
 gem "exception_notification", "~> 4.5.0"
-gem "nokogiri", ">= 1.18.9"
+gem "nokogiri", ">= 1.19.7"
 gem "rdoc", ">= 6.6.3.1"
 gem "uri", ">= 1.0.4"
-gem "rack", ">= 3.1.18"
+gem "rack", "~> 3.2.8"
+gem "rack-proxy", "~> 1.0.3"
 gem "simple-feed", "~> 3.2.0"
 # For external api docs
 gem "rswag-api", "~> 2.13"
@@ -105,6 +107,7 @@ group :development, :test do
   # Byebug still requires the readline compatibility library.
   gem "readline", "~> 0.0.4"
   gem "rspec-rails", "~> 6.1.0"
+  gem "parallel_tests", "~> 5.9"
   gem "rswag-specs", "~> 2.17"
   gem "factory_bot_rails", "~> 6.4.2"
   gem "faker", "~> 3.2.2"
@@ -112,9 +115,6 @@ group :development, :test do
   gem "database_cleaner-active_record"
   gem "vcr", "~> 6.2"
   gem "bullet", "~> 8.0"
-
-  # FactoryBot requires observer, which is no longer a default Ruby gem.
-  gem "observer", "~> 0.1"
 end
 
 group :test do

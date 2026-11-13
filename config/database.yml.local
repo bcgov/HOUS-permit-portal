@@ -12,4 +12,4 @@ development:
   database: hous_permit_portal_development
 test:
   <<: *default
-  database: hous_permit_portal_test
+  database: hous_permit_portal_test<%= ENV["TEST_ENV_NUMBER"] %>
