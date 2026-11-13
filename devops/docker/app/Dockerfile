@@ -17,12 +17,12 @@ ENV RAILS_ENV="production" \
 
 # Patch inherited packages as well as the libraries installed here. Refresh this
 # layer with --pull --no-cache when rebuilding for distribution security updates.
-# ImageMagick and libvips are runtime dependencies of mini_magick/ruby-vips.
+# Shrine uses the file command to detect upload MIME types.
 RUN apt-get update -qq && \
     apt-get upgrade --no-install-recommends -y && \
     apt-get install --no-install-recommends -y \
-      ca-certificates imagemagick libgeos-c1t64 libjemalloc2 libpq5 \
-      libproj25 libvips netcat-openbsd postgresql-client proj-bin tzdata && \
+      ca-certificates file libgeos-c1t64 libjemalloc2 libpq5 libproj25 \
+      netcat-openbsd postgresql-client proj-bin tzdata && \
     rm -rf /var/lib/apt/lists/*
 
 # Use jemalloc to improve memory management
