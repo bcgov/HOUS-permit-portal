@@ -92,6 +92,7 @@ export const RequirementFieldRow = ({
   } = useFormContext<IRequirementBlockForm>()
 
   const watchedHint = watch(`requirementsAttributes.${index}.hint`)
+  const watchedInstructions = watch(`requirementsAttributes.${index}.instructions`)
   const watchedRequired = watch(`requirementsAttributes.${index}.required`)
   const requirementType = watch(`requirementsAttributes.${index}.inputType`) ?? field.inputType
   const watchedElective = watch(`requirementsAttributes.${index}.elective`)
@@ -105,6 +106,8 @@ export const RequirementFieldRow = ({
   const defaultHint = watch(`requirementsAttributes.${index}.defaultHint`)
   const defaultInstructions = watch(`requirementsAttributes.${index}.defaultInstructions`)
   const displayedHint = usesBankQuestion && watchedHint == null ? defaultHint : watchedHint
+  const displayedInstructions =
+    usesBankQuestion && watchedInstructions == null ? defaultInstructions : watchedInstructions
 
   const [questionViewer, setQuestionViewer] = useState<{ id: string; key: number } | null>(null)
   // Editable inputs use defaultValue / useFieldArray local state — remount after bank sync.
@@ -310,6 +313,7 @@ export const RequirementFieldRow = ({
           requirementType={requirementType}
           label={watch(`requirementsAttributes.${index}.label`)}
           helperText={displayedHint}
+          instructions={displayedInstructions}
           inputOptions={watch(`requirementsAttributes.${index}.inputOptions`)}
           unit={
             requirementType === ERequirementType.number
