@@ -18,6 +18,7 @@ import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { IRequirementTemplateConfigError } from "../../../types/types"
 import { ConfigErrorsList } from "./config-errors-list"
+import { PermitInformationReminderLink } from "./permit-information-reminder-link"
 import { VersionNoteField, normalizedVersionNote } from "./version-note-field"
 
 interface ICreateEarlyAccessVersionModalProps {
@@ -108,6 +109,7 @@ export const CreateEarlyAccessVersionModal = observer(function CreateEarlyAccess
             ) : (
               <Stack spacing={6}>
                 <Text>{t("requirementTemplate.edit.earlyAccessModalBody")}</Text>
+                <PermitInformationReminderLink requirementTemplateId={requirementTemplateId} />
                 <VersionNoteField value={versionNote} onChange={setVersionNote} />
                 {requirementTemplateId && (
                   <ConfigErrorsList

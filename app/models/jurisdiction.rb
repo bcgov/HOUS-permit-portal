@@ -60,6 +60,7 @@ class Jurisdiction < ApplicationRecord
   has_many :project_meetings, through: :permit_projects
   has_many :contacts, as: :contactable, dependent: :destroy
   has_many :jurisdiction_memberships, dependent: :destroy
+  has_many :jurisdiction_explainers, dependent: :destroy
   has_many :users, through: :jurisdiction_memberships
   has_many :submitters, through: :permit_applications, source: :submitter
   has_many :jurisdiction_requirement_templates, dependent: :destroy
