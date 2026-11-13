@@ -126,6 +126,51 @@ RSpec.describe ProjectMembershipPolicy, type: :policy do
     end
   end
 
+  it "lets Expanded with an invite grant invite below Full, and not touch a Full invite" do
+    expanded = create(:user, :submitter)
+    expanded_membership =
+      create(
+        :project_membership,
+        permit_project: project,
+        user: expanded,
+        access: :expanded
+      )
+    create(:project_grant, :invite, project_membership: expanded_membership)
+    standard_invite =
+      project.project_memberships.new(
+        access: :standard,
+        invited_email: "standard@example.com"
+      )
+    standard_pending =
+      create(:project_membership, :pending_invitation, permit_project: project)
+    full_invite =
+      create(
+        :project_membership,
+        :pending_invitation,
+        permit_project: project,
+        access: :full
+      )
+
+    expect(policy(standard_invite, acting_user: expanded).create?).to be true
+    expect(
+      policy(
+        project.project_memberships.new(access: :expanded),
+        acting_user: expanded
+      ).create?
+    ).to be true
+    expect(
+      policy(
+        project.project_memberships.new(access: :full),
+        acting_user: expanded
+      ).create?
+    ).to be false
+    expect(policy(full_invite, acting_user: expanded).reinvite?).to be false
+    expect(policy(full_invite, acting_user: expanded).destroy?).to be false
+    expect(policy(standard_pending, acting_user: expanded).reinvite?).to be true
+    expect(policy(standard_pending, acting_user: expanded).destroy?).to be true
+    expect(policy(standard_invite, acting_user: owner).create?).to be true
+  end
+
   it "lets Expanded and Standard leave by removing their own membership" do
     expanded_user = create(:user, :submitter)
     expanded =

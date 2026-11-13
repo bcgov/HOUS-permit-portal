@@ -222,6 +222,9 @@ class Api::PermitApplicationsController < Api::ApplicationController
       end
     else
       authorize @permit_application
+      unless supporting_documents_within_block_grant?
+        raise Pundit::NotAuthorizedError
+      end
     end
     begin
       success = @permit_application.update(supporting_document_params)
@@ -396,7 +399,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
   def download_supporting_documents_zip
     authorize @permit_application
 
-    document_ids = Array(params[:supporting_document_ids]).presence
+    document_ids = zip_document_ids
     request_id = SecureRandom.uuid
 
     SupportingDocumentsZipDownloadJob.perform_async(
@@ -630,6 +633,40 @@ class Api::PermitApplicationsController < Api::ApplicationController
       )
     end
     version
+  end
+
+  def supporting_documents_within_block_grant?
+    @permit_application.supporting_documents_within_block_grant?(
+      current_user,
+      fulfillment_document_attributes
+    )
+  end
+
+  # :all and review staff keep the requested ids. A block grant zips only
+  # the files on those blocks.
+  def zip_document_ids
+    requested = Array(params[:supporting_document_ids]).presence
+    permissions =
+      @permit_application.submission_requirement_block_edit_permissions(
+        user_id: current_user.id
+      )
+    return requested unless permissions.is_a?(Array)
+
+    allowed_documents =
+      @permit_application.supporting_documents_for_submitter_based_on_user_permissions(
+        @permit_application.supporting_documents,
+        user: current_user
+      )
+    allowed = allowed_documents == false ? [] : allowed_documents.map(&:id)
+    if requested && (requested.map(&:to_s) - allowed.map(&:to_s)).any?
+      raise Pundit::NotAuthorizedError
+    end
+
+    # An empty list would make the zipper include every file.
+    ids = requested || allowed
+    raise Pundit::NotAuthorizedError if Array(ids).empty?
+
+    ids
   end
 
   def supporting_document_params

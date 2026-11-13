@@ -48,6 +48,7 @@ class PermitApplication < ApplicationRecord
   attr_accessor :front_end_form_update
 
   has_many :submission_versions, dependent: :destroy
+  has_many :project_grants, dependent: :destroy
   has_many :notes, as: :noteable, dependent: :destroy
   before_destroy :delete_legacy_submission_collaboration_rows
   # TODO: HUB-5783 Submission rows (collaboration_type 0) stay in these tables
@@ -345,17 +346,57 @@ class PermitApplication < ApplicationRecord
     collaborators.any?
   end
 
-  # TODO: HUB-5783 This used to grant block-level edit access to submitter
-  # collaborators. A delegatee could edit every block; an assignee could edit
-  # assigned_requirement_block_id. How that becomes grants is still open.
-  # Check git history before changing it.
-  # :all is project edit access (Full or Expanded). A list of block ids
-  # would be a grant.
+  # :all is Full or Expanded on this project. A list is a Standard member's
+  # block grants on this application. nil is everyone else. The form, save,
+  # supporting-file, and revision-request readers already honor those three.
   def submission_requirement_block_edit_permissions(user_id:)
     user = User.find_by(id: user_id)
+    return nil unless user
     return :all if project_access_for(user).edit_application?
+    return :all if application_granted_to?(user)
 
-    nil
+    block_grant_ids_for(user).presence
+  end
+
+  def block_granted_to?(user)
+    block_grant_ids_for(user).any?
+  end
+
+  def application_granted_to?(user)
+    return false unless user
+
+    project_grants
+      .application
+      .joins(:project_membership)
+      .where(project_memberships: { user_id: user.id })
+      .exists?
+  end
+
+  def block_grant_ids_for(user)
+    return [] unless user
+
+    project_grants
+      .block
+      .joins(:project_membership)
+      .where(project_memberships: { user_id: user.id })
+      .pluck(:requirement_block_id)
+  end
+
+  def block_id_from_data_key(data_key)
+    data_key.to_s[/RB([a-zA-Z0-9\-]+)/, 1]
+  end
+
+  # A new supporting file has to name a granted block. :all keeps every file.
+  def supporting_documents_within_block_grant?(user, attributes)
+    permissions =
+      submission_requirement_block_edit_permissions(user_id: user&.id)
+    return true if permissions == :all
+    return false unless permissions.is_a?(Array)
+
+    Array(attributes).all? do |attrs|
+      key = attrs[:data_key] || attrs["data_key"]
+      permissions.include?(block_id_from_data_key(key))
+    end
   end
 
   def user_can_edit_block?(user_id:, requirement_block_id:)

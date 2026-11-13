@@ -127,6 +127,52 @@ RSpec.describe SupportingDocumentPolicy, type: :policy do
     [outsider, owned, target]
   end
 
+  it "downloads and removes only a supporting file on a granted block" do
+    submitter = create(:user, :submitter)
+    permit_application =
+      create(
+        :permit_application,
+        submitter: submitter,
+        jurisdiction: jurisdiction,
+        sandbox: sandbox
+      )
+    granted_id = SecureRandom.uuid
+    other_id = SecureRandom.uuid
+    member = member_with_access(permit_application, :standard)
+    create(
+      :project_grant,
+      project_membership: ProjectMembership.find_by!(user: member),
+      permit_application: permit_application,
+      requirement_block_id: granted_id
+    )
+    granted =
+      create(
+        :supporting_document,
+        permit_application: permit_application,
+        data_key: "file|RB#{granted_id}"
+      )
+    other =
+      create(
+        :supporting_document,
+        permit_application: permit_application,
+        data_key: "file|RB#{other_id}"
+      )
+
+    expect(policy(member, granted).download?).to be true
+    expect(policy(member, other).download?).to be false
+    expect(policy(member, granted).destroy?).to be true
+    expect(policy(member, other).destroy?).to be false
+
+    create(
+      :project_grant,
+      :application,
+      project_membership: ProjectMembership.find_by!(user: member),
+      permit_application: permit_application
+    )
+    expect(policy(member, other).download?).to be true
+    expect(policy(member, other).destroy?).to be true
+  end
+
   it "download? denies a Full member of a different project" do
     outsider, owned, target = full_member_of_another_project(jurisdiction)
 

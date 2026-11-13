@@ -846,6 +846,10 @@ en:
       destroy_error:
         title: Error
         message: "%{error_message}"
+    project_grant:
+      create_error:
+        title: Error
+        message: "%{error_message}"
     project_invitation:
       expired_error:
         title: Error

@@ -449,6 +449,21 @@
   }
 }
 
+// A block conditional hides the panel. Keep the title and replace the fields.
+.formio-component-panel.formio-hidden {
+  display: block !important;
+
+  > .card > .card-body {
+    display: none;
+  }
+
+  > .card::after {
+    content: "Hidden by an answer in another fieldset. You do not need to complete this fieldset.";
+    display: block;
+    padding: var(--chakra-space-2) var(--chakra-space-6) var(--chakra-space-4);
+  }
+}
+
 .form-wrapper {
   h2,
   .formio-section-container > label {

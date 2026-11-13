@@ -262,6 +262,57 @@ RSpec.describe StepCodePolicy, type: :policy do
       expect(policy_for(standard, step_code).destroy?).to be false
       expect(policy_for(standard, step_code).restore?).to be false
     end
+
+    it "shows a Step Code for any block grant and edits it only for the energy block" do
+      membership = ProjectMembership.find_by!(user: standard)
+      create(
+        :project_grant,
+        project_membership: membership,
+        permit_application: permit_application,
+        requirement_block_id: other_block_id
+      )
+
+      expect(policy_for(standard, step_code).show?).to be true
+      expect(policy_for(standard, step_code).update?).to be false
+      expect(policy_for(standard, step_code).create?).to be false
+      expect(policy_for(standard, step_code).destroy?).to be false
+
+      create(
+        :project_grant,
+        project_membership: membership,
+        permit_application: permit_application,
+        requirement_block_id: step_code_block_id
+      )
+
+      expect(policy_for(standard, step_code).update?).to be true
+      expect(policy_for(standard, step_code).create?).to be true
+      expect(policy_for(standard, step_code).destroy?).to be false
+    end
+
+    it "lets an application grant edit Step Code without the energy block" do
+      permit_application.template_version.update!(
+        requirement_blocks_json: {
+          SecureRandom.uuid => {
+            "name" => "Site",
+            "requirements" => [
+              { "id" => SecureRandom.uuid, "input_type" => "text" }
+            ]
+          }
+        }
+      )
+      membership = ProjectMembership.find_by!(user: standard)
+      create(
+        :project_grant,
+        :application,
+        project_membership: membership,
+        permit_application: permit_application
+      )
+
+      expect(policy_for(standard, step_code).show?).to be true
+      expect(policy_for(standard, step_code).update?).to be true
+      expect(policy_for(standard, step_code).create?).to be true
+      expect(policy_for(standard, step_code).destroy?).to be false
+    end
   end
 
   context "for an Expanded member of the project" do

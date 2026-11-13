@@ -494,6 +494,53 @@ RSpec.describe PermitApplicationPolicy do
       end
     end
 
+    it "keeps the revision note, additional information, and submit behind an application grant" do
+      revision =
+        create(
+          :permit_application,
+          :revisions_requested,
+          submitter: submitter,
+          jurisdiction: jurisdiction,
+          sandbox: sandbox
+        )
+      standard = create(:user, :submitter)
+      membership =
+        create(
+          :project_membership,
+          permit_project: revision.permit_project,
+          user: standard,
+          access: :standard
+        )
+      create(
+        :project_grant,
+        project_membership: membership,
+        permit_application: revision,
+        requirement_block_id: SecureRandom.uuid
+      )
+      policy = described_class.new(UserContext.new(standard, sandbox), revision)
+
+      expect(policy.update_submitter_note?).to be false
+      expect(policy.upload_revision_fulfillment?).to be false
+      expect(policy.submit?).to be false
+
+      create(
+        :project_grant,
+        :application,
+        project_membership: membership,
+        permit_application: revision
+      )
+
+      expect(policy.update_submitter_note?).to be true
+      expect(policy.upload_revision_fulfillment?).to be true
+      expect(policy.submit?).to be true
+      expect(
+        described_class::Scope.new(
+          UserContext.new(standard, sandbox),
+          PermitApplication.all
+        ).resolve_viewable
+      ).to include(revision)
+    end
+
     it "acknowledge_published_electives? permits a member who can edit the draft" do
       expect(
         described_class.new(
@@ -1451,6 +1498,54 @@ RSpec.describe PermitApplicationPolicy do
       expect(
         PermitApplicationPolicy.new(context, draft_permit_application).show?
       ).to be false
+    end
+
+    it "opens the granted application and leaves the next one closed" do
+      standard = create(:user, :submitter)
+      membership =
+        create(
+          :project_membership,
+          permit_project: draft_permit_application.permit_project,
+          user: standard,
+          access: :standard
+        )
+      other_application =
+        create(
+          :permit_application,
+          submitter: submitter,
+          jurisdiction: jurisdiction,
+          sandbox: sandbox,
+          permit_project: draft_permit_application.permit_project,
+          template_version: draft_permit_application.template_version
+        )
+      create(
+        :project_grant,
+        project_membership: membership,
+        permit_application: draft_permit_application,
+        requirement_block_id: SecureRandom.uuid
+      )
+      context = UserContext.new(standard, sandbox)
+      viewable =
+        PermitApplicationPolicy::Scope.new(
+          context,
+          PermitApplication.all
+        ).resolve_viewable
+
+      granted = PermitApplicationPolicy.new(context, draft_permit_application)
+      expect(granted.show?).to be true
+      expect(granted.update?).to be true
+      expect(granted.update_version?).to be true
+      expect(granted.acknowledge_published_electives?).to be true
+      expect(granted.upload_supporting_document?).to be true
+      expect(granted.submit?).to be false
+      expect(
+        PermitApplicationPolicy.new(context, other_application).show?
+      ).to be false
+      expect(
+        PermitApplicationPolicy.new(context, other_application).update_version?
+      ).to be false
+      expect(viewable).to include(draft_permit_application)
+      expect(viewable).not_to include(other_application)
     end
   end
 end

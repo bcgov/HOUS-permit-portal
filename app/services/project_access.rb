@@ -66,10 +66,14 @@ class ProjectAccess
     full?
   end
 
-  # Invite, choose access, re-send, and cancel a pending or expired invite.
-  # GRANTS TODO: Expanded with an invite grant. They must not offer Full.
-  # Standard stays denied. This is not a future grant.
+  # Full, or Expanded with an invite grant. Standard stays denied.
+  # Offering Full is invite_at_full?.
   def invite_people?
+    full? || (expanded? && membership.project_grants.invite.exists?)
+  end
+
+  # Offer Full, and re-send or cancel a Full invite. Full only.
+  def invite_at_full?
     full?
   end
 
@@ -94,34 +98,36 @@ class ProjectAccess
     full_or_expanded?
   end
 
-  # Also downloads, Step Code view, revision reference files, and requests
-  # on the application.
-  # GRANTS TODO: Standard with a grant on the application.
+  # Project-wide. A block grant opens one application through
+  # PermitApplicationPolicy, not every application on the project.
   def view_application?
     full_or_expanded?
   end
 
-  # Also template version, electives, supporting documents, Step Code create
-  # and edit, and responding to requests.
-  # GRANTS TODO: Standard with a block grant.
+  # Project-wide edit. A Standard block grant is checked on that application.
   def edit_application?
     full_or_expanded?
   end
 
-  # Standard stays denied. This is not a future grant.
-  # Assigning submit to someone else is assign_submit?.
+  # Standard stays denied unless this application has an application grant.
   def submit_application?
     full_or_expanded?
   end
 
-  # GRANTS TODO: Full and Expanded assign blocks once a grant record exists.
+  # Assign a block grant.
   def assign_block?
-    false
+    full_or_expanded?
   end
 
-  # GRANTS TODO: Full and Expanded assign submit once a grant record exists.
-  def assign_submit?
-    false
+  # Assign the grant that opens one whole application. Full and Expanded.
+  def assign_application?
+    full_or_expanded?
+  end
+
+  # Give an Expanded member an invite grant. Full only.
+  # Sending the invite is invite_people?.
+  def assign_invite?
+    full?
   end
 
   # Full archives any draft. Any member archives a draft they created.

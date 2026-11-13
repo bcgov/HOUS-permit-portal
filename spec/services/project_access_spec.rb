@@ -24,6 +24,7 @@ RSpec.describe ProjectAccess do
       expect(access.archive_project?).to be true
       expect(access.pin_project?).to be true
       expect(access.invite_people?).to be true
+      expect(access.invite_at_full?).to be true
       expect(access.manage_member_standing?).to be true
       expect(access.view_invitations?).to be true
       expect(access.add_application?).to be true
@@ -34,8 +35,9 @@ RSpec.describe ProjectAccess do
       expect(access.manage_meetings?).to be true
       expect(access.view_project_notes?).to be true
       expect(access.view_activity?).to be true
-      expect(access.assign_block?).to be false
-      expect(access.assign_submit?).to be false
+      expect(access.assign_block?).to be true
+      expect(access.assign_application?).to be true
+      expect(access.assign_invite?).to be true
       expect(
         access.edit_role_tags?(ProjectMembership.new(access: :standard))
       ).to be true
@@ -51,6 +53,7 @@ RSpec.describe ProjectAccess do
       expect(access.view_project?).to be true
       expect(access.edit_project?).to be false
       expect(access.invite_people?).to be false
+      expect(access.invite_at_full?).to be false
       expect(access.manage_member_standing?).to be false
       expect(access.view_invitations?).to be true
       expect(access.add_application?).to be true
@@ -61,8 +64,18 @@ RSpec.describe ProjectAccess do
       expect(access.manage_meetings?).to be true
       expect(access.view_project_notes?).to be true
       expect(access.view_activity?).to be true
-      expect(access.assign_block?).to be false
-      expect(access.assign_submit?).to be false
+      expect(access.assign_block?).to be true
+      expect(access.assign_application?).to be true
+      expect(access.assign_invite?).to be false
+    end
+
+    it "invites after an invite grant" do
+      expect(access.invite_people?).to be false
+
+      create(:project_grant, :invite, project_membership: access.membership)
+
+      expect(access.invite_people?).to be true
+      expect(access.invite_at_full?).to be false
     end
 
     it "edits anyone's role tags" do
@@ -107,6 +120,8 @@ RSpec.describe ProjectAccess do
       expect(access.view_project?).to be true
       expect(access.pin_project?).to be true
       expect(access.edit_project?).to be false
+      expect(access.invite_at_full?).to be false
+      expect(access.assign_invite?).to be false
       expect(access.view_application?).to be false
       expect(access.edit_application?).to be false
       expect(access.add_application?).to be false
@@ -165,12 +180,23 @@ RSpec.describe ProjectAccess do
         accesses[:full]
       )
       expect(described_class.levels(:edit_project?)).to eq([accesses[:full]])
+      expect(described_class.levels(:assign_invite?)).to eq([accesses[:full]])
+      expect(described_class.levels(:invite_at_full?)).to eq([accesses[:full]])
       expect(described_class.levels(:view_application?)).to contain_exactly(
         accesses[:expanded],
         accesses[:full]
       )
-      expect(described_class.levels(:assign_block?)).to eq([])
-      expect(described_class.member_sql(:assign_block?)).to eq("FALSE")
+      expect(described_class.levels(:assign_block?)).to contain_exactly(
+        accesses[:expanded],
+        accesses[:full]
+      )
+      expect(described_class.levels(:assign_application?)).to contain_exactly(
+        accesses[:expanded],
+        accesses[:full]
+      )
+      expect(described_class.member_sql(:assign_block?)).to include(
+        "pm.access IN (#{accesses[:expanded]}, #{accesses[:full]})"
+      )
 
       sql =
         described_class.member_sql(
