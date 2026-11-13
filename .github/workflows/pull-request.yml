@@ -34,7 +34,7 @@ jobs:
           node-version-file: ".nvmrc"
           cache: "npm"
       - name: Install Node Dependencies
-        run: npm ci
+        run: npm ci --ignore-scripts
       - name: Run Frontend Tests
         run: npm test
       - name: Build Frontend and PDF Reports
