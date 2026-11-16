@@ -5,9 +5,7 @@ import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IPart3StepCode, Part3StepCodeModel } from "../models/part-3-step-code"
-import { IPart3StepCodeChecklist } from "../models/part-3-step-code-checklist"
 import { IPart9StepCode, Part9StepCodeModel } from "../models/part-9-step-code"
-import { IPart9StepCodeChecklist } from "../models/part-9-step-code-checklist"
 import { EEnergyStep, EStepCodeSortFields, EStepCodeType, EZeroCarbonStep } from "../types/enums"
 import { IPart3ChecklistSelectOptions, IPart9ChecklistSelectOptions, TSearchParams } from "../types/types"
 import {
@@ -344,6 +342,4 @@ export const StepCodeStoreModel = types
     }),
   }))
 
-export interface IStepCodeStore extends Instance<typeof StepCodeStoreModel> {
-  getChecklist(stepCodeId: any): IPart9StepCodeChecklist | IPart3StepCodeChecklist
-}
+export interface IStepCodeStore extends Instance<typeof StepCodeStoreModel> {}

@@ -28,7 +28,8 @@ require_relative "../lib/redis_sentinel_configuration"
 
 module HousPermitPortal
   class Application < Rails::Application
-    # Initialize configuration defaults for originally generated Rails version.
+    # Preserve application behavior during the Rails 8.1 upgrade. Adopt newer
+    # framework defaults separately after reviewing their compatibility.
     config.load_defaults 7.2
 
     # Please, add to the `ignore` list any other `lib` subdirectories that do

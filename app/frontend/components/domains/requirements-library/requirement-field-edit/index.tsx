@@ -16,8 +16,15 @@ import { CalendarBlank, Envelope, MapPin, Phone, X } from "@phosphor-icons/react
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React from "react"
-import { Controller, FieldValues, useController, useFieldArray, useFormContext } from "react-hook-form"
-import { UseFieldArrayProps } from "react-hook-form/dist/types"
+import {
+  Controller,
+  FieldArray,
+  FieldValues,
+  UseFieldArrayProps,
+  useController,
+  useFieldArray,
+  useFormContext,
+} from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import {
   EEnergyStepCodeDependencyRequirementCode,
@@ -39,6 +46,7 @@ export type TRequirementEditProps<TFieldValues extends FieldValues> = TEditableG
   editableInstructionsTextProps?: TEditableInstructionsTextProps<TFieldValues>
   multiOptionProps?: {
     useFieldArrayProps: UseFieldArrayProps<TFieldValues>
+    emptyOption: FieldArray<TFieldValues>
     onOptionValueChange: (optionIndex: number, optionValue: string) => void
     getOptionValue: (idx: number) => IOption | undefined
   }
@@ -184,7 +192,7 @@ const requirementsComponentMap = {
       return null
     }
 
-    const { useFieldArrayProps, onOptionValueChange, getOptionValue } = multiOptionProps
+    const { useFieldArrayProps, emptyOption, onOptionValueChange, getOptionValue } = multiOptionProps
 
     const { fields, append, remove } = useFieldArray<TFieldValues>(useFieldArrayProps)
 
@@ -224,11 +232,10 @@ const requirementsComponentMap = {
               </HStack>
             ))}
 
-            {/*  @ts-ignore*/}
             <Button
               variant={"link"}
               textDecoration={"underline"}
-              onClick={() => append({ value: "", label: "" })}
+              onClick={() => append(emptyOption)}
               isDisabled={isLockedOptions}
             >
               {t("requirementsLibrary.modals.addOptionButton")}
@@ -280,7 +287,7 @@ const requirementsComponentMap = {
       return null
     }
 
-    const { useFieldArrayProps, onOptionValueChange, getOptionValue } = multiOptionProps
+    const { useFieldArrayProps, emptyOption, onOptionValueChange, getOptionValue } = multiOptionProps
 
     const { fields, append, remove } = useFieldArray<TFieldValues>({ ...useFieldArrayProps })
     const isLockedOptions = !!editableGroupProps.lockDefinition
@@ -317,11 +324,10 @@ const requirementsComponentMap = {
               </HStack>
             ))}
 
-            {/*  @ts-ignore*/}
             <Button
               variant={"link"}
               textDecoration={"underline"}
-              onClick={() => append({ value: "", label: "" })}
+              onClick={() => append(emptyOption)}
               isDisabled={isLockedOptions}
             >
               {t("requirementsLibrary.modals.addOptionButton")}
@@ -343,7 +349,7 @@ const requirementsComponentMap = {
       import.meta.env.DEV && console.error("multiOptionProps is required for select requirement edit")
       return null
     }
-    const { useFieldArrayProps, onOptionValueChange, getOptionValue } = multiOptionProps
+    const { useFieldArrayProps, emptyOption, onOptionValueChange, getOptionValue } = multiOptionProps
 
     const { fields, append, remove } = useFieldArray<TFieldValues>(useFieldArrayProps)
 
@@ -378,8 +384,7 @@ const requirementsComponentMap = {
             <Button
               variant={"link"}
               textDecoration={"underline"}
-              //  @ts-ignore
-              onClick={() => append({ value: "", label: "" })}
+              onClick={() => append(emptyOption)}
               isDisabled={isLockedOptions}
             >
               {t("requirementsLibrary.modals.addOptionButton")}

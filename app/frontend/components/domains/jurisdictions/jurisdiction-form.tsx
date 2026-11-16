@@ -173,7 +173,7 @@ export const JurisdictionFormSection: React.FC<TJurisdictionFormProps> = ({
           variant="outline"
           size="sm"
           onClick={() => {
-            setValue("ltsaMatcher", "")
+            setValue<"ltsaMatcher">("ltsaMatcher", "")
           }}
         >
           {t("ui.clear")}

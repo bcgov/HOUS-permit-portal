@@ -20,7 +20,7 @@ import { ApplicationReviewAssigneesCell } from "../jurisdictions/submission-inbo
 
 interface IPermitApplicationGridRowProps {
   permitApplication: IPermitApplication
-  searchModel?: ISearch
+  searchModel?: Pick<ISearch, "search">
   fromInbox?: boolean
 }
 

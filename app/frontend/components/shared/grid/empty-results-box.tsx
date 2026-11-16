@@ -2,7 +2,7 @@ import { Box, BoxProps, HStack, Text } from "@chakra-ui/react"
 import { Empty } from "@phosphor-icons/react"
 import React from "react"
 
-export interface IEmptyResultsBoxProps extends BoxProps {
+export interface IEmptyResultsBoxProps extends Omit<BoxProps, "title"> {
   title?: React.ReactNode
   description?: React.ReactNode
   icon?: React.ReactNode

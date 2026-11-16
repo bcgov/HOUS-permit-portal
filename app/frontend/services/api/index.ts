@@ -606,7 +606,9 @@ export class Api {
 
   async fetchJurisdictionPermitApplications(
     jurisdictionId,
-    params?: TSearchParams<EPermitApplicationInboxSortFields, IPermitApplicationInboxSearchFilters>
+    params?:
+      | TSearchParams<EPermitApplicationInboxSortFields, IPermitApplicationInboxSearchFilters>
+      | TSearchParams<EPermitApplicationSortFields, IPermitApplicationSearchFilters>
   ) {
     return this.client.post<IJurisdictionPermitApplicationResponse>(
       `/jurisdictions/${jurisdictionId}/permit_applications/search`,
@@ -1085,7 +1087,7 @@ export class Api {
   }
 
   async restoreRequirementBlockFromVersion(templateVersionId: string, requirementBlockId: string) {
-    return this.client.post<IRequirementBlockResponse>(
+    return this.client.post<IApiResponse<IRequirementBlock, {}>>(
       `/template_versions/${templateVersionId}/restore_requirement_block`,
       { requirementBlockId }
     )

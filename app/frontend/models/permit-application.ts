@@ -234,6 +234,8 @@ export const PermitApplicationModel = types.snapshotProcessor(
       get latestRevisionRequests() {
         return (self.latestSubmissionVersion?.revisionRequests || []).slice().sort((a, b) => a.createdAt - b.createdAt)
       },
+    }))
+    .views((self) => ({
       get latestFieldRevisionRequests() {
         return self.latestRevisionRequests.filter(
           (request) => request.type !== ERevisionRequestType.SupportingDocumentRevisionRequest

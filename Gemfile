@@ -7,15 +7,14 @@ gem "csv", "~> 3.3"
 gem "ostruct", "~> 0.6"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem "rails", "7.2.3.2"
+gem "rails", "8.1.4.1"
 
-# json 3 removed quirks_mode; Rails 7.2 ActiveSupport still passes it.
-# Drop this pin when upgrading to Rails >= 8.1.
+# Keep JSON 2 while upgrading Rails; adopt JSON 3 separately after compatibility testing.
 gem "json", "~> 2.21"
 
 # Use postgresql as the database for Active Record
 gem "pg", "~> 1.1"
-gem "activerecord-nulldb-adapter", "~> 1.1.0" # for Dockerfile asset build
+gem "activerecord-nulldb-adapter", "~> 1.2.2" # for Dockerfile asset build
 
 # Use the Puma web server [https://github.com/puma/puma]
 gem "puma", ">= 6.4.2"
@@ -23,7 +22,7 @@ gem "puma", ">= 6.4.2"
 # Use Redis adapter to run Action Cable in production
 # gem "redis", ">= 4.0.1"
 
-gem "vite_rails", "3.0.17"
+gem "vite_rails", "3.11.1"
 gem "dotenv-rails", "2.8.1", require: "dotenv/rails-now"
 
 # Use Kredis to get higher-level data types in Redis [https://github.com/rails/kredis]
@@ -50,7 +49,8 @@ gem "omniauth-rails_csrf_protection", "1.0.1"
 gem "blueprinter", "~> 1.0.2"
 
 gem "awesome_print", "~> 1.9"
-gem "sidekiq", "~> 7.2.4"
+# Sidekiq 8.1 requires connection_pool 3; SimpleFeed still requires version 2.
+gem "sidekiq", "~> 8.0.10"
 gem "sentry-ruby", "~> 7.1.0"
 gem "sentry-rails", "~> 7.1.0"
 gem "sentry-sidekiq", "~> 7.1.0"
@@ -61,25 +61,25 @@ gem "acts_as_list", "~> 1.1.0"
 gem "searchkick", "~> 5.3.1"
 gem "elasticsearch", "~> 8.11.2"
 gem "kaminari", "~> 1.2.2"
-gem "acts-as-taggable-on", "~> 12.0"
+gem "acts-as-taggable-on", "~> 13.0"
 # Assuming BC Common Object Management Service (COMS) is compatible with S3 formats:
 gem "aws-sdk-s3", "~> 1.208.0"
 gem "pundit", "~> 2.3.1"
 gem "phonelib", "~> 0.8.5"
 gem "roo", "~> 3.0"
-gem "discard", "~> 1.2"
+gem "discard", "~> 1.4"
 gem "faraday", "~> 2.14.3"
 gem "factory_bot", "~> 6.4"
 gem "observer", "~> 0.1"
 # The timcop gem mocks Time, it is only used in specs and for seeding a published template version to get around time based validations
 gem "timecop", "~> 0.9.8"
 gem "sidekiq-cron", "~> 2.4"
-gem "sidekiq-unique-jobs", "~> 8.0"
+gem "sidekiq-unique-jobs", "~> 8.1"
 gem "rubyzip", "~> 3.7.0"
 gem "anycable-rails", "~> 1.6.2"
 gem "addressable", "~> 2.9.2"
 gem "friendly_id", "~> 5.5.1"
-gem "exception_notification", "~> 4.5.0"
+gem "exception_notification", "~> 5.0.1"
 gem "nokogiri", ">= 1.19.7"
 gem "rdoc", ">= 6.6.3.1"
 gem "uri", ">= 1.0.4"
@@ -87,8 +87,8 @@ gem "rack", "~> 3.2.8"
 gem "rack-proxy", "~> 1.0.3"
 gem "simple-feed", "~> 3.2.0"
 # For external api docs
-gem "rswag-api", "~> 2.13"
-gem "rswag-ui", "~> 2.13"
+gem "rswag-api", "~> 2.17"
+gem "rswag-ui", "~> 2.17"
 
 # brew install geos
 # bundle config build.rgeo --with-geos-dir="$(brew --prefix geos)"
@@ -106,19 +106,19 @@ group :development, :test do
   gem "pry-byebug", "~> 3.10.1"
   # Byebug still requires the readline compatibility library.
   gem "readline", "~> 0.0.4"
-  gem "rspec-rails", "~> 6.1.0"
+  gem "rspec-rails", "~> 8.1.0"
   gem "parallel_tests", "~> 5.9"
   gem "rswag-specs", "~> 2.17"
   gem "factory_bot_rails", "~> 6.4.2"
   gem "faker", "~> 3.2.2"
   gem "shoulda-matchers", "~> 5.3.0"
   gem "database_cleaner-active_record"
-  gem "vcr", "~> 6.2"
-  gem "bullet", "~> 8.0"
+  gem "vcr", "~> 6.4"
+  gem "bullet", "~> 8.3.1"
 end
 
 group :test do
-  gem "rspec-sidekiq", "~> 4.1"
+  gem "rspec-sidekiq", "~> 5.3"
 end
 
 group :development do

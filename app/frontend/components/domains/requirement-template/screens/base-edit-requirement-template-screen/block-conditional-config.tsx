@@ -246,7 +246,9 @@ export const BlockConditionalConfig = observer(function BlockConditionalConfig({
     const effect = conditional.show
       ? t("requirementTemplate.edit.blockConditional.showBlock")
       : t("requirementTemplate.edit.blockConditional.hideBlock")
-    const operatorLabel = t(`requirementsLibrary.modals.conditionalSetup.operators.${conditional.operator}`)
+    const operatorLabel = t(`requirementsLibrary.modals.conditionalSetup.operators.${conditional.operator}`, {
+      defaultValue: conditional.operator,
+    })
 
     return (
       <HStack
@@ -363,7 +365,11 @@ export const BlockConditionalConfig = observer(function BlockConditionalConfig({
                   />
                 ) : selectedRequirement?.inputType === ERequirementType.date ? (
                   <DatePicker
-                    selected={conditional?.eq ? parse(conditional.eq, datefnsAppDateFormat, new Date()) : null}
+                    selected={
+                      typeof conditional?.eq === "string" && conditional.eq
+                        ? parse(conditional.eq, datefnsAppDateFormat, new Date())
+                        : null
+                    }
                     onChange={(date: Date) => handleValueChange(date ? format(date, datefnsAppDateFormat) : "")}
                     containerProps={{
                       w: "full",
@@ -376,7 +382,7 @@ export const BlockConditionalConfig = observer(function BlockConditionalConfig({
                 ) : (
                   <input
                     type={selectedRequirement?.inputType === ERequirementType.number ? "number" : "text"}
-                    value={conditional?.eq || ""}
+                    value={String(conditional?.eq ?? "")}
                     onChange={(e) => handleValueChange(e.target.value)}
                     style={{
                       padding: "6px 10px",

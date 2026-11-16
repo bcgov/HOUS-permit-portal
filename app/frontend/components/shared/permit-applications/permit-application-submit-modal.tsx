@@ -172,7 +172,7 @@ const CollaboratorSubmitBlockModalContent = observer(function CollaboratorSubmit
   const { t } = useTranslation()
 
   const submitter = permitApplication.submitter
-  const delegatee = permitApplication.delegatee
+  const delegatee = permitApplication.designatedSubmitter?.collaborator?.user
 
   return (
     <VStack spacing={8} textAlign={"center"}>
