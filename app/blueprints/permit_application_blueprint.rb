@@ -27,6 +27,10 @@ class PermitApplicationBlueprint < Blueprinter::Base
       pa.application_contact_membership&.display_name
     end
 
+    field :application_contact_role do |pa|
+      pa.application_contact_membership&.user&.role
+    end
+
     association :sandbox, blueprint: SandboxBlueprint
 
     field :tags do |pa, _options|

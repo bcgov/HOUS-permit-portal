@@ -1609,6 +1609,8 @@ Thank you,
           people: {
             searchPlaceholder: "Search by name",
             addPerson: "Add a person",
+            inviteDisabled:
+              "You do not have permission to invite people. Please contact a project member with Full access.",
             addPersonTitle: "Add a person to this project",
             addPersonDescription:
               "Enter their details and choose what they can access. We'll send an invitation to the email address you provide.",

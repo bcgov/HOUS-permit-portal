@@ -12,6 +12,11 @@ import {
   MenuButton,
   MenuItem,
   MenuList,
+  Popover,
+  PopoverArrow,
+  PopoverBody,
+  PopoverContent,
+  PopoverTrigger,
   Text,
   VStack,
 } from "@chakra-ui/react"
@@ -176,7 +181,7 @@ const PeopleList = observer(({ permitProject }: IProps) => {
                 {t("permitProject.details.people")}
               </Heading>
             </Flex>
-            {projectAccess?.invitePeople && (
+            {projectAccess?.invitePeople ? (
               <RouterLinkButton
                 variant="primary"
                 leftIcon={<Icon as={Plus} />}
@@ -184,6 +189,33 @@ const PeopleList = observer(({ permitProject }: IProps) => {
               >
                 {t("permitProject.people.addPerson")}
               </RouterLinkButton>
+            ) : (
+              <Popover trigger="hover" placement="bottom-end" isLazy openDelay={200}>
+                <PopoverTrigger>
+                  <Box as="span" display="inline-block">
+                    <Button variant="primary" leftIcon={<Icon as={Plus} />} isDisabled>
+                      {t("permitProject.people.addPerson")}
+                    </Button>
+                  </Box>
+                </PopoverTrigger>
+                <PopoverContent
+                  bg="gray.700"
+                  color="whiteAlpha.900"
+                  border="none"
+                  borderRadius="sm"
+                  boxShadow="md"
+                  fontSize="sm"
+                  fontWeight="medium"
+                  w="auto"
+                  maxW="280px"
+                  sx={{ "--popper-arrow-bg": "var(--chakra-colors-gray-700)" }}
+                >
+                  <PopoverArrow bg="gray.700" />
+                  <PopoverBody px={2} py={1}>
+                    {t("permitProject.people.inviteDisabled")}
+                  </PopoverBody>
+                </PopoverContent>
+              </Popover>
             )}
           </Flex>
 

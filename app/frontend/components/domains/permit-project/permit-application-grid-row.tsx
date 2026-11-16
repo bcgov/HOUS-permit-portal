@@ -100,7 +100,13 @@ export const PermitApplicationGridRow = observer(
               <ApplicationReviewAssigneesCell application={permitApplication} />
             ) : (
               permitApplication.applicationContactName && (
-                <Text noOfLines={1}>{permitApplication.applicationContactName}</Text>
+                <Tooltip label={permitApplication.applicationContactName} hasArrow placement="top" openDelay={200}>
+                  <SharedAvatar
+                    name={permitApplication.applicationContactName}
+                    role={permitApplication.applicationContactRole}
+                    size="sm"
+                  />
+                </Tooltip>
               )
             )}
           </SearchGridItem>

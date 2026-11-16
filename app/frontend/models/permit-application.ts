@@ -120,6 +120,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       projectNumber: types.maybeNull(types.string),
       applicationContactMembershipId: types.maybeNull(types.string),
       applicationContactName: types.maybeNull(types.string),
+      applicationContactRole: types.maybeNull(types.string),
       discardedAt: types.maybeNull(types.Date),
       inboxSortOrder: types.maybeNull(types.number),
       allowedManualTransitions: types.optional(types.array(types.string), []),
@@ -889,6 +890,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
           const data = response.data?.data
           self.applicationContactMembershipId = data?.applicationContactMembershipId ?? membershipId
           self.applicationContactName = data?.applicationContactName ?? null
+          self.applicationContactRole = data?.applicationContactRole ?? null
         }
         return response.ok
       }),
