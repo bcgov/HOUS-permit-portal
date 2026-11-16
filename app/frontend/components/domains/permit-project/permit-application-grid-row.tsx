@@ -64,7 +64,7 @@ export const PermitApplicationGridRow = observer(
       >
         <SearchGridRow
           aria-disabled={isDisabledRow}
-          opacity={isLockedDraft ? 0.55 : undefined}
+          opacity={isLockedDraft || isViewRestricted ? 0.55 : undefined}
           bgImage={
             shouldMarkRow
               ? `repeating-linear-gradient(45deg,${colors.background.sandboxStripe} 5px,${colors.background.sandboxStripe} 10px,rgba(0, 0, 0, 0) 10px,rgba(0, 0, 0, 0) 20px)`

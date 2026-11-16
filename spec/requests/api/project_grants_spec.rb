@@ -808,5 +808,17 @@ RSpec.describe "project grants", type: :request do
           headers: headers
       expect(response).to have_http_status(:forbidden)
     end
+
+    it "lists the application's grants for review staff who can open it" do
+      grant = grant_block!
+      create(:project_meeting, :open, permit_project: project)
+      sign_in create(:user, :reviewer, jurisdiction: jurisdiction)
+
+      get "/api/permit_applications/#{application.id}/project_grants",
+          headers: headers
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response["data"].map { |row| row["id"] }).to include(grant.id)
+    end
   end
 end

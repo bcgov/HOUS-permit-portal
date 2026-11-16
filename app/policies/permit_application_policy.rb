@@ -35,9 +35,9 @@ class PermitApplicationPolicy < ApplicationPolicy
     project_access.edit_application?
   end
 
-  # The people panel. Same door as opening this application.
+  # The people panel. Same door as opening this application, including review staff.
   def open_people?
-    can_open?
+    show?
   end
 
   # A field-revision response is this check while revisions_requested.

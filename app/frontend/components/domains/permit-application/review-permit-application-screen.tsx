@@ -14,15 +14,17 @@ import {
   Text,
   useDisclosure,
 } from "@chakra-ui/react"
-import { ArrowsClockwise, CaretDown, CaretRight, CaretUp, Info, NotePencil, Swap } from "@phosphor-icons/react"
+import { ArrowsClockwise, CaretDown, CaretRight, CaretUp, Info, NotePencil, Swap, Users } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useRef, useState } from "react"
 import { useController, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
+import { useServerAPI } from "../../../setup/root"
 import { stickyBelowNavBar } from "../../../styles/nav-bar-offset"
 import { EPermitApplicationStatus } from "../../../types/enums"
+import { IProjectGrant } from "../../../types/types"
 import { CopyableValue } from "../../shared/base/copyable-value"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
@@ -33,6 +35,7 @@ import { BrowserSearchPrompt } from "../../shared/permit-applications/browser-se
 import { PermitApplicationStatusTag } from "../../shared/permit-applications/permit-application-status-tag"
 import { RequirementForm } from "../../shared/permit-applications/requirement-form"
 import { ReviewAndSendRequestsScreen } from "../../shared/revisions/review-and-send-requests-screen"
+import { ApplicationPeoplePanel } from "./application-people-panel"
 import { ChecklistSideBar } from "./checklist-sidebar"
 import { BlockCollaboratorAssignmentManagement } from "./collaborator-management/block-collaborator-assignment-management"
 import { CollaboratorsSidebar } from "./collaborator-management/collaborators-sidebar"
@@ -45,8 +48,12 @@ interface IReferenceNumberForm {
   referenceNumber?: string
 }
 
+const countGrantedPeople = (grants: IProjectGrant[]) =>
+  new Set(grants.filter((grant) => grant.kind !== "invite").map((grant) => grant.projectMembershipId)).size
+
 export const ReviewPermitApplicationScreen = observer(() => {
   const { currentPermitApplication, error } = usePermitApplication({ review: true })
+  const api = useServerAPI()
   const { t } = useTranslation()
   const formRef = useRef(null)
   const { requirementBlockAssignmentNodes, updateRequirementBlockAssignmentNode } = useCollaborationAssignmentNodes({
@@ -72,6 +79,8 @@ export const ReviewPermitApplicationScreen = observer(() => {
   const [isReviewingSend, setIsReviewingSend] = useState(false)
   const [isRetriggeringWebhook, setIsRetriggeringWebhook] = useState(false)
   const [isStartingReview, setIsStartingReview] = useState(false)
+  const [peopleOpen, setPeopleOpen] = useState(false)
+  const [grantedPeopleCount, setGrantedPeopleCount] = useState(0)
 
   const sendRevisionContainerRef = useRef<HTMLDivElement | null>(null)
 
@@ -86,6 +95,21 @@ export const ReviewPermitApplicationScreen = observer(() => {
       currentPermitApplication.markAsViewed()
     }
   }, [currentPermitApplication])
+
+  useEffect(() => {
+    const applicationId = currentPermitApplication?.id
+    if (!applicationId) return
+    let cancelled = false
+    const load = async () => {
+      const response = await api.fetchProjectGrants(applicationId)
+      if (cancelled || !response.ok) return
+      setGrantedPeopleCount(countGrantedPeople(response.data?.data ?? []))
+    }
+    void load()
+    return () => {
+      cancelled = true
+    }
+  }, [currentPermitApplication?.id])
 
   useEffect(() => {
     const container = document.getElementById("permitApplicationFieldsContainer")
@@ -236,6 +260,9 @@ export const ReviewPermitApplicationScreen = observer(() => {
           <Flex direction="column" align="flex-end" justify="space-between">
             <Stack direction={{ base: "column", lg: "row" }} align={{ base: "flex-end", lg: "center" }}>
               <BrowserSearchPrompt />
+              <Button variant="primary" leftIcon={<Users />} onClick={() => setPeopleOpen((open) => !open)}>
+                {t("permitApplication.people.buttonWithCount", { count: grantedPeopleCount })}
+              </Button>
               <Button variant="ghost" leftIcon={<Info size={20} />} color="white" onClick={onContactsOpen}>
                 {t("permitApplication.show.contactsSummary")}
               </Button>
@@ -351,7 +378,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
           </Flex>
         )}
       </Flex>
-      <Box id="sidebar-and-form-container" sx={{ "&:after": { content: `""`, display: "block", clear: "both" } }}>
+      <Flex id="sidebar-and-form-container" align="flex-start" w="full">
         {isReviewingSend ? (
           <ReviewAndSendRequestsScreen
             permitApplication={currentPermitApplication}
@@ -377,6 +404,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
               <Flex
                 flex={1}
                 direction="column"
+                minW={0}
                 pt={8}
                 position={"relative"}
                 id="permitApplicationFieldsContainer"
@@ -388,6 +416,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
                   onCompletedBlocksChange={setCompletedBlocks}
                   showHelpButton
                   readOnly={isReadOnly}
+                  sideOffset={peopleOpen ? 360 : 0}
                   renderTopButtons={() => {
                     const collaboratorsButton = (
                       <CollaboratorsSidebar
@@ -439,7 +468,16 @@ export const ReviewPermitApplicationScreen = observer(() => {
             )}
           </>
         )}
-      </Box>
+        {peopleOpen && (
+          <ApplicationPeoplePanel
+            permitApplication={currentPermitApplication}
+            stickyHeaderHeight={permitHeaderHeight}
+            readOnly
+            onClose={() => setPeopleOpen(false)}
+            onGrantsChange={(grants) => setGrantedPeopleCount(countGrantedPeople(grants))}
+          />
+        )}
+      </Flex>
       {isContactsOpen && (
         <ContactSummaryModal
           isOpen={isContactsOpen}

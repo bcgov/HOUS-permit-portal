@@ -2100,6 +2100,7 @@ Thank you,
             standardTitle: "Other people with access to this application",
             standardDescription:
               "People with Standard project access can be given this application, or specific blocks, to view and edit.",
+            giveSomeone: "+ Give someone access",
             entireApplication: "Entire application",
             noBlocks: "No blocks assigned",
             accessTitle: "Application access",

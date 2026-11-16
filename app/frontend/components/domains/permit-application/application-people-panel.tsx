@@ -18,6 +18,7 @@ interface IApplicationPeoplePanelProps {
   // Edit page: pin under the permit header. Applications list: fill the column.
   stickyHeaderHeight?: number
   onGrantsChange?: (grants: IProjectGrant[]) => void
+  readOnly?: boolean
 }
 
 type TPanelView = "summary" | "access" | "contact"
@@ -53,6 +54,7 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
   onClose,
   stickyHeaderHeight,
   onGrantsChange,
+  readOnly = false,
 }: IApplicationPeoplePanelProps) {
   const { t } = useTranslation()
   const api = useServerAPI()
@@ -63,15 +65,18 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [view, setView] = useState<TPanelView>("summary")
+  const [adding, setAdding] = useState(false)
   const [selectedPerson, setSelectedPerson] = useState<IProjectPerson | null>(null)
   const [accessMode, setAccessMode] = useState<TAccessMode>("blocks")
   const [blockIds, setBlockIds] = useState<string[]>([])
   const [contactId, setContactId] = useState<string | null>(permitApplication.applicationContactMembershipId)
 
-  const canChange = Boolean(
-    permitApplication.currentUserAccess?.editApplication ??
-      permitProjectStore.currentPermitProject?.currentUserAccess?.editApplication
-  )
+  const canChange =
+    !readOnly &&
+    Boolean(
+      permitApplication.currentUserAccess?.editApplication ??
+        permitProjectStore.currentPermitProject?.currentUserAccess?.editApplication
+    )
   const options = blockOptions(permitApplication.formJson)
   const fullPeople = people.filter((person) => person.access !== EProjectAccess.standard)
   const standardPeople = people.filter((person) => person.access === EProjectAccess.standard)
@@ -106,6 +111,10 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
   const grantsFor = (membershipId: string) =>
     grants.filter((grant) => grant.projectMembershipId === membershipId && grant.kind !== "invite")
 
+  const grantedStandardPeople = standardPeople.filter((person) => grantsFor(person.id).length > 0)
+  const ungrantedStandardPeople = standardPeople.filter((person) => grantsFor(person.id).length === 0)
+  const personOptions: IOption[] = ungrantedStandardPeople.map((person) => ({ label: person.name, value: person.id }))
+
   const blockName = (blockId: string | null) => options.find((option) => option.value === blockId)?.label
 
   const accessSummary = (person: IProjectPerson) => {
@@ -129,6 +138,7 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
 
   const openAccess = (person: IProjectPerson) => {
     const mine = grantsFor(person.id)
+    setAdding(false)
     setSelectedPerson(person)
     setAccessMode(mine.some((grant) => grant.kind === "application") ? "application" : "blocks")
     setBlockIds(
@@ -136,6 +146,14 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
         .filter((grant) => grant.kind === "block" && grant.requirementBlockId)
         .map((grant) => grant.requirementBlockId as string)
     )
+    setView("access")
+  }
+
+  const openAdd = () => {
+    setAdding(true)
+    setSelectedPerson(null)
+    setAccessMode("application")
+    setBlockIds([])
     setView("access")
   }
 
@@ -257,7 +275,7 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
           <Flex justify="center" py={10}>
             <SharedSpinner />
           </Flex>
-        ) : view === "access" && selectedPerson ? (
+        ) : view === "access" ? (
           <VStack align="stretch" spacing={4}>
             <Button
               variant="link"
@@ -276,11 +294,41 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
               {t("permitApplication.people.accessTitle")}
             </Text>
             <Text color="text.secondary">{t("permitApplication.people.accessDescription")}</Text>
-            <PersonRow
-              person={selectedPerson}
-              line={personLine(selectedPerson)}
-              you={currentUserId === selectedPerson.userId}
-            />
+            {adding ? (
+              <>
+                <AsyncSelect<IOption, false>
+                  isCreatable={false}
+                  defaultOptions={personOptions}
+                  loadOptions={(input) => {
+                    const query = input.trim().toLowerCase()
+                    return Promise.resolve(personOptions.filter((option) => option.label.toLowerCase().includes(query)))
+                  }}
+                  value={personOptions.find((option) => option.value === selectedPerson?.id) ?? null}
+                  onChange={(selected) => {
+                    const person = ungrantedStandardPeople.find((candidate) => candidate.id === selected?.value)
+                    setSelectedPerson(person ?? null)
+                  }}
+                  placeholder={t("permitApplication.blockAccess.peoplePlaceholder")}
+                  stylesToMerge={{ control: { height: "auto", minHeight: "var(--chakra-sizes-10)" } }}
+                />
+                {permitApplication.projectId && (
+                  <Text color="text.secondary">
+                    {t("permitApplication.blockAccess.cantFind")}{" "}
+                    <RouterLink to={`/projects/${permitApplication.projectId}/people`} color="text.link">
+                      {t("permitApplication.blockAccess.addPerson")}
+                    </RouterLink>
+                  </Text>
+                )}
+              </>
+            ) : (
+              selectedPerson && (
+                <PersonRow
+                  person={selectedPerson}
+                  line={personLine(selectedPerson)}
+                  you={currentUserId === selectedPerson.userId}
+                />
+              )
+            )}
             <RadioGroup value={accessMode} onChange={(value) => setAccessMode(value as TAccessMode)}>
               <VStack align="stretch" spacing={3}>
                 <Radio value="application">{t("permitApplication.people.entireApplication")}</Radio>
@@ -337,12 +385,14 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
           <VStack align="stretch" spacing={10}>
             {permitApplication.projectId && (
               <Box>
-                <Text color="text.secondary" lineHeight="1.6" mb={3}>
+                <Text color="text.secondary" lineHeight="1.6" mb={readOnly ? 0 : 3}>
                   {t("permitApplication.people.manageAccess")}
                 </Text>
-                <RouterLink to={`/projects/${permitApplication.projectId}/people`} color="text.link">
-                  {t("permitApplication.people.manageAccessLink")}
-                </RouterLink>
+                {!readOnly && (
+                  <RouterLink to={`/projects/${permitApplication.projectId}/people`} color="text.link">
+                    {t("permitApplication.people.manageAccessLink")}
+                  </RouterLink>
+                )}
               </Box>
             )}
 
@@ -373,7 +423,7 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
                 {t("permitApplication.people.standardDescription")}
               </Text>
               <VStack align="stretch" spacing={6}>
-                {standardPeople.map((person) => (
+                {grantedStandardPeople.map((person) => (
                   <Box key={person.id}>
                     <PersonRow person={person} line={personLine(person)} you={currentUserId === person.userId} />
                     <Text mt={3} fontSize="sm" color="text.secondary" lineHeight="1.5">
@@ -395,6 +445,11 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
                   </Box>
                 ))}
               </VStack>
+              {canChange && (
+                <Button variant="link" px={0} h="auto" minH={0} mt={4} onClick={openAdd}>
+                  {t("permitApplication.people.giveSomeone")}
+                </Button>
+              )}
             </Box>
 
             <Box>
@@ -441,7 +496,14 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
           <Button variant="secondary" onClick={() => setView("summary")} isDisabled={saving}>
             {t("ui.cancel")}
           </Button>
-          <Button variant="primary" onClick={view === "access" ? saveAccess : saveContact} isDisabled={saving}>
+          <Button
+            variant="primary"
+            onClick={view === "access" ? saveAccess : saveContact}
+            isDisabled={
+              saving ||
+              (view === "access" && (!selectedPerson || (adding && accessMode === "blocks" && blockIds.length === 0)))
+            }
+          >
             {t("ui.onlySave")}
           </Button>
         </Flex>
