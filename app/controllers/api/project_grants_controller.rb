@@ -6,7 +6,10 @@ class Api::ProjectGrantsController < Api::ApplicationController
   def index
     application = PermitApplication.find(params[:permit_application_id])
     authorize application, :open_people?
-    render_success application.project_grants.order(:created_at)
+    render_success application
+                     .project_grants
+                     .includes(project_membership: :user)
+                     .order(:created_at)
   rescue ActiveRecord::RecordNotFound
     skip_authorization
     raise

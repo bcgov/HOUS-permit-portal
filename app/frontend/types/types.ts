@@ -711,6 +711,7 @@ export interface IProjectGrant {
   projectMembershipId: string
   permitApplicationId: string | null
   requirementBlockId: string | null
+  memberName?: string | null
 }
 
 // The caller's project access (ProjectAccess#to_h). The API is the check.

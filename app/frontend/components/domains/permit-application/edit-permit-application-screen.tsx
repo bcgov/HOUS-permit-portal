@@ -123,7 +123,12 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const [isReviewingSubmit, setIsReviewingSubmit] = useState(false)
   const [peopleOpen, setPeopleOpen] = useState(false)
   const [blockAccessId, setBlockAccessId] = useState<string | null>(null)
+  const [grants, setGrants] = useState<IProjectGrant[]>([])
   const [grantedPeopleCount, setGrantedPeopleCount] = useState(0)
+  const applyGrants = (next: IProjectGrant[]) => {
+    setGrants(next)
+    setGrantedPeopleCount(countGrantedPeople(next))
+  }
   const [imminentSubmission, setImminentSubmission] = useState(null)
   const reviewSubmitActionsRef = useRef<IReviewSubmitActions | null>(null)
 
@@ -134,7 +139,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
     const load = async () => {
       const response = await api.fetchProjectGrants(applicationId)
       if (cancelled || !response.ok) return
-      setGrantedPeopleCount(countGrantedPeople(response.data?.data ?? []))
+      applyGrants(response.data?.data ?? [])
     }
     void load()
     return () => {
@@ -626,7 +631,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
             permitApplication={currentPermitApplication}
             stickyHeaderHeight={permitHeaderHeight}
             onClose={() => setPeopleOpen(false)}
-            onGrantsChange={(grants) => setGrantedPeopleCount(countGrantedPeople(grants))}
+            onGrantsChange={applyGrants}
           />
         )}
         {blockAccessId && (
@@ -635,7 +640,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
             requirementBlockId={blockAccessId}
             stickyHeaderHeight={permitHeaderHeight}
             onClose={() => setBlockAccessId(null)}
-            onGrantsChange={(grants) => setGrantedPeopleCount(countGrantedPeople(grants))}
+            onGrantsChange={applyGrants}
           />
         )}
       </Flex>
@@ -645,6 +650,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
           requirementBlockAssignmentNode={requirementBlockAssignmentNode}
           permitApplication={currentPermitApplication}
           collaborationType={ECollaborationType.submission}
+          grants={grants}
         />
       ))}
       {isContactsOpen && (

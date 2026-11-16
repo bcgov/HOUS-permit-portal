@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react"
 import { createPortal } from "react-dom"
 import { IPermitApplication } from "../../../../models/permit-application"
 import { ECollaborationType, EPermitBlockStatus } from "../../../../types/enums"
+import { IProjectGrant } from "../../../../types/types"
 import { BlockStatusSelect } from "../../../shared/select/selectors/block-status-select"
 import { CollaboratorAssignmentModal } from "./collaborator-assignment-modal"
 
@@ -17,16 +18,21 @@ interface IProps {
   requirementBlockAssignmentNode: IRequirementBlockAssignmentNode
   permitApplication: IPermitApplication
   collaborationType?: ECollaborationType
+  grants?: IProjectGrant[]
 }
 
 export const BlockCollaboratorAssignmentManagement = observer(function BlockCollaboratorAssignmentManagement({
   requirementBlockAssignmentNode,
   permitApplication,
   collaborationType = ECollaborationType.review,
+  grants = [],
 }: IProps) {
   const { requirementBlockId, attachmentNode } = requirementBlockAssignmentNode
   const existingAssignments = permitApplication.getCollaborationAssigneesByBlockId(requirementBlockId)
   const submissionSide = collaborationType === ECollaborationType.submission
+  const blockGrantees = grants.filter(
+    (grant) => grant.kind === "block" && grant.requirementBlockId === requirementBlockId && grant.memberName
+  )
   return (
     <>
       {createPortal(
@@ -41,6 +47,18 @@ export const BlockCollaboratorAssignmentManagement = observer(function BlockColl
               permitApplication={permitApplication}
               requirementBlockId={requirementBlockId}
             />
+          )}
+          {submissionSide && blockGrantees.length > 0 && (
+            <HStack spacing={1}>
+              {blockGrantees.map((grant) => {
+                const name = grant.memberName ?? ""
+                return (
+                  <Tooltip key={grant.id} label={name}>
+                    <Avatar name={name} size="sm" bg="semantic.warningLight" color="text.primary" />
+                  </Tooltip>
+                )
+              })}
+            </HStack>
           )}
         </HStack>,
         attachmentNode
