@@ -96,7 +96,13 @@ export const PermitApplicationGridRow = observer(
             </VStack>
           </SearchGridItem>
           <SearchGridItem>
-            {fromInbox && <ApplicationReviewAssigneesCell application={permitApplication} />}
+            {fromInbox ? (
+              <ApplicationReviewAssigneesCell application={permitApplication} />
+            ) : (
+              permitApplication.applicationContactName && (
+                <Text noOfLines={1}>{permitApplication.applicationContactName}</Text>
+              )
+            )}
           </SearchGridItem>
           <SearchGridItem>{permitApplication.number}</SearchGridItem>
           <SearchGridItem>{format(updatedAt, datefnsTableDateFormat)}</SearchGridItem>

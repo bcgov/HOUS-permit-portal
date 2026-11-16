@@ -26,7 +26,10 @@ class PermitApplication < ApplicationRecord
     :step_code,
     :submitter,
     :created_by,
-    { permit_collaborations: :collaborator }
+    {
+      permit_collaborations: :collaborator,
+      application_contact_membership: :user
+    }
   ]
 
   belongs_to :submitter, class_name: "User", optional: true

@@ -261,6 +261,7 @@ class PermitProject < ApplicationRecord
           :submitter,
           :created_by,
           :template_version,
+          application_contact_membership: :user,
           requirement_template: :taggings
         )
         .order(updated_at: :desc)

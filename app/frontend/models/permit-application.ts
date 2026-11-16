@@ -119,6 +119,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       projectId: types.maybeNull(types.string),
       projectNumber: types.maybeNull(types.string),
       applicationContactMembershipId: types.maybeNull(types.string),
+      applicationContactName: types.maybeNull(types.string),
       discardedAt: types.maybeNull(types.Date),
       inboxSortOrder: types.maybeNull(types.number),
       allowedManualTransitions: types.optional(types.array(types.string), []),
@@ -885,7 +886,9 @@ export const PermitApplicationModel = types.snapshotProcessor(
       updateApplicationContact: flow(function* (membershipId: string) {
         const response = yield self.environment.api.updateApplicationContact(self.id, membershipId)
         if (response.ok) {
-          self.applicationContactMembershipId = response.data?.data?.applicationContactMembershipId ?? membershipId
+          const data = response.data?.data
+          self.applicationContactMembershipId = data?.applicationContactMembershipId ?? membershipId
+          self.applicationContactName = data?.applicationContactName ?? null
         }
         return response.ok
       }),

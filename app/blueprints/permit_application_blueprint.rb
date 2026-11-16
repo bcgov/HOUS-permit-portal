@@ -23,6 +23,10 @@ class PermitApplicationBlueprint < Blueprinter::Base
            :step_code_stage,
            :application_contact_membership_id
 
+    field :application_contact_name do |pa|
+      pa.application_contact_membership&.display_name
+    end
+
     association :sandbox, blueprint: SandboxBlueprint
 
     field :tags do |pa, _options|
