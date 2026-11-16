@@ -17,13 +17,20 @@ FactoryBot.define do
 
     factory :full_requirement_template,
             aliases: [:live_full_requirement_template] do
-      transient { sections_count { 5 } }
+      transient do
+        sections_count { 5 }
+        template_section_blocks_count { 5 }
+        requirements_count { 5 }
+      end
 
       after(:create) do |template, evaluator|
         template.requirement_template_sections << create_list(
           :requirement_template_section_with_template_section_blocks,
           evaluator.sections_count,
-          requirement_template: template
+          requirement_template: template,
+          template_section_blocks_count:
+            evaluator.template_section_blocks_count,
+          requirements_count: evaluator.requirements_count
         )
       end
     end

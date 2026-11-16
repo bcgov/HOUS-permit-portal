@@ -1,24 +1,23 @@
-# spec/support/rack_attack_helper.rb
 module RackAttackHelper
-  def with_temporary_rate_limit(throttle_key, limit:, period:, &block)
-    original_limit = Rack::Attack.throttles[throttle_key]&.limit
-    original_period = Rack::Attack.throttles[throttle_key]&.period
-
-    # Temporarily change the rate limit
-    Rack::Attack.throttle(throttle_key, limit: limit, period: period) do |req|
-      req.ip
-    end
-
-    block.call
-
-    # Revert to the original configuration
+  def with_temporary_rate_limit(throttle_key, limit:, period:)
+    original = Rack::Attack.throttles[throttle_key]
     Rack::Attack.throttle(
       throttle_key,
-      limit: original_limit,
-      period: original_period
-    ) { |req| req.ip }
+      limit: limit,
+      period: period
+    ) { |request| request.ip }
+    yield
+  ensure
+    if original
+      Rack::Attack.throttles[throttle_key] = original
+    else
+      Rack::Attack.throttles.delete(throttle_key)
+    end
     Rack::Attack.reset!
   end
 end
 
-RSpec.configure { |config| config.include RackAttackHelper }
+RSpec.configure do |config|
+  config.include RackAttackHelper
+  config.before(:each, type: :request) { Rack::Attack.reset! }
+end

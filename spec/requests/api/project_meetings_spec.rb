@@ -190,7 +190,7 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
       )
     end
 
-    before { ProjectMeeting.reindex }
+    before { reindex_search(ProjectMeeting) }
 
     it "returns scoped meeting requests for the project owner" do
       post "/api/permit_projects/#{permit_project.id}/meetings/search",
@@ -208,6 +208,7 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
     end
 
     it "does not return meetings to unrelated users" do
+      silence_policy_filtered_search_warning(meeting, draft_meeting)
       sign_in other_user
 
       post "/api/permit_projects/#{permit_project.id}/meetings/search",
@@ -224,6 +225,7 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
     end
 
     it "returns project-scoped submitted meeting requests for jurisdiction review staff" do
+      silence_policy_filtered_search_warning(draft_meeting)
       reviewer = create(:user, :reviewer, jurisdiction: jurisdiction)
       sign_in reviewer
 
@@ -245,6 +247,7 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
     end
 
     it "does not return project meetings to review staff outside the jurisdiction" do
+      silence_policy_filtered_search_warning(meeting, draft_meeting)
       other_jurisdiction = create(:sub_district, project_meetings_enabled: true)
       reviewer = create(:user, :reviewer, jurisdiction: other_jurisdiction)
       sign_in reviewer
@@ -321,7 +324,7 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
 
     before do
       sign_in reviewer
-      ProjectMeeting.reindex
+      reindex_search(ProjectMeeting)
     end
 
     it "returns jurisdiction-scoped submitted meeting requests with metadata" do
@@ -414,8 +417,7 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
             ),
           confirmed_date: 20.days.from_now
         )
-      ProjectMeeting.reindex
-
+      reindex_search(ProjectMeeting)
       post "/api/jurisdictions/#{jurisdiction.id}/project_meetings/search",
            params: {
              query: "*",
