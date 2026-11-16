@@ -20,8 +20,9 @@ import {
 import { CalendarBlank, Envelope, FileCloud, LightningA, MapPin, Phone } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
-import { ENumberUnit, ERequirementContactFieldItemType, ERequirementType } from "../../../../types/enums"
+import { ENumberUnit, ERequirementType } from "../../../../types/enums"
 import { MultiplySumGridPreview } from "../multiply-sum-grid-preview"
+import { generalContactFieldItems, professionalContactFieldItems } from "./contact-field-items"
 import { GenericContactDisplay } from "./generic-contact-display"
 import { GenericFieldDisplay } from "./generic-field-display"
 import { GenericMultiDisplay } from "./generic-multi-display"
@@ -312,76 +313,11 @@ const requirementsComponentMap = {
   },
 
   [ERequirementType.generalContact](props: TRequirementFieldDisplayProps) {
-    const contactFieldItemTypes: Array<{ type: ERequirementContactFieldItemType; containerProps?: BoxProps }> = [
-      {
-        type: ERequirementContactFieldItemType.contactType,
-        containerProps: {
-          gridColumn: "1 / span 2",
-          sx: {
-            ".chakra-form-control input": {
-              maxW: "full",
-            },
-          },
-        },
-      },
-      { type: ERequirementContactFieldItemType.firstName },
-      { type: ERequirementContactFieldItemType.lastName },
-      { type: ERequirementContactFieldItemType.email },
-      { type: ERequirementContactFieldItemType.phone },
-      {
-        type: ERequirementContactFieldItemType.address,
-        containerProps: {
-          gridColumn: "1 / span 2",
-          sx: {
-            ".chakra-form-control input": {
-              maxW: "full",
-            },
-          },
-        },
-      },
-      { type: ERequirementContactFieldItemType.title },
-      { type: ERequirementContactFieldItemType.organization },
-    ]
-
-    return <GenericContactDisplay contactFieldItems={contactFieldItemTypes} {...props} />
+    return <GenericContactDisplay contactFieldItems={generalContactFieldItems} {...props} />
   },
 
   [ERequirementType.professionalContact](props: TRequirementFieldDisplayProps) {
-    const contactFieldItemTypes: Array<{ type: ERequirementContactFieldItemType; containerProps?: BoxProps }> = [
-      {
-        type: ERequirementContactFieldItemType.contactType,
-        containerProps: {
-          gridColumn: "1 / span 2",
-          sx: {
-            ".chakra-form-control input": {
-              maxW: "full",
-            },
-          },
-        },
-      },
-      { type: ERequirementContactFieldItemType.firstName },
-      { type: ERequirementContactFieldItemType.lastName },
-      { type: ERequirementContactFieldItemType.email },
-      { type: ERequirementContactFieldItemType.phone },
-      {
-        type: ERequirementContactFieldItemType.address,
-        containerProps: {
-          gridColumn: "1 / span 2",
-          sx: {
-            ".chakra-form-control input": {
-              maxW: "full",
-            },
-          },
-        },
-      },
-      { type: ERequirementContactFieldItemType.title },
-      { type: ERequirementContactFieldItemType.businessName },
-      { type: ERequirementContactFieldItemType.businessLicense },
-      { type: ERequirementContactFieldItemType.professionalAssociation },
-      { type: ERequirementContactFieldItemType.professionalNumber },
-    ]
-
-    return <GenericContactDisplay contactFieldItems={contactFieldItemTypes} {...props} />
+    return <GenericContactDisplay contactFieldItems={professionalContactFieldItems} {...props} />
   },
 
   [ERequirementType.multiplySumGrid](props: TRequirementFieldDisplayProps & { inputOptions?: any }) {
