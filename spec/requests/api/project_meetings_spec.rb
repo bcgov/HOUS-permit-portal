@@ -46,7 +46,7 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
       )
     end
 
-    it "lets Expanded request a meeting and denies Standard" do
+    it "lets Expanded request a meeting and denies Limited" do
       expanded = create(:user, :submitter)
       standard = create(:user, :submitter)
       create(
@@ -59,7 +59,7 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
         :project_membership,
         user: standard,
         permit_project: permit_project,
-        access: :standard
+        access: :limited
       )
 
       sign_in expanded
@@ -165,7 +165,7 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
       )
     end
 
-    it "returns a meeting to Expanded and hides it from Standard" do
+    it "returns a meeting to Expanded and hides it from Limited" do
       meeting = create(:project_meeting, permit_project: permit_project)
       expanded = create(:user, :submitter)
       standard = create(:user, :submitter)
@@ -179,7 +179,7 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
         :project_membership,
         user: standard,
         permit_project: permit_project,
-        access: :standard
+        access: :limited
       )
 
       sign_in expanded
@@ -228,7 +228,7 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
   end
 
   describe "GET /api/project_meetings/:id/download_calendar" do
-    it "lets Expanded download a calendar invite and hides it from Standard" do
+    it "lets Expanded download a calendar invite and hides it from Limited" do
       meeting =
         create(
           :project_meeting,
@@ -248,7 +248,7 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
         :project_membership,
         user: standard,
         permit_project: permit_project,
-        access: :standard
+        access: :limited
       )
 
       sign_in expanded
@@ -368,7 +368,7 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
       expect(json_response["data"].pluck("id")).not_to include(other_meeting.id)
     end
 
-    it "returns meetings to Expanded and hides them from Standard" do
+    it "returns meetings to Expanded and hides them from Limited" do
       expanded = create(:user, :submitter)
       standard = create(:user, :submitter)
       create(
@@ -381,7 +381,7 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
         :project_membership,
         user: standard,
         permit_project: permit_project,
-        access: :standard
+        access: :limited
       )
 
       sign_in expanded
@@ -674,7 +674,7 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
   end
 
   describe "PATCH /api/permit_projects/:permit_project_id/meetings/:id" do
-    it "lets Expanded edit a draft and an active meeting and denies Standard" do
+    it "lets Expanded edit a draft and an active meeting and denies Limited" do
       draft = create(:project_meeting, permit_project: permit_project)
       active = create(:project_meeting, :open, permit_project: permit_project)
       expanded = create(:user, :submitter)
@@ -689,7 +689,7 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
         :project_membership,
         user: standard,
         permit_project: permit_project,
-        access: :standard
+        access: :limited
       )
 
       sign_in expanded
@@ -952,7 +952,7 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
   end
 
   describe "POST /api/permit_projects/:permit_project_id/meetings/:id/withdraw" do
-    it "lets Expanded withdraw a meeting request and denies Standard" do
+    it "lets Expanded withdraw a meeting request and denies Limited" do
       meeting = create(:project_meeting, :open, permit_project: permit_project)
       expanded = create(:user, :submitter)
       standard = create(:user, :submitter)
@@ -966,7 +966,7 @@ RSpec.describe "Api::ProjectMeetings", type: :request do
         :project_membership,
         user: standard,
         permit_project: permit_project,
-        access: :standard
+        access: :limited
       )
 
       sign_in standard

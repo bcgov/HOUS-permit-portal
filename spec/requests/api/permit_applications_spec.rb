@@ -111,13 +111,13 @@ RSpec.describe "Api::PermitApplications", type: :request do
       expect(json_response.dig("data", "id")).to eq(permit_application.id)
     end
 
-    it "forbids a Standard member from opening the application" do
+    it "forbids a Limited member from opening the application" do
       member = create(:user, :submitter)
       create(
         :project_membership,
         permit_project: permit_project,
         user: member,
-        access: :standard
+        access: :limited
       )
       sign_in member
 
@@ -187,7 +187,7 @@ RSpec.describe "Api::PermitApplications", type: :request do
         :project_membership,
         permit_project: submitted.permit_project,
         user: standard,
-        access: :standard
+        access: :limited
       )
       sign_in standard
       get "/api/permit_applications/#{submitted.id}", headers: headers
@@ -366,13 +366,13 @@ RSpec.describe "Api::PermitApplications", type: :request do
       expect(permit_application.reload.nickname).to eq("Expanded edit")
     end
 
-    it "forbids a Standard member from editing the application" do
+    it "forbids a Limited member from editing the application" do
       member = create(:user, :submitter)
       create(
         :project_membership,
         permit_project: permit_project,
         user: member,
-        access: :standard
+        access: :limited
       )
       sign_in member
 
@@ -609,13 +609,13 @@ RSpec.describe "Api::PermitApplications", type: :request do
       expect(permit_application.reload).to be_newly_submitted
     end
 
-    it "forbids a Standard member from submitting a draft" do
+    it "forbids a Limited member from submitting a draft" do
       member = create(:user, :submitter)
       create(
         :project_membership,
         permit_project: permit_project,
         user: member,
-        access: :standard
+        access: :limited
       )
       sign_in member
 
@@ -658,7 +658,7 @@ RSpec.describe "Api::PermitApplications", type: :request do
       expect(permit_application.reload).to be_resubmitted
     end
 
-    it "forbids a Standard member from resubmitting a revision request" do
+    it "forbids a Limited member from resubmitting a revision request" do
       version =
         create(:submission_version, permit_application: permit_application)
       create(:revision_request, submission_version: version)
@@ -671,7 +671,7 @@ RSpec.describe "Api::PermitApplications", type: :request do
         :project_membership,
         permit_project: permit_project,
         user: member,
-        access: :standard
+        access: :limited
       )
       sign_in member
 
@@ -981,13 +981,13 @@ RSpec.describe "Api::PermitApplications", type: :request do
       expect(response).to have_http_status(:ok)
     end
 
-    it "forbids a Standard member from acknowledging published electives" do
+    it "forbids a Limited member from acknowledging published electives" do
       member = create(:user, :submitter)
       create(
         :project_membership,
         permit_project: permit_project,
         user: member,
-        access: :standard
+        access: :limited
       )
       sign_in member
 
@@ -1201,13 +1201,13 @@ RSpec.describe "Api::PermitApplications", type: :request do
       expect(revision_application).to be_revisions_requested
     end
 
-    it "forbids a Standard member from responding to a field revision" do
+    it "forbids a Limited member from responding to a field revision" do
       member = create(:user, :submitter)
       create(
         :project_membership,
         permit_project: permit_project,
         user: member,
-        access: :standard
+        access: :limited
       )
       sign_in member
 
@@ -1344,13 +1344,13 @@ RSpec.describe "Api::PermitApplications", type: :request do
       expect(document_request.supporting_documents.reload.size).to eq(1)
     end
 
-    it "forbids a Standard member from uploading a fulfillment" do
+    it "forbids a Limited member from uploading a fulfillment" do
       member = create(:user, :submitter)
       create(
         :project_membership,
         permit_project: revision_application.permit_project,
         user: member,
-        access: :standard
+        access: :limited
       )
       sign_in member
 
@@ -1449,13 +1449,13 @@ RSpec.describe "Api::PermitApplications", type: :request do
       expect(response).to have_http_status(:ok)
     end
 
-    it "forbids a Standard member from updating the template version" do
+    it "forbids a Limited member from updating the template version" do
       member = create(:user, :submitter)
       create(
         :project_membership,
         permit_project: permit_project,
         user: member,
-        access: :standard
+        access: :limited
       )
       sign_in member
 
@@ -1736,13 +1736,13 @@ RSpec.describe "Api::PermitApplications", type: :request do
       expect(json_response["data"]).to be_an(Array)
     end
 
-    it "forbids a Standard member from uploading a supporting document" do
+    it "forbids a Limited member from uploading a supporting document" do
       member = create(:user, :submitter)
       create(
         :project_membership,
         permit_project: permit_project,
         user: member,
-        access: :standard
+        access: :limited
       )
       sign_in member
 
@@ -1826,13 +1826,13 @@ RSpec.describe "Api::PermitApplications", type: :request do
       )
     end
 
-    it "forbids a Standard member from generating the application zip" do
+    it "forbids a Limited member from generating the application zip" do
       member = create(:user, :submitter)
       create(
         :project_membership,
         permit_project: permit_project,
         user: member,
-        access: :standard
+        access: :limited
       )
       sign_in member
       allow(ZipfileJob).to receive(:perform_async)
@@ -1917,13 +1917,13 @@ RSpec.describe "Api::PermitApplications", type: :request do
       expect(SupportingDocumentsZipDownloadJob).to have_received(:perform_async)
     end
 
-    it "forbids a Standard member from downloading the supporting-document zip" do
+    it "forbids a Limited member from downloading the supporting-document zip" do
       member = create(:user, :submitter)
       create(
         :project_membership,
         permit_project: permit_project,
         user: member,
-        access: :standard
+        access: :limited
       )
       sign_in member
       allow(SupportingDocumentsZipDownloadJob).to receive(:perform_async)
@@ -1961,13 +1961,13 @@ RSpec.describe "Api::PermitApplications", type: :request do
   end
 
   describe "DELETE /api/permit_applications/:id" do
-    it "archives a draft for a Standard member who created it" do
+    it "archives a draft for a Limited member who created it" do
       member = create(:user, :submitter)
       create(
         :project_membership,
         permit_project: permit_project,
         user: member,
-        access: :standard
+        access: :limited
       )
       own =
         create(
@@ -1985,13 +1985,13 @@ RSpec.describe "Api::PermitApplications", type: :request do
       expect(own.reload).to be_discarded
     end
 
-    it "forbids a Standard member from archiving someone else's draft" do
+    it "forbids a Limited member from archiving someone else's draft" do
       member = create(:user, :submitter)
       create(
         :project_membership,
         permit_project: permit_project,
         user: member,
-        access: :standard
+        access: :limited
       )
       sign_in member
 
@@ -2032,13 +2032,13 @@ RSpec.describe "Api::PermitApplications", type: :request do
   end
 
   describe "POST /api/permit_applications/:id/restore" do
-    it "restores a draft for the Standard member who created it" do
+    it "restores a draft for the Limited member who created it" do
       member = create(:user, :submitter)
       create(
         :project_membership,
         permit_project: permit_project,
         user: member,
-        access: :standard
+        access: :limited
       )
       own =
         create(
@@ -2113,7 +2113,7 @@ RSpec.describe "Api::PermitApplications", type: :request do
           :project_membership,
           permit_project: project,
           user: create(:user, :submitter),
-          access: :standard
+          access: :limited
         )
 
       sign_in submitter

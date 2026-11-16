@@ -45,7 +45,7 @@ RSpec.describe ReportDocumentPolicy, type: :policy do
       :project_membership,
       permit_project: application.permit_project,
       user: standard,
-      access: :standard
+      access: :limited
     )
     step_code =
       create(

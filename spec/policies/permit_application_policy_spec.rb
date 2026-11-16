@@ -70,13 +70,13 @@ RSpec.describe PermitApplicationPolicy do
       expect(policy.show?).to be true
     end
 
-    it "denies show for a Standard member" do
+    it "denies show for a Limited member" do
       standard = create(:user, :submitter)
       create(
         :project_membership,
         permit_project: draft_permit_application.permit_project,
         user: standard,
-        access: :standard
+        access: :limited
       )
       policy =
         described_class.new(
@@ -119,13 +119,13 @@ RSpec.describe PermitApplicationPolicy do
       expect(policy.create?).to be true
     end
 
-    it "denies create for a Standard member" do
+    it "denies create for a Limited member" do
       standard = create(:user, :submitter)
       create(
         :project_membership,
         permit_project: draft_permit_application.permit_project,
         user: standard,
-        access: :standard
+        access: :limited
       )
       policy =
         described_class.new(
@@ -281,7 +281,7 @@ RSpec.describe PermitApplicationPolicy do
         :project_membership,
         permit_project: draft_permit_application.permit_project,
         user: standard,
-        access: :standard
+        access: :limited
       )
       expect(
         described_class.new(
@@ -367,7 +367,7 @@ RSpec.describe PermitApplicationPolicy do
         :project_membership,
         permit_project: draft_permit_application.permit_project,
         user: standard,
-        access: :standard
+        access: :limited
       )
       expect(
         described_class.new(
@@ -444,7 +444,7 @@ RSpec.describe PermitApplicationPolicy do
       ).to be false
     end
 
-    it "lets Full and Expanded respond during revisions and denies Standard" do
+    it "lets Full and Expanded respond during revisions and denies Limited" do
       revision =
         create(
           :permit_application,
@@ -465,7 +465,7 @@ RSpec.describe PermitApplicationPolicy do
         :project_membership,
         permit_project: revision.permit_project,
         user: standard,
-        access: :standard
+        access: :limited
       )
 
       %i[
@@ -509,7 +509,7 @@ RSpec.describe PermitApplicationPolicy do
           :project_membership,
           permit_project: revision.permit_project,
           user: standard,
-          access: :standard
+          access: :limited
         )
       create(
         :project_grant,
@@ -576,7 +576,7 @@ RSpec.describe PermitApplicationPolicy do
         :project_membership,
         permit_project: draft_permit_application.permit_project,
         user: standard,
-        access: :standard
+        access: :limited
       )
       expect(
         described_class.new(
@@ -619,7 +619,7 @@ RSpec.describe PermitApplicationPolicy do
         :project_membership,
         permit_project: draft_permit_application.permit_project,
         user: standard,
-        access: :standard
+        access: :limited
       )
       expect(
         described_class.new(
@@ -709,7 +709,7 @@ RSpec.describe PermitApplicationPolicy do
       ).to be false
     end
 
-    it "submit? permits Full and Expanded on a draft or a revision request and denies Standard" do
+    it "submit? permits Full and Expanded on a draft or a revision request and denies Limited" do
       expanded = create(:user, :submitter)
       standard = create(:user, :submitter)
       create(
@@ -722,7 +722,7 @@ RSpec.describe PermitApplicationPolicy do
         :project_membership,
         permit_project: draft_permit_application.permit_project,
         user: standard,
-        access: :standard
+        access: :limited
       )
 
       expect(
@@ -822,7 +822,7 @@ RSpec.describe PermitApplicationPolicy do
         :project_membership,
         permit_project: draft_permit_application.permit_project,
         user: standard,
-        access: :standard
+        access: :limited
       )
       standard_policy =
         described_class.new(
@@ -1069,14 +1069,14 @@ RSpec.describe PermitApplicationPolicy do
       ).to be true
     end
 
-    it "lets a Standard member archive only a draft they created" do
+    it "lets a Limited member archive only a draft they created" do
       standard = create(:user, :submitter)
       project = draft_permit_application.permit_project
       create(
         :project_membership,
         permit_project: project,
         user: standard,
-        access: :standard
+        access: :limited
       )
       own =
         create(
@@ -1479,13 +1479,13 @@ RSpec.describe PermitApplicationPolicy do
       expect(resolve_for.call(sandbox)).not_to include(live)
     end
 
-    it "keeps a Standard member in the project list and out of applications they can open" do
+    it "keeps a Limited member in the project list and out of applications they can open" do
       standard = create(:user, :submitter)
       create(
         :project_membership,
         permit_project: draft_permit_application.permit_project,
         user: standard,
-        access: :standard
+        access: :limited
       )
       context = UserContext.new(standard, sandbox)
 
@@ -1507,7 +1507,7 @@ RSpec.describe PermitApplicationPolicy do
           :project_membership,
           permit_project: draft_permit_application.permit_project,
           user: standard,
-          access: :standard
+          access: :limited
         )
       other_application =
         create(

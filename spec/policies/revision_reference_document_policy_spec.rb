@@ -44,7 +44,7 @@ RSpec.describe RevisionReferenceDocumentPolicy, type: :policy do
       :project_membership,
       permit_project: permit_project,
       user: standard,
-      access: :standard
+      access: :limited
     )
 
     expect(policy(owner).download?).to be false
@@ -95,7 +95,7 @@ RSpec.describe RevisionReferenceDocumentPolicy, type: :policy do
         :project_membership,
         permit_project: permit_project,
         user: standard,
-        access: :standard
+        access: :limited
       )
     create(
       :project_grant,
@@ -122,7 +122,7 @@ RSpec.describe RevisionReferenceDocumentPolicy, type: :policy do
         :project_membership,
         permit_project: permit_project,
         user: standard,
-        access: :standard
+        access: :limited
       )
     create(
       :project_grant,

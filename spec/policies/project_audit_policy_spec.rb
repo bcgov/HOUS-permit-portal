@@ -205,7 +205,7 @@ RSpec.describe ProjectAuditPolicy do
       end
     end
 
-    it "includes activity for an Expanded member and excludes it for Standard" do
+    it "includes activity for an Expanded member and excludes it for Limited" do
       project_audit =
         ApplicationAudit.find_by!(
           auditable_type: "PermitProject",
@@ -223,7 +223,7 @@ RSpec.describe ProjectAuditPolicy do
         :project_membership,
         permit_project: project,
         user: standard,
-        access: :standard
+        access: :limited
       )
 
       expect(resolved_scope_for(expanded)).to include(project_audit)

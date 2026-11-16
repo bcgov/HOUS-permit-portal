@@ -102,7 +102,7 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
       expect(response).to have_http_status(:forbidden)
     end
 
-    it "shows every member their access and hides invitations from Standard" do
+    it "shows every member their access and hides invitations from Limited" do
       standard =
         create(:user, :submitter, first_name: "Sam", last_name: "Standard")
       expanded =
@@ -111,7 +111,7 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
         :project_membership,
         user: standard,
         permit_project: project,
-        access: :standard
+        access: :limited
       )
       create(
         :project_membership,
@@ -134,7 +134,7 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
         invited_first_name: "Eddie",
         invited_last_name: "Expired",
         invitation_sent_at: 4.days.ago,
-        access: :standard
+        access: :limited
       )
       ProjectMembership.reindex
 
@@ -173,7 +173,7 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
       ).to include("status" => "pending", "access" => "expanded")
       expect(
         invitation_rows.find { |row| row["name"] == "Eddie Expired" }
-      ).to include("status" => "expired", "access" => "standard")
+      ).to include("status" => "expired", "access" => "limited")
       expect(invitation_rows).to all(
         satisfy { |row| !row.key?("invited_email") }
       )
@@ -307,15 +307,15 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
       patch "/api/permit_projects/#{project.id}/memberships/#{membership.id}",
             params: {
               membership: {
-                access: "standard"
+                access: "limited"
               }
             },
             headers: headers,
             as: :json
 
       expect(response).to have_http_status(:ok)
-      expect(json_response["data"]).to include("access" => "standard")
-      expect(membership.reload.access).to eq("standard")
+      expect(json_response["data"]).to include("access" => "limited")
+      expect(membership.reload.access).to eq("limited")
     end
 
     it "creates and removes an invite grant for an Expanded member" do
@@ -369,14 +369,14 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
       patch "/api/permit_projects/#{project.id}/memberships/#{expanded.id}",
             params: {
               membership: {
-                access: "standard"
+                access: "limited"
               }
             },
             headers: headers,
             as: :json
 
       expect(response).to have_http_status(:ok)
-      expect(expanded.reload.access).to eq("standard")
+      expect(expanded.reload.access).to eq("limited")
       expect(expanded.project_grants.invite.count).to eq(1)
     end
 
@@ -417,7 +417,7 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
       patch "/api/permit_projects/#{project.id}/memberships/#{membership.id}",
             params: {
               membership: {
-                access: "standard",
+                access: "limited",
                 role_tags: ["Builder"]
               }
             },
@@ -429,7 +429,7 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
       expect(membership.role_list).to contain_exactly("Architect")
     end
 
-    it "lets Expanded change anyone's role and denies Standard" do
+    it "lets Expanded change anyone's role and denies Limited" do
       expanded_user = create(:user, :submitter)
       standard_user = create(:user, :submitter)
       expanded_membership =
@@ -444,7 +444,7 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
           :project_membership,
           permit_project: project,
           user: standard_user,
-          access: :standard
+          access: :limited
         )
       sign_in expanded_user
 
@@ -505,8 +505,8 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
       )
     end
 
-    it "denies Expanded and Standard from changing access or contact designation" do
-      %i[expanded standard].each do |level|
+    it "denies Expanded and Limited from changing access or contact designation" do
+      %i[expanded limited].each do |level|
         person = create(:user, :submitter)
         create(
           :project_membership,
@@ -531,7 +531,7 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
         patch "/api/permit_projects/#{project.id}/memberships/#{membership.id}",
               params: {
                 membership: {
-                  access: "standard"
+                  access: "limited"
                 }
               },
               headers: headers,
@@ -638,7 +638,7 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
       patch "/api/permit_projects/#{project.id}/memberships/#{membership.id}",
             params: {
               membership: {
-                access: "standard"
+                access: "limited"
               }
             },
             headers: headers,
@@ -670,8 +670,8 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
       expect(names).not_to include("Mina Member")
     end
 
-    it "denies Expanded and Standard from removing another member" do
-      %i[expanded standard].each do |level|
+    it "denies Expanded and Limited from removing another member" do
+      %i[expanded limited].each do |level|
         person = create(:user, :submitter)
         create(
           :project_membership,
@@ -852,7 +852,7 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
         :project_membership,
         permit_project: project,
         user: member,
-        access: :standard
+        access: :limited
       )
       sign_in member
 
@@ -965,8 +965,8 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
       expect(pending.project_grants.invite.count).to eq(1)
     end
 
-    it "denies Expanded and Standard from inviting with an access level" do
-      %i[expanded standard].each do |level|
+    it "denies Expanded and Limited from inviting with an access level" do
+      %i[expanded limited].each do |level|
         person = create(:user, :submitter)
         create(
           :project_membership,
@@ -1015,8 +1015,8 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
       expect(response).to have_http_status(:forbidden)
     end
 
-    it "denies Expanded and Standard from resending or canceling an invitation" do
-      %i[expanded standard].each do |level|
+    it "denies Expanded and Limited from resending or canceling an invitation" do
+      %i[expanded limited].each do |level|
         person = create(:user, :submitter)
         create(
           :project_membership,

@@ -48,7 +48,7 @@ RSpec.describe "Api::ProjectAudits (project activities)", type: :request do
   end
 
   describe "POST /api/permit_projects/:id/activities" do
-    it "returns activity to Expanded and hides it from Standard" do
+    it "returns activity to Expanded and hides it from Limited" do
       expanded = create(:user, :submitter)
       standard = create(:user, :submitter)
       create(
@@ -61,7 +61,7 @@ RSpec.describe "Api::ProjectAudits (project activities)", type: :request do
         :project_membership,
         user: standard,
         permit_project: permit_project,
-        access: :standard
+        access: :limited
       )
 
       sign_in expanded

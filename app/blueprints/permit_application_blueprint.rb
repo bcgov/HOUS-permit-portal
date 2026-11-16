@@ -1,5 +1,5 @@
 class PermitApplicationBlueprint < Blueprinter::Base
-  # A project member who cannot open the application (Standard) still sees it
+  # A project member who cannot open the application (Limited) still sees it
   # in the project list. No files, PDFs, or submission versions.
   view :summary do
     identifier :id

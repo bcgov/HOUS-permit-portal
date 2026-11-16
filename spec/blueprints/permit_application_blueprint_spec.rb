@@ -58,7 +58,7 @@ RSpec.describe PermitApplicationBlueprint do
         :project_membership,
         permit_project: project,
         user: user,
-        access: :standard
+        access: :limited
       )
     create(
       :project_grant,

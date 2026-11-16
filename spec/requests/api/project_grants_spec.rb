@@ -36,7 +36,7 @@ RSpec.describe "project grants", type: :request do
       :project_membership,
       permit_project: project,
       user: standard_user,
-      access: :standard
+      access: :limited
     )
   end
   let!(:expanded_membership) do
@@ -568,7 +568,7 @@ RSpec.describe "project grants", type: :request do
       expect(response).to have_http_status(:no_content)
     end
 
-    it "denies Standard, a grant to yourself, and a Full member of another project" do
+    it "denies Limited, a grant to yourself, and a Full member of another project" do
       outsider = create(:user, :submitter)
       create(
         :permit_application,
@@ -619,7 +619,7 @@ RSpec.describe "project grants", type: :request do
       expect(response).to have_http_status(:forbidden)
     end
 
-    it "lets a Standard member with an application grant reach submit and see every block" do
+    it "lets a Limited member with an application grant reach submit and see every block" do
       sign_in owner
       post "/api/permit_applications/#{application.id}/project_grants",
            params: {
@@ -685,7 +685,7 @@ RSpec.describe "project grants", type: :request do
                first_name: "Sam",
                last_name: "Standard",
                email: "sam-standard@example.com",
-               access: "standard"
+               access: "limited"
              }
            },
            headers: headers,
@@ -712,7 +712,7 @@ RSpec.describe "project grants", type: :request do
           :project_membership,
           :pending_invitation,
           permit_project: project,
-          access: :standard
+          access: :limited
         )
       email = pending.invited_email
       post "/api/permit_projects/#{project.id}/memberships/#{pending.id}/reinvite",
@@ -727,7 +727,7 @@ RSpec.describe "project grants", type: :request do
       expect(ProjectMembership.exists?(pending.id)).to be false
     end
 
-    it "refuses re-send and cancel of a Full invite, and refuses Standard" do
+    it "refuses re-send and cancel of a Full invite, and refuses Limited" do
       full_invite =
         create(
           :project_membership,
@@ -754,7 +754,7 @@ RSpec.describe "project grants", type: :request do
                first_name: "Nope",
                last_name: "Standard",
                email: "nope-standard@example.com",
-               access: "standard"
+               access: "limited"
              }
            },
            headers: headers,

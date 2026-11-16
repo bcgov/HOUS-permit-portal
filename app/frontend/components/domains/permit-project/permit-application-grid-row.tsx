@@ -35,7 +35,7 @@ export const PermitApplicationGridRow = observer(
     const { currentUser } = userStore
     const isSandboxMismatch = currentSandbox?.id !== permitApplication.sandbox?.id && !currentUser?.isSuperAdmin
     const isLockedDraft = permitApplication.isLockedForReviewStaff
-    // A Standard member sees the row (name and status) but cannot open it,
+    // A Limited member sees the row (name and status) but cannot open it,
     // unless a grant on this application says they can.
     const isViewRestricted =
       !fromInbox &&
@@ -43,7 +43,7 @@ export const PermitApplicationGridRow = observer(
       permitApplication.canOpen !== true
     const { canArchiveDraft } = permitApplication
     const isDisabledRow = isSandboxMismatch || isLockedDraft || isViewRestricted
-    // A Standard creator cannot open the row, and can still archive that draft.
+    // A Limited creator cannot open the row, and can still archive that draft.
     const menuDisabled = isSandboxMismatch || isLockedDraft || (isViewRestricted && !canArchiveDraft)
     const shouldMarkRow = currentSandbox?.id !== permitApplication.sandbox?.id
     const permitApplicationPath = fromInbox ? `/permit-applications/${id}` : `/permit-applications/${id}/edit`

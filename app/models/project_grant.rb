@@ -5,21 +5,21 @@ class ProjectGrant < ApplicationRecord
   enum :kind, { block: 0, application: 1, invite: 2 }, validate: true
 
   # A grant authorizes only while the member's access still matches it.
-  # Block and application grants are Standard. An invite grant is Expanded.
+  # Block and application grants are Limited. An invite grant is Expanded.
   scope :authorizing,
         -> do
           joins(:project_membership).where(
             <<~SQL.squish,
               (
                 project_grants.kind IN (:block_kinds)
-                AND project_memberships.access = :standard
+                AND project_memberships.access = :limited
               ) OR (
                 project_grants.kind = :invite_kind
                 AND project_memberships.access = :expanded
               )
             SQL
             block_kinds: [kinds.fetch("block"), kinds.fetch("application")],
-            standard: ProjectMembership.accesses.fetch("standard"),
+            limited: ProjectMembership.accesses.fetch("limited"),
             invite_kind: kinds.fetch("invite"),
             expanded: ProjectMembership.accesses.fetch("expanded")
           )
@@ -109,7 +109,7 @@ class ProjectGrant < ApplicationRecord
     membership = project_membership
     return if membership.blank?
     return if invite? && membership.expanded?
-    return if (block? || application?) && membership.standard?
+    return if (block? || application?) && membership.limited?
 
     errors.add(:project_membership, "cannot hold this grant")
   end

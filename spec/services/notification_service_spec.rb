@@ -394,7 +394,7 @@ RSpec.describe NotificationService do
           :project_membership,
           permit_project: project,
           user: contact_user,
-          access: :standard
+          access: :limited
         )
       permit_application =
         create(
@@ -660,7 +660,7 @@ RSpec.describe NotificationService do
       ).with(permit_application, submitter)
     end
 
-    it "includes a Standard application contact alongside Full members" do
+    it "includes a Limited application contact alongside Full members" do
       owner = create(:user, :submitter)
       contact_user = create(:user, :submitter)
       project = create(:permit_project, owner: owner)
@@ -669,7 +669,7 @@ RSpec.describe NotificationService do
           :project_membership,
           permit_project: project,
           user: contact_user,
-          access: :standard
+          access: :limited
         )
       permit_application =
         create(
@@ -1077,7 +1077,7 @@ RSpec.describe NotificationService do
           :project_membership,
           permit_project: project,
           user: contact_user,
-          access: :standard
+          access: :limited
         )
       requirement_template = create(:requirement_template)
       old_template_version =
@@ -1178,7 +1178,7 @@ RSpec.describe NotificationService do
           :project_membership,
           permit_project: project,
           user: contact_user,
-          access: :standard
+          access: :limited
         )
       permit_application =
         create(

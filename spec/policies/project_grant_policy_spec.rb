@@ -21,7 +21,7 @@ RSpec.describe ProjectGrantPolicy, type: :policy do
       :project_membership,
       permit_project: project,
       user: standard_user,
-      access: :standard
+      access: :limited
     )
   end
   let(:expanded_membership) do
@@ -66,7 +66,7 @@ RSpec.describe ProjectGrantPolicy, type: :policy do
     end
   end
 
-  it "denies Standard and a Full member of another project" do
+  it "denies Limited and a Full member of another project" do
     outsider = create(:user, :submitter)
     create(:permit_application, submitter: outsider, jurisdiction: jurisdiction)
 

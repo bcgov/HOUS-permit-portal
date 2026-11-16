@@ -131,7 +131,7 @@ RSpec.describe ProjectMembership, type: :model do
     project = create(:permit_project)
     membership = project.project_memberships.find_by!(user: project.creator)
 
-    expect(membership.update(access: :standard)).to be false
+    expect(membership.update(access: :limited)).to be false
     expect(membership.errors[:access]).to be_present
     expect(membership.destroy).to be false
     expect(ProjectMembership.exists?(membership.id)).to be true

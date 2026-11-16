@@ -84,7 +84,7 @@ module Api::Concerns::Search::ProjectMemberships
     where
   end
 
-  # Standard members do not see pending or expired invites. Review staff for
+  # Limited members do not see pending or expired invites. Review staff for
   # this jurisdiction do: the inbox People tab is the same list, view only.
   def project_access
     @project_access ||= pundit_user.access.on(@permit_project)

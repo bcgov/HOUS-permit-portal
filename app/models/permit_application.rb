@@ -355,7 +355,7 @@ class PermitApplication < ApplicationRecord
     collaborators.any?
   end
 
-  # :all is Full or Expanded on this project. A list is a Standard member's
+  # :all is Full or Expanded on this project. A list is a Limited member's
   # block grants on this application. nil is everyone else. The form, save,
   # supporting-file, and revision-request readers already honor those three.
   def submission_requirement_block_edit_permissions(user_id:)

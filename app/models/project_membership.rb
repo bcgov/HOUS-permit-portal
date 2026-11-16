@@ -13,8 +13,8 @@ class ProjectMembership < ApplicationRecord
   alias_method :role_tags=, :role_list=
 
   enum :access,
-       { standard: 0, expanded: 1, full: 2 },
-       default: :standard,
+       { limited: 0, expanded: 1, full: 2 },
+       default: :limited,
        validate: true
   # scopes: false — the value `none` would override ActiveRecord::Relation.none
   enum :contact_designation,

@@ -776,7 +776,7 @@ export enum EPermitProjectRollupStatus {
 }
 
 export enum EProjectAccess {
-  standard = "standard",
+  limited = "limited",
   expanded = "expanded",
   full = "full",
 }

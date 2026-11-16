@@ -28,7 +28,7 @@ class Api::PermitProjects::MembershipsController < Api::ApplicationController
         invited_email: create_membership_params[:email],
         contact_designation:
           create_membership_params[:contact_designation].presence || :none,
-        access: create_membership_params[:access].presence || :standard,
+        access: create_membership_params[:access].presence || :limited,
         role_tags: create_membership_params[:role_tags] || []
       )
     raw_token = issue_invitation!(@membership)

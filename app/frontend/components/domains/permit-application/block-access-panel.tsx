@@ -94,18 +94,18 @@ export const BlockAccessPanel = observer(function BlockAccessPanel({
   )
 
   const alreadyEdits = people.filter(
-    (person) => person.access !== EProjectAccess.standard || hasApplicationGrant(person)
+    (person) => person.access !== EProjectAccess.limited || hasApplicationGrant(person)
   )
   const additional = people.filter(
     (person) =>
-      person.access === EProjectAccess.standard &&
+      person.access === EProjectAccess.limited &&
       !hasApplicationGrant(person) &&
       blockGrants.some((grant) => grant.projectMembershipId === person.id)
   )
   const options = useMemo<IOption[]>(
     () =>
       people
-        .filter((person) => person.access === EProjectAccess.standard && !hasApplicationGrant(person))
+        .filter((person) => person.access === EProjectAccess.limited && !hasApplicationGrant(person))
         .map((person) => ({ label: person.name, value: person.id })),
     [people, grants]
   )
@@ -156,7 +156,7 @@ export const BlockAccessPanel = observer(function BlockAccessPanel({
   const projectLine = (person: IProjectPerson) => {
     const role = person.roleTags.join(", ")
     const access =
-      person.access === EProjectAccess.standard
+      person.access === EProjectAccess.limited
         ? t("permitApplication.people.entireApplication")
         : t("permitApplication.people.accessLevel", {
             level: t(`permitProject.people.access.${person.access}`),

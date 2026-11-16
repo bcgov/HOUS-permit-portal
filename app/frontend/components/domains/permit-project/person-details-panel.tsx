@@ -19,7 +19,7 @@ import { AllowInviteField } from "./allow-invite-field"
 interface IPersonDetailsPanelProps {
   person: IProjectPerson
   isSelf?: boolean
-  // Three levels: role tags (Expanded on self and Standard), access and
+  // Three levels: role tags (Expanded on self and Limited), access and
   // contact designation (Full), and re-send (same as invite).
   canEditRoleTags: boolean
   canManageStanding: boolean

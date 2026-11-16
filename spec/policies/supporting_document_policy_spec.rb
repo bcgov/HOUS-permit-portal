@@ -83,7 +83,7 @@ RSpec.describe SupportingDocumentPolicy, type: :policy do
       )
     record = document_for(permit_application)
     expanded_member = member_with_access(permit_application, :expanded)
-    standard_member = member_with_access(permit_application, :standard)
+    standard_member = member_with_access(permit_application, :limited)
 
     expect(policy(submitter, record).upload?).to be true
     expect(policy(expanded_member, record).upload?).to be true
@@ -102,7 +102,7 @@ RSpec.describe SupportingDocumentPolicy, type: :policy do
       )
     record = document_for(permit_application)
     expanded_member = member_with_access(permit_application, :expanded)
-    standard_member = member_with_access(permit_application, :standard)
+    standard_member = member_with_access(permit_application, :limited)
 
     expect(policy(submitter, record).destroy?).to be true
     expect(policy(expanded_member, record).destroy?).to be true
@@ -138,7 +138,7 @@ RSpec.describe SupportingDocumentPolicy, type: :policy do
       )
     granted_id = SecureRandom.uuid
     other_id = SecureRandom.uuid
-    member = member_with_access(permit_application, :standard)
+    member = member_with_access(permit_application, :limited)
     create(
       :project_grant,
       project_membership: ProjectMembership.find_by!(user: member),

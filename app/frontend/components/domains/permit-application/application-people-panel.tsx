@@ -78,8 +78,8 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
         permitProjectStore.currentPermitProject?.currentUserAccess?.editApplication
     )
   const options = blockOptions(permitApplication.formJson)
-  const fullPeople = people.filter((person) => person.access !== EProjectAccess.standard)
-  const standardPeople = people.filter((person) => person.access === EProjectAccess.standard)
+  const fullPeople = people.filter((person) => person.access !== EProjectAccess.limited)
+  const limitedPeople = people.filter((person) => person.access === EProjectAccess.limited)
   const contact = people.find((person) => person.id === permitApplication.applicationContactMembershipId)
 
   useEffect(() => {
@@ -111,9 +111,9 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
   const grantsFor = (membershipId: string) =>
     grants.filter((grant) => grant.projectMembershipId === membershipId && grant.kind !== "invite")
 
-  const grantedStandardPeople = standardPeople.filter((person) => grantsFor(person.id).length > 0)
-  const ungrantedStandardPeople = standardPeople.filter((person) => grantsFor(person.id).length === 0)
-  const personOptions: IOption[] = ungrantedStandardPeople.map((person) => ({ label: person.name, value: person.id }))
+  const grantedLimitedPeople = limitedPeople.filter((person) => grantsFor(person.id).length > 0)
+  const ungrantedLimitedPeople = limitedPeople.filter((person) => grantsFor(person.id).length === 0)
+  const personOptions: IOption[] = ungrantedLimitedPeople.map((person) => ({ label: person.name, value: person.id }))
 
   const blockName = (blockId: string | null) => options.find((option) => option.value === blockId)?.label
 
@@ -305,7 +305,7 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
                   }}
                   value={personOptions.find((option) => option.value === selectedPerson?.id) ?? null}
                   onChange={(selected) => {
-                    const person = ungrantedStandardPeople.find((candidate) => candidate.id === selected?.value)
+                    const person = ungrantedLimitedPeople.find((candidate) => candidate.id === selected?.value)
                     setSelectedPerson(person ?? null)
                   }}
                   placeholder={t("permitApplication.blockAccess.peoplePlaceholder")}
@@ -423,7 +423,7 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
                 {t("permitApplication.people.standardDescription")}
               </Text>
               <VStack align="stretch" spacing={6}>
-                {grantedStandardPeople.map((person) => (
+                {grantedLimitedPeople.map((person) => (
                   <Box key={person.id}>
                     <PersonRow person={person} line={personLine(person)} you={currentUserId === person.userId} />
                     <Text mt={3} fontSize="sm" color="text.secondary" lineHeight="1.5">

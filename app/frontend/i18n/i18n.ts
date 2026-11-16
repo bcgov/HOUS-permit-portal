@@ -1633,7 +1633,7 @@ Thank you,
             contactChoiceNone: "No",
             projectAccessDescription: "Choose the level of access this person needs.",
             formAccessDescription: {
-              standard:
+              limited:
                 "Can view basic project details. Can be given one application, or specific blocks, to view and edit.",
               expanded: "Can view and edit project details and applications. Cannot submit or withdraw applications.",
               full: "Can manage all parts of the project, including submitting applications and managing people.",
@@ -1710,7 +1710,7 @@ Thank you,
             accessIntro: "Choose the level of access this person needs.",
             compareAccessLevels: "Compare access levels",
             compareAccessLevelsTodo:
-              "TODO HUB-5778: Explain the difference between Standard, Expanded, and Full project access.",
+              "TODO HUB-5778: Explain the difference between Limited, Expanded, and Full project access.",
             additionalAccess: "Additional access",
             additionalAccessPlaceholder: "None",
             removePerson: "Remove person",
@@ -1729,13 +1729,13 @@ Thank you,
               professional: "Professional",
             },
             accessDescription: {
-              standard:
+              limited:
                 "Can view basic project details. Can be given one application, or specific blocks, to view and edit.",
-              expanded: "Can view project details and work on more of the permit applications than Standard access.",
+              expanded: "Can view project details and work on more of the permit applications than Limited access.",
               full: "Can view and edit the project and its permit applications.",
             },
             accessChoiceDescription: {
-              standard:
+              limited:
                 "Can view basic project details. Can be given one application, or specific blocks, to view and edit.",
               expanded: "Can edit project details, permit applications, and invite people to the project.",
               full: "Can manage project information, permit applications, and people's access.",
@@ -1747,7 +1747,7 @@ Thank you,
               status: "Status",
             },
             access: {
-              standard: "Standard",
+              limited: "Limited",
               expanded: "Expanded",
               full: "Full",
             },
@@ -2099,7 +2099,7 @@ Thank you,
               "People with Full or Expanded project access can edit and submit any permit application in this project.",
             standardTitle: "Other people with access to this application",
             standardDescription:
-              "People with Standard project access can be given this application, or specific blocks, to view and edit.",
+              "People with Limited project access can be given this application, or specific blocks, to view and edit.",
             giveSomeone: "+ Give someone access",
             entireApplication: "Entire application",
             noBlocks: "No blocks assigned",
@@ -2121,12 +2121,12 @@ Thank you,
               "People with Full or Expanded project access can edit all permit application requirements.",
             manageProjectAccess: "Manage project access",
             additionalTitle: "Additional edit access",
-            additionalDescription: "People with Standard project access can be given edit access to this area.",
+            additionalDescription: "People with Limited project access can be given edit access to this area.",
             none: "No one has been given additional edit access to this requirement.",
             giveSomeone: "+ Give someone edit access",
             manageEditAccess: "Manage edit access",
             editorDescription:
-              "People with Standard project access can be given edit access to this area. People with Expanded or Full access can already edit it.",
+              "People with Limited project access can be given edit access to this area. People with Expanded or Full access can already edit it.",
             whoCanEdit: "Who can edit {{block}}?",
             peoplePlaceholder: "Select people",
             cantFind: "Can't find the person you're looking for?",

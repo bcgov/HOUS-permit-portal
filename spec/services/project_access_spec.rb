@@ -39,7 +39,7 @@ RSpec.describe ProjectAccess do
       expect(access.assign_application?).to be true
       expect(access.assign_invite?).to be true
       expect(
-        access.edit_role_tags?(ProjectMembership.new(access: :standard))
+        access.edit_role_tags?(ProjectMembership.new(access: :limited))
       ).to be true
       expect(access.archive_draft?(PermitApplication.new)).to be true
     end
@@ -79,7 +79,7 @@ RSpec.describe ProjectAccess do
     end
 
     it "edits anyone's role tags" do
-      %i[standard expanded full].each do |level|
+      %i[limited expanded full].each do |level|
         expect(
           access.edit_role_tags?(
             ProjectMembership.new(
@@ -101,12 +101,12 @@ RSpec.describe ProjectAccess do
     end
   end
 
-  describe "a Standard member" do
-    subject(:access) { access_for(create(:user, :submitter), :standard) }
+  describe "a Limited member" do
+    subject(:access) { access_for(create(:user, :submitter), :limited) }
 
     it "archives only a draft they created" do
       user = create(:user, :submitter)
-      access = access_for(user, :standard)
+      access = access_for(user, :limited)
 
       expect(
         access.archive_draft?(PermitApplication.new(created_by: user))
@@ -135,7 +135,7 @@ RSpec.describe ProjectAccess do
 
     it "cannot change role tags" do
       expect(
-        access.edit_role_tags?(ProjectMembership.new(access: :standard))
+        access.edit_role_tags?(ProjectMembership.new(access: :limited))
       ).to be false
     end
   end
@@ -175,7 +175,7 @@ RSpec.describe ProjectAccess do
       accesses = ProjectMembership.accesses
 
       expect(described_class.levels(:view_project?)).to contain_exactly(
-        accesses[:standard],
+        accesses[:limited],
         accesses[:expanded],
         accesses[:full]
       )

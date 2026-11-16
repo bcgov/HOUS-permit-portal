@@ -89,13 +89,13 @@ RSpec.describe Api::StepCodesController, type: :controller do
       expect(step_code.reload.read_attribute(:title)).to eq("Expanded edit")
     end
 
-    it "forbids a Standard member from editing an attached Step Code" do
+    it "forbids a Limited member from editing an attached Step Code" do
       member = create(:user, :submitter)
       create(
         :project_membership,
         permit_project: permit_application.permit_project,
         user: member,
-        access: :standard
+        access: :limited
       )
       sign_in member
 
@@ -213,13 +213,13 @@ RSpec.describe Api::StepCodesController, type: :controller do
       )
     end
 
-    it "forbids a Standard member from attaching a Step Code they created" do
+    it "forbids a Limited member from attaching a Step Code they created" do
       member = create(:user, :submitter)
       create(
         :project_membership,
         permit_project: permit_application.permit_project,
         user: member,
-        access: :standard
+        access: :limited
       )
       standalone =
         create(:part_3_step_code, permit_application: nil, creator: member)
@@ -348,13 +348,13 @@ RSpec.describe Api::StepCodesController, type: :controller do
       expect(step_code.reload).to be_discarded
     end
 
-    it "forbids a Standard member from discarding an attached Step Code" do
+    it "forbids a Limited member from discarding an attached Step Code" do
       member = create(:user, :submitter)
       create(
         :project_membership,
         permit_project: permit_application.permit_project,
         user: member,
-        access: :standard
+        access: :limited
       )
       sign_in member
 
@@ -413,14 +413,14 @@ RSpec.describe Api::StepCodesController, type: :controller do
       expect(step_code.reload).not_to be_discarded
     end
 
-    it "forbids a Standard member from restoring an attached Step Code" do
+    it "forbids a Limited member from restoring an attached Step Code" do
       step_code.update!(discarded_at: Time.current)
       member = create(:user, :submitter)
       create(
         :project_membership,
         permit_project: permit_application.permit_project,
         user: member,
-        access: :standard
+        access: :limited
       )
       sign_in member
 

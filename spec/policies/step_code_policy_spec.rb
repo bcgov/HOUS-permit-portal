@@ -93,13 +93,13 @@ RSpec.describe StepCodePolicy, type: :policy do
       ).to be true
     end
 
-    it "denies a Standard member from attaching a Step Code they created" do
+    it "denies a Limited member from attaching a Step Code they created" do
       standard = create(:user, :submitter)
       create(
         :project_membership,
         permit_project: permit_application.permit_project,
         user: standard,
-        access: :standard
+        access: :limited
       )
       standalone =
         create(
@@ -236,7 +236,7 @@ RSpec.describe StepCodePolicy, type: :policy do
     end
   end
 
-  context "for a Standard member of the project" do
+  context "for a Limited member of the project" do
     let(:standard) { create(:user, :submitter) }
     let(:step_code) do
       create(
@@ -251,7 +251,7 @@ RSpec.describe StepCodePolicy, type: :policy do
         :project_membership,
         permit_project: permit_application.permit_project,
         user: standard,
-        access: :standard
+        access: :limited
       )
     end
 
@@ -364,13 +364,13 @@ RSpec.describe StepCodePolicy, type: :policy do
     expect(policy_for(member, step_code).restore?).to be true
   end
 
-  it "denies a Standard member from deleting a Step Code they created on the application" do
+  it "denies a Limited member from deleting a Step Code they created on the application" do
     standard = create(:user, :submitter)
     create(
       :project_membership,
       permit_project: permit_application.permit_project,
       user: standard,
-      access: :standard
+      access: :limited
     )
     step_code =
       create(

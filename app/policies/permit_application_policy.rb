@@ -185,7 +185,7 @@ class PermitApplicationPolicy < ApplicationPolicy
   # we may want to separate an admin update to a secondary policy
 
   class Scope < Scope
-    # The project's application list. Every member, including Standard, is
+    # The project's application list. Every member, including Limited, is
     # in it; opening one is show?.
     def resolve
       resolve_for(:view_project?)
@@ -218,7 +218,7 @@ class PermitApplicationPolicy < ApplicationPolicy
                 #{ProjectGrant.kinds.fetch("application")}
               )
               AND grant_pm.user_id = :uid
-              AND grant_pm.access = #{ProjectMembership.accesses.fetch("standard")}
+              AND grant_pm.access = #{ProjectMembership.accesses.fetch("limited")}
               AND grant_pm.permit_project_id = permit_applications.permit_project_id
           )
         SQL
@@ -258,7 +258,7 @@ class PermitApplicationPolicy < ApplicationPolicy
     project_access.edit_application? || block_granted? || application_granted?
   end
 
-  # Full and Expanded pass without a grant row. A Standard member needs an
+  # Full and Expanded pass without a grant row. A Limited member needs an
   # application grant on this application. A block grant never counts.
   def submission_permitted?
     project_access.submit_application? || application_granted?

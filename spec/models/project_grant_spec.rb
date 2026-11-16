@@ -16,7 +16,7 @@ RSpec.describe ProjectGrant, type: :model do
       :project_membership,
       permit_project: project,
       user: create(:user, :submitter),
-      access: :standard
+      access: :limited
     )
   end
 
@@ -150,7 +150,7 @@ RSpec.describe ProjectGrant, type: :model do
     expect(on_standard).not_to be_valid
   end
 
-  it "rejects a block grant or an application grant on a member who is not Standard" do
+  it "rejects a block grant or an application grant on a member who is not Limited" do
     expanded =
       create(
         :project_membership,
@@ -215,7 +215,7 @@ RSpec.describe ProjectGrant, type: :model do
     access = ProjectAccess.new(user, project.sandbox, project)
     expect(access.invite_people?).to be true
 
-    membership.update!(access: :standard)
+    membership.update!(access: :limited)
     access = ProjectAccess.new(user, project.sandbox, project)
     expect(ProjectGrant.exists?(invite.id)).to be true
     expect(access.invite_people?).to be false

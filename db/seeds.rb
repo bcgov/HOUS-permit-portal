@@ -816,8 +816,8 @@ else
   member_profiles = [
     [:full, :none, ["Architect"]],
     [:expanded, :alternate, ["Coordinating registered professional"]],
-    [:standard, :none, ["Builder"]],
-    [:standard, :none, []]
+    [:limited, :none, ["Builder"]],
+    [:limited, :none, []]
   ]
 
   half_projects.each do |project|
