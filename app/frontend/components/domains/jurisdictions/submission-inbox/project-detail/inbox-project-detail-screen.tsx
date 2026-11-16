@@ -1,5 +1,5 @@
 import { Container, Flex, Heading, IconButton, TabPanel, TabPanels, Tabs, Text } from "@chakra-ui/react"
-import { CalendarBlank, CaretLeft, Chat, ClipboardText, SquaresFour, TrendUp } from "@phosphor-icons/react"
+import { CalendarBlank, CaretLeft, Chat, ClipboardText, SquaresFour, TrendUp, Users } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -11,6 +11,7 @@ import { belowNavBarInFlow } from "../../../../../styles/nav-bar-offset"
 import { ErrorScreen } from "../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
 import { ActivityTabPanelContent } from "../../../permit-project/activity-tab-panel-content"
+import { PeopleTabPanelContent } from "../../../permit-project/people-tab-panel-content"
 import { ITabItem, ProjectSidebarTabList } from "../../../permit-project/project-sidebar-tab-list"
 import { InboxMeetingsTab } from "./inbox-meetings-tab"
 import { InboxNotesTab } from "./inbox-notes-tab"
@@ -47,16 +48,22 @@ export const InboxProjectDetailScreen = observer(() => {
         tabIndex: 1,
       },
       {
+        label: t("submissionInbox.projectDetail.people"),
+        icon: Users,
+        to: `${inboxProjectBasePath}/people`,
+        tabIndex: 2,
+      },
+      {
         label: t("submissionInbox.projectDetail.notes"),
         icon: Chat,
         to: `${inboxProjectBasePath}/notes`,
-        tabIndex: 2,
+        tabIndex: 3,
       },
       {
         label: t("submissionInbox.projectDetail.activity"),
         icon: TrendUp,
         to: `${inboxProjectBasePath}/activity`,
-        tabIndex: 3,
+        tabIndex: 4,
       },
       ...(projectMeetingsEnabled
         ? [
@@ -64,7 +71,7 @@ export const InboxProjectDetailScreen = observer(() => {
               label: t("submissionInbox.projectDetail.meetings"),
               icon: CalendarBlank,
               to: `${inboxProjectBasePath}/meetings`,
-              tabIndex: 4,
+              tabIndex: 5,
             },
           ]
         : []),
@@ -126,6 +133,9 @@ export const InboxProjectDetailScreen = observer(() => {
           </TabPanel>
           <TabPanel flex={1} minH={0} minW={0} display="flex" flexDirection="column" overflow="hidden">
             {isPending ? <LoadingScreen /> : <InboxPermitsTab permitProject={currentPermitProject} />}
+          </TabPanel>
+          <TabPanel flex={1} minH={0} minW={0} display="flex" flexDirection="column" overflow="hidden">
+            {isPending ? <LoadingScreen /> : <PeopleTabPanelContent permitProject={currentPermitProject} readOnly />}
           </TabPanel>
           <TabPanel flex={1} minH={0} minW={0} display="flex" flexDirection="column" overflow="hidden">
             {isPending ? <LoadingScreen /> : <InboxNotesTab permitProject={currentPermitProject} />}

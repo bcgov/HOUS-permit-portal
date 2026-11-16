@@ -178,6 +178,27 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
         satisfy { |row| !row.key?("invited_email") }
       )
     end
+
+    it "shows invitations to review staff for the jurisdiction" do
+      create(
+        :project_membership,
+        :pending_invitation,
+        permit_project: project,
+        invited_first_name: "Penny",
+        invited_last_name: "Pending"
+      )
+      ProjectMembership.reindex
+      sign_in create(:user, :reviewer, jurisdiction: jurisdiction)
+
+      get "/api/permit_projects/#{project.id}/memberships", headers: headers
+
+      expect(response).to have_http_status(:ok)
+      rows = json_response["data"]
+      expect(rows.map { |row| row["name"] }).to include("Penny Pending")
+      expect(rows).to all(
+        satisfy { |row| !row.key?("email") && !row.key?("invited_email") }
+      )
+    end
   end
 
   describe "POST /api/permit_projects/:id/memberships/search" do

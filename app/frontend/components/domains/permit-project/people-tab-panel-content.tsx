@@ -48,19 +48,20 @@ const PEOPLE_GRID_TEMPLATE_COLUMNS = "2fr 1.5fr 1fr 1fr 60px"
 
 interface IProps {
   permitProject: IPermitProject
+  readOnly?: boolean
 }
 
-export const PeopleTabPanelContent = observer(({ permitProject }: IProps) => {
+export const PeopleTabPanelContent = observer(({ permitProject, readOnly = false }: IProps) => {
   const isNew = Boolean(useMatch("/projects/:permitProjectId/people/new"))
   if (isNew && !permitProject.currentUserAccess?.invitePeople) {
     return <Navigate to={`/projects/${permitProject.id}/people`} replace />
   }
   if (isNew) return <AddProjectPersonForm permitProject={permitProject} />
 
-  return <PeopleList permitProject={permitProject} />
+  return <PeopleList permitProject={permitProject} readOnly={readOnly} />
 })
 
-const PeopleList = observer(({ permitProject }: IProps) => {
+const PeopleList = observer(({ permitProject, readOnly = false }: IProps) => {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { projectPeopleStore, permitProjectStore, userStore } = useMst()
@@ -181,42 +182,43 @@ const PeopleList = observer(({ permitProject }: IProps) => {
                 {t("permitProject.details.people")}
               </Heading>
             </Flex>
-            {projectAccess?.invitePeople ? (
-              <RouterLinkButton
-                variant="primary"
-                leftIcon={<Icon as={Plus} />}
-                to={`/projects/${permitProject.id}/people/new`}
-              >
-                {t("permitProject.people.addPerson")}
-              </RouterLinkButton>
-            ) : (
-              <Popover trigger="hover" placement="bottom-end" isLazy openDelay={200}>
-                <PopoverTrigger>
-                  <Box as="span" display="inline-block">
-                    <Button variant="primary" leftIcon={<Icon as={Plus} />} isDisabled>
-                      {t("permitProject.people.addPerson")}
-                    </Button>
-                  </Box>
-                </PopoverTrigger>
-                <PopoverContent
-                  bg="gray.700"
-                  color="whiteAlpha.900"
-                  border="none"
-                  borderRadius="sm"
-                  boxShadow="md"
-                  fontSize="sm"
-                  fontWeight="medium"
-                  w="auto"
-                  maxW="280px"
-                  sx={{ "--popper-arrow-bg": "var(--chakra-colors-gray-700)" }}
+            {!readOnly &&
+              (projectAccess?.invitePeople ? (
+                <RouterLinkButton
+                  variant="primary"
+                  leftIcon={<Icon as={Plus} />}
+                  to={`/projects/${permitProject.id}/people/new`}
                 >
-                  <PopoverArrow bg="gray.700" />
-                  <PopoverBody px={2} py={1}>
-                    {t("permitProject.people.inviteDisabled")}
-                  </PopoverBody>
-                </PopoverContent>
-              </Popover>
-            )}
+                  {t("permitProject.people.addPerson")}
+                </RouterLinkButton>
+              ) : (
+                <Popover trigger="hover" placement="bottom-end" isLazy openDelay={200}>
+                  <PopoverTrigger>
+                    <Box as="span" display="inline-block">
+                      <Button variant="primary" leftIcon={<Icon as={Plus} />} isDisabled>
+                        {t("permitProject.people.addPerson")}
+                      </Button>
+                    </Box>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    bg="gray.700"
+                    color="whiteAlpha.900"
+                    border="none"
+                    borderRadius="sm"
+                    boxShadow="md"
+                    fontSize="sm"
+                    fontWeight="medium"
+                    w="auto"
+                    maxW="280px"
+                    sx={{ "--popper-arrow-bg": "var(--chakra-colors-gray-700)" }}
+                  >
+                    <PopoverArrow bg="gray.700" />
+                    <PopoverBody px={2} py={1}>
+                      {t("permitProject.people.inviteDisabled")}
+                    </PopoverBody>
+                  </PopoverContent>
+                </Popover>
+              ))}
           </Flex>
 
           <Flex direction="column" gap={4} w="full">
@@ -263,7 +265,7 @@ const PeopleList = observer(({ permitProject }: IProps) => {
           </Flex>
 
           <SearchGrid
-            templateColumns={PEOPLE_GRID_TEMPLATE_COLUMNS}
+            templateColumns={readOnly ? "2fr 1.5fr 1fr 1fr" : PEOPLE_GRID_TEMPLATE_COLUMNS}
             gridRowClassName="project-people-grid-row"
             isEmpty={!isSearching && tablePeople.length === 0}
             emptyTitle={t("permitProject.people.emptyTitle")}
@@ -276,7 +278,7 @@ const PeopleList = observer(({ permitProject }: IProps) => {
                   <Text px={4}>{t(`permitProject.people.columns.${column}`)}</Text>
                 </GridHeader>
               ))}
-              <GridHeader role="columnheader" />
+              {!readOnly && <GridHeader role="columnheader" />}
             </Box>
             {isSearching ? (
               <Flex gridColumn="1 / -1" justify="center" align="center" minH="200px">
@@ -286,8 +288,8 @@ const PeopleList = observer(({ permitProject }: IProps) => {
               tablePeople.map((person) => (
                 <SearchGridRow
                   key={person.id}
-                  onClick={() => selectPerson(person)}
-                  bg={selectedPerson?.id === person.id ? "semantic.infoLight" : undefined}
+                  onClick={readOnly ? undefined : () => selectPerson(person)}
+                  bg={!readOnly && selectedPerson?.id === person.id ? "semantic.infoLight" : undefined}
                 >
                   <SearchGridItem>
                     <Flex align="center" gap={2.5}>
@@ -323,29 +325,31 @@ const PeopleList = observer(({ permitProject }: IProps) => {
                         ? t("permitProject.people.statusPending")
                         : t("permitProject.people.statusActive")}
                   </SearchGridItem>
-                  <SearchGridItem justifyContent="flex-end" px={2}>
-                    <Menu>
-                      <MenuButton
-                        as={IconButton}
-                        aria-label={t("ui.options")}
-                        icon={<DotsThreeVertical size={20} />}
-                        variant="ghost"
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                      <MenuList boxShadow="elevations.elevation04" borderColor="border.base" minW="220px">
-                        <MenuItem
-                          icon={<Info size={16} />}
-                          fontSize="sm"
-                          onClick={(event) => {
-                            event.stopPropagation()
-                            selectPerson(person)
-                          }}
-                        >
-                          {t("permitProject.people.details")}
-                        </MenuItem>
-                      </MenuList>
-                    </Menu>
-                  </SearchGridItem>
+                  {!readOnly && (
+                    <SearchGridItem justifyContent="flex-end" px={2}>
+                      <Menu>
+                        <MenuButton
+                          as={IconButton}
+                          aria-label={t("ui.options")}
+                          icon={<DotsThreeVertical size={20} />}
+                          variant="ghost"
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                        <MenuList boxShadow="elevations.elevation04" borderColor="border.base" minW="220px">
+                          <MenuItem
+                            icon={<Info size={16} />}
+                            fontSize="sm"
+                            onClick={(event) => {
+                              event.stopPropagation()
+                              selectPerson(person)
+                            }}
+                          >
+                            {t("permitProject.people.details")}
+                          </MenuItem>
+                        </MenuList>
+                      </Menu>
+                    </SearchGridItem>
+                  )}
                 </SearchGridRow>
               ))
             )}
@@ -367,7 +371,7 @@ const PeopleList = observer(({ permitProject }: IProps) => {
           </Flex>
         </VStack>
       </Flex>
-      {selectedPerson && (
+      {selectedPerson && !readOnly && (
         <PersonDetailsPanel
           person={selectedPerson}
           isSelf={Boolean(selectedPerson.userId && selectedPerson.userId === currentUser?.id)}

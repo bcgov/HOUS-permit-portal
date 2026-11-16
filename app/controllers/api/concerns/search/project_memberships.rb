@@ -75,7 +75,7 @@ module Api::Concerns::Search::ProjectMemberships
     filters = membership_filters
     where[:access] = filters[:access] if filters[:access].present?
     where[:role_tags] = filters[:role_tags] if filters[:role_tags].present?
-    unless project_access.view_invitations?
+    unless project_access.view_invitations? || review_staff_for_project?
       where[:id] = @permit_project
         .project_memberships
         .where.not(user_id: nil)
@@ -84,10 +84,15 @@ module Api::Concerns::Search::ProjectMemberships
     where
   end
 
-  # Standard members do not see pending or expired invites. The memberships
-  # controller uses this same method for the people payload.
+  # Standard members do not see pending or expired invites. Review staff for
+  # this jurisdiction do: the inbox People tab is the same list, view only.
   def project_access
     @project_access ||= pundit_user.access.on(@permit_project)
+  end
+
+  def review_staff_for_project?
+    current_user.review_staff? &&
+      current_user.member_of?(@permit_project.jurisdiction_id)
   end
 
   def primary_contact_name
