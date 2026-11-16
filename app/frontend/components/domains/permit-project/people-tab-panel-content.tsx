@@ -106,9 +106,12 @@ const PeopleList = observer(({ permitProject }: IProps) => {
     roleTags?: string[]
     contactDesignation?: EProjectContactDesignation
     access?: EProjectAccess
+    allowInvite?: boolean
   }) => {
     if (!selectedPerson) return
-    const changingOwnAccess = Boolean(changes.access && selectedPerson.userId === currentUser?.id)
+    const changingOwnAccess = Boolean(
+      selectedPerson.userId === currentUser?.id && (changes.access || changes.allowInvite !== undefined)
+    )
     setIsSaving(true)
     const updated = await updateProjectPerson(selectedPerson.id, changes)
     if (changingOwnAccess && updated) {

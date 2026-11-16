@@ -47,6 +47,7 @@ interface IRequirementFormProps {
   updateCollaborationAssignmentNodes?: () => void
   onReviewSubmit?: (submission: any) => void
   showResubmissionSummary?: boolean
+  sideOffset?: number
 }
 
 export const RequirementForm = observer(
@@ -63,6 +64,7 @@ export const RequirementForm = observer(
     updateCollaborationAssignmentNodes,
     onReviewSubmit,
     showResubmissionSummary,
+    sideOffset,
   }: IRequirementFormProps) => {
     const {
       jurisdiction,
@@ -382,7 +384,7 @@ export const RequirementForm = observer(
           mb="40vh"
           mx="auto"
           pl={{ base: "10" }}
-          pr={{ base: "10", xl: "var(--app-permit-form-right-white-space)" }}
+          pr={sideOffset ? { base: "10" } : { base: "10", xl: "var(--app-permit-form-right-white-space)" }}
           width="full"
           maxWidth="container.lg"
           gap={8}
@@ -400,7 +402,7 @@ export const RequirementForm = observer(
               <SharedSpinner h={24} w={24} />
             </Center>
           )}
-          <ErrorsBox data={errorBoxData} />
+          <ErrorsBox data={errorBoxData} sideOffset={sideOffset} />
           {shouldShowDiff &&
             userShouldSeeDiff &&
             (permitApplication.diff ? (

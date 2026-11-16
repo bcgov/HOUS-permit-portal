@@ -446,6 +446,33 @@
     i {
       order: 2;
     }
+
+    .edit-block-access {
+      order: 1;
+      margin-left: auto;
+      margin-right: var(--chakra-space-3);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      color: var(--chakra-colors-text-link);
+      font-weight: normal;
+      font-size: var(--chakra-fontSizes-sm);
+      text-decoration: none;
+      white-space: nowrap;
+
+      i {
+        order: 0;
+        font-size: 1rem;
+      }
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+
+    .formio-collapse-icon {
+      order: 3;
+    }
   }
 }
 

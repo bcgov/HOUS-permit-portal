@@ -110,6 +110,66 @@ RSpec.describe PermitApplication::FormJsonService do
     )
   end
 
+  it "drops the sign-off section when the user only has block grants" do
+    form_json = {
+      "components" => [
+        { "components" => [{ "id" => "rb1" }] },
+        {
+          "key" => "section-completion-key",
+          "components" => [{ "key" => "submit" }]
+        }
+      ]
+    }
+    user = instance_double("User", id: "u1")
+    service =
+      build_service(
+        form_json: form_json,
+        requirement_blocks_json: {
+          "rb1" => {
+            "requirements" => [{ "id" => "r1", "elective" => false }]
+          }
+        },
+        current_user: user,
+        permissions: ["rb1"]
+      )
+
+    service.call
+
+    expect(service.form_json["components"].map { |c| c["key"] }).not_to include(
+      "section-completion-key"
+    )
+  end
+
+  it "keeps the sign-off section when the user can submit the application" do
+    form_json = {
+      "components" => [
+        { "components" => [{ "id" => "rb1" }] },
+        {
+          "key" => "section-completion-key",
+          "components" => [{ "key" => "submit" }]
+        }
+      ]
+    }
+    user = instance_double("User", id: "u1")
+    service =
+      build_service(
+        form_json: form_json,
+        requirement_blocks_json: {
+          "rb1" => {
+            "requirements" => [{ "id" => "r1", "elective" => false }]
+          }
+        },
+        current_user: user,
+        permissions: :all
+      )
+
+    service.call
+
+    expect(service.form_json["components"].map { |c| c["key"] }).to include(
+      "section-completion-key"
+    )
+  end
+
   it "sets Energy Step Code fields required based on permit_application.energy_step_code_required?" do
     form_json = {
       "components" => [

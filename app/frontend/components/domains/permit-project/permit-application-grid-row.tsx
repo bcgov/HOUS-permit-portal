@@ -1,5 +1,5 @@
 import { Button, Icon, IconButton, Menu, MenuButton, MenuItem, MenuList, Text, Tooltip, VStack } from "@chakra-ui/react"
-import { Archive, ClockClockwise, DotsThreeVertical } from "@phosphor-icons/react"
+import { Archive, ClockClockwise, DotsThreeVertical, Users } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -22,10 +22,11 @@ interface IPermitApplicationGridRowProps {
   permitApplication: IPermitApplication
   searchModel?: ISearch
   fromInbox?: boolean
+  onOpenPeople?: (permitApplication: IPermitApplication) => void
 }
 
 export const PermitApplicationGridRow = observer(
-  ({ permitApplication, searchModel, fromInbox = false }: IPermitApplicationGridRowProps) => {
+  ({ permitApplication, searchModel, fromInbox = false, onOpenPeople }: IPermitApplicationGridRowProps) => {
     const { t } = useTranslation()
     const navigate = useNavigate()
     const { id, updatedAt, usingCurrentTemplateVersion, createdBy, nickname, templateNickname } = permitApplication
@@ -34,9 +35,12 @@ export const PermitApplicationGridRow = observer(
     const { currentUser } = userStore
     const isSandboxMismatch = currentSandbox?.id !== permitApplication.sandbox?.id && !currentUser?.isSuperAdmin
     const isLockedDraft = permitApplication.isLockedForReviewStaff
-    // A Standard member sees the row (name and status) but cannot open it.
+    // A Standard member sees the row (name and status) but cannot open it,
+    // unless a grant on this application says they can.
     const isViewRestricted =
-      !fromInbox && permitProjectStore.currentPermitProject?.currentUserAccess?.viewApplication === false
+      !fromInbox &&
+      permitProjectStore.currentPermitProject?.currentUserAccess?.viewApplication === false &&
+      permitApplication.canOpen !== true
     const { canArchiveDraft } = permitApplication
     const isDisabledRow = isSandboxMismatch || isLockedDraft || isViewRestricted
     // A Standard creator cannot open the row, and can still archive that draft.
@@ -127,6 +131,19 @@ export const PermitApplicationGridRow = observer(
                 >
                   {t("ui.view")}
                 </MenuItem>
+                {onOpenPeople && (
+                  <MenuItem
+                    icon={<Users size={16} />}
+                    isDisabled={isDisabledRow}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      if (isDisabledRow) return
+                      onOpenPeople(permitApplication)
+                    }}
+                  >
+                    {t("permitApplication.people.button")}
+                  </MenuItem>
+                )}
                 {!permitApplication.isDiscarded && permitApplication.isDraft && canArchiveDraft && (
                   <ConfirmationModal
                     title={t("ui.confirmArchive")}

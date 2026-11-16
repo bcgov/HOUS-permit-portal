@@ -1,4 +1,17 @@
 class Api::ProjectGrantsController < Api::ApplicationController
+  # The application is the door. There is no grant scope to apply.
+  skip_after_action :verify_policy_scoped, only: :index
+  after_action :verify_authorized, only: :index
+
+  def index
+    application = PermitApplication.find(params[:permit_application_id])
+    authorize application, :open_people?
+    render_success application.project_grants.order(:created_at)
+  rescue ActiveRecord::RecordNotFound
+    skip_authorization
+    raise
+  end
+
   def create
     @grant = build_grant
     authorize @grant

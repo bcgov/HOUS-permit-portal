@@ -103,6 +103,20 @@ RSpec.describe ProjectGrant, type: :model do
     expect(grant).not_to be_valid
   end
 
+  it "stores an invite grant on a pending Expanded invitation" do
+    pending =
+      create(
+        :project_membership,
+        :pending_invitation,
+        permit_project: project,
+        access: :expanded
+      )
+
+    grant = described_class.create!(project_membership: pending, kind: :invite)
+
+    expect(grant).to be_persisted
+  end
+
   it "rejects an application from another project" do
     other = create(:permit_application)
 
@@ -174,18 +188,8 @@ RSpec.describe ProjectGrant, type: :model do
     ).not_to be_valid
   end
 
-  it "drops grants the new access level cannot hold" do
-    expanded =
-      create(
-        :project_membership,
-        permit_project: project,
-        user: create(:user, :submitter),
-        access: :expanded
-      )
-    invite = create(:project_grant, :invite, project_membership: expanded)
-    expanded.update!(access: :standard)
-    expect(ProjectGrant.exists?(invite.id)).to be false
-
+  it "keeps grants when access changes and authorizes only a matching level" do
+    user = membership.user
     block_grant =
       create(
         :project_grant,
@@ -200,13 +204,27 @@ RSpec.describe ProjectGrant, type: :model do
         project_membership: membership,
         permit_application: application
       )
-    membership.update!(access: :expanded)
-    expect(ProjectGrant.exists?(block_grant.id)).to be false
-    expect(ProjectGrant.exists?(application_grant.id)).to be false
 
-    kept_invite =
-      create(:project_grant, :invite, project_membership: membership)
+    membership.update!(access: :expanded)
+    expect(ProjectGrant.exists?(block_grant.id)).to be true
+    expect(ProjectGrant.exists?(application_grant.id)).to be true
+    expect(application.block_granted_to?(user)).to be false
+    expect(application.application_granted_to?(user)).to be false
+
+    invite = create(:project_grant, :invite, project_membership: membership)
+    access = ProjectAccess.new(user, project.sandbox, project)
+    expect(access.invite_people?).to be true
+
+    membership.update!(access: :standard)
+    access = ProjectAccess.new(user, project.sandbox, project)
+    expect(ProjectGrant.exists?(invite.id)).to be true
+    expect(access.invite_people?).to be false
+    expect(application.block_granted_to?(user)).to be true
+    expect(application.application_granted_to?(user)).to be true
+
     membership.update!(access: :full)
-    expect(ProjectGrant.exists?(kept_invite.id)).to be false
+    expect(ProjectGrant.where(project_membership: membership).count).to eq(3)
+    expect(application.application_granted_to?(user)).to be false
+    expect(application.block_granted_to?(user)).to be false
   end
 end

@@ -14,16 +14,29 @@ const defaultButtonsTemplate = Templates.current.button.form
 const chefsTemplateGlobal = globalThis as typeof globalThis & {
   __housOriginalLabelTemplate?: typeof defaultLabelTemplate
   __housOriginalButtonsTemplate?: typeof defaultButtonsTemplate
+  __housOriginalComponentTemplate?: (ctx: { visible?: boolean; classes?: string }) => string
 }
 const originalLabelTemplate = chefsTemplateGlobal.__housOriginalLabelTemplate ?? defaultLabelTemplate
 const originalButtonsTemplate = chefsTemplateGlobal.__housOriginalButtonsTemplate ?? defaultButtonsTemplate
 chefsTemplateGlobal.__housOriginalLabelTemplate = originalLabelTemplate
 chefsTemplateGlobal.__housOriginalButtonsTemplate = originalButtonsTemplate
+const defaultComponentTemplate = Templates.current.component.form
+const originalComponentTemplate = chefsTemplateGlobal.__housOriginalComponentTemplate ?? defaultComponentTemplate
+chefsTemplateGlobal.__housOriginalComponentTemplate = originalComponentTemplate
 
 //container - we can add for main headers like Contact Info.
 //panels - are for section blocks, to put things inside panels, we need to target the components section under the body
 
 Templates.current = {
+  // Form.io omits children when a component is hidden, so a panel has no card for the placeholder.
+  component: {
+    form: (ctx) => {
+      if (!ctx.visible && String(ctx.classes || "").includes("formio-component-panel")) {
+        return originalComponentTemplate({ ...ctx, visible: true })
+      }
+      return originalComponentTemplate(ctx)
+    },
+  },
   panel: {
     form: (ctx) => {
       let template = overridePanelTemplate(ctx)

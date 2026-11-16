@@ -20,7 +20,8 @@ class PermitApplicationBlueprint < Blueprinter::Base
            :template_nickname,
            :discarded_at,
            :days_in_queue,
-           :step_code_stage
+           :step_code_stage,
+           :application_contact_membership_id
 
     association :sandbox, blueprint: SandboxBlueprint
 
@@ -31,6 +32,15 @@ class PermitApplicationBlueprint < Blueprinter::Base
 
     field :can_archive_draft do |pa, options|
       options[:project_access]&.archive_draft?(pa) || false
+    end
+
+    # Project-wide view is Full or Expanded. A grant opens this one application.
+    field :can_open do |pa, options|
+      user = options[:current_user]
+      next false unless user
+      next true if options[:project_access]&.view_application?
+
+      pa.block_granted_to?(user) || pa.application_granted_to?(user)
     end
 
     field :created_by do |pa, _options|

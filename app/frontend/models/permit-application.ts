@@ -36,6 +36,7 @@ import {
   combineRevisionButtons,
   highlightPublishedElectives,
   processFieldsForEphemeral,
+  stampEditAccessLinks,
 } from "../utils/formio-component-traversal"
 import { injectOptionalElectivesButtons } from "../utils/view-optional-electives"
 
@@ -117,12 +118,15 @@ export const PermitApplicationModel = types.snapshotProcessor(
       templateNickname: types.maybeNull(types.string),
       projectId: types.maybeNull(types.string),
       projectNumber: types.maybeNull(types.string),
+      applicationContactMembershipId: types.maybeNull(types.string),
       discardedAt: types.maybeNull(types.Date),
       inboxSortOrder: types.maybeNull(types.number),
       allowedManualTransitions: types.optional(types.array(types.string), []),
       daysInQueue: types.maybeNull(types.number),
       // Project list rows only. Full: any draft. Expanded: drafts they created.
       canArchiveDraft: types.optional(types.boolean, false),
+      // This application, including a block or application grant.
+      canOpen: types.optional(types.boolean, false),
       // The caller's project access, on the full application payload.
       currentUserAccess: types.maybeNull(types.frozen<IProjectAccess>()),
     })
@@ -346,6 +350,10 @@ export const PermitApplicationModel = types.snapshotProcessor(
 
         if (self.isEphemeral) {
           return injectOptionalElectivesButtons(revisionModeFormJson, t("templateVersionPreview.viewOptionalElectives"))
+        }
+
+        if (forSubmitterEdit && self.currentUserAccess?.editApplication) {
+          return stampEditAccessLinks(revisionModeFormJson, t("permitApplication.blockAccess.editAccess"))
         }
 
         return revisionModeFormJson
@@ -873,6 +881,13 @@ export const PermitApplicationModel = types.snapshotProcessor(
           self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
         }
         return response
+      }),
+      updateApplicationContact: flow(function* (membershipId: string) {
+        const response = yield self.environment.api.updateApplicationContact(self.id, membershipId)
+        if (response.ok) {
+          self.applicationContactMembershipId = response.data?.data?.applicationContactMembershipId ?? membershipId
+        }
+        return response.ok
       }),
       submit: flow(function* (params) {
         const response = yield self.environment.api.submitPermitApplication(self.id, params)

@@ -22,6 +22,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
                   restore
                   transition_status
                   mark_as_unviewed
+                  update_application_contact
                 ]
   skip_after_action :verify_policy_scoped, only: [:index]
 
@@ -260,6 +261,35 @@ class Api::PermitApplicationsController < Api::ApplicationController
       end
     rescue Shrine::FileNotFound
       render_error "permit_application.file_not_found_error"
+    end
+  end
+
+  def update_application_contact
+    authorize @permit_application
+    @permit_application.application_contact_membership_id =
+      params.dig(
+        :permit_application,
+        :application_contact_membership_id
+      ).presence
+
+    if @permit_application.save
+      render_success @permit_application,
+                     nil,
+                     {
+                       blueprint: PermitApplicationBlueprint,
+                       blueprint_opts: {
+                         view: :summary
+                       }
+                     }
+    else
+      render_error "permit_application.update_application_contact_error",
+                   {
+                     status: :unprocessable_content,
+                     message_opts: {
+                       error_message:
+                         @permit_application.errors.full_messages.join(", ")
+                     }
+                   }
     end
   end
 

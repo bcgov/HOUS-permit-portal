@@ -27,6 +27,19 @@ class PermitApplicationPolicy < ApplicationPolicy
     user.review_staff? && user.member_of?(record.jurisdiction_id)
   end
 
+  # Full and Expanded only. A block grant can save the draft and still
+  # cannot choose who the building authority contacts.
+  def update_application_contact?
+    return false if record.discarded?
+
+    project_access.edit_application?
+  end
+
+  # The people panel. Same door as opening this application.
+  def open_people?
+    can_open?
+  end
+
   # A field-revision response is this check while revisions_requested.
   # The save still drops keys that are not a granted block.
   def update?
@@ -205,6 +218,7 @@ class PermitApplicationPolicy < ApplicationPolicy
                 #{ProjectGrant.kinds.fetch("application")}
               )
               AND grant_pm.user_id = :uid
+              AND grant_pm.access = #{ProjectMembership.accesses.fetch("standard")}
               AND grant_pm.permit_project_id = permit_applications.permit_project_id
           )
         SQL

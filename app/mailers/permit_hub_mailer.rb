@@ -196,7 +196,7 @@ class PermitHubMailer < ApplicationMailer
   end
 
   def notify_review_started(permit_application)
-    @user = permit_application.submitter
+    @user = permit_application.application_message_recipient
     @permit_application = permit_application
     send_user_mail(
       email: @user.email,

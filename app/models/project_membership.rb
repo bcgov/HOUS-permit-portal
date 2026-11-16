@@ -24,7 +24,6 @@ class ProjectMembership < ApplicationRecord
        validate: true
 
   before_validation :normalize_invited_fields
-  before_update :drop_grants_for_new_access, if: :will_save_change_to_access?
 
   validates :user_id, uniqueness: { scope: :permit_project_id }, allow_nil: true
   validates :invited_first_name,
@@ -96,18 +95,6 @@ class ProjectMembership < ApplicationRecord
     self.invited_email = invited_email&.strip&.downcase
     self.invited_first_name = invited_first_name&.strip
     self.invited_last_name = invited_last_name&.strip
-  end
-
-  # Invite only fits Expanded. Block and application grants only fit Standard.
-  # Full already has the project, so that level keeps no grants.
-  def drop_grants_for_new_access
-    if standard?
-      project_grants.invite.destroy_all
-    elsif expanded?
-      project_grants.where.not(kind: :invite).destroy_all
-    else
-      project_grants.destroy_all
-    end
   end
 
   def unique_pending_or_active_invited_email

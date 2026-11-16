@@ -11,7 +11,7 @@ import {
   Tooltip,
   useDisclosure,
 } from "@chakra-ui/react"
-import { CaretDown, CaretRight, CaretUp, FloppyDiskBack, Info, NotePencil } from "@phosphor-icons/react"
+import { CaretDown, CaretRight, CaretUp, FloppyDiskBack, Info, NotePencil, Users } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
@@ -20,12 +20,14 @@ import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { Link, useNavigate } from "react-router-dom"
 import { requirementTypeToFormioType } from "../../../constants"
+import { COMPLETTION_SECTION_KEY } from "../../../constants/formio-constants"
 import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
 import { useInterval } from "../../../hooks/use-interval"
-import { useMst } from "../../../setup/root"
+import { useMst, useServerAPI } from "../../../setup/root"
 import { stickyBelowNavBar } from "../../../styles/nav-bar-offset"
 import { ICustomEventMap } from "../../../types/dom"
 import { ECustomEvents, ERequirementType } from "../../../types/enums"
+import { IProjectGrant } from "../../../types/types"
 import { findPidComponentKey } from "../../../utils/formio-component-traversal"
 import { handleScrollToBottom, handleScrollToTop } from "../../../utils/utility-functions"
 import { CopyableValue } from "../../shared/base/copyable-value"
@@ -42,6 +44,8 @@ import {
   IReviewSubmitActions,
   ReviewAndSubmitRevisedApplicationScreen,
 } from "../../shared/revisions/review-and-submit-revised-application-screen"
+import { ApplicationPeoplePanel } from "./application-people-panel"
+import { BlockAccessPanel } from "./block-access-panel"
 import { ChecklistSideBar } from "./checklist-sidebar"
 import { ContactSummaryModal } from "./contact-summary-modal"
 import { setupEnergyStepCodeReportLink } from "./energy-step-code-report-link"
@@ -54,8 +58,12 @@ type TPermitApplicationMetadataForm = {
   nickname: string
 }
 
+const countGrantedPeople = (grants: IProjectGrant[]) =>
+  new Set(grants.filter((grant) => grant.kind !== "invite").map((grant) => grant.projectMembershipId)).size
+
 export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationScreenProps) => {
   const { userStore, uiStore } = useMst()
+  const api = useServerAPI()
   const { scrollToSelector, setScrollToSelector } = uiStore
   const currentUser = userStore.currentUser
   const { currentPermitApplication, error } = usePermitApplication()
@@ -108,8 +116,65 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
     onClose: onSubmitBlockedModalClose,
   } = useDisclosure()
   const [isReviewingSubmit, setIsReviewingSubmit] = useState(false)
+  const [peopleOpen, setPeopleOpen] = useState(false)
+  const [blockAccessId, setBlockAccessId] = useState<string | null>(null)
+  const [grantedPeopleCount, setGrantedPeopleCount] = useState(0)
   const [imminentSubmission, setImminentSubmission] = useState(null)
   const reviewSubmitActionsRef = useRef<IReviewSubmitActions | null>(null)
+
+  useEffect(() => {
+    const applicationId = currentPermitApplication?.id
+    if (!applicationId) return
+    let cancelled = false
+    const load = async () => {
+      const response = await api.fetchProjectGrants(applicationId)
+      if (cancelled || !response.ok) return
+      setGrantedPeopleCount(countGrantedPeople(response.data?.data ?? []))
+    }
+    void load()
+    return () => {
+      cancelled = true
+    }
+  }, [currentPermitApplication?.id])
+
+  useEffect(() => {
+    setBlockAccessId(null)
+  }, [currentPermitApplication?.id])
+
+  useEffect(() => {
+    const handleEditBlockAccess = (event: Event) => {
+      const requirementBlockId = (event as CustomEvent<{ requirementBlockId?: string }>).detail?.requirementBlockId
+      if (!currentPermitApplication?.currentUserAccess?.editApplication) return
+      if (!requirementBlockId) return
+      setPeopleOpen(false)
+      setBlockAccessId(requirementBlockId)
+    }
+    const handleHeaderClick = (event: Event) => {
+      const target = event.target as HTMLElement | null
+      const link = target?.closest?.(".edit-block-access") as HTMLElement | null
+      if (!link) return
+      event.preventDefault()
+      event.stopPropagation()
+      if (event.type !== "click") return
+      const panel = link.closest(".formio-component-panel")
+      const requirementBlockId = panel
+        ? Array.from(panel.classList)
+            .find((className) => className.includes("|RB"))
+            ?.split("|RB")
+            .at(-1)
+        : null
+      if (!requirementBlockId) return
+      document.dispatchEvent(new CustomEvent("editBlockAccess", { detail: { requirementBlockId } }))
+    }
+    document.addEventListener("editBlockAccess", handleEditBlockAccess)
+    document.addEventListener("click", handleHeaderClick, true)
+    document.addEventListener("mousedown", handleHeaderClick, true)
+    return () => {
+      document.removeEventListener("editBlockAccess", handleEditBlockAccess)
+      document.removeEventListener("click", handleHeaderClick, true)
+      document.removeEventListener("mousedown", handleHeaderClick, true)
+    }
+  }, [currentPermitApplication?.currentUserAccess?.editApplication])
 
   const handlePermitApplicationUpdate = (_event: ICustomEventMap[ECustomEvents.handlePermitApplicationUpdate]) => {
     if (formRef.current) {
@@ -298,6 +363,9 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const submitClickHandler = currentPermitApplication.canUserSubmit(currentUser)
     ? handleScrollToBottom
     : onSubmitBlockedModalOpen
+  const showSubmitControl =
+    isReviewingSubmit || formJson?.components?.some((section) => section.key === COMPLETTION_SECTION_KEY)
+  const sidePanelOpen = peopleOpen || Boolean(blockAccessId)
   let sidebar = <ChecklistSideBar permitApplication={currentPermitApplication} completedBlocks={completedBlocks} />
   if (isReviewingSubmit && imminentSubmission) {
     sidebar = (
@@ -425,6 +493,16 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                 <BrowserSearchPrompt />
                 <Button
                   variant="primary"
+                  leftIcon={<Users />}
+                  onClick={() => {
+                    setBlockAccessId(null)
+                    setPeopleOpen((open) => !open)
+                  }}
+                >
+                  {t("permitApplication.people.buttonWithCount", { count: grantedPeopleCount })}
+                </Button>
+                <Button
+                  variant="primary"
                   onClick={
                     isReviewingSubmit ? () => reviewSubmitActionsRef.current?.saveAndExit() : handleClickFinishLater
                   }
@@ -434,15 +512,17 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                     ? t("permitApplication.show.revision.saveAndExit")
                     : t("permitApplication.edit.saveDraft")}
                 </Button>
-                <Button
-                  rightIcon={<CaretRight />}
-                  onClick={isReviewingSubmit ? () => reviewSubmitActionsRef.current?.submit() : submitClickHandler}
-                  isDisabled={isReviewingSubmit && currentPermitApplication.digitalSealChecks.pendingCount > 0}
-                >
-                  {isReviewingSubmit
-                    ? t("permitApplication.new.submitApplication")
-                    : t("permitApplication.edit.submit")}
-                </Button>
+                {showSubmitControl && (
+                  <Button
+                    rightIcon={<CaretRight />}
+                    onClick={isReviewingSubmit ? () => reviewSubmitActionsRef.current?.submit() : submitClickHandler}
+                    isDisabled={isReviewingSubmit && currentPermitApplication.digitalSealChecks.pendingCount > 0}
+                  >
+                    {isReviewingSubmit
+                      ? t("permitApplication.new.submitApplication")
+                      : t("permitApplication.edit.submit")}
+                  </Button>
+                )}
                 {!currentPermitApplication.canUserSubmit(currentUser) && isSubmitBlockedModalOpen && (
                   <PermitApplicationSubmitModal
                     permitApplication={currentPermitApplication}
@@ -452,7 +532,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                 )}
               </HStack>
             )}
-            <FloatingHelpDrawer top={{ base: "auto", md: "250px" }} bottom={{ base: 18, md: "auto" }} />
+            <FloatingHelpDrawer top="auto" bottom="76px" right={sidePanelOpen ? "380px" : "20px"} />
           </Flex>
           {currentPermitApplication.isRevisionsRequested && !isReviewingSubmit && (
             <Flex
@@ -489,13 +569,20 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
           )}
         </Flex>
       )}
-      <Box id="sidebar-and-form-container" sx={{ "&:after": { content: `""`, display: "block", clear: "both" } }}>
-        {sidebar}
+      <Flex id="sidebar-and-form-container" align="stretch" w="full">
+        <Box
+          flex={isReviewingSubmit ? 1 : undefined}
+          flexShrink={isReviewingSubmit ? 1 : 0}
+          minW={isReviewingSubmit ? 0 : undefined}
+        >
+          {sidebar}
+        </Box>
         {formJson && (
           <Flex
             flex={1}
             direction="column"
-            pt={8}
+            minW={0}
+            pt={4}
             position={"relative"}
             id="permitApplicationFieldsContainer"
             display={isReviewingSubmit ? "none" : "flex"}
@@ -514,18 +601,38 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                   isDisabled={isSubmitted || currentPermitApplication.isViewingPastRequests}
                 />
               )}
+              sideOffset={sidePanelOpen ? 360 : 0}
               onReviewSubmit={
                 currentPermitApplication.canUserSubmit(currentUser)
                   ? (submission) => {
                       setImminentSubmission(submission)
                       setIsReviewingSubmit(true)
+                      setPeopleOpen(false)
+                      setBlockAccessId(null)
                     }
                   : undefined
               }
             />
           </Flex>
         )}
-      </Box>
+        {peopleOpen && (
+          <ApplicationPeoplePanel
+            permitApplication={currentPermitApplication}
+            stickyHeaderHeight={permitHeaderHeight}
+            onClose={() => setPeopleOpen(false)}
+            onGrantsChange={(grants) => setGrantedPeopleCount(countGrantedPeople(grants))}
+          />
+        )}
+        {blockAccessId && (
+          <BlockAccessPanel
+            permitApplication={currentPermitApplication}
+            requirementBlockId={blockAccessId}
+            stickyHeaderHeight={permitHeaderHeight}
+            onClose={() => setBlockAccessId(null)}
+            onGrantsChange={(grants) => setGrantedPeopleCount(countGrantedPeople(grants))}
+          />
+        )}
+      </Flex>
       {isContactsOpen && (
         <ContactSummaryModal
           isOpen={isContactsOpen}

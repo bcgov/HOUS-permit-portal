@@ -22,4 +22,9 @@ class ProjectMembershipBlueprint < Blueprinter::Base
   field :can_edit_role_tags do |membership, options|
     options[:project_access]&.edit_role_tags?(membership) || false
   end
+
+  # The invite-grant row. It authorizes only while the member is Expanded.
+  field :allow_invite do |membership|
+    membership.project_grants.invite.exists?
+  end
 end

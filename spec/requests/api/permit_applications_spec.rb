@@ -2097,4 +2097,57 @@ RSpec.describe "Api::PermitApplications", type: :request do
       expect(response).to have_http_status(:forbidden)
     end
   end
+
+  describe "PATCH /api/permit_applications/:id/application_contact" do
+    it "lets Full set the contact and refuses a block grant" do
+      project = create(:permit_project, owner: submitter)
+      application =
+        create(
+          :permit_application,
+          permit_project: project,
+          submitter: submitter,
+          jurisdiction: project.jurisdiction
+        )
+      member =
+        create(
+          :project_membership,
+          permit_project: project,
+          user: create(:user, :submitter),
+          access: :standard
+        )
+
+      sign_in submitter
+      patch "/api/permit_applications/#{application.id}/application_contact",
+            params: {
+              permit_application: {
+                application_contact_membership_id: member.id
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(application.reload.application_contact_membership).to eq(member)
+
+      create(
+        :project_grant,
+        project_membership: member,
+        permit_application: application,
+        requirement_block_id: SecureRandom.uuid
+      )
+      sign_in member.user
+      patch "/api/permit_applications/#{application.id}/application_contact",
+            params: {
+              permit_application: {
+                application_contact_membership_id:
+                  project.project_memberships.find_by!(user: submitter).id
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(application.reload.application_contact_membership).to eq(member)
+    end
+  end
 end

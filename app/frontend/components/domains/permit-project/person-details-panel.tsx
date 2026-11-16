@@ -14,6 +14,7 @@ import { ConfirmationModal } from "../../shared/modals/confirmation-modal"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { ProjectAccessTag } from "../../shared/permit-projects/project-access-tag"
 import { ProjectRoleSelect } from "../../shared/select/selectors/project-role-select"
+import { AllowInviteField } from "./allow-invite-field"
 
 interface IPersonDetailsPanelProps {
   person: IProjectPerson
@@ -32,6 +33,7 @@ interface IPersonDetailsPanelProps {
     roleTags?: string[]
     contactDesignation?: EProjectContactDesignation
     access?: EProjectAccess
+    allowInvite?: boolean
   }) => void
   onReinvite?: () => Promise<boolean>
   onRemove: () => void
@@ -579,9 +581,22 @@ export const PersonDetailsPanel = ({
               <Text fontWeight="bold" fontSize="md">
                 {t("permitProject.people.additionalAccess")}
               </Text>
-              <Text fontSize="sm" color="text.secondary" mt={2.5}>
-                {t("permitProject.people.additionalAccessPlaceholder")}
-              </Text>
+              {person.access === EProjectAccess.expanded && canManageStanding ? (
+                <Box mt={2.5}>
+                  <AllowInviteField
+                    value={person.allowInvite === true}
+                    isDisabled={isSaving}
+                    onChange={(allowInvite) => {
+                      if (allowInvite === (person.allowInvite === true)) return
+                      void onSave({ allowInvite })
+                    }}
+                  />
+                </Box>
+              ) : (
+                <Text fontSize="sm" color="text.secondary" mt={2.5}>
+                  {t("permitProject.people.additionalAccessPlaceholder")}
+                </Text>
+              )}
             </Box>
 
             {canRemove && (

@@ -4,6 +4,27 @@ class ProjectGrant < ApplicationRecord
 
   enum :kind, { block: 0, application: 1, invite: 2 }, validate: true
 
+  # A grant authorizes only while the member's access still matches it.
+  # Block and application grants are Standard. An invite grant is Expanded.
+  scope :authorizing,
+        -> do
+          joins(:project_membership).where(
+            <<~SQL.squish,
+              (
+                project_grants.kind IN (:block_kinds)
+                AND project_memberships.access = :standard
+              ) OR (
+                project_grants.kind = :invite_kind
+                AND project_memberships.access = :expanded
+              )
+            SQL
+            block_kinds: [kinds.fetch("block"), kinds.fetch("application")],
+            standard: ProjectMembership.accesses.fetch("standard"),
+            invite_kind: kinds.fetch("invite"),
+            expanded: ProjectMembership.accesses.fetch("expanded")
+          )
+        end
+
   before_validation :clear_requirement_block_id_unless_block
 
   validates :permit_application, presence: true, unless: :invite?
@@ -65,7 +86,10 @@ class ProjectGrant < ApplicationRecord
     self.requirement_block_id = nil unless block?
   end
 
+  # Invite grants are chosen on the invitation, before the person accepts.
+  # Block and application grants still need an accepted member.
   def membership_is_accepted
+    return if invite?
     return if project_membership&.active?
 
     errors.add(:project_membership, "must be an accepted member")

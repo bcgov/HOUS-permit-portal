@@ -81,6 +81,7 @@ export const ProjectPeopleStoreModel = types
       roleTags?: string[]
       contactDesignation?: EProjectContactDesignation
       access?: EProjectAccess
+      allowInvite?: boolean
     }) {
       const permitProjectId = self.rootStore.permitProjectStore.currentPermitProject?.id
       if (!permitProjectId) return null
@@ -109,6 +110,7 @@ export const ProjectPeopleStoreModel = types
         roleTags?: string[]
         contactDesignation?: EProjectContactDesignation
         access?: EProjectAccess
+        allowInvite?: boolean
       }
     ) {
       const permitProjectId = self.rootStore.permitProjectStore.currentPermitProject?.id

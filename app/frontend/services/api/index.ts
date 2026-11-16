@@ -91,6 +91,7 @@ import {
   IPermitApplicationSearchFilters,
   IPermitProjectSearchFilters,
   IProjectAuditSearchFilters,
+  IProjectGrant,
   IProjectInvitation,
   IProjectMeetingInboxSearchFilters,
   IProjectPerson,
@@ -510,6 +511,7 @@ export class Api {
       roleTags?: string[]
       contactDesignation?: EProjectContactDesignation
       access?: EProjectAccess
+      allowInvite?: boolean
     }
   ) {
     return this.client.post<IApiResponse<IProjectPerson, Record<string, never>>>(
@@ -531,6 +533,7 @@ export class Api {
       roleTags?: string[]
       contactDesignation?: EProjectContactDesignation
       access?: EProjectAccess
+      allowInvite?: boolean
     }
   ) {
     return this.client.patch<IApiResponse<IProjectPerson, Record<string, never>>>(
@@ -886,6 +889,34 @@ export class Api {
     return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/submitter_note`, {
       permitApplication: { submitterNote },
     })
+  }
+
+  async updateApplicationContact(id: string, applicationContactMembershipId: string) {
+    return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/application_contact`, {
+      permitApplication: { applicationContactMembershipId },
+    })
+  }
+
+  async fetchProjectGrants(permitApplicationId: string) {
+    return this.client.get<IApiResponse<IProjectGrant[], {}>>(
+      `/permit_applications/${permitApplicationId}/project_grants`
+    )
+  }
+
+  async createProjectGrant(
+    permitApplicationId: string,
+    grant: { membershipId: string; kind: "block" | "application"; requirementBlockId?: string | null }
+  ) {
+    return this.client.post<IApiResponse<IProjectGrant, {}>>(
+      `/permit_applications/${permitApplicationId}/project_grants`,
+      { grant }
+    )
+  }
+
+  async destroyProjectGrant(permitApplicationId: string, id: string) {
+    return this.client.delete<IApiResponse<null, {}>>(
+      `/permit_applications/${permitApplicationId}/project_grants/${id}`
+    )
   }
 
   async submitPermitApplication(id, params) {

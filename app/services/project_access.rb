@@ -69,7 +69,7 @@ class ProjectAccess
   # Full, or Expanded with an invite grant. Standard stays denied.
   # Offering Full is invite_at_full?.
   def invite_people?
-    full? || (expanded? && membership.project_grants.invite.exists?)
+    full? || (expanded? && membership.project_grants.invite.authorizing.exists?)
   end
 
   # Offer Full, and re-send or cancel a Full invite. Full only.

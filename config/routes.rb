@@ -218,7 +218,7 @@ Rails.application.routes.draw do
 
     resources :permit_applications, only: %i[update show destroy] do
       resources :project_grants,
-                only: %i[create destroy],
+                only: %i[index create destroy],
                 controller: "project_grants"
       collection { patch :reorder }
       post "restore", on: :member
@@ -248,6 +248,9 @@ Rails.application.routes.draw do
       patch "revision_requests",
             on: :member,
             to: "permit_applications#update_revision_requests"
+      patch "application_contact",
+            on: :member,
+            to: "permit_applications#update_application_contact"
       patch "submitter_note",
             on: :member,
             to: "permit_applications#update_submitter_note"

@@ -207,7 +207,8 @@ RSpec.describe PermitHubMailer, type: :mailer do
       instance_double(
         "PermitApplication",
         number: "PA-1",
-        submitter: confirmed_user
+        submitter: confirmed_user,
+        application_message_recipient: confirmed_user
       )
     contact =
       instance_double("SubmissionContact", email: "reviewer@example.com")

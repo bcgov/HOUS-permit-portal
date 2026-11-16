@@ -31,6 +31,7 @@ import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { ProjectAccessTag } from "../../shared/permit-projects/project-access-tag"
 import { ProjectRoleSelect } from "../../shared/select/selectors/project-role-select"
+import { AllowInviteField } from "./allow-invite-field"
 
 interface IAddProjectPersonFormProps {
   permitProject: IPermitProject
@@ -43,6 +44,7 @@ interface IAddProjectPersonFormValues {
   roleTags: string[]
   contactDesignation: EProjectContactDesignation | ""
   access: EProjectAccess | ""
+  allowInvite: boolean
 }
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -65,6 +67,7 @@ export const AddProjectPersonForm = observer(({ permitProject }: IAddProjectPers
     register,
     control,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting, isSubmitted },
   } = useForm<IAddProjectPersonFormValues>({
     defaultValues: {
@@ -74,8 +77,10 @@ export const AddProjectPersonForm = observer(({ permitProject }: IAddProjectPers
       roleTags: [],
       contactDesignation: "",
       access: "",
+      allowInvite: true,
     },
   })
+  const selectedAccess = watch("access")
 
   const peoplePath = `/projects/${permitProject.id}/people`
 
@@ -89,6 +94,7 @@ export const AddProjectPersonForm = observer(({ permitProject }: IAddProjectPers
       roleTags: values.roleTags,
       contactDesignation: values.contactDesignation,
       access: values.access,
+      ...(values.access === EProjectAccess.expanded ? { allowInvite: values.allowInvite } : {}),
     })
 
     if (created) {
@@ -337,6 +343,16 @@ export const AddProjectPersonForm = observer(({ permitProject }: IAddProjectPers
                 </FormControl>
               )}
             />
+
+            {selectedAccess === EProjectAccess.expanded && (
+              <Controller
+                name="allowInvite"
+                control={control}
+                render={({ field }) => (
+                  <AllowInviteField value={field.value} isDisabled={isSubmitting} onChange={field.onChange} />
+                )}
+              />
+            )}
           </VStack>
 
           <HStack spacing={3} pt={2}>

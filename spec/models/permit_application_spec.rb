@@ -2,6 +2,43 @@ require "rails_helper"
 
 RSpec.describe PermitApplication, type: :model do
   include ActiveSupport::Testing::TimeHelpers
+
+  describe "application contact" do
+    it "copies the primary contact once and leaves it when the primary changes" do
+      project = create(:permit_project)
+      primary =
+        project.project_memberships.find_by!(contact_designation: :primary)
+      application =
+        create(
+          :permit_application,
+          permit_project: project,
+          submitter: project.owner,
+          jurisdiction: project.jurisdiction
+        )
+
+      expect(application.application_contact_membership).to eq(primary)
+
+      replacement =
+        create(
+          :project_membership,
+          permit_project: project,
+          user: create(:user, :submitter)
+        )
+      replacement.update!(contact_designation: :primary)
+
+      expect(application.reload.application_contact_membership).to eq(primary)
+
+      later =
+        create(
+          :permit_application,
+          permit_project: project,
+          submitter: project.owner,
+          jurisdiction: project.jurisdiction
+        )
+      expect(later.application_contact_membership).to eq(replacement)
+    end
+  end
+
   describe "associations" do
     subject { build_stubbed(:permit_application) }
 

@@ -37,6 +37,9 @@ class PermitApplication < ApplicationRecord
              class_name: "CustomizationChange",
              optional: true
   belongs_to :permit_project, optional: true, touch: true
+  belongs_to :application_contact_membership,
+             class_name: "ProjectMembership",
+             optional: true
 
   has_one :requirement_template, through: :template_version
 
@@ -96,6 +99,7 @@ class PermitApplication < ApplicationRecord
             },
             allow_nil: true
   validate :submission_versions_match_status
+  validate :application_contact_on_project
 
   delegate :published_template_version, to: :template_version
 
@@ -103,6 +107,8 @@ class PermitApplication < ApplicationRecord
   before_validation :set_template_version, on: :create
   before_validation :populate_base_form_data, on: :create
   before_validation :assign_created_by_from_submitter, on: :create
+  before_validation :assign_application_contact, on: :create
+  before_create :assign_application_contact
   before_create :acknowledge_current_customization_change
   before_save :take_form_customizations_snapshot_if_submitted
 
@@ -367,7 +373,7 @@ class PermitApplication < ApplicationRecord
 
     project_grants
       .application
-      .joins(:project_membership)
+      .authorizing
       .where(project_memberships: { user_id: user.id })
       .exists?
   end
@@ -377,7 +383,7 @@ class PermitApplication < ApplicationRecord
 
     project_grants
       .block
-      .joins(:project_membership)
+      .authorizing
       .where(project_memberships: { user_id: user.id })
       .pluck(:requirement_block_id)
   end
@@ -916,6 +922,12 @@ class PermitApplication < ApplicationRecord
     end
   end
 
+  # Who is told about this application. The stored contact when they still
+  # have a user, otherwise the submitter.
+  def application_message_recipient
+    application_contact_membership&.user || submitter
+  end
+
   private
 
   # The project's own sandbox, so a model check never depends on the request.
@@ -942,6 +954,30 @@ class PermitApplication < ApplicationRecord
   # association reader skips PublicRecordable's unsaved readonly snapshot user.
   def assign_created_by_from_submitter
     self.created_by ||= association(:submitter).reader
+  end
+
+  # The project's primary contact at the moment this application is created.
+  # A later change to the primary contact leaves this row alone.
+  # before_create runs again so a project saved during this create still counts.
+  def assign_application_contact
+    return if application_contact_membership_id.present?
+    return if permit_project.blank? || !permit_project.persisted?
+
+    self.application_contact_membership =
+      permit_project.project_memberships.find_by(contact_designation: :primary)
+  end
+
+  def application_contact_on_project
+    membership = application_contact_membership
+    return if membership.blank?
+    if membership.permit_project_id == permit_project_id && membership.active?
+      return
+    end
+
+    errors.add(
+      :application_contact_membership,
+      "must be an active member of this project"
+    )
   end
 
   def update_collaboration_assignments

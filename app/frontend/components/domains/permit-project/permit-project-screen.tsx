@@ -189,7 +189,7 @@ export const PermitProjectScreen = observer(() => {
               {isPending ? <LoadingScreen /> : <ActivityTabPanelContent permitProject={currentPermitProject} />}
             </TabPanel>
           )}
-          <TabPanel h="full" overflowY="auto">
+          <TabPanel p={0} h="full" overflow="hidden">
             {isPending ? <LoadingScreen /> : <PermitsTabPanelContent permitProject={currentPermitProject} />}
           </TabPanel>
           <TabPanel p={0} h="full" overflow="hidden">
