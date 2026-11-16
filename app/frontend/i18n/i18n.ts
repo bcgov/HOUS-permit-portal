@@ -1701,6 +1701,8 @@ Thank you,
               "The building authority may contact these people with questions about the project. The alternate contact may be contacted if the primary contact is unavailable.",
             notAssigned: "Not assigned",
             contactQuestion: "Should this person be a project contact?",
+            contactEmailHelp:
+              "The primary and alternate contacts are emailed when applications are added to this project. The primary contact is also the contact on new applications, and receives emails about those applications. Applications that already exist keep their current contact.",
             contactYesPrimary: "Yes, as the primary contact",
             contactYesAlternate: "Yes, as the alternate contact",
             replacePrimaryContact: "{{name}} will replace {{existing}} as the primary contact.",

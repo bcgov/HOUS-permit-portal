@@ -26,7 +26,7 @@ import { useInterval } from "../../../hooks/use-interval"
 import { useMst, useServerAPI } from "../../../setup/root"
 import { stickyBelowNavBar } from "../../../styles/nav-bar-offset"
 import { ICustomEventMap } from "../../../types/dom"
-import { ECustomEvents, ERequirementType } from "../../../types/enums"
+import { ECollaborationType, ECustomEvents, ERequirementType } from "../../../types/enums"
 import { IProjectGrant } from "../../../types/types"
 import { findPidComponentKey } from "../../../utils/formio-component-traversal"
 import { handleScrollToBottom, handleScrollToTop } from "../../../utils/utility-functions"
@@ -47,6 +47,8 @@ import {
 import { ApplicationPeoplePanel } from "./application-people-panel"
 import { BlockAccessPanel } from "./block-access-panel"
 import { ChecklistSideBar } from "./checklist-sidebar"
+import { BlockCollaboratorAssignmentManagement } from "./collaborator-management/block-collaborator-assignment-management"
+import { useCollaborationAssignmentNodes } from "./collaborator-management/hooks/use-collaboration-assignment-nodes"
 import { ContactSummaryModal } from "./contact-summary-modal"
 import { setupEnergyStepCodeReportLink } from "./energy-step-code-report-link"
 import { RevisionSideBar } from "./revision-sidebar"
@@ -71,6 +73,9 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
 
   const formRef = useRef(null)
   const navigate = useNavigate()
+  const { requirementBlockAssignmentNodes, updateRequirementBlockAssignmentNode } = useCollaborationAssignmentNodes({
+    formRef,
+  })
 
   const acknowledgedElectivesKey = useRef("")
   useEffect(() => {
@@ -602,6 +607,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                 />
               )}
               sideOffset={sidePanelOpen ? 360 : 0}
+              updateCollaborationAssignmentNodes={updateRequirementBlockAssignmentNode}
               onReviewSubmit={
                 currentPermitApplication.canUserSubmit(currentUser)
                   ? (submission) => {
@@ -633,6 +639,14 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
           />
         )}
       </Flex>
+      {requirementBlockAssignmentNodes.map((requirementBlockAssignmentNode) => (
+        <BlockCollaboratorAssignmentManagement
+          key={requirementBlockAssignmentNode.requirementBlockId}
+          requirementBlockAssignmentNode={requirementBlockAssignmentNode}
+          permitApplication={currentPermitApplication}
+          collaborationType={ECollaborationType.submission}
+        />
+      ))}
       {isContactsOpen && (
         <ContactSummaryModal
           isOpen={isContactsOpen}

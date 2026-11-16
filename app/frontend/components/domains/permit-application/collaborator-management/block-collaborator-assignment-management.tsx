@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { createPortal } from "react-dom"
 import { IPermitApplication } from "../../../../models/permit-application"
-import { EPermitBlockStatus } from "../../../../types/enums"
+import { ECollaborationType, EPermitBlockStatus } from "../../../../types/enums"
 import { BlockStatusSelect } from "../../../shared/select/selectors/block-status-select"
 import { CollaboratorAssignmentModal } from "./collaborator-assignment-modal"
 
@@ -16,46 +16,59 @@ export interface IRequirementBlockAssignmentNode {
 interface IProps {
   requirementBlockAssignmentNode: IRequirementBlockAssignmentNode
   permitApplication: IPermitApplication
+  collaborationType?: ECollaborationType
 }
 
 export const BlockCollaboratorAssignmentManagement = observer(function BlockCollaboratorAssignmentManagement({
   requirementBlockAssignmentNode,
   permitApplication,
+  collaborationType = ECollaborationType.review,
 }: IProps) {
   const { requirementBlockId, attachmentNode } = requirementBlockAssignmentNode
   const existingAssignments = permitApplication.getCollaborationAssigneesByBlockId(requirementBlockId)
+  const submissionSide = collaborationType === ECollaborationType.submission
   return (
     <>
       {createPortal(
-        <HStack mr={6} spacing={6} onClick={(e) => e.stopPropagation()}>
-          <StatusSelect permitApplication={permitApplication} requirementBlockId={requirementBlockId} />
-          <CollaboratorAssignmentModal permitApplication={permitApplication} requirementBlockId={requirementBlockId} />
+        <HStack className="block-header-controls" spacing={6} onClick={(e) => e.stopPropagation()}>
+          <StatusSelect
+            permitApplication={permitApplication}
+            requirementBlockId={requirementBlockId}
+            collaborationType={collaborationType}
+          />
+          {!submissionSide && (
+            <CollaboratorAssignmentModal
+              permitApplication={permitApplication}
+              requirementBlockId={requirementBlockId}
+            />
+          )}
         </HStack>,
         attachmentNode
       )}
 
-      {createPortal(
-        <Stack
-          as={"ul"}
-          top={0}
-          right={"-48px"}
-          position={"absolute"}
-          listStyleType={"none"}
-          pl={0}
-          spacing={1}
-          onClick={(e) => e.stopPropagation()}
-          cursor={"auto"}
-        >
-          {existingAssignments.map((assignment) => (
-            <Box as={"li"} key={assignment.id} pl={0}>
-              <Tooltip label={assignment.collaborator?.user?.name}>
-                <Avatar name={assignment.collaborator?.user?.name} size={"sm"} />
-              </Tooltip>
-            </Box>
-          ))}
-        </Stack>,
-        attachmentNode
-      )}
+      {!submissionSide &&
+        createPortal(
+          <Stack
+            as={"ul"}
+            top={0}
+            right={"-48px"}
+            position={"absolute"}
+            listStyleType={"none"}
+            pl={0}
+            spacing={1}
+            onClick={(e) => e.stopPropagation()}
+            cursor={"auto"}
+          >
+            {existingAssignments.map((assignment) => (
+              <Box as={"li"} key={assignment.id} pl={0}>
+                <Tooltip label={assignment.collaborator?.user?.name}>
+                  <Avatar name={assignment.collaborator?.user?.name} size={"sm"} />
+                </Tooltip>
+              </Box>
+            ))}
+          </Stack>,
+          attachmentNode
+        )}
     </>
   )
 })
@@ -63,11 +76,16 @@ export const BlockCollaboratorAssignmentManagement = observer(function BlockColl
 const StatusSelect = observer(function StatusSelect({
   permitApplication,
   requirementBlockId,
+  collaborationType,
 }: {
   permitApplication: IPermitApplication
   requirementBlockId: string
+  collaborationType: ECollaborationType
 }) {
-  const permitBlockStatus = permitApplication.getPermitBlockStatus(requirementBlockId)
+  const permitBlockStatus = permitApplication.permitBlockStatuses.find(
+    (blockStatus) =>
+      blockStatus.requirementBlockId === requirementBlockId && blockStatus.collaborationType === collaborationType
+  )
 
   const [status, setStatus] = useState<EPermitBlockStatus>(permitBlockStatus?.status || EPermitBlockStatus.draft)
 
@@ -80,7 +98,11 @@ const StatusSelect = observer(function StatusSelect({
     try {
       setStatus(newStatus)
 
-      const response = await permitApplication.createOrUpdatePermitBlockStatus(requirementBlockId, newStatus)
+      const response = await permitApplication.createOrUpdatePermitBlockStatus(
+        requirementBlockId,
+        newStatus,
+        collaborationType
+      )
 
       if (!response) {
         setStatus(originalStatus)
@@ -90,7 +112,10 @@ const StatusSelect = observer(function StatusSelect({
     }
   }
 
-  const isDisabled = !permitApplication.isSubmitted
+  const isDisabled =
+    collaborationType === ECollaborationType.submission
+      ? !permitApplication.isDraft || permitApplication.isViewingPastRequests
+      : !permitApplication.isSubmitted
 
   return (
     <BlockStatusSelect

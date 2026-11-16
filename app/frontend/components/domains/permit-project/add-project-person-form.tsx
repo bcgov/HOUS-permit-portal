@@ -27,6 +27,7 @@ import { IPermitProject } from "../../../models/permit-project"
 import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus, EProjectAccess, EProjectContactDesignation } from "../../../types/enums"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
+import { InfoTooltip } from "../../shared/info-tooltip"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { ProjectAccessTag } from "../../shared/permit-projects/project-access-tag"
@@ -263,7 +264,18 @@ export const AddProjectPersonForm = observer(({ permitProject }: IAddProjectPers
               render={({ field }) => (
                 <FormControl as="fieldset" isInvalid={Boolean(errors.contactDesignation)}>
                   <FormLabel as="legend" fontWeight="bold" mb={2}>
-                    {t("permitProject.people.makeProjectContactPrompt")}
+                    <HStack spacing={2} align="center">
+                      <Text as="span">{t("permitProject.people.makeProjectContactPrompt")}</Text>
+                      <InfoTooltip
+                        hasArrow
+                        placement="top"
+                        openDelay={200}
+                        maxW="320px"
+                        whiteSpace="normal"
+                        label={t("permitProject.people.contactEmailHelp")}
+                        ariaLabel={t("permitProject.people.contactEmailHelp")}
+                      />
+                    </HStack>
                   </FormLabel>
                   <RadioGroup value={field.value} onChange={field.onChange}>
                     <VStack align="flex-start" spacing={2}>

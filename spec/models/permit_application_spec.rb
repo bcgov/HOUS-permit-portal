@@ -632,4 +632,132 @@ RSpec.describe PermitApplication, type: :model do
       expect(permit_application.can_finalize_requests?).to be true
     end
   end
+
+  describe "block status resets" do
+    def field_key(block_id, code = "name")
+      "formSubmissionDataRSTsection|RB#{block_id}|#{code}"
+    end
+
+    it "sets the submitter status to draft for a block with a requested field" do
+      allow(DebouncedNotificationEmailJob).to receive(:perform_in)
+      allow(WebsocketBroadcaster).to receive(:push_update_to_relevant_users)
+      permit_application = create(:permit_application, :newly_submitted)
+      version = permit_application.latest_submission_version
+      requested_block_id = SecureRandom.uuid
+      untouched_block_id = SecureRandom.uuid
+      create(
+        :revision_request,
+        submission_version: version,
+        requirement_json: {
+          "id" => "requirement",
+          "key" => field_key(requested_block_id)
+        }
+      )
+      create(:supporting_document_revision_request, submission_version: version)
+      requested =
+        create(
+          :permit_block_status,
+          permit_application: permit_application,
+          requirement_block_id: requested_block_id,
+          collaboration_type: :submission,
+          status: :ready
+        )
+      untouched =
+        create(
+          :permit_block_status,
+          permit_application: permit_application,
+          requirement_block_id: untouched_block_id,
+          collaboration_type: :submission,
+          status: :in_progress
+        )
+      review =
+        create(
+          :permit_block_status,
+          permit_application: permit_application,
+          requirement_block_id: requested_block_id,
+          collaboration_type: :review,
+          status: :ready
+        )
+      allow(NotificationService).to receive(
+        :publish_application_revisions_request_event
+      )
+      expect(DebouncedNotificationEmailJob).not_to receive(:perform_in)
+
+      permit_application.finalize_revision_requests!
+
+      expect(requested.reload).to be_draft
+      expect(untouched.reload).to be_in_progress
+      expect(review.reload).to be_ready
+    end
+
+    it "sets the reviewer status to draft when a field in that block changed on resubmit" do
+      allow(DebouncedNotificationEmailJob).to receive(:perform_in)
+      allow(WebsocketBroadcaster).to receive(:push_update_to_relevant_users)
+      permit_application = create(:permit_application, :revisions_requested)
+      changed_block_id = SecureRandom.uuid
+      same_block_id = SecureRandom.uuid
+      changed_key = field_key(changed_block_id)
+      same_key = field_key(same_block_id, "email")
+      permit_application.latest_submission_version.update!(
+        submission_data: {
+          "data" => {
+            "section" => {
+              changed_key => "old",
+              same_key => "same"
+            }
+          }
+        }
+      )
+      permit_application.update!(
+        submission_data: {
+          "data" => {
+            "section" => {
+              changed_key => "new",
+              same_key => "same"
+            }
+          }
+        }
+      )
+      permit_application.template_version.update!(
+        form_json: {
+          "components" => []
+        }
+      )
+      changed =
+        create(
+          :permit_block_status,
+          permit_application: permit_application,
+          requirement_block_id: changed_block_id,
+          collaboration_type: :review,
+          status: :ready
+        )
+      unchanged =
+        create(
+          :permit_block_status,
+          permit_application: permit_application,
+          requirement_block_id: same_block_id,
+          collaboration_type: :review,
+          status: :in_progress
+        )
+      submission =
+        create(
+          :permit_block_status,
+          permit_application: permit_application,
+          requirement_block_id: changed_block_id,
+          collaboration_type: :submission,
+          status: :ready
+        )
+      allow(permit_application).to receive(:can_submit?).and_return(true)
+      allow(permit_application).to receive(:send_submit_notifications)
+      allow(ZipfileJob).to receive(:perform_async)
+      expect(DebouncedNotificationEmailJob).not_to receive(:perform_in)
+
+      permit_application.submit!
+
+      expect(permit_application).to be_resubmitted
+      expect(changed.reload).to be_draft
+      expect(unchanged.reload).to be_in_progress
+      expect(submission.reload).to be_ready
+    end
+  end
 end

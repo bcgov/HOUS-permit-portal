@@ -59,6 +59,7 @@ import {
   IUsersResponse,
 } from "../../types/api-responses"
 import {
+  ECollaborationType,
   ECollaboratorType,
   EJurisdictionSortFields,
   EPermitApplicationInboxSortFields,
@@ -848,9 +849,11 @@ export class Api {
     {
       requirementBlockId,
       status,
+      collaborationType,
     }: {
       requirementBlockId: string
       status: EPermitBlockStatus
+      collaborationType: ECollaborationType
     }
   ) {
     return this.client.post<ApiResponse<IPermitCollaboration>>(
@@ -858,6 +861,7 @@ export class Api {
       {
         requirementBlockId,
         status,
+        collaborationType,
       }
     )
   }

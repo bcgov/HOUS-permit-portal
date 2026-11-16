@@ -1,6 +1,11 @@
 module NotificationAggregators
   class PermitBlockReadySummary
-    def self.call(permit_application_id:, user_id:, debounce_window_seconds:)
+    def self.call(
+      permit_application_id:,
+      user_id:,
+      debounce_window_seconds:,
+      collaboration_type: nil
+    )
       permit_application = PermitApplication.find_by(id: permit_application_id)
       user = User.find_by(id: user_id)
 
@@ -12,10 +17,15 @@ module NotificationAggregators
       lookback_duration = (debounce_window_seconds.to_i * 3) + 1.minute
       window_start = Time.current - lookback_duration
       statuses =
-        PermitBlockStatus
-          .where(permit_application_id: permit_application_id, status: :ready)
-          .where("updated_at >= ?", window_start)
-          .select(&:block_exists?)
+        PermitBlockStatus.where(
+          permit_application_id: permit_application_id,
+          status: :ready
+        )
+      if collaboration_type.present?
+        statuses = statuses.where(collaboration_type: collaboration_type)
+      end
+      statuses =
+        statuses.where("updated_at >= ?", window_start).select(&:block_exists?)
 
       Rails.logger.info(
         "[PermitBlockReadySummary] Found #{statuses.count} status(es) in debounce window"

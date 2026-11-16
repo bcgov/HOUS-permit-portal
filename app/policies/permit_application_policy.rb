@@ -160,12 +160,20 @@ class PermitApplicationPolicy < ApplicationPolicy
 
   def create_or_update_permit_block_status?
     permit_block_status = record
+    application = permit_block_status.permit_application
 
-    user.review_staff? &&
-      user
-        .jurisdictions
-        .find_by(id: permit_block_status.permit_application.jurisdiction_id)
-        .present? && permit_block_status.permit_application.submitted?
+    if permit_block_status.submission?
+      application.draft? &&
+        application.user_can_edit_block?(
+          user_id: user.id,
+          requirement_block_id: permit_block_status.requirement_block_id
+        )
+    elsif permit_block_status.review?
+      user.review_staff? && user.member_of?(application.jurisdiction_id) &&
+        application.submitted?
+    else
+      false
+    end
   end
 
   def download_application_metrics_csv?

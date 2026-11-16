@@ -57,16 +57,14 @@ class PermitApplication < ApplicationRecord
   has_many :project_grants, dependent: :destroy
   has_many :notes, as: :noteable, dependent: :destroy
   before_destroy :delete_legacy_submission_collaboration_rows
-  # TODO: HUB-5783 Submission rows (collaboration_type 0) stay in these tables
-  # until they are converted to project memberships and grants. Ignore them
-  # here so they are not treated as review assignments.
+  # TODO: HUB-5783 Submission collaborator rows (collaboration_type 0) stay in
+  # permit_collaborations until they are converted. Ignore them here so they
+  # are not treated as review assignments. Block statuses keep both sides.
   has_many :permit_collaborations,
            -> { where(discarded_at: nil).where.not(collaboration_type: 0) },
            dependent: :destroy
   has_many :collaborators, through: :permit_collaborations
-  has_many :permit_block_statuses,
-           -> { where.not(collaboration_type: 0) },
-           dependent: :destroy
+  has_many :permit_block_statuses, dependent: :destroy
 
   # HUB-5145: Keep one StepCode per permit as the report family. Pre-Construction
   # and As-Built should become staged child checklists selected by the StepCode's
@@ -216,7 +214,8 @@ class PermitApplication < ApplicationRecord
 
   def users_by_collaboration_options(
     collaborator_type: nil,
-    assigned_requirement_block_id: nil
+    assigned_requirement_block_id: nil,
+    collaboration_type: nil
   )
     base_where_clause = {
       collaborations: {
@@ -234,6 +233,12 @@ class PermitApplication < ApplicationRecord
     base_where_clause[:collaborations][:permit_collaborations][
       :assigned_requirement_block_id
     ] = assigned_requirement_block_id if assigned_requirement_block_id.present?
+
+    if collaboration_type.present?
+      base_where_clause[:collaborations][:permit_collaborations][
+        :collaboration_type
+      ] = PermitCollaboration.collaboration_types.fetch(collaboration_type.to_s)
+    end
 
     User
       .joins(collaborations: :permit_collaborations)
@@ -938,15 +943,10 @@ class PermitApplication < ApplicationRecord
     ProjectAccess.new(user, permit_project&.sandbox, permit_project)
   end
 
-  # TODO: HUB-5783 The association scopes above ignore submission rows. Delete
-  # them with the application so the foreign keys still allow destroy.
-  # Remove this once those rows are backfilled and collaboration_type is gone.
+  # TODO: HUB-5783 Submission collaborator rows are outside the association
+  # scope, so destroy would leave them and the foreign key would block it.
   def delete_legacy_submission_collaboration_rows
     PermitCollaboration.where(
-      permit_application_id: id,
-      collaboration_type: 0
-    ).delete_all
-    PermitBlockStatus.where(
       permit_application_id: id,
       collaboration_type: 0
     ).delete_all

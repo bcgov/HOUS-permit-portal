@@ -488,7 +488,8 @@ class Api::PermitApplicationsController < Api::ApplicationController
   def create_or_update_permit_block_status
     @permit_block_status =
       @permit_application.permit_block_statuses.find_or_initialize_by(
-        requirement_block_id: params.require(:requirement_block_id)
+        requirement_block_id: params.require(:requirement_block_id),
+        collaboration_type: block_status_collaboration_type
       )
 
     authorize @permit_block_status, policy_class: PermitApplicationPolicy
@@ -584,6 +585,19 @@ class Api::PermitApplicationsController < Api::ApplicationController
   end
 
   private
+
+  # The edit screen writes the submission status. The review screen writes the
+  # review status. A missing side follows who is calling.
+  def block_status_collaboration_type
+    requested = params[:collaboration_type].to_s
+    return requested if %w[submission review].include?(requested)
+
+    if current_user.review_staff? && @permit_application.submitted?
+      "review"
+    else
+      "submission"
+    end
+  end
 
   def show_blueprint_view_for(user)
     if params[:review] && user.review_staff?

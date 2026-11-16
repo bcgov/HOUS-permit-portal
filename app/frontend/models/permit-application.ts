@@ -4,6 +4,7 @@ import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import {
+  ECollaborationType,
   ECollaboratorType,
   EPermitApplicationStatus,
   EPermitBlockStatus,
@@ -729,10 +730,15 @@ export const PermitApplicationModel = types.snapshotProcessor(
 
         return false
       }),
-      createOrUpdatePermitBlockStatus: flow(function* (requirementBlockId: string, status: EPermitBlockStatus) {
+      createOrUpdatePermitBlockStatus: flow(function* (
+        requirementBlockId: string,
+        status: EPermitBlockStatus,
+        collaborationType: ECollaborationType
+      ) {
         const response = yield self.environment.api.createOrUpdatePermitBlockStatus(self.id, {
           requirementBlockId,
           status,
+          collaborationType,
         })
 
         if (!response.ok) {

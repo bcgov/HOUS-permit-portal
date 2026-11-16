@@ -980,8 +980,19 @@ RSpec.describe PermitApplicationPolicy do
           jurisdiction_id: jurisdiction.id
         )
       submitted_status =
-        double("PermitBlockStatus", permit_application: submitted)
-      draft_status = double("PermitBlockStatus", permit_application: draft)
+        double(
+          "PermitBlockStatus",
+          permit_application: submitted,
+          submission?: false,
+          review?: true
+        )
+      draft_status =
+        double(
+          "PermitBlockStatus",
+          permit_application: draft,
+          submission?: false,
+          review?: true
+        )
 
       expect(
         described_class.new(
@@ -1001,6 +1012,23 @@ RSpec.describe PermitApplicationPolicy do
           submitted_status
         ).create_or_update_permit_block_status?
       ).to be false
+    end
+
+    it "lets a member set the submission status on a draft they can edit" do
+      status =
+        PermitBlockStatus.new(
+          permit_application: draft_permit_application,
+          requirement_block_id: SecureRandom.uuid,
+          collaboration_type: :submission,
+          status: :draft
+        )
+
+      expect(
+        described_class.new(
+          UserContext.new(submitter, sandbox),
+          status
+        ).create_or_update_permit_block_status?
+      ).to be true
     end
 
     it "download_application_metrics_csv? permits only super_admin" do

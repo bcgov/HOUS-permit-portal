@@ -1561,6 +1561,26 @@ RSpec.describe "Api::PermitApplications", type: :request do
 
       expect(response).to have_http_status(:ok)
       expect(json_response.dig("data", "status")).to eq("ready")
+      expect(json_response.dig("data", "collaboration_type")).to eq("review")
+    end
+
+    it "lets a member set the submission status on a draft" do
+      allow(WebsocketBroadcaster).to receive(:push_update_to_relevant_users)
+
+      post "/api/permit_applications/#{permit_application.id}/permit_block_status",
+           params: {
+             requirement_block_id: TestConstants::REQUIREMENT_BLOCK_IDS.first,
+             status: "in_progress",
+             collaboration_type: "submission"
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("data", "status")).to eq("in_progress")
+      expect(json_response.dig("data", "collaboration_type")).to eq(
+        "submission"
+      )
     end
   end
 
