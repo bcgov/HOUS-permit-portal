@@ -44,6 +44,8 @@ export type TRequirementEditProps<TFieldValues extends FieldValues> = TEditableG
   }
   canAddMultipleContactProps?: IControlProps<TFieldValues>
   isMultipleFilesCheckboxProps?: TIsMultipleFilesCheckboxProps<TFieldValues>
+  /** Contact previews use the same required flags as the read-only preview. */
+  required?: boolean
 }
 
 const requirementsComponentMap = {

@@ -302,6 +302,7 @@ export const RequirementFieldRow = ({
             }
             requirementCode={watchedRequirementCode}
             lockDefinition={usesBankQuestion}
+            required={watchedRequired}
           />
         </Box>
       )}
