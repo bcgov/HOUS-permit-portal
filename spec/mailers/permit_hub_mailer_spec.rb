@@ -116,6 +116,80 @@ RSpec.describe PermitHubMailer, type: :mailer do
     expect(mailer).not_to have_received(:send_mail)
   end
 
+  it "notify_project_grant sends an application grant email" do
+    grant =
+      instance_double(
+        "ProjectGrant",
+        block?: false,
+        application?: true,
+        permit_application:
+          instance_double("PermitApplication", permit_project: nil),
+        project_membership:
+          instance_double("ProjectMembership", user: confirmed_user)
+      )
+
+    mailer.notify_project_grant(grant)
+
+    expect(mailer).to have_received(:send_mail).with(
+      email: confirmed_user.email,
+      template_key: :notify_project_grant,
+      subject_key: :notify_project_application_grant
+    )
+  end
+
+  it "notify_project_grant sends a block grant email" do
+    grant =
+      instance_double(
+        "ProjectGrant",
+        block?: true,
+        application?: false,
+        requirement_block_id: "block-1",
+        permit_application:
+          instance_double(
+            "PermitApplication",
+            permit_project: nil,
+            template_version:
+              instance_double(
+                "TemplateVersion",
+                requirement_blocks_json: {
+                  "block-1" => {
+                    "name" => "Energy"
+                  }
+                }
+              )
+          ),
+        project_membership:
+          instance_double("ProjectMembership", user: confirmed_user)
+      )
+
+    mailer.notify_project_grant(grant)
+
+    expect(mailer).to have_received(:send_mail).with(
+      email: confirmed_user.email,
+      template_key: :notify_project_grant,
+      subject_key: :notify_project_block_grant
+    )
+    expect(mailer.instance_variable_get(:@requirement_block_name)).to eq(
+      "Energy"
+    )
+  end
+
+  it "notify_project_grant skips an invite grant" do
+    grant =
+      instance_double(
+        "ProjectGrant",
+        block?: false,
+        application?: false,
+        permit_application: nil,
+        project_membership:
+          instance_double("ProjectMembership", user: confirmed_user)
+      )
+
+    mailer.notify_project_grant(grant)
+
+    expect(mailer).not_to have_received(:send_mail)
+  end
+
   it "notify_block_status_ready returns when user preference disabled" do
     permit_block_status =
       instance_double("PermitBlockStatus", block_exists?: true)

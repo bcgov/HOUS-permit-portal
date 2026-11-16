@@ -528,31 +528,35 @@ RSpec.describe "project grants", type: :request do
     it "lets Full and Expanded create and remove block and application grants" do
       sign_in owner
 
-      post "/api/permit_applications/#{application.id}/project_grants",
-           params: {
-             grant: {
-               membership_id: standard_membership.id,
-               kind: "block",
-               requirement_block_id: granted_block_id
-             }
-           },
-           headers: headers,
-           as: :json
+      expect {
+        post "/api/permit_applications/#{application.id}/project_grants",
+             params: {
+               grant: {
+                 membership_id: standard_membership.id,
+                 kind: "block",
+                 requirement_block_id: granted_block_id
+               }
+             },
+             headers: headers,
+             as: :json
+      }.to have_enqueued_mail(PermitHubMailer, :notify_project_grant)
 
       expect(response).to have_http_status(:created)
       block_grant = ProjectGrant.find(json_response.dig("data", "id"))
       expect(block_grant).to be_block
 
       sign_in expanded_user
-      post "/api/permit_applications/#{application.id}/project_grants",
-           params: {
-             grant: {
-               membership_id: standard_membership.id,
-               kind: "application"
-             }
-           },
-           headers: headers,
-           as: :json
+      expect {
+        post "/api/permit_applications/#{application.id}/project_grants",
+             params: {
+               grant: {
+                 membership_id: standard_membership.id,
+                 kind: "application"
+               }
+             },
+             headers: headers,
+             as: :json
+      }.to have_enqueued_mail(PermitHubMailer, :notify_project_grant)
 
       expect(response).to have_http_status(:created)
       submit_grant = ProjectGrant.find(json_response.dig("data", "id"))
@@ -779,9 +783,11 @@ RSpec.describe "project grants", type: :request do
       expect(response).to have_http_status(:forbidden)
 
       sign_in owner
-      post "/api/permit_projects/#{project.id}/memberships/#{other_expanded.id}/project_grants",
-           headers: headers,
-           as: :json
+      expect {
+        post "/api/permit_projects/#{project.id}/memberships/#{other_expanded.id}/project_grants",
+             headers: headers,
+             as: :json
+      }.not_to have_enqueued_mail(PermitHubMailer, :notify_project_grant)
 
       expect(response).to have_http_status(:created)
       expect(other_expanded.project_grants.invite).to exist

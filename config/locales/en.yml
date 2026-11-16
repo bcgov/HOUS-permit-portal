@@ -225,6 +225,8 @@ en:
       notify_permit_collaboration: "Welcome you have been invited to Collaborate in the Building Permit Hub"
       notify_project_review_collaboration: "You have been assigned as a review collaborator on a project"
       notify_project_membership_invitation: "You've been invited to join a project"
+      notify_project_application_grant: "You've been given a permit application"
+      notify_project_block_grant: "You've been given a requirement to edit"
       notify_new_or_unconfirmed_permit_collaboration: "You’re Invited to Collaborate on a Building Permit Application"
       notify_new_or_unconfirmed_preview: "You’re Invited to Preview a Building Permit Template"
       notify_preview: "You're Invited to Preview a Building Permit Template"

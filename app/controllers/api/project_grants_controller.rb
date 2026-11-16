@@ -20,6 +20,7 @@ class Api::ProjectGrantsController < Api::ApplicationController
     authorize @grant
 
     if @grant.save
+      deliver_project_grant_email
       render_success @grant, nil, status: :created
     else
       render_error "project_grant.create_error",
@@ -61,6 +62,12 @@ class Api::ProjectGrantsController < Api::ApplicationController
         membership_id: params[:membership_id]
       )
     end
+  end
+
+  def deliver_project_grant_email
+    return unless @grant.block? || @grant.application?
+
+    PermitHubMailer.notify_project_grant(@grant).deliver_later
   end
 
   def find_grant
