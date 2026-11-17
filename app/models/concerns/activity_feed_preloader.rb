@@ -8,6 +8,8 @@ module ActivityFeedPreloader
       preload_permit_project_collaborations(audits)
       preload_submission_versions(audits)
       preload_project_meetings(audits)
+      preload_project_memberships(audits)
+      preload_project_grants(audits)
     end
 
     private
@@ -75,6 +77,38 @@ module ActivityFeedPreloader
         associations: {
           permit_application: :jurisdiction
         }
+      ).call
+    end
+
+    def preload_project_memberships(audits)
+      records =
+        audits
+          .select { |a| a.auditable_type == "ProjectMembership" }
+          .map(&:auditable)
+          .compact
+      return if records.empty?
+
+      ActiveRecord::Associations::Preloader.new(
+        records: records,
+        associations: [:user, { permit_project: :jurisdiction }]
+      ).call
+    end
+
+    def preload_project_grants(audits)
+      records =
+        audits
+          .select { |a| a.auditable_type == "ProjectGrant" }
+          .map(&:auditable)
+          .compact
+      return if records.empty?
+
+      ActiveRecord::Associations::Preloader.new(
+        records: records,
+        associations: [
+          { project_membership: :user },
+          { permit_application: :template_version },
+          { permit_project: :jurisdiction }
+        ]
       ).call
     end
 

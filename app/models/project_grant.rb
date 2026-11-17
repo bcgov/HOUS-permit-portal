@@ -1,6 +1,13 @@
 class ProjectGrant < ApplicationRecord
   belongs_to :project_membership
   belongs_to :permit_application, optional: true
+  has_one :permit_project, through: :project_membership
+
+  # A grant removed because the membership is being destroyed is not its own
+  # activity row. The membership destroy is the people change.
+  audited on: %i[create destroy],
+          associated_with: :permit_project,
+          if: :record_grant_activity?
 
   enum :kind, { block: 0, application: 1, invite: 2 }, validate: true
 
@@ -80,7 +87,35 @@ class ProjectGrant < ApplicationRecord
   end
   private_class_method :application_kind?
 
+  def record_grant_activity?
+    destroyed_by_association.blank?
+  end
+
+  def after_audit
+    audit = audits.order(version: :desc).first
+    return if audit.blank?
+
+    extra = {
+      "person_name" => project_membership&.display_name.presence,
+      "application_name" => permit_application&.nickname.presence,
+      "block_name" => activity_block_name.presence
+    }.compact
+    merged = audit.audited_changes.merge(extra)
+    return if merged == audit.audited_changes
+
+    audit.update_columns(audited_changes: merged)
+  end
+
   private
+
+  def activity_block_name
+    return unless block? && requirement_block_id.present?
+
+    permit_application&.template_version&.requirement_blocks_json&.dig(
+      requirement_block_id,
+      "name"
+    )
+  end
 
   def clear_requirement_block_id_unless_block
     self.requirement_block_id = nil unless block?

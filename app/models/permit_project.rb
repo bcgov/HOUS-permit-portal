@@ -372,18 +372,21 @@ class PermitProject < ApplicationRecord
   def ensure_creator_membership!
     return if owner_id.blank?
 
-    project_memberships
-      .where(contact_designation: :primary)
-      .where.not(user_id: owner_id)
-      .update_all(
-        contact_designation:
-          ProjectMembership.contact_designations.fetch("none")
-      )
+    # The owner backfill and a new project's owner row are not people changes.
+    ProjectMembership.without_auditing do
+      project_memberships
+        .where(contact_designation: :primary)
+        .where.not(user_id: owner_id)
+        .update_all(
+          contact_designation:
+            ProjectMembership.contact_designations.fetch("none")
+        )
 
-    membership = project_memberships.find_or_initialize_by(user_id: owner_id)
-    membership.access = :full
-    membership.contact_designation = :primary
-    membership.save!
+      membership = project_memberships.find_or_initialize_by(user_id: owner_id)
+      membership.access = :full
+      membership.contact_designation = :primary
+      membership.save!
+    end
   end
 
   private
