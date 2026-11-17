@@ -149,14 +149,35 @@ RSpec.describe PermitBlockStatus, type: :model do
   end
 
   describe "#users_to_notify_status_ready" do
-    it "includes the submitter, delegatees, and relevant assignees" do
+    it "notifies the application contact for a submission status" do
+      permit_application = create(:permit_application)
+      contact = create(:user, :submitter)
+      membership =
+        create(
+          :project_membership,
+          permit_project: permit_application.permit_project,
+          user: contact
+        )
+      permit_application.update!(application_contact_membership: membership)
+      status =
+        build(
+          :permit_block_status,
+          permit_application: permit_application,
+          collaboration_type: :submission
+        )
+
+      expect(status.users_to_notify_status_ready).to eq([contact])
+    end
+
+    it "notifies review delegatees and the assignee for that block" do
       permit_application = create(:permit_application)
       rb_id = SecureRandom.uuid
       status =
         build(
           :permit_block_status,
           permit_application: permit_application,
-          requirement_block_id: rb_id
+          requirement_block_id: rb_id,
+          collaboration_type: :review
         )
 
       delegatee_users = [create(:user)]
@@ -177,7 +198,7 @@ RSpec.describe PermitBlockStatus, type: :model do
       ).and_return(assignee_users)
 
       expect(status.users_to_notify_status_ready).to match_array(
-        [permit_application.submitter, *delegatee_users, *assignee_users]
+        [*delegatee_users, *assignee_users]
       )
     end
   end

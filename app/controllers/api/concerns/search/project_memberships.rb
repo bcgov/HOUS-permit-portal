@@ -91,7 +91,7 @@ module Api::Concerns::Search::ProjectMemberships
   end
 
   def review_staff_for_project?
-    current_user.review_staff? &&
+    current_user&.review_staff? &&
       current_user.member_of?(@permit_project.jurisdiction_id)
   end
 

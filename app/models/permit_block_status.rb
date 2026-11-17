@@ -56,18 +56,17 @@ class PermitBlockStatus < ApplicationRecord
   end
 
   def users_to_notify_status_ready
-    users_to_notify = []
-    users_to_notify << permit_application.submitter if submission?
+    if submission?
+      return [permit_application.application_message_recipient].compact
+    end
 
-    users_to_notify +=
+    users_to_notify =
       permit_application.users_by_collaboration_options(
-        collaboration_type: collaboration_type,
         collaborator_type: :delegatee
-      )
+      ).to_a
 
     users_to_notify +=
       permit_application.users_by_collaboration_options(
-        collaboration_type: collaboration_type,
         collaborator_type: :assignee,
         assigned_requirement_block_id: requirement_block_id
       )

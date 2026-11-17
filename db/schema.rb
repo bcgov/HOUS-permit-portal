@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_11_13_130000) do
+ActiveRecord::Schema[7.2].define(version: 2026_11_17_180000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -67,13 +67,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_13_130000) do
 
   create_table "collaborators", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "user_id", null: false
-    t.string "collaboratorable_type", null: false
-    t.uuid "collaboratorable_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.uuid "jurisdiction_id"
-    t.index ["collaboratorable_type", "collaboratorable_id"], name: "idx_on_collaboratorable_type_collaboratorable_id_aa1cca136d"
-    t.index ["collaboratorable_type", "collaboratorable_id"], name: "index_collaborators_on_collaboratorable"
+    t.uuid "jurisdiction_id", null: false
     t.index ["jurisdiction_id"], name: "index_collaborators_on_jurisdiction_id"
     t.index ["user_id", "jurisdiction_id"], name: "index_collaborators_on_user_id_and_jurisdiction_id", unique: true
     t.index ["user_id"], name: "index_collaborators_on_user_id"
@@ -679,17 +675,15 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_13_130000) do
   create_table "permit_collaborations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "collaborator_id", null: false
     t.uuid "permit_application_id", null: false
-    t.integer "collaboration_type", default: 0
     t.integer "collaborator_type", default: 0
     t.string "assigned_requirement_block_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.datetime "discarded_at"
-    t.index ["collaboration_type"], name: "index_permit_collaborations_on_collaboration_type"
     t.index ["collaborator_id"], name: "index_permit_collaborations_on_collaborator_id"
     t.index ["collaborator_type"], name: "index_permit_collaborations_on_collaborator_type"
     t.index ["discarded_at"], name: "index_permit_collaborations_on_discarded_at"
-    t.index ["permit_application_id", "collaborator_id", "collaboration_type", "collaborator_type", "assigned_requirement_block_id"], name: "index_permit_collaborations_on_unique_columns", unique: true, where: "(discarded_at IS NULL)"
+    t.index ["permit_application_id", "collaborator_id", "collaborator_type", "assigned_requirement_block_id"], name: "index_permit_collaborations_on_unique_columns", unique: true, where: "(discarded_at IS NULL)"
     t.index ["permit_application_id"], name: "index_permit_collaborations_on_permit_application_id"
   end
 
@@ -843,7 +837,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_13_130000) do
     t.datetime "updated_at", null: false
     t.index ["permit_application_id"], name: "index_project_grants_on_permit_application_id"
     t.index ["project_membership_id", "permit_application_id", "requirement_block_id"], name: "index_project_grants_one_block", unique: true, where: "(kind = 0)"
-    t.index ["project_membership_id", "permit_application_id"], name: "index_project_grants_one_submit", unique: true, where: "(kind = 1)"
+    t.index ["project_membership_id", "permit_application_id"], name: "index_project_grants_one_application", unique: true, where: "(kind = 1)"
     t.index ["project_membership_id"], name: "index_project_grants_on_project_membership_id"
     t.index ["project_membership_id"], name: "index_project_grants_one_invite", unique: true, where: "(kind = 2)"
   end
@@ -897,8 +891,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_13_130000) do
     t.string "invitation_token"
     t.datetime "invitation_sent_at"
     t.datetime "invitation_accepted_at"
-    t.datetime "invitation_declined_at"
-    t.index "permit_project_id, lower((invited_email)::text)", name: "index_project_memberships_unique_pending_email_per_project", unique: true, where: "((user_id IS NULL) AND (invitation_declined_at IS NULL))"
+    t.index "permit_project_id, lower((invited_email)::text)", name: "index_project_memberships_unique_pending_email_per_project", unique: true, where: "(user_id IS NULL)"
     t.index ["invitation_token"], name: "index_project_memberships_on_invitation_token", unique: true, where: "(invitation_token IS NOT NULL)"
     t.index ["invited_by_id"], name: "index_project_memberships_on_invited_by_id"
     t.index ["permit_project_id"], name: "index_project_memberships_on_permit_project_id"
