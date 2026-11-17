@@ -88,13 +88,33 @@ RSpec.describe ProjectGrant, type: :model do
     expect(duplicate).not_to be_valid
   end
 
-  it "rejects a grant on a pending invite" do
+  it "stores a block grant on a pending Limited invite" do
     pending =
       create(:project_membership, :pending_invitation, permit_project: project)
 
     grant =
-      described_class.new(
+      described_class.create!(
         project_membership: pending,
+        permit_application: application,
+        kind: :block,
+        requirement_block_id: SecureRandom.uuid
+      )
+
+    expect(grant).to be_persisted
+  end
+
+  it "rejects a grant on an expired invite" do
+    expired =
+      create(
+        :project_membership,
+        :pending_invitation,
+        permit_project: project,
+        invitation_sent_at: 73.hours.ago
+      )
+
+    grant =
+      described_class.new(
+        project_membership: expired,
         permit_application: application,
         kind: :block,
         requirement_block_id: SecureRandom.uuid

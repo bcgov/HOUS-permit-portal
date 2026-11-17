@@ -3,7 +3,6 @@ import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { IPermitProject } from "../../../models/permit-project"
 import { useMst } from "../../../setup/root"
-import { EProjectAccess, EProjectContactDesignation } from "../../../types/enums"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { AddProjectPersonForm } from "./add-project-person-form"
 
@@ -55,8 +54,6 @@ export const AddProjectPersonModal = observer(function AddProjectPersonModal({
                 onCreated?.()
                 onClose()
               }}
-              defaultContactDesignation={EProjectContactDesignation.none}
-              defaultAccess={EProjectAccess.limited}
             />
           ) : (
             <Flex justify="center" py={10}>

@@ -33,7 +33,11 @@ const loadActivePeople = async (api: ReturnType<typeof useServerAPI>, projectId:
     totalPages = response.data?.meta?.totalPages ?? 1
     page += 1
   } while (page <= totalPages)
-  return people.filter((person) => person.status === EProjectMembershipStatus.active)
+  return people.filter(
+    (person) =>
+      person.status === EProjectMembershipStatus.active ||
+      (person.status === EProjectMembershipStatus.pending && person.access === EProjectAccess.limited)
+  )
 }
 
 const blockTitleFor = (permitApplication: IPermitApplication, requirementBlockId: string) => {

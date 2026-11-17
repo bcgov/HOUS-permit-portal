@@ -87,12 +87,13 @@ class ProjectGrant < ApplicationRecord
   end
 
   # Invite grants are chosen on the invitation, before the person accepts.
-  # Block and application grants still need an accepted member.
+  # A block or application grant can be stored on a pending invite. It
+  # authorizes only after that membership has a user. An expired invite cannot.
   def membership_is_accepted
     return if invite?
-    return if project_membership&.active?
+    return if project_membership&.active? || project_membership&.pending?
 
-    errors.add(:project_membership, "must be an accepted member")
+    errors.add(:project_membership, "must be a pending or accepted member")
   end
 
   def application_on_membership_project
