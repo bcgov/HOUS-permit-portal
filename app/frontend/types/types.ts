@@ -147,6 +147,7 @@ export type TSearchParams<IModelSortFields, IModelFilterFields = {}> = {
   page?: number
   perPage?: number
   showArchived?: boolean
+  accessibleOnly?: boolean
   publishedOnly?: boolean
   releaseType?: EReleaseNoteType
   year?: number

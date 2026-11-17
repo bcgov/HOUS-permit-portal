@@ -36,6 +36,10 @@ import { AllowInviteField } from "./allow-invite-field"
 
 interface IAddProjectPersonFormProps {
   permitProject: IPermitProject
+  onCancel?: () => void
+  onCreated?: () => void
+  defaultContactDesignation?: EProjectContactDesignation
+  defaultAccess?: EProjectAccess
 }
 
 interface IAddProjectPersonFormValues {
@@ -52,83 +56,84 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 const SectionDivider = () => <Box as="hr" w="full" my={0} border="0" borderTop="1px solid" borderColor="border.light" />
 
-export const AddProjectPersonForm = observer(({ permitProject }: IAddProjectPersonFormProps) => {
-  const { t } = useTranslation()
-  const navigate = useNavigate()
-  const { projectPeopleStore } = useMst()
-  const { primaryContactName, alternateContactNames, createProjectPerson, search } = projectPeopleStore
+export const AddProjectPersonForm = observer(
+  ({ permitProject, onCancel, onCreated, defaultContactDesignation, defaultAccess }: IAddProjectPersonFormProps) => {
+    const { t } = useTranslation()
+    const navigate = useNavigate()
+    const { projectPeopleStore } = useMst()
+    const { primaryContactName, alternateContactNames, createProjectPerson, search } = projectPeopleStore
 
-  useEffect(() => {
-    if (!primaryContactName) {
+    useEffect(() => {
       search()
-    }
-  }, [permitProject.id])
+    }, [permitProject.id])
 
-  const {
-    register,
-    control,
-    handleSubmit,
-    watch,
-    formState: { errors, isSubmitting, isSubmitted },
-  } = useForm<IAddProjectPersonFormValues>({
-    defaultValues: {
-      firstName: "",
-      lastName: "",
-      email: "",
-      roleTags: [],
-      contactDesignation: "",
-      access: "",
-      allowInvite: true,
-    },
-  })
-  const selectedAccess = watch("access")
-
-  const peoplePath = `/projects/${permitProject.id}/people`
-
-  const onSubmit = async (values: IAddProjectPersonFormValues) => {
-    if (!values.contactDesignation || !values.access) return
-
-    const created = await createProjectPerson({
-      firstName: values.firstName.trim(),
-      lastName: values.lastName.trim(),
-      email: values.email.trim(),
-      roleTags: values.roleTags,
-      contactDesignation: values.contactDesignation,
-      access: values.access,
-      ...(values.access === EProjectAccess.expanded ? { allowInvite: values.allowInvite } : {}),
+    const {
+      register,
+      control,
+      handleSubmit,
+      watch,
+      formState: { errors, isSubmitting, isSubmitted },
+    } = useForm<IAddProjectPersonFormValues>({
+      defaultValues: {
+        firstName: "",
+        lastName: "",
+        email: "",
+        roleTags: [],
+        contactDesignation: defaultContactDesignation ?? "",
+        access: defaultAccess ?? "",
+        allowInvite: true,
+      },
     })
+    const selectedAccess = watch("access")
 
-    if (created) {
-      navigate(peoplePath)
+    const peoplePath = `/projects/${permitProject.id}/people`
+
+    const onSubmit = async (values: IAddProjectPersonFormValues) => {
+      if (!values.contactDesignation || !values.access) return
+
+      const created = await createProjectPerson({
+        firstName: values.firstName.trim(),
+        lastName: values.lastName.trim(),
+        email: values.email.trim(),
+        roleTags: values.roleTags,
+        contactDesignation: values.contactDesignation,
+        access: values.access,
+        ...(values.access === EProjectAccess.expanded ? { allowInvite: values.allowInvite } : {}),
+      })
+
+      if (created) {
+        if (onCreated) onCreated()
+        else navigate(peoplePath)
+      }
     }
-  }
 
-  const errorEntries = [
-    errors.firstName && { id: "add-person-first-name", message: errors.firstName.message },
-    errors.lastName && { id: "add-person-last-name", message: errors.lastName.message },
-    errors.email && { id: "add-person-email", message: errors.email.message },
-    errors.contactDesignation && { id: "add-person-contact-designation", message: errors.contactDesignation.message },
-    errors.access && { id: "add-person-access", message: errors.access.message },
-  ].filter(Boolean) as { id: string; message?: string }[]
+    const errorEntries = [
+      errors.firstName && { id: "add-person-first-name", message: errors.firstName.message },
+      errors.lastName && { id: "add-person-last-name", message: errors.lastName.message },
+      errors.email && { id: "add-person-email", message: errors.email.message },
+      errors.contactDesignation && { id: "add-person-contact-designation", message: errors.contactDesignation.message },
+      errors.access && { id: "add-person-access", message: errors.access.message },
+    ].filter(Boolean) as { id: string; message?: string }[]
 
-  const resolvedPrimaryName = primaryContactName || permitProject.ownerName || t("permitProject.people.notAssigned")
-  const resolvedAlternateNames =
-    alternateContactNames.length > 0 ? alternateContactNames.join(", ") : t("permitProject.people.notAssigned")
+    const resolvedPrimaryName = primaryContactName || permitProject.ownerName || t("permitProject.people.notAssigned")
+    const resolvedAlternateNames =
+      alternateContactNames.length > 0 ? alternateContactNames.join(", ") : t("permitProject.people.notAssigned")
 
-  return (
-    <Flex direction="column" flex={1} minW={0} h="full" minH={0} overflowY="auto" bg="greys.white" p={10}>
+    const form = (
       <Box as="form" onSubmit={handleSubmit(onSubmit)} noValidate maxW="640px" w="full">
         <VStack align="stretch" spacing={8}>
           <VStack align="flex-start" spacing={3}>
-            <RouterLinkButton
-              to={peoplePath}
-              variant="link"
-              leftIcon={<CaretLeft size={16} />}
-              px={0}
-              color="text.link"
-            >
-              {t("permitProject.details.people")}
-            </RouterLinkButton>
+            {!onCancel && (
+              <RouterLinkButton
+                to={peoplePath}
+                variant="link"
+                leftIcon={<CaretLeft size={16} />}
+                px={0}
+                color="text.link"
+              >
+                {t("permitProject.details.people")}
+              </RouterLinkButton>
+            )}
             <Heading as="h2" size="lg" mb={0}>
               {t("permitProject.people.addPersonTitle")}
             </Heading>
@@ -368,7 +373,11 @@ export const AddProjectPersonForm = observer(({ permitProject }: IAddProjectPers
           </VStack>
 
           <HStack spacing={3} pt={2}>
-            <Button variant="secondary" onClick={() => navigate(peoplePath)} isDisabled={isSubmitting}>
+            <Button
+              variant="secondary"
+              onClick={() => (onCancel ? onCancel() : navigate(peoplePath))}
+              isDisabled={isSubmitting}
+            >
               {t("ui.cancel")}
             </Button>
             <Button variant="primary" type="submit" isLoading={isSubmitting}>
@@ -377,6 +386,14 @@ export const AddProjectPersonForm = observer(({ permitProject }: IAddProjectPers
           </HStack>
         </VStack>
       </Box>
-    </Flex>
-  )
-})
+    )
+
+    if (onCancel) return form
+
+    return (
+      <Flex direction="column" flex={1} minW={0} h="full" minH={0} overflowY="auto" bg="greys.white" p={10}>
+        {form}
+      </Flex>
+    )
+  }
+)

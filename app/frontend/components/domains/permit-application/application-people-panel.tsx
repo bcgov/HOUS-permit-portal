@@ -11,6 +11,7 @@ import { IFormJson, IOption, IProjectGrant, IProjectPerson } from "../../../type
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { AsyncSelect } from "../../shared/select/async-select"
+import { AddProjectPersonModal } from "../permit-project/add-project-person-modal"
 
 interface IApplicationPeoplePanelProps {
   permitApplication: IPermitApplication
@@ -70,6 +71,7 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
   const [accessMode, setAccessMode] = useState<TAccessMode>("blocks")
   const [blockIds, setBlockIds] = useState<string[]>([])
   const [contactId, setContactId] = useState<string | null>(permitApplication.applicationContactMembershipId)
+  const [inviteOpen, setInviteOpen] = useState(false)
 
   const canChange =
     !readOnly &&
@@ -244,271 +246,289 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
         }
 
   return (
-    <Flex
-      as="aside"
-      direction="column"
-      w="360px"
-      flexShrink={0}
-      overflow="hidden"
-      borderLeft="1px solid"
-      borderColor="border.light"
-      bg="greys.white"
-      {...sticky}
-    >
+    <>
       <Flex
-        align="center"
-        justify="space-between"
-        px={6}
-        py={6}
+        as="aside"
+        direction="column"
+        w="360px"
         flexShrink={0}
-        borderBottom="1px solid"
+        overflow="hidden"
+        borderLeft="1px solid"
         borderColor="border.light"
+        bg="greys.white"
+        {...sticky}
       >
-        <Text fontWeight="bold" fontSize="lg">
-          {t("permitApplication.people.title")}
-        </Text>
-        <IconButton aria-label={t("ui.close")} icon={<X />} variant="ghost" onClick={onClose} />
-      </Flex>
+        <Flex
+          align="center"
+          justify="space-between"
+          px={6}
+          py={6}
+          flexShrink={0}
+          borderBottom="1px solid"
+          borderColor="border.light"
+        >
+          <Text fontWeight="bold" fontSize="lg">
+            {t("permitApplication.people.title")}
+          </Text>
+          <IconButton aria-label={t("ui.close")} icon={<X />} variant="ghost" onClick={onClose} />
+        </Flex>
 
-      <Box flex={1} minH={0} overflowY="auto" px={6} py={8}>
-        {loading ? (
-          <Flex justify="center" py={10}>
-            <SharedSpinner />
-          </Flex>
-        ) : view === "access" ? (
-          <VStack align="stretch" spacing={4}>
-            <Button
-              variant="link"
-              leftIcon={<CaretLeft size={20} />}
-              onClick={() => setView("summary")}
-              alignSelf="flex-start"
-              fontWeight="normal"
-              color="text.link"
-              px={0}
-              h="auto"
-              minH={0}
-            >
-              {t("ui.back")}
-            </Button>
-            <Text fontWeight="bold" fontSize="lg">
-              {t("permitApplication.people.accessTitle")}
-            </Text>
-            <Text color="text.secondary">{t("permitApplication.people.accessDescription")}</Text>
-            {adding ? (
-              <>
-                <AsyncSelect<IOption, false>
-                  isCreatable={false}
-                  defaultOptions={personOptions}
-                  loadOptions={(input) => {
-                    const query = input.trim().toLowerCase()
-                    return Promise.resolve(personOptions.filter((option) => option.label.toLowerCase().includes(query)))
-                  }}
-                  value={personOptions.find((option) => option.value === selectedPerson?.id) ?? null}
-                  onChange={(selected) => {
-                    const person = ungrantedLimitedPeople.find((candidate) => candidate.id === selected?.value)
-                    setSelectedPerson(person ?? null)
-                  }}
-                  placeholder={t("permitApplication.blockAccess.peoplePlaceholder")}
-                  stylesToMerge={{ control: { height: "auto", minHeight: "var(--chakra-sizes-10)" } }}
-                />
-                {permitApplication.projectId && (
-                  <Text color="text.secondary">
-                    {t("permitApplication.blockAccess.cantFind")}{" "}
-                    <RouterLink to={`/projects/${permitApplication.projectId}/people`} color="text.link">
-                      {t("permitApplication.blockAccess.addPerson")}
-                    </RouterLink>
-                  </Text>
-                )}
-              </>
-            ) : (
-              selectedPerson && (
-                <PersonRow
-                  person={selectedPerson}
-                  line={personLine(selectedPerson)}
-                  you={currentUserId === selectedPerson.userId}
-                />
-              )
-            )}
-            <RadioGroup value={accessMode} onChange={(value) => setAccessMode(value as TAccessMode)}>
-              <VStack align="stretch" spacing={3}>
-                <Radio value="application">{t("permitApplication.people.entireApplication")}</Radio>
-                <Radio value="blocks">{t("permitApplication.people.specificBlocks")}</Radio>
-              </VStack>
-            </RadioGroup>
-            {accessMode === "blocks" && (
-              <AsyncSelect<IOption, true>
-                isCreatable={false}
-                isMulti
-                defaultOptions={options}
-                loadOptions={(input) => {
-                  const query = input.trim().toLowerCase()
-                  return Promise.resolve(options.filter((option) => option.label.toLowerCase().includes(query)))
-                }}
-                value={options.filter((option) => blockIds.includes(String(option.value)))}
-                onChange={(selected) => setBlockIds((selected || []).map((option) => String(option.value)))}
-                placeholder={t("permitApplication.people.blocksPlaceholder")}
-                stylesToMerge={{ control: { height: "auto", minHeight: "var(--chakra-sizes-10)" } }}
-              />
-            )}
-          </VStack>
-        ) : view === "contact" ? (
-          <VStack align="stretch" spacing={4}>
-            <Button
-              variant="link"
-              leftIcon={<CaretLeft size={20} />}
-              onClick={() => setView("summary")}
-              alignSelf="flex-start"
-              fontWeight="normal"
-              color="text.link"
-              px={0}
-              h="auto"
-              minH={0}
-            >
-              {t("ui.back")}
-            </Button>
-            <Text fontWeight="bold" fontSize="lg">
-              {t("permitApplication.people.contactTitle")}
-            </Text>
-            <Text color="text.secondary">{t("permitApplication.people.contactChoose")}</Text>
-            <RadioGroup value={contactId ?? ""} onChange={setContactId}>
-              <VStack align="stretch" spacing={3}>
-                {people.map((person) => (
-                  <Radio key={person.id} value={person.id}>
-                    {person.name}
-                    {currentUserId === person.userId ? ` ${t("permitApplication.people.you")}` : ""}
-                  </Radio>
-                ))}
-              </VStack>
-            </RadioGroup>
-          </VStack>
-        ) : (
-          <VStack align="stretch" spacing={10}>
-            {permitApplication.projectId && (
-              <Box>
-                <Text color="text.secondary" lineHeight="1.6" mb={readOnly ? 0 : 3}>
-                  {t("permitApplication.people.manageAccess")}
-                </Text>
-                {!readOnly && (
-                  <RouterLink to={`/projects/${permitApplication.projectId}/people`} color="text.link">
-                    {t("permitApplication.people.manageAccessLink")}
-                  </RouterLink>
-                )}
-              </Box>
-            )}
-
-            <Box>
-              <Text fontWeight="bold" fontSize="md" mb={3}>
-                {t("permitApplication.people.fullTitle")}
+        <Box flex={1} minH={0} overflowY="auto" px={6} py={8}>
+          {loading ? (
+            <Flex justify="center" py={10}>
+              <SharedSpinner />
+            </Flex>
+          ) : view === "access" ? (
+            <VStack align="stretch" spacing={4}>
+              <Button
+                variant="link"
+                leftIcon={<CaretLeft size={20} />}
+                onClick={() => setView("summary")}
+                alignSelf="flex-start"
+                fontWeight="normal"
+                color="text.link"
+                px={0}
+                h="auto"
+                minH={0}
+              >
+                {t("ui.back")}
+              </Button>
+              <Text fontWeight="bold" fontSize="lg">
+                {t("permitApplication.people.accessTitle")}
               </Text>
-              <Text color="text.secondary" lineHeight="1.6" mb={5}>
-                {t("permitApplication.people.fullDescription")}
-              </Text>
-              <VStack align="stretch" spacing={5}>
-                {fullPeople.map((person) => (
-                  <PersonRow
-                    key={person.id}
-                    person={person}
-                    line={personLine(person)}
-                    you={currentUserId === person.userId}
+              <Text color="text.secondary">{t("permitApplication.people.accessDescription")}</Text>
+              {adding ? (
+                <>
+                  <AsyncSelect<IOption, false>
+                    isCreatable={false}
+                    defaultOptions={personOptions}
+                    loadOptions={(input) => {
+                      const query = input.trim().toLowerCase()
+                      return Promise.resolve(
+                        personOptions.filter((option) => option.label.toLowerCase().includes(query))
+                      )
+                    }}
+                    value={personOptions.find((option) => option.value === selectedPerson?.id) ?? null}
+                    onChange={(selected) => {
+                      const person = ungrantedLimitedPeople.find((candidate) => candidate.id === selected?.value)
+                      setSelectedPerson(person ?? null)
+                    }}
+                    placeholder={t("permitApplication.blockAccess.peoplePlaceholder")}
+                    stylesToMerge={{ control: { height: "auto", minHeight: "var(--chakra-sizes-10)" } }}
                   />
-                ))}
-              </VStack>
-            </Box>
-
-            <Box>
-              <Text fontWeight="bold" fontSize="md" mb={3}>
-                {t("permitApplication.people.standardTitle")}
-              </Text>
-              <Text color="text.secondary" lineHeight="1.6" mb={5}>
-                {t("permitApplication.people.standardDescription")}
-              </Text>
-              <VStack align="stretch" spacing={6}>
-                {grantedLimitedPeople.map((person) => (
-                  <Box key={person.id}>
-                    <PersonRow person={person} line={personLine(person)} you={currentUserId === person.userId} />
-                    <Text mt={3} fontSize="sm" color="text.secondary" lineHeight="1.5">
-                      {accessSummary(person)}
-                    </Text>
-                    {canChange && (
+                  {permitApplication.projectId && (
+                    <Text color="text.secondary">
+                      {t("permitApplication.blockAccess.cantFind")}{" "}
                       <Button
                         variant="link"
-                        size="sm"
-                        px={0}
-                        h="auto"
-                        minH={0}
-                        mt={2}
-                        onClick={() => openAccess(person)}
+                        color="text.link"
+                        fontWeight="normal"
+                        verticalAlign="baseline"
+                        onClick={() => setInviteOpen(true)}
                       >
-                        {t("ui.change")}
+                        {t("permitApplication.blockAccess.addPerson")}
                       </Button>
-                    )}
-                  </Box>
-                ))}
-              </VStack>
-              {canChange && (
-                <Button variant="link" px={0} h="auto" minH={0} mt={4} onClick={openAdd}>
-                  {t("permitApplication.people.giveSomeone")}
-                </Button>
+                    </Text>
+                  )}
+                </>
+              ) : (
+                selectedPerson && (
+                  <PersonRow
+                    person={selectedPerson}
+                    line={personLine(selectedPerson)}
+                    you={currentUserId === selectedPerson.userId}
+                  />
+                )
               )}
-            </Box>
-
-            <Box>
-              <Text fontWeight="bold" fontSize="md" mb={3}>
-                {t("permitApplication.people.contactTitle")}
-              </Text>
-              <Text color="text.secondary" lineHeight="1.6" mb={5}>
-                {t("permitApplication.people.contactDescription")}
-              </Text>
-              {contact && (
-                <PersonRow
-                  person={contact}
-                  line={
-                    contact.contactDesignation === EProjectContactDesignation.primary
-                      ? t("permitApplication.people.projectPrimaryContact")
-                      : personLine(contact)
-                  }
-                  you={currentUserId === contact.userId}
+              <RadioGroup value={accessMode} onChange={(value) => setAccessMode(value as TAccessMode)}>
+                <VStack align="stretch" spacing={3}>
+                  <Radio value="application">{t("permitApplication.people.entireApplication")}</Radio>
+                  <Radio value="blocks">{t("permitApplication.people.specificBlocks")}</Radio>
+                </VStack>
+              </RadioGroup>
+              {accessMode === "blocks" && (
+                <AsyncSelect<IOption, true>
+                  isCreatable={false}
+                  isMulti
+                  defaultOptions={options}
+                  loadOptions={(input) => {
+                    const query = input.trim().toLowerCase()
+                    return Promise.resolve(options.filter((option) => option.label.toLowerCase().includes(query)))
+                  }}
+                  value={options.filter((option) => blockIds.includes(String(option.value)))}
+                  onChange={(selected) => setBlockIds((selected || []).map((option) => String(option.value)))}
+                  placeholder={t("permitApplication.people.blocksPlaceholder")}
+                  stylesToMerge={{ control: { height: "auto", minHeight: "var(--chakra-sizes-10)" } }}
                 />
               )}
-              {canChange && (
-                <Button
-                  variant="link"
-                  size="sm"
-                  px={0}
-                  h="auto"
-                  minH={0}
-                  mt={3}
-                  onClick={() => {
-                    setContactId(permitApplication.applicationContactMembershipId)
-                    setView("contact")
-                  }}
-                >
-                  {t("ui.change")}
-                </Button>
+            </VStack>
+          ) : view === "contact" ? (
+            <VStack align="stretch" spacing={4}>
+              <Button
+                variant="link"
+                leftIcon={<CaretLeft size={20} />}
+                onClick={() => setView("summary")}
+                alignSelf="flex-start"
+                fontWeight="normal"
+                color="text.link"
+                px={0}
+                h="auto"
+                minH={0}
+              >
+                {t("ui.back")}
+              </Button>
+              <Text fontWeight="bold" fontSize="lg">
+                {t("permitApplication.people.contactTitle")}
+              </Text>
+              <Text color="text.secondary">{t("permitApplication.people.contactChoose")}</Text>
+              <RadioGroup value={contactId ?? ""} onChange={setContactId}>
+                <VStack align="stretch" spacing={3}>
+                  {people.map((person) => (
+                    <Radio key={person.id} value={person.id}>
+                      {person.name}
+                      {currentUserId === person.userId ? ` ${t("permitApplication.people.you")}` : ""}
+                    </Radio>
+                  ))}
+                </VStack>
+              </RadioGroup>
+            </VStack>
+          ) : (
+            <VStack align="stretch" spacing={10}>
+              {permitApplication.projectId && (
+                <Box>
+                  <Text color="text.secondary" lineHeight="1.6" mb={readOnly ? 0 : 3}>
+                    {t("permitApplication.people.manageAccess")}
+                  </Text>
+                  {!readOnly && (
+                    <RouterLink to={`/projects/${permitApplication.projectId}/people`} color="text.link">
+                      {t("permitApplication.people.manageAccessLink")}
+                    </RouterLink>
+                  )}
+                </Box>
               )}
-            </Box>
-          </VStack>
-        )}
-      </Box>
 
-      {view !== "summary" && (
-        <Flex flexShrink={0} gap={4} px={6} py={4} borderTop="1px solid" borderColor="border.light">
-          <Button variant="secondary" onClick={() => setView("summary")} isDisabled={saving}>
-            {t("ui.cancel")}
-          </Button>
-          <Button
-            variant="primary"
-            onClick={view === "access" ? saveAccess : saveContact}
-            isDisabled={
-              saving ||
-              (view === "access" && (!selectedPerson || (adding && accessMode === "blocks" && blockIds.length === 0)))
-            }
-          >
-            {t("ui.onlySave")}
-          </Button>
-        </Flex>
-      )}
-    </Flex>
+              <Box>
+                <Text fontWeight="bold" fontSize="md" mb={3}>
+                  {t("permitApplication.people.fullTitle")}
+                </Text>
+                <Text color="text.secondary" lineHeight="1.6" mb={5}>
+                  {t("permitApplication.people.fullDescription")}
+                </Text>
+                <VStack align="stretch" spacing={5}>
+                  {fullPeople.map((person) => (
+                    <PersonRow
+                      key={person.id}
+                      person={person}
+                      line={personLine(person)}
+                      you={currentUserId === person.userId}
+                    />
+                  ))}
+                </VStack>
+              </Box>
+
+              <Box>
+                <Text fontWeight="bold" fontSize="md" mb={3}>
+                  {t("permitApplication.people.standardTitle")}
+                </Text>
+                <Text color="text.secondary" lineHeight="1.6" mb={5}>
+                  {t("permitApplication.people.standardDescription")}
+                </Text>
+                <VStack align="stretch" spacing={6}>
+                  {grantedLimitedPeople.map((person) => (
+                    <Box key={person.id}>
+                      <PersonRow person={person} line={personLine(person)} you={currentUserId === person.userId} />
+                      <Text mt={3} fontSize="sm" color="text.secondary" lineHeight="1.5">
+                        {accessSummary(person)}
+                      </Text>
+                      {canChange && (
+                        <Button
+                          variant="link"
+                          size="sm"
+                          px={0}
+                          h="auto"
+                          minH={0}
+                          mt={2}
+                          onClick={() => openAccess(person)}
+                        >
+                          {t("ui.change")}
+                        </Button>
+                      )}
+                    </Box>
+                  ))}
+                </VStack>
+                {canChange && (
+                  <Button variant="link" px={0} h="auto" minH={0} mt={4} onClick={openAdd}>
+                    {t("permitApplication.people.giveSomeone")}
+                  </Button>
+                )}
+              </Box>
+
+              <Box>
+                <Text fontWeight="bold" fontSize="md" mb={3}>
+                  {t("permitApplication.people.contactTitle")}
+                </Text>
+                <Text color="text.secondary" lineHeight="1.6" mb={5}>
+                  {t("permitApplication.people.contactDescription")}
+                </Text>
+                {contact && (
+                  <PersonRow
+                    person={contact}
+                    line={
+                      contact.contactDesignation === EProjectContactDesignation.primary
+                        ? t("permitApplication.people.projectPrimaryContact")
+                        : personLine(contact)
+                    }
+                    you={currentUserId === contact.userId}
+                  />
+                )}
+                {canChange && (
+                  <Button
+                    variant="link"
+                    size="sm"
+                    px={0}
+                    h="auto"
+                    minH={0}
+                    mt={3}
+                    onClick={() => {
+                      setContactId(permitApplication.applicationContactMembershipId)
+                      setView("contact")
+                    }}
+                  >
+                    {t("ui.change")}
+                  </Button>
+                )}
+              </Box>
+            </VStack>
+          )}
+        </Box>
+
+        {view !== "summary" && (
+          <Flex flexShrink={0} gap={4} px={6} py={4} borderTop="1px solid" borderColor="border.light">
+            <Button variant="secondary" onClick={() => setView("summary")} isDisabled={saving}>
+              {t("ui.cancel")}
+            </Button>
+            <Button
+              variant="primary"
+              onClick={view === "access" ? saveAccess : saveContact}
+              isDisabled={
+                saving ||
+                (view === "access" && (!selectedPerson || (adding && accessMode === "blocks" && blockIds.length === 0)))
+              }
+            >
+              {t("ui.onlySave")}
+            </Button>
+          </Flex>
+        )}
+      </Flex>
+      <AddProjectPersonModal
+        isOpen={inviteOpen}
+        onClose={() => setInviteOpen(false)}
+        projectId={permitApplication.projectId}
+        onCreated={() => {
+          void loadActivePeople(api, permitApplication.projectId).then(setPeople)
+        }}
+      />
+    </>
   )
 })
 

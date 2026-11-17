@@ -42,6 +42,7 @@ export const PermitApplicationStoreModel = types
       templateVersionIdFilter: types.maybeNull(types.string),
       requirementTemplateIdFilter: types.optional(types.array(types.string), []),
       hasCollaboratorFilter: types.maybeNull(types.boolean),
+      accessibleOnly: types.optional(types.boolean, false),
     }),
     createSearchModel<EProjectPermitApplicationSortFields | EPermitApplicationSortFields>(
       "searchPermitApplications",
@@ -111,6 +112,10 @@ export const PermitApplicationStoreModel = types
     setHasCollaboratorFilter(value: boolean) {
       setQueryParam("hasCollaborator", value.toString())
       self.hasCollaboratorFilter = value
+    },
+    setAccessibleOnly(value: boolean) {
+      setQueryParam("accessibleOnly", value ? "true" : "")
+      self.accessibleOnly = value
     },
     resetCurrentPermitApplication() {
       self.currentPermitApplication = null
@@ -241,6 +246,7 @@ export const PermitApplicationStoreModel = types
         page: opts?.page ?? self.currentPage,
         perPage: opts?.countPerPage ?? self.countPerPage,
         showArchived: self.showArchived,
+        accessibleOnly: self.accessibleOnly,
         filters: {
           status: self.statusFilter,
           templateVersionId: self.templateVersionIdFilter,
@@ -383,11 +389,13 @@ export const PermitApplicationStoreModel = types
       const templateVersionIdFilter = queryParams.get("templateVersionId")
       const requirementTemplateIdFilter = queryParams.get("requirementTemplateId")?.split(",")
       const hasCollaboratorFilter = queryParams.get("hasCollaborator") === "true"
+      const accessibleOnly = queryParams.get("accessibleOnly") === "true"
 
       self.setStatusFilter(statusFilter)
       self.setRequirementTemplateIdFilter(requirementTemplateIdFilter)
       self.templateVersionIdFilter = templateVersionIdFilter
       self.hasCollaboratorFilter = hasCollaboratorFilter
+      self.accessibleOnly = accessibleOnly
     },
 
     processWebsocketChange: flow(function* (payload: IUserPushPayload) {
@@ -428,9 +436,10 @@ export const PermitApplicationStoreModel = types
       self.hasCollaboratorFilter = null
       self.templateVersionIdFilter = null
       self.requirementTemplateIdFilter = [] as any
+      self.accessibleOnly = false
       if (typeof window !== "undefined") {
         const url = new URL(window.location.href)
-        const staticParams = ["templateVersionId", "requirementTemplateId", "hasCollaborator"]
+        const staticParams = ["templateVersionId", "requirementTemplateId", "hasCollaborator", "accessibleOnly"]
         staticParams.forEach((param) => {
           url.searchParams.delete(param)
         })

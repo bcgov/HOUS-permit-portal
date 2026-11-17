@@ -11,6 +11,7 @@ import { IOption, IProjectGrant, IProjectPerson } from "../../../types/types"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { AsyncSelect } from "../../shared/select/async-select"
+import { AddProjectPersonModal } from "../permit-project/add-project-person-modal"
 
 interface IBlockAccessPanelProps {
   permitApplication: IPermitApplication
@@ -60,6 +61,7 @@ export const BlockAccessPanel = observer(function BlockAccessPanel({
   const [saving, setSaving] = useState(false)
   const [view, setView] = useState<"summary" | "edit">("summary")
   const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [inviteOpen, setInviteOpen] = useState(false)
 
   const blockTitle = blockTitleFor(permitApplication, requirementBlockId)
   const peoplePath = permitApplication.projectId ? `/projects/${permitApplication.projectId}/people` : "/projects"
@@ -174,147 +176,173 @@ export const BlockAccessPanel = observer(function BlockAccessPanel({
         }
 
   return (
-    <Flex
-      as="aside"
-      direction="column"
-      w="360px"
-      flexShrink={0}
-      overflow="hidden"
-      borderLeft="1px solid"
-      borderColor="border.light"
-      bg="greys.white"
-      {...sticky}
-    >
+    <>
       <Flex
-        align="center"
-        justify="space-between"
-        px={6}
-        py={6}
+        as="aside"
+        direction="column"
+        w="360px"
         flexShrink={0}
-        borderBottom="1px solid"
+        overflow="hidden"
+        borderLeft="1px solid"
         borderColor="border.light"
+        bg="greys.white"
+        {...sticky}
       >
-        <Text fontWeight="bold" fontSize="lg">
-          {blockTitle}
-        </Text>
-        <IconButton aria-label={t("ui.close")} icon={<X />} variant="ghost" onClick={onClose} />
-      </Flex>
+        <Flex
+          align="center"
+          justify="space-between"
+          px={6}
+          py={6}
+          flexShrink={0}
+          borderBottom="1px solid"
+          borderColor="border.light"
+        >
+          <Text fontWeight="bold" fontSize="lg">
+            {blockTitle}
+          </Text>
+          <IconButton aria-label={t("ui.close")} icon={<X />} variant="ghost" onClick={onClose} />
+        </Flex>
 
-      <Box flex={1} minH={0} overflowY="auto" px={6} py={6}>
-        {loading ? (
-          <Flex justify="center" py={10}>
-            <SharedSpinner />
-          </Flex>
-        ) : view === "edit" ? (
-          <VStack align="stretch" spacing={4}>
-            <Button
-              variant="link"
-              leftIcon={<CaretLeft size={20} />}
-              onClick={() => setView("summary")}
-              alignSelf="flex-start"
-              fontWeight="normal"
-              color="text.link"
-              px={0}
-              h="auto"
-              minH={0}
-            >
-              {t("ui.back")}
-            </Button>
-            <Text fontWeight="bold" fontSize="lg">
-              {t("permitApplication.blockAccess.additionalTitle")}
-            </Text>
-            <Text color="text.secondary" lineHeight="1.6">
-              {t("permitApplication.blockAccess.editorDescription")}
-            </Text>
-            <Text fontWeight="bold">{t("permitApplication.blockAccess.whoCanEdit", { block: blockTitle })}</Text>
-            <AsyncSelect<IOption, true>
-              isCreatable={false}
-              isMulti
-              defaultOptions={options}
-              loadOptions={(input) => {
-                const query = input.trim().toLowerCase()
-                return Promise.resolve(options.filter((option) => option.label.toLowerCase().includes(query)))
-              }}
-              value={options.filter((option) => selectedIds.includes(String(option.value)))}
-              onChange={(selected) => setSelectedIds((selected || []).map((option) => String(option.value)))}
-              placeholder={t("permitApplication.blockAccess.peoplePlaceholder")}
-              stylesToMerge={{ control: { height: "auto", minHeight: "var(--chakra-sizes-10)" } }}
-            />
-            <Text color="text.secondary">
-              {t("permitApplication.blockAccess.cantFind")}{" "}
-              <RouterLink to={peoplePath}>{t("permitApplication.blockAccess.addPerson")}</RouterLink>
-            </Text>
-          </VStack>
-        ) : (
-          <VStack align="stretch" spacing={8}>
-            <Box>
-              <Text fontWeight="bold" fontSize="md" mb={3}>
-                {t("permitApplication.blockAccess.throughProjectTitle")}
-              </Text>
-              <Text color="text.secondary" lineHeight="1.6" mb={5}>
-                {t("permitApplication.blockAccess.throughProjectDescription")}{" "}
-                <RouterLink to={peoplePath}>{t("permitApplication.blockAccess.manageProjectAccess")}</RouterLink>
-              </Text>
-              <VStack align="stretch" spacing={5}>
-                {alreadyEdits.map((person) => (
-                  <PersonRow
-                    key={person.id}
-                    person={person}
-                    line={projectLine(person)}
-                    you={currentUserId === person.userId}
-                  />
-                ))}
-              </VStack>
-            </Box>
-
-            <Box>
-              <Text fontWeight="bold" fontSize="md" mb={3}>
+        <Box flex={1} minH={0} overflowY="auto" px={6} py={6}>
+          {loading ? (
+            <Flex justify="center" py={10}>
+              <SharedSpinner />
+            </Flex>
+          ) : view === "edit" ? (
+            <VStack align="stretch" spacing={4}>
+              <Button
+                variant="link"
+                leftIcon={<CaretLeft size={20} />}
+                onClick={() => setView("summary")}
+                alignSelf="flex-start"
+                fontWeight="normal"
+                color="text.link"
+                px={0}
+                h="auto"
+                minH={0}
+              >
+                {t("ui.back")}
+              </Button>
+              <Text fontWeight="bold" fontSize="lg">
                 {t("permitApplication.blockAccess.additionalTitle")}
               </Text>
-              <Text color="text.secondary" lineHeight="1.6" mb={5}>
-                {t("permitApplication.blockAccess.additionalDescription")}
+              <Text color="text.secondary" lineHeight="1.6">
+                {t("permitApplication.blockAccess.editorDescription")}
               </Text>
-              {additional.length === 0 ? (
-                <>
-                  <Text color="text.secondary" mb={3}>
-                    {t("permitApplication.blockAccess.none")}
-                  </Text>
-                  <Button variant="link" px={0} h="auto" minH={0} onClick={openEditor}>
-                    {t("permitApplication.blockAccess.giveSomeone")}
-                  </Button>
-                </>
-              ) : (
+              <Text fontWeight="bold">{t("permitApplication.blockAccess.whoCanEdit", { block: blockTitle })}</Text>
+              <AsyncSelect<IOption, true>
+                isCreatable={false}
+                isMulti
+                defaultOptions={options}
+                loadOptions={(input) => {
+                  const query = input.trim().toLowerCase()
+                  return Promise.resolve(options.filter((option) => option.label.toLowerCase().includes(query)))
+                }}
+                value={options.filter((option) => selectedIds.includes(String(option.value)))}
+                onChange={(selected) => setSelectedIds((selected || []).map((option) => String(option.value)))}
+                placeholder={t("permitApplication.blockAccess.peoplePlaceholder")}
+                stylesToMerge={{ control: { height: "auto", minHeight: "var(--chakra-sizes-10)" } }}
+              />
+              <Text color="text.secondary">
+                {t("permitApplication.blockAccess.cantFind")}{" "}
+                <Button
+                  variant="link"
+                  color="text.link"
+                  fontWeight="normal"
+                  verticalAlign="baseline"
+                  onClick={() => setInviteOpen(true)}
+                >
+                  {t("permitApplication.blockAccess.addPerson")}
+                </Button>
+              </Text>
+            </VStack>
+          ) : (
+            <VStack align="stretch" spacing={8}>
+              <Box>
+                <Text fontWeight="bold" fontSize="md" mb={3}>
+                  {t("permitApplication.blockAccess.throughProjectTitle")}
+                </Text>
+                <Text color="text.secondary" lineHeight="1.6" mb={5}>
+                  {t("permitApplication.blockAccess.throughProjectDescription")}{" "}
+                  <RouterLink to={peoplePath}>{t("permitApplication.blockAccess.manageProjectAccess")}</RouterLink>
+                </Text>
                 <VStack align="stretch" spacing={5}>
-                  {additional.map((person) => (
-                    <Box key={person.id}>
-                      <PersonRow
-                        person={person}
-                        line={person.roleTags.join(", ")}
-                        you={currentUserId === person.userId}
-                      />
-                      <Button variant="link" size="sm" px={0} h="auto" minH={0} mt={2} onClick={openEditor}>
-                        {t("permitApplication.blockAccess.manageEditAccess")}
-                      </Button>
-                    </Box>
+                  {alreadyEdits.map((person) => (
+                    <PersonRow
+                      key={person.id}
+                      person={person}
+                      line={projectLine(person)}
+                      you={currentUserId === person.userId}
+                    />
                   ))}
                 </VStack>
-              )}
-            </Box>
-          </VStack>
-        )}
-      </Box>
+              </Box>
 
-      {view === "edit" && (
-        <Flex flexShrink={0} gap={4} px={6} py={4} borderTop="1px solid" borderColor="border.light" justify="flex-end">
-          <Button variant="secondary" onClick={() => setView("summary")} isDisabled={saving}>
-            {t("ui.cancel")}
-          </Button>
-          <Button variant="primary" onClick={save} isLoading={saving}>
-            {t("ui.onlySave")}
-          </Button>
-        </Flex>
-      )}
-    </Flex>
+              <Box>
+                <Text fontWeight="bold" fontSize="md" mb={3}>
+                  {t("permitApplication.blockAccess.additionalTitle")}
+                </Text>
+                <Text color="text.secondary" lineHeight="1.6" mb={5}>
+                  {t("permitApplication.blockAccess.additionalDescription")}
+                </Text>
+                {additional.length === 0 ? (
+                  <>
+                    <Text color="text.secondary" mb={3}>
+                      {t("permitApplication.blockAccess.none")}
+                    </Text>
+                    <Button variant="link" px={0} h="auto" minH={0} onClick={openEditor}>
+                      {t("permitApplication.blockAccess.giveSomeone")}
+                    </Button>
+                  </>
+                ) : (
+                  <VStack align="stretch" spacing={5}>
+                    {additional.map((person) => (
+                      <Box key={person.id}>
+                        <PersonRow
+                          person={person}
+                          line={person.roleTags.join(", ")}
+                          you={currentUserId === person.userId}
+                        />
+                        <Button variant="link" size="sm" px={0} h="auto" minH={0} mt={2} onClick={openEditor}>
+                          {t("permitApplication.blockAccess.manageEditAccess")}
+                        </Button>
+                      </Box>
+                    ))}
+                  </VStack>
+                )}
+              </Box>
+            </VStack>
+          )}
+        </Box>
+
+        {view === "edit" && (
+          <Flex
+            flexShrink={0}
+            gap={4}
+            px={6}
+            py={4}
+            borderTop="1px solid"
+            borderColor="border.light"
+            justify="flex-end"
+          >
+            <Button variant="secondary" onClick={() => setView("summary")} isDisabled={saving}>
+              {t("ui.cancel")}
+            </Button>
+            <Button variant="primary" onClick={save} isLoading={saving}>
+              {t("ui.onlySave")}
+            </Button>
+          </Flex>
+        )}
+      </Flex>
+      <AddProjectPersonModal
+        isOpen={inviteOpen}
+        onClose={() => setInviteOpen(false)}
+        projectId={permitApplication.projectId}
+        onCreated={() => {
+          void loadActivePeople(api, permitApplication.projectId).then(setPeople)
+        }}
+      />
+    </>
   )
 })
 

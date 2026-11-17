@@ -1,4 +1,4 @@
-import { Box, Flex, Heading, HStack } from "@chakra-ui/react"
+import { Box, Checkbox, Flex, Heading, HStack } from "@chakra-ui/react"
 import { ClipboardText } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
@@ -7,7 +7,7 @@ import { useSearch } from "../../../hooks/use-search"
 import { IPermitApplication } from "../../../models/permit-application"
 import { IPermitProject } from "../../../models/permit-project"
 import { useMst } from "../../../setup/root"
-import { EProjectPermitApplicationSortFields } from "../../../types/enums"
+import { EProjectAccess, EProjectPermitApplicationSortFields } from "../../../types/enums"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
 import { ToggleArchivedButton } from "../../shared/buttons/toggle-archived-button"
@@ -59,9 +59,21 @@ export const PermitsTabPanelContent = observer(({ permitProject }: IProps) => {
             />
           ) : (
             <>
-              <Flex gap={2} mb={2}>
+              <Flex gap={2} mb={2} align="center">
                 <RequirementTemplateFilter searchModel={permitApplicationStore} />
                 <StatusFilter searchModel={permitApplicationStore} />
+                {permitProject.currentUserAccess?.level === EProjectAccess.limited && (
+                  <Checkbox
+                    isChecked={permitApplicationStore.accessibleOnly}
+                    onChange={(event) => {
+                      permitApplicationStore.setAccessibleOnly(event.target.checked)
+                      permitApplicationStore.search()
+                    }}
+                    size="sm"
+                  >
+                    {t("permitProject.index.accessibleOnly")}
+                  </Checkbox>
+                )}
               </Flex>
               <SearchGrid
                 templateColumns="2.25fr 1.75fr 1fr 1.4fr 1fr 1.1fr 0.5fr"
