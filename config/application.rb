@@ -59,6 +59,11 @@ module HousPermitPortal
     # Use Sidekiq for Active Job
     config.active_job.queue_adapter = :sidekiq
 
+    # Mail workers need to see the committed records referenced by deliver_later.
+    ActiveSupport.on_load(:action_mailer) do
+      ActionMailer::MailDeliveryJob.enqueue_after_transaction_commit = true
+    end
+
     # Force UUID primary keys for new tables and models
     config.generators { |g| g.orm :active_record, primary_key_type: :uuid }
 
