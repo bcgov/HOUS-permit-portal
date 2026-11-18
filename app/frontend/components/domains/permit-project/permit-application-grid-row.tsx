@@ -22,11 +22,18 @@ interface IPermitApplicationGridRowProps {
   permitApplication: IPermitApplication
   searchModel?: ISearch
   fromInbox?: boolean
+  isActive?: boolean
   onOpenPeople?: (permitApplication: IPermitApplication) => void
 }
 
 export const PermitApplicationGridRow = observer(
-  ({ permitApplication, searchModel, fromInbox = false, onOpenPeople }: IPermitApplicationGridRowProps) => {
+  ({
+    permitApplication,
+    searchModel,
+    fromInbox = false,
+    isActive = false,
+    onOpenPeople,
+  }: IPermitApplicationGridRowProps) => {
     const { t } = useTranslation()
     const navigate = useNavigate()
     const { id, updatedAt, usingCurrentTemplateVersion, createdBy, nickname, templateNickname } = permitApplication
@@ -64,7 +71,12 @@ export const PermitApplicationGridRow = observer(
       >
         <SearchGridRow
           aria-disabled={isDisabledRow}
+          aria-current={isActive ? "true" : undefined}
           opacity={isLockedDraft || isViewRestricted ? 0.55 : undefined}
+          bg={isActive ? "semantic.infoLight" : undefined}
+          borderLeftWidth={isActive ? "4px" : undefined}
+          borderLeftStyle={isActive ? "solid" : undefined}
+          borderLeftColor={isActive ? "theme.blue" : undefined}
           bgImage={
             shouldMarkRow
               ? `repeating-linear-gradient(45deg,${colors.background.sandboxStripe} 5px,${colors.background.sandboxStripe} 10px,rgba(0, 0, 0, 0) 10px,rgba(0, 0, 0, 0) 20px)`
@@ -79,7 +91,7 @@ export const PermitApplicationGridRow = observer(
             isDisabledRow
               ? { cursor: "not-allowed" }
               : {
-                  bg: "greys.grey03",
+                  bg: isActive ? "semantic.infoLight" : "greys.grey03",
                   cursor: "pointer",
                 }
           }
