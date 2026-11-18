@@ -146,6 +146,7 @@ en:
           attributes:
             submitter:
               incorrect_role: "must have the submitter role"
+              inactive_member: "must be an active member of this project"
             jurisdiction:
               no_contact: "is not ready to accept applications through this tool yet. Please check with your local jurisdiction."
               inbox_not_enabled: "inbox for this permit application is not enabled"

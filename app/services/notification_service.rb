@@ -389,14 +389,11 @@ class NotificationService
     scope.pluck("application_message_users.id").uniq
   end
 
-  # The submitter's membership, or the submitter when that membership is gone.
+  # The submitter, when they still have an account.
   def self.with_application_message_recipient(scope)
-    scope.left_joins(:submitter_membership).joins(<<~SQL.squish)
+    scope.joins(<<~SQL.squish)
       INNER JOIN users application_message_users
-        ON application_message_users.id = COALESCE(
-          project_memberships.user_id,
-          permit_applications.submitter_id
-        )
+        ON application_message_users.id = permit_applications.submitter_id
       INNER JOIN preferences
         ON preferences.user_id = application_message_users.id
     SQL

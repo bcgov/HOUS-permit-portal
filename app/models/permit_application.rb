@@ -26,7 +26,7 @@ class PermitApplication < ApplicationRecord
     :step_code,
     :submitter,
     :created_by,
-    { permit_collaborations: :collaborator, submitter_membership: :user }
+    { permit_collaborations: :collaborator }
   ]
 
   belongs_to :submitter, class_name: "User", optional: true
@@ -37,9 +37,6 @@ class PermitApplication < ApplicationRecord
              class_name: "CustomizationChange",
              optional: true
   belongs_to :permit_project, touch: true
-  belongs_to :submitter_membership,
-             class_name: "ProjectMembership",
-             optional: true
 
   has_one :requirement_template, through: :template_version
 
@@ -92,14 +89,13 @@ class PermitApplication < ApplicationRecord
             },
             allow_nil: true
   validate :submission_versions_match_status
-  validate :submitter_membership_matches_submitter
+  validate :submitter_is_active_member
 
   delegate :published_template_version, to: :template_version
 
   before_validation :assign_unique_number, on: :create
   before_validation :set_template_version, on: :create
   before_validation :populate_base_form_data, on: :create
-  before_validation :assign_submitter_membership
   before_validation :assign_created_by_from_submitter, on: :create
   before_create :acknowledge_current_customization_change
   before_save :take_form_customizations_snapshot_if_submitted
@@ -918,10 +914,16 @@ class PermitApplication < ApplicationRecord
     end
   end
 
-  # Who is told about this application. The submitter's membership when it
-  # still has a user, otherwise the submitter.
+  # Who is told about this application.
   def application_message_recipient
-    submitter_membership&.user || submitter
+    submitter
+  end
+
+  # The submitter's membership on this project. A user has one.
+  def submitter_membership
+    return if submitter_id.blank? || permit_project.blank?
+
+    permit_project.project_memberships.find_by(user_id: submitter_id)
   end
 
   private
@@ -938,29 +940,13 @@ class PermitApplication < ApplicationRecord
     self.created_by ||= association(:submitter).reader
   end
 
-  # The submitter's membership on this project.
-  def assign_submitter_membership
-    return unless permit_project&.persisted? && submitter_id.present?
-
-    self.submitter_membership =
-      permit_project.project_memberships.find_by(user_id: submitter_id)
-  end
-
-  def submitter_membership_matches_submitter
+  # Orphaning clears the submitter. The membership rule applies only while one is set.
+  def submitter_is_active_member
     return unless permit_project&.persisted?
-    # Orphaning clears the submitter. The membership rule applies only while one is set.
     return if submitter_id.blank?
+    return if submitter_membership&.active?
 
-    membership = submitter_membership
-    if membership&.permit_project_id == permit_project_id &&
-         membership.active? && membership.user_id == submitter_id
-      return
-    end
-
-    errors.add(
-      :submitter_membership,
-      "must be the submitter's active membership on this project"
-    )
+    errors.add(:submitter, :inactive_member)
   end
 
   def update_collaboration_assignments

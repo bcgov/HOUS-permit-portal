@@ -52,7 +52,7 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
   const [selectedPerson, setSelectedPerson] = useState<IProjectMembership | null>(null)
   const [accessMode, setAccessMode] = useState<TAccessMode>("blocks")
   const [blockIds, setBlockIds] = useState<string[]>([])
-  const [contactId, setContactId] = useState<string | null>(permitApplication.submitterMembershipId)
+  const [contactId, setContactId] = useState<string | null>(null)
   const [pickedContact, setPickedContact] = useState<IOption | null>(null)
   const [inviteOpen, setInviteOpen] = useState(false)
 
@@ -70,7 +70,7 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
   const options = blockOptions(permitApplication.formJson)
   const fullPeople = people.filter((person) => person.access !== EProjectAccess.limited)
   const limitedPeople = people.filter((person) => person.access === EProjectAccess.limited)
-  const contact = people.find((person) => person.id === permitApplication.submitterMembershipId)
+  const contact = people.find((person) => person.userId === permitApplication.submitter?.id)
 
   useEffect(() => {
     let cancelled = false
@@ -87,7 +87,8 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
       }
       await Promise.all([loadedProject?.fetchMemberships(), permitApplication.fetchProjectGrants()])
       if (cancelled) return
-      setContactId(permitApplication.submitterMembershipId)
+      const loadedPeople = loadedProject?.panelMemberships ?? []
+      setContactId(loadedPeople.find((person) => person.userId === permitApplication.submitter?.id)?.id ?? null)
       setPickedContact(null)
       setLoading(false)
     }
@@ -107,10 +108,10 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
   const storedContact = permitApplication.submitter
   const storedContactName = typeof storedContact?.name === "string" ? storedContact.name : null
   const storedContactOption: IOption | null =
-    permitApplication.submitterMembershipId && storedContact && storedContactName
+    contact?.id && storedContact && storedContactName
       ? {
           label: contactLabel(storedContactName, storedContact.id),
-          value: permitApplication.submitterMembershipId,
+          value: contact.id,
         }
       : null
   const selectedContactOption =
@@ -545,7 +546,7 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
                     minH={0}
                     mt={3}
                     onClick={() => {
-                      setContactId(permitApplication.submitterMembershipId)
+                      setContactId(contact?.id ?? null)
                       setPickedContact(null)
                       setView("contact")
                     }}

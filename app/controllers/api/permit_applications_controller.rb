@@ -270,9 +270,15 @@ class Api::PermitApplicationsController < Api::ApplicationController
       @permit_application.permit_project&.project_memberships&.find_by(
         id: params.dig(:permit_application, :submitter_membership_id)
       )
-    @permit_application.submitter = membership&.user
+    if membership&.active?
+      @permit_application.submitter = membership.user
+      saved = @permit_application.save
+    else
+      @permit_application.errors.add(:submitter, :inactive_member)
+      saved = false
+    end
 
-    if @permit_application.save
+    if saved
       render_success @permit_application,
                      nil,
                      {

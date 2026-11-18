@@ -20,8 +20,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
            :template_nickname,
            :discarded_at,
            :days_in_queue,
-           :step_code_stage,
-           :submitter_membership_id
+           :step_code_stage
 
     association :sandbox, blueprint: SandboxBlueprint
 

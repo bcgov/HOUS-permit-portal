@@ -75,7 +75,7 @@ RSpec.describe PermitApplication, type: :model do
         )
 
       expect(application).not_to be_valid
-      expect(application.errors[:submitter_membership]).to be_present
+      expect(application.errors[:submitter]).to be_present
     end
   end
 
