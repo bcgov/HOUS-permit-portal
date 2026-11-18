@@ -90,6 +90,7 @@ export const PermitsTabPanelContent = observer(({ permitProject }: IProps) => {
                       key={permitApplication.id}
                       permitApplication={permitApplication}
                       searchModel={permitApplicationStore}
+                      isActive={peopleApplication?.id === permitApplication.id}
                       onOpenPeople={(application) => setPeopleApplication(application)}
                     />
                   ))}

@@ -282,7 +282,7 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
         {...sticky}
       >
         <Flex
-          align="center"
+          align="flex-start"
           justify="space-between"
           px={6}
           py={6}
@@ -290,9 +290,19 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
           borderBottom="1px solid"
           borderColor="border.light"
         >
-          <Text fontWeight="bold" fontSize="lg">
-            {t("permitApplication.people.title")}
-          </Text>
+          <Box minW={0} pr={2}>
+            <Text fontWeight="bold" fontSize="lg">
+              {t("permitApplication.people.title")}
+            </Text>
+            <Text fontSize="sm" noOfLines={2}>
+              {permitApplication.templateNickname || permitApplication.number}
+            </Text>
+            {permitApplication.nickname && (
+              <Text fontSize="sm" color="text.secondary" noOfLines={1}>
+                {permitApplication.nickname}
+              </Text>
+            )}
+          </Box>
           <IconButton aria-label={t("ui.close")} icon={<X />} variant="ghost" onClick={onClose} />
         </Flex>
 
