@@ -127,6 +127,7 @@ export const QuestionsTable = observer(function QuestionsTable({
                         requirementType={question.inputType}
                         label={question.label}
                         helperText={question.hint}
+                        instructions={question.instructions}
                         inputOptions={question.inputOptions}
                         options={question.inputOptions?.valueOptions?.map((option: { label: string }) => option.label)}
                         required
