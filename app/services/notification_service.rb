@@ -169,7 +169,7 @@ class NotificationService
       NotificationPushJob.perform_async(notification_hash)
     end
 
-    # Application contacts still receive the in-app draft warning, but this
+    # Submitters still receive the in-app draft warning, but this
     # email is written for jurisdiction managers and API partners.
     user_ids = manager_ids
     users_with_email_enabled =
@@ -389,9 +389,9 @@ class NotificationService
     scope.pluck("application_message_users.id").uniq
   end
 
-  # The application's contact, or the submitter when that contact has no user.
+  # The submitter's membership, or the submitter when that membership is gone.
   def self.with_application_message_recipient(scope)
-    scope.left_joins(:application_contact_membership).joins(<<~SQL.squish)
+    scope.left_joins(:submitter_membership).joins(<<~SQL.squish)
       INNER JOIN users application_message_users
         ON application_message_users.id = COALESCE(
           project_memberships.user_id,

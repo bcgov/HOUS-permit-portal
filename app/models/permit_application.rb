@@ -26,10 +26,7 @@ class PermitApplication < ApplicationRecord
     :step_code,
     :submitter,
     :created_by,
-    {
-      permit_collaborations: :collaborator,
-      application_contact_membership: :user
-    }
+    { permit_collaborations: :collaborator, submitter_membership: :user }
   ]
 
   belongs_to :submitter, class_name: "User", optional: true
@@ -39,8 +36,8 @@ class PermitApplication < ApplicationRecord
   belongs_to :acknowledged_customization_change,
              class_name: "CustomizationChange",
              optional: true
-  belongs_to :permit_project, optional: true, touch: true
-  belongs_to :application_contact_membership,
+  belongs_to :permit_project, touch: true
+  belongs_to :submitter_membership,
              class_name: "ProjectMembership",
              optional: true
 
@@ -86,7 +83,6 @@ class PermitApplication < ApplicationRecord
           )
         end
 
-  validate :jurisdiction_or_permit_project_present
   validate :jurisdiction_has_matching_submission_contact
   validates :number, presence: true
   validates :reference_number, length: { maximum: 300 }, allow_nil: true
@@ -96,16 +92,15 @@ class PermitApplication < ApplicationRecord
             },
             allow_nil: true
   validate :submission_versions_match_status
-  validate :application_contact_on_project
+  validate :submitter_membership_matches_submitter
 
   delegate :published_template_version, to: :template_version
 
   before_validation :assign_unique_number, on: :create
   before_validation :set_template_version, on: :create
   before_validation :populate_base_form_data, on: :create
+  before_validation :assign_submitter_membership
   before_validation :assign_created_by_from_submitter, on: :create
-  before_validation :assign_application_contact, on: :create
-  before_create :assign_application_contact
   before_create :acknowledge_current_customization_change
   before_save :take_form_customizations_snapshot_if_submitted
 
@@ -905,7 +900,7 @@ class PermitApplication < ApplicationRecord
   end
 
   # A member who adds a draft is its creator. Review staff who are not
-  # members add it as the jurisdiction, with the project creator as submitter.
+  # members add it as the jurisdiction, with the primary contact as submitter.
   def assign_creation_actors(user)
     project = permit_project
     return unless project && user
@@ -915,14 +910,18 @@ class PermitApplication < ApplicationRecord
       self.submitter = user
     else
       self.created_by = project.jurisdiction
-      self.submitter = project.owner
+      self.submitter =
+        project
+          .project_memberships
+          .find_by(contact_designation: :primary)
+          &.user || project.owner
     end
   end
 
-  # Who is told about this application. The stored contact when they still
-  # have a user, otherwise the submitter.
+  # Who is told about this application. The submitter's membership when it
+  # still has a user, otherwise the submitter.
   def application_message_recipient
-    application_contact_membership&.user || submitter
+    submitter_membership&.user || submitter
   end
 
   private
@@ -939,27 +938,28 @@ class PermitApplication < ApplicationRecord
     self.created_by ||= association(:submitter).reader
   end
 
-  # The project's primary contact at the moment this application is created.
-  # A later change to the primary contact leaves this row alone.
-  # before_create runs again so a project saved during this create still counts.
-  def assign_application_contact
-    return if application_contact_membership_id.present?
-    return if permit_project.blank? || !permit_project.persisted?
+  # The submitter's membership on this project.
+  def assign_submitter_membership
+    return unless permit_project&.persisted? && submitter_id.present?
 
-    self.application_contact_membership =
-      permit_project.project_memberships.find_by(contact_designation: :primary)
+    self.submitter_membership =
+      permit_project.project_memberships.find_by(user_id: submitter_id)
   end
 
-  def application_contact_on_project
-    membership = application_contact_membership
-    return if membership.blank?
-    if membership.permit_project_id == permit_project_id && membership.active?
+  def submitter_membership_matches_submitter
+    return unless permit_project&.persisted?
+    # Orphaning clears the submitter. The membership rule applies only while one is set.
+    return if submitter_id.blank?
+
+    membership = submitter_membership
+    if membership&.permit_project_id == permit_project_id &&
+         membership.active? && membership.user_id == submitter_id
       return
     end
 
     errors.add(
-      :application_contact_membership,
-      "must be an active member of this project"
+      :submitter_membership,
+      "must be the submitter's active membership on this project"
     )
   end
 
@@ -1161,17 +1161,6 @@ class PermitApplication < ApplicationRecord
   # TODO: Also enqueue project when a meeting request is made
   def enqueue_permit_project_if_draft
     permit_project&.enqueue! if permit_project&.draft?
-  end
-
-  def jurisdiction_or_permit_project_present
-    if jurisdiction.nil? && permit_project.nil?
-      errors.add(
-        :jurisdiction,
-        I18n.t(
-          "activerecord.errors.models.permit_application.attributes.jurisdiction.no_jurisdiction"
-        )
-      )
-    end
   end
 
   def submitter_must_have_role

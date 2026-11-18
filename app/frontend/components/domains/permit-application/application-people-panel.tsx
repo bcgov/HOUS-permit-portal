@@ -4,11 +4,13 @@ import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { IPermitApplication } from "../../../models/permit-application"
-import { useMst, useServerAPI } from "../../../setup/root"
+import { IProjectMembership } from "../../../models/project-membership"
+import { useMst } from "../../../setup/root"
 import { stickyBelowNavBar } from "../../../styles/nav-bar-offset"
-import { EProjectAccess, EProjectContactDesignation, EProjectMembershipStatus } from "../../../types/enums"
-import { IFormJson, IOption, IProjectGrant, IProjectPerson } from "../../../types/types"
+import { EProjectAccess, EProjectContactDesignation } from "../../../types/enums"
+import { IFormJson, IOption } from "../../../types/types"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
+import { ConfirmationModal } from "../../shared/modals/confirmation-modal"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { AsyncSelect } from "../../shared/select/async-select"
 import { AddProjectPersonModal } from "../permit-project/add-project-person-modal"
@@ -18,7 +20,6 @@ interface IApplicationPeoplePanelProps {
   onClose: () => void
   // Edit page: pin under the permit header. Applications list: fill the column.
   stickyHeaderHeight?: number
-  onGrantsChange?: (grants: IProjectGrant[]) => void
   readOnly?: boolean
 }
 
@@ -35,47 +36,30 @@ const blockOptions = (formJson: IFormJson | null | undefined): IOption[] => {
   )
 }
 
-const loadActivePeople = async (api: ReturnType<typeof useServerAPI>, projectId: string | null) => {
-  if (!projectId) return []
-  const people: IProjectPerson[] = []
-  let page = 1
-  let totalPages = 1
-  do {
-    const response = await api.fetchPermitProjectMemberships(projectId, { page, perPage: 100 })
-    if (!response.ok) return people
-    people.push(...(response.data?.data ?? []))
-    totalPages = response.data?.meta?.totalPages ?? 1
-    page += 1
-  } while (page <= totalPages)
-  return people.filter(
-    (person) =>
-      person.status === EProjectMembershipStatus.active ||
-      (person.status === EProjectMembershipStatus.pending && person.access === EProjectAccess.limited)
-  )
-}
-
 export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
   permitApplication,
   onClose,
   stickyHeaderHeight,
-  onGrantsChange,
   readOnly = false,
 }: IApplicationPeoplePanelProps) {
   const { t } = useTranslation()
-  const api = useServerAPI()
   const { permitApplicationStore, userStore, permitProjectStore } = useMst()
   const currentUserId = userStore.currentUser?.id
-  const [people, setPeople] = useState<IProjectPerson[]>([])
-  const [grants, setGrants] = useState<IProjectGrant[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [view, setView] = useState<TPanelView>("summary")
   const [adding, setAdding] = useState(false)
-  const [selectedPerson, setSelectedPerson] = useState<IProjectPerson | null>(null)
+  const [selectedPerson, setSelectedPerson] = useState<IProjectMembership | null>(null)
   const [accessMode, setAccessMode] = useState<TAccessMode>("blocks")
   const [blockIds, setBlockIds] = useState<string[]>([])
-  const [contactId, setContactId] = useState<string | null>(permitApplication.applicationContactMembershipId)
+  const [contactId, setContactId] = useState<string | null>(permitApplication.submitterMembershipId)
+  const [pickedContact, setPickedContact] = useState<IOption | null>(null)
   const [inviteOpen, setInviteOpen] = useState(false)
+
+  const project = permitApplication.projectId
+    ? permitProjectStore.permitProjectMap.get(permitApplication.projectId)
+    : null
+  const people = project?.panelMemberships ?? []
 
   const canChange =
     !readOnly &&
@@ -86,7 +70,7 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
   const options = blockOptions(permitApplication.formJson)
   const fullPeople = people.filter((person) => person.access !== EProjectAccess.limited)
   const limitedPeople = people.filter((person) => person.access === EProjectAccess.limited)
-  const contact = people.find((person) => person.id === permitApplication.applicationContactMembershipId)
+  const contact = people.find((person) => person.id === permitApplication.submitterMembershipId)
 
   useEffect(() => {
     let cancelled = false
@@ -96,16 +80,15 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
       if (!permitApplication.formJson) {
         await permitApplicationStore.fetchPermitApplication(permitApplication.id)
       }
-      const [loadedPeople, grantsResponse] = await Promise.all([
-        loadActivePeople(api, permitApplication.projectId),
-        api.fetchProjectGrants(permitApplication.id),
-      ])
+      const projectId = permitApplication.projectId
+      let loadedProject = projectId ? permitProjectStore.permitProjectMap.get(projectId) : null
+      if (!loadedProject && projectId) {
+        loadedProject = await permitProjectStore.fetchPermitProject(projectId)
+      }
+      await Promise.all([loadedProject?.fetchMemberships(), permitApplication.fetchProjectGrants()])
       if (cancelled) return
-      const loadedGrants = grantsResponse.ok ? (grantsResponse.data?.data ?? []) : []
-      setPeople(loadedPeople)
-      setGrants(loadedGrants)
-      onGrantsChange?.(loadedGrants)
-      setContactId(permitApplication.applicationContactMembershipId)
+      setContactId(permitApplication.submitterMembershipId)
+      setPickedContact(null)
       setLoading(false)
     }
     load()
@@ -114,16 +97,46 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
     }
   }, [permitApplication.id])
 
-  const grantsFor = (membershipId: string) =>
-    grants.filter((grant) => grant.projectMembershipId === membershipId && grant.kind !== "invite")
+  const grantsFor = (membershipId: string) => permitApplication.grantsFor(membershipId)
 
   const grantedLimitedPeople = limitedPeople.filter((person) => grantsFor(person.id).length > 0)
   const ungrantedLimitedPeople = limitedPeople.filter((person) => grantsFor(person.id).length === 0)
   const personOptions: IOption[] = ungrantedLimitedPeople.map((person) => ({ label: person.name, value: person.id }))
+  const contactLabel = (name: string, userId: string | null | undefined) =>
+    `${name}${currentUserId && currentUserId === userId ? ` ${t("permitApplication.people.you")}` : ""}`
+  const storedContact = permitApplication.submitter
+  const storedContactName = typeof storedContact?.name === "string" ? storedContact.name : null
+  const storedContactOption: IOption | null =
+    permitApplication.submitterMembershipId && storedContact && storedContactName
+      ? {
+          label: contactLabel(storedContactName, storedContact.id),
+          value: permitApplication.submitterMembershipId,
+        }
+      : null
+  const selectedContactOption =
+    pickedContact?.value === contactId
+      ? pickedContact
+      : storedContactOption?.value === contactId
+        ? storedContactOption
+        : null
+
+  const loadContactOptions = async (input: string) => {
+    const query = input.trim()
+    if (!query) return storedContactOption ? [storedContactOption] : []
+    const projectId = permitApplication.projectId
+    if (!projectId) return []
+
+    const loadedProject =
+      permitProjectStore.permitProjectMap.get(projectId) ?? (await permitProjectStore.fetchPermitProject(projectId))
+    if (!loadedProject) return []
+
+    const matches = await loadedProject.searchMemberships(query)
+    return matches.map((person) => ({ label: contactLabel(person.name, person.userId), value: person.id }))
+  }
 
   const blockName = (blockId: string | null) => options.find((option) => option.value === blockId)?.label
 
-  const accessSummary = (person: IProjectPerson) => {
+  const accessSummary = (person: IProjectMembership) => {
     const mine = grantsFor(person.id)
     if (mine.some((grant) => grant.kind === "application")) return t("permitApplication.people.entireApplication")
     const names = mine
@@ -134,7 +147,7 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
     return names.join(", ")
   }
 
-  const personLine = (person: IProjectPerson) => {
+  const personLine = (person: IProjectMembership) => {
     const role = person.roleTags.join(", ")
     const access = person.access
       ? t("permitApplication.people.accessLevel", { level: t(`permitProject.people.access.${person.access}`) })
@@ -142,7 +155,7 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
     return [role, access].filter(Boolean).join(" · ")
   }
 
-  const openAccess = (person: IProjectPerson) => {
+  const openAccess = (person: IProjectMembership) => {
     const mine = grantsFor(person.id)
     setAdding(false)
     setSelectedPerson(person)
@@ -173,16 +186,15 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
 
     if (accessMode === "application") {
       if (!applicationGrant) {
-        const created = await api.createProjectGrant(permitApplication.id, {
+        ok = await permitApplication.createProjectGrant({
           membershipId: selectedPerson.id,
           kind: "application",
         })
-        ok = created.ok
       }
       if (ok) {
         for (const grant of blockGrants) {
-          const removed = await api.destroyProjectGrant(permitApplication.id, grant.id)
-          if (!removed.ok) {
+          const removed = await permitApplication.destroyProjectGrant(grant.id)
+          if (!removed) {
             ok = false
             break
           }
@@ -190,19 +202,18 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
       }
     } else {
       if (applicationGrant) {
-        const removed = await api.destroyProjectGrant(permitApplication.id, applicationGrant.id)
-        ok = removed.ok
+        ok = await permitApplication.destroyProjectGrant(applicationGrant.id)
       }
       const wanted = new Set(blockIds)
       if (ok) {
         for (const blockId of blockIds) {
           if (blockGrants.some((grant) => grant.requirementBlockId === blockId)) continue
-          const created = await api.createProjectGrant(permitApplication.id, {
+          const created = await permitApplication.createProjectGrant({
             membershipId: selectedPerson.id,
             kind: "block",
             requirementBlockId: blockId,
           })
-          if (!created.ok) {
+          if (!created) {
             ok = false
             break
           }
@@ -211,8 +222,8 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
       if (ok) {
         for (const grant of blockGrants) {
           if (!grant.requirementBlockId || wanted.has(grant.requirementBlockId)) continue
-          const removed = await api.destroyProjectGrant(permitApplication.id, grant.id)
-          if (!removed.ok) {
+          const removed = await permitApplication.destroyProjectGrant(grant.id)
+          if (!removed) {
             ok = false
             break
           }
@@ -220,22 +231,29 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
       }
     }
 
-    if (ok) {
-      const refreshed = await api.fetchProjectGrants(permitApplication.id)
-      if (refreshed.ok) {
-        const loadedGrants = refreshed.data?.data ?? []
-        setGrants(loadedGrants)
-        onGrantsChange?.(loadedGrants)
+    if (ok) setView("summary")
+    setSaving(false)
+  }
+
+  const removeAccess = async () => {
+    if (!selectedPerson) return
+    setSaving(true)
+    let ok = true
+    for (const grant of grantsFor(selectedPerson.id)) {
+      const removed = await permitApplication.destroyProjectGrant(grant.id)
+      if (!removed) {
+        ok = false
+        break
       }
-      setView("summary")
     }
+    if (ok) setView("summary")
     setSaving(false)
   }
 
   const saveContact = async () => {
     if (!contactId) return
     setSaving(true)
-    const ok = await permitApplication.updateApplicationContact(contactId)
+    const ok = await permitApplication.updateSubmitter(contactId)
     if (ok) setView("summary")
     setSaving(false)
   }
@@ -365,6 +383,31 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
                   stylesToMerge={{ control: { height: "auto", minHeight: "var(--chakra-sizes-10)" } }}
                 />
               )}
+              {!adding && selectedPerson && (
+                <ConfirmationModal
+                  promptHeader={t("permitApplication.people.removeAccessTitle")}
+                  promptMessage={t("permitApplication.people.removeAccessBody")}
+                  confirmText={t("ui.remove")}
+                  confirmButtonBg="semantic.error"
+                  onConfirm={() => {
+                    void removeAccess()
+                  }}
+                  renderTrigger={(onOpen) => (
+                    <Button
+                      variant="link"
+                      size="sm"
+                      px={0}
+                      h="auto"
+                      minH={0}
+                      alignSelf="flex-start"
+                      onClick={onOpen}
+                      isDisabled={saving}
+                    >
+                      {t("ui.remove")}
+                    </Button>
+                  )}
+                />
+              )}
             </VStack>
           ) : view === "contact" ? (
             <VStack align="stretch" spacing={4}>
@@ -385,16 +428,24 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
                 {t("permitApplication.people.contactTitle")}
               </Text>
               <Text color="text.secondary">{t("permitApplication.people.contactChoose")}</Text>
-              <RadioGroup value={contactId ?? ""} onChange={setContactId}>
-                <VStack align="stretch" spacing={3}>
-                  {people.map((person) => (
-                    <Radio key={person.id} value={person.id}>
-                      {person.name}
-                      {currentUserId === person.userId ? ` ${t("permitApplication.people.you")}` : ""}
-                    </Radio>
-                  ))}
-                </VStack>
-              </RadioGroup>
+              <AsyncSelect<IOption, false>
+                isCreatable={false}
+                defaultOptions={storedContactOption ? [storedContactOption] : []}
+                loadOptions={loadContactOptions}
+                value={selectedContactOption}
+                onChange={(selected) => {
+                  if (!selected?.value) {
+                    setContactId(null)
+                    setPickedContact(null)
+                    return
+                  }
+                  const option = { label: selected.label, value: String(selected.value) }
+                  setContactId(option.value)
+                  setPickedContact(option)
+                }}
+                placeholder={t("permitApplication.people.contactPlaceholder")}
+                stylesToMerge={{ control: { height: "auto", minHeight: "var(--chakra-sizes-10)" } }}
+              />
             </VStack>
           ) : (
             <VStack align="stretch" spacing={10}>
@@ -494,7 +545,8 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
                     minH={0}
                     mt={3}
                     onClick={() => {
-                      setContactId(permitApplication.applicationContactMembershipId)
+                      setContactId(permitApplication.submitterMembershipId)
+                      setPickedContact(null)
                       setView("contact")
                     }}
                   >
@@ -529,14 +581,16 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
         onClose={() => setInviteOpen(false)}
         projectId={permitApplication.projectId}
         onCreated={() => {
-          void loadActivePeople(api, permitApplication.projectId).then(setPeople)
+          const projectId = permitApplication.projectId
+          const loadedProject = projectId ? permitProjectStore.permitProjectMap.get(projectId) : null
+          void loadedProject?.fetchMemberships()
         }}
       />
     </>
   )
 })
 
-const PersonRow = ({ person, line, you }: { person: IProjectPerson; line: string; you: boolean }) => {
+const PersonRow = ({ person, line, you }: { person: IProjectMembership; line: string; you: boolean }) => {
   const { t } = useTranslation()
   return (
     <Flex align="center" gap={4}>

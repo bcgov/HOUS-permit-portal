@@ -12,6 +12,8 @@ FactoryBot.define do
       sandbox { nil }
       # When true, stub a fake plan document to satisfy step_code_plan_* helpers
       with_fake_plan_document { false }
+      # The submitter must belong to the project.
+      ensure_submitter_membership { true }
     end
 
     permit_project do
@@ -30,6 +32,15 @@ FactoryBot.define do
     association :template_version
 
     after(:build) do |permit_application, evaluator|
+      if evaluator.ensure_submitter_membership
+        project = permit_application.permit_project
+        submitter = permit_application.association(:submitter).reader
+        if project&.persisted? && submitter.present? &&
+             !project.project_memberships.exists?(user_id: submitter.id)
+          project.project_memberships.create!(user: submitter, access: :full)
+        end
+      end
+
       if evaluator.with_fake_plan_document
         fake_doc =
           Struct.new(:last_signer, :file_data).new(

@@ -21,15 +21,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
            :discarded_at,
            :days_in_queue,
            :step_code_stage,
-           :application_contact_membership_id
-
-    field :application_contact_name do |pa|
-      pa.application_contact_membership&.display_name
-    end
-
-    field :application_contact_role do |pa|
-      pa.application_contact_membership&.user&.role
-    end
+           :submitter_membership_id
 
     association :sandbox, blueprint: SandboxBlueprint
 
