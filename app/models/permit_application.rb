@@ -90,7 +90,6 @@ class PermitApplication < ApplicationRecord
           )
         end
 
-  validate :jurisdiction_or_permit_project_present
   validate :jurisdiction_has_matching_submission_contact
   validates :number, presence: true
   validates :reference_number, length: { maximum: 300 }, allow_nil: true
@@ -100,7 +99,7 @@ class PermitApplication < ApplicationRecord
             },
             allow_nil: true
   validate :submission_versions_match_status
-  validate :application_contact_on_project
+  validate :submitter_is_active_member
 
   delegate :published_template_version, to: :template_version
 
@@ -108,8 +107,6 @@ class PermitApplication < ApplicationRecord
   before_validation :set_template_version, on: :create
   before_validation :populate_base_form_data, on: :create
   before_validation :assign_created_by_from_submitter, on: :create
-  before_validation :assign_application_contact, on: :create
-  before_create :assign_application_contact
   before_create :acknowledge_current_customization_change
   before_save :take_form_customizations_snapshot_if_submitted
 
@@ -183,6 +180,7 @@ class PermitApplication < ApplicationRecord
 
   def submitter=(user)
     self.submitter_membership = membership_for_submitter(user)
+    @submitter_without_membership = user.present? && submitter_membership.nil?
   end
 
   # Permit-scoped stage pin: which checklist counts for this permit's completion /
@@ -961,8 +959,7 @@ class PermitApplication < ApplicationRecord
     end
   end
 
-  # Who is told about this application. The stored contact when they still
-  # have a user, otherwise the submitter.
+  # Who is told about this application. The contact wins when one is set.
   def application_message_recipient
     application_contact_membership&.user || submitter
   end
@@ -989,8 +986,7 @@ class PermitApplication < ApplicationRecord
     return if user.blank? || permit_project.blank?
 
     if permit_project.persisted?
-      permit_project.project_memberships.find_by(user_id: user.id) ||
-        primary_contact_membership(permit_project)
+      permit_project.project_memberships.find_by(user_id: user.id)
     else
       permit_project.project_memberships.find do |membership|
         membership.user_id == user.id
@@ -1008,28 +1004,17 @@ class PermitApplication < ApplicationRecord
     throw(:abort)
   end
 
-  # The project's primary contact at the moment this application is created.
-  # A later change to the primary contact leaves this row alone.
-  # before_create runs again so a project saved during this create still counts.
-  def assign_application_contact
-    return if application_contact_membership_id.present?
-    return if permit_project.blank? || !permit_project.persisted?
-
-    self.application_contact_membership =
-      permit_project.project_memberships.find_by(contact_designation: :primary)
-  end
-
-  def application_contact_on_project
-    membership = application_contact_membership
-    return if membership.blank?
-    if membership.permit_project_id == permit_project_id && membership.active?
+  # Orphaning clears the submitter. The membership rule applies only while one is set.
+  def submitter_is_active_member
+    if @submitter_without_membership
+      errors.add(:submitter, :inactive_member)
       return
     end
+    return unless permit_project&.persisted?
+    return if submitter_membership_id.blank?
+    return if submitter_membership&.active?
 
-    errors.add(
-      :application_contact_membership,
-      "must be an active member of this project"
-    )
+    errors.add(:submitter, :inactive_member)
   end
 
   def update_collaboration_assignments
@@ -1230,17 +1215,6 @@ class PermitApplication < ApplicationRecord
   # TODO: Also enqueue project when a meeting request is made
   def enqueue_permit_project_if_draft
     permit_project&.enqueue! if permit_project&.draft?
-  end
-
-  def jurisdiction_or_permit_project_present
-    if jurisdiction.nil? && permit_project.nil?
-      errors.add(
-        :jurisdiction,
-        I18n.t(
-          "activerecord.errors.models.permit_application.attributes.jurisdiction.no_jurisdiction"
-        )
-      )
-    end
   end
 
   def submitter_must_have_role

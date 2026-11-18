@@ -99,11 +99,11 @@ export const PermitApplicationGridRow = observer(
             {fromInbox ? (
               <ApplicationReviewAssigneesCell application={permitApplication} />
             ) : (
-              permitApplication.applicationContactName && (
-                <Tooltip label={permitApplication.applicationContactName} hasArrow placement="top" openDelay={200}>
+              permitApplication.submitter?.name && (
+                <Tooltip label={permitApplication.submitter.name} hasArrow placement="top" openDelay={200}>
                   <SharedAvatar
-                    name={permitApplication.applicationContactName}
-                    role={permitApplication.applicationContactRole}
+                    name={permitApplication.submitter.name}
+                    role={permitApplication.submitter.role}
                     size="sm"
                   />
                 </Tooltip>

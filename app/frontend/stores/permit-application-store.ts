@@ -141,14 +141,17 @@ export const PermitApplicationStoreModel = types
           )
       }
 
-      return R.mergeRight(pad, {
-        sandbox: pad.sandbox?.id,
-        jurisdiction: pad.jurisdiction?.id,
-        submitter: pad.submitter?.id,
-        templateVersion: pad.templateVersion?.id,
-        publishedTemplateVersion: pad.publishedTemplateVersion?.id,
-        stepCode: pad.stepCode?.id,
-      })
+      return R.mergeRight(
+        pad,
+        R.reject(R.isNil, {
+          sandbox: pad.sandbox?.id,
+          jurisdiction: pad.jurisdiction?.id,
+          submitter: pad.submitter?.id,
+          templateVersion: pad.templateVersion?.id,
+          publishedTemplateVersion: pad.publishedTemplateVersion?.id,
+          stepCode: pad.stepCode?.id,
+        })
+      )
     },
     __beforeMergeUpdateAll(permitApplicationsData) {
       //find all unique jurisdictions

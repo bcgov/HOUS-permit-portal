@@ -149,7 +149,7 @@ RSpec.describe PermitBlockStatus, type: :model do
   end
 
   describe "#users_to_notify_status_ready" do
-    it "notifies the application contact for a submission status" do
+    it "notifies the submitter for a submission status" do
       permit_application = create(:permit_application)
       contact = create(:user, :submitter)
       membership =
@@ -158,7 +158,8 @@ RSpec.describe PermitBlockStatus, type: :model do
           permit_project: permit_application.permit_project,
           user: contact
         )
-      permit_application.update!(application_contact_membership: membership)
+      permit_application.update!(submitter: contact)
+      expect(permit_application.submitter_membership).to eq(membership)
       status =
         build(
           :permit_block_status,

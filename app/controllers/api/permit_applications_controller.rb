@@ -22,7 +22,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
                   restore
                   transition_status
                   mark_as_unviewed
-                  update_application_contact
+                  update_submitter
                 ]
   skip_after_action :verify_policy_scoped, only: [:index]
 
@@ -264,15 +264,21 @@ class Api::PermitApplicationsController < Api::ApplicationController
     end
   end
 
-  def update_application_contact
+  def update_submitter
     authorize @permit_application
-    @permit_application.application_contact_membership_id =
-      params.dig(
-        :permit_application,
-        :application_contact_membership_id
-      ).presence
+    membership =
+      @permit_application.permit_project&.project_memberships&.find_by(
+        id: params.dig(:permit_application, :submitter_membership_id)
+      )
+    if membership&.active?
+      @permit_application.submitter_membership = membership
+      saved = @permit_application.save
+    else
+      @permit_application.errors.add(:submitter, :inactive_member)
+      saved = false
+    end
 
-    if @permit_application.save
+    if saved
       render_success @permit_application,
                      nil,
                      {
@@ -282,7 +288,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
                        }
                      }
     else
-      render_error "permit_application.update_application_contact_error",
+      render_error "permit_application.update_submitter_error",
                    {
                      status: :unprocessable_content,
                      message_opts: {

@@ -1,5 +1,5 @@
 import { t } from "i18next"
-import { cast, flow, getSnapshot, Instance, toGenerator, types } from "mobx-state-tree"
+import { applySnapshot, cast, flow, getSnapshot, Instance, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
@@ -49,6 +49,7 @@ import { ICollaborator } from "./collaborator"
 import { JurisdictionModel } from "./jurisdiction"
 import { IPermitBlockStatus, PermitBlockStatusModel } from "./permit-block-status"
 import { IPermitCollaboration, PermitCollaborationModel } from "./permit-collaboration"
+import { ProjectGrantModel } from "./project-grant"
 import { IRequirement } from "./requirement"
 import { SandboxModel } from "./sandbox"
 import { TemplateVersionModel } from "./template-version"
@@ -115,13 +116,11 @@ export const PermitApplicationModel = types.snapshotProcessor(
       selectedSubmissionVersion: types.maybeNull(types.frozen<ISubmissionVersion>()),
       permitCollaborationMap: types.map(PermitCollaborationModel),
       permitBlockStatusMap: types.map(PermitBlockStatusModel),
+      projectGrantMap: types.map(ProjectGrantModel),
       isViewingPastRequests: types.optional(types.boolean, false),
       templateNickname: types.maybeNull(types.string),
       projectId: types.maybeNull(types.string),
       projectNumber: types.maybeNull(types.string),
-      applicationContactMembershipId: types.maybeNull(types.string),
-      applicationContactName: types.maybeNull(types.string),
-      applicationContactRole: types.maybeNull(types.string),
       discardedAt: types.maybeNull(types.Date),
       inboxSortOrder: types.maybeNull(types.number),
       allowedManualTransitions: types.optional(types.array(types.string), []),
@@ -752,47 +751,26 @@ export const PermitApplicationModel = types.snapshotProcessor(
         return self.permitBlockStatusMap.get(permitBlockStatus.id)
       }),
     }))
+    .views((self) => ({
+      get projectGrants() {
+        return Array.from(self.projectGrantMap.values())
+      },
+      get grantedPeopleCount() {
+        return new Set(
+          Array.from(self.projectGrantMap.values())
+            .filter((grant) => grant.kind !== "invite")
+            .map((grant) => grant.projectMembershipId)
+        ).size
+      },
+      grantsFor(membershipId: string) {
+        return Array.from(self.projectGrantMap.values()).filter(
+          (grant) => grant.projectMembershipId === membershipId && grant.kind !== "invite"
+        )
+      },
+    }))
     .actions((self) => ({
       __mergeUpdate: (resourceData) => {
-        let jurisdiction = resourceData["jurisdiction"]
-        let submitter = resourceData["submitter"]
-        let templateVersion = resourceData["templateVersion"]
-        let publishedTemplateVersion = resourceData["publishedTemplateVersion"]
-        const permitCollaborations = resourceData["permitCollaborations"]
-
-        if (jurisdiction && typeof jurisdiction !== "string") {
-          self.rootStore.jurisdictionStore.mergeUpdate(jurisdiction, "jurisdictionMap")
-          jurisdiction = jurisdiction["id"]
-        }
-        if (submitter && typeof submitter !== "string") {
-          self.rootStore.userStore.mergeUpdate(submitter, "usersMap")
-          submitter = submitter["id"]
-        }
-        if (templateVersion && typeof templateVersion !== "string") {
-          self.rootStore.templateVersionStore.mergeUpdate(templateVersion, "templateVersionMap")
-          templateVersion = templateVersion["id"]
-        }
-        if (publishedTemplateVersion && typeof publishedTemplateVersion !== "string") {
-          self.rootStore.templateVersionStore.mergeUpdate(publishedTemplateVersion, "templateVersionMap")
-          publishedTemplateVersion = publishedTemplateVersion["id"]
-        }
-
-        if (permitCollaborations && Array.isArray(permitCollaborations)) {
-          const collaborators = R.map(R.prop("collaborator"), permitCollaborations)
-
-          self.rootStore.collaboratorStore.mergeUpdateAll(
-            R.uniqBy((c) => c.id, collaborators),
-            "collaboratorMap"
-          )
-        }
-
-        const newData = R.mergeRight(resourceData, {
-          jurisdiction,
-          submitter,
-          templateVersion,
-          publishedTemplateVersion,
-        })
-        self.rootStore.permitApplicationStore.permitApplicationMap.put(newData)
+        applySnapshot(self, preprocessPermitApplicationSnapshot(R.mergeLeft(resourceData, getSnapshot(self))))
       },
       setFormattedComplianceData(data: Record<string, any>) {
         self.formattedComplianceData = data
@@ -890,15 +868,40 @@ export const PermitApplicationModel = types.snapshotProcessor(
         }
         return response
       }),
-      updateApplicationContact: flow(function* (membershipId: string) {
-        const response = yield self.environment.api.updateApplicationContact(self.id, membershipId)
+      updateSubmitter: flow(function* (membershipId: string) {
+        const response = yield self.environment.api.updateSubmitter(self.id, membershipId)
         if (response.ok) {
-          const data = response.data?.data
-          self.applicationContactMembershipId = data?.applicationContactMembershipId ?? membershipId
-          self.applicationContactName = data?.applicationContactName ?? null
-          self.applicationContactRole = data?.applicationContactRole ?? null
+          const { data: permitApplication } = response.data
+          self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
         }
         return response.ok
+      }),
+      fetchProjectGrants: flow(function* () {
+        const response = yield self.environment.api.fetchProjectGrants(self.id)
+        if (!response.ok) return false
+
+        const grants = response.data?.data ?? []
+        self.projectGrantMap.clear()
+        grants.forEach((grant) => self.projectGrantMap.put(grant))
+        return true
+      }),
+      createProjectGrant: flow(function* (grant: {
+        membershipId: string
+        kind: "block" | "application"
+        requirementBlockId?: string | null
+      }) {
+        const response = yield self.environment.api.createProjectGrant(self.id, grant)
+        if (!response.ok || !response.data?.data) return false
+
+        self.projectGrantMap.put(response.data.data)
+        return true
+      }),
+      destroyProjectGrant: flow(function* (id: string) {
+        const response = yield self.environment.api.destroyProjectGrant(self.id, id)
+        if (!response.ok) return false
+
+        self.projectGrantMap.delete(id)
+        return true
       }),
       submit: flow(function* (params) {
         const response = yield self.environment.api.submitPermitApplication(self.id, params)
@@ -1057,21 +1060,26 @@ export const PermitApplicationModel = types.snapshotProcessor(
       }),
     })),
   {
-    preProcessor: (snapshot: any) => {
-      const processedSnapshot = { ...snapshot }
-
-      if (Array.isArray(snapshot.permitCollaborations)) {
-        processedSnapshot.permitCollaborationMap = convertResourceArrayToRecord(snapshot.permitCollaborations)
-      }
-
-      if (Array.isArray(snapshot.permitBlockStatuses)) {
-        processedSnapshot.permitBlockStatusMap = convertResourceArrayToRecord(snapshot.permitBlockStatuses)
-      }
-
-      return processedSnapshot
-    },
+    preProcessor: preprocessPermitApplicationSnapshot,
   }
 )
+
+// put() runs this preprocessor. applySnapshot does not, so __mergeUpdate calls it too.
+function preprocessPermitApplicationSnapshot(snapshot: any) {
+  const processedSnapshot = { ...snapshot }
+
+  if (Array.isArray(snapshot.permitCollaborations)) {
+    processedSnapshot.permitCollaborationMap = convertResourceArrayToRecord(snapshot.permitCollaborations)
+  }
+  delete processedSnapshot.permitCollaborations
+
+  if (Array.isArray(snapshot.permitBlockStatuses)) {
+    processedSnapshot.permitBlockStatusMap = convertResourceArrayToRecord(snapshot.permitBlockStatuses)
+  }
+  delete processedSnapshot.permitBlockStatuses
+
+  return processedSnapshot
+}
 
 export const reasonCodes = [
   "non_compliant",

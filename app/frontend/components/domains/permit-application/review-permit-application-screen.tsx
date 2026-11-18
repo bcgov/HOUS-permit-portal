@@ -21,10 +21,8 @@ import { useController, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
-import { useServerAPI } from "../../../setup/root"
 import { stickyBelowNavBar } from "../../../styles/nav-bar-offset"
 import { EPermitApplicationStatus } from "../../../types/enums"
-import { IProjectGrant } from "../../../types/types"
 import { CopyableValue } from "../../shared/base/copyable-value"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
@@ -48,12 +46,8 @@ interface IReferenceNumberForm {
   referenceNumber?: string
 }
 
-const countGrantedPeople = (grants: IProjectGrant[]) =>
-  new Set(grants.filter((grant) => grant.kind !== "invite").map((grant) => grant.projectMembershipId)).size
-
 export const ReviewPermitApplicationScreen = observer(() => {
   const { currentPermitApplication, error } = usePermitApplication({ review: true })
-  const api = useServerAPI()
   const { t } = useTranslation()
   const formRef = useRef(null)
   const { requirementBlockAssignmentNodes, updateRequirementBlockAssignmentNode } = useCollaborationAssignmentNodes({
@@ -80,7 +74,6 @@ export const ReviewPermitApplicationScreen = observer(() => {
   const [isRetriggeringWebhook, setIsRetriggeringWebhook] = useState(false)
   const [isStartingReview, setIsStartingReview] = useState(false)
   const [peopleOpen, setPeopleOpen] = useState(false)
-  const [grantedPeopleCount, setGrantedPeopleCount] = useState(0)
 
   const sendRevisionContainerRef = useRef<HTMLDivElement | null>(null)
 
@@ -97,18 +90,8 @@ export const ReviewPermitApplicationScreen = observer(() => {
   }, [currentPermitApplication])
 
   useEffect(() => {
-    const applicationId = currentPermitApplication?.id
-    if (!applicationId) return
-    let cancelled = false
-    const load = async () => {
-      const response = await api.fetchProjectGrants(applicationId)
-      if (cancelled || !response.ok) return
-      setGrantedPeopleCount(countGrantedPeople(response.data?.data ?? []))
-    }
-    void load()
-    return () => {
-      cancelled = true
-    }
+    if (!currentPermitApplication) return
+    void currentPermitApplication.fetchProjectGrants()
   }, [currentPermitApplication?.id])
 
   useEffect(() => {
@@ -261,7 +244,9 @@ export const ReviewPermitApplicationScreen = observer(() => {
             <Stack direction={{ base: "column", lg: "row" }} align={{ base: "flex-end", lg: "center" }}>
               <BrowserSearchPrompt />
               <Button variant="primary" leftIcon={<Users />} onClick={() => setPeopleOpen((open) => !open)}>
-                {t("permitApplication.people.buttonWithCount", { count: grantedPeopleCount })}
+                {t("permitApplication.people.buttonWithCount", {
+                  count: currentPermitApplication.grantedPeopleCount,
+                })}
               </Button>
               <Button variant="ghost" leftIcon={<Info size={20} />} color="white" onClick={onContactsOpen}>
                 {t("permitApplication.show.contactsSummary")}
@@ -474,7 +459,6 @@ export const ReviewPermitApplicationScreen = observer(() => {
             stickyHeaderHeight={permitHeaderHeight}
             readOnly
             onClose={() => setPeopleOpen(false)}
-            onGrantsChange={(grants) => setGrantedPeopleCount(countGrantedPeople(grants))}
           />
         )}
       </Flex>

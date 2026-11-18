@@ -169,7 +169,7 @@ class NotificationService
       NotificationPushJob.perform_async(notification_hash)
     end
 
-    # Application contacts still receive the in-app draft warning, but this
+    # Submitters still receive the in-app draft warning, but this
     # email is written for jurisdiction managers and API partners.
     user_ids = manager_ids
     users_with_email_enabled =
