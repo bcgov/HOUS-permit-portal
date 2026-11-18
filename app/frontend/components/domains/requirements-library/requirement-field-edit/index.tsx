@@ -19,16 +19,15 @@ import React from "react"
 import { Controller, FieldValues, useController, useFieldArray, useFormContext } from "react-hook-form"
 import { UseFieldArrayProps } from "react-hook-form/dist/types"
 import { useTranslation } from "react-i18next"
-import {
-  EEnergyStepCodeDependencyRequirementCode,
-  ENumberUnit,
-  ERequirementContactFieldItemType,
-  ERequirementType,
-} from "../../../../types/enums"
+import { EEnergyStepCodeDependencyRequirementCode, ENumberUnit, ERequirementType } from "../../../../types/enums"
 import { IOption } from "../../../../types/types"
 import { isContactRequirement, isMultiOptionRequirement } from "../../../../utils/utility-functions"
 import { UnitSelect } from "../../../shared/select/selectors/unit-select"
 import { MultiplySumGridPreview } from "../multiply-sum-grid-preview"
+import {
+  generalContactFieldItems,
+  professionalContactFieldItems,
+} from "../requirement-field-display/contact-field-items"
 import { EditableGroup, TEditableGroupProps } from "./editable-group"
 import { GenericContactEdit } from "./generic-contact-edit"
 import { PidInfoEdit } from "./pid-info-edit"
@@ -44,6 +43,8 @@ export type TRequirementEditProps<TFieldValues extends FieldValues> = TEditableG
   }
   canAddMultipleContactProps?: IControlProps<TFieldValues>
   isMultipleFilesCheckboxProps?: TIsMultipleFilesCheckboxProps<TFieldValues>
+  /** Contact previews use the same required flags as the read-only preview. */
+  required?: boolean
 }
 
 const requirementsComponentMap = {
@@ -423,25 +424,6 @@ const requirementsComponentMap = {
     canAddMultipleContactProps,
     ...rest
   }: TRequirementEditProps<TFieldValues>) {
-    const contactFieldItemTypes: Array<{ type: ERequirementContactFieldItemType; containerProps?: BoxProps }> = [
-      { type: ERequirementContactFieldItemType.firstName },
-      { type: ERequirementContactFieldItemType.lastName },
-      { type: ERequirementContactFieldItemType.email },
-      { type: ERequirementContactFieldItemType.phone },
-      {
-        type: ERequirementContactFieldItemType.address,
-        containerProps: {
-          gridColumn: "1 / span 2",
-          sx: {
-            ".chakra-form-control input": {
-              maxW: "full",
-            },
-          },
-        },
-      },
-      { type: ERequirementContactFieldItemType.organization },
-    ]
-
     if (!canAddMultipleContactProps) {
       import.meta.env.DEV && console.error("canAddMultipleContactProps is required for contact requirement edit")
       return null
@@ -450,7 +432,7 @@ const requirementsComponentMap = {
     return (
       <GenericContactEdit<TFieldValues>
         requirementType={ERequirementType.generalContact}
-        contactFieldItems={contactFieldItemTypes}
+        contactFieldItems={generalContactFieldItems}
         editableLabelProps={editableLabelProps}
         {...canAddMultipleContactProps}
         {...rest}
@@ -468,36 +450,10 @@ const requirementsComponentMap = {
       return null
     }
 
-    const contactFieldItemTypes: Array<{ type: ERequirementContactFieldItemType; containerProps?: BoxProps }> = [
-      { type: ERequirementContactFieldItemType.firstName },
-      { type: ERequirementContactFieldItemType.lastName },
-      { type: ERequirementContactFieldItemType.email },
-      { type: ERequirementContactFieldItemType.phone },
-      {
-        type: ERequirementContactFieldItemType.address,
-        containerProps: {
-          gridColumn: "1 / span 2",
-          sx: {
-            ".chakra-form-control input": {
-              maxW: "full",
-            },
-          },
-        },
-      },
-      { type: ERequirementContactFieldItemType.professionalAssociation },
-      { type: ERequirementContactFieldItemType.contactType },
-      {
-        type: ERequirementContactFieldItemType.professionalNumber,
-        containerProps: {
-          gridColumn: "1 / span 2",
-        },
-      },
-      { type: ERequirementContactFieldItemType.organization },
-    ]
     return (
       <GenericContactEdit<TFieldValues>
         requirementType={ERequirementType.professionalContact}
-        contactFieldItems={contactFieldItemTypes}
+        contactFieldItems={professionalContactFieldItems}
         editableLabelProps={editableLabelProps}
         {...canAddMultipleContactProps}
         {...rest}
