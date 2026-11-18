@@ -20,12 +20,14 @@ class Qa::FullPermitProjectService
       template_versions = available_template_versions
       permit_applications =
         template_versions.map do |template_version|
-          PermitApplication.create!(
-            submitter: @current_user,
-            permit_project: project,
-            template_version_id: template_version.id,
-            jurisdiction: @jurisdiction
-          )
+          permit_application =
+            PermitApplication.new(
+              permit_project: project,
+              template_version_id: template_version.id,
+              jurisdiction: @jurisdiction
+            )
+          permit_application.assign_creation_actors(@current_user)
+          permit_application.save!
         end
 
       { project: project, permit_applications: permit_applications }

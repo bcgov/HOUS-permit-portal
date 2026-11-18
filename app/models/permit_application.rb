@@ -24,15 +24,14 @@ class PermitApplication < ApplicationRecord
   SEARCH_INCLUDES = [
     :submission_versions,
     :step_code,
-    :submitter,
     :created_by,
     {
       permit_collaborations: :collaborator,
-      application_contact_membership: :user
+      application_contact_membership: :user,
+      submitter_membership: :user
     }
   ]
 
-  belongs_to :submitter, class_name: "User", optional: true
   belongs_to :created_by, polymorphic: true, optional: true
   public_recordable user_association: :submitter
   belongs_to :template_version
@@ -42,7 +41,12 @@ class PermitApplication < ApplicationRecord
   belongs_to :permit_project, optional: true, touch: true
   belongs_to :application_contact_membership,
              class_name: "ProjectMembership",
-             optional: true
+             optional: true,
+             inverse_of: false
+  belongs_to :submitter_membership,
+             class_name: "ProjectMembership",
+             optional: true,
+             inverse_of: :permit_applications
 
   has_one :requirement_template, through: :template_version
 
@@ -120,7 +124,9 @@ class PermitApplication < ApplicationRecord
   after_commit :mark_permit_project_as_unviewed, if: :status_changed_to_intake?
   after_commit :enqueue_permit_project_if_draft, if: :status_changed_to_intake?
   scope :with_submitter_role,
-        -> { joins(:submitter).where(users: { role: "submitter" }) }
+        -> do
+          joins(submitter_membership: :user).where(users: { role: "submitter" })
+        end
 
   scope :unviewed,
         -> do
@@ -143,6 +149,40 @@ class PermitApplication < ApplicationRecord
 
   def public_record?
     !new_draft?
+  end
+
+  # A submitted application with no contact is orphaned. A draft is not.
+  def orphaned?
+    orphaned_at.present? || (public_record? && submitter_membership_id.blank?)
+  end
+
+  # The membership's user, or the snapshot left when that contact is gone.
+  def submitter
+    user = submitter_membership&.user
+    return user if user.present?
+    return nil unless orphaned?
+
+    record_id = id
+    User
+      .new(
+        omniauth_username:
+          omniauth_username_snapshot || I18n.t("misc.removed_placeholder"),
+        first_name: first_name_snapshot || I18n.t("misc.removed_placeholder"),
+        last_name: last_name_snapshot || I18n.t("misc.removed_placeholder"),
+        discarded_at: Time.current
+      )
+      .tap do |snapshot|
+        snapshot.define_singleton_method(:id) { "deleted-#{record_id}" }
+        snapshot.readonly!
+      end
+  end
+
+  def submitter_id
+    submitter_membership&.user_id
+  end
+
+  def submitter=(user)
+    self.submitter_membership = membership_for_submitter(user)
   end
 
   # Permit-scoped stage pin: which checklist counts for this permit's completion /
@@ -318,13 +358,14 @@ class PermitApplication < ApplicationRecord
       full_address: full_address,
       template_tags: template_tag_list&.join(", "),
       template_nickname: template_nickname,
-      submitter: "#{submitter.name} #{submitter.email}",
+      submitter:
+        (submitter.present? ? "#{submitter.name} #{submitter.email}" : nil),
       submitted_at: submitted_at,
       resubmitted_at: resubmitted_at,
       viewed_at: viewed_at,
       status: status,
       jurisdiction_id: jurisdiction&.id,
-      submitter_id: submitter.id,
+      submitter_id: submitter_id,
       template_version_id: template_version.id,
       requirement_template_id: template_version.requirement_template.id,
       created_at: created_at,
@@ -804,7 +845,7 @@ class PermitApplication < ApplicationRecord
     aggregates =
       PermitApplication
         .joins(template_version: :requirement_template)
-        .joins(:submitter)
+        .joins(submitter_membership: :user)
         .joins(
           "LEFT OUTER JOIN permit_projects ON permit_projects.id = permit_applications.permit_project_id"
         )
@@ -904,18 +945,19 @@ class PermitApplication < ApplicationRecord
     )
   end
 
-  # A member who adds a draft is its creator. Review staff who are not
-  # members add it as the jurisdiction, with the project creator as submitter.
+  # A member who adds a draft is its creator and its submitter. Anyone else
+  # adds it as the jurisdiction, with the primary contact as submitter.
   def assign_creation_actors(user)
     project = permit_project
     return unless project && user
 
-    if project_access_for(user).add_application?
+    membership = project.project_memberships.find_by(user_id: user.id)
+    if membership&.active?
       self.created_by = user
-      self.submitter = user
+      self.submitter_membership = membership
     else
       self.created_by = project.jurisdiction
-      self.submitter = project.owner
+      self.submitter_membership = primary_contact_membership(project)
     end
   end
 
@@ -932,11 +974,38 @@ class PermitApplication < ApplicationRecord
     ProjectAccess.new(user, permit_project&.sandbox, permit_project)
   end
 
-  # ponytail: assign_creation_actors sets a jurisdiction when a reviewer creates
-  # the draft. Anything else is created by the submitter.
-  # association reader skips PublicRecordable's unsaved readonly snapshot user.
   def assign_created_by_from_submitter
-    self.created_by ||= association(:submitter).reader
+    self.created_by ||= submitter_membership&.user
+  end
+
+  def primary_contact_membership(project)
+    project
+      .project_memberships
+      .where.not(user_id: nil)
+      .find_by(contact_designation: :primary)
+  end
+
+  def membership_for_submitter(user)
+    return if user.blank? || permit_project.blank?
+
+    if permit_project.persisted?
+      permit_project.project_memberships.find_by(user_id: user.id) ||
+        primary_contact_membership(permit_project)
+    else
+      permit_project.project_memberships.find do |membership|
+        membership.user_id == user.id
+      end
+    end
+  end
+
+  def prevent_updates_if_orphaned
+    return unless orphaned?
+
+    allowed_keys = %w[orphaned_at updated_at submitter_membership_id]
+    return if (changes.keys - allowed_keys).empty?
+
+    errors.add(:base, "Cannot update an orphaned record")
+    throw(:abort)
   end
 
   # The project's primary contact at the moment this application is created.

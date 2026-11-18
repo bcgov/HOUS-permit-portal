@@ -39,10 +39,95 @@ RSpec.describe PermitApplication, type: :model do
     end
   end
 
+  describe "submitter membership" do
+    it "stores the acting member as the submitter" do
+      project = create(:permit_project)
+      member =
+        create(
+          :project_membership,
+          permit_project: project,
+          user: create(:user, :submitter),
+          access: :limited
+        )
+      application =
+        build(
+          :permit_application,
+          permit_project: project,
+          jurisdiction: project.jurisdiction
+        )
+      application.assign_creation_actors(member.user)
+      application.save!
+
+      expect(application.created_by).to eq(member.user)
+      expect(application.submitter_membership).to eq(member)
+      expect(application.submitter_id).to eq(member.user_id)
+    end
+
+    it "stores the primary contact when the creator is not a member" do
+      project = create(:permit_project)
+      application =
+        build(
+          :permit_application,
+          permit_project: project,
+          jurisdiction: project.jurisdiction
+        )
+      application.assign_creation_actors(create(:user, :reviewer))
+      application.save!
+
+      primary =
+        project.project_memberships.find_by!(contact_designation: :primary)
+      expect(application.created_by).to eq(project.jurisdiction)
+      expect(application.submitter_membership).to eq(primary)
+    end
+
+    it "orphans a submitted application when the membership is removed and leaves a draft" do
+      project = create(:permit_project)
+      member =
+        create(
+          :project_membership,
+          permit_project: project,
+          user: create(:user, :submitter),
+          access: :limited
+        )
+      submitted =
+        create(
+          :permit_application,
+          :newly_submitted,
+          permit_project: project,
+          submitter: member.user,
+          jurisdiction: project.jurisdiction
+        )
+      draft =
+        create(
+          :permit_application,
+          permit_project: project,
+          submitter: member.user,
+          jurisdiction: project.jurisdiction
+        )
+
+      member.destroy!
+
+      submitted.reload
+      draft.reload
+      expect(submitted.submitter_membership_id).to be_nil
+      expect(submitted.orphaned_at).to be_present
+      expect(submitted.discarded_at).to be_nil
+      expect(submitted).to be_orphaned
+      expect(submitted.submitter).to be_readonly
+      expect(draft.submitter_membership_id).to be_nil
+      expect(draft.orphaned_at).to be_nil
+      expect(draft).not_to be_orphaned
+    end
+  end
+
   describe "associations" do
     subject { build_stubbed(:permit_application) }
 
-    it { should belong_to(:submitter).class_name("User").optional }
+    it do
+      should belong_to(:submitter_membership).class_name(
+               "ProjectMembership"
+             ).optional
+    end
     it { should belong_to(:permit_project).optional }
   end
 

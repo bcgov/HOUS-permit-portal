@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_11_17_180000) do
+ActiveRecord::Schema[7.2].define(version: 2026_11_18_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -617,7 +617,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_17_180000) do
 
   create_table "permit_applications", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.integer "status", default: 0
-    t.uuid "submitter_id"
     t.uuid "jurisdiction_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -650,6 +649,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_17_180000) do
     t.uuid "created_by_id"
     t.uuid "acknowledged_customization_change_id"
     t.uuid "application_contact_membership_id"
+    t.uuid "submitter_membership_id"
     t.index ["acknowledged_customization_change_id"], name: "index_permit_applications_on_acked_change_id"
     t.index ["application_contact_membership_id"], name: "index_permit_applications_on_application_contact_membership_id"
     t.index ["created_by_type", "created_by_id"], name: "index_permit_applications_on_created_by"
@@ -657,7 +657,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_17_180000) do
     t.index ["jurisdiction_id"], name: "index_permit_applications_on_jurisdiction_id"
     t.index ["number"], name: "index_permit_applications_on_number", unique: true
     t.index ["permit_project_id"], name: "index_permit_applications_on_permit_project_id"
-    t.index ["submitter_id"], name: "index_permit_applications_on_submitter_id"
+    t.index ["submitter_membership_id"], name: "index_permit_applications_on_submitter_membership_id"
     t.index ["template_version_id"], name: "index_permit_applications_on_template_version_id"
   end
 
@@ -1489,8 +1489,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_17_180000) do
   add_foreign_key "permit_applications", "jurisdictions"
   add_foreign_key "permit_applications", "permit_projects"
   add_foreign_key "permit_applications", "project_memberships", column: "application_contact_membership_id", on_delete: :nullify
+  add_foreign_key "permit_applications", "project_memberships", column: "submitter_membership_id", on_delete: :nullify
   add_foreign_key "permit_applications", "template_versions"
-  add_foreign_key "permit_applications", "users", column: "submitter_id"
   add_foreign_key "permit_block_statuses", "permit_applications"
   add_foreign_key "permit_collaborations", "collaborators"
   add_foreign_key "permit_collaborations", "permit_applications"

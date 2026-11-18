@@ -21,6 +21,10 @@ class ProjectMembership < ApplicationRecord
   belongs_to :permit_project
   belongs_to :invited_by, class_name: "User", optional: true
   has_many :project_grants, dependent: :destroy
+  has_many :permit_applications,
+           foreign_key: :submitter_membership_id,
+           dependent: :nullify,
+           inverse_of: :submitter_membership
 
   acts_as_taggable_on :roles
   # The API calls these role_tags. Tagging stores them on role_list.
@@ -55,7 +59,11 @@ class ProjectMembership < ApplicationRecord
   validate :primary_contact_stays
   validate :keeps_a_full_member, on: :update
 
-  before_destroy :keep_full_member_and_primary_contact
+  # dependent: :nullify is registered with has_many and runs in definition
+  # order. Prepend so a blocked destroy aborts before the snapshot, and the
+  # snapshot runs before the foreign key is cleared.
+  before_destroy :orphan_public_record_applications, prepend: true
+  before_destroy :keep_full_member_and_primary_contact, prepend: true
   before_update :remember_role_names
   after_create :audit_invitation_sent
   after_update :audit_role_names
@@ -249,6 +257,30 @@ class ProjectMembership < ApplicationRecord
     end
     errors.add(:base, :primary_contact) if primary?
     throw :abort if errors.any?
+  end
+
+  # A submitted application is already orphaned once this contact is gone.
+  # Copy the name first, and stamp orphaned_at so retention can find it.
+  # Do not discard it here.
+  def orphan_public_record_applications
+    return if user.blank?
+
+    PermitApplication
+      .unscoped
+      .where(submitter_membership_id: id)
+      .find_each do |application|
+        next unless application.public_record?
+        next if application.orphaned_at.present?
+
+        application.update_columns(
+          omniauth_username_snapshot:
+            user.omniauth_username.presence || user.email,
+          first_name_snapshot: user.first_name,
+          last_name_snapshot: user.last_name,
+          orphaned_at: Time.current,
+          updated_at: Time.current
+        )
+      end
   end
 
   def other_active_full_members

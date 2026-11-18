@@ -1,7 +1,7 @@
 FactoryBot.define do
   factory :permit_application do
-    association :submitter, factory: :user, role: "submitter"
     transient do
+      submitter { association(:user, role: "submitter") }
       jurisdiction { nil }
       pid { nil }
       pin { nil }
@@ -30,6 +30,12 @@ FactoryBot.define do
     association :template_version
 
     after(:build) do |permit_application, evaluator|
+      project = permit_application.permit_project
+      if project&.persisted? && evaluator.submitter
+        membership =
+          project.project_memberships.find_by(user_id: evaluator.submitter.id)
+        permit_application.submitter_membership = membership if membership
+      end
       if evaluator.with_fake_plan_document
         fake_doc =
           Struct.new(:last_signer, :file_data).new(
@@ -40,6 +46,23 @@ FactoryBot.define do
           fake_doc
         end
       end
+    end
+
+    after(:create) do |permit_application, evaluator|
+      next if permit_application.submitter_membership_id.present?
+      next if evaluator.submitter.blank?
+
+      project = permit_application.permit_project
+      next if project.blank?
+
+      membership =
+        project.project_memberships.find_by(user_id: evaluator.submitter.id) ||
+          project.project_memberships.create!(
+            user: evaluator.submitter,
+            access: :limited
+          )
+      permit_application.update_columns(submitter_membership_id: membership.id)
+      permit_application.submitter_membership = membership
     end
 
     trait :newly_submitted do

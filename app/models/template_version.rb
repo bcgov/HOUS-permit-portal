@@ -9,7 +9,8 @@ class TemplateVersion < ApplicationRecord
 
   has_many :jurisdiction_template_version_customizations, dependent: :destroy
   has_many :permit_applications, dependent: :nullify
-  has_many :submitters, through: :permit_applications
+  has_many :submitter_memberships, through: :permit_applications
+  has_many :submitters, through: :submitter_memberships, source: :user
   has_many :integration_mappings, dependent: :destroy
   has_many :template_version_feedbacks, dependent: :destroy
   has_many :template_version_previews, dependent: :destroy
